@@ -1,4 +1,4 @@
-/* Immerse, the video player, the profile gate, and honest markers for the parts of
+﻿/* Immerse, the video player, the profile gate, and honest markers for the parts of
  * the web app that are not ported yet. */
 
 import React, { useState } from "react";
@@ -6,7 +6,7 @@ import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
 import { WebView } from "react-native-webview";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, UnitIcon } from "../ui";
+import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, UnitIcon, Avatar, AV, AV_IDS } from "../ui";
 import { UN, lessonCount, unitState, unitUnlocked, markComponent, L, lessonWords } from "../data";
 
 /* ------------------------------------------------------------- immerse */
@@ -107,15 +107,43 @@ export function Video({ route, navigation }) {
 
 /* --------------------------------------------------------------- gate */
 
-const AVATARS = ["monkeynaut", "gymbun", "shadesduck", "djcat", "scarfbear",
-                 "profowl", "kingfrog", "bowtiepen", "sneakfox", "spikelib"];
-
-export function Gate() {
+export function Gate({ onPlacement }) {
   const { accounts, createProfile, selectProfile } = useSession();
   const t = useTheme();
   const [name, setName] = useState("");
-  const [avatar, setAvatar] = useState(AVATARS[0]);
+  const [avatar, setAvatar] = useState(AV_IDS[0]);
   const [creating, setCreating] = useState(!accounts.list.length);
+  const [offer, setOffer] = useState(null);
+
+  // After creating a profile, offer the placement test before the app opens.
+  if (offer) {
+    return (
+      <Screen>
+        <Title sub="A short test can skip what you already know.">
+          Where should we start?
+        </Title>
+        <List>
+          <Row onPress={() => onPlacement(true)}>
+            <Avatar id={offer.avatar} size={44} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+                Take the placement test
+              </Text>
+              <Muted>50 questions · about 10 minutes</Muted>
+            </View>
+          </Row>
+          <Row last onPress={() => onPlacement(false)}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+                Start from the beginning
+              </Text>
+              <Muted>You can test out of a section later</Muted>
+            </View>
+          </Row>
+        </List>
+      </Screen>
+    );
+  }
 
   if (!creating) {
     return (
@@ -125,11 +153,8 @@ export function Gate() {
           {accounts.list.map((a, k) => (
             <Row key={a.id} last={k === accounts.list.length - 1}
                  onPress={() => selectProfile(a.id)}>
-              <View style={{ width: 44, height: 44, borderRadius: 22,
-                             alignItems: "center", justifyContent: "center",
-                             backgroundColor: t.surface2 }}>
-                <UnitIcon id="family" size={22} />
-              </View>
+              <Avatar id={a.avatar} size={44} />
+
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
                   {a.name}
@@ -150,17 +175,16 @@ export function Gate() {
       <Title sub="Pick a character and a name.">Welcome to Bridges</Title>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10,
                      marginBottom: 14 }}>
-        {AVATARS.map((id) => (
+        {AV_IDS.map((id) => (
           <Pressable
             key={id}
+            accessibilityLabel={AV[id].name}
             onPress={() => setAvatar(id)}
-            style={{ width: 60, height: 60, borderRadius: 30, borderWidth: 2,
+            style={{ width: 62, height: 62, borderRadius: 31, borderWidth: 2, padding: 2,
                      borderColor: id === avatar ? t.brand : "transparent",
-                     backgroundColor: t.surface2,
                      alignItems: "center", justifyContent: "center" }}
           >
-            <UnitIcon id={id === avatar ? "family" : "family"} size={26}
-                      color={id === avatar ? t.brandInk : t.ink3} />
+            <Avatar id={id} size={54} />
           </Pressable>
         ))}
       </View>
@@ -174,7 +198,7 @@ export function Gate() {
                  fontSize: 17, color: t.ink }}
       />
       <Btn kind="pri" style={{ marginTop: 14 }} label="Continue"
-           onPress={() => createProfile(name.trim(), avatar)} />
+           onPress={async () => { const a = await createProfile(name.trim(), avatar); setOffer(a); }} />
     </Screen>
   );
 }

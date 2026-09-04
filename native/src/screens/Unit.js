@@ -1,4 +1,4 @@
-/* A unit's lessons, and inside a lesson its three components. */
+﻿/* A unit's lessons, and inside a lesson its three components. */
 
 import React from "react";
 import { View, Text } from "react-native";
@@ -70,6 +70,10 @@ export function UnitScreen({ route, navigation }) {
           );
         })}
       </List>
+      {unit.kind === "spine" && unitFineProgress(st, unit) < 1 ? (
+        <Btn label="Test out of this section" style={{ marginTop: 16 }}
+             onPress={() => navigation.navigate("TestOut", { unitId: unit.id })} />
+      ) : null}
     </Screen>
   );
 }
@@ -100,12 +104,9 @@ export function LessonScreen({ route, navigation }) {
         {cs.map((c, k) => (
           <Row key={c.id} last={k === cs.length - 1}
                onPress={() => {
-                 if (c.id === "video" && unit.v) {
-                   navigation.navigate("Video", { unitId: unit.id, index: i });
-                 } else {
-                   navigation.navigate("Run",
-                     { unitId: unit.id, index: i, part: c.id });
-                 }
+                 const dest = c.id === "video" ? "Video"
+                            : c.id === "quiz" ? "Quiz" : "Vocab";
+                 navigation.navigate(dest, { unitId: unit.id, index: i });
                }}>
             <Tick on={c.done} />
             <View style={{ flex: 1 }}>

@@ -1,0 +1,6 @@
+{
+  "name": "@bridges/core",
+  "private": true,
+  "type": "module",
+  "description": "Logic shared by the web build and the React Native app: folding and transliteration, the FSRS scheduler, question generation, icons and avatars. No DOM, no storage, no platform globals."
+}

@@ -1,4 +1,4 @@
-﻿/* One line icon per subject, drawn inline so the app carries its own artwork and
+/* One line icon per subject, drawn inline so the app carries its own artwork and
    works offline. Shared verbatim with the native app, which renders the same paths
    through react-native-svg. */
 export const ICONS = {

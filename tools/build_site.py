@@ -272,7 +272,7 @@ def main():
     # core/ is shared verbatim with the React Native app, so it is written as ES
     # modules. The web bundle is one classic script, so the module syntax is stripped
     # on the way in rather than the logic being duplicated for each platform.
-    core_files = ["util.js", "fsrs.js", "icons.js"]
+    core_files = ["util.js", "fsrs.js", "icons.js", "avatars.js"]
     core = "\n".join(strip_modules((ROOT / "core" / f).read_text(encoding="utf-8"))
                      for f in core_files if (ROOT / "core" / f).exists())
 

@@ -1,0 +1,208 @@
+/* Tests for core/ — the logic both platforms share.
+ *
+ * The web suites drive the DOM and the browser suite drives layout; neither reaches
+ * the rules underneath. Since core/ is now the single implementation of folding,
+ * scheduling and question generation, a bug here is a bug in both apps at once.
+ *
+ *   node tools/core.test.mjs
+ */
+
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN }
+  from "../core/util.js";
+import { fsrsReview, fsrsPreview, isTrouble, retrievability } from "../core/fsrs.js";
+import { makeQuestions, DRILL_TYPES } from "../core/questions.js";
+import { ICONS, iconFor } from "../core/icons.js";
+import { AV, AV_IDS } from "../core/avatars.js";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const DATA = JSON.parse(readFileSync(join(ROOT, "native/assets/data.json"), "utf8"));
+
+let failures = 0, checks = 0;
+const ok = (cond, label, extra) => {
+  checks++;
+  console.log((cond ? "  pass  " : "  FAIL  ") + label +
+              (cond || extra === undefined ? "" : "  → " + extra));
+  if (!cond) failures++;
+};
+const group = (n) => console.log("\n" + n);
+
+/* ------------------------------------------------------------------ util */
+
+group("folding");
+ok(fold("Кни́гу") === "книгу", "strips stress and lowercases", fold("Кни́гу"));
+ok(fold("ёлка") === "елка", "folds ё to е", fold("ёлка"));
+ok(fold("  СЕБЕ ") === "себе", "trims");
+ok(fold("во́ду") === fold("воду"), "stressed and plain forms fold together");
+ok(bare("кни́га") === "книга", "bare keeps case, drops the accent");
+
+group("tokenising");
+{
+  // The accent must stay inside the token, or a stressed word splits in two.
+  const toks = "Я пью во́ду.".match(TOKEN);
+  ok(toks.length === 3, "a stressed sentence yields three tokens", JSON.stringify(toks));
+  ok(toks[2] === "во́ду", "the accent stays attached", toks[2]);
+}
+
+group("transliteration");
+ok(translit("sebe") === "себе", "sebe", translit("sebe"));
+ok(translit("kniga") === "книга", "kniga", translit("kniga"));
+ok(translit("shchi") === "щи", "multi-letter clusters win", translit("shchi"));
+ok(translitBack("щи") === "shchi", "and round-trip back", translitBack("щи"));
+ok(firstSense({ e: "tea, tea-party, methinks", b: "чай" }) === "tea",
+   "firstSense takes the first gloss only");
+
+group("shuffle and sample");
+{
+  const src = [1, 2, 3, 4, 5];
+  const copy = src.slice();
+  const out = sample(src, 3);
+  ok(out.length === 3, "sample returns the requested count");
+  ok(JSON.stringify(src) === JSON.stringify(copy), "sample does not mutate its input");
+  ok(new Set(out).size === 3, "sample does not repeat");
+  const big = Array.from({ length: 200 }, (_, i) => i);
+  ok(JSON.stringify(shuffle(big.slice())) !== JSON.stringify(big), "shuffle reorders");
+}
+
+/* ------------------------------------------------------------------ fsrs */
+
+group("FSRS");
+{
+  let card, day = 0;
+  const ivs = [];
+  for (let i = 0; i < 5; i++) {
+    card = fsrsReview(card, 3, day);
+    ivs.push(card.due - day);
+    day = card.due;
+  }
+  ok(ivs.every((v, i) => i === 0 || v > ivs[i - 1]),
+     "repeated Good lengthens the interval each time", ivs.join(", "));
+  ok(ivs[0] >= 3 && ivs[0] <= 5, "the first Good lands around 4 days", String(ivs[0]));
+  ok(card.d >= 1 && card.d <= 10, "difficulty stays in range", String(card.d));
+
+  const lapsed = fsrsReview(card, 1, day);
+  ok(lapsed.s < card.s, "Again reduces stability", `${card.s.toFixed(1)} → ${lapsed.s.toFixed(1)}`);
+  ok(lapsed.due === day, "Again schedules the card for the same day");
+  ok(lapsed.lapses === 1, "Again records a lapse");
+
+  const hard = fsrsReview(card, 2, day);
+  const easy = fsrsReview(card, 4, day);
+  ok(hard.due < easy.due, "Hard schedules sooner than Easy",
+     `${hard.due - day}d vs ${easy.due - day}d`);
+
+  const fresh = fsrsPreview(undefined, 0);
+  ok(fresh[1] === "now" && /d$/.test(fresh[3]),
+     "a new card previews Again as now and Good in days", JSON.stringify(fresh));
+
+  let t = undefined;
+  for (let i = 0; i < 4; i++) t = fsrsReview(t, 1, i);
+  ok(isTrouble(t), "four lapses bank a word as trouble");
+  ok(!isTrouble(fsrsReview(undefined, 3, 0)), "one good answer does not");
+
+  ok(retrievability(0, 10) === 1, "recall is certain on the day of review");
+  ok(retrievability(100, 10) < retrievability(10, 10), "and decays with time");
+}
+
+/* ------------------------------------------------------------- artwork */
+
+group("shared artwork");
+ok(Object.keys(ICONS).length >= 18, "an icon per subject", String(Object.keys(ICONS).length));
+ok(iconFor("core3") === ICONS.core, "core stages fall back to the core mark");
+ok(iconFor("nonsense") === ICONS.speech, "an unknown id still yields a path");
+ok(AV_IDS.length === 10, "ten avatars", String(AV_IDS.length));
+ok(AV_IDS.every((id) => AV[id].svg && AV[id].bg && AV[id].name),
+   "each avatar has art, a background and a name");
+ok(new Set(AV_IDS.map((id) => AV[id].svg)).size === AV_IDS.length,
+   "and no two share the same drawing");
+
+/* ---------------------------------------------------------- questions */
+
+const L = DATA.lemmas, IX = DATA.index, UN = DATA.units, PATH = DATA.path;
+const STAGES = (() => {
+  const out = [];
+  PATH.forEach((p) => {
+    if (p.c === 0 || !out.length) out.push({ core: UN[p.u], branches: [] });
+    else out[out.length - 1].branches.push(UN[p.u]);
+  });
+  return out;
+})();
+const LESSON_SIZE = 7;
+const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / LESSON_SIZE));
+const lessonWords = (u, i) => u.w.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
+const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice: () => true });
+
+group("lesson generation");
+{
+  const unit = UN.find((u) => u.id === "food");
+  const steps = Q.vocabSteps(unit, 0);
+  ok(steps[0].t === "grammar", "the first lesson opens on the unit's grammar note");
+  ok(steps.filter((s) => s.t === "word").length === lessonWords(unit, 0).length,
+     "every new word is presented");
+  ok(steps.some((s) => s.options), "questions are interleaved between the words");
+  const wordAt = steps.findIndex((s) => s.t === "word");
+  const qAt = steps.findIndex((s) => s.options);
+  ok(wordAt < qAt, "a word is always taught before it is asked");
+
+  const quiz = Q.quizSteps(unit, 0);
+  ok(quiz.length === 8, "a lesson quiz is 8 questions", String(quiz.length));
+  ok(quiz.every((q) => q.options || q.typed || q.pairs),
+     "every quiz question is answerable");
+  ok(quiz.every((q) => !q.options || q.options.filter((o) => o.right).length === 1),
+     "each has exactly one right answer");
+}
+
+group("placement");
+{
+  const p = Q.placementQuestions();
+  ok(p.length === 50, "placement is 50 questions", String(p.length));
+  ok(p.every((q) => typeof q.stage === "number"),
+     "every question carries the stage it came from — nothing can unlock without it");
+  ok(new Set(p.map((q) => q.stage)).size === STAGES.length,
+     "all stages are sampled", String(new Set(p.map((q) => q.stage)).size));
+
+  const s = Q.sectionQuestions(UN.find((u) => u.id === "core2"));
+  ok(s.length === 30, "a section test is 30 questions", String(s.length));
+  ok(s.every((q) => typeof q.lesson === "number"), "each tagged with its sub-lesson");
+}
+
+group("drills");
+for (const d of DRILL_TYPES) {
+  const qs = Q.drillQuestions(d.id);
+  ok(qs.length === 10, `${d.id}: generates a full set`, String(qs.length));
+  ok(qs.every((q) => q.options && q.options.length >= 3),
+     `${d.id}: every question has options`);
+  ok(qs.every((q) => q.options.filter((o) => o.right).length === 1),
+     `${d.id}: exactly one right answer each`);
+  if (d.id === "cases") {
+    ok(qs.every((q) => q.table), "cases: every question can show its table");
+    ok(qs.every((q) => !q.options.some(
+      (o) => o.right && fold(o.label) === fold(q.prompt))),
+      "cases: never asks for the form already on screen");
+  }
+  if (d.id === "stress") {
+    ok(qs.every((q) => q.options.every((o) => fold(o.label) === fold(q.prompt))),
+       "stress: all options are the same word, differing only in accent");
+  }
+  if (d.id === "aspect") {
+    ok(qs.every((q) => q.note), "aspect: the rule is available as a hint");
+  }
+}
+
+group("question shape");
+{
+  // Both runners read these fields; a missing one is a blank screen on one platform.
+  const all = [].concat(Q.quizSteps(UN[0], 0), Q.drillQuestions("cases", 4));
+  ok(all.every((q) => typeof q.ask === "string" && q.ask.length),
+     "every question states what is being asked");
+  ok(all.every((q) => q.options || q.typed || q.pairs),
+     "and offers a way to answer");
+  ok(all.filter((q) => q.typed).every((q) => q.target && q.answer),
+     "typed questions carry both the target and the displayed answer");
+}
+
+console.log("\n" + checks + " checks · " +
+            (failures ? failures + " FAILED" : "all passed"));
+process.exit(failures ? 1 : 0);

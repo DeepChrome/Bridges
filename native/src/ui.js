@@ -9,8 +9,9 @@ import {
   View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Path, SvgXml } from "react-native-svg";
 import { iconFor } from "@core/icons";
+import { AV, AV_IDS } from "@core/avatars";
 import { useTheme, radius, space } from "./theme";
 import { say, hasRealAudio } from "./audio";
 
@@ -167,6 +168,24 @@ export function Thumb({ id, done, locked, n }) {
     </View>
   );
 }
+
+/* The same ten characters the web app draws, from the same source. SvgXml renders the
+   shared markup directly rather than each platform keeping its own copy of the art. */
+export function Avatar({ id, size = 44 }) {
+  const a = AV[id] || AV[AV_IDS[0]];
+  return (
+    <View style={{ width: size, height: size, borderRadius: size / 2,
+                   backgroundColor: a.bg, overflow: "hidden" }}>
+      <SvgXml
+        width={size}
+        height={size}
+        xml={`<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">${a.svg}</svg>`}
+      />
+    </View>
+  );
+}
+
+export { AV, AV_IDS };
 
 /* A speaker that stays live when the collection has a real recording, whether or not
    the device has a Russian voice. */

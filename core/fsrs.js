@@ -1,4 +1,4 @@
-﻿/* FSRS-4.5 (Free Spaced Repetition Scheduler) with the published default weights.
+/* FSRS-4.5 (Free Spaced Repetition Scheduler) with the published default weights.
  *
  * Ratings match Anki: 1 Again, 2 Hard, 3 Good, 4 Easy.
  * A card's memory is (stability, difficulty); the interval is how long until

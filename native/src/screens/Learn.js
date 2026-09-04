@@ -72,14 +72,21 @@ export default function Learn({ navigation }) {
           .concat(stage.branches.map((u) => ({ u, branch: true })));
         return (
           <View key={stage.core.id} style={{ marginTop: 22 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10,
+            <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10,
                            marginBottom: 9 }}>
-              {/* One string, not two children: a screen reader should hear
-                  "Stage 1", not "Stage" then "1". */}
-              <Text style={[styles.sectionLabel, { color: t.ink2, marginBottom: 0 }]}>
-                {`Stage ${i + 1}`}
-              </Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: t.line }} />
+              <View style={{ flex: 1 }}>
+                {/* One string, not two children: a screen reader should hear
+                    "Chapter 1", not "Chapter" then "1". */}
+                <Text style={[styles.sectionLabel, { color: t.ink3, marginBottom: 0 }]}>
+                  {`Chapter ${stage.n || i + 1}`}
+                </Text>
+                {stage.title ? (
+                  <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700",
+                                 letterSpacing: -0.2, marginTop: 1 }}>
+                    {stage.title}
+                  </Text>
+                ) : null}
+              </View>
               {stageDone(st, stage) ? <Pill tone="good">done</Pill>
                 : !open ? <Pill>locked</Pill> : null}
             </View>

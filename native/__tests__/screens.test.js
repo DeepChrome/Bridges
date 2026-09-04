@@ -56,11 +56,23 @@ afterEach(async () => {
 });
 
 describe("Learn", () => {
-  it("draws every stage and unit", async () => {
+  it("draws every chapter and unit", async () => {
     await withProfile(<Learn navigation={nav} />);
-    expect(await screen.findByText(/Stage 1/)).toBeTruthy();
-    expect(screen.getByText(new RegExp(`Stage ${STAGES.length}`))).toBeTruthy();
+    expect(await screen.findByText(/Chapter 1/)).toBeTruthy();
+    expect(screen.getByText(new RegExp(`Chapter ${STAGES.length}`))).toBeTruthy();
     expect(screen.getByText("Food & Drink")).toBeTruthy();
+  });
+
+  /* The point of chapters is that they are named, not numbered — a regression here
+     would put "Core 3" back in front of the learner. */
+  it("names every chapter and its core unit", async () => {
+    await withProfile(<Learn navigation={nav} />);
+    await screen.findByText(/Chapter 1/);
+    for (const stage of STAGES) {
+      expect(stage.title).toBeTruthy();
+      expect(stage.core.name).not.toMatch(/^Core \d+$/);
+    }
+    expect(screen.getByText(STAGES[0].title)).toBeTruthy();
   });
 
   it("opens a unit when tapped", async () => {

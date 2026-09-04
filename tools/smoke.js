@@ -17,6 +17,22 @@ const VIDEOS = JSON.parse(
   fs.readFileSync(path.join(__dirname, "..", "data", "videos.json"), "utf8")).units;
 const WITH_VIDEO = Object.keys(VIDEOS).length;
 
+/* Same reasoning for the dictionary. Which words the lexicon has a paradigm for
+   moves with every OpenRussian rebuild, so the paradigm-less word used to check the
+   empty-table case is read out of the payload the page was built from rather than
+   pinned by name. Fields: 0 bare, 6 gloss, 8 shape id. */
+const payloadPath = path.join(__dirname, "..", "native", "assets", "data.json");
+if (!fs.existsSync(payloadPath)) {
+  console.error("smoke: " + payloadPath + " is missing — run tools/build_site.py first.\n" +
+                "It writes the page and this payload from one gather(), so they match.");
+  process.exit(1);
+}
+const PAYLOAD = JSON.parse(fs.readFileSync(payloadPath, "utf8"));
+const STUDIED = new Set(PAYLOAD.lemmas.map((l) => l.b));
+const DEEP_ROWS = PAYLOAD.deep.split("\n").filter(Boolean).map((r) => r.split("\t"));
+const NO_PARADIGM = DEEP_ROWS.find(
+  (r) => !r[8] && r[6] && !STUDIED.has(r[0]) && /^[а-яё]+$/.test(r[0]));
+
 let failures = 0, checks = 0;
 const ok = (cond, label, extra) => {
   checks++;
@@ -360,18 +376,75 @@ setTimeout(async () => {
   group("words");
   await tab("dict");
   const q = $("#q");
-  const type = (v) => { q.value = v; q.dispatchEvent(new window.Event("input", { bubbles: true })); };
-  type("книгу");
-  ok(/кни/.test(($("#s-dict .hw") || {}).textContent || ""), "Cyrillic search works");
+  const find = (v) => {
+    q.value = v;
+    q.dispatchEvent(new window.Event("input", { bubbles: true }));
+  };
+
+  find("книгу");
+  ok($$("#results .row").length > 0, "results appear as you type",
+     String($$("#results .row").length));
+  ok(/кни/.test(($("#results .rw") || {}).textContent || ""),
+     "the top result is the word that was asked for");
+
+  find("sebe");
+  ok(/себ/.test(($("#results .rw") || {}).textContent || ""),
+     "Latin input transliterates");
+  find("war");
+  ok(/война/.test(($("#results .rw") || {}).textContent || ""), "English search works");
+
+  // The wider lexicon: words the curriculum does not teach are still findable,
+  // which is the whole point of shipping the deep tier.
+  find("grapes");
+  // Headwords are displayed with their stress mark, so «виногра́д» carries a
+  // combining acute between the а and the д. Assertions have to fold it out or
+  // they fail on a word that is on the screen.
+  //
+  // Recomposing afterwards is not optional: NFD also splits й into и + U+0306 and
+  // ё into е + U+0308, so without the NFC step a word like «абонементный» stops
+  // matching itself and the test reports a bug that is not there.
+  const plain = (s) =>
+    (s || "").normalize("NFD").replace(/[̀́]/g, "").normalize("NFC");
+  ok(/виноград/.test(plain($("#results").textContent)),
+     "a word outside the collection is found");
+  ok(/grape/i.test($("#results").textContent || ""),
+     "and the result carries its meaning, like any other");
+
+  // The full write-up is a press further on, and that is what a word link opens.
+  await nav("#/w/" + encodeURIComponent("книгу"));
+  ok(/книга/.test(($("#recent") || {}).textContent || ""),
+     "opening an entry is what gets remembered, as Russian");
+  ok(/кни/.test(($("#s-dict .hw") || {}).textContent || ""),
+     "a word link opens the full entry");
   ok($$("#s-dict table").length > 0, "paradigm table rendered");
-  type("sebe");
-  ok(/себ/.test(($("#s-dict .hw") || {}).textContent || ""), "Latin input transliterates");
-  type("war");
-  ok(/война/.test(($("#s-dict .hw") || {}).textContent || ""), "English search works");
-  type("книгу");
   ok($$("#s-dict .ex .tok:not(.dead)").length > 0, "sentence tokens are links");
   const stress = ($("#s-dict .ex .ru") || {}).textContent || "";
   ok(!/[\s ]́/.test(stress), "stress marks stay on their vowel");
+
+  // First press summarises without leaving the sentence; only the second follows
+  // the link.
+  const tok = $("#s-dict .ex .tok:not(.dead)");
+  tok.dispatchEvent(new window.Event("click", { bubbles: true, cancelable: true }));
+  ok($("#pop").style.display === "block", "the first press shows the summary");
+  ok(/Tap again/.test($("#pop").textContent), "and says how to go further");
+
+  // A word the curriculum never teaches is a full entry, not a stub with an
+  // apology: the deep tier ships its paradigm too, so there is one kind of entry.
+  await nav("#/w/" + encodeURIComponent("виноград"));
+  ok(/виноград/.test(plain(($("#s-dict .hw") || {}).textContent)),
+     "a word outside the curriculum opens its entry");
+  ok($$("#s-dict table").length > 0, "and declines in full, like a studied word");
+
+  // The honesty rule survives the upgrade: where the lexicon genuinely has no
+  // paradigm, nothing is invented and no empty table is drawn.
+  ok(!!NO_PARADIGM, "the payload has a glossed lemma with no paradigm to check");
+  if (NO_PARADIGM) {
+    await nav("#/w/" + encodeURIComponent(NO_PARADIGM[0]));
+    ok(new RegExp(NO_PARADIGM[0]).test(plain(($("#s-dict .hw") || {}).textContent)),
+       "a lemma with no paradigm still opens: " + NO_PARADIGM[0],
+       "headword shown: " + JSON.stringify(plain(($("#s-dict .hw") || {}).textContent)));
+    ok($$("#s-dict table").length === 0, "with no empty table drawn for it");
+  }
 
   group("profile");
   await nav("#/you");

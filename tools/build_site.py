@@ -23,6 +23,171 @@ from panel import build_tables, fold  # noqa: E402
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 
+# Part of speech is one letter in the deep-dictionary blob — 46,000 rows makes the
+# spelled-out word expensive. Must stay in step with POS_CODE in core/search.js.
+POS_LETTER = {
+    "noun": "n", "verb": "v", "adjective": "a", "adverb": "d", "pronoun": "p",
+    "preposition": "r", "conjunction": "c", "particle": "t", "numeral": "m",
+    "interjection": "i", "possessive": "s",
+}
+
+
+ACC_MARKS = "́̀"
+B36 = "0123456789abcdefghijklmnopqrstuvwxyz"
+
+
+def _plain(s):
+    return "".join(c for c in s if c not in ACC_MARKS)
+
+
+def _stress_index(s):
+    """Where the stress sits in the unaccented string, or -1 for none.
+
+    Reconstruction is exact for 764,755 of the lexicon's 764,916 paradigm forms;
+    the 161 with a secondary stress are carried verbatim as overrides rather than
+    approximated.
+    """
+    i = -1
+    for ch in s:
+        if ch in ACC_MARKS:
+            return i
+        i += 1
+    return -1
+
+
+def build_dictionary(db, sentences, items_of_key, keys_of, stats):
+    """Every glossed lemma, with its paradigm and its sentences.
+
+    The curriculum ships ~4,000 lemmas in full. The lexicon holds 58,844, and an
+    entry that says "no paradigm for this one" is not a dictionary entry — so every
+    glossed lemma gets its declension or conjugation here.
+
+    Shipping those tables naively costs 19 MB. They compress to about a tenth of
+    that because Russian endings repeat: 41,087 paradigms are built from 3,166
+    distinct sets of endings. Each lemma therefore stores a stem length, a shape id,
+    and one character of stress per form — the shape table carries the endings once.
+
+    Every count here is printed by the build, so a stale number in this docstring is
+    a discrepancy you can see rather than one you have to measure.
+    """
+    meta = {}
+    for lid, bare, acc, pos, gender, animate, aspect, partner, en in db.execute(
+            "select id, bare, accented, pos, gender, animate, aspect, partner, en"
+            " from lemmas where en is not null and en <> ''"):
+        meta[lid] = {"b": bare, "w": acc or bare, "p": pos, "g": gender,
+                     "an": animate, "a": aspect, "pt": partner, "e": en}
+
+    par = {}
+    for lid, slot, acc in db.execute(
+            "select lemma_id, slot, accented from paradigm"
+            " where accented is not null and accented <> ''"):
+        if lid in meta:
+            par.setdefault(lid, {}).setdefault(slot, [])
+            if acc not in par[lid][slot]:
+                par[lid][slot].append(acc)
+
+    # Sentences from his own decks, for every glossed lemma that has one — 7,488 of
+    # them, where only the studied 4,000 were reachable before. Pooled and
+    # referenced, since one sentence often illustrates several words.
+    pool, pool_at = [], {}
+    def sentence_ref(iid):
+        if iid not in pool_at:
+            ru, en_s, deck, has_audio = sentences[iid]
+            pool_at[iid] = len(pool)
+            pool.append([ru, en_s, deck, 1 if has_audio else 0])
+        return pool_at[iid]
+
+    slot_names, slot_at = [], {}
+    shapes, shape_at = [], {}
+    lines = []
+
+    for lid in sorted(meta, key=lambda x: meta[x]["b"]):
+        m = meta[lid]
+        bare = m["b"]
+        slots = par.get(lid, {})
+
+        shape_id, stem_len, stress, overrides = "", "", "", []
+        if slots:
+            flat = {s: [_plain(v) for v in vs] for s, vs in slots.items()}
+            stem = bare
+            for forms in flat.values():
+                for f in forms:
+                    n = 0
+                    while n < len(stem) and n < len(f) and stem[n] == f[n]:
+                        n += 1
+                    stem = stem[:n]
+            stem_len = B36[len(stem)] if len(stem) < 36 else B36[0]
+            if len(stem) >= 36:
+                stem = ""
+
+            key_parts, marks = [], []
+            for s in sorted(slots):
+                if s not in slot_at:
+                    slot_at[s] = len(slot_names)
+                    slot_names.append(s)
+                key_parts.append((slot_at[s], tuple(f[len(stem):] for f in flat[s])))
+                for k, raw in enumerate(slots[s]):
+                    idx = _stress_index(raw)
+                    if sum(raw.count(c) for c in ACC_MARKS) > 1 or idx >= 36:
+                        overrides.append(f"{slot_at[s]}.{k}={raw}")
+                        marks.append("-")
+                    elif idx < 0:
+                        marks.append("-")
+                    else:
+                        marks.append(B36[idx])
+            shape_key = tuple(key_parts)
+            if shape_key not in shape_at:
+                shape_at[shape_key] = len(shapes)
+                shapes.append(shape_key)
+            shape_id = str(shape_at[shape_key])
+            stress = "".join(marks)
+
+        refs = []
+        for iid in sorted({i for k in keys_of.get(lid, ()) for i in items_of_key.get(k, ())
+                           if i in sentences})[:4]:
+            refs.append(str(sentence_ref(iid)))
+
+        lines.append("\t".join([
+            bare,
+            "" if m["w"] == bare else m["w"],
+            POS_LETTER.get(m["p"], m["p"] or ""),
+            m["g"] or "",
+            m["a"] or "",
+            m["pt"] or "",
+            (m["e"] or "").replace("\t", " "),
+            stem_len,
+            shape_id,
+            stress,
+            ",".join(refs),
+            ";".join(overrides),
+        ]))
+
+    shape_blob = "\n".join(
+        "\t".join(str(si) + ":" + "/".join(ends) for si, ends in sh) for sh in shapes)
+
+    # The app now lays paradigm tables out in JavaScript, because it has to do it for
+    # words whose tables were never built here. panel.py still owns the layout for
+    # the CLI, so the two could drift — this sample is what stops that silently:
+    # core.test.mjs asserts the JS output matches these tables exactly.
+    sample = []
+    for lid in sorted(meta, key=lambda x: meta[x]["b"]):
+        m = meta[lid]
+        if not par.get(lid):
+            continue
+        if len(sample) >= 60:
+            break
+        if len(sample) % 4 == 0 or m["p"] in ("verb", "adjective", "pronoun"):
+            sample.append({"b": m["b"], "p": m["p"],
+                           "t": build_tables(m["p"], par[lid])})
+    stats["tsample"] = len(sample)
+
+    stats["deep"] = len(lines)
+    stats["deep_paradigms"] = sum(1 for x in lines if x.split("\t")[8])
+    stats["deep_examples"] = sum(1 for x in lines if x.split("\t")[10])
+    stats["deep_sentences"] = len(pool)
+    stats["shapes"] = len(shapes)
+    return "\n".join(lines), shape_blob, slot_names, pool, sample
+
 
 def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     db = sqlite3.connect(f"file:{lex_path}?mode=ro", uri=True)
@@ -70,9 +235,16 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         group by f.lemma_id
     """))
 
+    # Every glossed lemma, not just the curriculum's: build_dictionary reaches these
+    # to find example sentences, and filtering to `seen` silently capped the deep
+    # tier's sentences at the 4,000 studied words. Bounded to lemmas that can produce
+    # output — all 58,844 would hold 567,526 form keys for nothing.
+    glossed = {r[0] for r in db.execute(
+        "select id from lemmas where en is not null and en <> ''")}
+    keep = seen | glossed
     keys_of = {}
     for lid, k in db.execute("select lemma_id, key from forms"):
-        if lid in seen:
+        if lid in keep:
             keys_of.setdefault(lid, set()).add(k)
 
     sentences = {}
@@ -104,21 +276,15 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             continue
         bare, accented, pos, gender, aspect, partner, en = row
 
-        par = {}
-        for slot, acc in db.execute(
-                "select slot, accented from paradigm where lemma_id=?", (lid,)):
-            par.setdefault(slot, [])
-            if acc not in par[slot]:
-                par[slot].append(acc)
-
         keys = keys_of.get(lid, set())
-        cand = {i for k in keys for i in items_of_key.get(k, ())}
-        ex = [{"ru": sentences[i][0], "en": sentences[i][1],
-               "d": sentences[i][2], "au": sentences[i][3]}
-              for i in sorted(cand, key=lambda i: len(sentences[i][0]))[:n_examples]]
 
+        # Neither the paradigm tables nor the example sentences are stored here any
+        # more: the dictionary tier below carries both, for all 46,000 glossed
+        # lemmas rather than only these 4,000, and the app rebuilds `t` and `x` on
+        # the way in. Keeping a second copy cost 2.6 MB and was one more thing that
+        # could disagree with itself.
         e = {"w": accented or bare, "b": bare, "p": pos, "e": en or "",
-             "t": build_tables(pos, par), "x": ex, "n": corpus_n.get(lid, 0)}
+             "n": corpus_n.get(lid, 0)}
         if gender:
             e["g"] = gender
         if aspect:
@@ -183,10 +349,23 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
                 }
         units.append(u)
 
-    path = [{"r": r, "c": c, "u": uidx[tid], "req": uidx.get(req)}
-            for r, c, tid, req in db.execute(
-                "select row, col, topic_id, requires from t.path order by row, col")
-            if tid in uidx]
+    # Chapter titles ride on the spine row that opens each chapter, which is where the
+    # app already starts a new stage — no second structure to keep in step with path.
+    chapters = {sid: (n, title) for n, title, sid
+                in db.execute("select n, title, spine_id from t.chapters order by n")}
+
+    path = []
+    for r, c, tid, req in db.execute(
+            "select row, col, topic_id, requires from t.path order by row, col"):
+        if tid not in uidx:
+            continue
+        row = {"r": r, "c": c, "u": uidx[tid], "req": uidx.get(req)}
+        if tid in chapters:
+            row["cn"], row["ch"] = chapters[tid]
+        path.append(row)
+
+    deep, shapes, slot_names, sent_pool, tsample = build_dictionary(
+        db, sentences, items_of_key, keys_of, stats)
 
     db.close()
 
@@ -205,7 +384,9 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         stats["audio_utterances"] = len(audio)
 
     return {"stats": stats, "lemmas": lemmas, "index": index,
-            "units": units, "path": path, "audio": {"files": audio}}
+            "units": units, "path": path, "audio": {"files": audio},
+            "deep": deep, "shapes": shapes, "slots": slot_names,
+            "sent": sent_pool, "tsample": tsample}
 
 
 FONTS = ("https://fonts.googleapis.com/css2?"
@@ -289,7 +470,10 @@ def main():
     # core/ is shared verbatim with the React Native app, so it is written as ES
     # modules. The web bundle is one classic script, so the module syntax is stripped
     # on the way in rather than the logic being duplicated for each platform.
-    core_files = ["util.js", "fsrs.js", "icons.js", "avatars.js"]
+    # forms.js after util.js: it calls fold() and firstSense() at run time, and the
+    # concatenation order is the only thing standing in for module resolution.
+    core_files = ["util.js", "paradigm.js", "entry.js", "forms.js", "search.js",
+                  "fsrs.js", "icons.js", "avatars.js"]
     core = "\n".join(strip_modules((ROOT / "core" / f).read_text(encoding="utf-8"))
                      for f in core_files if (ROOT / "core" / f).exists())
 
@@ -331,6 +515,17 @@ def main():
     print(f"  units        : {len(payload['units'])}  "
           f"({sum(1 for u in payload['units'] if u['kind']=='spine')} spine, "
           f"{sum(1 for u in payload['units'] if u['kind']=='branch')} branch)")
+    # The deep tier is most of the payload, so the build has to report what it ships:
+    # a drop in either coverage number is the symptom of a join quietly breaking.
+    st = payload["stats"]
+    deep_n = st["deep"]
+    print(f"  dictionary   : {deep_n:,} glossed lemmas "
+          f"({st['deep_paradigms']:,} with a paradigm, "
+          f"{100*st['deep_paradigms']/deep_n:.1f}%; "
+          f"{st['deep_examples']:,} with sentences, "
+          f"{100*st['deep_examples']/deep_n:.1f}%)")
+    print(f"  shared       : {st['shapes']:,} ending shapes, "
+          f"{st['deep_sentences']:,} pooled sentences")
     print(f"  scripts      : {', '.join(js_files)}")
     print(f"  page         : {(args.outdir / 'index.html').stat().st_size/1_048_576:.2f} MB")
 

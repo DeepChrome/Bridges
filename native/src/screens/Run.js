@@ -11,7 +11,8 @@ import { View, Text, TextInput, Pressable, ScrollView, Modal } from "react-nativ
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row } from "../ui";
-import { say } from "../audio";
+import { say, cue, answerAudioText, stop as stopAudio } from "../audio";
+import { Linked } from "../words";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { fsrsReview, isTrouble } from "@core/fsrs";
 import { fold, translit, today, translitBack, firstSense } from "@core/util";
@@ -194,7 +195,7 @@ function HintSheet({ q, onClose }) {
                 {(q.note.examples || []).map(([ru, en], k) => (
                   <View key={k} style={{ marginTop: 12, borderTopWidth: 1,
                                          borderTopColor: t.lineSoft, paddingTop: 10 }}>
-                    <Text style={{ color: t.ink, fontSize: 18 }}>{ru}</Text>
+                    <Linked text={ru} size={18} />
                     <Muted>{en}</Muted>
                   </View>
                 ))}
@@ -221,6 +222,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
   const [usedHint, setUsedHint] = useState(false);
   const results = useRef([]);
   const tally = useRef({ right: 0, wrong: 0, helped: 0 });
+  const sayTimer = useRef(null);
 
   const q = steps[at];
 
@@ -228,11 +230,32 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
     if (q && q.autoplay) say(q.autoplay);
   }, [at]);
 
+  // A pending answer reading must not outlive the screen, or the word arrives
+  // over the top of whatever the learner moved on to.
+  useEffect(() => () => {
+    if (sayTimer.current) clearTimeout(sayTimer.current);
+    stopAudio();
+  }, []);
+
   if (!q) return null;
 
   const record = (correct, wordIdxs) => {
     setAnswered(true);
     setRight(correct);
+
+    cue(correct ? "right" : "wrong");
+    // The word itself, just behind the cue so the two do not talk over each
+    // other. Only on a correct answer: hearing the right form is the reward,
+    // and it is also the moment the learner is listening for it.
+    if (correct) {
+      const opt = q.options ? q.options.find((o) => o.right) : null;
+      const text = answerAudioText(q, opt);
+      if (text) {
+        if (sayTimer.current) clearTimeout(sayTimer.current);
+        sayTimer.current = setTimeout(() => say(text), 420);
+      }
+    }
+
     if (correct) tally.current.right += 1; else tally.current.wrong += 1;
     if (usedHint) tally.current.helped += 1;
     results.current.push({ right: correct, stage: q.stage, lesson: q.lesson, i: q.i });
@@ -246,6 +269,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
   };
 
   const next = () => {
+    // Moving on cancels a reading that has not started yet.
+    if (sayTimer.current) { clearTimeout(sayTimer.current); sayTimer.current = null; }
     if (at + 1 >= steps.length) {
       onFinish({ ...tally.current, total: steps.length, results: results.current });
       return;

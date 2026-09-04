@@ -17,13 +17,16 @@ import Svg, { Path } from "react-native-svg";
 
 import { SessionProvider, useSession } from "./src/session";
 import { light, dark } from "./src/theme";
-import { Loading, Avatar } from "./src/ui";
+import { Loading, Avatar, HeaderTitle } from "./src/ui";
+import { unitById, chapterOf, L, resolveWord } from "./src/data";
 import Learn from "./src/screens/Learn";
 import Search from "./src/screens/Search";
 import Study from "./src/screens/Study";
 import You from "./src/screens/You";
 import { UnitScreen, LessonScreen } from "./src/screens/Unit";
 import { Immerse, Video, Gate } from "./src/screens/Misc";
+import WordScreen from "./src/screens/Word";
+import { WordsProvider, navRef } from "./src/words";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
 } from "./src/screens/Flows";
@@ -59,18 +62,55 @@ function MeButton({ navigation }) {
 
 const withMe = ({ navigation }) => ({
   headerRight: () => <MeButton navigation={navigation} />,
+  headerBackButtonDisplayMode: "minimal",
 });
+
+/* A screen's header names the screen and what it belongs to, both read from the
+   route rather than hardcoded — "Vocabulary / Around Town", not "Vocabulary". */
+const titled = (what) => ({ navigation, route }) => {
+  const p = (route && route.params) || {};
+  const unit = p.unitId ? unitById(p.unitId) : null;
+  const chapter = unit ? chapterOf(unit.id) : null;
+  const label = typeof what === "function" ? what(p, unit) : what;
+  const sub = unit ? unit.name
+            : chapter ? chapter.title
+            : null;
+  return {
+    headerRight: () => <MeButton navigation={navigation} />,
+    headerBackButtonDisplayMode: "minimal",
+    headerTitleAlign: "center",
+    headerTitle: () => <HeaderTitle title={label} sub={sub} />,
+  };
+};
+
+/* The unit screen is the one place the chapter, not the unit, is the parent. */
+const unitTitled = ({ navigation, route }) => {
+  const unit = unitById((route.params || {}).unitId);
+  const chapter = unit ? chapterOf(unit.id) : null;
+  return {
+    headerRight: () => <MeButton navigation={navigation} />,
+    headerBackButtonDisplayMode: "minimal",
+    headerTitleAlign: "center",
+    headerTitle: () => (
+      <HeaderTitle
+        title={unit ? unit.name : "Unit"}
+        sub={chapter ? `Chapter ${chapter.n} · ${chapter.title}` : null}
+      />
+    ),
+  };
+};
 
 function LearnStack() {
   return (
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Path" component={Learn} options={{ title: "Learn" }} />
-      <Stack.Screen name="Unit" component={UnitScreen} options={{ title: "Unit" }} />
-      <Stack.Screen name="Lesson" component={LessonScreen} options={{ title: "Lesson" }} />
-      <Stack.Screen name="Vocab" component={VocabFlow} options={{ title: "Vocabulary" }} />
-      <Stack.Screen name="Quiz" component={QuizFlow} options={{ title: "Quiz" }} />
-      <Stack.Screen name="Video" component={Video} options={{ title: "Video" }} />
-      <Stack.Screen name="TestOut" component={SectionFlow} options={{ title: "Test out" }} />
+      <Stack.Screen name="Unit" component={UnitScreen} options={unitTitled} />
+      <Stack.Screen name="Lesson" component={LessonScreen}
+                    options={titled((p) => `Lesson ${(p.index || 0) + 1}`)} />
+      <Stack.Screen name="Vocab" component={VocabFlow} options={titled("Vocabulary")} />
+      <Stack.Screen name="Quiz" component={QuizFlow} options={titled("Quiz")} />
+      <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
+      <Stack.Screen name="TestOut" component={SectionFlow} options={titled("Test out")} />
       <Stack.Screen name="Placement" component={PlacementFlow}
                     options={{ title: "Placement" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
@@ -83,7 +123,14 @@ function PracticeStack() {
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Drills" component={DrillList} options={{ title: "Practice" }} />
       <Stack.Screen name="Drill" component={DrillFlow}
-                    options={({ route }) => ({ title: route.params.type })} />
+                    options={({ navigation, route }) => ({
+                      headerRight: () => <MeButton navigation={navigation} />,
+                      headerBackButtonDisplayMode: "minimal",
+                      headerTitleAlign: "center",
+                      headerTitle: () => (
+                        <HeaderTitle title={route.params.type} sub="Drill" />
+                      ),
+                    })} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
     </Stack.Navigator>
   );
@@ -93,7 +140,7 @@ function ImmerseStack() {
   return (
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Episodes" component={Immerse} options={{ title: "Immerse" }} />
-      <Stack.Screen name="Video" component={Video} options={{ title: "Video" }} />
+      <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
     </Stack.Navigator>
   );
@@ -164,20 +211,54 @@ function Splash({ onDone }) {
   );
 }
 
+/* The word entry lives above the tabs rather than inside each stack: it is reachable
+   from every screen — a tapped word in a lesson, a search result, an example
+   sentence — and one screen with one back stack beats five copies of it. */
+const Root = createNativeStackNavigator();
+
+const wordTitled = ({ route }) => {
+  const p = route.params || {};
+  const w = p.word !== undefined ? resolveWord(p.word) : L[p.i];
+  return {
+    headerTitleAlign: "center",
+    headerBackButtonDisplayMode: "minimal",
+    headerTitle: () => (
+      <HeaderTitle title={w ? w.w : "Word"} sub={w && w.p ? w.p : "Dictionary"} />
+    ),
+  };
+};
+
 function Shell() {
   const { ready, account } = useSession();
   const [splashDone, setSplashDone] = useState(false);
   const [placement, setPlacement] = useState(null);
 
+  /* Acting on the gate's answer. The navigator only exists once there is an
+     account, so this runs on the render after the profile is created: effects fire
+     child-first, so the stack below is mounted and the ref is live by now. */
+  useEffect(() => {
+    if (placement !== true) return;
+    if (navRef.isReady()) {
+      navRef.navigate("Tabs", { screen: "Learn", params: { screen: "Placement" } });
+    }
+    setPlacement(null);
+  }, [placement]);
+
   if (!splashDone) return <Splash onDone={() => setSplashDone(true)} />;
   if (!ready) return <Loading />;
-  if (!account) return <Gate onPlacement={(wanted) => setPlacement(wanted)} />;
+  if (!account) return <Gate onPlacement={setPlacement} />;
 
   return (
-    <Tabs.Navigator
-      screenOptions={{ headerShown: false }}
-      initialRouteName={placement ? "Learn" : "Learn"}
-    >
+    <Root.Navigator>
+      <Root.Screen name="Tabs" component={TabShell} options={{ headerShown: false }} />
+      <Root.Screen name="Word" component={WordScreen} options={wordTitled} />
+    </Root.Navigator>
+  );
+}
+
+function TabShell() {
+  return (
+    <Tabs.Navigator screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="Learn" component={LearnStack}
                    options={{ tabBarIcon: LearnIcon }} />
       <Tabs.Screen name="Study" component={StudyStack}
@@ -205,9 +286,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <SessionProvider>
-        <NavigationContainer theme={navTheme}>
-          <Shell />
-          <StatusBar style={scheme === "light" ? "dark" : "light"} />
+        <NavigationContainer ref={navRef} theme={navTheme}>
+          <WordsProvider>
+            <Shell />
+            <StatusBar style={scheme === "light" ? "dark" : "light"} />
+          </WordsProvider>
         </NavigationContainer>
       </SessionProvider>
     </SafeAreaProvider>

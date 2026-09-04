@@ -3,13 +3,18 @@
    reads as deliberate rather than stretched. */
 
 :root {
-  --bg:#F6F5F1; --surface:#FFFFFF; --surface-2:#EDEBE4; --surface-3:#E2DFD5;
-  --ink:#17181A; --ink-2:#5A5D5E; --ink-3:#8B8F8C;
-  --line:#DEDCD3; --line-soft:#EAE8E1;
-  --brand:#C08519; --brand-ink:#8A6114; --brand-bg:#F6EBD3; --brand-dim:#9A6B14;
-  --good:#2F8C5A; --good-bg:#DFF0E5; --good-dim:#246E46;
-  --bad:#C0473E; --bad-bg:#F7E2E0; --bad-dim:#9A382F;
-  --info:#3C74B4; --info-bg:#E2ECF8;
+  /* Neutrals all sit on one hue (44° warm here, 205° cool in dark) and every
+     foreground was solved against the surface it actually sits on rather than
+     picked by eye — see the header comment in native/src/theme.js. Six pairs
+     failed WCAG before, muted 13px text worst at 3.01:1. Keep the two files
+     identical; they are one design system with two renderers. */
+  --bg:#F5F4F2; --surface:#FFFFFF; --surface-2:#EBEAE6; --surface-3:#DFDDD8;
+  --ink:#1A1917; --ink-2:#4E4B45; --ink-3:#6C685F;
+  --line:#D6D3CD; --line-soft:#E8E7E3;
+  --brand:#B67D18; --brand-ink:#8A6114; --brand-bg:#F6EBD3; --brand-dim:#956713;
+  --good:#28784D; --good-bg:#DFF0E5; --good-dim:#246E46;
+  --bad:#B2423A; --bad-bg:#F7E2E0; --bad-dim:#9A382F;
+  --info:#386CA8; --info-bg:#E2ECF8;
   --shadow:rgba(23,24,26,0.14);
 
   --f-ui:"Golos Text","Segoe UI",system-ui,-apple-system,sans-serif;
@@ -23,23 +28,23 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:#0E1113; --surface:#171B1E; --surface-2:#1F2428; --surface-3:#282F34;
-    --ink:#ECEFF1; --ink-2:#A0A8AD; --ink-3:#78817F;
-    --line:#2A3136; --line-soft:#212728;
+    --bg:#0F1112; --surface:#171B1E; --surface-2:#202427; --surface-3:#292F33;
+    --ink:#EEEFEF; --ink-2:#B9BEC2; --ink-3:#959CA1;
+    --line:#2B3135; --line-soft:#212528;
     --brand:#E0A73C; --brand-ink:#EDBE62; --brand-bg:#2C2517; --brand-dim:#A87B24;
-    --good:#4CAF7D; --good-bg:#16281E; --good-dim:#357C58;
-    --bad:#E0685D; --bad-bg:#2A1917; --bad-dim:#A44A41;
+    --good:#4CAF7D; --good-bg:#16281E; --good-dim:#3B8A62;
+    --bad:#E0685D; --bad-bg:#2A1917; --bad-dim:#BD6157;
     --info:#6BA3E0; --info-bg:#152230;
     --shadow:rgba(0,0,0,0.45);
   }
 }
 :root[data-theme="dark"] {
-  --bg:#0E1113; --surface:#171B1E; --surface-2:#1F2428; --surface-3:#282F34;
-  --ink:#ECEFF1; --ink-2:#A0A8AD; --ink-3:#78817F;
-  --line:#2A3136; --line-soft:#212728;
+  --bg:#0F1112; --surface:#171B1E; --surface-2:#202427; --surface-3:#292F33;
+  --ink:#EEEFEF; --ink-2:#B9BEC2; --ink-3:#959CA1;
+  --line:#2B3135; --line-soft:#212528;
   --brand:#E0A73C; --brand-ink:#EDBE62; --brand-bg:#2C2517; --brand-dim:#A87B24;
-  --good:#4CAF7D; --good-bg:#16281E; --good-dim:#357C58;
-  --bad:#E0685D; --bad-bg:#2A1917; --bad-dim:#A44A41;
+  --good:#4CAF7D; --good-bg:#16281E; --good-dim:#3B8A62;
+  --bad:#E0685D; --bad-bg:#2A1917; --bad-dim:#BD6157;
   --info:#6BA3E0; --info-bg:#152230;
   --shadow:rgba(0,0,0,0.45);
 }
@@ -196,8 +201,15 @@ button.pill { min-height:24px; padding:5px 10px; border:0; cursor:pointer; font:
 .stage-h {
   display:flex; align-items:center; gap:10px; margin:18px 0 10px;
 }
-.stage-h .ttl { font-size:13px; font-weight:600; letter-spacing:0.04em;
-                text-transform:uppercase; color:var(--ink-2); }
+/* Number over name: the chapter is a place in a sequence and a subject, and the
+   subject is the part worth reading first at a glance. No rule beside it — the
+   track already draws a vertical spine, and a second line floating at an
+   arbitrary height beside a two-line heading only adds noise. */
+.chap { display:flex; flex-direction:column; gap:1px; flex:1; min-width:0; }
+.stage-h .ttl { font-size:11px; font-weight:700; letter-spacing:0.09em;
+                text-transform:uppercase; color:var(--ink-3); }
+.stage-h .name { font-size:17px; font-weight:700; letter-spacing:-0.01em;
+                 color:var(--ink); }
 .stage-h .ln { flex:1; height:1px; background:var(--line); }
 /* No width:100% — the track already stretches its children, and combining the two
    with .branch's margin-left pushed the row 26px past the viewport. */
@@ -285,12 +297,22 @@ button.pill { min-height:24px; padding:5px 10px; border:0; cursor:pointer; font:
 }
 
 /* ---------- dictionary ---------- */
-.searchwrap { position:relative; margin-bottom:12px; }
+.searchwrap { display:flex; margin-bottom:12px; }
 #q {
-  width:100%; font:inherit; font-family:var(--f-ru); font-size:17px;
+  flex:1; min-width:0; font:inherit; font-family:var(--f-ru); font-size:17px;
   padding:13px 14px; border-radius:var(--r); border:1px solid var(--line);
   background:var(--surface); color:var(--ink);
 }
+/* Section label, shared by "Recent" and the result count. */
+.reclbl {
+  font-size:11px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase;
+  color:var(--ink-3); margin:16px 0 8px 2px;
+}
+.row .rw { display:block; font-family:var(--f-ru); font-size:19px; font-weight:600;
+           color:var(--ink); }
+.row .rg { display:block; font-size:13px; color:var(--ink-3); margin-top:1px; }
+/* Says what a screen does not contain — never a substitute for content. */
+.note { color:var(--ink-3); font-size:13px; margin-top:10px; line-height:1.5; }
 .hw { font-family:var(--f-ru); font-size:28px; font-weight:600; line-height:1.15; }
 .gloss { color:var(--ink-2); margin:6px 0 0; font-size:15px; }
 .tagrow { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
@@ -305,9 +327,16 @@ td.f { font-family:var(--f-ru); font-size:15px; }
 .ex:last-child { border-bottom:0; }
 .ex .ru { font-family:var(--f-ru); font-size:17px; }
 .ex .en { font-size:13px; color:var(--ink-2); margin-top:2px; }
-.tok { color:inherit; text-decoration:none; border-bottom:1px dotted var(--line); }
-.tok:hover { color:var(--brand-ink); border-bottom-color:var(--brand); }
-.tok.dead { border-bottom:0; }
+/* A link looks like a link: underlined, in both apps. A dotted bottom border read
+   as decoration rather than as something you could press. */
+.tok {
+  color:inherit; text-decoration:underline;
+  text-decoration-color:var(--brand); text-decoration-thickness:1px;
+  text-underline-offset:2px;
+}
+.tok:hover { color:var(--brand-ink); }
+/* Not in the lexicon, so not a link — and must not pretend to be one. */
+.tok.dead { text-decoration:none; }
 .chips { display:flex; flex-wrap:wrap; gap:7px; }
 .chip {
   font:inherit; font-size:14px; font-family:var(--f-ru); padding:10px 14px;
@@ -475,7 +504,13 @@ td.f { font-family:var(--f-ru); font-size:15px; }
   box-shadow:0 6px 20px var(--shadow); display:none; pointer-events:none;
 }
 #pop .pw { font-family:var(--f-ru); font-size:17px; font-weight:600; }
-#pop .pg { color:var(--ink-2); font-size:13px; margin-top:2px; }
+/* Which form was tapped — the answer to the question the first press asks. */
+#pop .pf { color:var(--ink-3); font-size:12px; margin-top:1px; }
+#pop .pg { color:var(--ink-2); font-size:13px; margin-top:4px; }
+#pop .ph {
+  color:var(--ink-3); font-size:11px; font-weight:600; letter-spacing:0.04em;
+  margin-top:8px; padding-top:6px; border-top:1px solid var(--line-soft);
+}
 /* Lives in the top bar rather than floating over the content it would otherwise
    cover. */
 .devbadge {

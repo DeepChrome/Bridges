@@ -24,6 +24,7 @@ export const DEFAULTS = {
   pinned: [],
   unit: {},             // unitId -> {best, done, video, lessons:{i:{v,q}}}
   drills: {},
+  recent: [],           // dictionary history, newest first; keyed on the word itself
   name: "",
   xp: 0,
   day: null,

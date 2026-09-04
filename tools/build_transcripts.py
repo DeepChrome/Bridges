@@ -51,7 +51,13 @@ def fetch(video_id, pause):
 
 
 def words_with_times(path):
-    """-> [(token, absolute_ms)] for every Cyrillic word in the transcript."""
+    """-> [(token, absolute_ms)] for every Cyrillic word in the transcript.
+
+    Auto-captions roll: the same word is re-emitted as the caption scrolls, so a
+    word repeated within a second of itself is one utterance, not two. Collapsing
+    here rather than later keeps the surrounding context readable — otherwise every
+    snippet stutters.
+    """
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
@@ -68,8 +74,27 @@ def words_with_times(path):
                 continue
             at = base + s.get("tOffsetMs", 0)
             for m in TOKEN.finditer(text):
-                out.append((m.group(0), at))
+                tok = m.group(0)
+                if out and out[-1][0] == tok and at - out[-1][1] <= 1000:
+                    continue
+                out.append((tok, at))
     return out
+
+
+def snippet(stream, i, before=6, after=7):
+    """The words either side of one occurrence — what was actually being said.
+
+    Auto-captions carry no punctuation, so a fixed window is the honest unit: it is
+    presented as "what you heard around this word", not as a sentence.
+    """
+    lo = max(0, i - before)
+    words = [w for w, _ in stream[lo:i + after + 1]]
+    text = " ".join(words)
+    if lo > 0:
+        text = "… " + text
+    if i + after + 1 < len(stream):
+        text = text + " …"
+    return text
 
 
 def main():
@@ -117,22 +142,27 @@ def main():
             stats["empty"] += 1
             continue
         hits = defaultdict(list)
-        for token, at in pairs:
+        for i, (token, at) in enumerate(pairs):
             lemma = form_to_lemma.get(fold(token))
             if lemma:
-                hits[lemma].append(at)
+                hits[lemma].append((at, token, i))
         if not hits:
             stats["no matches"] += 1
             continue
         # Timings sorted, and near-duplicates within a second collapsed — the same
         # word repeated in one breath is one moment to replay, not three.
+        #
+        # Each kept moment carries the form actually spoken and the words around it.
+        # The learner asked "where did I hear this?", and a bare timestamp does not
+        # answer that until the video has already jumped.
         index[vid] = {}
-        for lemma, times in hits.items():
-            times.sort()
+        for lemma, occs in hits.items():
+            occs.sort()
             keep = []
-            for t in times:
-                if not keep or t - keep[-1] > 1000:
-                    keep.append(t)
+            for at, token, i in occs:
+                if keep and at - keep[-1]["t"] <= 1000:
+                    continue
+                keep.append({"t": at, "w": token, "s": snippet(pairs, i)})
             index[vid][lemma] = keep
         stats["indexed"] += 1
         stats["words"] += len(pairs)

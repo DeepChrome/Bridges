@@ -35,6 +35,7 @@ const DEFAULTS = {
   trouble: {},          // word -> times it tripped you up
   pinned: [],           // words starred by hand
   unit: {},             // unitId -> {best, done, lessons:{i:score}}
+  recent: [],           // dictionary history, newest first; keyed on the word itself
   name: "",
   xp: 0,
   day: null,
@@ -195,14 +196,30 @@ function speakBtn(text) {
 /* ---------------------------------------------------------------- popover */
 const pop = $("#pop");
 let popTimer = null;
-const hidePop = () => { pop.style.display = "none"; clearTimeout(popTimer); };
-function showPop(target, i) {
-  const w = L[i];
+/* Which word the popover is currently describing — the state that makes the second
+   press mean "go there" rather than "show me again". */
+let popFor = null;
+const hidePop = () => {
+  pop.style.display = "none";
+  popFor = null;
+  clearTimeout(popTimer);
+};
+/* Same summary the native sheet shows, from the same core function: the word, which
+   form was actually tapped, its grammar, and the gloss. */
+function showPop(target, i, surface) {
+  const s = summarise(L[i], surface);
   pop.textContent = "";
-  pop.append(el("div", "pw", w.w));
+  pop.append(el("div", "pw", s.word));
+  if (s.form) {
+    pop.append(el("div", "pf",
+      s.surface ? s.surface + " · " + s.form.text : s.form.text));
+  } else if (s.surface) {
+    pop.append(el("div", "pf", s.surface + " · form not in the paradigm"));
+  }
   pop.append(el("div", "pg",
-    [w.p, w.g].filter(Boolean).join(" · ") +
-    (w.e ? " — " + w.e.split(/[,;]/).slice(0, 3).join(", ") : "")));
+    s.tags.join(" · ") + (s.gloss ? " — " + s.gloss : "")));
+  pop.append(el("div", "ph", "Tap again for the full entry"));
+  popFor = i;
   pop.style.display = "block";
   const r = target.getBoundingClientRect();
   const maxL = window.scrollX + document.documentElement.clientWidth - pop.offsetWidth - 10;
@@ -222,20 +239,22 @@ function linkify(text) {
       const a = el("a", "tok", m[0]);
       a.href = "#/w/" + encodeURIComponent(fold(m[0]));
       const idx = hits[0];
+      const surface = m[0];
+
+      // Hovering is not pressing: on a pointer device the summary can just appear.
       a.addEventListener("mouseenter", () => {
-        popTimer = setTimeout(() => showPop(a, idx), 200);
+        popTimer = setTimeout(() => showPop(a, idx, surface), 200);
       });
       a.addEventListener("mouseleave", hidePop);
-      let lp = null, moved = false;
-      a.addEventListener("touchstart", () => {
-        moved = false;
-        lp = setTimeout(() => { showPop(a, idx); lp = null; }, 420);
-      }, { passive: true });
-      a.addEventListener("touchmove", () => { moved = true; clearTimeout(lp); lp = null; },
-                        { passive: true });
-      a.addEventListener("touchend", (e) => {
-        if (lp) clearTimeout(lp);
-        else if (!moved) { e.preventDefault(); hidePop(); }
+
+      // Two presses, the same as the native sheet. The first answers "which word is
+      // this, and which form?" without leaving the sentence; only the second commits
+      // to the full entry. Applies to clicks as well as taps, so the behaviour does
+      // not change depending on what you are holding.
+      a.addEventListener("click", (e) => {
+        if (popFor === idx) { hidePop(); return; }   // second press: follow the link
+        e.preventDefault();
+        showPop(a, idx, surface);
       });
       f.append(a);
     } else {
@@ -248,13 +267,15 @@ function linkify(text) {
 }
 
 /* ------------------------------------------------------------ curriculum */
-/* Stages come straight from the path layout: a spine unit and the branches
-   that hang off it. */
+/* Chapters come straight from the path layout: a spine unit, the title of the
+   chapter it opens, and the themed branches that hang off it. */
 const STAGES = (() => {
   const out = [];
   PATH.forEach((p) => {
-    if (p.c === 0 || !out.length) out.push({ core: UN[p.u], branches: [] });
-    else out[out.length - 1].branches.push(UN[p.u]);
+    if (p.c === 0 || !out.length) {
+      out.push({ core: UN[p.u], branches: [],
+                 n: p.cn || out.length + 1, title: p.ch || "" });
+    } else out[out.length - 1].branches.push(UN[p.u]);
   });
   return out;
 })();
@@ -404,8 +425,10 @@ function renderPath() {
   STAGES.forEach((s, i) => {
     const open = stageUnlocked(i);
     const h = el("div", "stage-h");
-    h.append(el("span", "ttl", "Stage " + (i + 1)));
-    h.append(el("span", "ln"));
+    const lab = el("div", "chap");
+    lab.append(el("span", "ttl", "Chapter " + (s.n || i + 1)));
+    if (s.title) lab.append(el("span", "name", s.title));
+    h.append(lab);
     if (stageDone(s)) h.append(el("span", "pill good", "done"));
     else if (!open) h.append(el("span", "pill lock", "locked"));
     track.append(h);
@@ -703,7 +726,7 @@ function openSetPicker() {
       const on = units.every((u) => ST.sets.includes(u.id));
       const sec = el("div", "sec");
       const h = el("div", "stagepick");
-      h.append(el("span", "ttl", "Stage " + (i + 1)));
+      h.append(el("span", "ttl", s.title || "Chapter " + (s.n || i + 1)));
       const toggle = el("button", "btn ghost", on ? "Deselect stage" : "Select stage");
       toggle.addEventListener("click", () => {
         const ids = units.map((u) => u.id);
@@ -932,62 +955,138 @@ function renderDict() {
   q.placeholder = "Russian, English or Latin";
   q.autocomplete = "off"; q.spellcheck = false;
   wrap.append(q);
+  // Results as you type; choosing one opens the entry.
+  q.addEventListener("input", (e) => runSearch(e.target.value));
   root.append(wrap);
 
-  const chips = el("div", "chips");
-  ["себе", "я", "книгу", "хочу", "война", "друга"].forEach((w) => {
-    const c = el("button", "chip", w);
-    c.addEventListener("click", () => { location.hash = "#/w/" + encodeURIComponent(w); });
-    chips.append(c);
-  });
-  root.append(chips);
+  const recent = el("div");
+  recent.id = "recent";
+  root.append(recent);
 
   const res = el("div");
   res.id = "results";
   res.style.marginTop = "14px";
   root.append(res);
-  q.addEventListener("input", (e) => runSearch(e.target.value));
+
+  drawRecent();
 }
 
-function search(raw) {
-  const q = fold(raw);
-  if (!q) return [];
-  if (IX[q]) return IX[q].slice(0, 4);
-  const tr = translit(q);
-  if (tr !== q && IX[tr]) return IX[tr].slice(0, 4);
-  const esc = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/^to /, "");
-  const scored = [];
-  for (let i = 0; i < L.length; i++) {
-    const g = L[i].e;
-    if (!g) continue;
-    const senses = g.toLowerCase().split(/[,;]\s*/);
-    let s = 0;
-    if (senses.includes(esc)) s = 3;
-    else if (senses.some((x) => new RegExp("\\b" + esc + "\\b").test(x))) s = 2;
-    else if (g.toLowerCase().includes(esc)) s = 1;
-    if (s) scored.push([s, i]);
-  }
-  if (scored.length) {
-    scored.sort((a, b) => b[0] - a[0] || a[1] - b[1]);
-    return scored.slice(0, 6).map((x) => x[1]);
-  }
-  const pre = [];
-  for (const k in IX) {
-    if (k.startsWith(q) || k.startsWith(tr)) { pre.push(...IX[k]); if (pre.length > 6) break; }
-  }
-  return pre.slice(0, 6);
+/* What has actually been looked up, rather than a fixed list of examples. Empty
+   until the learner searches something, at which point it earns its space. */
+function drawRecent() {
+  const host = $("#recent");
+  if (!host) return;
+  host.textContent = "";
+  const words = ST.recent || [];
+  if (!words.length) return;
+
+  const h = el("h2", "", "Recent");
+  h.className = "reclbl";
+  host.append(h);
+  const chips = el("div", "chips");
+  words.forEach((w) => {
+    const c = el("button", "chip", w);
+    c.type = "button";
+    c.addEventListener("click", () => {
+      const box = $("#q");
+      if (box) box.value = w;
+      runSearch(w);
+    });
+    chips.append(c);
+  });
+  host.append(chips);
 }
 
+/* Opening an entry is what counts as looking a word up — typing on the way to it is
+   not a search worth remembering. Stores the Russian, so searching "war" leaves
+   война on the shelf rather than the English. */
+function rememberSearch(word) {
+  ST.recent = [word].concat((ST.recent || []).filter((w) => w !== word)).slice(0, 6);
+  save();
+  drawRecent();
+}
+
+/* Lookup lives in core/search.js so both apps rank results identically — this file
+   used to carry its own near-copy, which is exactly how the two drift apart. */
+let deepCache = null;
+const deepList = () => {
+  if (deepCache === null) deepCache = parseDeep(DATA.deep || "");
+  return deepCache;
+};
+let deepMap = null;
+const deepIndex = () => {
+  if (deepMap === null) {
+    deepMap = new Map();
+    for (const d of deepList()) if (!deepMap.has(d.b)) deepMap.set(d.b, d);
+  }
+  return deepMap;
+};
+
+/* Tables and sentences are stored once and rebuilt per entry — see core/entry.js.
+   Done eagerly for the curriculum's words so lessons and drills keep reading `w.t`
+   and `w.x` off the lemma exactly as before. */
+const hydrate = makeHydrator({
+  deepIndex: deepIndex, shapes: DATA.shapes, slots: DATA.slots, sent: DATA.sent,
+});
+L.forEach(hydrate);
+
+const rawSearch = makeSearch({ L: L, IX: IX, deep: deepList });
+const rawResolve = makeResolve({ L: L, IX: IX, deep: deepList });
+const search = (q, limit) => rawSearch(q, limit).map(hydrate);
+const resolveWord = (w) => { const h = rawResolve(w); return h ? hydrate(h) : null; };
+
+/* The full entry — everything the summary withholds. This is what #/w/ renders, so
+   following a word link lands on the write-up rather than on a list. */
+function showEntry(raw) {
+  const res = $("#results");
+  res.textContent = "";
+  // An entry is not a result list, so the shelf comes back.
+  const shelf = $("#recent");
+  if (shelf) shelf.hidden = false;
+
+  const w = resolveWord(raw);
+  if (!w) {
+    res.append(el("div", "empty", "Nothing for “" + raw + "”."));
+    return;
+  }
+  rememberSearch(w.b);
+  // One kind of entry. A word from the wider lexicon has the same paradigm, the
+  // same grammar and the same sentences as one from the curriculum — there is
+  // nothing to explain away.
+  res.append(entryCard(w));
+}
+
+/* Results are summaries — the word and what it means, which is what a search is
+   usually asking. The full entry is one press further, the same two steps the word
+   links in sentences use. */
 function runSearch(raw) {
   const res = $("#results");
   res.textContent = "";
+  // The shelf is for when you have nothing else to look at.
+  const shelf = $("#recent");
+  if (shelf) shelf.hidden = !!raw.trim();
   if (!raw.trim()) return;
   const hits = search(raw);
   if (!hits.length) {
     res.append(el("div", "empty", "Nothing for “" + raw + "”."));
     return;
   }
-  hits.forEach((i) => res.append(entryCard(i)));
+  const list = el("div", "list");
+  hits.forEach((w) => {
+    const r = el("button", "row");
+    r.type = "button";
+    const lbl = el("span", "lbl");
+    lbl.append(el("span", "rw", w.w));
+    lbl.append(el("span", "rg", firstSense(w)));
+    r.append(lbl);
+    if (w.p) r.append(el("span", "pill", w.p));
+    r.append(speakBtn(w.b));
+    r.addEventListener("click", () => {
+      location.hash = "#/w/" + encodeURIComponent(fold(w.b));
+    });
+    list.append(r);
+  });
+  res.append(list);
 }
 
 function renderTable(t) {
@@ -1008,8 +1107,9 @@ function renderTable(t) {
   return b;
 }
 
-function entryCard(i) {
-  const w = L[i];
+/* Takes the entry itself, not a lemma index — the dictionary reaches words that
+   have no index into L. */
+function entryCard(w) {
   const c = el("div", "panel");
   const head = el("div");
   head.style.cssText = "display:flex;align-items:center;gap:10px";
@@ -1454,7 +1554,7 @@ function route() {
     setScreen("dict");
     const w = decodeURIComponent(parts[1] || "");
     $("#q").value = w;
-    runSearch(w);
+    showEntry(w);
     return;
   }
   if (parts[0] === "placement" && typeof startPlacement === "function") {

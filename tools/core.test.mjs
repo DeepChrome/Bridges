@@ -15,11 +15,28 @@ import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN 
   from "../core/util.js";
 import { fsrsReview, fsrsPreview, isTrouble, retrievability } from "../core/fsrs.js";
 import { makeQuestions, DRILL_TYPES } from "../core/questions.js";
+import { describeForm, summarise } from "../core/forms.js";
+import { parseDeep } from "../core/search.js";
+import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
+import { makeHydrator } from "../core/entry.js";
 import { ICONS, iconFor } from "../core/icons.js";
 import { AV, AV_IDS } from "../core/avatars.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DATA = JSON.parse(readFileSync(join(ROOT, "native/assets/data.json"), "utf8"));
+
+/* The payload stores paradigms and sentences once, shared; entries are filled out
+   on the way in. Set up here because more than one group needs it. */
+const DEEP = parseDeep(DATA.deep || "");
+const DEEP_BY_BARE = new Map();
+for (const d of DEEP) if (!DEEP_BY_BARE.has(d.b)) DEEP_BY_BARE.set(d.b, d);
+const hydrate = makeHydrator({
+  deepIndex: () => DEEP_BY_BARE, shapes: DATA.shapes, slots: DATA.slots,
+  sent: DATA.sent,
+});
+// Both apps do exactly this at load, and the drill generators read `w.t` and `w.x`
+// straight off the lemma — so the suite has to stand in the same place they do.
+DATA.lemmas.forEach(hydrate);
 
 let failures = 0, checks = 0;
 const ok = (cond, label, extra) => {
@@ -201,6 +218,111 @@ group("question shape");
      "and offers a way to answer");
   ok(all.filter((q) => q.typed).every((q) => q.target && q.answer),
      "typed questions carry both the target and the displayed answer");
+}
+
+/* ----------------------------------------------------------------- forms */
+
+group("naming the form a learner just tapped");
+{
+  // Tables are rebuilt on the way in now, so an entry has to be hydrated before it
+  // has any to describe.
+  const byBare = (b) => hydrate(DATA.lemmas.find((l) => l.b === b));
+
+  // A noun: the cell knows its own case and number.
+  const kniga = byBare("книга");
+  if (kniga) {
+    const acc = describeForm(kniga, "книгу");
+    ok(!!acc, "an inflected noun form is found in the paradigm");
+    ok(acc && /singular/i.test(acc.text) && /accusative/i.test(acc.text),
+       "and is named by case and number", acc && acc.text);
+    ok(describeForm(kniga, "книга").text.toLowerCase().includes("nominative"),
+       "the headword itself resolves to the nominative");
+  }
+
+  // A verb: the row label is the whole answer, so the generic "Form" column is
+  // dropped rather than producing "я form".
+  const verb = DATA.lemmas.find((l) => l.p === "verb" && (l.t || []).length);
+  if (verb) {
+    const cell = verb.t[0].rows.find((r) => (Array.isArray(r[1]) ? r[1][0] : r[1]));
+    const one = Array.isArray(cell[1]) ? cell[1][0] : cell[1];
+    const d = describeForm(verb, one);
+    ok(!!d, "a verb form is found");
+    ok(d && !/\bform\b/i.test(d.text), "and is not described as a “form”", d && d.text);
+  }
+
+  ok(describeForm(kniga || DATA.lemmas[0], "zzzz") === null,
+     "a form that is not in the paradigm returns null rather than guessing");
+  ok(describeForm(null, "книгу") === null, "a missing lemma is handled");
+  ok(describeForm({ b: "x" }, "x") === null, "a lemma with no tables is handled");
+
+  const s = summarise(kniga || DATA.lemmas[0], "книгу");
+  ok(!!s && !!s.gloss, "a summary carries a gloss");
+  ok(s.tags.length > 0, "and the standing grammatical tags", s.tags.join(", "));
+  const same = summarise(kniga || DATA.lemmas[0], (kniga || DATA.lemmas[0]).b);
+  ok(same.surface === null,
+     "the surface form is only reported when it differs from the headword");
+}
+
+/* -------------------------------------------------- paradigm reconstruction */
+
+group("paradigms rebuilt from shared ending-shapes");
+{
+  const deep = DEEP;
+  const byBare = DEEP_BY_BARE;
+
+  ok(deep.length > 40000, "the dictionary carries every glossed lemma", String(deep.length));
+  const withPar = deep.filter((d) => d.shape !== "").length;
+  ok(withPar > 40000, "and a paradigm for almost all of them", String(withPar));
+
+  /* The layout lives twice — here and in panel.py, which still serves the CLI. The
+     build emits a sample of Python-built tables precisely so drift cannot go
+     unnoticed. */
+  const sample = DATA.tsample || [];
+  ok(sample.length > 0, "the build shipped a table sample to check against",
+     String(sample.length));
+  let same = 0, differed = null;
+  for (const s of sample) {
+    const rec = byBare.get(s.b);
+    if (!rec) continue;
+    const mine = buildTables(s.p, slotsOf(rec, decodeShapes(DATA.shapes), DATA.slots));
+    if (JSON.stringify(mine) === JSON.stringify(s.t)) same++;
+    else if (!differed) differed = s.b + ": " + JSON.stringify(mine).slice(0, 120);
+  }
+  ok(same === sample.length,
+     "core/paradigm.js reproduces panel.py's tables exactly",
+     differed || `${same}/${sample.length}`);
+
+  // Stress has to survive the round trip or every table is subtly wrong.
+  const kniga = byBare.get("книга");
+  if (kniga) {
+    const slots = slotsOf(kniga, decodeShapes(DATA.shapes), DATA.slots);
+    ok(slots.sg_acc && slots.sg_acc[0] === "кни́гу",
+       "an inflected form comes back with its stress intact",
+       slots.sg_acc && slots.sg_acc[0]);
+  }
+
+  // A word outside the curriculum gets the same treatment as one inside it.
+  const vino = byBare.get("виноград");
+  ok(!!vino, "a word the curriculum never teaches is in the dictionary");
+  if (vino) {
+    hydrate(vino);
+    ok(vino.t.length > 0, "and it has a paradigm", vino.t.map((t) => t.title).join(", "));
+    ok(vino.t[0].rows.length === 6, "with every case", String(vino.t[0].rows.length));
+  }
+
+  // Studied lemmas are hydrated from the same store, not from a second copy.
+  // Read the file again rather than the in-memory object: hydration mutates, and
+  // an earlier group in this file has already filled this one in.
+  const onDisk = JSON.parse(readFileSync(join(ROOT, "native/assets/data.json"), "utf8"))
+    .lemmas.find((x) => x.b === "книга");
+  ok(onDisk && onDisk.t === undefined && onDisk.x === undefined,
+     "the payload no longer carries a second copy of tables or sentences");
+  const l = DATA.lemmas.find((x) => x.b === "книга");
+  hydrate(l);
+  ok(l.t.length > 0 && l.x.length > 0,
+     "which hydration restores", `${l.t.length} table(s), ${l.x.length} example(s)`);
+  ok(describeForm(l, "книгу") !== null,
+     "and form description still works off the rebuilt tables");
 }
 
 console.log("\n" + checks + " checks · " +

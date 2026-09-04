@@ -1,9 +1,9 @@
 ﻿/* Immerse, the video player, the profile gate, and honest markers for the parts of
  * the web app that are not ported yet. */
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
-import { WebView } from "react-native-webview";
+import { YouTube } from "../youtube";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, UnitIcon, Avatar, AV, AV_IDS } from "../ui";
@@ -54,13 +54,45 @@ export function Immerse({ navigation }) {
   );
 }
 
+const clock = (ms) => {
+  const s = Math.max(0, Math.round(ms / 1000));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+};
+
+/* Five seconds of lead-in, ten seconds of playback: enough to hear the run-up to
+   the word rather than landing on top of it. */
+const LEAD_MS = 5000;
+const HOLD_MS = 10000;
+
 export function Video({ route, navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
   const unit = UN.find((u) => u.id === route.params.unitId);
   const i = route.params.index;
   const [playing, setPlaying] = useState(false);
+  const [focus, setFocus] = useState(null);
+  const player = useRef(null);
+  const pending = useRef(null);
   if (!unit || !unit.v) return null;
+
+  const heard = unit.v.heard || {};
+
+  const jump = (ms) => {
+    const at = Math.max(0, ms - LEAD_MS);
+    if (player.current) player.current.seek(at, HOLD_MS);
+    else pending.current = at;      // the player is still mounting; run it on ready
+  };
+
+  /* Tapping the same word again walks to its next occurrence, so a word said five
+     times is five listening chances rather than the same one replayed. */
+  const openWord = (word) => {
+    const occ = heard[word];
+    if (!occ || !occ.length) { setFocus({ word, missing: true }); return; }
+    const k = focus && focus.word === word ? (focus.k + 1) % occ.length : 0;
+    setFocus({ word, k, n: occ.length, ...occ[k] });
+    setPlaying(true);
+    jump(occ[k].t);
+  };
 
   return (
     <Screen>
@@ -68,10 +100,15 @@ export function Video({ route, navigation }) {
       {playing ? (
         <View style={{ aspectRatio: 16 / 9, borderRadius: radius.md,
                        overflow: "hidden", backgroundColor: "#000" }}>
-          <WebView
-            source={{ uri: `https://www.youtube-nocookie.com/embed/${unit.v.id}?playsinline=1` }}
-            allowsInlineMediaPlayback
-            mediaPlaybackRequiresUserAction={false}
+          <YouTube
+            ref={player}
+            videoId={unit.v.id}
+            onReady={() => {
+              if (pending.current != null) {
+                player.current && player.current.seek(pending.current, HOLD_MS);
+                pending.current = null;
+              }
+            }}
           />
         </View>
       ) : (
@@ -83,14 +120,62 @@ export function Video({ route, navigation }) {
         Listen for
       </Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
-        {lessonWords(unit, i).map((x) => (
-          <View key={x} style={{ borderWidth: 1, borderColor: t.line,
-                                 backgroundColor: t.surface, borderRadius: 99,
-                                 paddingHorizontal: 14, paddingVertical: 10 }}>
-            <Text style={{ color: t.ink2, fontSize: 14 }}>{L[x].b}</Text>
-          </View>
-        ))}
+        {lessonWords(unit, i).map((x) => {
+          const word = L[x].b;
+          const occ = heard[word];
+          const spoken = !!(occ && occ.length);
+          const active = focus && focus.word === word;
+          return (
+            <Pressable
+              key={x}
+              onPress={() => openWord(word)}
+              accessibilityRole="button"
+              accessibilityLabel={spoken
+                ? `${word}, heard ${occ.length} time${occ.length > 1 ? "s" : ""}`
+                : `${word}, not spoken in this episode`}
+              style={{ borderWidth: 1,
+                       borderColor: active ? t.brand : spoken ? t.line : t.lineSoft,
+                       backgroundColor: active ? t.brandBg : t.surface,
+                       borderRadius: 99, paddingHorizontal: 14, paddingVertical: 10,
+                       minHeight: 44, justifyContent: "center",
+                       flexDirection: "row", alignItems: "center", gap: 6 }}
+            >
+              <Text style={{ fontSize: 14,
+                             color: active ? t.brandInk : spoken ? t.ink2 : t.ink3 }}>
+                {word}
+              </Text>
+              {spoken ? (
+                <Text style={{ color: t.ink3, fontSize: 11 }}>{`×${occ.length}`}</Text>
+              ) : null}
+            </Pressable>
+          );
+        })}
       </View>
+
+      {focus ? (
+        <Card style={{ marginTop: 14 }}>
+          {focus.missing ? (
+            <Muted>{`“${focus.word}” is not spoken in this episode.`}</Muted>
+          ) : (
+            <>
+              <View style={{ flexDirection: "row", alignItems: "center",
+                             marginBottom: 8 }}>
+                <Pill tone="brand">{clock(focus.t)}</Pill>
+                <View style={{ flex: 1 }} />
+                <Muted>{focus.n > 1 ? `${focus.k + 1} of ${focus.n}` : "once"}</Muted>
+              </View>
+              <Text style={{ color: t.ink2, fontSize: 15, lineHeight: 22 }}>
+                {focus.s}
+              </Text>
+              <Btn
+                label="Play it again"
+                style={{ marginTop: 12 }}
+                onPress={() => { setPlaying(true); jump(focus.t); }}
+              />
+            </>
+          )}
+        </Card>
+      ) : null}
 
       <Btn
         kind="pri"
@@ -115,7 +200,16 @@ export function Gate({ onPlacement }) {
   const [creating, setCreating] = useState(!accounts.list.length);
   const [offer, setOffer] = useState(null);
 
-  // After creating a profile, offer the placement test before the app opens.
+  /* The profile is created by the *choice* below, not by Continue.
+     Creating it earlier sets the active account, which is exactly the condition the
+     shell uses to leave the gate — so the app would swap to the tabs and unmount
+     this screen before the question could be asked. Holding the name and avatar
+     here until the learner answers keeps the gate in charge of its own flow. */
+  const start = async (wanted) => {
+    await createProfile(offer.name, offer.avatar);
+    onPlacement(wanted);
+  };
+
   if (offer) {
     return (
       <Screen>
@@ -123,7 +217,7 @@ export function Gate({ onPlacement }) {
           Where should we start?
         </Title>
         <List>
-          <Row onPress={() => onPlacement(true)}>
+          <Row onPress={() => start(true)}>
             <Avatar id={offer.avatar} size={44} />
             <View style={{ flex: 1 }}>
               <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
@@ -132,7 +226,7 @@ export function Gate({ onPlacement }) {
               <Muted>50 questions · about 10 minutes</Muted>
             </View>
           </Row>
-          <Row last onPress={() => onPlacement(false)}>
+          <Row last onPress={() => start(false)}>
             <View style={{ flex: 1 }}>
               <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
                 Start from the beginning
@@ -198,7 +292,7 @@ export function Gate({ onPlacement }) {
                  fontSize: 17, color: t.ink }}
       />
       <Btn kind="pri" style={{ marginTop: 14 }} label="Continue"
-           onPress={async () => { const a = await createProfile(name.trim(), avatar); setOffer(a); }} />
+           onPress={() => setOffer({ name: name.trim(), avatar })} />
     </Screen>
   );
 }

@@ -15,6 +15,7 @@ const Ctx = createContext(null);
 
 export function SessionProvider({ children }) {
   const [ready, setReady] = useState(false);
+  const [error, setError] = useState(null);
   const [accounts, setAccounts] = useState({ list: [], active: null });
   const [st, setSt] = useState(DEFAULTS);
 
@@ -24,14 +25,24 @@ export function SessionProvider({ children }) {
     // tree and the next mount can inherit the mess.
     let live = true;
     (async () => {
-      const acc = await loadAccounts();
-      if (!live) return;
-      setAccounts(acc);
-      if (acc.active) {
-        const loaded = touchStreak(await loadState(acc.active));
+      try {
+        const acc = await loadAccounts();
         if (!live) return;
-        setSt(loaded);
-        saveState(acc.active, loaded);
+        setAccounts(acc);
+        if (acc.active) {
+          const loaded = touchStreak(await loadState(acc.active));
+          if (!live) return;
+          setSt(loaded);
+          saveState(acc.active, loaded);
+        }
+      } catch (e) {
+        // Not swallowed — recorded and rendered. Boot is the one place where an
+        // unhandled rejection is invisible rather than loud: `ready` simply stays
+        // false and the app sits on the loading spinner forever with nothing on
+        // screen to say why. Starting with the default profile set is the honest
+        // fallback; the banner says the save could not be read so the learner
+        // knows their history is not gone, only unread.
+        if (live) setError(e);
       }
       if (live) setReady(true);
     })();
@@ -40,6 +51,7 @@ export function SessionProvider({ children }) {
 
   const value = useMemo(() => ({
     ready,
+    error,
     accounts,
     account: accounts.list.find((a) => a.id === accounts.active) || null,
     st,

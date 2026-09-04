@@ -6,6 +6,7 @@ import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row } from "../ui";
 import { L, UN, STAGES, unitUnlocked, idxOfWord } from "../data";
+import { Linked } from "../words";
 import { fsrsReview, fsrsPreview, isTrouble } from "@core/fsrs";
 import { shuffle, today } from "@core/util";
 
@@ -239,7 +240,7 @@ export default function Study() {
                                textAlign: "center" }}>{w.e}</Text>
                 {w.x && w.x[0] ? (
                   <View style={{ marginTop: 14, alignSelf: "stretch" }}>
-                    <Text style={{ color: t.ink, fontSize: 17 }}>{w.x[0].ru}</Text>
+                    <Linked text={w.x[0].ru} size={17} />
                     <Muted>{w.x[0].en}</Muted>
                   </View>
                 ) : null}

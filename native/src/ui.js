@@ -223,6 +223,29 @@ export function Muted({ children, size = 13, style }) {
   return <Text style={[{ color: t.ink3, fontSize: size }, style]}>{children}</Text>;
 }
 
+/* A header that says where you are: what this screen is, and what it belongs to.
+   "Lesson 3" over "Around Town" beats a bar that just reads "Lesson" — the same
+   generic-naming problem as the units had, one level up. */
+export function HeaderTitle({ title, sub }) {
+  const t = useTheme();
+  return (
+    <View style={{ alignItems: "center", justifyContent: "center" }}>
+      <Text numberOfLines={1}
+            style={{ color: t.ink, fontSize: 16, fontWeight: "700",
+                     letterSpacing: -0.2 }}>
+        {title}
+      </Text>
+      {sub ? (
+        <Text numberOfLines={1}
+              style={{ color: t.ink3, fontSize: 10, fontWeight: "700",
+                       letterSpacing: 0.9, textTransform: "uppercase", marginTop: 1 }}>
+          {sub}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 export function Loading() {
   const t = useTheme();
   return (

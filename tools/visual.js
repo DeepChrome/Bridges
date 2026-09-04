@@ -295,11 +295,62 @@ async function shoot(page, name) {
     return Math.round(((hi + 0.05) / (lo + 0.05)) * 10) / 10;
   });
   ok(contrast >= 4.5, "body text contrast ≥ 4.5:1 in light theme", contrast + ":1");
+
+  // This context has its own storage, so it starts at the splash and then the
+  // gate. Both have to be got past or the light-theme screenshots are pictures
+  // of the splash and the avatar picker — which is exactly what they were.
+  await lp.evaluate(() => {
+    const s = document.querySelector("#splash");
+    if (s) s.click();
+  });
+  await lp.waitForTimeout(200);
+  const splashUp = await lp.evaluate(() => {
+    const s = document.querySelector("#splash");
+    return !!s && !s.classList.contains("gone");
+  });
+  ok(!splashUp, "splash dismissed before the light-theme screenshots");
+
+  await lp.evaluate(() => {
+    const box = document.querySelector("#gate .namebox");
+    if (!box) return;
+    box.value = "Jared";
+    Array.from(document.querySelectorAll("#gate .btn"))
+      .find((b) => b.textContent.trim() === "Continue").click();
+  });
+  await lp.waitForTimeout(250);
+  await lp.evaluate(() => {
+    const row = Array.from(document.querySelectorAll("#gate .row"))
+      .find((r) => /Start from the beginning/.test(r.textContent));
+    if (row) row.click();
+  });
+  await lp.waitForTimeout(300);
+  const past = await lp.evaluate(() => !document.querySelector("#gate"));
+  ok(past, "light theme reaches the app, not the gate");
+
   for (const [name, hash] of [["path", "#/path"], ["words", "#/w/%D0%BA%D0%BD%D0%B8%D0%B3%D1%83"]]) {
     await lp.evaluate((h) => { location.hash = h; }, hash);
     await lp.waitForTimeout(250);
     await lp.screenshot({ path: path.join(SHOTS, "light-" + name + ".png") });
   }
+
+  // The results list is a different screen from the entry, and nothing else looks
+  // at it — drive a real search rather than trusting that it renders.
+  await lp.evaluate(() => { location.hash = "#/dict"; });
+  await lp.waitForTimeout(250);
+  await lp.evaluate(() => {
+    const q = document.querySelector("#q");
+    q.value = "book";
+    q.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await lp.waitForTimeout(250);
+  const rows = await lp.evaluate(() => document.querySelectorAll("#results .row").length);
+  ok(rows > 0, "search results render as a list", String(rows));
+  const tall = await lp.evaluate(() => {
+    const r = document.querySelector("#results .row");
+    return r ? Math.round(r.getBoundingClientRect().height) : 0;
+  });
+  ok(tall >= 44, "a result row is a comfortable tap target", tall + "px");
+  await lp.screenshot({ path: path.join(SHOTS, "light-search.png") });
 
   ok(errors.length === 0, "no console errors across the run", errors.join(" | ").slice(0, 200));
 

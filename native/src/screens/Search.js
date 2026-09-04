@@ -1,161 +1,113 @@
-﻿/* Search — the dictionary. Any form, English, or Latin spelling. */
+/* Search — the dictionary.
+ *
+ * Results appear as you type, as a list of matches; choosing one opens the entry.
+ * The list is the summary layer, so a search that finds six plausible words shows
+ * six, rather than committing the screen to whichever one happened to rank first.
+ *
+ * Two tiers, marked honestly. Words from the curriculum carry study data and resolve
+ * from any inflected form; the rest of the lexicon is headword and meaning only, and
+ * says so rather than opening an entry that turns out to be empty.
+ */
 
 import React, { useMemo, useState } from "react";
-import { View, Text, TextInput, ScrollView, Pressable } from "react-native";
+import { View, Text, TextInput, Pressable } from "react-native";
+import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Pill, Speaker, Muted } from "../ui";
-import { L, IX, UN } from "../data";
-import { fold, translit, firstSense } from "@core/util";
+import { Screen, Pill, Speaker, Muted, List, Row } from "../ui";
+import { searchWords, DEEP_COUNT } from "../data";
+import { firstSense } from "@core/util";
 
-function search(raw) {
-  const q = fold(raw);
-  if (!q) return [];
-  if (IX[q]) return IX[q].slice(0, 4);
-  const tr = translit(q);
-  if (tr !== q && IX[tr]) return IX[tr].slice(0, 4);
+const RECENT_MAX = 6;
 
-  // English: whole-sense matches beat buried substrings, so "war" finds война
-  // rather than к ("toward").
-  const qe = q.replace(/^to /, "");
-  const esc = qe.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const scored = [];
-  for (let i = 0; i < L.length; i++) {
-    const g = L[i].e;
-    if (!g) continue;
-    const senses = g.toLowerCase().split(/[,;]\s*/);
-    let s = 0;
-    if (senses.includes(qe)) s = 3;
-    else if (senses.some((x) => new RegExp("\\b" + esc + "\\b").test(x))) s = 2;
-    else if (g.toLowerCase().includes(qe)) s = 1;
-    if (s) scored.push([s, i]);
-  }
-  if (scored.length) {
-    scored.sort((a, b) => b[0] - a[0] || a[1] - b[1]);
-    return scored.slice(0, 6).map((x) => x[1]);
-  }
-  const pre = [];
-  for (const k in IX) {
-    if (k.startsWith(q) || k.startsWith(tr)) {
-      pre.push(...IX[k]);
-      if (pre.length > 6) break;
-    }
-  }
-  return pre.slice(0, 6);
-}
-
-function Table({ table }) {
+export default function Search({ navigation }) {
   const t = useTheme();
-  return (
-    <View style={{ marginTop: 14 }}>
-      <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600",
-                     letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>
-        {table.title}
-      </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View>
-          <View style={{ flexDirection: "row" }}>
-            {table.columns.map((c) => (
-              <Text key={c} style={{ width: 110, color: t.ink3, fontSize: 10,
-                                     fontWeight: "600", textTransform: "uppercase",
-                                     letterSpacing: 0.6, paddingVertical: 6 }}>
-                {c}
-              </Text>
-            ))}
-          </View>
-          {table.rows.map((r, ri) => (
-            <View key={ri} style={{ flexDirection: "row", borderTopWidth: 1,
-                                    borderTopColor: t.lineSoft }}>
-              {r.map((cell, ci) => (
-                <Text
-                  key={ci}
-                  style={{ width: 110, paddingVertical: 6, fontSize: ci === 0 ? 13 : 15,
-                           color: ci === 0 ? t.ink3 : t.ink }}
-                >
-                  {Array.isArray(cell) ? cell.join(" / ") : cell}
-                </Text>
-              ))}
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-    </View>
-  );
-}
+  const { st, update } = useSession();
+  const [text, setText] = useState("");
 
-function Entry({ i, onWord }) {
-  const w = L[i];
-  const t = useTheme();
-  const unit = w.u ? UN.find((u) => u.id === w.u) : null;
-  return (
-    <Card style={{ marginTop: 12 }}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <Text style={{ color: t.ink, fontSize: 28, fontWeight: "600", flex: 1 }}>
-          {w.w}
-        </Text>
-        <Speaker text={w.b} />
-      </View>
-      {w.e ? <Text style={{ color: t.ink2, fontSize: 15, marginTop: 6 }}>{w.e}</Text> : null}
-      <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-        {[w.p, w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
-        {w.fr ? <Pill>{"#" + w.fr}</Pill> : null}
-        {unit ? <Pill tone="brand">{unit.name}</Pill> : null}
-      </View>
-      {(w.t || []).map((tb, k) => <Table key={k} table={tb} />)}
-      {(w.x || []).length ? (
-        <View style={{ marginTop: 14, borderTopWidth: 1, borderTopColor: t.line,
-                       paddingTop: 10 }}>
-          {w.x.map((e, k) => (
-            <View key={k} style={{ paddingVertical: 8 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Text style={{ color: t.ink, fontSize: 17, flex: 1 }}>{e.ru}</Text>
-                <Speaker text={e.ru} size={36} />
-              </View>
-              <Muted>{e.en}</Muted>
-            </View>
-          ))}
-        </View>
-      ) : null}
-    </Card>
-  );
-}
+  const q = text.trim();
+  const hits = useMemo(() => searchWords(q), [q]);
+  const recent = st.recent || [];
 
-export default function Search() {
-  const t = useTheme();
-  const [q, setQ] = useState("");
-  const hits = useMemo(() => search(q), [q]);
+  /* Opening an entry is what counts as having looked a word up — typing on the way
+     to it is not a search worth remembering. */
+  const open = (entry) => {
+    update((prev) => ({
+      ...prev,
+      recent: [entry.b, ...(prev.recent || []).filter((w) => w !== entry.b)]
+        .slice(0, RECENT_MAX),
+    }));
+    navigation.navigate("Word", { word: entry.b });
+  };
 
   return (
     <Screen>
       <TextInput
-        value={q}
-        onChangeText={setQ}
+        value={text}
+        onChangeText={setText}
         placeholder="Russian, English or Latin"
         placeholderTextColor={t.ink3}
         autoCorrect={false}
         autoCapitalize="none"
+        returnKeyType="search"
         style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
                  borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 13,
                  fontSize: 17, color: t.ink }}
       />
-      <View style={{ flexDirection: "row", gap: 7, flexWrap: "wrap", marginTop: 10 }}>
-        {["себе", "я", "книгу", "хочу", "война"].map((w) => (
-          <Pressable
-            key={w}
-            onPress={() => setQ(w)}
-            style={{ borderWidth: 1, borderColor: t.line, backgroundColor: t.surface,
-                     borderRadius: 99, paddingHorizontal: 14, paddingVertical: 10,
-                     minHeight: 40, justifyContent: "center" }}
-          >
-            <Text style={{ color: t.ink2, fontSize: 14 }}>{w}</Text>
-          </Pressable>
-        ))}
-      </View>
-      {q.trim() && !hits.length ? (
+
+      {!q && recent.length ? (
+        <>
+          <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700",
+                         letterSpacing: 1, textTransform: "uppercase",
+                         marginTop: 16, marginBottom: 8, marginLeft: 2 }}>
+            Recent
+          </Text>
+          <View style={{ flexDirection: "row", gap: 7, flexWrap: "wrap" }}>
+            {recent.map((w) => (
+              <Pressable
+                key={w}
+                accessibilityRole="button"
+                onPress={() => navigation.navigate("Word", { word: w })}
+                style={{ borderWidth: 1, borderColor: t.line, backgroundColor: t.surface,
+                         borderRadius: 99, paddingHorizontal: 14, paddingVertical: 10,
+                         minHeight: 44, justifyContent: "center" }}
+              >
+                <Text style={{ color: t.ink2, fontSize: 14 }}>{w}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </>
+      ) : null}
+
+      {q && !hits.length ? (
         <Muted style={{ textAlign: "center", marginTop: 34 }}>
           {`Nothing for “${q}”.`}
         </Muted>
       ) : null}
-      {hits.map((i) => <Entry key={i} i={i} />)}
+
+      {hits.length ? (
+        <View style={{ marginTop: 16 }}>
+          <List>
+            {hits.map((h, k) => (
+              <Row key={h.b} last={k === hits.length - 1} onPress={() => open(h)}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 19, fontWeight: "600" }}>
+                    {h.w}
+                  </Text>
+                  <Muted size={14}>{firstSense(h)}</Muted>
+                </View>
+                {h.p ? <Pill>{h.p}</Pill> : null}
+                <Speaker text={h.b} size={38} />
+              </Row>
+            ))}
+          </List>
+        </View>
+      ) : null}
+
+      {!q ? (
+        <Muted style={{ textAlign: "center", marginTop: recent.length ? 28 : 34 }}>
+          {`${DEEP_COUNT.toLocaleString("en-US")} words`}
+        </Muted>
+      ) : null}
     </Screen>
   );
 }

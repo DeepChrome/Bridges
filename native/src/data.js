@@ -6,6 +6,8 @@
 
 import DATA from "../assets/data.json";
 import { fold } from "@core/util";
+import { makeSearch, makeResolve, parseDeep } from "@core/search";
+import { makeHydrator } from "@core/entry";
 
 export const L = DATA.lemmas;
 export const IX = DATA.index;
@@ -22,15 +24,73 @@ export const audioUrl = (text) => {
   return hit ? AUDIO_BASE + hit : null;
 };
 
-/* Stages come straight from the path layout: a spine unit and its branches. */
+/* Chapters come straight from the path layout: a spine unit, its title, and the
+   themed units that follow it. */
 export const STAGES = (() => {
   const out = [];
   PATH.forEach((p) => {
-    if (p.c === 0 || !out.length) out.push({ core: UN[p.u], branches: [] });
-    else out[out.length - 1].branches.push(UN[p.u]);
+    if (p.c === 0 || !out.length) {
+      out.push({ core: UN[p.u], branches: [],
+                 n: p.cn || out.length + 1, title: p.ch || "" });
+    } else {
+      out[out.length - 1].branches.push(UN[p.u]);
+    }
   });
   return out;
 })();
+
+/* The wider dictionary: headwords and meanings for every glossed lemma in the
+   lexicon, not just the ones the curriculum teaches. Parsed on first use — it costs
+   about 16ms, which is worth paying when someone searches rather than at every
+   cold start. */
+let deepCache = null;
+const deepList = () => {
+  if (deepCache === null) deepCache = parseDeep(DATA.deep || "");
+  return deepCache;
+};
+
+let deepMap = null;
+const deepIndex = () => {
+  if (deepMap === null) {
+    deepMap = new Map();
+    for (const d of deepList()) if (!deepMap.has(d.b)) deepMap.set(d.b, d);
+  }
+  return deepMap;
+};
+
+export const DEEP_COUNT = (DATA.stats && DATA.stats.deep) || 0;
+
+/* Tables and example sentences are stored once, shared, and rebuilt per entry —
+   see core/entry.js. Screens keep reading `w.t` and `w.x` as they always have. */
+export const hydrate = makeHydrator({
+  deepIndex, shapes: DATA.shapes, slots: DATA.slots, sent: DATA.sent,
+});
+
+/* Eagerly, for the curriculum's own words. Lessons, drills and flashcards read
+   `w.x` and `w.t` straight off these objects in a dozen places; filling them here
+   means no call site can be missed and quietly lose its example sentences. Costs
+   about 120ms at start, measured, most of it parsing the dictionary once. */
+L.forEach(hydrate);
+
+const rawSearch = makeSearch({ L, IX, deep: deepList });
+const rawResolve = makeResolve({ L, IX, deep: deepList });
+
+export const searchWords = (q, limit) => rawSearch(q, limit).map(hydrate);
+export const resolveWord = (w) => {
+  const hit = rawResolve(w);
+  return hit ? hydrate(hit) : null;
+};
+
+/* Which chapter a unit belongs to — the spine unit that opens it, or any of its
+   themed units. Used by the headers so a screen can say where the learner is. */
+export function chapterOf(unitId) {
+  for (const s of STAGES) {
+    if (s.core.id === unitId || s.branches.some((b) => b.id === unitId)) return s;
+  }
+  return null;
+}
+
+export const unitById = (id) => UN.find((u) => u.id === id) || null;
 
 export const LESSON_SIZE = 7;
 export const PASS_MARK = 80;

@@ -176,12 +176,33 @@ OVERRIDES = {
     "область": None,       # administrative oblast, not a field in nature
 }
 
+# A chapter is one spine unit plus the branches that follow it — the shape a language
+# textbook already has: a core of words you cannot speak without, then the themed
+# vocabulary that builds on them. Aligned index-for-index with STAGE_PLAN below.
+#
+# The chapter title names what the chapter collectively covers, taken from its
+# branches. The spine name *describes* what is actually in that frequency band — it
+# does not define it. The spine is ordered by how often a word occurs in the decks,
+# so these names were written by reading the word lists, not by deciding in advance
+# what each unit ought to contain. Re-read them if --pool changes: the bands shift.
+CHAPTERS = [
+    ("Pronouns & Being",       "People and Time"),
+    ("Time, Life & People",    "Home and Table"),
+    ("Wanting & Knowing",      "Town and Travel"),
+    ("Everyday Things",        "Body and Appearance"),
+    ("Family & Home Life",     "School and Work"),
+    ("Health & Getting Around", "Nature and Animals"),
+    ("Days, Talk & the World", "Mind and Language"),
+    ("Thought & Society",      "Culture and Society"),
+]
+
 PARENS = re.compile(r"\([^)]*\)")
 
 SCHEMA = """
 drop table if exists topics;
 drop table if exists unit_words;
 drop table if exists path;
+drop table if exists chapters;
 
 create table topics (
   id     text primary key,
@@ -203,6 +224,12 @@ create table path (
   col      integer not null,     -- 0 = spine, +/-1 = branches
   topic_id text not null references topics(id),
   requires text                  -- topic that must come first
+);
+
+create table chapters (
+  n        integer primary key,   -- 1-based, the number the learner sees
+  title    text not null,         -- what the chapter collectively covers
+  spine_id text not null references topics(id)
 );
 
 create index idx_unit_words on unit_words(topic_id, ord);
@@ -285,9 +312,16 @@ def main():
         chunk = spine_pool[i:i + SPINE_UNIT]
         if len(chunk) < SPINE_UNIT // 2:
             break
-        tid = f"core{i // SPINE_UNIT + 1}"
+        n = i // SPINE_UNIT + 1
+        tid = f"core{n}"
+        # Past the curated list the bands are unnamed rather than numbered — a wrong
+        # name is worse than none, and this only happens if --pool grows.
+        spine_name, chapter_title = (CHAPTERS[n - 1] if n <= len(CHAPTERS)
+                                     else (f"More Words {n}", f"Chapter {n}"))
         db.execute("insert into topics (id, name, kind, ord, n) values (?,?,?,?,?)",
-                   (tid, f"Core {i // SPINE_UNIT + 1}", "spine", ordv, len(chunk)))
+                   (tid, spine_name, "spine", ordv, len(chunk)))
+        db.execute("insert into chapters (n, title, spine_id) values (?,?,?)",
+                   (n, chapter_title, tid))
         db.executemany(
             "insert into unit_words (topic_id, lemma_id, ord, reason) values (?,?,?,?)",
             [(tid, lid, j, "frequency") for j, lid in enumerate(chunk)])

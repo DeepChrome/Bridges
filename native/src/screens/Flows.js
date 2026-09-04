@@ -7,6 +7,7 @@ import { useSession } from "../session";
 import { useTheme } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb } from "../ui";
 import { Runner, Done } from "./Run";
+import { Linked } from "../words";
 import { Q, DRILL_TYPES, TEST_OUT } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK,
@@ -64,8 +65,10 @@ export function VocabFlow({ route, navigation }) {
             {(step.note.examples || []).map(([ru, en], k) => (
               <View key={k} style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1,
                                      borderTopColor: t.lineSoft }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Text style={{ color: t.ink, fontSize: 19, flex: 1 }}>{ru}</Text>
+                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+                  <View style={{ flex: 1 }}>
+                    <Linked text={ru} size={19} />
+                  </View>
                   <Speaker text={ru} size={36} />
                 </View>
                 <Muted>{en}</Muted>
@@ -89,8 +92,10 @@ export function VocabFlow({ route, navigation }) {
             {w.x && w.x[0] ? (
               <View style={{ marginTop: 14, paddingTop: 12, borderTopWidth: 1,
                              borderTopColor: t.lineSoft, alignSelf: "stretch" }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Text style={{ color: t.ink, fontSize: 18, flex: 1 }}>{w.x[0].ru}</Text>
+                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+                  <View style={{ flex: 1 }}>
+                    <Linked text={w.x[0].ru} size={18} />
+                  </View>
                   <Speaker text={w.x[0].ru} size={36} />
                 </View>
                 <Muted>{w.x[0].en}</Muted>

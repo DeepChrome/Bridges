@@ -7,7 +7,7 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react-native";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
@@ -41,8 +41,12 @@ describe("profile gate", () => {
     fireEvent.press(screen.getByText("Continue"));
     expect(await screen.findByText("Where should we start?")).toBeTruthy();
     expect(screen.getByText(/50 questions/)).toBeTruthy();
+    // The profile is created by this choice, not by Continue — so the callback
+    // lands after the write. Creating it earlier set the active account, which is
+    // what the shell watches to leave the gate, and this screen was unmounted
+    // before it could be answered.
     fireEvent.press(screen.getByText("Start from the beginning"));
-    expect(onPlacement).toHaveBeenCalledWith(false);
+    await waitFor(() => expect(onPlacement).toHaveBeenCalledWith(false));
   });
 
   /* A fourth test here hits the same cumulative timeout described in

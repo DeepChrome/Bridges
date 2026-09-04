@@ -399,10 +399,46 @@ Each of these cost real time. Do not relearn them.
 - **jsdom needs a real `url`** or `localStorage` throws a SecurityError and the test
   exercises the app's try/catch instead of its persistence.
 - **PowerShell round-trips corrupt UTF-8.** Edit source files with the editing tools,
-  not `Get-Content | Set-Content` regex passes.
+  not `Get-Content | Set-Content` regex passes. This has now bitten twice; the second
+  time it turned every Cyrillic string in a test file into mojibake and produced a
+  "failure" that was purely the corruption. If a test starts failing right after a
+  shell edit touched the file, suspect the encoding before the code.
+- **A `disabled` prop on `Pressable` plus React 19 makes tests lie.** `fireEvent`
+  does not necessarily flush a preceding `changeText`, so a button whose `disabled`
+  is derived from that state is still disabled when the press arrives — the press is
+  silently dropped and the feature looks broken. `Btn` sidesteps it by never passing
+  `disabled` to `Pressable` (`onPress={disabled ? undefined : onPress}`); use `Btn`
+  rather than a hand-rolled Pressable, and in tests `await waitFor` on the input's
+  value before pressing.
 - **The phone is the source of truth for Anki content.** The desktop collection is only
   current after an AnkiDroid → AnkiWeb → desktop sync, and media syncs separately and
   lags. Check the deck list in the ingest output against the phone before trusting it.
+- **The YouTube player refuses to be embedded on `youtube.com` itself** — it answers
+  with error **152**, and only *after* firing `onReady`, so it looks like it worked
+  right up to the moment it doesn't. `native/src/youtube.js` therefore serves its host
+  page with `baseUrl` and `origin` set to the app's own domain. Any real origin except
+  youtube.com works; this was measured across four origins and confirmed on all 27
+  curriculum videos. Pointing a WebView straight at `youtube.com/embed/ID` fails
+  differently and just as hard: no host page means no origin to check, and the player
+  reports a "video player configuration error".
+- **`oEmbed` returning 200 does not mean a video is playable in an embed.** All 27
+  videos passed the oEmbed check while every one of them failed with 152. Verify with
+  a real player, not a metadata endpoint.
+- **`$host` is a read-only PowerShell automatic variable**, like `$args`. Assigning
+  either in a loop or a script aborts it. Use `$addr`, `$deployArgs`, and so on.
+- **Headwords are displayed with their stress mark.** «виногра́д» carries a combining
+  acute between the а and the д, so a test asserting `/виноград/` against rendered
+  text fails on a word that is plainly on the screen. Fold the accents out of the
+  text before matching — `s.normalize("NFD").replace(/[̀́]/g, "")`. This
+  cost an hour of hunting a bug that did not exist.
+- **…and recompose afterwards, or that fold bites back.** NFD does not only split off
+  the stress mark: it also decomposes **й** into и + U+0306 and **ё** into е + U+0308.
+  Stripping just the two accents leaves those apart, so «абонементный» stops matching
+  itself and the test reports a bug on a word rendering perfectly. End the fold with
+  `.normalize("NFC")`. виноград has no й, which is exactly why the incomplete helper
+  looked correct for months.
+- **`Get-Content -Raw` misreads UTF-8 without a BOM**, so grepping a built page for
+  Cyrillic from PowerShell reports a false negative. Check with `node -e` instead.
 
 ## 24. Conventions
 
@@ -514,6 +550,57 @@ match wins, specific before broad) and place it in `STAGE_PLAN`. Only nouns, ver
 adjectives are branch-eligible; core-frequency words stay on the spine. Misfilings get
 an `OVERRIDES` entry, not a rule hack.
 
+**The dictionary has two tiers, and they differ in findability, not in content.**
+`core/search.js` ranks both and is the only lookup implementation — each app used to
+carry its own near-copy.
+
+- *studied* — the ~4,000 curriculum lemmas. Every inflected form indexed, so «книгу»
+  resolves; example sentences from his own decks; audio.
+- *deep* — every glossed lemma in the lexicon (~46,000), shipped as a tab-separated
+  blob in `payload.deep` and parsed lazily. TSV because JSON key names cost more than
+  the content. **Headwords only** — indexing all 567,526 forms would add megabytes to
+  reach words nobody studies, so a deep word is found by its dictionary form or its
+  meaning, not by an inflection.
+
+**There is one kind of entry.** The deep tier carries paradigms too — 41,087 of the
+45,987, the rest having none in OpenRussian — because an entry reading "no paradigm
+for this one" is not a dictionary entry. `core/paradigm.js` rebuilds them on the way
+in from ~3,200 shared ending-shapes plus a per-lemma stem length, shape id and stress
+string; that compression is what makes it affordable (19 MB of rendered tables becomes
+under 2 MB). So a word outside the curriculum opens a full entry with nothing to
+apologise for, and the old "dictionary-only" badge and disclaimer are gone. The
+honesty rule survives in the only place it still applies: **where the lexicon
+genuinely has no paradigm, invent nothing and draw no empty table.** Smoke asserts
+both halves, picking the paradigm-less word out of the payload rather than by name.
+
+Example sentences are the one thing still bounded by the corpus — 7,488 lemmas have
+one, since they can only come from his decks. `keys_of` in `build_site.py` must stay
+unfiltered by the curriculum set: filtering it there silently capped deep sentences at
+the studied 3,930 while the docstring claimed 7,488, and nothing failed. The build now
+prints both coverage numbers on every run, so a broken join shows up as a dropped
+percentage instead of staying invisible.
+
+Ranking note: transliteration deliberately scores *below* an exact gloss, because
+"war" transliterates to «вар» (pitch) and the person typing wants война.
+
+**Word links are two presses, on both platforms.** The first answers "which word is
+this, and which form?" without leaving the sentence — a sheet on native, the popover
+on web. Only the second commits to the full entry. Both read the form's name out of
+the paradigm table via `describeForm`/`summarise` in `core/forms.js`, so there is no
+second grammatical description to keep in step with `panel.py`'s tables. A link is
+always underlined; an unrecognised token (`.tok.dead`, or an unmarked run from
+`splitTokens`) must never look like one. Anything rendering Russian prose should use
+`Linked` (native) or `linkify` (web) rather than a plain string.
+
+**Chapters.** The path is read as a textbook: a chapter is one spine unit plus the
+branches that follow it, and both carry real names — `CHAPTERS` in `build_topics.py`,
+aligned index-for-index with `STAGE_PLAN`, written into a `chapters` table and ridden
+out to the app on the spine's `path` row as `cn`/`ch`. **Nothing the learner sees may
+be named "Core 3" or "Stage 3".** The chapter title names what the chapter covers,
+taken from its branches; the spine name *describes* the frequency band it actually
+contains, read off the word list rather than decided in advance. Change `--pool` and
+the bands shift — re-read them before trusting the names.
+
 **A new screen:** add `<main id="s-name">` to `shell.html`, a renderer in `app.js`, an
 entry in `SCREENS`/`TITLES`, and a route. Give it a tab only if it earns one; otherwise
 reach it from an existing screen and let the back arrow return.
@@ -549,8 +636,18 @@ stylesheet's `[hidden] { display:none }`. Layout bugs need the browser.
 python tools/build_site.py     # or the full pipeline if data changed
 node tools/smoke.js            # must be all-pass
 node tools/visual.js           # must be all-pass; then look at tools/shots/
+node tools/contrast.js         # palette: contrast minimums + the two platforms agreeing
+cd native && npx jest          # the native suite
 python tools/serve.py          # test on the phone over the LAN
 ```
+
+`tools/contrast.js` reads `native/src/theme.js` and `tools/app/app.css` directly and
+asserts three things: every foreground clears its WCAG minimum against the surface it
+actually sits on, the neutrals stay in one hue family per theme, and the two files
+carry identical values. It exists because both failures are invisible — a colour
+nudged for looks once put muted 13px text at 3.01:1, and a colour changed on one
+platform silently left the other behind. **Never pick a palette value by eye: change
+it, run the audit, and if it fails, solve for the value rather than nudging it.**
 
 **Deploys cost credits.** The Netlify free plan grants 300 credits a month and they run
 down fast; the pool refreshes on the 7th. Iterate against `tools/serve.py` and deploy

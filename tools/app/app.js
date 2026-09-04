@@ -1,4 +1,4 @@
-/* Bridges — app shell, screens and router.
+﻿/* Bridges — app shell, screens and router.
  * DATA is injected by tools/build_site.py. */
 
 const L = DATA.lemmas, IX = DATA.index, UN = DATA.units, PATH = DATA.path;
@@ -14,39 +14,9 @@ const el = (t, c, x) => {
 };
 const frag = () => document.createDocumentFragment();
 const nf = (n) => n.toLocaleString("en-US");
-const ACC = /[\u0300\u0301]/g;
-const fold = (s) => s.normalize("NFD").replace(ACC, "").normalize("NFC")
-                     .toLowerCase().replace(/ё/g, "е").trim();
-const bare = (s) => s.normalize("NFD").replace(ACC, "").normalize("NFC");
-/* The combining acute must be inside the class, or a stressed word splits into two
-   links with the accent stranded between them ("во ́ду"). fold() removes it again
-   for the lookup, so the index is unaffected. */
-const TOKEN = /[а-яёА-ЯЁ̀́]+(?:-[а-яёА-ЯЁ̀́]+)*/g;
-const shuffle = (a) => {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
-const sample = (a, n) => shuffle(a.slice()).slice(0, n);
-
-const TR = [["shch","щ"],["sch","щ"],["yo","ё"],["zh","ж"],["kh","х"],["ts","ц"],
-            ["ch","ч"],["sh","ш"],["yu","ю"],["ya","я"],["ye","е"],["j","й"],
-            ["a","а"],["b","б"],["v","в"],["g","г"],["d","д"],["e","е"],["z","з"],
-            ["i","и"],["k","к"],["l","л"],["m","м"],["n","н"],["o","о"],["p","п"],
-            ["r","р"],["s","с"],["t","т"],["u","у"],["f","ф"],["h","х"],["y","ы"],
-            ["c","к"],["w","в"],["x","кс"],["'","ь"]];
-function translit(s) {
-  let out = "", i = 0; const low = s.toLowerCase();
-  outer: while (i < low.length) {
-    for (const [a, b] of TR) {
-      if (low.startsWith(a, i)) { out += b; i += a.length; continue outer; }
-    }
-    out += low[i++];
-  }
-  return out;
-}
+/* fold, bare, TOKEN, shuffle, sample, today, translit and friends now live in
+ * core/util.js, shared verbatim with the native app and inlined above this file
+ * by tools/build_site.py. */
 
 /* ---------------------------------------------------------------- store */
 /* Set to rb.state.<profileId> once a profile is chosen. The bare key is only read
@@ -142,7 +112,6 @@ function loadState() {
 
 let ST = Object.assign({}, DEFAULTS);
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(ST)); } catch (e) {} };
-const today = () => Math.floor(Date.now() / 86400000);
 
 /* Point the store at one profile and load it, migrating on the way in. */
 function useAccount(id) {
@@ -351,30 +320,7 @@ function unitFineProgress(u) {
   return total ? done / total : 0;
 }
 
-/* One line icon per subject, drawn inline so the app stays self-contained. */
-const ICONS = {
-  core: "M4 7h9M4 12h13M4 17h16",
-  family: "M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM2 20a6 6 0 0 1 12 0M17 13a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM15 20a4.5 4.5 0 0 1 7-3.7",
-  time: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",
-  food: "M5 8h11v5a5.5 5.5 0 0 1-11 0zM16 9h2a2 2 0 0 1 0 4h-2M4 20h13",
-  home: "M4 11 12 4l8 7M6 10v9h12v-9M10 19v-5h4v5",
-  city: "M3 20h18M5 20V9l5-3v14M14 20V11h5v9M8 12h1M8 15h1M16 14h1M16 17h1",
-  travel: "M4 16V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9M4 12h16M7 19v1M17 19v1M4 16h16v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z",
-  work: "M4 8h16v11H4zM9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M4 13h16",
-  school: "M4 6a2 2 0 0 1 2-2h11v15H6a2 2 0 0 0-2 2zM17 4h2v15h-2",
-  body: "M12 20s-7-4.4-7-9.2A4.1 4.1 0 0 1 12 8a4.1 4.1 0 0 1 7 2.8C19 15.6 12 20 12 20z",
-  clothes: "M8 4 5 7l2 2 1-1v11h8V8l1 1 2-2-3-3-2 1a3 3 0 0 1-4 0z",
-  nature: "M12 21v-6M12 15c-4 0-6-2.5-6-5.5S8 4 12 4s6 2.5 6 5.5-2 5.5-6 5.5z",
-  animals: "M8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM16 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM5 16a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM19 16a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM12 21c-2.5 0-4-1.5-4-3.2 0-2 2-2.8 4-2.8s4 .8 4 2.8c0 1.7-1.5 3.2-4 3.2z",
-  sport: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3.5 9h17M6 18c2-3 2-9 0-12M18 18c-2-3-2-9 0-12",
-  art: "M9 18V6l11-2v12M9 18a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0zM20 16a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z",
-  politics: "M3 20h18M5 20v-9M10 20v-9M14 20v-9M19 20v-9M3 11h18L12 4 3 11z",
-  military: "M12 3l8 3v6c0 4.4-3.3 8-8 9-4.7-1-8-4.6-8-9V6z",
-  tech: "M4 5h16v10H4zM9 19h6M12 15v4",
-  emotion: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8.5 14a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01",
-  speech: "M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-5 4z",
-};
-const iconFor = (id) => ICONS[id] || (id.startsWith("core") ? ICONS.core : ICONS.speech);
+/* ICONS and iconFor live in core/icons.js, shared with the native app. */
 
 function unitIcon(unitId, size) {
   const ns = "http://www.w3.org/2000/svg";

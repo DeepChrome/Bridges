@@ -579,15 +579,4 @@ const EXERCISES = {
 
 /* ---------------------------------------------------------------- helpers */
 
-function firstSense(w) {
-  const s = (w.e || "").split(/[,;]/)[0].trim();
-  return s || w.b;
-}
-
-const BACK = { "а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"yo","ж":"zh","з":"z",
-  "и":"i","й":"j","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t",
-  "у":"u","ф":"f","х":"h","ц":"ts","ч":"ch","ш":"sh","щ":"shch","ъ":"","ы":"y","ь":"'",
-  "э":"e","ю":"yu","я":"ya" };
-function translitBack(s) {
-  return Array.from(bare(s).toLowerCase()).map((c) => (c in BACK ? BACK[c] : c)).join("");
-}
+/* firstSense and translitBack live in core/util.js, shared with the native app. */

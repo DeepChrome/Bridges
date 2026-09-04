@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import io
 import json
+import re
 import shutil
 import sqlite3
 import sys
@@ -232,6 +233,18 @@ ARTIFACT = """<title>Bridges</title>
 """
 
 
+def strip_modules(src):
+    """ES module syntax out, so a shared core file can live in one classic script.
+
+    Only `export` prefixes and whole-line imports are removed; nothing else about
+    the file changes, which is what lets core/ be the single source of truth for
+    both the web bundle and the native app.
+    """
+    src = re.sub(r"(?m)^\s*import\s[^\n]*?;\s*$", "", src)
+    src = re.sub(r"(?m)^export\s+(default\s+)?", "", src)
+    return src
+
+
 def assemble(tpl, fonts, css, shell, js):
     """Token replacement, not str.format — the CSS and JS are full of braces."""
     for token, value in (("@FONTS@", fonts), ("@CSS@", css),
@@ -256,14 +269,21 @@ def main():
 
     css = (args.src / "app.css").read_text(encoding="utf-8")
     shell = (args.src / "shell.html").read_text(encoding="utf-8")
+    # core/ is shared verbatim with the React Native app, so it is written as ES
+    # modules. The web bundle is one classic script, so the module syntax is stripped
+    # on the way in rather than the logic being duplicated for each platform.
+    core_files = ["util.js", "fsrs.js", "icons.js"]
+    core = "\n".join(strip_modules((ROOT / "core" / f).read_text(encoding="utf-8"))
+                     for f in core_files if (ROOT / "core" / f).exists())
+
     # Order matters: everything is concatenated into one script, so top-level consts
     # must be evaluated before app.js's boot IIFE reaches them. Function declarations
     # hoist across the whole script, so only const/let evaluation order is at stake.
     js_files = []
-    for f in ("fsrs.js", "accounts.js", "lessons.js", "drills.js", "app.js"):
+    for f in ("accounts.js", "lessons.js", "drills.js", "app.js"):
         if (args.src / f).exists():
             js_files.append(f)
-    js = "const DATA = " + blob + ";\n" + "\n".join(
+    js = "const DATA = " + blob + ";\n" + core + "\n" + "\n".join(
         (args.src / f).read_text(encoding="utf-8") for f in js_files)
 
     args.outdir.mkdir(parents=True, exist_ok=True)
@@ -271,6 +291,14 @@ def main():
         assemble(HEAD, FONTS, css, shell, js), encoding="utf-8")
     (args.outdir / "artifact.html").write_text(
         assemble(ARTIFACT, FONTS, css, shell, js), encoding="utf-8")
+
+    # The native app bundles the same payload, so both platforms are always built
+    # from one generation of the data.
+    native_assets = ROOT / "native" / "assets"
+    if native_assets.exists():
+        (native_assets / "data.json").write_text(blob, encoding="utf-8")
+        print(f"  native data  : {native_assets / 'data.json'} "
+              f"({len(blob)/1_048_576:.2f} MB)")
 
     # PWA files. The cache name is stamped with a hash of the page so a new build
     # actually evicts the old one from installed devices.

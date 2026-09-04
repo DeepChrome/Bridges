@@ -22,3 +22,8 @@ tools/_*.js
 tools/_*.py
 tools/shots/
 site/audio/
+
+native/node_modules/
+native/.expo/
+native/assets/data.json
+.expo-export/

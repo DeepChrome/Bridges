@@ -1,0 +1,147 @@
+{
+  "_comment": [
+    "One grammar point per unit, shown before the first lesson of that unit.",
+    "Hand-authored and deliberately narrow: a single rule the learner can hold in",
+    "mind while meeting the unit's vocabulary. Stress marks are combining acutes.",
+    "Keep each body to one or two sentences — this is a teaching card, not a chapter."
+  ],
+
+  "notes": {
+    "core1": {
+      "title": "No “a”, no “the”, no “is”",
+      "body": "Russian has no articles, and it leaves out the present tense of “to be”.",
+      "examples": [["Я студе́нт.", "I am a student."], ["Он до́ма.", "He is at home."]]
+    },
+    "core2": {
+      "title": "Every noun has a gender",
+      "body": "A noun ending in a consonant is masculine, in -а/-я feminine, in -о/-е neuter. Everything that describes it must agree.",
+      "examples": [["но́вый дом", "a new house (m)"], ["но́вая кни́га", "a new book (f)"]]
+    },
+    "core3": {
+      "title": "Making things plural",
+      "body": "Masculine and feminine nouns usually take -ы or -и; neuter nouns take -а or -я.",
+      "examples": [["дом → дома́", "house → houses"], ["кни́га → кни́ги", "book → books"]]
+    },
+    "core4": {
+      "title": "The accusative marks the object",
+      "body": "The thing an action is done to changes form. Feminine -а becomes -у; inanimate masculine looks unchanged.",
+      "examples": [["Я чита́ю кни́гу.", "I am reading a book."], ["Я ви́жу дом.", "I see a house."]]
+    },
+    "core5": {
+      "title": "Two verb patterns",
+      "body": "Most verbs follow either the -е- pattern (чита́ю, чита́ешь) or the -и- pattern (говорю́, говори́шь).",
+      "examples": [["я чита́ю, ты чита́ешь", "I read, you read"], ["я говорю́, ты говори́шь", "I speak, you speak"]]
+    },
+    "core6": {
+      "title": "Saying where something is",
+      "body": "After в or на meaning “in” or “on”, the noun takes the prepositional case, usually ending in -е.",
+      "examples": [["в до́ме", "in the house"], ["на столе́", "on the table"]]
+    },
+    "core7": {
+      "title": "The past tense agrees with the subject",
+      "body": "Drop -ть and add -л, -ла, -ло or -ли. It matches gender and number, not person — “I read” differs for a man and a woman.",
+      "examples": [["Он чита́л.", "He read."], ["Она́ чита́ла.", "She read."]]
+    },
+    "core8": {
+      "title": "Two aspects of every verb",
+      "body": "Imperfective verbs describe the process or a repeated action; perfective verbs describe one completed act.",
+      "examples": [["Я чита́л кни́гу.", "I was reading the book."], ["Я прочита́л кни́гу.", "I finished the book."]]
+    },
+
+    "family": {
+      "title": "“My” agrees with what is owned",
+      "body": "Possessives take the gender of the thing possessed, not of the owner.",
+      "examples": [["мой брат, моя́ сестра́", "my brother, my sister"], ["мои́ роди́тели", "my parents"]]
+    },
+    "time": {
+      "title": "Numbers change the noun after them",
+      "body": "1 takes the plain form, 2–4 take the genitive singular, and 5 and above take the genitive plural.",
+      "examples": [["оди́н час, два часа́", "one hour, two hours"], ["пять часо́в", "five hours"]]
+    },
+    "food": {
+      "title": "Eating and drinking take the accusative",
+      "body": "есть, пить and хоте́ть all put their object in the accusative.",
+      "examples": [["Я пью во́ду.", "I am drinking water."], ["Я хочу́ ко́фе.", "I want coffee."]]
+    },
+    "home": {
+      "title": "Where you are vs where you are going",
+      "body": "в and на take the prepositional for a location and the accusative for a destination.",
+      "examples": [["Я до́ма, в ко́мнате.", "I am at home, in the room."], ["Я иду́ в ко́мнату.", "I am going into the room."]]
+    },
+    "city": {
+      "title": "Two verbs for “go”",
+      "body": "идти́ is one trip in one direction happening now; ходи́ть is going regularly or there and back.",
+      "examples": [["Я иду́ в магази́н.", "I am going to the shop."], ["Я хожу́ в магази́н ка́ждый день.", "I go to the shop every day."]]
+    },
+    "travel": {
+      "title": "Travelling by something",
+      "body": "Use на plus the prepositional case for the means of transport.",
+      "examples": [["на авто́бусе", "by bus"], ["Мы е́дем на по́езде.", "We are going by train."]]
+    },
+    "work": {
+      "title": "Working “as” something",
+      "body": "A profession after рабо́тать takes the instrumental case.",
+      "examples": [["Она́ рабо́тает врачо́м.", "She works as a doctor."], ["Он рабо́тает инжене́ром.", "He works as an engineer."]]
+    },
+    "school": {
+      "title": "Three ways to “study”",
+      "body": "учи́ть is to memorise something, учи́ться is to be a student, изуча́ть is to study a subject in depth.",
+      "examples": [["Я учу́ слова́.", "I am learning words."], ["Я учу́сь в университе́те.", "I study at university."]]
+    },
+    "body": {
+      "title": "What hurts is the subject",
+      "body": "Russian says “by me hurts the head” — the aching part stays in the nominative and the person takes у + genitive.",
+      "examples": [["У меня́ боли́т голова́.", "I have a headache."], ["У неё боля́т но́ги.", "Her legs hurt."]]
+    },
+    "clothes": {
+      "title": "Wearing vs putting on",
+      "body": "носи́ть is what you wear habitually; надева́ть/наде́ть is the act of putting something on.",
+      "examples": [["Он но́сит очки́.", "He wears glasses."], ["Наде́нь ку́ртку.", "Put your jacket on."]]
+    },
+    "nature": {
+      "title": "Seasons take the instrumental",
+      "body": "Times of year and times of day use the instrumental with no preposition.",
+      "examples": [["зимо́й, ле́том", "in winter, in summer"], ["у́тром, ве́чером", "in the morning, in the evening"]]
+    },
+    "animals": {
+      "title": "Living things take the genitive as object",
+      "body": "For masculine animate nouns — and all animate plurals — the accusative copies the genitive.",
+      "examples": [["Я ви́жу кота́.", "I see the cat."], ["Я ви́жу дом.", "I see the house (inanimate, unchanged)."]]
+    },
+    "sport": {
+      "title": "Playing games vs playing instruments",
+      "body": "игра́ть в plus the accusative for sports and games; игра́ть на plus the prepositional for instruments.",
+      "examples": [["игра́ть в футбо́л", "to play football"], ["игра́ть на гита́ре", "to play the guitar"]]
+    },
+    "art": {
+      "title": "Talking about a work",
+      "body": "о (об before a vowel) plus the prepositional case means “about”.",
+      "examples": [["фильм о войне́", "a film about the war"], ["кни́га об иску́сстве", "a book about art"]]
+    },
+    "politics": {
+      "title": "Quantity words take the genitive plural",
+      "body": "After мно́го, ма́ло, ско́лько and similar words, the noun goes into the genitive plural.",
+      "examples": [["мно́го люде́й", "many people"], ["ма́ло вре́мени", "little time"]]
+    },
+    "military": {
+      "title": "“With” takes the instrumental",
+      "body": "с plus the instrumental means together with — including who you are fighting or negotiating with.",
+      "examples": [["война́ с враго́м", "war with the enemy"], ["Он говори́т с генера́лом.", "He is speaking with the general."]]
+    },
+    "tech": {
+      "title": "Communicating “by” something",
+      "body": "по plus the dative case gives the medium something travels through.",
+      "examples": [["по телефо́ну", "by phone"], ["по интерне́ту", "over the internet"]]
+    },
+    "emotion": {
+      "title": "Liking is done “to” you",
+      "body": "нра́виться puts the person in the dative and the thing liked in the nominative — literally “to me is pleasing”.",
+      "examples": [["Мне нра́вится му́зыка.", "I like music."], ["Ей нра́вятся ко́шки.", "She likes cats."]]
+    },
+    "speech": {
+      "title": "Speaking a language",
+      "body": "говори́ть по-ру́сски uses an adverb with no case at all; the noun form needs на + prepositional.",
+      "examples": [["Я говорю́ по-ру́сски.", "I speak Russian."], ["Он говори́т на ру́сском языке́.", "He speaks in Russian."]]
+    }
+  }
+}

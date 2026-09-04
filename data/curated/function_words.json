@@ -1,0 +1,224 @@
+{
+  "_comment": [
+    "Closed-class paradigms that OpenRussian ships without inflection data.",
+    "These are the highest-frequency words in the language, so the gap is small in",
+    "lemma count and huge in token count. Hand-authored; Russian closed-class",
+    "morphology is finite and stable, so this file should rarely need edits.",
+    "",
+    "Slot naming matches OpenRussian so the renderer is shared:",
+    "  pronouns    -> nom / gen / dat / acc / inst / prep",
+    "  possessives -> decl_{m,f,n,pl}_{nom,gen,dat,acc,inst,prep}",
+    "  verbs       -> presfut_{sg1,sg2,sg3,pl1,pl2,pl3}",
+    "attach_to merges forms into an existing lemma instead of creating a new one.",
+    "н-prefixed variants (него, ним) are the forms used after a preposition."
+  ],
+
+  "entries": [
+    {
+      "lemma": "я", "pos": "pronoun", "en": "I, me",
+      "forms": {
+        "nom": ["я"], "gen": ["меня́"], "dat": ["мне"], "acc": ["меня́"],
+        "inst": ["мной", "мно́ю"], "prep": ["мне"]
+      }
+    },
+    {
+      "lemma": "ты", "pos": "pronoun", "en": "you (singular, informal)",
+      "forms": {
+        "nom": ["ты"], "gen": ["тебя́"], "dat": ["тебе́"], "acc": ["тебя́"],
+        "inst": ["тобо́й", "тобо́ю"], "prep": ["тебе́"]
+      }
+    },
+    {
+      "lemma": "он", "pos": "pronoun", "en": "he, it",
+      "forms": {
+        "nom": ["он"], "gen": ["его́", "него́"], "dat": ["ему́", "нему́"],
+        "acc": ["его́", "него́"], "inst": ["им", "ним"], "prep": ["нём"]
+      }
+    },
+    {
+      "lemma": "она", "pos": "pronoun", "en": "she, it",
+      "forms": {
+        "nom": ["она́"], "gen": ["её", "неё"], "dat": ["ей", "ней"],
+        "acc": ["её", "неё"], "inst": ["ей", "е́ю", "ней", "не́ю"], "prep": ["ней"]
+      }
+    },
+    {
+      "lemma": "оно", "pos": "pronoun", "en": "it",
+      "forms": {
+        "nom": ["оно́"], "gen": ["его́", "него́"], "dat": ["ему́", "нему́"],
+        "acc": ["его́", "него́"], "inst": ["им", "ним"], "prep": ["нём"]
+      }
+    },
+    {
+      "lemma": "мы", "pos": "pronoun", "en": "we, us",
+      "forms": {
+        "nom": ["мы"], "gen": ["нас"], "dat": ["нам"], "acc": ["нас"],
+        "inst": ["на́ми"], "prep": ["нас"]
+      }
+    },
+    {
+      "lemma": "вы", "pos": "pronoun", "en": "you (plural or formal)",
+      "forms": {
+        "nom": ["вы"], "gen": ["вас"], "dat": ["вам"], "acc": ["вас"],
+        "inst": ["ва́ми"], "prep": ["вас"]
+      }
+    },
+    {
+      "lemma": "они", "pos": "pronoun", "en": "they, them",
+      "forms": {
+        "nom": ["они́"], "gen": ["их", "них"], "dat": ["им", "ним"],
+        "acc": ["их", "них"], "inst": ["и́ми", "ни́ми"], "prep": ["них"]
+      }
+    },
+    {
+      "lemma": "себя", "pos": "pronoun",
+      "en": "oneself, myself, yourself, himself, herself, itself, ourselves, themselves",
+      "note": "Reflexive. Has no nominative — it never acts as the subject.",
+      "forms": {
+        "gen": ["себя́"], "dat": ["себе́"], "acc": ["себя́"],
+        "inst": ["собо́й", "собо́ю"], "prep": ["себе́"]
+      }
+    },
+
+    {
+      "lemma": "мой", "pos": "possessive", "en": "my, mine",
+      "forms": {
+        "decl_m_nom": ["мой"], "decl_m_gen": ["моего́"], "decl_m_dat": ["моему́"],
+        "decl_m_acc": ["мой", "моего́"], "decl_m_inst": ["мои́м"], "decl_m_prep": ["моём"],
+        "decl_f_nom": ["моя́"], "decl_f_gen": ["мое́й"], "decl_f_dat": ["мое́й"],
+        "decl_f_acc": ["мою́"], "decl_f_inst": ["мое́й", "мое́ю"], "decl_f_prep": ["мое́й"],
+        "decl_n_nom": ["моё"], "decl_n_gen": ["моего́"], "decl_n_dat": ["моему́"],
+        "decl_n_acc": ["моё"], "decl_n_inst": ["мои́м"], "decl_n_prep": ["моём"],
+        "decl_pl_nom": ["мои́"], "decl_pl_gen": ["мои́х"], "decl_pl_dat": ["мои́м"],
+        "decl_pl_acc": ["мои́", "мои́х"], "decl_pl_inst": ["мои́ми"], "decl_pl_prep": ["мои́х"]
+      }
+    },
+    {
+      "lemma": "твой", "pos": "possessive", "en": "your, yours (singular, informal)",
+      "forms": {
+        "decl_m_nom": ["твой"], "decl_m_gen": ["твоего́"], "decl_m_dat": ["твоему́"],
+        "decl_m_acc": ["твой", "твоего́"], "decl_m_inst": ["твои́м"], "decl_m_prep": ["твоём"],
+        "decl_f_nom": ["твоя́"], "decl_f_gen": ["твое́й"], "decl_f_dat": ["твое́й"],
+        "decl_f_acc": ["твою́"], "decl_f_inst": ["твое́й", "твое́ю"], "decl_f_prep": ["твое́й"],
+        "decl_n_nom": ["твоё"], "decl_n_gen": ["твоего́"], "decl_n_dat": ["твоему́"],
+        "decl_n_acc": ["твоё"], "decl_n_inst": ["твои́м"], "decl_n_prep": ["твоём"],
+        "decl_pl_nom": ["твои́"], "decl_pl_gen": ["твои́х"], "decl_pl_dat": ["твои́м"],
+        "decl_pl_acc": ["твои́", "твои́х"], "decl_pl_inst": ["твои́ми"], "decl_pl_prep": ["твои́х"]
+      }
+    },
+    {
+      "lemma": "свой", "pos": "possessive", "en": "one's own",
+      "note": "Refers back to the subject of the clause.",
+      "forms": {
+        "decl_m_nom": ["свой"], "decl_m_gen": ["своего́"], "decl_m_dat": ["своему́"],
+        "decl_m_acc": ["свой", "своего́"], "decl_m_inst": ["свои́м"], "decl_m_prep": ["своём"],
+        "decl_f_nom": ["своя́"], "decl_f_gen": ["свое́й"], "decl_f_dat": ["свое́й"],
+        "decl_f_acc": ["свою́"], "decl_f_inst": ["свое́й", "свое́ю"], "decl_f_prep": ["свое́й"],
+        "decl_n_nom": ["своё"], "decl_n_gen": ["своего́"], "decl_n_dat": ["своему́"],
+        "decl_n_acc": ["своё"], "decl_n_inst": ["свои́м"], "decl_n_prep": ["своём"],
+        "decl_pl_nom": ["свои́"], "decl_pl_gen": ["свои́х"], "decl_pl_dat": ["свои́м"],
+        "decl_pl_acc": ["свои́", "свои́х"], "decl_pl_inst": ["свои́ми"], "decl_pl_prep": ["свои́х"]
+      }
+    },
+    {
+      "lemma": "наш", "pos": "possessive", "en": "our, ours",
+      "forms": {
+        "decl_m_nom": ["наш"], "decl_m_gen": ["на́шего"], "decl_m_dat": ["на́шему"],
+        "decl_m_acc": ["наш", "на́шего"], "decl_m_inst": ["на́шим"], "decl_m_prep": ["на́шем"],
+        "decl_f_nom": ["на́ша"], "decl_f_gen": ["на́шей"], "decl_f_dat": ["на́шей"],
+        "decl_f_acc": ["на́шу"], "decl_f_inst": ["на́шей"], "decl_f_prep": ["на́шей"],
+        "decl_n_nom": ["на́ше"], "decl_n_gen": ["на́шего"], "decl_n_dat": ["на́шему"],
+        "decl_n_acc": ["на́ше"], "decl_n_inst": ["на́шим"], "decl_n_prep": ["на́шем"],
+        "decl_pl_nom": ["на́ши"], "decl_pl_gen": ["на́ших"], "decl_pl_dat": ["на́шим"],
+        "decl_pl_acc": ["на́ши", "на́ших"], "decl_pl_inst": ["на́шими"], "decl_pl_prep": ["на́ших"]
+      }
+    },
+    {
+      "lemma": "ваш", "pos": "possessive", "en": "your, yours (plural or formal)",
+      "forms": {
+        "decl_m_nom": ["ваш"], "decl_m_gen": ["ва́шего"], "decl_m_dat": ["ва́шему"],
+        "decl_m_acc": ["ваш", "ва́шего"], "decl_m_inst": ["ва́шим"], "decl_m_prep": ["ва́шем"],
+        "decl_f_nom": ["ва́ша"], "decl_f_gen": ["ва́шей"], "decl_f_dat": ["ва́шей"],
+        "decl_f_acc": ["ва́шу"], "decl_f_inst": ["ва́шей"], "decl_f_prep": ["ва́шей"],
+        "decl_n_nom": ["ва́ше"], "decl_n_gen": ["ва́шего"], "decl_n_dat": ["ва́шему"],
+        "decl_n_acc": ["ва́ше"], "decl_n_inst": ["ва́шим"], "decl_n_prep": ["ва́шем"],
+        "decl_pl_nom": ["ва́ши"], "decl_pl_gen": ["ва́ших"], "decl_pl_dat": ["ва́шим"],
+        "decl_pl_acc": ["ва́ши", "ва́ших"], "decl_pl_inst": ["ва́шими"], "decl_pl_prep": ["ва́ших"]
+      }
+    },
+
+    {
+      "lemma": "кто", "pos": "pronoun", "en": "who",
+      "forms": {
+        "nom": ["кто"], "gen": ["кого́"], "dat": ["кому́"], "acc": ["кого́"],
+        "inst": ["кем"], "prep": ["ком"]
+      }
+    },
+    {
+      "lemma": "что", "pos": "pronoun", "en": "what; that",
+      "forms": {
+        "nom": ["что"], "gen": ["чего́"], "dat": ["чему́"], "acc": ["что"],
+        "inst": ["чем"], "prep": ["чём"]
+      }
+    },
+    {
+      "lemma": "чей", "pos": "possessive", "en": "whose",
+      "forms": {
+        "decl_m_nom": ["чей"], "decl_m_gen": ["чьего́"], "decl_m_dat": ["чьему́"],
+        "decl_m_acc": ["чей", "чьего́"], "decl_m_inst": ["чьим"], "decl_m_prep": ["чьём"],
+        "decl_f_nom": ["чья"], "decl_f_gen": ["чьей"], "decl_f_dat": ["чьей"],
+        "decl_f_acc": ["чью"], "decl_f_inst": ["чьей"], "decl_f_prep": ["чьей"],
+        "decl_n_nom": ["чьё"], "decl_n_gen": ["чьего́"], "decl_n_dat": ["чьему́"],
+        "decl_n_acc": ["чьё"], "decl_n_inst": ["чьим"], "decl_n_prep": ["чьём"],
+        "decl_pl_nom": ["чьи"], "decl_pl_gen": ["чьих"], "decl_pl_dat": ["чьим"],
+        "decl_pl_acc": ["чьи", "чьих"], "decl_pl_inst": ["чьи́ми"], "decl_pl_prep": ["чьих"]
+      }
+    },
+    {
+      "lemma": "весь", "pos": "possessive", "en": "all, whole, entire",
+      "forms": {
+        "decl_m_nom": ["весь"], "decl_m_gen": ["всего́"], "decl_m_dat": ["всему́"],
+        "decl_m_acc": ["весь", "всего́"], "decl_m_inst": ["всем"], "decl_m_prep": ["всём"],
+        "decl_f_nom": ["вся"], "decl_f_gen": ["всей"], "decl_f_dat": ["всей"],
+        "decl_f_acc": ["всю"], "decl_f_inst": ["всей", "все́ю"], "decl_f_prep": ["всей"],
+        "decl_n_nom": ["всё"], "decl_n_gen": ["всего́"], "decl_n_dat": ["всему́"],
+        "decl_n_acc": ["всё"], "decl_n_inst": ["всем"], "decl_n_prep": ["всём"],
+        "decl_pl_nom": ["все"], "decl_pl_gen": ["всех"], "decl_pl_dat": ["всем"],
+        "decl_pl_acc": ["все", "всех"], "decl_pl_inst": ["все́ми"], "decl_pl_prep": ["всех"]
+      }
+    },
+    {
+      "lemma": "один", "pos": "numeral", "en": "one; a certain; alone",
+      "forms": {
+        "decl_m_nom": ["оди́н"], "decl_m_gen": ["одного́"], "decl_m_dat": ["одному́"],
+        "decl_m_acc": ["оди́н", "одного́"], "decl_m_inst": ["одни́м"], "decl_m_prep": ["одно́м"],
+        "decl_f_nom": ["одна́"], "decl_f_gen": ["одно́й"], "decl_f_dat": ["одно́й"],
+        "decl_f_acc": ["одну́"], "decl_f_inst": ["одно́й", "одно́ю"], "decl_f_prep": ["одно́й"],
+        "decl_n_nom": ["одно́"], "decl_n_gen": ["одного́"], "decl_n_dat": ["одному́"],
+        "decl_n_acc": ["одно́"], "decl_n_inst": ["одни́м"], "decl_n_prep": ["одно́м"],
+        "decl_pl_nom": ["одни́"], "decl_pl_gen": ["одни́х"], "decl_pl_dat": ["одни́м"],
+        "decl_pl_acc": ["одни́", "одни́х"], "decl_pl_inst": ["одни́ми"], "decl_pl_prep": ["одни́х"]
+      }
+    },
+
+    {
+      "attach_to": "быть", "pos": "verb",
+      "note": "OpenRussian lists only есть for быть; the actual future paradigm is missing.",
+      "forms": {
+        "presfut_sg1": ["бу́ду"], "presfut_sg2": ["бу́дешь"], "presfut_sg3": ["бу́дет"],
+        "presfut_pl1": ["бу́дем"], "presfut_pl2": ["бу́дете"], "presfut_pl3": ["бу́дут"]
+      }
+    },
+
+    { "attach_to": "с",   "pos": "other", "forms": { "variant": ["со"] } },
+    { "attach_to": "в",   "pos": "other", "forms": { "variant": ["во"] } },
+    { "attach_to": "к",   "pos": "other", "forms": { "variant": ["ко"] } },
+    { "attach_to": "о",   "pos": "other", "forms": { "variant": ["об", "обо"] } },
+    { "attach_to": "из",  "pos": "other", "forms": { "variant": ["изо"] } },
+    { "attach_to": "под", "pos": "other", "forms": { "variant": ["подо"] } },
+    { "attach_to": "над", "pos": "other", "forms": { "variant": ["надо"] } },
+    { "attach_to": "без", "pos": "other", "forms": { "variant": ["безо"] } },
+    { "attach_to": "перед", "pos": "other", "forms": { "variant": ["передо"] } },
+    { "attach_to": "год", "pos": "noun", "forms": { "pl_nom": ["го́ды"], "pl_gen": ["годо́в"] } }
+  ]
+}

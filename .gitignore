@@ -1,0 +1,24 @@
+# Generated databases and working copies — all rebuildable from tools/
+data/corpus.db
+data/lexicon.db
+data/_work/
+
+# Downloaded source dumps (re-fetchable; OpenRussian is ~22 MB)
+data/raw/
+
+# Generated page (3.5 MB, rebuilt by tools/build_site.py)
+site/
+
+# Netlify link state contains the project id
+.netlify/
+
+# Never commit deploy credentials
+.env
+*.token
+
+__pycache__/
+node_modules/
+tools/_*.js
+tools/_*.py
+tools/shots/
+site/audio/

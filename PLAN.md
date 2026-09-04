@@ -21,10 +21,15 @@ Python builds the data once; the app is static. Rebuild everything with:
 ```
 python tools/ingest_anki.py      # after any Anki sync
 python tools/build_lexicon.py
+python tools/ingest_tatoeba.py   # dictionary examples his decks never use
 python tools/build_topics.py
+python tools/build_audio.py      # export the collection's recordings
 python tools/make_icons.py       # only if the icon changes
 python tools/build_site.py
-node   tools/smoke.js            # 50 checks against the generated page
+node   tools/smoke.js            # 157 checks against the generated page
+node   tools/visual.js           # layout, at 390px and 320px, both themes
+node   tools/contrast.js         # palette: contrast + the two platforms agreeing
+cd native; npx jest              # the native suite
 .\tools\deploy.ps1
 ```
 
@@ -36,7 +41,11 @@ node   tools/smoke.js            # 50 checks against the generated page
 | Lexicon | Done — 58,844 lemmas, 567k inflected forms, 97.7% coverage of the decks' text |
 | Blocks | Done — 27 units (8 core stages, 19 topics) laid out as a path |
 | App | Done — mobile shell, lesson engine, flashcards, dictionary, PWA |
-| YouTube | Not started |
+| YouTube | Done — 27 episodes matched to units, with word-level timings |
+| Audio | Done — 13,368 recordings exported, 86.8% of studied lemmas; TTS labelled as fallback |
+| Dictionary | Done — all 45,987 glossed lemmas, 89.3% with a paradigm |
+| Examples | Done — 48.8% of glossed lemmas have a sentence (7,488 his, 14,952 Tatoeba) |
+| Native | Done — full parity with the web app, one shared `core/` |
 
 ## App structure
 

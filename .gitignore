@@ -1,6 +1,7 @@
 # Generated databases and working copies — all rebuildable from tools/
 data/corpus.db
 data/lexicon.db
+data/examples.db
 data/_work/
 
 # Downloaded source dumps (re-fetchable; OpenRussian is ~22 MB)

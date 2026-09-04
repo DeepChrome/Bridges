@@ -33,6 +33,15 @@ const DEEP_ROWS = PAYLOAD.deep.split("\n").filter(Boolean).map((r) => r.split("\
 const NO_PARADIGM = DEEP_ROWS.find(
   (r) => !r[8] && r[6] && !STUDIED.has(r[0]) && /^[а-яё]+$/.test(r[0]));
 
+/* A word whose only example comes from outside his decks — field 10 is the list of
+   sentence-pool indices, and field 4 of a pool row names an outside source. */
+const SENT = PAYLOAD.sent || [];
+const EXT_WORD = DEEP_ROWS.find((r) => {
+  if (!r[10] || !/^[а-яё-]+$/.test(r[0])) return false;
+  const refs = r[10].split(",").map(Number);
+  return refs.length && refs.every((i) => SENT[i] && SENT[i][4]);
+});
+
 let failures = 0, checks = 0;
 const ok = (cond, label, extra) => {
   checks++;
@@ -420,6 +429,9 @@ setTimeout(async () => {
   ok($$("#s-dict .ex .tok:not(.dead)").length > 0, "sentence tokens are links");
   const stress = ($("#s-dict .ex .ru") || {}).textContent || "";
   ok(!/[\s ]́/.test(stress), "stress marks stay on their vowel");
+  // His own material claims no source, so an unlabelled sentence means "yours".
+  ok($$("#s-dict .ex .exsrc").length === 0,
+     "a sentence from his own decks is not labelled with a source");
 
   // First press summarises without leaving the sentence; only the second follows
   // the link.
@@ -434,6 +446,20 @@ setTimeout(async () => {
   ok(/виноград/.test(plain(($("#s-dict .hw") || {}).textContent)),
      "a word outside the curriculum opens its entry");
   ok($$("#s-dict table").length > 0, "and declines in full, like a studied word");
+
+  // A borrowed sentence says so. Attested Russian is still not material he has
+  // studied, and the entry must not let the two read alike.
+  ok(!!EXT_WORD, "the payload has a word whose only example is external");
+  if (EXT_WORD) {
+    await nav("#/w/" + encodeURIComponent(EXT_WORD[0]));
+    const labels = $$("#s-dict .ex .exsrc");
+    ok(labels.length > 0, "an outside sentence names its source: " + EXT_WORD[0],
+       "examples=" + $$("#s-dict .ex").length);
+    ok(labels.every((n) => n.textContent.trim().length > 0),
+       "and the label is not blank");
+    ok($$("#s-dict .ex .tok:not(.dead)").length > 0,
+       "its words are still links, like any other sentence");
+  }
 
   // The honesty rule survives the upgrade: where the lexicon genuinely has no
   // paradigm, nothing is invented and no empty table is drawn.
@@ -480,6 +506,16 @@ setTimeout(async () => {
   ok(!!byText(".sheet .btn", /^Copy$/), "copy control present");
   ok(!!byText(".sheet .btn", /^Export$/), "export control present");
   ok(!!byText(".sheet .btn", /^Import$/), "import control present");
+  // Attribution is a condition of both corpora's licences, so its absence is a
+  // compliance failure rather than a cosmetic one. It was missing entirely once.
+  const sheetText = ($(".sheet") || {}).textContent || "";
+  ok(/OpenRussian/.test(sheetText), "OpenRussian is credited");
+  ok(/CC BY-SA 4\.0/.test(sheetText), "with its licence");
+  if (PAYLOAD.stats && PAYLOAD.stats.ext_sentences) {
+    ok(new RegExp(PAYLOAD.stats.ext_source).test(sheetText),
+       "the sentence source is credited: " + PAYLOAD.stats.ext_source);
+    ok(sheetText.includes(PAYLOAD.stats.ext_licence), "with its licence");
+  }
   const sw = $(".sheet .sw");
   ok(sw.getAttribute("aria-checked") === "true", "developer mode reads as on");
   sw.click();

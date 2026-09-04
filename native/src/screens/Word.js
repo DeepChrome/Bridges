@@ -97,7 +97,9 @@ export default function Word({ route }) {
           <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700",
                          letterSpacing: 1, textTransform: "uppercase",
                          marginTop: 22, marginBottom: 8, marginLeft: 2 }}>
-            {`In your collection · ${examples.length}`}
+            {examples.every((e) => !e.src)
+              ? `In your collection · ${examples.length}`
+              : `Examples · ${examples.length}`}
           </Text>
           <Card>
             {examples.map((e, k) => (
@@ -113,6 +115,15 @@ export default function Word({ route }) {
                   <Speaker text={e.ru} size={36} />
                 </View>
                 <Muted style={{ marginTop: 4 }}>{e.en}</Muted>
+                {/* Only sentences from outside his decks carry a source, so an
+                    unlabelled one reads as his own — same rule as the web app. */}
+                {e.src ? (
+                  <Text style={{ color: t.ink3, fontSize: 10, fontWeight: "700",
+                                 letterSpacing: 0.6, textTransform: "uppercase",
+                                 marginTop: 4 }}>
+                    {e.src}
+                  </Text>
+                ) : null}
               </View>
             ))}
           </Card>

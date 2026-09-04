@@ -1157,6 +1157,9 @@ function entryCard(w) {
       ru.append(linkify(e.ru));
       r.append(ru);
       r.append(el("div", "en", e.en));
+      // Sentences from his own decks say nothing; one from outside names its source,
+      // so material he has studied is never confused with material he has not.
+      if (e.src) r.append(el("div", "exsrc", e.src));
       ex.append(r);
     });
     c.append(ex);
@@ -1475,6 +1478,15 @@ function openSettings() {
   const ver = el("div", "empty", "Built " + DATA.stats.built);
   ver.style.paddingBottom = "0";
   sheet.append(ver);
+
+  // Both corpora are licensed on condition of attribution, so this credit is an
+  // obligation rather than a nicety. Rendered from stats.credits, which the build
+  // reads out of the databases themselves.
+  (DATA.stats.credits || []).forEach((c) => {
+    const line = el("div", "empty", c.l ? c.n + " · " + c.l : c.n);
+    line.style.cssText = "padding-top:2px;padding-bottom:0;font-size:11px";
+    sheet.append(line);
+  });
 
   bg.append(sheet);
   document.body.append(bg);

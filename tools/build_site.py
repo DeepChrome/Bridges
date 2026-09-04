@@ -55,7 +55,8 @@ def _stress_index(s):
     return -1
 
 
-def build_dictionary(db, sentences, items_of_key, keys_of, stats):
+def build_dictionary(db, sentences, items_of_key, keys_of, stats,
+                     ext_sentences=None, ext_items_of_key=None):
     """Every glossed lemma, with its paradigm and its sentences.
 
     The curriculum ships ~4,000 lemmas in full. The lexicon holds 58,844, and an
@@ -94,12 +95,24 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats):
         if iid not in pool_at:
             ru, en_s, deck, has_audio = sentences[iid]
             pool_at[iid] = len(pool)
-            pool.append([ru, en_s, deck, 1 if has_audio else 0])
+            # Fifth field is the outside source, empty for his own decks. The app
+            # labels whatever it is told rather than knowing any source by name.
+            pool.append([ru, en_s, deck, 1 if has_audio else 0, ""])
         return pool_at[iid]
+
+    def ext_ref(xid):
+        """Same pool, keyed apart so an external id cannot collide with an item id."""
+        key = ("x", xid)
+        if key not in pool_at:
+            ru, en_s, src = ext_sentences[xid]
+            pool_at[key] = len(pool)
+            pool.append([ru, en_s, src, 0, src])
+        return pool_at[key]
 
     slot_names, slot_at = [], {}
     shapes, shape_at = [], {}
     lines = []
+    ext_only = 0            # words whose only example comes from outside his decks
 
     for lid in sorted(meta, key=lambda x: meta[x]["b"]):
         m = meta[lid]
@@ -142,10 +155,22 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats):
             shape_id = str(shape_at[shape_key])
             stress = "".join(marks)
 
+        # His own decks first, always. A Tatoeba sentence is attested Russian but it
+        # is not material he has studied, so it fills the remaining slots rather than
+        # competing for the first one.
+        keys = keys_of.get(lid, ())
         refs = []
-        for iid in sorted({i for k in keys_of.get(lid, ()) for i in items_of_key.get(k, ())
+        for iid in sorted({i for k in keys for i in items_of_key.get(k, ())
                            if i in sentences})[:4]:
             refs.append(str(sentence_ref(iid)))
+        own = len(refs)
+        if ext_items_of_key and len(refs) < 4:
+            spare = 4 - len(refs)
+            for xid in sorted({x for k in keys for x in ext_items_of_key.get(k, ())
+                               if x in ext_sentences})[:spare]:
+                refs.append(str(ext_ref(xid)))
+        if refs and not own:
+            ext_only += 1
 
         lines.append("\t".join([
             bare,
@@ -184,6 +209,7 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats):
     stats["deep"] = len(lines)
     stats["deep_paradigms"] = sum(1 for x in lines if x.split("\t")[8])
     stats["deep_examples"] = sum(1 for x in lines if x.split("\t")[10])
+    stats["deep_ext_only"] = ext_only
     stats["deep_sentences"] = len(pool)
     stats["shapes"] = len(shapes)
     return "\n".join(lines), shape_blob, slot_names, pool, sample
@@ -258,6 +284,37 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     for k, iid in db.execute("select key, item_id from c.item_tokens"):
         if iid in sentences:
             items_of_key.setdefault(k, []).append(iid)
+
+    # Tatoeba examples, when tools/ingest_tatoeba.py has built them. Its own database
+    # rather than corpus.db: both build_topics.py and the candidate-lemma query above
+    # rank the curriculum by counting item_tokens with no filter on kind, so foreign
+    # sentences landing there would quietly change which lemmas the curriculum uses.
+    ext_sentences, ext_items_of_key = {}, {}
+    ext_path = ROOT / "data" / "examples.db"
+    if ext_path.exists():
+        ex = sqlite3.connect(f"file:{ext_path}?mode=ro", uri=True)
+        for xid, ru, en_s, src in ex.execute("select id, ru, en, source from items"):
+            ext_sentences[xid] = (ru, en_s, src)
+        for k, xid in ex.execute("select key, item_id from item_tokens"):
+            ext_items_of_key.setdefault(k, []).append(xid)
+        row = ex.execute("select v from meta where k='licence'").fetchone()
+        stats["ext_licence"] = row[0] if row else ""
+        stats["ext_source"] = (ex.execute(
+            "select v from meta where k='source'").fetchone() or [""])[0]
+        ex.close()
+    stats["ext_sentences"] = len(ext_sentences)
+
+    # Attribution is a licence condition on both corpora, not decoration. It is built
+    # from what the databases themselves record, so a source cannot be credited by a
+    # string in the UI that has drifted from the data actually shipped.
+    credits = []
+    lex_meta = dict(db.execute("select k, v from meta"))
+    if lex_meta.get("source"):
+        credits.append({"n": lex_meta["source"], "l": lex_meta.get("license", "")})
+    if ext_sentences and stats.get("ext_source"):
+        credits.append({"n": f"{stats['ext_source']} (tatoeba.org)",
+                        "l": stats.get("ext_licence", "")})
+    stats["credits"] = credits
 
     vocab_by_key = {}
     for rk, fr, ipm in db.execute(
@@ -365,7 +422,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         path.append(row)
 
     deep, shapes, slot_names, sent_pool, tsample = build_dictionary(
-        db, sentences, items_of_key, keys_of, stats)
+        db, sentences, items_of_key, keys_of, stats, ext_sentences, ext_items_of_key)
 
     db.close()
 
@@ -526,6 +583,10 @@ def main():
           f"{100*st['deep_examples']/deep_n:.1f}%)")
     print(f"  shared       : {st['shapes']:,} ending shapes, "
           f"{st['deep_sentences']:,} pooled sentences")
+    if st.get("ext_sentences"):
+        print(f"  {st['ext_source'].lower():13.13}: {st['ext_sentences']:,} sentences, "
+              f"the only example for {st['deep_ext_only']:,} words "
+              f"({st['ext_licence']})")
     print(f"  scripts      : {', '.join(js_files)}")
     print(f"  page         : {(args.outdir / 'index.html').stat().st_size/1_048_576:.2f} MB")
 

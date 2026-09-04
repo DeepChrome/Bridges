@@ -327,6 +327,10 @@ td.f { font-family:var(--f-ru); font-size:15px; }
 .ex:last-child { border-bottom:0; }
 .ex .ru { font-family:var(--f-ru); font-size:17px; }
 .ex .en { font-size:13px; color:var(--ink-2); margin-top:2px; }
+/* Provenance, not a badge: it sits under the translation and stays quiet until you
+   look for it. Only sentences from outside his decks carry one. */
+.ex .exsrc { font-size:10px; font-weight:600; letter-spacing:0.06em;
+             text-transform:uppercase; color:var(--ink-3); margin-top:4px; }
 /* A link looks like a link: underlined, in both apps. A dotted bottom border read
    as decoration rather than as something you could press. */
 .tok {

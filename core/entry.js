@@ -22,7 +22,10 @@ export function makeHydrator({ deepIndex, shapes, slots, sent }) {
     const out = [];
     for (const r of refs.split(",")) {
       const row = pool[Number(r)];
-      if (row) out.push({ ru: row[0], en: row[1], d: row[2], au: !!row[3] });
+      // `src` names an outside source and is empty for his own decks, so a screen
+      // can say where a sentence came from without knowing any source by name.
+      if (row) out.push({ ru: row[0], en: row[1], d: row[2], au: !!row[3],
+                          src: row[4] || "" });
     }
     return out;
   };

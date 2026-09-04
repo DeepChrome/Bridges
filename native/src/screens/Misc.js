@@ -297,22 +297,3 @@ export function Gate({ onPlacement }) {
   );
 }
 
-/* ------------------------------------------------------------ not yet */
-
-/* Named plainly rather than dressed up as working screens: the exercise runner is
-   the largest remaining piece of the port and pretending otherwise would be a lie
-   in the shape of a UI. */
-export function NotPorted({ title, detail, web }) {
-  const t = useTheme();
-  return (
-    <Screen>
-      <Title sub="Not ported to native yet">{title}</Title>
-      <Card>
-        <Text style={{ color: t.ink2, fontSize: 15 }}>{detail}</Text>
-        <Muted style={{ marginTop: 12 }}>
-          {`Working today in the web build at bridges-jf.netlify.app${web || ""}`}
-        </Muted>
-      </Card>
-    </Screen>
-  );
-}

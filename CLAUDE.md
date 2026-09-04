@@ -40,12 +40,19 @@ Built and working today:
 
 Known gaps, stated honestly:
 
-- **Audio.** The decks reference 23,449 recordings; 16,934 are present on the desktop
-  and 6,654 are still unsynced from the phone. None are wired into the app yet — it
-  falls back to device TTS. Real recordings should be preferred wherever a valid match
-  exists.
+- **Audio — largely done, contrary to what this file said for a long time.**
+  `build_audio.py` exports the collection's recordings best-source-first under a
+  content hash; the build ships 13,368 files (~209 MB). 86.8% of the 4,000 studied
+  lemmas and effectively every pooled sentence have a real recording. `say()` in
+  `app.js` prefers them and falls back to the device voice, which is labelled
+  "(device voice)" and never presented as authentic. What remains is the ~13% of
+  studied lemmas with no recording, most of which need an AnkiDroid → AnkiWeb →
+  desktop sync rather than any code.
 - **Topic organisation.** Heuristic classification covers ~36% of the material. The
   objective is better pedagogical organisation, *not* a higher number.
+- **Dictionary examples.** 22,440 of 45,987 glossed lemmas (48.8%) have a sentence:
+  7,488 from his own decks, the rest from Tatoeba. The other half have none, because
+  no source covers them — see §30a.
 
 ## 2. Product vision
 
@@ -324,8 +331,9 @@ apps is how the schedulers or the unlock rules quietly start disagreeing. After 
 extraction, run the web suites: they passing unchanged is what proves the move was
 behaviour-preserving.
 
-The native app is a port in progress. Screens not yet ported render `NotPorted`, which
-says so plainly — never a stub dressed up as a working screen.
+The port is complete — every screen is real, and the `NotPorted` placeholder it used
+during the port has been deleted. If a future screen genuinely is not ready, say so
+plainly rather than shipping a stub dressed up as a working screen.
 
 ## 21. Layout
 
@@ -505,20 +513,38 @@ repeated failures, poor FSRS performance and lapses. It must not become another
 arbitrary list. Difficult material should eventually return through different contexts
 and activity types. The goal is mastery, not punishment.
 
-## 27. Audio (next major feature)
+## 27. Audio (built — hold the line it established)
 
-Priority order when this is picked up: investigate how media references exist in the
-source decks → determine whether mapping can be deterministic → **measure coverage** →
-detect duplicates, missing files and incorrect mappings → build a single
-media-resolution layer rather than scattering path logic through components → prefer
-verified recordings, use TTS as an explicit fallback → **never present TTS as authentic
-corpus audio**.
+This shipped. `audit_audio.py` measured the four sources in the collection and found
+they differ wildly in quality; `build_audio.py` exports best-source-first under a
+content hash, which both collapses duplicates across decks and silently upgrades
+thousands of words that exist in two sources at different bitrates:
 
-Playback must be responsive, cache-friendly, resilient, mobile-compatible and workable
-inside an eventual APK. Controls stay minimal; no audio chrome cluttering lessons.
+```
+Languages on Fire     281 files   128-320 kbps stereo   human studio
+Yandex TTS          2,534 files    64 kbps mono         good neural TTS
+Russian Core 5000  10,337 files    64 kbps mono         uniform, unverified
+Google TTS         10,366 files    32 kbps mono         worst held
+```
 
-Current reality: `items.audio` holds filenames, `collection.media` holds the files,
-6,654 are still missing locally. Report real coverage, not an optimistic estimate.
+`AUDIO` in `app.js` maps a **folded** utterance to an exported file, so words and
+whole sentences resolve through the same table. `say()` prefers a recording, falls
+back to the device voice, and falls back again if the file fails to play. The rule
+that mattered held: **TTS is never presented as authentic corpus audio** — the button
+is labelled "Hear it (device voice)" and only carries `.real` when a recording backs
+it. Preserve that whenever you touch playback.
+
+Only ship what exists: the build filters the manifest to files actually present, so a
+partial export cannot promise audio the build does not carry. Report real coverage,
+never an optimistic estimate.
+
+## 27a. Tatoeba audio is licensed per recording
+
+The sentence text is uniformly CC BY 2.0 FR. **The recordings are not.** Of the 185
+fetched so far, 157 are CC BY 4.0, but 17 are CC BY-NC, 7 are CC BY-NC-ND, and 2 carry
+no stated licence at all. NC bars commercial use and ND arguably bars re-encoding the
+file. Filter on the licence field at fetch time rather than discovering this later;
+`fetch_tatoeba_audio.py` already reads it.
 
 ## 28. Topic classification
 
@@ -582,6 +608,38 @@ percentage instead of staying invisible.
 
 Ranking note: transliteration deliberately scores *below* an exact gloss, because
 "war" transliterates to «вар» (pitch) and the person typing wants война.
+
+## 30a. Borrowed sentences live in their own database
+
+His decks reach 7,488 glossed lemmas and that is a hard ceiling — the other 38,499
+words simply do not occur in his cards, so no amount of pooling or cap-raising finds
+them one. `ingest_tatoeba.py` fills 14,952 of them from Tatoeba, taking dictionary
+coverage to 48.8%.
+
+**It writes `data/examples.db`, never `corpus.db`.** Both `build_topics.py` and the
+candidate-lemma query in `build_site.py` rank the curriculum by counting rows in
+`corpus.db`'s `item_tokens` *with no filter on kind*. A foreign sentence landing there
+would silently change which 4,000 lemmas the curriculum is built from and reshuffle
+the whole path. The corpus is his; this is a reference shelf standing beside it.
+
+Three rules hold this honest:
+
+1. **His own sentences always rank first.** External ones fill the remaining slots of
+   the four, never compete for the first.
+2. **A borrowed sentence says so.** Pool rows carry a fifth field naming an outside
+   source, empty for his decks, and both apps render whatever they are told rather
+   than knowing "Tatoeba" by name. An unlabelled sentence therefore means "yours" —
+   which is why native's heading drops from "In your collection" to "Examples" the
+   moment the list is not purely his.
+3. **Attribution is a licence condition, not decoration** — see rule 10. The credit is
+   built from the `meta` rows of the databases themselves, so it cannot drift from
+   what was actually shipped. It was missing from the page entirely until 2026-09-04
+   despite rule 10 claiming it was there; smoke now asserts both corpora and both
+   licences appear.
+
+Never fabricate example sentences. Attested Russian from a licensed corpus is a
+different thing from generated Russian, and the learner cannot tell a subtly wrong
+sentence from a right one — that is precisely why he is the one studying it.
 
 **Word links are two presses, on both platforms.** The first answers "which word is
 this, and which form?" without leaving the sentence — a sheet on native, the popover
@@ -655,8 +713,16 @@ deliberately, not after every change. `.\tools\deploy.ps1` when it is genuinely 
 The 205 MB of audio is one large first upload — Netlify diffs files, so later deploys
 stay cheap.
 
-If a data tool changed, re-run in order (`ingest` → `lexicon` → `topics` → `site`) and
-check the coverage line — see rule 2.
+If a data tool changed, re-run in order and check the coverage line — see rule 2:
+
+```
+ingest_anki → build_lexicon → ingest_tatoeba → build_topics → build_site
+```
+
+`ingest_tatoeba` sits after the lexicon because it needs to know which glossed lemmas
+his decks already reach, and before `build_site` because that is what consumes
+`examples.db`. It touches neither `corpus.db` nor `topics.db`, so skipping it only
+costs the borrowed sentences.
 
 ## 32. Session start
 

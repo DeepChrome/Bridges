@@ -84,9 +84,9 @@ export function Btn({ label, onPress, kind = "plain", disabled, style }) {
   const t = useTheme();
   const tone = {
     plain: { bg: t.surface, border: t.line, fg: t.ink },
-    pri: { bg: t.brand, border: t.brandDim, fg: "#1A1508" },
-    good: { bg: t.good, border: t.goodDim, fg: "#fff" },
-    bad: { bg: t.bad, border: t.badDim, fg: "#fff" },
+    pri: { bg: t.brand, border: t.brandDim, fg: t.brandOn },
+    good: { bg: t.good, border: t.goodDim, fg: t.goodOn },
+    bad: { bg: t.bad, border: t.badDim, fg: t.badOn },
     ghost: { bg: "transparent", border: "transparent", fg: t.ink2 },
   }[kind];
   return (

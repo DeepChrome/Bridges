@@ -474,14 +474,19 @@ function unitNode(u, open, isBranch) {
   body.append(el("div", "nm", u.name));
   let lessonsDone = 0;
   for (let i = 0; i < lessonCount(u); i++) if (lessonDone(u, i)) lessonsDone++;
-  body.append(el("div", "sub", open
-    ? lessonsDone + "/" + lessonCount(u) + " lessons · " + Math.round(pr * 100) + "%"
-    : "Locked"));
-  const bar = el("div", "pbar");
-  const fill = el("i");
-  fill.style.width = (pr * 100).toFixed(0) + "%";
-  bar.append(fill);
-  body.append(bar);
+  // An untouched unit says what it holds, not three different zeros. The bar and the
+  // percentage are progress, and there is no progress yet to draw — an empty track
+  // under every row is weight without information.
+  body.append(el("div", "sub", !open ? "Locked"
+    : lessonsDone === 0 ? lessonCount(u) + " lessons"
+    : lessonsDone + "/" + lessonCount(u) + " lessons · " + Math.round(pr * 100) + "%"));
+  if (open && lessonsDone > 0) {
+    const bar = el("div", "pbar");
+    const fill = el("i");
+    fill.style.width = (pr * 100).toFixed(0) + "%";
+    bar.append(fill);
+    body.append(bar);
+  }
   n.append(body);
   if (open) n.addEventListener("click", () => { location.hash = "#/unit/" + u.id; });
   return n;

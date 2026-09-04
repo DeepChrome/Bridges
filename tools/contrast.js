@@ -85,6 +85,13 @@ const PAIRS = [
   ["ink", "badBg", 4.5, "feedback heading, wrong"],
   ["brand", "bg", 3.0, "brand accent and focus ring"],
   ["line", "bg", 1.3, "hairline against the page"],
+  // Label on a filled button. Missing here once, and it cost twice: a hardcoded
+  // #1A1508 left over from the goldenrod brand put near-black on indigo, and a
+  // hardcoded #fff put white on the dark theme's light green at 2.25:1. Text on a
+  // fill has to be a token that flips with the theme, and it has to be audited.
+  ["brandOn", "brand", 4.5, "label on the primary button"],
+  ["goodOn", "good", 4.5, "label on the correct button"],
+  ["badOn", "bad", 4.5, "label on the wrong button"],
 ];
 
 for (const theme of ["light", "dark"]) {

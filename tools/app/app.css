@@ -8,13 +8,17 @@
      picked by eye — see the header comment in native/src/theme.js. Six pairs
      failed WCAG before, muted 13px text worst at 3.01:1. Keep the two files
      identical; they are one design system with two renderers. */
-  --bg:#F5F4F2; --surface:#FFFFFF; --surface-2:#EBEAE6; --surface-3:#DFDDD8;
-  --ink:#1A1917; --ink-2:#4E4B45; --ink-3:#6C685F;
-  --line:#D6D3CD; --line-soft:#E8E7E3;
-  --brand:#B67D18; --brand-ink:#8A6114; --brand-bg:#F6EBD3; --brand-dim:#956713;
-  --good:#28784D; --good-bg:#DFF0E5; --good-dim:#246E46;
-  --bad:#B2423A; --bad-bg:#F7E2E0; --bad-dim:#9A382F;
-  --info:#386CA8; --info-bg:#E2ECF8;
+  --bg:#F7F8F9; --surface:#FFFFFF; --surface-2:#EEF0F4; --surface-3:#DFE3E9;
+  --ink:#14171C; --ink-2:#4B505A; --ink-3:#676D79;
+  --line:#D2D7E1; --line-soft:#ECEFF3;
+  --brand:#4D45E6; --brand-ink:#2D24DB; --brand-bg:#EBEAFD; --brand-dim:#332CBC;
+  --good:#22774D; --good-bg:#E1F3EA; --good-dim:#1F6B45;
+  --bad:#B53E30; --bad-bg:#F9E6E4; --bad-dim:#A5382C;
+  --info:#2967AE; --info-bg:#E2EEFB;
+  /* Text sitting *on* a filled button. It flips with the theme — the dark theme's
+     accents are light ones — so it cannot be a hardcoded #fff at the call site,
+     which is how dark mode ended up with white on light green at 2.25:1. */
+  --brand-on:#FFFFFF; --good-on:#FFFFFF; --bad-on:#FFFFFF;
   --shadow:rgba(23,24,26,0.14);
 
   --f-ui:"Golos Text","Segoe UI",system-ui,-apple-system,sans-serif;
@@ -28,24 +32,26 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:#0F1112; --surface:#171B1E; --surface-2:#202427; --surface-3:#292F33;
-    --ink:#EEEFEF; --ink-2:#B9BEC2; --ink-3:#959CA1;
-    --line:#2B3135; --line-soft:#212528;
-    --brand:#E0A73C; --brand-ink:#EDBE62; --brand-bg:#2C2517; --brand-dim:#A87B24;
-    --good:#4CAF7D; --good-bg:#16281E; --good-dim:#3B8A62;
-    --bad:#E0685D; --bad-bg:#2A1917; --bad-dim:#BD6157;
-    --info:#6BA3E0; --info-bg:#152230;
+    --bg:#0C0D10; --surface:#16181C; --surface-2:#1F2228; --surface-3:#2C3037;
+    --ink:#EDEEF0; --ink-2:#B9BCC3; --ink-3:#959BA7;
+    --line:#2E323B; --line-soft:#22252B;
+    --brand:#7F79F6; --brand-ink:#8A85F7; --brand-bg:#181636; --brand-dim:#5A54D4;
+    --good:#47C285; --good-bg:#12271D; --good-dim:#3C9F6E;
+    --bad:#E16D60; --bad-bg:#2C1715; --bad-dim:#CA5649;
+    --info:#639FE3; --info-bg:#152230;
+    --brand-on:#0C0D10; --good-on:#0C0D10; --bad-on:#0C0D10;
     --shadow:rgba(0,0,0,0.45);
   }
 }
 :root[data-theme="dark"] {
-  --bg:#0F1112; --surface:#171B1E; --surface-2:#202427; --surface-3:#292F33;
-  --ink:#EEEFEF; --ink-2:#B9BEC2; --ink-3:#959CA1;
-  --line:#2B3135; --line-soft:#212528;
-  --brand:#E0A73C; --brand-ink:#EDBE62; --brand-bg:#2C2517; --brand-dim:#A87B24;
-  --good:#4CAF7D; --good-bg:#16281E; --good-dim:#3B8A62;
-  --bad:#E0685D; --bad-bg:#2A1917; --bad-dim:#BD6157;
-  --info:#6BA3E0; --info-bg:#152230;
+  --bg:#0C0D10; --surface:#16181C; --surface-2:#1F2228; --surface-3:#2C3037;
+  --ink:#EDEEF0; --ink-2:#B9BCC3; --ink-3:#959BA7;
+  --line:#2E323B; --line-soft:#22252B;
+  --brand:#7F79F6; --brand-ink:#8A85F7; --brand-bg:#181636; --brand-dim:#5A54D4;
+  --good:#47C285; --good-bg:#12271D; --good-dim:#3C9F6E;
+  --bad:#E16D60; --bad-bg:#2C1715; --bad-dim:#CA5649;
+  --info:#639FE3; --info-bg:#152230;
+  --brand-on:#0C0D10; --good-on:#0C0D10; --bad-on:#0C0D10;
   --shadow:rgba(0,0,0,0.45);
 }
 
@@ -127,9 +133,9 @@ main[hidden] { display:none; }
 .btn:active { transform:translateY(2px); border-bottom-width:1px; margin-bottom:2px; }
 .btn:disabled { opacity:.45; cursor:default; transform:none; }
 .btn.block { display:block; width:100%; }
-.btn.pri { background:var(--brand); border-color:var(--brand-dim); color:#1A1508; }
-.btn.go { background:var(--good); border-color:var(--good-dim); color:#fff; }
-.btn.no { background:var(--bad); border-color:var(--bad-dim); color:#fff; }
+.btn.pri { background:var(--brand); border-color:var(--brand-dim); color:var(--brand-on); }
+.btn.go { background:var(--good); border-color:var(--good-dim); color:var(--good-on); }
+.btn.no { background:var(--bad); border-color:var(--bad-dim); color:var(--bad-on); }
 .btn.ghost { background:transparent; border-color:transparent; color:var(--ink-2); border-bottom-width:1px; }
 .btn:focus-visible, .iconbtn:focus-visible, .tabbar button:focus-visible,
 .node:focus-visible, .opt:focus-visible, input:focus-visible {

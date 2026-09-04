@@ -459,7 +459,15 @@ Each of these cost real time. Do not relearn them.
   token-level: bare `:root` for light, `@media (prefers-color-scheme: dark)` guarded as
   `:root:not([data-theme="light"])`, and `:root[data-theme="dark"]` for the toggle.
   **Never define a colour only inside a media or `[data-theme]` block** — it will not
-  apply in the default un-stamped state.
+  apply in the default un-stamped state. Note there are *three* blocks to keep in
+  step, and `contrast.js` only parses two of them; the media block is what system dark
+  mode actually uses.
+- **Text on a fill is its own token** — `--brand-on`, `--good-on`, `--bad-on`. It
+  cannot be a literal at the call site, because it flips with the theme: the light
+  theme's accents are dark and take white, the dark theme's are light and take near
+  black. Hardcoding cost twice — a `#1A1508` left over from the goldenrod brand put
+  near-black on indigo, and a `#fff` put white on dark-theme green at 2.25:1. All
+  three pairs are audited now.
 - Comments explain **why**, not what. Data-source quirks cite the source.
 
 ## 25. UI standards

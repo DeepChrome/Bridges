@@ -6,11 +6,11 @@
 
 import { useColorScheme } from "react-native";
 
-/* Every neutral sits on one hue per theme — warm (44°) on the pale ground, cool
- * (205°) on the dark one — because a ramp that wanders between hue families is what
- * makes an interface look accidental. The previous light ramp put green-grey text
- * (hue 135) on warm paper (hue 47), which is the muddiness you could see but not
- * name.
+/* Every neutral sits on one hue — 220° in both themes — because a ramp that wanders
+ * between hue families is what makes an interface look accidental. The palette was
+ * warm (44°) until 2026-09-04; the sepia cast and a muddy goldenrod brand (#B67D18)
+ * were most of why the app read as dated, so both themes moved to a cool neutral
+ * with an indigo accent.
  *
  * Foreground values are not hand-picked: each was walked along its own hue until it
  * cleared its contrast minimum against the surface it actually sits on (4.5:1 for
@@ -19,23 +19,25 @@ import { useColorScheme } from "react-native";
  * rather than trusting the swatch. */
 
 const light = {
-  bg: "#F5F4F2", surface: "#FFFFFF", surface2: "#EBEAE6", surface3: "#DFDDD8",
-  ink: "#1A1917", ink2: "#4E4B45", ink3: "#6C685F",
-  line: "#D6D3CD", lineSoft: "#E8E7E3",
-  brand: "#B67D18", brandInk: "#8A6114", brandBg: "#F6EBD3", brandDim: "#956713",
-  good: "#28784D", goodBg: "#DFF0E5", goodDim: "#246E46",
-  bad: "#B2423A", badBg: "#F7E2E0", badDim: "#9A382F",
-  info: "#386CA8", infoBg: "#E2ECF8",
+  bg: "#F7F8F9", surface: "#FFFFFF", surface2: "#EEF0F4", surface3: "#DFE3E9",
+  ink: "#14171C", ink2: "#4B505A", ink3: "#676D79",
+  line: "#D2D7E1", lineSoft: "#ECEFF3",
+  brand: "#4D45E6", brandInk: "#2D24DB", brandBg: "#EBEAFD", brandDim: "#332CBC",
+  good: "#22774D", goodBg: "#E1F3EA", goodDim: "#1F6B45",
+  bad: "#B53E30", badBg: "#F9E6E4", badDim: "#A5382C",
+  info: "#2967AE", infoBg: "#E2EEFB",
+  brandOn: "#FFFFFF", goodOn: "#FFFFFF", badOn: "#FFFFFF",
 };
 
 const dark = {
-  bg: "#0F1112", surface: "#171B1E", surface2: "#202427", surface3: "#292F33",
-  ink: "#EEEFEF", ink2: "#B9BEC2", ink3: "#959CA1",
-  line: "#2B3135", lineSoft: "#212528",
-  brand: "#E0A73C", brandInk: "#EDBE62", brandBg: "#2C2517", brandDim: "#A87B24",
-  good: "#4CAF7D", goodBg: "#16281E", goodDim: "#3B8A62",
-  bad: "#E0685D", badBg: "#2A1917", badDim: "#BD6157",
-  info: "#6BA3E0", infoBg: "#152230",
+  bg: "#0C0D10", surface: "#16181C", surface2: "#1F2228", surface3: "#2C3037",
+  ink: "#EDEEF0", ink2: "#B9BCC3", ink3: "#959BA7",
+  line: "#2E323B", lineSoft: "#22252B",
+  brand: "#7F79F6", brandInk: "#8A85F7", brandBg: "#181636", brandDim: "#5A54D4",
+  good: "#47C285", goodBg: "#12271D", goodDim: "#3C9F6E",
+  bad: "#E16D60", badBg: "#2C1715", badDim: "#CA5649",
+  info: "#639FE3", infoBg: "#152230",
+  brandOn: "#0C0D10", goodOn: "#0C0D10", badOn: "#0C0D10",
 };
 
 /* Literata carries the Cyrillic and does the language's typography; the system face

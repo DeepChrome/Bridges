@@ -173,7 +173,7 @@ function Sheet({ state, onClose, onFull }) {
               borderRadius: radius.md, paddingVertical: 14, alignItems: "center",
             })}
           >
-            <Text style={{ color: "#1A1508", fontWeight: "700", fontSize: 15 }}>
+            <Text style={{ color: t.brandOn, fontWeight: "700", fontSize: 15 }}>
               Full entry
             </Text>
           </Pressable>

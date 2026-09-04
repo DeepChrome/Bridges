@@ -145,7 +145,7 @@ function Tick({ on }) {
                    borderColor: on ? t.good : t.line,
                    backgroundColor: on ? t.good : "transparent",
                    alignItems: "center", justifyContent: "center" }}>
-      {on ? <Text style={{ color: "#fff", fontWeight: "800", fontSize: 13 }}>✓</Text> : null}
+      {on ? <Text style={{ color: t.goodOn, fontWeight: "800", fontSize: 13 }}>✓</Text> : null}
     </View>
   );
 }
@@ -267,12 +267,14 @@ export default function Study() {
                 >
                   <Text style={{ fontWeight: "600", fontSize: 13,
                                  color: kind === "plain" ? t.ink
-                                      : kind === "pri" ? "#1A1508" : "#fff" }}>
+                                      : kind === "pri" ? t.brandOn
+                                      : kind === "good" ? t.goodOn : t.badOn }}>
                     {label}
                   </Text>
                   <Text style={{ fontSize: 10, opacity: 0.75, fontWeight: "500",
                                  color: kind === "plain" ? t.ink2
-                                      : kind === "pri" ? "#1A1508" : "#fff" }}>
+                                      : kind === "pri" ? t.brandOn
+                                      : kind === "good" ? t.goodOn : t.badOn }}>
                     {iv[g]}
                   </Text>
                 </Pressable>

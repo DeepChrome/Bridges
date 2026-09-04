@@ -150,6 +150,15 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     if vpath.exists():
         videos = json.loads(vpath.read_text(encoding="utf-8")).get("units", {})
 
+    # Which of a unit's words are actually spoken in its episode, and when. Only the
+    # unit's own vocabulary is shipped — the transcript itself stays out of the app,
+    # which keeps the payload small and means we ship an index, not a copy of the
+    # captions. Times are milliseconds from the start of the video.
+    heard = {}
+    tpath = ROOT / "data" / "transcripts.json"
+    if tpath.exists():
+        heard = json.loads(tpath.read_text(encoding="utf-8"))
+
     units = []
     uidx = {}
     for tid, name, kind, n in db.execute(
@@ -164,6 +173,14 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         if tid in videos:
             v = videos[tid]
             u["v"] = {"id": v["id"], "title": v["title"], "dur": v.get("dur")}
+            spoken = heard.get(v["id"], {})
+            if spoken:
+                # Only this unit's own words, and at most a handful of moments each —
+                # the learner replays one occurrence, not every one.
+                u["v"]["heard"] = {
+                    lemmas[i]["b"]: spoken[lemmas[i]["b"]][:4]
+                    for i in words if lemmas[i]["b"] in spoken
+                }
         units.append(u)
 
     path = [{"r": r, "c": c, "u": uidx[tid], "req": uidx.get(req)}

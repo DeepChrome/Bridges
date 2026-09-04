@@ -14,101 +14,141 @@
    "dur": 569,
    "score": 99
   },
-  "speech": {
-   "id": "vJZs4TZLCwc",
-   "title": "50+ Useful Conversation Phrases to React in a Dialogue Like a Russian | Super Easy Russian 15",
-   "dur": 386,
-   "score": 2
+  "emotion": {
+   "id": "dalB0YYQ1Lw",
+   "title": "Date Like A Russian: Dos and Dont's | Easy Russian Podcast 67",
+   "dur": 2525,
+   "hit": 19,
+   "coverage": 0.48717948717948717,
+   "score": 607.1794871794872
   },
   "school": {
-   "id": "3_fiyh0fXyM",
-   "title": "8 Modern Russian Books You Can Read as a Russian Learner | Easy Russian 73",
-   "dur": 881,
-   "score": 2
-  },
-  "time": {
-   "id": "WSguH8tnTIo",
-   "title": "Days Of Week in Russian | Super Easy Russian 29",
-   "dur": 604,
-   "score": 2
-  },
-  "clothes": {
-   "id": "MbvtSNMwshI",
-   "title": "Fashion in Russia: What Do People Wear? | Easy Russian 90",
-   "dur": 997,
-   "score": 2
+   "id": "pNogULi28gs",
+   "title": "What Language Would You Like To Learn? | Easy Russian 66",
+   "dur": 1606,
+   "hit": 14,
+   "coverage": 0.358974358974359,
+   "score": 598.9743589743589
   },
   "food": {
-   "id": "rDQ802sFP2Y",
-   "title": "How to Cook the Most Delicious Russian Salad | Easy Russian New Year’s Special",
-   "dur": 921,
-   "score": 2
-  },
-  "emotion": {
-   "id": "6idM4p8PLqE",
-   "title": "Love In Russia vs Love In Europe and The USA | Easy Russian 123",
-   "dur": 959,
-   "score": 2
-  },
-  "work": {
-   "id": "l9TRRR8Z_QQ",
-   "title": "What Can You Buy With 500 Rubles in Russia? | Easy Russian 45",
-   "dur": 785,
-   "score": 2
+   "id": "SJ-ip-OicNQ",
+   "title": "Having Lunch In Slow Russian | Super Easy Russian 53",
+   "dur": 881,
+   "hit": 18,
+   "coverage": 0.45,
+   "score": 570.0
   },
   "family": {
-   "id": "UsaA3prpbWg",
-   "title": "Where are the most beautiful girls (and boys)? | Easy Russian 86",
-   "dur": 743,
-   "score": 2
+   "id": "t9YstQvhEso",
+   "title": "Looking at Our Family Photos| Easy Russian Podcast 42",
+   "dur": 1908,
+   "hit": 15,
+   "coverage": 0.375,
+   "score": 495.0
   },
-  "nature": {
-   "id": "53GIoeOAam4",
-   "title": "Winter Tour Around The Moscow River Landmarks | Easy Russian 44",
-   "dur": 934,
-   "score": 2
-  },
-  "travel": {
-   "id": "-qbTumiWw98",
-   "title": "15 Essential Travel Phrases in Russian! | Super Easy Russian 39",
-   "dur": 319,
-   "score": 1
-  },
-  "animals": {
-   "id": "23PEkMd2svg",
-   "title": "15 Useful Russian Animal Idioms You Should Know | Super Easy Russian 34",
-   "dur": 535,
-   "score": 1
-  },
-  "art": {
-   "id": "j8QwQBWc8sM",
-   "title": "5 Ways To Talk About Movies In Russian | Easy Russian 107",
-   "dur": 527,
-   "score": 1
-  },
-  "body": {
-   "id": "XTMNiYPHgkQ",
-   "title": "8 Russian Proverbs With Body Parts | Super Easy Russian 41",
-   "dur": 430,
-   "score": 1
+  "speech": {
+   "id": "oM8eHOONclY",
+   "title": "How Did We Make 100 Podcasts? | Easy Russian Podcast 100",
+   "dur": 2498,
+   "hit": 19,
+   "coverage": 0.475,
+   "score": 475.0
   },
   "sport": {
    "id": "sw2V54gc-iQ",
    "title": "Do Russians Love Sport? | Easy Russian 91",
    "dur": 893,
-   "score": 1
+   "hit": 14,
+   "coverage": 0.35,
+   "score": 470.0
+  },
+  "clothes": {
+   "id": "MbvtSNMwshI",
+   "title": "Fashion in Russia: What Do People Wear? | Easy Russian 90",
+   "dur": 997,
+   "hit": 9,
+   "coverage": 0.225,
+   "score": 465.0
+  },
+  "time": {
+   "id": "WSguH8tnTIo",
+   "title": "Days Of Week in Russian | Super Easy Russian 29",
+   "dur": 604,
+   "hit": 8,
+   "coverage": 0.2,
+   "score": 440.0
+  },
+  "nature": {
+   "id": "6IXtQx8SwBE",
+   "title": "15 Activities to Do in Winter | Easy Russian 35",
+   "dur": 616,
+   "hit": 12,
+   "coverage": 0.3,
+   "score": 420.0
+  },
+  "art": {
+   "id": "nunVkD5wd1c",
+   "title": "Best Musicians to Learn Russian With | Easy Russian 77",
+   "dur": 1057,
+   "hit": 12,
+   "coverage": 0.3,
+   "score": 420.0
+  },
+  "work": {
+   "id": "l9TRRR8Z_QQ",
+   "title": "What Can You Buy With 500 Rubles in Russia? | Easy Russian 45",
+   "dur": 785,
+   "hit": 7,
+   "coverage": 0.1794871794871795,
+   "score": 419.48717948717945
+  },
+  "animals": {
+   "id": "23PEkMd2svg",
+   "title": "15 Useful Russian Animal Idioms You Should Know | Super Easy Russian 34",
+   "dur": 535,
+   "hit": 7,
+   "coverage": 0.28,
+   "score": 400.0
+  },
+  "body": {
+   "id": "ADTwFvHACE4",
+   "title": "Why Do Russians Know So Much Poetry by Heart? | Easy Russian 69",
+   "dur": 990,
+   "hit": 9,
+   "coverage": 0.23076923076923078,
+   "score": 350.7692307692308
+  },
+  "travel": {
+   "id": "G3fGvuFg7x4",
+   "title": "3 Things Not To Do In Russia | Easy Russian 92",
+   "dur": 1189,
+   "hit": 13,
+   "coverage": 0.3333333333333333,
+   "score": 333.3333333333333
   },
   "politics": {
    "id": "-VBHghC4oug",
    "title": "Do Russians Think There’s Freedom of Speech in Russia? | Easy Russian 51",
    "dur": 763,
-   "score": 1
+   "hit": 7,
+   "coverage": 0.175,
+   "score": 295.0
   },
   "home": {
-   "id": "21zBGnmMFmQ",
-   "title": "Moving to a New Apartment | Super Easy Russian Podcast 37",
-   "dur": 1445,
-   "score": 1
+   "id": "c-LYnJIMpK0",
+   "title": "Did They Live Happily Ever After? | Easy Russian Podcast 114",
+   "dur": 3253,
+   "hit": 10,
+   "coverage": 0.25,
+   "score": 250.0
+  },
+  "military": {
+   "id": "LRuXjFF8A9c",
+   "title": "Russian New Year's and Christmas Traditions | Easy Russian Podcast 3",
+   "dur": 1921,
+   "hit": 7,
+   "coverage": 0.175,
+   "score": 175.0
   },
   "core1": {
    "id": "-NbTi2_5Gps",
@@ -129,33 +169,33 @@
    "score": 0
   },
   "core4": {
+   "id": "vJZs4TZLCwc",
+   "title": "50+ Useful Conversation Phrases to React in a Dialogue Like a Russian | Super Easy Russian 15",
+   "dur": 386,
+   "score": 0
+  },
+  "core5": {
    "id": "Fzvt4bgepks",
    "title": "Russian Car Vocabulary | Super Easy Russian 17",
    "dur": 926,
    "score": 0
   },
-  "core5": {
+  "core6": {
    "id": "7sFEx8Z4XQ8",
    "title": "How to Describe Your Day In Russian | Super Easy Russian 18",
    "dur": 521,
    "score": 0
   },
-  "core6": {
+  "core7": {
    "id": "ZyPPmqYu9nY",
    "title": "9 Common Mistakes Russian Learners Make | Super Easy Russian 19",
    "dur": 553,
    "score": 0
   },
-  "core7": {
+  "core8": {
    "id": "pfLVqvgkTbU",
    "title": "Russian Instrumental Case - Very Useful 😀 | Super Easy Russian 20",
    "dur": 562,
-   "score": 0
-  },
-  "core8": {
-   "id": "wCzD2jitlEs",
-   "title": "How to Know a Word’s Gender in Russian | Super Easy Russian 21",
-   "dur": 503,
    "score": 0
   }
  }

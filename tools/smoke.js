@@ -10,6 +10,13 @@ const { JSDOM, VirtualConsole } = require("jsdom");
 const file = path.join(__dirname, "..", "site", "index.html");
 const html = fs.readFileSync(file, "utf8");
 
+/* Expectations about the curriculum are derived from the generated data, not
+   hardcoded: how many units have an episode changes whenever the matcher improves,
+   and a test that pins yesterday's number fails for the wrong reason. */
+const VIDEOS = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "..", "data", "videos.json"), "utf8")).units;
+const WITH_VIDEO = Object.keys(VIDEOS).length;
+
 let failures = 0, checks = 0;
 const ok = (cond, label, extra) => {
   checks++;
@@ -150,8 +157,12 @@ setTimeout(async () => {
      String($$("#s-lesson .row").length));
   ok($$("#s-lesson .check").length === 3, "each component has a completion circle");
   ok($$("#s-lesson .check.on").length === 0, "nothing is ticked to begin with");
+  // Every unit currently has an episode, so the two-component path has no case to
+  // exercise. Assert that rather than pretend otherwise.
+  ok(WITH_VIDEO === 27, "every unit has an episode, so every lesson has three steps",
+     WITH_VIDEO + " of 27");
   await nav("#/lesson/military/0");
-  ok($$("#s-lesson .row").length === 2, "two components when the unit has no video",
+  ok($$("#s-lesson .row").length === 3, "a unit with a video shows three components",
      String($$("#s-lesson .row").length));
 
   group("vocab component");
@@ -337,10 +348,10 @@ setTimeout(async () => {
   group("immerse");
   await tab("immerse");
   ok($("#s-immerse").hidden === false, "immerse screen opens");
-  ok($$("#s-immerse .row").length === 26, "every unit with a video is listed",
-     String($$("#s-immerse .row").length));
+  ok($$("#s-immerse .row").length === WITH_VIDEO, "every unit with a video is listed",
+     $$("#s-immerse .row").length + " of " + WITH_VIDEO);
   ok(/Easy Russian/.test($("#s-immerse").textContent), "the source is named");
-  ok($$("#s-immerse .thumb svg").length === 26, "each episode carries its unit icon");
+  ok($$("#s-immerse .thumb svg").length === WITH_VIDEO, "each episode carries its unit icon");
   $("#s-immerse .row").click();
   await tick();
   ok(/Play here|Mark as watched/.test($("#s-lesson").textContent),

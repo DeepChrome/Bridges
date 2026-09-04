@@ -28,3 +28,5 @@ native/.expo/
 native/assets/data.json
 .expo-export/
 native/coverage/
+data/raw/subs/
+data/transcripts.json

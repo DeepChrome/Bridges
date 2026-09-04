@@ -89,16 +89,49 @@ def main():
 
     db = sqlite3.connect(f"file:{args.topics}?mode=ro", uri=True)
     units = db.execute("select id, name, kind, ord from topics order by ord").fetchall()
+
+    # What each unit actually teaches, as lemma head-words — the same keys the
+    # transcript index uses.
+    db.execute("attach database ? as lex", (str(ROOT / "data" / "lexicon.db"),))
+    unit_words = {}
+    for tid, bare in db.execute(
+            "select u.topic_id, l.bare from unit_words u"
+            " join lex.lemmas l on l.id = u.lemma_id"):
+        unit_words.setdefault(tid, set()).add(bare)
     db.close()
+
+    # Heard vocabulary per video, from tools/build_transcripts.py. When present this
+    # replaces title guessing: a video earns a unit by actually saying its words.
+    heard = {}
+    tpath = ROOT / "data" / "transcripts.json"
+    if tpath.exists():
+        heard = {vid: set(words) for vid, words in
+                 json.loads(tpath.read_text(encoding="utf-8")).items()}
+        print(f"transcripts available for {len(heard)} videos")
 
     # Rank every (video, topic) pair once, then hand each unit its best unused video so
     # two units never advertise the same clip.
+    # A video's claim on a unit is the share of that unit's vocabulary it actually
+    # speaks. Coverage rather than raw count, so a long video does not win every unit
+    # simply by saying more words. Title keywords remain the fallback for the videos
+    # with no transcript.
+    # Both signals, because each is wrong alone: coverage alone hands "Body & Health"
+    # a video about New Year because the words happen to occur, while the title alone
+    # cannot tell whether the unit's words are ever actually spoken. Coverage leads,
+    # a topical title breaks ties.
     ranked = []
     for v in rows:
-        for tid, words in kw.items():
-            s = score_title(v["title"], words)
-            if s >= args.min_score:
-                ranked.append((s, tid, v))
+        spoken = heard.get(v["id"])
+        for tid in kw:
+            words = unit_words.get(tid) or set()
+            title_score = score_title(v["title"], kw[tid])
+            hit = len(words & spoken) if (spoken and words) else 0
+            coverage = hit / len(words) if words else 0
+            if hit >= 5:
+                cand = dict(v, hit=hit, coverage=coverage)
+                ranked.append((coverage * 1000 + title_score * 120, tid, cand))
+            elif title_score >= args.min_score:
+                ranked.append((title_score, tid, dict(v)))
     ranked.sort(key=lambda x: (-x[0], x[2]["title"]))
 
     by_id = {v["id"]: v for v in rows}
@@ -139,8 +172,14 @@ def main():
     for tid, name, kind, _ in units:
         v = assigned.get(tid)
         mark = "  " if v else "!!"
-        detail = f"{v['title'][:58]}" if v else "(no confident match)"
-        print(f"{mark} {name:<22} {detail}")
+        if v and "coverage" in v:
+            how = f"{v['hit']:>3} words, {v['coverage']:.0%} of the unit"
+        elif v:
+            how = "title match      "
+        else:
+            how = "—"
+        detail = f"{v['title'][:42]}" if v else "(no confident match)"
+        print(f"{mark} {name:<22} {how:<24} {detail}")
 
 
 if __name__ == "__main__":

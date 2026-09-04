@@ -22,7 +22,7 @@ export function Immerse({ navigation }) {
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6,
                      marginBottom: 14 }}>
         <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>{seen}</Text>
-        <Muted size={14}>of {withVideo.length} watched</Muted>
+        <Muted size={14}>{`of ${withVideo.length} watched`}</Muted>
       </View>
       <List>
         {withVideo.map((u, k) => {

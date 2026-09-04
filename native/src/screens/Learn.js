@@ -74,8 +74,10 @@ export default function Learn({ navigation }) {
           <View key={stage.core.id} style={{ marginTop: 22 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10,
                            marginBottom: 9 }}>
+              {/* One string, not two children: a screen reader should hear
+                  "Stage 1", not "Stage" then "1". */}
               <Text style={[styles.sectionLabel, { color: t.ink2, marginBottom: 0 }]}>
-                Stage {i + 1}
+                {`Stage ${i + 1}`}
               </Text>
               <View style={{ flex: 1, height: 1, backgroundColor: t.line }} />
               {stageDone(st, stage) ? <Pill tone="good">done</Pill>

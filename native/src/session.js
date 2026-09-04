@@ -19,17 +19,23 @@ export function SessionProvider({ children }) {
   const [st, setSt] = useState(DEFAULTS);
 
   useEffect(() => {
+    // Guarded: the load is asynchronous, and setting state on a provider that has
+    // already gone away is a real bug, not just a warning — it lands on a detached
+    // tree and the next mount can inherit the mess.
+    let live = true;
     (async () => {
       const acc = await loadAccounts();
+      if (!live) return;
       setAccounts(acc);
       if (acc.active) {
         const loaded = touchStreak(await loadState(acc.active));
+        if (!live) return;
         setSt(loaded);
         saveState(acc.active, loaded);
       }
-      setReady(true);
+      if (live) setReady(true);
     })();
-    return () => { flushState(); };
+    return () => { live = false; flushState(); };
   }, []);
 
   const value = useMemo(() => ({

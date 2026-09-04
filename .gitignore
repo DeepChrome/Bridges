@@ -27,3 +27,4 @@ native/node_modules/
 native/.expo/
 native/assets/data.json
 .expo-export/
+native/coverage/

@@ -96,7 +96,7 @@ export function LessonScreen({ route, navigation }) {
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6,
                      marginBottom: 14 }}>
         <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
-          {cs.filter((c) => c.done).length}/{cs.length}
+          {`${cs.filter((c) => c.done).length}/${cs.length}`}
         </Text>
         <Muted size={14}>steps done</Muted>
       </View>

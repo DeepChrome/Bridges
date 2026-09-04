@@ -304,6 +304,29 @@ changed, `undefined` flowing silently through a render path. Hold the same bar.
     Touch targets ≥44px, `env(safe-area-inset-*)` respected, one-handed reach, primary
     actions in consistent positions, no hover-dependent affordances.
 
+## 20a. Two platforms, one core
+
+There are now two apps and they must not drift:
+
+- `core/` — ES modules holding everything both need: `fold`/`translit` and friends,
+  the FSRS scheduler, the subject icons. **No DOM, no storage, no platform globals.**
+- `tools/app/` — the web app. `build_site.py` strips the module syntax and inlines
+  `core/` into the single classic script, so the web bundle keeps its no-bundler rule.
+- `native/` — the Expo app. Imports `core/` as `@core/...`, resolved by a custom
+  `resolveRequest` in `native/metro.config.js`. `extraNodeModules` does **not** work
+  here: it is only consulted after the default resolver fails to find a *package* of
+  that name, which never happens for a bare specifier outside `node_modules`.
+- Both consume the same generated payload — `build_site.py` writes the web bundle and
+  `native/assets/data.json` from one `gather()`.
+
+**When logic belongs to both, it goes in `core/`.** Duplicating a rule across the two
+apps is how the schedulers or the unlock rules quietly start disagreeing. After any
+extraction, run the web suites: they passing unchanged is what proves the move was
+behaviour-preserving.
+
+The native app is a port in progress. Screens not yet ported render `NotPorted`, which
+says so plainly — never a stub dressed up as a working screen.
+
 ## 21. Layout
 
 ```

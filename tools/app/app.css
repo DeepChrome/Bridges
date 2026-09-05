@@ -103,6 +103,13 @@ main {
   padding-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 20px);
 }
 main[hidden] { display:none; }
+/* The lesson's primary action holds one position however tall the step is. #app is
+   already a column with main:flex:1, so the screen only has to become a column and
+   let .adv take up the slack — a short teach card no longer leaves Continue floating
+   in the middle with a void beneath it. Safe against [hidden] because the rule at the
+   foot of this file carries !important. */
+#s-lesson.run { display:flex; flex-direction:column; gap:16px; }
+#s-lesson.run .adv { margin-top:auto; }
 
 /* ---------- bottom nav ---------- */
 .tabbar {

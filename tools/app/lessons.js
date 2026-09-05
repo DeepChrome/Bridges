@@ -162,9 +162,13 @@ function drawWord(root, s) {
   advance(root, "Continue");
 }
 
+/* `adv` drops the action to the foot of the screen — see #s-lesson in app.css. A
+   teach card is short and a sentence card is tall, and without this the primary
+   action lands in a different place on every step. */
 function advance(root, label) {
-  const b = el("button", "btn pri block", label);
-  b.style.marginTop = "16px";
+  // No inline margin-top — it would beat the stylesheet's `margin-top:auto` and the
+  // button would stay wherever the card happened to end. The column's gap spaces it.
+  const b = el("button", "btn pri block adv", label);
   b.addEventListener("click", () => { LS.at++; drawStep(); });
   root.append(b);
 }
@@ -299,6 +303,10 @@ function startVideo(unit, index) {
 function done(title, detail, ok_) {
   const root = $("#s-lesson");
   root.textContent = "";
+  // Still the runner, so the action stays where every step put it. Set explicitly
+  // rather than inherited from whichever screen came before — the video path reaches
+  // here without a step having run.
+  root.classList.add("run");
   const p = el("div", "panel");
   p.style.cssText = "text-align:center;padding:30px 18px";
   const orb = el("div", "orb");
@@ -309,13 +317,16 @@ function done(title, detail, ok_) {
   p.append(el("div", null, title));
   if (detail) p.append(el("div", "gloss", detail));
   root.append(p);
-  const b = el("button", "btn pri block", "Back to lesson");
-  b.style.marginTop = "16px";
+  const b = el("button", "btn pri block adv", "Back to lesson");
   b.addEventListener("click", backToHub);
   root.append(b);
 }
 
 function header(root, label, at, total) {
+  // Marks the screen as running a step, which is what lets the primary action sit at
+  // the foot of it. renderUnit clears this again for the lesson list, which shares
+  // #s-lesson and wants ordinary stacked flow.
+  root.classList.add("run");
   const top = el("div", "lesson-top");
   if (at > 0 && LS.log[at - 1]) {
     const prev = el("button", "speak");
@@ -457,7 +468,7 @@ function judge(root, right, wordIdx) {
   const idx = typeof wordIdx === "number" ? wordIdx : (LS.steps[LS.at] || {}).i;
   if (typeof idx === "number" && L[idx]) gradeWord(idx, right, LS.usedHint);
 
-  const v = el("div", "verdict " + (right ? "right" : "wrong"));
+  const v = el("div", "verdict adv " + (right ? "right" : "wrong"));
   v.append(el("div", "vh", right ? "Correct" : "Not quite"));
   if (!right && LS.cur && LS.cur.a) v.append(el("div", "vb", "Answer: " + LS.cur.a));
   const b = el("button", (right ? "btn go" : "btn no") + " block", "Continue");

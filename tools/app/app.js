@@ -503,6 +503,9 @@ function lessonThumb(u, i, done) {
 function renderUnit(u) {
   const root = $("#s-lesson");
   root.textContent = "";
+  // The lesson list shares this screen with the exercise runner, and wants ordinary
+  // stacked flow rather than the runner's bottom-anchored column.
+  root.classList.remove("run");
   setScreen("lesson");
   $("#title").textContent = u.name;
 
@@ -585,6 +588,9 @@ function renderUnit(u) {
 function renderLessonHub(u, i) {
   const root = $("#s-lesson");
   root.textContent = "";
+  // A list, not a step: ordinary stacked flow. Cleared explicitly because arriving
+  // here from a finished step would otherwise inherit the runner's column.
+  root.classList.remove("run");
   setScreen("lesson");
   $("#title").textContent = u.name + " · " + (i + 1);
 
@@ -1266,12 +1272,21 @@ function renderYou() {
   card.append(swap);
   root.append(card);
 
-  const lvlBar = el("div", "pbar");
-  lvlBar.style.margin = "10px 0 18px";
-  const f = el("i");
-  f.style.width = ((ST.xp || 0) % 100) + "%";
-  lvlBar.append(f);
-  root.append(lvlBar);
+  // Same rule as the path: a track with nothing in it is weight without information.
+  const intoLevel = (ST.xp || 0) % 100;
+  if (intoLevel > 0) {
+    const lvlBar = el("div", "pbar");
+    lvlBar.style.margin = "10px 0 18px";
+    const f = el("i");
+    f.style.width = intoLevel + "%";
+    lvlBar.append(f);
+    root.append(lvlBar);
+  } else {
+    // The stats still need air beneath the name card.
+    const gap = el("div");
+    gap.style.height = "18px";
+    root.append(gap);
+  }
 
   const learned = Object.values(ST.seen).filter((s) => (s.reps || 0) > 0).length;
   const lessons = Object.values(ST.unit).reduce(
@@ -1294,10 +1309,12 @@ function renderYou() {
   tsec.style.marginTop = "20px";
   tsec.append(el("h2", null, "Trouble words"));
   if (!tw.length) {
-    const p = el("div", "panel");
-    p.append(el("div", "empty",
-      "Words you keep forgetting collect here, plus anything you star."));
-    tsec.append(p);
+    // A label, not a paragraph in a card. `.empty` carries 34px of padding for a
+    // genuinely blank screen; inside a panel it built a tall box around one sentence.
+    // The explanation belongs in the tooltip — rule 7.
+    const n = el("div", "note", "Nothing yet");
+    n.title = "Words you keep forgetting collect here, plus anything you star.";
+    tsec.append(n);
   } else {
     const go = el("button", "btn pri block", "Review " + tw.length + " trouble " +
                  (tw.length === 1 ? "word" : "words"));

@@ -227,12 +227,14 @@ button.pill { min-height:24px; padding:5px 10px; border:0; cursor:pointer; font:
 }
 .node:active:not(:disabled) { transform:translateY(2px); border-bottom-width:1px; margin-bottom:12px; }
 .node:disabled { cursor:default; opacity:.55; }
-.node .orb {
+/* Not scoped to .node: path nodes use .thumb, and the only .orb left is the profile
+   avatar fallback. Scoping the base styles here meant that fallback rendered as a
+   square with the letter in the corner — the done/open variants beneath it were
+   styling an element that no longer existed. */
+.orb {
   flex:none; width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
   background:var(--surface-2); color:var(--ink-3); font-weight:700; font-size:15px;
 }
-.node.done .orb { background:var(--good-bg); color:var(--good); }
-.node.open .orb { background:var(--brand-bg); color:var(--brand-ink); }
 .node .body { flex:1; min-width:0; }
 .node .nm { font-weight:600; font-size:15px; }
 .node .sub { font-size:12px; color:var(--ink-3); margin-top:2px; }

@@ -10,16 +10,20 @@
 
 param(
     [switch]$Draft,
-    [switch]$SkipBuild,
-    [int]$Lemmas = 2500
+    [switch]$SkipBuild
 )
 
 $ErrorActionPreference = "Stop"
 Set-Location (Split-Path $PSScriptRoot -Parent)
 
 if (-not $SkipBuild) {
+    # No --lemmas override. It used to pass 2500, which shipped a different app than
+    # the suites ever saw: 25,852 indexed forms against the 40,499 built locally, so
+    # thousands of words silently failed to resolve when tapped in a sentence. That
+    # saved 0.56 MB back when those lemmas carried the paradigms; the deep dictionary
+    # carries them now and does not vary with this flag. Build what you tested.
     Write-Host "rebuilding page..." -ForegroundColor Cyan
-    & python tools\build_site.py --lemmas $Lemmas
+    & python tools\build_site.py
     if ($LASTEXITCODE -ne 0) { throw "build_site.py failed" }
 }
 

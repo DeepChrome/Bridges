@@ -258,6 +258,51 @@ def measure_sentences(sentences, sent_tokens, index, key_units, audio, src_of, s
     return out
 
 
+# One letter per source in the shipped rows, so an activity can tell a human
+# recording from a synthetic one without a lookup. Matches build_audio.py's names.
+SRC_CODE = {"tatoeba": "t", "lof": "l", "yandex": "y", "core5000": "c",
+            "googletts": "g", "other": "o"}
+
+SPEAK_MAX_DIFFICULTY = 0.2
+SPEAK_TOKENS = (3, 12)
+POOL_MIN_PER_UNIT = 15
+
+
+def build_pools(measured, units, stats):
+    """The sentences the speaking and listening activities draw from, by unit.
+
+    Cut from measure_sentences() output rather than the dictionary's sentence pool:
+    that pool holds whatever illustrates a word, capped four per lemma, while these
+    need every sentence a learner at a given point could be asked to say — with a
+    recording to compare against and an English side to prompt with.
+
+    Shipped as one shared row list plus per-unit index lists, so a sentence in both
+    pools is stored once. Rows: [ru, en, tokens, difficulty, source letter]. The
+    audio key is fold(ru), which the app already derives — not shipped.
+    """
+    rows, at = [], {}
+
+    def row_for(rec):
+        ru, en, n, diff, unit, fname, src = rec
+        if ru not in at:
+            at[ru] = len(rows)
+            rows.append([ru, en, n, round(diff, 2), SRC_CODE.get(src, "o")])
+        return at[ru]
+
+    speak = {}
+    for rec in measured:
+        ru, en, n, diff, unit, fname, src = rec
+        if unit is None or not fname or not en:
+            continue
+        if diff <= SPEAK_MAX_DIFFICULTY and SPEAK_TOKENS[0] <= n <= SPEAK_TOKENS[1]:
+            speak.setdefault(units[unit]["id"], []).append(row_for(rec))
+
+    stats["speak_pool"] = {uid: len(v) for uid, v in speak.items()}
+    stats["speak_short"] = sorted(u["id"] for u in units
+                                  if len(speak.get(u["id"], ())) < POOL_MIN_PER_UNIT)
+    return {"rows": rows, "speak": speak}
+
+
 def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     db = sqlite3.connect(f"file:{lex_path}?mode=ro", uri=True)
     db.execute("attach database ? as c", (str(corpus_path),))
@@ -501,11 +546,12 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         src_of = json.loads(apath.read_text(encoding="utf-8")).get("src", {})
     measured = measure_sentences(sentences, sent_tokens, index, key_units, audio,
                                  src_of, stats)
+    speech = build_pools(measured, units, stats)
 
     return {"stats": stats, "lemmas": lemmas, "index": index,
             "units": units, "path": path, "audio": {"files": audio},
             "deep": deep, "shapes": shapes, "slots": slot_names,
-            "sent": sent_pool, "tsample": tsample}
+            "sent": sent_pool, "tsample": tsample, "speech": speech}
 
 
 FONTS = ("https://fonts.googleapis.com/css2?"
@@ -657,6 +703,15 @@ def main():
               f"{st['sentences_with_unit']:,} placed in a unit, "
               f"{st['sentences_with_audio']:,} with a recording")
         print("  difficulty   : " + "  ".join(f"{lab} {n:,}" for lab, n in st["difficulty_hist"]))
+    # Pool sizes per unit. A unit below the floor is named: a speaking activity that
+    # keeps asking the same five sentences is worse than none.
+    if st.get("speak_pool") is not None:
+        sp = st["speak_pool"]
+        print(f"  speak pool   : {sum(sp.values()):,} sentences over {len(sp)} units; "
+              f"min {min(sp.values()) if sp else 0}, max {max(sp.values()) if sp else 0}")
+        if st["speak_short"]:
+            print(f"    under {POOL_MIN_PER_UNIT}: " + ", ".join(
+                f"{u} ({sp.get(u, 0)})" for u in st["speak_short"]))
     print(f"  scripts      : {', '.join(js_files)}")
     print(f"  page         : {(args.outdir / 'index.html').stat().st_size/1_048_576:.2f} MB")
 

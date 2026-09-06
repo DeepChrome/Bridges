@@ -335,6 +335,19 @@ The port is complete — every screen is real, and the `NotPorted` placeholder i
 during the port has been deleted. If a future screen genuinely is not ready, say so
 plainly rather than shipping a stub dressed up as a working screen.
 
+**As of 2026-09-05 the native app is the product and the web app is on hold.** New
+feature and interface work goes to `native/`. The web app still builds, still holds
+the verification suites, and still serves the audio the native app streams, so do not
+break it — but it is no longer where design work lands, and it is not the thing to
+screenshot when the question is "how does Bridges look".
+
+That inverts the usual risk: **native has no visual suite.** `visual.js` renders the
+web build in Chromium and says nothing about React Native, and jest asserts structure,
+not pixels. So when a native screen's meaning lives in its appearance — the path's
+rings are the whole interface, with no text saying "underway" — assert the visual
+contract in the render tree instead: which colour a stroke carries, whether an arc is
+drawn at all. `native/__tests__/path.test.js` is the pattern.
+
 ## 21. Layout
 
 ```

@@ -50,7 +50,7 @@ export function VocabFlow({ route, navigation }) {
   if (step.t === "grammar" || step.t === "word") {
     const w = step.t === "word" ? L[step.i] : null;
     return (
-      <Screen>
+      <Screen fill>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12,
                        marginBottom: 16 }}>
           <View style={{ flex: 1 }}><Bar value={at / steps.length} /></View>
@@ -103,10 +103,16 @@ export function VocabFlow({ route, navigation }) {
             ) : null}
           </Card>
         )}
-        <Btn kind="pri" style={{ marginTop: 16 }}
-             label={step.t === "grammar" ? "Start learning"
-                    : at + 1 >= steps.length ? "Finish" : "Continue"}
-             onPress={advance} />
+        {/* marginTop:"auto" against Screen's flexGrow: the action holds one position
+            whatever the card's height, instead of moving down the screen each step.
+            The gap lives on the wrapper — putting it on the button would change the
+            button's own padding. */}
+        <View style={{ marginTop: "auto", paddingTop: 16 }}>
+          <Btn kind="pri"
+               label={step.t === "grammar" ? "Start learning"
+                      : at + 1 >= steps.length ? "Finish" : "Continue"}
+               onPress={advance} />
+        </View>
       </Screen>
     );
   }

@@ -129,11 +129,9 @@ export default function You({ navigation }) {
         Trouble words
       </Text>
       {!trouble.length ? (
-        <Card>
-          <Muted style={{ textAlign: "center" }}>
-            Words you keep forgetting collect here, plus anything you star.
-          </Muted>
-        </Card>
+        // A label, not a paragraph centred in a card: the card built a tall empty box
+        // around one sentence and pushed everything below it off the screen.
+        <Muted>Nothing yet</Muted>
       ) : (
         <>
           <Btn

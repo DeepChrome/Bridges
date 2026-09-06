@@ -15,14 +15,20 @@ import { AV, AV_IDS } from "@core/avatars";
 import { useTheme, radius, space } from "./theme";
 import { say, hasRealAudio } from "./audio";
 
-export function Screen({ children, scroll = true }) {
+/* `fill` makes the content container grow to the height of the screen, which is what
+   lets a step's primary action sit at the foot of it with marginTop:"auto" instead of
+   floating wherever the card happens to end. Opt-in per screen: a list does not want
+   its last row shoved to the bottom. */
+export function Screen({ children, scroll = true, fill = false }) {
   const t = useTheme();
   const Body = scroll ? ScrollView : View;
   return (
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: t.bg }}>
       <Body
         style={{ flex: 1 }}
-        contentContainerStyle={scroll ? { padding: space.pad, paddingBottom: 40 } : null}
+        contentContainerStyle={scroll
+          ? { padding: space.pad, paddingBottom: 40, ...(fill ? { flexGrow: 1 } : null) }
+          : null}
       >
         {children}
       </Body>

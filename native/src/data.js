@@ -39,6 +39,16 @@ export const STAGES = (() => {
   return out;
 })();
 
+/* Which column each unit sits in: -1, 0 or +1. build_topics.py already lays the path
+   out this way, so the route meanders the way the curriculum says rather than by an
+   alternation invented in a screen. Kept as a lookup so STAGES.branches stays a plain
+   list of units — unitUnlocked and nextLesson both rely on that. */
+export const COL = (() => {
+  const out = {};
+  PATH.forEach((p) => { const u = UN[p.u]; if (u) out[u.id] = p.c || 0; });
+  return out;
+})();
+
 /* The wider dictionary: headwords and meanings for every glossed lemma in the
    lexicon, not just the ones the curriculum teaches. Parsed on first use — it costs
    about 16ms, which is worth paying when someone searches rather than at every

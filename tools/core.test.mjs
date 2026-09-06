@@ -18,6 +18,7 @@ import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrad
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, speechDefault, ATTEMPT_CAP }
   from "../core/state.js";
 import { compare, words } from "../core/compare.js";
+import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, DRILL_TYPES } from "../core/questions.js";
 import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
@@ -271,6 +272,37 @@ group("transcript compare");
 
   r = compare("да", "");
   ok(r.wer === 1 && st(r) === "ins", "nothing expected but something said is an insertion");
+}
+
+/* --------------------------------------------------------- error tags */
+/* The closed vocabulary a feedback model may use. The backend rejects any other
+   tag, so the list, the learner-facing text and the grammar links must all hold. */
+
+group("error tags");
+{
+  const WANT = ["CASE", "NUMBER", "GENDER_AGREE", "ASPECT", "TENSE", "PERSON",
+                "WORD_ORDER", "PREPOSITION", "WRONG_WORD", "MISSING_WORD",
+                "EXTRA_WORD", "STRESS", "UNCLEAR"];
+  ok(TAG_IDS.length === WANT.length && WANT.every((t) => TAG_IDS.includes(t)),
+     "exactly the thirteen tags the roadmap names", TAG_IDS.join(","));
+  ok(new Set(TAG_IDS).size === TAG_IDS.length, "no tag twice");
+  ok(ERROR_TAGS.every((t) => typeof t.en === "string" && t.en.length >= 20),
+     "every tag has a description a learner can read");
+  ok(ERROR_TAGS.every((t) => t.id === t.id.toUpperCase() && /^[A-Z_]+$/.test(t.id)),
+     "ids are upper-case identifiers");
+
+  // A grammar link must point at a unit that exists and has a note to show.
+  const unitsWithNotes = new Set(DATA.units.filter((u) => u.g).map((u) => u.id));
+  const linked = ERROR_TAGS.filter((t) => t.unit);
+  ok(linked.length >= 8, "most tags link to a grammar step", String(linked.length));
+  ok(linked.every((t) => unitsWithNotes.has(t.unit)),
+     "and every link is to a unit that carries a grammar note",
+     linked.filter((t) => !unitsWithNotes.has(t.unit)).map((t) => t.id).join(","));
+
+  ok(isTag("CASE") && !isTag("case") && !isTag("SPELLING") && !isTag(null),
+     "isTag is exact and rejects anything outside the list");
+  ok(tagInfo("ASPECT").unit === "core8" && tagInfo("NOPE") === null,
+     "tagInfo returns the entry, or null");
 }
 
 /* ------------------------------------------------------------- artwork */

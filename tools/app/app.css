@@ -201,39 +201,68 @@ button.pill { min-height:24px; padding:5px 10px; border:0; cursor:pointer; font:
 .pill.lock { background:var(--surface-2); color:var(--ink-3); }
 
 /* ---------- path ---------- */
-/* A continuous rail runs behind the core nodes so the stages read as one route
-   rather than a stack of cards. */
-.track { display:flex; flex-direction:column; align-items:stretch; gap:0; position:relative; }
-.track::before {
-  content:""; position:absolute; left:37px; top:34px; bottom:34px; width:2px;
-  background:var(--line); z-index:0;
-}
-.track > * { position:relative; z-index:1; }
-.stage-h { background:var(--bg); }
-.stage { padding:6px 0 2px; }
+/* Nodes on a route, not a stack of cards. Each unit is a disc carrying its own
+   progress as a ring, and the chapter's units meander left and right so the eye
+   follows a way through rather than reading a list. The offset is a transform, not a
+   margin: it cannot widen the page, which is what protects 320px.
+   No connector line — with discs this close the route reads without one, and a line
+   through offset nodes only draws attention to the corners it cuts. */
+.track { display:flex; flex-direction:column; align-items:center; gap:4px; }
 .stage-h {
-  display:flex; align-items:center; gap:10px; margin:18px 0 10px;
+  align-self:stretch; display:flex; flex-direction:column; align-items:center;
+  gap:1px; margin:26px 0 14px; text-align:center;
 }
-/* Number over name: the chapter is a place in a sequence and a subject, and the
-   subject is the part worth reading first at a glance. No rule beside it — the
-   track already draws a vertical spine, and a second line floating at an
-   arbitrary height beside a two-line heading only adds noise. */
-.chap { display:flex; flex-direction:column; gap:1px; flex:1; min-width:0; }
+.stage-h:first-child { margin-top:8px; }
 .stage-h .ttl { font-size:11px; font-weight:700; letter-spacing:0.09em;
                 text-transform:uppercase; color:var(--ink-3); }
-.stage-h .name { font-size:17px; font-weight:700; letter-spacing:-0.01em;
+.stage-h .name { font-size:18px; font-weight:700; letter-spacing:-0.01em;
                  color:var(--ink); }
-.stage-h .ln { flex:1; height:1px; background:var(--line); }
-/* No width:100% — the track already stretches its children, and combining the two
-   with .branch's margin-left pushed the row 26px past the viewport. */
+.chap { display:flex; flex-direction:column; align-items:center; gap:1px; }
+
 .node {
-  position:relative; display:flex; align-items:center; gap:13px;
-  background:var(--surface); border:1px solid var(--line); border-bottom-width:3px;
-  border-radius:var(--r-lg); padding:13px 15px; cursor:pointer; font:inherit;
-  color:inherit; text-align:left; margin-bottom:10px;
+  display:flex; flex-direction:column; align-items:center; gap:7px;
+  background:none; border:0; padding:6px 0 10px; width:118px;
+  cursor:pointer; font:inherit; color:inherit;
+  transform:translateX(var(--x, 0px));
 }
-.node:active:not(:disabled) { transform:translateY(2px); border-bottom-width:1px; margin-bottom:12px; }
-.node:disabled { cursor:default; opacity:.55; }
+.node:disabled { cursor:default; }
+/* The disc. The ring is a conic gradient rather than a second <svg>, because the
+   thumbnail check counts exactly one svg per node and a ring element would double it. */
+.node .thumb {
+  position:relative; width:68px; height:68px; border-radius:50%; flex:none;
+  display:grid; place-items:center; color:var(--ink-3);
+  background:conic-gradient(var(--ring, transparent) calc(var(--p, 0) * 1%),
+                            var(--track-c, var(--surface-3)) 0);
+  box-shadow:0 3px 0 var(--line);
+  transition:transform .06s ease, box-shadow .06s ease;
+}
+/* The inner face, so the conic gradient reads as a ring rather than a pie. */
+.node .thumb::after {
+  content:""; position:absolute; inset:5px; border-radius:50%;
+  background:var(--face, var(--surface));
+}
+.node .thumb svg { position:relative; z-index:1; width:26px; height:26px; }
+.node:active:not(:disabled) .thumb { transform:translateY(2px); box-shadow:0 1px 0 var(--line); }
+.node .nm {
+  font-size:12px; font-weight:600; line-height:1.25; text-align:center;
+  color:var(--ink-2); max-width:112px;
+}
+/* Available but untouched. The ring stays neutral and the *icon* carries the
+   invitation: a full coloured ring has to mean finished, or a fresh unit and a
+   completed one look the same at a glance — which is exactly how it looked with
+   developer mode unlocking everything. */
+.node.open .thumb { --ring:transparent; --track-c:var(--surface-3); --face:var(--surface);
+                    color:var(--brand); }
+.node.open .nm { color:var(--ink); }
+/* Underway: the ring is the progress itself. */
+.node.going .thumb { --ring:var(--brand); --track-c:var(--surface-3); --face:var(--surface);
+                     color:var(--brand-ink); }
+.node.going .nm { color:var(--ink); }
+.node.done .thumb { --ring:var(--good); --p:100; --face:var(--good-bg); color:var(--good); }
+.node.done .nm { color:var(--ink); }
+.node.locked .thumb { --ring:transparent; --track-c:var(--line-soft); --face:var(--surface-2);
+                      color:var(--ink-3); box-shadow:0 3px 0 var(--line-soft); }
+.node.locked .nm { color:var(--ink-3); }
 /* Not scoped to .node: path nodes use .thumb, and the only .orb left is the profile
    avatar fallback. Scoping the base styles here meant that fallback rendered as a
    square with the letter in the corner — the done/open variants beneath it were
@@ -242,14 +271,12 @@ button.pill { min-height:24px; padding:5px 10px; border:0; cursor:pointer; font:
   flex:none; width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
   background:var(--surface-2); color:var(--ink-3); font-weight:700; font-size:15px;
 }
-.node .body { flex:1; min-width:0; }
-.node .nm { font-weight:600; font-size:15px; }
-.node .sub { font-size:12px; color:var(--ink-3); margin-top:2px; }
-.node.branch { margin-left:26px; }
-.node.branch::before {
-  content:""; position:absolute; left:-16px; top:50%; width:16px; height:1px;
-  background:var(--line);
-}
+/* A branch is a smaller disc than the spine unit it hangs off, so the shape of the
+   curriculum is legible without a word of explanation. */
+.node.branch { width:104px; }
+.node.branch .thumb { width:56px; height:56px; }
+.node.branch .thumb svg { width:22px; height:22px; }
+.node.branch .nm { max-width:100px; }
 
 /* ---------- lesson / activities ---------- */
 .lesson-top { display:flex; align-items:center; gap:12px; margin-bottom:16px; }

@@ -280,6 +280,16 @@ const STAGES = (() => {
   return out;
 })();
 
+/* Which column each unit sits in: -1, 0 or +1. build_topics.py already lays the path
+   out this way, so the route meanders the way the curriculum says rather than by an
+   alternation invented in the view. Kept as a lookup so the shape of STAGES.branches
+   stays a plain list of units — unitUnlocked and nextLesson both rely on that. */
+const COL = (() => {
+  const out = {};
+  PATH.forEach((p) => { const u = UN[p.u]; if (u) out[u.id] = p.c || 0; });
+  return out;
+})();
+
 const LESSON_SIZE = 7;
 const PASS_MARK = 80;
 const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / LESSON_SIZE));
@@ -432,8 +442,12 @@ function renderPath() {
     if (stageDone(s)) h.append(el("span", "pill good", "done"));
     else if (!open) h.append(el("span", "pill lock", "locked"));
     track.append(h);
-    track.append(unitNode(s.core, open, false));
-    s.branches.forEach((u) => track.append(unitNode(u, unitUnlocked(u), true)));
+    // The spine holds the centre line; its branches swing to the column the data puts
+    // them in. 58px keeps the widest disc clear of the edge at 320px.
+    track.append(unitNode(s.core, open, false, (COL[s.core.id] || 0) * 58));
+    s.branches.forEach((u) => {
+      track.append(unitNode(u, unitUnlocked(u), true, (COL[u.id] || 0) * 58));
+    });
   });
   root.append(track);
 }
@@ -453,12 +467,27 @@ function nextLesson() {
   return null;
 }
 
-function unitNode(u, open, isBranch) {
+/* One unit as a disc on the route. `offset` shifts it left or right so a chapter
+   meanders instead of stacking; it is applied as a transform, which cannot widen the
+   page. */
+function unitNode(u, open, isBranch, offset) {
   const pr = unitFineProgress(u);
   const complete = unitProgress(u) >= 1;
-  const n = el("button", "node" + (isBranch ? " branch" : "") +
-                          (complete ? " done" : open ? " open" : " locked"));
+  let lessonsDone = 0;
+  for (let i = 0; i < lessonCount(u); i++) if (lessonDone(u, i)) lessonsDone++;
+
+  // Four states, and the disc says which without a word: locked, open and untouched,
+  // underway with the ring showing how far, and done. "Underway" keys on fine
+  // progress, not on completed lessons — a unit with a video needs that video watched
+  // before any of its lessons counts as done, so four finished lesson bodies would
+  // otherwise still show as untouched. Partial credit is the whole point of
+  // unitFineProgress.
+  const state = complete ? " done" : !open ? " locked"
+              : pr > 0 ? " going" : " open";
+  const n = el("button", "node" + (isBranch ? " branch" : "") + state);
   n.disabled = !open;
+  if (offset) n.style.setProperty("--x", offset + "px");
+  if (state === " going") n.style.setProperty("--p", (pr * 100).toFixed(0));
 
   const thumb = el("div", "thumb" + (complete ? " done" : ""));
   if (open) {
@@ -469,25 +498,14 @@ function unitNode(u, open, isBranch) {
       'rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>';
   }
   n.append(thumb);
+  n.append(el("div", "nm", u.name));
 
-  const body = el("div", "body");
-  body.append(el("div", "nm", u.name));
-  let lessonsDone = 0;
-  for (let i = 0; i < lessonCount(u); i++) if (lessonDone(u, i)) lessonsDone++;
-  // An untouched unit says what it holds, not three different zeros. The bar and the
-  // percentage are progress, and there is no progress yet to draw — an empty track
-  // under every row is weight without information.
-  body.append(el("div", "sub", !open ? "Locked"
-    : lessonsDone === 0 ? lessonCount(u) + " lessons"
-    : lessonsDone + "/" + lessonCount(u) + " lessons · " + Math.round(pr * 100) + "%"));
-  if (open && lessonsDone > 0) {
-    const bar = el("div", "pbar");
-    const fill = el("i");
-    fill.style.width = (pr * 100).toFixed(0) + "%";
-    bar.append(fill);
-    body.append(bar);
-  }
-  n.append(body);
+  // The count is a tooltip, not a third line under every disc — the ring already
+  // carries the progress and the padlock already carries the lock.
+  n.title = !open ? u.name + " — locked"
+    : lessonsDone === 0 ? u.name + " — " + lessonCount(u) + " lessons"
+    : u.name + " — " + lessonsDone + " of " + lessonCount(u) + " lessons done";
+
   if (open) n.addEventListener("click", () => { location.hash = "#/unit/" + u.id; });
   return n;
 }

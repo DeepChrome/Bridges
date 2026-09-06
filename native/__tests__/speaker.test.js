@@ -1,13 +1,16 @@
 /* The speaker button never produces the wrong language.
  *
- * The bug this pins, found on a real phone: a sentence with no recording fell
- * through to Speech.speak(text, {language: "ru-RU"}), and a device with no Russian
- * voice installed substitutes its default — reading Cyrillic aloud in English. Since
- * the Tatoeba examples added in Phase 2 carry no audio at all, that was most example
- * sentences in the dictionary.
- *
  * The rule, matching the web app: a recording plays regardless; without one the
- * button is live only if the device really can speak Russian.
+ * button is live only if the device really can speak Russian. Without that guard a
+ * sentence with no recording fell through to Speech.speak(text, {language: "ru-RU"}),
+ * and a device with no Russian voice substitutes its default — Cyrillic read aloud
+ * in English.
+ *
+ * Honesty note: this guard was written as the fix for "English audio on the phone"
+ * and was not that bug. The English the owner heard was real recordings fetched
+ * from Tatoeba under the wrong id (see fetch_tatoeba_audio.py). The guard is still
+ * right — it just was not the cause — and the pipeline now verifies what a recording
+ * says rather than trusting its filename.
  *
  * Own file, per the timeout note in screens.test.js.
  */

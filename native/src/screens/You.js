@@ -10,6 +10,18 @@ import {
 import { L, UN, STATS, idxOfWord } from "../data";
 import { troubleWords } from "./Study";
 import { today } from "@core/util";
+import { tagInfo } from "@core/errortags";
+
+/* The grammar the learner keeps getting wrong, from the tags the speech feedback
+   attaches to attempts (ROADMAP P5.11). Counted in state by recordAttempt; shown
+   here most frequent first, each pointing at the unit whose note teaches it. */
+export function grammarTrouble(st) {
+  const counts = (st.speech && st.speech.tagCounts) || {};
+  return Object.keys(counts)
+    .map((id) => ({ id, n: counts[id], info: tagInfo(id) }))
+    .filter((x) => x.info && x.n > 0)
+    .sort((a, b) => b.n - a.n || a.id.localeCompare(b.id));
+}
 
 function Stat({ value, label }) {
   const t = useTheme();
@@ -106,7 +118,10 @@ export default function You({ navigation }) {
     .reduce((a, u) => a + Object.keys(u.lessons || {}).length, 0);
   const due = Object.keys(st.seen).filter((w) => st.seen[w].due <= today()).length;
   const trouble = troubleWords(st);
+  const grammar = grammarTrouble(st);
   const level = Math.floor((st.xp || 0) / 100) + 1;
+  const openUnit = (unitId) =>
+    navigation.navigate("Learn", { screen: "Unit", params: { unitId } });
 
   return (
     <Screen>
@@ -170,6 +185,31 @@ export default function You({ navigation }) {
             </List>
           </View>
         </>
+      )}
+
+      <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1,
+                     textTransform: "uppercase", marginTop: 22, marginBottom: 9 }}>
+        Grammar
+      </Text>
+      {!grammar.length ? (
+        <Muted>Nothing yet</Muted>
+      ) : (
+        <List>
+          {grammar.map((g, k) => {
+            const unit = g.info.unit ? UN.find((u) => u.id === g.info.unit) : null;
+            return (
+              <Row key={g.id} last={k === grammar.length - 1}
+                   onPress={unit ? () => openUnit(unit.id) : undefined}
+                   disabled={!unit}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>{g.info.en}</Text>
+                  {unit ? <Muted>{unit.name}</Muted> : null}
+                </View>
+                <Pill>{`${g.n}×`}</Pill>
+              </Row>
+            );
+          })}
+        </List>
       )}
 
       <Settings visible={settings} onClose={() => setSettings(false)}

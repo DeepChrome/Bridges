@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "native",
+    "name": "Bridges",
     "slug": "native",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,13 +9,18 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Bridges listens to you read Russian sentences aloud so it can check the words you said. Audio stays on the device unless you turn on cloud recognition in Settings."
+        "NSMicrophoneUsageDescription": "Bridges listens to you read Russian sentences aloud so it can check the words you said. Audio stays on the device unless you turn on cloud recognition in Settings.",
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition."
       }
     },
     "android": {
       "package": "app.bridges.russian",
       "permissions": [
-        "RECORD_AUDIO"
+        "RECORD_AUDIO",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -30,6 +35,12 @@
     "plugins": [
       "expo-audio",
       "expo-speech-recognition"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a1211d89-3433-4da8-85a9-6bca368b80ee"
+      }
+    },
+    "owner": "akromah"
   }
 }

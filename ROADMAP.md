@@ -99,6 +99,15 @@ can overrule any of them.
   `core.test.mjs`, which only makes sense if the step lives in `core/`. Both apps now
   run `core/state.js`; the web app dropped its private copies to avoid a collision in
   the single script scope.
+- **A16 — P1.4 before P1.3.** The development build needs `expo-dev-client`, and a
+  dev client is only useful with `expo start` running on this machine and the phone on
+  the same network — the owner is remote. The standalone **preview** APK works offline
+  and is what the Phase 3 STT gate actually needs, so it was built first and the dev
+  client deferred until someone is on the LAN. Saves an EAS build too.
+- **A17 — app name.** The Expo scaffold left `name`/`slug` as "native", which is what
+  the phone's home screen would have shown. `name` is now "Bridges". The slug stays
+  "native" because the EAS project was already linked under it and recreating the
+  project to change an internal identifier is not worth it.
 - **A15 — P2.1 shipping.** Difficulty and unit are computed for all 13,517 sentences
   and reported as a histogram on every build; the payload carries only the pooled
   subset (11,608 rows for both pools), since nothing consumes the rest and the native

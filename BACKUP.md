@@ -41,7 +41,10 @@ Full rebuild order, from sources only:
 Location: `C:\Users\jared\OneDrive\BridgesBackup\2026-09-05\`
 
 Contents: the live Anki media directory, the collection snapshot from `data/_work/`,
-all of `data/raw/`, `data/transcripts.json`, and `site/audio/`. About 700 MB.
+all of `data/raw/`, `data/transcripts.json`, and `site/audio/`.
+
+Verified 2026-09-05 23:03 after the copy: **37,309 files, 670.5 MB**; the media
+directory copied 291.96 MB with 0 failures (robocopy).
 
 **Whether OneDrive is actually syncing that folder to the cloud cannot be verified from
 a shell.** Check the OneDrive tray icon shows it as synced before trusting it as

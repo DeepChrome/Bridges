@@ -96,3 +96,24 @@ export function isTrouble(card) {
   if (!card) return false;
   return (card.lapses || 0) >= LEECH_LAPSES || ((card.d || 0) >= 8.5 && (card.reps || 0) >= 3);
 }
+
+/* The grade a right-or-wrong answer earns. One rule for both runners: an answer
+   reached with the table open is Hard, not Good — recognised, not recalled. An
+   activity that scores itself more finely (a spoken sentence, say) skips this and
+   hands applyGrade a grade of its own. */
+export const gradeFor = (correct, hinted) => (correct ? (hinted ? 2 : 3) : 1);
+
+/* One graded review applied to learner state, returned as new objects. `seen` and
+   `trouble` are the two slots a review touches; nothing else is read. The trouble
+   rule follows the grade: a lapse on a word the scheduler now counts as a leech is
+   held against it, and any recall that lifts it back out clears it. This is the
+   runners' rule; the flashcard screens keep their own for now (see the core test). */
+export function applyGrade(seen, trouble, word, grade, now) {
+  const g = Math.min(4, Math.max(1, grade | 0));
+  const card = fsrsReview(seen[word], g, now);
+  const nextSeen = Object.assign({}, seen, { [word]: card });
+  const nextTrouble = Object.assign({}, trouble);
+  if (g === 1 && isTrouble(card)) nextTrouble[word] = (nextTrouble[word] || 0) + 1;
+  else if (g > 1 && nextTrouble[word] && !isTrouble(card)) delete nextTrouble[word];
+  return { seen: nextSeen, trouble: nextTrouble, card: card };
+}

@@ -14,19 +14,17 @@ import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row } from "../ui";
 import { say, cue, answerAudioText, stop as stopAudio } from "../audio";
 import { Linked } from "../words";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
-import { fsrsReview, isTrouble } from "@core/fsrs";
+import { gradeFor, applyGrade } from "@core/fsrs";
 import { fold, translit, today, translitBack, firstSense } from "@core/util";
 
-/* An answer reached with the table open is Hard, not Good — recognised, not recalled. */
-function gradeInto(st, idx, correct, hinted) {
+/* One review into state. The grade comes from gradeFor (right or wrong, table used or
+   not) or is handed in directly by an activity that scores itself, as the speaking
+   activities will. Both go through core's applyGrade, so the trouble rule lives once
+   for both platforms. */
+function gradeInto(st, idx, grade) {
   if (typeof idx !== "number" || !L[idx]) return st;
-  const word = L[idx].b;
-  const card = fsrsReview(st.seen[word], correct ? (hinted ? 2 : 3) : 1, today());
-  const seen = { ...st.seen, [word]: card };
-  const trouble = { ...st.trouble };
-  if (!correct && isTrouble(card)) trouble[word] = (trouble[word] || 0) + 1;
-  else if (correct && trouble[word] && !isTrouble(card)) delete trouble[word];
-  return { ...st, seen, trouble };
+  const r = applyGrade(st.seen, st.trouble, L[idx].b, grade, today());
+  return { ...st, seen: r.seen, trouble: r.trouble };
 }
 
 function Options({ q, answered, picked, onPick }) {
@@ -239,7 +237,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
 
   if (!q) return null;
 
-  const record = (correct, wordIdxs) => {
+  /* `grade` lets an activity that scores itself hand in 1–4 directly. Without it, the
+     answer's right/wrong and whether the table was used decide, as before. */
+  const record = (correct, wordIdxs, grade) => {
     setAnswered(true);
     setRight(correct);
 
@@ -262,8 +262,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
     if (gradeWords) {
       const idxs = wordIdxs || (typeof q.i === "number" ? [q.i] : []);
       if (idxs.length) {
-        update((prev) => idxs.reduce(
-          (acc, ix) => gradeInto(acc, ix, correct, usedHint), prev));
+        const g = grade || gradeFor(correct, usedHint);
+        update((prev) => idxs.reduce((acc, ix) => gradeInto(acc, ix, g), prev));
       }
     }
   };

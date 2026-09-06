@@ -13,7 +13,8 @@ import { dirname, join } from "node:path";
 
 import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN }
   from "../core/util.js";
-import { fsrsReview, fsrsPreview, isTrouble, retrievability } from "../core/fsrs.js";
+import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
+  from "../core/fsrs.js";
 import { makeQuestions, DRILL_TYPES } from "../core/questions.js";
 import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
@@ -121,6 +122,52 @@ group("FSRS");
 
   ok(retrievability(0, 10) === 1, "recall is certain on the day of review");
   ok(retrievability(100, 10) < retrievability(10, 10), "and decays with time");
+}
+
+/* --------------------------------------------------------------- grading */
+/* gradeFor and applyGrade are the runners' rule, shared by web and native since
+   P0.6 — each used to carry its own copy. The flashcard screens (web rateCard, native
+   Study) still carry a third rule that clears trouble only on Good or better; that
+   divergence is recorded here rather than silently unified. */
+
+group("grading");
+{
+  ok(gradeFor(true, false) === 3, "a plain right answer is Good");
+  ok(gradeFor(true, true) === 2, "right with the table open is Hard — recognised, not recalled");
+  ok(gradeFor(false, false) === 1 && gradeFor(false, true) === 1, "wrong is Again either way");
+
+  // Repeated Again makes a leech. isTrouble has two branches — four lapses, or high
+  // difficulty after three reviews — and the difficulty branch trips first here, so
+  // the bank counts every Again from that point on, not only the fourth.
+  let seen = {}, trouble = {};
+  for (let i = 0; i < 4; i++) ({ seen, trouble } = applyGrade(seen, trouble, "слово", 1, i));
+  ok(isTrouble(seen["слово"]), "four lapses through applyGrade bank the word");
+  ok(trouble["слово"] >= 1, "and the bank counts the lapses since it became one",
+     String(trouble["слово"]));
+  const banked = trouble["слово"];
+
+  // Trouble clears exactly when a recall lifts the card out of leech territory. A
+  // word four lapses deep never leaves it — lapses do not decay — so this recall
+  // must not clear it.
+  const r = applyGrade(seen, trouble, "слово", 3, 5);
+  ok(r.card.reps === seen["слово"].reps + 1, "the card advanced");
+  ok((r.trouble["слово"] === undefined) === !isTrouble(r.card),
+     "trouble clears only when the scheduler no longer calls it a leech");
+  ok(r.trouble["слово"] === banked, "and a permanent leech stays banked at its count");
+
+  // Inputs are never mutated: both platforms hand in their live state.
+  const s0 = { книга: fsrsReview(undefined, 3, 0) }, t0 = {};
+  const out = applyGrade(s0, t0, "книга", 4, 1);
+  ok(out.seen !== s0 && out.trouble !== t0, "returns new objects");
+  ok(s0["книга"].reps === 1 && out.seen["книга"].reps === 2, "and leaves the originals alone");
+
+  // A grade handed in directly is honoured — including Easy, which the right/wrong
+  // mapping can never produce. This is the path a self-scoring activity uses.
+  const easy = applyGrade({}, {}, "да", 4, 0).card;
+  const good = applyGrade({}, {}, "да", 3, 0).card;
+  ok(easy.due > good.due, "grade 4 handed in directly schedules further out than 3");
+  ok(applyGrade({}, {}, "да", 9, 0).card.due === easy.due, "grades clamp to 4");
+  ok(applyGrade({}, {}, "да", 0, 0).card.lapses === 1, "and to 1");
 }
 
 /* ------------------------------------------------------------- artwork */

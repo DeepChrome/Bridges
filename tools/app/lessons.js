@@ -408,13 +408,14 @@ function drawReview(i) {
 
 /* An answer reached with the table open is Hard, not Good — it was recognised, not
    recalled, and the schedule should reflect that. */
-function gradeWord(idx, correct, hinted) {
+/* `grade` overrides the right/wrong mapping for an activity that scores itself. The
+   mapping and the trouble rule both live in core/fsrs.js now, shared with native —
+   this used to be a second copy of the same rule. */
+function gradeWord(idx, correct, hinted, grade) {
   const word = L[idx].b;
-  const grade = correct ? (hinted ? 2 : 3) : 1;
-  const card = fsrsReview(ST.seen[word], grade, today());
-  ST.seen[word] = card;
-  if (!correct && isTrouble(card)) ST.trouble[word] = (ST.trouble[word] || 0) + 1;
-  else if (correct && ST.trouble[word] && !isTrouble(card)) delete ST.trouble[word];
+  const r = applyGrade(ST.seen, ST.trouble, word, grade || gradeFor(correct, hinted), today());
+  ST.seen = r.seen;
+  ST.trouble = r.trouble;
   save();
 }
 

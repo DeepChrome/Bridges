@@ -14,6 +14,7 @@ import re
 import shutil
 import sqlite3
 import sys
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -213,6 +214,48 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
     stats["deep_sentences"] = len(pool)
     stats["shapes"] = len(shapes)
     return "\n".join(lines), shape_blob, slot_names, pool, sample
+
+
+def measure_sentences(sentences, sent_tokens, index, key_units, audio, src_of, stats):
+    """How hard each corpus sentence is, and where in the curriculum it belongs.
+
+    difficulty = 1 - studied/tokens, where a token is studied if its folded form
+    is in the lookup index — i.e. it resolves to one of the shipped lemmas. unit is
+    the *latest* unit (by path order) that introduces any of the sentence's lemmas,
+    so a sentence becomes available once everything in it has been met. Sentences
+    whose lemmas belong to no unit get no unit; they can still be measured.
+
+    Returns one record per English-paired sentence with tokens:
+      (ru, en, n_tokens, difficulty, unit_index_or_None, audio_file_or_None, src)
+    The pools the speaking and listening activities draw from are cut from this.
+    """
+    out = []
+    for iid, (ru, en, _deck, _has) in sentences.items():
+        toks = sent_tokens.get(iid)
+        if not toks:
+            continue
+        n = len(toks)
+        studied = sum(1 for k in toks if k in index)
+        units = [u for k in toks for u in key_units.get(k, ())]
+        fname = audio.get(fold(ru))
+        out.append((ru, en, n, 1 - studied / n, max(units) if units else None,
+                    fname, src_of.get(fname, "") if fname else ""))
+
+    # Buckets match the pool thresholds, so the report answers the question the
+    # pools ask: how much of the corpus is within reach at each cut.
+    edges = [(0.0, "= 0"), (0.2, "≤ 0.2"), (0.35, "≤ 0.35"), (0.5, "≤ 0.5"),
+             (0.75, "≤ 0.75"), (1.01, "> 0.75")]
+    hist = Counter()
+    for r in out:
+        for edge, label in edges:
+            if r[3] <= edge:
+                hist[label] += 1
+                break
+    stats["sentences_measured"] = len(out)
+    stats["sentences_with_unit"] = sum(1 for r in out if r[4] is not None)
+    stats["sentences_with_audio"] = sum(1 for r in out if r[5])
+    stats["difficulty_hist"] = [(label, hist[label]) for _, label in edges]
+    return out
 
 
 def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
@@ -424,6 +467,18 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     deep, shapes, slot_names, sent_pool, tsample = build_dictionary(
         db, sentences, items_of_key, keys_of, stats, ext_sentences, ext_items_of_key)
 
+    # Per-sentence tokens and which units each token's lemma belongs to, for the
+    # sentence measurements below — taken while the database is still open.
+    sent_tokens = {}
+    for k, iid in db.execute("select key, item_id from c.item_tokens order by rowid"):
+        if iid in sentences:
+            sent_tokens.setdefault(iid, []).append(k)
+    key_units = {}
+    for lid, tid in unit_of.items():
+        if tid in uidx:
+            for k in keys_of.get(lid, ()):
+                key_units.setdefault(k, set()).add(uidx[tid])
+
     db.close()
 
     # Real recordings, when tools/build_audio.py has exported them. Only entries whose
@@ -439,6 +494,13 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             audio = {k: v for k, v in raw.items() if v in present}
         stats["audio_files"] = len(set(audio.values()))
         stats["audio_utterances"] = len(audio)
+
+    # Where each shipped recording came from, per file, from the same manifest.
+    src_of = {}
+    if apath.exists():
+        src_of = json.loads(apath.read_text(encoding="utf-8")).get("src", {})
+    measured = measure_sentences(sentences, sent_tokens, index, key_units, audio,
+                                 src_of, stats)
 
     return {"stats": stats, "lemmas": lemmas, "index": index,
             "units": units, "path": path, "audio": {"files": audio},
@@ -588,6 +650,13 @@ def main():
         print(f"  {st['ext_source'].lower():13.13}: {st['ext_sentences']:,} sentences, "
               f"the only example for {st['deep_ext_only']:,} words "
               f"({st['ext_licence']})")
+    # Sentence difficulty is what the speaking and listening pools are cut from; the
+    # histogram says how much of the corpus is within reach at each cut.
+    if st.get("sentences_measured"):
+        print(f"  sentences    : {st['sentences_measured']:,} measured, "
+              f"{st['sentences_with_unit']:,} placed in a unit, "
+              f"{st['sentences_with_audio']:,} with a recording")
+        print("  difficulty   : " + "  ".join(f"{lab} {n:,}" for lab, n in st["difficulty_hist"]))
     print(f"  scripts      : {', '.join(js_files)}")
     print(f"  page         : {(args.outdir / 'index.html').stat().st_size/1_048_576:.2f} MB")
 

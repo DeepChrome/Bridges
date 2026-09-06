@@ -108,7 +108,7 @@ def main():
     upgraded = sum(1 for v in best.values() if v["src"] == "core5000")
     print(f"\nwould have been Google TTS without ranking: up to {upgraded:,} utterances")
 
-    missing, total_bytes, manifest = 0, 0, {}
+    missing, total_bytes, manifest, srcs = 0, 0, {}, {}
     if not args.dry_run:
         args.out.mkdir(parents=True, exist_ok=True)
 
@@ -126,10 +126,16 @@ def main():
             if not dest.exists():
                 dest.write_bytes(data)
         manifest[key] = h
+        srcs[h] = v["src"]
 
+    # `src` names where each shipped file came from, per file, so a consumer can
+    # tell a human recording from a synthetic one — the listening pool excludes the
+    # 32 kbps Google voice, and nothing may present TTS as authentic. `sources` is
+    # the same information summed, kept for the build's own report.
     args.manifest.parent.mkdir(parents=True, exist_ok=True)
     args.manifest.write_text(
         json.dumps({"files": manifest,
+                    "src": srcs,
                     "sources": {k: v for k, v in picked.items()}},
                    ensure_ascii=False, separators=(",", ":")),
         encoding="utf-8")

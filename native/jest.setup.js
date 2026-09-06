@@ -60,6 +60,7 @@ jest.mock("expo-speech-recognition", () => {
       isRecognitionAvailable: jest.fn(() => true),
       supportsOnDeviceRecognition: jest.fn(() => true),
       getSupportedLocales: jest.fn(async () => ({ locales: ["ru-RU"], installedLocales: ["ru-RU"] })),
+      androidTriggerOfflineModelDownload: jest.fn(async () => ({ status: "opened_dialog" })),
     },
     useSpeechRecognitionEvent: (name, handler) => {
       React.useEffect(() => {

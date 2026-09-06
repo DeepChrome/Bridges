@@ -12,7 +12,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, Share } from "react-native";
+import { View, Text, Share, Switch } from "react-native";
 import {
   ExpoSpeechRecognitionModule, useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
@@ -57,6 +57,12 @@ export default function SttLab() {
   const [verdict, setVerdict] = useState(null);      // { transcript, res, latencyMs }
   const [error, setError] = useState(null);
   const [caps, setCaps] = useState(null);            // what this device can do
+  /* On-device is the default because it keeps audio on the phone. But Android reports
+     Russian as "supported" while the offline model is not downloaded, and start()
+     then fails with language-not-supported — so the lab has to be able to measure the
+     network recogniser too, and to record which one produced each number. */
+  const [onDevice, setOnDevice] = useState(true);
+  const [note, setNote] = useState(null);
   const startedAt = useRef(0);
   const item = STT_SET[i];
 
@@ -88,8 +94,8 @@ export default function SttLab() {
     setPhase("done");
     log({ ts: Date.now(), key: fold(item.ru), kind: "lab", i, unit: item.unit,
           transcript, target: item.ru, wer: res.wer, tags: [], grade: null,
-          latencyMs, engine: "device", onDevice: true });
-  }, [item, i, log]);
+          latencyMs, engine: onDevice ? "device" : "network", onDevice });
+  }, [item, i, log, onDevice]);
 
   useSpeechRecognitionEvent("result", (ev) => {
     if (phase !== "listening") return;
@@ -101,10 +107,17 @@ export default function SttLab() {
     if (phase !== "listening") return;
     const latencyMs = Date.now() - startedAt.current;
     setError(`${ev.error}${ev.message ? " — " + ev.message : ""}`);
+    // The one error worth explaining: the model is missing, not the language.
+    if (/not-supported|not downloaded/i.test(`${ev.error} ${ev.message || ""}`)) {
+      setNote(onDevice
+        ? "Russian is supported but its offline model is not on this phone. "
+          + "Tap Download, or turn off on-device to measure the network recogniser."
+        : "The recogniser refused this language even over the network.");
+    }
     setPhase("idle");
     log({ ts: Date.now(), key: fold(item.ru), kind: "lab", i, unit: item.unit,
           transcript: "", target: item.ru, wer: 1, tags: [], grade: null, latencyMs,
-          engine: "device", onDevice: true, error: ev.error });
+          engine: onDevice ? "device" : "network", onDevice, error: ev.error });
   });
   useSpeechRecognitionEvent("end", () => {
     // Ended with no final result and no error: treat as nothing heard.
@@ -119,11 +132,28 @@ export default function SttLab() {
     setPhase("listening");
     ExpoSpeechRecognitionModule.start({
       lang: LANG,
-      requiresOnDeviceRecognition: true,
+      requiresOnDeviceRecognition: onDevice,
       interimResults: true,
       maxAlternatives: 1,
       continuous: false,
     });
+  };
+
+  /* Android 13+ only: opens the system's model-download dialog. Fire and forget —
+     it reports that the dialog opened, not that the download finished. */
+  const download = async () => {
+    setNote(null); setError(null);
+    try {
+      const r = await ExpoSpeechRecognitionModule.androidTriggerOfflineModelDownload({
+        locale: LANG,
+      });
+      setNote(typeof r === "object" && r && r.status
+        ? `download: ${r.status} — when it finishes, come back and press Speak`
+        : "download requested — when it finishes, come back and press Speak");
+    } catch (e) {
+      setNote(`could not start the download — ${e.message || e}. `
+        + "Settings → System → Languages → On-device speech recognition → add Russian.");
+    }
   };
 
   const stop = () => { try { ExpoSpeechRecognitionModule.stop(); } catch (e) { /* none */ } };
@@ -207,14 +237,34 @@ export default function SttLab() {
       {error ? (
         <Card style={{ marginTop: 12, borderColor: t.bad }}>
           <Text style={{ color: t.bad }}>{error}</Text>
+          {note ? <Muted style={{ marginTop: 6 }}>{note}</Muted> : null}
         </Card>
+      ) : note ? (
+        <Card style={{ marginTop: 12 }}><Muted>{note}</Muted></Card>
       ) : null}
 
       <View style={{ marginTop: "auto", paddingTop: 16, gap: 8 }}>
+        {/* Which recogniser is being measured. Every attempt records this, so a mixed
+            export can still be read one engine at a time. */}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10,
+                       paddingHorizontal: 2 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15 }}>On-device only</Text>
+            <Muted size={12}>
+              {onDevice ? "Audio stays on the phone" : "Audio goes to the recogniser's servers"}
+            </Muted>
+          </View>
+          <Switch
+            value={onDevice}
+            onValueChange={(v) => { setOnDevice(v); setError(null); setNote(null); }}
+            trackColor={{ true: t.good, false: t.surface3 }}
+          />
+        </View>
         {phase === "listening"
           ? <Btn kind="bad" label="Stop" onPress={stop} />
           : <Btn kind="pri" label={verdict || error ? "Again" : "Speak"} onPress={speak} />}
         <Btn label="Next sentence" onPress={next} />
+        <Btn label="Download Russian model" onPress={download} />
         <Btn kind="ghost" label={`Export ${logged} attempts`} onPress={exportAttempts} />
       </View>
     </Screen>

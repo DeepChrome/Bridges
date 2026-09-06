@@ -357,6 +357,27 @@ group("lesson generation");
   ok(quiz.every(answerable), "every quiz question is answerable");
   ok(quiz.every((q) => !q.options || q.options.filter((o) => o.right).length === 1),
      "each has exactly one right answer");
+
+  // Over many quizzes: never the same word twice in a row, and a short last lesson
+  // is topped up from the unit's earlier words rather than left short.
+  let adjacent = 0, quizzes = 0;
+  for (const u of UN) {
+    for (let li = 0; li < lessonCount(u); li++) {
+      const qs = Q.quizSteps(u, li);
+      quizzes++;
+      for (let k = 1; k < qs.length; k++) {
+        if (typeof qs[k].i === "number" && qs[k].i === qs[k - 1].i) adjacent++;
+      }
+    }
+  }
+  ok(adjacent === 0, `no quiz asks the same word twice in a row (${quizzes} quizzes)`, String(adjacent));
+  const small = UN.find((u) => u.w.length % 7 && u.w.length > 7);
+  const lastQuiz = Q.quizSteps(small, lessonCount(small) - 1);
+  ok(lastQuiz.filter((q) => q.kind !== "hear" && q.kind !== "say").length >= 8,
+     `${small.id}: a short last lesson still gets a full quiz`, String(lastQuiz.length));
+  const own = new Set(lessonWords(small, lessonCount(small) - 1));
+  ok(lastQuiz.some((q) => typeof q.i === "number" && !own.has(q.i)),
+     "topped up with the unit's earlier words");
 }
 
 /* The listening step rides on the quiz from the second chapter on. */

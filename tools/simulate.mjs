@@ -239,21 +239,27 @@ function metrics(run) {
   const lastAt = new Map(); const gaps = [];
   let backToBack = 0, within3 = 0, sameQuizTwice = 0, quizQs = 0;
   const seenInQuiz = new Map();
+  let prev = null;
   for (const q of log) {
     if (q.phase !== "quiz") continue;
     quizQs++;
+    const quizId = `${q.unit}/${q.lesson}/${q.try}`;
+    const speech = q.kind === "hear" || q.kind === "say";
     for (const w of q.words) {
       if (lastAt.has(w)) {
         const gap = quizQs - lastAt.get(w);
         gaps.push(gap);
-        if (gap === 1) backToBack++;
         if (gap <= 3) within3++;
+        // Back-to-back: two word questions in a row about the same word within one
+        // quiz. A sentence step sharing a lemma with its neighbour is not that.
+        if (gap === 1 && !speech && prev && prev.quizId === quizId && !prev.speech) backToBack++;
       }
       lastAt.set(w, quizQs);
-      const key = `${q.unit}/${q.lesson}/${q.try}/${w}`;
+      const key = `${quizId}/${w}`;
       if (seenInQuiz.has(key)) sameQuizTwice++;
       seenInQuiz.set(key, true);
     }
+    prev = { quizId, speech };
   }
   gaps.sort((a, b) => a - b);
   m.recurrence = {

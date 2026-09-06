@@ -228,7 +228,29 @@ export function makeQuestions(env) {
     return row ? { t: kind, row, unit: unit.id } : null;
   }
 
-  /* The quiz is mixed and unordered, and asks for production at least twice. */
+  /* No two consecutive questions about the same word: a repeat straight after
+     is not retrieval, it is the answer still on screen. Rebuilds the (already
+     shuffled) list greedily, taking the first question that is not about the word
+     just asked; only when nothing else is left does a repeat follow itself. */
+  function spread(list) {
+    const same = (a, b) => a && b && typeof a.i === "number" && a.i === b.i;
+    const rest = list.slice(), out = [];
+    while (rest.length) {
+      const k = rest.findIndex((e) => !same(e, out[out.length - 1]));
+      if (k >= 0) { out.push(rest.splice(k, 1)[0]); continue; }
+      // Only questions about the word just asked are left: slot one in earlier,
+      // between two questions about other words. With fewer than three distinct
+      // words in a quiz there may be no such gap, and then it follows itself.
+      const e = rest.shift();
+      let j = out.findIndex((x, n) => n > 0 && !same(out[n - 1], e) && !same(x, e));
+      out.splice(j > 0 ? j : out.length, 0, e);
+    }
+    return out;
+  }
+
+  /* The quiz is mixed and unordered, and asks for production at least twice. A
+     short last lesson tops up with words from the unit's earlier lessons — review,
+     not padding — so a three-word lesson is not a five-question quiz. */
   function quizSteps(unit, index) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
@@ -240,7 +262,13 @@ export function makeQuestions(env) {
       .map((i) => candidates(i, pool).filter((e) => e.t === "type" || e.t === "cloze"))
       .filter((a) => a.length).map((a) => a[0]);
     shuffle(production).slice(0, 2).forEach((e) => bag.push(e));
-    const out = shuffle(bag).slice(0, QUIZ_N).map(present).filter(Boolean);
+    const earlier = shuffle(unit.w.slice(0, index * lessonWords(unit, 0).length)
+      .filter((i) => !words.includes(i)));
+    while (bag.length < QUIZ_N && earlier.length) {
+      const c = candidates(earlier.pop(), pool);
+      bag.push(c[Math.floor(Math.random() * c.length)]);
+    }
+    const out = spread(shuffle(bag).slice(0, QUIZ_N)).map(present).filter(Boolean);
     // Speech steps ride on top of the QUIZ_N vocabulary questions, at a random
     // position each — never first, so the quiz opens on a word rather than audio.
     const stage = stageOf(unit);

@@ -2,6 +2,8 @@
 data/corpus.db
 data/lexicon.db
 data/examples.db
+data/topics.db
+data/audio.json
 data/_work/
 
 # Downloaded source dumps (re-fetchable; OpenRussian is ~22 MB)

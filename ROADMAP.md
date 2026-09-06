@@ -132,6 +132,21 @@ can overrule any of them.
   rebuilt and redeployed. Recorded as a CLAUDE.md trap. The gate export
   `export-2026-09-06b.json` was read on the affected build: the three Tatoeba items
   played English, so the owner could not hear a model for them.
+- **A20 — P5.4 trouble writes.** The task says feedback tags go "to `trouble` for
+  the affected lemma". Not done that way: `trouble` is governed by the FSRS leech
+  rule through `applyGrade` (core.test.mjs pins it), and a second path writing
+  into it from model output would make the bank count things the scheduler does
+  not call trouble. The tags go to `speech.tagCounts` and onto the attempt
+  (`tagAttempt`), and the affected lemma already receives Again through the
+  alignment grade. Revisit only if the bank proves too quiet.
+- **A21 — "smoke extended" (P5.5, P5.10).** Smoke drives the web build, which does
+  not carry the speech activities (web is on hold, A-series above). The equivalent
+  is `native/__tests__/registry.test.js`, which now proves Hear and Say have
+  views, plus `hear.test.js` and `say.test.js` through the real runner.
+- **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
+  local verdict, grammar section) were built before Phase 4 because Phase 4 stops
+  at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the
+  client existed. P5.12 (offline audio cache) is not started.
 
 ---
 

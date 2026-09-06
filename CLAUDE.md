@@ -368,8 +368,11 @@ bridges/                          (directory is still named russian-blocks on di
     icons.js avatars.js
   native/              <- THE PRODUCT (Expo / React Native); see native/README.md
     src/screens/       <- Learn, Unit, Flows, Run (the runner + VIEWS registry), You…
+    src/activities/    <- Hear, Say, Alignment (§30c)
+    src/lib/feedback.js<- client for the Worker (§30d)
     __tests__/         <- jest; path.test.js and registry.test.js are the patterns
     eas.json app.json  <- build profiles; Android package and mic permission
+  backend/             <- the feedback Worker (§30d): src/, test/, eval/, wrangler.toml
   tools/
     ingest_anki.py     <- Anki .anki2 -> data/corpus.db  (per-notetype adapters)
     build_lexicon.py   <- OpenRussian CSVs + curated -> data/lexicon.db
@@ -797,11 +800,44 @@ nothing; a lemma met twice takes its worst. Every attempt lands in
 `speech.attempts` as kind `hear` or `say`; the You screen's Grammar section lists
 `speech.tagCounts`, which only Phase 4's feedback fills.
 
+**Online feedback** (§30d) is layered on Say after the local verdict: a spinner
+under the alignment while the Worker answers, then rows — praise, each grammar
+point with its tag, a better word — and nothing at all on any failure. The reply's
+tags are attached to the attempt already logged (`tagAttempt` in `core/state.js`)
+and that is what the Grammar section counts.
+
 The STT gate (P3.6) was decided 2026-09-06 on `data/stt/export-2026-09-06b.json`:
 on 2–4-word sentences the on-device recogniser is phonetically faithful to what a
 non-native says (perfect on 8 of 16 sentences, median best WER 17%), latency p50
 3.4 s / p95 4.4 s from release to result. Whisper (P3.7) is not needed. The latency
 is a design constraint for Say, not a defect to fix.
+
+## 30d. The feedback Worker (ROADMAP Phase 4) — the only server
+
+`backend/` is a Cloudflare Worker with one route, `POST /v1/feedback`. It exists
+for one reason: the Anthropic key must live somewhere that is not the app (rule
+20.11 and the roadmap's "no API keys in native/, site/, core/ or any tracked file").
+
+What it does: checks the app's bearer token (`APP_TOKEN`, a Worker secret; 401
+without); refuses past a daily cap (`DAILY_CAP`, 300, per UTC day, counted in KV;
+429 with a message); asks the model (`MODEL`, Haiku 4.5, 400 tokens) for feedback
+on one spoken sentence with `src/prompt.js`; validates the reply with
+`src/schema.js` — tags must be in `core/errortags.js`, notes ≤ 20 words, praise
+≤ 12 — retrying once with a nudge and otherwise answering `{ ok:false, reason:
+"parse" }`; logs token counts per request and per day to KV.
+
+What it never does: receive or store audio (the app sends a transcript), hold
+learner state, or keep anything beyond the day's counter and the token log.
+
+`handle(request, env, deps)` takes `fetch` and the clock as arguments, so
+`backend/test/` runs it in plain Node with a fake KV and a fake upstream (19
+checks); `wrangler dev` needs `backend/.dev.vars` (gitignored). `backend/eval/`
+scores the prompt on 30 hand-written learner errors against the API directly
+(pass bar: ≥ 80 % primary-tag accuracy, ≤ 1 of 5 correct sentences flagged); it has
+**not yet been run** — it needs the key. The native client is
+`native/src/lib/feedback.js`, configured by `EXPO_PUBLIC_FEEDBACK_URL` and
+`EXPO_PUBLIC_APP_TOKEN` from `native/.env` or the EAS profile's environment;
+`.easignore` excludes `.env`, so an EAS build gets them only from EAS.
 
 ## 31. Verification
 

@@ -22,15 +22,18 @@ export function sentenceLemmas(ru, IX) {
   return out;
 }
 
-/* One row from a unit's pool, preferring sentences that contain a lemma the lesson
-   is teaching so the activity reinforces what was just met rather than the unit at
-   large. `want` is a Set of lemma indices; with none matching, any row will do. */
-export function pickPrompt(rows, idxs, want, IX, random) {
+/* One row from a pool, preferring sentences that contain a lemma the lesson is
+   teaching so the activity reinforces what was just met rather than the unit at
+   large. `want` is a Set of lemma indices; with none matching, any row will do —
+   unless `onlyWanted`, in which case null, so a caller can fall through to a wider
+   pool rather than take an unrelated sentence from a narrow one. */
+export function pickPrompt(rows, idxs, want, IX, random, onlyWanted) {
   if (!idxs || !idxs.length) return null;
   const rnd = random || Math.random;
   const preferred = want && want.size
     ? idxs.filter((i) => sentenceLemmas(rows[i][0], IX).some((l) => want.has(l)))
     : [];
+  if (!preferred.length && onlyWanted) return null;
   const from = preferred.length ? preferred : idxs;
   return rows[from[Math.floor(rnd() * from.length)]] || null;
 }

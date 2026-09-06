@@ -191,13 +191,40 @@ export function makeQuestions(env) {
     return steps;
   }
 
+  /* Every unit on the route up to and including this one: the spine and branches
+     of earlier chapters, and this chapter's up to the unit itself. What a learner
+     here has been through, in order. */
+  function unitsUpTo(unit) {
+    const out = [];
+    for (const s of STAGES) {
+      const here = [s.core].concat(s.branches || []);
+      const at = here.indexOf(unit);
+      if (at < 0) { out.push(...here); continue; }
+      out.push(...here.slice(0, at + 1));
+      return out;
+    }
+    return out;
+  }
+
   /* One speech prompt for a lesson, or null when this platform carries no pools or
-     the unit has none — the quiz then simply has no such step, never a blank one. */
+     nothing sayable has been unlocked yet — the quiz then simply has no such step,
+     never a blank one and never a sentence from further along the route.
+
+     A unit's own list is what it added to the pool; the sentences a learner here
+     can say are everything added up to this point. Preference in order: a sentence
+     from this unit using a word of this lesson, one from anywhere unlocked using a
+     word of this lesson, one from this unit, one from anywhere unlocked. */
   function speechPrompt(kind, unit, index) {
     const poolName = { hear: "listen", say: "speak" }[kind];
     if (!SPEECH || !SPEECH[poolName]) return null;
-    const row = pickPrompt(SPEECH.rows, SPEECH[poolName][unit.id],
-                           new Set(lessonWords(unit, index)), IX);
+    const pool = SPEECH[poolName];
+    const own = pool[unit.id] || [];
+    const all = unitsUpTo(unit).flatMap((u) => pool[u.id] || []);
+    const want = new Set(lessonWords(unit, index));
+    const row = pickPrompt(SPEECH.rows, own, want, IX, null, true)
+      || pickPrompt(SPEECH.rows, all, want, IX, null, true)
+      || pickPrompt(SPEECH.rows, own, null, IX)
+      || pickPrompt(SPEECH.rows, all, null, IX);
     return row ? { t: kind, row, unit: unit.id } : null;
   }
 
@@ -439,7 +466,7 @@ export function makeQuestions(env) {
   }
 
   return {
-    distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf,
+    distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, placementQuestions, sectionQuestions, drillQuestions,
   };
 }

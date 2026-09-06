@@ -376,8 +376,26 @@ group("hearing");
   ok(h.autoplay === h.target && h.en && h.unit === later.id,
      "it plays the target, carries the meaning and the unit");
   ok(!h.sub && !h.say, "but shows no meaning and offers no speaker before the answer");
-  ok(SPEECH.listen[later.id].some((i) => SPEECH.rows[i][0] === h.target),
-     "the sentence comes from the unit's own listening pool");
+  const unlocked = Q.unitsUpTo(later).flatMap((u) => SPEECH.listen[u.id] || []);
+  ok(unlocked.some((i) => SPEECH.rows[i][0] === h.target),
+     "the sentence comes from a listening pool unlocked by this unit");
+  const beyond = UN.filter((u) => !Q.unitsUpTo(later).includes(u))
+    .flatMap((u) => SPEECH.listen[u.id] || []);
+  ok(!beyond.some((i) => SPEECH.rows[i][0] === h.target) || unlocked.some((i) => SPEECH.rows[i][0] === h.target),
+     "and never from a unit further along the route");
+
+  // The route up to a unit: earlier chapters whole, this chapter up to the unit.
+  const s1 = STAGES[1];
+  const upToBranch = Q.unitsUpTo(s1.branches[0]);
+  ok(upToBranch[0] === STAGES[0].core && upToBranch.includes(s1.core)
+     && upToBranch[upToBranch.length - 1] === s1.branches[0]
+     && !upToBranch.includes(s1.branches[1] || null),
+     "unitsUpTo stops at the unit itself", upToBranch.map((u) => u.id).join(","));
+
+  // The first chapter's spine has sayable sentences of its own.
+  const firstPool = (SPEECH.speak[first.id] || []).map((i) => SPEECH.rows[i]);
+  ok(firstPool.length > 0 && firstPool.every((r) => r[2] <= 12),
+     `${first.id}: has sayable sentences of its own`, String(firstPool.length));
   ok(!!DATA.audio.files[fold(h.target)], "and has a recording — the pool guarantees one");
   ok(h.lemmas.length > 0 && h.lemmas.every((i) => L[i]),
      "the lemmas it grades are real curriculum entries");

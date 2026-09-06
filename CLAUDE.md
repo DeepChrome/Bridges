@@ -711,16 +711,24 @@ the app already derives, so it is not shipped. `source` is one letter from
 5000, `g` Google TTS, `o` other — so an activity can label provenance without a
 lookup. Cuts, all constants at the top of `build_site.py`:
 
-- *speak* — recording, English, difficulty ≤ 0.2, 3–12 tokens.
-- *listen* — recording, English, difficulty ≤ 0.35, 4–15 tokens, source not Google
-  TTS (32 kbps) or "other". Core 5000 is **in**; without it the pool is 1,732 rather
-  than 10,811 (roadmap A13).
+- *speak* — recording, English, 3–12 tokens.
+- *listen* — recording, English, 4–15 tokens, source not Google TTS (32 kbps) or
+  "other". Core 5000 is **in** (roadmap A13).
 
-`difficulty` is `1 − studied/tokens` (a token is studied if its folded form is in the
-lookup index) and a sentence's unit is the *latest* unit that introduces any of its
-lemmas — it becomes available once everything in it has been met. The build prints
-the difficulty histogram and both pool sizes per unit on every run and names any
-unit under 15 prompts; a broken join shows up there.
+**A sentence's unit is where it becomes sayable**, and that is a coverage rule, not
+a difficulty score: every token must be taught by some unit — the unit is the latest
+of those on the route — or be within the top 500 by frequency (`COVERAGE_FREE_RANK`:
+«не», «и», «в», met from the first screen). One rarer untaught word and the sentence
+is in no pool. The rule used to be only "the latest taught word", and «Абсолютно
+ничто не может оправдать такие действия» reached a chapter-2 quiz on the strength
+of «не» and «может». The units teach 969 lemmas, so the pools are small early
+(chapter 1's spine adds ~50, most branches under 15, `home` none) and the app draws
+a quiz's prompts from **everything unlocked up to the unit** (`unitsUpTo` in
+`core/questions.js`), preferring this lesson's words, then this unit — and asks
+nothing when there is nothing, never a sentence from further along. `difficulty`
+(`1 − studied/tokens`) still rides on each row for the record. The build prints
+both pool sizes per unit on every run and names any unit under 15; a broken join
+shows up there.
 
 **Learner state v5** adds `speech: { attempts, tagCounts }`. `recordAttempt` in
 `core/state.js` keeps the newest 200 attempts and counts every tag; it never holds

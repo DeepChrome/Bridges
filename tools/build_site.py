@@ -216,14 +216,28 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
     return "\n".join(lines), shape_blob, slot_names, pool, sample
 
 
-def measure_sentences(sentences, sent_tokens, index, key_units, audio, src_of, stats):
+# A word the units never teach may still appear in a pool sentence if it is this
+# common — «не», «и», «в», «что»: met on every screen from the first lesson. Anything
+# rarer and untaught makes the sentence unavailable to every unit. 500 was chosen by
+# measuring: at 300 the second chapter has 27 speakable sentences, at 500 it has 42
+# and the first chapter 48; at 0 the first chapter has 8.
+COVERAGE_FREE_RANK = 500
+
+
+def measure_sentences(sentences, sent_tokens, index, key_units, lemmas, unit_pos,
+                      audio, src_of, stats):
     """How hard each corpus sentence is, and where in the curriculum it belongs.
 
     difficulty = 1 - studied/tokens, where a token is studied if its folded form
-    is in the lookup index — i.e. it resolves to one of the shipped lemmas. unit is
-    the *latest* unit (by path order) that introduces any of the sentence's lemmas,
-    so a sentence becomes available once everything in it has been met. Sentences
-    whose lemmas belong to no unit get no unit; they can still be measured.
+    is in the lookup index — i.e. it resolves to one of the shipped lemmas.
+
+    unit is where the sentence becomes sayable: the *latest* unit (by path order)
+    teaching any of its lemmas, provided every other token is also taught by some
+    unit or is within COVERAGE_FREE_RANK by frequency. A sentence with one word the
+    curriculum never teaches has no unit at all. It used to be enough for the
+    latest taught word to be in the unit, and «Абсолютно ничто не может оправдать
+    такие действия» landed in the second chapter's quiz because «не» and «может»
+    are taught there and the four words nobody had taught did not count.
 
     Returns one record per English-paired sentence with tokens:
       (ru, en, n_tokens, difficulty, unit_index_or_None, audio_file_or_None, src)
@@ -236,9 +250,21 @@ def measure_sentences(sentences, sent_tokens, index, key_units, audio, src_of, s
             continue
         n = len(toks)
         studied = sum(1 for k in toks if k in index)
-        units = [u for k in toks for u in key_units.get(k, ())]
+        unit, covered = None, True
+        for k in toks:
+            taught = key_units.get(k)
+            if taught:
+                latest = max(taught, key=lambda u: unit_pos.get(u, -1))
+                if unit is None or unit_pos.get(latest, -1) > unit_pos.get(unit, -1):
+                    unit = latest
+                continue
+            hit = index.get(k)
+            fr = lemmas[hit[0]].get("fr") if hit else None
+            if not (fr and fr <= COVERAGE_FREE_RANK):
+                covered = False
+                break
         fname = audio.get(fold(ru))
-        out.append((ru, en, n, 1 - studied / n, max(units) if units else None,
+        out.append((ru, en, n, 1 - studied / n, unit if covered else None,
                     fname, src_of.get(fname, "") if fname else ""))
 
     # Buckets match the pool thresholds, so the report answers the question the
@@ -263,9 +289,7 @@ def measure_sentences(sentences, sent_tokens, index, key_units, audio, src_of, s
 SRC_CODE = {"tatoeba": "t", "lof": "l", "yandex": "y", "core5000": "c",
             "googletts": "g", "other": "o"}
 
-SPEAK_MAX_DIFFICULTY = 0.2
 SPEAK_TOKENS = (3, 12)
-LISTEN_MAX_DIFFICULTY = 0.35
 LISTEN_TOKENS = (4, 15)
 LISTEN_EXCLUDE = ("googletts", "other")
 POOL_MIN_PER_UNIT = 15
@@ -277,7 +301,12 @@ def build_pools(measured, units, stats):
     Cut from measure_sentences() output rather than the dictionary's sentence pool:
     that pool holds whatever illustrates a word, capped four per lemma, while these
     need every sentence a learner at a given point could be asked to say — with a
-    recording to compare against and an English side to prompt with.
+    recording to compare against and an English side to prompt with. A sentence's
+    unit is where it becomes sayable (measure_sentences); the app draws a quiz's
+    prompts from every unit up to that point, so a unit's own list is what it adds
+    to the pool, not all a learner there may be asked. Early units add little —
+    the counts below say how little — and the app asks nothing rather than
+    something too hard when there is nothing.
 
     Shipped as one shared row list plus per-unit index lists, so a sentence in both
     pools is stored once. Rows: [ru, en, tokens, difficulty, source letter]. The
@@ -297,7 +326,7 @@ def build_pools(measured, units, stats):
         ru, en, n, diff, unit, fname, src = rec
         if unit is None or not fname or not en:
             continue
-        if diff <= SPEAK_MAX_DIFFICULTY and SPEAK_TOKENS[0] <= n <= SPEAK_TOKENS[1]:
+        if SPEAK_TOKENS[0] <= n <= SPEAK_TOKENS[1]:
             speak.setdefault(units[unit]["id"], []).append(row_for(rec))
 
     stats["speak_pool"] = {uid: len(v) for uid, v in speak.items()}
@@ -315,7 +344,7 @@ def build_pools(measured, units, stats):
         ru, en, n, diff, unit, fname, src = rec
         if unit is None or not fname or not en or src in LISTEN_EXCLUDE:
             continue
-        if diff <= LISTEN_MAX_DIFFICULTY and LISTEN_TOKENS[0] <= n <= LISTEN_TOKENS[1]:
+        if LISTEN_TOKENS[0] <= n <= LISTEN_TOKENS[1]:
             listen.setdefault(units[unit]["id"], []).append(row_for(rec))
             if src in ("tatoeba", "lof", "yandex"):
                 listen_human_yandex += 1
@@ -547,6 +576,9 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         if tid in uidx:
             for k in keys_of.get(lid, ()):
                 key_units.setdefault(k, set()).add(uidx[tid])
+    # Path order per unit index: "the latest unit" means latest on the learner's
+    # route, not highest in the units list.
+    unit_pos = {row["u"]: n for n, row in enumerate(path)}
 
     db.close()
 
@@ -568,8 +600,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     src_of = {}
     if apath.exists():
         src_of = json.loads(apath.read_text(encoding="utf-8")).get("src", {})
-    measured = measure_sentences(sentences, sent_tokens, index, key_units, audio,
-                                 src_of, stats)
+    measured = measure_sentences(sentences, sent_tokens, index, key_units, lemmas,
+                                 unit_pos, audio, src_of, stats)
     speech = build_pools(measured, units, stats)
 
     return {"stats": stats, "lemmas": lemmas, "index": index,
@@ -720,8 +752,8 @@ def main():
         print(f"  {st['ext_source'].lower():13.13}: {st['ext_sentences']:,} sentences, "
               f"the only example for {st['deep_ext_only']:,} words "
               f"({st['ext_licence']})")
-    # Sentence difficulty is what the speaking and listening pools are cut from; the
-    # histogram says how much of the corpus is within reach at each cut.
+    # The pools are cut by curriculum coverage (measure_sentences); the difficulty
+    # histogram is the wider picture of how much of the corpus resolves at all.
     if st.get("sentences_measured"):
         print(f"  sentences    : {st['sentences_measured']:,} measured, "
               f"{st['sentences_with_unit']:,} placed in a unit, "

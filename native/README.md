@@ -18,9 +18,31 @@ Profiles are in `eas.json`. EAS's free tier has a monthly build cap — check
 expo.dev before assuming a build is free. If it is exhausted, `npm run android`
 builds locally, which needs Android Studio's SDK and a JDK on this machine.
 
-## Emulator and screenshots
+## Emulator
 
-Not set up yet — see ROADMAP.md P1.6–P1.8. Until then there is no way to see the
-native UI from this machine: `tools/visual.js` at the repo root renders the *web*
-build, and jest asserts structure, not pixels. `__tests__/path.test.js` shows the
+```
+.\tools\emulator.ps1                          boot and wait
+.\tools\emulator.ps1 -Apk build.apk           boot, install, launch
+.\tools\emulator.ps1 -Shot path               boot, then screenshot
+```
+
+Boots a Pixel 6 / API 34 AVD headless in about 45 seconds and leaves it running;
+re-running attaches to it rather than starting a second one.
+
+The SDK is at `C:\Android\sdk` and a JDK 17 at `C:\Android\jdk`, both **outside the
+repo** so they survive a clone, and both installed from **archives rather than
+installers**. That matters: an MSI wants UAC elevation, which a non-interactive shell
+cannot answer, so it hangs forever instead of failing. Same trap with `sdkmanager
+--licenses` — piping `y` into the batch file silently accepts nothing; redirect stdin
+from a file instead.
+
+To rebuild the environment from scratch, see the commit for P1.6.
+
+## Screenshots
+
+`screenshots/` holds captures from the emulator. Note what they are and are not:
+they prove the app **runs and draws** on a real Android device, which nothing else
+here does — `tools/visual.js` at the repo root renders the *web* build, and jest
+asserts structure, not pixels. They are not yet a regression suite; the pixel-diff
+comparison is ROADMAP P1.8. Until that exists, `__tests__/path.test.js` remains the
 substitute: assert the visual contract in the render tree.

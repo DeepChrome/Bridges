@@ -79,3 +79,24 @@ export function recordAttempt(speech, attempt) {
   for (const t of (attempt && attempt.tags) || []) tagCounts[t] = (tagCounts[t] || 0) + 1;
   return { attempts: kept, tagCounts: tagCounts };
 }
+
+/* Tags that arrive after the attempt was recorded — the feedback service answers
+   seconds later, and the attempt must not wait for it. Finds the attempt by its
+   timestamp, adds the tags it did not have yet, and counts exactly those. An
+   attempt already rotated out of the cap still gets its tags counted. */
+export function tagAttempt(speech, ts, tags) {
+  const cur = speech || speechDefault();
+  const list = (tags || []).filter((t, i, a) => typeof t === "string" && a.indexOf(t) === i);
+  if (!list.length) return cur;
+  const tagCounts = Object.assign({}, cur.tagCounts || {});
+  const attempts = (cur.attempts || []).map((a) => {
+    if (!a || a.ts !== ts) return a;
+    const had = a.tags || [];
+    const fresh = list.filter((t) => !had.includes(t));
+    return fresh.length ? Object.assign({}, a, { tags: had.concat(fresh) }) : a;
+  });
+  const hit = (cur.attempts || []).find((a) => a && a.ts === ts);
+  const counted = hit ? list.filter((t) => !(hit.tags || []).includes(t)) : list;
+  for (const t of counted) tagCounts[t] = (tagCounts[t] || 0) + 1;
+  return { attempts: attempts, tagCounts: tagCounts };
+}

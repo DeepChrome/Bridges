@@ -19,6 +19,11 @@ import { Q, SPEECH_MIX } from "../src/questions";
 import { L, IX, STAGES, SPEECH } from "../src/data";
 import { fold, today } from "@core/util";
 import { applyGrade } from "@core/fsrs";
+import { getFeedback } from "../src/lib/feedback";
+
+/* The Worker is out of scope here: the client is stubbed and, unless a test says
+   otherwise, answers as an unconfigured build would. */
+jest.mock("../src/lib/feedback", () => ({ getFeedback: jest.fn() }));
 
 const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.say.fromStage
                                  && (SPEECH.speak[s.core.id] || []).length).core;
@@ -65,6 +70,7 @@ beforeEach(async () => {
   await flushState();
   await AsyncStorage.clear();
   jest.clearAllMocks();
+  getFeedback.mockResolvedValue({ ok: false, reason: "unconfigured" });
   global.__stt.reset();
   global.__played = [];
 });
@@ -160,6 +166,48 @@ describe("say", () => {
     expect(st.speech.attempts).toHaveLength(0);
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ right: 0, total: 0, skipped: 1 }));
+  });
+
+  it("asks the feedback service after settling, shows its notes, and counts its tags", async () => {
+    let resolve;
+    getFeedback.mockReturnValueOnce(new Promise((res) => { resolve = res; }));
+    await withSay();
+    await screen.findByText(question.en);
+    await speak();
+    await final(heard.split(/\s+/).slice(1).join(" "));
+    expect(getFeedback).not.toHaveBeenCalled();                 // not before the verdict
+    await act(async () => { fireEvent.press(screen.getByText("Keep")); });
+    expect(await screen.findByText("Not quite")).toBeTruthy();
+    expect(screen.getByTestId("feedback-pending")).toBeTruthy(); // below it, not blocking it
+    expect(getFeedback).toHaveBeenCalledTimes(1);
+    expect(getFeedback.mock.calls[0][0]).toMatchObject({ target: question.target, unitId: later.id });
+    expect(getFeedback.mock.calls[0][0].lemmas).toEqual(question.lemmas.map((i) => L[i].b));
+
+    await act(async () => {
+      resolve({ ok: true, overall: "minor", praise: "Clear pronunciation.",
+                words: [], wordChoice: [{ said: "очень", better: "весьма", note: "" }],
+                grammar: [{ tag: "CASE", note: "Accusative after the verb." }] });
+    });
+    expect(await screen.findByText("Accusative after the verb.")).toBeTruthy();
+    expect(screen.getByText("case")).toBeTruthy();
+    expect(screen.getByText("Clear pronunciation.")).toBeTruthy();
+    expect(screen.getByText("очень → весьма")).toBeTruthy();
+    expect(screen.queryByTestId("feedback-pending")).toBeNull();
+    const st = await saved();
+    expect(st.speech.tagCounts).toEqual({ CASE: 1 });
+    expect(st.speech.attempts[0].tags).toEqual(["CASE"]);
+  });
+
+  it("shows nothing extra when the service is unavailable", async () => {
+    getFeedback.mockResolvedValueOnce({ ok: false, reason: "offline" });
+    await withSay();
+    await screen.findByText(question.en);
+    await speak();
+    await final(heard);
+    expect(await screen.findByText("Correct")).toBeTruthy();
+    await act(async () => {});
+    expect(screen.queryByTestId("feedback")).toBeNull();
+    expect(screen.queryByTestId("feedback-pending")).toBeNull();
   });
 
   it("without the offline model it says so and offers the download", async () => {

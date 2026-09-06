@@ -16,21 +16,23 @@
  * (Phase 4), layered on after the local verdict and never in its way.
  */
 
-import React, { useRef, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import {
   ExpoSpeechRecognitionModule as M, useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Btn, Muted, Speaker } from "../ui";
+import { Btn, Muted, Pill, Speaker } from "../ui";
 import { Linked } from "../words";
-import { IX } from "../data";
+import { L, IX, UN } from "../data";
+import { getFeedback } from "../lib/feedback";
 import { Alignment } from "./Alignment";
 import { compare } from "@core/compare";
 import { gradeAlignment } from "@core/speech";
-import { recordAttempt } from "@core/state";
+import { recordAttempt, tagAttempt } from "@core/state";
+import { tagInfo } from "@core/errortags";
 import { fold } from "@core/util";
 
 export const ATTEMPTS = 3;
@@ -69,6 +71,35 @@ function HoldButton({ phase, onIn, onOut }) {
   );
 }
 
+/* Tag names are the closed list's ids; shown as words, not constants. */
+const tagLabel = (id) => id.toLowerCase().replace(/_/g, " ");
+
+/* What the Worker had to say, under the local verdict: a line of praise when it
+   gave one, then each grammar point with its tag, then a better word where one
+   fits. Rows, not cards — this sits inside the answer already on screen. */
+function Feedback({ fb }) {
+  const t = useTheme();
+  const rows = (fb.grammar || []).map((g) => ({ key: "g" + g.tag, chip: tagLabel(g.tag),
+    text: g.note, title: (tagInfo(g.tag) || {}).en }))
+    .concat((fb.wordChoice || []).map((c, k) => ({ key: "w" + k, chip: "better",
+      text: `${c.said} → ${c.better}${c.note ? " · " + c.note : ""}` })));
+  if (!rows.length && !fb.praise) return null;
+  return (
+    <View testID="feedback" style={{ marginTop: 12, gap: 8 }}>
+      {fb.praise ? <Muted>{fb.praise}</Muted> : null}
+      {rows.map((row) => (
+        <View key={row.key} style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+          <Pill>{row.chip}</Pill>
+          <Text style={{ color: t.ink2, fontSize: 14, flex: 1 }}
+                accessibilityLabel={row.title ? `${row.title}. ${row.text}` : row.text}>
+            {row.text}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export function Say({ q, r }) {
   const { update } = useSession();
   const t = useTheme();
@@ -89,22 +120,52 @@ export function Say({ q, r }) {
   const [block, setBlock] = useState(null);          // { why: mic | model | engine, text }
   const releasedAt = useRef(0);
   const releasedEarly = useRef(false);
+  // The feedback service's answer: null (not asked), "pending", or the reply.
+  // Anything but a reply renders nothing extra — the local verdict stands alone.
+  const [fb, setFb] = useState(null);
+  const alive = useRef(true);
+  useEffect(() => () => { alive.current = false; }, []);
 
-  const log = (fields) => update((prev) => ({
-    ...prev,
-    speech: recordAttempt(prev.speech, {
-      ts: Date.now(), key: fold(q.target), kind: "say", unit: q.unit, target: q.target,
-      tags: [], engine: "device", onDevice: true, ...fields,
-    }),
-  }));
+  const log = (fields) => {
+    const ts = Date.now();
+    update((prev) => ({
+      ...prev,
+      speech: recordAttempt(prev.speech, {
+        ts, key: fold(q.target), kind: "say", unit: q.unit, target: q.target,
+        tags: [], engine: "device", onDevice: true, ...fields,
+      }),
+    }));
+    return ts;
+  };
+
+  /* Online enhancement, after the local verdict and never in its way: the Worker
+     names the grammar behind a miss. Its tags go onto the attempt already logged,
+     so the trouble bank's grammar section counts them; a failure of any kind
+     leaves the screen exactly as the local verdict drew it. */
+  const askFeedback = async (transcript, ts) => {
+    setFb("pending");
+    const unit = UN.find((u) => u.id === q.unit);
+    const reply = await getFeedback({
+      transcript, target: q.target, unitId: q.unit,
+      topic: unit && unit.g ? unit.g.title : null,
+      lemmas: (q.lemmas || []).map((i) => L[i].b),
+    });
+    if (!reply || reply.ok !== true) { if (alive.current) setFb(null); return; }
+    const tags = (reply.grammar || []).map((g) => g.tag)
+      .concat((reply.words || []).flatMap((w) => w.tags || []));
+    if (tags.length) update((prev) => ({ ...prev, speech: tagAttempt(prev.speech, ts, tags) }));
+    if (alive.current) setFb(reply);
+  };
 
   /* Hand the grades in. `n` is the attempt that produced `out`. */
-  const settle = (out, n) => {
+  const settle = (out, n, transcript, ts) => {
     const perfect = out.wer === 0;
     setSettled(true);
     r.record(perfect, gradeAlignment(out.alignment, IX, { perfect, firstTry: n === 1 }));
+    askFeedback(transcript, ts);
   };
 
+  const last = useRef({ transcript: "", ts: 0 });
   const finish = (transcript) => {
     const n = attemptRef.current + 1;
     attemptRef.current = n;
@@ -113,10 +174,11 @@ export function Say({ q, r }) {
     const perfect = out.wer === 0;
     setRes(out);
     go("heard");
-    log({ transcript, wer: out.wer, attempt: n,
-          latencyMs: Date.now() - releasedAt.current,
-          grade: perfect ? (n === 1 ? 4 : 3) : 1 });
-    if (perfect || n >= ATTEMPTS) settle(out, n);
+    const ts = log({ transcript, wer: out.wer, attempt: n,
+                     latencyMs: Date.now() - releasedAt.current,
+                     grade: perfect ? (n === 1 ? 4 : 3) : 1 });
+    last.current = { transcript, ts };
+    if (perfect || n >= ATTEMPTS) settle(out, n, transcript, ts);
   };
 
   useSpeechRecognitionEvent("result", (ev) => {
@@ -181,7 +243,7 @@ export function Say({ q, r }) {
   };
 
   const again = () => { setRes(null); setLive(""); go("idle"); };
-  const keep = () => settle(res, attempt);
+  const keep = () => settle(res, attempt, last.current.transcript, last.current.ts);
   const skip = () => r.skip();
   const getModel = async () => {
     try { await M.androidTriggerOfflineModelDownload({ locale: LANG }); } catch (e) { /* stays blocked */ }
@@ -215,6 +277,10 @@ export function Say({ q, r }) {
             <Btn label="Keep" onPress={keep} />
           </View>
         ) : null}
+        {fb === "pending" ? (
+          <ActivityIndicator testID="feedback-pending" color={t.ink3}
+                             style={{ alignSelf: "flex-start", marginTop: 12 }} />
+        ) : fb ? <Feedback fb={fb} /> : null}
       </View>
     );
   }

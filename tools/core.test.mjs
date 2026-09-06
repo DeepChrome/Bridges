@@ -15,7 +15,7 @@ import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN 
   from "../core/util.js";
 import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
   from "../core/fsrs.js";
-import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, speechDefault, ATTEMPT_CAP }
+import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP }
   from "../core/state.js";
 import { compare, words } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
@@ -420,6 +420,27 @@ group("speaking");
      "the sentence comes from the unit's speaking pool");
   ok(!!DATA.audio.files[fold(s.target)], "and has a recording to hear afterwards");
   ok(s.lemmas.length > 0, "and lemmas to grade");
+}
+
+/* Tags that arrive after the attempt: the feedback service is slower than the verdict. */
+group("late tags");
+{
+  let sp = recordAttempt(speechDefault(), { ts: 10, key: "а", kind: "say", tags: [] });
+  sp = recordAttempt(sp, { ts: 20, key: "б", kind: "say", tags: ["CASE"] });
+  const before = sp;
+  sp = tagAttempt(sp, 10, ["CASE", "ASPECT", "CASE"]);
+  ok(sp !== before && before.attempts[0].tags.length === 0, "returns new objects, leaves the old alone");
+  ok(sp.attempts[0].tags.join() === "CASE,ASPECT", "the matching attempt gains the tags, once each",
+     sp.attempts[0].tags.join());
+  ok(sp.attempts[1].tags.join() === "CASE", "the other attempt is untouched");
+  ok(sp.tagCounts.CASE === 2 && sp.tagCounts.ASPECT === 1, "counts add to what recordAttempt counted",
+     JSON.stringify(sp.tagCounts));
+  const again = tagAttempt(sp, 10, ["CASE"]);
+  ok(again.tagCounts.CASE === 2, "tagging the same attempt with the same tag again counts nothing");
+  const gone = tagAttempt(sp, 999, ["TENSE"]);
+  ok(gone.tagCounts.TENSE === 1 && gone.attempts.length === 2,
+     "an attempt no longer held still has its tags counted");
+  ok(tagAttempt(sp, 10, []) === sp && tagAttempt(sp, 10, null) === sp, "no tags: same object back");
 }
 
 /* Per-word grades from an alignment: what the speech activities hand the scheduler. */

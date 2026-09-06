@@ -121,6 +121,17 @@ can overrule any of them.
   recording to hear before reading (`native/src/sttset.js` states the selection). The
   P3.6 gate is decided on this set; the first export is kept as
   `data/stt/export-2026-09-06.json` for the record.
+- **A19 — the English audio was the data, not the device.** The owner reported
+  English speech from the speaker button twice: first on dictionary example
+  sentences (2026-09-06, preview build), then on the STT set. The first report was
+  answered with a device-voice guard (correct in itself, and kept) that was not the
+  cause. The cause: `fetch_tatoeba_audio.py` fetched by sentence id from an endpoint
+  keyed by audio id — 84 of 190 Tatoeba recordings were other people's English
+  sentences. Fixed at the source, refetched, verified by language detection
+  (`data/stt/` neighbours hold no audio; the scan lives in the session scratchpad),
+  rebuilt and redeployed. Recorded as a CLAUDE.md trap. The gate export
+  `export-2026-09-06b.json` was read on the affected build: the three Tatoeba items
+  played English, so the owner could not hear a model for them.
 
 ---
 

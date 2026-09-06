@@ -32,7 +32,7 @@ Built and working today:
 - any recognised token can expose lemma, meaning, grammar, full paradigm, and every
   other sentence in the corpus containing that word
 - a learning path of 8 core stages and 19 topic branches
-- lessons built from six activity types
+- lessons built from six activity types, plus Hear and Say on native (§30c)
 - FSRS scheduling behind the four Anki review outcomes
 - a trouble bank for vocabulary that repeatedly causes difficulty
 - installable PWA, deployed to Netlify
@@ -479,6 +479,19 @@ Each of these cost real time. Do not relearn them.
   looked correct for months.
 - **`Get-Content -Raw` misreads UTF-8 without a BOM**, so grepping a built page for
   Cyrillic from PowerShell reports a false negative. Check with `node -e` instead.
+- **Tatoeba has two ids and they are not interchangeable.** The CDN path
+  `audio.tatoeba.org/sentences/rus/<sentence id>.mp3` is keyed by sentence; the app
+  route `tatoeba.org/audio/download/<audio id>` by recording. `fetch_tatoeba_audio.py`
+  once passed the sentence id to both, and whenever the CDN throttled, the app route
+  served recording number *sentence id* — a valid MP3 of plausible length, of some
+  other sentence, usually English. 84 of 190 "native recordings" were wrong, and the
+  phone played "It may not be as difficult to do that as you think" for «Вот мы
+  здесь.» Nothing downstream could catch it: size, duration and duration-to-length
+  correlation all looked right, and the first diagnosis blamed the device voice.
+  **A file's name and size say nothing about what it says.** When audio is fetched
+  or mapped, listen to a sample — `faster-whisper` in a scratch venv language-detects
+  a sentence in seconds, and the Windows `System.Speech` dictation recogniser tells
+  English from noise with no install at all.
 
 ## 24. Conventions
 
@@ -580,11 +593,12 @@ never an optimistic estimate.
 
 ## 27a. Tatoeba audio is licensed per recording
 
-The sentence text is uniformly CC BY 2.0 FR. **The recordings are not.** Of the 185
-fetched so far, 157 are CC BY 4.0, but 17 are CC BY-NC, 7 are CC BY-NC-ND, and 2 carry
-no stated licence at all. NC bars commercial use and ND arguably bars re-encoding the
-file. Filter on the licence field at fetch time rather than discovering this later;
-`fetch_tatoeba_audio.py` already reads it.
+The sentence text is uniformly CC BY 2.0 FR. **The recordings are not.** Of the 190
+fetched (refetched 2026-09-06 after the id fix in §23), 157 are CC BY 4.0 and 2 CC0,
+but 17 are CC BY-NC, 7 are CC BY-NC-ND, and 7 carry no stated licence at all. NC bars
+commercial use and ND arguably bars re-encoding the file. Filter on the licence field
+at fetch time rather than discovering this later; `fetch_tatoeba_audio.py` already
+reads it.
 
 ## 28. Topic classification
 
@@ -683,8 +697,8 @@ sentence from a right one — that is precisely why he is the one studying it.
 
 ## 30b. The speaking and listening foundations (ROADMAP Phase 2)
 
-Built 2026-09-06, ahead of the activities that will use them. Everything here is
-data or pure logic; no screen consumes it yet.
+Built 2026-09-06, ahead of the activities that use them. Everything here is data or
+pure logic; the native Hear and Say activities (§30c) are what consume it.
 
 **`payload.speech`** — `{ rows, speak, listen }`. `rows` is one shared list of
 `[ru, en, tokens, difficulty, source]`; `speak` and `listen` map a unit id to row
@@ -755,6 +769,39 @@ reach it from an existing screen and let the back arrow return.
 **A new data source:** it becomes rows in `corpus.db` via an adapter in
 `ingest_anki.py` (or a sibling tool writing the same schema). Word links, cloze
 exercises and examples then work for free. Never special-case a source in the app.
+
+## 30c. Hear and Say (ROADMAP Phase 5, native only)
+
+Two activities on top of §30b, both scored by `core/compare.js` and graded per word
+by `core/speech.js`, so a dropped word reads the same whether it was typed or said.
+
+- **Hear** — the recording plays on arrival, three counted replays, the learner
+  types (Latin is transliterated); the sentence and its meaning appear only after
+  the answer, the sentence word-linked. From the second chapter, one per quiz.
+- **Say** — English prompt, hold to speak, on-device `ru-RU` recognition (audio never
+  leaves the phone), three attempts with the alignment and the native recording
+  shown between them. Microphone permission is asked at the first Say, never at
+  launch; refused, or with no offline Russian model installed, the step says so and
+  offers Skip. From the third chapter, one per quiz.
+
+`SPEECH_MIX` in `core/questions.js` is the one place that says which chapter each
+joins from and how many per quiz; the steps are spliced into the QUIZ_N vocabulary
+questions, never first. The runner's contract grew two things for them: `record()`
+accepts `{ i, grade }` pairs when a view scored each word itself, and `skip()` marks
+a step that could not be attempted — it grades nothing and is left out of the total,
+so a phone with the microphone off scores the same quiz as one without.
+
+**Grades** (`gradeAlignment`): a right word is Good, or Easy when the whole sentence
+was right first time; a wrong or missing word is Again; an extra word grades
+nothing; a lemma met twice takes its worst. Every attempt lands in
+`speech.attempts` as kind `hear` or `say`; the You screen's Grammar section lists
+`speech.tagCounts`, which only Phase 4's feedback fills.
+
+The STT gate (P3.6) was decided 2026-09-06 on `data/stt/export-2026-09-06b.json`:
+on 2–4-word sentences the on-device recogniser is phonetically faithful to what a
+non-native says (perfect on 8 of 16 sentences, median best WER 17%), latency p50
+3.4 s / p95 4.4 s from release to result. Whisper (P3.7) is not needed. The latency
+is a design constraint for Say, not a defect to fix.
 
 ## 31. Verification
 

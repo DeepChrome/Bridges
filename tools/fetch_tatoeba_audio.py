@@ -30,18 +30,27 @@ from panel import fold  # noqa: E402
 
 RAW = ROOT / "data" / "raw" / "tatoeba"
 OUT = RAW / "audio"
-# The CDN serves the original upload; the app endpoint re-encodes it smaller. Measured
-# on the same sentence: 31,978 bytes from the CDN against 21,545 from the app route.
-URLS = ["https://audio.tatoeba.org/sentences/rus/{}.mp3",
-        "https://tatoeba.org/en/audio/download/{}"]
+# Two ids, and they are not interchangeable. The CDN path is keyed by SENTENCE id; the
+# app route is keyed by AUDIO id (the second column of sentences_with_audio). This
+# script once passed the sentence id to both, and whenever the CDN request failed
+# under throttling the app route happily served recording #<sentence id> — a real
+# file, right size, wrong sentence, usually English. It reached the phone as
+# «Вот мы здесь.» playing "It may not be as difficult to do that as you think."
+# Nothing in the pipeline could have caught it: the file was valid MP3 of the right
+# length. The bytes now have to be right at the source, so this is the one place
+# that must never pass the wrong id.
+CDN_URL = "https://audio.tatoeba.org/sentences/rus/{sid}.mp3"
+APP_URL = "https://tatoeba.org/en/audio/download/{aid}"
 UA = "Mozilla/5.0 (compatible; bridges-personal-study/1.0)"
 
 
-def fetch(sid, tries=3):
-    """Try each host, then retry — the app endpoint throttles under a fast loop."""
+def fetch(sid, aid, tries=3):
+    """The CDN by sentence id first, the app route by audio id second, then retry —
+    the app endpoint throttles under a fast loop."""
+    urls = [CDN_URL.format(sid=sid)] + ([APP_URL.format(aid=aid)] if aid else [])
     for attempt in range(tries):
-        for tpl in URLS:
-            req = urllib.request.Request(tpl.format(sid), headers={"User-Agent": UA})
+        for url in urls:
+            req = urllib.request.Request(url, headers={"User-Agent": UA})
             try:
                 with urllib.request.urlopen(req, timeout=30) as r:
                     data = r.read()
@@ -75,6 +84,7 @@ def load_index():
         # First recording wins; they are equivalent for our purposes.
         by_text.setdefault(key, {
             "sid": sid, "text": rus[sid],
+            "aid": int(p[1]) if len(p) > 1 and p[1].isdigit() else None,
             "user": p[2] if len(p) > 2 else "",
             "licence": p[3] if len(p) > 3 else "",
         })
@@ -87,6 +97,9 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--pause", type=float, default=0.4,
                     help="seconds between requests; be a good guest")
+    ap.add_argument("--refetch", action="store_true",
+                    help="download again even if the file exists (after the id bug, "
+                         "every file fetched before 2026-09-06 is suspect)")
     args = ap.parse_args()
 
     by_text = load_index()
@@ -108,11 +121,11 @@ def main():
     manifest, got, failed, skipped = {}, 0, 0, 0
     for n, (key, info) in enumerate(sorted(wanted.items()), 1):
         dest = OUT / f"{info['sid']}.mp3"
-        if dest.exists() and dest.stat().st_size > 500:
+        if not args.refetch and dest.exists() and dest.stat().st_size > 500:
             manifest[key] = info
             skipped += 1
             continue
-        data = fetch(info["sid"])
+        data = fetch(info["sid"], info.get("aid"))
         if data:
             dest.write_bytes(data)
             manifest[key] = info

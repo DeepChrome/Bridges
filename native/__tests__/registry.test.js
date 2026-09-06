@@ -49,6 +49,11 @@ describe("activity registry", () => {
     const quiz = Q.quizSteps(later, 0);
     expect(quiz.some((q) => q.kind === "hear")).toBe(true);
     qs.push(...quiz);
+    const speaking = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.say.fromStage
+                                        && (SPEECH.speak[s.core.id] || []).length).core;
+    const quiz2 = Q.quizSteps(speaking, 0);
+    expect(quiz2.some((q) => q.kind === "say")).toBe(true);
+    qs.push(...quiz2);
     expectViews(kindsOf(qs));
   });
 

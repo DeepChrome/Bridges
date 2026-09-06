@@ -14,6 +14,7 @@ import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row } from "../ui";
 import { say, cue, answerAudioText, stop as stopAudio } from "../audio";
 import { Linked } from "../words";
 import { Hear } from "../activities/Hear";
+import { Say } from "../activities/Say";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade } from "@core/fsrs";
 import { fold, translit, today, translitBack, firstSense } from "@core/util";
@@ -218,10 +219,11 @@ function HintSheet({ q, onClose }) {
    rather than a blank step in someone's lesson.
 
    The runner hands each view the same small contract: the question, and
-   { answered, picked, setPicked, record } — record(correct, words, grade) being
-   how any view reports a result. `words` is a list of lemma indices sharing one
-   grade, or of { i, grade } pairs when the view scored each word itself, as the
-   speech activities do. */
+   { answered, picked, setPicked, record, skip } — record(correct, words, grade)
+   being how any view reports a result. `words` is a list of lemma indices sharing
+   one grade, or of { i, grade } pairs when the view scored each word itself, as
+   the speech activities do. skip() is for a step that cannot be attempted at all
+   (no microphone): it grades nothing and leaves the score alone. */
 const asOptions = (q, r) => (
   <Options q={q} answered={r.answered} picked={r.picked}
            onPick={(i, o) => { r.setPicked(i); r.record(!!o.right); }} />
@@ -241,6 +243,7 @@ export const VIEWS = {
   type: (q, r) => <Typed q={q} answered={r.answered} onAnswer={r.record} />,
   match: (q, r) => <Match q={q} onDone={(ok, idxs) => r.record(ok, idxs)} />,
   hear: (q, r) => <Hear q={q} r={r} />,
+  say: (q, r) => <Say q={q} r={r} />,
 };
 
 /* ------------------------------------------------------------------ runner */
@@ -255,7 +258,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
   const [hintOpen, setHintOpen] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
   const results = useRef([]);
-  const tally = useRef({ right: 0, wrong: 0, helped: 0 });
+  const tally = useRef({ right: 0, wrong: 0, helped: 0, skipped: 0 });
   const sayTimer = useRef(null);
 
   const q = steps[at];
@@ -307,11 +310,21 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
     }
   };
 
+  /* A step that could not be attempted. Not a wrong answer: it is left out of the
+     total, so a phone with the microphone off scores the same quiz as one without. */
+  const skip = () => {
+    setAnswered(true);
+    setRight(null);
+    tally.current.skipped += 1;
+    results.current.push({ skipped: true, stage: q.stage, lesson: q.lesson, i: q.i });
+  };
+
   const next = () => {
     // Moving on cancels a reading that has not started yet.
     if (sayTimer.current) { clearTimeout(sayTimer.current); sayTimer.current = null; }
     if (at + 1 >= steps.length) {
-      onFinish({ ...tally.current, total: steps.length, results: results.current });
+      onFinish({ ...tally.current, total: steps.length - tally.current.skipped,
+                 results: results.current });
       return;
     }
     setAt(at + 1);
@@ -356,7 +369,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
         />
       ) : null}
 
-      {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record }) : null}
+      {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip }) : null}
 
       {answered ? (
         // Anchored to the foot of the screen against Screen's flexGrow, so Continue
@@ -364,17 +377,18 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
         // happened to end — the same rule Flows.js and the web runner already follow.
         // The gap lives on the wrapper, not the card.
         <View testID="verdict" style={{ marginTop: "auto", paddingTop: 18 }}>
-          <Card style={{ backgroundColor: right ? t.goodBg : t.badBg,
-                         borderColor: right ? t.good : t.bad }}>
+          <Card style={right === null ? undefined
+                       : { backgroundColor: right ? t.goodBg : t.badBg,
+                           borderColor: right ? t.good : t.bad }}>
             <Text style={{ color: t.ink, fontWeight: "700", fontSize: 16 }}>
-              {right ? "Correct" : "Not quite"}
+              {right === null ? "Skipped" : right ? "Correct" : "Not quite"}
             </Text>
-            {!right && (answer || q.answer) ? (
+            {right === false && (answer || q.answer) ? (
               <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>
                 {`Answer: ${answer ? answer.label : q.answer}`}
               </Text>
             ) : null}
-            <Btn kind={right ? "good" : "bad"} label="Continue"
+            <Btn kind={right === null ? "plain" : right ? "good" : "bad"} label="Continue"
                  style={{ marginTop: 12 }} onPress={next} />
           </Card>
         </View>

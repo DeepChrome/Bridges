@@ -53,7 +53,9 @@ jest.mock("expo-speech-recognition", () => {
   return {
     ExpoSpeechRecognitionModule: {
       start: (opts) => { stt.calls.push(opts); stt.emit("start", {}); },
-      stop: jest.fn(() => stt.emit("end", {})),
+      // stop() does not emit "end" here: on the device the final result arrives
+      // first and "end" after it, so a test emits them in that order itself.
+      stop: jest.fn(),
       abort: jest.fn(() => stt.emit("end", {})),
       requestPermissionsAsync: jest.fn(async () => ({ granted: true, status: "granted" })),
       getPermissionsAsync: jest.fn(async () => ({ granted: true, status: "granted" })),

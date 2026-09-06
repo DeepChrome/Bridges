@@ -20,6 +20,7 @@ export const QUIZ_N = 8;
    the numbers live here, in one place, rather than in each generator. */
 export const SPEECH_MIX = {
   hear: { fromStage: 1, perQuiz: 1 },
+  say: { fromStage: 2, perQuiz: 1 },
 };
 export const PRACTICE_N = 8;
 export const DRILL_N = 10;
@@ -156,6 +157,15 @@ export function makeQuestions(env) {
           kind: e.t, ask: "Type what you hear", prompt: "", cyr: true,
           autoplay: ru, target: ru, en, unit: e.unit,
           lemmas: sentenceLemmas(ru, IX),
+        };
+      }
+      /* The English is the prompt; the Russian is what the learner produces, so it
+         is neither shown nor played until an attempt has been made. */
+      case "say": {
+        const [ru, en] = e.row;
+        return {
+          kind: e.t, ask: "Say it in Russian", prompt: en, cyr: false,
+          target: ru, en, unit: e.unit, lemmas: sentenceLemmas(ru, IX),
         };
       }
       default:

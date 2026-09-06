@@ -335,7 +335,8 @@ const lessonWords = (u, i) => u.w.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
 const SPEECH = DATA.speech;
 const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH,
                           hasVoice: () => true });
-const answerable = (q) => q.options || q.typed || q.pairs || q.kind === "hear";
+const answerable = (q) =>
+  q.options || q.typed || q.pairs || q.kind === "hear" || q.kind === "say";
 
 group("lesson generation");
 {
@@ -350,7 +351,7 @@ group("lesson generation");
   ok(wordAt < qAt, "a word is always taught before it is asked");
 
   const quiz = Q.quizSteps(unit, 0);
-  const speechN = quiz.filter((q) => q.kind === "hear").length;
+  const speechN = quiz.filter((q) => q.kind === "hear" || q.kind === "say").length;
   ok(quiz.length === 8 + speechN, "a lesson quiz is 8 questions plus its speech steps",
      String(quiz.length));
   ok(quiz.every(answerable), "every quiz question is answerable");
@@ -395,8 +396,30 @@ group("hearing");
 
   // No pools at all — the web app today — means no speech steps, not blank ones.
   const dry = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice: () => true });
-  ok(dry.quizSteps(later, 0).every((q) => q.kind !== "hear"),
+  ok(dry.quizSteps(later, 0).every((q) => q.kind !== "hear" && q.kind !== "say"),
      "without pools a quiz is the eight vocabulary questions");
+}
+
+/* The speaking step joins a chapter later than hearing, and is prompted in English. */
+group("speaking");
+{
+  ok(SPEECH_MIX.say.fromStage > SPEECH_MIX.hear.fromStage,
+     "recognition before production: say starts after hear");
+  const early = STAGES[SPEECH_MIX.say.fromStage - 1].core;
+  ok(!Q.quizSteps(early, 0).some((q) => q.kind === "say"),
+     `${early.id}: no speaking step yet`);
+  const unit = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.say.fromStage
+                                  && (SPEECH.speak[s.core.id] || []).length).core;
+  const says = Q.quizSteps(unit, 0).filter((q) => q.kind === "say");
+  ok(says.length === SPEECH_MIX.say.perQuiz, `${unit.id}: one say step per quiz`,
+     String(says.length));
+  const s = says[0];
+  ok(s.prompt === s.en && !s.cyr, "the prompt is the English");
+  ok(!s.autoplay && !s.say, "nothing is played before the attempt — that would be copying");
+  ok(SPEECH.speak[unit.id].some((i) => SPEECH.rows[i][0] === s.target),
+     "the sentence comes from the unit's speaking pool");
+  ok(!!DATA.audio.files[fold(s.target)], "and has a recording to hear afterwards");
+  ok(s.lemmas.length > 0, "and lemmas to grade");
 }
 
 /* Per-word grades from an alignment: what the speech activities hand the scheduler. */

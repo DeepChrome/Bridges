@@ -1,0 +1,37 @@
+[
+  {"id": "case-1", "tag": "CASE", "target": "Я читаю книгу.", "transcript": "я читаю книга", "topic": "Accusative case", "lemmas": ["я", "читать", "книга"]},
+  {"id": "case-2", "tag": "CASE", "target": "Он живёт в Москве.", "transcript": "он живёт в москва", "topic": "Prepositional case", "lemmas": ["он", "жить", "в", "москва"]},
+  {"id": "case-3", "tag": "CASE", "target": "У меня нет времени.", "transcript": "у меня нет время", "topic": "Genitive after нет", "lemmas": ["у", "я", "нет", "время"]},
+  {"id": "case-4", "tag": "CASE", "target": "Она дала мне книгу.", "transcript": "она дала я книгу", "topic": "Dative case", "lemmas": ["она", "дать", "я", "книга"]},
+  {"id": "case-5", "tag": "CASE", "target": "Мы идём в школу.", "transcript": "мы идём в школа", "topic": "Accusative of direction", "lemmas": ["мы", "идти", "в", "школа"]},
+
+  {"id": "aspect-1", "tag": "ASPECT", "target": "Он вдруг закричал.", "transcript": "он вдруг кричал", "topic": "Aspect", "lemmas": ["он", "вдруг", "закричать"]},
+  {"id": "aspect-2", "tag": "ASPECT", "target": "Я наконец нашёл ключи.", "transcript": "я наконец находил ключи", "topic": "Aspect", "lemmas": ["я", "наконец", "найти", "ключ"]},
+  {"id": "aspect-3", "tag": "ASPECT", "target": "Она открыла окно и вышла.", "transcript": "она открывала окно и выходила", "topic": "Aspect", "lemmas": ["она", "открыть", "окно", "и", "выйти"]},
+  {"id": "aspect-4", "tag": "ASPECT", "target": "Дай мне, пожалуйста, ручку.", "transcript": "давай мне пожалуйста ручку", "topic": "Aspect in the imperative", "lemmas": ["дать", "я", "пожалуйста", "ручка"]},
+  {"id": "aspect-5", "tag": "ASPECT", "target": "Я хочу купить машину.", "transcript": "я хочу покупать машину", "topic": "Aspect", "lemmas": ["я", "хотеть", "купить", "машина"]},
+
+  {"id": "gender-1", "tag": "GENDER_AGREE", "target": "Моя мама работает в школе.", "transcript": "мой мама работает в школе", "topic": "Gender agreement", "lemmas": ["мой", "мама", "работать", "в", "школа"]},
+  {"id": "gender-2", "tag": "GENDER_AGREE", "target": "Это красивая девушка.", "transcript": "это красивый девушка", "topic": "Gender agreement", "lemmas": ["это", "красивый", "девушка"]},
+  {"id": "gender-3", "tag": "GENDER_AGREE", "target": "Она пришла домой.", "transcript": "она пришёл домой", "topic": "Past tense agreement", "lemmas": ["она", "прийти", "домой"]},
+  {"id": "gender-4", "tag": "GENDER_AGREE", "target": "Новый дом стоит на улице.", "transcript": "новая дом стоит на улице", "topic": "Gender agreement", "lemmas": ["новый", "дом", "стоять", "на", "улица"]},
+  {"id": "gender-5", "tag": "GENDER_AGREE", "target": "Мой брат читал книгу.", "transcript": "мой брат читала книгу", "topic": "Past tense agreement", "lemmas": ["мой", "брат", "читать", "книга"]},
+
+  {"id": "word-1", "tag": "WRONG_WORD", "target": "Я ем суп.", "transcript": "я пью суп", "topic": null, "lemmas": ["я", "есть", "суп"]},
+  {"id": "word-2", "tag": "WRONG_WORD", "target": "Он идёт на работу пешком.", "transcript": "он едет на работу пешком", "topic": "Verbs of motion", "lemmas": ["он", "идти", "на", "работа", "пешком"]},
+  {"id": "word-3", "tag": "WRONG_WORD", "target": "Я слушаю музыку.", "transcript": "я слышу музыку", "topic": null, "lemmas": ["я", "слушать", "музыка"]},
+  {"id": "word-4", "tag": "WRONG_WORD", "target": "Мы смотрим фильм.", "transcript": "мы видим фильм", "topic": null, "lemmas": ["мы", "смотреть", "фильм"]},
+  {"id": "word-5", "tag": "WRONG_WORD", "target": "Он знает этот город.", "transcript": "он умеет этот город", "topic": null, "lemmas": ["он", "знать", "этот", "город"]},
+
+  {"id": "order-1", "tag": "WORD_ORDER", "target": "Я иду в школу.", "transcript": "я иду школу в", "topic": null, "lemmas": ["я", "идти", "в", "школа"]},
+  {"id": "order-2", "tag": "WORD_ORDER", "target": "Я не понимаю.", "transcript": "я понимаю не", "topic": "Negation", "lemmas": ["я", "не", "понимать"]},
+  {"id": "order-3", "tag": "WORD_ORDER", "target": "У меня есть собака.", "transcript": "меня у есть собака", "topic": "Possession with у", "lemmas": ["у", "я", "есть", "собака"]},
+  {"id": "order-4", "tag": "WORD_ORDER", "target": "Мне нравится этот город.", "transcript": "мне этот нравится город", "topic": null, "lemmas": ["я", "нравиться", "этот", "город"]},
+  {"id": "order-5", "tag": "WORD_ORDER", "target": "Я очень люблю тебя.", "transcript": "я люблю очень тебя", "topic": null, "lemmas": ["я", "очень", "любить", "ты"]},
+
+  {"id": "ok-1", "tag": null, "target": "Я не знаю.", "transcript": "я не знаю", "topic": null, "lemmas": ["я", "не", "знать"]},
+  {"id": "ok-2", "tag": null, "target": "Где ты живёшь?", "transcript": "где ты живёшь", "topic": null, "lemmas": ["где", "ты", "жить"]},
+  {"id": "ok-3", "tag": null, "target": "Мы вчера ходили в кино.", "transcript": "мы вчера ходили в кино", "topic": "Verbs of motion", "lemmas": ["мы", "вчера", "ходить", "в", "кино"]},
+  {"id": "ok-4", "tag": null, "target": "У него есть сестра.", "transcript": "у него есть сестра", "topic": "Possession with у", "lemmas": ["у", "он", "есть", "сестра"]},
+  {"id": "ok-5", "tag": null, "target": "Сегодня хорошая погода.", "transcript": "сегодня хорошая погода", "topic": null, "lemmas": ["сегодня", "хороший", "погода"]}
+]

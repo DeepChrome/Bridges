@@ -22,7 +22,9 @@ const nf = (n) => n.toLocaleString("en-US");
 /* Set to rb.state.<profileId> once a profile is chosen. The bare key is only read
    during adoption of a pre-profile save. */
 let KEY = "rb.state";
-const SCHEMA_VERSION = 4;
+/* SCHEMA_VERSION, MIGRATIONS and migrate come from core/state.js, inlined above this
+   file — shared with the native app since v5 so an exported profile imports into
+   either without two copies of the migration steps having to agree. */
 const LEGACY_KEYS = ["rb.v2", "rb.v1"];   // read once, then migrated forward
 
 const DEFAULTS = {
@@ -40,52 +42,8 @@ const DEFAULTS = {
   xp: 0,
   day: null,
   streak: 0,
+  speech: speechDefault(),   // the speaking activities' record; never audio
 };
-/* Migrations are explicit and forward-only. Each step takes the previous shape and
-   returns the next; unknown or corrupt state falls back to defaults rather than
-   throwing away a partially-readable save. */
-const MIGRATIONS = {
-  // v1 (rb.v1) used Leitner counters: seen[word] = {n, due}. FSRS needs stability and
-  // difficulty, which cannot be derived from a repetition count — so reps are kept as
-  // history and the word re-enters scheduling as new rather than inventing a memory
-  // state that was never measured.
-  1: (s) => {
-    const seen = {};
-    for (const w in (s.seen || {})) {
-      const old = s.seen[w] || {};
-      seen[w] = { s: 0, d: 0, due: old.due || 0, last: 0, reps: old.n || 0, lapses: 0 };
-    }
-    return Object.assign({}, s, { seen: seen, trouble: {}, pinned: [], v: 2 });
-  },
-  // v2 -> v3 only adds fields that DEFAULTS already supplies.
-  2: (s) => Object.assign({}, s, { v: 3 }),
-  // v3 -> v4: a lesson stopped being a single score and became three components.
-  // An existing score means the quiz was passed, which means the words were seen.
-  3: (s) => {
-    const unit = {};
-    for (const id in (s.unit || {})) {
-      const u = s.unit[id];
-      const lessons = {};
-      for (const k in (u.lessons || {})) {
-        const old = u.lessons[k];
-        lessons[k] = typeof old === "number" ? { v: true, q: old } : old;
-      }
-      unit[id] = Object.assign({}, u, { lessons: lessons });
-    }
-    return Object.assign({}, s, { unit: unit, v: 4 });
-  },
-};
-
-function migrate(raw, from) {
-  let s = raw, v = from;
-  while (v < SCHEMA_VERSION) {
-    const step = MIGRATIONS[v];
-    if (!step) break;
-    s = step(s);
-    v = s.v || v + 1;
-  }
-  return s;
-}
 
 function loadState() {
   let raw = null, version = SCHEMA_VERSION;

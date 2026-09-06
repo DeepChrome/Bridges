@@ -15,6 +15,8 @@ import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN 
   from "../core/util.js";
 import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
   from "../core/fsrs.js";
+import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, speechDefault, ATTEMPT_CAP }
+  from "../core/state.js";
 import { makeQuestions, DRILL_TYPES } from "../core/questions.js";
 import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
@@ -168,6 +170,56 @@ group("grading");
   ok(easy.due > good.due, "grade 4 handed in directly schedules further out than 3");
   ok(applyGrade({}, {}, "да", 9, 0).card.due === easy.due, "grades clamp to 4");
   ok(applyGrade({}, {}, "да", 0, 0).card.lapses === 1, "and to 1");
+}
+
+/* ------------------------------------------------------------ state */
+/* The schema lives in core since v5 so the two apps run one set of migrations. */
+
+group("state schema");
+{
+  ok(SCHEMA_VERSION === 5, "schema is at 5", String(SCHEMA_VERSION));
+  ok([1, 2, 3, 4].every((k) => typeof MIGRATIONS[k] === "function"),
+     "a migration step exists from every earlier version");
+
+  // A real v4 save: FSRS cards, component lessons, no speech slot.
+  const v4 = {
+    v: 4, seen: { книга: { s: 3, d: 5, due: 10, last: 6, reps: 3, lapses: 0 } },
+    trouble: { стол: 2 }, pinned: ["дом"], xp: 42, streak: 5,
+    unit: { core1: { lessons: { 0: { v: true, q: 90 } }, video: true } },
+  };
+  const v5 = migrate(v4, 4);
+  ok(v5.v === 5, "v4 migrates to v5");
+  ok(Array.isArray(v5.speech.attempts) && v5.speech.attempts.length === 0 &&
+     Object.keys(v5.speech.tagCounts).length === 0, "with an empty speech slot");
+  ok(v5.seen["книга"].reps === 3 && v5.trouble["стол"] === 2 && v5.pinned[0] === "дом" &&
+     v5.xp === 42, "and everything else untouched");
+  ok(v5.unit.core1.lessons[0].q === 90, "lesson components survive");
+  ok(v4.speech === undefined, "the input was not mutated");
+
+  // A save that somehow already carries a speech slot keeps it.
+  const kept = migrate({ v: 4, speech: { attempts: [{ ts: 1 }], tagCounts: { CASE: 2 } } }, 4);
+  ok(kept.speech.attempts.length === 1 && kept.speech.tagCounts.CASE === 2,
+     "an existing speech slot is kept, not reset");
+
+  // The oldest shape still comes all the way forward.
+  const v1 = migrate({ seen: { да: { n: 4, due: 3 } }, unit: { core1: { lessons: { 0: 80 } } } }, 1);
+  ok(v1.v === 5 && v1.seen["да"].reps === 4 && v1.unit.core1.lessons[0].q === 80 && v1.speech,
+     "v1 → v5 in one pass keeps history and gains the slot");
+
+  // recordAttempt: newest ATTEMPT_CAP kept, tags counted, nothing mutated.
+  let sp = speechDefault();
+  for (let i = 0; i < ATTEMPT_CAP + 25; i++) {
+    sp = recordAttempt(sp, { ts: i, key: "k", kind: "say", tags: i % 2 ? ["CASE"] : [] });
+  }
+  ok(sp.attempts.length === ATTEMPT_CAP, "attempts are capped", String(sp.attempts.length));
+  ok(sp.attempts[0].ts === 25 && sp.attempts[ATTEMPT_CAP - 1].ts === ATTEMPT_CAP + 24,
+     "and it is the oldest that go");
+  ok(sp.tagCounts.CASE === Math.floor((ATTEMPT_CAP + 25) / 2),
+     "every tag was counted, including from dropped attempts", String(sp.tagCounts.CASE));
+  const base = speechDefault();
+  const one = recordAttempt(base, { tags: ["ASPECT", "ASPECT"] });
+  ok(base.attempts.length === 0 && one.attempts.length === 1 && one.tagCounts.ASPECT === 2,
+     "recordAttempt returns a new object and counts repeated tags");
 }
 
 /* ------------------------------------------------------------- artwork */

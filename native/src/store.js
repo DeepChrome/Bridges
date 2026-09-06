@@ -8,8 +8,12 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { today } from "@core/util";
+import { SCHEMA_VERSION, migrate, speechDefault } from "@core/state";
 
-export const SCHEMA_VERSION = 4;
+/* The schema and its migrations live in core/state.js since v5, shared with the web
+   app so an exported profile imports into either without two copies of the steps
+   having to agree. Re-exported: callers here import them from the store. */
+export { SCHEMA_VERSION, migrate };
 export const ACC_KEY = "rb.accounts";
 const stateKey = (id) => "rb.state." + id;
 
@@ -29,45 +33,8 @@ export const DEFAULTS = {
   xp: 0,
   day: null,
   streak: 0,
+  speech: speechDefault(),   // the speaking activities' record; never audio
 };
-
-/* Forward-only, and identical to the web migrations. A save that cannot be read is
-   replaced by defaults rather than throwing away a partially readable one. */
-const MIGRATIONS = {
-  1: (s) => {
-    const seen = {};
-    for (const w in (s.seen || {})) {
-      const old = s.seen[w] || {};
-      seen[w] = { s: 0, d: 0, due: old.due || 0, last: 0, reps: old.n || 0, lapses: 0 };
-    }
-    return { ...s, seen, trouble: {}, pinned: [], v: 2 };
-  },
-  2: (s) => ({ ...s, v: 3 }),
-  3: (s) => {
-    const unit = {};
-    for (const id in (s.unit || {})) {
-      const u = s.unit[id];
-      const lessons = {};
-      for (const k in (u.lessons || {})) {
-        const old = u.lessons[k];
-        lessons[k] = typeof old === "number" ? { v: true, q: old } : old;
-      }
-      unit[id] = { ...u, lessons };
-    }
-    return { ...s, unit, v: 4 };
-  },
-};
-
-export function migrate(raw, from) {
-  let s = raw, v = from;
-  while (v < SCHEMA_VERSION) {
-    const step = MIGRATIONS[v];
-    if (!step) break;
-    s = step(s);
-    v = s.v || v + 1;
-  }
-  return s;
-}
 
 export function normalise(raw, assumedVersion) {
   if (!raw || typeof raw !== "object") return { ...DEFAULTS };

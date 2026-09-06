@@ -529,7 +529,8 @@ def main():
     # on the way in rather than the logic being duplicated for each platform.
     # forms.js after util.js: it calls fold() and firstSense() at run time, and the
     # concatenation order is the only thing standing in for module resolution.
-    core_files = ["util.js", "paradigm.js", "entry.js", "forms.js", "search.js",
+    core_files = ["util.js", "state.js", "compare.js", "errortags.js",
+                  "paradigm.js", "entry.js", "forms.js", "search.js",
                   "fsrs.js", "icons.js", "avatars.js"]
     core = "\n".join(strip_modules((ROOT / "core" / f).read_text(encoding="utf-8"))
                      for f in core_files if (ROOT / "core" / f).exists())

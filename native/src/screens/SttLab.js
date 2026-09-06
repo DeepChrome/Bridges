@@ -12,7 +12,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Share } from "react-native";
 import {
   ExpoSpeechRecognitionModule, useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
@@ -133,6 +133,22 @@ export default function SttLab() {
     setPhase("idle"); setLive(""); setVerdict(null); setError(null);
   };
 
+  /* The whole speech slot as JSON, through the share sheet — no file system
+     permission, no server, and tools/stt_report.py reads exactly this shape. */
+  const exportAttempts = async () => {
+    const payload = JSON.stringify({
+      exported: new Date().toISOString(),
+      set: STT_SET.length,
+      attempts: (st.speech && st.speech.attempts) || [],
+      tagCounts: (st.speech && st.speech.tagCounts) || {},
+    });
+    try {
+      await Share.share({ message: payload, title: "bridges-stt-export.json" });
+    } catch (e) {
+      setError(`export failed — ${e.message || e}`);
+    }
+  };
+
   if (!st.dev) {
     return (
       <Screen>
@@ -199,6 +215,7 @@ export default function SttLab() {
           ? <Btn kind="bad" label="Stop" onPress={stop} />
           : <Btn kind="pri" label={verdict || error ? "Again" : "Speak"} onPress={speak} />}
         <Btn label="Next sentence" onPress={next} />
+        <Btn kind="ghost" label={`Export ${logged} attempts`} onPress={exportAttempts} />
       </View>
     </Screen>
   );

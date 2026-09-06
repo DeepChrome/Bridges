@@ -5,6 +5,7 @@
    Own file, per the timeout note in screens.test.js. */
 
 import React from "react";
+import { Share } from "react-native";
 import { render, screen, fireEvent, act } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -86,5 +87,22 @@ describe("STT lab", () => {
     expect(await screen.findByText(/no-speech/)).toBeTruthy();
     expect(screen.getByText("1 logged")).toBeTruthy();
     expect(screen.getByText("Again")).toBeTruthy();
+  });
+
+  it("exports the speech slot as JSON through the share sheet", async () => {
+    const share = jest.spyOn(Share, "share").mockResolvedValue({ action: "sharedAction" });
+    await withLab({
+      dev: true,
+      speech: { attempts: [{ kind: "lab", target: "Вот это да!", transcript: "вот это да",
+                             wer: 0, latencyMs: 900 }], tagCounts: {} },
+    });
+    await screen.findByText(STT_SET[0].ru);
+    await act(async () => { fireEvent.press(screen.getByText("Export 1 attempts")); });
+    expect(share).toHaveBeenCalledTimes(1);
+    const sent = JSON.parse(share.mock.calls[0][0].message);
+    expect(sent.attempts).toHaveLength(1);
+    expect(sent.attempts[0]).toMatchObject({ kind: "lab", wer: 0 });
+    expect(sent.set).toBe(30);
+    share.mockRestore();
   });
 });

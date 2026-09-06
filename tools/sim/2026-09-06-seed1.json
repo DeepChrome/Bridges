@@ -1,0 +1,251 @@
+[
+ {
+  "profile": "quick",
+  "seed": 1000,
+  "metrics": {
+   "recurrence": {
+    "quizQuestions": 433,
+    "askedAgain": 309,
+    "backToBack": 27,
+    "within3": 84,
+    "sameQuizTwice": 117,
+    "medianGap": 7,
+    "quizzes": 50
+   },
+   "mix": {
+    "choose-ru": 69,
+    "cloze": 138,
+    "listen": 65,
+    "choose-en": 56,
+    "type": 67,
+    "hear": 29,
+    "say": 9
+   },
+   "chapters": [
+    {
+     "chapter": 1,
+     "title": "People and Time",
+     "lessons": 16,
+     "newWordsPerLesson": 6.8,
+     "quizAccuracy": 0.86,
+     "passFirstTry": 12,
+     "failedThrice": 1,
+     "speechSteps": 0,
+     "speechTokensMean": null,
+     "speechTokensMax": null
+    },
+    {
+     "chapter": 2,
+     "title": "Home and Table",
+     "lessons": 16,
+     "newWordsPerLesson": 6.7,
+     "quizAccuracy": 0.89,
+     "passFirstTry": 13,
+     "failedThrice": 1,
+     "speechSteps": 20,
+     "speechTokensMean": 5.2,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 3,
+     "title": "Town and Travel",
+     "lessons": 8,
+     "newWordsPerLesson": 6.6,
+     "quizAccuracy": 0.84,
+     "passFirstTry": 7,
+     "failedThrice": 0,
+     "speechSteps": 18,
+     "speechTokensMean": 5.2,
+     "speechTokensMax": 7
+    }
+   ],
+   "words": {
+    "taught": 272,
+    "everAsked": 272,
+    "taughtButNeverAsked": 0,
+    "inSeen": 282,
+    "trouble": 2,
+    "leeches": 3
+   },
+   "review": {
+    "simulatedDays": 20,
+    "dueAtEnd": 200,
+    "duePerDay": 10
+   },
+   "lessons": {
+    "total": 40,
+    "passed": 38,
+    "retakes": 10,
+    "shortQuizzes": 2
+   },
+   "structural": 0
+  },
+  "structural": []
+ },
+ {
+  "profile": "steady",
+  "seed": 1001,
+  "metrics": {
+   "recurrence": {
+    "quizQuestions": 578,
+    "askedAgain": 515,
+    "backToBack": 50,
+    "within3": 130,
+    "sameQuizTwice": 170,
+    "medianGap": 7,
+    "quizzes": 66
+   },
+   "mix": {
+    "choose-ru": 77,
+    "cloze": 199,
+    "type": 80,
+    "listen": 82,
+    "choose-en": 85,
+    "hear": 42,
+    "say": 13
+   },
+   "chapters": [
+    {
+     "chapter": 1,
+     "title": "People and Time",
+     "lessons": 16,
+     "newWordsPerLesson": 6.8,
+     "quizAccuracy": 0.85,
+     "passFirstTry": 9,
+     "failedThrice": 0,
+     "speechSteps": 0,
+     "speechTokensMean": null,
+     "speechTokensMax": null
+    },
+    {
+     "chapter": 2,
+     "title": "Home and Table",
+     "lessons": 16,
+     "newWordsPerLesson": 6.6,
+     "quizAccuracy": 0.81,
+     "passFirstTry": 8,
+     "failedThrice": 2,
+     "speechSteps": 29,
+     "speechTokensMean": 5,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 3,
+     "title": "Town and Travel",
+     "lessons": 8,
+     "newWordsPerLesson": 6.5,
+     "quizAccuracy": 0.77,
+     "passFirstTry": 4,
+     "failedThrice": 1,
+     "speechSteps": 26,
+     "speechTokensMean": 5.2,
+     "speechTokensMax": 7
+    }
+   ],
+   "words": {
+    "taught": 272,
+    "everAsked": 272,
+    "taughtButNeverAsked": 0,
+    "inSeen": 283,
+    "trouble": 9,
+    "leeches": 14
+   },
+   "review": {
+    "simulatedDays": 20,
+    "dueAtEnd": 217,
+    "duePerDay": 10.8
+   },
+   "lessons": {
+    "total": 40,
+    "passed": 37,
+    "retakes": 26,
+    "shortQuizzes": 2
+   },
+   "structural": 0
+  },
+  "structural": []
+ },
+ {
+  "profile": "struggling",
+  "seed": 1002,
+  "metrics": {
+   "recurrence": {
+    "quizQuestions": 882,
+    "askedAgain": 901,
+    "backToBack": 66,
+    "within3": 205,
+    "sameQuizTwice": 260,
+    "medianGap": 7,
+    "quizzes": 101
+   },
+   "mix": {
+    "cloze": 289,
+    "choose-ru": 139,
+    "type": 128,
+    "choose-en": 128,
+    "listen": 113,
+    "hear": 63,
+    "say": 22
+   },
+   "chapters": [
+    {
+     "chapter": 1,
+     "title": "People and Time",
+     "lessons": 16,
+     "newWordsPerLesson": 6.8,
+     "quizAccuracy": 0.67,
+     "passFirstTry": 3,
+     "failedThrice": 7,
+     "speechSteps": 0,
+     "speechTokensMean": null,
+     "speechTokensMax": null
+    },
+    {
+     "chapter": 2,
+     "title": "Home and Table",
+     "lessons": 16,
+     "newWordsPerLesson": 6.6,
+     "quizAccuracy": 0.66,
+     "passFirstTry": 3,
+     "failedThrice": 12,
+     "speechSteps": 41,
+     "speechTokensMean": 4.7,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 3,
+     "title": "Town and Travel",
+     "lessons": 8,
+     "newWordsPerLesson": 6.4,
+     "quizAccuracy": 0.6,
+     "passFirstTry": 1,
+     "failedThrice": 6,
+     "speechSteps": 44,
+     "speechTokensMean": 5,
+     "speechTokensMax": 8
+    }
+   ],
+   "words": {
+    "taught": 272,
+    "everAsked": 272,
+    "taughtButNeverAsked": 0,
+    "inSeen": 289,
+    "trouble": 69,
+    "leeches": 76
+   },
+   "review": {
+    "simulatedDays": 20,
+    "dueAtEnd": 260,
+    "duePerDay": 13
+   },
+   "lessons": {
+    "total": 40,
+    "passed": 15,
+    "retakes": 61,
+    "shortQuizzes": 2
+   },
+   "structural": 0
+  },
+  "structural": []
+ }
+]

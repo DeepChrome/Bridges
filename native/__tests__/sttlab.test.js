@@ -13,6 +13,13 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import SttLab from "../src/screens/SttLab";
 import { STT_SET } from "../src/sttset";
+import { AUDIO } from "../src/data";
+import { fold } from "@core/util";
+
+// What the recogniser would return for the first sentence: no case, no punctuation.
+const first = STT_SET[0].ru;
+const firstHeard = fold(first).replace(/[^а-яё\s-]/g, "").trim();
+const firstWord = firstHeard.split(/\s+/)[0];
 
 const base = {
   v: 5, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
@@ -40,12 +47,18 @@ afterEach(async () => {
 });
 
 describe("STT lab", () => {
-  it("has a thirty-sentence set, six per unit, all short", () => {
+  it("has thirty sentences of two to four words, each with a recording", () => {
     expect(STT_SET).toHaveLength(30);
-    const perUnit = {};
-    for (const s of STT_SET) perUnit[s.unit] = (perUnit[s.unit] || 0) + 1;
-    expect(Object.values(perUnit)).toEqual([6, 6, 6, 6, 6]);
-    for (const s of STT_SET) expect(s.ru.split(/\s+/).length).toBeLessThanOrEqual(10);
+    expect(new Set(STT_SET.map((s) => fold(s.ru))).size).toBe(30);
+    for (const s of STT_SET) {
+      const n = (fold(s.ru).match(/[а-яё]+(?:-[а-яё]+)*/g) || []).length;
+      expect(n).toBeGreaterThanOrEqual(2);
+      expect(n).toBeLessThanOrEqual(4);
+      expect(s.ru).not.toMatch(/\d|["«»]/);
+      // The point of the set: the learner hears a native recording before reading.
+      expect(AUDIO[fold(s.ru)]).toBeTruthy();
+      expect(["t", "l", "y", "c"]).toContain(s.src);
+    }
   });
 
   it("refuses to render without developer mode", async () => {
@@ -64,14 +77,14 @@ describe("STT lab", () => {
       lang: "ru-RU", requiresOnDeviceRecognition: true, interimResults: true,
     });
 
-    // A partial result shows live; the final one is scored. The set's first sentence
-    // is «Вот это да!»; the recogniser drops the punctuation, compare() does not mind.
+    // A partial result shows live; the final one is scored. The recogniser drops
+    // case and punctuation; compare() does not mind.
     await act(async () => {
-      global.__stt.emit("result", { isFinal: false, results: [{ transcript: "вот", confidence: 0.5 }] });
+      global.__stt.emit("result", { isFinal: false, results: [{ transcript: firstWord, confidence: 0.5 }] });
     });
-    expect(screen.getByText("вот")).toBeTruthy();
+    expect(screen.getByText(firstWord)).toBeTruthy();
     await act(async () => {
-      global.__stt.emit("result", { isFinal: true, results: [{ transcript: "вот это да", confidence: 0.9 }] });
+      global.__stt.emit("result", { isFinal: true, results: [{ transcript: firstHeard, confidence: 0.9 }] });
     });
     expect(await screen.findByText("WER 0%")).toBeTruthy();
     expect(screen.getByText("1 logged")).toBeTruthy();
@@ -93,7 +106,7 @@ describe("STT lab", () => {
     const share = jest.spyOn(Share, "share").mockResolvedValue({ action: "sharedAction" });
     await withLab({
       dev: true,
-      speech: { attempts: [{ kind: "lab", target: "Вот это да!", transcript: "вот это да",
+      speech: { attempts: [{ kind: "lab", target: first, transcript: firstHeard,
                              wer: 0, latencyMs: 900 }], tagCounts: {} },
     });
     await screen.findByText(STT_SET[0].ru);

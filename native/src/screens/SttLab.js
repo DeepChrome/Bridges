@@ -25,6 +25,7 @@ import { recordAttempt } from "@core/state";
 import { fold } from "@core/util";
 
 const LANG = "ru-RU";
+const SRC_NAME = { t: "Tatoeba", l: "Languages on Fire", y: "Yandex", c: "Core 5000" };
 
 /* One word of the alignment, coloured by what happened to it. */
 function Word({ a }) {
@@ -92,7 +93,7 @@ export default function SttLab() {
     const res = compare(transcript, item.ru);
     setVerdict({ transcript, res, latencyMs });
     setPhase("done");
-    log({ ts: Date.now(), key: fold(item.ru), kind: "lab", i, unit: item.unit,
+    log({ ts: Date.now(), key: fold(item.ru), kind: "lab", i, src: item.src,
           transcript, target: item.ru, wer: res.wer, tags: [], grade: null,
           latencyMs, engine: onDevice ? "device" : "network", onDevice });
   }, [item, i, log, onDevice]);
@@ -115,7 +116,7 @@ export default function SttLab() {
         : "The recogniser refused this language even over the network.");
     }
     setPhase("idle");
-    log({ ts: Date.now(), key: fold(item.ru), kind: "lab", i, unit: item.unit,
+    log({ ts: Date.now(), key: fold(item.ru), kind: "lab", i, src: item.src,
           transcript: "", target: item.ru, wer: 1, tags: [], grade: null, latencyMs,
           engine: onDevice ? "device" : "network", onDevice, error: ev.error });
   });
@@ -193,7 +194,7 @@ export default function SttLab() {
     <Screen fill>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
         <Pill tone="brand">{`${i + 1}/${STT_SET.length}`}</Pill>
-        <Pill>{item.unit}</Pill>
+        <Pill>{SRC_NAME[item.src] || item.src}</Pill>
         <View style={{ flex: 1 }} />
         <Muted size={12}>{`${logged} logged`}</Muted>
       </View>

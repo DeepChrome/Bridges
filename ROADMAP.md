@@ -112,6 +112,15 @@ can overrule any of them.
   and reported as a histogram on every build; the payload carries only the pooled
   subset (11,608 rows for both pools), since nothing consumes the rest and the native
   payload grew 1.7 MB as it is.
+- **A18 — P3.5 test set, revised.** The set as specified (difficulty 0, 3–10 tokens,
+  five units) was read on the phone on 2026-09-06 and measured the owner's reading,
+  not the recogniser: median WER 67% on sentences such as «Институт я окончила с
+  отличием», with transcripts phonetically faithful to what was said. A non-native
+  beginner cannot read those, so the number said nothing about the engine. Replaced by
+  thirty sentences of 2–4 words, every word in the top-300 lemmas, each with a native
+  recording to hear before reading (`native/src/sttset.js` states the selection). The
+  P3.6 gate is decided on this set; the first export is kept as
+  `data/stt/export-2026-09-06.json` for the record.
 
 ---
 

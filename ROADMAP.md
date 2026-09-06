@@ -84,6 +84,25 @@ can overrule any of them.
 - **A11 — Commit trailer.** Commits carry
   `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` per the session's
   attribution instruction.
+- **A12 — P2.6 key.** The roadmap says "keyed on `q.t`". The generators' step objects
+  carry `t`, but what `present()` hands the runner carries `kind`; the registry is
+  keyed on `kind`. Same intent, the field that actually exists.
+- **A13 — P2.3 and Core 5000.** "Confirmed-human or Yandex" read literally drops the
+  78% of recordings that are Core 5000, leaving 1,732 listening prompts instead of
+  10,811. The stated reason for the exclusion is quality, and Core 5000's 64 kbps /
+  48 kHz matches Yandex; whether a human or a voice recorded it is unverified, not
+  known. Core 5000 stays in the listening pool; Google TTS and "other" are excluded;
+  the build prints the count without Core 5000 beside the pool so the owner can pull
+  it with one constant.
+- **A14 — P2.4 extraction done inside Phase 2**, reversing A7's deferral: the
+  roadmap's own "done when" required the v4→v5 step to be tested from
+  `core.test.mjs`, which only makes sense if the step lives in `core/`. Both apps now
+  run `core/state.js`; the web app dropped its private copies to avoid a collision in
+  the single script scope.
+- **A15 — P2.1 shipping.** Difficulty and unit are computed for all 13,517 sentences
+  and reported as a histogram on every build; the payload carries only the pooled
+  subset (11,608 rows for both pools), since nothing consumes the rest and the native
+  payload grew 1.7 MB as it is.
 
 ---
 

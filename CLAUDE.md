@@ -354,22 +354,41 @@ drawn at all. `native/__tests__/path.test.js` is the pattern.
 bridges/                          (directory is still named russian-blocks on disk)
   CLAUDE.md            <- this file
   PLAN.md              <- status, phases, known gaps
+  ROADMAP.md           <- the speaking/listening roadmap and its execution log
+  BACKUP.md            <- what git does not hold, and where the second copy is
+  core/                <- shared by both apps; ES modules, no DOM, no storage
+    util.js            <- fold, translit, tokens — the join key for everything
+    fsrs.js            <- FSRS-4.5, gradeFor, applyGrade
+    state.js           <- learner-state schema, migrations, recordAttempt
+    questions.js       <- question generation for lessons, tests and drills
+    search.js          <- both dictionary tiers, one ranking
+    entry.js paradigm.js forms.js   <- entry hydration, paradigm rebuild, form names
+    compare.js         <- transcript vs target, word-aligned through fold()
+    errortags.js       <- the closed list of learner-error tags
+    icons.js avatars.js
+  native/              <- THE PRODUCT (Expo / React Native); see native/README.md
+    src/screens/       <- Learn, Unit, Flows, Run (the runner + VIEWS registry), You…
+    __tests__/         <- jest; path.test.js and registry.test.js are the patterns
+    eas.json app.json  <- build profiles; Android package and mic permission
   tools/
     ingest_anki.py     <- Anki .anki2 -> data/corpus.db  (per-notetype adapters)
     build_lexicon.py   <- OpenRussian CSVs + curated -> data/lexicon.db
+    ingest_tatoeba.py  <- Tatoeba dumps -> data/examples.db (never corpus.db)
     build_topics.py    <- corpus + lexicon -> data/topics.db (units + path layout)
-    build_site.py      <- everything -> site/  (the assembler; owns the templates)
+    build_audio.py     <- Anki media -> site/audio + data/audio.json (best source first)
+    build_site.py      <- everything -> site/ and native/assets/data.json
     make_icons.py      <- PNG icons, hand-rolled with zlib (no image library)
     panel.py           <- form -> lemma + paradigm tables + examples (shared logic)
     lookup.py          <- CLI word panel, for checking data without a browser
     smoke.js           <- headless checks against the built page
     deploy.ps1         <- rebuild + Netlify deploy
-    app/               <- APP SOURCES (edit these, never site/)
+    app/               <- WEB APP SOURCES (edit these, never site/); on hold since 2026-09-05
       shell.html       <- top bar, five <main> screens, bottom tab bar
       app.css          <- design tokens, both themes, layout
+      accounts.js      <- profiles and the gate
       app.js           <- store, router, path, practice, dictionary, profile, settings
       lessons.js       <- lesson engine and the activity types
-      fsrs.js          <- FSRS-4.5 scheduler
+      drills.js        <- grammar drills
       manifest.json    <- PWA manifest
       sw.js            <- service worker (@BUILD@ stamped by the assembler)
   data/
@@ -661,6 +680,55 @@ Three rules hold this honest:
 Never fabricate example sentences. Attested Russian from a licensed corpus is a
 different thing from generated Russian, and the learner cannot tell a subtly wrong
 sentence from a right one — that is precisely why he is the one studying it.
+
+## 30b. The speaking and listening foundations (ROADMAP Phase 2)
+
+Built 2026-09-06, ahead of the activities that will use them. Everything here is
+data or pure logic; no screen consumes it yet.
+
+**`payload.speech`** — `{ rows, speak, listen }`. `rows` is one shared list of
+`[ru, en, tokens, difficulty, source]`; `speak` and `listen` map a unit id to row
+indices. A sentence in both pools is stored once. The audio key is `fold(ru)`, which
+the app already derives, so it is not shipped. `source` is one letter from
+`build_audio.py`'s names — `t` Tatoeba, `l` Languages on Fire, `y` Yandex, `c` Core
+5000, `g` Google TTS, `o` other — so an activity can label provenance without a
+lookup. Cuts, all constants at the top of `build_site.py`:
+
+- *speak* — recording, English, difficulty ≤ 0.2, 3–12 tokens.
+- *listen* — recording, English, difficulty ≤ 0.35, 4–15 tokens, source not Google
+  TTS (32 kbps) or "other". Core 5000 is **in**; without it the pool is 1,732 rather
+  than 10,811 (roadmap A13).
+
+`difficulty` is `1 − studied/tokens` (a token is studied if its folded form is in the
+lookup index) and a sentence's unit is the *latest* unit that introduces any of its
+lemmas — it becomes available once everything in it has been met. The build prints
+the difficulty histogram and both pool sizes per unit on every run and names any
+unit under 15 prompts; a broken join shows up there.
+
+**Learner state v5** adds `speech: { attempts, tagCounts }`. `recordAttempt` in
+`core/state.js` keeps the newest 200 attempts and counts every tag; it never holds
+audio. The migrations moved to `core/state.js` in the same change — both apps used to
+carry a copy, and the settings sheet moves a profile between them by export/import,
+so a step landing on one side only would corrupt a profile in transit. The web app
+dropped its private `SCHEMA_VERSION`/`MIGRATIONS`/`migrate` (they would collide in
+the single script scope); the native store re-exports core's.
+
+**`core/compare.js`** — `compare(transcript, target) → { wer, alignment, said,
+expected }`. Both sides through `fold()`; only Cyrillic runs are words, hyphenated
+ones whole; word-level Levenshtein with a backtrace that prefers substitution on
+ties. **`core/errortags.js`** — the closed list of thirteen tags a feedback model may
+use, each with learner-facing text and, for nine, the unit whose grammar note teaches
+it. **`core/fsrs.js`** gained `gradeFor(correct, hinted)` and
+`applyGrade(seen, trouble, word, grade, now)` — one grading rule for both runners,
+and the path by which a self-scoring activity hands in a grade of its own
+(`record(correct, wordIdxs, grade)` on native, `gradeWord(idx, correct, hinted,
+grade)` on web). The flashcard screens still carry a third trouble rule (clears only
+on Good or better); `core.test.mjs` records the divergence rather than hiding it.
+
+**The native runner dispatches by `kind`** through `VIEWS` in `Run.js` — twelve
+entries for the twelve kinds `core/questions.js` emits — and `registry.test.js` runs
+every generator to prove each kind has a view. Adding an activity is one generator
+case, one entry, one component.
 
 **Word links are two presses, on both platforms.** The first answers "which word is
 this, and which form?" without leaving the sentence — a sheet on native, the popover

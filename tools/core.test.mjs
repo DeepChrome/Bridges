@@ -17,6 +17,7 @@ import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrad
   from "../core/fsrs.js";
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, speechDefault, ATTEMPT_CAP }
   from "../core/state.js";
+import { compare, words } from "../core/compare.js";
 import { makeQuestions, DRILL_TYPES } from "../core/questions.js";
 import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
@@ -220,6 +221,56 @@ group("state schema");
   const one = recordAttempt(base, { tags: ["ASPECT", "ASPECT"] });
   ok(base.attempts.length === 0 && one.attempts.length === 1 && one.tagCounts.ASPECT === 2,
      "recordAttempt returns a new object and counts repeated tags");
+}
+
+/* ------------------------------------------------------------ compare */
+/* A recogniser's transcript against the target sentence, word by word. */
+
+group("transcript compare");
+{
+  const st = (r) => r.alignment.map((a) => a.status).join(" ");
+
+  let r = compare("Я пью чай без сахара.", "Я пью чай без сахара.");
+  ok(r.wer === 0 && st(r) === "ok ok ok ok ok", "identical sentences: no errors", st(r));
+
+  r = compare("я пью чай без сахара", "Я пью́ ча́й без са́хара.");
+  ok(r.wer === 0, "stress marks, case and punctuation never count", st(r));
+
+  r = compare("ёлка", "елка");
+  ok(r.wer === 0 && r.alignment[0].status === "ok", "ё and е are the same word");
+
+  r = compare("Я пью кофе без сахара", "Я пью чай без сахара");
+  ok(r.wer === 0.2 && st(r) === "ok ok sub ok ok", "one wrong word is one substitution", st(r));
+  ok(r.alignment[2].said === "кофе" && r.alignment[2].expected === "чай",
+     "and the alignment says which word for which");
+
+  r = compare("Я пью без сахара", "Я пью чай без сахара");
+  ok(r.wer === 0.2 && st(r) === "ok ok del ok ok", "a dropped word is a deletion", st(r));
+  ok(r.alignment[2].said === null && r.alignment[2].expected === "чай", "naming the missing word");
+
+  r = compare("Я пью чай очень без сахара", "Я пью чай без сахара");
+  ok(r.wer === 0.2 && st(r) === "ok ok ok ins ok ok", "an added word is an insertion", st(r));
+  ok(r.alignment[3].said === "очень" && r.alignment[3].expected === null, "naming the extra word");
+
+  r = compare("", "Я пью чай");
+  ok(r.wer === 1 && st(r) === "del del del", "nothing said: everything missing, WER 1", st(r));
+
+  r = compare("что-то", "Я пью чай");
+  ok(r.wer === 1, "WER never exceeds 1", String(r.wer));
+
+  ok(words("кто-то, OK 1 hello, кто").join("|") === "кто-то|кто",
+     "hyphenated words stay whole; Latin, digits and punctuation are not words",
+     words("кто-то, OK 1 hello, кто").join("|"));
+
+  r = compare("Чай пью я", "Я пью чай");
+  ok(Math.abs(r.wer - 2 / 3) < 1e-9 && st(r) === "sub ok sub",
+     "reordered words: the middle holds, the ends substitute — 2 of 3", st(r) + " " + r.wer);
+
+  r = compare("", "");
+  ok(r.wer === 0 && r.alignment.length === 0, "nothing expected, nothing said: no error");
+
+  r = compare("да", "");
+  ok(r.wer === 1 && st(r) === "ins", "nothing expected but something said is an insertion");
 }
 
 /* ------------------------------------------------------------- artwork */

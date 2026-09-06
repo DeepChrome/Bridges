@@ -12,7 +12,10 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { Runner } from "../src/screens/Run";
 
+/* Every question present() emits carries a kind; the registry draws nothing for one
+   that does not, which is what registry.test.js guards. */
 const question = {
+  kind: "choose-en",
   ask: "Pick the word",
   prompt: "книга",
   cyr: true,

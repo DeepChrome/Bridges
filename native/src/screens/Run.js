@@ -207,6 +207,38 @@ function HintSheet({ q, onClose }) {
   );
 }
 
+/* ---------------------------------------------------------------- registry */
+
+/* Which component draws a question, by its kind — the same shape as the web app's
+   EXERCISES map. Every kind core/questions.js can emit has an entry, and
+   registry.test.js proves that by running the generators rather than by a list that
+   could drift. Adding an activity is one generator case, one entry here, one
+   component. A kind with no entry draws nothing; the test makes that a failure
+   rather than a blank step in someone's lesson.
+
+   The runner hands each view the same small contract: the question, and
+   { answered, picked, setPicked, record } — record(correct, wordIdxs, grade) being
+   how any view, including a future self-scoring one, reports a result. */
+const asOptions = (q, r) => (
+  <Options q={q} answered={r.answered} picked={r.picked}
+           onPick={(i, o) => { r.setPicked(i); r.record(!!o.right); }} />
+);
+
+export const VIEWS = {
+  "choose-en": asOptions,
+  "choose-ru": asOptions,
+  listen: asOptions,
+  cloze: asOptions,
+  cases: asOptions,
+  aspect: asOptions,
+  agreement: asOptions,
+  conjugation: asOptions,
+  stress: asOptions,
+  grammar: asOptions,
+  type: (q, r) => <Typed q={q} answered={r.answered} onAnswer={r.record} />,
+  match: (q, r) => <Match q={q} onDone={(ok, idxs) => r.record(ok, idxs)} />,
+};
+
 /* ------------------------------------------------------------------ runner */
 
 export function Runner({ title, steps, onFinish, gradeWords = true }) {
@@ -317,14 +349,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
         />
       ) : null}
 
-      {q.options ? (
-        <Options q={q} answered={answered} picked={picked}
-                 onPick={(i, o) => { setPicked(i); record(!!o.right); }} />
-      ) : q.typed ? (
-        <Typed q={q} answered={answered} onAnswer={record} />
-      ) : q.pairs ? (
-        <Match q={q} onDone={(ok, idxs) => record(ok, idxs)} />
-      ) : null}
+      {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record }) : null}
 
       {answered ? (
         // Anchored to the foot of the screen against Screen's flexGrow, so Continue

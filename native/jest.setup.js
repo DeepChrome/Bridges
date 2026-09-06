@@ -19,12 +19,22 @@ jest.mock("expo-audio", () => ({
   setAudioModeAsync: jest.fn(async () => {}),
 }));
 
+/* A device with a Russian voice, by default. `global.__voices` lets a test take it
+   away — the case that matters, since without one the platform substitutes another
+   language rather than failing. */
 jest.mock("expo-speech", () => ({
-  speak: (text) => {
+  speak: (text, opts) => {
     global.__spoke = global.__spoke || [];
     global.__spoke.push(text);
+    global.__spokeOpts = global.__spokeOpts || [];
+    global.__spokeOpts.push(opts);
   },
   stop: jest.fn(),
+  getAvailableVoicesAsync: jest.fn(async () =>
+    global.__voices !== undefined ? global.__voices : [
+      { identifier: "ru-RU-x-ruf-local", name: "Russian", quality: "Default", language: "ru-RU" },
+      { identifier: "en-US-x-sfg-local", name: "English", quality: "Default", language: "en-US" },
+    ]),
 }));
 
 /* Speech recognition: the native module is replaced by one that records what it was

@@ -21,10 +21,67 @@ async function prepare() {
   ready = true;
 }
 
+/* Whether this device can actually say Russian.
+ *
+ * Asking the platform to speak ru-RU when no Russian voice is installed does not
+ * fail — Android quietly substitutes the default voice, which reads Cyrillic as
+ * nonsense in English. That is worse than silence: it is wrong audio presented as
+ * the language being learned, which rule 27 forbids. The web app has always found a
+ * voice first and disabled the button without one (app.js pickVoice); this is that
+ * rule, ported.
+ *
+ * Probed once, asynchronously. Until it resolves there is no voice, so a recording
+ * still plays and TTS stays quiet — the safe way round. */
+let ruVoice = null;
+let probe = null;
+const voiceListeners = new Set();
+
+export function hasRussianVoice() {
+  return !!ruVoice;
+}
+
+export function probeVoices() {
+  if (!probe) {
+    probe = (async () => {
+      try {
+        const voices = await Speech.getAvailableVoicesAsync();
+        ruVoice = (voices || []).find((v) => v.language && /^ru/i.test(v.language)) || null;
+      } catch (e) {
+        ruVoice = null;                 // no enumeration: treat as no voice
+      }
+      voiceListeners.forEach((fn) => fn());
+      return ruVoice;
+    })();
+  }
+  return probe;
+}
+
+/* Re-render a speaker once the probe lands. */
+export function onVoicesChanged(fn) {
+  voiceListeners.add(fn);
+  return () => voiceListeners.delete(fn);
+}
+
+/* Ask again. The set of installed voices is not fixed for the life of the process —
+   someone can install a Russian language pack and come back — so the answer has to
+   be refreshable rather than decided once at launch. */
+export function refreshVoices() {
+  probe = null;
+  ruVoice = null;
+  return probeVoices();
+}
+
+probeVoices();
+
 export function speakTTS(text) {
+  if (!ruVoice) return false;
   try {
     Speech.stop();
-    Speech.speak(bare(text), { language: "ru-RU", rate: 0.9 });
+    // Pin the voice, not just the language tag: the tag alone still lets the
+    // platform fall back to whatever it has.
+    Speech.speak(bare(text), {
+      language: ruVoice.language, voice: ruVoice.identifier, rate: 0.9,
+    });
     return true;
   } catch (e) {
     return false;

@@ -4,7 +4,7 @@
  * spacing, radii and colours stay in one place instead of being retyped per screen.
  */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet,
 } from "react-native";
@@ -13,7 +13,7 @@ import Svg, { Path, SvgXml } from "react-native-svg";
 import { iconFor } from "@core/icons";
 import { AV, AV_IDS } from "@core/avatars";
 import { useTheme, radius, space } from "./theme";
-import { say, hasRealAudio } from "./audio";
+import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged } from "./audio";
 
 /* `fill` makes the content container grow to the height of the screen, which is what
    lets a step's primary action sit at the foot of it with marginTop:"auto" instead of
@@ -196,18 +196,38 @@ export { AV, AV_IDS };
 
 /* A speaker that stays live when the collection has a real recording, whether or not
    the device has a Russian voice. */
+/* A recording plays whatever the device can do. Without one, the button is live only
+   if the device really can speak Russian — otherwise it would substitute another
+   language, and offering a control that produces wrong audio is worse than offering
+   none. Same rule as the web app. `disabled` is withheld from Pressable deliberately
+   (see Btn): passing it makes React 19 tests drop presses. */
 export function Speaker({ text, size = 40 }) {
   const t = useTheme();
   const real = hasRealAudio(text);
+  const [voice, setVoice] = useState(hasRussianVoice());
+  useEffect(() => {
+    let alive = true;
+    probeVoices().then(() => { if (alive) setVoice(hasRussianVoice()); });
+    const off = onVoicesChanged(() => { if (alive) setVoice(hasRussianVoice()); });
+    return () => { alive = false; off(); };
+  }, []);
+
+  const live = real || voice;
   return (
     <Pressable
-      accessibilityLabel={real ? "Hear it" : "Hear it (device voice)"}
-      onPress={() => say(text)}
+      testID={real ? "speaker-real" : live ? "speaker-tts" : "speaker-silent"}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: !live }}
+      accessibilityLabel={real ? "Hear it"
+        : live ? "Hear it (device voice)"
+        : "No recording, and this device has no Russian voice"}
+      onPress={live ? () => say(text) : undefined}
       hitSlop={8}
       style={({ pressed }) => ({
         width: size, height: size, borderRadius: size / 2, borderWidth: 1,
         borderColor: real ? t.brand : t.line, alignItems: "center",
-        justifyContent: "center", opacity: pressed ? 0.6 : 1,
+        justifyContent: "center",
+        opacity: !live ? 0.35 : pressed ? 0.6 : 1,
       })}
     >
       <Svg width={18} height={18} viewBox="0 0 24 24" fill="none"

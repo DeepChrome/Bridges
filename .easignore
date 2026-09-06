@@ -26,6 +26,10 @@ node_modules
 .env.*
 *.token
 .netlify/
+backend/.dev.vars
+
+# The feedback Worker is its own deployable; the app only knows its URL.
+backend/
 
 # Generated output and source data: several hundred megabytes, none of which the
 # native bundle touches. native/assets/data.json is NOT under data/ and stays.

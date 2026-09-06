@@ -1,0 +1,15 @@
+{
+  "name": "bridges-feedback",
+  "private": true,
+  "type": "module",
+  "description": "The one server Bridges has: a Cloudflare Worker that holds the Anthropic key and turns a spoken attempt into structured feedback.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test \"test/*.test.mjs\"",
+    "eval": "node eval/run.js"
+  },
+  "devDependencies": {
+    "wrangler": "^4.129.0"
+  }
+}

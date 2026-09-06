@@ -19,6 +19,9 @@ site/
 # Never commit deploy credentials
 .env
 *.token
+backend/.dev.vars
+backend/.wrangler/
+native/.env
 
 __pycache__/
 node_modules/

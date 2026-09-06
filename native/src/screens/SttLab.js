@@ -1,0 +1,205 @@
+/* STT Lab — a developer-mode screen for measuring speech recognition (ROADMAP P3.2).
+ *
+ * Nothing in Phase 5 is worth building unless on-device Russian recognition is good
+ * enough on the owner's own voice, and that is a number, not an assumption. This
+ * screen shows one sentence from the fixed test set, listens through the platform
+ * recogniser with on-device recognition required, and scores the transcript against
+ * the sentence with core/compare.js. Every attempt — final result or error — is
+ * recorded in the learner state's speech slot as kind "lab", for export.
+ *
+ * Not a learner feature. It is reachable only from the settings sheet with developer
+ * mode on, and it renders a plain refusal otherwise.
+ */
+
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { View, Text } from "react-native";
+import {
+  ExpoSpeechRecognitionModule, useSpeechRecognitionEvent,
+} from "expo-speech-recognition";
+import { useSession } from "../session";
+import { useTheme, radius } from "../theme";
+import { Screen, Card, Btn, Muted, Pill, Speaker } from "../ui";
+import { STT_SET } from "../sttset";
+import { compare } from "@core/compare";
+import { recordAttempt } from "@core/state";
+import { fold } from "@core/util";
+
+const LANG = "ru-RU";
+
+/* One word of the alignment, coloured by what happened to it. */
+function Word({ a }) {
+  const t = useTheme();
+  const styles = {
+    ok: { color: t.good, backgroundColor: t.goodBg },
+    sub: { color: t.bad, backgroundColor: t.badBg },
+    del: { color: t.bad, backgroundColor: t.badBg },
+    ins: { color: t.ink3, backgroundColor: t.surface2 },
+  };
+  const label = a.status === "ok" ? a.said
+    : a.status === "sub" ? `${a.said} → ${a.expected}`
+    : a.status === "del" ? `— ${a.expected}`
+    : `+ ${a.said}`;
+  return (
+    <Text style={[{ fontSize: 15, paddingVertical: 3, paddingHorizontal: 7,
+                    borderRadius: radius.sm, overflow: "hidden", marginRight: 6,
+                    marginBottom: 6 }, styles[a.status]]}>
+      {label}
+    </Text>
+  );
+}
+
+export default function SttLab() {
+  const { st, update } = useSession();
+  const t = useTheme();
+  const [i, setI] = useState(0);
+  const [phase, setPhase] = useState("idle");        // idle | listening | done
+  const [live, setLive] = useState("");
+  const [verdict, setVerdict] = useState(null);      // { transcript, res, latencyMs }
+  const [error, setError] = useState(null);
+  const [caps, setCaps] = useState(null);            // what this device can do
+  const startedAt = useRef(0);
+  const item = STT_SET[i];
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const M = ExpoSpeechRecognitionModule;
+      let available = false, onDevice = false, hasRu = null;
+      try { available = !!M.isRecognitionAvailable(); } catch (e) { /* stays false */ }
+      try { onDevice = !!M.supportsOnDeviceRecognition(); } catch (e) { /* stays false */ }
+      try {
+        const loc = await M.getSupportedLocales({ androidRecognitionServicePackage: undefined });
+        const all = (loc.locales || []).concat(loc.installedLocales || []);
+        hasRu = all.some((l) => /^ru/i.test(l));
+      } catch (e) { hasRu = null; }
+      if (alive) setCaps({ available, onDevice, hasRu });
+    })();
+    return () => { alive = false; };
+  }, []);
+
+  const log = useCallback((attempt) => {
+    update((prev) => ({ ...prev, speech: recordAttempt(prev.speech, attempt) }));
+  }, [update]);
+
+  const finish = useCallback((transcript) => {
+    const latencyMs = Date.now() - startedAt.current;
+    const res = compare(transcript, item.ru);
+    setVerdict({ transcript, res, latencyMs });
+    setPhase("done");
+    log({ ts: Date.now(), key: fold(item.ru), kind: "lab", i, unit: item.unit,
+          transcript, target: item.ru, wer: res.wer, tags: [], grade: null,
+          latencyMs, engine: "device", onDevice: true });
+  }, [item, i, log]);
+
+  useSpeechRecognitionEvent("result", (ev) => {
+    if (phase !== "listening") return;
+    const text = ev.results && ev.results[0] ? ev.results[0].transcript : "";
+    if (ev.isFinal) finish(text);
+    else setLive(text);
+  });
+  useSpeechRecognitionEvent("error", (ev) => {
+    if (phase !== "listening") return;
+    const latencyMs = Date.now() - startedAt.current;
+    setError(`${ev.error}${ev.message ? " — " + ev.message : ""}`);
+    setPhase("idle");
+    log({ ts: Date.now(), key: fold(item.ru), kind: "lab", i, unit: item.unit,
+          transcript: "", target: item.ru, wer: 1, tags: [], grade: null, latencyMs,
+          engine: "device", onDevice: true, error: ev.error });
+  });
+  useSpeechRecognitionEvent("end", () => {
+    // Ended with no final result and no error: treat as nothing heard.
+    if (phase === "listening") setPhase("idle");
+  });
+
+  const speak = async () => {
+    setError(null); setLive(""); setVerdict(null);
+    const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+    if (!perm.granted) { setError("microphone permission denied"); return; }
+    startedAt.current = Date.now();
+    setPhase("listening");
+    ExpoSpeechRecognitionModule.start({
+      lang: LANG,
+      requiresOnDeviceRecognition: true,
+      interimResults: true,
+      maxAlternatives: 1,
+      continuous: false,
+    });
+  };
+
+  const stop = () => { try { ExpoSpeechRecognitionModule.stop(); } catch (e) { /* none */ } };
+
+  const next = () => {
+    setI((i + 1) % STT_SET.length);
+    setPhase("idle"); setLive(""); setVerdict(null); setError(null);
+  };
+
+  if (!st.dev) {
+    return (
+      <Screen>
+        <Card><Muted>Developer mode is off.</Muted></Card>
+      </Screen>
+    );
+  }
+
+  const logged = ((st.speech && st.speech.attempts) || []).filter((a) => a.kind === "lab").length;
+
+  return (
+    <Screen fill>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <Pill tone="brand">{`${i + 1}/${STT_SET.length}`}</Pill>
+        <Pill>{item.unit}</Pill>
+        <View style={{ flex: 1 }} />
+        <Muted size={12}>{`${logged} logged`}</Muted>
+      </View>
+
+      {caps ? (
+        <Muted size={12} style={{ marginBottom: 10 }}>
+          {`recogniser ${caps.available ? "available" : "unavailable"} · on-device ${caps.onDevice ? "yes" : "no"} · ru ${caps.hasRu === null ? "?" : caps.hasRu ? "yes" : "no"}`}
+        </Muted>
+      ) : null}
+
+      <Card>
+        <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+          <Text style={{ color: t.ink, fontSize: 24, lineHeight: 32, flex: 1 }}>{item.ru}</Text>
+          <Speaker text={item.ru} size={36} />
+        </View>
+        <Muted style={{ marginTop: 6 }}>{item.en}</Muted>
+      </Card>
+
+      {phase === "listening" ? (
+        <Card style={{ marginTop: 12, borderColor: t.brand }}>
+          <Muted>Listening…</Muted>
+          <Text style={{ color: t.ink, fontSize: 18, marginTop: 4 }}>{live || " "}</Text>
+        </Card>
+      ) : null}
+
+      {verdict ? (
+        <Card style={{ marginTop: 12 }}>
+          <View style={{ flexDirection: "row", gap: 8, marginBottom: 8 }}>
+            <Pill tone={verdict.res.wer === 0 ? "good" : undefined}>
+              {`WER ${Math.round(verdict.res.wer * 100)}%`}
+            </Pill>
+            <Pill>{`${verdict.latencyMs} ms`}</Pill>
+          </View>
+          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+            {verdict.res.alignment.map((a, k) => <Word key={k} a={a} />)}
+          </View>
+          <Muted size={12} style={{ marginTop: 4 }}>{`heard: “${verdict.transcript}”`}</Muted>
+        </Card>
+      ) : null}
+
+      {error ? (
+        <Card style={{ marginTop: 12, borderColor: t.bad }}>
+          <Text style={{ color: t.bad }}>{error}</Text>
+        </Card>
+      ) : null}
+
+      <View style={{ marginTop: "auto", paddingTop: 16, gap: 8 }}>
+        {phase === "listening"
+          ? <Btn kind="bad" label="Stop" onPress={stop} />
+          : <Btn kind="pri" label={verdict || error ? "Again" : "Speak"} onPress={speak} />}
+        <Btn label="Next sentence" onPress={next} />
+      </View>
+    </Screen>
+  );
+}

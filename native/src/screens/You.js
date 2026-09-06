@@ -22,7 +22,7 @@ function Stat({ value, label }) {
   );
 }
 
-function Settings({ visible, onClose }) {
+function Settings({ visible, onClose, onLab }) {
   const { st, update, signOut } = useSession();
   const t = useTheme();
   return (
@@ -48,7 +48,7 @@ function Settings({ visible, onClose }) {
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>
-              <Row last>
+              <Row last={!st.dev}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Card side</Text>
                   <Muted>{st.dir ? "English first" : "Russian first"}</Muted>
@@ -59,6 +59,15 @@ function Settings({ visible, onClose }) {
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>
+              {st.dev ? (
+                // A measuring tool, not a feature: only with developer mode on.
+                <Row last onPress={() => { onClose(); onLab(); }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.ink, fontSize: 15 }}>STT Lab</Text>
+                    <Muted>Measure speech recognition on your voice</Muted>
+                  </View>
+                </Row>
+              ) : null}
             </List>
 
             <Btn label="Switch profile" style={{ marginTop: 16 }}
@@ -163,7 +172,8 @@ export default function You({ navigation }) {
         </>
       )}
 
-      <Settings visible={settings} onClose={() => setSettings(false)} />
+      <Settings visible={settings} onClose={() => setSettings(false)}
+                onLab={() => navigation.navigate("SttLab")} />
     </Screen>
   );
 }

@@ -26,6 +26,7 @@ import You from "./src/screens/You";
 import { UnitScreen, LessonScreen } from "./src/screens/Unit";
 import { Immerse, Video, Gate } from "./src/screens/Misc";
 import WordScreen from "./src/screens/Word";
+import SttLab from "./src/screens/SttLab";
 import { WordsProvider, navRef } from "./src/words";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
@@ -252,6 +253,8 @@ function Shell() {
     <Root.Navigator>
       <Root.Screen name="Tabs" component={TabShell} options={{ headerShown: false }} />
       <Root.Screen name="Word" component={WordScreen} options={wordTitled} />
+      {/* Developer-mode only; the screen itself refuses to render otherwise. */}
+      <Root.Screen name="SttLab" component={SttLab} options={{ title: "STT Lab" }} />
     </Root.Navigator>
   );
 }

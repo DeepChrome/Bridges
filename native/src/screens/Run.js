@@ -13,6 +13,7 @@ import { useTheme, radius } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row } from "../ui";
 import { say, cue, answerAudioText, stop as stopAudio } from "../audio";
 import { Linked } from "../words";
+import { Hear } from "../activities/Hear";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade } from "@core/fsrs";
 import { fold, translit, today, translitBack, firstSense } from "@core/util";
@@ -217,8 +218,10 @@ function HintSheet({ q, onClose }) {
    rather than a blank step in someone's lesson.
 
    The runner hands each view the same small contract: the question, and
-   { answered, picked, setPicked, record } — record(correct, wordIdxs, grade) being
-   how any view, including a future self-scoring one, reports a result. */
+   { answered, picked, setPicked, record } — record(correct, words, grade) being
+   how any view reports a result. `words` is a list of lemma indices sharing one
+   grade, or of { i, grade } pairs when the view scored each word itself, as the
+   speech activities do. */
 const asOptions = (q, r) => (
   <Options q={q} answered={r.answered} picked={r.picked}
            onPick={(i, o) => { r.setPicked(i); r.record(!!o.right); }} />
@@ -237,6 +240,7 @@ export const VIEWS = {
   grammar: asOptions,
   type: (q, r) => <Typed q={q} answered={r.answered} onAnswer={r.record} />,
   match: (q, r) => <Match q={q} onDone={(ok, idxs) => r.record(ok, idxs)} />,
+  hear: (q, r) => <Hear q={q} r={r} />,
 };
 
 /* ------------------------------------------------------------------ runner */
@@ -270,8 +274,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
   if (!q) return null;
 
   /* `grade` lets an activity that scores itself hand in 1–4 directly. Without it, the
-     answer's right/wrong and whether the table was used decide, as before. */
-  const record = (correct, wordIdxs, grade) => {
+     answer's right/wrong and whether the table was used decide, as before. An entry
+     of `words` that is { i, grade } carries its own grade instead. */
+  const record = (correct, words, grade) => {
     setAnswered(true);
     setRight(correct);
 
@@ -292,10 +297,12 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
     if (usedHint) tally.current.helped += 1;
     results.current.push({ right: correct, stage: q.stage, lesson: q.lesson, i: q.i });
     if (gradeWords) {
-      const idxs = wordIdxs || (typeof q.i === "number" ? [q.i] : []);
-      if (idxs.length) {
+      const entries = words || (typeof q.i === "number" ? [q.i] : []);
+      if (entries.length) {
         const g = grade || gradeFor(correct, usedHint);
-        update((prev) => idxs.reduce((acc, ix) => gradeInto(acc, ix, g), prev));
+        update((prev) => entries.reduce((acc, e) => (
+          typeof e === "number" ? gradeInto(acc, e, g) : gradeInto(acc, e.i, e.grade)
+        ), prev));
       }
     }
   };

@@ -19,7 +19,8 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, speechDefault, ATTE
   from "../core/state.js";
 import { compare, words } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
-import { makeQuestions, DRILL_TYPES } from "../core/questions.js";
+import { makeQuestions, DRILL_TYPES, SPEECH_MIX } from "../core/questions.js";
+import { sentenceLemmas, gradeAlignment } from "../core/speech.js";
 import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
 import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
@@ -331,7 +332,10 @@ const STAGES = (() => {
 const LESSON_SIZE = 7;
 const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / LESSON_SIZE));
 const lessonWords = (u, i) => u.w.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
-const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice: () => true });
+const SPEECH = DATA.speech;
+const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH,
+                          hasVoice: () => true });
+const answerable = (q) => q.options || q.typed || q.pairs || q.kind === "hear";
 
 group("lesson generation");
 {
@@ -346,11 +350,88 @@ group("lesson generation");
   ok(wordAt < qAt, "a word is always taught before it is asked");
 
   const quiz = Q.quizSteps(unit, 0);
-  ok(quiz.length === 8, "a lesson quiz is 8 questions", String(quiz.length));
-  ok(quiz.every((q) => q.options || q.typed || q.pairs),
-     "every quiz question is answerable");
+  const speechN = quiz.filter((q) => q.kind === "hear").length;
+  ok(quiz.length === 8 + speechN, "a lesson quiz is 8 questions plus its speech steps",
+     String(quiz.length));
+  ok(quiz.every(answerable), "every quiz question is answerable");
   ok(quiz.every((q) => !q.options || q.options.filter((o) => o.right).length === 1),
      "each has exactly one right answer");
+}
+
+/* The listening step rides on the quiz from the second chapter on. */
+group("hearing");
+{
+  const first = STAGES[0].core;
+  const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.hear.fromStage
+                                   && (SPEECH.listen[s.core.id] || []).length).core;
+  ok(!Q.quizSteps(first, 0).some((q) => q.kind === "hear"),
+     "the first chapter's quiz is reading-only");
+  const quiz = Q.quizSteps(later, 0);
+  const hears = quiz.filter((q) => q.kind === "hear");
+  ok(hears.length === SPEECH_MIX.hear.perQuiz, `${later.id}: one hear step per quiz`,
+     String(hears.length));
+  ok(quiz[0].kind !== "hear", "and never first — the quiz opens on a word");
+  const h = hears[0];
+  ok(h.autoplay === h.target && h.en && h.unit === later.id,
+     "it plays the target, carries the meaning and the unit");
+  ok(!h.sub && !h.say, "but shows no meaning and offers no speaker before the answer");
+  ok(SPEECH.listen[later.id].some((i) => SPEECH.rows[i][0] === h.target),
+     "the sentence comes from the unit's own listening pool");
+  ok(!!DATA.audio.files[fold(h.target)], "and has a recording — the pool guarantees one");
+  ok(h.lemmas.length > 0 && h.lemmas.every((i) => L[i]),
+     "the lemmas it grades are real curriculum entries");
+
+  // The prompt leans toward the lesson's own words when the pool has any.
+  const want = new Set(lessonWords(later, 0));
+  let leaning = 0;
+  for (let k = 0; k < 20; k++) {
+    const row = Q.speechPrompt("hear", later, 0).row;
+    if (sentenceLemmas(row[0], IX).some((i) => want.has(i))) leaning++;
+  }
+  const possible = SPEECH.listen[later.id]
+    .some((i) => sentenceLemmas(SPEECH.rows[i][0], IX).some((x) => want.has(x)));
+  ok(!possible || leaning === 20,
+     "every pick contains a lesson word when any pool sentence does", `${leaning}/20`);
+
+  // No pools at all — the web app today — means no speech steps, not blank ones.
+  const dry = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice: () => true });
+  ok(dry.quizSteps(later, 0).every((q) => q.kind !== "hear"),
+     "without pools a quiz is the eight vocabulary questions");
+}
+
+/* Per-word grades from an alignment: what the speech activities hand the scheduler. */
+group("speech grading");
+{
+  const idx = (w) => IX[fold(w)][0];
+  const r = compare("Я пью кофе без сахара", "Я пью чай без сахара");
+  let g = gradeAlignment(r.alignment, IX, { perfect: false, firstTry: true });
+  const by = Object.fromEntries(g.map((x) => [x.i, x.grade]));
+  ok(by[idx("чай")] === 1, "a substituted word is Again");
+  ok(by[idx("пью")] === 3, "a correct word in an imperfect sentence is Good");
+  ok(g.every((x) => x.grade >= 1 && x.grade <= 4 && L[x.i]), "grades are 1–4 on real lemmas");
+
+  g = gradeAlignment(compare("Я пью чай", "Я пью чай").alignment, IX,
+                     { perfect: true, firstTry: true });
+  ok(g.every((x) => x.grade === 4), "a perfect first attempt is Easy for every word");
+  g = gradeAlignment(compare("Я пью чай", "Я пью чай").alignment, IX,
+                     { perfect: true, firstTry: false });
+  ok(g.every((x) => x.grade === 3), "perfect on a retry is Good, not Easy");
+
+  g = gradeAlignment(compare("Я пью чай очень", "Я пью чай").alignment, IX, {});
+  ok(!g.some((x) => x.i === idx("очень")), "an inserted word grades nothing");
+
+  g = gradeAlignment(compare("Я не знаю, не хочу", "Я не знаю, не хочу").alignment, IX,
+                     { perfect: false });
+  const ne = g.find((x) => x.i === idx("не"));
+  ok(g.filter((x) => x.i === idx("не")).length === 1 && ne.grade === 3,
+     "a lemma met twice is graded once");
+  g = gradeAlignment(compare("Я не знаю, хочу", "Я не знаю, не хочу").alignment, IX, {});
+  ok(g.find((x) => x.i === idx("не")).grade === 1,
+     "and takes its worst grade — right once and dropped once is Again");
+
+  ok(sentenceLemmas("Я пью чай.", IX).length === 3, "sentenceLemmas: every studied word once");
+  ok(sentenceLemmas("Я не знаю, не хочу.", IX).filter((i) => i === idx("не")).length === 1,
+     "a repeated word appears once");
 }
 
 group("placement");
@@ -396,8 +477,7 @@ group("question shape");
   const all = [].concat(Q.quizSteps(UN[0], 0), Q.drillQuestions("cases", 4));
   ok(all.every((q) => typeof q.ask === "string" && q.ask.length),
      "every question states what is being asked");
-  ok(all.every((q) => q.options || q.typed || q.pairs),
-     "and offers a way to answer");
+  ok(all.every(answerable), "and offers a way to answer");
   ok(all.filter((q) => q.typed).every((q) => q.target && q.answer),
      "typed questions carry both the target and the displayed answer");
 }

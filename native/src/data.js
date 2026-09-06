@@ -15,6 +15,9 @@ export const UN = DATA.units;
 export const PATH = DATA.path;
 export const STATS = DATA.stats;
 export const AUDIO = (DATA.audio && DATA.audio.files) || {};
+/* The speaking and listening pools (CLAUDE.md §30b): one shared row list, and per
+   unit the rows each activity may draw from. */
+export const SPEECH = DATA.speech || { rows: [], speak: {}, listen: {} };
 
 /* Recordings are served from the deployed site rather than bundled: 209 MB will not
    fit in a store binary, and streaming keeps the app installable. */

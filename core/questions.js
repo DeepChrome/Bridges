@@ -10,8 +10,17 @@
 
 // Explicit extension: Node's ESM resolver requires it, Metro tolerates either.
 import { fold, shuffle, sample, firstSense, TOKEN } from "./util.js";
+import { sentenceLemmas, pickPrompt } from "./speech.js";
 
 export const QUIZ_N = 8;
+
+/* How the speech activities join a lesson quiz, on top of QUIZ_N: from which chapter
+   (0-based stage index) and how many per quiz. The first chapters stay reading-only
+   — a learner who has met forty words is not ready to transcribe a sentence — and
+   the numbers live here, in one place, rather than in each generator. */
+export const SPEECH_MIX = {
+  hear: { fromStage: 1, perQuiz: 1 },
+};
 export const PRACTICE_N = 8;
 export const DRILL_N = 10;
 export const PLACEMENT_N = 50;
@@ -39,8 +48,10 @@ export const DRILL_TYPES = [
 ];
 
 export function makeQuestions(env) {
-  const { L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice } = env;
+  const { L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice, SPEECH } = env;
   const voice = () => (typeof hasVoice === "function" ? hasVoice() : !!hasVoice);
+  const stageOf = (u) =>
+    STAGES.findIndex((s) => s.core === u || (s.branches || []).includes(u));
 
   /* ------------------------------------------------------------ helpers */
 
@@ -135,6 +146,18 @@ export function makeQuestions(env) {
           kind: e.t, ask: "Match the pairs", prompt: "", cyr: false,
           pairs: e.pairs.map((i) => ({ i, ru: L[i].w, en: firstSense(L[i]) })),
         };
+      /* A sentence from the listening pool, played rather than shown. The English
+         is carried as `en`, not `sub`: the runner draws `sub` under the prompt, and
+         the meaning is revealed only after the answer. No `say` either — the
+         activity owns replay, because it counts them. */
+      case "hear": {
+        const [ru, en] = e.row;
+        return {
+          kind: e.t, ask: "Type what you hear", prompt: "", cyr: true,
+          autoplay: ru, target: ru, en, unit: e.unit,
+          lemmas: sentenceLemmas(ru, IX),
+        };
+      }
       default:
         return null;
     }
@@ -158,6 +181,16 @@ export function makeQuestions(env) {
     return steps;
   }
 
+  /* One speech prompt for a lesson, or null when this platform carries no pools or
+     the unit has none — the quiz then simply has no such step, never a blank one. */
+  function speechPrompt(kind, unit, index) {
+    const poolName = { hear: "listen", say: "speak" }[kind];
+    if (!SPEECH || !SPEECH[poolName]) return null;
+    const row = pickPrompt(SPEECH.rows, SPEECH[poolName][unit.id],
+                           new Set(lessonWords(unit, index)), IX);
+    return row ? { t: kind, row, unit: unit.id } : null;
+  }
+
   /* The quiz is mixed and unordered, and asks for production at least twice. */
   function quizSteps(unit, index) {
     const words = lessonWords(unit, index);
@@ -170,7 +203,19 @@ export function makeQuestions(env) {
       .map((i) => candidates(i, pool).filter((e) => e.t === "type" || e.t === "cloze"))
       .filter((a) => a.length).map((a) => a[0]);
     shuffle(production).slice(0, 2).forEach((e) => bag.push(e));
-    return shuffle(bag).slice(0, QUIZ_N).map(present).filter(Boolean);
+    const out = shuffle(bag).slice(0, QUIZ_N).map(present).filter(Boolean);
+    // Speech steps ride on top of the QUIZ_N vocabulary questions, at a random
+    // position each — never first, so the quiz opens on a word rather than audio.
+    const stage = stageOf(unit);
+    for (const kind of Object.keys(SPEECH_MIX)) {
+      const mix = SPEECH_MIX[kind];
+      if (stage < mix.fromStage) continue;
+      for (let k = 0; k < mix.perQuiz; k++) {
+        const e = speechPrompt(kind, unit, index);
+        if (e) out.splice(1 + Math.floor(Math.random() * out.length), 0, present(e));
+      }
+    }
+    return out;
   }
 
   /* ------------------------------------------------------- placement sets */
@@ -384,7 +429,7 @@ export function makeQuestions(env) {
   }
 
   return {
-    distractors, clozeFor, candidates, present, poolFor,
+    distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf,
     vocabSteps, quizSteps, placementQuestions, sectionQuestions, drillQuestions,
   };
 }

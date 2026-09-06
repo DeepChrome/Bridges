@@ -9,8 +9,8 @@
  */
 
 import { VIEWS } from "../src/screens/Run";
-import { Q, DRILL_TYPES } from "../src/questions";
-import { STAGES } from "../src/data";
+import { Q, DRILL_TYPES, SPEECH_MIX } from "../src/questions";
+import { STAGES, SPEECH } from "../src/data";
 
 const kindsOf = (qs) => new Set(qs.filter(Boolean).map((q) => q.kind));
 const expectViews = (kinds) => {
@@ -43,6 +43,12 @@ describe("activity registry", () => {
     }
     qs.push(...Q.quizSteps(unit, 0));
     qs.push(Q.present({ t: "match", pairs: unit.w.slice(0, 3) }));
+    // The speech steps only join from a later chapter; make sure one is drawn.
+    const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.hear.fromStage
+                                     && (SPEECH.listen[s.core.id] || []).length).core;
+    const quiz = Q.quizSteps(later, 0);
+    expect(quiz.some((q) => q.kind === "hear")).toBe(true);
+    qs.push(...quiz);
     expectViews(kindsOf(qs));
   });
 

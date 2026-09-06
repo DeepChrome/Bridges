@@ -17,8 +17,9 @@ import {
   ExpoSpeechRecognitionModule, useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
 import { useSession } from "../session";
-import { useTheme, radius } from "../theme";
+import { useTheme } from "../theme";
 import { Screen, Card, Btn, Muted, Pill, Speaker } from "../ui";
+import { Alignment } from "../activities/Alignment";
 import { STT_SET } from "../sttset";
 import { compare } from "@core/compare";
 import { recordAttempt } from "@core/state";
@@ -26,28 +27,6 @@ import { fold } from "@core/util";
 
 const LANG = "ru-RU";
 const SRC_NAME = { t: "Tatoeba", l: "Languages on Fire", y: "Yandex", c: "Core 5000" };
-
-/* One word of the alignment, coloured by what happened to it. */
-function Word({ a }) {
-  const t = useTheme();
-  const styles = {
-    ok: { color: t.good, backgroundColor: t.goodBg },
-    sub: { color: t.bad, backgroundColor: t.badBg },
-    del: { color: t.bad, backgroundColor: t.badBg },
-    ins: { color: t.ink3, backgroundColor: t.surface2 },
-  };
-  const label = a.status === "ok" ? a.said
-    : a.status === "sub" ? `${a.said} → ${a.expected}`
-    : a.status === "del" ? `— ${a.expected}`
-    : `+ ${a.said}`;
-  return (
-    <Text style={[{ fontSize: 15, paddingVertical: 3, paddingHorizontal: 7,
-                    borderRadius: radius.sm, overflow: "hidden", marginRight: 6,
-                    marginBottom: 6 }, styles[a.status]]}>
-      {label}
-    </Text>
-  );
-}
 
 export default function SttLab() {
   const { st, update } = useSession();
@@ -228,9 +207,7 @@ export default function SttLab() {
             </Pill>
             <Pill>{`${verdict.latencyMs} ms`}</Pill>
           </View>
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            {verdict.res.alignment.map((a, k) => <Word key={k} a={a} />)}
-          </View>
+          <Alignment alignment={verdict.res.alignment} />
           <Muted size={12} style={{ marginTop: 4 }}>{`heard: “${verdict.transcript}”`}</Muted>
         </Card>
       ) : null}

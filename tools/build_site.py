@@ -265,6 +265,9 @@ SRC_CODE = {"tatoeba": "t", "lof": "l", "yandex": "y", "core5000": "c",
 
 SPEAK_MAX_DIFFICULTY = 0.2
 SPEAK_TOKENS = (3, 12)
+LISTEN_MAX_DIFFICULTY = 0.35
+LISTEN_TOKENS = (4, 15)
+LISTEN_EXCLUDE = ("googletts", "other")
 POOL_MIN_PER_UNIT = 15
 
 
@@ -300,7 +303,28 @@ def build_pools(measured, units, stats):
     stats["speak_pool"] = {uid: len(v) for uid, v in speak.items()}
     stats["speak_short"] = sorted(u["id"] for u in units
                                   if len(speak.get(u["id"], ())) < POOL_MIN_PER_UNIT)
-    return {"rows": rows, "speak": speak}
+
+    # Listening: a little harder and a little longer, and the recording must be one
+    # worth transcribing. Google TTS (32 kbps, 24 kHz) is excluded on quality; so is
+    # "other", whose provenance is unknown. Core 5000 stays in: its 64 kbps / 48 kHz
+    # matches Yandex, and whether a human or a voice recorded it is unverified rather
+    # than known to be synthetic — the count without it is reported alongside so the
+    # owner can pull it if that matters.
+    listen, listen_human_yandex = {}, 0
+    for rec in measured:
+        ru, en, n, diff, unit, fname, src = rec
+        if unit is None or not fname or not en or src in LISTEN_EXCLUDE:
+            continue
+        if diff <= LISTEN_MAX_DIFFICULTY and LISTEN_TOKENS[0] <= n <= LISTEN_TOKENS[1]:
+            listen.setdefault(units[unit]["id"], []).append(row_for(rec))
+            if src in ("tatoeba", "lof", "yandex"):
+                listen_human_yandex += 1
+
+    stats["listen_pool"] = {uid: len(v) for uid, v in listen.items()}
+    stats["listen_without_core5000"] = listen_human_yandex
+    stats["listen_short"] = sorted(u["id"] for u in units
+                                   if len(listen.get(u["id"], ())) < POOL_MIN_PER_UNIT)
+    return {"rows": rows, "speak": speak, "listen": listen}
 
 
 def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
@@ -712,6 +736,14 @@ def main():
         if st["speak_short"]:
             print(f"    under {POOL_MIN_PER_UNIT}: " + ", ".join(
                 f"{u} ({sp.get(u, 0)})" for u in st["speak_short"]))
+    if st.get("listen_pool") is not None:
+        lp = st["listen_pool"]
+        print(f"  listen pool  : {sum(lp.values()):,} sentences over {len(lp)} units; "
+              f"min {min(lp.values()) if lp else 0}, max {max(lp.values()) if lp else 0}; "
+              f"{st['listen_without_core5000']:,} without Core 5000")
+        if st["listen_short"]:
+            print(f"    under {POOL_MIN_PER_UNIT}: " + ", ".join(
+                f"{u} ({lp.get(u, 0)})" for u in st["listen_short"]))
     print(f"  scripts      : {', '.join(js_files)}")
     print(f"  page         : {(args.outdir / 'index.html').stat().st_size/1_048_576:.2f} MB")
 

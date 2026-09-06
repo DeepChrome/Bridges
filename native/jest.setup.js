@@ -27,6 +27,39 @@ jest.mock("expo-speech", () => ({
   stop: jest.fn(),
 }));
 
+/* Speech recognition: the native module is replaced by one that records what it was
+   asked to do and lets a test deliver a result. A test calls
+   global.__stt.emit("result", { results: [{ transcript, confidence }], isFinal: true })
+   to stand in for the recogniser; `calls` holds every start() options object. */
+jest.mock("expo-speech-recognition", () => {
+  const React = require("react");
+  const listeners = {};
+  const stt = {
+    calls: [],
+    emit: (name, payload) => (listeners[name] || []).forEach((h) => h(payload)),
+    reset: () => { stt.calls.length = 0; for (const k in listeners) delete listeners[k]; },
+  };
+  global.__stt = stt;
+  return {
+    ExpoSpeechRecognitionModule: {
+      start: (opts) => { stt.calls.push(opts); stt.emit("start", {}); },
+      stop: jest.fn(() => stt.emit("end", {})),
+      abort: jest.fn(() => stt.emit("end", {})),
+      requestPermissionsAsync: jest.fn(async () => ({ granted: true, status: "granted" })),
+      getPermissionsAsync: jest.fn(async () => ({ granted: true, status: "granted" })),
+      isRecognitionAvailable: jest.fn(() => true),
+      supportsOnDeviceRecognition: jest.fn(() => true),
+      getSupportedLocales: jest.fn(async () => ({ locales: ["ru-RU"], installedLocales: ["ru-RU"] })),
+    },
+    useSpeechRecognitionEvent: (name, handler) => {
+      React.useEffect(() => {
+        (listeners[name] = listeners[name] || []).push(handler);
+        return () => { listeners[name] = (listeners[name] || []).filter((h) => h !== handler); };
+      }, [name, handler]);
+    },
+  };
+});
+
 jest.mock("react-native-webview", () => {
   const React = require("react");
   const { View } = require("react-native");

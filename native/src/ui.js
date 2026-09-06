@@ -25,6 +25,7 @@ export function Screen({ children, scroll = true, fill = false }) {
   return (
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: t.bg }}>
       <Body
+        testID="screen-body"
         style={{ flex: 1 }}
         contentContainerStyle={scroll
           ? { padding: space.pad, paddingBottom: 40, ...(fill ? { flexGrow: 1 } : null) }

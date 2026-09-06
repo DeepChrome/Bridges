@@ -285,7 +285,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
   const answer = q.options ? q.options.find((o) => o.right) : null;
 
   return (
-    <Screen>
+    <Screen fill>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12,
                      marginBottom: 16 }}>
         <View style={{ flex: 1 }}><Bar value={at / steps.length} /></View>
@@ -327,20 +327,25 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
       ) : null}
 
       {answered ? (
-        <Card style={{ marginTop: 18,
-                       backgroundColor: right ? t.goodBg : t.badBg,
-                       borderColor: right ? t.good : t.bad }}>
-          <Text style={{ color: t.ink, fontWeight: "700", fontSize: 16 }}>
-            {right ? "Correct" : "Not quite"}
-          </Text>
-          {!right && (answer || q.answer) ? (
-            <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>
-              {`Answer: ${answer ? answer.label : q.answer}`}
+        // Anchored to the foot of the screen against Screen's flexGrow, so Continue
+        // sits in the same place on every question instead of wherever the options
+        // happened to end — the same rule Flows.js and the web runner already follow.
+        // The gap lives on the wrapper, not the card.
+        <View testID="verdict" style={{ marginTop: "auto", paddingTop: 18 }}>
+          <Card style={{ backgroundColor: right ? t.goodBg : t.badBg,
+                         borderColor: right ? t.good : t.bad }}>
+            <Text style={{ color: t.ink, fontWeight: "700", fontSize: 16 }}>
+              {right ? "Correct" : "Not quite"}
             </Text>
-          ) : null}
-          <Btn kind={right ? "good" : "bad"} label="Continue"
-               style={{ marginTop: 12 }} onPress={next} />
-        </Card>
+            {!right && (answer || q.answer) ? (
+              <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>
+                {`Answer: ${answer ? answer.label : q.answer}`}
+              </Text>
+            ) : null}
+            <Btn kind={right ? "good" : "bad"} label="Continue"
+                 style={{ marginTop: 12 }} onPress={next} />
+          </Card>
+        </View>
       ) : null}
 
       {hintOpen ? <HintSheet q={q} onClose={() => setHintOpen(false)} /> : null}

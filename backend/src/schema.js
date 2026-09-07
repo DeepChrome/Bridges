@@ -63,10 +63,25 @@ export function validate(raw) {
   return {
     ok: true,
     value: {
-      words: raw.words, grammar: raw.grammar, wordChoice: raw.wordChoice,
-      overall: raw.overall, praise: raw.praise,
+      words: raw.words,
+      grammar: raw.grammar.map((g) => Object.assign({}, g, { note: plain(g.note) })),
+      wordChoice: raw.wordChoice.map((c) => Object.assign({}, c, { note: plain(c.note) })),
+      overall: raw.overall, praise: plain(raw.praise),
     },
   };
+}
+
+/* The owner's rule for everything shown after an answer: no dashes. Models reach
+   for them constantly despite the prompt, so the reply is cleaned here, once, and
+   the app never sees one. A dash between words becomes a comma; one at an edge
+   is dropped. */
+export function plain(s) {
+  return String(s || "")
+    .replace(/\s*[—–]+\s*/g, ", ")
+    .replace(/\s+-\s+/g, ", ")
+    .replace(/^,\s*/, "").replace(/,\s*$/, "")
+    .replace(/,\s*,/g, ",")
+    .trim();
 }
 
 /* Models wrap JSON in prose or fences despite instructions; take the outermost

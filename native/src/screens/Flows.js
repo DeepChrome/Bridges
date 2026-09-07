@@ -148,7 +148,7 @@ export function QuizFlow({ route, navigation }) {
     const passed = result.score >= PASS_MARK;
     return (
       <Done
-        title={passed ? "Quiz passed" : `Not quite — ${PASS_MARK}% to pass`}
+        title={passed ? "Quiz passed" : `Not quite. ${PASS_MARK}% to pass`}
         detail={`${result.right} of ${result.total} right`}
         score={result.score}
         passed={passed}
@@ -294,7 +294,7 @@ export function PlacementFlow({ navigation }) {
           score: scoreOf(r),
           detail: placed
             ? `Stages 1–${placed} are marked done. You start at stage ${placed + 1}.`
-            : "Starting from stage 1 — nothing to skip yet.",
+            : "Starting from stage 1. Nothing to skip yet.",
         });
       }}
     />
@@ -339,7 +339,7 @@ export function SectionFlow({ route, navigation }) {
           score: scoreOf(r),
           detail: cleared
             ? `${cleared} of ${lessonCount(unit)} lessons marked done.`
-            : "No lessons skipped — worth working through this one.",
+            : "No lessons skipped. Worth working through this one.",
         });
       }}
     />

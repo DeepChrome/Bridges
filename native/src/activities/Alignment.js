@@ -13,16 +13,24 @@ function Word({ a }) {
   const styles = {
     ok: { color: t.good, backgroundColor: t.goodBg },
     sub: { color: t.bad, backgroundColor: t.badBg },
-    del: { color: t.bad, backgroundColor: t.badBg },
+    // A word that was not said: outlined rather than filled, so the gap reads as
+    // a gap. No dash in front of it — the owner's rule for every verdict.
+    del: { color: t.bad, backgroundColor: "transparent", borderWidth: 1,
+           borderColor: t.bad, borderStyle: "dashed" },
     ins: { color: t.ink3, backgroundColor: t.surface2 },
   };
   const label = a.status === "ok" ? a.said
     : a.status === "sub" ? `${a.said} → ${a.expected}`
-    : a.status === "del" ? `— ${a.expected}`
+    : a.status === "del" ? a.expected
     : `+ ${a.said}`;
+  const spoken = a.status === "ok" ? a.said
+    : a.status === "sub" ? `${a.said}, should be ${a.expected}`
+    : a.status === "del" ? `${a.expected}, not said`
+    : `${a.said}, extra`;
   return (
     <Text
       testID={`align-${a.status}`}
+      accessibilityLabel={spoken}
       style={[{ fontSize: 15, paddingVertical: 3, paddingHorizontal: 7,
                 borderRadius: radius.sm, overflow: "hidden", marginRight: 6,
                 marginBottom: 6 }, styles[a.status]]}

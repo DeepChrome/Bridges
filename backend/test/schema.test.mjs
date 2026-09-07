@@ -2,7 +2,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { validate, extractJson } from "../src/schema.js";
+import { validate, extractJson, plain } from "../src/schema.js";
 
 const good = () => ({
   words: [
@@ -76,6 +76,20 @@ test("a non-object, or arrays where objects belong, is refused without throwing"
   const r = validate(g);
   assert.equal(r.ok, false);
   assert.equal(r.errors.length, 2);
+});
+
+test("dashes never reach the app: notes and praise come back plain", () => {
+  const g = good();
+  g.grammar[0].note = "«книгу» — accusative after «читать» — not «книга»";
+  g.wordChoice = [{ said: "очень", better: "весьма", note: "more formal - here" }];
+  g.praise = "Good verb — nice.";
+  const r = validate(g);
+  assert.equal(r.ok, true);
+  assert.equal(r.value.grammar[0].note, "«книгу», accusative after «читать», not «книга»");
+  assert.equal(r.value.wordChoice[0].note, "more formal, here");
+  assert.equal(r.value.praise, "Good verb, nice.");
+  assert.equal(plain("— leading and trailing —"), "leading and trailing");
+  assert.equal(plain("кто-то"), "кто-то");                   // a hyphen inside a word stays
 });
 
 test("extractJson takes the outermost object out of prose or fences", () => {

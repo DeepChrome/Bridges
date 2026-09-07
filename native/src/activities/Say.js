@@ -199,7 +199,7 @@ export function Say({ q, r }) {
     } else if (ev.error === "no-speech") {
       setNote("Nothing heard");
     } else {
-      setBlock({ why: "engine", text: `Recognition failed — ${ev.error}` });
+      setBlock({ why: "engine", text: `Recognition failed: ${ev.error}` });
     }
     log({ transcript: "", wer: 1, attempt: attemptRef.current, error: ev.error,
           latencyMs: Date.now() - releasedAt.current, grade: null });
@@ -232,7 +232,7 @@ export function Say({ q, r }) {
                 maxAlternatives: 1, continuous: false });
     } catch (e) {
       go("idle");
-      setBlock({ why: "engine", text: `Recognition failed — ${e.message || e}` });
+      setBlock({ why: "engine", text: `Recognition failed: ${e.message || e}` });
     }
   };
 

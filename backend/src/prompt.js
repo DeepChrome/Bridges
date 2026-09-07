@@ -32,7 +32,7 @@ Rules:
 - "words" aligns the transcript to the target word by word. "sub" = a different word was said, "del" = a target word was not said, "ins" = an extra word was said. "lemma" is the dictionary form of the expected word (or of the said word for "ins").
 - TAG must be one of exactly these names:
 ${TAG_LINES}
-- "grammar" lists at most three points, most important first. A note is at most 20 words of plain English a beginner understands, naming the form that was needed (e.g. "«книгу» — accusative after «читать», not nominative «книга»").
+- "grammar" lists at most three points, most important first. A note is at most 20 words of plain English a beginner understands, naming the form that was needed (e.g. "Use «книгу», the accusative after «читать», not «книга»"). Plain sentences with commas and full stops; never a dash.
 - "wordChoice" is for a word that is grammatical but not what a speaker would say. At most two. A note is at most 20 words.
 - "overall": "ok" when the sentence would be understood as intended with correct grammar; "minor" when understood but with an error; "major" when the meaning is lost or several errors.
 - "praise": at most 12 words, only when something was genuinely done well; otherwise "".

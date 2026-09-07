@@ -68,9 +68,9 @@ function PathNode({ unit, open, branch, onOpen }) {
       accessibilityRole="button"
       accessibilityState={{ disabled: !open }}
       accessibilityLabel={
-        !open ? `${unit.name} — locked`
-          : done === 0 ? `${unit.name} — ${lessonCount(unit)} lessons`
-          : `${unit.name} — ${done} of ${lessonCount(unit)} lessons done`
+        !open ? `${unit.name}, locked`
+          : done === 0 ? `${unit.name}, ${lessonCount(unit)} lessons`
+          : `${unit.name}, ${done} of ${lessonCount(unit)} lessons done`
       }
       style={{
         alignItems: "center", width: branch ? 104 : 118, paddingTop: 6,

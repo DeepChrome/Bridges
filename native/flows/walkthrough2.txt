@@ -51,7 +51,7 @@ wait:1
 tap:^Immerse$
 wait:2
 shot:50-immerse
-tap:Search videos
+tap:^Search: travel
 type:grammar
 wait:2
 shot:51-immerse-grammar

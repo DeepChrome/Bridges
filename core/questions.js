@@ -252,7 +252,9 @@ export function makeQuestions(env) {
     const meaningOf = (i) => rows[i][1];
     const questions = chosen.map((ri, k) => {
       const en = meaningOf(ri);
-      const wrong = unique(others.map(meaningOf).filter((m) => m && m !== en)).slice(0, 3);
+      // Each question draws its own wrong answers, so two questions in one
+      // scene do not offer the same three (seen on the emulator walkthrough).
+      const wrong = unique(shuffle(others.slice()).map(meaningOf).filter((m) => m && m !== en)).slice(0, 3);
       if (wrong.length < 3) return null;
       return {
         ask: `Sentence ${k + 1}: what does it mean?`, row: k,

@@ -841,11 +841,23 @@ learner state, or keep anything beyond the day's counter and the token log.
 `backend/test/` runs it in plain Node with a fake KV and a fake upstream (19
 checks); `wrangler dev` needs `backend/.dev.vars` (gitignored). `backend/eval/`
 scores the prompt on 30 hand-written learner errors against the API directly
-(pass bar: ≥ 80 % primary-tag accuracy, ≤ 1 of 5 correct sentences flagged); it has
-**not yet been run** — it needs the key. The native client is
-`native/src/lib/feedback.js`, configured by `EXPO_PUBLIC_FEEDBACK_URL` and
-`EXPO_PUBLIC_APP_TOKEN` from `native/.env` or the EAS profile's environment;
-`.easignore` excludes `.env`, so an EAS build gets them only from EAS.
+(pass bar: ≥ 80 % primary-tag accuracy, ≤ 1 of 5 correct sentences flagged).
+**Run 2026-09-06 on Haiku 4.5: pass** — 80 % (20/25), 0 false positives, 0 parse
+failures, ~$0.06 for the 30 calls; the misses are the WRONG_WORD cases, which the
+model files under `wordChoice` rather than a grammar tag (report committed).
+
+**Deployed 2026-09-06** at `https://bridges-feedback.bridges-feedback.workers.dev`
+under the owner's Cloudflare account; KV namespace `USAGE`. Wrangler is
+authenticated with a `CLOUDFLARE_API_TOKEN` in the shell, not `wrangler login` —
+the OAuth browser flow times out over the owner's remote session. Upload secrets
+with `wrangler secret bulk <file>`, not a PowerShell pipe: the pipe appends a
+newline, the token check is length-exact, and every request came back 401 until
+the secret was re-uploaded. A real attempt answers in ~3.5 s.
+
+The native client is `native/src/lib/feedback.js`, configured by
+`EXPO_PUBLIC_FEEDBACK_URL` and `EXPO_PUBLIC_APP_TOKEN` from `native/.env` locally
+and from the EAS **preview** environment (`eas env:list --environment preview`) for
+builds; `.easignore` excludes `.env`, so an EAS build gets them only from EAS.
 
 ## 31. Verification
 

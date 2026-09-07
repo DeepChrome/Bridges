@@ -40,7 +40,9 @@ Built and working today:
 - FSRS scheduling behind the four Anki review outcomes
 - a trouble bank for vocabulary that repeatedly causes difficulty
 - installable PWA, deployed to Netlify
-- a headless validation suite (currently ~65 checks)
+- verification: 159 web smoke checks, 230 core checks, 108 native jest checks, 99
+  contrast checks, 34 Worker checks, a seeded learner simulator and an emulator
+  walkthrough (§31)
 
 Known gaps, stated honestly:
 
@@ -157,7 +159,7 @@ validation · runtime inspection · mobile viewport checks · interaction testin
 persistence and reload · back-navigation · offline/PWA behaviour · malformed or missing
 data · a realistic study session.
 
-The ~65 headless checks are a **regression floor, not a ceiling**. Never delete a
+The headless checks are a **regression floor, not a ceiling**. Never delete a
 legitimate test to restore green.
 
 ## 10. Mandatory self-review
@@ -1089,6 +1091,30 @@ several channels carry the channel's initials where a unit has its icon.
   «житься» (counted for every «нет») and «двух» (a form of «два») left the spine
   (`STUBS`).
 
+## 30i. Toward a release (Phase 8, as far as it goes without the owner)
+
+- **Per-user tokens** (P8.4) — `identify()` in the Worker: the `APP_TOKEN`
+  secret is the owner; any other bearer token is a KV record `user:<token>`
+  (`backend/tools/user.mjs add|revoke|list`) with its own caps; counters are per
+  user per day. `backend/README.md`.
+- **Two build flags** — `build_audio.py --commercial` leaves out the 31 Tatoeba
+  recordings that are NC, ND or unlicensed (P8.3); `build_site.py --public`
+  ships no caption text with the video moments (P8.8: `s` on a moment is
+  YouTube's caption text; the private build keeps it because it is what the
+  learner reads after tapping a word). Neither is on by default. A dry run of
+  `build_audio.py` writes nothing now — it once rewrote the manifest.
+- **The tour** (P8.6) — `Intro.js`: three cards (words are links; which voice
+  is which; the microphone stays on the phone) between naming the first profile
+  and the placement choice, and again from Settings.
+- **Stress** (P8.5, re-measured): 3,254 of the lexicon's polysyllabic headwords
+  and 2,055 paradigm forms carry no mark — not 27,795. Only 18 of the headwords
+  are in the curriculum; `data/curated/stress.json` marks those by hand and
+  `build_lexicon.py` applies it. The rest are names and rarities; a Wiktionary
+  pass is not worth its dump.
+- **Licensing and listing** — `docs/licensing.md` (P8.1), `docs/store-listing.md`
+  with the privacy disclosure and six screenshots (P8.7). P8.2 waits on the
+  owner's choice of audio.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -1114,12 +1140,21 @@ stylesheet's `[hidden] { display:none }`. Layout bugs need the browser.
 
 ```
 python tools/build_site.py     # or the full pipeline if data changed
+node tools/core.test.mjs       # the shared logic: generators, scheduler, state
 node tools/smoke.js            # must be all-pass
 node tools/visual.js           # must be all-pass; then look at tools/shots/
 node tools/contrast.js         # palette: contrast minimums + the two platforms agreeing
 cd native && npx jest          # the native suite
+cd backend && npm test         # the Worker
+node tools/simulate.mjs        # seeded learners; diff tools/sim/ against the last run
+.\native\tools\walk.ps1 -Flow native\flows\walkthrough2.txt   # the emulator; read the shots
 python tools/serve.py          # test on the phone over the LAN
 ```
+
+There is no pixel-diff suite for native (ROADMAP P1.8): quiz questions are
+random, so a screenshot baseline would fail on every run for no reason. The
+walkthrough's screenshots are read by a person instead, and the render-tree
+assertions (path.test.js, video.test.js) carry the visual contract.
 
 `tools/contrast.js` reads `native/src/theme.js` and `tools/app/app.css` directly and
 asserts three things: every foreground clears its WCAG minimum against the surface it

@@ -16,6 +16,7 @@ import csv
 import re
 import sqlite3
 import sys
+import json
 import unicodedata
 from pathlib import Path
 
@@ -26,6 +27,10 @@ csv.field_size_limit(10_000_000)
 
 VOWELS = "аеёиоуыэюяАЕЁИОУЫЭЮЯ"
 ACUTE = "́"
+# Hand-marked stress for headwords the dump leaves bare (ROADMAP P8.5).
+_STRESS_PATH = ROOT / "data" / "curated" / "stress.json"
+STRESS = {k: v for k, v in json.loads(_STRESS_PATH.read_text(encoding="utf-8")).items()
+          if not k.startswith("_")} if _STRESS_PATH.exists() else {}
 
 
 def deapostrophe(s: str) -> str:
@@ -136,6 +141,10 @@ class Builder:
                 self.next_id += 1
                 lid = self.next_id
                 accented = deapostrophe(CLEAN_RE.sub("", row.get("accented") or bare))
+                # OpenRussian leaves some headwords unmarked (pronouns, names);
+                # data/curated/stress.json fills the ones the curriculum teaches.
+                if ACUTE not in unicodedata.normalize("NFD", accented) and "ё" not in accented:
+                    accented = STRESS.get(fold(bare), accented)
                 self.db.execute(
                     "insert into lemmas (id, bare, key, accented, pos, gender, animate,"
                     " aspect, partner, indeclinable, sg_only, pl_only, en, de)"
@@ -210,11 +219,13 @@ class Builder:
                 lid = self.next_id
                 bare = unicodedata.normalize(
                     "NFC", unicodedata.normalize("NFD", e["lemma"]).replace(ACUTE, ""))
+                accented = e.get("accented", e["lemma"])
+                if ACUTE not in unicodedata.normalize("NFD", accented) and "ё" not in accented:
+                    accented = STRESS.get(fold(bare), accented)
                 self.db.execute(
                     "insert into lemmas (id, bare, key, accented, pos, en)"
                     " values (?,?,?,?,?,?)",
-                    (lid, bare, fold(bare), e.get("accented", e["lemma"]),
-                     e["pos"], e.get("en")))
+                    (lid, bare, fold(bare), accented, e["pos"], e.get("en")))
                 self.db.execute("insert into forms (key, lemma_id, slot) values (?,?,?)",
                                 (fold(bare), lid, "lemma"))
                 n_new += 1

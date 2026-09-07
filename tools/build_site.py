@@ -723,6 +723,27 @@ def strip_modules(src):
     return src
 
 
+def strip_captions(payload):
+    """The video moments carry a ten-word window of YouTube's caption text (`s`),
+    which is the video's text, not ours. A private build keeps it — it is what the
+    learner reads after tapping a word — a public one ships the moment and the
+    spoken form only. Returns how many were stripped."""
+    n = 0
+    for u in payload.get("units", []):
+        for occs in ((u.get("v") or {}).get("heard") or {}).values():
+            for o in occs:
+                if "s" in o:
+                    del o["s"]
+                    n += 1
+    for v in payload.get("videos", []):
+        for occs in (v.get("words") or {}).values():
+            for o in occs:
+                if "s" in o:
+                    del o["s"]
+                    n += 1
+    return n
+
+
 def assemble(tpl, fonts, css, shell, js):
     """Token replacement, not str.format — the CSS and JS are full of braces."""
     for token, value in (("@FONTS@", fonts), ("@CSS@", css),
@@ -740,9 +761,15 @@ def main():
     ap.add_argument("--outdir", type=Path, default=ROOT / "site")
     ap.add_argument("--lemmas", type=int, default=4000)
     ap.add_argument("--examples", type=int, default=2)
+    ap.add_argument("--public", action="store_true",
+                    help="a build for distribution: ships no caption text with the video "
+                         "moments, only the spoken form and the time (ROADMAP P8.8)")
     args = ap.parse_args()
 
     payload = gather(args.lexicon, args.corpus, args.topics, args.lemmas, args.examples)
+    if args.public:
+        stripped = strip_captions(payload)
+        print(f"  public build : {stripped:,} caption snippets stripped from the video moments")
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
 
     css = (args.src / "app.css").read_text(encoding="utf-8")

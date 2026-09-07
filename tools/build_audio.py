@@ -37,6 +37,7 @@ RANK = {"tatoeba": 5, "lof": 4, "yandex": 3, "core5000": 2, "googletts": 1, "oth
 LABEL = {5: "Tatoeba (native speakers)", 4: "Languages on Fire (human)",
          3: "Yandex neural TTS", 2: "Core 5000", 1: "Google TTS", 0: "other"}
 TATOEBA_DIR = ROOT / "data" / "raw" / "tatoeba" / "audio"
+COMMERCIAL_OK = re.compile(r"^(CC BY \d|CC0)")
 
 
 def source_of(name):
@@ -57,6 +58,9 @@ def main():
     ap.add_argument("--out", type=Path, default=ROOT / "site" / "audio")
     ap.add_argument("--manifest", type=Path, default=ROOT / "data" / "audio.json")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--commercial", action="store_true",
+                    help="leave out recordings whose licence bars commercial use or "
+                         "re-encoding (Tatoeba CC BY-NC, CC BY-NC-ND, unstated) — ROADMAP P8.3")
     args = ap.parse_args()
 
     db = sqlite3.connect(f"file:{args.corpus}?mode=ro", uri=True)
@@ -82,10 +86,15 @@ def main():
     tat_manifest = ROOT / "data" / "raw" / "tatoeba" / "audio_manifest.json"
     if tat_manifest.exists():
         tat = json.loads(tat_manifest.read_text(encoding="utf-8"))
-        added = 0
+        added, gated = 0, 0
         for key, info in tat.items():
             path = TATOEBA_DIR / f"{info['sid']}.mp3"
             if not path.exists():
+                continue
+            # Licensed per recording (CLAUDE.md §27a). A public build keeps only
+            # what allows commercial use and re-encoding: CC BY and CC0.
+            if args.commercial and not COMMERCIAL_OK.match(info.get("licence") or ""):
+                gated += 1
                 continue
             cur = best.get(key)
             if cur is None or RANK["tatoeba"] > cur["rank"]:
@@ -93,7 +102,8 @@ def main():
                              "file": str(path), "src": "tatoeba",
                              "rank": RANK["tatoeba"], "abs": True}
                 added += 1
-        print(f"native Tatoeba recordings layered in: {added}")
+        print(f"native Tatoeba recordings layered in: {added}"
+              + (f" ({gated} left out by licence)" if args.commercial else ""))
     db.close()
 
     picked = Counter(v["src"] for v in best.values())
@@ -131,14 +141,17 @@ def main():
     # `src` names where each shipped file came from, per file, so a consumer can
     # tell a human recording from a synthetic one — the listening pool excludes the
     # 32 kbps Google voice, and nothing may present TTS as authentic. `sources` is
-    # the same information summed, kept for the build's own report.
-    args.manifest.parent.mkdir(parents=True, exist_ok=True)
-    args.manifest.write_text(
-        json.dumps({"files": manifest,
-                    "src": srcs,
-                    "sources": {k: v for k, v in picked.items()}},
-                   ensure_ascii=False, separators=(",", ":")),
-        encoding="utf-8")
+    # the same information summed, kept for the build's own report. A dry run
+    # writes nothing — it once rewrote the manifest and the next site build
+    # shipped a different audio set than the one on disk.
+    if not args.dry_run:
+        args.manifest.parent.mkdir(parents=True, exist_ok=True)
+        args.manifest.write_text(
+            json.dumps({"files": manifest,
+                        "src": srcs,
+                        "sources": {k: v for k, v in picked.items()}},
+                       ensure_ascii=False, separators=(",", ":")),
+            encoding="utf-8")
 
     uniq = len(set(manifest.values()))
     print(f"\nmanifest      : {len(manifest):,} utterances → {uniq:,} unique files")

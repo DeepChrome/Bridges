@@ -225,6 +225,13 @@ can overrule any of them.
   TTS, keep Tatoeba's CC BY/CC0 voices; the caption snippets shipped with the
   video library would also have to go for a public release). Both stop there,
   as the roadmap says they must.
+- **A33 — Phase 8 without the owner (2026-09-07).** Done: P8.3 as a build flag
+  (`--commercial`, off), P8.4 per-user tokens, P8.5 re-measured and the
+  curriculum's 18 unmarked headwords filled by hand (the lexicon-wide 3,254 are
+  names and rarities; no Wiktionary dump), P8.6 the tour, P8.7 the listing draft
+  and privacy disclosure, P8.8 as a build flag (`--public`, off). Waiting on the
+  owner: P8.1's audio choice and so P8.2; a privacy policy URL; the store account.
+  P1.8 is closed as "no pixel suite, by design" (CLAUDE.md §31).
 - **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
   local verdict, grammar section) were built before Phase 4 because Phase 4 stops
   at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the

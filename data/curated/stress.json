@@ -1,0 +1,21 @@
+{
+  "_": "Stress for headwords OpenRussian leaves unmarked (ROADMAP P8.5). The lexicon carries 3,254 polysyllabic headwords with no stress mark; 18 of them are in the curriculum, and these are those, marked by hand from Zaliznyak. build_lexicon.py applies the mark when the source row has none.",
+  "она": "она́",
+  "оно": "оно́",
+  "они": "они́",
+  "один": "оди́н",
+  "себя": "себя́",
+  "родители": "роди́тели",
+  "мэри": "Мэ́ри",
+  "молодые": "молоды́е",
+  "из-за": "и́з-за",
+  "америка": "Аме́рика",
+  "установить": "установи́ть",
+  "зачем": "заче́м",
+  "кинжный": "ки́нжный",
+  "оон": "ОО́Н",
+  "боулинг": "бо́улинг",
+  "китай": "Кита́й",
+  "поставленный": "поста́вленный",
+  "начала": "начала́"
+}

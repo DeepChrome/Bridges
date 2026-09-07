@@ -81,9 +81,11 @@ function Typed({ q, answered, onAnswer }) {
                  borderBottomWidth: 3, borderRadius: radius.md, paddingHorizontal: 14,
                  paddingVertical: 13, fontSize: 20, color: t.ink }}
       />
-      <Muted style={{ marginTop: 8 }}>
-        {`Latin spelling works — “${translitBack(q.target)}”.`}
-      </Muted>
+      {/* The Latin spelling of the answer is shown only once it has been given —
+          before that it is the answer, in a font the learner can read. */}
+      {answered ? (
+        <Muted style={{ marginTop: 8 }}>{`Latin spelling: “${translitBack(q.target)}”`}</Muted>
+      ) : null}
       {!answered ? (
         <Btn kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} />
       ) : null}
@@ -248,7 +250,10 @@ export const VIEWS = {
 
 /* ------------------------------------------------------------------ runner */
 
-export function Runner({ title, steps, onFinish, gradeWords = true }) {
+/* `progress` overrides the bar and the count when the runner is showing one step
+   of a longer flow — the vocabulary lesson runs each question in its own runner,
+   and "1/1" over an empty bar on every question said nothing. */
+export function Runner({ title, steps, onFinish, gradeWords = true, progress }) {
   const { update } = useSession();
   const t = useTheme();
   const [at, setAt] = useState(0);
@@ -340,8 +345,12 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
     <Screen fill>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12,
                      marginBottom: 16 }}>
-        <View style={{ flex: 1 }}><Bar value={at / steps.length} /></View>
-        <Pill tone="brand">{`${at + 1}/${steps.length}`}</Pill>
+        <View style={{ flex: 1 }}>
+          <Bar value={progress ? progress.at / progress.total : at / steps.length} />
+        </View>
+        <Pill tone="brand">
+          {progress ? `${progress.at + 1}/${progress.total}` : `${at + 1}/${steps.length}`}
+        </Pill>
       </View>
 
       <View style={{ alignItems: "center", marginBottom: 20 }}>
@@ -369,7 +378,12 @@ export function Runner({ title, steps, onFinish, gradeWords = true }) {
         />
       ) : null}
 
-      {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip }) : null}
+      {/* Keyed by position so a view is remounted for every step: two typed
+          questions in a row otherwise share one input, and the second opens with
+          the first's answer still in it. */}
+      <View key={at}>
+        {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip }) : null}
+      </View>
 
       {answered ? (
         // Anchored to the foot of the screen against Screen's flexGrow, so Continue

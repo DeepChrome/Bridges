@@ -52,6 +52,18 @@ describe("grammar trouble", () => {
     expect((await screen.findAllByText("Nothing yet")).length).toBe(2);   // words, grammar
   });
 
+  it("counts a lesson as cleared only when it is done, not merely attempted", async () => {
+    const u = UN[0];
+    // Three lessons done (vocabulary met, quiz passed, the shared video watched)
+    // and a fourth only attempted — quiz failed at 75, no vocabulary. Counting
+    // attempts would say 4. Three and four appear nowhere else on the screen.
+    await withYou({ unit: { [u.id]: { best: 90, done: false, video: true,
+      lessons: { 0: { v: true, q: 90 }, 1: { v: true, q: 85 }, 2: { v: true, q: 100 }, 3: { q: 75 } } } } });
+    expect(await screen.findByText("lessons cleared")).toBeTruthy();
+    expect(screen.getByText("3")).toBeTruthy();
+    expect(screen.queryByText("4")).toBeNull();
+  });
+
   it("lists a tag with its count and opens the unit that teaches it", async () => {
     await withYou({ speech: { attempts: [], tagCounts: { CASE: 3, WORD_ORDER: 1 } } });
     expect(await screen.findByText(tagInfo("CASE").en)).toBeTruthy();

@@ -371,6 +371,28 @@ group("lesson generation");
     }
   }
   ok(adjacent === 0, `no quiz asks the same word twice in a row (${quizzes} quizzes)`, String(adjacent));
+
+  // Gap-fills: the hole is a whole word, and the sentence is one the learner can
+  // read — every word resolvable, the shortest such example.
+  let insideWord = 0, unresolved = 0, clozes = 0;
+  const letter = /[а-яёА-ЯЁ]/;
+  for (let i = 0; i < L.length; i++) {
+    const c = Q.clozeFor(i);
+    if (!c) continue;
+    clozes++;
+    const q = Q.present({ t: "cloze", i, ex: c.ex, token: c.token, pool: [] });
+    const at = q.prompt.indexOf("_____");
+    if (letter.test(q.prompt[at - 1] || " ") || letter.test(q.prompt[at + 5] || " ")) insideWord++;
+    const toks = c.ex.ru.match(TOKEN) || [];
+    if (toks.some((t) => !IX[fold(t)]) && L[i].x.some((ex) => {
+      const tt = ex.ru.match(TOKEN) || [];
+      return tt.length >= 3 && tt.every((t) => IX[fold(t)]) && tt.some((t) => (IX[fold(t)] || []).includes(i));
+    })) unresolved++;
+  }
+  ok(insideWord === 0, `the gap never opens inside another word (${clozes} clozes)`, String(insideWord));
+  ok(unresolved === 0, "a fully readable example is chosen whenever the word has one", String(unresolved));
+  ok(Q.present({ t: "cloze", i: 0, ex: { ru: "Это явление в фокусе.", en: "" }, token: "в", pool: [] }).prompt
+     === "Это явление _____ фокусе.", "«в» leaves «явление» whole");
   const small = UN.find((u) => u.w.length % 7 && u.w.length > 7);
   const lastQuiz = Q.quizSteps(small, lessonCount(small) - 1);
   ok(lastQuiz.filter((q) => q.kind !== "hear" && q.kind !== "say").length >= 8,

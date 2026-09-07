@@ -30,6 +30,11 @@ export function Screen({ children, scroll = true, fill = false }) {
         contentContainerStyle={scroll
           ? { padding: space.pad, paddingBottom: 40, ...(fill ? { flexGrow: 1 } : null) }
           : null}
+        // With the keyboard up, a ScrollView's default is to spend the first touch
+        // dismissing it and deliver nothing. Every typed answer's Check, the gate's
+        // Continue and a tapped search result needed two presses; found on the
+        // emulator walkthrough. "handled" lets the button take the press.
+        {...(scroll ? { keyboardShouldPersistTaps: "handled" } : null)}
       >
         {children}
       </Body>

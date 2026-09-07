@@ -18,6 +18,7 @@ import Svg, { Path } from "react-native-svg";
 import { SessionProvider, useSession } from "./src/session";
 import { light, dark } from "./src/theme";
 import { Loading, Avatar, HeaderTitle } from "./src/ui";
+import { DRILL_TYPES } from "./src/questions";
 import { unitById, chapterOf, L, resolveWord } from "./src/data";
 import Learn from "./src/screens/Learn";
 import Search from "./src/screens/Search";
@@ -55,6 +56,7 @@ function MeButton({ navigation }) {
   if (!account) return null;
   return (
     <Pressable onPress={() => navigation.navigate("You")} hitSlop={8}
+               accessibilityRole="button" accessibilityLabel={`${account.name}, your profile`}
                style={{ marginRight: 4 }}>
       <Avatar id={account.avatar} size={30} />
     </Pressable>
@@ -129,7 +131,10 @@ function PracticeStack() {
                       headerBackButtonDisplayMode: "minimal",
                       headerTitleAlign: "center",
                       headerTitle: () => (
-                        <HeaderTitle title={route.params.type} sub="Drill" />
+                        <HeaderTitle
+                          title={(DRILL_TYPES.find((d) => d.id === route.params.type) || {}).name
+                                 || route.params.type}
+                          sub="Drill" />
                       ),
                     })} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />

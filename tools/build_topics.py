@@ -271,16 +271,43 @@ def main():
             meta[lid] = {"bare": row[0], "acc": row[1], "pos": row[2],
                          "en": row[3], "n": n}
 
+    # One word, one lesson. OpenRussian carries several rows for one form — я as
+    # pronoun and as "other", мой as adjective and as possessive — and `forms`
+    # maps the surface key to every one of them, so they tie on count and all
+    # arrived on the spine: chapter 1 taught я in lesson 1 and again in lesson 2.
+    # Keep one row per bare form, preferring a real part of speech over "other".
+    # NAMES: forms the corpus counts as a common word but which are a proper name
+    # in every sentence — «Том» is Tom, not a volume — kept out of every unit.
+    POS_RANK = {"other": 9, "possessive": 8}
+    NAMES = {"том"}
+    seen_bare, deduped = {}, []
+    for lid, n in pool:
+        m = meta.get(lid)
+        if not m or m["bare"] in NAMES:
+            continue
+        key = m["bare"]
+        if key in seen_bare:
+            # Same form already placed with the same count: keep the better row.
+            kept = seen_bare[key]
+            if meta[kept]["n"] == n and POS_RANK.get(m["pos"], 0) < POS_RANK.get(meta[kept]["pos"], 0):
+                deduped[deduped.index(kept)] = lid
+                seen_bare[key] = lid
+            continue
+        seen_bare[key] = lid
+        deduped.append(lid)
+    dropped = len([1 for lid, _ in pool if lid in meta]) - len(deduped)
+
     # The spine is decided first, and its words are then off-limits to the branches:
     # a core word is taught once, on the spine, not again inside a topic.
-    spine_pool = [lid for lid, _ in pool if lid in meta][:SPINE_UNIT * 8]
+    spine_pool = deduped[:SPINE_UNIT * 8]
     spine_set = set(spine_pool)
+    dedup_set = set(deduped)
 
     rules = compile_rules()
     assigned, by_topic = {}, {t: [] for t, _, _ in rules}
 
     for lid, m in meta.items():
-        if lid in spine_set or m["pos"] not in BRANCHABLE:
+        if lid in spine_set or lid not in dedup_set or m["pos"] not in BRANCHABLE:
             continue
         if m["bare"] in OVERRIDES:
             tid = OVERRIDES[m["bare"]]
@@ -376,6 +403,7 @@ def main():
 
     print(f"wrote {args.out}")
     print(f"  pool considered   : {len(meta):,} lemmas with glosses")
+    print(f"  duplicate forms   : {dropped:,} rows dropped (one row per bare form; names out)")
     print(f"  placed in a topic : {len(assigned):,} ({len(assigned)/max(1,len(meta)):.0%})")
     print(f"  spine units       : {len(spine_ids)}")
     print(f"  branch units      : {len(branch_ids)}\n")

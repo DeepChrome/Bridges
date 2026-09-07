@@ -122,6 +122,7 @@ export function VocabFlow({ route, navigation }) {
     <Runner
       key={at}
       steps={[step]}
+      progress={{ at, total: steps.length }}
       onFinish={advance}
     />
   );

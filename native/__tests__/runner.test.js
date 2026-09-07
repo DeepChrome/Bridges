@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
@@ -62,5 +62,34 @@ describe("runner verdict", () => {
     await withRunner();
     await screen.findByText("book");
     expect(screen.queryByTestId("verdict")).toBeNull();
+  });
+
+  it("lets a button take the first press while the keyboard is up", async () => {
+    // Found on the emulator: Check, Continue and a search result all needed two
+    // presses after typing, because the ScrollView spent the first on the keyboard.
+    await withRunner();
+    await screen.findByText("book");
+    expect(screen.getByTestId("screen-body").props.keyboardShouldPersistTaps).toBe("handled");
+  });
+
+  it("gives each typed question a fresh field, and the Latin hint only after", async () => {
+    const typed = (word, en) => ({ kind: "type", ask: "Write it in Russian", prompt: en,
+                                   cyr: false, typed: true, answer: word, target: word });
+    await withRunner({ steps: [typed("что", "what"), typed("он", "he")] });
+    const input = await screen.findByPlaceholderText("Cyrillic or Latin");
+    expect(screen.queryByText(/Latin spelling/)).toBeNull();      // the answer stays hidden
+    fireEvent.changeText(input, "chto");
+    await waitFor(() => expect(screen.getByPlaceholderText("Cyrillic or Latin").props.value).toBe("chto"));
+    await act(async () => { fireEvent.press(screen.getByText("Check")); });
+    expect(await screen.findByText("Correct")).toBeTruthy();
+    expect(screen.getByText("Latin spelling: “chto”")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    // Question 8 on the emulator opened with question 7's answer still in it.
+    expect((await screen.findByPlaceholderText("Cyrillic or Latin")).props.value).toBe("");
+  });
+
+  it("shows the enclosing flow's progress when told to", async () => {
+    await withRunner({ progress: { at: 4, total: 16 } });
+    expect(await screen.findByText("5/16")).toBeTruthy();
   });
 });

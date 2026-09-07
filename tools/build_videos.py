@@ -12,6 +12,7 @@ loose one, and the report says how many.
 """
 
 import argparse
+import html
 import json
 import re
 import sqlite3
@@ -78,7 +79,8 @@ def main():
         parts = line.rstrip("\n").split("\t")
         if len(parts) < 2 or not parts[0].strip():
             continue
-        vid, title = parts[0].strip(), parts[1].strip()
+        # The feed carries titles HTML-escaped; an emoji arrived as "&#128512;".
+        vid, title = parts[0].strip(), html.unescape(parts[1].strip())
         dur = int(parts[2]) if len(parts) > 2 and parts[2].isdigit() else None
         if SKIP_RE.search(title):
             continue

@@ -7,7 +7,7 @@ import { useTheme, radius } from "../theme";
 import {
   Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Title,
 } from "../ui";
-import { L, UN, STATS, idxOfWord } from "../data";
+import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
 import { troubleWords } from "./Study";
 import { today } from "@core/util";
 import { tagInfo } from "@core/errortags";
@@ -114,8 +114,12 @@ export default function You({ navigation }) {
   const [settings, setSettings] = useState(false);
 
   const learned = Object.values(st.seen).filter((c) => (c.reps || 0) > 0).length;
-  const lessons = Object.values(st.unit)
-    .reduce((a, u) => a + Object.keys(u.lessons || {}).length, 0);
+  // Cleared means done — vocabulary met and the quiz passed — not merely attempted.
+  const lessons = UN.reduce((a, u) => {
+    let n = 0;
+    for (let i = 0; i < lessonCount(u); i++) if (lessonDone(st, u, i)) n++;
+    return a + n;
+  }, 0);
   const due = Object.keys(st.seen).filter((w) => st.seen[w].due <= today()).length;
   const trouble = troubleWords(st);
   const grammar = grammarTrouble(st);

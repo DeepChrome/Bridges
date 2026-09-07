@@ -69,19 +69,38 @@ export function makeQuestions(env) {
     return out;
   }
 
-  /* A gap-fill needs an example whose blanked token really is this lemma. */
+  /* A gap-fill needs an example whose blanked token really is this lemma. Of the
+     examples that qualify, the one a learner can read: every word resolvable in
+     the index, then the shortest. Without that rule the first example won — and
+     lesson 1 asked for a gap in «Это явление продолжает оставаться в фокусе
+     внимания экспертов». */
   function clozeFor(idx) {
     const w = L[idx];
     if (!w.x || !w.x.length) return null;
+    let best = null;
     for (const ex of w.x) {
       const toks = ex.ru.match(TOKEN) || [];
+      if (toks.length < 3) continue;
       const hit = toks.find((t) => {
         const ids = IX[fold(t)];
         return ids && ids.includes(idx);
       });
-      if (hit && toks.length >= 3) return { ex, token: hit };
+      if (!hit) continue;
+      const unknown = toks.filter((t) => !IX[fold(t)]).length;
+      const score = unknown * 100 + toks.length;
+      if (!best || score < best.score) best = { ex, token: hit, score };
     }
-    return null;
+    return best ? { ex: best.ex, token: best.token } : null;
+  }
+
+  /* The gap replaces the token as a whole word, never a substring: «в» must not
+     open a hole inside «явление». */
+  function gapped(ru, token) {
+    // Letters only, not the hyphen: «SMS-сообщение» and «Радио-2» hold the token
+    // against a hyphen and must still get their gap.
+    const letter = "а-яёА-ЯЁ̀́";
+    const re = new RegExp(`(^|[^${letter}])${token}(?![${letter}])`);
+    return ru.replace(re, "$1_____");
   }
 
   const poolFor = (u) =>
@@ -133,7 +152,7 @@ export function makeQuestions(env) {
         const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, (x) => x.b)));
         return {
           kind: e.t, i: e.i, ask: "Fill the gap",
-          prompt: e.ex.ru.replace(e.token, "_____"), sub: e.ex.en, cyr: true,
+          prompt: gapped(e.ex.ru, e.token), sub: e.ex.en, cyr: true,
           options: opts.map((i) => ({ label: L[i].b, right: i === e.i, cyr: true })),
         };
       }

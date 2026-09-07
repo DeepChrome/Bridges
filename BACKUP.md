@@ -40,13 +40,15 @@ Full rebuild order, from sources only:
 
 ## Second copy
 
-Location: `C:\Users\jared\OneDrive\BridgesBackup\2026-09-05\`
+Location: `C:\Users\jared\OneDrive\BridgesBackup\2026-09-07\` (the 2026-09-05 copy
+beside it can be deleted once this one shows as synced).
 
 Contents: the live Anki media directory, the collection snapshot from `data/_work/`,
-all of `data/raw/`, `data/transcripts.json`, and `site/audio/`.
+all of `data/raw/` (now with the six new channels' captions and metadata),
+`data/transcripts.json`, and `site/audio/`.
 
-Verified 2026-09-05 23:03 after the copy: **37,309 files, 670.5 MB**; the media
-directory copied 291.96 MB with 0 failures (robocopy).
+Verified 2026-09-07 02:13 after the copy: **37,790 files, 927.7 MB** (robocopy,
+0 failures). The 2026-09-05 copy was 37,309 files, 670.5 MB.
 
 **Whether OneDrive is actually syncing that folder to the cloud cannot be verified from
 a shell.** Check the OneDrive tray icon shows it as synced before trusting it as
@@ -54,5 +56,7 @@ off-machine. Drives D:, E: and H: on this machine also have >1 TB free each; whe
 they are separate physical disks from C: is not known.
 
 Refresh the copy after any Anki sync that brings new media across, and after
-`harvest_videos.py` fetches new captions or metadata (2026-09-07: it did, for six
-new channels — the copy is behind until refreshed).
+`harvest_videos.py` fetches new captions or metadata.
+
+**The code itself has no second copy.** There is no git remote (ROADMAP P0.1 needs
+the owner's GitHub login). Until there is, the repository lives only on this disk.

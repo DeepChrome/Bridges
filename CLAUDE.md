@@ -1066,6 +1066,28 @@ several channels carry the channel's initials where a unit has its icon.
   and Remove; "Export selected" writes any ticked sets as one deck.
 - **Icon** — `make_app_icon.py`: a suspension bridge in white on the brand
   indigo, every size Expo and the web need, no image library.
+- **Offline audio** (P5.12, 2026-09-07) — `cache.js`: with the setting on
+  (`st.offline`, Settings → "Audio for offline"), opening a unit downloads that
+  unit's words and pool sentences and the next unit's to the app cache
+  (`File.downloadFileAsync`, three at a time), and removes any other unit's
+  files; `say()` prefers the local copy (`cachedUri`, synchronous — playback
+  must not wait). Bounded to two units and `CAP_BYTES`; a failed download is
+  counted, never retried in a loop. Settings shows what is saved and clears it.
+- **The pass mark has relief** (ROADMAP A29) — `quizPassed` in `core/state.js`:
+  80 % to pass, or 70 % from the third attempt on. `markComponent` counts
+  `tries` on the lesson slot in both apps; the simulator uses the same rule.
+  The struggling simulated learner went from 25 of 40 lessons passed to 39,
+  eight of them on relief; the quick learner used it once.
+- **The simulator runs Study** — every simulated day (two lessons) reviews what
+  is due, capped at 60, through the real FSRS review; the report carries reviews
+  a day, the again rate, the largest day and the days a backlog built. At forty
+  lessons no profile builds a backlog (14–31 reviews a day).
+- **Four more side quests** (A24 continued): Law & Crime, Science, Faith &
+  Tradition, Business & Finance — rules in `build_topics.py`, placed in chapters
+  6 and 8, read through `audit_branches.py` with fourteen overrides. The pool
+  count credits a shared form to its headword owner alone when there is one, so
+  «житься» (counted for every «нет») and «двух» (a form of «два») left the spine
+  (`STUBS`).
 
 ## 31. Verification
 

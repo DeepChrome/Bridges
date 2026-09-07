@@ -1,0 +1,105 @@
+# Round two of the walkthrough: the screens added 2026-09-07. A fresh install:
+#   adb shell pm clear app.bridges.russian; launch; then
+#   .\native\tools\walk.ps1 -Flow native\flows\walkthrough2.txt
+# Screenshots land in native/screenshots/walk/. Read them — that is the audit.
+
+shot:40-gate
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+tap:^Start from the beginning$
+wait:2
+shot:41-learn-home-button
+# Home button in a header: open a unit, then the house.
+tap:Start ·
+wait:2
+shot:42-unit
+tap:Home, the path
+wait:1
+shot:43-home-pressed
+# Practice: the new rows, the quiz setup, listening.
+tap:^Practice$
+wait:2
+shot:44-practice
+tap:^Quiz, Choose
+wait:2
+shot:45-quiz-setup
+scroll
+shot:46-quiz-setup-sections
+scroll
+scroll
+scroll
+tap:^Start$
+wait:3
+shot:47-quiz-running
+texts
+back
+wait:1
+back
+wait:1
+tap:^Listening, Scenes
+wait:3
+shot:48-listening-scene
+tap:Play the sentences
+wait:4
+shot:49-listening-playing
+back
+wait:1
+# Immerse: the library and the search bar, a word typed in Cyrillic.
+tap:^Immerse$
+wait:2
+shot:50-immerse
+tap:Search videos
+type:grammar
+wait:2
+shot:51-immerse-grammar
+clear
+type:travel
+wait:2
+shot:52-immerse-travel
+clear
+wait:1
+tapn:seen|min:0
+wait:3
+shot:53-video
+scroll
+shot:54-video-words
+back
+wait:1
+# Study: the picker with decks.
+tap:^Study$
+wait:2
+shot:55-study-empty
+tap:^Change$
+wait:2
+shot:56-study-picker
+tap:^Done$
+wait:1
+# Settings: the new rows.
+tapxy:988:202
+wait:2
+tap:^Settings$
+wait:1
+shot:57-settings-top
+scroll
+shot:58-settings-more
+tap:Kalimba
+wait:1
+tap:Slowest
+wait:1
+shot:59-settings-chosen
+tap:^Done$
+wait:1
+# A typed question with the keyboard: Learn → unit → lesson → quiz.
+tap:^Learn$
+wait:2
+tap:Start ·
+wait:2
+tap:^1, Lesson 1
+wait:2
+tap:^Quiz, Show
+wait:3
+shot:60-quiz
+texts

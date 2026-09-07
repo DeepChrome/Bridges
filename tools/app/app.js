@@ -248,10 +248,19 @@ const COL = (() => {
   return out;
 })();
 
-const LESSON_SIZE = 7;
 const PASS_MARK = 80;
-const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / LESSON_SIZE));
-const lessonWords = (u, i) => u.w.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
+/* Lessons ramp by chapter — five, six, then seven words — the same numbers as
+   core/questions.js LESSON_RAMP, which the native app reads. core/questions.js is
+   not inlined into this bundle, so the values are repeated here; a profile moved
+   between the apps keys on lesson indices, so the two must agree. */
+const LESSON_RAMP = [5, 6];
+const LESSON_SIZE = 7;
+const unitLessonSize = (u) => {
+  const k = STAGES.findIndex((s) => s.core === u || s.branches.includes(u));
+  return k >= 0 && k < LESSON_RAMP.length ? LESSON_RAMP[k] : LESSON_SIZE;
+};
+const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / unitLessonSize(u)));
+const lessonWords = (u, i) => u.w.slice(i * unitLessonSize(u), (i + 1) * unitLessonSize(u));
 const unitState = (id) => ST.unit[id] || { best: 0, done: false, lessons: {}, video: false };
 
 /* A lesson is three things that can be done in any order. The video belongs to the

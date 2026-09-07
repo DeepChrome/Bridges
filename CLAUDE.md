@@ -836,6 +836,31 @@ non-native says (perfect on 8 of 16 sentences, median best WER 17%), latency p50
 3.4 s / p95 4.4 s from release to result. Whisper (P3.7) is not needed. The latency
 is a design constraint for Say, not a defect to fix.
 
+## 30e. The path's shape (2026-09-06)
+
+Decided with the owner after the first simulated-learner and walkthrough trials:
+
+- **Grammar runs in the order the courses agree on** — `docs/grammar-sequence.md`
+  compares five of them. The spine cards go no-"is" → present tense → gender →
+  plural → prepositional → accusative → past → aspect, and a branch card may only
+  use what its chapter's spine has introduced, which is why the branches are
+  paired with the chapters they are (`STAGE_PLAN` in `build_topics.py`). Change a
+  card and check the pairing; `core/errortags.js` links tags to the same units.
+- **Side quests.** A chapter's branches are optional detours: the road forks after
+  `FORK_AT` (2) spine lessons, the next chapter needs only the spine, and
+  `nextLesson` ("Continue") follows the spine. `Learn.js` draws the fork; niche
+  quests (Medicine first) are rules in `build_topics.py` like any branch.
+- **Lessons ramp**: `LESSON_RAMP` in `core/questions.js` — five words a lesson in
+  chapter 1, six in chapter 2, seven after. The web bundle repeats the numbers
+  (`app.js`) because `core/questions.js` is not inlined there; a profile moved
+  between the apps keys on lesson indices, so the two must agree.
+- **Drills ask only about the learner's own words**: `drillPool` in `data.js`,
+  widened along the route below forty.
+- **Branch word lists are read, not trusted.** Rules match only a gloss's first
+  two senses (≤ 3 words), and `tools/audit_branches.py` prints every branch word
+  with the sense that placed it; the ~150 `OVERRIDES` are the record of three
+  read-throughs. Rerun the audit after any rule change.
+
 ## 30d. The feedback Worker (ROADMAP Phase 4) — the only server
 
 `backend/` is a Cloudflare Worker with one route, `POST /v1/feedback`. It exists

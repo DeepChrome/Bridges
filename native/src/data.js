@@ -8,6 +8,7 @@ import DATA from "../assets/data.json";
 import { fold } from "@core/util";
 import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator } from "@core/entry";
+import { lessonSize } from "@core/questions";
 
 export const L = DATA.lemmas;
 export const IX = DATA.index;
@@ -105,11 +106,18 @@ export function chapterOf(unitId) {
 
 export const unitById = (id) => UN.find((u) => u.id === id) || null;
 
-export const LESSON_SIZE = 7;
 export const PASS_MARK = 80;
 
-export const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / LESSON_SIZE));
-export const lessonWords = (u, i) => u.w.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
+/* Lessons ramp: five words each in chapter 1, six in chapter 2, seven after
+   (core/questions.js LESSON_RAMP). A unit's chapter decides, spine or branch. */
+const stageIndexOf = (u) =>
+  STAGES.findIndex((s) => s.core === u || s.branches.includes(u));
+export const unitLessonSize = (u) => lessonSize(stageIndexOf(u));
+export const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / unitLessonSize(u)));
+export const lessonWords = (u, i) => {
+  const n = unitLessonSize(u);
+  return u.w.slice(i * n, (i + 1) * n);
+};
 
 export const unitState = (st, id) =>
   st.unit[id] || { best: 0, done: false, lessons: {}, video: false };

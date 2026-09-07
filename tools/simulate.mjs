@@ -24,7 +24,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fold, TOKEN } from "../core/util.js";
-import { makeQuestions, QUIZ_N, SPEECH_MIX } from "../core/questions.js";
+import { makeQuestions, QUIZ_N, SPEECH_MIX, lessonSize } from "../core/questions.js";
 import { gradeFor, applyGrade, isTrouble } from "../core/fsrs.js";
 import { compare } from "../core/compare.js";
 import { gradeAlignment, sentenceLemmas } from "../core/speech.js";
@@ -58,10 +58,11 @@ const STAGES = (() => {
   });
   return out;
 })();
-const LESSON_SIZE = 7, PASS_MARK = 80;
-const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / LESSON_SIZE));
-const lessonWords = (u, i) => u.w.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
+const PASS_MARK = 80;
 const chapterOf = (u) => STAGES.findIndex((s) => s.core === u || s.branches.includes(u));
+const sizeOf = (u) => lessonSize(chapterOf(u));
+const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / sizeOf(u)));
+const lessonWords = (u, i) => u.w.slice(i * sizeOf(u), (i + 1) * sizeOf(u));
 
 /* The route as the app unlocks it with developer mode off: a chapter after the
    previous spine is done, a branch once its spine has a lesson done. */

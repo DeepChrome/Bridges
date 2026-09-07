@@ -22,6 +22,15 @@ export const SPEECH_MIX = {
   hear: { fromStage: 1, perQuiz: 1 },
   say: { fromStage: 2, perQuiz: 1 },
 };
+/* New words per lesson, by chapter: a ramp, not a flat seven from lesson one. The
+   first chapter's lessons carry five, the second's six, then seven. Both apps and
+   the simulator size lessons through this, so the lesson a state key names is the
+   same lesson everywhere. */
+export const LESSON_RAMP = [5, 6];
+export const LESSON_SIZE = 7;
+export const lessonSize = (stageIndex) =>
+  (stageIndex >= 0 && stageIndex < LESSON_RAMP.length ? LESSON_RAMP[stageIndex] : LESSON_SIZE);
+
 export const PRACTICE_N = 8;
 export const DRILL_N = 10;
 export const PLACEMENT_N = 50;

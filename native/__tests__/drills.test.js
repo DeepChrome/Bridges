@@ -2,8 +2,16 @@
    Found on the emulator walkthrough: "genitive plural of рис" for a learner who
    knew six words. */
 
-import { drillPool, DRILL_POOL_MIN, STAGES, L, idxOfWord } from "../src/data";
+import { drillPool, DRILL_POOL_MIN, STAGES, L, idxOfWord, lessonWords, lessonCount } from "../src/data";
 import { Q } from "../src/questions";
+
+describe("lesson ramp", () => {
+  it("chapter 1 teaches five words a lesson, chapter 3 seven", () => {
+    expect(lessonWords(STAGES[0].core, 0)).toHaveLength(5);
+    expect(lessonCount(STAGES[0].core)).toBe(Math.ceil(STAGES[0].core.w.length / 5));
+    expect(lessonWords(STAGES[2].core, 0)).toHaveLength(7);
+  });
+});
 
 const fresh = { seen: {}, trouble: {}, unit: {}, dev: false };
 

@@ -19,7 +19,8 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
   from "../core/state.js";
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
-import { makeQuestions, DRILL_TYPES, SPEECH_MIX } from "../core/questions.js";
+import { makeQuestions, DRILL_TYPES, SPEECH_MIX, lessonSize, LESSON_RAMP, LESSON_SIZE }
+  from "../core/questions.js";
 import { sentenceLemmas, gradeAlignment } from "../core/speech.js";
 import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
@@ -329,14 +330,30 @@ const STAGES = (() => {
   });
   return out;
 })();
-const LESSON_SIZE = 7;
-const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / LESSON_SIZE));
-const lessonWords = (u, i) => u.w.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
+// Mirrors native/src/data.js: lessons ramp by chapter through core's lessonSize.
+const stageIndexOf = (u) => STAGES.findIndex((s) => s.core === u || s.branches.includes(u));
+const sizeOf = (u) => lessonSize(stageIndexOf(u));
+const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / sizeOf(u)));
+const lessonWords = (u, i) => u.w.slice(i * sizeOf(u), (i + 1) * sizeOf(u));
 const SPEECH = DATA.speech;
 const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH,
                           hasVoice: () => true });
 const answerable = (q) =>
   q.options || q.typed || q.pairs || q.kind === "hear" || q.kind === "say";
+
+group("lesson ramp");
+{
+  ok(lessonSize(0) === LESSON_RAMP[0] && lessonSize(1) === LESSON_RAMP[1]
+     && lessonSize(2) === LESSON_SIZE && lessonSize(7) === LESSON_SIZE && lessonSize(-1) === LESSON_SIZE,
+     "five, six, then seven words a lesson, and seven for anything unplaced");
+  ok(LESSON_RAMP.every((n, k) => k === 0 || n >= LESSON_RAMP[k - 1]) && LESSON_RAMP[LESSON_RAMP.length - 1] <= LESSON_SIZE,
+     "the ramp only ever rises");
+  const c1 = STAGES[0].core, c3 = STAGES[2].core;
+  ok(lessonWords(c1, 0).length === 5 && lessonCount(c1) === Math.ceil(c1.w.length / 5),
+     `chapter 1 lessons carry five words (${lessonCount(c1)} lessons)`);
+  ok(lessonWords(c3, 0).length === 7, "chapter 3 lessons carry seven");
+  ok(lessonWords(STAGES[0].branches[0], 0).length === 5, "a chapter's side quests ramp with it");
+}
 
 group("lesson generation");
 {

@@ -18,6 +18,7 @@ whose word has left the units is dropped from the app, not from the cache.
 
 import argparse
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -27,7 +28,31 @@ ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw" / "images"
 OUT = ROOT / "native" / "assets" / "img"
 JS = ROOT / "native" / "src" / "images.js"
+TERMS = ROOT / "data" / "curated" / "image_terms.json"
 ABSTRACT_UNITS = {"time", "emotion", "speech", "politics", "business"}
+MAX_TITLE_WORDS = 4
+# Antiques and press photographs: the public-domain pool is US government
+# releases and museum scans, and a search term in one of their titles is a
+# unit's name ("RED HORSE conduct annual training") or a caption, not the
+# thing. Anything matching this is left out; Wikipedia's own choices pass.
+OLD_RE = re.compile(r"\b1[0-9]{3}\b|museum|titel op object|funerary|manuscript|engrav|"
+                    r"lithograph|woodcut|etching|fresco|codex|\bnavy\b|\barmy\b|air force|"
+                    r"marines?\b|soldier|troop|\bLCCN\b|red horse|opera|portrait|attrice|"
+                    r"actress|joueur|sheet music|summit|conference|ceremony|exercise\b", re.I)
+
+
+def names(info):
+    """Is the file named after the thing? The title carries the search term as a
+    whole word, is short (a file called "Bangkok Taxi.jpg" is a photo of a taxi;
+    "2016 DoD Warrior Games Swimming Competition" is not a photo of swimming),
+    and is not a catalogued antique or a press release."""
+    title = re.sub(r"^File:|\.[a-z]+$", "", (info.get("title") or ""), flags=re.I).lower()
+    if OLD_RE.search(title):
+        return False
+    if len(re.findall(r"[a-zа-яё]+", title)) > MAX_TITLE_WORDS:
+        return False
+    words = [w for w in re.split(r"[^a-z]+", (info.get("term") or "").lower()) if len(w) > 2]
+    return any(re.search(r"\b" + re.escape(w) + r"s?\b", title) for w in words)
 
 
 def main():
@@ -37,6 +62,10 @@ def main():
 
     manifest = json.loads((RAW / "manifest.json").read_text(encoding="utf-8"))
     payload = json.loads(args.payload.read_text(encoding="utf-8"))
+    curated = {}
+    if TERMS.exists():
+        curated = {k: v for k, v in json.loads(TERMS.read_text(encoding="utf-8")).items()
+                   if not k.startswith("_") and v}
     # Only units whose words are things: a search for "investment" or "society"
     # returns something, and that something is the kind of picture that makes an
     # app look generated. The spine's nouns (время, год, человек) are left out
@@ -47,10 +76,19 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for old in OUT.glob("*.jpg"):
         old.unlink()
-    entries, credits, total = [], {}, 0
+    entries, credits, total, doubtful = [], {}, 0, 0
     for n, (bare, info) in enumerate(sorted(manifest.items())):
         src = RAW / f"{bare}.jpg"
         if not info or not src.exists() or bare not in taught:
+            continue
+        # Shipped: Wikipedia's lead image (an editor chose it for the article on
+        # the thing), or a Commons file found by a search term a person wrote in
+        # image_terms.json and named after the thing. A Commons hit on the
+        # word's gloss alone is not: measured on the harvest, about half of
+        # those were the wrong subject — "tablet" a clay tablet, "animal" a door
+        # knocker, "dog" a soldier. Precision over coverage, as with the videos.
+        if info.get("via") != "wikipedia" and not (bare in curated and names(info)):
+            doubtful += 1
             continue
         name = f"{n:04d}.jpg"
         shutil.copyfile(src, OUT / name)
@@ -72,7 +110,7 @@ def main():
     JS.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {JS}")
     print(f"  photos shipped : {len(entries)} of {sum(1 for v in manifest.values() if v)} harvested"
-          f" ({len(taught)} words taught)")
+          f" ({len(taught)} words taught; {doubtful} left out: not Wikipedia's choice and no curated term)")
     print(f"  bytes          : {total / 1_048_576:.1f} MB")
 
 

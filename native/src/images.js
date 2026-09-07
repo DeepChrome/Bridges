@@ -3,576 +3,131 @@
    on the bare word. CREDITS carries each file's title, author and licence. */
 
 export const IMAGES = {
-  "автобус": require("../assets/img/0003.jpg"),
   "автомат": require("../assets/img/0004.jpg"),
-  "автомобиль": require("../assets/img/0005.jpg"),
-  "автор": require("../assets/img/0006.jpg"),
   "ад": require("../assets/img/0008.jpg"),
-  "адрес": require("../assets/img/0009.jpg"),
-  "актриса": require("../assets/img/0010.jpg"),
-  "актёр": require("../assets/img/0011.jpg"),
   "ангел": require("../assets/img/0013.jpg"),
-  "аптека": require("../assets/img/0015.jpg"),
-  "аренда": require("../assets/img/0017.jpg"),
   "арест": require("../assets/img/0018.jpg"),
   "армия": require("../assets/img/0019.jpg"),
-  "артист": require("../assets/img/0020.jpg"),
-  "атака": require("../assets/img/0021.jpg"),
-  "аудитория": require("../assets/img/0022.jpg"),
-  "аэропорт": require("../assets/img/0023.jpg"),
-  "баба": require("../assets/img/0024.jpg"),
-  "бабочка": require("../assets/img/0025.jpg"),
   "бабушка": require("../assets/img/0026.jpg"),
-  "багаж": require("../assets/img/0027.jpg"),
   "бал": require("../assets/img/0028.jpg"),
   "балет": require("../assets/img/0029.jpg"),
-  "балкон": require("../assets/img/0030.jpg"),
   "банк": require("../assets/img/0031.jpg"),
-  "баскетбол": require("../assets/img/0032.jpg"),
-  "бассейн": require("../assets/img/0033.jpg"),
-  "батарея": require("../assets/img/0034.jpg"),
-  "бег": require("../assets/img/0035.jpg"),
-  "белка": require("../assets/img/0037.jpg"),
   "берег": require("../assets/img/0038.jpg"),
-  "библиотека": require("../assets/img/0040.jpg"),
-  "библия": require("../assets/img/0041.jpg"),
-  "билет": require("../assets/img/0043.jpg"),
-  "биология": require("../assets/img/0044.jpg"),
-  "битва": require("../assets/img/0045.jpg"),
   "близнец": require("../assets/img/0046.jpg"),
-  "блокнот": require("../assets/img/0047.jpg"),
   "бог": require("../assets/img/0048.jpg"),
   "болезнь": require("../assets/img/0050.jpg"),
-  "боль": require("../assets/img/0051.jpg"),
-  "больница": require("../assets/img/0052.jpg"),
-  "бомба": require("../assets/img/0053.jpg"),
-  "борьба": require("../assets/img/0055.jpg"),
-  "ботинок": require("../assets/img/0056.jpg"),
   "брат": require("../assets/img/0057.jpg"),
   "бригада": require("../assets/img/0058.jpg"),
-  "брюки": require("../assets/img/0059.jpg"),
-  "бумага": require("../assets/img/0061.jpg"),
-  "бутылка": require("../assets/img/0062.jpg"),
-  "буфет": require("../assets/img/0063.jpg"),
-  "вагон": require("../assets/img/0066.jpg"),
   "вакцина": require("../assets/img/0067.jpg"),
-  "ванная": require("../assets/img/0068.jpg"),
-  "велосипед": require("../assets/img/0070.jpg"),
-  "вера": require("../assets/img/0071.jpg"),
-  "весна": require("../assets/img/0072.jpg"),
-  "ветер": require("../assets/img/0073.jpg"),
-  "ветеран": require("../assets/img/0074.jpg"),
-  "виза": require("../assets/img/0078.jpg"),
   "внук": require("../assets/img/0085.jpg"),
   "внучка": require("../assets/img/0086.jpg"),
-  "водитель": require("../assets/img/0089.jpg"),
   "войско": require("../assets/img/0091.jpg"),
-  "вокзал": require("../assets/img/0092.jpg"),
-  "волейбол": require("../assets/img/0093.jpg"),
-  "волк": require("../assets/img/0094.jpg"),
-  "волос": require("../assets/img/0096.jpg"),
   "вор": require("../assets/img/0098.jpg"),
-  "ворот": require("../assets/img/0099.jpg"),
-  "враг": require("../assets/img/0101.jpg"),
-  "вред": require("../assets/img/0103.jpg"),
-  "встреча": require("../assets/img/0105.jpg"),
-  "выставка": require("../assets/img/0108.jpg"),
-  "выстрел": require("../assets/img/0109.jpg"),
-  "газ": require("../assets/img/0110.jpg"),
-  "газета": require("../assets/img/0111.jpg"),
-  "галстук": require("../assets/img/0112.jpg"),
-  "генерал": require("../assets/img/0113.jpg"),
-  "гитара": require("../assets/img/0114.jpg"),
-  "голова": require("../assets/img/0118.jpg"),
-  "гора": require("../assets/img/0120.jpg"),
-  "горло": require("../assets/img/0122.jpg"),
-  "городок": require("../assets/img/0124.jpg"),
-  "гостиная": require("../assets/img/0126.jpg"),
-  "гостиница": require("../assets/img/0127.jpg"),
-  "гость": require("../assets/img/0128.jpg"),
-  "градус": require("../assets/img/0130.jpg"),
-  "грех": require("../assets/img/0132.jpg"),
-  "гриб": require("../assets/img/0133.jpg"),
-  "гром": require("../assets/img/0134.jpg"),
-  "грудь": require("../assets/img/0135.jpg"),
-  "грузовик": require("../assets/img/0136.jpg"),
-  "губа": require("../assets/img/0137.jpg"),
-  "данные": require("../assets/img/0138.jpg"),
-  "двигатель": require("../assets/img/0141.jpg"),
-  "двор": require("../assets/img/0142.jpg"),
-  "девочка": require("../assets/img/0143.jpg"),
-  "девчонка": require("../assets/img/0145.jpg"),
-  "дед": require("../assets/img/0146.jpg"),
-  "дедушка": require("../assets/img/0147.jpg"),
-  "деревня": require("../assets/img/0153.jpg"),
-  "дерево": require("../assets/img/0154.jpg"),
-  "деятельность": require("../assets/img/0156.jpg"),
-  "диагноз": require("../assets/img/0157.jpg"),
-  "диван": require("../assets/img/0158.jpg"),
-  "директор": require("../assets/img/0159.jpg"),
-  "договор": require("../assets/img/0161.jpg"),
-  "дождь": require("../assets/img/0162.jpg"),
-  "доказательство": require("../assets/img/0163.jpg"),
-  "доклад": require("../assets/img/0164.jpg"),
-  "доктор": require("../assets/img/0165.jpg"),
-  "должность": require("../assets/img/0167.jpg"),
-  "доллар": require("../assets/img/0168.jpg"),
-  "дорога": require("../assets/img/0170.jpg"),
-  "дочка": require("../assets/img/0172.jpg"),
-  "душа": require("../assets/img/0176.jpg"),
-  "дядя": require("../assets/img/0177.jpg"),
-  "еда": require("../assets/img/0179.jpg"),
-  "жанр": require("../assets/img/0180.jpg"),
-  "желудок": require("../assets/img/0181.jpg"),
-  "живопись": require("../assets/img/0184.jpg"),
-  "живот": require("../assets/img/0185.jpg"),
-  "животное": require("../assets/img/0186.jpg"),
-  "журнал": require("../assets/img/0188.jpg"),
-  "журналист": require("../assets/img/0189.jpg"),
-  "заболевание": require("../assets/img/0190.jpg"),
-  "забор": require("../assets/img/0191.jpg"),
-  "завод": require("../assets/img/0192.jpg"),
-  "завтрак": require("../assets/img/0193.jpg"),
-  "задание": require("../assets/img/0194.jpg"),
-  "закон": require("../assets/img/0197.jpg"),
-  "занавеска": require("../assets/img/0198.jpg"),
-  "зарплата": require("../assets/img/0199.jpg"),
-  "заседание": require("../assets/img/0200.jpg"),
-  "защита": require("../assets/img/0201.jpg"),
-  "здание": require("../assets/img/0203.jpg"),
-  "земля": require("../assets/img/0206.jpg"),
-  "зеркало": require("../assets/img/0207.jpg"),
-  "змея": require("../assets/img/0208.jpg"),
-  "знание": require("../assets/img/0209.jpg"),
-  "зоопарк": require("../assets/img/0210.jpg"),
-  "зуб": require("../assets/img/0211.jpg"),
-  "игрок": require("../assets/img/0212.jpg"),
-  "игрушка": require("../assets/img/0213.jpg"),
-  "изобретение": require("../assets/img/0216.jpg"),
-  "изучение": require("../assets/img/0217.jpg"),
-  "икона": require("../assets/img/0218.jpg"),
-  "инженер": require("../assets/img/0219.jpg"),
-  "инструмент": require("../assets/img/0220.jpg"),
-  "интернет": require("../assets/img/0222.jpg"),
-  "искусство": require("../assets/img/0223.jpg"),
-  "исследование": require("../assets/img/0224.jpg"),
-  "источник": require("../assets/img/0226.jpg"),
-  "кабинет": require("../assets/img/0229.jpg"),
-  "казнь": require("../assets/img/0230.jpg"),
-  "камень": require("../assets/img/0231.jpg"),
-  "камера": require("../assets/img/0232.jpg"),
-  "каникулы": require("../assets/img/0233.jpg"),
-  "капитан": require("../assets/img/0234.jpg"),
-  "карман": require("../assets/img/0235.jpg"),
-  "карта": require("../assets/img/0236.jpg"),
-  "картина": require("../assets/img/0237.jpg"),
-  "картинка": require("../assets/img/0238.jpg"),
-  "карьера": require("../assets/img/0239.jpg"),
-  "касса": require("../assets/img/0240.jpg"),
-  "каток": require("../assets/img/0241.jpg"),
-  "квартал": require("../assets/img/0242.jpg"),
-  "кино": require("../assets/img/0244.jpg"),
-  "кинотеатр": require("../assets/img/0245.jpg"),
-  "клавиатура": require("../assets/img/0246.jpg"),
-  "клавиша": require("../assets/img/0247.jpg"),
-  "класс": require("../assets/img/0248.jpg"),
-  "клетка": require("../assets/img/0249.jpg"),
-  "клиника": require("../assets/img/0251.jpg"),
-  "клуб": require("../assets/img/0252.jpg"),
-  "ключ": require("../assets/img/0253.jpg"),
-  "кнопка": require("../assets/img/0255.jpg"),
-  "ковёр": require("../assets/img/0256.jpg"),
-  "кожа": require("../assets/img/0257.jpg"),
-  "коза": require("../assets/img/0258.jpg"),
-  "козёл": require("../assets/img/0259.jpg"),
-  "колено": require("../assets/img/0260.jpg"),
-  "коллега": require("../assets/img/0261.jpg"),
-  "кольцо": require("../assets/img/0262.jpg"),
-  "команда": require("../assets/img/0263.jpg"),
-  "командир": require("../assets/img/0264.jpg"),
-  "командировка": require("../assets/img/0265.jpg"),
-  "командование": require("../assets/img/0266.jpg"),
-  "комната": require("../assets/img/0267.jpg"),
-  "комод": require("../assets/img/0268.jpg"),
-  "контракт": require("../assets/img/0272.jpg"),
-  "концерт": require("../assets/img/0273.jpg"),
-  "конь": require("../assets/img/0274.jpg"),
-  "корабль": require("../assets/img/0275.jpg"),
-  "корова": require("../assets/img/0276.jpg"),
-  "космос": require("../assets/img/0278.jpg"),
-  "кость": require("../assets/img/0279.jpg"),
-  "костюм": require("../assets/img/0280.jpg"),
-  "кот": require("../assets/img/0281.jpg"),
-  "кофе": require("../assets/img/0282.jpg"),
-  "кошка": require("../assets/img/0283.jpg"),
-  "край": require("../assets/img/0284.jpg"),
-  "красота": require("../assets/img/0285.jpg"),
-  "крепость": require("../assets/img/0287.jpg"),
-  "кресло": require("../assets/img/0288.jpg"),
-  "крест": require("../assets/img/0289.jpg"),
-  "кровать": require("../assets/img/0291.jpg"),
-  "кровь": require("../assets/img/0292.jpg"),
-  "крыло": require("../assets/img/0294.jpg"),
-  "культура": require("../assets/img/0295.jpg"),
-  "курорт": require("../assets/img/0296.jpg"),
-  "курс": require("../assets/img/0297.jpg"),
-  "куртка": require("../assets/img/0298.jpg"),
-  "кухня": require("../assets/img/0299.jpg"),
-  "лаборатория": require("../assets/img/0300.jpg"),
-  "лампа": require("../assets/img/0301.jpg"),
-  "лекарство": require("../assets/img/0302.jpg"),
-  "лекция": require("../assets/img/0303.jpg"),
-  "лес": require("../assets/img/0304.jpg"),
-  "лестница": require("../assets/img/0305.jpg"),
-  "лечение": require("../assets/img/0308.jpg"),
-  "лист": require("../assets/img/0309.jpg"),
-  "литература": require("../assets/img/0310.jpg"),
-  "лодка": require("../assets/img/0312.jpg"),
-  "лошадь": require("../assets/img/0313.jpg"),
-  "лук": require("../assets/img/0314.jpg"),
-  "лыжа": require("../assets/img/0315.jpg"),
-  "лёд": require("../assets/img/0317.jpg"),
-  "магазин": require("../assets/img/0319.jpg"),
-  "майка": require("../assets/img/0320.jpg"),
-  "малыш": require("../assets/img/0321.jpg"),
-  "мальчик": require("../assets/img/0322.jpg"),
-  "мальчишка": require("../assets/img/0323.jpg"),
-  "масло": require("../assets/img/0326.jpg"),
-  "математика": require("../assets/img/0327.jpg"),
-  "матч": require("../assets/img/0328.jpg"),
-  "мебель": require("../assets/img/0331.jpg"),
-  "медведь": require("../assets/img/0332.jpg"),
-  "медицина": require("../assets/img/0333.jpg"),
-  "медсестра": require("../assets/img/0334.jpg"),
-  "менеджер": require("../assets/img/0335.jpg"),
-  "метро": require("../assets/img/0338.jpg"),
-  "мина": require("../assets/img/0340.jpg"),
-  "митинг": require("../assets/img/0343.jpg"),
-  "мода": require("../assets/img/0345.jpg"),
-  "мозг": require("../assets/img/0346.jpg"),
-  "молодёжь": require("../assets/img/0347.jpg"),
-  "молоко": require("../assets/img/0348.jpg"),
-  "монета": require("../assets/img/0351.jpg"),
-  "мороженое": require("../assets/img/0353.jpg"),
-  "мороз": require("../assets/img/0354.jpg"),
-  "мост": require("../assets/img/0355.jpg"),
-  "мотоцикл": require("../assets/img/0356.jpg"),
-  "муж": require("../assets/img/0357.jpg"),
-  "мужчина": require("../assets/img/0358.jpg"),
-  "музей": require("../assets/img/0359.jpg"),
-  "музыка": require("../assets/img/0360.jpg"),
-  "музыкант": require("../assets/img/0361.jpg"),
-  "мышка": require("../assets/img/0363.jpg"),
-  "мышь": require("../assets/img/0365.jpg"),
-  "мясо": require("../assets/img/0367.jpg"),
-  "мяч": require("../assets/img/0368.jpg"),
-  "мёд": require("../assets/img/0369.jpg"),
-  "наказание": require("../assets/img/0373.jpg"),
-  "нападение": require("../assets/img/0375.jpg"),
-  "напиток": require("../assets/img/0376.jpg"),
-  "наркомания": require("../assets/img/0377.jpg"),
-  "наркотик": require("../assets/img/0378.jpg"),
-  "насекомое": require("../assets/img/0380.jpg"),
-  "насморк": require("../assets/img/0381.jpg"),
-  "наступление": require("../assets/img/0383.jpg"),
-  "наука": require("../assets/img/0384.jpg"),
-  "начальник": require("../assets/img/0386.jpg"),
-  "небо": require("../assets/img/0387.jpg"),
-  "невеста": require("../assets/img/0388.jpg"),
-  "незнакомец": require("../assets/img/0390.jpg"),
-  "немка": require("../assets/img/0391.jpg"),
-  "новость": require("../assets/img/0392.jpg"),
-  "нога": require("../assets/img/0393.jpg"),
-  "ноготь": require("../assets/img/0394.jpg"),
-  "нож": require("../assets/img/0395.jpg"),
-  "нос": require("../assets/img/0397.jpg"),
-  "носок": require("../assets/img/0398.jpg"),
-  "ноутбук": require("../assets/img/0399.jpg"),
-  "обед": require("../assets/img/0401.jpg"),
-  "облако": require("../assets/img/0403.jpg"),
-  "оборона": require("../assets/img/0404.jpg"),
-  "образование": require("../assets/img/0405.jpg"),
-  "обстановка": require("../assets/img/0406.jpg"),
-  "обувь": require("../assets/img/0408.jpg"),
-  "одежда": require("../assets/img/0412.jpg"),
-  "озеро": require("../assets/img/0413.jpg"),
-  "олимпиада": require("../assets/img/0416.jpg"),
-  "операция": require("../assets/img/0417.jpg"),
-  "оружие": require("../assets/img/0418.jpg"),
-  "остров": require("../assets/img/0419.jpg"),
-  "ответ": require("../assets/img/0420.jpg"),
-  "отель": require("../assets/img/0421.jpg"),
-  "открытие": require("../assets/img/0423.jpg"),
-  "отряд": require("../assets/img/0425.jpg"),
-  "отступление": require("../assets/img/0426.jpg"),
-  "офис": require("../assets/img/0427.jpg"),
-  "офицер": require("../assets/img/0428.jpg"),
-  "официант": require("../assets/img/0429.jpg"),
-  "оценка": require("../assets/img/0430.jpg"),
-  "ошибка": require("../assets/img/0431.jpg"),
-  "палец": require("../assets/img/0432.jpg"),
-  "пальто": require("../assets/img/0433.jpg"),
-  "памятник": require("../assets/img/0434.jpg"),
-  "панель": require("../assets/img/0436.jpg"),
-  "парень": require("../assets/img/0437.jpg"),
-  "парк": require("../assets/img/0438.jpg"),
-  "паспорт": require("../assets/img/0441.jpg"),
-  "пасха": require("../assets/img/0443.jpg"),
-  "пациент": require("../assets/img/0444.jpg"),
-  "певец": require("../assets/img/0445.jpg"),
-  "певица": require("../assets/img/0446.jpg"),
-  "пенсия": require("../assets/img/0447.jpg"),
-  "переезд": require("../assets/img/0448.jpg"),
-  "перекрытие": require("../assets/img/0449.jpg"),
-  "перчатка": require("../assets/img/0450.jpg"),
-  "песня": require("../assets/img/0451.jpg"),
-  "песок": require("../assets/img/0452.jpg"),
-  "пиджак": require("../assets/img/0455.jpg"),
-  "писатель": require("../assets/img/0456.jpg"),
-  "пистолет": require("../assets/img/0457.jpg"),
-  "плавание": require("../assets/img/0459.jpg"),
-  "плата": require("../assets/img/0461.jpg"),
-  "платье": require("../assets/img/0463.jpg"),
-  "плечо": require("../assets/img/0464.jpg"),
-  "площадь": require("../assets/img/0465.jpg"),
-  "пляж": require("../assets/img/0466.jpg"),
-  "победа": require("../assets/img/0467.jpg"),
-  "повреждение": require("../assets/img/0468.jpg"),
-  "погода": require("../assets/img/0469.jpg"),
-  "подвал": require("../assets/img/0470.jpg"),
-  "подоконник": require("../assets/img/0471.jpg"),
-  "подруга": require("../assets/img/0472.jpg"),
-  "поездка": require("../assets/img/0474.jpg"),
-  "показание": require("../assets/img/0475.jpg"),
-  "пол": require("../assets/img/0476.jpg"),
-  "поле": require("../assets/img/0478.jpg"),
-  "полиция": require("../assets/img/0481.jpg"),
-  "полк": require("../assets/img/0482.jpg"),
-  "полка": require("../assets/img/0483.jpg"),
-  "полковник": require("../assets/img/0484.jpg"),
-  "порода": require("../assets/img/0491.jpg"),
-  "постель": require("../assets/img/0493.jpg"),
-  "похороны": require("../assets/img/0494.jpg"),
-  "почта": require("../assets/img/0495.jpg"),
-  "поэт": require("../assets/img/0496.jpg"),
-  "пояс": require("../assets/img/0497.jpg"),
-  "правило": require("../assets/img/0498.jpg"),
-  "предмет": require("../assets/img/0501.jpg"),
-  "пресса": require("../assets/img/0504.jpg"),
-  "преступление": require("../assets/img/0505.jpg"),
-  "преступник": require("../assets/img/0506.jpg"),
-  "прибор": require("../assets/img/0507.jpg"),
-  "приказ": require("../assets/img/0510.jpg"),
-  "природа": require("../assets/img/0512.jpg"),
-  "провод": require("../assets/img/0514.jpg"),
-  "программа": require("../assets/img/0515.jpg"),
-  "проезд": require("../assets/img/0517.jpg"),
-  "произведение": require("../assets/img/0518.jpg"),
-  "пространство": require("../assets/img/0519.jpg"),
-  "противник": require("../assets/img/0520.jpg"),
-  "профессор": require("../assets/img/0521.jpg"),
-  "птица": require("../assets/img/0522.jpg"),
-  "пуговица": require("../assets/img/0523.jpg"),
-  "пуля": require("../assets/img/0524.jpg"),
-  "путешествие": require("../assets/img/0525.jpg"),
-  "пьеса": require("../assets/img/0526.jpg"),
-  "работник": require("../assets/img/0528.jpg"),
-  "радио": require("../assets/img/0529.jpg"),
-  "радиоприёмник": require("../assets/img/0530.jpg"),
-  "радиостанция": require("../assets/img/0531.jpg"),
-  "ранение": require("../assets/img/0535.jpg"),
-  "распятие": require("../assets/img/0536.jpg"),
-  "редакция": require("../assets/img/0539.jpg"),
-  "рейс": require("../assets/img/0540.jpg"),
-  "река": require("../assets/img/0541.jpg"),
-  "религия": require("../assets/img/0543.jpg"),
-  "ремень": require("../assets/img/0544.jpg"),
-  "ремонт": require("../assets/img/0545.jpg"),
-  "ресторан": require("../assets/img/0547.jpg"),
-  "рецепт": require("../assets/img/0548.jpg"),
-  "ритм": require("../assets/img/0550.jpg"),
-  "родитель": require("../assets/img/0553.jpg"),
-  "рождество": require("../assets/img/0554.jpg"),
-  "роман": require("../assets/img/0555.jpg"),
-  "рот": require("../assets/img/0556.jpg"),
-  "рубашка": require("../assets/img/0557.jpg"),
-  "рубль": require("../assets/img/0558.jpg"),
-  "ружьё": require("../assets/img/0559.jpg"),
-  "руководитель": require("../assets/img/0561.jpg"),
-  "рыба": require("../assets/img/0562.jpg"),
-  "рынок": require("../assets/img/0563.jpg"),
-  "сад": require("../assets/img/0564.jpg"),
-  "сайт": require("../assets/img/0565.jpg"),
-  "салат": require("../assets/img/0566.jpg"),
-  "самоубийство": require("../assets/img/0568.jpg"),
-  "сапог": require("../assets/img/0569.jpg"),
-  "сахар": require("../assets/img/0570.jpg"),
-  "свадьба": require("../assets/img/0571.jpg"),
-  "свидетель": require("../assets/img/0572.jpg"),
-  "свидетельство": require("../assets/img/0573.jpg"),
-  "свинья": require("../assets/img/0574.jpg"),
-  "село": require("../assets/img/0577.jpg"),
-  "сердце": require("../assets/img/0580.jpg"),
-  "сестра": require("../assets/img/0581.jpg"),
-  "сеть": require("../assets/img/0582.jpg"),
-  "сигнал": require("../assets/img/0583.jpg"),
-  "симптом": require("../assets/img/0584.jpg"),
-  "система": require("../assets/img/0585.jpg"),
-  "скорая": require("../assets/img/0586.jpg"),
-  "словарь": require("../assets/img/0587.jpg"),
-  "служба": require("../assets/img/0589.jpg"),
-  "снег": require("../assets/img/0591.jpg"),
-  "собор": require("../assets/img/0593.jpg"),
-  "собрание": require("../assets/img/0594.jpg"),
-  "сок": require("../assets/img/0595.jpg"),
-  "солдат": require("../assets/img/0596.jpg"),
-  "соль": require("../assets/img/0598.jpg"),
-  "сон": require("../assets/img/0599.jpg"),
-  "сосед": require("../assets/img/0601.jpg"),
-  "сотрудник": require("../assets/img/0602.jpg"),
-  "спектакль": require("../assets/img/0603.jpg"),
-  "спина": require("../assets/img/0604.jpg"),
-  "спинка": require("../assets/img/0605.jpg"),
-  "спорт": require("../assets/img/0607.jpg"),
-  "спортзал": require("../assets/img/0608.jpg"),
-  "справедливость": require("../assets/img/0610.jpg"),
-  "сражение": require("../assets/img/0611.jpg"),
-  "стадион": require("../assets/img/0614.jpg"),
-  "стакан": require("../assets/img/0615.jpg"),
-  "станция": require("../assets/img/0616.jpg"),
-  "старик": require("../assets/img/0617.jpg"),
-  "статуя": require("../assets/img/0618.jpg"),
-  "статья": require("../assets/img/0619.jpg"),
-  "стекло": require("../assets/img/0620.jpg"),
-  "стена": require("../assets/img/0621.jpg"),
-  "стихотворение": require("../assets/img/0622.jpg"),
-  "стол": require("../assets/img/0624.jpg"),
-  "столик": require("../assets/img/0626.jpg"),
-  "столовая": require("../assets/img/0627.jpg"),
-  "строительство": require("../assets/img/0630.jpg"),
-  "студент": require("../assets/img/0631.jpg"),
-  "стул": require("../assets/img/0632.jpg"),
-  "суд": require("../assets/img/0634.jpg"),
-  "судно": require("../assets/img/0635.jpg"),
-  "судья": require("../assets/img/0636.jpg"),
-  "суп": require("../assets/img/0637.jpg"),
-  "супруг": require("../assets/img/0638.jpg"),
-  "супруга": require("../assets/img/0639.jpg"),
-  "сын": require("../assets/img/0641.jpg"),
-  "сынок": require("../assets/img/0642.jpg"),
-  "сыр": require("../assets/img/0643.jpg"),
-  "сюжет": require("../assets/img/0644.jpg"),
-  "таблетка": require("../assets/img/0645.jpg"),
-  "такси": require("../assets/img/0646.jpg"),
-  "тарелка": require("../assets/img/0647.jpg"),
-  "творчество": require("../assets/img/0648.jpg"),
-  "театр": require("../assets/img/0649.jpg"),
-  "телевидение": require("../assets/img/0650.jpg"),
-  "телефон": require("../assets/img/0652.jpg"),
-  "тело": require("../assets/img/0653.jpg"),
-  "тема": require("../assets/img/0654.jpg"),
-  "температура": require("../assets/img/0655.jpg"),
-  "теннис": require("../assets/img/0656.jpg"),
-  "теория": require("../assets/img/0657.jpg"),
-  "тетрадь": require("../assets/img/0658.jpg"),
-  "техник": require("../assets/img/0659.jpg"),
-  "технология": require("../assets/img/0660.jpg"),
-  "товар": require("../assets/img/0662.jpg"),
-  "товарищ": require("../assets/img/0663.jpg"),
-  "торт": require("../assets/img/0665.jpg"),
-  "трава": require("../assets/img/0666.jpg"),
-  "травма": require("../assets/img/0667.jpg"),
-  "трамвай": require("../assets/img/0668.jpg"),
-  "тренер": require("../assets/img/0669.jpg"),
-  "труп": require("../assets/img/0671.jpg"),
-  "турист": require("../assets/img/0673.jpg"),
-  "турнир": require("../assets/img/0674.jpg"),
-  "тюрьма": require("../assets/img/0678.jpg"),
-  "тётка": require("../assets/img/0679.jpg"),
-  "тётя": require("../assets/img/0680.jpg"),
-  "тёща": require("../assets/img/0681.jpg"),
-  "убийство": require("../assets/img/0683.jpg"),
-  "убийца": require("../assets/img/0684.jpg"),
-  "университет": require("../assets/img/0689.jpg"),
-  "упражнение": require("../assets/img/0690.jpg"),
-  "урок": require("../assets/img/0691.jpg"),
-  "ус": require("../assets/img/0692.jpg"),
-  "устройство": require("../assets/img/0693.jpg"),
-  "училище": require("../assets/img/0695.jpg"),
-  "учитель": require("../assets/img/0696.jpg"),
-  "учительница": require("../assets/img/0697.jpg"),
-  "фабрика": require("../assets/img/0699.jpg"),
-  "файл": require("../assets/img/0700.jpg"),
-  "фамилия": require("../assets/img/0701.jpg"),
-  "физика": require("../assets/img/0703.jpg"),
-  "флот": require("../assets/img/0706.jpg"),
-  "формат": require("../assets/img/0708.jpg"),
-  "фотоаппарат": require("../assets/img/0709.jpg"),
-  "фотография": require("../assets/img/0710.jpg"),
-  "фронт": require("../assets/img/0712.jpg"),
-  "фрукт": require("../assets/img/0713.jpg"),
-  "футбол": require("../assets/img/0714.jpg"),
-  "химия": require("../assets/img/0715.jpg"),
-  "хлеб": require("../assets/img/0716.jpg"),
-  "холод": require("../assets/img/0717.jpg"),
-  "хор": require("../assets/img/0718.jpg"),
-  "храм": require("../assets/img/0719.jpg"),
-  "художник": require("../assets/img/0720.jpg"),
-  "центр": require("../assets/img/0723.jpg"),
-  "церковь": require("../assets/img/0724.jpg"),
-  "чай": require("../assets/img/0725.jpg"),
-  "чемодан": require("../assets/img/0729.jpg"),
-  "чемпион": require("../assets/img/0730.jpg"),
-  "чемпионат": require("../assets/img/0731.jpg"),
-  "чёрт": require("../assets/img/0736.jpg"),
-  "шахматы": require("../assets/img/0737.jpg"),
-  "шерсть": require("../assets/img/0738.jpg"),
-  "шея": require("../assets/img/0739.jpg"),
-  "шкаф": require("../assets/img/0740.jpg"),
-  "шоколад": require("../assets/img/0742.jpg"),
-  "штраф": require("../assets/img/0743.jpg"),
-  "эволюция": require("../assets/img/0744.jpg"),
-  "экзамен": require("../assets/img/0745.jpg"),
-  "экран": require("../assets/img/0747.jpg"),
-  "эксперимент": require("../assets/img/0748.jpg"),
-  "электричество": require("../assets/img/0749.jpg"),
-  "электричка": require("../assets/img/0750.jpg"),
-  "электроэнергия": require("../assets/img/0751.jpg"),
-  "элемент": require("../assets/img/0752.jpg"),
-  "энергетика": require("../assets/img/0755.jpg"),
-  "энергия": require("../assets/img/0756.jpg"),
-  "этаж": require("../assets/img/0757.jpg"),
-  "юность": require("../assets/img/0758.jpg"),
-  "юноша": require("../assets/img/0759.jpg"),
-  "юрист": require("../assets/img/0760.jpg"),
-  "яблоко": require("../assets/img/0761.jpg"),
-  "яйцо": require("../assets/img/0763.jpg"),
+  "воспитание": require("../assets/img/0101.jpg"),
+  "враг": require("../assets/img/0102.jpg"),
+  "газ": require("../assets/img/0111.jpg"),
+  "газета": require("../assets/img/0112.jpg"),
+  "грех": require("../assets/img/0133.jpg"),
+  "дед": require("../assets/img/0147.jpg"),
+  "дедушка": require("../assets/img/0148.jpg"),
+  "дождь": require("../assets/img/0163.jpg"),
+  "доктор": require("../assets/img/0166.jpg"),
+  "душа": require("../assets/img/0177.jpg"),
+  "дядя": require("../assets/img/0178.jpg"),
+  "еда": require("../assets/img/0180.jpg"),
+  "живопись": require("../assets/img/0185.jpg"),
+  "заболевание": require("../assets/img/0191.jpg"),
+  "забор": require("../assets/img/0192.jpg"),
+  "изобретение": require("../assets/img/0217.jpg"),
+  "икона": require("../assets/img/0219.jpg"),
+  "инженер": require("../assets/img/0220.jpg"),
+  "казнь": require("../assets/img/0231.jpg"),
+  "капитан": require("../assets/img/0235.jpg"),
+  "карта": require("../assets/img/0237.jpg"),
+  "кнопка": require("../assets/img/0256.jpg"),
+  "ковёр": require("../assets/img/0257.jpg"),
+  "крыло": require("../assets/img/0295.jpg"),
+  "лекарство": require("../assets/img/0303.jpg"),
+  "лес": require("../assets/img/0305.jpg"),
+  "математика": require("../assets/img/0328.jpg"),
+  "мебель": require("../assets/img/0332.jpg"),
+  "медицина": require("../assets/img/0334.jpg"),
+  "медсестра": require("../assets/img/0335.jpg"),
+  "муж": require("../assets/img/0358.jpg"),
+  "мужчина": require("../assets/img/0359.jpg"),
+  "музыка": require("../assets/img/0361.jpg"),
+  "музыкант": require("../assets/img/0362.jpg"),
+  "мяч": require("../assets/img/0369.jpg"),
+  "мёд": require("../assets/img/0370.jpg"),
+  "наказание": require("../assets/img/0374.jpg"),
+  "наркомания": require("../assets/img/0378.jpg"),
+  "наркотик": require("../assets/img/0379.jpg"),
+  "невеста": require("../assets/img/0389.jpg"),
+  "новость": require("../assets/img/0393.jpg"),
+  "носок": require("../assets/img/0399.jpg"),
+  "облако": require("../assets/img/0404.jpg"),
+  "образование": require("../assets/img/0406.jpg"),
+  "обстановка": require("../assets/img/0407.jpg"),
+  "одежда": require("../assets/img/0413.jpg"),
+  "остров": require("../assets/img/0420.jpg"),
+  "офицер": require("../assets/img/0429.jpg"),
+  "официант": require("../assets/img/0430.jpg"),
+  "пасха": require("../assets/img/0444.jpg"),
+  "певец": require("../assets/img/0446.jpg"),
+  "певица": require("../assets/img/0447.jpg"),
+  "песня": require("../assets/img/0452.jpg"),
+  "писатель": require("../assets/img/0457.jpg"),
+  "пистолет": require("../assets/img/0458.jpg"),
+  "платье": require("../assets/img/0464.jpg"),
+  "победа": require("../assets/img/0468.jpg"),
+  "подруга": require("../assets/img/0473.jpg"),
+  "показание": require("../assets/img/0476.jpg"),
+  "преступление": require("../assets/img/0506.jpg"),
+  "преступник": require("../assets/img/0507.jpg"),
+  "противник": require("../assets/img/0521.jpg"),
+  "профессор": require("../assets/img/0522.jpg"),
+  "пуговица": require("../assets/img/0524.jpg"),
+  "распятие": require("../assets/img/0537.jpg"),
+  "родитель": require("../assets/img/0554.jpg"),
+  "роман": require("../assets/img/0556.jpg"),
+  "рубль": require("../assets/img/0559.jpg"),
+  "самоубийство": require("../assets/img/0569.jpg"),
+  "сахар": require("../assets/img/0571.jpg"),
+  "сестра": require("../assets/img/0582.jpg"),
+  "сигнал": require("../assets/img/0584.jpg"),
+  "собор": require("../assets/img/0594.jpg"),
+  "сок": require("../assets/img/0596.jpg"),
+  "солдат": require("../assets/img/0597.jpg"),
+  "сон": require("../assets/img/0600.jpg"),
+  "спина": require("../assets/img/0605.jpg"),
+  "спинка": require("../assets/img/0606.jpg"),
+  "спорт": require("../assets/img/0608.jpg"),
+  "справедливость": require("../assets/img/0611.jpg"),
+  "стул": require("../assets/img/0633.jpg"),
+  "судья": require("../assets/img/0637.jpg"),
+  "супруг": require("../assets/img/0639.jpg"),
+  "супруга": require("../assets/img/0640.jpg"),
+  "театр": require("../assets/img/0650.jpg"),
+  "телевидение": require("../assets/img/0651.jpg"),
+  "техник": require("../assets/img/0660.jpg"),
+  "товарищ": require("../assets/img/0664.jpg"),
+  "труп": require("../assets/img/0672.jpg"),
+  "тюрьма": require("../assets/img/0679.jpg"),
+  "тёща": require("../assets/img/0682.jpg"),
+  "убийство": require("../assets/img/0684.jpg"),
+  "урок": require("../assets/img/0692.jpg"),
+  "ус": require("../assets/img/0693.jpg"),
+  "фамилия": require("../assets/img/0702.jpg"),
+  "шкаф": require("../assets/img/0741.jpg"),
+  "яйцо": require("../assets/img/0764.jpg"),
 };
 
 export const CREDITS = {
- "автобус": {
-  "t": "V142mev, nu venture bus in Chatham.jpg",
-  "a": "cliff wilton",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:V142mev,_nu_venture_bus_in_Chatham.jpg"
- },
  "автомат": {
   "t": "Control room pt tupper.jpg",
   "a": "Achim Hering",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Control_room_pt_tupper.jpg"
- },
- "автомобиль": {
-  "t": "Combat Center supports car show, street fair 150425-M-FZ867-201.jpg",
-  "a": "Lance Cpl. Julio McGraw",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Combat_Center_supports_car_show,_street_fair_150425-M-FZ867-201.jpg"
- },
- "автор": {
-  "t": "Best selling author turns sights on New York National Guard's 'Harlem Hellfighters' 140206-Z-ZZ999-001.jpg",
-  "a": "Maj. Al Phillips",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Best_selling_author_turns_sights_on_New_York_National_Guard%27s_%27Harlem_Hellfighters%27_140206-Z-ZZ999-001.jpg"
  },
  "ад": {
   "t": "Fra Angelico 010.jpg",
@@ -580,41 +135,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Fra_Angelico_010.jpg"
  },
- "адрес": {
-  "t": "Gemeindehaus Splügen Nord- und Westfassade.jpg",
-  "a": "Tinux",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Gemeindehaus_Spl%C3%BCgen_Nord-_und_Westfassade.jpg"
- },
- "актриса": {
-  "t": "Miss Ngoc Minh, a well-known singer and actress.jpg",
-  "a": "Vietnam Council on Foreign Relations",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Miss_Ngoc_Minh,_a_well-known_singer_and_actress.jpg"
- },
- "актёр": {
-  "t": "Solo performance-Actor practicing theater-Qom City-Iran Art in 2014 Mostafa Meraji 08.jpg",
-  "a": "Mostafameraji",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Solo_performance-Actor_practicing_theater-Qom_City-Iran_Art_in_2014_Mostafa_Meraji_08.jpg"
- },
  "ангел": {
   "t": "Angel of the Annunciation MET DP167921.jpg",
   "a": "",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Angel_of_the_Annunciation_MET_DP167921.jpg"
- },
- "аптека": {
-  "t": "USNS Comfort Pharmacy Distributes Patient Medication (49770907857).jpg",
-  "a": "Navy Medicine from Washington, DC, USA",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:USNS_Comfort_Pharmacy_Distributes_Patient_Medication_(49770907857).jpg"
- },
- "аренда": {
-  "t": "Ajax tegen ADO 2-1. Swart scoorde eerste doelpunt. Cruijff rent juichend weg, ke, Bestanddeelnr 923-0554.jpg",
-  "a": "Bert Verhoeff for Anefo",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Ajax_tegen_ADO_2-1._Swart_scoorde_eerste_doelpunt._Cruijff_rent_juichend_weg,_ke,_Bestanddeelnr_923-0554.jpg"
  },
  "арест": {
   "t": "ICE.XCheckII.3cops1arrest.jpg",
@@ -628,53 +153,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:250th_United_States_Army_Birthday_Parade_in_Washington,_D.C._on_June_14,_2025_-_262.jpg"
  },
- "артист": {
-  "t": "Artist Linda Campbell Community flyer (14765329616).jpg",
-  "a": "BLM Nevada",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Artist_Linda_Campbell_Community_flyer_(14765329616).jpg"
- },
- "атака": {
-  "t": "374 SFS responds to ground attack scenario during BM 25-2 (8898901).jpg",
-  "a": "U.S. Air Force photo by Senior Airman Jarrett Smith",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:374_SFS_responds_to_ground_attack_scenario_during_BM_25-2_(8898901).jpg"
- },
- "аудитория": {
-  "t": "Lecture Hall.jpg",
-  "a": "Paul The Writer",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Lecture_Hall.jpg"
- },
- "аэропорт": {
-  "t": "2016 02 06 Airport Police Station-3 (24481453349).jpg",
-  "a": "AMISOM Public Information",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:2016_02_06_Airport_Police_Station-3_(24481453349).jpg"
- },
- "баба": {
-  "t": "A woman looking at the Lake.jpg",
-  "a": "Iurie Nistor",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:A_woman_looking_at_the_Lake.jpg"
- },
- "бабочка": {
-  "t": "Monarch butterfly insect on butterflyweed flower.jpg",
-  "a": "Laura Perlick, U.S. Fish and Wildlife Service",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Monarch_butterfly_insect_on_butterflyweed_flower.jpg"
- },
  "бабушка": {
   "t": "The Favorite by Georgios Iakovidis.jpg",
   "a": "Georgios Jakobides",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:The_Favorite_by_Georgios_Iakovidis.jpg"
- },
- "багаж": {
-  "t": "ALL 00262Airline Luggage Label Collection Image (54883996718).jpg",
-  "a": "San Diego Air &amp; Space Museum Archives",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:ALL_00262Airline_Luggage_Label_Collection_Image_(54883996718).jpg"
  },
  "бал": {
   "t": "Many balls.jpg",
@@ -688,47 +171,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Edgar_Degas_-_La_Classe_de_danse.jpg"
  },
- "балкон": {
-  "t": "IMAG4085-library-gardens-k-street-flats-balcony-location.jpg",
-  "a": "Alfred Twu",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:IMAG4085-library-gardens-k-street-flats-balcony-location.jpg"
- },
  "банк": {
   "t": "London.bankofengland.arp.jpg",
   "a": "Adrian Pingstone",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:London.bankofengland.arp.jpg"
- },
- "баскетбол": {
-  "t": "Basketball team loses, but wins friends DVIDS242111.jpg",
-  "a": "Photo by: Senior Master Sgt. Mike Litsey",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Basketball_team_loses,_but_wins_friends_DVIDS242111.jpg"
- },
- "бассейн": {
-  "t": "Working in motor pool at Guantanamo Bay DVIDS93895.jpg",
-  "a": "Spc. Erica Isaacson",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Working_in_motor_pool_at_Guantanamo_Bay_DVIDS93895.jpg"
- },
- "батарея": {
-  "t": "Primary battery manufacture. (e8982e0cdd16436bbef680f23a33f186).jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Primary_battery_manufacture._(e8982e0cdd16436bbef680f23a33f186).jpg"
- },
- "бег": {
-  "t": "Boo Run 111031-F-MM068-003.jpg",
-  "a": "Senior Airman Amber Kelly-Herard",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Boo_Run_111031-F-MM068-003.jpg"
- },
- "белка": {
-  "t": "Squirrel acrobatics.jpg",
-  "a": "Kerri Love",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Squirrel_acrobatics.jpg"
  },
  "берег": {
   "t": "London.bankofengland.arp.jpg",
@@ -736,47 +183,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:London.bankofengland.arp.jpg"
  },
- "библиотека": {
-  "t": "Wea01121 - Flickr - NOAA Photo Library.jpg",
-  "a": "NOAA Photo Library",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Wea01121_-_Flickr_-_NOAA_Photo_Library.jpg"
- },
- "библия": {
-  "t": "The Bible, The Book of Common Prayer, The Book of Psalms with Royal Stuart arms MET 182889.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:The_Bible,_The_Book_of_Common_Prayer,_The_Book_of_Psalms_with_Royal_Stuart_arms_MET_182889.jpg"
- },
- "билет": {
-  "t": "A ticket from Florida's Turnpike.jpg",
-  "a": "K7HPN",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:A_ticket_from_Florida%27s_Turnpike.jpg"
- },
- "биология": {
-  "t": "Volunteers and biology technician from Mt goat research crew (8387966376).jpg",
-  "a": "USFWSAlaska",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Volunteers_and_biology_technician_from_Mt_goat_research_crew_(8387966376).jpg"
- },
- "битва": {
-  "t": "Soldiers battle wildfire 120916-Z-IK464-010.jpg",
-  "a": "Staff Sgt. Jason Kriess",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Soldiers_battle_wildfire_120916-Z-IK464-010.jpg"
- },
  "близнец": {
   "t": "Mauch Twins.jpg",
   "a": "William A. Macis",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Mauch_Twins.jpg"
- },
- "блокнот": {
-  "t": "Mini purse and note book.jpg",
-  "a": "Reshmamohamed",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Mini_purse_and_note_book.jpg"
  },
  "бог": {
   "t": "Michelangelo, Creation of Adam 04.jpg",
@@ -790,36 +201,6 @@ export const CREDITS = {
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Michael_Ancher,_Den_syge_pige,_1882,_KMS4002,_Statens_Museum_for_Kunst.jpg"
  },
- "боль": {
-  "t": "The pain is brutal for these Marines 150306-M-IN448-048.jpg",
-  "a": "Sgt. Matthew Callahan",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:The_pain_is_brutal_for_these_Marines_150306-M-IN448-048.jpg"
- },
- "больница": {
-  "t": "Marines, Sailors bring smiles to hospital children during Fleet Week Port Everglades 140430-N-PG340-002.jpg",
-  "a": "U.S. Navy photo by Petty Officer 3rd Class Stephane Belcher/Released",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Marines,_Sailors_bring_smiles_to_hospital_children_during_Fleet_Week_Port_Everglades_140430-N-PG340-002.jpg"
- },
- "бомба": {
-  "t": "Bomb build at Snowbird 150127-Z-VA676-028.jpg",
-  "a": "Tech. Sgt. Daniel Heaton",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Bomb_build_at_Snowbird_150127-Z-VA676-028.jpg"
- },
- "борьба": {
-  "t": "Teammates US Air Force (USAF) STAFF Sergeant (SSGT) Kevin Dorobek, USAF SENIOR MASTER Sergeant (SMSGT) Michael Cross and USAF SSGT Larry Wade struggle to drag chemical warfare victi - DPLA - 8ccad1cb1da7931a5e672aa9717d1f43.jpeg",
-  "a": "Department of Defense. American Forces Information Service. Defense Visual Infor",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Teammates_US_Air_Force_(USAF)_STAFF_Sergeant_(SSGT)_Kevin_Dorobek,_USAF_SENIOR_MASTER_Sergeant_(SMSGT)_Michael_Cross_and_USAF_SSGT_Larry_Wade_struggle_to_drag_chemical_warfare_victi_-_DPLA_-_8ccad1cb1da7931a5e672aa9717d1f43.jpeg"
- },
- "ботинок": {
-  "t": "Op de boot, RP-F-2016-135-2-44-4.jpg",
-  "a": "Rijksmuseum",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Op_de_boot,_RP-F-2016-135-2-44-4.jpg"
- },
  "брат": {
   "t": "Jackson 5 1969.jpg",
   "a": "Bernie Ilson, Inc., public relations, New York.",
@@ -832,83 +213,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Latvian_platoon_at_Camp_Lejeune.jpg"
  },
- "брюки": {
-  "t": "Trousers MET CI50.98.1 d.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Trousers_MET_CI50.98.1_d.jpg"
- },
- "бумага": {
-  "t": "Salt Lake Temple with faded words Digital Scrapbook paper.jpg",
-  "a": "Granny Enchanted",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Salt_Lake_Temple_with_faded_words_Digital_Scrapbook_paper.jpg"
- },
- "бутылка": {
-  "t": "Message Bottle on Sand.jpg",
-  "a": "Snapwire",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Message_Bottle_on_Sand.jpg"
- },
- "буфет": {
-  "t": "Sideboard, known as The Pericles Dressoir MET DP-898-002.jpg",
-  "a": "Bruce James Talbert",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Sideboard,_known_as_The_Pericles_Dressoir_MET_DP-898-002.jpg"
- },
- "вагон": {
-  "t": "Miles City Bucking Horse parade 2024 - Range Riders.jpg",
-  "a": "Tbennert",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Miles_City_Bucking_Horse_parade_2024_-_Range_Riders.jpg"
- },
  "вакцина": {
   "t": "Smallpox vaccine.jpg",
   "a": "Photo Credit: James Gathany\nContent Providers(s): CDC",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Smallpox_vaccine.jpg"
- },
- "ванная": {
-  "t": "Children's Welfare Department - bathroom(GN14372).jpg",
-  "a": "State Government Photographer",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Children%27s_Welfare_Department_-_bathroom(GN14372).jpg"
- },
- "велосипед": {
-  "t": "Bicycle on Ice Oulu 20140329.jpg",
-  "a": "Estormiz",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Bicycle_on_Ice_Oulu_20140329.jpg"
- },
- "вера": {
-  "t": "Faith Fighting Battalions flag 2.jpg",
-  "a": "Papuagunnie",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Faith_Fighting_Battalions_flag_2.jpg"
- },
- "весна": {
-  "t": "Ear Spring ejecta - science equipment (30714784267).jpg",
-  "a": "Yellowstone National Park",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ear_Spring_ejecta_-_science_equipment_(30714784267).jpg"
- },
- "ветер": {
-  "t": "07583jfKamikaze Divine Wind East Airfields Peace Memorials Pampanga Cityfvf 09.JPG",
-  "a": "Judgefloro",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:07583jfKamikaze_Divine_Wind_East_Airfields_Peace_Memorials_Pampanga_Cityfvf_09.JPG"
- },
- "ветеран": {
-  "t": "Son ensures Vietnam veteran is laid to rest 150522-F-BS505-141.jpg",
-  "a": "Staff Sgt. Clayton Lenhardt",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Son_ensures_Vietnam_veteran_is_laid_to_rest_150522-F-BS505-141.jpg"
- },
- "виза": {
-  "t": "Visa pour le Cameroun 2024.jpg",
-  "a": "Rakoon",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Visa_pour_le_Cameroun_2024.jpg"
  },
  "внук": {
   "t": "Sauk Indian family by Frank Rinehart 1899.jpg",
@@ -922,41 +231,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Sauk_Indian_family_by_Frank_Rinehart_1899.jpg"
  },
- "водитель": {
-  "t": "John Bartlett (racing Driver).jpg",
-  "a": "AmazingJourneys",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:John_Bartlett_(racing_Driver).jpg"
- },
  "войско": {
   "t": "250th United States Army Birthday Parade in Washington, D.C. on June 14, 2025 - 262.jpg",
   "a": "usarmyband",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:250th_United_States_Army_Birthday_Parade_in_Washington,_D.C._on_June_14,_2025_-_262.jpg"
- },
- "вокзал": {
-  "t": "MT-Sumiyoshichō Station-Building for Chita-Handa.jpg",
-  "a": "ButuCC",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:MT-Sumiyoshich%C5%8D_Station-Building_for_Chita-Handa.jpg"
- },
- "волейбол": {
-  "t": "Plessis-Robinson Volley-ball - Stade poitevin volley beach - LBM - 13 novembre 2014 - 09.JPG",
-  "a": "Shev123",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Plessis-Robinson_Volley-ball_-_Stade_poitevin_volley_beach_-_LBM_-_13_novembre_2014_-_09.JPG"
- },
- "волк": {
-  "t": "Wolf Pack’s F-16 Fighting Falcons begin departure for Super Squadron Test Phase II (9231558).jpg",
-  "a": "U.S. Air Force photo by Senior Airman Landon Gunsauls",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Wolf_Pack%E2%80%99s_F-16_Fighting_Falcons_begin_departure_for_Super_Squadron_Test_Phase_II_(9231558).jpg"
- },
- "волос": {
-  "t": "Auburn hair.jpg",
-  "a": "Gbi.bytos",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Auburn_hair.jpg"
  },
  "вор": {
   "t": "Paul-Charles Chocarne-Moreau The Cunning Thief.jpg",
@@ -964,41 +243,17 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Paul-Charles_Chocarne-Moreau_The_Cunning_Thief.jpg"
  },
- "ворот": {
-  "t": "Standing band (collar) with tassels MET GT196j.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Standing_band_(collar)_with_tassels_MET_GT196j.jpg"
+ "воспитание": {
+  "t": "Schoolgirls in Bamozai.JPG",
+  "a": "Capt. John Severns, U.S. Air Force",
+  "l": "Public domain",
+  "u": "https://commons.wikimedia.org/wiki/File:Schoolgirls_in_Bamozai.JPG"
  },
  "враг": {
   "t": "Yevgeny Onegin by Repin.jpg",
   "a": "Ilya Repin",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Yevgeny_Onegin_by_Repin.jpg"
- },
- "вред": {
-  "t": "Schaatswedstrijden te Heerenveen om Gouden Schaats , Harm Kuipers in actie, nr , Bestanddeelnr 925-2443.jpg",
-  "a": "Bert Verhoeff / Anefo",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Schaatswedstrijden_te_Heerenveen_om_Gouden_Schaats_,_Harm_Kuipers_in_actie,_nr_,_Bestanddeelnr_925-2443.jpg"
- },
- "встреча": {
-  "t": "Secretary Blinken and Secretary Austin Participate in a 2+2 Meeting with Japanese Foreign Minister Motegi and Japanese Defense Minister Kishi (51043045672).jpg",
-  "a": "U.S. Department of State from United States",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Secretary_Blinken_and_Secretary_Austin_Participate_in_a_2%2B2_Meeting_with_Japanese_Foreign_Minister_Motegi_and_Japanese_Defense_Minister_Kishi_(51043045672).jpg"
- },
- "выставка": {
-  "t": "Bodrum \"İşte Benim Zeki Müren\" Sergisi Kostüm 2015.jpg",
-  "a": "Hamdigumus",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Bodrum_%22%C4%B0%C5%9Fte_Benim_Zeki_M%C3%BCren%22_Sergisi_Kost%C3%BCm_2015.jpg"
- },
- "выстрел": {
-  "t": "Mally 0318 Mally Collection Image SC 10240 - William O Mally Collection Image Bill and George Whitlock \"I think this is a wonderful shot taken at our camp in the desert\" (54340193573).jpg",
-  "a": "San Diego Air &amp; Space Museum Archives",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Mally_0318_Mally_Collection_Image_SC_10240_-_William_O_Mally_Collection_Image_Bill_and_George_Whitlock_%22I_think_this_is_a_wonderful_shot_taken_at_our_camp_in_the_desert%22_(54340193573).jpg"
  },
  "газ": {
   "t": "Purplesmoke.jpg",
@@ -1012,137 +267,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:NYTimes-Page1-11-11-1918.jpg"
  },
- "галстук": {
-  "t": "Love dreams - theme from alias jimmy valentine.jpg",
-  "a": "Lyrics by Mort Harris &amp; Raymond Klages\n\nMelody by William Axt and David Mend",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Love_dreams_-_theme_from_alias_jimmy_valentine.jpg"
- },
- "генерал": {
-  "t": "Le général Berdoulat gouverneur militaire de Paris (1).JPEG",
-  "a": "Agence de presse Meurisse",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Le_g%C3%A9n%C3%A9ral_Berdoulat_gouverneur_militaire_de_Paris_(1).JPEG"
- },
- "гитара": {
-  "t": "Music-technology-guitar-microphone-studio-amplifier-846852-pxhere (cropped).jpg",
-  "a": "rafabendo",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Music-technology-guitar-microphone-studio-amplifier-846852-pxhere_(cropped).jpg"
- },
- "голова": {
-  "t": "SRCC and Head of ATMIS meets the Minister of Interior, Federal Affairs and Reconciliation - 53017142545.jpg",
-  "a": "Atmis Somalia",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:SRCC_and_Head_of_ATMIS_meets_the_Minister_of_Interior,_Federal_Affairs_and_Reconciliation_-_53017142545.jpg"
- },
- "гора": {
-  "t": "VMM-268 Supports Mountain Exercise 1-15 at Marine Corps Mountain Warfare Training Center Bridgeport, California 150204-M-DF987-005.jpg",
-  "a": "Cpl. Allison Herman",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:VMM-268_Supports_Mountain_Exercise_1-15_at_Marine_Corps_Mountain_Warfare_Training_Center_Bridgeport,_California_150204-M-DF987-005.jpg"
- },
- "горло": {
-  "t": "Cut-throat-spawning-15271.jpg",
-  "a": "Ed Austin &amp; Herb Jones",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Cut-throat-spawning-15271.jpg"
- },
- "городок": {
-  "t": "\"Hunters\" and Iraqi army run insurgents out of town DVIDS46688.jpg",
-  "a": "Spc. Paul Harris",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:%22Hunters%22_and_Iraqi_army_run_insurgents_out_of_town_DVIDS46688.jpg"
- },
- "гостиная": {
-  "t": "Door of the Living Room at the Former Residence of He Shuheng3.jpg",
-  "a": "Huangdan2060",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Door_of_the_Living_Room_at_the_Former_Residence_of_He_Shuheng3.jpg"
- },
- "гостиница": {
-  "t": "The Athens Hotel.jpg",
-  "a": "Oakland Tribune",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:The_Athens_Hotel.jpg"
- },
- "гость": {
-  "t": "Junior Ranger family at Canyon Visitor Education Center (48637359383).jpg",
-  "a": "Yellowstone National Park",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Junior_Ranger_family_at_Canyon_Visitor_Education_Center_(48637359383).jpg"
- },
- "градус": {
-  "t": "Triveni Degree College.jpg",
-  "a": "Hindhu Sree",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Triveni_Degree_College.jpg"
- },
  "грех": {
   "t": "Jan Brueghel de Oude en Peter Paul Rubens - Het aards paradijs met de zondeval van Adam en Eva.jpg",
   "a": "Peter Paul Rubens / Jan Brueghel the Elder",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Jan_Brueghel_de_Oude_en_Peter_Paul_Rubens_-_Het_aards_paradijs_met_de_zondeval_van_Adam_en_Eva.jpg"
- },
- "гриб": {
-  "t": "SZ 深圳 Shenzhen 福田 Futian 沙尾村 ShaWeiCun 城中村 village shop 冬菇 Chinese mushroom May 2025 R12S 03.jpg",
-  "a": "Haudsum Tucakm",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:SZ_%E6%B7%B1%E5%9C%B3_Shenzhen_%E7%A6%8F%E7%94%B0_Futian_%E6%B2%99%E5%B0%BE%E6%9D%91_ShaWeiCun_%E5%9F%8E%E4%B8%AD%E6%9D%91_village_shop_%E5%86%AC%E8%8F%87_Chinese_mushroom_May_2025_R12S_03.jpg"
- },
- "гром": {
-  "t": "Thunder Over The Empire Airfest 2012 120520-F-EI671-349.jpg",
-  "a": "Tech. Sgt. Joselito Aribuabo",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Thunder_Over_The_Empire_Airfest_2012_120520-F-EI671-349.jpg"
- },
- "грудь": {
-  "t": "Fractured breast implant.jpg",
-  "a": "",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Fractured_breast_implant.jpg"
- },
- "грузовик": {
-  "t": "On-board scale example.jpg",
-  "a": "U. S. Department of Transportation Federal Highway Administration",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:On-board_scale_example.jpg"
- },
- "губа": {
-  "t": "Popliteal Pterygia, Lip Pits, Cleft Lip and Palate 1.jpg",
-  "a": "Sydney S. Gellis and Murray Feingold",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Popliteal_Pterygia,_Lip_Pits,_Cleft_Lip_and_Palate_1.jpg"
- },
- "данные": {
-  "t": "BSA Report to the Nation 170308-H-OD937-050 (33344471675).jpg",
-  "a": "U.S. Department of Homeland Security (DHS)",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:BSA_Report_to_the_Nation_170308-H-OD937-050_(33344471675).jpg"
- },
- "двигатель": {
-  "t": "Working in motor pool at Guantanamo Bay DVIDS93895.jpg",
-  "a": "Spc. Erica Isaacson",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Working_in_motor_pool_at_Guantanamo_Bay_DVIDS93895.jpg"
- },
- "двор": {
-  "t": "Pellerhof nach Süden.jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Pellerhof_nach_S%C3%BCden.jpg"
- },
- "девочка": {
-  "t": "আশ্রম বালিকা Ashram Girl.jpg",
-  "a": "Sumasa",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:%E0%A6%86%E0%A6%B6%E0%A7%8D%E0%A6%B0%E0%A6%AE_%E0%A6%AC%E0%A6%BE%E0%A6%B2%E0%A6%BF%E0%A6%95%E0%A6%BE_Ashram_Girl.jpg"
- },
- "девчонка": {
-  "t": "আশ্রম বালিকা Ashram Girl.jpg",
-  "a": "Sumasa",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:%E0%A6%86%E0%A6%B6%E0%A7%8D%E0%A6%B0%E0%A6%AE_%E0%A6%AC%E0%A6%BE%E0%A6%B2%E0%A6%BF%E0%A6%95%E0%A6%BE_Ashram_Girl.jpg"
  },
  "дед": {
   "t": "The Favorite by Georgios Iakovidis.jpg",
@@ -1156,95 +285,17 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:The_Favorite_by_Georgios_Iakovidis.jpg"
  },
- "деревня": {
-  "t": "Turquoise of Nishapur - village of Ma'dan 15.JPG",
-  "a": "Sonia Sevilla",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Turquoise_of_Nishapur_-_village_of_Ma%27dan_15.JPG"
- },
- "дерево": {
-  "t": "Fallen tree - 1F.jpg",
-  "a": "Xyxyzyz",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Fallen_tree_-_1F.jpg"
- },
- "деятельность": {
-  "t": "3rd Maintenance Battalion prepares to conduct an Intermediate Maintenance Activity Field Exercise (8923458).jpg",
-  "a": "U.S. Marine Corps photo by Lance Cpl. Aaliyah Hunt",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:3rd_Maintenance_Battalion_prepares_to_conduct_an_Intermediate_Maintenance_Activity_Field_Exercise_(8923458).jpg"
- },
- "диагноз": {
-  "t": "Medical evaluation for diagnosis of micropenis.jpg",
-  "a": "Badassz71",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Medical_evaluation_for_diagnosis_of_micropenis.jpg"
- },
- "диван": {
-  "t": "Sofa Aliance Siavosh Adeli.jpg",
-  "a": "David-wiki-writer",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Sofa_Aliance_Siavosh_Adeli.jpg"
- },
- "директор": {
-  "t": "PRT Farah meets with the Provincial Director of Telecommunications 130501-N-IE116-030.jpg",
-  "a": "Chief Petty Officer Joshua Ives",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:PRT_Farah_meets_with_the_Provincial_Director_of_Telecommunications_130501-N-IE116-030.jpg"
- },
- "договор": {
-  "t": "Cultural Exchange with Karyo High School and M C Perry HS Sister-School Agreement signing (9456478).jpg",
-  "a": "U.S. Marine Corps photo by Lance Cpl. Isaac De Leon",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Cultural_Exchange_with_Karyo_High_School_and_M_C_Perry_HS_Sister-School_Agreement_signing_(9456478).jpg"
- },
  "дождь": {
   "t": "Hard rain on a roof.jpg",
   "a": "W.carter",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Hard_rain_on_a_roof.jpg"
  },
- "доказательство": {
-  "t": "3rd CAB conduct proof of concept operations (9584795).jpg",
-  "a": "U.S. Army Reserve photo by Staff Sgt. Alyssa Blom",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:3rd_CAB_conduct_proof_of_concept_operations_(9584795).jpg"
- },
- "доклад": {
-  "t": "Commander of the First Fleet Command General Lecture, 8 November 2024 15.jpg",
-  "a": "Jeromi Mikhael",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Commander_of_the_First_Fleet_Command_General_Lecture,_8_November_2024_15.jpg"
- },
  "доктор": {
   "t": "Columbia University PhD.jpg",
   "a": "Jjazz76",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Columbia_University_PhD.jpg"
- },
- "должность": {
-  "t": "Hanamaki post office 83004.jpg",
-  "a": "Lunatic_artemis(uploader)",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Hanamaki_post_office_83004.jpg"
- },
- "доллар": {
-  "t": "Dollarbiljetten, opdracht Elsevier, Bestanddeelnr 922-0198.jpg",
-  "a": "Bert Verhoeff for Anefo",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Dollarbiljetten,_opdracht_Elsevier,_Bestanddeelnr_922-0198.jpg"
- },
- "дорога": {
-  "t": "Service members visits various school and road construction sites DVIDS204702.jpg",
-  "a": "Staff Sgt. Teddy Wade",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Service_members_visits_various_school_and_road_construction_sites_DVIDS204702.jpg"
- },
- "дочка": {
-  "t": "Ezidi man wounded by a bullet, interviewed in Shingal in April of 2019 with his daughter 10.jpg",
-  "a": "Levi Clancy",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Ezidi_man_wounded_by_a_bullet,_interviewed_in_Shingal_in_April_of_2019_with_his_daughter_10.jpg"
  },
  "душа": {
   "t": "Schiavonetti Soul leaving body 1808.jpg",
@@ -1264,47 +315,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Good_Food_Display_-_NCI_Visuals_Online.jpg"
  },
- "жанр": {
-  "t": "Méthode de goût et d'expression pour apprendre à filer les sons, rendre la voix fléxible et acquérir le genre moderne - bpt6k9751444r (09 of 28).jpg",
-  "a": "Degola, A.. Compositeur",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:M%C3%A9thode_de_go%C3%BBt_et_d%27expression_pour_apprendre_%C3%A0_filer_les_sons,_rendre_la_voix_fl%C3%A9xible_et_acqu%C3%A9rir_le_genre_moderne_-_bpt6k9751444r_(09_of_28).jpg"
- },
- "желудок": {
-  "t": "Man opening chicken's stomach.jpg",
-  "a": "Serleehu",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Man_opening_chicken%27s_stomach.jpg"
- },
  "живопись": {
   "t": "Mona Lisa, by Leonardo da Vinci, from C2RMF retouched.jpg",
   "a": "Leonardo da Vinci",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Mona_Lisa,_by_Leonardo_da_Vinci,_from_C2RMF_retouched.jpg"
- },
- "живот": {
-  "t": "Man opening chicken's stomach.jpg",
-  "a": "Serleehu",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Man_opening_chicken%27s_stomach.jpg"
- },
- "животное": {
-  "t": "Heurtoir animal 28.jpg",
-  "a": "Renhour48",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Heurtoir_animal_28.jpg"
- },
- "журнал": {
-  "t": "Brood X 17 year periodical cicadas 2021 (51214420716).jpg",
-  "a": "Dan Keck from Ohio",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Brood_X_17_year_periodical_cicadas_2021_(51214420716).jpg"
- },
- "журналист": {
-  "t": "US Navy 041009-N-1810F-044 Journalist 1st Class Lizandra Murray and Chief Petty Officer Mark Rinschler, both assigned to Naval Media Center, Washington, D.C., maneuver their Duckie whitewater boat down rapids.jpg",
-  "a": "U.S. Navy photo by Photographer's Mate 3rd Class Todd Frantom",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_041009-N-1810F-044_Journalist_1st_Class_Lizandra_Murray_and_Chief_Petty_Officer_Mark_Rinschler,_both_assigned_to_Naval_Media_Center,_Washington,_D.C.,_maneuver_their_Duckie_whitewater_boat_down_rapids.jpg"
  },
  "заболевание": {
   "t": "Michael Ancher, Den syge pige, 1882, KMS4002, Statens Museum for Kunst.jpg",
@@ -1318,119 +333,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Westtown.jpg"
  },
- "завод": {
-  "t": "Factory truck parks at the loading dock, Iraq in 2003.jpeg",
-  "a": "Sgt. Raul Elliot, U.S. U.S. Army",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Factory_truck_parks_at_the_loading_dock,_Iraq_in_2003.jpeg"
- },
- "завтрак": {
-  "t": "Breakfast Table LACMA M.2006.51.32 (1 of 2).jpg",
-  "a": "",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Breakfast_Table_LACMA_M.2006.51.32_(1_of_2).jpg"
- },
- "задание": {
-  "t": "KFOR 36 Task Force Aviation Transfer of Authority (9513403).jpg",
-  "a": "U.S. Army National Guard photo by Staff Sgt. Alyssa Lisenbe",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:KFOR_36_Task_Force_Aviation_Transfer_of_Authority_(9513403).jpg"
- },
- "закон": {
-  "t": "Case law south.jpg",
-  "a": "1brownsfan",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Case_law_south.jpg"
- },
- "занавеска": {
-  "t": "Window curtain MET AR1097.jpg",
-  "a": "Hector Guimard",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Window_curtain_MET_AR1097.jpg"
- },
- "зарплата": {
-  "t": "2017-05-24 Obaidul Quader keynote address BRTC depot Kamalapur Dhaka salary gratuity distribution (PID-0049142).jpg",
-  "a": "Press Information Department",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:2017-05-24_Obaidul_Quader_keynote_address_BRTC_depot_Kamalapur_Dhaka_salary_gratuity_distribution_(PID-0049142).jpg"
- },
- "заседание": {
-  "t": "US Navy 120207-N-JS205-044 Pacific Fleet Master Chief holds a question and answer session with Sailors.jpg",
-  "a": "U.S. Navy photo by Mass Communication Specialist Seaman Apprentice Samuel Souvan",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_120207-N-JS205-044_Pacific_Fleet_Master_Chief_holds_a_question_and_answer_session_with_Sailors.jpg"
- },
- "защита": {
-  "t": "Adm. Walsh and Brig. Gen. Francis Agwi, commander of the Papua New Guinea Defence Force (5889569324).jpg",
-  "a": "East Asia and Pacific Media Hub U.S. Department of State",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Adm._Walsh_and_Brig._Gen._Francis_Agwi,_commander_of_the_Papua_New_Guinea_Defence_Force_(5889569324).jpg"
- },
- "здание": {
-  "t": "MT-Sumiyoshichō Station-Building for Chita-Handa.jpg",
-  "a": "ButuCC",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:MT-Sumiyoshich%C5%8D_Station-Building_for_Chita-Handa.jpg"
- },
- "земля": {
-  "t": "Wiki Loves Earth Taraba 2024 Physical Training (100).jpg",
-  "a": "Yahuzaishat",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Wiki_Loves_Earth_Taraba_2024_Physical_Training_(100).jpg"
- },
- "зеркало": {
-  "t": "Alice through the Looking-glass, Castle Gardens, Guildford 02.jpg",
-  "a": "Poliphilo",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Alice_through_the_Looking-glass,_Castle_Gardens,_Guildford_02.jpg"
- },
- "змея": {
-  "t": "Bust of a royal figure with downward-hanging snake MET DP243423.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Bust_of_a_royal_figure_with_downward-hanging_snake_MET_DP243423.jpg"
- },
- "знание": {
-  "t": "Documenting Hausa Local Knowledge and Oral Histories 10.jpg",
-  "a": "Gwanki",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Documenting_Hausa_Local_Knowledge_and_Oral_Histories_10.jpg"
- },
- "зоопарк": {
-  "t": "-The Bear Enclave, Zoological Gardens, Brussels- MET DP132571.jpg",
-  "a": "Louis Pierre Théophile Dubois de Nehaut",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:-The_Bear_Enclave,_Zoological_Gardens,_Brussels-_MET_DP132571.jpg"
- },
- "зуб": {
-  "t": "US Navy 100907-N-3237D-290 Cdr. Cristino Gaverete extracts a decaying tooth from an elderly Guatemalan woman at a Continuing Promise 2010 medical.jpg",
-  "a": "U.S. Navy photo by Mass Communication 3rd Class Morgan Dial",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_100907-N-3237D-290_Cdr._Cristino_Gaverete_extracts_a_decaying_tooth_from_an_elderly_Guatemalan_woman_at_a_Continuing_Promise_2010_medical.jpg"
- },
- "игрок": {
-  "t": "Kolomenskoe2015TAE 01 Player.jpg",
-  "a": "Лапоть",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Kolomenskoe2015TAE_01_Player.jpg"
- },
- "игрушка": {
-  "t": "Operation Toy Drop 2015 151209-A-JP456-313.jpg",
-  "a": "Pfc. Gabriel Prado",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Operation_Toy_Drop_2015_151209-A-JP456-313.jpg"
- },
  "изобретение": {
   "t": "Science and Invention Nov 1928 Cover 2.jpg",
   "a": "Experimenter Publishing",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Science_and_Invention_Nov_1928_Cover_2.jpg"
- },
- "изучение": {
-  "t": "Smithsonian biodiversity study 140508-N-LE393-113.jpg",
-  "a": "Petty Officer 1st Class Eric Dietrich",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Smithsonian_biodiversity_study_140508-N-LE393-113.jpg"
  },
  "икона": {
   "t": "The Ladder of Divine Ascent Monastery of St Catherine Sinai 12th century.jpg",
@@ -1444,65 +351,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Kitty_Joyner_-_Electrical_Engineer_-_GPN-2000-001933.jpg"
  },
- "инструмент": {
-  "t": "Nouvelle méthode de flûte - contenant les principes de cet instrument dévelopés (sic) dans toutte (sic) leur étendue, les gammes, l'étude des intervalles, les divers coups de langue, des préludes et... - bpt6k3177770 (58 of 60).jpg",
-  "a": "Michel, V. (17..-18.. ; musicien). Compositeur",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Nouvelle_m%C3%A9thode_de_fl%C3%BBte_-_contenant_les_principes_de_cet_instrument_d%C3%A9velop%C3%A9s_(sic)_dans_toutte_(sic)_leur_%C3%A9tendue,_les_gammes,_l%27%C3%A9tude_des_intervalles,_les_divers_coups_de_langue,_des_pr%C3%A9ludes_et..._-_bpt6k3177770_(58_of_60).jpg"
- },
- "интернет": {
-  "t": "Internet freedom rally in Moscow (2017-07-23) 203.jpg",
-  "a": "DonSimon",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Internet_freedom_rally_in_Moscow_(2017-07-23)_203.jpg"
- },
- "искусство": {
-  "t": "Ac.parthenon5.jpg",
-  "a": "",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ac.parthenon5.jpg"
- },
- "исследование": {
-  "t": "All of Us Research Program Launch (41150168074).jpg",
-  "a": "NIH Image Gallery from Bethesda, Maryland, USA",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:All_of_Us_Research_Program_Launch_(41150168074).jpg"
- },
- "источник": {
-  "t": "Ear Spring ejecta - science equipment (30714784267).jpg",
-  "a": "Yellowstone National Park",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ear_Spring_ejecta_-_science_equipment_(30714784267).jpg"
- },
- "кабинет": {
-  "t": "Hanamaki post office 83004.jpg",
-  "a": "Lunatic_artemis(uploader)",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Hanamaki_post_office_83004.jpg"
- },
  "казнь": {
   "t": "Execution of Louis XVI.jpg",
   "a": "Isidore Stanislas Helman / After Charles Monnet",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Execution_of_Louis_XVI.jpg"
- },
- "камень": {
-  "t": "Stone carvings of musicians in Beverley Minster (13).jpg",
-  "a": "Immanuel Giel",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Stone_carvings_of_musicians_in_Beverley_Minster_(13).jpg"
- },
- "камера": {
-  "t": "BMS Cafeteria,Placement-cell and Indoor-stadium.jpg",
-  "a": "Sujaybagi",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:BMS_Cafeteria,Placement-cell_and_Indoor-stadium.jpg"
- },
- "каникулы": {
-  "t": "Uni.of.bath.campus.arp.jpg",
-  "a": "",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Uni.of.bath.campus.arp.jpg"
  },
  "капитан": {
   "t": "Captain on ship.jpg",
@@ -1510,107 +363,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Captain_on_ship.jpg"
  },
- "карман": {
-  "t": "Pocket Knife.jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Pocket_Knife.jpg"
- },
  "карта": {
   "t": "World Map 1689.JPG",
   "a": "Gerard van Schagen",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:World_Map_1689.JPG"
- },
- "картина": {
-  "t": "Żywoty św. Pańskich na wszystkie dnie roku-picture p. 975.jpg",
-  "a": "AnonymousUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:%C5%BBywoty_%C5%9Bw._Pa%C5%84skich_na_wszystkie_dnie_roku-picture_p._975.jpg"
- },
- "картинка": {
-  "t": "Żywoty św. Pańskich na wszystkie dnie roku-picture p. 975.jpg",
-  "a": "AnonymousUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:%C5%BBywoty_%C5%9Bw._Pa%C5%84skich_na_wszystkie_dnie_roku-picture_p._975.jpg"
- },
- "карьера": {
-  "t": "DHS Senior Official Kristie Canegallo, Gives Remarks at the DHS Career Expo Kick-Off in Washington, D.C. on June 27, 2024 - 20.jpg",
-  "a": "DHSgov",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:DHS_Senior_Official_Kristie_Canegallo,_Gives_Remarks_at_the_DHS_Career_Expo_Kick-Off_in_Washington,_D.C._on_June_27,_2024_-_20.jpg"
- },
- "касса": {
-  "t": "Florence - Giotto's Bell Tower - Cash desk.jpg",
-  "a": "User:Mattes",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Florence_-_Giotto%27s_Bell_Tower_-_Cash_desk.jpg"
- },
- "каток": {
-  "t": "Ottawa Winter Carnival at Cartier Square, undated, with huge skating rink and ice castle. (31660563652).jpg",
-  "a": "Ross Dunn",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ottawa_Winter_Carnival_at_Cartier_Square,_undated,_with_huge_skating_rink_and_ice_castle._(31660563652).jpg"
- },
- "квартал": {
-  "t": "Consolidated XBY-1 front three quarter view.jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Consolidated_XBY-1_front_three_quarter_view.jpg"
- },
- "кино": {
-  "t": "Morano Gigetta Attrice cinema muto.jpg",
-  "a": "Maria Teresa Pino",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Morano_Gigetta_Attrice_cinema_muto.jpg"
- },
- "кинотеатр": {
-  "t": "Morano Gigetta Attrice cinema muto.jpg",
-  "a": "Maria Teresa Pino",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Morano_Gigetta_Attrice_cinema_muto.jpg"
- },
- "клавиатура": {
-  "t": "US Navy 070213-N-1113S-007 Three members of the U.S. 7th Fleet Band cheer as a Philippine Central Command Band member plays the keyboard at the Cebu SM City Mall.jpg",
-  "a": "U.S. Navy photo by Mass Communication Specialist 2nd Class Matthew Schwarz",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_070213-N-1113S-007_Three_members_of_the_U.S._7th_Fleet_Band_cheer_as_a_Philippine_Central_Command_Band_member_plays_the_keyboard_at_the_Cebu_SM_City_Mall.jpg"
- },
- "клавиша": {
-  "t": "Beehive B100 keyboard key caps back.jpg",
-  "a": "snuci",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Beehive_B100_keyboard_key_caps_back.jpg"
- },
- "класс": {
-  "t": "ALP recruit class physical training 120310-N-UD522-079.jpg",
-  "a": "Petty Officer 2nd Class David Brandenburg",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:ALP_recruit_class_physical_training_120310-N-UD522-079.jpg"
- },
- "клетка": {
-  "t": "Cage crinoline MET CI43.126.43 B.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Cage_crinoline_MET_CI43.126.43_B.jpg"
- },
- "клиника": {
-  "t": "Hard work at medical clinic in Nicaragua DVIDS109683.jpg",
-  "a": "",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Hard_work_at_medical_clinic_in_Nicaragua_DVIDS109683.jpg"
- },
- "клуб": {
-  "t": "Bisbee Woman's Club from High Rd 1.JPG",
-  "a": "Ammodramus",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Bisbee_Woman%27s_Club_from_High_Rd_1.JPG"
- },
- "ключ": {
-  "t": "DLA plays key role in Walter Reed closure DVIDS453026.jpg",
-  "a": "DoD photo by Sebastian J. Sciotti Jr.",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:DLA_plays_key_role_in_Walter_Reed_closure_DVIDS453026.jpg"
  },
  "кнопка": {
   "t": "Reserveknapper til Hans' uniform.jpg",
@@ -1624,233 +381,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Wollteppich_1.jpg"
  },
- "кожа": {
-  "t": "Dominican School House Skin Graft 140425-A-IW172-100.jpg",
-  "a": "Staff Sgt. Richard Lutz",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Dominican_School_House_Skin_Graft_140425-A-IW172-100.jpg"
- },
- "коза": {
-  "t": "John Clinton Doe Goat pendant.jpg",
-  "a": "Photo by Jack Friess, RCCO Deputy Coroner, Analyst",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:John_Clinton_Doe_Goat_pendant.jpg"
- },
- "козёл": {
-  "t": "Whitegoat.jpg",
-  "a": "Shanmathi Moorthi",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Whitegoat.jpg"
- },
- "колено": {
-  "t": "Mother with baby on knee sitting in garden(GN00430).jpg",
-  "a": "State Government Photographer",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Mother_with_baby_on_knee_sitting_in_garden(GN00430).jpg"
- },
- "коллега": {
-  "t": "Priest Clemente Terry Figueroa (left) and Colleague (right).jpg",
-  "a": "Copyright © ImageColorizer 2018-2024; prompted by Luis Paulo Vinatea Barberena",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Priest_Clemente_Terry_Figueroa_(left)_and_Colleague_(right).jpg"
- },
- "кольцо": {
-  "t": "Boxing is more than just throwing punches. it’s surviving the grind when everything in your body is screaming to stop. Sparring tests your limits, both physically and mentally. It’s the rounds where you’re gassed, bru.jpg",
-  "a": "Fadi (boxeur)",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Boxing_is_more_than_just_throwing_punches._it%E2%80%99s_surviving_the_grind_when_everything_in_your_body_is_screaming_to_stop._Sparring_tests_your_limits,_both_physically_and_mentally._It%E2%80%99s_the_rounds_where_you%E2%80%99re_gassed,_bru.jpg"
- },
- "команда": {
-  "t": "Aligning strategic objectives- SETAF-AF hosts 79th TSC command team (9394241).jpg",
-  "a": "U.S. Army photo by Cpl. James Robinson",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Aligning_strategic_objectives-_SETAF-AF_hosts_79th_TSC_command_team_(9394241).jpg"
- },
- "командир": {
-  "t": "US Navy 071026-N-9909C-001 Officer Candidate Zachary Moody selects orders to USS Germantown (LSD 42) with a click of a mouse as Vice Adm. Terry Etnyre, commander of U.S. Naval Surface Forces looks on.jpg",
-  "a": "U.S. Navy photo by Cdr. Jane Campbell",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_071026-N-9909C-001_Officer_Candidate_Zachary_Moody_selects_orders_to_USS_Germantown_(LSD_42)_with_a_click_of_a_mouse_as_Vice_Adm._Terry_Etnyre,_commander_of_U.S._Naval_Surface_Forces_looks_on.jpg"
- },
- "командировка": {
-  "t": "Bernadette Meehan presented her credentials to President Boric of Chile (1).jpg",
-  "a": "Office of U.S. Ambassador to Chile",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Bernadette_Meehan_presented_her_credentials_to_President_Boric_of_Chile_(1).jpg"
- },
- "командование": {
-  "t": "Aligning strategic objectives- SETAF-AF hosts 79th TSC command team (9394241).jpg",
-  "a": "U.S. Army photo by Cpl. James Robinson",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Aligning_strategic_objectives-_SETAF-AF_hosts_79th_TSC_command_team_(9394241).jpg"
- },
- "комната": {
-  "t": "Harran Eski Ev Odası ve Üzerlik Bitkisi 2015.jpg",
-  "a": "Hamdigumus",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Harran_Eski_Ev_Odas%C4%B1_ve_%C3%9Czerlik_Bitkisi_2015.jpg"
- },
- "комод": {
-  "t": "High chest of drawers MET DP360496.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:High_chest_of_drawers_MET_DP360496.jpg"
- },
- "контракт": {
-  "t": "Operational Contract Support Joint Exercise 2015 small unit tactics training 150315-F-OG799-272.jpg",
-  "a": "Staff Sgt. Veronica Montes",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Operational_Contract_Support_Joint_Exercise_2015_small_unit_tactics_training_150315-F-OG799-272.jpg"
- },
- "концерт": {
-  "t": "US Navy 070618-N-3957E-109 Ensign Patrick K. Sweeten conducts the United States Navy Band during their summer concert held on the west steps of the U.S. Capitol.jpg",
-  "a": "U.S. Navy photo by Musician 1st Class Casey J. Elliott",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_070618-N-3957E-109_Ensign_Patrick_K._Sweeten_conducts_the_United_States_Navy_Band_during_their_summer_concert_held_on_the_west_steps_of_the_U.S._Capitol.jpg"
- },
- "конь": {
-  "t": "200th RED HORSE conduct annual training abroad (7932397).jpg",
-  "a": "U.S. Air Force photo by Master Sgt. Joseph Harwood",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:200th_RED_HORSE_conduct_annual_training_abroad_(7932397).jpg"
- },
- "корабль": {
-  "t": "US Navy 081116-N-7544A-047 Senior Airman Ben Lemus, an Air Force optometry journeyman embarked aboard the amphibious assault ship USS Kearsarge (LHD 3), gives a patient glasses.jpg",
-  "a": "U.S. Navy photo by Mass Communication Specialist 3rd Class Maddelin Angebrand",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_081116-N-7544A-047_Senior_Airman_Ben_Lemus,_an_Air_Force_optometry_journeyman_embarked_aboard_the_amphibious_assault_ship_USS_Kearsarge_(LHD_3),_gives_a_patient_glasses.jpg"
- },
- "корова": {
-  "t": "09386jfIrrigation Cow Grassland Tarcan Baliuag Bulacanfvf 24.JPG",
-  "a": "Judgefloro",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:09386jfIrrigation_Cow_Grassland_Tarcan_Baliuag_Bulacanfvf_24.JPG"
- },
- "космос": {
-  "t": "Falcon Heavy Launches ViaSat-3 F3 from Kennedy Space Center (9655233).jpg",
-  "a": "U.S. Space Force photo by Gwendolyn Kurzen",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Falcon_Heavy_Launches_ViaSat-3_F3_from_Kennedy_Space_Center_(9655233).jpg"
- },
- "кость": {
-  "t": "SZ 深圳 Shenzhen 福田 Futian 福星路 Fuxing Road shop 牛掌櫃啃豬大骨自助火鍋餐廳 Niu Zhanggui Big Pork Bone Buffet Hot Pot Restaurant September 2025 R12S 309.jpg",
-  "a": "POLANWOK Shingua",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:SZ_%E6%B7%B1%E5%9C%B3_Shenzhen_%E7%A6%8F%E7%94%B0_Futian_%E7%A6%8F%E6%98%9F%E8%B7%AF_Fuxing_Road_shop_%E7%89%9B%E6%8E%8C%E6%AB%83%E5%95%83%E8%B1%AC%E5%A4%A7%E9%AA%A8%E8%87%AA%E5%8A%A9%E7%81%AB%E9%8D%8B%E9%A4%90%E5%BB%B3_Niu_Zhanggui_Big_Pork_Bone_Buffet_Hot_Pot_Restaurant_September_2025_R12S_309.jpg"
- },
- "костюм": {
-  "t": "Actualités n°129 Le nouveau costume des cochers turcs à Constantinople. G.3328(2).jpg",
-  "a": "Daumier, Honoré (Marseille, 26–02–1808 - Valmondois, 10–02–1879), dessinateur",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Actualit%C3%A9s_n%C2%B0129_Le_nouveau_costume_des_cochers_turcs_%C3%A0_Constantinople._G.3328(2).jpg"
- },
- "кот": {
-  "t": "Exemple de races de chats présentes sur Terre.jpg",
-  "a": "Andrea3396",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Exemple_de_races_de_chats_pr%C3%A9sentes_sur_Terre.jpg"
- },
- "кофе": {
-  "t": "Bacabal, coffee and cake.jpg",
-  "a": "Gerda Arendt",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Bacabal,_coffee_and_cake.jpg"
- },
- "кошка": {
-  "t": "Exemple de races de chats présentes sur Terre.jpg",
-  "a": "Andrea3396",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Exemple_de_races_de_chats_pr%C3%A9sentes_sur_Terre.jpg"
- },
- "край": {
-  "t": "Housing in El Paso, Texas along the border with Mexico DSF6364.jpg",
-  "a": "Levi Meir Clancy",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Housing_in_El_Paso,_Texas_along_the_border_with_Mexico_DSF6364.jpg"
- },
- "красота": {
-  "t": "US Navy 050107-N-6074Y-198 The coast of Sumatra, Indonesia in the southern Aceh region reveals her beauty in spite of the devastation that was left in wake of the Tsunami that struck the entire region.jpg",
-  "a": "U.S. Navy photo by Photographer's Mate 3rd Class M. Jeremie Yoder",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_050107-N-6074Y-198_The_coast_of_Sumatra,_Indonesia_in_the_southern_Aceh_region_reveals_her_beauty_in_spite_of_the_devastation_that_was_left_in_wake_of_the_Tsunami_that_struck_the_entire_region.jpg"
- },
- "крепость": {
-  "t": "Soldiers assault an enemy stronghold in California 151107-A-QU939-033.jpg",
-  "a": "Sgt. Richard Jones",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Soldiers_assault_an_enemy_stronghold_in_California_151107-A-QU939-033.jpg"
- },
- "кресло": {
-  "t": "Wainscot armchair MET DP-14061-004.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Wainscot_armchair_MET_DP-14061-004.jpg"
- },
- "крест": {
-  "t": "492nd, 493rd FGS Airmen cross-certify on opposing aircraft (9525049).jpg",
-  "a": "U.S. Air Force photo by Senior Airman Ashley Talley",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:492nd,_493rd_FGS_Airmen_cross-certify_on_opposing_aircraft_(9525049).jpg"
- },
- "кровать": {
-  "t": "20251209-USDA-BED-Rick Stern-001 (54994302158).jpg",
-  "a": "USDAgov",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:20251209-USDA-BED-Rick_Stern-001_(54994302158).jpg"
- },
- "кровь": {
-  "t": "U.S. Air Force Staff Sgt. Courtney Blood, a medical specialist assigned to the 109th Airlift Wing, sits with a dog after surgery during an Innovative Readiness Training.jpg",
-  "a": "Senior Airman Jocelyn Tuller",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:U.S._Air_Force_Staff_Sgt._Courtney_Blood,_a_medical_specialist_assigned_to_the_109th_Airlift_Wing,_sits_with_a_dog_after_surgery_during_an_Innovative_Readiness_Training.jpg"
- },
  "крыло": {
   "t": "Wing.two.arp.600pix.jpg",
   "a": "",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Wing.two.arp.600pix.jpg"
- },
- "культура": {
-  "t": "Trees - Simorgh Culture House - Nishapur 001.JPG",
-  "a": "Sonia Sevilla",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Trees_-_Simorgh_Culture_House_-_Nishapur_001.JPG"
- },
- "курорт": {
-  "t": "The Best Health Resort in California.jpg",
-  "a": "Orange County Register",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:The_Best_Health_Resort_in_California.jpg"
- },
- "курс": {
-  "t": "Okinawa COMMSTRAT Marines complete the USMC O-Course - COMMSTRAT FTX 2025 (9000897).jpg",
-  "a": "U.S. Marine Corps photo by Cpl. Thomas Sheng",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Okinawa_COMMSTRAT_Marines_complete_the_USMC_O-Course_-_COMMSTRAT_FTX_2025_(9000897).jpg"
- },
- "куртка": {
-  "t": "Retroreflective demonstration with Bike Lane Uprising jacket. (September 13, 2025).jpg",
-  "a": "Czbik",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Retroreflective_demonstration_with_Bike_Lane_Uprising_jacket._(September_13,_2025).jpg"
- },
- "кухня": {
-  "t": "Acela Kitchen Gallery .jpg",
-  "a": "Bonnachoven",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Acela_Kitchen_Gallery_.jpg"
- },
- "лаборатория": {
-  "t": "Mecesup-Laboratory-U. del Bio-Bio.jpg",
-  "a": "Carlos Gatica",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Mecesup-Laboratory-U._del_Bio-Bio.jpg"
- },
- "лампа": {
-  "t": "Devilish Aroma Lamp.jpg",
-  "a": "5snake5",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Devilish_Aroma_Lamp.jpg"
  },
  "лекарство": {
   "t": "The Doctor Luke Fildes crop.jpg",
@@ -1858,107 +393,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:The_Doctor_Luke_Fildes_crop.jpg"
  },
- "лекция": {
-  "t": "Commander of the First Fleet Command General Lecture, 8 November 2024 15.jpg",
-  "a": "Jeromi Mikhael",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Commander_of_the_First_Fleet_Command_General_Lecture,_8_November_2024_15.jpg"
- },
  "лес": {
   "t": "16 wood samples.jpg",
   "a": "Anonimski",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:16_wood_samples.jpg"
- },
- "лестница": {
-  "t": "\"Youth\" bronze sculpture by Paul Manship, on the left — top of the stairs leading down to the sunken plaza, designed by Manship to \"announce\" Prometheus.jpg",
-  "a": "Bigeez",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:%22Youth%22_bronze_sculpture_by_Paul_Manship,_on_the_left_%E2%80%94_top_of_the_stairs_leading_down_to_the_sunken_plaza,_designed_by_Manship_to_%22announce%22_Prometheus.jpg"
- },
- "лечение": {
-  "t": "Installation of Treatment Wall to Remove Contamination from Groundwater at West Valley is Completed (7442874450).jpg",
-  "a": "ENERGY.GOV",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Installation_of_Treatment_Wall_to_Remove_Contamination_from_Groundwater_at_West_Valley_is_Completed_(7442874450).jpg"
- },
- "лист": {
-  "t": "Kowhai Blooms with Leaf Buds.jpg",
-  "a": "Karora",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Kowhai_Blooms_with_Leaf_Buds.jpg"
- },
- "литература": {
-  "t": "Repository of Arts, literature, fashions, etc... - New series - estampe - btv1b8562490c (181 of 195).jpg",
-  "a": "",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Repository_of_Arts,_literature,_fashions,_etc..._-_New_series_-_estampe_-_btv1b8562490c_(181_of_195).jpg"
- },
- "лодка": {
-  "t": "Boat Operations from the USS Green Bay (LPD 20) 150311-M-CX588-217.jpg",
-  "a": "Gunnery Sgt. Ismael Pena",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Boat_Operations_from_the_USS_Green_Bay_(LPD_20)_150311-M-CX588-217.jpg"
- },
- "лошадь": {
-  "t": "200th RED HORSE conduct annual training abroad (7932397).jpg",
-  "a": "U.S. Air Force photo by Master Sgt. Joseph Harwood",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:200th_RED_HORSE_conduct_annual_training_abroad_(7932397).jpg"
- },
- "лук": {
-  "t": "Potato Onion exposed for sale - Fruit vendor Cotton-beating Bazaar of Nishapur 2.JPG",
-  "a": "Sonia Sevilla",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Potato_Onion_exposed_for_sale_-_Fruit_vendor_Cotton-beating_Bazaar_of_Nishapur_2.JPG"
- },
- "лыжа": {
-  "t": "Moscow, water ski ramps in Strogino, July 2025 03.jpg",
-  "a": "Retired electrician",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Moscow,_water_ski_ramps_in_Strogino,_July_2025_03.jpg"
- },
- "лёд": {
-  "t": "Bicycle on Ice Oulu 20140329.jpg",
-  "a": "Estormiz",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Bicycle_on_Ice_Oulu_20140329.jpg"
- },
- "магазин": {
-  "t": "3rd Maintenance sets up shop during Balikatan 2014 140427-M-PU373-913.jpg",
-  "a": "Lance Cpl. Joey Holeman",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:3rd_Maintenance_sets_up_shop_during_Balikatan_2014_140427-M-PU373-913.jpg"
- },
- "майка": {
-  "t": "US Navy 090702-N-8110K-098 Mayor Joseph Curtatone presents his city's t-shirt to Vice Adm. Kevin M. McCoy, Commander, Naval Sea Systems Command prior to a performance by the U.S. Navy Band Northeast at Somerville High School.jpg",
-  "a": "U.S. Navy photo by Chief Mass Communication Specialist Dave Kaylor",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_090702-N-8110K-098_Mayor_Joseph_Curtatone_presents_his_city%27s_t-shirt_to_Vice_Adm._Kevin_M._McCoy,_Commander,_Naval_Sea_Systems_Command_prior_to_a_performance_by_the_U.S._Navy_Band_Northeast_at_Somerville_High_School.jpg"
- },
- "малыш": {
-  "t": "US Navy 090220-N-4774B-001 Lt. j.g. Jarrod Johnson holds a small child during a Project Handclasp community relations event.jpg",
-  "a": "U.S. Navy photo by Mass Communication Specialist 2nd Class Daniel Barker",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_090220-N-4774B-001_Lt._j.g._Jarrod_Johnson_holds_a_small_child_during_a_Project_Handclasp_community_relations_event.jpg"
- },
- "мальчик": {
-  "t": "Boy Scout Troop 167 visits JBA 150319-F-DL987-019.jpg",
-  "a": "Senior Airman Preston Webb",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Boy_Scout_Troop_167_visits_JBA_150319-F-DL987-019.jpg"
- },
- "мальчишка": {
-  "t": "Boy Scout Troop 167 visits JBA 150319-F-DL987-019.jpg",
-  "a": "Senior Airman Preston Webb",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Boy_Scout_Troop_167_visits_JBA_150319-F-DL987-019.jpg"
- },
- "масло": {
-  "t": "Peanut butter, marmalade, and blackberry jam on toasted German rye bread - Massachusetts.jpg",
-  "a": "Daderot",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Peanut_butter,_marmalade,_and_blackberry_jam_on_toasted_German_rye_bread_-_Massachusetts.jpg"
  },
  "математика": {
   "t": "Woman teaching geometry.jpg",
@@ -1966,23 +405,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Woman_teaching_geometry.jpg"
  },
- "матч": {
-  "t": "Soccer match 140630-N-YU572-097.jpg",
-  "a": "Petty Officer 1st Class Jay Pugh",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Soccer_match_140630-N-YU572-097.jpg"
- },
  "мебель": {
   "t": "8th Century BCE Assyrian Plaque from Fort Shalmaneser. in Nimrud.jpg",
   "a": "Artist Unknown",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:8th_Century_BCE_Assyrian_Plaque_from_Fort_Shalmaneser._in_Nimrud.jpg"
- },
- "медведь": {
-  "t": "Fall Forest in Big Bear, CA (21816645994).jpg",
-  "a": "San Bernardino Nat'l Forest",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Fall_Forest_in_Big_Bear,_CA_(21816645994).jpg"
  },
  "медицина": {
   "t": "The Doctor Luke Fildes crop.jpg",
@@ -1996,84 +423,6 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Nurse_checks_blood_pressure.jpg"
  },
- "менеджер": {
-  "t": "2000. Project manager Wayne Kleckner. Douglas-fir tussock moth control project. Umatilla and Wallowa-Whitman National Forests, Oregon. (36470488872).jpg",
-  "a": "R6, State &amp; Private Forestry, Forest Health Protection",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:2000._Project_manager_Wayne_Kleckner._Douglas-fir_tussock_moth_control_project._Umatilla_and_Wallowa-Whitman_National_Forests,_Oregon._(36470488872).jpg"
- },
- "метро": {
-  "t": "Clear Creek Metro Park (47758783981).jpg",
-  "a": "Dan Keck from Ohio",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Clear_Creek_Metro_Park_(47758783981).jpg"
- },
- "мина": {
-  "t": "Esgair Mwyn Mine 01.jpg",
-  "a": "Chris Popham",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Esgair_Mwyn_Mine_01.jpg"
- },
- "митинг": {
-  "t": "Secretary Blinken and Secretary Austin Participate in a 2+2 Meeting with Japanese Foreign Minister Motegi and Japanese Defense Minister Kishi (51043045672).jpg",
-  "a": "U.S. Department of State from United States",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Secretary_Blinken_and_Secretary_Austin_Participate_in_a_2%2B2_Meeting_with_Japanese_Foreign_Minister_Motegi_and_Japanese_Defense_Minister_Kishi_(51043045672).jpg"
- },
- "мода": {
-  "t": "IMGStrohut.jpg",
-  "a": "Mitumial",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:IMGStrohut.jpg"
- },
- "мозг": {
-  "t": "Brain Problems.jpg",
-  "a": "No machine-readable author provided. Webber assumed (based on copyright claims).",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Brain_Problems.jpg"
- },
- "молодёжь": {
-  "t": "Educating the youth 150707-F-AB987-001.jpg",
-  "a": "Airman 1st Class Tara Fadenrecht",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Educating_the_youth_150707-F-AB987-001.jpg"
- },
- "молоко": {
-  "t": "VMA-231 performs monthly contest with holiday twist 111205-M-AF823-465.jpg",
-  "a": "Lance Cpl. Scott L. Tomaszycki",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:VMA-231_performs_monthly_contest_with_holiday_twist_111205-M-AF823-465.jpg"
- },
- "монета": {
-  "t": "Ancient Greece Bronze Dolphin Coin (28580509745).jpg",
-  "a": "Gary Todd from Xinzheng, China",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Ancient_Greece_Bronze_Dolphin_Coin_(28580509745).jpg"
- },
- "мороженое": {
-  "t": "Gelato ice cream.jpg",
-  "a": "rawpixel",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Gelato_ice_cream.jpg"
- },
- "мороз": {
-  "t": "Frost on the blades (7097262).jpg",
-  "a": "U.S. Army photo by Staff Sgt. Thomas Mort",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Frost_on_the_blades_(7097262).jpg"
- },
- "мост": {
-  "t": "Navy Divers, Army Enginners, Recover Collapsed Bridge DVIDS54827.jpg",
-  "a": "MDSU",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Navy_Divers,_Army_Enginners,_Recover_Collapsed_Bridge_DVIDS54827.jpg"
- },
- "мотоцикл": {
-  "t": "Italian police motor cycle photo2.JPG",
-  "a": "AlfvanBeem",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Italian_police_motor_cycle_photo2.JPG"
- },
  "муж": {
   "t": "Lotto, Lorenzo - Husband and Wife.jpg",
   "a": "Lorenzo Lotto",
@@ -2086,12 +435,6 @@ export const CREDITS = {
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Outdoors-man-portrait_(cropped).jpg"
  },
- "музей": {
-  "t": "Liège Outremeuse Museum Tchantchès.jpg",
-  "a": "Hoebele",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Li%C3%A8ge_Outremeuse_Museum_Tchantch%C3%A8s.jpg"
- },
  "музыка": {
   "t": "The Sounds of Earth - GPN-2000-001976.jpg",
   "a": "NASA",
@@ -2103,24 +446,6 @@ export const CREDITS = {
   "a": "Rowland Scherman, National Archives and Records Administration",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Joan_Baez_and_Bob_Dylan.jpg"
- },
- "мышка": {
-  "t": "US Navy 071026-N-9909C-001 Officer Candidate Zachary Moody selects orders to USS Germantown (LSD 42) with a click of a mouse as Vice Adm. Terry Etnyre, commander of U.S. Naval Surface Forces looks on.jpg",
-  "a": "U.S. Navy photo by Cdr. Jane Campbell",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_071026-N-9909C-001_Officer_Candidate_Zachary_Moody_selects_orders_to_USS_Germantown_(LSD_42)_with_a_click_of_a_mouse_as_Vice_Adm._Terry_Etnyre,_commander_of_U.S._Naval_Surface_Forces_looks_on.jpg"
- },
- "мышь": {
-  "t": "US Navy 071026-N-9909C-001 Officer Candidate Zachary Moody selects orders to USS Germantown (LSD 42) with a click of a mouse as Vice Adm. Terry Etnyre, commander of U.S. Naval Surface Forces looks on.jpg",
-  "a": "U.S. Navy photo by Cdr. Jane Campbell",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_071026-N-9909C-001_Officer_Candidate_Zachary_Moody_selects_orders_to_USS_Germantown_(LSD_42)_with_a_click_of_a_mouse_as_Vice_Adm._Terry_Etnyre,_commander_of_U.S._Naval_Surface_Forces_looks_on.jpg"
- },
- "мясо": {
-  "t": "Flesh Fly Los Angeles 2015-08-06 3.jpg",
-  "a": "Junkyardsparkle",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Flesh_Fly_Los_Angeles_2015-08-06_3.jpg"
  },
  "мяч": {
   "t": "Many balls.jpg",
@@ -2140,18 +465,6 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Pentonvilleiso19.jpg"
  },
- "нападение": {
-  "t": "374 SFS responds to ground attack scenario during BM 25-2 (8898901).jpg",
-  "a": "U.S. Air Force photo by Senior Airman Jarrett Smith",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:374_SFS_responds_to_ground_attack_scenario_during_BM_25-2_(8898901).jpg"
- },
- "напиток": {
-  "t": "EmiMa-077.jpg",
-  "a": "Emanuel Jöbstl und Martin Thoma",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:EmiMa-077.jpg"
- },
  "наркомания": {
   "t": "Syringe-1884784 1920.jpg",
   "a": "Pixabay",
@@ -2164,89 +477,17 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Bayer_Heroin_bottle.jpg"
  },
- "насекомое": {
-  "t": "Monarch butterfly insect on butterflyweed flower.jpg",
-  "a": "Laura Perlick, U.S. Fish and Wildlife Service",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Monarch_butterfly_insect_on_butterflyweed_flower.jpg"
- },
- "насморк": {
-  "t": "Every clime and place, Marines train for cold-weather operations 140124-M-DS159-014.jpg",
-  "a": "Lance Cpl. Sullivan Laramie",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Every_clime_and_place,_Marines_train_for_cold-weather_operations_140124-M-DS159-014.jpg"
- },
- "наступление": {
-  "t": "President Rodrigo Duterte is escorted by Armed Forces of the Philippines Chief of Staff Lt. General Ricardo Visaya upon arrival at F. Bangoy International Airport in Davao City on September 10.jpg",
-  "a": "Presidential Communications Operations Office",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:President_Rodrigo_Duterte_is_escorted_by_Armed_Forces_of_the_Philippines_Chief_of_Staff_Lt._General_Ricardo_Visaya_upon_arrival_at_F._Bangoy_International_Airport_in_Davao_City_on_September_10.jpg"
- },
- "наука": {
-  "t": "Ear Spring ejecta - science equipment (30714784267).jpg",
-  "a": "Yellowstone National Park",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ear_Spring_ejecta_-_science_equipment_(30714784267).jpg"
- },
- "начальник": {
-  "t": "Vicenza BOSS hosts invitational soccer scrimmage with Italian Carabinieri (7541892).jpg",
-  "a": "U.S. Army photo by Cpl. Timothee Buangala",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Vicenza_BOSS_hosts_invitational_soccer_scrimmage_with_Italian_Carabinieri_(7541892).jpg"
- },
- "небо": {
-  "t": "US Navy 031115-N-6213R-270 An F-A-18E Super Hornet assigned to the Eagles of Strike Fighter Squadron One One Five (VFA-115) flies into the late afternoon sky after launching from USS John C. Stennis (CVN 74).jpg",
-  "a": "U.S. Navy photo by Photographer's Mate 3rd Class Mark J. Rebilas.",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_031115-N-6213R-270_An_F-A-18E_Super_Hornet_assigned_to_the_Eagles_of_Strike_Fighter_Squadron_One_One_Five_(VFA-115)_flies_into_the_late_afternoon_sky_after_launching_from_USS_John_C._Stennis_(CVN_74).jpg"
- },
  "невеста": {
   "t": "Wed-dress-001.jpg",
   "a": "Charles W. Lindner, active 1890-1894 in Chicago",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Wed-dress-001.jpg"
  },
- "незнакомец": {
-  "t": "Welcome Stranger (SAYRE 14702).jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Welcome_Stranger_(SAYRE_14702).jpg"
- },
- "немка": {
-  "t": "German Woman (35371956186).jpg",
-  "a": "Midnight Believer",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:German_Woman_(35371956186).jpg"
- },
  "новость": {
-  "t": "Land on the Moon 7 21 1969-repair.jpg",
-  "a": "Jack Weir (1928-2005)",
+  "t": "NYTimes-Page1-11-11-1918.jpg",
+  "a": "Charles Ransom Miller",
   "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Land_on_the_Moon_7_21_1969-repair.jpg"
- },
- "нога": {
-  "t": "Centris adani, m, leg 2021-07-29-14.52.16 ZS PMax UDR (51560298619).jpg",
-  "a": "USGS Bee Inventory and Monitoring Lab from Beltsville, Maryland, USA",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Centris_adani,_m,_leg_2021-07-29-14.52.16_ZS_PMax_UDR_(51560298619).jpg"
- },
- "ноготь": {
-  "t": "Nail MET DP2208 74.51.5375.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Nail_MET_DP2208_74.51.5375.jpg"
- },
- "нож": {
-  "t": "Pocket Knife.jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Pocket_Knife.jpg"
- },
- "нос": {
-  "t": "Nose Shichihouji 34.jpg",
-  "a": "Brakeet",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Nose_Shichihouji_34.jpg"
+  "u": "https://commons.wikimedia.org/wiki/File:NYTimes-Page1-11-11-1918.jpg"
  },
  "носок": {
   "t": "HandKnittedWhiteLaceSock.jpg",
@@ -2254,29 +495,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:HandKnittedWhiteLaceSock.jpg"
  },
- "ноутбук": {
-  "t": "Dummy laptop in furniture store.jpg",
-  "a": "HendrixHammer",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Dummy_laptop_in_furniture_store.jpg"
- },
- "обед": {
-  "t": "Lunch in St Johns refectory.jpg",
-  "a": "Rathfelder",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Lunch_in_St_Johns_refectory.jpg"
- },
  "облако": {
   "t": "ISS-40 Thunderheads near Borneo.jpg",
   "a": "NASA/Expedition 40 crew member",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:ISS-40_Thunderheads_near_Borneo.jpg"
- },
- "оборона": {
-  "t": "Adm. Walsh and Brig. Gen. Francis Agwi, commander of the Papua New Guinea Defence Force (5889569324).jpg",
-  "a": "East Asia and Pacific Media Hub U.S. Department of State",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Adm._Walsh_and_Brig._Gen._Francis_Agwi,_commander_of_the_Papua_New_Guinea_Defence_Force_(5889569324).jpg"
  },
  "образование": {
   "t": "Schoolgirls in Bamozai.JPG",
@@ -2290,83 +513,17 @@ export const CREDITS = {
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:8th_Century_BCE_Assyrian_Plaque_from_Fort_Shalmaneser._in_Nimrud.jpg"
  },
- "обувь": {
-  "t": "Pair of curled-toe ankle footwear, leather - Museo Egizio, Turin S 5149 p03.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Pair_of_curled-toe_ankle_footwear,_leather_-_Museo_Egizio,_Turin_S_5149_p03.jpg"
- },
  "одежда": {
   "t": "Clothes.jpg",
   "a": "Unknown authorUnknown author",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Clothes.jpg"
  },
- "озеро": {
-  "t": "Lake Charles Historic District 99.jpg",
-  "a": "Donna Fricker",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Lake_Charles_Historic_District_99.jpg"
- },
- "олимпиада": {
-  "t": "Australian Representatives at the 2024 Quiz Olympiad in Fuengirola, Spain.jpg",
-  "a": "Quizzing Australia",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Australian_Representatives_at_the_2024_Quiz_Olympiad_in_Fuengirola,_Spain.jpg"
- },
- "операция": {
-  "t": "CLB-6 ramps up for Operation Enduring Freedom 130320-M-XX123-002.jpg",
-  "a": "2nd Lt. John Parry",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:CLB-6_ramps_up_for_Operation_Enduring_Freedom_130320-M-XX123-002.jpg"
- },
- "оружие": {
-  "t": "'Viper' weapon loaders on the line 150714-F-QN515-101.jpg",
-  "a": "Tech. Sgt. Joseph Swafford",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:%27Viper%27_weapon_loaders_on_the_line_150714-F-QN515-101.jpg"
- },
  "остров": {
   "t": "Hawaje-NoRedLine.jpg",
   "a": "Jacques Descloitres",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Hawaje-NoRedLine.jpg"
- },
- "ответ": {
-  "t": "US Navy 120207-N-JS205-044 Pacific Fleet Master Chief holds a question and answer session with Sailors.jpg",
-  "a": "U.S. Navy photo by Mass Communication Specialist Seaman Apprentice Samuel Souvan",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_120207-N-JS205-044_Pacific_Fleet_Master_Chief_holds_a_question_and_answer_session_with_Sailors.jpg"
- },
- "отель": {
-  "t": "The Athens Hotel.jpg",
-  "a": "Oakland Tribune",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:The_Athens_Hotel.jpg"
- },
- "открытие": {
-  "t": "Discovery Marsh Tule Lake NWR.jpg",
-  "a": "Dave Menke, USFWS",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Discovery_Marsh_Tule_Lake_NWR.jpg"
- },
- "отряд": {
-  "t": "12th LCT Squad Attacks Day 3 (8923424).jpg",
-  "a": "U.S. Marine Corps photo by Cpl. John Simpson",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:12th_LCT_Squad_Attacks_Day_3_(8923424).jpg"
- },
- "отступление": {
-  "t": "Region 6 External Affairs Retreat at the Bear River Refuge (16150480015).jpg",
-  "a": "USFWS Mountain Prairie",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Region_6_External_Affairs_Retreat_at_the_Bear_River_Refuge_(16150480015).jpg"
- },
- "офис": {
-  "t": "Hanamaki post office 83004.jpg",
-  "a": "Lunatic_artemis(uploader)",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Hanamaki_post_office_83004.jpg"
  },
  "офицер": {
   "t": "Sabhara officer.jpg",
@@ -2380,71 +537,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Annie_O%27Black_1973.jpg"
  },
- "оценка": {
-  "t": "Grade 2 clear cell renal cell carcinoma, original.jpg",
-  "a": "Mikael Häggström, M.D. Author info - Reusing images- Conflicts of interest:  Non",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Grade_2_clear_cell_renal_cell_carcinoma,_original.jpg"
- },
- "ошибка": {
-  "t": "BG-road-sign-mistake.jpg",
-  "a": "Vassia Atanassova - Spiritia",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:BG-road-sign-mistake.jpg"
- },
- "палец": {
-  "t": "Finger Bowl MET DP243795.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Finger_Bowl_MET_DP243795.jpg"
- },
- "пальто": {
-  "t": "A young Iranian man with Fedora hat Iran Mashhad City Photo By Mostafa Meraji 05.jpg",
-  "a": "Mostafameraji",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:A_young_Iranian_man_with_Fedora_hat_Iran_Mashhad_City_Photo_By_Mostafa_Meraji_05.jpg"
- },
- "памятник": {
-  "t": "Syracuse monument klein.jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Syracuse_monument_klein.jpg"
- },
- "панель": {
-  "t": "Pavement 14 - Arlington, MA - 20210215 091000.jpg",
-  "a": "Daderot",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Pavement_14_-_Arlington,_MA_-_20210215_091000.jpg"
- },
- "парень": {
-  "t": "Boy Scout Troop 167 visits JBA 150319-F-DL987-019.jpg",
-  "a": "Senior Airman Preston Webb",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Boy_Scout_Troop_167_visits_JBA_150319-F-DL987-019.jpg"
- },
- "парк": {
-  "t": "Park Moczydło w Warszawie 31.jpg",
-  "a": "Jdec",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Park_Moczyd%C5%82o_w_Warszawie_31.jpg"
- },
- "паспорт": {
-  "t": "20190218 120059 Sheremetyevo Airport terminal D February 2019 passport control.jpg",
-  "a": "Rakoon",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:20190218_120059_Sheremetyevo_Airport_terminal_D_February_2019_passport_control.jpg"
- },
  "пасха": {
   "t": "Chora Anastasis2.jpg",
   "a": "AnonymousUnknown author",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Chora_Anastasis2.jpg"
- },
- "пациент": {
-  "t": "US Navy 081116-N-7544A-047 Senior Airman Ben Lemus, an Air Force optometry journeyman embarked aboard the amphibious assault ship USS Kearsarge (LHD 3), gives a patient glasses.jpg",
-  "a": "U.S. Navy photo by Mass Communication Specialist 3rd Class Maddelin Angebrand",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_081116-N-7544A-047_Senior_Airman_Ben_Lemus,_an_Air_Force_optometry_journeyman_embarked_aboard_the_amphibious_assault_ship_USS_Kearsarge_(LHD_3),_gives_a_patient_glasses.jpg"
  },
  "певец": {
   "t": "Ah cricket 20122 (7364759010).jpg",
@@ -2458,47 +555,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Ah_cricket_20122_(7364759010).jpg"
  },
- "пенсия": {
-  "t": "Tarjetas de Pensión Alimentaria -i---i- (34475732323).jpg",
-  "a": "Gobierno CDMX",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Tarjetas_de_Pensi%C3%B3n_Alimentaria_-i---i-_(34475732323).jpg"
- },
- "переезд": {
-  "t": "Ambassador Amy Gutmann met with Holocaust survivor Inge Auerbacher shared her journey of survival and perseverance through VR technology at the Berlin Meta offices on 8 September 2023 - 4.jpg",
-  "a": "usbotschaftberlin",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ambassador_Amy_Gutmann_met_with_Holocaust_survivor_Inge_Auerbacher_shared_her_journey_of_survival_and_perseverance_through_VR_technology_at_the_Berlin_Meta_offices_on_8_September_2023_-_4.jpg"
- },
- "перекрытие": {
-  "t": "Worcester Guildhall Assembly Room.jpg",
-  "a": "Michael D Beckwith",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Worcester_Guildhall_Assembly_Room.jpg"
- },
- "перчатка": {
-  "t": "Coca Cola and Glove at Oracle Park.jpg",
-  "a": "PcK.10",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Coca_Cola_and_Glove_at_Oracle_Park.jpg"
- },
  "песня": {
   "t": "Billie Holiday, Downbeat, New York, N.Y., ca. Feb. 1947 (William P. Gottlieb 04251).jpg",
   "a": "William P. Gottlieb",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Billie_Holiday,_Downbeat,_New_York,_N.Y.,_ca._Feb._1947_(William_P._Gottlieb_04251).jpg"
- },
- "песок": {
-  "t": "Message Bottle on Sand.jpg",
-  "a": "Snapwire",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Message_Bottle_on_Sand.jpg"
- },
- "пиджак": {
-  "t": "A young Iranian man with Fedora hat Iran Mashhad City Photo By Mostafa Meraji 05.jpg",
-  "a": "Mostafameraji",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:A_young_Iranian_man_with_Fedora_hat_Iran_Mashhad_City_Photo_By_Mostafa_Meraji_05.jpg"
  },
  "писатель": {
   "t": "Francisco de Goya y Lucientes - Gaspar Melchor de Jovellanos.jpg",
@@ -2512,41 +573,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Pistol_used_by_%22Squeaky%22_Fromme.JPG"
  },
- "плавание": {
-  "t": "2016 DoD Warrior Games Swimming Competition 160620-A-OE370-115.jpg",
-  "a": "Staff Sgt. Jefferson VanWey",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:2016_DoD_Warrior_Games_Swimming_Competition_160620-A-OE370-115.jpg"
- },
- "плата": {
-  "t": "Servicemembers pay tribute to fallen British hero, decommission Dwyer Memorial 120730-M-PH863-002.jpg",
-  "a": "Cpl. Alfred V. Lopez",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Servicemembers_pay_tribute_to_fallen_British_hero,_decommission_Dwyer_Memorial_120730-M-PH863-002.jpg"
- },
  "платье": {
   "t": "Afternoon ensemble MET 63.212a-b CP4.jpg",
   "a": "",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Afternoon_ensemble_MET_63.212a-b_CP4.jpg"
- },
- "плечо": {
-  "t": "West Virginia State Route 150 shoulder washout.jpg",
-  "a": "U.S. Federal Highway Administration",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:West_Virginia_State_Route_150_shoulder_washout.jpg"
- },
- "площадь": {
-  "t": "Recueil. Patrimoine architectural du département de l'Aisne - Arrondissement de Soissons. (Communes classées dans l'ordre alphabétique, de Pommiers à Saint-Bandry) - btv1b84329953 (052 of 115).jpg",
-  "a": "",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Recueil._Patrimoine_architectural_du_d%C3%A9partement_de_l%27Aisne_-_Arrondissement_de_Soissons._(Communes_class%C3%A9es_dans_l%27ordre_alphab%C3%A9tique,_de_Pommiers_%C3%A0_Saint-Bandry)_-_btv1b84329953_(052_of_115).jpg"
- },
- "пляж": {
-  "t": "1st Special Operations Security Forces Squadron and Fort Walton Beach Police Department Active-shooter Training DVIDS298535.jpg",
-  "a": "Staff Sgt. Sheila deVera",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:1st_Special_Operations_Security_Forces_Squadron_and_Fort_Walton_Beach_Police_Department_Active-shooter_Training_DVIDS298535.jpg"
  },
  "победа": {
   "t": "La Liberté guidant le peuple - Eugène Delacroix - Musée du Louvre Peintures RF 129 - après restauration 2024.jpg",
@@ -2554,137 +585,17 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:La_Libert%C3%A9_guidant_le_peuple_-_Eug%C3%A8ne_Delacroix_-_Mus%C3%A9e_du_Louvre_Peintures_RF_129_-_apr%C3%A8s_restauration_2024.jpg"
  },
- "повреждение": {
-  "t": "US Navy 080626-N-6863R-193 The aircraft carrier USS Carl Vinson (CVN 70) Sailors perform pipe-patching procedures during the Damage Control Olympics held at Farrier Firefighting School on board Naval Station Norfolk.jpg",
-  "a": "U.S. Navy photo by Mass Communication Specialist Seaman Luis Ramirez",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_080626-N-6863R-193_The_aircraft_carrier_USS_Carl_Vinson_(CVN_70)_Sailors_perform_pipe-patching_procedures_during_the_Damage_Control_Olympics_held_at_Farrier_Firefighting_School_on_board_Naval_Station_Norfolk.jpg"
- },
- "погода": {
-  "t": "Every clime and place, Marines train for cold-weather operations 140124-M-DS159-014.jpg",
-  "a": "Lance Cpl. Sullivan Laramie",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Every_clime_and_place,_Marines_train_for_cold-weather_operations_140124-M-DS159-014.jpg"
- },
- "подвал": {
-  "t": "HK 堅尼地城 Kennedy Town 士美菲路 Smithfield Walk 聯安新樓 Luen On Apartments basement mall 薩莉亞餐廳 Saizeriya Restaurant April 2024 R12S 01.jpg",
-  "a": "BASUWT 22 law AONGo",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:HK_%E5%A0%85%E5%B0%BC%E5%9C%B0%E5%9F%8E_Kennedy_Town_%E5%A3%AB%E7%BE%8E%E8%8F%B2%E8%B7%AF_Smithfield_Walk_%E8%81%AF%E5%AE%89%E6%96%B0%E6%A8%93_Luen_On_Apartments_basement_mall_%E8%96%A9%E8%8E%89%E4%BA%9E%E9%A4%90%E5%BB%B3_Saizeriya_Restaurant_April_2024_R12S_01.jpg"
- },
- "подоконник": {
-  "t": "Winston Peters sitting on window sill 2024.jpg",
-  "a": "US Embassy",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Winston_Peters_sitting_on_window_sill_2024.jpg"
- },
  "подруга": {
   "t": "Best friends (1934), by Romualdo Locatelli.jpg",
   "a": "Romualdo Locatelli",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Best_friends_(1934),_by_Romualdo_Locatelli.jpg"
  },
- "поездка": {
-  "t": "Ambassador Amy Gutmann met with Holocaust survivor Inge Auerbacher shared her journey of survival and perseverance through VR technology at the Berlin Meta offices on 8 September 2023 - 4.jpg",
-  "a": "usbotschaftberlin",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ambassador_Amy_Gutmann_met_with_Holocaust_survivor_Inge_Auerbacher_shared_her_journey_of_survival_and_perseverance_through_VR_technology_at_the_Berlin_Meta_offices_on_8_September_2023_-_4.jpg"
- },
  "показание": {
   "t": "Testimony in court.jpg",
   "a": "Environmental Protection Agency. 12/2/1970",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Testimony_in_court.jpg"
- },
- "пол": {
-  "t": "Worcester Guildhall Assembly Room.jpg",
-  "a": "Michael D Beckwith",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Worcester_Guildhall_Assembly_Room.jpg"
- },
- "поле": {
-  "t": "Warrior Games USMC Track and Field 130514-M-SO412-464.jpg",
-  "a": "Lance Cpl. Sharon D. Kyle",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Warrior_Games_USMC_Track_and_Field_130514-M-SO412-464.jpg"
- },
- "полиция": {
-  "t": "Joint operation with Iraqi national police at Forward Operating Base Loyalty DVIDS144323.jpg",
-  "a": "Staff Sgt. James Selesnick",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Joint_operation_with_Iraqi_national_police_at_Forward_Operating_Base_Loyalty_DVIDS144323.jpg"
- },
- "полк": {
-  "t": "USMC Wounded Warrior Regiment Warrior Athlete Reconditioning Program Swim Camp 130718-M-DE387-045.jpg",
-  "a": "Capt. Ryan Powell",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:USMC_Wounded_Warrior_Regiment_Warrior_Athlete_Reconditioning_Program_Swim_Camp_130718-M-DE387-045.jpg"
- },
- "полка": {
-  "t": "Candle on a shelf with some pinecones and stuff in the background.jpg",
-  "a": "Jon Sullivan",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Candle_on_a_shelf_with_some_pinecones_and_stuff_in_the_background.jpg"
- },
- "полковник": {
-  "t": "Guardsmen Celebrate Hnederson's Promotion to Colonel (42025133325).jpg",
-  "a": "Arkansas National Guard",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Guardsmen_Celebrate_Hnederson%27s_Promotion_to_Colonel_(42025133325).jpg"
- },
- "порода": {
-  "t": "Battle Group Poland joins Polish uniformed services for run and swim race (6710702).jpg",
-  "a": "U.S. Army photo by Sgt. 1st Class Adrian Patoka",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Battle_Group_Poland_joins_Polish_uniformed_services_for_run_and_swim_race_(6710702).jpg"
- },
- "постель": {
-  "t": "Fragment of a bed frame, wood - Museo Egizio (Turin) S 11111 02 p03.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Fragment_of_a_bed_frame,_wood_-_Museo_Egizio_(Turin)_S_11111_02_p03.jpg"
- },
- "похороны": {
-  "t": "US Navy 030830-N-3228G-004 A Naval Station Pearl Harbor Ceremonial Guard folds the National Ensign during a burial ceremony, held aboard the USS Utah Memorial, for Darrell Allen, a Pearl Harbor survivor.jpg",
-  "a": "U.S. Navy photo by Photographer's Mate 1st Class William R. Goodwin.",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_030830-N-3228G-004_A_Naval_Station_Pearl_Harbor_Ceremonial_Guard_folds_the_National_Ensign_during_a_burial_ceremony,_held_aboard_the_USS_Utah_Memorial,_for_Darrell_Allen,_a_Pearl_Harbor_survivor.jpg"
- },
- "почта": {
-  "t": "Hanamaki post office 83004.jpg",
-  "a": "Lunatic_artemis(uploader)",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Hanamaki_post_office_83004.jpg"
- },
- "поэт": {
-  "t": "Le Poët-Sigillat Église Saint-Martin 7.JPG",
-  "a": "Torsade de Pointes",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Le_Po%C3%ABt-Sigillat_%C3%89glise_Saint-Martin_7.JPG"
- },
- "пояс": {
-  "t": "World War I German Empire Belt Buckle.jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:World_War_I_German_Empire_Belt_Buckle.jpg"
- },
- "правило": {
-  "t": "Centro Cultural y de Visitantes “El Rule” -i---i- (35215193161).jpg",
-  "a": "Gobierno CDMX",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Centro_Cultural_y_de_Visitantes_%E2%80%9CEl_Rule%E2%80%9D_-i---i-_(35215193161).jpg"
- },
- "предмет": {
-  "t": "US Army South and Dominican Republic Armed Forces perform Personnel Recovery-Force Protection Subject Matter Expert Exchange 140310-A-CL600-055.jpg",
-  "a": "Kaye Richey",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Army_South_and_Dominican_Republic_Armed_Forces_perform_Personnel_Recovery-Force_Protection_Subject_Matter_Expert_Exchange_140310-A-CL600-055.jpg"
- },
- "пресса": {
-  "t": "Secretary Rubio and U.S. NSA Waltz Talk to the Press (54382200550).jpg",
-  "a": "U.S. Department of State",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Secretary_Rubio_and_U.S._NSA_Waltz_Talk_to_the_Press_(54382200550).jpg"
  },
  "преступление": {
   "t": "Jakub Schikaneder - Murder in the House.JPG",
@@ -2698,54 +609,6 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Jakub_Schikaneder_-_Murder_in_the_House.JPG"
  },
- "прибор": {
-  "t": "Improvised Explosive Device Detection Dogs (IDD) 130319-M-RF297-160.jpg",
-  "a": "Sgt. Tammy Hineline",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Improvised_Explosive_Device_Detection_Dogs_(IDD)_130319-M-RF297-160.jpg"
- },
- "приказ": {
-  "t": "Navy captain inducted into Order of the Dragon 120720-A-IJ129-092.jpg",
-  "a": "Jessica Maxwell",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Navy_captain_inducted_into_Order_of_the_Dragon_120720-A-IJ129-092.jpg"
- },
- "природа": {
-  "t": "Lost Place Neandertal.jpg",
-  "a": "Wendelin Jacober",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Lost_Place_Neandertal.jpg"
- },
- "провод": {
-  "t": "Immediate Response 23 - Maine Army National Guard Demonstrates Concertina Wire To Montenegro Military (7809836).jpg",
-  "a": "U.S. Air Force photo by Master Sgt. Travis Hill",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Immediate_Response_23_-_Maine_Army_National_Guard_Demonstrates_Concertina_Wire_To_Montenegro_Military_(7809836).jpg"
- },
- "программа": {
-  "t": "USMC Wounded Warrior Regiment Warrior Athlete Reconditioning Program Swim Camp 130718-M-DE387-045.jpg",
-  "a": "Capt. Ryan Powell",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:USMC_Wounded_Warrior_Regiment_Warrior_Athlete_Reconditioning_Program_Swim_Camp_130718-M-DE387-045.jpg"
- },
- "проезд": {
-  "t": "Ambassador Amy Gutmann met with Holocaust survivor Inge Auerbacher shared her journey of survival and perseverance through VR technology at the Berlin Meta offices on 8 September 2023 - 4.jpg",
-  "a": "usbotschaftberlin",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ambassador_Amy_Gutmann_met_with_Holocaust_survivor_Inge_Auerbacher_shared_her_journey_of_survival_and_perseverance_through_VR_technology_at_the_Berlin_Meta_offices_on_8_September_2023_-_4.jpg"
- },
- "произведение": {
-  "t": "Blackjack maintence crews work in shadows DVIDS79818.jpg",
-  "a": "Sgt. Zachary Mott",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Blackjack_maintence_crews_work_in_shadows_DVIDS79818.jpg"
- },
- "пространство": {
-  "t": "Falcon Heavy Launches ViaSat-3 F3 from Kennedy Space Center (9655233).jpg",
-  "a": "U.S. Space Force photo by Gwendolyn Kurzen",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Falcon_Heavy_Launches_ViaSat-3_F3_from_Kennedy_Space_Center_(9655233).jpg"
- },
  "противник": {
   "t": "Yevgeny Onegin by Repin.jpg",
   "a": "Ilya Repin",
@@ -2758,65 +621,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Einstein_1921_by_F_Schmutzer_-_restoration.jpg"
  },
- "птица": {
-  "t": "Carved Wooden Bird by Fritz Baurichter.jpg",
-  "a": "Fritz Baurichter",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Carved_Wooden_Bird_by_Fritz_Baurichter.jpg"
- },
  "пуговица": {
   "t": "Reserveknapper til Hans' uniform.jpg",
   "a": "Europeana staff photographer",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Reserveknapper_til_Hans%27_uniform.jpg"
- },
- "пуля": {
-  "t": "Ezidi man wounded by a bullet, interviewed in Shingal in April of 2019 with his daughter 10.jpg",
-  "a": "Levi Clancy",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Ezidi_man_wounded_by_a_bullet,_interviewed_in_Shingal_in_April_of_2019_with_his_daughter_10.jpg"
- },
- "путешествие": {
-  "t": "Ambassador Amy Gutmann met with Holocaust survivor Inge Auerbacher shared her journey of survival and perseverance through VR technology at the Berlin Meta offices on 8 September 2023 - 4.jpg",
-  "a": "usbotschaftberlin",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ambassador_Amy_Gutmann_met_with_Holocaust_survivor_Inge_Auerbacher_shared_her_journey_of_survival_and_perseverance_through_VR_technology_at_the_Berlin_Meta_offices_on_8_September_2023_-_4.jpg"
- },
- "пьеса": {
-  "t": "Civilians role play at Integrated Training Exercise (ITX) 2-16 160212-F-MJ875-442.jpg",
-  "a": "Senior Airman Steven Ortiz",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Civilians_role_play_at_Integrated_Training_Exercise_(ITX)_2-16_160212-F-MJ875-442.jpg"
- },
- "работник": {
-  "t": "President Joe Biden signs an Executive Order establishing the White House Task Force on Worker Organizing and Empowerment.jpg",
-  "a": "The White House",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:President_Joe_Biden_signs_an_Executive_Order_establishing_the_White_House_Task_Force_on_Worker_Organizing_and_Empowerment.jpg"
- },
- "радио": {
-  "t": "NSA Naples Commanding Officer Holds Monthly Radio Talk Show (6364886).jpg",
-  "a": "U.S. Navy photo by [null Courtesy]",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:NSA_Naples_Commanding_Officer_Holds_Monthly_Radio_Talk_Show_(6364886).jpg"
- },
- "радиоприёмник": {
-  "t": "T1154N transmitter and R1155 receiver, British World War II radio equipment - Collings Foundation - Massachusetts - DSC07105.jpg",
-  "a": "Daderot",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:T1154N_transmitter_and_R1155_receiver,_British_World_War_II_radio_equipment_-_Collings_Foundation_-_Massachusetts_-_DSC07105.jpg"
- },
- "радиостанция": {
-  "t": "NHK Obihiro Broadcasting Station.jpg",
-  "a": "Ozizo",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:NHK_Obihiro_Broadcasting_Station.jpg"
- },
- "ранение": {
-  "t": "Staff Ride at Chancellorsville, Jackson Wounding Tour (de0778af-2d3b-453a-b4c9-584783a055b4).jpg",
-  "a": "Mary O'Neill",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Staff_Ride_at_Chancellorsville,_Jackson_Wounding_Tour_(de0778af-2d3b-453a-b4c9-584783a055b4).jpg"
  },
  "распятие": {
   "t": "Crucifixion Strasbourg Unterlinden Inv88RP536.jpg",
@@ -2824,71 +633,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Crucifixion_Strasbourg_Unterlinden_Inv88RP536.jpg"
  },
- "редакция": {
-  "t": "Editorial Staff of Gudok and William Z. Foster.jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Editorial_Staff_of_Gudok_and_William_Z._Foster.jpg"
- },
- "рейс": {
-  "t": "Tajaun Levy - 2010 Annual CIP Kayaking trip (4755268200).jpg",
-  "a": "U. S. Fish and Wildlife Service - Northeast Region",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Tajaun_Levy_-_2010_Annual_CIP_Kayaking_trip_(4755268200).jpg"
- },
- "река": {
-  "t": "One team, one fight, Cherry Point ARFF Marines train MEU-bound New River Marines 121102-M-EY704-011.jpg",
-  "a": "Lance Cpl. Cory D. Polom",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:One_team,_one_fight,_Cherry_Point_ARFF_Marines_train_MEU-bound_New_River_Marines_121102-M-EY704-011.jpg"
- },
- "религия": {
-  "t": "Pakhangba Yangpi Naoyom, a Classical Meitei language text, which is a sacred scripture (in traditional Meetei Mayek writing system) of traditional Meitei religion of Kangleipak 159.jpg",
-  "a": "Original author : Unknown\n\nTranscribed by Kala Meitei, Pukhrambam",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Pakhangba_Yangpi_Naoyom,_a_Classical_Meitei_language_text,_which_is_a_sacred_scripture_(in_traditional_Meetei_Mayek_writing_system)_of_traditional_Meitei_religion_of_Kangleipak_159.jpg"
- },
- "ремень": {
-  "t": "Buff strap-6 (25846928594).jpg",
-  "a": "U. S. Army Old Guard Fife and Drum Corps",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Buff_strap-6_(25846928594).jpg"
- },
- "ремонт": {
-  "t": "Engineers repair road 130828-A-RN538-015.jpg",
-  "a": "Sgt. Joshua Dwyer",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Engineers_repair_road_130828-A-RN538-015.jpg"
- },
- "ресторан": {
-  "t": "HK 堅尼地城 Kennedy Town 士美菲路 Smithfield Walk 聯安新樓 Luen On Apartments basement mall 薩莉亞餐廳 Saizeriya Restaurant April 2024 R12S 01.jpg",
-  "a": "BASUWT 22 law AONGo",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:HK_%E5%A0%85%E5%B0%BC%E5%9C%B0%E5%9F%8E_Kennedy_Town_%E5%A3%AB%E7%BE%8E%E8%8F%B2%E8%B7%AF_Smithfield_Walk_%E8%81%AF%E5%AE%89%E6%96%B0%E6%A8%93_Luen_On_Apartments_basement_mall_%E8%96%A9%E8%8E%89%E4%BA%9E%E9%A4%90%E5%BB%B3_Saizeriya_Restaurant_April_2024_R12S_01.jpg"
- },
- "рецепт": {
-  "t": "Pasta con pomodorini e muddica atturrata (Barcellona Pozzo di Gotto) 15 08 2024 02.jpg",
-  "a": "Effems",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Pasta_con_pomodorini_e_muddica_atturrata_(Barcellona_Pozzo_di_Gotto)_15_08_2024_02.jpg"
- },
- "ритм": {
-  "t": "All-American drummer marches to the rhythm of Army Values 170103-A-LV861-021.jpg",
-  "a": "Spc. Fatima Konteh",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:All-American_drummer_marches_to_the_rhythm_of_Army_Values_170103-A-LV861-021.jpg"
- },
  "родитель": {
   "t": "Parents and their baby.jpg",
   "a": "sheldonl",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Parents_and_their_baby.jpg"
- },
- "рождество": {
-  "t": "Christmas at Forward Operating Base Loyalty DVIDS140176.jpg",
-  "a": "Spc. Joshua Lowery",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Christmas_at_Forward_Operating_Base_Loyalty_DVIDS140176.jpg"
  },
  "роман": {
   "t": "Madame de Pompadour.jpg",
@@ -2896,65 +645,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Madame_de_Pompadour.jpg"
  },
- "рот": {
-  "t": "Dr. Adah Elizabeth Verder mouth pipetting (38455898272).jpg",
-  "a": "NIH Image Gallery from Bethesda, Maryland, USA",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Dr._Adah_Elizabeth_Verder_mouth_pipetting_(38455898272).jpg"
- },
- "рубашка": {
-  "t": "US Navy 090702-N-8110K-098 Mayor Joseph Curtatone presents his city's t-shirt to Vice Adm. Kevin M. McCoy, Commander, Naval Sea Systems Command prior to a performance by the U.S. Navy Band Northeast at Somerville High School.jpg",
-  "a": "U.S. Navy photo by Chief Mass Communication Specialist Dave Kaylor",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_090702-N-8110K-098_Mayor_Joseph_Curtatone_presents_his_city%27s_t-shirt_to_Vice_Adm._Kevin_M._McCoy,_Commander,_Naval_Sea_Systems_Command_prior_to_a_performance_by_the_U.S._Navy_Band_Northeast_at_Somerville_High_School.jpg"
- },
  "рубль": {
   "t": "5000 rubles obverse 2023.jpg",
   "a": "w:ru:Банк России",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:5000_rubles_obverse_2023.jpg"
- },
- "ружьё": {
-  "t": "Browning M2 .50 Caliber Machine Gun 150424-M-WS167-003.jpg",
-  "a": "Cpl. Anthony Quintanilla",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Browning_M2_.50_Caliber_Machine_Gun_150424-M-WS167-003.jpg"
- },
- "руководитель": {
-  "t": "Sergeant-majoor Bouwmans, Deputy Supply Section Leader.jpg",
-  "a": "Ministerie van Defensie",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Sergeant-majoor_Bouwmans,_Deputy_Supply_Section_Leader.jpg"
- },
- "рыба": {
-  "t": "Koi fish in pond - 49557472852.jpg",
-  "a": "Alabama Extension",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Koi_fish_in_pond_-_49557472852.jpg"
- },
- "рынок": {
-  "t": "Falcon Leap Airborne Operation For Market Garden 81 (9329550).jpg",
-  "a": "U.S. Army photo by Staff Sgt. Donte Shelton",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Falcon_Leap_Airborne_Operation_For_Market_Garden_81_(9329550).jpg"
- },
- "сад": {
-  "t": "Falcon Leap Airborne Operation For Market Garden 81 (9329550).jpg",
-  "a": "U.S. Army photo by Staff Sgt. Donte Shelton",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Falcon_Leap_Airborne_Operation_For_Market_Garden_81_(9329550).jpg"
- },
- "сайт": {
-  "t": "Proefoefening van de landmacht op gehuurd terrein te Valkenswaard (NB), Bestanddeelnr 917-2226.jpg",
-  "a": "Hugo van Gelderen / Anefo",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Proefoefening_van_de_landmacht_op_gehuurd_terrein_te_Valkenswaard_(NB),_Bestanddeelnr_917-2226.jpg"
- },
- "салат": {
-  "t": "RECALLED – Chopped Asian Salad Kit (26489678383).jpg",
-  "a": "The U.S. Food and Drug Administration",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:RECALLED_%E2%80%93_Chopped_Asian_Salad_Kit_(26489678383).jpg"
  },
  "самоубийство": {
   "t": "Édouard Manet - Le Suicidé (ca. 1877).jpg",
@@ -2962,53 +657,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:%C3%89douard_Manet_-_Le_Suicid%C3%A9_(ca._1877).jpg"
  },
- "сапог": {
-  "t": "Op de boot, RP-F-2016-135-2-44-4.jpg",
-  "a": "Rijksmuseum",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Op_de_boot,_RP-F-2016-135-2-44-4.jpg"
- },
  "сахар": {
   "t": "Sucre blanc cassonade complet rapadura.jpg",
   "a": "Romain Behar",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Sucre_blanc_cassonade_complet_rapadura.jpg"
- },
- "свадьба": {
-  "t": "Traditional Yoruba wedding at Traditional Yoruba wedding at Arowomole Ogbomosho South, Nigeria 16.jpg",
-  "a": "Bembety",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Traditional_Yoruba_wedding_at_Traditional_Yoruba_wedding_at_Arowomole_Ogbomosho_South,_Nigeria_16.jpg"
- },
- "свидетель": {
-  "t": "Indian Prime Minister Narendra Modi, Lao PDR Prime Minister Thongloun Sisoulith, and United Nations Secretary General Antonio Guterres witness the program proper during the opening of the 31st ASEAN Summit.jpg",
-  "a": "Presidential Communications Operations Office",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Indian_Prime_Minister_Narendra_Modi,_Lao_PDR_Prime_Minister_Thongloun_Sisoulith,_and_United_Nations_Secretary_General_Antonio_Guterres_witness_the_program_proper_during_the_opening_of_the_31st_ASEAN_Summit.jpg"
- },
- "свидетельство": {
-  "t": "Pictorial evidence of Nigeria footballers.jpg",
-  "a": "Briyua",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Pictorial_evidence_of_Nigeria_footballers.jpg"
- },
- "свинья": {
-  "t": "Kunekune pig (foreground) - Willowbank Wildlife Reserve - Christchurch, NZ - DSC01589.jpg",
-  "a": "Daderot",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Kunekune_pig_(foreground)_-_Willowbank_Wildlife_Reserve_-_Christchurch,_NZ_-_DSC01589.jpg"
- },
- "село": {
-  "t": "Turquoise of Nishapur - village of Ma'dan 15.JPG",
-  "a": "Sonia Sevilla",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Turquoise_of_Nishapur_-_village_of_Ma%27dan_15.JPG"
- },
- "сердце": {
-  "t": "CLR-27 mortarman awarded Purple Heart Medal 131008-M-DS159-021.jpg",
-  "a": "Lance Cpl. Sullivan Laramie",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:CLR-27_mortarman_awarded_Purple_Heart_Medal_131008-M-DS159-021.jpg"
  },
  "сестра": {
   "t": "Little Julia tending the baby at home.jpg",
@@ -3016,65 +669,17 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Little_Julia_tending_the_baby_at_home.jpg"
  },
- "сеть": {
-  "t": "Screenshot of GSS Data Explorer Website.jpg",
-  "a": "Rcragun",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Screenshot_of_GSS_Data_Explorer_Website.jpg"
- },
  "сигнал": {
   "t": "William Powell Frith The signal 1858.jpg",
   "a": "William Powell Frith",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:William_Powell_Frith_The_signal_1858.jpg"
  },
- "симптом": {
-  "t": "Tri-colored bat with visible WNS symptom (8622566900).jpg",
-  "a": "U.S. Fish and Wildlife Service Headquarters",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Tri-colored_bat_with_visible_WNS_symptom_(8622566900).jpg"
- },
- "система": {
-  "t": "PRNG Black Hawk Rescue Hoist System training 140904-A-KD550-867.jpg",
-  "a": "Sgt. Pablo Pantoja",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:PRNG_Black_Hawk_Rescue_Hoist_System_training_140904-A-KD550-867.jpg"
- },
- "скорая": {
-  "t": "CVRT Samaritan ambulance van het Belgische leger, Erfgoeddag 2017 foto 5.JPG",
-  "a": "Alf van Beem",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:CVRT_Samaritan_ambulance_van_het_Belgische_leger,_Erfgoeddag_2017_foto_5.JPG"
- },
- "словарь": {
-  "t": "An-naym-550x550h.jpg",
-  "a": "Ubaydulloh ibn Muhammad",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:An-naym-550x550h.jpg"
- },
- "служба": {
-  "t": "Service members visits various school and road construction sites DVIDS204702.jpg",
-  "a": "Staff Sgt. Teddy Wade",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Service_members_visits_various_school_and_road_construction_sites_DVIDS204702.jpg"
- },
- "снег": {
-  "t": "Fairmount, Georgia snow, Dec 2017.jpg",
-  "a": "Thomson200",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Fairmount,_Georgia_snow,_Dec_2017.jpg"
- },
  "собор": {
   "t": "Catedral da Sé em São Paulo.jpg",
   "a": "Wilfredor",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Catedral_da_S%C3%A9_em_S%C3%A3o_Paulo.jpg"
- },
- "собрание": {
-  "t": "Secretary Blinken and Secretary Austin Participate in a 2+2 Meeting with Japanese Foreign Minister Motegi and Japanese Defense Minister Kishi (51043045672).jpg",
-  "a": "U.S. Department of State from United States",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Secretary_Blinken_and_Secretary_Austin_Participate_in_a_2%2B2_Meeting_with_Japanese_Foreign_Minister_Motegi_and_Japanese_Defense_Minister_Kishi_(51043045672).jpg"
  },
  "сок": {
   "t": "Orange juice 1.jpg",
@@ -3088,35 +693,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:2ID_Recon_Baghdad.jpg"
  },
- "соль": {
-  "t": "Salt Lake Temple with faded words Digital Scrapbook paper.jpg",
-  "a": "Granny Enchanted",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Salt_Lake_Temple_with_faded_words_Digital_Scrapbook_paper.jpg"
- },
  "сон": {
   "t": "A dream (BM 1868,0808.9057).jpg",
   "a": "Print made by: Robert Seymour (?)\n\nPublished by: Thomas McLean\nPrinted by: Josep",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:A_dream_(BM_1868,0808.9057).jpg"
- },
- "сосед": {
-  "t": "A young man speaks with his neighbour at Hamar Weyne's meat market in the Somali capital of Mogadishu on October 3. Ahead of Eid al-Adha, many of Mogadishu's residents have been busy today preparing (15240819699).jpg",
-  "a": "AMISOM Public Information",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:A_young_man_speaks_with_his_neighbour_at_Hamar_Weyne%27s_meat_market_in_the_Somali_capital_of_Mogadishu_on_October_3._Ahead_of_Eid_al-Adha,_many_of_Mogadishu%27s_residents_have_been_busy_today_preparing_(15240819699).jpg"
- },
- "сотрудник": {
-  "t": "Summary execution of a French collaborator.jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Summary_execution_of_a_French_collaborator.jpg"
- },
- "спектакль": {
-  "t": "Civilians role play at Integrated Training Exercise (ITX) 2-16 160212-F-MJ875-442.jpg",
-  "a": "Senior Airman Steven Ortiz",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Civilians_role_play_at_Integrated_Training_Exercise_(ITX)_2-16_160212-F-MJ875-442.jpg"
  },
  "спина": {
   "t": "Posterior view of human female and male backs (cropped).jpg",
@@ -3136,107 +717,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Youth-soccer-indiana.jpg"
  },
- "спортзал": {
-  "t": "Blue Eagle Gym renovation 14May2025 01.jpg",
-  "a": "RFNirmala",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Blue_Eagle_Gym_renovation_14May2025_01.jpg"
- },
  "справедливость": {
   "t": "Justice Statue Iran.jpg",
   "a": "Ing.Arch.Stanislav Sůva - Sculptor: Lajoš Biró",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Justice_Statue_Iran.jpg"
- },
- "сражение": {
-  "t": "Soldiers battle wildfire 120916-Z-IK464-010.jpg",
-  "a": "Staff Sgt. Jason Kriess",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Soldiers_battle_wildfire_120916-Z-IK464-010.jpg"
- },
- "стадион": {
-  "t": "Army-vs-eastern-michigan-at-michie-stadium-oct-14-2017--us-army-photo-by-kimberly-monterroso 37697631511 o.jpg",
-  "a": "U.S. Army photographer",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Army-vs-eastern-michigan-at-michie-stadium-oct-14-2017--us-army-photo-by-kimberly-monterroso_37697631511_o.jpg"
- },
- "стакан": {
-  "t": "Ambassador Glass Visits U S Forces Japan (9199848).jpg",
-  "a": "U.S. Air Force photo by Senior Airman Jarrett Smith",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ambassador_Glass_Visits_U_S_Forces_Japan_(9199848).jpg"
- },
- "станция": {
-  "t": "MT-Sumiyoshichō Station-Building for Chita-Handa.jpg",
-  "a": "ButuCC",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:MT-Sumiyoshich%C5%8D_Station-Building_for_Chita-Handa.jpg"
- },
- "старик": {
-  "t": "The Old Man (e876f44a-098d-f879-d6d1-c2cbcd3c9889).jpg",
-  "a": "NPS",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:The_Old_Man_(e876f44a-098d-f879-d6d1-c2cbcd3c9889).jpg"
- },
- "статуя": {
-  "t": "Statue Pont d'Iéna 3.jpg",
-  "a": "Vassil",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Statue_Pont_d%27I%C3%A9na_3.jpg"
- },
- "статья": {
-  "t": "South Bend High School Class Day 1892.jpg",
-  "a": "C. B. Hibberd",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:South_Bend_High_School_Class_Day_1892.jpg"
- },
- "стекло": {
-  "t": "Ambassador Glass Visits U S Forces Japan (9199848).jpg",
-  "a": "U.S. Air Force photo by Senior Airman Jarrett Smith",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Ambassador_Glass_Visits_U_S_Forces_Japan_(9199848).jpg"
- },
- "стена": {
-  "t": "Blast Wall 3 - Johnny Ro Veterans Memorial Park - Leominster, Massachusetts - DSC09140.jpg",
-  "a": "Daderot",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Blast_Wall_3_-_Johnny_Ro_Veterans_Memorial_Park_-_Leominster,_Massachusetts_-_DSC09140.jpg"
- },
- "стихотворение": {
-  "t": "\"Never Alone\" poem selected for Redwood picnic table. (1edabc15-8fb7-4470-9f30-1309864e2579).jpg",
-  "a": "NPS",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:%22Never_Alone%22_poem_selected_for_Redwood_picnic_table._(1edabc15-8fb7-4470-9f30-1309864e2579).jpg"
- },
- "стол": {
-  "t": "Summit on water conservation brings Afghan provincial leadership to the table 120301-N-UR169-007.jpg",
-  "a": "Chief Petty Officer L.A. Shively",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Summit_on_water_conservation_brings_Afghan_provincial_leadership_to_the_table_120301-N-UR169-007.jpg"
- },
- "столик": {
-  "t": "EFTA00001401 - Cozy living room with deep blue walls a white sofa adorned with floral pillows and a dark wood chest of drawers topped with two lamps A plaid rug covers the floor and a small table holds a book.jpg",
-  "a": "Federal Bureau of Investigation",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:EFTA00001401_-_Cozy_living_room_with_deep_blue_walls_a_white_sofa_adorned_with_floral_pillows_and_a_dark_wood_chest_of_drawers_topped_with_two_lamps_A_plaid_rug_covers_the_floor_and_a_small_table_holds_a_book.jpg"
- },
- "столовая": {
-  "t": "Main Dining Room, Cincinnati Union Terminal, Queensgate, Cincinnati, OH (47478522372).jpg",
-  "a": "Warren LeMay from Cincinnati, OH, United States",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Main_Dining_Room,_Cincinnati_Union_Terminal,_Queensgate,_Cincinnati,_OH_(47478522372).jpg"
- },
- "строительство": {
-  "t": "MT-Sumiyoshichō Station-Building for Chita-Handa.jpg",
-  "a": "ButuCC",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:MT-Sumiyoshich%C5%8D_Station-Building_for_Chita-Handa.jpg"
- },
- "студент": {
-  "t": "US Navy 050826-N-9407V-003 Hospital Corpsman 2nd Class Larosa A. Watson, assigned to the amphibious assault ship USS Boxer (LHD 4), gives a Marshallese student an immunization during a community health fair in Majuro, Marshall.jpg",
-  "a": "U.S. Navy photo by Lithographer's Mate Jessica R. Vargas",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_050826-N-9407V-003_Hospital_Corpsman_2nd_Class_Larosa_A._Watson,_assigned_to_the_amphibious_assault_ship_USS_Boxer_(LHD_4),_gives_a_Marshallese_student_an_immunization_during_a_community_health_fair_in_Majuro,_Marshall.jpg"
  },
  "стул": {
   "t": "Set of fourteen side chairs MET DP110780.jpg",
@@ -3244,29 +729,11 @@ export const CREDITS = {
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Set_of_fourteen_side_chairs_MET_DP110780.jpg"
  },
- "суд": {
-  "t": "Banquet Scene of Members of the Law Court LACMA 45.21.17.jpg",
-  "a": "Niklaus Wirt (attributed to) (Switzerland, died 1585)",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Banquet_Scene_of_Members_of_the_Law_Court_LACMA_45.21.17.jpg"
- },
- "судно": {
-  "t": "Boat Operations from the USS Green Bay (LPD 20) 150311-M-CX588-217.jpg",
-  "a": "Gunnery Sgt. Ismael Pena",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Boat_Operations_from_the_USS_Green_Bay_(LPD_20)_150311-M-CX588-217.jpg"
- },
  "судья": {
   "t": "ICJ-CJI hearing 1.jpg",
   "a": "Jeroen Bouman",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:ICJ-CJI_hearing_1.jpg"
- },
- "суп": {
-  "t": "Wheat soup 02.jpg",
-  "a": "Shams948",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Wheat_soup_02.jpg"
  },
  "супруг": {
   "t": "Lotto, Lorenzo - Husband and Wife.jpg",
@@ -3280,54 +747,6 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Kustodiev_Merchants_Wife.jpg"
  },
- "сын": {
-  "t": "Father inducts son into Army National Guard from halfway 'round the globe' DVIDS82248.jpg",
-  "a": "Maj. Mark Lappegaard",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Father_inducts_son_into_Army_National_Guard_from_halfway_%27round_the_globe%27_DVIDS82248.jpg"
- },
- "сынок": {
-  "t": "Father inducts son into Army National Guard from halfway 'round the globe' DVIDS82248.jpg",
-  "a": "Maj. Mark Lappegaard",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Father_inducts_son_into_Army_National_Guard_from_halfway_%27round_the_globe%27_DVIDS82248.jpg"
- },
- "сыр": {
-  "t": "NYC Union Square cheese wheel pasta.jpg",
-  "a": "Artprof23",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:NYC_Union_Square_cheese_wheel_pasta.jpg"
- },
- "сюжет": {
-  "t": "US Army South and Dominican Republic Armed Forces perform Personnel Recovery-Force Protection Subject Matter Expert Exchange 140310-A-CL600-055.jpg",
-  "a": "Kaye Richey",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Army_South_and_Dominican_Republic_Armed_Forces_perform_Personnel_Recovery-Force_Protection_Subject_Matter_Expert_Exchange_140310-A-CL600-055.jpg"
- },
- "таблетка": {
-  "t": "Persepolis clay tablet.jpg",
-  "a": "Pentocelo",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Persepolis_clay_tablet.jpg"
- },
- "такси": {
-  "t": "Bangkok Taxi.jpg",
-  "a": "Nandu forever",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Bangkok_Taxi.jpg"
- },
- "тарелка": {
-  "t": "Nástěnný talíř - dívka s pampeliškami.jpg",
-  "a": "Tomáš Bechr",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:N%C3%A1st%C4%9Bnn%C3%BD_tal%C3%AD%C5%99_-_d%C3%ADvka_s_pampeli%C5%A1kami.jpg"
- },
- "творчество": {
-  "t": "Creative work of art.jpg",
-  "a": "Attahokah",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Creative_work_of_art.jpg"
- },
  "театр": {
   "t": "Bernhardt Hamlet2.jpg",
   "a": "Lafayette Photo, London",
@@ -3340,65 +759,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Cptvdisplay.jpg"
  },
- "телефон": {
-  "t": "Upper Blacktail Patrol Cabin- historic telephone (53989887822).jpg",
-  "a": "YellowstoneNPS",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Upper_Blacktail_Patrol_Cabin-_historic_telephone_(53989887822).jpg"
- },
- "тело": {
-  "t": "Pyramid Rock Body Surfing Competition 2015 150208-M-TT233-075.jpg",
-  "a": "Lance Cpl. Julian Temblador",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Pyramid_Rock_Body_Surfing_Competition_2015_150208-M-TT233-075.jpg"
- },
- "тема": {
-  "t": "US Army South and Dominican Republic Armed Forces perform Personnel Recovery-Force Protection Subject Matter Expert Exchange 140310-A-CL600-055.jpg",
-  "a": "Kaye Richey",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Army_South_and_Dominican_Republic_Armed_Forces_perform_Personnel_Recovery-Force_Protection_Subject_Matter_Expert_Exchange_140310-A-CL600-055.jpg"
- },
- "температура": {
-  "t": "Pakkanen.jpg",
-  "a": "User:Mysid",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Pakkanen.jpg"
- },
- "теннис": {
-  "t": "O. Froitzheim (portrait du joueur de tennis à l'occasion des championnats du monde de tennis sur terre battue) - btv1b6925509d.jpg",
-  "a": "Agence Rol. Agence photographique (commanditaire)",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:O._Froitzheim_(portrait_du_joueur_de_tennis_%C3%A0_l%27occasion_des_championnats_du_monde_de_tennis_sur_terre_battue)_-_btv1b6925509d.jpg"
- },
- "теория": {
-  "t": "Critique of the Theory of Evolution Fig 081.jpg",
-  "a": "Thomas Hunt Morgan",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Critique_of_the_Theory_of_Evolution_Fig_081.jpg"
- },
- "тетрадь": {
-  "t": "Menu key -- RM notebook design.jpg",
-  "a": "Daniel beardsmore",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Menu_key_--_RM_notebook_design.jpg"
- },
  "техник": {
   "t": "Technician checks circuit card.jpg",
   "a": "Bill Branson (Photographer)",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Technician_checks_circuit_card.jpg"
- },
- "технология": {
-  "t": "Technology bridges gap between kids, deployed troopers DVIDS351308.jpg",
-  "a": "Pfc. Angel Turner",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Technology_bridges_gap_between_kids,_deployed_troopers_DVIDS351308.jpg"
- },
- "товар": {
-  "t": "Attendees listen to U S Department of Agriculture USDA Secretary Vilsack as he delivers the keynote address at the 2022 Commodity Classic at the New Orleans Ernest N Morial Convention Center in New Orleans, (20220311-OSEC-LSC-0393).jpg",
-  "a": "USDAgov",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Attendees_listen_to_U_S_Department_of_Agriculture_USDA_Secretary_Vilsack_as_he_delivers_the_keynote_address_at_the_2022_Commodity_Classic_at_the_New_Orleans_Ernest_N_Morial_Convention_Center_in_New_Orleans,_(20220311-OSEC-LSC-0393).jpg"
  },
  "товарищ": {
   "t": "Harrison Fisher WWI American Red Cross poster.jpg",
@@ -3406,71 +771,17 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Harrison_Fisher_WWI_American_Red_Cross_poster.jpg"
  },
- "торт": {
-  "t": "MRF-SEA- 249th Marine Corps Birthday Cake Cutting Ceremony (8747104).jpg",
-  "a": "U.S. Marine Corps photo by Sgt. Shaina Jupiter",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:MRF-SEA-_249th_Marine_Corps_Birthday_Cake_Cutting_Ceremony_(8747104).jpg"
- },
- "трава": {
-  "t": "CNGB Gen. Frank Grass visits Camp Phoenix 140325-A-MV865-427.jpg",
-  "a": "Capt. Michael Thompson",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:CNGB_Gen._Frank_Grass_visits_Camp_Phoenix_140325-A-MV865-427.jpg"
- },
- "травма": {
-  "t": "German Trauma Society Recognizes LRMC (9001300).jpg",
-  "a": "Travis Jones",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:German_Trauma_Society_Recognizes_LRMC_(9001300).jpg"
- },
- "трамвай": {
-  "t": "2016 tram tracks replacement in Tallinn 021.JPG",
-  "a": "Dmitry G",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:2016_tram_tracks_replacement_in_Tallinn_021.JPG"
- },
- "тренер": {
-  "t": "US Navy 050626-N-5345W-115 A T-45A Goshawk trainer aircraft, assigned to Training Air Wing Two (TW-2), makes an arrested landing on the flight deck aboard the Nimitz-class aircraft carrier USS Harry S. Truman (CVN 75).jpg",
-  "a": "U.S. Navy photo by Photographer's Mate 3rd Class Kristopher Wilson",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:US_Navy_050626-N-5345W-115_A_T-45A_Goshawk_trainer_aircraft,_assigned_to_Training_Air_Wing_Two_(TW-2),_makes_an_arrested_landing_on_the_flight_deck_aboard_the_Nimitz-class_aircraft_carrier_USS_Harry_S._Truman_(CVN_75).jpg"
- },
  "труп": {
   "t": "Disderi 2.jpg",
   "a": "Eugène Disdéri",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Disderi_2.jpg"
  },
- "турист": {
-  "t": "Barfanbar Mountains, Qom Province 07.jpg",
-  "a": "Mostafameraji",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Barfanbar_Mountains,_Qom_Province_07.jpg"
- },
- "турнир": {
-  "t": "2018 Roland Garros Qualifying Tournament - 59.jpg",
-  "a": "Shev123",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:2018_Roland_Garros_Qualifying_Tournament_-_59.jpg"
- },
  "тюрьма": {
   "t": "Pentonvilleiso19.jpg",
   "a": "Joshua Jebb",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Pentonvilleiso19.jpg"
- },
- "тётка": {
-  "t": "Great Aunt Kate Dorsey (28415482518).jpg",
-  "a": "Midnight Believer",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Great_Aunt_Kate_Dorsey_(28415482518).jpg"
- },
- "тётя": {
-  "t": "Great Aunt Kate Dorsey (28415482518).jpg",
-  "a": "Midnight Believer",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Great_Aunt_Kate_Dorsey_(28415482518).jpg"
  },
  "тёща": {
   "t": "Guerre contre le Paraguay - L'Emperur de Brésil et seus deux gendres, le Duc de Saxe-Cobourg-Gotha et le Comte D'Eu, au camp D'Alegrete (D'après un dessin de M. Maximo Alvès).jpg",
@@ -3484,24 +795,6 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Peter_Paul_Rubens_-_Cain_slaying_Abel_(Courtauld_Institute).jpg"
  },
- "убийца": {
-  "t": "Park Ranger Bruce welds the two tail pieces together to prepare it for attachment. From the Keet'k- Female Juvenile Killer Whale (5e74d5fc-1dd8-b71c-0717-f781cba77b7f).JPG",
-  "a": "NPS Photo",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Park_Ranger_Bruce_welds_the_two_tail_pieces_together_to_prepare_it_for_attachment._From_the_Keet%27k-_Female_Juvenile_Killer_Whale_(5e74d5fc-1dd8-b71c-0717-f781cba77b7f).JPG"
- },
- "университет": {
-  "t": "Brigade S1 Hosts Human Resources University (9031845).jpg",
-  "a": "U.S. Army photo by Capt. Frank Spatt",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Brigade_S1_Hosts_Human_Resources_University_(9031845).jpg"
- },
- "упражнение": {
-  "t": "Large Scale Exercise 2014 140726-M-QP075-154.jpg",
-  "a": "Lance Cpl. Nathaniel Castillo",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Large_Scale_Exercise_2014_140726-M-QP075-154.jpg"
- },
  "урок": {
   "t": "William-Adolphe Bouguereau (1825-1905) - The Difficult Lesson (1884).jpg",
   "a": "William-Adolphe Bouguereau",
@@ -3514,299 +807,17 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Gaishi_Nagaoka.jpg"
  },
- "устройство": {
-  "t": "Improvised Explosive Device Detection Dogs (IDD) 130319-M-RF297-160.jpg",
-  "a": "Sgt. Tammy Hineline",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Improvised_Explosive_Device_Detection_Dogs_(IDD)_130319-M-RF297-160.jpg"
- },
- "училище": {
-  "t": "IVO-school Noske, Bestanddeelnr 904-5622.jpg",
-  "a": "Nationaal Archief",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:IVO-school_Noske,_Bestanddeelnr_904-5622.jpg"
- },
- "учитель": {
-  "t": "Celebrating the 2025 DoDEA Teacher of the Year Mrs Harris-Boring (8677899).jpg",
-  "a": "U.S. Air Force photo by Senior Airman Jordan Lazaro",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Celebrating_the_2025_DoDEA_Teacher_of_the_Year_Mrs_Harris-Boring_(8677899).jpg"
- },
- "учительница": {
-  "t": "Celebrating the 2025 DoDEA Teacher of the Year Mrs Harris-Boring (8677899).jpg",
-  "a": "U.S. Air Force photo by Senior Airman Jordan Lazaro",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Celebrating_the_2025_DoDEA_Teacher_of_the_Year_Mrs_Harris-Boring_(8677899).jpg"
- },
- "фабрика": {
-  "t": "Factory truck parks at the loading dock, Iraq in 2003.jpeg",
-  "a": "Sgt. Raul Elliot, U.S. U.S. Army",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Factory_truck_parks_at_the_loading_dock,_Iraq_in_2003.jpeg"
- },
- "файл": {
-  "t": "Tuzla unrest 2014-02-07 file 24.JPG",
-  "a": "Ojan",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Tuzla_unrest_2014-02-07_file_24.JPG"
- },
  "фамилия": {
   "t": "FML Names-3.jpg",
   "a": "PikachuMai",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:FML_Names-3.jpg"
  },
- "физика": {
-  "t": "The Feynman Lectures on Physics.jpg",
-  "a": "Barak Sh",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:The_Feynman_Lectures_on_Physics.jpg"
- },
- "флот": {
-  "t": "Canadian International Fleet Review DVIDS294916.jpg",
-  "a": "Aaron Holt",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Canadian_International_Fleet_Review_DVIDS294916.jpg"
- },
- "формат": {
-  "t": "USDA Secretary Brooke Rollins Announces Program to Support Small- and Mid-Size Beef Processors (55367345815).jpg",
-  "a": "USDAgov",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:USDA_Secretary_Brooke_Rollins_Announces_Program_to_Support_Small-_and_Mid-Size_Beef_Processors_(55367345815).jpg"
- },
- "фотоаппарат": {
-  "t": "55th Signal Company (Combat Camera) FRG Company Picnic 150702-A-BS187-019.jpg",
-  "a": "Sgt. Timothy Villareal",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:55th_Signal_Company_(Combat_Camera)_FRG_Company_Picnic_150702-A-BS187-019.jpg"
- },
- "фотография": {
-  "t": "AC powered NE-2 type neon lamp close-up.jpg",
-  "a": "Junkyardsparkle",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:AC_powered_NE-2_type_neon_lamp_close-up.jpg"
- },
- "фронт": {
-  "t": "Canadian International Fleet Review DVIDS294916.jpg",
-  "a": "Aaron Holt",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Canadian_International_Fleet_Review_DVIDS294916.jpg"
- },
- "фрукт": {
-  "t": "Citrus fruits.jpg",
-  "a": "Scott Bauer, USDA",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Citrus_fruits.jpg"
- },
- "футбол": {
-  "t": "Seattle Marines, NFL coaches host football camp in Renton 150614-M-MM918-013.jpg",
-  "a": "Sgt. Reece Lodder",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Seattle_Marines,_NFL_coaches_host_football_camp_in_Renton_150614-M-MM918-013.jpg"
- },
- "химия": {
-  "t": "Fume hood contains chemicals.jpg",
-  "a": "Rayhana Alhour",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Fume_hood_contains_chemicals.jpg"
- },
- "хлеб": {
-  "t": "Loaf of Bread MET 36.3.78 EGDP016121.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Loaf_of_Bread_MET_36.3.78_EGDP016121.jpg"
- },
- "холод": {
-  "t": "Every clime and place, Marines train for cold-weather operations 140124-M-DS159-014.jpg",
-  "a": "Lance Cpl. Sullivan Laramie",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Every_clime_and_place,_Marines_train_for_cold-weather_operations_140124-M-DS159-014.jpg"
- },
- "хор": {
-  "t": "USAREUR-AF Band & Chorus plays at Bran Castle (6844125).jpg",
-  "a": "U.S. Army photo by Spc. Jameson Harris",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:USAREUR-AF_Band_%26_Chorus_plays_at_Bran_Castle_(6844125).jpg"
- },
- "храм": {
-  "t": "Vue des Pylones du Temple Khons et d'une partie du village de Karnac MET DP131868.jpg",
-  "a": "Maxime Du Camp",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Vue_des_Pylones_du_Temple_Khons_et_d%27une_partie_du_village_de_Karnac_MET_DP131868.jpg"
- },
- "художник": {
-  "t": "Artist Linda Campbell Community flyer (14765329616).jpg",
-  "a": "BLM Nevada",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Artist_Linda_Campbell_Community_flyer_(14765329616).jpg"
- },
- "центр": {
-  "t": "Kyrgyz explosive experts test skills with Transit Center Airmen DVIDS350304.jpg",
-  "a": "Staff Sgt. Nathaniel Bevier",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Kyrgyz_explosive_experts_test_skills_with_Transit_Center_Airmen_DVIDS350304.jpg"
- },
- "церковь": {
-  "t": "Church of the Protection of the Theotokos (Mishenskoye).jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Church_of_the_Protection_of_the_Theotokos_(Mishenskoye).jpg"
- },
- "чай": {
-  "t": "Tea in different grade of fermentation.jpg",
-  "a": "Haneburger",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Tea_in_different_grade_of_fermentation.jpg"
- },
- "чемодан": {
-  "t": "Old big suitcase.JPG",
-  "a": "Alf van Beem",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Old_big_suitcase.JPG"
- },
- "чемпион": {
-  "t": "Giorgos Kalafatis champion.jpg",
-  "a": "AnonymousUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Giorgos_Kalafatis_champion.jpg"
- },
- "чемпионат": {
-  "t": "JAFCG at the 2024 College Football Playoff National Championship Game, January 7-8, 2024 (53456653048).jpg",
-  "a": "3d U.S. Infantry Regiment \"The Old Guard\" from Joint Base Myer - Henderson Hall,",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:JAFCG_at_the_2024_College_Football_Playoff_National_Championship_Game,_January_7-8,_2024_(53456653048).jpg"
- },
- "чёрт": {
-  "t": "Devil Dog for a day, CLB-3, Make-A-Wish make dream extra special 140514-M-TH981-013.jpg",
-  "a": "Kristen Wong",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Devil_Dog_for_a_day,_CLB-3,_Make-A-Wish_make_dream_extra_special_140514-M-TH981-013.jpg"
- },
- "шахматы": {
-  "t": "Chess Pavilion at Han Garden Hong Kong.JPG",
-  "a": "Hkgalbert",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Chess_Pavilion_at_Han_Garden_Hong_Kong.JPG"
- },
- "шерсть": {
-  "t": "Auburn hair.jpg",
-  "a": "Gbi.bytos",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Auburn_hair.jpg"
- },
- "шея": {
-  "t": "Attic clay neck-handled amphora, Late Geometric IIB Period, c. 720 BC (28263054470).jpg",
-  "a": "Gary Todd from Xinzheng, China",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Attic_clay_neck-handled_amphora,_Late_Geometric_IIB_Period,_c._720_BC_(28263054470).jpg"
- },
  "шкаф": {
   "t": "Serwantka.JPG",
   "a": "No machine-readable author provided. Julo assumed (based on copyright claims).",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Serwantka.JPG"
- },
- "шоколад": {
-  "t": "Bûche de Noël chocolat framboise maison.jpg",
-  "a": "Jebulon",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:B%C3%BBche_de_No%C3%ABl_chocolat_framboise_maison.jpg"
- },
- "штраф": {
-  "t": "Pergola - Palace of Fine Arts - San Francisco, CA - DSC02488.jpg",
-  "a": "Daderot",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Pergola_-_Palace_of_Fine_Arts_-_San_Francisco,_CA_-_DSC02488.jpg"
- },
- "эволюция": {
-  "t": "Critique of the Theory of Evolution Fig 081.jpg",
-  "a": "Thomas Hunt Morgan",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Critique_of_the_Theory_of_Evolution_Fig_081.jpg"
- },
- "экзамен": {
-  "t": "NTSB Intern Jeremy Laurel assisting with component examination (27582275990).jpg",
-  "a": "NTSBgov",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:NTSB_Intern_Jeremy_Laurel_assisting_with_component_examination_(27582275990).jpg"
- },
- "экран": {
-  "t": "SPACE AGE 2 - Screen w high voltage beam control (30280208785).jpg",
-  "a": "Wolfgang Stief from Tittmoning, Germany",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:SPACE_AGE_2_-_Screen_w_high_voltage_beam_control_(30280208785).jpg"
- },
- "эксперимент": {
-  "t": "2020 02 12 HS-PHI Interoffice Collaboration Experiment-14.jpg",
-  "a": "NOAA NSSL",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:2020_02_12_HS-PHI_Interoffice_Collaboration_Experiment-14.jpg"
- },
- "электричество": {
-  "t": "Electricity pylons, Ukraine 132.jpg",
-  "a": "Novoklimov",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Electricity_pylons,_Ukraine_132.jpg"
- },
- "электричка": {
-  "t": "Advertisement of Kyushu Electric Railway.jpg",
-  "a": "Unknown authorUnknown author",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Advertisement_of_Kyushu_Electric_Railway.jpg"
- },
- "электроэнергия": {
-  "t": "Tokyo Electric Power Hospital.JPG",
-  "a": "Abasaa",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Tokyo_Electric_Power_Hospital.JPG"
- },
- "элемент": {
-  "t": "Papier dominoté doré, gaufré. Sur un fond rouge, des motifs végétaux, des entrelacs, un oiseau, un personnage masculin, élément décoratif dentellé, orné de gros points. - btv1b10576309f (33 of 92).jpg",
-  "a": "",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Papier_dominot%C3%A9_dor%C3%A9,_gaufr%C3%A9._Sur_un_fond_rouge,_des_motifs_v%C3%A9g%C3%A9taux,_des_entrelacs,_un_oiseau,_un_personnage_masculin,_%C3%A9l%C3%A9ment_d%C3%A9coratif_dentell%C3%A9,_orn%C3%A9_de_gros_points._-_btv1b10576309f_(33_of_92).jpg"
- },
- "энергетика": {
-  "t": "Moscow Power Engineering Institute, Technical University Russia.jpg",
-  "a": "qweasdqwe",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Moscow_Power_Engineering_Institute,_Technical_University_Russia.jpg"
- },
- "энергия": {
-  "t": "PRESS CONEFERENCE ENERGY 2016-07-13 (27683120523).jpg",
-  "a": "EU2016 SK",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:PRESS_CONEFERENCE_ENERGY_2016-07-13_(27683120523).jpg"
- },
- "этаж": {
-  "t": "Worcester Guildhall Assembly Room.jpg",
-  "a": "Michael D Beckwith",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Worcester_Guildhall_Assembly_Room.jpg"
- },
- "юность": {
-  "t": "Educating the youth 150707-F-AB987-001.jpg",
-  "a": "Airman 1st Class Tara Fadenrecht",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Educating_the_youth_150707-F-AB987-001.jpg"
- },
- "юноша": {
-  "t": "Young Man and Woman in a Landscape MET 136740.jpg",
-  "a": "",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Young_Man_and_Woman_in_a_Landscape_MET_136740.jpg"
- },
- "юрист": {
-  "t": "1947年3月13日臺灣臺南市長候選人湯德章律師遭蔣中正與陳儀所屬非法殺害 Lawyer and People-elected Mayoral-candidate of Tainan murdered by Chinese military.jpeg",
-  "a": "中華日報 (Newspaper of TAIWAN)",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:1947%E5%B9%B43%E6%9C%8813%E6%97%A5%E8%87%BA%E7%81%A3%E8%87%BA%E5%8D%97%E5%B8%82%E9%95%B7%E5%80%99%E9%81%B8%E4%BA%BA%E6%B9%AF%E5%BE%B7%E7%AB%A0%E5%BE%8B%E5%B8%AB%E9%81%AD%E8%94%A3%E4%B8%AD%E6%AD%A3%E8%88%87%E9%99%B3%E5%84%80%E6%89%80%E5%B1%AC%E9%9D%9E%E6%B3%95%E6%AE%BA%E5%AE%B3_Lawyer_and_People-elected_Mayoral-candidate_of_Tainan_murdered_by_Chinese_military.jpeg"
- },
- "яблоко": {
-  "t": "Oak-apple-and-acorn.JPG",
-  "a": "Vassia Atanassova - Spiritia",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Oak-apple-and-acorn.JPG"
  },
  "яйцо": {
   "t": "Adolphe Millot oeufs-fixed.jpg",

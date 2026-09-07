@@ -1111,14 +1111,21 @@ several channels carry the channel's initials where a unit has its icon.
   under the side quests (`merge-<id>` paths) — a fork that never re-joined read
   as a dead end.
 - **Photographs** (`harvest_images.py` → `build_images.py`): for every noun a
-  unit teaches, Wikimedia Commons is searched for the first English sense and
-  the first JPEG that is **CC0 or public domain** is taken — nothing else, so no
-  card needs a credit line — at 176 px (~9 KB). Shipped as `native/assets/img/`
-  through the generated `native/src/images.js` (`IMAGES` by bare word, `CREDITS`
-  title/author/licence), shown above the word on the vocabulary card and the
-  entry, with the credit on the entry. Commons full-text search is crude:
-  `data/curated/image_terms.json` overrides a search term or blanks a word.
-  Quality is a person's judgment; the tool prints every miss.
+  unit teaches, the English Wikipedia article's lead image when it is **CC0 or
+  public domain**, else the first such JPEG Commons finds for the first English
+  sense, at 176 px, cached under `data/raw/images/` with title, author and
+  licence. **Only Wikipedia's choices ship** (117 of the 662 words in the
+  concrete units; 151 of 745 harvested were Wikipedia's), plus a
+  Commons file when a person wrote the search term in
+  `data/curated/image_terms.json` and the file is named after it: measured on
+  the harvest, about half of the plain Commons hits were the wrong subject —
+  "tablet" a clay tablet, "animal" a door knocker, "dog" a soldier — because
+  the public-domain pool is museum scans and government press photographs, and
+  a caption match is not a subject match. Openverse, which would have done
+  better, did not answer. Shipped through the generated `native/src/images.js`
+  (`IMAGES` by bare word, `CREDITS`), above the word on the vocabulary card and
+  the entry, credited on the entry. To give a word a photo: add its term to
+  `image_terms.json` and re-run both tools; to remove one, blank it.
 
 - **Per-user tokens** (P8.4) — `identify()` in the Worker: the `APP_TOKEN`
   secret is the owner; any other bearer token is a KV record `user:<token>`

@@ -165,18 +165,22 @@ def main():
     tally = Counter()
     misses = []
     for tid, bare, en in rows:
-        if bare in manifest and manifest[bare] and (OUT / f"{bare}.jpg").exists():
+        curated = terms.get(bare)
+        stale = (curated is not None and bare in manifest
+                 and (manifest[bare] or {}).get("term") != curated)
+        if bare in manifest and manifest[bare] and (OUT / f"{bare}.jpg").exists() and not stale:
             tally["have"] += 1
             continue
-        if bare in manifest and manifest[bare] is None and not args.report:
+        if bare in manifest and manifest[bare] is None and not args.report and not stale:
             tally["skipped before"] += 1
             continue
         if args.report:
             tally["missing"] += 1
             misses.append((tid, bare, en))
             continue
-        term = terms.get(bare)
+        term = curated
         if term == "":
+            manifest[bare] = None
             tally["curated skip"] += 1
             continue
         if not term:

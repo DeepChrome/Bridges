@@ -48,6 +48,18 @@ export function pickPrompt(rows, idxs, want, IX, random, onlyWanted) {
  * A lemma met twice in one sentence takes its worst grade — getting «не» right
  * once and wrong once is not a Good. Only expected words are graded, and only those
  * the index knows; a word outside the curriculum has no card to grade. */
+/* The tags the feedback service put on one attempt, each once. A word tagged
+   CASE under a grammar note that also says CASE is one slip, not two; the count
+   the trouble bank keeps is of slips, so both runners take their tags from here. */
+export function feedbackTags(fb) {
+  const out = [];
+  const seen = new Set();
+  const add = (t) => { if (t && !seen.has(t)) { seen.add(t); out.push(t); } };
+  for (const g of (fb && fb.grammar) || []) add(g.tag);
+  for (const w of (fb && fb.words) || []) for (const t of w.tags || []) add(t);
+  return out;
+}
+
 export function gradeAlignment(alignment, IX, opts) {
   const perfect = !!(opts && opts.perfect);
   const firstTry = !opts || opts.firstTry !== false;

@@ -77,7 +77,31 @@ export function recordAttempt(speech, attempt) {
   const kept = overflow > 0 ? attempts.slice(overflow) : attempts;
   const tagCounts = Object.assign({}, cur.tagCounts || {});
   for (const t of (attempt && attempt.tags) || []) tagCounts[t] = (tagCounts[t] || 0) + 1;
-  return { attempts: kept, tagCounts: tagCounts };
+  // Spread, not rebuild: the slot also carries the day's talk budget, and an
+  // attempt recorded mid-conversation must not reset it.
+  return Object.assign({}, cur, { attempts: kept, tagCounts: tagCounts });
+}
+
+/* Conversation sessions are budgeted (ROADMAP P6.5): at most TALK_SESSIONS_PER_DAY
+   a day and TALK_TURNS per session, counted here in the learner's own state so the
+   picker can say what is left before the Worker's counter would refuse. `day` is
+   the day number from util.today(). */
+export const TALK_SESSIONS_PER_DAY = 3;
+export const TALK_TURNS = 12;
+
+export function talkAllowance(speech, day) {
+  const t = (speech && speech.talk) || {};
+  const used = t.day === day ? (t.sessions || 0) : 0;
+  return { used, left: Math.max(0, TALK_SESSIONS_PER_DAY - used), turns: TALK_TURNS };
+}
+
+/* Spend one session; returns a new speech slot, or the same one when nothing is
+   left — the caller checks talkAllowance first and shows why. */
+export function startTalkSession(speech, day) {
+  const cur = speech || speechDefault();
+  const a = talkAllowance(cur, day);
+  if (!a.left) return cur;
+  return Object.assign({}, cur, { talk: { day: day, sessions: a.used + 1 } });
 }
 
 /* Tags that arrive after the attempt was recorded — the feedback service answers
@@ -98,5 +122,5 @@ export function tagAttempt(speech, ts, tags) {
   const hit = (cur.attempts || []).find((a) => a && a.ts === ts);
   const counted = hit ? list.filter((t) => !(hit.tags || []).includes(t)) : list;
   for (const t of counted) tagCounts[t] = (tagCounts[t] || 0) + 1;
-  return { attempts: attempts, tagCounts: tagCounts };
+  return Object.assign({}, cur, { attempts: attempts, tagCounts: tagCounts });
 }

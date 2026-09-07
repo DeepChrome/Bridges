@@ -15,13 +15,15 @@ import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN 
   from "../core/util.js";
 import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
   from "../core/fsrs.js";
-import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP }
+import { SCENARIOS } from "../core/scenarios.js";
+import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP,
+         talkAllowance, startTalkSession, TALK_SESSIONS_PER_DAY, TALK_TURNS }
   from "../core/state.js";
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, DRILL_TYPES, SPEECH_MIX, lessonSize, LESSON_RAMP, LESSON_SIZE }
   from "../core/questions.js";
-import { sentenceLemmas, gradeAlignment } from "../core/speech.js";
+import { sentenceLemmas, gradeAlignment, feedbackTags } from "../core/speech.js";
 import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
 import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
@@ -224,6 +226,10 @@ group("state schema");
   const one = recordAttempt(base, { tags: ["ASPECT", "ASPECT"] });
   ok(base.attempts.length === 0 && one.attempts.length === 1 && one.tagCounts.ASPECT === 2,
      "recordAttempt returns a new object and counts repeated tags");
+  const budgeted = Object.assign({}, base, { talk: { day: 7, sessions: 2 } });
+  ok(recordAttempt(budgeted, { ts: 1, tags: [] }).talk.sessions === 2
+     && tagAttempt(recordAttempt(budgeted, { ts: 1, tags: [] }), 1, ["CASE"]).talk.day === 7,
+     "an attempt recorded mid-conversation keeps the day's talk budget");
 }
 
 /* ------------------------------------------------------------ compare */
@@ -500,6 +506,25 @@ group("speaking");
   ok(s.lemmas.length > 0, "and lemmas to grade");
 }
 
+/* Conversation sessions are budgeted in the learner's own state. */
+group("talk allowance");
+{
+  let sp = speechDefault();
+  ok(talkAllowance(sp, 100).left === TALK_SESSIONS_PER_DAY && talkAllowance(sp, 100).turns === TALK_TURNS,
+     "a fresh day has every session and twelve turns each");
+  sp = startTalkSession(sp, 100);
+  sp = startTalkSession(sp, 100);
+  ok(talkAllowance(sp, 100).used === 2 && talkAllowance(sp, 100).left === TALK_SESSIONS_PER_DAY - 2,
+     "each session started is one fewer left");
+  sp = startTalkSession(sp, 100);
+  const full = startTalkSession(sp, 100);
+  ok(full === sp && talkAllowance(sp, 100).left === 0, "past the cap nothing is spent and nothing is left");
+  ok(talkAllowance(sp, 101).left === TALK_SESSIONS_PER_DAY, "a new day starts over");
+  ok(SCENARIOS.length === 10 && SCENARIOS.every((s) => s.id && s.unit && s.prompt && s.title && s.en),
+     "ten scenarios, each tied to a unit and carrying a prompt");
+  ok(SCENARIOS.every((s) => UN.some((u) => u.id === s.unit)), "every scenario's unit exists");
+}
+
 /* Tags that arrive after the attempt: the feedback service is slower than the verdict. */
 group("late tags");
 {
@@ -544,6 +569,11 @@ group("speech grading");
   g = gradeAlignment(compare("Я пью чай", "Я пью чай").alignment, IX,
                      { perfect: true, firstTry: true, hinted: true });
   ok(g.every((x) => x.grade === 2), "with a hint a right word is Hard, even when perfect");
+
+  ok(JSON.stringify(feedbackTags({ grammar: [{ tag: "CASE" }, { tag: "ASPECT" }],
+                                   words: [{ tags: ["CASE"] }, { tags: [] }, {}] }))
+     === '["CASE","ASPECT"]', "a slip tagged on the word and in the note counts once");
+  ok(feedbackTags(null).length === 0, "no feedback, no tags");
 
   ok(charDistance("книга", "книгу") === 1 && charDistance("книга", "кни́га") === 0
      && charDistance("стол", "книга") > 1, "charDistance: a letter off is 1, stress is 0");

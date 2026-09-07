@@ -1,12 +1,14 @@
-/* The Bridges feedback Worker (ROADMAP Phase 4).
+/* The Bridges Worker (ROADMAP Phases 4 and 6).
  *
- * One route: POST /v1/feedback. It holds the Anthropic key so the app never does,
- * checks the app's bearer token, refuses past a daily request cap, asks the model
- * for structured feedback on a spoken sentence, validates the reply against
- * schema.js (retrying once), and logs token counts to KV. That is all it does.
+ * Two routes, one job each. POST /v1/feedback grades one spoken sentence;
+ * POST /v1/talk takes the tutor's turn in a short conversation. Both hold the
+ * Anthropic key so the app never does, check the app's bearer token, refuse past a
+ * daily cap of their own, ask the model, validate the reply against a schema
+ * (retrying once), and log token counts to KV. That is all this Worker does.
  *
  * What it never does: store audio (none is sent — the app sends a transcript),
- * store learner state, or keep anything beyond the day's counters and token log.
+ * store learner state or a conversation (the app sends the whole exchange each
+ * turn), or keep anything beyond the day's counters and token log.
  *
  * `handle` takes its dependencies as arguments so the tests run it in plain Node
  * with a fake KV and a fake fetch; the default export is what Cloudflare calls.
@@ -14,12 +16,13 @@
 
 import { validate, extractJson } from "./schema.js";
 import { SYSTEM, userMessage, RETRY_NUDGE } from "./prompt.js";
+import { SYSTEM_TALK, talkMessage, validateTalk } from "./talk.js";
 
 const API = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
-const MAX_TOKENS = 400;
 const UPSTREAM_TIMEOUT_MS = 15000;
 const DEFAULT_CAP = 300;
+const DEFAULT_TALK_CAP = 36;          // 3 sessions of 12 turns (ROADMAP P6.5)
 const DAY_TTL = 60 * 60 * 48;
 
 const json = (status, body) => new Response(JSON.stringify(body), {
@@ -37,7 +40,7 @@ function tokenMatches(given, expected) {
   return diff === 0;
 }
 
-async function askModel(fetchFn, env, messages) {
+async function askModel(fetchFn, env, system, messages, maxTokens) {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), UPSTREAM_TIMEOUT_MS);
   try {
@@ -51,15 +54,15 @@ async function askModel(fetchFn, env, messages) {
       },
       body: JSON.stringify({
         model: env.MODEL || "claude-haiku-4-5-20251001",
-        max_tokens: MAX_TOKENS,
-        system: SYSTEM,
+        max_tokens: maxTokens,
+        system,
         messages,
       }),
     });
     const body = await r.json().catch(() => null);
     if (!r.ok || !body) return { error: `upstream ${r.status}`, status: r.status };
     const text = (body.content || []).filter((c) => c.type === "text").map((c) => c.text).join("");
-    return { text, usage: body.usage || {} };
+    return { text, usage: body.usage || {}, stop: body.stop_reason || null };
   } catch (e) {
     return { error: e.name === "AbortError" ? "upstream timeout" : `upstream ${e.message || e}` };
   } finally {
@@ -67,12 +70,37 @@ async function askModel(fetchFn, env, messages) {
   }
 }
 
+/* The two routes differ in prompt, reply shape, cap and token budget — nothing
+   else. `validate` gets the parsed JSON and returns { ok, value | errors }. */
+const ROUTES = {
+  "/v1/feedback": {
+    kind: "feedback", counter: "count", cap: (env) => parseInt(env.DAILY_CAP, 10) || DEFAULT_CAP,
+    maxTokens: 400, system: SYSTEM,
+    check: (b) => typeof b.transcript === "string" && typeof b.target === "string" && b.target.trim()
+      ? null : "transcript and target are required",
+    message: (b) => userMessage(b),
+    validate: (parsed) => validate(parsed),
+    capMessage: (cap) => `Daily feedback limit of ${cap} reached; resets at 00:00 UTC.`,
+  },
+  "/v1/talk": {
+    kind: "talk", counter: "talk", cap: (env) => parseInt(env.TALK_DAILY_CAP, 10) || DEFAULT_TALK_CAP,
+    // A turn is ~700 output tokens with its word-by-word grading; at 600 the
+    // JSON was cut short and read as "no JSON" (found on the first live turn).
+    maxTokens: 1000, system: SYSTEM_TALK,
+    check: (b) => typeof b.scenario === "string" && b.scenario.trim() ? null : "scenario is required",
+    message: (b) => talkMessage(b),
+    validate: (parsed, b) => validateTalk(parsed, b.studied),
+    capMessage: (cap) => `Daily conversation limit of ${cap} turns reached; resets at 00:00 UTC.`,
+  },
+};
+
 export async function handle(request, env, deps = {}) {
   const fetchFn = deps.fetch || globalThis.fetch;
   const now = deps.now ? deps.now() : new Date();
   const url = new URL(request.url);
 
-  if (url.pathname !== "/v1/feedback") return json(404, { ok: false, reason: "not found" });
+  const route = ROUTES[url.pathname];
+  if (!route) return json(404, { ok: false, reason: "not found" });
   if (request.method !== "POST") return json(405, { ok: false, reason: "method" });
 
   const auth = request.headers.get("authorization") || "";
@@ -84,58 +112,57 @@ export async function handle(request, env, deps = {}) {
 
   let body;
   try { body = await request.json(); } catch (e) { body = null; }
-  if (!body || typeof body.transcript !== "string" || typeof body.target !== "string"
-      || !body.target.trim()) {
-    return json(400, { ok: false, reason: "transcript and target are required" });
-  }
+  const problem = body && typeof body === "object" ? route.check(body) : "a JSON body is required";
+  if (problem) return json(400, { ok: false, reason: problem });
 
-  // Cost guard: one counter per UTC day. Read, compare, write — not atomic, which
-  // is fine for a single learner's phone and wrong for a fleet; the cap is a
-  // backstop against a bug in a loop, not a billing system.
-  const cap = parseInt(env.DAILY_CAP, 10) || DEFAULT_CAP;
+  // Cost guard: one counter per route per UTC day. Read, compare, write — not
+  // atomic, which is fine for a single learner's phone and wrong for a fleet; the
+  // cap is a backstop against a bug in a loop, not a billing system.
+  const cap = route.cap(env);
   const day = dayKey(now);
-  const countKey = `count:${day}`;
+  const countKey = `${route.counter}:${day}`;
   const count = parseInt(await env.USAGE.get(countKey), 10) || 0;
-  if (count >= cap) {
-    return json(429, { ok: false, reason: "cap",
-                       message: `Daily feedback limit of ${cap} reached; resets at 00:00 UTC.` });
-  }
+  if (count >= cap) return json(429, { ok: false, reason: "cap", message: route.capMessage(cap) });
   await env.USAGE.put(countKey, String(count + 1), { expirationTtl: DAY_TTL });
 
-  const messages = [{ role: "user", content: userMessage(body) }];
+  const messages = [{ role: "user", content: route.message(body) }];
   let tokensIn = 0, tokensOut = 0, result = null, lastErrors = null;
   for (let attempt = 0; attempt < 2 && !result; attempt++) {
-    const reply = await askModel(fetchFn, env, messages);
+    const reply = await askModel(fetchFn, env, route.system, messages, route.maxTokens);
     if (reply.error) {
-      await logUsage(env, day, now, { error: reply.error, attempt });
+      await logUsage(env, day, now, { kind: route.kind, error: reply.error, attempt });
       return json(502, { ok: false, reason: "upstream", detail: reply.error });
     }
     tokensIn += reply.usage.input_tokens || 0;
     tokensOut += reply.usage.output_tokens || 0;
     const parsed = extractJson(reply.text);
-    const v = parsed ? validate(parsed) : { ok: false, errors: ["no JSON object in reply"] };
+    // A reply cut at the token limit is a length problem, and the nudge should
+    // say so; it must not be filed under "no JSON" where it looks like a format slip.
+    const v = reply.stop === "max_tokens"
+      ? { ok: false, errors: [`reply cut off at ${route.maxTokens} tokens; answer more briefly`] }
+      : parsed ? route.validate(parsed, body) : { ok: false, errors: ["no JSON object in reply"] };
     if (v.ok) result = v.value;
     else {
       lastErrors = v.errors;
       messages.push({ role: "assistant", content: reply.text || "" });
-      messages.push({ role: "user", content: RETRY_NUDGE });
+      messages.push({ role: "user", content: RETRY_NUDGE + " Problems: " + v.errors.slice(0, 4).join("; ") });
     }
   }
 
-  await logUsage(env, day, now, { in: tokensIn, out: tokensOut, model: env.MODEL,
-                                  parsed: !!result });
+  await logUsage(env, day, now, { kind: route.kind, in: tokensIn, out: tokensOut,
+                                  model: env.MODEL, parsed: !!result });
   if (!result) return json(200, { ok: false, reason: "parse", errors: lastErrors });
   return json(200, { ok: true, ...result });
 }
 
-/* Per-request line plus a running daily total, so cost per request can be read
-   off KV without a dashboard. */
+/* Per-request line plus a running daily total per route, so cost per request can
+   be read off KV without a dashboard. */
 async function logUsage(env, day, now, entry) {
   const line = { ts: now.toISOString(), ...entry };
   await env.USAGE.put(`log:${day}:${now.getTime()}`, JSON.stringify(line),
                       { expirationTtl: DAY_TTL * 15 });
   if (typeof entry.in === "number") {
-    const key = `tokens:${day}`;
+    const key = `tokens:${day}:${entry.kind}`;
     const cur = JSON.parse((await env.USAGE.get(key)) || "{\"in\":0,\"out\":0,\"n\":0}");
     cur.in += entry.in; cur.out += entry.out; cur.n += 1;
     await env.USAGE.put(key, JSON.stringify(cur), { expirationTtl: DAY_TTL * 15 });

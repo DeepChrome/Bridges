@@ -32,6 +32,9 @@ export function validate(raw) {
     if (!strOrNull(w.expected)) bad(`words[${i}].expected: not a string or null`);
     if (!isStr(w.lemma)) bad(`words[${i}].lemma: not a string`);
     if (!STATUSES.includes(w.status)) bad(`words[${i}].status: ${JSON.stringify(w.status)}`);
+    // A word with nothing wrong is written without tags eight times out of ten
+    // (measured on the conversation eval); an absent list is an empty one.
+    if (w.tags === undefined || w.tags === null) w.tags = [];
     if (!Array.isArray(w.tags)) bad(`words[${i}].tags: not an array`);
     else w.tags.forEach((t) => { if (!isTag(t)) bad(`words[${i}].tags: unknown tag ${JSON.stringify(t)}`); });
   });

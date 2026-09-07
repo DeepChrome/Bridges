@@ -36,13 +36,14 @@ const GOOD = {
 };
 
 /* An upstream that answers with the given texts in order and records what it got. */
-function upstream(texts, status = 200) {
+function upstream(texts, status = 200, stops = []) {
   const calls = [];
   const fetch = async (url, init) => {
     calls.push(JSON.parse(init.body));
-    const text = texts[Math.min(calls.length - 1, texts.length - 1)];
+    const n = Math.min(calls.length - 1, texts.length - 1);
     return new Response(JSON.stringify({
-      content: [{ type: "text", text }], usage: { input_tokens: 120, output_tokens: 60 },
+      content: [{ type: "text", text: texts[n] }], usage: { input_tokens: 120, output_tokens: 60 },
+      stop_reason: stops[n] || "end_turn",
     }), { status });
   };
   return { fetch, calls };
@@ -86,7 +87,7 @@ test("a valid reply comes back as ok with the schema fields, tokens logged", asy
   assert.equal(up.calls[0].max_tokens, 400);
   assert.deepEqual(JSON.parse(up.calls[0].messages[0].content).lemmas, attempt.lemmas);
   assert.equal(e.USAGE.store.get("count:2026-09-06"), "1");
-  assert.deepEqual(JSON.parse(e.USAGE.store.get("tokens:2026-09-06")), { in: 120, out: 60, n: 1 });
+  assert.deepEqual(JSON.parse(e.USAGE.store.get("tokens:2026-09-06:feedback")), { in: 120, out: 60, n: 1 });
 });
 
 test("an off-schema reply is retried once with a nudge, then accepted", async () => {
@@ -110,6 +111,15 @@ test("two bad replies → ok:false reason parse, and an unknown tag counts as ba
   assert.equal(body.reason, "parse");
   assert.match(body.errors.join(" "), /unknown tag "TYPO"/);
   assert.equal(up.calls.length, 2);
+});
+
+test("a reply cut at the token limit is named as such, and the retry is asked to be brief", async () => {
+  const cut = JSON.stringify(GOOD).slice(0, 40);                       // truncated mid-object
+  const up = upstream([cut, JSON.stringify(GOOD)], 200, ["max_tokens", "end_turn"]);
+  const r = await handle(req(attempt, auth), env(), { fetch: up.fetch });
+  assert.equal((await r.json()).ok, true);
+  assert.equal(up.calls.length, 2);
+  assert.match(up.calls[1].messages[2].content, /cut off at 400 tokens/);
 });
 
 test("the daily cap: the request past it gets 429 and never reaches the model", async () => {

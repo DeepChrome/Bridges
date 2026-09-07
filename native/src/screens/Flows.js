@@ -7,15 +7,15 @@ import { useSession } from "../session";
 import { useTheme } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
-
-/* The mark for a run: partial credit summed over first attempts, as a percentage. */
-const scoreOf = (r) => (r.total ? Math.round(r.credit / r.total * 100) : 0);
 import { Linked } from "../words";
 import { Q, DRILL_TYPES, TEST_OUT } from "../questions";
 import {
-  L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK,
+  L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
 } from "../data";
 import { touchStreak } from "../store";
+
+/* The mark for a run: partial credit summed over first attempts, as a percentage. */
+const scoreOf = (r) => (r.total ? Math.round(r.credit / r.total * 100) : 0);
 
 /* ------------------------------------------------------------- vocabulary */
 
@@ -205,10 +205,13 @@ export function DrillList({ navigation }) {
 
 export function DrillFlow({ route, navigation }) {
   const { type } = route.params;
-  const { update } = useSession();
+  const { st, update } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
-  const steps = useMemo(() => Q.drillQuestions(type), [type, seed]);
+  // Only the learner's own words (data.js drillPool); the pool is fixed for the
+  // run so answering does not reshuffle the questions underneath.
+  const pool = useMemo(() => drillPool(st), [type, seed]);
+  const steps = useMemo(() => Q.drillQuestions(type, undefined, pool), [type, seed, pool]);
   const spec = DRILL_TYPES.find((d) => d.id === type);
   useAudioStopOnLeave();
 

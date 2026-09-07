@@ -582,6 +582,22 @@ for (const d of DRILL_TYPES) {
   }
 }
 
+/* A drill asks only about the learner's own words when given a pool. */
+group("drill pool");
+{
+  const pool = UN.find((u) => u.id === "core1").w.concat(UN.find((u) => u.id === "core2").w);
+  const inPool = new Set(pool);
+  for (const type of ["cases", "conjugation", "stress"]) {
+    const qs = Q.drillQuestions(type, 6, pool);
+    ok(qs.every((q) => inPool.has(q.i)), `${type}: every question is about a pooled word`,
+       qs.filter((q) => !inPool.has(q.i)).map((q) => q.prompt).join(","));
+  }
+  const tiny = Q.drillQuestions("cases", 6, [pool[0]]);
+  ok(tiny.length <= 1 || tiny.every((q) => q.i === pool[0]),
+     "a one-word pool yields at most that word's questions");
+  ok(Q.drillQuestions("cases", 6).length === 6, "no pool: the whole curriculum, as before");
+}
+
 group("question shape");
 {
   // Both runners read these fields; a missing one is a blank screen on one platform.

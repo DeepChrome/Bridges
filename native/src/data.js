@@ -204,3 +204,34 @@ export const idxOfWord = (w) => {
   const h = IX[fold(w)];
   return h && h.length ? h[0] : -1;
 };
+
+/* What a practice drill may ask about: the words the learner has met, widened
+   along the route until there are enough to drill. A fresh learner gets the first
+   units' words in path order; nobody gets the genitive plural of a word they have
+   never seen. DRILL_POOL_MIN is the floor below which the route is added. */
+export const DRILL_POOL_MIN = 40;
+export function drillPool(st) {
+  const out = [];
+  const have = new Set();
+  const add = (i) => { if (i >= 0 && !have.has(i)) { have.add(i); out.push(i); } };
+  // State keys on the lemma's bare form; where two lemmas share a folded form
+  // (все/всё), take the one whose bare form is the key, not the index's first.
+  const exact = (w) => {
+    const hits = IX[fold(w)] || [];
+    const same = hits.find((i) => L[i] && L[i].b === w);
+    return same !== undefined ? same : (hits.length ? hits[0] : -1);
+  };
+  for (const w of Object.keys(st.seen || {})) add(exact(w));
+  if (out.length >= DRILL_POOL_MIN) return out;
+  // The route in order: every unit up to and including where the learner is,
+  // then onward until the floor is met.
+  const here = nextLesson(st);
+  const route = [];
+  for (const s of STAGES) route.push(s.core, ...s.branches);
+  const at = here ? route.indexOf(here.unit) : route.length - 1;
+  for (let k = 0; k < route.length && out.length < DRILL_POOL_MIN; k++) {
+    if (k > at && out.length >= DRILL_POOL_MIN) break;
+    for (const i of route[k].w) add(i);
+  }
+  return out;
+}

@@ -369,10 +369,17 @@ export function makeQuestions(env) {
 
   /* ------------------------------------------------------------- drills */
 
-  function pickWhere(fn, tries) {
+  /* The words a drill may ask about. Set per call by drillQuestions(): the
+     learner's own words, so "genitive plural of рис" never lands on someone who
+     knows six words. Distractors still come from anywhere — a wrong option needs
+     no acquaintance. */
+  let drillPool = null;
+
+  function pickWhere(fn, tries, anywhere) {
+    const from = !anywhere && drillPool && drillPool.length ? drillPool : L;
     for (let n = 0; n < (tries || 300); n++) {
-      const w = L[Math.floor(Math.random() * L.length)];
-      if (fn(w)) return w;
+      const w = from[Math.floor(Math.random() * from.length)];
+      if (w && fn(w)) return w;
     }
     return null;
   }
@@ -407,7 +414,7 @@ export function makeQuestions(env) {
     if (!w) return null;
     const others = [];
     for (let n = 0; n < 60 && others.length < 3; n++) {
-      const o = pickWhere((x) => x.p === "verb" && realPartner(x.pt) && x.pt !== w.pt, 60);
+      const o = pickWhere((x) => x.p === "verb" && realPartner(x.pt) && x.pt !== w.pt, 60, true);
       if (o && !others.includes(o.pt.trim())) others.push(o.pt.trim());
     }
     if (others.length < 3) return null;
@@ -423,6 +430,8 @@ export function makeQuestions(env) {
 
   function qAgreement() {
     const adj = pickWhere((x) => x.p === "adjective" && tableTitled(x, /Declension/));
+    // The noun only sets the gender; any noun the learner has met will do, and
+    // when the pool has no adjective yet the drill has no question — as it should.
     const noun = pickWhere((x) => x.p === "noun" && ["m", "f", "n"].includes(x.g));
     if (!adj || !noun) return null;
     const t = tableTitled(adj, /Declension/);
@@ -497,17 +506,24 @@ export function makeQuestions(env) {
   const GEN = { cases: qCases, aspect: qAspect, agreement: qAgreement,
                 conjugation: qConjugation, stress: qStress, grammar: qGrammar };
 
-  function drillQuestions(type, n) {
+  /* `pool`: lemma indices the drill may ask about (see native data.js drillPool);
+     without one, every word in the curriculum. */
+  function drillQuestions(type, n, pool) {
     const out = [];
     const seen = new Set();
     const want = n || DRILL_N;
-    for (let k = 0; k < want * 25 && out.length < want; k++) {
-      const q = GEN[type] && GEN[type]();
-      if (!q) continue;
-      const key = q.kind + "|" + q.prompt + "|" + q.ask;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push(q);
+    drillPool = pool && pool.length ? pool.map((i) => L[i]).filter(Boolean) : null;
+    try {
+      for (let k = 0; k < want * 25 && out.length < want; k++) {
+        const q = GEN[type] && GEN[type]();
+        if (!q) continue;
+        const key = q.kind + "|" + q.prompt + "|" + q.ask;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(q);
+      }
+    } finally {
+      drillPool = null;
     }
     return out;
   }

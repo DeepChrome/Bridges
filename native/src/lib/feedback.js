@@ -16,33 +16,46 @@
  */
 
 export const TIMEOUT_MS = 8000;
+export const TALK_TIMEOUT_MS = 20000;   // a conversational turn is longer
 
-export function config() {
+export function config(route = "/v1/feedback") {
   const url = process.env.EXPO_PUBLIC_FEEDBACK_URL || "";
   const token = process.env.EXPO_PUBLIC_APP_TOKEN || "";
-  return url && token ? { url: url.replace(/\/+$/, "") + "/v1/feedback", token } : null;
+  return url && token ? { url: url.replace(/\/+$/, "") + route, token } : null;
 }
 
 export async function getFeedback({ transcript, target, unitId, topic, lemmas }, deps = {}) {
-  const cfg = deps.config || config();
+  return post({ transcript, target, unitId, topic: topic || null, lemmas: lemmas || [] },
+              deps, "/v1/feedback", TIMEOUT_MS);
+}
+
+/* The tutor's turn (ROADMAP P6.2). The whole exchange goes every time; the Worker
+   keeps nothing. Same failure reasons as getFeedback. */
+export async function talk({ scenario, topic, studied, history, transcript }, deps = {}) {
+  return post({ scenario, topic: topic || null, studied: studied || [], history: history || [],
+                transcript: transcript || "" },
+              deps, "/v1/talk", TALK_TIMEOUT_MS);
+}
+
+async function post(body, deps, route, timeoutMs) {
+  const cfg = deps.config || config(route);
   if (!cfg) return { ok: false, reason: "unconfigured" };
   const fetchFn = deps.fetch || globalThis.fetch;
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), deps.timeoutMs || TIMEOUT_MS);
+  const timer = setTimeout(() => ctl.abort(), deps.timeoutMs || timeoutMs);
   try {
     const r = await fetchFn(cfg.url, {
       method: "POST",
       signal: ctl.signal,
       headers: { "content-type": "application/json", authorization: `Bearer ${cfg.token}` },
-      body: JSON.stringify({ transcript, target, unitId, topic: topic || null,
-                             lemmas: lemmas || [] }),
+      body: JSON.stringify(body),
     });
-    let body = null;
-    try { body = await r.json(); } catch (e) { body = null; }
-    if (!r.ok) return { ok: false, reason: "http", status: r.status, detail: body && body.reason };
-    if (!body || typeof body !== "object") return { ok: false, reason: "parse" };
-    if (body.ok !== true) return { ok: false, reason: body.reason || "parse" };
-    return body;
+    let data = null;
+    try { data = await r.json(); } catch (e) { data = null; }
+    if (!r.ok) return { ok: false, reason: "http", status: r.status, detail: data && data.reason };
+    if (!data || typeof data !== "object") return { ok: false, reason: "parse" };
+    if (data.ok !== true) return { ok: false, reason: data.reason || "parse" };
+    return data;
   } catch (e) {
     if (e && e.name === "AbortError") return { ok: false, reason: "timeout" };
     // React Native's fetch rejects with "Network request failed" when there is no

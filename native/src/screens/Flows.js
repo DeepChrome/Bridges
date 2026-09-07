@@ -7,6 +7,7 @@ import { useSession } from "../session";
 import { useTheme } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
+import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
 import { Linked } from "../words";
 import { Q, DRILL_TYPES, TEST_OUT } from "../questions";
 import {
@@ -179,8 +180,20 @@ export function QuizFlow({ route, navigation }) {
 export function DrillList({ navigation }) {
   const { st } = useSession();
   const t = useTheme();
+  const talkOpen = talkUnlocked(st);
   return (
     <Screen>
+      {/* Conversation first: it is the one thing here that is not a drill. */}
+      <List>
+        <Row last onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
+          <Thumb id="speech" locked={!talkOpen} />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Talk</Text>
+            <Muted>{talkOpen ? "A short conversation on a topic" : `Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}</Muted>
+          </View>
+        </Row>
+      </List>
+      <View style={{ height: 12 }} />
       <List>
         {DRILL_TYPES.map((d, k) => {
           const best = ((st.drills || {})[d.id] || {}).best;

@@ -19,6 +19,7 @@ import { SessionProvider, useSession } from "./src/session";
 import { light, dark } from "./src/theme";
 import { Loading, Avatar, HeaderTitle } from "./src/ui";
 import { DRILL_TYPES } from "./src/questions";
+import Talk from "./src/screens/Talk";
 import { unitById, chapterOf, L, resolveWord } from "./src/data";
 import Learn from "./src/screens/Learn";
 import Search from "./src/screens/Search";
@@ -125,6 +126,7 @@ function PracticeStack() {
   return (
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Drills" component={DrillList} options={{ title: "Practice" }} />
+      <Stack.Screen name="Talk" component={Talk} options={{ title: "Talk" }} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <MeButton navigation={navigation} />,

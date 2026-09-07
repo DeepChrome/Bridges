@@ -7,10 +7,10 @@
  * the next try is made having heard it. The grade goes to the scheduler per word
  * when the attempt is settled — perfect, kept, or the third.
  *
- * Two things can stop it before it starts, and both are said plainly rather than
- * left as a button that does nothing: the microphone permission is refused (asked
- * here, at the first Say, not at launch), or Russian has no offline model on this
- * phone. Either offers Skip, which grades nothing and does not count in the score.
+ * The microphone is asked for here, at the first Say, not at launch. Refused, or
+ * with no offline Russian model on the phone, the step says so and offers Skip,
+ * which grades nothing and does not count in the score. The hold-to-speak
+ * mechanics live in ../speech.js, shared with the conversation screen.
  *
  * The recogniser is not asked for grammar; that is the feedback service's job
  * (Phase 4), layered on after the local verdict and never in its way.
@@ -19,26 +19,23 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import {
-  ExpoSpeechRecognitionModule as M, useSpeechRecognitionEvent,
-} from "expo-speech-recognition";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
 import { Btn, Muted, Pill, Speaker } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN } from "../data";
 import { getFeedback } from "../lib/feedback";
+import { useRecognizer } from "../speech";
 import { Alignment } from "./Alignment";
 import { compare } from "@core/compare";
-import { gradeAlignment } from "@core/speech";
+import { gradeAlignment, feedbackTags } from "@core/speech";
 import { recordAttempt, tagAttempt } from "@core/state";
 import { tagInfo } from "@core/errortags";
 import { fold } from "@core/util";
 
 export const ATTEMPTS = 3;
-const LANG = "ru-RU";
 
-function HoldButton({ phase, onIn, onOut }) {
+export function HoldButton({ phase, onIn, onOut, size = 84 }) {
   const t = useTheme();
   const listening = phase === "listening";
   const busy = phase === "asking";
@@ -53,13 +50,13 @@ function HoldButton({ phase, onIn, onOut }) {
         onPressOut={onOut}
         hitSlop={8}
         style={{
-          width: 84, height: 84, borderRadius: 42, alignItems: "center",
+          width: size, height: size, borderRadius: size / 2, alignItems: "center",
           justifyContent: "center",
           backgroundColor: listening ? t.brand : t.brandBg,
           borderWidth: 1, borderColor: t.brand, opacity: busy ? 0.6 : 1,
         }}
       >
-        <Svg width={34} height={34} viewBox="0 0 24 24" fill="none"
+        <Svg width={size * 0.4} height={size * 0.4} viewBox="0 0 24 24" fill="none"
              stroke={listening ? t.brandOn : t.brandInk} strokeWidth={2}
              strokeLinecap="round" strokeLinejoin="round">
           <Path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z" />
@@ -77,7 +74,7 @@ const tagLabel = (id) => id.toLowerCase().replace(/_/g, " ");
 /* What the Worker had to say, under the local verdict: a line of praise when it
    gave one, then each grammar point with its tag, then a better word where one
    fits. Rows, not cards — this sits inside the answer already on screen. */
-function Feedback({ fb }) {
+export function Feedback({ fb }) {
   const t = useTheme();
   const rows = (fb.grammar || []).map((g) => ({ key: "g" + g.tag, chip: tagLabel(g.tag),
     text: g.note, title: (tagInfo(g.tag) || {}).en }))
@@ -100,26 +97,28 @@ function Feedback({ fb }) {
   );
 }
 
+/* What can stop speaking before it starts, said plainly, with a way out. */
+export function Blocked({ block, onGetModel, onSkip, skipLabel }) {
+  const t = useTheme();
+  return (
+    <View style={{ alignItems: "center", gap: 12 }}>
+      <Text style={{ color: t.ink2, fontSize: 15, textAlign: "center" }}>{block.text}</Text>
+      {block.why === "model" ? <Btn label="Get Russian" onPress={onGetModel} /> : null}
+      {onSkip ? (
+        <Btn kind="ghost" label={skipLabel || (block.why === "mic" ? "Skip (mic off)" : "Skip")}
+             onPress={onSkip} />
+      ) : null}
+    </View>
+  );
+}
+
 export function Say({ q, r }) {
   const { update } = useSession();
   const t = useTheme();
-  // Phase in a ref as well as state: the recogniser's events and a press that ends
-  // before the permission prompt resolves both need the current value, not the one
-  // their closure was made with.
-  const [phase, setPhase] = useState("idle");        // idle | asking | listening | heard
-  const phaseRef = useRef("idle");
-  const go = (p) => { phaseRef.current = p; setPhase(p); };
-  const [live, setLiveState] = useState("");
-  const liveRef = useRef("");
-  const setLive = (s) => { liveRef.current = s; setLiveState(s); };
   const [res, setRes] = useState(null);
   const [attempt, setAttempt] = useState(0);
   const attemptRef = useRef(0);
   const [settled, setSettled] = useState(false);
-  const [note, setNote] = useState(null);
-  const [block, setBlock] = useState(null);          // { why: mic | model | engine, text }
-  const releasedAt = useRef(0);
-  const releasedEarly = useRef(false);
   // The feedback service's answer: null (not asked), "pending", or the reply.
   // Anything but a reply renders nothing extra — the local verdict stands alone.
   const [fb, setFb] = useState(null);
@@ -151,8 +150,7 @@ export function Say({ q, r }) {
       lemmas: (q.lemmas || []).map((i) => L[i].b),
     });
     if (!reply || reply.ok !== true) { if (alive.current) setFb(null); return; }
-    const tags = (reply.grammar || []).map((g) => g.tag)
-      .concat((reply.words || []).flatMap((w) => w.tags || []));
+    const tags = feedbackTags(reply);
     if (tags.length) update((prev) => ({ ...prev, speech: tagAttempt(prev.speech, ts, tags) }));
     if (alive.current) setFb(reply);
   };
@@ -169,98 +167,30 @@ export function Say({ q, r }) {
   };
 
   const last = useRef({ transcript: "", ts: 0 });
-  const finish = (transcript) => {
-    const n = attemptRef.current + 1;
-    attemptRef.current = n;
-    setAttempt(n);
-    const out = compare(transcript, q.target);
-    const perfect = out.wer === 0;
-    setRes(out);
-    go("heard");
-    const ts = log({ transcript, wer: out.wer, attempt: n,
-                     latencyMs: Date.now() - releasedAt.current,
-                     grade: perfect ? (n === 1 ? 4 : 3) : 1 });
-    last.current = { transcript, ts };
-    if (perfect || n >= ATTEMPTS) settle(out, n, transcript, ts);
-  };
-
-  useSpeechRecognitionEvent("result", (ev) => {
-    if (phaseRef.current !== "listening") return;
-    const text = ev.results && ev.results[0] ? ev.results[0].transcript : "";
-    if (ev.isFinal) finish(text);
-    else setLive(text);
-  });
-  useSpeechRecognitionEvent("error", (ev) => {
-    if (phaseRef.current !== "listening") return;
-    go("idle");
-    const what = `${ev.error} ${ev.message || ""}`;
-    if (/not-supported|not downloaded/i.test(what)) {
-      setBlock({ why: "model", text: "Russian is not installed for offline recognition." });
-    } else if (ev.error === "no-speech") {
-      setNote("Nothing heard");
-    } else {
-      setBlock({ why: "engine", text: `Recognition failed: ${ev.error}` });
-    }
-    log({ transcript: "", wer: 1, attempt: attemptRef.current, error: ev.error,
-          latencyMs: Date.now() - releasedAt.current, grade: null });
-  });
-  useSpeechRecognitionEvent("end", () => {
-    if (phaseRef.current !== "listening") return;
-    // Ended without a final result. The last partial is what the recogniser had,
-    // so score that rather than throw the attempt away; with nothing at all heard,
-    // back to idle and let the learner try again.
-    if (liveRef.current) finish(liveRef.current);
-    else go("idle");
+  const rec = useRecognizer({
+    enabled: !r.answered,
+    onFinal: (transcript, latencyMs) => {
+      const n = attemptRef.current + 1;
+      attemptRef.current = n;
+      setAttempt(n);
+      const out = compare(transcript, q.target);
+      const perfect = out.wer === 0;
+      setRes(out);
+      const ts = log({ transcript, wer: out.wer, attempt: n, latencyMs,
+                       grade: perfect ? (n === 1 ? 4 : 3) : 1 });
+      last.current = { transcript, ts };
+      if (perfect || n >= ATTEMPTS) settle(out, n, transcript, ts);
+    },
+    onError: (error, latencyMs) => {
+      log({ transcript: "", wer: 1, attempt: attemptRef.current, error, latencyMs, grade: null });
+    },
   });
 
-  const hold = async () => {
-    if (r.answered || phaseRef.current !== "idle") return;
-    setLive(""); setNote(null);
-    releasedEarly.current = false;
-    go("asking");
-    let perm;
-    try { perm = await M.requestPermissionsAsync(); } catch (e) { perm = { granted: false }; }
-    if (!perm.granted) {
-      go("idle");
-      setBlock({ why: "mic", text: "The microphone is off for Bridges." });
-      return;
-    }
-    if (releasedEarly.current) { go("idle"); return; }
-    go("listening");
-    try {
-      M.start({ lang: LANG, requiresOnDeviceRecognition: true, interimResults: true,
-                maxAlternatives: 1, continuous: false });
-    } catch (e) {
-      go("idle");
-      setBlock({ why: "engine", text: `Recognition failed: ${e.message || e}` });
-    }
-  };
-
-  const release = () => {
-    releasedAt.current = Date.now();
-    if (phaseRef.current === "listening") {
-      try { M.stop(); } catch (e) { /* the end event still arrives */ }
-    } else {
-      releasedEarly.current = true;
-    }
-  };
-
-  const again = () => { setRes(null); setLive(""); go("idle"); };
+  const again = () => { setRes(null); rec.setLive(""); };
   const keep = () => settle(res, attempt, last.current.transcript, last.current.ts);
-  const skip = () => r.skip();
-  const getModel = async () => {
-    try { await M.androidTriggerOfflineModelDownload({ locale: LANG }); } catch (e) { /* stays blocked */ }
-  };
 
-  if (block) {
-    return (
-      <View style={{ alignItems: "center", gap: 12 }}>
-        <Text style={{ color: t.ink2, fontSize: 15, textAlign: "center" }}>{block.text}</Text>
-        {block.why === "model" ? <Btn label="Get Russian" onPress={getModel} /> : null}
-        <Btn kind="ghost" label={block.why === "mic" ? "Skip (mic off)" : "Skip"}
-             onPress={skip} />
-      </View>
-    );
+  if (rec.block) {
+    return <Blocked block={rec.block} onGetModel={rec.getModel} onSkip={() => r.skip()} />;
   }
 
   if (res) {
@@ -290,10 +220,10 @@ export function Say({ q, r }) {
 
   return (
     <View style={{ alignItems: "center" }}>
-      <HoldButton phase={phase} onIn={hold} onOut={release} />
+      <HoldButton phase={rec.phase} onIn={rec.hold} onOut={rec.release} />
       <Text style={{ color: t.ink, fontSize: 18, marginTop: 16, minHeight: 24,
                      textAlign: "center" }}>
-        {phase === "listening" ? live : note || ""}
+        {rec.phase === "listening" ? rec.live : rec.note || ""}
       </Text>
       {attempt > 0 ? <Muted>{`${ATTEMPTS - attempt} left`}</Muted> : null}
     </View>

@@ -22,10 +22,24 @@ export const MAX_TURNS = 12;          // learner turns per session
 export const MAX_NEW_WORDS = 2;
 const CYRILLIC_WORD = /[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*/g;
 
-export const SYSTEM_TALK = `You are a patient Russian tutor having a short spoken conversation with a beginner-to-intermediate learner.
+/* How the tutor pitches its Russian (the owner, 2026-09-07): the learner picks. */
+export const LEVELS = {
+  beginner: "The learner is a beginner: use only very common, concrete words and the present tense; short sentences of three to six words; no idioms.",
+  intermediate: "The learner is intermediate: everyday Russian, past and future tenses are fine, an occasional less common word.",
+  advanced: "The learner is advanced: speak naturally, use idioms, participles, aspect pairs and longer sentences where a native would; you may write up to three sentences.",
+};
+export const LEVEL_SENTENCES = { beginner: 2, intermediate: 2, advanced: 3 };
+export const DEFAULT_LEVEL = "intermediate";
+export const levelOf = (x) => (x in LEVELS ? x : DEFAULT_LEVEL);
+
+export const SYSTEM_TALK = `You are a patient Russian tutor having a short spoken conversation with a learner.
 
 You receive JSON with:
 - "scenario": the situation (e.g. ordering in a café) and your role in it.
+- "level": how to pitch your Russian, one of "beginner", "intermediate", "advanced":
+  beginner — ${LEVELS.beginner}
+  intermediate — ${LEVELS.intermediate}
+  advanced — ${LEVELS.advanced}
 - "topic": the grammar point of the learner's current unit, if any.
 - "studied": dictionary forms of the words the learner has studied. Prefer these. You may use at most ${MAX_NEW_WORDS} words per turn that are not among them; list every such word in "newWords".
 - "history": the conversation so far, oldest first, each turn {"who":"tutor"|"learner","ru":...}.
@@ -41,7 +55,7 @@ Reply with a single JSON object and nothing else — no prose, no code fences:
 }
 
 Rules:
-- "reply_ru": at most two sentences, plain everyday Russian, and exactly one of them a question that keeps the conversation going. Stay in the scenario. Never lecture.
+- "reply_ru": at most two sentences (three for an advanced learner), pitched at "level", and exactly one of them a question that keeps the conversation going. Stay in the scenario. Never lecture.
 - "reply_en": a natural English translation of reply_ru.
 - "reply_tokens": every Russian word of reply_ru in order, each with its dictionary form (nominative singular; infinitive for verbs).
 - "feedback": null when transcript is empty. Otherwise grade the learner's turn: "words" aligns what was said to what a Russian speaker would have said in that turn ("expected" is your correction of each word, or null for an extra word), with "lemma" the dictionary form; a well-formed turn gets every word "ok", "grammar" and "wordChoice" empty, "overall" "ok". Notes are at most 20 words of plain English, plain sentences with commas and full stops, never a dash. "praise" at most 12 words or "".
@@ -50,9 +64,10 @@ ${TAG_LINES}
 - "newWords": each word in reply_ru whose dictionary form is not in "studied", at most ${MAX_NEW_WORDS}; if you would need more, rephrase.
 - Never invent an error to have something to say.`;
 
-export function talkMessage({ scenario, topic, studied, history, transcript }) {
+export function talkMessage({ scenario, topic, studied, history, transcript, level }) {
   return JSON.stringify({
     scenario: String(scenario || ""),
+    level: levelOf(level),
     topic: topic ? String(topic) : null,
     studied: Array.isArray(studied) ? studied.map(String).slice(0, 400) : [],
     history: Array.isArray(history)
@@ -66,15 +81,16 @@ const sentences = (s) => String(s).split(/(?<=[.!?…])\s+/).filter((x) => x.tri
 const isStr = (x) => typeof x === "string";
 
 /* -> { ok: true, value } or { ok: false, errors } */
-export function validateTalk(raw, studied) {
+export function validateTalk(raw, studied, level) {
   const errors = [];
   const bad = (m) => errors.push(m);
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return { ok: false, errors: ["reply is not an object"] };
+  const maxSentences = LEVEL_SENTENCES[levelOf(level)];
 
   if (!isStr(raw.reply_ru) || !raw.reply_ru.trim()) bad("reply_ru: missing");
   else {
     if (!/[а-яёА-ЯЁ]/.test(raw.reply_ru)) bad("reply_ru: not Russian");
-    if (sentences(raw.reply_ru) > 2) bad("reply_ru: more than two sentences");
+    if (sentences(raw.reply_ru) > maxSentences) bad(`reply_ru: more than ${maxSentences === 2 ? "two" : "three"} sentences`);
     if (!/\?/.test(raw.reply_ru)) bad("reply_ru: no question");
   }
   if (!isStr(raw.reply_en) || !raw.reply_en.trim()) bad("reply_en: missing");

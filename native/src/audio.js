@@ -128,7 +128,9 @@ function rateFor(text, opts) {
   const repeat = opts.repeat !== false && last.text === text && now - last.at < REPEAT_WINDOW_MS;
   const slow = opts.slow !== undefined ? !!opts.slow : (repeat && !last.slow);
   if (opts.repeat !== false) last = { text, at: now, slow };
-  return prefs.rate * (slow ? REPEAT_RATE : 1);
+  // A caller may name a speed of its own (the Talk tutor has one) instead of the setting.
+  const chosen = opts.speed ? SPEEDS.find((x) => x.id === opts.speed) : null;
+  return (chosen ? chosen.rate : prefs.rate) * (slow ? REPEAT_RATE : 1);
 }
 
 export function speakTTS(text, opts = {}) {

@@ -40,6 +40,8 @@ export const DEFAULTS = {
   cue: "bell",          // the sound a right answer makes (audio.js CUE_NAMES)
   osk: false,           // an on-screen Russian keyboard for typed answers
   offline: false,       // download a unit's audio when it is opened (cache.js)
+  talkLevel: null,      // how the Talk tutor pitches its Russian; null = by chapter reached
+  talkSpeed: "normal",  // how fast the tutor is read out (audio.js SPEEDS)
 };
 
 export function normalise(raw, assumedVersion) {

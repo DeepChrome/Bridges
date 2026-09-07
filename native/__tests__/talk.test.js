@@ -82,6 +82,10 @@ describe("talk", () => {
     expect(talk.mock.calls[0][0]).toMatchObject({ transcript: "", history: [] });
     expect(talk.mock.calls[0][0].scenario).toMatch(/waiter/);
     expect(talk.mock.calls[0][0].studied.length).toBeGreaterThan(20);
+    // Chapters 1–5 are done, so the tutor pitches its Russian at the advanced
+    // level unless a level was chosen; and it reads its turn out as it arrives.
+    expect(talk.mock.calls[0][0].level).toBe("advanced");
+    expect(global.__spoke[global.__spoke.length - 1]).toMatch(/Здравствуйте/);
 
     const hold = screen.getByTestId("say-hold");
     await act(async () => { fireEvent(hold, "pressIn"); });
@@ -105,6 +109,22 @@ describe("talk", () => {
     await act(async () => { fireEvent.press(screen.getByText("Add to study")); });
     expect((await saved()).pinned).toEqual(["булочка"]);
     expect(screen.getByText("added")).toBeTruthy();
+  });
+
+  it("lets the learner pick the tutor's level and pace, and remembers them", async () => {
+    talk.mockResolvedValue(OPENING);
+    await withTalk({ unit: done() });
+    await screen.findByText("В кафе");
+    await act(async () => { fireEvent.press(screen.getByText("Beginner")); });
+    await act(async () => { fireEvent.press(screen.getByText("Slowest")); });
+    const st = await saved();
+    expect(st.talkLevel).toBe("beginner");
+    expect(st.talkSpeed).toBe("slowest");
+    global.__spokeOpts = [];
+    await act(async () => { fireEvent.press(screen.getByText("В кафе")); });
+    await screen.findByText(/Здравствуйте/);
+    expect(talk.mock.calls[0][0].level).toBe("beginner");
+    expect(global.__spokeOpts[0].rate).toBeCloseTo(0.9 * 0.65);       // the tutor's own pace
   });
 
   it("ends with a summary and spends the day's sessions", async () => {

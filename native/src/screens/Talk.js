@@ -20,8 +20,9 @@ import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
 import { Screen, Card, Btn, Pill, Muted, Speaker, List, Row, Thumb } from "../ui";
 import { Linked } from "../words";
-import { L, IX, UN, STAGES, stageDone, unitUnlocked, drillPool } from "../data";
+import { L, IX, UN, STAGES, stageDone, unitUnlocked, drillPool, nextLesson } from "../data";
 import { talk as askTutor } from "../lib/feedback";
+import { say, SPEEDS } from "../audio";
 import { useRecognizer } from "../speech";
 import { HoldButton, Feedback, Blocked } from "../activities/Say";
 import { Alignment } from "../activities/Alignment";
@@ -64,6 +65,7 @@ function TutorBubble({ turn }) {
                           borderRadius: radius.lg, borderBottomLeftRadius: 4, padding: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
           <View style={{ flex: 1 }}><Linked text={turn.ru} size={17} /></View>
+          {/* Hear it again — it was read out when it arrived. */}
           <Speaker text={turn.ru} size={32} />
         </View>
         {showEn ? <Muted style={{ marginTop: 6 }}>{turn.en}</Muted> : null}
@@ -72,10 +74,12 @@ function TutorBubble({ turn }) {
   );
 }
 
+/* The learner's words in a bubble; the tutor's notes on them under it, outside
+   the bubble, in a quieter face — there to read, not part of what was said. */
 function LearnerBubble({ turn }) {
   const t = useTheme();
   return (
-    <View testID="learner-bubble" style={{ alignSelf: "flex-end", maxWidth: "88%", marginBottom: 10 }}>
+    <View testID="learner-bubble" style={{ alignSelf: "flex-end", maxWidth: "88%", marginBottom: 10, alignItems: "flex-end" }}>
       <View style={{ backgroundColor: t.brandBg, borderColor: t.brand, borderWidth: 1,
                      borderRadius: radius.lg, borderBottomRightRadius: 4, padding: 12 }}>
         {turn.alignment ? (
@@ -84,8 +88,43 @@ function LearnerBubble({ turn }) {
           <Text style={{ color: t.ink, fontSize: 17 }}>{turn.ru}</Text>
         )}
         {turn.pending ? <ActivityIndicator testID="turn-pending" color={t.ink3} style={{ alignSelf: "flex-start", marginTop: 6 }} /> : null}
-        {turn.feedback ? <Feedback fb={turn.feedback} /> : null}
       </View>
+      {turn.feedback ? <Feedback fb={turn.feedback} quiet style={{ marginTop: 6, paddingHorizontal: 4 }} /> : null}
+    </View>
+  );
+}
+
+/* The tutor's pitch and pace, chosen on the picker and kept. */
+export const TALK_LEVELS = [
+  { id: "beginner", name: "Beginner", blurb: "Simple words, present tense" },
+  { id: "intermediate", name: "Intermediate", blurb: "Everyday Russian, all tenses" },
+  { id: "advanced", name: "Advanced", blurb: "Idioms and longer sentences" },
+];
+/* Without a choice, the level follows the route: chapters 1–2 beginner, 3–5
+   intermediate, later advanced. */
+export function talkLevelFor(st) {
+  if (st.talkLevel && TALK_LEVELS.some((l) => l.id === st.talkLevel)) return st.talkLevel;
+  const here = nextLesson(st);
+  const stage = here ? STAGES.findIndex((s) => s.core.id === here.unit.id) : STAGES.length;
+  return stage < 2 ? "beginner" : stage < 5 ? "intermediate" : "advanced";
+}
+
+function Choice({ options, value, onPick, testID }) {
+  const t = useTheme();
+  return (
+    <View testID={testID} style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+      {options.map((o) => {
+        const on = o.id === value;
+        return (
+          <Pressable key={o.id} onPress={() => onPick(o.id)} accessibilityRole="button"
+                     accessibilityState={{ selected: on }}
+                     style={{ borderWidth: 1, borderColor: on ? t.brand : t.line,
+                              backgroundColor: on ? t.brandBg : t.surface, borderRadius: 99,
+                              paddingHorizontal: 12, paddingVertical: 7, minHeight: 34 }}>
+            <Text style={{ color: on ? t.brandInk : t.ink2, fontSize: 13 }}>{o.name}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -122,6 +161,9 @@ export default function Talk({ navigation, route }) {
 
   const unit = scenario ? UN.find((u) => u.id === scenario.unit) : null;
 
+  const level = talkLevelFor(st);
+  const speed = st.talkSpeed || "normal";
+
   /* One round trip: the whole exchange plus the learner's latest words. */
   const ask = async (history, transcript) => {
     setFailure(null);
@@ -129,7 +171,7 @@ export default function Talk({ navigation, route }) {
       scenario: scenario.prompt, topic: unit && unit.g ? unit.g.title : null,
       studied: studiedFor(st),
       history: history.map((x) => ({ who: x.who, ru: x.ru })),
-      transcript,
+      transcript, level,
     });
     if (!alive.current) return;
     if (!reply || reply.ok !== true) {
@@ -173,6 +215,9 @@ export default function Talk({ navigation, route }) {
     }
     setTurns((prev) => prev.concat([{ who: "tutor", ru: reply.reply_ru, en: reply.reply_en,
                                       tokens: reply.reply_tokens }]));
+    // The tutor speaks its turn as it arrives (the owner, 2026-09-07), at the
+    // pace chosen on the picker; the speaker on the bubble is for hearing it again.
+    say(reply.reply_ru, { repeat: false, speed });
     if (reply.newWords && reply.newWords.length) {
       setNewWords((prev) => {
         const have = new Set(prev.map((w) => w.lemma));
@@ -232,6 +277,16 @@ export default function Talk({ navigation, route }) {
             {`Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}
           </Muted>
         ) : null}
+        <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1,
+                       textTransform: "uppercase", marginBottom: 8 }}>The tutor</Text>
+        <Choice testID="talk-level" options={TALK_LEVELS} value={level}
+                onPick={(id) => update((p) => ({ ...p, talkLevel: id }))} />
+        <Muted style={{ marginTop: 6, marginBottom: 10 }}>
+          {TALK_LEVELS.find((l) => l.id === level).blurb + (st.talkLevel ? "" : " · set by where you are")}
+        </Muted>
+        <Choice testID="talk-speed" options={SPEEDS} value={speed}
+                onPick={(id) => update((p) => ({ ...p, talkSpeed: id }))} />
+        <Muted style={{ marginTop: 6, marginBottom: 16 }}>How fast the tutor is read out</Muted>
         <List>
           {SCENARIOS.map((s, k) => {
             const u = UN.find((x) => x.id === s.unit);

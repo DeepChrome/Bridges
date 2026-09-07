@@ -74,20 +74,22 @@ const tagLabel = (id) => id.toLowerCase().replace(/_/g, " ");
 /* What the Worker had to say, under the local verdict: a line of praise when it
    gave one, then each grammar point with its tag, then a better word where one
    fits. Rows, not cards — this sits inside the answer already on screen. */
-export function Feedback({ fb }) {
+export function Feedback({ fb, quiet, style }) {
   const t = useTheme();
   const rows = (fb.grammar || []).map((g) => ({ key: "g" + g.tag, chip: tagLabel(g.tag),
     text: g.note, title: (tagInfo(g.tag) || {}).en }))
     .concat((fb.wordChoice || []).map((c, k) => ({ key: "w" + k, chip: "better",
       text: `${c.said} → ${c.better}${c.note ? " · " + c.note : ""}` })));
   if (!rows.length && !fb.praise) return null;
+  // `quiet`: outside a chat bubble, in a smaller italic face — there, not dominant.
+  const face = quiet ? { color: t.ink3, fontSize: 13, fontStyle: "italic" } : { color: t.ink2, fontSize: 14 };
   return (
-    <View testID="feedback" style={{ marginTop: 12, gap: 8 }}>
-      {fb.praise ? <Muted>{fb.praise}</Muted> : null}
+    <View testID="feedback" style={[{ marginTop: quiet ? 0 : 12, gap: quiet ? 4 : 8 }, style]}>
+      {fb.praise ? <Text style={face}>{fb.praise}</Text> : null}
       {rows.map((row) => (
         <View key={row.key} style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-          <Pill>{row.chip}</Pill>
-          <Text style={{ color: t.ink2, fontSize: 14, flex: 1 }}
+          {quiet ? <Text style={[face, { fontStyle: "normal", fontWeight: "600" }]}>{row.chip}</Text> : <Pill>{row.chip}</Pill>}
+          <Text style={[face, { flex: 1 }]}
                 accessibilityLabel={row.title ? `${row.title}. ${row.text}` : row.text}>
             {row.text}
           </Text>

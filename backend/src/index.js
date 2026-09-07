@@ -104,7 +104,7 @@ const ROUTES = {
     maxTokens: 1000, system: SYSTEM_TALK,
     check: (b) => typeof b.scenario === "string" && b.scenario.trim() ? null : "scenario is required",
     message: (b) => talkMessage(b),
-    validate: (parsed, b) => validateTalk(parsed, b.studied),
+    validate: (parsed, b) => validateTalk(parsed, b.studied, b.level),
     capMessage: (cap) => `Daily conversation limit of ${cap} turns reached; resets at 00:00 UTC.`,
   },
 };

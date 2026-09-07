@@ -31,6 +31,17 @@ test("a reply of three sentences is refused", () => {
   assert.match(validateTalk(g, studied).errors.join("\n"), /more than two sentences/);
 });
 
+test("the level rides in the message, and an advanced learner may get three sentences", () => {
+  const m = JSON.parse(talkMessage({ scenario: "café", studied, history: [], transcript: "", level: "advanced" }));
+  assert.equal(m.level, "advanced");
+  assert.equal(JSON.parse(talkMessage({ scenario: "café", studied, history: [], transcript: "" })).level, "intermediate");
+  assert.equal(JSON.parse(talkMessage({ scenario: "café", studied, history: [], transcript: "", level: "bogus" })).level, "intermediate");
+  const g = good(); g.reply_ru = "Привет. Как дела. Что хотите?";
+  g.reply_tokens = "Привет Как дела Что хотите".split(" ").map((w) => ({ ru: w, lemma: w.toLowerCase() }));
+  assert.equal(validateTalk(g, studied, "advanced").ok, true);
+  assert.match(validateTalk(g, studied, "beginner").errors.join("\n"), /more than two sentences/);
+});
+
 test("a reply with no question is refused", () => {
   const g = good(); g.reply_ru = "Здравствуйте, я вас слушаю.";
   g.reply_tokens = "Здравствуйте я вас слушаю".split(" ").map((w) => ({ ru: w, lemma: w.toLowerCase() }));

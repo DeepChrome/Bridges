@@ -47,6 +47,27 @@ def tone(freq_from, freq_to, ms, gain=1.0, harmonic=0.0):
     return out
 
 
+def bell(freq, ms, partials, attack_ms=4.0):
+    """One struck bell note: a set of partials (ratio, gain, decay seconds) over a
+    fundamental, each dying at its own rate so the tone thins as it fades — which
+    is what makes it read as a bell rather than an organ. A 4 ms raised-cosine
+    attack keeps the strike soft."""
+    n = int(RATE * ms / 1000)
+    fade = int(RATE * 0.15)                  # the last 150 ms eased to silence
+    out = []
+    for i in range(n):
+        t = i / RATE
+        a = min(1.0, t * 1000 / attack_ms)
+        a = 0.5 - 0.5 * math.cos(math.pi * a)
+        if i > n - fade:
+            a *= 0.5 + 0.5 * math.cos(math.pi * (i - (n - fade)) / fade)
+        s = 0.0
+        for ratio, gain, decay in partials:
+            s += gain * math.sin(2 * math.pi * freq * ratio * t) * math.exp(-t / decay)
+        out.append(s * a)
+    return out
+
+
 def mix(*layers):
     """Overlay layers of differing length, offset in samples: (samples, offset)."""
     length = max(off + len(buf) for buf, off in layers)
@@ -75,12 +96,18 @@ def main():
     ap.add_argument("--out", type=Path, default=ROOT / "native" / "assets" / "sfx")
     args = ap.parse_args()
 
-    # Correct: a rising major third (E6 -> G#6) — the interval a doorbell uses, and
-    # short enough to land before the learner's eyes leave the answer.
-    right = mix(
-        (tone(1318.5, 1318.5, 110, gain=0.5, harmonic=0.12), 0),
-        (tone(1661.2, 1661.2, 260, gain=0.6, harmonic=0.12), int(RATE * 0.075)),
-    )
+    # Correct: one soft bell on A5, ringing for about a second. The first version
+    # was two thin high sines a tenth of a second long, which the owner described
+    # accurately and unprintably. A bell's partials are not harmonic — the second
+    # sits near 2.76× the fundamental, not 3× — and each fades at its own pace;
+    # that inharmonicity and the long tail are the whole difference between a
+    # "bing" and a beep. Quiet: it sits under the word that is read out after it.
+    right = bell(880.0, 1400, [
+        (1.00, 1.00, 0.55),      # fundamental, the body of the note
+        (2.00, 0.28, 0.32),      # octave, a little brightness that goes first
+        (2.76, 0.16, 0.22),      # the bell's characteristic minor-tenth partial
+        (4.07, 0.05, 0.12),      # a touch of strike, gone in a tenth of a second
+    ])
 
     # Incorrect: a falling minor third, low and quiet. Descending reads as negative
     # across most listeners; keeping it in the low register and off the harmonics

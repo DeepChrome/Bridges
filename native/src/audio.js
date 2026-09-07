@@ -163,8 +163,8 @@ export function cue(kind) {
   try {
     if (!cuePlayers[kind]) {
       cuePlayers[kind] = createAudioPlayer(src);
-      // Under the language audio, not over it.
-      cuePlayers[kind].volume = kind === "wrong" ? 0.55 : 0.7;
+      // Under the language audio, not over it. The bell is quiet by design.
+      cuePlayers[kind].volume = kind === "wrong" ? 0.5 : 0.45;
     }
     const p = cuePlayers[kind];
     p.seekTo(0);

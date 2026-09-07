@@ -104,7 +104,42 @@ jest.mock("react-native-webview", () => {
 jest.mock("expo-sqlite", () => ({ deserializeDatabaseAsync: jest.fn(), openDatabaseAsync: jest.fn() }));
 jest.mock("expo-document-picker", () => ({ getDocumentAsync: jest.fn() }));
 jest.mock("expo-sharing", () => ({ shareAsync: jest.fn(), isAvailableAsync: jest.fn(async () => true) }));
-jest.mock("expo-file-system", () => ({ File: function File() {}, Paths: { cache: "cache://" } }));
+/* A file system in memory, enough for the audio cache: directories that list,
+   files that exist, download and delete. global.__fs is the store; a test seeds
+   it or reads it back. File.downloadFileAsync records the URL on __downloads. */
+jest.mock("expo-file-system", () => {
+  const fs = { dirs: new Set(), files: new Map() };   // uri -> size
+  global.__fs = fs;
+  global.__downloads = [];
+  const join = (...parts) => parts.map((p) => (typeof p === "string" ? p : p.uri)).join("/").replace(/([^:/])\/{2,}/g, "$1/");
+  class Directory {
+    constructor(...uris) { this.uri = join(...uris); }
+    get exists() { return fs.dirs.has(this.uri); }
+    create() { fs.dirs.add(this.uri); }
+    list() {
+      return [...fs.files.keys()].filter((u) => u.startsWith(this.uri + "/"))
+        .map((u) => new File(u));
+    }
+  }
+  class File {
+    constructor(...uris) { this.uri = join(...uris); }
+    get name() { return this.uri.split("/").pop(); }
+    get exists() { return fs.files.has(this.uri); }
+    get size() { return fs.files.get(this.uri) || 0; }
+    create() { fs.files.set(this.uri, 0); }
+    delete() { fs.files.delete(this.uri); }
+    write(bytes) { fs.files.set(this.uri, bytes.length || 0); }
+    async bytes() { return new Uint8Array(0); }
+    static async downloadFileAsync(url, dest) {
+      global.__downloads.push(url);
+      if (global.__downloadFail && global.__downloadFail(url)) throw new Error("offline");
+      const f = new File(dest, url.split("/").pop());
+      fs.files.set(f.uri, 40000);
+      return f;
+    }
+  }
+  return { File, Directory, Paths: { cache: new Directory("file:///cache") } };
+});
 
 /* No animation mock: jest-expo already handles the driver, and the path that used
    to need stubbing no longer exists in React Native 0.86. */

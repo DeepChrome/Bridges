@@ -15,6 +15,21 @@
 
 export const SCHEMA_VERSION = 6;
 
+/* A lesson quiz passes at PASS_MARK. After RELIEF_AFTER attempts it passes at
+   RELIEF_MARK instead: the simulated struggling learner failed 15 of 40 lessons
+   three times over and left with 84 leeches, and a learner stuck on one lesson
+   is not learning. The bar is not lowered for anyone who clears it — only from
+   the third try on, and the score itself is still recorded (ROADMAP A29, the
+   agent's decision, reversible by setting RELIEF_AFTER to Infinity). One rule
+   for both apps and the simulator; `l` is the lesson slot {q, tries}. */
+export const PASS_MARK = 80;
+export const RELIEF_MARK = 70;
+export const RELIEF_AFTER = 3;
+export const quizPassed = (l) => {
+  if (!l || typeof l.q !== "number") return false;
+  return l.q >= PASS_MARK || ((l.tries || 0) >= RELIEF_AFTER && l.q >= RELIEF_MARK);
+};
+
 /* What the speaking activities record. Attempts are capped so state stays a small
    JSON blob; tagCounts is the long-term memory of what kinds of error recur. No
    audio is ever stored here. */

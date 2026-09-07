@@ -250,7 +250,7 @@ const COL = (() => {
   return out;
 })();
 
-const PASS_MARK = 80;
+/* PASS_MARK, RELIEF_MARK and quizPassed come from core/state.js, inlined above. */
 /* Lessons ramp by chapter — five, six, then seven words — the same numbers as
    core/questions.js LESSON_RAMP, which the native app reads. core/questions.js is
    not inlined into this bundle, so the values are repeated here; a profile moved
@@ -273,8 +273,7 @@ function components(u, i) {
   const l = (st.lessons || {})[i] || {};
   const out = [
     { id: "vocab", label: "Vocabulary", done: !!l.v },
-    { id: "quiz", label: "Quiz", done: typeof l.q === "number" && l.q >= PASS_MARK,
-      score: l.q },
+    { id: "quiz", label: "Quiz", done: quizPassed(l), score: l.q },
   ];
   if (u.v) out.push({ id: "video", label: "Video", done: !!st.video, shared: true });
   return out;
@@ -292,6 +291,7 @@ function markComponent(u, i, id, extra) {
     if (id === "vocab") l.v = true;
     if (id === "quiz") {
       l.q = Math.max(l.q || 0, extra || 0);
+      l.tries = (l.tries || 0) + 1;            // what the relief rule counts
       st.best = Math.max(st.best || 0, extra || 0);
     }
     st.lessons[i] = l;

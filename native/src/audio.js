@@ -7,6 +7,7 @@
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Speech from "expo-speech";
 import { audioUrl } from "./data";
+import { cachedUri } from "./cache";
 import { bare } from "@core/util";
 
 let player = null;
@@ -155,7 +156,8 @@ export function speakTTS(text, opts = {}) {
    by whenIdle(). */
 export async function say(text, opts = {}) {
   const rate = rateFor(text, opts);
-  const url = audioUrl(text);
+  // The offline copy when there is one (cache.js), else the stream.
+  const url = cachedUri(text) || audioUrl(text);
   if (!url) return speakTTS(text, { ...opts, rate });
   await prepare();
   try {

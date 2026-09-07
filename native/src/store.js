@@ -39,6 +39,7 @@ export const DEFAULTS = {
   speed: "normal",      // how fast Russian is read: normal, slower, slowest
   cue: "bell",          // the sound a right answer makes (audio.js CUE_NAMES)
   osk: false,           // an on-screen Russian keyboard for typed answers
+  offline: false,       // download a unit's audio when it is opened (cache.js)
 };
 
 export function normalise(raw, assumedVersion) {

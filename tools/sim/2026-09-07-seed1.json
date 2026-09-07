@@ -4,22 +4,22 @@
   "seed": 1000,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 525,
-    "askedAgain": 677,
-    "backToBack": 6,
-    "within3": 243,
-    "sameQuizTwice": 293,
+    "quizQuestions": 463,
+    "askedAgain": 565,
+    "backToBack": 4,
+    "within3": 214,
+    "sameQuizTwice": 264,
     "medianGap": 6,
-    "quizzes": 60
+    "quizzes": 53
    },
    "mix": {
-    "cloze": 187,
-    "choose-ru": 83,
-    "listen": 69,
-    "choose-en": 69,
-    "type": 69,
-    "hear": 24,
-    "scene": 24
+    "cloze": 152,
+    "choose-ru": 62,
+    "listen": 72,
+    "choose-en": 72,
+    "type": 63,
+    "hear": 21,
+    "scene": 21
    },
    "chapters": [
     {
@@ -28,7 +28,7 @@
      "lessons": 22,
      "newWordsPerLesson": 4.9,
      "quizAccuracy": 0.86,
-     "passFirstTry": 12,
+     "passFirstTry": 15,
      "failedThrice": 0,
      "speechSteps": 0,
      "speechTokensMean": null,
@@ -38,12 +38,12 @@
      "chapter": 2,
      "title": "Food and School",
      "lessons": 18,
-     "newWordsPerLesson": 5.2,
-     "quizAccuracy": 0.84,
-     "passFirstTry": 12,
+     "newWordsPerLesson": 5.3,
+     "quizAccuracy": 0.83,
+     "passFirstTry": 15,
      "failedThrice": 0,
-     "speechSteps": 24,
-     "speechTokensMean": 5,
+     "speechSteps": 21,
+     "speechTokensMean": 4.9,
      "speechTokensMax": 7
     }
    ],
@@ -51,19 +51,25 @@
     "taught": 212,
     "everAsked": 212,
     "taughtButNeverAsked": 0,
-    "inSeen": 231,
-    "trouble": 5,
-    "leeches": 6
+    "inSeen": 229,
+    "trouble": 13,
+    "leeches": 12
    },
    "review": {
     "simulatedDays": 20,
-    "dueAtEnd": 173,
-    "duePerDay": 8.7
+    "dueAtEnd": 0,
+    "duePerDay": 0,
+    "sessions": 20,
+    "reviewsPerDay": 14.6,
+    "maxDueInADay": 34,
+    "againRate": 0.01,
+    "backlogDays": 0
    },
    "lessons": {
     "total": 40,
     "passed": 40,
-    "retakes": 20,
+    "relieved": 1,
+    "retakes": 13,
     "shortQuizzes": 3
    },
    "structural": 0
@@ -75,22 +81,22 @@
   "seed": 1001,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 606,
-    "askedAgain": 907,
-    "backToBack": 13,
-    "within3": 300,
-    "sameQuizTwice": 391,
+    "quizQuestions": 594,
+    "askedAgain": 864,
+    "backToBack": 10,
+    "within3": 302,
+    "sameQuizTwice": 366,
     "medianGap": 6,
-    "quizzes": 68
+    "quizzes": 67
    },
    "mix": {
-    "choose-ru": 94,
-    "cloze": 227,
-    "listen": 74,
-    "choose-en": 69,
-    "type": 74,
-    "scene": 34,
-    "hear": 34
+    "choose-ru": 69,
+    "cloze": 205,
+    "listen": 96,
+    "choose-en": 85,
+    "type": 75,
+    "hear": 32,
+    "scene": 32
    },
    "chapters": [
     {
@@ -98,8 +104,8 @@
      "title": "People and Time",
      "lessons": 22,
      "newWordsPerLesson": 4.9,
-     "quizAccuracy": 0.83,
-     "passFirstTry": 12,
+     "quizAccuracy": 0.84,
+     "passFirstTry": 10,
      "failedThrice": 0,
      "speechSteps": 0,
      "speechTokensMean": null,
@@ -109,12 +115,12 @@
      "chapter": 2,
      "title": "Food and School",
      "lessons": 18,
-     "newWordsPerLesson": 5.3,
-     "quizAccuracy": 0.74,
-     "passFirstTry": 7,
-     "failedThrice": 3,
-     "speechSteps": 34,
-     "speechTokensMean": 4.9,
+     "newWordsPerLesson": 5.4,
+     "quizAccuracy": 0.73,
+     "passFirstTry": 8,
+     "failedThrice": 0,
+     "speechSteps": 32,
+     "speechTokensMean": 5.2,
      "speechTokensMax": 7
     }
    ],
@@ -122,19 +128,25 @@
     "taught": 212,
     "everAsked": 212,
     "taughtButNeverAsked": 0,
-    "inSeen": 236,
-    "trouble": 29,
-    "leeches": 37
+    "inSeen": 233,
+    "trouble": 27,
+    "leeches": 22
    },
    "review": {
     "simulatedDays": 20,
-    "dueAtEnd": 204,
-    "duePerDay": 10.2
+    "dueAtEnd": 0,
+    "duePerDay": 0,
+    "sessions": 20,
+    "reviewsPerDay": 18.3,
+    "maxDueInADay": 40,
+    "againRate": 0.01,
+    "backlogDays": 0
    },
    "lessons": {
     "total": 40,
-    "passed": 37,
-    "retakes": 28,
+    "passed": 40,
+    "relieved": 2,
+    "retakes": 27,
     "shortQuizzes": 3
    },
    "structural": 0
@@ -146,22 +158,22 @@
   "seed": 1002,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 903,
-    "askedAgain": 1504,
+    "quizQuestions": 956,
+    "askedAgain": 1555,
     "backToBack": 10,
-    "within3": 508,
-    "sameQuizTwice": 591,
+    "within3": 550,
+    "sameQuizTwice": 626,
     "medianGap": 6,
-    "quizzes": 101
+    "quizzes": 107
    },
    "mix": {
-    "cloze": 311,
-    "choose-ru": 137,
-    "choose-en": 124,
-    "type": 120,
-    "listen": 111,
-    "scene": 50,
-    "hear": 50
+    "cloze": 321,
+    "choose-ru": 135,
+    "choose-en": 122,
+    "type": 141,
+    "listen": 129,
+    "scene": 54,
+    "hear": 54
    },
    "chapters": [
     {
@@ -169,9 +181,9 @@
      "title": "People and Time",
      "lessons": 22,
      "newWordsPerLesson": 4.9,
-     "quizAccuracy": 0.72,
+     "quizAccuracy": 0.75,
      "passFirstTry": 5,
-     "failedThrice": 5,
+     "failedThrice": 0,
      "speechSteps": 0,
      "speechTokensMean": null,
      "speechTokensMax": null
@@ -180,12 +192,12 @@
      "chapter": 2,
      "title": "Food and School",
      "lessons": 18,
-     "newWordsPerLesson": 5.3,
-     "quizAccuracy": 0.61,
+     "newWordsPerLesson": 5.1,
+     "quizAccuracy": 0.62,
      "passFirstTry": 1,
-     "failedThrice": 11,
-     "speechSteps": 50,
-     "speechTokensMean": 5.2,
+     "failedThrice": 1,
+     "speechSteps": 54,
+     "speechTokensMean": 5,
      "speechTokensMax": 7
     }
    ],
@@ -194,18 +206,24 @@
     "everAsked": 212,
     "taughtButNeverAsked": 0,
     "inSeen": 230,
-    "trouble": 88,
-    "leeches": 97
+    "trouble": 83,
+    "leeches": 62
    },
    "review": {
     "simulatedDays": 20,
-    "dueAtEnd": 217,
-    "duePerDay": 10.8
+    "dueAtEnd": 3,
+    "duePerDay": 0.1,
+    "sessions": 20,
+    "reviewsPerDay": 31.2,
+    "maxDueInADay": 56,
+    "againRate": 0.05,
+    "backlogDays": 0
    },
    "lessons": {
     "total": 40,
-    "passed": 24,
-    "retakes": 61,
+    "passed": 39,
+    "relieved": 8,
+    "retakes": 67,
     "shortQuizzes": 3
    },
    "structural": 0

@@ -9,6 +9,7 @@ import { fold } from "@core/util";
 import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator } from "@core/entry";
 import { lessonSize } from "@core/questions";
+import { quizPassed } from "@core/state";
 
 export const L = DATA.lemmas;
 export const IX = DATA.index;
@@ -113,7 +114,7 @@ export function chapterOf(unitId) {
 
 export const unitById = (id) => UN.find((u) => u.id === id) || null;
 
-export const PASS_MARK = 80;
+export { PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "@core/state";
 
 /* Lessons ramp: five words each in chapter 1, six in chapter 2, seven after
    (core/questions.js LESSON_RAMP). A unit's chapter decides, spine or branch. */
@@ -136,8 +137,7 @@ export function components(st, u, i) {
   const l = (s.lessons || {})[i] || {};
   const out = [
     { id: "vocab", label: "Vocabulary", done: !!l.v },
-    { id: "quiz", label: "Quiz", score: l.q,
-      done: typeof l.q === "number" && l.q >= PASS_MARK },
+    { id: "quiz", label: "Quiz", score: l.q, tries: l.tries || 0, done: quizPassed(l) },
   ];
   if (u.v) out.push({ id: "video", label: "Video", done: !!s.video, shared: true });
   return out;
@@ -155,6 +155,7 @@ export function markComponent(st, u, i, id, extra) {
     if (id === "vocab") l.v = true;
     if (id === "quiz") {
       l.q = Math.max(l.q || 0, extra || 0);
+      l.tries = (l.tries || 0) + 1;            // what the relief rule counts
       s.best = Math.max(s.best || 0, extra || 0);
     }
     s.lessons[i] = l;

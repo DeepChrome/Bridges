@@ -1,6 +1,6 @@
 /* You — profile, progress, the trouble bank, and settings. */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Modal, ScrollView, Switch, Alert, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
@@ -9,6 +9,7 @@ import {
 } from "../ui";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
 import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
+import { cacheStats, clearCache } from "../cache";
 import { troubleWords } from "./Study";
 import { today } from "@core/util";
 import { tagInfo } from "@core/errortags";
@@ -59,6 +60,11 @@ function Choice({ options, value, onPick, testID }) {
 function Settings({ visible, onClose, onLab }) {
   const { st, update, signOut } = useSession();
   const t = useTheme();
+  const [cache, setCache] = useState(() => cacheStats());
+  useEffect(() => { if (visible) setCache(cacheStats()); }, [visible]);
+  const cacheLine = cache.files
+    ? `${cache.files} files, ${(cache.bytes / 1048576).toFixed(1)} MB saved`
+    : "nothing saved yet";
   return (
     <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)",
@@ -102,6 +108,22 @@ function Settings({ visible, onClose, onLab }) {
                   testID="osk-switch"
                   value={!!st.osk}
                   onValueChange={(v) => update((p) => ({ ...p, osk: v }))}
+                  trackColor={{ true: t.good, false: t.surface3 }}
+                />
+              </Row>
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Audio for offline</Text>
+                  <Muted>{`Downloads a unit's recordings when you open it · ${cacheLine}`}</Muted>
+                  {cache.files ? (
+                    <Btn kind="ghost" label="Clear downloaded audio" style={{ alignSelf: "flex-start", marginTop: 4 }}
+                         onPress={() => { clearCache(); setCache(cacheStats()); }} />
+                  ) : null}
+                </View>
+                <Switch
+                  testID="offline-switch"
+                  value={!!st.offline}
+                  onValueChange={(v) => update((p) => ({ ...p, offline: v }))}
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>

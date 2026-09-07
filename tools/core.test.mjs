@@ -16,6 +16,7 @@ import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN 
 import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
   from "../core/fsrs.js";
 import { SCENARIOS } from "../core/scenarios.js";
+import { quizPassed } from "../core/state.js";
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP,
          talkAllowance, startTalkSession, TALK_SESSIONS_PER_DAY, TALK_TURNS }
   from "../core/state.js";
@@ -199,6 +200,9 @@ group("state schema");
   ok(v6.v === 6 && v6.watched && Object.keys(v6.watched).length === 0 && Array.isArray(v6.decks),
      "v4 migrates to v6 with empty watched and decks slots");
   ok(migrate({ v: 5, watched: { abc: 3 } }, 5).watched.abc === 3, "an existing watched slot is kept");
+  ok(quizPassed({ q: 80 }) && !quizPassed({ q: 79, tries: 2 }) && quizPassed({ q: 70, tries: 3 })
+     && !quizPassed({ q: 69, tries: 5 }) && !quizPassed(undefined),
+     "a quiz passes at the mark, or at the relief mark from the third try");
   ok(Array.isArray(v5.speech.attempts) && v5.speech.attempts.length === 0 &&
      Object.keys(v5.speech.tagCounts).length === 0, "with an empty speech slot");
   ok(v5.seen["книга"].reps === 3 && v5.trouble["стол"] === 2 && v5.pinned[0] === "дом" &&

@@ -1,12 +1,17 @@
-/* Study — flashcards with the four Anki buttons, scheduled by FSRS. */
+/* Study — flashcards with the four Anki buttons, scheduled by FSRS.
+ *
+ * A card is a curriculum word or, since 2026-09-07, a card from an imported Anki
+ * deck (You → decks). Both key their schedule on the Russian string (rule 20.4),
+ * so a deck card that is also a curriculum word shares one memory. */
 
-import React, { useMemo, useState } from "react";
-import { View, Text, Modal, ScrollView, Pressable } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Modal, ScrollView, Pressable, Alert } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row } from "../ui";
 import { L, UN, STAGES, unitUnlocked, idxOfWord } from "../data";
 import { Linked } from "../words";
+import { importDeck, exportDeck } from "../anki";
 import { fsrsReview, fsrsPreview, isTrouble } from "@core/fsrs";
 import { shuffle, today } from "@core/util";
 
@@ -18,9 +23,13 @@ export function troubleWords(st) {
                             ((st.seen[a] || {}).lapses || 0));
 }
 
+/* A card as the screen draws it: `b` is the schedule key, `w` the face. */
+const cardOf = (i) => ({ key: "w" + i, w: L[i].w, b: L[i].b, e: L[i].e, x: L[i].x });
+const deckCard = (c) => ({ key: "d" + c.ru, w: c.ru, b: c.ru, e: c.en });
+
 /* Higher is more urgent: banked trouble first, then most overdue, then unseen. */
-function weight(st, i) {
-  const w = L[i].b;
+function weight(st, card) {
+  const w = card.b;
   const c = st.seen[w];
   let score = 0;
   if (st.trouble[w] || (c && isTrouble(c))) score += 1000;
@@ -30,22 +39,32 @@ function weight(st, i) {
   return score;
 }
 
-function buildQueue(st, limit) {
-  const ids = st.sets.length ? st.sets : [UN[0].id];
+/* Only what is ticked. With nothing ticked the queue is empty and the screen says
+   so — it used to fall back to the first unit's words, which read as a set of
+   common words that could not be switched off (the owner, 2026-09-07). */
+export function buildQueue(st, limit) {
   const pool = [];
-  ids.forEach((id) => {
+  const have = new Set();
+  const add = (card) => { if (!have.has(card.b)) { have.add(card.b); pool.push(card); } };
+  st.sets.forEach((id) => {
     if (id === "__trouble__") {
       troubleWords(st).forEach((w) => {
         const i = idxOfWord(w);
-        if (i >= 0 && !pool.includes(i)) pool.push(i);
+        if (i >= 0) add(cardOf(i));
+        else add({ key: "d" + w, w, b: w, e: "" });
       });
       return;
     }
+    if (id.startsWith("deck:")) {
+      const d = (st.decks || []).find((x) => "deck:" + x.id === id);
+      if (d) d.cards.forEach((c) => add(deckCard(c)));
+      return;
+    }
     const u = UN.find((x) => x.id === id);
-    if (u) u.w.forEach((i) => { if (!pool.includes(i)) pool.push(i); });
+    if (u) u.w.forEach((i) => add(cardOf(i)));
   });
   const t = today();
-  let q = pool.filter((i) => { const c = st.seen[L[i].b]; return !c || c.due <= t; });
+  let q = pool.filter((c) => { const s = st.seen[c.b]; return !s || s.due <= t; });
   if (!q.length) q = pool.slice();
   if (limit) {
     q.sort((a, b) => weight(st, b) - weight(st, a));
@@ -54,13 +73,57 @@ function buildQueue(st, limit) {
   return q;
 }
 
+/* The cards a set holds, for export. */
+export function cardsOfSets(st, ids) {
+  return buildQueue({ ...st, sets: ids, seen: {} }).map((c) => ({ ru: c.b, en: c.e || "" }));
+}
+
+export const newDeckId = () => "k" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+
 function SetPicker({ visible, onClose }) {
   const { st, update } = useSession();
   const t = useTheme();
+  const [busy, setBusy] = useState(false);
   const toggle = (id) => update((p) => ({
     ...p,
     sets: p.sets.includes(id) ? p.sets.filter((x) => x !== id) : p.sets.concat(id),
   }));
+
+  const doImport = async () => {
+    setBusy(true);
+    const res = await importDeck();
+    setBusy(false);
+    if (res.cancelled) return;
+    if (res.error) { Alert.alert("Import", res.error); return; }
+    const added = res.decks.map((d) => ({ id: newDeckId(), name: d.name, cards: d.cards, added: today() }));
+    update((p) => ({ ...p, decks: (p.decks || []).concat(added),
+                     sets: p.sets.concat(added.map((d) => "deck:" + d.id)) }));
+    const n = added.reduce((a, d) => a + d.cards.length, 0);
+    Alert.alert("Imported", `${n} cards in ${added.length} ${added.length === 1 ? "deck" : "decks"}.`);
+  };
+
+  const doExport = async (name, ids) => {
+    const cards = cardsOfSets(st, ids);
+    if (!cards.length) { Alert.alert("Export", "Nothing to export."); return; }
+    setBusy(true);
+    try {
+      await exportDeck(name, cards);
+    } catch (e) {
+      Alert.alert("Export", "The deck could not be written.");
+    }
+    setBusy(false);
+  };
+
+  const removeDeck = (d) => Alert.alert(
+    "Remove deck", `Remove “${d.name}”? Its cards' review history stays.`,
+    [{ text: "Cancel", style: "cancel" },
+     { text: "Remove", style: "destructive",
+       onPress: () => update((p) => ({ ...p, decks: (p.decks || []).filter((x) => x.id !== d.id),
+                                       sets: p.sets.filter((x) => x !== "deck:" + d.id) })) }]);
+
+  const selectedNames = st.sets.map((id) => id === "__trouble__" ? "Trouble words"
+    : id.startsWith("deck:") ? ((st.decks || []).find((d) => "deck:" + d.id === id) || {}).name
+    : (UN.find((u) => u.id === id) || {}).name).filter(Boolean);
 
   return (
     <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
@@ -95,6 +158,42 @@ function SetPicker({ visible, onClose }) {
                 </List>
               </View>
             ) : null}
+
+            <View style={{ marginBottom: 18 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <Text style={{ flex: 1, color: t.ink3, fontSize: 11, fontWeight: "600",
+                               letterSpacing: 1, textTransform: "uppercase" }}>
+                  Your decks
+                </Text>
+                <Btn kind="ghost" label={busy ? "Working…" : "Import"} disabled={busy}
+                     onPress={doImport} />
+              </View>
+              {(st.decks || []).length ? (
+                <List>
+                  {(st.decks || []).map((d, k) => (
+                    <Row key={d.id} last={k === st.decks.length - 1}
+                         onPress={() => toggle("deck:" + d.id)}>
+                      <Tick on={st.sets.includes("deck:" + d.id)} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: t.ink, fontSize: 15 }}>{d.name}</Text>
+                        <Muted>{d.cards.length + " cards"}</Muted>
+                      </View>
+                      <Pressable onPress={() => doExport(d.name, ["deck:" + d.id])} hitSlop={8}
+                                 accessibilityRole="button" accessibilityLabel={`Export ${d.name}`}>
+                        <Pill>export</Pill>
+                      </Pressable>
+                      <Pressable onPress={() => removeDeck(d)} hitSlop={8} style={{ marginLeft: 6 }}
+                                 accessibilityRole="button" accessibilityLabel={`Remove ${d.name}`}>
+                        <Pill>remove</Pill>
+                      </Pressable>
+                    </Row>
+                  ))}
+                </List>
+              ) : (
+                <Muted>Import an Anki deck (.apkg) or its text export.</Muted>
+              )}
+            </View>
+
             {STAGES.map((s, i) => {
               const units = [s.core].concat(s.branches).filter((u) => unitUnlocked(st, u));
               if (!units.length) return null;
@@ -105,9 +204,9 @@ function SetPicker({ visible, onClose }) {
                                  marginBottom: 8 }}>
                     <Text style={{ flex: 1, color: t.ink3, fontSize: 11, fontWeight: "600",
                                    letterSpacing: 1, textTransform: "uppercase" }}>
-                      {`Stage ${i + 1}`}
+                      {`Chapter ${s.n || i + 1}`}
                     </Text>
-                    <Btn kind="ghost" label={on ? "Deselect stage" : "Select stage"}
+                    <Btn kind="ghost" label={on ? "Deselect chapter" : "Select chapter"}
                          onPress={() => update((p) => {
                            const ids = units.map((u) => u.id);
                            return { ...p, sets: on
@@ -131,6 +230,11 @@ function SetPicker({ visible, onClose }) {
               );
             })}
           </ScrollView>
+          {st.sets.length ? (
+            <Btn label={busy ? "Working…" : "Export selected as an Anki deck"} disabled={busy}
+                 style={{ marginTop: 8 }}
+                 onPress={() => doExport(selectedNames.length === 1 ? selectedNames[0] : "Bridges", st.sets)} />
+          ) : null}
           <Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />
         </View>
       </View>
@@ -163,11 +267,16 @@ export default function Study() {
     setAt(0);
     setShown(false);
   };
+  // The profile arrives after the first render, and a set or a deck can change
+  // from the picker: the queue follows what is ticked.
+  const setsKey = st.sets.join(",") + "|" + (st.decks || []).map((d) => d.id + d.cards.length).join(",");
+  useEffect(() => { rebuild(); }, [setsKey]);
 
   const names = st.sets.map((id) => id === "__trouble__" ? "Trouble words"
+    : id.startsWith("deck:") ? ((st.decks || []).find((d) => "deck:" + d.id === id) || {}).name
     : (UN.find((u) => u.id === id) || {}).name).filter(Boolean);
 
-  const w = queue[at] !== undefined ? L[queue[at]] : null;
+  const w = queue[at] !== undefined ? queue[at] : null;
   const iv = w ? fsrsPreview(st.seen[w.b], today()) : {};
 
   const grade = (g) => {
@@ -230,7 +339,8 @@ export default function Study() {
                              textAlign: "center" }}>{w.e || "—"}</Text>
             ) : (
               <>
-                <Text style={{ color: t.ink, fontSize: 34, fontWeight: "600" }}>{w.w}</Text>
+                <Text style={{ color: t.ink, fontSize: w.w.length > 18 ? 24 : 34, fontWeight: "600",
+                               textAlign: "center" }}>{w.w}</Text>
                 <View style={{ marginTop: 10 }}><Speaker text={w.b} /></View>
               </>
             )}
@@ -292,7 +402,7 @@ export default function Study() {
         </>
       )}
 
-      <SetPicker visible={picker} onClose={() => { setPicker(false); rebuild(); }} />
+      <SetPicker visible={picker} onClose={() => setPicker(false)} />
     </Screen>
   );
 }

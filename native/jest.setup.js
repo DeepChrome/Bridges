@@ -99,5 +99,12 @@ jest.mock("react-native-webview", () => {
   return { WebView: (props) => React.createElement(View, { testID: "webview", ...props }) };
 });
 
+/* The Anki import/export modules: files, the picker, SQLite and the share sheet
+   are all injected by anki.js, so the packages only need to load. */
+jest.mock("expo-sqlite", () => ({ deserializeDatabaseAsync: jest.fn(), openDatabaseAsync: jest.fn() }));
+jest.mock("expo-document-picker", () => ({ getDocumentAsync: jest.fn() }));
+jest.mock("expo-sharing", () => ({ shareAsync: jest.fn(), isAvailableAsync: jest.fn(async () => true) }));
+jest.mock("expo-file-system", () => ({ File: function File() {}, Paths: { cache: "cache://" } }));
+
 /* No animation mock: jest-expo already handles the driver, and the path that used
    to need stubbing no longer exists in React Native 0.86. */

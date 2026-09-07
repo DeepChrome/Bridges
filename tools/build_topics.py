@@ -68,15 +68,14 @@ RULES = [
 
     ("work",       "Work & Money",      """work job profession career office factory
         worker employee employer boss director manager engineer doctor teacher
-        lawyer nurse driver farmer builder salary wage pay money cash coin rouble
-        ruble dollar price cost expensive cheap buy sell trade business company
-        firm market economy bank credit debt tax profit rich poor pension
-        contract meeting colleague retire hire fire""".split()),
+        nurse driver farmer builder salary wage pay money cash coin rouble
+        ruble dollar expensive cheap buy sell rich poor pension
+        meeting colleague retire hire fire""".split()),
 
     ("school",     "School & Learning", """school university college class lesson
         student pupil teacher professor study learn teach read write book notebook
-        pen pencil paper exam test grade mark homework subject mathematics physics
-        chemistry biology history geography language grammar word dictionary
+        pen pencil paper exam test grade mark homework subject
+        history geography language grammar word dictionary
         library knowledge education degree diploma course lecture question answer
         example rule mistake""".split()),
 
@@ -124,10 +123,35 @@ RULES = [
         actress stage play film movie cinema director scene poem poetry poet
         novel writer author literature culture beauty""".split()),
 
+    # Side quests (ROADMAP A24, more of them 2026-09-07): niche by design, each
+    # before the broad topic it would otherwise fall into.
+    ("law",        "Law & Crime",       """law legal lawyer court judge jury trial
+        verdict sentence prison jail police officer detective crime criminal thief
+        theft steal robbery murder murderer guilty innocent evidence witness
+        arrest fine punishment penalty justice illegal contract sue lawsuit
+        bribe fraud""".split()),
+
+    ("science",    "Science",           """science scientist research experiment
+        laboratory theory hypothesis physics chemistry biology mathematics
+        formula atom molecule cell gene evolution gravity energy planet universe
+        galaxy space rocket satellite orbit telescope microscope discovery
+        invention chemical element temperature measure""".split()),
+
+    ("religion",   "Faith & Tradition", """god church cathedral priest monk nun
+        monastery prayer pray faith belief holy saint soul sin heaven hell angel
+        devil bible icon cross orthodox christian muslim jewish mosque synagogue
+        religion religious christmas easter fast baptism wedding funeral ritual
+        sacred temple""".split()),
+
+    ("business",   "Business & Finance","""business company firm corporation trade
+        economy economic market finance financial bank credit loan debt tax
+        profit loss investment investor stock share deal customer client product
+        brand advertisement advertising price cost budget income wealth
+        entrepreneur startup""".split()),
+
     ("politics",   "Politics & Society","""state government president minister
-        parliament election vote party politics political power law legal court
-        judge police prison crime criminal thief steal murder trial lawyer
-        constitution right freedom citizen nation nationality republic democracy
+        parliament election vote party politics political power constitution
+        right freedom citizen nation nationality republic democracy
         revolution protest strike society public official mayor governor
         authority ambassador embassy treaty""".split()),
 
@@ -141,8 +165,7 @@ RULES = [
         phone telephone mobile internet website email programme program software
         data file screen keyboard camera photograph photo radio television
         newspaper magazine journalist news press article report broadcast channel
-        electricity battery wire signal network system technology invention
-        science scientist research experiment laboratory""".split()),
+        electricity battery wire signal network system technology""".split()),
 
     ("time",       "Time & Numbers",    """time hour minute second day night morning
         evening afternoon week month year century today tomorrow yesterday now
@@ -269,6 +292,16 @@ OVERRIDES = {
     # -- medicine: "operation" the action, "treatment" the processing, "injury" the insult
     "доктор": "medicine", "действие": None, "процедура": None, "обработка": None,
     "обида": None, "поправка": None, "наркотика": None,
+    # -- law: "sentence" the grammar, "officer" the soldier
+    "предложение": None, "фраза": "speech", "командир": "military", "офицер": "military",
+    # -- science: "cell" the camera, "space" the gap, "measure" the step
+    "камера": "tech", "метр": None, "мера": None, "промежуток": "time", "расстояние": None,
+    "сантиметр": None, "энергетический": "tech",
+    # -- religion: "fast" the speed, "temple" of the head, "belief" the conviction
+    "быстрый": None, "скорый": None, "висок": "body", "убеждение": "emotion",
+    # -- business: "deal" the change, "stock" the supply, "trade" the craft
+    "сдача": None, "учёт": None, "запас": None, "мастерство": None, "воспользоваться": None,
+    "публикация": "tech", "хозяйственный": None, "потеря": None,
 }
 
 # A chapter is one spine unit plus the branches that follow it — the shape a language
@@ -352,11 +385,27 @@ def main():
     src.execute("attach database ? as c", (str(args.corpus),))
 
     # The candidate pool: lemmas ranked by how often they actually occur in the decks.
-    pool = src.execute("""
-        select f.lemma_id, count(*) n from c.item_tokens t
-        join forms f on f.key = t.key
-        group by f.lemma_id order by n desc limit ?
-    """, (args.pool,)).fetchall()
+    # A form key shared by several lemmas is credited to the one whose own
+    # headword it is when exactly one of them has it as headword («нет» is a form
+    # of «житься» in OpenRussian, «просто» of «простой»; the particle and the
+    # adverb are the words spoken), and to all of them otherwise, as before. The
+    # first rule put «житься» on chapter 1's spine (CLAUDE.md §23).
+    owners = {}
+    for key, lid in src.execute("select key, lemma_id from forms"):
+        owners.setdefault(key, []).append(lid)
+    bare_of = dict(src.execute("select id, bare from lemmas"))
+    counts = {}
+    for key, n in src.execute("select key, count(*) from c.item_tokens group by key"):
+        ids = owners.get(key)
+        if not ids:
+            continue
+        if len(ids) > 1:
+            heads = [lid for lid in ids if fold(bare_of.get(lid, "")) == key]
+            if len(heads) == 1:
+                ids = heads
+        for lid in ids:
+            counts[lid] = counts.get(lid, 0) + n
+    pool = sorted(counts.items(), key=lambda x: -x[1])[:args.pool]
 
     meta = {}
     for lid, n in pool:
@@ -374,11 +423,15 @@ def main():
     # NAMES: forms the corpus counts as a common word but which are a proper name
     # in every sentence — «Том» is Tom, not a volume — kept out of every unit.
     POS_RANK = {"other": 9, "possessive": 8}
+    # …and STUBS: OpenRussian rows that are an inflection dressed as a headword
+    # («двух» is a form of «два», glossed "both"), which no learner should meet as
+    # a word of their own.
     NAMES = {"том"}
+    STUBS = {"двух", "житься"}
     seen_bare, deduped = {}, []
     for lid, n in pool:
         m = meta.get(lid)
-        if not m or m["bare"] in NAMES:
+        if not m or m["bare"] in NAMES or m["bare"] in STUBS:
             continue
         key = m["bare"]
         if key in seen_bare:
@@ -482,15 +535,18 @@ def main():
     # chapter 6 teaches the accusative, so work (having/not having: the first
     # genitive) then animals (animate accusative copies the genitive); chapter 8
     # opens on military, which introduces the instrumental that tech then uses.
+    # Side quests sit with the chapter whose grammar they can use: business with
+    # work (the genitive of having), science and law with the instrumental
+    # chapter, faith with art and society.
     STAGE_PLAN = [
         ["family", "time"],
         ["food", "school"],
         ["home", "clothes"],
         ["city", "travel"],
         ["body", "nature", "medicine"],
-        ["work", "animals"],
+        ["work", "animals", "business"],
         ["emotion", "speech"],
-        ["military", "tech", "sport", "art", "politics"],
+        ["military", "tech", "sport", "art", "politics", "science", "law", "religion"],
     ]
     have = set(branch_ids)
     planned = [b for stage in STAGE_PLAN for b in stage if b in have]

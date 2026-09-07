@@ -1,4 +1,4 @@
-"""Generate the two answer cues, the same way make_icons.py generates the icons.
+"""Generate the answer cues, the same way make_app_icon.py generates the icons.
 
 Hand-rolled with the stdlib `wave` module so the repository carries no opaque binary
 blobs it cannot regenerate, and no audio dependency.

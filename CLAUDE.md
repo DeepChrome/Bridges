@@ -391,8 +391,7 @@ bridges/                          (directory is still named russian-blocks on di
     harvest_videos.py  <- YouTube listings, metadata, captions -> data/raw (§30g)
     build_transcripts.py <- captions -> data/transcripts.json, lemma resolved (§30g)
     build_videos.py    <- catalogue + index -> data/videos.json (§30g)
-    make_icons.py      <- PNG icons, hand-rolled with zlib (no image library)
-    make_app_icon.py   <- the bridge mark, every size both apps need
+    make_app_icon.py   <- the bridge mark, every size both apps need (zlib PNGs, no image library)
     make_sounds.py     <- the answer cues, ten right and one wrong
     panel.py           <- form -> lemma + paradigm tables + examples (shared logic)
     lookup.py          <- CLI word panel, for checking data without a browser

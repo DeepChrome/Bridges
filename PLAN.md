@@ -24,7 +24,7 @@ python tools/build_lexicon.py
 python tools/ingest_tatoeba.py   # dictionary examples his decks never use
 python tools/build_topics.py
 python tools/build_audio.py      # export the collection's recordings
-python tools/make_icons.py       # only if the icon changes
+python tools/make_app_icon.py    # only if the icon changes
 python tools/build_site.py
 node   tools/smoke.js            # 157 checks against the generated page
 node   tools/visual.js           # layout, at 390px and 320px, both themes

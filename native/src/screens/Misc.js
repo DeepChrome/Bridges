@@ -10,6 +10,7 @@ import {
   UN, STATS, unitState, markComponent, L, VIDEOS, videoById, videoWatched, unitById,
 } from "../data";
 import { fold, today } from "@core/util";
+import { Intro } from "./Intro";
 
 /* ------------------------------------------------------------- immerse */
 
@@ -311,6 +312,7 @@ export function Gate({ onPlacement }) {
   const [avatar, setAvatar] = useState(AV_IDS[0]);
   const [creating, setCreating] = useState(!accounts.list.length);
   const [offer, setOffer] = useState(null);
+  const [toured, setToured] = useState(false);
 
   /* The profile is created by the *choice* below, not by Continue.
      Creating it earlier sets the active account, which is exactly the condition the
@@ -321,6 +323,12 @@ export function Gate({ onPlacement }) {
     await createProfile(offer.name, offer.avatar);
     onPlacement(wanted);
   };
+
+  // The tour sits between the name and the first choice: the first profile on
+  // this phone sees it once; a second profile skips it.
+  if (offer && !toured && accounts.list.length === 0) {
+    return <Intro onDone={() => setToured(true)} />;
+  }
 
   if (offer) {
     return (

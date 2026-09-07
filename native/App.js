@@ -29,6 +29,7 @@ import { UnitScreen, LessonScreen } from "./src/screens/Unit";
 import { Immerse, Video, Gate } from "./src/screens/Misc";
 import WordScreen from "./src/screens/Word";
 import SttLab from "./src/screens/SttLab";
+import TourScreen from "./src/screens/Intro";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import {
@@ -299,6 +300,7 @@ function Shell() {
       <Root.Screen name="Word" component={WordScreen} options={wordTitled} />
       {/* Developer-mode only; the screen itself refuses to render otherwise. */}
       <Root.Screen name="SttLab" component={SttLab} options={{ title: "STT Lab" }} />
+      <Root.Screen name="Tour" component={TourScreen} options={{ title: "Tour" }} />
     </Root.Navigator>
   );
 }

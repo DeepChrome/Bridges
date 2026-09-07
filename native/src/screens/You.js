@@ -57,7 +57,7 @@ function Choice({ options, value, onPick, testID }) {
   );
 }
 
-function Settings({ visible, onClose, onLab }) {
+function Settings({ visible, onClose, onLab, onTour }) {
   const { st, update, signOut } = useSession();
   const t = useTheme();
   const [cache, setCache] = useState(() => cacheStats());
@@ -141,6 +141,12 @@ function Settings({ visible, onClose, onLab }) {
                   <Muted>Tap to hear</Muted>
                   <Choice testID="cue-choice" options={CUE_NAMES} value={st.cue || "bell"}
                           onPick={(id) => { previewCue(id); update((p) => ({ ...p, cue: id })); }} />
+                </View>
+              </Row>
+              <Row last={!st.dev} onPress={() => { onClose(); onTour(); }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Show the tour</Text>
+                  <Muted>Words, voices and the microphone, in three cards</Muted>
                 </View>
               </Row>
               {st.dev ? (
@@ -289,7 +295,8 @@ export default function You({ navigation }) {
       )}
 
       <Settings visible={settings} onClose={() => setSettings(false)}
-                onLab={() => navigation.navigate("SttLab")} />
+                onLab={() => navigation.navigate("SttLab")}
+                onTour={() => navigation.navigate("Tour")} />
     </Screen>
   );
 }

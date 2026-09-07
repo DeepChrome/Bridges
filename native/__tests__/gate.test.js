@@ -7,7 +7,7 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
@@ -37,8 +37,15 @@ describe("profile gate", () => {
     const onPlacement = jest.fn();
     await render(<SessionProvider><Gate onPlacement={onPlacement} /></SessionProvider>);
     await screen.findByText("Welcome to Bridges");
-    fireEvent.changeText(screen.getByPlaceholderText("Your name"), "Jared");
-    fireEvent.press(screen.getByText("Continue"));
+    // Awaited: a press left un-awaited in RNTL 14 can land after the next one.
+    await act(async () => { fireEvent.changeText(screen.getByPlaceholderText("Your name"), "Jared"); });
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    // The first profile on a phone sees the tour first: three cards, skippable,
+    // the first about the two-press dictionary (ROADMAP P8.6).
+    expect(await screen.findByText("Every Russian word is a door")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("Next")); });
+    expect(await screen.findByText("Real voices, and the phone's")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("Skip")); });
     expect(await screen.findByText("Where should we start?")).toBeTruthy();
     expect(screen.getByText(/50 questions/)).toBeTruthy();
     // The profile is created by this choice, not by Continue — so the callback

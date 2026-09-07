@@ -220,8 +220,9 @@ def main():
                 scored.append((cov + ts * 0.1, tid))
         scored.sort(reverse=True)
         v["topics"] = [tid for _, tid in scored[:3]]
-        text = v["title"] + " " + " ".join(v.get("tags") or [])
-        lv = first_hits(text, LEVELS)
+        # The title first, the channel's tags only as a fallback: a channel tags
+        # everything "russian for beginners" and titles a video "Intermediate".
+        lv = first_hits(v["title"], LEVELS) or first_hits(" ".join(v.get("tags") or []), LEVELS)
         v["level"] = lv[0] if lv else None
         st = tstats.get(v["id"])
         v["ease"] = st["ease"] if st else None

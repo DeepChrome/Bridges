@@ -104,16 +104,30 @@ describe("path node states", () => {
     expect(screen.queryByTestId("arc-core4")).toBeNull();
   });
 
-  /* The route bends the way build_topics.py laid it out, not by an alternation
-     invented in the screen: a spine unit sits on the centre line, its branches
-     either side. */
-  it("offsets branches off the centre line, spine units on it", async () => {
+  /* The fork: side quests sit in a row under their chapter's spine unit, locked
+     with dashed lanes until FORK_AT spine lessons are done, then open — and the
+     next chapter never depends on them. */
+  it("keeps side quests locked behind the fork, then opens them after two spine lessons", async () => {
     await withState({});
     const spine = await screen.findByTestId("node-core1");
     const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : s);
-    const shift = (n) => flat(n.props.style).transform[0].translateX;
-    expect(shift(spine)).toBe(0);
-    expect(shift(screen.getByTestId("node-family"))).toBeLessThan(0);
-    expect(shift(screen.getByTestId("node-time"))).toBeGreaterThan(0);
+    expect(flat(spine.props.style).transform[0].translateX).toBe(0);
+    expect(screen.getByTestId("fork-core1").props.accessibilityLabel).toMatch(/after lesson 2/);
+    expect(screen.getByTestId("node-family").props.accessibilityState.disabled).toBe(true);
+    expect(screen.getByTestId("lane-family").props.strokeDasharray).toBeTruthy();
+    // family is left of time: the row keeps the curriculum's order.
+    const left = screen.getByTestId("node-family").parent;
+    const right = screen.getByTestId("node-time").parent;
+    expect(flat(left.props.style).left).toBeLessThan(flat(right.props.style).left);
+  });
+
+  it("opens the fork once two spine lessons are done, and Continue stays on the spine", async () => {
+    await withState({ unit: { core1: { video: true, lessons: { 0: { v: true, q: 90 }, 1: { v: true, q: 85 } } } } });
+    await screen.findByTestId("node-core1");
+    expect(screen.getByTestId("fork-core1").props.accessibilityLabel).toBe("Side quests");
+    expect(screen.getByTestId("node-family").props.accessibilityState.disabled).toBe(false);
+    expect(screen.getByTestId("lane-family").props.strokeDasharray).toBeUndefined();
+    // The main road: lesson 3 of the spine, not a side quest.
+    expect(screen.getByText(/Continue · Pronouns & Being · Lesson 3/)).toBeTruthy();
   });
 });

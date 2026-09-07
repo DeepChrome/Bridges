@@ -177,24 +177,34 @@ export function stageUnlocked(st, i) {
   return stageDone(st, STAGES[i - 1]);
 }
 
+/* Side quests. A chapter's branches are optional detours off the spine: the road
+   forks once this many spine lessons are done, and the learner may take any of
+   them or stay on the main path — the next chapter needs only the spine. */
+export const FORK_AT = 2;
+export const spineLessonsDone = (st, stage) => {
+  let n = 0;
+  for (let i = 0; i < lessonCount(stage.core); i++) if (lessonDone(st, stage.core, i)) n++;
+  return n;
+};
+export const forkOpen = (st, stage) => !!st.dev || spineLessonsDone(st, stage) >= FORK_AT;
+
 export function unitUnlocked(st, u) {
   if (st.dev) return true;
   const i = STAGES.findIndex((s) => s.core.id === u.id || s.branches.includes(u));
   if (i < 0) return true;
   if (!stageUnlocked(st, i)) return false;
   if (STAGES[i].core.id === u.id) return true;
-  return unitProgress(st, STAGES[i].core) > 0;
+  return forkOpen(st, STAGES[i]);
 }
 
-/* The first unfinished lesson in path order — what "Continue" resumes. */
+/* The first unfinished spine lesson — what "Continue" resumes. Side quests are
+   never what Continue leads to; they are chosen on the map. */
 export function nextLesson(st) {
   for (let i = 0; i < STAGES.length; i++) {
     if (!stageUnlocked(st, i)) break;
-    for (const u of [STAGES[i].core].concat(STAGES[i].branches)) {
-      if (!unitUnlocked(st, u)) continue;
-      for (let k = 0; k < lessonCount(u); k++) {
-        if (!lessonDone(st, u, k)) return { unit: u, index: k };
-      }
+    const u = STAGES[i].core;
+    for (let k = 0; k < lessonCount(u); k++) {
+      if (!lessonDone(st, u, k)) return { unit: u, index: k };
     }
   }
   return null;

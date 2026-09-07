@@ -163,6 +163,16 @@ can overrule any of them.
   5. Curriculum data smells: «житься» and «двух» reached chapter 1's spine as
      headwords (OpenRussian stub rows); the `#187` frequency chip is unexplained;
      one Immerse row per unit only.
+- **A24 — side quests (owner, 2026-09-06).** "Two core lessons, then the road
+  forks into broadening topics; the student can also stay on the main path." Built
+  as: a chapter's branches are its side quests; the fork opens after `FORK_AT`
+  (2) lessons of the chapter's spine unit; the next chapter needs only the spine;
+  "Continue" follows the spine and never a side quest. The Learn screen draws the
+  fork — lanes from the spine to a row of quests, dashed and locked until it
+  opens, animated open when it does. A first niche topic, **Medicine**, joins
+  chapter 5; the grammar-driven re-pairing of branches (docs/grammar-sequence.md)
+  decides which quests a chapter offers. More niche topics (science, law,
+  religion, business) need their own rules and enough words each — `BRANCH_MIN`.
 - **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
   local verdict, grammar section) were built before Phase 4 because Phase 4 stops
   at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the

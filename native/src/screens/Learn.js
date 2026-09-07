@@ -1,30 +1,34 @@
-/* Learn — the path. Nodes on a route, not a column of cards.
+/* Learn — the path. A spine of chapters, and at each chapter a fork.
  *
- * Each unit is a disc carrying its own progress as a ring, with its name beneath it,
- * and a chapter meanders left and right instead of stacking. The offsets come from
- * `COL`, which build_topics.py assigned when it laid the curriculum out — the route
- * bends the way the data says rather than by an alternation invented here.
+ * Each unit is a disc carrying its own progress as a ring, with its name beneath
+ * it. The spine runs down the centre. After FORK_AT lessons of a chapter's spine
+ * unit the road forks: lanes curve out to that chapter's side quests, drawn in a
+ * row, and the main road carries on underneath to the next chapter. Side quests
+ * are optional — the next chapter needs only the spine — so the fork is an offer,
+ * not a gate. Before it opens the lanes are drawn dashed and the quests locked,
+ * so the learner can see what is coming.
  *
  * The web app draws the ring with a conic gradient, which React Native has no
  * equivalent for; here it is a stroked circle with a dash offset. Same four states,
  * same colours, different renderer — that is the kind of difference rule 20a allows.
  */
 
-import React from "react";
-import { View, Text, Pressable } from "react-native";
-import Svg, { Circle, Path } from "react-native-svg";
+import React, { useEffect, useRef } from "react";
+import { View, Text, Pressable, Animated, useWindowDimensions } from "react-native";
+import Svg, { Circle, Path, Line } from "react-native-svg";
 import { useSession } from "../session";
-import { useTheme } from "../theme";
+import { useTheme, space } from "../theme";
 import { Screen, Btn, Pill, UnitIcon, Muted, styles } from "../ui";
 import {
-  STAGES, COL, lessonCount, lessonDone, unitFineProgress, unitProgress,
-  stageDone, stageUnlocked, unitUnlocked, nextLesson,
+  STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress,
+  stageDone, stageUnlocked, unitUnlocked, nextLesson, forkOpen, FORK_AT,
 } from "../data";
 
-const SWING = 58;          // px either side of the centre line
 const STROKE = 5;
+const LANE_H = 64;          // height of the fork drawing
+const TRUNK_W = 3;
 
-function PathNode({ unit, open, branch, onOpen }) {
+function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
   const { st } = useSession();
   const t = useTheme();
   const [pressed, setPressed] = React.useState(false);
@@ -73,8 +77,8 @@ function PathNode({ unit, open, branch, onOpen }) {
           : `${unit.name}, ${done} of ${lessonCount(unit)} lessons done`
       }
       style={{
-        alignItems: "center", width: branch ? 104 : 118, paddingTop: 6,
-        paddingBottom: 10, transform: [{ translateX: (COL[unit.id] || 0) * SWING }],
+        alignItems: "center", width: branch ? 96 : 118, paddingTop: 6,
+        paddingBottom: 10, transform: [{ translateX: dx }],
       }}
     >
       <View style={{ width: size, height: size + 3 }}>
@@ -111,10 +115,72 @@ function PathNode({ unit, open, branch, onOpen }) {
       </View>
       <Text style={{ color: tone.nm, fontSize: 12, fontWeight: "600", lineHeight: 15,
                      textAlign: "center", marginTop: 7,
-                     maxWidth: branch ? 100 : 112 }}>
+                     maxWidth: branch ? 92 : 112 }}>
         {unit.name}
       </Text>
     </Pressable>
+  );
+}
+
+/* A stretch of the main road between things on it. */
+function Trunk({ height = 18, dim }) {
+  const t = useTheme();
+  return <View style={{ width: TRUNK_W, height, backgroundColor: dim ? t.lineSoft : t.line,
+                        borderRadius: 2 }} />;
+}
+
+/* The fork: lanes from the spine out to each side quest, the quests in a row, and
+   the road going on beneath. Animates open the first time it is drawn open —
+   lanes fade in, the row rises to meet them — and sits still after that. */
+function Fork({ stage, chapterOpen, onOpen }) {
+  const { st } = useSession();
+  const t = useTheme();
+  const { width: screenW } = useWindowDimensions();
+  const open = chapterOpen && forkOpen(st, stage);
+  const n = stage.branches.length;
+  const W = Math.min(screenW - space.pad * 2, 400);
+  const spacing = Math.min(104, Math.floor(W / n));
+  const xs = stage.branches.map((_, k) => W / 2 + (k - (n - 1) / 2) * spacing);
+
+  const anim = useRef(new Animated.Value(open ? 0 : 1)).current;
+  useEffect(() => {
+    if (!open) return;
+    Animated.timing(anim, { toValue: 1, duration: 650, useNativeDriver: true }).start();
+  }, [open]);
+
+  const lane = open ? t.brand : t.lineSoft;
+  return (
+    <View testID={`fork-${stage.core.id}`} accessibilityLabel={open ? "Side quests" : `Side quests, after lesson ${FORK_AT}`}
+          style={{ alignItems: "center", alignSelf: "stretch" }}>
+      <Trunk height={10} dim={!open} />
+      <Animated.View style={{ opacity: open ? anim : 1 }}>
+        <Svg width={W} height={LANE_H}>
+          {/* The main road, straight through. */}
+          <Line x1={W / 2} y1={0} x2={W / 2} y2={LANE_H} stroke={t.line} strokeWidth={TRUNK_W} />
+          {xs.map((x, k) => (
+            <Path key={k} testID={`lane-${stage.branches[k].id}`}
+                  d={`M ${W / 2} 0 C ${W / 2} ${LANE_H * 0.55}, ${x} ${LANE_H * 0.35}, ${x} ${LANE_H}`}
+                  stroke={lane} strokeWidth={TRUNK_W} fill="none" strokeLinecap="round"
+                  strokeDasharray={open ? undefined : "4 6"} />
+          ))}
+        </Svg>
+      </Animated.View>
+      <Animated.View
+        style={{ width: W, height: 112, opacity: open ? anim : 1,
+                 transform: [{ translateY: open ? anim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) : 0 }] }}>
+        {stage.branches.map((u, k) => (
+          <View key={u.id} style={{ position: "absolute", left: xs[k] - 48, top: 0 }}>
+            <PathNode unit={u} open={unitUnlocked(st, u)} branch onOpen={onOpen} />
+          </View>
+        ))}
+      </Animated.View>
+      {!open ? (
+        <Muted size={11} style={{ marginTop: -4, marginBottom: 6 }}>
+          {`Side quests · after lesson ${FORK_AT}`}
+        </Muted>
+      ) : null}
+      <Trunk height={18} dim={!chapterOpen} />
+    </View>
   );
 }
 
@@ -152,7 +218,7 @@ export default function Learn({ navigation }) {
           const open = stageUnlocked(st, i);
           return (
             <View key={stage.core.id} style={{ alignItems: "center", alignSelf: "stretch" }}>
-              <View style={{ alignItems: "center", marginTop: 26, marginBottom: 14 }}>
+              <View style={{ alignItems: "center", marginTop: 22, marginBottom: 12 }}>
                 {/* One string, not two children: a screen reader should hear
                     "Chapter 1", not "Chapter" then "1". */}
                 <Text style={[styles.sectionLabel, { color: t.ink3, marginBottom: 0 }]}>
@@ -170,10 +236,9 @@ export default function Learn({ navigation }) {
                 </View>
               </View>
               <PathNode unit={stage.core} open={open} branch={false} onOpen={openUnit} />
-              {stage.branches.map((u) => (
-                <PathNode key={u.id} unit={u} open={unitUnlocked(st, u)} branch
-                          onOpen={openUnit} />
-              ))}
+              {stage.branches.length ? (
+                <Fork stage={stage} chapterOpen={open} onOpen={openUnit} />
+              ) : null}
             </View>
           );
         })}

@@ -55,7 +55,7 @@ RULES = [
         rent landlord neighbour""".split()),
 
     ("city",       "Around Town",       """city town village street road square park
-        shop store market bank post office hospital school library museum theatre
+        shop store market bank post office school library museum theatre
         theater cinema church cathedral bridge station airport hotel restaurant
         pharmacy bakery address building house block district centre center
         crossroads pavement sidewalk fountain monument""".split()),
@@ -79,6 +79,13 @@ RULES = [
         chemistry biology history geography language grammar word dictionary
         library knowledge education degree diploma course lecture question answer
         example rule mistake""".split()),
+
+    # Before body, so the clinic claims its words and body keeps the anatomy. A
+    # side quest (ROADMAP A24): niche by design.
+    ("medicine",   "Medicine",          """hospital clinic doctor physician surgeon
+        nurse patient medicine drug pill tablet disease illness infection virus
+        vaccine surgery operation treatment cure diagnosis symptom fever
+        pharmacy ambulance injury wound recover recovery prescription""".split()),
 
     ("body",       "Body & Health",     """head face eye ear nose mouth tooth teeth
         tongue lip neck shoulder arm hand finger leg foot knee back chest heart
@@ -201,7 +208,7 @@ OVERRIDES = {
     "выйти": None, "кампания": None, "рубеж": None, "плоскость": None,
     "прохожий": None, "наступить": None, "край": "nature",
     # -- work: teachers, doctors, society and "fire"
-    "общество": "politics", "доктор": "body", "учитель": "school",
+    "общество": "politics", "учитель": "school",
     "учительница": "school", "произведение": "art", "взять": None,
     "свидание": None, "крепкий": None, "пожар": None, "десятка": None,
     "удаться": None, "пользоваться": None, "хозяйство": None,
@@ -212,7 +219,7 @@ OVERRIDES = {
     # -- body: "head" the chief, "back" the rear, a gun
     "обувь": "clothes", "холод": "nature", "здравоохранение": "politics",
     "ружьё": "military", "личной": None, "глава": None, "задний": None,
-    "перемена": None, "орган": None, "сердечный": None,
+    "перемена": None, "орган": None, "сердечный": None, "больница": "medicine",
     # -- clothes: "short", "thin", "fat", "ring" and "suit" in their other senses
     "позвонить": "speech", "иск": "politics", "жир": "food", "бабочка": "animals",
     "прекрасный": None, "короткий": None, "пола": None, "размер": None,
@@ -259,6 +266,9 @@ OVERRIDES = {
     "возвращаться": None, "отдать": None, "языковый": None, "стрелка": None,
     "относиться": None, "поддерживать": None, "деление": None, "разделение": None,
     "святая": None, "затишье": None, "узнать": None,
+    # -- medicine: "operation" the action, "treatment" the processing, "injury" the insult
+    "доктор": "medicine", "действие": None, "процедура": None, "обработка": None,
+    "обида": None, "поправка": None, "наркотика": None,
 }
 
 # A chapter is one spine unit plus the branches that follow it — the shape a language
@@ -275,7 +285,7 @@ CHAPTERS = [
     ("Time, Life & People",    "Food and School"),
     ("Wanting & Knowing",      "Home and Clothes"),
     ("Everyday Things",        "Town and Travel"),
-    ("Family & Home Life",     "Body and Nature"),
+    ("Family & Home Life",     "Health and Nature"),
     ("Health & Getting Around", "Work and Animals"),
     ("Days, Talk & the World", "Mind and Language"),
     ("Thought & Society",      "Culture and Society"),
@@ -477,7 +487,7 @@ def main():
         ["food", "school"],
         ["home", "clothes"],
         ["city", "travel"],
-        ["body", "nature"],
+        ["body", "nature", "medicine"],
         ["work", "animals"],
         ["emotion", "speech"],
         ["military", "tech", "sport", "art", "politics"],

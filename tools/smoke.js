@@ -28,6 +28,10 @@ if (!fs.existsSync(payloadPath)) {
   process.exit(1);
 }
 const PAYLOAD = JSON.parse(fs.readFileSync(payloadPath, "utf8"));
+/* The unit count is read from the payload, not pinned: build_topics.py adds a
+   side quest whenever a topic rule reaches BRANCH_MIN words. */
+const UNITS = PAYLOAD.units.length;
+const NO_VIDEO = PAYLOAD.units.filter((u) => !u.v).map((u) => u.id);
 const STUDIED = new Set(PAYLOAD.lemmas.map((l) => l.b));
 const DEEP_ROWS = PAYLOAD.deep.split("\n").filter(Boolean).map((r) => r.split("\t"));
 const NO_PARADIGM = DEEP_ROWS.find(
@@ -169,10 +173,10 @@ setTimeout(async () => {
   ok($$("#s-path .node:disabled").length === 0, "dev mode unlocks every unit");
 
   group("path");
-  ok($$("#s-path .node").length === 27, "27 unit nodes",
+  ok($$("#s-path .node").length === UNITS, `${UNITS} unit nodes`,
      String($$("#s-path .node").length));
   ok($$("#s-path .stage-h").length === 8, "8 stages");
-  ok($$("#s-path .node .thumb svg").length === 27, "every unit node has a thumbnail",
+  ok($$("#s-path .node .thumb svg").length === UNITS, "every unit node has a thumbnail",
      String($$("#s-path .node .thumb svg").length));
 
   group("lesson hub");
@@ -182,13 +186,18 @@ setTimeout(async () => {
      String($$("#s-lesson .row").length));
   ok($$("#s-lesson .check").length === 3, "each component has a completion circle");
   ok($$("#s-lesson .check.on").length === 0, "nothing is ticked to begin with");
-  // Every unit currently has an episode, so the two-component path has no case to
-  // exercise. Assert that rather than pretend otherwise.
-  ok(WITH_VIDEO === 27, "every unit has an episode, so every lesson has three steps",
-     WITH_VIDEO + " of 27");
   await nav("#/lesson/military/0");
   ok($$("#s-lesson .row").length === 3, "a unit with a video shows three components",
      String($$("#s-lesson .row").length));
+  // A unit without an episode (the Medicine side quest, as of 2026-09-06) shows
+  // two: the video row is not a placeholder, it is absent.
+  ok(WITH_VIDEO + NO_VIDEO.length === UNITS, "every unit either has an episode or is listed without one",
+     `${WITH_VIDEO} with, ${NO_VIDEO.length} without, ${UNITS} units`);
+  if (NO_VIDEO.length) {
+    await nav(`#/lesson/${NO_VIDEO[0]}/0`);
+    ok($$("#s-lesson .row").length === 2, `a unit without a video (${NO_VIDEO[0]}) shows two components`,
+       String($$("#s-lesson .row").length));
+  }
 
   group("vocab component");
   await nav("#/lesson/food/0/vocab");
@@ -302,7 +311,7 @@ setTimeout(async () => {
   byText(".sheet .btn", /^Select all$/).click();
   await tick();
   const allCount = state().sets.length;
-  ok(allCount === 27, "select all takes every unlocked set", String(allCount));
+  ok(allCount === UNITS, "select all takes every unlocked set", String(allCount));
   byText(".sheet .btn", /^Clear$/).click();
   await tick();
   ok(state().sets.length === 0, "clear empties the selection");

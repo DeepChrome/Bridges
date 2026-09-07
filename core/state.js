@@ -106,7 +106,9 @@ export function recordAttempt(speech, attempt) {
    a day and TALK_TURNS per session, counted here in the learner's own state so the
    picker can say what is left before the Worker's counter would refuse. `day` is
    the day number from util.today(). */
-export const TALK_SESSIONS_PER_DAY = 3;
+/* Unlimited since 2026-09-07 (the owner: "remove the three limit for now");
+   sessions are still counted, and the Worker keeps a backstop cap of its own. */
+export const TALK_SESSIONS_PER_DAY = Infinity;
 export const TALK_TURNS = 12;
 
 export function talkAllowance(speech, day) {

@@ -236,6 +236,14 @@ can overrule any of them.
   with a chosen level and pace, and puts its notes under the bubble; Immerse
   gets thumbnails and CEFR filtering; the Learn header and the fork's return
   lanes; public-domain photographs on the vocabulary cards. CLAUDE.md §30h′.
+- **A35 — Talk, second pass (2026-09-07).** The three-a-day limit is off
+  (`TALK_SESSIONS_PER_DAY = Infinity`; the Worker's backstop is 240 turns);
+  the tutor's text always shows, with an English line under it that one toggle
+  turns off (on by default); new words leave the transcript for a summary at
+  the end — went well, to work on, words from this conversation with "Add to
+  review"; a hint (bulb) asks the Worker for one suitable reply (`hint: true`
+  on `/v1/talk`). Definitions everywhere number their senses and show up to
+  three examples. CLAUDE.md §30h′.
 - **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
   local verdict, grammar section) were built before Phase 4 because Phase 4 stops
   at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the

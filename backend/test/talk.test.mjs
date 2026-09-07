@@ -42,6 +42,24 @@ test("the level rides in the message, and an advanced learner may get three sent
   assert.match(validateTalk(g, studied, "beginner").errors.join("\n"), /more than two sentences/);
 });
 
+test("a hint is one short Russian sentence with its English, and rides the talk route", async () => {
+  const { validateHint, hintMessage } = await import("../src/talk.js");
+  assert.equal(validateHint({ hint_ru: "Я хочу чай, пожалуйста.", hint_en: "I would like tea, please." }).ok, true);
+  assert.match(validateHint({ hint_ru: "Да. Нет.", hint_en: "Yes. No." }).errors.join(" "), /one sentence/);
+  assert.match(validateHint({ hint_ru: "tea please", hint_en: "x" }).errors.join(" "), /not Russian/);
+  const m = JSON.parse(hintMessage({ scenario: "café", level: "beginner", studied: ["чай"], history: [{ who: "tutor", ru: "Что вы хотите?" }] }));
+  assert.equal(m.level, "beginner");
+  assert.equal(m.history.length, 1);
+  assert.equal(m.transcript, undefined);
+  const e = env(); const up = upstream([JSON.stringify({ hint_ru: "Чай, пожалуйста.", hint_en: "Tea, please." })]);
+  const r = await handle(req({ scenario: "café", history: [], hint: true }, auth), e, { fetch: up.fetch });
+  const body = await r.json();
+  assert.equal(body.ok, true);
+  assert.equal(body.hint_ru, "Чай, пожалуйста.");
+  assert.equal(up.calls[0].max_tokens, 200);
+  assert.match(up.calls[0].system, /asked for a hint/);
+});
+
 test("a reply with no question is refused", () => {
   const g = good(); g.reply_ru = "Здравствуйте, я вас слушаю.";
   g.reply_tokens = "Здравствуйте я вас слушаю".split(" ").map((w) => ({ ru: w, lemma: w.toLowerCase() }));

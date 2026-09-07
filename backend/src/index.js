@@ -16,13 +16,13 @@
 
 import { validate, extractJson } from "./schema.js";
 import { SYSTEM, userMessage, RETRY_NUDGE } from "./prompt.js";
-import { SYSTEM_TALK, talkMessage, validateTalk } from "./talk.js";
+import { SYSTEM_TALK, talkMessage, validateTalk, SYSTEM_HINT, hintMessage, validateHint } from "./talk.js";
 
 const API = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
 const UPSTREAM_TIMEOUT_MS = 15000;
 const DEFAULT_CAP = 300;
-const DEFAULT_TALK_CAP = 36;          // 3 sessions of 12 turns (ROADMAP P6.5)
+const DEFAULT_TALK_CAP = 240;         // a runaway backstop, not a budget (was 3 sessions of 12)
 const DAY_TTL = 60 * 60 * 48;
 
 const json = (status, body) => new Response(JSON.stringify(body), {
@@ -106,6 +106,12 @@ const ROUTES = {
     message: (b) => talkMessage(b),
     validate: (parsed, b) => validateTalk(parsed, b.studied, b.level),
     capMessage: (cap) => `Daily conversation limit of ${cap} turns reached; resets at 00:00 UTC.`,
+    // `hint: true` asks for one thing the learner could say next instead of a
+    // turn; same route, same counter, a smaller prompt and reply.
+    variant: (b) => (b.hint ? {
+      kind: "hint", maxTokens: 200, system: SYSTEM_HINT,
+      message: (x) => hintMessage(x), validate: (parsed) => validateHint(parsed),
+    } : null),
   },
 };
 
@@ -114,7 +120,7 @@ export async function handle(request, env, deps = {}) {
   const now = deps.now ? deps.now() : new Date();
   const url = new URL(request.url);
 
-  const route = ROUTES[url.pathname];
+  let route = ROUTES[url.pathname];
   if (!route) return json(404, { ok: false, reason: "not found" });
   if (request.method !== "POST") return json(405, { ok: false, reason: "method" });
 
@@ -128,6 +134,7 @@ export async function handle(request, env, deps = {}) {
   try { body = await request.json(); } catch (e) { body = null; }
   const problem = body && typeof body === "object" ? route.check(body) : "a JSON body is required";
   if (problem) return json(400, { ok: false, reason: problem });
+  if (route.variant) route = { ...route, ...(route.variant(body) || {}) };
 
   // Cost guard: one counter per route per user per UTC day. Read, compare, write
   // — not atomic, which is fine for a phone or a few and wrong for a fleet; the

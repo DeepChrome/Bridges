@@ -42,6 +42,7 @@ export const DEFAULTS = {
   offline: false,       // download a unit's audio when it is opened (cache.js)
   talkLevel: null,      // how the Talk tutor pitches its Russian; null = by chapter reached
   talkSpeed: "normal",  // how fast the tutor is read out (audio.js SPEEDS)
+  talkEn: true,         // English under the tutor's turns
 };
 
 export function normalise(raw, assumedVersion) {

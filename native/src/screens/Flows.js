@@ -6,7 +6,7 @@ import { View, Text, Pressable, Image } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { IMAGES } from "../images";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb, Senses } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
 import { Linked } from "../words";
@@ -97,24 +97,24 @@ export function VocabFlow({ route, navigation }) {
               <Text style={{ color: t.ink, fontSize: 38, fontWeight: "600" }}>{w.w}</Text>
               <Speaker text={w.b} />
             </View>
-            <Text style={{ color: t.ink2, fontSize: 17, textAlign: "center" }}>
-              {(w.e || "").split(/[,;]/).slice(0, 2).join(", ").trim()}
-            </Text>
+            {/* The whole entry, sense by sense, and the word in two contexts — a
+                card a learner can read, not a gloss (the owner, 2026-09-07). */}
+            <Senses e={w.e} size={16} style={{ marginTop: 0 }} />
             <View style={{ flexDirection: "row", gap: 6, marginTop: 10 }}>
               {[w.p, w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
             </View>
-            {w.x && w.x[0] ? (
-              <View style={{ marginTop: 14, paddingTop: 12, borderTopWidth: 1,
-                             borderTopColor: t.lineSoft, alignSelf: "stretch" }}>
+            {(w.x || []).slice(0, 2).map((ex, k) => (
+              <View key={k} style={{ marginTop: k ? 10 : 14, paddingTop: k ? 10 : 12, borderTopWidth: 1,
+                                     borderTopColor: t.lineSoft, alignSelf: "stretch" }}>
                 <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
                   <View style={{ flex: 1 }}>
-                    <Linked text={w.x[0].ru} size={18} />
+                    <Linked text={ex.ru} size={18} />
                   </View>
-                  <Speaker text={w.x[0].ru} size={36} />
+                  <Speaker text={ex.ru} size={36} />
                 </View>
-                <Muted>{w.x[0].en}</Muted>
+                <Muted>{ex.en}</Muted>
               </View>
-            ) : null}
+            ))}
           </Card>
         )}
         {/* marginTop:"auto" against Screen's flexGrow: the action holds one position

@@ -578,10 +578,12 @@ group("talk allowance");
   sp = startTalkSession(sp, 100);
   ok(talkAllowance(sp, 100).used === 2 && talkAllowance(sp, 100).left === TALK_SESSIONS_PER_DAY - 2,
      "each session started is one fewer left");
+  // No cap since 2026-09-07: a fourth session is spent and counted like the rest.
   sp = startTalkSession(sp, 100);
-  const full = startTalkSession(sp, 100);
-  ok(full === sp && talkAllowance(sp, 100).left === 0, "past the cap nothing is spent and nothing is left");
-  ok(talkAllowance(sp, 101).left === TALK_SESSIONS_PER_DAY, "a new day starts over");
+  const fourth = startTalkSession(sp, 100);
+  ok(fourth !== sp && talkAllowance(fourth, 100).used === 4 && talkAllowance(fourth, 100).left === Infinity,
+     "sessions are counted without a limit");
+  ok(talkAllowance(sp, 101).used === 0, "a new day starts the count over");
   ok(SCENARIOS.length === 10 && SCENARIOS.every((s) => s.id && s.unit && s.prompt && s.title && s.en),
      "ten scenarios, each tied to a unit and carrying a prompt");
   ok(SCENARIOS.every((s) => UN.some((u) => u.id === s.unit)), "every scenario's unit exists");

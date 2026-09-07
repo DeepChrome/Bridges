@@ -15,5 +15,6 @@ id = "b604658a70984d208e21ea65006f01d0"
 [vars]
 MODEL = "claude-haiku-4-5-20251001"
 DAILY_CAP = "300"
-# Conversation turns a day: three sessions of twelve (core/state.js), for one learner.
-TALK_DAILY_CAP = "36"
+# Conversation turns a day for one user: a backstop against a runaway loop, not a
+# budget — the owner lifted the three-sessions limit on 2026-09-07.
+TALK_DAILY_CAP = "240"

@@ -1101,6 +1101,24 @@ several channels carry the channel's initials where a unit has its icon.
   pitches the prompt and an advanced learner may get three sentences. The notes
   on a learner's turn sit *under* the bubble in a smaller italic face
   (`Feedback quiet`) — there, not dominant.
+- **Talk, second pass (the owner, later the same evening).** No daily limit
+  (`TALK_SESSIONS_PER_DAY` is `Infinity`; the Worker's `TALK_DAILY_CAP` is a
+  240-turn backstop). The toolbar is four icon buttons and nothing else —
+  restart, end, a bulb for a **hint**, EN for the English under tutor turns (on
+  by default, `st.talkEn`); Home is in the header. A hint is the same Worker
+  route with `hint: true` (`SYSTEM_HINT`, one sentence ≤ 12 words, at the
+  level, from studied words), shown under the transcript until the learner
+  speaks. Vocabulary is **not** shown in the transcript any more; the end
+  screen (`Summary`) reads the conversation back — went well, to work on (each
+  grammar tag with its plain-English name and the tutor's notes), and up to
+  eight words from it (`conversationWords`: the tutor's new words, then
+  curriculum content words from its turns, trouble and unmet first), each with
+  Add, and Add all, into `pinned`.
+- **Entries read like a dictionary**: `Senses` in ui.js lays a gloss out by its
+  semicolon groups as numbered lines; the flashcard's back shows every sense and
+  three example sentences, the vocabulary card every sense and two. The pools
+  already carry up to four sentences a word; the `--examples` flag on
+  `build_site.py` is dead and says so.
 - **Immerse** rows carry the video's YouTube thumbnail (fetched from YouTube,
   nothing stored) and a **CEFR code** (`cefr` from the title's own "B1+" or the
   level word; the transcript's ease was measured and does not separate levels,

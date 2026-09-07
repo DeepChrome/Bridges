@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Modal, ScrollView, Pressable, Alert } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses } from "../ui";
 import { L, UN, STAGES, unitUnlocked, idxOfWord } from "../data";
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";
@@ -346,14 +346,16 @@ export default function Study() {
             )}
             {shown ? (
               <>
-                <Text style={{ color: t.ink2, fontSize: 15, marginTop: 10,
-                               textAlign: "center" }}>{w.e}</Text>
-                {w.x && w.x[0] ? (
-                  <View style={{ marginTop: 14, alignSelf: "stretch" }}>
-                    <Linked text={w.x[0].ru} size={17} />
-                    <Muted>{w.x[0].en}</Muted>
+                <Senses e={w.e} />
+                {(w.x || []).slice(0, 3).map((ex, k) => (
+                  // The word in use, three ways: the entry reads like a dictionary,
+                  // not a gloss (the owner, 2026-09-07).
+                  <View key={k} style={{ marginTop: k ? 10 : 14, alignSelf: "stretch",
+                                         paddingTop: k ? 10 : 0, borderTopWidth: k ? 1 : 0, borderTopColor: t.lineSoft }}>
+                    <Linked text={ex.ru} size={16} />
+                    <Muted>{ex.en}</Muted>
                   </View>
-                ) : null}
+                ))}
               </>
             ) : null}
           </Card>

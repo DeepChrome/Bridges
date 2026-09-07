@@ -31,6 +31,13 @@ export async function getFeedback({ transcript, target, unitId, topic, lemmas },
 
 /* The tutor's turn (ROADMAP P6.2). The whole exchange goes every time; the Worker
    keeps nothing. Same failure reasons as getFeedback. */
+/* One thing the learner could say next. Same route as a turn, `hint: true`. */
+export async function hint({ scenario, studied, history, level }, deps = {}) {
+  return post({ scenario, studied: studied || [], history: history || [],
+                level: level || "intermediate", hint: true },
+              deps, "/v1/talk", TALK_TIMEOUT_MS);
+}
+
 export async function talk({ scenario, topic, studied, history, transcript, level }, deps = {}) {
   return post({ scenario, topic: topic || null, studied: studied || [], history: history || [],
                 transcript: transcript || "", level: level || "intermediate" },

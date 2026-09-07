@@ -250,6 +250,29 @@ export function Ru({ children, size = 19, style }) {
   return <Text style={[{ color: t.ink, fontSize: size }, style]}>{children}</Text>;
 }
 
+/* A gloss laid out as a dictionary would: the sense groups OpenRussian separates
+   with semicolons as numbered lines, each with its synonyms — «стол» is
+   "1. table, desk, board  2. diet, cooking, cuisine  3. department, section",
+   not one run of nine words. One group stays a single line, unnumbered. */
+export function senseGroups(e) {
+  return String(e || "").split(/\s*;\s*/).map((s) => s.trim()).filter(Boolean);
+}
+
+export function Senses({ e, size = 15, align = "center", style }) {
+  const t = useTheme();
+  const groups = senseGroups(e);
+  if (!groups.length) return null;
+  return (
+    <View testID="senses" style={[{ marginTop: 10, alignSelf: "stretch", gap: 3 }, style]}>
+      {groups.map((g, k) => (
+        <Text key={k} style={{ color: t.ink2, fontSize: size, textAlign: align, lineHeight: size + 6 }}>
+          {groups.length > 1 ? `${k + 1}. ${g}` : g}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
 export function Muted({ children, size = 13, style, testID }) {
   const t = useTheme();
   return <Text testID={testID} style={[{ color: t.ink3, fontSize: size }, style]}>{children}</Text>;

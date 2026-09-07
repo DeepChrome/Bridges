@@ -64,6 +64,41 @@ ${TAG_LINES}
 - "newWords": each word in reply_ru whose dictionary form is not in "studied", at most ${MAX_NEW_WORDS}; if you would need more, rephrase.
 - Never invent an error to have something to say.`;
 
+/* A hint (the owner, 2026-09-07): one way the learner could answer the tutor's
+   last turn, at their level, from the words they have studied. */
+export const SYSTEM_HINT = `You are a patient Russian tutor. The learner is in a spoken conversation and has asked for a hint: one natural, short thing they could say next in Russian.
+
+You receive JSON with "scenario", "level" (beginner: very simple words and the present tense; intermediate: everyday Russian; advanced: natural Russian), "studied" (dictionary forms of words the learner knows — prefer these), and "history" (the conversation so far, oldest first; the last turn is the tutor's, which the hint must answer).
+
+Reply with a single JSON object and nothing else:
+{ "hint_ru": string, "hint_en": string }
+
+Rules: hint_ru is one sentence of at most twelve words that answers the tutor's last turn and fits the scenario; hint_en is its natural English translation. No notes, no alternatives, no dashes.`;
+
+export function hintMessage({ scenario, level, studied, history }) {
+  return JSON.stringify({
+    scenario: String(scenario || ""), level: levelOf(level),
+    studied: Array.isArray(studied) ? studied.map(String).slice(0, 400) : [],
+    history: Array.isArray(history)
+      ? history.slice(-2 * MAX_TURNS).map((h) => ({ who: h.who === "learner" ? "learner" : "tutor", ru: String(h.ru || "") }))
+      : [],
+  });
+}
+
+export function validateHint(raw) {
+  const errors = [];
+  if (!raw || typeof raw !== "object") return { ok: false, errors: ["reply is not an object"] };
+  if (!isStr(raw.hint_ru) || !raw.hint_ru.trim()) errors.push("hint_ru: missing");
+  else {
+    if (!/[а-яёА-ЯЁ]/.test(raw.hint_ru)) errors.push("hint_ru: not Russian");
+    if ((raw.hint_ru.match(CYRILLIC_WORD) || []).length > 12) errors.push("hint_ru: more than twelve words");
+    if (sentences(raw.hint_ru) > 1) errors.push("hint_ru: more than one sentence");
+  }
+  if (!isStr(raw.hint_en) || !raw.hint_en.trim()) errors.push("hint_en: missing");
+  if (errors.length) return { ok: false, errors };
+  return { ok: true, value: { hint_ru: raw.hint_ru.trim(), hint_en: plain(raw.hint_en) } };
+}
+
 export function talkMessage({ scenario, topic, studied, history, transcript, level }) {
   return JSON.stringify({
     scenario: String(scenario || ""),

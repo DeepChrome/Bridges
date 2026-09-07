@@ -762,7 +762,9 @@ def main():
     ap.add_argument("--src", type=Path, default=ROOT / "tools" / "app")
     ap.add_argument("--outdir", type=Path, default=ROOT / "site")
     ap.add_argument("--lemmas", type=int, default=4000)
-    ap.add_argument("--examples", type=int, default=2)
+    # Not read any more: examples per lemma are capped at four where the pools
+    # are built (§30a). Kept so an old command line still parses.
+    ap.add_argument("--examples", type=int, default=4)
     ap.add_argument("--public", action="store_true",
                     help="a build for distribution: ships no caption text with the video "
                          "moments, only the spoken form and the time (ROADMAP P8.8)")

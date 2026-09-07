@@ -9,7 +9,7 @@
 import React from "react";
 import { View, Text, ScrollView, Image } from "react-native";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Pill, Speaker, Muted } from "../ui";
+import { Screen, Card, Pill, Speaker, Muted, Senses } from "../ui";
 import { L, UN, resolveWord } from "../data";
 import { Linked } from "../words";
 import { IMAGES, CREDITS } from "../images";
@@ -88,9 +88,7 @@ export default function Word({ route }) {
           </Text>
           <Speaker text={w.b} />
         </View>
-        {w.e ? (
-          <Text style={{ color: t.ink2, fontSize: 16, marginTop: 8 }}>{w.e}</Text>
-        ) : null}
+        <Senses e={w.e} size={16} align="left" style={{ marginTop: 8 }} />
         <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
           {[w.p, w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
           {w.pt ? <Pill>{`pair: ${w.pt}`}</Pill> : null}

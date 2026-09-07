@@ -1,17 +1,20 @@
 /* Talk — a short conversation in Russian on a topic (ROADMAP Phase 6).
  *
  * Three screens in one: the picker (a scenario per unit, open when the unit is,
- * with the day's sessions left), the exchange, and the summary. The tutor is the
- * Worker's /v1/talk route; the learner speaks through the same hold-to-speak as
- * Say (../speech.js). Every turn: the learner's words are graded against the
- * tutor's correction the way Say grades them — per lemma, into the scheduler,
- * with the tags counted — and any word the tutor used that the learner has not
- * studied is offered to pin for study.
+ * with the level and pace to talk at), the exchange, and the summary. The tutor
+ * is the Worker's /v1/talk route; the learner speaks through the same
+ * hold-to-speak as Say (../speech.js). Every turn: the learner's words are
+ * graded against the tutor's correction the way Say grades them — per lemma,
+ * into the scheduler, with the tags counted. Words the tutor used that the
+ * learner has not studied wait for the summary, where each can be added to
+ * review — the transcript itself stays a conversation.
  *
  * Tutor bubbles carry the Russian with every recognised word a dictionary link,
- * the English behind a tap, and a Speaker — which, having no recording, is the
- * device voice and says so (doctrine §27). Nothing here stores audio; the whole
- * exchange goes to the Worker each turn and the Worker keeps none of it.
+ * an English line one toggle turns off, and a Speaker to hear it again — the
+ * reply is read out once on arrival, and having no recording it is the device
+ * voice and says so (doctrine §27). A bulb asks the Worker for one suitable
+ * reply. Nothing here stores audio; the whole exchange goes to the Worker each
+ * turn and the Worker keeps none of it.
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -19,7 +22,7 @@ import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-nati
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
-import { Screen, Card, Btn, Pill, Muted, Speaker, List, Row, Thumb } from "../ui";
+import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, stageDone, unitUnlocked, drillPool, nextLesson } from "../data";
 import { talk as askTutor, hint as askHint } from "../lib/feedback";

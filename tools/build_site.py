@@ -289,6 +289,13 @@ def measure_sentences(sentences, sent_tokens, index, key_units, lemmas, unit_pos
 SRC_CODE = {"tatoeba": "t", "lof": "l", "yandex": "y", "core5000": "c",
             "googletts": "g", "other": "o"}
 
+# The video library (build_videos.py): how many curriculum words a video lists to
+# listen for, how many moments each, and the frequency rank below which a word is
+# a function word rather than something to listen for.
+VIDEO_WORDS = 20
+VIDEO_MOMENTS = 3
+VIDEO_SKIP_TOP = 150
+
 SPEAK_TOKENS = (3, 12)
 LISTEN_TOKENS = (4, 15)
 LISTEN_EXCLUDE = ("googletts", "other")
@@ -509,19 +516,22 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     if gpath.exists():
         grammar = json.loads(gpath.read_text(encoding="utf-8")).get("notes", {})
 
-    videos = {}
+    videos, library, channels = {}, [], []
     vpath = ROOT / "data" / "videos.json"
     if vpath.exists():
-        videos = json.loads(vpath.read_text(encoding="utf-8")).get("units", {})
+        vdata = json.loads(vpath.read_text(encoding="utf-8"))
+        videos = vdata.get("units", {})
+        library = vdata.get("videos", [])
+        channels = vdata.get("channels", [])
 
-    # Which of a unit's words are actually spoken in its episode, and when. Only the
-    # unit's own vocabulary is shipped — the transcript itself stays out of the app,
-    # which keeps the payload small and means we ship an index, not a copy of the
-    # captions. Times are milliseconds from the start of the video.
+    # Which words are actually spoken in a video, and when. Only curriculum words
+    # are shipped, and only a few moments each — the transcript itself stays out of
+    # the app, which keeps the payload small and means we ship an index, not a copy
+    # of the captions. Times are milliseconds from the start of the video.
     heard = {}
     tpath = ROOT / "data" / "transcripts.json"
     if tpath.exists():
-        heard = json.loads(tpath.read_text(encoding="utf-8"))
+        heard = json.loads(tpath.read_text(encoding="utf-8")).get("index", {})
 
     units = []
     uidx = {}
@@ -536,16 +546,64 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             u["g"] = grammar[tid]
         if tid in videos:
             v = videos[tid]
-            u["v"] = {"id": v["id"], "title": v["title"], "dur": v.get("dur")}
+            u["v"] = {"id": v["id"], "title": v["title"], "dur": v.get("dur"),
+                      "ch": v.get("channel")}
             spoken = heard.get(v["id"], {})
             if spoken:
                 # Only this unit's own words, and at most a handful of moments each —
-                # the learner replays one occurrence, not every one.
+                # the learner replays one occurrence, not every one. A unit word
+                # the video never says is not listed: what is under a video must
+                # be in the video (the owner's rule, 2026-09-07).
                 u["v"]["heard"] = {
                     lemmas[i]["b"]: spoken[lemmas[i]["b"]][:4]
                     for i in words if lemmas[i]["b"] in spoken
                 }
         units.append(u)
+
+    # --- the video library ---------------------------------------------------
+    # Every harvested video with a transcript, for Immerse: the search keywords,
+    # the units whose words it speaks, and up to VIDEO_WORDS curriculum words it
+    # says, each with a few moments. A video attached to a unit lists that unit's
+    # words first; the rest are the content words it says most, commonest first
+    # among ties. Function words are not "listen for" material.
+    video_list = []
+    unit_words_of = {u["id"]: u["w"] for u in units}
+    unit_of_video = {v["id"]: tid for tid, v in videos.items()}
+    idx_of_bare = {}
+    for i, e in enumerate(lemmas):
+        idx_of_bare.setdefault(e["b"], i)
+    for v in library:
+        spoken = heard.get(v["id"])
+        if not spoken:
+            continue
+        chosen = []
+        tid = unit_of_video.get(v["id"])
+        if tid:
+            chosen = [lemmas[i]["b"] for i in unit_words_of.get(tid, []) if lemmas[i]["b"] in spoken]
+        pool = []
+        for bare, occ in spoken.items():
+            i = idx_of_bare.get(bare)
+            if i is None or i < VIDEO_SKIP_TOP or bare in chosen:
+                continue
+            if lemmas[i]["p"] not in ("noun", "verb", "adjective"):
+                continue
+            pool.append((-len(occ), i, bare))
+        pool.sort()
+        chosen += [bare for _, _, bare in pool[:max(0, VIDEO_WORDS - len(chosen))]]
+        entry = {"id": v["id"], "title": v["title"], "ch": v.get("ch"), "dur": v.get("dur"),
+                 "kw": v.get("kw", ""), "topics": v.get("topics", []),
+                 "words": {b: spoken[b][:VIDEO_MOMENTS] for b in chosen}}
+        if tid:
+            entry["unit"] = tid
+        if v.get("level"):
+            entry["level"] = v["level"]
+        if v.get("ease") is not None:
+            entry["ease"] = v["ease"]
+        if v.get("chapters"):
+            entry["chapters"] = v["chapters"]
+        video_list.append(entry)
+    stats["videos"] = len(video_list)
+    stats["channels"] = [c.get("name") for c in channels]
 
     # Chapter titles ride on the spine row that opens each chapter, which is where the
     # app already starts a new stage — no second structure to keep in step with path.
@@ -607,7 +665,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     return {"stats": stats, "lemmas": lemmas, "index": index,
             "units": units, "path": path, "audio": {"files": audio},
             "deep": deep, "shapes": shapes, "slots": slot_names,
-            "sent": sent_pool, "tsample": tsample, "speech": speech}
+            "sent": sent_pool, "tsample": tsample, "speech": speech,
+            "videos": video_list}
 
 
 FONTS = ("https://fonts.googleapis.com/css2?"

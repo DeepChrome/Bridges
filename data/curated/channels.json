@@ -1,0 +1,12 @@
+{
+  "_": "YouTube channels the Immerse library draws on. Hand-curated: a channel earns a place by teaching in spoken Russian with auto-captions available. `max` newest videos within the duration bounds are harvested; Easy Russian is taken whole because the unit videos come from it.",
+  "channels": [
+    { "handle": "EasyRussianVideos",    "name": "Easy Russian",          "max": 400, "min_sec": 120, "max_sec": 2400 },
+    { "handle": "ComprehensibleRussian","name": "Comprehensible Russian","max": 40,  "min_sec": 120, "max_sec": 1800 },
+    { "handle": "BoostYourRussian",     "name": "Boost Your Russian",    "max": 40,  "min_sec": 120, "max_sec": 1800 },
+    { "handle": "RealRussianClub",      "name": "Real Russian Club",     "max": 40,  "min_sec": 120, "max_sec": 1800 },
+    { "handle": "russianfromrussia",    "name": "Russian from Russia",   "max": 40,  "min_sec": 120, "max_sec": 1800 },
+    { "handle": "RussianProgress",      "name": "Russian Progress",      "max": 40,  "min_sec": 120, "max_sec": 1800 },
+    { "handle": "RussianWithMax",       "name": "Russian With Max",      "max": 40,  "min_sec": 120, "max_sec": 1800 }
+  ]
+}

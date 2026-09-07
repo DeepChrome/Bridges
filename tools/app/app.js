@@ -43,6 +43,8 @@ const DEFAULTS = {
   day: null,
   streak: 0,
   speech: speechDefault(),   // the speaking activities' record; never audio
+  watched: {},          // video id -> day watched (the native Immerse library)
+  decks: [],            // imported Anki decks (native); carried so a profile round-trips
 };
 
 function loadState() {
@@ -554,7 +556,7 @@ function renderUnit(u) {
     const vs = el("div", "sec");
     vs.append(el("h2", null, "Watch"));
     const card = el("div", "panel");
-    card.append(el("div", "q", "Easy Russian"));
+    card.append(el("div", "q", u.v.ch || "Video"));
     card.append(el("h3", "gtitle", u.v.title));
     const open = el("a", "btn block", "Open on YouTube" +
                     (u.v.dur ? " · " + Math.round(u.v.dur / 60) + " min" : ""));

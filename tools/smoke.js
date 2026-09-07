@@ -159,7 +159,7 @@ setTimeout(async () => {
   ok(!!$("#me .avatar"), "the profile avatar sits in the top bar");
   ok($("#s-path").hidden === false, "path is the home screen");
   ok(!!doc.querySelector('meta[name="viewport"]'), "viewport meta present");
-  ok(state().v === 5, "state stamped with the current schema", String(state().v));
+  ok(state().v === 6,"state stamped with the current schema", String(state().v));
 
   group("splash");
   ok(!!$("#splash"), "splash screen present");
@@ -559,7 +559,7 @@ setTimeout(async () => {
     ok(acc.list[0].name === "Jared", "the adopted profile keeps its name");
     const st = JSON.parse(
       mDom.window.localStorage.getItem("rb.state." + acc.active) || "{}");
-    ok(st.v === 5, "legacy save migrated to the current schema", String(st.v));
+    ok(st.v === 6,"legacy save migrated to the current schema", String(st.v));
     ok(st.speech && Array.isArray(st.speech.attempts) && st.speech.tagCounts,
        "v5 gave the migrated save its speech slot");
     ok((st.seen["книга"] || {}).reps === 3, "repetition history preserved");

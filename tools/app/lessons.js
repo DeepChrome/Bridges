@@ -242,14 +242,18 @@ function finishQuiz() {
 /* ------------------------------------------------------------- video */
 
 function startVideo(unit, index) {
-  LS = { unit: unit, index: index, words: lessonWords(unit, index), mode: "video" };
+  // Only words the episode actually says (the transcript index decides): a word
+  // listed under a video must be in the video. Without an index, the lesson's words.
+  const heard = unit.v.heard;
+  const words = lessonWords(unit, index).filter((i) => !heard || heard[L[i].b]);
+  LS = { unit: unit, index: index, words: words, mode: "video" };
   $("#title").textContent = unit.name + " · Video";
   const root = $("#s-lesson");
   root.textContent = "";
   const v = unit.v;
 
   const p = el("div", "panel");
-  p.append(el("div", "q", "Easy Russian"));
+  p.append(el("div", "q", v.ch || "Video"));
   p.append(el("h3", "gtitle", v.title));
   if (v.dur) p.append(el("div", "en", Math.round(v.dur / 60) + " min"));
 

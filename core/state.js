@@ -13,7 +13,7 @@
  * single classic script, and the rest of core/ keeps to that style.
  */
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 /* What the speaking activities record. Attempts are capped so state stays a small
    JSON blob; tagCounts is the long-term memory of what kinds of error recur. No
@@ -53,6 +53,11 @@ export const MIGRATIONS = {
   },
   // v4 -> v5: the speaking activities get somewhere to record what happened.
   4: (s) => Object.assign({}, s, { speech: s.speech || speechDefault(), v: 5 }),
+  // v5 -> v6: the video library outgrew the units, so watching is recorded per
+  // video (id -> day watched) as well as per unit; and imported Anki decks
+  // ([{ id, name, cards: [{ ru, en }] }]) get a slot. Their cards are scheduled
+  // in `seen` under the Russian string like any other word.
+  5: (s) => Object.assign({}, s, { watched: s.watched || {}, decks: s.decks || [], v: 6 }),
 };
 
 export function migrate(raw, from) {

@@ -1,22 +1,34 @@
-"""Match Easy Russian videos to study units.
+"""The video library: every harvested video with what it is about, and one video
+per study unit.
 
-Reuses the topic keyword sets from build_topics.py so a video and a vocabulary unit
-are judged against the same vocabulary of ideas — there is no second taxonomy to keep
-in sync.
+Reads the catalogue from tools/harvest_videos.py and the index from
+tools/build_transcripts.py, writes data/videos.json:
 
-Scoring is deliberately conservative: a video is attached only when its title matches
-a unit's keywords clearly. Units with no confident match get no video rather than a
-loose one, and the report says how many.
+  channels  the sources, for the credit line
+  units     unit id -> the one video that teaches its words (coverage-led)
+  videos    every video: title, channel, duration, keywords, the units whose
+            vocabulary it speaks, its level and ease, its chapters
+
+Keywords are what the Immerse search matches: the title, the channel's own tags,
+the start of the description, the grammar points a title names, the level, and the
+names of the units and chapters whose words the video speaks. So "grammar" finds
+the case lessons and "travel" finds the trip vlogs, without a taxonomy of its own —
+the unit keyword sets in build_topics.py are reused, as before.
+
+Unit attachment is deliberately conservative: a video is attached only when it
+actually speaks a good share of the unit's words (the transcript decides), with the
+title as tie-break; units with no confident match get no video rather than a loose
+one, and the report says how many.
 
     python tools/build_videos.py
 """
 
 import argparse
-import html
 import json
 import re
 import sqlite3
 import sys
+from collections import defaultdict
 from pathlib import Path
 
 # reconfigure, not a fresh TextIOWrapper: build_topics wraps sys.stdout at import
@@ -25,6 +37,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_topics import RULES  # noqa: E402
+from panel import fold  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -32,9 +45,8 @@ ROOT = Path(__file__).resolve().parent.parent
 # topic of their own.
 BEGINNER_RE = re.compile(r"super easy russian", re.I)
 
-# Titles that are channel business rather than teaching material.
-SKIP_RE = re.compile(r"\b(trailer|announcement|q&a|behind the scenes|patreon|"
-                     r"livestream|shorts)\b", re.I)
+# A unit's video is watched inside a lesson; a half-hour vlog is not that.
+UNIT_MAX_SEC = 1200
 
 # Keyword matching gets these wrong: "city" pulled a video about a Latvian city
 # rather than town vocabulary, and "photos" pulled a family album into Technology.
@@ -47,11 +59,53 @@ OVERRIDES = {
 
 STOP = set("""the a an and or of in on at to for with about from is are was were be
 been being this that these those it its as by how why what when where who russian
-russia russians people easy super vs your you we our my""".split())
+russia russians people easy super vs your you we our my me i do does did can will
+not no yes all one two more most very just into out up down over than then them
+they their there here his her she he him has have had but if so some any every
+also new learn learning language languages video videos episode part lesson lessons
+podcast channel subscribe like comment share""".split())
+
+# What a title says the video teaches. Each hit adds its key and "grammar".
+GRAMMAR = [
+    ("cases", r"\bcases?\b|prepositional|accusative|genitive|dative|instrumental|nominative"),
+    ("verbs", r"\bverbs?\b|conjugat"),
+    ("tense", r"past tense|future tense|present tense|\btenses?\b"),
+    ("aspect", r"\baspects?\b|perfective|imperfective"),
+    ("motion", r"verbs? of motion"),
+    ("plural", r"\bplurals?\b"),
+    ("gender", r"\bgenders?\b"),
+    ("pronouns", r"\bpronouns?\b"),
+    ("adjectives", r"\badjectives?\b"),
+    ("adverbs", r"\badverbs?\b"),
+    ("numbers", r"\bnumbers?\b|\bnumerals?\b|\bcounting\b"),
+    ("prepositions", r"\bprepositions?\b"),
+    ("imperative", r"\bimperative\b"),
+    ("particles", r"\bparticles?\b"),
+    ("prefixes", r"\bprefix(es)?\b"),
+    ("stress", r"\bstress\b|\baccent\b"),
+    ("pronunciation", r"pronunciation|pronounce|sounds?\b"),
+    ("alphabet", r"alphabet|cyrillic"),
+]
+KINDS = [
+    ("vocabulary", r"vocabulary|\bwords\b|phrases|expressions|slang|idioms"),
+    ("listening", r"listening|comprehensible|comprehension|\bstory\b|\bstories\b|fairy tale|\bvlog\b|podcast|conversation|dialogue|interview"),
+    ("culture", r"culture|tradition|holiday|history|soviet|\bussr\b"),
+    ("interview", r"street interview|interviews?\b"),
+    ("slow", r"\bslow\b"),
+]
+LEVELS = [
+    ("beginner", r"\ba1\b|super easy|for beginners|beginner|from zero|absolute|\bslow\b"),
+    ("elementary", r"\ba2\b|elementary"),
+    ("intermediate", r"\bb1\b|intermediate"),
+    ("upper-intermediate", r"\bb2\b|upper"),
+    ("advanced", r"\bc1\b|\bc2\b|advanced"),
+]
+LATIN = re.compile(r"[a-z']+")
+CYRILLIC = re.compile(r"[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*")
 
 
 def tokens(text):
-    return [w for w in re.findall(r"[a-z']+", text.lower()) if w not in STOP and len(w) > 2]
+    return [w for w in LATIN.findall(text.lower()) if w not in STOP and len(w) > 2]
 
 
 def score_title(title, keywords):
@@ -65,33 +119,64 @@ def score_title(title, keywords):
     return hits
 
 
+def first_hits(text, table):
+    return [key for key, pat in table if re.search(pat, text, re.I)]
+
+
+def keywords(v, topics, unit_name, chapter_title):
+    """The search string: distinct words, most specific first, capped."""
+    out, seen = [], set()
+
+    def add(words):
+        for w in words:
+            w = w.lower().strip()
+            if w and w not in seen:
+                seen.add(w)
+                out.append(w)
+
+    text = v["title"] + " " + " ".join(v.get("tags") or [])
+    add(tokens(v["title"]))
+    add(fold(w) for w in CYRILLIC.findall(v["title"]))
+    grammar = first_hits(text, GRAMMAR)
+    if grammar:
+        add(["grammar"] + grammar)
+    add(first_hits(text, KINDS))
+    level = v.get("level")
+    if level:
+        add([level, level.split("-")[0]])
+    for tid in topics:
+        add([tid] + tokens(unit_name.get(tid, "")))
+    if chapter_title:
+        add(tokens(chapter_title))
+    add(tokens(v.get("channel", "")))
+    add(t for tag in (v.get("tags") or []) for t in tokens(tag))
+    add(tokens(v.get("desc", ""))[:40])
+    return " ".join(out[:90])
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--videos", type=Path,
-                    default=ROOT / "data" / "raw" / "youtube" / "easyrussian.tsv")
+    ap.add_argument("--catalogue", type=Path,
+                    default=ROOT / "data" / "raw" / "youtube" / "catalogue.json")
+    ap.add_argument("--transcripts", type=Path, default=ROOT / "data" / "transcripts.json")
     ap.add_argument("--topics", type=Path, default=ROOT / "data" / "topics.db")
     ap.add_argument("--out", type=Path, default=ROOT / "data" / "videos.json")
     ap.add_argument("--min-score", type=int, default=1)
     args = ap.parse_args()
 
-    rows = []
-    for line in args.videos.read_text(encoding="utf-8").splitlines():
-        parts = line.rstrip("\n").split("\t")
-        if len(parts) < 2 or not parts[0].strip():
-            continue
-        # The feed carries titles HTML-escaped; an emoji arrived as "&#128512;".
-        vid, title = parts[0].strip(), html.unescape(parts[1].strip())
-        dur = int(parts[2]) if len(parts) > 2 and parts[2].isdigit() else None
-        if SKIP_RE.search(title):
-            continue
-        rows.append({"id": vid, "title": title, "dur": dur})
-    print(f"{len(rows)} teaching videos considered")
+    if not args.catalogue.exists():
+        sys.exit(f"no catalogue at {args.catalogue}; run tools/harvest_videos.py first")
+    catalogue = json.loads(args.catalogue.read_text(encoding="utf-8"))
+    rows = [dict(v) for v in catalogue["videos"]]
+    print(f"{len(rows)} videos in the catalogue from {len(catalogue['channels'])} channels")
 
     kw = {tid: set(words) for tid, _, words in RULES}
+    unit_name = {tid: name for tid, name, _ in RULES}
 
     db = sqlite3.connect(f"file:{args.topics}?mode=ro", uri=True)
     units = db.execute("select id, name, kind, ord from topics order by ord").fetchall()
-
+    for tid, name, _, _ in units:
+        unit_name[tid] = name
     # What each unit actually teaches, as lemma head-words — the same keys the
     # transcript index uses.
     db.execute("attach database ? as lex", (str(ROOT / "data" / "lexicon.db"),))
@@ -100,29 +185,60 @@ def main():
             "select u.topic_id, l.bare from unit_words u"
             " join lex.lemmas l on l.id = u.lemma_id"):
         unit_words.setdefault(tid, set()).add(bare)
+    # A unit's chapter, read off the path the way the app reads it: a spine row
+    # opens a chapter and the branches after it belong to that chapter.
+    chapter_title = {sid: title for _, title, sid
+                     in db.execute("select n, title, spine_id from chapters")}
+    chapter_of, current = {}, None
+    for _, col, tid in db.execute("select row, col, topic_id from path order by row, col"):
+        if col == 0 or current is None:
+            current = chapter_title.get(tid, current)
+        chapter_of[tid] = current
     db.close()
 
-    # Heard vocabulary per video, from tools/build_transcripts.py. When present this
-    # replaces title guessing: a video earns a unit by actually saying its words.
-    heard = {}
-    tpath = ROOT / "data" / "transcripts.json"
-    if tpath.exists():
-        heard = {vid: set(words) for vid, words in
-                 json.loads(tpath.read_text(encoding="utf-8")).items()}
+    # Heard vocabulary per video, from tools/build_transcripts.py.
+    heard, tstats = {}, {}
+    if args.transcripts.exists():
+        data = json.loads(args.transcripts.read_text(encoding="utf-8"))
+        heard = {vid: set(words) for vid, words in data.get("index", {}).items()}
+        tstats = data.get("stats", {})
         print(f"transcripts available for {len(heard)} videos")
 
-    # Rank every (video, topic) pair once, then hand each unit its best unused video so
-    # two units never advertise the same clip.
-    # A video's claim on a unit is the share of that unit's vocabulary it actually
-    # speaks. Coverage rather than raw count, so a long video does not win every unit
-    # simply by saying more words. Title keywords remain the fallback for the videos
+    # --- what each video is about ------------------------------------------
+    # Topic units only: a spine unit's words are the commonest in the language,
+    # so every video "covers" it, and that says nothing about the video.
+    branch_ids = [tid for tid, _, kind, _ in units if kind != "spine"]
+    for v in rows:
+        spoken = heard.get(v["id"], set())
+        scored = []
+        for tid in branch_ids:
+            words = unit_words.get(tid, set())
+            hit = len(words & spoken) if spoken else 0
+            cov = hit / len(words) if words else 0
+            ts = score_title(v["title"], kw.get(tid, set()))
+            if (hit >= 4 and cov >= 0.1) or ts >= 2:
+                scored.append((cov + ts * 0.1, tid))
+        scored.sort(reverse=True)
+        v["topics"] = [tid for _, tid in scored[:3]]
+        text = v["title"] + " " + " ".join(v.get("tags") or [])
+        lv = first_hits(text, LEVELS)
+        v["level"] = lv[0] if lv else None
+        st = tstats.get(v["id"])
+        v["ease"] = st["ease"] if st else None
+        v["kw"] = keywords(v, v["topics"], unit_name,
+                           chapter_of.get(v["topics"][0]) if v["topics"] else None)
+
+    # --- one video per unit --------------------------------------------------
+    # Rank every (video, unit) pair once, then hand each unit its best unused video
+    # so two units never advertise the same clip. A video's claim on a unit is the
+    # share of that unit's vocabulary it actually speaks — coverage rather than raw
+    # count, so a long video does not win every unit simply by saying more words —
+    # with a topical title breaking ties. Title alone is the fallback for a video
     # with no transcript.
-    # Both signals, because each is wrong alone: coverage alone hands "Body & Health"
-    # a video about New Year because the words happen to occur, while the title alone
-    # cannot tell whether the unit's words are ever actually spoken. Coverage leads,
-    # a topical title breaks ties.
     ranked = []
     for v in rows:
+        if v.get("dur") and v["dur"] > UNIT_MAX_SEC:
+            continue
         spoken = heard.get(v["id"])
         for tid in kw:
             words = unit_words.get(tid) or set()
@@ -130,8 +246,8 @@ def main():
             hit = len(words & spoken) if (spoken and words) else 0
             coverage = hit / len(words) if words else 0
             if hit >= 5:
-                cand = dict(v, hit=hit, coverage=coverage)
-                ranked.append((coverage * 1000 + title_score * 120, tid, cand))
+                ranked.append((coverage * 1000 + title_score * 120, tid,
+                               dict(v, hit=hit, coverage=coverage)))
             elif title_score >= args.min_score:
                 ranked.append((title_score, tid, dict(v)))
     ranked.sort(key=lambda x: (-x[0], x[2]["title"]))
@@ -144,34 +260,42 @@ def main():
             assigned[tid] = dict(v, score=99)
             taken.add(vid)
         else:
-            print(f"  !! override video not in the listing: {vid} ({tid})")
-
+            print(f"  !! override video not in the catalogue: {vid} ({tid})")
     for s, tid, v in ranked:
         if tid in assigned or v["id"] in taken:
             continue
         assigned[tid] = dict(v, score=s)
         taken.add(v["id"])
 
-    # Core stages get the beginner series, in the channel's own order (newest first,
-    # so reverse for a gentle-to-harder progression).
+    # Core stages get the beginner series, in the channel's own order (the listing
+    # is newest first, so reverse for a gentle-to-harder progression).
     beginner = [v for v in reversed(rows)
                 if BEGINNER_RE.search(v["title"]) and v["id"] not in taken]
     cores = [u for u in units if u[2] == "spine"]
-    for i, (tid, name, kind, _) in enumerate(cores):
+    for i, (tid, _name, _kind, _) in enumerate(cores):
         if i < len(beginner):
             assigned[tid] = dict(beginner[i], score=0)
             taken.add(beginner[i]["id"])
 
-    out = {"channel": "Easy Russian",
-           "channel_url": "https://www.youtube.com/@EasyRussian",
-           "units": assigned}
+    keep = ("id", "title", "dur", "channel", "score", "hit", "coverage")
+    out = {
+        "channels": catalogue["channels"],
+        "units": {tid: {k: v[k] for k in keep if k in v} for tid, v in assigned.items()},
+        "videos": [{"id": v["id"], "title": v["title"], "ch": v.get("channel"),
+                    "dur": v.get("dur"), "kw": v["kw"], "topics": v["topics"],
+                    "level": v["level"], "ease": v["ease"], "upload": v.get("upload"),
+                    "chapters": (v.get("chapters") or [])[:12]}
+                   for v in rows if heard.get(v["id"])],
+    }
     args.out.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 
     have = sum(1 for u in units if u[0] in assigned)
     print(f"wrote {args.out}")
+    print(f"  library          : {len(out['videos'])} videos with a transcript "
+          f"({len(rows) - len(out['videos'])} without, left out)")
     print(f"  units with a video : {have}/{len(units)}")
     print(f"  videos used        : {len(taken)}\n")
-    for tid, name, kind, _ in units:
+    for tid, name, _kind, _ in units:
         v = assigned.get(tid)
         mark = "  " if v else "!!"
         if v and "coverage" in v:
@@ -182,6 +306,12 @@ def main():
             how = "—"
         detail = f"{v['title'][:42]}" if v else "(no confident match)"
         print(f"{mark} {name:<22} {how:<24} {detail}")
+    levels = defaultdict(int)
+    for v in out["videos"]:
+        levels[v["level"] or "unstated"] += 1
+    print(f"\n  levels: {dict(levels)}")
+    with_topics = sum(1 for v in out["videos"] if v["topics"])
+    print(f"  videos with a unit topic: {with_topics}/{len(out['videos'])}")
 
 
 if __name__ == "__main__":

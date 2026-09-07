@@ -19,6 +19,13 @@ export const AUDIO = (DATA.audio && DATA.audio.files) || {};
 /* The speaking and listening pools (CLAUDE.md §30b): one shared row list, and per
    unit the rows each activity may draw from. */
 export const SPEECH = DATA.speech || { rows: [], speak: {}, listen: {} };
+/* The Immerse library: every harvested video with a transcript, its search
+   keywords, and the study words it actually says (with moments). A unit's own
+   episode is also here, marked with `unit`. */
+export const VIDEOS = DATA.videos || [];
+export const videoById = (id) => VIDEOS.find((v) => v.id === id) || null;
+export const videoWatched = (st, v) =>
+  !!((st.watched || {})[v.id]) || (!!v.unit && !!unitState(st, v.unit).video);
 
 /* Recordings are served from the deployed site rather than bundled: 209 MB will not
    fit in a store binary, and streaming keeps the app installable. */
@@ -216,6 +223,20 @@ export function nextLesson(st) {
     }
   }
   return null;
+}
+
+/* Where the learner is: every unit on the route up to the spine lesson Continue
+   would resume, or the whole route once it is done. What a quiz or a listening
+   drill draws from by default — cumulative, to here (the owner, 2026-09-07). */
+export function reachedUnits(st) {
+  const here = nextLesson(st);
+  const out = [];
+  for (const s of STAGES) {
+    out.push(s.core);
+    if (here && s.core.id === here.unit.id) return out;
+    out.push(...s.branches);
+  }
+  return out;
 }
 
 export const idxOfWord = (w) => {

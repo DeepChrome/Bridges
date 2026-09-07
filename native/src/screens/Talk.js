@@ -139,7 +139,12 @@ export default function Talk({ navigation, route }) {
         : "The tutor could not answer. Try again.");
       return;
     }
-    // The learner's turn, graded now that the tutor has read it.
+    // The learner's turn, graded now that the tutor has read it. The tutor may
+    // send no grading at all for a turn (the validator allows null); then the
+    // words stand as said, ungraded, and the conversation goes on.
+    if (transcript && !reply.feedback) {
+      setTurns((prev) => prev.map((x) => (x.pending ? { ...x, pending: false } : x)));
+    }
     if (transcript && reply.feedback) {
       const words = reply.feedback.words || [];
       const alignment = words.map((w) => ({ said: w.said, expected: w.expected,

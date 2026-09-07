@@ -121,6 +121,22 @@ describe("talk", () => {
     expect(talk).toHaveBeenCalledTimes(1);                                 // refused, not sent
   });
 
+  it("a turn the tutor did not grade stands as said and the conversation goes on", async () => {
+    talk.mockResolvedValueOnce(OPENING).mockResolvedValueOnce({ ...REPLY, feedback: null, newWords: [] });
+    await withTalk({ unit: done() });
+    await act(async () => { fireEvent.press(await screen.findByText("В кафе")); });
+    await screen.findByText(/Здравствуйте/);
+    const hold = screen.getByTestId("say-hold");
+    await act(async () => { fireEvent(hold, "pressIn"); });
+    await act(async () => { fireEvent(hold, "pressOut"); });
+    await act(async () => { global.__stt.emit("result", { isFinal: true, results: [{ transcript: "я хочу чай" }] }); });
+    expect(await screen.findByText(/Вы хотите чай\?/)).toBeTruthy();
+    expect(screen.queryByTestId("turn-pending")).toBeNull();
+    expect(screen.getByText("я хочу чай")).toBeTruthy();
+    expect(screen.getByText("11 turns left")).toBeTruthy();
+    expect((await saved()).speech.attempts).toHaveLength(0);
+  });
+
   it("says so when the tutor cannot answer, and offers a retry", async () => {
     talk.mockResolvedValueOnce({ ok: false, reason: "offline" }).mockResolvedValueOnce(OPENING);
     await withTalk({ unit: done() });

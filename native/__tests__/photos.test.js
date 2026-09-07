@@ -1,0 +1,65 @@
+/* Photographs on the vocabulary card and the entry (the owner, 2026-09-07):
+   shipped by tools/build_images.py from public-domain Commons files, keyed on
+   the word, with the credit on the entry.
+
+   Own file, per the timeout note in screens.test.js. */
+
+import React from "react";
+import { render, screen } from "@testing-library/react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { SessionProvider } from "../src/session";
+import { flushState } from "../src/store";
+import WordScreen from "../src/screens/Word";
+import { VocabFlow } from "../src/screens/Flows";
+import { IMAGES, CREDITS } from "../src/images";
+import { UN, L, lessonWords, lessonCount } from "../src/data";
+
+const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
+async function withProfile(ui) {
+  await AsyncStorage.setItem("rb.accounts", JSON.stringify({
+    list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
+  return await render(<SessionProvider>{ui}</SessionProvider>);
+}
+beforeEach(async () => { await flushState(); await AsyncStorage.clear(); });
+afterEach(async () => { await flushState(); });
+
+const withPhoto = Object.keys(IMAGES);
+
+describe("photographs", () => {
+  it("ship only for words the units teach, every one with a credit and a free licence", () => {
+    expect(withPhoto.length).toBeGreaterThan(100);
+    const taught = new Set(UN.flatMap((u) => u.w.map((i) => L[i].b)));
+    for (const w of withPhoto) {
+      expect(taught.has(w)).toBe(true);
+      expect(CREDITS[w]).toBeTruthy();
+      expect(CREDITS[w].l).toMatch(/^(CC0|Public domain)/i);
+    }
+  });
+
+  it("appear on the entry with the credit", async () => {
+    const w = withPhoto[0];
+    await withProfile(<WordScreen route={{ params: { word: w } }} />);
+    expect(await screen.findByTestId("word-photo")).toBeTruthy();
+    expect(screen.getByText(new RegExp(`Photo: .*${CREDITS[w].l.split(" ")[0]}`))).toBeTruthy();
+  });
+
+  it("appear on the vocabulary card of a lesson that teaches such a word, and not otherwise", async () => {
+    // Find a lesson whose first taught word has a photo, then step to it.
+    let found = null;
+    for (const u of UN) {
+      for (let i = 0; i < lessonCount(u) && !found; i++) {
+        const words = lessonWords(u, i);
+        if (words.length && IMAGES[L[words[0]].b]) found = { u, i };
+      }
+      if (found) break;
+    }
+    expect(found).toBeTruthy();
+    await withProfile(<VocabFlow route={{ params: { unitId: found.u.id, index: found.i } }} navigation={nav} />);
+    // The grammar note opens the first lesson; the first word card follows it.
+    const start = await screen.findByText(/Start learning|Continue/);
+    const { fireEvent, act } = require("@testing-library/react-native");
+    if (start.props.children === "Start learning") await act(async () => { fireEvent.press(start); });
+    expect(await screen.findByTestId("word-photo")).toBeTruthy();
+  });
+});

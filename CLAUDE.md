@@ -1091,7 +1091,34 @@ several channels carry the channel's initials where a unit has its icon.
   «житься» (counted for every «нет») and «двух» (a form of «два») left the spine
   (`STUBS`).
 
-## 30i. Toward a release (Phase 8, as far as it goes without the owner)
+## 30h′. The owner's second batch (2026-09-07, evening)
+
+- **Talk speaks.** The tutor's turn is read out as it arrives (`say` with the
+  tutor's own pace, `st.talkSpeed`); the speaker on the bubble is for hearing it
+  again. The learner picks the tutor's **level** on the picker (`TALK_LEVELS`;
+  unset, it follows the route: chapters 1–2 beginner, 3–5 intermediate, then
+  advanced) and it rides to the Worker as `level`, where `LEVELS` in `talk.js`
+  pitches the prompt and an advanced learner may get three sentences. The notes
+  on a learner's turn sit *under* the bubble in a smaller italic face
+  (`Feedback quiet`) — there, not dominant.
+- **Immerse** rows carry the video's YouTube thumbnail (fetched from YouTube,
+  nothing stored) and a **CEFR code** (`cefr` from the title's own "B1+" or the
+  level word; the transcript's ease was measured and does not separate levels,
+  so it is not used). Typing "B1" filters to B1 and B1+, "B1+" to B1+ only;
+  the codes are never displayed.
+- **Learn**: the score line is centred, Continue names only the unit,
+  "Continue (Pronouns & Being)", and the fork's lanes come back to the road
+  under the side quests (`merge-<id>` paths) — a fork that never re-joined read
+  as a dead end.
+- **Photographs** (`harvest_images.py` → `build_images.py`): for every noun a
+  unit teaches, Wikimedia Commons is searched for the first English sense and
+  the first JPEG that is **CC0 or public domain** is taken — nothing else, so no
+  card needs a credit line — at 176 px (~9 KB). Shipped as `native/assets/img/`
+  through the generated `native/src/images.js` (`IMAGES` by bare word, `CREDITS`
+  title/author/licence), shown above the word on the vocabulary card and the
+  entry, with the credit on the entry. Commons full-text search is crude:
+  `data/curated/image_terms.json` overrides a search term or blanks a word.
+  Quality is a person's judgment; the tool prints every miss.
 
 - **Per-user tokens** (P8.4) — `identify()` in the Worker: the `APP_TOKEN`
   secret is the owner; any other bearer token is a KV record `user:<token>`

@@ -1,0 +1,9 @@
+{
+  "_": "Search terms for tools/harvest_images.py where a word's first English sense finds the wrong picture on Wikimedia Commons, or no picture. A blank string means: no photo for this word.",
+  "молоко": "glass of milk",
+  "хлеб": "loaf of bread",
+  "сыр": "cheese wheel",
+  "торт": "birthday cake",
+  "завтрак": "breakfast table",
+  "овощ": "vegetables market"
+}

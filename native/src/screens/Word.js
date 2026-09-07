@@ -7,11 +7,12 @@
  */
 
 import React from "react";
-import { View, Text, ScrollView } from "react-native";
-import { useTheme } from "../theme";
+import { View, Text, ScrollView, Image } from "react-native";
+import { useTheme, radius } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted } from "../ui";
 import { L, UN, resolveWord } from "../data";
 import { Linked } from "../words";
+import { IMAGES, CREDITS } from "../images";
 
 export function Table({ table }) {
   const t = useTheme();
@@ -71,9 +72,16 @@ export default function Word({ route }) {
   const unit = w.u ? UN.find((u) => u.id === w.u) : null;
   const examples = w.x || [];
 
+  const photo = IMAGES[w.b];
+  const credit = CREDITS[w.b];
   return (
     <Screen>
       <Card>
+        {photo ? (
+          <Image testID="word-photo" source={photo} resizeMode="cover"
+                 accessibilityLabel={`Photo: ${(w.e || "").split(/[,;]/)[0]}`}
+                 style={{ width: "100%", height: 160, borderRadius: radius.md, marginBottom: 12 }} />
+        ) : null}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           <Text style={{ color: t.ink, fontSize: 32, fontWeight: "600", flex: 1 }}>
             {w.w}
@@ -90,6 +98,12 @@ export default function Word({ route }) {
           {unit ? <Pill tone="brand">{unit.name}</Pill> : null}
         </View>
         {(w.t || []).map((tb, k) => <Table key={k} table={tb} />)}
+        {credit ? (
+          // The photo's record: Commons title, author where one is named, licence.
+          <Muted size={11} style={{ marginTop: 12 }}>
+            {`Photo: ${credit.t}${credit.a ? `, ${credit.a}` : ""} · ${credit.l}, Wikimedia Commons`}
+          </Muted>
+        ) : null}
       </Card>
 
       {examples.length ? (

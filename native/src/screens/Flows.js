@@ -2,9 +2,10 @@
  * placement routes. Each one supplies its steps and decides what the result means. */
 
 import React, { useMemo, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Image } from "react-native";
 import { useSession } from "../session";
-import { useTheme } from "../theme";
+import { useTheme, radius } from "../theme";
+import { IMAGES } from "../images";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
@@ -83,6 +84,13 @@ export function VocabFlow({ route, navigation }) {
           </Card>
         ) : (
           <Card style={{ alignItems: "center" }}>
+            {IMAGES[w.b] ? (
+              // A photograph of the thing, when Commons has a public-domain one
+              // (tools/harvest_images.py). Above the word: see it, then read it.
+              <Image testID="word-photo" source={IMAGES[w.b]} resizeMode="cover"
+                     accessibilityLabel={`Photo: ${(w.e || "").split(/[,;]/)[0]}`}
+                     style={{ width: "100%", height: 150, borderRadius: radius.md, marginBottom: 12 }} />
+            ) : null}
             <Muted>New word</Muted>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10,
                            marginVertical: 8 }}>

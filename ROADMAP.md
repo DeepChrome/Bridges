@@ -232,6 +232,10 @@ can overrule any of them.
   and privacy disclosure, P8.8 as a build flag (`--public`, off). Waiting on the
   owner: P8.1's audio choice and so P8.2; a privacy policy URL; the store account.
   P1.8 is closed as "no pixel suite, by design" (CLAUDE.md §31).
+- **A34 — the owner's second batch (2026-09-07).** Talk reads its turn out,
+  with a chosen level and pace, and puts its notes under the bubble; Immerse
+  gets thumbnails and CEFR filtering; the Learn header and the fork's return
+  lanes; public-domain photographs on the vocabulary cards. CLAUDE.md §30h′.
 - **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
   local verdict, grammar section) were built before Phase 4 because Phase 4 stops
   at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the

@@ -29,6 +29,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SPINE_UNIT = 28      # words per core unit
 BRANCH_MAX = 40      # cap on a topic unit
 BRANCH_MIN = 10      # below this a topic isn't worth a unit
+PRIMARY_SENSES = 2   # how many of a gloss's senses may claim a topic
+SENSE_WORDS = 3      # and how long such a sense may be
 
 # Ordered by priority: the first rule that matches claims the word. Specific topics
 # come before broad ones so "football" lands in sport, not in games-in-general.
@@ -160,7 +162,10 @@ RULES = [
 # the closed class are taught on the spine, where their frequency puts them anyway.
 BRANCHABLE = {"noun", "verb", "adjective"}
 
-# Ambiguous glosses the rules get wrong, resolved by hand. None = leave unplaced.
+# Ambiguous glosses the rules get wrong, resolved by hand. None = leave unplaced
+# (the word stays in the dictionary and, if common enough, on the spine). Read from
+# `python tools/audit_branches.py` on 2026-09-06, every branch, every word; the
+# rule change to primary senses removed most accidents and these are the rest.
 OVERRIDES = {
     "берег": "nature",     # "bank" here is a riverbank, not a branch of Sberbank
     "уж": None,            # "grass snake" is real but уж is overwhelmingly a particle
@@ -174,6 +179,86 @@ OVERRIDES = {
     "знать": None,         # the verb "to know" swamps the noun "nobility"
     "стать": None,         # "become", not a word about animals
     "область": None,       # administrative oblast, not a field in nature
+
+    # -- family: "people", "person", "man-" and "relative" as words, not kin
+    "некоторый": None, "чужой": None, "соседний": None, "искусственный": None,
+    "личность": None, "относительный": None, "любопытный": "emotion",
+    "техник": "work", "звезда": "nature", "народ": "politics",
+    "общественность": "politics", "нация": "politics",
+    # -- food: things made of glass, and "plate" the chart
+    "зеркало": "home", "стекло": "home", "таблица": None, "мелочь": None,
+    "растительный": None,
+    # -- home: "home" the country and "house" the theatre
+    "театр": "art", "кинотеатр": "city", "клуб": "city", "аудитория": "school",
+    "отечественный": "politics", "родина": "politics", "расписание": "time",
+    "ровный": None, "половой": None, "снять": None, "лечь": None,
+    # -- city: "post", "station", "office" and "building" in their other senses
+    "школьный": "school", "училище": "school", "учебный": "school",
+    "театральный": "art", "редакция": "tech", "должность": "work",
+    "секрет": None, "пост": None, "экспедиция": None, "проведение": None,
+    "пункт": None,
+    # -- travel: "leave", "drive", "border", "plane" as other things
+    "выйти": None, "кампания": None, "рубеж": None, "плоскость": None,
+    "прохожий": None, "наступить": None, "край": "nature",
+    # -- work: teachers, doctors, society and "fire"
+    "общество": "politics", "доктор": "body", "учитель": "school",
+    "учительница": "school", "произведение": "art", "взять": None,
+    "свидание": None, "крепкий": None, "пожар": None, "десятка": None,
+    "удаться": None, "пользоваться": None, "хозяйство": None,
+    # -- school: "paper" the newspaper, "degree" the temperature, "rule" the verb
+    "газета": "tech", "ноутбук": "tech", "рабочий": "work", "бухгалтерский": "work",
+    "сюжет": "art", "градус": "nature", "править": "politics", "классный": None,
+    "степень": None,
+    # -- body: "head" the chief, "back" the rear, a gun
+    "обувь": "clothes", "холод": "nature", "здравоохранение": "politics",
+    "ружьё": "military", "личной": None, "глава": None, "задний": None,
+    "перемена": None, "орган": None, "сердечный": None,
+    # -- clothes: "short", "thin", "fat", "ring" and "suit" in their other senses
+    "позвонить": "speech", "иск": "politics", "жир": "food", "бабочка": "animals",
+    "прекрасный": None, "короткий": None, "пола": None, "размер": None,
+    "тонкий": None, "краткий": None, "величина": None, "жирный": None,
+    "раздаться": None,
+    # -- nature: "field" of industry, "rock" the fate, ice cream
+    "мороженое": "food", "отрасль": "work", "придтись": None, "площадка": None,
+    "рок": None,
+    # -- animals
+    "кошки": None,         # cat-o'-nine-tails
+    # -- sport: "coach" the carriage, "ball" the dance, "race" the breed
+    "поражение": "military", "вагон": "travel", "актёр": "art", "порода": "animals",
+    "бригада": "work", "бал": "art", "удар": None, "потерять": None, "терять": None,
+    "шар": None, "раса": None,
+    # -- art: "play" the verb, "stage" the phase, "instrument" the gun
+    "орудие": "military", "играть": None, "игра": None, "приближение": None,
+    "этап": None, "стадия": None, "фигура": None, "втора": None,
+    # -- politics: "power" the energy, "state" the condition, "public" the vowel
+    "электроэнергия": "tech", "энергетика": "tech", "сила": None, "процесс": None,
+    "состояние": None, "верный": None, "гласный": None,
+    # -- military: "general" the adjective, "peace" the quiet, "division" the section
+    "начальство": "work", "мир": None, "общий": None, "покой": None, "раздел": None,
+    "генеральный": None, "всеобщий": None,
+    # -- tech: "article" the goods, "report" the gunshot, "system" the order
+    "товар": "work", "выстрел": "military", "весть": "speech", "опыт": None,
+    "карточка": None, "строй": None, "схема": None,
+    # -- time: "watch" the verb, "minute" the adjective, "number" the headcount
+    "имя": None, "бывший": None, "численность": None, "посмотреть": None,
+    "подробный": None,
+    # -- emotion: "like" the preposition, "want" the need, "thought" the Duma
+    "дума": "politics", "подобный": None, "уметь": None, "рада": None,
+    "выглядеть": None, "потребность": None, "хотеться": None, "внезапный": None,
+    "чаять": None,
+    # -- speech: "call" as summon, visit, drop in; "sentence" the verdict
+    "приговор": "politics", "вызвать": None, "вызывать": None, "визит": None,
+    "вызов": None, "велеть": None, "заходить": None, "зайти": None, "мол": None,
+    # -- second pass, the words that moved up to fill the gaps
+    "дежурный": None, "практик": None, "витрина": "city", "клавиша": "tech",
+    "снимать": None, "сочетание": None, "стеклянный": "home",
+    "обращение": None, "квадратный": None, "радиостанция": "tech",
+    "оставить": None, "механический": "tech", "огонь": None, "творчество": "art",
+    "заказать": None,
+    # -- third pass: "back" the verb, "hand" of a clock, "division" the arithmetic
+    "возвращаться": None, "отдать": None, "языковый": None, "стрелка": None,
+    "относиться": None, "поддерживать": None, "деление": None, "разделение": None,
+    "святая": None, "затишье": None, "узнать": None,
 }
 
 # A chapter is one spine unit plus the branches that follow it — the shape a language
@@ -316,12 +401,18 @@ def main():
                 by_topic[tid].append((lid, m["n"], "manual"))
             continue
         # Parentheticals are disambiguators, not meanings: "on (date)" must not
-        # make на a word about time.
+        # make на a word about time. Only the PRIMARY senses count — the first
+        # two, and each at most three words — because a word is what it mostly
+        # means: стекло is "glass" the material before it is a drinking glass,
+        # зеркало is a mirror, таблица is a chart. Matching any sense anywhere
+        # put all three in Food, глухой ("deaf"; also "blind wall") in Home, and
+        # a fifth of every branch was that kind of accident.
         senses = [PARENS.sub(" ", s).strip()
                   for s in re.split(r"[,;]", m["en"].lower())]
+        primary = [s for s in senses[:PRIMARY_SENSES] if s and len(s.split()) <= SENSE_WORDS]
         for tid, _, pat in rules:
-            hit = next((s for s in senses if pat.search(s)), None)
-            if hit and len(hit) <= 40:
+            hit = next((s for s in primary if pat.search(s)), None)
+            if hit:
                 assigned[lid] = tid
                 by_topic[tid].append((lid, m["n"], hit))
                 break

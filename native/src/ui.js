@@ -250,9 +250,9 @@ export function Ru({ children, size = 19, style }) {
   return <Text style={[{ color: t.ink, fontSize: size }, style]}>{children}</Text>;
 }
 
-export function Muted({ children, size = 13, style }) {
+export function Muted({ children, size = 13, style, testID }) {
   const t = useTheme();
-  return <Text style={[{ color: t.ink3, fontSize: size }, style]}>{children}</Text>;
+  return <Text testID={testID} style={[{ color: t.ink3, fontSize: size }, style]}>{children}</Text>;
 }
 
 /* A header that says where you are: what this screen is, and what it belongs to.

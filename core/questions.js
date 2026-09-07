@@ -144,7 +144,7 @@ export function makeQuestions(env) {
         const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, (x) => x.b)));
         return {
           kind: e.t, i: e.i, ask: "What did you hear?", prompt: "", cyr: true,
-          autoplay: w.b, say: w.b,
+          autoplay: w.b, say: w.b, hint: firstSense(w),
           options: opts.map((i) => ({ label: L[i].w, right: i === e.i, cyr: true })),
         };
       }
@@ -168,13 +168,13 @@ export function makeQuestions(env) {
         };
       /* A sentence from the listening pool, played rather than shown. The English
          is carried as `en`, not `sub`: the runner draws `sub` under the prompt, and
-         the meaning is revealed only after the answer. No `say` either — the
-         activity owns replay, because it counts them. */
+         the meaning is revealed only after the answer — or on request, as the hint,
+         at the cost of the grade. No `say` either — the activity owns replay. */
       case "hear": {
         const [ru, en] = e.row;
         return {
           kind: e.t, ask: "Type what you hear", prompt: "", cyr: true,
-          autoplay: ru, target: ru, en, unit: e.unit,
+          autoplay: ru, target: ru, en, unit: e.unit, hint: en,
           lemmas: sentenceLemmas(ru, IX),
         };
       }

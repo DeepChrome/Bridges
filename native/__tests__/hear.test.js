@@ -14,11 +14,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { Runner } from "../src/screens/Run";
-import { REPLAYS } from "../src/activities/Hear";
 import { Q, SPEECH_MIX } from "../src/questions";
 import { L, IX, STAGES, SPEECH } from "../src/data";
-import { fold } from "@core/util";
+import { fold, today } from "@core/util";
 import { words } from "@core/compare";
+import { applyGrade } from "@core/fsrs";
 
 const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.hear.fromStage
                                  && (SPEECH.listen[s.core.id] || []).length).core;
@@ -69,14 +69,33 @@ describe("hear", () => {
     expect(screen.queryByText(question.target)).toBeNull();
   });
 
-  it("allows a fixed number of replays", async () => {
+  it("replays as often as asked", async () => {
     await withHear();
     const play = await screen.findByTestId("hear-play");
-    for (let k = 0; k < REPLAYS + 2; k++) {
+    for (let k = 0; k < 6; k++) {
       await act(async () => { fireEvent.press(play); });
     }
-    expect(global.__played).toHaveLength(1 + REPLAYS);
-    expect(screen.getByTestId("hear-play").props.accessibilityState.disabled).toBe(true);
+    expect(global.__played).toHaveLength(7);
+  });
+
+  it("gives partial credit for the words that were right, and the hint costs the grade", async () => {
+    await withHear();
+    const input = await screen.findByTestId("hear-input");
+    await act(async () => { fireEvent.press(screen.getByText("Hint")); });
+    expect(screen.getByTestId("hint-text").props.children).toBe(question.en);
+    const words = heard.split(/\s+/);
+    const typed = words.slice(0, -1).concat("жираф").join(" ");             // last word wrong
+    fireEvent.changeText(input, typed);
+    await waitFor(() => expect(screen.getByTestId("hear-input").props.value).toBe(typed));
+    await act(async () => { fireEvent.press(screen.getByText("Check")); });
+    expect(await screen.findByText("Almost")).toBeTruthy();
+    expect(screen.getByText(`${words.length - 1} of ${words.length} words`)).toBeTruthy();
+    const st = await saved();
+    expect(st.speech.attempts[0].hinted).toBe(true);
+    // Hinted right words are Hard (2): due no further out than an unhinted Good.
+    const okLemmas = question.lemmas.filter((i) => fold(L[i].b) !== fold(words[words.length - 1]));
+    const good = applyGrade({}, {}, "x", 3, today()).card.due;
+    for (const i of okLemmas) if (st.seen[L[i].b].lapses === 0) expect(st.seen[L[i].b].due).toBeLessThan(good);
   });
 
   it("a perfect answer is Correct, every word Easy, and the attempt is logged", async () => {
@@ -105,7 +124,7 @@ describe("hear", () => {
     expect(st.speech.attempts[0]).toMatchObject({ kind: "hear", wer: 0, unit: later.id });
   });
 
-  it("a wrong word is Not quite, that word Again, the rest Good", async () => {
+  it("a wrong word is Almost (partial credit), that word Again, the rest Good", async () => {
     await withHear();
     const input = await screen.findByTestId("hear-input");
     const wrongWord = "жираф";                       // never in a listening sentence
@@ -114,7 +133,8 @@ describe("hear", () => {
     fireEvent.changeText(input, typed);
     await waitFor(() => expect(screen.getByTestId("hear-input").props.value).toBe(typed));
     await act(async () => { fireEvent.press(screen.getByText("Check")); });
-    expect(await screen.findByText("Not quite")).toBeTruthy();
+    expect(await screen.findByText(words.length > 1 ? "Almost" : "Not quite")).toBeTruthy();
+    expect(screen.getByText("Comes round again")).toBeTruthy();
     expect(screen.getAllByTestId("align-sub")).toHaveLength(1);
 
     const st = await saved();

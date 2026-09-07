@@ -161,7 +161,10 @@ export function Say({ q, r }) {
   const settle = (out, n, transcript, ts) => {
     const perfect = out.wer === 0;
     setSettled(true);
-    r.record(perfect, gradeAlignment(out.alignment, IX, { perfect, firstTry: n === 1 }));
+    const okN = out.alignment.filter((a) => a.status === "ok").length;
+    r.record(perfect, gradeAlignment(out.alignment, IX, { perfect, firstTry: n === 1 }),
+             undefined,
+             { credit: 1 - out.wer, note: perfect ? null : `${okN} of ${out.expected.length} words` });
     askFeedback(transcript, ts);
   };
 

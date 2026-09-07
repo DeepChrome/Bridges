@@ -10,14 +10,34 @@ jest.mock("@react-native-async-storage/async-storage", () =>
 /* Playback is asserted by what it was asked to play, not by any sound. Recorded on
    globals rather than exports: an `export` here would make this file an ES module,
    which changes how Babel hoists the jest.mock calls above it. */
+/* A player finishes on the tick after play() unless a test holds it: set
+   global.__audioHold = true and later call global.__audioFinish() to end every
+   playback started meanwhile — that is how "the next question waits for the
+   recording" is exercised. */
 jest.mock("expo-audio", () => ({
   createAudioPlayer: (src) => {
     global.__played = global.__played || [];
     global.__played.push(src && src.uri);
-    return { play: jest.fn(), pause: jest.fn(), remove: jest.fn() };
+    const listeners = [];
+    const finish = () => listeners.forEach((fn) => fn({ didJustFinish: true, playing: false }));
+    global.__audioPending = global.__audioPending || [];
+    return {
+      play: jest.fn(() => {
+        if (global.__audioHold) global.__audioPending.push(finish);
+        else setTimeout(finish, 0);
+      }),
+      pause: jest.fn(),
+      remove: jest.fn(),
+      addListener: (name, fn) => { listeners.push(fn); return { remove: () => {} }; },
+    };
   },
   setAudioModeAsync: jest.fn(async () => {}),
 }));
+global.__audioFinish = () => {
+  const p = global.__audioPending || [];
+  global.__audioPending = [];
+  p.forEach((f) => f());
+};
 
 /* A device with a Russian voice, by default. `global.__voices` lets a test take it
    away — the case that matters, since without one the platform substitutes another

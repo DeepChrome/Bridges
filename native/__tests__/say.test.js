@@ -134,7 +134,7 @@ describe("say", () => {
     expect(st.speech.attempts[1]).toMatchObject({ attempt: 2, wer: 0 });
   });
 
-  it("keeping an imperfect attempt is Not quite, the missed word Again", async () => {
+  it("keeping an imperfect attempt is Almost (partial credit), the missed word Again", async () => {
     await withSay();
     await screen.findByText(question.en);
     await speak();
@@ -144,7 +144,7 @@ describe("say", () => {
     const dropped = IX[words[k]][0];
     await final(words.filter((_, j) => j !== k).join(" "));
     await act(async () => { fireEvent.press(screen.getByText("Keep")); });
-    expect(await screen.findByText("Not quite")).toBeTruthy();
+    expect(await screen.findByText(/^(Almost|Not quite)$/)).toBeTruthy();
     const st = await saved();
     for (const i of question.lemmas) {
       expect({ lemma: L[i].b, lapses: st.seen[L[i].b].lapses })
@@ -177,7 +177,7 @@ describe("say", () => {
     await final(heard.split(/\s+/).slice(1).join(" "));
     expect(getFeedback).not.toHaveBeenCalled();                 // not before the verdict
     await act(async () => { fireEvent.press(screen.getByText("Keep")); });
-    expect(await screen.findByText("Not quite")).toBeTruthy();
+    expect(await screen.findByText(/^(Almost|Not quite)$/)).toBeTruthy();
     expect(screen.getByTestId("feedback-pending")).toBeTruthy(); // below it, not blocking it
     expect(getFeedback).toHaveBeenCalledTimes(1);
     expect(getFeedback.mock.calls[0][0]).toMatchObject({ target: question.target, unitId: later.id });

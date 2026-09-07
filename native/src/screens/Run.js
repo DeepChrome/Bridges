@@ -11,7 +11,8 @@ import { View, Text, TextInput, Pressable, ScrollView, Modal } from "react-nativ
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row } from "../ui";
-import { say, cue, answerAudioText, stop as stopAudio } from "../audio";
+import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
+import { charDistance } from "@core/compare";
 import { Linked } from "../words";
 import { Hear } from "../activities/Hear";
 import { Say } from "../activities/Say";
@@ -64,7 +65,15 @@ function Typed({ q, answered, onAnswer }) {
   const check = () => {
     if (answered) return;
     const given = fold(text);
-    onAnswer(given === fold(q.target) || translit(given) === fold(q.target));
+    const want = fold(q.target);
+    const typed = given === want || translit(given) === want ? want
+      : /[а-яё]/i.test(given) ? given : translit(given);
+    if (typed === want) return onAnswer(true);
+    // A letter off on a word of four or more is half credit — the word is known,
+    // the spelling is not — and the verdict says which letter.
+    const d = charDistance(typed, want);
+    if (d === 1 && want.length >= 4) onAnswer(false, undefined, undefined, { credit: 0.5, note: "One letter off" });
+    else onAnswer(false);
   };
   return (
     <View>
@@ -110,7 +119,13 @@ function Match({ q, onDone }) {
       const next = cleared.concat(item.i);
       setCleared(next);
       setPicked(null);
-      if (next.length === q.pairs.length) onDone(missed.current === 0, q.pairs.map((p) => p.i));
+      if (next.length === q.pairs.length) {
+        // Every pair gets matched in the end; the credit is how many were matched
+        // without a miss along the way.
+        const credit = Math.max(0, 1 - missed.current / q.pairs.length);
+        onDone(missed.current === 0, q.pairs.map((p) => p.i), credit,
+               missed.current ? `${missed.current} ${missed.current === 1 ? "miss" : "misses"}` : null);
+      }
     } else {
       missed.current += 1;
       setWrong(item.i);
@@ -243,50 +258,71 @@ export const VIEWS = {
   stress: asOptions,
   grammar: asOptions,
   type: (q, r) => <Typed q={q} answered={r.answered} onAnswer={r.record} />,
-  match: (q, r) => <Match q={q} onDone={(ok, idxs) => r.record(ok, idxs)} />,
+  match: (q, r) => <Match q={q} onDone={(ok, idxs, credit, note) => r.record(ok, idxs, undefined, { credit, note })} />,
   hear: (q, r) => <Hear q={q} r={r} />,
   say: (q, r) => <Say q={q} r={r} />,
 };
 
 /* ------------------------------------------------------------------ runner */
 
+/* Leaving a flow stops whatever is playing. This lives on the flow screens, not
+   the runner: the vocabulary flow remounts its runner for every question, and a
+   recording must be allowed to finish across that boundary. */
+export function useAudioStopOnLeave() {
+  useEffect(() => () => stopAudio(), []);
+}
+
 /* `progress` overrides the bar and the count when the runner is showing one step
    of a longer flow — the vocabulary lesson runs each question in its own runner,
-   and "1/1" over an empty bar on every question said nothing. */
-export function Runner({ title, steps, onFinish, gradeWords = true, progress }) {
+   and "1/1" over an empty bar on every question said nothing.
+
+   `recycle` (default on): a question answered short of full credit goes to the
+   back of the deck and comes round once more. The score counts first attempts
+   only, so the retake is practice, not a second chance at the mark; the retake
+   is still a review for the scheduler. Off for the placement and section tests,
+   which measure rather than teach, and for the one-question vocabulary runner. */
+export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true }) {
   const { update } = useSession();
   const t = useTheme();
+  const [queue, setQueue] = useState(() => steps.slice());
   const [at, setAt] = useState(0);
   const [answered, setAnswered] = useState(false);
-  const [right, setRight] = useState(null);
+  const [verdict, setVerdict] = useState(null);      // { right, credit, note } | skipped: right null
   const [picked, setPicked] = useState(null);
   const [hintOpen, setHintOpen] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
   const results = useRef([]);
-  const tally = useRef({ right: 0, wrong: 0, helped: 0, skipped: 0 });
+  const tally = useRef({ right: 0, wrong: 0, helped: 0, skipped: 0, credit: 0 });
   const sayTimer = useRef(null);
+  const atRef = useRef(0);
 
-  const q = steps[at];
+  const q = queue[at];
 
+  // Autoplay waits for whatever is still playing — the previous answer's reading,
+  // the previous question's recording — so nothing talks over the language audio.
+  // If the learner has moved on again by the time it is quiet, this one is dropped.
   useEffect(() => {
-    if (q && q.autoplay) say(q.autoplay);
+    atRef.current = at;
+    if (!q || !q.autoplay) return;
+    const mine = at;
+    whenIdle().then(() => { if (atRef.current === mine) say(q.autoplay); });
   }, [at]);
 
-  // A pending answer reading must not outlive the screen, or the word arrives
-  // over the top of whatever the learner moved on to.
-  useEffect(() => () => {
-    if (sayTimer.current) clearTimeout(sayTimer.current);
-    stopAudio();
-  }, []);
+  useEffect(() => () => { if (sayTimer.current) clearTimeout(sayTimer.current); }, []);
 
   if (!q) return null;
 
   /* `grade` lets an activity that scores itself hand in 1–4 directly. Without it, the
      answer's right/wrong and whether the table was used decide, as before. An entry
-     of `words` that is { i, grade } carries its own grade instead. */
-  const record = (correct, words, grade) => {
+     of `words` that is { i, grade } carries its own grade instead. `extra.credit`
+     (0–1, default 1 or 0 from `correct`) is partial credit for the score, with
+     `extra.note` saying why ("3 of 4 words"). */
+  const record = (correct, words, grade, extra) => {
+    const credit = extra && typeof extra.credit === "number"
+      ? Math.max(0, Math.min(1, extra.credit)) : (correct ? 1 : 0);
+    const note = extra && extra.note ? extra.note : null;
     setAnswered(true);
-    setRight(correct);
+    setVerdict({ right: !!correct, credit, note });
 
     cue(correct ? "right" : "wrong");
     // The word itself, just behind the cue so the two do not talk over each
@@ -301,9 +337,16 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress }) 
       }
     }
 
-    if (correct) tally.current.right += 1; else tally.current.wrong += 1;
-    if (usedHint) tally.current.helped += 1;
-    results.current.push({ right: correct, stage: q.stage, lesson: q.lesson, i: q.i });
+    // The mark is the first attempt's; a recycled question is not scored again.
+    if (!q.retry) {
+      if (correct) tally.current.right += 1; else tally.current.wrong += 1;
+      tally.current.credit += credit;
+      if (usedHint) tally.current.helped += 1;
+      results.current.push({ right: !!correct, credit, stage: q.stage, lesson: q.lesson, i: q.i });
+    }
+    if (recycle && credit < 1 && !q.retry) {
+      setQueue((prev) => prev.concat([{ ...q, retry: true }]));
+    }
     if (gradeWords) {
       const entries = words || (typeof q.i === "number" ? [q.i] : []);
       if (entries.length) {
@@ -319,37 +362,46 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress }) 
      total, so a phone with the microphone off scores the same quiz as one without. */
   const skip = () => {
     setAnswered(true);
-    setRight(null);
-    tally.current.skipped += 1;
-    results.current.push({ skipped: true, stage: q.stage, lesson: q.lesson, i: q.i });
+    setVerdict({ right: null, credit: 0, note: null });
+    if (!q.retry) {
+      tally.current.skipped += 1;
+      results.current.push({ skipped: true, stage: q.stage, lesson: q.lesson, i: q.i });
+    }
   };
 
   const next = () => {
-    // Moving on cancels a reading that has not started yet.
+    // Moving on cancels a reading that has not started yet; one already playing
+    // is left to finish — the next question's audio waits for it.
     if (sayTimer.current) { clearTimeout(sayTimer.current); sayTimer.current = null; }
-    if (at + 1 >= steps.length) {
+    if (at + 1 >= queue.length) {
       onFinish({ ...tally.current, total: steps.length - tally.current.skipped,
                  results: results.current });
       return;
     }
     setAt(at + 1);
     setAnswered(false);
-    setRight(null);
+    setVerdict(null);
     setPicked(null);
     setUsedHint(false);
   };
 
   const answer = q.options ? q.options.find((o) => o.right) : null;
+  const right = verdict ? verdict.right : null;
+  const partial = verdict && verdict.right === false && verdict.credit > 0;
+  const tone = !verdict || verdict.right === null ? null
+    : verdict.right ? { bg: t.goodBg, line: t.good, btn: "good" }
+    : partial ? { bg: t.brandBg, line: t.brand, btn: "pri" }
+    : { bg: t.badBg, line: t.bad, btn: "bad" };
 
   return (
     <Screen fill>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12,
                      marginBottom: 16 }}>
         <View style={{ flex: 1 }}>
-          <Bar value={progress ? progress.at / progress.total : at / steps.length} />
+          <Bar value={progress ? progress.at / progress.total : at / queue.length} />
         </View>
         <Pill tone="brand">
-          {progress ? `${progress.at + 1}/${progress.total}` : `${at + 1}/${steps.length}`}
+          {progress ? `${progress.at + 1}/${progress.total}` : `${at + 1}/${queue.length}`}
         </Pill>
       </View>
 
@@ -378,11 +430,24 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress }) 
         />
       ) : null}
 
+      {/* A textual hint — the meaning of what was heard — costs the grade the way
+          the table does: right with a hint is Hard, not Good. */}
+      {q.hint && !answered ? (
+        usedHint ? (
+          <Muted testID="hint-text" style={{ marginBottom: 12, textAlign: "center", fontSize: 15 }}>
+            {q.hint}
+          </Muted>
+        ) : (
+          <Btn kind="ghost" label="Hint" style={{ marginBottom: 12 }}
+               onPress={() => setUsedHint(true)} />
+        )
+      ) : null}
+
       {/* Keyed by position so a view is remounted for every step: two typed
           questions in a row otherwise share one input, and the second opens with
           the first's answer still in it. */}
       <View key={at}>
-        {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip }) : null}
+        {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip, usedHint }) : null}
       </View>
 
       {answered ? (
@@ -391,18 +456,22 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress }) 
         // happened to end — the same rule Flows.js and the web runner already follow.
         // The gap lives on the wrapper, not the card.
         <View testID="verdict" style={{ marginTop: "auto", paddingTop: 18 }}>
-          <Card style={right === null ? undefined
-                       : { backgroundColor: right ? t.goodBg : t.badBg,
-                           borderColor: right ? t.good : t.bad }}>
+          <Card style={tone ? { backgroundColor: tone.bg, borderColor: tone.line } : undefined}>
             <Text style={{ color: t.ink, fontWeight: "700", fontSize: 16 }}>
-              {right === null ? "Skipped" : right ? "Correct" : "Not quite"}
+              {right === null ? "Skipped" : right ? "Correct" : partial ? "Almost" : "Not quite"}
             </Text>
+            {verdict && verdict.note ? (
+              <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>{verdict.note}</Text>
+            ) : null}
             {right === false && (answer || q.answer) ? (
               <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>
                 {`Answer: ${answer ? answer.label : q.answer}`}
               </Text>
             ) : null}
-            <Btn kind={right === null ? "plain" : right ? "good" : "bad"} label="Continue"
+            {right === false && recycle && !q.retry ? (
+              <Muted style={{ marginTop: 6 }}>Comes round again</Muted>
+            ) : null}
+            <Btn kind={tone ? tone.btn : "plain"} label="Continue"
                  style={{ marginTop: 12 }} onPress={next} />
           </Card>
         </View>

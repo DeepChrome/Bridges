@@ -786,9 +786,11 @@ exercises and examples then work for free. Never special-case a source in the ap
 Two activities on top of §30b, both scored by `core/compare.js` and graded per word
 by `core/speech.js`, so a dropped word reads the same whether it was typed or said.
 
-- **Hear** — the recording plays on arrival, three counted replays, the learner
-  types (Latin is transliterated); the sentence and its meaning appear only after
-  the answer, the sentence word-linked. From the second chapter, one per quiz.
+- **Hear** — the recording plays on arrival, replays are unlimited (counted in
+  the log, never capped — the owner's rule), the learner types (Latin is
+  transliterated); the sentence and its meaning appear only after the answer, the
+  sentence word-linked. A **Hint** (the English) is there on request and costs
+  the grade: right with a hint is Hard. From the second chapter, one per quiz.
 - **Say** — English prompt, hold to speak, on-device `ru-RU` recognition (audio never
   leaves the phone), three attempts with the alignment and the native recording
   shown between them. Microphone permission is asked at the first Say, never at
@@ -797,10 +799,24 @@ by `core/speech.js`, so a dropped word reads the same whether it was typed or sa
 
 `SPEECH_MIX` in `core/questions.js` is the one place that says which chapter each
 joins from and how many per quiz; the steps are spliced into the QUIZ_N vocabulary
-questions, never first. The runner's contract grew two things for them: `record()`
-accepts `{ i, grade }` pairs when a view scored each word itself, and `skip()` marks
-a step that could not be attempted — it grades nothing and is left out of the total,
-so a phone with the microphone off scores the same quiz as one without.
+questions, never first. The runner's contract grew for them: `record(correct, words,
+grade, { credit, note })` accepts `{ i, grade }` pairs when a view scored each word
+itself and a **partial credit** in 0–1 with the reason ("3 of 4 words", "One
+letter off"); `skip()` marks a step that could not be attempted — it grades nothing
+and is left out of the total, so a phone with the microphone off scores the same
+quiz as one without; `usedHint` tells a view a hint was taken.
+
+**Runner rules the owner set (2026-09-06):** audio is never cut by moving on — a
+recording plays to its end and the next question's autoplay waits for it
+(`whenIdle()` in `audio.js`; a stalled stream is released after 15 s, longer than
+any recording); the score is partial credit summed over first attempts (`credit /
+total`), and a Hear/Say step earns the fraction of words right, a typed word a
+letter off earns half, a match earns what was matched without a miss; and a
+question short of full credit is **recycled** to the back of the deck once, marked
+"Comes round again" — practice, not a second chance at the mark, but a second
+review for the scheduler. Recycling is off for the placement and section tests and
+the one-question vocabulary runner. Leaving a flow stops audio
+(`useAudioStopOnLeave` on each flow screen), not unmounting a runner.
 
 **Grades** (`gradeAlignment`): a right word is Good, or Easy when the whole sentence
 was right first time; a wrong or missing word is Again; an extra word grades

@@ -40,7 +40,8 @@ export function pickPrompt(rows, idxs, want, IX, random, onlyWanted) {
 
 /* Per-lemma grades from an alignment (ROADMAP P5.4 / P5.9).
  *
- *   ok        -> Good, or Easy when the whole sentence was right first time
+ *   ok        -> Good, or Easy when the whole sentence was right first time,
+ *                or Hard when a hint was used — recognised, not recalled
  *   sub, del  -> Again
  *   ins       -> nothing: an extra word has no expected lemma to grade
  *
@@ -50,12 +51,13 @@ export function pickPrompt(rows, idxs, want, IX, random, onlyWanted) {
 export function gradeAlignment(alignment, IX, opts) {
   const perfect = !!(opts && opts.perfect);
   const firstTry = !opts || opts.firstTry !== false;
+  const hinted = !!(opts && opts.hinted);
   const grade = {};
   for (const a of alignment || []) {
     if (!a.expected) continue;
     const hit = IX[fold(a.expected)];
     if (!hit || !hit.length) continue;
-    const g = a.status === "ok" ? (perfect && firstTry ? 4 : 3) : 1;
+    const g = a.status !== "ok" ? 1 : hinted ? 2 : (perfect && firstTry ? 4 : 3);
     const i = hit[0];
     grade[i] = i in grade ? Math.min(grade[i], g) : g;
   }

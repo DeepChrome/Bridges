@@ -24,6 +24,22 @@ export function words(s) {
   return out;
 }
 
+/* Character edits between two folded strings — for "close" on a typed answer: a
+   letter off is worth something, a different word is not. */
+export function charDistance(a, b) {
+  const s = fold(a || ""), t = fold(b || "");
+  const n = s.length, m = t.length;
+  let prev = Array.from({ length: m + 1 }, (_, j) => j);
+  for (let i = 1; i <= n; i++) {
+    const row = [i];
+    for (let j = 1; j <= m; j++) {
+      row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (s[i - 1] === t[j - 1] ? 0 : 1));
+    }
+    prev = row;
+  }
+  return prev[m];
+}
+
 /* -> { wer, alignment: [{ said, expected, status }], said: [...], expected: [...] }
    status is one of ok, sub, del (expected word not said), ins (said word not expected).
    wer is edits over expected length; an empty target with something said is 1. */

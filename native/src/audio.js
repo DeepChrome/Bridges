@@ -73,23 +73,50 @@ export function refreshVoices() {
 
 probeVoices();
 
+/* What is playing right now, as a promise that settles when it ends — by
+   finishing, by being replaced, by being stopped, or (a stalled stream) by the
+   guard below. Anything that must not talk over the language audio awaits
+   whenIdle() first; the runner's autoplay does. */
+let current = Promise.resolve();
+let settle = null;
+// A stream that never reports finishing would hold the next question forever.
+// Fifteen seconds is longer than any recording in the collection (the longest
+// pooled sentence is under ten), so this only ever fires on a stall.
+const STALL_MS = 15000;
+
+function begin() {
+  if (settle) settle();
+  let done;
+  current = new Promise((res) => { done = res; });
+  const timer = setTimeout(() => done(), STALL_MS);
+  settle = () => { clearTimeout(timer); done(); settle = null; };
+  return settle;
+}
+
+export const whenIdle = () => current;
+
 export function speakTTS(text) {
   if (!ruVoice) return false;
   try {
     Speech.stop();
+    const end = begin();
     // Pin the voice, not just the language tag: the tag alone still lets the
     // platform fall back to whatever it has.
     Speech.speak(bare(text), {
       language: ruVoice.language, voice: ruVoice.identifier, rate: 0.9,
+      onDone: end, onStopped: end, onError: end,
     });
     return true;
   } catch (e) {
+    if (settle) settle();
     return false;
   }
 }
 
 /* Plays the real recording when the collection has one, otherwise the device voice.
-   A failed load falls back rather than leaving the learner in silence. */
+   A failed load falls back rather than leaving the learner in silence. Resolves
+   with true/false for whether anything started; the playback itself is tracked
+   by whenIdle(). */
 export async function say(text) {
   const url = audioUrl(text);
   if (!url) return speakTTS(text);
@@ -97,10 +124,17 @@ export async function say(text) {
   try {
     Speech.stop();
     if (player) { player.remove(); player = null; }
+    const end = begin();
     player = createAudioPlayer({ uri: url });
+    if (player.addListener) {
+      player.addListener("playbackStatusUpdate", (s) => {
+        if (s && (s.didJustFinish || s.error)) end();
+      });
+    }
     player.play();
     return true;
   } catch (e) {
+    if (settle) settle();
     return speakTTS(text);
   }
 }
@@ -108,6 +142,7 @@ export async function say(text) {
 export function stop() {
   try { Speech.stop(); } catch (e) {}
   try { if (player) player.pause(); } catch (e) {}
+  if (settle) settle();
 }
 
 export const hasRealAudio = (text) => !!audioUrl(text);

@@ -6,7 +6,10 @@ import { View, Text } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb } from "../ui";
-import { Runner, Done } from "./Run";
+import { Runner, Done, useAudioStopOnLeave } from "./Run";
+
+/* The mark for a run: partial credit summed over first attempts, as a percentage. */
+const scoreOf = (r) => (r.total ? Math.round(r.credit / r.total * 100) : 0);
 import { Linked } from "../words";
 import { Q, DRILL_TYPES, TEST_OUT } from "../questions";
 import {
@@ -24,6 +27,7 @@ export function VocabFlow({ route, navigation }) {
   const steps = useMemo(() => Q.vocabSteps(unit, index), [unit.id, index]);
   const [at, setAt] = useState(0);
   const [done, setDone] = useState(false);
+  useAudioStopOnLeave();
 
   if (done) {
     return (
@@ -123,6 +127,7 @@ export function VocabFlow({ route, navigation }) {
       key={at}
       steps={[step]}
       progress={{ at, total: steps.length }}
+      recycle={false}
       onFinish={advance}
     />
   );
@@ -137,6 +142,7 @@ export function QuizFlow({ route, navigation }) {
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
   const steps = useMemo(() => Q.quizSteps(unit, index), [unitId, index, seed]);
+  useAudioStopOnLeave();
 
   if (result) {
     const passed = result.score >= PASS_MARK;
@@ -157,7 +163,7 @@ export function QuizFlow({ route, navigation }) {
     <Runner
       steps={steps}
       onFinish={(r) => {
-        const score = r.total ? Math.round(r.right / r.total * 100) : 0;
+        const score = scoreOf(r);
         update((prev) => touchStreak({
           ...markComponent(prev, unit, index, "quiz", score),
           xp: (prev.xp || 0) + r.right * 2 + (score >= PASS_MARK ? 10 : 0),
@@ -204,6 +210,7 @@ export function DrillFlow({ route, navigation }) {
   const [seed, setSeed] = useState(0);
   const steps = useMemo(() => Q.drillQuestions(type), [type, seed]);
   const spec = DRILL_TYPES.find((d) => d.id === type);
+  useAudioStopOnLeave();
 
   if (!steps.length) {
     return <Done title="No questions available" onBack={() => navigation.goBack()} />;
@@ -226,7 +233,7 @@ export function DrillFlow({ route, navigation }) {
     <Runner
       steps={steps}
       onFinish={(r) => {
-        const score = r.total ? Math.round(r.right / r.total * 100) : 0;
+        const score = scoreOf(r);
         update((prev) => {
           const drills = { ...(prev.drills || {}) };
           const cur = drills[type] || { best: 0, runs: 0 };
@@ -245,6 +252,7 @@ export function PlacementFlow({ navigation }) {
   const { update, accounts, account } = useSession();
   const [result, setResult] = useState(null);
   const steps = useMemo(() => Q.placementQuestions(), []);
+  useAudioStopOnLeave();
 
   if (result) {
     return (
@@ -260,6 +268,7 @@ export function PlacementFlow({ navigation }) {
   return (
     <Runner
       steps={steps}
+      recycle={false}
       onFinish={(r) => {
         // A stage is cleared when its questions were answered well enough. Stop at
         // the first stage that is not — placement must not leave holes behind you.
@@ -282,7 +291,7 @@ export function PlacementFlow({ navigation }) {
         });
         if (account) account.placed = placed;
         setResult({
-          score: Math.round(r.right / r.total * 100),
+          score: scoreOf(r),
           detail: placed
             ? `Stages 1–${placed} are marked done. You start at stage ${placed + 1}.`
             : "Starting from stage 1 — nothing to skip yet.",
@@ -297,6 +306,7 @@ export function SectionFlow({ route, navigation }) {
   const { update } = useSession();
   const [result, setResult] = useState(null);
   const steps = useMemo(() => Q.sectionQuestions(unit), [unit.id]);
+  useAudioStopOnLeave();
 
   if (result) {
     return (
@@ -308,6 +318,7 @@ export function SectionFlow({ route, navigation }) {
   return (
     <Runner
       steps={steps}
+      recycle={false}
       onFinish={(r) => {
         let cleared = 0;
         update((prev) => {
@@ -325,7 +336,7 @@ export function SectionFlow({ route, navigation }) {
           return next;
         });
         setResult({
-          score: Math.round(r.right / r.total * 100),
+          score: scoreOf(r),
           detail: cleared
             ? `${cleared} of ${lessonCount(unit)} lessons marked done.`
             : "No lessons skipped — worth working through this one.",

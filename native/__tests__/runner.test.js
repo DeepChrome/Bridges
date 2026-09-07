@@ -92,4 +92,69 @@ describe("runner verdict", () => {
     await withRunner({ progress: { at: 4, total: 16 } });
     expect(await screen.findByText("5/16")).toBeTruthy();
   });
+
+  it("recycles a wrong answer to the back of the deck and scores first attempts only", async () => {
+    const onFinish = jest.fn();
+    const second = { ...question, prompt: "стол", options: [{ label: "table", right: true }, { label: "book" }] };
+    await withRunner({ steps: [question, second], onFinish });
+    expect(await screen.findByText("1/2")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("table")); });   // wrong for книга
+    expect(await screen.findByText("Not quite")).toBeTruthy();
+    expect(screen.getByText("Comes round again")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    expect(await screen.findByText("2/3")).toBeTruthy();                       // the deck grew
+    await act(async () => { fireEvent.press(screen.getByText("table")); });    // right for стол
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    expect(await screen.findByText("3/3")).toBeTruthy();
+    expect(screen.getByText("книга")).toBeTruthy();                            // книга is back
+    await act(async () => { fireEvent.press(screen.getByText("book")); });
+    expect(await screen.findByText("Correct")).toBeTruthy();
+    expect(screen.queryByText("Comes round again")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ right: 1, wrong: 1, credit: 1, total: 2 }));
+  });
+
+  it("does not recycle when told not to, and reports partial credit as Almost", async () => {
+    const onFinish = jest.fn();
+    const typed = { kind: "type", ask: "Write it in Russian", prompt: "book", cyr: false,
+                    typed: true, answer: "книга", target: "книга" };
+    await withRunner({ steps: [typed], onFinish, recycle: false });
+    const input = await screen.findByPlaceholderText("Cyrillic or Latin");
+    fireEvent.changeText(input, "книгу");                                      // one letter off
+    await waitFor(() => expect(screen.getByPlaceholderText("Cyrillic or Latin").props.value).toBe("книгу"));
+    await act(async () => { fireEvent.press(screen.getByText("Check")); });
+    expect(await screen.findByText("Almost")).toBeTruthy();
+    expect(screen.getByText("One letter off")).toBeTruthy();
+    expect(screen.getByText("Answer: книга")).toBeTruthy();
+    expect(screen.queryByText("Comes round again")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ credit: 0.5, total: 1 }));
+  });
+
+  it("offers a hint that costs the grade, and waits for playing audio before autoplay", async () => {
+    const heard = { kind: "listen", i: 0, ask: "What did you hear?", prompt: "", cyr: true,
+                    autoplay: "книга", say: "книга", hint: "book",
+                    options: [{ label: "книга", right: true, cyr: true }, { label: "стол", cyr: true }] };
+    global.__audioHold = true;
+    try {
+      await withRunner({ steps: [heard, heard], recycle: false });
+      await screen.findByText("Hint");
+      expect(global.__played.filter((u) => u && u.includes("/audio/"))).toHaveLength(1);
+      expect(screen.queryByTestId("hint-text")).toBeNull();
+      await act(async () => { fireEvent.press(screen.getByText("Hint")); });
+      expect(screen.getByTestId("hint-text").props.children).toBe("book");
+      await act(async () => { fireEvent.press(screen.getAllByText("книга")[0]); });
+      expect(await screen.findByText("Correct")).toBeTruthy();
+      await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+      // The first recording is still "playing": the second question has not autoplayed.
+      await act(async () => {});
+      expect(global.__played.filter((u) => u && u.includes("/audio/"))).toHaveLength(1);
+      await act(async () => { global.__audioFinish(); });
+      await act(async () => {});
+      expect(global.__played.filter((u) => u && u.includes("/audio/")).length).toBeGreaterThanOrEqual(2);
+    } finally {
+      global.__audioHold = false;
+      global.__audioFinish();
+    }
+  });
 });

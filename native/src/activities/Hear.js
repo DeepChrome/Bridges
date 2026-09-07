@@ -1,12 +1,13 @@
 /* Hear: a native recording plays, the learner types what was said (ROADMAP P5.8).
  *
  * The runner plays the sentence once on arrival (`autoplay`); this view owns the
- * replays, because they are counted — three, then the learner has to commit. The
+ * replays — as many as the learner wants; the count is logged, never capped. The
  * answer is scored by core/compare.js exactly as a spoken attempt would be, so a
  * dropped word or a wrong ending reads the same way in both activities, and each
- * word's grade goes to the scheduler through the runner's record(). The English
- * and the sentence itself appear only after the answer: before it, the audio is
- * the whole prompt.
+ * word's grade goes to the scheduler through the runner's record(), with the
+ * words right out of the words asked as partial credit. The English and the
+ * sentence itself appear only after the answer: before it, the audio is the whole
+ * prompt — unless the learner asks the runner for the hint, which is the English.
  */
 
 import React, { useState } from "react";
@@ -24,26 +25,22 @@ import { gradeAlignment } from "@core/speech";
 import { recordAttempt } from "@core/state";
 import { fold, translit } from "@core/util";
 
-export const REPLAYS = 3;
 const CYRILLIC = /[а-яё]/i;
 
-function PlayButton({ left, onPress }) {
+function PlayButton({ onPress }) {
   const t = useTheme();
-  const live = left > 0;
   return (
     <View style={{ alignItems: "center" }}>
       <Pressable
         testID="hear-play"
         accessibilityRole="button"
-        accessibilityState={{ disabled: !live }}
-        accessibilityLabel={live ? `Play again, ${left} left` : "No replays left"}
-        onPress={live ? onPress : undefined}
+        accessibilityLabel="Play again"
+        onPress={onPress}
         hitSlop={8}
         style={({ pressed }) => ({
           width: 72, height: 72, borderRadius: 36, alignItems: "center",
           justifyContent: "center", backgroundColor: t.brandBg,
-          borderWidth: 1, borderColor: t.brand,
-          opacity: !live ? 0.35 : pressed ? 0.6 : 1,
+          borderWidth: 1, borderColor: t.brand, opacity: pressed ? 0.6 : 1,
         })}
       >
         <Svg width={30} height={30} viewBox="0 0 24 24" fill="none"
@@ -53,13 +50,6 @@ function PlayButton({ left, onPress }) {
           <Path d="M15.5 8.5a5 5 0 0 1 0 7" />
         </Svg>
       </Pressable>
-      {/* Replays left, as dots rather than a number: glanceable, and no copy. */}
-      <View style={{ flexDirection: "row", gap: 5, marginTop: 10 }}>
-        {Array.from({ length: REPLAYS }, (_, k) => (
-          <View key={k} style={{ width: 6, height: 6, borderRadius: 3,
-                                 backgroundColor: k < left ? t.brand : t.line }} />
-        ))}
-      </View>
     </View>
   );
 }
@@ -72,7 +62,6 @@ export function Hear({ q, r }) {
   const [res, setRes] = useState(null);
 
   const replay = () => {
-    if (plays >= REPLAYS) return;
     setPlays(plays + 1);
     say(q.target);
   };
@@ -85,13 +74,18 @@ export function Hear({ q, r }) {
     const out = compare(heard, q.target);
     const perfect = out.wer === 0;
     setRes(out);
-    r.record(perfect, gradeAlignment(out.alignment, IX, { perfect, firstTry: true }));
+    const n = out.expected.length;
+    const okN = out.alignment.filter((a) => a.status === "ok").length;
+    r.record(perfect,
+             gradeAlignment(out.alignment, IX, { perfect, firstTry: true, hinted: !!r.usedHint }),
+             undefined,
+             { credit: 1 - out.wer, note: perfect ? null : `${okN} of ${n} words` });
     update((prev) => ({
       ...prev,
       speech: recordAttempt(prev.speech, {
         ts: Date.now(), key: fold(q.target), kind: "hear", unit: q.unit,
         transcript: heard, target: q.target, wer: out.wer, tags: [],
-        grade: perfect ? 3 : 1, plays: plays + 1,
+        grade: perfect ? (r.usedHint ? 2 : 3) : 1, plays: plays + 1, hinted: !!r.usedHint,
       }),
     }));
   };
@@ -111,7 +105,7 @@ export function Hear({ q, r }) {
 
   return (
     <View>
-      <PlayButton left={REPLAYS - plays} onPress={replay} />
+      <PlayButton onPress={replay} />
       <TextInput
         testID="hear-input"
         value={text}

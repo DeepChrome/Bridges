@@ -17,7 +17,7 @@ import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrad
   from "../core/fsrs.js";
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP }
   from "../core/state.js";
-import { compare, words } from "../core/compare.js";
+import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, DRILL_TYPES, SPEECH_MIX } from "../core/questions.js";
 import { sentenceLemmas, gradeAlignment } from "../core/speech.js";
@@ -524,6 +524,12 @@ group("speech grading");
 
   g = gradeAlignment(compare("Я пью чай очень", "Я пью чай").alignment, IX, {});
   ok(!g.some((x) => x.i === idx("очень")), "an inserted word grades nothing");
+  g = gradeAlignment(compare("Я пью чай", "Я пью чай").alignment, IX,
+                     { perfect: true, firstTry: true, hinted: true });
+  ok(g.every((x) => x.grade === 2), "with a hint a right word is Hard, even when perfect");
+
+  ok(charDistance("книга", "книгу") === 1 && charDistance("книга", "кни́га") === 0
+     && charDistance("стол", "книга") > 1, "charDistance: a letter off is 1, stress is 0");
 
   g = gradeAlignment(compare("Я не знаю, не хочу", "Я не знаю, не хочу").alignment, IX,
                      { perfect: false });

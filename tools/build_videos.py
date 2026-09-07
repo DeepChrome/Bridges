@@ -123,6 +123,25 @@ def first_hits(text, table):
     return [key for key, pat in table if re.search(pat, text, re.I)]
 
 
+CEFR_RE = re.compile(r"\b([ABC][12])(\+?)\b")
+LEVEL_CEFR = {"beginner": "A1", "elementary": "A2", "intermediate": "B1",
+              "upper-intermediate": "B2", "advanced": "C1"}
+
+
+def cefr_of(title, level, ease):
+    """A CEFR code for the search: the title's own ("B1+") first, then the level
+    word. Never shown, only matched when someone types "B1". The transcript's
+    ease is deliberately not used: measured, it does not separate the levels
+    (beginner videos median 0.62, intermediate 0.60), so it would only invent
+    codes. A video with neither stays uncoded and is found by its words."""
+    m = CEFR_RE.search(title.upper())
+    if m:
+        return m.group(1) + m.group(2)
+    if level in LEVEL_CEFR:
+        return LEVEL_CEFR[level]
+    return None
+
+
 def keywords(v, topics, unit_name, chapter_title):
     """The search string: distinct words, most specific first, capped."""
     out, seen = [], set()
@@ -226,6 +245,7 @@ def main():
         v["level"] = lv[0] if lv else None
         st = tstats.get(v["id"])
         v["ease"] = st["ease"] if st else None
+        v["cefr"] = cefr_of(v["title"], v["level"], v["ease"])
         v["kw"] = keywords(v, v["topics"], unit_name,
                            chapter_of.get(v["topics"][0]) if v["topics"] else None)
 
@@ -284,7 +304,8 @@ def main():
         "units": {tid: {k: v[k] for k in keep if k in v} for tid, v in assigned.items()},
         "videos": [{"id": v["id"], "title": v["title"], "ch": v.get("channel"),
                     "dur": v.get("dur"), "kw": v["kw"], "topics": v["topics"],
-                    "level": v["level"], "ease": v["ease"], "upload": v.get("upload"),
+                    "level": v["level"], "ease": v["ease"], "cefr": v.get("cefr"),
+                    "upload": v.get("upload"),
                     "chapters": (v.get("chapters") or [])[:12]}
                    for v in rows if heard.get(v["id"])],
     }

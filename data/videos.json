@@ -307,6 +307,7 @@
    ],
    "level": null,
    "ease": 0.645,
+   "cefr": null,
    "upload": "20260826",
    "chapters": []
   },
@@ -323,6 +324,7 @@
    ],
    "level": null,
    "ease": 0.697,
+   "cefr": null,
    "upload": "20260810",
    "chapters": []
   },
@@ -339,6 +341,7 @@
    ],
    "level": null,
    "ease": 0.62,
+   "cefr": null,
    "upload": "20260728",
    "chapters": []
   },
@@ -355,6 +358,7 @@
    ],
    "level": null,
    "ease": 0.591,
+   "cefr": null,
    "upload": "20260714",
    "chapters": []
   },
@@ -371,6 +375,7 @@
    ],
    "level": null,
    "ease": 0.672,
+   "cefr": null,
    "upload": "20260629",
    "chapters": []
   },
@@ -387,6 +392,7 @@
    ],
    "level": null,
    "ease": 0.644,
+   "cefr": null,
    "upload": "20260615",
    "chapters": []
   },
@@ -403,6 +409,7 @@
    ],
    "level": "beginner",
    "ease": 0.606,
+   "cefr": "A1",
    "upload": "20260601",
    "chapters": []
   },
@@ -417,6 +424,7 @@
    ],
    "level": "beginner",
    "ease": 0.621,
+   "cefr": "A1",
    "upload": "20260505",
    "chapters": []
   },
@@ -433,6 +441,7 @@
    ],
    "level": null,
    "ease": 0.65,
+   "cefr": null,
    "upload": "20260420",
    "chapters": []
   },
@@ -449,6 +458,7 @@
    ],
    "level": null,
    "ease": 0.629,
+   "cefr": null,
    "upload": "20260407",
    "chapters": []
   },
@@ -465,6 +475,7 @@
    ],
    "level": null,
    "ease": 0.622,
+   "cefr": null,
    "upload": "20260323",
    "chapters": []
   },
@@ -480,6 +491,7 @@
    ],
    "level": null,
    "ease": 0.626,
+   "cefr": null,
    "upload": "20260311",
    "chapters": []
   },
@@ -496,6 +508,7 @@
    ],
    "level": null,
    "ease": 0.644,
+   "cefr": null,
    "upload": "20260223",
    "chapters": []
   },
@@ -512,6 +525,7 @@
    ],
    "level": null,
    "ease": 0.633,
+   "cefr": null,
    "upload": "20260211",
    "chapters": []
   },
@@ -527,6 +541,7 @@
    ],
    "level": null,
    "ease": 0.596,
+   "cefr": null,
    "upload": "20260128",
    "chapters": []
   },
@@ -543,6 +558,7 @@
    ],
    "level": null,
    "ease": 0.652,
+   "cefr": null,
    "upload": "20260114",
    "chapters": []
   },
@@ -559,6 +575,7 @@
    ],
    "level": null,
    "ease": 0.667,
+   "cefr": null,
    "upload": "20260101",
    "chapters": []
   },
@@ -573,6 +590,7 @@
    ],
    "level": "beginner",
    "ease": 0.573,
+   "cefr": "A1",
    "upload": "20251217",
    "chapters": []
   },
@@ -589,6 +607,7 @@
    ],
    "level": null,
    "ease": 0.643,
+   "cefr": null,
    "upload": "20251203",
    "chapters": []
   },
@@ -601,6 +620,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.725,
+   "cefr": "A1",
    "upload": "20251104",
    "chapters": []
   },
@@ -617,6 +637,7 @@
    ],
    "level": null,
    "ease": 0.603,
+   "cefr": null,
    "upload": "20251022",
    "chapters": []
   },
@@ -633,6 +654,7 @@
    ],
    "level": null,
    "ease": 0.61,
+   "cefr": null,
    "upload": "20251006",
    "chapters": []
   },
@@ -649,6 +671,7 @@
    ],
    "level": "beginner",
    "ease": 0.537,
+   "cefr": "A1",
    "upload": "20250922",
    "chapters": []
   },
@@ -665,6 +688,7 @@
    ],
    "level": "beginner",
    "ease": 0.604,
+   "cefr": "A1",
    "upload": "20250908",
    "chapters": []
   },
@@ -681,6 +705,7 @@
    ],
    "level": null,
    "ease": 0.66,
+   "cefr": null,
    "upload": "20250819",
    "chapters": []
   },
@@ -697,6 +722,7 @@
    ],
    "level": null,
    "ease": 0.648,
+   "cefr": null,
    "upload": "20250804",
    "chapters": []
   },
@@ -712,6 +738,7 @@
    ],
    "level": "beginner",
    "ease": 0.641,
+   "cefr": "A1",
    "upload": "20250721",
    "chapters": []
   },
@@ -728,6 +755,7 @@
    ],
    "level": null,
    "ease": 0.605,
+   "cefr": null,
    "upload": "20250708",
    "chapters": []
   },
@@ -744,6 +772,7 @@
    ],
    "level": "beginner",
    "ease": 0.653,
+   "cefr": "A1",
    "upload": "20250623",
    "chapters": []
   },
@@ -760,6 +789,7 @@
    ],
    "level": null,
    "ease": 0.633,
+   "cefr": null,
    "upload": "20250609",
    "chapters": []
   },
@@ -776,6 +806,7 @@
    ],
    "level": null,
    "ease": 0.555,
+   "cefr": null,
    "upload": "20250512",
    "chapters": []
   },
@@ -790,6 +821,7 @@
    ],
    "level": "beginner",
    "ease": 0.666,
+   "cefr": "A1",
    "upload": "20250429",
    "chapters": []
   },
@@ -804,6 +836,7 @@
    ],
    "level": "beginner",
    "ease": 0.542,
+   "cefr": "A1",
    "upload": "20250414",
    "chapters": []
   },
@@ -820,6 +853,7 @@
    ],
    "level": null,
    "ease": 0.662,
+   "cefr": null,
    "upload": "20250331",
    "chapters": []
   },
@@ -834,6 +868,7 @@
    ],
    "level": "beginner",
    "ease": 0.574,
+   "cefr": "A1",
    "upload": "20250317",
    "chapters": []
   },
@@ -850,6 +885,7 @@
    ],
    "level": null,
    "ease": 0.607,
+   "cefr": null,
    "upload": "20250304",
    "chapters": []
   },
@@ -866,6 +902,7 @@
    ],
    "level": null,
    "ease": 0.667,
+   "cefr": null,
    "upload": "20250203",
    "chapters": []
   },
@@ -880,6 +917,7 @@
    ],
    "level": null,
    "ease": 0.657,
+   "cefr": null,
    "upload": "20250120",
    "chapters": []
   },
@@ -896,6 +934,7 @@
    ],
    "level": null,
    "ease": 0.621,
+   "cefr": null,
    "upload": "20250106",
    "chapters": []
   },
@@ -912,6 +951,7 @@
    ],
    "level": null,
    "ease": 0.622,
+   "cefr": null,
    "upload": "20241202",
    "chapters": []
   },
@@ -928,6 +968,7 @@
    ],
    "level": null,
    "ease": 0.609,
+   "cefr": null,
    "upload": "20241118",
    "chapters": []
   },
@@ -944,6 +985,7 @@
    ],
    "level": "beginner",
    "ease": 0.618,
+   "cefr": "A1",
    "upload": "20241104",
    "chapters": []
   },
@@ -960,6 +1002,7 @@
    ],
    "level": null,
    "ease": 0.644,
+   "cefr": null,
    "upload": "20241023",
    "chapters": []
   },
@@ -976,6 +1019,7 @@
    ],
    "level": "beginner",
    "ease": 0.699,
+   "cefr": "A1",
    "upload": "20240909",
    "chapters": []
   },
@@ -991,6 +1035,7 @@
    ],
    "level": "beginner",
    "ease": 0.672,
+   "cefr": "A1",
    "upload": "20240826",
    "chapters": []
   },
@@ -1007,6 +1052,7 @@
    ],
    "level": null,
    "ease": 0.61,
+   "cefr": null,
    "upload": "20240812",
    "chapters": []
   },
@@ -1022,6 +1068,7 @@
    ],
    "level": "beginner",
    "ease": 0.592,
+   "cefr": "A1",
    "upload": "20240729",
    "chapters": []
   },
@@ -1038,6 +1085,7 @@
    ],
    "level": null,
    "ease": 0.598,
+   "cefr": null,
    "upload": "20240712",
    "chapters": []
   },
@@ -1054,6 +1102,7 @@
    ],
    "level": "beginner",
    "ease": 0.563,
+   "cefr": "A1",
    "upload": "20240614",
    "chapters": []
   },
@@ -1070,6 +1119,7 @@
    ],
    "level": null,
    "ease": 0.621,
+   "cefr": null,
    "upload": "20240601",
    "chapters": []
   },
@@ -1085,6 +1135,7 @@
    ],
    "level": "beginner",
    "ease": 0.584,
+   "cefr": "A1",
    "upload": "20240518",
    "chapters": []
   },
@@ -1100,6 +1151,7 @@
    ],
    "level": null,
    "ease": 0.573,
+   "cefr": null,
    "upload": "20240503",
    "chapters": []
   },
@@ -1114,6 +1166,7 @@
    ],
    "level": "beginner",
    "ease": 0.683,
+   "cefr": "A1",
    "upload": "20240419",
    "chapters": []
   },
@@ -1128,6 +1181,7 @@
    ],
    "level": "beginner",
    "ease": 0.533,
+   "cefr": "A1",
    "upload": "20240405",
    "chapters": []
   },
@@ -1144,6 +1198,7 @@
    ],
    "level": null,
    "ease": 0.56,
+   "cefr": null,
    "upload": "20240322",
    "chapters": []
   },
@@ -1160,6 +1215,7 @@
    ],
    "level": null,
    "ease": 0.628,
+   "cefr": null,
    "upload": "20240301",
    "chapters": []
   },
@@ -1176,6 +1232,7 @@
    ],
    "level": null,
    "ease": 0.641,
+   "cefr": null,
    "upload": "20240209",
    "chapters": []
   },
@@ -1190,6 +1247,7 @@
    ],
    "level": null,
    "ease": 0.676,
+   "cefr": null,
    "upload": "20240130",
    "chapters": []
   },
@@ -1206,6 +1264,7 @@
    ],
    "level": null,
    "ease": 0.62,
+   "cefr": null,
    "upload": "20240127",
    "chapters": []
   },
@@ -1222,6 +1281,7 @@
    ],
    "level": null,
    "ease": 0.643,
+   "cefr": null,
    "upload": "20240112",
    "chapters": []
   },
@@ -1238,6 +1298,7 @@
    ],
    "level": null,
    "ease": 0.584,
+   "cefr": null,
    "upload": "20231230",
    "chapters": []
   },
@@ -1254,6 +1315,7 @@
    ],
    "level": null,
    "ease": 0.615,
+   "cefr": null,
    "upload": "20231222",
    "chapters": []
   },
@@ -1270,6 +1332,7 @@
    ],
    "level": null,
    "ease": 0.641,
+   "cefr": null,
    "upload": "20231215",
    "chapters": []
   },
@@ -1286,6 +1349,7 @@
    ],
    "level": null,
    "ease": 0.59,
+   "cefr": null,
    "upload": "20231201",
    "chapters": [
     {
@@ -1335,6 +1399,7 @@
    ],
    "level": null,
    "ease": 0.605,
+   "cefr": null,
    "upload": "20231110",
    "chapters": [
     {
@@ -1388,6 +1453,7 @@
    ],
    "level": "beginner",
    "ease": 0.668,
+   "cefr": "A1",
    "upload": "20231027",
    "chapters": []
   },
@@ -1404,6 +1470,7 @@
    ],
    "level": null,
    "ease": 0.607,
+   "cefr": null,
    "upload": "20231013",
    "chapters": []
   },
@@ -1416,6 +1483,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.519,
+   "cefr": "A1",
    "upload": "20230929",
    "chapters": []
   },
@@ -1432,6 +1500,7 @@
    ],
    "level": null,
    "ease": 0.637,
+   "cefr": null,
    "upload": "20230915",
    "chapters": []
   },
@@ -1446,6 +1515,7 @@
    ],
    "level": "beginner",
    "ease": 0.666,
+   "cefr": "A1",
    "upload": "20230818",
    "chapters": [
     {
@@ -1511,6 +1581,7 @@
    ],
    "level": null,
    "ease": 0.654,
+   "cefr": null,
    "upload": "20230804",
    "chapters": []
   },
@@ -1527,6 +1598,7 @@
    ],
    "level": null,
    "ease": 0.616,
+   "cefr": null,
    "upload": "20230721",
    "chapters": []
   },
@@ -1543,6 +1615,7 @@
    ],
    "level": null,
    "ease": 0.57,
+   "cefr": null,
    "upload": "20230714",
    "chapters": []
   },
@@ -1557,6 +1630,7 @@
    ],
    "level": null,
    "ease": 0.615,
+   "cefr": null,
    "upload": "20230630",
    "chapters": []
   },
@@ -1573,6 +1647,7 @@
    ],
    "level": null,
    "ease": 0.637,
+   "cefr": null,
    "upload": "20230616",
    "chapters": []
   },
@@ -1589,6 +1664,7 @@
    ],
    "level": null,
    "ease": 0.643,
+   "cefr": null,
    "upload": "20230609",
    "chapters": []
   },
@@ -1604,6 +1680,7 @@
    ],
    "level": null,
    "ease": 0.582,
+   "cefr": null,
    "upload": "20230602",
    "chapters": []
   },
@@ -1620,6 +1697,7 @@
    ],
    "level": null,
    "ease": 0.582,
+   "cefr": null,
    "upload": "20230519",
    "chapters": []
   },
@@ -1634,6 +1712,7 @@
    ],
    "level": "beginner",
    "ease": 0.608,
+   "cefr": "A1",
    "upload": "20230505",
    "chapters": []
   },
@@ -1650,6 +1729,7 @@
    ],
    "level": null,
    "ease": 0.615,
+   "cefr": null,
    "upload": "20230428",
    "chapters": []
   },
@@ -1666,6 +1746,7 @@
    ],
    "level": null,
    "ease": 0.653,
+   "cefr": null,
    "upload": "20230421",
    "chapters": []
   },
@@ -1682,6 +1763,7 @@
    ],
    "level": null,
    "ease": 0.604,
+   "cefr": null,
    "upload": "20230414",
    "chapters": []
   },
@@ -1698,6 +1780,7 @@
    ],
    "level": null,
    "ease": 0.567,
+   "cefr": null,
    "upload": "20230407",
    "chapters": []
   },
@@ -1714,6 +1797,7 @@
    ],
    "level": null,
    "ease": 0.613,
+   "cefr": null,
    "upload": "20230331",
    "chapters": []
   },
@@ -1730,6 +1814,7 @@
    ],
    "level": null,
    "ease": 0.648,
+   "cefr": null,
    "upload": "20230324",
    "chapters": []
   },
@@ -1746,6 +1831,7 @@
    ],
    "level": "beginner",
    "ease": 0.597,
+   "cefr": "A1",
    "upload": "20230317",
    "chapters": []
   },
@@ -1760,6 +1846,7 @@
    ],
    "level": "beginner",
    "ease": 0.578,
+   "cefr": "A1",
    "upload": "20230310",
    "chapters": []
   },
@@ -1776,6 +1863,7 @@
    ],
    "level": null,
    "ease": 0.63,
+   "cefr": null,
    "upload": "20230304",
    "chapters": []
   },
@@ -1792,6 +1880,7 @@
    ],
    "level": null,
    "ease": 0.672,
+   "cefr": null,
    "upload": "20230217",
    "chapters": []
   },
@@ -1808,6 +1897,7 @@
    ],
    "level": null,
    "ease": 0.605,
+   "cefr": null,
    "upload": "20230210",
    "chapters": []
   },
@@ -1822,6 +1912,7 @@
    ],
    "level": "beginner",
    "ease": 0.694,
+   "cefr": "A1",
    "upload": "20230127",
    "chapters": []
   },
@@ -1838,6 +1929,7 @@
    ],
    "level": null,
    "ease": 0.645,
+   "cefr": null,
    "upload": "20230120",
    "chapters": []
   },
@@ -1852,6 +1944,7 @@
    ],
    "level": null,
    "ease": 0.606,
+   "cefr": null,
    "upload": "20230113",
    "chapters": []
   },
@@ -1868,6 +1961,7 @@
    ],
    "level": null,
    "ease": 0.651,
+   "cefr": null,
    "upload": "20230106",
    "chapters": []
   },
@@ -1884,6 +1978,7 @@
    ],
    "level": null,
    "ease": 0.617,
+   "cefr": null,
    "upload": "20221231",
    "chapters": []
   },
@@ -1896,6 +1991,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.776,
+   "cefr": "A1",
    "upload": "20221230",
    "chapters": []
   },
@@ -1912,6 +2008,7 @@
    ],
    "level": null,
    "ease": 0.641,
+   "cefr": null,
    "upload": "20221217",
    "chapters": []
   },
@@ -1928,6 +2025,7 @@
    ],
    "level": "beginner",
    "ease": 0.724,
+   "cefr": "A1",
    "upload": "20221209",
    "chapters": []
   },
@@ -1944,6 +2042,7 @@
    ],
    "level": null,
    "ease": 0.682,
+   "cefr": null,
    "upload": "20221202",
    "chapters": [
     {
@@ -1973,6 +2072,7 @@
    "topics": [],
    "level": null,
    "ease": 0.614,
+   "cefr": null,
    "upload": "20221130",
    "chapters": []
   },
@@ -1989,6 +2089,7 @@
    ],
    "level": null,
    "ease": 0.607,
+   "cefr": null,
    "upload": "20221125",
    "chapters": []
   },
@@ -2005,6 +2106,7 @@
    ],
    "level": "beginner",
    "ease": 0.651,
+   "cefr": "A1",
    "upload": "20221118",
    "chapters": []
   },
@@ -2021,6 +2123,7 @@
    ],
    "level": null,
    "ease": 0.677,
+   "cefr": null,
    "upload": "20221111",
    "chapters": [
     {
@@ -2054,6 +2157,7 @@
    ],
    "level": null,
    "ease": 0.665,
+   "cefr": null,
    "upload": "20221104",
    "chapters": []
   },
@@ -2066,6 +2170,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.686,
+   "cefr": "A1",
    "upload": "20221028",
    "chapters": []
   },
@@ -2082,6 +2187,7 @@
    ],
    "level": null,
    "ease": 0.691,
+   "cefr": null,
    "upload": "20221021",
    "chapters": [
     {
@@ -2119,6 +2225,7 @@
    ],
    "level": null,
    "ease": 0.664,
+   "cefr": null,
    "upload": "20221014",
    "chapters": []
   },
@@ -2135,6 +2242,7 @@
    ],
    "level": null,
    "ease": 0.658,
+   "cefr": null,
    "upload": "20221007",
    "chapters": []
   },
@@ -2151,6 +2259,7 @@
    ],
    "level": null,
    "ease": 0.64,
+   "cefr": null,
    "upload": "20220930",
    "chapters": []
   },
@@ -2167,6 +2276,7 @@
    ],
    "level": null,
    "ease": 0.669,
+   "cefr": null,
    "upload": "20220916",
    "chapters": []
   },
@@ -2183,6 +2293,7 @@
    ],
    "level": null,
    "ease": 0.657,
+   "cefr": null,
    "upload": "20220909",
    "chapters": []
   },
@@ -2199,6 +2310,7 @@
    ],
    "level": null,
    "ease": 0.652,
+   "cefr": null,
    "upload": "20220902",
    "chapters": []
   },
@@ -2213,6 +2325,7 @@
    ],
    "level": null,
    "ease": 0.704,
+   "cefr": null,
    "upload": "20220901",
    "chapters": []
   },
@@ -2228,6 +2341,7 @@
    ],
    "level": "beginner",
    "ease": 0.685,
+   "cefr": "A1",
    "upload": "20220520",
    "chapters": []
   },
@@ -2244,6 +2358,7 @@
    ],
    "level": null,
    "ease": 0.639,
+   "cefr": null,
    "upload": "20220506",
    "chapters": []
   },
@@ -2258,6 +2373,7 @@
    ],
    "level": "beginner",
    "ease": 0.665,
+   "cefr": "A1",
    "upload": "20220401",
    "chapters": []
   },
@@ -2274,6 +2390,7 @@
    ],
    "level": "beginner",
    "ease": 0.619,
+   "cefr": "A1",
    "upload": "20220304",
    "chapters": []
   },
@@ -2290,6 +2407,7 @@
    ],
    "level": null,
    "ease": 0.614,
+   "cefr": null,
    "upload": "20220218",
    "chapters": []
   },
@@ -2306,6 +2424,7 @@
    ],
    "level": null,
    "ease": 0.664,
+   "cefr": null,
    "upload": "20220121",
    "chapters": []
   },
@@ -2322,6 +2441,7 @@
    ],
    "level": "beginner",
    "ease": 0.623,
+   "cefr": "A1",
    "upload": "20220114",
    "chapters": []
   },
@@ -2338,6 +2458,7 @@
    ],
    "level": null,
    "ease": 0.584,
+   "cefr": null,
    "upload": "20211210",
    "chapters": [
     {
@@ -2391,6 +2512,7 @@
    ],
    "level": "beginner",
    "ease": 0.646,
+   "cefr": "A1",
    "upload": "20211203",
    "chapters": []
   },
@@ -2407,6 +2529,7 @@
    ],
    "level": null,
    "ease": 0.608,
+   "cefr": null,
    "upload": "20211119",
    "chapters": []
   },
@@ -2423,6 +2546,7 @@
    ],
    "level": "beginner",
    "ease": 0.607,
+   "cefr": "A1",
    "upload": "20211105",
    "chapters": []
   },
@@ -2438,6 +2562,7 @@
    ],
    "level": "beginner",
    "ease": 0.674,
+   "cefr": "A1",
    "upload": "20211009",
    "chapters": []
   },
@@ -2454,6 +2579,7 @@
    ],
    "level": "beginner",
    "ease": 0.678,
+   "cefr": "A1",
    "upload": "20210917",
    "chapters": []
   },
@@ -2470,6 +2596,7 @@
    ],
    "level": null,
    "ease": 0.618,
+   "cefr": null,
    "upload": "20210903",
    "chapters": []
   },
@@ -2486,6 +2613,7 @@
    ],
    "level": "beginner",
    "ease": 0.703,
+   "cefr": "A1",
    "upload": "20210813",
    "chapters": []
   },
@@ -2502,6 +2630,7 @@
    ],
    "level": null,
    "ease": 0.656,
+   "cefr": null,
    "upload": "20210730",
    "chapters": []
   },
@@ -2518,6 +2647,7 @@
    ],
    "level": "beginner",
    "ease": 0.696,
+   "cefr": "A1",
    "upload": "20210716",
    "chapters": []
   },
@@ -2534,6 +2664,7 @@
    ],
    "level": null,
    "ease": 0.644,
+   "cefr": null,
    "upload": "20210618",
    "chapters": []
   },
@@ -2550,6 +2681,7 @@
    ],
    "level": null,
    "ease": 0.639,
+   "cefr": null,
    "upload": "20210604",
    "chapters": []
   },
@@ -2566,6 +2698,7 @@
    ],
    "level": "beginner",
    "ease": 0.57,
+   "cefr": "A1",
    "upload": "20210514",
    "chapters": []
   },
@@ -2582,6 +2715,7 @@
    ],
    "level": null,
    "ease": 0.617,
+   "cefr": null,
    "upload": "20210409",
    "chapters": []
   },
@@ -2598,6 +2732,7 @@
    ],
    "level": null,
    "ease": 0.652,
+   "cefr": null,
    "upload": "20210312",
    "chapters": []
   },
@@ -2614,6 +2749,7 @@
    ],
    "level": "beginner",
    "ease": 0.631,
+   "cefr": "A1",
    "upload": "20210226",
    "chapters": []
   },
@@ -2630,6 +2766,7 @@
    ],
    "level": null,
    "ease": 0.629,
+   "cefr": null,
    "upload": "20210129",
    "chapters": []
   },
@@ -2644,6 +2781,7 @@
    ],
    "level": null,
    "ease": 0.606,
+   "cefr": null,
    "upload": "20201218",
    "chapters": []
   },
@@ -2660,6 +2798,7 @@
    ],
    "level": null,
    "ease": 0.591,
+   "cefr": null,
    "upload": "20201030",
    "chapters": []
   },
@@ -2676,6 +2815,7 @@
    ],
    "level": null,
    "ease": 0.628,
+   "cefr": null,
    "upload": "20200926",
    "chapters": []
   },
@@ -2691,6 +2831,7 @@
    ],
    "level": "beginner",
    "ease": 0.648,
+   "cefr": "A1",
    "upload": "20200828",
    "chapters": []
   },
@@ -2705,6 +2846,7 @@
    ],
    "level": null,
    "ease": 0.665,
+   "cefr": null,
    "upload": "20200710",
    "chapters": []
   },
@@ -2717,6 +2859,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.675,
+   "cefr": "A1",
    "upload": "20200703",
    "chapters": []
   },
@@ -2733,6 +2876,7 @@
    ],
    "level": null,
    "ease": 0.683,
+   "cefr": null,
    "upload": "20200626",
    "chapters": []
   },
@@ -2747,6 +2891,7 @@
    ],
    "level": "beginner",
    "ease": 0.583,
+   "cefr": "A1",
    "upload": "20200522",
    "chapters": []
   },
@@ -2762,6 +2907,7 @@
    ],
    "level": null,
    "ease": 0.658,
+   "cefr": null,
    "upload": "20200424",
    "chapters": []
   },
@@ -2778,6 +2924,7 @@
    ],
    "level": "beginner",
    "ease": 0.655,
+   "cefr": "A1",
    "upload": "20200327",
    "chapters": []
   },
@@ -2793,6 +2940,7 @@
    ],
    "level": "intermediate",
    "ease": 0.72,
+   "cefr": "B1",
    "upload": "20260902",
    "chapters": [
     {
@@ -2844,6 +2992,7 @@
    ],
    "level": "beginner",
    "ease": 0.683,
+   "cefr": "A1",
    "upload": "20260729",
    "chapters": [
     {
@@ -2897,6 +3046,7 @@
    ],
    "level": "beginner",
    "ease": 0.657,
+   "cefr": "A1",
    "upload": "20260722",
    "chapters": [
     {
@@ -2960,6 +3110,7 @@
    ],
    "level": "beginner",
    "ease": 0.415,
+   "cefr": "A1",
    "upload": "20260715",
    "chapters": [
     {
@@ -3005,6 +3156,7 @@
    ],
    "level": "beginner",
    "ease": 0.588,
+   "cefr": "A1",
    "upload": "20260708",
    "chapters": [
     {
@@ -3061,6 +3213,7 @@
    ],
    "level": "beginner",
    "ease": 0.662,
+   "cefr": "A1",
    "upload": "20260701",
    "chapters": [
     {
@@ -3106,6 +3259,7 @@
    ],
    "level": "beginner",
    "ease": 0.671,
+   "cefr": "A1",
    "upload": "20260624",
    "chapters": [
     {
@@ -3167,6 +3321,7 @@
    ],
    "level": "beginner",
    "ease": 0.646,
+   "cefr": "A1",
    "upload": "20260617",
    "chapters": [
     {
@@ -3231,6 +3386,7 @@
    ],
    "level": "beginner",
    "ease": 0.591,
+   "cefr": "A1",
    "upload": "20260610",
    "chapters": [
     {
@@ -3288,6 +3444,7 @@
    ],
    "level": "beginner",
    "ease": 0.671,
+   "cefr": "A1",
    "upload": "20260603",
    "chapters": [
     {
@@ -3353,6 +3510,7 @@
    ],
    "level": "beginner",
    "ease": 0.636,
+   "cefr": "A1",
    "upload": "20260527",
    "chapters": [
     {
@@ -3398,6 +3556,7 @@
    ],
    "level": "beginner",
    "ease": 0.639,
+   "cefr": "A1",
    "upload": "20260520",
    "chapters": [
     {
@@ -3451,6 +3610,7 @@
    ],
    "level": "beginner",
    "ease": 0.663,
+   "cefr": "A1",
    "upload": "20260513",
    "chapters": [
     {
@@ -3510,6 +3670,7 @@
    ],
    "level": "beginner",
    "ease": 0.449,
+   "cefr": "A1",
    "upload": "20260506",
    "chapters": [
     {
@@ -3563,6 +3724,7 @@
    ],
    "level": "beginner",
    "ease": 0.637,
+   "cefr": "A1",
    "upload": "20260430",
    "chapters": [
     {
@@ -3628,6 +3790,7 @@
    ],
    "level": "beginner",
    "ease": 0.648,
+   "cefr": "A1",
    "upload": "20260429",
    "chapters": [
     {
@@ -3692,6 +3855,7 @@
    ],
    "level": "beginner",
    "ease": 0.636,
+   "cefr": "A1",
    "upload": "20260422",
    "chapters": [
     {
@@ -3747,6 +3911,7 @@
    ],
    "level": "beginner",
    "ease": 0.407,
+   "cefr": "A1",
    "upload": "20260415",
    "chapters": [
     {
@@ -3796,6 +3961,7 @@
    ],
    "level": "beginner",
    "ease": 0.593,
+   "cefr": "A1",
    "upload": "20260408",
    "chapters": [
     {
@@ -3845,6 +4011,7 @@
    ],
    "level": "beginner",
    "ease": 0.654,
+   "cefr": "A1",
    "upload": "20260407",
    "chapters": [
     {
@@ -3888,6 +4055,7 @@
    ],
    "level": "beginner",
    "ease": 0.669,
+   "cefr": "A1",
    "upload": "20260401",
    "chapters": [
     {
@@ -3935,6 +4103,7 @@
    ],
    "level": "beginner",
    "ease": 0.583,
+   "cefr": "A1",
    "upload": "20260325",
    "chapters": [
     {
@@ -3999,6 +4168,7 @@
    ],
    "level": "beginner",
    "ease": 0.646,
+   "cefr": "A1",
    "upload": "20260318",
    "chapters": [
     {
@@ -4046,6 +4216,7 @@
    ],
    "level": "beginner",
    "ease": 0.612,
+   "cefr": "A1",
    "upload": "20260311",
    "chapters": [
     {
@@ -4099,6 +4270,7 @@
    ],
    "level": "beginner",
    "ease": 0.652,
+   "cefr": "A1",
    "upload": "20260310",
    "chapters": [
     {
@@ -4148,6 +4320,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.571,
+   "cefr": "A1",
    "upload": "20260304",
    "chapters": [
     {
@@ -4204,6 +4377,7 @@
    ],
    "level": "beginner",
    "ease": 0.689,
+   "cefr": "A1",
    "upload": "20260225",
    "chapters": [
     {
@@ -4269,6 +4443,7 @@
    ],
    "level": "beginner",
    "ease": 0.66,
+   "cefr": "A1",
    "upload": "20260218",
    "chapters": [
     {
@@ -4334,6 +4509,7 @@
    ],
    "level": "beginner",
    "ease": 0.617,
+   "cefr": "A1",
    "upload": "20260211",
    "chapters": [
     {
@@ -4395,6 +4571,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.666,
+   "cefr": "A1",
    "upload": "20260204",
    "chapters": [
     {
@@ -4460,6 +4637,7 @@
    ],
    "level": "beginner",
    "ease": 0.64,
+   "cefr": "A1",
    "upload": "20260203",
    "chapters": [
     {
@@ -4508,6 +4686,7 @@
    ],
    "level": "beginner",
    "ease": 0.537,
+   "cefr": "A1",
    "upload": "20260131",
    "chapters": [
     {
@@ -4568,6 +4747,7 @@
    ],
    "level": "beginner",
    "ease": 0.662,
+   "cefr": "A1",
    "upload": "20260128",
    "chapters": [
     {
@@ -4589,6 +4769,7 @@
    ],
    "level": "beginner",
    "ease": 0.574,
+   "cefr": "A1",
    "upload": "20260124",
    "chapters": [
     {
@@ -4652,6 +4833,7 @@
    ],
    "level": "beginner",
    "ease": 0.603,
+   "cefr": "A1",
    "upload": "20260121",
    "chapters": [
     {
@@ -4713,6 +4895,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.401,
+   "cefr": "A1",
    "upload": "20260117",
    "chapters": [
     {
@@ -4741,6 +4924,7 @@
    ],
    "level": "beginner",
    "ease": 0.646,
+   "cefr": "A1",
    "upload": "20260114",
    "chapters": [
     {
@@ -4785,6 +4969,7 @@
    ],
    "level": "beginner",
    "ease": 0.645,
+   "cefr": "A1",
    "upload": "20260110",
    "chapters": [
     {
@@ -4824,6 +5009,7 @@
    ],
    "level": null,
    "ease": 0.6,
+   "cefr": null,
    "upload": "20260107",
    "chapters": [
     {
@@ -4857,6 +5043,7 @@
    ],
    "level": "beginner",
    "ease": 0.661,
+   "cefr": "A1",
    "upload": "20260103",
    "chapters": [
     {
@@ -4920,6 +5107,7 @@
    ],
    "level": "beginner",
    "ease": 0.624,
+   "cefr": "A1",
    "upload": "20260207",
    "chapters": []
   },
@@ -4935,6 +5123,7 @@
    ],
    "level": "beginner",
    "ease": 0.727,
+   "cefr": "A1",
    "upload": "20251219",
    "chapters": []
   },
@@ -4949,6 +5138,7 @@
    ],
    "level": "beginner",
    "ease": 0.525,
+   "cefr": "A1",
    "upload": "20250321",
    "chapters": []
   },
@@ -4961,6 +5151,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.502,
+   "cefr": "B1",
    "upload": "20241227",
    "chapters": []
   },
@@ -4973,6 +5164,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.537,
+   "cefr": "B1",
    "upload": "20241213",
    "chapters": []
   },
@@ -4985,6 +5177,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.56,
+   "cefr": "B1",
    "upload": "20241130",
    "chapters": []
   },
@@ -4997,6 +5190,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.59,
+   "cefr": "B1",
    "upload": "20241018",
    "chapters": []
   },
@@ -5009,6 +5203,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.593,
+   "cefr": "B1",
    "upload": "20240913",
    "chapters": []
   },
@@ -5021,6 +5216,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.597,
+   "cefr": "B1",
    "upload": "20240816",
    "chapters": []
   },
@@ -5033,6 +5229,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.541,
+   "cefr": "B1",
    "upload": "20240712",
    "chapters": []
   },
@@ -5045,6 +5242,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.528,
+   "cefr": "B1",
    "upload": "20240614",
    "chapters": []
   },
@@ -5059,6 +5257,7 @@
    ],
    "level": "intermediate",
    "ease": 0.443,
+   "cefr": "B1",
    "upload": "20240510",
    "chapters": []
   },
@@ -5073,6 +5272,7 @@
    ],
    "level": "intermediate",
    "ease": 0.637,
+   "cefr": "B1",
    "upload": "20240412",
    "chapters": []
   },
@@ -5085,6 +5285,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.572,
+   "cefr": "B1",
    "upload": "20240301",
    "chapters": []
   },
@@ -5097,6 +5298,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.484,
+   "cefr": "B1",
    "upload": "20240202",
    "chapters": []
   },
@@ -5109,6 +5311,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.537,
+   "cefr": "B1",
    "upload": "20231124",
    "chapters": []
   },
@@ -5125,6 +5328,7 @@
    ],
    "level": "intermediate",
    "ease": 0.563,
+   "cefr": "B1",
    "upload": "20230908",
    "chapters": []
   },
@@ -5140,6 +5344,7 @@
    ],
    "level": "intermediate",
    "ease": 0.605,
+   "cefr": "B1",
    "upload": "20230804",
    "chapters": []
   },
@@ -5154,6 +5359,7 @@
    ],
    "level": "intermediate",
    "ease": 0.68,
+   "cefr": "B1",
    "upload": "20230714",
    "chapters": []
   },
@@ -5169,6 +5375,7 @@
    ],
    "level": "intermediate",
    "ease": 0.65,
+   "cefr": "B1",
    "upload": "20230624",
    "chapters": []
   },
@@ -5181,6 +5388,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.474,
+   "cefr": "A1",
    "upload": "20230526",
    "chapters": []
   },
@@ -5197,6 +5405,7 @@
    ],
    "level": "intermediate",
    "ease": 0.714,
+   "cefr": "B1",
    "upload": "20230415",
    "chapters": []
   },
@@ -5211,6 +5420,7 @@
    ],
    "level": "intermediate",
    "ease": 0.665,
+   "cefr": "B1",
    "upload": "20230325",
    "chapters": []
   },
@@ -5227,6 +5437,7 @@
    ],
    "level": "intermediate",
    "ease": 0.688,
+   "cefr": "B1",
    "upload": "20230311",
    "chapters": []
   },
@@ -5239,6 +5450,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.517,
+   "cefr": "A1",
    "upload": "20230225",
    "chapters": []
   },
@@ -5253,6 +5465,7 @@
    ],
    "level": "beginner",
    "ease": 0.623,
+   "cefr": "A1",
    "upload": "20230128",
    "chapters": [
     {
@@ -5274,6 +5487,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.516,
+   "cefr": "A1",
    "upload": "20230114",
    "chapters": []
   },
@@ -5286,6 +5500,7 @@
    "topics": [],
    "level": null,
    "ease": 0.651,
+   "cefr": null,
    "upload": "20221229",
    "chapters": [
     {
@@ -5313,6 +5528,7 @@
    ],
    "level": null,
    "ease": 0.498,
+   "cefr": null,
    "upload": "20221223",
    "chapters": [
     {
@@ -5340,6 +5556,7 @@
    ],
    "level": "beginner",
    "ease": 0.528,
+   "cefr": "A1",
    "upload": "20221217",
    "chapters": [
     {
@@ -5361,6 +5578,7 @@
    "topics": [],
    "level": null,
    "ease": 0.59,
+   "cefr": null,
    "upload": "20221209",
    "chapters": [
     {
@@ -5388,6 +5606,7 @@
    ],
    "level": "beginner",
    "ease": 0.643,
+   "cefr": "A1",
    "upload": "20221118",
    "chapters": [
     {
@@ -5409,6 +5628,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.605,
+   "cefr": "A1",
    "upload": "20221021",
    "chapters": []
   },
@@ -5423,6 +5643,7 @@
    ],
    "level": "beginner",
    "ease": 0.6,
+   "cefr": "A1",
    "upload": "20260830",
    "chapters": []
   },
@@ -5435,6 +5656,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.39,
+   "cefr": "A1",
    "upload": "20260810",
    "chapters": []
   },
@@ -5447,6 +5669,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.267,
+   "cefr": "A1",
    "upload": "20260717",
    "chapters": []
   },
@@ -5463,6 +5686,7 @@
    ],
    "level": null,
    "ease": 0.549,
+   "cefr": null,
    "upload": "20260708",
    "chapters": []
   },
@@ -5477,6 +5701,7 @@
    ],
    "level": "beginner",
    "ease": 0.526,
+   "cefr": "A1",
    "upload": "20260708",
    "chapters": []
   },
@@ -5489,6 +5714,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.221,
+   "cefr": "A1",
    "upload": "20250621",
    "chapters": []
   },
@@ -5501,6 +5727,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.336,
+   "cefr": "A1",
    "upload": "20250605",
    "chapters": []
   },
@@ -5513,6 +5740,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.279,
+   "cefr": "A1",
    "upload": "20250529",
    "chapters": []
   },
@@ -5527,6 +5755,7 @@
    ],
    "level": "beginner",
    "ease": 0.233,
+   "cefr": "A1",
    "upload": "20250521",
    "chapters": []
   },
@@ -5539,6 +5768,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.219,
+   "cefr": "A1",
    "upload": "20250516",
    "chapters": []
   },
@@ -5555,6 +5785,7 @@
    ],
    "level": "beginner",
    "ease": 0.584,
+   "cefr": "A1",
    "upload": "20250227",
    "chapters": []
   },
@@ -5569,6 +5800,7 @@
    ],
    "level": "beginner",
    "ease": 0.448,
+   "cefr": "A1",
    "upload": "20250222",
    "chapters": []
   },
@@ -5581,6 +5813,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.754,
+   "cefr": "A1",
    "upload": "20241127",
    "chapters": []
   },
@@ -5597,6 +5830,7 @@
    ],
    "level": "beginner",
    "ease": 0.5,
+   "cefr": "A1",
    "upload": "20241014",
    "chapters": []
   },
@@ -5611,6 +5845,7 @@
    ],
    "level": "beginner",
    "ease": 0.52,
+   "cefr": "A1",
    "upload": "20240803",
    "chapters": []
   },
@@ -5623,6 +5858,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.699,
+   "cefr": "A1",
    "upload": "20240412",
    "chapters": []
   },
@@ -5635,6 +5871,7 @@
    "topics": [],
    "level": "beginner",
    "ease": 0.576,
+   "cefr": "A1",
    "upload": "20240229",
    "chapters": []
   },
@@ -5650,6 +5887,7 @@
    ],
    "level": "intermediate",
    "ease": 0.649,
+   "cefr": "B1",
    "upload": "20240913",
    "chapters": []
   },
@@ -5664,6 +5902,7 @@
    ],
    "level": "beginner",
    "ease": 0.558,
+   "cefr": "A1",
    "upload": "20240722",
    "chapters": []
   },
@@ -5676,6 +5915,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.563,
+   "cefr": "B1",
    "upload": "20240619",
    "chapters": []
   },
@@ -5691,6 +5931,7 @@
    ],
    "level": "intermediate",
    "ease": 0.619,
+   "cefr": "B1",
    "upload": "20240610",
    "chapters": []
   },
@@ -5707,6 +5948,7 @@
    ],
    "level": "intermediate",
    "ease": 0.573,
+   "cefr": "B1",
    "upload": "20240522",
    "chapters": []
   },
@@ -5721,6 +5963,7 @@
    ],
    "level": "intermediate",
    "ease": 0.606,
+   "cefr": "B1",
    "upload": "20240510",
    "chapters": []
   },
@@ -5735,6 +5978,7 @@
    ],
    "level": "intermediate",
    "ease": 0.546,
+   "cefr": "B1",
    "upload": "20240421",
    "chapters": []
   },
@@ -5747,6 +5991,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.483,
+   "cefr": "B1",
    "upload": "20240403",
    "chapters": []
   },
@@ -5763,6 +6008,7 @@
    ],
    "level": "intermediate",
    "ease": 0.617,
+   "cefr": "B1",
    "upload": "20240321",
    "chapters": []
   },
@@ -5778,6 +6024,7 @@
    ],
    "level": "intermediate",
    "ease": 0.66,
+   "cefr": "B1",
    "upload": "20240305",
    "chapters": []
   },
@@ -5792,6 +6039,7 @@
    ],
    "level": "intermediate",
    "ease": 0.497,
+   "cefr": "B1",
    "upload": "20240202",
    "chapters": []
   },
@@ -5804,6 +6052,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.492,
+   "cefr": "B1",
    "upload": "20240109",
    "chapters": []
   },
@@ -5819,6 +6068,7 @@
    ],
    "level": "intermediate",
    "ease": 0.548,
+   "cefr": "B1",
    "upload": "20240105",
    "chapters": []
   },
@@ -5834,6 +6084,7 @@
    ],
    "level": "intermediate",
    "ease": 0.527,
+   "cefr": "B1",
    "upload": "20240103",
    "chapters": []
   },
@@ -5849,6 +6100,7 @@
    ],
    "level": "intermediate",
    "ease": 0.557,
+   "cefr": "B1",
    "upload": "20240102",
    "chapters": []
   },
@@ -5863,6 +6115,7 @@
    ],
    "level": "intermediate",
    "ease": 0.551,
+   "cefr": "B1",
    "upload": "20240101",
    "chapters": []
   },
@@ -5875,6 +6128,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.645,
+   "cefr": "B1",
    "upload": "20231225",
    "chapters": []
   },
@@ -5891,6 +6145,7 @@
    ],
    "level": "intermediate",
    "ease": 0.586,
+   "cefr": "B1",
    "upload": "20231212",
    "chapters": []
   },
@@ -5905,6 +6160,7 @@
    ],
    "level": "intermediate",
    "ease": 0.619,
+   "cefr": "B1",
    "upload": "20231129",
    "chapters": []
   },
@@ -5921,6 +6177,7 @@
    ],
    "level": "intermediate",
    "ease": 0.57,
+   "cefr": "B1",
    "upload": "20231112",
    "chapters": []
   },
@@ -5937,6 +6194,7 @@
    ],
    "level": "intermediate",
    "ease": 0.641,
+   "cefr": "B1",
    "upload": "20231029",
    "chapters": []
   },
@@ -5953,6 +6211,7 @@
    ],
    "level": "intermediate",
    "ease": 0.724,
+   "cefr": "B1",
    "upload": "20231015",
    "chapters": []
   },
@@ -5968,6 +6227,7 @@
    ],
    "level": "intermediate",
    "ease": 0.634,
+   "cefr": "B1",
    "upload": "20230924",
    "chapters": []
   },
@@ -5983,6 +6243,7 @@
    ],
    "level": "intermediate",
    "ease": 0.551,
+   "cefr": "B1",
    "upload": "20230910",
    "chapters": []
   },
@@ -5999,6 +6260,7 @@
    ],
    "level": "intermediate",
    "ease": 0.665,
+   "cefr": "B1",
    "upload": "20230822",
    "chapters": []
   },
@@ -6013,6 +6275,7 @@
    ],
    "level": "intermediate",
    "ease": 0.604,
+   "cefr": "B1",
    "upload": "20230803",
    "chapters": []
   },
@@ -6029,6 +6292,7 @@
    ],
    "level": "intermediate",
    "ease": 0.585,
+   "cefr": "B1",
    "upload": "20230717",
    "chapters": []
   },
@@ -6045,6 +6309,7 @@
    ],
    "level": "advanced",
    "ease": 0.541,
+   "cefr": "C1",
    "upload": "20230703",
    "chapters": []
   },
@@ -6059,6 +6324,7 @@
    ],
    "level": "advanced",
    "ease": 0.604,
+   "cefr": "C1",
    "upload": "20230620",
    "chapters": []
   },
@@ -6073,6 +6339,7 @@
    ],
    "level": "intermediate",
    "ease": 0.477,
+   "cefr": "B1",
    "upload": "20230604",
    "chapters": []
   },
@@ -6089,6 +6356,7 @@
    ],
    "level": "intermediate",
    "ease": 0.503,
+   "cefr": "B1",
    "upload": "20230521",
    "chapters": []
   },
@@ -6101,6 +6369,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.542,
+   "cefr": "B1",
    "upload": "20230507",
    "chapters": []
   },
@@ -6117,6 +6386,7 @@
    ],
    "level": "intermediate",
    "ease": 0.589,
+   "cefr": "B1",
    "upload": "20230409",
    "chapters": []
   },
@@ -6131,6 +6401,7 @@
    ],
    "level": "intermediate",
    "ease": 0.668,
+   "cefr": "B1",
    "upload": "20230319",
    "chapters": []
   },
@@ -6143,6 +6414,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.579,
+   "cefr": "B1",
    "upload": "20230305",
    "chapters": []
   },
@@ -6155,6 +6427,7 @@
    "topics": [],
    "level": "intermediate",
    "ease": 0.694,
+   "cefr": "B1",
    "upload": "20230219",
    "chapters": []
   },
@@ -6171,6 +6444,7 @@
    ],
    "level": "intermediate",
    "ease": 0.637,
+   "cefr": "B1",
    "upload": "20230203",
    "chapters": []
   },
@@ -6185,6 +6459,7 @@
    ],
    "level": "beginner",
    "ease": 0.618,
+   "cefr": "A1",
    "upload": "20221229",
    "chapters": []
   },
@@ -6200,6 +6475,7 @@
    ],
    "level": "intermediate",
    "ease": 0.604,
+   "cefr": "B1",
    "upload": "20221214",
    "chapters": []
   },
@@ -6215,6 +6491,7 @@
    ],
    "level": "intermediate",
    "ease": 0.599,
+   "cefr": "B1",
    "upload": "20221129",
    "chapters": []
   },
@@ -6231,6 +6508,7 @@
    ],
    "level": null,
    "ease": 0.577,
+   "cefr": null,
    "upload": "20260905",
    "chapters": []
   },
@@ -6247,6 +6525,7 @@
    ],
    "level": "advanced",
    "ease": 0.584,
+   "cefr": "C1",
    "upload": "20251231",
    "chapters": []
   },
@@ -6263,6 +6542,7 @@
    ],
    "level": "advanced",
    "ease": 0.598,
+   "cefr": "C1",
    "upload": "20251221",
    "chapters": [
     {
@@ -6328,6 +6608,7 @@
    ],
    "level": "intermediate",
    "ease": 0.602,
+   "cefr": "B1",
    "upload": "20251212",
    "chapters": []
   },
@@ -6344,6 +6625,7 @@
    ],
    "level": "intermediate",
    "ease": 0.639,
+   "cefr": "B1",
    "upload": "20251111",
    "chapters": [
     {
@@ -6409,6 +6691,7 @@
    ],
    "level": "intermediate",
    "ease": 0.669,
+   "cefr": "B1",
    "upload": "20251024",
    "chapters": []
   },
@@ -6425,6 +6708,7 @@
    ],
    "level": "intermediate",
    "ease": 0.642,
+   "cefr": "B1",
    "upload": "20250918",
    "chapters": [
     {
@@ -6466,6 +6750,7 @@
    ],
    "level": null,
    "ease": 0.622,
+   "cefr": null,
    "upload": "20240127",
    "chapters": [
     {
@@ -6527,6 +6812,7 @@
    ],
    "level": "intermediate",
    "ease": 0.623,
+   "cefr": "B1",
    "upload": "20230924",
    "chapters": [
     {
@@ -6592,6 +6878,7 @@
    ],
    "level": "intermediate",
    "ease": 0.614,
+   "cefr": "B1",
    "upload": "20230920",
    "chapters": [
     {
@@ -6640,6 +6927,7 @@
    ],
    "level": "intermediate",
    "ease": 0.6,
+   "cefr": "B1",
    "upload": "20230905",
    "chapters": [
     {
@@ -6701,6 +6989,7 @@
    ],
    "level": "intermediate",
    "ease": 0.636,
+   "cefr": "B1",
    "upload": "20230828",
    "chapters": [
     {
@@ -6750,6 +7039,7 @@
    ],
    "level": "advanced",
    "ease": 0.621,
+   "cefr": "C1",
    "upload": "20230820",
    "chapters": [
     {
@@ -6807,6 +7097,7 @@
    ],
    "level": "intermediate",
    "ease": 0.603,
+   "cefr": "B1",
    "upload": "20260814",
    "chapters": [
     {
@@ -6844,6 +7135,7 @@
    ],
    "level": "beginner",
    "ease": 0.637,
+   "cefr": "A1",
    "upload": "20260807",
    "chapters": [
     {
@@ -6881,6 +7173,7 @@
    ],
    "level": "intermediate",
    "ease": 0.602,
+   "cefr": "B1",
    "upload": "20260729",
    "chapters": [
     {
@@ -6918,6 +7211,7 @@
    ],
    "level": "beginner",
    "ease": 0.596,
+   "cefr": "A1",
    "upload": "20260713",
    "chapters": [
     {
@@ -6957,6 +7251,7 @@
    ],
    "level": "intermediate",
    "ease": 0.568,
+   "cefr": "B1",
    "upload": "20260703",
    "chapters": [
     {
@@ -6994,6 +7289,7 @@
    ],
    "level": "elementary",
    "ease": 0.631,
+   "cefr": "A2",
    "upload": "20260626",
    "chapters": [
     {
@@ -7031,6 +7327,7 @@
    ],
    "level": "beginner",
    "ease": 0.626,
+   "cefr": "A1",
    "upload": "20260617",
    "chapters": [
     {
@@ -7064,6 +7361,7 @@
    ],
    "level": "beginner",
    "ease": 0.63,
+   "cefr": "A1",
    "upload": "20260519",
    "chapters": [
     {
@@ -7101,6 +7399,7 @@
    ],
    "level": "elementary",
    "ease": 0.637,
+   "cefr": "A2",
    "upload": "20260512",
    "chapters": [
     {
@@ -7136,6 +7435,7 @@
    ],
    "level": "beginner",
    "ease": 0.573,
+   "cefr": "A2",
    "upload": "20260506",
    "chapters": [
     {
@@ -7171,6 +7471,7 @@
    ],
    "level": null,
    "ease": 0.686,
+   "cefr": null,
    "upload": "20260504",
    "chapters": []
   },
@@ -7187,6 +7488,7 @@
    ],
    "level": "intermediate",
    "ease": 0.589,
+   "cefr": "B1",
    "upload": "20260427",
    "chapters": [
     {
@@ -7228,6 +7530,7 @@
    ],
    "level": null,
    "ease": 0.589,
+   "cefr": null,
    "upload": "20260428",
    "chapters": []
   },
@@ -7244,6 +7547,7 @@
    ],
    "level": "intermediate",
    "ease": 0.619,
+   "cefr": "B1",
    "upload": "20260408",
    "chapters": []
   },
@@ -7260,6 +7564,7 @@
    ],
    "level": "elementary",
    "ease": 0.646,
+   "cefr": "A2",
    "upload": "20260402",
    "chapters": [
     {
@@ -7297,6 +7602,7 @@
    ],
    "level": "intermediate",
    "ease": 0.63,
+   "cefr": "B1",
    "upload": "20260320",
    "chapters": [
     {
@@ -7334,6 +7640,7 @@
    ],
    "level": "elementary",
    "ease": 0.607,
+   "cefr": "A2",
    "upload": "20260227",
    "chapters": [
     {
@@ -7371,6 +7678,7 @@
    ],
    "level": "elementary",
    "ease": 0.641,
+   "cefr": "A2",
    "upload": "20260216",
    "chapters": [
     {
@@ -7404,6 +7712,7 @@
    ],
    "level": "intermediate",
    "ease": 0.65,
+   "cefr": "B1",
    "upload": "20260205",
    "chapters": [
     {
@@ -7441,6 +7750,7 @@
    ],
    "level": "elementary",
    "ease": 0.619,
+   "cefr": "A2",
    "upload": "20260122",
    "chapters": [
     {
@@ -7482,6 +7792,7 @@
    ],
    "level": "elementary",
    "ease": 0.638,
+   "cefr": "A2",
    "upload": "20260116",
    "chapters": [
     {
@@ -7519,6 +7830,7 @@
    ],
    "level": "elementary",
    "ease": 0.663,
+   "cefr": "A2",
    "upload": "20251220",
    "chapters": [
     {
@@ -7556,6 +7868,7 @@
    ],
    "level": "elementary",
    "ease": 0.593,
+   "cefr": "A2",
    "upload": "20251207",
    "chapters": [
     {
@@ -7593,6 +7906,7 @@
    ],
    "level": "elementary",
    "ease": 0.632,
+   "cefr": "A2",
    "upload": "20251128",
    "chapters": [
     {
@@ -7630,6 +7944,7 @@
    ],
    "level": "elementary",
    "ease": 0.642,
+   "cefr": "A2",
    "upload": "20251121",
    "chapters": [
     {
@@ -7667,6 +7982,7 @@
    ],
    "level": "elementary",
    "ease": 0.652,
+   "cefr": "A2",
    "upload": "20251112",
    "chapters": [
     {
@@ -7704,6 +8020,7 @@
    ],
    "level": "elementary",
    "ease": 0.571,
+   "cefr": "A2",
    "upload": "20251031",
    "chapters": [
     {
@@ -7741,6 +8058,7 @@
    ],
    "level": "elementary",
    "ease": 0.603,
+   "cefr": "A2",
    "upload": "20251024",
    "chapters": [
     {
@@ -7778,6 +8096,7 @@
    ],
    "level": "intermediate",
    "ease": 0.636,
+   "cefr": "B1",
    "upload": "20251010",
    "chapters": [
     {
@@ -7815,6 +8134,7 @@
    ],
    "level": "beginner",
    "ease": 0.607,
+   "cefr": "A1",
    "upload": "20251003",
    "chapters": [
     {
@@ -7856,6 +8176,7 @@
    ],
    "level": "intermediate",
    "ease": 0.672,
+   "cefr": "B1",
    "upload": "20250926",
    "chapters": [
     {

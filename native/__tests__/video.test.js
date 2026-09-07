@@ -83,17 +83,30 @@ describe("the video data", () => {
                              (v.kw + " " + v.title).includes(word))).toBe(true);
     expect(searchVideos(VIDEOS, "xyzzy-nothing")).toEqual([]);
   });
+
+  it("filters on a typed CEFR code, which is never displayed", () => {
+    const b1 = searchVideos(VIDEOS, "b1");
+    expect(b1.length).toBeGreaterThan(0);
+    expect(b1.every((v) => /^B1\+?$/.test(v.cefr))).toBe(true);
+    const a1 = searchVideos(VIDEOS, "A1 grammar");
+    expect(a1.every((v) => v.cefr === "A1" && (v.kw + " " + v.title).toLowerCase().includes("grammar"))).toBe(true);
+    const plus = searchVideos(VIDEOS, "b1+");
+    expect(plus.every((v) => v.cefr === "B1+")).toBe(true);
+    expect(VIDEOS.filter((v) => v.cefr).length).toBeGreaterThan(150);
+  });
 });
 
 describe("Immerse", () => {
   it("lists the library, filters as you type, and opens a video", async () => {
     await withProfile(<Immerse navigation={nav} />);
     expect(await screen.findByText(`of ${VIDEOS.length} watched`)).toBeTruthy();
+    // Each row carries the video's YouTube thumbnail.
+    const first = libraryOrder(VIDEOS)[0];
+    expect(screen.getByTestId(`thumb-${first.id}`).props.source.uri).toContain(first.id);
     const input = screen.getByTestId("video-search");
     await act(async () => { fireEvent.changeText(input, "xyzzy-nothing"); });
     expect(screen.getByText(/Nothing matches/)).toBeTruthy();
     await act(async () => { fireEvent.changeText(input, ""); });
-    const first = libraryOrder(VIDEOS)[0];
     await act(async () => { fireEvent.press(screen.getAllByText(first.title.split(" | ")[0].trim())[0]); });
     expect(nav.navigate).toHaveBeenCalledWith("Video", { videoId: first.id });
   });

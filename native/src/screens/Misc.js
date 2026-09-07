@@ -1,7 +1,7 @@
 /* Immerse (the video library), the video player, and the profile gate. */
 
 import React, { useMemo, useRef, useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
+import { View, Text, TextInput, Pressable, ScrollView, Image } from "react-native";
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
@@ -17,17 +17,23 @@ import { Intro } from "./Intro";
 const short = (title) => title.split(" | ")[0].trim();
 const minutes = (dur) => (dur ? `${Math.round(dur / 60)} min` : "");
 
-/* A channel's mark where a unit's icon would be: its initials, so the rows of a
-   library from several sources read at a glance. */
-function ChannelMark({ name, done }) {
+/* The video's own thumbnail from YouTube (the owner, 2026-09-07), with a tick
+   once watched. The image is YouTube's, fetched from YouTube; nothing is stored. */
+export const thumbUrl = (id) => `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+function VideoThumb({ id, done }) {
   const t = useTheme();
-  const initials = (name || "").split(/\s+/).map((w) => w[0]).filter(Boolean).slice(0, 2).join("");
   return (
-    <View style={{ width: 44, height: 44, borderRadius: 12, alignItems: "center",
-                   justifyContent: "center", backgroundColor: done ? t.goodBg : t.surface2,
-                   borderWidth: done ? 2 : 0, borderColor: t.good }}>
-      <Text style={{ color: done ? t.good : t.ink3, fontSize: 13, fontWeight: "700",
-                     letterSpacing: 0.5 }}>{initials.toUpperCase()}</Text>
+    <View style={{ width: 72, height: 44, borderRadius: 8, overflow: "hidden",
+                   backgroundColor: t.surface2, borderWidth: done ? 2 : 0, borderColor: t.good }}>
+      <Image testID={`thumb-${id}`} source={{ uri: thumbUrl(id) }}
+             style={{ width: "100%", height: "100%" }} resizeMode="cover"
+             accessibilityIgnoresInvertColors />
+      {done ? (
+        <View style={{ position: "absolute", right: 3, bottom: 3, width: 16, height: 16,
+                       borderRadius: 8, backgroundColor: t.good, alignItems: "center", justifyContent: "center" }}>
+          <Text style={{ color: t.goodOn, fontSize: 10, fontWeight: "800" }}>✓</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -47,6 +53,15 @@ export function libraryOrder(videos) {
   });
 }
 
+/* A CEFR code typed as a search term ("b1", "B1+", "a2") filters on the video's
+   code: "b1" takes B1 and B1+, "b1+" only B1+. The codes are never displayed. */
+const CEFR_TERM = /^[abc][12]\+?$/;
+const cefrMatches = (term, code) => {
+  if (!code) return false;
+  const c = code.toLowerCase();
+  return term.endsWith("+") ? c === term : c === term || c === term + "+";
+};
+
 export function searchVideos(videos, query) {
   const terms = fold(query).split(/\s+/).filter(Boolean);
   if (!terms.length) return libraryOrder(videos);
@@ -55,6 +70,10 @@ export function searchVideos(videos, query) {
     const hay = ((v.kw || "") + " " + v.title + " " + (v.ch || "")).toLowerCase();
     let score = 0, ok = true;
     for (const term of terms) {
+      if (CEFR_TERM.test(term)) {
+        if (cefrMatches(term, v.cefr)) { score += 2; continue; }
+        ok = false; break;
+      }
       const cyr = /[а-яё]/.test(term);
       const said = cyr && Object.keys(v.words || {}).some((w) => fold(w).startsWith(term));
       const inTitle = v.title.toLowerCase().includes(term);
@@ -87,7 +106,7 @@ export function Immerse({ navigation }) {
         testID="video-search"
         value={query}
         onChangeText={setQuery}
-        placeholder="Search: travel, grammar, beginner, слово…"
+        placeholder="Search: travel, grammar, B1, слово…"
         placeholderTextColor={t.ink3}
         autoCorrect={false}
         autoCapitalize="none"
@@ -105,8 +124,7 @@ export function Immerse({ navigation }) {
             return (
               <Row key={v.id} last={k === shown.length - 1}
                    onPress={() => navigation.navigate("Video", { videoId: v.id })}>
-                {unit ? <Thumb id={unit.id} done={watched} />
-                      : <ChannelMark name={v.ch} done={watched} />}
+                <VideoThumb id={v.id} done={watched} />
                 <View style={{ flex: 1 }}>
                   <Text numberOfLines={2}
                         style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>

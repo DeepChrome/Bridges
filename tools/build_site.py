@@ -599,6 +599,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             entry["level"] = v["level"]
         if v.get("ease") is not None:
             entry["ease"] = v["ease"]
+        if v.get("cefr"):
+            entry["cefr"] = v["cefr"]
         if v.get("chapters"):
             entry["chapters"] = v["chapters"]
         video_list.append(entry)

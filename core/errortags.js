@@ -8,15 +8,18 @@
  * the app has nothing to send them to yet.
  */
 
+/* The units follow the spine's grammar order (docs/grammar-sequence.md): core2
+   present tense, core3 gender, core4 plural, core5 prepositional, core6
+   accusative, core7 past, core8 aspect. Change the notes, change these. */
 export const ERROR_TAGS = [
-  { id: "CASE", en: "The wrong case ending for the word's role in the sentence", unit: "core4" },
-  { id: "NUMBER", en: "Singular where plural was needed, or the reverse", unit: "core3" },
-  { id: "GENDER_AGREE", en: "An adjective or past-tense verb not matching the noun's gender", unit: "core2" },
+  { id: "CASE", en: "The wrong case ending for the word's role in the sentence", unit: "core6" },
+  { id: "NUMBER", en: "Singular where plural was needed, or the reverse", unit: "core4" },
+  { id: "GENDER_AGREE", en: "An adjective or past-tense verb not matching the noun's gender", unit: "core3" },
   { id: "ASPECT", en: "Imperfective where the perfective partner was needed, or the reverse", unit: "core8" },
   { id: "TENSE", en: "The wrong tense for when it happened", unit: "core7" },
-  { id: "PERSON", en: "A verb ending that does not match who is doing it", unit: "core5" },
+  { id: "PERSON", en: "A verb ending that does not match who is doing it", unit: "core2" },
   { id: "WORD_ORDER", en: "Words in an order a speaker would not use", unit: null },
-  { id: "PREPOSITION", en: "The wrong preposition, or the wrong case after it", unit: "core6" },
+  { id: "PREPOSITION", en: "The wrong preposition, or the wrong case after it", unit: "core5" },
   { id: "WRONG_WORD", en: "A different word from the one that fits", unit: null },
   { id: "MISSING_WORD", en: "A word the sentence needs was left out", unit: null },
   { id: "EXTRA_WORD", en: "A word the sentence does not need, often an article or “is”", unit: "core1" },

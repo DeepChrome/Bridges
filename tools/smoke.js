@@ -193,7 +193,8 @@ setTimeout(async () => {
   group("vocab component");
   await nav("#/lesson/food/0/vocab");
   ok(!!$("#s-lesson .gtitle"), "vocab opens on the unit's grammar rule");
-  ok(/accusative/i.test($("#s-lesson").textContent), "the grammar note is the unit's");
+  // food's card is the two irregular verbs (docs/grammar-sequence.md), not a case.
+  ok(/пить|есть/.test($("#s-lesson").textContent), "the grammar note is the unit's");
   const vocabRun = await runExercises();
   ok(vocabRun.steps < 90, "vocab runs to completion", "steps " + vocabRun.steps);
   ok(vocabRun.seen.has("teach"), "teaching cards appeared");

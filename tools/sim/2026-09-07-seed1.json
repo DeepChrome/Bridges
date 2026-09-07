@@ -4,22 +4,22 @@
   "seed": 1000,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 505,
-    "askedAgain": 390,
+    "quizQuestions": 560,
+    "askedAgain": 472,
     "backToBack": 0,
-    "within3": 112,
-    "sameQuizTwice": 147,
+    "within3": 124,
+    "sameQuizTwice": 156,
     "medianGap": 6,
-    "quizzes": 58
+    "quizzes": 64
    },
    "mix": {
-    "choose-ru": 76,
-    "listen": 59,
-    "cloze": 175,
-    "choose-en": 72,
+    "choose-ru": 99,
+    "listen": 69,
+    "cloze": 194,
+    "choose-en": 68,
     "type": 82,
-    "hear": 31,
-    "say": 10
+    "hear": 37,
+    "say": 11
    },
    "chapters": [
     {
@@ -36,46 +36,46 @@
     },
     {
      "chapter": 2,
-     "title": "Home and Table",
+     "title": "Food and School",
      "lessons": 16,
-     "newWordsPerLesson": 6.7,
-     "quizAccuracy": 0.88,
-     "passFirstTry": 13,
+     "newWordsPerLesson": 6.6,
+     "quizAccuracy": 0.84,
+     "passFirstTry": 9,
      "failedThrice": 1,
-     "speechSteps": 21,
-     "speechTokensMean": 5.4,
-     "speechTokensMax": 8
+     "speechSteps": 26,
+     "speechTokensMean": 5,
+     "speechTokensMax": 7
     },
     {
      "chapter": 3,
-     "title": "Town and Travel",
+     "title": "Home and Clothes",
      "lessons": 8,
-     "newWordsPerLesson": 6.5,
-     "quizAccuracy": 0.83,
+     "newWordsPerLesson": 6.8,
+     "quizAccuracy": 0.81,
      "passFirstTry": 6,
-     "failedThrice": 0,
-     "speechSteps": 20,
-     "speechTokensMean": 5,
-     "speechTokensMax": 8
+     "failedThrice": 1,
+     "speechSteps": 22,
+     "speechTokensMean": 5.1,
+     "speechTokensMax": 9
     }
    ],
    "words": {
     "taught": 272,
     "everAsked": 272,
     "taughtButNeverAsked": 0,
-    "inSeen": 289,
-    "trouble": 4,
-    "leeches": 5
+    "inSeen": 288,
+    "trouble": 5,
+    "leeches": 6
    },
    "review": {
     "simulatedDays": 20,
-    "dueAtEnd": 204,
-    "duePerDay": 10.2
+    "dueAtEnd": 209,
+    "duePerDay": 10.4
    },
    "lessons": {
     "total": 40,
-    "passed": 38,
-    "retakes": 18,
+    "passed": 37,
+    "retakes": 24,
     "shortQuizzes": 0
    },
    "structural": 0
@@ -87,22 +87,22 @@
   "seed": 1001,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 655,
-    "askedAgain": 648,
+    "quizQuestions": 644,
+    "askedAgain": 618,
     "backToBack": 0,
-    "within3": 138,
-    "sameQuizTwice": 198,
-    "medianGap": 7,
-    "quizzes": 73
+    "within3": 133,
+    "sameQuizTwice": 174,
+    "medianGap": 8,
+    "quizzes": 72
    },
    "mix": {
-    "choose-ru": 95,
-    "cloze": 202,
-    "type": 111,
-    "listen": 78,
-    "choose-en": 98,
-    "hear": 52,
-    "say": 19
+    "choose-ru": 99,
+    "cloze": 208,
+    "type": 99,
+    "listen": 88,
+    "choose-en": 82,
+    "hear": 51,
+    "say": 17
    },
    "chapters": [
     {
@@ -119,46 +119,46 @@
     },
     {
      "chapter": 2,
-     "title": "Home and Table",
+     "title": "Food and School",
      "lessons": 16,
-     "newWordsPerLesson": 6.5,
+     "newWordsPerLesson": 6.4,
      "quizAccuracy": 0.77,
-     "passFirstTry": 5,
-     "failedThrice": 6,
-     "speechSteps": 33,
-     "speechTokensMean": 5,
-     "speechTokensMax": 8
+     "passFirstTry": 4,
+     "failedThrice": 5,
+     "speechSteps": 34,
+     "speechTokensMean": 4.8,
+     "speechTokensMax": 7
     },
     {
      "chapter": 3,
-     "title": "Town and Travel",
+     "title": "Home and Clothes",
      "lessons": 8,
-     "newWordsPerLesson": 6.3,
-     "quizAccuracy": 0.67,
-     "passFirstTry": 1,
-     "failedThrice": 2,
-     "speechSteps": 38,
-     "speechTokensMean": 5.2,
-     "speechTokensMax": 9
+     "newWordsPerLesson": 6.9,
+     "quizAccuracy": 0.71,
+     "passFirstTry": 3,
+     "failedThrice": 1,
+     "speechSteps": 34,
+     "speechTokensMean": 4.6,
+     "speechTokensMax": 7
     }
    ],
    "words": {
     "taught": 272,
     "everAsked": 272,
     "taughtButNeverAsked": 0,
-    "inSeen": 297,
-    "trouble": 13,
-    "leeches": 19
+    "inSeen": 285,
+    "trouble": 18,
+    "leeches": 21
    },
    "review": {
     "simulatedDays": 20,
-    "dueAtEnd": 241,
-    "duePerDay": 12.1
+    "dueAtEnd": 234,
+    "duePerDay": 11.7
    },
    "lessons": {
     "total": 40,
-    "passed": 32,
-    "retakes": 33,
+    "passed": 34,
+    "retakes": 32,
     "shortQuizzes": 0
    },
    "structural": 0
@@ -170,22 +170,22 @@
   "seed": 1002,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 944,
-    "askedAgain": 1004,
+    "quizQuestions": 954,
+    "askedAgain": 1006,
     "backToBack": 0,
-    "within3": 227,
-    "sameQuizTwice": 263,
+    "within3": 222,
+    "sameQuizTwice": 258,
     "medianGap": 8,
-    "quizzes": 107
+    "quizzes": 108
    },
    "mix": {
-    "cloze": 305,
-    "choose-ru": 149,
-    "type": 157,
-    "choose-en": 132,
-    "listen": 113,
-    "hear": 68,
-    "say": 20
+    "cloze": 320,
+    "choose-ru": 141,
+    "type": 164,
+    "choose-en": 124,
+    "listen": 115,
+    "hear": 69,
+    "say": 21
    },
    "chapters": [
     {
@@ -202,46 +202,46 @@
     },
     {
      "chapter": 2,
-     "title": "Home and Table",
+     "title": "Food and School",
      "lessons": 16,
-     "newWordsPerLesson": 6.6,
-     "quizAccuracy": 0.6,
+     "newWordsPerLesson": 6.4,
+     "quizAccuracy": 0.63,
      "passFirstTry": 0,
-     "failedThrice": 13,
+     "failedThrice": 12,
      "speechSteps": 48,
-     "speechTokensMean": 5.2,
+     "speechTokensMean": 5.1,
      "speechTokensMax": 7
     },
     {
      "chapter": 3,
-     "title": "Town and Travel",
+     "title": "Home and Clothes",
      "lessons": 8,
      "newWordsPerLesson": 6.5,
-     "quizAccuracy": 0.64,
-     "passFirstTry": 1,
-     "failedThrice": 5,
-     "speechSteps": 40,
-     "speechTokensMean": 5.1,
-     "speechTokensMax": 9
+     "quizAccuracy": 0.61,
+     "passFirstTry": 0,
+     "failedThrice": 4,
+     "speechSteps": 42,
+     "speechTokensMean": 4.7,
+     "speechTokensMax": 7
     }
    ],
    "words": {
     "taught": 272,
     "everAsked": 272,
     "taughtButNeverAsked": 0,
-    "inSeen": 297,
-    "trouble": 93,
-    "leeches": 102
+    "inSeen": 293,
+    "trouble": 85,
+    "leeches": 90
    },
    "review": {
     "simulatedDays": 20,
-    "dueAtEnd": 262,
-    "duePerDay": 13.1
+    "dueAtEnd": 265,
+    "duePerDay": 13.3
    },
    "lessons": {
     "total": 40,
-    "passed": 15,
-    "retakes": 67,
+    "passed": 17,
+    "retakes": 68,
     "shortQuizzes": 0
    },
    "structural": 0

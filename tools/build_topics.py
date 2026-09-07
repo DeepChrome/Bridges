@@ -272,11 +272,11 @@ OVERRIDES = {
 # what each unit ought to contain. Re-read them if --pool changes: the bands shift.
 CHAPTERS = [
     ("Pronouns & Being",       "People and Time"),
-    ("Time, Life & People",    "Home and Table"),
-    ("Wanting & Knowing",      "Town and Travel"),
-    ("Everyday Things",        "Body and Appearance"),
-    ("Family & Home Life",     "School and Work"),
-    ("Health & Getting Around", "Nature and Animals"),
+    ("Time, Life & People",    "Food and School"),
+    ("Wanting & Knowing",      "Home and Clothes"),
+    ("Everyday Things",        "Town and Travel"),
+    ("Family & Home Life",     "Body and Nature"),
+    ("Health & Getting Around", "Work and Animals"),
     ("Days, Talk & the World", "Mind and Language"),
     ("Thought & Society",      "Culture and Society"),
 ]
@@ -463,15 +463,24 @@ def main():
     # --- lay out the tree --------------------------------------------------
     # Concrete, immediately useful topics come early; abstract and specialist
     # ones come late. Anything not named here lands in the final stage.
+    #
+    # The order is also the grammar order (docs/grammar-sequence.md): each
+    # chapter's spine note introduces one point, and a branch's note may only use
+    # what has been introduced by then. Chapter 2 teaches the present tense, so it
+    # gets the two branches whose notes are about verbs (food: есть/пить, school:
+    # учить/учиться); chapter 3 teaches gender, so home and clothes (agreement);
+    # chapter 6 teaches the accusative, so work (having/not having: the first
+    # genitive) then animals (animate accusative copies the genitive); chapter 8
+    # opens on military, which introduces the instrumental that tech then uses.
     STAGE_PLAN = [
         ["family", "time"],
-        ["food", "home"],
+        ["food", "school"],
+        ["home", "clothes"],
         ["city", "travel"],
-        ["body", "clothes"],
-        ["school", "work"],
-        ["nature", "animals"],
+        ["body", "nature"],
+        ["work", "animals"],
         ["emotion", "speech"],
-        ["sport", "art", "tech", "politics", "military"],
+        ["military", "tech", "sport", "art", "politics"],
     ]
     have = set(branch_ids)
     planned = [b for stage in STAGE_PLAN for b in stage if b in have]

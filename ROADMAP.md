@@ -173,6 +173,20 @@ can overrule any of them.
   chapter 5; the grammar-driven re-pairing of branches (docs/grammar-sequence.md)
   decides which quests a chapter offers. More niche topics (science, law,
   religion, business) need their own rules and enough words each — `BRANCH_MIN`.
+- **A25 — P6.1, the lexicon at runtime (2026-09-06).** Measured: the app's index
+  already resolves 128,168 folded forms; the 439,358 forms beyond it are 9.3 MB
+  raw. Neither option A nor B was taken. The Worker asks the model to lemmatise
+  every word of its own reply (`reply_tokens`, validated word-for-word against
+  `reply_ru`) and of the learner's turn (`feedback.words[].lemma`), and the app
+  resolves those dictionary forms through the index it carries. Nothing ships,
+  nothing is resolved server-side from a lexicon, and a wrong lemma costs one
+  unlinked word rather than a wrong grade. Revisit only if the eval shows the
+  model's lemmas missing the index often; today it does not.
+- **A26 — P6.6 placement.** "A Talk tab or a card on the path": neither. Talk is
+  the first row of Practice, which is where the learner already goes to do
+  something with what they know; a sixth tab was a mechanism too many (doctrine
+  20.8) and a card on the path would sit on the one screen that must stay a
+  curriculum.
 - **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
   local verdict, grammar section) were built before Phase 4 because Phase 4 stops
   at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the
@@ -418,6 +432,30 @@ Goal: free-form spoken exchange constrained to what the learner knows. This is t
 
 Phase 6 report: lexicon option chosen with sizes, per-session token cost from KV logs,
 projected monthly cost at 3 sessions/day.
+
+**Phase 6 report (2026-09-06).** All seven tasks done in one day; P6.1 and P6.6
+resolved as A25 and A26. `core/scenarios.js` (10 scenarios), `backend/src/talk.js`
++ `/v1/talk` (33 backend checks), `native/src/screens/Talk.js` (4 jest cases:
+lock, a graded two-turn exchange with a tag counted and a word pinned, the daily
+budget spent, a failed turn retried), `native/src/speech.js` (the hold-to-speak
+hook Say and Talk now share), `feedbackTags` and the talk budget in core (207
+core checks). Deployed to the same Worker with `TALK_DAILY_CAP=36`.
+Eval, ten cases on Haiku 4.5 (`backend/eval/talk-report-*.json`): the first run
+was valid 9/10 but first-try only 2/10 — the model omits `tags` on a word with
+nothing wrong (now read as empty) and, at 600 output tokens, a graded turn was
+cut short and misread as "no JSON" (the first live turn against the deployed
+Worker failed exactly so; budget now 1,000 and a cut reply is named in the
+retry), and a studied word listed under `newWords` is dropped rather than
+refused. After the three fixes: valid 10/10, first try 7/10, tag accuracy 4/4,
+correct turns accepted 4/4, reply vocabulary in the studied list 53 % (the eval's
+"studied" is chapters 1–3 only; the app sends up to 300 words). The three
+retries left are the model writing three short sentences, or a `reply_tokens`
+list that does not match its own reply. Cost per turn ≈ 2.9k in / 0.6k out
+tokens ≈ $0.006; a full 12-turn session ≈ $0.07; three a day ≈ **$6–7 a
+month**, within the $20 loaded. Not done: a Maestro flow (the walkthrough
+driver would need a mocked Worker; jest covers the exchange), and the picker's
+"opens after chapter 5" gate has not been felt on the phone — developer mode is
+on, so the owner will see every scenario open.
 
 ---
 

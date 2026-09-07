@@ -32,7 +32,8 @@ Built and working today:
 - any recognised token can expose lemma, meaning, grammar, full paradigm, and every
   other sentence in the corpus containing that word
 - a learning path of 8 core stages and 19 topic branches
-- lessons built from six activity types, plus Hear and Say on native (§30c)
+- lessons built from six activity types, plus Hear and Say on native (§30c) and a
+  conversation mode, Talk (§30f)
 - FSRS scheduling behind the four Anki review outcomes
 - a trouble bank for vocabulary that repeatedly causes difficulty
 - installable PWA, deployed to Netlify
@@ -453,6 +454,13 @@ Each of these cost real time. Do not relearn them.
   `disabled` to `Pressable` (`onPress={disabled ? undefined : onPress}`); use `Btn`
   rather than a hand-rolled Pressable, and in tests `await waitFor` on the input's
   value before pressing.
+- **…and the reverse lie: RNTL 14's `fireEvent.press` finds a wrapper's own
+  `onPress` prop.** It walks the fibre chain through composite components, so a
+  `Row` or `Btn` that withholds `onPress` from its Pressable when disabled still
+  fires in a test — the handler is read off the wrapper's props. On the device the
+  press is dead, as intended, so a test asserting "locked, therefore nothing
+  happens" passes for the wrong reason or fails for none. Guard in the handler
+  (`start()` checks `canStart()` in `Talk.js`), not only in the control.
 - **The phone is the source of truth for Anki content.** The desktop collection is only
   current after an AnkiDroid → AnkiWeb → desktop sync, and media syncs separately and
   lags. Check the deck list in the ingest output against the phone before trusting it.
@@ -863,9 +871,10 @@ Decided with the owner after the first simulated-learner and walkthrough trials:
 
 ## 30d. The feedback Worker (ROADMAP Phase 4) — the only server
 
-`backend/` is a Cloudflare Worker with one route, `POST /v1/feedback`. It exists
-for one reason: the Anthropic key must live somewhere that is not the app (rule
-20.11 and the roadmap's "no API keys in native/, site/, core/ or any tracked file").
+`backend/` is a Cloudflare Worker with two routes, `POST /v1/feedback` (this
+section) and `POST /v1/talk` (§30f). It exists for one reason: the Anthropic key
+must live somewhere that is not the app (rule 20.11 and the roadmap's "no API keys
+in native/, site/, core/ or any tracked file").
 
 What it does: checks the app's bearer token (`APP_TOKEN`, a Worker secret; 401
 without); refuses past a daily cap (`DAILY_CAP`, 300, per UTC day, counted in KV;
@@ -899,6 +908,48 @@ The native client is `native/src/lib/feedback.js`, configured by
 `EXPO_PUBLIC_FEEDBACK_URL` and `EXPO_PUBLIC_APP_TOKEN` from `native/.env` locally
 and from the EAS **preview** environment (`eas env:list --environment preview`) for
 builds; `.easignore` excludes `.env`, so an EAS build gets them only from EAS.
+
+## 30f. Talk — conversation mode (ROADMAP Phase 6, native only)
+
+A short spoken exchange on a situation, with the Worker as the tutor. Built
+2026-09-06; the pieces and the rules that hold them:
+
+- **Scenarios are data** — `core/scenarios.js`, ten of them, each tied to the unit
+  whose words it leans on (café → Food, doctor → Medicine). A scenario opens when
+  its unit does; Talk itself opens once chapter 5's spine is done
+  (`TALK_UNLOCK_STAGE` in `Talk.js`) or in developer mode. It is the first row of
+  Practice, not a tab: one entry, no new mechanism on the path.
+- **The Worker keeps nothing.** Every turn the app sends the scenario, the unit's
+  grammar topic, the studied words (`drillPool`, strongest first, ≤ 300) and the
+  whole exchange; `/v1/talk` answers in Russian, ≤ 2 sentences with one question,
+  lemmatises its own reply (`reply_tokens`), grades the learner's turn in the
+  Say feedback schema, and names ≤ 2 words it used outside the studied list.
+  `backend/src/talk.js` holds the prompt and `validateTalk`; `backend/eval/`
+  scores it on ten cases (`run_talk.js`). The forms index is **not** shipped for
+  this (ROADMAP A25): the model lemmatises, the app resolves lemmas through the
+  dictionary it already carries.
+- **Grading is Say's.** Each `feedback.words` entry with an `expected` lemma the
+  index knows is Good when `ok`, Again otherwise, through `applyGrade`; the
+  attempt is logged as kind `talk` with its scenario; `feedbackTags` in
+  `core/speech.js` counts each tag once per turn (a word and its note naming the
+  same slip is one slip), for Say and Talk alike. A new word the tutor used is
+  offered with "Add to study" and goes to `pinned`, nowhere else.
+- **Budget** — `TALK_SESSIONS_PER_DAY` (3) and `TALK_TURNS` (12) in
+  `core/state.js`, kept in `speech.talk` by day so the picker can say what is
+  left; the Worker's `TALK_DAILY_CAP` (36 turns) is the backstop. `recordAttempt`
+  and `tagAttempt` spread the slot rather than rebuild it, or the budget vanishes
+  with the first graded turn — that bug lasted an hour.
+- **Voice** — tutor bubbles use `Speaker`, which has no recording for a generated
+  sentence and so is the device voice, labelled as such (§27). Nothing here plays
+  audio automatically: a conversation is read and spoken, not listened to.
+- **Failure** is said plainly in the transcript — no connection, used up, could
+  not answer — with a retry that resends the same turn; the learner's words are
+  never lost to a failed request.
+
+Measured on Haiku 4.5, ten eval cases, after the two fixes the first live turn
+forced (`tags` may be absent on a word with nothing wrong; the token budget is
+1,000, since a graded turn runs ~700 output tokens and at 600 the JSON was cut
+short and misread as "no JSON"): see the ROADMAP Phase 6 report for the numbers.
 
 ## 31. Verification
 

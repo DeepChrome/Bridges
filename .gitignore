@@ -40,3 +40,6 @@ native/assets/data.json
 native/coverage/
 data/raw/subs/
 data/transcripts.json
+
+# emulator walkthrough screenshots (native/tools/walk.ps1)
+native/screenshots/

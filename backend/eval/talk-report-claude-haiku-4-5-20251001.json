@@ -1,0 +1,880 @@
+{
+ "summary": {
+  "model": "claude-haiku-4-5-20251001",
+  "cases": 10,
+  "valid": 10,
+  "validFirstTry": 7,
+  "tagAccuracy": 1,
+  "tagHits": 4,
+  "tagTotal": 4,
+  "correctTurnsAccepted": 1,
+  "vocabularyInStudied": 0.53,
+  "tokens": {
+   "in": 29401,
+   "out": 5910
+  },
+  "perTurn": {
+   "in": 2940,
+   "out": 591
+  },
+  "estCostUsd": 0.059,
+  "estSessionUsd": 0.0707
+ },
+ "rows": [
+  {
+   "id": "cafe-open",
+   "attempts": 1,
+   "verdict": "open · vocab 5/6 · new 1",
+   "reply": {
+    "reply_ru": "Добрый день! Что вы хотите пить?",
+    "reply_en": "Good afternoon! What would you like to drink?",
+    "reply_tokens": [
+     {
+      "ru": "Добрый",
+      "lemma": "добрый"
+     },
+     {
+      "ru": "день",
+      "lemma": "день"
+     },
+     {
+      "ru": "Что",
+      "lemma": "что"
+     },
+     {
+      "ru": "вы",
+      "lemma": "вы"
+     },
+     {
+      "ru": "хотите",
+      "lemma": "хотеть"
+     },
+     {
+      "ru": "пить",
+      "lemma": "пить"
+     }
+    ],
+    "feedback": null,
+    "newWords": [
+     {
+      "ru": "Добрый",
+      "lemma": "добрый",
+      "en": "good"
+     }
+    ]
+   },
+   "errors": null
+  },
+  {
+   "id": "cafe-order",
+   "attempts": 2,
+   "verdict": "ok · vocab 10/10 · new 0",
+   "reply": {
+    "reply_ru": "Хорошо, один кофе и хлеб. Вы хотите масло к хлебу?",
+    "reply_en": "Good, one coffee and bread. Would you like butter with your bread?",
+    "reply_tokens": [
+     {
+      "ru": "Хорошо",
+      "lemma": "хорошо"
+     },
+     {
+      "ru": "один",
+      "lemma": "один"
+     },
+     {
+      "ru": "кофе",
+      "lemma": "кофе"
+     },
+     {
+      "ru": "и",
+      "lemma": "и"
+     },
+     {
+      "ru": "хлеб",
+      "lemma": "хлеб"
+     },
+     {
+      "ru": "Вы",
+      "lemma": "вы"
+     },
+     {
+      "ru": "хотите",
+      "lemma": "хотеть"
+     },
+     {
+      "ru": "масло",
+      "lemma": "масло"
+     },
+     {
+      "ru": "к",
+      "lemma": "к"
+     },
+     {
+      "ru": "хлебу",
+      "lemma": "хлеб"
+     }
+    ],
+    "feedback": {
+     "words": [
+      {
+       "said": "я",
+       "expected": "я",
+       "lemma": "я",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "хочу",
+       "expected": "хочу",
+       "lemma": "хотеть",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "кофе",
+       "expected": "кофе",
+       "lemma": "кофе",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "и",
+       "expected": "и",
+       "lemma": "и",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "хлеб",
+       "expected": "хлеб",
+       "lemma": "хлеб",
+       "status": "ok",
+       "tags": []
+      }
+     ],
+     "grammar": [],
+     "wordChoice": [],
+     "overall": "ok",
+     "praise": "Perfect! Clear order."
+    },
+    "newWords": []
+   },
+   "errors": [
+    "reply_tokens: do not match reply_ru word for word"
+   ]
+  },
+  {
+   "id": "cafe-error",
+   "attempts": 1,
+   "verdict": "hit · vocab 1/6 · new 2",
+   "reply": {
+    "reply_ru": "Вода или минеральная вода? Со льдом?",
+    "reply_en": "Water or mineral water? With ice?",
+    "reply_tokens": [
+     {
+      "ru": "Вода",
+      "lemma": "вода"
+     },
+     {
+      "ru": "или",
+      "lemma": "или"
+     },
+     {
+      "ru": "минеральная",
+      "lemma": "минеральный"
+     },
+     {
+      "ru": "вода",
+      "lemma": "вода"
+     },
+     {
+      "ru": "Со",
+      "lemma": "с"
+     },
+     {
+      "ru": "льдом",
+      "lemma": "лёд"
+     }
+    ],
+    "feedback": {
+     "words": [
+      {
+       "said": "я",
+       "expected": "я",
+       "lemma": "я",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "хочу",
+       "expected": "хочу",
+       "lemma": "хотеть",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "вода",
+       "expected": "воду",
+       "lemma": "вода",
+       "status": "sub",
+       "tags": [
+        "CASE"
+       ]
+      }
+     ],
+     "grammar": [
+      {
+       "tag": "CASE",
+       "note": "After хотеть, the object takes the accusative case. Say воду, not вода."
+      }
+     ],
+     "wordChoice": [],
+     "overall": "minor",
+     "praise": "Good start! You used хотеть correctly."
+    },
+    "newWords": [
+     {
+      "ru": "минеральная",
+      "lemma": "минеральный",
+      "en": "mineral"
+     },
+     {
+      "ru": "лёд",
+      "lemma": "лёд",
+      "en": "ice"
+     }
+    ]
+   },
+   "errors": null
+  },
+  {
+   "id": "intro-open",
+   "attempts": 2,
+   "verdict": "open · vocab 3/8 · new 2",
+   "reply": {
+    "reply_ru": "Привет! Я Маша, студентка, а как тебя зовут?",
+    "reply_en": "Hi! I'm Masha, a student. What's your name?",
+    "reply_tokens": [
+     {
+      "ru": "Привет",
+      "lemma": "привет"
+     },
+     {
+      "ru": "Я",
+      "lemma": "я"
+     },
+     {
+      "ru": "Маша",
+      "lemma": "Маша"
+     },
+     {
+      "ru": "студентка",
+      "lemma": "студентка"
+     },
+     {
+      "ru": "а",
+      "lemma": "а"
+     },
+     {
+      "ru": "как",
+      "lemma": "как"
+     },
+     {
+      "ru": "тебя",
+      "lemma": "ты"
+     },
+     {
+      "ru": "зовут",
+      "lemma": "звать"
+     }
+    ],
+    "feedback": null,
+    "newWords": [
+     {
+      "ru": "Привет",
+      "lemma": "привет",
+      "en": "hi"
+     },
+     {
+      "ru": "Маша",
+      "lemma": "Маша",
+      "en": "Masha (name)"
+     }
+    ]
+   },
+   "errors": [
+    "reply_ru: more than two sentences"
+   ]
+  },
+  {
+   "id": "intro-reply",
+   "attempts": 1,
+   "verdict": "ok · vocab 5/8 · new 1",
+   "reply": {
+    "reply_ru": "Очень приятно, Джаред! Ты студент университета или училища?",
+    "reply_en": "Very nice to meet you, Jared! Are you a university or college student?",
+    "reply_tokens": [
+     {
+      "ru": "Очень",
+      "lemma": "очень"
+     },
+     {
+      "ru": "приятно",
+      "lemma": "приятный"
+     },
+     {
+      "ru": "Джаред",
+      "lemma": "Джаред"
+     },
+     {
+      "ru": "Ты",
+      "lemma": "ты"
+     },
+     {
+      "ru": "студент",
+      "lemma": "студент"
+     },
+     {
+      "ru": "университета",
+      "lemma": "университет"
+     },
+     {
+      "ru": "или",
+      "lemma": "или"
+     },
+     {
+      "ru": "училища",
+      "lemma": "училище"
+     }
+    ],
+    "feedback": {
+     "words": [
+      {
+       "said": "меня",
+       "expected": "меня",
+       "lemma": "я",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "зовут",
+       "expected": "зовут",
+       "lemma": "звать",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "джаред",
+       "expected": "джаред",
+       "lemma": "Джаред",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "я",
+       "expected": "я",
+       "lemma": "я",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "студент",
+       "expected": "студент",
+       "lemma": "студент",
+       "status": "ok",
+       "tags": []
+      }
+     ],
+     "grammar": [],
+     "wordChoice": [],
+     "overall": "ok",
+     "praise": "Perfect! You introduced yourself clearly."
+    },
+    "newWords": [
+     {
+      "ru": "или",
+      "lemma": "или",
+      "en": "or"
+     }
+    ]
+   },
+   "errors": null
+  },
+  {
+   "id": "intro-gender",
+   "attempts": 1,
+   "verdict": "hit · vocab 2/5 · new 1",
+   "reply": {
+    "reply_ru": "Ах, в Америке! Какой штат?",
+    "reply_en": "Oh, in America! Which state?",
+    "reply_tokens": [
+     {
+      "ru": "Ах",
+      "lemma": "ах"
+     },
+     {
+      "ru": "в",
+      "lemma": "в"
+     },
+     {
+      "ru": "Америке",
+      "lemma": "Америка"
+     },
+     {
+      "ru": "Какой",
+      "lemma": "какой"
+     },
+     {
+      "ru": "штат",
+      "lemma": "штат"
+     }
+    ],
+    "feedback": {
+     "words": [
+      {
+       "said": "я",
+       "expected": null,
+       "lemma": "я",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "живу",
+       "expected": null,
+       "lemma": "жить",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "в",
+       "expected": null,
+       "lemma": "в",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "америка",
+       "expected": "Америке",
+       "lemma": "Америка",
+       "status": "sub",
+       "tags": []
+      }
+     ],
+     "grammar": [
+      {
+       "tag": "CASE",
+       "note": "After 'в', use the prepositional case. 'Америка' becomes 'Америке'."
+      }
+     ],
+     "wordChoice": [],
+     "overall": "minor",
+     "praise": "Good! You answered clearly."
+    },
+    "newWords": [
+     {
+      "ru": "штат",
+      "lemma": "штат",
+      "en": "state"
+     }
+    ]
+   },
+   "errors": null
+  },
+  {
+   "id": "shop",
+   "attempts": 1,
+   "verdict": "hit · vocab 4/6 · new 1",
+   "reply": {
+    "reply_ru": "Красивую рубашку? Какой размер вам нужен?",
+    "reply_en": "A beautiful shirt? What size do you need?",
+    "reply_tokens": [
+     {
+      "ru": "Красивую",
+      "lemma": "красивый"
+     },
+     {
+      "ru": "рубашку",
+      "lemma": "рубашка"
+     },
+     {
+      "ru": "Какой",
+      "lemma": "какой"
+     },
+     {
+      "ru": "размер",
+      "lemma": "размер"
+     },
+     {
+      "ru": "вам",
+      "lemma": "вы"
+     },
+     {
+      "ru": "нужен",
+      "lemma": "нужный"
+     }
+    ],
+    "feedback": {
+     "words": [
+      {
+       "said": "я",
+       "expected": null,
+       "lemma": "я",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "ищу",
+       "expected": null,
+       "lemma": "искать",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "красный",
+       "expected": "красную",
+       "lemma": "красный",
+       "status": "sub",
+       "tags": [
+        "GENDER_AGREE",
+        "CASE"
+       ]
+      },
+      {
+       "said": "рубашка",
+       "expected": "рубашку",
+       "lemma": "рубашка",
+       "status": "sub",
+       "tags": [
+        "CASE"
+       ]
+      }
+     ],
+     "grammar": [
+      {
+       "tag": "GENDER_AGREE",
+       "note": "Adjective must agree with the noun's gender. Рубашка is feminine, so красный becomes красная (or красную in the accusative)."
+      },
+      {
+       "tag": "CASE",
+       "note": "In this context, use accusative case for the direct object: красную рубашку."
+      }
+     ],
+     "wordChoice": [],
+     "overall": "minor",
+     "praise": "Good start! You understood the scenario well."
+    },
+    "newWords": [
+     {
+      "ru": "размер",
+      "lemma": "размер",
+      "en": "size"
+     }
+    ]
+   },
+   "errors": null
+  },
+  {
+   "id": "weather",
+   "attempts": 1,
+   "verdict": "ok · vocab 4/11 · new 2",
+   "reply": {
+    "reply_ru": "Да, совсем зима! А ты часто видишь снег в этом месяце?",
+    "reply_en": "Yes, it's completely winter now! Do you often see snow in this month?",
+    "reply_tokens": [
+     {
+      "ru": "Да",
+      "lemma": "да"
+     },
+     {
+      "ru": "совсем",
+      "lemma": "совсем"
+     },
+     {
+      "ru": "зима",
+      "lemma": "зима"
+     },
+     {
+      "ru": "А",
+      "lemma": "а"
+     },
+     {
+      "ru": "ты",
+      "lemma": "ты"
+     },
+     {
+      "ru": "часто",
+      "lemma": "часто"
+     },
+     {
+      "ru": "видишь",
+      "lemma": "видеть"
+     },
+     {
+      "ru": "снег",
+      "lemma": "снег"
+     },
+     {
+      "ru": "в",
+      "lemma": "в"
+     },
+     {
+      "ru": "этом",
+      "lemma": "этот"
+     },
+     {
+      "ru": "месяце",
+      "lemma": "месяц"
+     }
+    ],
+    "feedback": {
+     "words": [
+      {
+       "said": "да",
+       "expected": "да",
+       "lemma": "да",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "очень",
+       "expected": "очень",
+       "lemma": "очень",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "холодно",
+       "expected": "холодно",
+       "lemma": "холодный",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "и",
+       "expected": "и",
+       "lemma": "и",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "идёт",
+       "expected": "идёт",
+       "lemma": "идти",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "снег",
+       "expected": "снег",
+       "lemma": "снег",
+       "status": "ok",
+       "tags": []
+      }
+     ],
+     "grammar": [],
+     "wordChoice": [],
+     "overall": "ok",
+     "praise": "Perfect! You answered naturally."
+    },
+    "newWords": [
+     {
+      "ru": "совсем",
+      "lemma": "совсем",
+      "en": "completely"
+     },
+     {
+      "ru": "зима",
+      "lemma": "зима",
+      "en": "winter"
+     }
+    ]
+   },
+   "errors": null
+  },
+  {
+   "id": "directions",
+   "attempts": 2,
+   "verdict": "ok · vocab 3/9 · new 2",
+   "reply": {
+    "reply_ru": "Метро совсем близко, на этой улице направо. Вы спешите?",
+    "reply_en": "The metro is very close, turn right on this street. Are you in a hurry?",
+    "reply_tokens": [
+     {
+      "ru": "Метро",
+      "lemma": "метро"
+     },
+     {
+      "ru": "совсем",
+      "lemma": "совсем"
+     },
+     {
+      "ru": "близко",
+      "lemma": "близко"
+     },
+     {
+      "ru": "на",
+      "lemma": "на"
+     },
+     {
+      "ru": "этой",
+      "lemma": "этот"
+     },
+     {
+      "ru": "улице",
+      "lemma": "улица"
+     },
+     {
+      "ru": "направо",
+      "lemma": "направо"
+     },
+     {
+      "ru": "Вы",
+      "lemma": "вы"
+     },
+     {
+      "ru": "спешите",
+      "lemma": "спешить"
+     }
+    ],
+    "feedback": {
+     "words": [
+      {
+       "said": "где",
+       "expected": null,
+       "lemma": "где",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "здесь",
+       "expected": null,
+       "lemma": "здесь",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "метро",
+       "expected": null,
+       "lemma": "метро",
+       "status": "ok",
+       "tags": []
+      }
+     ],
+     "grammar": [],
+     "wordChoice": [],
+     "overall": "ok",
+     "praise": "Good start! Your question was clear."
+    },
+    "newWords": [
+     {
+      "ru": "метро",
+      "lemma": "метро",
+      "en": "metro"
+     },
+     {
+      "ru": "улица",
+      "lemma": "улица",
+      "en": "street"
+     }
+    ]
+   },
+   "errors": [
+    "reply_ru: more than two sentences"
+   ]
+  },
+  {
+   "id": "past",
+   "attempts": 1,
+   "verdict": "hit · vocab 2/5 · new 2",
+   "reply": {
+    "reply_ru": "Интересно! А фильм тебе понравился?",
+    "reply_en": "Interesting! Did you like the film?",
+    "reply_tokens": [
+     {
+      "ru": "Интересно",
+      "lemma": "интересно"
+     },
+     {
+      "ru": "А",
+      "lemma": "а"
+     },
+     {
+      "ru": "фильм",
+      "lemma": "фильм"
+     },
+     {
+      "ru": "тебе",
+      "lemma": "ты"
+     },
+     {
+      "ru": "понравился",
+      "lemma": "понравиться"
+     }
+    ],
+    "feedback": {
+     "words": [
+      {
+       "said": "я",
+       "expected": "я",
+       "lemma": "я",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "читала",
+       "expected": "читала",
+       "lemma": "читать",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "книгу",
+       "expected": "книгу",
+       "lemma": "книга",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "и",
+       "expected": "и",
+       "lemma": "и",
+       "status": "ok",
+       "tags": []
+      },
+      {
+       "said": "смотрел",
+       "expected": "смотрела",
+       "lemma": "смотреть",
+       "status": "sub",
+       "tags": [
+        "GENDER_AGREE"
+       ]
+      }
+     ],
+     "grammar": [
+      {
+       "tag": "GENDER_AGREE",
+       "note": "The past tense verb must agree with the subject. You (я) are feminine, so use смотрела, not смотрел."
+      }
+     ],
+     "wordChoice": [],
+     "overall": "minor",
+     "praise": "Good! You used two past-tense verbs correctly."
+    },
+    "newWords": [
+     {
+      "ru": "Интересно",
+      "lemma": "интересно",
+      "en": "interesting"
+     },
+     {
+      "ru": "понравился",
+      "lemma": "понравиться",
+      "en": "pleased, liked"
+     }
+    ]
+   },
+   "errors": null
+  }
+ ]
+}

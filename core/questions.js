@@ -20,8 +20,29 @@ export const QUIZ_N = 8;
    the numbers live here, in one place, rather than in each generator. */
 export const SPEECH_MIX = {
   hear: { fromStage: 1, perQuiz: 1 },
+  scene: { fromStage: 1, perQuiz: 1 },
   say: { fromStage: 2, perQuiz: 1 },
 };
+
+/* A listening scene: two or three sentences from the listening pool, played in
+   a row, with a question per sentence and one about a word heard — the questions
+   readable before the audio starts (the owner, 2026-09-07). */
+export const SCENE_ROWS = [2, 3];
+/* Below this frequency rank a lemma is a function word, not a word to listen for. */
+export const SCENE_SKIP_TOP = 100;
+
+/* What a learner may put in a quiz of their own (Practice → Quiz). */
+export const QUIZ_KINDS = [
+  { id: "choose-en", name: "Meaning", blurb: "Pick the English" },
+  { id: "choose-ru", name: "Russian", blurb: "Pick the Russian" },
+  { id: "listen", name: "Hear a word", blurb: "Pick the word you hear" },
+  { id: "cloze", name: "Fill the gap", blurb: "A sentence with a word missing" },
+  { id: "type", name: "Type it", blurb: "Write the Russian" },
+  { id: "hear", name: "Hear a sentence", blurb: "Type what is said" },
+  { id: "say", name: "Say it", blurb: "Read a sentence aloud" },
+  { id: "scene", name: "Listening scene", blurb: "A few sentences, then questions" },
+];
+export const QUIZ_LENGTHS = [10, 20, 30];
 /* New words per lesson, by chapter: a ramp, not a flat seven from lesson one. The
    first chapter's lessons carry five, the second's six, then seven. Both apps and
    the simulator size lessons through this, so the lesson a state key names is the
@@ -196,9 +217,135 @@ export function makeQuestions(env) {
           target: ru, en, unit: e.unit, lemmas: sentenceLemmas(ru, IX),
         };
       }
+      /* Already in its final shape: sceneFor builds the questions with the rows. */
+      case "scene":
+        return e.scene;
       default:
         return null;
     }
+  }
+
+  /* ---------------------------------------------------------------- scenes */
+
+  const unique = (a) => a.filter((x, k) => a.indexOf(x) === k);
+  const pickOne = (a) => a[Math.floor(Math.random() * a.length)];
+
+  /* A listening scene from the listening pool of these units (ids): SCENE_ROWS
+     sentences, one meaning question each with three other sentences' meanings as
+     the wrong answers, and one "which word did you hear?" with three words from
+     sentences that were not played. `want` (a Set of lemma indices) prefers a
+     first sentence that uses a lesson word. Null when the pool is too small to
+     make wrong answers from — never a scene with two options. */
+  function sceneFor(unitIds, want) {
+    if (!SPEECH || !SPEECH.listen || !SPEECH.rows) return null;
+    const rows = SPEECH.rows;
+    const idxs = unique(unitIds.flatMap((id) => SPEECH.listen[id] || []));
+    if (idxs.length < 5) return null;
+    const preferred = want && want.size
+      ? idxs.filter((i) => sentenceLemmas(rows[i][0], IX).some((l) => want.has(l)))
+      : [];
+    const first = preferred.length ? pickOne(preferred) : pickOne(idxs);
+    const rest = shuffle(idxs.filter((i) => i !== first));
+    const count = Math.min(pickOne(SCENE_ROWS), rest.length + 1);
+    const chosen = [first].concat(rest.slice(0, count - 1));
+    const others = rest.slice(count - 1);
+    const meaningOf = (i) => rows[i][1];
+    const questions = chosen.map((ri, k) => {
+      const en = meaningOf(ri);
+      const wrong = unique(others.map(meaningOf).filter((m) => m && m !== en)).slice(0, 3);
+      if (wrong.length < 3) return null;
+      return {
+        ask: `Sentence ${k + 1}: what does it mean?`, row: k,
+        options: shuffle([{ label: en, right: true }]
+          .concat(wrong.map((m) => ({ label: m, right: false })))),
+      };
+    });
+    if (questions.some((q) => !q)) return null;
+    const heardAll = unique(chosen.flatMap((ri) => sentenceLemmas(rows[ri][0], IX)));
+    const heard = heardAll.filter((i) => i >= SCENE_SKIP_TOP);
+    const absent = unique(others.flatMap((ri) => sentenceLemmas(rows[ri][0], IX)))
+      .filter((i) => i >= SCENE_SKIP_TOP && !heardAll.includes(i));
+    if (heard.length && absent.length >= 3) {
+      const h = pickOne(heard);
+      const wrong = shuffle(absent).slice(0, 3);
+      questions.push({
+        ask: "Which word did you hear?", i: h, cyr: true,
+        options: shuffle([{ label: L[h].w, right: true, i: h }]
+          .concat(wrong.map((i) => ({ label: L[i].w, right: false, i })))),
+      });
+    }
+    return {
+      kind: "scene", ask: "Listen, then answer", prompt: "", cyr: true, unit: unitIds[0],
+      rows: chosen.map((ri) => ({ ru: rows[ri][0], en: rows[ri][1],
+                                  lemmas: sentenceLemmas(rows[ri][0], IX) })),
+      lemmas: heardAll, questions,
+    };
+  }
+
+  /* A run of scenes for the listening drill, no two opening on the same sentence. */
+  function listeningDrill(units, n) {
+    const ids = units.map((u) => u.id);
+    const out = [], seen = new Set();
+    for (let k = 0; k < n * 6 && out.length < n; k++) {
+      const s = sceneFor(ids, null);
+      if (!s || seen.has(s.rows[0].ru)) continue;
+      seen.add(s.rows[0].ru);
+      out.push(s);
+    }
+    return out;
+  }
+
+  /* ----------------------------------------------------------- custom quiz */
+
+  /* A hear or say step from the pools of these units, any sentence. */
+  function sentencePrompt(kind, unitIds) {
+    const poolName = { hear: "listen", say: "speak" }[kind];
+    if (!SPEECH || !SPEECH[poolName]) return null;
+    const pool = SPEECH[poolName];
+    const idxs = unique(unitIds.flatMap((id) => pool[id] || []));
+    const row = pickPrompt(SPEECH.rows, idxs, null, IX);
+    return row ? present({ t: kind, row, unit: unitIds[0] }) : null;
+  }
+
+  /* The learner's own quiz (Practice → Quiz): `units` to draw words and sentences
+     from, `kinds` from QUIZ_KINDS, `n` questions. Word questions share the words
+     out round-robin so a short list is not asked about the same word five times;
+     sentence kinds take about a third of the quiz between them when chosen. */
+  function customQuiz({ units, kinds, n }) {
+    const wordKinds = kinds.filter((k) => ["choose-en", "choose-ru", "listen", "cloze", "type"].includes(k));
+    const sentenceKinds = kinds.filter((k) => ["hear", "say", "scene"].includes(k));
+    if (!units.length || (!wordKinds.length && !sentenceKinds.length)) return [];
+    const words = unique(units.flatMap((u) => u.w));
+    const pool = words.length >= 8 ? words : poolFor(units[0]);
+    const unitIds = units.map((u) => u.id);
+    const out = [];
+    const sentenceShare = sentenceKinds.length
+      ? (wordKinds.length ? Math.max(sentenceKinds.length, Math.round(n / 3)) : n) : 0;
+    const wordShare = wordKinds.length ? n - sentenceShare : 0;
+    const bag = shuffle(words.slice());
+    for (let k = 0; out.length < wordShare && bag.length && k < wordShare * 4; k++) {
+      const i = bag[k % bag.length];
+      const kind = pickOne(wordKinds);
+      let e = { t: kind, i, pool };
+      if (kind === "cloze") {
+        const c = clozeFor(i);
+        e = c ? { t: "cloze", i, ex: c.ex, token: c.token, pool } : { t: "choose-en", i, pool };
+      }
+      const q = present(e);
+      if (q) out.push(q);
+    }
+    const seen = new Set();
+    for (let k = 0, made = 0; made < sentenceShare && k < sentenceShare * 5; k++) {
+      const kind = sentenceKinds[k % sentenceKinds.length];
+      const q = kind === "scene" ? sceneFor(unitIds, null) : sentencePrompt(kind, unitIds);
+      if (!q) continue;
+      const key = q.kind + "|" + (q.target || (q.rows ? q.rows[0].ru : ""));
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(q);
+      made++;
+    }
+    return spread(shuffle(out)).slice(0, n);
   }
 
   /* --------------------------------------------------------- lesson sets */
@@ -243,6 +390,14 @@ export function makeQuestions(env) {
      from this unit using a word of this lesson, one from anywhere unlocked using a
      word of this lesson, one from this unit, one from anywhere unlocked. */
   function speechPrompt(kind, unit, index) {
+    if (kind === "scene") {
+      // The unit's own listening pool when it can carry a scene, else everything
+      // unlocked so far; a lesson word in the first sentence when there is one.
+      const want = new Set(lessonWords(unit, index));
+      const scene = sceneFor([unit.id], want)
+        || sceneFor(unitsUpTo(unit).map((u) => u.id), want);
+      return scene ? { t: "scene", scene } : null;
+    }
     const poolName = { hear: "listen", say: "speak" }[kind];
     if (!SPEECH || !SPEECH[poolName]) return null;
     const pool = SPEECH[poolName];
@@ -540,5 +695,6 @@ export function makeQuestions(env) {
   return {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, placementQuestions, sectionQuestions, drillQuestions,
+    sceneFor, listeningDrill, customQuiz,
   };
 }

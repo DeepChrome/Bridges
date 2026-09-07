@@ -149,6 +149,11 @@ function simulate(profileName, seed) {
       if (q.options.length < 2) bad("fewer than two options");
     }
     if (q.kind === "cloze" && !/_____/.test(q.prompt)) bad("cloze without a gap");
+    if (q.kind === "scene") {
+      if (!q.rows || !q.questions || q.questions.length < q.rows.length) bad("scene without a question per sentence");
+      for (const row of q.rows || []) if (!DATA.audio.files[fold(row.ru)]) bad("scene sentence without audio");
+      for (const qq of q.questions || []) if (qq.options.filter((o) => o.right).length !== 1) bad("scene question without one right option");
+    }
     if (q.kind === "type" && (!q.target || !q.answer)) bad("type without target/answer");
     if ((q.kind === "hear" || q.kind === "say") && !DATA.audio.files[fold(q.target)]) bad("speech step without audio");
     if (q.kind === "hear" || q.kind === "say") {
@@ -176,6 +181,17 @@ function simulate(profileName, seed) {
       words = q.pairs.map((p) => p.i);
       correct = words.every((i) => rand() < chance("match", i));
       for (const i of words) { grade(i, correct); met.set(i, (met.get(i) || 0) + 1); }
+    } else if (q.kind === "scene") {
+      // Each question answered with the profile's listening chance; a sentence's
+      // words graded by its question, as the activity does.
+      let right = 0;
+      for (const qq of q.questions) {
+        const ok = rand() < chance("hear", qq.i);
+        if (ok) right++;
+        const lem = typeof qq.row === "number" ? (q.rows[qq.row].lemmas || []) : [qq.i];
+        for (const i of lem) { grade(i, ok); met.set(i, (met.get(i) || 0) + 1); words.push(i); }
+      }
+      correct = right === q.questions.length;
     } else {
       const i = q.i;
       correct = rand() < chance(q.kind, i);

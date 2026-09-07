@@ -11,4 +11,6 @@ export const Q = makeQuestions({
   hasVoice: () => true,
 });
 
-export { DRILL_TYPES, PLACEMENT_N, SECTION_N, TEST_OUT, SPEECH_MIX } from "@core/questions";
+export {
+  DRILL_TYPES, PLACEMENT_N, SECTION_N, TEST_OUT, SPEECH_MIX, QUIZ_KINDS, QUIZ_LENGTHS,
+} from "@core/questions";

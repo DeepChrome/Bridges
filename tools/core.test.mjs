@@ -183,8 +183,8 @@ group("grading");
 
 group("state schema");
 {
-  ok(SCHEMA_VERSION === 5, "schema is at 5", String(SCHEMA_VERSION));
-  ok([1, 2, 3, 4].every((k) => typeof MIGRATIONS[k] === "function"),
+  ok(SCHEMA_VERSION === 6, "schema is at 6", String(SCHEMA_VERSION));
+  ok([1, 2, 3, 4, 5].every((k) => typeof MIGRATIONS[k] === "function"),
      "a migration step exists from every earlier version");
 
   // A real v4 save: FSRS cards, component lessons, no speech slot.
@@ -193,8 +193,12 @@ group("state schema");
     trouble: { стол: 2 }, pinned: ["дом"], xp: 42, streak: 5,
     unit: { core1: { lessons: { 0: { v: true, q: 90 } }, video: true } },
   };
-  const v5 = migrate(v4, 4);
+  const v5 = MIGRATIONS[4](v4);
   ok(v5.v === 5, "v4 migrates to v5");
+  const v6 = migrate(v4, 4);
+  ok(v6.v === 6 && v6.watched && Object.keys(v6.watched).length === 0 && Array.isArray(v6.decks),
+     "v4 migrates to v6 with empty watched and decks slots");
+  ok(migrate({ v: 5, watched: { abc: 3 } }, 5).watched.abc === 3, "an existing watched slot is kept");
   ok(Array.isArray(v5.speech.attempts) && v5.speech.attempts.length === 0 &&
      Object.keys(v5.speech.tagCounts).length === 0, "with an empty speech slot");
   ok(v5.seen["книга"].reps === 3 && v5.trouble["стол"] === 2 && v5.pinned[0] === "дом" &&
@@ -209,8 +213,8 @@ group("state schema");
 
   // The oldest shape still comes all the way forward.
   const v1 = migrate({ seen: { да: { n: 4, due: 3 } }, unit: { core1: { lessons: { 0: 80 } } } }, 1);
-  ok(v1.v === 5 && v1.seen["да"].reps === 4 && v1.unit.core1.lessons[0].q === 80 && v1.speech,
-     "v1 → v5 in one pass keeps history and gains the slot");
+  ok(v1.v === 6 && v1.seen["да"].reps === 4 && v1.unit.core1.lessons[0].q === 80 && v1.speech,
+     "v1 → v6 in one pass keeps history and gains the slots");
 
   // recordAttempt: newest ATTEMPT_CAP kept, tags counted, nothing mutated.
   let sp = speechDefault();
@@ -345,7 +349,9 @@ const SPEECH = DATA.speech;
 const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH,
                           hasVoice: () => true });
 const answerable = (q) =>
-  q.options || q.typed || q.pairs || q.kind === "hear" || q.kind === "say";
+  q.options || q.typed || q.pairs || q.kind === "hear" || q.kind === "say"
+  || (q.kind === "scene" && q.questions && q.questions.every((x) => x.options));
+const SPEECH_KINDS = ["hear", "say", "scene"];
 
 group("lesson ramp");
 {
@@ -374,7 +380,7 @@ group("lesson generation");
   ok(wordAt < qAt, "a word is always taught before it is asked");
 
   const quiz = Q.quizSteps(unit, 0);
-  const speechN = quiz.filter((q) => q.kind === "hear" || q.kind === "say").length;
+  const speechN = quiz.filter((q) => SPEECH_KINDS.includes(q.kind)).length;
   ok(quiz.length === 8 + speechN, "a lesson quiz is 8 questions plus its speech steps",
      String(quiz.length));
   ok(quiz.every(answerable), "every quiz question is answerable");
@@ -480,8 +486,60 @@ group("hearing");
 
   // No pools at all — the web app today — means no speech steps, not blank ones.
   const dry = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice: () => true });
-  ok(dry.quizSteps(later, 0).every((q) => q.kind !== "hear" && q.kind !== "say"),
+  ok(dry.quizSteps(later, 0).every((q) => !SPEECH_KINDS.includes(q.kind)),
      "without pools a quiz is the eight vocabulary questions");
+}
+
+/* Listening scenes: a few sentences, questions readable before the audio, and a
+   quiz of the learner's own choosing (the owner, 2026-09-07). */
+group("scenes and custom quizzes");
+{
+  const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.scene.fromStage
+                                   && (SPEECH.listen[s.core.id] || []).length >= 5).core;
+  const quiz = Q.quizSteps(later, 0);
+  const scenes = quiz.filter((q) => q.kind === "scene");
+  ok(scenes.length === SPEECH_MIX.scene.perQuiz, `${later.id}: one scene per quiz`, String(scenes.length));
+  ok(!Q.quizSteps(STAGES[0].core, 0).some((q) => q.kind === "scene"), "none in the first chapter");
+  const s = scenes[0];
+  ok(s.rows.length >= 2 && s.rows.length <= 3, "two or three sentences", String(s.rows.length));
+  ok(s.rows.every((r) => DATA.audio.files[fold(r.ru)]), "every sentence has a recording");
+  ok(s.questions.length >= s.rows.length, "a question per sentence at least");
+  ok(s.questions.every((q) => q.options.length === 4 && q.options.filter((o) => o.right).length === 1),
+     "four options, one right, on every question");
+  s.rows.forEach((r, k) => {
+    const q = s.questions[k];
+    ok(q.row === k && q.options.find((o) => o.right).label === r.en,
+       `question ${k + 1} asks the meaning of sentence ${k + 1}`);
+    ok(new Set(q.options.map((o) => o.label)).size === 4, "and its options are distinct");
+  });
+  const heardQ = s.questions.find((q) => typeof q.i === "number");
+  if (heardQ) {
+    ok(s.lemmas.includes(heardQ.i) && !heardQ.options.some((o) => !o.right && s.lemmas.includes(o.i)),
+       "the heard word was said and the wrong ones were not");
+  }
+  ok(!s.autoplay, "nothing plays before the learner presses Play");
+  ok(!answerable({ kind: "scene", questions: [{}] }), "a scene without options is not answerable");
+
+  const drill = Q.listeningDrill(Q.unitsUpTo(later), 4);
+  ok(drill.length === 4 && new Set(drill.map((d) => d.rows[0].ru)).size === 4,
+     "a listening drill of four distinct scenes", String(drill.length));
+
+  const units = Q.unitsUpTo(later);
+  const own = Q.customQuiz({ units, kinds: ["choose-en", "type"], n: 10 });
+  ok(own.length === 10 && own.every((q) => q.kind === "choose-en" || q.kind === "type"),
+     "a custom quiz asks only the chosen kinds", own.map((q) => q.kind).join(","));
+  const wordSet = new Set(units.flatMap((u) => u.w));
+  ok(own.every((q) => wordSet.has(q.i)), "and only about the chosen sections' words");
+  const mixed = Q.customQuiz({ units, kinds: ["choose-ru", "hear", "scene"], n: 12 });
+  ok(mixed.some((q) => q.kind === "hear") && mixed.some((q) => q.kind === "scene"),
+     "sentence kinds join when chosen", mixed.map((q) => q.kind).join(","));
+  ok(mixed.filter((q) => q.kind === "hear" || q.kind === "scene").length <= 5,
+     "and take about a third of the quiz");
+  ok(Q.customQuiz({ units, kinds: [], n: 10 }).length === 0
+     && Q.customQuiz({ units: [], kinds: ["type"], n: 10 }).length === 0,
+     "nothing chosen, nothing asked");
+  ok(Q.customQuiz({ units, kinds: ["scene"], n: 3 }).every((q) => q.kind === "scene"),
+     "scenes alone make a listening-only quiz");
 }
 
 /* The speaking step joins a chapter later than hearing, and is prompted in English. */

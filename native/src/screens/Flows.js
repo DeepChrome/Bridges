@@ -2,16 +2,17 @@
  * placement routes. Each one supplies its steps and decides what the result means. */
 
 import React, { useMemo, useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
 import { Linked } from "../words";
-import { Q, DRILL_TYPES, TEST_OUT } from "../questions";
+import { Q, DRILL_TYPES, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
+  reachedUnits, unitUnlocked,
 } from "../data";
 import { touchStreak } from "../store";
 
@@ -183,10 +184,29 @@ export function DrillList({ navigation }) {
   const talkOpen = talkUnlocked(st);
   return (
     <Screen>
-      {/* Conversation first: it is the one thing here that is not a drill. */}
+      {/* What is not a grammar drill comes first: a quiz of the learner's own
+          making, listening scenes, and conversation. */}
       <List>
+        <Row onPress={() => navigation.navigate("QuizSetup")}>
+          <Thumb id="core" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Quiz</Text>
+            <Muted>Choose the questions and the sections</Muted>
+          </View>
+          {((st.drills || {}).quiz || {}).best
+            ? <Pill tone="good">{(st.drills.quiz.best) + "%"}</Pill> : null}
+        </Row>
+        <Row onPress={() => navigation.navigate("Listening")}>
+          <Thumb id="speech" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Listening</Text>
+            <Muted>Scenes from what you have met so far</Muted>
+          </View>
+          {((st.drills || {}).listening || {}).best
+            ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
+        </Row>
         <Row last onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
-          <Thumb id="speech" locked={!talkOpen} />
+          <Thumb id="emotion" locked={!talkOpen} />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Talk</Text>
             <Muted>{talkOpen ? "A short conversation on a topic" : `Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}</Muted>
@@ -259,6 +279,147 @@ export function DrillFlow({ route, navigation }) {
         setResult({ ...r, score });
       }}
     />
+  );
+}
+
+/* Best and runs for a practice run, keyed like the grammar drills. */
+const bestOf = (prev, key, score, xp) => {
+  const drills = { ...(prev.drills || {}) };
+  const cur = drills[key] || { best: 0, runs: 0 };
+  drills[key] = { best: Math.max(cur.best || 0, score), runs: (cur.runs || 0) + 1 };
+  return touchStreak({ ...prev, drills, xp: (prev.xp || 0) + xp });
+};
+
+/* ------------------------------------------------------------- listening */
+
+export const LISTENING_N = 5;
+
+export function ListeningFlow({ navigation }) {
+  const { st, update } = useSession();
+  const [result, setResult] = useState(null);
+  const [seed, setSeed] = useState(0);
+  const units = useMemo(() => reachedUnits(st), [seed]);
+  const steps = useMemo(() => Q.listeningDrill(units, LISTENING_N), [units, seed]);
+  useAudioStopOnLeave();
+
+  if (!steps.length) {
+    return <Done title="Nothing to listen to yet" detail="Scenes need a few sentences from your units."
+                 onBack={() => navigation.goBack()} />;
+  }
+  if (result) {
+    return (
+      <Done title="Listening" detail={`${result.right} of ${result.total} scenes clean`}
+            score={result.score} passed={result.score >= 80}
+            onAgain={() => { setResult(null); setSeed(seed + 1); }}
+            onBack={() => navigation.goBack()} />
+    );
+  }
+  return (
+    <Runner steps={steps} recycle={false}
+            onFinish={(r) => {
+              const score = scoreOf(r);
+              update((prev) => bestOf(prev, "listening", score, r.right * 2));
+              setResult({ ...r, score });
+            }} />
+  );
+}
+
+/* ------------------------------------------------------------------ quiz */
+
+/* The learner's own quiz: which kinds of question, which sections, how long. The
+   sections default to everything up to where they are on the path. */
+export function QuizSetup({ navigation }) {
+  const { st } = useSession();
+  const t = useTheme();
+  const reached = useMemo(() => reachedUnits(st).map((u) => u.id), []);
+  const [kinds, setKinds] = useState(QUIZ_KINDS.map((k) => k.id));
+  const [units, setUnits] = useState(reached);
+  const [n, setN] = useState(QUIZ_LENGTHS[0]);
+  const flip = (list, set) => (id) =>
+    set(list.includes(id) ? list.filter((x) => x !== id) : list.concat(id));
+  const ready = kinds.length > 0 && units.length > 0;
+
+  const Section = ({ label }) => (
+    <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1,
+                   textTransform: "uppercase", marginTop: 18, marginBottom: 8 }}>{label}</Text>
+  );
+  const Chip = ({ on, label, onPress, testID }) => (
+    <Pressable onPress={onPress} testID={testID} accessibilityRole="button"
+               accessibilityState={{ selected: on }}
+               style={{ borderWidth: 1, borderColor: on ? t.brand : t.line,
+                        backgroundColor: on ? t.brandBg : t.surface, borderRadius: 99,
+                        paddingHorizontal: 13, paddingVertical: 9, minHeight: 40 }}>
+      <Text style={{ color: on ? t.brandInk : t.ink2, fontSize: 14 }}>{label}</Text>
+    </Pressable>
+  );
+
+  return (
+    <Screen>
+      <Section label="Questions" />
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+        {QUIZ_KINDS.map((k) => (
+          <Chip key={k.id} on={kinds.includes(k.id)} label={k.name}
+                onPress={() => flip(kinds, setKinds)(k.id)} testID={`kind-${k.id}`} />
+        ))}
+      </View>
+      <Section label="Sections" />
+      {STAGES.map((s, si) => {
+        const here = [s.core].concat(s.branches).filter((u) => unitUnlocked(st, u));
+        if (!here.length) return null;
+        return (
+          <View key={s.core.id} style={{ marginBottom: 10 }}>
+            <Muted style={{ marginBottom: 6 }}>{`Chapter ${s.n} · ${s.title}`}</Muted>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+              {here.map((u) => (
+                <Chip key={u.id} on={units.includes(u.id)} label={u.name}
+                      onPress={() => flip(units, setUnits)(u.id)} testID={`unit-${u.id}`} />
+              ))}
+            </View>
+          </View>
+        );
+      })}
+      <Section label="Length" />
+      <View style={{ flexDirection: "row", gap: 6 }}>
+        {QUIZ_LENGTHS.map((len) => (
+          <Chip key={len} on={n === len} label={String(len)} onPress={() => setN(len)}
+                testID={`len-${len}`} />
+        ))}
+      </View>
+      <Btn kind="pri" label={ready ? "Start" : "Pick a question type and a section"}
+           disabled={!ready} style={{ marginTop: 22 }}
+           onPress={() => navigation.navigate("CustomQuiz", { kinds, units, n })} />
+    </Screen>
+  );
+}
+
+export function CustomQuizFlow({ route, navigation }) {
+  const { kinds, units: unitIds, n } = route.params;
+  const { update } = useSession();
+  const [result, setResult] = useState(null);
+  const [seed, setSeed] = useState(0);
+  const units = useMemo(() => unitIds.map((id) => UN.find((u) => u.id === id)).filter(Boolean), [unitIds]);
+  const steps = useMemo(() => Q.customQuiz({ units, kinds, n }), [units, kinds, n, seed]);
+  useAudioStopOnLeave();
+
+  if (!steps.length) {
+    return <Done title="No questions for that choice" detail="Try more sections or another kind of question."
+                 onBack={() => navigation.goBack()} />;
+  }
+  if (result) {
+    return (
+      <Done title="Quiz" detail={`${result.right} of ${result.total} right`}
+            score={result.score} passed={result.score >= PASS_MARK}
+            onAgain={() => { setResult(null); setSeed(seed + 1); }}
+            onBack={() => navigation.goBack()} />
+    );
+  }
+  return (
+    <Runner steps={steps}
+            onFinish={(r) => {
+              const score = scoreOf(r);
+              update((prev) => bestOf(prev, "quiz", score, r.right));
+              setResult({ ...r, score });
+            }} />
   );
 }
 

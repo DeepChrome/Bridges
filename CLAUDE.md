@@ -32,8 +32,11 @@ Built and working today:
 - any recognised token can expose lemma, meaning, grammar, full paradigm, and every
   other sentence in the corpus containing that word
 - a learning path of 8 core stages and 19 topic branches
-- lessons built from six activity types, plus Hear and Say on native (§30c) and a
-  conversation mode, Talk (§30f)
+- lessons built from six activity types, plus Hear, Say and listening scenes on
+  native (§30c), a conversation mode, Talk (§30f), quizzes of the learner's own
+  making and Anki decks in and out (§30h)
+- a video library of 321 captioned episodes from seven YouTube channels, searchable,
+  each listing only the study words it actually says (§30g)
 - FSRS scheduling behind the four Anki review outcomes
 - a trouble bank for vocabulary that repeatedly causes difficulty
 - installable PWA, deployed to Netlify
@@ -366,11 +369,15 @@ bridges/                          (directory is still named russian-blocks on di
     entry.js paradigm.js forms.js   <- entry hydration, paradigm rebuild, form names
     compare.js         <- transcript vs target, word-aligned through fold()
     errortags.js       <- the closed list of learner-error tags
+    scenarios.js       <- the Talk situations (§30f)
+    anki.js            <- Anki decks: field parsing, legacy collection rows (§30h)
     icons.js avatars.js
   native/              <- THE PRODUCT (Expo / React Native); see native/README.md
     src/screens/       <- Learn, Unit, Flows, Run (the runner + VIEWS registry), You…
-    src/activities/    <- Hear, Say, Alignment (§30c)
+    src/activities/    <- Hear, Say, Scene, Alignment (§30c)
     src/lib/feedback.js<- client for the Worker (§30d)
+    src/anki.js        <- .apkg in and out: zip, zstd, SQLite in memory (§30h)
+    src/keyboard.js    <- the on-screen Russian keyboard (§30h)
     __tests__/         <- jest; path.test.js and registry.test.js are the patterns
     eas.json app.json  <- build profiles; Android package and mic permission
   backend/             <- the feedback Worker (§30d): src/, test/, eval/, wrangler.toml
@@ -381,7 +388,12 @@ bridges/                          (directory is still named russian-blocks on di
     build_topics.py    <- corpus + lexicon -> data/topics.db (units + path layout)
     build_audio.py     <- Anki media -> site/audio + data/audio.json (best source first)
     build_site.py      <- everything -> site/ and native/assets/data.json
+    harvest_videos.py  <- YouTube listings, metadata, captions -> data/raw (§30g)
+    build_transcripts.py <- captions -> data/transcripts.json, lemma resolved (§30g)
+    build_videos.py    <- catalogue + index -> data/videos.json (§30g)
     make_icons.py      <- PNG icons, hand-rolled with zlib (no image library)
+    make_app_icon.py   <- the bridge mark, every size both apps need
+    make_sounds.py     <- the answer cues, ten right and one wrong
     panel.py           <- form -> lemma + paradigm tables + examples (shared logic)
     lookup.py          <- CLI word panel, for checking data without a browser
     smoke.js           <- headless checks against the built page
@@ -503,6 +515,18 @@ Each of these cost real time. Do not relearn them.
   or mapped, listen to a sample — `faster-whisper` in a scratch venv language-detects
   a sentence in seconds, and the Windows `System.Speech` dictation recogniser tells
   English from noise with no install at all.
+- **A form key is not a lemma.** 8,404 of the lexicon's 567,526 form keys belong to
+  more than one lemma, and they carry 16 % of everything said in a video: «нет» is
+  listed as a form of «житься», «просто» of «простой», «лет» of «лёт», «уже» of
+  «узкий». `form_to_lemma.setdefault(key, bare)` took whichever row came first,
+  and the video screen listed words the video never said — the owner tapped
+  «житься» and heard «нет». `build_transcripts.py` now resolves a shared form by
+  word class (a closed-class headword like «просто» beats the adjective it could
+  inflect) and by *independent* frequency (tokens of forms that belong to one lemma
+  alone — counting shared forms under every owner is what made «лёт» look twice
+  as common as «год»), and drops what it cannot settle (1.4 % of words, «его»,
+  «том», «стоит»). Any new join through `forms.key` needs the same care;
+  `IX[fold(x)][0]` in the apps has the same shape and the same trap.
 
 ## 24. Conventions
 
@@ -805,6 +829,16 @@ by `core/speech.js`, so a dropped word reads the same whether it was typed or sa
   launch; refused, or with no offline Russian model installed, the step says so and
   offers Skip. From the third chapter, one per quiz.
 
+- **Scene** (2026-09-07) — two or three sentences from the listening pool played
+  in a row, with a meaning question per sentence (four meanings, three from
+  sentences not played) and one "which word did you hear?"; the questions are on
+  screen before anything plays and nothing plays until Play is pressed — a
+  listener who knows what to listen for listens differently. Credit is the share
+  right; a sentence's words are graded by its question. From the second chapter,
+  one per quiz; also the Listening drill in Practice (`listeningDrill`), five
+  scenes from the units reached so far. `sceneFor` returns null when a pool
+  cannot supply three wrong meanings — never a scene with two options.
+
 `SPEECH_MIX` in `core/questions.js` is the one place that says which chapter each
 joins from and how many per quiz; the steps are spliced into the QUIZ_N vocabulary
 questions, never first. The runner's contract grew for them: `record(correct, words,
@@ -950,6 +984,89 @@ Measured on Haiku 4.5, ten eval cases, after the two fixes the first live turn
 forced (`tags` may be absent on a word with nothing wrong; the token budget is
 1,000, since a graded turn runs ~700 output tokens and at 600 the JSON was cut
 short and misread as "no JSON"): see the ROADMAP Phase 6 report for the numbers.
+
+## 30g. The video library (2026-09-07)
+
+**The rule:** a word listed under a video is a word the video says. Nothing
+else earns a chip. The owner found the old screen listing lesson words the
+episode never spoke, and a tapped word landing on a different word (the form
+trap in §23).
+
+Four tools, in order, each re-runnable:
+
+1. `harvest_videos.py` — the channels in `data/curated/channels.json` (seven;
+   Easy Russian whole, forty newest of each other within 2–30 minutes), listed
+   with yt-dlp, then per video the metadata (`data/raw/youtube/meta/<id>.json`:
+   title, tags, description, chapters, upload date) and the Russian auto-captions
+   (`data/raw/subs/`). Cached; a re-run costs nothing for what is on disk. Writes
+   `data/raw/youtube/catalogue.json`. YouTube rate-limits: 1 s pause, failures
+   counted, not retried. 396 videos, 321 with captions (75 have none).
+2. `build_transcripts.py` — captions to `{ index: { video: { lemma: [moments] } },
+   stats }`, a moment being `{t, w, s}`: milliseconds, the form spoken, the words
+   around it. Lemma resolution as §23 says; `--audit` prints how the commonest
+   ambiguous forms went. Read it after touching the resolver.
+3. `build_videos.py` — one video per unit (coverage of the unit's words, title as
+   tie-break, ≤ 20 minutes, `OVERRIDES` for the misses), and for every video its
+   `kw` search string (title, tags, the grammar points a title names, level,
+   channel, the names of the topic units whose words it speaks and their
+   chapter), `topics` (branch units only — every video "covers" the spine),
+   `level` (from the title: beginner, intermediate…), `ease` (share of tokens in
+   the corpus's top thousand), `chapters`.
+4. `build_site.py` — ships `payload.videos`: per video up to `VIDEO_WORDS` (20)
+   curriculum words it says, a unit's own words first when it is a unit's
+   episode, then content words by how often they are said, function words
+   (`VIDEO_SKIP_TOP`) never; `VIDEO_MOMENTS` (3) each. 1.8 MB for 321 videos.
+   `u.v.heard` stays for the lesson's video component.
+
+In the app: `VIDEOS` in `data.js`; Immerse is the library with a search bar
+(`searchVideos`: every query word must match the keywords or title, or — in
+Cyrillic — a study word the video says; unit episodes first, then easiest first);
+the Video screen takes `{videoId}` or `{unitId, index}` and `videoFor` merges the
+unit's heard words with the library entry. Watching is `st.watched[id]` (state
+v6) and, for a unit's episode, the unit flag as before. Rows of a library from
+several channels carry the channel's initials where a unit has its icon.
+
+## 30h. Settings, keyboard, quizzes and decks (the owner's batch, 2026-09-07)
+
+- **Right-answer cue** — ten in `make_sounds.py` (`CORRECT`), named in
+  `audio.js CUE_NAMES`, chosen in Settings with a preview; `st.cue`. The first
+  bell was "programmed"; the fix is a choice, since one ear's bell is another's
+  beep.
+- **Reading speed** — `SPEEDS` in `audio.js` (normal 1.0, slower 0.8, slowest
+  0.65), `st.speed`; a recording slows with pitch correction, the device voice by
+  its rate. **A second press within six seconds plays at three quarters of
+  that**, the third at full again (`rateFor`); the runner's own readings pass
+  `repeat: false` so they neither slow nor count. The shell hands both settings to
+  `configureAudio` — playback never reads state.
+- **On-screen Russian keyboard** — `keyboard.js`: ЙЦУКЕН rows, `RuInput` wraps
+  every typed answer (type, Hear) with a toggle beside the input; `st.osk` turns
+  it on for all of them; when up, the system keyboard stays down
+  (`showSoftInputOnFocus`).
+- **Home** — every header but the path's carries a house beside the avatar
+  (`HeaderRight` in App.js), straight to the path from anywhere.
+- **Flashcards** — nothing ticked is nothing queued. The picker used to fall
+  back to the first unit, which read as twenty common words that could not be
+  switched off.
+- **Quiz** (Practice) — `QuizSetup`: the kinds (`QUIZ_KINDS`), the sections
+  (default: `reachedUnits`, every unit up to the spine lesson Continue would
+  resume), the length; `customQuiz` shares words out round-robin and gives
+  sentence kinds about a third when chosen. Best score under `drills.quiz`.
+- **Anki decks** — `core/anki.js` parses fields (first Cyrillic field the
+  Russian, first other the English, HTML and `[sound:]` stripped) and writes the
+  rows of a legacy collection (schema 11, one Basic model); `native/src/anki.js`
+  does the device: `.apkg` is a zip, current Anki and AnkiDroid compress the
+  collection inside with zstd (`collection.anki21b`, `fzstd`), older ones do not
+  (`.anki21`/`.anki2`); the collection is opened *in memory*
+  (`deserializeDatabaseAsync`) and never written to disk; schema ≥ 15 keeps
+  decks in a table with U+001F between subdeck names, older ones as JSON in
+  `col`. Export builds the collection in memory, serialises it, zips it with an
+  empty media manifest and hands it to the share sheet. Decks live in
+  `st.decks` (v6); their cards are scheduled in `seen` under the Russian string
+  like any word (rule 20.4), so a deck card that is also a curriculum word shares
+  one memory. The Study picker lists them under "Your decks" with Import, Export
+  and Remove; "Export selected" writes any ticked sets as one deck.
+- **Icon** — `make_app_icon.py`: a suspension bridge in white on the brand
+  indigo, every size Expo and the web need, no image library.
 
 ## 31. Verification
 

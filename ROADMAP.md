@@ -187,6 +187,22 @@ can overrule any of them.
   something with what they know; a sixth tab was a mechanism too many (doctrine
   20.8) and a card on the path would sit on the one screen that must stay a
   curriculum.
+- **A27 — the video library (owner, 2026-09-07).** "The words that appear
+  below the video MUST appear in the video." Two causes found: the screen listed
+  the lesson's words with the unheard ones greyed, and the transcript index
+  credited shared forms to the wrong lemma (CLAUDE.md §23, §30g). Rebuilt as a
+  four-tool pipeline over seven channels (`data/curated/channels.json`), 321
+  captioned videos, keywords harvested from the channels' own metadata, a search
+  bar on Immerse, and only spoken words under any video. Videos are matched to
+  the units whose words they speak (`topics`) and shown with the unit's name.
+- **A28 — the owner's batch (2026-09-07).** Listening scenes in lessons and
+  Practice; an on-screen Russian keyboard; flashcards with nothing ticked show
+  nothing; a home button in every header; ten right-answer sounds to choose
+  from; reading speed with two slower settings and a slower second press; a
+  Practice quiz with chosen question kinds and sections, cumulative to the
+  learner's position by default; Anki decks in (.apkg, text) and out (.apkg); a
+  bridge icon. All in CLAUDE.md §30c, §30g, §30h. Not done: the web app carries
+  none of these (on hold); a Maestro flow for the new screens.
 - **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
   local verdict, grammar section) were built before Phase 4 because Phase 4 stops
   at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the

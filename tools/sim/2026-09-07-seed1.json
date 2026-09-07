@@ -4,21 +4,22 @@
   "seed": 1000,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 546,
-    "askedAgain": 440,
-    "backToBack": 0,
-    "within3": 130,
-    "sameQuizTwice": 149,
+    "quizQuestions": 525,
+    "askedAgain": 677,
+    "backToBack": 6,
+    "within3": 243,
+    "sameQuizTwice": 293,
     "medianGap": 6,
-    "quizzes": 65
+    "quizzes": 60
    },
    "mix": {
-    "cloze": 202,
-    "choose-ru": 94,
-    "listen": 65,
-    "choose-en": 81,
-    "type": 75,
-    "hear": 29
+    "cloze": 187,
+    "choose-ru": 83,
+    "listen": 69,
+    "choose-en": 69,
+    "type": 69,
+    "hear": 24,
+    "scene": 24
    },
    "chapters": [
     {
@@ -37,32 +38,32 @@
      "chapter": 2,
      "title": "Food and School",
      "lessons": 18,
-     "newWordsPerLesson": 5.7,
+     "newWordsPerLesson": 5.2,
      "quizAccuracy": 0.84,
-     "passFirstTry": 10,
+     "passFirstTry": 12,
      "failedThrice": 0,
-     "speechSteps": 29,
-     "speechTokensMean": 5.1,
-     "speechTokensMax": 8
+     "speechSteps": 24,
+     "speechTokensMean": 5,
+     "speechTokensMax": 7
     }
    ],
    "words": {
     "taught": 212,
     "everAsked": 212,
     "taughtButNeverAsked": 0,
-    "inSeen": 222,
-    "trouble": 2,
-    "leeches": 2
+    "inSeen": 231,
+    "trouble": 5,
+    "leeches": 6
    },
    "review": {
     "simulatedDays": 20,
-    "dueAtEnd": 167,
-    "duePerDay": 8.3
+    "dueAtEnd": 173,
+    "duePerDay": 8.7
    },
    "lessons": {
     "total": 40,
     "passed": 40,
-    "retakes": 25,
+    "retakes": 20,
     "shortQuizzes": 3
    },
    "structural": 0
@@ -74,21 +75,22 @@
   "seed": 1001,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 626,
-    "askedAgain": 568,
-    "backToBack": 0,
-    "within3": 138,
-    "sameQuizTwice": 174,
-    "medianGap": 7,
-    "quizzes": 74
+    "quizQuestions": 606,
+    "askedAgain": 907,
+    "backToBack": 13,
+    "within3": 300,
+    "sameQuizTwice": 391,
+    "medianGap": 6,
+    "quizzes": 68
    },
    "mix": {
-    "choose-ru": 104,
-    "cloze": 233,
-    "listen": 87,
-    "choose-en": 75,
-    "type": 87,
-    "hear": 40
+    "choose-ru": 94,
+    "cloze": 227,
+    "listen": 74,
+    "choose-en": 69,
+    "type": 74,
+    "scene": 34,
+    "hear": 34
    },
    "chapters": [
     {
@@ -107,32 +109,32 @@
      "chapter": 2,
      "title": "Food and School",
      "lessons": 18,
-     "newWordsPerLesson": 5.6,
-     "quizAccuracy": 0.76,
-     "passFirstTry": 4,
-     "failedThrice": 6,
-     "speechSteps": 40,
-     "speechTokensMean": 5.1,
-     "speechTokensMax": 8
+     "newWordsPerLesson": 5.3,
+     "quizAccuracy": 0.74,
+     "passFirstTry": 7,
+     "failedThrice": 3,
+     "speechSteps": 34,
+     "speechTokensMean": 4.9,
+     "speechTokensMax": 7
     }
    ],
    "words": {
     "taught": 212,
     "everAsked": 212,
     "taughtButNeverAsked": 0,
-    "inSeen": 221,
-    "trouble": 15,
-    "leeches": 20
+    "inSeen": 236,
+    "trouble": 29,
+    "leeches": 37
    },
    "review": {
     "simulatedDays": 20,
-    "dueAtEnd": 184,
-    "duePerDay": 9.2
+    "dueAtEnd": 204,
+    "duePerDay": 10.2
    },
    "lessons": {
     "total": 40,
-    "passed": 34,
-    "retakes": 34,
+    "passed": 37,
+    "retakes": 28,
     "shortQuizzes": 3
    },
    "structural": 0
@@ -144,21 +146,22 @@
   "seed": 1002,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 763,
-    "askedAgain": 703,
-    "backToBack": 0,
-    "within3": 183,
-    "sameQuizTwice": 210,
-    "medianGap": 7,
-    "quizzes": 91
+    "quizQuestions": 903,
+    "askedAgain": 1504,
+    "backToBack": 10,
+    "within3": 508,
+    "sameQuizTwice": 591,
+    "medianGap": 6,
+    "quizzes": 101
    },
    "mix": {
-    "cloze": 278,
-    "choose-ru": 125,
-    "choose-en": 112,
-    "type": 110,
-    "listen": 98,
-    "hear": 40
+    "cloze": 311,
+    "choose-ru": 137,
+    "choose-en": 124,
+    "type": 120,
+    "listen": 111,
+    "scene": 50,
+    "hear": 50
    },
    "chapters": [
     {
@@ -177,11 +180,11 @@
      "chapter": 2,
      "title": "Food and School",
      "lessons": 18,
-     "newWordsPerLesson": 5.5,
-     "quizAccuracy": 0.66,
-     "passFirstTry": 7,
-     "failedThrice": 9,
-     "speechSteps": 40,
+     "newWordsPerLesson": 5.3,
+     "quizAccuracy": 0.61,
+     "passFirstTry": 1,
+     "failedThrice": 11,
+     "speechSteps": 50,
      "speechTokensMean": 5.2,
      "speechTokensMax": 7
     }
@@ -190,19 +193,19 @@
     "taught": 212,
     "everAsked": 212,
     "taughtButNeverAsked": 0,
-    "inSeen": 221,
-    "trouble": 52,
-    "leeches": 62
+    "inSeen": 230,
+    "trouble": 88,
+    "leeches": 97
    },
    "review": {
     "simulatedDays": 20,
-    "dueAtEnd": 196,
-    "duePerDay": 9.8
+    "dueAtEnd": 217,
+    "duePerDay": 10.8
    },
    "lessons": {
     "total": 40,
-    "passed": 26,
-    "retakes": 51,
+    "passed": 24,
+    "retakes": 61,
     "shortQuizzes": 3
    },
    "structural": 0

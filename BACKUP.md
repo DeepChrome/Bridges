@@ -16,8 +16,9 @@ back.
 | **Anki media** (live) | `%APPDATA%\Anki2\User 1\collection.media\` | 23,587 files, 292.0 MB (23,546 mp3) | Partly. Media syncs separately from cards and lags; CLAUDE.md records recordings still unsynced from the phone. **This is the real audio asset** — `site/audio/` is derived from it. |
 | Collection snapshot | `data/_work/collection.anki2` (+ `-wal`, `-shm`) | 26.4 MB | Yes — `ingest_anki.py` copies the live collection here on every run. Kept in the backup as a consistent point-in-time copy. |
 | OpenRussian dump | `data/raw/openrussian/` | 21.7 MB | Yes, in minutes — github.com/Badestrand/russian-dictionary. Backed up anyway so the exact dump version is reproducible. |
-| YouTube auto-subtitles | `data/raw/subs/` | 26.7 MB | Slowly and unreliably — `build_transcripts.py` pulls them with yt-dlp, 152 videos with a 0.6 s pause, and YouTube rate-limits or blocks. Treat as hard to regenerate. |
-| Easy Russian episode list | `data/raw/youtube/easyrussian.tsv` | small | Hand-curated input. |
+| YouTube auto-subtitles | `data/raw/subs/` | ~60 MB, 321 videos | Slowly and unreliably — `harvest_videos.py` pulls them with yt-dlp, one request a second, and YouTube rate-limits or blocks (75 of 396 videos had none). Treat as hard to regenerate. |
+| YouTube metadata | `data/raw/youtube/meta/` + `catalogue.json` | ~30 MB, 395 files | Same tool, same caveat; the catalogue is rebuilt from the cache with `--no-fetch`. |
+| Easy Russian episode list | `data/raw/youtube/easyrussian.tsv` | small | Hand-curated input; merged into the harvest so the unit videos never depend on today's network. Channels themselves are curated in `data/curated/channels.json` (tracked). |
 | Tatoeba dumps + audio | `data/raw/tatoeba/` | 53.4 MB | Dumps re-download in minutes (`ingest_tatoeba.py` fetches them). The 185 recordings were fetched one by one with a pause; `ATTRIBUTION.txt` beside them is a licence record. |
 
 ## Generated — regenerable, kept for convenience
@@ -29,9 +30,10 @@ back.
 | `data/examples.db` | `ingest_tatoeba.py` | 5.4 MB | ~1 min once dumps are present |
 | `data/topics.db` | `build_topics.py` | 0.1 MB | seconds; content-identical on rebuild, bytes differ at the SQLite page level |
 | `data/audio.json` | `build_audio.py` | 0.9 MB | ~1 min; deterministic from the media dir (13,183 utterances) |
-| `data/transcripts.json` | `build_transcripts.py` | 41.5 MB | minutes, **if** `data/raw/subs/` is present |
-| `site/` incl. `site/audio/` | `build_site.py`, `build_audio.py` | 12.6 MB page + 208.8 MB audio | ~1 min each, from the databases and the media dir |
-| `native/assets/data.json` | `build_site.py` | 12.43 MB | with the page |
+| `data/transcripts.json` | `build_transcripts.py` | 55 MB | minutes, **if** `data/raw/subs/` and the catalogue are present |
+| `data/videos.json` (tracked) | `build_videos.py` | 0.4 MB | seconds |
+| `site/` incl. `site/audio/` | `build_site.py`, `build_audio.py` | 15.6 MB page + 208.8 MB audio | ~1 min each, from the databases and the media dir |
+| `native/assets/data.json` | `build_site.py` | 15.5 MB | with the page |
 
 Full rebuild order, from sources only:
 `ingest_anki → build_lexicon → ingest_tatoeba → build_topics → build_audio → build_site`.
@@ -52,4 +54,5 @@ off-machine. Drives D:, E: and H: on this machine also have >1 TB free each; whe
 they are separate physical disks from C: is not known.
 
 Refresh the copy after any Anki sync that brings new media across, and after
-`build_transcripts.py` fetches new subtitles.
+`harvest_videos.py` fetches new captions or metadata (2026-09-07: it did, for six
+new channels — the copy is behind until refreshed).

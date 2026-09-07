@@ -1,4 +1,4 @@
-# Round two of the walkthrough: the screens added 2026-09-07. A fresh install:
+﻿# Round two of the walkthrough: the screens added 2026-09-07. A fresh install:
 #   adb shell pm clear app.bridges.russian; launch; then
 #   .\native\tools\walk.ps1 -Flow native\flows\walkthrough2.txt
 # Screenshots land in native/screenshots/walk/. Read them — that is the audit.
@@ -13,7 +13,7 @@ tap:^Start from the beginning$
 wait:2
 shot:41-learn-home-button
 # Home button in a header: open a unit, then the house.
-tap:Start ·
+tap:^Start \(
 wait:2
 shot:42-unit
 tap:Home, the path
@@ -95,7 +95,7 @@ wait:1
 # A typed question with the keyboard: Learn → unit → lesson → quiz.
 tap:^Learn$
 wait:2
-tap:Start ·
+tap:^Start \(
 wait:2
 tap:^1, Lesson 1
 wait:2

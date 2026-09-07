@@ -115,6 +115,7 @@ describe("path node states", () => {
     expect(screen.getByTestId("fork-core1").props.accessibilityLabel).toMatch(/after lesson 2/);
     expect(screen.getByTestId("node-family").props.accessibilityState.disabled).toBe(true);
     expect(screen.getByTestId("lane-family").props.strokeDasharray).toBeTruthy();
+    expect(screen.getByTestId("merge-family").props.strokeDasharray).toBeTruthy();
     // family is left of time: the row keeps the curriculum's order.
     const left = screen.getByTestId("node-family").parent;
     const right = screen.getByTestId("node-time").parent;
@@ -127,7 +128,9 @@ describe("path node states", () => {
     expect(screen.getByTestId("fork-core1").props.accessibilityLabel).toBe("Side quests");
     expect(screen.getByTestId("node-family").props.accessibilityState.disabled).toBe(false);
     expect(screen.getByTestId("lane-family").props.strokeDasharray).toBeUndefined();
-    // The main road: lesson 3 of the spine, not a side quest.
-    expect(screen.getByText(/Continue · Pronouns & Being · Lesson 3/)).toBeTruthy();
+    // The main road: the spine unit, not a side quest.
+    expect(screen.getByText("Continue (Pronouns & Being)")).toBeTruthy();
+    // The lanes come back to the road after the quests, solid once open.
+    expect(screen.getByTestId("merge-family").props.strokeDasharray).toBeUndefined();
   });
 });

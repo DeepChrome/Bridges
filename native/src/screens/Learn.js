@@ -26,6 +26,7 @@ import {
 
 const STROKE = 5;
 const LANE_H = 64;          // height of the fork drawing
+const MERGE_H = 44;         // and of the lanes coming back to the road
 const TRUNK_W = 3;
 
 function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
@@ -179,7 +180,20 @@ function Fork({ stage, chapterOpen, onOpen }) {
           {`Side quests · after lesson ${FORK_AT}`}
         </Muted>
       ) : null}
-      <Trunk height={18} dim={!chapterOpen} />
+      {/* The lanes come back: from under each quest to the road, which goes on to
+          the next chapter. A fork that never re-joined read as a dead end. */}
+      <Animated.View style={{ opacity: open ? anim : 1 }}>
+        <Svg width={W} height={MERGE_H}>
+          <Line x1={W / 2} y1={0} x2={W / 2} y2={MERGE_H} stroke={t.line} strokeWidth={TRUNK_W} />
+          {xs.map((x, k) => (
+            <Path key={k} testID={`merge-${stage.branches[k].id}`}
+                  d={`M ${x} 0 C ${x} ${MERGE_H * 0.65}, ${W / 2} ${MERGE_H * 0.45}, ${W / 2} ${MERGE_H}`}
+                  stroke={lane} strokeWidth={TRUNK_W} fill="none" strokeLinecap="round"
+                  strokeDasharray={open ? undefined : "4 6"} />
+          ))}
+        </Svg>
+      </Animated.View>
+      <Trunk height={10} dim={!chapterOpen} />
     </View>
   );
 }
@@ -192,7 +206,9 @@ export default function Learn({ navigation }) {
 
   return (
     <Screen>
-      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
+      {/* The score line, centred at the top; the button under it names what it
+          opens and no more (the owner, 2026-09-07). */}
+      <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 6 }}>
         <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
           {(st.xp || 0).toLocaleString("en-US")}
         </Text>
@@ -207,8 +223,8 @@ export default function Learn({ navigation }) {
       {next ? (
         <Btn
           kind="pri"
-          style={{ marginTop: 12 }}
-          label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} · ${next.unit.name} · Lesson ${next.index + 1}`}
+          style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
+          label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} (${next.unit.name})`}
           onPress={() => navigation.navigate("Unit", { unitId: next.unit.id })}
         />
       ) : null}

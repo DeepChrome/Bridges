@@ -12,10 +12,12 @@ import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row } from "../ui";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
+import { RuInput } from "../keyboard";
 import { charDistance } from "@core/compare";
 import { Linked } from "../words";
 import { Hear } from "../activities/Hear";
 import { Say } from "../activities/Say";
+import { Scene } from "../activities/Scene";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade } from "@core/fsrs";
 import { fold, translit, today, translitBack, firstSense } from "@core/util";
@@ -77,19 +79,8 @@ function Typed({ q, answered, onAnswer }) {
   };
   return (
     <View>
-      <TextInput
-        value={text}
-        onChangeText={setText}
-        editable={!answered}
-        placeholder="Cyrillic or Latin"
-        placeholderTextColor={t.ink3}
-        autoCorrect={false}
-        autoCapitalize="none"
-        onSubmitEditing={check}
-        style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
-                 borderBottomWidth: 3, borderRadius: radius.md, paddingHorizontal: 14,
-                 paddingVertical: 13, fontSize: 20, color: t.ink }}
-      />
+      <RuInput value={text} onChangeText={setText} editable={!answered} onSubmit={check}
+               testID="type-input" />
       {/* The Latin spelling of the answer is shown only once it has been given —
           before that it is the answer, in a font the learner can read. */}
       {answered ? (
@@ -261,6 +252,7 @@ export const VIEWS = {
   match: (q, r) => <Match q={q} onDone={(ok, idxs, credit, note) => r.record(ok, idxs, undefined, { credit, note })} />,
   hear: (q, r) => <Hear q={q} r={r} />,
   say: (q, r) => <Say q={q} r={r} />,
+  scene: (q, r) => <Scene q={q} r={r} />,
 };
 
 /* ------------------------------------------------------------------ runner */
@@ -305,7 +297,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     atRef.current = at;
     if (!q || !q.autoplay) return;
     const mine = at;
-    whenIdle().then(() => { if (atRef.current === mine) say(q.autoplay); });
+    whenIdle().then(() => { if (atRef.current === mine) say(q.autoplay, { repeat: false }); });
   }, [at]);
 
   useEffect(() => () => { if (sayTimer.current) clearTimeout(sayTimer.current); }, []);
@@ -333,7 +325,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       const text = answerAudioText(q, opt);
       if (text) {
         if (sayTimer.current) clearTimeout(sayTimer.current);
-        sayTimer.current = setTimeout(() => say(text), 420);
+        sayTimer.current = setTimeout(() => say(text, { repeat: false }), 420);
       }
     }
 

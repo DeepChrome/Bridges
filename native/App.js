@@ -30,8 +30,10 @@ import { Immerse, Video, Gate } from "./src/screens/Misc";
 import WordScreen from "./src/screens/Word";
 import SttLab from "./src/screens/SttLab";
 import { WordsProvider, navRef } from "./src/words";
+import { configureAudio } from "./src/audio";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
+  QuizSetup, CustomQuizFlow, ListeningFlow,
 } from "./src/screens/Flows";
 
 const Tabs = createBottomTabNavigator();
@@ -51,7 +53,25 @@ const ImmerseIcon = icon("M3 5h18v14H3zm8 4.5 4 2.5-4 2.5z");
 const SearchIcon = icon("M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm9 16-3.5-3.5");
 
 /* The profile avatar sits in the header, as it does on the web, rather than
-   spending a tab on it. */
+   spending a tab on it. Beside it, on every screen but the path itself, a way
+   home: back to the path in one press from anywhere (the owner, 2026-09-07). */
+function HomeButton() {
+  const scheme = useColorScheme();
+  const p = scheme === "light" ? light : dark;
+  return (
+    <Pressable onPress={() => navRef.navigate("Tabs", { screen: "Learn", params: { screen: "Path" } })}
+               hitSlop={8} accessibilityRole="button" accessibilityLabel="Home, the path"
+               testID="home-button"
+               style={{ marginRight: 12, width: 30, height: 30, alignItems: "center",
+                        justifyContent: "center" }}>
+      <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={p.ink2}
+           strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M4 11 12 4l8 7M6 10v9h12v-9M10 19v-5h4v5" />
+      </Svg>
+    </Pressable>
+  );
+}
+
 function MeButton({ navigation }) {
   const { account } = useSession();
   if (!account) return null;
@@ -64,8 +84,18 @@ function MeButton({ navigation }) {
   );
 }
 
-const withMe = ({ navigation }) => ({
-  headerRight: () => <MeButton navigation={navigation} />,
+function HeaderRight({ navigation, route }) {
+  const home = !route || route.name !== "Path";
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      {home ? <HomeButton /> : null}
+      <MeButton navigation={navigation} />
+    </View>
+  );
+}
+
+const withMe = ({ navigation, route }) => ({
+  headerRight: () => <HeaderRight navigation={navigation} route={route} />,
   headerBackButtonDisplayMode: "minimal",
 });
 
@@ -80,7 +110,7 @@ const titled = (what) => ({ navigation, route }) => {
             : chapter ? chapter.title
             : null;
   return {
-    headerRight: () => <MeButton navigation={navigation} />,
+    headerRight: () => <HeaderRight navigation={navigation} route={route} />,
     headerBackButtonDisplayMode: "minimal",
     headerTitleAlign: "center",
     headerTitle: () => <HeaderTitle title={label} sub={sub} />,
@@ -92,7 +122,7 @@ const unitTitled = ({ navigation, route }) => {
   const unit = unitById((route.params || {}).unitId);
   const chapter = unit ? chapterOf(unit.id) : null;
   return {
-    headerRight: () => <MeButton navigation={navigation} />,
+    headerRight: () => <HeaderRight navigation={navigation} route={route} />,
     headerBackButtonDisplayMode: "minimal",
     headerTitleAlign: "center",
     headerTitle: () => (
@@ -127,9 +157,12 @@ function PracticeStack() {
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Drills" component={DrillList} options={{ title: "Practice" }} />
       <Stack.Screen name="Talk" component={Talk} options={{ title: "Talk" }} />
+      <Stack.Screen name="QuizSetup" component={QuizSetup} options={{ title: "Quiz" }} />
+      <Stack.Screen name="CustomQuiz" component={CustomQuizFlow} options={{ title: "Quiz" }} />
+      <Stack.Screen name="Listening" component={ListeningFlow} options={{ title: "Listening" }} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
-                      headerRight: () => <MeButton navigation={navigation} />,
+                      headerRight: () => <HeaderRight navigation={navigation} route={route} />,
                       headerBackButtonDisplayMode: "minimal",
                       headerTitleAlign: "center",
                       headerTitle: () => (
@@ -230,6 +263,7 @@ const wordTitled = ({ route }) => {
   return {
     headerTitleAlign: "center",
     headerBackButtonDisplayMode: "minimal",
+    headerRight: () => <HomeButton />,
     headerTitle: () => (
       <HeaderTitle title={w ? w.w : "Word"} sub={w && w.p ? w.p : "Dictionary"} />
     ),
@@ -237,9 +271,12 @@ const wordTitled = ({ route }) => {
 };
 
 function Shell() {
-  const { ready, account } = useSession();
+  const { ready, account, st } = useSession();
   const [splashDone, setSplashDone] = useState(false);
   const [placement, setPlacement] = useState(null);
+
+  /* Playback reads its two settings from here rather than from state. */
+  useEffect(() => { configureAudio({ speed: st.speed, cue: st.cue }); }, [st.speed, st.cue]);
 
   /* Acting on the gate's answer. The navigator only exists once there is an
      account, so this runs on the render after the profile is created: effects fire

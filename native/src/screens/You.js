@@ -1,13 +1,14 @@
 /* You — profile, progress, the trouble bank, and settings. */
 
 import React, { useState } from "react";
-import { View, Text, Modal, ScrollView, Switch, Alert } from "react-native";
+import { View, Text, Modal, ScrollView, Switch, Alert, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import {
   Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Title,
 } from "../ui";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
+import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { troubleWords } from "./Study";
 import { today } from "@core/util";
 import { tagInfo } from "@core/errortags";
@@ -30,6 +31,27 @@ function Stat({ value, label }) {
                    borderWidth: 1, borderRadius: radius.md, padding: 13 }}>
       <Text style={{ color: t.ink, fontSize: 22, fontWeight: "700" }}>{value}</Text>
       <Muted size={12}>{label}</Muted>
+    </View>
+  );
+}
+
+/* A row of choices, one lit. */
+function Choice({ options, value, onPick, testID }) {
+  const t = useTheme();
+  return (
+    <View testID={testID} style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+      {options.map((o) => {
+        const on = o.id === value;
+        return (
+          <Pressable key={o.id} onPress={() => onPick(o.id)} accessibilityRole="button"
+                     accessibilityState={{ selected: on }}
+                     style={{ borderWidth: 1, borderColor: on ? t.brand : t.line,
+                              backgroundColor: on ? t.brandBg : t.surface, borderRadius: 99,
+                              paddingHorizontal: 13, paddingVertical: 8, minHeight: 36 }}>
+            <Text style={{ color: on ? t.brandInk : t.ink2, fontSize: 14 }}>{o.name}</Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -60,7 +82,7 @@ function Settings({ visible, onClose, onLab }) {
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>
-              <Row last={!st.dev}>
+              <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Card side</Text>
                   <Muted>{st.dir ? "English first" : "Russian first"}</Muted>
@@ -70,6 +92,34 @@ function Settings({ visible, onClose, onLab }) {
                   onValueChange={(v) => update((p) => ({ ...p, dir: v ? 1 : 0 }))}
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
+              </Row>
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Russian keyboard</Text>
+                  <Muted>On screen, for typed answers</Muted>
+                </View>
+                <Switch
+                  testID="osk-switch"
+                  value={!!st.osk}
+                  onValueChange={(v) => update((p) => ({ ...p, osk: v }))}
+                  trackColor={{ true: t.good, false: t.surface3 }}
+                />
+              </Row>
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Reading speed</Text>
+                  <Muted>Press a speaker twice for slower</Muted>
+                  <Choice testID="speed-choice" options={SPEEDS} value={st.speed || "normal"}
+                          onPick={(id) => update((p) => ({ ...p, speed: id }))} />
+                </View>
+              </Row>
+              <Row last={!st.dev}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Right-answer sound</Text>
+                  <Muted>Tap to hear</Muted>
+                  <Choice testID="cue-choice" options={CUE_NAMES} value={st.cue || "bell"}
+                          onPick={(id) => { previewCue(id); update((p) => ({ ...p, cue: id })); }} />
+                </View>
               </Row>
               {st.dev ? (
                 // A measuring tool, not a feature: only with developer mode on.

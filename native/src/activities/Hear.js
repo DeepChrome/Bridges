@@ -11,12 +11,13 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, TextInput, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
-import { useTheme, radius } from "../theme";
+import { useTheme } from "../theme";
 import { Btn, Muted } from "../ui";
 import { say } from "../audio";
+import { RuInput } from "../keyboard";
 import { Linked } from "../words";
 import { IX } from "../data";
 import { Alignment } from "./Alignment";
@@ -106,19 +107,9 @@ export function Hear({ q, r }) {
   return (
     <View>
       <PlayButton onPress={replay} />
-      <TextInput
-        testID="hear-input"
-        value={text}
-        onChangeText={setText}
-        placeholder="Cyrillic or Latin"
-        placeholderTextColor={t.ink3}
-        autoCorrect={false}
-        autoCapitalize="none"
-        onSubmitEditing={check}
-        style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
-                 borderBottomWidth: 3, borderRadius: radius.md, paddingHorizontal: 14,
-                 paddingVertical: 13, fontSize: 20, color: t.ink, marginTop: 18 }}
-      />
+      <View style={{ marginTop: 18 }}>
+        <RuInput testID="hear-input" value={text} onChangeText={setText} onSubmit={check} />
+      </View>
       <Btn kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} />
     </View>
   );

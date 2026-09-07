@@ -34,6 +34,11 @@ export const DEFAULTS = {
   day: null,
   streak: 0,
   speech: speechDefault(),   // the speaking activities' record; never audio
+  watched: {},          // video id -> day watched (the Immerse library)
+  decks: [],            // imported Anki decks: {id, name, cards:[{ru, en}]}
+  speed: "normal",      // how fast Russian is read: normal, slower, slowest
+  cue: "bell",          // the sound a right answer makes (audio.js CUE_NAMES)
+  osk: false,           // an on-screen Russian keyboard for typed answers
 };
 
 export function normalise(raw, assumedVersion) {

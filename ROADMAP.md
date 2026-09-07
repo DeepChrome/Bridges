@@ -143,6 +143,26 @@ can overrule any of them.
   not carry the speech activities (web is on hold, A-series above). The equivalent
   is `native/__tests__/registry.test.js`, which now proves Hear and Say have
   views, plus `hear.test.js` and `say.test.js` through the real runner.
+- **A23 — UX trials, added at the owner's request (2026-09-06).** Two reusable
+  instruments now sit beside the suites: `tools/simulate.mjs` (seeded learners
+  through the real generators and scheduler; baseline in `tools/sim/`) and
+  `native/tools/walk.ps1` + `native/flows/walkthrough.txt` (the app driven on the
+  emulator by its accessibility tree, screenshots in `native/screenshots/walk/`).
+  Run both after a change to lessons, generators or screens; diff the report.
+  Findings still open from the first trials, in priority order:
+  1. Practice drills draw from all ~4,000 lemmas ("genitive plural of рис" for a
+     learner who knows six words). They should draw from words met so far,
+     widening as the learner advances, and from the curriculum order before that.
+  2. The 80 % pass mark with no adaptive relief: the simulated struggling learner
+     passes 25 of 40 lessons and ends with 84 leeches. A product decision — easier
+     retake, lower bar early, or review-first — not a bug.
+  3. The simulator does not yet run Study (review) sessions, so review debt only
+     accumulates (13 due/day after 20 days); add them to measure the real load.
+  4. Flat curve: 6.8 new words every lesson from lesson 1, and no speech step in
+     chapter 1's 16 lessons.
+  5. Curriculum data smells: «житься» and «двух» reached chapter 1's spine as
+     headwords (OpenRussian stub rows); the `#187` frequency chip is unexplained;
+     one Immerse row per unit only.
 - **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
   local verdict, grammar section) were built before Phase 4 because Phase 4 stops
   at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the

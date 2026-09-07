@@ -1,0 +1,1503 @@
+{
+ "summary": {
+  "model": "claude-haiku-4-5-20251001",
+  "cases": 30,
+  "primaryTagAccuracy": 0.8,
+  "tagHits": 20,
+  "tagTotal": 25,
+  "falsePositives": 0,
+  "correctSentences": 5,
+  "parseFailures": 0,
+  "tokens": {
+   "in": 25164,
+   "out": 7178
+  },
+  "estCostUsd": 0.0611,
+  "pass": true
+ },
+ "rows": [
+  {
+   "id": "case-1",
+   "expected": "CASE",
+   "primary": "CASE",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "я",
+      "expected": "Я",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "читаю",
+      "expected": "читаю",
+      "lemma": "читать",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "книга",
+      "expected": "книгу",
+      "lemma": "книга",
+      "status": "sub",
+      "tags": [
+       "CASE"
+      ]
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "CASE",
+      "note": "«книгу» — accusative after «читать», not nominative «книга»"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good verb conjugation and word order."
+   }
+  },
+  {
+   "id": "case-2",
+   "expected": "CASE",
+   "primary": "CASE",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "он",
+      "expected": "Он",
+      "lemma": "он",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "живёт",
+      "expected": "живёт",
+      "lemma": "жить",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "в",
+      "expected": "в",
+      "lemma": "в",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "москва",
+      "expected": "Москве",
+      "lemma": "москва",
+      "status": "sub",
+      "tags": [
+       "CASE"
+      ]
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "CASE",
+      "note": "«Москве» — prepositional case after «в», not nominative «Москва»"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good verb conjugation and preposition use."
+   }
+  },
+  {
+   "id": "case-3",
+   "expected": "CASE",
+   "primary": "CASE",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "у",
+      "expected": "у",
+      "lemma": "у",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "меня",
+      "expected": "меня",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "нет",
+      "expected": "нет",
+      "lemma": "нет",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "время",
+      "expected": "времени",
+      "lemma": "время",
+      "status": "sub",
+      "tags": [
+       "CASE"
+      ]
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "CASE",
+      "note": "«времени» — genitive after нет, not nominative «время»"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good use of the structure у меня нет."
+   }
+  },
+  {
+   "id": "case-4",
+   "expected": "CASE",
+   "primary": "CASE",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "она",
+      "expected": "Она",
+      "lemma": "она",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "дала",
+      "expected": "дала",
+      "lemma": "дать",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "я",
+      "expected": "мне",
+      "lemma": "я",
+      "status": "sub",
+      "tags": [
+       "CASE"
+      ]
+     },
+     {
+      "said": "книгу",
+      "expected": "книгу",
+      "lemma": "книга",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "CASE",
+      "note": "«я» is nominative; use dative «мне» after «дать» (to give to someone)"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good verb form and object case!"
+   }
+  },
+  {
+   "id": "case-5",
+   "expected": "CASE",
+   "primary": "CASE",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "мы",
+      "expected": "Мы",
+      "lemma": "мы",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "идём",
+      "expected": "идём",
+      "lemma": "идти",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "в",
+      "expected": "в",
+      "lemma": "в",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "школа",
+      "expected": "школу",
+      "lemma": "школа",
+      "status": "sub",
+      "tags": [
+       "CASE"
+      ]
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "CASE",
+      "note": "«школу» — accusative after «в» for direction, not nominative «школа»"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good verb conjugation and preposition use."
+   }
+  },
+  {
+   "id": "aspect-1",
+   "expected": "ASPECT",
+   "primary": "ASPECT",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "он",
+      "expected": "Он",
+      "lemma": "он",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "вдруг",
+      "expected": "вдруг",
+      "lemma": "вдруг",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "кричал",
+      "expected": "закричал",
+      "lemma": "кричать",
+      "status": "sub",
+      "tags": [
+       "ASPECT"
+      ]
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "ASPECT",
+      "note": "«закричал» (perfective) shows he started shouting suddenly, not «кричал» (imperfective, continuous)"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good word order and stress placement."
+   }
+  },
+  {
+   "id": "aspect-2",
+   "expected": "ASPECT",
+   "primary": "ASPECT",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "я",
+      "expected": "Я",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "наконец",
+      "expected": "наконец",
+      "lemma": "наконец",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "находил",
+      "expected": "нашёл",
+      "lemma": "найти",
+      "status": "sub",
+      "tags": [
+       "ASPECT"
+      ]
+     },
+     {
+      "said": "ключи",
+      "expected": "ключи",
+      "lemma": "ключ",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "ASPECT",
+      "note": "«нашёл» (perfective past) — completed action. «находил» is imperfective, suggesting ongoing search."
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good word order and case usage."
+   }
+  },
+  {
+   "id": "aspect-3",
+   "expected": "ASPECT",
+   "primary": "ASPECT",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "она",
+      "expected": "Она",
+      "lemma": "она",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "открывала",
+      "expected": "открыла",
+      "lemma": "открыть",
+      "status": "sub",
+      "tags": [
+       "ASPECT"
+      ]
+     },
+     {
+      "said": "окно",
+      "expected": "окно",
+      "lemma": "окно",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "и",
+      "expected": "и",
+      "lemma": "и",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "выходила",
+      "expected": "вышла",
+      "lemma": "выйти",
+      "status": "sub",
+      "tags": [
+       "ASPECT"
+      ]
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "ASPECT",
+      "note": "Use perfective «открыла» and «вышла» for completed actions, not imperfective «открывала» and «выходила»"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good sentence structure and word order."
+   }
+  },
+  {
+   "id": "aspect-4",
+   "expected": "ASPECT",
+   "primary": "ASPECT",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "давай",
+      "expected": "Дай",
+      "lemma": "дать",
+      "status": "sub",
+      "tags": [
+       "ASPECT"
+      ]
+     },
+     {
+      "said": "мне",
+      "expected": "мне",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "пожалуйста",
+      "expected": "пожалуйста",
+      "lemma": "пожалуйста",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "ручку",
+      "expected": "ручку",
+      "lemma": "ручка",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "ASPECT",
+      "note": "«дай» (perfective imperative) for a single request; «давай» (imperfective) is for repeated or habitual actions"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good natural intonation and clear pronunciation."
+   }
+  },
+  {
+   "id": "aspect-5",
+   "expected": "ASPECT",
+   "primary": "ASPECT",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "я",
+      "expected": "Я",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "хочу",
+      "expected": "хочу",
+      "lemma": "хотеть",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "покупать",
+      "expected": "купить",
+      "lemma": "купить",
+      "status": "sub",
+      "tags": [
+       "ASPECT"
+      ]
+     },
+     {
+      "said": "машину",
+      "expected": "машину",
+      "lemma": "машина",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "ASPECT",
+      "note": "«купить» (perfective) shows a completed action; «покупать» (imperfective) shows an ongoing or repeated action. Use perfective with «хочу»."
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good sentence structure and correct accusative case on the object."
+   }
+  },
+  {
+   "id": "gender-1",
+   "expected": "GENDER_AGREE",
+   "primary": "GENDER_AGREE",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "мой",
+      "expected": "Моя",
+      "lemma": "мой",
+      "status": "sub",
+      "tags": [
+       "GENDER_AGREE"
+      ]
+     },
+     {
+      "said": "мама",
+      "expected": "мама",
+      "lemma": "мама",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "работает",
+      "expected": "работает",
+      "lemma": "работать",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "в",
+      "expected": "в",
+      "lemma": "в",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "школе",
+      "expected": "школе",
+      "lemma": "школа",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "GENDER_AGREE",
+      "note": "«мой» is masculine. Use feminine «моя» with «мама»."
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good word order and correct case usage overall."
+   }
+  },
+  {
+   "id": "gender-2",
+   "expected": "GENDER_AGREE",
+   "primary": "GENDER_AGREE",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "это",
+      "expected": "Это",
+      "lemma": "это",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "красивый",
+      "expected": "красивая",
+      "lemma": "красивый",
+      "status": "sub",
+      "tags": [
+       "GENDER_AGREE"
+      ]
+     },
+     {
+      "said": "девушка",
+      "expected": "девушка",
+      "lemma": "девушка",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "GENDER_AGREE",
+      "note": "«красивая» — feminine to match feminine noun «девушка», not masculine «красивый»"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good sentence structure and pronunciation!"
+   }
+  },
+  {
+   "id": "gender-3",
+   "expected": "GENDER_AGREE",
+   "primary": "GENDER_AGREE",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "она",
+      "expected": "Она",
+      "lemma": "она",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "пришёл",
+      "expected": "пришла",
+      "lemma": "прийти",
+      "status": "sub",
+      "tags": [
+       "GENDER_AGREE"
+      ]
+     },
+     {
+      "said": "домой",
+      "expected": "домой",
+      "lemma": "домой",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "GENDER_AGREE",
+      "note": "«пришла» is feminine to match «она», not masculine «пришёл»"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good sentence structure and correct aspect use."
+   }
+  },
+  {
+   "id": "gender-4",
+   "expected": "GENDER_AGREE",
+   "primary": "GENDER_AGREE",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "новая",
+      "expected": "Новый",
+      "lemma": "новый",
+      "status": "sub",
+      "tags": [
+       "GENDER_AGREE"
+      ]
+     },
+     {
+      "said": "дом",
+      "expected": "дом",
+      "lemma": "дом",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "стоит",
+      "expected": "стоит",
+      "lemma": "стоять",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "на",
+      "expected": "на",
+      "lemma": "на",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "улице",
+      "expected": "улице",
+      "lemma": "улица",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "GENDER_AGREE",
+      "note": "«новая» is feminine, but «дом» is masculine. Use «новый»."
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good sentence structure and correct preposition use."
+   }
+  },
+  {
+   "id": "gender-5",
+   "expected": "GENDER_AGREE",
+   "primary": "GENDER_AGREE",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "мой",
+      "expected": "Мой",
+      "lemma": "мой",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "брат",
+      "expected": "брат",
+      "lemma": "брат",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "читала",
+      "expected": "читал",
+      "lemma": "читать",
+      "status": "sub",
+      "tags": [
+       "GENDER_AGREE"
+      ]
+     },
+     {
+      "said": "книгу",
+      "expected": "книгу",
+      "lemma": "книга",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "GENDER_AGREE",
+      "note": "«читал» (masculine) agrees with «брат», not «читала» (feminine)"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good past tense use with the object in accusative case."
+   }
+  },
+  {
+   "id": "word-1",
+   "expected": "WRONG_WORD",
+   "primary": null,
+   "overall": "minor",
+   "verdict": "secondary (primary null)",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "я",
+      "expected": "Я",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "пью",
+      "expected": "ем",
+      "lemma": "есть",
+      "status": "sub",
+      "tags": [
+       "WRONG_WORD"
+      ]
+     },
+     {
+      "said": "суп",
+      "expected": "суп",
+      "lemma": "суп",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [],
+    "wordChoice": [
+     {
+      "said": "пью",
+      "better": "ем",
+      "note": "You drink (пить) liquids. You eat (есть) food like soup."
+     }
+    ],
+    "overall": "minor",
+    "praise": "Good pronunciation and word order!"
+   }
+  },
+  {
+   "id": "word-2",
+   "expected": "WRONG_WORD",
+   "primary": null,
+   "overall": "minor",
+   "verdict": "secondary (primary null)",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "он",
+      "expected": "Он",
+      "lemma": "он",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "едет",
+      "expected": "идёт",
+      "lemma": "идти",
+      "status": "sub",
+      "tags": [
+       "WRONG_WORD"
+      ]
+     },
+     {
+      "said": "на",
+      "expected": "на",
+      "lemma": "на",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "работу",
+      "expected": "работу",
+      "lemma": "работа",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "пешком",
+      "expected": "пешком",
+      "lemma": "пешком",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [],
+    "wordChoice": [
+     {
+      "said": "едет",
+      "better": "идёт",
+      "note": "Use идти for walking on foot; ехать means travelling by vehicle"
+     }
+    ],
+    "overall": "minor",
+    "praise": "Good case usage and word order."
+   }
+  },
+  {
+   "id": "word-3",
+   "expected": "WRONG_WORD",
+   "primary": null,
+   "overall": "minor",
+   "verdict": "secondary (primary null)",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "я",
+      "expected": "Я",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "слышу",
+      "expected": "слушаю",
+      "lemma": "слушать",
+      "status": "sub",
+      "tags": [
+       "WRONG_WORD"
+      ]
+     },
+     {
+      "said": "музыку",
+      "expected": "музыку",
+      "lemma": "музыка",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [],
+    "wordChoice": [
+     {
+      "said": "слышу",
+      "better": "слушаю",
+      "note": "«слышу» means you hear (passive perception), but «слушаю» means you listen (active attention)"
+     }
+    ],
+    "overall": "minor",
+    "praise": "Good pronunciation and correct accusative case!"
+   }
+  },
+  {
+   "id": "word-4",
+   "expected": "WRONG_WORD",
+   "primary": null,
+   "overall": "minor",
+   "verdict": "secondary (primary null)",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "мы",
+      "expected": "Мы",
+      "lemma": "мы",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "видим",
+      "expected": "смотрим",
+      "lemma": "смотреть",
+      "status": "sub",
+      "tags": [
+       "WRONG_WORD"
+      ]
+     },
+     {
+      "said": "фильм",
+      "expected": "фильм",
+      "lemma": "фильм",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [],
+    "wordChoice": [
+     {
+      "said": "видим",
+      "better": "смотрим",
+      "note": "Use «смотреть» for watching a film, not «видеть» (to see)."
+     }
+    ],
+    "overall": "minor",
+    "praise": "Good sentence structure and word order!"
+   }
+  },
+  {
+   "id": "word-5",
+   "expected": "WRONG_WORD",
+   "primary": null,
+   "overall": "minor",
+   "verdict": "secondary (primary null)",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "он",
+      "expected": "Он",
+      "lemma": "он",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "умеет",
+      "expected": "знает",
+      "lemma": "знать",
+      "status": "sub",
+      "tags": [
+       "WRONG_WORD"
+      ]
+     },
+     {
+      "said": "этот",
+      "expected": "этот",
+      "lemma": "этот",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "город",
+      "expected": "город",
+      "lemma": "город",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [],
+    "wordChoice": [
+     {
+      "said": "умеет",
+      "better": "знает",
+      "note": "«Умеет» means 'is able to / can do'. Use «знает» for 'knows a place'."
+     }
+    ],
+    "overall": "minor",
+    "praise": "Good sentence structure and case agreement!"
+   }
+  },
+  {
+   "id": "order-1",
+   "expected": "WORD_ORDER",
+   "primary": "WORD_ORDER",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "я",
+      "expected": "Я",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "иду",
+      "expected": "иду",
+      "lemma": "идти",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "школу",
+      "expected": "в",
+      "lemma": "в",
+      "status": "del",
+      "tags": []
+     },
+     {
+      "said": "в",
+      "expected": "школу",
+      "lemma": "школа",
+      "status": "sub",
+      "tags": [
+       "WORD_ORDER"
+      ]
+     },
+     {
+      "said": null,
+      "expected": ".",
+      "lemma": ".",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "WORD_ORDER",
+      "note": "The preposition «в» must come before the noun «школу», not after it."
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Correct case ending on «школу» (accusative after «в»)."
+   }
+  },
+  {
+   "id": "order-2",
+   "expected": "WORD_ORDER",
+   "primary": "WORD_ORDER",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "я",
+      "expected": "Я",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "понимаю",
+      "expected": "не",
+      "lemma": "не",
+      "status": "sub",
+      "tags": []
+     },
+     {
+      "said": "не",
+      "expected": "понимаю",
+      "lemma": "понимать",
+      "status": "sub",
+      "tags": []
+     },
+     {
+      "said": null,
+      "expected": ".",
+      "lemma": ".",
+      "status": "del",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "WORD_ORDER",
+      "note": "In Russian negation, «не» comes before the verb: «я не понимаю», not after it."
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good attempt with the right words!"
+   }
+  },
+  {
+   "id": "order-3",
+   "expected": "WORD_ORDER",
+   "primary": "WORD_ORDER",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "меня",
+      "expected": "у",
+      "lemma": "я",
+      "status": "sub",
+      "tags": [
+       "WORD_ORDER"
+      ]
+     },
+     {
+      "said": "у",
+      "expected": "меня",
+      "lemma": "я",
+      "status": "sub",
+      "tags": [
+       "WORD_ORDER"
+      ]
+     },
+     {
+      "said": "есть",
+      "expected": "есть",
+      "lemma": "есть",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "собака",
+      "expected": "собака",
+      "lemma": "собака",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "WORD_ORDER",
+      "note": "«У меня» must come first. The preposition «у» always starts the phrase in possession sentences."
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good case ending on «меня» — genitive is correct for possession."
+   }
+  },
+  {
+   "id": "order-4",
+   "expected": "WORD_ORDER",
+   "primary": "WORD_ORDER",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "мне",
+      "expected": "Мне",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "этот",
+      "expected": null,
+      "lemma": "этот",
+      "status": "ins",
+      "tags": []
+     },
+     {
+      "said": "нравится",
+      "expected": "нравится",
+      "lemma": "нравиться",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "город",
+      "expected": "этот",
+      "lemma": "город",
+      "status": "sub",
+      "tags": [
+       "WORD_ORDER"
+      ]
+     },
+     {
+      "said": null,
+      "expected": "город",
+      "lemma": "город",
+      "status": "del",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "WORD_ORDER",
+      "note": "The adjective «этот» must come before the noun «город», not after the verb."
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good dative case «мне» and correct verb form!"
+   }
+  },
+  {
+   "id": "order-5",
+   "expected": "WORD_ORDER",
+   "primary": "WORD_ORDER",
+   "overall": "minor",
+   "verdict": "hit",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "я",
+      "expected": "Я",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "люблю",
+      "expected": "очень",
+      "lemma": "любить",
+      "status": "sub",
+      "tags": [
+       "WORD_ORDER"
+      ]
+     },
+     {
+      "said": "очень",
+      "expected": "люблю",
+      "lemma": "очень",
+      "status": "sub",
+      "tags": [
+       "WORD_ORDER"
+      ]
+     },
+     {
+      "said": "тебя",
+      "expected": "тебя",
+      "lemma": "ты",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [
+     {
+      "tag": "WORD_ORDER",
+      "note": "«очень» should come before the verb: «я очень люблю тебя»"
+     }
+    ],
+    "wordChoice": [],
+    "overall": "minor",
+    "praise": "Good pronunciation and correct verb form!"
+   }
+  },
+  {
+   "id": "ok-1",
+   "expected": null,
+   "primary": null,
+   "overall": "ok",
+   "verdict": "ok",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "я",
+      "expected": "Я",
+      "lemma": "я",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "не",
+      "expected": "не",
+      "lemma": "не",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "знаю",
+      "expected": "знаю",
+      "lemma": "знать",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [],
+    "wordChoice": [],
+    "overall": "ok",
+    "praise": "Perfect! Natural and correct."
+   }
+  },
+  {
+   "id": "ok-2",
+   "expected": null,
+   "primary": null,
+   "overall": "ok",
+   "verdict": "ok",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "где",
+      "expected": "Где",
+      "lemma": "где",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "ты",
+      "expected": "ты",
+      "lemma": "ты",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "живёшь",
+      "expected": "живёшь",
+      "lemma": "жить",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [],
+    "wordChoice": [],
+    "overall": "ok",
+    "praise": "Perfect sentence! Correct conjugation and word order."
+   }
+  },
+  {
+   "id": "ok-3",
+   "expected": null,
+   "primary": null,
+   "overall": "ok",
+   "verdict": "ok",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "мы",
+      "expected": "Мы",
+      "lemma": "мы",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "вчера",
+      "expected": "вчера",
+      "lemma": "вчера",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "ходили",
+      "expected": "ходили",
+      "lemma": "ходить",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "в",
+      "expected": "в",
+      "lemma": "в",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "кино",
+      "expected": "кино",
+      "lemma": "кино",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [],
+    "wordChoice": [],
+    "overall": "ok",
+    "praise": "Perfect! Correct verb of motion in past tense."
+   }
+  },
+  {
+   "id": "ok-4",
+   "expected": null,
+   "primary": null,
+   "overall": "ok",
+   "verdict": "ok",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "у",
+      "expected": "У",
+      "lemma": "у",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "него",
+      "expected": "него",
+      "lemma": "он",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "есть",
+      "expected": "есть",
+      "lemma": "есть",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "сестра",
+      "expected": "сестра",
+      "lemma": "сестра",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [],
+    "wordChoice": [],
+    "overall": "ok",
+    "praise": "Perfect! Correct possession structure with genitive case."
+   }
+  },
+  {
+   "id": "ok-5",
+   "expected": null,
+   "primary": null,
+   "overall": "ok",
+   "verdict": "ok",
+   "attempts": 1,
+   "reply": {
+    "words": [
+     {
+      "said": "сегодня",
+      "expected": "Сегодня",
+      "lemma": "сегодня",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "хорошая",
+      "expected": "хорошая",
+      "lemma": "хороший",
+      "status": "ok",
+      "tags": []
+     },
+     {
+      "said": "погода",
+      "expected": "погода",
+      "lemma": "погода",
+      "status": "ok",
+      "tags": []
+     }
+    ],
+    "grammar": [],
+    "wordChoice": [],
+    "overall": "ok",
+    "praise": "Perfect sentence with correct gender agreement."
+   }
+  }
+ ]
+}

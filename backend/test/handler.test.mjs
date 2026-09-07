@@ -64,6 +64,26 @@ test("wrong token → 401; right token but no upstream key → 503", async () =>
   assert.equal(r2.status, 503);
 });
 
+/* Per-user tokens (P8.4): a KV record admits a second learner with a cap of their
+   own; revoking it refuses them; the owner's count is untouched. */
+test("a user token from KV is admitted with its own counter and cap, and a revoked one is not", async () => {
+  const e = env({ DAILY_CAP: "5" });
+  const utoken = "learner-token-abcdefghijkl";
+  await e.USAGE.put(`user:${utoken}`, JSON.stringify({ id: "ann", caps: { feedback: 1 } }));
+  const up = upstream([JSON.stringify(GOOD)]);
+  const uauth = { authorization: `Bearer ${utoken}` };
+  assert.equal((await handle(req(attempt, uauth), e, { fetch: up.fetch })).status, 200);
+  const capped = await handle(req(attempt, uauth), e, { fetch: up.fetch });
+  assert.equal(capped.status, 429);                                   // her cap, not the owner's
+  assert.equal((await handle(req(attempt, auth), e, { fetch: up.fetch })).status, 200);
+  assert.equal(e.USAGE.store.get("count:" + new Date().toISOString().slice(0, 10) + ":ann"), "1");
+  const line = [...e.USAGE.store.entries()].find(([k]) => k.startsWith("log:"));
+  assert.equal(JSON.parse(line[1]).user, "ann");
+  await e.USAGE.put(`user:${utoken}`, JSON.stringify({ id: "ann", revoked: true }));
+  assert.equal((await handle(req(attempt, uauth), e, { fetch: up.fetch })).status, 401);
+  assert.equal((await handle(req(attempt, { authorization: "Bearer short" }), e)).status, 401);
+});
+
 test("other paths and methods are refused", async () => {
   assert.equal((await handle(req(attempt, auth, { path: "/" }), env())).status, 404);
   assert.equal((await handle(req(null, auth, { method: "GET" }), env())).status, 405);
@@ -86,7 +106,7 @@ test("a valid reply comes back as ok with the schema fields, tokens logged", asy
   assert.equal(up.calls[0].model, "claude-haiku-4-5-20251001");
   assert.equal(up.calls[0].max_tokens, 400);
   assert.deepEqual(JSON.parse(up.calls[0].messages[0].content).lemmas, attempt.lemmas);
-  assert.equal(e.USAGE.store.get("count:2026-09-06"), "1");
+  assert.equal(e.USAGE.store.get("count:2026-09-06:owner"), "1");
   assert.deepEqual(JSON.parse(e.USAGE.store.get("tokens:2026-09-06:feedback")), { in: 120, out: 60, n: 1 });
 });
 

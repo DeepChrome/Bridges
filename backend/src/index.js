@@ -40,6 +40,21 @@ function tokenMatches(given, expected) {
   return diff === 0;
 }
 
+/* Who is calling (ROADMAP P8.4). The owner's APP_TOKEN secret is one user; any
+   other bearer token is looked up in KV under `user:<token>`, written there by
+   backend/tools/user.mjs as { id, caps: { feedback, talk }, revoked }. A revoked
+   record refuses like an unknown one; deleting the key does the same. Nothing
+   else is stored about a user — the counters and the token log carry the id. */
+const MIN_TOKEN = 16;
+async function identify(given, env) {
+  if (env.APP_TOKEN && tokenMatches(given, env.APP_TOKEN)) return { id: "owner", caps: null };
+  if (!given || given.length < MIN_TOKEN) return null;
+  let rec = null;
+  try { rec = JSON.parse((await env.USAGE.get(`user:${given}`)) || "null"); } catch (e) { rec = null; }
+  if (!rec || rec.revoked || !rec.id) return null;
+  return { id: String(rec.id), caps: rec.caps || null };
+}
+
 async function askModel(fetchFn, env, system, messages, maxTokens) {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), UPSTREAM_TIMEOUT_MS);
@@ -105,9 +120,8 @@ export async function handle(request, env, deps = {}) {
 
   const auth = request.headers.get("authorization") || "";
   const given = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
-  if (!env.APP_TOKEN || !tokenMatches(given, env.APP_TOKEN)) {
-    return json(401, { ok: false, reason: "unauthorised" });
-  }
+  const user = await identify(given, env);
+  if (!user) return json(401, { ok: false, reason: "unauthorised" });
   if (!env.ANTHROPIC_API_KEY) return json(503, { ok: false, reason: "no upstream key" });
 
   let body;
@@ -115,12 +129,12 @@ export async function handle(request, env, deps = {}) {
   const problem = body && typeof body === "object" ? route.check(body) : "a JSON body is required";
   if (problem) return json(400, { ok: false, reason: problem });
 
-  // Cost guard: one counter per route per UTC day. Read, compare, write — not
-  // atomic, which is fine for a single learner's phone and wrong for a fleet; the
+  // Cost guard: one counter per route per user per UTC day. Read, compare, write
+  // — not atomic, which is fine for a phone or a few and wrong for a fleet; the
   // cap is a backstop against a bug in a loop, not a billing system.
-  const cap = route.cap(env);
+  const cap = (user.caps && user.caps[route.kind]) || route.cap(env);
   const day = dayKey(now);
-  const countKey = `${route.counter}:${day}`;
+  const countKey = `${route.counter}:${day}:${user.id}`;
   const count = parseInt(await env.USAGE.get(countKey), 10) || 0;
   if (count >= cap) return json(429, { ok: false, reason: "cap", message: route.capMessage(cap) });
   await env.USAGE.put(countKey, String(count + 1), { expirationTtl: DAY_TTL });
@@ -130,7 +144,7 @@ export async function handle(request, env, deps = {}) {
   for (let attempt = 0; attempt < 2 && !result; attempt++) {
     const reply = await askModel(fetchFn, env, route.system, messages, route.maxTokens);
     if (reply.error) {
-      await logUsage(env, day, now, { kind: route.kind, error: reply.error, attempt });
+      await logUsage(env, day, now, { kind: route.kind, user: user.id, error: reply.error, attempt });
       return json(502, { ok: false, reason: "upstream", detail: reply.error });
     }
     tokensIn += reply.usage.input_tokens || 0;
@@ -149,7 +163,7 @@ export async function handle(request, env, deps = {}) {
     }
   }
 
-  await logUsage(env, day, now, { kind: route.kind, in: tokensIn, out: tokensOut,
+  await logUsage(env, day, now, { kind: route.kind, user: user.id, in: tokensIn, out: tokensOut,
                                   model: env.MODEL, parsed: !!result });
   if (!result) return json(200, { ok: false, reason: "parse", errors: lastErrors });
   return json(200, { ok: true, ...result });

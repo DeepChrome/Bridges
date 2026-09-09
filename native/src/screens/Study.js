@@ -5,10 +5,10 @@
  * so a deck card that is also a curriculum word shares one memory. */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, Modal, ScrollView, Pressable, Alert } from "react-native";
+import { View, Text, Pressable, Alert } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, Tick, SectionLabel } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, Tick, SectionLabel, Sheet } from "../ui";
 import { L, UN, STAGES, unitUnlocked, idxOfWord } from "../data";
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";
@@ -140,26 +140,31 @@ function SetPicker({ visible, onClose }) {
     : id.startsWith("deck:") ? ((st.decks || []).find((d) => "deck:" + d.id === id) || {}).name
     : (UN.find((u) => u.id === id) || {}).name).filter(Boolean);
 
+  const header = (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
+      <Text style={{ flex: 1, color: t.ink, fontSize: 17, fontWeight: "600" }}>
+        Practise
+      </Text>
+      <Btn kind="ghost" label="Select all"
+           onPress={() => update((p) => ({
+             ...p, sets: UN.filter((u) => unitUnlocked(p, u)).map((u) => u.id) }))} />
+      <Btn kind="ghost" label="Clear"
+           onPress={() => update((p) => ({ ...p, sets: [] }))} />
+    </View>
+  );
+  const footer = (
+    <>
+      {st.sets.length ? (
+        <Btn label={busy ? "Working…" : "Export selected as an Anki deck"} disabled={busy}
+             style={{ marginTop: 8 }}
+             onPress={() => doExport(selectedNames.length === 1 ? selectedNames[0] : "Bridges", st.sets)} />
+      ) : null}
+      <Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />
+    </>
+  );
+
   return (
-    <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
-      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)",
-                     justifyContent: "flex-end" }}>
-        <View style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.lg,
-                       borderTopRightRadius: radius.lg, padding: 16, maxHeight: "88%" }}>
-          <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: t.line,
-                         alignSelf: "center", marginBottom: 14 }} />
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8,
-                         marginBottom: 12 }}>
-            <Text style={{ flex: 1, color: t.ink, fontSize: 17, fontWeight: "600" }}>
-              Practise
-            </Text>
-            <Btn kind="ghost" label="Select all"
-                 onPress={() => update((p) => ({
-                   ...p, sets: UN.filter((u) => unitUnlocked(p, u)).map((u) => u.id) }))} />
-            <Btn kind="ghost" label="Clear"
-                 onPress={() => update((p) => ({ ...p, sets: [] }))} />
-          </View>
-          <ScrollView>
+    <Sheet visible={visible} onClose={onClose} header={header} footer={footer} maxHeight="88%">
             {troubleWords(st).length ? (
               <View style={{ marginBottom: 18 }}>
                 <List>
@@ -234,16 +239,7 @@ function SetPicker({ visible, onClose }) {
                 </View>
               );
             })}
-          </ScrollView>
-          {st.sets.length ? (
-            <Btn label={busy ? "Working…" : "Export selected as an Anki deck"} disabled={busy}
-                 style={{ marginTop: 8 }}
-                 onPress={() => doExport(selectedNames.length === 1 ? selectedNames[0] : "Bridges", st.sets)} />
-          ) : null}
-          <Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />
-        </View>
-      </View>
-    </Modal>
+    </Sheet>
   );
 }
 

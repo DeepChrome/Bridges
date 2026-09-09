@@ -9,7 +9,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { Immerse, Video, searchVideos, libraryOrder, videoFor } from "../src/screens/Misc";
-import { UN, VIDEOS, unitById } from "../src/data";
+import { UN, videos, unitById } from "../src/data";
+
+const VIDEOS = videos();
 
 jest.mock("../src/youtube", () => {
   const React = require("react");

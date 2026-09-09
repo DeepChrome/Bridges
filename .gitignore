@@ -36,6 +36,9 @@ native/.expo/
 native/android/
 native/ios/
 native/assets/data.json
+native/assets/deep.json
+native/assets/sent.json
+native/assets/videos.json
 .expo-export/
 native/coverage/
 data/raw/subs/

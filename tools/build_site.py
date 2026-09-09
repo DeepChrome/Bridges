@@ -140,6 +140,7 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
     slot_names, slot_at = [], {}
     shapes, shape_at = [], {}
     lines = []
+    rec_of = {}             # lemma id -> its compressed record, for the studied rows
     ext_only = 0            # words whose only example comes from outside his decks
 
     for lid in sorted(meta, key=lambda x: meta[x]["b"]):
@@ -206,6 +207,13 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
         if refs and not own:
             ext_only += 1
 
+        rec = (stem_len, shape_id, stress, ",".join(refs), ";".join(overrides))
+        rec_of[lid] = rec
+        # By folded headword and part of speech, first wins — the app's twinOf()
+        # rule (core/entry.js), applied here so a studied row without a line of
+        # its own still ships a record.
+        for key in (fold(bare) + "|" + (m["p"] or ""), fold(bare)):
+            rec_of.setdefault(key, rec)
         lines.append("\t".join([
             bare,
             "" if m["w"] == bare else m["w"],
@@ -246,7 +254,7 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
     stats["deep_ext_only"] = ext_only
     stats["deep_sentences"] = len(pool)
     stats["shapes"] = len(shapes)
-    return "\n".join(lines), shape_blob, slot_names, pool, sample
+    return "\n".join(lines), shape_blob, slot_names, pool, sample, rec_of
 
 
 # A word the units never teach may still appear in a pool sentence if it is this
@@ -255,6 +263,10 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
 # measuring: at 300 the second chapter has 27 speakable sentences, at 500 it has 42
 # and the first chapter 48; at 0 the first chapter has 8.
 COVERAGE_FREE_RANK = 500
+
+# The parts of the payload the native app loads on first use rather than at boot,
+# each written to its own file beside data.json.
+NATIVE_PARTS = ["deep", "sent", "videos"]
 
 
 def measure_sentences(sentences, sent_tokens, index, key_units, lemmas, unit_pos,
@@ -722,9 +734,37 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             sent_tokens.setdefault(iid, []).append(k)
     studied_keys = {k for lid in seen for k in keys_of.get(lid, ())}
 
-    deep, shapes, slot_names, sent_pool, tsample = build_dictionary(
+    deep, shapes, slot_names, sent_pool, tsample, rec_of = build_dictionary(
         db, sentences, items_of_key, keys_of, stats, ext_sentences, ext_items_of_key,
         resolver=resolver, sent_tokens=sent_tokens, studied_keys=studied_keys)
+
+    # Every studied row carries a compressed record — the same five fields its
+    # dictionary line has, or its twin's (a glossless row, the same word under
+    # another id), or an empty one when the lexicon has nothing — so the app
+    # hydrates the curriculum's words without ever opening the dictionary at boot
+    # (the engineering review, 2026-09-08: 4.45 MB parsed and 30 MB of tables
+    # built before the first screen). About 160 KB.
+    own = twinned = 0
+    for lid, i in pos_of.items():
+        e = lemmas[i]
+        rec = rec_of.get(lid)
+        if rec is not None:
+            own += 1
+        else:
+            rec = rec_of.get(fold(e["b"]) + "|" + (e["p"] or "")) or rec_of.get(fold(e["b"]))
+            twinned += rec is not None
+        stem_len, shape_id, stress, refs, over = rec or ("", "", "", "", "")
+        e["shape"] = shape_id
+        if stem_len:
+            e["stem"] = stem_len
+        if stress:
+            e["stress"] = stress
+        if refs:
+            e["refs"] = refs
+        if over:
+            e["over"] = over
+    stats["lemmas_with_record"] = own
+    stats["lemmas_twinned"] = twinned
 
     key_units = {}
     for lid, tid in unit_of.items():
@@ -901,12 +941,23 @@ def main():
         assemble(ARTIFACT, FONTS, css, shell, js), encoding="utf-8")
 
     # The native app bundles the same payload, so both platforms are always built
-    # from one generation of the data.
+    # from one generation of the data — in four files, not one: the dictionary,
+    # the sentence pool and the video library are most of the bytes and none of
+    # the first screen, so the app requires each on first use (P9.24). The
+    # tools read them back together (tools/payload.mjs).
     native_assets = ROOT / "native" / "assets"
     if native_assets.exists():
-        (native_assets / "data.json").write_text(blob, encoding="utf-8")
-        print(f"  native data  : {native_assets / 'data.json'} "
-              f"({len(blob)/1_048_576:.2f} MB)")
+        parts = {k: payload[k] for k in NATIVE_PARTS}
+        parts["data"] = {k: v for k, v in payload.items() if k not in NATIVE_PARTS}
+        sizes = []
+        for name in ["data"] + NATIVE_PARTS:
+            text = json.dumps(parts[name], ensure_ascii=False, separators=(",", ":"))
+            (native_assets / f"{name}.json").write_text(text, encoding="utf-8")
+            sizes.append(f"{name}.json {len(text.encode('utf-8'))/1_048_576:.2f} MB")
+        print(f"  native data  : {', '.join(sizes)}")
+        print(f"  records      : {payload['stats'].get('lemmas_with_record', 0):,} of "
+              f"{len(payload['lemmas']):,} studied rows carry their own paradigm record, "
+              f"{payload['stats'].get('lemmas_twinned', 0)} a twin's; none needs the dictionary at boot")
 
     # PWA files. The cache name is stamped with a hash of the page so a new build
     # actually evicts the old one from installed devices.

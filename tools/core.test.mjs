@@ -33,8 +33,10 @@ import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ICONS, iconFor } from "../core/icons.js";
 import { AV, AV_IDS } from "../core/avatars.js";
 
+import { loadPayload } from "./payload.mjs";
+
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const DATA = JSON.parse(readFileSync(join(ROOT, "native/assets/data.json"), "utf8"));
+const DATA = loadPayload(ROOT);
 
 /* The payload stores paradigms and sentences once, shared; entries are filled out
    on the way in. Set up here because more than one group needs it. */
@@ -960,10 +962,29 @@ group("paradigms rebuilt from shared ending-shapes");
   // Studied lemmas are hydrated from the same store, not from a second copy.
   // Read the file again rather than the in-memory object: hydration mutates, and
   // an earlier group in this file has already filled this one in.
-  const onDisk = JSON.parse(readFileSync(join(ROOT, "native/assets/data.json"), "utf8"))
-    .lemmas.find((x) => x.b === "книга");
+  const fresh = JSON.parse(readFileSync(join(ROOT, "native/assets/data.json"), "utf8")).lemmas;
+  const onDisk = fresh.find((x) => x.b === "книга");
   ok(onDisk && onDisk.t === undefined && onDisk.x === undefined,
      "the payload no longer carries a second copy of tables or sentences");
+  // …but every studied row carries its compressed record, so the curriculum
+  // hydrates without the dictionary: a hydrator that refuses to open it still
+  // fills every word out (P9.24). The sentence pool is opened on the first
+  // example read, not before.
+  let poolOpened = 0;
+  const strict = makeHydrator({
+    deepIndex: () => { throw new Error("the dictionary was opened to hydrate a studied word"); },
+    shapes: DATA.shapes, slots: DATA.slots, sent: () => { poolOpened++; return DATA.sent; },
+  });
+  ok(fresh.every((w) => w.shape !== undefined), "every studied row carries a paradigm record");
+  fresh.forEach(strict);
+  ok(poolOpened === 0, "registering the words opens no sentence pool");
+  let filled = 0;
+  try {
+    for (const w of fresh) if (w.t.length || w.x.length) filled++;
+  } catch (e) { ok(false, "hydrating the curriculum needs no dictionary", e.message); }
+  ok(filled > fresh.length * 0.95, "and nearly every studied word has tables or sentences",
+     `${filled}/${fresh.length}`);
+  ok(poolOpened === 1, "the sentence pool was opened once, on first use", String(poolOpened));
   const l = DATA.lemmas.find((x) => x.b === "книга");
   hydrate(l);
   ok(l.t.length > 0 && l.x.length > 0,

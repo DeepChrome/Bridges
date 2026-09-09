@@ -7,7 +7,7 @@ import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, Avatar, AV, AV_IDS, SearchField, SectionLabel } from "../ui";
 import {
-  UN, STATS, unitState, markComponent, L, VIDEOS, videoById, videoWatched, unitById,
+  UN, STATS, unitState, markComponent, L, videos, videoById, videoWatched, unitById,
 } from "../data";
 import { fold, today } from "@core/util";
 import { Intro } from "./Intro";
@@ -92,15 +92,16 @@ export function Immerse({ navigation }) {
   const { st } = useSession();
   const t = useTheme();
   const [query, setQuery] = useState("");
-  const seen = VIDEOS.filter((v) => videoWatched(st, v)).length;
-  const shown = useMemo(() => searchVideos(VIDEOS, query), [query]);
+  const all = videos();
+  const seen = all.filter((v) => videoWatched(st, v)).length;
+  const shown = useMemo(() => searchVideos(all, query), [query]);
 
   return (
     <Screen>
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6,
                      marginBottom: 12 }}>
         <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>{seen}</Text>
-        <Muted size={14}>{`of ${VIDEOS.length} watched`}</Muted>
+        <Muted size={14}>{`of ${all.length} watched`}</Muted>
       </View>
       <SearchField testID="video-search" value={query} onChangeText={setQuery}
                    placeholder="Search: travel, grammar, B1, слово…" label="Search videos"
@@ -162,7 +163,7 @@ function focusAt(v, params) {
 export function videoFor(params) {
   const unit = params.unitId ? unitById(params.unitId) : null;
   let v = params.videoId ? videoById(params.videoId)
-        : unit && unit.v ? (VIDEOS.find((x) => x.id === unit.v.id) || {
+        : unit && unit.v ? (videoById(unit.v.id) || {
             id: unit.v.id, title: unit.v.title, ch: unit.v.ch, dur: unit.v.dur, words: {} })
         : null;
   if (!v) return null;

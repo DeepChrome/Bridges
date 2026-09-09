@@ -31,6 +31,7 @@ import { compare } from "../core/compare.js";
 import { gradeAlignment, sentenceLemmas } from "../core/speech.js";
 import { parseDeep } from "../core/search.js";
 import { makeHydrator } from "../core/entry.js";
+import { loadPayload } from "./payload.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
@@ -41,7 +42,7 @@ const ONLY = arg("--profile", null);
 
 /* ------------------------------------------------------------ the world */
 
-const DATA = JSON.parse(readFileSync(join(ROOT, "native/assets/data.json"), "utf8"));
+const DATA = loadPayload(ROOT);
 const L = DATA.lemmas, IX = DATA.index, UN = DATA.units, PATH = DATA.path, SPEECH = DATA.speech;
 const DEEP = parseDeep(DATA.deep || "");
 const DEEP_BY_BARE = new Map();

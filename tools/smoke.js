@@ -28,6 +28,11 @@ if (!fs.existsSync(payloadPath)) {
   process.exit(1);
 }
 const PAYLOAD = JSON.parse(fs.readFileSync(payloadPath, "utf8"));
+// The dictionary and the sentence pool sit beside data.json (tools/payload.mjs).
+for (const part of ["deep", "sent"]) {
+  const file = path.join(path.dirname(payloadPath), part + ".json");
+  if (fs.existsSync(file)) PAYLOAD[part] = JSON.parse(fs.readFileSync(file, "utf8"));
+}
 /* The unit count is read from the payload, not pinned: build_topics.py adds a
    side quest whenever a topic rule reaches BRANCH_MIN words. */
 const UNITS = PAYLOAD.units.length;

@@ -1,7 +1,7 @@
 # Bridges — native app
 
 Expo managed workflow, React Native 0.86, Android first. The data payload
-(`assets/data.json`) is written by `python tools/build_site.py` at the repo root;
+(`assets/data.json`, with `deep.json`, `sent.json` and `videos.json` beside it, required on first use) is written by `python tools/build_site.py` at the repo root;
 recordings stream from the deployed web site rather than shipping in the binary.
 
 ## Build and install (Android)

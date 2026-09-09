@@ -1,13 +1,13 @@
 /* You — profile, progress, the trouble bank, and settings. */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, Modal, ScrollView, Switch, Alert } from "react-native";
+import { View, Text, Switch, Alert } from "react-native";
 import { useSession } from "../session";
 import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
 import { useTheme, radius } from "../theme";
 import {
-  Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel,
+  Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet,
 } from "../ui";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
 import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
@@ -49,16 +49,8 @@ function Settings({ visible, onClose, onLab, onTour }) {
     ? `${cache.files} files, ${(cache.bytes / 1048576).toFixed(1)} MB saved`
     : "nothing saved yet";
   return (
-    <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
-      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)",
-                     justifyContent: "flex-end" }}>
-        <View style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.lg,
-                       borderTopRightRadius: radius.lg, padding: 16, maxHeight: "85%" }}>
-          <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: t.line,
-                         alignSelf: "center", marginBottom: 14 }} />
-          <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600",
-                         marginBottom: 14 }}>Settings</Text>
-          <ScrollView>
+    <Sheet visible={visible} onClose={onClose} title="Settings"
+           footer={<Btn kind="pri" label="Done" style={{ marginTop: 14 }} onPress={onClose} />}>
             <List>
               <Row>
                 <View style={{ flex: 1 }}>
@@ -187,11 +179,7 @@ function Settings({ visible, onClose, onLab, onTour }) {
             <Muted style={{ textAlign: "center", marginTop: 16 }}>
               {`Built ${STATS.built}`}
             </Muted>
-          </ScrollView>
-          <Btn kind="pri" label="Done" style={{ marginTop: 14 }} onPress={onClose} />
-        </View>
-      </View>
-    </Modal>
+    </Sheet>
   );
 }
 

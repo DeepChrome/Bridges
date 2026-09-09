@@ -7,10 +7,10 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Modal, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet } from "../ui";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
 import { RuInput } from "../keyboard";
 import { charDistance } from "@core/compare";
@@ -157,65 +157,55 @@ function Match({ q, onDone }) {
 function HintSheet({ q, onClose }) {
   const t = useTheme();
   return (
-    <Modal transparent animationType="slide" visible onRequestClose={onClose}>
-      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)",
-                     justifyContent: "flex-end" }}>
-        <View style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.lg,
-                       borderTopRightRadius: radius.lg, padding: 16, maxHeight: "85%" }}>
-          <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: t.line,
-                         alignSelf: "center", marginBottom: 14 }} />
-          <ScrollView>
-            {q.table ? (
-              <>
-                <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600",
-                               marginBottom: 8 }}>{q.table.title}</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <View>
-                    <View style={{ flexDirection: "row" }}>
-                      {q.table.columns.map((c) => (
-                        <Text key={c} style={{ width: 105, color: t.ink3, fontSize: 10,
-                                               fontWeight: "600", paddingVertical: 6,
-                                               textTransform: "uppercase" }}>{c}</Text>
-                      ))}
-                    </View>
-                    {q.table.rows.map((r, ri) => (
-                      <View key={ri} style={{ flexDirection: "row", borderTopWidth: 1,
-                                              borderTopColor: t.lineSoft }}>
-                        {r.map((cell, ci) => (
-                          <Text key={ci} style={{ width: 105, paddingVertical: 6,
-                                                  fontSize: ci === 0 ? 12 : 15,
-                                                  color: ci === 0 ? t.ink3 : t.ink }}>
-                            {Array.isArray(cell) ? cell.join(" / ") : cell}
-                          </Text>
-                        ))}
-                      </View>
-                    ))}
-                  </View>
-                </ScrollView>
-              </>
-            ) : null}
-            {q.note ? (
-              <>
-                <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>
-                  {q.note.title}
-                </Text>
-                <Text style={{ color: t.ink2, fontSize: 15, marginTop: 6 }}>
-                  {q.note.body}
-                </Text>
-                {(q.note.examples || []).map(([ru, en], k) => (
-                  <View key={k} style={{ marginTop: 12, borderTopWidth: 1,
-                                         borderTopColor: t.lineSoft, paddingTop: 10 }}>
-                    <Linked text={ru} size={18} />
-                    <Muted>{en}</Muted>
-                  </View>
+    <Sheet onClose={onClose}
+           footer={<Btn kind="pri" label="Got it" style={{ marginTop: 14 }} onPress={onClose} />}>
+      {q.table ? (
+        <>
+          <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600",
+                         marginBottom: 8 }}>{q.table.title}</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View>
+              <View style={{ flexDirection: "row" }}>
+                {q.table.columns.map((c) => (
+                  <Text key={c} style={{ width: 105, color: t.ink3, fontSize: 10,
+                                         fontWeight: "600", paddingVertical: 6,
+                                         textTransform: "uppercase" }}>{c}</Text>
                 ))}
-              </>
-            ) : null}
+              </View>
+              {q.table.rows.map((r, ri) => (
+                <View key={ri} style={{ flexDirection: "row", borderTopWidth: 1,
+                                        borderTopColor: t.lineSoft }}>
+                  {r.map((cell, ci) => (
+                    <Text key={ci} style={{ width: 105, paddingVertical: 6,
+                                            fontSize: ci === 0 ? 12 : 15,
+                                            color: ci === 0 ? t.ink3 : t.ink }}>
+                      {Array.isArray(cell) ? cell.join(" / ") : cell}
+                    </Text>
+                  ))}
+                </View>
+              ))}
+            </View>
           </ScrollView>
-          <Btn kind="pri" label="Got it" style={{ marginTop: 14 }} onPress={onClose} />
-        </View>
-      </View>
-    </Modal>
+        </>
+      ) : null}
+      {q.note ? (
+        <>
+          <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>
+            {q.note.title}
+          </Text>
+          <Text style={{ color: t.ink2, fontSize: 15, marginTop: 6 }}>
+            {q.note.body}
+          </Text>
+          {(q.note.examples || []).map(([ru, en], k) => (
+            <View key={k} style={{ marginTop: 12, borderTopWidth: 1,
+                                   borderTopColor: t.lineSoft, paddingTop: 10 }}>
+              <Linked text={ru} size={18} />
+              <Muted>{en}</Muted>
+            </View>
+          ))}
+        </>
+      ) : null}
+    </Sheet>
   );
 }
 

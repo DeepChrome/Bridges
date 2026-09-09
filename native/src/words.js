@@ -17,9 +17,10 @@
 import React, {
   createContext, useCallback, useContext, useMemo, useRef, useState,
 } from "react";
-import { View, Text, Pressable, Modal, ScrollView } from "react-native";
+import { View, Text } from "react-native";
 import { createNavigationContainerRef } from "@react-navigation/native";
-import { useTheme, radius } from "./theme";
+import { useTheme } from "./theme";
+import { Sheet, Btn } from "./ui";
 import { L, IX } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise } from "@core/forms";
@@ -82,7 +83,7 @@ export function Linked({ text, style, size = 17, color }) {
 
 /* ------------------------------------------------------------------ sheet */
 
-function Sheet({ state, onClose, onFull }) {
+function WordSheet({ state, onClose, onFull }) {
   const t = useTheme();
   if (!state) return null;
   const { index, surface } = state;
@@ -91,75 +92,44 @@ function Sheet({ state, onClose, onFull }) {
   if (!s) return null;
 
   return (
-    <Modal transparent animationType="slide" visible onRequestClose={onClose}>
-      <Pressable
-        accessibilityLabel="Close"
-        onPress={onClose}
-        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" }}
-      >
-        {/* Stop the backdrop's press from closing when the sheet itself is tapped. */}
-        <Pressable
-          onPress={() => {}}
-          style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.lg,
-                   borderTopRightRadius: radius.lg, padding: 18, paddingBottom: 26,
-                   maxHeight: "80%" }}
-        >
-          <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: t.line,
-                         alignSelf: "center", marginBottom: 16 }} />
-          <ScrollView>
-            <Text style={{ color: t.ink, fontSize: 30, fontWeight: "600" }}>
-              {s.word}
-            </Text>
+    <Sheet onClose={onClose} maxHeight="80%"
+                 footer={<Btn kind="pri" label="Full entry" style={{ marginTop: 18 }} onPress={onFull} />}>
+      <Text style={{ color: t.ink, fontSize: 30, fontWeight: "600" }}>
+        {s.word}
+      </Text>
 
-            {s.surface ? (
-              <Text style={{ color: t.ink3, fontSize: 14, marginTop: 4 }}>
-                {s.form
-                  ? `${s.surface} · ${s.form.text}`
-                  : `${s.surface} · form not listed`}
+      {s.surface ? (
+        <Text style={{ color: t.ink3, fontSize: 14, marginTop: 4 }}>
+          {s.form
+            ? `${s.surface} · ${s.form.text}`
+            : `${s.surface} · form not listed`}
+        </Text>
+      ) : s.form ? (
+        <Text style={{ color: t.ink3, fontSize: 14, marginTop: 4 }}>
+          {s.form.text}
+        </Text>
+      ) : null}
+
+      {s.gloss ? (
+        <Text style={{ color: t.ink2, fontSize: 17, marginTop: 12 }}>
+          {s.gloss}
+        </Text>
+      ) : null}
+
+      {s.tags.length ? (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6,
+                       marginTop: 12 }}>
+          {s.tags.map((x) => (
+            <View key={x} style={{ backgroundColor: t.surface2, borderRadius: 99,
+                                   paddingHorizontal: 11, paddingVertical: 5 }}>
+              <Text style={{ color: t.ink2, fontSize: 12, fontWeight: "600" }}>
+                {x}
               </Text>
-            ) : s.form ? (
-              <Text style={{ color: t.ink3, fontSize: 14, marginTop: 4 }}>
-                {s.form.text}
-              </Text>
-            ) : null}
-
-            {s.gloss ? (
-              <Text style={{ color: t.ink2, fontSize: 17, marginTop: 12 }}>
-                {s.gloss}
-              </Text>
-            ) : null}
-
-            {s.tags.length ? (
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6,
-                             marginTop: 12 }}>
-                {s.tags.map((x) => (
-                  <View key={x} style={{ backgroundColor: t.surface2, borderRadius: 99,
-                                         paddingHorizontal: 11, paddingVertical: 5 }}>
-                    <Text style={{ color: t.ink2, fontSize: 12, fontWeight: "600" }}>
-                      {x}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            ) : null}
-          </ScrollView>
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={onFull}
-            style={({ pressed }) => ({
-              marginTop: 18, backgroundColor: t.brand, borderColor: t.brandDim,
-              borderWidth: 1, borderBottomWidth: pressed ? 1 : 3,
-              borderRadius: radius.md, paddingVertical: 14, alignItems: "center",
-            })}
-          >
-            <Text style={{ color: t.brandOn, fontWeight: "700", fontSize: 15 }}>
-              Full entry
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Pressable>
-    </Modal>
+            </View>
+          ))}
+        </View>
+      ) : null}
+    </Sheet>
   );
 }
 
@@ -188,7 +158,7 @@ export function WordsProvider({ children }) {
   return (
     <Ctx.Provider value={value}>
       {children}
-      <Sheet
+      <WordSheet
         state={state}
         onClose={() => { setState(null); showing.current = null; }}
         onFull={() => state && openFull(state.index)}

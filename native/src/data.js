@@ -6,6 +6,15 @@
 
 import DATA from "../assets/data.json";
 import { fold, today } from "@core/util";
+
+/* The three heavy parts of the payload — the dictionary (4.5 MB), the sentence
+   pool and the video library, seventy per cent of the bytes — live in their own
+   files and are required on first use, not at boot (P9.24). Nothing on the first
+   screen needs them: a lesson reads the pool for its first example sentence,
+   Immerse the library, a search the dictionary. */
+const deepBlob = () => require("../assets/deep.json");
+const sentPool = () => require("../assets/sent.json");
+export const videos = () => require("../assets/videos.json");
 import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize } from "@core/questions";
@@ -20,11 +29,10 @@ export const AUDIO = (DATA.audio && DATA.audio.files) || {};
 /* The speaking and listening pools (CLAUDE.md §30b): one shared row list, and per
    unit the rows each activity may draw from. */
 export const SPEECH = DATA.speech || { rows: [], speak: {}, listen: {} };
-/* The Immerse library: every harvested video with a transcript, its search
-   keywords, and the study words it actually says (with moments). A unit's own
-   episode is also here, marked with `unit`. */
-export const VIDEOS = DATA.videos || [];
-export const videoById = (id) => VIDEOS.find((v) => v.id === id) || null;
+/* The Immerse library (`videos()` above): every harvested video with a
+   transcript, its search keywords, and the study words it actually says (with
+   moments). A unit's own episode is also here, marked with `unit`. */
+export const videoById = (id) => videos().find((v) => v.id === id) || null;
 export const videoWatched = (st, v) =>
   !!((st.watched || {})[v.id]) || (!!v.unit && !!unitState(st, v.unit).video);
 
@@ -48,7 +56,7 @@ export function heardIn(bare) {
     };
     const episodes = new Set(UN.filter((u) => u.v).map((u) => u.v.id));
     for (const u of UN) if (u.v && u.v.heard) add(u.v, u.v.heard);
-    for (const v of VIDEOS) add(v, v.words);
+    for (const v of videos()) add(v, v.words);
     // A unit's own episode first, then where the word is said most.
     for (const rows of heardIndex.values()) {
       rows.sort((a, b) => (episodes.has(b.id) - episodes.has(a.id)) || (b.n - a.n));
@@ -91,12 +99,12 @@ export const COL = (() => {
 })();
 
 /* The wider dictionary: headwords and meanings for every glossed lemma in the
-   lexicon, not just the ones the curriculum teaches. Parsed on first use — it costs
-   about 16ms, which is worth paying when someone searches rather than at every
-   cold start. */
+   lexicon, not just the ones the curriculum teaches. Required and parsed on first
+   use — a search, or a word link to a word the curriculum does not teach — never
+   at a cold start. */
 let deepCache = null;
 const deepList = () => {
-  if (deepCache === null) deepCache = parseDeep(DATA.deep || "");
+  if (deepCache === null) deepCache = parseDeep(deepBlob() || "");
   return deepCache;
 };
 
@@ -111,13 +119,13 @@ export const DEEP_COUNT = (DATA.stats && DATA.stats.deep) || 0;
 /* Tables and example sentences are stored once, shared, and rebuilt per entry —
    see core/entry.js. Screens keep reading `w.t` and `w.x` as they always have. */
 export const hydrate = makeHydrator({
-  deepIndex, shapes: DATA.shapes, slots: DATA.slots, sent: DATA.sent,
+  deepIndex, shapes: DATA.shapes, slots: DATA.slots, sent: sentPool,
 });
 
-/* Eagerly, for the curriculum's own words. Lessons, drills and flashcards read
-   `w.x` and `w.t` straight off these objects in a dozen places; filling them here
-   means no call site can be missed and quietly lose its example sentences. Costs
-   about 120ms at start, measured, most of it parsing the dictionary once. */
+/* For the curriculum's own words. Lessons, drills and flashcards read `w.x` and
+   `w.t` straight off these objects in a dozen places; registering them here means
+   no call site can be missed and quietly lose its example sentences. Cheap: the
+   tables and sentences are built on first read, not here (core/entry.js). */
 L.forEach(hydrate);
 
 const rawSearch = makeSearch({ L, IX, deep: deepList });

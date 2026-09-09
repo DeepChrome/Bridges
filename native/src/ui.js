@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet, TextInput,
+  View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet, TextInput, Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml } from "react-native-svg";
@@ -115,6 +115,43 @@ export function Btn({ label, onPress, kind = "plain", disabled, style }) {
     >
       <Text style={{ color: tone.fg, fontWeight: "600", fontSize: 15 }}>{label}</Text>
     </Pressable>
+  );
+}
+
+/* A bottom sheet — the one shape for a word's summary, a question's table, the
+   Study picker and Settings, which each used to carry the same backdrop, handle
+   and radius in their own words (P9.16). A press on the backdrop closes it;
+   `title` (a string) or `header` (a node) sits above the scrolling body and
+   `footer` below it, off the scroll, so the sheet's action never scrolls away. */
+export function Sheet({ visible = true, onClose, title, header, children, footer,
+                        maxHeight = "85%", testID }) {
+  const t = useTheme();
+  return (
+    <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
+      <Pressable
+        accessibilityLabel="Close"
+        onPress={onClose}
+        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" }}
+      >
+        {/* The sheet itself swallows the press, so only the backdrop closes. */}
+        <Pressable
+          onPress={() => {}}
+          testID={testID}
+          style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.lg,
+                   borderTopRightRadius: radius.lg, padding: 16, paddingBottom: 22, maxHeight }}
+        >
+          <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: t.line,
+                         alignSelf: "center", marginBottom: 14 }} />
+          {header ? header : title ? (
+            <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600", marginBottom: 14 }}>
+              {title}
+            </Text>
+          ) : null}
+          <ScrollView>{children}</ScrollView>
+          {footer || null}
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
 

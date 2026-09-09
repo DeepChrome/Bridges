@@ -31,7 +31,8 @@ Built and working today:
 - a 58,844-lemma lexicon resolving ~97.7% of the Russian text in the collection
 - any recognised token can expose lemma, meaning, grammar, full paradigm, and every
   other sentence in the corpus containing that word
-- a learning path of 8 core stages and 19 topic branches
+- a learning path of ten chapters: ten spine units of thirty words and 24 topic
+  branches as side quests, 169 lessons, 1,056 words taught (§30i)
 - lessons built from six activity types, plus Hear, Say and listening scenes on
   native (§30c), a conversation mode, Talk (§30f), quizzes of the learner's own
   making and Anki decks in and out (§30h)
@@ -40,8 +41,8 @@ Built and working today:
 - FSRS scheduling behind the four Anki review outcomes
 - a trouble bank for vocabulary that repeatedly causes difficulty
 - installable PWA, deployed to Netlify
-- verification: 159 web smoke checks, 230 core checks, 108 native jest checks, 99
-  contrast checks, 34 Worker checks, a seeded learner simulator and an emulator
+- verification: 159 web smoke checks, 305 core checks, 137 native jest checks, 99
+  contrast checks, 36 Worker checks, a seeded learner simulator and an emulator
   walkthrough (§31)
 
 Known gaps, stated honestly:
@@ -330,7 +331,12 @@ There are now two apps and they must not drift:
   here: it is only consulted after the default resolver fails to find a *package* of
   that name, which never happens for a bare specifier outside `node_modules`.
 - Both consume the same generated payload — `build_site.py` writes the web bundle and
-  `native/assets/data.json` from one `gather()`.
+  `native/assets/data.json` from one `gather()`. On native the payload is four
+  files: `data.json` at boot, and `deep.json`, `sent.json`, `videos.json` (the
+  dictionary, the sentence pool, the video library — seventy per cent of the
+  bytes) required on first use. `tools/payload.mjs` reads them back as one for
+  the suites; a tool that reads `data.json` alone sees no `deep`, `sent` or
+  `videos` and must say so rather than treat them as empty.
 
 **When logic belongs to both, it goes in `core/`.** Duplicating a rule across the two
 apps is how the schedulers or the unlock rules quietly start disagreeing. After any
@@ -389,7 +395,9 @@ bridges/                          (directory is still named russian-blocks on di
     ingest_tatoeba.py  <- Tatoeba dumps -> data/examples.db (never corpus.db)
     build_topics.py    <- corpus + lexicon -> data/topics.db (units + path layout)
     build_audio.py     <- Anki media -> site/audio + data/audio.json (best source first)
-    build_site.py      <- everything -> site/ and native/assets/data.json
+    build_site.py      <- everything -> site/ and native/assets/{data,deep,sent,videos}.json
+    payload.mjs        <- the four native files read back as one, for the tools
+    simulate.mjs       <- seeded learners through the real generators and scheduler -> tools/sim/
     harvest_videos.py  <- YouTube listings, metadata, captions -> data/raw (§30g)
     build_transcripts.py <- captions -> data/transcripts.json, lemma resolved (§30g)
     build_videos.py    <- catalogue + index -> data/videos.json (§30g)
@@ -578,8 +586,8 @@ than by adding visible text.
 ## 26. Learning design
 
 The learner should implicitly know where they are, what they are learning, what comes
-next, how they are progressing, and why material returns. The 8 stages and 19 branches
-should read as a curriculum, not a menu.
+next, how they are progressing, and why material returns. The ten chapters, spine
+and side quests, should read as a curriculum, not a menu.
 
 Balance structured progression, spaced repetition, vocabulary acquisition, contextual
 sentence exposure, listening, recognition, production, grammatical pattern recognition
@@ -823,7 +831,10 @@ by `core/speech.js`, so a dropped word reads the same whether it was typed or sa
   the log, never capped — the owner's rule), the learner types (Latin is
   transliterated); the sentence and its meaning appear only after the answer, the
   sentence word-linked. A **Hint** (the English) is there on request and costs
-  the grade: right with a hint is Hard. From the second chapter, one per quiz.
+  the grade: right with a hint is Hard. From chapter 1's third lesson
+  (`SPEECH_MIX.hear`, 2026-09-08 — the first chapter used to be reading-only
+  across 22 lessons), one per quiz; a near miss (same lemma, ≤ 2 letters off)
+  is Hard with half credit and names the form expected.
 - **Say** — English prompt, hold to speak, on-device `ru-RU` recognition (audio never
   leaves the phone), three attempts with the alignment and the native recording
   shown between them. Microphone permission is asked at the first Say, never at
@@ -861,9 +872,13 @@ review for the scheduler. Recycling is off for the placement and section tests a
 the one-question vocabulary runner. Leaving a flow stops audio
 (`useAudioStopOnLeave` on each flow screen), not unmounting a runner.
 
-**Grades** (`gradeAlignment`): a right word is Good, or Easy when the whole sentence
-was right first time; a wrong or missing word is Again; an extra word grades
-nothing; a lemma met twice takes its worst. Every attempt lands in
+**Grades** (`gradeAlignment`, tightened 2026-09-08): only **content words** are
+graded by a sentence — a lemma below `SPEECH_SKIP_TOP` (100) by frequency is
+not a word anyone is learning from «Я не знаю» — a right word is Good (never
+Easy: hearing a word in one sentence is not knowing it), a near miss is Hard,
+a wrong or missing word is Again; an extra word grades nothing; a lemma met
+twice takes its worst. A Scene grades only the words its question was right
+about. Every attempt lands in
 `speech.attempts` as kind `hear` or `say`; the You screen's Grammar section lists
 `speech.tagCounts`, which only Phase 4's feedback fills.
 
@@ -951,8 +966,9 @@ A short spoken exchange on a situation, with the Worker as the tutor. Built
 
 - **Scenarios are data** — `core/scenarios.js`, ten of them, each tied to the unit
   whose words it leans on (café → Food, doctor → Medicine). A scenario opens when
-  its unit does; Talk itself opens once chapter 5's spine is done
-  (`TALK_UNLOCK_STAGE` in `Talk.js`) or in developer mode. It is the first row of
+  its unit does; Talk itself opens once chapter 2's spine is done
+  (`TALK_UNLOCK_STAGE` = 1 in `Talk.js`, brought forward from chapter 5 on
+  2026-09-08 at beginner level) or in developer mode. It is the first row of
   Practice, not a tab: one entry, no new mechanism on the path.
 - **The Worker keeps nothing.** Every turn the app sends the scenario, the unit's
   grammar topic, the studied words (`drillPool`, strongest first, ≤ 300) and the
@@ -1096,8 +1112,8 @@ several channels carry the channel's initials where a unit has its icon.
 - **Talk speaks.** The tutor's turn is read out as it arrives (`say` with the
   tutor's own pace, `st.talkSpeed`); the speaker on the bubble is for hearing it
   again. The learner picks the tutor's **level** on the picker (`TALK_LEVELS`;
-  unset, it follows the route: chapters 1–2 beginner, 3–5 intermediate, then
-  advanced) and it rides to the Worker as `level`, where `LEVELS` in `talk.js`
+  unset, it follows the route: chapters 1–4 beginner, 5–7 intermediate, then
+  advanced — `talkLevelFor`) and it rides to the Worker as `level`, where `LEVELS` in `talk.js`
   pitches the prompt and an advanced learner may get three sentences. The notes
   on a learner's turn sit *under* the bubble in a smaller italic face
   (`Feedback quiet`) — there, not dominant.
@@ -1159,10 +1175,12 @@ several channels carry the channel's initials where a unit has its icon.
   Russian article), or "" for no picture; re-run both tools. Read the
   contact sheet after a harvest. Read on 2026-09-08: 550 found, 116 blanked
   by eye (abstract nouns, months and weekdays, roles that came back as
-  statues, anything medical), 14 given a curated term; **432 of the 1,070
-  unit words ship, 14.1 MB.** Verbs and adjectives take no English route at
-  all — "suit" for «подходить» found a man in tweed, "back" for «поддержать»
-  a pair of bare backs — so only a handful of them have a picture.
+  statues, anything medical), 14 given a curated term. After the
+  curriculum's re-cut (§30i) and a harvest for the words that joined:
+  **346 of the 1,056 unit words ship, 11.6 MB** — the new words are mostly
+  verbs. Verbs and adjectives take no English route at all — "suit" for
+  «подходить» found a man in tweed, "back" for «поддержать» a pair of bare
+  backs — so only a handful of them have a picture.
 
 - **Heard in** (the owner, 2026-09-08): a dictionary entry lists the videos
   that say the word — `heardIn(bare)` in `data.js`, a reverse index over
@@ -1199,6 +1217,70 @@ several channels carry the channel's initials where a unit has its icon.
 - **Licensing and listing** — `docs/licensing.md` (P8.1), `docs/store-listing.md`
   with the privacy disclosure and six screenshots (P8.7). P8.2 waits on the
   owner's choice of audio.
+
+## 30i. Phase 9 — the learner's review (2026-09-08 → 09)
+
+Four reviews from the learner's side (`docs/reviews/2026-09-08-*.md`, ROADMAP
+Phase 9) and the rules they left behind. The A37 log entry carries the numbers.
+
+- **Shared forms have one owner.** `Resolver` in `panel.py` (lifted from
+  `build_transcripts.py`): a closed-class headword beats an inflection it could
+  be, stubs are demoted, independent frequency decides with a margin, and
+  `data/curated/lemma_overrides.json` settles the rest ("bare" or "bare|pos").
+  `build_topics.py` counts a token once through it, `build_site.py` orders
+  `index[key]` by it (every consumer takes `[0]`) and attaches examples through
+  it. `core/entry.js makeDeepIndex` keys the dictionary by `fold(b)` **and**
+  POS, so «мочь» the verb never inherits the noun's slots.
+- **A leech is a lapse on a graduated card.** `fsrsReview`: a repeat on the day
+  a card was last seen is a learning step — it touches neither `lapses` nor
+  difficulty. Struggling simulated leeches went 73 → 11 over forty lessons.
+- **Production produces.** Cloze options are surface forms from the word's own
+  paradigm and the verdict shows the sentence whole with the form named
+  (`describeForm`); `type` accepts any pool word of the same sense
+  (`sameSense`, `alts`); the quiz's two production slots prefer `type`.
+- **Review rides on the path.** "Review · N due" on Learn; `quizSteps(unit,
+  index, prefer)` tops up with what is due or in trouble before the unit's
+  earlier words (`reviewWords` in `data.js`); the listening drill asks for
+  trouble lemmas; Study's nothing-due state offers study-ahead.
+- **The chapter's grammar is asked** (P9.20, `FORM_MIX` in `core/questions.js`):
+  one `form` question per quiz from chapter 2, for the form the chapter's
+  card teaches, chosen from the word's paradigm through chapter 5 and typed
+  from chapter 6. The card says which — `form` in `grammar_notes.json` names
+  a table, rows and columns as `panel.py` labels them, or a drill (agreement,
+  aspect); a branch card without one inherits its chapter's. The Cases drill
+  asks only for the cells the route so far has introduced
+  (`formsIntroduced`; before chapter 4 it says the cases come with chapter 4).
+- **The curriculum's cut** (P9.22, `build_topics.py`): ten spine units of
+  `SPINE_UNIT` (30) words, `SPINE_VERBS` (5) verbs each, the top `SPINE_FR`
+  (200) by frequency reserved for the spine; a closed-class lane for the
+  top-500 words no topic rule takes; `BRANCH_MAX_EARLY` (20) for the first
+  three chapters and `BRANCH_VERBS` per branch; `STAGE_PLAN` and `CHAPTERS`
+  ten deep. `check_grammar_cards` in `build_site.py` reports any card example
+  using a word taught later or never — read the build output after touching
+  a card. Hear from chapter 1 lesson 3; `pickPrompt` draws from the easiest
+  half of what fits.
+- **A session cannot lose the month.** The profile row `rb.state.<id>` carries
+  no decks; decks live in `rb.decks.<id>` + `rb.deck.<id>.<deckId>.<n>` chunks
+  (`DECK_CHUNK`); an unreadable row is set aside as `rb.state.<id>.bad-<ts>`,
+  the boot shows `StateBanner`, and nothing is written until the learner
+  chooses; saves run from an effect only when dirty and flush on background;
+  backup and restore through the share sheet (`backup.js`). A stream that
+  fails falls back to the device voice, then says so; the recogniser has an
+  8 s watchdog; a queued autoplay never fires after the runner is gone.
+- **Boot reads nothing it does not need** (P9.24): every studied row carries
+  its compressed paradigm record (the 21 glossless rows an empty one), `t`
+  and `x` are memoised getters built on first read, and the payload is split
+  as §20a says. Measured in node: 42 ms to parse `data.json`, 3 ms to
+  register the hydrators, no dictionary parse; the dictionary costs 87 ms on
+  the first search. `core.test.mjs` hydrates every studied row through a
+  hydrator that refuses to open the dictionary.
+- **One way to say each thing** (P9.16): `Tick`, `Chip` (44 px), `Choice`,
+  `SearchField`, `SectionLabel`, `Sheet` in `ui.js`. A new sheet is a `Sheet`
+  with a header, body and footer, not a Modal.
+- **What the simulator says now** (seed 3, 169 lessons, `tools/sim/`): quick
+  169 of 169 passed, steady 163, struggling 109 with 139 leeches and 53
+  backlog days. The struggling learner is the open problem: the relief rule
+  carries them through, but 60 reviews a day is not a load a person keeps up.
 
 ## 31. Verification
 

@@ -250,6 +250,24 @@ can overrule any of them.
   (CLAUDE.md §30h′ Photographs — the numbers are there); dictionary entries
   list where a native speaker says the word, with the moment ("Heard in");
   the eighth chapter's eight side quests in ranks of three.
+- **A37 — Phase 9 executed (2026-09-08 → 09).** Done, in eight commits: 9A
+  whole (P9.1–P9.6); 9B whole (P9.7–P9.11); 9C whole (P9.12–P9.16, the last
+  of it the `Sheet`); 9D whole (P9.17–P9.21, the form question last); 9E's
+  P9.22 (ten chapters, verbs from lesson one, the closed-class lane, the
+  card check, Hear from chapter 1 lesson 3); 9F's P9.24–P9.27 (the split
+  payload and lazy hydration, dark theme and permissions, the deletions,
+  the third photo pass). Simulator, seed 3, the whole route of 169 lessons,
+  after P9.22 and P9.20: quick 169/169 passed (17 on relief), 29 leeches;
+  steady 163/169 (44), 45 leeches, 14 backlog days; struggling 109/169 (68),
+  139 leeches, 53 backlog days, 164 due at the end (`tools/sim/2026-09-09-
+  seed3.md`). Before the phase (2026-09-07, forty lessons) the struggling
+  learner had 73 leeches of 212 words; the lapse rule alone took that to 11.
+  **Open:** P9.23's remaining instruments — a lesson end to end through the
+  flows, migration fixtures, an Anki round trip through a real SQLite, Study
+  grading persistence, the dark-theme render, the walkthrough re-shot — and
+  the struggling learner's review load, which no rule in this phase reduced:
+  a daily cap on new words when the due count is high is the next thing to
+  simulate. CLAUDE.md §30i.
 - **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
   local verdict, grammar section) were built before Phase 4 because Phase 4 stops
   at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the
@@ -567,6 +585,13 @@ U = interface, C = content, E = engineering) so the evidence can be re-read.
 
 Order of execution is by learner impact: a wrong headword on the spine and a
 save that a corrupt row replaces with a fresh profile come before any polish.
+
+**Status (2026-09-09, A37):** done — P9.1–P9.22, P9.24–P9.27. Open — P9.23 in
+part (the simulator ran before and after; the tests that exist are the bad row,
+backup round trip, audio failure paths, the watchdog, grading owner, reset,
+Heard-in; still missing: a lesson end to end through the flows, migration
+fixtures, the Anki round trip through a real SQLite, Study grading persistence,
+the dark-theme render, the walkthrough re-shot).
 
 ### 9A — Data integrity: the joins under the material
 

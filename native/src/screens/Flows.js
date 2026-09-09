@@ -269,14 +269,21 @@ export function DrillFlow({ route, navigation }) {
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
   // Only the learner's own words (data.js drillPool); the pool is fixed for the
-  // run so answering does not reshuffle the questions underneath.
+  // run so answering does not reshuffle the questions underneath. The cases
+  // drill asks only for the cases the route so far has taught.
   const pool = useMemo(() => drillPool(st), [type, seed]);
-  const steps = useMemo(() => Q.drillQuestions(type, undefined, pool), [type, seed, pool]);
+  const cells = useMemo(() => (type === "cases" ? Q.formsIntroduced(reachedUnits(st)) : undefined), [type, seed]);
+  const steps = useMemo(() => Q.drillQuestions(type, undefined, pool, cells), [type, seed, pool, cells]);
   const spec = DRILL_TYPES.find((d) => d.id === type);
   useAudioStopOnLeave();
 
   if (!steps.length) {
-    return <Done title="No questions available" onBack={() => navigation.goBack()} />;
+    const from = cells && !cells.length ? STAGES.findIndex((s) => Q.formsIntroduced([s.core]).length) : -1;
+    return (
+      <Done title={from >= 0 ? "Not yet" : "No questions available"}
+            detail={from >= 0 ? `The cases come with chapter ${from + 1}.` : undefined}
+            onBack={() => navigation.goBack()} />
+    );
   }
   if (result) {
     return (

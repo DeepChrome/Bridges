@@ -6,7 +6,12 @@
     "Keep each body to one or two sentences — this is a teaching card, not a chapter.",
     "The ORDER is the point: spine notes run simple to complex in the sequence the",
     "external courses agree on (docs/grammar-sequence.md), and a branch note never",
-    "uses a case or tense its chapter's spine has not yet introduced."
+    "uses a case or tense its chapter's spine has not yet introduced.",
+    "`form` says what the card teaches in terms the paradigm tables can ask",
+    "(core/questions.js formPrompt): a table title with the row and column labels",
+    "panel.py writes, or a drill the practice screen already has. A branch card",
+    "without one inherits its chapter's; the Cases drill asks only for the cells",
+    "the route so far has named."
   ],
 
   "notes": {
@@ -16,46 +21,55 @@
       "examples": [["Я — Джа́ред.", "I am Jared."], ["Э́то он.", "That is him."]]
     },
     "core2": {
+      "form": { "pos": "verb", "table": "Present / Future" },
       "title": "Two verb patterns",
       "body": "Most verbs follow either the -е- pattern (чита́ю, чита́ешь) or the -и- pattern (говорю́, говори́шь).",
       "examples": [["я чита́ю, ты чита́ешь", "I read, you read"], ["я говорю́, ты говори́шь", "I speak, you speak"]]
     },
     "core3": {
+      "form": { "drill": "agreement" },
       "title": "Every noun has a gender",
       "body": "A noun ending in a consonant is masculine, in -а/-я feminine, in -о/-е neuter. Everything that describes it must agree.",
       "examples": [["но́вый дом", "a new house (m)"], ["но́вая кни́га", "a new book (f)"]]
     },
     "core4": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Nominative"], "cols": ["Plural"] },
       "title": "Making things plural",
       "body": "Masculine and feminine nouns usually take -ы or -и; neuter nouns take -а or -я. (A few masculine nouns take a stressed -а́ instead — дом → дома́ — and Around Town shows them.)",
       "examples": [["стол → столы́", "table → tables"], ["кни́га → кни́ги", "book → books"]]
     },
     "core5": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Prepositional"], "cols": ["Singular"] },
       "title": "Saying where something is",
       "body": "After в or на meaning “in” or “on”, the noun takes the prepositional case, usually ending in -е.",
       "examples": [["в до́ме", "in the house"], ["на столе́", "on the table"]]
     },
     "core6": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative"], "cols": ["Singular"] },
       "title": "The accusative marks the object",
       "body": "The thing an action is done to changes form. Feminine -а becomes -у; inanimate masculine looks unchanged.",
       "examples": [["Я чита́ю кни́гу.", "I am reading a book."], ["Я ви́жу дом.", "I see a house."]]
     },
     "core7": {
+      "form": { "pos": "verb", "table": "Past" },
       "title": "The past tense agrees with the subject",
       "body": "Drop -ть and add -л, -ла, -ло or -ли. It matches gender and number, not person — “I read” differs for a man and a woman.",
       "examples": [["Он чита́л.", "He read."], ["Она́ чита́ла.", "She read."]]
     },
     "core8": {
+      "form": { "drill": "aspect" },
       "title": "Two aspects of every verb",
       "body": "Imperfective verbs describe the process or a repeated action; perfective verbs describe one completed act.",
       "examples": [["Я чита́л кни́гу.", "I was reading the book."], ["Я прочита́л кни́гу.", "I finished the book."]]
     },
     "core9": {
+      "form": { "pos": "verb", "table": "Present / Future", "aspect": "perfective" },
       "title": "Talking about the future",
       "body": "A perfective verb in its present-tense forms already means the future: я сде́лаю is “I will do”. For a process use бу́ду plus the imperfective: я бу́ду рабо́тать.",
       "examples": [["За́втра я сде́лаю э́то.", "Tomorrow I will do it."], ["Я бу́ду рабо́тать до́ма.", "I will be working at home."]]
     },
     "core10": {
+      "form": { "pos": "verb", "table": "Imperative" },
       "title": "Asking someone to do something",
       "body": "The imperative is the ты form with -й, -и or -ь: чита́й, скажи́, забу́дь; add -те to one person you say вы to, or to several.",
       "examples": [["Скажи́, где ты живёшь.", "Tell me where you live."], ["Прочита́йте э́то, пожа́луйста.", "Read this, please."]]
@@ -97,6 +111,7 @@
       "examples": [["у́лицы и площа́ди", "streets and squares"], ["больши́е города́", "big cities"]]
     },
     "travel": {
+      "form": { "pos": "verb", "table": "Present / Future" },
       "title": "Two verbs for “go”",
       "body": "идти́ is one trip in one direction happening now; ходи́ть is going regularly or there and back.",
       "examples": [["Я иду́ в парк.", "I am going to the park."], ["Я хожу́ в парк ка́ждый день.", "I go to the park every day."]]
@@ -112,6 +127,7 @@
       "examples": [["в лесу́", "in the forest"], ["на мо́ре", "at the sea"]]
     },
     "work": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Genitive"], "cols": ["Singular"] },
       "title": "Having and not having",
       "body": "у меня́ есть + the plain form for having; у меня́ нет + the genitive for not having — the genitive’s first job.",
       "examples": [["У меня́ есть рабо́та.", "I have a job."], ["У меня́ нет де́нег.", "I have no money."]]
@@ -122,36 +138,43 @@
       "examples": [["Я ви́жу кота́.", "I see the cat."], ["Я ви́жу дом.", "I see the house (inanimate, unchanged)."]]
     },
     "emotion": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Dative"], "cols": ["Singular"] },
       "title": "Liking is done “to” you",
       "body": "нра́виться puts the person in the dative and the thing liked in the nominative — literally “to me is pleasing”.",
       "examples": [["Мне нра́вится му́зыка.", "I like music."], ["Ей нра́вятся ко́шки.", "She likes cats."]]
     },
     "speech": {
+      "form": { "pos": "verb", "table": "Present / Future" },
       "title": "Speaking a language",
       "body": "говори́ть по-ру́сски uses an adverb with no case at all; the noun form needs на + prepositional.",
       "examples": [["Я говорю́ по-ру́сски.", "I speak Russian."], ["Он говори́т на ру́сском языке́.", "He speaks in Russian."]]
     },
     "military": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
       "title": "“With” takes the instrumental",
       "body": "с plus the instrumental means together with — including who you are fighting or negotiating with.",
       "examples": [["война́ с враго́м", "war with the enemy"], ["Он говори́т с генера́лом.", "He is speaking with the general."]]
     },
     "tech": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Dative"], "cols": ["Singular"] },
       "title": "Communicating “by” something",
       "body": "по plus the dative case gives the medium something travels through.",
       "examples": [["по телефо́ну", "by phone"], ["по интерне́ту", "over the internet"]]
     },
     "sport": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative", "Prepositional"], "cols": ["Singular"] },
       "title": "Playing games vs playing instruments",
       "body": "игра́ть в plus the accusative for sports and games; игра́ть на plus the prepositional for instruments.",
       "examples": [["игра́ть в футбо́л", "to play football"], ["игра́ть на компью́тере", "to play on the computer"]]
     },
     "art": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Prepositional"], "cols": ["Singular"] },
       "title": "Talking about a work",
       "body": "о (об before a vowel) plus the prepositional case means “about”.",
       "examples": [["фильм о войне́", "a film about the war"], ["кни́га о Москве́", "a book about Moscow"]]
     },
     "politics": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Genitive"], "cols": ["Plural"] },
       "title": "Quantity words take the genitive",
       "body": "After мно́го, ма́ло, ско́лько and similar words the noun goes into the genitive: plural for things you count, singular for things you measure.",
       "examples": [["мно́го люде́й", "many people"], ["ма́ло вре́мени", "little time"]]
@@ -162,21 +185,25 @@
       "examples": [["Я у врача́.", "I am at the doctor's."], ["Она́ в больни́це.", "She is in hospital."]]
     },
     "business": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Genitive"], "cols": ["Singular"] },
       "title": "How much does it cost?",
       "body": "ско́лько сто́ит plus the thing; the answer counts in roubles the way hours are counted — оди́н рубль, два рубля́, пять рубле́й.",
       "examples": [["Ско́лько э́то сто́ит?", "How much does this cost?"], ["Э́то сто́ит два рубля́.", "It costs two roubles."]]
     },
     "law": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
       "title": "What someone is, was, or became",
       "body": "After рабо́тать, стать and the past of быть, the role goes into the instrumental: юри́ст → юри́стом, судья́ → судьёй.",
       "examples": [["Он рабо́тает юри́стом.", "He works as a lawyer."], ["Она́ ста́ла судьёй.", "She became a judge."]]
     },
     "science": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
       "title": "Doing something with something",
       "body": "The instrumental, with no preposition, is the field or the tool: занима́ться матема́тикой; and what someone became: стать учёным.",
       "examples": [["Он занима́ется матема́тикой.", "He does mathematics."], ["Она́ ста́ла учёным.", "She became a scientist."]]
     },
     "religion": {
+      "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative", "Dative"], "cols": ["Singular"] },
       "title": "Believing in",
       "body": "ве́рить в plus the accusative is to believe in something; ве́рить plus the dative is to believe someone.",
       "examples": [["Я ве́рю в Бо́га.", "I believe in God."], ["Я тебе́ ве́рю.", "I believe you."]]

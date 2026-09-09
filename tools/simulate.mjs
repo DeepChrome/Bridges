@@ -102,7 +102,7 @@ const PROFILES = {
 const KIND_DIFFICULTY = {           // multiplier on the chance of being right
   "choose-en": 1.00, listen: 0.95, "choose-ru": 0.92, cloze: 0.85, type: 0.70,
   match: 0.95, cases: 0.85, aspect: 0.8, agreement: 0.85, conjugation: 0.85,
-  stress: 0.8, grammar: 0.85,
+  stress: 0.8, grammar: 0.85, form: 0.8,
 };
 
 /* --------------------------------------------------------------- a run */

@@ -22,7 +22,7 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
   from "../core/state.js";
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
-import { makeQuestions, DRILL_TYPES, SPEECH_MIX, lessonSize, LESSON_RAMP, LESSON_SIZE }
+import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, lessonSize, LESSON_RAMP, LESSON_SIZE }
   from "../core/questions.js";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP }
   from "../core/speech.js";
@@ -400,7 +400,8 @@ group("lesson generation");
 
   const quiz = Q.quizSteps(unit, 0);
   const speechN = quiz.filter((q) => SPEECH_KINDS.includes(q.kind)).length;
-  ok(quiz.length === 8 + speechN, "a lesson quiz is 8 questions plus its speech steps",
+  const formN = quiz.filter((q) => q.kind === "form").length;
+  ok(quiz.length === 8 + speechN + formN, "a lesson quiz is 8 questions plus its speech and form steps",
      String(quiz.length));
   ok(quiz.every(answerable), "every quiz question is answerable");
   ok(quiz.every((q) => !q.options || q.options.filter((o) => o.right).length === 1),
@@ -511,6 +512,93 @@ group("hearing");
   const dry = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice: () => true });
   ok(dry.quizSteps(later, 0).every((q) => !SPEECH_KINDS.includes(q.kind)),
      "without pools a quiz is the eight vocabulary questions");
+}
+
+/* The form question (P9.20): the chapter's grammar is asked, not only shown —
+   the form the card teaches, from the word's own paradigm, one per quiz. */
+group("form questions");
+{
+  const paradigmHas = (w, label) => (w.t || []).some((t) => t.rows.some((r) =>
+    r.slice(1).some((c) => (Array.isArray(c) ? c : [c]).some((f) => f && fold(f) === fold(label)))));
+  const isForm = (spec) => (q) => (spec.drill ? q.kind === spec.drill : q.kind === "form");
+  ok(!Q.formSpec(STAGES[0].core), "chapter 1's card teaches nothing a table can ask");
+  ok(!Q.quizSteps(STAGES[0].core, 1).some((q) => q.kind === "form"), "so chapter 1 has no form question");
+  ok(STAGES.slice(1).every((s) => Q.formSpec(s.core)), "every later chapter's card says what form it teaches",
+     STAGES.slice(1).filter((s) => !Q.formSpec(s.core)).map((s) => s.core.id).join(","));
+  let firstNotFirst = true, answersInParadigm = true, namesTheForm = true, neverHeadword = true;
+  STAGES.slice(1).forEach((s, k) => {
+    const spec = Q.formSpec(s.core);
+    const quiz = Q.quizSteps(s.core, 0);
+    const forms = quiz.filter(isForm(spec));
+    ok(forms.length === FORM_MIX.perQuiz, `${s.core.id}: one form question per quiz (${spec.drill || spec.table})`,
+       String(forms.length));
+    if (quiz[0] && isForm(spec)(quiz[0])) firstNotFirst = false;
+    if (spec.drill) return;
+    const q = forms[0];
+    const typed = k + 1 >= FORM_MIX.typedFromStage;
+    ok(!!q && (typed ? q.typed && q.target && q.answer : q.options && q.options.length === 4),
+       `${s.core.id}: ${typed ? "typed" : "chosen"}, as the chapter index says`);
+    if (!q) return;
+    const right = typed ? q.answer : q.options.find((o) => o.right).label;
+    if (!paradigmHas(L[q.i], right)) answersInParadigm = false;
+    if (!q.table || q.table.title !== spec.table || !/^(Choose|Write) the /.test(q.ask)) namesTheForm = false;
+    if (fold(right) === fold(L[q.i].w)) neverHeadword = false;
+  });
+  ok(firstNotFirst, "never first — the quiz opens on a word");
+  ok(answersInParadigm, "the right answer is a form of the word asked about");
+  ok(namesTheForm, "the question names the form and can show the table");
+  ok(neverHeadword, "the form asked for is never the headword on screen");
+
+  // The chapter's card names the form; the words are the lesson's when any has it.
+  const plural = STAGES.find((s) => (Q.formSpec(s.core) || {}).rows && Q.formSpec(s.core).rows[0] === "Nominative");
+  ok(!!plural, "a chapter teaches the plural");
+  if (plural) {
+    const q = Q.quizSteps(plural.core, 0).find((x) => x.kind === "form");
+    ok(q && /nominative plural/.test(q.ask), "core4 asks for the nominative plural", q && q.ask);
+    const own = new Set(lessonWords(plural.core, 0));
+    const able = [...own].some((i) => Q.formPrompt(plural.core, 0, i));
+    ok(!able || own.has(q.i), "asked about one of the lesson's own words when one has the form");
+    const branch = plural.branches[0];
+    ok(Q.formSpec(branch) === Q.formSpec(plural.core) || branch.g.form, "a branch inherits its chapter's form or names its own");
+  }
+  const past = STAGES.find((s) => (Q.formSpec(s.core) || {}).table === "Past");
+  if (past) {
+    const q = Q.quizSteps(past.core, 0).find((x) => x.kind === "form");
+    ok(q && /^Write the past for “(он|она|оно|они)”$/.test(q.ask), "the past is asked by subject, typed", q && q.ask);
+  }
+  const imperative = STAGES.find((s) => (Q.formSpec(s.core) || {}).table === "Imperative");
+  if (imperative) {
+    const q = Q.quizSteps(imperative.core, 0).find((x) => x.kind === "form");
+    ok(q && /^Write the imperative for “(ты|вы)”$/.test(q.ask), "the imperative by ты or вы", q && q.ask);
+  }
+  const future = STAGES.find((s) => (Q.formSpec(s.core) || {}).aspect === "perfective");
+  if (future) {
+    const q = Q.quizSteps(future.core, 0).find((x) => x.kind === "form");
+    ok(q && L[q.i].a === "perfective" && /the future for/.test(q.ask), "the future is a perfective verb's present table", q && q.ask);
+  }
+
+  // The Cases drill asks only for what the route has taught.
+  const reached = (n) => STAGES.slice(0, n).flatMap((s) => [s.core].concat(s.branches));
+  ok(Q.formsIntroduced(reached(3)).length === 0, "after three chapters no case has been introduced");
+  const c4 = Q.formsIntroduced(reached(4));
+  ok(c4.length === 1 && c4[0].row === "Nominative" && c4[0].col === "Plural", "chapter 4 introduces the nominative plural", JSON.stringify(c4));
+  const c6 = Q.formsIntroduced(reached(6));
+  ok(c6.some((c) => c.row === "Genitive") && !c6.some((c) => c.row === "Instrumental"),
+     "chapter 6's branch adds the genitive; the instrumental waits", JSON.stringify(c6));
+  ok(Q.drillQuestions("cases", 6, null, []).length === 0, "with nothing introduced the cases drill has no question");
+  const gated = Q.drillQuestions("cases", 8, null, [{ row: "Prepositional", col: "Singular" }]);
+  ok(gated.length === 8 && gated.every((q) => q.ask === "Choose prepositional singular"),
+     "gated, it asks for that cell alone", gated.map((q) => q.ask).join("|"));
+
+  // The learner's own quiz may ask for forms; a unit whose chapter teaches none
+  // falls back to the meaning rather than asking nothing.
+  ok(QUIZ_KINDS.some((k) => k.id === "form"), "Forms is a kind the custom quiz offers");
+  const prep = STAGES.find((s) => (Q.formSpec(s.core) || {}).rows && Q.formSpec(s.core).rows[0] === "Prepositional");
+  const custom = Q.customQuiz({ units: [prep.core], kinds: ["form"], n: 10 });
+  ok(custom.length === 10 && custom.filter((q) => q.kind === "form").length >= 5,
+     "a Forms-only quiz is mostly form questions", custom.map((q) => q.kind).join(","));
+  const none = Q.customQuiz({ units: [STAGES[0].core], kinds: ["form"], n: 5 });
+  ok(none.length === 5 && none.every((q) => q.kind === "choose-en"), "and meanings where the chapter teaches no form");
 }
 
 /* Listening scenes: a few sentences, questions readable before the audio, and a

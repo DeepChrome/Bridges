@@ -9,7 +9,7 @@
  */
 
 import { VIEWS } from "../src/screens/Run";
-import { Q, DRILL_TYPES, SPEECH_MIX } from "../src/questions";
+import { Q, DRILL_TYPES, SPEECH_MIX, FORM_MIX } from "../src/questions";
 import { STAGES, SPEECH } from "../src/data";
 
 const kindsOf = (qs) => new Set(qs.filter(Boolean).map((q) => q.kind));
@@ -55,6 +55,10 @@ describe("activity registry", () => {
     const quiz2 = Q.quizSteps(speaking, 0);
     expect(quiz2.some((q) => q.kind === "say")).toBe(true);
     qs.push(...quiz2);
+    // The chapter's form, chosen and typed (form.test.js exercises the views).
+    qs.push(Q.formPrompt(STAGES[FORM_MIX.fromStage].core, 0));
+    qs.push(Q.formPrompt(STAGES[FORM_MIX.typedFromStage].core, 0));
+    expect(qs.filter((q) => q && q.kind === "form").length).toBe(2);
     expectViews(kindsOf(qs));
   });
 

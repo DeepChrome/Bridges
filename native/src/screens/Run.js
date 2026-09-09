@@ -251,6 +251,9 @@ export const VIEWS = {
   stress: asOptions,
   grammar: asOptions,
   type: (q, r) => <Typed q={q} answered={r.answered} onAnswer={r.record} />,
+  // The chapter's form: chosen from the paradigm early, typed later — the
+  // question says which (core/questions.js FORM_MIX).
+  form: (q, r) => (q.typed ? <Typed q={q} answered={r.answered} onAnswer={r.record} /> : asOptions(q, r)),
   match: (q, r) => <Match q={q} onDone={(ok, idxs, credit, note) => r.record(ok, idxs, undefined, { credit, note })} />,
   hear: (q, r) => <Hear q={q} r={r} />,
   say: (q, r) => <Say q={q} r={r} />,

@@ -11,7 +11,7 @@
 // Explicit extension: Node's ESM resolver requires it, Metro tolerates either.
 import { fold, shuffle, sample, firstSense, TOKEN } from "./util.js";
 import { sentenceLemmas, pickPrompt } from "./speech.js";
-import { describeForm } from "./forms.js";
+import { describeForm, GENERIC_COLUMN } from "./forms.js";
 
 export const QUIZ_N = 8;
 
@@ -31,6 +31,17 @@ export const speechFrom = (kind, stage, lesson) => {
   return stage > mix.fromStage || (stage === mix.fromStage && lesson >= (mix.fromLesson || 0));
 };
 
+/* The form question (P9.20): one per quiz, asking for the form the chapter's
+   grammar card teaches — the plural of a chapter-4 noun, the prepositional of a
+   chapter-5 noun, the past of a chapter-7 verb — chosen from the word's own
+   paradigm early and typed from `typedFromStage` on. Which form is the card's
+   business (`form` in grammar_notes.json); a branch card without one inherits
+   its chapter's. Chapter 1's card ("no is") teaches nothing a table can ask, so
+   the question starts with chapter 2. */
+export const FORM_MIX = { fromStage: 1, typedFromStage: 5, perQuiz: 1 };
+/* The columns of a noun's declension table, for a spec that names rows only. */
+const NOUN_COLUMNS = ["Singular", "Plural"];
+
 /* A listening scene: two or three sentences from the listening pool, played in
    a row, with a question per sentence and one about a word heard — the questions
    readable before the audio starts (the owner, 2026-09-07). */
@@ -45,6 +56,7 @@ export const QUIZ_KINDS = [
   { id: "listen", name: "Hear a word", blurb: "Pick the word you hear" },
   { id: "cloze", name: "Fill the gap", blurb: "A sentence with a word missing" },
   { id: "type", name: "Type it", blurb: "Write the Russian" },
+  { id: "form", name: "Forms", blurb: "A word in the form its chapter teaches" },
   { id: "hear", name: "Hear a sentence", blurb: "Type what is said" },
   { id: "say", name: "Say it", blurb: "Read a sentence aloud" },
   { id: "scene", name: "Listening scene", blurb: "A few sentences, then questions" },
@@ -265,9 +277,12 @@ export function makeQuestions(env) {
           target: ru, en, unit: e.unit, lemmas: sentenceLemmas(ru, IX),
         };
       }
-      /* Already in its final shape: sceneFor builds the questions with the rows. */
+      /* Already in its final shape: sceneFor builds the questions with the rows,
+         formPrompt the form question with the cell. */
       case "scene":
         return e.scene;
+      case "form":
+        return e.q;
       default:
         return null;
     }
@@ -347,6 +362,123 @@ export function makeQuestions(env) {
     return out;
   }
 
+  /* ------------------------------------------------------------------ forms */
+
+  /* What a unit's card teaches, as something the tables can answer:
+       { pos, table, rows?, cols?, aspect? }  a cell of a paradigm table — rows and
+                                              columns by their labels, any when absent
+       { drill }                              a rule the drills already ask (agreement,
+                                              aspect), on the route's words
+     A branch card without a spec inherits its chapter's. */
+  function formSpec(unit) {
+    if (unit.g && unit.g.form) return unit.g.form;
+    const s = STAGES[stageOf(unit)];
+    return (s && s.core.g && s.core.g.form) || null;
+  }
+
+  /* The cells of a word's table the spec allows, each { table, ri, ci, forms }.
+     The headword itself is never a cell: it is on screen, and asking for it
+     answers itself (masculine inanimate accusatives, the nominative singular). */
+  function formCells(w, spec) {
+    if (!w || w.p !== spec.pos || (spec.aspect && w.a !== spec.aspect)) return [];
+    if (w.p === "noun" && w.pl) return [];
+    const t = (w.t || []).find((x) => x.title === spec.table);
+    if (!t) return [];
+    const out = [];
+    t.rows.forEach((row, ri) => {
+      if (spec.rows && !spec.rows.includes(row[0])) return;
+      for (let ci = 1; ci < row.length; ci++) {
+        if (spec.cols && !spec.cols.includes(t.columns[ci] || "")) continue;
+        const forms = (Array.isArray(row[ci]) ? row[ci] : [row[ci]]).filter(Boolean);
+        if (!forms.length || forms.some((f) => fold(f) === fold(w.w))) continue;
+        out.push({ table: t, ri, ci, forms });
+      }
+    });
+    return out;
+  }
+
+  /* "the nominative plural" · "the present for “ты”" · "the past for “она”". */
+  function formName(t, ri, ci, w) {
+    const row = t.rows[ri][0], col = t.columns[ci] || "";
+    if (!GENERIC_COLUMN.test(col)) return `the ${row.toLowerCase()} ${col.toLowerCase()}`;
+    const what = t.title === "Present / Future"
+      ? (w.a === "perfective" ? "future" : "present") : t.title.toLowerCase();
+    return `the ${what} for “${row}”`;
+  }
+
+  /* One question for a word and a cell: chosen from the word's own paradigm —
+     the rest of the table first, then its other tables — or typed. Null when
+     the paradigm cannot supply three wrong forms. */
+  function formQuestion(i, cell, typed) {
+    const w = L[i];
+    const { table: t, ri, ci, forms } = cell;
+    const target = forms[0];
+    const what = formName(t, ri, ci, w);
+    const base = { kind: "form", i, cyr: true, prompt: w.w, sub: firstSense(w), table: t };
+    if (typed) {
+      return { ...base, ask: `Write ${what}`, typed: true, answer: target, target,
+               alts: forms.slice(1).map(fold) };
+    }
+    // Each cell's first form only — the wrong answers should be forms the learner
+    // will meet, not «машиною» from the back of the cell.
+    const own = t.rows.flatMap((row) => cellsOf(row).map((c) => (Array.isArray(c) ? c[0] : c)));
+    const seen = new Set([fold(target)]);
+    const wrong = [];
+    for (const f of shuffle(own.filter(Boolean)).concat(shuffle(paradigmForms(w)))) {
+      if (seen.has(fold(f))) continue;
+      seen.add(fold(f));
+      wrong.push(f);
+      if (wrong.length === 3) break;
+    }
+    if (wrong.length < 3) return null;
+    return {
+      ...base, ask: `Choose ${what}`,
+      options: shuffle([{ label: target, right: true, cyr: true }]
+        .concat(wrong.map((f) => ({ label: f, right: false, cyr: true })))),
+    };
+  }
+
+  /* The form question for a lesson: this lesson's words first, then the unit's,
+     then anything on the route so far — the first tier with a word that has
+     the form. `only` (a lemma index) asks about that word or nothing. Null when
+     the chapter's card teaches nothing a table can ask. */
+  function formPrompt(unit, index, only) {
+    const spec = formSpec(unit);
+    if (!spec) return null;
+    if (spec.drill) {
+      return withPool(unitsUpTo(unit).flatMap((u) => u.w), () => (GEN[spec.drill] ? GEN[spec.drill]() : null));
+    }
+    const typed = stageOf(unit) >= FORM_MIX.typedFromStage;
+    const tiers = only !== undefined ? [[only]]
+      : [lessonWords(unit, index), unit.w, unitsUpTo(unit).flatMap((u) => u.w)];
+    for (const tier of tiers) {
+      const able = shuffle(unique(tier).filter((i) => formCells(L[i], spec).length));
+      for (const i of able.slice(0, 6)) {
+        const q = formQuestion(i, pickOne(formCells(L[i], spec)), typed);
+        if (q) return q;
+      }
+    }
+    return null;
+  }
+
+  /* The cells of a noun's declension the route so far has introduced, as
+     { row, col } pairs — what the Cases drill may ask for. A chapter-3 learner
+     is not asked the instrumental plural; before the first case chapter the
+     list is empty and the drill says so. */
+  function formsIntroduced(units) {
+    const out = [];
+    for (const u of units) {
+      const spec = u.g && u.g.form;
+      if (!spec || spec.pos !== "noun" || spec.table !== "Declension" || !spec.rows) continue;
+      for (const row of spec.rows) {
+        for (const col of spec.cols || NOUN_COLUMNS) {
+          if (!out.some((c) => c.row === row && c.col === col)) out.push({ row, col });
+        }
+      }
+    }
+    return out;
+  }
+
   /* ----------------------------------------------------------- custom quiz */
 
   /* A hear or say step from the pools of these units, any sentence. */
@@ -364,7 +496,7 @@ export function makeQuestions(env) {
      out round-robin so a short list is not asked about the same word five times;
      sentence kinds take about a third of the quiz between them when chosen. */
   function customQuiz({ units, kinds, n }) {
-    const wordKinds = kinds.filter((k) => ["choose-en", "choose-ru", "listen", "cloze", "type"].includes(k));
+    const wordKinds = kinds.filter((k) => ["choose-en", "choose-ru", "listen", "cloze", "type", "form"].includes(k));
     const sentenceKinds = kinds.filter((k) => ["hear", "say", "scene"].includes(k));
     if (!units.length || (!wordKinds.length && !sentenceKinds.length)) return [];
     const words = unique(units.flatMap((u) => u.w));
@@ -382,6 +514,17 @@ export function makeQuestions(env) {
       if (kind === "cloze") {
         const c = clozeFor(i);
         e = c ? { t: "cloze", i, ex: c.ex, token: c.token, pool } : { t: "choose-en", i, pool };
+      } else if (kind === "form") {
+        // A word's own unit decides the form. Not every word has one — a verb
+        // in a chapter teaching the plural — so the bag is walked from here for
+        // one that does; when no chosen unit teaches a form at all, the meaning
+        // is asked instead of nothing.
+        let f = null;
+        for (let j = 0; j < bag.length && !f; j++) {
+          const cand = bag[(k + j) % bag.length];
+          f = formPrompt(units.find((u) => u.w.includes(cand)) || units[0], 0, cand);
+        }
+        e = f ? { t: "form", q: f } : { t: "choose-en", i, pool };
       }
       const q = present(e);
       if (q) out.push(q);
@@ -526,7 +669,24 @@ export function makeQuestions(env) {
         if (e) out.splice(1 + Math.floor(Math.random() * out.length), 0, present(e));
       }
     }
+    // And the chapter's form, the same way: on top, never first — and not
+    // beside another question about its word, since it has one.
+    if (stage >= FORM_MIX.fromStage) {
+      for (let k = 0; k < FORM_MIX.perQuiz; k++) {
+        const q = formPrompt(unit, index);
+        if (q) out.splice(slotApart(out, q), 0, q);
+      }
+    }
     return out;
+  }
+
+  /* A position after the first question whose neighbours are not about q's
+     word; any position after the first when there is none. */
+  function slotApart(out, q) {
+    const clash = (x) => x && typeof x.i === "number" && x.i === q.i;
+    const free = [];
+    for (let p = 1; p <= out.length; p++) if (!clash(out[p - 1]) && !clash(out[p])) free.push(p);
+    return free.length ? pickOne(free) : 1 + Math.floor(Math.random() * out.length);
   }
 
   /* ------------------------------------------------------- placement sets */
@@ -602,6 +762,13 @@ export function makeQuestions(env) {
      no acquaintance. */
   let drillPool = null;
 
+  /* Run a generator against a pool (lemma indices) and put the pool back. */
+  function withPool(pool, fn) {
+    const before = drillPool;
+    drillPool = pool && pool.length ? pool.map((i) => L[i]).filter(Boolean) : null;
+    try { return fn(); } finally { drillPool = before; }
+  }
+
   function pickWhere(fn, tries, anywhere) {
     const from = !anywhere && drillPool && drillPool.length ? drillPool : L;
     for (let n = 0; n < (tries || 300); n++) {
@@ -611,7 +778,10 @@ export function makeQuestions(env) {
     return null;
   }
 
-  function qCases() {
+  /* `cells` ({ row, col } pairs, from formsIntroduced) limits what may be asked
+     for to the cases the route has taught; the wrong answers still come from
+     the whole table. */
+  function qCases(cells) {
     const w = pickWhere((x) => x.p === "noun" && tableTitled(x, /Declension/));
     if (!w) return null;
     const t = tableTitled(w, /Declension/);
@@ -622,7 +792,8 @@ export function makeQuestions(env) {
     if (opts.length < 4) return null;
     // Never ask for the form already on screen: the headword is usually the
     // nominative singular, and asking for it answers itself.
-    const askable = opts.filter((o) => fold(o.label) !== fold(w.w));
+    const askable = opts.filter((o) => fold(o.label) !== fold(w.w)
+      && (!cells || cells.some((c) => c.row === t.rows[o.ri][0] && c.col === t.columns[o.ci + 1])));
     if (!askable.length) return null;
     const target = askable[Math.floor(Math.random() * askable.length)];
     const wrong = shuffle(opts.filter((o) => o.label !== target.label)).slice(0, 3);
@@ -739,30 +910,28 @@ export function makeQuestions(env) {
                 conjugation: qConjugation, stress: qStress, grammar: qGrammar };
 
   /* `pool`: lemma indices the drill may ask about (see native data.js drillPool);
-     without one, every word in the curriculum. */
-  function drillQuestions(type, n, pool) {
+     without one, every word in the curriculum. `cells`: for the cases drill,
+     the cells the route has introduced (formsIntroduced); without it, any. */
+  function drillQuestions(type, n, pool, cells) {
     const out = [];
     const seen = new Set();
     const want = n || DRILL_N;
-    drillPool = pool && pool.length ? pool.map((i) => L[i]).filter(Boolean) : null;
-    try {
+    withPool(pool, () => {
       for (let k = 0; k < want * 25 && out.length < want; k++) {
-        const q = GEN[type] && GEN[type]();
+        const q = GEN[type] && GEN[type](cells);
         if (!q) continue;
         const key = q.kind + "|" + q.prompt + "|" + q.ask;
         if (seen.has(key)) continue;
         seen.add(key);
         out.push(q);
       }
-    } finally {
-      drillPool = null;
-    }
+    });
     return out;
   }
 
   return {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, placementQuestions, sectionQuestions, drillQuestions,
-    sceneFor, listeningDrill, customQuiz,
+    sceneFor, listeningDrill, customQuiz, formPrompt, formSpec, formsIntroduced,
   };
 }

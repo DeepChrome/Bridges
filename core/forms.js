@@ -14,7 +14,7 @@ import { fold, firstSense } from "./util.js";
 
 /* Columns that carry no information of their own — the row label is the whole
    answer, so "Present / Future · я" reads better than "я form". */
-const GENERIC_COLUMN = /^(form|forms)?$/i;
+export const GENERIC_COLUMN = /^(form|forms)?$/i;
 
 /* Which cell of which table holds this surface form.
  *

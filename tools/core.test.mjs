@@ -368,6 +368,11 @@ group("lesson ramp");
      `chapter 1 lessons carry five words (${lessonCount(c1)} lessons)`);
   ok(lessonWords(c3, 0).length === 7, "chapter 3 lessons carry seven");
   ok(lessonWords(STAGES[0].branches[0], 0).length === 5, "a chapter's side quests ramp with it");
+  // The web bundle repeats the numbers (core/questions.js is not inlined there),
+  // and a profile moved between the apps keys on lesson indices: the two must agree.
+  const web = readFileSync(join(ROOT, "tools/app/app.js"), "utf8").match(/const LESSON_RAMP = (\[[^\]]*\])/);
+  ok(web && JSON.stringify(JSON.parse(web[1])) === JSON.stringify(LESSON_RAMP),
+     "the web app's LESSON_RAMP matches core's", web && web[1]);
 }
 
 group("lesson generation");

@@ -13,7 +13,7 @@ import Svg, { Path, SvgXml } from "react-native-svg";
 import { iconFor } from "@core/icons";
 import { AV, AV_IDS } from "@core/avatars";
 import { useTheme, radius, space } from "./theme";
-import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged } from "./audio";
+import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
 
 /* `fill` makes the content container grow to the height of the screen, which is what
    lets a step's primary action sit at the foot of it with marginTop:"auto" instead of
@@ -210,15 +210,26 @@ export function Speaker({ text, size = 40 }) {
   const t = useTheme();
   const real = hasRealAudio(text);
   const [voice, setVoice] = useState(hasRussianVoice());
+  // A stream that failed with no voice to fall back on: the button says so
+  // for a few seconds instead of doing nothing (audio.js onAudioFailure).
+  const [down, setDown] = useState(false);
   useEffect(() => {
     let alive = true;
+    let timer = null;
     probeVoices().then(() => { if (alive) setVoice(hasRussianVoice()); });
     const off = onVoicesChanged(() => { if (alive) setVoice(hasRussianVoice()); });
-    return () => { alive = false; off(); };
-  }, []);
+    const offFail = onAudioFailure((what) => {
+      if (!alive || what !== text) return;
+      setDown(true);
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => { if (alive) setDown(false); }, 4000);
+    });
+    return () => { alive = false; off(); offFail(); if (timer) clearTimeout(timer); };
+  }, [text]);
 
   const live = real || voice;
   return (
+    <View style={{ alignItems: "center" }}>
     <Pressable
       testID={real ? "speaker-real" : live ? "speaker-tts" : "speaker-silent"}
       accessibilityRole="button"
@@ -242,6 +253,10 @@ export function Speaker({ text, size = 40 }) {
         <Path d="M15.5 8.5a5 5 0 0 1 0 7" />
       </Svg>
     </Pressable>
+    {down ? (
+      <Text testID="speaker-down" style={{ color: t.ink3, fontSize: 10, marginTop: 2 }}>No audio right now</Text>
+    ) : null}
+    </View>
   );
 }
 

@@ -53,6 +53,17 @@ export function cachedUri(text) {
   try { return new File(ensure(), file).uri; } catch (e) { return null; }
 }
 
+/* A cached copy that would not play — cut off by a lost connection mid-download,
+   say — is removed so the next play streams and the next prefetch fetches it
+   again. cachedUri() trusts any file present; this is the correction. */
+export function dropCached(text) {
+  const file = AUDIO[fold(text)];
+  if (!file) return false;
+  try { new File(ensure(), file).delete(); } catch (e) { /* already gone */ }
+  names().delete(file);
+  return true;
+}
+
 /* Every audio file a unit needs: its words, then its pools' sentences. */
 export function filesForUnit(unit) {
   const keys = [];

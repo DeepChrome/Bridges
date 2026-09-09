@@ -24,7 +24,7 @@ import { useTheme } from "../theme";
 import { Btn, Muted, Pill, Speaker } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN } from "../data";
-import { getFeedback } from "../lib/feedback";
+import { getFeedback, config } from "../lib/feedback";
 import { useRecognizer } from "../speech";
 import { Alignment } from "./Alignment";
 import { compare } from "@core/compare";
@@ -144,6 +144,8 @@ export function Say({ q, r }) {
      so the trouble bank's grammar section counts them; a failure of any kind
      leaves the screen exactly as the local verdict drew it. */
   const askFeedback = async (transcript, ts) => {
+    // A build without the Worker's address has nothing to wait for: no spinner.
+    if (!config()) return;
     setFb("pending");
     const unit = UN.find((u) => u.id === q.unit);
     const reply = await getFeedback({

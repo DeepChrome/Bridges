@@ -21,10 +21,13 @@ jest.mock("expo-audio", () => ({
     const listeners = [];
     const finish = () => listeners.forEach((fn) => fn({ didJustFinish: true, playing: false }));
     global.__audioPending = global.__audioPending || [];
+    // A test makes the most recent stream fail the way a 404 or a dropped
+    // connection does: an error status after play() started.
+    global.__audioError = () => listeners.forEach((fn) => fn({ error: "failed", playing: false }));
     return {
       play: jest.fn(() => {
         if (global.__audioHold) global.__audioPending.push(finish);
-        else setTimeout(finish, 0);
+        else if (!global.__audioNeverFinish) setTimeout(finish, 0);
       }),
       pause: jest.fn(),
       remove: jest.fn(),

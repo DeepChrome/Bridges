@@ -23,6 +23,7 @@ import {
 } from "expo-speech-recognition";
 
 export const LANG = "ru-RU";
+export const WATCHDOG_MS = 8000;
 
 export function useRecognizer({ onFinal, onError, enabled = true } = {}) {
   const [phase, setPhase] = useState("idle");
@@ -34,11 +35,13 @@ export function useRecognizer({ onFinal, onError, enabled = true } = {}) {
   const [note, setNote] = useState(null);
   const [block, setBlock] = useState(null);
   const releasedAt = useRef(0);
+  const watchdog = useRef(null);
   const releasedEarly = useRef(false);
   const cb = useRef({ onFinal, onError });
   cb.current = { onFinal, onError };
 
   const finish = (text) => {
+    if (watchdog.current) { clearTimeout(watchdog.current); watchdog.current = null; }
     go("idle");
     if (cb.current.onFinal) cb.current.onFinal(text, Date.now() - releasedAt.current);
   };
@@ -94,10 +97,23 @@ export function useRecognizer({ onFinal, onError, enabled = true } = {}) {
     }
   };
 
+  /* A recogniser that never reports "end" after stop() would leave the button
+     stuck on "Listening…" and the whole activity behind it. The measured p95
+     from release to result is 4.4 s (CLAUDE.md §30c); at WATCHDOG_MS the
+     attempt is abandoned and said so. */
   const release = () => {
     releasedAt.current = Date.now();
     if (phaseRef.current === "listening") {
       try { M.stop(); } catch (e) { /* the end event still arrives */ }
+      if (watchdog.current) clearTimeout(watchdog.current);
+      watchdog.current = setTimeout(() => {
+        watchdog.current = null;
+        if (phaseRef.current !== "listening") return;
+        // The last partial is what the recogniser had; with nothing, say so.
+        if (liveRef.current) finish(liveRef.current);
+        else { go("idle"); setNote("Nothing heard"); }
+        try { M.abort(); } catch (e) { /* nothing to abort */ }
+      }, WATCHDOG_MS);
     } else {
       releasedEarly.current = true;
     }

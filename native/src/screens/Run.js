@@ -289,20 +289,26 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const tally = useRef({ right: 0, wrong: 0, helped: 0, skipped: 0, credit: 0 });
   const sayTimer = useRef(null);
   const atRef = useRef(0);
+  const alive = useRef(true);
 
   const q = queue[at];
 
   // Autoplay waits for whatever is still playing — the previous answer's reading,
   // the previous question's recording — so nothing talks over the language audio.
-  // If the learner has moved on again by the time it is quiet, this one is dropped.
+  // If the learner has moved on again by the time it is quiet, this one is
+  // dropped — and so is one queued when the runner itself has gone: leaving
+  // stops the audio, and stopping is exactly what released the wait.
   useEffect(() => {
     atRef.current = at;
     if (!q || !q.autoplay) return;
     const mine = at;
-    whenIdle().then(() => { if (atRef.current === mine) say(q.autoplay, { repeat: false }); });
+    whenIdle().then(() => { if (alive.current && atRef.current === mine) say(q.autoplay, { repeat: false }); });
   }, [at]);
 
-  useEffect(() => () => { if (sayTimer.current) clearTimeout(sayTimer.current); }, []);
+  useEffect(() => () => {
+    alive.current = false;
+    if (sayTimer.current) clearTimeout(sayTimer.current);
+  }, []);
 
   if (!q) return null;
 

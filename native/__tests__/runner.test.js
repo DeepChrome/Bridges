@@ -157,4 +157,34 @@ describe("runner verdict", () => {
       global.__audioFinish();
     }
   });
+
+  /* Leaving stops the audio, and stopping is what released the queued autoplay:
+     the next question used to play over the path (the engineering review). */
+  it("never autoplays after the runner has gone", async () => {
+    const heard = { kind: "listen", i: 0, ask: "What did you hear?", prompt: "", cyr: true,
+                    autoplay: "книга", say: "книга",
+                    options: [{ label: "книга", right: true, cyr: true }, { label: "стол", cyr: true }] };
+    global.__audioHold = true;
+    global.__played = [];
+    try {
+      const r = await withRunner({ steps: [heard, heard], recycle: false });
+      await screen.findByText("стол");
+      const played = () => global.__played.filter((u) => u && u.includes("/audio/")).length;
+      expect(played()).toBe(1);
+      // A wrong answer: a right one schedules its own reading, which is not
+      // what this test is about.
+      await act(async () => { fireEvent.press(screen.getByText("стол")); });
+      await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+      // The second question is queued behind the first recording; the learner leaves.
+      // (RNTL 14's unmount is asynchronous, like its render.)
+      await act(async () => { await r.unmount(); });
+      const before = played();
+      await act(async () => { global.__audioFinish(); });
+      await act(async () => {});
+      expect(played()).toBe(before);
+    } finally {
+      global.__audioHold = false;
+      global.__audioFinish();
+    }
+  });
 });

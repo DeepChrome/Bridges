@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Modal, ScrollView, Switch, Alert, Pressable } from "react-native";
 import { useSession } from "../session";
+import { DEFAULTS, SETTING_KEYS } from "../store";
+import { speechDefault } from "@core/state";
 import { useTheme, radius } from "../theme";
 import {
   Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Title,
@@ -170,9 +172,13 @@ function Settings({ visible, onClose, onLab, onTour }) {
                 "Erase all progress for this profile?",
                 [{ text: "Cancel", style: "cancel" },
                  { text: "Erase", style: "destructive",
+                   // Everything that is progress goes — the schedule, the
+                   // lessons, the speaking record, what was watched — and
+                   // only settings and imported decks stay.
                    onPress: () => update((p) => ({
-                     ...p, seen: {}, trouble: {}, pinned: [], unit: {}, drills: {},
-                     xp: 0, streak: 0, day: null,
+                     ...DEFAULTS,
+                     ...Object.fromEntries(SETTING_KEYS.map((k) => [k, p[k]])),
+                     speech: speechDefault(),
                    })) }])}
             />
             <Muted style={{ textAlign: "center", marginTop: 16 }}>
@@ -215,7 +221,7 @@ export default function You({ navigation }) {
           </Text>
           <Muted>
             {`Level ${level} · ${(st.xp || 0).toLocaleString("en-US")} XP` +
-             (account && account.placed ? ` · placed at stage ${account.placed}` : "")}
+             (account && account.placed ? ` · placed at chapter ${account.placed + 1}` : "")}
           </Muted>
         </View>
         <Btn kind="ghost" label="Settings" onPress={() => setSettings(true)} />

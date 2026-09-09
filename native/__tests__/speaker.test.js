@@ -86,6 +86,29 @@ describe("speaker", () => {
     expect(global.__played).toHaveLength(0);
   });
 
+  /* A stream that fails after it started — a 404, a lost connection — used to
+     end in silence: the fallback only caught a synchronous throw. */
+  it("falls back to the device voice when the stream reports an error", async () => {
+    await withVoices(null);
+    await draw(<Speaker text={withAudio} />);
+    await act(async () => { fireEvent.press(screen.getByTestId("speaker-real")); });
+    expect(global.__played).toHaveLength(1);
+    await act(async () => { global.__audioError(); });
+    expect(global.__spoke).toHaveLength(1);
+    expect(screen.queryByTestId("speaker-down")).toBeNull();
+  });
+
+  it("says so when the stream fails and there is no voice to fall back on", async () => {
+    await withVoices([
+      { identifier: "en-US-x-sfg-local", name: "English", quality: "Default", language: "en-US" },
+    ]);
+    await draw(<Speaker text={withAudio} />);
+    await act(async () => { fireEvent.press(screen.getByTestId("speaker-real")); });
+    await act(async () => { global.__audioError(); });
+    expect(global.__spoke).toHaveLength(0);
+    expect(screen.getByTestId("speaker-down")).toHaveTextContent("No audio right now");
+  });
+
   it("still plays a real recording on a device with no Russian voice", async () => {
     await withVoices([
       { identifier: "en-US-x-sfg-local", name: "English", quality: "Default", language: "en-US" },

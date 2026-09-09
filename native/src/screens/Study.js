@@ -12,7 +12,7 @@ import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses } from 
 import { L, UN, STAGES, unitUnlocked, idxOfWord } from "../data";
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";
-import { fsrsReview, fsrsPreview, isTrouble } from "@core/fsrs";
+import { fsrsPreview, isTrouble, applyGrade } from "@core/fsrs";
 import { shuffle, today } from "@core/util";
 
 export function troubleWords(st) {
@@ -39,14 +39,12 @@ function weight(st, card) {
   return score;
 }
 
-/* Only what is ticked. With nothing ticked the queue is empty and the screen says
-   so — it used to fall back to the first unit's words, which read as a set of
-   common words that could not be switched off (the owner, 2026-09-07). */
-export function buildQueue(st, limit) {
+/* Every card the ticked sets hold, one of each. */
+export function cardsIn(st, sets) {
   const pool = [];
   const have = new Set();
   const add = (card) => { if (!have.has(card.b)) { have.add(card.b); pool.push(card); } };
-  st.sets.forEach((id) => {
+  sets.forEach((id) => {
     if (id === "__trouble__") {
       troubleWords(st).forEach((w) => {
         const i = idxOfWord(w);
@@ -63,6 +61,14 @@ export function buildQueue(st, limit) {
     const u = UN.find((x) => x.id === id);
     if (u) u.w.forEach((i) => add(cardOf(i)));
   });
+  return pool;
+}
+
+/* Only what is ticked. With nothing ticked the queue is empty and the screen says
+   so — it used to fall back to the first unit's words, which read as a set of
+   common words that could not be switched off (the owner, 2026-09-07). */
+export function buildQueue(st, limit) {
+  const pool = cardsIn(st, st.sets);
   const t = today();
   let q = pool.filter((c) => { const s = st.seen[c.b]; return !s || s.due <= t; });
   if (!q.length) q = pool.slice();
@@ -73,9 +79,11 @@ export function buildQueue(st, limit) {
   return q;
 }
 
-/* The cards a set holds, for export. */
+/* The cards a set holds, for export — every card, due or not. (It used to blank
+   `seen` to get past the due filter, which emptied the Trouble set: its words
+   are found *through* `seen`.) */
 export function cardsOfSets(st, ids) {
-  return buildQueue({ ...st, sets: ids, seen: {} }).map((c) => ({ ru: c.b, en: c.e || "" }));
+  return cardsIn(st, ids).map((c) => ({ ru: c.b, en: c.e || "" }));
 }
 
 export const newDeckId = () => "k" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
@@ -279,14 +287,14 @@ export default function Study() {
   const w = queue[at] !== undefined ? queue[at] : null;
   const iv = w ? fsrsPreview(st.seen[w.b], today()) : {};
 
+  /* One trouble rule for the cards and the runners (core/fsrs.js applyGrade):
+     a card used to clear only on Good or better here and on any recall there,
+     so a word could be trouble on the path and not on the cards. */
   const grade = (g) => {
     const word = w.b;
     update((prev) => {
-      const card = fsrsReview(prev.seen[word], g, today());
-      const trouble = { ...prev.trouble };
-      if (isTrouble(card)) trouble[word] = (trouble[word] || 0) + (g === 1 ? 1 : 0);
-      else if (g > 2 && trouble[word]) delete trouble[word];
-      return { ...prev, seen: { ...prev.seen, [word]: card }, trouble,
+      const r = applyGrade(prev.seen, prev.trouble, word, g, today());
+      return { ...prev, seen: r.seen, trouble: r.trouble,
                xp: (prev.xp || 0) + (g === 1 ? 0 : 1) };
     });
     if (g === 1) setQueue(queue.concat(queue[at]));

@@ -402,7 +402,7 @@ export function Gate({ onPlacement }) {
                 <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
                   {a.name}
                 </Text>
-                <Muted>{a.placed ? `Placed at stage ${a.placed}` : "Tap to continue"}</Muted>
+                <Muted>{a.placed ? `Placed at chapter ${a.placed + 1}` : "Tap to continue"}</Muted>
               </View>
             </Row>
           ))}

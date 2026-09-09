@@ -25,7 +25,7 @@ import { useTheme, radius, space } from "../theme";
 import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, stageDone, unitUnlocked, drillPool, nextLesson } from "../data";
-import { talk as askTutor, hint as askHint } from "../lib/feedback";
+import { talk as askTutor, hint as askHint, config } from "../lib/feedback";
 import { say, SPEEDS } from "../audio";
 import { tagInfo } from "@core/errortags";
 import { useRecognizer } from "../speech";
@@ -36,6 +36,25 @@ import { feedbackTags } from "@core/speech";
 import { recordAttempt, talkAllowance, startTalkSession, TALK_TURNS } from "@core/state";
 import { applyGrade } from "@core/fsrs";
 import { fold, today, firstSense } from "@core/util";
+
+/* What a failed turn says. The reasons that will not fix themselves are named
+   as such — a build without the Worker's address, a refused key, the day's
+   backstop — so the learner is not told to try again what cannot work. `retry`
+   says whether the button that resends the turn is offered. */
+export function failureText(reply) {
+  const r = reply || {};
+  const cap = r.reason === "cap" || r.status === 429 || r.detail === "cap";
+  if (!reply || r.reason === "unconfigured") {
+    return { text: "Conversation is not available in this build.", retry: false };
+  }
+  if (cap) return { text: "Today's conversations are used up. Tomorrow, then.", retry: false };
+  if (r.status === 401 || r.status === 403) {
+    return { text: "This build's tutor key was refused.", retry: false };
+  }
+  if (r.reason === "offline") return { text: "No connection. Try again when you are online.", retry: true };
+  if (r.reason === "timeout") return { text: "The tutor took too long. Try again.", retry: true };
+  return { text: "The tutor could not answer. Try again.", retry: true };
+}
 
 /* Talk unlocks once chapter 5's spine is done (ROADMAP P6.6), or in dev mode. */
 export const TALK_UNLOCK_STAGE = 4;
@@ -333,9 +352,7 @@ export default function Talk({ navigation, route }) {
     if (!alive.current) return;
     if (!reply || reply.ok !== true) {
       setTurns((prev) => prev.map((x) => (x.pending ? { ...x, pending: false } : x)));
-      setFailure(reply && reply.reason === "cap" ? "Today's conversations are used up."
-        : reply && reply.reason === "offline" ? "No connection. Try again when you are online."
-        : "The tutor could not answer. Try again.");
+      setFailure(failureText(reply));
       return;
     }
     // The learner's turn, graded now that the tutor has read it. The tutor may
@@ -386,9 +403,12 @@ export default function Talk({ navigation, route }) {
   /* A scenario can start when Talk is open, its unit is, and a session is left
      today. The row reads this to dim itself and start() checks it again: the guard
      lives with the action, not only in the control that offers it. */
+  // A build without the Worker's address cannot start a conversation at all;
+  // the picker says so instead of spinning.
+  const configured = !!config("/v1/talk");
   const canStart = (s) => {
     const u = UN.find((x) => x.id === s.unit);
-    return talkUnlocked(st) && !!u && unitUnlocked(st, u) && allowance.left > 0;
+    return configured && talkUnlocked(st) && !!u && unitUnlocked(st, u) && allowance.left > 0;
   };
   const [run, setRun] = useState(0);                // bumps on Restart so the opening is asked again
   const start = (s) => {
@@ -421,7 +441,7 @@ export default function Talk({ navigation, route }) {
     const reply = await askHint({ scenario: scenario.prompt, studied: studiedFor(st),
                                   history: turns.map((x) => ({ who: x.who, ru: x.ru })), level });
     if (!alive.current) return;
-    if (!reply || reply.ok !== true) { setHint(null); setFailure("No hint this time. Try again."); return; }
+    if (!reply || reply.ok !== true) { setHint(null); setFailure({ text: "No hint this time.", retry: false }); return; }
     setHint({ ru: reply.hint_ru, en: reply.hint_en });
   };
 
@@ -446,6 +466,10 @@ export default function Talk({ navigation, route }) {
         {!open ? (
           <Muted style={{ marginBottom: 12 }}>
             {`Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}
+          </Muted>
+        ) : !configured ? (
+          <Muted testID="talk-unconfigured" style={{ marginBottom: 12 }}>
+            Conversation is not available in this build.
           </Muted>
         ) : null}
         <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1,
@@ -519,8 +543,8 @@ export default function Talk({ navigation, route }) {
         {hint ? <HintCard hint={hint} en={en} onClose={() => setHint(null)} /> : null}
         {failure ? (
           <View style={{ alignItems: "center", gap: 8, marginTop: 8 }}>
-            <Muted>{failure}</Muted>
-            {!/used up|hint/.test(failure) ? (
+            <Muted>{failure.text}</Muted>
+            {failure.retry ? (
               <Btn label="Try again" onPress={() => {
                 const lastLearner = [...turns].reverse().find((x) => x.who === "learner");
                 if (turns.length === 0) ask([], "");

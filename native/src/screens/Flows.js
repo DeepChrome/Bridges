@@ -434,7 +434,7 @@ export function CustomQuizFlow({ route, navigation }) {
 /* --------------------------------------------------------------- placement */
 
 export function PlacementFlow({ navigation }) {
-  const { update, accounts, account } = useSession();
+  const { update, updateAccount } = useSession();
   const [result, setResult] = useState(null);
   const steps = useMemo(() => Q.placementQuestions(), []);
   useAudioStopOnLeave();
@@ -474,12 +474,14 @@ export function PlacementFlow({ navigation }) {
           }
           return next;
         });
-        if (account) account.placed = placed;
+        // Saved with the profile, not written into the live record: the gate
+        // and You read it back after a relaunch.
+        updateAccount({ placed });
         setResult({
           score: scoreOf(r),
           detail: placed
-            ? `Stages 1–${placed} are marked done. You start at stage ${placed + 1}.`
-            : "Starting from stage 1. Nothing to skip yet.",
+            ? `${placed === 1 ? "Chapter 1 is" : `Chapters 1–${placed} are`} marked done. You start at chapter ${placed + 1}.`
+            : "Starting from chapter 1. Nothing to skip yet.",
         });
       }}
     />

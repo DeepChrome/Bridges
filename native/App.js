@@ -271,6 +271,30 @@ const wordTitled = ({ route }) => {
   };
 };
 
+/* What the save layer has to say, over whatever is on screen: the row could not
+   be read, or could not be written. One line, one dismissal; nothing here is
+   swallowed (session.js). */
+function StateBanner() {
+  const { error, clearError } = useSession();
+  const scheme = useColorScheme();
+  const p = scheme === "light" ? light : dark;
+  if (!error) return null;
+  return (
+    <View testID="state-banner"
+          style={{ backgroundColor: p.badBg, borderBottomWidth: 1, borderBottomColor: p.bad,
+                   paddingHorizontal: 16, paddingVertical: 10, flexDirection: "row",
+                   alignItems: "center", gap: 12 }}>
+      <Text style={{ color: p.ink, fontSize: 13, flex: 1 }}>{error.text}</Text>
+      <Pressable onPress={clearError} hitSlop={8} accessibilityRole="button"
+                 accessibilityLabel="Dismiss">
+        <Text style={{ color: p.bad, fontSize: 13, fontWeight: "700" }}>
+          {error.kind === "unreadable" ? "Keep going" : "OK"}
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
 function Shell() {
   const { ready, account, st } = useSession();
   const [splashDone, setSplashDone] = useState(false);
@@ -295,6 +319,8 @@ function Shell() {
   if (!account) return <Gate onPlacement={setPlacement} />;
 
   return (
+    <View style={{ flex: 1 }}>
+    <StateBanner />
     <Root.Navigator>
       <Root.Screen name="Tabs" component={TabShell} options={{ headerShown: false }} />
       <Root.Screen name="Word" component={WordScreen} options={wordTitled} />
@@ -305,6 +331,7 @@ function Shell() {
       <Root.Screen name="SttLab" component={SttLab} options={{ title: "STT Lab" }} />
       <Root.Screen name="Tour" component={TourScreen} options={{ title: "Tour" }} />
     </Root.Navigator>
+    </View>
   );
 }
 

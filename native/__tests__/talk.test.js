@@ -16,7 +16,11 @@ import { SCENARIOS } from "@core/scenarios";
 import { TALK_SESSIONS_PER_DAY } from "@core/state";
 import { today } from "@core/util";
 
-jest.mock("../src/lib/feedback", () => ({ talk: jest.fn(), hint: jest.fn(), getFeedback: jest.fn() }));
+jest.mock("../src/lib/feedback", () => ({
+  talk: jest.fn(), hint: jest.fn(), getFeedback: jest.fn(),
+  // A configured build: the picker offers every open scenario.
+  config: jest.fn(() => ({ url: "https://worker.test/v1/talk", token: "t" })),
+}));
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const base = {

@@ -7,8 +7,15 @@
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Speech from "expo-speech";
 import { audioUrl } from "./data";
-import { cachedUri } from "./cache";
+import { cachedUri, dropCached } from "./cache";
 import { bare } from "@core/util";
+
+/* When nothing could play — the stream failed and there is no Russian voice —
+   whoever drew the speaker is told, so the learner sees "No audio right now"
+   rather than a button that does nothing. */
+const failListeners = new Set();
+export function onAudioFailure(fn) { failListeners.add(fn); return () => failListeners.delete(fn); }
+const failed = (text) => failListeners.forEach((fn) => fn(text));
 
 let player = null;
 let ready = false;
@@ -153,34 +160,54 @@ export function speakTTS(text, opts = {}) {
 }
 
 /* Plays the real recording when the collection has one, otherwise the device voice.
-   A failed load falls back rather than leaving the learner in silence. Resolves
-   with true/false for whether anything started; the playback itself is tracked
-   by whenIdle(). */
+   A failed load falls back rather than leaving the learner in silence: a
+   synchronous failure at once, and a stream that reports an error after it
+   started (a 404, a dropped connection, a cached file cut off mid-download —
+   which is also deleted) through the same fallback. With no device voice either
+   the speaker is told (onAudioFailure). Resolves with true/false for whether
+   anything started; the playback itself is tracked by whenIdle(). */
 export async function say(text, opts = {}) {
   const rate = rateFor(text, opts);
   // The offline copy when there is one (cache.js), else the stream.
-  const url = cachedUri(text) || audioUrl(text);
-  if (!url) return speakTTS(text, { ...opts, rate });
+  const local = cachedUri(text);
+  const url = local || audioUrl(text);
+  if (!url) {
+    const spoke = speakTTS(text, { ...opts, rate });
+    if (!spoke) failed(text);
+    return spoke;
+  }
   await prepare();
+  const fallback = () => {
+    if (local) dropCached(text);
+    if (!speakTTS(text, { ...opts, rate })) failed(text);
+  };
   try {
     Speech.stop();
     if (player) { player.remove(); player = null; }
     const end = begin();
-    player = createAudioPlayer({ uri: url });
-    if (player.addListener) {
-      player.addListener("playbackStatusUpdate", (s) => {
-        if (s && (s.didJustFinish || s.error)) end();
+    const mine = createAudioPlayer({ uri: url });
+    player = mine;
+    if (mine.addListener) {
+      mine.addListener("playbackStatusUpdate", (s) => {
+        if (!s) return;
+        if (s.error && player === mine) {
+          end();
+          fallback();
+        } else if (s.didJustFinish) {
+          end();
+        }
       });
     }
-    if (rate !== 1 && typeof player.setPlaybackRate === "function") {
+    if (rate !== 1 && typeof mine.setPlaybackRate === "function") {
       // Slower, not lower: pitch correction keeps the voice the same voice.
-      try { player.shouldCorrectPitch = true; player.setPlaybackRate(rate, "high"); } catch (e) {}
+      try { mine.shouldCorrectPitch = true; mine.setPlaybackRate(rate, "high"); } catch (e) {}
     }
-    player.play();
+    mine.play();
     return true;
   } catch (e) {
     if (settle) settle();
-    return speakTTS(text, { ...opts, rate });
+    fallback();
+    return hasRussianVoice();
   }
 }
 

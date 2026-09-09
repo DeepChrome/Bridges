@@ -20,10 +20,14 @@ import { L, IX, STAGES, SPEECH } from "../src/data";
 import { fold, today } from "@core/util";
 import { applyGrade } from "@core/fsrs";
 import { getFeedback } from "../src/lib/feedback";
+import { WATCHDOG_MS } from "../src/speech";
 
 /* The Worker is out of scope here: the client is stubbed and, unless a test says
    otherwise, answers as an unconfigured build would. */
-jest.mock("../src/lib/feedback", () => ({ getFeedback: jest.fn() }));
+jest.mock("../src/lib/feedback", () => ({
+  getFeedback: jest.fn(),
+  config: jest.fn(() => ({ url: "https://worker.test/v1/feedback", token: "t" })),
+}));
 
 const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.say.fromStage
                                  && (SPEECH.speak[s.core.id] || []).length).core;
@@ -112,6 +116,28 @@ describe("say", () => {
 
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ right: 1, total: 1, skipped: 0 }));
+  });
+
+  /* A recogniser that never reports back after stop() used to leave the button
+     on "Listening…" for good: the watchdog gives up and says so. */
+  it("gives up on a recogniser that never answers, and can be tried again", async () => {
+    jest.useFakeTimers();
+    try {
+      await withSay();
+      await screen.findByText(question.en);
+      const hold = screen.getByTestId("say-hold");
+      await act(async () => { fireEvent(hold, "pressIn"); });
+      await act(async () => { fireEvent(hold, "pressOut"); });
+      expect(ExpoSpeechRecognitionModule.stop).toHaveBeenCalledTimes(1);
+      await act(async () => { jest.advanceTimersByTime(WATCHDOG_MS + 10); });
+      expect(ExpoSpeechRecognitionModule.abort).toHaveBeenCalled();
+      expect(screen.getByText("Nothing heard")).toBeTruthy();
+      // Back to idle: a new hold starts the recogniser again.
+      await act(async () => { fireEvent(hold, "pressIn"); });
+      expect(global.__stt.calls).toHaveLength(2);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("a wrong attempt shows the alignment and offers a retry; perfect on retry is Good", async () => {

@@ -26,14 +26,11 @@ export const IMAGES = {
   "бассейн": require("../assets/img/0605.jpg"),
   "батарея": require("../assets/img/0606.jpg"),
   "бег": require("../assets/img/0607.jpg"),
-  "белка": require("../assets/img/0610.jpg"),
   "берег": require("../assets/img/0611.jpg"),
   "беседа": require("../assets/img/0612.jpg"),
   "библиотека": require("../assets/img/0613.jpg"),
   "библия": require("../assets/img/0614.jpg"),
   "билет": require("../assets/img/0616.jpg"),
-  "близнец": require("../assets/img/0619.jpg"),
-  "блокнот": require("../assets/img/0620.jpg"),
   "бог": require("../assets/img/0621.jpg"),
   "богатство": require("../assets/img/0622.jpg"),
   "больница": require("../assets/img/0628.jpg"),
@@ -47,7 +44,6 @@ export const IMAGES = {
   "бумага": require("../assets/img/0643.jpg"),
   "бутылка": require("../assets/img/0644.jpg"),
   "вагон": require("../assets/img/0650.jpg"),
-  "ванная": require("../assets/img/0652.jpg"),
   "велосипед": require("../assets/img/0655.jpg"),
   "вера": require("../assets/img/0656.jpg"),
   "весна": require("../assets/img/0658.jpg"),
@@ -58,14 +54,12 @@ export const IMAGES = {
   "вино": require("../assets/img/0669.jpg"),
   "вирус": require("../assets/img/0672.jpg"),
   "власть": require("../assets/img/0674.jpg"),
-  "внимание": require("../assets/img/0676.jpg"),
   "вода": require("../assets/img/0680.jpg"),
   "водитель": require("../assets/img/0681.jpg"),
   "военный": require("../assets/img/0682.jpg"),
   "волейбол": require("../assets/img/0688.jpg"),
   "волк": require("../assets/img/0689.jpg"),
   "волос": require("../assets/img/0691.jpg"),
-  "воспитание": require("../assets/img/0696.jpg"),
   "врач": require("../assets/img/0698.jpg"),
   "время": require("../assets/img/0700.jpg"),
   "встреча": require("../assets/img/0701.jpg"),
@@ -79,14 +73,10 @@ export const IMAGES = {
   "город": require("../assets/img/0726.jpg"),
   "городок": require("../assets/img/0727.jpg"),
   "госдума": require("../assets/img/0730.jpg"),
-  "гостиная": require("../assets/img/0731.jpg"),
   "гостиница": require("../assets/img/0732.jpg"),
   "гражданин": require("../assets/img/0738.jpg"),
   "гриб": require("../assets/img/0740.jpg"),
-  "гром": require("../assets/img/0741.jpg"),
   "грудь": require("../assets/img/0742.jpg"),
-  "грузовик": require("../assets/img/0743.jpg"),
-  "губа": require("../assets/img/0744.jpg"),
   "дверь": require("../assets/img/0749.jpg"),
   "двигатель": require("../assets/img/0750.jpg"),
   "двор": require("../assets/img/0751.jpg"),
@@ -109,7 +99,6 @@ export const IMAGES = {
   "дочка": require("../assets/img/0791.jpg"),
   "дочь": require("../assets/img/0792.jpg"),
   "друг": require("../assets/img/0793.jpg"),
-  "душа": require("../assets/img/0797.jpg"),
   "еда": require("../assets/img/0800.jpg"),
   "желудок": require("../assets/img/0806.jpg"),
   "женщина": require("../assets/img/0808.jpg"),
@@ -121,28 +110,22 @@ export const IMAGES = {
   "заказчик": require("../assets/img/0826.jpg"),
   "закон": require("../assets/img/0827.jpg"),
   "занавеска": require("../assets/img/0829.jpg"),
-  "звонок": require("../assets/img/0834.jpg"),
   "здание": require("../assets/img/0835.jpg"),
   "здоровье": require("../assets/img/0837.jpg"),
   "здравоохранение": require("../assets/img/0838.jpg"),
   "земля": require("../assets/img/0839.jpg"),
-  "змея": require("../assets/img/0841.jpg"),
   "знание": require("../assets/img/0842.jpg"),
-  "зоопарк": require("../assets/img/0844.jpg"),
   "зуб": require("../assets/img/0845.jpg"),
   "игрок": require("../assets/img/0847.jpg"),
   "игрушка": require("../assets/img/0848.jpg"),
   "изобретение": require("../assets/img/0853.jpg"),
   "инструмент": require("../assets/img/0858.jpg"),
-  "искусство": require("../assets/img/0862.jpg"),
   "исследование": require("../assets/img/0863.jpg"),
   "история": require("../assets/img/0865.jpg"),
   "источник": require("../assets/img/0866.jpg"),
   "камень": require("../assets/img/0874.jpg"),
-  "каникулы": require("../assets/img/0876.jpg"),
   "капитан": require("../assets/img/0877.jpg"),
   "карман": require("../assets/img/0878.jpg"),
-  "каток": require("../assets/img/0884.jpg"),
   "квартира": require("../assets/img/0886.jpg"),
   "кино": require("../assets/img/0887.jpg"),
   "кинотеатр": require("../assets/img/0888.jpg"),
@@ -157,17 +140,14 @@ export const IMAGES = {
   "ковёр": require("../assets/img/0899.jpg"),
   "кожа": require("../assets/img/0900.jpg"),
   "коза": require("../assets/img/0901.jpg"),
-  "козёл": require("../assets/img/0902.jpg"),
   "кольцо": require("../assets/img/0905.jpg"),
   "команда": require("../assets/img/0906.jpg"),
   "комната": require("../assets/img/0910.jpg"),
-  "комод": require("../assets/img/0911.jpg"),
   "компьютер": require("../assets/img/0913.jpg"),
   "концерт": require("../assets/img/0917.jpg"),
   "конь": require("../assets/img/0918.jpg"),
   "корабль": require("../assets/img/0919.jpg"),
   "корова": require("../assets/img/0920.jpg"),
-  "космос": require("../assets/img/0923.jpg"),
   "костюм": require("../assets/img/0925.jpg"),
   "кот": require("../assets/img/0926.jpg"),
   "кофе": require("../assets/img/0928.jpg"),
@@ -180,7 +160,6 @@ export const IMAGES = {
   "кровать": require("../assets/img/0940.jpg"),
   "кровь": require("../assets/img/0941.jpg"),
   "культура": require("../assets/img/0944.jpg"),
-  "курорт": require("../assets/img/0946.jpg"),
   "куртка": require("../assets/img/0948.jpg"),
   "кухня": require("../assets/img/0949.jpg"),
   "лаборатория": require("../assets/img/0950.jpg"),
@@ -195,8 +174,6 @@ export const IMAGES = {
   "лицо": require("../assets/img/0963.jpg"),
   "лодка": require("../assets/img/0964.jpg"),
   "лошадь": require("../assets/img/0965.jpg"),
-  "лук": require("../assets/img/0966.jpg"),
-  "лыжа": require("../assets/img/0967.jpg"),
   "любовь": require("../assets/img/0970.jpg"),
   "магазин": require("../assets/img/0975.jpg"),
   "мальчик": require("../assets/img/0979.jpg"),
@@ -211,7 +188,6 @@ export const IMAGES = {
   "метро": require("../assets/img/0995.jpg"),
   "мина": require("../assets/img/0998.jpg"),
   "минута": require("../assets/img/1000.jpg"),
-  "митинг": require("../assets/img/1002.jpg"),
   "мода": require("../assets/img/1005.jpg"),
   "мозг": require("../assets/img/1006.jpg"),
   "море": require("../assets/img/1015.jpg"),
@@ -224,7 +200,6 @@ export const IMAGES = {
   "музыкант": require("../assets/img/1026.jpg"),
   "мысль": require("../assets/img/1027.jpg"),
   "мышка": require("../assets/img/1029.jpg"),
-  "мышление": require("../assets/img/1030.jpg"),
   "мышь": require("../assets/img/1031.jpg"),
   "мясо": require("../assets/img/1033.jpg"),
   "мяч": require("../assets/img/1034.jpg"),
@@ -234,20 +209,14 @@ export const IMAGES = {
   "напиток": require("../assets/img/1044.jpg"),
   "наркотик": require("../assets/img/1046.jpg"),
   "насекомое": require("../assets/img/1048.jpg"),
-  "небо": require("../assets/img/1057.jpg"),
   "невеста": require("../assets/img/1059.jpg"),
   "новость": require("../assets/img/1068.jpg"),
   "нож": require("../assets/img/1072.jpg"),
-  "нос": require("../assets/img/1074.jpg"),
-  "носок": require("../assets/img/1076.jpg"),
   "ноутбук": require("../assets/img/1077.jpg"),
   "ночь": require("../assets/img/1079.jpg"),
   "обед": require("../assets/img/1082.jpg"),
   "обещание": require("../assets/img/1083.jpg"),
-  "облако": require("../assets/img/1085.jpg"),
-  "образование": require("../assets/img/1087.jpg"),
   "обстановка": require("../assets/img/1089.jpg"),
-  "обсуждение": require("../assets/img/1090.jpg"),
   "обувь": require("../assets/img/1091.jpg"),
   "общество": require("../assets/img/1094.jpg"),
   "одежда": require("../assets/img/1100.jpg"),
@@ -258,14 +227,12 @@ export const IMAGES = {
   "остров": require("../assets/img/1110.jpg"),
   "отель": require("../assets/img/1112.jpg"),
   "отец": require("../assets/img/1113.jpg"),
-  "отряд": require("../assets/img/1118.jpg"),
   "офис": require("../assets/img/1120.jpg"),
   "офицер": require("../assets/img/1121.jpg"),
   "официант": require("../assets/img/1123.jpg"),
   "палец": require("../assets/img/1126.jpg"),
   "пальто": require("../assets/img/1127.jpg"),
   "памятник": require("../assets/img/1128.jpg"),
-  "панель": require("../assets/img/1130.jpg"),
   "парк": require("../assets/img/1132.jpg"),
   "парламент": require("../assets/img/1133.jpg"),
   "паспорт": require("../assets/img/1135.jpg"),
@@ -274,7 +241,6 @@ export const IMAGES = {
   "пациент": require("../assets/img/1138.jpg"),
   "певец": require("../assets/img/1139.jpg"),
   "певица": require("../assets/img/1140.jpg"),
-  "перчатка": require("../assets/img/1146.jpg"),
   "пиво": require("../assets/img/1150.jpg"),
   "пистолет": require("../assets/img/1154.jpg"),
   "плавание": require("../assets/img/1157.jpg"),
@@ -289,22 +255,15 @@ export const IMAGES = {
   "поезд": require("../assets/img/1180.jpg"),
   "пол": require("../assets/img/1185.jpg"),
   "поле": require("../assets/img/1187.jpg"),
-  "политик": require("../assets/img/1188.jpg"),
   "политика": require("../assets/img/1189.jpg"),
-  "полицейский": require("../assets/img/1191.jpg"),
   "полиция": require("../assets/img/1192.jpg"),
-  "полка": require("../assets/img/1194.jpg"),
   "полковник": require("../assets/img/1195.jpg"),
   "пора": require("../assets/img/1204.jpg"),
-  "постель": require("../assets/img/1209.jpg"),
-  "похороны": require("../assets/img/1210.jpg"),
   "почта": require("../assets/img/1211.jpg"),
   "пояс": require("../assets/img/1214.jpg"),
-  "право": require("../assets/img/1218.jpg"),
   "предприниматель": require("../assets/img/1223.jpg"),
   "президент": require("../assets/img/1224.jpg"),
   "природа": require("../assets/img/1236.jpg"),
-  "провод": require("../assets/img/1239.jpg"),
   "пространство": require("../assets/img/1246.jpg"),
   "профессор": require("../assets/img/1248.jpg"),
   "птица": require("../assets/img/1250.jpg"),
@@ -313,21 +272,16 @@ export const IMAGES = {
   "пьеса": require("../assets/img/1254.jpg"),
   "радио": require("../assets/img/1259.jpg"),
   "радиоприёмник": require("../assets/img/1260.jpg"),
-  "радиостанция": require("../assets/img/1261.jpg"),
   "радость": require("../assets/img/1263.jpg"),
   "разговор": require("../assets/img/1266.jpg"),
   "ребёнок": require("../assets/img/1272.jpg"),
   "река": require("../assets/img/1276.jpg"),
   "реклама": require("../assets/img/1277.jpg"),
   "религия": require("../assets/img/1279.jpg"),
-  "ремень": require("../assets/img/1280.jpg"),
   "ресторан": require("../assets/img/1283.jpg"),
-  "родители": require("../assets/img/1288.jpg"),
   "родитель": require("../assets/img/1289.jpg"),
-  "рождество": require("../assets/img/1291.jpg"),
   "рот": require("../assets/img/1294.jpg"),
   "рубашка": require("../assets/img/1295.jpg"),
-  "ружьё": require("../assets/img/1297.jpg"),
   "рука": require("../assets/img/1298.jpg"),
   "руководитель": require("../assets/img/1299.jpg"),
   "рыба": require("../assets/img/1301.jpg"),
@@ -336,17 +290,13 @@ export const IMAGES = {
   "салат": require("../assets/img/1306.jpg"),
   "самолёт": require("../assets/img/1308.jpg"),
   "сапог": require("../assets/img/1311.jpg"),
-  "сахар": require("../assets/img/1312.jpg"),
   "свадьба": require("../assets/img/1313.jpg"),
   "свинья": require("../assets/img/1316.jpg"),
   "свобода": require("../assets/img/1317.jpg"),
-  "село": require("../assets/img/1325.jpg"),
   "сентябрь": require("../assets/img/1328.jpg"),
   "сестра": require("../assets/img/1331.jpg"),
   "сеть": require("../assets/img/1333.jpg"),
-  "скорая": require("../assets/img/1338.jpg"),
   "словарь": require("../assets/img/1339.jpg"),
-  "смерть": require("../assets/img/1345.jpg"),
   "снег": require("../assets/img/1348.jpg"),
   "собака": require("../assets/img/1349.jpg"),
   "собор": require("../assets/img/1350.jpg"),
@@ -354,7 +304,6 @@ export const IMAGES = {
   "сок": require("../assets/img/1352.jpg"),
   "солдат": require("../assets/img/1353.jpg"),
   "солнце": require("../assets/img/1355.jpg"),
-  "соль": require("../assets/img/1356.jpg"),
   "сон": require("../assets/img/1357.jpg"),
   "спектакль": require("../assets/img/1363.jpg"),
   "спорт": require("../assets/img/1368.jpg"),
@@ -366,16 +315,13 @@ export const IMAGES = {
   "стена": require("../assets/img/1386.jpg"),
   "стол": require("../assets/img/1390.jpg"),
   "столик": require("../assets/img/1392.jpg"),
-  "столовая": require("../assets/img/1393.jpg"),
   "строительство": require("../assets/img/1398.jpg"),
   "студент": require("../assets/img/1399.jpg"),
   "стул": require("../assets/img/1401.jpg"),
   "суд": require("../assets/img/1403.jpg"),
-  "судно": require("../assets/img/1405.jpg"),
   "судья": require("../assets/img/1406.jpg"),
   "суп": require("../assets/img/1407.jpg"),
   "сцена": require("../assets/img/1411.jpg"),
-  "сыр": require("../assets/img/1416.jpg"),
   "таблетка": require("../assets/img/1418.jpg"),
   "такси": require("../assets/img/1420.jpg"),
   "тарелка": require("../assets/img/1421.jpg"),
@@ -384,13 +330,11 @@ export const IMAGES = {
   "телевизор": require("../assets/img/1427.jpg"),
   "телефон": require("../assets/img/1428.jpg"),
   "теннис": require("../assets/img/1433.jpg"),
-  "тетрадь": require("../assets/img/1435.jpg"),
   "технология": require("../assets/img/1437.jpg"),
   "товар": require("../assets/img/1439.jpg"),
   "торговля": require("../assets/img/1441.jpg"),
   "торт": require("../assets/img/1442.jpg"),
   "трава": require("../assets/img/1444.jpg"),
-  "трамвай": require("../assets/img/1446.jpg"),
   "тренер": require("../assets/img/1448.jpg"),
   "туман": require("../assets/img/1452.jpg"),
   "турист": require("../assets/img/1453.jpg"),
@@ -399,13 +343,10 @@ export const IMAGES = {
   "университет": require("../assets/img/1475.jpg"),
   "упражнение": require("../assets/img/1476.jpg"),
   "урок": require("../assets/img/1477.jpg"),
-  "учащийся": require("../assets/img/1484.jpg"),
   "училище": require("../assets/img/1486.jpg"),
   "учёный": require("../assets/img/1490.jpg"),
   "ущерб": require("../assets/img/1491.jpg"),
-  "фабрика": require("../assets/img/1492.jpg"),
   "февраль": require("../assets/img/1495.jpg"),
-  "физика": require("../assets/img/1496.jpg"),
   "фильм": require("../assets/img/1497.jpg"),
   "фотоаппарат": require("../assets/img/1503.jpg"),
   "фотография": require("../assets/img/1504.jpg"),
@@ -419,21 +360,16 @@ export const IMAGES = {
   "центр": require("../assets/img/1523.jpg"),
   "чай": require("../assets/img/1525.jpg"),
   "час": require("../assets/img/1526.jpg"),
-  "часы": require("../assets/img/1527.jpg"),
   "человек": require("../assets/img/1528.jpg"),
-  "чемодан": require("../assets/img/1529.jpg"),
   "чемпион": require("../assets/img/1530.jpg"),
   "чёрт": require("../assets/img/1538.jpg"),
   "шахматы": require("../assets/img/1539.jpg"),
-  "шерсть": require("../assets/img/1540.jpg"),
   "школа": require("../assets/img/1543.jpg"),
   "шоколад": require("../assets/img/1545.jpg"),
   "эволюция": require("../assets/img/1548.jpg"),
   "экзамен": require("../assets/img/1549.jpg"),
   "эксперимент": require("../assets/img/1553.jpg"),
   "электричество": require("../assets/img/1554.jpg"),
-  "электричка": require("../assets/img/1555.jpg"),
-  "энергетика": require("../assets/img/1560.jpg"),
   "этаж": require("../assets/img/1562.jpg"),
   "яблоко": require("../assets/img/1568.jpg"),
   "яйцо": require("../assets/img/1571.jpg"),
@@ -566,12 +502,6 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:193_Herd_of_Reindeers_running_in_Southern_Iceland_Photo_by_Giles_Laurent.jpg"
  },
- "белка": {
-  "t": "Белка в ботаническом саду Ташкента, март 2026.jpg",
-  "a": "26D",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:%D0%91%D0%B5%D0%BB%D0%BA%D0%B0_%D0%B2_%D0%B1%D0%BE%D1%82%D0%B0%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%BC_%D1%81%D0%B0%D0%B4%D1%83_%D0%A2%D0%B0%D1%88%D0%BA%D0%B5%D0%BD%D1%82%D0%B0,_%D0%BC%D0%B0%D1%80%D1%82_2026.jpg"
- },
  "берег": {
   "t": "Spring Lake, New Jersey Beach at Sunrise.jpg",
   "a": "Nick Harris",
@@ -601,18 +531,6 @@ export const CREDITS = {
   "a": "Andreas -horn- Hornig",
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Ticket_(unseparated)_Kurkino-Berchtesgaden.JPG"
- },
- "близнец": {
-  "t": "Red-haired Siblings.jpg",
-  "a": "Dpulitzer",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Red-haired_Siblings.jpg"
- },
- "блокнот": {
-  "t": "Notebooks.jpg",
-  "a": "L.Marie",
-  "l": "CC BY 2.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Notebooks.jpg"
  },
  "бог": {
   "t": "Файл:Istanbul, Hagia Sophia, Allah.jpg",
@@ -692,12 +610,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:D-DB_50_80_36-75_071-1_DABpza_758.5_Doerverden_01.07.2013.jpg"
  },
- "ванная": {
-  "t": "Файл:Salle de bain du Gouverneur.jpg",
-  "a": "Aristidek5maya",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Salle_de_bain_du_Gouverneur.jpg"
- },
  "велосипед": {
   "t": "Файл:JugendstilBikes Miyata760SR06.jpg",
   "a": "JugendstilBikes",
@@ -758,12 +670,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:AuthorityOfLaw.JPG"
  },
- "внимание": {
-  "t": "Файл:Student in Ban Khung Taphao School 1.JPG",
-  "a": "ผู้สร้างสรรค์ผลงาน/ส่งข้อมูลเก็บในคลังข้อมูลเสรีวิกิมีเดียคอมมอนส์ - เทวประภาส ม",
-  "l": "CC BY 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Student_in_Ban_Khung_Taphao_School_1.JPG"
- },
  "вода": {
   "t": "E8661-Pattaya-water-vending-machines.jpg",
   "a": "Vmenkov",
@@ -799,12 +705,6 @@ export const CREDITS = {
   "a": "Kritzolina",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Blond_hair_going_gray_01.jpg"
- },
- "воспитание": {
-  "t": "Baby Sofia.jpg",
-  "a": "James.rybarsyk",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Baby_Sofia.jpg"
  },
  "врач": {
   "t": "Aerial-Picture-of-Jackson-e1445995779731.jpg",
@@ -884,12 +784,6 @@ export const CREDITS = {
   "l": "CC BY 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:%D0%A0%D0%B0%D1%81%D1%81%D0%BC%D0%BE%D1%82%D1%80%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0_%D0%B1%D1%8E%D0%B4%D0%B6%D0%B5%D1%82%D0%B0_%D0%BD%D0%B0_2023-2025_%D0%B3%D0%BE%D0%B4%D1%8B_%D0%B2_%D0%93%D0%BE%D1%81%D1%83%D0%B4%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B9_%D0%B4%D1%83%D0%BC%D0%B5.jpg"
  },
- "гостиная": {
-  "t": "Файл:Beach House Bridgehampton (12).jpg",
-  "a": "Interior Designer Amy Lau",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Beach_House_Bridgehampton_(12).jpg"
- },
  "гостиница": {
   "t": "Livorno - Hotel Palazzo - 2025-09-29 20-09-38 001.jpg",
   "a": "Terragio67",
@@ -908,29 +802,11 @@ export const CREDITS = {
   "l": "CC BY 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Sparrige_Sch%C3%BCppling_(Pholiota_squarrosa).jpg"
  },
- "гром": {
-  "t": "Файл:Wall cloud with lightning - NOAA - rotated.jpg",
-  "a": "Rotating by Holek (обсуждение · вклад), picture came from U.S. National Oceanic ",
-  "l": "CC BY-SA 2.5 pl",
-  "u": "https://commons.wikimedia.org/wiki/File:Wall_cloud_with_lightning_-_NOAA_-_rotated.jpg"
- },
  "грудь": {
   "t": "Young Woman Wearing Orange Sports Bra.jpg",
   "a": "Flame, not lame",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Young_Woman_Wearing_Orange_Sports_Bra.jpg"
- },
- "грузовик": {
-  "t": "Файл:Грузовой автомобиль ГАЗ-АА.jpg",
-  "a": "Башин Денис Анатольевич",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:%D0%93%D1%80%D1%83%D0%B7%D0%BE%D0%B2%D0%BE%D0%B9_%D0%B0%D0%B2%D1%82%D0%BE%D0%BC%D0%BE%D0%B1%D0%B8%D0%BB%D1%8C_%D0%93%D0%90%D0%97-%D0%90%D0%90.jpg"
- },
- "губа": {
-  "t": "Lips 2023.jpg",
-  "a": "PumpkinMan1943",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Lips_2023.jpg"
  },
  "дверь": {
   "t": "Файл:Bronze door, Basilica di San Giovanni, 2013.jpg",
@@ -1064,12 +940,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Childhood_friends_at_a_carnival.jpg"
  },
- "душа": {
-  "t": "The wheel of life, Buddhism Bhavachakra.jpg",
-  "a": "Nagarjun Kandukuru from Bangalore, India",
-  "l": "CC BY 2.0",
-  "u": "https://commons.wikimedia.org/wiki/File:The_wheel_of_life,_Buddhism_Bhavachakra.jpg"
- },
  "еда": {
   "t": "Christmas table (Serbian cuisine).jpg",
   "a": "Petar Milošević",
@@ -1136,12 +1006,6 @@ export const CREDITS = {
   "l": "CC BY 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:%D0%A3%D1%82%D1%80%D0%B5%D0%BD%D0%BD%D0%B5%D0%B5_%D1%81%D0%BE%D0%BB%D0%BD%D1%86%D0%B5_%D1%81%D0%BA%D0%B2%D0%BE%D0%B7%D1%8C_%D0%B3%D0%B0%D1%80%D0%B4%D0%B8%D0%BD%D1%83_%D0%B8_%D1%88%D1%82%D0%BE%D1%80%D1%83.jpg"
  },
- "звонок": {
-  "t": "RyoanJi-Kane.jpg",
-  "a": "Syohei Arai",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:RyoanJi-Kane.jpg"
- },
  "здание": {
   "t": "Philae temple at night.jpg",
   "a": "Moh hakem",
@@ -1166,23 +1030,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Terrestrial_planet_size_comparisons.jpg"
  },
- "змея": {
-  "t": "Файл:Snakes Diversity.jpg",
-  "a": "Termininja\n\nVictorrocha (File:Crotalus cerastes mesquite springs CA-2.jpg)\nErikp",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Snakes_Diversity.jpg"
- },
  "знание": {
   "t": "Latin dictionary.jpg",
   "a": "Dr. Marcus Gossler",
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Latin_dictionary.jpg"
- },
- "зоопарк": {
-  "t": "STL Elephant.jpg",
-  "a": "Daniel Schwen",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:STL_Elephant.jpg"
  },
  "зуб": {
   "t": "Mammoth ivory hg.jpg",
@@ -1214,12 +1066,6 @@ export const CREDITS = {
   "l": "CC BY-SA 2.5",
   "u": "https://commons.wikimedia.org/wiki/File:20060513_toolbox.jpg"
  },
- "искусство": {
-  "t": "Файл:Art-portrait-collage 2.jpg",
-  "a": "User:Husky and h3m3ls, Mischa de Muynck and Niels",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Art-portrait-collage_2.jpg"
- },
  "исследование": {
   "t": "Файл:Alcator C-Mod.jpg",
   "a": "Dan Brunner",
@@ -1244,12 +1090,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Two-parts_stone_nikogda_takih_ne_videl_vot.JPG"
  },
- "каникулы": {
-  "t": "Last day in Tanzanian school by Rasheedhrasheed.jpg",
-  "a": "Rasheedhrasheed",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Last_day_in_Tanzanian_school_by_Rasheedhrasheed.jpg"
- },
  "капитан": {
   "t": "Captain on ship.jpg",
   "a": "Hillebrand Steve, U.S. Fish and Wildlife Service",
@@ -1261,12 +1101,6 @@ export const CREDITS = {
   "a": "Jamie",
   "l": "CC BY-SA 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:Black_Jeans_with_Zipper_Pocket_Detailing_(15470033547).jpg"
- },
- "каток": {
-  "t": "Rockefeller-ice.jpg",
-  "a": "Bruin from Columbus, Ohio, U.S.A.",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Rockefeller-ice.jpg"
  },
  "квартира": {
   "t": "Файл:Housing and Development Board flats near Woodlands Avenue 7, Singapore.jpg",
@@ -1352,12 +1186,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Hausziege_04.jpg"
  },
- "козёл": {
-  "t": "Hausziege 04.jpg",
-  "a": "Kuebi = Armin Kübelbeck",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Hausziege_04.jpg"
- },
  "кольцо": {
   "t": "Ring Ruby.jpg",
   "a": "ネックレス (A necklace)",
@@ -1375,12 +1203,6 @@ export const CREDITS = {
   "a": "Neoclassicism Enthusiast",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:D.A._Sturdza_House,_Bucharest_(Romania)_9.jpg"
- },
- "комод": {
-  "t": "Файл:CommodeBoulle.jpg",
-  "a": "O.Taris",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:CommodeBoulle.jpg"
  },
  "компьютер": {
   "t": "2014 Modding komputera 01.jpg",
@@ -1411,12 +1233,6 @@ export const CREDITS = {
   "a": "Keith Weller/USDA",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Cow_female_black_white.jpg"
- },
- "космос": {
-  "t": "Файл:Kirovsk2007.jpg",
-  "a": "Собственная работа",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Kirovsk2007.jpg"
  },
  "костюм": {
   "t": "King Jigme Khesar Namgyel Wangchuck (edit).jpg",
@@ -1489,12 +1305,6 @@ export const CREDITS = {
   "a": "Museo de Altamira y D. Rodríguez",
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:9_Bisonte_Magdaleniense_pol%C3%ADcromo.jpg"
- },
- "курорт": {
-  "t": "Cherry Resort inside Temi Tea Garden, Namchi, Sikkim.jpg",
-  "a": "Subhrajyoti07",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Cherry_Resort_inside_Temi_Tea_Garden,_Namchi,_Sikkim.jpg"
  },
  "куртка": {
   "t": "Jack Wolfskin, OutDoor 2018, Friedrichshafen (1X7A0421).jpg",
@@ -1580,18 +1390,6 @@ export const CREDITS = {
   "l": "CC BY-SA 2.5",
   "u": "https://commons.wikimedia.org/wiki/File:Pernod_Al_Ariba_0046b.jpg"
  },
- "лук": {
-  "t": "Texture d'oignons dans un panier au Bénin.jpg",
-  "a": "Adoscam",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Texture_d%27oignons_dans_un_panier_au_B%C3%A9nin.jpg"
- },
- "лыжа": {
-  "t": "Interboot 2023, Friedrichshafen (P1120640).jpg",
-  "a": "MB-one",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Interboot_2023,_Friedrichshafen_(P1120640).jpg"
- },
  "любовь": {
   "t": "Sri Lankan woman and child.jpg",
   "a": "Steve Evans from India and USA",
@@ -1676,12 +1474,6 @@ export const CREDITS = {
   "l": "CC BY 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:La_minute_(315630347).jpg"
  },
- "митинг": {
-  "t": "Файл:Anti-government protest in Sri Lanka 2022.jpg",
-  "a": "AntanO",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Anti-government_protest_in_Sri_Lanka_2022.jpg"
- },
  "мода": {
   "t": "Siegel & Stockman. The Brandery Winter Edition 2010.jpg",
   "a": "thebrandery",
@@ -1754,12 +1546,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Fancy_mice.jpg"
  },
- "мышление": {
-  "t": "Файл:Rodin Mislityel.jpg",
-  "a": "Завсегдатай",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Rodin_Mislityel.jpg"
- },
  "мышь": {
   "t": "Файл:Apodemus sylvaticus bosmuis.jpg",
   "a": "Rasbak",
@@ -1814,12 +1600,6 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Insecta_Diversity.jpg"
  },
- "небо": {
-  "t": "Файл:Solar eclipse of 2008 August 1st in Novosibirsk, Russia.jpg",
-  "a": "Michael",
-  "l": "CC BY 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Solar_eclipse_of_2008_August_1st_in_Novosibirsk,_Russia.jpg"
- },
  "невеста": {
   "t": "Файл:Wedding portrait, Bangladesh, Jubair.JPG",
   "a": "Jubair1985",
@@ -1837,18 +1617,6 @@ export const CREDITS = {
   "a": "Lixeiden",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Morakniv_Basic_511_Carbon_Steel_5.jpg"
- },
- "нос": {
-  "t": "Файл:Neus1.jpg",
-  "a": "LHOON",
-  "l": "CC BY-SA 2.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Neus1.jpg"
- },
- "носок": {
-  "t": "Файл:Toe socks on Brighton beach.jpg",
-  "a": "stvcr",
-  "l": "CC BY-SA 2.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Toe_socks_on_Brighton_beach.jpg"
  },
  "ноутбук": {
   "t": "Файл:2008 MacBook Aluminium.jpg",
@@ -1874,29 +1642,11 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Switzerland_promises_continued_BARMM_support,_lauds_PBBM_thrust_towards_food_security,_energy_sufficiency.jpg"
  },
- "облако": {
-  "t": "Файл:Clouds, cloudscape over Lombok Strait, Bali Sea, Gili Islands, West Nusa Tenggara, Indonesia.jpg",
-  "a": "Vyacheslav Argenberg",
-  "l": "CC BY 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Clouds,_cloudscape_over_Lombok_Strait,_Bali_Sea,_Gili_Islands,_West_Nusa_Tenggara,_Indonesia.jpg"
- },
- "образование": {
-  "t": "Education in South Africa (8329322789).jpg",
-  "a": "USAID in Africa",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Education_in_South_Africa_(8329322789).jpg"
- },
  "обстановка": {
   "t": "Low-back armchair, China, late Ming to Qing dynasty, late 16th-18th century AD, huanghuali rosewood - Arthur M. Sackler Gallery - DSC05918.JPG",
   "a": "Daderot",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Low-back_armchair,_China,_late_Ming_to_Qing_dynasty,_late_16th-18th_century_AD,_huanghuali_rosewood_-_Arthur_M._Sackler_Gallery_-_DSC05918.JPG"
- },
- "обсуждение": {
-  "t": "वार्तालाप.jpg",
-  "a": "Surenders25",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:%E0%A4%B5%E0%A4%BE%E0%A4%B0%E0%A5%8D%E0%A4%A4%E0%A4%BE%E0%A4%B2%E0%A4%BE%E0%A4%AA.jpg"
  },
  "обувь": {
   "t": "King Street Sneak.JPG",
@@ -1958,12 +1708,6 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Father%27s_love_(cropped).jpg"
  },
- "отряд": {
-  "t": "Batalionul 191 infanterie 54.jpg",
-  "a": "Locotenent-Colonel Dragoş Anghelache",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Batalionul_191_infanterie_54.jpg"
- },
  "офис": {
   "t": "Файл:Deutsche-Bank-Frankfurt-am-Main.jpg",
   "a": "Raimond Spekking",
@@ -1999,12 +1743,6 @@ export const CREDITS = {
   "a": "Halley Pacheco de Oliveira",
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Monumento_ao_Cristo_Redentor.jpg"
- },
- "панель": {
-  "t": "Brick sidewalk, EDS, Cambridge.jpg",
-  "a": "Macrakis",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Brick_sidewalk,_EDS,_Cambridge.jpg"
  },
  "парк": {
   "t": "Halleyparknovember b (cropped).jpg",
@@ -2053,12 +1791,6 @@ export const CREDITS = {
   "a": "Steffen Prößdorf",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:2018-11-02_Konzert_-The_Hellfreaks-_in_-Ilvers_Musikbar-_in_Erfurt_IMG_3414_LR10_by_Stepro.jpg"
- },
- "перчатка": {
-  "t": "Файл:Puma Furio Gloves - Punggung Tangan.JPG",
-  "a": "F1fans",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Puma_Furio_Gloves_-_Punggung_Tangan.JPG"
  },
  "пиво": {
   "t": "Файл:Weizenbier.jpg",
@@ -2144,35 +1876,17 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Iglesia_de_Nuestra_Se%C3%B1ora_de_La_Blanca,_Cardej%C3%B3n,_Espa%C3%B1a,_2012-09-01,_DD_02.JPG"
  },
- "политик": {
-  "t": "Файл:Mavzolej kremlin.jpg",
-  "a": "ангкок",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Mavzolej_kremlin.jpg"
- },
  "политика": {
   "t": "Файл:Mavzolej kremlin.jpg",
   "a": "ангкок",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Mavzolej_kremlin.jpg"
  },
- "полицейский": {
-  "t": "Файл:HH Polizeihauptmeister MZ.jpg",
-  "a": "Daniel Schwen",
-  "l": "CC BY-SA 2.5",
-  "u": "https://commons.wikimedia.org/wiki/File:HH_Polizeihauptmeister_MZ.jpg"
- },
  "полиция": {
   "t": "Файл:HH Polizeihauptmeister MZ.jpg",
   "a": "Daniel Schwen",
   "l": "CC BY-SA 2.5",
   "u": "https://commons.wikimedia.org/wiki/File:HH_Polizeihauptmeister_MZ.jpg"
- },
- "полка": {
-  "t": "Atifells de cuina andalusins, Museu Arqueològic Municipal d'Alcoi.JPG",
-  "a": "Joanbanjo",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Atifells_de_cuina_andalusins,_Museu_Arqueol%C3%B2gic_Municipal_d%27Alcoi.JPG"
  },
  "полковник": {
   "t": "Файл:VladikavkazMP-2017-11.jpg",
@@ -2186,18 +1900,6 @@ export const CREDITS = {
   "l": "CC BY 2.5",
   "u": "https://commons.wikimedia.org/wiki/File:Swatch_Irony_angle_below.jpg"
  },
- "постель": {
-  "t": "Bed in hotel room 5.jpg",
-  "a": "Kurt Kaiser",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Bed_in_hotel_room_5.jpg"
- },
- "похороны": {
-  "t": "Файл:Funeral of Boris Yeltsin-1.jpg",
-  "a": "Presidential Press and Information Office",
-  "l": "CC BY 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Funeral_of_Boris_Yeltsin-1.jpg"
- },
  "почта": {
   "t": "HK Postman Collect Letters.JPG",
   "a": "Chong Fat",
@@ -2209,12 +1911,6 @@ export const CREDITS = {
   "a": "CEphoto, Uwe Aranas",
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Germany_Belt-and-Buckle-02.jpg"
- },
- "право": {
-  "t": "Файл:Uscatitle11.jpg",
-  "a": "Coolcaesar из английский Википедия",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Uscatitle11.jpg"
  },
  "предприниматель": {
   "t": "Tulane University Environmental Action League, New Orleans, February 2011.jpg",
@@ -2233,12 +1929,6 @@ export const CREDITS = {
   "a": "Marlon Felippe",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Drops_Impact.jpg"
- },
- "провод": {
-  "t": "Файл:Шкаф 093136.jpg",
-  "a": "Mixabest",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:%D0%A8%D0%BA%D0%B0%D1%84_093136.jpg"
  },
  "пространство": {
   "t": "Solar system.jpg",
@@ -2288,12 +1978,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Icom_IC-R7000_radio_receiver.jpg"
  },
- "радиостанция": {
-  "t": "Tyholt taarnet.jpg",
-  "a": "Alex Brasetvik",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Tyholt_taarnet.jpg"
- },
  "радость": {
   "t": "Sara Ahmed-IMG 6457.jpg",
   "a": "Rama",
@@ -2330,35 +2014,17 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Via_Dolorosa,_Jerusalem.jpg"
  },
- "ремень": {
-  "t": "Germany Belt-and-Buckle-02.jpg",
-  "a": "CEphoto, Uwe Aranas",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Germany_Belt-and-Buckle-02.jpg"
- },
  "ресторан": {
   "t": "Файл:AntoinesDiningRoom8Oct07A.jpg",
   "a": "Infrogmation of New Orleans",
   "l": "CC BY 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:AntoinesDiningRoom8Oct07A.jpg"
  },
- "родители": {
-  "t": "Parents and their baby.jpg",
-  "a": "sheldonl",
-  "l": "CC0",
-  "u": "https://commons.wikimedia.org/wiki/File:Parents_and_their_baby.jpg"
- },
  "родитель": {
   "t": "Parents and their baby.jpg",
   "a": "sheldonl",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Parents_and_their_baby.jpg"
- },
- "рождество": {
-  "t": "NativityChristmasLights2.jpg",
-  "a": "File:NativityChristmasLights.jpg:\nderivative work: Crumpled Fire",
-  "l": "CC BY-SA 2.0",
-  "u": "https://commons.wikimedia.org/wiki/File:NativityChristmasLights2.jpg"
  },
  "рот": {
   "t": "Lion Showing off His Mouth (21454262492).jpg",
@@ -2371,12 +2037,6 @@ export const CREDITS = {
   "a": "",
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Blue_Business_Shirt.jpg"
- },
- "ружьё": {
-  "t": "Файл:РМБ-93 - МВСВ-2008 01.jpg",
-  "a": "Vitaly V. Kuzmin",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:%D0%A0%D0%9C%D0%91-93_-_%D0%9C%D0%92%D0%A1%D0%92-2008_01.jpg"
  },
  "рука": {
   "t": "Файл:Две острые палочки, сложным образом зажатые в руке человека.JPG",
@@ -2426,12 +2086,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Bodysuit_with_opaque_cotton_front_and_transparent_lace_backside_-_worn_with_low_rise_denim_shorts_ankle_boots_and_over_sheer_to_waist_tights_-_ModelTanja.jpg"
  },
- "сахар": {
-  "t": "Файл:Sucre blanc cassonade complet rapadura.jpg",
-  "a": "Romain Behar",
-  "l": "Public domain",
-  "u": "https://commons.wikimedia.org/wiki/File:Sucre_blanc_cassonade_complet_rapadura.jpg"
- },
  "свадьба": {
   "t": "Hindu wedding rituals b (cropped).jpg",
   "a": "Will",
@@ -2449,12 +2103,6 @@ export const CREDITS = {
   "a": "William Zhang",
   "l": "CC BY 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:Liberty_Bell_2017a.jpg"
- },
- "село": {
-  "t": "Bourton-on-the-Water 2010 PD 09.JPG",
-  "a": "Bin im Garten",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Bourton-on-the-Water_2010_PD_09.JPG"
  },
  "сентябрь": {
   "t": "Файл:September.jpg",
@@ -2474,23 +2122,11 @@ export const CREDITS = {
   "l": "CC BY 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:Tea_strainer.jpg"
  },
- "скорая": {
-  "t": "Stockholm, ambulans, 2014, 21.jpg",
-  "a": "AleWi",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Stockholm,_ambulans,_2014,_21.jpg"
- },
  "словарь": {
   "t": "Woerterbuchstapel Langenscheidt.jpg",
   "a": "Langenscheidt",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Woerterbuchstapel_Langenscheidt.jpg"
- },
- "смерть": {
-  "t": "Kameldornbaum Sossusvlei.jpg",
-  "a": "Hp.Baumeler",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Kameldornbaum_Sossusvlei.jpg"
  },
  "снег": {
   "t": "Файл:Fresh snow.JPG",
@@ -2533,12 +2169,6 @@ export const CREDITS = {
   "a": "Matúš Motlo",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:The_Sun_in_white_light.jpg"
- },
- "соль": {
-  "t": "Файл:TableSaltRussia.jpg",
-  "a": "Leonid Dzhepko / Л.П. Джепко",
-  "l": "CC BY-SA 2.5",
-  "u": "https://commons.wikimedia.org/wiki/File:TableSaltRussia.jpg"
  },
  "сон": {
   "t": "Файл:Спящий кот.jpg",
@@ -2606,12 +2236,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:2008-04-13_Expandable_table_expanding.jpg"
  },
- "столовая": {
-  "t": "Файл:Ycyk-Ata stolovay.jpg",
-  "a": "DVA",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Ycyk-Ata_stolovay.jpg"
- },
  "строительство": {
   "t": "Construction site in Cologne, Germany (2017).jpg",
   "a": "Whiteghost.ink",
@@ -2636,12 +2260,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Supreme_Court_of_the_United_Kingdom,_Court_1_Interior,_London,_UK_-_Diliff.jpg"
  },
- "судно": {
-  "t": "Portland Pudgy safety dinghy, rowing.JPG",
-  "a": "Poe artist",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Portland_Pudgy_safety_dinghy,_rowing.JPG"
- },
  "судья": {
   "t": "Cms BANCOIMAGEMFOTOMINISTRO bancoImagemFotoMinistro AP 88800.jpg",
   "a": "Equipe STF",
@@ -2659,12 +2277,6 @@ export const CREDITS = {
   "a": "Ed and Eddie from Palo Alto, USA",
   "l": "CC BY-SA 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:SFOperaHouse2_(8189967420).jpg"
- },
- "сыр": {
-  "t": "2015-01-25 Tobermory, Isle of Mull Cheese Sgriob-ruadh Farm - hu - 7900.jpg",
-  "a": "Hubertl",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:2015-01-25_Tobermory,_Isle_of_Mull_Cheese_Sgriob-ruadh_Farm_-_hu_-_7900.jpg"
  },
  "таблетка": {
   "t": "FlattenedRoundPills.jpg",
@@ -2714,12 +2326,6 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Court_18_long_view.JPG"
  },
- "тетрадь": {
-  "t": "Notebooks.jpg",
-  "a": "L.Marie",
-  "l": "CC BY 2.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Notebooks.jpg"
- },
  "технология": {
   "t": "Dampfturbine Montage01.jpg",
   "a": "Siemens Pressebild",
@@ -2749,12 +2355,6 @@ export const CREDITS = {
   "a": "Vyacheslav Argenberg",
   "l": "CC BY 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Steppe_flora,_Wild_flowers,_Rostov-on-Don,_Russia.jpg"
- },
- "трамвай": {
-  "t": "Flexity Tram Zürich 4001.jpg",
-  "a": "Chme82",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Flexity_Tram_Z%C3%BCrich_4001.jpg"
  },
  "тренер": {
   "t": "Torre and coaches.jpg",
@@ -2804,12 +2404,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:%D0%A3%D1%80%D0%BE%D0%BA_%D1%85%D0%B8%D0%BC%D0%B8%D0%B8.jpg"
  },
- "учащийся": {
-  "t": "High school students, SAS Pudong.jpg",
-  "a": "Mettevanderheide",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:High_school_students,_SAS_Pudong.jpg"
- },
  "училище": {
   "t": "Vrapice CZ vocational school 008.jpg",
   "a": "User:Miaow Miaow",
@@ -2828,23 +2422,11 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Lokomotiva_162_011-1_po_nehod%C4%9B.jpg"
  },
- "фабрика": {
-  "t": "Файл:Cromford Mill 2008.jpg",
-  "a": "craig carter from DERBYSHIRE, UK",
-  "l": "CC BY 2.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Cromford_Mill_2008.jpg"
- },
  "февраль": {
   "t": "Файл:Февра́ль.jpg",
   "a": "Володимир Тертишник",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:%D0%A4%D0%B5%D0%B2%D1%80%D0%B0%CC%81%D0%BB%D1%8C.jpg"
- },
- "физика": {
-  "t": "Файл:Lasers.jpeg",
-  "a": "彭家杰",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Lasers.jpeg"
  },
  "фильм": {
   "t": "Файл:Quartz 2x8S-3.jpg",
@@ -2924,23 +2506,11 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:AstiCattedrale.jpg"
  },
- "часы": {
-  "t": "Matthew Norman carriage clock.jpg",
-  "a": "Petar Milošević",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Matthew_Norman_carriage_clock.jpg"
- },
  "человек": {
   "t": "Baby with Aerobie flying ring.jpg",
   "a": "John Mayer",
   "l": "CC BY 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:Baby_with_Aerobie_flying_ring.jpg"
- },
- "чемодан": {
-  "t": "Файл:Reisekoffer Vulkanfiber.JPG",
-  "a": "Michael Kammerer (Rob Gyp)",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Reisekoffer_Vulkanfiber.JPG"
  },
  "чемпион": {
   "t": "Champions 2009.JPG",
@@ -2959,12 +2529,6 @@ export const CREDITS = {
   "a": "Nikolai Bulykin",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:%D0%91%D1%83%D1%85%D0%B0%D1%80%D0%B0,_%D0%9A%D1%83%D0%BA%D0%B5%D0%BB%D1%8C%D0%B4%D0%B0%D1%88,_%D1%88%D0%B0%D1%85%D0%BC%D0%B0%D1%82%D1%8B.jpg"
- },
- "шерсть": {
-  "t": "Файл:Goosebumps in cat.jpg",
-  "a": "SKsiddhartthan",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Goosebumps_in_cat.jpg"
  },
  "школа": {
   "t": "Файл:Молодецьке (Маньківський р-н). Школа.jpg",
@@ -3001,18 +2565,6 @@ export const CREDITS = {
   "a": "Kreuzschnabel",
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:2015_Freileitungen_bei_Marxheim.jpg"
- },
- "электричка": {
-  "t": "Siemens Nexas 789M Frankston to Williamstown service via Flinders Street at Seaford railway station Platform 1 (28 January 2026).jpg",
-  "a": "PEPSI697",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Siemens_Nexas_789M_Frankston_to_Williamstown_service_via_Flinders_Street_at_Seaford_railway_station_Platform_1_(28_January_2026).jpg"
- },
- "энергетика": {
-  "t": "Файл:Three Gorges Dam, Yangtze River, China.jpg",
-  "a": "Le Grand Portage",
-  "l": "CC BY 2.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Three_Gorges_Dam,_Yangtze_River,_China.jpg"
  },
  "этаж": {
   "t": "Idiosyncratic elevator panel.jpg",

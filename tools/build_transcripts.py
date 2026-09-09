@@ -34,33 +34,12 @@ from pathlib import Path
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
-from panel import fold  # noqa: E402
+from panel import fold, Resolver  # noqa: E402
 
 SUBS = ROOT / "data" / "raw" / "subs"
 CATALOGUE = ROOT / "data" / "raw" / "youtube" / "catalogue.json"
 TOKEN = re.compile(r"[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*")
 
-# A lemma whose gloss only names it as a form of another word ("dative of I") is a
-# stub row, not a word: it must not win a form from the word it is a form of.
-STUB_GLOSS = re.compile(r"^\s*(\w+\s+)?(form|case|plural|singular|dative|accusative|genitive|"
-                        r"instrumental|prepositional|nominative|short form|comparative)\b.*\bof\b", re.I)
-
-# How clearly a lemma must own a form to be credited with it: the best candidate's
-# independent frequency against the runner-up's.
-MARGIN = 3.0
-# A form that is also a lemma's own dictionary form («том», «дома») weighs more
-# than the same form as somebody else's inflection.
-HEADWORD_BONUS = 3.0
-# The closed class: particles, adverbs, conjunctions, numerals, pronouns. A form
-# that is the headword of one of these («просто», «конечно», «уже», «нет») is that
-# word when spoken, not the adjective or noun it could also inflect — the adverb in
-# -о is the classic case, and the corpus cannot settle it because the tokens are
-# counted under both.
-CLOSED = {"other", "pronoun", "possessive", "numeral"}
-# …except against a personal pronoun: «его» is "his" or "him", «их» "their" or
-# "them", and neither reading owns the form. Those are dropped.
-PERSONAL = {"я", "ты", "он", "она", "оно", "мы", "вы", "они", "себя"}
-POSSESSIVE = {"его", "её", "их"}
 # The corpus's top thousand lemmas count as common when judging a video's ease.
 TOP_RANK = 1000
 
@@ -113,72 +92,16 @@ def snippet(stream, i, before=4, after=5):
 
 
 def load_lexicon(lex_path, corpus_path):
-    """form key -> its candidate lemmas, each {bare, pos, glossed, stub, head, n}.
-
-    `n` is the lemma's *independent* frequency: corpus tokens of forms that belong
-    to it alone. Counting shared forms under every owner is what made «лёт» look
-    twice as common as «год» — every «лет» was credited to both."""
+    """-> (Resolver, bare -> frequency rank). The form -> lemma rule itself lives
+    in panel.py (resolve), shared with the pool count and the lookup index."""
     db = sqlite3.connect(f"file:{lex_path}?mode=ro", uri=True)
     db.execute("attach database ? as c", (str(corpus_path),))
-    key_owners = defaultdict(set)
-    for key, lid in db.execute("select key, lemma_id from forms"):
-        key_owners[key].add(lid)
-    indep = Counter()
-    for key, n in db.execute("select key, count(*) from c.item_tokens group by key"):
-        ids = key_owners.get(key)
-        if ids and len(ids) == 1:
-            indep[next(iter(ids))] += n
-    lemma = {}
-    for lid, bare, pos, en in db.execute("select id, bare, pos, en from lemmas"):
-        lemma[lid] = {"bare": bare, "pos": pos or "other",
-                      "glossed": bool(en and en.strip()),
-                      "stub": bool(en and STUB_GLOSS.match(en)), "n": indep.get(lid, 0)}
+    r = Resolver(db)
+    bare_of = dict(db.execute("select id, bare from lemmas"))
     db.close()
-    cands = {}
-    for key, ids in key_owners.items():
-        rows = []
-        for lid in ids:
-            c = dict(lemma[lid])
-            c["head"] = fold(c["bare"]) == key
-            rows.append(c)
-        cands[key] = rows
-    ranks = {lemma[lid]["bare"]: r for r, lid
-             in enumerate(sorted(indep, key=lambda x: -indep[x]))}
-    return cands, ranks
-
-
-def resolve(cands):
-    """-> (bare or None, ambiguous?) for a form's candidate lemmas."""
-    if not cands:
-        return None, False
-    if len(cands) == 1:
-        return cands[0]["bare"], False
-    live = [c for c in cands if not c["stub"]] or cands
-    glossed = [c for c in live if c["glossed"]]
-    live = glossed or live
-    # OpenRussian lists «весь», «мой», «свой» twice, as adjective and possessive, and
-    # «пора» twice as a noun: one headword is one word, whichever row it came from.
-    if len({c["bare"] for c in live}) == 1:
-        return live[0]["bare"], True
-    closed_head = [c for c in live if c["head"] and c["pos"] in CLOSED]
-    if closed_head:
-        rivals = [c for c in live if c not in closed_head]
-        personal = [c for c in rivals if c["bare"] in PERSONAL]
-        if personal:
-            # «нас», «тебя», «ему» are listed as headwords of their own; they are
-            # forms of the pronoun. «его», «её», «их» are also possessives, and
-            # nothing in a transcript says which reading was meant.
-            if any(c["bare"] in POSSESSIVE for c in closed_head):
-                return None, True
-            return max(personal, key=lambda c: c["n"])["bare"], True
-        best = max(closed_head, key=lambda c: (c["n"], "ё" in c["bare"]))
-        return best["bare"], True
-    weighed = sorted(((c["n"] + 1.0) * (HEADWORD_BONUS if c["head"] else 1.0), c["bare"])
-                     for c in live)
-    weighed.reverse()
-    if weighed[0][0] >= MARGIN * weighed[1][0]:
-        return weighed[0][1], True
-    return None, True
+    ranks = {bare_of[lid]: k for k, lid
+             in enumerate(sorted(r.indep, key=lambda x: -r.indep[x]))}
+    return r, ranks
 
 
 def main():
@@ -196,7 +119,8 @@ def main():
     videos = [v["id"] for v in catalogue["videos"]]
     print(f"{len(videos)} videos in the catalogue")
 
-    owners, ranks = load_lexicon(args.lexicon, args.corpus)
+    resolver, ranks = load_lexicon(args.lexicon, args.corpus)
+    owners = resolver.cands
     print(f"  lexicon index: {len(owners):,} forms")
 
     index, stats, per_video = {}, Counter(), {}
@@ -216,7 +140,8 @@ def main():
         for i, (token, at) in enumerate(pairs):
             key = fold(token)
             if key not in cache:
-                cache[key] = resolve(owners.get(key))
+                cand, ambiguous = resolver.owner(key)
+                cache[key] = (cand["bare"] if cand else None, ambiguous)
             lemma, ambiguous = cache[key]
             if lemma is None:
                 if ambiguous:

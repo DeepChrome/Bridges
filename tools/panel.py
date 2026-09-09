@@ -12,10 +12,15 @@ Output is plain JSON-able dicts:
     }
 """
 
+import json
+import re
 import sqlite3
 import unicodedata
+from collections import Counter, defaultdict
+from pathlib import Path
 
 ACUTE = "́"
+ROOT = Path(__file__).resolve().parent.parent
 
 CASES = [("nom", "Nominative"), ("gen", "Genitive"), ("dat", "Dative"),
          ("acc", "Accusative"), ("inst", "Instrumental"), ("prep", "Prepositional")]
@@ -31,6 +36,146 @@ SHORT = [("short_m", "m"), ("short_f", "f"), ("short_n", "n"), ("short_pl", "pl"
 def fold(s: str) -> str:
     d = unicodedata.normalize("NFD", s).replace(ACUTE, "").replace("̀", "")
     return unicodedata.normalize("NFC", d).lower().replace("ё", "е").strip()
+
+
+# --- which lemma a form belongs to -------------------------------------------
+#
+# 8,404 of the lexicon's form keys belong to more than one lemma, and they carry
+# 18 % of the corpus: «нет» is a form of «житься», «лет» of «лёт», «уже» of
+# «узкий», «тут» of the mulberry. Every join through `forms.key` — the pool
+# count that cuts the spine, the order of the app's lookup index, which
+# sentences illustrate a word, which lemma a video credits — has to settle the
+# same question the same way, so the rule lives here (it grew up in
+# build_transcripts.py, CLAUDE.md §23) and everything imports it.
+
+# A lemma whose gloss only names it as a form of another word ("dative of I") is a
+# stub row, not a word: it must not win a form from the word it is a form of.
+STUB_GLOSS = re.compile(r"^\s*(\w+\s+)?(form|case|plural|singular|dative|accusative|genitive|"
+                        r"genetive|instrumental|prepositional|nominative|short form|comparative)\b.*\bof\b", re.I)
+# How clearly a lemma must own a form to be credited with it: the best candidate's
+# independent frequency against the runner-up's.
+MARGIN = 3.0
+# A form that is also a lemma's own dictionary form («том», «дома») weighs more
+# than the same form as somebody else's inflection.
+HEADWORD_BONUS = 3.0
+# The closed class: particles, adverbs, conjunctions, numerals, pronouns. A form
+# that is the headword of one of these («просто», «конечно», «уже», «нет») is that
+# word when spoken, not the adjective or noun it could also inflect — the adverb in
+# -о is the classic case, and the corpus cannot settle it because the tokens are
+# counted under both.
+CLOSED = {"other", "pronoun", "possessive", "numeral"}
+# …except against a personal pronoun: «его» is "his" or "him", «их» "their" or
+# "them", and neither reading owns the form. Those are dropped.
+PERSONAL = {"я", "ты", "он", "она", "оно", "мы", "вы", "они", "себя"}
+POSSESSIVE = {"его", "её", "их"}
+# What the rule cannot settle, a person did: form key -> "bare" or "bare|pos".
+OVERRIDES_PATH = ROOT / "data" / "curated" / "lemma_overrides.json"
+
+
+def load_owners(db):
+    """form key -> its candidate lemmas, each {lid, bare, pos, glossed, stub,
+    head, n}, from a lexicon connection with the corpus attached as `c`.
+
+    `n` is the lemma's *independent* frequency: corpus tokens of forms that
+    belong to it alone. Counting shared forms under every owner is what made
+    «лёт» look twice as common as «год» — every «лет» was credited to both."""
+    key_owners = defaultdict(set)
+    for key, lid in db.execute("select key, lemma_id from forms"):
+        key_owners[key].add(lid)
+    indep = Counter()
+    for key, n in db.execute("select key, count(*) from c.item_tokens group by key"):
+        ids = key_owners.get(key)
+        if ids and len(ids) == 1:
+            indep[next(iter(ids))] += n
+    lemma = {}
+    for lid, bare, pos, en in db.execute("select id, bare, pos, en from lemmas"):
+        lemma[lid] = {"lid": lid, "bare": bare, "pos": pos or "other",
+                      "glossed": bool(en and en.strip()),
+                      "stub": bool(en and STUB_GLOSS.match(en)), "n": indep.get(lid, 0)}
+    cands = {}
+    for key, ids in key_owners.items():
+        rows = []
+        for lid in ids:
+            c = dict(lemma[lid])
+            c["head"] = fold(c["bare"]) == key
+            rows.append(c)
+        rows.sort(key=lambda c: (-c["n"], c["lid"]))
+        cands[key] = rows
+    return cands, indep
+
+
+def load_overrides(path=OVERRIDES_PATH):
+    if not path.exists():
+        return {}
+    return {k: v for k, v in json.loads(path.read_text(encoding="utf-8")).items()
+            if not k.startswith("_")}
+
+
+def _matches(c, spec):
+    bare, _, pos = spec.partition("|")
+    return c["bare"] == bare and (not pos or c["pos"] == pos)
+
+
+def resolve(cands, override=None):
+    """-> (candidate or None, ambiguous?) for a form's candidate lemmas.
+
+    A candidate is the dict load_owners builds; callers read ["bare"] or
+    ["lid"]. `override` is the curated "bare" or "bare|pos" for this key."""
+    if not cands:
+        return None, False
+    if override:
+        hit = next((c for c in cands if _matches(c, override)), None)
+        if hit:
+            return hit, True
+    if len(cands) == 1:
+        return cands[0], False
+    live = [c for c in cands if not c["stub"]] or cands
+    glossed = [c for c in live if c["glossed"]]
+    live = glossed or live
+    # OpenRussian lists «весь», «мой», «свой» twice, as adjective and possessive, and
+    # «пора» twice as a noun: one headword is one word, whichever row it came from.
+    # The row that owns the most forms of its own stands for it.
+    if len({c["bare"] for c in live}) == 1:
+        return max(live, key=lambda c: (c["n"], c["pos"] != "other")), True
+    closed_head = [c for c in live if c["head"] and c["pos"] in CLOSED]
+    if closed_head:
+        rivals = [c for c in live if c not in closed_head]
+        personal = [c for c in rivals if c["bare"] in PERSONAL]
+        if personal:
+            # «нас», «тебя», «ему» are listed as headwords of their own; they are
+            # forms of the pronoun. «его», «её», «их» are also possessives, and
+            # nothing in a transcript says which reading was meant.
+            if any(c["bare"] in POSSESSIVE for c in closed_head):
+                return None, True
+            return max(personal, key=lambda c: c["n"]), True
+        return max(closed_head, key=lambda c: (c["n"], "ё" in c["bare"])), True
+    weighed = sorted(((c["n"] + 1.0) * (HEADWORD_BONUS if c["head"] else 1.0), c["lid"], c)
+                     for c in live)
+    weighed.reverse()
+    if weighed[0][0] >= MARGIN * weighed[1][0]:
+        return weighed[0][2], True
+    return None, True
+
+
+class Resolver:
+    """The rule with its data: owner(key) -> (candidate or None, ambiguous)."""
+
+    def __init__(self, db, overrides=None):
+        self.cands, self.indep = load_owners(db)
+        self.overrides = load_overrides() if overrides is None else overrides
+        self._memo = {}
+
+    def candidates(self, key):
+        return self.cands.get(key, [])
+
+    def owner(self, key):
+        if key not in self._memo:
+            self._memo[key] = resolve(self.cands.get(key), self.overrides.get(key))
+        return self._memo[key]
+
+    def owner_id(self, key):
+        c, _ = self.owner(key)
+        return c["lid"] if c else None
 
 
 def _cells(par, slot):

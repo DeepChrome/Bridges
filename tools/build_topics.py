@@ -21,7 +21,7 @@ import io
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from panel import fold  # noqa: E402
+from panel import fold, Resolver, STUB_GLOSS  # noqa: E402
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
@@ -385,33 +385,31 @@ def main():
     src.execute("attach database ? as c", (str(args.corpus),))
 
     # The candidate pool: lemmas ranked by how often they actually occur in the decks.
-    # A form key shared by several lemmas is credited to the one whose own
-    # headword it is when exactly one of them has it as headword («нет» is a form
-    # of «житься» in OpenRussian, «просто» of «простой»; the particle and the
-    # adverb are the words spoken), and to all of them otherwise, as before. The
-    # first rule put «житься» on chapter 1's spine (CLAUDE.md §23).
-    owners = {}
-    for key, lid in src.execute("select key, lemma_id from forms"):
-        owners.setdefault(key, []).append(lid)
-    bare_of = dict(src.execute("select id, bare from lemmas"))
-    counts = {}
+    # A token is counted once, for the one lemma its form belongs to (panel.py
+    # resolve(): the headword over the inflection it could be, stubs demoted,
+    # the curated overrides for the rest); a form the rule cannot settle counts
+    # for nobody. Two earlier counts each put wrong words on the spine: crediting
+    # every owner made «житься» a chapter-1 word on the strength of «нет», and
+    # crediting once *per paradigm row* — the forms table lists a key several
+    # times for one lemma — made «быль» five times and «лета» fifty times as
+    # common as they are (CLAUDE.md §23).
+    resolver = Resolver(src)
+    counts, unsettled = {}, 0
     for key, n in src.execute("select key, count(*) from c.item_tokens group by key"):
-        ids = owners.get(key)
-        if not ids:
+        lid = resolver.owner_id(key)
+        if lid is None:
+            unsettled += n if resolver.candidates(key) else 0
             continue
-        if len(ids) > 1:
-            heads = [lid for lid in ids if fold(bare_of.get(lid, "")) == key]
-            if len(heads) == 1:
-                ids = heads
-        for lid in ids:
-            counts[lid] = counts.get(lid, 0) + n
+        counts[lid] = counts.get(lid, 0) + n
     pool = sorted(counts.items(), key=lambda x: -x[1])[:args.pool]
 
     meta = {}
     for lid, n in pool:
         row = src.execute(
             "select bare, accented, pos, en from lemmas where id=?", (lid,)).fetchone()
-        if row and row[3]:
+        # An inflection dressed as a headword ("genitive of I") is not a word to
+        # teach; the pronoun it belongs to is on the spine already.
+        if row and row[3] and not STUB_GLOSS.match(row[3]):
             meta[lid] = {"bare": row[0], "acc": row[1], "pos": row[2],
                          "en": row[3], "n": n}
 
@@ -568,7 +566,8 @@ def main():
     db.commit()
 
     print(f"wrote {args.out}")
-    print(f"  pool considered   : {len(meta):,} lemmas with glosses")
+    print(f"  pool considered   : {len(meta):,} lemmas with glosses "
+          f"({unsettled:,} tokens of forms the resolver could not settle counted for nobody)")
     print(f"  duplicate forms   : {dropped:,} rows dropped (one row per bare form; names out)")
     print(f"  placed in a topic : {len(assigned):,} ({len(assigned)/max(1,len(meta)):.0%})")
     print(f"  spine units       : {len(spine_ids)}")

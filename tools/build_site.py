@@ -19,7 +19,7 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from panel import build_tables, fold  # noqa: E402
+from panel import build_tables, fold, Resolver  # noqa: E402
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
@@ -56,8 +56,35 @@ def _stress_index(s):
     return -1
 
 
+def rank_examples(cands, sentences, sent_tokens, studied_keys):
+    """The sentences worth showing first, and one of each.
+
+    The collection holds the same sentence twice — the Core 5000 deck's stressed
+    copy of an Ultimate Guide card — so "four examples" was often two; one of
+    each (by fold), the stressed and recorded copy kept. Then the readable ones
+    first: fewest words outside the curriculum, then shortest — the entry, the
+    vocabulary card and the flashcard back all used to open on whatever sentence
+    had the lowest id («в» on «Он лежал в гробу»).
+    """
+    best = {}
+    for iid in cands:
+        ru, _en, _deck, has_audio = sentences[iid]
+        k = fold(ru)
+        score = (sum(ru.count(c) for c in ACC_MARKS) > 0, has_audio, -iid)
+        if k not in best or score > best[k][0]:
+            best[k] = (score, iid)
+    kept = [iid for _, iid in best.values()]
+
+    def hardness(iid):
+        toks = sent_tokens.get(iid, ())
+        unknown = sum(1 for k in toks if k not in studied_keys)
+        return (unknown, len(sentences[iid][0]), iid)
+    return sorted(kept, key=hardness)
+
+
 def build_dictionary(db, sentences, items_of_key, keys_of, stats,
-                     ext_sentences=None, ext_items_of_key=None):
+                     ext_sentences=None, ext_items_of_key=None,
+                     resolver=None, sent_tokens=None, studied_keys=frozenset()):
     """Every glossed lemma, with its paradigm and its sentences.
 
     The curriculum ships ~4,000 lemmas in full. The lexicon holds 58,844, and an
@@ -159,16 +186,22 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
         # His own decks first, always. A Tatoeba sentence is attested Russian but it
         # is not material he has studied, so it fills the remaining slots rather than
         # competing for the first one.
-        keys = keys_of.get(lid, ())
-        refs = []
-        for iid in sorted({i for k in keys for i in items_of_key.get(k, ())
-                           if i in sentences})[:4]:
-            refs.append(str(sentence_ref(iid)))
+        #
+        # Only through forms the lemma owns: a key shared with another lemma
+        # attaches a sentence only when the resolver gives it to this one, or
+        # «мочь» is illustrated by «недержание мочи» and «лук» by Великие Луки.
+        keys = [k for k in keys_of.get(lid, ())
+                if resolver is None or len(resolver.candidates(k)) < 2
+                or resolver.owner_id(k) == lid]
+        cands = {i for k in keys for i in items_of_key.get(k, ()) if i in sentences}
+        ranked = (rank_examples(cands, sentences, sent_tokens or {}, studied_keys)
+                  if sent_tokens is not None else sorted(cands))
+        refs = [str(sentence_ref(iid)) for iid in ranked[:4]]
         own = len(refs)
         if ext_items_of_key and len(refs) < 4:
             spare = 4 - len(refs)
-            for xid in sorted({x for k in keys for x in ext_items_of_key.get(k, ())
-                               if x in ext_sentences})[:spare]:
+            ext = {x for k in keys for x in ext_items_of_key.get(k, ()) if x in ext_sentences}
+            for xid in sorted(ext, key=lambda x: (len(ext_sentences[x][0]), x))[:spare]:
                 refs.append(str(ext_ref(xid)))
         if refs and not own:
             ext_only += 1
@@ -393,21 +426,23 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     stats["cov_forms"], stats["cov_tokens"] = cov_f, cov_t
 
     # --- candidate lemmas: everything a unit uses, plus the commonest ------
+    # A token counts once, for the lemma its form belongs to (panel.py resolve()
+    # — the same rule build_topics.py cuts the spine with), so the order of the
+    # shipped lemmas, which is also the priority of the lookup index, is the
+    # words' real frequency and not the number of paradigm rows sharing a key.
+    resolver = Resolver(db)
+    corpus_n = {}
+    for key, n in db.execute("select key, count(*) from c.item_tokens group by key"):
+        lid = resolver.owner_id(key)
+        if lid is not None:
+            corpus_n[lid] = corpus_n.get(lid, 0) + n
     unit_lemmas = [r[0] for r in db.execute("select distinct lemma_id from t.unit_words")]
-    top = [r[0] for r in db.execute("""
-        select f.lemma_id from c.item_tokens tk join forms f on f.key = tk.key
-        group by f.lemma_id order by count(*) desc limit ?
-    """, (n_lemmas,))]
+    top = [lid for lid, _ in sorted(corpus_n.items(), key=lambda x: (-x[1], x[0]))[:n_lemmas]]
     order, seen = [], set()
     for lid in top + unit_lemmas:
         if lid not in seen:
             seen.add(lid)
             order.append(lid)
-
-    corpus_n = dict(db.execute("""
-        select f.lemma_id, count(*) from c.item_tokens tk join forms f on f.key = tk.key
-        group by f.lemma_id
-    """))
 
     # Every glossed lemma, not just the curriculum's: build_dictionary reaches these
     # to find example sentences, and filtering to `seen` silently capped the deep
@@ -509,6 +544,21 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         pos_of[lid] = i
         for k in keys:
             index.setdefault(k, []).append(i)
+
+    # A shared key lists the lemma the form belongs to first: every consumer
+    # takes index[key][0] — word links, grading, cloze labels, search — and by
+    # frequency alone «нет» opened «житься» and «лет» credited «лёт».
+    reordered = 0
+    for k, ids in index.items():
+        if len(ids) < 2:
+            continue
+        lid = resolver.owner_id(k)
+        i = pos_of.get(lid)
+        if i is not None and ids[0] != i:
+            ids.remove(i)
+            ids.insert(0, i)
+            reordered += 1
+    stats["index_reordered"] = reordered
 
     # --- units and path ----------------------------------------------------
     grammar = {}
@@ -622,15 +672,19 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             row["cn"], row["ch"] = chapters[tid]
         path.append(row)
 
-    deep, shapes, slot_names, sent_pool, tsample = build_dictionary(
-        db, sentences, items_of_key, keys_of, stats, ext_sentences, ext_items_of_key)
-
     # Per-sentence tokens and which units each token's lemma belongs to, for the
-    # sentence measurements below — taken while the database is still open.
+    # example ranking and the sentence measurements below — taken while the
+    # database is still open.
     sent_tokens = {}
     for k, iid in db.execute("select key, item_id from c.item_tokens order by rowid"):
         if iid in sentences:
             sent_tokens.setdefault(iid, []).append(k)
+    studied_keys = {k for lid in seen for k in keys_of.get(lid, ())}
+
+    deep, shapes, slot_names, sent_pool, tsample = build_dictionary(
+        db, sentences, items_of_key, keys_of, stats, ext_sentences, ext_items_of_key,
+        resolver=resolver, sent_tokens=sent_tokens, studied_keys=studied_keys)
+
     key_units = {}
     for lid, tid in unit_of.items():
         if tid in uidx:

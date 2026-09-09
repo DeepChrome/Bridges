@@ -47,6 +47,8 @@ BEGINNER_RE = re.compile(r"super easy russian", re.I)
 
 # A unit's video is watched inside a lesson; a half-hour vlog is not that.
 UNIT_MAX_SEC = 1200
+# A video is a unit's episode only if it says this many of the unit's words.
+MIN_HIT = 5
 
 # Keyword matching gets these wrong: "city" pulled a video about a Latvian city
 # rather than town vocabulary, and "photos" pulled a family album into Technology.
@@ -266,7 +268,7 @@ def main():
             title_score = score_title(v["title"], kw[tid])
             hit = len(words & spoken) if (spoken and words) else 0
             coverage = hit / len(words) if words else 0
-            if hit >= 5:
+            if hit >= MIN_HIT:
                 ranked.append((coverage * 1000 + title_score * 120, tid,
                                dict(v, hit=hit, coverage=coverage)))
             elif title_score >= args.min_score:
@@ -289,14 +291,25 @@ def main():
         taken.add(v["id"])
 
     # Core stages get the beginner series, in the channel's own order (the listing
-    # is newest first, so reverse for a gentle-to-harder progression).
+    # is newest first, so reverse for a gentle-to-harder progression) — but only
+    # an episode that says at least MIN_HIT of the unit's words. The series used
+    # to be dealt out regardless, and a chapter's video listed none of its words
+    # (the content review, 2026-09-08); no video beats one that says nothing.
     beginner = [v for v in reversed(rows)
                 if BEGINNER_RE.search(v["title"]) and v["id"] not in taken]
     cores = [u for u in units if u[2] == "spine"]
-    for i, (tid, _name, _kind, _) in enumerate(cores):
-        if i < len(beginner):
-            assigned[tid] = dict(beginner[i], score=0)
-            taken.add(beginner[i]["id"])
+    for tid, _name, _kind, _ in cores:
+        words = unit_words.get(tid) or set()
+        for v in beginner:
+            if v["id"] in taken:
+                continue
+            spoken = heard.get(v["id"]) or set()
+            hit = len(words & set(spoken))
+            if hit >= MIN_HIT:
+                assigned[tid] = dict(v, score=0, hit=hit,
+                                     coverage=hit / len(words) if words else 0)
+                taken.add(v["id"])
+                break
 
     keep = ("id", "title", "dur", "channel", "score", "hit", "coverage")
     out = {

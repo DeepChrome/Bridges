@@ -46,11 +46,12 @@ export function heardIn(bare) {
         if (!rows.some((r) => r.id === v.id)) rows.push({ id: v.id, title: v.title, ch: v.ch, n: occ.length, ...occ[0] });
       }
     };
+    const episodes = new Set(UN.filter((u) => u.v).map((u) => u.v.id));
     for (const u of UN) if (u.v && u.v.heard) add(u.v, u.v.heard);
     for (const v of VIDEOS) add(v, v.words);
-    // The unit's own episode first, then where the word is said most.
+    // A unit's own episode first, then where the word is said most.
     for (const rows of heardIndex.values()) {
-      rows.sort((a, b) => (b.n - a.n));
+      rows.sort((a, b) => (episodes.has(b.id) - episodes.has(a.id)) || (b.n - a.n));
     }
   }
   return heardIndex.get(bare) || [];

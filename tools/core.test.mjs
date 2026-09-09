@@ -28,7 +28,7 @@ import { sentenceLemmas, gradeAlignment, feedbackTags } from "../core/speech.js"
 import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
 import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
-import { makeHydrator } from "../core/entry.js";
+import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ICONS, iconFor } from "../core/icons.js";
 import { AV, AV_IDS } from "../core/avatars.js";
 
@@ -38,8 +38,7 @@ const DATA = JSON.parse(readFileSync(join(ROOT, "native/assets/data.json"), "utf
 /* The payload stores paradigms and sentences once, shared; entries are filled out
    on the way in. Set up here because more than one group needs it. */
 const DEEP = parseDeep(DATA.deep || "");
-const DEEP_BY_BARE = new Map();
-for (const d of DEEP) if (!DEEP_BY_BARE.has(d.b)) DEEP_BY_BARE.set(d.b, d);
+const DEEP_BY_BARE = makeDeepIndex(DEEP);
 const hydrate = makeHydrator({
   deepIndex: () => DEEP_BY_BARE, shapes: DATA.shapes, slots: DATA.slots,
   sent: DATA.sent,
@@ -610,6 +609,29 @@ group("late tags");
   ok(tagAttempt(sp, 10, []) === sp && tagAttempt(sp, 10, null) === sp, "no tags: same object back");
 }
 
+/* The first lemma under a shared form key is the word a speaker means by it —
+   every consumer takes IX[key][0] (word links, grading, cloze labels, search),
+   and until 2026-09-08 «нет» opened «житься» and «лет» credited «лёт»
+   (CLAUDE.md §23; panel.py resolve()). */
+group("lookup index order");
+{
+  const first = (k) => L[IX[k][0]];
+  for (const [k, want] of [["нет", "нет"], ["уже", "уже"], ["после", "после"], ["при", "при"],
+                           ["лет", "год"], ["два", "два"], ["три", "три"], ["потом", "потом"],
+                           ["надо", "надо"], ["почти", "почти"], ["были", "быть"], ["день", "день"]]) {
+    ok(IX[k] && first(k).b === want, `«${k}» resolves first to «${want}»`, IX[k] && first(k).b);
+  }
+  ok(IX["тут"] && first("тут").p !== "noun", "«тут» is the adverb, not the mulberry", first("тут").p);
+  ok(IX["есть"] && first("есть").p !== "verb", "«есть» is \"there is\" before \"eat\"", first("есть").p);
+  // No inflection dressed as a headword is taught as a word of its own.
+  const stub = /^\s*(\w+\s+)?(form|case|plural|singular|dative|accusative|genitive|genetive|instrumental|prepositional|nominative)\b.*\bof\b/i;
+  const stubs = UN.flatMap((u) => u.w).filter((i) => stub.test(L[i].e)).map((i) => L[i].b);
+  ok(stubs.length === 0, "no unit teaches a case-form stub", stubs.join(" "));
+  for (const b of ["лёт", "быль", "деть", "лета", "житься", "двух"]) {
+    ok(!UN.some((u) => u.w.some((i) => L[i].b === b)), `«${b}» is not on the path`);
+  }
+}
+
 /* Per-word grades from an alignment: what the speech activities hand the scheduler. */
 group("speech grading");
 {
@@ -782,7 +804,7 @@ group("paradigms rebuilt from shared ending-shapes");
      String(sample.length));
   let same = 0, differed = null;
   for (const s of sample) {
-    const rec = byBare.get(s.b);
+    const rec = byBare.get(fold(s.b) + "|" + s.p) || byBare.get(fold(s.b));
     if (!rec) continue;
     const mine = buildTables(s.p, slotsOf(rec, decodeShapes(DATA.shapes), DATA.slots));
     if (JSON.stringify(mine) === JSON.stringify(s.t)) same++;

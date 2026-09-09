@@ -13,7 +13,7 @@
     "core1": {
       "title": "No “a”, no “the”, no “is”",
       "body": "Russian has no articles, and it leaves out the present tense of “to be”.",
-      "examples": [["Я студе́нт.", "I am a student."], ["Он до́ма.", "He is at home."]]
+      "examples": [["Я — Джа́ред.", "I am Jared."], ["Э́то он.", "That is him."]]
     },
     "core2": {
       "title": "Two verb patterns",
@@ -50,11 +50,21 @@
       "body": "Imperfective verbs describe the process or a repeated action; perfective verbs describe one completed act.",
       "examples": [["Я чита́л кни́гу.", "I was reading the book."], ["Я прочита́л кни́гу.", "I finished the book."]]
     },
+    "core9": {
+      "title": "Talking about the future",
+      "body": "A perfective verb in its present-tense forms already means the future: я сде́лаю is “I will do”. For a process use бу́ду plus the imperfective: я бу́ду рабо́тать.",
+      "examples": [["За́втра я сде́лаю э́то.", "Tomorrow I will do it."], ["Я бу́ду рабо́тать до́ма.", "I will be working at home."]]
+    },
+    "core10": {
+      "title": "Asking someone to do something",
+      "body": "The imperative is the ты form with -й, -и or -ь: чита́й, скажи́, забу́дь; add -те to one person you say вы to, or to several.",
+      "examples": [["Скажи́, где ты живёшь.", "Tell me where you live."], ["Прочита́йте э́то, пожа́луйста.", "Read this, please."]]
+    },
 
     "family": {
       "title": "“My” agrees with what is owned",
       "body": "Possessives take the gender of the thing possessed, not of the owner.",
-      "examples": [["мой брат, моя́ сестра́", "my brother, my sister"], ["мои́ роди́тели", "my parents"]]
+      "examples": [["мой брат, моя́ дочь", "my brother, my daughter"], ["мои́ роди́тели", "my parents"]]
     },
     "time": {
       "title": "Numbers change the noun after them",
@@ -62,9 +72,9 @@
       "examples": [["оди́н час, два часа́", "one hour, two hours"], ["пять часо́в", "five hours"]]
     },
     "food": {
-      "title": "Two verbs you say every day",
-      "body": "есть (to eat) is irregular: я ем, ты ешь, он ест. пить (to drink) keeps the -е- pattern on a short stem: я пью, ты пьёшь.",
-      "examples": [["Я ем хлеб.", "I eat bread."], ["Ты пьёшь чай?", "Do you drink tea?"]]
+      "title": "Saying what you want",
+      "body": "хоте́ть is irregular — я хочу́, ты хо́чешь, он хо́чет, мы хоти́м — and the thing you want follows it directly.",
+      "examples": [["Я хочу́ чай.", "I want tea."], ["Ты хо́чешь ко́фе?", "Do you want coffee?"]]
     },
     "school": {
       "title": "Three ways to “study”",
@@ -89,7 +99,7 @@
     "travel": {
       "title": "Two verbs for “go”",
       "body": "идти́ is one trip in one direction happening now; ходи́ть is going regularly or there and back.",
-      "examples": [["Я иду́ в магази́н.", "I am going to the shop."], ["Я хожу́ в магази́н ка́ждый день.", "I go to the shop every day."]]
+      "examples": [["Я иду́ в парк.", "I am going to the park."], ["Я хожу́ в парк ка́ждый день.", "I go to the park every day."]]
     },
     "body": {
       "title": "What hurts is the subject",
@@ -134,12 +144,12 @@
     "sport": {
       "title": "Playing games vs playing instruments",
       "body": "игра́ть в plus the accusative for sports and games; игра́ть на plus the prepositional for instruments.",
-      "examples": [["игра́ть в футбо́л", "to play football"], ["игра́ть на гита́ре", "to play the guitar"]]
+      "examples": [["игра́ть в футбо́л", "to play football"], ["игра́ть на компью́тере", "to play on the computer"]]
     },
     "art": {
       "title": "Talking about a work",
       "body": "о (об before a vowel) plus the prepositional case means “about”.",
-      "examples": [["фильм о войне́", "a film about the war"], ["кни́га об иску́сстве", "a book about art"]]
+      "examples": [["фильм о войне́", "a film about the war"], ["кни́га о Москве́", "a book about Moscow"]]
     },
     "politics": {
       "title": "Quantity words take the genitive",
@@ -154,7 +164,7 @@
     "business": {
       "title": "How much does it cost?",
       "body": "ско́лько сто́ит plus the thing; the answer counts in roubles the way hours are counted — оди́н рубль, два рубля́, пять рубле́й.",
-      "examples": [["Ско́лько э́то сто́ит?", "How much does this cost?"], ["Э́то сто́ит сто рубле́й.", "It costs a hundred roubles."]]
+      "examples": [["Ско́лько э́то сто́ит?", "How much does this cost?"], ["Э́то сто́ит два рубля́.", "It costs two roubles."]]
     },
     "law": {
       "title": "What someone is, was, or became",
@@ -163,8 +173,8 @@
     },
     "science": {
       "title": "Doing something with something",
-      "body": "The instrumental, with no preposition, is the tool or the field: занима́ться нау́кой, писа́ть ру́чкой.",
-      "examples": [["Он занима́ется нау́кой.", "He does science."], ["Мы пи́шем ру́чкой.", "We write with a pen."]]
+      "body": "The instrumental, with no preposition, is the field or the tool: занима́ться матема́тикой; and what someone became: стать учёным.",
+      "examples": [["Он занима́ется матема́тикой.", "He does mathematics."], ["Она́ ста́ла учёным.", "She became a scientist."]]
     },
     "religion": {
       "title": "Believing in",

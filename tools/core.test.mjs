@@ -450,15 +450,19 @@ group("lesson generation");
      "topped up with the unit's earlier words");
 }
 
-/* The listening step rides on the quiz from the second chapter on. */
+/* The listening step rides on the quiz from SPEECH_MIX.hear on — the first
+   chapter's third lesson (P9.22), once a few words have been met. */
 group("hearing");
 {
   const first = STAGES[0].core;
   const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.hear.fromStage
                                    && (SPEECH.listen[s.core.id] || []).length).core;
+  const lesson = Q.stageOf(later) === SPEECH_MIX.hear.fromStage ? (SPEECH_MIX.hear.fromLesson || 0) : 0;
   ok(!Q.quizSteps(first, 0).some((q) => q.kind === "hear"),
-     "the first chapter's quiz is reading-only");
-  const quiz = Q.quizSteps(later, 0);
+     "the first lesson's quiz is reading-only");
+  ok(SPEECH_MIX.hear.fromStage === 0 && SPEECH_MIX.hear.fromLesson === 2,
+     "listening joins in chapter 1 from the third lesson");
+  const quiz = Q.quizSteps(later, lesson);
   const hears = quiz.filter((q) => q.kind === "hear");
   ok(hears.length === SPEECH_MIX.hear.perQuiz, `${later.id}: one hear step per quiz`,
      String(hears.length));
@@ -492,10 +496,10 @@ group("hearing");
      "the lemmas it grades are real curriculum entries");
 
   // The prompt leans toward the lesson's own words when the pool has any.
-  const want = new Set(lessonWords(later, 0));
+  const want = new Set(lessonWords(later, lesson));
   let leaning = 0;
   for (let k = 0; k < 20; k++) {
-    const row = Q.speechPrompt("hear", later, 0).row;
+    const row = Q.speechPrompt("hear", later, lesson).row;
     if (sentenceLemmas(row[0], IX).some((i) => want.has(i))) leaning++;
   }
   const possible = SPEECH.listen[later.id]

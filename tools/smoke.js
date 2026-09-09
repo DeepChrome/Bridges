@@ -175,7 +175,8 @@ setTimeout(async () => {
   group("path");
   ok($$("#s-path .node").length === UNITS, `${UNITS} unit nodes`,
      String($$("#s-path .node").length));
-  ok($$("#s-path .stage-h").length === 8, "8 stages");
+  ok($$("#s-path .stage-h").length === 10, "10 chapters",
+     String($$("#s-path .stage-h").length));
   ok($$("#s-path .node .thumb svg").length === UNITS, "every unit node has a thumbnail",
      String($$("#s-path .node .thumb svg").length));
 
@@ -202,8 +203,8 @@ setTimeout(async () => {
   group("vocab component");
   await nav("#/lesson/food/0/vocab");
   ok(!!$("#s-lesson .gtitle"), "vocab opens on the unit's grammar rule");
-  // food's card is the two irregular verbs (docs/grammar-sequence.md), not a case.
-  ok(/пить|есть/.test($("#s-lesson").textContent), "the grammar note is the unit's");
+  // food's card is «хотеть» (docs/grammar-sequence.md), not a case.
+  ok(/хот|хоч/.test($("#s-lesson").textContent), "the grammar note is the unit's");
   const vocabRun = await runExercises();
   ok(vocabRun.steps < 90, "vocab runs to completion", "steps " + vocabRun.steps);
   ok(vocabRun.seen.has("teach"), "teaching cards appeared");

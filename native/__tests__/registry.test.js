@@ -43,10 +43,11 @@ describe("activity registry", () => {
     }
     qs.push(...Q.quizSteps(unit, 0));
     qs.push(Q.present({ t: "match", pairs: unit.w.slice(0, 3) }));
-    // The speech steps only join from a later chapter; make sure one is drawn.
+    // The speech steps only join from a later lesson or chapter; make sure one is drawn.
     const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.hear.fromStage
                                      && (SPEECH.listen[s.core.id] || []).length).core;
-    const quiz = Q.quizSteps(later, 0);
+    const lesson = Q.stageOf(later) === SPEECH_MIX.hear.fromStage ? (SPEECH_MIX.hear.fromLesson || 0) : 0;
+    const quiz = Q.quizSteps(later, lesson);
     expect(quiz.some((q) => q.kind === "hear")).toBe(true);
     qs.push(...quiz);
     const speaking = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.say.fromStage

@@ -127,8 +127,13 @@ describe("path node states", () => {
   it("lays a chapter's side quests out in ranks of three, none overlapping", async () => {
     await withState({});
     const { questRanks } = require("../src/screens/Learn");
-    const big = STAGES.find((s) => s.branches.length > 3);
-    expect(big).toBeTruthy();
+    // The rule, on a chapter wider than the drawing: eight quests read 3 · 3 · 2.
+    const eight = STAGES.flatMap((s) => s.branches).slice(0, 8);
+    expect(questRanks(eight).map((r) => r.length)).toEqual([3, 3, 2]);
+    expect(questRanks(eight).flat()).toEqual(eight);
+    // The drawing, on the widest chapter the curriculum has.
+    const big = STAGES.reduce((a, s) => (s.branches.length > a.branches.length ? s : a));
+    expect(big.branches.length).toBeGreaterThanOrEqual(3);
     const ranks = questRanks(big.branches);
     expect(ranks.every((r) => r.length <= 3)).toBe(true);
     expect(ranks.flat()).toEqual(big.branches);

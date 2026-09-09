@@ -51,40 +51,49 @@
    "channel": "Easy Russian",
    "score": 99
   },
-  "time": {
-   "id": "iPAYNKPQFL8",
-   "title": "Why Russians STOP Working for Half of May | May Holidays, Victory Day & Shashlik (Russian Culture)",
-   "dur": 709,
+  "home": {
+   "id": "soKb7C4g_X8",
+   "title": "Step Inside My Russian Apartment: A Cozy Home Tour | Learn Russian Naturally",
+   "dur": 1112,
    "channel": "Comprehensible Russian",
-   "score": 730.0,
-   "hit": 10,
-   "coverage": 0.25
+   "score": 790.0,
+   "hit": 11,
+   "coverage": 0.55
   },
   "clothes": {
    "id": "MbvtSNMwshI",
    "title": "Fashion in Russia: What Do People Wear? | Easy Russian 90",
    "dur": 997,
    "channel": "Easy Russian",
-   "score": 622.3529411764705,
-   "hit": 13,
-   "coverage": 0.38235294117647056
+   "score": 740.0,
+   "hit": 10,
+   "coverage": 0.5
   },
-  "home": {
-   "id": "soKb7C4g_X8",
-   "title": "Step Inside My Russian Apartment: A Cozy Home Tour | Learn Russian Naturally",
-   "dur": 1112,
+  "school": {
+   "id": "BxUZdClSMnM",
+   "title": "University System in Russia 🎓 Politics, Education & Change | Natural Russian Input",
+   "dur": 984,
    "channel": "Comprehensible Russian",
-   "score": 590.0,
-   "hit": 14,
-   "coverage": 0.35
+   "score": 690.0,
+   "hit": 9,
+   "coverage": 0.45
   },
   "food": {
    "id": "SJ-ip-OicNQ",
    "title": "Having Lunch In Slow Russian | Super Easy Russian 53",
    "dur": 881,
    "channel": "Easy Russian",
+   "score": 620.0,
+   "hit": 10,
+   "coverage": 0.5
+  },
+  "time": {
+   "id": "cCiCckakpto",
+   "title": "April News About Russia: Chernobyl Story, Syzran Tragedy & Youth Debt (Russian Comprehensible Input)",
+   "dur": 930,
+   "channel": "Comprehensible Russian",
    "score": 570.0,
-   "hit": 18,
+   "hit": 9,
    "coverage": 0.45
   },
   "art": {
@@ -96,14 +105,14 @@
    "hit": 13,
    "coverage": 0.325
   },
-  "school": {
-   "id": "BxUZdClSMnM",
-   "title": "University System in Russia 🎓 Politics, Education & Change | Natural Russian Input",
-   "dur": 984,
-   "channel": "Comprehensible Russian",
-   "score": 540.0,
-   "hit": 12,
-   "coverage": 0.3
+  "family": {
+   "id": "z4-Ra9EDmzo",
+   "title": "What's Your Favourite Family Portrait?| Easy Russian 82",
+   "dur": 646,
+   "channel": "Easy Russian",
+   "score": 520.0,
+   "hit": 8,
+   "coverage": 0.4
   },
   "sport": {
    "id": "sw2V54gc-iQ",
@@ -114,14 +123,14 @@
    "hit": 15,
    "coverage": 0.375
   },
-  "emotion": {
-   "id": "6idM4p8PLqE",
-   "title": "Love In Russia vs Love In Europe and The USA | Easy Russian 123",
-   "dur": 959,
+  "nature": {
+   "id": "ACn7xTNNRcc",
+   "title": "How to Enjoy Winter? | Easy Russian 81",
+   "dur": 742,
    "channel": "Easy Russian",
-   "score": 490.0,
-   "hit": 10,
-   "coverage": 0.25
+   "score": 470.0,
+   "hit": 14,
+   "coverage": 0.35
   },
   "work": {
    "id": "YNZ67LZMgx0",
@@ -132,14 +141,14 @@
    "hit": 14,
    "coverage": 0.35
   },
-  "nature": {
-   "id": "ACn7xTNNRcc",
-   "title": "How to Enjoy Winter? | Easy Russian 81",
-   "dur": 742,
+  "emotion": {
+   "id": "6idM4p8PLqE",
+   "title": "Love In Russia vs Love In Europe and The USA | Easy Russian 123",
+   "dur": 959,
    "channel": "Easy Russian",
-   "score": 445.0,
-   "hit": 13,
-   "coverage": 0.325
+   "score": 440.0,
+   "hit": 8,
+   "coverage": 0.2
   },
   "politics": {
    "id": "N9iqXaWlljg",
@@ -150,59 +159,50 @@
    "hit": 8,
    "coverage": 0.2
   },
-  "family": {
-   "id": "z4-Ra9EDmzo",
-   "title": "What's Your Favourite Family Portrait?| Easy Russian 82",
-   "dur": 646,
-   "channel": "Easy Russian",
-   "score": 395.0,
-   "hit": 11,
-   "coverage": 0.275
-  },
-  "animals": {
-   "id": "23PEkMd2svg",
-   "title": "15 Useful Russian Animal Idioms You Should Know | Super Easy Russian 34",
-   "dur": 535,
-   "channel": "Easy Russian",
-   "score": 370.0,
-   "hit": 6,
-   "coverage": 0.25
-  },
   "speech": {
    "id": "vJZs4TZLCwc",
    "title": "50+ Useful Conversation Phrases to React in a Dialogue Like a Russian | Super Easy Russian 15",
    "dur": 386,
    "channel": "Easy Russian",
-   "score": 365.0,
-   "hit": 5,
-   "coverage": 0.125
-  },
-  "business": {
-   "id": "cCiCckakpto",
-   "title": "April News About Russia: Chernobyl Story, Syzran Tragedy & Youth Debt (Russian Comprehensible Input)",
-   "dur": 930,
-   "channel": "Comprehensible Russian",
-   "score": 348.57142857142856,
-   "hit": 8,
-   "coverage": 0.22857142857142856
+   "score": 390.0,
+   "hit": 6,
+   "coverage": 0.15
   },
   "body": {
    "id": "hFWGPcA6r6s",
    "title": "Do Russians Go To Doctors? | Easy Russian 103",
    "dur": 1034,
    "channel": "Easy Russian",
-   "score": 345.0,
-   "hit": 9,
-   "coverage": 0.225
+   "score": 370.0,
+   "hit": 10,
+   "coverage": 0.25
+  },
+  "animals": {
+   "id": "23PEkMd2svg",
+   "title": "15 Useful Russian Animal Idioms You Should Know | Super Easy Russian 34",
+   "dur": 535,
+   "channel": "Easy Russian",
+   "score": 350.7692307692308,
+   "hit": 6,
+   "coverage": 0.23076923076923078
   },
   "travel": {
    "id": "vs3K5EwZHwo",
    "title": "№ 129 - Про велосипеды - Russian podcast with subs",
    "dur": 1115,
    "channel": "Russian Progress",
-   "score": 300.0,
-   "hit": 12,
-   "coverage": 0.3
+   "score": 325.0,
+   "hit": 13,
+   "coverage": 0.325
+  },
+  "military": {
+   "id": "iPAYNKPQFL8",
+   "title": "Why Russians STOP Working for Half of May | May Holidays, Victory Day & Shashlik (Russian Culture)",
+   "dur": 709,
+   "channel": "Comprehensible Russian",
+   "score": 320.0,
+   "hit": 8,
+   "coverage": 0.2
   },
   "science": {
    "id": "3_fiyh0fXyM",
@@ -213,14 +213,14 @@
    "hit": 5,
    "coverage": 0.2
   },
-  "military": {
-   "id": "wGcqFV_alDk",
-   "title": "Narva: What Is It Like to Live at the Border with Russia? | Easy Russian 52",
-   "dur": 955,
+  "business": {
+   "id": "AyRPqHcRCx8",
+   "title": "Let's Talk About Money in Russian | Easy Russian 121",
+   "dur": 943,
    "channel": "Easy Russian",
-   "score": 175.0,
+   "score": 200.0,
    "hit": 7,
-   "coverage": 0.175
+   "coverage": 0.2
   },
   "religion": {
    "id": "aBQptpP5ZOI",
@@ -243,7 +243,7 @@
    "channel": "Easy Russian",
    "score": 0,
    "hit": 18,
-   "coverage": 0.6428571428571429
+   "coverage": 0.6
   },
   "core2": {
    "id": "Rtm6_ayvBX0",
@@ -252,7 +252,7 @@
    "channel": "Easy Russian",
    "score": 0,
    "hit": 11,
-   "coverage": 0.39285714285714285
+   "coverage": 0.36666666666666664
   },
   "core3": {
    "id": "JRcV-A7r470",
@@ -260,8 +260,8 @@
    "dur": 241,
    "channel": "Easy Russian",
    "score": 0,
-   "hit": 12,
-   "coverage": 0.42857142857142855
+   "hit": 13,
+   "coverage": 0.43333333333333335
   },
   "core4": {
    "id": "Fzvt4bgepks",
@@ -269,26 +269,26 @@
    "dur": 926,
    "channel": "Easy Russian",
    "score": 0,
-   "hit": 15,
-   "coverage": 0.5357142857142857
+   "hit": 12,
+   "coverage": 0.4
   },
   "core5": {
-   "id": "ZyPPmqYu9nY",
-   "title": "9 Common Mistakes Russian Learners Make | Super Easy Russian 19",
-   "dur": 553,
-   "channel": "Easy Russian",
-   "score": 0,
-   "hit": 8,
-   "coverage": 0.2857142857142857
-  },
-  "core6": {
    "id": "7sFEx8Z4XQ8",
    "title": "How to Describe Your Day In Russian | Super Easy Russian 18",
    "dur": 521,
    "channel": "Easy Russian",
    "score": 0,
-   "hit": 8,
-   "coverage": 0.2857142857142857
+   "hit": 7,
+   "coverage": 0.23333333333333334
+  },
+  "core6": {
+   "id": "ZyPPmqYu9nY",
+   "title": "9 Common Mistakes Russian Learners Make | Super Easy Russian 19",
+   "dur": 553,
+   "channel": "Easy Russian",
+   "score": 0,
+   "hit": 10,
+   "coverage": 0.3333333333333333
   },
   "core7": {
    "id": "pfLVqvgkTbU",
@@ -297,7 +297,7 @@
    "channel": "Easy Russian",
    "score": 0,
    "hit": 12,
-   "coverage": 0.42857142857142855
+   "coverage": 0.4
   },
   "core8": {
    "id": "07krcppZGxw",
@@ -305,8 +305,26 @@
    "dur": 692,
    "channel": "Easy Russian",
    "score": 0,
-   "hit": 8,
-   "coverage": 0.2857142857142857
+   "hit": 7,
+   "coverage": 0.23333333333333334
+  },
+  "core9": {
+   "id": "wCzD2jitlEs",
+   "title": "How to Know a Word’s Gender in Russian | Super Easy Russian 21",
+   "dur": 503,
+   "channel": "Easy Russian",
+   "score": 0,
+   "hit": 7,
+   "coverage": 0.23333333333333334
+  },
+  "core10": {
+   "id": "-mf38m0rRfE",
+   "title": "10 Situations Where to Use Russian Genitive Case | Super Easy Russian 23",
+   "dur": 777,
+   "channel": "Easy Russian",
+   "score": 0,
+   "hit": 9,
+   "coverage": 0.3
   }
  },
  "videos": [
@@ -332,11 +350,10 @@
    "title": "Where Can You Practice Russian Outside of Russia? | Easy Russian 124",
    "ch": "Easy Russian",
    "dur": 412,
-   "kw": "practice outside listening interview school food drink emotion feelings mind street native tutorial become member",
+   "kw": "practice outside listening interview food drink school street native tutorial become member",
    "topics": [
-    "school",
     "food",
-    "emotion"
+    "school"
    ],
    "level": null,
    "ease": 0.697,
@@ -349,11 +366,11 @@
    "title": "Love In Russia vs Love In Europe and The USA | Easy Russian 123",
    "ch": "Easy Russian",
    "dur": 959,
-   "kw": "love europe usa listening interview emotion feelings mind school family street native tutorial become member",
+   "kw": "love europe usa listening interview emotion feelings mind family school street native tutorial become member",
    "topics": [
     "emotion",
-    "school",
-    "family"
+    "family",
+    "school"
    ],
    "level": null,
    "ease": 0.622,
@@ -366,10 +383,10 @@
    "title": "Will AI Replace Jobs in Russia? | Easy Russian 122",
    "ch": "Easy Russian",
    "dur": 889,
-   "kw": "replace jobs listening interview work money school emotion feelings mind animals street native tutorial become member",
+   "kw": "replace jobs listening interview school work money emotion feelings mind food street native tutorial become member",
    "topics": [
-    "work",
     "school",
+    "work",
     "emotion"
    ],
    "level": null,
@@ -383,11 +400,11 @@
    "title": "Let's Talk About Money in Russian | Easy Russian 121",
    "ch": "Easy Russian",
    "dur": 943,
-   "kw": "let's talk money listening interview speech work emotion feelings mind street native tutorial urban media arts production",
+   "kw": "let's talk money listening interview school speech work food street native tutorial urban media arts production",
    "topics": [
+    "school",
     "speech",
-    "work",
-    "emotion"
+    "work"
    ],
    "level": null,
    "ease": 0.675,
@@ -400,11 +417,11 @@
    "title": "The Most Unexpected Jobs In Russia | Easy Russian 120",
    "ch": "Easy Russian",
    "dur": 1055,
-   "kw": "unexpected jobs listening interview school emotion feelings mind work money food street native tutorial days free lingopie",
+   "kw": "unexpected jobs listening interview school work money emotion feelings mind food street native tutorial days free lingopie",
    "topics": [
     "school",
-    "emotion",
-    "work"
+    "work",
+    "emotion"
    ],
    "level": null,
    "ease": 0.645,
@@ -417,11 +434,11 @@
    "title": "Talking About Burnout In Slow Russian | Easy Russian 119",
    "ch": "Easy Russian",
    "dur": 802,
-   "kw": "talking burnout slow listening interview beginner emotion feelings mind time numbers body health street native tutorial become member",
+   "kw": "talking burnout slow listening interview beginner time numbers emotion feelings mind travel transport street native tutorial become member",
    "topics": [
-    "emotion",
     "time",
-    "body"
+    "emotion",
+    "travel"
    ],
    "level": "beginner",
    "ease": 0.613,
@@ -449,11 +466,11 @@
    "title": "He Learned Russian Using These Rules, And You Can Too | Easy Russian 118",
    "ch": "Easy Russian",
    "dur": 1159,
-   "kw": "learned using rules too listening interview school art music emotion feelings mind food street native tutorial become member",
+   "kw": "learned using rules too listening interview school food drink art music street native tutorial become member",
    "topics": [
     "school",
-    "art",
-    "emotion"
+    "food",
+    "art"
    ],
    "level": null,
    "ease": 0.65,
@@ -466,9 +483,9 @@
    "title": "How To Talk About Superstitions in Russian? | Easy Russian 117",
    "ch": "Easy Russian",
    "dur": 1246,
-   "kw": "talk superstitions listening interview emotion feelings mind speech time numbers street native tutorial find ideal teacher italki use promo code easyrussian discount first minimum",
+   "kw": "talk superstitions listening interview family speech time numbers street native tutorial find ideal teacher italki use promo code easyrussian discount first minimum",
    "topics": [
-    "emotion",
+    "family",
     "speech",
     "time"
    ],
@@ -483,11 +500,11 @@
    "title": "Shopping On a Russian Marketplace | Easy Russian 116",
    "ch": "Easy Russian",
    "dur": 1019,
-   "kw": "shopping marketplace listening interview travel transport home time numbers town street native tutorial days free lingopie",
+   "kw": "shopping marketplace listening interview home travel transport tech technology media clothes street native tutorial days free lingopie",
    "topics": [
-    "travel",
     "home",
-    "time"
+    "travel",
+    "tech"
    ],
    "level": null,
    "ease": 0.622,
@@ -500,11 +517,9 @@
    "title": "How Arturo Mastered Russian in 7 month: Meeting Our Subscriber in Paris | Easy Russian 115",
    "ch": "Easy Russian",
    "dur": 1064,
-   "kw": "arturo mastered month meeting subscriber paris listening interview school family emotion feelings mind food street native tutorial mexico learner ugc literature become member",
+   "kw": "arturo mastered month meeting subscriber paris listening interview school food street native tutorial mexico learner ugc literature become member",
    "topics": [
-    "school",
-    "family",
-    "emotion"
+    "school"
    ],
    "level": null,
    "ease": 0.626,
@@ -517,11 +532,11 @@
    "title": "How to Take a Russian On a Date? | Easy Russian 114",
    "ch": "Easy Russian",
    "dur": 1167,
-   "kw": "take date listening interview emotion feelings mind time numbers family street native tutorial become member",
+   "kw": "take date listening interview family emotion feelings mind clothes looks time street native tutorial become member",
    "topics": [
+    "family",
     "emotion",
-    "time",
-    "family"
+    "clothes"
    ],
    "level": null,
    "ease": 0.644,
@@ -534,11 +549,11 @@
    "title": "The Uncensored Russian For Everyday Conversations (18+) | Easy Russian 113",
    "ch": "Easy Russian",
    "dur": 946,
-   "kw": "uncensored everyday conversations listening interview speech emotion feelings mind family street native tutorial find ideal teacher italki use code easyrussian off first class minimum",
+   "kw": "uncensored everyday conversations listening interview speech school emotion feelings mind street native tutorial find ideal teacher italki use code easyrussian off first class minimum",
    "topics": [
     "speech",
-    "emotion",
-    "family"
+    "school",
+    "emotion"
    ],
    "level": null,
    "ease": 0.634,
@@ -568,11 +583,11 @@
    "title": "What You Always Get Wrong About Russians | Easy Russian 111",
    "ch": "Easy Russian",
    "dur": 1051,
-   "kw": "always get wrong listening interview nature weather time numbers clothes looks health street native tutorial become member",
+   "kw": "always get wrong listening interview time numbers school nature weather street native tutorial become member",
    "topics": [
-    "nature",
     "time",
-    "clothes"
+    "school",
+    "nature"
    ],
    "level": null,
    "ease": 0.653,
@@ -585,11 +600,11 @@
    "title": "A Day in the Life of Russian Girls (From Paris With Love) | Easy Russian 110 | Easy Russian",
    "ch": "Easy Russian",
    "dur": 751,
-   "kw": "day life girls paris love listening interview emotion feelings mind time numbers speech street native tutorial local lingopie free trial off yearly plan",
+   "kw": "day life girls paris love listening interview time numbers emotion feelings mind school street native tutorial local lingopie free trial off yearly plan",
    "topics": [
-    "emotion",
     "time",
-    "speech"
+    "emotion",
+    "school"
    ],
    "level": null,
    "ease": 0.668,
@@ -617,10 +632,10 @@
    "title": "What Not To Do In Russia As a Foreigner in Public? | Easy Russian 109",
    "ch": "Easy Russian",
    "dur": 987,
-   "kw": "foreigner public listening interview travel transport home speech town street native tutorial become member",
+   "kw": "foreigner public listening interview home travel transport speech clothes street native tutorial become member",
    "topics": [
-    "travel",
     "home",
+    "travel",
     "speech"
    ],
    "level": null,
@@ -634,10 +649,8 @@
    "title": "How To Talk About Time In Russian? | Super Easy Russian 52",
    "ch": "Easy Russian",
    "dur": 694,
-   "kw": "talk time listening interview beginner numbers street native tutorial become member",
-   "topics": [
-    "time"
-   ],
+   "kw": "talk time listening interview beginner street native tutorial become member",
+   "topics": [],
    "level": "beginner",
    "ease": 0.727,
    "cefr": "A1",
@@ -649,11 +662,11 @@
    "title": "How Do Russians Celebrate Halloween? | Easy Russian 108",
    "ch": "Easy Russian",
    "dur": 1048,
-   "kw": "celebrate halloween listening interview family school emotion feelings mind time street native tutorial days free lingopie",
+   "kw": "celebrate halloween listening interview family school home time street native tutorial days free lingopie",
    "topics": [
     "family",
     "school",
-    "emotion"
+    "home"
    ],
    "level": null,
    "ease": 0.603,
@@ -666,10 +679,10 @@
    "title": "5 Ways To Talk About Movies In Russian | Easy Russian 107",
    "ch": "Easy Russian",
    "dur": 527,
-   "kw": "ways talk movies listening interview speech family food drink mind street native tutorial become member",
+   "kw": "ways talk movies listening interview family speech food drink time street native tutorial become member",
    "topics": [
-    "speech",
     "family",
+    "speech",
     "food"
    ],
    "level": null,
@@ -683,10 +696,9 @@
    "title": "What Russians Do at The Dacha (Countryside)? | Super Easy Russian 51",
    "ch": "Easy Russian",
    "dur": 376,
-   "kw": "dacha countryside listening interview beginner nature weather food drink art music health street native tutorial become member",
+   "kw": "dacha countryside listening interview beginner nature weather art music health street native tutorial become member",
    "topics": [
     "nature",
-    "food",
     "art"
    ],
    "level": "beginner",
@@ -700,11 +712,11 @@
    "title": "Russia Is Not For Beginners: Marina Drives to Kamchatka | Easy Russian 106",
    "ch": "Easy Russian",
    "dur": 744,
-   "kw": "beginners marina drives kamchatka listening interview beginner travel transport school emotion feelings mind town street native tutorial days free lingopie",
+   "kw": "beginners marina drives kamchatka listening interview beginner travel transport time numbers school town street native tutorial days free lingopie",
    "topics": [
     "travel",
-    "school",
-    "emotion"
+    "time",
+    "school"
    ],
    "level": "beginner",
    "ease": 0.605,
@@ -717,11 +729,10 @@
    "title": "Going To Russia: What Has Changed In 2025? | Easy Russian 105",
    "ch": "Easy Russian",
    "dur": 452,
-   "kw": "going changed listening interview travel transport food drink clothes looks town street native tutorial become member",
+   "kw": "going changed listening interview travel transport nature weather town street native tutorial become member",
    "topics": [
     "travel",
-    "food",
-    "clothes"
+    "nature"
    ],
    "level": null,
    "ease": 0.665,
@@ -734,11 +745,11 @@
    "title": "Shopping In Russia: Tips From Locals | Easy Russian 104",
    "ch": "Easy Russian",
    "dur": 914,
-   "kw": "shopping tips locals listening interview work money clothes looks food drink animals street native tutorial become member",
+   "kw": "shopping tips locals listening interview clothes looks food drink work money home street native tutorial become member",
    "topics": [
-    "work",
     "clothes",
-    "food"
+    "food",
+    "work"
    ],
    "level": null,
    "ease": 0.65,
@@ -751,10 +762,9 @@
    "title": "The Office Life in Slow Russian | Super Easy Russian 50",
    "ch": "Easy Russian",
    "dur": 549,
-   "kw": "office life slow listening interview beginner work money time numbers animals street native tutorial become member",
+   "kw": "office life slow listening interview beginner work money animals street native tutorial become member",
    "topics": [
-    "work",
-    "time"
+    "work"
    ],
    "level": "beginner",
    "ease": 0.644,
@@ -767,11 +777,11 @@
    "title": "Do Russians Go To Doctors? | Easy Russian 103",
    "ch": "Easy Russian",
    "dur": 1034,
-   "kw": "doctors listening interview body health medicine emotion feelings mind nature street native tutorial want course message clubeasyrussian gmail com become member",
+   "kw": "doctors listening interview body health medicine school nature street native tutorial want course message clubeasyrussian gmail com become member",
    "topics": [
     "body",
     "medicine",
-    "emotion"
+    "school"
    ],
    "level": null,
    "ease": 0.606,
@@ -784,11 +794,10 @@
    "title": "20 Beginners Greetings & Farewells in Slow Russian | Super Easy Russian 49",
    "ch": "Easy Russian",
    "dur": 670,
-   "kw": "beginners greetings farewells slow listening interview beginner speech travel transport family mind street native tutorial become member",
+   "kw": "beginners greetings farewells slow listening interview beginner family speech time street native tutorial become member",
    "topics": [
-    "speech",
-    "travel",
-    "family"
+    "family",
+    "speech"
    ],
    "level": "beginner",
    "ease": 0.653,
@@ -817,11 +826,11 @@
    "title": "How to Talk About Pets in Russian? | Easy Russian 101",
    "ch": "Easy Russian",
    "dur": 800,
-   "kw": "talk pets listening interview animals speech emotion feelings mind work street native tutorial become member",
+   "kw": "talk pets listening interview animals speech home work street native tutorial become member",
    "topics": [
     "animals",
     "speech",
-    "emotion"
+    "home"
    ],
    "level": null,
    "ease": 0.558,
@@ -836,8 +845,7 @@
    "dur": 349,
    "kw": "grocery shopping phrases slow vocabulary listening interview beginner food drink school street native tutorial become member",
    "topics": [
-    "food",
-    "school"
+    "food"
    ],
    "level": "beginner",
    "ease": 0.669,
@@ -865,11 +873,11 @@
    "title": "Why do Russians Love Dark Humor? | Easy Russian 100",
    "ch": "Easy Russian",
    "dur": 813,
-   "kw": "love dark humor listening interview emotion feelings mind school body health street native tutorial become member",
+   "kw": "love dark humor listening interview school emotion feelings mind family food street native tutorial become member",
    "topics": [
-    "emotion",
     "school",
-    "body"
+    "emotion",
+    "family"
    ],
    "level": null,
    "ease": 0.664,
@@ -882,9 +890,10 @@
    "title": "6 Ways To Express Emotions In Russian | Easy Russian 99",
    "ch": "Easy Russian",
    "dur": 565,
-   "kw": "ways express emotions grammar pronunciation vocabulary listening interview beginner emotion feelings mind street native tutorial beginners phrases teacher speak study common become member",
+   "kw": "ways express emotions grammar pronunciation vocabulary listening interview beginner emotion feelings mind travel transport street native tutorial beginners phrases teacher speak study common become member",
    "topics": [
-    "emotion"
+    "emotion",
+    "travel"
    ],
    "level": "beginner",
    "ease": 0.578,
@@ -914,10 +923,10 @@
    "title": "Your Most Embarrassing Moments From Life In Russia | Easy Russian 97",
    "ch": "Easy Russian",
    "dur": 752,
-   "kw": "embarrassing moments life listening interview clothes looks time numbers family home street native tutorial join challenge",
+   "kw": "embarrassing moments life listening interview clothes looks school family home street native tutorial join challenge",
    "topics": [
     "clothes",
-    "time",
+    "school",
     "family"
    ],
    "level": null,
@@ -947,11 +956,11 @@
    "title": "How To Celebrate New Year In Russia | Easy Russian 95",
    "ch": "Easy Russian",
    "dur": 1300,
-   "kw": "celebrate year listening interview time numbers emotion feelings mind family street native tutorial become member",
+   "kw": "celebrate year listening interview time numbers family emotion feelings mind street native tutorial become member",
    "topics": [
     "time",
-    "emotion",
-    "family"
+    "family",
+    "emotion"
    ],
    "level": null,
    "ease": 0.625,
@@ -964,11 +973,11 @@
    "title": "Do Russians Know How to Smalltalk? | Easy Russian 94",
    "ch": "Easy Russian",
    "dur": 875,
-   "kw": "know smalltalk listening interview emotion feelings mind speech school street native tutorial become member",
+   "kw": "know smalltalk listening interview emotion feelings mind school time numbers street native tutorial become member",
    "topics": [
     "emotion",
-    "speech",
-    "school"
+    "school",
+    "time"
    ],
    "level": null,
    "ease": 0.623,
@@ -981,11 +990,11 @@
    "title": "5 Ways Berlin Changed Me As a Russian | Easy Russian 93",
    "ch": "Easy Russian",
    "dur": 665,
-   "kw": "ways berlin changed listening interview travel transport time numbers food drink town street native tutorial environment live affects behaviour daily habits marina answer definitely explains examples looking differences similarities life moscow become member",
+   "kw": "ways berlin changed listening interview time numbers food drink travel transport street native tutorial environment live affects behaviour daily habits marina answer definitely explains examples looking differences similarities life moscow become member",
    "topics": [
-    "travel",
     "time",
-    "food"
+    "food",
+    "travel"
    ],
    "level": null,
    "ease": 0.611,
@@ -998,10 +1007,10 @@
    "title": "Special Questions in Russian | Super Easy Russian 46",
    "ch": "Easy Russian",
    "dur": 525,
-   "kw": "special questions listening interview beginner speech school emotion feelings mind street native tutorial become member",
+   "kw": "special questions listening interview beginner school speech emotion feelings mind food street native tutorial become member",
    "topics": [
-    "speech",
     "school",
+    "speech",
     "emotion"
    ],
    "level": "beginner",
@@ -1015,11 +1024,11 @@
    "title": "3 Things Not To Do In Russia | Easy Russian 92",
    "ch": "Easy Russian",
    "dur": 1189,
-   "kw": "things listening interview speech school emotion feelings mind street native tutorial become member",
+   "kw": "things listening interview school speech politics society food street native tutorial become member",
    "topics": [
-    "speech",
     "school",
-    "emotion"
+    "speech",
+    "politics"
    ],
    "level": null,
    "ease": 0.645,
@@ -1032,11 +1041,10 @@
    "title": "94 Simple Questions in Russian | Super Easy Russian 44",
    "ch": "Easy Russian",
    "dur": 462,
-   "kw": "simple questions listening interview beginner nature weather travel transport home health street native tutorial become member",
+   "kw": "simple questions listening interview beginner nature weather travel transport health street native tutorial become member",
    "topics": [
     "nature",
-    "travel",
-    "home"
+    "travel"
    ],
    "level": "beginner",
    "ease": 0.699,
@@ -1065,7 +1073,7 @@
    "title": "Do Russians Love Sport? | Easy Russian 91",
    "ch": "Easy Russian",
    "dur": 893,
-   "kw": "love sport listening interview games emotion feelings mind body health culture society street native tutorial become member",
+   "kw": "love sport listening interview games emotion feelings mind body health conflict tech street native tutorial become member",
    "topics": [
     "sport",
     "emotion",
@@ -1082,11 +1090,11 @@
    "title": "Having Breakfast in Slow Russian | Super Easy Russian 42",
    "ch": "Easy Russian",
    "dur": 1685,
-   "kw": "having breakfast slow listening interview beginner food drink speech school street native tutorial become member",
+   "kw": "having breakfast slow listening interview beginner food drink speech nature weather school street native tutorial become member",
    "topics": [
     "food",
     "speech",
-    "school"
+    "nature"
    ],
    "level": "beginner",
    "ease": 0.597,
@@ -1099,11 +1107,11 @@
    "title": "Fashion in Russia: What Do People Wear? | Easy Russian 90",
    "ch": "Easy Russian",
    "dur": 997,
-   "kw": "fashion wear listening interview clothes looks emotion feelings mind speech home street native tutorial become member",
+   "kw": "fashion wear listening interview clothes looks family emotion feelings mind home street native tutorial become member",
    "topics": [
     "clothes",
-    "emotion",
-    "speech"
+    "family",
+    "emotion"
    ],
    "level": null,
    "ease": 0.6,
@@ -1132,11 +1140,11 @@
    "title": "The Most Popular Russian Games | Easy Russian 89",
    "ch": "Easy Russian",
    "dur": 874,
-   "kw": "popular games listening interview sport family travel transport culture society street native tutorial become member",
+   "kw": "popular games listening interview sport family school conflict tech street native tutorial become member",
    "topics": [
     "sport",
     "family",
-    "travel"
+    "school"
    ],
    "level": null,
    "ease": 0.624,
@@ -1196,10 +1204,8 @@
    "title": "How Russians Cook Pancakes. In Slow Russian | Super Easy Russian 38",
    "ch": "Easy Russian",
    "dur": 373,
-   "kw": "cook pancakes slow listening interview beginner food drink school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
-   "topics": [
-    "food"
-   ],
+   "kw": "cook pancakes slow listening interview beginner school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "topics": [],
    "level": "beginner",
    "ease": 0.543,
    "cefr": "A1",
@@ -1211,12 +1217,8 @@
    "title": "Modern Russian Slang, From The Streets | Easy Russian 87",
    "ch": "Easy Russian",
    "dur": 544,
-   "kw": "modern slang streets vocabulary listening interview clothes looks school emotion feelings mind home teacher native speaker street interviews education teachers student free tutorial tutorials become member",
-   "topics": [
-    "clothes",
-    "school",
-    "emotion"
-   ],
+   "kw": "modern slang streets vocabulary listening interview school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "topics": [],
    "level": null,
    "ease": 0.56,
    "cefr": null,
@@ -1228,10 +1230,10 @@
    "title": "Where are the most beautiful girls (and boys)? | Easy Russian 86",
    "ch": "Easy Russian",
    "dur": 743,
-   "kw": "beautiful girls boys listening interview clothes looks family time numbers home school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "beautiful girls boys listening interview family clothes looks time numbers school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
-    "clothes",
     "family",
+    "clothes",
     "time"
    ],
    "level": null,
@@ -1245,11 +1247,11 @@
    "title": "How Much Money Do You Need to Live in Moscow? | Easy Russian 85",
    "ch": "Easy Russian",
    "dur": 500,
-   "kw": "much money need live moscow listening interview work business finance time numbers animals school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "much money need live moscow listening interview work business finance speech animals school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
     "work",
     "business",
-    "time"
+    "speech"
    ],
    "level": null,
    "ease": 0.644,
@@ -1262,10 +1264,8 @@
    "title": "Easy Russian 30 Day Challenge!",
    "ch": "Easy Russian",
    "dur": 122,
-   "kw": "day challenge listening interview food drink school teacher native speaker street interviews education teachers student free tutorial tutorials join boost until spring link",
-   "topics": [
-    "food"
-   ],
+   "kw": "day challenge listening interview school teacher native speaker street interviews education teachers student free tutorial tutorials join boost until spring link",
+   "topics": [],
    "level": null,
    "ease": 0.676,
    "cefr": null,
@@ -1311,10 +1311,9 @@
    "title": "How to Cook the Most Delicious Russian Salad | Easy Russian New Year’s Special",
    "ch": "Easy Russian",
    "dur": 921,
-   "kw": "cook delicious salad year special listening interview food drink time numbers work money school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "cook delicious salad year special listening interview food drink work money school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
     "food",
-    "time",
     "work"
    ],
    "level": null,
@@ -1328,11 +1327,11 @@
    "title": "Looking at Our Family Photos| Easy Russian Podcast 42",
    "ch": "Easy Russian",
    "dur": 1908,
-   "kw": "looking family photos listening interview tech technology media emotion feelings mind time school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "looking family photos listening interview home time numbers school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
     "family",
-    "tech",
-    "emotion"
+    "home",
+    "time"
    ],
    "level": null,
    "ease": 0.619,
@@ -1362,11 +1361,11 @@
    "title": "How to Enjoy Winter? | Easy Russian 81",
    "ch": "Easy Russian",
    "dur": 742,
-   "kw": "enjoy winter listening interview nature weather travel transport emotion feelings mind health school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "enjoy winter listening interview nature weather time numbers food drink health school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
     "nature",
-    "travel",
-    "emotion"
+    "time",
+    "food"
    ],
    "level": null,
    "ease": 0.593,
@@ -1466,11 +1465,11 @@
    "title": "Everything You Need to Know About the Past in Russian| Super Easy Russian 37",
    "ch": "Easy Russian",
    "dur": 856,
-   "kw": "everything need know past listening interview beginner emotion feelings mind school time numbers teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "everything need know past listening interview beginner emotion feelings mind school family teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
     "emotion",
     "school",
-    "time"
+    "family"
    ],
    "level": "beginner",
    "ease": 0.668,
@@ -1483,11 +1482,11 @@
    "title": "Foreign Words in Everyday Russian | Easy Russian Podcast 32",
    "ch": "Easy Russian",
    "dur": 2212,
-   "kw": "foreign words everyday vocabulary listening interview speech emotion feelings mind school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "foreign words everyday vocabulary listening interview school speech emotion feelings mind food teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
+    "school",
     "speech",
-    "emotion",
-    "school"
+    "emotion"
    ],
    "level": null,
    "ease": 0.61,
@@ -1513,11 +1512,11 @@
    "title": "Russians on Their School Memories | Easy Russian 79",
    "ch": "Easy Russian",
    "dur": 804,
-   "kw": "school memories listening interview work money time numbers food teacher native speaker street interviews education teachers student free tutorial tutorials first day become member",
+   "kw": "school memories listening interview time numbers family food teacher native speaker street interviews education teachers student free tutorial tutorials first day become member",
    "topics": [
     "school",
-    "work",
-    "time"
+    "time",
+    "family"
    ],
    "level": null,
    "ease": 0.636,
@@ -1592,11 +1591,11 @@
    "title": "Are You Hospitable? | Easy Russian 78",
    "ch": "Easy Russian",
    "dur": 668,
-   "kw": "hospitable listening interview speech food drink emotion feelings mind school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "hospitable listening interview home family speech clothes school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
-    "speech",
-    "food",
-    "emotion"
+    "home",
+    "family",
+    "speech"
    ],
    "level": null,
    "ease": 0.654,
@@ -1609,11 +1608,11 @@
    "title": "Why Russian Is Tough Even for a Native Speaker? | Easy Russian Podcast 21",
    "ch": "Easy Russian",
    "dur": 1531,
-   "kw": "tough even native speaker listening interview emotion feelings mind school tech technology media teacher street interviews education teachers student free tutorial tutorials become member",
+   "kw": "tough even native speaker listening interview school emotion feelings mind time numbers food teacher street interviews education teachers student free tutorial tutorials become member",
    "topics": [
-    "emotion",
     "school",
-    "tech"
+    "emotion",
+    "time"
    ],
    "level": null,
    "ease": 0.619,
@@ -1626,11 +1625,11 @@
    "title": "Best Musicians to Learn Russian With | Easy Russian 77",
    "ch": "Easy Russian",
    "dur": 1057,
-   "kw": "best musicians listening interview art music emotion feelings mind school culture society teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "best musicians listening interview art music emotion feelings mind home culture society school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
     "art",
     "emotion",
-    "school"
+    "home"
    ],
    "level": null,
    "ease": 0.574,
@@ -1643,9 +1642,10 @@
    "title": "Say Ы! How To ACTUALLY Pronounce the Most Difficult Russian Sound | Easy Russian 76",
    "ch": "Easy Russian",
    "dur": 815,
-   "kw": "say actually pronounce difficult sound ы grammar pronunciation listening interview school food teacher native speaker street interviews education teachers student free tutorial tutorials sounds become member",
+   "kw": "say actually pronounce difficult sound ы grammar pronunciation listening interview school speech food teacher native speaker street interviews education teachers student free tutorial tutorials sounds become member",
    "topics": [
-    "school"
+    "school",
+    "speech"
    ],
    "level": null,
    "ease": 0.616,
@@ -1658,11 +1658,11 @@
    "title": "The Do's and Dont's of Dating in Russian | Easy Russian 75",
    "ch": "Easy Russian",
    "dur": 808,
-   "kw": "do's dont's dating listening interview speech food drink emotion feelings mind school teacher native speaker street interviews education teachers student free tutorial tutorials date love restaurants cinemas first weird become member",
+   "kw": "do's dont's dating listening interview speech emotion feelings mind work money school teacher native speaker street interviews education teachers student free tutorial tutorials date love restaurants cinemas first weird become member",
    "topics": [
     "speech",
-    "food",
-    "emotion"
+    "emotion",
+    "work"
    ],
    "level": null,
    "ease": 0.64,
@@ -1675,11 +1675,11 @@
    "title": "What Are We Most Afraid Of? | Easy Russian Podcast 15",
    "ch": "Easy Russian",
    "dur": 1662,
-   "kw": "afraid listening interview emotion feelings mind school speech teacher native speaker street interviews education teachers student free tutorial tutorials get interactive transcript player",
+   "kw": "afraid listening interview emotion feelings mind school family teacher native speaker street interviews education teachers student free tutorial tutorials get interactive transcript player",
    "topics": [
     "emotion",
     "school",
-    "speech"
+    "family"
    ],
    "level": null,
    "ease": 0.648,
@@ -1692,10 +1692,11 @@
    "title": "Do Russians Believe in Zodiac Signs? | Easy Russian 74",
    "ch": "Easy Russian",
    "dur": 538,
-   "kw": "believe zodiac signs listening interview emotion feelings mind family school teacher native speaker street interviews education teachers student free tutorial tutorials astrology scorpio taurus leo cancer capricorn aquarius libra gemini aries virgo pisces sagittarius become member",
+   "kw": "believe zodiac signs listening interview emotion feelings mind family tech technology media school teacher native speaker street interviews education teachers student free tutorial tutorials astrology scorpio taurus leo cancer capricorn aquarius libra gemini aries virgo pisces sagittarius become member",
    "topics": [
     "emotion",
-    "family"
+    "family",
+    "tech"
    ],
    "level": null,
    "ease": 0.583,
@@ -1740,11 +1741,11 @@
    "title": "What is your favorite Russian movie? | Easy Russian 72",
    "ch": "Easy Russian",
    "dur": 864,
-   "kw": "favorite movie listening interview art music emotion feelings mind speech culture society school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "favorite movie listening interview art music family emotion feelings mind culture society school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
     "art",
-    "emotion",
-    "speech"
+    "family",
+    "emotion"
    ],
    "level": null,
    "ease": 0.615,
@@ -1757,10 +1758,9 @@
    "title": "What's In Your Bag? | Easy Russian 71",
    "ch": "Easy Russian",
    "dur": 819,
-   "kw": "what's bag listening interview food drink school clothes looks teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "what's bag listening interview food drink clothes looks school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
     "food",
-    "school",
     "clothes"
    ],
    "level": null,
@@ -1774,11 +1774,11 @@
    "title": "How Do Russians Celebrate the Orthodox Easter? | Easy Russian 70",
    "ch": "Easy Russian",
    "dur": 684,
-   "kw": "celebrate orthodox easter listening culture interview religion faith tradition food drink time numbers society school teacher native speaker street interviews education teachers student free tutorial tutorials traditions celebration become member",
+   "kw": "celebrate orthodox easter listening culture interview religion faith tradition work money speech law school teacher native speaker street interviews education teachers student free tutorial tutorials traditions celebration become member",
    "topics": [
     "religion",
-    "food",
-    "time"
+    "work",
+    "speech"
    ],
    "level": null,
    "ease": 0.606,
@@ -1791,11 +1791,11 @@
    "title": "Why Do Russians Know So Much Poetry by Heart? | Easy Russian 69",
    "ch": "Easy Russian",
    "dur": 990,
-   "kw": "know much poetry heart listening interview emotion feelings mind art music school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "know much poetry heart listening interview school art music emotion feelings mind food teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
-    "emotion",
+    "school",
     "art",
-    "school"
+    "emotion"
    ],
    "level": null,
    "ease": 0.569,
@@ -1808,11 +1808,11 @@
    "title": "The Coldest Part of Russia | Easy Russian 68",
    "ch": "Easy Russian",
    "dur": 1045,
-   "kw": "coldest listening interview nature weather time numbers body health school teacher native speaker street interviews education teachers student free tutorial tutorials check sakha team",
+   "kw": "coldest listening interview nature weather time numbers clothes looks health school teacher native speaker street interviews education teachers student free tutorial tutorials check sakha team",
    "topics": [
     "nature",
     "time",
-    "body"
+    "clothes"
    ],
    "level": null,
    "ease": 0.613,
@@ -1842,11 +1842,11 @@
    "title": "Word Association Game - Months in Russian! | Super Easy Russian 33",
    "ch": "Easy Russian",
    "dur": 1007,
-   "kw": "word association game months listening interview beginner time numbers nature weather emotion feelings mind school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "word association game months listening interview beginner time numbers nature weather family school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
     "time",
     "nature",
-    "emotion"
+    "family"
    ],
    "level": "beginner",
    "ease": 0.592,
@@ -1859,9 +1859,8 @@
    "title": "The Ultimate Guide to Numbers in Russian | Super Easy Russian 32",
    "ch": "Easy Russian",
    "dur": 501,
-   "kw": "ultimate guide numbers grammar listening interview beginner time nature weather school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "ultimate guide numbers grammar listening interview beginner nature weather health school teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
-    "time",
     "nature"
    ],
    "level": "beginner",
@@ -1875,11 +1874,11 @@
    "title": "What Language Would You Like To Learn? | Easy Russian 66",
    "ch": "Easy Russian",
    "dur": 1606,
-   "kw": "would listening interview school emotion feelings mind art music food teacher native speaker street interviews education teachers student free tutorial tutorials become member",
+   "kw": "would listening interview school emotion feelings mind speech food teacher native speaker street interviews education teachers student free tutorial tutorials become member",
    "topics": [
     "school",
     "emotion",
-    "art"
+    "speech"
    ],
    "level": null,
    "ease": 0.632,
@@ -1892,11 +1891,11 @@
    "title": "What's Your Favourite Country? | Easy Russian 65",
    "ch": "Easy Russian",
    "dur": 1045,
-   "kw": "what's favourite country listening interview politics society school nature weather culture teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
+   "kw": "what's favourite country listening interview school politics society travel transport food teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
    "topics": [
-    "politics",
     "school",
-    "nature"
+    "politics",
+    "travel"
    ],
    "level": null,
    "ease": 0.673,
@@ -1925,10 +1924,8 @@
    "title": "Basic Russian Verbs (Group II) | Super Easy Russian 31",
    "ch": "Easy Russian",
    "dur": 408,
-   "kw": "basic verbs group grammar listening interview beginner school food teacher native speaker street interviews education teachers student free tutorial tutorials",
-   "topics": [
-    "school"
-   ],
+   "kw": "basic verbs group grammar listening interview beginner school teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "topics": [],
    "level": "beginner",
    "ease": 0.696,
    "cefr": "A1",
@@ -1940,11 +1937,11 @@
    "title": "Answering Your Questions About Our Videos From the Baltic Countries | Easy Russian 63",
    "ch": "Easy Russian",
    "dur": 1060,
-   "kw": "answering questions baltic countries listening interview speech school emotion feelings mind teacher native speaker street interviews education teachers student free tutorial tutorials tim nikita frequently asked under produced trip through series episodes which visited latvia lithuania estonia related",
+   "kw": "answering questions baltic countries listening interview school speech time numbers food teacher native speaker street interviews education teachers student free tutorial tutorials tim nikita frequently asked under produced trip through series episodes which visited latvia lithuania estonia feelings related",
    "topics": [
-    "speech",
     "school",
-    "emotion"
+    "speech",
+    "time"
    ],
    "level": null,
    "ease": 0.648,
@@ -1957,9 +1954,8 @@
    "title": "What Are Your Plans for 2023? | Easy Russian 62",
    "ch": "Easy Russian",
    "dur": 508,
-   "kw": "plans listening interview school work money food teacher native speaker street interviews education teachers student free tutorial tutorials try lingopie days com easyrussian get off annual plan life time decide stay become member patreon",
+   "kw": "plans listening interview work money animals school teacher native speaker street interviews education teachers student free tutorial tutorials try lingopie days com easyrussian get off annual plan life time decide stay become member patreon",
    "topics": [
-    "school",
     "work"
    ],
    "level": null,
@@ -1973,11 +1969,11 @@
    "title": "New Year at a Refugee Center in Latvia | Easy Russian 61",
    "ch": "Easy Russian",
    "dur": 796,
-   "kw": "year refugee center latvia listening interview time numbers city around town emotion feelings mind school teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
+   "kw": "year refugee center latvia listening interview time numbers city around town clothes looks school teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
    "topics": [
     "time",
     "city",
-    "emotion"
+    "clothes"
    ],
    "level": null,
    "ease": 0.653,
@@ -1990,11 +1986,11 @@
    "title": "Russian New Year's and Christmas Traditions | Easy Russian Podcast 3",
    "ch": "Easy Russian",
    "dur": 1921,
-   "kw": "year's christmas traditions listening culture interview emotion feelings mind religion faith tradition food drink school teacher native speaker street interviews education teachers student free tutorial tutorials marina nikita talk families eat burning paper sure wish come true subtitles available press follow",
+   "kw": "year's christmas traditions listening culture interview food drink emotion feelings mind religion faith tradition school teacher native speaker street interviews education teachers student free tutorial tutorials marina nikita talk families eat burning paper sure wish come true subtitles available press follow",
    "topics": [
+    "food",
     "emotion",
-    "religion",
-    "food"
+    "religion"
    ],
    "level": null,
    "ease": 0.62,
@@ -2020,11 +2016,11 @@
    "title": "How Has Russia Changed in 2022? | Easy Russian 59",
    "ch": "Easy Russian",
    "dur": 538,
-   "kw": "changed listening interview politics society emotion feelings mind work money culture school teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
+   "kw": "changed listening interview school politics society emotion feelings mind food teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
    "topics": [
+    "school",
     "politics",
-    "emotion",
-    "work"
+    "emotion"
    ],
    "level": null,
    "ease": 0.643,
@@ -2037,11 +2033,11 @@
    "title": "Days Of Week in Russian | Super Easy Russian 29",
    "ch": "Easy Russian",
    "dur": 604,
-   "kw": "days week listening interview beginner time numbers work money school teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
+   "kw": "days week listening interview beginner time numbers school food drink teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
    "topics": [
     "time",
-    "work",
-    "school"
+    "school",
+    "food"
    ],
    "level": "beginner",
    "ease": 0.725,
@@ -2054,11 +2050,11 @@
    "title": "What Estonians Think about Russian | Easy Russian 58",
    "ch": "Easy Russian",
    "dur": 1410,
-   "kw": "estonians think listening interview emotion feelings mind school time numbers teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
+   "kw": "estonians think listening interview school time numbers emotion feelings mind food teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
    "topics": [
-    "emotion",
     "school",
-    "time"
+    "time",
+    "emotion"
    ],
    "level": null,
    "ease": 0.683,
@@ -2088,10 +2084,8 @@
    "title": "Learn Russian With the New Easy Russian Podcast!",
    "ch": "Easy Russian",
    "dur": 139,
-   "kw": "listening interview school food teacher native speaker street interviews education teachers student free tutorial tutorials listen",
-   "topics": [
-    "school"
-   ],
+   "kw": "listening interview school teacher native speaker street interviews education teachers student free tutorial tutorials listen",
+   "topics": [],
    "level": null,
    "ease": 0.614,
    "cefr": null,
@@ -2103,10 +2097,10 @@
    "title": "What’s the Most Beautiful Language in the World? | Easy Russian 57",
    "ch": "Easy Russian",
    "dur": 634,
-   "kw": "beautiful world listening interview emotion feelings mind school work money teacher native speaker street interviews education teachers student free tutorial tutorials thanks sponsor lingopie great",
+   "kw": "beautiful world listening interview school emotion feelings mind work money food teacher native speaker street interviews education teachers student free tutorial tutorials thanks sponsor lingopie great",
    "topics": [
-    "emotion",
     "school",
+    "emotion",
     "work"
    ],
    "level": null,
@@ -2120,11 +2114,10 @@
    "title": "Introduce Yourself in Russian | Super Easy Russian 28",
    "ch": "Easy Russian",
    "dur": 585,
-   "kw": "introduce yourself listening interview beginner school time numbers tech technology media food teacher native speaker street interviews education teachers student free tutorial tutorials vocab beginners",
+   "kw": "introduce yourself listening interview beginner school sport games food teacher native speaker street interviews education teachers student free tutorial tutorials vocab beginners",
    "topics": [
     "school",
-    "time",
-    "tech"
+    "sport"
    ],
    "level": "beginner",
    "ease": 0.651,
@@ -2137,11 +2130,11 @@
    "title": "Daugavpils: Everybody Speaks Russian in This Latvian City | Easy Russian 56",
    "ch": "Easy Russian",
    "dur": 1205,
-   "kw": "daugavpils everybody speaks latvian city listening interview speech travel transport around town mind school teacher native speaker street interviews education teachers student free tutorial tutorials introduction think knowing enough non citizens latvia",
+   "kw": "daugavpils everybody speaks latvian city listening interview school family speech food teacher native speaker street interviews education teachers student free tutorial tutorials introduction think knowing enough non citizens latvia",
    "topics": [
-    "speech",
-    "travel",
-    "city"
+    "school",
+    "family",
+    "speech"
    ],
    "level": null,
    "ease": 0.677,
@@ -2171,11 +2164,11 @@
    "title": "What Russians Think About Leaving Russia Now | Easy Russian 55",
    "ch": "Easy Russian",
    "dur": 740,
-   "kw": "think leaving now listening interview emotion feelings mind travel transport school teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "think leaving now listening interview school emotion feelings mind travel transport food teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
+    "school",
     "emotion",
-    "travel",
-    "school"
+    "travel"
    ],
    "level": null,
    "ease": 0.666,
@@ -2201,11 +2194,11 @@
    "title": "How Do People in Lithuania Feel About Speaking Russian | Easy Russian 54",
    "ch": "Easy Russian",
    "dur": 1139,
-   "kw": "lithuania feel speaking listening interview politics society emotion feelings mind travel transport culture school teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
+   "kw": "lithuania feel speaking listening interview politics society travel transport school culture teacher native speaker street interviews education teachers student free tutorial tutorials become member patreon",
    "topics": [
     "politics",
-    "emotion",
-    "travel"
+    "travel",
+    "school"
    ],
    "level": null,
    "ease": 0.691,
@@ -2256,11 +2249,11 @@
    "title": "Narva: What Is It Like to Live at the Border with Russia? | Easy Russian 52",
    "ch": "Easy Russian",
    "dur": 955,
-   "kw": "narva live border listening interview travel transport school politics society town teacher native speaker street interviews education teachers student free tutorial tutorials living",
+   "kw": "narva live border listening interview school travel transport family food teacher native speaker street interviews education teachers student free tutorial tutorials living",
    "topics": [
-    "travel",
     "school",
-    "politics"
+    "travel",
+    "family"
    ],
    "level": null,
    "ease": 0.658,
@@ -2290,11 +2283,11 @@
    "title": "Is Russian Still Spoken in Latvia? | Easy Russian 50",
    "ch": "Easy Russian",
    "dur": 1279,
-   "kw": "still spoken latvia listening interview school emotion feelings mind politics society food teacher native speaker street interviews education teachers student free tutorial tutorials speaking riga",
+   "kw": "still spoken latvia listening interview school politics society emotion feelings mind food teacher native speaker street interviews education teachers student free tutorial tutorials speaking riga",
    "topics": [
     "school",
-    "emotion",
-    "politics"
+    "politics",
+    "emotion"
    ],
    "level": null,
    "ease": 0.67,
@@ -2307,10 +2300,10 @@
    "title": "Why You Should Learn Russian in 2022 | Easy Russian 49",
    "ch": "Easy Russian",
    "dur": 639,
-   "kw": "should listening interview school emotion feelings mind sport games food teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "should listening interview school tech technology media sport games food teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
     "school",
-    "emotion",
+    "tech",
     "sport"
    ],
    "level": null,
@@ -2324,10 +2317,10 @@
    "title": "Why I Left Russia (But Not the Language) | Easy Russian 48",
    "ch": "Easy Russian",
    "dur": 550,
-   "kw": "left listening interview emotion feelings mind politics society travel transport school teacher native speaker street interviews education teachers student free tutorial tutorials exile emigrants abroad",
+   "kw": "left listening interview politics society emotion feelings mind travel transport culture school teacher native speaker street interviews education teachers student free tutorial tutorials exile emigrants abroad",
    "topics": [
-    "emotion",
     "politics",
+    "emotion",
     "travel"
    ],
    "level": null,
@@ -2343,8 +2336,7 @@
    "dur": 316,
    "kw": "relaunching listening interview emotion feelings mind school teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
-    "emotion",
-    "school"
+    "emotion"
    ],
    "level": null,
    "ease": 0.705,
@@ -2357,10 +2349,10 @@
    "title": "Learn to Talk About Your Neighbourhood in Russian | Super Easy Russian 26",
    "ch": "Easy Russian",
    "dur": 536,
-   "kw": "talk neighbourhood listening interview beginner food drink school city around town teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "talk neighbourhood listening interview beginner school food drink city around town teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
-    "food",
     "school",
+    "food",
     "city"
    ],
    "level": "beginner",
@@ -2406,11 +2398,10 @@
    "title": "How to Read Russian - Rules of Reading | Super Easy Russian 10 (24 Part 2)",
    "ch": "Easy Russian",
    "dur": 807,
-   "kw": "read rules reading listening interview beginner school family home food teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "read rules reading listening interview beginner school family food teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
     "school",
-    "family",
-    "home"
+    "family"
    ],
    "level": "beginner",
    "ease": 0.62,
@@ -2423,11 +2414,11 @@
    "title": "What Russians Think About the Netherlands and Dutch People | Easy Russian 46",
    "ch": "Easy Russian",
    "dur": 840,
-   "kw": "think netherlands dutch listening interview emotion feelings mind school nature weather teacher native speaker street interviews education teachers student free tutorial tutorials rusians",
+   "kw": "think netherlands dutch listening interview emotion feelings mind school speech teacher native speaker street interviews education teachers student free tutorial tutorials rusians",
    "topics": [
     "emotion",
     "school",
-    "nature"
+    "speech"
    ],
    "level": null,
    "ease": 0.614,
@@ -2457,11 +2448,11 @@
    "title": "Russian Alphabet (How to Pronounce Russian Letters) | Super Easy Russian 24",
    "ch": "Easy Russian",
    "dur": 589,
-   "kw": "alphabet pronounce letters grammar pronunciation listening interview beginner speech school home mind teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "alphabet pronounce letters grammar pronunciation listening interview beginner school speech tech technology media food teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
-    "speech",
     "school",
-    "home"
+    "speech",
+    "tech"
    ],
    "level": "beginner",
    "ease": 0.623,
@@ -2474,11 +2465,11 @@
    "title": "Winter Tour Around The Moscow River Landmarks | Easy Russian 44",
    "ch": "Easy Russian",
    "dur": 934,
-   "kw": "winter tour around moscow river landmarks listening interview nature weather emotion feelings mind city town health school teacher native speaker street interviews education teachers student free tutorial tutorials walk sights gorky park visit",
+   "kw": "winter tour around moscow river landmarks listening interview nature weather emotion feelings mind home health school teacher native speaker street interviews education teachers student free tutorial tutorials walk sights city gorky park visit",
    "topics": [
     "nature",
     "emotion",
-    "city"
+    "home"
    ],
    "level": null,
    "ease": 0.586,
@@ -2528,10 +2519,10 @@
    "title": "10 Situations Where to Use Russian Genitive Case | Super Easy Russian 23",
    "ch": "Easy Russian",
    "dur": 777,
-   "kw": "situations use genitive case grammar cases listening interview beginner food drink school work money teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "situations use genitive case grammar cases listening interview beginner school food drink work money teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
-    "food",
     "school",
+    "food",
     "work"
    ],
    "level": "beginner",
@@ -2545,11 +2536,11 @@
    "title": "What’s the First Thing You Do in the Morning? | Easy Russian 43",
    "ch": "Easy Russian",
    "dur": 698,
-   "kw": "first thing morning listening interview time numbers food drink tech technology media school teacher native speaker street interviews education teachers student free tutorial tutorials online thank sponsor italki get credits after taking sign",
+   "kw": "first thing morning listening interview time numbers home school teacher native speaker street interviews education teachers student free tutorial tutorials online thank sponsor italki get credits after taking sign",
    "topics": [
     "time",
-    "food",
-    "tech"
+    "home",
+    "school"
    ],
    "level": null,
    "ease": 0.61,
@@ -2562,11 +2553,9 @@
    "title": "Why Peter the Great Lived in This Dutch House? | Super Easy Russian 22",
    "ch": "Easy Russian",
    "dur": 692,
-   "kw": "peter great lived dutch house listening culture interview beginner city around town travel transport school teacher native speaker street interviews education teachers student free tutorial tutorials history check follow",
+   "kw": "peter great lived dutch house listening culture interview beginner city around town travel school teacher native speaker street interviews education teachers student free tutorial tutorials history check follow",
    "topics": [
-    "city",
-    "travel",
-    "school"
+    "city"
    ],
    "level": "beginner",
    "ease": 0.608,
@@ -2579,10 +2568,9 @@
    "title": "How to Know a Word’s Gender in Russian | Super Easy Russian 21",
    "ch": "Easy Russian",
    "dur": 503,
-   "kw": "know word gender grammar cases vocabulary listening interview beginner school emotion feelings mind food teacher native speaker street interviews education teachers tutorial tutorials words simple nouns nominative genders endings feminine masculine",
+   "kw": "know word gender grammar cases vocabulary listening interview beginner nature weather health school teacher native speaker street interviews education teachers tutorial tutorials words simple nouns nominative genders endings feminine masculine",
    "topics": [
-    "school",
-    "emotion"
+    "nature"
    ],
    "level": "beginner",
    "ease": 0.674,
@@ -2595,9 +2583,9 @@
    "title": "Russian Instrumental Case - Very Useful 😀 | Super Easy Russian 20",
    "ch": "Easy Russian",
    "dur": 562,
-   "kw": "instrumental case useful grammar cases listening interview beginner school emotion feelings mind food teacher native speaker street interviews education teachers student free tutorial tutorials study beginners",
+   "kw": "instrumental case useful grammar cases listening interview beginner nature weather emotion feelings mind health school teacher native speaker street interviews education teachers student free tutorial tutorials study beginners",
    "topics": [
-    "school",
+    "nature",
     "emotion"
    ],
    "level": "beginner",
@@ -2611,11 +2599,11 @@
    "title": "The Most Annoyingly Catchy Russian Songs | Easy Russian 41",
    "ch": "Easy Russian",
    "dur": 643,
-   "kw": "annoyingly catchy songs listening interview time numbers speech school teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "annoyingly catchy songs listening interview time numbers school speech teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
     "time",
-    "speech",
-    "school"
+    "school",
+    "speech"
    ],
    "level": null,
    "ease": 0.623,
@@ -2662,11 +2650,10 @@
    "title": "How to Describe Your Day In Russian | Super Easy Russian 18",
    "ch": "Easy Russian",
    "dur": 521,
-   "kw": "describe day listening interview beginner food drink home travel transport school teacher native speaker street interviews education teachers student free tutorial tutorials daily routines",
+   "kw": "describe day listening interview beginner travel transport nature weather town school teacher native speaker street interviews education teachers student free tutorial tutorials daily routines",
    "topics": [
-    "food",
-    "home",
-    "travel"
+    "travel",
+    "nature"
    ],
    "level": "beginner",
    "ease": 0.696,
@@ -2679,11 +2666,11 @@
    "title": "What Are You Proud Of? | Easy Russian 39",
    "ch": "Easy Russian",
    "dur": 850,
-   "kw": "proud listening interview emotion feelings mind work money school teacher native speaker street interviews education teachers student free tutorial tutorials thank sponsor italki get credits after taking first sign",
+   "kw": "proud listening interview school emotion feelings mind time numbers food teacher native speaker street interviews education teachers student free tutorial tutorials thank sponsor italki get credits after taking first sign",
    "topics": [
+    "school",
     "emotion",
-    "work",
-    "school"
+    "time"
    ],
    "level": null,
    "ease": 0.645,
@@ -2696,11 +2683,11 @@
    "title": "Russian in the Netherlands: 6 Things Which Surprised Me | Easy Russian 38",
    "ch": "Easy Russian",
    "dur": 849,
-   "kw": "netherlands things which surprised listening culture interview food drink emotion feelings mind travel transport school teacher native speaker street interviews education teachers student free tutorial tutorials cultural differences shocks",
+   "kw": "netherlands things which surprised listening culture interview food drink emotion feelings mind school teacher native speaker street interviews education teachers student free tutorial tutorials cultural differences shocks",
    "topics": [
     "food",
     "emotion",
-    "travel"
+    "school"
    ],
    "level": null,
    "ease": 0.639,
@@ -2730,11 +2717,11 @@
    "title": "Which Foreign Cuisine Do You Like the Most? | Easy Russian 37",
    "ch": "Easy Russian",
    "dur": 1032,
-   "kw": "which foreign cuisine listening interview food drink emotion feelings mind school teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "which foreign cuisine listening interview food drink school nature weather teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
     "food",
-    "emotion",
-    "school"
+    "school",
+    "nature"
    ],
    "level": null,
    "ease": 0.618,
@@ -2747,11 +2734,11 @@
    "title": "Russians About Precious Old Things in Their Lives | Easy Russian 36",
    "ch": "Easy Russian",
    "dur": 915,
-   "kw": "precious old things lives listening interview family school emotion feelings mind time teacher native speaker street interviews education teachers student free tutorial tutorials flea market moscow",
+   "kw": "precious old things lives listening interview family school home time teacher native speaker street interviews education teachers student free tutorial tutorials flea market moscow",
    "topics": [
     "family",
     "school",
-    "emotion"
+    "home"
    ],
    "level": null,
    "ease": 0.654,
@@ -2764,11 +2751,11 @@
    "title": "Laptop, App and Other Words Russians Call Differently | Super Easy Russian 16",
    "ch": "Easy Russian",
    "dur": 569,
-   "kw": "laptop app other words call differently vocabulary listening interview beginner speech food drink school mind teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "laptop app other words call differently vocabulary listening interview beginner food drink speech time numbers school teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
-    "speech",
     "food",
-    "school"
+    "speech",
+    "time"
    ],
    "level": "beginner",
    "ease": 0.631,
@@ -2781,11 +2768,11 @@
    "title": "15 Activities to Do in Winter | Easy Russian 35",
    "ch": "Easy Russian",
    "dur": 616,
-   "kw": "activities winter listening interview nature weather food drink travel transport health school teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "activities winter listening interview nature weather time numbers food drink health school teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
     "nature",
-    "food",
-    "travel"
+    "time",
+    "food"
    ],
    "level": null,
    "ease": 0.631,
@@ -2798,10 +2785,10 @@
    "title": "Why Don't Russian People Smile? | Easy Russian 34",
    "ch": "Easy Russian",
    "dur": 503,
-   "kw": "don't smile listening interview nature weather emotion feelings mind health school teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "don't smile listening interview nature weather tech technology media health school teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
     "nature",
-    "emotion"
+    "tech"
    ],
    "level": null,
    "ease": 0.608,
@@ -2814,11 +2801,11 @@
    "title": "16 Soviet Snacks Every Russian Ate in Their Childhood | Easy Russian 33",
    "ch": "Easy Russian",
    "dur": 756,
-   "kw": "soviet snacks ate childhood listening culture interview food drink time numbers emotion feelings mind school teacher native speaker street interviews education teachers student free tutorial tutorials sweets treats",
+   "kw": "soviet snacks ate childhood listening culture interview food drink time numbers school teacher native speaker street interviews education teachers student free tutorial tutorials sweets treats",
    "topics": [
     "food",
     "time",
-    "emotion"
+    "school"
    ],
    "level": null,
    "ease": 0.593,
@@ -2831,11 +2818,11 @@
    "title": "What Are the Best Places to Visit in Russia? | Easy Russian 32",
    "ch": "Easy Russian",
    "dur": 714,
-   "kw": "best places visit listening interview nature weather travel transport emotion feelings mind health school teacher native speaker street interviews education teachers student free tutorial tutorials",
+   "kw": "best places visit listening interview nature weather travel transport animals health school teacher native speaker street interviews education teachers student free tutorial tutorials",
    "topics": [
     "nature",
     "travel",
-    "emotion"
+    "animals"
    ],
    "level": null,
    "ease": 0.63,
@@ -2848,10 +2835,9 @@
    "title": "50+ Useful Conversation Phrases to React in a Dialogue Like a Russian | Super Easy Russian 15",
    "ch": "Easy Russian",
    "dur": 386,
-   "kw": "useful conversation phrases react dialogue vocabulary listening interview beginner speech emotion feelings mind school teacher native speaker street interviews education teachers student free tutorial tutorials conversational",
+   "kw": "useful conversation phrases react dialogue vocabulary listening interview beginner speech mind school teacher native speaker street interviews education teachers student free tutorial tutorials conversational",
    "topics": [
-    "speech",
-    "emotion"
+    "speech"
    ],
    "level": "beginner",
    "ease": 0.648,
@@ -2864,10 +2850,8 @@
    "title": "Russian Idiom Compared: Moscow Wasn't Built at Once | Easy Russian 31",
    "ch": "Easy Russian",
    "dur": 406,
-   "kw": "idiom compared moscow wasn't built once vocabulary listening interview school food teacher native speaker street interviews education teachers student free tutorial tutorials idioms check other comparisons",
-   "topics": [
-    "school"
-   ],
+   "kw": "idiom compared moscow wasn't built once vocabulary listening interview school teacher native speaker street interviews education teachers student free tutorial tutorials idioms check other comparisons",
+   "topics": [],
    "level": null,
    "ease": 0.669,
    "cefr": null,
@@ -2879,8 +2863,10 @@
    "title": "Why Is Country Life at Dachas So Important for Russians? | Super Easy Russian 3",
    "ch": "Easy Russian",
    "dur": 241,
-   "kw": "country life dachas important listening interview beginner school teacher native speaker street interviews education teachers student free tutorial tutorials dacha countryside",
-   "topics": [],
+   "kw": "country life dachas important listening interview beginner travel transport town school teacher native speaker street interviews education teachers student free tutorial tutorials dacha countryside",
+   "topics": [
+    "travel"
+   ],
    "level": "beginner",
    "ease": 0.675,
    "cefr": "A1",
@@ -2892,11 +2878,11 @@
    "title": "Moscow Districts: Where Russian People Actually Live | Easy Russian 30",
    "ch": "Easy Russian",
    "dur": 631,
-   "kw": "moscow districts actually live listening interview city around town home work money travel school teacher native speaker street interviews education teachers student free tutorial tutorials looks",
+   "kw": "moscow districts actually live listening interview city around town home tech technology media travel school teacher native speaker street interviews education teachers student free tutorial tutorials looks",
    "topics": [
     "city",
     "home",
-    "work"
+    "tech"
    ],
    "level": null,
    "ease": 0.684,
@@ -3010,10 +2996,9 @@
    "title": "Can I Get the Perfect Shot for Social Media? Simple Russian for Beginners",
    "ch": "Comprehensible Russian",
    "dur": 431,
-   "kw": "get perfect shot social media simple beginners listening slow beginner clothes looks tech technology home comprehensible stories complete natural approach zero input immersion refold practice inna elvira tries take photo using phone camera testing light distance settings while useful everyday vocabulary learners want practical through fun visual relatable real life situation try platform comprehensive library built progress",
+   "kw": "get perfect shot social media simple beginners listening slow beginner clothes looks home comprehensible stories complete natural approach zero input immersion refold practice inna elvira tries take photo using phone camera testing light distance settings while useful everyday vocabulary learners want practical through fun visual relatable real life situation try platform comprehensive library built progress",
    "topics": [
-    "clothes",
-    "tech"
+    "clothes"
    ],
    "level": "beginner",
    "ease": 0.683,
@@ -3173,11 +3158,11 @@
    "title": "Inside a Russian Wedding: Traditions & Surprises You Didn’t Know! (Real Russian Culture)",
    "ch": "Comprehensible Russian",
    "dur": 1204,
-   "kw": "inside wedding traditions surprises didn know real culture listening slow beginner emotion feelings mind religion faith tradition time numbers comprehensible natural approach stories intermediate learners speech through without grammar rules biographies listen understand immersion context nastya explains traditional works marriage proposal parents blessing bride price zags ceremony shouting big banquet perfect want family makes weddings unique unforgettable try platform comprehensive library built progress tracker powerful tools",
+   "kw": "inside wedding traditions surprises didn know real culture listening slow beginner emotion feelings mind time numbers religion faith tradition comprehensible natural approach stories intermediate learners speech through without grammar rules biographies listen understand immersion context nastya explains traditional works marriage proposal parents blessing bride price zags ceremony shouting big banquet perfect want family makes weddings unique unforgettable try platform comprehensive library built progress tracker powerful tools",
    "topics": [
     "emotion",
-    "religion",
-    "time"
+    "time",
+    "religion"
    ],
    "level": "beginner",
    "ease": 0.591,
@@ -3276,11 +3261,11 @@
    "title": "Women in the USSR: Rights, Work, & Politics | Russian History in Simple Russian",
    "ch": "Comprehensible Russian",
    "dur": 1009,
-   "kw": "women ussr rights work politics history simple listening culture slow beginner society money school comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context nastya explores early equality laws opportunities real life challenges double workload policy changes try platform comprehensive library built progress tracker powerful tools",
+   "kw": "women ussr rights work politics history simple listening culture slow beginner school society money food comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context nastya explores early equality laws opportunities real life challenges double workload policy changes try platform comprehensive library built progress tracker powerful tools",
    "topics": [
+    "school",
     "politics",
-    "work",
-    "school"
+    "work"
    ],
    "level": "beginner",
    "ease": 0.672,
@@ -3338,11 +3323,11 @@
    "title": "Top 10 Legendary Russians🌟 | Famous Writers, Artists & Celebrities (Easy Russian Listening)",
    "ch": "Comprehensible Russian",
    "dur": 710,
-   "kw": "top legendary famous writers artists celebrities listening culture slow beginner art music school time numbers society comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context elvira introduces alexander pushkin mikhail lomonosov yuri gagarin pyotr tchaikovsky alla pugacheva explaining important try platform comprehensive library built progress tracker powerful tools",
+   "kw": "top legendary famous writers artists celebrities listening culture slow beginner art music school emotion feelings mind society comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context elvira introduces alexander pushkin mikhail lomonosov yuri gagarin pyotr tchaikovsky alla pugacheva explaining important try platform comprehensive library built progress tracker powerful tools",
    "topics": [
     "art",
     "school",
-    "time"
+    "emotion"
    ],
    "level": "beginner",
    "ease": 0.659,
@@ -3404,10 +3389,9 @@
    "title": "Trying TOO Many Russian Sweets😅 “Alenka” & Pryaniki & Caramel Review (Easy Russian)",
    "ch": "Comprehensible Russian",
    "dur": 674,
-   "kw": "trying too many sweets alenka pryaniki caramel review listening culture slow beginner emotion feelings mind food drink comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context nastya sonya try variety traditional chocolate coins baba yaga candies tula pryanik classic cookies rate each platform comprehensive library built progress tracker powerful tools",
+   "kw": "trying too many sweets alenka pryaniki caramel review listening culture slow beginner emotion feelings mind comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context nastya sonya try variety traditional chocolate coins baba yaga candies tula pryanik classic cookies rate each platform comprehensive library built progress tracker powerful tools",
    "topics": [
-    "emotion",
-    "food"
+    "emotion"
    ],
    "level": "beginner",
    "ease": 0.596,
@@ -3461,11 +3445,11 @@
    "title": "Don’t Do This in Russia🚫10 Cultural Mistakes to Avoid | Real Russian Life",
    "ch": "Comprehensible Russian",
    "dur": 775,
-   "kw": "don cultural mistakes avoid real life listening slow beginner speech emotion feelings mind clothes looks comprehensible beginners complete natural approach stories zero input immersion refold practice inna elvira shares important tips smiling public asking personal questions giving flowers small talk house rules try platform comprehensive library built progress tracker powerful tools",
+   "kw": "don cultural mistakes avoid real life listening slow beginner clothes looks speech emotion feelings mind home comprehensible beginners complete natural approach stories zero input immersion refold practice inna elvira shares important tips smiling public asking personal questions giving flowers small talk house rules try platform comprehensive library built progress tracker powerful tools",
    "topics": [
+    "clothes",
     "speech",
-    "emotion",
-    "clothes"
+    "emotion"
    ],
    "level": "beginner",
    "ease": 0.673,
@@ -3573,10 +3557,9 @@
    "title": "The Secret of the Domovoy 👀Russian House Spirit | Slow Russian Story",
    "ch": "Comprehensible Russian",
    "dur": 737,
-   "kw": "secret domovoy house spirit slow story listening culture beginner emotion feelings mind clothes looks comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context elvira explains famous household believe guardian still today try platform comprehensive library built progress tracker powerful tools",
+   "kw": "secret domovoy house spirit slow story listening culture beginner emotion feelings mind comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context elvira explains famous household believe guardian looks still today try platform comprehensive library built progress tracker powerful tools",
    "topics": [
-    "emotion",
-    "clothes"
+    "emotion"
    ],
    "level": "beginner",
    "ease": 0.642,
@@ -3626,11 +3609,11 @@
    "title": "What Russian School Is Really Like 🏫 Morning Routine & Study Day | Easy Listening Practice",
    "ch": "Comprehensible Russian",
    "dur": 844,
-   "kw": "school really morning routine study day listening practice vocabulary beginner time numbers food drink comprehensible vlog daily casual life words input inna immersion nastya shows full breakfast classes friends caf after try platform comprehensive library built progress tracker powerful tools",
+   "kw": "school really morning routine study day listening practice vocabulary beginner time numbers home food comprehensible vlog daily casual life words input inna immersion nastya shows full breakfast classes friends caf after try platform comprehensive library built progress tracker powerful tools",
    "topics": [
     "school",
     "time",
-    "food"
+    "home"
    ],
    "level": "beginner",
    "ease": 0.667,
@@ -3870,11 +3853,10 @@
    "title": "What Does Every Russian House Have? Learn Russian in Russian Only",
    "ch": "Comprehensible Russian",
    "dur": 554,
-   "kw": "house only vocabulary listening beginner city around town emotion feelings mind food drink travel comprehensible native speakers vlog daily casual morning routine life words practice input immersion nastya shows common things find typical home tea sets plants photo albums icons fridge magnets different cities traditions souvenirs culture slow clear understand try platform comprehensive library built progress tracker powerful tools",
+   "kw": "house only vocabulary listening beginner city around town emotion feelings mind travel comprehensible native speakers vlog daily casual morning routine life words practice input immersion nastya shows common things find typical home tea sets plants photo albums icons fridge magnets different cities traditions souvenirs culture slow clear understand try platform comprehensive library built progress tracker powerful tools",
    "topics": [
     "city",
-    "emotion",
-    "food"
+    "emotion"
    ],
    "level": "beginner",
    "ease": 0.639,
@@ -3976,10 +3958,9 @@
    "title": "Strange Russian Superstitions | Real Russian Life",
    "ch": "Comprehensible Russian",
    "dur": 502,
-   "kw": "strange superstitions real life vocabulary listening culture beginner food drink family body health school comprehensible through daily casual morning routine vlog words practice input inna immersion discover nastya kitchen rules beliefs mirrors doors even salt explores popular sometimes surprising traditions still follow today natural while diving bit mystery summer village day grandma",
+   "kw": "strange superstitions real life vocabulary listening culture beginner emotion feelings mind body health comprehensible through daily casual morning routine vlog words practice input inna immersion discover nastya kitchen rules beliefs mirrors doors even salt explores popular sometimes surprising traditions still follow today natural while diving bit mystery summer village day grandma",
    "topics": [
-    "food",
-    "family",
+    "emotion",
     "body"
    ],
    "level": "beginner",
@@ -4026,10 +4007,10 @@
    "title": "Russia’s Sovereign Internet, Floods in Dagestan, Chelyabinsk School Incident | March News Recap",
    "ch": "Comprehensible Russian",
    "dur": 986,
-   "kw": "sovereign internet floods dagestan chelyabinsk school incident march news recap listening culture slow beginner tech technology media time numbers society comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context try platform comprehensive library built progress tracker powerful tools",
+   "kw": "sovereign internet floods dagestan chelyabinsk school incident march news recap listening culture slow beginner tech technology media time numbers food comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context try platform comprehensive library built progress tracker powerful tools",
    "topics": [
-    "tech",
     "school",
+    "tech",
     "time"
    ],
    "level": "beginner",
@@ -4072,12 +4053,8 @@
    "title": "Russian Life Insights: Surprising Things in Russian Homes",
    "ch": "Comprehensible Russian",
    "dur": 731,
-   "kw": "life insights surprising things homes listening culture slow beginner clothes looks food drink emotion feelings mind home comprehensible through stories intermediate learners speech natural without grammar rules biographies listen understand immersion context everyday elvira shares real habits hospitality taking off shoes famous bag bags reusing jars containers while discovering practical cultural details make daily unique try platform comprehensive library built progress tracker powerful tools",
-   "topics": [
-    "clothes",
-    "food",
-    "emotion"
-   ],
+   "kw": "life insights surprising things homes listening culture slow beginner comprehensible through stories intermediate learners speech natural without grammar rules biographies listen understand immersion context everyday elvira shares real habits hospitality taking off shoes famous bag bags reusing jars containers while discovering practical cultural details make daily unique try platform comprehensive library built progress tracker powerful tools",
+   "topics": [],
    "level": "beginner",
    "ease": 0.677,
    "cefr": "A1",
@@ -4122,10 +4099,9 @@
    "title": "😱 What REALLY Happens at a RUSSIAN Kids' Gymnastics Competition!",
    "ch": "Comprehensible Russian",
    "dur": 592,
-   "kw": "really happens kids' gymnastics competition vocabulary listening beginner clothes looks food drink home comprehensible vlog daily casual morning routine life words practice input immersion join nastya sisters masha polina fun day rhythmic watch prepare train perform see excitement winning medals certificates perfect beginners real conversations simple phrases everyday while baking delicious pie dried apricots",
+   "kw": "really happens kids' gymnastics competition vocabulary listening beginner emotion feelings mind comprehensible vlog daily casual morning routine life words practice input immersion join nastya sisters masha polina fun day rhythmic watch prepare train perform see excitement winning medals certificates perfect beginners real conversations simple phrases everyday while baking delicious pie dried apricots",
    "topics": [
-    "clothes",
-    "food"
+    "emotion"
    ],
    "level": "beginner",
    "ease": 0.586,
@@ -4237,10 +4213,9 @@
    "title": "Inside a Russian Supermarket: Shopping Before 10 PM!",
    "ch": "Comprehensible Russian",
    "dur": 661,
-   "kw": "inside supermarket shopping before vocabulary listening beginner food drink time numbers school comprehensible daily life vlog casual morning routine words practice input inna immersion valera visits store showing milk yogurt sour cream cheese cookies chocolate coffee bread looks curd bars champagne sold explains ryazhenka tan ayran describes talks babaevsky dark try platform comprehensive library built progress tracker powerful tools",
+   "kw": "inside supermarket shopping before vocabulary listening beginner food drink school comprehensible daily life vlog casual morning routine words practice input inna immersion valera visits store showing milk yogurt sour cream cheese cookies chocolate coffee bread looks curd bars champagne sold explains ryazhenka tan ayran describes talks babaevsky dark try platform comprehensive library built progress tracker powerful tools",
    "topics": [
-    "food",
-    "time"
+    "food"
    ],
    "level": "beginner",
    "ease": 0.614,
@@ -4290,10 +4265,10 @@
    "title": "Russian News Recap Feb 2026: New Public Chamber, Moscow Figure Skating Week, Alzheimer’s Research",
    "ch": "Comprehensible Russian",
    "dur": 863,
-   "kw": "news recap feb public chamber moscow figure skating week alzheimer research listening culture slow beginner politics society time numbers emotion feelings mind comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context february highlights formation test early detection discussions athletes international sports birth rare bezoar goat zoo luzhniki previous release blizzard wwii memory sochi ski resorts monthly",
+   "kw": "news recap feb public chamber moscow figure skating week alzheimer research listening culture slow beginner politics society school emotion feelings mind comprehensible stories intermediate learners speech through natural without grammar rules biographies listen understand immersion context february highlights formation test early detection discussions athletes international sports birth rare bezoar goat zoo luzhniki previous release blizzard wwii memory sochi ski resorts monthly",
    "topics": [
     "politics",
-    "time",
+    "school",
     "emotion"
    ],
    "level": "beginner",
@@ -4400,8 +4375,7 @@
    "dur": 690,
    "kw": "typical grandmother makes different everyone else listening slow beginner clothes looks home comprehensible through storytelling conversation real dialogue practice daily inna input immersion discover grandmas special naturally elvira talks traditional floral housecoats warm scarves endless food tea love fun way understand culture everyday try platform comprehensive library built progress tracker powerful tools",
    "topics": [
-    "clothes",
-    "home"
+    "clothes"
    ],
    "level": "beginner",
    "ease": 0.691,
@@ -4463,11 +4437,11 @@
    "title": "The Truth About Living in Russia: Benefits and Drawbacks",
    "ch": "Comprehensible Russian",
    "dur": 1469,
-   "kw": "truth living benefits drawbacks listening culture slow beginner school travel transport nature weather food comprehensible stories simple intermediate learners speech through natural without grammar rules biographies listen understand immersion context explore real nastya stunning rich free education healthcare see daily life beyond headlines shares both perks challenges different cities moscow modern metro small town buses salaries housing climate fascinating honest look really across perfect anyone curious",
+   "kw": "truth living benefits drawbacks listening culture slow beginner school travel transport food drink comprehensible stories simple intermediate learners speech through natural without grammar rules biographies listen understand immersion context explore real nastya stunning nature rich free education healthcare see daily life beyond headlines shares both perks challenges different cities moscow modern metro small town buses salaries housing climate fascinating honest look really across perfect anyone curious",
    "topics": [
     "school",
     "travel",
-    "nature"
+    "food"
    ],
    "level": "beginner",
    "ease": 0.662,
@@ -4529,11 +4503,10 @@
    "title": "Travelling as a Backpacker in Southeast Asia | Effortless Russian",
    "ch": "Comprehensible Russian",
    "dur": 720,
-   "kw": "travelling backpacker southeast asia effortless vocabulary listening beginner travel transport nature weather food drink town comprehensible vlog daily casual morning routine life words practice input inna immersion valera shares story trip thailand laos local baguette sandwiches quiet towns french architecture hitchhiking jungle finally powerful wild waterfall hidden deep swimming alone under turns mix fear adrenaline pure joy calm immersive real emotions slow clear",
+   "kw": "travelling backpacker southeast asia effortless vocabulary listening beginner travel transport nature weather town comprehensible vlog daily casual morning routine life words practice input inna immersion valera shares story trip thailand laos local baguette sandwiches quiet towns french architecture hitchhiking jungle finally powerful wild waterfall hidden deep swimming alone under turns mix fear adrenaline pure joy calm immersive real emotions slow clear",
    "topics": [
     "travel",
-    "nature",
-    "food"
+    "nature"
    ],
    "level": "beginner",
    "ease": 0.619,
@@ -4707,9 +4680,8 @@
    "title": "What Makes Russian Pies So Special? Learn Russian in Context",
    "ch": "Comprehensible Russian",
    "dur": 764,
-   "kw": "makes pies special context listening culture slow beginner food drink speech school comprehensible through stories intermediate learners natural without grammar rules biographies listen understand immersion valera explains types open closed semi common fillings cultural significance great real spoken vocabulary try platform comprehensive library built progress tracker powerful tools",
+   "kw": "makes pies special context listening culture slow beginner speech mind comprehensible through stories intermediate learners natural without grammar rules biographies listen understand immersion valera explains types open closed semi common fillings cultural significance great real spoken food vocabulary try platform comprehensive library built progress tracker powerful tools",
    "topics": [
-    "food",
     "speech"
    ],
    "level": "beginner",
@@ -4945,10 +4917,9 @@
    "title": "Why Do Russians Have TWO New Years? | Russian Immersion Video",
    "ch": "Comprehensible Russian",
    "dur": 539,
-   "kw": "years immersion listening slow beginner work money food drink animals comprehensible through storytelling story stories beginners acquire simple input natural approach celebrate year twice discover old future telling dumplings context unique tradition try platform comprehensive library built progress tracker powerful tools",
+   "kw": "years immersion listening slow beginner work money animals comprehensible through storytelling story stories beginners acquire simple input natural approach celebrate year twice discover old future telling dumplings context unique tradition try platform comprehensive library built progress tracker powerful tools",
    "topics": [
-    "work",
-    "food"
+    "work"
    ],
    "level": "beginner",
    "ease": 0.646,
@@ -4990,10 +4961,10 @@
    "title": "Dubai to Goa: CRAZY Travel Coincidence!",
    "ch": "Comprehensible Russian",
    "dur": 619,
-   "kw": "dubai goa crazy travel coincidence listening slow beginner work money emotion feelings mind animals comprehensible story beginners complete natural approach stories input immersion refold practice inna follow valera travels through uae india bustling streets sunny beaches hear amazing chance meeting leads unexpected reunion try platform comprehensive library built progress tracker powerful tools",
+   "kw": "dubai goa crazy travel coincidence listening slow beginner work money nature weather animals comprehensible story beginners complete natural approach stories input immersion refold practice inna follow valera travels through uae india bustling streets sunny beaches hear amazing chance meeting leads unexpected reunion try platform comprehensive library built progress tracker powerful tools",
    "topics": [
     "work",
-    "emotion"
+    "nature"
    ],
    "level": "beginner",
    "ease": 0.646,
@@ -5063,11 +5034,11 @@
    "title": "Winter St. Petersburg in 72 Hours — Must-See Spots | Learn Russian with Real Russians",
    "ch": "Comprehensible Russian",
    "dur": 1056,
-   "kw": "winter petersburg hours must see spots real vocabulary listening beginner time numbers nature weather travel transport comprehensible vlog daily casual morning routine life words practice input immersion join nastya cozy trip saint cultural capital explores stunning landmarks church savior spilled blood annenkirche isaac cathedral enjoys caf pishki botanical garden experiences night mariinsky theatre tips prices personal impressions make mini both fun informative try",
+   "kw": "winter petersburg hours must see spots real vocabulary listening beginner nature weather travel transport clothes looks health comprehensible vlog daily casual morning routine life words practice input immersion join nastya cozy trip saint cultural capital explores stunning landmarks church savior spilled blood annenkirche isaac cathedral enjoys caf pishki botanical garden experiences night mariinsky theatre tips prices personal impressions make mini both fun informative try",
    "topics": [
-    "time",
     "nature",
-    "travel"
+    "travel",
+    "clothes"
    ],
    "level": "beginner",
    "ease": 0.661,
@@ -5129,10 +5100,8 @@
    "title": "Slow Russian podcast for beginners (The History of Russian Salad)",
    "ch": "Boost Your Russian",
    "dur": 486,
-   "kw": "slow beginners history salad vocabulary listening culture beginner food drink school boost practice comprehension english translation text kasha sign before sale ends save",
-   "topics": [
-    "food"
-   ],
+   "kw": "slow beginners history salad vocabulary listening culture beginner boost practice comprehension english translation text kasha food sign before sale ends save",
+   "topics": [],
    "level": "beginner",
    "ease": 0.624,
    "cefr": "A1",
@@ -5160,10 +5129,8 @@
    "title": "Slow Russian podcast for beginners (Russian kasha)",
    "ch": "Boost Your Russian",
    "dur": 416,
-   "kw": "slow beginners kasha vocabulary listening culture beginner food drink school boost practice comprehension english translation text sign free trial texts",
-   "topics": [
-    "food"
-   ],
+   "kw": "slow beginners kasha vocabulary listening culture beginner boost practice comprehension english translation text food sign free trial texts",
+   "topics": [],
    "level": "beginner",
    "ease": 0.554,
    "cefr": "A1",
@@ -5394,10 +5361,10 @@
    "title": "Learn Russian Conversations (with English translation) - Pre-intermediate // Going by Bus",
    "ch": "Boost Your Russian",
    "dur": 213,
-   "kw": "conversations english translation pre intermediate going bus listening speech travel transport mind boost converstion conversation dialogue free resources training conjugate verbs",
+   "kw": "conversations english translation pre intermediate going bus listening travel transport speech town boost converstion conversation dialogue free resources training conjugate verbs",
    "topics": [
-    "speech",
-    "travel"
+    "travel",
+    "speech"
    ],
    "level": "intermediate",
    "ease": 0.654,
@@ -5455,11 +5422,10 @@
    "title": "Learn Russian Conversations (with English translation) - Pre-intermediate // At the hotel",
    "ch": "Boost Your Russian",
    "dur": 273,
-   "kw": "conversations english translation pre intermediate hotel listening speech food drink tech technology media mind boost converstion conversation dialogue level free resources training conjugate verbs",
+   "kw": "conversations english translation pre intermediate hotel listening speech food drink mind boost converstion conversation dialogue level free resources training conjugate verbs",
    "topics": [
     "speech",
-    "food",
-    "tech"
+    "food"
    ],
    "level": "intermediate",
    "ease": 0.688,
@@ -5472,10 +5438,8 @@
    "title": "Russian Fairy Tale // Bilingual Story in Russian and English",
    "ch": "Boost Your Russian",
    "dur": 176,
-   "kw": "fairy tale bilingual story english listening beginner travel transport town boost through stories book children's books beginners parallel text reading turnip repka tales get",
-   "topics": [
-    "travel"
-   ],
+   "kw": "fairy tale bilingual story english listening beginner boost through stories book children's books beginners parallel text reading turnip repka tales get",
+   "topics": [],
    "level": "beginner",
    "ease": 0.522,
    "cefr": "A1",
@@ -5487,10 +5451,8 @@
    "title": "Texts in Slow Russian (with parallel English translation) // 3",
    "ch": "Boost Your Russian",
    "dur": 445,
-   "kw": "texts slow parallel english translation listening beginner food drink school boost beginners text audio reading get",
-   "topics": [
-    "food"
-   ],
+   "kw": "texts slow parallel english translation listening beginner boost beginners text audio reading get",
+   "topics": [],
    "level": "beginner",
    "ease": 0.623,
    "cefr": "A1",
@@ -5550,10 +5512,8 @@
    "title": "Learn Russian with songs (lyrics in English and Russian)",
    "ch": "Boost Your Russian",
    "dur": 577,
-   "kw": "songs lyrics english nature weather health boost music movies subtitles katyusha song translation letra ruso subtitle",
-   "topics": [
-    "nature"
-   ],
+   "kw": "songs lyrics english boost music movies subtitles katyusha song translation letra ruso subtitle",
+   "topics": [],
    "level": null,
    "ease": 0.498,
    "cefr": null,
@@ -5578,10 +5538,9 @@
    "title": "Texts in Slow Russian (with parallel English translation) // 2",
    "ch": "Boost Your Russian",
    "dur": 456,
-   "kw": "texts slow parallel english translation listening beginner clothes looks travel transport home boost beginners text audio reading get",
+   "kw": "texts slow parallel english translation listening beginner clothes looks home boost beginners text audio reading get",
    "topics": [
-    "clothes",
-    "travel"
+    "clothes"
    ],
    "level": "beginner",
    "ease": 0.528,
@@ -5629,10 +5588,8 @@
    "title": "Texts in Slow Russian (with parallel English translation) // 1",
    "ch": "Boost Your Russian",
    "dur": 396,
-   "kw": "texts slow parallel english translation listening beginner city around town travel boost beginners text audio reading get",
-   "topics": [
-    "city"
-   ],
+   "kw": "texts slow parallel english translation listening beginner boost beginners text audio reading get",
+   "topics": [],
    "level": "beginner",
    "ease": 0.648,
    "cefr": "A1",
@@ -5681,10 +5638,8 @@
    "title": "Practice Russian ACTIVELY! – FIRST VERBS",
    "ch": "Real Russian Club",
    "dur": 546,
-   "kw": "practice actively first verbs grammar listening slow beginner school food real club daria molchanova teacher travel course russische sprache russo tprs mini stories welcome beginners today through using method teaching proficiency reading storytelling hear simple sentences answer questions vocabulary context main rule loud even short panda giraffe don know perfect important thing respond listen great",
-   "topics": [
-    "school"
-   ],
+   "kw": "practice actively first verbs grammar listening slow beginner real club daria molchanova teacher travel course russische sprache russo tprs mini stories welcome beginners today through using method teaching proficiency reading storytelling hear simple sentences answer questions vocabulary context main rule loud even short panda giraffe don know perfect important thing respond listen great",
+   "topics": [],
    "level": "beginner",
    "ease": 0.404,
    "cefr": "A1",
@@ -5709,11 +5664,11 @@
    "title": "113 – Dacha The Main Russian Obsession",
    "ch": "Real Russian Club",
    "dur": 1186,
-   "kw": "dacha main obsession school food drink emotion feelings mind real club let talk summer gardens fresh vegetables berries shashlik feel both rest work slow transcript audio download",
+   "kw": "dacha main obsession school emotion feelings mind speech food real club let talk summer gardens fresh vegetables berries shashlik feel both rest work slow transcript audio download",
    "topics": [
     "school",
-    "food",
-    "emotion"
+    "emotion",
+    "speech"
    ],
    "level": null,
    "ease": 0.551,
@@ -5726,11 +5681,8 @@
    "title": "113 – Dacha The Main Russian Obsession",
    "ch": "Real Russian Club",
    "dur": 1200,
-   "kw": "dacha main obsession slow beginner time numbers food drink real club daria molchanova teacher travel course russische sprache russo let's talk summer gardens fresh vegetables berries shashlik feel both rest work transcript audio download",
-   "topics": [
-    "time",
-    "food"
-   ],
+   "kw": "dacha main obsession slow beginner real club daria molchanova teacher travel course russische sprache russo let's talk summer gardens fresh vegetables berries shashlik feel both rest work transcript audio download",
+   "topics": [],
    "level": "beginner",
    "ease": 0.526,
    "cefr": "A1",
@@ -5768,10 +5720,8 @@
    "title": "Speak Russian as a Total Beginner! – TPRS Lesson 3",
    "ch": "Real Russian Club",
    "dur": 357,
-   "kw": "speak total beginner tprs slow food drink school real club daria molchanova teacher travel course russische sprache russo series favorite speaking absolute beginners use simply listen answer questions loud even it's realrussianclub russianlanguage learnrussian russianlessons",
-   "topics": [
-    "food"
-   ],
+   "kw": "speak total beginner tprs slow real club daria molchanova teacher travel course russische sprache russo series favorite speaking absolute beginners use simply listen answer questions loud even it's realrussianclub russianlanguage learnrussian russianlessons",
+   "topics": [],
    "level": "beginner",
    "ease": 0.279,
    "cefr": "A1",
@@ -5811,10 +5761,9 @@
    "title": "Interactive Russian Folk Tale Lesson",
    "ch": "Real Russian Club",
    "dur": 1080,
-   "kw": "interactive folk tale slow beginner animals family work real club daria molchanova teacher travel course russische sprache russo improve listening skills classic turnip simple yet fun story helps practice vocabulary pronunciation comprehension big gratitude goes varvara beautiful slides",
+   "kw": "interactive folk tale slow beginner animals work real club daria molchanova teacher travel course russische sprache russo improve listening skills classic turnip simple yet fun story helps practice vocabulary pronunciation comprehension big gratitude goes varvara beautiful slides",
    "topics": [
-    "animals",
-    "family"
+    "animals"
    ],
    "level": "beginner",
    "ease": 0.587,
@@ -5827,10 +5776,8 @@
    "title": "READ RUSSIAN! Interactive Russian Folk Tale Lesson",
    "ch": "Real Russian Club",
    "dur": 1265,
-   "kw": "read interactive folk tale grammar pronunciation listening slow beginner family time real club teacher course russische sprache russo practice reading story beginners fairy subtitles turnip stories fast improve skills classic simple yet fun helps vocabulary comprehension big gratitude goes varvara beautiful slides",
-   "topics": [
-    "family"
-   ],
+   "kw": "read interactive folk tale grammar pronunciation listening slow beginner real club teacher course russische sprache russo practice reading story beginners fairy subtitles turnip stories fast improve skills classic simple yet fun helps vocabulary comprehension big gratitude goes varvara beautiful slides",
+   "topics": [],
    "level": "beginner",
    "ease": 0.451,
    "cefr": "A1",
@@ -5855,11 +5802,9 @@
    "title": "Learn Russian with me in FLORIDA",
    "ch": "Real Russian Club",
    "dur": 805,
-   "kw": "florida slow beginner food drink nature weather home school real club daria molchanova teacher travel course russische sprache russo best",
+   "kw": "florida slow beginner nature weather health real club daria molchanova teacher travel course russische sprache russo best",
    "topics": [
-    "food",
-    "nature",
-    "home"
+    "nature"
    ],
    "level": "beginner",
    "ease": 0.5,
@@ -5930,9 +5875,9 @@
    "title": "Russian Verbs of Motion with Russian Folk Tales: КАТИТЬСЯ с Колобком",
    "ch": "Russian from Russia",
    "dur": 404,
-   "kw": "verbs motion folk tales катиться с колобком grammar vocabulary listening beginner family time phrases speak class online english study anytime beginners basic intermediate reading fairy kolobok next series through today it's tale youngest children imagine help another verb good little kids words repeated remember tell absolutely know heard many times since early childhood now find song constantly",
+   "kw": "verbs motion folk tales катиться с колобком grammar vocabulary listening beginner travel transport town phrases speak class online english study anytime beginners basic intermediate reading fairy kolobok next series through today it's tale youngest children imagine help another verb good little kids words repeated remember tell absolutely know heard many times since early childhood now find song constantly",
    "topics": [
-    "family"
+    "travel"
    ],
    "level": "beginner",
    "ease": 0.558,
@@ -5945,8 +5890,10 @@
    "title": "Intermediate Russian: бросать деньги на ветер и транжирить",
    "ch": "Russian from Russia",
    "dur": 140,
-   "kw": "intermediate бросать деньги на ветер и транжирить grammar verbs vocabulary listening phrases speak class online english study anytime beginners beginner basic money related talking addition previous",
-   "topics": [],
+   "kw": "intermediate бросать деньги на ветер и транжирить grammar verbs vocabulary listening sport games conflict tech phrases speak class online english study anytime beginners beginner basic money related talking addition previous",
+   "topics": [
+    "sport"
+   ],
    "level": "intermediate",
    "ease": 0.563,
    "cefr": "B1",
@@ -5958,9 +5905,10 @@
    "title": "Intermediate Russian: 10 \"денежных\" глаголов",
    "ch": "Russian from Russia",
    "dur": 556,
-   "kw": "intermediate денежных глаголов grammar verbs vocabulary listening work money animals phrases speak class online english study anytime beginners beginner basic reading related talking today precisely done present ten 'money' familiar while may become acquainted case such important topic absolutely necessary know use full transcript",
+   "kw": "intermediate денежных глаголов grammar verbs vocabulary listening work money speech animals phrases speak class online english study anytime beginners beginner basic reading related talking today precisely done present ten 'money' familiar while may become acquainted case such important topic absolutely necessary know use full transcript",
    "topics": [
-    "work"
+    "work",
+    "speech"
    ],
    "level": "intermediate",
    "ease": 0.62,
@@ -5973,11 +5921,11 @@
    "title": "Intermediate Russian: О звуках",
    "ch": "Russian from Russia",
    "dur": 1161,
-   "kw": "intermediate о звуках grammar verbs pronunciation vocabulary listening nature weather emotion feelings mind home health phrases speak class online english study anytime beginners beginner basic reading sounds say something rustles hums rumbles whispers buzzes whistles screeches knocks still don't know describe hear using now time watch full transcript",
+   "kw": "intermediate о звуках grammar verbs pronunciation vocabulary listening home clothes looks nature weather phrases speak class online english study anytime beginners beginner basic reading sounds say something rustles hums rumbles whispers buzzes whistles screeches knocks still don't know describe hear using now time watch full transcript",
    "topics": [
-    "nature",
-    "emotion",
-    "home"
+    "home",
+    "clothes",
+    "nature"
    ],
    "level": "intermediate",
    "ease": 0.575,
@@ -6005,10 +5953,10 @@
    "title": "Intermediate Russian Folk Tales: Кощей Бессмертный, часть 3. После смерти злодея",
    "ch": "Russian from Russia",
    "dur": 792,
-   "kw": "intermediate folk tales кощей бессмертный часть после смерти злодея vocabulary listening speech family mind phrases speak class online english study anytime beginners beginner basic reading fairy koschei deathless continue through third final tale died happens after death don't look logic may lack",
+   "kw": "intermediate folk tales кощей бессмертный часть после смерти злодея vocabulary listening speech emotion feelings mind phrases speak class online english study anytime beginners beginner basic reading fairy koschei deathless continue through third final tale died happens after death don't look logic may lack",
    "topics": [
     "speech",
-    "family"
+    "emotion"
    ],
    "level": "intermediate",
    "ease": 0.549,
@@ -6021,8 +5969,10 @@
    "title": "Intermediate Russian Folk Tales: Кощей Бессмертный, часть 2. Смерть злодея",
    "ch": "Russian from Russia",
    "dur": 392,
-   "kw": "intermediate folk tales кощей бессмертный часть смерть злодея vocabulary listening phrases speak class online english study anytime beginners beginner basic reading fairy koschei deathless series learners last began telling tale today hear see continuation beginning",
-   "topics": [],
+   "kw": "intermediate folk tales кощей бессмертный часть смерть злодея vocabulary listening emotion feelings mind phrases speak class online english study anytime beginners beginner basic reading fairy koschei deathless series learners last began telling tale today hear see continuation beginning",
+   "topics": [
+    "emotion"
+   ],
    "level": "intermediate",
    "ease": 0.487,
    "cefr": "B1",
@@ -6034,10 +5984,10 @@
    "title": "Intermediate Russian Folk Tales: Кощей Бессмертный, часть 1",
    "ch": "Russian from Russia",
    "dur": 648,
-   "kw": "intermediate folk tales кощей бессмертный часть vocabulary listening travel transport family speech town phrases speak class online english study anytime beginners beginner basic reading fairy koschei deathless continuing series today it's main villain such times full transcript",
+   "kw": "intermediate folk tales кощей бессмертный часть vocabulary listening family travel transport speech time phrases speak class online english study anytime beginners beginner basic reading fairy koschei deathless continuing series today it's main villain such times full transcript",
    "topics": [
-    "travel",
     "family",
+    "travel",
     "speech"
    ],
    "level": "intermediate",
@@ -6110,10 +6060,8 @@
    "title": "Russian New Year Stories for Intermediate Learners: Волшебный медальон (story 3)",
    "ch": "Russian from Russia",
    "dur": 265,
-   "kw": "year stories intermediate learners story волшебный медальон grammar verbs motion vocabulary listening family time phrases speak class online english study anytime beginners basic reading ded moroz father frost year's week small village lost snowy expanses strange occurred brought together destinies misha young musician snegurochka snow maiden granddaughter grandfather full transcript",
-   "topics": [
-    "family"
-   ],
+   "kw": "year stories intermediate learners story волшебный медальон grammar verbs motion vocabulary listening phrases speak class online english study anytime beginners basic reading ded moroz father frost year's week small village lost snowy expanses strange occurred brought together destinies misha young musician snegurochka snow maiden granddaughter grandfather full transcript",
+   "topics": [],
    "level": "intermediate",
    "ease": 0.53,
    "cefr": "B1",
@@ -6167,11 +6115,11 @@
    "title": "Intermediate Russian Listening: Барахолка",
    "ch": "Russian from Russia",
    "dur": 1046,
-   "kw": "intermediate listening барахолка vocabulary food drink city around town clothes looks school phrases speak class online english study anytime beginners beginner basic reading flea market today introduce various words names different objects show famous markets full transcript",
+   "kw": "intermediate listening барахолка vocabulary food drink family city around town school phrases speak class online english study anytime beginners beginner basic reading flea market today introduce various words names different objects show famous markets full transcript",
    "topics": [
     "food",
-    "city",
-    "clothes"
+    "family",
+    "city"
    ],
    "level": "intermediate",
    "ease": 0.588,
@@ -6184,8 +6132,10 @@
    "title": "Intermediate Russian Grammar: НЕСТИ, ВЕСТИ, ВЕЗТИ (transitive verbs of motion)",
    "ch": "Russian from Russia",
    "dur": 565,
-   "kw": "intermediate grammar transitive verbs motion нести вести везти vocabulary listening phrases speak class online english study anytime beginners beginner basic again only well few words looking picture talking something someone full transcript",
-   "topics": [],
+   "kw": "intermediate grammar transitive verbs motion нести вести везти vocabulary listening speech mind phrases speak class online english study anytime beginners beginner basic again only well few words looking picture talking something someone full transcript",
+   "topics": [
+    "speech"
+   ],
    "level": "intermediate",
    "ease": 0.624,
    "cefr": "B1",
@@ -6197,11 +6147,11 @@
    "title": "Intermediate Russian Listening: Город Углич, смерть царевича Дмитрия и колокол",
    "ch": "Russian from Russia",
    "dur": 694,
-   "kw": "intermediate listening город углич смерть царевича дмитрия и колокол vocabulary culture law crime speech time numbers society phrases speak class online english study anytime beginners beginner basic reading uglich history ivan terrible tsarevich dmitry trouble heard story terrible's youngest son died century think after watching might want besides undoubtedly encounter interesting words photos taken while other images open internet sources full transcript",
+   "kw": "intermediate listening город углич смерть царевича дмитрия и колокол vocabulary culture family law crime speech time phrases speak class online english study anytime beginners beginner basic reading uglich history ivan terrible tsarevich dmitry trouble heard story terrible's youngest son died century think after watching might want besides undoubtedly encounter interesting words photos taken while other images open internet sources full transcript",
    "topics": [
+    "family",
     "law",
-    "speech",
-    "time"
+    "speech"
    ],
    "level": "intermediate",
    "ease": 0.572,
@@ -6214,11 +6164,10 @@
    "title": "Intermediate Russian Listening: Из прошлого",
    "ch": "Russian from Russia",
    "dur": 1166,
-   "kw": "intermediate listening из прошлого vocabulary culture time numbers school food drink phrases speak class online english study anytime beginners beginner basic reading things past soviet times nineties life ussr phenomena common during union early may now seem strange today i'm going talk three such fact i've talked before long ago six years combined photos taken open internet sources",
+   "kw": "intermediate listening из прошлого vocabulary culture time numbers city around town phrases speak class online english study anytime beginners beginner basic reading things past soviet times nineties life ussr phenomena common during union early may now seem strange today i'm going talk three such fact i've talked before long ago six years combined photos taken open internet sources",
    "topics": [
     "time",
-    "school",
-    "food"
+    "city"
    ],
    "level": "intermediate",
    "ease": 0.643,
@@ -6231,11 +6180,9 @@
    "title": "Intermediate Russian: БОЛЬШЕ и БОЛЕЕ",
    "ch": "Russian from Russia",
    "dur": 702,
-   "kw": "intermediate больше и более vocabulary listening speech school food drink mind phrases speak class online english study anytime beginners beginner basic reading confusing words cause confusion may seem simple yet still even puzzle good command exactly such asked explain use today doing full transcript",
+   "kw": "intermediate больше и более vocabulary listening speech mind phrases speak class online english study anytime beginners beginner basic reading confusing words cause confusion may seem simple yet still even puzzle good command exactly such asked explain use today doing full transcript",
    "topics": [
-    "speech",
-    "school",
-    "food"
+    "speech"
    ],
    "level": "intermediate",
    "ease": 0.728,
@@ -6248,11 +6195,9 @@
    "title": "Intermediate Russian: О моих подкастах",
    "ch": "Russian from Russia",
    "dur": 388,
-   "kw": "intermediate о моих подкастах grammar verbs vocabulary listening school speech emotion feelings mind food phrases speak class online english study anytime beginners beginner basic reading talk podcasts lately i've receiving lot questions many level proficiency designed whether subscription required download transcripts decided it's finally time make answer audio",
+   "kw": "intermediate о моих подкастах grammar verbs vocabulary listening speech mind phrases speak class online english study anytime beginners beginner basic reading talk podcasts lately i've receiving lot questions many level proficiency designed whether subscription required download transcripts decided it's finally time make answer audio",
    "topics": [
-    "school",
-    "speech",
-    "emotion"
+    "speech"
    ],
    "level": "intermediate",
    "ease": 0.635,
@@ -6265,9 +6210,8 @@
    "title": "Intermediate Russian: Про грибы и ягоды",
    "ch": "Russian from Russia",
    "dur": 322,
-   "kw": "intermediate про грибы и ягоды vocabulary listening time numbers nature weather phrases speak class online english study anytime beginners beginner basic reading mushrooms berries cranberry today i'm telling august september fruitful months made show forest well collect really hope after watching few words full transcript",
+   "kw": "intermediate про грибы и ягоды vocabulary listening nature weather health phrases speak class online english study anytime beginners beginner basic reading mushrooms berries cranberry today i'm telling august september fruitful months made show forest well collect really hope after watching few words full transcript",
    "topics": [
-    "time",
     "nature"
    ],
    "level": "intermediate",
@@ -6281,10 +6225,10 @@
    "title": "Intermediate Russian Listening: Здесь умерла Цветаева",
    "ch": "Russian from Russia",
    "dur": 647,
-   "kw": "intermediate listening здесь умерла цветаева vocabulary school family travel transport food phrases speak class online english study anytime beginners beginner basic reading elabuga marina tsvetaeva died know i'm telling place took own life decide make because huge fan poetry sure it's believe such stories help better understand history that's probably important you're full transcript",
+   "kw": "intermediate listening здесь умерла цветаева vocabulary family military conflict travel transport time phrases speak class online english study anytime beginners beginner basic reading elabuga marina tsvetaeva died know i'm telling place took own life decide make because huge fan poetry sure it's believe such stories help better understand history that's probably important you're full transcript",
    "topics": [
-    "school",
     "family",
+    "military",
     "travel"
    ],
    "level": "intermediate",
@@ -6298,10 +6242,8 @@
    "title": "A Litte Bit of Russian Grammar: ПОСЛЕ или ПОСЛЕ ТОГО КАК?",
    "ch": "Russian from Russia",
    "dur": 510,
-   "kw": "litte bit grammar после или того как prepositions vocabulary listening intermediate school food phrases speak class online english study anytime conjunctions after before preposition conjunction today i'm talking common mistakes made learners often identical instance both translated which choose pdf transcript",
-   "topics": [
-    "school"
-   ],
+   "kw": "litte bit grammar после или того как prepositions vocabulary listening intermediate phrases speak class online english study anytime conjunctions after before preposition conjunction today i'm talking common mistakes made learners often identical instance both translated which choose pdf transcript",
+   "topics": [],
    "level": "intermediate",
    "ease": 0.604,
    "cefr": "B1",
@@ -6313,11 +6255,11 @@
    "title": "Intermediate Russian Listening: 16 минут о зимнем Тобольске",
    "ch": "Russian from Russia",
    "dur": 972,
-   "kw": "intermediate listening минут о зимнем тобольске vocabulary time numbers city around town nature weather phrases speak class online english study anytime beginners basic tobolsk siberia capital romanov family exile prison i'm talking which historic region place lived since august until april full pdf transcript",
+   "kw": "intermediate listening минут о зимнем тобольске vocabulary time numbers city around town travel transport phrases speak class online english study anytime beginners basic tobolsk siberia capital romanov family exile prison i'm talking which historic region place lived since august until april full pdf transcript",
    "topics": [
     "time",
     "city",
-    "nature"
+    "travel"
    ],
    "level": "intermediate",
    "ease": 0.586,
@@ -6345,11 +6287,10 @@
    "title": "Advanced Russian: Делаем упражнения вместе. РАБОТАТЬ с префиксами, часть 1",
    "ch": "Russian from Russia",
    "dur": 763,
-   "kw": "advanced делаем упражнения вместе работать с префиксами часть grammar verbs prefixes vocabulary listening school work money time numbers food phrases speak class online english study anytime intermediate exercise teacher know especially because sometimes translated same verb that's i've made",
+   "kw": "advanced делаем упражнения вместе работать с префиксами часть grammar verbs prefixes vocabulary listening school work money food phrases speak class online english study anytime intermediate exercise teacher know especially because sometimes translated same verb that's i've made",
    "topics": [
     "school",
-    "work",
-    "time"
+    "work"
    ],
    "level": "advanced",
    "ease": 0.613,
@@ -6377,10 +6318,10 @@
    "title": "Intermediate Russian: Детские загадки",
    "ch": "Russian from Russia",
    "dur": 541,
-   "kw": "intermediate детские загадки vocabulary listening clothes looks family speech home phrases speak class online english study anytime beginners basic short riddles kids famous solve answers next",
+   "kw": "intermediate детские загадки vocabulary listening clothes looks travel transport speech home phrases speak class online english study anytime beginners basic short riddles kids famous solve answers next",
    "topics": [
     "clothes",
-    "family",
+    "travel",
     "speech"
    ],
    "level": "intermediate",
@@ -6407,11 +6348,11 @@
    "title": "Intermediate Russian Listening: Здесь жил Распутин",
    "ch": "Russian from Russia",
    "dur": 909,
-   "kw": "intermediate listening здесь жил распутин vocabulary family time numbers school phrases speak class online english study anytime beginners beginner basic pokrovskoye rasputin lived museum born homeland you'll see siberian village which mysterious personalities century today i'm talking grigory find pdf transcript",
+   "kw": "intermediate listening здесь жил распутин vocabulary family school home time phrases speak class online english study anytime beginners beginner basic pokrovskoye rasputin lived museum born homeland you'll see siberian village which mysterious personalities century today i'm talking grigory find pdf transcript",
    "topics": [
     "family",
-    "time",
-    "school"
+    "school",
+    "home"
    ],
    "level": "intermediate",
    "ease": 0.593,
@@ -6424,9 +6365,8 @@
    "title": "Intermediate Russian Grammar: Мне это не сделать",
    "ch": "Russian from Russia",
    "dur": 366,
-   "kw": "intermediate grammar мне это не сделать verbs aspect vocabulary listening school body health food phrases speak class online english study anytime beginners beginner basic reading negative infinitive perfective what's difference between mean that's i'm talking today's pdf transcript",
+   "kw": "intermediate grammar мне это не сделать verbs aspect vocabulary listening body health nature phrases speak class online english study anytime beginners beginner basic reading negative infinitive perfective what's difference between mean that's i'm talking today's pdf transcript",
    "topics": [
-    "school",
     "body"
    ],
    "level": "intermediate",
@@ -6440,8 +6380,9 @@
    "title": "Intermediate Russian Listening: Где в России пеликаны",
    "ch": "Russian from Russia",
    "dur": 403,
-   "kw": "intermediate listening где в россии пеликаны vocabulary travel transport nature weather town phrases speak class online english study anytime beginners beginner basic reading kalmykia pelicans reserves today i'm talking again went watch birds make photos wasn't satisfied i'd made hoped visit places don't know i'll that's i've decided short using pdf transcript",
+   "kw": "intermediate listening где в россии пеликаны vocabulary animals travel transport nature weather work phrases speak class online english study anytime beginners beginner basic reading kalmykia pelicans reserves today i'm talking again went watch birds make photos wasn't satisfied i'd made hoped visit places don't know i'll that's i've decided short using pdf transcript",
    "topics": [
+    "animals",
     "travel",
     "nature"
    ],
@@ -6456,10 +6397,8 @@
    "title": "Intermediate Russian: (Не) работается, (не) спится, (не) пишется... (Reflexive Impersonal Verbs)",
    "ch": "Russian from Russia",
    "dur": 296,
-   "kw": "intermediate reflexive impersonal verbs не работается спится пишется grammar vocabulary listening emotion feelings mind phrases speak class online english study anytime beginners beginner basic reading what's difference between i'm talking song",
-   "topics": [
-    "emotion"
-   ],
+   "kw": "intermediate reflexive impersonal verbs не работается спится пишется grammar vocabulary listening phrases speak class online english study anytime beginners beginner basic reading what's difference between i'm talking song",
+   "topics": [],
    "level": "intermediate",
    "ease": 0.696,
    "cefr": "B1",
@@ -6488,9 +6427,10 @@
    "title": "Прощай, 2022 (год, который испоганил всё)",
    "ch": "Russian from Russia",
    "dur": 482,
-   "kw": "прощай год который испоганил все vocabulary listening beginner time numbers phrases speak class online english study anytime basic intermediate advanced fucking",
+   "kw": "прощай год который испоганил все vocabulary listening beginner time numbers emotion feelings mind phrases speak class online english study anytime basic intermediate advanced fucking",
    "topics": [
-    "time"
+    "time",
+    "emotion"
    ],
    "level": "beginner",
    "ease": 0.623,
@@ -6503,10 +6443,10 @@
    "title": "Intermediate Russian Listening: ПОВЕСТКА",
    "ch": "Russian from Russia",
    "dur": 581,
-   "kw": "intermediate listening повестка vocabulary travel transport law crime town phrases speak class online english study anytime beginner basic advanced military service conscription army mobilization registration office mean keep news may seen word many times today we'll see looks read together pdf transcript",
+   "kw": "intermediate listening повестка vocabulary law crime travel transport faith phrases speak class online english study anytime beginner basic advanced military service conscription army mobilization registration office mean keep news may seen word many times today we'll see looks read together pdf transcript",
    "topics": [
-    "travel",
-    "law"
+    "law",
+    "travel"
    ],
    "level": "intermediate",
    "ease": 0.609,
@@ -6519,9 +6459,8 @@
    "title": "Intermediate Russian Grammar and Vocabulary through Poetry: Ночь, улица, фонарь, аптека (А.Блок)",
    "ch": "Russian from Russia",
    "dur": 673,
-   "kw": "intermediate grammar vocabulary through poetry ночь улица фонарь аптека а блок school speech food learners advanced free amazing online alexander blok night street streetlight drugstore yesterday birthday greatest poets that's decided upload again today working famous poem drug store pur",
+   "kw": "intermediate grammar vocabulary through poetry ночь улица фонарь аптека а блок speech mind learners advanced free amazing online alexander blok night street streetlight drugstore yesterday birthday greatest poets that's decided upload again today working famous poem drug store pur",
    "topics": [
-    "school",
     "speech"
    ],
    "level": "intermediate",
@@ -6535,10 +6474,10 @@
    "title": "На велосипеде на русском - Vlog to learn Russian (sub)",
    "ch": "Russian Progress",
    "dur": 890,
-   "kw": "vlog sub на велосипеде русском listening school time numbers city around town food progress",
+   "kw": "vlog sub на велосипеде русском listening school travel transport city around town food progress",
    "topics": [
     "school",
-    "time",
+    "travel",
     "city"
    ],
    "level": null,
@@ -6552,11 +6491,11 @@
    "title": "In Russian about Africa, Kenya with @mkov23 - Advanced Russian podcast with subs",
    "ch": "Russian Progress",
    "dur": 1224,
-   "kw": "africa kenya mkov advanced subs listening city around town travel transport time numbers progress transcript glossary",
+   "kw": "africa kenya mkov advanced subs listening time numbers family city around town progress transcript glossary",
    "topics": [
-    "city",
-    "travel",
-    "time"
+    "time",
+    "family",
+    "city"
    ],
    "level": "advanced",
    "ease": 0.585,
@@ -6569,11 +6508,11 @@
    "title": "Talking Africa, Ethiopia in Russian with @mkov23 - Advanced Russian podcast with subs",
    "ch": "Russian Progress",
    "dur": 1345,
-   "kw": "talking africa ethiopia mkov advanced subs listening travel transport city around town religion faith tradition progress leran intermediate transcript glossary",
+   "kw": "talking africa ethiopia mkov advanced subs listening travel transport city around town time numbers progress leran intermediate transcript glossary",
    "topics": [
     "travel",
     "city",
-    "religion"
+    "time"
    ],
    "level": "advanced",
    "ease": 0.599,
@@ -6635,11 +6574,11 @@
    "title": "A walk in -27°C in Siberia - Vlog in Russian with subtitles",
    "ch": "Russian Progress",
    "dur": 1471,
-   "kw": "walk siberia vlog subtitles listening intermediate clothes looks nature weather school home progress advanced novosibirsk comprehensible transcript glossary",
+   "kw": "walk siberia vlog subtitles listening intermediate clothes looks nature weather travel transport home progress advanced novosibirsk comprehensible transcript glossary",
    "topics": [
     "clothes",
     "nature",
-    "school"
+    "travel"
    ],
    "level": "intermediate",
    "ease": 0.602,
@@ -6718,11 +6657,11 @@
    "title": "Иностранцы в Бишкеке, Кыргызстане 🇰🇬 - Intermediate Russian Podcast (sub)",
    "ch": "Russian Progress",
    "dur": 956,
-   "kw": "intermediate sub иностранцы в бишкеке кыргызстане listening travel transport nature weather time numbers town progress",
+   "kw": "intermediate sub иностранцы в бишкеке кыргызстане listening travel transport time numbers nature weather town progress",
    "topics": [
     "travel",
-    "nature",
-    "time"
+    "time",
+    "nature"
    ],
    "level": "intermediate",
    "ease": 0.67,
@@ -6735,11 +6674,11 @@
    "title": "Learn Russian with Russian Progress Podcast (B1/B2) subs",
    "ch": "Russian Progress",
    "dur": 517,
-   "kw": "progress subs listening intermediate school emotion feelings mind time numbers food",
+   "kw": "progress subs listening intermediate school emotion feelings mind speech food",
    "topics": [
     "school",
     "emotion",
-    "time"
+    "speech"
    ],
    "level": "intermediate",
    "ease": 0.642,
@@ -6777,11 +6716,11 @@
    "title": "№ 129 - Про велосипеды - Russian podcast with subs",
    "ch": "Russian Progress",
    "dur": 1115,
-   "kw": "subs про велосипеды listening travel transport school city around town progress",
+   "kw": "subs про велосипеды listening travel transport school time numbers town progress",
    "topics": [
     "travel",
     "school",
-    "city"
+    "time"
    ],
    "level": null,
    "ease": 0.624,
@@ -6839,11 +6778,11 @@
    "title": "№ 112 - Моё лето '23 | Intermediate Russian podcast (sub)",
    "ch": "Russian Progress",
    "dur": 788,
-   "kw": "intermediate sub мое лето listening school nature weather time numbers food progress",
+   "kw": "intermediate sub мое лето listening school time numbers nature weather food progress",
    "topics": [
     "school",
-    "nature",
-    "time"
+    "time",
+    "nature"
    ],
    "level": "intermediate",
    "ease": 0.623,
@@ -6905,11 +6844,9 @@
    "title": "№ 111 - Хорошие и плохие качества (имхо) - Intermediate Russian with subs",
    "ch": "Russian Progress",
    "dur": 641,
-   "kw": "intermediate subs хорошие и плохие качества имхо emotion feelings mind clothes looks time numbers progress",
+   "kw": "intermediate subs хорошие и плохие качества имхо emotion feelings mind progress",
    "topics": [
-    "emotion",
-    "clothes",
-    "time"
+    "emotion"
    ],
    "level": "intermediate",
    "ease": 0.616,
@@ -6955,10 +6892,10 @@
    "title": "№ 108 - Волосы, причёски, стрижки: мой опыт - Intermediate Russian Podcast (sub)",
    "ch": "Russian Progress",
    "dur": 557,
-   "kw": "intermediate sub волосы прически стрижки мой опыт vocabulary listening emotion feelings mind time numbers progress comprehensible",
+   "kw": "intermediate sub волосы прически стрижки мой опыт vocabulary listening time numbers emotion feelings mind progress comprehensible",
    "topics": [
-    "emotion",
-    "time"
+    "time",
+    "emotion"
    ],
    "level": "intermediate",
    "ease": 0.602,
@@ -7016,11 +6953,11 @@
    "title": "№ 105 - Как иностранцу поехать в Россию? - Intermediate Russian Podcast Q/A",
    "ch": "Russian Progress",
    "dur": 598,
-   "kw": "intermediate как иностранцу поехать в россию listening school travel transport emotion feelings mind food progress",
+   "kw": "intermediate как иностранцу поехать в россию listening school travel transport speech food progress",
    "topics": [
     "school",
     "travel",
-    "emotion"
+    "speech"
    ],
    "level": "intermediate",
    "ease": 0.637,
@@ -7066,11 +7003,11 @@
    "title": "№ 104 - Что такое дизайн? /с Любой - Advanced Russian Podcast (sub)",
    "ch": "Russian Progress",
    "dur": 1368,
-   "kw": "advanced sub что такое дизаи н с любой listening school emotion feelings mind travel transport food progress intermediate subtitles design",
+   "kw": "advanced sub что такое дизаи н с любой listening school emotion feelings mind home food progress intermediate subtitles design",
    "topics": [
     "school",
     "emotion",
-    "travel"
+    "home"
    ],
    "level": "advanced",
    "ease": 0.622,
@@ -7124,11 +7061,11 @@
    "title": "Our First Hike Together in Brazil — Russian You Can Understand B1+",
    "ch": "Russian With Max",
    "dur": 1207,
-   "kw": "first hike together brazil understand grammar prefixes vocabulary listening slow intermediate nature weather emotion feelings mind food drink health max subs subtitles vlog online foreigners practice conversation phrases common words russianb russiana easyrussian travel study membership get transcript key",
+   "kw": "first hike together brazil understand grammar prefixes vocabulary listening slow intermediate nature weather food drink emotion feelings mind health max subs subtitles vlog online foreigners practice conversation phrases common words russianb russiana easyrussian travel study membership get transcript key",
    "topics": [
     "nature",
-    "emotion",
-    "food"
+    "food",
+    "emotion"
    ],
    "level": "intermediate",
    "ease": 0.605,
@@ -7162,11 +7099,11 @@
    "title": "Our Last Days in Tbilisi - Comprehensible Russian Vlog",
    "ch": "Russian With Max",
    "dur": 1238,
-   "kw": "last days tbilisi comprehensible vlog grammar prefixes vocabulary listening culture slow beginner travel transport food drink family town max subs subtitles intermediate online foreigners practice conversation phrases common words russianb russiana easyrussian georgia country ussr study membership get transcript key",
+   "kw": "last days tbilisi comprehensible vlog grammar prefixes vocabulary listening culture slow beginner family travel transport speech time max subs subtitles intermediate online foreigners practice conversation phrases common words russianb russiana easyrussian georgia country ussr study membership get transcript key",
    "topics": [
+    "family",
     "travel",
-    "food",
-    "family"
+    "speech"
    ],
    "level": "beginner",
    "ease": 0.642,
@@ -7200,11 +7137,11 @@
    "title": "Russian Vlog for Learners (B1+) - Streets of Tbilisi and a Tech Store",
    "ch": "Russian With Max",
    "dur": 1058,
-   "kw": "vlog learners streets tbilisi tech store grammar prefixes vocabulary listening culture slow intermediate city around town travel transport nature weather max subs subtitles online foreigners practice conversation phrases common words russianb russiana easyrussian georgia ussr study membership get transcript key",
+   "kw": "vlog learners streets tbilisi tech store grammar prefixes vocabulary listening culture slow intermediate city around town nature weather travel transport max subs subtitles online foreigners practice conversation phrases common words russianb russiana easyrussian georgia ussr study membership get transcript key",
    "topics": [
     "city",
-    "travel",
-    "nature"
+    "nature",
+    "travel"
    ],
    "level": "intermediate",
    "ease": 0.605,
@@ -7238,11 +7175,11 @@
    "title": "Russian Listening Practice - Hiking with My Son in Georgia",
    "ch": "Russian With Max",
    "dur": 1784,
-   "kw": "listening practice hiking son georgia grammar prefixes vocabulary culture slow beginner nature weather animals time numbers health max subs subtitles vlog intermediate online foreigners conversation phrases common words russianb russiana easyrussian ussr study membership get transcript key",
+   "kw": "listening practice hiking son georgia grammar prefixes vocabulary culture slow beginner nature weather food drink clothes looks health max subs subtitles vlog intermediate online foreigners conversation phrases common words russianb russiana easyrussian ussr study membership get transcript key",
    "topics": [
     "nature",
-    "animals",
-    "time"
+    "food",
+    "clothes"
    ],
    "level": "beginner",
    "ease": 0.599,
@@ -7280,10 +7217,8 @@
    "title": "Learn Russian Vocabulary: Cleaning the House in Russian B1+",
    "ch": "Russian With Max",
    "dur": 1096,
-   "kw": "vocabulary cleaning house grammar verbs prefixes listening slow intermediate home school emotion feelings mind clothes max subs subtitles vlog online foreigners practice conversation phrases common words russianb russiana easyrussian transcript",
+   "kw": "vocabulary cleaning house grammar verbs prefixes listening slow intermediate emotion feelings mind max subs subtitles vlog online foreigners practice conversation phrases common words russianb russiana easyrussian transcript",
    "topics": [
-    "home",
-    "school",
     "emotion"
    ],
    "level": "intermediate",
@@ -7318,11 +7253,11 @@
    "title": "Russian Listening Practice A2-B1 - Max Against Consumerism",
    "ch": "Russian With Max",
    "dur": 1156,
-   "kw": "listening practice max against consumerism grammar prefixes vocabulary culture slow elementary travel transport clothes looks food drink town subs subtitles vlog intermediate online foreigners conversation phrases common words russianb russiana easyrussian sovietrussia ussr transcript",
+   "kw": "listening practice max against consumerism grammar prefixes vocabulary culture slow elementary clothes looks travel transport speech home subs subtitles vlog intermediate online foreigners conversation phrases common words russianb russiana easyrussian sovietrussia ussr transcript",
    "topics": [
-    "travel",
     "clothes",
-    "food"
+    "travel",
+    "speech"
    ],
    "level": "elementary",
    "ease": 0.633,
@@ -7356,11 +7291,11 @@
    "title": "A Relaxed Russian Vlog You Can Actually Follow",
    "ch": "Russian With Max",
    "dur": 777,
-   "kw": "relaxed vlog actually follow grammar prefixes vocabulary listening culture slow beginner emotion feelings mind travel transport nature weather max subs subtitles intermediate online foreigners practice conversation phrases common words russianb russiana easyrussian ussr georgia travelrussian transcript",
+   "kw": "relaxed vlog actually follow grammar prefixes vocabulary listening culture slow beginner nature weather emotion feelings mind travel transport health max subs subtitles intermediate online foreigners practice conversation phrases common words russianb russiana easyrussian ussr georgia travelrussian transcript",
    "topics": [
+    "nature",
     "emotion",
-    "travel",
-    "nature"
+    "travel"
    ],
    "level": "beginner",
    "ease": 0.626,
@@ -7390,11 +7325,11 @@
    "title": "We Left Spain for Georgia - Easy Russian Vlog for Learners",
    "ch": "Russian With Max",
    "dur": 1623,
-   "kw": "left spain georgia vlog learners grammar prefixes vocabulary listening culture slow beginner travel transport city around town emotion feelings mind max subs subtitles intermediate online foreigners practice conversation phrases common words russianb russiana easyrussian sovietrussia ussr transcript",
+   "kw": "left spain georgia vlog learners grammar prefixes vocabulary listening culture slow beginner travel transport school city around town max subs subtitles intermediate online foreigners practice conversation phrases common words russianb russiana easyrussian sovietrussia ussr transcript",
    "topics": [
     "travel",
-    "city",
-    "emotion"
+    "school",
+    "city"
    ],
    "level": "beginner",
    "ease": 0.631,
@@ -7428,11 +7363,11 @@
    "title": "My Last Vlog from Spain - Easy Russian Listening A2+",
    "ch": "Russian With Max",
    "dur": 838,
-   "kw": "last vlog spain listening grammar prefixes vocabulary slow elementary emotion feelings mind nature weather travel transport max subs subtitles intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana easyrussian transcript",
+   "kw": "last vlog spain listening grammar prefixes vocabulary slow elementary nature weather travel transport emotion feelings mind health max subs subtitles intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana easyrussian transcript",
    "topics": [
-    "emotion",
     "nature",
-    "travel"
+    "travel",
+    "emotion"
    ],
    "level": "elementary",
    "ease": 0.637,
@@ -7466,11 +7401,10 @@
    "title": "Learn Russian with This Super Easy Vlog for Beginners (A2)",
    "ch": "Russian With Max",
    "dur": 846,
-   "kw": "vlog beginners grammar prefixes vocabulary listening slow beginner travel transport nature weather time numbers town max subs subtitles intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana easyrussian transcript",
+   "kw": "vlog beginners grammar prefixes vocabulary listening slow beginner travel transport nature weather town max subs subtitles intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana easyrussian transcript",
    "topics": [
     "travel",
-    "nature",
-    "time"
+    "nature"
    ],
    "level": "beginner",
    "ease": 0.574,
@@ -7517,11 +7451,11 @@
    "title": "If You Understand This Russian Dialogue, You’re B1+",
    "ch": "Russian With Max",
    "dur": 1707,
-   "kw": "understand dialogue grammar prefixes vocabulary listening slow intermediate emotion feelings mind body health time numbers max subs subtitles vlog online foreigners practice conversation phrases common words russianb russiana russiandialogue russianc transcript",
+   "kw": "understand dialogue grammar prefixes vocabulary listening slow intermediate emotion feelings mind time numbers school max subs subtitles vlog online foreigners practice conversation phrases common words russianb russiana russiandialogue russianc transcript",
    "topics": [
     "emotion",
-    "body",
-    "time"
+    "time",
+    "school"
    ],
    "level": "intermediate",
    "ease": 0.59,
@@ -7559,10 +7493,10 @@
    "title": "361 - Сон, здоровье и технологии – разговор про умные кольца и фитнес-браслеты",
    "ch": "Russian With Max",
    "dur": 1734,
-   "kw": "сон здоровье и технологии разговор про умные кольца фитнес-браслеты time numbers emotion feelings mind body health max yulia discuss smart gadgets such rings fitness trackers influence habits dialogue learners want improve listening skills explore topics related modern technology transcript key vocabulary extras",
+   "kw": "сон здоровье и технологии разговор про умные кольца фитнес-браслеты time numbers school body health max yulia discuss smart gadgets such rings fitness trackers influence habits dialogue learners want improve listening skills explore topics related modern technology transcript key vocabulary extras",
    "topics": [
     "time",
-    "emotion",
+    "school",
     "body"
    ],
    "level": null,
@@ -7593,11 +7527,11 @@
    "title": "New Neighborhoods in Spain vs Russia — Comprehensible Russian Vlog (A2–B1)",
    "ch": "Russian With Max",
    "dur": 1152,
-   "kw": "neighborhoods spain comprehensible vlog grammar prefixes vocabulary listening slow elementary sport games nature weather time numbers culture society max subs subtitles intermediate online foreigners practice conversation phrases common words russianb russiana transcript",
+   "kw": "neighborhoods spain comprehensible vlog grammar prefixes vocabulary listening slow elementary food drink nature weather sport games school max subs subtitles intermediate online foreigners practice conversation phrases common words russianb russiana transcript",
    "topics": [
-    "sport",
+    "food",
     "nature",
-    "time"
+    "sport"
    ],
    "level": "elementary",
    "ease": 0.648,
@@ -7631,10 +7565,10 @@
    "title": "We Learned About London Wrong at School — Comprehensible Russian Vlog (B1+)",
    "ch": "Russian With Max",
    "dur": 1597,
-   "kw": "learned london wrong school comprehensible vlog grammar prefixes vocabulary listening slow intermediate city around town travel transport max subs subtitles online foreigners practice conversation phrases common words russianb russiana transcript",
+   "kw": "learned london wrong school comprehensible vlog grammar prefixes vocabulary listening slow intermediate city around town travel transport food max subs subtitles online foreigners practice conversation phrases common words russianb russiana transcript",
    "topics": [
-    "city",
     "school",
+    "city",
     "travel"
    ],
    "level": "intermediate",
@@ -7707,11 +7641,11 @@
    "title": "Rainy Day in Madrid — Meeting Yulia | Comprehensible Russian Vlog (A2–B1)",
    "ch": "Russian With Max",
    "dur": 1277,
-   "kw": "rainy day madrid meeting yulia comprehensible vlog grammar prefixes vocabulary listening slow elementary city around town nature weather emotion feelings mind travel max subs subtitles intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana transcript",
+   "kw": "rainy day madrid meeting yulia comprehensible vlog grammar prefixes vocabulary listening slow elementary city around town nature weather travel transport max subs subtitles intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana transcript",
    "topics": [
     "city",
     "nature",
-    "emotion"
+    "travel"
    ],
    "level": "elementary",
    "ease": 0.642,
@@ -7741,11 +7675,11 @@
    "title": "Sabrina Is Turning 3! — Parenting in Russian (B1–B2 Dialogue)",
    "ch": "Russian With Max",
    "dur": 1358,
-   "kw": "sabrina turning parenting dialogue grammar prefixes vocabulary listening slow intermediate emotion feelings mind travel transport school max subs subtitles vlog online foreigners practice conversation phrases common words russianb russiana russiandialogue transcript",
+   "kw": "sabrina turning parenting dialogue grammar prefixes vocabulary listening slow intermediate school travel transport emotion feelings mind food max subs subtitles vlog online foreigners practice conversation phrases common words russianb russiana russiandialogue transcript",
    "topics": [
-    "emotion",
+    "school",
     "travel",
-    "school"
+    "emotion"
    ],
    "level": "intermediate",
    "ease": 0.655,
@@ -7779,11 +7713,11 @@
    "title": "How Russians Celebrate New Year in Spain – Hotel, Olivier & Culture Shock (A2–B1)",
    "ch": "Russian With Max",
    "dur": 1239,
-   "kw": "celebrate year spain hotel olivier culture shock grammar prefixes vocabulary listening slow elementary city around town travel transport time numbers max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana transcript",
+   "kw": "celebrate year spain hotel olivier culture shock grammar prefixes vocabulary listening slow elementary city around town food drink travel transport max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana transcript",
    "topics": [
     "city",
-    "travel",
-    "time"
+    "food",
+    "travel"
    ],
    "level": "elementary",
    "ease": 0.62,
@@ -7821,11 +7755,11 @@
    "title": "What Every Russian Does on December 31 – New Year & Olivier Salad in Spain (A2–B1)",
    "ch": "Russian With Max",
    "dur": 1446,
-   "kw": "december year olivier salad spain grammar prefixes vocabulary listening slow elementary time numbers nature weather emotion feelings mind max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana transcript",
+   "kw": "december year olivier salad spain grammar prefixes vocabulary listening slow elementary time numbers clothes looks nature weather max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana transcript",
    "topics": [
     "time",
-    "nature",
-    "emotion"
+    "clothes",
+    "nature"
    ],
    "level": "elementary",
    "ease": 0.64,
@@ -7859,11 +7793,11 @@
    "title": "Are We Buying This House in Spain? – Comprehensible Russian Vlog (A2–B1)",
    "ch": "Russian With Max",
    "dur": 882,
-   "kw": "buying house spain comprehensible vlog grammar prefixes vocabulary listening slow elementary home city around town time numbers clothes max subs subtitles intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana transcript",
+   "kw": "buying house spain comprehensible vlog grammar prefixes vocabulary listening slow elementary home city around town travel transport clothes max subs subtitles intermediate online foreigners practice conversation phrases common words russianinspain russianb russiana transcript",
    "topics": [
     "home",
     "city",
-    "time"
+    "travel"
    ],
    "level": "elementary",
    "ease": 0.663,
@@ -7897,11 +7831,11 @@
    "title": "Осознанное Потребление и Велосипед: Медленный Влог на Русском Языке (A2–B1)",
    "ch": "Russian With Max",
    "dur": 1628,
-   "kw": "осознанное потребление и велосипед медленный влог на русском языке grammar prefixes vocabulary listening slow elementary travel transport home work money town max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain mindful spending bike life russaina russianb",
+   "kw": "осознанное потребление и велосипед медленный влог на русском языке grammar prefixes vocabulary listening slow elementary home travel transport school clothes max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain mindful spending bike life russaina russianb",
    "topics": [
-    "travel",
     "home",
-    "work"
+    "travel",
+    "school"
    ],
    "level": "elementary",
    "ease": 0.598,
@@ -7935,11 +7869,11 @@
    "title": "Обживаемся в Испании! Как Проходит Наша Жизнь (Влог на Понятном Русском, A2+)",
    "ch": "Russian With Max",
    "dur": 1569,
-   "kw": "обживаемся в испании как проходит наша жизнь влог на понятном русском grammar prefixes vocabulary listening slow elementary home nature weather emotion feelings mind clothes max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain settling life spain real",
+   "kw": "обживаемся в испании как проходит наша жизнь влог на понятном русском grammar prefixes vocabulary listening slow elementary school home time numbers food max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain settling life spain real",
    "topics": [
+    "school",
     "home",
-    "nature",
-    "emotion"
+    "time"
    ],
    "level": "elementary",
    "ease": 0.635,
@@ -7973,11 +7907,11 @@
    "title": "Этот Город Меня Покорил! Влог на понятном русском (A2+)",
    "ch": "Russian With Max",
    "dur": 1146,
-   "kw": "этот город меня покорил влог на понятном русском grammar prefixes vocabulary listening slow elementary nature weather city around town emotion feelings mind health max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain travel spain won oviedo",
+   "kw": "этот город меня покорил влог на понятном русском grammar prefixes vocabulary listening slow elementary school nature weather city around town food max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain travel spain won oviedo",
    "topics": [
+    "school",
     "nature",
-    "city",
-    "emotion"
+    "city"
    ],
    "level": "elementary",
    "ease": 0.644,
@@ -8011,11 +7945,11 @@
    "title": "Как Мы Снимали Квартиру в Овьедо, Испания (Влог на Русском, A2-B1+)",
    "ch": "Russian With Max",
    "dur": 1500,
-   "kw": "как мы снимали квартиру в овьедо испания влог на русском grammar prefixes vocabulary listening slow elementary home emotion feelings mind time numbers clothes max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain travel spain renting apartment oviedo",
+   "kw": "как мы снимали квартиру в овьедо испания влог на русском grammar prefixes vocabulary listening slow elementary home time numbers emotion feelings mind clothes max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain travel spain renting apartment oviedo",
    "topics": [
     "home",
-    "emotion",
-    "time"
+    "time",
+    "emotion"
    ],
    "level": "elementary",
    "ease": 0.654,
@@ -8049,10 +7983,10 @@
    "title": "Влог из Испании - Учим Русский в Ботаническом Саду (A2+)",
    "ch": "Russian With Max",
    "dur": 1218,
-   "kw": "влог из испании учим русский в ботаническом саду grammar prefixes vocabulary listening slow elementary food drink school nature weather max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain travel spain botanical garden",
+   "kw": "влог из испании учим русский в ботаническом саду grammar prefixes vocabulary listening slow elementary school food drink nature weather max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain travel spain botanical garden",
    "topics": [
-    "food",
     "school",
+    "food",
     "nature"
    ],
    "level": "elementary",
@@ -8087,11 +8021,11 @@
    "title": "Славяне Вместе Делают Шашлыки в Испании (Влог на русском, A2-B1+)",
    "ch": "Russian With Max",
    "dur": 1025,
-   "kw": "славяне вместе делают шашлыки в испании влог на русском grammar prefixes vocabulary listening slow elementary travel transport nature weather animals town max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain spain slavs making shashlik together",
+   "kw": "славяне вместе делают шашлыки в испании влог на русском grammar prefixes vocabulary listening slow elementary travel transport animals nature weather town max subs subtitles vlog intermediate online foreigners practice conversation phrases common words russianinspain spain slavs making shashlik together",
    "topics": [
     "travel",
-    "nature",
-    "animals"
+    "animals",
+    "nature"
    ],
    "level": "elementary",
    "ease": 0.605,
@@ -8125,11 +8059,11 @@
    "title": "Встреча с Лучшим Другом во Франции, Бордо (Влог на русском, B1+)",
    "ch": "Russian With Max",
    "dur": 1094,
-   "kw": "встреча с лучшим другом во франции бордо влог на русском grammar prefixes vocabulary listening slow intermediate city around town time numbers emotion feelings mind travel max subs subtitles vlog online foreigners practice conversation phrases common words meeting best friend bordeaux france travelfrance",
+   "kw": "встреча с лучшим другом во франции бордо влог на русском grammar prefixes vocabulary listening slow intermediate city around town time numbers home travel max subs subtitles vlog online foreigners practice conversation phrases common words meeting best friend bordeaux france travelfrance",
    "topics": [
     "city",
     "time",
-    "emotion"
+    "home"
    ],
    "level": "intermediate",
    "ease": 0.639,
@@ -8163,11 +8097,11 @@
    "title": "Собираю Чемоданы: Полезная Русская Лексика для Путешествий и Переезда",
    "ch": "Russian With Max",
    "dur": 1758,
-   "kw": "собираю чемоданы полезная русская лексика для путешествий и переезда grammar prefixes vocabulary listening slow beginner time numbers clothes looks travel transport max subs subtitles vlog intermediate online foreigners practice conversation phrases common words brazil packing bags useful moving",
+   "kw": "собираю чемоданы полезная русская лексика для путешествий и переезда grammar prefixes vocabulary listening slow beginner food drink time numbers home school max subs subtitles vlog intermediate online foreigners practice conversation phrases common words brazil packing bags useful travel moving",
    "topics": [
+    "food",
     "time",
-    "clothes",
-    "travel"
+    "home"
    ],
    "level": "beginner",
    "ease": 0.612,

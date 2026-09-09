@@ -60,6 +60,8 @@ export function failureText(reply) {
    lessons in, while the café and the flat are chapter 1–3 words; the pedagogy
    review, 2026-09-08), or in dev mode. */
 export const TALK_UNLOCK_STAGE = 1;
+// With ten chapters (2026-09-08) the level bands are: 1–4 beginner, 5–7
+// intermediate, 8–10 advanced (talkLevelFor).
 export const talkUnlocked = (st) => !!st.dev || stageDone(st, STAGES[TALK_UNLOCK_STAGE]);
 
 /* Which words to tell the tutor the learner knows: the words met, strongest
@@ -289,13 +291,13 @@ export const TALK_LEVELS = [
   { id: "intermediate", name: "Intermediate", blurb: "Everyday Russian, all tenses" },
   { id: "advanced", name: "Advanced", blurb: "Idioms and longer sentences" },
 ];
-/* Without a choice, the level follows the route: chapters 1–4 beginner, 5–6
+/* Without a choice, the level follows the route: chapters 1–4 beginner, 5–7
    intermediate, later advanced. */
 export function talkLevelFor(st) {
   if (st.talkLevel && TALK_LEVELS.some((l) => l.id === st.talkLevel)) return st.talkLevel;
   const here = nextLesson(st);
   const stage = here ? STAGES.findIndex((s) => s.core.id === here.unit.id) : STAGES.length;
-  return stage < 4 ? "beginner" : stage < 6 ? "intermediate" : "advanced";
+  return stage < 4 ? "beginner" : stage < 7 ? "intermediate" : "advanced";
 }
 
 export default function Talk({ navigation, route }) {

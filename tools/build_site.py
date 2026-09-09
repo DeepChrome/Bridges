@@ -330,9 +330,38 @@ VIDEO_MOMENTS = 3
 VIDEO_SKIP_TOP = 150
 
 SPEAK_TOKENS = (3, 12)
-LISTEN_TOKENS = (4, 15)
+LISTEN_TOKENS = (3, 15)     # three words is a sentence to hear in chapter 1
 LISTEN_EXCLUDE = ("googletts", "other")
 POOL_MIN_PER_UNIT = 15
+
+
+def check_grammar_cards(units, path, lemmas, index, keys_of, pos_of):
+    """Every token in a unit's grammar card examples resolves to a word taught
+    by that unit or one earlier on the route, or is within COVERAGE_FREE_RANK.
+    Prints what is not; returns the count."""
+    order = [row["u"] for row in path]
+    taught = set()
+    bad = 0
+    for ui in order:
+        u = units[ui]
+        taught.update(u["w"])
+        card = u.get("g")
+        if not card:
+            continue
+        for ru, _en in card.get("examples", []):
+            for m in re.finditer(r"[а-яёА-ЯЁ́]+", ru):
+                key = fold(m.group(0))
+                hit = index.get(key)
+                if not hit:
+                    continue                      # not a curriculum word at all
+                if any(i in taught for i in hit):
+                    continue
+                fr = lemmas[hit[0]].get("fr")
+                if fr and fr <= COVERAGE_FREE_RANK:
+                    continue
+                print(f"  !! card {u['id']}: «{m.group(0)}» ({lemmas[hit[0]]['b']}) is taught later or never")
+                bad += 1
+    return bad
 
 
 def build_pools(measured, units, stats):
@@ -678,6 +707,11 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         if tid in chapters:
             row["cn"], row["ch"] = chapters[tid]
         path.append(row)
+
+    # A grammar card may only use words taught by then (or the commonest few
+    # hundred): chapter 2's card conjugated «читать», a chapter-8 word. Reported,
+    # not fatal — the cards are hand-written and the fix is a word in the card.
+    stats["card_words_untaught"] = check_grammar_cards(units, path, lemmas, index, keys_of, pos_of)
 
     # Per-sentence tokens and which units each token's lemma belongs to, for the
     # example ranking and the sentence measurements below — taken while the

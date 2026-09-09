@@ -16,13 +16,19 @@ import { describeForm } from "./forms.js";
 export const QUIZ_N = 8;
 
 /* How the speech activities join a lesson quiz, on top of QUIZ_N: from which chapter
-   (0-based stage index) and how many per quiz. The first chapters stay reading-only
-   — a learner who has met forty words is not ready to transcribe a sentence — and
-   the numbers live here, in one place, rather than in each generator. */
+   (0-based stage index) — and, within that chapter, from which lesson — and how
+   many per quiz. Hearing a sentence starts in chapter 1 from its third lesson
+   (the first chapter used to be reading-only across 22 lessons); speaking waits
+   for chapter 3. The numbers live here, in one place, rather than in each
+   generator. */
 export const SPEECH_MIX = {
-  hear: { fromStage: 1, perQuiz: 1 },
+  hear: { fromStage: 0, fromLesson: 2, perQuiz: 1 },
   scene: { fromStage: 1, perQuiz: 1 },
   say: { fromStage: 2, perQuiz: 1 },
+};
+export const speechFrom = (kind, stage, lesson) => {
+  const mix = SPEECH_MIX[kind];
+  return stage > mix.fromStage || (stage === mix.fromStage && lesson >= (mix.fromLesson || 0));
 };
 
 /* A listening scene: two or three sentences from the listening pool, played in
@@ -447,13 +453,17 @@ export function makeQuestions(env) {
     const poolName = { hear: "listen", say: "speak" }[kind];
     if (!SPEECH || !SPEECH[poolName]) return null;
     const pool = SPEECH[poolName];
-    const own = pool[unit.id] || [];
+    // Hearing in chapter 1 draws on the speak pool when the listen pool has
+    // nothing yet: its short sentences are the right first thing to hear.
+    const fallback = kind === "hear" && SPEECH.speak ? SPEECH.speak : null;
+    const own = (pool[unit.id] || []).concat(fallback && !(pool[unit.id] || []).length ? (fallback[unit.id] || []) : []);
     const all = unitsUpTo(unit).flatMap((u) => pool[u.id] || []);
     const want = new Set(lessonWords(unit, index));
     const row = pickPrompt(SPEECH.rows, own, want, IX, null, true)
       || pickPrompt(SPEECH.rows, all, want, IX, null, true)
       || pickPrompt(SPEECH.rows, own, null, IX)
-      || pickPrompt(SPEECH.rows, all, null, IX);
+      || pickPrompt(SPEECH.rows, all, null, IX)
+      || (fallback ? pickPrompt(SPEECH.rows, unitsUpTo(unit).flatMap((u) => fallback[u.id] || []), null, IX) : null);
     return row ? { t: kind, row, unit: unit.id } : null;
   }
 
@@ -510,7 +520,7 @@ export function makeQuestions(env) {
     const stage = stageOf(unit);
     for (const kind of Object.keys(SPEECH_MIX)) {
       const mix = SPEECH_MIX[kind];
-      if (stage < mix.fromStage) continue;
+      if (!speechFrom(kind, stage, index)) continue;
       for (let k = 0; k < mix.perQuiz; k++) {
         const e = speechPrompt(kind, unit, index);
         if (e) out.splice(1 + Math.floor(Math.random() * out.length), 0, present(e));

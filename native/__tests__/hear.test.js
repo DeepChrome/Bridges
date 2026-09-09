@@ -23,12 +23,13 @@ import { SPEECH_SKIP_TOP } from "@core/speech";
 
 const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.hear.fromStage
                                  && (SPEECH.listen[s.core.id] || []).length).core;
+const lesson = Q.stageOf(later) === SPEECH_MIX.hear.fromStage ? (SPEECH_MIX.hear.fromLesson || 0) : 0;
 /* A sentence with a content word in it — only those are graded by a sentence
    (core/speech.js SPEECH_SKIP_TOP). */
 function withContent(kind) {
   let q = null;
   for (let k = 0; k < 80 && !(q && q.lemmas.some((i) => i >= SPEECH_SKIP_TOP)); k++) {
-    q = Q.present(Q.speechPrompt(kind, later, 0));
+    q = Q.present(Q.speechPrompt(kind, later, lesson));
   }
   return q;
 }

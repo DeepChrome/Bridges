@@ -35,8 +35,12 @@ export function pickPrompt(rows, idxs, want, IX, random, onlyWanted) {
     ? idxs.filter((i) => sentenceLemmas(rows[i][0], IX).some((l) => want.has(l)))
     : [];
   if (!preferred.length && onlyWanted) return null;
-  const from = preferred.length ? preferred : idxs;
-  return rows[from[Math.floor(rnd() * from.length)]] || null;
+  // Easiest first: the shorter half of what qualifies, at random within it. A
+  // uniform draw handed a fourteen-word sentence as readily as a four-word one.
+  const from = (preferred.length ? preferred : idxs).slice()
+    .sort((a, b) => (rows[a][2] || 0) - (rows[b][2] || 0));
+  const easy = from.slice(0, Math.max(3, Math.ceil(from.length / 2)));
+  return rows[easy[Math.floor(rnd() * easy.length)]] || null;
 }
 
 /* Per-lemma grades from an alignment (ROADMAP P5.4 / P5.9).

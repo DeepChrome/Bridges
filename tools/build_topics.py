@@ -21,16 +21,43 @@ import io
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from panel import fold, Resolver, STUB_GLOSS  # noqa: E402
+from panel import fold, Resolver, STUB_GLOSS  # noqa: E402  (fold: the fr lookup)
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 
-SPINE_UNIT = 28      # words per core unit
-BRANCH_MAX = 40      # cap on a topic unit
+SPINE_UNIT = 30      # words per core unit
+SPINE_UNITS = 10     # core units: ten chapters (eight left chapter 8 a 44-lesson dump)
+SPINE_VERBS = 5      # verbs a spine unit carries at least — chapter 1 had one (быть)
+SPINE_FR = 200       # this common in the Core-5000 ranking: spine, whatever the decks say
+CLOSED_TOP = 500     # closed-class words this common are spine: no branch can take them
+CLOSED = {"other", "pronoun", "possessive", "numeral"}
+BRANCH_MAX = 40      # cap on a topic unit…
+BRANCH_MAX_EARLY = 20  # …and in the first chapters, where forty nouns is a word bank
+EARLY_CHAPTERS = 3
 BRANCH_MIN = 10      # below this a topic isn't worth a unit
 PRIMARY_SENSES = 2   # how many of a gloss's senses may claim a topic
 SENSE_WORDS = 3      # and how long such a sense may be
+
+# Verbs a topic teaches alongside its nouns, so a chapter about food can say
+# something (the pedagogy review, 2026-09-08: family was 39 nouns and an
+# adjective). A verb already on the spine stays there — taught once.
+BRANCH_VERBS = {
+    "family":   "любить жить звать родиться расти".split(),
+    "food":     "есть пить готовить заказать завтракать обедать ужинать пробовать".split(),
+    "school":   "учить учиться изучать читать писать считать".split(),
+    "home":     "жить спать сидеть лежать убирать мыть".split(),
+    "clothes":  "носить надеть одеваться снять".split(),
+    "city":     "идти ходить находиться искать".split(),
+    "travel":   "ехать поехать приехать летать плыть отправляться".split(),
+    "body":     "болеть чувствовать".split(),
+    "nature":   "гулять расти".split(),
+    "work":     "работать зарабатывать платить".split(),
+    "animals":  "кормить бегать".split(),
+    "sport":    "играть бегать плавать выиграть".split(),
+    "emotion":  "нравиться бояться радоваться".split(),
+    "speech":   "говорить сказать спросить ответить рассказывать объяснять".split(),
+}
 
 # Ordered by priority: the first rule that matches claims the word. Specific topics
 # come before broad ones so "football" lands in sport, not in games-in-general.
@@ -321,7 +348,9 @@ CHAPTERS = [
     ("Family & Home Life",     "Health and Nature"),
     ("Health & Getting Around", "Work and Animals"),
     ("Days, Talk & the World", "Mind and Language"),
-    ("Thought & Society",      "Culture and Society"),
+    ("Things & Happenings",    "Conflict, Tech and Sport"),
+    ("Where, When & How",      "Culture and Society"),
+    ("Thought & Society",      "Law and Faith"),
 ]
 
 PARENS = re.compile(r"\([^)]*\)")
@@ -445,15 +474,63 @@ def main():
 
     # The spine is decided first, and its words are then off-limits to the branches:
     # a core word is taught once, on the spine, not again inside a topic.
-    spine_pool = deduped[:SPINE_UNIT * 8]
-    spine_set = set(spine_pool)
+    #
+    # What the spine holds (the pedagogy review, 2026-09-08): the commonest words
+    # by the decks' own count, plus three kinds of word the count alone put in
+    # the wrong place or nowhere — closed-class words in the top CLOSED_TOP (да,
+    # если, или, два: no topic rule can take them, so 210 of the 463 commonest
+    # were taught nowhere), words the Core-5000 ranking puts in the top SPINE_FR
+    # (понимать is #85 there and was a side-quest word), and enough verbs per
+    # unit to make a sentence with (SPINE_VERBS; chapter 1 taught one verb).
+    fr = {}
+    for rk, f in src.execute("select ru_key, freq_rank from c.items"
+                             " where kind='vocab' and freq_rank is not null"):
+        fr.setdefault(rk, f)
+    total = SPINE_UNIT * SPINE_UNITS
+    forced = set()
+    for k, lid in enumerate(deduped):
+        m = meta[lid]
+        if (m["pos"] in CLOSED and k < CLOSED_TOP) or fr.get(fold(m["bare"]), 10 ** 9) <= SPINE_FR:
+            forced.add(lid)
+    rest = [lid for lid in deduped if lid not in forced]
+    spine_pool = sorted(list(forced) + rest[:max(0, total - len(forced))], key=deduped.index)
+    # Cut into units by frequency, each with its quota of verbs: a unit short of
+    # verbs pulls the next ones forward and gives up its least common other words
+    # to the unit after.
+    spine_chunks, used = [], set()
+    for n in range(SPINE_UNITS):
+        free = [lid for lid in spine_pool if lid not in used]
+        chunk = free[:SPINE_UNIT]
+        verbs_in = [lid for lid in chunk if meta[lid]["pos"] == "verb"]
+        if len(verbs_in) < SPINE_VERBS:
+            extra = [lid for lid in free[SPINE_UNIT:] if meta[lid]["pos"] == "verb"][:SPINE_VERBS - len(verbs_in)]
+            drop = [lid for lid in chunk if meta[lid]["pos"] != "verb"][::-1][:len(extra)]
+            chunk = [lid for lid in chunk if lid not in drop] + extra
+            chunk.sort(key=spine_pool.index)
+        used.update(chunk)
+        spine_chunks.append(chunk)
+    spine_set = set(used)
     dedup_set = set(deduped)
 
     rules = compile_rules()
     assigned, by_topic = {}, {t: [] for t, _, _ in rules}
+    by_bare = {}
+    for lid in deduped:
+        by_bare.setdefault(meta[lid]["bare"], []).append(lid)
+
+    # A topic's own verbs first (BRANCH_VERBS), unless the spine has them.
+    for tid, verbs in BRANCH_VERBS.items():
+        if tid not in by_topic:
+            continue
+        for bare in verbs:
+            for lid in by_bare.get(bare, []):
+                if meta[lid]["pos"] == "verb" and lid not in spine_set and lid not in assigned:
+                    assigned[lid] = tid
+                    by_topic[tid].append((lid, meta[lid]["n"], "verb"))
+                    break
 
     for lid, m in meta.items():
-        if lid in spine_set or lid not in dedup_set or m["pos"] not in BRANCHABLE:
+        if lid in spine_set or lid not in dedup_set or m["pos"] not in BRANCHABLE or lid in assigned:
             continue
         if m["bare"] in OVERRIDES:
             tid = OVERRIDES[m["bare"]]
@@ -487,11 +564,10 @@ def main():
     spine_ids = []
 
     # --- spine: the commonest words, whatever they are about --------------
-    for i in range(0, len(spine_pool), SPINE_UNIT):
-        chunk = spine_pool[i:i + SPINE_UNIT]
+    for i, chunk in enumerate(spine_chunks):
         if len(chunk) < SPINE_UNIT // 2:
             break
-        n = i // SPINE_UNIT + 1
+        n = i + 1
         tid = f"core{n}"
         # Past the curated list the bands are unnamed rather than numbered — a wrong
         # name is worse than none, and this only happens if --pool grows.
@@ -505,20 +581,6 @@ def main():
             "insert into unit_words (topic_id, lemma_id, ord, reason) values (?,?,?,?)",
             [(tid, lid, j, "frequency") for j, lid in enumerate(chunk)])
         spine_ids.append(tid)
-        ordv += 1
-
-    # --- branches: topic units --------------------------------------------
-    branch_ids = []
-    for tid, name, _ in rules:
-        words = sorted(by_topic[tid], key=lambda x: -x[1])[:BRANCH_MAX]
-        if len(words) < BRANCH_MIN:
-            continue
-        db.execute("insert into topics (id, name, kind, ord, n) values (?,?,?,?,?)",
-                   (tid, name, "branch", ordv, len(words)))
-        db.executemany(
-            "insert into unit_words (topic_id, lemma_id, ord, reason) values (?,?,?,?)",
-            [(tid, lid, j, why) for j, (lid, _, why) in enumerate(words)])
-        branch_ids.append(tid)
         ordv += 1
 
     # --- lay out the tree --------------------------------------------------
@@ -535,17 +597,42 @@ def main():
     # opens on military, which introduces the instrumental that tech then uses.
     # Side quests sit with the chapter whose grammar they can use: business with
     # work (the genitive of having), science and law with the instrumental
-    # chapter, faith with art and society.
+    # chapter, faith with art and society. Ten chapters since 2026-09-08: the
+    # eighth used to carry eight quests and 44 lessons.
     STAGE_PLAN = [
         ["family", "time"],
         ["food", "school"],
         ["home", "clothes"],
         ["city", "travel"],
         ["body", "nature", "medicine"],
-        ["work", "animals", "business"],
-        ["emotion", "speech"],
-        ["military", "tech", "sport", "art", "politics", "science", "law", "religion"],
+        ["work", "animals"],
+        ["emotion", "speech", "business"],
+        ["military", "tech", "sport"],
+        ["art", "politics", "science"],
+        ["law", "religion"],
     ]
+    chapter_of = {b: k for k, stage in enumerate(STAGE_PLAN) for b in stage}
+
+    # --- branches: topic units --------------------------------------------
+    # Capped, and capped harder in the first chapters: forty nouns of family
+    # eight lessons deep is a word bank, not a lesson. A topic's own verbs
+    # (BRANCH_VERBS) are kept ahead of the cap.
+    branch_ids = []
+    for tid, name, _ in rules:
+        cap = BRANCH_MAX_EARLY if chapter_of.get(tid, 99) < EARLY_CHAPTERS else BRANCH_MAX
+        verbs = [w for w in by_topic[tid] if w[2] == "verb"]
+        others = sorted([w for w in by_topic[tid] if w[2] != "verb"], key=lambda x: -x[1])
+        words = verbs + others[:max(0, cap - len(verbs))]
+        if len(words) < BRANCH_MIN:
+            continue
+        db.execute("insert into topics (id, name, kind, ord, n) values (?,?,?,?,?)",
+                   (tid, name, "branch", ordv, len(words)))
+        db.executemany(
+            "insert into unit_words (topic_id, lemma_id, ord, reason) values (?,?,?,?)",
+            [(tid, lid, j, why) for j, (lid, _, why) in enumerate(words)])
+        branch_ids.append(tid)
+        ordv += 1
+
     have = set(branch_ids)
     planned = [b for stage in STAGE_PLAN for b in stage if b in have]
     leftover = [b for b in branch_ids if b not in planned]

@@ -1,4 +1,8 @@
-# Bridges — rebuild the app from the current databases and push it to Netlify.
+# Bridges - rebuild the app from the current databases and push it to Netlify.
+#
+# ASCII only: PowerShell 5.1 reads a .ps1 with no byte-order mark as ANSI, so a
+# UTF-8 em-dash becomes three characters ending in what cp1252 calls a right
+# double quote, which closes a string early and breaks the parse.
 #
 #   .\tools\deploy.ps1              rebuild + deploy to production
 #   .\tools\deploy.ps1 -Draft       deploy to a preview URL instead
@@ -29,7 +33,7 @@ if (-not $SkipBuild) {
 
 if (-not (Test-Path "site\index.html")) { throw "site\index.html not found" }
 
-# Not $args — that is a PowerShell automatic variable and assigning to it is unsafe.
+# Not $args - that is a PowerShell automatic variable and assigning to it is unsafe.
 $deployArgs = @("deploy", "--dir=site", "--no-build")
 if (-not $Draft) { $deployArgs += "--prod" }
 

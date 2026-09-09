@@ -1,0 +1,47 @@
+# Round three: what Phase 9 changed (ROADMAP A37, CLAUDE.md 30i). A fresh install:
+#   adb shell pm clear app.bridges.russian; launch; then
+#   .\native\tools\walk.ps1 -Flow native\flows\walkthrough3.txt
+# Screenshots land in native/screenshots/walk/. Read them - that is the audit.
+
+shot:50-gate
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+# The tour (P8.6) sits between the name and the placement choice.
+shot:51-tour
+tap:^Skip$
+wait:2
+tap:^Start from the beginning$
+wait:3
+# Ten chapters (P9.22), the fork's ranks, the lanes that come back to the road.
+shot:52-learn-top
+expect:Chapter 1
+expect:^Start \(
+scroll
+scroll
+shot:53-learn-chapter-3
+scroll
+scroll
+scroll
+scroll
+shot:54-learn-middle
+scroll
+scroll
+scroll
+scroll
+scroll
+scroll
+scroll
+scroll
+shot:55-learn-bottom
+expect:Chapter 10
+scrolltop
+wait:1
+# Continue lands on a question, not a checklist (P9.12).
+tap:^Start \(
+wait:3
+shot:56-first-question
+back
+wait:2

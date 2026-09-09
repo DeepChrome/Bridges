@@ -19,7 +19,8 @@
 #   expect:<regex>     fail the walk if no node matches
 #
 # Reads the accessibility tree through `uiautomator dump`, so it finds things the
-# way a screen reader does — which is also a check that they are labelled at all.
+# way a screen reader does - which is also a check that they are labelled at all.
+# ASCII only: see the note in emulator.ps1 about .ps1 files without a BOM.
 # No Maestro: it needs WSL on Windows, and this covers the click-through the UX
 # audit needs with nothing to install.
 
@@ -35,9 +36,25 @@ $root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 if (-not $OutDir) { $OutDir = Join-Path $root "native\screenshots\walk" }
 New-Item -ItemType Directory -Force $OutDir | Out-Null
 
+# adb writes ordinary progress to stderr - "1 file pulled", "device offline" while
+# booting - and PowerShell 5.1 turns any native stderr line into a NativeCommandError.
+# Under ErrorActionPreference = Stop that is terminating, so a *successful* `adb pull`
+# aborted the walk on its first screenshot (2026-09-09). Redirecting to $null does not
+# help: the record is created before the redirect. Every adb call goes through here,
+# where stderr joins the output stream and the exit code is what decides.
+function Invoke-Adb {
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $out = & $adb @args 2>&1
+        if ($LASTEXITCODE -ne 0) { throw "adb $($args -join ' ') failed: $out" }
+        return @($out | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] })
+    } finally { $ErrorActionPreference = $prev }
+}
+
 function Get-Tree {
-    & $adb shell uiautomator dump /sdcard/ui.xml 2>$null | Out-Null
-    $xml = (& $adb shell cat /sdcard/ui.xml) -join ""
+    Invoke-Adb shell uiautomator dump /sdcard/ui.xml | Out-Null
+    $xml = (Invoke-Adb shell cat /sdcard/ui.xml) -join ""
     # Every node with a label and bounds. Text and content-desc both count.
     $nodes = @()
     foreach ($m in [regex]::Matches($xml, '<node [^>]*>')) {
@@ -74,40 +91,40 @@ function Do-Step([string]$step) {
         "tap" {
             $n = Find-Node $parts[1]
             if (-not $n) { throw "tap: nothing on screen matches '$($parts[1])'" }
-            & $adb shell input tap $n.x $n.y | Out-Null
+            Invoke-Adb shell input tap $n.x $n.y | Out-Null
             Start-Sleep -Milliseconds 900
         }
         "tapxy" {
-            & $adb shell input tap $parts[1] $parts[2] | Out-Null
+            Invoke-Adb shell input tap $parts[1] $parts[2] | Out-Null
             Start-Sleep -Milliseconds 900
         }
         "tapn" {
             $n = Find-Node $parts[1] ([int]$parts[2])
             if (-not $n) { throw "tapn: no match #$($parts[2]) for '$($parts[1])'" }
-            & $adb shell input tap $n.x $n.y | Out-Null
+            Invoke-Adb shell input tap $n.x $n.y | Out-Null
             Start-Sleep -Milliseconds 900
         }
         "type" {
-            & $adb shell input text ($parts[1] -replace " ", "%s") | Out-Null
+            Invoke-Adb shell input text ($parts[1] -replace " ", "%s") | Out-Null
             Start-Sleep -Milliseconds 400
         }
         "shot" {
             Start-Sleep -Milliseconds 600
-            & $adb shell screencap -p /sdcard/_w.png | Out-Null
-            & $adb pull /sdcard/_w.png (Join-Path $OutDir "$($parts[1]).png") | Out-Null
+            Invoke-Adb shell screencap -p /sdcard/_w.png | Out-Null
+            Invoke-Adb pull /sdcard/_w.png (Join-Path $OutDir "$($parts[1]).png") | Out-Null
             Write-Host "  shot $($parts[1])"
         }
-        "back" { & $adb shell input keyevent 4 | Out-Null; Start-Sleep -Milliseconds 800 }
-        "key" { & $adb shell input keyevent $parts[1] | Out-Null; Start-Sleep -Milliseconds 200 }
+        "back" { Invoke-Adb shell input keyevent 4 | Out-Null; Start-Sleep -Milliseconds 800 }
+        "key" { Invoke-Adb shell input keyevent $parts[1] | Out-Null; Start-Sleep -Milliseconds 200 }
         "clear" {
             # Delete whatever is in the focused field: end of text, then backspaces.
-            & $adb shell input keyevent 123 | Out-Null
-            for ($i = 0; $i -lt 30; $i++) { & $adb shell input keyevent 67 | Out-Null }
+            Invoke-Adb shell input keyevent 123 | Out-Null
+            for ($i = 0; $i -lt 30; $i++) { Invoke-Adb shell input keyevent 67 | Out-Null }
         }
         "wait" { Start-Sleep -Seconds ([double]$parts[1]) }
-        "scroll" { & $adb shell input swipe 540 1700 540 700 300 | Out-Null; Start-Sleep -Milliseconds 800 }
+        "scroll" { Invoke-Adb shell input swipe 540 1700 540 700 300 | Out-Null; Start-Sleep -Milliseconds 800 }
         "scrolltop" {
-            for ($i = 0; $i -lt 8; $i++) { & $adb shell input swipe 540 700 540 1900 200 | Out-Null }
+            for ($i = 0; $i -lt 8; $i++) { Invoke-Adb shell input swipe 540 700 540 1900 200 | Out-Null }
             Start-Sleep -Milliseconds 800
         }
         "texts" { Get-Tree | ForEach-Object { Write-Host "    [$($_.x),$($_.y)] $($_.label)" } }

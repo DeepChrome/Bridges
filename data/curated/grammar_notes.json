@@ -27,8 +27,8 @@
     },
     "core4": {
       "title": "Making things plural",
-      "body": "Masculine and feminine nouns usually take -ы or -и; neuter nouns take -а or -я.",
-      "examples": [["дом → дома́", "house → houses"], ["кни́га → кни́ги", "book → books"]]
+      "body": "Masculine and feminine nouns usually take -ы or -и; neuter nouns take -а or -я. (A few masculine nouns take a stressed -а́ instead — дом → дома́ — and Around Town shows them.)",
+      "examples": [["стол → столы́", "table → tables"], ["кни́га → кни́ги", "book → books"]]
     },
     "core5": {
       "title": "Saying where something is",
@@ -63,7 +63,7 @@
     },
     "food": {
       "title": "Two verbs you say every day",
-      "body": "есть (to eat) and пить (to drink) follow neither pattern: я ем, ты ешь; я пью, ты пьёшь.",
+      "body": "есть (to eat) is irregular: я ем, ты ешь, он ест. пить (to drink) keeps the -е- pattern on a short stem: я пью, ты пьёшь.",
       "examples": [["Я ем хлеб.", "I eat bread."], ["Ты пьёшь чай?", "Do you drink tea?"]]
     },
     "school": {
@@ -142,9 +142,34 @@
       "examples": [["фильм о войне́", "a film about the war"], ["кни́га об иску́сстве", "a book about art"]]
     },
     "politics": {
-      "title": "Quantity words take the genitive plural",
-      "body": "After мно́го, ма́ло, ско́лько and similar words, the noun goes into the genitive plural.",
+      "title": "Quantity words take the genitive",
+      "body": "After мно́го, ма́ло, ско́лько and similar words the noun goes into the genitive: plural for things you count, singular for things you measure.",
       "examples": [["мно́го люде́й", "many people"], ["ма́ло вре́мени", "little time"]]
+    },
+    "medicine": {
+      "title": "At the doctor's",
+      "body": "у plus a person means at their place — у врача́ — while в plus the prepositional is the building you are in: в больни́це.",
+      "examples": [["Я у врача́.", "I am at the doctor's."], ["Она́ в больни́це.", "She is in hospital."]]
+    },
+    "business": {
+      "title": "How much does it cost?",
+      "body": "ско́лько сто́ит plus the thing; the answer counts in roubles the way hours are counted — оди́н рубль, два рубля́, пять рубле́й.",
+      "examples": [["Ско́лько э́то сто́ит?", "How much does this cost?"], ["Э́то сто́ит сто рубле́й.", "It costs a hundred roubles."]]
+    },
+    "law": {
+      "title": "What someone is, was, or became",
+      "body": "After рабо́тать, стать and the past of быть, the role goes into the instrumental: юри́ст → юри́стом, судья́ → судьёй.",
+      "examples": [["Он рабо́тает юри́стом.", "He works as a lawyer."], ["Она́ ста́ла судьёй.", "She became a judge."]]
+    },
+    "science": {
+      "title": "Doing something with something",
+      "body": "The instrumental, with no preposition, is the tool or the field: занима́ться нау́кой, писа́ть ру́чкой.",
+      "examples": [["Он занима́ется нау́кой.", "He does science."], ["Мы пи́шем ру́чкой.", "We write with a pen."]]
+    },
+    "religion": {
+      "title": "Believing in",
+      "body": "ве́рить в plus the accusative is to believe in something; ве́рить plus the dative is to believe someone.",
+      "examples": [["Я ве́рю в Бо́га.", "I believe in God."], ["Я тебе́ ве́рю.", "I believe you."]]
     }
   }
 }

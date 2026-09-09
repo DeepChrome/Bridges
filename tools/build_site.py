@@ -212,7 +212,7 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
             POS_LETTER.get(m["p"], m["p"] or ""),
             m["g"] or "",
             m["a"] or "",
-            m["pt"] or "",
+            (m["pt"] or "").split(";")[0].strip(),
             (m["e"] or "").replace("\t", " "),
             stem_len,
             shape_id,
@@ -510,11 +510,11 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     lemmas, index, pos_of = [], {}, {}
     for lid in order:
         row = db.execute(
-            "select bare, accented, pos, gender, aspect, partner, en from lemmas"
+            "select bare, accented, pos, gender, aspect, partner, en, pl_only from lemmas"
             " where id=?", (lid,)).fetchone()
         if not row:
             continue
-        bare, accented, pos, gender, aspect, partner, en = row
+        bare, accented, pos, gender, aspect, partner, en, pl_only = row
 
         keys = keys_of.get(lid, set())
 
@@ -530,7 +530,14 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         if aspect:
             e["a"] = aspect
         if partner:
-            e["pt"] = partner
+            # The first partner is the pair the aspect drill asks for; the rest
+            # ride along for the entry ("pair: сказать, поговорить").
+            parts = [p.strip() for p in partner.split(";") if p.strip()]
+            e["pt"] = parts[0]
+            if len(parts) > 1:
+                e["pt2"] = ", ".join(parts[1:])
+        if pl_only:
+            e["pl"] = 1
         if lid in unit_of:
             e["u"] = unit_of[lid]
         v = vocab_by_key.get(fold(bare))

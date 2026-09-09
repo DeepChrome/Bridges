@@ -147,6 +147,18 @@ export function makeQuestions(env) {
     return list.map((e) => Object.assign(e, { pool }));
   }
 
+  /* A wrong option must be wrong. A unit that teaches «кот» and «кошка» has two
+     words whose first sense is "cat", and 202 unit words share a first sense
+     with another in their unit (the content review, 2026-09-08): a distractor
+     with the same meaning as the answer is a question with two right answers.
+     The key a distractor is chosen by is therefore the meaning, whichever way
+     round the question is asked. */
+  const bySense = (x) => fold(firstSense(x));
+  /* And when the learner types, any word of the pool with that meaning is right:
+     "jacket" → «пиджак» or «куртка». */
+  const sameSense = (e, w) =>
+    (e.pool || []).filter((i) => i !== e.i && bySense(L[i]) === bySense(w)).map((i) => fold(L[i].b));
+
   /* Turns a generated exercise into what a runner needs to show: a prompt, options
      and which one is right. Keeping this here means the web and native runners
      cannot disagree about what a question *is*. */
@@ -154,8 +166,7 @@ export function makeQuestions(env) {
     const w = L[e.i];
     switch (e.t) {
       case "choose-en": {
-        const opts = shuffle([e.i].concat(
-          distractors(e.i, e.pool, 3, (x) => firstSense(x))));
+        const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, bySense)));
         return {
           kind: e.t, i: e.i, ask: "What does this mean?",
           prompt: w.w, cyr: true, say: w.b,
@@ -163,7 +174,7 @@ export function makeQuestions(env) {
         };
       }
       case "choose-ru": {
-        const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, (x) => x.b)));
+        const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, bySense)));
         return {
           kind: e.t, i: e.i, ask: "Choose the Russian",
           prompt: firstSense(w), cyr: false,
@@ -179,7 +190,7 @@ export function makeQuestions(env) {
         };
       }
       case "cloze": {
-        const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, (x) => x.b)));
+        const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, bySense)));
         return {
           kind: e.t, i: e.i, ask: "Fill the gap",
           prompt: gapped(e.ex.ru, e.token), sub: e.ex.en, cyr: true,
@@ -190,6 +201,7 @@ export function makeQuestions(env) {
         return {
           kind: e.t, i: e.i, ask: "Write it in Russian",
           prompt: firstSense(w), cyr: false, typed: true, answer: w.w, target: w.b,
+          alts: sameSense(e, w),
         };
       case "match":
         return {
@@ -598,7 +610,9 @@ export function makeQuestions(env) {
     const adj = pickWhere((x) => x.p === "adjective" && tableTitled(x, /Declension/));
     // The noun only sets the gender; any noun the learner has met will do, and
     // when the pool has no adjective yet the drill has no question — as it should.
-    const noun = pickWhere((x) => x.p === "noun" && ["m", "f", "n"].includes(x.g));
+    // …but not a plural-only noun: «часы» is plural, and «но́вый часы» is not
+    // agreement.
+    const noun = pickWhere((x) => x.p === "noun" && ["m", "f", "n"].includes(x.g) && !x.pl);
     if (!adj || !noun) return null;
     const t = tableTitled(adj, /Declension/);
     const nom = t.rows.find((r) => /Nominative/i.test(r[0]));
@@ -606,6 +620,9 @@ export function makeQuestions(env) {
     const want = { m: 0, f: 1, n: 2 }[noun.g];
     const forms = cellsOf(nom).map((c) => (c && c.length ? c[0] : null));
     if (!forms[want] || forms.filter(Boolean).length < 3) return null;
+    // An adjective whose genders share a form (an indeclinable «беж») would
+    // offer the right answer twice.
+    if (new Set(forms.filter(Boolean)).size !== forms.filter(Boolean).length) return null;
     return {
       kind: "agreement", i: L.indexOf(adj), cyr: true,
       ask: "Choose the form that agrees", prompt: `___ ${noun.w}`,

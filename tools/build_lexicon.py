@@ -31,6 +31,23 @@ ACUTE = "́"
 _STRESS_PATH = ROOT / "data" / "curated" / "stress.json"
 STRESS = {k: v for k, v in json.loads(_STRESS_PATH.read_text(encoding="utf-8")).items()
           if not k.startswith("_")} if _STRESS_PATH.exists() else {}
+# Hand-written English where OpenRussian's is wrong first, garbled or a stub:
+# keyed on the bare form, or "bare|pos" when two rows share the spelling. The
+# first sense is the quiz prompt, so its order is content.
+_GLOSS_PATH = ROOT / "data" / "curated" / "gloss_overrides.json"
+GLOSS = {k: v for k, v in json.loads(_GLOSS_PATH.read_text(encoding="utf-8")).items()
+         if not k.startswith("_")} if _GLOSS_PATH.exists() else {}
+
+
+def gloss_for(bare, pos, en):
+    return GLOSS.get(f"{bare}|{pos}", GLOSS.get(bare, en))
+
+
+def clean_partner(p):
+    """OpenRussian joins several partners with ";" and marks stress with an
+    apostrophe in them too ("поплы'ть"); one clean list, "; "-joined."""
+    parts = [deapostrophe(x.strip()) for x in (p or "").split(";") if x.strip()]
+    return "; ".join(parts) or None
 
 
 def deapostrophe(s: str) -> str:
@@ -151,10 +168,10 @@ class Builder:
                     " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (lid, bare, fold(bare), accented, pos,
                      row.get("gender") or None, as_int(row.get("animate")),
-                     row.get("aspect") or None, (row.get("partner") or "").strip() or None,
+                     row.get("aspect") or None, clean_partner(row.get("partner")),
                      as_int(row.get("indeclinable")), as_int(row.get("sg_only")),
                      as_int(row.get("pl_only")),
-                     (row.get("translations_en") or "").strip() or None,
+                     gloss_for(bare, pos, (row.get("translations_en") or "").strip() or None),
                      (row.get("translations_de") or "").strip() or None))
                 n_lemmas += 1
 
@@ -225,7 +242,8 @@ class Builder:
                 self.db.execute(
                     "insert into lemmas (id, bare, key, accented, pos, en)"
                     " values (?,?,?,?,?,?)",
-                    (lid, bare, fold(bare), accented, e["pos"], e.get("en")))
+                    (lid, bare, fold(bare), accented, e["pos"],
+                     gloss_for(bare, e["pos"], e.get("en"))))
                 self.db.execute("insert into forms (key, lemma_id, slot) values (?,?,?)",
                                 (fold(bare), lid, "lemma"))
                 n_new += 1

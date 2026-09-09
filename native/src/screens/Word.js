@@ -96,7 +96,7 @@ export default function Word({ route, navigation }) {
         <Senses e={w.e} size={16} align="left" style={{ marginTop: 8 }} />
         <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
           {[w.p, w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
-          {w.pt ? <Pill>{`pair: ${w.pt}`}</Pill> : null}
+          {w.pt ? <Pill>{`pair: ${[w.pt, w.pt2].filter(Boolean).join(", ")}`}</Pill> : null}
           {w.fr ? <Pill>{"#" + w.fr}</Pill> : null}
           {unit ? <Pill tone="brand">{unit.name}</Pill> : null}
         </View>

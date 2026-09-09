@@ -529,7 +529,9 @@ function exType(root, e) {
   const check = () => {
     if (LS.answered) return;
     const given = fold(input.value);
-    const right = given === fold(w.b) || translit(given) === fold(w.b);
+    const alts = (e.alts || []);
+    const right = given === fold(w.b) || translit(given) === fold(w.b)
+      || alts.includes(given) || alts.includes(translit(given));
     input.disabled = true;
     go.disabled = true;
     judge(root, right, e.i);

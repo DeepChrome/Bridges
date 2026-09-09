@@ -70,7 +70,9 @@ function Typed({ q, answered, onAnswer }) {
     const want = fold(q.target);
     const typed = given === want || translit(given) === want ? want
       : /[а-яё]/i.test(given) ? given : translit(given);
-    if (typed === want) return onAnswer(true);
+    // Another word of the pool with the same meaning is right too: "jacket"
+    // is «пиджак» and «куртка», and the prompt did not say which.
+    if (typed === want || (q.alts || []).includes(typed)) return onAnswer(true);
     // A letter off on a word of four or more is half credit — the word is known,
     // the spelling is not — and the verdict says which letter.
     const d = charDistance(typed, want);

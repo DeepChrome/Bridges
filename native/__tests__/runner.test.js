@@ -5,6 +5,7 @@
  */
 
 import React from "react";
+import { Alert } from "react-native";
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -138,10 +139,10 @@ describe("runner verdict", () => {
     global.__audioHold = true;
     try {
       await withRunner({ steps: [heard, heard], recycle: false });
-      await screen.findByText("Hint");
+      await screen.findByText(/^Hint/);
       expect(global.__played.filter((u) => u && u.includes("/audio/"))).toHaveLength(1);
       expect(screen.queryByTestId("hint-text")).toBeNull();
-      await act(async () => { fireEvent.press(screen.getByText("Hint")); });
+      await act(async () => { fireEvent.press(screen.getByText(/^Hint/)); });
       expect(screen.getByTestId("hint-text").props.children).toBe("book");
       await act(async () => { fireEvent.press(screen.getAllByText("книга")[0]); });
       expect(await screen.findByText("Correct")).toBeTruthy();
@@ -155,6 +156,37 @@ describe("runner verdict", () => {
     } finally {
       global.__audioHold = false;
       global.__audioFinish();
+    }
+  });
+
+  /* The back arrow mid-run asks first; before the first answer, and after the
+     last, it does not. */
+  it("asks before the back arrow discards a run that has started", async () => {
+    const listeners = {};
+    const navigation = {
+      addListener: (name, fn) => { listeners[name] = fn; return () => delete listeners[name]; },
+      dispatch: jest.fn(),
+    };
+    const second = { ...question, prompt: "стол", options: [{ label: "table", right: true }, { label: "book" }] };
+    const alert = jest.spyOn(Alert, "alert").mockImplementation(() => {});
+    try {
+      await withRunner({ steps: [question, second], navigation, recycle: false });
+      await screen.findByText("book");
+      const leave = () => {
+        const e = { preventDefault: jest.fn(), data: { action: { type: "GO_BACK" } } };
+        listeners.beforeRemove(e);
+        return e;
+      };
+      expect(leave().preventDefault).not.toHaveBeenCalled();         // nothing answered yet
+      await act(async () => { fireEvent.press(screen.getByText("book")); });
+      await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+      const e = leave();
+      expect(e.preventDefault).toHaveBeenCalled();                    // mid-run: asks
+      expect(alert).toHaveBeenCalledTimes(1);
+      alert.mock.calls[0][2].find((b) => b.text === "Leave").onPress();
+      expect(navigation.dispatch).toHaveBeenCalledWith(e.data.action);
+    } finally {
+      alert.mockRestore();
     }
   });
 

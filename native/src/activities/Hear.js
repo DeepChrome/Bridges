@@ -15,14 +15,15 @@ import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Btn, Muted } from "../ui";
+import { Btn, Muted, Speaker } from "../ui";
 import { say } from "../audio";
 import { RuInput } from "../keyboard";
 import { Linked } from "../words";
-import { IX } from "../data";
+import { IX, L } from "../data";
 import { Alignment } from "./Alignment";
 import { compare } from "@core/compare";
-import { gradeAlignment } from "@core/speech";
+import { gradeAlignment, alignmentCredit, nearMiss } from "@core/speech";
+import { describeForm } from "@core/forms";
 import { recordAttempt } from "@core/state";
 import { fold, translit } from "@core/util";
 
@@ -75,12 +76,22 @@ export function Hear({ q, r }) {
     const out = compare(heard, q.target);
     const perfect = out.wer === 0;
     setRes(out);
-    const n = out.expected.length;
-    const okN = out.alignment.filter((a) => a.status === "ok").length;
+    // A word a letter or two off is half right (core/speech.js nearMiss), and
+    // the note names the form that was wanted.
+    const c = alignmentCredit(out.alignment, IX);
+    const nears = out.alignment.filter((a) => nearMiss(a, IX));
+    const named = nears.map((a) => {
+      const i = IX[fold(a.expected)][0];
+      const d = describeForm(L[i], a.expected);
+      return d ? `«${a.expected}» is ${d.text.toLowerCase()}` : `«${a.expected}»`;
+    });
+    const note = perfect ? null
+      : `${c.ok} of ${c.n} words` + (c.near ? `, ${c.near} a letter off` : "")
+        + (named.length ? ` — ${named.join("; ")}` : "");
     r.record(perfect,
              gradeAlignment(out.alignment, IX, { perfect, firstTry: true, hinted: !!r.usedHint }),
              undefined,
-             { credit: 1 - out.wer, note: perfect ? null : `${okN} of ${n} words` });
+             { credit: c.credit, note });
     update((prev) => ({
       ...prev,
       speech: recordAttempt(prev.speech, {
@@ -95,10 +106,16 @@ export function Hear({ q, r }) {
     return (
       <View>
         <Alignment alignment={res.alignment} />
+        {/* The moment the learner sees which word was missed is the moment to
+            hear it again — the speaker stays after the answer. */}
         <View style={{ marginTop: 10, paddingTop: 12, borderTopWidth: 1,
-                       borderTopColor: t.lineSoft }}>
-          <Linked text={q.target} size={20} />
-          <Muted style={{ marginTop: 4 }}>{q.en}</Muted>
+                       borderTopColor: t.lineSoft, flexDirection: "row",
+                       alignItems: "flex-start", gap: 8 }}>
+          <View style={{ flex: 1 }}>
+            <Linked text={q.target} size={20} />
+            <Muted style={{ marginTop: 4 }}>{q.en}</Muted>
+          </View>
+          <Speaker text={q.target} size={36} />
         </View>
       </View>
     );

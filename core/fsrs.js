@@ -53,7 +53,15 @@ export function intervalFor(s) {
 }
 
 /* card: {s, d, due, last, reps, lapses} — or undefined for a brand new word.
-   Returns the updated card. `now` is a day number. */
+   Returns the updated card. `now` is a day number.
+
+   A lapse is an Again on a card the learner had *kept* — Anki's rule. A review
+   on the day the card was last reviewed is a learning step: it reschedules the
+   card but touches neither lapses nor difficulty. Without this a new word
+   answered Again, Again, Good in one session was a leech before the day was
+   out, and the trouble bank listed yesterday's new words rather than what is
+   hard (the pedagogy review, 2026-09-08: 73 leeches of 212 words for the
+   struggling simulated learner). */
 export function fsrsReview(card, grade, now) {
   const g = Math.min(4, Math.max(1, grade | 0));
   let s, d, reps, lapses;
@@ -62,15 +70,16 @@ export function fsrsReview(card, grade, now) {
     s = initStability(g);
     d = initDifficulty(g);
     reps = 1;
-    lapses = g === 1 ? 1 : 0;
+    lapses = 0;
   } else {
+    const learning = card.last !== undefined && card.last >= now;
     const elapsed = Math.max(0, now - (card.last === undefined ? now : card.last));
     const r = retrievability(elapsed, card.s);
-    d = nextDifficulty(card.d, g);
+    d = learning ? card.d : nextDifficulty(card.d, g);
     s = g === 1 ? stabilityAfterLapse(d, card.s, r)
                 : stabilityAfterRecall(d, card.s, r, g);
     reps = (card.reps || 0) + 1;
-    lapses = (card.lapses || 0) + (g === 1 ? 1 : 0);
+    lapses = (card.lapses || 0) + (g === 1 && !learning ? 1 : 0);
   }
 
   // Again comes back in the same session rather than tomorrow.

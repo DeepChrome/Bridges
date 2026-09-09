@@ -26,4 +26,3 @@ export const SCENARIOS = [
     prompt: "You are a close friend on the phone in the evening. Ask how the learner's day was, what they did, and how they feel about it." },
 ];
 
-export const scenarioById = (id) => SCENARIOS.find((s) => s.id === id) || null;

@@ -5,22 +5,19 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Bridges listens to you read Russian sentences aloud so it can check the words you said. Audio stays on the device unless you turn on cloud recognition in Settings.",
-        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition."
+        "NSMicrophoneUsageDescription": "Bridges listens to you read Russian sentences aloud so it can check the words you said. Audio stays on the device; only the words recognised are checked.",
+        "NSSpeechRecognitionUsageDescription": "Bridges recognises the Russian you say, on the device, to check the words against the sentence."
       }
     },
     "android": {
       "package": "app.bridges.russian",
       "permissions": [
-        "RECORD_AUDIO",
         "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "adaptiveIcon": {
         "backgroundColor": "#4D45E6",

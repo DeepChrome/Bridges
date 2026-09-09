@@ -5,7 +5,7 @@
  */
 
 import DATA from "../assets/data.json";
-import { fold } from "@core/util";
+import { fold, today } from "@core/util";
 import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize } from "@core/questions";
@@ -252,6 +252,16 @@ export function nextLesson(st) {
   return null;
 }
 
+/* The first thing left to do in that lesson — what Continue opens directly, so
+   the path leads to a question and not to a checklist (the interface review,
+   2026-09-08): { unit, index, step } with step one of vocab | quiz | video. */
+export function nextStep(st) {
+  const here = nextLesson(st);
+  if (!here) return null;
+  const c = components(st, here.unit, here.index).find((x) => !x.done);
+  return { ...here, step: c ? c.id : "vocab" };
+}
+
 /* Where the learner is: every unit on the route up to the spine lesson Continue
    would resume, or the whole route once it is done. What a quiz or a listening
    drill draws from by default — cumulative, to here (the owner, 2026-09-07). */
@@ -269,6 +279,24 @@ export function reachedUnits(st) {
 export const idxOfWord = (w) => {
   const h = IX[fold(w)];
   return h && h.length ? h[0] : -1;
+};
+
+/* What the scheduler wants back today, as lemma indices: the trouble bank
+   first, then everything due. What a quiz tops up with and a drill asks for
+   before anything else — review on the path, not only in the Study tab. */
+export function reviewWords(st) {
+  const t = today();
+  const out = [], have = new Set();
+  const add = (w) => { const i = idxOfWord(w); if (i >= 0 && !have.has(i)) { have.add(i); out.push(i); } };
+  for (const w in (st.trouble || {})) add(w);
+  for (const w in (st.seen || {})) if (st.seen[w].due <= t) add(w);
+  return out;
+}
+export const dueCount = (st) => {
+  const t = today();
+  let n = 0;
+  for (const w in (st.seen || {})) if (st.seen[w].due <= t) n++;
+  return n;
 };
 
 /* What a practice drill may ask about: the words the learner has met, widened

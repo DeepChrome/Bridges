@@ -40,10 +40,6 @@ const dark = {
   brandOn: "#0C0D10", goodOn: "#0C0D10", badOn: "#0C0D10",
 };
 
-/* Literata carries the Cyrillic and does the language's typography; the system face
-   handles the interface until the font is bundled. */
-export const RU_FONT = undefined;
-
 export const radius = { sm: 8, md: 14, lg: 20 };
 export const space = { pad: 16, gap: 10 };
 

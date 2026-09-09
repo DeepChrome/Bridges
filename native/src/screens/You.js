@@ -1,17 +1,18 @@
 /* You — profile, progress, the trouble bank, and settings. */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, Modal, ScrollView, Switch, Alert, Pressable } from "react-native";
+import { View, Text, Modal, ScrollView, Switch, Alert } from "react-native";
 import { useSession } from "../session";
 import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
 import { useTheme, radius } from "../theme";
 import {
-  Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Title,
+  Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel,
 } from "../ui";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
 import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { cacheStats, clearCache } from "../cache";
+import { backupProfile, restoreProfile } from "../backup";
 import { troubleWords } from "./Study";
 import { today } from "@core/util";
 import { tagInfo } from "@core/errortags";
@@ -38,29 +39,9 @@ function Stat({ value, label }) {
   );
 }
 
-/* A row of choices, one lit. */
-function Choice({ options, value, onPick, testID }) {
-  const t = useTheme();
-  return (
-    <View testID={testID} style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
-      {options.map((o) => {
-        const on = o.id === value;
-        return (
-          <Pressable key={o.id} onPress={() => onPick(o.id)} accessibilityRole="button"
-                     accessibilityState={{ selected: on }}
-                     style={{ borderWidth: 1, borderColor: on ? t.brand : t.line,
-                              backgroundColor: on ? t.brandBg : t.surface, borderRadius: 99,
-                              paddingHorizontal: 13, paddingVertical: 8, minHeight: 36 }}>
-            <Text style={{ color: on ? t.brandInk : t.ink2, fontSize: 14 }}>{o.name}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
 
 function Settings({ visible, onClose, onLab, onTour }) {
-  const { st, update, signOut } = useSession();
+  const { st, update, signOut, account, restore } = useSession();
   const t = useTheme();
   const [cache, setCache] = useState(() => cacheStats());
   useEffect(() => { if (visible) setCache(cacheStats()); }, [visible]);
@@ -79,17 +60,6 @@ function Settings({ visible, onClose, onLab, onTour }) {
                          marginBottom: 14 }}>Settings</Text>
           <ScrollView>
             <List>
-              <Row>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Developer mode</Text>
-                  <Muted>All lessons unlocked</Muted>
-                </View>
-                <Switch
-                  value={!!st.dev}
-                  onValueChange={(v) => update((p) => ({ ...p, dev: v }))}
-                  trackColor={{ true: t.good, false: t.surface3 }}
-                />
-              </Row>
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Card side</Text>
@@ -133,7 +103,7 @@ function Settings({ visible, onClose, onLab, onTour }) {
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Reading speed</Text>
                   <Muted>Press a speaker twice for slower</Muted>
-                  <Choice testID="speed-choice" options={SPEEDS} value={st.speed || "normal"}
+                  <Choice testID="speed-choice" options={SPEEDS} value={st.speed || "normal"} style={{ marginTop: 8 }}
                           onPick={(id) => update((p) => ({ ...p, speed: id }))} />
                 </View>
               </Row>
@@ -141,15 +111,28 @@ function Settings({ visible, onClose, onLab, onTour }) {
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Right-answer sound</Text>
                   <Muted>Tap to hear</Muted>
-                  <Choice testID="cue-choice" options={CUE_NAMES} value={st.cue || "bell"}
+                  <Choice testID="cue-choice" options={CUE_NAMES} value={st.cue || "bell"} style={{ marginTop: 8 }}
                           onPick={(id) => { previewCue(id); update((p) => ({ ...p, cue: id })); }} />
                 </View>
               </Row>
-              <Row last={!st.dev} onPress={() => { onClose(); onTour(); }}>
+              <Row onPress={() => { onClose(); onTour(); }}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Show the tour</Text>
                   <Muted>Words, voices and the microphone, in three cards</Muted>
                 </View>
+              </Row>
+              {/* Last, not first: a new learner's settings sheet should not open on
+                  a switch they cannot place. It ships on (rule 20.9). */}
+              <Row last={!st.dev}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Developer mode</Text>
+                  <Muted>All lessons unlocked</Muted>
+                </View>
+                <Switch
+                  value={!!st.dev}
+                  onValueChange={(v) => update((p) => ({ ...p, dev: v }))}
+                  trackColor={{ true: t.good, false: t.surface3 }}
+                />
               </Row>
               {st.dev ? (
                 // A measuring tool, not a feature: only with developer mode on.
@@ -162,7 +145,27 @@ function Settings({ visible, onClose, onLab, onTour }) {
               ) : null}
             </List>
 
-            <Btn label="Switch profile" style={{ marginTop: 16 }}
+            {/* The schedule off the phone and back: the one thing no rebuild
+                can regenerate (ROADMAP P9.10). */}
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
+              <Btn label="Back up progress" style={{ flex: 1 }}
+                   onPress={async () => {
+                     try { await backupProfile(st, account); }
+                     catch (e) { Alert.alert("Back up", "The backup could not be written."); }
+                   }} />
+              <Btn label="Restore" style={{ flex: 1 }}
+                   onPress={async () => {
+                     const res = await restoreProfile();
+                     if (res.cancelled) return;
+                     if (res.error) { Alert.alert("Restore", res.error); return; }
+                     const words = Object.keys(res.state.seen || {}).length;
+                     Alert.alert("Restore this backup?",
+                       `${res.name ? res.name + ", " : ""}${words} words with a schedule. It replaces this profile's progress.`,
+                       [{ text: "Cancel", style: "cancel" },
+                        { text: "Restore", style: "destructive", onPress: () => { restore(res.state); onClose(); } }]);
+                   }} />
+            </View>
+            <Btn label="Switch profile" style={{ marginTop: 8 }}
                  onPress={() => { onClose(); signOut(); }} />
             <Btn
               label="Reset progress"
@@ -236,10 +239,7 @@ export default function You({ navigation }) {
         <Stat value={due.toLocaleString("en-US")} label="due now" />
       </View>
 
-      <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1,
-                     textTransform: "uppercase", marginTop: 22, marginBottom: 9 }}>
-        Trouble words
-      </Text>
+      <SectionLabel style={{ marginTop: 22 }}>Trouble words</SectionLabel>
       {!trouble.length ? (
         // A label, not a paragraph centred in a card: the card built a tall empty box
         // around one sentence and pushed everything below it off the screen.
@@ -275,10 +275,7 @@ export default function You({ navigation }) {
         </>
       )}
 
-      <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1,
-                     textTransform: "uppercase", marginTop: 22, marginBottom: 9 }}>
-        Grammar
-      </Text>
+      <SectionLabel style={{ marginTop: 22 }}>Grammar</SectionLabel>
       {!grammar.length ? (
         <Muted>Nothing yet</Muted>
       ) : (

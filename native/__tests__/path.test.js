@@ -11,7 +11,7 @@
  */
 
 import React from "react";
-import { render, screen } from "@testing-library/react-native";
+import { render, screen, fireEvent } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
@@ -150,8 +150,11 @@ describe("path node states", () => {
     expect(screen.getByTestId("fork-core1").props.accessibilityLabel).toBe("Side quests");
     expect(screen.getByTestId("node-family").props.accessibilityState.disabled).toBe(false);
     expect(screen.getByTestId("lane-family").props.strokeDasharray).toBeUndefined();
-    // The main road: the spine unit, not a side quest.
-    expect(screen.getByText("Continue (Pronouns & Being)")).toBeTruthy();
+    // The main road: the spine unit, not a side quest — and Continue opens the
+    // next lesson's first undone step, not the unit's list of lessons.
+    const cont = screen.getByText("Continue (Pronouns & Being)");
+    fireEvent.press(cont);
+    expect(nav.navigate).toHaveBeenCalledWith("Vocab", { unitId: "core1", index: 2 });
     // The lanes come back to the road after the quests, solid once open.
     expect(screen.getByTestId("merge-family").props.strokeDasharray).toBeUndefined();
   });

@@ -24,7 +24,8 @@ import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, DRILL_TYPES, SPEECH_MIX, lessonSize, LESSON_RAMP, LESSON_SIZE }
   from "../core/questions.js";
-import { sentenceLemmas, gradeAlignment, feedbackTags } from "../core/speech.js";
+import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP }
+  from "../core/speech.js";
 import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
 import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
@@ -124,9 +125,19 @@ group("FSRS");
      "a new card previews Again as now and Good in days", JSON.stringify(fresh));
 
   let t = undefined;
-  for (let i = 0; i < 4; i++) t = fsrsReview(t, 1, i);
-  ok(isTrouble(t), "four lapses bank a word as trouble");
+  for (let i = 0; i < 5; i++) t = fsrsReview(t, 1, i);
+  ok(isTrouble(t), "four lapses on kept cards bank a word as trouble");
   ok(!isTrouble(fsrsReview(undefined, 3, 0)), "one good answer does not");
+  // A lapse is an Again on a card the learner had kept: same-day repeats are
+  // learning steps and count for nothing, and a first Again is not a lapse.
+  let n = fsrsReview(undefined, 1, 10);
+  n = fsrsReview(n, 1, 10);
+  n = fsrsReview(n, 3, 10);
+  ok(n.lapses === 0 && !isTrouble(n), "Again, Again, Good on one day is learning, not lapsing",
+     JSON.stringify(n));
+  ok(n.d === fsrsReview(undefined, 1, 10).d, "and leaves difficulty where the first answer set it");
+  const kept = fsrsReview(fsrsReview(undefined, 3, 10), 1, 14);
+  ok(kept.lapses === 1, "an Again days later on a kept card is a lapse");
 
   ok(retrievability(0, 10) === 1, "recall is certain on the day of review");
   ok(retrievability(100, 10) < retrievability(10, 10), "and decays with time");
@@ -175,7 +186,7 @@ group("grading");
   const good = applyGrade({}, {}, "да", 3, 0).card;
   ok(easy.due > good.due, "grade 4 handed in directly schedules further out than 3");
   ok(applyGrade({}, {}, "да", 9, 0).card.due === easy.due, "grades clamp to 4");
-  ok(applyGrade({}, {}, "да", 0, 0).card.lapses === 1, "and to 1");
+  ok(applyGrade({}, {}, "да", 0, 0).card.due === 0, "and to 1 (Again: due again today)");
 }
 
 /* ------------------------------------------------------------ state */
@@ -641,25 +652,41 @@ group("lookup index order");
 group("speech grading");
 {
   const idx = (w) => IX[fold(w)][0];
+  ok(idx("чай") >= SPEECH_SKIP_TOP && idx("сахар") >= SPEECH_SKIP_TOP && idx("не") < SPEECH_SKIP_TOP,
+     "the fixtures: «чай» and «сахар» are content words, «не» is not");
   const r = compare("Я пью кофе без сахара", "Я пью чай без сахара");
   let g = gradeAlignment(r.alignment, IX, { perfect: false, firstTry: true });
   const by = Object.fromEntries(g.map((x) => [x.i, x.grade]));
   ok(by[idx("чай")] === 1, "a substituted word is Again");
-  ok(by[idx("пью")] === 3, "a correct word in an imperfect sentence is Good");
-  ok(g.every((x) => x.grade >= 1 && x.grade <= 4 && L[x.i]), "grades are 1–4 on real lemmas");
+  ok(by[idx("сахар")] === 3, "a correct word in an imperfect sentence is Good");
+  ok(g.every((x) => x.grade >= 1 && x.grade <= 4 && L[x.i] && x.i >= SPEECH_SKIP_TOP),
+     "grades are 1–4 on real content lemmas; «я», «пью», «без» are no evidence");
 
   g = gradeAlignment(compare("Я пью чай", "Я пью чай").alignment, IX,
                      { perfect: true, firstTry: true });
-  ok(g.every((x) => x.grade === 4), "a perfect first attempt is Easy for every word");
+  ok(g.length >= 1 && g.every((x) => x.grade === 3),
+     "a perfect first attempt is Good — capped, one sentence is not Easy for every word");
   g = gradeAlignment(compare("Я пью чай", "Я пью чай").alignment, IX,
                      { perfect: true, firstTry: false });
-  ok(g.every((x) => x.grade === 3), "perfect on a retry is Good, not Easy");
+  ok(g.every((x) => x.grade === 3), "perfect on a retry is Good too");
 
   g = gradeAlignment(compare("Я пью чай очень", "Я пью чай").alignment, IX, {});
   ok(!g.some((x) => x.i === idx("очень")), "an inserted word grades nothing");
   g = gradeAlignment(compare("Я пью чай", "Я пью чай").alignment, IX,
                      { perfect: true, firstTry: true, hinted: true });
   ok(g.every((x) => x.grade === 2), "with a hint a right word is Hard, even when perfect");
+
+  // A letter off on the same word — the ending, not the word — is a near miss:
+  // Hard, and half credit.
+  const near = compare("Я пью чая", "Я пью чай");
+  ok(near.alignment.some((a) => nearMiss(a, IX)), "«чая» for «чай» is a near miss");
+  ok(gradeAlignment(near.alignment, IX, {}).find((x) => x.i === idx("чай")).grade === 2,
+     "and grades Hard, not Again");
+  const c = alignmentCredit(near.alignment, IX);
+  ok(c.near === 1 && c.ok === 2 && Math.abs(c.credit - 2.5 / 3) < 1e-9,
+     "credit counts it half", JSON.stringify(c));
+  ok(!compare("Я пью кофе", "Я пью чай").alignment.some((a) => nearMiss(a, IX)),
+     "a different word is not a near miss");
 
   ok(JSON.stringify(feedbackTags({ grammar: [{ tag: "CASE" }, { tag: "ASPECT" }],
                                    words: [{ tags: ["CASE"] }, { tags: [] }, {}] }))
@@ -669,14 +696,15 @@ group("speech grading");
   ok(charDistance("книга", "книгу") === 1 && charDistance("книга", "кни́га") === 0
      && charDistance("стол", "книга") > 1, "charDistance: a letter off is 1, stress is 0");
 
-  g = gradeAlignment(compare("Я не знаю, не хочу", "Я не знаю, не хочу").alignment, IX,
+  g = gradeAlignment(compare("Я пью чай, ты пьёшь чай", "Я пью чай, ты пьёшь чай").alignment, IX,
                      { perfect: false });
-  const ne = g.find((x) => x.i === idx("не"));
-  ok(g.filter((x) => x.i === idx("не")).length === 1 && ne.grade === 3,
+  ok(g.filter((x) => x.i === idx("чай")).length === 1 && g.find((x) => x.i === idx("чай")).grade === 3,
      "a lemma met twice is graded once");
-  g = gradeAlignment(compare("Я не знаю, хочу", "Я не знаю, не хочу").alignment, IX, {});
-  ok(g.find((x) => x.i === idx("не")).grade === 1,
+  g = gradeAlignment(compare("Я пью чай, ты пьёшь кофе", "Я пью чай, ты пьёшь чай").alignment, IX, {});
+  ok(g.find((x) => x.i === idx("чай")).grade === 1,
      "and takes its worst grade — right once and dropped once is Again");
+  g = gradeAlignment(compare("Я не знаю, хочу", "Я не знаю, не хочу").alignment, IX, {});
+  ok(!g.some((x) => x.i === idx("не")), "a function word dropped is not a lapse on «не»");
 
   ok(sentenceLemmas("Я пью чай.", IX).length === 3, "sentenceLemmas: every studied word once");
   ok(sentenceLemmas("Я не знаю, не хочу.", IX).filter((i) => i === idx("не")).length === 1,

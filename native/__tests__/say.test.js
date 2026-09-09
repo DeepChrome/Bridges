@@ -21,6 +21,7 @@ import { fold, today } from "@core/util";
 import { applyGrade } from "@core/fsrs";
 import { getFeedback } from "../src/lib/feedback";
 import { WATCHDOG_MS } from "../src/speech";
+import { SPEECH_SKIP_TOP } from "@core/speech";
 
 /* The Worker is out of scope here: the client is stubbed and, unless a test says
    otherwise, answers as an unconfigured build would. */
@@ -31,8 +32,19 @@ jest.mock("../src/lib/feedback", () => ({
 
 const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.say.fromStage
                                  && (SPEECH.speak[s.core.id] || []).length).core;
-const question = Q.present(Q.speechPrompt("say", later, 0));
+/* A sentence with a content word in it — only those are graded by a sentence
+   (core/speech.js SPEECH_SKIP_TOP), and the pool's first draw may be «Я тебя
+   люблю». */
+function withContent(kind) {
+  let q = null;
+  for (let k = 0; k < 80 && !(q && q.lemmas.some((i) => i >= SPEECH_SKIP_TOP)); k++) {
+    q = Q.present(Q.speechPrompt(kind, later, 0));
+  }
+  return q;
+}
+const question = withContent("say");
 const heard = fold(question.target).replace(/[^а-яё\s-]/g, "").trim();
+const content = question.lemmas.filter((i) => i >= SPEECH_SKIP_TOP);
 const dueFor = (grade) => applyGrade({}, {}, "x", grade, today()).card.due;
 
 const base = {
@@ -109,8 +121,9 @@ describe("say", () => {
     expect(screen.getByTestId("speaker-real")).toBeTruthy();   // the native recording
 
     const st = await saved();
-    expect(question.lemmas.length).toBeGreaterThan(0);
-    for (const i of question.lemmas) expect(st.seen[L[i].b].due).toBe(dueFor(4));
+    expect(content.length).toBeGreaterThan(0);
+    // Good, capped: one sentence said right is not Easy for every word in it.
+    for (const i of content) expect(st.seen[L[i].b].due).toBe(dueFor(3));
     expect(st.speech.attempts).toHaveLength(1);
     expect(st.speech.attempts[0]).toMatchObject({ kind: "say", wer: 0, attempt: 1, unit: later.id });
 
@@ -155,7 +168,7 @@ describe("say", () => {
     expect(await screen.findByText("Correct")).toBeTruthy();
 
     const st = await saved();
-    for (const i of question.lemmas) expect(st.seen[L[i].b].due).toBe(dueFor(3));
+    for (const i of content) expect(st.seen[L[i].b].due).toBe(dueFor(3));
     expect(st.speech.attempts).toHaveLength(2);
     expect(st.speech.attempts[1]).toMatchObject({ attempt: 2, wer: 0 });
   });
@@ -164,18 +177,32 @@ describe("say", () => {
     await withSay();
     await screen.findByText(question.en);
     await speak();
-    // Drop the first word the curriculum knows (a name like «Том» has no card).
+    // Drop the first content word (a name like «Том» has no card; «не» is not graded).
     const words = heard.split(/\s+/);
-    const k = words.findIndex((w) => IX[w] && IX[w].length);
+    const k = words.findIndex((w) => IX[w] && IX[w].length && IX[w][0] >= SPEECH_SKIP_TOP);
     const dropped = IX[words[k]][0];
     await final(words.filter((_, j) => j !== k).join(" "));
     await act(async () => { fireEvent.press(screen.getByText("Keep")); });
     expect(await screen.findByText(/^(Almost|Not quite)$/)).toBeTruthy();
     const st = await saved();
-    for (const i of question.lemmas) {
-      expect({ lemma: L[i].b, lapses: st.seen[L[i].b].lapses })
-        .toEqual({ lemma: L[i].b, lapses: i === dropped ? 1 : 0 });
+    // The dropped word is Again (due again today); the rest are due later. A
+    // first Again on a new card is a learning step, not a lapse.
+    for (const i of content) {
+      expect({ lemma: L[i].b, when: st.seen[L[i].b].due === today() ? "today" : "later" })
+        .toEqual({ lemma: L[i].b, when: i === dropped ? "today" : "later" });
     }
+    expect(st.seen[L[dropped].b]).toBeTruthy();
+  });
+
+  it("offers a way past without speaking, which grades nothing", async () => {
+    await withSay();
+    await screen.findByText(question.en);
+    await act(async () => { fireEvent.press(screen.getByText("Can't speak now")); });
+    expect(await screen.findByText("Skipped")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ skipped: 1, total: 0 }));
+    const st = await saved();
+    for (const i of question.lemmas) expect(st.seen[L[i].b]).toBeUndefined();
   });
 
   it("with the microphone refused it offers Skip, which grades nothing", async () => {

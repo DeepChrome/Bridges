@@ -18,11 +18,11 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
-import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb } from "../ui";
+import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, stageDone, unitUnlocked, drillPool, nextLesson } from "../data";
 import { talk as askTutor, hint as askHint, config } from "../lib/feedback";
@@ -56,13 +56,19 @@ export function failureText(reply) {
   return { text: "The tutor could not answer. Try again.", retry: true };
 }
 
-/* Talk unlocks once chapter 5's spine is done (ROADMAP P6.6), or in dev mode. */
-export const TALK_UNLOCK_STAGE = 4;
+/* Talk opens once chapter 2's spine is done (it was chapter 5's — ninety
+   lessons in, while the café and the flat are chapter 1–3 words; the pedagogy
+   review, 2026-09-08), or in dev mode. */
+export const TALK_UNLOCK_STAGE = 1;
 export const talkUnlocked = (st) => !!st.dev || stageDone(st, STAGES[TALK_UNLOCK_STAGE]);
 
 /* Which words to tell the tutor the learner knows: the words met, strongest
-   first, topped up along the route — the same pool the drills use. */
-const studiedFor = (st) => drillPool(st).map((i) => L[i].b).slice(0, 300);
+   first — by the scheduler's stability, not the order they were met in —
+   topped up along the route (the same pool the drills use). */
+const studiedFor = (st) => {
+  const s = (i) => ((st.seen || {})[L[i].b] || {}).s || 0;
+  return drillPool(st).slice().sort((a, b) => s(b) - s(a)).map((i) => L[i].b).slice(0, 300);
+};
 
 /* Per-lemma grades from the tutor's word-by-word correction, the Say rule: right
    is Good, wrong or missing is Again, an extra word grades nothing. */
@@ -182,14 +188,10 @@ function Summary({ scenario, turns, newWords, st, onPin, onPinAll, onAgain, onBa
         {scenario.title}
       </Text>
 
-      <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 }}>
-        Went well
-      </Text>
+      <SectionLabel>Went well</SectionLabel>
       {good.map((g, k) => <Text key={k} style={{ color: t.ink2, fontSize: 15, marginBottom: 4 }}>{g}</Text>)}
 
-      <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1, textTransform: "uppercase", marginTop: 18, marginBottom: 6 }}>
-        To work on
-      </Text>
+      <SectionLabel style={{ marginTop: 18 }}>To work on</SectionLabel>
       {!Object.keys(points).length && !better.length ? (
         <Muted>Nothing the tutor corrected.</Muted>
       ) : null}
@@ -206,9 +208,7 @@ function Summary({ scenario, turns, newWords, st, onPin, onPinAll, onAgain, onBa
       {words.length ? (
         <>
           <View style={{ flexDirection: "row", alignItems: "center", marginTop: 18, marginBottom: 6 }}>
-            <Text style={{ flex: 1, color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1, textTransform: "uppercase" }}>
-              Words from this conversation
-            </Text>
+            <SectionLabel style={{ flex: 1, marginBottom: 0 }}>Words from this conversation</SectionLabel>
             {words.some((w) => !pinned.has(w.lemma)) ? (
               <Btn kind="ghost" label="Add all to review" onPress={() => onPinAll(words)} />
             ) : null}
@@ -289,33 +289,13 @@ export const TALK_LEVELS = [
   { id: "intermediate", name: "Intermediate", blurb: "Everyday Russian, all tenses" },
   { id: "advanced", name: "Advanced", blurb: "Idioms and longer sentences" },
 ];
-/* Without a choice, the level follows the route: chapters 1–2 beginner, 3–5
+/* Without a choice, the level follows the route: chapters 1–4 beginner, 5–6
    intermediate, later advanced. */
 export function talkLevelFor(st) {
   if (st.talkLevel && TALK_LEVELS.some((l) => l.id === st.talkLevel)) return st.talkLevel;
   const here = nextLesson(st);
   const stage = here ? STAGES.findIndex((s) => s.core.id === here.unit.id) : STAGES.length;
-  return stage < 2 ? "beginner" : stage < 5 ? "intermediate" : "advanced";
-}
-
-function Choice({ options, value, onPick, testID }) {
-  const t = useTheme();
-  return (
-    <View testID={testID} style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-      {options.map((o) => {
-        const on = o.id === value;
-        return (
-          <Pressable key={o.id} onPress={() => onPick(o.id)} accessibilityRole="button"
-                     accessibilityState={{ selected: on }}
-                     style={{ borderWidth: 1, borderColor: on ? t.brand : t.line,
-                              backgroundColor: on ? t.brandBg : t.surface, borderRadius: 99,
-                              paddingHorizontal: 12, paddingVertical: 7, minHeight: 34 }}>
-            <Text style={{ color: on ? t.brandInk : t.ink2, fontSize: 13 }}>{o.name}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
+  return stage < 4 ? "beginner" : stage < 6 ? "intermediate" : "advanced";
 }
 
 export default function Talk({ navigation, route }) {
@@ -472,8 +452,7 @@ export default function Talk({ navigation, route }) {
             Conversation is not available in this build.
           </Muted>
         ) : null}
-        <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1,
-                       textTransform: "uppercase", marginBottom: 8 }}>The tutor</Text>
+        <SectionLabel>The tutor</SectionLabel>
         <Choice testID="talk-level" options={TALK_LEVELS} value={level}
                 onPick={(id) => update((p) => ({ ...p, talkLevel: id }))} />
         <Muted style={{ marginTop: 6, marginBottom: 10 }}>
@@ -522,7 +501,12 @@ export default function Talk({ navigation, route }) {
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <Pill tone="brand">{scenario.title}</Pill>
         <View style={{ flex: 1 }} />
-        <Tool label="Restart the conversation" testID="talk-restart" onPress={() => start(scenario)}>
+        <Tool label="Restart the conversation" testID="talk-restart"
+              onPress={() => (turns.some((x) => x.who === "learner")
+                ? Alert.alert("Start over?", "This conversation is wiped.",
+                              [{ text: "Keep going", style: "cancel" },
+                               { text: "Restart", style: "destructive", onPress: () => start(scenario) }])
+                : start(scenario))}>
           <Icon d={RESTART} color={t.ink2} />
         </Tool>
         <Tool label="End the conversation" testID="talk-end" onPress={() => setEnded(true)}>

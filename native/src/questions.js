@@ -1,6 +1,5 @@
 /* The shared question generators, bound to this platform's data and voice. */
 
-import * as Speech from "expo-speech";
 import { makeQuestions } from "@core/questions";
 import { L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH } from "./data";
 

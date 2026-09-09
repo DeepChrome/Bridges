@@ -10,10 +10,10 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { View, Text, TextInput, Pressable } from "react-native";
+import { View, Text } from "react-native";
 import { useSession } from "../session";
-import { useTheme, radius } from "../theme";
-import { Screen, Pill, Speaker, Muted, List, Row } from "../ui";
+import { useTheme } from "../theme";
+import { Screen, Pill, Speaker, Muted, List, Row, SearchField, SectionLabel, Chip } from "../ui";
 import { searchWords, DEEP_COUNT } from "../data";
 import { firstSense } from "@core/util";
 
@@ -41,38 +41,15 @@ export default function Search({ navigation }) {
 
   return (
     <Screen>
-      <TextInput
-        value={text}
-        onChangeText={setText}
-        placeholder="Russian, English or Latin"
-        placeholderTextColor={t.ink3}
-        autoCorrect={false}
-        autoCapitalize="none"
-        returnKeyType="search"
-        style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
-                 borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 13,
-                 fontSize: 17, color: t.ink }}
-      />
+      <SearchField value={text} onChangeText={setText} placeholder="Russian, English or Latin"
+                   label="Search the dictionary" testID="word-search" />
 
       {!q && recent.length ? (
         <>
-          <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700",
-                         letterSpacing: 1, textTransform: "uppercase",
-                         marginTop: 16, marginBottom: 8, marginLeft: 2 }}>
-            Recent
-          </Text>
+          <SectionLabel style={{ marginTop: 16 }}>Recent</SectionLabel>
           <View style={{ flexDirection: "row", gap: 7, flexWrap: "wrap" }}>
             {recent.map((w) => (
-              <Pressable
-                key={w}
-                accessibilityRole="button"
-                onPress={() => navigation.navigate("Word", { word: w })}
-                style={{ borderWidth: 1, borderColor: t.line, backgroundColor: t.surface,
-                         borderRadius: 99, paddingHorizontal: 14, paddingVertical: 10,
-                         minHeight: 44, justifyContent: "center" }}
-              >
-                <Text style={{ color: t.ink2, fontSize: 14 }}>{w}</Text>
-              </Pressable>
+              <Chip key={w} label={w} onPress={() => navigation.navigate("Word", { word: w })} />
             ))}
           </View>
         </>

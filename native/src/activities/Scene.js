@@ -19,6 +19,7 @@ import { Btn, Muted, Pill } from "../ui";
 import { say, whenIdle, stop } from "../audio";
 import { Linked } from "../words";
 import { recordAttempt } from "@core/state";
+import { SPEECH_SKIP_TOP } from "@core/speech";
 import { fold } from "@core/util";
 
 function PlayButton({ onPress, playing }) {
@@ -73,14 +74,19 @@ export function Scene({ q, r }) {
     if (r.answered || !allPicked) return;
     const verdicts = q.questions.map((qq, k) => !!qq.options[picks[k]].right);
     const right = verdicts.filter(Boolean).length;
-    // Grades per lemma: a sentence's words by its meaning question, the heard
-    // word by its own; a lemma in two sentences takes its worst.
+    // Grades per lemma: a sentence understood is Good for its content words —
+    // never Easy, and function words are no evidence either way; a meaning
+    // missed grades nothing, since not choosing it is not the same as not
+    // knowing each word. The "which word did you hear?" question grades its
+    // own word both ways. A lemma in two sentences takes its worst.
     const grade = {};
     const put = (i, g) => { grade[i] = i in grade ? Math.min(grade[i], g) : g; };
     q.questions.forEach((qq, k) => {
-      const g = verdicts[k] ? 3 : 1;
-      if (typeof qq.row === "number") (q.rows[qq.row].lemmas || []).forEach((i) => put(i, g));
-      else if (typeof qq.i === "number") put(qq.i, g);
+      if (typeof qq.row === "number") {
+        if (verdicts[k]) (q.rows[qq.row].lemmas || []).filter((i) => i >= SPEECH_SKIP_TOP).forEach((i) => put(i, 3));
+      } else if (typeof qq.i === "number") {
+        put(qq.i, verdicts[k] ? 3 : 1);
+      }
     });
     const words = Object.keys(grade).map((k) => ({ i: Number(k), grade: grade[k] }));
     r.record(right === verdicts.length, words, undefined, {

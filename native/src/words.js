@@ -80,26 +80,6 @@ export function Linked({ text, style, size = 17, color }) {
   );
 }
 
-/* A single word as a link, for chips and headings where there is no sentence. */
-export function WordLink({ word, style, size = 17 }) {
-  const words = useWords();
-  const t = useTheme();
-  const known = lookup(word) !== null;
-  if (!known || !words) {
-    return <Text style={[{ color: t.ink, fontSize: size }, style]}>{word}</Text>;
-  }
-  return (
-    <Text
-      accessibilityRole="link"
-      onPress={() => words.open(word)}
-      style={[{ color: t.ink, fontSize: size, textDecorationLine: "underline",
-                textDecorationColor: t.brand }, style]}
-    >
-      {word}
-    </Text>
-  );
-}
-
 /* ------------------------------------------------------------------ sheet */
 
 function Sheet({ state, onClose, onFull }) {
@@ -135,7 +115,7 @@ function Sheet({ state, onClose, onFull }) {
               <Text style={{ color: t.ink3, fontSize: 14, marginTop: 4 }}>
                 {s.form
                   ? `${s.surface} · ${s.form.text}`
-                  : `${s.surface} · form not in the paradigm`}
+                  : `${s.surface} · form not listed`}
               </Text>
             ) : s.form ? (
               <Text style={{ color: t.ink3, fontSize: 14, marginTop: 4 }}>

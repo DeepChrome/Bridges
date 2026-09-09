@@ -2,31 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
-import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn } from "../ui";
+import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick } from "../ui";
 import {
   UN, lessonCount, lessonWords, lessonDone, components, unitFineProgress, L,
 } from "../data";
 import { prefetchUnit } from "../cache";
-
-function Tick({ on }) {
-  const t = useTheme();
-  return (
-    <View style={{ width: 28, height: 28, borderRadius: 14, borderWidth: 2,
-                   borderColor: on ? t.good : t.line,
-                   backgroundColor: on ? t.goodBg : "transparent",
-                   alignItems: "center", justifyContent: "center" }}>
-      {on ? (
-        <Svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={t.good}
-             strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-          <Path d="m5 13 4 4 10-10" />
-        </Svg>
-      ) : null}
-    </View>
-  );
-}
 
 export function UnitScreen({ route, navigation }) {
   const { st } = useSession();
@@ -100,6 +82,8 @@ export function UnitScreen({ route, navigation }) {
   );
 }
 
+const STEP_LABEL = { vocab: "Start the vocabulary", quiz: "Take the quiz", video: "Watch the video" };
+
 export function LessonScreen({ route, navigation }) {
   const { st } = useSession();
   const t = useTheme();
@@ -142,7 +126,16 @@ export function LessonScreen({ route, navigation }) {
           </Row>
         ))}
       </List>
-      {lessonDone(st, unit, i) && i + 1 < lessonCount(unit) ? (
+      {/* One primary action: the next undone step, or the next lesson. */}
+      {!lessonDone(st, unit, i) ? (
+        <Btn kind="pri" style={{ marginTop: 16 }}
+             label={STEP_LABEL[cs.find((c) => !c.done).id]}
+             onPress={() => {
+               const c = cs.find((x) => !x.done);
+               navigation.navigate(c.id === "video" ? "Video" : c.id === "quiz" ? "Quiz" : "Vocab",
+                                   { unitId: unit.id, index: i });
+             }} />
+      ) : i + 1 < lessonCount(unit) ? (
         <Btn kind="pri" style={{ marginTop: 16 }} label="Next lesson"
              onPress={() => navigation.setParams({ index: i + 1 })} />
       ) : null}

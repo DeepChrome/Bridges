@@ -28,7 +28,7 @@ import { getFeedback, config } from "../lib/feedback";
 import { useRecognizer } from "../speech";
 import { Alignment } from "./Alignment";
 import { compare } from "@core/compare";
-import { gradeAlignment, feedbackTags } from "@core/speech";
+import { gradeAlignment, alignmentCredit, feedbackTags } from "@core/speech";
 import { recordAttempt, tagAttempt } from "@core/state";
 import { tagInfo } from "@core/errortags";
 import { fold } from "@core/util";
@@ -163,10 +163,11 @@ export function Say({ q, r }) {
   const settle = (out, n, transcript, ts) => {
     const perfect = out.wer === 0;
     setSettled(true);
-    const okN = out.alignment.filter((a) => a.status === "ok").length;
+    const c = alignmentCredit(out.alignment, IX);
     r.record(perfect, gradeAlignment(out.alignment, IX, { perfect, firstTry: n === 1 }),
              undefined,
-             { credit: 1 - out.wer, note: perfect ? null : `${okN} of ${out.expected.length} words` });
+             { credit: c.credit,
+               note: perfect ? null : `${c.ok} of ${c.n} words` + (c.near ? `, ${c.near} nearly` : "") });
     askFeedback(transcript, ts);
   };
 
@@ -230,6 +231,13 @@ export function Say({ q, r }) {
         {rec.phase === "listening" ? rec.live : rec.note || ""}
       </Text>
       {attempt > 0 ? <Muted>{`${ATTEMPTS - attempt} left`}</Muted> : null}
+      {/* A library, a cold, a sleeping child: a way past that is not three
+          wrong attempts. Skipped, like a refused microphone — graded nothing,
+          left out of the total. */}
+      {attempt === 0 ? (
+        <Btn kind="ghost" label="Can't speak now" style={{ marginTop: 10 }}
+             onPress={() => r.skip()} />
+      ) : null}
     </View>
   );
 }

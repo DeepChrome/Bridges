@@ -11,6 +11,7 @@
 // Explicit extension: Node's ESM resolver requires it, Metro tolerates either.
 import { fold, shuffle, sample, firstSense, TOKEN } from "./util.js";
 import { sentenceLemmas, pickPrompt } from "./speech.js";
+import { describeForm } from "./forms.js";
 
 export const QUIZ_N = 8;
 
@@ -147,6 +148,20 @@ export function makeQuestions(env) {
     return list.map((e) => Object.assign(e, { pool }));
   }
 
+  /* Every form in a word's paradigm tables, as written (with stress). */
+  function paradigmForms(w) {
+    const out = [];
+    for (const table of w.t || []) {
+      for (const row of table.rows || []) {
+        for (let ci = 1; ci < row.length; ci++) {
+          const cell = row[ci];
+          for (const f of Array.isArray(cell) ? cell : [cell]) if (f) out.push(f);
+        }
+      }
+    }
+    return out;
+  }
+
   /* A wrong option must be wrong. A unit that teaches «кот» and «кошка» has two
      words whose first sense is "cat", and 202 unit words share a first sense
      with another in their unit (the content review, 2026-09-08): a distractor
@@ -189,12 +204,27 @@ export function makeQuestions(env) {
           options: opts.map((i) => ({ label: L[i].w, right: i === e.i, cyr: true })),
         };
       }
+      /* The gap held an inflected form, and the answer is that form: the
+         options are the word's other forms first («пива», «пиво», «пивом»),
+         topped up with other words when the paradigm is short. The whole
+         sentence comes back in the verdict with the form named — until now the
+         options were bare lemmas, «Я не хочу _____» was answered «пиво», and
+         the restored sentence was never shown (the pedagogy review). */
       case "cloze": {
-        const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, bySense)));
+        const token = e.token;
+        const own = unique(paradigmForms(w).filter((f) => fold(f) !== fold(token)));
+        const wrong = shuffle(own).slice(0, 3).map((f) => ({ label: f, right: false, cyr: true }));
+        if (wrong.length < 3) {
+          for (const i of distractors(e.i, e.pool, 3 - wrong.length, bySense)) {
+            wrong.push({ label: L[i].b, right: false, cyr: true });
+          }
+        }
+        const form = describeForm(w, token);
         return {
           kind: e.t, i: e.i, ask: "Fill the gap",
-          prompt: gapped(e.ex.ru, e.token), sub: e.ex.en, cyr: true,
-          options: opts.map((i) => ({ label: L[i].b, right: i === e.i, cyr: true })),
+          prompt: gapped(e.ex.ru, token), sub: e.ex.en, cyr: true,
+          options: shuffle([{ label: token, right: true, cyr: true }].concat(wrong)),
+          reveal: e.ex.ru, formNote: form ? `«${token}» is ${form.text.toLowerCase()}` : null,
         };
       }
       case "type":
@@ -296,12 +326,14 @@ export function makeQuestions(env) {
     };
   }
 
-  /* A run of scenes for the listening drill, no two opening on the same sentence. */
-  function listeningDrill(units, n) {
+  /* A run of scenes for the listening drill, no two opening on the same
+     sentence; `want` (a Set of lemma indices — the trouble bank, say) prefers
+     scenes that open on one of those words. */
+  function listeningDrill(units, n, want) {
     const ids = units.map((u) => u.id);
     const out = [], seen = new Set();
     for (let k = 0; k < n * 6 && out.length < n; k++) {
-      const s = sceneFor(ids, null);
+      const s = sceneFor(ids, want && want.size ? want : null);
       if (!s || seen.has(s.rows[0].ru)) continue;
       seen.add(s.rows[0].ru);
       out.push(s);
@@ -445,10 +477,13 @@ export function makeQuestions(env) {
     return out;
   }
 
-  /* The quiz is mixed and unordered, and asks for production at least twice. A
-     short last lesson tops up with words from the unit's earlier lessons — review,
-     not padding — so a three-word lesson is not a five-question quiz. */
-  function quizSteps(unit, index) {
+  /* The quiz is mixed and unordered, and asks for production at least twice —
+     typed, since typing is recall and a gap-fill is recognition; the gap-fill
+     stands in only for a word with nothing to type. A short last lesson tops
+     up with review: `prefer` (lemma indices — what is due or in trouble, the
+     app decides) first, then words from the unit's earlier lessons, so a
+     three-word lesson is not a five-question quiz. */
+  function quizSteps(unit, index, prefer) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
     const bag = words.map((i) => {
@@ -456,13 +491,17 @@ export function makeQuestions(env) {
       return c[Math.floor(Math.random() * c.length)];
     });
     const production = words
-      .map((i) => candidates(i, pool).filter((e) => e.t === "type" || e.t === "cloze"))
-      .filter((a) => a.length).map((a) => a[0]);
+      .map((i) => {
+        const c = candidates(i, pool);
+        return c.find((e) => e.t === "type") || c.find((e) => e.t === "cloze");
+      })
+      .filter(Boolean);
     shuffle(production).slice(0, 2).forEach((e) => bag.push(e));
+    const review = shuffle((prefer || []).filter((i) => L[i] && !words.includes(i)));
     const earlier = shuffle(unit.w.slice(0, index * lessonWords(unit, 0).length)
-      .filter((i) => !words.includes(i)));
-    while (bag.length < QUIZ_N && earlier.length) {
-      const c = candidates(earlier.pop(), pool);
+      .filter((i) => !words.includes(i) && !review.includes(i)));
+    while (bag.length < QUIZ_N && (review.length || earlier.length)) {
+      const c = candidates(review.length ? review.pop() : earlier.pop(), pool);
       bag.push(c[Math.floor(Math.random() * c.length)]);
     }
     const out = spread(shuffle(bag).slice(0, QUIZ_N)).map(present).filter(Boolean);

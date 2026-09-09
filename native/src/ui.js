@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet,
+  View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet, TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml } from "react-native-svg";
@@ -115,6 +115,93 @@ export function Btn({ label, onPress, kind = "plain", disabled, style }) {
     >
       <Text style={{ color: tone.fg, fontWeight: "600", fontSize: 15 }}>{label}</Text>
     </Pressable>
+  );
+}
+
+/* A section's heading: one style, used everywhere a screen groups things
+   under a label (it was retyped inline two dozen times). */
+export function SectionLabel({ children, style, testID }) {
+  const t = useTheme();
+  return (
+    <Text testID={testID} style={[styles.sectionLabel, { color: t.ink3 }, style]}>{children}</Text>
+  );
+}
+
+/* A chip in a row of choices, lit when chosen. One size for every screen, and
+   that size is a thumb's: three screens had their own at 34, 36 and 40 px. */
+export function Chip({ on, label, onPress, testID }) {
+  const t = useTheme();
+  return (
+    <Pressable onPress={onPress} testID={testID} accessibilityRole="button"
+               accessibilityState={{ selected: !!on }}
+               style={{ borderWidth: 1, borderColor: on ? t.brand : t.line,
+                        backgroundColor: on ? t.brandBg : t.surface, borderRadius: 99,
+                        paddingHorizontal: 14, paddingVertical: 10, minHeight: 44,
+                        justifyContent: "center" }}>
+      <Text style={{ color: on ? t.brandInk : t.ink2, fontSize: 14 }}>{label}</Text>
+    </Pressable>
+  );
+}
+
+/* A row of chips, one lit. */
+export function Choice({ options, value, onPick, testID, style }) {
+  return (
+    <View testID={testID} style={[{ flexDirection: "row", flexWrap: "wrap", gap: 6 }, style]}>
+      {options.map((o) => (
+        <Chip key={o.id} on={o.id === value} label={o.name} onPress={() => onPick(o.id)} />
+      ))}
+    </View>
+  );
+}
+
+/* A search box with a way to clear it on every platform — TextInput's own clear
+   button is iOS-only. */
+export function SearchField({ value, onChangeText, placeholder, label, testID, style, autoFocus }) {
+  const t = useTheme();
+  return (
+    <View style={[{ flexDirection: "row", alignItems: "center" }, style]}>
+      <TextInput
+        testID={testID}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={t.ink3}
+        autoCorrect={false}
+        autoCapitalize="none"
+        autoFocus={autoFocus}
+        returnKeyType="search"
+        accessibilityLabel={label}
+        style={{ flex: 1, backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
+                 borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 12,
+                 paddingRight: value ? 44 : 14, fontSize: 16, color: t.ink }}
+      />
+      {value ? (
+        <Pressable onPress={() => onChangeText("")} hitSlop={10} accessibilityRole="button"
+                   accessibilityLabel="Clear" testID={testID ? testID + "-clear" : undefined}
+                   style={{ position: "absolute", right: 6, width: 36, height: 36, borderRadius: 18,
+                            alignItems: "center", justifyContent: "center" }}>
+          <Text style={{ color: t.ink3, fontSize: 16 }}>✕</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+/* Done, drawn one way: a green disc with a tick. */
+export function Tick({ on, size = 26 }) {
+  const t = useTheme();
+  return (
+    <View style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 2,
+                   borderColor: on ? t.good : t.line,
+                   backgroundColor: on ? t.goodBg : "transparent",
+                   alignItems: "center", justifyContent: "center" }}>
+      {on ? (
+        <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none" stroke={t.good}
+             strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+          <Path d="m5 13 4 4 10-10" />
+        </Svg>
+      ) : null}
+    </View>
   );
 }
 
@@ -258,11 +345,6 @@ export function Speaker({ text, size = 40 }) {
     ) : null}
     </View>
   );
-}
-
-export function Ru({ children, size = 19, style }) {
-  const t = useTheme();
-  return <Text style={[{ color: t.ink, fontSize: size }, style]}>{children}</Text>;
 }
 
 /* A gloss laid out as a dictionary would: the sense groups OpenRussian separates

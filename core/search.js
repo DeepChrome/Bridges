@@ -31,8 +31,6 @@ export const POS_CODE = {
   n: "noun", v: "verb", a: "adjective", d: "adverb", p: "pronoun", r: "preposition",
   c: "conjunction", t: "particle", m: "numeral", i: "interjection", s: "possessive",
 };
-export const POS_LETTER = Object.fromEntries(
-  Object.entries(POS_CODE).map(([k, v]) => [v, k]));
 
 /* One line per entry:
    bare, accented, pos, gender, aspect, partner, gloss,

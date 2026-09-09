@@ -19,11 +19,22 @@ import { L, IX, STAGES, SPEECH } from "../src/data";
 import { fold, today } from "@core/util";
 import { words } from "@core/compare";
 import { applyGrade } from "@core/fsrs";
+import { SPEECH_SKIP_TOP } from "@core/speech";
 
 const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.hear.fromStage
                                  && (SPEECH.listen[s.core.id] || []).length).core;
-const question = Q.present(Q.speechPrompt("hear", later, 0));
+/* A sentence with a content word in it — only those are graded by a sentence
+   (core/speech.js SPEECH_SKIP_TOP). */
+function withContent(kind) {
+  let q = null;
+  for (let k = 0; k < 80 && !(q && q.lemmas.some((i) => i >= SPEECH_SKIP_TOP)); k++) {
+    q = Q.present(Q.speechPrompt(kind, later, 0));
+  }
+  return q;
+}
+const question = withContent("hear");
 const heard = fold(question.target).replace(/[^а-яё\s-]/g, "").trim();
+const content = question.lemmas.filter((i) => i >= SPEECH_SKIP_TOP);
 
 const base = {
   v: 5, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
@@ -81,7 +92,7 @@ describe("hear", () => {
   it("gives partial credit for the words that were right, and the hint costs the grade", async () => {
     await withHear();
     const input = await screen.findByTestId("hear-input");
-    await act(async () => { fireEvent.press(screen.getByText("Hint")); });
+    await act(async () => { fireEvent.press(screen.getByText(/^Hint/)); });
     expect(screen.getByTestId("hint-text").props.children).toBe(question.en);
     const words = heard.split(/\s+/);
     const typed = words.slice(0, -1).concat("жираф").join(" ");             // last word wrong
@@ -93,12 +104,12 @@ describe("hear", () => {
     const st = await saved();
     expect(st.speech.attempts[0].hinted).toBe(true);
     // Hinted right words are Hard (2): due no further out than an unhinted Good.
-    const okLemmas = question.lemmas.filter((i) => fold(L[i].b) !== fold(words[words.length - 1]));
+    const okLemmas = content.filter((i) => fold(L[i].b) !== fold(words[words.length - 1]));
     const good = applyGrade({}, {}, "x", 3, today()).card.due;
-    for (const i of okLemmas) if (st.seen[L[i].b].lapses === 0) expect(st.seen[L[i].b].due).toBeLessThan(good);
+    for (const i of okLemmas) if (st.seen[L[i].b].due > today()) expect(st.seen[L[i].b].due).toBeLessThan(good);
   });
 
-  it("a perfect answer is Correct, every word Easy, and the attempt is logged", async () => {
+  it("a perfect answer is Correct, every content word Good, and the attempt is logged", async () => {
     await withHear();
     const input = await screen.findByTestId("hear-input");
     fireEvent.changeText(input, heard);
@@ -113,13 +124,15 @@ describe("hear", () => {
     expect(screen.getByText(question.en)).toBeTruthy();
 
     const st = await saved();
-    expect(question.lemmas.length).toBeGreaterThan(0);
-    for (const i of question.lemmas) {
+    expect(content.length).toBeGreaterThan(0);
+    for (const i of content) {
       const card = st.seen[L[i].b];
       expect(card).toBeTruthy();
       expect(card.reps).toBe(1);
-      expect(card.lapses).toBe(0);
+      expect(card.due).toBe(applyGrade({}, {}, "x", 3, today()).card.due);   // Good, not Easy
     }
+    // Function words are no evidence either way and get no card from a sentence.
+    for (const i of question.lemmas) if (i < SPEECH_SKIP_TOP) expect(st.seen[L[i].b]).toBeUndefined();
     expect(st.speech.attempts).toHaveLength(1);
     expect(st.speech.attempts[0]).toMatchObject({ kind: "hear", wer: 0, unit: later.id });
   });
@@ -129,7 +142,10 @@ describe("hear", () => {
     const input = await screen.findByTestId("hear-input");
     const wrongWord = "жираф";                       // never in a listening sentence
     const words = heard.split(/\s+/);
-    const typed = [wrongWord].concat(words.slice(1)).join(" ");
+    // Replace the first *content* word: a function word dropped grades nothing.
+    const k = words.findIndex((w) => IX[w] && IX[w][0] >= SPEECH_SKIP_TOP);
+    expect(k).toBeGreaterThanOrEqual(0);
+    const typed = words.map((w, j) => (j === k ? wrongWord : w)).join(" ");
     fireEvent.changeText(input, typed);
     await waitFor(() => expect(screen.getByTestId("hear-input").props.value).toBe(typed));
     await act(async () => { fireEvent.press(screen.getByText("Check")); });
@@ -139,13 +155,15 @@ describe("hear", () => {
 
     const st = await saved();
     expect(st.speech.attempts[0].wer).toBeGreaterThan(0);
-    // The lemma behind the first word lapsed; every other lemma in the sentence
-    // was answered and did not. (A lemma met twice takes its worst grade, so it
-    // lapses even if its other occurrence was right.)
-    const firstLemma = (IX[words[0]] || [])[0];
-    for (const i of question.lemmas) {
-      expect({ lemma: L[i].b, lapses: st.seen[L[i].b].lapses })
-        .toEqual({ lemma: L[i].b, lapses: i === firstLemma ? 1 : 0 });
+    // The lemma behind the first word was graded Again and is due again today;
+    // every other lemma in the sentence was answered and is due later. (A lemma
+    // met twice takes its worst grade, so it is Again even if its other
+    // occurrence was right.) A first Again on a new card is a learning step,
+    // not a lapse, so the schedule is what shows the grade.
+    const wrongLemma = IX[words[k]][0];
+    for (const i of content) {
+      expect({ lemma: L[i].b, when: st.seen[L[i].b].due === today() ? "today" : "later" })
+        .toEqual({ lemma: L[i].b, when: i === wrongLemma ? "today" : "later" });
     }
   });
 });

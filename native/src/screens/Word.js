@@ -9,7 +9,7 @@
 import React from "react";
 import { View, Text, ScrollView, Image, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Pill, Speaker, Muted, Senses, List, Row } from "../ui";
+import { Screen, Card, Pill, Speaker, Muted, Senses, List, Row, SectionLabel } from "../ui";
 import { L, UN, resolveWord, heardIn } from "../data";
 import { Linked } from "../words";
 import { IMAGES, CREDITS } from "../images";
@@ -17,6 +17,7 @@ import { clock, short } from "./Misc";
 
 /* How many videos an entry lists under "Heard in". */
 const HEARD_ROWS = 4;
+const GENDER = { m: "masculine", f: "feminine", n: "neuter", pl: "plural" };
 
 export function Table({ table }) {
   const t = useTheme();
@@ -94,10 +95,12 @@ export default function Word({ route, navigation }) {
           <Speaker text={w.b} />
         </View>
         <Senses e={w.e} size={16} align="left" style={{ marginTop: 8 }} />
+        {/* Words a learner reads, not codes: "feminine", not "f"; "№ 187 by
+            frequency", not "#187". */}
         <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
-          {[w.p, w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
+          {[w.p, GENDER[w.g] || w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
           {w.pt ? <Pill>{`pair: ${[w.pt, w.pt2].filter(Boolean).join(", ")}`}</Pill> : null}
-          {w.fr ? <Pill>{"#" + w.fr}</Pill> : null}
+          {w.fr ? <Pill>{`№ ${w.fr} by frequency`}</Pill> : null}
           {unit ? <Pill tone="brand">{unit.name}</Pill> : null}
         </View>
         {(w.t || []).map((tb, k) => <Table key={k} table={tb} />)}
@@ -117,13 +120,11 @@ export default function Word({ route, navigation }) {
 
       {examples.length ? (
         <>
-          <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700",
-                         letterSpacing: 1, textTransform: "uppercase",
-                         marginTop: 22, marginBottom: 8, marginLeft: 2 }}>
+          <SectionLabel style={{ marginTop: 22 }}>
             {examples.every((e) => !e.src)
               ? `In your collection · ${examples.length}`
               : `Examples · ${examples.length}`}
-          </Text>
+          </SectionLabel>
           <Card>
             {examples.map((e, k) => (
               <View
@@ -159,11 +160,7 @@ export default function Word({ route, navigation }) {
           listed — the transcript index decides, never a guess. */}
       {heard.length ? (
         <>
-          <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700",
-                         letterSpacing: 1, textTransform: "uppercase",
-                         marginTop: 22, marginBottom: 8, marginLeft: 2 }}>
-            {`Heard in · ${heard.length}`}
-          </Text>
+          <SectionLabel style={{ marginTop: 22 }}>{`Heard in · ${heard.length}`}</SectionLabel>
           <List>
             {heard.slice(0, HEARD_ROWS).map((h, k, all) => (
               <Row key={h.id} last={k === all.length - 1}

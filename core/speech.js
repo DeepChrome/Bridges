@@ -7,6 +7,7 @@
  */
 
 import { fold, TOKEN } from "./util.js";
+import { charDistance } from "./compare.js";
 
 /* The curriculum lemmas a sentence contains, each once, in order of appearance.
    Reads the same index the word links use, so a word is "in" the sentence exactly
@@ -60,8 +61,23 @@ export function feedbackTags(fb) {
   return out;
 }
 
+/* Below this index a lemma is a function word — «не», «и», «в» — met on every
+   screen and not what a sentence activity is evidence about. */
+export const SPEECH_SKIP_TOP = 100;
+
+/* A substituted word that is the same lemma a letter or two off — «книга» for
+   «книгу» — is the word known and the ending not: half credit and Hard, with
+   the expected form named, rather than a whole-word lapse (the pedagogy
+   review, 2026-09-08). */
+export function nearMiss(a, IX) {
+  if (!a || a.status !== "sub" || !a.said || !a.expected) return false;
+  const s = fold(a.said), e = fold(a.expected);
+  const hs = IX[s], he = IX[e];
+  if (!hs || !he || !hs.length || !he.length || hs[0] !== he[0]) return false;
+  return charDistance(s, e) <= 2;
+}
+
 export function gradeAlignment(alignment, IX, opts) {
-  const perfect = !!(opts && opts.perfect);
   const firstTry = !opts || opts.firstTry !== false;
   const hinted = !!(opts && opts.hinted);
   const grade = {};
@@ -69,9 +85,25 @@ export function gradeAlignment(alignment, IX, opts) {
     if (!a.expected) continue;
     const hit = IX[fold(a.expected)];
     if (!hit || !hit.length) continue;
-    const g = a.status !== "ok" ? 1 : hinted ? 2 : (perfect && firstTry ? 4 : 3);
     const i = hit[0];
+    // Content words only: a sentence right or wrong says nothing about «не».
+    if (i < SPEECH_SKIP_TOP) continue;
+    // Capped at Good: one sentence said right is not "Easy" for every word in it.
+    const g = a.status === "ok" ? (hinted ? 2 : 3) : nearMiss(a, IX) ? 2 : 1;
     grade[i] = i in grade ? Math.min(grade[i], g) : g;
   }
+  void firstTry;
   return Object.keys(grade).map((k) => ({ i: Number(k), grade: grade[k] }));
+}
+
+/* The share of a sentence that was right, a near miss counting half. */
+export function alignmentCredit(alignment, IX) {
+  const expected = (alignment || []).filter((a) => a.expected);
+  if (!expected.length) return { credit: 0, ok: 0, near: 0, n: 0 };
+  let ok = 0, near = 0;
+  for (const a of expected) {
+    if (a.status === "ok") ok++;
+    else if (nearMiss(a, IX)) near++;
+  }
+  return { credit: (ok + near / 2) / expected.length, ok, near, n: expected.length };
 }

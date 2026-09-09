@@ -2,19 +2,20 @@
  * placement routes. Each one supplies its steps and decides what the result means. */
 
 import React, { useMemo, useState } from "react";
-import { View, Text, Pressable, Image } from "react-native";
+import { View, Text, Image } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { IMAGES } from "../images";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb, Senses } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb, Senses, SectionLabel, Chip } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
 import { Linked } from "../words";
 import { Q, DRILL_TYPES, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
-  reachedUnits, unitUnlocked,
+  reachedUnits, unitUnlocked, reviewWords,
 } from "../data";
+import { quizPassed } from "@core/state";
 import { touchStreak } from "../store";
 
 /* The mark for a run: partial credit summed over first attempts, as a percentage. */
@@ -61,7 +62,7 @@ export function VocabFlow({ route, navigation }) {
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12,
                        marginBottom: 16 }}>
           <View style={{ flex: 1 }}><Bar value={at / steps.length} /></View>
-          <Pill>{`${at + 1}/${steps.length}`}</Pill>
+          <Pill tone="brand">{`${at + 1}/${steps.length}`}</Pill>
         </View>
         {step.t === "grammar" ? (
           <Card>
@@ -148,22 +149,33 @@ export function VocabFlow({ route, navigation }) {
 export function QuizFlow({ route, navigation }) {
   const { unitId, index } = route.params;
   const unit = UN.find((u) => u.id === unitId);
-  const { update } = useSession();
+  const { st, update } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
-  const steps = useMemo(() => Q.quizSteps(unit, index), [unitId, index, seed]);
+  // The quiz tops up with what is due or in trouble before the unit's earlier
+  // words: review comes to the path (the pedagogy review, 2026-09-08).
+  const steps = useMemo(() => Q.quizSteps(unit, index, reviewWords(st)), [unitId, index, seed]);
   useAudioStopOnLeave();
 
   if (result) {
-    const passed = result.score >= PASS_MARK;
+    // What the lesson list will show, not the raw mark: the relief rule
+    // (core/state.js quizPassed) accepts a lower score from the third try,
+    // and this screen used to say "Not quite" over a quiz the list ticked.
+    const { passed, relief } = result;
+    const last = index + 1 >= lessonCount(unit);
     return (
       <Done
-        title={passed ? "Quiz passed" : `Not quite. ${PASS_MARK}% to pass`}
+        title={relief ? `Passed on the ${ordinal(result.tries)} try`
+             : passed ? "Quiz passed" : `Not quite. ${PASS_MARK}% to pass`}
         detail={`${result.right} of ${result.total} right`}
         score={result.score}
         passed={passed}
         againLabel="Try again"
         onAgain={() => { setResult(null); setSeed(seed + 1); }}
+        onContinue={passed && !last
+          ? () => navigation.replace("Vocab", { unitId, index: index + 1 })
+          : undefined}
+        continueLabel="Next lesson"
         onBack={() => navigation.goBack()}
       />
     );
@@ -172,17 +184,23 @@ export function QuizFlow({ route, navigation }) {
   return (
     <Runner
       steps={steps}
+      navigation={navigation}
       onFinish={(r) => {
         const score = scoreOf(r);
+        const before = ((st.unit[unit.id] || {}).lessons || {})[index] || {};
+        const slot = { q: Math.max(before.q || 0, score), tries: (before.tries || 0) + 1 };
+        const passed = quizPassed(slot);
         update((prev) => touchStreak({
           ...markComponent(prev, unit, index, "quiz", score),
-          xp: (prev.xp || 0) + r.right * 2 + (score >= PASS_MARK ? 10 : 0),
+          xp: (prev.xp || 0) + r.right * 2 + (passed ? 10 : 0),
         }));
-        setResult({ ...r, score });
+        setResult({ ...r, score, passed, relief: passed && score < PASS_MARK, tries: slot.tries });
       }}
     />
   );
 }
+
+const ordinal = (n) => (n === 1 ? "first" : n === 2 ? "second" : n === 3 ? "third" : `${n}th`);
 
 /* ------------------------------------------------------------------ drills */
 
@@ -194,6 +212,7 @@ export function DrillList({ navigation }) {
     <Screen>
       {/* What is not a grammar drill comes first: a quiz of the learner's own
           making, listening scenes, and conversation. */}
+      <SectionLabel>Practise</SectionLabel>
       <List>
         <Row onPress={() => navigation.navigate("QuizSetup")}>
           <Thumb id="core" />
@@ -221,7 +240,7 @@ export function DrillList({ navigation }) {
           </View>
         </Row>
       </List>
-      <View style={{ height: 12 }} />
+      <SectionLabel style={{ marginTop: 18 }}>Grammar drills</SectionLabel>
       <List>
         {DRILL_TYPES.map((d, k) => {
           const best = ((st.drills || {})[d.id] || {}).best;
@@ -276,14 +295,10 @@ export function DrillFlow({ route, navigation }) {
   return (
     <Runner
       steps={steps}
+      navigation={navigation}
       onFinish={(r) => {
         const score = scoreOf(r);
-        update((prev) => {
-          const drills = { ...(prev.drills || {}) };
-          const cur = drills[type] || { best: 0, runs: 0 };
-          drills[type] = { best: Math.max(cur.best || 0, score), runs: (cur.runs || 0) + 1 };
-          return touchStreak({ ...prev, drills, xp: (prev.xp || 0) + r.right });
-        });
+        update((prev) => bestOf(prev, type, score, r.right));
         setResult({ ...r, score });
       }}
     />
@@ -307,7 +322,8 @@ export function ListeningFlow({ navigation }) {
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
   const units = useMemo(() => reachedUnits(st), [seed]);
-  const steps = useMemo(() => Q.listeningDrill(units, LISTENING_N), [units, seed]);
+  // Scenes that open on a word from the trouble bank, when the pools have one.
+  const steps = useMemo(() => Q.listeningDrill(units, LISTENING_N, new Set(reviewWords(st))), [units, seed]);
   useAudioStopOnLeave();
 
   if (!steps.length) {
@@ -323,7 +339,7 @@ export function ListeningFlow({ navigation }) {
     );
   }
   return (
-    <Runner steps={steps} recycle={false}
+    <Runner steps={steps} recycle={false} navigation={navigation}
             onFinish={(r) => {
               const score = scoreOf(r);
               update((prev) => bestOf(prev, "listening", score, r.right * 2));
@@ -347,19 +363,7 @@ export function QuizSetup({ navigation }) {
     set(list.includes(id) ? list.filter((x) => x !== id) : list.concat(id));
   const ready = kinds.length > 0 && units.length > 0;
 
-  const Section = ({ label }) => (
-    <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1,
-                   textTransform: "uppercase", marginTop: 18, marginBottom: 8 }}>{label}</Text>
-  );
-  const Chip = ({ on, label, onPress, testID }) => (
-    <Pressable onPress={onPress} testID={testID} accessibilityRole="button"
-               accessibilityState={{ selected: on }}
-               style={{ borderWidth: 1, borderColor: on ? t.brand : t.line,
-                        backgroundColor: on ? t.brandBg : t.surface, borderRadius: 99,
-                        paddingHorizontal: 13, paddingVertical: 9, minHeight: 40 }}>
-      <Text style={{ color: on ? t.brandInk : t.ink2, fontSize: 14 }}>{label}</Text>
-    </Pressable>
-  );
+  const Section = ({ label }) => <SectionLabel style={{ marginTop: 18 }}>{label}</SectionLabel>;
 
   return (
     <Screen>
@@ -422,7 +426,7 @@ export function CustomQuizFlow({ route, navigation }) {
     );
   }
   return (
-    <Runner steps={steps}
+    <Runner steps={steps} navigation={navigation}
             onFinish={(r) => {
               const score = scoreOf(r);
               update((prev) => bestOf(prev, "quiz", score, r.right));
@@ -454,6 +458,7 @@ export function PlacementFlow({ navigation }) {
     <Runner
       steps={steps}
       recycle={false}
+      navigation={navigation}
       onFinish={(r) => {
         // A stage is cleared when its questions were answered well enough. Stop at
         // the first stage that is not — placement must not leave holes behind you.
@@ -506,6 +511,7 @@ export function SectionFlow({ route, navigation }) {
     <Runner
       steps={steps}
       recycle={false}
+      navigation={navigation}
       onFinish={(r) => {
         let cleared = 0;
         update((prev) => {

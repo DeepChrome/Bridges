@@ -11,6 +11,7 @@ import { View, Text, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius } from "../theme";
 import { Screen, Btn, Muted, Speaker } from "../ui";
+import { hasRussianVoice } from "../audio";
 
 const PAGES = [
   {
@@ -46,6 +47,9 @@ function Demo({ kind }) {
     );
   }
   if (kind === "speaker") {
+    // On a phone with no Russian voice the grey speaker is dead, and the card
+    // must not describe a button that does nothing.
+    const voice = hasRussianVoice();
     return (
       <View style={{ flexDirection: "row", gap: 18, alignItems: "center" }}>
         <View style={{ alignItems: "center", gap: 6 }}>
@@ -54,7 +58,7 @@ function Demo({ kind }) {
         </View>
         <View style={{ alignItems: "center", gap: 6 }}>
           <Speaker text="несуществующее слово для тура" size={48} />
-          <Muted>device voice</Muted>
+          <Muted>{voice ? "device voice" : "no Russian voice on this phone"}</Muted>
         </View>
       </View>
     );

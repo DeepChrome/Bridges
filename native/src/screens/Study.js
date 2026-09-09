@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Modal, ScrollView, Pressable, Alert } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, Tick, SectionLabel } from "../ui";
 import { L, UN, STAGES, unitUnlocked, idxOfWord } from "../data";
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";
@@ -44,13 +44,18 @@ export function cardsIn(st, sets) {
   const pool = [];
   const have = new Set();
   const add = (card) => { if (!have.has(card.b)) { have.add(card.b); pool.push(card); } };
+  const byWord = (w) => {
+    const i = idxOfWord(w);
+    if (i >= 0) add(cardOf(i));
+    else add({ key: "d" + w, w, b: w, e: "" });
+  };
   sets.forEach((id) => {
-    if (id === "__trouble__") {
-      troubleWords(st).forEach((w) => {
-        const i = idxOfWord(w);
-        if (i >= 0) add(cardOf(i));
-        else add({ key: "d" + w, w, b: w, e: "" });
-      });
+    if (id === "__trouble__") { troubleWords(st).forEach(byWord); return; }
+    // Everything the scheduler wants today, whichever set it came from — what
+    // "Review · N due" on the path opens.
+    if (id === "__due__") {
+      const t = today();
+      for (const w in st.seen) if (st.seen[w].due <= t) byWord(w);
       return;
     }
     if (id.startsWith("deck:")) {
@@ -67,11 +72,13 @@ export function cardsIn(st, sets) {
 /* Only what is ticked. With nothing ticked the queue is empty and the screen says
    so — it used to fall back to the first unit's words, which read as a set of
    common words that could not be switched off (the owner, 2026-09-07). */
-export function buildQueue(st, limit) {
+export function buildQueue(st, limit, ahead) {
   const pool = cardsIn(st, st.sets);
   const t = today();
+  // What is due, and new cards; the whole set only when asked to study ahead —
+  // it used to fall through to everything silently, so "nothing due" never showed.
   let q = pool.filter((c) => { const s = st.seen[c.b]; return !s || s.due <= t; });
-  if (!q.length) q = pool.slice();
+  if (ahead) q = pool.slice();
   if (limit) {
     q.sort((a, b) => weight(st, b) - weight(st, a));
     q = q.slice(0, limit);
@@ -169,10 +176,7 @@ function SetPicker({ visible, onClose }) {
 
             <View style={{ marginBottom: 18 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <Text style={{ flex: 1, color: t.ink3, fontSize: 11, fontWeight: "600",
-                               letterSpacing: 1, textTransform: "uppercase" }}>
-                  Your decks
-                </Text>
+                <SectionLabel style={{ flex: 1, marginBottom: 0 }}>Your decks</SectionLabel>
                 <Btn kind="ghost" label={busy ? "Working…" : "Import"} disabled={busy}
                      onPress={doImport} />
               </View>
@@ -186,14 +190,10 @@ function SetPicker({ visible, onClose }) {
                         <Text style={{ color: t.ink, fontSize: 15 }}>{d.name}</Text>
                         <Muted>{d.cards.length + " cards"}</Muted>
                       </View>
-                      <Pressable onPress={() => doExport(d.name, ["deck:" + d.id])} hitSlop={8}
-                                 accessibilityRole="button" accessibilityLabel={`Export ${d.name}`}>
-                        <Pill>export</Pill>
-                      </Pressable>
-                      <Pressable onPress={() => removeDeck(d)} hitSlop={8} style={{ marginLeft: 6 }}
-                                 accessibilityRole="button" accessibilityLabel={`Remove ${d.name}`}>
-                        <Pill>remove</Pill>
-                      </Pressable>
+                      <Btn kind="ghost" label="Export" onPress={() => doExport(d.name, ["deck:" + d.id])}
+                           style={{ paddingHorizontal: 8 }} />
+                      <Btn kind="ghost" label="Remove" onPress={() => removeDeck(d)}
+                           style={{ paddingHorizontal: 8 }} />
                     </Row>
                   ))}
                 </List>
@@ -210,10 +210,7 @@ function SetPicker({ visible, onClose }) {
                 <View key={s.core.id} style={{ marginBottom: 18 }}>
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 8,
                                  marginBottom: 8 }}>
-                    <Text style={{ flex: 1, color: t.ink3, fontSize: 11, fontWeight: "600",
-                                   letterSpacing: 1, textTransform: "uppercase" }}>
-                      {`Chapter ${s.n || i + 1}`}
-                    </Text>
+                    <SectionLabel style={{ flex: 1, marginBottom: 0 }}>{`Chapter ${s.n || i + 1}`}</SectionLabel>
                     <Btn kind="ghost" label={on ? "Deselect chapter" : "Select chapter"}
                          onPress={() => update((p) => {
                            const ids = units.map((u) => u.id);
@@ -250,18 +247,6 @@ function SetPicker({ visible, onClose }) {
   );
 }
 
-function Tick({ on }) {
-  const t = useTheme();
-  return (
-    <View style={{ width: 24, height: 24, borderRadius: 7, borderWidth: 2,
-                   borderColor: on ? t.good : t.line,
-                   backgroundColor: on ? t.good : "transparent",
-                   alignItems: "center", justifyContent: "center" }}>
-      {on ? <Text style={{ color: t.goodOn, fontWeight: "800", fontSize: 13 }}>✓</Text> : null}
-    </View>
-  );
-}
-
 export default function Study() {
   const { st, update } = useSession();
   const t = useTheme();
@@ -269,18 +254,22 @@ export default function Study() {
   const [queue, setQueue] = useState(() => buildQueue(st));
   const [at, setAt] = useState(0);
   const [shown, setShown] = useState(false);
+  const [back, setBack] = useState(false);       // reading a card already graded
 
-  const rebuild = (limit) => {
-    setQueue(buildQueue(st, limit));
+  const rebuild = (limit, ahead) => {
+    setQueue(buildQueue(st, limit, ahead));
     setAt(0);
     setShown(false);
+    setBack(false);
   };
+  const chosen = cardsIn(st, st.sets).length;      // cards in the sets, due or not
   // The profile arrives after the first render, and a set or a deck can change
   // from the picker: the queue follows what is ticked.
   const setsKey = st.sets.join(",") + "|" + (st.decks || []).map((d) => d.id + d.cards.length).join(",");
   useEffect(() => { rebuild(); }, [setsKey]);
 
   const names = st.sets.map((id) => id === "__trouble__" ? "Trouble words"
+    : id === "__due__" ? "Due today"
     : id.startsWith("deck:") ? ((st.decks || []).find((d) => "deck:" + d.id === id) || {}).name
     : (UN.find((u) => u.id === id) || {}).name).filter(Boolean);
 
@@ -300,6 +289,7 @@ export default function Study() {
     if (g === 1) setQueue(queue.concat(queue[at]));
     setAt(at + 1);
     setShown(false);
+    setBack(false);
   };
 
   return (
@@ -313,25 +303,38 @@ export default function Study() {
             </Text>
             <Muted>{queue.length ? `${queue.length} cards` : "Nothing selected"}</Muted>
           </View>
-          <Pill tone="brand">Change</Pill>
+          <Btn kind="ghost" label="Change" style={{ paddingHorizontal: 8 }} onPress={() => setPicker(true)} />
         </Row>
       </List>
 
-      <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
-        <Btn label="Shuffle" style={{ flex: 1 }}
-             onPress={() => { setQueue(shuffle(queue.slice())); setAt(0); setShown(false); }} />
-        <Btn label="Fast 20" style={{ flex: 1 }} onPress={() => rebuild(20)} />
-      </View>
+      {/* Nothing to shuffle or cut when there is no queue: the empty state has
+          one action, choosing a set, not two dead buttons above it. */}
+      {queue.length ? (
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+          <Btn label="Shuffle" style={{ flex: 1 }}
+               onPress={() => { setQueue(shuffle(queue.slice())); setAt(0); setShown(false); }} />
+          <Btn label="20 most urgent" style={{ flex: 1 }} onPress={() => rebuild(20)} />
+        </View>
+      ) : null}
 
       {!w ? (
         <Card style={{ marginTop: 16, alignItems: "center" }}>
           <Text style={{ color: t.ink, fontSize: 16 }}>
-            {queue.length ? "Set finished." : "Pick a set to practise."}
+            {queue.length ? "Set finished."
+              : chosen ? "Nothing due today." : "Pick a set to practise."}
           </Text>
           {queue.length ? (
             <Btn kind="pri" label="Go again" style={{ marginTop: 14 }}
                  onPress={() => rebuild()} />
-          ) : null}
+          ) : chosen ? (
+            // The scheduler has nothing to ask; studying ahead is the learner's
+            // choice, said as such, not the default.
+            <Btn label={`Study ahead · ${chosen} cards`} style={{ marginTop: 14 }}
+                 onPress={() => rebuild(undefined, true)} />
+          ) : (
+            <Btn kind="pri" label="Choose what to review" style={{ marginTop: 14 }}
+                 onPress={() => setPicker(true)} />
+          )}
         </Card>
       ) : (
         <>
@@ -371,6 +374,10 @@ export default function Study() {
           {!shown ? (
             <Btn kind="pri" label="Show" style={{ marginTop: 14 }}
                  onPress={() => setShown(true)} />
+          ) : back ? (
+            // Looking back at a graded card: read it, do not grade it twice.
+            <Btn kind="pri" label="Next" style={{ marginTop: 14 }}
+                 onPress={() => { setBack(false); setAt(at + 1); setShown(false); }} />
           ) : (
             <View style={{ flexDirection: "row", gap: 6, marginTop: 14 }}>
               {[[1, "Again", "bad"], [2, "Hard", "plain"],
@@ -391,7 +398,7 @@ export default function Study() {
                                       : kind === "good" ? t.goodOn : t.badOn }}>
                     {label}
                   </Text>
-                  <Text style={{ fontSize: 10, opacity: 0.75, fontWeight: "500",
+                  <Text style={{ fontSize: 12, fontWeight: "500",
                                  color: kind === "plain" ? t.ink2
                                       : kind === "pri" ? t.brandOn
                                       : kind === "good" ? t.goodOn : t.badOn }}>
@@ -405,9 +412,9 @@ export default function Study() {
           <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
             <Btn kind="ghost" label="◀ Previous" style={{ flex: 1 }}
                  disabled={at === 0}
-                 onPress={() => { setAt(at - 1); setShown(true); }} />
+                 onPress={() => { setAt(at - 1); setShown(true); setBack(true); }} />
             <Btn kind="ghost" label="Skip ▶" style={{ flex: 1 }}
-                 onPress={() => { setAt(at + 1); setShown(false); }} />
+                 onPress={() => { setAt(at + 1); setShown(false); setBack(false); }} />
           </View>
         </>
       )}

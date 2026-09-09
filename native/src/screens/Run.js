@@ -6,11 +6,11 @@
  * only two things a caller supplies.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, Modal } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, Pressable, ScrollView, Modal, Alert } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted } from "../ui";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
 import { RuInput } from "../keyboard";
 import { charDistance } from "@core/compare";
@@ -275,11 +275,29 @@ export function useAudioStopOnLeave() {
    only, so the retake is practice, not a second chance at the mark; the retake
    is still a review for the scheduler. Off for the placement and section tests,
    which measure rather than teach, and for the one-question vocabulary runner. */
-export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true }) {
+export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true, navigation }) {
   const { update } = useSession();
   const t = useTheme();
   const [queue, setQueue] = useState(() => steps.slice());
   const [at, setAt] = useState(0);
+  const finished = useRef(false);
+
+  /* The back arrow sits a thumb's width from Home, and one mis-tap used to throw
+     a ten-minute placement away without a word. With `navigation` given, a run
+     that has started and not finished asks first. Grades already written stay
+     written; only the mark is lost. */
+  const guard = useRef(false);
+  useEffect(() => {
+    if (!navigation || typeof navigation.addListener !== "function") return undefined;
+    return navigation.addListener("beforeRemove", (e) => {
+      if (!guard.current) return;
+      e.preventDefault();
+      Alert.alert("Leave the quiz?", "The mark is lost; what you have answered is kept.",
+                  [{ text: "Stay", style: "cancel" },
+                   { text: "Leave", style: "destructive",
+                     onPress: () => navigation.dispatch(e.data.action) }]);
+    });
+  }, [navigation]);
   const [answered, setAnswered] = useState(false);
   const [verdict, setVerdict] = useState(null);      // { right, credit, note } | skipped: right null
   const [picked, setPicked] = useState(null);
@@ -292,6 +310,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const alive = useRef(true);
 
   const q = queue[at];
+  guard.current = at > 0 && !finished.current;
 
   // Autoplay waits for whatever is still playing — the previous answer's reading,
   // the previous question's recording — so nothing talks over the language audio.
@@ -374,6 +393,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     // is left to finish — the next question's audio waits for it.
     if (sayTimer.current) { clearTimeout(sayTimer.current); sayTimer.current = null; }
     if (at + 1 >= queue.length) {
+      finished.current = true;
+      guard.current = false;
       onFinish({ ...tally.current, total: steps.length - tally.current.skipped,
                  results: results.current });
       return;
@@ -421,24 +442,26 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         {q.say ? <View style={{ marginTop: 12 }}><Speaker text={q.say} /></View> : null}
       </View>
 
+      {/* A hint — the table, or the meaning of what was heard — costs the grade:
+          right with a hint is Hard, not Good. The label says so beforehand;
+          nothing used to, and the table opened on every question. */}
       {(q.table || q.note) && !answered ? (
         <Btn
-          label={usedHint ? "Table used" : "Show the table"}
+          kind="ghost"
+          label={usedHint ? "Table used · counts as a hint" : "Show the table · counts as a hint"}
           disabled={usedHint}
           style={{ marginBottom: 12 }}
           onPress={() => { setUsedHint(true); setHintOpen(true); }}
         />
       ) : null}
 
-      {/* A textual hint — the meaning of what was heard — costs the grade the way
-          the table does: right with a hint is Hard, not Good. */}
       {q.hint && !answered ? (
         usedHint ? (
           <Muted testID="hint-text" style={{ marginBottom: 12, textAlign: "center", fontSize: 15 }}>
             {q.hint}
           </Muted>
         ) : (
-          <Btn kind="ghost" label="Hint" style={{ marginBottom: 12 }}
+          <Btn kind="ghost" label="Hint · counts" style={{ marginBottom: 12 }}
                onPress={() => setUsedHint(true)} />
         )
       ) : null}
@@ -468,6 +491,17 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                 {`Answer: ${answer ? answer.label : q.answer}`}
               </Text>
             ) : null}
+            {/* A gap-fill gives the sentence back whole, every word a link, and
+                names the form that filled it. */}
+            {right !== null && q.reveal ? (
+              <View style={{ marginTop: 8 }}>
+                <Linked text={q.reveal} size={17} />
+                {q.formNote ? <Muted style={{ marginTop: 3 }}>{q.formNote}</Muted> : null}
+              </View>
+            ) : null}
+            {right === true && usedHint ? (
+              <Muted style={{ marginTop: 4 }}>Right, with a hint</Muted>
+            ) : null}
             {right === false && recycle && !q.retry ? (
               <Muted style={{ marginTop: 6 }}>Comes round again</Muted>
             ) : null}
@@ -484,11 +518,16 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
 
 /* ------------------------------------------------------------------ done */
 
-export function Done({ title, detail, score, passed, onAgain, onBack, againLabel }) {
+/* The end of a run. The primary button points forward: after a pass it is
+   Continue (or Done), and "Try again" drops to a ghost — it used to be the
+   blue button whether the quiz was passed or failed, so passing read as an
+   invitation to do it over (the interface review, 2026-09-08). */
+export function Done({ title, detail, score, passed, onAgain, onBack, againLabel, onContinue, continueLabel }) {
   const t = useTheme();
   const tone = passed === false ? { bg: t.badBg, fg: t.bad }
              : passed === true ? { bg: t.goodBg, fg: t.good }
              : { bg: t.brandBg, fg: t.brandInk };
+  const forward = passed !== false;
   return (
     <Screen>
       <Card style={{ alignItems: "center", paddingVertical: 30 }}>
@@ -502,11 +541,17 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
         <Text style={{ color: t.ink, fontSize: 16, fontWeight: "600" }}>{title}</Text>
         {detail ? <Muted style={{ marginTop: 6, textAlign: "center" }}>{detail}</Muted> : null}
       </Card>
-      {onAgain ? (
-        <Btn kind="pri" label={againLabel || "Again"} style={{ marginTop: 16 }}
-             onPress={onAgain} />
+      {forward ? (
+        <Btn kind="pri" label={onContinue ? (continueLabel || "Continue") : "Done"}
+             style={{ marginTop: 16 }} onPress={onContinue || onBack} />
       ) : null}
-      <Btn kind="ghost" label="Back" style={{ marginTop: 8 }} onPress={onBack} />
+      {onAgain ? (
+        <Btn kind={forward ? "ghost" : "pri"} label={againLabel || "Again"}
+             style={{ marginTop: forward ? 8 : 16 }} onPress={onAgain} />
+      ) : null}
+      {!forward || onContinue ? (
+        <Btn kind="ghost" label="Back" style={{ marginTop: 8 }} onPress={onBack} />
+      ) : null}
     </Screen>
   );
 }

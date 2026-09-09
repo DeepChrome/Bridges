@@ -21,8 +21,11 @@ import { useTheme, space } from "../theme";
 import { Screen, Btn, Pill, UnitIcon, Muted, styles } from "../ui";
 import {
   STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress,
-  stageDone, stageUnlocked, unitUnlocked, nextLesson, forkOpen, FORK_AT,
+  stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, FORK_AT, dueCount,
 } from "../data";
+
+/* A lesson step's screen. */
+export const STEP_ROUTE = { vocab: "Vocab", quiz: "Quiz", video: "Video" };
 
 const STROKE = 5;
 const LANE_H = 64;          // height of the fork drawing
@@ -234,9 +237,10 @@ function Fork({ stage, chapterOpen, onOpen }) {
 }
 
 export default function Learn({ navigation }) {
-  const { st } = useSession();
+  const { st, update } = useSession();
   const t = useTheme();
-  const next = nextLesson(st);
+  const next = nextStep(st);
+  const due = dueCount(st);
   const openUnit = (unit) => navigation.navigate("Unit", { unitId: unit.id });
 
   return (
@@ -255,12 +259,30 @@ export default function Learn({ navigation }) {
         <Muted size={14}>{st.streak === 1 ? "day" : "days"} in a row</Muted>
       </View>
 
+      {/* What is due sits on the path, above the lesson: review is part of
+          the route, not a tab the learner has to remember (the pedagogy
+          review, 2026-09-08). Opens the flashcards on exactly the due words. */}
+      {due > 0 ? (
+        <Btn
+          kind="plain"
+          testID="review-due"
+          style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
+          label={`Review · ${due} due`}
+          onPress={() => {
+            update((p) => ({ ...p, sets: ["__due__"] }));
+            navigation.navigate("Study");
+          }}
+        />
+      ) : null}
       {next ? (
+        // Straight to the next undone step of the next lesson — a question
+        // within seconds, not a unit list and a lesson list first.
         <Btn
           kind="pri"
           style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
           label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} (${next.unit.name})`}
-          onPress={() => navigation.navigate("Unit", { unitId: next.unit.id })}
+          onPress={() => navigation.navigate(STEP_ROUTE[next.step] || "Vocab",
+                                             { unitId: next.unit.id, index: next.index })}
         />
       ) : null}
 

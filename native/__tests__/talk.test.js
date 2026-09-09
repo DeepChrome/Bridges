@@ -4,6 +4,7 @@
    Own file, per the timeout note in screens.test.js. */
 
 import React from "react";
+import { Alert } from "react-native";
 import { render, screen, fireEvent, act } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -88,7 +89,7 @@ describe("talk", () => {
     expect(talk.mock.calls[0][0].studied.length).toBeGreaterThan(20);
     // Chapters 1–5 are done, so the tutor pitches its Russian at the advanced
     // level unless a level was chosen; and it reads its turn out as it arrives.
-    expect(talk.mock.calls[0][0].level).toBe("advanced");
+    expect(talk.mock.calls[0][0].level).toBe("beginner");      // chapters 1–4 by the route
     expect(global.__spoke[global.__spoke.length - 1]).toMatch(/Здравствуйте/);
 
     const hold = screen.getByTestId("say-hold");
@@ -110,8 +111,8 @@ describe("talk", () => {
     const st = await saved();
     expect(st.speech.tagCounts).toEqual({ CASE: 1 });
     expect(st.speech.attempts[0]).toMatchObject({ kind: "talk", scenario: "cafe", transcript: "я хочу вода" });
-    expect(st.seen["вода"].lapses).toBe(1);
-    expect(st.seen["хотеть"].lapses).toBe(0);
+    expect(st.seen["вода"].due).toBe(today());               // Again: due again today
+    expect(st.seen["хотеть"].due).toBeGreaterThan(today());  // Good
     expect(st.speech.talk).toEqual({ day: today(), sessions: 1 });
 
     // English off, then the summary: what went well, what to work on, the words.
@@ -143,13 +144,18 @@ describe("talk", () => {
     expect(await screen.findByText(/Я хочу чай, пожалуйста/)).toBeTruthy();
     expect(screen.getByText("I would like tea, please.")).toBeTruthy();
     expect(hint.mock.calls[0][0].history).toHaveLength(1);
-    expect(hint.mock.calls[0][0].level).toBe("advanced");
+    expect(hint.mock.calls[0][0].level).toBe("beginner");      // chapters 1–4 by the route
     const hold = screen.getByTestId("say-hold");
     await act(async () => { fireEvent(hold, "pressIn"); });
     await act(async () => { fireEvent(hold, "pressOut"); });
     await act(async () => { global.__stt.emit("result", { isFinal: true, results: [{ transcript: "я хочу чай" }] }); });
     expect(screen.queryByTestId("hint-card")).toBeNull();
+    // Restart asks first once the learner has spoken; the confirmation is taken.
+    const alert = jest.spyOn(Alert, "alert").mockImplementation((_t, _m, buttons) =>
+      buttons.find((b) => b.style === "destructive").onPress());
     await act(async () => { fireEvent.press(screen.getByTestId("talk-restart")); });
+    expect(alert).toHaveBeenCalledTimes(1);
+    alert.mockRestore();
     expect(await screen.findByText(/Здравствуйте/)).toBeTruthy();
     expect(screen.queryByText("я хочу чай")).toBeNull();
     expect(talk).toHaveBeenCalledTimes(3);                                 // open, turn, open again

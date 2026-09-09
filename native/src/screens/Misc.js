@@ -5,7 +5,7 @@ import { View, Text, TextInput, Pressable, ScrollView, Image } from "react-nativ
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, Avatar, AV, AV_IDS } from "../ui";
+import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, Avatar, AV, AV_IDS, SearchField, SectionLabel } from "../ui";
 import {
   UN, STATS, unitState, markComponent, L, VIDEOS, videoById, videoWatched, unitById,
 } from "../data";
@@ -102,20 +102,9 @@ export function Immerse({ navigation }) {
         <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>{seen}</Text>
         <Muted size={14}>{`of ${VIDEOS.length} watched`}</Muted>
       </View>
-      <TextInput
-        testID="video-search"
-        value={query}
-        onChangeText={setQuery}
-        placeholder="Search: travel, grammar, B1, слово…"
-        placeholderTextColor={t.ink3}
-        autoCorrect={false}
-        autoCapitalize="none"
-        clearButtonMode="while-editing"
-        accessibilityLabel="Search videos"
-        style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
-                 borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 11,
-                 fontSize: 16, color: t.ink, marginBottom: 12 }}
-      />
+      <SearchField testID="video-search" value={query} onChangeText={setQuery}
+                   placeholder="Search: travel, grammar, B1, слово…" label="Search videos"
+                   style={{ marginBottom: 12 }} />
       {shown.length ? (
         <List>
           {shown.map((v, k) => {
@@ -135,7 +124,6 @@ export function Immerse({ navigation }) {
                       .filter(Boolean).join(" · ")}
                   </Muted>
                 </View>
-                {watched ? <Pill tone="good">seen</Pill> : null}
               </Row>
             );
           })}
@@ -145,10 +133,6 @@ export function Immerse({ navigation }) {
           {`Nothing matches “${query.trim()}”`}
         </Muted>
       )}
-      <Muted style={{ textAlign: "center", marginTop: 20 }}>
-        {`Videos from ${(STATS.channels || []).filter(Boolean).join(", ")}. ` +
-         "The words under each one are the ones it actually says."}
-      </Muted>
     </Screen>
   );
 }
@@ -238,7 +222,7 @@ export function Video({ route, navigation }) {
 
   return (
     <Screen>
-      <Title sub={[v.ch, minutes(v.dur), unit ? unit.name : null].filter(Boolean).join(" · ")}>
+      <Title sub={[v.ch, minutes(v.dur), unit ? unit.name : null, watched ? "watched" : null].filter(Boolean).join(" · ")}>
         {short(v.title)}
       </Title>
       {playing ? (
@@ -259,10 +243,7 @@ export function Video({ route, navigation }) {
         <Btn kind="pri" label="Play here" onPress={() => setPlaying(true)} />
       )}
 
-      <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1,
-                     textTransform: "uppercase", marginTop: 18, marginBottom: 8 }}>
-        Listen for
-      </Text>
+      <SectionLabel style={{ marginTop: 18 }}>Listen for</SectionLabel>
       {words.length ? (
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
           {words.map((word) => {
@@ -308,10 +289,7 @@ export function Video({ route, navigation }) {
 
       {v.chapters && v.chapters.length ? (
         <>
-          <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "600", letterSpacing: 1,
-                         textTransform: "uppercase", marginTop: 18, marginBottom: 8 }}>
-            Chapters
-          </Text>
+          <SectionLabel style={{ marginTop: 18 }}>Chapters</SectionLabel>
           <List>
             {v.chapters.map((c, k) => (
               <Row key={k} last={k === v.chapters.length - 1}
@@ -326,8 +304,14 @@ export function Video({ route, navigation }) {
         </>
       ) : null}
 
-      <Btn kind="pri" style={{ marginTop: 20 }}
-           label={watched ? "Watched" : "Mark as watched"} onPress={markWatched} />
+      {/* Once watched, the fact sits by the title (the thumbnail in the library
+          shows it too); a primary button reading "Watched" that went back was a
+          third way of saying the same thing. */}
+      {watched ? (
+        <Btn kind="ghost" style={{ marginTop: 20 }} label="Back" onPress={() => navigation.goBack()} />
+      ) : (
+        <Btn kind="pri" style={{ marginTop: 20 }} label="Mark as watched" onPress={markWatched} />
+      )}
     </Screen>
   );
 }

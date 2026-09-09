@@ -420,9 +420,12 @@ export function makeQuestions(env) {
                alts: forms.slice(1).map(fold) };
     }
     // Each cell's first form only — the wrong answers should be forms the learner
-    // will meet, not «машиною» from the back of the cell.
+    // will meet, not «машиною» from the back of the cell. The headword is barred
+    // too: it is the prompt, printed at the top of the screen, and offering it as
+    // an option is a free elimination (seen on the emulator — «рука́» stood above
+    // its own four choices).
     const own = t.rows.flatMap((row) => cellsOf(row).map((c) => (Array.isArray(c) ? c[0] : c)));
-    const seen = new Set([fold(target)]);
+    const seen = new Set([fold(target), fold(w.w)]);
     const wrong = [];
     for (const f of shuffle(own.filter(Boolean)).concat(shuffle(paradigmForms(w)))) {
       if (seen.has(fold(f))) continue;

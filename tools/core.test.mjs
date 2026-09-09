@@ -551,6 +551,21 @@ group("form questions");
   ok(namesTheForm, "the question names the form and can show the table");
   ok(neverHeadword, "the form asked for is never the headword on screen");
 
+  // …and no option repeats the prompt, which would be a free elimination.
+  let promptAsOption = 0, drawn = 0;
+  for (const s of STAGES.slice(1)) {
+    const spec = Q.formSpec(s.core);
+    if (!spec || spec.drill) continue;
+    for (let k = 0; k < 40; k++) {
+      const q = Q.formPrompt(s.core, 0);
+      if (!q || !q.options) continue;
+      drawn++;
+      if (q.options.some((o) => fold(o.label) === fold(q.prompt))) promptAsOption++;
+    }
+  }
+  ok(drawn > 0 && promptAsOption === 0,
+     `no option repeats the word on screen (${drawn} chosen form questions)`, String(promptAsOption));
+
   // The chapter's card names the form; the words are the lesson's when any has it.
   const plural = STAGES.find((s) => (Q.formSpec(s.core) || {}).rows && Q.formSpec(s.core).rows[0] === "Nominative");
   ok(!!plural, "a chapter teaches the plural");

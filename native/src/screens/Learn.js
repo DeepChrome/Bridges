@@ -2,8 +2,8 @@
  *
  * Each unit is a disc carrying its own progress as a ring, with its name beneath
  * it. The spine runs down the centre. After FORK_AT lessons of a chapter's spine
- * unit the road forks: lanes curve out to that chapter's side quests, drawn in a
- * row, and the main road carries on underneath to the next chapter. Side quests
+ * unit the road forks: lanes curve out to that chapter's side quests, drawn in
+ * ranks of three, and the main road carries on underneath to the next chapter. Side quests
  * are optional — the next chapter needs only the spine — so the fork is an offer,
  * not a gate. Before it opens the lanes are drawn dashed and the quests locked,
  * so the learner can see what is coming.
@@ -27,7 +27,25 @@ import {
 const STROKE = 5;
 const LANE_H = 64;          // height of the fork drawing
 const MERGE_H = 44;         // and of the lanes coming back to the road
+const ROW_GAP = 40;         // between ranks of side quests, when there is more than one
+const ROW_H = 112;          // a rank of quest discs with their names
+const QUEST_COLS = 3;       // quests to a rank: a fourth overlaps its neighbours' names
 const TRUNK_W = 3;
+
+/* A chapter's side quests in ranks of QUEST_COLS, each rank centred on the road:
+   eight quests read 3 · 3 · 2. Every rank keeps the curriculum's order. */
+export function questRanks(branches) {
+  const ranks = [];
+  for (let k = 0; k < branches.length; k += QUEST_COLS) ranks.push(branches.slice(k, k + QUEST_COLS));
+  return ranks;
+}
+
+/* Where a rank's discs sit across the drawing's width W. */
+function rankXs(rank, W) {
+  const n = rank.length;
+  const spacing = Math.min(120, Math.floor(W / QUEST_COLS));
+  return rank.map((_, k) => W / 2 + (k - (n - 1) / 2) * spacing);
+}
 
 function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
   const { st } = useSession();
@@ -130,18 +148,37 @@ function Trunk({ height = 18, dim }) {
                         borderRadius: 2 }} />;
 }
 
-/* The fork: lanes from the spine out to each side quest, the quests in a row, and
-   the road going on beneath. Animates open the first time it is drawn open —
-   lanes fade in, the row rises to meet them — and sits still after that. */
+/* Lanes fanning out from the road to a rank of quests, the road running on
+   beneath them. */
+function FanOut({ rank, xs, W, height, stroke, road, dashed }) {
+  return (
+    <Svg width={W} height={height}>
+      <Line x1={W / 2} y1={0} x2={W / 2} y2={height} stroke={road} strokeWidth={TRUNK_W} />
+      {xs.map((x, k) => (
+        <Path key={rank[k].id} testID={`lane-${rank[k].id}`}
+              d={`M ${W / 2} 0 C ${W / 2} ${height * 0.55}, ${x} ${height * 0.35}, ${x} ${height}`}
+              stroke={stroke} strokeWidth={TRUNK_W} fill="none" strokeLinecap="round"
+              strokeDasharray={dashed ? "4 6" : undefined} />
+      ))}
+    </Svg>
+  );
+}
+
+/* The fork: lanes from the spine out to the chapter's side quests, in ranks of
+   QUEST_COLS (the eighth chapter's eight quests used to sit in one row and
+   their names ran into each other — the owner, 2026-09-08), and the road going
+   on beneath. Each rank past the first gets its own fan of lanes from the
+   road; the last rank's lanes come back to it. Animates open the first time
+   it is drawn open — lanes fade in, the ranks rise to meet them — and sits
+   still after that. */
 function Fork({ stage, chapterOpen, onOpen }) {
   const { st } = useSession();
   const t = useTheme();
   const { width: screenW } = useWindowDimensions();
   const open = chapterOpen && forkOpen(st, stage);
-  const n = stage.branches.length;
   const W = Math.min(screenW - space.pad * 2, 400);
-  const spacing = Math.min(104, Math.floor(W / n));
-  const xs = stage.branches.map((_, k) => W / 2 + (k - (n - 1) / 2) * spacing);
+  const ranks = questRanks(stage.branches);
+  const xs = ranks.map((rank) => rankXs(rank, W));
 
   const anim = useRef(new Animated.Value(open ? 0 : 1)).current;
   useEffect(() => {
@@ -150,43 +187,41 @@ function Fork({ stage, chapterOpen, onOpen }) {
   }, [open]);
 
   const lane = open ? t.brand : t.lineSoft;
+  const fade = { opacity: open ? anim : 1 };
+  const rise = { transform: [{ translateY: open ? anim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) : 0 }] };
+  const last = ranks.length - 1;
   return (
     <View testID={`fork-${stage.core.id}`} accessibilityLabel={open ? "Side quests" : `Side quests, after lesson ${FORK_AT}`}
           style={{ alignItems: "center", alignSelf: "stretch" }}>
       <Trunk height={10} dim={!open} />
-      <Animated.View style={{ opacity: open ? anim : 1 }}>
-        <Svg width={W} height={LANE_H}>
-          {/* The main road, straight through. */}
-          <Line x1={W / 2} y1={0} x2={W / 2} y2={LANE_H} stroke={t.line} strokeWidth={TRUNK_W} />
-          {xs.map((x, k) => (
-            <Path key={k} testID={`lane-${stage.branches[k].id}`}
-                  d={`M ${W / 2} 0 C ${W / 2} ${LANE_H * 0.55}, ${x} ${LANE_H * 0.35}, ${x} ${LANE_H}`}
-                  stroke={lane} strokeWidth={TRUNK_W} fill="none" strokeLinecap="round"
-                  strokeDasharray={open ? undefined : "4 6"} />
-          ))}
-        </Svg>
-      </Animated.View>
-      <Animated.View
-        style={{ width: W, height: 112, opacity: open ? anim : 1,
-                 transform: [{ translateY: open ? anim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) : 0 }] }}>
-        {stage.branches.map((u, k) => (
-          <View key={u.id} style={{ position: "absolute", left: xs[k] - 48, top: 0 }}>
-            <PathNode unit={u} open={unitUnlocked(st, u)} branch onOpen={onOpen} />
-          </View>
-        ))}
-      </Animated.View>
+      {ranks.map((rank, r) => (
+        <React.Fragment key={r}>
+          <Animated.View style={fade}>
+            <FanOut rank={rank} xs={xs[r]} W={W} height={r ? ROW_GAP : LANE_H}
+                    stroke={lane} road={t.line} dashed={!open} />
+          </Animated.View>
+          <Animated.View testID={`rank-${stage.core.id}-${r}`} style={[{ width: W, height: ROW_H }, fade, rise]}>
+            {rank.map((u, k) => (
+              <View key={u.id} style={{ position: "absolute", left: xs[r][k] - 48, top: 0 }}>
+                <PathNode unit={u} open={unitUnlocked(st, u)} branch onOpen={onOpen} />
+              </View>
+            ))}
+          </Animated.View>
+        </React.Fragment>
+      ))}
       {!open ? (
         <Muted size={11} style={{ marginTop: -4, marginBottom: 6 }}>
           {`Side quests · after lesson ${FORK_AT}`}
         </Muted>
       ) : null}
-      {/* The lanes come back: from under each quest to the road, which goes on to
-          the next chapter. A fork that never re-joined read as a dead end. */}
-      <Animated.View style={{ opacity: open ? anim : 1 }}>
+      {/* The lanes come back: from under each quest of the last rank to the road,
+          which goes on to the next chapter. A fork that never re-joined read as
+          a dead end. */}
+      <Animated.View style={fade}>
         <Svg width={W} height={MERGE_H}>
           <Line x1={W / 2} y1={0} x2={W / 2} y2={MERGE_H} stroke={t.line} strokeWidth={TRUNK_W} />
-          {xs.map((x, k) => (
-            <Path key={k} testID={`merge-${stage.branches[k].id}`}
+          {xs[last].map((x, k) => (
+            <Path key={k} testID={`merge-${ranks[last][k].id}`}
                   d={`M ${x} 0 C ${x} ${MERGE_H * 0.65}, ${W / 2} ${MERGE_H * 0.45}, ${W / 2} ${MERGE_H}`}
                   stroke={lane} strokeWidth={TRUNK_W} fill="none" strokeLinecap="round"
                   strokeDasharray={open ? undefined : "4 6"} />

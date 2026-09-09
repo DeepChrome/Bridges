@@ -7,18 +7,21 @@ Reads data/raw/images/ (tools/harvest_images.py) and writes:
                                 looked up through the map below
   native/src/images.js          IMAGES: bare word -> require(...), generated, so
                                 Metro sees every asset statically; and CREDITS,
-                                title, author and licence per word, for the
-                                word's entry
+                                title, author, licence and page per word, for
+                                the word's entry — the credit a CC BY licence
+                                asks for
 
 Only words the curriculum carries are shipped (the payload decides); a photo
 whose word has left the units is dropped from the app, not from the cache.
+Only the second harvest's records ship (manifest entries with v == 2): the
+first harvest's plain Commons searches were half wrong subjects, and its
+public-domain pool looked a century old.
 
     python tools/build_images.py
 """
 
 import argparse
 import json
-import re
 import shutil
 import sys
 from pathlib import Path
@@ -28,31 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw" / "images"
 OUT = ROOT / "native" / "assets" / "img"
 JS = ROOT / "native" / "src" / "images.js"
-TERMS = ROOT / "data" / "curated" / "image_terms.json"
-ABSTRACT_UNITS = {"time", "emotion", "speech", "politics", "business"}
-MAX_TITLE_WORDS = 4
-# Antiques and press photographs: the public-domain pool is US government
-# releases and museum scans, and a search term in one of their titles is a
-# unit's name ("RED HORSE conduct annual training") or a caption, not the
-# thing. Anything matching this is left out; Wikipedia's own choices pass.
-OLD_RE = re.compile(r"\b1[0-9]{3}\b|museum|titel op object|funerary|manuscript|engrav|"
-                    r"lithograph|woodcut|etching|fresco|codex|\bnavy\b|\barmy\b|air force|"
-                    r"marines?\b|soldier|troop|\bLCCN\b|red horse|opera|portrait|attrice|"
-                    r"actress|joueur|sheet music|summit|conference|ceremony|exercise\b", re.I)
-
-
-def names(info):
-    """Is the file named after the thing? The title carries the search term as a
-    whole word, is short (a file called "Bangkok Taxi.jpg" is a photo of a taxi;
-    "2016 DoD Warrior Games Swimming Competition" is not a photo of swimming),
-    and is not a catalogued antique or a press release."""
-    title = re.sub(r"^File:|\.[a-z]+$", "", (info.get("title") or ""), flags=re.I).lower()
-    if OLD_RE.search(title):
-        return False
-    if len(re.findall(r"[a-zа-яё]+", title)) > MAX_TITLE_WORDS:
-        return False
-    words = [w for w in re.split(r"[^a-z]+", (info.get("term") or "").lower()) if len(w) > 2]
-    return any(re.search(r"\b" + re.escape(w) + r"s?\b", title) for w in words)
+VERSION = 2
 
 
 def main():
@@ -62,44 +41,33 @@ def main():
 
     manifest = json.loads((RAW / "manifest.json").read_text(encoding="utf-8"))
     payload = json.loads(args.payload.read_text(encoding="utf-8"))
-    curated = {}
-    if TERMS.exists():
-        curated = {k: v for k, v in json.loads(TERMS.read_text(encoding="utf-8")).items()
-                   if not k.startswith("_") and v}
-    # Only units whose words are things: a search for "investment" or "society"
-    # returns something, and that something is the kind of picture that makes an
-    # app look generated. The spine's nouns (время, год, человек) are left out
-    # for the same reason.
-    taught = {payload["lemmas"][i]["b"] for u in payload["units"]
-              if u["kind"] != "spine" and u["id"] not in ABSTRACT_UNITS for i in u["w"]}
+    taught = {payload["lemmas"][i]["b"] for u in payload["units"] for i in u["w"]}
 
     OUT.mkdir(parents=True, exist_ok=True)
     for old in OUT.glob("*.jpg"):
         old.unlink()
-    entries, credits, total, doubtful = [], {}, 0, 0
+    entries, credits, total, stale = [], {}, 0, 0
+    by_via = {}
     for n, (bare, info) in enumerate(sorted(manifest.items())):
         src = RAW / f"{bare}.jpg"
-        if not info or not src.exists() or bare not in taught:
+        if not info or bare.startswith("_") or not src.exists() or bare not in taught:
             continue
-        # Shipped: Wikipedia's lead image (an editor chose it for the article on
-        # the thing), or a Commons file found by a search term a person wrote in
-        # image_terms.json and named after the thing. A Commons hit on the
-        # word's gloss alone is not: measured on the harvest, about half of
-        # those were the wrong subject — "tablet" a clay tablet, "animal" a door
-        # knocker, "dog" a soldier. Precision over coverage, as with the videos.
-        if info.get("via") != "wikipedia" and not (bare in curated and names(info)):
-            doubtful += 1
+        if info.get("v") != VERSION:
+            stale += 1
             continue
         name = f"{n:04d}.jpg"
         shutil.copyfile(src, OUT / name)
         total += src.stat().st_size
         entries.append((bare, name))
+        by_via[info.get("via")] = by_via.get(info.get("via"), 0) + 1
         credits[bare] = {"t": info["title"].replace("File:", ""), "a": info.get("author") or "",
                          "l": info["licence"], "u": info.get("url") or ""}
 
-    lines = ["/* Generated by tools/build_images.py — do not edit. Public-domain and CC0",
-             "   photographs from Wikimedia Commons for the words the units teach, keyed",
-             "   on the bare word. CREDITS carries each file's title, author and licence. */",
+    lines = ["/* Generated by tools/build_images.py — do not edit. Photographs from",
+             "   Wikipedia's articles and Wikimedia Commons, free to reuse with credit",
+             "   (CC0, public domain, CC BY, CC BY-SA), for the words the units teach,",
+             "   keyed on the bare word. CREDITS carries each file's title, author,",
+             "   licence and page, shown on the word's entry. */",
              "", "export const IMAGES = {"]
     for bare, name in entries:
         lines.append(f'  "{bare}": require("../assets/img/{name}"),')
@@ -109,8 +77,8 @@ def main():
     lines.append("")
     JS.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {JS}")
-    print(f"  photos shipped : {len(entries)} of {sum(1 for v in manifest.values() if v)} harvested"
-          f" ({len(taught)} words taught; {doubtful} left out: not Wikipedia's choice and no curated term)")
+    print(f"  photos shipped : {len(entries)} of {len(taught)} words taught "
+          f"({', '.join(f'{k} {v}' for k, v in sorted(by_via.items()))}; {stale} first-harvest records left out)")
     print(f"  bytes          : {total / 1_048_576:.1f} MB")
 
 

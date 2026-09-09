@@ -14,7 +14,7 @@ import { Intro } from "./Intro";
 
 /* ------------------------------------------------------------- immerse */
 
-const short = (title) => title.split(" | ")[0].trim();
+export const short = (title) => title.split(" | ")[0].trim();
 const minutes = (dur) => (dur ? `${Math.round(dur / 60)} min` : "");
 
 /* The video's own thumbnail from YouTube (the owner, 2026-09-07), with a tick
@@ -153,7 +153,7 @@ export function Immerse({ navigation }) {
   );
 }
 
-const clock = (ms) => {
+export const clock = (ms) => {
   const s = Math.max(0, Math.round(ms / 1000));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 };
@@ -162,6 +162,15 @@ const clock = (ms) => {
    the word rather than landing on top of it. */
 const LEAD_MS = 5000;
 const HOLD_MS = 10000;
+
+/* Opened from a dictionary entry at a moment (`word`, `at`): the word is the
+   focus from the start, at that occurrence. */
+function focusAt(v, params) {
+  const occ = params.word && v.words[params.word];
+  if (!occ || !occ.length) return null;
+  const k = Math.max(0, occ.findIndex((o) => o.t === params.at));
+  return { word: params.word, k, n: occ.length, ...occ[k] };
+}
 
 /* What the screen shows for a route: the library entry, or for a unit's episode
    the entry with the unit's own heard words first — every word the unit teaches
@@ -185,11 +194,13 @@ export function videoFor(params) {
 export function Video({ route, navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
-  const v = videoFor(route.params || {});
-  const [playing, setPlaying] = useState(false);
-  const [focus, setFocus] = useState(null);
+  const params = route.params || {};
+  const v = videoFor(params);
+  const [focus, setFocus] = useState(() => (v ? focusAt(v, params) : null));
+  const [playing, setPlaying] = useState(!!focus);
   const player = useRef(null);
-  const pending = useRef(null);
+  // A moment asked for before the player exists is held for onReady.
+  const pending = useRef(focus ? [Math.max(0, focus.t - LEAD_MS), HOLD_MS] : null);
   if (!v) return null;
 
   const unit = v.unit ? unitById(v.unit) : null;

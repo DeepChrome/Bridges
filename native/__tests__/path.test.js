@@ -18,7 +18,7 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import Learn from "../src/screens/Learn";
 import { light } from "../src/theme";
-import { lessonCount, UN } from "../src/data";
+import { lessonCount, UN, STAGES } from "../src/data";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 
@@ -120,6 +120,28 @@ describe("path node states", () => {
     const left = screen.getByTestId("node-family").parent;
     const right = screen.getByTestId("node-time").parent;
     expect(flat(left.props.style).left).toBeLessThan(flat(right.props.style).left);
+  });
+
+  /* Eight quests in one row overlapped their names (the owner, 2026-09-08):
+     they sit in ranks of three now, each disc a full disc's width from the next. */
+  it("lays a chapter's side quests out in ranks of three, none overlapping", async () => {
+    await withState({});
+    const { questRanks } = require("../src/screens/Learn");
+    const big = STAGES.find((s) => s.branches.length > 3);
+    expect(big).toBeTruthy();
+    const ranks = questRanks(big.branches);
+    expect(ranks.every((r) => r.length <= 3)).toBe(true);
+    expect(ranks.flat()).toEqual(big.branches);
+    await screen.findByTestId(`node-${big.core.id}`);
+    const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : s);
+    ranks.forEach((rank, r) => {
+      expect(screen.getByTestId(`rank-${big.core.id}-${r}`)).toBeTruthy();
+      const lefts = rank.map((u) => flat(screen.getByTestId(`node-${u.id}`).parent.props.style).left);
+      for (let k = 1; k < lefts.length; k++) expect(lefts[k] - lefts[k - 1]).toBeGreaterThanOrEqual(96);
+      for (const u of rank) expect(screen.getByTestId(`lane-${u.id}`)).toBeTruthy();
+    });
+    // The road comes back from the last rank.
+    for (const u of ranks[ranks.length - 1]) expect(screen.getByTestId(`merge-${u.id}`)).toBeTruthy();
   });
 
   it("opens the fork once two spine lessons are done, and Continue stays on the spine", async () => {

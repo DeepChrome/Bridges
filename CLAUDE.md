@@ -1128,22 +1128,55 @@ several channels carry the channel's initials where a unit has its icon.
   "Continue (Pronouns & Being)", and the fork's lanes come back to the road
   under the side quests (`merge-<id>` paths) — a fork that never re-joined read
   as a dead end.
-- **Photographs** (`harvest_images.py` → `build_images.py`): for every noun a
-  unit teaches, the English Wikipedia article's lead image when it is **CC0 or
-  public domain**, else the first such JPEG Commons finds for the first English
-  sense, at 176 px, cached under `data/raw/images/` with title, author and
-  licence. **Only Wikipedia's choices ship** (117 of the 662 words in the
-  concrete units; 151 of 745 harvested were Wikipedia's), plus a
-  Commons file when a person wrote the search term in
-  `data/curated/image_terms.json` and the file is named after it: measured on
-  the harvest, about half of the plain Commons hits were the wrong subject —
-  "tablet" a clay tablet, "animal" a door knocker, "dog" a soldier — because
-  the public-domain pool is museum scans and government press photographs, and
-  a caption match is not a subject match. Openverse, which would have done
-  better, did not answer. Shipped through the generated `native/src/images.js`
-  (`IMAGES` by bare word, `CREDITS`), above the word on the vocabulary card and
-  the entry, credited on the entry. To give a word a photo: add its term to
-  `image_terms.json` and re-run both tools; to remove one, blank it.
+- **Photographs** (`harvest_images.py` → `build_images.py`; second harvest
+  2026-09-08, the owner: "modern pictures on most vocabulary slides"). For
+  every noun, verb and adjective a unit teaches: the **Russian Wikipedia
+  article on the Russian word itself** when there is one — the word, not a
+  translation, so «бал» is the dance and «насморк» never becomes "cold" the
+  temperature — with the English article of the same concept (via Wikidata)
+  as a second source; without a Russian article, the English gloss's senses
+  in turn, by title, or through Wikidata's label search when the title is a
+  disambiguation page or a film (items that are films, albums, people,
+  surnames… are refused by P31, `NOT_A_THING`). Pictures in order of how
+  surely they are *of* the thing: the article's lead image; a Commons
+  *quality image* whose structured data depicts the concept (P180) and whose
+  name or categories say so; the article's other photographs in page order
+  (the parse API — the query API lists files alphabetically and once handed
+  "animal" a rotifer). Usable means JPEG ≥ 640 px, not extreme in shape,
+  taken 1995 or later when it says (a public-domain file with no date is
+  treated as old), and not artwork, fossil, skeleton, scan or diagram by title
+  or categories (`ART_RE`, `NOT_IT_RE`). **Licence: anything that allows
+  reuse with credit** — CC0, public domain, CC BY, CC BY-SA — never NC, ND
+  or GFDL-only; the entry credits title, author and licence and the line
+  opens the Commons page (docs/licensing.md § Photographs). Thumbnails are
+  320 px (30–45 KB; 176 px was soft on the card). Once a term has found its
+  article the search stops there whether or not a photo was usable: the next
+  sense of «порода» is "race", and a wrong-sense picture is worse than none.
+  The first harvest's public-domain-only Commons searches (half wrong
+  subjects, a century old) are superseded; `build_images.py` ships only
+  manifest entries with `v: 2`. To fix a word: a term in
+  `data/curated/image_terms.json` (English; it is searched instead of the
+  Russian article), or "" for no picture; re-run both tools. Read the
+  contact sheet after a harvest. Read on 2026-09-08: 550 found, 116 blanked
+  by eye (abstract nouns, months and weekdays, roles that came back as
+  statues, anything medical), 14 given a curated term; **432 of the 1,070
+  unit words ship, 14.1 MB.** Verbs and adjectives take no English route at
+  all — "suit" for «подходить» found a man in tweed, "back" for «поддержать»
+  a pair of bare backs — so only a handful of them have a picture.
+
+- **Heard in** (the owner, 2026-09-08): a dictionary entry lists the videos
+  that say the word — `heardIn(bare)` in `data.js`, a reverse index over
+  `payload.videos[].words` and the units' `v.heard`, built on first use —
+  each row the moment and the spoken form, opening the player at that moment
+  with the run-up (`Video` takes `{videoId, word, at}` and starts with the
+  word in focus). The player is registered on the Root stack as well as the
+  tab stacks so Back returns to the entry, not to the library.
+
+- **Side quests in ranks** (the owner, 2026-09-08): a chapter's quests sit
+  in ranks of `QUEST_COLS` (3) — the eighth chapter's eight read 3 · 3 · 2 —
+  each rank with its own fan of lanes from the road; the last rank's lanes
+  come back. `questRanks` in `Learn.js`; the test asserts no two discs in a
+  rank are closer than a disc's width.
 
 - **Per-user tokens** (P8.4) — `identify()` in the Worker: the `APP_TOKEN`
   secret is the owner; any other bearer token is a KV record `user:<token>`

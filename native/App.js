@@ -298,6 +298,9 @@ function Shell() {
     <Root.Navigator>
       <Root.Screen name="Tabs" component={TabShell} options={{ headerShown: false }} />
       <Root.Screen name="Word" component={WordScreen} options={wordTitled} />
+      {/* The player above the tabs too, so an entry's "Heard in" row opens the
+          video over the entry and Back returns to the word, not to the library. */}
+      <Root.Screen name="Video" component={Video} options={titled("Episode")} />
       {/* Developer-mode only; the screen itself refuses to render otherwise. */}
       <Root.Screen name="SttLab" component={SttLab} options={{ title: "STT Lab" }} />
       <Root.Screen name="Tour" component={TourScreen} options={{ title: "Tour" }} />

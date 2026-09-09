@@ -244,6 +244,12 @@ can overrule any of them.
   review"; a hint (bulb) asks the Worker for one suitable reply (`hint: true`
   on `/v1/talk`). Definitions everywhere number their senses and show up to
   three examples. CLAUDE.md §30h′.
+- **A36 — pictures, moments, ranks (the owner, 2026-09-08).** The photo
+  harvest rebuilt around the Russian Wikipedia article on the word and any
+  reuse-with-credit licence, for nouns, verbs and adjectives of every unit
+  (CLAUDE.md §30h′ Photographs — the numbers are there); dictionary entries
+  list where a native speaker says the word, with the moment ("Heard in");
+  the eighth chapter's eight side quests in ranks of three.
 - **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
   local verdict, grammar section) were built before Phase 4 because Phase 4 stops
   at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the
@@ -294,6 +300,7 @@ ANTHROPIC_API_KEY:       set as a Cloudflare secret in Phase 4 — never written
 | 6 | Conversation mode | — | 1–2 weeks | — |
 | 7 | Stress feedback spike (optional) | — | 2–4 weeks | **[STOP — user decides]** |
 | 8 | Pre-dissemination | — | 1–2 weeks | **[STOP — user decides]** |
+| 9 | The learner's review (2026-09-08) | — | 2–3 weeks | — |
 
 Phases 0 → 1 → 2 can run in that order without any user input, **except** where A4
 applies: P0.1 (GitHub auth) and the installs in Phase 1 are user actions. Phase 3 is
@@ -546,6 +553,81 @@ Only when the proof of concept is judged good. These are the things that go from
 | P8.8 | `data/transcripts.json` (YouTube-derived, 217k timed words): confirm it is used only for the Easy Russian episode links (27 videos) and that no transcript text is redistributed. If it is, strip to timings + your own corpus tokens. | half day |
 
 ---
+
+## Phase 9 — The learner's review (2026-09-08)
+
+Four independent reviews, each from a learner's side of the product — the
+material's effectiveness, the interface's clarity, the trustworthiness of the
+content, and the reliability of a daily session — are filed in full under
+`docs/reviews/2026-09-08-*.md`. They agree on the shape of the problem: the
+mechanics (runner, scheduler, pools, word links, honest audio) are sound, and
+what limits the product is **the data joins beneath them** and **the first
+ten minutes of flow**. Every item below cites its review finding (P = pedagogy,
+U = interface, C = content, E = engineering) so the evidence can be re-read.
+
+Order of execution is by learner impact: a wrong headword on the spine and a
+save that a corrupt row replaces with a fresh profile come before any polish.
+
+### 9A — Data integrity: the joins under the material
+
+| ID | Task | Evidence | Effort |
+|---|---|---|---|
+| P9.1 | **The ё join.** `deepIndex` in `native/src/data.js` (and `tools/app/app.js`) keys on the unfolded bare form while `core/entry.js` looks up `fold(entry.b)`: every ё headword, and Россия/Москва, hydrate with no examples and no paradigm although the payload carries both; homograph twins (мочь, знать, русский) get a noun's slots. Key on `fold(b)` + POS with a fold-only fallback; test: every unit word with refs hydrates with examples. | C4 | 1 h |
+| P9.2 | **Count a token once.** `build_topics.py` (`owners` as a list) and `build_site.py` (`top`, `corpus_n`) count a corpus token once per *paradigm row* sharing its key, so «быль» is ×5 and «лета» ×53. Dedupe on (key, lemma). 58 words leave the spine, 58 join (если, или, два, надо, нужно, пожалуйста, никогда…). Re-read the spine names after. | C1, P2, P14 | half day |
+| P9.3 | **One resolver for shared forms.** Lift `build_transcripts.resolve()`'s rule (closed-class headword beats the inflection it could be; stubs demoted; independent frequency with a margin) into `panel.py`; use it for the pool count in `build_topics.py`, for the order of `index[key]` in `build_site.py`, and for which sentences an example is attached through. Curated `data/curated/lemma_overrides.json` for what the rule cannot settle (лет→год, тут→"here", есть→"there is", мой→мой). The 11 case-form stubs (меня, мне, его…) and the wrong homographs (лёт, лета, быль, деть, тут, вод, помочь-noun, мыть, больший, сей) leave the spine. Build check prints the first choice for the 100 commonest shared keys; core check `IX["нет"][0]` is «нет». | C2, C3, C9, E2 | 1 day |
+| P9.4 | **Examples worth reading.** Dedupe the stress twins by `fold(ru)` (3,999 of 23,930 rows); rank a word's examples by (taught by this unit or earlier, unknown tokens, length), his own first; the entry, the card and the flashcard back all see the readable sentence first. | C8, C10, P11 | 3 h |
+| P9.5 | **Glosses and drill data.** `data/curated/gloss_overrides.json` applied in `build_lexicon.py` (wrong first senses: всё, десяток, шерсть, пиджак, порода…; garbage: говорить "gapirish", поражение…); `pt` split on ";" with the apostrophe→acute conversion; `pl_only` shipped and honoured by the agreement drill; the three grammar-card errors fixed and the five units without a card given one; quiz prompts disambiguated at build (кот/кошка, понять/понимать) and `type` accepting any same-sense pool word. | C5, C6, C7, C13 | 1 day |
+| P9.6 | **Unit episodes that say the unit's words.** A unit gets a video only when it says ≥ 5 of the unit's words (science says 0 of 21 today); `heardIn` lists the unit's own episode first as its comment promises. | C11 | 1 h |
+
+### 9B — Reliability: a session that cannot lose the month
+
+| ID | Task | Evidence | Effort |
+|---|---|---|---|
+| P9.7 | **An unreadable save is kept, not replaced.** `loadState` tells "no row" from "unreadable": copy the raw value aside, flag `error`, do not write until the learner chooses; render the boot error (nothing does today). Decks move to their own rows (`rb.deck.<id>`, state v7) so a 20,000-card import cannot push the profile row past Android's 2 MB cursor window. Save from an effect, flush on background, surface a persistent write failure. | E1, E7, E15 | 1 day |
+| P9.8 | **Silence is never silent.** A recording that fails to stream falls back to the device voice, then says "No audio right now"; a cut-off cached file is deleted and re-streamed; a queued autoplay never fires after the runner is gone; the recogniser has a watchdog (8 s) that returns to idle with "Nothing heard". | E3, E4, E5, U4 | half day |
+| P9.9 | **Failures that will not fix themselves say so.** Talk and Say name `unconfigured`, 401 and 429 (the 240-turn backstop) instead of "Try again"; the picker disables what cannot run. | E6, U8 | 1 h |
+| P9.10 | **Profile backup and restore on native** through the share sheet and the picker, via `normalise`; round-trip test. | E14 | half day |
+| P9.11 | Small integrity fixes: `Reset progress` rebuilds from `DEFAULTS` (keeps settings and decks); placement result saved through the session, not mutated in place; exporting the Trouble set includes the leeches; Study grades through `applyGrade` (one trouble rule); `LESSON_RAMP` in core. | E9, E10, E11, E19, E20, U15 | 2 h |
+
+### 9C — The first ten minutes: flow
+
+| ID | Task | Evidence | Effort |
+|---|---|---|---|
+| P9.12 | **Continue lands on a question.** `nextLesson` returns the first undone step; Continue opens it; Unit and Lesson stay for browsing and get a primary button for their next step. | U1 | 2 h |
+| P9.13 | **The result screen tells the truth and points forward.** `passed` from `quizPassed` on the updated slot ("Passed on the third try"); on a pass the primary is Continue, Try again is the ghost; the same in drills, listening and custom quizzes. | U2, U3, E8 | 1 h |
+| P9.14 | **No dead ends.** A Say step offers "Can't speak now" (skip); Hear keeps a speaker after the answer; the back arrow confirms before discarding a run (runner, placement, section test) and Talk confirms Restart. | U5, U6, U10, U12 | 3 h |
+| P9.15 | **Copy.** "chapter" everywhere ("stage" leaks in three places); "#187"/"f" pills spelled out; "form not listed"; Practice's two lists labelled; Immerse's closing paragraph cut; a clear button in both search fields; the tour's speaker captioned when the phone has no Russian voice; hints say they count. | U7, U11, U16–U19, U21, U25 | 2 h |
+| P9.16 | **One way to say each thing.** `Tick`, `Chip` (44 px), `Sheet`, `SectionLabel` in `ui.js` replacing the four sheets, three chip rows, two ticks and 24 inline labels; "done" shown one way (Immerse shows it three times on one row); Study's empty state with one action and no dead buttons; the progress pill one tone; interval captions readable; developer mode at the foot of Settings; Previous card read-only. | U9, U13, U14, U20, U22–U24, E18 | 1 day |
+
+### 9D — Learning mechanics
+
+| ID | Task | Evidence | Effort |
+|---|---|---|---|
+| P9.17 | **A leech is a lapse on a graduated card.** Same-day repeats are learning steps that touch neither lapses nor difficulty (today Again, Again, Good on one new word makes it trouble in one session: 73 leeches of 212 words for the struggling simulated learner). Pin in `core.test.mjs`; rerun the simulator. | P6 | half day |
+| P9.18 | **Production that produces.** Cloze options are surface forms (the removed token plus distractors from its paradigm) and the verdict shows the whole sentence with the form named; the quiz's production slots prefer `type`; Hear's near miss (same lemma, ≤ 2 letters) is Hard with half credit and the expected form named; Scene grades the heard word and content words only, capped at Good. | P5, P13, P16 | 1 day |
+| P9.19 | **Review on the path.** "Review · N due" above Continue on Learn; the quiz's top-up slots take due and trouble words first; the listening drill asks for trouble lemmas; Study's nothing-due state says so and offers study-ahead. | P7, P15 | 1 day |
+| P9.20 | **A `form` question.** From the chapter's grammar note and the paradigm tables already shipped: choose (early) or type (later) the case, number or tense the chapter teaches; one per quiz; `qCases` gated by cases introduced so far. | P3 | 2–3 days |
+| P9.21 | Talk from chapter 2 at beginner level through chapter 4; `studiedFor` truly strongest first. | P17 | 2 h |
+
+### 9E — The curriculum's cut
+
+| ID | Task | Evidence | Effort |
+|---|---|---|---|
+| P9.22 | **Verbs from lesson one.** A verb quota per spine unit (the six commonest unplaced verbs); a closed-class lane per chapter for the 210 top-500 words no topic rule can take (да, или, если, надо, два…); words in the top ~350 reserved for the spine before branch rules run; `BRANCH_MAX` by chapter with a short verb list per branch; two more spine units so chapter 8 stops being 44 lessons; a build check that every grammar card's example uses only words taught by then; Hear from chapter 1 lesson 3; sentence difficulty measured against the learner's position, easiest first. | P1, P2, P4, P8, P9, P10, P12 | 2–3 days |
+| P9.23 | **Instruments.** The simulator run to 169 lessons before and after P9.22; the walkthrough re-shot; the missing tests named in the engineering review (a lesson end to end in the runner, the bad row, migration fixtures, Anki round trip, audio failure paths, the watchdog, grading owner, reset, Heard-in navigation). | P18, E22 | 1 day |
+
+### 9F — Startup, ship, and health
+
+| ID | Task | Evidence | Effort |
+|---|---|---|---|
+| P9.24 | Studied rows carry their paradigm refs (+159 KB) so boot no longer parses the 4.45 MB deep dictionary to hydrate 4,006 words; `t`/`x` as lazy memoised getters; then `deep`, `videos`, `sent` (70 % of the payload) as modules required on first use. | E13 | 2 days |
+| P9.25 | `userInterfaceStyle: automatic` (the dark theme has never rendered on a phone), the walkthrough in dark; `app.json` permissions and the mic text made true; cues as OGG. | E12, E16 | 2 h |
+| P9.26 | Deletions the engineering review proved unused (`Ru`, `WordLink`, `RU_FONT`, `scenarioById`, `POS_LETTER`, stray imports, internal-only exports), stale comments, CLAUDE.md counts. | E21, E22 | 2 h |
+| P9.27 | **Photographs, third pass.** Verbs and adjectives only through the Russian article; places refused on the English route; the sheet read again and the wrong ones blanked in `image_terms.json`. | C12 | 2 h + harvest |
+
+**Not done in this phase, by decision:** a shared APK still carries the owner's
+Worker token (E17) — a process fix (mint a user token per build), noted for
+Phase 8's ship step.
 
 ## 9. Cost model (owner's estimates — verify current prices at the source before quoting)
 

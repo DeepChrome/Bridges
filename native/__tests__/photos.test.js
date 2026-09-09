@@ -1,6 +1,6 @@
 /* Photographs on the vocabulary card and the entry (the owner, 2026-09-07):
-   shipped by tools/build_images.py from public-domain Commons files, keyed on
-   the word, with the credit on the entry.
+   shipped by tools/build_images.py from Wikipedia's and Commons' free
+   photographs, keyed on the word, with the credit on the entry.
 
    Own file, per the timeout note in screens.test.js. */
 
@@ -33,7 +33,9 @@ describe("photographs", () => {
     for (const w of withPhoto) {
       expect(taught.has(w)).toBe(true);
       expect(CREDITS[w]).toBeTruthy();
-      expect(CREDITS[w].l).toMatch(/^(CC0|Public domain)/i);
+      // Reuse with credit: CC0, public domain, CC BY, CC BY-SA. Never NC or ND.
+      expect(CREDITS[w].l).toMatch(/^(CC0|Public domain|CC BY(-SA)? \d)/i);
+      expect(CREDITS[w].l).not.toMatch(/-N[CD]/i);
     }
   });
 

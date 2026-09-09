@@ -131,6 +131,33 @@ describe("Video", () => {
     expect(screen.getByText(unit.v.heard[heard[0]][0].s)).toBeTruthy();
   });
 
+  /* From a dictionary entry (the owner, 2026-09-08): the entry lists the videos
+     that say the word with the moment, and opening one lands on that moment
+     with the word in focus and the player up. */
+  it("lists where a word is heard on its entry, and opens the player at the moment", async () => {
+    const { heardIn } = require("../src/data");
+    const WordScreen = require("../src/screens/Word").default;
+    const word = Object.keys(libraryVideo.words)[0];
+    const rows = heardIn(word);
+    expect(rows.some((r) => r.id === libraryVideo.id)).toBe(true);
+    for (const r of rows) expect(typeof r.t).toBe("number");
+    expect(heardIn("xyzzy")).toEqual([]);
+
+    await withProfile(<WordScreen route={{ params: { word } }} navigation={nav} />);
+    expect(await screen.findByText(`Heard in · ${rows.length}`)).toBeTruthy();
+    const first = rows[0];
+    await act(async () => { fireEvent.press(screen.getAllByText(first.title.split(" | ")[0].trim())[0]); });
+    expect(nav.navigate).toHaveBeenCalledWith("Video", { videoId: first.id, word, at: first.t });
+
+    await flushState(); await AsyncStorage.clear();
+    await withProfile(<Video route={{ params: { videoId: first.id, word, at: first.t } }} navigation={nav} />);
+    // The player is up without "Play here", and the moment's caption is shown.
+    expect(await screen.findByTestId("yt-player")).toBeTruthy();
+    expect(screen.queryByText("Play here")).toBeNull();
+    const occ = require("../src/data").videoById(first.id).words[word].find((o) => o.t === first.t);
+    expect(screen.getByText(occ.s)).toBeTruthy();
+  });
+
   it("records a library video as watched, and a unit episode for its unit too", async () => {
     await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={nav} />);
     await act(async () => { fireEvent.press(await screen.findByText("Mark as watched")); });

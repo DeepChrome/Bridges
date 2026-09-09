@@ -7,12 +7,16 @@
  */
 
 import React from "react";
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Pill, Speaker, Muted, Senses } from "../ui";
-import { L, UN, resolveWord } from "../data";
+import { Screen, Card, Pill, Speaker, Muted, Senses, List, Row } from "../ui";
+import { L, UN, resolveWord, heardIn } from "../data";
 import { Linked } from "../words";
 import { IMAGES, CREDITS } from "../images";
+import { clock, short } from "./Misc";
+
+/* How many videos an entry lists under "Heard in". */
+const HEARD_ROWS = 4;
 
 export function Table({ table }) {
   const t = useTheme();
@@ -53,7 +57,7 @@ export function Table({ table }) {
   );
 }
 
-export default function Word({ route }) {
+export default function Word({ route, navigation }) {
   const t = useTheme();
   /* Addressed by the word, not by an index: lemma indices are assigned by frequency
      at build time and move on every rebuild, which is the same reason learner state
@@ -71,6 +75,7 @@ export default function Word({ route }) {
   }
   const unit = w.u ? UN.find((u) => u.id === w.u) : null;
   const examples = w.x || [];
+  const heard = heardIn(w.b);
 
   const photo = IMAGES[w.b];
   const credit = CREDITS[w.b];
@@ -97,10 +102,16 @@ export default function Word({ route }) {
         </View>
         {(w.t || []).map((tb, k) => <Table key={k} table={tb} />)}
         {credit ? (
-          // The photo's record: Commons title, author where one is named, licence.
-          <Muted size={11} style={{ marginTop: 12 }}>
-            {`Photo: ${credit.t}${credit.a ? `, ${credit.a}` : ""} · ${credit.l}, Wikimedia Commons`}
-          </Muted>
+          // The photo's record: title, author where one is named, licence — and
+          // the page it came from, which is what a CC BY credit asks for.
+          <Pressable onPress={credit.u ? () => Linking.openURL(credit.u) : undefined}
+                     accessibilityRole={credit.u ? "link" : undefined}
+                     accessibilityLabel={`Photo credit: ${credit.t}${credit.a ? `, ${credit.a}` : ""}, ${credit.l}`}
+                     hitSlop={8} style={{ marginTop: 12 }}>
+            <Muted size={11} testID="photo-credit">
+              {`Photo: ${credit.t}${credit.a ? `, ${credit.a}` : ""} · ${credit.l}, Wikimedia Commons`}
+            </Muted>
+          </Pressable>
         ) : null}
       </Card>
 
@@ -139,6 +150,34 @@ export default function Word({ route }) {
               </View>
             ))}
           </Card>
+        </>
+      ) : null}
+
+      {/* Where a native speaker says it: the videos that say the word, each at
+          the moment it is said. A tap opens the player there, the run-up
+          included (the owner, 2026-09-08). Only videos that say the word are
+          listed — the transcript index decides, never a guess. */}
+      {heard.length ? (
+        <>
+          <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700",
+                         letterSpacing: 1, textTransform: "uppercase",
+                         marginTop: 22, marginBottom: 8, marginLeft: 2 }}>
+            {`Heard in · ${heard.length}`}
+          </Text>
+          <List>
+            {heard.slice(0, HEARD_ROWS).map((h, k, all) => (
+              <Row key={h.id} last={k === all.length - 1}
+                   onPress={() => navigation && navigation.navigate("Video", { videoId: h.id, word: w.b, at: h.t })}>
+                <Pill tone="brand">{clock(h.t)}</Pill>
+                <View style={{ flex: 1 }}>
+                  <Text numberOfLines={1} style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+                    {short(h.title)}
+                  </Text>
+                  <Muted>{[h.ch, `«${h.w}»`, h.n > 1 ? `×${h.n}` : null].filter(Boolean).join(" · ")}</Muted>
+                </View>
+              </Row>
+            ))}
+          </List>
         </>
       ) : null}
     </Screen>

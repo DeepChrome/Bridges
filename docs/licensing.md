@@ -51,6 +51,27 @@ editing, **$1,500–3,000** and several weeks. Best sound, highest cost.
 exist and marking the rest synthetic. Nothing changes for the owner's own use in
 the meantime; the current build is a private tool.
 
+## Photographs (2026-09-08)
+
+The vocabulary cards and entries carry photographs from the English Wikipedia
+article on the word's thing and from Wikimedia Commons (`harvest_images.py`,
+CLAUDE.md §30h′). Only licences that allow reuse with credit are taken: CC0,
+public domain, CC BY and CC BY-SA, any version; nothing NC, ND or GFDL-only. The
+obligations and how the app meets them:
+
+- **Attribution** (CC BY, CC BY-SA): the entry shows the file's title, author
+  and licence under the photo, and the line opens the file's Commons page, which
+  carries the full licence text. The vocabulary card shows the photo without a
+  line; the entry is one tap away through the word. `CREDITS` in
+  `native/src/images.js` is the record.
+- **Share-alike** (CC BY-SA): applies to adaptations of the photograph. A
+  320-pixel thumbnail is a reproduction, not a derivative; the app around it is
+  not a derivative of the photograph. The photograph itself, if ever
+  re-published from the app, stays under its own licence.
+- **Freedom of panorama, personality rights**: Commons' own review is relied on;
+  photographs of identifiable people are avoided by the harvest's subject rules
+  rather than by law.
+
 ## What is cheap regardless of the option (P8.3)
 
 Gate the 31 Tatoeba recordings that are NC, ND or unstated behind a build flag so

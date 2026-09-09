@@ -46,3 +46,6 @@ data/transcripts.json
 
 # emulator walkthrough screenshots (native/tools/walk.ps1)
 native/screenshots/
+
+# locally built APKs (native/tools/README: gradlew assembleRelease), ~190 MB
+native/build-out/

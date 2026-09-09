@@ -7,7 +7,7 @@
 import DATA from "../assets/data.json";
 import { fold } from "@core/util";
 import { makeSearch, makeResolve, parseDeep } from "@core/search";
-import { makeHydrator } from "@core/entry";
+import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize } from "@core/questions";
 import { quizPassed } from "@core/state";
 
@@ -27,6 +27,34 @@ export const VIDEOS = DATA.videos || [];
 export const videoById = (id) => VIDEOS.find((v) => v.id === id) || null;
 export const videoWatched = (st, v) =>
   !!((st.watched || {})[v.id]) || (!!v.unit && !!unitState(st, v.unit).video);
+
+/* Where a word is heard: every video that says it, with the moment (the owner,
+   2026-09-08 — a definition should lead to a native speaker saying the word).
+   Built once from the library's own word lists on first use, so an entry never
+   scans three hundred videos to find its rows. A unit's episode lists the
+   unit's words under `heard` and the library entry the rest; both count. */
+let heardIndex = null;
+export function heardIn(bare) {
+  if (!heardIndex) {
+    heardIndex = new Map();
+    const add = (v, words) => {
+      for (const w in words) {
+        const occ = words[w];
+        if (!occ || !occ.length) continue;
+        if (!heardIndex.has(w)) heardIndex.set(w, []);
+        const rows = heardIndex.get(w);
+        if (!rows.some((r) => r.id === v.id)) rows.push({ id: v.id, title: v.title, ch: v.ch, n: occ.length, ...occ[0] });
+      }
+    };
+    for (const u of UN) if (u.v && u.v.heard) add(u.v, u.v.heard);
+    for (const v of VIDEOS) add(v, v.words);
+    // The unit's own episode first, then where the word is said most.
+    for (const rows of heardIndex.values()) {
+      rows.sort((a, b) => (b.n - a.n));
+    }
+  }
+  return heardIndex.get(bare) || [];
+}
 
 /* Recordings are served from the deployed site rather than bundled: 209 MB will not
    fit in a store binary, and streaming keeps the app installable. */
@@ -73,10 +101,7 @@ const deepList = () => {
 
 let deepMap = null;
 const deepIndex = () => {
-  if (deepMap === null) {
-    deepMap = new Map();
-    for (const d of deepList()) if (!deepMap.has(d.b)) deepMap.set(d.b, d);
-  }
+  if (deepMap === null) deepMap = makeDeepIndex(deepList());
   return deepMap;
 };
 

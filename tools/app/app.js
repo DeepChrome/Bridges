@@ -1013,10 +1013,7 @@ const deepList = () => {
 };
 let deepMap = null;
 const deepIndex = () => {
-  if (deepMap === null) {
-    deepMap = new Map();
-    for (const d of deepList()) if (!deepMap.has(d.b)) deepMap.set(d.b, d);
-  }
+  if (deepMap === null) deepMap = makeDeepIndex(deepList());
   return deepMap;
 };
 

@@ -13,6 +13,29 @@
 import { fold } from "./util.js";
 import { decodeShapes, slotsOf, buildTables } from "./paradigm.js";
 
+/* The dictionary tier by *folded* headword — and by headword-and-POS first,
+   because OpenRussian lists homographs as separate rows («мочь» the verb and
+   the noun "might", «русский» the adjective and the noun) and a studied verb
+   must not inherit a noun's slots. The key is folded because the lookup is:
+   the map used to be keyed on the bare form as written, so every ё headword
+   («ребёнок», «ещё») and every capitalised one («Россия») missed and opened
+   with no examples and no paradigm although the payload carried both. */
+export function makeDeepIndex(list) {
+  const map = new Map();
+  for (const d of list) {
+    const k = fold(d.b);
+    const kp = k + "|" + (d.p || "");
+    if (!map.has(kp)) map.set(kp, d);
+    if (!map.has(k)) map.set(k, d);
+  }
+  return map;
+}
+
+export function twinOf(deepIndex, entry) {
+  const k = fold(entry.b);
+  return deepIndex.get(k + "|" + (entry.p || "")) || deepIndex.get(k) || null;
+}
+
 export function makeHydrator({ deepIndex, shapes, slots, sent }) {
   const shapeList = decodeShapes(shapes || "");
   const pool = sent || [];
@@ -36,7 +59,7 @@ export function makeHydrator({ deepIndex, shapes, slots, sent }) {
     if (!entry || entry.t !== undefined) return entry;
     // A studied lemma carries no paradigm record of its own; its dictionary twin
     // does, and they are the same word.
-    const rec = entry.shape !== undefined ? entry : deepIndex().get(fold(entry.b));
+    const rec = entry.shape !== undefined ? entry : twinOf(deepIndex(), entry);
     entry.t = rec ? buildTables(entry.p, slotsOf(rec, shapeList, slots || [])) : [];
     entry.x = examples(rec ? rec.refs : "");
     if (rec && rec !== entry) {

@@ -41,7 +41,7 @@ Built and working today:
 - FSRS scheduling behind the four Anki review outcomes
 - a trouble bank for vocabulary that repeatedly causes difficulty
 - installable PWA, deployed to Netlify
-- verification: 159 web smoke checks, 305 core checks, 137 native jest checks, 99
+- verification: 159 web smoke checks, 307 core checks, 138 native jest checks, 99
   contrast checks, 36 Worker checks, a seeded learner simulator and an emulator
   walkthrough (§31)
 
@@ -511,6 +511,23 @@ Each of these cost real time. Do not relearn them.
   looked correct for months.
 - **`Get-Content -Raw` misreads UTF-8 without a BOM**, so grepping a built page for
   Cyrillic from PowerShell reports a false negative. Check with `node -e` instead.
+- **…and PowerShell 5.1 misreads a `.ps1` the same way, which stops the script
+  dead.** A script file with no byte-order mark is parsed as ANSI, so a UTF-8
+  em-dash arrives as three characters ending in what cp1252 calls a right double
+  quote — inside a string that *closes the string*, and the file fails to parse
+  with errors pointing at innocent lines further down. `emulator.ps1`, `walk.ps1`
+  and `deploy.ps1` each carried one and none of the three could run (2026-09-09).
+  **Keep `.ps1` files ASCII.** Prose belongs in the markdown, not in a shell
+  comment.
+- **adb writes ordinary progress to stderr, and that is fatal under
+  `$ErrorActionPreference = "Stop"`.** "device offline" while an emulator boots,
+  "1 file pulled, 0 skipped" after a *successful* pull: PowerShell 5.1 wraps any
+  native stderr line in a NativeCommandError, which Stop makes terminating, so
+  the walkthrough died on its first screenshot. `2>$null` does not help — the
+  record is created before the redirect. Both scripts now route every call
+  through an `Invoke-Adb` helper that redirects stderr into the output stream and
+  lets the **exit code** decide. Any new native command in a `.ps1` needs the same
+  treatment.
 - **Tatoeba has two ids and they are not interchangeable.** The CDN path
   `audio.tatoeba.org/sentences/rus/<sentence id>.mp3` is keyed by sentence; the app
   route `tatoeba.org/audio/download/<audio id>` by recording. `fetch_tatoeba_audio.py`
@@ -1322,6 +1339,22 @@ There is no pixel-diff suite for native (ROADMAP P1.8): quiz questions are
 random, so a screenshot baseline would fail on every run for no reason. The
 walkthrough's screenshots are read by a person instead, and the render-tree
 assertions (path.test.js, video.test.js) carry the visual contract.
+
+`native/flows/walkthrough3.txt` walks what Phase 9 changed. **The walkthrough
+earns its keep**: reading its shots on 2026-09-09 is what found a form question
+offering «рука́» as one of its own four options, which 307 core checks had not,
+because no test had asked whether a distractor could equal the prompt. Run it
+after any change to a screen, and *look at the pictures*.
+
+**A locally built APK cannot update one installed from EAS.** The local build is
+signed with `android/app/debug.keystore`; Android refuses the update with
+`INSTALL_FAILED_UPDATE_INCOMPATIBLE` and the only way through is to uninstall,
+which erases the learner's progress. So before handing over a local build, say
+so: back up first (Settings → Back up progress), uninstall, install, restore.
+Building locally is what to do when the EAS free tier's monthly Android builds
+are used up; `-PreactNativeArchitectures=arm64-v8a` halves the APK (65 MB rather
+than 121 MB) and covers every phone worth naming, but only a universal build
+runs on the x86_64 emulator.
 
 `tools/contrast.js` reads `native/src/theme.js` and `tools/app/app.css` directly and
 asserts three things: every foreground clears its WCAG minimum against the surface it

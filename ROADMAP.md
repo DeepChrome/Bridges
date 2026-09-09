@@ -262,12 +262,27 @@ can overrule any of them.
   139 leeches, 53 backlog days, 164 due at the end (`tools/sim/2026-09-09-
   seed3.md`). Before the phase (2026-09-07, forty lessons) the struggling
   learner had 73 leeches of 212 words; the lapse rule alone took that to 11.
-  **Open:** P9.23's remaining instruments — a lesson end to end through the
-  flows, migration fixtures, an Anki round trip through a real SQLite, Study
-  grading persistence, the dark-theme render, the walkthrough re-shot — and
-  the struggling learner's review load, which no rule in this phase reduced:
-  a daily cap on new words when the due count is high is the next thing to
-  simulate. CLAUDE.md §30i.
+  **P9.23, closed 2026-09-09 on the emulator.** Three of §31's instruments
+  could not run at all from a non-interactive shell: `emulator.ps1`,
+  `walk.ps1` and `deploy.ps1` carried em-dashes with no byte-order mark, so
+  PowerShell 5.1 read them as ANSI and failed to parse them, and adb's
+  ordinary stderr ("1 file pulled") is terminating under
+  `ErrorActionPreference = Stop`. Both are fixed and written into CLAUDE.md
+  §23. With them working: `flows/walkthrough3.txt` walks the ten chapters
+  (Chapter 10 reached), the tour, and Continue landing on a question;
+  `lesson.test.js` drives QuizFlow end to end through a real session.
+  **The walkthrough immediately earned itself** — a form question was
+  offering «рука́» among its own four options, which 305 core checks had not
+  caught because none asked whether a distractor could equal the prompt.
+  Fixed, re-checked on the device across ten questions, and pinned in
+  `core.test.mjs`. The dark theme also rendered on a device for the first
+  time, and only because `expo-system-ui` was added: without it
+  `userInterfaceStyle: automatic` is a no-op that `expo prebuild` warns
+  about, so P9.25 had shipped inert.
+  **Still open:** migration fixtures, an Anki round trip through a real
+  SQLite, Study grading persistence — and the struggling learner's review
+  load, which no rule in this phase reduced: a daily cap on new words when
+  the due count is high is the next thing to simulate. CLAUDE.md §30i.
 - **A22 — order of Phases 4 and 5.** Phase 5's local parts (Hear, Say with the
   local verdict, grammar section) were built before Phase 4 because Phase 4 stops
   at P4.3 on the owner's accounts; the Say → Worker wiring (P5.3) landed once the
@@ -586,12 +601,10 @@ U = interface, C = content, E = engineering) so the evidence can be re-read.
 Order of execution is by learner impact: a wrong headword on the spine and a
 save that a corrupt row replaces with a fresh profile come before any polish.
 
-**Status (2026-09-09, A37):** done — P9.1–P9.22, P9.24–P9.27. Open — P9.23 in
-part (the simulator ran before and after; the tests that exist are the bad row,
-backup round trip, audio failure paths, the watchdog, grading owner, reset,
-Heard-in; still missing: a lesson end to end through the flows, migration
-fixtures, the Anki round trip through a real SQLite, Study grading persistence,
-the dark-theme render, the walkthrough re-shot).
+**Status (2026-09-09, A37):** done — P9.1–P9.27. Open within P9.23: migration
+fixtures, the Anki round trip through a real SQLite, and Study grading
+persistence. Everything else in the phase is built and verified, the last of it
+on the emulator (the walkthrough, the dark theme, a lesson end to end).
 
 ### 9A — Data integrity: the joins under the material
 

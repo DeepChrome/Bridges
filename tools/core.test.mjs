@@ -709,6 +709,20 @@ group("scenes and custom quizzes");
    Russian stays inside the lesson's vocabulary; this proves the app turns one
    into a scene a learner can actually answer, and that it is preferred over the
    corpus scene wherever a lesson has one. */
+/* The first n written sentences in route order, as the app walks them. */
+function routeOpening(n) {
+  const out = [];
+  for (const s of STAGES) {
+    for (const u of [s.core].concat(s.branches || [])) {
+      for (let i = 0; i < lessonCount(u) && out.length < n; i++) {
+        const x = SCRIPTS[`${u.id}:${i}`];
+        if (x) out.push(...x.rows.map((r) => r.en));
+      }
+    }
+  }
+  return out.slice(0, n);
+}
+
 group("written lesson passages");
 {
   const keys = Object.keys(SCRIPTS);
@@ -758,6 +772,30 @@ group("written lesson passages");
   }
   ok(!offLevel.length, "no Russian option is a word the learner has not reached",
      offLevel.slice(0, 4).join(", "));
+
+  // The very first lesson has nothing behind it to draw wrong answers from, so
+  // it borrows from the front of the route rather than the whole file. Borrowing
+  // at large put "Our customer is an entrepreneur from Moscow." beside «Это я.»
+  // on the emulator, and the right answer was simply the short one.
+  {
+    const opener = STAGES[0].core;
+    const scene = Q.scriptScene(opener, 0);
+    // A generous window on purpose: the contract is "early in the route", not an
+    // exact slice. Forty sentences is the first seven or eight lessons; a
+    // chapter-10 sentence about entrepreneurs is nowhere near it.
+    const early = new Set(routeOpening(40));
+    const far = [];
+    for (const q of scene.questions) {
+      if (typeof q.i === "number") continue;
+      for (const o of q.options) {
+        if (!o.right && !early.has(o.label) && !SCRIPTS[`${opener.id}:0`].rows.some((r) => r.en === o.label)) {
+          far.push(o.label);
+        }
+      }
+    }
+    ok(!far.length, "the first lesson's wrong answers come from the opening of the route",
+       far.slice(0, 2).join(" | "));
+  }
 
   // A scripted lesson's quiz gets the written passage, not a corpus scene.
   const scripted = keys.map((k) => k.split(":")).find(([id, i]) => {

@@ -71,6 +71,9 @@ export const SCENE_ROWS = [2, 3];
 export const LESSON_LINES = 5;
 /* Below this frequency rank a lemma is a function word, not a word to listen for. */
 export const SCENE_SKIP_TOP = 100;
+/* How far into the route a lesson with nothing behind it may reach for wrong
+   answers: about the first five lessons, which is the same register. */
+export const TOPUP_ROWS = 24;
 
 /* What a learner may put in a quiz of their own (Practice → Quiz). */
 export const QUIZ_KINDS = [
@@ -421,6 +424,24 @@ export function makeQuestions(env) {
    * `written: true` rides on the question: there is no recording for a sentence
    * nobody has said, so the device voice reads it and the screen says so (§27).
    */
+  /* Every written sentence in route order, built once. The head of this list is
+     the opening of chapter 1, which is what an early lesson borrows its wrong
+     answers from. */
+  let routeRowsCache = null;
+  function routeRows() {
+    if (routeRowsCache) return routeRowsCache;
+    routeRowsCache = [];
+    for (const s of STAGES) {
+      for (const u of [s.core].concat(s.branches || [])) {
+        for (let i = 0; i < lessonCount(u); i++) {
+          const x = SCRIPTS[`${u.id}:${i}`];
+          if (x) routeRowsCache.push(...x.rows);
+        }
+      }
+    }
+    return routeRowsCache;
+  }
+
   /* Every word taught on the route up to and including this lesson. */
   function wordsUpTo(unit, index) {
     const out = [];
@@ -450,13 +471,17 @@ export function makeQuestions(env) {
     const mine = new Set(s.rows.map((r) => r.en));
     const reached = scriptKeysUpTo(unit, index)
       .flatMap((k) => SCRIPTS[k].rows).filter((r) => !mine.has(r.en));
-    // The English distractors may come from anywhere when the route is too
-    // short to supply three — the very first lesson has nothing behind it, and
-    // a wrong option written in English gives no Russian away. The *Russian*
-    // distractors below may not: an option is a word on screen, and a beginner
-    // choosing between four words has to be choosing between four of their own.
+    /* The first lesson has nothing behind it, so its wrong answers have to come
+       from somewhere else. Taking them from the whole file was the obvious move
+       and made the question free: on the emulator, «Это я.» was offered against
+       "Our customer is an entrepreneur from Moscow." — the right answer was the
+       short one, no listening required. The top-up comes off the front of the
+       route instead, where the sentences are the same size and shape.
+       English distractors are safe to borrow at all because English gives no
+       Russian away; the *Russian* options below are not, and never leave the
+       curriculum the learner has actually met. */
     const meanings = reached.length >= 3 ? reached
-      : reached.concat(Object.values(SCRIPTS).flatMap((x) => x.rows).filter((r) => !mine.has(r.en)));
+      : reached.concat(routeRows().filter((r) => !mine.has(r.en)).slice(0, TOPUP_ROWS));
 
     const rows = s.rows.map((r) => ({ ru: r.ru, en: r.en, lemmas: sentenceLemmas(r.ru, IX) }));
     const questions = rows.map((row, k) => {

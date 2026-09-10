@@ -161,9 +161,13 @@ function PracticeStack() {
       <Stack.Screen name="Talk" component={Talk} options={{ title: "Talk" }} />
       <Stack.Screen name="QuizSetup" component={QuizSetup} options={{ title: "Quiz" }} />
       <Stack.Screen name="CustomQuiz" component={CustomQuizFlow} options={{ title: "Quiz" }} />
-      <Stack.Screen name="Listening" component={ListeningList} options={{ title: "Listening" }} />
+      {/* The route names are historical: "Scenes" is the lesson-level listening
+          the learner meets first, "Listening" the native-speed passages behind
+          it. The titles say which is which; renaming the routes would break
+          every deep link and saved navigation state for nothing. */}
+      <Stack.Screen name="Listening" component={ListeningList} options={{ title: "Native speed" }} />
       <Stack.Screen name="Passage" component={PassageFlow} options={{ title: "Listening" }} />
-      <Stack.Screen name="Scenes" component={ListeningFlow} options={{ title: "Scenes" }} />
+      <Stack.Screen name="Scenes" component={ListeningFlow} options={{ title: "Listening" }} />
       <Stack.Screen name="Sounds" component={Sounds} options={{ title: "Sounds" }} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({

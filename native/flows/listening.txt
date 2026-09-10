@@ -1,0 +1,31 @@
+# The written lesson passage, on the emulator (CLAUDE.md 30j).
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\listening.txt -Device emulator
+#
+# Starts from the launcher, so force-stop the app first if it is already open.
+# Reads the whole screen at the end: what to look at is the line under the
+# replay buttons (topic, unit, sentence count, and whose voice), and whether the
+# four English options are all sentences of about the same size. A wrong answer
+# borrowed from late in the route gives the question away without any listening,
+# which is what this flow caught the first time it ran.
+
+# Home first: force-stopping the app leaves its dead task on screen, not the
+# launcher, so the icon is not there to tap.
+key:3
+wait:2
+tap:Bridges
+wait:12
+expect:Learn
+shot:00-path
+
+tapn:Practice:0
+wait:3
+expect:Five short sentences from the unit you are on
+shot:01-practice
+
+tapn:Listening:0
+wait:4
+expect:LISTEN, THEN ANSWER
+expect:Play sentence 1 again
+texts
+shot:02-passage

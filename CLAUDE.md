@@ -509,6 +509,16 @@ Each of these cost real time. Do not relearn them.
   itself and the test reports a bug on a word rendering perfectly. End the fold with
   `.normalize("NFC")`. виноград has no й, which is exactly why the incomplete helper
   looked correct for months.
+- **A local `assembleRelease` does not notice that `core/` changed.** Gradle's
+  input tracking for the JS bundle watches `native/`, so an edit to
+  `core/questions.js` leaves `createBundleReleaseJsAndAssets` up to date and the
+  APK ships the *previous* bundle. It builds in four seconds instead of twenty
+  and says BUILD SUCCESSFUL, and the emulator then shows the old behaviour
+  while the tests show the new one — which reads exactly like a bug in the code
+  you just wrote. This cost a round of "the fix didn't work" on the listening
+  distractors. **After touching `core/`, delete
+  `native/android/app/build/generated/assets/react/release` before assembling**,
+  or check the build took long enough to have run Metro.
 - **`Get-Content -Raw` misreads UTF-8 without a BOM**, so grepping a built page for
   Cyrillic from PowerShell reports a false negative. Check with `node -e` instead.
 - **…and PowerShell 5.1 misreads a `.ps1` the same way, which stops the script

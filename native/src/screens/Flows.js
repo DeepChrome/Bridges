@@ -13,7 +13,7 @@ import { Linked } from "../words";
 import { Q, DRILL_TYPES, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
-  reachedUnits, unitUnlocked, reviewWords, passages, knownWords, lessonsDone,
+  reachedUnits, unitUnlocked, reviewWords, passages, knownWords, lessonsDone, nextLesson,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { firstSense } from "@core/util";
@@ -528,7 +528,15 @@ export function ListeningFlow({ navigation }) {
      no script, so the activity never goes empty. */
   const steps = useMemo(() => {
     const want = new Set(reviewWords(st));
-    const done = (u) => lessonsDone(st, u);
+    /* Where they are, not only what they have finished. Counting finished
+       lessons alone left a learner on their very first lesson with nothing
+       written to listen to, and the corpus fallback then handed them the
+       unconnected sentences the owner objected to in the first place. The
+       lesson Continue would open is a lesson being taught now, so its passage
+       is revision of what is in front of them. */
+    const here = nextLesson(st);
+    const done = (u) =>
+      here && here.unit.id === u.id ? here.index + 1 : lessonsDone(st, u);
     const out = [];
     const seen = new Set();
     for (let k = 0; k < LISTENING_N * 6 && out.length < LISTENING_N; k++) {

@@ -146,6 +146,11 @@ function simulate(profileName, seed) {
     return toks.map((w) => (rand() < P.speech ? w + "х" : w)).join(" ");
   };
 
+  /* How much of the listening a learner meets is written rather than harvested,
+     and how much of the written material turns out to have a real recording
+     anyway (the collection holds one for sentences people actually say). */
+  const written = { scenes: 0, rows: 0, withAudio: 0 };
+
   const check = (q, where) => {
     const bad = (why) => structural.push({ where, kind: q.kind, why, prompt: q.prompt });
     if (!q.kind) bad("no kind");
@@ -158,7 +163,17 @@ function simulate(profileName, seed) {
     if (q.kind === "cloze" && !/_____/.test(q.prompt)) bad("cloze without a gap");
     if (q.kind === "scene") {
       if (!q.rows || !q.questions || q.questions.length < q.rows.length) bad("scene without a question per sentence");
-      for (const row of q.rows || []) if (!DATA.audio.files[fold(row.ru)]) bad("scene sentence without audio");
+      // A corpus scene is cut from sentences that have a recording, so one
+      // without audio there is a broken join. A written passage (§30j) has no
+      // recording by nature — nobody has said the sentence — and is read by the
+      // device voice, which the screen says. Counted, not faulted.
+      if (!q.written) {
+        for (const row of q.rows || []) if (!DATA.audio.files[fold(row.ru)]) bad("scene sentence without audio");
+      } else {
+        written.scenes++;
+        written.rows += (q.rows || []).length;
+        written.withAudio += (q.rows || []).filter((r) => DATA.audio.files[fold(r.ru)]).length;
+      }
       for (const qq of q.questions || []) if (qq.options.filter((o) => o.right).length !== 1) bad("scene question without one right option");
     }
     if (q.kind === "type" && (!q.target || !q.answer)) bad("type without target/answer");
@@ -293,7 +308,7 @@ function simulate(profileName, seed) {
   const due = Object.values(st.seen).filter((c) => c.due <= day).length;
   Math.random = restore;
   return { profile: profileName, seed, log, perLesson, structural, st, met, day, due,
-           reviews, heldDays };
+           reviews, heldDays, written };
 }
 
 /* ------------------------------------------------------------- metrics */
@@ -397,7 +412,7 @@ function metrics(run) {
 const profiles = ONLY ? [ONLY] : Object.keys(PROFILES);
 const runs = profiles.map((p, k) => simulate(p, SEED * 1000 + k));
 const results = runs.map((r) => ({ profile: r.profile, seed: r.seed, metrics: metrics(r),
-                                   structural: r.structural.slice(0, 30) }));
+                                   written: r.written, structural: r.structural.slice(0, 30) }));
 
 const lines = [];
 const out = (s = "") => lines.push(s);
@@ -415,6 +430,8 @@ for (const r of results) {
   out(`- review: ${m.review.simulatedDays} days with a Study session each; ${m.review.reviewsPerDay} reviews a day, again rate ${m.review.againRate}, most due in one day ${m.review.maxDueInADay}, days with a backlog past the cap ${m.review.backlogDays}; ${m.review.dueAtEnd} due at the end`);
   out(`- review-first: ${m.review.heldDays} days spent clearing reviews rather than starting a lesson (threshold ${HOLD_AT || "off"})`);
   out(`- quiz activity mix: ${Object.entries(m.mix).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(", ")}`);
+  out(`- written passages met: ${r.written.scenes} scenes, ${r.written.rows} sentences, `
+      + `${r.written.withAudio} of them with a real recording anyway`);
   out(`- structural problems: ${m.structural}`);
   out();
   out("| chapter | lessons | new words/lesson | quiz accuracy | pass 1st try | failed ×3 | speech steps | speech words mean/max |");

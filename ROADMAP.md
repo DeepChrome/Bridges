@@ -335,6 +335,7 @@ ANTHROPIC_API_KEY:       set as a Cloudflare secret in Phase 4 — never written
 | 8 | Pre-dissemination | — | 1–2 weeks | **[STOP — user decides]** |
 | 9 | The learner's review (2026-09-08) | — | 2–3 weeks | — |
 | 10 | The edge (2026-09-10) | — | 3–4 weeks | — |
+| 11 | What the second review left open (2026-09-10) | — | ~1 week | — |
 
 Phases 0 → 1 → 2 can run in that order without any user input, **except** where A4
 applies: P0.1 (GitHub auth) and the installs in Phase 1 are user actions. Phase 3 is
@@ -697,6 +698,25 @@ together. These tasks are about being one tool that does it.
 Order: P10.1 and P10.2 first (a day or two each, and both aimed at the
 production gap), then P10.3 with P10.4, which are the edge. P10.7 is the
 largest and the least certain.
+
+## Phase 11 — What the second user review left open (2026-09-10)
+
+Four reviews (material, interface, correctness, data) plus an emulator pass. The
+severe findings were fixed the same day (commit "The user review…"); these are
+the rest, ranked, with the evidence each was measured by.
+
+| ID | Task | Evidence | Effort |
+|---|---|---|---|
+| P11.1 | **The photographs need a proper read.** 39 of the 55 opened showed the wrong subject; 24 are blanked and 19 duplicates resolved, but **291 were never opened**. They are unmeasured, not clean. Read the contact sheet properly, blank what is wrong, and fix the two harvest rules that let them through: `ART_RE` matches Latin only (so «Скульптура…» and a chart passed), and `NOT_A_PLACE` is a QID allow-list rather than a P31/P279 subclass test (so any gloss that is also a toponym passed). | The data review, 50 thumbnails opened | 1 day |
+| P11.2 | **~25 branch words sit in the wrong unit**, every one through an English-gloss homograph: Body & Health teaches «спинка» [matched *back* — of a chair] and «свидетель» [*eye*-witness]; Animals teaches «выдерживать» [*bear* = endure] beside «медведь»; Politics teaches «вечеринка» [*party*]. The unit is the context that teaches the word. Fix with `OVERRIDES`, and require a rule to match the **first** sense when the matched sense is a known English homograph. | `tools/audit_branches.py`, whose own matched-sense column names the cause | half day |
+| P11.3 | **Three shared forms mis-resolve, and `IX[…][0]` grades.** «стоит» → «стоять» (59 occurrences, including the Business card's own «Ско́лько э́то сто́ит?»), «начал»/«начала» → the noun «начало» (36), «дорога» → «дорогой» (14). `gradeAlignment` writes FSRS history through the same index, so the wrong word is being scheduled. Three `lemma_overrides.json` entries and a rebuild. | Measured over the shipped payload | 2 h |
+| P11.4 | **A retake repeats 41 % of the quiz, half of it byte-for-byte** (50 %/41 % once words mature). Carry the previous attempt's question keys into `quizSteps` and prefer a different shape per word. Also: the two guaranteed production slots are always `type` — `c.find(type) \|\| c.find(cloze)` can never reach the second branch. | Measured, 169 lessons, first try vs retake | half day |
+| P11.5 | **`справа` is an adverb taught as a noun with a full feminine declension**, so the chapter's form question can ask for the genitive plural of an adverb. `перед`, `ничего` are typed noun, `как` adjective, `зовут` is a verb form taught as a headword. A `pos` override, and a build assertion that no unit word tagged noun is in `function_words.json`. | The data review | 2 h |
+| P11.6 | **The speech pool is 26 % duplicate rows** — the same sentence stored once accented and once not, both pointing at one recording. 30 of 676 scenes play the same recording twice and ask two questions about it; 87 wrong meaning options belong to a sentence that was played. De-duplicate on `fold(ru)` in `build_site.py`. | Measured over 676 generated scenes | 3 h |
+| P11.7 | **Distractors ignore part of speech.** In 23.7 % of option sets the answer is the only option of its own class — "in" against *want / year / he* — so the ending gives it away. Also 1.1 % carry a second genuinely correct option («у» vs «на» for "at"), and `type`'s `alts` only accept words from the same unit, so «тут» is marked wrong for «здесь». | 8,448 generated option sets | half day |
+| P11.8 | **The form question starves in the table chapters**: chapter 6 can ask **7** distinct questions across five lessons and every retake, because `formPrompt`'s tiers only widen when the narrower one is empty. Merge the tiers, and let a spec name several cells once the chapter has taught them. | 30 draws per lesson per spine unit | 3 h |
+| P11.9 | **Interface smoothing**, all measured: the Video screen's focus card sits below 20 word rows, so tapping a word looks like it did nothing; "Heard in · 130" lists four with no way to the rest (22 % of words are in more than four videos); the word sheet shows the gloss as one run where every other surface numbers the senses; Practice is eleven identical rows and says "Practise" under a header reading "Practice"; the two listening activities share one name across four places; the Settings list loses a hairline mid-group; the keyboard's keys are 42 px against the project's own 44 px rule. | The interface review | 1 day |
+| P11.10 | **Licence exposure, for the owner to decide.** All 31 non-commercial-safe Tatoeba recordings ship (`--commercial` off), beside 10,311 Core 5000 and 170 Languages on Fire files the audit itself calls not redistributable, 208 MB on a public host. `--public` is off, so 1.13 MB of verbatim caption text ships while `docs/licensing.md` L22 says it does not. The 157 CC BY recordings name no speaker anywhere shipped. Fine for one learner; not for distribution. | Hash-matched against `site/audio` | owner's call |
 
 ## 9. Cost model (owner's estimates — verify current prices at the source before quoting)
 

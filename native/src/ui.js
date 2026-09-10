@@ -73,10 +73,11 @@ export function List({ children }) {
   );
 }
 
-export function Row({ children, onPress, disabled, last }) {
+export function Row({ children, onPress, disabled, last, testID }) {
   const t = useTheme();
   return (
     <Pressable
+      testID={testID}
       onPress={disabled ? undefined : onPress}
       style={({ pressed }) => ({
         flexDirection: "row", alignItems: "center", gap: 12,

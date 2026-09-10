@@ -393,6 +393,21 @@ group("lesson generation");
   const unit = UN.find((u) => u.id === "food");
   const steps = Q.vocabSteps(unit, 0);
   ok(steps[0].t === "grammar", "the first lesson opens on the unit's grammar note");
+  // The whole list before the cards (the owner, 2026-09-10).
+  const listAt = steps.findIndex((s) => s.t === "list");
+  ok(listAt >= 0 && listAt < steps.findIndex((s) => s.t === "word"),
+     "the lesson's words are listed together before the first card");
+  ok(steps[listAt].words.join() === lessonWords(unit, 0).join(),
+     "and the list is exactly this lesson's words");
+  for (const u of UN) {
+    for (let li = 0; li < lessonCount(u); li++) {
+      const s = Q.vocabSteps(u, li);
+      if (s.filter((x) => x.t === "list").length !== 1) {
+        ok(false, `${u.id}/${li}: exactly one list step`); break;
+      }
+    }
+  }
+  ok(true, "every lesson on the route opens on its word list");
   ok(steps.filter((s) => s.t === "word").length === lessonWords(unit, 0).length,
      "every new word is presented");
   ok(steps.some((s) => s.options), "questions are interleaved between the words");
@@ -855,6 +870,51 @@ for (const d of DRILL_TYPES) {
   if (d.id === "aspect") {
     ok(qs.every((q) => q.note), "aspect: the rule is available as a hint");
   }
+}
+
+/* A drill is a pool of questions, not a handful the learner sees again and again
+   (the owner, 2026-09-10). Measured at the point on the route where each opens:
+   the numbers below are floors, and a run is DRILL_N. */
+group("drill variety");
+{
+  const route = STAGES.flatMap((s) => [s.core].concat(s.branches));
+  const distinct = (type, units) => {
+    const pool = [...new Set(units.flatMap((u) => u.w))];
+    const seen = new Set();
+    for (let k = 0; k < 25; k++) {
+      for (const q of Q.drillQuestions(type, 30, pool)) seen.add(Q.drillKey(q));
+    }
+    return seen.size;
+  };
+  // Each drill, from the chapter that opens it, must beat a run several times over.
+  const FLOOR = 100;
+  for (const d of DRILL_TYPES) {
+    const at = Q.drillOpensAt(d.id);
+    const units = route.slice(0, Math.max(3, (at + 1) * 3));
+    const n = distinct(d.id, units);
+    ok(n >= FLOOR, `${d.id}: ${n} distinct questions where it opens (floor ${FLOOR})`, String(n));
+  }
+  // The identity of a question includes its answer: a shape whose content is all
+  // in its options carries no prompt, and keying on the prompt let only one of
+  // them into a run.
+  const bare = Q.drillQuestions("aspect", 10, route.flatMap((u) => u.w))
+    .filter((q) => !q.prompt);
+  ok(new Set(bare.map(Q.drillKey)).size === bare.length,
+     "promptless questions are still told apart", `${bare.length} drawn`);
+
+  /* A drill opens when the route has taught its rule, so nobody drills aspect in
+     chapter 1 — where their words could fill fifteen questions. */
+  ok(Q.drillOpensAt("aspect") === 7 && Q.drillOpensAt("cases") === 3
+     && Q.drillOpensAt("conjugation") === 1 && Q.drillOpensAt("agreement") === 2,
+     "each drill opens at the chapter that teaches it",
+     DRILL_TYPES.map((d) => `${d.id}:${Q.drillOpensAt(d.id) + 1}`).join(" "));
+  ok(Q.drillOpensAt("stress") === -1 && Q.drillOpensAt("grammar") === -1,
+     "stress and grammar are open from the start");
+  const first = Q.drillsIntroduced(route.slice(0, 3));
+  ok(first.has("stress") && first.has("grammar") && !first.has("aspect") && !first.has("cases"),
+     "chapter 1 opens two of the six", [...first].join(","));
+  ok(Q.drillsIntroduced(route).size === DRILL_TYPES.length,
+     "and the whole route opens them all");
 }
 
 /* A drill asks only about the learner's own words when given a pool. */

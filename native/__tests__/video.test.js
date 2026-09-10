@@ -10,6 +10,7 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { Immerse, Video, searchVideos, libraryOrder, videoFor } from "../src/screens/Misc";
 import { UN, videos, unitById } from "../src/data";
+import { fold, firstSense } from "@core/util";
 
 const VIDEOS = videos();
 
@@ -122,13 +123,18 @@ describe("Video", () => {
     expect(Object.keys(v.words).slice(0, heard.length)).toEqual(heard);
     await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />);
     await screen.findByText("Play here");
-    for (const w of heard) expect(screen.getByText(w)).toBeTruthy();
+    // One row per word, keyed by the bare form: the row itself shows the headword
+    // as written, stress mark and all, which no plain text match would find (§23).
+    for (const w of heard) expect(screen.getByTestId(`heard-${w}`)).toBeTruthy();
+    // Each word carries its meaning beside it (the owner, 2026-09-10).
+    const { L, idxOfWord } = require("../src/data");
+    const meaning = firstSense(L[idxOfWord(heard[0])]);
+    expect(meaning && screen.getAllByText(meaning).length).toBeTruthy();
     // No unit word the episode does not say is on the screen.
-    const { L } = require("../src/data");
     const silent = unit.w.map((i) => L[i].b).filter((b) => !unit.v.heard[b]);
-    for (const b of silent.slice(0, 5)) expect(screen.queryByText(b)).toBeNull();
+    for (const b of silent.slice(0, 5)) expect(screen.queryByTestId(`heard-${b}`)).toBeNull();
     expect(screen.queryByText(/not spoken/)).toBeNull();
-    await act(async () => { fireEvent.press(screen.getByText(heard[0])); });
+    await act(async () => { fireEvent.press(screen.getByTestId(`heard-${heard[0]}`)); });
     expect(screen.getByTestId("yt-player")).toBeTruthy();
     expect(screen.getByText(unit.v.heard[heard[0]][0].s)).toBeTruthy();
   });

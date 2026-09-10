@@ -464,6 +464,35 @@ export function makeQuestions(env) {
     return null;
   }
 
+  /* Which practice drills the route so far has taught, read off the same grammar
+     cards that drive the form question. A learner three lessons in was being
+     offered the Aspect drill, which chapter 8 teaches — and the pool of aspect
+     questions their words could fill was fifteen, so it asked the same handful
+     over and over. Stress and Grammar are open from the start: both are about
+     words in general rather than a rule the path introduces. */
+  function drillsIntroduced(units) {
+    const out = new Set(["stress", "grammar"]);
+    for (const u of units) {
+      const spec = formSpec(u);
+      if (!spec) continue;
+      if (spec.drill) out.add(spec.drill);
+      else if (spec.pos === "noun" && spec.table === "Declension") out.add("cases");
+      else if (spec.pos === "verb") out.add("conjugation");
+    }
+    return out;
+  }
+
+  /* The first chapter (0-based) that opens a drill, for "Opens in chapter N";
+     -1 when it is open from the start or never. */
+  function drillOpensAt(drill) {
+    if (drill === "stress" || drill === "grammar") return -1;
+    for (let s = 0; s < STAGES.length; s++) {
+      const units = [STAGES[s].core].concat(STAGES[s].branches || []);
+      if (drillsIntroduced(units).has(drill)) return s;
+    }
+    return -1;
+  }
+
   /* The cells of a noun's declension the route so far has introduced, as
      { row, col } pairs — what the Cases drill may ask for. A chapter-3 learner
      is not asked the instrumental plural; before the first case chapter the
@@ -548,12 +577,19 @@ export function makeQuestions(env) {
 
   /* --------------------------------------------------------- lesson sets */
 
-  /* Vocabulary: teach a word, then retrieve the pair just seen. */
+  /* Vocabulary: see the whole list, then meet each word, then retrieve the pair
+     just seen.
+
+     The list first (the owner, 2026-09-10): a lesson used to open straight onto
+     card one of seven with no sense of what was coming, which is a worse way to
+     meet a set of words than reading them together. `t: "list"` carries the
+     lesson's words for the screen to lay out; the cards follow unchanged. */
   function vocabSteps(unit, index) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
     const steps = [];
     if (index === 0 && unit.g) steps.push({ t: "grammar", note: unit.g });
+    if (words.length) steps.push({ t: "list", words });
     words.forEach((w, n) => {
       steps.push({ t: "word", i: w });
       if (n % 2 === 1 || n === words.length - 1) {
@@ -810,97 +846,221 @@ export function makeQuestions(env) {
     };
   }
 
-  function qAspect() {
+  /* Three wrong labels for a drill: `from` first (the word's own paradigm, which
+     is what a learner confuses), topped up by `more()` (other words), never
+     equal to the answer or to each other. Null when three cannot be found —
+     two options is a coin flip, not a drill. */
+  function threeWrong(right, from, more) {
+    const seen = new Set([fold(right)]);
+    const out = [];
+    const take = (f) => {
+      if (!f || seen.has(fold(f))) return;
+      seen.add(fold(f));
+      out.push(f);
+    };
+    shuffle(from.slice()).forEach(take);
+    for (let n = 0; n < 80 && out.length < 3 && more; n++) take(more());
+    return out.length >= 3 ? out.slice(0, 3) : null;
+  }
+
+  const optionsOf = (right, wrong) =>
+    shuffle([right].concat(wrong)).map((s) => ({ label: s, right: s === right, cyr: true }));
+
+  /* Aspect, two ways round: name a verb's partner, or pick the verb of an aspect
+     out of four. The partner question is limited by how many verbs in the pool
+     have one — seven after the first chapter — so the second shape carries the
+     drill early on, where any verb marked for aspect qualifies. */
+  function qAspectPartner() {
     const w = pickWhere((x) => x.p === "verb" && realPartner(x.pt) && x.a);
     if (!w) return null;
-    const others = [];
-    for (let n = 0; n < 60 && others.length < 3; n++) {
-      const o = pickWhere((x) => x.p === "verb" && realPartner(x.pt) && x.pt !== w.pt, 60, true);
-      if (o && !others.includes(o.pt.trim())) others.push(o.pt.trim());
-    }
-    if (others.length < 3) return null;
     const want = w.a === "imperfective" ? "perfective" : "imperfective";
+    const wrong = threeWrong(w.pt.trim(), [], () => {
+      const o = pickWhere((x) => x.p === "verb" && realPartner(x.pt) && x.pt !== w.pt, 60, true);
+      return o ? o.pt.trim() : null;
+    });
+    if (!wrong) return null;
     return {
       kind: "aspect", i: L.indexOf(w), cyr: true,
       ask: `Choose the ${want} partner`, prompt: w.w, sub: w.e || "",
       note: (UN.find((u) => u.id === "core8") || {}).g,
-      options: shuffle([w.pt.trim()].concat(others))
-        .map((s) => ({ label: s, right: s === w.pt.trim(), cyr: true })),
+      options: optionsOf(w.pt.trim(), wrong),
     };
   }
 
+  function qAspectWhich() {
+    const want = Math.random() < 0.5 ? "perfective" : "imperfective";
+    const other = want === "perfective" ? "imperfective" : "perfective";
+    const w = pickWhere((x) => x.p === "verb" && x.a === want);
+    if (!w) return null;
+    const wrong = threeWrong(w.w, [], () => {
+      const o = pickWhere((x) => x.p === "verb" && x.a === other, 60, true);
+      return o ? o.w : null;
+    });
+    if (!wrong) return null;
+    return {
+      kind: "aspect", i: L.indexOf(w), cyr: true,
+      ask: `Which of these is ${want}?`, prompt: "", sub: "",
+      note: (UN.find((u) => u.id === "core8") || {}).g,
+      options: optionsOf(w.w, wrong),
+    };
+  }
+
+  const qAspect = () => oneOf([qAspectWhich, qAspectPartner]);
+
+  /* Agreement in any case the adjective declines for, not the nominative alone.
+     The noun is shown in that case too — «___ кни́ге» wants «но́вой» — so the
+     question is read rather than pattern-matched off a familiar ending. The
+     wrong answers come from the adjective's own table, which is where the
+     confusion lives; taking them from the same case's other genders alone
+     failed whenever two genders share a form, which in the oblique cases they
+     usually do. */
+  const GENDER_COL = { m: "Masculine", f: "Feminine", n: "Neuter" };
   function qAgreement() {
     const adj = pickWhere((x) => x.p === "adjective" && tableTitled(x, /Declension/));
-    // The noun only sets the gender; any noun the learner has met will do, and
-    // when the pool has no adjective yet the drill has no question — as it should.
     // …but not a plural-only noun: «часы» is plural, and «но́вый часы» is not
     // agreement.
-    const noun = pickWhere((x) => x.p === "noun" && ["m", "f", "n"].includes(x.g) && !x.pl);
+    const noun = pickWhere((x) => x.p === "noun" && ["m", "f", "n"].includes(x.g) && !x.pl
+                                  && tableTitled(x, /Declension/));
     if (!adj || !noun) return null;
     const t = tableTitled(adj, /Declension/);
-    const nom = t.rows.find((r) => /Nominative/i.test(r[0]));
-    if (!nom) return null;
-    const want = { m: 0, f: 1, n: 2 }[noun.g];
-    const forms = cellsOf(nom).map((c) => (c && c.length ? c[0] : null));
-    if (!forms[want] || forms.filter(Boolean).length < 3) return null;
-    // An adjective whose genders share a form (an indeclinable «беж») would
-    // offer the right answer twice.
-    if (new Set(forms.filter(Boolean)).size !== forms.filter(Boolean).length) return null;
+    const nt = tableTitled(noun, /Declension/);
+    const col = t.columns.indexOf(GENDER_COL[noun.g]);
+    if (col < 1) return null;
+    // A case both tables fill: the adjective's form is the answer, the noun's is
+    // the prompt.
+    const rows = shuffle(t.rows.filter((r) => {
+      const nr = nt.rows.find((x) => x[0] === r[0]);
+      return r[col] && r[col].length && nr && nr[1] && nr[1].length;
+    }));
+    if (!rows.length) return null;
+    const row = rows[0];
+    const right = row[col][0];
+    const nounForm = nt.rows.find((x) => x[0] === row[0])[1][0];
+    const own = t.rows.flatMap((r) => cellsOf(r).map((c) => (Array.isArray(c) ? c[0] : c)));
+    const wrong = threeWrong(right, own.filter(Boolean));
+    if (!wrong) return null;
     return {
       kind: "agreement", i: L.indexOf(adj), cyr: true,
-      ask: "Choose the form that agrees", prompt: `___ ${noun.w}`,
-      sub: `${firstSense(adj)} ${firstSense(noun)}`, table: t,
-      options: shuffle(forms.filter(Boolean))
-        .map((f) => ({ label: f, right: f === forms[want], cyr: true })),
+      ask: "Choose the form that agrees", prompt: `___ ${nounForm}`,
+      sub: `${firstSense(adj)} ${firstSense(noun)} · ${row[0].toLowerCase()}`, table: t,
+      options: optionsOf(right, wrong),
     };
   }
 
-  function qConjugation() {
-    const w = pickWhere((x) => x.p === "verb" && tableTitled(x, /Present|Future/));
-    if (!w) return null;
-    const t = tableTitled(w, /Present|Future/);
+  /* Conjugation across all three of a verb's tables — present or future, past,
+     imperative — and both directions. Asking only the present, as this did,
+     left a chapter-7 learner drilling a tense they had moved past. */
+  const VERB_TABLES = [/^Present/, /^Past/, /^Imperative/];
+  function verbTable() {
+    const re = VERB_TABLES[Math.floor(Math.random() * VERB_TABLES.length)];
+    const w = pickWhere((x) => x.p === "verb" && tableTitled(x, re));
+    return w ? { w, t: tableTitled(w, re) } : null;
+  }
+
+  function qConjugationForm() {
+    const pick = verbTable();
+    if (!pick) return null;
+    const { w, t } = pick;
+    const rows = t.rows.filter((r) => r[1] && r[1].length);
+    if (!rows.length) return null;
+    const target = rows[Math.floor(Math.random() * rows.length)];
+    const right = target[1][0];
+    // The verb's own other persons first — the imperative has only two rows, so
+    // the same cell from other verbs fills the rest.
+    const own = rows.filter((r) => r !== target).map((r) => r[1][0]);
+    const wrong = threeWrong(right, own, () => {
+      const o = pickWhere((x) => x.p === "verb" && x !== w && tableTitled(x, new RegExp("^" + t.title.split(" ")[0])), 40, true);
+      if (!o) return null;
+      const ot = tableTitled(o, new RegExp("^" + t.title.split(" ")[0]));
+      const or = ot && ot.rows.find((r) => r[0] === target[0]);
+      return or && or[1] && or[1].length ? or[1][0] : null;
+    });
+    if (!wrong) return null;
+    const what = t.title === "Imperative" ? "imperative"
+      : t.title === "Past" ? "past" : (w.a === "perfective" ? "future" : "present");
+    return {
+      kind: "conjugation", i: L.indexOf(w), cyr: true,
+      ask: `Choose the ${what} for “${target[0]}”`, prompt: w.w, sub: w.e || "", table: t,
+      options: optionsOf(right, wrong),
+    };
+  }
+
+  /* The other direction: here is a form, whose is it? Reading a conjugated verb
+     is what the learner does when a sentence arrives, and it is not the same
+     skill as producing one. */
+  function qConjugationWho() {
+    const pick = verbTable();
+    if (!pick) return null;
+    const { w, t } = pick;
     const rows = t.rows.filter((r) => r[1] && r[1].length);
     if (rows.length < 4) return null;
     const target = rows[Math.floor(Math.random() * rows.length)];
-    const wrong = shuffle(rows.filter((r) => r[1][0] !== target[1][0])).slice(0, 3);
-    if (wrong.length < 3) return null;
+    // Only rows whose form differs: «он» and «оно» share a past in some verbs,
+    // and two labels for one form is a question with two right answers.
+    const others = rows.filter((r) => fold(r[1][0]) !== fold(target[1][0]));
+    const wrong = threeWrong(target[0], others.map((r) => r[0]));
+    if (!wrong) return null;
     return {
       kind: "conjugation", i: L.indexOf(w), cyr: true,
-      ask: `Choose the form for “${target[0]}”`, prompt: w.w, sub: w.e || "", table: t,
-      options: shuffle([target].concat(wrong))
-        .map((r) => ({ label: r[1][0], right: r[1][0] === target[1][0], cyr: true })),
+      ask: "Whose form is this?", prompt: target[1][0], sub: firstSense(w), table: t,
+      options: shuffle([target[0]].concat(wrong))
+        .map((s) => ({ label: s, right: s === target[0] })),
     };
   }
 
-  /* Move the stress to each other vowel to build the wrong answers. */
-  function qStress() {
-    const w = pickWhere((x) => /́/.test(x.w) && x.b.length > 3);
-    if (!w) return null;
+  const qConjugation = () => oneOf([qConjugationForm, qConjugationForm, qConjugationWho]);
+
+  /* Move the stress to each other vowel to build the wrong answers. Any accented
+     form counts, not only the headword: «рука́» and «ру́ки» shift, and that shift
+     is the thing being drilled. */
+  function stressQuestion(w, accented) {
+    const plain = accented.normalize("NFD").replace(/[̀́]/g, "").normalize("NFC");
     const positions = [];
-    for (let k = 0; k < w.b.length; k++) {
-      if (VOWELS_RU.indexOf(w.b[k]) >= 0) positions.push(k);
+    for (let k = 0; k < plain.length; k++) {
+      if (VOWELS_RU.indexOf(plain[k]) >= 0) positions.push(k);
     }
     if (positions.length < 2) return null;
     const variants = positions
-      .map((k) => w.b.slice(0, k + 1) + "́" + w.b.slice(k + 1))
-      .filter((v) => fold(v) === fold(w.w) && v !== w.w);
+      .map((k) => plain.slice(0, k + 1) + "́" + plain.slice(k + 1))
+      .filter((v) => fold(v) === fold(accented) && v !== accented);
     // Two options is a coin flip, not a drill — a word needs enough vowels to
     // place the stress somewhere genuinely wrong at least twice.
     if (variants.length < 2) return null;
     return {
       kind: "stress", i: L.indexOf(w), cyr: true,
-      ask: "Choose where the stress falls", prompt: w.b, sub: w.e || "", say: w.b,
-      options: shuffle([w.w].concat(shuffle(variants).slice(0, 3)))
-        .map((s) => ({ label: s, right: s === w.w, cyr: true })),
+      ask: "Choose where the stress falls", prompt: plain, sub: w.e || "", say: plain,
+      options: shuffle([accented].concat(shuffle(variants).slice(0, 3)))
+        .map((s) => ({ label: s, right: s === accented, cyr: true })),
     };
   }
 
-  function qGrammar() {
-    const withNotes = UN.filter((u) => u.g && u.g.examples && u.g.examples.length);
+  function qStress() {
+    const w = pickWhere((x) => /́/.test(x.w) && x.b.length > 3);
+    if (!w) return null;
+    // The headword about half the time, else one of its inflected forms.
+    if (Math.random() < 0.5) {
+      const forms = shuffle(paradigmForms(w).filter((f) => /́/.test(f)));
+      for (const f of forms.slice(0, 6)) {
+        const q = stressQuestion(w, f);
+        if (q) return q;
+      }
+    }
+    return stressQuestion(w, w.w);
+  }
+
+  /* The rule a sentence shows, and the sentence a rule is shown by. The card
+     examples are a fixed set — two per unit — so this drill has a ceiling the
+     others do not; asking it in both directions is what doubles it, and the
+     naming question below draws on the paradigm instead, which does not run out. */
+  const unitsWithNotes = () => UN.filter((u) => u.g && u.g.examples && u.g.examples.length);
+
+  function qGrammarRule() {
+    const withNotes = unitsWithNotes();
     if (withNotes.length < 4) return null;
     const pick = withNotes[Math.floor(Math.random() * withNotes.length)];
     const ex = pick.g.examples[Math.floor(Math.random() * pick.g.examples.length)];
-    const others = shuffle(withNotes.filter((u) => u.id !== pick.id)).slice(0, 3);
+    const others = shuffle(withNotes.filter((u) => u.g.title !== pick.g.title)).slice(0, 3);
+    if (others.length < 3) return null;
     return {
       kind: "grammar", cyr: true, ask: "Choose the rule this shows",
       prompt: ex[0], sub: ex[1], note: pick.g,
@@ -909,8 +1069,71 @@ export function makeQuestions(env) {
     };
   }
 
+  function qGrammarExample() {
+    const withNotes = unitsWithNotes();
+    if (withNotes.length < 4) return null;
+    const pick = withNotes[Math.floor(Math.random() * withNotes.length)];
+    const ex = pick.g.examples[Math.floor(Math.random() * pick.g.examples.length)];
+    const others = shuffle(withNotes.filter((u) => u.g.title !== pick.g.title));
+    const wrong = threeWrong(ex[0], others.map((u) => u.g.examples[0][0]).filter(Boolean));
+    if (!wrong) return null;
+    return {
+      kind: "grammar", cyr: true, ask: `Which sentence shows “${pick.g.title}”?`,
+      prompt: "", sub: "", note: pick.g,
+      options: optionsOf(ex[0], wrong),
+    };
+  }
+
+  /* Name the form: the paradigm supplies the question, so this one grows with
+     the curriculum rather than with the number of hand-written cards. */
+  function qGrammarName() {
+    const w = pickWhere((x) => (x.p === "noun" || x.p === "adjective" || x.p === "verb")
+                               && (x.t || []).length);
+    if (!w) return null;
+    const t = (w.t || [])[Math.floor(Math.random() * w.t.length)];
+    if (!t || !t.rows.length) return null;
+    const cells = [];
+    t.rows.forEach((r, ri) => cellsOf(r).forEach((c, ci) => {
+      if (c && c.length) cells.push({ label: c[0], ri, ci });
+    }));
+    if (cells.length < 4) return null;
+    const target = cells[Math.floor(Math.random() * cells.length)];
+    const name = (o) => formName(t, o.ri, o.ci + 1, w).replace(/^the /, "");
+    const right = name(target);
+    // Only cells whose form differs, or two names would both be right.
+    const others = cells.filter((o) => fold(o.label) !== fold(target.label));
+    const wrong = threeWrong(right, unique(others.map(name)));
+    if (!wrong) return null;
+    return {
+      kind: "grammar", i: L.indexOf(w), cyr: true,
+      ask: "What form is this?", prompt: target.label, sub: firstSense(w), table: t,
+      options: shuffle([right].concat(wrong)).map((s) => ({ label: s, right: s === right })),
+    };
+  }
+
+  const qGrammar = () => oneOf([qGrammarName, qGrammarRule, qGrammarExample]);
+
+  /* Try the shapes in a random order and take the first that produces a
+     question: early on, a pool of seventy words cannot fill every shape. */
+  function oneOf(shapes) {
+    for (const make of shuffle(shapes.slice())) {
+      const q = make();
+      if (q) return q;
+    }
+    return null;
+  }
+
   const GEN = { cases: qCases, aspect: qAspect, agreement: qAgreement,
                 conjugation: qConjugation, stress: qStress, grammar: qGrammar };
+
+  /* What makes two drill questions the same question: what is shown, what is
+     asked, and what the answer is. The answer has to be in it — a shape whose
+     content lives entirely in its options ("Which of these is perfective?")
+     carries no prompt at all, and keying on the prompt alone collapsed every
+     one of them into a single entry, so a run could hold exactly one. */
+  const drillKey = (q) => [q.kind, q.prompt, q.ask,
+                           (q.options || []).filter((o) => o.right).map((o) => o.label).join(",")]
+    .join("|");
 
   /* `pool`: lemma indices the drill may ask about (see native data.js drillPool);
      without one, every word in the curriculum. `cells`: for the cases drill,
@@ -923,7 +1146,7 @@ export function makeQuestions(env) {
       for (let k = 0; k < want * 25 && out.length < want; k++) {
         const q = GEN[type] && GEN[type](cells);
         if (!q) continue;
-        const key = q.kind + "|" + q.prompt + "|" + q.ask;
+        const key = drillKey(q);
         if (seen.has(key)) continue;
         seen.add(key);
         out.push(q);
@@ -934,7 +1157,8 @@ export function makeQuestions(env) {
 
   return {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
-    vocabSteps, quizSteps, placementQuestions, sectionQuestions, drillQuestions,
+    vocabSteps, quizSteps, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, listeningDrill, customQuiz, formPrompt, formSpec, formsIntroduced,
+    drillsIntroduced, drillOpensAt,
   };
 }

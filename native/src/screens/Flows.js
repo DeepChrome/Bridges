@@ -16,6 +16,7 @@ import {
   reachedUnits, unitUnlocked, reviewWords,
 } from "../data";
 import { quizPassed } from "@core/state";
+import { firstSense } from "@core/util";
 import { touchStreak } from "../store";
 
 /* The mark for a run: partial credit summed over first attempts, as a percentage. */
@@ -54,6 +55,48 @@ export function VocabFlow({ route, navigation }) {
       setAt(at + 1);
     }
   };
+
+  /* The lesson's words, all of them, before the cards begin (the owner,
+     2026-09-10). Scrollable rather than paged: reading the set together is the
+     point, so it is one list with the photograph, the word and its first
+     meaning on each line. */
+  if (step.t === "list") {
+    return (
+      <Screen>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 16 }}>
+          <View style={{ flex: 1 }}><Bar value={at / steps.length} /></View>
+          <Pill tone="brand">{`${at + 1}/${steps.length}`}</Pill>
+        </View>
+        <SectionLabel testID="vocab-list">
+          {`${step.words.length} new ${step.words.length === 1 ? "word" : "words"}`}
+        </SectionLabel>
+        <List>
+          {step.words.map((i, k) => {
+            const word = L[i];
+            return (
+              <Row key={i} testID={`new-${word.b}`} last={k === step.words.length - 1}>
+                {IMAGES[word.b] ? (
+                  <Image source={IMAGES[word.b]} resizeMode="cover"
+                         accessibilityLabel={`Photo: ${(word.e || "").split(/[,;]/)[0]}`}
+                         style={{ width: 46, height: 46, borderRadius: radius.sm }} />
+                ) : (
+                  <Thumb id={unit.id} />
+                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 19, fontWeight: "600" }}>{word.w}</Text>
+                  <Muted numberOfLines={1}>{firstSense(word)}</Muted>
+                </View>
+                <Speaker text={word.b} size={36} />
+              </Row>
+            );
+          })}
+        </List>
+        <View style={{ marginTop: "auto", paddingTop: 16 }}>
+          <Btn kind="pri" label="Start learning" onPress={advance} />
+        </View>
+      </Screen>
+    );
+  }
 
   if (step.t === "grammar" || step.t === "word") {
     const w = step.t === "word" ? L[step.i] : null;
@@ -208,6 +251,7 @@ export function DrillList({ navigation }) {
   const { st } = useSession();
   const t = useTheme();
   const talkOpen = talkUnlocked(st);
+  const openDrills = useMemo(() => Q.drillsIntroduced(reachedUnits(st)), [st.unit]);
   return (
     <Screen>
       {/* What is not a grammar drill comes first: a quiz of the learner's own
@@ -241,20 +285,28 @@ export function DrillList({ navigation }) {
         </Row>
       </List>
       <SectionLabel style={{ marginTop: 18 }}>Grammar drills</SectionLabel>
+      {/* A drill opens when the route has taught its rule (core/questions.js
+          drillsIntroduced), read off the same grammar cards that drive the form
+          question. Aspect belongs to chapter 8, and offering it in chapter 1
+          meant asking the same fifteen questions the learner's words could fill
+          (the owner, 2026-09-10). */}
       <List>
         {DRILL_TYPES.map((d, k) => {
           const best = ((st.drills || {})[d.id] || {}).best;
+          const open = st.dev || openDrills.has(d.id);
+          const at = Q.drillOpensAt(d.id);
           return (
-            <Row key={d.id} last={k === DRILL_TYPES.length - 1}
-                 onPress={() => navigation.navigate("Drill", { type: d.id })}>
-              <Thumb id={d.icon} />
+            <Row key={d.id} last={k === DRILL_TYPES.length - 1} disabled={!open}
+                 testID={`drill-${d.id}`}
+                 onPress={() => open && navigation.navigate("Drill", { type: d.id })}>
+              <Thumb id={d.icon} locked={!open} />
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
                   {d.name}
                 </Text>
-                <Muted>{d.blurb}</Muted>
+                <Muted>{open ? d.blurb : `Opens in chapter ${at + 1}`}</Muted>
               </View>
-              {best ? <Pill tone="good">{best + "%"}</Pill> : null}
+              {open && best ? <Pill tone="good">{best + "%"}</Pill> : null}
             </Row>
           );
         })}

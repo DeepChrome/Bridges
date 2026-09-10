@@ -8,8 +8,9 @@ import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, Avatar, AV, AV_IDS, SearchField, SectionLabel } from "../ui";
 import {
   UN, STATS, unitState, markComponent, L, videos, videoById, videoWatched, unitById,
+  idxOfWord,
 } from "../data";
-import { fold, today } from "@core/util";
+import { fold, today, firstSense } from "@core/util";
 import { Intro } from "./Intro";
 
 /* ------------------------------------------------------------- immerse */
@@ -245,32 +246,32 @@ export function Video({ route, navigation }) {
       )}
 
       <SectionLabel style={{ marginTop: 18 }}>Listen for</SectionLabel>
+      {/* One word a line with its meaning beside it, not a wrap of bare chips
+          (the owner, 2026-09-10): the list is read before watching, and a word
+          without its English says nothing to listen for. */}
       {words.length ? (
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
-          {words.map((word) => {
+        <List>
+          {words.map((word, k) => {
             const occ = v.words[word];
             const active = focus && focus.word === word;
+            const entry = L[idxOfWord(word)];
             return (
-              <Pressable
-                key={word}
-                onPress={() => openWord(word)}
-                accessibilityRole="button"
-                accessibilityLabel={`${word}, heard ${occ.length} time${occ.length > 1 ? "s" : ""}`}
-                style={{ borderWidth: 1,
-                         borderColor: active ? t.brand : t.line,
-                         backgroundColor: active ? t.brandBg : t.surface,
-                         borderRadius: 99, paddingHorizontal: 14, paddingVertical: 10,
-                         minHeight: 44, justifyContent: "center",
-                         flexDirection: "row", alignItems: "center", gap: 6 }}
-              >
-                <Text style={{ fontSize: 14, color: active ? t.brandInk : t.ink2 }}>
-                  {word}
-                </Text>
-                <Text style={{ color: t.ink3, fontSize: 11 }}>{`×${occ.length}`}</Text>
-              </Pressable>
+              <Row key={word} testID={`heard-${word}`} last={k === words.length - 1}
+                   onPress={() => openWord(word)}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 17, fontWeight: "600",
+                                 color: active ? t.brandInk : t.ink }}>
+                    {entry ? entry.w : word}
+                  </Text>
+                  {entry && firstSense(entry) ? (
+                    <Muted numberOfLines={1}>{firstSense(entry)}</Muted>
+                  ) : null}
+                </View>
+                <Muted size={12}>{occ.length > 1 ? `${occ.length}×` : ""}</Muted>
+              </Row>
             );
           })}
-        </View>
+        </List>
       ) : (
         <Muted>No study words are spoken in this one.</Muted>
       )}

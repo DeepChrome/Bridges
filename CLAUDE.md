@@ -1312,7 +1312,13 @@ Phase 9) and the rules they left behind. The A37 log entry carries the numbers.
   hydrator that refuses to open the dictionary.
 - **One way to say each thing** (P9.16): `Tick`, `Chip` (44 px), `Choice`,
   `SearchField`, `SectionLabel`, `Sheet` in `ui.js`. A new sheet is a `Sheet`
-  with a header, body and footer, not a Modal.
+  with a header, body and footer, not a Modal. **`List` decides which of its
+  rows is last** (2026-09-10) — never pass `last` yourself. Every call site
+  used to compute it, so inserting a row *above* the one carrying it left a
+  hairline missing from the middle of the group and nothing failed; Settings
+  shipped that way. `List` overrides whatever a row claims and skips the
+  children that rendered nothing, so a trailing `{cond ? <Row/> : null}` needs
+  no help. A row nested inside a wrapper is out of reach and still owns its own.
 - **Reviews come before new words** (2026-09-10, `REVIEW_FIRST` = 40 in
   `core/state.js`). Above forty due cards Learn makes Review the primary
   action and the next lesson the quiet one, with "Clear these before new

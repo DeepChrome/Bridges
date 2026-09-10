@@ -347,6 +347,51 @@ LISTEN_EXCLUDE = ("googletts", "other")
 POOL_MIN_PER_UNIT = 15
 
 
+# The classes that do not decline or conjugate the way a content word does. A
+# curated closed-class entry and a unit teaching the same word as a noun are two
+# sources of truth disagreeing, and only one of them can be right.
+CLOSED_POS = {"other", "pronoun", "possessive", "numeral"}
+CONTENT_POS = {"noun", "adjective", "verb"}
+
+
+def check_closed_class(units, lemmas, with_paradigm):
+    """No unit may teach as a content word something function_words.json declares
+    closed-class and the lexicon gives no content-word forms.
+
+    «перед» shipped as a noun glossed "before": OpenRussian carries a bare noun row
+    beside the preposition, the noun row won build_topics' dedupe, and the
+    curriculum then taught a preposition as a noun — with a noun's declension
+    tables, so the chapter's form question could ask for its genitive plural
+    (ROADMAP P11.5). Fatal, because nothing downstream can notice: a wrong
+    declension looks exactly like a right one.
+
+    Both halves are needed. The curated file also declares «мой», «твой», «свой»
+    and «весь» possessive, and OpenRussian carries each of them again as an
+    adjective — with its own 27-row declension, the same forms the curated entry
+    hand-authored. Those are one word listed twice, not a word in the wrong class,
+    and the unit teaching the adjective row shows the learner nothing false. (That
+    duplication is its own defect and is not this check's business: the curated
+    entries are redundant for those four, since the file exists for paradigms
+    OpenRussian does not ship.) «перед»'s noun row has no paradigm at all, which
+    is what separates the two cases.
+    """
+    path = ROOT / "data" / "curated" / "function_words.json"
+    if not path.exists():
+        return []
+    closed = set()
+    for e in json.loads(path.read_text(encoding="utf-8"))["entries"]:
+        if e.get("pos") in CLOSED_POS:
+            closed.add(fold(e.get("lemma") or e["attach_to"]))
+    bad = []
+    for u in units:
+        for i in u["w"]:
+            e = lemmas[i]
+            if e["p"] in CONTENT_POS and fold(e["b"]) in closed and i not in with_paradigm:
+                bad.append(f"{u['id']} teaches «{e['b']}» as a {e['p']} with no {e['p']} "
+                           "forms in the lexicon, and function_words.json calls it closed-class")
+    return bad
+
+
 def check_grammar_cards(units, path, lemmas, index, keys_of, pos_of):
     """Every token in a unit's grammar card examples resolves to a word taught
     by that unit or one earlier on the route, or is within COVERAGE_FREE_RANK.
@@ -392,15 +437,37 @@ def build_pools(measured, units, stats):
     Shipped as one shared row list plus per-unit index lists, so a sentence in both
     pools is stored once. Rows: [ru, en, tokens, difficulty, source letter]. The
     audio key is fold(ru), which the app already derives — not shipped.
+
+    "Once" means once per fold(ru), not once per string. The collection holds the
+    same sentence twice — the Core 5000 deck's stressed copy of an Ultimate Guide
+    card — and both copies fold to the same audio key, so the pools were 26 % one
+    sentence stored under two spellings pointing at one recording (ROADMAP P11.6).
+    A scene built from that played the same recording for two of its questions and
+    drew a wrong meaning option from a sentence it had just played. The stressed
+    copy is kept, as rank_examples keeps it for the dictionary's examples.
     """
-    rows, at = [], {}
+    rows, at, score, spellings = [], {}, {}, set()
+
+    def quality(rec):
+        ru, _en, _n, _diff, _unit, fname, _src = rec
+        return (sum(ru.count(c) for c in ACC_MARKS) > 0, bool(fname))
 
     def row_for(rec):
         ru, en, n, diff, unit, fname, src = rec
-        if ru not in at:
-            at[ru] = len(rows)
-            rows.append([ru, en, n, round(diff, 2), SRC_CODE.get(src, "o")])
-        return at[ru]
+        k = fold(ru)
+        spellings.add(ru)
+        row = [ru, en, n, round(diff, 2), SRC_CODE.get(src, "o")]
+        if k not in at:
+            at[k], score[k] = len(rows), quality(rec)
+            rows.append(row)
+        elif quality(rec) > score[k]:
+            rows[at[k]], score[k] = row, quality(rec)
+        return at[k]
+
+    def add(pool, uid, i):
+        seen = pool.setdefault(uid, [])
+        if i not in seen:          # both spellings reach the same unit
+            seen.append(i)
 
     speak = {}
     for rec in measured:
@@ -408,7 +475,7 @@ def build_pools(measured, units, stats):
         if unit is None or not fname or not en:
             continue
         if SPEAK_TOKENS[0] <= n <= SPEAK_TOKENS[1]:
-            speak.setdefault(units[unit]["id"], []).append(row_for(rec))
+            add(speak, units[unit]["id"], row_for(rec))
 
     stats["speak_pool"] = {uid: len(v) for uid, v in speak.items()}
     stats["speak_short"] = sorted(u["id"] for u in units
@@ -426,14 +493,17 @@ def build_pools(measured, units, stats):
         if unit is None or not fname or not en or src in LISTEN_EXCLUDE:
             continue
         if LISTEN_TOKENS[0] <= n <= LISTEN_TOKENS[1]:
-            listen.setdefault(units[unit]["id"], []).append(row_for(rec))
-            if src in ("tatoeba", "lof", "yandex"):
+            before = len(listen.get(units[unit]["id"], ()))
+            add(listen, units[unit]["id"], row_for(rec))
+            if src in ("tatoeba", "lof", "yandex") and len(listen[units[unit]["id"]]) > before:
                 listen_human_yandex += 1
 
     stats["listen_pool"] = {uid: len(v) for uid, v in listen.items()}
     stats["listen_without_core5000"] = listen_human_yandex
     stats["listen_short"] = sorted(u["id"] for u in units
                                    if len(listen.get(u["id"], ())) < POOL_MIN_PER_UNIT)
+    stats["speech_rows"] = len(rows)
+    stats["speech_folded"] = len(spellings) - len(rows)
     return {"rows": rows, "speak": speak, "listen": listen}
 
 
@@ -724,6 +794,9 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     # hundred): chapter 2's card conjugated «читать», a chapter-8 word. Reported,
     # not fatal — the cards are hand-written and the fix is a word in the card.
     stats["card_words_untaught"] = check_grammar_cards(units, path, lemmas, index, keys_of, pos_of)
+    with_paradigm = {pos_of[l] for (l,) in db.execute(
+        "select distinct lemma_id from paradigm") if l in pos_of}
+    stats["closed_class_taught"] = check_closed_class(units, lemmas, with_paradigm)
 
     # Per-sentence tokens and which units each token's lemma belongs to, for the
     # example ranking and the sentence measurements below — taken while the
@@ -1035,6 +1108,9 @@ def main():
         print("  difficulty   : " + "  ".join(f"{lab} {n:,}" for lab, n in st["difficulty_hist"]))
     # Pool sizes per unit. A unit below the floor is named: a speaking activity that
     # keeps asking the same five sentences is worse than none.
+    if st.get("speech_rows") is not None:
+        print(f"  speech rows  : {st['speech_rows']:,} sentences; "
+              f"{st['speech_folded']:,} second spellings of one folded through to it")
     if st.get("speak_pool") is not None:
         sp = st["speak_pool"]
         print(f"  speak pool   : {sum(sp.values()):,} sentences over {len(sp)} units; "
@@ -1057,6 +1133,13 @@ def main():
     print(f"  scripts      : {', '.join(js_files)}")
     print(f"  page         : {(args.outdir / 'index.html').stat().st_size/1_048_576:.2f} MB")
 
+    # Reported after the summary so the rest of the numbers are still readable,
+    # but the exit code is non-zero: a curriculum that teaches a preposition as a
+    # noun must not reach a build anyone deploys.
+    for line in st.get("closed_class_taught") or ():
+        print(f"  !! {line}")
+    return 1 if st.get("closed_class_taught") else 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

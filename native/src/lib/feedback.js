@@ -44,6 +44,17 @@ export async function talk({ scenario, topic, studied, history, transcript, leve
               deps, "/v1/talk", TALK_TIMEOUT_MS);
 }
 
+/* The chapter-end task (ROADMAP P10.5). Marked against the requirements the
+   task itself sets and the words this learner has actually been taught, so a
+   chapter-2 attempt is never faulted for the vocabulary of chapter 7. Given the
+   same budget as a conversational turn: the model is reading a paragraph and
+   judging two or three things about it, not one sentence. */
+export async function markTask({ goal, must, attempt, studied, chapter }, deps = {}) {
+  return post({ goal, must: must || [], attempt, studied: (studied || []).slice(0, 300),
+                chapter: chapter || null },
+              deps, "/v1/task", TALK_TIMEOUT_MS);
+}
+
 async function post(body, deps, route, timeoutMs) {
   const cfg = deps.config || config(route);
   if (!cfg) return { ok: false, reason: "unconfigured" };

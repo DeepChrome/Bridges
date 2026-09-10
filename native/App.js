@@ -31,6 +31,7 @@ import WordScreen from "./src/screens/Word";
 import SttLab from "./src/screens/SttLab";
 import TourScreen from "./src/screens/Intro";
 import Sounds from "./src/screens/Sounds";
+import { ChapterTask } from "./src/screens/Task";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import {
@@ -148,6 +149,10 @@ function LearnStack() {
       <Stack.Screen name="Quiz" component={QuizFlow} options={titled("Quiz")} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       <Stack.Screen name="TestOut" component={SectionFlow} options={titled("Test out")} />
+      {/* The task at the end of a chapter (ROADMAP P10.5). On the Learn stack
+          because that is where it is offered: it belongs to the chapter. */}
+      <Stack.Screen name="ChapterTask" component={ChapterTask}
+                    options={{ title: "Chapter task" }} />
       <Stack.Screen name="Placement" component={PlacementFlow}
                     options={{ title: "Placement" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />

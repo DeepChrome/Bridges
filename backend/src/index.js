@@ -17,6 +17,7 @@
 import { validate, extractJson } from "./schema.js";
 import { SYSTEM, userMessage, RETRY_NUDGE } from "./prompt.js";
 import { SYSTEM_TALK, talkMessage, validateTalk, SYSTEM_HINT, hintMessage, validateHint } from "./talk.js";
+import { SYSTEM_TASK, taskMessage, validateTask } from "./task.js";
 
 const API = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
@@ -112,6 +113,21 @@ const ROUTES = {
       kind: "hint", maxTokens: 200, system: SYSTEM_HINT,
       message: (x) => hintMessage(x), validate: (parsed) => validateHint(parsed),
     } : null),
+  },
+  /* The task at the end of a chapter (ROADMAP P10.5). It shares the feedback
+     counter and cap rather than taking one of its own: a learner does ten of
+     these in the life of the whole course, so a separate budget would be a
+     knob with nothing on the other end of it. */
+  "/v1/task": {
+    kind: "task", counter: "count", cap: (env) => parseInt(env.DAILY_CAP, 10) || DEFAULT_CAP,
+    maxTokens: 700, system: SYSTEM_TASK,
+    check: (b) => (typeof b.goal === "string" && b.goal.trim()
+                   && Array.isArray(b.must) && b.must.length
+                   && typeof b.attempt === "string" && b.attempt.trim()
+      ? null : "goal, must and attempt are required"),
+    message: (b) => taskMessage(b),
+    validate: (parsed, b) => validateTask(parsed, b.must),
+    capMessage: (cap) => `Daily limit of ${cap} reached; resets at 00:00 UTC.`,
   },
 };
 

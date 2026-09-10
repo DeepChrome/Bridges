@@ -20,10 +20,45 @@ import { useSession } from "../session";
 import { useTheme, space } from "../theme";
 import { Screen, Btn, Pill, UnitIcon, Muted, styles } from "../ui";
 import {
-  STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress,
+  STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress, unitState,
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, FORK_AT, dueCount,
 } from "../data";
 import { reviewFirst } from "@core/state";
+import { taskFor } from "@core/tasks";
+
+/* The chapter's task, offered once its spine is finished (ROADMAP P10.5).
+   Nothing at all until then: an offer to "say who you are" before the chapter
+   that teaches it is an invitation to fail. */
+function ChapterTaskCard({ chapter, spineDone, done, onOpen }) {
+  const t = useTheme();
+  const task = taskFor(chapter);
+  if (!task || !spineDone) return null;
+  return (
+    <Pressable
+      testID={`chapter-task-${chapter}`}
+      accessibilityRole="button"
+      onPress={onOpen}
+      style={({ pressed }) => ({
+        alignSelf: "stretch", marginTop: 16, padding: 14, borderRadius: 20,
+        backgroundColor: done ? t.goodBg : t.brandBg,
+        borderColor: done ? t.goodDim : t.brandDim, borderWidth: 1,
+        flexDirection: "row", alignItems: "center", gap: 12,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700", letterSpacing: 0.8 }}>
+          {done ? "TASK DONE" : "CHAPTER TASK"}
+        </Text>
+        <Text style={{ color: t.ink, fontSize: 16, fontWeight: "700", marginTop: 2 }}>
+          {task.title}
+        </Text>
+        <Muted numberOfLines={2}>{task.goal}</Muted>
+      </View>
+      {done ? <Pill tone="good">done</Pill> : null}
+    </Pressable>
+  );
+}
 
 /* A lesson step's screen. */
 export const STEP_ROUTE = { vocab: "Vocab", quiz: "Quiz", video: "Video" };
@@ -325,6 +360,17 @@ export default function Learn({ navigation }) {
               {stage.branches.length ? (
                 <Fork stage={stage} chapterOpen={open} onOpen={openUnit} />
               ) : null}
+              {/* The chapter's task, once its spine is finished (ROADMAP P10.5).
+                  On the path rather than in Practice because it belongs to the
+                  chapter: it is the thing the chapter was for. Keyed on the
+                  spine alone, the same rule the next chapter unlocks by — the
+                  side quests are optional and this is not held back by them. */}
+              <ChapterTaskCard
+                chapter={stage.n || i + 1}
+                spineDone={!!unitState(st, stage.core.id).done}
+                done={!!((st.tasks || {})[stage.n || i + 1] || {}).done}
+                onOpen={() => navigation.navigate("ChapterTask", { chapter: stage.n || i + 1 })}
+              />
             </View>
           );
         })}

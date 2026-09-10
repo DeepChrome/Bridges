@@ -6,7 +6,7 @@
  * dead-ending.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, ScrollView, Image, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, List, Row, SectionLabel } from "../ui";
@@ -15,7 +15,10 @@ import { Linked } from "../words";
 import { IMAGES, CREDITS } from "../images";
 import { clock, short } from "./Misc";
 
-/* How many videos an entry lists under "Heard in". */
+/* How many videos an entry lists under "Heard in" before it asks. Four is a
+   glance; 22 % of the words the library says are said in more than four videos
+   and «что» in 130, so the count in the heading used to promise a list the
+   screen had no way to reach (ROADMAP P11.9). */
 const HEARD_ROWS = 4;
 const GENDER = { m: "masculine", f: "feminine", n: "neuter", pl: "plural" };
 
@@ -60,6 +63,7 @@ export function Table({ table }) {
 
 export default function Word({ route, navigation }) {
   const t = useTheme();
+  const [allHeard, setAllHeard] = useState(false);
   /* Addressed by the word, not by an index: lemma indices are assigned by frequency
      at build time and move on every rebuild, which is the same reason learner state
      keys on the word. The index form is still accepted for older call sites. */
@@ -162,8 +166,8 @@ export default function Word({ route, navigation }) {
         <>
           <SectionLabel style={{ marginTop: 22 }}>{`Heard in · ${heard.length}`}</SectionLabel>
           <List>
-            {heard.slice(0, HEARD_ROWS).map((h, k, all) => (
-              <Row key={h.id} last={k === all.length - 1}
+            {(allHeard ? heard : heard.slice(0, HEARD_ROWS)).map((h) => (
+              <Row key={h.id} testID={`heard-${h.id}`}
                    onPress={() => navigation && navigation.navigate("Video", { videoId: h.id, word: w.b, at: h.t })}>
                 <Pill tone="brand">{clock(h.t)}</Pill>
                 <View style={{ flex: 1 }}>
@@ -174,6 +178,15 @@ export default function Word({ route, navigation }) {
                 </View>
               </Row>
             ))}
+            {/* The rest of them, in the row after the last one rather than as a
+                control off to the side — the list expands where it stopped. */}
+            {heard.length > HEARD_ROWS ? (
+              <Row testID="heard-more" onPress={() => setAllHeard(!allHeard)}>
+                <Text style={{ flex: 1, color: t.brandInk, fontSize: 15, fontWeight: "600" }}>
+                  {allHeard ? "Show fewer" : `Show all ${heard.length}`}
+                </Text>
+              </Row>
+            ) : null}
           </List>
         </>
       ) : null}

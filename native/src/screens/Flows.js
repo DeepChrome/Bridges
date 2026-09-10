@@ -31,6 +31,10 @@ export const VOCAB_XP = 5;
    is about a minute and a half and does not outstay a contrast. */
 export const SOUND_DRILL_N = 10;
 
+/* Sentences in a shadowing run. Fewer than a quiz: each one is a recording, a
+   hold, a wait for the recogniser and usually a second go. */
+export const SHADOW_N = 6;
+
 /* ------------------------------------------------------------- vocabulary */
 
 export function VocabFlow({ route, navigation }) {
@@ -116,6 +120,39 @@ export function VocabFlow({ route, navigation }) {
       recycle={false}
       onFinish={advance}
     />
+  );
+}
+
+/* ---------------------------------------------------------------- shadowing */
+
+/* Hear a sentence, say it back (ROADMAP P10.6). Drawn from the speak pool, so
+   every sentence has a real recording — shadowing a device voice would be
+   shadowing a robot's rhythm, which is the one thing the exercise is for. */
+export function ShadowFlow({ navigation }) {
+  const { st } = useSession();
+  const [result, setResult] = useState(null);
+  const [seed, setSeed] = useState(0);
+  const units = useMemo(() => reachedUnits(st), [seed]);
+  const steps = useMemo(() => Q.shadowDrill(units, SHADOW_N), [units, seed]);
+  useAudioStopOnLeave();
+
+  if (!steps.length) {
+    return <Done title="Nothing to shadow yet"
+                 detail="A sentence needs a recording and words you have met."
+                 onBack={() => navigation.goBack()} />;
+  }
+  if (result) {
+    return (
+      <Done title="Shadowing"
+            detail={`${result.right} of ${result.total} clean`}
+            score={scoreOf(result)} passed={scoreOf(result) >= 70}
+            onAgain={() => { setResult(null); setSeed(seed + 1); }}
+            onBack={() => navigation.goBack()} />
+    );
+  }
+  return (
+    <Runner steps={steps} recycle={false} navigation={navigation}
+            onFinish={(r) => setResult(r)} />
   );
 }
 
@@ -285,6 +322,16 @@ export function DrillList({ navigation }) {
               Native speed
             </Text>
             <Muted>Half a minute of a real speaker · much harder</Muted>
+          </View>
+        </Row>
+        {/* Listen, then say it back (P10.6). Sits between the two listening
+            rows and Talk because that is what it is: the step from taking
+            Russian in to putting it out, with the model still in your ear. */}
+        <Row onPress={() => navigation.navigate("Shadow")}>
+          <Thumb id="art" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Shadowing</Text>
+            <Muted>Hear a sentence and say it straight back</Muted>
           </View>
         </Row>
         <Row onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>

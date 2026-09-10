@@ -22,6 +22,7 @@ import { Say } from "../activities/Say";
 import { Scene } from "../activities/Scene";
 import { Passage } from "../activities/Passage";
 import { PairHear, PairSay } from "../activities/Pair";
+import { Shadow } from "../activities/Shadow";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade } from "@core/fsrs";
 import { fold, translit, today, translitBack, firstSense } from "@core/util";
@@ -258,6 +259,8 @@ export const VIEWS = {
   // The pronunciation drill: hear a contrast, then produce it (P10.8).
   "pair-hear": (q, r) => <PairHear q={q} r={r} />,
   "pair-say": (q, r) => <PairSay q={q} r={r} />,
+  // Hear a sentence and say it straight back (P10.6).
+  shadow: (q, r) => <Shadow q={q} r={r} />,
 };
 
 /* ------------------------------------------------------------------ runner */

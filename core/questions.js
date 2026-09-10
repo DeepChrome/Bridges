@@ -738,6 +738,36 @@ export function makeQuestions(env) {
     return all ? { ...all, level: units.length ? units[units.length - 1].name : "" } : null;
   }
 
+  /* Shadowing (ROADMAP P10.6): hear a sentence and say it straight back.
+   *
+   * The third thing you can do with a sentence, and the one the app was
+   * missing. Hear types what was said; Say produces Russian from an English
+   * prompt; shadowing gives the learner the model and asks only for the mouth —
+   * no decoding, no retrieval, just the sounds and the rhythm. It is the
+   * cheapest of the three to build because every piece already exists, and the
+   * one with nothing else like it in the app.
+   *
+   * Drawn from the **speak** pool, which is cut to sentences that have a real
+   * recording and run 3–12 tokens: shadowing a device voice would be shadowing
+   * a robot's rhythm, which is the one thing the exercise is for. No sentence
+   * without audio can appear here, so unlike Hear there is no fallback. */
+  function shadowDrill(units, n) {
+    if (!SPEECH || !SPEECH.speak || !SPEECH.rows) return [];
+    const rows = SPEECH.rows;
+    const idxs = unique(units.flatMap((u) => SPEECH.speak[u.id] || []));
+    if (!idxs.length) return [];
+    const out = [];
+    for (const ri of shuffle(idxs).slice(0, n)) {
+      const [ru, en] = rows[ri];
+      out.push({
+        kind: "shadow", ask: "Listen, then say it back", prompt: "", cyr: true,
+        autoplay: ru, target: ru, en, unit: units[units.length - 1].id,
+        lemmas: sentenceLemmas(ru, IX),
+      });
+    }
+    return out;
+  }
+
   /* A run of scenes for the listening drill, no two opening on the same
      sentence; `want` (a Set of lemma indices — the trouble bank, say) prefers
      scenes that open on one of those words. */
@@ -1629,7 +1659,7 @@ export function makeQuestions(env) {
   return {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
-    sceneFor, listeningDrill, lessonPassage, scriptScene, writtenPassage,
+    sceneFor, listeningDrill, lessonPassage, scriptScene, writtenPassage, shadowDrill,
     customQuiz, formPrompt, formSpec, formsIntroduced,
     drillsIntroduced, drillOpensAt, passagesFor, passageQuestions, passageFit,
   };

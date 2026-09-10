@@ -166,8 +166,11 @@ export function VocabFlow({ route, navigation }) {
             The gap lives on the wrapper — putting it on the button would change the
             button's own padding. */}
         <View style={{ marginTop: "auto", paddingTop: 16 }}>
+          {/* The word list that follows a grammar card owns "Start learning", so
+              the card itself only moves on — the two used to carry the same
+              label and the lesson asked to start twice. */}
           <Btn kind="pri"
-               label={step.t === "grammar" ? "Start learning"
+               label={step.t === "grammar" ? "Continue"
                       : at + 1 >= steps.length ? "Finish" : "Continue"}
                onPress={advance} />
         </View>
@@ -323,8 +326,15 @@ export function DrillFlow({ route, navigation }) {
   // Only the learner's own words (data.js drillPool); the pool is fixed for the
   // run so answering does not reshuffle the questions underneath. The cases
   // drill asks only for the cases the route so far has taught.
-  const pool = useMemo(() => drillPool(st), [type, seed]);
-  const cells = useMemo(() => (type === "cases" ? Q.formsIntroduced(reachedUnits(st)) : undefined), [type, seed]);
+  //
+  // Unless the drill is open only because developer mode says so: a learner in
+  // chapter 1 who opens Aspect has met eight verbs, and the drill would ask the
+  // same handful all run. Skipping ahead means the whole curriculum is fair game.
+  const ahead = useMemo(() => !Q.drillsIntroduced(reachedUnits(st)).has(type), [type]);
+  const pool = useMemo(() => (ahead ? null : drillPool(st)), [type, seed, ahead]);
+  const cells = useMemo(
+    () => (type === "cases" && !ahead ? Q.formsIntroduced(reachedUnits(st)) : undefined),
+    [type, seed, ahead]);
   const steps = useMemo(() => Q.drillQuestions(type, undefined, pool, cells), [type, seed, pool, cells]);
   const spec = DRILL_TYPES.find((d) => d.id === type);
   useAudioStopOnLeave();

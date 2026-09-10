@@ -66,4 +66,20 @@ describe("drills open with the route", () => {
     await screen.findByText("Aspect pairs");
     expect(screen.queryByText(/Opens in chapter/)).toBeNull();
   });
+
+  /* Opening a drill ahead of the route widens its words to the whole curriculum:
+     a chapter-1 learner in developer mode has met eight verbs, and Aspect drawn
+     from those asks the same handful every run. */
+  it("a drill opened ahead of the route draws on every word", () => {
+    const key = (q) => Q.drillKey(q);
+    const early = [...new Set(STAGES.slice(0, 1).flatMap((s) => [s.core].concat(s.branches))
+      .flatMap((u) => u.w))];
+    const narrow = new Set();
+    const wide = new Set();
+    for (let k = 0; k < 12; k++) {
+      Q.drillQuestions("aspect", 20, early).forEach((q) => narrow.add(key(q)));
+      Q.drillQuestions("aspect", 20, null).forEach((q) => wide.add(key(q)));
+    }
+    expect(wide.size).toBeGreaterThan(narrow.size * 3);
+  });
 });

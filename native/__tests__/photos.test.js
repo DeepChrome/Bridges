@@ -58,10 +58,15 @@ describe("photographs", () => {
     }
     expect(found).toBeTruthy();
     await withProfile(<VocabFlow route={{ params: { unitId: found.u.id, index: found.i } }} navigation={nav} />);
-    // The grammar note opens the first lesson; the first word card follows it.
-    const start = await screen.findByText(/Start learning|Continue/);
+    // A lesson opens on its grammar note, then the word list, then the cards, and
+    // which of those a given lesson has varies — so step forward until the first
+    // card rather than assuming a screen count.
     const { fireEvent, act } = require("@testing-library/react-native");
-    if (start.props.children === "Start learning") await act(async () => { fireEvent.press(start); });
+    for (let n = 0; n < 3 && !screen.queryByTestId("word-photo"); n++) {
+      const go = screen.queryByText(/^(Start learning|Continue)$/);
+      if (!go) break;
+      await act(async () => { fireEvent.press(go); });
+    }
     expect(await screen.findByTestId("word-photo")).toBeTruthy();
   });
 });

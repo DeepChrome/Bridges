@@ -30,6 +30,7 @@ import { Immerse, Video, Gate } from "./src/screens/Misc";
 import WordScreen from "./src/screens/Word";
 import SttLab from "./src/screens/SttLab";
 import TourScreen from "./src/screens/Intro";
+import Sounds from "./src/screens/Sounds";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import {
@@ -161,6 +162,7 @@ function PracticeStack() {
       <Stack.Screen name="QuizSetup" component={QuizSetup} options={{ title: "Quiz" }} />
       <Stack.Screen name="CustomQuiz" component={CustomQuizFlow} options={{ title: "Quiz" }} />
       <Stack.Screen name="Listening" component={ListeningFlow} options={{ title: "Listening" }} />
+      <Stack.Screen name="Sounds" component={Sounds} options={{ title: "Sounds" }} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <HeaderRight navigation={navigation} route={route} />,

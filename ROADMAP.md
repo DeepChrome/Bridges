@@ -334,6 +334,7 @@ ANTHROPIC_API_KEY:       set as a Cloudflare secret in Phase 4 — never written
 | 7 | Stress feedback spike (optional) | — | 2–4 weeks | **[STOP — user decides]** |
 | 8 | Pre-dissemination | — | 1–2 weeks | **[STOP — user decides]** |
 | 9 | The learner's review (2026-09-08) | — | 2–3 weeks | — |
+| 10 | The edge (2026-09-10) | — | 3–4 weeks | — |
 
 Phases 0 → 1 → 2 can run in that order without any user input, **except** where A4
 applies: P0.1 (GitHub auth) and the installs in Phase 1 are user actions. Phase 3 is
@@ -666,6 +667,35 @@ on the emulator (the walkthrough, the dark theme, a lesson end to end).
 **Not done in this phase, by decision:** a shared APK still carries the owner's
 Worker token (E17) — a process fix (mint a user token per build), noted for
 Phase 8's ship step.
+
+## Phase 10 — The edge (2026-09-10)
+
+Where the market actually leaves a gap, from a morning's research (sources in the
+session log): input has to be 95–98 % comprehensible to build acquisition; real
+content beats scripted content; **production beats recognition**, which is the
+thing every review of Duolingo says it fails at; the *intermediate plateau* —
+past drills, short of native material — is the stretch nobody serves; and the
+AI-tutor apps (Speak, Praktika) have no spaced repetition at all.
+
+Bridges is unusual in holding all three pieces at once — a real scheduler,
+native content indexed to the word, and a tutor — on a corpus that is the
+owner's own. The workflow serious Russian learners run by hand is Language
+Reactor to watch, vocabsieve to mine, Anki to review: three tools glued
+together. These tasks are about being one tool that does it.
+
+| ID | Task | Why | Effort |
+|---|---|---|---|
+| P10.1 | **Production by default on a mature card.** Once a card is stable, stop offering four choices: type it or say it. `candidates()` picks by stability rather than always easiest-first; the Russian keyboard and the recogniser are already there. | The clearest finding in the research, and the one competitor weakness everyone names | 1 day |
+| P10.2 | **Pronunciation in the lesson** (the owner, 2026-09-10). The alphabet with English word comparisons, the false-friend letters (В Н Р С У Х), the five hard/soft vowel pairs, and a vowel chart laid out by mouth openness and tongue position. A tip on the word card when a word carries a trap letter or a sound English lacks; a reference screen for the whole system. | Nothing in the app teaches the letters; the owner learned from exactly such a chart | 2 days |
+| P10.3 | **Comprehensible input from the video library.** Measured 2026-09-10: about **25,000 caption lines** of 4–12 words sit within one unknown word of what the curriculum teaches, across the 327 caption files. Merge auto-caption fragments into sentences (they break mid-clause and carry no punctuation), index by the lemmas they need, and serve them against the learner's own FSRS state — i+1 from native speech. | The differentiator nothing else has: native content chosen by a personal scheduler | 3–5 days |
+| P10.4 | **One-tap sentence mining while watching.** A line in Immerse becomes a card carrying that video's own audio and moment. | Collapses the three-tool workflow into one tap; the player, index and scheduler exist | 2 days |
+| P10.5 | **A task at the end of each chapter.** "Order a coffee with what you know", scored by the Worker against the words actually taught. | Forces output against a goal rather than a quiz | 2–3 days |
+| P10.6 | **Shadowing.** Repeat after the recording, scored on alignment; recordings, speed control and on-device dictation are all in place. | Underserved, and cheap given what exists | 2–3 days |
+| P10.7 | **Read anything.** Paste Russian text or a YouTube link; it is lemmatised against what the learner knows and unknown words are one tap from a card. | Makes Bridges the place reading happens, not a place beside it | 1–2 weeks |
+
+Order: P10.1 and P10.2 first (a day or two each, and both aimed at the
+production gap), then P10.3 with P10.4, which are the edge. P10.7 is the
+largest and the least certain.
 
 ## 9. Cost model (owner's estimates — verify current prices at the source before quoting)
 

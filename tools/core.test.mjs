@@ -22,8 +22,10 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
   from "../core/state.js";
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
-import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, lessonSize, LESSON_RAMP, LESSON_SIZE }
+import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, PRODUCE_AT,
+         lessonSize, LESSON_RAMP, LESSON_SIZE }
   from "../core/questions.js";
+import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS } from "../core/alphabet.js";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP }
   from "../core/speech.js";
 import { describeForm, summarise } from "../core/forms.js";
@@ -870,6 +872,95 @@ for (const d of DRILL_TYPES) {
   if (d.id === "aspect") {
     ok(qs.every((q) => q.note), "aspect: the rule is available as a hint");
   }
+}
+
+/* The alphabet and the sounds under it (ROADMAP P10.2). Hand-authored teaching
+   content, so what is checked is that it is complete and internally consistent —
+   a missing letter or a pair that does not pair is a lesson that teaches a
+   falsehood. */
+group("the writing system");
+{
+  ok(LETTERS.length === 33, "all 33 letters", String(LETTERS.length));
+  ok(LETTERS.every((x) => x.l && x.name && x.ipa && x.like && x.kind),
+     "each carries a name, a sound, an English comparison and a class");
+  const vowels = LETTERS.filter((x) => x.kind === "vowel");
+  const signs = LETTERS.filter((x) => x.kind === "sign");
+  ok(vowels.length === 10, "ten vowel letters", String(vowels.length));
+  ok(signs.length === 2, "the hard and soft signs", String(signs.length));
+  ok(LETTERS.filter((x) => x.kind === "consonant").length === 21, "twenty-one consonants");
+  // Alphabetical order, by the Russian alphabet's own sequence.
+  const order = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+  ok(LETTERS.map((x) => x.l[0]).join("") === order, "in alphabetical order");
+  const bare = new Set(LETTERS.map((x) => x.l.split(" ")[1]));
+  ok(bare.size === 33, "no letter listed twice", String(bare.size));
+
+  ok(VOWEL_PAIRS.length === 5, "five hard/soft vowel pairs", String(VOWEL_PAIRS.length));
+  // Every pair's letters are real vowel letters, and every vowel is in a pair.
+  const paired = VOWEL_PAIRS.flatMap((p) => [p.hard, p.soft]);
+  ok(paired.every((v) => bare.has(v)), "the pairs use real letters");
+  ok(new Set(paired).size === 10 && vowels.every((v) => paired.includes(v.l.split(" ")[1])),
+     "and every vowel letter is in exactly one pair");
+  ok(VOWEL_PAIRS.every((p) => p.example.length === 2 && p.gloss.length === 2
+                              && p.example[0] !== p.example[1]),
+     "each pair contrasts two real words");
+
+  ok(VOWEL_CHART.length === 6, "six vowel sounds on the chart", String(VOWEL_CHART.length));
+  ok(VOWEL_CHART.every((v) => v.x >= 0 && v.x <= 1 && v.y >= 0 && v.y <= 1),
+     "every one placed inside the chart");
+  // и front and close, у back and close, а open: if these drift the picture lies.
+  const at = (v) => VOWEL_CHART.find((x) => x.v === v);
+  ok(at("и").x < at("ы").x && at("ы").x < at("у").x, "и is front, ы central, у back");
+  ok(at("а").y > at("э").y && at("э").y > at("и").y, "а is the open one, и the closed");
+
+  ok(TRAPS.length === 6, "six letters that look Latin and are not",
+     TRAPS.map((x) => x.l[0]).join(""));
+  ok(TRAPS.every((x) => x.note && /looks like/i.test(x.note)),
+     "each says what it is mistaken for");
+  // The tip a word earns.
+  ok(/\bv\b/.test(soundTip("врач") || ""), "«врач» warns about в", soundTip("врач"));
+  ok(/tongue back/.test(soundTip("ты") || ""), "«ты» explains ы", soundTip("ты"));
+  ok(soundTip("да") === null, "a word with nothing tricky gets no tip", String(soundTip("да")));
+  ok(soundTip("") === null && soundTip(undefined) === null, "and neither does nothing");
+}
+
+/* Recognition to meet a word, production to keep it (ROADMAP P10.1). */
+group("production on a known word");
+{
+  const unit = UN.find((u) => u.id === "food");
+  const words = lessonWords(unit, 0);
+  const RECOGNITION = ["choose-en", "choose-ru", "listen"];
+  const kindsFor = (seen) => {
+    const out = new Set();
+    for (let k = 0; k < 40; k++) {
+      for (const q of Q.quizSteps(unit, 0, [], seen)) {
+        // The chapter's `form` question has its own chosen-then-typed rule
+        // (FORM_MIX) and is not drawn from candidates().
+        if (q.kind !== "form" && typeof q.i === "number" && words.includes(q.i)) out.add(q.kind);
+      }
+    }
+    return out;
+  };
+  const fresh = kindsFor({});
+  ok(RECOGNITION.some((k) => fresh.has(k)),
+     "a word just met is asked by recognition", [...fresh].join(","));
+
+  // The same words, now held by the scheduler past PRODUCE_AT.
+  const known = {};
+  for (const i of words) known[L[i].b] = { s: PRODUCE_AT + 2, d: 5, due: 0, last: -1, reps: 4, lapses: 0 };
+  const mature = kindsFor(known);
+  ok(!RECOGNITION.some((k) => mature.has(k)),
+     "a word the scheduler holds is never asked by multiple choice", [...mature].join(","));
+  ok(mature.has("type") || mature.has("cloze"),
+     "it is typed or filled into a gap instead", [...mature].join(","));
+
+  // Just below the line it is still recognition: the rule is stability, not age.
+  const young = {};
+  for (const i of words) young[L[i].b] = { s: PRODUCE_AT - 1, d: 5, due: 0, last: -1, reps: 2, lapses: 0 };
+  ok(RECOGNITION.some((k) => kindsFor(young).has(k)),
+     `below ${PRODUCE_AT} days of stability recognition is still offered`);
+  // And a platform that passes no schedule behaves exactly as before.
+  ok(RECOGNITION.some((k) => kindsFor(undefined).has(k)),
+     "with no schedule given, nothing changes");
 }
 
 /* A drill is a pool of questions, not a handful the learner sees again and again

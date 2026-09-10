@@ -1,9 +1,9 @@
 ﻿/* A unit's lessons, and inside a lesson its three components. */
 
 import React, { useEffect, useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { useSession } from "../session";
-import { useTheme } from "../theme";
+import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick } from "../ui";
 import {
   UN, lessonCount, lessonWords, lessonDone, components, unitFineProgress, L,
@@ -97,6 +97,11 @@ export function LessonScreen({ route, navigation }) {
     video: "Hear them in the wild · shared across this unit",
   };
 
+  const nextId = (cs.find((c) => !c.done) || {}).id;
+  const open = (id) => navigation.navigate(
+    id === "video" ? "Video" : id === "quiz" ? "Quiz" : "Vocab",
+    { unitId: unit.id, index: i });
+
   return (
     <Screen>
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6,
@@ -106,26 +111,51 @@ export function LessonScreen({ route, navigation }) {
         </Text>
         <Muted size={14}>steps done</Muted>
       </View>
-      <List>
-        {cs.map((c, k) => (
-          <Row key={c.id} last={k === cs.length - 1}
-               onPress={() => {
-                 const dest = c.id === "video" ? "Video"
-                            : c.id === "quiz" ? "Quiz" : "Vocab";
-                 navigation.navigate(dest, { unitId: unit.id, index: i });
-               }}>
-            <Tick on={c.done} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
-                {c.label}
-              </Text>
-              <Muted>{copy[c.id]}</Muted>
-            </View>
-            {c.id === "quiz" && typeof c.score === "number"
-              ? <Pill tone={c.done ? "good" : undefined}>{c.score + "%"}</Pill> : null}
-          </Row>
-        ))}
-      </List>
+      {/* Three cards with air between them rather than three rows of one list:
+          the steps of a lesson are a short sequence, and a flat list of ticks
+          read as a settings screen (the owner, 2026-09-10). The step to do next
+          carries the brand edge, so the eye lands on it without a label. */}
+      <View style={{ gap: 10 }}>
+        {cs.map((c, k) => {
+          const isNext = c.id === nextId;
+          return (
+            <Pressable
+              key={c.id}
+              testID={`step-${c.id}`}
+              onPress={() => open(c.id)}
+              style={({ pressed }) => ({
+                backgroundColor: c.done ? t.surface2 : t.surface,
+                borderColor: isNext ? t.brand : t.line,
+                borderWidth: 1,
+                borderBottomWidth: pressed ? 1 : isNext ? 3 : 1,
+                marginBottom: pressed ? 2 : 0,
+                borderRadius: radius.lg,
+                padding: 15,
+                flexDirection: "row", alignItems: "center", gap: 14,
+                opacity: c.done ? 0.85 : 1,
+              })}
+            >
+              <View style={{ width: 38, height: 38, borderRadius: 19,
+                             alignItems: "center", justifyContent: "center",
+                             backgroundColor: c.done ? t.good : isNext ? t.brand : t.surface2,
+                             borderWidth: c.done || isNext ? 0 : 1, borderColor: t.line }}>
+                <Text style={{ fontSize: c.done ? 17 : 15, fontWeight: "700",
+                               color: c.done ? t.goodOn : isNext ? t.brandOn : t.ink3 }}>
+                  {c.done ? "✓" : String(k + 1)}
+                </Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: t.ink, fontSize: 16, fontWeight: "600" }}>
+                  {c.label}
+                </Text>
+                <Muted>{copy[c.id]}</Muted>
+              </View>
+              {c.id === "quiz" && typeof c.score === "number"
+                ? <Pill tone={c.done ? "good" : undefined}>{c.score + "%"}</Pill> : null}
+            </Pressable>
+          );
+        })}
+      </View>
       {/* One primary action: the next undone step, or the next lesson. */}
       {!lessonDone(st, unit, i) ? (
         <Btn kind="pri" style={{ marginTop: 16 }}

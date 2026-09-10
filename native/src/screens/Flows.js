@@ -17,6 +17,7 @@ import {
 } from "../data";
 import { quizPassed } from "@core/state";
 import { firstSense } from "@core/util";
+import { soundTip } from "@core/alphabet";
 import { touchStreak } from "../store";
 
 /* The mark for a run: partial credit summed over first attempts, as a percentage. */
@@ -147,6 +148,16 @@ export function VocabFlow({ route, navigation }) {
             <View style={{ flexDirection: "row", gap: 6, marginTop: 10 }}>
               {[w.p, w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
             </View>
+            {/* One line about a sound this word carries — a letter that is not
+                what it looks like, or one English has not got (ROADMAP P10.2).
+                A tip, not a lesson: the whole system is under Practice → Sounds. */}
+            {soundTip(w.b) ? (
+              <View testID="sound-tip"
+                    style={{ marginTop: 12, backgroundColor: t.surface2, borderRadius: radius.sm,
+                             paddingHorizontal: 12, paddingVertical: 9, alignSelf: "stretch" }}>
+                <Muted size={13} style={{ textAlign: "center" }}>{soundTip(w.b)}</Muted>
+              </View>
+            ) : null}
             {(w.x || []).slice(0, 2).map((ex, k) => (
               <View key={k} style={{ marginTop: k ? 10 : 14, paddingTop: k ? 10 : 12, borderTopWidth: 1,
                                      borderTopColor: t.lineSoft, alignSelf: "stretch" }}>
@@ -200,7 +211,10 @@ export function QuizFlow({ route, navigation }) {
   const [seed, setSeed] = useState(0);
   // The quiz tops up with what is due or in trouble before the unit's earlier
   // words: review comes to the path (the pedagogy review, 2026-09-08).
-  const steps = useMemo(() => Q.quizSteps(unit, index, reviewWords(st)), [unitId, index, seed]);
+  // `st.seen` rides along so a word the scheduler already trusts is asked by
+  // typing rather than by four choices (ROADMAP P10.1).
+  const steps = useMemo(() => Q.quizSteps(unit, index, reviewWords(st), st.seen),
+                        [unitId, index, seed]);
   useAudioStopOnLeave();
 
   if (result) {
@@ -279,11 +293,20 @@ export function DrillList({ navigation }) {
           {((st.drills || {}).listening || {}).best
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
         </Row>
-        <Row last onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
+        <Row onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
           <Thumb id="emotion" locked={!talkOpen} />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Talk</Text>
             <Muted>{talkOpen ? "A short conversation on a topic" : `Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}</Muted>
+          </View>
+        </Row>
+        {/* The letters and the mouth behind them (ROADMAP P10.2). Open from the
+            first screen: nothing else in the app teaches the alphabet. */}
+        <Row last onPress={() => navigation.navigate("Sounds")}>
+          <Thumb id="speech" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Sounds</Text>
+            <Muted>The alphabet, the vowel pairs and the vowel chart</Muted>
           </View>
         </Row>
       </List>

@@ -45,6 +45,12 @@ const NOUN_COLUMNS = ["Singular", "Plural"];
 /* A listening scene: two or three sentences from the listening pool, played in
    a row, with a question per sentence and one about a word heard — the questions
    readable before the audio starts (the owner, 2026-09-07). */
+/* Days of stability after which a word is asked by production rather than by
+   recognition (ROADMAP P10.1). Four is roughly the third or fourth correct
+   recall: long enough that the word is known, early enough that it is still
+   being learned. */
+export const PRODUCE_AT = 4;
+
 export const SCENE_ROWS = [2, 3];
 /* Below this frequency rank a lemma is a function word, not a word to listen for. */
 export const SCENE_SKIP_TOP = 100;
@@ -155,16 +161,40 @@ export function makeQuestions(env) {
   const poolFor = (u) =>
     (u.w.length >= 8 ? u.w : UN.flatMap((x) => x.w).slice(0, 400));
 
-  /* Options for a word, easiest first: recognition before production. */
-  function candidates(idx, pool) {
+  /* Options for a word, easiest first: recognition before production.
+     With `known` (the learner's card for this word), a word the scheduler already
+     trusts is asked the other way round — see PRODUCE_AT. */
+  function candidates(idx, pool, known) {
     const list = [{ t: "choose-en", i: idx }];
     if (voice()) list.push({ t: "listen", i: idx });
     list.push({ t: "choose-ru", i: idx });
     const c = clozeFor(idx);
     if (c) list.push({ t: "cloze", i: idx, ex: c.ex, token: c.token });
     list.push({ t: "type", i: idx });
-    return list.map((e) => Object.assign(e, { pool }));
+    const out = list.map((e) => Object.assign(e, { pool }));
+    return mature(known) ? productionOnly(out) : out;
   }
+
+  /* Recognition is picking the right answer out of four; production is finding
+     it yourself. Every review of the big apps lands on the same complaint — that
+     tapping through multiple choice teaches you to recognise words you cannot
+     use — and the research agrees that producing a word builds more than
+     choosing it does (ROADMAP P10.1).
+
+     So recognition is for meeting a word, not for keeping it. Once the scheduler
+     holds a card for PRODUCE_AT days it has been recalled correctly several
+     times, and from then on the word is asked by typing or by a gap to fill.
+     Stability rather than a count of reviews, because that is what the scheduler
+     actually believes about the memory. */
+  const mature = (card) => !!card && typeof card.s === "number" && card.s >= PRODUCE_AT;
+  const PRODUCTION = ["type", "cloze"];
+  /* Not a reordering — a restriction. The quiz picks at random from what this
+     returns, so leaving the recognition kinds in the list would leave them in
+     the quiz. A word with no example sentence has only `type`, which is fine. */
+  const productionOnly = (list) => {
+    const say = list.filter((e) => PRODUCTION.includes(e.t));
+    return say.length ? say : list;
+  };
 
   /* Every form in a word's paradigm tables, as written (with stress). */
   function paradigmForms(w) {
@@ -675,16 +705,19 @@ export function makeQuestions(env) {
      up with review: `prefer` (lemma indices — what is due or in trouble, the
      app decides) first, then words from the unit's earlier lessons, so a
      three-word lesson is not a five-question quiz. */
-  function quizSteps(unit, index, prefer) {
+  function quizSteps(unit, index, prefer, seen) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
+    // `seen` is the learner's schedule keyed on the Russian string (rule 20.4).
+    // A word the scheduler already holds is asked by production (PRODUCE_AT).
+    const card = (i) => (seen && L[i] ? seen[L[i].b] : null);
     const bag = words.map((i) => {
-      const c = candidates(i, pool);
+      const c = candidates(i, pool, card(i));
       return c[Math.floor(Math.random() * c.length)];
     });
     const production = words
       .map((i) => {
-        const c = candidates(i, pool);
+        const c = candidates(i, pool, card(i));
         return c.find((e) => e.t === "type") || c.find((e) => e.t === "cloze");
       })
       .filter(Boolean);
@@ -693,7 +726,8 @@ export function makeQuestions(env) {
     const earlier = shuffle(unit.w.slice(0, index * lessonWords(unit, 0).length)
       .filter((i) => !words.includes(i) && !review.includes(i)));
     while (bag.length < QUIZ_N && (review.length || earlier.length)) {
-      const c = candidates(review.length ? review.pop() : earlier.pop(), pool);
+      const pick = review.length ? review.pop() : earlier.pop();
+      const c = candidates(pick, pool, card(pick));
       bag.push(c[Math.floor(Math.random() * c.length)]);
     }
     const out = spread(shuffle(bag).slice(0, QUIZ_N)).map(present).filter(Boolean);

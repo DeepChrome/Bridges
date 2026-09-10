@@ -41,9 +41,9 @@ Built and working today:
 - FSRS scheduling behind the four Anki review outcomes
 - a trouble bank for vocabulary that repeatedly causes difficulty
 - installable PWA, deployed to Netlify
-- verification: 159 web smoke checks, 307 core checks, 138 native jest checks, 99
-  contrast checks, 36 Worker checks, a seeded learner simulator and an emulator
-  walkthrough (§31)
+- verification: 159 web smoke checks, 409 core checks, 212 native jest checks, 99
+  contrast checks, 54 visual checks, 47 Worker checks, a copy cap, a written-passage
+  gate, a seeded learner simulator and an emulator walkthrough (§31)
 
 Known gaps, stated honestly:
 
@@ -1237,7 +1237,8 @@ several channels carry the channel's initials where a unit has its icon.
   by eye (abstract nouns, months and weekdays, roles that came back as
   statues, anything medical), 14 given a curated term. After the
   curriculum's re-cut (§30i) and a harvest for the words that joined:
-  **314 of the 1,045 unit words ship, 10.7 MB** — the new words are mostly
+  **259 of the 1,045 unit words ship, 9.0 MB** after the 2026-09-10 read
+  (P11.1: 58 blanked by eye, and the harvest rules fixed) — the new words are mostly
   verbs. Verbs and adjectives take no English route at all — "suit" for
   «подходить» found a man in tweed, "back" for «поддержать» a pair of bare
   backs — so only a handful of them have a picture.
@@ -1517,7 +1518,7 @@ were inline JSX inside `VocabFlow` — no component, no name, no test seam, so
 there was nothing to design. All three drew the same `Card` as the verdict panel
 and the Done panel: four different kinds of moment, one shape. The photograph was
 a 150 px band inset inside the card's padding, so it read as an attachment rather
-than the subject — and only 314 of the 1,045 unit words have one, the ones that
+than the subject — and only a quarter of the unit words have one, the ones that
 do not being mostly the function words a beginner meets first, so the common
 early card was a large empty white box with a small word in it. There was **no
 animation anywhere in a lesson**: stepping card to card was a synchronous

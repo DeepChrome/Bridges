@@ -104,7 +104,7 @@ can overrule any of them.
   the same network — the owner is remote. The standalone **preview** APK works offline
   and is what the Phase 3 STT gate actually needs, so it was built first and the dev
   client deferred until someone is on the LAN. Saves an EAS build too.
-- **A17 — app name.** The Expo scaffold left `name`/`slug` as "native", which is what
+- **A17 — app name.** The Expo scafold left `name`/`slug` as "native", which is what
   the phone's home screen would have shown. `name` is now "Bridges". The slug stays
   "native" because the EAS project was already linked under it and recreating the
   project to change an internal identifier is not worth it.
@@ -322,24 +322,30 @@ ANTHROPIC_API_KEY:       set as a Cloudflare secret in Phase 4 — never written
 
 ## 3. Phase overview
 
-| Phase | Name | Blocks | Effort | Gate |
-|---|---|---|---|---|
-| 0 | Backup & hygiene | everything | ~half day | — |
-| 1 | Get it on a phone | 3, 5 | 2–3 days | — |
-| 2 | Data & state foundations | 5 | 2–3 days | — |
-| 3 | STT spike | 4, 5 | 1–2 days | **[STOP — user must speak]** |
-| 4 | Backend | 5, 6 | 2–3 days | **[STOP — user sets secret]** |
-| 5 | "Say it" + "Hear it" activities | 6 | 1–2 weeks | — |
-| 6 | Conversation mode | — | 1–2 weeks | — |
-| 7 | Stress feedback spike (optional) | — | 2–4 weeks | **[STOP — user decides]** |
-| 8 | Pre-dissemination | — | 1–2 weeks | **[STOP — user decides]** |
-| 9 | The learner's review (2026-09-08) | — | 2–3 weeks | — |
-| 10 | The edge (2026-09-10) | — | 3–4 weeks | — |
-| 11 | What the second review left open (2026-09-10) | — | ~1 week | — |
+| Phase | Name | Effort | State |
+|---|---|---|---|
+| 0 | Backup & hygiene | ~half day | done |
+| 1 | Get it on a phone | 2–3 days | done |
+| 2 | Data & state foundations | 2–3 days | done |
+| 3 | STT spike | 1–2 days | done — on-device recognition passed the gate 2026-09-06, Whisper not needed |
+| 4 | Backend | 2–3 days | done — the Worker is live, three routes |
+| 5 | "Say it" + "Hear it" | 1–2 weeks | done |
+| 6 | Conversation mode | 1–2 weeks | done |
+| 7 | Stress feedback spike (optional) | 2–4 weeks | **not started, and not obviously worth it** — P8.5 measured only 18 curriculum headwords missing a stress mark, so the problem it was for turned out to be small |
+| 8 | Pre-dissemination | 1–2 weeks | done but for the licence decision (P12.11) |
+| 9 | The learner's review (2026-09-08) | 2–3 weeks | done but for two instruments (P12.9) |
+| 10 | The edge (2026-09-10) | 3–4 weeks | done, all nine |
+| 11 | What the second review left open (2026-09-10) | ~1 week | done, nine of ten; the tenth is P12.11 |
+| 12 | What is actually left (2026-09-10) | — | **open — the one list** |
 
-Phases 0 → 1 → 2 can run in that order without any user input, **except** where A4
-applies: P0.1 (GitHub auth) and the installs in Phase 1 are user actions. Phase 3 is
-the first designed gate.
+Phase 12 is where to look. Everything before it is closed except the handful of
+items it names, and it names them wherever they came from, so nothing has to be
+reconstructed by reading eleven sections for struck-through rows.
+
+Phase 7 is the one thing on this roadmap that was planned and then not built. It
+is left in rather than deleted because the reason matters: the measurement that
+would have justified it (P8.5) came back small, so the phase was never worth
+opening. Deleting it would lose that.
 
 ---
 
@@ -686,19 +692,20 @@ together. These tasks are about being one tool that does it.
 
 | ID | Task | Why | Effort |
 |---|---|---|---|
-| P10.1 | **Production by default on a mature card.** Once a card is stable, stop offering four choices: type it or say it. `candidates()` picks by stability rather than always easiest-first; the Russian keyboard and the recogniser are already there. | The clearest finding in the research, and the one competitor weakness everyone names | 1 day |
-| P10.2 | **Pronunciation in the lesson** (the owner, 2026-09-10). The alphabet with English word comparisons, the false-friend letters (В Н Р С У Х), the five hard/soft vowel pairs, and a vowel chart laid out by mouth openness and tongue position. A tip on the word card when a word carries a trap letter or a sound English lacks; a reference screen for the whole system. | Nothing in the app teaches the letters; the owner learned from exactly such a chart | 2 days |
+| P10.1 | **Production by default on a mature card — done 2026-09-10.** Past `PRODUCE_AT` (4 days of FSRS stability) `candidates()` returns only `type` and `cloze`. It is a **restriction, not a reordering**: `quizSteps` picks at random from what `candidates()` returns, so leaving the multiple-choice kinds in the list would have left them in the quiz. | The clearest finding in the research, and the one competitor weakness everyone names | done |
+| P10.2 | **Pronunciation in the lesson — done 2026-09-10** (the owner). `core/alphabet.js`: 33 letters with an English word to hear each in, the six Latin look-alikes, the five hard/soft vowel pairs, and a vowel chart placed by tongue position and jaw opening. `soundTip(word)` puts one line on a vocabulary card. Comparisons are approximations offered as a way in, not claims of identity — Russian к is unaspirated, so the note reads "the k in skate" — and where English has nothing (ы) the note says so and describes the mouth. | Nothing in the app teaches the letters; the owner learned from exactly such a chart | done |
 | P10.3 | **Listening passages — done 2026-09-10.** `build_listening.py` slides a 45 s window over each video's word stream and keeps the three densest non-overlapping spans: **926 passages** from 312 videos, 12–56 curriculum words each, median 33, 0.83 MB. The app ranks them by how many of *this* learner's words they say. Player skips ±5 s inside the span. Questions ask what was caught. **What the build measured and the design had to answer:** assigning each passage a chapter gave chapters 1–3 four passages between them and chapter 10 three hundred — 45 s of a native speaker simply uses more words than a beginner has. The intermediate plateau, in one number. So nothing is gated; the ranking does the work, and the Scenes activity stays for beginners. | The differentiator nothing else has: native content chosen by a personal scheduler | done |
 | P10.4 | **Mining from a video — done 2026-09-10.** A word's moment in Immerse offers "Add to review": it goes into `pinned` and `mined` (state v7) keeps the video, the millisecond and the caption around it, so the flashcard carries "Where you heard it" straight back to that second. The three-tool workflow (Language Reactor, vocabsieve, Anki) in one tap. **Not** a sentence card: the captions have no translation, so a mined line would be a card with no meaning on its back — the word has an entry, a gloss and audio, and the moment is what was missing. | Collapses the three-tool workflow into one tap; the player, index and scheduler exist | done |
-| P10.9 | **Level-matched listening — done 2026-09-10.** The owner listened to P10.3's passages and rejected them: *"way too advanced… generate your own and they should correspond to chapters/lessons. Lesson 1 audio should be extremely straightforward, simple, relaxed cadence."* Told that generated Russian was against doctrine, he overruled it. **169 lessons, 844 sentences**, one written passage each, in `data/curated/scripts/`. `check_scripts.mjs` proves every word is a form of a lemma that lesson taught, that sentences stay inside their chapter's length, that each passage uses at least three of its own lesson's words, and that no sentence repeats. Practice → Listening now leads with these; P10.3's native-speed passages are the second row and say they are harder. **The open item:** no Russian speaker has read them. Level is machine-checked, idiom is not. | The corpus could not do this: the same measurement under P10.3 — chapters 1–3 sharing four passages — is exactly why | done |
-| P10.8 | **A pronunciation drill — done 2026-09-10.** Thirteen minimal pairs: the five vowel pairs plus eight consonant contrasts (ш/щ, ж/ш, б/п, д/т, з/с, р/л, hard and soft л and т). Heard first, then said, alternating; reached from Sounds rather than as a twelfth row on Practice. **The saying half never says "you said it wrong"** — the recogniser was measured on 2–4-word sentences where context carries the work, and a single word is a harder ask — so it names which of the two it heard, and when it heard neither it skips and grades nothing. Every word is checked against the shipped dictionary by `core.test.mjs`: a minimal pair invented by a non-native author is exactly what §30a exists to prevent. | The owner asked; and hearing a contrast is not the same as producing it | done |
 | P10.5 | **A task at the end of each chapter — done 2026-09-10.** Ten goals in `core/tasks.js`, one a chapter, offered on the path once a chapter's spine is finished. `POST /v1/task` judges **the goal, not the grammar**, against the words that learner has been taught. Not scored and cannot be failed: each requirement is met or not, and the validator refuses a reply that invents, drops, renames or double-judges one, with `done` derived rather than asked for. The file writes no Russian at all, which is what keeps it clear of §30a. | Forces output against a goal rather than a quiz | done |
 | P10.6 | **Shadowing — done 2026-09-10.** Hear a sentence, say it straight back. Drawn from the speak pool so every sentence has a real recording; shadowing a device voice would be shadowing a robot's rhythm. Two things separate it from the activities it sits between, and both are asserted: the Russian is not on screen before the attempt (with it there this is reading aloud, which is Say), and replaying the model costs nothing (in Hear the recording *is* the question). | Underserved, and cheap given what exists | done |
 | P10.7 | **Read anything — done 2026-09-10.** Paste Russian and it reports the share of **content** words the learner is scheduling, which are new, and which the dictionary cannot resolve; the reading view is `Linked`, so a tapped word opens the same sheet as anywhere else. New words go to `pinned`, due today. A YouTube link opens the episode when it is already in the library and says plainly that it cannot do more — fetching and captioning a video is a build-time job with a tool chain behind it. The analysis is in `core/read.js`, pure and testable. | Makes Bridges the place reading happens, not a place beside it | done |
+| P10.8 | **A pronunciation drill — done 2026-09-10.** Thirteen minimal pairs: the five vowel pairs plus eight consonant contrasts (ш/щ, ж/ш, б/п, д/т, з/с, р/л, hard and soft л and т). Heard first, then said, alternating; reached from Sounds rather than as a twelfth row on Practice. **The saying half never says "you said it wrong"** — the recogniser was measured on 2–4-word sentences where context carries the work, and a single word is a harder ask — so it names which of the two it heard, and when it heard neither it skips and grades nothing. Every word is checked against the shipped dictionary by `core.test.mjs`: a minimal pair invented by a non-native author is exactly what §30a exists to prevent. | The owner asked; and hearing a contrast is not the same as producing it | done |
+| P10.9 | **Level-matched listening — done 2026-09-10.** The owner listened to P10.3's passages and rejected them: *"way too advanced… generate your own and they should correspond to chapters/lessons. Lesson 1 audio should be extremely straightforward, simple, relaxed cadence."* Told that generated Russian was against doctrine, he overruled it. **168 lessons, 839 sentences**, one written passage each, in `data/curated/scripts/`. `check_scripts.mjs` proves every word is a form of a lemma that lesson taught, that sentences stay inside their chapter's length, that each passage uses at least three of its own lesson's words, and that no sentence repeats. Practice → Listening now leads with these; P10.3's native-speed passages are the second row and say they are harder. **The open item:** no Russian speaker has read them. Level is machine-checked, idiom is not. | The corpus could not do this: the same measurement under P10.3 — chapters 1–3 sharing four passages — is exactly why | done |
 
-Order: P10.1 and P10.2 first (a day or two each, and both aimed at the
-production gap), then P10.3 with P10.4, which are the edge. P10.7 is the
-largest and the least certain.
+**All nine shipped on 2026-09-10.** What the phase set out to close — production
+against an intention rather than recognition against a prompt, and input from
+outside the corpus — is closed. What it did not close is that none of it has been
+used by a learner for more than a few minutes on an emulator; see Phase 12.
 
 ## Phase 11 — What the second user review left open (2026-09-10)
 
@@ -709,17 +716,44 @@ the rest, ranked, with the evidence each was measured by.
 | ID | Task | Evidence | Effort |
 |---|---|---|---|
 | P11.1 | **The photographs — read 2026-09-10, and the rules fixed.** Three rule bugs, not two: `ART_RE` was Latin-only (so «Скульптура студента МАДИ» stood for «студент» and a monument to Ё for «буква» — both are refused now and get no picture rather than a statue); `NOT_A_PLACE` was a QID allow-list and is a P279 walk from four roots; and `graphs?\b` had no leading boundary, so it matched the tail of **"photograph"** and was throwing away the one kind of file the harvest wants (`icons?\b` matched "silicon", `covers?\b` matched "discovers"). **149 of the 305 shipped were opened**, chosen worst-route-first: every one reached through an English gloss (39), every one from the `depicts` route, and the whole `article` route. Error rates measured, not estimated: **English gloss 44 %, `article` ~50 %, `depicts` ~12 %, `lead` lowest**. 58 blanked, 4 re-termed, 2 re-picked; shipped 314 → **259**, which is the right direction — a wrong picture is worse than none. **156 remain unopened, almost all on the `lead` route**, which is the safest and the only one not exhausted. | The data review, 50 thumbnails opened | mostly done |
-| P11.1b | **The 156 unread `lead`-route photographs.** The route that takes the article's own lead image, and the one with the lowest measured error rate — but it is a rate, not zero, and these have not been looked at. | Sampling, 2026-09-10 | half day |
-| ~~P11.1~~ | ~~**The photographs need a proper read.**~~ 39 of the 55 opened showed the wrong subject; 24 are blanked and 19 duplicates resolved, but **291 were never opened**. They are unmeasured, not clean. Read the contact sheet properly, blank what is wrong, and fix the two harvest rules that let them through: `ART_RE` matches Latin only (so «Скульптура…» and a chart passed), and `NOT_A_PLACE` is a QID allow-list rather than a P31/P279 subclass test (so any gloss that is also a toponym passed). | The data review, 50 thumbnails opened | 1 day |
-| P11.2 | **Branch words in the wrong unit — done 2026-09-10.** HOMOGRAPHS in uild_topics.py: an English word with two unrelated senses may only claim a lemma from its **first** sense, and only when that sense carries no parenthetical (a gloss says first what a word mostly means; «back (of a chair)» exists to say otherwise). Thirty-two entries, each naming the word that put it there. Where the wrong reading is itself the plain first sense — «bear» is the whole of выдерживать's — no rule can tell and the fix is OVERRIDES. Measured with udit_branches.py: **39 words left a wrong unit, 7 moved to a right one** (плавание→Sport, свидетель→Law, судья and судить→Law, услышать→Speech, номер→Time, кнопка→Technology), 28 came up behind them to fill the caps — and half the overrides added here are for those refills, which is the thing to re-read after any change. | 	ools/audit_branches.py, whose own matched-sense column names the cause | done |
+| P11.2 | **Branch words in the wrong unit — done 2026-09-10.** HOMOGRAPHS in build_topics.py: an English word with two unrelated senses may only claim a lemma from its **first** sense, and only when that sense carries no parenthetical (a gloss says first what a word mostly means; «back (of a chair)» exists to say otherwise). Thirty-two entries, each naming the word that put it there. Where the wrong reading is itself the plain first sense — «bear» is the whole of выдерживать's — no rule can tell and the fix is OVERRIDES. Measured with audit_branches.py: **39 words left a wrong unit, 7 moved to a right one** (плавание→Sport, свидетель→Law, судья and судить→Law, услышать→Speech, номер→Time, кнопка→Technology), 28 came up behind them to fill the caps — and half the overrides added here are for those refills, which is the thing to re-read after any change. | tools/audit_branches.py, whose own matched-sense column names the cause | done |
 | P11.3 | **Three shared forms mis-resolved — done 2026-09-10.** `lemma_overrides.json`: «стоит»→стоить (the corpus's own English side says cost 30, stand 20 over 63 sentences), «начал»/«начала»→начать, «дорога»→the noun. `IX[key][0]` now opens and grades the right lemma for all three; стоить's recovered frequency also moved it from a chapter-7 side quest onto the chapter-4 spine, where a word that common belongs. | Measured over the shipped payload, before and after | done |
 | P11.4 | **A retake repeated the quiz — done 2026-09-10.** `quizSteps` takes what the last attempt asked and prefers another shape for a word that comes back; a word with only one shape still repeats, because asking nothing is worse. Measured over all 169 lessons: **24.0 % → 2.7 %** of a retake is the same shape about the same word. The flow holds the keys in a ref for the session only — a retake days later is a real review. The dead production branch is fixed too: `candidates` always ends with a `type`, so `find(type) \|\| find(cloze)` meant every guaranteed production slot in the app was typed and the gap-fill was unreachable. | Measured, 169 lessons, first try vs retake | done |
 | P11.5 | **A word's part of speech is data — done 2026-09-10.** `data/curated/pos_overrides.json`, applied in `build_lexicon.py`: справа, ничего and как are retyped `other`, and retyping **drops the paradigm the wrong file gave them** (справа's thirteen invented cells, none of which occurs anywhere in the collection). перед and зовут were a shared form rather than a wrong class and went to `lemma_overrides.json`; both impostor rows then fall out of the pool for want of a corpus count. `check_closed_class` in `build_site.py` fails the build when a unit teaches as a content word something `function_words.json` calls closed-class **and** the lexicon gives no content-word forms — verified by removing the перед override and watching it fail. A stale pos override is fatal too. | The data review | done |
-| P11.6 | **The speech pool de-duplicates on old(ru) — done 2026-09-10.** 301 of 2,298 rows were a second spelling of one sentence (26 % of the pool was one sentence stored twice), and 647 of 4,634 per-unit entries pointed at a recording the unit already had. Now 1,987 rows, 0 duplicate groups, 0 duplicate entries; over 3,080 generated scenes, **0 play one recording twice**. The stressed copy is kept, as ank_examples keeps it. The pools were never as large as they looked: speak 2,320→1,986, listen 2,314→1,981, four more units below POOL_MIN_PER_UNIT. Still open and belonging to P11.7: 126 English glosses cover more than one Russian sentence, so 0.5 % of scene options are a second correct answer. | Measured over the shipped payload and 3,080 generated scenes | done |
+| P11.6 | **The speech pool de-duplicates on fold(ru) — done 2026-09-10.** 301 of 2,298 rows were a second spelling of one sentence (26 % of the pool was one sentence stored twice), and 647 of 4,634 per-unit entries pointed at a recording the unit already had. Now 1,987 rows, 0 duplicate groups, 0 duplicate entries; over 3,080 generated scenes, **0 play one recording twice**. The stressed copy is kept, as rank_examples keeps it. The pools were never as large as they looked: speak 2,320→1,986, listen 2,314→1,981, four more units below POOL_MIN_PER_UNIT. Still open and belonging to P11.7: 126 English glosses cover more than one Russian sentence, so 0.5 % of scene options are a second correct answer. | Measured over the shipped payload and 3,080 generated scenes | done |
 | P11.7 | **Distractors ignored part of speech — done 2026-09-10.** Wrong answers take the answer's own class first, then anything, then merely-distinct so no question loses a fourth option: **23.7 % → 2.1 %**, and the remainder is a data limit rather than a bug (the curriculum has few possessives, so nothing of «наш»'s class exists to stand beside it). A second correct option was checked one way only, first sense against first sense; both directions and every synonym now, **1.1 % → 0.0 %**. And `type`'s `alts` searched the question's own pool, so «тут» was marked wrong for "here" because the unit taught «здесь» — the learner had written correct Russian and was told they were wrong. The synonym index is over the whole curriculum. | 8,448 generated option sets | done |
 | P11.8 | **The form question starved — done 2026-09-10.** The tiers were a fallback chain, so a chapter whose card names a cell few of its words carry kept a narrow tier that was never quite empty and the wider ones were never reached. They are shares of one draw now, 55/25/20. Chapter 6: **7 → 47** distinct questions; every chapter now between 38 and 129. Note the shape of the mistake on the way: weighting the words and shuffling one bag leaves the lesson at 9 % of draws, because the route tier holds hundreds of words against the lesson's one or two. The share has to be on the tier. | 30 draws per lesson per spine unit | done |
 | P11.9 | **Interface smoothing — done 2026-09-10.** All seven. The Video focus card moved above the word list (about 1,100 px of rows stood between the player and it, so a tap read as doing nothing); "Heard in" expands past four in the place the list stopped; the word sheet was worse than one run — it showed `firstSense`, so «стол» read "table" while three sense groups sat behind it — and now uses `Senses`; Practice leads with one action and groups the rest; the two listening activities are named apart; the keyboard's 36 keys are 44 px tall (width cannot be: twelve keys on a 390 px screen is 27 px each, which still clears WCAG 2.5.8's 24 px). The Settings hairline was fixed at the cause: `last` was computed at 23 call sites, so inserting a row above the one carrying it silently broke the group and nothing could fail. `List` decides now. | The interface review | done |
-| P11.10 | **Licence exposure, for the owner to decide.** All 31 non-commercial-safe Tatoeba recordings ship (`--commercial` off), beside 10,311 Core 5000 and 170 Languages on Fire files the audit itself calls not redistributable, 208 MB on a public host. `--public` is off, so 1.13 MB of verbatim caption text ships while `docs/licensing.md` L22 says it does not. The 157 CC BY recordings name no speaker anywhere shipped. Fine for one learner; not for distribution. | Hash-matched against `site/audio` | owner's call |
+
+**Nine of ten shipped on 2026-09-10.** The tenth is the licence question, which is
+a decision rather than a task and now sits in Phase 12 with everything else that
+is open.
+
+## Phase 12 — What is actually left (2026-09-10)
+
+**This is the one list.** Phases 0 to 11 are closed, and everything still
+outstanding — whatever phase it came out of — is here, so that "what is left"
+has a single answer rather than needing eleven sections read for struck-through
+rows. Ordered by what would change the product most.
+
+The pattern in it is worth naming: almost nothing here is unbuilt. It is work
+that cannot be finished by a machine — a learner using the thing, a native
+speaker reading it, an owner making a call — plus a short tail of second sources
+of truth that are harmless today and will not stay harmless.
+
+| ID | Task | Why it is open | Effort |
+|---|---|---|---|
+| P12.1 | **Put it on the phone and use it for a week.** Everything since 2026-09-09 — the written passages, four new activities, the redesigned lesson, Yuri, the photograph cull, the copy cut — has run only on an x86_64 emulator driven by a script. The APKs are built and waiting at `native/build-out/`. | Not a task an agent can do. Every other item on this list would be re-ranked by a week of real use | the owner |
+| P12.2 | **A Russian speaker reads the 839 written passages.** Every sentence is machine-checked for level and for words that exist; **none is checked for idiom**, which is exactly the risk §30a was written about and which the owner accepted knowingly when he asked for them. | The single largest unverified surface in the product | 1–2 days of someone's reading |
+| P12.3 | **The 156 unread photographs.** All on the `lead` route (the article's own lead image), the lowest measured error rate of the four routes — but a rate, not zero. The other three routes were read exhaustively and ran 12–50 % wrong. | Measured; the photograph is now the top of every vocabulary card, so a wrong one is highly visible | half a day |
+| P12.4 | **The struggling learner's review load.** Seed 1 over 168 lessons: 121 of 168 passed, but ~55 reviews a day and a backlog on 78 days. The relief rule and review-first carry them through; the load is still not one a person keeps up. A daily cap on *new* words when the due count is high is the next thing to simulate. | `tools/sim/`, three profiles, every run | 1 day |
+| P12.5 | **126 English glosses cover more than one Russian sentence**, so 0.5 % of scene options are still a second correct answer — «Он наконец нашёл работу.» and «нашла работу» are distinct sentences with distinct recordings and one English. Different cause from P11.6's duplicate rows, and the fix is in `sceneFor`, not the build. | Measured over 3,080 generated scenes | 2 h |
+| P12.6 | **About thirty words lost their unit and gained no other**, so the curriculum went 1,056 → 1,045. That is the correct outcome under P11.2's own principle — the unit is the context that teaches the word — but смочь, цель, воля, подходить, вред and the rest are now untaught rather than taught in the wrong place. Keeping them needs a rule that can place them, not an override. | `tools/audit_branches.py` after the 2026-09-10 re-cut | half a day, or a decision to leave them |
+| P12.7 | **Four possessives are listed twice.** мой, твой, свой and весь come from OpenRussian as adjectives and again from `function_words.json` as possessives, with identical 27-row paradigms. `function_words.json` exists for paradigms OpenRussian does not ship, and for these four it does. Harmless today; it is the shape of thing that stops being harmless. | Found while writing `check_closed_class` | 1 h |
+| P12.8 | **Two resolvers can disagree about which row a word is.** `build_topics.py`'s same-bare dedupe (`POS_RANK`) and `panel.py`'s `Resolver` are separate rules: «мой» is taught as the adjective row while the index opens the possessive. Same gloss, same paradigm, and `st.seen` keys on the string, so nothing is wrong today — but §22 says avoid a second source of truth, and this is one. | Read across the two after P11.5 | 3 h |
+| P12.9 | **Two instruments the engineering review asked for are still stubs.** `store.test.js` migrates only v6, so v1–v5 have no fixture and a migration could break a real profile silently; the Anki round trip runs through a *fake* SQLite, so it proves the zip and the schema branch and not that Anki can open what we write. | P9.23, never finished | half a day |
+| P12.10 | **The dark theme has never been looked at on a device.** `userInterfaceStyle: automatic` ships and `contrast.js` proves every token clears its minimum, but no one has seen the app dark on a phone. The walkthrough has never been shot in it. | §20a: native has no visual suite, so a person is the suite | 2 h |
+| P12.11 | **Licence exposure — the owner's decision, not a task.** All 31 non-commercial-safe Tatoeba recordings ship (`--commercial` off), beside 10,311 Core 5000 and 170 Languages on Fire files the audit itself calls not redistributable, 208 MB on a public host. `--public` is off, so 1.13 MB of verbatim caption text ships while `docs/licensing.md` L22 says it does not. The 157 CC BY recordings name no speaker anywhere shipped. Fine for one learner; not for distribution. | Hash-matched against `site/audio` | owner's call |
 
 ## 9. Cost model (owner's estimates — verify current prices at the source before quoting)
 
@@ -740,19 +774,21 @@ from Phase 4 on.
 
 ## 10. Acceptance checklist
 
-Run this before declaring Phase 5 or 6 done.
+Written for Phase 5 and 6 and now the standing list: run it before saying any
+phase is done. Ticked where it holds as of 2026-09-10.
 
-- [ ] Every suite green, including native visual (P1.8)
-- [ ] App works fully offline for reading/typing activities; Say degrades to (a)-tier silently; Hear works offline when audio is cached
-- [ ] No spinner ever blocks the local verdict
-- [ ] Every Russian token on every screen is a two-press dictionary link
-- [ ] Device TTS is always labelled; no synthetic audio is presented as human
-- [ ] Mic permission asked at first use, denial handled
-- [ ] Learner state survives a data regeneration (keys are Russian strings)
-- [ ] `git remote -v` shows origin and the last commit is pushed
-- [ ] CLAUDE.md numbers match the verification script's output
-- [ ] Cost cap enforced in Worker AND client
-- [ ] No secret in any tracked file (`git grep -i "sk-ant"` returns nothing)
+- [x] Every suite green — smoke 159, core 409, native 212, contrast 99, visual 54, Worker 47, written passages 168/0 errors, copy cap 247/0 over
+- [x] App works fully offline for reading and typing; Say degrades silently; Hear works offline when audio is cached
+- [x] No spinner ever blocks the local verdict
+- [x] Every Russian token on every screen is a two-press dictionary link
+- [x] Device TTS is always labelled; no synthetic audio is presented as human
+- [x] Mic permission asked at first use, denial handled
+- [x] Learner state survives a data regeneration (keys are Russian strings)
+- [x] Cost cap enforced in Worker AND client
+- [x] No secret in any tracked file. `git grep -i "sk-ant"` returns two lines and both are meant to be there: this one, and the `sk-ant-...` placeholder in `backend/.dev.vars.example`. Written as "returns nothing", the check cried wolf the first time it was run for real — a check that always fails is a check nobody reads.
+- [x] CLAUDE.md numbers match what the suites actually print — **re-checked 2026-09-10 and they did not**: the contract still claimed 307 core and 138 native checks, and 314 photographs where 259 ship. This line is the only reason that was caught, which is the argument for keeping it.
+- [ ] **A learner has used the build.** Nothing here has been on a phone since 2026-09-09; an emulator driven by a script is not use. This is P12.1 and it is the one unticked box that matters.
+- [ ] Native pixel-diff suite (P1.8) — deliberately never built: quiz questions are random, so a screenshot baseline fails on every run for no reason. Read the walkthrough shots instead.
 
 ---
 

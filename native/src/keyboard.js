@@ -19,6 +19,15 @@ import { useTheme, radius } from "./theme";
 /* The standard ЙЦУКЕН layout, as on every Russian phone. */
 export const ROWS = ["йцукенгшщзхъ", "фывапролджэё", "ячсмитьбю"];
 
+/* Rule 20.12's minimum, and it applies to a key as much as to a button — the
+   keys were 42 (ROADMAP P11.9). Height is the axis that is ours to set: the
+   widest row is twelve keys, so at the 390 px design width each is about 27 px
+   across and 44 would need a 528 px screen. Every phone keyboard makes the same
+   trade, and a key still clears WCAG 2.5.8's 24 px in both axes. `flex` shares
+   whatever width there is, so raising this cannot push a row off the screen. */
+export const KEY_H = 44;
+const KEY_GAP = 1.5;      // each side, so a row of n keys spends 2·n·KEY_GAP
+
 function Key({ label, onPress, wide, tone, testID, children }) {
   const t = useTheme();
   return (
@@ -28,7 +37,7 @@ function Key({ label, onPress, wide, tone, testID, children }) {
       accessibilityRole="button"
       accessibilityLabel={label}
       style={({ pressed }) => ({
-        flex: wide || 1, height: 42, marginHorizontal: 1.5, borderRadius: 7,
+        flex: wide || 1, height: KEY_H, marginHorizontal: KEY_GAP, borderRadius: 7,
         alignItems: "center", justifyContent: "center",
         backgroundColor: pressed ? t.surface3 : tone === "brand" ? t.brandBg : t.surface,
         borderWidth: 1, borderColor: tone === "brand" ? t.brand : t.line,

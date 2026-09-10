@@ -13,7 +13,8 @@ import { flushState } from "../src/store";
 import You from "../src/screens/You";
 import Study from "../src/screens/Study";
 import { Speaker } from "../src/ui";
-import { RuInput, ROWS } from "../src/keyboard";
+import { RuInput, RuKeyboard, ROWS, KEY_H } from "../src/keyboard";
+import { space } from "../src/theme";
 import { configureAudio, audioPrefs, cue, say, CUE_NAMES, SPEEDS } from "../src/audio";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
@@ -104,6 +105,31 @@ describe("the on-screen keyboard", () => {
     const Harness = () => <RuInput value="" onChangeText={() => {}} testID="in" />;
     await withProfile(<Harness />, { osk: true });
     expect(await screen.findByTestId("ru-keyboard")).toBeTruthy();
+  });
+
+  /* Rule 20.12's 44 px, on every key and not only the letters — they were 42
+     (ROADMAP P11.9). Nothing on the screen says how big a key is, so the size
+     is asserted in the render tree (§20a). The width is `flex`, so a row cannot
+     overflow; what is worth pinning is that it stays a usable width at the
+     390 px design size. */
+  it("draws every key at the 44 px minimum, and the widest row still fits 390", async () => {
+    await render(<RuKeyboard onKey={() => {}} onBackspace={() => {}} onSubmit={() => {}} />);
+    const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : (s || {}));
+    // Every key, not only the letters: backspace, space and check are keys too.
+    const keys = screen.getAllByRole("button");
+    expect(keys.length).toBe(ROWS.join("").length + 3);
+    expect(KEY_H).toBeGreaterThanOrEqual(44);
+    for (const k of keys) {
+      const s = flat(k.props.style);
+      expect(s.height).toBeGreaterThanOrEqual(44);
+      expect(s.flex).toBeGreaterThan(0);        // width is shared, so a row cannot overflow
+    }
+    for (const id of ["key-backspace", "key-space", "key-submit"]) {
+      expect(flat(screen.getByTestId(id).props.style).height).toBeGreaterThanOrEqual(44);
+    }
+    const widest = Math.max(...ROWS.map((r) => r.length));
+    const each = (390 - space.pad * 2 - widest * 3) / widest;   // 3 px of margin a key
+    expect(each).toBeGreaterThan(24);                           // WCAG 2.5.8's floor
   });
 });
 

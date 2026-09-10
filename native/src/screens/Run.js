@@ -18,6 +18,7 @@ import { Linked } from "../words";
 import { Hear } from "../activities/Hear";
 import { Say } from "../activities/Say";
 import { Scene } from "../activities/Scene";
+import { Passage } from "../activities/Passage";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade } from "@core/fsrs";
 import { fold, translit, today, translitBack, firstSense } from "@core/util";
@@ -248,6 +249,9 @@ export const VIEWS = {
   hear: (q, r) => <Hear q={q} r={r} />,
   say: (q, r) => <Say q={q} r={r} />,
   scene: (q, r) => <Scene q={q} r={r} />,
+  // A listening passage and the questions that follow it (ROADMAP P10.3).
+  passage: (q, r) => <Passage q={q} r={r} />,
+  heard: asOptions,
 };
 
 /* ------------------------------------------------------------------ runner */

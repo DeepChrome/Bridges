@@ -51,6 +51,16 @@ const NOUN_COLUMNS = ["Singular", "Plural"];
    being learned. */
 export const PRODUCE_AT = 4;
 
+/* A listening passage (ROADMAP P10.3): how many questions it carries, and how
+   many of its words a learner must already know before it is offered at all.
+   Five questions is what fits on the screen under the player without scrolling
+   while the audio is still in mind. */
+export const PASSAGE_Q = 5;
+export const PASSAGE_MIN_KNOWN = 6;
+/* What the player skips by, in milliseconds — the owner asked for a YouTube-ish
+   five seconds, and build_listening.py steps its windows by the same amount. */
+export const SKIP_MS = 5000;
+
 export const SCENE_ROWS = [2, 3];
 /* Below this frequency rank a lemma is a function word, not a word to listen for. */
 export const SCENE_SKIP_TOP = 100;
@@ -375,6 +385,86 @@ export function makeQuestions(env) {
                                   lemmas: sentenceLemmas(rows[ri][0], IX) })),
       lemmas: heardAll, questions,
     };
+  }
+
+  /* ------------------------------------------------------- listening passages */
+
+  /* Half a minute of one native speaker on one subject, and questions about what
+     was caught in it (ROADMAP P10.3, the owner 2026-09-10).
+     `passages` come from tools/build_listening.py: a video, a span, and the
+     curriculum words said in it with their milliseconds.
+
+     What the questions can honestly be: the captions are YouTube's own, with no
+     punctuation and no translation, so nothing here claims to test whether the
+     learner understood the passage. It tests what they caught — which words went
+     past — and that is a real skill at any level and the only thing the data
+     supports. The moment each word was said rides on the question, so a missed
+     one can be played back where it happened. */
+
+  /* How well a passage suits this learner: the words in it they have met. `known`
+     is a Set of bare forms. Nothing is gated — a beginner simply gets the passage
+     with most of their own words in it. */
+  function passageFit(passage, known) {
+    let n = 0;
+    for (const w in passage.words) if (!known || known.has(w)) n++;
+    return n;
+  }
+
+  /* The passages worth offering, best fit first. */
+  function passagesFor(passages, known, limit) {
+    const scored = (passages || [])
+      .map((p) => ({ p, fit: passageFit(p, known) }))
+      .filter((x) => x.fit >= PASSAGE_MIN_KNOWN)
+      .sort((a, b) => b.fit - a.fit);
+    return scored.slice(0, limit || 40).map((x) => x.p);
+  }
+
+  /* PASSAGE_Q questions about one passage. `known` keeps both the answers and the
+     wrong options inside what the learner has met — being unable to answer
+     because you have never seen any of the four words teaches nothing. */
+  function passageQuestions(passage, known) {
+    const said = Object.keys(passage.words || {}).filter((w) => !known || known.has(w));
+    if (said.length < 4) return [];
+    const idx = (b) => (IX[fold(b)] || [])[0];
+    const heard = shuffle(said.slice()).filter((b) => idx(b) !== undefined);
+    if (heard.length < 4) return [];
+    // Words the learner knows that this passage does not say.
+    const absent = shuffle([...(known || [])].filter((b) => !(b in passage.words)))
+      .filter((b) => idx(b) !== undefined);
+    const out = [];
+    for (const b of heard.slice(0, PASSAGE_Q - 1)) {
+      const wrong = absent.splice(0, 3);
+      if (wrong.length < 3) break;
+      const i = idx(b);
+      out.push({
+        kind: "heard", i, cyr: true, ask: "Which of these did you hear?",
+        prompt: "", at: passage.words[b][0],
+        lemmas: [i],
+        options: shuffle([{ label: L[i].w, right: true }]
+          .concat(wrong.map((x) => ({ label: L[idx(x)].w, right: false }))))
+          .map((o) => ({ ...o, cyr: true })),
+      });
+    }
+    // …and one about the order two of them came in, which needs the passage to
+    // have been followed rather than scanned.
+    const two = heard.filter((b) => passage.words[b][0] !== undefined).slice(0, 6);
+    const pair = two.map((b) => ({ b, at: passage.words[b][0] }))
+      .sort((a, b) => a.at - b.at);
+    if (pair.length >= 2 && out.length) {
+      const first = pair[0], later = pair[pair.length - 1];
+      if (later.at - first.at > 2000) {
+        const i = idx(first.b);
+        out.push({
+          kind: "heard", i, cyr: true, ask: "Which came first?",
+          prompt: "", at: first.at, lemmas: [i],
+          options: shuffle([
+            { label: L[i].w, right: true, cyr: true },
+            { label: L[idx(later.b)].w, right: false, cyr: true },
+          ]),
+        });
+      }
+    }
+    return out;
   }
 
   /* A run of scenes for the listening drill, no two opening on the same
@@ -1193,6 +1283,6 @@ export function makeQuestions(env) {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, listeningDrill, customQuiz, formPrompt, formSpec, formsIntroduced,
-    drillsIntroduced, drillOpensAt,
+    drillsIntroduced, drillOpensAt, passagesFor, passageQuestions, passageFit,
   };
 }

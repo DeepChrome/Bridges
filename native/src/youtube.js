@@ -107,6 +107,30 @@ const page = (videoId) => `<!doctype html>
     if (player) player.pauseVideo();
   };
 
+  /* A listening passage needs the position, not just the ability to jump to one:
+     the learner skips five seconds back from wherever they are, and the bar has
+     to move while it plays. Polled rather than pushed - the IFrame API has no
+     time event - and only while playing, so a paused passage costs nothing. */
+  var ticker = null;
+  window.brWatch = function (on) {
+    if (ticker) { clearInterval(ticker); ticker = null; }
+    if (!on) return;
+    ticker = setInterval(function () {
+      if (!player || !player.getCurrentTime) return;
+      post({ type: "time", at: Math.round(player.getCurrentTime() * 1000) });
+    }, 250);
+  };
+
+  /* Seek without restarting the hold timer: skipping inside a passage must not
+     extend or cancel the stop at its end. */
+  window.brSkip = function (deltaSeconds, lo, hi) {
+    if (!player || !player.getCurrentTime) return;
+    var at = player.getCurrentTime() + deltaSeconds;
+    if (at < lo) at = lo;
+    if (at > hi) at = hi;
+    player.seekTo(at, true);
+  };
+
   /* Distinguish the three ways this fails before a player exists, because they
      have different fixes: the script never arrived, the script arrived but the
      API never called us back, or the page itself threw. */
@@ -126,7 +150,7 @@ const page = (videoId) => `<!doctype html>
 </html>`;
 
 export const YouTube = forwardRef(function YouTube(
-  { videoId, onReady, onEnded, onError, theme }, ref
+  { videoId, onReady, onEnded, onError, onTime, theme }, ref
 ) {
   const web = useRef(null);
   const isReady = useRef(false);
@@ -153,6 +177,18 @@ export const YouTube = forwardRef(function YouTube(
     pause() {
       if (!web.current) return;
       web.current.injectJavaScript("window.brPause(); true;");
+    },
+    /* Skip within a passage, clamped to its own span so five seconds back at the
+       start does not drop the learner into the middle of the video before it. */
+    skip(deltaMs, loMs, hiMs) {
+      if (!web.current || !isReady.current) return;
+      web.current.injectJavaScript(
+        `window.brSkip(${deltaMs / 1000}, ${(loMs || 0) / 1000}, ${(hiMs || 0) / 1000}); true;`);
+    },
+    /* Start or stop the position reports that feed onTime. */
+    watch(on) {
+      if (!web.current) return;
+      web.current.injectJavaScript(`window.brWatch(${on ? "true" : "false"}); true;`);
     },
   }), []);
 
@@ -197,8 +233,9 @@ export const YouTube = forwardRef(function YouTube(
           let msg = null;
           try { msg = JSON.parse(e.nativeEvent.data); } catch { return; }
           // Onto the Metro console: a player that fails on the device cannot be
-          // debugged from the machine any other way.
-          console.log("[youtube]", JSON.stringify(msg));
+          // debugged from the machine any other way. Position reports are the one
+          // exception — four a second would bury everything else.
+          if (msg.type !== "time") console.log("[youtube]", JSON.stringify(msg));
           if (msg.type === "ready") {
             isReady.current = true;
             setLoading(false);
@@ -208,6 +245,8 @@ export const YouTube = forwardRef(function YouTube(
             }
             onReady && onReady();
           }
+          else if (msg.type === "time") { onTime && onTime(msg.at); }
+          else if (msg.type === "held") { onEnded && onEnded(); }
           else if (msg.type === "ended") { onEnded && onEnded(); }
           else if (msg.type === "error") {
             setLoading(false);

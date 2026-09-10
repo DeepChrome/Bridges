@@ -13,7 +13,7 @@ import { Linked } from "../words";
 import { Q, DRILL_TYPES, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
-  reachedUnits, unitUnlocked, reviewWords,
+  reachedUnits, unitUnlocked, reviewWords, passages, knownWords,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { firstSense } from "@core/util";
@@ -288,7 +288,17 @@ export function DrillList({ navigation }) {
           <Thumb id="speech" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Listening</Text>
-            <Muted>Scenes from what you have met so far</Muted>
+            <Muted>Half a minute of one speaker, on one subject</Muted>
+          </View>
+        </Row>
+        {/* The older activity: a few sentences from the pools, each with its own
+            meaning. Kept because it is the only listening a beginner can do —
+            a passage of native speech needs words they have not met yet. */}
+        <Row onPress={() => navigation.navigate("Scenes")}>
+          <Thumb id="time" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Scenes</Text>
+            <Muted>Short sentences from what you have met</Muted>
           </View>
           {((st.drills || {}).listening || {}).best
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
@@ -408,6 +418,92 @@ const bestOf = (prev, key, score, xp) => {
 /* ------------------------------------------------------------- listening */
 
 export const LISTENING_N = 5;
+
+/* The passages on offer: half a minute of one speaker each, ranked by how many of
+   this learner's own words they say (ROADMAP P10.3). Grouped by the video they
+   come from, so the list reads as topics rather than as 900 spans. */
+export function ListeningList({ navigation }) {
+  const { st } = useSession();
+  const t = useTheme();
+  const known = useMemo(() => new Set(knownWords(st)), [st.seen]);
+  const shown = useMemo(() => Q.passagesFor(passages(), known, 30), [known]);
+
+  if (!shown.length) {
+    return (
+      <Done title="Not yet"
+            detail="A passage needs a few words you have already met. Come back after a lesson or two."
+            onBack={() => navigation.goBack()} />
+    );
+  }
+  return (
+    <Screen>
+      <SectionLabel>{`${shown.length} passages`}</SectionLabel>
+      <Muted style={{ marginBottom: 10 }}>
+        Half a minute of one speaker on one subject, richest in your own words first.
+      </Muted>
+      <List>
+        {shown.map((p, k) => {
+          const fit = Q.passageFit(p, known);
+          const best = ((st.drills || {})[`passage:${p.id}`] || {}).best;
+          return (
+            <Row key={p.id} last={k === shown.length - 1} testID={`passage-${p.id}`}
+                 onPress={() => navigation.navigate("Passage", { id: p.id })}>
+              <Thumb id="speech" />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}
+                      numberOfLines={2}>
+                  {p.title}
+                </Text>
+                <Muted>{`${fit} words you know · ${Math.round((p.end - p.start) / 1000)}s`}</Muted>
+              </View>
+              {best ? <Pill tone="good">{best + "%"}</Pill> : null}
+            </Row>
+          );
+        })}
+      </List>
+    </Screen>
+  );
+}
+
+/* One passage: hear it, then answer for what you caught. */
+export function PassageFlow({ route, navigation }) {
+  const { st, update } = useSession();
+  const [result, setResult] = useState(null);
+  const [seed, setSeed] = useState(0);
+  const passage = useMemo(() => passages().find((p) => p.id === route.params.id), [route.params.id]);
+  const known = useMemo(() => new Set(knownWords(st)), [st.seen]);
+  const steps = useMemo(() => {
+    if (!passage) return [];
+    const qs = Q.passageQuestions(passage, known);
+    if (!qs.length) return [];
+    // The passage itself is the first step; the questions follow it.
+    return [{ kind: "passage", video: passage.v, title: passage.title,
+              start: passage.start, end: passage.end }].concat(qs);
+  }, [passage, seed]);
+  useAudioStopOnLeave();
+
+  if (!passage || !steps.length) {
+    return <Done title="Not yet"
+                 detail="This passage needs a few more words you have met."
+                 onBack={() => navigation.goBack()} />;
+  }
+  if (result) {
+    return (
+      <Done title="Listening" detail={`${result.right} of ${result.total} caught`}
+            score={result.score} passed={result.score >= 80}
+            onAgain={() => { setResult(null); setSeed(seed + 1); }}
+            onBack={() => navigation.goBack()} />
+    );
+  }
+  return (
+    <Runner steps={steps} recycle={false} navigation={navigation}
+            onFinish={(r) => {
+              const score = scoreOf(r);
+              update((prev) => bestOf(prev, `passage:${passage.id}`, score, r.right * 2));
+              setResult({ ...r, score });
+            }} />
+  );
+}
 
 export function ListeningFlow({ navigation }) {
   const { st, update } = useSession();

@@ -874,6 +874,78 @@ for (const d of DRILL_TYPES) {
   }
 }
 
+/* Listening passages (ROADMAP P10.3): half a minute of one speaker, ranked
+   against what the learner actually knows rather than assigned a chapter. */
+group("listening passages");
+{
+  const P = DATA.listening || [];
+  ok(P.length > 200, "the build ships passages", String(P.length));
+  ok(P.every((p) => p.v && p.start >= 0 && p.end > p.start && p.title),
+     "each names a video and a span inside it");
+  const lengths = P.map((p) => p.end - p.start);
+  ok(Math.min(...lengths) >= 30000 && Math.max(...lengths) <= 62000,
+     "every passage is between thirty seconds and a minute",
+     `${Math.min(...lengths)}–${Math.max(...lengths)} ms`);
+  ok(P.every((p) => Object.keys(p.words).length >= 12),
+     "and says at least a dozen curriculum words");
+  // Every word shipped is a real curriculum word, said at a time inside the span.
+  const taught = new Set();
+  for (const u of UN) for (const i of u.w) taught.add(L[i].b);
+  let stray = 0, outside = 0;
+  for (const p of P) {
+    for (const w in p.words) {
+      if (!taught.has(w)) stray++;
+      if (p.words[w].some((ms) => ms < p.start || ms > p.end)) outside++;
+    }
+  }
+  ok(stray === 0, "every word listed is one the curriculum teaches", String(stray));
+  ok(outside === 0, "and every moment falls inside the passage", String(outside));
+
+  // No two passages from one video overlap: three windows on the same half minute
+  // would be one passage offered three times.
+  let overlaps = 0;
+  const byVideo = {};
+  for (const p of P) (byVideo[p.v] = byVideo[p.v] || []).push(p);
+  for (const v in byVideo) {
+    const list = byVideo[v].slice().sort((a, b) => a.start - b.start);
+    for (let k = 1; k < list.length; k++) if (list[k].start < list[k - 1].end) overlaps++;
+  }
+  ok(overlaps === 0, "passages from one video never overlap", String(overlaps));
+
+  /* Ranked by fit, and a learner who knows nothing is offered nothing rather
+     than a passage they cannot touch. */
+  ok(Q.passagesFor(P, new Set(), 10).length === 0, "no words known, nothing offered");
+  const someWords = new Set(UN.slice(0, 12).flatMap((u) => u.w).map((i) => L[i].b));
+  const fitted = Q.passagesFor(P, someWords, 10);
+  ok(fitted.length > 0, "a learner part-way along is offered some", String(fitted.length));
+  const fits = fitted.map((p) => Q.passageFit(p, someWords));
+  ok(fits.every((f, k) => k === 0 || fits[k - 1] >= f), "best fit first", fits.join(","));
+  ok(fits.every((f) => f >= 6), "and never one with almost nothing they know");
+
+  /* The questions: about what was caught, and answerable — both the answer and
+     the wrong options are words this learner has met. */
+  const p = fitted[0];
+  const qs = Q.passageQuestions(p, someWords);
+  ok(qs.length >= 2 && qs.length <= 5, "up to five questions a passage", String(qs.length));
+  ok(qs.every((x) => x.options.filter((o) => o.right).length === 1),
+     "exactly one right answer each");
+  // Folded on both sides: an option is printed as the stressed headword, and a
+  // capitalised one («Россия») is not its own bare form.
+  const knownFolded = new Set([...someWords].map(fold));
+  ok(qs.every((x) => x.options.every((o) => knownFolded.has(fold(o.label)))),
+     "every option is a word the learner has met",
+     qs.flatMap((x) => x.options.map((o) => o.label))
+       .filter((l) => !knownFolded.has(fold(l))).join(","));
+  const right = qs.map((x) => fold(x.options.find((o) => o.right).label));
+  ok(right.every((b) => b in p.words || qs.find((x) => x.ask === "Which came first?")),
+     "and the right answer is a word the passage says");
+  ok(qs.every((x) => typeof x.at === "number" && x.at >= p.start && x.at <= p.end),
+     "each carries the moment its word went by, for playing it back");
+  ok(new Set(qs.map((x) => x.ask + "|" + right)).size >= 1
+     && qs.filter((x) => x.ask === "Which of these did you hear?").length >= 1,
+     "the bulk ask what was heard");
+}
+
 /* The alphabet and the sounds under it (ROADMAP P10.2). Hand-authored teaching
    content, so what is checked is that it is complete and internally consistent —
    a missing letter or a pair that does not pair is a lesson that teaches a

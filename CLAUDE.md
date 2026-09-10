@@ -1348,6 +1348,43 @@ that are elsewhere three separate tools.
   that becomes a tick, and the brand edge on whichever step is next — not three
   rows of one list, which read as a settings screen.
 
+## 30k. Listening passages (P10.3, 2026-09-10)
+
+The listening activity used to play two or three unrelated sentences and ask what
+each meant. The owner's complaint was exact: no topic, no thread, no way to hear
+a bit again.
+
+A **passage** is 45 seconds of one real video — `tools/build_listening.py` slides
+a window over each video's word stream (`build_transcripts.words_with_times`) and
+keeps the three densest non-overlapping spans. 926 passages from 312 videos,
+12–56 curriculum words each, 0.83 MB, shipped as `listening.json` beside the
+other lazily-required parts (§20a).
+
+**The tool deliberately does not place a passage on the route.** The first cut
+assigned each one the chapter by which most of its words are taught, and the
+answer was worth keeping: chapters 1–3 got four passages between them, chapter 10
+got 345. Forty-five seconds of a native speaker uses more words than a beginner
+has, and no threshold fixes that — it is the intermediate plateau in one
+measurement. So the app ranks instead (`passagesFor`, `passageFit`): the passage
+richest in *this* learner's own words, from `st.seen`, comes first, and
+`PASSAGE_MIN_KNOWN` (6) keeps out the ones they could not touch. Measured: 5
+words met offers nothing, 10 offers 302, 30 offers 801. The Scenes activity stays
+for the days before that.
+
+**The questions are about what was caught, not what was understood.** The
+captions are YouTube's own — no punctuation, no translation — so nothing claims
+to test comprehension, and both the answers and the wrong options are drawn from
+words the learner has met. Each carries the millisecond its word went by, so a
+missed one can be played back where it happened. Real comprehension questions
+need a translation pass over the spans; that is a build-time LLM job and the
+owner's money, so it waits for him.
+
+`youtube.js` gained `skip(deltaMs, lo, hi)` — clamped to the passage, so five
+seconds back at the start does not drop the learner into the video before it —
+and `watch(on)`, which polls the position four times a second while playing
+because the IFrame API has no time event. Position reports are the one message
+kept out of the console log; four a second would bury everything else.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

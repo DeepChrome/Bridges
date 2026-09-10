@@ -266,7 +266,7 @@ COVERAGE_FREE_RANK = 500
 
 # The parts of the payload the native app loads on first use rather than at boot,
 # each written to its own file beside data.json.
-NATIVE_PARTS = ["deep", "sent", "videos"]
+NATIVE_PARTS = ["deep", "sent", "videos", "listening"]
 
 
 def measure_sentences(sentences, sent_tokens, index, key_units, lemmas, unit_pos,
@@ -799,11 +799,20 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
                                  unit_pos, audio, src_of, stats)
     speech = build_pools(measured, units, stats)
 
+    # Listening passages: spans of real video, 45 s each, with the curriculum
+    # words they say (tools/build_listening.py). Shipped whole — which passage
+    # suits which learner is decided in the app, against what they have met.
+    listening = []
+    lpath = ROOT / "data" / "listening.json"
+    if lpath.exists():
+        listening = json.loads(lpath.read_text(encoding="utf-8")).get("passages", [])
+        stats["listening"] = len(listening)
+
     return {"stats": stats, "lemmas": lemmas, "index": index,
             "units": units, "path": path, "audio": {"files": audio},
             "deep": deep, "shapes": shapes, "slots": slot_names,
             "sent": sent_pool, "tsample": tsample, "speech": speech,
-            "videos": video_list}
+            "videos": video_list, "listening": listening}
 
 
 FONTS = ("https://fonts.googleapis.com/css2?"

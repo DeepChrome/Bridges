@@ -9,7 +9,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-export const PARTS = ["deep", "sent", "videos"];
+export const PARTS = ["deep", "sent", "videos", "listening"];
 
 export function loadPayload(root) {
   const dir = join(root, "native", "assets");

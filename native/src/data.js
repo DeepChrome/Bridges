@@ -15,6 +15,9 @@ import { fold, today } from "@core/util";
 const deepBlob = () => require("../assets/deep.json");
 const sentPool = () => require("../assets/sent.json");
 export const videos = () => require("../assets/videos.json");
+/* Listening passages (tools/build_listening.py): spans of real video with the
+   curriculum words they say. Required when the listening screen opens. */
+export const passages = () => require("../assets/listening.json");
 import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize } from "@core/questions";
@@ -300,6 +303,10 @@ export function reviewWords(st) {
   for (const w in (st.seen || {})) if (st.seen[w].due <= t) add(w);
   return out;
 }
+/* Every word the learner has actually met, as bare forms — the scheduler's own
+   record, which is the honest answer to "what do they know". */
+export const knownWords = (st) => Object.keys((st && st.seen) || {});
+
 export const dueCount = (st) => {
   const t = today();
   let n = 0;

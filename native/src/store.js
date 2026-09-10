@@ -53,6 +53,7 @@ export const DEFAULTS = {
   streak: 0,
   speech: speechDefault(),   // the speaking activities' record; never audio
   watched: {},          // video id -> day watched (the Immerse library)
+  mined: {},            // word -> {v, t, s}: taken from a video, and where from
   decks: [],            // imported Anki decks: {id, name, cards:[{ru, en}]}
   speed: "normal",      // how fast Russian is read: normal, slower, slowest
   cue: "bell",          // the sound a right answer makes (audio.js CUE_NAMES)

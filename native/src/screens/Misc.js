@@ -192,6 +192,17 @@ export function Video({ route, navigation }) {
   const unit = v.unit ? unitById(v.unit) : null;
   const words = Object.keys(v.words || {});
   const watched = videoWatched(st, v);
+  const mined = st.mined || {};
+
+  /* Mining a word: into the review set, with the video and the second it was
+     said, so nothing about where it came from is lost. Keyed on the Russian
+     string like every other piece of learner state (rule 20.4). */
+  const mine = (f) => update((prev) => ({
+    ...prev,
+    pinned: (prev.pinned || []).includes(f.word) ? prev.pinned
+      : (prev.pinned || []).concat([f.word]),
+    mined: { ...(prev.mined || {}), [f.word]: { v: v.id, t: f.t, s: f.s } },
+  }));
 
   const jump = (ms, hold = HOLD_MS) => {
     const at = Math.max(0, ms - (hold ? LEAD_MS : 0));
@@ -286,6 +297,17 @@ export function Video({ route, navigation }) {
           <Text style={{ color: t.ink2, fontSize: 15, lineHeight: 22 }}>{focus.s}</Text>
           <Btn label="Play it again" style={{ marginTop: 12 }}
                onPress={() => { setPlaying(true); jump(focus.t); }} />
+          {/* One tap takes the word into review and keeps where it was heard, so
+              the flashcard can send you back to this second (ROADMAP P10.4).
+              What serious learners do by hand across three tools. */}
+          {mined[focus.word] ? (
+            <Muted testID="mined" style={{ textAlign: "center", marginTop: 10 }}>
+              In your review, from here
+            </Muted>
+          ) : (
+            <Btn kind="pri" testID="mine" label="Add to review" style={{ marginTop: 8 }}
+                 onPress={() => mine(focus)} />
+          )}
         </Card>
       ) : null}
 

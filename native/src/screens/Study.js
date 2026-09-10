@@ -243,7 +243,7 @@ function SetPicker({ visible, onClose }) {
   );
 }
 
-export default function Study() {
+export default function Study({ navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
   const [picker, setPicker] = useState(false);
@@ -363,6 +363,23 @@ export default function Study() {
                     <Muted>{ex.en}</Muted>
                   </View>
                 ))}
+                {/* A word taken from a video keeps its source, and the card sends
+                    you back to the second it was said (ROADMAP P10.4). */}
+                {(st.mined || {})[w.b] ? (
+                  <Pressable
+                    testID="from-video"
+                    accessibilityRole="button"
+                    onPress={() => navigation.navigate("Video", {
+                      videoId: st.mined[w.b].v, word: w.b, at: st.mined[w.b].t })}
+                    style={{ marginTop: 14, alignSelf: "stretch", paddingTop: 12,
+                             borderTopWidth: 1, borderTopColor: t.lineSoft }}
+                  >
+                    <Muted numberOfLines={2}>{st.mined[w.b].s}</Muted>
+                    <Text style={{ color: t.brandInk, fontSize: 13, marginTop: 4 }}>
+                      Where you heard it
+                    </Text>
+                  </Pressable>
+                ) : null}
               </>
             ) : null}
           </Card>

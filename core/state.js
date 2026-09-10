@@ -13,7 +13,7 @@
  * single classic script, and the rest of core/ keeps to that style.
  */
 
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 /* A lesson quiz passes at PASS_MARK. After RELIEF_AFTER attempts it passes at
    RELIEF_MARK instead: the simulated struggling learner failed 15 of 40 lessons
@@ -90,6 +90,9 @@ export const MIGRATIONS = {
   // ([{ id, name, cards: [{ ru, en }] }]) get a slot. Their cards are scheduled
   // in `seen` under the Russian string like any other word.
   5: (s) => Object.assign({}, s, { watched: s.watched || {}, decks: s.decks || [], v: 6 }),
+  // v7 adds `mined`: a word taken from a video keeps where it was heard, so the
+  // flashcard can send you back to the second it was said (ROADMAP P10.4).
+  6: (s) => Object.assign({}, s, { mined: s.mined || {}, v: 7 }),
 };
 
 export function migrate(raw, from) {

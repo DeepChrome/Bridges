@@ -198,8 +198,8 @@ group("grading");
 
 group("state schema");
 {
-  ok(SCHEMA_VERSION === 6, "schema is at 6", String(SCHEMA_VERSION));
-  ok([1, 2, 3, 4, 5].every((k) => typeof MIGRATIONS[k] === "function"),
+  ok(SCHEMA_VERSION === 7, "schema is at 7", String(SCHEMA_VERSION));
+  ok([1, 2, 3, 4, 5, 6].every((k) => typeof MIGRATIONS[k] === "function"),
      "a migration step exists from every earlier version");
 
   // A real v4 save: FSRS cards, component lessons, no speech slot.
@@ -210,10 +210,16 @@ group("state schema");
   };
   const v5 = MIGRATIONS[4](v4);
   ok(v5.v === 5, "v4 migrates to v5");
-  const v6 = migrate(v4, 4);
-  ok(v6.v === 6 && v6.watched && Object.keys(v6.watched).length === 0 && Array.isArray(v6.decks),
-     "v4 migrates to v6 with empty watched and decks slots");
+  const latest = migrate(v4, 4);
+  ok(latest.v === SCHEMA_VERSION && latest.watched
+     && Object.keys(latest.watched).length === 0 && Array.isArray(latest.decks),
+     "v4 comes forward with empty watched and decks slots");
+  // v7 (ROADMAP P10.4): a word taken from a video keeps where it was heard.
+  ok(latest.mined && Object.keys(latest.mined).length === 0,
+     "…and an empty mined map");
   ok(migrate({ v: 5, watched: { abc: 3 } }, 5).watched.abc === 3, "an existing watched slot is kept");
+  ok(migrate({ v: 6, mined: { дом: { v: "abc", t: 12 } } }, 6).mined["дом"].t === 12,
+     "an existing mined map is kept, not reset");
   ok(quizPassed({ q: 80 }) && !quizPassed({ q: 79, tries: 2 }) && quizPassed({ q: 70, tries: 3 })
      && !quizPassed({ q: 69, tries: 5 }) && !quizPassed(undefined),
      "a quiz passes at the mark, or at the relief mark from the third try");
@@ -231,8 +237,9 @@ group("state schema");
 
   // The oldest shape still comes all the way forward.
   const v1 = migrate({ seen: { да: { n: 4, due: 3 } }, unit: { core1: { lessons: { 0: 80 } } } }, 1);
-  ok(v1.v === 6 && v1.seen["да"].reps === 4 && v1.unit.core1.lessons[0].q === 80 && v1.speech,
-     "v1 → v6 in one pass keeps history and gains the slots");
+  ok(v1.v === SCHEMA_VERSION && v1.seen["да"].reps === 4
+     && v1.unit.core1.lessons[0].q === 80 && v1.speech && v1.mined,
+     `v1 → v${SCHEMA_VERSION} in one pass keeps history and gains the slots`);
 
   // recordAttempt: newest ATTEMPT_CAP kept, tags counted, nothing mutated.
   let sp = speechDefault();

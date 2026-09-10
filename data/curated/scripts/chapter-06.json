@@ -13,9 +13,9 @@
    ]
   },
   "core6:1": {
-   "title": "Yesterday with the dog",
+   "title": "At home with the dog",
    "rows": [
-    { "ru": "Вчера мы с женой были дома.", "en": "Yesterday my wife and I were at home." },
+    { "ru": "Мы с женой были дома.", "en": "My wife and I were at home." },
     { "ru": "У нас есть собака.", "en": "We have a dog." },
     { "ru": "У собаки большая голова.", "en": "The dog has a big head." },
     { "ru": "Она весь день стояла у двери.", "en": "She stood by the door all day." },
@@ -23,12 +23,12 @@
    ]
   },
   "core6:2": {
-   "title": "Working without music",
+   "title": "Working without you",
    "rows": [
-    { "ru": "Ты можешь работать без музыки?", "en": "Can you work without music?" },
-    { "ru": "Нет, без музыки я ничего не делаю.", "en": "No, without music I get nothing done." },
-    { "ru": "Под музыку работа идёт очень хорошо.", "en": "With music on, the work goes really well." },
-    { "ru": "А я так могу работать только два часа.", "en": "But I can only work like that for two hours." },
+    { "ru": "Вчера я работал два часа.", "en": "Yesterday I worked for two hours." },
+    { "ru": "Без тебя я ничего не делаю.", "en": "Without you I get nothing done." },
+    { "ru": "Дело шло очень хорошо.", "en": "The work was going really well." },
+    { "ru": "А ты можешь работать два часа?", "en": "And can you work for two hours?" },
     { "ru": "Ничего, каждый работает как хочет.", "en": "Never mind, everyone works the way they like." }
    ]
   },
@@ -38,7 +38,7 @@
     { "ru": "На столе было вино.", "en": "There was wine on the table." },
     { "ru": "Отец умеет его делать.", "en": "My father knows how to make it." },
     { "ru": "Мы пили вино и говорили об истории семьи.", "en": "We drank wine and talked about our family history." },
-    { "ru": "Он сказал: «Наша задача — жить хорошо».", "en": "He said: our job is to live well." },
+    { "ru": "А после была музыка.", "en": "And afterwards there was music." },
     { "ru": "Дома всегда так хорошо.", "en": "It is always so good at home." }
    ]
   },
@@ -46,9 +46,9 @@
    "title": "A favourite book",
    "rows": [
     { "ru": "Это моя любимая книга.", "en": "This is my favourite book." },
-    { "ru": "Многие её не знают.", "en": "Many people do not know it." },
+    { "ru": "Её знают не все.", "en": "Not everyone knows it." },
     { "ru": "Я читаю её каждый год.", "en": "I read it every year." },
-    { "ru": "Многие любят фильмы, а я — книги.", "en": "A lot of people love films, but I love books." },
+    { "ru": "Это моя задача на весь день.", "en": "That is my task for the whole day." },
     { "ru": "Любимая книга — как друг.", "en": "A favourite book is like a friend." }
    ]
   },
@@ -77,7 +77,7 @@
    "rows": [
     { "ru": "Этот рабочий уже два года на заводе.", "en": "This worker has been at the factory for two years." },
     { "ru": "Вчера ему не заплатили.", "en": "Yesterday they did not pay him." },
-    { "ru": "Его семья страдает без денег.", "en": "His family is suffering without money." },
+    { "ru": "Его семья живёт без денег.", "en": "His family is living without money." },
     { "ru": "Директор сказал, что деньги будут.", "en": "The director said the money would come." },
     { "ru": "Но рабочий уже думает о новой службе.", "en": "But the worker is already thinking about a new job." }
    ]
@@ -127,7 +127,7 @@
    "rows": [
     { "ru": "В квартире была мышь.", "en": "There was a mouse in the flat." },
     { "ru": "Кот бегал за ней весь день.", "en": "The cat chased it all day." },
-    { "ru": "Мама не переносит мышей.", "en": "Mum cannot stand mice." },
+    { "ru": "Мама не хочет видеть мышей.", "en": "Mum does not want to see mice." },
     { "ru": "Мышь — не насекомое, но мама её не любит.", "en": "A mouse is not an insect, but Mum does not like it." },
     { "ru": "А бабочку она любит.", "en": "A butterfly, though, she likes." }
    ]
@@ -147,7 +147,7 @@
    "rows": [
     { "ru": "У двери птица сделала гнездо.", "en": "A bird has built a nest by the door." },
     { "ru": "Под столом живёт наша мышка.", "en": "Our little mouse lives under the table." },
-    { "ru": "Кот не выдержал и пошёл к гнезду.", "en": "The cat could not bear it and went over to the nest." },
+    { "ru": "Кот пошёл к гнезду.", "en": "The cat went over to the nest." },
     { "ru": "А свинья ничего не видела.", "en": "The pig, meanwhile, saw nothing." },
     { "ru": "Каждое животное здесь имеет своё место.", "en": "Every animal here has its own place." }
    ]

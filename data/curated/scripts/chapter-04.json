@@ -36,7 +36,7 @@
    "title": "The house where father lives",
    "rows": [
     { "ru": "Это дом, в котором живёт мой отец.", "en": "This is the house where my father lives." },
-    { "ru": "Он здесь никогда не работает.", "en": "He never works here." },
+    { "ru": "Дом стоит очень много.", "en": "The house costs a lot." },
     { "ru": "Ему надо играть с ребёнком.", "en": "He needs to play with his child." },
     { "ru": "Нужно время.", "en": "Time is what it takes." },
     { "ru": "Но времени у него нет.", "en": "But he has no time." }
@@ -45,11 +45,11 @@
   "core4:4": {
    "title": "Waiting by the school",
    "rows": [
-    { "ru": "Мы стоим здесь уже час.", "en": "We have been standing here for an hour." },
+    { "ru": "Мы здесь уже час.", "en": "We have been here for an hour." },
     { "ru": "Отец сказал, что надо пойти.", "en": "Father said we had to go." },
-    { "ru": "У школы стоят машины.", "en": "There are cars parked by the school." },
+    { "ru": "У школы много машин.", "en": "There are a lot of cars by the school." },
     { "ru": "Пойдём на работу.", "en": "Let us walk to work." },
-    { "ru": "Я не хочу стоять.", "en": "I do not want to stand around." }
+    { "ru": "Отец никогда не играет.", "en": "Father never plays." }
    ]
   },
   "city:0": {
@@ -59,7 +59,7 @@
     { "ru": "Он в центре, за рынком.", "en": "It is in the centre, behind the market." },
     { "ru": "А где отель?", "en": "And where is the hotel?" },
     { "ru": "Отель тоже в центре.", "en": "The hotel is in the centre too." },
-    { "ru": "Аэропорт за городом.", "en": "The airport is outside the city." }
+    { "ru": "Эта дорога идёт в центр.", "en": "This road goes to the centre." }
    ]
   },
   "city:1": {
@@ -68,8 +68,8 @@
     { "ru": "Какой у гостиницы адрес?", "en": "What is the hotel's address?" },
     { "ru": "Она на площади, у музея.", "en": "It is on the square, by the museum." },
     { "ru": "А наш офис в парке.", "en": "And our office is in the park." },
-    { "ru": "Все обращаются к нам.", "en": "Everybody comes to us." },
-    { "ru": "Мы там каждый день.", "en": "We are there every day." }
+    { "ru": "Мы там каждый день.", "en": "We are there every day." },
+    { "ru": "Аэропорт за городом.", "en": "The airport is outside the city." }
    ]
   },
   "city:2": {
@@ -107,9 +107,9 @@
    "rows": [
     { "ru": "В нашем квартале есть памятник.", "en": "There is a monument in our quarter." },
     { "ru": "За ним рыночная площадь.", "en": "Behind it is the market square." },
-    { "ru": "А в переулке школа плавания.", "en": "And in the side street there is a swimming school." },
+    { "ru": "А в переулке собор.", "en": "And in the side street there is a cathedral." },
     { "ru": "Мой отец там работал.", "en": "My father used to work there." },
-    { "ru": "Он очень любит плавание.", "en": "He loves swimming very much." }
+    { "ru": "Шоссе идёт через деревню.", "en": "The highway goes through the village." }
    ]
   },
   "travel:0": {

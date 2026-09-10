@@ -7,7 +7,7 @@
    "rows": [
     { "ru": "Вчера я остался дома и писал книгу.", "en": "Yesterday I stayed at home and wrote my book." },
     { "ru": "Я боялся сказать правду отцу.", "en": "I was afraid to tell my father the truth." },
-    { "ru": "Но я рассказал ему всё.", "en": "But I told him everything." },
+    { "ru": "Но я сказал ему всё.", "en": "But I told him everything." },
     { "ru": "Отец помог мне и не сказал ни слова.", "en": "My father helped me and did not say a word." },
     { "ru": "Мы думали над этим весь день.", "en": "We thought it over all day." }
    ]
@@ -18,7 +18,7 @@
     { "ru": "Вот наш новый телевизор.", "en": "Here is our new television." },
     { "ru": "Он маленький, но это не проблема.", "en": "It is small, but that is not a problem." },
     { "ru": "Ночью мы смотрели новый фильм.", "en": "At night we watched a new film." },
-    { "ru": "Тогда я забыл о времени.", "en": "I forgot about the time then." },
+    { "ru": "Я забыл о времени.", "en": "I forgot about the time." },
     { "ru": "После фильма я просто не хотел говорить.", "en": "After the film I simply did not want to talk." }
    ]
   },
@@ -28,7 +28,7 @@
     { "ru": "Завтра мы идём смотреть небольшую квартиру.", "en": "Tomorrow we are going to look at a small flat." },
     { "ru": "В ней одно окно, но огромное.", "en": "It has one window, but an enormous one." },
     { "ru": "Мы прошли по этой улице вчера.", "en": "We walked down this street yesterday." },
-    { "ru": "Мы работали за каждый рубль.", "en": "We worked for every rouble." },
+    { "ru": "Тогда мы её не купили.", "en": "We did not buy it then." },
     { "ru": "Мы уже готовы её купить.", "en": "We are ready to buy it now." }
    ]
   },
@@ -36,7 +36,7 @@
    "title": "A scientist on television",
    "rows": [
     { "ru": "Вчера по телевизору говорил один учёный.", "en": "Yesterday a scientist was speaking on television." },
-    { "ru": "Мы слушали его два часа.", "en": "We listened to him for two hours." },
+    { "ru": "Мы смотрели его два часа.", "en": "We watched him for two hours." },
     { "ru": "Он рассказал о другом случае.", "en": "He told us about a different case." },
     { "ru": "Он смотрел нам в глаза и говорил правду.", "en": "He looked us in the eye and told the truth." },
     { "ru": "Теперь я сам хочу читать такие книги.", "en": "Now I want to read books like that myself." }
@@ -45,11 +45,11 @@
   "core7:4": {
    "title": "Prices and what matters",
    "rows": [
-    { "ru": "Цена — это главный вопрос.", "en": "The price is the main question." },
+    { "ru": "Цена — это большой вопрос.", "en": "The price is a big question." },
     { "ru": "Вчера цены были другие.", "en": "Yesterday the prices were different." },
     { "ru": "Теперь у нас нет таких денег.", "en": "Now we do not have that kind of money." },
-    { "ru": "Мы весь день смотрели на цены.", "en": "We spent all day looking at prices." },
-    { "ru": "Главное — не бояться и ждать.", "en": "The main thing is not to be afraid, and to wait." }
+    { "ru": "Мы слушали о ценах весь день.", "en": "We spent all day listening about prices." },
+    { "ru": "Надо не бояться и ждать.", "en": "One must not be afraid, and must wait." }
    ]
   },
   "emotion:0": {
@@ -57,7 +57,7 @@
    "rows": [
     { "ru": "Мне очень нравится эта идея.", "en": "I like this idea very much." },
     { "ru": "Я помню, как ты рассказал о ней.", "en": "I remember how you told me about it." },
-    { "ru": "Тогда я не понял главного.", "en": "Back then I did not understand the main part." },
+    { "ru": "Тогда я не понял идею.", "en": "Back then I did not understand the idea." },
     { "ru": "Теперь у меня другое мнение.", "en": "Now I have a different opinion." },
     { "ru": "Это интересный случай, и я счастлив.", "en": "It is an interesting case, and I am happy." }
    ]
@@ -68,7 +68,7 @@
     { "ru": "Мама всегда переживает за меня.", "en": "Mum always worries about me." },
     { "ru": "Я ненавижу этот страх.", "en": "I hate this fear." },
     { "ru": "Но я верю, что всё будет хорошо.", "en": "But I believe everything will be fine." },
-    { "ru": "Отец гордится мной, и это главное.", "en": "My father is proud of me, and that is what matters." },
+    { "ru": "Отец гордится мной, и это хорошо.", "en": "My father is proud of me, and that is good." },
     { "ru": "Он слушает меня с интересом.", "en": "He listens to me with interest." }
    ]
   },
@@ -128,7 +128,7 @@
     { "ru": "Вчера мне позвонил друг.", "en": "A friend rang me yesterday." },
     { "ru": "Он хотел поговорить о новой книге.", "en": "He wanted to talk about a new book." },
     { "ru": "Разговор был небольшой.", "en": "It was a short conversation." },
-    { "ru": "Тогда у нас была дискуссия о каждой букве.", "en": "Then we had a discussion about every letter." },
+    { "ru": "Тогда у нас был разговор о каждой букве.", "en": "Then we had a talk about every letter." },
     { "ru": "Я прошу вас звонить мне каждый день.", "en": "I ask you to call me every day." }
    ]
   },
@@ -137,7 +137,7 @@
    "rows": [
     { "ru": "Вчера в компании была большая беседа.", "en": "Yesterday there was a long discussion at the company." },
     { "ru": "Мы говорили о новом названии.", "en": "We were talking about the new name." },
-    { "ru": "Один человек кричал, другой молчал.", "en": "One man shouted, another said nothing." },
+    { "ru": "Один человек кричал, другой не ответил.", "en": "One man shouted, another did not answer." },
     { "ru": "Я обещал, что мы договоримся завтра.", "en": "I promised we would come to an agreement tomorrow." },
     { "ru": "Это был случай, когда все хотели плакать.", "en": "It was the kind of day that made everyone want to cry." }
    ]
@@ -149,15 +149,15 @@
     { "ru": "Он не забыл своё обещание.", "en": "He has not forgotten his promise." },
     { "ru": "Он проговорил эти слова очень просто.", "en": "He said those words very plainly." },
     { "ru": "Мне не надо объясняться.", "en": "I do not need to explain myself." },
-    { "ru": "Он не указывает мне, что делать.", "en": "He does not tell me what to do." }
+    { "ru": "Ссоры больше нет.", "en": "There is no more quarrel." }
    ]
   },
   "speech:4": {
    "title": "A meeting that got loud",
    "rows": [
-    { "ru": "Мы беседовали о новом наименовании.", "en": "We were talking over the new name." },
+    { "ru": "Мы беседовали о новом названии.", "en": "We were talking over the new name." },
     { "ru": "Тогда он заговорил о цене.", "en": "Then he started talking about the price." },
-    { "ru": "Он утверждает, что это главный вопрос.", "en": "He insists that this is the main question." },
+    { "ru": "Он утверждает, что это большой вопрос.", "en": "He insists that this is a big question." },
     { "ru": "Он закричал, и мы все молчали.", "en": "He shouted, and we all fell silent." },
     { "ru": "Этот крик я не забуду.", "en": "I will not forget that shout." }
    ]
@@ -168,7 +168,7 @@
     { "ru": "Он повторил вопрос два раза.", "en": "He repeated the question twice." },
     { "ru": "Я не мог перевести это слово.", "en": "I could not translate this word." },
     { "ru": "Он объяснил мне каждую букву.", "en": "He explained every letter to me." },
-    { "ru": "Теперь я отличаю эти два слова.", "en": "Now I can tell these two words apart." },
+    { "ru": "Теперь я знаю эти два слова.", "en": "Now I know these two words." },
     { "ru": "Тогда мы обсуждали новый фильм.", "en": "Then we discussed a new film." }
    ]
   },
@@ -197,7 +197,7 @@
    "rows": [
     { "ru": "У фирмы есть долг.", "en": "The firm has a debt." },
     { "ru": "Налог в этом году больше.", "en": "The tax is higher this year." },
-    { "ru": "Мы делим доход на всех.", "en": "We divide the income among everyone." },
+    { "ru": "Доход фирмы очень небольшой.", "en": "The firm's income is very small." },
     { "ru": "Как вы оцениваете это изделие?", "en": "How do you price this product?" },
     { "ru": "Кредитный фонд помог нашей компании.", "en": "The credit fund helped our company." }
    ]
@@ -206,7 +206,7 @@
    "title": "Our customer the entrepreneur",
    "rows": [
     { "ru": "Наш заказчик — предприниматель из Москвы.", "en": "Our customer is an entrepreneur from Moscow." },
-    { "ru": "Он хорошо разбирается в торговле.", "en": "He knows the trade well." },
+    { "ru": "Он хорошо знает торговлю.", "en": "He knows the trade well." },
     { "ru": "Он делится с нами всем.", "en": "He shares everything with us." },
     { "ru": "Налоговый вопрос он знает очень хорошо.", "en": "He knows the tax side of it very well." },
     { "ru": "Ущерб был небольшой.", "en": "The damage was small." }

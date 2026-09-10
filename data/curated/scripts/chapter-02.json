@@ -128,7 +128,7 @@
     { "ru": "Я иду на новый курс.", "en": "I am starting a new course." },
     { "ru": "Курс идёт уже год.", "en": "The course has been running for a year." },
     { "ru": "Я написал ответ.", "en": "I wrote the answer." },
-    { "ru": "Учитель прочитал мой ответ.", "en": "The teacher read my answer." },
+    { "ru": "Профессор прочитал мой ответ.", "en": "The professor read my answer." },
     { "ru": "Ошибок не было.", "en": "There were no mistakes." }
    ]
   }

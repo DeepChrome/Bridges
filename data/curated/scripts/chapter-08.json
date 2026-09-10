@@ -8,7 +8,7 @@
     { "ru": "Моя мать ещё очень молодая.", "en": "My mother is still very young." },
     { "ru": "Новый день начался, и она уже за компьютером.", "en": "A new day has begun, and she is already at her computer." },
     { "ru": "Её компания делает новый продукт.", "en": "Her company is making a new product." },
-    { "ru": "Она часто видит самолёты из окна.", "en": "She often sees planes out of the window." },
+    { "ru": "Она часто смотрит в окно.", "en": "She often looks out of the window." },
     { "ru": "Да, этот продукт уже знают в Москве.", "en": "Yes, people in Moscow already know this product." }
    ]
   },
@@ -19,7 +19,7 @@
     { "ru": "Она весь день в своей комнате.", "en": "She has been in her room all day." },
     { "ru": "Мы вызвали врача.", "en": "We called a doctor." },
     { "ru": "Мы не слышим, что они говорят.", "en": "We can't hear what they are saying." },
-    { "ru": "Весь мир для неё сейчас — эта комната.", "en": "Right now her whole world is this one room." }
+    { "ru": "Никто не видит её весь день.", "en": "Nobody sees her all day." }
    ]
   },
   "core8:2": {
@@ -28,7 +28,7 @@
     { "ru": "Что произошло вчера?", "en": "What happened yesterday?" },
     { "ru": "Ночью новая программа не работала.", "en": "The new program wasn't working during the night." },
     { "ru": "Мы вызвали помощь, и она пришла очень быстро.", "en": "We called for help and it came very quickly." },
-    { "ru": "Пока все спали, они сделали свою работу.", "en": "While everyone slept, they did their work." },
+    { "ru": "Пока мы ждали, они сделали свою работу.", "en": "While we waited, they did their work." },
     { "ru": "Сейчас всё работает, и мы вернулись.", "en": "Everything is running now, and we are back." }
    ]
   },
@@ -47,9 +47,9 @@
    "rows": [
     { "ru": "Вчера мы были в большом магазине.", "en": "Yesterday we were at a big shop." },
     { "ru": "Там мы видели очень хороший компьютер.", "en": "There we saw a very good computer." },
-    { "ru": "Но его цена слишком большая.", "en": "But its price is too high." },
+    { "ru": "Но его цена очень большая.", "en": "But its price is very high." },
     { "ru": "Отец сказал, что мы его не возьмём.", "en": "Dad said we would not take it." },
-    { "ru": "Мама тоже думает, что это слишком много.", "en": "Mum thinks it's too much as well." }
+    { "ru": "Мама тоже думает, что это много.", "en": "Mum thinks it is a lot as well." }
    ]
   },
   "military:0": {
@@ -126,7 +126,7 @@
    "title": "A message on the screen",
    "rows": [
     { "ru": "На экране моего телефона новое сообщение.", "en": "There's a new message on my phone screen." },
-    { "ru": "Я нажал и увидел новость.", "en": "I tapped it and saw the news." },
+    { "ru": "Это новость о нашем городе.", "en": "It is news about our city." },
     { "ru": "В сети об этом уже все говорят.", "en": "Everyone online is talking about it already." },
     { "ru": "Этот сайт я читаю каждый день.", "en": "I read that site every day." },
     { "ru": "Моё новое устройство работает очень быстро.", "en": "My new device runs very fast." }
@@ -135,7 +135,7 @@
   "tech:2": {
    "title": "Filing a report",
    "rows": [
-    { "ru": "Учёный подал свой доклад в редакцию.", "en": "The scientist filed his report with the editorial office." },
+    { "ru": "Учёный сделал новый доклад.", "en": "The scientist has made a new report." },
     { "ru": "Его новый прибор видит очень маленький сигнал.", "en": "His new instrument picks up a very small signal." },
     { "ru": "Но здесь нет телефонного сигнала.", "en": "But there is no phone signal here." },
     { "ru": "Сотовый телефон в этом месте не работает.", "en": "A mobile phone doesn't work in this spot." },
@@ -179,7 +179,7 @@
     { "ru": "Он играет в футбол каждый день.", "en": "He plays football every day." },
     { "ru": "Ещё он хорошо плавает и играет в теннис.", "en": "He also swims well and plays tennis." },
     { "ru": "Вчера он выиграл первый раз.", "en": "Yesterday he won for the first time." },
-    { "ru": "Его цель — делать эти упражнения каждый день.", "en": "His aim is to do these exercises every day." }
+    { "ru": "Он делает эти упражнения каждый день.", "en": "He does these exercises every day." }
    ]
   },
   "sport:1": {
@@ -187,8 +187,8 @@
    "rows": [
     { "ru": "Вчера мы смотрели большой матч.", "en": "Yesterday we watched a big match." },
     { "ru": "Наша команда играла очень хорошо.", "en": "Our team played very well." },
-    { "ru": "Судья не видел, что произошло.", "en": "The referee didn't see what happened." },
-    { "ru": "Об этом мы услышали только сегодня.", "en": "We only heard about it today." },
+    { "ru": "Один игрок играл очень хорошо.", "en": "One player played very well." },
+    { "ru": "Он хочет завоевать чемпионат.", "en": "He wants to win the championship." },
     { "ru": "Через год у нас будет большой чемпионат.", "en": "In a year we'll have a big championship here." }
    ]
   },
@@ -199,7 +199,7 @@
     { "ru": "Один игрок хорошо ловит, другой хорошо бросает.", "en": "One player catches well, another throws well." },
     { "ru": "Наша команда хочет стать первой.", "en": "Our team wants to come first." },
     { "ru": "Но победить в этом чемпионате будет не просто.", "en": "But winning this championship won't be easy." },
-    { "ru": "Место в чемпионате всегда соответствует работе команды.", "en": "A place in the championship always matches the work a team puts in." }
+    { "ru": "Место в чемпионате — это работа команды.", "en": "A place in the championship is the team's own work." }
    ]
   },
   "sport:3": {
@@ -219,7 +219,7 @@
     { "ru": "Его тренер был чемпионом мира.", "en": "His coach was a world champion." },
     { "ru": "На стадионе они играют в волейбол.", "en": "At the stadium they play volleyball." },
     { "ru": "А дома он играет в шахматы.", "en": "And at home he plays chess." },
-    { "ru": "Завтра матч будет судить новый судья.", "en": "Tomorrow a new referee will officiate the match." }
+    { "ru": "А завтра у него бег на стадионе.", "en": "And tomorrow he has a run at the stadium." }
    ]
   },
   "sport:5": {

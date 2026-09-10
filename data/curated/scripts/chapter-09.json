@@ -6,7 +6,7 @@
    "title": "Around our house",
    "rows": [
     { "ru": "Наш дом находится около школы.", "en": "Our house is near the school." },
-    { "ru": "Между домом и школой большая улица.", "en": "Between the house and the school there is a wide street." },
+    { "ru": "Тут очень большая улица.", "en": "There is a very big street here." },
     { "ru": "На другой стороне улицы второй дом.", "en": "On the other side of the street there is a second house." },
     { "ru": "Мы можем жить там.", "en": "We could live there." },
     { "ru": "Я не против, земля тут хорошая.", "en": "I don't mind, the land here is good." }
@@ -15,18 +15,18 @@
   "core9:1": {
    "title": "Speaking a little slower",
    "rows": [
-    { "ru": "Ты меня понимаешь?", "en": "Do you understand me?" },
+    { "ru": "Ты меня слышишь?", "en": "Can you hear me?" },
     { "ru": "Да, почти всё.", "en": "Yes, almost everything." },
     { "ru": "Иногда ты говоришь очень быстро.", "en": "Sometimes you speak very fast." },
     { "ru": "Лучше слушать каждый день, это необходимо.", "en": "It is better to listen every day, that is essential." },
-    { "ru": "Спасибо, теперь я понимаю.", "en": "Thank you, now I understand." }
+    { "ru": "Спасибо, теперь мне лучше.", "en": "Thank you, I feel better now." }
    ]
   },
   "core9:2": {
-   "title": "Meeting someone new",
+   "title": "Getting to know each other",
    "rows": [
-    { "ru": "Как тебя зовут?", "en": "What is your name?" },
-    { "ru": "Меня зовут Анна.", "en": "My name is Anna." },
+    { "ru": "Ты меня понимаешь?", "en": "Do you understand me?" },
+    { "ru": "Да, теперь я понимаю.", "en": "Yes, now I understand." },
     { "ru": "Откуда ты?", "en": "Where are you from?" },
     { "ru": "Я из Москвы, но три года живу тут.", "en": "I am from Moscow, but I have lived here for three years." },
     { "ru": "Ну, потом пойдём в город.", "en": "Well, we'll go into town later." }
@@ -96,7 +96,7 @@
    "title": "My friend and his guitar",
    "rows": [
     { "ru": "Мой друг играет на гитаре каждый день.", "en": "My friend plays the guitar every day." },
-    { "ru": "Это его любимый инструмент.", "en": "It is his favourite instrument." },
+    { "ru": "Это его любимая гитара.", "en": "It is his favourite guitar." },
     { "ru": "Он часто напевает одну песню.", "en": "He often hums the same song." },
     { "ru": "Не знаю, какой это жанр.", "en": "I don't know what genre it is." },
     { "ru": "Потом он играет пьесу для нас.", "en": "Then he plays a piece for us." }
@@ -129,7 +129,7 @@
     { "ru": "Министр говорил об этом вчера.", "en": "The minister spoke about it yesterday." },
     { "ru": "Каждый гражданин может знать, что делает власть.", "en": "Every citizen may know what those in power are doing." },
     { "ru": "Государство должно помочь семьям.", "en": "The state must help families." },
-    { "ru": "Но я не смог найти эту программу.", "en": "But I could not find that programme." }
+    { "ru": "Но я не мог найти эту программу.", "en": "But I could not find that programme." }
    ]
   },
   "politics:2": {
@@ -149,7 +149,7 @@
     { "ru": "Чиновники говорили о национальной программе.", "en": "The officials talked about the national programme." },
     { "ru": "В госдуме об этом говорили три часа.", "en": "In the Duma they discussed it for three hours." },
     { "ru": "У этого министра большой авторитет.", "en": "That minister carries a lot of authority." },
-    { "ru": "А потом у нас была вечеринка.", "en": "And afterwards we had a party." }
+    { "ru": "А потом мы говорили о губернаторе.", "en": "And afterwards we talked about the governor." }
    ]
   },
   "politics:4": {
@@ -157,7 +157,7 @@
    "rows": [
     { "ru": "Мэр нашего города говорил о здравоохранении.", "en": "The mayor of our town spoke about healthcare." },
     { "ru": "Губернатор тоже говорил после него.", "en": "The governor spoke after him as well." },
-    { "ru": "Потом они опубликовали новую программу.", "en": "Then they published a new programme." },
+    { "ru": "Потом у них была новая программа.", "en": "Then they had a new programme." },
     { "ru": "У нас в стране много национальностей.", "en": "There are many nationalities in our country." },
     { "ru": "Политика это не только слова.", "en": "Politics is not only words." }
    ]
@@ -166,10 +166,10 @@
    "title": "After the revolution",
    "rows": [
     { "ru": "Председатель говорил о революции.", "en": "The chairman spoke about the revolution." },
-    { "ru": "Справа от него стоял мэр.", "en": "The mayor was standing to his right." },
-    { "ru": "Он сказал, что это была воля народа.", "en": "He said that it was the will of the people." },
+    { "ru": "Около него стоял посол.", "en": "The ambassador was standing next to him." },
+    { "ru": "Он сказал, что это была демократия.", "en": "He said that this was democracy." },
     { "ru": "После революции жизнь стала другой.", "en": "After the revolution life became different." },
-    { "ru": "Штат это почти как наша республика.", "en": "A state is almost like our republic." }
+    { "ru": "Потом был большой митинг в городе.", "en": "Then there was a big rally in the city." }
    ]
   },
   "science:0": {
@@ -179,17 +179,17 @@
     { "ru": "Это большое открытие.", "en": "This is a big discovery." },
     { "ru": "Он любит математику больше всего.", "en": "He loves mathematics most of all." },
     { "ru": "Каждый час он смотрит на температуру.", "en": "Every hour he checks the temperature." },
-    { "ru": "В этом пространстве много энергии.", "en": "There is a lot of energy in this space." }
+    { "ru": "В этом пространстве три элемента.", "en": "There are three elements in this space." }
    ]
   },
   "science:1": {
    "title": "Inside the laboratory",
    "rows": [
     { "ru": "В лаборатории работают три человека.", "en": "Three people work in the laboratory." },
-    { "ru": "Они измерили температуру воды.", "en": "They measured the temperature of the water." },
+    { "ru": "Энергия здесь очень большая.", "en": "The energy here is very great." },
     { "ru": "Это химический элемент.", "en": "This is a chemical element." },
     { "ru": "Наша планета очень маленькая, а вселенная огромная.", "en": "Our planet is very small, and the universe is enormous." },
-    { "ru": "Это космическое изобретение сделали в Москве.", "en": "This space invention was made in Moscow." }
+    { "ru": "Космическая лаборатория находится в Москве.", "en": "The space laboratory is in Moscow." }
    ]
   },
   "science:2": {
@@ -198,8 +198,8 @@
     { "ru": "Мы были на космодроме.", "en": "We were at the cosmodrome." },
     { "ru": "Там работают исследовательские лаборатории.", "en": "Research laboratories work there." },
     { "ru": "Каждый день надо мерить температуру.", "en": "The temperature has to be measured every day." },
-    { "ru": "Этот эксперимент дал хороший результат.", "en": "The experiment gave a good result." },
-    { "ru": "Он читает книги о химии и эволюции.", "en": "He reads books about chemistry and evolution." }
+    { "ru": "Это изобретение дало хороший результат.", "en": "This invention gave a good result." },
+    { "ru": "Он читает книги о химии и теории.", "en": "He reads books about chemistry and theory." }
    ]
   },
   "science:3": {

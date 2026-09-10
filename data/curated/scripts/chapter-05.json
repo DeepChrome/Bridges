@@ -8,7 +8,7 @@
     { "ru": "Эта женщина хочет купить книгу.", "en": "This woman wants to buy a book." },
     { "ru": "Я говорю ей об одной новой книге.", "en": "I tell her about one new book." },
     { "ru": "Это самая новая книга здесь.", "en": "It is the newest book here." },
-    { "ru": "Женщина дала мне деньги.", "en": "The woman gave me the money." },
+    { "ru": "Женщина стоит и читает.", "en": "The woman is standing and reading." },
     { "ru": "Больше книг у нас нет.", "en": "We have no more books." }
    ]
   },
@@ -27,7 +27,7 @@
    "rows": [
     { "ru": "Моя семья живёт в большом доме.", "en": "My family lives in a big house." },
     { "ru": "Этот дом находится в городе.", "en": "The house is in the city." },
-    { "ru": "Мамы сейчас нет дома.", "en": "Mum is not at home right now." },
+    { "ru": "Её сейчас нет дома.", "en": "She is not at home right now." },
     { "ru": "Она вышла за водой.", "en": "She has gone out to get water." },
     { "ru": "Девушка у двери ждёт её.", "en": "The girl at the door is waiting for her." }
    ]
@@ -39,14 +39,14 @@
     { "ru": "Данная компания находится в Москве.", "en": "The company in question is in Moscow." },
     { "ru": "Скажите, пожалуйста, все там говорят на русском?", "en": "Tell me, please, does everyone speak Russian there?" },
     { "ru": "Да, там нужно знать русский язык.", "en": "Yes, you need to know Russian there." },
-    { "ru": "Через минуту я буду знать больше.", "en": "In a minute I will know more." }
+    { "ru": "Мама тоже там работает.", "en": "Mum works there too." }
    ]
   },
   "core5:4": {
    "title": "Finding the street",
    "rows": [
-    { "ru": "Мы не можем найти эту улицу.", "en": "We cannot find this street." },
-    { "ru": "Девушка на улице говорит с нами.", "en": "A girl in the street is talking to us." },
+    { "ru": "Мы не можем найти этот дом.", "en": "We cannot find this house." },
+    { "ru": "Девушка у двери говорит с нами.", "en": "A girl at the door is talking to us." },
     { "ru": "Она знает, где находится наш дом.", "en": "She knows where our house is." },
     { "ru": "Мы нашли дом через минуту.", "en": "We found the house in a minute." },
     { "ru": "Вот наша дверь.", "en": "Here is our door." }
@@ -65,9 +65,9 @@
   "body:1": {
    "title": "A sore shoulder",
    "rows": [
-    { "ru": "У меня болит правое плечо.", "en": "My right shoulder hurts." },
+    { "ru": "У меня болит плечо.", "en": "My shoulder hurts." },
     { "ru": "Эта боль у меня каждый день.", "en": "I have this pain every day." },
-    { "ru": "Я не чувствую правой руки.", "en": "I cannot feel my right hand." },
+    { "ru": "Колено тоже болит.", "en": "My knee hurts too." },
     { "ru": "Крови нет, и это хорошо.", "en": "There is no blood, and that is good." },
     { "ru": "Мой зуб тоже болит.", "en": "My tooth hurts as well." }
    ]
@@ -79,7 +79,7 @@
     { "ru": "Спина и колено тоже болят.", "en": "My back and knee hurt too." },
     { "ru": "Всё тело чувствует эту боль.", "en": "My whole body feels this pain." },
     { "ru": "Врач говорит, что нужно больше воды.", "en": "The doctor says I need more water." },
-    { "ru": "Друг поддержал меня и дал воды.", "en": "A friend held me up and gave me water." }
+    { "ru": "Друг дал мне воды.", "en": "A friend gave me water." }
    ]
   },
   "body:3": {
@@ -88,7 +88,7 @@
     { "ru": "У ребёнка болит живот.", "en": "The child has a stomach ache." },
     { "ru": "Врач будет его лечить.", "en": "The doctor will treat him." },
     { "ru": "Ребёнок мёрзнет и не чувствует пальцев.", "en": "The child is freezing and cannot feel his fingers." },
-    { "ru": "Он протянул врачу руку.", "en": "He held out his hand to the doctor." },
+    { "ru": "У него болит горло.", "en": "His throat hurts." },
     { "ru": "Врач сказал, что это не большая проблема.", "en": "The doctor said it is not a big problem." }
    ]
   },
@@ -97,19 +97,9 @@
    "rows": [
     { "ru": "Сегодня я иду к зубному врачу.", "en": "Today I am going to the dentist." },
     { "ru": "Я заболел, и горло очень болит.", "en": "I have fallen ill, and my throat hurts a lot." },
-    { "ru": "Желудок тоже болит каждый день.", "en": "My stomach hurts every day too." },
-    { "ru": "Я не могу сдерживать эту боль.", "en": "I cannot keep holding this pain in." },
-    { "ru": "Но врач говорит, что вреда для здоровья нет.", "en": "But the doctor says there is no harm to my health." }
-   ]
-  },
-  "body:5": {
-   "title": "The heart holds up",
-   "rows": [
-    { "ru": "Врач сказал, что сердце здоровое.", "en": "The doctor said my heart is healthy." },
-    { "ru": "Сегодня оно меня не подводит.", "en": "Today it is not letting me down." },
-    { "ru": "Но я не мог сдержать боль в груди.", "en": "But I could not hold back the pain in my chest." },
-    { "ru": "У ребёнка тоже болит ножка.", "en": "The child's little leg hurts too." },
-    { "ru": "Мама ждёт нас у двери.", "en": "Mum is waiting for us by the door." }
+    { "ru": "Шея и желудок тоже болят.", "en": "My neck and stomach hurt too." },
+    { "ru": "Я очень усталый.", "en": "I am very tired." },
+    { "ru": "Но врач говорит, что сердце здоровое.", "en": "But the doctor says my heart is healthy." }
    ]
   },
   "nature:0": {
@@ -129,7 +119,7 @@
     { "ru": "Сколько сейчас градусов?", "en": "What is the temperature right now?" },
     { "ru": "Летом здесь очень тёплое море.", "en": "In summer the sea here is very warm." },
     { "ru": "Но ветер уже холодный.", "en": "But the wind is cold already." },
-    { "ru": "Одно дерево упало на улицу.", "en": "One tree has fallen into the street." }
+    { "ru": "На берегу уже снег.", "en": "There is snow on the bank already." }
    ]
   },
   "nature:2": {
@@ -137,7 +127,7 @@
    "rows": [
     { "ru": "Мы стоим на берегу реки.", "en": "We are standing on the river bank." },
     { "ru": "Снег уже на траве и на камнях.", "en": "There is snow on the grass and on the stones already." },
-    { "ru": "Листья упали в холодную воду.", "en": "The leaves have fallen into the cold water." },
+    { "ru": "Листья и песок в холодной воде.", "en": "Leaves and sand are in the cold water." },
     { "ru": "Остров на реке очень большой.", "en": "The island in the river is very big." },
     { "ru": "Мы хотим гулять там летом.", "en": "We want to walk there in the summer." }
    ]
@@ -168,7 +158,7 @@
     { "ru": "Сегодня на поле большой туман.", "en": "There is thick fog on the field today." },
     { "ru": "Трава очень мокрая от дождя.", "en": "The grass is very wet from the rain." },
     { "ru": "Холод идёт с реки и с озера.", "en": "Cold air is coming off the river and the lake." },
-    { "ru": "Мы не хотим гулять здесь.", "en": "We do not want to walk here." },
+    { "ru": "Гром и молния идут с гор.", "en": "Thunder and lightning are coming off the mountains." },
     { "ru": "Дома нас ждёт мама.", "en": "Mum is waiting for us at home." }
    ]
   },
@@ -195,7 +185,7 @@
   "medicine:2": {
    "title": "Getting better",
    "rows": [
-    { "ru": "Клиника находится на нашей улице.", "en": "The clinic is on our street." },
+    { "ru": "Клиника находится в нашем городе.", "en": "The clinic is in our city." },
     { "ru": "Там мне сказали мой диагноз.", "en": "There they told me my diagnosis." },
     { "ru": "Первый симптом был через день.", "en": "The first symptom came a day later." },
     { "ru": "Сейчас я уже выздоравливаю.", "en": "Now I am already getting better." },

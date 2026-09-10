@@ -67,7 +67,7 @@
    "rows": [
     { "ru": "Это дело об убийстве.", "en": "This is a murder case." },
     { "ru": "Преступление произошло рядом с нашим городом.", "en": "The crime happened near our city." },
-    { "ru": "Свидетельство одной женщины очень помогло суду.", "en": "One woman's evidence helped the court a great deal." },
+    { "ru": "Судья говорил об этом преступлении.", "en": "The judge spoke about this crime." },
     { "ru": "Виновный уже знает своё наказание.", "en": "The guilty man already knows his punishment." },
     { "ru": "Его ждёт тюрьма.", "en": "Prison is waiting for him." }
    ]
@@ -76,29 +76,29 @@
    "title": "The thief in our building",
    "rows": [
     { "ru": "В нашем доме жил вор.", "en": "A thief used to live in our building." },
-    { "ru": "Он воровал деньги в магазине.", "en": "He was stealing money at the shop." },
-    { "ru": "Полиция быстро нашла доказательства.", "en": "The police quickly found the proof." },
+    { "ru": "Он взял деньги в магазине.", "en": "He took money from the shop." },
+    { "ru": "Полиция быстро нашла свидетеля.", "en": "The police quickly found a witness." },
     { "ru": "Арест был вчера.", "en": "The arrest was yesterday." },
     { "ru": "Женщина из магазина будет свидетельствовать в суде.", "en": "The woman from the shop is going to testify in court." }
    ]
   },
   "law:3": {
-   "title": "My friend the lawyer",
+   "title": "The stolen money",
    "rows": [
-    { "ru": "Мой друг работает юристом.", "en": "My friend works as a lawyer." },
-    { "ru": "Он читает контракты каждый день.", "en": "He reads contracts every day." },
-    { "ru": "Однажды ему хотели дать взятку.", "en": "One day somebody tried to give him a bribe." },
-    { "ru": "Конечно, это уголовное дело.", "en": "That is a criminal matter, of course." },
-    { "ru": "Его показания очень помогли полиции.", "en": "His testimony helped the police a lot." }
+    { "ru": "Этот человек воровал деньги.", "en": "This man was stealing money." },
+    { "ru": "Полиция нашла все доказательства.", "en": "The police found all the proof." },
+    { "ru": "Его показания помогли полиции.", "en": "His testimony helped the police." },
+    { "ru": "Судить его будут в этом году.", "en": "He will be tried this year." },
+    { "ru": "Контракт тоже был преступный.", "en": "The contract was criminal too." }
    ]
   },
   "law:4": {
    "title": "A detective novel",
    "rows": [
     { "ru": "Вчера я читал новый детектив.", "en": "Yesterday I was reading a new detective novel." },
-    { "ru": "В книге были вор и убийство.", "en": "There was a thief and a murder in the book." },
+    { "ru": "В книге были вор и уголовное дело.", "en": "There was a thief and a criminal case in the book." },
     { "ru": "Полиция не могла найти убийцу.", "en": "The police could not find the killer." },
-    { "ru": "Но в конце все доказательства нашли.", "en": "But in the end they found all the proof." },
+    { "ru": "Юристу хотели дать взятку.", "en": "Somebody tried to give the lawyer a bribe." },
     { "ru": "Такие книги я очень люблю.", "en": "I really love books like that." }
    ]
   },

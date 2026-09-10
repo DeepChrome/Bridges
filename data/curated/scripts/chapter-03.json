@@ -79,7 +79,7 @@
     { "ru": "Мебель уже на кухне.", "en": "The furniture is in the kitchen already." },
     { "ru": "Шкаф большой и чистый.", "en": "The cupboard is big and clean." },
     { "ru": "Забор тоже новый.", "en": "The fence is new too." },
-    { "ru": "Я люблю свой родной город.", "en": "I love my home town." }
+    { "ru": "А стекло уже чистое.", "en": "And the glass is clean already." }
    ]
   },
   "clothes:0": {
@@ -105,11 +105,11 @@
   "clothes:2": {
    "title": "Choosing what to wear",
    "rows": [
-    { "ru": "Это платье тебе очень подходит.", "en": "That dress suits you very well." },
+    { "ru": "Это платье очень красивое.", "en": "This dress is very beautiful." },
     { "ru": "А пальто и пиджак?", "en": "And the coat and the jacket?" },
-    { "ru": "Пальто не подходит к платью.", "en": "The coat does not go with the dress." },
+    { "ru": "Кольцо тоже красивое.", "en": "The ring is beautiful too." },
     { "ru": "Надень рубашку и пиджак.", "en": "Put on the shirt and the jacket." },
-    { "ru": "Как это звучит?", "en": "How does that sound?" }
+    { "ru": "Майка — это тоже мода.", "en": "A T-shirt is fashion too." }
    ]
   }
  }

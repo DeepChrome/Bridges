@@ -15,25 +15,42 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { Runner } from "../src/screens/Run";
 import { Q, SPEECH_MIX } from "../src/questions";
-import { L, IX, STAGES, SPEECH } from "../src/data";
+import { L, IX, STAGES, SPEECH, lessonCount } from "../src/data";
 import { fold, today } from "@core/util";
 import { words } from "@core/compare";
 import { applyGrade } from "@core/fsrs";
 import { SPEECH_SKIP_TOP } from "@core/speech";
 
-const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.hear.fromStage
-                                 && (SPEECH.listen[s.core.id] || []).length).core;
-const lesson = Q.stageOf(later) === SPEECH_MIX.hear.fromStage ? (SPEECH_MIX.hear.fromLesson || 0) : 0;
-/* A sentence with a content word in it — only those are graded by a sentence
-   (core/speech.js SPEECH_SKIP_TOP). */
-function withContent(kind) {
-  let q = null;
-  for (let k = 0; k < 80 && !(q && q.lemmas.some((i) => i >= SPEECH_SKIP_TOP)); k++) {
-    q = Q.present(Q.speechPrompt(kind, later, lesson));
+/* The earliest lesson whose Hear pool can actually supply a sentence with a
+   content word in it — only those are graded (core/speech.js SPEECH_SKIP_TOP),
+   and the per-word FSRS writes are what this file is here to assert.
+ *
+ * Not simply "the first stage with a pool": which lemmas a lesson teaches moves
+ * whenever the curriculum is re-cut, and chapter 1's are pronouns and «быть», so
+ * some of its lessons draw only from «Я не Том»-shaped sentences and grade
+ * nothing. Searching for the lesson rather than pinning one keeps the assertions
+ * exactly as strong while surviving a rebuild. */
+function findPrompt(kind) {
+  for (const s of STAGES) {
+    if (Q.stageOf(s.core) < SPEECH_MIX.hear.fromStage) continue;
+    if (!(SPEECH.listen[s.core.id] || []).length) continue;
+    const from = Q.stageOf(s.core) === SPEECH_MIX.hear.fromStage
+      ? (SPEECH_MIX.hear.fromLesson || 0) : 0;
+    for (let li = from; li < lessonCount(s.core); li++) {
+      for (let k = 0; k < 80; k++) {
+        const q = Q.present(Q.speechPrompt(kind, s.core, li));
+        if (q && q.lemmas && q.lemmas.some((i) => i >= SPEECH_SKIP_TOP)) {
+          return { q, unit: s.core, lesson: li };
+        }
+      }
+    }
   }
-  return q;
+  throw new Error(`no ${kind} prompt anywhere carries a content word`);
 }
-const question = withContent("hear");
+const found = findPrompt("hear");
+const later = found.unit;
+const lesson = found.lesson;
+const question = found.q;
 const heard = fold(question.target).replace(/[^а-яё\s-]/g, "").trim();
 const content = question.lemmas.filter((i) => i >= SPEECH_SKIP_TOP);
 

@@ -62,23 +62,23 @@
    ]
   },
   "family:0": {
-   "title": "My husband and daughter",
+   "title": "My husband Ivan",
    "rows": [
     { "ru": "Это мой муж.", "en": "This is my husband." },
-    { "ru": "А это наша дочь.", "en": "And this is our daughter." },
-    { "ru": "Она родилась здесь.", "en": "She was born here." },
-    { "ru": "Дочь растёт.", "en": "Our daughter is growing." },
-    { "ru": "Мужчина не хочет говорить.", "en": "The man does not want to talk." }
+    { "ru": "Его зовут Иван.", "en": "His name is Ivan." },
+    { "ru": "Он родился здесь.", "en": "He was born here." },
+    { "ru": "А это Аня.", "en": "And this is Anya." },
+    { "ru": "Аня растёт.", "en": "Anya is growing." }
    ]
   },
   "family:1": {
-   "title": "A guest at our home",
+   "title": "Our son and daughter",
    "rows": [
     { "ru": "Это наш сын.", "en": "This is our son." },
     { "ru": "А это мой брат.", "en": "And this is my brother." },
     { "ru": "Девочка — его подруга.", "en": "The girl is his friend." },
-    { "ru": "У нас гость.", "en": "We have a guest." },
-    { "ru": "Гость хочет знать, кто мы.", "en": "The guest wants to know who we are." }
+    { "ru": "А это наша дочь.", "en": "And this is our daughter." },
+    { "ru": "Дочь хочет знать, кто мы.", "en": "Our daughter wants to know who we are." }
    ]
   },
   "family:2": {
@@ -98,7 +98,7 @@
     { "ru": "Это наш малыш.", "en": "This is our little one." },
     { "ru": "Он ещё не говорит.", "en": "He does not talk yet." },
     { "ru": "Это наш семейный год.", "en": "This is our family year." },
-    { "ru": "Молодёжь хочет знать всё.", "en": "Young people want to know everything." }
+    { "ru": "Мальчишка хочет знать всё.", "en": "The lad wants to know everything." }
    ]
   },
   "time:0": {
@@ -106,7 +106,7 @@
    "rows": [
     { "ru": "Уже утро.", "en": "It is morning already." },
     { "ru": "Пора!", "en": "It is time!" },
-    { "ru": "Этот месяц наш.", "en": "This month is ours." },
+    { "ru": "Эта неделя наша.", "en": "This week is ours." },
     { "ru": "А вечер?", "en": "And the evening?" },
     { "ru": "Вечер тоже наш.", "en": "The evening is ours too." }
    ]
@@ -115,7 +115,7 @@
    "title": "Numbers and months",
    "rows": [
     { "ru": "Какое это число?", "en": "What number is this?" },
-    { "ru": "Это март.", "en": "This is March." },
+    { "ru": "Какой это месяц?", "en": "What month is this?" },
     { "ru": "А это сентябрь.", "en": "And this is September." },
     { "ru": "Ещё секунда.", "en": "One more second." },
     { "ru": "Это тысяча.", "en": "This is a thousand." }
@@ -134,11 +134,11 @@
   "time:3": {
    "title": "Months of the year",
    "rows": [
-    { "ru": "Это май.", "en": "This is May." },
-    { "ru": "А это июнь.", "en": "And this is June." },
+    { "ru": "Это июнь.", "en": "This is June." },
+    { "ru": "А это декабрь.", "en": "And this is December." },
     { "ru": "Третий месяц — наш.", "en": "The third month is ours." },
     { "ru": "В среду мы здесь.", "en": "On Wednesday we are here." },
-    { "ru": "А декабрь?", "en": "And December?" }
+    { "ru": "А ты успел?", "en": "And did you make it in time?" }
    ]
   }
  }

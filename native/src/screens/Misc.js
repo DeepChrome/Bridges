@@ -196,13 +196,28 @@ export function Video({ route, navigation }) {
 
   /* Mining a word: into the review set, with the video and the second it was
      said, so nothing about where it came from is lost. Keyed on the Russian
-     string like every other piece of learner state (rule 20.4). */
-  const mine = (f) => update((prev) => ({
-    ...prev,
-    pinned: (prev.pinned || []).includes(f.word) ? prev.pinned
-      : (prev.pinned || []).concat([f.word]),
-    mined: { ...(prev.mined || {}), [f.word]: { v: v.id, t: f.t, s: f.s } },
-  }));
+     string like every other piece of learner state (rule 20.4).
+
+     "Add to review" has to mean the scheduler owns it. `pinned` alone did not:
+     its only reader is the Study picker's Trouble set, so a mined word was
+     never due, never counted by "Review · N due", and never topped a quiz up —
+     the button reported something that had not happened. So the word also gets
+     a card, new and due today, exactly the shape the v1 migration gives a word
+     with no measured memory. An existing card is left alone: mining a word you
+     are already studying must not reset its schedule. */
+  const mine = (f) => update((prev) => {
+    const seen = { ...(prev.seen || {}) };
+    if (!seen[f.word]) {
+      seen[f.word] = { s: 0, d: 0, due: today(), last: 0, reps: 0, lapses: 0 };
+    }
+    return {
+      ...prev,
+      seen,
+      pinned: (prev.pinned || []).includes(f.word) ? prev.pinned
+        : (prev.pinned || []).concat([f.word]),
+      mined: { ...(prev.mined || {}), [f.word]: { v: v.id, t: f.t, s: f.s } },
+    };
+  });
 
   const jump = (ms, hold = HOLD_MS) => {
     const at = Math.max(0, ms - (hold ? LEAD_MS : 0));

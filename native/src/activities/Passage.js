@@ -32,6 +32,7 @@ export function Passage({ q, r }) {
   const [at, setAt] = useState(q.start);
   const [playing, setPlaying] = useState(false);
   const [heard, setHeard] = useState(false);      // played through at least once
+  const [dead, setDead] = useState(null);         // the player refused; see below
   const span = Math.max(1, q.end - q.start);
 
   // Position reports only while it is playing.
@@ -49,9 +50,17 @@ export function Passage({ q, r }) {
     }
   }, [at, playing]);
 
+  /* Play owns the position, because the stop effect reads it. Setting `playing`
+     alone and seeking the player left `at` sitting past the end, so the effect
+     below fired again the instant it re-ran and paused on the spot — "Again",
+     the control this whole activity exists for, was dead after the first
+     listen. Position reports only arrive while playing, so nothing else would
+     ever have moved `at` back. */
   const play = () => {
+    const from = at >= q.end - 500 ? q.start : at;
+    setAt(from);
     setPlaying(true);
-    player.current && player.current.seek(at >= q.end - 500 ? q.start : at, 0);
+    player.current && player.current.seek(from, 0);
   };
   const pause = () => {
     setPlaying(false);
@@ -84,13 +93,15 @@ export function Passage({ q, r }) {
   return (
     <View>
       {/* The player is present but small: this is listening, and a video the
-          learner watches is a different activity (Immerse). */}
+          learner watches is a different activity (Immerse). Kept a pixel tall
+          rather than unmounted, because it is what makes the sound. */}
       <View style={{ height: 1, overflow: "hidden", opacity: 0 }}>
         <YouTube
           ref={player}
           videoId={q.video}
           onTime={(ms) => setAt(ms)}
           onEnded={() => { setPlaying(false); setHeard(true); }}
+          onError={(code) => { setPlaying(false); setDead(code); }}
         />
       </View>
 
@@ -116,11 +127,29 @@ export function Passage({ q, r }) {
       </View>
 
       {/* Nothing is asked until it has been heard once — the questions are about
-          the passage, and offering them first turns it into a reading test. */}
+          the passage, and offering them first turns it into a reading test.
+
+          Some videos cannot be embedded at all: the owner disables it, and the
+          player says so (youtube.js, errors 101 and 150). The player is hidden
+          here, so that message would never be seen — the learner would press
+          Play, hear nothing, and be told to listen once through, for ever. A
+          refusal is named and the step is skipped, which the runner leaves out
+          of the total rather than marking wrong (the same way Say handles a
+          missing microphone). */}
       <View style={{ marginTop: 16 }}>
-        {heard ? (
+        {dead ? (
+          <>
+            <Muted testID="passage-dead" style={{ textAlign: "center", marginBottom: 10 }}>
+              This one cannot be played here.
+            </Muted>
+            <Btn label="Skip it" onPress={() => r.skip()} />
+          </>
+        ) : heard ? (
+          // The passage is a gate, not a question: it is skipped rather than
+          // recorded, so listening does not hand everyone a free mark and
+          // inflate the score the list shows.
           <Btn kind="pri" testID="passage-done" label="Answer the questions"
-               onPress={() => r.record(true, [], undefined, { credit: 1, note: null })} />
+               onPress={() => r.skip()} />
         ) : (
           <Muted style={{ textAlign: "center" }}>
             Listen once through, then the questions.

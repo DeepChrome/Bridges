@@ -39,6 +39,21 @@ describe("photographs", () => {
     }
   });
 
+  /* One picture, one word. Nineteen files were shipped for two or three words
+     each — one photograph standing for both «кот» and «кошка», both «актёр» and
+     «актриса». On a vocabulary card the picture is the meaning, so a shared one
+     teaches that two different words mean the same thing. */
+  it("never use one photograph for two words", () => {
+    // Through FILES, not IMAGES: the bundler turns every require() into the same
+    // handle under test, so IMAGES cannot tell two pictures apart.
+    const { FILES } = require("../src/images");
+    expect(Object.keys(FILES).sort()).toEqual(withPhoto.slice().sort());
+    const names = Object.values(FILES);
+    expect(new Set(names).size).toBe(names.length);
+    // …and the titles carry no doubled prefix from the Russian route.
+    for (const w of withPhoto) expect(CREDITS[w].t).not.toMatch(/^(File|Файл):/);
+  });
+
   it("appear on the entry with the credit", async () => {
     const w = withPhoto[0];
     await withProfile(<WordScreen route={{ params: { word: w } }} />);

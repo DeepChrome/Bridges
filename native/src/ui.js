@@ -409,9 +409,17 @@ export function Senses({ e, size = 15, align = "center", style }) {
   );
 }
 
-export function Muted({ children, size = 13, style, testID }) {
+/* `numberOfLines` is passed through deliberately: seven call sites hand it over
+   to clamp a long caption or title, and dropping it (as this did) let a mined
+   caption run to five lines on a flashcard. Same class as the testID drops. */
+export function Muted({ children, size = 13, style, testID, numberOfLines }) {
   const t = useTheme();
-  return <Text testID={testID} style={[{ color: t.ink3, fontSize: size }, style]}>{children}</Text>;
+  return (
+    <Text testID={testID} numberOfLines={numberOfLines}
+          style={[{ color: t.ink3, fontSize: size }, style]}>
+      {children}
+    </Text>
+  );
 }
 
 /* A header that says where you are: what this screen is, and what it belongs to.

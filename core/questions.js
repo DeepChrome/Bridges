@@ -57,6 +57,9 @@ export const PRODUCE_AT = 4;
    while the audio is still in mind. */
 export const PASSAGE_Q = 5;
 export const PASSAGE_MIN_KNOWN = 6;
+/* Below this rank a lemma is a function word, not something to listen for —
+   the same line the scenes and the speech grading already draw. */
+export const PASSAGE_SKIP_TOP = 100;
 /* What the player skips by, in milliseconds — the owner asked for a YouTube-ish
    five seconds, and build_listening.py steps its windows by the same amount. */
 export const SKIP_MS = 5000;
@@ -142,7 +145,7 @@ export function makeQuestions(env) {
   function clozeFor(idx) {
     const w = L[idx];
     if (!w.x || !w.x.length) return null;
-    let best = null;
+    const scored = [];
     for (const ex of w.x) {
       const toks = ex.ru.match(TOKEN) || [];
       if (toks.length < 3) continue;
@@ -152,10 +155,18 @@ export function makeQuestions(env) {
       });
       if (!hit) continue;
       const unknown = toks.filter((t) => !IX[fold(t)]).length;
-      const score = unknown * 100 + toks.length;
-      if (!best || score < best.score) best = { ex, token: hit, score };
+      scored.push({ ex, token: hit, score: unknown * 100 + toks.length });
     }
-    return best ? { ex: best.ex, token: best.token } : null;
+    if (!scored.length) return null;
+    /* Readability is a filter, not a ranking. Returning the single minimum made
+       the gap-fill for a word the same sentence for ever — 97 % of words have
+       another that qualifies, and the whole curriculum could only ever show 892
+       of its ~4,100 example sentences. Anything within a few points of the best
+       is equally readable, so draw among those. */
+    const best = Math.min(...scored.map((s) => s.score));
+    const close = scored.filter((s) => s.score <= best + 3);
+    const pick = close[Math.floor(Math.random() * close.length)];
+    return { ex: pick.ex, token: pick.token };
   }
 
   /* The gap replaces the token as a whole word, never a substring: «в» must not
@@ -406,9 +417,21 @@ export function makeQuestions(env) {
      with most of their own words in it. */
   function passageFit(passage, known) {
     let n = 0;
-    for (const w in passage.words) if (!known || known.has(w)) n++;
+    for (const w in passage.words) {
+      if ((!known || known.has(w)) && contentWord(w)) n++;
+    }
     return n;
   }
+
+  /* Words below PASSAGE_SKIP_TOP by frequency are «и», «не», «в» — a native
+     speaker says them constantly, so counting them made "richest in your own
+     words" a ranking by function-word density, and 95 % of the answers were
+     one. The same rule already guards the scenes (SCENE_SKIP_TOP) and the
+     per-word grading (SPEECH_SKIP_TOP). L is in frequency order. */
+  const contentWord = (bare) => {
+    const i = (IX[fold(bare)] || [])[0];
+    return i !== undefined && i >= PASSAGE_SKIP_TOP;
+  };
 
   /* The passages worth offering, best fit first. */
   function passagesFor(passages, known, limit) {
@@ -423,13 +446,20 @@ export function makeQuestions(env) {
      wrong options inside what the learner has met — being unable to answer
      because you have never seen any of the four words teaches nothing. */
   function passageQuestions(passage, known) {
-    const said = Object.keys(passage.words || {}).filter((w) => !known || known.has(w));
+    const said = Object.keys(passage.words || {})
+      .filter((w) => (!known || known.has(w)) && contentWord(w));
     if (said.length < 4) return [];
     const idx = (b) => (IX[fold(b)] || [])[0];
     const heard = shuffle(said.slice()).filter((b) => idx(b) !== undefined);
     if (heard.length < 4) return [];
-    // Words the learner knows that this passage does not say.
-    const absent = shuffle([...(known || [])].filter((b) => !(b in passage.words)))
+    /* Words the learner knows that this passage does not say — and `maybe` is
+       the difference between "not said" and "not settled". A form the resolver
+       could not pin to one lemma is still a form that was spoken, so offering
+       its candidates as wrong answers marked a learner wrong for hearing
+       correctly (build_listening.py). */
+    const spoken = new Set(Object.keys(passage.words || {}).concat(passage.maybe || []));
+    const absent = shuffle([...(known || [])]
+      .filter((b) => !spoken.has(b) && contentWord(b)))
       .filter((b) => idx(b) !== undefined);
     const out = [];
     for (const b of heard.slice(0, PASSAGE_Q - 1)) {
@@ -713,8 +743,15 @@ export function makeQuestions(env) {
     words.forEach((w, n) => {
       steps.push({ t: "word", i: w });
       if (n % 2 === 1 || n === words.length - 1) {
-        words.slice(Math.max(0, n - 1), n + 1)
-          .forEach((r) => steps.push(present(candidates(r, pool)[0])));
+        // Drawn, not fixed at [0]. `candidates` is ordered easiest first, and
+        // taking the head meant every one of the 1,199 retrievals across the
+        // whole route was "What does this mean?" — four English options, for
+        // every word a learner ever meets. The easiest two shapes still carry
+        // it: this is the retrieval right after meeting the word.
+        words.slice(Math.max(0, n - 1), n + 1).forEach((r) => {
+          const c = candidates(r, pool).slice(0, 3);
+          steps.push(present(c[Math.floor(Math.random() * c.length)]));
+        });
       }
     });
     return steps;

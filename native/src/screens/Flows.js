@@ -5,7 +5,7 @@ import React, { useMemo, useState } from "react";
 import { View, Text, Image } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { IMAGES } from "../images";
+import { IMAGES, CREDITS } from "../images";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb, Senses, SectionLabel, Chip } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
@@ -130,11 +130,19 @@ export function VocabFlow({ route, navigation }) {
         ) : (
           <Card style={{ alignItems: "center" }}>
             {IMAGES[w.b] ? (
-              // A photograph of the thing, when Commons has a public-domain one
-              // (tools/harvest_images.py). Above the word: see it, then read it.
-              <Image testID="word-photo" source={IMAGES[w.b]} resizeMode="cover"
-                     accessibilityLabel={`Photo: ${(w.e || "").split(/[,;]/)[0]}`}
-                     style={{ width: "100%", height: 150, borderRadius: radius.md, marginBottom: 12 }} />
+              // A photograph of the thing (tools/harvest_images.py). Above the
+              // word: see it, then read it. CC BY and CC BY-SA require the credit
+              // wherever the picture appears, not only on the entry (rule 20.10).
+              <>
+                <Image testID="word-photo" source={IMAGES[w.b]} resizeMode="cover"
+                       accessibilityLabel={`Photo: ${firstSense(w)}`}
+                       style={{ width: "100%", height: 150, borderRadius: radius.md, marginBottom: 6 }} />
+                {CREDITS[w.b] ? (
+                  <Muted testID="photo-credit" size={11} style={{ marginBottom: 10, textAlign: "center" }}>
+                    {`${CREDITS[w.b].a || "Wikimedia Commons"} · ${CREDITS[w.b].l}`}
+                  </Muted>
+                ) : null}
+              </>
             ) : null}
             <Muted>New word</Muted>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10,

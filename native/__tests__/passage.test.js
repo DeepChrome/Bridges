@@ -27,6 +27,7 @@ jest.mock("../src/youtube", () => {
         watch: (on) => calls.push(["watch", on]),
       }));
       global.__ytTime = props.onTime;
+      global.__ytError = props.onError;
       return <View testID="yt-player" />;
     }),
   };
@@ -99,6 +100,24 @@ describe("a listening passage", () => {
     expect(skips[1][1]).toBeGreaterThan(0);
   });
 
+  /* The control the activity exists for. It used to be dead after the first
+     listen: play() left `at` past the end, so the stop effect paused again the
+     moment it re-ran. */
+  it("plays again after it has run to the end", async () => {
+    await withProfile(<Runner steps={[step]} onFinish={jest.fn()} gradeWords={false} />);
+    await screen.findByTestId("yt-player");
+    await act(async () => { fireEvent.press(screen.getByTestId("passage-play")); });
+    await act(async () => { global.__ytTime(passage.end + 100); });
+    expect(await screen.findByText("Again")).toBeTruthy();
+
+    calls.length = 0;
+    await act(async () => { fireEvent.press(screen.getByTestId("passage-play")); });
+    expect(calls.find((c) => c[0] === "seek")).toEqual(["seek", passage.start, 0]);
+    // …and it keeps playing rather than stopping on the spot.
+    expect(calls.some((c) => c[0] === "pause")).toBe(false);
+    expect(screen.getByText("Pause")).toBeTruthy();
+  });
+
   it("offers the questions once the passage has played out", async () => {
     const onFinish = jest.fn();
     await withProfile(<Runner steps={[step]} onFinish={onFinish} gradeWords={false} />);
@@ -112,6 +131,28 @@ describe("a listening passage", () => {
     // The runner shows its verdict first; Continue is what ends a run.
     await act(async () => { fireEvent.press(await screen.findByText("Continue")); });
     expect(onFinish).toHaveBeenCalled();
+    /* The passage is a gate, not a question. Recording it as right handed every
+       learner a free mark and inflated the score the list shows, so it is
+       skipped — which the runner leaves out of the total. */
+    const r = onFinish.mock.calls[0][0];
+    expect(r.skipped).toBe(1);
+    expect(r.right).toBe(0);
+  });
+
+  /* Some videos refuse to embed at all (youtube.js, errors 101 and 150). The
+     player is hidden here, so its own message would never be seen: without this
+     the learner presses Play, hears nothing, and is told to listen once through
+     for ever. */
+  it("names a video that will not play and lets the learner move on", async () => {
+    const onFinish = jest.fn();
+    await withProfile(<Runner steps={[step]} onFinish={onFinish} gradeWords={false} />);
+    await screen.findByTestId("yt-player");
+    await act(async () => { global.__ytError(150, true); });
+    expect(await screen.findByTestId("passage-dead")).toBeTruthy();
+    expect(screen.queryByTestId("passage-done")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByText("Skip it")); });
+    await act(async () => { fireEvent.press(await screen.findByText("Continue")); });
+    expect(onFinish.mock.calls[0][0].skipped).toBe(1);
   });
 });
 

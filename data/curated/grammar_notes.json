@@ -77,7 +77,7 @@
 
     "family": {
       "title": "“My” agrees with what is owned",
-      "body": "Possessives take the gender of the thing possessed, not of the owner.",
+      "body": "мой, твой, наш, ваш and свой take the gender of the thing possessed, not of the owner. (его, её and их never change.)",
       "examples": [["мой брат, моя́ дочь", "my brother, my daughter"], ["мои́ роди́тели", "my parents"]]
     },
     "time": {

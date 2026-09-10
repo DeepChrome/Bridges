@@ -58,7 +58,9 @@ export const LETTERS = [
     note: "Only when stressed. Unstressed it slides toward a." },
   { l: "П п", name: "пэ", ipa: "[p]", kind: "consonant", like: "p in spot",
     note: "No puff of air, unlike the p in pot." },
-  { l: "Р р", name: "эр", ipa: "[r]", kind: "consonant", like: "the rolled r of Spanish pero",
+  // Spanish perro, not pero: pero is a single tap and perro is the trill, and
+  // that pair is the one every Spanish learner knows. Hard Russian р is the trill.
+  { l: "Р р", name: "эр", ipa: "[r]", kind: "consonant", like: "the rolled r of Spanish perro",
     trap: true, note: "Looks like P. It is a tapped or rolled r." },
   { l: "С с", name: "эс", ipa: "[s]", kind: "consonant", like: "s in sun", trap: true,
     note: "Looks like C. It is always an s, never a k." },
@@ -83,7 +85,9 @@ export const LETTERS = [
     note: "Say ee, then pull the tongue straight back without rounding the lips." },
   { l: "Ь ь", name: "мягкий знак", ipa: "—", kind: "sign", like: "no sound of its own",
     note: "The soft sign: softens the consonant before it." },
-  { l: "Э э", name: "э", ipa: "[e]", kind: "vowel", like: "e in met" },
+  // [ɛ] rather than [e]: the comparison is "e in met", and the vowel chart puts
+  // it open-mid, so the narrow symbol is the honest one.
+  { l: "Э э", name: "э", ipa: "[ɛ]", kind: "vowel", like: "e in met" },
   { l: "Ю ю", name: "ю", ipa: "[ju] / [u]", kind: "vowel", like: "u in use" },
   { l: "Я я", name: "я", ipa: "[ja] / [a]", kind: "vowel", like: "ya in yard" },
 ];

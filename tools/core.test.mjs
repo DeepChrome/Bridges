@@ -948,6 +948,34 @@ group("listening passages");
      "and the right answer is a word the passage says");
   ok(qs.every((x) => typeof x.at === "number" && x.at >= p.start && x.at <= p.end),
      "each carries the moment its word went by, for playing it back");
+
+  /* A wrong option must not be a word the passage says. `words` alone was not
+     enough: it holds only the forms the resolver could settle, so «его» went by,
+     «он» was offered as not said, and hearing correctly was marked wrong — a
+     quarter of the questions. `maybe` carries what the form could have been. */
+  let claimedUnsaid = 0, checked = 0;
+  for (const pp of Q.passagesFor(P, someWords, 40)) {
+    const spoken = new Set(Object.keys(pp.words).concat(pp.maybe || []));
+    for (const x of Q.passageQuestions(pp, someWords)) {
+      if (x.ask !== "Which of these did you hear?") continue;   // order asks about two spoken words
+      for (const o of x.options) {
+        if (o.right) continue;
+        checked++;
+        if (spoken.has(fold(o.label))) claimedUnsaid++;
+      }
+    }
+  }
+  ok(checked > 50 && claimedUnsaid === 0,
+     `no wrong option is a word the passage says (${checked} checked)`, String(claimedUnsaid));
+  ok(P.every((x) => Array.isArray(x.maybe)), "every passage ships what its forms might have been");
+
+  /* And the answers are words worth listening for. Counting «и» and «в» made
+     the ranking a function-word density ranking and 95 % of answers a function
+     word (PASSAGE_SKIP_TOP). */
+  const funcAnswer = Q.passagesFor(P, someWords, 20).flatMap((pp) =>
+    Q.passageQuestions(pp, someWords).map((x) => x.options.find((o) => o.right).label))
+    .filter((lab) => ((IX[fold(lab)] || [])[0] ?? 0) < 100);
+  ok(funcAnswer.length === 0, "and never a function word", funcAnswer.join(","));
   ok(new Set(qs.map((x) => x.ask + "|" + right)).size >= 1
      && qs.filter((x) => x.ask === "Which of these did you hear?").length >= 1,
      "the bulk ask what was heard");

@@ -39,6 +39,21 @@ afterEach(async () => {
   await flushState();
 });
 
+/* Naming the corpora and their licences is a condition of using them (rule
+   20.10), not decoration. The web build has carried it since 2026-09-04; the
+   native app — the product — showed nothing at all until 2026-09-10. */
+describe("attribution", () => {
+  it("names every corpus and its licence in Settings", async () => {
+    const { STATS } = require("../src/data");
+    expect((STATS.credits || []).length).toBeGreaterThan(0);
+    await withYou({});
+    fireEvent.press(await screen.findByText("Settings"));
+    for (const c of STATS.credits) {
+      expect(await screen.findByText(`${c.n} · ${c.l}`)).toBeTruthy();
+    }
+  });
+});
+
 describe("grammar trouble", () => {
   it("orders tags by count and drops unknown ones", () => {
     const g = grammarTrouble({ speech: { tagCounts: { CASE: 2, PERSON: 5, BOGUS: 9, STRESS: 0 } } });

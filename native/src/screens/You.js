@@ -176,7 +176,23 @@ function Settings({ visible, onClose, onLab, onTour }) {
                      speech: speechDefault(),
                    })) }])}
             />
-            <Muted style={{ textAlign: "center", marginTop: 16 }}>
+            {/* The corpora and their licences. OpenRussian is CC BY-SA 4.0 and
+                Tatoeba CC BY 2.0 FR: naming them is a licence condition, not
+                decoration (rule 20.10). The web build has shown this since
+                2026-09-04 and the native app — the product — never had it.
+                Built from the databases' own meta rows, so it cannot drift from
+                what was actually shipped. */}
+            <View style={{ marginTop: 20 }}>
+              {(STATS.credits || []).map((c) => (
+                <Muted key={c.n} size={12} style={{ textAlign: "center" }}>
+                  {`${c.n} · ${c.l}`}
+                </Muted>
+              ))}
+              <Muted size={12} style={{ textAlign: "center" }}>
+                Photographs from Wikimedia Commons, credited on each word.
+              </Muted>
+            </View>
+            <Muted style={{ textAlign: "center", marginTop: 12 }}>
               {`Built ${STATS.built}`}
             </Muted>
     </Sheet>

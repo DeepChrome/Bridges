@@ -11,6 +11,7 @@ import { Video } from "../src/screens/Misc";
 import Study from "../src/screens/Study";
 import { videos, unitById, L, idxOfWord } from "../src/data";
 import { migrate, SCHEMA_VERSION } from "@core/state";
+import { today } from "@core/util";
 
 jest.mock("../src/youtube", () => {
   const React = require("react");
@@ -63,6 +64,14 @@ describe("mining a word from a video", () => {
     expect(saved.mined[word]).toMatchObject({ v: unitVideo.id });
     expect(saved.mined[word].t).toBe(unit.v.heard[word][0].t);
     expect(typeof saved.mined[word].s).toBe("string");
+    /* "Add to review" has to mean the scheduler owns it: the word gets a card,
+       due today, so it is counted by "Review · N due" and reached by the quiz
+       top-up. Pinning alone was read only by the Study picker's Trouble set. */
+    expect(saved.seen[word]).toMatchObject({ s: 0, reps: 0, lapses: 0 });
+    expect(saved.seen[word].due).toBeLessThanOrEqual(today());
+    const { dueCount, reviewWords } = require("../src/data");
+    expect(dueCount(saved)).toBeGreaterThan(0);
+    expect(reviewWords(saved)).toContain(idxOfWord(word));
     // Said once, and it says so rather than offering to add it again.
     expect(await screen.findByTestId("mined")).toBeTruthy();
     expect(screen.queryByTestId("mine")).toBeNull();
@@ -75,6 +84,21 @@ describe("mining a word from a video", () => {
     await screen.findByText("Play here");
     await act(async () => { fireEvent.press(screen.getByTestId(`heard-${word}`)); });
     expect(await screen.findByTestId("mined")).toBeTruthy();
+  });
+
+  /* A word already being studied keeps its schedule: mining must not hand a
+     mature card back to the scheduler as new. */
+  it("leaves an existing card's schedule alone", async () => {
+    const card = { s: 12, d: 6, due: today() + 9, last: today() - 3, reps: 5, lapses: 1 };
+    await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />,
+                      { seen: { [word]: card } });
+    await screen.findByText("Play here");
+    await act(async () => { fireEvent.press(screen.getByTestId(`heard-${word}`)); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("mine")); });
+    await flushState();
+    const saved = JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+    expect(saved.seen[word]).toEqual(card);
+    expect(saved.mined[word]).toBeTruthy();
   });
 });
 

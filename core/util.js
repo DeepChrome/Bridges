@@ -67,8 +67,24 @@ export function translitBack(s) {
     .map((c) => (c in BACK ? BACK[c] : c)).join("");
 }
 
-/* First dictionary sense — glosses run long and trail into archaic readings. */
+/* First dictionary sense — glosses run long and trail into archaic readings.
+ *
+ * Splits on top-level separators only. A comma inside a bracket is part of the
+ * sense, not the end of it: «ты» is glossed "you (singular, informal)" and a
+ * naive split showed the learner **"you (singular"** — an unclosed bracket on a
+ * first-chapter card, and on the graded answer, since firstSense is what
+ * "Choose the Russian" and "Write it in Russian" ask for. */
 export function firstSense(w) {
-  const s = (w.e || "").split(/[,;]/)[0].trim();
-  return s || w.b;
+  const gloss = (w.e || "");
+  let depth = 0;
+  for (let i = 0; i < gloss.length; i++) {
+    const c = gloss[i];
+    if (c === "(" || c === "[") depth++;
+    else if (c === ")" || c === "]") depth = Math.max(0, depth - 1);
+    else if ((c === "," || c === ";") && depth === 0) {
+      const s = gloss.slice(0, i).trim();
+      return s || w.b;
+    }
+  }
+  return gloss.trim() || w.b;
 }

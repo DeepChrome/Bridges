@@ -27,6 +27,14 @@ if (!fs.existsSync(payloadPath)) {
                 "It writes the page and this payload from one gather(), so they match.");
   process.exit(1);
 }
+/* The schema version, read out of core rather than retyped here. Two checks used
+   to carry the number as a literal, and bumping it (v7, the mined slot) turned
+   the deploy gate red for a change that was correct — the sort of failure that
+   teaches you to ignore the gate. */
+const SCHEMA = Number(
+  /SCHEMA_VERSION\s*=\s*(\d+)/.exec(
+    fs.readFileSync(path.join(__dirname, "..", "core", "state.js"), "utf8"))[1]);
+
 const PAYLOAD = JSON.parse(fs.readFileSync(payloadPath, "utf8"));
 // The dictionary and the sentence pool sit beside data.json (tools/payload.mjs).
 for (const part of ["deep", "sent"]) {
@@ -164,7 +172,7 @@ setTimeout(async () => {
   ok(!!$("#me .avatar"), "the profile avatar sits in the top bar");
   ok($("#s-path").hidden === false, "path is the home screen");
   ok(!!doc.querySelector('meta[name="viewport"]'), "viewport meta present");
-  ok(state().v === 6,"state stamped with the current schema", String(state().v));
+  ok(state().v === SCHEMA, "state stamped with the current schema", String(state().v));
 
   group("splash");
   ok(!!$("#splash"), "splash screen present");
@@ -565,7 +573,7 @@ setTimeout(async () => {
     ok(acc.list[0].name === "Jared", "the adopted profile keeps its name");
     const st = JSON.parse(
       mDom.window.localStorage.getItem("rb.state." + acc.active) || "{}");
-    ok(st.v === 6,"legacy save migrated to the current schema", String(st.v));
+    ok(st.v === SCHEMA, "legacy save migrated to the current schema", String(st.v));
     ok(st.speech && Array.isArray(st.speech.attempts) && st.speech.tagCounts,
        "v5 gave the migrated save its speech slot");
     ok((st.seen["книга"] || {}).reps === 3, "repetition history preserved");

@@ -70,6 +70,28 @@ MIN_WORDS = 12
 COVERAGE = 0.8
 
 
+def paradigm_index(lexicon_path, unit_of):
+    """folded form -> the curriculum lemmas whose PARADIGM holds it.
+
+    `forms` and `paradigm` are not the same table, and the app rebuilds its
+    tables from the latter. A form present in one and absent from the other is
+    how a spoken «его» could still be offered as a word «он» did not say, even
+    after the resolver's own candidates were taken into account.
+    """
+    db = sqlite3.connect(f"file:{lexicon_path}?mode=ro", uri=True)
+    bare_of = dict(db.execute("select id, bare from lemmas"))
+    out = {}
+    for lid, accented in db.execute(
+            "select lemma_id, accented from paradigm"
+            " where accented is not null and accented <> ''"):
+        bare = bare_of.get(lid)
+        if bare is None or bare not in unit_of:
+            continue
+        out.setdefault(fold(accented), set()).add(bare)
+    db.close()
+    return out
+
+
 def load_units(topics_path, lexicon_path):
     """-> (unit order, {unit id: chapter index}, {bare: unit id}) from topics.db."""
     db = sqlite3.connect(f"file:{topics_path}?mode=ro", uri=True)
@@ -89,7 +111,7 @@ def load_units(topics_path, lexicon_path):
     return order, chapter, unit_of
 
 
-def spans_for(stream, resolver, unit_of, chapter):
+def spans_for(stream, resolver, unit_of, chapter, par_index):
     """Every candidate window in one video, best first.
 
     -> [{start, end, words: {bare: [ms]}, chapter}]
@@ -102,27 +124,40 @@ def spans_for(stream, resolver, unit_of, chapter):
     while start + MIN_MS <= last:
         end = start + SPAN_MS
         words = {}
+        # Curriculum words that MIGHT have been said: every lemma the resolver
+        # lists as a candidate for a form spoken here but could not settle, or
+        # settled to something outside the units. The questions need it. A wrong
+        # option is "a word you know that this passage does not say", and reading
+        # that off `words` alone called every unsettled form unspoken — «его» is
+        # heard, «он» is offered as not said, and the learner is marked wrong for
+        # hearing correctly. A quarter of the questions, measured. Shipping the
+        # candidates rather than every surface form keeps it small.
+        maybe = set()
         for tok, at in stream:
             if at < start:
                 continue
             if at >= end:
                 break
+            key = fold(tok)
+            # Anything this form could belong to, from both tables.
+            maybe |= par_index.get(key, set())
+            for c in resolver.candidates(key):
+                if c["bare"] in unit_of:
+                    maybe.add(c["bare"])
             # The shared-form rule, the same one the pools and the lookup index
             # use (panel.py Resolver) — a form belongs to one lemma or to none.
-            cand, ambiguous = resolver.owner(fold(tok))
-            if cand is None or ambiguous:
+            cand, ambiguous = resolver.owner(key)
+            if cand is None or ambiguous or cand["bare"] not in unit_of:
                 continue
-            bare = cand["bare"]
-            if bare not in unit_of:
-                continue
-            words.setdefault(bare, []).append(at)
+            words.setdefault(cand["bare"], []).append(at)
         if len(words) >= MIN_WORDS:
             # Diagnostic only (see the docstring): where this passage would land
             # if it were assigned a chapter, which is what the build reports.
             chapters = sorted(chapter[unit_of[b]] for b in words)
             at_index = min(len(chapters) - 1, int(len(chapters) * COVERAGE))
             out.append({"start": start, "end": min(end, last + 1500),
-                        "words": words, "chapter": chapters[at_index]})
+                        "words": words, "maybe": maybe,
+                        "chapter": chapters[at_index]})
         start += STEP_MS
     out.sort(key=lambda s: (-len(s["words"]), s["start"]))
     # Non-overlapping, best first.
@@ -151,6 +186,7 @@ def main():
     db.execute("attach database ? as c", (str(args.corpus),))
     resolver = Resolver(db)
     order, chapter, unit_of = load_units(args.topics, args.lexicon)
+    par_index = paradigm_index(args.lexicon, unit_of)
 
     catalogue = json.loads(args.videos.read_text(encoding="utf-8"))
     library = {v["id"]: v for v in catalogue.get("videos", [])}
@@ -162,7 +198,7 @@ def main():
             skipped["no captions"] += 1
             continue
         stream = words_with_times(path)
-        found = spans_for(stream, resolver, unit_of, chapter)
+        found = spans_for(stream, resolver, unit_of, chapter, par_index)
         if not found:
             skipped["too thin"] += 1
             continue
@@ -177,6 +213,9 @@ def main():
                 # Bare word -> the milliseconds it was said at, for the questions
                 # and for "you missed this one, here is where".
                 "words": {b: sorted(ms) for b, ms in s["words"].items()},
+                # …and the ones that may have been said but could not be pinned
+                # to a lemma. Never an answer; never a wrong option either.
+                "maybe": sorted(b for b in s["maybe"] if b not in s["words"]),
             })
             # Kept out of the payload; the report below is its only reader.
             passages[-1]["_chapter"] = s["chapter"]

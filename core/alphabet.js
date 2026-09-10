@@ -20,6 +20,9 @@
  * describes the mouth instead.
  */
 
+// Explicit extension: Node's ESM resolver requires it, Metro tolerates either.
+import { shuffle } from "./util.js";
+
 /* Every letter in alphabetical order.
  *   l     the capital and small letter
  *   name  what the letter is called in Russian
@@ -142,3 +145,116 @@ export function soundTip(word) {
 }
 
 export const TRAPS = LETTERS.filter((x) => x.trap);
+
+/* ------------------------------------------------- minimal pairs (P10.8) */
+
+/* Two real words that differ by one sound. Hearing a contrast and producing it
+   are different skills, and the reference screen only ever offered the first —
+   the owner asked for practice as well as a chart.
+ *
+ * Consonant contrasts, chosen for what actually goes wrong for an English
+ * speaker: the two sounds English does not distinguish (ш/щ), the two it does
+ * not have as a pair (hard and soft л, т), the voiced/voiceless pairs a
+ * final-devoicing language keeps confusing, and р against л because р is a trap
+ * letter that also has to be tapped.
+ *
+ * Every word here is checked by `core.test.mjs` against the shipped dictionary:
+ * a minimal pair invented by an author who is not a native speaker is the exact
+ * failure §30a exists to prevent, and a pair whose members are not both real
+ * words teaches a wrong word alongside a right one. */
+export const CONTRASTS = [
+  { a: "чаша", b: "чаща", gloss: ["bowl", "thicket"],
+    about: "ш and щ. щ is longer and further forward, tongue flat against the ridge behind the teeth." },
+  { a: "жар", b: "шар", gloss: ["heat", "ball"],
+    about: "ж and ш are the same mouth, voiced and voiceless: ж is the s in measure." },
+  { a: "бар", b: "пар", gloss: ["bar", "steam"],
+    about: "б and п. Russian п has no puff of air after it, unlike the English p." },
+  { a: "дом", b: "том", gloss: ["house", "volume"],
+    about: "д and т, tongue against the teeth rather than the ridge behind them." },
+  { a: "роза", b: "роса", gloss: ["rose", "dew"],
+    about: "з and с between vowels, where English often blurs the two." },
+  { a: "рак", b: "лак", gloss: ["crayfish", "varnish"],
+    about: "р is tapped against the ridge; л is heavy, with the back of the tongue raised." },
+  { a: "мел", b: "мель", gloss: ["chalk", "shoal"],
+    about: "Hard and soft л. The soft one is said with the tongue arched towards the roof." },
+  { a: "брат", b: "брать", gloss: ["brother", "to take"],
+    about: "Hard and soft т. The soft sign is not a sound of its own; it bends the letter before it." },
+];
+
+/* A pair member that is a real word but not a dictionary headword, with the
+   lemma it belongs to. The dictionary ships headwords only (§30), so the check
+   that keeps these honest cannot see an inflected form — and ё barely occurs in
+   a nominal stem, so almost every о/ё minimal pair in the language is a past
+   tense against a noun. Naming the lemma keeps the guard real: an invented word
+   still has nowhere to hide, because its lemma would not resolve either. */
+export const NOT_HEADWORD = {
+  "нёс": "нести",              // he carried — past of нести
+};
+
+/* The vowel pairs and the consonant contrasts as one list, in the shape the
+   drill uses. A vowel pair already carries its own example words. */
+export function soundPairs() {
+  const vowels = VOWEL_PAIRS.map((p) => ({
+    a: p.example[0], b: p.example[1], gloss: p.gloss,
+    about: `${p.hard} and ${p.soft} are one sound, ${p.sound}. The pair says whether the consonant`
+           + ` before it is hard or soft.`,
+    kind: "vowel",
+  }));
+  return vowels.concat(CONTRASTS.map((c) => ({ ...c, kind: "consonant" })));
+}
+
+/* The lemma a pair member should be looked up under. */
+export const pairLemma = (w) => NOT_HEADWORD[w] || w;
+
+/* A run of the pronunciation drill: hear a contrast, then produce it.
+ *
+ * The two alternate, and hearing comes first for a given pair, because being
+ * told your own attempt was wrong before you have heard what right sounds like
+ * is not practice. No pair repeats until every one has been used.
+ *
+ * These questions carry no lemma indices. That is deliberate: pronunciation is
+ * not vocabulary, and a drill on «чаша» should not put «чаша» into the
+ * scheduler as a word the learner is studying. */
+export function pairDrill(n = 10) {
+  const bag = shuffle(soundPairs().slice());
+  const out = [];
+  for (let k = 0; out.length < n; k++) {
+    const p = bag[Math.floor(k / 2) % bag.length];
+    const flip = Math.random() < 0.5;
+    const target = flip ? p.b : p.a;
+    const other = flip ? p.a : p.b;
+    const gloss = flip ? p.gloss[1] : p.gloss[0];
+    const otherGloss = flip ? p.gloss[0] : p.gloss[1];
+    out.push(k % 2 === 0
+      ? {
+          kind: "pair-hear", ask: "Which word did you hear?", prompt: "", cyr: true,
+          autoplay: target, target, other, about: p.about, contrast: p.kind,
+          options: shuffle([
+            { label: target, right: true, cyr: true, sub: gloss },
+            { label: other, right: false, cyr: true, sub: otherGloss },
+          ]),
+        }
+      : {
+          kind: "pair-say", ask: "Say this word", prompt: target, sub: gloss, cyr: true,
+          target, other, otherGloss, about: p.about, contrast: p.kind,
+        });
+  }
+  return out;
+}
+
+/* Where two words of a pair differ, as a character index, or -1 when they do
+   not differ by exactly one position. A soft sign added at the end counts: it
+   is one sound's worth of difference even though it lengthens the word. */
+export function pairDiff(a, b) {
+  if (a === b) return -1;
+  if (b.length === a.length + 1 && b.slice(0, a.length) === a && b.endsWith("ь")) return a.length;
+  if (a.length === b.length + 1 && a.slice(0, b.length) === b && a.endsWith("ь")) return b.length;
+  if (a.length !== b.length) return -1;
+  let at = -1;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] === b[i]) continue;
+    if (at >= 0) return -1;
+    at = i;
+  }
+  return at;
+}

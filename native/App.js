@@ -35,7 +35,7 @@ import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
-  QuizSetup, CustomQuizFlow, ListeningFlow, ListeningList, PassageFlow,
+  QuizSetup, CustomQuizFlow, ListeningFlow, ListeningList, PassageFlow, SoundDrillFlow,
 } from "./src/screens/Flows";
 
 const Tabs = createBottomTabNavigator();
@@ -169,6 +169,9 @@ function PracticeStack() {
       <Stack.Screen name="Passage" component={PassageFlow} options={{ title: "Listening" }} />
       <Stack.Screen name="Scenes" component={ListeningFlow} options={{ title: "Listening" }} />
       <Stack.Screen name="Sounds" component={Sounds} options={{ title: "Sounds" }} />
+      {/* The pronunciation drill, reached from Sounds (ROADMAP P10.8). */}
+      <Stack.Screen name="SoundDrill" component={SoundDrillFlow}
+                    options={{ title: "Practise sounds" }} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <HeaderRight navigation={navigation} route={route} />,

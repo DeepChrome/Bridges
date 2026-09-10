@@ -21,6 +21,7 @@ import { Hear } from "../activities/Hear";
 import { Say } from "../activities/Say";
 import { Scene } from "../activities/Scene";
 import { Passage } from "../activities/Passage";
+import { PairHear, PairSay } from "../activities/Pair";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade } from "@core/fsrs";
 import { fold, translit, today, translitBack, firstSense } from "@core/util";
@@ -254,6 +255,9 @@ export const VIEWS = {
   // A listening passage and the questions that follow it (ROADMAP P10.3).
   passage: (q, r) => <Passage q={q} r={r} />,
   heard: asOptions,
+  // The pronunciation drill: hear a contrast, then produce it (P10.8).
+  "pair-hear": (q, r) => <PairHear q={q} r={r} />,
+  "pair-say": (q, r) => <PairSay q={q} r={r} />,
 };
 
 /* ------------------------------------------------------------------ runner */

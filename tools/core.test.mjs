@@ -25,7 +25,8 @@ import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, PRODUCE_AT,
          lessonSize, LESSON_RAMP, LESSON_SIZE }
   from "../core/questions.js";
-import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS } from "../core/alphabet.js";
+import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
+         soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP }
   from "../core/speech.js";
 import { describeForm, summarise } from "../core/forms.js";
@@ -800,6 +801,36 @@ group("question quality");
   ok(shapes.has("cloze") && shapes.has("type"),
      "both production shapes are reachable in a lesson quiz",
      [...shapes].join(", "));
+}
+
+/* The minimal pairs the pronunciation drill is built from (P10.8). The point of
+   this group is that neither word of a pair can be invented: they were written
+   by an author who is not a native speaker, and a pair whose second member is
+   not a real word teaches a wrong word beside a right one. */
+group("minimal pairs");
+{
+  const pairs = soundPairs();
+  ok(pairs.length >= 12, `${pairs.length} pairs`, String(pairs.length));
+  const deepWords = new Set(parseDeep(DATA.deep || "").map((x) => fold(x.b)));
+  const known = (w) => deepWords.has(fold(pairLemma(w))) || !!IX[fold(pairLemma(w))];
+
+  const missing = pairs.flatMap((p) => [p.a, p.b]).filter((w) => !known(w));
+  ok(!missing.length, "every word of every pair is in the dictionary", missing.join(", "));
+
+  const notMinimal = pairs.filter((p) => pairDiff(p.a, p.b) < 0)
+    .map((p) => `${p.a}/${p.b}`);
+  ok(!notMinimal.length, "and each pair differs in exactly one place", notMinimal.join(", "));
+
+  ok(pairs.every((p) => p.gloss && p.gloss.length === 2 && p.gloss.every(Boolean)),
+     "each side is glossed, so a learner can tell which word they heard");
+  ok(pairs.every((p) => p.about && p.about.length > 20),
+     "and each pair says what the contrast is");
+  const dup = pairs.map((p) => `${p.a}/${p.b}`).filter((k, i, a) => a.indexOf(k) !== i);
+  ok(!dup.length, "no pair is listed twice", dup.join(", "));
+  // A pair whose two words fold to the same key cannot be told apart by the
+  // recogniser or by the audio table, so it is not a usable contrast here.
+  const folded = pairs.filter((p) => fold(p.a) === fold(p.b)).map((p) => `${p.a}/${p.b}`);
+  ok(!folded.length, "and no pair collapses under fold()", folded.join(", "));
 }
 
 /* Yuri (§30m). The art is judged by eye; what a suite can hold is that every

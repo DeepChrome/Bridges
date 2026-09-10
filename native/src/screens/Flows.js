@@ -2,9 +2,9 @@
  * placement routes. Each one supplies its steps and decides what the result means. */
 
 import React, { useMemo, useRef, useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { useSession } from "../session";
-import { useTheme } from "../theme";
+import { useTheme, radius } from "../theme";
 import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
@@ -15,6 +15,7 @@ import {
   reachedUnits, unitUnlocked, reviewWords, passages, knownWords, lessonsDone, nextLesson,
 } from "../data";
 import { quizPassed } from "@core/state";
+import { pairDrill } from "@core/alphabet";
 import { touchStreak } from "../store";
 
 /* The mark for a run: partial credit summed over first attempts, as a percentage. */
@@ -25,6 +26,10 @@ const scoreOf = (r) => (r.total ? Math.round(r.credit / r.total * 100) : 0);
    lesson changed nothing a learner could see on the path. Deliberately smaller
    than a quiz — reading a set is not the same as retrieving it. */
 export const VOCAB_XP = 5;
+
+/* Pairs in one run of the pronunciation drill: five heard and five said, which
+   is about a minute and a half and does not outstay a contrast. */
+export const SOUND_DRILL_N = 10;
 
 /* ------------------------------------------------------------- vocabulary */
 
@@ -114,6 +119,40 @@ export function VocabFlow({ route, navigation }) {
   );
 }
 
+/* ------------------------------------------------------ pronunciation drill */
+
+/* Minimal pairs, heard and then said (ROADMAP P10.8). Reached from Sounds,
+   which is the home of the writing system: a drill on the letters belongs with
+   the letters rather than as a twelfth row on Practice (rule 20.8).
+
+   Not scored out of a pass mark. A pronunciation attempt the recogniser did not
+   catch is skipped rather than failed (see Pair.js), so a percentage here would
+   be a percentage of however many attempts happened to be audible. */
+export function SoundDrillFlow({ navigation }) {
+  const [result, setResult] = useState(null);
+  const [seed, setSeed] = useState(0);
+  const steps = useMemo(() => pairDrill(SOUND_DRILL_N), [seed]);
+  useAudioStopOnLeave();
+
+  if (result) {
+    return (
+      <Done
+        title="Sounds"
+        detail={result.total
+          ? `${result.right} of ${result.total} caught`
+          : "Nothing the phone could hear"}
+        onAgain={() => { setResult(null); setSeed(seed + 1); }}
+        againLabel="Again"
+        onBack={() => navigation.goBack()}
+      />
+    );
+  }
+  return (
+    <Runner steps={steps} recycle={false} navigation={navigation}
+            onFinish={(r) => setResult(r)} />
+  );
+}
+
 /* -------------------------------------------------------------- lesson quiz */
 
 export function QuizFlow({ route, navigation }) {
@@ -198,19 +237,35 @@ export function DrillList({ navigation }) {
   const openDrills = useMemo(() => Q.drillsIntroduced(reachedUnits(st)), [st.unit]);
   return (
     <Screen>
-      {/* What is not a grammar drill comes first: a quiz of the learner's own
-          making, listening scenes, and conversation. */}
-      <SectionLabel>Practise</SectionLabel>
+      {/* The screen was eleven identical rows under a label reading "Practise"
+          beneath a header reading "Practice" — the same word twice, and no
+          hierarchy at all, so nothing on it looked more worth doing than
+          anything else (the interface review, P11.9).
+
+          A quiz of the learner's own making is the thing most often wanted, so
+          it leads and looks like it. The rest group by what they ask of you. */}
+      <Pressable
+        testID="practice-quiz"
+        accessibilityRole="button"
+        onPress={() => navigation.navigate("QuizSetup")}
+        style={({ pressed }) => ({
+          flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 20,
+          backgroundColor: t.brandBg, borderColor: t.brandDim, borderWidth: 1,
+          borderRadius: radius.lg, padding: 14, minHeight: 64,
+          opacity: pressed ? 0.7 : 1,
+        })}
+      >
+        <Thumb id="core" />
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700" }}>Build a quiz</Text>
+          <Muted>Choose the questions and the sections</Muted>
+        </View>
+        {((st.drills || {}).quiz || {}).best
+          ? <Pill tone="good">{(st.drills.quiz.best) + "%"}</Pill> : null}
+      </Pressable>
+
+      <SectionLabel>Listening and speaking</SectionLabel>
       <List>
-        <Row onPress={() => navigation.navigate("QuizSetup")}>
-          <Thumb id="core" />
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Quiz</Text>
-            <Muted>Choose the questions and the sections</Muted>
-          </View>
-          {((st.drills || {}).quiz || {}).best
-            ? <Pill tone="good">{(st.drills.quiz.best) + "%"}</Pill> : null}
-        </Row>
         {/* Listening at the learner's level comes first, and the native-speed
             one says plainly that it is harder. The owner found the video
             passages "way too advanced" and nothing on the row warned him. */}
@@ -418,7 +473,10 @@ export function PassageFlow({ route, navigation }) {
   }
   if (result) {
     return (
-      <Done title="Listening" detail={`${result.right} of ${result.total} caught`}
+      // Named apart from the level-matched activity: the two used to share the
+      // word "Listening" across four surfaces, so one score could not be told
+      // from the other's (P11.9).
+      <Done title="Native speed" detail={`${result.right} of ${result.total} caught`}
             score={result.score} passed={result.score >= 80}
             onAgain={() => { setResult(null); setSeed(seed + 1); }}
             onBack={() => navigation.goBack()} />

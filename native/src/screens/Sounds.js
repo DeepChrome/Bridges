@@ -13,7 +13,7 @@ import React from "react";
 import { View, Text, Pressable } from "react-native";
 import Svg, { Line, Circle, Text as SvgText, Polygon } from "react-native-svg";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Card, Muted, SectionLabel, Speaker, Chip } from "../ui";
+import { Screen, List, Row, Card, Muted, SectionLabel, Speaker, Chip, Btn } from "../ui";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, TRAPS } from "@core/alphabet";
 
 /* The vowel trapezoid: across is where the tongue sits, down is how far the jaw
@@ -56,15 +56,23 @@ function VowelChart() {
   );
 }
 
-export default function Sounds() {
+export default function Sounds({ navigation }) {
   const t = useTheme();
   return (
     <Screen>
+      {/* Practice, at the top, because the reference below it is what you come
+          back to and this is what you came to do (ROADMAP P10.8). It lives here
+          rather than as a twelfth row on Practice: a drill on the letters
+          belongs with the letters (rule 20.8). */}
+      <Btn kind="pri" testID="sound-drill" label="Practise these sounds"
+           style={{ marginBottom: 20 }}
+           onPress={() => navigation.navigate("SoundDrill")} />
+
       <SectionLabel>The six vowel sounds</SectionLabel>
       <VowelChart />
       <List>
-        {VOWEL_CHART.map((v, k) => (
-          <Row key={v.v} last={k === VOWEL_CHART.length - 1}>
+        {VOWEL_CHART.map((v) => (
+          <Row key={v.v}>
             <Text style={{ color: t.ink, fontSize: 22, fontWeight: "700", width: 34 }}>{v.v}</Text>
             <View style={{ flex: 1 }}>
               <Text style={{ color: t.ink, fontSize: 15 }}>{v.like}</Text>
@@ -82,8 +90,8 @@ export default function Sounds() {
         before it is hard or soft, so you never have to guess.
       </Muted>
       <List>
-        {VOWEL_PAIRS.map((p, k) => (
-          <Row key={p.hard} last={k === VOWEL_PAIRS.length - 1}>
+        {VOWEL_PAIRS.map((p) => (
+          <Row key={p.hard}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 6, width: 76 }}>
               <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>{p.hard}</Text>
               <Muted size={12}>hard</Muted>
@@ -105,8 +113,8 @@ export default function Sounds() {
       {/* What stops a beginner reading at all. */}
       <SectionLabel style={{ marginTop: 22 }}>Looks Latin, is not</SectionLabel>
       <List>
-        {TRAPS.map((row, k) => (
-          <Row key={row.l} last={k === TRAPS.length - 1}>
+        {TRAPS.map((row) => (
+          <Row key={row.l}>
             <Text style={{ color: t.bad, fontSize: 22, fontWeight: "700", width: 46 }}>
               {row.l.split(" ")[0]}
             </Text>
@@ -120,8 +128,8 @@ export default function Sounds() {
 
       <SectionLabel style={{ marginTop: 22 }}>{`All ${LETTERS.length} letters`}</SectionLabel>
       <List>
-        {LETTERS.map((row, k) => (
-          <Row key={row.l} last={k === LETTERS.length - 1}>
+        {LETTERS.map((row) => (
+          <Row key={row.l}>
             <Text style={{ color: row.trap ? t.bad : t.ink, fontSize: 20, fontWeight: "700",
                            width: 52 }}>
               {row.l}

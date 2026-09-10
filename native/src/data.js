@@ -32,6 +32,11 @@ export const AUDIO = (DATA.audio && DATA.audio.files) || {};
 /* The speaking and listening pools (CLAUDE.md §30b): one shared row list, and per
    unit the rows each activity may draw from. */
 export const SPEECH = DATA.speech || { rows: [], speak: {}, listen: {} };
+/* The written lesson passages (§30j), keyed "unitId:lessonIndex": four or five
+   sentences on one subject, using only what that lesson has taught. Small enough
+   to sit in data.json, and the lesson quiz asks for one before it has drawn a
+   single card, so it must be here at boot rather than required on use. */
+export const SCRIPTS = DATA.scripts || {};
 /* The Immerse library (`videos()` above): every harvested video with a
    transcript, its search keywords, and the study words it actually says (with
    moments). A unit's own episode is also here, marked with `unit`. */
@@ -181,6 +186,16 @@ export function components(st, u, i) {
 }
 
 export const lessonDone = (st, u, i) => components(st, u, i).every((c) => c.done);
+
+/* How far into a unit the learner has actually got — the count of its finished
+   lessons, so a written passage can be pitched at what they have met rather
+   than at what the unit eventually teaches. Gaps count as not reached: the run
+   stops at the first lesson still open. */
+export function lessonsDone(st, u) {
+  let n = 0;
+  while (n < lessonCount(u) && lessonDone(st, u, n)) n++;
+  return n;
+}
 
 export function markComponent(st, u, i, id, extra) {
   const s = { best: 0, done: false, lessons: {}, video: false, ...(st.unit[u.id] || {}) };

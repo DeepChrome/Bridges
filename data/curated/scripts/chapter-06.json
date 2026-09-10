@@ -1,0 +1,156 @@
+{
+ "chapter": 6,
+ "name": "Work and Animals",
+ "lessons": {
+  "core6:0": {
+   "title": "A new flat",
+   "rows": [
+    { "ru": "Вот наша новая квартира.", "en": "Here is our new flat." },
+    { "ru": "Мы живём здесь уже год.", "en": "We have been living here a year now." },
+    { "ru": "Я часто работаю дома.", "en": "I often work at home." },
+    { "ru": "Друг увидел квартиру и сказал, что она большая.", "en": "A friend saw the flat and said it was big." },
+    { "ru": "Даже он хочет жить здесь.", "en": "Even he wants to live here." }
+   ]
+  },
+  "core6:1": {
+   "title": "Yesterday with the dog",
+   "rows": [
+    { "ru": "Вчера мы с женой были дома.", "en": "Yesterday my wife and I were at home." },
+    { "ru": "У нас есть собака.", "en": "We have a dog." },
+    { "ru": "У собаки большая голова.", "en": "The dog has a big head." },
+    { "ru": "Она весь день стояла у двери.", "en": "She stood by the door all day." },
+    { "ru": "Жена сказала, что это её дело.", "en": "My wife said that was her business." }
+   ]
+  },
+  "core6:2": {
+   "title": "Working without music",
+   "rows": [
+    { "ru": "Ты можешь работать без музыки?", "en": "Can you work without music?" },
+    { "ru": "Нет, без музыки я ничего не делаю.", "en": "No, without music I get nothing done." },
+    { "ru": "Под музыку работа идёт очень хорошо.", "en": "With music on, the work goes really well." },
+    { "ru": "А я так могу работать только два часа.", "en": "But I can only work like that for two hours." },
+    { "ru": "Ничего, каждый работает как хочет.", "en": "Never mind, everyone works the way they like." }
+   ]
+  },
+  "core6:3": {
+   "title": "Wine and family stories",
+   "rows": [
+    { "ru": "На столе было вино.", "en": "There was wine on the table." },
+    { "ru": "Отец умеет его делать.", "en": "My father knows how to make it." },
+    { "ru": "Мы пили вино и говорили об истории семьи.", "en": "We drank wine and talked about our family history." },
+    { "ru": "Он сказал: «Наша задача — жить хорошо».", "en": "He said: our job is to live well." },
+    { "ru": "Дома всегда так хорошо.", "en": "It is always so good at home." }
+   ]
+  },
+  "core6:4": {
+   "title": "A favourite book",
+   "rows": [
+    { "ru": "Это моя любимая книга.", "en": "This is my favourite book." },
+    { "ru": "Многие её не знают.", "en": "Many people do not know it." },
+    { "ru": "Я читаю её каждый год.", "en": "I read it every year." },
+    { "ru": "Многие любят фильмы, а я — книги.", "en": "A lot of people love films, but I love books." },
+    { "ru": "Любимая книга — как друг.", "en": "A favourite book is like a friend." }
+   ]
+  },
+  "work:0": {
+   "title": "A job at the factory",
+   "rows": [
+    { "ru": "Мой друг работает на заводе.", "en": "My friend works at a factory." },
+    { "ru": "Там хорошо платят.", "en": "They pay well there." },
+    { "ru": "Он зарабатывает деньги для семьи.", "en": "He earns money for his family." },
+    { "ru": "Его коллеги говорят, что он богатый.", "en": "His colleagues say he is rich." },
+    { "ru": "Но товары в городе очень дорогие.", "en": "But things in town are very expensive." }
+   ]
+  },
+  "work:1": {
+   "title": "A meeting with the director",
+   "rows": [
+    { "ru": "Сегодня у нас встреча с директором.", "en": "Today we have a meeting with the director." },
+    { "ru": "Директор дал нам новое задание.", "en": "The director gave us a new assignment." },
+    { "ru": "Все сотрудники были на встрече.", "en": "All the employees were at the meeting." },
+    { "ru": "Он сказал, что зарплата будет в долларах.", "en": "He said the salary would be in dollars." },
+    { "ru": "После встречи все пошли работать.", "en": "After the meeting everyone went off to work." }
+   ]
+  },
+  "work:2": {
+   "title": "The worker who was not paid",
+   "rows": [
+    { "ru": "Этот рабочий уже два года на заводе.", "en": "This worker has been at the factory for two years." },
+    { "ru": "Вчера ему не заплатили.", "en": "Yesterday they did not pay him." },
+    { "ru": "Его семья страдает без денег.", "en": "His family is suffering without money." },
+    { "ru": "Директор сказал, что деньги будут.", "en": "The director said the money would come." },
+    { "ru": "Но рабочий уже думает о новой службе.", "en": "But the worker is already thinking about a new job." }
+   ]
+  },
+  "work:3": {
+   "title": "Payday at the cash desk",
+   "rows": [
+    { "ru": "Сегодня все работники получат зарплату.", "en": "Today all the employees will get their pay." },
+    { "ru": "Мы стоим у кассы.", "en": "We are standing by the cash desk." },
+    { "ru": "Наш руководитель говорит с каждым работником.", "en": "Our manager speaks with every employee." },
+    { "ru": "Начальник сказал, что зарплата будет больше.", "en": "The boss said the pay would be higher." },
+    { "ru": "После этого я иду покупать книги.", "en": "After that I go and buy books." }
+   ]
+  },
+  "work:4": {
+   "title": "The team meeting",
+   "rows": [
+    { "ru": "Сегодня у нас заседание.", "en": "We have a meeting today." },
+    { "ru": "Вся бригада уже здесь.", "en": "The whole team is already here." },
+    { "ru": "Наш инженер проработал на заводе два года.", "en": "Our engineer put in two years at the factory." },
+    { "ru": "Администратор дал каждому новое задание.", "en": "The administrator gave everyone a new assignment." },
+    { "ru": "Инженер говорит, что этот товар дешёвый.", "en": "The engineer says this product is cheap." }
+   ]
+  },
+  "work:5": {
+   "title": "Talking about professions",
+   "rows": [
+    { "ru": "На собрании говорили о новой профессии.", "en": "At the meeting they talked about a new profession." },
+    { "ru": "Менеджер сказал, что это денежная профессия.", "en": "The manager said it is a well-paid profession." },
+    { "ru": "Все в компании трудятся каждый день.", "en": "Everyone at the company works hard every day." },
+    { "ru": "Моя профессия не самая денежная, но любимая.", "en": "Mine is not the best paid profession, but I love it." },
+    { "ru": "Дома жена сказала: «Ты много трудишься».", "en": "At home my wife said: you work too hard." }
+   ]
+  },
+  "animals:0": {
+   "title": "Feeding the animals",
+   "rows": [
+    { "ru": "Каждый день я кормлю кошку.", "en": "Every day I feed the cat." },
+    { "ru": "Наш кот всегда бегает по квартире.", "en": "Our tomcat is always running about the flat." },
+    { "ru": "В клетке живёт птица.", "en": "There is a bird living in the cage." },
+    { "ru": "Птицу тоже надо кормить.", "en": "The bird has to be fed too." },
+    { "ru": "А коровы у нас нет.", "en": "But we do not have a cow." }
+   ]
+  },
+  "animals:1": {
+   "title": "A mouse in the flat",
+   "rows": [
+    { "ru": "В квартире была мышь.", "en": "There was a mouse in the flat." },
+    { "ru": "Кот бегал за ней весь день.", "en": "The cat chased it all day." },
+    { "ru": "Мама не переносит мышей.", "en": "Mum cannot stand mice." },
+    { "ru": "Мышь — не насекомое, но мама её не любит.", "en": "A mouse is not an insect, but Mum does not like it." },
+    { "ru": "А бабочку она любит.", "en": "A butterfly, though, she likes." }
+   ]
+  },
+  "animals:2": {
+   "title": "A book of animals",
+   "rows": [
+    { "ru": "В книге я увидел лошадь и медведя.", "en": "In the book I saw a horse and a bear." },
+    { "ru": "Конь стоял у двери.", "en": "A horse was standing by a door." },
+    { "ru": "Коза и курица были дома.", "en": "A goat and a hen were at home." },
+    { "ru": "У птицы большие крылья, а у кота лапы.", "en": "A bird has big wings, and a cat has paws." },
+    { "ru": "Эту книгу я читаю каждый день.", "en": "I read this book every day." }
+   ]
+  },
+  "animals:3": {
+   "title": "The nest by the door",
+   "rows": [
+    { "ru": "У двери птица сделала гнездо.", "en": "A bird has built a nest by the door." },
+    { "ru": "Под столом живёт наша мышка.", "en": "Our little mouse lives under the table." },
+    { "ru": "Кот не выдержал и пошёл к гнезду.", "en": "The cat could not bear it and went over to the nest." },
+    { "ru": "А свинья ничего не видела.", "en": "The pig, meanwhile, saw nothing." },
+    { "ru": "Каждое животное здесь имеет своё место.", "en": "Every animal here has its own place." }
+   ]
+  }
+ }
+}

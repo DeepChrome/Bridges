@@ -1,0 +1,136 @@
+{
+ "chapter": 2,
+ "name": "Food and School",
+ "lessons": {
+  "core2:0": {
+   "title": "Asking about a stranger",
+   "rows": [
+    { "ru": "Кто этот человек?", "en": "Who is that man?" },
+    { "ru": "Я его не знаю.", "en": "I do not know him." },
+    { "ru": "Он говорит о нас?", "en": "Is he talking about us?" },
+    { "ru": "Нет, он говорит о себе.", "en": "No, he is talking about himself." },
+    { "ru": "Он очень хочет знать, кто мы.", "en": "He very much wants to know who we are." }
+   ]
+  },
+  "core2:1": {
+   "title": "My child",
+   "rows": [
+    { "ru": "Это мой ребёнок.", "en": "This is my child." },
+    { "ru": "У нас только один ребёнок.", "en": "We have only one child." },
+    { "ru": "Он здесь один.", "en": "He is here on his own." },
+    { "ru": "Он здесь всё время.", "en": "He is here all the time." },
+    { "ru": "Мой ребёнок уже всё знает.", "en": "My child already knows everything." }
+   ]
+  },
+  "core2:2": {
+   "title": "Do you work yet?",
+   "rows": [
+    { "ru": "Ты уже работаешь?", "en": "Are you working already?" },
+    { "ru": "Да, я работаю здесь.", "en": "Yes, I work here." },
+    { "ru": "А твой ребёнок?", "en": "And your child?" },
+    { "ru": "Он ещё не работает.", "en": "He does not work yet." },
+    { "ru": "У него есть время.", "en": "He has time." }
+   ]
+  },
+  "core2:3": {
+   "title": "A day of doing things",
+   "rows": [
+    { "ru": "Что вы делаете?", "en": "What are you doing?" },
+    { "ru": "Я делаю это для себя.", "en": "I am doing it for myself." },
+    { "ru": "Мы всё сделали за день.", "en": "We got everything done in a day." },
+    { "ru": "Я очень люблю такие дни.", "en": "I really love days like this." },
+    { "ru": "А вы любите работать?", "en": "And do you like working?" }
+   ]
+  },
+  "core2:4": {
+   "title": "Starting a new job",
+   "rows": [
+    { "ru": "У меня новая работа.", "en": "I have a new job." },
+    { "ru": "Я иду на работу.", "en": "I am on my way to work." },
+    { "ru": "Я ещё не всех знаю.", "en": "I do not know everyone yet." },
+    { "ru": "Я знаю только одного человека.", "en": "I know only one person." },
+    { "ru": "Он тоже здесь новый.", "en": "He is new here too." }
+   ]
+  },
+  "food:0": {
+   "title": "Ordering lunch",
+   "rows": [
+    { "ru": "Мы обедаем здесь.", "en": "We are having lunch here." },
+    { "ru": "Что вы закажете?", "en": "What will you order?" },
+    { "ru": "Я закажу кофе.", "en": "I will order a coffee." },
+    { "ru": "А я хочу пиво.", "en": "And I want a beer." },
+    { "ru": "Ты уже пробовал это пиво?", "en": "Have you tried this beer before?" }
+   ]
+  },
+  "food:1": {
+   "title": "At the restaurant",
+   "rows": [
+    { "ru": "Мы обедаем в ресторане.", "en": "We are having lunch at a restaurant." },
+    { "ru": "Я хочу выпить чай.", "en": "I want to drink some tea." },
+    { "ru": "А ты хочешь торт?", "en": "And would you like some cake?" },
+    { "ru": "Здесь есть хлеб и масло.", "en": "There is bread and butter here." },
+    { "ru": "Ты уже пробовал этот торт?", "en": "Have you tried this cake yet?" }
+   ]
+  },
+  "food:2": {
+   "title": "A tasty lunch",
+   "rows": [
+    { "ru": "Обед был очень вкусный.", "en": "Lunch was very good." },
+    { "ru": "Я заказал рыбу и молоко.", "en": "I ordered fish and milk." },
+    { "ru": "Рыба была очень вкусная.", "en": "The fish was really tasty." },
+    { "ru": "Молоко было в бутылке.", "en": "The milk came in a bottle." },
+    { "ru": "А какой напиток ты пробовал?", "en": "And which drink did you try?" }
+   ]
+  },
+  "food:3": {
+   "title": "Salad on the plate",
+   "rows": [
+    { "ru": "На тарелке салат.", "en": "There is a salad on the plate." },
+    { "ru": "Салат очень вкусный.", "en": "The salad is very good." },
+    { "ru": "Эта тарелка для тебя.", "en": "This plate is for you." },
+    { "ru": "Я хочу ещё салата.", "en": "I would like some more salad." },
+    { "ru": "Мы обедаем и говорим.", "en": "We eat our lunch and talk." }
+   ]
+  },
+  "school:0": {
+   "title": "A student and his mistakes",
+   "rows": [
+    { "ru": "Я студент.", "en": "I am a student." },
+    { "ru": "Я учусь уже год.", "en": "I have been studying for a year now." },
+    { "ru": "Мой ответ был не тот.", "en": "My answer was the wrong one." },
+    { "ru": "Это моя ошибка.", "en": "That is my mistake." },
+    { "ru": "Я учусь на своих ошибках.", "en": "I learn from my own mistakes." }
+   ]
+  },
+  "school:1": {
+   "title": "A day at university",
+   "rows": [
+    { "ru": "Я учусь в университете.", "en": "I study at the university." },
+    { "ru": "Я иду на лекцию.", "en": "I am on my way to a lecture." },
+    { "ru": "Тема лекции очень новая.", "en": "The topic of the lecture is brand new." },
+    { "ru": "В классе только студенты.", "en": "There are only students in the classroom." },
+    { "ru": "Здесь все хотят знаний.", "en": "Everyone here wants knowledge." }
+   ]
+  },
+  "school:2": {
+   "title": "The English lesson",
+   "rows": [
+    { "ru": "У нас урок английского.", "en": "We have an English lesson." },
+    { "ru": "Это наш новый учитель.", "en": "This is our new teacher." },
+    { "ru": "Английский для меня ещё новый.", "en": "English is still new to me." },
+    { "ru": "Я прочитал весь урок.", "en": "I have read the whole lesson." },
+    { "ru": "Я всему научился здесь.", "en": "I learned it all here." }
+   ]
+  },
+  "school:3": {
+   "title": "Writing on the course",
+   "rows": [
+    { "ru": "Я иду на новый курс.", "en": "I am starting a new course." },
+    { "ru": "Курс идёт уже год.", "en": "The course has been running for a year." },
+    { "ru": "Я написал ответ.", "en": "I wrote the answer." },
+    { "ru": "Учитель прочитал мой ответ.", "en": "The teacher read my answer." },
+    { "ru": "Ошибок не было.", "en": "There were no mistakes." }
+   ]
+  }
+ }
+}

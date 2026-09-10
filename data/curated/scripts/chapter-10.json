@@ -1,0 +1,136 @@
+{
+ "chapter": 10,
+ "name": "Law and Faith",
+ "lessons": {
+  "core10:0": {
+   "title": "Near the old house",
+   "rows": [
+    { "ru": "Однажды я работал рядом с этим домом.", "en": "One day I was working near this house." },
+    { "ru": "Эта часть города очень большая.", "en": "This part of the city is very big." },
+    { "ru": "Там постоянно много машин.", "en": "There are always a lot of cars there." },
+    { "ru": "Примерно час я стоял у двери.", "en": "I stood by the door for about an hour." },
+    { "ru": "Ждать до конца я не мог.", "en": "I couldn't wait until the end." }
+   ]
+  },
+  "core10:1": {
+   "title": "Starting the day early",
+   "rows": [
+    { "ru": "Я начинаю работать очень рано.", "en": "I start work very early." },
+    { "ru": "Некоторые приходят лишь через час.", "en": "Some people only turn up an hour later." },
+    { "ru": "Так у меня есть возможность думать о работе.", "en": "That way I get a chance to think about the work." },
+    { "ru": "Я считаю, что это очень хорошо.", "en": "I think that is a very good thing." },
+    { "ru": "Но не каждый может работать так рано.", "en": "But not everyone can work that early." }
+   ]
+  },
+  "core10:2": {
+   "title": "How the company works",
+   "rows": [
+    { "ru": "В нашей компании своя система.", "en": "Our company has its own system." },
+    { "ru": "Приходится выходить из дома очень рано.", "en": "You have to leave the house very early." },
+    { "ru": "Работать таким образом могут не все.", "en": "Not everyone can work that way." },
+    { "ru": "Но именно поэтому мы всё делаем быстро.", "en": "But that is exactly why we get everything done quickly." },
+    { "ru": "Также у нас есть время для семьи.", "en": "We also have time for our families." }
+   ]
+  },
+  "core10:3": {
+   "title": "A colleague who says nothing",
+   "rows": [
+    { "ru": "Он вообще не отвечает на мои вопросы.", "en": "He doesn't answer my questions at all." },
+    { "ru": "Хотя я знаю, что он всё слышит.", "en": "Even though I know he hears everything." },
+    { "ru": "У него такое отношение к работе.", "en": "That is his attitude to work." },
+    { "ru": "Ничто не может ему помочь.", "en": "Nothing can help him." },
+    { "ru": "Однако он, конечно, хороший человек.", "en": "He is a good man, though, of course." }
+   ]
+  },
+  "core10:4": {
+   "title": "Deciding things every day",
+   "rows": [
+    { "ru": "Каждый день приходится решать новые задачи.", "en": "Every day there are new problems to solve." },
+    { "ru": "Иногда это становится большой проблемой.", "en": "Sometimes that becomes a real problem." },
+    { "ru": "Но я решаю почти всё сам.", "en": "But I decide almost everything myself." },
+    { "ru": "Конечно, некоторые вопросы решает мой друг.", "en": "Of course, my friend handles some of the questions." },
+    { "ru": "Так человек постоянно становится лучше.", "en": "That is how a person keeps getting better." }
+   ]
+  },
+  "law:0": {
+   "title": "An illegal agreement",
+   "rows": [
+    { "ru": "Однажды полиция нашла незаконный договор.", "en": "One day the police found an illegal agreement." },
+    { "ru": "По закону так делать нельзя.", "en": "By law you cannot do that." },
+    { "ru": "Преступник говорил, что ничего не знает.", "en": "The criminal kept saying he knew nothing." },
+    { "ru": "Но для полиции закон есть закон.", "en": "But for the police the law is the law." },
+    { "ru": "В конце концов будет суд.", "en": "In the end there will be a trial." }
+   ]
+  },
+  "law:1": {
+   "title": "The murder case",
+   "rows": [
+    { "ru": "Это дело об убийстве.", "en": "This is a murder case." },
+    { "ru": "Преступление произошло рядом с нашим городом.", "en": "The crime happened near our city." },
+    { "ru": "Свидетельство одной женщины очень помогло суду.", "en": "One woman's evidence helped the court a great deal." },
+    { "ru": "Виновный уже знает своё наказание.", "en": "The guilty man already knows his punishment." },
+    { "ru": "Его ждёт тюрьма.", "en": "Prison is waiting for him." }
+   ]
+  },
+  "law:2": {
+   "title": "The thief in our building",
+   "rows": [
+    { "ru": "В нашем доме жил вор.", "en": "A thief used to live in our building." },
+    { "ru": "Он воровал деньги в магазине.", "en": "He was stealing money at the shop." },
+    { "ru": "Полиция быстро нашла доказательства.", "en": "The police quickly found the proof." },
+    { "ru": "Арест был вчера.", "en": "The arrest was yesterday." },
+    { "ru": "Женщина из магазина будет свидетельствовать в суде.", "en": "The woman from the shop is going to testify in court." }
+   ]
+  },
+  "law:3": {
+   "title": "My friend the lawyer",
+   "rows": [
+    { "ru": "Мой друг работает юристом.", "en": "My friend works as a lawyer." },
+    { "ru": "Он читает контракты каждый день.", "en": "He reads contracts every day." },
+    { "ru": "Однажды ему хотели дать взятку.", "en": "One day somebody tried to give him a bribe." },
+    { "ru": "Конечно, это уголовное дело.", "en": "That is a criminal matter, of course." },
+    { "ru": "Его показания очень помогли полиции.", "en": "His testimony helped the police a lot." }
+   ]
+  },
+  "law:4": {
+   "title": "A detective novel",
+   "rows": [
+    { "ru": "Вчера я читал новый детектив.", "en": "Yesterday I was reading a new detective novel." },
+    { "ru": "В книге были вор и убийство.", "en": "There was a thief and a murder in the book." },
+    { "ru": "Полиция не могла найти убийцу.", "en": "The police could not find the killer." },
+    { "ru": "Но в конце все доказательства нашли.", "en": "But in the end they found all the proof." },
+    { "ru": "Такие книги я очень люблю.", "en": "I really love books like that." }
+   ]
+  },
+  "religion:0": {
+   "title": "The temple near our house",
+   "rows": [
+    { "ru": "Рядом с нашим домом есть большой храм.", "en": "There is a big church near our house." },
+    { "ru": "Однажды там была свадьба моего друга.", "en": "My friend's wedding was held there once." },
+    { "ru": "В храме много икон.", "en": "There are many icons in the church." },
+    { "ru": "Некоторые приходят в храм молиться.", "en": "Some people come to the church to pray." },
+    { "ru": "Хотя я не религиозный человек, мне там хорошо.", "en": "Although I am not a religious man, I feel good there." }
+   ]
+  },
+  "religion:1": {
+   "title": "Easter at home",
+   "rows": [
+    { "ru": "Завтра пасха, и все идут в храм.", "en": "Tomorrow is Easter, and everyone is going to church." },
+    { "ru": "Это самый главный христианский день.", "en": "It is the most important Christian day." },
+    { "ru": "Мама читает библию каждый день.", "en": "Mum reads the Bible every day." },
+    { "ru": "Без веры она жить не может.", "en": "She could not live without her faith." },
+    { "ru": "На той иконе ангел, а рядом распятие.", "en": "There is an angel on that icon, and a crucifix beside it." }
+   ]
+  },
+  "religion:2": {
+   "title": "What my mother believes",
+   "rows": [
+    { "ru": "Моя мама постоянно говорит о боге.", "en": "My mother talks about God all the time." },
+    { "ru": "Она считает, что вера — это доверие.", "en": "She thinks that faith means trust." },
+    { "ru": "Грех есть у каждого человека.", "en": "Every person has their sins." },
+    { "ru": "Дьявол и грех — это одно и то же.", "en": "The devil and sin are one and the same thing." },
+    { "ru": "Господь всё видит и всё знает.", "en": "The Lord sees everything and knows everything." }
+   ]
+  }
+ }
+}

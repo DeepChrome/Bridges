@@ -1,0 +1,116 @@
+{
+ "chapter": 3,
+ "name": "Home and Clothes",
+ "lessons": {
+  "core3:0": {
+   "title": "Where you live",
+   "rows": [
+    { "ru": "Где ты живёшь?", "en": "Where do you live?" },
+    { "ru": "Я живу здесь уже год.", "en": "I have been living here for a year." },
+    { "ru": "Вот книга про эту страну.", "en": "Here is a book about this country." },
+    { "ru": "Это очень новая книга.", "en": "It is a very new book." },
+    { "ru": "Я бы хотел жить там.", "en": "I would like to live there." }
+   ]
+  },
+  "core3:1": {
+   "title": "Something to say today",
+   "rows": [
+    { "ru": "Сегодня я должен работать.", "en": "Today I have to work." },
+    { "ru": "Какая большая работа!", "en": "What a big job!" },
+    { "ru": "Но я хочу сказать вам.", "en": "But I want to tell you something." },
+    { "ru": "Что ты хочешь сказать?", "en": "What do you want to say?" },
+    { "ru": "Я здесь, чтобы это сделать.", "en": "I am here to get it done." }
+   ]
+  },
+  "core3:2": {
+   "title": "A friend is thinking",
+   "rows": [
+    { "ru": "Мой друг сейчас здесь.", "en": "My friend is here right now." },
+    { "ru": "Что он делает?", "en": "What is he doing?" },
+    { "ru": "Он смотрит на книгу.", "en": "He is looking at a book." },
+    { "ru": "О чём он думает?", "en": "What is he thinking about?" },
+    { "ru": "Он думает о новой работе.", "en": "He is thinking about a new job." }
+   ]
+  },
+  "core3:3": {
+   "title": "First day in town",
+   "rows": [
+    { "ru": "Это мой первый день в городе.", "en": "This is my first day in the city." },
+    { "ru": "Я здесь уже час.", "en": "I have been here an hour already." },
+    { "ru": "Я вижу большой новый город.", "en": "I see a big new city." },
+    { "ru": "Это слово я уже знаю.", "en": "This word I already know." },
+    { "ru": "После работы я думаю о жизни.", "en": "After work I think about life." }
+   ]
+  },
+  "core3:4": {
+   "title": "When there is time",
+   "rows": [
+    { "ru": "Когда ты работаешь?", "en": "When do you work?" },
+    { "ru": "Сегодня у меня много работы.", "en": "I have a lot of work today." },
+    { "ru": "А когда ты видишь друзей?", "en": "And when do you see your friends?" },
+    { "ru": "Только после работы.", "en": "Only after work." },
+    { "ru": "Сейчас у меня нет времени.", "en": "Right now I have no time." }
+   ]
+  },
+  "home:0": {
+   "title": "Looking for the key",
+   "rows": [
+    { "ru": "Где ключ?", "en": "Where is the key?" },
+    { "ru": "Он лежит на кухне.", "en": "It is lying in the kitchen." },
+    { "ru": "Я сижу здесь уже час.", "en": "I have been sitting here for an hour." },
+    { "ru": "Мы живём на первом этаже.", "en": "We live on the first floor." },
+    { "ru": "Лестница там, за стеной.", "en": "The stairs are over there, behind the wall." }
+   ]
+  },
+  "home:1": {
+   "title": "Furniture in the room",
+   "rows": [
+    { "ru": "Вот стул, а вот кресло.", "en": "Here is a chair, and here is an armchair." },
+    { "ru": "Кровать у стены.", "en": "The bed is by the wall." },
+    { "ru": "Зеркало большое и новое.", "en": "The mirror is big and new." },
+    { "ru": "Книга лежит на полу.", "en": "A book is lying on the floor." },
+    { "ru": "Наш двор очень большой.", "en": "Our courtyard is very big." }
+   ]
+  },
+  "home:2": {
+   "title": "Repairs at home",
+   "rows": [
+    { "ru": "У нас сейчас ремонт.", "en": "We are having repairs done at the moment." },
+    { "ru": "Мебель уже на кухне.", "en": "The furniture is in the kitchen already." },
+    { "ru": "Шкаф большой и чистый.", "en": "The cupboard is big and clean." },
+    { "ru": "Забор тоже новый.", "en": "The fence is new too." },
+    { "ru": "Я люблю свой родной город.", "en": "I love my home town." }
+   ]
+  },
+  "clothes:0": {
+   "title": "Getting dressed for work",
+   "rows": [
+    { "ru": "Я одеваюсь и иду на работу.", "en": "I get dressed and go to work." },
+    { "ru": "Что ты надел сегодня?", "en": "What did you put on today?" },
+    { "ru": "Это новое, но не очень красивое.", "en": "It is new, but not very nice." },
+    { "ru": "Я ношу это только на работе.", "en": "I only wear it at work." },
+    { "ru": "После работы я это сниму.", "en": "After work I will take it off." }
+   ]
+  },
+  "clothes:1": {
+   "title": "Packing clothes",
+   "rows": [
+    { "ru": "Вот моя одежда и обувь.", "en": "Here are my clothes and my shoes." },
+    { "ru": "Костюм новый и очень красивый.", "en": "The suit is new and very smart." },
+    { "ru": "Где мой галстук?", "en": "Where is my tie?" },
+    { "ru": "Он в кармане куртки.", "en": "It is in the jacket pocket." },
+    { "ru": "Я надену костюм и галстук.", "en": "I will put on the suit and the tie." }
+   ]
+  },
+  "clothes:2": {
+   "title": "Choosing what to wear",
+   "rows": [
+    { "ru": "Это платье тебе очень подходит.", "en": "That dress suits you very well." },
+    { "ru": "А пальто и пиджак?", "en": "And the coat and the jacket?" },
+    { "ru": "Пальто не подходит к платью.", "en": "The coat does not go with the dress." },
+    { "ru": "Надень рубашку и пиджак.", "en": "Put on the shirt and the jacket." },
+    { "ru": "Как это звучит?", "en": "How does that sound?" }
+   ]
+  }
+ }
+}

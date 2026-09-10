@@ -1,0 +1,145 @@
+{
+ "chapter": 1,
+ "name": "People and Time",
+ "lessons": {
+  "core1:0": {
+   "title": "Who is this?",
+   "rows": [
+    { "ru": "Кто это?", "en": "Who is this?" },
+    { "ru": "Это я.", "en": "This is me." },
+    { "ru": "А это он?", "en": "And is this him?" },
+    { "ru": "Нет, он не здесь.", "en": "No, he is not here." }
+   ]
+  },
+  "core1:1": {
+   "title": "Here with us",
+   "rows": [
+    { "ru": "Это я и он.", "en": "This is me and him." },
+    { "ru": "А кто это?", "en": "And who is that?" },
+    { "ru": "Мы здесь.", "en": "We are here." },
+    { "ru": "Он не с нами?", "en": "Is he not with us?" },
+    { "ru": "Он с нами.", "en": "He is with us." }
+   ]
+  },
+  "core1:2": {
+   "title": "Who are you?",
+   "rows": [
+    { "ru": "Кто ты?", "en": "Who are you?" },
+    { "ru": "А кто она?", "en": "And who is she?" },
+    { "ru": "Что это?", "en": "What is this?" },
+    { "ru": "Вы с нами?", "en": "Are you with us?" },
+    { "ru": "Да, мы с вами.", "en": "Yes, we are with you." }
+   ]
+  },
+  "core1:3": {
+   "title": "Where they are from",
+   "rows": [
+    { "ru": "Кто они?", "en": "Who are they?" },
+    { "ru": "Они из Москвы.", "en": "They are from Moscow." },
+    { "ru": "Тот не с ними.", "en": "That one is not with them." },
+    { "ru": "Они у нас.", "en": "They are at our place." },
+    { "ru": "А ты из Москвы?", "en": "And are you from Moscow?" }
+   ]
+  },
+  "core1:4": {
+   "title": "Everyone is here",
+   "rows": [
+    { "ru": "Все здесь?", "en": "Is everyone here?" },
+    { "ru": "Да, все наши здесь.", "en": "Yes, all of ours are here." },
+    { "ru": "Он не может.", "en": "He cannot." },
+    { "ru": "Мы за вас.", "en": "We are behind you." },
+    { "ru": "Все к нам!", "en": "Everyone over to us!" }
+   ]
+  },
+  "core1:5": {
+   "title": "What he wants to say",
+   "rows": [
+    { "ru": "Я не знаю.", "en": "I do not know." },
+    { "ru": "Что ты хочешь?", "en": "What do you want?" },
+    { "ru": "Он говорит с нами.", "en": "He is speaking with us." },
+    { "ru": "Этот год наш.", "en": "This year is ours." },
+    { "ru": "Он не хочет говорить.", "en": "He does not want to speak." }
+   ]
+  },
+  "family:0": {
+   "title": "My husband and daughter",
+   "rows": [
+    { "ru": "Это мой муж.", "en": "This is my husband." },
+    { "ru": "А это наша дочь.", "en": "And this is our daughter." },
+    { "ru": "Она родилась здесь.", "en": "She was born here." },
+    { "ru": "Дочь растёт.", "en": "Our daughter is growing." },
+    { "ru": "Мужчина не хочет говорить.", "en": "The man does not want to talk." }
+   ]
+  },
+  "family:1": {
+   "title": "A guest at our home",
+   "rows": [
+    { "ru": "Это наш сын.", "en": "This is our son." },
+    { "ru": "А это мой брат.", "en": "And this is my brother." },
+    { "ru": "Девочка — его подруга.", "en": "The girl is his friend." },
+    { "ru": "У нас гость.", "en": "We have a guest." },
+    { "ru": "Гость хочет знать, кто мы.", "en": "The guest wants to know who we are." }
+   ]
+  },
+  "family:2": {
+   "title": "Grandmother and the boy",
+   "rows": [
+    { "ru": "Это моя бабушка.", "en": "This is my grandmother." },
+    { "ru": "Мальчик — её сын?", "en": "Is the boy her son?" },
+    { "ru": "Нет, это её брат.", "en": "No, that is her brother." },
+    { "ru": "Наши родители здесь.", "en": "Our parents are here." },
+    { "ru": "Тот старик не с нами.", "en": "That old man is not with us." }
+   ]
+  },
+  "family:3": {
+   "title": "Our family name",
+   "rows": [
+    { "ru": "Какая у вас фамилия?", "en": "What is your surname?" },
+    { "ru": "Это наш малыш.", "en": "This is our little one." },
+    { "ru": "Он ещё не говорит.", "en": "He does not talk yet." },
+    { "ru": "Это наш семейный год.", "en": "This is our family year." },
+    { "ru": "Молодёжь хочет знать всё.", "en": "Young people want to know everything." }
+   ]
+  },
+  "time:0": {
+   "title": "Morning and evening",
+   "rows": [
+    { "ru": "Уже утро.", "en": "It is morning already." },
+    { "ru": "Пора!", "en": "It is time!" },
+    { "ru": "Этот месяц наш.", "en": "This month is ours." },
+    { "ru": "А вечер?", "en": "And the evening?" },
+    { "ru": "Вечер тоже наш.", "en": "The evening is ours too." }
+   ]
+  },
+  "time:1": {
+   "title": "Numbers and months",
+   "rows": [
+    { "ru": "Какое это число?", "en": "What number is this?" },
+    { "ru": "Это март.", "en": "This is March." },
+    { "ru": "А это сентябрь.", "en": "And this is September." },
+    { "ru": "Ещё секунда.", "en": "One more second." },
+    { "ru": "Это тысяча.", "en": "This is a thousand." }
+   ]
+  },
+  "time:2": {
+   "title": "Monday in April",
+   "rows": [
+    { "ru": "Это понедельник.", "en": "It is Monday." },
+    { "ru": "А это апрель.", "en": "And this is April." },
+    { "ru": "Мы не успели.", "en": "We did not make it in time." },
+    { "ru": "Он хочет миллион.", "en": "He wants a million." },
+    { "ru": "Мы успеем?", "en": "Will we make it in time?" }
+   ]
+  },
+  "time:3": {
+   "title": "Months of the year",
+   "rows": [
+    { "ru": "Это май.", "en": "This is May." },
+    { "ru": "А это июнь.", "en": "And this is June." },
+    { "ru": "Третий месяц — наш.", "en": "The third month is ours." },
+    { "ru": "В среду мы здесь.", "en": "On Wednesday we are here." },
+    { "ru": "А декабрь?", "en": "And December?" }
+   ]
+  }
+ }
+}

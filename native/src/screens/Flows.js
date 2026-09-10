@@ -13,7 +13,7 @@ import { Linked } from "../words";
 import { Q, DRILL_TYPES, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
-  reachedUnits, unitUnlocked, reviewWords, passages, knownWords,
+  reachedUnits, unitUnlocked, reviewWords, passages, knownWords, lessonsDone,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { firstSense } from "@core/util";
@@ -292,24 +292,26 @@ export function DrillList({ navigation }) {
           {((st.drills || {}).quiz || {}).best
             ? <Pill tone="good">{(st.drills.quiz.best) + "%"}</Pill> : null}
         </Row>
-        <Row onPress={() => navigation.navigate("Listening")}>
+        {/* Listening at the learner's level comes first, and the native-speed
+            one says plainly that it is harder. The owner found the video
+            passages "way too advanced" and nothing on the row warned him. */}
+        <Row onPress={() => navigation.navigate("Scenes")}>
           <Thumb id="speech" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Listening</Text>
-            <Muted>Half a minute of one speaker, on one subject</Muted>
-          </View>
-        </Row>
-        {/* The older activity: a few sentences from the pools, each with its own
-            meaning. Kept because it is the only listening a beginner can do —
-            a passage of native speech needs words they have not met yet. */}
-        <Row onPress={() => navigation.navigate("Scenes")}>
-          <Thumb id="time" />
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Scenes</Text>
-            <Muted>Short sentences from what you have met</Muted>
+            <Muted>Five short sentences from the unit you are on</Muted>
           </View>
           {((st.drills || {}).listening || {}).best
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
+        </Row>
+        <Row onPress={() => navigation.navigate("Listening")}>
+          <Thumb id="tech" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+              Native speed
+            </Text>
+            <Muted>Half a minute of a real speaker · much harder</Muted>
+          </View>
         </Row>
         <Row onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
           <Thumb id="emotion" locked={!talkOpen} />
@@ -518,12 +520,30 @@ export function ListeningFlow({ navigation }) {
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
   const units = useMemo(() => reachedUnits(st), [seed]);
-  // Scenes that open on a word from the trouble bank, when the pools have one.
-  const steps = useMemo(() => Q.listeningDrill(units, LISTENING_N, new Set(reviewWords(st))), [units, seed]);
+  /* The passages written for the lessons this learner has finished (§30j).
+     The owner, 2026-09-10: the native-speed video passages were "way too
+     advanced", and the build's own numbers agreed — 45 s of a native speaker
+     uses more words than the first three chapters hold. These are pitched at
+     the lesson instead, and the corpus scene is the fallback for a lesson with
+     no script, so the activity never goes empty. */
+  const steps = useMemo(() => {
+    const want = new Set(reviewWords(st));
+    const done = (u) => lessonsDone(st, u);
+    const out = [];
+    const seen = new Set();
+    for (let k = 0; k < LISTENING_N * 6 && out.length < LISTENING_N; k++) {
+      const p = Q.writtenPassage(units, done) || Q.lessonPassage(units, want);
+      if (!p || seen.has(p.rows[0].ru)) continue;
+      seen.add(p.rows[0].ru);
+      out.push(p);
+    }
+    return out;
+  }, [units, seed]);
   useAudioStopOnLeave();
 
   if (!steps.length) {
-    return <Done title="Nothing to listen to yet" detail="Scenes need a few sentences from your units."
+    return <Done title="Nothing to listen to yet"
+                 detail="Finish a lesson and its listening passage opens here."
                  onBack={() => navigation.goBack()} />;
   }
   if (result) {

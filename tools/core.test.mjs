@@ -371,7 +371,8 @@ const sizeOf = (u) => lessonSize(stageIndexOf(u));
 const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / sizeOf(u)));
 const lessonWords = (u, i) => u.w.slice(i * sizeOf(u), (i + 1) * sizeOf(u));
 const SPEECH = DATA.speech;
-const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH,
+const SCRIPTS = DATA.scripts || {};
+const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH, SCRIPTS,
                           hasVoice: () => true });
 const answerable = (q) =>
   q.options || q.typed || q.pairs || q.kind === "hear" || q.kind === "say"
@@ -653,8 +654,18 @@ group("scenes and custom quizzes");
   ok(scenes.length === SPEECH_MIX.scene.perQuiz, `${later.id}: one scene per quiz`, String(scenes.length));
   ok(!Q.quizSteps(STAGES[0].core, 0).some((q) => q.kind === "scene"), "none in the first chapter");
   const s = scenes[0];
-  ok(s.rows.length >= 2 && s.rows.length <= 3, "two or three sentences", String(s.rows.length));
-  ok(s.rows.every((r) => DATA.audio.files[fold(r.ru)]), "every sentence has a recording");
+  // Two shapes now share the kind: the corpus scene, which is short and every
+  // sentence of which has a real recording, and the passage written for the
+  // lesson (§30j), which is longer and read by the device voice because nobody
+  // has ever said it. A scene must be one or the other, never a corpus scene
+  // claiming to be written or a written one claiming a recording it lacks.
+  if (s.written) {
+    ok(s.rows.length >= 4 && s.rows.length <= 5, "a written passage is four or five sentences", String(s.rows.length));
+    ok(s.topic && s.level, "and says what it is about and where it is from", `${s.topic} / ${s.level}`);
+  } else {
+    ok(s.rows.length >= 2 && s.rows.length <= 3, "two or three sentences", String(s.rows.length));
+    ok(s.rows.every((r) => DATA.audio.files[fold(r.ru)]), "every sentence has a recording");
+  }
   ok(s.questions.length >= s.rows.length, "a question per sentence at least");
   ok(s.questions.every((q) => q.options.length === 4 && q.options.filter((o) => o.right).length === 1),
      "four options, one right, on every question");
@@ -692,6 +703,83 @@ group("scenes and custom quizzes");
      "nothing chosen, nothing asked");
   ok(Q.customQuiz({ units, kinds: ["scene"], n: 3 }).every((q) => q.kind === "scene"),
      "scenes alone make a listening-only quiz");
+}
+
+/* The written lesson passages (§30j). tools/check_scripts.mjs is what proves the
+   Russian stays inside the lesson's vocabulary; this proves the app turns one
+   into a scene a learner can actually answer, and that it is preferred over the
+   corpus scene wherever a lesson has one. */
+group("written lesson passages");
+{
+  const keys = Object.keys(SCRIPTS);
+  ok(keys.length > 0, "the payload ships them", String(keys.length));
+  ok(keys.every((k) => /^[a-z0-9_]+:\d+$/.test(k)), "each keyed unit and lesson index");
+
+  // Every script names a lesson that exists, and every one of them builds.
+  const byId = new Map(UN.map((u) => [u.id, u]));
+  const orphan = keys.filter((k) => {
+    const [id, i] = k.split(":");
+    const u = byId.get(id);
+    return !u || Number(i) >= lessonCount(u);
+  });
+  ok(!orphan.length, "none names a lesson off the path", orphan.slice(0, 4).join(", "));
+
+  let built = 0, bad = [];
+  for (const k of keys) {
+    const [id, i] = k.split(":");
+    const scene = Q.scriptScene(byId.get(id), Number(i));
+    if (!scene) { bad.push(k); continue; }
+    built++;
+    if (scene.rows.length !== SCRIPTS[k].rows.length) bad.push(`${k}: lost a sentence`);
+    if (!scene.written) bad.push(`${k}: not marked written`);
+    if (scene.questions.length < scene.rows.length) bad.push(`${k}: too few questions`);
+    for (const q of scene.questions) {
+      if (q.options.length !== 4) bad.push(`${k}: ${q.options.length} options`);
+      if (q.options.filter((o) => o.right).length !== 1) bad.push(`${k}: not one right answer`);
+      if (new Set(q.options.map((o) => o.label)).size !== 4) bad.push(`${k}: a repeated option`);
+    }
+  }
+  ok(built === keys.length, "every one of them builds into a scene", `${built} of ${keys.length}`);
+  ok(!bad.length, "and each is answerable: four distinct options, one right", bad.slice(0, 4).join(" | "));
+
+  // The Russian distractors in "which word did you hear?" are words on screen,
+  // so they must be words this learner has met — the English ones may come from
+  // anywhere, because English gives no Russian away.
+  const offLevel = [];
+  for (const k of keys.slice(0, 40)) {
+    const [id, i] = k.split(":");
+    const u = byId.get(id);
+    const met = new Set(Q.unitsUpTo(u).flatMap((x) => x.w));
+    const scene = Q.scriptScene(u, Number(i));
+    for (const q of (scene.questions || [])) {
+      if (typeof q.i !== "number") continue;
+      for (const o of q.options) if (typeof o.i === "number" && !met.has(o.i)) offLevel.push(`${k}: ${o.label}`);
+    }
+  }
+  ok(!offLevel.length, "no Russian option is a word the learner has not reached",
+     offLevel.slice(0, 4).join(", "));
+
+  // A scripted lesson's quiz gets the written passage, not a corpus scene.
+  const scripted = keys.map((k) => k.split(":")).find(([id, i]) => {
+    const u = byId.get(id);
+    return u && Q.stageOf(u) >= SPEECH_MIX.scene.fromStage;
+  });
+  if (scripted) {
+    const u = byId.get(scripted[0]);
+    const step = Q.speechPrompt("scene", u, Number(scripted[1]));
+    ok(step && step.scene.written,
+       `${scripted.join(":")}: the lesson's own passage is what the quiz asks`);
+  }
+
+  // Practice's Listening draws on the lessons actually finished, and never on
+  // one that has not been reached.
+  const units = Q.unitsUpTo(STAGES[2].core);
+  const p = Q.writtenPassage(units, () => 2);
+  ok(p && p.written && p.rows.length >= 4, "Practice draws a written passage too");
+  const first = Q.writtenPassage([STAGES[0].core], (u) => 1);
+  ok(first && first.unit === STAGES[0].core.id && first.rows.length >= 4,
+     "one lesson in, the first lesson's passage is available");
+  ok(Q.writtenPassage(units, () => 0) === null, "no lessons finished, no passage");
 }
 
 /* The speaking step joins a chapter later than hearing, and is prompted in English. */

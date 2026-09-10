@@ -1,0 +1,226 @@
+{
+ "chapter": 7,
+ "name": "Mind and Language",
+ "lessons": {
+  "core7:0": {
+   "title": "Telling my father the truth",
+   "rows": [
+    { "ru": "Вчера я остался дома и писал книгу.", "en": "Yesterday I stayed at home and wrote my book." },
+    { "ru": "Я боялся сказать правду отцу.", "en": "I was afraid to tell my father the truth." },
+    { "ru": "Но я рассказал ему всё.", "en": "But I told him everything." },
+    { "ru": "Отец помог мне и не сказал ни слова.", "en": "My father helped me and did not say a word." },
+    { "ru": "Мы думали над этим весь день.", "en": "We thought it over all day." }
+   ]
+  },
+  "core7:1": {
+   "title": "A small new television",
+   "rows": [
+    { "ru": "Вот наш новый телевизор.", "en": "Here is our new television." },
+    { "ru": "Он маленький, но это не проблема.", "en": "It is small, but that is not a problem." },
+    { "ru": "Ночью мы смотрели новый фильм.", "en": "At night we watched a new film." },
+    { "ru": "Тогда я забыл о времени.", "en": "I forgot about the time then." },
+    { "ru": "После фильма я просто не хотел говорить.", "en": "After the film I simply did not want to talk." }
+   ]
+  },
+  "core7:2": {
+   "title": "Looking at a small flat",
+   "rows": [
+    { "ru": "Завтра мы идём смотреть небольшую квартиру.", "en": "Tomorrow we are going to look at a small flat." },
+    { "ru": "В ней одно окно, но огромное.", "en": "It has one window, but an enormous one." },
+    { "ru": "Мы прошли по этой улице вчера.", "en": "We walked down this street yesterday." },
+    { "ru": "Мы работали за каждый рубль.", "en": "We worked for every rouble." },
+    { "ru": "Мы уже готовы её купить.", "en": "We are ready to buy it now." }
+   ]
+  },
+  "core7:3": {
+   "title": "A scientist on television",
+   "rows": [
+    { "ru": "Вчера по телевизору говорил один учёный.", "en": "Yesterday a scientist was speaking on television." },
+    { "ru": "Мы слушали его два часа.", "en": "We listened to him for two hours." },
+    { "ru": "Он рассказал о другом случае.", "en": "He told us about a different case." },
+    { "ru": "Он смотрел нам в глаза и говорил правду.", "en": "He looked us in the eye and told the truth." },
+    { "ru": "Теперь я сам хочу читать такие книги.", "en": "Now I want to read books like that myself." }
+   ]
+  },
+  "core7:4": {
+   "title": "Prices and what matters",
+   "rows": [
+    { "ru": "Цена — это главный вопрос.", "en": "The price is the main question." },
+    { "ru": "Вчера цены были другие.", "en": "Yesterday the prices were different." },
+    { "ru": "Теперь у нас нет таких денег.", "en": "Now we do not have that kind of money." },
+    { "ru": "Мы весь день смотрели на цены.", "en": "We spent all day looking at prices." },
+    { "ru": "Главное — не бояться и ждать.", "en": "The main thing is not to be afraid, and to wait." }
+   ]
+  },
+  "emotion:0": {
+   "title": "An idea I like",
+   "rows": [
+    { "ru": "Мне очень нравится эта идея.", "en": "I like this idea very much." },
+    { "ru": "Я помню, как ты рассказал о ней.", "en": "I remember how you told me about it." },
+    { "ru": "Тогда я не понял главного.", "en": "Back then I did not understand the main part." },
+    { "ru": "Теперь у меня другое мнение.", "en": "Now I have a different opinion." },
+    { "ru": "Это интересный случай, и я счастлив.", "en": "It is an interesting case, and I am happy." }
+   ]
+  },
+  "emotion:1": {
+   "title": "Fear and family",
+   "rows": [
+    { "ru": "Мама всегда переживает за меня.", "en": "Mum always worries about me." },
+    { "ru": "Я ненавижу этот страх.", "en": "I hate this fear." },
+    { "ru": "Но я верю, что всё будет хорошо.", "en": "But I believe everything will be fine." },
+    { "ru": "Отец гордится мной, и это главное.", "en": "My father is proud of me, and that is what matters." },
+    { "ru": "Он слушает меня с интересом.", "en": "He listens to me with interest." }
+   ]
+  },
+  "emotion:2": {
+   "title": "A dream of Moscow",
+   "rows": [
+    { "ru": "Я всегда мечтал жить в Москве.", "en": "I always dreamed of living in Moscow." },
+    { "ru": "Мама удивилась, но ничего не сказала.", "en": "Mum was surprised, but said nothing." },
+    { "ru": "Я подумал и остался дома.", "en": "I thought about it and stayed at home." },
+    { "ru": "Меня интересует только одно.", "en": "Only one thing interests me." },
+    { "ru": "Это любовь, радость и спокойная жизнь.", "en": "That is love, joy and a quiet life." }
+   ]
+  },
+  "emotion:3": {
+   "title": "Hope before tomorrow",
+   "rows": [
+    { "ru": "Я надеюсь, что завтра всё пройдёт хорошо.", "en": "I hope everything will go well tomorrow." },
+    { "ru": "Но я сомневаюсь в себе.", "en": "But I have doubts about myself." },
+    { "ru": "Волнение прошло, и осталась только надежда.", "en": "The nerves passed, and only hope was left." },
+    { "ru": "Эта книга меня очень заинтересовала.", "en": "This book interested me a great deal." },
+    { "ru": "Я запомнил каждое слово этого учёного.", "en": "I memorised every word that scientist said." }
+   ]
+  },
+  "emotion:4": {
+   "title": "A curious child",
+   "rows": [
+    { "ru": "Наш ребёнок очень любопытный.", "en": "Our child is very curious." },
+    { "ru": "Он интересуется всем, что видит.", "en": "He takes an interest in everything he sees." },
+    { "ru": "У него память, как у учёного.", "en": "He has a memory like a scientist's." },
+    { "ru": "У меня была одна тревожная мысль.", "en": "I had one anxious thought." },
+    { "ru": "Он нуждается в нас, и мы его полюбили.", "en": "He needs us, and we have come to love him." }
+   ]
+  },
+  "emotion:5": {
+   "title": "A friend in love",
+   "rows": [
+    { "ru": "Мой друг влюблён и очень счастлив.", "en": "My friend is in love and very happy." },
+    { "ru": "Но вчера он был грустный.", "en": "But yesterday he was sad." },
+    { "ru": "Меня это беспокоит.", "en": "That worries me." },
+    { "ru": "Я вспомнил его слова о ней.", "en": "I remembered what he said about her." },
+    { "ru": "Не надо волноваться за него.", "en": "There is no need to worry about him." }
+   ]
+  },
+  "speech:0": {
+   "title": "Writing a letter to a friend",
+   "rows": [
+    { "ru": "Вчера я писал письмо другу.", "en": "Yesterday I was writing a letter to a friend." },
+    { "ru": "Я попросил его ответить завтра.", "en": "I asked him to answer tomorrow." },
+    { "ru": "Он спросил меня о работе.", "en": "He asked me about work." },
+    { "ru": "Я объяснял ему всё очень просто.", "en": "I explained it all to him very simply." },
+    { "ru": "Мы разговаривали и рассказывали о себе.", "en": "We talked and told each other about ourselves." }
+   ]
+  },
+  "speech:1": {
+   "title": "A phone call from a friend",
+   "rows": [
+    { "ru": "Вчера мне позвонил друг.", "en": "A friend rang me yesterday." },
+    { "ru": "Он хотел поговорить о новой книге.", "en": "He wanted to talk about a new book." },
+    { "ru": "Разговор был небольшой.", "en": "It was a short conversation." },
+    { "ru": "Тогда у нас была дискуссия о каждой букве.", "en": "Then we had a discussion about every letter." },
+    { "ru": "Я прошу вас звонить мне каждый день.", "en": "I ask you to call me every day." }
+   ]
+  },
+  "speech:2": {
+   "title": "Choosing a name at work",
+   "rows": [
+    { "ru": "Вчера в компании была большая беседа.", "en": "Yesterday there was a long discussion at the company." },
+    { "ru": "Мы говорили о новом названии.", "en": "We were talking about the new name." },
+    { "ru": "Один человек кричал, другой молчал.", "en": "One man shouted, another said nothing." },
+    { "ru": "Я обещал, что мы договоримся завтра.", "en": "I promised we would come to an agreement tomorrow." },
+    { "ru": "Это был случай, когда все хотели плакать.", "en": "It was the kind of day that made everyone want to cry." }
+   ]
+  },
+  "speech:3": {
+   "title": "Quiet after the quarrel",
+   "rows": [
+    { "ru": "Ссора прошла, и в доме тишина.", "en": "The quarrel is over, and the house is quiet." },
+    { "ru": "Он не забыл своё обещание.", "en": "He has not forgotten his promise." },
+    { "ru": "Он проговорил эти слова очень просто.", "en": "He said those words very plainly." },
+    { "ru": "Мне не надо объясняться.", "en": "I do not need to explain myself." },
+    { "ru": "Он не указывает мне, что делать.", "en": "He does not tell me what to do." }
+   ]
+  },
+  "speech:4": {
+   "title": "A meeting that got loud",
+   "rows": [
+    { "ru": "Мы беседовали о новом наименовании.", "en": "We were talking over the new name." },
+    { "ru": "Тогда он заговорил о цене.", "en": "Then he started talking about the price." },
+    { "ru": "Он утверждает, что это главный вопрос.", "en": "He insists that this is the main question." },
+    { "ru": "Он закричал, и мы все молчали.", "en": "He shouted, and we all fell silent." },
+    { "ru": "Этот крик я не забуду.", "en": "I will not forget that shout." }
+   ]
+  },
+  "speech:5": {
+   "title": "A Russian lesson",
+   "rows": [
+    { "ru": "Он повторил вопрос два раза.", "en": "He repeated the question twice." },
+    { "ru": "Я не мог перевести это слово.", "en": "I could not translate this word." },
+    { "ru": "Он объяснил мне каждую букву.", "en": "He explained every letter to me." },
+    { "ru": "Теперь я отличаю эти два слова.", "en": "Now I can tell these two words apart." },
+    { "ru": "Тогда мы обсуждали новый фильм.", "en": "Then we discussed a new film." }
+   ]
+  },
+  "business:0": {
+   "title": "Our small firm",
+   "rows": [
+    { "ru": "Наша фирма небольшая, но у нас есть клиенты.", "en": "Our firm is small, but we have clients." },
+    { "ru": "Сколько стоит эта реклама?", "en": "How much does this advertising cost?" },
+    { "ru": "Стоимость очень большая.", "en": "The cost is very high." },
+    { "ru": "Клиент хотел знать цену.", "en": "The client wanted to know the price." },
+    { "ru": "Наш бизнес — это не только экономический вопрос.", "en": "Our business is not only an economic question." }
+   ]
+  },
+  "business:1": {
+   "title": "The budget this year",
+   "rows": [
+    { "ru": "Наш бюджет на этот год небольшой.", "en": "Our budget for this year is small." },
+    { "ru": "Доход компании теперь огромный.", "en": "The company's income is enormous now." },
+    { "ru": "Цена наших акций стала больше.", "en": "The price of our shares has gone up." },
+    { "ru": "Этот кредит стоит очень много.", "en": "This loan costs a great deal." },
+    { "ru": "Это большой финансовый вопрос для экономики.", "en": "That is a big financial question for the economy." }
+   ]
+  },
+  "business:2": {
+   "title": "Debt, tax and the fund",
+   "rows": [
+    { "ru": "У фирмы есть долг.", "en": "The firm has a debt." },
+    { "ru": "Налог в этом году больше.", "en": "The tax is higher this year." },
+    { "ru": "Мы делим доход на всех.", "en": "We divide the income among everyone." },
+    { "ru": "Как вы оцениваете это изделие?", "en": "How do you price this product?" },
+    { "ru": "Кредитный фонд помог нашей компании.", "en": "The credit fund helped our company." }
+   ]
+  },
+  "business:3": {
+   "title": "Our customer the entrepreneur",
+   "rows": [
+    { "ru": "Наш заказчик — предприниматель из Москвы.", "en": "Our customer is an entrepreneur from Moscow." },
+    { "ru": "Он хорошо разбирается в торговле.", "en": "He knows the trade well." },
+    { "ru": "Он делится с нами всем.", "en": "He shares everything with us." },
+    { "ru": "Налоговый вопрос он знает очень хорошо.", "en": "He knows the tax side of it very well." },
+    { "ru": "Ущерб был небольшой.", "en": "The damage was small." }
+   ]
+  },
+  "business:4": {
+   "title": "Profit and loss",
+   "rows": [
+    { "ru": "Эта сделка дала нам большую прибыль.", "en": "This deal brought us a large profit." },
+    { "ru": "В том году был только убыток.", "en": "That year there was nothing but loss." },
+    { "ru": "Мы торгуем уже два года.", "en": "We have been trading for two years now." },
+    { "ru": "Всё дорожает каждый день.", "en": "Everything is getting more expensive every day." },
+    { "ru": "Это вложение стало нашим богатством.", "en": "That investment became our fortune." }
+   ]
+  }
+ }
+}

@@ -1,0 +1,236 @@
+{
+ "chapter": 8,
+ "name": "Conflict, Tech and Sport",
+ "lessons": {
+  "core8:0": {
+   "title": "A young mother at work",
+   "rows": [
+    { "ru": "Моя мать ещё очень молодая.", "en": "My mother is still very young." },
+    { "ru": "Новый день начался, и она уже за компьютером.", "en": "A new day has begun, and she is already at her computer." },
+    { "ru": "Её компания делает новый продукт.", "en": "Her company is making a new product." },
+    { "ru": "Она часто видит самолёты из окна.", "en": "She often sees planes out of the window." },
+    { "ru": "Да, этот продукт уже знают в Москве.", "en": "Yes, people in Moscow already know this product." }
+   ]
+  },
+  "core8:1": {
+   "title": "Nobody hears a thing",
+   "rows": [
+    { "ru": "Мама сегодня не ходит в магазин.", "en": "Mum isn't going to the shop today." },
+    { "ru": "Она весь день в своей комнате.", "en": "She has been in her room all day." },
+    { "ru": "Мы вызвали врача.", "en": "We called a doctor." },
+    { "ru": "Мы не слышим, что они говорят.", "en": "We can't hear what they are saying." },
+    { "ru": "Весь мир для неё сейчас — эта комната.", "en": "Right now her whole world is this one room." }
+   ]
+  },
+  "core8:2": {
+   "title": "The program stopped in the night",
+   "rows": [
+    { "ru": "Что произошло вчера?", "en": "What happened yesterday?" },
+    { "ru": "Ночью новая программа не работала.", "en": "The new program wasn't working during the night." },
+    { "ru": "Мы вызвали помощь, и она пришла очень быстро.", "en": "We called for help and it came very quickly." },
+    { "ru": "Пока все спали, они сделали свою работу.", "en": "While everyone slept, they did their work." },
+    { "ru": "Сейчас всё работает, и мы вернулись.", "en": "Everything is running now, and we are back." }
+   ]
+  },
+  "core8:3": {
+   "title": "Cooking and packing",
+   "rows": [
+    { "ru": "Мама готовит уже час.", "en": "Mum has been cooking for an hour now." },
+    { "ru": "Я взял несколько вещей из комнаты.", "en": "I took a few things out of the room." },
+    { "ru": "Отец даёт мне свой телефон.", "en": "Dad hands me his phone." },
+    { "ru": "Я тоже хочу помочь маме.", "en": "I want to help Mum too." },
+    { "ru": "А эти вещи мы возьмём завтра.", "en": "And we'll take these things tomorrow." }
+   ]
+  },
+  "core8:4": {
+   "title": "Too expensive at the shop",
+   "rows": [
+    { "ru": "Вчера мы были в большом магазине.", "en": "Yesterday we were at a big shop." },
+    { "ru": "Там мы видели очень хороший компьютер.", "en": "There we saw a very good computer." },
+    { "ru": "Но его цена слишком большая.", "en": "But its price is too high." },
+    { "ru": "Отец сказал, что мы его не возьмём.", "en": "Dad said we would not take it." },
+    { "ru": "Мама тоже думает, что это слишком много.", "en": "Mum thinks it's too much as well." }
+   ]
+  },
+  "military:0": {
+   "title": "My father in the army",
+   "rows": [
+    { "ru": "Мой отец был солдатом.", "en": "My father was a soldier." },
+    { "ru": "Он был в армии два года.", "en": "He spent two years in the army." },
+    { "ru": "Его командир был очень молодой человек.", "en": "His commander was a very young man." },
+    { "ru": "Защита страны была их главным делом.", "en": "Defending the country was their main business." },
+    { "ru": "Для них это была борьба за мир.", "en": "For them it was a struggle for peace." }
+   ]
+  },
+  "military:1": {
+   "title": "An order at the front",
+   "rows": [
+    { "ru": "Командир дал новый приказ.", "en": "The commander gave a new order." },
+    { "ru": "Солдаты пошли на фронт.", "en": "The soldiers set off for the front." },
+    { "ru": "У противника было хорошее оружие.", "en": "The enemy had good weapons." },
+    { "ru": "Мы слышали первый выстрел.", "en": "We heard the first shot." },
+    { "ru": "Победа была не за нами.", "en": "The victory was not ours." }
+   ]
+  },
+  "military:2": {
+   "title": "A veteran remembers",
+   "rows": [
+    { "ru": "Этот человек — ветеран войны.", "en": "This man is a war veteran." },
+    { "ru": "Он был капитаном на фронте.", "en": "He was a captain at the front." },
+    { "ru": "Он боролся с врагом за свою страну.", "en": "He fought the enemy for his country." },
+    { "ru": "Пуля прошла через его руку.", "en": "A bullet went through his hand." },
+    { "ru": "Он не забыл это поражение.", "en": "He never forgot that defeat." }
+   ]
+  },
+  "military:3": {
+   "title": "Waiting for the offensive",
+   "rows": [
+    { "ru": "Полковник приказал офицерам ждать.", "en": "The colonel ordered the officers to wait." },
+    { "ru": "У молодого офицера был только пистолет.", "en": "The young officer had only a pistol." },
+    { "ru": "Наступление началось ночью.", "en": "The offensive began at night." },
+    { "ru": "Полк пошёл в атаку.", "en": "The regiment went into the attack." },
+    { "ru": "Никто не знал, что произойдёт.", "en": "Nobody knew what would happen." }
+   ]
+  },
+  "military:4": {
+   "title": "The general and the battle",
+   "rows": [
+    { "ru": "Генерал говорил о большой битве.", "en": "The general spoke about a great battle." },
+    { "ru": "Его войско воевало два года.", "en": "His army had been at war for two years." },
+    { "ru": "Ночью они атаковали большой город.", "en": "At night they attacked a large city." },
+    { "ru": "Солдаты дрались на улицах города.", "en": "The soldiers fought in the streets of the town." },
+    { "ru": "Эта война была для них последней.", "en": "That war was their last." }
+   ]
+  },
+  "military:5": {
+   "title": "The night attack on the fortress",
+   "rows": [
+    { "ru": "Нападение произошло ночью.", "en": "The attack came at night." },
+    { "ru": "Враг напал на крепость.", "en": "The enemy attacked the fortress." },
+    { "ru": "Обороной командовал молодой офицер.", "en": "A young officer was in command of the defence." },
+    { "ru": "Он командовал полком уже два года.", "en": "He had been commanding the regiment for two years." },
+    { "ru": "Крепость стояла до последнего дня.", "en": "The fortress held out to the very last day." }
+   ]
+  },
+  "tech:0": {
+   "title": "News at home",
+   "rows": [
+    { "ru": "Отец читает газету каждый день.", "en": "Dad reads the paper every day." },
+    { "ru": "Я читаю статьи в интернете.", "en": "I read articles online." },
+    { "ru": "В этом журнале очень хорошие фотографии.", "en": "This magazine has very good photographs." },
+    { "ru": "Мама слушает радио, когда готовит.", "en": "Mum listens to the radio while she cooks." },
+    { "ru": "Камера в моём телефоне тоже хорошая.", "en": "The camera on my phone is good too." }
+   ]
+  },
+  "tech:1": {
+   "title": "A message on the screen",
+   "rows": [
+    { "ru": "На экране моего телефона новое сообщение.", "en": "There's a new message on my phone screen." },
+    { "ru": "Я нажал и увидел новость.", "en": "I tapped it and saw the news." },
+    { "ru": "В сети об этом уже все говорят.", "en": "Everyone online is talking about it already." },
+    { "ru": "Этот сайт я читаю каждый день.", "en": "I read that site every day." },
+    { "ru": "Моё новое устройство работает очень быстро.", "en": "My new device runs very fast." }
+   ]
+  },
+  "tech:2": {
+   "title": "Filing a report",
+   "rows": [
+    { "ru": "Учёный подал свой доклад в редакцию.", "en": "The scientist filed his report with the editorial office." },
+    { "ru": "Его новый прибор видит очень маленький сигнал.", "en": "His new instrument picks up a very small signal." },
+    { "ru": "Но здесь нет телефонного сигнала.", "en": "But there is no phone signal here." },
+    { "ru": "Сотовый телефон в этом месте не работает.", "en": "A mobile phone doesn't work in this spot." },
+    { "ru": "В редакции об этом докладе ещё не знают.", "en": "At the editorial office they don't know about the report yet." }
+   ]
+  },
+  "tech:3": {
+   "title": "A journalist and his laptop",
+   "rows": [
+    { "ru": "Журналист взял свой ноутбук и пошёл на работу.", "en": "The journalist took his laptop and set off for work." },
+    { "ru": "Он читал этот файл весь день.", "en": "He read that file all day." },
+    { "ru": "Он пишет о новых технологиях.", "en": "He writes about new technologies." },
+    { "ru": "Вчера на телевидении говорили об электроэнергии.", "en": "Yesterday they were talking about electric power on television." },
+    { "ru": "Автомат делает эту работу быстро.", "en": "A machine does this job quickly." }
+   ]
+  },
+  "tech:4": {
+   "title": "Nothing but the answering machine",
+   "rows": [
+    { "ru": "Батарея в моём ноутбуке уже не работает.", "en": "The battery in my laptop has stopped working." },
+    { "ru": "Одна клавиша на клавиатуре тоже не работает.", "en": "One key on the keyboard doesn't work either." },
+    { "ru": "Я вызвал друга по телефону.", "en": "I called a friend on the phone." },
+    { "ru": "Но там был только автоответчик.", "en": "But all I got was the answering machine." },
+    { "ru": "Про фото я сообщу ему завтра.", "en": "I'll tell him about the photo tomorrow." }
+   ]
+  },
+  "tech:5": {
+   "title": "The night without electricity",
+   "rows": [
+    { "ru": "Вчера в доме не было электричества.", "en": "Yesterday there was no electricity in the building." },
+    { "ru": "Провод у окна не работал.", "en": "The wire by the window wasn't working." },
+    { "ru": "Ни один канал на телевизоре не работал.", "en": "Not a single channel on the television worked." },
+    { "ru": "Каждый абонент в этом доме ждал помощи.", "en": "Every subscriber in the building was waiting for help." },
+    { "ru": "Я взял фотоаппарат и вышел на улицу.", "en": "I took my camera and went out into the street." }
+   ]
+  },
+  "sport:0": {
+   "title": "A friend who loves sport",
+   "rows": [
+    { "ru": "Мой друг очень любит спорт.", "en": "My friend really loves sport." },
+    { "ru": "Он играет в футбол каждый день.", "en": "He plays football every day." },
+    { "ru": "Ещё он хорошо плавает и играет в теннис.", "en": "He also swims well and plays tennis." },
+    { "ru": "Вчера он выиграл первый раз.", "en": "Yesterday he won for the first time." },
+    { "ru": "Его цель — делать эти упражнения каждый день.", "en": "His aim is to do these exercises every day." }
+   ]
+  },
+  "sport:1": {
+   "title": "Watching the match",
+   "rows": [
+    { "ru": "Вчера мы смотрели большой матч.", "en": "Yesterday we watched a big match." },
+    { "ru": "Наша команда играла очень хорошо.", "en": "Our team played very well." },
+    { "ru": "Судья не видел, что произошло.", "en": "The referee didn't see what happened." },
+    { "ru": "Об этом мы услышали только сегодня.", "en": "We only heard about it today." },
+    { "ru": "Через год у нас будет большой чемпионат.", "en": "In a year we'll have a big championship here." }
+   ]
+  },
+  "sport:2": {
+   "title": "The basketball players",
+   "rows": [
+    { "ru": "Наши игроки уже играют в баскетбол.", "en": "Our players are already out on the basketball court." },
+    { "ru": "Один игрок хорошо ловит, другой хорошо бросает.", "en": "One player catches well, another throws well." },
+    { "ru": "Наша команда хочет стать первой.", "en": "Our team wants to come first." },
+    { "ru": "Но победить в этом чемпионате будет не просто.", "en": "But winning this championship won't be easy." },
+    { "ru": "Место в чемпионате всегда соответствует работе команды.", "en": "A place in the championship always matches the work a team puts in." }
+   ]
+  },
+  "sport:3": {
+   "title": "By the pool with a ball",
+   "rows": [
+    { "ru": "Мы играем в мяч у бассейна.", "en": "We play ball by the pool." },
+    { "ru": "Он бросил мяч, и я его поймал.", "en": "He threw the ball and I caught it." },
+    { "ru": "Эти мячи мы выбрасываем каждый год.", "en": "We throw these balls out every year." },
+    { "ru": "Наша команда часто проигрывает.", "en": "Our team loses often." },
+    { "ru": "Но на олимпиаде они хотят выиграть.", "en": "But at the Olympics they want to win." }
+   ]
+  },
+  "sport:4": {
+   "title": "The gym and the stadium",
+   "rows": [
+    { "ru": "Каждый день он ходит в спортзал.", "en": "He goes to the gym every day." },
+    { "ru": "Его тренер был чемпионом мира.", "en": "His coach was a world champion." },
+    { "ru": "На стадионе они играют в волейбол.", "en": "At the stadium they play volleyball." },
+    { "ru": "А дома он играет в шахматы.", "en": "And at home he plays chess." },
+    { "ru": "Завтра матч будет судить новый судья.", "en": "Tomorrow a new referee will officiate the match." }
+   ]
+  },
+  "sport:5": {
+   "title": "The runner who always wins",
+   "rows": [
+    { "ru": "Бег — это его любимый спорт.", "en": "Running is his favourite sport." },
+    { "ru": "Он выигрывает уже два года.", "en": "He has been winning for two years now." },
+    { "ru": "Вчера на стадионе все бросились за ним.", "en": "Yesterday at the stadium everyone rushed after him." },
+    { "ru": "Люди всегда бросаются к нему после бега.", "en": "People always rush over to him after a race." },
+    { "ru": "Он вскинул руки и не сказал ни слова.", "en": "He threw up his hands and did not say a word." }
+   ]
+  }
+ }
+}

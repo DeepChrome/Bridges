@@ -808,11 +808,40 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         listening = json.loads(lpath.read_text(encoding="utf-8")).get("passages", [])
         stats["listening"] = len(listening)
 
+    scripts = load_scripts(stats)
+
     return {"stats": stats, "lemmas": lemmas, "index": index,
             "units": units, "path": path, "audio": {"files": audio},
             "deep": deep, "shapes": shapes, "slots": slot_names,
             "sent": sent_pool, "tsample": tsample, "speech": speech,
-            "videos": video_list, "listening": listening}
+            "videos": video_list, "listening": listening, "scripts": scripts}
+
+
+def load_scripts(stats):
+    """The written lesson passages (CLAUDE.md 30j).
+
+    One file per chapter under data/curated/scripts/, merged into a single map
+    keyed "unitId:lessonIndex". These are authored rather than harvested, which
+    is the whole reason tools/check_scripts.mjs exists — that tool is what
+    proves each passage stays inside the vocabulary its lesson has taught, and
+    it runs on the built payload, so it must be run after this. Small enough
+    (tens of kilobytes) to ride in data.json and be there at boot.
+    """
+    out = {}
+    sdir = ROOT / "data" / "curated" / "scripts"
+    if not sdir.exists():
+        stats["written"] = 0
+        return out
+    for path in sorted(sdir.glob("*.json")):
+        obj = json.loads(path.read_text(encoding="utf-8"))
+        for key, entry in (obj.get("lessons") or obj).items():
+            if key in out:
+                raise SystemExit(f"{path.name}: {key} is written twice")
+            out[key] = {"title": entry["title"],
+                        "rows": [{"ru": r["ru"], "en": r["en"]} for r in entry["rows"]]}
+    stats["written"] = len(out)
+    stats["written_lines"] = sum(len(e["rows"]) for e in out.values())
+    return out
 
 
 FONTS = ("https://fonts.googleapis.com/css2?"
@@ -1021,6 +1050,10 @@ def main():
         if st["listen_short"]:
             print(f"    under {POOL_MIN_PER_UNIT}: " + ", ".join(
                 f"{u} ({lp.get(u, 0)})" for u in st["listen_short"]))
+    # The written lesson passages. `node tools/check_scripts.mjs --strict` is what
+    # says they are at level and complete; this line only says how many shipped.
+    print(f"  passages     : {st.get('written', 0)} lessons written, "
+          f"{st.get('written_lines', 0)} sentences")
     print(f"  scripts      : {', '.join(js_files)}")
     print(f"  page         : {(args.outdir / 'index.html').stat().st_size/1_048_576:.2f} MB")
 

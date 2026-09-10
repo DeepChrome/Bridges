@@ -752,9 +752,18 @@ Three rules hold this honest:
    despite rule 10 claiming it was there; smoke now asserts both corpora and both
    licences appear.
 
-Never fabricate example sentences. Attested Russian from a licensed corpus is a
-different thing from generated Russian, and the learner cannot tell a subtly wrong
-sentence from a right one — that is precisely why he is the one studying it.
+**Never fabricate a *dictionary example*.** An entry's sentences claim to be attested
+Russian from a licensed corpus, and the learner cannot tell a subtly wrong sentence
+from a right one — that is precisely why he is the one studying it. A generated
+sentence must never appear where an attested one is promised.
+
+**Written lesson material is the owner's explicit exception** (2026-09-10). He ruled
+that the corpus cannot supply level-matched listening — "You aren't going to find
+perfect audios. If you generate, we can vet it later and improve as needed" — and that
+every lesson is to have a passage written for it. So `data/curated/listening_scripts.json`
+is authored, not harvested, and §30j sets the terms that keep it honest: every word
+machine-checked against what that lesson has taught, the voice labelled as the device
+voice, and the whole file open to correction.
 
 ## 30b. The speaking and listening foundations (ROADMAP Phase 2)
 
@@ -1385,6 +1394,75 @@ and `watch(on)`, which polls the position four times a second while playing
 because the IFrame API has no time event. Position reports are the one message
 kept out of the console log; four a second would bury everything else.
 
+## 30j. The written lesson passages (2026-09-10)
+
+The owner, having listened to the video passages: *"The listening audios are way
+too advanced… it would be best if you generated your own and they corresponded to
+chapters/lessons. So, Lesson 1 audio should be extremely straightforward, simple,
+relaxed cadence etc. All the learning content needs to be at the level the learner
+is at."* Told that generated Russian is what §30a forbids, he overruled it: *"You
+aren't going to find perfect audios. If you generate, we can vet it later and
+improve as needed. Remove that from the doctrine."*
+
+He was right about the corpus. Its listening pool is whatever his decks and the
+harvested videos happen to contain, so a beginner got either three-word fragments
+or forty-five seconds of a native speaker using words the first three chapters
+never teach. **169 lessons, 844 sentences**, one passage each, now live in
+`data/curated/scripts/chapter-NN.json` — authored, and the tooling is what keeps
+that honest:
+
+- `tools/lesson_brief.mjs --out DIR` writes the brief an author works from: per
+  lesson, the words it teaches and the palette it may draw on. The palette is
+  the spine of every earlier chapter, this chapter's spine for a branch, and the
+  unit's own earlier lessons — **never a sibling branch**, because side quests
+  are optional and a learner may not have taken it.
+- `FREE_WORDS` there is the only other allowance: the closed classes — pronouns,
+  prepositions, conjunctions, question words, the copula. A frequency cutoff was
+  tried first and was wrong: the hundred commonest lemmas include «любить»,
+  «город» and «работать», so a "free top 100" let lesson one write about loving
+  a new city. Content words are gated, always. That gate *is* the level match.
+- `tools/check_scripts.mjs` runs over the lot and fails the build's honesty
+  check if any word is not a form of a lemma that lesson has taught, if a
+  sentence outruns its chapter's length, if a passage does not use at least
+  three of its lesson's own words, or if a sentence is used twice anywhere.
+  `--strict` also requires all 169 to be present. What it **cannot** check is
+  whether the Russian is idiomatic; that is read by a person, and the owner
+  accepted the trade when he asked for these.
+
+In the app: `payload.scripts`, keyed `"unitId:lessonIndex"`, in `data.json` at
+boot (tens of kilobytes, and a lesson quiz asks for one before its first card).
+`scriptScene(unit, index)` in `core/questions.js` turns one into an ordinary
+`scene` question, and `speechPrompt("scene", …)` prefers it over the corpus
+scene; `writtenPassage(units, reached)` is what Practice → Listening draws,
+against the lessons actually **finished**, so the level follows progress rather
+than unlocks. The corpus scene remains the fallback and is not deleted.
+
+Two rules the build already had, which these passages tightened:
+
+- **The Russian options must be words the learner has met.** "Which word did
+  you hear?" puts four Cyrillic words on screen. Drawing the wrong three from
+  earlier passages was not enough — those legitimately contain proper nouns
+  («Москва») and closed-class glue («да»), and both appeared as options. They
+  come from the curriculum's own word lists up to that lesson now. The *English*
+  distractors may come from anywhere: English gives no Russian away.
+- **The voice note is counted, not declared.** A written passage was assumed to
+  be device voice throughout, since nobody has said these sentences — but the
+  collection holds recordings for some of them anyway («Кто это?» is a thing
+  people say), found through the same folded key as any other audio. §27 says
+  TTS is never passed off as a recording; announcing a device voice over a real
+  one is the same failure pointed the other way. `Scene.js` counts the rows that
+  have audio and says "device voice", "device voice for some lines", or nothing.
+
+Sentences carry **no stress marks** — they are read aloud, and a combining acute
+is for a headword on a page. Playback pauses `GAP_MS` (1.2 s) between sentences
+and there is a numbered button per sentence: ±5 seconds is the right control for
+one continuous recording, but for five separate ones the sentence is the unit a
+listener wants to go back to.
+
+**These have not been read by a Russian speaker.** Every one is machine-checked
+for level and for words that exist; none is checked for idiom. That is the open
+item, and the file is meant to be corrected in place.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -1410,6 +1488,7 @@ stylesheet's `[hidden] { display:none }`. Layout bugs need the browser.
 
 ```
 python tools/build_site.py     # or the full pipeline if data changed
+node tools/check_scripts.mjs --strict   # the written passages: level, coverage, no repeats
 node tools/core.test.mjs       # the shared logic: generators, scheduler, state
 node tools/smoke.js            # must be all-pass
 node tools/visual.js           # must be all-pass; then look at tools/shots/

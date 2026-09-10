@@ -65,6 +65,10 @@ export const PASSAGE_SKIP_TOP = 100;
 export const SKIP_MS = 5000;
 
 export const SCENE_ROWS = [2, 3];
+/* Sentences in a lesson-level listening passage. Five of the corpus's short
+   sentences with a pause between them is the half minute the owner asked for,
+   and five is also what fits on the screen with its questions. */
+export const LESSON_LINES = 5;
 /* Below this frequency rank a lemma is a function word, not a word to listen for. */
 export const SCENE_SKIP_TOP = 100;
 
@@ -118,6 +122,10 @@ export const DRILL_TYPES = [
 
 export function makeQuestions(env) {
   const { L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice, SPEECH } = env;
+  // The written lesson passages (§30j), keyed "unitId:lessonIndex". Absent on a
+  // platform that does not ship them, in which case the scene falls back to the
+  // corpus pools as it did before.
+  const SCRIPTS = env.SCRIPTS || {};
   const voice = () => (typeof hasVoice === "function" ? hasVoice() : !!hasVoice);
   const stageOf = (u) =>
     STAGES.findIndex((s) => s.core === u || (s.branches || []).includes(u));
@@ -350,7 +358,7 @@ export function makeQuestions(env) {
      sentences that were not played. `want` (a Set of lemma indices) prefers a
      first sentence that uses a lesson word. Null when the pool is too small to
      make wrong answers from — never a scene with two options. */
-  function sceneFor(unitIds, want) {
+  function sceneFor(unitIds, want, lines) {
     if (!SPEECH || !SPEECH.listen || !SPEECH.rows) return null;
     const rows = SPEECH.rows;
     const idxs = unique(unitIds.flatMap((id) => SPEECH.listen[id] || []));
@@ -360,7 +368,7 @@ export function makeQuestions(env) {
       : [];
     const first = preferred.length ? pickOne(preferred) : pickOne(idxs);
     const rest = shuffle(idxs.filter((i) => i !== first));
-    const count = Math.min(pickOne(SCENE_ROWS), rest.length + 1);
+    const count = Math.min(lines || pickOne(SCENE_ROWS), rest.length + 1);
     const chosen = [first].concat(rest.slice(0, count - 1));
     const others = rest.slice(count - 1);
     const meaningOf = (i) => rows[i][1];
@@ -396,6 +404,121 @@ export function makeQuestions(env) {
                                   lemmas: sentenceLemmas(rows[ri][0], IX) })),
       lemmas: heardAll, questions,
     };
+  }
+
+  /* --------------------------------------------------- the written passages */
+
+  /* The listening passage written for one lesson (§30j).
+   *
+   * The corpus could not do this job. Its listening pool is drawn from what his
+   * decks and the videos happen to contain, so a beginner's scene was either a
+   * handful of three-word fragments or, from a video, half a minute of native
+   * speech using words the first three chapters never teach — the owner's verdict
+   * on 2026-09-10 was "way too advanced". These passages are written per lesson
+   * against that lesson's own vocabulary and checked by tools/check_scripts.mjs,
+   * so the level is a property of the file rather than a hope.
+   *
+   * `written: true` rides on the question: there is no recording for a sentence
+   * nobody has said, so the device voice reads it and the screen says so (§27).
+   */
+  /* Every word taught on the route up to and including this lesson. */
+  function wordsUpTo(unit, index) {
+    const out = [];
+    for (const u of unitsUpTo(unit)) {
+      out.push(...(u === unit ? u.w.slice(0, (index + 1) * lessonWords(u, 0).length) : u.w));
+    }
+    return new Set(out);
+  }
+
+  function scriptKeysUpTo(unit, index) {
+    const out = [];
+    for (const u of unitsUpTo(unit)) {
+      const n = lessonCount(u);
+      for (let i = 0; i < n; i++) {
+        if (u === unit && i > index) break;
+        if (SCRIPTS[`${u.id}:${i}`]) out.push(`${u.id}:${i}`);
+      }
+    }
+    return out;
+  }
+
+  function scriptScene(unit, index) {
+    if (!SCRIPTS) return null;
+    const s = SCRIPTS[`${unit.id}:${index}`];
+    if (!s || !s.rows || s.rows.length < 3) return null;
+
+    const mine = new Set(s.rows.map((r) => r.en));
+    const reached = scriptKeysUpTo(unit, index)
+      .flatMap((k) => SCRIPTS[k].rows).filter((r) => !mine.has(r.en));
+    // The English distractors may come from anywhere when the route is too
+    // short to supply three — the very first lesson has nothing behind it, and
+    // a wrong option written in English gives no Russian away. The *Russian*
+    // distractors below may not: an option is a word on screen, and a beginner
+    // choosing between four words has to be choosing between four of their own.
+    const meanings = reached.length >= 3 ? reached
+      : reached.concat(Object.values(SCRIPTS).flatMap((x) => x.rows).filter((r) => !mine.has(r.en)));
+
+    const rows = s.rows.map((r) => ({ ru: r.ru, en: r.en, lemmas: sentenceLemmas(r.ru, IX) }));
+    const questions = rows.map((row, k) => {
+      const wrong = unique(shuffle(meanings.slice()).map((o) => o.en))
+        .filter((m) => m && m !== row.en).slice(0, 3);
+      if (wrong.length < 3) return null;
+      return {
+        ask: `Sentence ${k + 1}: what does it mean?`, row: k,
+        options: shuffle([{ label: row.en, right: true }]
+          .concat(wrong.map((m) => ({ label: m, right: false })))),
+      };
+    });
+    if (questions.some((q) => !q)) return null;
+
+    /* "Which word did you hear?" puts four Russian words on the screen, so all
+       four have to be words this learner has been taught — including the wrong
+       ones. Drawing them from the earlier passages alone was not enough: those
+       passages legitimately contain proper nouns («Москва») and closed-class
+       glue («да»), neither of which any lesson teaches, and both turned up as
+       options. The curriculum's own word lists up to this lesson are the
+       authority on what has been met. */
+    const met = wordsUpTo(unit, index);
+    const heardAll = unique(rows.flatMap((r) => r.lemmas));
+    const heard = heardAll.filter((i) => i >= SCENE_SKIP_TOP && met.has(i));
+    const absent = unique(reached.flatMap((r) => sentenceLemmas(r.ru, IX)))
+      .filter((i) => i >= SCENE_SKIP_TOP && met.has(i) && !heardAll.includes(i));
+    if (heard.length && absent.length >= 3) {
+      const h = pickOne(heard);
+      questions.push({
+        ask: "Which word did you hear?", i: h, cyr: true,
+        options: shuffle([{ label: L[h].w, right: true, i: h }]
+          .concat(shuffle(absent).slice(0, 3).map((i) => ({ label: L[i].w, right: false, i })))),
+      });
+    }
+    return {
+      kind: "scene", ask: "Listen, then answer", prompt: "", cyr: true,
+      unit: unit.id, rows, lemmas: heardAll, questions,
+      level: unit.name, topic: s.title, written: true,
+    };
+  }
+
+  /* The written passage for the latest lesson a learner has reached, for the
+     Listening activity in Practice — where there is no lesson to ask about, the
+     level still has to come from somewhere. `reached(unit) -> lessons done`
+     lets the caller say how far into each unit they are; without it the whole
+     unit counts as reached. */
+  function writtenPassage(units, reached) {
+    const keys = [];
+    for (const u of units) {
+      const n = lessonCount(u);
+      const done = reached ? Math.min(n, reached(u)) : n;
+      for (let i = 0; i < done; i++) if (SCRIPTS[`${u.id}:${i}`]) keys.push({ u, i });
+    }
+    if (!keys.length) return null;
+    // Latest first, so the passage matches where they are rather than where
+    // they started; a few back from the front so it is not always the same one.
+    const recent = keys.slice(-8);
+    for (const { u, i } of shuffle(recent)) {
+      const scene = scriptScene(u, i);
+      if (scene) return scene;
+    }
+    return null;
   }
 
   /* ------------------------------------------------------- listening passages */
@@ -495,6 +618,38 @@ export function makeQuestions(env) {
       }
     }
     return out;
+  }
+
+  /* Listening at the learner's own level (the owner, 2026-09-10: "the listening
+     audios are way too advanced… all the learning content needs to be at the
+     level the learner is at").
+
+     A passage of real video is native speech at native speed, and the build's own
+     numbers said what that means for a beginner: 45 seconds of it uses more words
+     than the first three chapters teach. This is the other source, and it was
+     already here — his own corpus. A unit's listening pool holds sentences every
+     word of which that unit or an earlier one teaches (build_site.py
+     measure_sentences), each with a real recording and a real English side. In
+     chapter 1 that is 32 sentences averaging under four words.
+
+     One unit at a time, so the sentences sit on one topic rather than wandering
+     the whole route; the latest unit the learner has reached, so the level rises
+     with them; and LESSON_LINES of them, which at that length is the half minute
+     he asked for. Nothing here is generated: fabricated Russian read by a robot
+     is exactly the material a learner cannot check (§30a). */
+  function lessonPassage(units, want) {
+    if (!SPEECH || !SPEECH.listen) return null;
+    const deep = (u) => (SPEECH.listen[u.id] || []).length;
+    // Latest first: where they are now, falling back down the route.
+    const rich = units.slice().reverse().filter((u) => deep(u) >= LESSON_LINES + 3);
+    for (const u of rich.slice(0, 6)) {
+      const scene = sceneFor([u.id], want, LESSON_LINES);
+      if (scene) return { ...scene, kind: "scene", unit: u.id, level: u.name };
+    }
+    // Nothing single-unit is deep enough yet — the first lessons. Everything
+    // reached so far, which is still only what they have been taught.
+    const all = sceneFor(units.map((u) => u.id), want, LESSON_LINES);
+    return all ? { ...all, level: units.length ? units[units.length - 1].name : "" } : null;
   }
 
   /* A run of scenes for the listening drill, no two opening on the same
@@ -782,10 +937,12 @@ export function makeQuestions(env) {
      word of this lesson, one from this unit, one from anywhere unlocked. */
   function speechPrompt(kind, unit, index) {
     if (kind === "scene") {
-      // The unit's own listening pool when it can carry a scene, else everything
-      // unlocked so far; a lesson word in the first sentence when there is one.
+      // The passage written for this lesson first — it is the only one certain
+      // to be at the learner's level and about this lesson's words. The corpus
+      // pools remain the fallback for a lesson with no script yet.
       const want = new Set(lessonWords(unit, index));
-      const scene = sceneFor([unit.id], want)
+      const scene = scriptScene(unit, index)
+        || sceneFor([unit.id], want)
         || sceneFor(unitsUpTo(unit).map((u) => u.id), want);
       return scene ? { t: "scene", scene } : null;
     }
@@ -1319,7 +1476,8 @@ export function makeQuestions(env) {
   return {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, placementQuestions, sectionQuestions, drillQuestions, drillKey,
-    sceneFor, listeningDrill, customQuiz, formPrompt, formSpec, formsIntroduced,
+    sceneFor, listeningDrill, lessonPassage, scriptScene, writtenPassage,
+    customQuiz, formPrompt, formSpec, formsIntroduced,
     drillsIntroduced, drillOpensAt, passagesFor, passageQuestions, passageFit,
   };
 }

@@ -83,10 +83,29 @@ PARENS = re.compile(r"\([^)]*\)")
 ART_RE = re.compile(r"paintings?\b|drawings?\b|engrav|lithograph|woodcut|etching|artworks?\b|"
                     r"PD-Art|PD-old|manuscript|illustrations?\b|sculptures?\b|statues?\b|"
                     r"posters?\b|logos?\b|\bmaps?\b|diagrams?\b|coats? of arms|stamps?\b|"
-                    r"coins?\b|banknotes?\b|screenshots?\b|covers?\b|icons?\b|"
+                    # Each of these needs a boundary at the *start* as well.
+                    # Without one, `graphs?\b` matched the tail of "photograph"
+                    # and threw away the one kind of file the harvest is
+                    # looking for; `icons?\b` matched "silicon" and `covers?\b`
+                    # matched "discovers" and "recovers". Pre-existing, and the
+                    # reason for a good part of the missing pictures rather
+                    # than the wrong ones (P11.1).
+                    r"coins?\b|banknotes?\b|screenshots?\b|\bcovers?\b|\bicons?\b|"
                     r"\b1[0-9]{3}s?\b(?! in )|museum|titel op object|codex|frescos?\b|"
                     r"reliefs?\b|mosaics?\b|scans?\b|cartoons?\b|comics?\b|emblems?\b|"
-                    r"flags?\b|heraldry|charts?\b|graphs?\b|renderings?\b|3D\b", re.I)
+                    r"flags?\b|heraldry|charts?\b|\bgraphs?\b|renderings?\b|3D\b|"
+                    # Cyrillic too. The pattern was Latin-only, and Commons
+                    # names and categorises Russian subjects in Russian, so
+                    # «Скульптура…» and «Схема…» walked straight through a rule
+                    # written to stop exactly them (the data review, P11.1).
+                    r"скульптур|статуя|статуи|памятник|бюст|"
+                    r"картина|картины|живопись|портрет|рисун|гравюр|литограф|"
+                    r"икона|иконы|фреск|мозаик|барельеф|"
+                    r"плакат|афиш|логотип|эмблем|герб|флаг|"
+                    r"марка почтов|монет|банкнот|купюр|"
+                    r"карта |карты |схем|диаграмм|чертёж|чертеж|график|"
+                    r"обложк|репродукц|иллюстрац|комикс|скриншот|макет|муляж",
+                    re.I)
 # Photographs of the wrong kind: the article on a living thing opens its
 # evolution section with a fossil and its anatomy section with a skeleton,
 # and both come before the first photograph of the animal alive.
@@ -200,10 +219,62 @@ def wd_search(term):
             and (r.get("label") or "").lower() == term.lower()]
 
 
+# The roots a place descends from. Anything whose "instance of" is a subclass
+# of one of these is a place, however obscure — which is the point: the list
+# below used to be the whole test, so «раз» matching the commune of Raze was
+# caught only because "commune of France" happened to be in it, and the next
+# unlisted administrative unit went through (the data review, P11.1).
+PLACE_ROOTS = {
+    "Q2221906": "geographic location",
+    "Q486972": "human settlement",
+    "Q56061": "administrative territorial entity",
+    "Q41176": "building",
+}
+_subclass_memo = {}
+
+
+def is_a_place(qid, depth=4):
+    """Whether `qid` is one of the place roots or descends from one, by P279.
+
+    Walked rather than listed. Memoised across the whole run and bounded in
+    depth: Wikidata's subclass graph has cycles and long chains, and neither an
+    infinite walk nor a wrong answer is acceptable in a harvest that runs for
+    hours. A lookup that fails is "not a place" — refusing on a network error
+    would silently blank words.
+    """
+    if qid in PLACE_ROOTS:
+        return PLACE_ROOTS[qid]
+    if depth <= 0:
+        return None
+    if qid in _subclass_memo:
+        return _subclass_memo[qid]
+    _subclass_memo[qid] = None                  # cycle guard, set before recursing
+    try:
+        d = api(WIKIDATA, {"action": "wbgetentities", "ids": qid, "props": "claims"})
+        e = (d.get("entities") or {}).get(qid) or {}
+        parents = []
+        for c in (e.get("claims") or {}).get("P279", []):
+            v = c.get("mainsnak", {}).get("datavalue", {}).get("value", {})
+            if isinstance(v, dict) and v.get("id"):
+                parents.append(v["id"])
+    except Exception:
+        return None
+    for p in parents:
+        why = is_a_place(p, depth - 1)
+        if why:
+            _subclass_memo[qid] = why
+            return why
+    return None
+
+
 def refused(kinds, english=False):
     why = next((NOT_A_THING[k] for k in kinds if k in NOT_A_THING), None)
     if not why and english:
+        # The listed QIDs first — free, and covers the common cases without a
+        # request — then the subclass walk for anything they do not name.
         why = next((NOT_A_PLACE[k] for k in kinds if k in NOT_A_PLACE), None)
+        if not why:
+            why = next((is_a_place(k) for k in kinds if is_a_place(k)), None)
     return why
 
 

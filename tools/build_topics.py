@@ -219,6 +219,56 @@ RULES = [
 # the closed class are taught on the spine, where their frequency puts them anyway.
 BRANCHABLE = {"noun", "verb", "adjective"}
 
+# English words that mean two unrelated things, one of which a topic rule wants.
+# The rules read an English gloss, so every one of these was a word placed in a unit
+# that has nothing to do with it: Body & Health taught «спинка» (the back of a
+# chair) and Animals taught «выдерживать» beside «медведь» (ROADMAP P11.2).
+#
+# The rule they trigger: a homograph may only claim a word from the word's FIRST
+# sense, and only when that sense carries no parenthetical. A gloss lists what a
+# word mostly means first, and a parenthetical is there precisely to say "not the
+# obvious reading" — «back (of a chair)». Where the homograph *is* the plain first
+# sense the gloss gives no signal at all and only a reader can tell («bear» is the
+# whole of выдерживать's first sense); those are OVERRIDES entries below.
+#
+# Each line names the word that put it here. Do not add one speculatively: a
+# homograph that has never misfiled anything costs correct placements.
+HOMOGRAPHS = {
+    "address": "обращаться is 'appeal to', not a street address",
+    "back":    "спинка is a chair's back; поддержать and сдерживать are 'support' and 'restrain'",
+    "bear":    "выдерживать and переносить are 'endure', not the animal",
+    "branch":  "дисциплина is a branch of science, not of a tree",
+    "catch":   "услышать is 'to hear'",
+    "deal":    "разбираться is 'manage', not a business deal",
+    "eye":     "свидетель is an eye-witness, not part of the face",
+    "file":    "подать is 'submit'",
+    "fire":    "гореть is 'burn', not hiring and firing",
+    "goal":    "цель is an aim, not a goal scored",
+    "hand":    "правый is 'right-hand'; протянуть is 'to hand over'",
+    "head":    "возглавлять is 'to lead'",
+    "home":    "родной is 'native'",
+    "hurt":    "вред is 'harm', not an ache",
+    "ill":     "подводить is 'do an ill', i.e. let someone down",
+    "match":   "соответствовать is 'correspond'",
+    "party":   "вечеринка is a celebration, not a political party",
+    "poor":    "страдать is 'suffer'",
+    "power":   "смочь is 'be able'; воля is 'will'",
+    "public":  "опубликовать is 'publish'",
+    "referee": "судить and судья are 'judge' first",
+    "revolution": "оборот is a rotation, not a rising",
+    "ring":    "звучать is 'to sound', not jewellery",
+    "school":  "плавание is swimming; 'swimming school' is a compound",
+    "share":   "делить is 'divide'",
+    "size":    "номер is a number",
+    "spring":  "возникнуть is 'arise'",
+    "storm":   "приступ is an assault or a fit",
+    "study":   "наука is 'science'; School wants the verb, and gets it from BRANCH_VERBS",
+    "suit":    "подходить is 'to fit'",
+    "tell":    "отличать is 'tell apart'",
+    "test":    "испытывать is 'experience, feel'",
+    "wind":    "газ is gas; nature wants the weather",
+}
+
 # Ambiguous glosses the rules get wrong, resolved by hand. None = leave unplaced
 # (the word stays in the dictionary and, if common enough, on the spine). Read from
 # `python tools/audit_branches.py` on 2026-09-06, every branch, every word; the
@@ -329,6 +379,34 @@ OVERRIDES = {
     # -- business: "deal" the change, "stock" the supply, "trade" the craft
     "сдача": None, "учёт": None, "запас": None, "мастерство": None, "воспользоваться": None,
     "публикация": "tech", "хозяйственный": None, "потеря": None,
+
+    # -- fourth pass (ROADMAP P11.2, 2026-09-10): the homographs HOMOGRAPHS cannot
+    # reach, because the wrong reading is the gloss's own plain first sense.
+    "выдерживать": None, "выдержать": None,   # "bear" = endure, beside медведь
+    "переносить": None,                       # likewise
+    "вечеринка": None,                        # "party" the celebration, in Politics
+    "протянуть": None,                        # "to hand", in Body & Health
+    "соответствовать": None,                  # "match" = correspond, in Sport
+    "подать": None,                           # "to file" = submit, in Technology
+    "отличать": None,                         # "tell" = tell apart, in Speech
+    "кнопка": "tech",                         # a push-button, not a shirt's
+    "инструмент": None,                       # a tool before a musical instrument
+    "упасть": None,                           # "to fall", not the season, in Nature
+    "правый": None,                           # "right-hand" put a direction in Body,
+                                              # as "port" once put «левый» there
+    # …and the words that came up behind them to fill a capped branch. A cap means
+    # evicting one word admits the next: read the audit again after any change here.
+    "зажигать": None,                         # "set fire" is to light a lamp
+    "связать": None,                          # "tie together", not a necktie
+    "марина": None,                           # a seascape, and mostly the name
+    "выскочить": None, "догонять": None,      # "jump out", "catch up": not sport
+    # "state" = say, not the polity — and left unplaced rather than moved into
+    # Speech, where at the cap they would have displaced объяснить, перевести and
+    # повторить, which is a worse unit than the one we started with.
+    "высказать": None, "высказывать": None, "излагать": None,
+    "митинг": "politics",                     # a rally, never a business meeting
+    "молодец": None,                          # "good job" is praise, not employment
+    "сделка": "business",                     # a deal really is a business deal
 }
 
 # A chapter is one spine unit plus the branches that follow it — the shape a language
@@ -545,11 +623,23 @@ def main():
         # зеркало is a mirror, таблица is a chart. Matching any sense anywhere
         # put all three in Food, глухой ("deaf"; also "blind wall") in Home, and
         # a fifth of every branch was that kind of accident.
-        senses = [PARENS.sub(" ", s).strip()
+        senses = [(PARENS.sub(" ", s).strip(), "(" in s)
                   for s in re.split(r"[,;]", m["en"].lower())]
-        primary = [s for s in senses[:PRIMARY_SENSES] if s and len(s.split()) <= SENSE_WORDS]
+        primary = [(k, s, qualified)
+                   for k, (s, qualified) in enumerate(senses[:PRIMARY_SENSES])
+                   if s and len(s.split()) <= SENSE_WORDS]
         for tid, _, pat in rules:
-            hit = next((s for s in primary if pat.search(s)), None)
+            hit = None
+            for k, sense, qualified in primary:
+                found = pat.search(sense)
+                if not found:
+                    continue
+                # HOMOGRAPHS: a word with two unrelated English readings may only
+                # claim a lemma from its plain first sense.
+                if found.group(1) in HOMOGRAPHS and (k > 0 or qualified):
+                    continue
+                hit = sense
+                break
             if hit:
                 assigned[lid] = tid
                 by_topic[tid].append((lid, m["n"], hit))

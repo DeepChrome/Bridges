@@ -1549,6 +1549,60 @@ real timers inside RNTL returns a tree at opacity 0 and then updates state
 outside `act()` — a warning per frame and an assertion racing the animation. The
 end state is also what reduced motion produces, so the default run covers it.
 
+## 30n. Production, and Russian from outside (Phase 10 finished, 2026-09-10)
+
+Four activities, all of them production or input the corpus did not supply.
+Each has one rule that is the whole reason it is not just another quiz, and in
+each case that rule is asserted rather than left in a comment.
+
+- **The pronunciation drill** (P10.8), `core/alphabet.js` + `activities/Pair.js`.
+  Thirteen minimal pairs, heard then said, reached from Sounds. **The saying
+  half never says "you said it wrong."** The recogniser was measured on 2–4-word
+  sentences (§30c); a single word out of context is a harder ask of it. So it
+  reports which of the two words it heard, and when it heard neither it skips
+  and grades nothing. Every pair word is checked against the shipped dictionary
+  — an invented minimal pair is precisely what §30a exists to stop, and
+  `NOT_HEADWORD` names the lemma for the one member («нёс») that is a real form
+  rather than a headword instead of relaxing the check.
+
+- **Shadowing** (P10.6), `activities/Shadow.js`. The Russian is **not** on
+  screen before the attempt: with it there this is reading aloud, which is Say.
+  Replays cost nothing, because repetition is the method — in Hear the recording
+  *is* the question, which is why replays are counted there.
+
+- **The chapter task** (P10.5), `core/tasks.js` + `backend/src/task.js`. Sets a
+  goal and asks whether the learner got it across. **Not scored and cannot be
+  failed** — a percentage would turn the one open-ended exercise back into the
+  quiz it exists as an alternative to. The Worker judges the goal, not the
+  grammar, against the words that learner has been taught, and `validateTask`
+  refuses a reply that invents, drops, renames or double-judges a requirement,
+  with `done` derived rather than asked for. The task file writes no Russian at
+  all, which is what keeps it clear of §30a; the test asserts that.
+
+- **Read anything** (P10.7), `core/read.js` + `screens/Read.js`. The share
+  reported is of **content** words: counting «и», «в», «не» would make every
+  text look part-known before a real word appeared. It advises and never blocks.
+  A YouTube link opens the episode when the library already has it and says
+  plainly that it can do no more, because fetching and captioning a video is a
+  build-time job with a tool chain behind it.
+
+Question quality, from the same day (P11.4, P11.7, P11.8), all measured before
+and after:
+
+| what | was | now |
+|---|---|---|
+| answer alone in its word class | 23.7 % | 2.1 % |
+| a second genuinely right option | 1.1 % | 0.0 % |
+| a retake repeating shape and word | 24.0 % | 2.7 % |
+| chapter 6's distinct form questions | 7 | 47 |
+
+Two traps worth keeping. **A tiered draw weights the tier, not the words in
+it** — the route tier holds hundreds of words against a lesson's one or two, so
+even at four times the weight the lesson was the subject of 9 % of draws.
+And **`c.find("type") || c.find("cloze")` can never reach its second branch**,
+because `candidates` always ends with a `type`: every guaranteed production slot
+in the app was a typed one and the gap-fill was unreachable there for months.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

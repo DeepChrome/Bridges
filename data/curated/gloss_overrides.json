@@ -89,5 +89,8 @@
   "уйти": "to leave, to go away (on foot, perfective)",
   "уехать": "to leave, to go away (by transport, perfective)",
   "уходить": "to leave, to go away (on foot, imperfective)",
-  "жёлтый": "yellow"
+  "жёлтый": "yellow",
+
+  "_3": "2026-09-10, ROADMAP P11.5: «перед» now reaches the spine as the preposition rather than the paradigm-less noun glossed 'before'. OpenRussian's own gloss for the preposition names the case it takes, which is a grammar note and not a meaning; the case belongs on the grammar card.",
+  "перед|other": "in front of, before"
 }

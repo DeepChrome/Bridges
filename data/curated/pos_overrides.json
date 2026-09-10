@@ -1,0 +1,21 @@
+{
+  "_": [
+    "Words OpenRussian files under the wrong part of speech, keyed on the bare",
+    "headword or \"bare|pos\" when two rows share the spelling. The value is the",
+    "class the word actually belongs to.",
+    "",
+    "This matters twice. The class decides whether a word is branch-eligible at",
+    "all (build_topics.BRANCHABLE is nouns, verbs and adjectives), and it decides",
+    "which paradigm tables panel.py draws — so an adverb filed in nouns.csv is",
+    "taught as a noun and the chapter's form question can ask for its genitive",
+    "plural. Where the class moves into a closed one, build_lexicon.py also drops",
+    "the inflection that came with the wrong file: OpenRussian gives «справа» a",
+    "full feminine declension and not one of those thirteen forms occurs anywhere",
+    "in the collection, because they are not words.",
+    "",
+    "A stale entry is a build error, not a silent no-op."
+  ],
+  "справа": "other",
+  "ничего": "other",
+  "как": "other"
+}

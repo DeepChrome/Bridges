@@ -37,10 +37,31 @@ STRESS = {k: v for k, v in json.loads(_STRESS_PATH.read_text(encoding="utf-8")).
 _GLOSS_PATH = ROOT / "data" / "curated" / "gloss_overrides.json"
 GLOSS = {k: v for k, v in json.loads(_GLOSS_PATH.read_text(encoding="utf-8")).items()
          if not k.startswith("_")} if _GLOSS_PATH.exists() else {}
+# Words the dump files under the wrong part of speech (ROADMAP P11.5): «справа»
+# is an adverb sitting in nouns.csv with an invented feminine declension. Same
+# key convention as the glosses.
+_POS_PATH = ROOT / "data" / "curated" / "pos_overrides.json"
+POS = {k: v for k, v in json.loads(_POS_PATH.read_text(encoding="utf-8")).items()
+       if not k.startswith("_")} if _POS_PATH.exists() else {}
+POS_USED = set()
 
 
 def gloss_for(bare, pos, en):
     return GLOSS.get(f"{bare}|{pos}", GLOSS.get(bare, en))
+
+
+def pos_for(bare, pos):
+    """The word's real class, and whether this file's inflection survives.
+
+    It does not: a paradigm read out of nouns.csv is a noun's paradigm, so once
+    the word is not a noun the thirteen cells are invented. «справа» is an adverb
+    and none of «справы», «справе», «справу» occurs anywhere in the collection.
+    """
+    for k in (f"{bare}|{pos}", bare):
+        if k in POS:
+            POS_USED.add(k)
+            return POS[k], POS[k] == pos
+    return pos, True
 
 
 def clean_partner(p):
@@ -144,17 +165,19 @@ class Builder:
         self.next_id = 0
         self.stats = {}
 
-    def load(self, filename, pos, meta_cols):
+    def load(self, filename, file_pos, meta_cols):
         path = RAW / filename
         if not path.exists():
             print(f"  !! missing {path}")
             return
-        n_lemmas = n_forms = 0
+        n_lemmas = n_forms = n_retyped = 0
         with path.open(encoding="utf-8", newline="") as fh:
             for row in csv.DictReader(fh, delimiter="\t"):
                 bare = CLEAN_RE.sub("", (row.get("bare") or "")).strip()
                 if not bare:
                     continue
+                pos, keep_paradigm = pos_for(bare, file_pos)
+                n_retyped += pos != file_pos
                 self.next_id += 1
                 lid = self.next_id
                 accented = deapostrophe(CLEAN_RE.sub("", row.get("accented") or bare))
@@ -183,7 +206,7 @@ class Builder:
                     seen.add((key_, slot))
 
                 for col, cell in row.items():
-                    if col in meta_cols or col is None:
+                    if col in meta_cols or col is None or not keep_paradigm:
                         continue
                     for v in variants(cell):
                         acc = deapostrophe(v)
@@ -203,8 +226,9 @@ class Builder:
                 self.db.executemany(
                     "insert into forms (key, lemma_id, slot) values (?,?,?)", rows_f)
                 n_forms += len(rows_f)
-        self.stats[pos] = (n_lemmas, n_forms)
-        print(f"  {pos:<11} {n_lemmas:>7,} lemmas  {n_forms:>9,} form entries")
+        self.stats[file_pos] = (n_lemmas, n_forms)
+        retyped = f"  ({n_retyped} re-typed)" if n_retyped else ""
+        print(f"  {file_pos:<11} {n_lemmas:>7,} lemmas  {n_forms:>9,} form entries{retyped}")
 
 
     def load_curated(self, path):
@@ -287,6 +311,19 @@ def main():
     b.load("others.csv", "other", ADJ_META)
     b.load_curated(ROOT / "data" / "curated" / "function_words.json")
 
+    # A curated decision that no longer matches anything is not harmless: it reads
+    # as a fix that is still in force while the word has quietly gone back to its
+    # old class. Say so loudly rather than shipping a lie in the comments.
+    stale = sorted(set(POS) - POS_USED)
+    if stale:
+        # Nothing is committed, and the half-built file is removed: a later tool
+        # reading a lexicon that stopped half way is worse than no lexicon.
+        db.close()
+        args.out.unlink(missing_ok=True)
+        print(f"\n  !! pos_overrides.json: {len(stale)} entries matched no lemma: "
+              + ", ".join(stale))
+        return 1
+
     db.execute("insert into meta (k, v) values (?,?)",
                ("source", "OpenRussian (github.com/Badestrand/russian-dictionary)"))
     db.execute("insert into meta (k, v) values (?,?)", ("license", "CC BY-SA 4.0"))
@@ -314,7 +351,8 @@ def main():
 
     db.close()
     print(f"\nwrote {args.out}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

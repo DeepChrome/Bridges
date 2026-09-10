@@ -32,7 +32,7 @@ Built and working today:
 - any recognised token can expose lemma, meaning, grammar, full paradigm, and every
   other sentence in the corpus containing that word
 - a learning path of ten chapters: ten spine units of thirty words and 24 topic
-  branches as side quests, 169 lessons, 1,056 words taught (§30i)
+  branches as side quests, 168 lessons, 1,045 words taught (§30i)
 - lessons built from six activity types, plus Hear, Say and listening scenes on
   native (§30c), a conversation mode, Talk (§30f), quizzes of the learner's own
   making and Anki decks in and out (§30h)
@@ -278,9 +278,10 @@ changed, `undefined` flowing silently through a render path. Hold the same bar.
 
 3. **Generated artifacts are disposable; sources are not.** `data/corpus.db`,
    `data/lexicon.db`, `data/topics.db`, `data/raw/` and `site/` are rebuildable and
-   gitignored. Never hand-edit them. Human decisions live in
-   `data/curated/function_words.json` and the `OVERRIDES` map in `build_topics.py`, and
-   a rebuild must never clobber them.
+   gitignored. Never hand-edit them. Human decisions live in `data/curated/`
+   (`function_words.json`, `lemma_overrides.json`, `gloss_overrides.json`,
+   `pos_overrides.json`, `image_terms.json`, `stress.json`, `scripts/`) and in the
+   `OVERRIDES` map in `build_topics.py`, and a rebuild must never clobber them.
 
 4. **Learner state keys on the Russian word string, never an array index.** Lemma
    indices are assigned by frequency at build time and shift on every rebuild.
@@ -1213,7 +1214,7 @@ several channels carry the channel's initials where a unit has its icon.
   by eye (abstract nouns, months and weekdays, roles that came back as
   statues, anything medical), 14 given a curated term. After the
   curriculum's re-cut (§30i) and a harvest for the words that joined:
-  **346 of the 1,056 unit words ship, 11.6 MB** — the new words are mostly
+  **314 of the 1,045 unit words ship, 10.7 MB** — the new words are mostly
   verbs. Verbs and adjectives take no English route at all — "suit" for
   «подходить» found a man in tweed, "back" for «поддержать» a pair of bare
   backs — so only a handful of them have a picture.
@@ -1329,9 +1330,9 @@ Phase 9) and the rules they left behind. The A37 log entry carries the numbers.
   after a review session, so a learner who clears their day never sees it
   (quick and steady: zero held days at both 25 and 40), while the struggling
   learner spends 12–17 days consolidating.
-- **What the simulator says now** (seed 1, 169 lessons, `tools/sim/`, rerun
-  2026-09-10 after §30k): quick 168 of 169 passed, steady 161, struggling 122
-  with 92 leeches and 78 backlog days. Review-first roughly halves the
+- **What the simulator says now** (seed 1, 168 lessons, `tools/sim/`, rerun
+  2026-09-10 after §30n): quick 167 of 168 passed, steady 163, struggling 121
+  with 96 leeches and 83 backlog days. Review-first roughly halves the
   struggling learner's worst day and all but empties the backlog at the end;
   leeches fall with it. The struggling learner is still the open problem — 55
   reviews a day is a hard route — but it is no longer a route that buries them.
@@ -1427,7 +1428,7 @@ improve as needed. Remove that from the doctrine."*
 He was right about the corpus. Its listening pool is whatever his decks and the
 harvested videos happen to contain, so a beginner got either three-word fragments
 or forty-five seconds of a native speaker using words the first three chapters
-never teach. **169 lessons, 844 sentences**, one passage each, now live in
+never teach. **168 lessons, 839 sentences**, one passage each, now live in
 `data/curated/scripts/chapter-NN.json` — authored, and the tooling is what keeps
 that honest:
 
@@ -1493,7 +1494,7 @@ were inline JSX inside `VocabFlow` — no component, no name, no test seam, so
 there was nothing to design. All three drew the same `Card` as the verdict panel
 and the Done panel: four different kinds of moment, one shape. The photograph was
 a 150 px band inset inside the card's padding, so it read as an attachment rather
-than the subject — and only 346 of the 1,056 unit words have one, the ones that
+than the subject — and only 314 of the 1,045 unit words have one, the ones that
 do not being mostly the function words a beginner meets first, so the common
 early card was a large empty white box with a small word in it. There was **no
 animation anywhere in a lesson**: stepping card to card was a synchronous
@@ -1548,6 +1549,67 @@ structure, never motion (§20a: native has no visual suite), and a 240 ms fade o
 real timers inside RNTL returns a tree at opacity 0 and then updates state
 outside `act()` — a warning per frame and an assertion racing the animation. The
 end state is also what reduced motion produces, so the default run covers it.
+
+## 30n. Phase 11 — four joins the second review measured wrong (2026-09-10)
+
+All four were in the pipeline and the curated data, so they share one rebuild:
+`build_lexicon → build_topics → build_site`, then `build_listening` and
+`build_images` because both are filtered by the curriculum and neither notices on
+its own that a word has left it.
+
+- **A word's part of speech is data, and OpenRussian gets it wrong.**
+  `data/curated/pos_overrides.json`, applied in `build_lexicon.py`: «справа» is
+  an adverb filed in nouns.csv *with a full feminine declension*, so it was
+  branch-eligible (it landed in Politics, on "on the right") and the chapter's
+  form question could ask for the genitive plural of an adverb. Retyping also
+  **drops the paradigm the wrong file gave it** — a paradigm read out of
+  nouns.csv is a noun's, and none of «справы», «справе», «справу» occurs anywhere
+  in the collection. «ничего» and «как» were the same mistake without the
+  invented forms. A stale entry fails the build and removes the half-written
+  lexicon rather than shipping a fix that is no longer doing anything.
+- **The other half of that class is a shared form, not a wrong class**, and it
+  belongs to `lemma_overrides.json`: «перед» is a preposition that lost
+  `build_topics`' same-bare dedupe to a paradigm-less noun row glossed "before",
+  and «зовут» is a form of «звать» that others.csv carries as a headword. Giving
+  the form to the right lemma leaves the impostor with no corpus count, and it
+  drops out of the pool without anything else being told.
+- **`check_closed_class` in `build_site.py` is fatal.** A unit may not teach as a
+  content word something `function_words.json` declares closed-class *and the
+  lexicon gives no content-word forms*. Both halves are needed: the curated file
+  also calls «мой», «твой», «свой» and «весь» possessive while OpenRussian
+  carries each again as an adjective with the same 27-row declension — that is
+  one word listed twice and shows the learner nothing false. Those duplicate
+  rows are a real but separate defect; «перед»'s noun row had no paradigm at all.
+- **`HOMOGRAPHS` in `build_topics.py`.** The topic rules read an English gloss,
+  so an English word with two unrelated senses files a word under whichever a
+  rule wants: Body & Health taught «спинка» (a chair's back) and «свидетель»
+  (*eye*-witness), Animals taught «выдерживать» (*bear* = endure) beside
+  «медведь», Politics taught «вечеринка» (*party*). A homograph may now only
+  claim a word from its **first** sense, and only when that sense carries no
+  parenthetical — a gloss says first what a word mostly means, and «back (of a
+  chair)» exists to say "not the obvious reading". Where the wrong reading *is*
+  the plain first sense the gloss gives no signal at all and only a reader can
+  tell; those stay `OVERRIDES` entries. 39 words left a wrong unit, 7 moved to a
+  right one (плавание→Sport, свидетель→Law, судья/судить→Law, услышать→Speech,
+  номер→Time, кнопка→Technology). **A branch is capped, so evicting one word
+  admits the next** — the refills are where the next round of accidents comes
+  from, and half the `OVERRIDES` added here are for words that arrived that way.
+  Rerun `tools/audit_branches.py` and read it, every time.
+- **The speech pool de-duplicates on `fold(ru)`.** The collection holds the same
+  sentence twice, once accented and once not, and both fold to one audio key: 301
+  of 2,298 rows were a second spelling, 26 % of the pool was one sentence stored
+  twice, and 647 of 4,634 per-unit entries pointed at a recording the unit
+  already had. A scene built from that played one recording for two of its
+  questions and drew a wrong meaning option from a sentence it had just played.
+  The stressed copy is kept, as `rank_examples` keeps it for the dictionary.
+  **The pools were never as large as they looked**: 2,320/2,314 became
+  1,986/1,981 and four more units fell below `POOL_MIN_PER_UNIT`.
+- **A curriculum change invalidates the written passages** (§30l), because they
+  are checked against the exact lesson a word is taught in. One word entering the
+  spine shifts every lesson boundary after it. This round cost 108 errors across
+  ~60 sentences, all repaired by editing the Russian; `check_scripts.mjs --strict`
+  is what says when it is done, and a unit that loses words can lose a lesson
+  outright, which orphans that lesson's passage.
 
 ## 30n. Production, and Russian from outside (Phase 10 finished, 2026-09-10)
 

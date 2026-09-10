@@ -144,5 +144,35 @@ jest.mock("expo-file-system", () => {
   return { File, Directory, Paths: { cache: new Directory("file:///cache") } };
 });
 
-/* No animation mock: jest-expo already handles the driver, and the path that used
-   to need stubbing no longer exists in React Native 0.86. */
+/* Animations land on their final value at once.
+ *
+ * jest-expo handles the driver, but not the clock: a 240 ms fade runs on real
+ * timers inside RNTL, so a `render()` returns a tree at opacity 0 and the frames
+ * that follow update state outside `act()` — a warning per frame and an assertion
+ * racing the animation. The suites assert structure, never motion (§20a: native
+ * has no visual suite), so the end state is the only frame that carries meaning.
+ *
+ * This is the same end state the reduced-motion path in `src/guide.js` produces,
+ * which means the default test run also exercises what a learner with motion
+ * turned off sees. `Animated.Value` and `interpolate` are untouched, so anything
+ * derived from an animated value still reads correctly. */
+{
+  const { Animated } = require("react-native");
+  const settle = (value, config) => ({
+    start: (cb) => {
+      if (config && config.toValue !== undefined) {
+        if (typeof config.toValue === "object" && config.toValue !== null) {
+          value.setValue(config.toValue.__getValue ? config.toValue.__getValue() : 0);
+        } else {
+          value.setValue(config.toValue);
+        }
+      }
+      if (cb) cb({ finished: true });
+    },
+    stop: () => {},
+    reset: () => {},
+  });
+  Animated.timing = settle;
+  Animated.spring = settle;
+  Animated.decay = settle;
+}

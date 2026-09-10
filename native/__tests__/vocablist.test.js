@@ -49,6 +49,10 @@ describe("the lesson's word list", () => {
     await screen.findByTestId("vocab-list");
     await act(async () => { fireEvent.press(screen.getByText("Start learning")); });
     expect(screen.queryByTestId("vocab-list")).toBeNull();
-    expect(screen.getByText("New word")).toBeTruthy();
+    // The card used to announce itself with a muted "New word" over the top of
+    // the photograph. The step counter already says which step this is and the
+    // card is unmistakably about one word, so the label was noise; the card
+    // itself is what the list leads into.
+    expect(screen.getByTestId("word-card")).toBeTruthy();
   });
 });

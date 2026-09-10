@@ -2,26 +2,29 @@
  * placement routes. Each one supplies its steps and decides what the result means. */
 
 import React, { useMemo, useState } from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text } from "react-native";
 import { useSession } from "../session";
-import { useTheme, radius } from "../theme";
-import { IMAGES, CREDITS } from "../images";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Thumb, Senses, SectionLabel, Chip } from "../ui";
+import { useTheme } from "../theme";
+import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
-import { Linked } from "../words";
+import { WordList, GrammarNote, WordCard } from "../lesson";
 import { Q, DRILL_TYPES, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
   reachedUnits, unitUnlocked, reviewWords, passages, knownWords, lessonsDone, nextLesson,
 } from "../data";
 import { quizPassed } from "@core/state";
-import { firstSense } from "@core/util";
-import { soundTip } from "@core/alphabet";
 import { touchStreak } from "../store";
 
 /* The mark for a run: partial credit summed over first attempts, as a percentage. */
 const scoreOf = (r) => (r.total ? Math.round(r.credit / r.total * 100) : 0);
+
+/* Meeting a lesson's words is work, and it used to pay nothing: quizzes and
+   drills moved `st.xp`, vocabulary did not, so finishing the teaching half of a
+   lesson changed nothing a learner could see on the path. Deliberately smaller
+   than a quiz — reading a set is not the same as retrieving it. */
+export const VOCAB_XP = 5;
 
 /* ------------------------------------------------------------- vocabulary */
 
@@ -39,7 +42,8 @@ export function VocabFlow({ route, navigation }) {
     return (
       <Done
         title="Vocabulary done"
-        detail={`${lessonWords(unit, index).length} words met`}
+        detail={`${lessonWords(unit, index).length} words met · +${VOCAB_XP} XP`}
+        guide="words"
         onBack={() => navigation.goBack()}
       />
     );
@@ -50,48 +54,24 @@ export function VocabFlow({ route, navigation }) {
   const step = steps[at];
   const advance = () => {
     if (at + 1 >= steps.length) {
-      update((prev) => markComponent(prev, unit, index, "vocab"));
+      update((prev) => ({
+        ...markComponent(prev, unit, index, "vocab"),
+        xp: (prev.xp || 0) + VOCAB_XP,
+      }));
       setDone(true);
     } else {
       setAt(at + 1);
     }
   };
 
-  /* The lesson's words, all of them, before the cards begin (the owner,
-     2026-09-10). Scrollable rather than paged: reading the set together is the
-     point, so it is one list with the photograph, the word and its first
-     meaning on each line. */
+  /* The three teaching steps live in `lesson.js` — they were inline here, which
+     is most of why they could not be designed: no component, no name, nothing to
+     test. The flow keeps what is genuinely its own (which step, what the button
+     says, when the lesson is over) and the steps draw themselves. */
   if (step.t === "list") {
     return (
       <Screen>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <View style={{ flex: 1 }}><Bar value={at / steps.length} /></View>
-          <Pill tone="brand">{`${at + 1}/${steps.length}`}</Pill>
-        </View>
-        <SectionLabel testID="vocab-list">
-          {`${step.words.length} new ${step.words.length === 1 ? "word" : "words"}`}
-        </SectionLabel>
-        <List>
-          {step.words.map((i, k) => {
-            const word = L[i];
-            return (
-              <Row key={i} testID={`new-${word.b}`} last={k === step.words.length - 1}>
-                {IMAGES[word.b] ? (
-                  <Image source={IMAGES[word.b]} resizeMode="cover"
-                         accessibilityLabel={`Photo: ${(word.e || "").split(/[,;]/)[0]}`}
-                         style={{ width: 46, height: 46, borderRadius: radius.sm }} />
-                ) : (
-                  <Thumb id={unit.id} />
-                )}
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 19, fontWeight: "600" }}>{word.w}</Text>
-                  <Muted numberOfLines={1}>{firstSense(word)}</Muted>
-                </View>
-                <Speaker text={word.b} size={36} />
-              </Row>
-            );
-          })}
-        </List>
+        <WordList unit={unit} words={step.words} at={at} total={steps.length} />
         <View style={{ marginTop: "auto", paddingTop: 16 }}>
           <Btn kind="pri" label="Start learning" onPress={advance} />
         </View>
@@ -100,86 +80,11 @@ export function VocabFlow({ route, navigation }) {
   }
 
   if (step.t === "grammar" || step.t === "word") {
-    const w = step.t === "word" ? L[step.i] : null;
     return (
       <Screen fill>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12,
-                       marginBottom: 16 }}>
-          <View style={{ flex: 1 }}><Bar value={at / steps.length} /></View>
-          <Pill tone="brand">{`${at + 1}/${steps.length}`}</Pill>
-        </View>
-        {step.t === "grammar" ? (
-          <Card>
-            <Muted>{unit.name}</Muted>
-            <Text style={{ color: t.ink, fontSize: 19, fontWeight: "600",
-                           marginTop: 6, marginBottom: 8 }}>{step.note.title}</Text>
-            <Text style={{ color: t.ink2, fontSize: 15 }}>{step.note.body}</Text>
-            {(step.note.examples || []).map(([ru, en], k) => (
-              <View key={k} style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1,
-                                     borderTopColor: t.lineSoft }}>
-                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-                  <View style={{ flex: 1 }}>
-                    <Linked text={ru} size={19} />
-                  </View>
-                  <Speaker text={ru} size={36} />
-                </View>
-                <Muted>{en}</Muted>
-              </View>
-            ))}
-          </Card>
-        ) : (
-          <Card style={{ alignItems: "center" }}>
-            {IMAGES[w.b] ? (
-              // A photograph of the thing (tools/harvest_images.py). Above the
-              // word: see it, then read it. CC BY and CC BY-SA require the credit
-              // wherever the picture appears, not only on the entry (rule 20.10).
-              <>
-                <Image testID="word-photo" source={IMAGES[w.b]} resizeMode="cover"
-                       accessibilityLabel={`Photo: ${firstSense(w)}`}
-                       style={{ width: "100%", height: 150, borderRadius: radius.md, marginBottom: 6 }} />
-                {CREDITS[w.b] ? (
-                  <Muted testID="photo-credit" size={11} style={{ marginBottom: 10, textAlign: "center" }}>
-                    {`${CREDITS[w.b].a || "Wikimedia Commons"} · ${CREDITS[w.b].l}`}
-                  </Muted>
-                ) : null}
-              </>
-            ) : null}
-            <Muted>New word</Muted>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10,
-                           marginVertical: 8 }}>
-              <Text style={{ color: t.ink, fontSize: 38, fontWeight: "600" }}>{w.w}</Text>
-              <Speaker text={w.b} />
-            </View>
-            {/* The whole entry, sense by sense, and the word in two contexts — a
-                card a learner can read, not a gloss (the owner, 2026-09-07). */}
-            <Senses e={w.e} size={16} style={{ marginTop: 0 }} />
-            <View style={{ flexDirection: "row", gap: 6, marginTop: 10 }}>
-              {[w.p, w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
-            </View>
-            {/* One line about a sound this word carries — a letter that is not
-                what it looks like, or one English has not got (ROADMAP P10.2).
-                A tip, not a lesson: the whole system is under Practice → Sounds. */}
-            {soundTip(w.b) ? (
-              <View testID="sound-tip"
-                    style={{ marginTop: 12, backgroundColor: t.surface2, borderRadius: radius.sm,
-                             paddingHorizontal: 12, paddingVertical: 9, alignSelf: "stretch" }}>
-                <Muted size={13} style={{ textAlign: "center" }}>{soundTip(w.b)}</Muted>
-              </View>
-            ) : null}
-            {(w.x || []).slice(0, 2).map((ex, k) => (
-              <View key={k} style={{ marginTop: k ? 10 : 14, paddingTop: k ? 10 : 12, borderTopWidth: 1,
-                                     borderTopColor: t.lineSoft, alignSelf: "stretch" }}>
-                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-                  <View style={{ flex: 1 }}>
-                    <Linked text={ex.ru} size={18} />
-                  </View>
-                  <Speaker text={ex.ru} size={36} />
-                </View>
-                <Muted>{ex.en}</Muted>
-              </View>
-            ))}
-          </Card>
-        )}
+        {step.t === "grammar"
+          ? <GrammarNote unit={unit} note={step.note} at={at} total={steps.length} />
+          : <WordCard i={step.i} at={at} total={steps.length} />}
         {/* marginTop:"auto" against Screen's flexGrow: the action holds one position
             whatever the card's height, instead of moving down the screen each step.
             The gap lives on the wrapper — putting it on the button would change the
@@ -238,6 +143,10 @@ export function QuizFlow({ route, navigation }) {
         detail={`${result.right} of ${result.total} right`}
         score={result.score}
         passed={passed}
+        /* The end of a lesson quiz is where Yuri belongs and the drills are
+           where he does not: this is the moment a lesson closes, and he stays
+           worth seeing only by not being on every results screen in the app. */
+        guide={relief ? "scraped" : passed ? "passed" : "failed"}
         againLabel="Try again"
         onAgain={() => { setResult(null); setSeed(seed + 1); }}
         onContinue={passed && !last

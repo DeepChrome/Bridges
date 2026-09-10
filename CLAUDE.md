@@ -1477,6 +1477,72 @@ listener wants to go back to.
 for level and for words that exist; none is checked for idiom. That is the open
 item, and the file is meant to be corrected in place.
 
+## 30m. Yuri, and the motion the lesson never had (2026-09-10)
+
+The owner: *"I think a main problem is that the lesson slides look so damn
+boring"*, and *"make a monkey theme character that guides on the journey"*.
+
+**Why they were boring, measured rather than felt.** The three teaching steps
+were inline JSX inside `VocabFlow` — no component, no name, no test seam, so
+there was nothing to design. All three drew the same `Card` as the verdict panel
+and the Done panel: four different kinds of moment, one shape. The photograph was
+a 150 px band inset inside the card's padding, so it read as an attachment rather
+than the subject — and only 346 of the 1,056 unit words have one, the ones that
+do not being mostly the function words a beginner meets first, so the common
+early card was a large empty white box with a small word in it. There was **no
+animation anywhere in a lesson**: stepping card to card was a synchronous
+re-render and the progress bar jumped. And the app had no type scale and no
+spacing scale — fifteen inline font sizes chosen a screen at a time, so nothing
+was two clear steps away from anything else.
+
+**What was added:**
+
+- `native/src/lesson.js` — `WordList`, `GrammarNote`, `WordCard`, `StepBar`,
+  carved out of `Flows.js`. Each step now has its own shape: the rule takes brand
+  colour and a left edge, the card is `radius.xl` with the photograph running to
+  all three edges as its head, and a word with no photograph gets that head band
+  in brand colour with the word itself in it, sized to its length (`bandSize` —
+  «в» at the same 40 px as «здравствуйте» sat in a 150 px band like a typo).
+- `theme.js` gained `type` and `motion`. New and rebuilt screens size from them;
+  existing literals are deliberately **not** swept, since a blind find-and-replace
+  across every screen is the refactor §12 warns about.
+- `native/src/guide.js` — `useEnter`, `usePop`, `useFill`, built on React
+  Native's own `Animated`. Reanimated would be a runtime dependency earning
+  nothing here: every animation is opacity and transform. Reduced motion is
+  honoured by jumping to the end state.
+- `Bar` takes `animate` — opt-in, because `Passage.js` drives its bar from a
+  position poll four times a second and an ease on top of that lags the video.
+
+**Yuri** (`core/guide.js`) is drawn in flat SVG like the avatars, in the
+`monkeynaut` palette — the owner's own profile picture — so he reads as that
+monkey with the helmet off; the scarf takes the theme's brand colour. Five poses,
+switched mostly by the **silhouette**: a raised arm reads as a wave at 40 px
+where an eyebrow does not.
+
+**He is almost silent, and that is the design.** Rule 20.7 is labels, not prose,
+and §25 says a polished learning screen may carry almost no text outside the
+language material. A mascot that narrates every step is precisely what §2 says
+this app must never become. So he appears in four places and nowhere else: the
+word list that opens a lesson, the grammar note (pointing at it), a **clean**
+answer in the runner, and the end of a lesson. Not on a wrong answer — a cartoon
+commiserating with someone who is concentrating — and not on the drill or
+listening results, or he becomes wallpaper within one session. `LINES` is the one
+place he speaks, capped at `MAX_WORDS` (8) with `core.test.mjs` enforcing it,
+because mascot copy grows a word at a time until it is a paragraph nobody reads.
+`native/__tests__/guide.test.js` asserts the absences, not just the presences.
+
+**Two things found on the way**, both the same class as §23's vanishing props:
+`Card` silently dropped `testID`, and `VocabFlow` awarded no XP at all — quizzes
+and drills moved `st.xp`, so finishing the teaching half of a lesson changed
+nothing a learner could see. It pays `VOCAB_XP` (5) now, less than a quiz because
+reading a set is not retrieving it.
+
+**Animations land instantly under test** (`jest.setup.js`). The suites assert
+structure, never motion (§20a: native has no visual suite), and a 240 ms fade on
+real timers inside RNTL returns a tree at opacity 0 and then updates state
+outside `act()` — a warning per frame and an assertion racing the animation. The
+end state is also what reduced motion produces, so the default run covers it.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

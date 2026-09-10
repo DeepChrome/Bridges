@@ -7,12 +7,14 @@
 import React, { useEffect, useState } from "react";
 import {
   View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet, TextInput, Modal,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml } from "react-native-svg";
 import { iconFor } from "@core/icons";
 import { AV, AV_IDS } from "@core/avatars";
 import { useTheme, radius, space } from "./theme";
+import { useFill } from "./guide";
 import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
 
 /* `fill` makes the content container grow to the height of the screen, which is what
@@ -53,10 +55,14 @@ export function Title({ children, sub }) {
   );
 }
 
-export function Card({ children, style }) {
+/* `testID` is forwarded deliberately: a wrapper that quietly drops the prop it
+   was given has now cost time on Row, Btn and Muted (see the note in §23 about
+   props that vanish), and a test then fails on a thing that is plainly drawn. */
+export function Card({ children, style, testID }) {
   const t = useTheme();
   return (
-    <View style={[{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
+    <View testID={testID}
+          style={[{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
                     borderRadius: radius.lg, padding: 16 }, style]}>
       {children}
     </View>
@@ -257,13 +263,21 @@ export function Pill({ children, tone }) {
   );
 }
 
-export function Bar({ value }) {
+/* `animate` fills to the new value rather than jumping to it — pass it wherever
+   the bar tracks discrete steps, which is the only place the movement means
+   anything. It is opt-in because the video passage drives its bar from a
+   position poll four times a second (Passage.js), and a 380 ms ease on top of
+   that would lag behind the video instead of following it. */
+export function Bar({ value, animate = false }) {
   const t = useTheme();
+  const width = useFill(Math.min(1, Math.max(0, value || 0)));
+  const fill = { height: "100%", backgroundColor: t.good };
   return (
     <View style={{ height: 8, borderRadius: 4, backgroundColor: t.surface2,
                    borderWidth: 1, borderColor: t.lineSoft, overflow: "hidden" }}>
-      <View style={{ width: `${Math.round(value * 100)}%`, height: "100%",
-                     backgroundColor: t.good }} />
+      {animate
+        ? <Animated.View style={[fill, { width }]} />
+        : <View style={[fill, { width: `${Math.round(value * 100)}%` }]} />}
     </View>
   );
 }
@@ -394,17 +408,31 @@ export function senseGroups(e) {
   return String(e || "").split(/\s*;\s*/).map((s) => s.trim()).filter(Boolean);
 }
 
-export function Senses({ e, size = 15, align = "center", style }) {
+/* `max` caps the list and says how many were left. A dictionary entry wants all
+   of them; a teaching card does not — «в» is glossed "in; at; into; to; for; on;
+   within", which is seven near-synonyms rather than seven senses, and numbering
+   them down a vocabulary card turned a preposition into a wall of text. The
+   entry is where the rest live, and the count says plainly that there are more
+   rather than quietly dropping them. */
+export function Senses({ e, size = 15, align = "center", style, max }) {
   const t = useTheme();
   const groups = senseGroups(e);
   if (!groups.length) return null;
+  const shown = max && groups.length > max ? groups.slice(0, max) : groups;
+  const rest = groups.length - shown.length;
   return (
     <View testID="senses" style={[{ marginTop: 10, alignSelf: "stretch", gap: 3 }, style]}>
-      {groups.map((g, k) => (
+      {shown.map((g, k) => (
         <Text key={k} style={{ color: t.ink2, fontSize: size, textAlign: align, lineHeight: size + 6 }}>
           {groups.length > 1 ? `${k + 1}. ${g}` : g}
         </Text>
       ))}
+      {rest ? (
+        <Text testID="senses-more"
+              style={{ color: t.ink3, fontSize: size - 2, textAlign: align, marginTop: 1 }}>
+          {`+${rest} more`}
+        </Text>
+      ) : null}
     </View>
   );
 }

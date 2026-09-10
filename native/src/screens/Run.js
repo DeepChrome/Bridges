@@ -7,10 +7,12 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Alert } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet } from "../ui";
+import { GuidePop, useEnter, usePop } from "../guide";
+import { guideLine, poseFor, LINES } from "@core/guide";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
 import { RuInput } from "../keyboard";
 import { charDistance } from "@core/compare";
@@ -410,13 +412,18 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     : verdict.right ? { bg: t.goodBg, line: t.good, btn: "good" }
     : partial ? { bg: t.brandBg, line: t.brand, btn: "pri" }
     : { bg: t.badBg, line: t.bad, btn: "bad" };
+  /* The verdict rises into place instead of appearing whole. It is the one
+     moment in a quiz where something happens *to* the learner rather than
+     because of them, and it used to be indistinguishable from a re-render.
+     Keyed on the step as well as `answered` so it plays once per question. */
+  const verdictIn = useEnter([answered, at], { distance: 14 });
 
   return (
     <Screen fill>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12,
                      marginBottom: 16 }}>
         <View style={{ flex: 1 }}>
-          <Bar value={progress ? progress.at / progress.total : at / queue.length} />
+          <Bar animate value={progress ? progress.at / progress.total : at / queue.length} />
         </View>
         <Pill tone="brand">
           {progress ? `${progress.at + 1}/${progress.total}` : `${at + 1}/${queue.length}`}
@@ -475,11 +482,20 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         // sits in the same place on every question instead of wherever the options
         // happened to end — the same rule Flows.js and the web runner already follow.
         // The gap lives on the wrapper, not the card.
-        <View testID="verdict" style={{ marginTop: "auto", paddingTop: 18 }}>
+        <Animated.View testID="verdict"
+                       style={[verdictIn, { marginTop: "auto", paddingTop: 18 }]}>
           <Card style={tone ? { backgroundColor: tone.bg, borderColor: tone.line } : undefined}>
-            <Text style={{ color: t.ink, fontWeight: "700", fontSize: 16 }}>
-              {right === null ? "Skipped" : right ? "Correct" : partial ? "Almost" : "Not quite"}
-            </Text>
+            {/* Yuri turns up for a clean answer and nowhere else in the runner.
+                He is the reward, so he has to stay rare: on every verdict he
+                would be wallpaper within one quiz, and on a wrong answer he
+                would be a cartoon commiserating with someone who is trying to
+                concentrate. */}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              {right === true && !usedHint ? <GuidePop pose="cheer" size={40} /> : null}
+              <Text style={{ color: t.ink, fontWeight: "700", fontSize: 16 }}>
+                {right === null ? "Skipped" : right ? "Correct" : partial ? "Almost" : "Not quite"}
+              </Text>
+            </View>
             {verdict && verdict.note ? (
               <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>{verdict.note}</Text>
             ) : null}
@@ -505,7 +521,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
             <Btn kind={tone ? tone.btn : "plain"} label="Continue"
                  style={{ marginTop: 12 }} onPress={next} />
           </Card>
-        </View>
+        </Animated.View>
       ) : null}
 
       {hintOpen ? <HintSheet q={q} onClose={() => setHintOpen(false)} /> : null}
@@ -515,28 +531,47 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
 
 /* ------------------------------------------------------------------ done */
 
+/* The kinds Done will let Yuri react to; anything else leaves him off. */
+const GUIDE_KINDS = Object.keys(LINES);
+
 /* The end of a run. The primary button points forward: after a pass it is
    Continue (or Done), and "Try again" drops to a ghost — it used to be the
    blue button whether the quiz was passed or failed, so passing read as an
    invitation to do it over (the interface review, 2026-09-08). */
-export function Done({ title, detail, score, passed, onAgain, onBack, againLabel, onContinue, continueLabel }) {
+export function Done({ title, detail, score, passed, onAgain, onBack, againLabel, onContinue, continueLabel, guide }) {
   const t = useTheme();
   const tone = passed === false ? { bg: t.badBg, fg: t.bad }
              : passed === true ? { bg: t.goodBg, fg: t.good }
              : { bg: t.brandBg, fg: t.brandInk };
   const forward = passed !== false;
+  /* `guide` is a kind from core/guide.js — "words", "passed", "scraped",
+     "failed". It turns the end of a run from a tick over an apology into the one
+     screen where Yuri has something to say, and it is opt-in so the half-dozen
+     places that reuse Done as an empty-state message box stay plain. */
+  const kind = guide && GUIDE_KINDS.includes(guide) ? guide : null;
+  const line = kind ? guideLine(kind, (title || "").length) : null;
+  const pop = usePop([kind, title]);
   return (
     <Screen>
       <Card style={{ alignItems: "center", paddingVertical: 30 }}>
-        <View style={{ width: 76, height: 76, borderRadius: 38, marginBottom: 14,
-                       alignItems: "center", justifyContent: "center",
-                       backgroundColor: tone.bg }}>
+        {kind ? (
+          <GuidePop pose={poseFor(kind)} size={92} style={{ marginBottom: 6 }} />
+        ) : null}
+        <Animated.View
+          style={[pop, { width: 76, height: 76, borderRadius: 38, marginBottom: 14,
+                         alignItems: "center", justifyContent: "center",
+                         backgroundColor: tone.bg }]}>
           <Text style={{ color: tone.fg, fontSize: 22, fontWeight: "700" }}>
             {score !== undefined ? `${score}%` : "✓"}
           </Text>
-        </View>
+        </Animated.View>
         <Text style={{ color: t.ink, fontSize: 16, fontWeight: "600" }}>{title}</Text>
         {detail ? <Muted style={{ marginTop: 6, textAlign: "center" }}>{detail}</Muted> : null}
+        {line ? (
+          <Muted testID="done-line" style={{ marginTop: 10, textAlign: "center", fontStyle: "italic" }}>
+            {line}
+          </Muted>
+        ) : null}
       </Card>
       {forward ? (
         <Btn kind="pri" label={onContinue ? (continueLabel || "Continue") : "Done"}

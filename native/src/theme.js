@@ -40,8 +40,27 @@ const dark = {
   brandOn: "#0C0D10", goodOn: "#0C0D10", badOn: "#0C0D10",
 };
 
-export const radius = { sm: 8, md: 14, lg: 20 };
+export const radius = { sm: 8, md: 14, lg: 20, xl: 26 };
 export const space = { pad: 16, gap: 10 };
+
+/* The type scale (2026-09-10). Before this the app used fifteen inline sizes —
+   38, 30, 26, 22, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10 — chosen one screen
+   at a time, which is a large part of why a lesson read as flat: nothing was
+   two clear steps away from anything else. New and rebuilt screens size from
+   here. Existing literals are left alone rather than swept, since a blind
+   find-and-replace across every screen is exactly the refactor §12 warns about.
+
+   `hero` is the Russian word on a vocabulary card and nothing else. */
+export const type = {
+  hero: 40, display: 28, title: 20, head: 17, body: 15, small: 13, tiny: 11,
+};
+
+/* Motion. One place for how long a thing takes, so a card that rises and a bar
+   that fills agree with each other. Deliberately short: §25 says motion
+   reinforces interaction and must never be decoration that delays study, so
+   these are the shortest durations that still read as movement rather than as
+   a repaint. Anything above `celebrate` is too slow to sit between questions. */
+export const motion = { quick: 130, enter: 240, settle: 380, celebrate: 520 };
 
 export function useTheme() {
   return useColorScheme() === "light" ? light : dark;

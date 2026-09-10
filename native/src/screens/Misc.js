@@ -271,6 +271,41 @@ export function Video({ route, navigation }) {
         <Btn kind="pri" label="Play here" onPress={() => setPlaying(true)} />
       )}
 
+      {/* The tapped word sits under the player, not under the list.
+          The list runs to VIDEO_WORDS (20) rows of 56 px, so about eleven
+          hundred pixels stood between the player and this card: tapping a word
+          set the focus and seeked the video, both off screen, and read as the
+          tap having done nothing at all (the interface review, P11.9).
+
+          Moved rather than scrolled to. The card is *about* the player's
+          position and its two actions belong beside the thing playing; a
+          scroll-to would also slide the word list out from under the finger,
+          which fights the repeat gesture — tapping the same word again walks to
+          its next occurrence. */}
+      {focus ? (
+        <Card testID="video-focus" style={{ marginTop: 14 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+            <Pill tone="brand">{clock(focus.t)}</Pill>
+            <View style={{ flex: 1 }} />
+            <Muted>{focus.n > 1 ? `${focus.k + 1} of ${focus.n}` : "once"}</Muted>
+          </View>
+          <Text style={{ color: t.ink2, fontSize: 15, lineHeight: 22 }}>{focus.s}</Text>
+          <Btn label="Play it again" style={{ marginTop: 12 }}
+               onPress={() => { setPlaying(true); jump(focus.t); }} />
+          {/* One tap takes the word into review and keeps where it was heard, so
+              the flashcard can send you back to this second (ROADMAP P10.4).
+              What serious learners do by hand across three tools. */}
+          {mined[focus.word] ? (
+            <Muted testID="mined" style={{ textAlign: "center", marginTop: 10 }}>
+              In your review, from here
+            </Muted>
+          ) : (
+            <Btn kind="pri" testID="mine" label="Add to review" style={{ marginTop: 8 }}
+                 onPress={() => mine(focus)} />
+          )}
+        </Card>
+      ) : null}
+
       <SectionLabel style={{ marginTop: 18 }}>Listen for</SectionLabel>
       {/* One word a line with its meaning beside it, not a wrap of bare chips
           (the owner, 2026-09-10): the list is read before watching, and a word
@@ -301,30 +336,6 @@ export function Video({ route, navigation }) {
       ) : (
         <Muted>No study words are spoken in this one.</Muted>
       )}
-
-      {focus ? (
-        <Card style={{ marginTop: 14 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-            <Pill tone="brand">{clock(focus.t)}</Pill>
-            <View style={{ flex: 1 }} />
-            <Muted>{focus.n > 1 ? `${focus.k + 1} of ${focus.n}` : "once"}</Muted>
-          </View>
-          <Text style={{ color: t.ink2, fontSize: 15, lineHeight: 22 }}>{focus.s}</Text>
-          <Btn label="Play it again" style={{ marginTop: 12 }}
-               onPress={() => { setPlaying(true); jump(focus.t); }} />
-          {/* One tap takes the word into review and keeps where it was heard, so
-              the flashcard can send you back to this second (ROADMAP P10.4).
-              What serious learners do by hand across three tools. */}
-          {mined[focus.word] ? (
-            <Muted testID="mined" style={{ textAlign: "center", marginTop: 10 }}>
-              In your review, from here
-            </Muted>
-          ) : (
-            <Btn kind="pri" testID="mine" label="Add to review" style={{ marginTop: 8 }}
-                 onPress={() => mine(focus)} />
-          )}
-        </Card>
-      ) : null}
 
       {v.chapters && v.chapters.length ? (
         <>

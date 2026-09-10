@@ -137,6 +137,17 @@ describe("Video", () => {
     await act(async () => { fireEvent.press(screen.getByTestId(`heard-${heard[0]}`)); });
     expect(screen.getByTestId("yt-player")).toBeTruthy();
     expect(screen.getByText(unit.v.heard[heard[0]][0].s)).toBeTruthy();
+
+    /* And the card is above the word list, not below twenty rows of it.
+       It used to sit under the whole list — about eleven hundred pixels down —
+       so a tap set the focus and seeked the video with both off screen, and
+       read as having done nothing (P11.9). Position is the fix, so position is
+       what is asserted: native has no visual suite, so a visual contract is
+       held in the render tree (§20a). */
+    const order = JSON.stringify(screen.toJSON());
+    expect(order.indexOf("video-focus")).toBeGreaterThan(-1);
+    expect(order.indexOf("video-focus")).toBeLessThan(order.indexOf("Listen for"));
+    expect(order.indexOf("video-focus")).toBeLessThan(order.indexOf(`heard-${heard[0]}`));
   });
 
   /* From a dictionary entry (the owner, 2026-09-08): the entry lists the videos

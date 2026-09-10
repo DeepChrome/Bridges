@@ -27,7 +27,11 @@
 param(
     [string]$Flow = "",
     [string[]]$Steps = @(),
-    [string]$OutDir = ""
+    [string]$OutDir = "",
+    # Which device, when more than one is attached - a serial from `adb devices`,
+    # or "emulator" for the running emulator. Without it adb refuses outright
+    # ("more than one device/emulator") the moment a phone is also plugged in.
+    [string]$Device = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -42,11 +46,23 @@ New-Item -ItemType Directory -Force $OutDir | Out-Null
 # aborted the walk on its first screenshot (2026-09-09). Redirecting to $null does not
 # help: the record is created before the redirect. Every adb call goes through here,
 # where stderr joins the output stream and the exit code is what decides.
+$target = @()
+if ($Device) {
+    $serial = $Device
+    if ($Device -eq "emulator") {
+        $line = (& $adb devices | Select-String "^emulator-\d+\s+device" | Select-Object -First 1)
+        if (-not $line) { throw "no emulator is running" }
+        $serial = ($line -split "\s+")[0]
+    }
+    $target = @("-s", $serial)
+    Write-Host "device $serial" -ForegroundColor DarkGray
+}
+
 function Invoke-Adb {
     $prev = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     try {
-        $out = & $adb @args 2>&1
+        $out = & $adb @target @args 2>&1
         if ($LASTEXITCODE -ne 0) { throw "adb $($args -join ' ') failed: $out" }
         return @($out | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] })
     } finally { $ErrorActionPreference = $prev }

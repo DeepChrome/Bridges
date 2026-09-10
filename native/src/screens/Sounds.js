@@ -23,9 +23,13 @@ function VowelChart() {
   const W = 300, H = 210, pad = 34;
   const px = (x) => pad + x * (W - pad * 2);
   const py = (y) => pad * 0.6 + y * (H - pad * 1.4);
+  // The axis words live outside the frame: at the top left "close" and the и
+  // circle were landing on each other, so the viewBox is widened rather than the
+  // vowels moved, which would have made the chart itself wrong.
+  const gut = 46;
   return (
     <Card>
-      <Svg width="100%" height={H + 26} viewBox={`0 0 ${W} ${H + 26}`}>
+      <Svg width="100%" height={H + 26} viewBox={`${-gut} 0 ${W + gut} ${H + 26}`}>
         {/* The frame: narrower at the bottom, as the mouth's own space is. */}
         <Polygon
           points={`${px(0)},${py(0)} ${px(1)},${py(0)} ${px(0.82)},${py(1)} ${px(0.2)},${py(1)}`}
@@ -33,8 +37,8 @@ function VowelChart() {
         />
         <SvgText x={px(0)} y={py(0) - 12} fontSize="10" fill={t.ink3}>front</SvgText>
         <SvgText x={px(1)} y={py(0) - 12} fontSize="10" fill={t.ink3} textAnchor="end">back</SvgText>
-        <SvgText x={px(0) - 26} y={py(0) + 4} fontSize="10" fill={t.ink3}>closed</SvgText>
-        <SvgText x={px(0.2) - 26} y={py(1) + 4} fontSize="10" fill={t.ink3}>open</SvgText>
+        <SvgText x={-gut + 4} y={py(0) + 4} fontSize="10" fill={t.ink3}>closed</SvgText>
+        <SvgText x={-gut + 4} y={py(1) + 4} fontSize="10" fill={t.ink3}>open</SvgText>
         <Line x1={px(0.5)} y1={py(0)} x2={px(0.5)} y2={py(1)}
               stroke={t.lineSoft} strokeWidth="1" strokeDasharray="3 4" />
         {VOWEL_CHART.map((v) => (

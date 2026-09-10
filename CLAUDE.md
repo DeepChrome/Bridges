@@ -1311,6 +1311,43 @@ Phase 9) and the rules they left behind. The A37 log entry carries the numbers.
   learner is still the open problem — 55 reviews a day and 173 trouble words
   is a hard route — but it is no longer a route that buries them.
 
+## 30j. Phase 10 — production, and the letters (2026-09-10)
+
+Where the market leaves a gap, from research filed in ROADMAP Phase 10: input
+has to be 95–98 % comprehensible; real content beats scripted; **production
+beats recognition**; the intermediate plateau is unserved; and the AI-tutor
+apps carry no scheduler at all. Bridges holds a scheduler, native content
+indexed to the word, and a tutor, on the owner's own corpus — the three things
+that are elsewhere three separate tools.
+
+- **Recognition meets a word; production keeps it.** `PRODUCE_AT` (4 days of
+  FSRS stability) in `core/questions.js`: past it, `candidates()` returns only
+  `type` and `cloze`. It is a **restriction, not a reordering** — `quizSteps`
+  picks at random from what `candidates()` returns, so leaving the
+  multiple-choice kinds in the list leaves them in the quiz. The learner's
+  `seen` map is threaded in as the fourth argument to `quizSteps`; pass nothing
+  and behaviour is exactly as before, which is what keeps the web build working.
+- **`core/alphabet.js`** is hand-authored teaching content, beside
+  `core/scenarios.js` — the pipeline cannot generate it, because the lexicon
+  knows how a word inflects and not that «В» catches every English speaker.
+  33 letters with an English word to hear each in; `TRAPS`, the six Latin
+  look-alikes (В Н Р С У Х); `VOWEL_PAIRS`, the five hard/soft pairs, each
+  contrasting two real words; `VOWEL_CHART`, six vowels placed by tongue
+  position (`x`, front to back) and jaw opening (`y`, close to open);
+  `soundTip(word)` for the one line a vocabulary card shows.
+  **Comparisons are approximations offered as a way in, not claims of
+  identity** — Russian к is unaspirated, so the note reads "the k in skate",
+  not "the k in kit", and where English has nothing (ы) the note says so and
+  describes the mouth. Change a letter and `core.test.mjs`'s "the writing
+  system" group re-checks that the set is complete, in alphabetical order, and
+  that every vowel sits in exactly one pair.
+- **Practice → Sounds** draws the chart, the pairs, the false friends and the
+  alphabet. It is open from the first screen: nothing else in the app teaches
+  the letters.
+- A **lesson's steps are three cards** with air between them, a numbered badge
+  that becomes a tick, and the brand edge on whichever step is next — not three
+  rows of one list, which read as a settings screen.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

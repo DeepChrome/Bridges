@@ -1,4 +1,4 @@
-/* The written lesson passage on screen (§30k).
+/* The written lesson passage on screen (§30l).
  *
  * The generator is covered in tools/core.test.mjs and the Russian itself by
  * tools/check_scripts.mjs. What is asserted here is only what a person sees and

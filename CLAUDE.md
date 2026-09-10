@@ -770,8 +770,8 @@ sentence must never appear where an attested one is promised.
 **Written lesson material is the owner's explicit exception** (2026-09-10). He ruled
 that the corpus cannot supply level-matched listening — "You aren't going to find
 perfect audios. If you generate, we can vet it later and improve as needed" — and that
-every lesson is to have a passage written for it. So `data/curated/listening_scripts.json`
-is authored, not harvested, and §30k sets the terms that keep it honest: every word
+every lesson is to have a passage written for it. So `data/curated/scripts/chapter-NN.json`
+is authored, not harvested, and §30l sets the terms that keep it honest: every word
 machine-checked against what that lesson has taught, the voice labelled as the device
 voice, and the whole file open to correction.
 
@@ -1408,7 +1408,7 @@ and `watch(on)`, which polls the position four times a second while playing
 because the IFrame API has no time event. Position reports are the one message
 kept out of the console log; four a second would bury everything else.
 
-## 30k. The written lesson passages (2026-09-10)
+## 30l. The written lesson passages (2026-09-10)
 
 The owner, having listened to the video passages: *"The listening audios are way
 too advanced… it would be best if you generated your own and they corresponded to

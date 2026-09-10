@@ -1,4 +1,4 @@
-# The written lesson passage, on the emulator (CLAUDE.md 30k).
+# The written lesson passage, on the emulator (CLAUDE.md 30l).
 #
 #   .\native\tools\walk.ps1 -Flow native\flows\listening.txt -Device emulator
 #

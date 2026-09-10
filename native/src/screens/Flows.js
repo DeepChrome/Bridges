@@ -520,7 +520,7 @@ export function ListeningFlow({ navigation }) {
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
   const units = useMemo(() => reachedUnits(st), [seed]);
-  /* The passages written for the lessons this learner has finished (§30k).
+  /* The passages written for the lessons this learner has finished (§30l).
      The owner, 2026-09-10: the native-speed video passages were "way too
      advanced", and the build's own numbers agreed — 45 s of a native speaker
      uses more words than the first three chapters hold. These are pitched at

@@ -104,6 +104,12 @@ export function Immerse({ navigation }) {
         <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>{seen}</Text>
         <Muted size={14}>{`of ${all.length} watched`}</Muted>
       </View>
+      {/* Russian from outside the library (ROADMAP P10.7). Immerse is where
+          material the learner did not get from the curriculum comes in, so this
+          is its home rather than a sixth tab. */}
+      <Btn testID="read-anything" label="Read something you found"
+           style={{ marginBottom: 12 }}
+           onPress={() => navigation.navigate("Read")} />
       <SearchField testID="video-search" value={query} onChangeText={setQuery}
                    placeholder="Search: travel, grammar, B1, слово…" label="Search videos"
                    style={{ marginBottom: 12 }} />

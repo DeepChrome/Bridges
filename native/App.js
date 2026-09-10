@@ -32,6 +32,7 @@ import SttLab from "./src/screens/SttLab";
 import TourScreen from "./src/screens/Intro";
 import Sounds from "./src/screens/Sounds";
 import { ChapterTask } from "./src/screens/Task";
+import { Read } from "./src/screens/Read";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import {
@@ -201,6 +202,8 @@ function ImmerseStack() {
   return (
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Episodes" component={Immerse} options={{ title: "Immerse" }} />
+      {/* Russian from outside the library (ROADMAP P10.7). */}
+      <Stack.Screen name="Read" component={Read} options={{ title: "Read" }} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
     </Stack.Navigator>

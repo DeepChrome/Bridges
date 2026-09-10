@@ -20,12 +20,16 @@ import React, {
 import { View, Text } from "react-native";
 import { createNavigationContainerRef } from "@react-navigation/native";
 import { useTheme } from "./theme";
-import { Sheet, Btn } from "./ui";
+import { Sheet, Btn, Senses } from "./ui";
 import { L, IX } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise } from "@core/forms";
 
 export const navRef = createNavigationContainerRef();
+
+/* How many sense groups the summary sheet lists before it counts the remainder;
+   the same cap the vocabulary card uses (lesson.js). */
+const SHEET_SENSES = 4;
 
 const Ctx = createContext(null);
 export const useWords = () => useContext(Ctx);
@@ -110,11 +114,16 @@ function WordSheet({ state, onClose, onFull }) {
         </Text>
       ) : null}
 
-      {s.gloss ? (
-        <Text style={{ color: t.ink2, fontSize: 17, marginTop: 12 }}>
-          {s.gloss}
-        </Text>
-      ) : null}
+      {/* The senses numbered, as the entry, the flashcard back and the
+          vocabulary card all number them — one run of prose was the odd surface
+          out, and it showed `firstSense` alone, so «стол» read "table" with
+          nothing to say that "diet" and "department" were also in there.
+          Capped, because this is the glance: `Full entry` is in the footer, one
+          press away, and that is the escape hatch `max` assumes. Four is the
+          vocabulary card's cap — the app's other glance-sized surface — rather
+          than a second number invented here. */}
+      <Senses e={lemma.e} size={17} align="left" max={SHEET_SENSES}
+              style={{ marginTop: 12 }} />
 
       {s.tags.length ? (
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6,

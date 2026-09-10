@@ -68,6 +68,11 @@ describe("form question", () => {
     await act(async () => { fireEvent.press(screen.getByText("Got it")); });
     const right = q.options.find((o) => o.right).label;
     await act(async () => { fireEvent.press(screen.getByText(right)); });
-    expect(await screen.findByText("Right, with a hint")).toBeTruthy();
+    /* The cost is stated on the button *before* it is pressed, which is where a
+       learner can act on it. The verdict used to add "Right, with a hint"
+       afterwards, which explained a mechanism to someone who had already paid
+       for it, and the owner had it cut (2026-09-10). What must hold is that the
+       answer is still marked right. */
+    expect(await screen.findByText("Correct")).toBeTruthy();
   });
 });

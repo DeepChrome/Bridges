@@ -301,6 +301,29 @@ changed, `undefined` flowing silently through a render path. Hold the same bar.
 7. **Copy discipline.** Labels, not prose. Explanation goes in a `title` tooltip or is
    cut. Never add a paragraph of instructions to a screen.
 
+   **This is enforced now, because writing it down did not work.** The rule was
+   here from the start and the app filled up with explanation anyway — "Comes
+   round again", "Right, with a hint", "Paste Russian from anywhere. Every word
+   becomes tappable…", "You can test out of a section later" — because each
+   sentence looks reasonable on its own screen and nothing ever compared them.
+   The owner, 2026-09-10: *"I don't love the random explanatory text all over
+   the app. Stuff like 'comes back around'… don't have to explain features that
+   don't have to be explained."*
+
+   `node tools/copy.mjs` caps a learner-facing string at **10 words** and reads
+   both quoted literals and JSX text. Longer copy goes in its `ALLOW` map with a
+   reason, and a reason is only ever one of three: it teaches something about
+   Russian, it says where something came from (rule 10), or it reports a failure
+   that would otherwise leave a dead control with nothing said. A string that
+   merely describes how the app behaves is not one of the three. The map is
+   checked for staleness too, so copy that is cut cannot leave its exemption
+   behind.
+
+   **The test for whether a line is explanation:** could the learner have worked
+   it out by looking? The deck growing from two questions to three *is*
+   recycling. One button being blue and the other not *is* the advice to review
+   first. Saying it as well is the app narrating itself.
+
 8. **One mechanism per screen.** Path, lesson, practice, dictionary, profile. Controls
    live in a titled section or the settings sheet, never scattered. New functionality
    gets a home, not a button in the corner of an existing screen.
@@ -1691,6 +1714,7 @@ stylesheet's `[hidden] { display:none }`. Layout bugs need the browser.
 ```
 python tools/build_site.py     # or the full pipeline if data changed
 node tools/check_scripts.mjs --strict   # the written passages: level, coverage, no repeats
+node tools/copy.mjs            # labels, not prose (rule 20.7), capped and checked
 node tools/core.test.mjs       # the shared logic: generators, scheduler, state
 node tools/smoke.js            # must be all-pass
 node tools/visual.js           # must be all-pass; then look at tools/shots/

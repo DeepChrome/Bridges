@@ -98,7 +98,7 @@ export function ChapterTask({ route, navigation }) {
           ))}
         </View>
         <Muted style={{ marginTop: 10 }}>
-          {`In Russian, up to ${MAX_SENTENCES(chapter)} sentences.`}
+          {`In Russian · up to ${MAX_SENTENCES(chapter)} sentences`}
         </Muted>
       </Card>
 
@@ -159,14 +159,16 @@ export function ChapterTask({ route, navigation }) {
             placeholder="Write it in Russian"
             style={{ minHeight: 110, textAlignVertical: "top", borderRadius: radius.md }}
           />
+          {/* Both of these are failures rather than explanations: without them
+              the button is dead or the answer vanishes with no reason given. */}
           {state === "failed" ? (
             <Muted testID="task-failed" style={{ marginTop: 10 }}>
-              Could not reach the marker. Your answer is still here; try again in a moment.
+              Could not reach the marker.
             </Muted>
           ) : null}
           {!configured ? (
             <Muted testID="task-unmarked" style={{ marginTop: 10 }}>
-              This build cannot mark a task. The goal above is still worth doing.
+              This build cannot mark a task.
             </Muted>
           ) : null}
           <View style={{ marginTop: "auto", paddingTop: 16 }}>

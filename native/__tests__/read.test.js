@@ -116,7 +116,10 @@ describe("the screen", () => {
     await act(async () => {
       fireEvent.changeText(screen.getByTestId("read-input"), `https://youtu.be/${v.id}`);
     });
-    await waitFor(() => expect(screen.getByTestId("read-link")).toBeTruthy());
+    // Nothing is said about a link the library has: pressing Read opens the
+    // episode, which is the answer (the owner on explanatory text, 2026-09-10).
+    await waitFor(() => expect(screen.getByTestId("read-input").props.value).toContain(v.id));
+    expect(screen.queryByTestId("read-link")).toBeNull();
     await act(async () => { fireEvent.press(screen.getByTestId("read-go")); });
     expect(nav.navigate).toHaveBeenCalledWith("Video", { videoId: v.id });
   });
@@ -126,6 +129,6 @@ describe("the screen", () => {
     await act(async () => {
       fireEvent.changeText(screen.getByTestId("read-input"), "https://youtu.be/zzzzzzzzzzz");
     });
-    await waitFor(() => expect(screen.getByTestId("read-link")).toHaveTextContent(/already in the library/));
+    await waitFor(() => expect(screen.getByTestId("read-link")).toHaveTextContent(/Not in the library/));
   });
 });

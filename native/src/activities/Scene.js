@@ -166,9 +166,15 @@ export function Scene({ q, r }) {
       <Muted testID="scene-about" style={{ textAlign: "center", marginTop: 8 }}>
         {[q.topic, q.level, `${q.rows.length} sentences`].filter(Boolean).join(" · ")}
       </Muted>
-      <Muted testID="scene-voice" style={{ textAlign: "center", marginTop: 2 }}>
-        {["Read the questions first", voiceNote].filter(Boolean).join(" · ")}
-      </Muted>
+      {/* Only the voice note survives here. "Read the questions first" was an
+          instruction for a screen that already puts the questions above the
+          Play button; whose voice this is cannot be worked out by looking (§27),
+          so that one stays. */}
+      {voiceNote ? (
+        <Muted testID="scene-voice" style={{ textAlign: "center", marginTop: 2 }}>
+          {voiceNote}
+        </Muted>
+      ) : null}
 
       {q.questions.map((qq, k) => (
         <View key={k} testID={`scene-q-${k}`} style={{ marginTop: 16 }}>

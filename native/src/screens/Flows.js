@@ -138,7 +138,7 @@ export function ShadowFlow({ navigation }) {
 
   if (!steps.length) {
     return <Done title="Nothing to shadow yet"
-                 detail="A sentence needs a recording and words you have met."
+                 detail="Come back after a lesson or two."
                  onBack={() => navigation.goBack()} />;
   }
   if (result) {
@@ -462,16 +462,13 @@ export function ListeningList({ navigation }) {
   if (!shown.length) {
     return (
       <Done title="Not yet"
-            detail="A passage needs a few words you have already met. Come back after a lesson or two."
+            detail="Come back after a lesson or two."
             onBack={() => navigation.goBack()} />
     );
   }
   return (
     <Screen>
       <SectionLabel>{`${shown.length} passages`}</SectionLabel>
-      <Muted style={{ marginBottom: 10 }}>
-        Half a minute of one speaker on one subject, richest in your own words first.
-      </Muted>
       <List>
         {shown.map((p, k) => {
           const fit = Q.passageFit(p, known);
@@ -515,7 +512,7 @@ export function PassageFlow({ route, navigation }) {
 
   if (!passage || !steps.length) {
     return <Done title="Not yet"
-                 detail="This passage needs a few more words you have met."
+                 detail="Come back after a lesson or two."
                  onBack={() => navigation.goBack()} />;
   }
   if (result) {
@@ -575,7 +572,7 @@ export function ListeningFlow({ navigation }) {
 
   if (!steps.length) {
     return <Done title="Nothing to listen to yet"
-                 detail="Finish a lesson and its listening passage opens here."
+                 detail="Finish a lesson first."
                  onBack={() => navigation.goBack()} />;
   }
   if (result) {
@@ -662,7 +659,7 @@ export function CustomQuizFlow({ route, navigation }) {
   useAudioStopOnLeave();
 
   if (!steps.length) {
-    return <Done title="No questions for that choice" detail="Try more sections or another kind of question."
+    return <Done title="No questions for that choice" detail="Try more sections."
                  onBack={() => navigation.goBack()} />;
   }
   if (result) {
@@ -780,7 +777,7 @@ export function SectionFlow({ route, navigation }) {
           score: scoreOf(r),
           detail: cleared
             ? `${cleared} of ${lessonCount(unit)} lessons marked done.`
-            : "No lessons skipped. Worth working through this one.",
+            : "No lessons skipped.",
         });
       }}
     />

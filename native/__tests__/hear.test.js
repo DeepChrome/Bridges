@@ -168,7 +168,6 @@ describe("hear", () => {
     await waitFor(() => expect(screen.getByTestId("hear-input").props.value).toBe(typed));
     await act(async () => { fireEvent.press(screen.getByText("Check")); });
     expect(await screen.findByText(words.length > 1 ? "Almost" : "Not quite")).toBeTruthy();
-    expect(screen.getByText("Comes round again")).toBeTruthy();
     expect(screen.getAllByTestId("align-sub")).toHaveLength(1);
 
     const st = await saved();

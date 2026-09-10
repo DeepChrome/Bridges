@@ -519,12 +519,12 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                 {q.formNote ? <Muted style={{ marginTop: 3 }}>{q.formNote}</Muted> : null}
               </View>
             ) : null}
-            {right === true && usedHint ? (
-              <Muted style={{ marginTop: 4 }}>Right, with a hint</Muted>
-            ) : null}
-            {right === false && recycle && !q.retry ? (
-              <Muted style={{ marginTop: 6 }}>Comes round again</Muted>
-            ) : null}
+            {/* "Comes round again" and "Right, with a hint" used to sit here.
+                Both explained a mechanism rather than telling the learner
+                anything they could act on — the question does come round again,
+                and they will see it; the hint button said it counted before it
+                was pressed. The owner, 2026-09-10: "don't have to explain
+                features that don't have to be explained." */}
             <Btn kind={tone ? tone.btn : "plain"} label="Continue"
                  style={{ marginTop: 12 }} onPress={next} />
           </Card>

@@ -101,7 +101,9 @@ describe("runner verdict", () => {
     expect(await screen.findByText("1/2")).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByText("table")); });   // wrong for книга
     expect(await screen.findByText("Not quite")).toBeTruthy();
-    expect(screen.getByText("Comes round again")).toBeTruthy();
+    /* The deck growing from 2 to 3 below is what recycling *is*; the line
+       reading "Comes round again" that used to be asserted here was the app
+       narrating it, and the owner had it cut (2026-09-10). */
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     expect(await screen.findByText("2/3")).toBeTruthy();                       // the deck grew
     await act(async () => { fireEvent.press(screen.getByText("table")); });    // right for стол
@@ -110,7 +112,6 @@ describe("runner verdict", () => {
     expect(screen.getByText("книга")).toBeTruthy();                            // книга is back
     await act(async () => { fireEvent.press(screen.getByText("book")); });
     expect(await screen.findByText("Correct")).toBeTruthy();
-    expect(screen.queryByText("Comes round again")).toBeNull();
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ right: 1, wrong: 1, credit: 1, total: 2 }));
   });
@@ -127,8 +128,8 @@ describe("runner verdict", () => {
     expect(await screen.findByText("Almost")).toBeTruthy();
     expect(screen.getByText("One letter off")).toBeTruthy();
     expect(screen.getByText("Answer: книга")).toBeTruthy();
-    expect(screen.queryByText("Comes round again")).toBeNull();
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    // Not recycled: the deck never grew, which the finish tally shows.
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ credit: 0.5, total: 1 }));
   });
 

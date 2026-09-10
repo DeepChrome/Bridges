@@ -134,11 +134,6 @@ export function PairSay({ q, r }) {
             {`«${q.other}» is ${q.otherGloss}`}
           </Muted>
         ) : null}
-        {heard.word === null ? (
-          <Muted style={{ textAlign: "center", marginTop: 6 }}>
-            Nothing is marked wrong on a word the phone did not hear.
-          </Muted>
-        ) : null}
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center",
                        gap: 10, marginTop: 14 }}>
           <Text style={{ color: t.ink, fontSize: 26, fontWeight: "700" }}>{q.target}</Text>

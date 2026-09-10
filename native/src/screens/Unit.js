@@ -94,7 +94,7 @@ export function LessonScreen({ route, navigation }) {
   const copy = {
     vocab: "Meet the new words",
     quiz: "Show you know them",
-    video: "Hear them in the wild · shared across this unit",
+    video: "Shared across this unit",
   };
 
   const nextId = (cs.find((c) => !c.done) || {}).id;

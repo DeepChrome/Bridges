@@ -69,7 +69,7 @@ export function Read({ navigation }) {
             {known.unknown ? ` · ${known.unknown} outside the dictionary` : ""}
           </Muted>
           {known.truncated ? (
-            <Muted style={{ marginTop: 4 }}>{`Only the first ${MAX_CHARS} characters were read.`}</Muted>
+            <Muted style={{ marginTop: 4 }}>{`First ${MAX_CHARS} characters only`}</Muted>
           ) : null}
         </Card>
 
@@ -111,10 +111,6 @@ export function Read({ navigation }) {
 
   return (
     <Screen fill>
-      <Muted style={{ marginBottom: 12 }}>
-        Paste Russian from anywhere. Every word becomes tappable, and the new ones
-        can go straight into your review.
-      </Muted>
       <RuInput
         testID="read-input"
         value={text}
@@ -123,11 +119,12 @@ export function Read({ navigation }) {
         placeholder="Paste Russian text"
         style={{ minHeight: 160, textAlignVertical: "top", borderRadius: radius.md }}
       />
-      {link ? (
+      {/* Nothing is said about a link the library has — pressing Read opens the
+          episode, which is the answer. A link it does not have has to say so,
+          because otherwise the button is dead with no reason given. */}
+      {link && !videoById(link) ? (
         <Muted testID="read-link" style={{ marginTop: 10 }}>
-          {videoById(link)
-            ? "That video is in the library. Opening it there."
-            : "A video link can only be opened if it is already in the library."}
+          Not in the library.
         </Muted>
       ) : null}
       <View style={{ marginTop: "auto", paddingTop: 16 }}>

@@ -417,10 +417,12 @@ export function Gate({ onPlacement }) {
           </Row>
           <Row last onPress={() => start(false)}>
             <View style={{ flex: 1 }}>
+              {/* No "You can test out of a section later" underneath. It was
+                  the app advertising a feature at someone choosing where to
+                  start, and testing out is offered on the unit that has it. */}
               <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
                 Start from the beginning
               </Text>
-              <Muted>You can test out of a section later</Muted>
             </View>
           </Row>
         </List>

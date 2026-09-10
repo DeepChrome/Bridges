@@ -75,17 +75,19 @@ describe("reviews before new words", () => {
     const lesson = await screen.findByText(/^(Start|Continue) \(/);
     expect(fillOf(lesson.parent)).toBe(light.brand.toUpperCase());
     expect(fillOf(btnFor(`Review · ${REVIEW_FIRST - 1} due`))).not.toBe(light.brand.toUpperCase());
-    expect(screen.queryByTestId("review-first")).toBeNull();
   });
 
-  it("makes reviewing primary once the backlog is real, and says why", async () => {
+  /* The swap *is* the message. There used to be a line under it reading "Clear
+     these before new words", and asserting that line was really asserting that
+     the app narrates its own rule (the owner, 2026-09-10). What has to hold is
+     which button is blue and that the lesson is still one press away. */
+  it("makes reviewing primary once the backlog is real, without saying so", async () => {
     await withState({ seen: due(REVIEW_FIRST) });
     const review = await screen.findByText(`Review · ${REVIEW_FIRST} due`);
     expect(fillOf(review.parent)).toBe(light.brand.toUpperCase());
     // …and the lesson is still there, still one press away.
     const lesson = screen.getByText(/^(Start|Continue) \(/);
     expect(fillOf(lesson.parent)).not.toBe(light.brand.toUpperCase());
-    expect(screen.getByTestId("review-first")).toBeTruthy();
     fireEvent.press(lesson);
     expect(nav.navigate).toHaveBeenCalled();
   });

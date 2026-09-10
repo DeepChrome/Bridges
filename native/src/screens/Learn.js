@@ -316,12 +316,12 @@ export default function Learn({ navigation }) {
           the lesson is still one press away, as the fork and developer mode are.
           Without it the struggling simulated learner walked into 254 cards due in
           a day and finished the route with 208 outstanding; holding new words
-          back halves the worst day and empties the backlog by the end. */}
-      {holdBack ? (
-        <Muted testID="review-first" style={{ marginTop: 6, textAlign: "center" }}>
-          Clear these before new words
-        </Muted>
-      ) : null}
+          back halves the worst day and empties the backlog by the end.
+
+          It used to say "Clear these before new words" underneath. The swap is
+          the message: one button is blue and the other is not, which is what
+          §25 means by showing rather than explaining, and the line was the app
+          narrating its own rule at someone who could already see it. */}
       {next ? (
         // Straight to the next undone step of the next lesson — a question
         // within seconds, not a unit list and a lesson list first.

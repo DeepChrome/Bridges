@@ -168,7 +168,7 @@ function SetPicker({ visible, onClose }) {
             {troubleWords(st).length ? (
               <View style={{ marginBottom: 18 }}>
                 <List>
-                  <Row last onPress={() => toggle("__trouble__")}>
+                  <Row onPress={() => toggle("__trouble__")}>
                     <Tick on={st.sets.includes("__trouble__")} />
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: t.ink, fontSize: 15 }}>Trouble words</Text>
@@ -187,8 +187,8 @@ function SetPicker({ visible, onClose }) {
               </View>
               {(st.decks || []).length ? (
                 <List>
-                  {(st.decks || []).map((d, k) => (
-                    <Row key={d.id} last={k === st.decks.length - 1}
+                  {(st.decks || []).map((d) => (
+                    <Row key={d.id}
                          onPress={() => toggle("deck:" + d.id)}>
                       <Tick on={st.sets.includes("deck:" + d.id)} />
                       <View style={{ flex: 1 }}>
@@ -225,8 +225,8 @@ function SetPicker({ visible, onClose }) {
                          })} />
                   </View>
                   <List>
-                    {units.map((u, k) => (
-                      <Row key={u.id} last={k === units.length - 1}
+                    {units.map((u) => (
+                      <Row key={u.id}
                            onPress={() => toggle(u.id)}>
                         <Tick on={st.sets.includes(u.id)} />
                         <View style={{ flex: 1 }}>
@@ -291,7 +291,7 @@ export default function Study({ navigation }) {
   return (
     <Screen>
       <List>
-        <Row last onPress={() => setPicker(true)}>
+        <Row onPress={() => setPicker(true)}>
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15 }}>
               {names.length ? (names.length === 1 ? names[0] : `${names.length} sets`)

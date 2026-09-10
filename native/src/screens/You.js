@@ -99,7 +99,7 @@ function Settings({ visible, onClose, onLab, onTour }) {
                           onPick={(id) => update((p) => ({ ...p, speed: id }))} />
                 </View>
               </Row>
-              <Row last={!st.dev}>
+              <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Right-answer sound</Text>
                   <Muted>Tap to hear</Muted>
@@ -115,12 +115,13 @@ function Settings({ visible, onClose, onLab, onTour }) {
               </Row>
               {/* Last, not first: a new learner's settings sheet should not open on
                   a switch they cannot place. It ships on (rule 20.9). */}
-              <Row last={!st.dev}>
+              <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Developer mode</Text>
                   <Muted>All lessons unlocked</Muted>
                 </View>
                 <Switch
+                  testID="dev-switch"
                   value={!!st.dev}
                   onValueChange={(v) => update((p) => ({ ...p, dev: v }))}
                   trackColor={{ true: t.good, false: t.surface3 }}
@@ -128,7 +129,7 @@ function Settings({ visible, onClose, onLab, onTour }) {
               </Row>
               {st.dev ? (
                 // A measuring tool, not a feature: only with developer mode on.
-                <Row last onPress={() => { onClose(); onLab(); }}>
+                <Row onPress={() => { onClose(); onLab(); }}>
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: t.ink, fontSize: 15 }}>STT Lab</Text>
                     <Muted>Measure speech recognition on your voice</Muted>
@@ -260,10 +261,10 @@ export default function You({ navigation }) {
           />
           <View style={{ marginTop: 10 }}>
             <List>
-              {trouble.slice(0, 12).map((w, k) => {
+              {trouble.slice(0, 12).map((w) => {
                 const i = idxOfWord(w);
                 return (
-                  <Row key={w} last={k === Math.min(12, trouble.length) - 1}>
+                  <Row key={w}>
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: t.ink, fontSize: 16 }}>
                         {i >= 0 ? L[i].w : w}
@@ -284,10 +285,10 @@ export default function You({ navigation }) {
         <Muted>Nothing yet</Muted>
       ) : (
         <List>
-          {grammar.map((g, k) => {
+          {grammar.map((g) => {
             const unit = g.info.unit ? UN.find((u) => u.id === g.info.unit) : null;
             return (
-              <Row key={g.id} last={k === grammar.length - 1}
+              <Row key={g.id}
                    onPress={unit ? () => openUnit(unit.id) : undefined}
                    disabled={!unit}>
                 <View style={{ flex: 1 }}>

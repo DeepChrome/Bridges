@@ -216,8 +216,8 @@ function Summary({ scenario, turns, newWords, st, onPin, onPinAll, onAgain, onBa
             ) : null}
           </View>
           <List>
-            {words.map((w, k) => (
-              <Row key={w.lemma} last={k === words.length - 1}>
+            {words.map((w) => (
+              <Row key={w.lemma}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 16 }}>{w.lemma}</Text>
                   <Muted>{w.en}</Muted>
@@ -464,11 +464,11 @@ export default function Talk({ navigation, route }) {
                 onPick={(id) => update((p) => ({ ...p, talkSpeed: id }))} />
         <Muted style={{ marginTop: 6, marginBottom: 16 }}>How fast the tutor is read out</Muted>
         <List>
-          {SCENARIOS.map((s, k) => {
+          {SCENARIOS.map((s) => {
             const u = UN.find((x) => x.id === s.unit);
             const enabled = canStart(s);
             return (
-              <Row key={s.id} last={k === SCENARIOS.length - 1} disabled={!enabled}
+              <Row key={s.id} disabled={!enabled}
                    onPress={() => start(s)}>
                 <Thumb id={s.icon} locked={!enabled} />
                 <View style={{ flex: 1 }}>

@@ -69,12 +69,31 @@ export function Card({ children, style, testID }) {
   );
 }
 
+/* Where the hairlines go is the List's business, not each row's.
+ *
+ * Every call site used to work it out for itself — `last={k === xs.length - 1}`,
+ * or a bare `last` on whichever row happened to be written down last — and the
+ * moment a row is inserted *after* the one carrying it, the group loses a
+ * hairline in its middle and nothing fails. That is exactly what happened to
+ * Settings when "Show the tour" landed under "Right-answer sound", both rows
+ * then claiming `last={!st.dev}` (ROADMAP P11.9).
+ *
+ * The List already knows which of its children renders last, so it says so.
+ * `Children.toArray` drops the ones that rendered nothing, which is why a
+ * trailing `{cond ? <Row/> : null}` no longer needs the row above it to
+ * second-guess the condition. A row nested inside a wrapper is out of reach and
+ * keeps its own `last`, as before. */
 export function List({ children }) {
   const t = useTheme();
+  const rows = React.Children.toArray(children);
   return (
     <View style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
                    borderRadius: radius.lg, overflow: "hidden" }}>
-      {children}
+      {rows.map((row, k) => (
+        React.isValidElement(row)
+          ? React.cloneElement(row, { last: k === rows.length - 1 })
+          : row
+      ))}
     </View>
   );
 }

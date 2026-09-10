@@ -64,8 +64,8 @@ export default function Search({ navigation }) {
       {hits.length ? (
         <View style={{ marginTop: 16 }}>
           <List>
-            {hits.map((h, k) => (
-              <Row key={h.b} last={k === hits.length - 1} onPress={() => open(h)}>
+            {hits.map((h) => (
+              <Row key={h.b} onPress={() => open(h)}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 19, fontWeight: "600" }}>
                     {h.w}

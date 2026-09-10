@@ -54,7 +54,7 @@ export function UnitScreen({ route, navigation }) {
           const cs = components(st, unit, i);
           const words = lessonWords(unit, i).map((x) => L[x].b);
           return (
-            <Row key={i} last={i === n - 1}
+            <Row key={i}
                  onPress={() => navigation.navigate("Lesson",
                    { unitId: unit.id, index: i })}>
               <Thumb id={unit.id} done={lessonDone(st, unit, i)} n={i + 1} />

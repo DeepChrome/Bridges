@@ -135,16 +135,56 @@ export function makeQuestions(env) {
 
   /* ------------------------------------------------------------ helpers */
 
+  /* A meaning with its parentheticals stripped, for comparing one gloss against
+     another: `firstSense` gives "on (place)" for «на», which never matches the
+     plain "on" sitting in «в»'s list even though a learner offered both would be
+     right either way. */
+  const senseKey = (s) => fold(String(s || "").replace(/\s*[([][^)\]]*[)\]]/g, "").trim());
+  const mainSense = (w) => senseKey(firstSense(w));
+  /* Every synonym in a gloss, not only the first group: OpenRussian separates
+     senses with semicolons and synonyms within a sense with commas, and both
+     matter here because either can be the meaning a learner reads. */
+  const allSenses = (w) =>
+    new Set(String(w.e || "").split(/[;,]/).map(senseKey).filter(Boolean));
+
+  /* Whether `i` can be a wrong answer against `correctIdx`.
+     A distractor is unsafe when the option a learner sees is *also* a right
+     answer. It was checked one way only — first sense against first sense —
+     which let «у» stand as a wrong answer to "at" beside «на», and 1.1 % of all
+     option sets carried a second genuinely correct choice. Both directions are
+     checked now, because the two question shapes read the pair opposite ways:
+     choose-en shows the distractor's meaning against the answer's word, and
+     choose-ru shows the answer's meaning against the distractor's word. */
+  function safeDistractor(correctIdx, i) {
+    const a = L[correctIdx], b = L[i];
+    if (!a || !b) return false;
+    return !allSenses(a).has(mainSense(b)) && !allSenses(b).has(mainSense(a));
+  }
+
+  /* Wrong answers, preferring words of the same class as the right one.
+     Ignoring part of speech meant that in 23.7 % of option sets the answer was
+     the only option of its own kind — "in" standing against *want*, *year* and
+     *he* — so the ending gave it away without the learner knowing the word at
+     all. Same class first, then anything, then (only if the pool is too thin to
+     fill four options at all) the merely-distinct. A question with three
+     options is worse than one with a weak fourth. */
   function distractors(correctIdx, pool, n, key) {
     const want = key(L[correctIdx]);
+    const pos = (L[correctIdx] || {}).p;
     const out = [];
-    for (const i of shuffle(pool.slice())) {
-      if (i === correctIdx) continue;
-      const v = key(L[i]);
-      if (!v || v === want || out.some((o) => key(L[o]) === v)) continue;
-      out.push(i);
-      if (out.length === n) break;
-    }
+    const take = (accept) => {
+      for (const i of shuffle(pool.slice())) {
+        if (out.length === n) return;
+        if (i === correctIdx || out.includes(i)) continue;
+        const v = key(L[i]);
+        if (!v || v === want || out.some((o) => key(L[o]) === v)) continue;
+        if (!accept(i)) continue;
+        out.push(i);
+      }
+    };
+    take((i) => L[i].p === pos && safeDistractor(correctIdx, i));
+    take((i) => safeDistractor(correctIdx, i));
+    take(() => true);
     return out;
   }
 
@@ -249,10 +289,31 @@ export function makeQuestions(env) {
      The key a distractor is chosen by is therefore the meaning, whichever way
      round the question is asked. */
   const bySense = (x) => fold(firstSense(x));
-  /* And when the learner types, any word of the pool with that meaning is right:
-     "jacket" → «пиджак» or «куртка». */
+
+  /* Every lemma that leads with a given meaning, built once on first use.
+     When the learner types, any Russian word with the meaning on screen is a
+     right answer: "jacket" → «пиджак» or «куртка». This used to search the
+     question's own pool, which is the unit's word list, so «тут» was marked
+     wrong for "here" because «здесь» happened to be the word the unit taught.
+     The learner had written correct Russian for the prompt they were given, and
+     the app told them they were wrong — the one verdict a study app must never
+     get backwards. The index is over the whole curriculum instead. */
+  let senseIndex = null;
+  function bySenseIndex() {
+    if (senseIndex) return senseIndex;
+    senseIndex = new Map();
+    L.forEach((x, i) => {
+      const k = mainSense(x);
+      if (!k) return;
+      if (!senseIndex.has(k)) senseIndex.set(k, []);
+      senseIndex.get(k).push(i);
+    });
+    return senseIndex;
+  }
   const sameSense = (e, w) =>
-    (e.pool || []).filter((i) => i !== e.i && bySense(L[i]) === bySense(w)).map((i) => fold(L[i].b));
+    unique((bySenseIndex().get(mainSense(w)) || [])
+      .filter((i) => i !== e.i)
+      .map((i) => fold(L[i].b)));
 
   /* Turns a generated exercise into what a runner needs to show: a prompt, options
      and which one is right. Keeping this here means the web and native runners
@@ -782,11 +843,56 @@ export function makeQuestions(env) {
       return withPool(unitsUpTo(unit).flatMap((u) => u.w), () => (GEN[spec.drill] ? GEN[spec.drill]() : null));
     }
     const typed = stageOf(unit) >= FORM_MIX.typedFromStage;
-    const tiers = only !== undefined ? [[only]]
-      : [lessonWords(unit, index), unit.w, unitsUpTo(unit).flatMap((u) => u.w)];
-    for (const tier of tiers) {
-      const able = shuffle(unique(tier).filter((i) => formCells(L[i], spec).length));
-      for (const i of able.slice(0, 6)) {
+    if (only !== undefined) {
+      const cells = formCells(L[only], spec);
+      return cells.length ? formQuestion(only, pickOne(cells), typed) : null;
+    }
+
+    /* The tiers used to be a fallback chain: the lesson's words, and only if
+       none of them had the form, the unit's, and only then the route's. Chapter
+       6's card asks for a table cell few of its words carry, so the narrow tier
+       was almost never empty — it held one or two words — and the wider ones
+       were therefore almost never reached. The chapter could ask **seven**
+       distinct questions across five lessons and every retake of them.
+
+       They are shares of one draw now. The lesson's own words are still what a
+       question is most likely to be about, which is the reason the tiers existed;
+       they are no longer the only thing it can be about.
+
+       The share is on the *tier*, not on each word in it. Weighting words and
+       shuffling one bag was the obvious way to do it and does not work here:
+       the route tier holds hundreds of words against the lesson's one or two,
+       so even at four times the weight the lesson was the subject of 9 % of
+       draws. Pick which tier to ask from, then a word inside it. */
+    const seen = new Set();
+    const ableOf = (tier) => {
+      const out = [];
+      for (const i of unique(tier)) {
+        if (seen.has(i)) continue;
+        seen.add(i);
+        if (formCells(L[i], spec).length) out.push(i);
+      }
+      return out;
+    };
+    const pools = [
+      { words: ableOf(lessonWords(unit, index)), share: 0.55 },
+      { words: ableOf(unit.w), share: 0.25 },
+      { words: ableOf(unitsUpTo(unit).flatMap((u) => u.w)), share: 0.20 },
+    ].filter((p) => p.words.length);
+    if (!pools.length) return null;
+
+    const total = pools.reduce((n, p) => n + p.share, 0);
+    let roll = Math.random() * total;
+    let chosen = pools.length - 1;
+    for (let k = 0; k < pools.length; k++) {
+      roll -= pools[k].share;
+      if (roll <= 0) { chosen = k; break; }
+    }
+    // The chosen tier first, then the others, so a tier whose words all fail to
+    // build a question costs range rather than the whole question.
+    const order = [pools[chosen]].concat(pools.filter((_, k) => k !== chosen));
+    for (const p of order) {
+      for (const i of shuffle(p.words.slice()).slice(0, 12)) {
         const q = formQuestion(i, pickOne(formCells(L[i], spec)), typed);
         if (q) return q;
       }
@@ -1014,21 +1120,34 @@ export function makeQuestions(env) {
      up with review: `prefer` (lemma indices — what is due or in trouble, the
      app decides) first, then words from the unit's earlier lessons, so a
      three-word lesson is not a five-question quiz. */
-  function quizSteps(unit, index, prefer, seen) {
+  function quizSteps(unit, index, prefer, seen, last) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
     // `seen` is the learner's schedule keyed on the Russian string (rule 20.4).
     // A word the scheduler already holds is asked by production (PRODUCE_AT).
     const card = (i) => (seen && L[i] ? seen[L[i].b] : null);
-    const bag = words.map((i) => {
-      const c = candidates(i, pool, card(i));
-      return c[Math.floor(Math.random() * c.length)];
-    });
+
+    /* `last` is what the previous attempt asked (`stepKeys` below). A retake
+       repeated 41 % of the quiz and half of that word for word, which is not a
+       second look at the material — it is the same screen again, and the
+       learner is being marked on whether they remember the last five minutes.
+       A word that comes back comes back in a different shape when it has one;
+       when it has only one, it repeats, because asking nothing would be worse. */
+    const avoid = new Set(last || []);
+    const drawFrom = (list, i) => {
+      const fresh = list.filter((e) => !avoid.has(`${e.t}:${i}`));
+      const from = fresh.length ? fresh : list;
+      return from.length ? from[Math.floor(Math.random() * from.length)] : null;
+    };
+    const draw = (i) => drawFrom(candidates(i, pool, card(i)), i);
+
+    const bag = words.map(draw).filter(Boolean);
+    /* Both production shapes, not just the first. `find(type) || find(cloze)`
+       could never reach its second branch: `candidates` always ends with a
+       `type`, so the gap-fill was unreachable here and every guaranteed
+       production slot in the app was a typed one. */
     const production = words
-      .map((i) => {
-        const c = candidates(i, pool, card(i));
-        return c.find((e) => e.t === "type") || c.find((e) => e.t === "cloze");
-      })
+      .map((i) => drawFrom(candidates(i, pool, card(i)).filter((e) => PRODUCTION.includes(e.t)), i))
       .filter(Boolean);
     shuffle(production).slice(0, 2).forEach((e) => bag.push(e));
     const review = shuffle((prefer || []).filter((i) => L[i] && !words.includes(i)));
@@ -1036,8 +1155,8 @@ export function makeQuestions(env) {
       .filter((i) => !words.includes(i) && !review.includes(i)));
     while (bag.length < QUIZ_N && (review.length || earlier.length)) {
       const pick = review.length ? review.pop() : earlier.pop();
-      const c = candidates(pick, pool, card(pick));
-      bag.push(c[Math.floor(Math.random() * c.length)]);
+      const e = draw(pick);
+      if (e) bag.push(e);
     }
     const out = spread(shuffle(bag).slice(0, QUIZ_N)).map(present).filter(Boolean);
     // Speech steps ride on top of the QUIZ_N vocabulary questions, at a random
@@ -1060,6 +1179,15 @@ export function makeQuestions(env) {
       }
     }
     return out;
+  }
+
+  /* What a run asked, in the form `quizSteps` takes back as `last`. The caller
+     keeps it between attempts; it is a list of "shape:word", so it says nothing
+     about whether the learner got them right and needs no schema of its own. */
+  function stepKeys(steps) {
+    return (steps || [])
+      .filter((q) => q && q.kind && typeof q.i === "number")
+      .map((q) => `${q.kind}:${q.i}`);
   }
 
   /* A position after the first question whose neighbours are not about q's
@@ -1500,7 +1628,7 @@ export function makeQuestions(env) {
 
   return {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
-    vocabSteps, quizSteps, placementQuestions, sectionQuestions, drillQuestions, drillKey,
+    vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, listeningDrill, lessonPassage, scriptScene, writtenPassage,
     customQuiz, formPrompt, formSpec, formsIntroduced,
     drillsIntroduced, drillOpensAt, passagesFor, passageQuestions, passageFit,

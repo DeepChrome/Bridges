@@ -1,7 +1,7 @@
 /* Everything the runner drives: vocabulary, lesson quiz, drills, and the two
  * placement routes. Each one supplies its steps and decides what the result means. */
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { View, Text } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
@@ -122,12 +122,22 @@ export function QuizFlow({ route, navigation }) {
   const { st, update } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
+  /* What the previous attempt asked. A retake used to repeat a quarter of the
+     quiz as the same shape about the same word, which is not a second look at
+     the material — it is the same screen again five minutes later (P11.4). Held
+     in a ref rather than state so recording it cannot itself cause a render, and
+     read at generation time. It lives for the session: a retake days later is a
+     real review and may legitimately look the same. */
+  const asked = useRef(null);
   // The quiz tops up with what is due or in trouble before the unit's earlier
   // words: review comes to the path (the pedagogy review, 2026-09-08).
   // `st.seen` rides along so a word the scheduler already trusts is asked by
   // typing rather than by four choices (ROADMAP P10.1).
-  const steps = useMemo(() => Q.quizSteps(unit, index, reviewWords(st), st.seen),
-                        [unitId, index, seed]);
+  const steps = useMemo(() => {
+    const next = Q.quizSteps(unit, index, reviewWords(st), st.seen, asked.current);
+    asked.current = Q.stepKeys(next);
+    return next;
+  }, [unitId, index, seed]);
   useAudioStopOnLeave();
 
   if (result) {

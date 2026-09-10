@@ -598,9 +598,27 @@ group("form questions");
   if (plural) {
     const q = Q.quizSteps(plural.core, 0).find((x) => x.kind === "form");
     ok(q && /nominative plural/.test(q.ask), "core4 asks for the nominative plural", q && q.ask);
+    /* The lesson's words are preferred, not required. Requiring them was the
+       bug (P11.8): the tiers were a fallback chain, so a chapter whose card
+       names a cell few of its words carry asked about the same one or two words
+       for ever — chapter 6 could produce seven distinct questions across five
+       lessons and every retake. What must hold now is that the lesson's own
+       words are still the likeliest subject, and that the pool is wider than
+       they are. */
     const own = new Set(lessonWords(plural.core, 0));
-    const able = [...own].some((i) => Q.formPrompt(plural.core, 0, i));
-    ok(!able || own.has(q.i), "asked about one of the lesson's own words when one has the form");
+    const able = [...own].filter((i) => Q.formPrompt(plural.core, 0, i));
+    const drawnAt = [];
+    for (let k = 0; k < 200; k++) {
+      const d = Q.formPrompt(plural.core, 0);
+      if (d && typeof d.i === "number") drawnAt.push(d.i);
+    }
+    const mine = drawnAt.filter((i) => own.has(i)).length;
+    ok(!able.length || mine > drawnAt.length * 0.3,
+       "the lesson's own words are the likeliest subject of its form question",
+       `${mine} of ${drawnAt.length}`);
+    ok(new Set(drawnAt).size > able.length,
+       "and the question is not confined to them",
+       `${new Set(drawnAt).size} distinct words, ${able.length} in the lesson`);
     const branch = plural.branches[0];
     ok(Q.formSpec(branch) === Q.formSpec(plural.core) || branch.g.form, "a branch inherits its chapter's form or names its own");
   }
@@ -710,6 +728,80 @@ group("scenes and custom quizzes");
    Russian stays inside the lesson's vocabulary; this proves the app turns one
    into a scene a learner can actually answer, and that it is preferred over the
    corpus scene wherever a lesson has one. */
+/* The three question-quality bugs the second review measured (ROADMAP P11.4 and
+   P11.7). Each is asserted as a rate over a population, not on one example: they
+   were all found by measuring and none of them shows on a single question. */
+group("question quality");
+{
+  // P11.7a — the answer must not be the only option of its own word class, or
+  // the ending gives it away without knowing the word. Was 23.7 % of option sets.
+  let sets = 0, lone = 0, second = 0, short = 0;
+  const senseKey = (s) => fold(String(s || "").replace(/\s*[([][^)\]]*[)\]]/g, "").trim());
+  const allSenses = (w) => new Set(String(w.e || "").split(/[;,]/).map(senseKey).filter(Boolean));
+  for (const u of UN) {
+    const pool = u.w.length >= 8 ? u.w : UN.flatMap((x) => x.w).slice(0, 400);
+    for (const i of u.w.slice(0, 12)) {
+      for (const kind of ["choose-en", "choose-ru"]) {
+        const q = Q.present({ t: kind, i, pool });
+        if (!q || !q.options) continue;
+        sets++;
+        if (q.options.length < 4) short++;
+        const wrong = q.options.filter((o) => !o.right).map((o) => (kind === "choose-en"
+          ? L.find((x) => firstSense(x) === o.label)
+          : L.find((x) => x.w === o.label))).filter(Boolean);
+        if (wrong.length && wrong.every((x) => x.p !== L[i].p)) lone++;
+        if (wrong.some((x) => allSenses(L[i]).has(senseKey(firstSense(x)))
+                           || allSenses(x).has(senseKey(firstSense(L[i]))))) second++;
+      }
+    }
+  }
+  ok(sets > 500, `${sets} option sets measured`);
+  ok(lone / sets < 0.08, "the answer is rarely the only option of its own class",
+     `${(lone / sets * 100).toFixed(1)}%`);
+  ok(second / sets < 0.005, "and almost never has a second right answer among the wrong ones",
+     `${(second / sets * 100).toFixed(1)}%`);
+  ok(short === 0, "no option set lost a fourth option to the stricter rules", String(short));
+
+  // P11.7c — a typed answer accepts any Russian word with the meaning shown, not
+  // only one from the same unit. «тут» for "here" was marked wrong because the
+  // unit happened to teach «здесь».
+  const here = L.findIndex((w) => w.b === "здесь");
+  if (here >= 0) {
+    const typed = Q.present({ t: "type", i: here, pool: [here] });
+    ok(typed.alts.length > 0, "a typed answer accepts synonyms from outside its own unit",
+       typed.alts.join(", "));
+  }
+
+  // P11.4 — a retake asked a quarter of the quiz as the same shape about the
+  // same word, half of it word for word.
+  let same = 0, total = 0;
+  for (const s of STAGES) {
+    for (const u of [s.core].concat(s.branches)) {
+      for (let li = 0; li < lessonCount(u); li++) {
+        const a = Q.quizSteps(u, li);
+        const b = Q.quizSteps(u, li, null, null, Q.stepKeys(a));
+        const before = new Set(Q.stepKeys(a));
+        for (const k of Q.stepKeys(b)) { total++; if (before.has(k)) same++; }
+      }
+    }
+  }
+  ok(total > 1000 && same / total < 0.08,
+     "a retake rarely repeats the same shape about the same word",
+     `${(same / total * 100).toFixed(1)}% of ${total}`);
+
+  // P11.4 — and the gap-fill was unreachable in the guaranteed production slots,
+  // because `find(type) || find(cloze)` can never reach its second branch.
+  const shapes = new Set();
+  for (const s of STAGES.slice(0, 4)) {
+    for (let d = 0; d < 40; d++) {
+      Q.quizSteps(s.core, 0).forEach((q) => shapes.add(q.kind));
+    }
+  }
+  ok(shapes.has("cloze") && shapes.has("type"),
+     "both production shapes are reachable in a lesson quiz",
+     [...shapes].join(", "));
+}
+
 /* Yuri (§30m). The art is judged by eye; what a suite can hold is that every
    pose actually draws, that he recolours with the theme, and that his one line
    of copy stays one line. */

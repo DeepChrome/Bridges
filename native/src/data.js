@@ -1,4 +1,4 @@
-﻿/* The generated payload and the curriculum logic that reads it.
+/* The generated payload and the curriculum logic that reads it.
  *
  * data.json is written by tools/build_site.py, the same bytes the web build embeds,
  * so both platforms are always a single generation of the pipeline.
@@ -32,7 +32,7 @@ export const AUDIO = (DATA.audio && DATA.audio.files) || {};
 /* The speaking and listening pools (CLAUDE.md §30b): one shared row list, and per
    unit the rows each activity may draw from. */
 export const SPEECH = DATA.speech || { rows: [], speak: {}, listen: {} };
-/* The written lesson passages (§30j), keyed "unitId:lessonIndex": four or five
+/* The written lesson passages (§30k), keyed "unitId:lessonIndex": four or five
    sentences on one subject, using only what that lesson has taught. Small enough
    to sit in data.json, and the lesson quiz asks for one before it has drawn a
    single card, so it must be here at boot rather than required on use. */

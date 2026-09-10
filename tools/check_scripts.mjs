@@ -1,4 +1,4 @@
-/* The guard on the written listening scripts (§30j).
+/* The guard on the written listening scripts (§30k).
  *
  * The scripts are authored rather than harvested, which means nothing about them
  * is true by construction. This is what can still be checked by machine, and it

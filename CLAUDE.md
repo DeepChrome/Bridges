@@ -771,7 +771,7 @@ sentence must never appear where an attested one is promised.
 that the corpus cannot supply level-matched listening — "You aren't going to find
 perfect audios. If you generate, we can vet it later and improve as needed" — and that
 every lesson is to have a passage written for it. So `data/curated/listening_scripts.json`
-is authored, not harvested, and §30j sets the terms that keep it honest: every word
+is authored, not harvested, and §30k sets the terms that keep it honest: every word
 machine-checked against what that lesson has taught, the voice labelled as the device
 voice, and the whole file open to correction.
 
@@ -1323,12 +1323,16 @@ Phase 9) and the rules they left behind. The A37 log entry carries the numbers.
   after a review session, so a learner who clears their day never sees it
   (quick and steady: zero held days at both 25 and 40), while the struggling
   learner spends 12–17 days consolidating.
-- **What the simulator says now** (seed 3, 169 lessons, `tools/sim/`): quick
-  169 of 169 passed, steady 163, struggling 102. Review-first roughly halves
-  the struggling learner's worst day (254 → 114 cards) and all but empties
-  the backlog at the end (208 → 29 due); leeches fall with it. The struggling
-  learner is still the open problem — 55 reviews a day and 173 trouble words
-  is a hard route — but it is no longer a route that buries them.
+- **What the simulator says now** (seed 1, 169 lessons, `tools/sim/`, rerun
+  2026-09-10 after §30k): quick 168 of 169 passed, steady 161, struggling 122
+  with 92 leeches and 78 backlog days. Review-first roughly halves the
+  struggling learner's worst day and all but empties the backlog at the end;
+  leeches fall with it. The struggling learner is still the open problem — 55
+  reviews a day is a hard route — but it is no longer a route that buries them.
+  The written passages are now most of the listening a learner meets (1,405
+  sentences for the quick profile over the full route, 2,610 for the
+  struggling one), and about 1 % of them turn out to have a real recording in
+  the collection anyway.
 
 ## 30j. Phase 10 — production, and the letters (2026-09-10)
 
@@ -1404,7 +1408,7 @@ and `watch(on)`, which polls the position four times a second while playing
 because the IFrame API has no time event. Position reports are the one message
 kept out of the console log; four a second would bury everything else.
 
-## 30j. The written lesson passages (2026-09-10)
+## 30k. The written lesson passages (2026-09-10)
 
 The owner, having listened to the video passages: *"The listening audios are way
 too advanced… it would be best if you generated your own and they corresponded to

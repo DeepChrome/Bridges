@@ -1,4 +1,4 @@
-﻿"""Generate the standalone app: lookup, flashcards, learning path, status.
+"""Generate the standalone app: lookup, flashcards, learning path, status.
 
 Bakes the lexicon subset, the study units and the path layout into one
 self-contained HTML file. No server, no external requests.
@@ -818,7 +818,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
 
 
 def load_scripts(stats):
-    """The written lesson passages (CLAUDE.md 30j).
+    """The written lesson passages (CLAUDE.md 30k).
 
     One file per chapter under data/curated/scripts/, merged into a single map
     keyed "unitId:lessonIndex". These are authored rather than harvested, which

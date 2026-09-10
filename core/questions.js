@@ -125,7 +125,7 @@ export const DRILL_TYPES = [
 
 export function makeQuestions(env) {
   const { L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice, SPEECH } = env;
-  // The written lesson passages (§30j), keyed "unitId:lessonIndex". Absent on a
+  // The written lesson passages (§30k), keyed "unitId:lessonIndex". Absent on a
   // platform that does not ship them, in which case the scene falls back to the
   // corpus pools as it did before.
   const SCRIPTS = env.SCRIPTS || {};
@@ -411,7 +411,7 @@ export function makeQuestions(env) {
 
   /* --------------------------------------------------- the written passages */
 
-  /* The listening passage written for one lesson (§30j).
+  /* The listening passage written for one lesson (§30k).
    *
    * The corpus could not do this job. Its listening pool is drawn from what his
    * decks and the videos happen to contain, so a beginner's scene was either a

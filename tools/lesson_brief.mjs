@@ -1,5 +1,5 @@
 /* What each lesson has to work with — the brief an author of a listening script
- * needs (§30j).
+ * needs (§30k).
  *
  * For every lesson on the path it prints the chapter, the unit, the grammar the
  * chapter has introduced by then, the words this lesson adds, and the palette a

@@ -656,7 +656,7 @@ group("scenes and custom quizzes");
   const s = scenes[0];
   // Two shapes now share the kind: the corpus scene, which is short and every
   // sentence of which has a real recording, and the passage written for the
-  // lesson (§30j), which is longer and read by the device voice because nobody
+  // lesson (§30k), which is longer and read by the device voice because nobody
   // has ever said it. A scene must be one or the other, never a corpus scene
   // claiming to be written or a written one claiming a recording it lacks.
   if (s.written) {
@@ -705,7 +705,7 @@ group("scenes and custom quizzes");
      "scenes alone make a listening-only quiz");
 }
 
-/* The written lesson passages (§30j). tools/check_scripts.mjs is what proves the
+/* The written lesson passages (§30k). tools/check_scripts.mjs is what proves the
    Russian stays inside the lesson's vocabulary; this proves the app turns one
    into a scene a learner can actually answer, and that it is preferred over the
    corpus scene wherever a lesson has one. */

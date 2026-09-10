@@ -164,7 +164,7 @@ function simulate(profileName, seed) {
     if (q.kind === "scene") {
       if (!q.rows || !q.questions || q.questions.length < q.rows.length) bad("scene without a question per sentence");
       // A corpus scene is cut from sentences that have a recording, so one
-      // without audio there is a broken join. A written passage (§30j) has no
+      // without audio there is a broken join. A written passage (§30k) has no
       // recording by nature — nobody has said the sentence — and is read by the
       // device voice, which the screen says. Counted, not faulted.
       if (!q.written) {

@@ -26,7 +26,7 @@ import { fileURLToPath } from "node:url";
 import { fold, TOKEN } from "../core/util.js";
 import { makeQuestions, QUIZ_N, SPEECH_MIX, lessonSize } from "../core/questions.js";
 import { gradeFor, applyGrade, isTrouble, fsrsReview } from "../core/fsrs.js";
-import { quizPassed, RELIEF_AFTER } from "../core/state.js";
+import { quizPassed, RELIEF_AFTER, reviewFirst, REVIEW_FIRST } from "../core/state.js";
 import { compare } from "../core/compare.js";
 import { gradeAlignment, sentenceLemmas } from "../core/speech.js";
 import { parseDeep } from "../core/search.js";
@@ -39,6 +39,11 @@ const arg = (name, dflt) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] 
 const LESSONS = parseInt(arg("--lessons", "40"), 10);
 const SEED = parseInt(arg("--seed", "1"), 10);
 const ONLY = arg("--profile", null);
+/* The review-first threshold (core/state.js REVIEW_FIRST), overridable so the
+   number can be chosen by sweeping it rather than by eye. `--review-first 0`
+   turns the rule off, which is how the before/after comparison is made. */
+const HOLD_AT = parseInt(arg("--review-first", String(REVIEW_FIRST)), 10);
+const holdNow = (due) => HOLD_AT > 0 && due >= HOLD_AT;
 
 /* ------------------------------------------------------------ the world */
 
@@ -226,9 +231,23 @@ function simulate(profileName, seed) {
     reviews.push({ day, due: dueWords.length, done, again });
   };
 
-  let lessons = 0;
+  let lessons = 0, heldDays = 0;
   for (const { unit, index } of route()) {
     if (lessons >= LESSONS) break;
+
+    /* Reviews before new words (core/state.js reviewFirst). Learn makes Review
+       the primary action above REVIEW_FIRST due cards, so the simulated learner
+       spends the day clearing instead of starting a lesson — and keeps spending
+       days until the backlog is under the line. Without this the learner took
+       two lessons a day into a 239-card backlog. */
+    let guard = 0;
+    while (holdNow(Object.keys(st.seen).filter((w) => st.seen[w].due <= day).length)
+           && guard++ < 40) {
+      day++;
+      heldDays++;
+      review();
+    }
+
     const ch = chapterOf(unit);
     const ctx = { unit: unit.id, chapter: ch + 1, lesson: index };
     const words = lessonWords(unit, index);
@@ -272,7 +291,8 @@ function simulate(profileName, seed) {
 
   const due = Object.values(st.seen).filter((c) => c.due <= day).length;
   Math.random = restore;
-  return { profile: profileName, seed, log, perLesson, structural, st, met, day, due, reviews };
+  return { profile: profileName, seed, log, perLesson, structural, st, met, day, due,
+           reviews, heldDays };
 }
 
 /* ------------------------------------------------------------- metrics */
@@ -359,7 +379,10 @@ function metrics(run) {
                reviewsPerDay: +(rv.reduce((a, r) => a + r.done, 0) / Math.max(1, rv.length)).toFixed(1),
                maxDueInADay: rv.reduce((a, r) => Math.max(a, r.due), 0),
                againRate: +(rv.reduce((a, r) => a + r.again, 0) / Math.max(1, rv.reduce((a, r) => a + r.done, 0))).toFixed(2),
-               backlogDays: rv.filter((r) => r.due > r.done).length };
+               backlogDays: rv.filter((r) => r.due > r.done).length,
+               // Days spent clearing reviews instead of starting a lesson,
+               // because the path said so (core/state.js reviewFirst).
+               heldDays: run.heldDays || 0 };
   m.lessons = { total: perLesson.length, passed: perLesson.filter((l) => l.passed).length,
                 relieved: perLesson.filter((l) => l.relieved).length,
                 retakes: perLesson.reduce((a, l) => a + l.tries - 1, 0),
@@ -389,6 +412,7 @@ for (const r of results) {
   out(`- words taught ${m.words.taught}; asked again after teaching ${m.words.everAsked}; taught but never asked ${m.words.taughtButNeverAsked}; in scheduler ${m.words.inSeen}; trouble ${m.words.trouble}; leeches ${m.words.leeches}`);
   out(`- recurrence over ${m.recurrence.quizQuestions} quiz questions in ${m.recurrence.quizzes} quizzes: a word asked again ${m.recurrence.askedAgain} times; back-to-back ${m.recurrence.backToBack}; within 3 questions ${m.recurrence.within3}; same word twice in one quiz ${m.recurrence.sameQuizTwice} (${(m.recurrence.sameQuizTwice / Math.max(1, m.recurrence.quizzes)).toFixed(1)} per quiz); median gap ${m.recurrence.medianGap}`);
   out(`- review: ${m.review.simulatedDays} days with a Study session each; ${m.review.reviewsPerDay} reviews a day, again rate ${m.review.againRate}, most due in one day ${m.review.maxDueInADay}, days with a backlog past the cap ${m.review.backlogDays}; ${m.review.dueAtEnd} due at the end`);
+  out(`- review-first: ${m.review.heldDays} days spent clearing reviews rather than starting a lesson (threshold ${HOLD_AT || "off"})`);
   out(`- quiz activity mix: ${Object.entries(m.mix).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(", ")}`);
   out(`- structural problems: ${m.structural}`);
   out();

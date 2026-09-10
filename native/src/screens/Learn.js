@@ -23,6 +23,7 @@ import {
   STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress,
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, FORK_AT, dueCount,
 } from "../data";
+import { reviewFirst } from "@core/state";
 
 /* A lesson step's screen. */
 export const STEP_ROUTE = { vocab: "Vocab", quiz: "Quiz", video: "Video" };
@@ -241,6 +242,7 @@ export default function Learn({ navigation }) {
   const t = useTheme();
   const next = nextStep(st);
   const due = dueCount(st);
+  const holdBack = reviewFirst(due);
   const openUnit = (unit) => navigation.navigate("Unit", { unitId: unit.id });
 
   return (
@@ -264,7 +266,7 @@ export default function Learn({ navigation }) {
           review, 2026-09-08). Opens the flashcards on exactly the due words. */}
       {due > 0 ? (
         <Btn
-          kind="plain"
+          kind={holdBack ? "pri" : "plain"}
           testID="review-due"
           style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
           label={`Review · ${due} due`}
@@ -274,11 +276,22 @@ export default function Learn({ navigation }) {
           }}
         />
       ) : null}
+      {/* Above REVIEW_FIRST due cards the two buttons trade places: reviewing is
+          the primary action and the next lesson goes quiet. Advice, not a lock —
+          the lesson is still one press away, as the fork and developer mode are.
+          Without it the struggling simulated learner walked into 254 cards due in
+          a day and finished the route with 208 outstanding; holding new words
+          back halves the worst day and empties the backlog by the end. */}
+      {holdBack ? (
+        <Muted testID="review-first" style={{ marginTop: 6, textAlign: "center" }}>
+          Clear these before new words
+        </Muted>
+      ) : null}
       {next ? (
         // Straight to the next undone step of the next lesson — a question
         // within seconds, not a unit list and a lesson list first.
         <Btn
-          kind="pri"
+          kind={holdBack ? "plain" : "pri"}
           style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
           label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} (${next.unit.name})`}
           onPress={() => navigation.navigate(STEP_ROUTE[next.step] || "Vocab",

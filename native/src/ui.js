@@ -92,7 +92,7 @@ export function Row({ children, onPress, disabled, last }) {
   );
 }
 
-export function Btn({ label, onPress, kind = "plain", disabled, style }) {
+export function Btn({ label, onPress, kind = "plain", disabled, style, testID }) {
   const t = useTheme();
   const tone = {
     plain: { bg: t.surface, border: t.line, fg: t.ink },
@@ -103,6 +103,7 @@ export function Btn({ label, onPress, kind = "plain", disabled, style }) {
   }[kind];
   return (
     <Pressable
+      testID={testID}
       onPress={disabled ? undefined : onPress}
       style={({ pressed }) => [{
         backgroundColor: tone.bg, borderColor: tone.border,

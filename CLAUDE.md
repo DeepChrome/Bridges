@@ -1294,10 +1294,22 @@ Phase 9) and the rules they left behind. The A37 log entry carries the numbers.
 - **One way to say each thing** (P9.16): `Tick`, `Chip` (44 px), `Choice`,
   `SearchField`, `SectionLabel`, `Sheet` in `ui.js`. A new sheet is a `Sheet`
   with a header, body and footer, not a Modal.
+- **Reviews come before new words** (2026-09-10, `REVIEW_FIRST` = 40 in
+  `core/state.js`). Above forty due cards Learn makes Review the primary
+  action and the next lesson the quiet one, with "Clear these before new
+  words" under it. It advises rather than locks, like the fork and developer
+  mode. **The threshold was swept, not guessed**: `simulate.mjs
+  --review-first N` overrides it, and across four seeds 40 beat 25 and 60 on
+  leeches and lessons passed. It is self-targeting — the check runs just
+  after a review session, so a learner who clears their day never sees it
+  (quick and steady: zero held days at both 25 and 40), while the struggling
+  learner spends 12–17 days consolidating.
 - **What the simulator says now** (seed 3, 169 lessons, `tools/sim/`): quick
-  169 of 169 passed, steady 163, struggling 109 with 139 leeches and 53
-  backlog days. The struggling learner is the open problem: the relief rule
-  carries them through, but 60 reviews a day is not a load a person keeps up.
+  169 of 169 passed, steady 163, struggling 102. Review-first roughly halves
+  the struggling learner's worst day (254 → 114 cards) and all but empties
+  the backlog at the end (208 → 29 due); leeches fall with it. The struggling
+  learner is still the open problem — 55 reviews a day and 173 trouble words
+  is a hard route — but it is no longer a route that buries them.
 
 ## 31. Verification
 

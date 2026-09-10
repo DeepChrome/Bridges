@@ -30,6 +30,23 @@ export const quizPassed = (l) => {
   return l.q >= PASS_MARK || ((l.tries || 0) >= RELIEF_AFTER && l.q >= RELIEF_MARK);
 };
 
+/* Reviews come before new words once the backlog is real.
+ *
+ * The simulated struggling learner took two lessons a day whatever was waiting,
+ * reached 239 cards due in one day and 53 days of backlog, and finished the route
+ * with 139 leeches — not because the scheduler was wrong but because nothing ever
+ * said "stop taking on new words". Anki users do this by hand; the path should say
+ * it. Above REVIEW_FIRST due cards, Learn makes Review the primary action and the
+ * next lesson the quiet one.
+ *
+ * It advises, it does not lock: the learner may still press on, which is the same
+ * rule the fork and developer mode follow. The number is what one sitting can
+ * absorb — the quick learner's busiest day was 58 cards and the steady learner's
+ * 74, so 40 leaves an unhurried route untouched and reins in a struggling one.
+ */
+export const REVIEW_FIRST = 40;
+export const reviewFirst = (due) => (due || 0) >= REVIEW_FIRST;
+
 /* What the speaking activities record. Attempts are capped so state stays a small
    JSON blob; tagCounts is the long-term memory of what kinds of error recur. No
    audio is ever stored here. */

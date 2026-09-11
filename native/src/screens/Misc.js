@@ -1,18 +1,17 @@
-/* Immerse (the video library), the video player, and the profile gate. */
+/* Immerse (the video library) and the video player. */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, TextInput, Pressable, ScrollView, Image } from "react-native";
+import { View, Text, Image } from "react-native";
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, Avatar, AV, AV_IDS, SearchField, SectionLabel } from "../ui";
+import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel } from "../ui";
 import {
   UN, STATS, unitState, markComponent, L, videos, videoById, videoWatched, unitById,
   idxOfWord,
 } from "../data";
 import { releaseAudio } from "../audio";
 import { fold, today, firstSense } from "@core/util";
-import { Intro } from "./Intro";
 
 /* ------------------------------------------------------------- immerse */
 
@@ -375,122 +374,6 @@ export function Video({ route, navigation }) {
       ) : (
         <Btn kind="pri" style={{ marginTop: 20 }} label="Mark as watched" onPress={markWatched} />
       )}
-    </Screen>
-  );
-}
-
-/* --------------------------------------------------------------- gate */
-
-export function Gate({ onPlacement }) {
-  const { accounts, createProfile, selectProfile } = useSession();
-  const t = useTheme();
-  const [name, setName] = useState("");
-  const [avatar, setAvatar] = useState(AV_IDS[0]);
-  const [creating, setCreating] = useState(!accounts.list.length);
-  const [offer, setOffer] = useState(null);
-  const [toured, setToured] = useState(false);
-
-  /* The profile is created by the *choice* below, not by Continue.
-     Creating it earlier sets the active account, which is exactly the condition the
-     shell uses to leave the gate — so the app would swap to the tabs and unmount
-     this screen before the question could be asked. Holding the name and avatar
-     here until the learner answers keeps the gate in charge of its own flow. */
-  const start = async (wanted) => {
-    await createProfile(offer.name, offer.avatar);
-    onPlacement(wanted);
-  };
-
-  // The tour sits between the name and the first choice: the first profile on
-  // this phone sees it once; a second profile skips it.
-  if (offer && !toured && accounts.list.length === 0) {
-    return <Intro onDone={() => setToured(true)} />;
-  }
-
-  if (offer) {
-    return (
-      <Screen>
-        <Title sub="A short test can skip what you already know.">
-          Where should we start?
-        </Title>
-        <List>
-          <Row onPress={() => start(true)}>
-            <Avatar id={offer.avatar} size={44} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
-                Take the placement test
-              </Text>
-              <Muted>50 questions · about 10 minutes</Muted>
-            </View>
-          </Row>
-          <Row last onPress={() => start(false)}>
-            <View style={{ flex: 1 }}>
-              {/* No "You can test out of a section later" underneath. It was
-                  the app advertising a feature at someone choosing where to
-                  start, and testing out is offered on the unit that has it. */}
-              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
-                Start from the beginning
-              </Text>
-            </View>
-          </Row>
-        </List>
-      </Screen>
-    );
-  }
-
-  if (!creating) {
-    return (
-      <Screen>
-        <Title>Who's studying?</Title>
-        <List>
-          {accounts.list.map((a, k) => (
-            <Row key={a.id} last={k === accounts.list.length - 1}
-                 onPress={() => selectProfile(a.id)}>
-              <Avatar id={a.avatar} size={44} />
-
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
-                  {a.name}
-                </Text>
-                <Muted>{a.placed ? `Placed at chapter ${a.placed + 1}` : "Tap to continue"}</Muted>
-              </View>
-            </Row>
-          ))}
-        </List>
-        <Btn style={{ marginTop: 14 }} label="New profile"
-             onPress={() => setCreating(true)} />
-      </Screen>
-    );
-  }
-
-  return (
-    <Screen>
-      <Title sub="Pick a character and a name.">Welcome to Bridges</Title>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10,
-                     marginBottom: 14 }}>
-        {AV_IDS.map((id) => (
-          <Pressable
-            key={id}
-            accessibilityLabel={AV[id].name}
-            onPress={() => setAvatar(id)}
-            style={{ width: 62, height: 62, borderRadius: 31, borderWidth: 2, padding: 2,
-                     borderColor: id === avatar ? t.brand : "transparent",
-                     alignItems: "center", justifyContent: "center" }}
-          >
-            <Avatar id={id} size={54} />
-          </Pressable>
-        ))}
-      </View>
-      <TextInput
-        value={name}
-        onChangeText={setName}
-        placeholder="Your name"
-        placeholderTextColor={t.ink3}
-        style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
-                 borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 13,
-                 fontSize: 17, color: t.ink }}
-      />
-      <Btn kind="pri" style={{ marginTop: 14 }} label="Continue"
-           onPress={() => setOffer({ name: name.trim(), avatar })} />
     </Screen>
   );
 }

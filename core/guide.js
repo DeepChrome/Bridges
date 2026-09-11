@@ -130,6 +130,13 @@ export const VIEW_BOX = "0 0 96 96";
    the cap, and `core.test.mjs` enforces it — a mascot's copy is exactly the kind
    that grows a word at a time until it is a paragraph nobody reads. */
 export const LINES = {
+  /* The other place a sentence from him is welcome: the screen the app opens
+     on, where the learner is not working yet and a guide who never introduces
+     himself is just a drawing. Said once, on the way in. */
+  hello: [
+    "Welcome aboard. I am Yuri.",
+    "Good to meet you. I am Yuri.",
+  ],
   words: [
     "Those are yours now.",
     "Well met. On you go.",

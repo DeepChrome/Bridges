@@ -193,6 +193,24 @@ export function useFill(value) {
   return v.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"], extrapolate: "clamp" });
 }
 
+/* A stroke that draws itself: the dash offset runs from the whole length to
+   zero, so a path appears to be laid down rather than to appear. Same trade as
+   `useFill` — a dash offset is not a transform — so it is for a screen with
+   nothing else happening, which in practice means the one the app opens on. */
+export function useDraw(length, { duration = motion.celebrate, delay = 0 } = {}) {
+  const v = useRef(new Animated.Value(reduceMotion ? 0 : length)).current;
+  useEffect(() => {
+    if (reduceMotion) { v.setValue(0); return undefined; }
+    v.setValue(length);
+    const a = Animated.timing(v, {
+      toValue: 0, duration, delay, easing: OUT, useNativeDriver: false,
+    });
+    a.start();
+    return () => a.stop();
+  }, [length, duration, delay, v]);
+  return v;
+}
+
 /* A progress ring that sweeps to its new value. Same trade as `useFill`: an SVG
    stroke offset is not a transform, so it is not on the native driver. Returns
    the raw Animated.Value, since the caller has to hand it to an animated Circle

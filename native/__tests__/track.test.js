@@ -24,6 +24,9 @@ beforeEach(() => {
 const started = () => global.__players.filter((p) => p.play.mock.calls.length);
 const alive = () => global.__players.filter((p) => p.play.mock.calls.length
                                                 && !p.remove.mock.calls.length);
+/* The assertion a person makes by listening: what is coming out of the speaker,
+   which is not the same question as what the app still holds a handle to. */
+const sounding = () => global.__sounding();
 
 describe("playing one track", () => {
   it("plays it, from where it was asked to", async () => {
@@ -40,6 +43,30 @@ describe("playing one track", () => {
     h.stop();
     expect(global.__players[0].remove).toHaveBeenCalled();
   });
+
+  /* The owner, 2026-09-11: *"When I pause the app, it just continues."*
+   * `remove()` releases the app's handle; it does not silence what is already
+   * playing. Every disposal site but `stop()` called it bare, so pausing a
+   * scenario, and leaving the screen, went on making a noise. */
+  it("is actually silent after it is stopped", async () => {
+    const h = await playTrack(SRC, 0);
+    expect(sounding()).toHaveLength(1);
+    h.stop();
+    expect(sounding()).toHaveLength(0);
+    expect(global.__players[0].pause).toHaveBeenCalled();
+  });
+
+  it("is silent after everything stops", async () => {
+    await playTrack(SRC, 0);
+    stop();
+    expect(sounding()).toHaveLength(0);
+  });
+
+  it("is silent after the audio is handed back entirely", async () => {
+    await playTrack(SRC, 0);
+    releaseAudio();
+    expect(sounding()).toHaveLength(0);
+  });
 });
 
 describe("pressing back faster than the audio can start", () => {
@@ -51,6 +78,8 @@ describe("pressing back faster than the audio can start", () => {
     const [ha, hb] = await Promise.all([a, b]);
 
     expect(alive()).toHaveLength(1);
+    // One voice in the room, not two.
+    expect(sounding()).toHaveLength(1);
     // And the one left is the last press, not the first.
     expect(hb).toBeTruthy();
     expect(hb.live()).toBe(true);
@@ -63,6 +92,7 @@ describe("pressing back faster than the audio can start", () => {
     const hs = await Promise.all(calls);
     expect(started().length).toBeLessThanOrEqual(1);
     expect(alive()).toHaveLength(1);
+    expect(sounding()).toHaveLength(1);
     // Only the last call gets a usable handle; the rest say so by returning null.
     expect(hs[hs.length - 1]).toBeTruthy();
     expect(hs.slice(0, -1).every((h) => h === null)).toBe(true);
@@ -96,5 +126,14 @@ describe("pressing a speaker twice", () => {
     await Promise.all([a, b]);
     expect(alive().length).toBeLessThanOrEqual(1);
     expect(started().length).toBeLessThanOrEqual(1);
+    expect(sounding().length).toBeLessThanOrEqual(1);
+  });
+
+  /* A recording started from anywhere has to silence a scenario, not join it:
+     one session, one thing audible. */
+  it("does not play a recording on top of a scenario", async () => {
+    await playTrack(SRC, 0);
+    await say("книга");
+    expect(sounding().length).toBeLessThanOrEqual(1);
   });
 });

@@ -27,6 +27,26 @@ let ready = false;
    is what should be heard. */
 let trackSeq = 0;
 
+/* Giving a player back: **pause first, then remove**, and never one without the
+ * other.
+ *
+ * `remove()` alone does not reliably stop what is already coming out of the
+ * speaker — it releases the app's handle, and the sound carries on with nothing
+ * left to stop it. Every disposal site but `stop()` used to call it bare, which
+ * is why pausing a scenario went on playing and why starting anything else
+ * played on top of it rather than instead of it (the owner, 2026-09-11, after
+ * the first fix: *"When I pause the app, it just continues, and if I press other
+ * buttons, it will spawn multiple overlapping audios"*).
+ *
+ * `pause()` alone is the mirror mistake and is already recorded in §23: a paused
+ * player keeps the Android audio session and silences whatever plays next. Both,
+ * in this order, is the only correct way to let one go. */
+function release(p) {
+  if (!p) return;
+  try { p.pause(); } catch (e) {}
+  try { p.remove(); } catch (e) {}
+}
+
 async function prepare() {
   if (ready) return;
   try {
@@ -372,14 +392,14 @@ export async function playTrack(source, from = 0) {
   if (abandoned()) return null;
   try {
     Speech.stop();
-    if (player) { player.remove(); player = null; }
+    if (player) { release(player); player = null; }
     const end = begin();
     const mine = createAudioPlayer(source);
     player = mine;
     let over = false;
     const drop = () => {
       if (player === mine) player = null;
-      try { mine.remove(); } catch (e) {}
+      release(mine);
       end();
       return null;
     };
@@ -409,9 +429,11 @@ export async function playTrack(source, from = 0) {
          the player that took over. */
       live: () => player === mine && seq === trackSeq,
       stop: () => {
-        if (player !== mine) return;            // somebody else owns the session
-        player = null;
-        try { mine.remove(); } catch (e) {}
+        /* Always released, even when somebody else now owns the session: this
+           handle's player is still the thing making a noise. Only the shared
+           `player` slot is left alone when it is not ours. */
+        if (player === mine) player = null;
+        release(mine);
         if (settle) settle();
       },
     };
@@ -451,7 +473,7 @@ export async function say(text, opts = {}) {
   };
   try {
     Speech.stop();
-    if (player) { player.remove(); player = null; }
+    if (player) { release(player); player = null; }
     const end = begin();
     const mine = createAudioPlayer({ uri: url });
     player = mine;
@@ -500,7 +522,7 @@ export function stop() {
      followed by a sentence. */
   trackSeq++;
   try { Speech.stop(); } catch (e) {}
-  try { if (player) { player.pause(); player.remove(); } } catch (e) {}
+  release(player);
   player = null;
   if (settle) settle();
 }
@@ -513,7 +535,7 @@ export function stop() {
 export function releaseAudio() {
   stop();
   for (const key of Object.keys(cuePlayers)) {
-    try { cuePlayers[key].remove(); } catch (e) {}
+    release(cuePlayers[key]);
     delete cuePlayers[key];
   }
   ready = false;

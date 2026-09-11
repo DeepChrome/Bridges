@@ -68,6 +68,15 @@ export function lineAt(spans, ms) {
   return k;
 }
 
+/* Where a touch on the bar lands, in milliseconds. Pure, and tested as such: the
+   gesture that produces `x` belongs to PanResponder and asserting it would be
+   asserting the framework (the same call made in motion.test.js). */
+export function msFor(x, width, total) {
+  if (!width || !total) return 0;
+  const f = Math.max(0, Math.min(1, x / width));
+  return Math.round(f * total);
+}
+
 export const clock = (ms) => {
   const s = Math.max(0, Math.round(ms / 1000));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
@@ -240,6 +249,22 @@ export function useScenario(lines, cast, seed = "") {
     setAt(-1);
   };
 
+  /* Move the playhead. `resume` says whether to carry on from there, so a drag
+     that grabbed a playing conversation leaves it playing and one that grabbed a
+     paused one does not start it. A bought track lands exactly where it is put;
+     the device voices can only resume at a line, and `play` already rounds to
+     the line sounding at that moment. */
+  const seek = (ms, resume = playing) => {
+    const tl = spans();
+    const to = Math.max(0, Math.min(Math.round(ms || 0), tl.total));
+    if (resume) { play(to); return; }
+    if (handle.current) { handle.current.stop(); handle.current = null; }
+    stop();
+    setPlaying(false);
+    setPos(to);
+    setAt(-1);
+  };
+
   const back = () => {
     const tl = spans();
     const from = Math.max(0, (playing ? pos : Math.min(pos, tl.total)) - SKIP_MS);
@@ -251,5 +276,5 @@ export function useScenario(lines, cast, seed = "") {
     else play(pos >= spans().total ? 0 : pos);
   };
 
-  return { playing, at, pos, plays, total: spans().total, play, pause, back, toggle };
+  return { playing, at, pos, plays, total: spans().total, play, pause, back, toggle, seek };
 }

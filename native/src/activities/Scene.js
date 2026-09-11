@@ -31,14 +31,14 @@
  * cast and per-sentence questions; both render through the same view.
  */
 
-import React, { useEffect, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, Pressable, PanResponder } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Btn, Muted, Bar } from "../ui";
 import { stop, hasRealAudio, hasRussianVoice } from "../audio";
-import { useScenario, trackWhenCurrent, SKIP_MS, clock } from "../scenario";
+import { useScenario, trackWhenCurrent, msFor, SKIP_MS, clock } from "../scenario";
 import { Linked } from "../words";
 import { useEnter } from "../motion";
 import { recordAttempt } from "@core/state";
@@ -115,12 +115,74 @@ function Transport({ s }) {
           <Icon d="M7 6h2v12H7zM19 6v12l-9-6z" color={t.ink2} />
         </Pressable>
       </View>
-      <View style={{ marginTop: 14 }}>
-        <Bar value={s.total ? Math.min(1, s.pos / s.total) : 0} />
-        <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 4 }}>
-          <Muted testID="scene-pos" size={T.tiny}>{clock(Math.min(s.pos, s.total))}</Muted>
-          <Muted size={T.tiny}>{clock(s.total)}</Muted>
-        </View>
+      <Scrub s={s} />
+    </View>
+  );
+}
+
+/* The bar, made a control (the owner, 2026-09-11: *"I would like the bar to be
+ * clickable to move the playhead… clickable and draggable is good"*).
+ *
+ * A tap moves the playhead; a drag scrubs. The whole 44 px strip is the target,
+ * not the 8 px bar inside it (§25), and the thumb is what says so — a bar with
+ * no thumb reads as a progress indicator, which is what this was.
+ *
+ * Seeking is not free here: a track resumes by opening a player at a new
+ * position, so following every frame of a drag would open a player a frame. The
+ * drag therefore moves a *local* position and the seek happens once, on
+ * release — which is also why the conversation pauses under the finger and
+ * carries on afterwards only if it was playing when it was grabbed. */
+function Scrub({ s }) {
+  const t = useTheme();
+  const [drag, setDrag] = useState(null);
+  const width = useRef(0);
+  /* The handlers are made once and the scenario changes every render, so they
+     read it through a ref. A PanResponder rebuilt mid-gesture drops the gesture. */
+  const live = useRef(s);
+  live.current = s;
+  const resume = useRef(false);
+
+  const msAt = (e) => msFor(e.nativeEvent.locationX, width.current, live.current.total);
+
+  const pan = useRef(PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderGrant: (e) => {
+      resume.current = live.current.playing;
+      if (live.current.playing) live.current.pause();
+      setDrag(msAt(e));
+    },
+    onPanResponderMove: (e) => setDrag(msAt(e)),
+    onPanResponderRelease: (e) => {
+      const to = msAt(e);
+      setDrag(null);
+      live.current.seek(to, resume.current);
+    },
+    onPanResponderTerminate: () => setDrag(null),
+  })).current;
+
+  const at = drag === null ? s.pos : drag;
+  const frac = s.total ? Math.min(1, Math.max(0, at / s.total)) : 0;
+
+  return (
+    <View style={{ marginTop: 6 }}>
+      <View
+        testID="scene-scrub"
+        accessibilityRole="adjustable"
+        accessibilityLabel="Position in the conversation"
+        onLayout={(e) => { width.current = e.nativeEvent.layout.width; }}
+        {...pan.panHandlers}
+        style={{ height: 44, justifyContent: "center" }}
+      >
+        <Bar value={frac} />
+        <View pointerEvents="none"
+              style={{ position: "absolute", left: `${frac * 100}%`, marginLeft: -8,
+                       width: 16, height: 16, borderRadius: 8, backgroundColor: t.good,
+                       borderWidth: 2, borderColor: t.surface }} />
+      </View>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Muted testID="scene-pos" size={T.tiny}>{clock(Math.min(at, s.total))}</Muted>
+        <Muted size={T.tiny}>{clock(s.total)}</Muted>
       </View>
     </View>
   );

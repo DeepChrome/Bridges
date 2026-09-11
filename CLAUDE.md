@@ -591,6 +591,19 @@ Each of these cost real time. Do not relearn them.
   or mapped, listen to a sample — `faster-whisper` in a scratch venv language-detects
   a sentence in seconds, and the Windows `System.Speech` dictation recogniser tells
   English from noise with no install at all.
+- **`remove()` does not stop the sound; `pause()` does not free the session.**
+  Letting an `expo-audio` player go takes **both, in that order**. §30h′ already
+  recorded half of it — a paused player holds the Android session and silences
+  whatever plays next — and the other half cost a second round of the same bug
+  report: `remove()` releases the app's handle without reliably silencing what is
+  already coming out of the speaker, so a scenario went on playing after Pause,
+  after leaving the screen, and underneath whatever was started next. Every
+  disposal site but `stop()` called `remove()` bare. There is one `release(p)`
+  now and nothing else may dispose of a player.
+  **The mock had to learn this before any test could catch it**: `jest.setup.js`
+  models `sounding`, which only `pause()` clears, and `global.__sounding()` is
+  what a test should assert — "was it released" and "is it quiet" are different
+  questions, and the first one passed throughout.
 - **Two awaits before a sound is two players.** `playTrack` and `say` both wait
   on the audio session and then on a seek before anything is audible, and a
   finger arrives inside that gap: "back five seconds" pressed four times started

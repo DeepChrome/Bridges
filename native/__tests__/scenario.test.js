@@ -14,7 +14,7 @@
  * the questions ask about, and look perfectly normal doing it.
  */
 
-import { estimateMs, timeline, lineAt, clock, GAP_MS, SKIP_MS, trackWhenCurrent }
+import { estimateMs, timeline, lineAt, clock, msFor, GAP_MS, SKIP_MS, trackWhenCurrent }
   from "../src/scenario";
 import { TRACKS } from "../src/scenetracks";
 import { hash } from "../src/audio";
@@ -89,6 +89,28 @@ describe("finding a place in it", () => {
     const k = lineAt(spans, from);
     expect(k).toBeLessThan(2);
     expect(spans[k].start).toBeLessThanOrEqual(from);
+  });
+});
+
+describe("pressing the bar", () => {
+  it("lands where the finger did", () => {
+    expect(msFor(0, 200, 30_000)).toBe(0);
+    expect(msFor(100, 200, 30_000)).toBe(15_000);
+    expect(msFor(200, 200, 30_000)).toBe(30_000);
+    expect(msFor(50, 200, 30_000)).toBe(7500);
+  });
+
+  it("cannot be dragged off either end", () => {
+    expect(msFor(-40, 200, 30_000)).toBe(0);
+    expect(msFor(9999, 200, 30_000)).toBe(30_000);
+  });
+
+  /* Before a layout has been measured the width is zero, and a scenario with no
+     track has no total until it has been heard. Neither may divide. */
+  it("is nothing at all when there is nothing to divide by", () => {
+    expect(msFor(100, 0, 30_000)).toBe(0);
+    expect(msFor(100, 200, 0)).toBe(0);
+    expect(msFor(100, undefined, undefined)).toBe(0);
   });
 });
 

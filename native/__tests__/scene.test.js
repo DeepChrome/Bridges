@@ -78,7 +78,10 @@ beforeEach(async () => {
   await probeVoices();
 });
 
-afterEach(async () => { await flushState(); });
+afterEach(async () => {
+  global.__audioNeverFinish = false;
+  await flushState();
+});
 
 describe("the listening scenario", () => {
   it("ships one that builds, with a cast and five questions", () => {
@@ -151,6 +154,46 @@ describe("the listening scenario", () => {
     expect(spoken.lines[0].s).not.toBe(spoken.lines[1].s);
     const voiceOf = (o) => `${o.voice}/${o.pitch}`;
     expect(voiceOf(global.__spokeOpts[0])).not.toBe(voiceOf(global.__spokeOpts[1]));
+  });
+
+  /* The owner, 2026-09-11: *"if the listening window is closed, it should cut
+     any actively playing audio"* — and *"when I pause the app, it just
+     continues"*. Both are the same thing: a player let go with `remove()` alone
+     keeps making a noise, so what has to be asserted is silence, not that the
+     app dropped its handle. */
+  it("goes quiet when it is paused", async () => {
+    // A half-minute conversation is still running when the button is pressed.
+    global.__audioNeverFinish = true;
+    await withScene();
+    const play = await screen.findByTestId("scene-play");
+    await act(async () => { fireEvent.press(play); });
+    await waitFor(() => expect(global.__sounding().length).toBe(1));
+    await act(async () => { fireEvent.press(screen.getByTestId("scene-play")); });
+    expect(global.__sounding()).toHaveLength(0);
+  });
+
+  it("goes quiet when the screen is closed", async () => {
+    global.__audioNeverFinish = true;
+    const view = await withScene();
+    const play = await screen.findByTestId("scene-play");
+    await act(async () => { fireEvent.press(play); });
+    await waitFor(() => expect(global.__sounding().length).toBe(1));
+    await act(async () => { view.unmount(); });
+    expect(global.__sounding()).toHaveLength(0);
+  });
+
+  /* The bar is a control now, and what makes it one is in the tree: a target big
+     enough to hit and the responder handlers a gesture needs. Where a touch
+     lands is arithmetic and is tested as arithmetic (scenario.test.js `msFor`);
+     driving PanResponder from here would be asserting the framework, as
+     motion.test.js says of two of its own cases. */
+  it("offers the bar as something to press and drag", async () => {
+    await withScene();
+    const bar = await screen.findByTestId("scene-scrub");
+    expect(bar.props.style.height).toBe(44);
+    expect(bar.props.accessibilityRole).toBe("adjustable");
+    expect(typeof bar.props.onStartShouldSetResponder).toBe("function");
+    expect(typeof bar.props.onResponderMove).toBe("function");
   });
 
   it("can be moved back and played again as often as wanted", async () => {

@@ -40,20 +40,33 @@ jest.mock("expo-audio", () => ({
       currentTime: 0,
       seekTo: jest.fn(async (sec) => { p.currentTime = sec; }),
       setPlaybackRate: jest.fn(),
+      /* `sounding` models the platform rather than the API: `remove()` releases
+         the app's handle and does NOT reliably silence what is already coming
+         out of the speaker, so only `pause()` clears this. A mock where remove
+         implied silence is what let "pause, and it keeps playing" ship — the
+         test could not tell the two apart. Read it through `global.__sounding`. */
+      sounding: false,
       play: jest.fn(() => {
+        p.sounding = true;
         if (global.__audioHold) global.__audioPending.push(finish);
         else if (!global.__audioNeverFinish) setTimeout(finish, 0);
       }),
-      pause: jest.fn(),
-      remove: jest.fn(),
+      pause: jest.fn(() => { p.sounding = false; }),
+      // Deliberately does not clear `sounding` — see above.
+      remove: jest.fn(() => { p.removed = true; }),
       addListener: (name, fn) => { listeners.push(fn); return { remove: () => {} }; },
     };
+    // A finished track is not still sounding.
+    listeners.push((s) => { if (s && s.didJustFinish) p.sounding = false; });
     global.__players = global.__players || [];
     global.__players.push(p);
     return p;
   },
   setAudioModeAsync: jest.fn(async () => {}),
 }));
+/* What is audible right now: every player that was played and has not been
+   paused. The assertion a person would make by listening. */
+global.__sounding = () => (global.__players || []).filter((p) => p.sounding);
 global.__audioFinish = () => {
   const p = global.__audioPending || [];
   global.__audioPending = [];

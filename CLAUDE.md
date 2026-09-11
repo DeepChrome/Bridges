@@ -1526,13 +1526,45 @@ writing dialogue. First names now decline (`nameForms`), since a conversation
 cannot keep every name in the nominative and the lexicon carries no personal
 names at all.
 
-**Different voices are key, and there is no audio file.** `castVoices(n)` in
-`native/src/audio.js` hands each speaker one of the phone's Russian voices, and
-falls back to pitch (±15 %) where the phone has only one. `speakLine()` speaks
-one line and resolves when it ends; it deliberately does **not** reach for a
-recording the way `say()` does — one studio line inside a conversation would
-change a speaker's voice mid-exchange, so a written scenario is the device
-throughout and the screen says "device voices" (§27).
+**Different voices are key, and there is no audio file.** `castVoices(cast)` in
+`native/src/audio.js` gives each speaker a voice. `speakLine()` speaks one line
+and resolves when it ends; it deliberately does **not** reach for a recording
+the way `say()` does — one studio line inside a conversation would change a
+speaker's voice mid-exchange, so a written scenario is the device throughout
+and the screen says "device voices" (§27).
+
+**A voice is chosen by who is speaking, and Android will not say which voice is
+which.** The first cut handed the voices out in the order the platform listed
+them — related to nothing — and the owner heard it on the first build that
+reached his phone: *"Masha clearly sounds like a guy instead of a girl."* Two
+separate facts were missing, and both are now data rather than inference:
+
+- **Who each character is.** `core/names.js` is the one table of people in the
+  scenarios, with each name's sex and its English spelling. `check_scripts.mjs`
+  validates every cast entry against it (a name it does not carry has no sex,
+  which is the bug), and the app reads the same table. It replaced a duplicate
+  name list that the checker used to keep privately.
+- **Which voice is which.** `voiceSex(v)` reads Google's `#female_1` marker
+  where there is one and answers `null` otherwise. **It never guesses from the
+  code**: `ru-ru-x-ruf-local` looks like it might mean something and does not.
+  Measured on the owner's Pixel 9: **nineteen Russian voices, and not one of
+  them states a sex** — four `ru[c-f]` families, eight `star` voices, `dfc`,
+  and the `ru-RU-language` alias. So the app cannot know, and a setting asks:
+  Settings → **Women's voice / Men's voice**, the voices numbered because their
+  names say nothing, each tap speaking a line in that voice *and* choosing it.
+  Stored as `st.voices = { f, m }` and handed to playback by `configureAudio`
+  like the speed and the cue; `voiceSex` reports the learner's answer first,
+  because they have heard the voice and the platform has not.
+
+Allocation is in that order — the learner's choice, then a stated sex, then
+whatever is free — and it is settled for the whole cast **before** anybody
+takes a voice that is not theirs. Doing it in cast order instead let the first
+speaker walk off with the only male voice, leaving the man who owned it to be
+the one pitched about. Only what is left over is separated by pitch (±%): it
+cannot make a man a woman, but it points the right way and keeps two speakers
+apart, which is the one thing a conversation cannot do without. The lab screen
+lists what the phone reports and what the app made of it, because none of this
+can be seen from a desk.
 
 **The timeline is built, not read.** `native/src/scenario.js`: every line has an
 estimate from its length, every line that plays is measured and the measurement

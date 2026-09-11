@@ -62,11 +62,17 @@ export const DEFAULTS = {
   talkLevel: null,      // how the Talk tutor pitches its Russian; null = by chapter reached
   talkSpeed: "normal",  // how fast the tutor is read out (audio.js SPEEDS)
   talkEn: true,         // English under the tutor's turns
+  /* Which of the phone's Russian voices reads the women in a conversation and
+     which reads the men (§30l). Empty until the learner says: Android's voice
+     list states the sex of a voice only sometimes — the owner's Pixel offers
+     nineteen Russian voices and names none of them — and guessing it out of an
+     identifier would be inventing data. */
+  voices: {},           // { f: identifier, m: identifier }
 };
 
 /* The keys that are settings, not progress: what "Reset progress" keeps. */
 export const SETTING_KEYS = ["dev", "theme", "dir", "name", "decks", "speed", "cue", "osk",
-                             "offline", "talkLevel", "talkSpeed", "talkEn"];
+                             "offline", "talkLevel", "talkSpeed", "talkEn", "voices"];
 
 export function normalise(raw, assumedVersion) {
   if (!raw || typeof raw !== "object") return { ...DEFAULTS };

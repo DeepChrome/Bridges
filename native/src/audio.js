@@ -9,6 +9,7 @@ import * as Speech from "expo-speech";
 import { audioUrl } from "./data";
 import { cachedUri, dropCached } from "./cache";
 import { bare } from "@core/util";
+import { sexOf } from "@core/names";
 
 /* When nothing could play — the stream failed and there is no Russian voice —
    whoever drew the speaker is told, so the learner sees "No audio right now"
@@ -91,30 +92,113 @@ export function refreshVoices() {
   return probeVoices();
 }
 
+/* Which sex a voice sounds like, as far as the platform will say.
+ *
+ * Google's text-to-speech names a modern voice `ru-ru-x-ruf#female_1-local`,
+ * and that marker is the only thing on either platform that states this
+ * outright — the rest of the identifier is an opaque three-letter code, and
+ * guessing sex from it would be inventing data. So: read the marker where
+ * there is one, read a plain "female"/"male" in the identifier or the name
+ * where there is one, and otherwise answer `null` and let the caller cope.
+ * Never guess. */
+export function voiceSex(v) {
+  const id = v && v.identifier;
+  /* What the learner said, first. On a phone whose voices state nothing — the
+     owner's offers nineteen Russian voices and names none of them — their ear
+     is the only source there is, and it is a better one than the platform's. */
+  if (id && prefs.voices) {
+    if (prefs.voices.f === id) return "f";
+    if (prefs.voices.m === id) return "m";
+  }
+  const s = `${id || ""} ${(v && v.name) || ""}`.toLowerCase();
+  if (/#?female/.test(s)) return "f";
+  if (/#?male/.test(s)) return "m";
+  return null;
+}
+
+/* How far pitch is moved when a voice of the right sex is not available.
+   It does not turn a man into a woman — nothing can, short of the phone
+   having the voice — but it separates the speakers and points in the right
+   direction. Android takes 0.5–2.0; a sixth either way is plainly a different
+   person and still sounds like a person. */
+const PITCH_UP = 1.18, PITCH_DOWN = 0.86;
+
 /* How a cast of speakers is shared out over the voices this phone has.
  *
- * Different voices are what make a recorded conversation followable — the
- * owner, 2026-09-10: *"different voices are key"*. Android usually carries
- * three or four Russian voices, so the first choice is a real voice each. A
- * phone with one voice still has to sound like two people, and pitch is the
- * only lever left: ±15% is plainly a different speaker without sounding like a
- * cartoon, and it is honest, because nothing here is claiming to be a
- * recording of anybody (§27).
+ * Different voices are what make a conversation followable — the owner,
+ * 2026-09-10: *"different voices are key"*. The first cut handed them out in
+ * the order Android happened to list them, which is not related to anything:
+ * whoever spoke first got voice zero, and he heard it immediately — *"Masha
+ * clearly sounds like a guy instead of a girl."*
  *
- * Deterministic in the number of speakers, so the same character keeps the same
- * voice for the whole scenario and across replays. */
-const PITCH = [1, 0.85, 1.15, 0.92];
-export function castVoices(n) {
-  const out = [];
-  for (let k = 0; k < n; k++) {
-    const own = ruVoices[k];
-    out.push(own
-      ? { voice: own.identifier, language: own.language, pitch: 1 }
-      : { voice: ruVoice ? ruVoice.identifier : null,
-          language: ruVoice ? ruVoice.language : "ru-RU",
-          pitch: PITCH[k % PITCH.length] });
-  }
-  return out;
+ * So the cast is matched by **sex** first (`core/names.js` says who each
+ * character is), and only what is left over is separated by pitch:
+ *
+ *   1. a free voice the platform says is that sex — the good case, pitch 1;
+ *   2. otherwise any free voice, pitched up for a woman and down for a man,
+ *      so the direction is right even when the voice is not;
+ *   3. otherwise a voice already in use, pitched away from its other speaker,
+ *      because two characters sharing one voice unseparated is the one
+ *      outcome that makes a conversation impossible to follow.
+ *
+ * Deterministic in the cast, so a character keeps their voice for the whole
+ * scenario and across every replay. */
+export function castVoices(cast) {
+  const list = Array.isArray(cast) ? cast : [];
+  const want = list.map((c) => (c && (c.sex || sexOf(c.ru))) || null);
+  const pools = { f: [], m: [], u: [] };
+  ruVoices.forEach((v) => pools[voiceSex(v) || "u"].push(v));
+
+  const used = new Set();
+  const mine = new Array(list.length);
+
+  /* What the learner actually chose comes first, ahead of anything the
+     platform implies about any other voice: they have heard these and it has
+     not. */
+  want.forEach((sex, k) => {
+    const id = sex && prefs.voices && prefs.voices[sex];
+    const v = id && ruVoices.find((x) => x.identifier === id && !used.has(x.identifier));
+    if (v) { used.add(v.identifier); mine[k] = v; }
+  });
+
+  /* Then sex matches, settled **before** anybody takes a voice that is not
+     theirs. Doing it in cast order instead let the first speaker walk off with
+     the only male voice, and the man who owned it was then the one pitched
+     about — which is the same bug as the original, one step along. */
+  want.forEach((sex, k) => {
+    if (!sex || mine[k]) return;
+    const v = pools[sex].find((x) => !used.has(x.identifier));
+    if (v) { used.add(v.identifier); mine[k] = v; }
+  });
+  want.forEach((sex, k) => {
+    if (mine[k]) return;
+    const v = ruVoices.find((x) => !used.has(x.identifier));
+    if (v) { used.add(v.identifier); mine[k] = v; }
+  });
+
+  const taken = new Set();
+  return list.map((c, k) => {
+    const sex = want[k];
+    // Still nothing means there are fewer voices than speakers: share one.
+    const v = mine[k] || (ruVoices.length ? ruVoices[k % ruVoices.length] : null);
+    let pitch = 1;
+    if (v && sex && voiceSex(v) !== sex) {
+      // Not the sex this character is. Pitch cannot make a man a woman, but it
+      // points the right way and keeps the two of them apart.
+      pitch = sex === "f" ? PITCH_UP : PITCH_DOWN;
+    }
+    // Two speakers on one voice at one pitch is the one outcome that makes a
+    // conversation impossible to follow; move the later one further.
+    while (v && taken.has(`${v.identifier}|${pitch.toFixed(3)}`)) {
+      pitch = pitch >= 1 ? pitch * 1.06 : pitch * 0.94;
+    }
+    if (v) taken.add(`${v.identifier}|${pitch.toFixed(3)}`);
+    return {
+      voice: v ? v.identifier : null,
+      language: (v && v.language) || (ruVoice && ruVoice.language) || "ru-RU",
+      pitch,
+    };
+  });
 }
 
 probeVoices();
@@ -155,11 +239,13 @@ export const SPEEDS = [
    the third at full again: hear it, then hear it slowly, without a control. */
 const REPEAT_RATE = 0.75;
 const REPEAT_WINDOW_MS = 6000;
-const prefs = { rate: 1.0, cue: "bell" };
-export function configureAudio({ speed, cue: cueId } = {}) {
+const prefs = { rate: 1.0, cue: "bell", voices: {} };
+export function configureAudio({ speed, cue: cueId, voices } = {}) {
   const s = SPEEDS.find((x) => x.id === speed);
   prefs.rate = s ? s.rate : 1.0;
   if (cueId && CUES.right[cueId]) prefs.cue = cueId;
+  // Which voice reads the women and which the men, when the learner has said.
+  if (voices) prefs.voices = voices;
 }
 export const audioPrefs = () => ({ ...prefs });
 
@@ -237,6 +323,19 @@ export function speakLine(text, opts = {}) {
       finish(false);
     }
   });
+}
+
+/* One voice, saying one line, so the learner can hear which it is.
+ *
+ * The sentence is a real one from the first chapter rather than a made-up
+ * sample: the app has 2,136 lines of Russian it wrote for exactly this level,
+ * and inventing a nineteenth for a settings screen would be careless. */
+const VOICE_SAMPLE = "Это я.";
+export function previewVoice(identifier) {
+  const v = ruVoices.find((x) => x.identifier === identifier);
+  if (!v) return false;
+  speakLine(VOICE_SAMPLE, { voice: v.identifier, language: v.language, pitch: 1 });
+  return true;
 }
 
 /* Plays the real recording when the collection has one, otherwise the device voice.

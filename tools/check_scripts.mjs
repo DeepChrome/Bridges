@@ -31,6 +31,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadPayload } from "./payload.mjs";
 import { fold, TOKEN } from "../core/util.js";
+import { PEOPLE } from "../core/names.js";
 import { briefs, FREE } from "./lesson_brief.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -39,14 +40,18 @@ export const SCRIPT_DIR = join(ROOT, "data", "curated", "scripts");
 const DATA = loadPayload(ROOT);
 const L = DATA.lemmas, IX = DATA.index;
 
-/* Proper nouns a script may use even though no lesson teaches them. Kept short
-   and explicit: a name is not vocabulary, but a passage with no people in it is
-   not a passage. Cities are the ones the corpus itself keeps naming. */
-export const NAMES = new Set([
-  "анна", "аня", "иван", "ваня", "маша", "мария", "саша", "лена", "нина", "олег",
-  "борис", "виктор", "катя", "миша", "пётр", "петя", "соня", "таня", "юра",
+/* Proper nouns a script may use even though no lesson teaches them. A name is
+   not vocabulary, but a passage with no people in it is not a passage.
+ *
+ * The people live in `core/names.js`, because the app needs the same list to
+ * give each character a voice of the right sex and two copies would drift.
+ * The places stay here — nothing but this check cares about them, and they are
+ * the ones the corpus itself keeps naming. */
+export const PLACES = new Set([
   "москва", "россия", "петербург", "сибирь", "киев", "волга", "джаред",
 ]);
+export const NAMES = new Set(
+  Object.keys(PEOPLE).map((n) => n.toLowerCase()).concat([...PLACES]));
 
 /* …and the forms those names take.
  *
@@ -130,9 +135,19 @@ export function checkOne(brief, entry) {
       if (!c.id) errors.push(`speaker ${k + 1}: no id`);
       else if (ids.has(c.id)) errors.push(`two speakers share the id "${c.id}"`);
       ids.add(c.id);
+      /* Against `core/names.js`, which is also where the app reads each
+         character's sex to pick their voice. A name it does not carry has no
+         sex, so it would be read aloud by whichever voice came first — which
+         is the bug this table exists to stop. The English spelling is checked
+         too: it is what the questions call the person, and a typo there is a
+         question about somebody who is not in the conversation. */
+      const person = PEOPLE[c.ru];
       if (!c.ru || !/^[А-ЯЁ][а-яё]+$/.test(c.ru)) errors.push(`speaker ${c.id}: "${c.ru}" is not a Russian given name`);
-      else if (!NAMES.has(c.ru.toLowerCase())) errors.push(`speaker ${c.id}: "${c.ru}" is not in the allowed names`);
+      else if (!person) errors.push(`speaker ${c.id}: "${c.ru}" is not in core/names.js`);
       if (!c.en || /[а-яё]/i.test(c.en)) errors.push(`speaker ${c.id}: no English name`);
+      else if (person && person.en !== c.en) {
+        errors.push(`speaker ${c.id}: "${c.ru}" is "${person.en}" in core/names.js, not "${c.en}"`);
+      }
     });
     if (rows.length < MIN_LINES || rows.length > MAX_LINES) {
       errors.push(`${rows.length} lines, wanted ${MIN_LINES}-${MAX_LINES}`);

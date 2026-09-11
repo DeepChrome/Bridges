@@ -93,7 +93,11 @@ export function useScenario(lines, cast) {
     return () => clearInterval(id);
   }, [playing]);
 
-  const voices = castVoices(Math.max(1, (cast || []).length));
+  /* By the cast, not by how many there are: a voice is chosen for *who* is
+     speaking (core/names.js knows each character's sex), so the same character
+     keeps the same voice across every replay. A corpus scene has no cast and
+     is read by one voice, which is what `[{}]` asks for. */
+  const voices = castVoices((cast || []).length ? cast : [{}]);
   const voiceFor = (line) => {
     const k = (cast || []).findIndex((c) => c.id === line.s);
     return voices[k < 0 ? 0 : k % voices.length];

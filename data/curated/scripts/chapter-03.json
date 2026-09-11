@@ -1,115 +1,414 @@
 {
  "chapter": 3,
- "name": "Home and Clothes",
+ "name": "Wanting & Knowing",
  "lessons": {
   "core3:0": {
-   "title": "Where you live",
-   "rows": [
-    { "ru": "Где ты живёшь?", "en": "Where do you live?" },
-    { "ru": "Я живу здесь уже год.", "en": "I have been living here for a year." },
-    { "ru": "Вот книга про эту страну.", "en": "Here is a book about this country." },
-    { "ru": "Это очень новая книга.", "en": "It is a very new book." },
-    { "ru": "Я бы хотел жить там.", "en": "I would like to live there." }
+   "title": "The missing book",
+   "cast": [
+    { "id": "a", "ru": "Аня", "en": "Anya" },
+    { "id": "b", "ru": "Миша", "en": "Misha" }
+   ],
+   "lines": [
+    { "s": "a", "ru": "Миша, где моя книга?", "en": "Misha, where is my book?" },
+    { "s": "b", "ru": "Твоя книга? Её нет.", "en": "Your book? It is not here." },
+    { "s": "a", "ru": "Нет? Как нет?", "en": "Not here? How can it not be?" },
+    { "s": "b", "ru": "Так. Тут её нет.", "en": "Like that. It is not here." },
+    { "s": "a", "ru": "А кто тут?", "en": "And who is here?" },
+    { "s": "b", "ru": "Тут только я, Аня.", "en": "Only me, Anya." },
+    { "s": "a", "ru": "Только ты? И книги нет.", "en": "Only you? And no book." },
+    { "s": "b", "ru": "Книга у Ивана. Он тут живёт.", "en": "Ivan has the book. He lives here." },
+    { "s": "a", "ru": "Иван? Он живёт тут?", "en": "Ivan? He lives here?" },
+    { "s": "b", "ru": "Живёт. Уже год.", "en": "He does. For a year now." },
+    { "s": "a", "ru": "А книга? Она о чём?", "en": "And the book? What is it about?" },
+    { "s": "b", "ru": "О стране. О нашей стране.", "en": "About the country. About our country." },
+    { "s": "a", "ru": "Я бы хотела эту книгу.", "en": "I would like that book." },
+    { "s": "b", "ru": "Книга у Ивана. Иди к нему.", "en": "Ivan has it. Go to him." }
+   ],
+   "questions": [
+    { "ask": "What is Anya looking for?",
+      "options": ["Her book", "Her keys", "Ivan", "Her coat"], "answer": 0 },
+    { "ask": "Who has it?",
+      "options": ["Ivan", "Misha", "Nobody, it is lost", "She had it herself"], "answer": 0 },
+    { "ask": "Who else is in the room?",
+      "options": ["Only Misha", "Nobody", "Ivan", "Several people"], "answer": 0 },
+    { "ask": "What is the book about?",
+      "options": ["Their country", "A person", "A city", "Misha does not say"], "answer": 0 },
+    { "ask": "What does Misha tell her to do?",
+      "options": ["Go and see Ivan", "Wait there", "Look again", "Forget about it"], "answer": 0 }
    ]
   },
+
   "core3:1": {
-   "title": "Something to say today",
-   "rows": [
-    { "ru": "Сегодня я должен работать.", "en": "Today I have to work." },
-    { "ru": "Какая большая работа!", "en": "What a big job!" },
-    { "ru": "Но я хочу сказать вам.", "en": "But I want to tell you something." },
-    { "ru": "Что ты хочешь сказать?", "en": "What do you want to say?" },
-    { "ru": "Я здесь, чтобы это сделать.", "en": "I am here to get it done." }
+   "title": "A big day",
+   "cast": [
+    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "b", "ru": "Борис", "en": "Boris" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Катя, что сегодня?", "en": "Katya, what is happening today?" },
+    { "s": "a", "ru": "Сегодня? Большой день.", "en": "Today? A big day." },
+    { "s": "b", "ru": "Большой? Какой день?", "en": "Big? What sort of day?" },
+    { "s": "a", "ru": "Такой, чтобы всё сказать.", "en": "The sort where you say everything." },
+    { "s": "b", "ru": "Сказать? Кому?", "en": "Say it? To whom?" },
+    { "s": "a", "ru": "Всем. Но не тут.", "en": "To everyone. But not here." },
+    { "s": "b", "ru": "Не тут? А где же?", "en": "Not here? Where, then?" },
+    { "s": "a", "ru": "Там, где все.", "en": "There, where everyone is." },
+    { "s": "b", "ru": "Ты должна это сказать?", "en": "Do you have to say it?" },
+    { "s": "a", "ru": "Должна. Сегодня.", "en": "I have to. Today." },
+    { "s": "b", "ru": "А что ты скажешь?", "en": "And what will you say?" },
+    { "s": "a", "ru": "Что я не могу так жить.", "en": "That I cannot go on living like this." },
+    { "s": "b", "ru": "Но это очень большой день.", "en": "But that is a very big day." },
+    { "s": "a", "ru": "Да, Борис. Но я должна.", "en": "Yes, Boris. But I have to." }
+   ],
+   "questions": [
+    { "ask": "What kind of day is it for Katya?",
+      "options": ["A big one", "An ordinary one", "A day off", "She will not say"], "answer": 0 },
+    { "ask": "What is she going to do?",
+      "options": ["Tell everyone something", "Leave the country", "Start a job", "Stay at home"], "answer": 0 },
+    { "ask": "Where will she do it?",
+      "options": ["Where everyone is", "Right there", "At home", "She has not decided"], "answer": 0 },
+    { "ask": "What is she going to tell them?",
+      "options": ["That she cannot live like this", "That she is leaving", "That she is ill", "That she is happy"],
+      "answer": 0 },
+    { "ask": "How does Boris respond?",
+      "options": ["He says it is a big day", "He talks her out of it", "He offers to come", "He laughs at her"],
+      "answer": 0 }
    ]
   },
+
   "core3:2": {
-   "title": "A friend is thinking",
-   "rows": [
-    { "ru": "Мой друг сейчас здесь.", "en": "My friend is here right now." },
-    { "ru": "Что он делает?", "en": "What is he doing?" },
-    { "ru": "Он смотрит на книгу.", "en": "He is looking at a book." },
-    { "ru": "О чём он думает?", "en": "What is he thinking about?" },
-    { "ru": "Он думает о новой работе.", "en": "He is thinking about a new job." }
+   "title": "Watching her friends",
+   "cast": [
+    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "b", "ru": "Олег", "en": "Oleg" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Лена, ты сейчас думаешь?", "en": "Lena, are you thinking about something?" },
+    { "s": "a", "ru": "Думаю. Смотрю и думаю.", "en": "I am. Watching and thinking." },
+    { "s": "b", "ru": "На что ты смотришь?", "en": "What are you looking at?" },
+    { "s": "a", "ru": "На них. Они мои друзья.", "en": "At them. They are my friends." },
+    { "s": "b", "ru": "Друзья? Все?", "en": "Friends? All of them?" },
+    { "s": "a", "ru": "Все. Уже не раз.", "en": "All of them. And not for the first time." },
+    { "s": "b", "ru": "Не раз? Как так?", "en": "Not the first time? How so?" },
+    { "s": "a", "ru": "Так. При них я могу всё.", "en": "Like this. With them I can do anything." },
+    { "s": "b", "ru": "При них? А при мне?", "en": "With them? And with me?" },
+    { "s": "a", "ru": "При тебе тоже, Олег.", "en": "With you too, Oleg." },
+    { "s": "b", "ru": "Я тоже стану другом?", "en": "So I will become a friend as well?" },
+    { "s": "a", "ru": "Станешь. Уже сейчас.", "en": "You will. Already." },
+    { "s": "b", "ru": "Сейчас? Я так не думаю.", "en": "Already? I do not think so." },
+    { "s": "a", "ru": "А ты думай, Олег.", "en": "Well, think about it, Oleg." }
+   ],
+   "questions": [
+    { "ask": "What is Lena doing?",
+      "options": ["Watching her friends and thinking", "Waiting for Oleg", "Reading", "Working"], "answer": 0 },
+    { "ask": "Who are the people she is watching?",
+      "options": ["Her friends", "Strangers", "Her family", "Oleg's friends"], "answer": 0 },
+    { "ask": "What does she say she can do with them?",
+      "options": ["Anything", "Nothing", "Only talk", "Study"], "answer": 0 },
+    { "ask": "What does she tell Oleg?",
+      "options": ["He is becoming a friend too", "He is not one of them", "He should leave", "She is busy"],
+      "answer": 0 },
+    { "ask": "Does Oleg believe her?",
+      "options": ["Not at first", "Yes, at once", "He does not answer", "He never asks"], "answer": 0 }
    ]
   },
+
   "core3:3": {
-   "title": "First day in town",
-   "rows": [
-    { "ru": "Это мой первый день в городе.", "en": "This is my first day in the city." },
-    { "ru": "Я здесь уже час.", "en": "I have been here an hour already." },
-    { "ru": "Я вижу большой новый город.", "en": "I see a big new city." },
-    { "ru": "Это слово я уже знаю.", "en": "This word I already know." },
-    { "ru": "После работы я думаю о жизни.", "en": "After work I think about life." }
+   "title": "Her first hour in the city",
+   "cast": [
+    { "id": "a", "ru": "Нина", "en": "Nina" },
+    { "id": "b", "ru": "Юра", "en": "Yura" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Нина, ты видишь город?", "en": "Nina, can you see the city?" },
+    { "s": "a", "ru": "Вижу. Первый раз.", "en": "I can. For the first time." },
+    { "s": "b", "ru": "Первый раз? За всю жизнь?", "en": "The first time? In your whole life?" },
+    { "s": "a", "ru": "За всю жизнь. Я тут час.", "en": "In my whole life. I have been here an hour." },
+    { "s": "b", "ru": "Час? И что ты видишь?", "en": "An hour? And what do you see?" },
+    { "s": "a", "ru": "Вижу всё. И всех.", "en": "I see everything. And everyone." },
+    { "s": "b", "ru": "А после? Что после?", "en": "And afterwards? What then?" },
+    { "s": "a", "ru": "После — не знаю.", "en": "Afterwards — I do not know." },
+    { "s": "b", "ru": "Не знаешь? Нет слов?", "en": "You do not know? No words at all?" },
+    { "s": "a", "ru": "Нет слов. Это город.", "en": "No words. This is a city." },
+    { "s": "b", "ru": "Такой город, такая жизнь.", "en": "Such a city, such a life." },
+    { "s": "a", "ru": "Да, Юра. Я это вижу.", "en": "Yes, Yura. I can see that." },
+    { "s": "b", "ru": "Ещё час? Или уже всё?", "en": "Another hour? Or is that enough?" },
+    { "s": "a", "ru": "Ещё час. Первый час.", "en": "Another hour. The first hour." }
+   ],
+   "questions": [
+    { "ask": "Is Nina from this city?",
+      "options": ["No, it is her first time", "Yes, she grew up there", "She used to live there", "She does not say"],
+      "answer": 0 },
+    { "ask": "How long has she been there?",
+      "options": ["An hour", "A day", "A year", "All her life"], "answer": 0 },
+    { "ask": "What does she say about what comes next?",
+      "options": ["She does not know", "She is going home", "She will stay a year", "Yura decides"], "answer": 0 },
+    { "ask": "How does she describe the city?",
+      "options": ["She has no words for it", "She says it is too big", "She does not like it", "She says it is like home"],
+      "answer": 0 },
+    { "ask": "What does she want at the end?",
+      "options": ["Another hour there", "To leave", "To sit down", "To find Yura's house"], "answer": 0 }
    ]
   },
+
   "core3:4": {
-   "title": "When there is time",
-   "rows": [
-    { "ru": "Когда ты работаешь?", "en": "When do you work?" },
-    { "ru": "Сегодня у меня много работы.", "en": "I have a lot of work today." },
-    { "ru": "А когда ты видишь друзей?", "en": "And when do you see your friends?" },
-    { "ru": "Только после работы.", "en": "Only after work." },
-    { "ru": "Сейчас у меня нет времени.", "en": "Right now I have no time." }
+   "title": "An hour of her own",
+   "cast": [
+    { "id": "a", "ru": "Соня", "en": "Sonya" },
+    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Соня, когда ты тут?", "en": "Sonya, when will you be here?" },
+    { "s": "a", "ru": "Когда? Сегодня.", "en": "When? Today." },
+    { "s": "b", "ru": "Сегодня? А сейчас?", "en": "Today? What about now?" },
+    { "s": "a", "ru": "Виктор, у меня много работы.", "en": "Viktor, I have a lot of work." },
+    { "s": "b", "ru": "Много работы? Как много?", "en": "A lot of work? How much?" },
+    { "s": "a", "ru": "Очень много. Весь день.", "en": "A great deal. All day." },
+    { "s": "b", "ru": "Весь день! А когда нет?", "en": "All day! And when are you free?" },
+    { "s": "a", "ru": "Когда нет? После работы.", "en": "When am I free? After work." },
+    { "s": "b", "ru": "После работы — это когда?", "en": "After work — when is that?" },
+    { "s": "a", "ru": "Это час. Только час.", "en": "That is an hour. One hour." },
+    { "s": "b", "ru": "Час — это не много.", "en": "An hour is not much." },
+    { "s": "a", "ru": "Не много. Но он мой.", "en": "Not much. But it is mine." },
+    { "s": "b", "ru": "Так когда ты тут, Соня?", "en": "So when will you be here, Sonya?" },
+    { "s": "a", "ru": "Сегодня. После работы.", "en": "Today. After work." }
+   ],
+   "questions": [
+    { "ask": "Why can Sonya not come now?",
+      "options": ["She has a lot of work", "She is ill", "She is with friends", "She does not want to"],
+      "answer": 0 },
+    { "ask": "How long does her work last?",
+      "options": ["All day", "An hour", "Until the evening only", "She does not say"], "answer": 0 },
+    { "ask": "How much free time does she have?",
+      "options": ["One hour", "All evening", "None at all", "Half the day"], "answer": 0 },
+    { "ask": "What does she say about that hour?",
+      "options": ["It is hers", "It is not enough", "She gives it to Viktor", "She works through it"],
+      "answer": 0 },
+    { "ask": "When will she come?",
+      "options": ["Today, after work", "Tomorrow", "Right away", "She does not say"], "answer": 0 }
    ]
   },
+
   "home:0": {
-   "title": "Looking for the key",
-   "rows": [
-    { "ru": "Где ключ?", "en": "Where is the key?" },
-    { "ru": "Он лежит на кухне.", "en": "It is lying in the kitchen." },
-    { "ru": "Я сижу здесь уже час.", "en": "I have been sitting here for an hour." },
-    { "ru": "Мы живём на первом этаже.", "en": "We live on the first floor." },
-    { "ru": "Лестница там, за стеной.", "en": "The stairs are over there, behind the wall." }
+   "title": "The key in the kitchen",
+   "cast": [
+    { "id": "a", "ru": "Маша", "en": "Masha" },
+    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Маша, где ключ?", "en": "Masha, where is the key?" },
+    { "s": "a", "ru": "Ключ? На кухне.", "en": "The key? In the kitchen." },
+    { "s": "b", "ru": "На кухне? Где там?", "en": "In the kitchen? Whereabouts?" },
+    { "s": "a", "ru": "Он лежит у стены.", "en": "It is lying by the wall." },
+    { "s": "b", "ru": "У стены... Я не вижу.", "en": "By the wall... I cannot see it." },
+    { "s": "a", "ru": "А ты смотри. Он там лежит.", "en": "Well, look. It is lying there." },
+    { "s": "b", "ru": "Нет его тут. Кто сидит на кухне?", "en": "It is not here. Who is sitting in the kitchen?" },
+    { "s": "a", "ru": "Там Иван. Он сидит.", "en": "Ivan is there. He is sitting." },
+    { "s": "b", "ru": "Иван? На каком этаже?", "en": "Ivan? On which floor?" },
+    { "s": "a", "ru": "На нашем этаже. Первый.", "en": "On our floor. The first." },
+    { "s": "b", "ru": "Первый этаж? А лестница?", "en": "The first floor? And the stairs?" },
+    { "s": "a", "ru": "Лестница тут, Пётр. Иди.", "en": "The stairs are here, Pyotr. Go on." },
+    { "s": "b", "ru": "Иду. Ключ у Ивана?", "en": "I am going. Does Ivan have the key?" },
+    { "s": "a", "ru": "Может быть. Он там сидит.", "en": "He may have. He is sitting there." }
+   ],
+   "questions": [
+    { "ask": "What is Pyotr looking for?",
+      "options": ["A key", "A chair", "Ivan", "The stairs"], "answer": 0 },
+    { "ask": "Where does Masha say it is?",
+      "options": ["In the kitchen by the wall", "On the stairs", "In the yard", "In her pocket"], "answer": 0 },
+    { "ask": "Does he find it there?",
+      "options": ["No", "Yes", "He does not look", "Masha finds it"], "answer": 0 },
+    { "ask": "Who is sitting in the kitchen?",
+      "options": ["Ivan", "Nobody", "Masha", "A guest"], "answer": 0 },
+    { "ask": "Which floor is it on?",
+      "options": ["The first", "The third", "The top one", "Nobody says"], "answer": 0 }
    ]
   },
+
   "home:1": {
-   "title": "Furniture in the room",
-   "rows": [
-    { "ru": "Вот стул, а вот кресло.", "en": "Here is a chair, and here is an armchair." },
-    { "ru": "Кровать у стены.", "en": "The bed is by the wall." },
-    { "ru": "Зеркало большое и новое.", "en": "The mirror is big and new." },
-    { "ru": "Книга лежит на полу.", "en": "A book is lying on the floor." },
-    { "ru": "Наш двор очень большой.", "en": "Our courtyard is very big." }
+   "title": "Furniture in the wrong places",
+   "cast": [
+    { "id": "a", "ru": "Таня", "en": "Tanya" },
+    { "id": "b", "ru": "Миша", "en": "Misha" }
+   ],
+   "lines": [
+    { "s": "a", "ru": "Миша, где мой стул?", "en": "Misha, where is my chair?" },
+    { "s": "b", "ru": "Стул? Он во дворе.", "en": "The chair? It is in the yard." },
+    { "s": "a", "ru": "Во дворе? Почему там?", "en": "In the yard? Why there?" },
+    { "s": "b", "ru": "Там сейчас все стулья.", "en": "All the chairs are out there now." },
+    { "s": "a", "ru": "А кресло? И кровать?", "en": "And the armchair? And the bed?" },
+    { "s": "b", "ru": "Кресло тут. Кровать тоже.", "en": "The armchair is here. The bed too." },
+    { "s": "a", "ru": "А зеркало? Оно на стене?", "en": "And the mirror? Is it on the wall?" },
+    { "s": "b", "ru": "На стене. Очень большое.", "en": "On the wall. A very big one." },
+    { "s": "a", "ru": "А пол? Что на полу?", "en": "And the floor? What is on the floor?" },
+    { "s": "b", "ru": "На полу только кресло.", "en": "Only the armchair is on the floor." },
+    { "s": "a", "ru": "Кресло на полу? Как так?", "en": "The armchair on the floor? How is that?" },
+    { "s": "b", "ru": "Так, Таня. Это домашний день.", "en": "That is how it is, Tanya. It is a day at home." },
+    { "s": "a", "ru": "Домашний день! И стул во дворе.", "en": "A day at home! And my chair in the yard." },
+    { "s": "b", "ru": "Стул во дворе. Кресло на полу.", "en": "The chair in the yard. The armchair on the floor." }
+   ],
+   "questions": [
+    { "ask": "Where is Tanya's chair?",
+      "options": ["In the yard", "In the kitchen", "By the mirror", "Nobody knows"], "answer": 0 },
+    { "ask": "What is still in the room?",
+      "options": ["The armchair and the bed", "Only the bed", "Nothing at all", "The chairs"], "answer": 0 },
+    { "ask": "Where is the mirror?",
+      "options": ["On the wall", "On the floor", "In the yard", "There is no mirror"], "answer": 0 },
+    { "ask": "How does Misha explain it?",
+      "options": ["He calls it a day at home", "He blames Tanya", "He does not explain", "He says it was an accident"],
+      "answer": 0 },
+    { "ask": "How does Tanya sound about her chair?",
+      "options": ["Unimpressed", "Delighted", "Indifferent", "Frightened"], "answer": 0 }
    ]
   },
+
   "home:2": {
-   "title": "Repairs at home",
-   "rows": [
-    { "ru": "У нас сейчас ремонт.", "en": "We are having repairs done at the moment." },
-    { "ru": "Мебель уже на кухне.", "en": "The furniture is in the kitchen already." },
-    { "ru": "Шкаф большой и чистый.", "en": "The cupboard is big and clean." },
-    { "ru": "Забор тоже новый.", "en": "The fence is new too." },
-    { "ru": "А стекло уже чистое.", "en": "And the glass is clean already." }
+   "title": "The house is being done up",
+   "cast": [
+    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "b", "ru": "Борис", "en": "Boris" }
+   ],
+   "lines": [
+    { "s": "a", "ru": "Борис, что тут? Ремонт?", "en": "Boris, what is going on here? Building work?" },
+    { "s": "b", "ru": "Ремонт, Катя. Уже год.", "en": "Building work, Katya. For a year now." },
+    { "s": "a", "ru": "Год? А мебель где?", "en": "A year? And where is the furniture?" },
+    { "s": "b", "ru": "Мебель во дворе. У забора.", "en": "The furniture is in the yard. By the fence." },
+    { "s": "a", "ru": "У забора? А стекло?", "en": "By the fence? And the glass?" },
+    { "s": "b", "ru": "Стекло тут. Оно чистое.", "en": "The glass is here. It is clean." },
+    { "s": "a", "ru": "Чистое стекло, а пол?", "en": "Clean glass — and the floor?" },
+    { "s": "b", "ru": "Пол не очень чистый.", "en": "The floor is not very clean." },
+    { "s": "a", "ru": "А шкаф? Где шкаф?", "en": "And the cupboard? Where is that?" },
+    { "s": "b", "ru": "Шкаф тоже во дворе.", "en": "The cupboard is in the yard as well." },
+    { "s": "a", "ru": "Вся мебель во дворе!", "en": "All the furniture is in the yard!" },
+    { "s": "b", "ru": "Вся. Но тут будет чисто.", "en": "All of it. But it will be clean here." },
+    { "s": "a", "ru": "Будет? Когда?", "en": "Will be? When?" },
+    { "s": "b", "ru": "После ремонта. Я так думаю.", "en": "After the work. I think." }
+   ],
+   "questions": [
+    { "ask": "What is happening at Boris's house?",
+      "options": ["It is being done up", "He is moving out", "Nothing at all", "He is selling it"], "answer": 0 },
+    { "ask": "How long has it been going on?",
+      "options": ["A year", "A week", "A month", "It has just started"], "answer": 0 },
+    { "ask": "Where is the furniture?",
+      "options": ["In the yard by the fence", "In the kitchen", "Gone", "On the first floor"], "answer": 0 },
+    { "ask": "What is not clean?",
+      "options": ["The floor", "The glass", "The cupboard", "Everything is clean"], "answer": 0 },
+    { "ask": "How sure is Boris that it will be finished?",
+      "options": ["Not very", "Completely sure", "He says next week", "He has given up"], "answer": 0 }
    ]
   },
+
   "clothes:0": {
-   "title": "Getting dressed for work",
-   "rows": [
-    { "ru": "Я одеваюсь и иду на работу.", "en": "I get dressed and go to work." },
-    { "ru": "Что ты надел сегодня?", "en": "What did you put on today?" },
-    { "ru": "Это новое, но не очень красивое.", "en": "It is new, but not very nice." },
-    { "ru": "Я ношу это только на работе.", "en": "I only wear it at work." },
-    { "ru": "После работы я это сниму.", "en": "After work I will take it off." }
+   "title": "An hour to get dressed",
+   "cast": [
+    { "id": "a", "ru": "Аня", "en": "Anya" },
+    { "id": "b", "ru": "Юра", "en": "Yura" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Аня, ты уже одеваешься?", "en": "Anya, are you getting dressed yet?" },
+    { "s": "a", "ru": "Одеваюсь. Уже час.", "en": "I am. For an hour now." },
+    { "s": "b", "ru": "Час? Какая одежда!", "en": "An hour? What clothes!" },
+    { "s": "a", "ru": "Одежда красивая. Ты видишь?", "en": "The clothes are beautiful. Can you see?" },
+    { "s": "b", "ru": "Вижу. Очень красивая.", "en": "I can. Very beautiful." },
+    { "s": "a", "ru": "А что мне надеть?", "en": "And what should I put on?" },
+    { "s": "b", "ru": "Надень то, что носишь.", "en": "Put on what you usually wear." },
+    { "s": "a", "ru": "Я это не ношу.", "en": "I do not wear that." },
+    { "s": "b", "ru": "Не носишь? А что носишь?", "en": "You do not? What do you wear, then?" },
+    { "s": "a", "ru": "Я ношу только своё.", "en": "I only wear my own things." },
+    { "s": "b", "ru": "Своё? А это чьё?", "en": "Your own? And whose is that?" },
+    { "s": "a", "ru": "Это тоже моё. Но я сниму.", "en": "That is mine too. But I will take it off." },
+    { "s": "b", "ru": "Снимешь? Мы уже идём!", "en": "Take it off? We are leaving!" },
+    { "s": "a", "ru": "Иду, Юра. Я уже красивая.", "en": "Coming, Yura. I look fine already." }
+   ],
+   "questions": [
+    { "ask": "How long has Anya been getting ready?",
+      "options": ["An hour", "All morning", "A few minutes", "She has not started"], "answer": 0 },
+    { "ask": "What does Yura suggest?",
+      "options": ["Wearing what she usually wears", "Wearing something new", "Staying at home", "Nothing"],
+      "answer": 0 },
+    { "ask": "What does she say about her clothes?",
+      "options": ["She only wears her own", "They are all Anya's", "She has nothing to wear", "They are new"],
+      "answer": 0 },
+    { "ask": "Why is Yura pressing her?",
+      "options": ["They are leaving", "He dislikes the dress", "He wants to go alone", "He is getting dressed too"],
+      "answer": 0 },
+    { "ask": "How does it end?",
+      "options": ["She comes as she is", "She changes again", "They stay in", "He leaves without her"],
+      "answer": 0 }
    ]
   },
+
   "clothes:1": {
-   "title": "Packing clothes",
-   "rows": [
-    { "ru": "Вот моя одежда и обувь.", "en": "Here are my clothes and my shoes." },
-    { "ru": "Костюм новый и очень красивый.", "en": "The suit is new and very smart." },
-    { "ru": "Где мой галстук?", "en": "Where is my tie?" },
-    { "ru": "Он в кармане куртки.", "en": "It is in the jacket pocket." },
-    { "ru": "Я надену костюм и галстук.", "en": "I will put on the suit and the tie." }
+   "title": "The tie in the coat pocket",
+   "cast": [
+    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Лена, где мой галстук?", "en": "Lena, where is my tie?" },
+    { "s": "a", "ru": "Галстук? В кармане, Виктор.", "en": "Your tie? In the pocket, Viktor." },
+    { "s": "b", "ru": "В кармане? В каком кармане?", "en": "In the pocket? Which pocket?" },
+    { "s": "a", "ru": "В кармане пальто.", "en": "In the coat pocket." },
+    { "s": "b", "ru": "В пальто! А костюм?", "en": "In the coat! And the suit?" },
+    { "s": "a", "ru": "Костюм тут. Он красивый.", "en": "The suit is here. It is a good one." },
+    { "s": "b", "ru": "А куртка? Я её не ношу.", "en": "And the jacket? I do not wear it." },
+    { "s": "a", "ru": "Не носишь? А обувь?", "en": "You do not? And your shoes?" },
+    { "s": "b", "ru": "Обувь? Она уже на мне.", "en": "Shoes? They are already on." },
+    { "s": "a", "ru": "Уже? А моё платье?", "en": "Already? And my dress?" },
+    { "s": "b", "ru": "Платье? Оно очень красивое.", "en": "The dress? It is very beautiful." },
+    { "s": "a", "ru": "Красивое, но не моё.", "en": "Beautiful, but not mine." },
+    { "s": "b", "ru": "Не твоё? А чьё, Лена?", "en": "Not yours? Whose is it, Lena?" },
+    { "s": "a", "ru": "Это платье Ани. Моё тут.", "en": "That dress is Anya's. Mine is here." }
+   ],
+   "questions": [
+    { "ask": "What is Viktor looking for?",
+      "options": ["His tie", "His shoes", "His coat", "A dress"], "answer": 0 },
+    { "ask": "Where is it?",
+      "options": ["In the coat pocket", "In the suit", "In the jacket", "Lena is wearing it"], "answer": 0 },
+    { "ask": "What does Viktor say about the jacket?",
+      "options": ["He does not wear it", "It is too small", "It is Lena's", "It is his favourite"], "answer": 0 },
+    { "ask": "Is he ready to go?",
+      "options": ["Almost — his shoes are on", "No, he is undressed", "Yes, completely", "He is not going"],
+      "answer": 0 },
+    { "ask": "Whose is the beautiful dress?",
+      "options": ["Anya's", "Lena's", "Viktor's sister's", "Nobody says"], "answer": 0 }
    ]
   },
+
   "clothes:2": {
-   "title": "Choosing what to wear",
-   "rows": [
-    { "ru": "Это платье очень красивое.", "en": "This dress is very beautiful." },
-    { "ru": "А пальто и пиджак?", "en": "And the coat and the jacket?" },
-    { "ru": "Кольцо тоже красивое.", "en": "The ring is beautiful too." },
-    { "ru": "Надень рубашку и пиджак.", "en": "Put on the shirt and the jacket." },
-    { "ru": "Майка — это тоже мода.", "en": "A T-shirt is fashion too." }
+   "title": "The beard is not fashion",
+   "cast": [
+    { "id": "a", "ru": "Соня", "en": "Sonya" },
+    { "id": "b", "ru": "Олег", "en": "Oleg" }
+   ],
+   "lines": [
+    { "s": "a", "ru": "Олег, это твой пиджак?", "en": "Oleg, is that your jacket?" },
+    { "s": "b", "ru": "Мой. И рубашка моя.", "en": "It is. And the shirt is mine." },
+    { "s": "a", "ru": "Рубашка красивая. А кольцо?", "en": "A good shirt. And the ring?" },
+    { "s": "b", "ru": "Кольцо? Это не моё.", "en": "The ring? That is not mine." },
+    { "s": "a", "ru": "Не твоё? А чьё кольцо?", "en": "Not yours? Whose ring is it?" },
+    { "s": "b", "ru": "Не знаю, Соня. Оно тут.", "en": "I do not know, Sonya. It was just here." },
+    { "s": "a", "ru": "А майка? Где твоя майка?", "en": "And your T-shirt? Where is that?" },
+    { "s": "b", "ru": "Майка? Я её не ношу.", "en": "The T-shirt? I do not wear it." },
+    { "s": "a", "ru": "Не носишь? Это мода?", "en": "You do not? Is that fashion?" },
+    { "s": "b", "ru": "Мода? Я не о моде думаю.", "en": "Fashion? I do not think about fashion." },
+    { "s": "a", "ru": "А борода? Это тоже мода?", "en": "And the beard? Is that fashion too?" },
+    { "s": "b", "ru": "Борода — это не мода. Это я.", "en": "The beard is not fashion. It is me." },
+    { "s": "a", "ru": "Такой ты! Пиджак и борода.", "en": "That is you all over! A jacket and a beard." },
+    { "s": "b", "ru": "Пиджак, рубашка и борода.", "en": "A jacket, a shirt and a beard." }
+   ],
+   "questions": [
+    { "ask": "What is Oleg wearing?",
+      "options": ["A jacket and shirt", "A T-shirt", "A coat", "A suit and tie"], "answer": 0 },
+    { "ask": "Whose is the ring?",
+      "options": ["He does not know", "His", "Sonya's", "His brother's"], "answer": 0 },
+    { "ask": "Why has he no T-shirt on?",
+      "options": ["He never wears one", "It is in the wash", "Sonya has it", "It is too cold"], "answer": 0 },
+    { "ask": "What does he say about fashion?",
+      "options": ["He does not think about it", "He follows it closely", "The beard is fashion", "Sonya knows better"],
+      "answer": 0 },
+    { "ask": "What does he say the beard is?",
+      "options": ["Simply himself", "This year's fashion", "For work", "Sonya's idea"], "answer": 0 }
    ]
   }
  }

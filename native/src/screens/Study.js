@@ -5,7 +5,7 @@
  * so a deck card that is also a curriculum word shares one memory. */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, Alert } from "react-native";
+import { View, Text, Pressable, TextInput, Alert } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, Tick, SectionLabel, Sheet } from "../ui";
@@ -103,6 +103,7 @@ function SetPicker({ visible, onClose }) {
     ...p,
     sets: p.sets.includes(id) ? p.sets.filter((x) => x !== id) : p.sets.concat(id),
   }));
+  const dueCount = cardsIn(st, ["__due__"]).length;
 
   const doImport = async () => {
     setBusy(true);
@@ -165,19 +166,35 @@ function SetPicker({ visible, onClose }) {
 
   return (
     <Sheet visible={visible} onClose={onClose} header={header} footer={footer} maxHeight="88%">
-            {troubleWords(st).length ? (
-              <View style={{ marginBottom: 18 }}>
-                <List>
-                  <Row onPress={() => toggle("__trouble__")}>
+            {/* Everything the picker can turn on, it can turn off.
+             *
+             * "Due today" is what the path's "Review · N due" switches on, and
+             * it had no row here — so a learner arriving that way was handed a
+             * set they could see the name of, could not find, and could not
+             * clear. The owner, 2026-09-11: *"Study mode — it defaults to
+             * having the basic set active. Every set of cards should be able to
+             * be toggled on or off."* The words it looked like were the first
+             * chapter's, because those are what is due early on. */}
+            <View style={{ marginBottom: 18 }}>
+              <List>
+                <Row testID="set-due" onPress={() => toggle("__due__")}>
+                  <Tick on={st.sets.includes("__due__")} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.ink, fontSize: 15 }}>Due today</Text>
+                    <Muted>{dueCount + " words"}</Muted>
+                  </View>
+                </Row>
+                {troubleWords(st).length ? (
+                  <Row testID="set-trouble" onPress={() => toggle("__trouble__")}>
                     <Tick on={st.sets.includes("__trouble__")} />
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: t.ink, fontSize: 15 }}>Trouble words</Text>
                       <Muted>{troubleWords(st).length + " words"}</Muted>
                     </View>
                   </Row>
-                </List>
-              </View>
-            ) : null}
+                ) : null}
+              </List>
+            </View>
 
             <View style={{ marginBottom: 18 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -243,10 +260,20 @@ function SetPicker({ visible, onClose }) {
   );
 }
 
+/* How many cards "For you" deals. Twenty unless the learner says otherwise; an
+   empty or nonsense box falls back to twenty rather than to nothing, because a
+   pile of zero cards is not a thing anybody asked for. */
+export const FOR_YOU_N = 20;
+export const pickN = (text) => {
+  const n = parseInt(String(text), 10);
+  return Number.isFinite(n) && n > 0 ? Math.min(n, 999) : FOR_YOU_N;
+};
+
 export default function Study({ navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
   const [picker, setPicker] = useState(false);
+  const [howMany, setHowMany] = useState(String(FOR_YOU_N));
   const [queue, setQueue] = useState(() => buildQueue(st));
   const [at, setAt] = useState(0);
   const [shown, setShown] = useState(false);
@@ -306,10 +333,24 @@ export default function Study({ navigation }) {
       {/* Nothing to shuffle or cut when there is no queue: the empty state has
           one action, choosing a set, not two dead buttons above it. */}
       {queue.length ? (
-        <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12 }}>
           <Btn label="Shuffle" style={{ flex: 1 }}
                onPress={() => { setQueue(shuffle(queue.slice())); setAt(0); setShown(false); }} />
-          <Btn label="20 most urgent" style={{ flex: 1 }} onPress={() => rebuild(20)} />
+          {/* "20 most urgent" said what the code does — it sorts by weight and
+              cuts. What a learner wants is a short pile picked for them, and how
+              short is theirs to say (the owner, 2026-09-11). */}
+          <Btn label="For you" style={{ flex: 1 }} onPress={() => rebuild(pickN(howMany))} />
+          <TextInput
+            testID="study-n"
+            value={howMany}
+            onChangeText={(v) => setHowMany(v.replace(/[^0-9]/g, "").slice(0, 3))}
+            onBlur={() => setHowMany(String(pickN(howMany)))}
+            keyboardType="number-pad"
+            selectTextOnFocus
+            style={{ width: 58, textAlign: "center", color: t.ink, fontSize: 15,
+                     borderWidth: 1, borderColor: t.line, borderRadius: radius.md,
+                     backgroundColor: t.surface, paddingVertical: 11 }}
+          />
         </View>
       ) : null}
 
@@ -342,8 +383,11 @@ export default function Study({ navigation }) {
 
           <Card style={{ marginTop: 12, alignItems: "center", paddingVertical: 28 }}>
             {!shown && st.dir ? (
-              <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600",
-                             textAlign: "center" }}>{w.e || "—"}</Text>
+              // English first: the same numbered senses, since the question is
+              // "which word means all of these?" and one of nine synonyms is a
+              // different question.
+              w.e ? <Senses e={w.e} size={20} style={{ marginTop: 0 }} />
+                  : <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600" }}>—</Text>
             ) : (
               <>
                 <Text style={{ color: t.ink, fontSize: w.w.length > 18 ? 24 : 34, fontWeight: "600",
@@ -353,7 +397,12 @@ export default function Study({ navigation }) {
             )}
             {shown ? (
               <>
-                <Senses e={w.e} />
+                {/* Every meaning, numbered and laid out as the entry lays it —
+                    the owner, 2026-09-11: *"make sure it has a comprehensive
+                    list sort of like you'd find in the dictionary"*. It was the
+                    same list centred at a smaller size, which read as a caption
+                    rather than as a dictionary's senses. */}
+                <Senses e={w.e} size={16} align="left" style={{ alignSelf: "stretch" }} />
                 {(w.x || []).slice(0, 3).map((ex, k) => (
                   // The word in use, three ways: the entry reads like a dictionary,
                   // not a gloss (the owner, 2026-09-07).
@@ -379,6 +428,14 @@ export default function Study({ navigation }) {
                       Where you heard it
                     </Text>
                   </Pressable>
+                ) : null}
+                {/* And the rest of what a dictionary holds — the paradigm, the
+                    frequency, every example — is one tap away rather than
+                    copied onto the card. A deck card has no entry to open. */}
+                {idxOfWord(w.b) >= 0 ? (
+                  <Btn kind="ghost" label="Full entry" testID="full-entry"
+                       style={{ marginTop: 12 }}
+                       onPress={() => navigation.navigate("Word", { word: w.b })} />
                 ) : null}
               </>
             ) : null}

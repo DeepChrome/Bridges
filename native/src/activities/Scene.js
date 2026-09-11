@@ -261,10 +261,21 @@ export function Scene({ q, r }) {
 
   return (
     <View>
+      {/* The conversation's own title, above it and the size of a heading. It
+          was 13 px of muted text under the transport, alongside the unit name,
+          which is how a learner can listen to a scene and not know it had one
+          (the owner, 2026-09-11: "Each should have a scenario title"). */}
+      {q.topic ? (
+        <Text testID="scene-title"
+              style={{ color: t.ink, fontSize: T.title, fontWeight: "700",
+                       textAlign: "center", marginBottom: 12 }}>
+          {q.topic}
+        </Text>
+      ) : null}
       <Transport s={s} />
       <Cast cast={cast} lines={lines} at={s.at} />
       <Muted testID="scene-about" style={{ textAlign: "center", marginTop: 10 }}>
-        {[q.topic, q.level].filter(Boolean).join(" · ")}
+        {q.level}
       </Muted>
       {voiceNote ? (
         <Muted testID="scene-voice" style={{ textAlign: "center", marginTop: 2 }}>

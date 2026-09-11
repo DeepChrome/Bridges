@@ -38,7 +38,7 @@ import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
-  QuizSetup, CustomQuizFlow, ListeningFlow, ListeningList, PassageFlow, SoundDrillFlow,
+  QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, ListeningList, PassageFlow, SoundDrillFlow,
   ShadowFlow,
 } from "./src/screens/Flows";
 
@@ -187,6 +187,8 @@ function PracticeStack() {
           every deep link and saved navigation state for nothing. */}
       <Stack.Screen name="Listening" component={ListeningList} options={{ title: "Native speed" }} />
       <Stack.Screen name="Passage" component={PassageFlow} options={{ title: "Listening" }} />
+      {/* The conversations to choose from, and one of them being listened to. */}
+      <Stack.Screen name="SceneList" component={ScenesList} options={{ title: "Listening" }} />
       <Stack.Screen name="Scenes" component={ListeningFlow} options={{ title: "Listening" }} />
       <Stack.Screen name="Sounds" component={Sounds} options={{ title: "Sounds" }} />
       {/* The pronunciation drill, reached from Sounds (ROADMAP P10.8). */}

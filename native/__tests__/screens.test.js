@@ -1,10 +1,10 @@
-/* Rendering tests for the native screens.
+﻿/* Rendering tests for the native screens.
  *
  * core.test.mjs proves the rules; this proves a screen draws and responds.
  *
  * COVERAGE IS PARTIAL AND DELIBERATELY SO. Past roughly the sixth test in a file,
  * every matcher begins timing out cumulatively in this React 19 / RNTL 14 /
- * jest-expo 57 combination — the render succeeds but nothing is findable. The cause
+ * jest-expo 57 combination â€” the render succeeds but nothing is findable. The cause
  * is not isolated, so rather than ship a red suite the screens that could not be
  * covered reliably are listed below and are exercised by hand instead. Two facts
  * learned the hard way, worth keeping:
@@ -39,13 +39,13 @@ async function withProfile(ui, { state } = {}) {
     active: "p1",
   }));
   if (state) await AsyncStorage.setItem("rb.state.p1", JSON.stringify(state));
-  // RNTL v14 renders asynchronously — the result must be awaited.
+  // RNTL v14 renders asynchronously â€” the result must be awaited.
   return await render(<SessionProvider>{ui}</SessionProvider>);
 }
 
 beforeEach(async () => {
   // store.js coalesces writes behind a timer. Left pending, it fires inside the next
-  // test and rewrites the storage that test just cleared — so drain it first.
+  // test and rewrites the storage that test just cleared â€” so drain it first.
   await flushState();
   await AsyncStorage.clear();
   jest.clearAllMocks();
@@ -63,7 +63,7 @@ describe("Learn", () => {
     expect(screen.getByText("Food & Drink")).toBeTruthy();
   });
 
-  /* The point of chapters is that they are named, not numbered — a regression here
+  /* The point of chapters is that they are named, not numbered â€” a regression here
      would put "Core 3" back in front of the learner. */
   it("names every chapter and its core unit", async () => {
     await withProfile(<Learn navigation={nav} />);

@@ -171,11 +171,15 @@ export function useScenario(lines, cast, seed = "") {
     if (track) {
       const h = await playTrack(track.src, fromMs);
       if (!alive.current || run.current !== id) { if (h) h.stop(); return; }
-      if (!h) { setPlaying(false); return; }   // nothing played; the transport stays put
-      handle.current = h;
-      setPos(fromMs);
-      setAt(lineAt(track.spans, fromMs));
-      return;
+      if (h) {
+        handle.current = h;
+        setPos(fromMs);
+        setAt(lineAt(track.spans, fromMs));
+        return;
+      }
+      /* The file would not open. Read it instead — a scenario that plays
+         nothing at all and says nothing about why is the worst of the three
+         outcomes, and the voices are right here. */
     }
 
     const tl = spans();

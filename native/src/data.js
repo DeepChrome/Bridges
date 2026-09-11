@@ -197,6 +197,41 @@ export function lessonsDone(st, u) {
   return n;
 }
 
+/* Every written scenario this learner can open, by chapter (§30l).
+ *
+ * The owner, 2026-09-11: *"in the listening section, I only see one transcript
+ * with 5 questions. Ideally, there would be one or two scenarios per chapter and
+ * then maybe some extras. Each should have a scenario title."* There were 168 of
+ * them all along; the activity drew one and dealt it out, so a learner could
+ * neither see what existed nor go back to one.
+ *
+ * A chapter's own two come first and are the spine's — the conversation built
+ * from the words that chapter is named for — and its side quests are the extras
+ * behind them. Unlocking follows the path exactly as the map does, `st.dev`
+ * included (rule 20.9), so this can never offer a lesson the path would not. */
+export function scenarioLibrary(st) {
+  const out = [];
+  for (const stage of STAGES) {
+    const rows = [];
+    const take = (u, extra) => {
+      if (!unitUnlocked(st, u)) return;
+      const n = lessonCount(u);
+      const reach = st.dev ? n : lessonsDone(st, u);
+      for (let i = 0; i < reach; i++) {
+        const s = SCRIPTS[`${u.id}:${i}`];
+        if (s && s.title) {
+          rows.push({ key: `${u.id}:${i}`, unit: u, index: i, extra,
+                      title: s.title, cast: (s.cast || []).map((c) => c.ru) });
+        }
+      }
+    };
+    take(stage.core, false);
+    stage.branches.forEach((u) => take(u, true));
+    if (rows.length) out.push({ stage, rows });
+  }
+  return out;
+}
+
 export function markComponent(st, u, i, id, extra) {
   const s = { best: 0, done: false, lessons: {}, video: false, ...(st.unit[u.id] || {}) };
   s.lessons = { ...s.lessons };

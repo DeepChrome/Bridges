@@ -13,6 +13,7 @@ import { Q, DRILL_TYPES, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
   reachedUnits, unitUnlocked, reviewWords, passages, knownWords, lessonsDone, nextLesson,
+  scenarioLibrary,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { pairDrill } from "@core/alphabet";
@@ -306,11 +307,11 @@ export function DrillList({ navigation }) {
         {/* Listening at the learner's level comes first, and the native-speed
             one says plainly that it is harder. The owner found the video
             passages "way too advanced" and nothing on the row warned him. */}
-        <Row onPress={() => navigation.navigate("Scenes")}>
+        <Row onPress={() => navigation.navigate("SceneList")}>
           <Thumb id="speech" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Listening</Text>
-            <Muted>A conversation at the level you are on</Muted>
+            <Muted>Conversations at the level you are on</Muted>
           </View>
           {((st.drills || {}).listening || {}).best
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
@@ -541,10 +542,72 @@ export function PassageFlow({ route, navigation }) {
   );
 }
 
-export function ListeningFlow({ navigation }) {
+/* Which conversations a chapter puts forward before the rest of them: the two
+   from its spine, the unit the chapter is named for. The side quests are
+   optional detours (§30e), so their scenarios are the extras. */
+const SCENES_SHOWN = 2;
+
+/* The conversations on offer, by chapter (the owner, 2026-09-11: *"one or two
+   scenarios per chapter and then maybe some extras. Each should have a scenario
+   title"*). Before this the activity drew one and dealt it out, so 168 written
+   conversations were a thing a learner could be given but never choose. */
+export function ScenesList({ navigation }) {
+  const { st } = useSession();
+  const t = useTheme();
+  const lib = useMemo(() => scenarioLibrary(st), [st.unit, st.dev]);
+  const [open, setOpen] = useState({});
+
+  if (!lib.length) {
+    return <Done title="Nothing to listen to yet" detail="Finish a lesson first."
+                 onBack={() => navigation.goBack()} />;
+  }
+  return (
+    <Screen>
+      {lib.map(({ stage, rows }) => {
+        const extras = rows.length - SCENES_SHOWN;
+        const showing = open[stage.n] ? rows : rows.slice(0, SCENES_SHOWN);
+        return (
+          <View key={stage.n}>
+            <SectionLabel>{stage.title || `Chapter ${stage.n}`}</SectionLabel>
+            <List>
+              {showing.map((s) => {
+                const best = ((st.drills || {})[`scene:${s.key}`] || {}).best;
+                return (
+                  <Row key={s.key} testID={`scene-row-${s.key}`}
+                       onPress={() => navigation.navigate("Scenes", { key: s.key })}>
+                    <Thumb id="speech" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}
+                            numberOfLines={2}>
+                        {s.title}
+                      </Text>
+                      <Muted>{s.cast.join(" · ")}</Muted>
+                    </View>
+                    {best ? <Pill tone="good">{best + "%"}</Pill> : null}
+                  </Row>
+                );
+              })}
+              {extras > 0 && !open[stage.n] ? (
+                <Row testID={`scene-more-${stage.n}`}
+                     onPress={() => setOpen({ ...open, [stage.n]: true })}>
+                  <View style={{ flex: 1 }}>
+                    <Muted>{`${extras} more`}</Muted>
+                  </View>
+                </Row>
+              ) : null}
+            </List>
+          </View>
+        );
+      })}
+    </Screen>
+  );
+}
+
+export function ListeningFlow({ route, navigation }) {
   const { st, update } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
+  const picked = route && route.params ? route.params.key : null;
   const units = useMemo(() => reachedUnits(st), [seed]);
   /* The passages written for the lessons this learner has finished (§30l).
      The owner, 2026-09-10: the native-speed video passages were "way too
@@ -553,6 +616,14 @@ export function ListeningFlow({ navigation }) {
      the lesson instead, and the corpus scene is the fallback for a lesson with
      no script, so the activity never goes empty. */
   const steps = useMemo(() => {
+    /* A conversation chosen from the library is the one that plays — the whole
+       point of the list is that it can be gone back to. */
+    if (picked) {
+      const [id, i] = picked.split(":");
+      const unit = units.find((u) => u.id === id) || UN.find((u) => u.id === id);
+      const one = unit ? Q.scriptScene(unit, Number(i)) : null;
+      return one ? [one] : [];
+    }
     const want = new Set(reviewWords(st));
     /* Where they are, not only what they have finished. Counting finished
        lessons alone left a learner on their very first lesson with nothing
@@ -592,7 +663,12 @@ export function ListeningFlow({ navigation }) {
     <Runner steps={steps} recycle={false} navigation={navigation}
             onFinish={(r) => {
               const score = scoreOf(r);
-              update((prev) => bestOf(prev, "listening", score, r.right * 2));
+              update((prev) => {
+                const next = bestOf(prev, "listening", score, r.right * 2);
+                // A chosen conversation also keeps its own best, so the library
+                // shows which have been done. XP is paid once, above.
+                return picked ? bestOf(next, `scene:${picked}`, score, 0) : next;
+              });
               setResult({ ...r, score });
             }} />
   );

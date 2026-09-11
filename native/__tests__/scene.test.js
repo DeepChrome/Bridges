@@ -117,8 +117,11 @@ describe("the listening scenario", () => {
        phone's nor the collection's would be the same lie pointed the other
        way. The recorded line is the one that needs no note. */
     expect(screen.queryByTestId("scene-voice")).toBeNull();
-    const about = String(screen.getByTestId("scene-about").props.children);
-    expect(about).toContain(question.topic);
+    /* The conversation's own title heads the activity, and the unit's name sits
+       under the transport: a learner who listened to a scene could not say what
+       it had been called. */
+    expect(String(screen.getByTestId("scene-title").props.children)).toBe(question.topic);
+    expect(String(screen.getByTestId("scene-about").props.children)).toBe(question.level);
   });
 
   it("says it is the device when the text has moved on from the audio", async () => {

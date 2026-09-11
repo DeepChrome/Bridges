@@ -400,7 +400,13 @@ export function DrillFlow({ route, navigation }) {
   const cells = useMemo(
     () => (type === "cases" && !ahead ? Q.formsIntroduced(reachedUnits(st)) : undefined),
     [type, seed, ahead]);
-  const steps = useMemo(() => Q.drillQuestions(type, undefined, pool, cells), [type, seed, pool, cells]);
+  /* Written or chosen (the owner, 2026-09-11: *"fill in the blank allows the
+     user to generate it completely rather than guess"*). On unless turned off,
+     because that is §30j's own finding — recognition meets a word, production
+     keeps it — and every drill question used to be four options. */
+  const typed = st.typedDrills !== false;
+  const steps = useMemo(() => Q.drillQuestions(type, undefined, pool, cells, typed),
+                        [type, seed, pool, cells, typed]);
   const spec = DRILL_TYPES.find((d) => d.id === type);
   useAudioStopOnLeave();
 

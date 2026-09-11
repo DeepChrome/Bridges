@@ -61,6 +61,23 @@ function Settings({ visible, onClose, onLab, onTour }) {
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>
+              {/* Drills used to be four options and nothing else. Writing the
+                  form is the same question without the eliminations, which is
+                  §30j's finding rather than a preference — so it is on unless
+                  turned off. Two of the shapes cannot be written at all and stay
+                  as they are (core/questions.js). */}
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Write drill answers</Text>
+                  <Muted>{st.typedDrills === false ? "Choose from four" : "Fill in the blank"}</Muted>
+                </View>
+                <Switch
+                  testID="typed-drills-switch"
+                  value={st.typedDrills !== false}
+                  onValueChange={(v) => update((p) => ({ ...p, typedDrills: v }))}
+                  trackColor={{ true: t.good, false: t.surface3 }}
+                />
+              </Row>
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Russian keyboard</Text>

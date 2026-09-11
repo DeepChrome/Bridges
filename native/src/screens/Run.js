@@ -251,21 +251,32 @@ const asOptions = (q, r) => (
            onPick={(i, o) => { r.setPicked(i); r.record(!!o.right); }} />
 );
 
+/* A question that is written when it was built to be written and chosen when it
+   was not. The generator decides (core/questions.js): some shapes have nothing
+   to produce, and a run with the setting on still falls back to those. */
+const eitherWay = (q, r) => (q.typed
+  ? <Typed q={q} answered={r.answered} onAnswer={r.record} />
+  : asOptions(q, r));
+
 export const VIEWS = {
   "choose-en": asOptions,
   "choose-ru": asOptions,
   listen: asOptions,
   cloze: asOptions,
-  cases: asOptions,
-  aspect: asOptions,
-  agreement: asOptions,
-  conjugation: asOptions,
+  /* The four drills a learner can either choose from or write (Settings →
+     "Write drill answers"). The question says which it is, exactly as the
+     chapter's form question does below. */
+  cases: eitherWay,
+  aspect: eitherWay,
+  agreement: eitherWay,
+  conjugation: eitherWay,
+  // Where the stress falls, and what a rule says: neither is a thing to write.
   stress: asOptions,
   grammar: asOptions,
   type: (q, r) => <Typed q={q} answered={r.answered} onAnswer={r.record} />,
   // The chapter's form: chosen from the paradigm early, typed later — the
   // question says which (core/questions.js FORM_MIX).
-  form: (q, r) => (q.typed ? <Typed q={q} answered={r.answered} onAnswer={r.record} /> : asOptions(q, r)),
+  form: eitherWay,
   match: (q, r) => <Match q={q} onDone={(ok, idxs, credit, note) => r.record(ok, idxs, undefined, { credit, note })} />,
   hear: (q, r) => <Hear q={q} r={r} />,
   say: (q, r) => <Say q={q} r={r} />,

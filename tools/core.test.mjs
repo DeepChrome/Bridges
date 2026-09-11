@@ -1368,6 +1368,44 @@ group("drill pool");
   ok(Q.drillQuestions("cases", 6).length === 6, "no pool: the whole curriculum, as before");
 }
 
+/* The owner, 2026-09-11: *"fill in the blank allows the user to generate it
+   completely rather than guess"*. Every drill question used to be four options,
+   which is §30j's point about recognition made against the app itself. */
+group("drills the learner writes");
+{
+  for (const type of ["cases", "agreement", "conjugation", "aspect"]) {
+    const qs = Q.drillQuestions(type, 8, null, undefined, true);
+    ok(qs.length === 8, `${type}: a written run fills up`, String(qs.length));
+    const written = qs.filter((q) => q.typed);
+    ok(written.length, `${type}: and is written, not chosen`, `${written.length} of ${qs.length}`);
+    ok(written.every((q) => q.target && q.answer && !q.options),
+       `${type}: a written question carries its answer and offers no options`);
+    ok(written.every((q) => /^Write /.test(q.ask)),
+       `${type}: and says so`, written.map((q) => q.ask)[0]);
+    // The answer must never be sitting on the screen already.
+    ok(written.every((q) => fold(q.target) !== fold(q.prompt || "")),
+       `${type}: never asks for the word it is showing`);
+  }
+
+  /* Two shapes cannot be written — "which of these is perfective?" and "whose
+     form is this?" are questions about a list, and there is nothing to produce.
+     They stay as they are rather than being dropped, so a run still fills. */
+  for (const type of ["stress", "grammar"]) {
+    const qs = Q.drillQuestions(type, 6, null, undefined, true);
+    ok(qs.length === 6 && qs.every((q) => !q.typed && q.options),
+       `${type}: nothing to write, so it is still chosen`, String(qs.length));
+  }
+
+  // Written questions are still told apart, or a run holds one of them.
+  const many = Q.drillQuestions("cases", 12, null, undefined, true);
+  ok(new Set(many.map(Q.drillKey)).size === many.length,
+     "written questions are distinct from each other", `${many.length} drawn`);
+
+  // Any other form in the same cell is right too: «о столе» and «о столу» both.
+  ok(many.every((q) => !q.alts || q.alts.every((a) => typeof a === "string")),
+     "alternative forms ride along folded, as the typed answer expects");
+}
+
 group("question shape");
 {
   // Both runners read these fields; a missing one is a blank screen on one platform.

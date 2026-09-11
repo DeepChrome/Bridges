@@ -58,6 +58,10 @@ export const DEFAULTS = {
   speed: "normal",      // how fast Russian is read: normal, slower, slowest
   cue: "bell",          // the sound a right answer makes (audio.js CUE_NAMES)
   osk: false,           // an on-screen Russian keyboard for typed answers
+  /* Drill answers written rather than chosen. On by default: four options is
+     the easier question, and §30j found production is what keeps a word. Some
+     drill shapes have nothing to produce and ignore it (core/questions.js). */
+  typedDrills: true,
   offline: false,       // download a unit's audio when it is opened (cache.js)
   talkLevel: null,      // how the Talk tutor pitches its Russian; null = by chapter reached
   talkSpeed: "normal",  // how fast the tutor is read out (audio.js SPEEDS)
@@ -66,7 +70,7 @@ export const DEFAULTS = {
 
 /* The keys that are settings, not progress: what "Reset progress" keeps. */
 export const SETTING_KEYS = ["dev", "theme", "dir", "name", "decks", "speed", "cue", "osk",
-                             "offline", "talkLevel", "talkSpeed", "talkEn"];
+                             "typedDrills", "offline", "talkLevel", "talkSpeed", "talkEn"];
 
 export function normalise(raw, assumedVersion) {
   if (!raw || typeof raw !== "object") return { ...DEFAULTS };

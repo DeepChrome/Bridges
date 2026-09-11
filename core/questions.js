@@ -1260,30 +1260,51 @@ export function makeQuestions(env) {
   /* `cells` ({ row, col } pairs, from formsIntroduced) limits what may be asked
      for to the cases the route has taught; the wrong answers still come from
      the whole table. */
-  function qCases(cells) {
+  function qCases(cells, typed) {
     const w = pickWhere((x) => x.p === "noun" && tableTitled(x, /Declension/));
     if (!w) return null;
     const t = tableTitled(w, /Declension/);
     const opts = [];
     t.rows.forEach((r, ri) => cellsOf(r).forEach((c, ci) => {
-      if (c && c.length) opts.push({ label: c[0], ri, ci });
+      // The rest of the cell rides along: a cell with two forms has two right
+      // answers, and a typed drill must accept either.
+      if (c && c.length) opts.push({ label: c[0], ri, ci, alts: c.slice(1) });
     }));
-    if (opts.length < 4) return null;
+    // Four to choose between, but a typed question needs only the one to write.
+    if (opts.length < (typed ? 1 : 4)) return null;
     // Never ask for the form already on screen: the headword is usually the
     // nominative singular, and asking for it answers itself.
     const askable = opts.filter((o) => fold(o.label) !== fold(w.w)
       && (!cells || cells.some((c) => c.row === t.rows[o.ri][0] && c.col === t.columns[o.ci + 1])));
     if (!askable.length) return null;
     const target = askable[Math.floor(Math.random() * askable.length)];
+    const what = `${t.rows[target.ri][0].toLowerCase()} ${t.columns[target.ci + 1].toLowerCase()}`;
+    const base = { kind: "cases", i: L.indexOf(w), cyr: true,
+                   prompt: w.w, sub: w.e || "", table: t };
+    if (typed) return written(base, `Write ${what}`, target.label, target.alts);
     const wrong = shuffle(opts.filter((o) => o.label !== target.label)).slice(0, 3);
     if (wrong.length < 3) return null;
     return {
-      kind: "cases", i: L.indexOf(w), cyr: true,
-      ask: `Choose ${t.rows[target.ri][0].toLowerCase()} ${t.columns[target.ci + 1].toLowerCase()}`,
-      prompt: w.w, sub: w.e || "", table: t,
+      ...base, ask: `Choose ${what}`,
       options: shuffle([target].concat(wrong))
         .map((o) => ({ label: o.label, right: o.label === target.label, cyr: true })),
     };
+  }
+
+  /* A drill question answered by writing the form rather than choosing it.
+   *
+   * The owner, 2026-09-11: *"fill in the blank allows the user to generate it
+   * completely rather than guess"* — which is §30j's own rule ("recognition
+   * meets a word; production keeps it") applied to the drills, where every
+   * question was four options.
+   *
+   * The shape is the one the typed form question already uses (`formQuestion`),
+   * so the runner needs no new view and the grading — a letter off is half
+   * credit, any other form of the same cell is right — is the grading every
+   * typed answer in the app gets. */
+  function written(base, ask, target, alts) {
+    return { ...base, ask, typed: true, answer: target, target,
+             alts: (alts || []).filter(Boolean).map(fold) };
   }
 
   /* Three wrong labels for a drill: `from` first (the word's own paradigm, which
@@ -1310,10 +1331,15 @@ export function makeQuestions(env) {
      out of four. The partner question is limited by how many verbs in the pool
      have one — seven after the first chapter — so the second shape carries the
      drill early on, where any verb marked for aspect qualifies. */
-  function qAspectPartner() {
+  function qAspectPartner(_cells, typed) {
     const w = pickWhere((x) => x.p === "verb" && realPartner(x.pt) && x.a);
     if (!w) return null;
     const want = w.a === "imperfective" ? "perfective" : "imperfective";
+    if (typed) {
+      return written({ kind: "aspect", i: L.indexOf(w), cyr: true, prompt: w.w,
+                       sub: w.e || "", note: (UN.find((u) => u.id === "core8") || {}).g },
+                     `Write the ${want} partner`, w.pt.trim());
+    }
     const wrong = threeWrong(w.pt.trim(), [], () => {
       const o = pickWhere((x) => x.p === "verb" && realPartner(x.pt) && x.pt !== w.pt, 60, true);
       return o ? o.pt.trim() : null;
@@ -1345,7 +1371,12 @@ export function makeQuestions(env) {
     };
   }
 
-  const qAspect = () => oneOf([qAspectWhich, qAspectPartner]);
+  /* Writing the partner is the only one of the two shapes that can be written:
+     "which of these is perfective?" is a question about a list, and there is
+     nothing to produce. A typed run is therefore all partners. */
+  const qAspect = (cells, typed) => (typed
+    ? qAspectPartner(cells, true) || qAspectWhich()
+    : oneOf([qAspectWhich, qAspectPartner]));
 
   /* Agreement in any case the adjective declines for, not the nominative alone.
      The noun is shown in that case too — «___ кни́ге» wants «но́вой» — so the
@@ -1355,7 +1386,7 @@ export function makeQuestions(env) {
      failed whenever two genders share a form, which in the oblique cases they
      usually do. */
   const GENDER_COL = { m: "Masculine", f: "Feminine", n: "Neuter" };
-  function qAgreement() {
+  function qAgreement(_cells, typed) {
     const adj = pickWhere((x) => x.p === "adjective" && tableTitled(x, /Declension/));
     // …but not a plural-only noun: «часы» is plural, and «но́вый часы» is not
     // agreement.
@@ -1376,6 +1407,12 @@ export function makeQuestions(env) {
     const row = rows[0];
     const right = row[col][0];
     const nounForm = nt.rows.find((x) => x[0] === row[0])[1][0];
+    if (typed) {
+      return written({ kind: "agreement", i: L.indexOf(adj), cyr: true,
+                       prompt: `___ ${nounForm}`, sub: `${adj.w} · ${adj.e || ""}`.trim(),
+                       table: t },
+                     "Write the form that agrees", right, row[col].slice(1));
+    }
     const own = t.rows.flatMap((r) => cellsOf(r).map((c) => (Array.isArray(c) ? c[0] : c)));
     const wrong = threeWrong(right, own.filter(Boolean));
     if (!wrong) return null;
@@ -1397,7 +1434,7 @@ export function makeQuestions(env) {
     return w ? { w, t: tableTitled(w, re) } : null;
   }
 
-  function qConjugationForm() {
+  function qConjugationForm(_cells, typed) {
     const pick = verbTable();
     if (!pick) return null;
     const { w, t } = pick;
@@ -1405,6 +1442,13 @@ export function makeQuestions(env) {
     if (!rows.length) return null;
     const target = rows[Math.floor(Math.random() * rows.length)];
     const right = target[1][0];
+    if (typed) {
+      const label = t.title === "Imperative" ? "imperative"
+        : t.title === "Past" ? "past" : (w.a === "perfective" ? "future" : "present");
+      return written({ kind: "conjugation", i: L.indexOf(w), cyr: true,
+                       prompt: w.w, sub: w.e || "", table: t },
+                     `Write the ${label} for “${target[0]}”`, right, target[1].slice(1));
+    }
     // The verb's own other persons first — the imperative has only two rows, so
     // the same cell from other verbs fills the rest.
     const own = rows.filter((r) => r !== target).map((r) => r[1][0]);
@@ -1448,7 +1492,11 @@ export function makeQuestions(env) {
     };
   }
 
-  const qConjugation = () => oneOf([qConjugationForm, qConjugationForm, qConjugationWho]);
+  /* "Whose form is this?" is read, not produced — the answer is a label, not
+     Russian — so a typed run asks only for forms. */
+  const qConjugation = (cells, typed) => (typed
+    ? qConjugationForm(cells, true) || qConjugationWho()
+    : oneOf([qConjugationForm, qConjugationForm, qConjugationWho]));
 
   /* Move the stress to each other vowel to build the wrong answers. Any accented
      form counts, not only the headword: «рука́» and «ру́ки» shift, and that shift
@@ -1572,19 +1620,27 @@ export function makeQuestions(env) {
      carries no prompt at all, and keying on the prompt alone collapsed every
      one of them into a single entry, so a run could hold exactly one. */
   const drillKey = (q) => [q.kind, q.prompt, q.ask,
-                           (q.options || []).filter((o) => o.right).map((o) => o.label).join(",")]
+                           // A typed question has no options; its answer is what
+                           // makes it the question it is.
+                           q.typed ? q.target
+                             : (q.options || []).filter((o) => o.right).map((o) => o.label).join(",")]
     .join("|");
 
   /* `pool`: lemma indices the drill may ask about (see native data.js drillPool);
      without one, every word in the curriculum. `cells`: for the cases drill,
      the cells the route has introduced (formsIntroduced); without it, any. */
-  function drillQuestions(type, n, pool, cells) {
+  /* `typed` asks for questions the learner writes the answer to rather than
+     picks (the owner, 2026-09-11). Not every shape can be written — "which of
+     these is perfective?" and "whose form is this?" are questions about a list —
+     so those generators answer with their chosen shape either way, and the
+     stress and grammar drills ignore the flag entirely. */
+  function drillQuestions(type, n, pool, cells, typed) {
     const out = [];
     const seen = new Set();
     const want = n || DRILL_N;
     withPool(pool, () => {
       for (let k = 0; k < want * 25 && out.length < want; k++) {
-        const q = GEN[type] && GEN[type](cells);
+        const q = GEN[type] && GEN[type](cells, typed);
         if (!q) continue;
         const key = drillKey(q);
         if (seen.has(key)) continue;

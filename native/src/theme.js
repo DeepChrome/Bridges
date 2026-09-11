@@ -55,6 +55,71 @@ export const type = {
   hero: 40, display: 28, title: 20, head: 17, body: 15, small: 13, tiny: 11,
 };
 
+/* The typeface (2026-09-11).
+ *
+ * The app was set in whatever the phone's system font happens to be, at fifteen
+ * sizes chosen a screen at a time. A system font is the single loudest signal
+ * that nobody designed a screen — and on Android it is Roboto, which is what
+ * every utility app on the phone is set in.
+ *
+ * Nunito: rounded, warm, and with a Cyrillic cut that carries stress marks and
+ * ё properly, which most display faces do not. Weight is how hierarchy is made
+ * here — the scale above is only five steps — so four weights ship.
+ *
+ * `React Native has no global font.` Every `Text` that names a size must also
+ * name a family or it silently falls back to the system one, which is worse
+ * than not having a typeface at all: two fonts on one screen reads as a bug.
+ * The app's own `Text` (ui.js) applies it, and **nothing imports `Text` from
+ * react-native any more** — `font.test.js` is what keeps that true. */
+export const font = {
+  regular: "Nunito_400Regular",
+  medium: "Nunito_600SemiBold",
+  bold: "Nunito_700Bold",
+  heavy: "Nunito_800ExtraBold",
+};
+
+/* Which file a weight resolves to. RN on Android does not synthesise weights
+   for a named family: `fontWeight: "700"` on a regular face is ignored, and the
+   text comes out light while the code says bold. So a weight picks its file. */
+export function faceFor(weight) {
+  const w = String(weight || "400");
+  if (w === "800" || w === "900") return font.heavy;
+  if (w === "700" || w === "bold") return font.bold;
+  if (w === "500" || w === "600") return font.medium;
+  return font.regular;
+}
+
+/* Depth (2026-09-11).
+ *
+ * Everything in the app sat on one plane: a white surface, a one-pixel
+ * hairline, on an almost-white ground. That is the whole of "blocky squares" —
+ * nothing is *above* anything, so nothing is more important than anything, and
+ * a screen reads as a form rather than as a thing you are using.
+ *
+ * Two levels and no more. `raised` is a grouped surface — a card, a list; `lift`
+ * is the one control on a screen that is the point of it. A third level would
+ * be a decision to make on every screen, which is how an interface stops being
+ * consistent.
+ *
+ * Shadows are near-black at very low opacity rather than grey, because a grey
+ * shadow on a tinted ground goes muddy; and `elevation` is set alongside for
+ * Android, which ignores the rest. Kept off the dark theme: a shadow under a
+ * dark surface on a dark ground is invisible, and the border is what separates
+ * things there. */
+export const shadow = {
+  raised: {
+    shadowColor: "#0B1020", shadowOpacity: 0.05, shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 }, elevation: 1,
+  },
+  lift: {
+    shadowColor: "#0B1020", shadowOpacity: 0.13, shadowRadius: 16,
+    shadowOffset: { width: 0, height: 5 }, elevation: 4,
+  },
+};
+export function useShadow(level = "raised") {
+  return useColorScheme() === "light" ? shadow[level] : null;
+}
+
 /* Motion. One place for how long a thing takes, so a card that rises and a bar
    that fills agree with each other. Deliberately short: §25 says motion
    reinforces interaction and must never be decoration that delays study, so

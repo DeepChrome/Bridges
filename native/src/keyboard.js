@@ -11,7 +11,8 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
+import { Text, TextInput } from "./ui";
 import Svg, { Path, Rect } from "react-native-svg";
 import { useSession } from "./session";
 import { useTheme, radius } from "./theme";

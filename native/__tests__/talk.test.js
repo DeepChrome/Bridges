@@ -12,13 +12,13 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import Talk, { TALK_UNLOCK_STAGE } from "../src/screens/Talk";
 import { STAGES, L, lessonCount } from "../src/data";
-import { talk, hint } from "../src/lib/feedback";
+import { talk, review, hint } from "../src/lib/feedback";
 import { SCENARIOS } from "@core/scenarios";
 import { TALK_SESSIONS_PER_DAY } from "@core/state";
 import { today } from "@core/util";
 
 jest.mock("../src/lib/feedback", () => ({
-  talk: jest.fn(), hint: jest.fn(), getFeedback: jest.fn(),
+  talk: jest.fn(), review: jest.fn(), hint: jest.fn(), getFeedback: jest.fn(),
   // A configured build: the picker offers every open scenario.
   config: jest.fn(() => ({ url: "https://worker.test/v1/talk", token: "t" })),
 }));
@@ -46,13 +46,17 @@ const OPENING = { ok: true, reply_ru: "Здравствуйте! Что вы х�
   feedback: null, newWords: [] };
 const REPLY = { ok: true, reply_ru: "Хорошо! Вы хотите чай?", reply_en: "Good! Do you want tea?",
   reply_tokens: [{ ru: "Хорошо", lemma: "хорошо" }, { ru: "Вы", lemma: "вы" }, { ru: "хотите", lemma: "хотеть" }, { ru: "чай", lemma: "чай" }],
+  newWords: [{ ru: "булочка", lemma: "булочка", en: "bun" }] };
+
+/* The marking is its own request now, asked at the same time as the reply, so
+   it is its own fixture: the tutor answers and the marking lands after. */
+const REVIEW = { ok: true,
   feedback: { words: [
       { said: "я", expected: "я", lemma: "я", status: "ok", tags: [] },
       { said: "хочу", expected: "хочу", lemma: "хотеть", status: "ok", tags: [] },
       { said: "вода", expected: "воду", lemma: "вода", status: "sub", tags: ["CASE"] }],
     grammar: [{ tag: "CASE", note: "Use «воду», the accusative after «хотеть»." }],
-    wordChoice: [], overall: "minor", praise: "" },
-  newWords: [{ ru: "булочка", lemma: "булочка", en: "bun" }] };
+    wordChoice: [], overall: "minor", praise: "" } };
 
 async function withTalk(state) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
@@ -80,6 +84,7 @@ describe("talk", () => {
 
   it("opens with the tutor's turn, grades a spoken turn, counts its tag, offers a new word", async () => {
     talk.mockResolvedValueOnce(OPENING).mockResolvedValueOnce(REPLY);
+    review.mockResolvedValue(REVIEW);
     await withTalk({ unit: done() });
     await act(async () => { fireEvent.press(await screen.findByText("В кафе")); });
     expect(await screen.findByText(/Здравствуйте! Что вы хотите\?/)).toBeTruthy();
@@ -99,6 +104,11 @@ describe("talk", () => {
     expect(await screen.findByText(/Вы хотите чай\?/)).toBeTruthy();
     expect(talk.mock.calls[1][0].history).toHaveLength(2);
     expect(talk.mock.calls[1][0].transcript).toBe("я хочу вода");
+    /* Both halves of the turn went at once, and the marking carries only what
+       marking needs: no studied list, no grammar topic. */
+    expect(review).toHaveBeenCalledTimes(1);
+    expect(review.mock.calls[0][0].transcript).toBe("я хочу вода");
+    expect(review.mock.calls[0][0].studied).toBeUndefined();
     // The learner's bubble carries the alignment; the grammar note sits under it.
     expect(screen.getAllByTestId("align-sub")).toHaveLength(1);
     expect(screen.getByText(/accusative after «хотеть»/)).toBeTruthy();
@@ -191,7 +201,8 @@ describe("talk", () => {
   });
 
   it("a turn the tutor did not grade stands as said and the conversation goes on", async () => {
-    talk.mockResolvedValueOnce(OPENING).mockResolvedValueOnce({ ...REPLY, feedback: null, newWords: [] });
+    talk.mockResolvedValueOnce(OPENING).mockResolvedValueOnce({ ...REPLY, newWords: [] });
+    review.mockResolvedValue({ ok: true, feedback: null });
     await withTalk({ unit: done() });
     await act(async () => { fireEvent.press(await screen.findByText("В кафе")); });
     await screen.findByText(/Здравствуйте/);
@@ -204,6 +215,23 @@ describe("talk", () => {
     expect(screen.getByText("я хочу чай")).toBeTruthy();
     expect(screen.getByText("11 turns left")).toBeTruthy();
     expect((await saved()).speech.attempts).toHaveLength(0);
+  });
+
+  /* Marking that never arrives must not leave the learner's own words spinning
+     under a conversation that is otherwise fine. */
+  it("stops waiting when the marking fails", async () => {
+    talk.mockResolvedValueOnce(OPENING).mockResolvedValueOnce({ ...REPLY, newWords: [] });
+    review.mockRejectedValue(new Error("no connection"));
+    await withTalk({ unit: done() });
+    await act(async () => { fireEvent.press(await screen.findByText("В кафе")); });
+    await screen.findByText(/Здравствуйте/);
+    const hold = screen.getByTestId("say-hold");
+    await act(async () => { fireEvent(hold, "pressIn"); });
+    await act(async () => { fireEvent(hold, "pressOut"); });
+    await act(async () => { global.__stt.emit("result", { isFinal: true, results: [{ transcript: "я хочу чай" }] }); });
+    expect(await screen.findByText(/Вы хотите чай\?/)).toBeTruthy();
+    expect(screen.queryByTestId("turn-pending")).toBeNull();
+    expect(screen.getByText("я хочу чай")).toBeTruthy();
   });
 
   it("says so when the tutor cannot answer, and offers a retry", async () => {

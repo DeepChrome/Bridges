@@ -10,10 +10,10 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Screen, Pill, Speaker, Muted, List, Row, SearchField, SectionLabel, Chip } from "../ui";
+import { Screen, Pill, Speaker, Muted, List, Row, SearchField, SectionLabel, Chip, Text } from "../ui";
 import { searchWords, DEEP_COUNT } from "../data";
 import { firstSense } from "@core/util";
 

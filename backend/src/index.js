@@ -16,7 +16,8 @@
 
 import { validate, extractJson } from "./schema.js";
 import { SYSTEM, userMessage, RETRY_NUDGE } from "./prompt.js";
-import { SYSTEM_TALK, talkMessage, validateTalk, SYSTEM_HINT, hintMessage, validateHint } from "./talk.js";
+import { SYSTEM_TALK, talkMessage, validateTalk, SYSTEM_HINT, hintMessage, validateHint,
+         SYSTEM_REVIEW, reviewMessage, validateReview } from "./talk.js";
 import { SYSTEM_TASK, taskMessage, validateTask } from "./task.js";
 
 const API = "https://api.anthropic.com/v1/messages";
@@ -71,7 +72,14 @@ async function askModel(fetchFn, env, system, messages, maxTokens) {
       body: JSON.stringify({
         model: env.MODEL || "claude-haiku-4-5-20251001",
         max_tokens: maxTokens,
-        system,
+        /* The system prompt is the same on every request of a route and is the
+           larger half of the input, so it is marked cacheable: the model reads
+           it once and reuses it for five minutes, which takes time off the front
+           of every turn and cost off all of them. Below the provider's minimum
+           length it simply does not cache — there is no error and nothing to
+           handle. Sent as a block rather than a string only because that is
+           where `cache_control` can be attached. */
+        system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
         messages,
       }),
     });
@@ -100,18 +108,23 @@ const ROUTES = {
   },
   "/v1/talk": {
     kind: "talk", counter: "talk", cap: (env) => parseInt(env.TALK_DAILY_CAP, 10) || DEFAULT_TALK_CAP,
-    // A turn is ~700 output tokens with its word-by-word grading; at 600 the
-    // JSON was cut short and read as "no JSON" (found on the first live turn).
-    maxTokens: 1000, system: SYSTEM_TALK,
+    /* The reply alone: no grading, no marking. ~200 output tokens where the
+       combined turn was ~700, and output tokens are the whole of the wait. */
+    maxTokens: 500, system: SYSTEM_TALK,
     check: (b) => typeof b.scenario === "string" && b.scenario.trim() ? null : "scenario is required",
     message: (b) => talkMessage(b),
     validate: (parsed, b) => validateTalk(parsed, b.studied, b.level),
     capMessage: (cap) => `Daily conversation limit of ${cap} turns reached; resets at 00:00 UTC.`,
-    // `hint: true` asks for one thing the learner could say next instead of a
-    // turn; same route, same counter, a smaller prompt and reply.
+    /* Two variants of the same turn, same route, same counter.
+       `hint: true` — one thing the learner could say next.
+       `review: true` — the learner's own turn graded, which the app asks for at
+       the same time as the reply rather than after it (talk.js). */
     variant: (b) => (b.hint ? {
       kind: "hint", maxTokens: 200, system: SYSTEM_HINT,
       message: (x) => hintMessage(x), validate: (parsed) => validateHint(parsed),
+    } : b.review ? {
+      kind: "review", maxTokens: 700, system: SYSTEM_REVIEW,
+      message: (x) => reviewMessage(x), validate: (parsed) => validateReview(parsed),
     } : null),
   },
   /* The task at the end of a chapter (ROADMAP P10.5). It shares the feedback

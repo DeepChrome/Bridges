@@ -5,10 +5,10 @@
  * so a deck card that is also a curriculum word shares one memory. */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, TextInput, Alert } from "react-native";
+import { View, Pressable, Alert } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, Tick, SectionLabel, Sheet } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, Tick, SectionLabel, Sheet, Text, TextInput } from "../ui";
 import { L, UN, STAGES, unitUnlocked, idxOfWord } from "../data";
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";

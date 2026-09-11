@@ -38,6 +38,15 @@ export async function hint({ scenario, studied, history, level }, deps = {}) {
               deps, "/v1/talk", TALK_TIMEOUT_MS);
 }
 
+/* The marking half of a turn, asked at the same time as the reply (§30f). It
+   carries no studied list and no grammar topic: those pitch the tutor's Russian,
+   not its marking, and every token left out is time the learner does not wait. */
+export async function review({ scenario, history, transcript, level }, deps = {}) {
+  return post({ scenario, history: history || [], transcript: transcript || "",
+                level: level || "intermediate", review: true },
+              deps, "/v1/talk", TALK_TIMEOUT_MS);
+}
+
 export async function talk({ scenario, topic, studied, history, transcript, level }, deps = {}) {
   return post({ scenario, topic: topic || null, studied: studied || [], history: history || [],
                 transcript: transcript || "", level: level || "intermediate" },

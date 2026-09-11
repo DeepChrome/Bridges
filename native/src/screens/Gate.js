@@ -29,10 +29,10 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TextInput, Pressable, Animated, Keyboard } from "react-native";
+import { View, Pressable, Animated, Keyboard } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Btn, Muted, Avatar, AV, AV_IDS } from "../ui";
+import { Screen, Btn, Muted, Avatar, AV, AV_IDS, Text, TextInput } from "../ui";
 import { Wordmark, Mark } from "../mark";
 import { Guide } from "../guide";
 import { useEnter, usePress, usePop } from "../motion";

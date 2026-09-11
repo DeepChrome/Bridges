@@ -23,7 +23,8 @@
  */
 
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
-import { View, Text, Pressable, Linking, ActivityIndicator } from "react-native";
+import { View, Pressable, Linking, ActivityIndicator } from "react-native";
+import { Text } from "./ui";
 import { WebView } from "react-native-webview";
 
 /* Owner-disabled embedding. Nothing we do on our side changes these two. */

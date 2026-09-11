@@ -17,11 +17,11 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { View, Pressable, ActivityIndicator } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Btn, Muted, Pill, Speaker } from "../ui";
+import { Btn, Muted, Pill, Speaker, Text } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN } from "../data";
 import { getFeedback, config } from "../lib/feedback";

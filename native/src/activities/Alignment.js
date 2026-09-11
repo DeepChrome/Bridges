@@ -5,7 +5,8 @@
  * an extra. The shape comes straight from core/compare.js. */
 
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
+import { Text } from "../ui";
 import { useTheme, radius } from "../theme";
 
 function Word({ a }) {

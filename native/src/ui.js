@@ -6,16 +6,49 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, Pressable, ScrollView, ActivityIndicator, StyleSheet, TextInput, Modal,
-  Animated,
+  View, Pressable, ScrollView, ActivityIndicator, StyleSheet, Modal, Animated,
 } from "react-native";
+/* Renamed on the way in: the app's own `Text` and `TextInput` are defined below
+   and are what everything else imports (font.test.js). */
+import { Text as RNText, TextInput as RNTextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml } from "react-native-svg";
 import { iconFor } from "@core/icons";
 import { AV, AV_IDS } from "@core/avatars";
-import { useTheme, radius, space } from "./theme";
-import { useFill, usePress } from "./motion";
+import { useTheme, radius, space, faceFor, useShadow } from "./theme";
+import { useFill, usePress, useEnter } from "./motion";
 import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
+
+/* The app's `Text`, and the only one anything may import.
+ *
+ * React Native has no global font: a `Text` that names a size and not a family
+ * silently falls back to the system one, and two typefaces on a screen read as a
+ * bug rather than as a choice. So every piece of text in the app comes through
+ * here, `font.test.js` asserts that nothing imports `Text` from react-native,
+ * and the typeface is set in exactly one place.
+ *
+ * It also turns a weight into a **face**. Android does not synthesise weights
+ * for a named family — `fontWeight: "700"` on the regular file is ignored and
+ * the text comes out light while the code says bold — so the weight asked for
+ * picks the file that has it. A caller writes `fontWeight` as it always did.
+ *
+ * `flatten` because a style may be an array, and the weight can be in any of
+ * its entries. */
+export function Text({ style, children, ...rest }) {
+  const flat = StyleSheet.flatten(style) || {};
+  return (
+    <RNText {...rest} style={[style, { fontFamily: faceFor(flat.fontWeight) }]}>
+      {children}
+    </RNText>
+  );
+}
+
+/* Typed answers are text too, and a Cyrillic keyboard's output in Roboto beside
+   Nunito everywhere else was the most visible half of the old mix. */
+export function TextInput({ style, ...rest }) {
+  const flat = StyleSheet.flatten(style) || {};
+  return <RNTextInput {...rest} style={[style, { fontFamily: faceFor(flat.fontWeight) }]} />;
+}
 
 /* `fill` makes the content container grow to the height of the screen, which is what
    lets a step's primary action sit at the foot of it with marginTop:"auto" instead of
@@ -24,8 +57,16 @@ import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAud
 export function Screen({ children, scroll = true, fill = false }) {
   const t = useTheme();
   const Body = scroll ? ScrollView : View;
+  /* Every screen's content arrives rather than appearing. The stack already
+     slides the screen in (App.js `withMe`); this is the half-step *inside* it
+     that makes the arrival read as one movement instead of a slide followed by
+     a snap. Content only — the ground does not move, or the whole app swims.
+     Reduced motion is the end state, and under test it lands on the first frame
+     (§30n′), so nothing has to settle before it can be pressed or found. */
+  const enter = useEnter();
   return (
     <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: t.bg }}>
+      <Animated.View style={[{ flex: 1 }, enter]}>
       <Body
         testID="screen-body"
         style={{ flex: 1 }}
@@ -40,6 +81,7 @@ export function Screen({ children, scroll = true, fill = false }) {
       >
         {children}
       </Body>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -60,10 +102,11 @@ export function Title({ children, sub }) {
    props that vanish), and a test then fails on a thing that is plainly drawn. */
 export function Card({ children, style, testID }) {
   const t = useTheme();
+  const raised = useShadow();
   return (
     <View testID={testID}
           style={[{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
-                    borderRadius: radius.lg, padding: 16 }, style]}>
+                    borderRadius: radius.lg, padding: 16 }, raised, style]}>
       {children}
     </View>
   );
@@ -85,10 +128,11 @@ export function Card({ children, style, testID }) {
  * keeps its own `last`, as before. */
 export function List({ children }) {
   const t = useTheme();
+  const raised = useShadow();
   const rows = React.Children.toArray(children);
   return (
-    <View style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
-                   borderRadius: radius.lg, overflow: "hidden" }}>
+    <View style={[{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
+                    borderRadius: radius.lg, overflow: "hidden" }, raised]}>
       {rows.map((row, k) => (
         React.isValidElement(row)
           ? React.cloneElement(row, { last: k === rows.length - 1 })
@@ -155,8 +199,13 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
      two buttons — so it goes on the wrapper with the transform, and the
      Pressable keeps only what it looks like. That split is also what keeps the
      button's own style readable in the render tree (§20a). */
+  /* The one control that is the point of the screen sits above it. Only `pri`,
+     and only when it is live: a shadow under a button nobody may press says the
+     opposite of what it is for. */
+  const lift = useShadow("lift");
   return (
-    <Animated.View style={[style, disabled ? null : press.style]}>
+    <Animated.View style={[style, disabled ? null : press.style,
+                           kind === "pri" && !disabled ? lift : null]}>
       <Pressable
         testID={testID}
         onPress={disabled ? undefined : onPress}

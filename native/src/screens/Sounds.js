@@ -10,10 +10,10 @@
  */
 
 import React from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import Svg, { Line, Circle, Text as SvgText, Polygon } from "react-native-svg";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Card, Muted, SectionLabel, Speaker, Chip, Btn } from "../ui";
+import { Screen, List, Row, Card, Muted, SectionLabel, Speaker, Chip, Btn, Text } from "../ui";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, TRAPS } from "@core/alphabet";
 
 /* The vowel trapezoid: across is where the tongue sits, down is how far the jaw

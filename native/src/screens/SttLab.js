@@ -12,13 +12,13 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, Share, Switch } from "react-native";
+import { View, Share, Switch } from "react-native";
 import {
   ExpoSpeechRecognitionModule, useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Screen, Card, Btn, Muted, Pill, Speaker } from "../ui";
+import { Screen, Card, Btn, Muted, Pill, Speaker, Text } from "../ui";
 import { Alignment } from "../activities/Alignment";
 import { STT_SET } from "../sttset";
 import { compare } from "@core/compare";

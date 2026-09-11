@@ -16,9 +16,9 @@
  */
 
 import React, { useRef, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { useTheme, radius, type as T } from "../theme";
-import { Btn, Muted, Speaker } from "../ui";
+import { Btn, Muted, Speaker, Text } from "../ui";
 import { useRecognizer } from "../speech";
 import { HoldButton, Blocked, ATTEMPTS } from "./Say";
 import { fold } from "@core/util";

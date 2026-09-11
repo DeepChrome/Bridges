@@ -15,10 +15,10 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Muted, Pill, SectionLabel, List, Row, Speaker } from "../ui";
+import { Screen, Card, Btn, Muted, Pill, SectionLabel, List, Row, Speaker, Text } from "../ui";
 import { RuInput } from "../keyboard";
 import { Linked } from "../words";
 import { L, IX, videoById } from "../data";

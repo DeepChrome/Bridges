@@ -7,8 +7,11 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Animated, Pressable, useColorScheme } from "react-native";
+import { View, Animated, Pressable, useColorScheme } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useFonts } from "expo-font";
+import { Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold,
+         Nunito_800ExtraBold } from "@expo-google-fonts/nunito";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { NavigationContainer, DefaultTheme, DarkTheme,
          getFocusedRouteNameFromRoute } from "@react-navigation/native";
@@ -19,7 +22,7 @@ import Svg, { Path } from "react-native-svg";
 import { SessionProvider, useSession } from "./src/session";
 import { light, dark } from "./src/theme";
 import { swipeAllowed } from "./src/tabs";
-import { Loading, Avatar, HeaderTitle } from "./src/ui";
+import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import { unitById, chapterOf, L, resolveWord } from "./src/data";
@@ -442,6 +445,17 @@ export default function App() {
     colors: { ...base.colors, background: p.bg, card: p.surface, text: p.ink,
               border: p.line, primary: p.brand },
   };
+
+  /* The typeface, before anything is drawn in it. Text rendered while the font
+     is still loading comes out in the system one and then jumps, which is the
+     flash every app with a webfont gets wrong; the app already waits behind a
+     splash, so this waits there too and nothing is ever drawn twice.
+     A font that fails to load is not worth refusing to start over: `loaded`
+     turns true either way, and Text falls back to the system face. */
+  const [loaded, fontError] = useFonts({
+    Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold, Nunito_800ExtraBold,
+  });
+  if (!loaded && !fontError) return null;
 
   return (
     <SafeAreaProvider>

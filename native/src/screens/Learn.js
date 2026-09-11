@@ -14,11 +14,11 @@
  */
 
 import React, { useEffect, useRef } from "react";
-import { View, Text, Pressable, Animated, useWindowDimensions } from "react-native";
+import { View, Pressable, Animated, useWindowDimensions } from "react-native";
 import Svg, { Circle, Path, Line } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, space } from "../theme";
-import { Screen, Btn, Pill, UnitIcon, Muted, styles } from "../ui";
+import { Screen, Btn, Pill, UnitIcon, Muted, styles, Text } from "../ui";
 import {
   STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress, unitState,
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, FORK_AT, dueCount,

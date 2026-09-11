@@ -1,14 +1,12 @@
 /* You — profile, progress, the trouble bank, and settings. */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, Switch, Alert } from "react-native";
+import { View, Switch, Alert } from "react-native";
 import { useSession } from "../session";
 import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
 import { useTheme, radius } from "../theme";
-import {
-  Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet,
-} from "../ui";
+import { Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text } from "../ui";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
 import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { cacheStats, clearCache } from "../cache";

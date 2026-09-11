@@ -2,10 +2,10 @@
  * placement routes. Each one supplies its steps and decides what the result means. */
 
 import React, { useMemo, useRef, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip } from "../ui";
+import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Text } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
 import { WordList, GrammarNote, WordCard } from "../lesson";

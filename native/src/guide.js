@@ -7,7 +7,8 @@
  */
 
 import React from "react";
-import { Animated, View, Text } from "react-native";
+import { Animated, View } from "react-native";
+import { Text } from "./ui";
 import { SvgXml } from "react-native-svg";
 import { guideSvg, VIEW_BOX, GUIDE } from "@core/guide";
 import { useTheme, radius, type as T } from "./theme";

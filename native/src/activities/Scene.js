@@ -32,11 +32,11 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, PanResponder } from "react-native";
+import { View, Pressable, PanResponder } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Btn, Muted, Bar } from "../ui";
+import { Btn, Muted, Bar, Text } from "../ui";
 import { stop, hasRealAudio, hasRussianVoice } from "../audio";
 import { useScenario, trackWhenCurrent, msFor, SKIP_MS, clock } from "../scenario";
 import { Linked } from "../words";

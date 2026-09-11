@@ -1,11 +1,11 @@
 /* Immerse (the video library) and the video player. */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Image } from "react-native";
+import { View, Image } from "react-native";
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel } from "../ui";
+import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel, Text } from "../ui";
 import {
   UN, STATS, unitState, markComponent, L, videos, videoById, videoWatched, unitById,
   idxOfWord,

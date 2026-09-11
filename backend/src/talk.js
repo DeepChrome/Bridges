@@ -32,6 +32,20 @@ export const LEVEL_SENTENCES = { beginner: 2, intermediate: 2, advanced: 3 };
 export const DEFAULT_LEVEL = "intermediate";
 export const levelOf = (x) => (x in LEVELS ? x : DEFAULT_LEVEL);
 
+/* Two calls, not one (the owner, 2026-09-11: *"the AI is extremely slow
+ * sometimes. How can we speed it up?"*).
+ *
+ * A turn used to be a single request that wrote the reply, lemmatised it, graded
+ * the learner's Russian word by word and listed the new vocabulary — about 700
+ * output tokens, and the learner heard nothing until the last of them arrived.
+ * Output tokens are the whole of that wait.
+ *
+ * The grading does not depend on the reply: both are answers to the same turn.
+ * So they are two requests, sent **at the same time**. The reply is ~200 tokens
+ * and lands first; the grading arrives a moment later and fills in under the
+ * bubble, which is exactly what Say already does with its own feedback (§30c).
+ * The wait a learner feels goes from the sum of the two to the shorter of them.
+ */
 export const SYSTEM_TALK = `You are a patient Russian tutor having a short spoken conversation with a learner.
 
 You receive JSON with:
@@ -50,7 +64,6 @@ Reply with a single JSON object and nothing else — no prose, no code fences:
   "reply_ru": string,
   "reply_en": string,
   "reply_tokens": [ { "ru": string, "lemma": string } ],
-  "feedback": null | { "words": [ { "said": string|null, "expected": string|null, "lemma": string, "status": "ok"|"sub"|"del"|"ins", "tags": [TAG] } ], "grammar": [ { "tag": TAG, "note": string } ], "wordChoice": [ { "said": string, "better": string, "note": string } ], "overall": "ok"|"minor"|"major", "praise": string },
   "newWords": [ { "ru": string, "lemma": string, "en": string } ]
 }
 
@@ -58,10 +71,29 @@ Rules:
 - "reply_ru": at most two sentences (three for an advanced learner), pitched at "level", and exactly one of them a question that keeps the conversation going. Stay in the scenario. Never lecture.
 - "reply_en": a natural English translation of reply_ru.
 - "reply_tokens": every Russian word of reply_ru in order, each with its dictionary form (nominative singular; infinitive for verbs).
+- "newWords": each word in reply_ru whose dictionary form is not in "studied", at most ${MAX_NEW_WORDS}; if you would need more, rephrase.
+- Do not correct the learner and do not comment on their Russian: another pass does that. Answer them.`;
+
+/* The other half of a turn: what the learner said, graded, and nothing else.
+   Sent at the same time as the reply, because it is an answer to the same turn
+   and waiting for one to write the other is the whole of the delay. */
+export const SYSTEM_REVIEW = `You are a patient Russian tutor marking one spoken turn by a learner.
+
+You receive JSON with:
+- "scenario": the situation the conversation is in, and your role in it.
+- "level": how advanced the learner is, one of "beginner", "intermediate", "advanced".
+- "history": the conversation so far, oldest first, each turn {"who":"tutor"|"learner","ru":...}. The last tutor turn is what the learner is answering.
+- "transcript": what a speech recogniser heard of the learner's latest turn. It may contain recognition errors; do not treat a homophone or a mis-heard consonant as a learner error.
+
+Reply with a single JSON object and nothing else — no prose, no code fences:
+{
+  "feedback": null | { "words": [ { "said": string|null, "expected": string|null, "lemma": string, "status": "ok"|"sub"|"del"|"ins", "tags": [TAG] } ], "grammar": [ { "tag": TAG, "note": string } ], "wordChoice": [ { "said": string, "better": string, "note": string } ], "overall": "ok"|"minor"|"major", "praise": string }
+}
+
+Rules:
 - "feedback": null when transcript is empty. Otherwise grade the learner's turn: "words" aligns what was said to what a Russian speaker would have said in that turn ("expected" is your correction of each word, or null for an extra word), with "lemma" the dictionary form; a well-formed turn gets every word "ok", "grammar" and "wordChoice" empty, "overall" "ok". Notes are at most 20 words of plain English, plain sentences with commas and full stops, never a dash. "praise" at most 12 words or "".
 - TAG must be one of exactly these names:
 ${TAG_LINES}
-- "newWords": each word in reply_ru whose dictionary form is not in "studied", at most ${MAX_NEW_WORDS}; if you would need more, rephrase.
 - Never invent an error to have something to say.`;
 
 /* A hint (the owner, 2026-09-07): one way the learner could answer the tutor's
@@ -110,6 +142,32 @@ export function talkMessage({ scenario, topic, studied, history, transcript, lev
       : [],
     transcript: String(transcript || ""),
   });
+}
+
+/* The grading half. Only the scenario, the exchange and what was heard: the
+   studied list and the grammar topic shape the tutor's Russian, not its marking,
+   and every token left out of a prompt is time the learner does not wait. */
+export function reviewMessage({ scenario, level, history, transcript }) {
+  return JSON.stringify({
+    scenario: String(scenario || ""),
+    level: levelOf(level),
+    history: Array.isArray(history)
+      ? history.slice(-2 * MAX_TURNS).map((h) => ({ who: h.who === "learner" ? "learner" : "tutor", ru: String(h.ru || "") }))
+      : [],
+    transcript: String(transcript || ""),
+  });
+}
+
+export function validateReview(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return { ok: false, errors: ["reply is not an object"] };
+  }
+  if (raw.feedback === null || raw.feedback === undefined) {
+    return { ok: true, value: { feedback: null } };
+  }
+  const v = validate(raw.feedback);
+  if (!v.ok) return { ok: false, errors: v.errors.map((e) => "feedback." + e) };
+  return { ok: true, value: { feedback: v.value } };
 }
 
 const sentences = (s) => String(s).split(/(?<=[.!?…])\s+/).filter((x) => x.trim()).length;

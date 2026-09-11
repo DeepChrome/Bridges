@@ -57,7 +57,36 @@ test("a hint is one short Russian sentence with its English, and rides the talk 
   assert.equal(body.ok, true);
   assert.equal(body.hint_ru, "Чай, пожалуйста.");
   assert.equal(up.calls[0].max_tokens, 200);
-  assert.match(up.calls[0].system, /asked for a hint/);
+  assert.match(up.calls[0].system[0].text, /asked for a hint/);
+});
+
+test("POST /v1/talk with review: true grades the turn and writes no Russian", async () => {
+  const up = upstream([JSON.stringify({ feedback: {
+    words: [{ said: "я", expected: "я", lemma: "я", status: "ok", tags: [] }],
+    grammar: [], wordChoice: [], overall: "ok", praise: "Good.",
+  } })]);
+  const r = await handle(req({ scenario: "café", review: true, history: [],
+                               transcript: "я хочу чай" }, auth), env(), { fetch: up.fetch });
+  assert.equal(r.status, 200);
+  const body = await r.json();
+  assert.equal(body.ok, true);
+  assert.equal(body.feedback.overall, "ok");
+  assert.match(up.calls[0].system[0].text, /marking one spoken turn/);
+  /* The marking prompt does not carry the studied list or the reply contract:
+     what is left out of it is time the learner does not wait. */
+  const sent = JSON.parse(up.calls[0].messages[0].content);
+  assert.equal(sent.studied, undefined);
+  assert.equal(sent.transcript, "я хочу чай");
+  assert.doesNotMatch(up.calls[0].system[0].text, /reply_ru/);
+});
+
+test("a review of nothing said is no feedback, not an error", async () => {
+  const up = upstream([JSON.stringify({ feedback: null })]);
+  const r = await handle(req({ scenario: "café", review: true, history: [], transcript: "" }, auth),
+                         env(), { fetch: up.fetch });
+  const body = await r.json();
+  assert.equal(body.ok, true);
+  assert.equal(body.feedback, null);
 });
 
 test("a reply with no question is refused", () => {
@@ -152,9 +181,14 @@ test("POST /v1/talk returns the validated turn and uses the talk prompt", async 
   const body = await r.json();
   assert.equal(body.ok, true);
   assert.equal(body.reply_ru, "Здравствуйте! Что вы хотите?");
-  assert.match(up.calls[0].system, /Russian tutor/);
-  assert.equal(up.calls[0].max_tokens, 1000);
+  assert.match(up.calls[0].system[0].text, /Russian tutor/);
+  assert.equal(up.calls[0].max_tokens, 500);
   assert.deepEqual(JSON.parse(up.calls[0].messages[0].content).studied, studied);
+  /* The reply carries no marking: that is the other request, and asking for
+     both in one is what made a turn slow (talk.js). */
+  assert.doesNotMatch(up.calls[0].system[0].text, /"feedback"/);
+  // The system prompt is the same every turn, so it is sent as a cacheable block.
+  assert.deepEqual(up.calls[0].system[0].cache_control, { type: "ephemeral" });
 });
 
 test("the talk cap is its own counter: the request past it gets 429", async () => {

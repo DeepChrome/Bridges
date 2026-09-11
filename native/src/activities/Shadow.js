@@ -20,10 +20,10 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme, type as T } from "../theme";
-import { Btn, Muted, Speaker } from "../ui";
+import { Btn, Muted, Speaker, Text } from "../ui";
 import { Linked } from "../words";
 import { IX } from "../data";
 import { say, whenIdle, stop } from "../audio";

@@ -23,10 +23,10 @@
  */
 
 import React, { useMemo, useState } from "react";
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Muted, Pill, SectionLabel } from "../ui";
+import { Screen, Card, Btn, Muted, Pill, SectionLabel, Text } from "../ui";
 import { RuInput } from "../keyboard";
 import { GuidePop } from "../guide";
 import { markTask, config } from "../lib/feedback";

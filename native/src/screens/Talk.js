@@ -18,14 +18,14 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
+import { View, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
-import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel } from "../ui";
+import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, stageDone, unitUnlocked, drillPool, nextLesson } from "../data";
-import { talk as askTutor, hint as askHint, config } from "../lib/feedback";
+import { talk as askTutor, review as askReview, hint as askHint, config } from "../lib/feedback";
 import { say, SPEEDS } from "../audio";
 import { tagInfo } from "@core/errortags";
 import { useRecognizer } from "../speech";
@@ -322,52 +322,69 @@ export default function Talk({ navigation, route }) {
   const level = talkLevelFor(st);
   const speed = st.talkSpeed || "normal";
 
-  /* One round trip: the whole exchange plus the learner's latest words. */
+  /* The learner's turn, marked. Applied whenever the marking arrives, which is
+     after the tutor has already answered — a turn with no marking at all is
+     allowed, and then the words stand as said and the conversation goes on. */
+  const applyReview = (feedback, transcript) => {
+    if (!transcript || !feedback) {
+      setTurns((prev) => prev.map((x) => (x.pending ? { ...x, pending: false } : x)));
+      return;
+    }
+    const words = feedback.words || [];
+    const alignment = words.map((w) => ({ said: w.said, expected: w.expected,
+      status: w.status === "ins" ? "ins" : w.status }));
+    const grades = gradeTurn(words);
+    const tags = feedbackTags(feedback);
+    update((prev) => {
+      let next = prev;
+      for (const g of grades) {
+        const r = applyGrade(next.seen, next.trouble, L[g.i].b, g.grade, day);
+        next = { ...next, seen: r.seen, trouble: r.trouble };
+      }
+      return {
+        ...next,
+        speech: recordAttempt(next.speech, {
+          ts: Date.now(), key: fold(transcript), kind: "talk", unit: scenario.unit,
+          scenario: scenario.id, transcript, target: words.map((w) => w.expected || "").join(" ").trim(),
+          wer: words.length ? words.filter((w) => w.status !== "ok").length / words.length : 0,
+          tags, grade: feedback.overall === "ok" ? 3 : 1,
+        }),
+      };
+    });
+    setTurns((prev) => prev.map((x) => (x.pending
+      ? { ...x, pending: false, alignment: alignment.length ? alignment : null, feedback }
+      : x)));
+  };
+
+  /* A turn is two requests, sent together (the owner, 2026-09-11: *"the AI is
+   * extremely slow sometimes"*).
+   *
+   * Answering the learner and marking what they said are both answers to the
+   * same turn, and neither needs the other. Asked as one request the model wrote
+   * about seven hundred tokens before the learner heard a word; asked together
+   * the reply is a fifth of that and lands first, and the marking appears under
+   * their own bubble a moment later — which is what Say has always done with its
+   * feedback. The wait goes from the sum of the two to the longer of them. */
   const ask = async (history, transcript) => {
     setFailure(null);
-    const reply = await askTutor({
+    const asHistory = history.map((x) => ({ who: x.who, ru: x.ru }));
+    const replying = askTutor({
       scenario: scenario.prompt, topic: unit && unit.g ? unit.g.title : null,
-      studied: studiedFor(st),
-      history: history.map((x) => ({ who: x.who, ru: x.ru })),
-      transcript, level,
+      studied: studiedFor(st), history: asHistory, transcript, level,
     });
+    const marking = transcript
+      ? askReview({ scenario: scenario.prompt, history: asHistory, transcript, level })
+      : null;
+    // Neither request is left unhandled: an unawaited rejection here would be
+    // reported by the platform as an app error over a conversation that is fine.
+    if (marking) marking.catch(() => null);
+
+    const reply = await replying;
     if (!alive.current) return;
     if (!reply || reply.ok !== true) {
       setTurns((prev) => prev.map((x) => (x.pending ? { ...x, pending: false } : x)));
       setFailure(failureText(reply));
       return;
-    }
-    // The learner's turn, graded now that the tutor has read it. The tutor may
-    // send no grading at all for a turn (the validator allows null); then the
-    // words stand as said, ungraded, and the conversation goes on.
-    if (transcript && !reply.feedback) {
-      setTurns((prev) => prev.map((x) => (x.pending ? { ...x, pending: false } : x)));
-    }
-    if (transcript && reply.feedback) {
-      const words = reply.feedback.words || [];
-      const alignment = words.map((w) => ({ said: w.said, expected: w.expected,
-        status: w.status === "ins" ? "ins" : w.status }));
-      const grades = gradeTurn(words);
-      const tags = feedbackTags(reply.feedback);
-      update((prev) => {
-        let next = prev;
-        for (const g of grades) {
-          const r = applyGrade(next.seen, next.trouble, L[g.i].b, g.grade, day);
-          next = { ...next, seen: r.seen, trouble: r.trouble };
-        }
-        return {
-          ...next,
-          speech: recordAttempt(next.speech, {
-            ts: Date.now(), key: fold(transcript), kind: "talk", unit: scenario.unit,
-            scenario: scenario.id, transcript, target: words.map((w) => w.expected || "").join(" ").trim(),
-            wer: words.length ? words.filter((w) => w.status !== "ok").length / words.length : 0,
-            tags, grade: reply.feedback.overall === "ok" ? 3 : 1,
-          }),
-        };
-      });
-      setTurns((prev) => prev.map((x) => (x.pending
-        ? { ...x, pending: false, alignment: alignment.length ? alignment : null, feedback: reply.feedback }
-        : x)));
     }
     setTurns((prev) => prev.concat([{ who: "tutor", ru: reply.reply_ru, en: reply.reply_en,
                                       tokens: reply.reply_tokens }]));
@@ -380,6 +397,14 @@ export default function Talk({ navigation, route }) {
         return prev.concat(reply.newWords.filter((w) => !have.has(w.lemma)));
       });
     }
+
+    if (!transcript) return;
+    const review = marking ? await Promise.resolve(marking).catch(() => null) : null;
+    if (!alive.current) return;
+    /* Marking that fails, or never comes, is not a failed turn: the tutor has
+       answered and the conversation is fine. The bubble stops waiting either
+       way — a turn left spinning for ever is the worse failure. */
+    applyReview(review && review.ok === true ? review.feedback : null, transcript);
   };
 
   /* A scenario can start when Talk is open, its unit is, and a session is left

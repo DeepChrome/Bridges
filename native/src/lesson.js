@@ -25,9 +25,9 @@
  */
 
 import React from "react";
-import { Animated, View, Text, Image } from "react-native";
+import { Animated, View, Image } from "react-native";
 import { useTheme, radius, type as T } from "./theme";
-import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses } from "./ui";
+import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses, Text } from "./ui";
 import { Linked } from "./words";
 import { Guide } from "./guide";
 import { useEnter } from "./motion";

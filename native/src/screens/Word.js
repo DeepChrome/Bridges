@@ -7,9 +7,9 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, ScrollView, Image, Pressable, Linking } from "react-native";
+import { View, ScrollView, Image, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Pill, Speaker, Muted, Senses, List, Row, SectionLabel } from "../ui";
+import { Screen, Card, Pill, Speaker, Muted, Senses, List, Row, SectionLabel, Text } from "../ui";
 import { L, UN, resolveWord, heardIn } from "../data";
 import { Linked } from "../words";
 import { IMAGES, CREDITS } from "../images";

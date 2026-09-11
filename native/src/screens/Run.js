@@ -7,10 +7,10 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ScrollView, Alert, Animated } from "react-native";
+import { View, Pressable, ScrollView, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Text } from "../ui";
 import { GuidePop } from "../guide";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, LINES } from "@core/guide";

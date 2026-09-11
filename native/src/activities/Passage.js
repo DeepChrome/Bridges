@@ -15,10 +15,10 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { YouTube } from "../youtube";
 import { useTheme, radius } from "../theme";
-import { Btn, Bar, Muted, Pill } from "../ui";
+import { Btn, Bar, Muted, Pill, Text } from "../ui";
 import { SKIP_MS } from "@core/questions";
 
 const clock = (ms) => {

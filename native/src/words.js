@@ -17,10 +17,10 @@
 import React, {
   createContext, useCallback, useContext, useMemo, useRef, useState,
 } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { createNavigationContainerRef } from "@react-navigation/native";
 import { useTheme } from "./theme";
-import { Sheet, Btn, Senses } from "./ui";
+import { Sheet, Btn, Senses, Text } from "./ui";
 import { L, IX } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise } from "@core/forms";

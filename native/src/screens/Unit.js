@@ -1,10 +1,10 @@
 ﻿/* A unit's lessons, and inside a lesson its three components. */
 
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick } from "../ui";
+import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick, Text } from "../ui";
 import {
   UN, lessonCount, lessonWords, lessonDone, components, unitFineProgress, L,
 } from "../data";

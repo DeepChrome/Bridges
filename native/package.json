@@ -11,6 +11,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@expo-google-fonts/nunito": "^0.4.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.18.18",
     "@react-navigation/material-top-tabs": "^7.6.17",
@@ -20,6 +21,7 @@
     "expo-audio": "~57.0.4",
     "expo-document-picker": "~57.0.1",
     "expo-file-system": "~57.0.6",
+    "expo-font": "~57.0.4",
     "expo-sharing": "~57.0.18",
     "expo-speech": "~57.0.2",
     "expo-speech-recognition": "^57.0.0",

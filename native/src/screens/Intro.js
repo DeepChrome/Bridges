@@ -7,10 +7,10 @@
  */
 
 import React, { useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius } from "../theme";
-import { Screen, Btn, Muted, Speaker } from "../ui";
+import { Screen, Btn, Muted, Speaker, Text } from "../ui";
 import { hasRussianVoice } from "../audio";
 
 const PAGES = [

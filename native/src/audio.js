@@ -21,6 +21,11 @@ const failed = (text) => failListeners.forEach((fn) => fn(text));
 
 let player = null;
 let ready = false;
+/* Bumped by every attempt to take the audio session — `say()` and `playTrack()`
+   both — so an attempt can tell that a later one took over while it was waiting
+   on a promise. One counter, because there is one `player`: whoever asked last
+   is what should be heard. */
+let trackSeq = 0;
 
 async function prepare() {
   if (ready) return;
@@ -353,7 +358,18 @@ export function speakLine(text, opts = {}) {
  * (§23) — resuming re-creates it and seeks, which costs nothing audible. */
 export async function playTrack(source, from = 0) {
   if (!source) return null;
+  /* Nothing here is audible until two awaits have passed — the audio session,
+     then the seek — and a finger on "back five seconds" arrives inside that gap.
+     Two calls in flight used to leave two players, and the first one was the one
+     nobody held a reference to any more: it played on underneath the second.
+     The owner heard it as recordings overlapping (2026-09-11).
+     So the last call wins, decided here rather than by whichever promise
+     happened to settle last: a superseded attempt never reaches `play()`, and
+     says so by answering null. */
+  const seq = ++trackSeq;
+  const abandoned = () => seq !== trackSeq;
   await prepare();
+  if (abandoned()) return null;
   try {
     Speech.stop();
     if (player) { player.remove(); player = null; }
@@ -361,6 +377,12 @@ export async function playTrack(source, from = 0) {
     const mine = createAudioPlayer(source);
     player = mine;
     let over = false;
+    const drop = () => {
+      if (player === mine) player = null;
+      try { mine.remove(); } catch (e) {}
+      end();
+      return null;
+    };
     if (mine.addListener) {
       mine.addListener("playbackStatusUpdate", (s) => {
         if (!s) return;
@@ -370,6 +392,7 @@ export async function playTrack(source, from = 0) {
     }
     if (from > 0 && typeof mine.seekTo === "function") {
       try { await mine.seekTo(from / 1000); } catch (e) {}
+      if (abandoned()) return drop();
     }
     const rate = prefs.rate;
     if (rate !== 1 && typeof mine.setPlaybackRate === "function") {
@@ -381,9 +404,13 @@ export async function playTrack(source, from = 0) {
          the player's own, so a slowed rate reports the right place. */
       pos: () => Math.round(((mine.currentTime || 0) * 1000) || from),
       ended: () => over,
-      live: () => player === mine,
+      /* Whether this handle is still the one playing. A caller that was
+         superseded must not act on its own handle — stopping it would tear down
+         the player that took over. */
+      live: () => player === mine && seq === trackSeq,
       stop: () => {
-        if (player === mine) { player = null; }
+        if (player !== mine) return;            // somebody else owns the session
+        player = null;
         try { mine.remove(); } catch (e) {}
         if (settle) settle();
       },
@@ -411,8 +438,14 @@ export async function say(text, opts = {}) {
     if (!spoke) failed(text);
     return spoke;
   }
+  /* The same race as `playTrack`, and this one is reached by a control the app
+     positively invites a learner to press twice (§30h: a second press within six
+     seconds plays it slower). Whoever asked last is what should be heard. */
+  const seq = ++trackSeq;
   await prepare();
+  if (seq !== trackSeq) return false;
   const fallback = () => {
+    if (seq !== trackSeq) return;       // superseded: the fallback would overlap
     if (local) dropCached(text);
     if (!speakTTS(text, { ...opts, rate })) failed(text);
   };
@@ -461,6 +494,11 @@ export async function say(text, opts = {}) {
  * is also why it was intermittent: go to a video without having played anything
  * and there is nothing held. */
 export function stop() {
+  /* Anything still opening a player is abandoned too. Stopping only what has
+     already started leaves the half-opened one to begin playing a moment later,
+     with nothing holding it — which is how leaving a screen could still be
+     followed by a sentence. */
+  trackSeq++;
   try { Speech.stop(); } catch (e) {}
   try { if (player) { player.pause(); player.remove(); } } catch (e) {}
   player = null;

@@ -591,6 +591,20 @@ Each of these cost real time. Do not relearn them.
   or mapped, listen to a sample — `faster-whisper` in a scratch venv language-detects
   a sentence in seconds, and the Windows `System.Speech` dictation recogniser tells
   English from noise with no install at all.
+- **Two awaits before a sound is two players.** `playTrack` and `say` both wait
+  on the audio session and then on a seek before anything is audible, and a
+  finger arrives inside that gap: "back five seconds" pressed four times started
+  four players, all of them sounding at once, because each call only tore down
+  what had *already* claimed `player` — and the ones still opening had claimed
+  nothing yet. The owner heard it as recordings overlapping (2026-09-11).
+  Removing the previous player is not enough; **an attempt has to be able to
+  learn it was superseded**, so both take a ticket from one counter (`trackSeq`,
+  one because there is one `player`) and check it after every await, and `stop()`
+  bumps it so leaving a screen reaches what has not started yet. A superseded
+  attempt returns null rather than falling back to the device voice, or the
+  fallback would be the thing overlapping. `track.test.js` fires the presses
+  without awaiting between them, which is the only way this shows up: awaited in
+  order, it always passes.
 - **An MP3 says how long it meant to be; it holds whole frames.** The scenario
   tracks are stitched with `-c copy`, so what a player hears is the frames, and
   at 24 kHz an MPEG-2 Layer III frame is 24 ms. `ffmpeg -t 0.42` for the silence

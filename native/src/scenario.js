@@ -225,6 +225,9 @@ export function useScenario(lines, cast, seed = "") {
          Android audio session (§23), and re-creating it to resume is free. */
       setPos(handle.current.pos());
       handle.current.stop();
+      /* And the session itself, in case something else took it while this was
+         playing: a handle that is no longer the owner cannot stop what is. */
+      stop();
       handle.current = null;
       setPlaying(false);
       setAt(-1);

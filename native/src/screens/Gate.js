@@ -28,8 +28,8 @@
  * any earlier unmounts this screen before the question can be asked.
  */
 
-import React, { useRef, useState } from "react";
-import { View, Text, TextInput, Pressable, Animated } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, TextInput, Pressable, Animated, Keyboard } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Btn, Muted, Avatar, AV, AV_IDS } from "../ui";
@@ -48,6 +48,35 @@ function Rise({ n = 0, style, children, testID }) {
   const anim = useEnter([], { delay: n * STEP });
   return (
     <Animated.View testID={testID} style={[anim, style]}>{children}</Animated.View>
+  );
+}
+
+/* The way in has one thing to say and should say it in the middle of the
+   screen. Everything here is short enough to fit, so the content is centred
+   rather than stacked under the status bar with half a screen of nothing
+   below it — which is what it looked like on the emulator.
+ *
+ * The padding is the keyboard. `android:windowSoftInputMode="adjustResize"` is
+ * set and does nothing here, because the app draws edge to edge and the window
+ * is never the thing that resizes; centred content therefore stayed centred in
+ * the *whole* screen and the name field was behind the keys you were typing on.
+ * Padding the foot by the keyboard's height moves the centre to the middle of
+ * what can actually be seen, which is what the learner means by "the middle".
+ * Ten lines and no new dependency (rule 20.5). */
+function Middle({ children }) {
+  const [pad, setPad] = useState(0);
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow",
+      (e) => setPad((e.endCoordinates && e.endCoordinates.height) || 0));
+    const hide = Keyboard.addListener("keyboardDidHide", () => setPad(0));
+    return () => { show.remove(); hide.remove(); };
+  }, []);
+  return (
+    <Screen fill>
+      <View style={{ flex: 1, justifyContent: "center", paddingBottom: pad }}>
+        {children}
+      </View>
+    </Screen>
   );
 }
 
@@ -84,7 +113,7 @@ function Face({ account, n, onPress }) {
 function SignIn({ accounts, onPick, onNew }) {
   const t = useTheme();
   return (
-    <Screen>
+    <Middle>
       <Rise n={0} style={{ alignItems: "center", marginTop: 24, marginBottom: 28 }}>
         <Mark size={56} />
       </Rise>
@@ -103,7 +132,7 @@ function SignIn({ accounts, onPick, onNew }) {
       <Rise n={2 + accounts.length} style={{ marginTop: 10 }}>
         <Btn label="New profile" onPress={onNew} />
       </Rise>
-    </Screen>
+    </Middle>
   );
 }
 
@@ -163,7 +192,7 @@ function NewProfile({ canCancel, onCancel, onDone }) {
      its Pressable (§23), so the handler is the only place the rule is real. */
   const go = () => { if (ready) onDone({ name: name.trim(), avatar }); };
   return (
-    <Screen>
+    <Middle>
       <Rise n={0} style={{ alignItems: "center", marginTop: 16 }}>
         <Wordmark size={64} />
       </Rise>
@@ -199,7 +228,7 @@ function NewProfile({ canCancel, onCancel, onDone }) {
           <Btn kind="ghost" style={{ marginTop: 4 }} label="Back" onPress={onCancel} />
         ) : null}
       </Rise>
-    </Screen>
+    </Middle>
   );
 }
 
@@ -237,7 +266,7 @@ function Option({ n, title, sub, onPress, testID }) {
 function Placement({ avatar, onChoose }) {
   const t = useTheme();
   return (
-    <Screen>
+    <Middle>
       <Rise n={0} style={{ alignItems: "center", marginTop: 24, marginBottom: 20 }}>
         <Avatar id={avatar} size={72} />
       </Rise>
@@ -254,7 +283,7 @@ function Placement({ avatar, onChoose }) {
               sub="50 questions · about 10 minutes" onPress={() => onChoose(true)} />
       <Option n={3} testID="placement-skip" title="Start from the beginning"
               onPress={() => onChoose(false)} />
-    </Screen>
+    </Middle>
   );
 }
 

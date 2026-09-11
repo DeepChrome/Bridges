@@ -109,7 +109,10 @@ function Transport({ s }) {
             backgroundColor: pressed ? t.surface2 : t.surface,
           })}
         >
-          <Icon d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z" color={t.ink2} />
+          {/* A bar and a triangle, not a second curling arrow: the back button
+              beside it is one already, and at 22 px the two were the same
+              picture with a number under one of them. */}
+          <Icon d="M7 6h2v12H7zM19 6v12l-9-6z" color={t.ink2} />
         </Pressable>
       </View>
       <View style={{ marginTop: 14 }}>

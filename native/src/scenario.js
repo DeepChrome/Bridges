@@ -118,9 +118,14 @@ export function useScenario(lines, cast) {
       await speakLine(lines[k].ru, voiceFor(lines[k]));
       if (!alive.current || run.current !== id) return;
       const took = Date.now() - t0;
-      // A line that came back at once was not spoken — no voice, or stopped
-      // before it began — and must not be recorded as a duration of nothing.
-      if (took > 250) measured.current[k] = took;
+      /* A line that came back at once was not spoken — no voice, or stopped
+         before it began — and must not be recorded as a duration of nothing.
+         The first honest measurement is kept and never overwritten: a replayed
+         line comes back a little quicker, and letting that through made the
+         total shrink while the learner was looking at it (0:30 to 0:28 on the
+         emulator). The length of the thing they are listening to must not
+         change under them. */
+      if (took > 250 && !measured.current[k]) measured.current[k] = took;
       base += (measured.current[k] || estimateMs(lines[k].ru)) + GAP_MS;
       setPos(base);
       if (k + 1 < lines.length) {

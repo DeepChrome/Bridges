@@ -49,6 +49,13 @@ describe("the timeline", () => {
     expect(real.spans[1].start).toBe(9000 + GAP_MS);
     expect(real.total).toBeGreaterThan(timeline(LINES).total);
   });
+
+  /* "The total must not change once a line has been measured" is a rule of the
+     hook, not of this arithmetic, and it cannot be asserted here: under test the
+     speech mock returns on the next tick, so nothing is ever measured and any
+     such test would pass for the wrong reason. It was found on the emulator —
+     the total shrank from 0:30 to 0:28 on a replay — and the guard is in
+     `useScenario`, with the reason written beside it. */
 });
 
 describe("finding a place in it", () => {

@@ -59,6 +59,13 @@ describe("a control under a finger", () => {
     expect(own.borderRadius).toBeGreaterThan(0);
   });
 
+  it("stops looking like a primary when it is disabled", async () => {
+    /* A faded primary still reads as a primary with pale text, which is how
+       the way-in screen's Continue looked live until you pressed it (§30p). */
+    await render(<Btn testID="b" kind="pri" label="Go" disabled onPress={jest.fn()} />);
+    expect(flat(screen.getByTestId("b")).backgroundColor).not.toBe(light.brand);
+  });
+
   it("survives a press in and out", async () => {
     const onPress = jest.fn();
     await render(<Btn testID="b" label="Go" onPress={onPress} />);

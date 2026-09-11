@@ -1,13 +1,12 @@
-# The written lesson passage, on the emulator (CLAUDE.md 30l).
+# The listening scenario, on the emulator (CLAUDE.md 30l).
 #
 #   .\native\tools\walk.ps1 -Flow native\flows\listening.txt -Device emulator
 #
 # Starts from the launcher, so force-stop the app first if it is already open.
-# Reads the whole screen at the end: what to look at is the line under the
-# replay buttons (topic, unit, sentence count, and whose voice), and whether the
-# four English options are all sentences of about the same size. A wrong answer
-# borrowed from late in the route gives the question away without any listening,
-# which is what this flow caught the first time it ran.
+# What to look at in the shots: the five questions are all readable before
+# anything plays; the transport is three controls and a bar; the cast names are
+# on screen (they are what half the questions are about); and after Check, the
+# conversation is there with a speaker over every line.
 
 # Home first: force-stopping the app leaves its dead task on screen, not the
 # launcher, so the icon is not there to tap.
@@ -20,12 +19,29 @@ shot:00-path
 
 tapn:Practice:0
 wait:3
-expect:Five short sentences from the unit you are on
+expect:A conversation at the level you are on
 shot:01-practice
 
-tapn:Listening:0
+# By its subtitle: "Listening" alone also matches the section label above it.
+tap:A conversation at the level you are on
 wait:4
 expect:LISTEN, THEN ANSWER
-expect:Play sentence 1 again
+expect:Play the conversation
+expect:Back five seconds
 texts
-shot:02-passage
+shot:02-scenario
+
+# Play it. The lines are spoken one at a time by the device voices; the bar and
+# the speaker chips move while it runs.
+tap:Play the conversation
+wait:6
+shot:03-playing
+
+# Back five seconds, then from the start: both have to work mid-playback.
+tap:Back five seconds
+wait:3
+shot:04-back
+
+tap:Play from the start
+wait:3
+shot:05-restart

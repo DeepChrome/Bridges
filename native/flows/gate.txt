@@ -1,0 +1,39 @@
+# The way in (CLAUDE.md 30p), on the emulator.
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\gate.txt -Device emulator
+#
+# Only meaningful on a phone with no profile yet, so clear the app's data first:
+#   adb shell pm clear com.akromah.bridges
+#
+# What to look at: the mark and the wordmark, Yuri waving with one line, the
+# characters in a row, and the name field. Then the placement offer, which is
+# two cards rather than a list. Nothing here should read as a settings page.
+
+key:3
+wait:2
+tap:Bridges
+wait:12
+expect:Bridges
+texts
+shot:00-new-here
+
+# Continue is guarded in the handler, not only on the button, so it does
+# nothing until the field has a name in it — walk the field first.
+tap:Your name
+wait:1
+type:Jared
+wait:1
+shot:01-named
+
+# The keyboard covers Continue, which is why the field takes "go" on the
+# keyboard itself (onSubmitEditing). Enter is that key.
+key:66
+wait:3
+texts
+shot:02-tour
+
+tapn:Skip:0
+wait:3
+expect:Where should we start
+texts
+shot:03-placement

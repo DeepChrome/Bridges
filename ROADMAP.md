@@ -729,9 +729,65 @@ the rest, ranked, with the evidence each was measured by.
 a decision rather than a task and now sits in Phase 12 with everything else that
 is open.
 
+## Phase 13 — Re-read of the whole list (2026-09-11)
+
+Phase 12 below was written on 2026-09-10 and is **stale in one specific way that
+matters**: its top item was "put it on the phone and use it for a week", and that
+week started. The owner has used the build all day and filed eleven faults. Nine
+of my last ten pieces of work came from him pressing something, not from this
+list — which is the list working exactly as it says it should, and the reason to
+re-rank rather than to keep ticking.
+
+### What closed, and what the use of it found
+
+| was | now |
+|---|---|
+| P12.1 *use it for a week* | **under way, and it is the most productive thing in the project.** Everything below came out of it |
+| P12.12 *nobody has heard a scenario on a phone* | **closed.** He heard one, and it was wrong: the voices ignored who was speaking. That produced `core/names.js`, `core/voices.js` measured by his ear, and then the whole of §30l's bought audio |
+| P12.4 *the struggling learner's review load* | **the symptom named there is gone**: 55 reviews a day → 37, 83 backlog days → 0, 96 leeches → 7 (three seeds, `docs/reviews/2026-09-11-simulated.md`). A different symptom replaced it — see 13.2 |
+
+### The list as it stands, re-ranked
+
+Effort is mine unless it says otherwise.
+
+| ID | What | Why it is where it is |
+|---|---|---|
+| **13.1** | **Deploy the Worker.** The Talk split and prompt caching are written, tested and committed, and the server is still running the old code. Until it is deployed the app asks for a marking the deployed Worker does not know how to give, and the owner's "extremely slow" complaint stands unfixed. | **Top, because it is the only thing in the project that is finished and not working.** Needs his Cloudflare token; one command |
+| **13.2** | **The pass mark is above what the app's own best learner scores.** Quick profile, 168 lessons: mean quiz accuracy **.79** against a pass mark of **.80**. Relief is not the safety net, it is the main road. Sweep 75/78/80 across three seeds as `REVIEW_FIRST` was swept | A number that is wrong by a point makes every learner retake; it is one afternoon and it changes the feel of the whole route |
+| **13.3** | **A Russian speaker reads the 2,213 scenario lines** (was P12.2). Unchanged in substance and now larger: the lines carry bought audio, so a wrong line is wrong in a voice | Still the largest unverified surface. 2–3 days of someone's reading, and not mine |
+| **13.4** | **The scene grades four-of-five, and that is a trade nobody priced.** It cut how often a word is asked again by 22–39 %, which is most of why the review load fell — and also less retrieval. Try three-of-five and measure `askedAgain` against leeches | Found by the nine-learner run; the fix and its risk are the same change |
+| **13.5** | **156 unread photographs** (was P12.3), **~30 words lost their unit** (P12.6), **126 glosses cover two sentences** (P12.5) | Unchanged, still real, still measured |
+| **13.6** | **Two generated payload files are tracked and three are ignored**, with no rule saying why: `listening.json` and `senses.json` are in git, `data/deep/sent/videos.json` are not. Either they are build outputs or they are not | Small, but it is the shape of thing that makes a fresh clone build differently from this one |
+| **13.7** | **The aspect drill is 16 % guessable and cannot be fixed from this data** (§30r). 242 of 693 verbs have no same-root alternative to stand against | Mitigated by the written drill being the default; the remainder is a data limit to accept or to source |
+| **13.8** | **The APK crossed 100 MB** (101.1 MB) when the scenario audio went in. Play's limit for a plain APK is 100 MB; an AAB with asset packs is the way through | Not urgent while he side-loads. It becomes a release blocker the day it is not |
+| **13.9** | **EAS has not built since three native modules were added** (`react-native-pager-view`, `expo-font`, and the asset directory). Local Gradle is what has been proving the app | The day the local keystore is not enough, this is between him and a build |
+| **13.10** | **Dark theme has still never been seen on a device** (P12.10); **`store.test.js` migrates only v6 and the Anki round trip runs on a fake SQLite** (P12.9); **four possessives listed twice** (P12.7); **two resolvers can disagree** (P12.8) | Unchanged. Each is half a day and none is urgent |
+| **13.11** | **Licence exposure** (P12.11) | Unchanged, and his call rather than a task |
+
+### Three process faults from today, and what they cost
+
+Worth writing down because each of them cost a round trip with him, and none was
+a hard problem:
+
+1. **PowerShell corrupted Cyrillic twice**, in a session where §23 documents that
+   exact trap. Once it silently mojibaked a test file; once it made a measurement
+   read "0 verbs with a partner" and nearly sent me down a wrong path. Knowing a
+   rule is not the same as being unable to break it — the fix is a check that
+   greps the tree for mojibake, not another paragraph in §23.
+2. **A fix shipped that did not fix anything**, because the mock modelled the
+   API rather than the platform: `remove()` on a player was treated as silence,
+   so "was it released" passed while "is it quiet" was never asked. The owner had
+   to report the same fault twice. **A mock has to model the failure mode, not
+   the happy path.**
+3. **Two of the option-quality metrics were wrong before they were right**, and
+   the first version would have reported 97 % of a healthy drill as broken. A
+   measurement gets reviewed like code, or it is just a number with a decimal
+   point.
+
 ## Phase 12 — What is actually left (2026-09-10)
 
-**This is the one list.** Phases 0 to 11 are closed, and everything still
+**Superseded by Phase 13 above; kept because the reasoning still reads.**
+Phases 0 to 11 are closed, and everything still
 outstanding — whatever phase it came out of — is here, so that "what is left"
 has a single answer rather than needing eleven sections read for struck-through
 rows. Ordered by what would change the product most.

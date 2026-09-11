@@ -7,7 +7,7 @@
  *   node tools/core.test.mjs
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -37,7 +37,7 @@ import { ICONS, iconFor } from "../core/icons.js";
 import { AV, AV_IDS } from "../core/avatars.js";
 import { POSES, guideSvg, LINES, MAX_WORDS, guideLine, poseFor } from "../core/guide.js";
 
-import { loadPayload } from "./payload.mjs";
+import { loadPayload, PARTS } from "./payload.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DATA = loadPayload(ROOT);
@@ -1371,6 +1371,58 @@ group("drill pool");
 /* The owner, 2026-09-11: *"fill in the blank allows the user to generate it
    completely rather than guess"*. Every drill question used to be four options,
    which is §30j's point about recognition made against the app itself. */
+/* Cyrillic that has been through a PowerShell round trip.
+ *
+ * §23 has warned about this since the first time it happened, and it happened
+ * twice again on 2026-09-11 — once silently mojibaking a test file, once making
+ * a measurement report "0 verbs with a partner" and nearly sending the work down
+ * a wrong path. Knowing the rule is plainly not the same as being unable to
+ * break it, so here is the check instead of another paragraph.
+ *
+ * UTF-8 Cyrillic read as cp1252 comes out as U+00D0 or U+00D1 followed by more
+ * Latin-1 — every Cyrillic letter becomes two characters, the first of them one
+ * of those two. U+FFFD is the other direction, a decode that gave up. Neither
+ * belongs in a source file.
+ *
+ * The example is written as code points rather than spelled out, because this
+ * check reads this file too: the first run failed on its own comment, which is
+ * at least a sign it works. Skipping this file would have been the wrong fix —
+ * it is as able to be corrupted as any other. */
+group("text that survived the shell");
+{
+  const roots = ["core", "tools", "native/src", "native/__tests__", "data/curated/scripts"];
+  const bad = [];
+  const walk = (dir) => {
+    for (const f of readdirSync(join(ROOT, dir), { withFileTypes: true })) {
+      const rel = `${dir}/${f.name}`;
+      if (f.isDirectory()) { if (f.name !== "node_modules") walk(rel); continue; }
+      if (!/\.(js|mjs|json|py)$/.test(f.name)) continue;
+      const s = readFileSync(join(ROOT, rel), "utf8");
+      // Built from escapes, so the file that looks for mis-decoded Cyrillic
+      // does not contain any. The first run failed on its own regex.
+      const m = s.match(new RegExp("[\\u00D0\\u00D1][\\u0080-\\u00BF]|\\uFFFD"));
+      if (m) bad.push(`${rel}: ${JSON.stringify(s.slice(Math.max(0, s.indexOf(m[0]) - 20), s.indexOf(m[0]) + 20))}`);
+    }
+  };
+  roots.forEach(walk);
+  ok(bad.length === 0, "no source file carries mis-decoded Cyrillic", bad.slice(0, 3).join(" | "));
+}
+
+/* The parts list in tools/payload.mjs is a second copy of NATIVE_PARTS in
+   build_site.py, and a part missing from it does not fail — every tool simply
+   reads the payload without it, and any check written against that part passes
+   on nothing. `senses` was missed exactly that way. */
+group("the payload the tools read");
+{
+  const src = readFileSync(join(ROOT, "tools/build_site.py"), "utf8");
+  const m = src.match(/NATIVE_PARTS\s*=\s*\[([^\]]*)\]/);
+  const named = m ? m[1].match(/"([^"]+)"/g).map((s) => s.replace(/"/g, "")) : [];
+  ok(named.length > 0, "build_site names the parts it writes", named.join(", "));
+  ok(named.every((p) => PARTS.includes(p)),
+     "and the tools' loader knows every one of them",
+     named.filter((p) => !PARTS.includes(p)).join(", ") || "none missing");
+}
+
 group("drills the learner writes");
 {
   for (const type of ["cases", "agreement", "conjugation", "aspect"]) {

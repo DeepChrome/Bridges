@@ -1959,6 +1959,46 @@ worked because the shell waits for `ready` before drawing the gate. **State that
 is correct only because of what a caller does elsewhere is the bug, not the
 symptom** — it is derived now.
 
+## 30q. Senses, from a source that has them (2026-09-11)
+
+The owner, with a Merriam-Webster entry beside the app: *"every single word
+should have a detailed entry with multiple uses of the word"*.
+
+**The app was not hiding them.** Measured across the 3,996 studied lemmas with a
+gloss: **3,543 — 89 % — had exactly one sense group.** OpenRussian gives a *list
+of translations*, not a dictionary entry. «идти» is `"go, walk"`. `senseGroups`
+has always split on the semicolons and numbered what it found; for nine words in
+ten there was one thing to number. A translation list cannot be split into senses
+after the fact, and inventing the split is exactly what §30a forbids — the
+learner cannot tell a fabricated sense from a real one.
+
+So the senses come from **English Wiktionary**, through kaikki.org's wiktextract
+JSONL (890 MB, `data/raw/wiktionary/`, gitignored and re-fetchable).
+`tools/ingest_wiktionary.py` → `data/senses.db`: 442,594 entries read, 57,720
+kept, 17,177 of them with more than one sense. What it drops is most of the file:
+**form-of rows** ("genitive plural of…") are not senses — the app knows the
+paradigms — and are refused both by wording and by wiktextract's own `form_of`
+field. Labels are kept only where they change what a sense *means* to a reader
+(figurative, colloquial, archaic, transitive); gender and aspect the app states
+elsewhere. Examples are kept only as a Russian/English **pair**.
+
+`load_senses` in `build_site.py` joins on the folded headword **and the part of
+speech** — «мочь» the verb must not inherit the noun's senses, the same trap
+§30i names for the index — and ships `senses.json` (0.98 MB), lazily required
+like the dictionary and the video library. Measured: **3,968 of 4,017 studied
+words covered (98 %), 2,334 with more than one sense (58 %)**, against 11 %
+before.
+
+`SenseList` in `ui.js` draws them as a dictionary does: numbered when there is
+more than one and never when there is not, labels in italics inside the line
+rather than as chips, the example indented under its own sense. The card shows
+four and the entry shows all of them. `Senses` (the gloss splitter) stays for the
+2 % with no entry and for deck cards, where a translation is all there is.
+
+**The licence is CC BY-SA 3.0** and the credit is built from `senses.db`'s own
+`meta` rows, like OpenRussian's and Tatoeba's, so it cannot drift from what
+shipped (rule 20.10).
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

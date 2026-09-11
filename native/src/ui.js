@@ -514,6 +514,62 @@ export function senseGroups(e) {
    them down a vocabulary card turned a preposition into a wall of text. The
    entry is where the rest live, and the count says plainly that there are more
    rather than quietly dropping them. */
+/* A dictionary entry's senses: numbered, labelled, with an example under the
+ * ones that have one (§30q).
+ *
+ * `senses` is `[{ g, t?, x? }]` — gloss, labels, examples — from Wiktionary, and
+ * is what the app shows whenever it has it. `Senses` below stays for the words
+ * it does not cover (2% of the curriculum) and for a deck card, where all there
+ * is is a translation.
+ *
+ * Left-aligned always. A numbered list centred on the screen is not a list, and
+ * that is how the glosses used to read on a card.
+ */
+export function SenseList({ senses, size = 15, style, max, testID }) {
+  const t = useTheme();
+  if (!senses || !senses.length) return null;
+  const shown = max && senses.length > max ? senses.slice(0, max) : senses;
+  const rest = senses.length - shown.length;
+  const many = senses.length > 1;
+  return (
+    <View testID={testID || "sense-list"} style={[{ alignSelf: "stretch", gap: 10 }, style]}>
+      {shown.map((s, k) => (
+        <View key={k} style={{ flexDirection: "row", gap: 8 }}>
+          {many ? (
+            <Text style={{ color: t.ink3, fontSize: size, fontWeight: "700",
+                           minWidth: 16, lineHeight: size + 6 }}>
+              {k + 1}
+            </Text>
+          ) : null}
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink2, fontSize: size, lineHeight: size + 6 }}>
+              {/* The labels read as part of the sentence, in italics, the way a
+                  dictionary sets them — not as chips, which would make every
+                  entry a row of badges (§25). */}
+              {s.t && s.t.length ? (
+                <Text style={{ color: t.ink3, fontStyle: "italic" }}>{s.t.join(", ") + " "}</Text>
+              ) : null}
+              {s.g}
+            </Text>
+            {(s.x || []).map((x, n) => (
+              <View key={n} style={{ marginTop: 5, paddingLeft: 10, borderLeftWidth: 2,
+                                     borderLeftColor: t.lineSoft }}>
+                <Text style={{ color: t.ink, fontSize: size - 1 }}>{x.ru}</Text>
+                <Text style={{ color: t.ink3, fontSize: size - 2 }}>{x.en}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      ))}
+      {rest ? (
+        <Text testID="senses-more" style={{ color: t.ink3, fontSize: size - 2 }}>
+          {`+${rest} more`}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 export function Senses({ e, size = 15, align = "center", style, max }) {
   const t = useTheme();
   const groups = senseGroups(e);

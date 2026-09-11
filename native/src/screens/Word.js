@@ -9,8 +9,8 @@
 import React, { useState } from "react";
 import { View, ScrollView, Image, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Pill, Speaker, Muted, Senses, List, Row, SectionLabel, Text } from "../ui";
-import { L, UN, resolveWord, heardIn } from "../data";
+import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text } from "../ui";
+import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord } from "../data";
 import { Linked } from "../words";
 import { IMAGES, CREDITS } from "../images";
 import { clock, short } from "./Misc";
@@ -81,6 +81,9 @@ export default function Word({ route, navigation }) {
   const unit = w.u ? UN.find((u) => u.id === w.u) : null;
   const examples = w.x || [];
   const heard = heardIn(w.b);
+  /* Senses are shipped for the studied words by index, so a dictionary-only
+     entry (the deep tier) has none and shows its gloss, as it always did. */
+  const senses = sensesOf(p.i !== undefined ? p.i : idxOfWord(w.b));
 
   const photo = IMAGES[w.b];
   const credit = CREDITS[w.b];
@@ -98,7 +101,11 @@ export default function Word({ route, navigation }) {
           </Text>
           <Speaker text={w.b} />
         </View>
-        <Senses e={w.e} size={16} align="left" style={{ marginTop: 8 }} />
+        {/* The entry gets every sense there is, with its examples: this is the
+            screen a learner opened *to read* (§30q). The card shows four. */}
+        {senses
+          ? <SenseList senses={senses} size={16} style={{ marginTop: 10 }} />
+          : <Senses e={w.e} size={16} align="left" style={{ marginTop: 8 }} />}
         {/* Words a learner reads, not codes: "feminine", not "f"; "№ 187 by
             frequency", not "#187". */}
         <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>

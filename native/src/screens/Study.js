@@ -8,8 +8,8 @@ import React, { useEffect, useState } from "react";
 import { View, Pressable, Alert } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, Tick, SectionLabel, Sheet, Text, TextInput } from "../ui";
-import { L, UN, STAGES, unitUnlocked, idxOfWord } from "../data";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Text, TextInput } from "../ui";
+import { L, UN, STAGES, unitUnlocked, idxOfWord, sensesOf } from "../data";
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";
 import { fsrsPreview, isTrouble, applyGrade } from "@core/fsrs";
@@ -298,6 +298,10 @@ export default function Study({ navigation }) {
 
   const w = queue[at] !== undefined ? queue[at] : null;
   const iv = w ? fsrsPreview(st.seen[w.b], today()) : {};
+  // A deck card has no lemma behind it and so no entry: `idxOfWord` is -1 and
+  // `sensesOf` says nothing, which is the honest answer for a card the learner
+  // wrote themselves.
+  const senses = w ? sensesOf(idxOfWord(w.b)) : null;
 
   /* One trouble rule for the cards and the runners (core/fsrs.js applyGrade):
      a card used to clear only on Good or better here and on any recall there,
@@ -397,12 +401,15 @@ export default function Study({ navigation }) {
             )}
             {shown ? (
               <>
-                {/* Every meaning, numbered and laid out as the entry lays it —
-                    the owner, 2026-09-11: *"make sure it has a comprehensive
-                    list sort of like you'd find in the dictionary"*. It was the
-                    same list centred at a smaller size, which read as a caption
-                    rather than as a dictionary's senses. */}
-                <Senses e={w.e} size={16} align="left" style={{ alignSelf: "stretch" }} />
+                {/* Every meaning the word has, numbered and laid out as a
+                    dictionary lays them (§30q) — labels and all. Where there are
+                    no senses for a word (2% of the curriculum, and every deck
+                    card) the translation stands on its own, which is all there
+                    is to show. Four at most here: the card is a card, and the
+                    full entry is one press away below. */}
+                {senses
+                  ? <SenseList senses={senses} size={16} max={4} style={{ marginTop: 10 }} />
+                  : <Senses e={w.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
                 {(w.x || []).slice(0, 3).map((ex, k) => (
                   // The word in use, three ways: the entry reads like a dictionary,
                   // not a gloss (the owner, 2026-09-07).

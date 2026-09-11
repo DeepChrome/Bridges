@@ -18,6 +18,9 @@ export const videos = () => require("../assets/videos.json");
 /* Listening passages (tools/build_listening.py): spans of real video with the
    curriculum words they say. Required when the listening screen opens. */
 export const passages = () => require("../assets/listening.json");
+/* Numbered senses for the studied words (tools/ingest_wiktionary.py, §30q).
+   Required when a word is opened, which is never the first screen. */
+const sensesBlob = () => require("../assets/senses.json");
 import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize } from "@core/questions";
@@ -71,6 +74,26 @@ export function heardIn(bare) {
     }
   }
   return heardIndex.get(bare) || [];
+}
+
+/* What a word means, as a dictionary would lay it out: numbered senses, each
+ * with the labels that change how it is read (figurative, colloquial, archaic)
+ * and, where Wiktionary has one, an attested example with its translation.
+ *
+ * The owner, 2026-09-11: *"every single word should have a detailed entry with
+ * multiple uses of the word"*. The app was not hiding them — OpenRussian gives a
+ * list of translations rather than senses, and 89% of the studied words had
+ * exactly one. 58% have more than one now (§30q).
+ *
+ * By lemma index, since that is what a card and an entry already hold. Read on
+ * first use and kept: the file is a megabyte and the parse is once per session.
+ */
+let senseIndex = null;
+export function sensesOf(i) {
+  if (i === undefined || i === null || i < 0) return null;
+  if (!senseIndex) senseIndex = sensesBlob() || {};
+  const s = senseIndex[String(i)];
+  return s && s.length ? s : null;
 }
 
 /* Recordings are served from the deployed site rather than bundled: 209 MB will not

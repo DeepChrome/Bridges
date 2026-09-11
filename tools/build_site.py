@@ -266,7 +266,7 @@ COVERAGE_FREE_RANK = 500
 
 # The parts of the payload the native app loads on first use rather than at boot,
 # each written to its own file beside data.json.
-NATIVE_PARTS = ["deep", "sent", "videos", "listening"]
+NATIVE_PARTS = ["deep", "sent", "videos", "listening", "senses"]
 
 
 def measure_sentences(sentences, sent_tokens, index, key_units, lemmas, unit_pos,
@@ -608,6 +608,16 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     if ext_sentences and stats.get("ext_source"):
         credits.append({"n": f"{stats['ext_source']} (tatoeba.org)",
                         "l": stats.get("ext_licence", "")})
+    # Wiktionary's senses (§30q), CC BY-SA 3.0. Read from senses.db's own meta
+    # for the same reason as the other two: a credit written in the UI drifts
+    # from what shipped, and this one cannot.
+    spath = ROOT / "data" / "senses.db"
+    if spath.exists():
+        sdb = sqlite3.connect(str(spath))
+        smeta = dict(sdb.execute("select k, v from meta"))
+        sdb.close()
+        if smeta.get("source"):
+            credits.append({"n": smeta["source"], "l": smeta.get("licence", "")})
     stats["credits"] = credits
 
     vocab_by_key = {}
@@ -883,11 +893,72 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
 
     scripts = load_scripts(stats)
 
+    senses = load_senses(lemmas, stats)
+
     return {"stats": stats, "lemmas": lemmas, "index": index,
             "units": units, "path": path, "audio": {"files": audio},
             "deep": deep, "shapes": shapes, "slots": slot_names,
             "sent": sent_pool, "tsample": tsample, "speech": speech,
-            "videos": video_list, "listening": listening, "scripts": scripts}
+            "videos": video_list, "listening": listening, "scripts": scripts,
+            "senses": senses}
+
+
+# Our part-of-speech names against Wiktionary's. Only these three are worth
+# matching on: the rest of the curriculum is closed-class words, where the entry
+# is the same whichever label either side used.
+POS_TO_WIKT = {"noun": "noun", "verb": "verb", "adjective": "adj", "adverb": "adv"}
+
+
+def load_senses(lemmas, stats):
+    """Numbered senses for the studied words (tools/ingest_wiktionary.py).
+
+    The owner, 2026-09-11, with a Merriam-Webster entry beside the app: *"every
+    single word should have a detailed entry with multiple uses of the word"*.
+    OpenRussian gives a list of translations, not senses — 89% of the studied
+    lemmas had exactly one sense group — so the senses come from Wiktionary,
+    which has them, under CC BY-SA 3.0.
+
+    Matched on the folded headword, preferring the entry filed under the same
+    part of speech: «мочь» the verb must not inherit the noun's senses, which is
+    the same trap §30i names for the dictionary index. Where our part of speech
+    has no entry, the word's only entry is used; where there are several and
+    none matches, the longest is, because a word the curriculum teaches as a
+    noun and Wiktionary files twice is usually the noun.
+
+    Shipped as its own lazily-required file: the entry needs them when a word is
+    opened, and boot does not (§30i P9.24).
+    """
+    path = ROOT / "data" / "senses.db"
+    if not path.exists():
+        stats["senses"] = 0
+        return {}
+    db = sqlite3.connect(str(path))
+    rows = {}
+    for key, pos, js in db.execute("SELECT key, pos, json FROM senses"):
+        rows.setdefault(key, {})[pos] = js
+    credit = dict(db.execute("SELECT k, v FROM meta").fetchall())
+    db.close()
+
+    out, found, multi = {}, 0, 0
+    for i, l in enumerate(lemmas):
+        by_pos = rows.get(fold(l.get("b") or ""))
+        if not by_pos:
+            continue
+        want = POS_TO_WIKT.get(l.get("p"))
+        js = by_pos.get(want)
+        if js is None:
+            js = max(by_pos.values(), key=len) if len(by_pos) > 1 else next(iter(by_pos.values()))
+        senses = json.loads(js)
+        if not senses:
+            continue
+        out[str(i)] = senses
+        found += 1
+        if len(senses) > 1:
+            multi += 1
+    stats["senses"] = found
+    stats["senses_multi"] = multi
+    stats["senses_credit"] = credit
+    return out
 
 
 def load_scripts(stats):
@@ -1140,6 +1211,14 @@ def main():
     # says they are at level and complete; this line only says how many shipped.
     print(f"  passages     : {st.get('written', 0)} lessons written, "
           f"{st.get('written_lines', 0)} sentences")
+    # Numbered senses, from Wiktionary (tools/ingest_wiktionary.py). The share
+    # with more than one is the number that matters: OpenRussian's glosses gave
+    # 11% of the curriculum a second sense and this is what replaced that.
+    if st.get("senses"):
+        cr = st.get("senses_credit") or {}
+        print(f"  senses       : {st['senses']:,} words, {st.get('senses_multi', 0):,} "
+              f"with more than one ({st['senses_multi']*100//max(1, st['senses'])}%)"
+              f"; {cr.get('source', '?')}, {cr.get('licence', '?')}")
     print(f"  scripts      : {', '.join(js_files)}")
     print(f"  page         : {(args.outdir / 'index.html').stat().st_size/1_048_576:.2f} MB")
 

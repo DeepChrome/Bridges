@@ -1,19 +1,25 @@
-/* The guard on the written listening scripts (§30l).
+/* The guard on the written listening scenarios (§30k).
  *
- * The scripts are authored rather than harvested, which means nothing about them
- * is true by construction. This is what can still be checked by machine, and it
- * is checked on every build:
+ * The scenarios are authored rather than harvested, which means nothing about
+ * them is true by construction. This is what can still be checked by machine,
+ * and it is checked on every build:
  *
  *   - every Cyrillic token resolves to a curriculum lemma, so an invented word
  *     or a typo cannot ship;
  *   - every lemma it resolves to is one the learner has met by that lesson, or
  *     is below FREE_RANK — the level guarantee, the whole point of the file;
- *   - the passage actually uses the words the lesson teaches;
- *   - sentences stay inside the length the chapter has earned;
- *   - no two lessons share a sentence, and every lesson on the path has one.
+ *   - the conversation actually uses the words the lesson teaches;
+ *   - lines stay inside the length the chapter has earned;
+ *   - two or three speakers, each of whom says something and is named out loud,
+ *     and none of whom says nearly everything;
+ *   - the whole thing runs for something like the half minute it promises;
+ *   - five questions, four distinct English options each, the answer among them;
+ *   - no two lessons share a line of three words or more, and every lesson on
+ *     the path has a scenario.
  *
- * What it cannot check is whether the Russian is idiomatic. That is read by a
- * person, and the owner accepted the trade when he asked for these (§30a).
+ * What it cannot check is whether the Russian is idiomatic, or whether a
+ * question is really answerable from the audio. Those are read by a person, and
+ * the owner accepted the trade when he asked for these (§30a).
  *
  *   node tools/check_scripts.mjs                      # data/curated/scripts/
  *   node tools/check_scripts.mjs --file <path.json>   # one chapter, while writing
@@ -76,7 +82,6 @@ export const NAME_KEYS = new Set(
    about all thirty words of Russian can say; the allowance grows with the
    palette so chapter 10 is not still writing baby talk. */
 export const maxWords = (chapter) => 4 + chapter;
-export const MIN_ROWS = 4, MAX_ROWS = 5;
 
 export function tokensOf(ru) {
   return (ru.match(TOKEN) || []).map((t) => fold(t));
@@ -112,12 +117,10 @@ export function checkOne(brief, entry) {
   if (/[а-яё]/i.test(entry.title || "")) errors.push("the title is the English topic, not Russian");
 
   /* The scenario shape (§30k): a cast, their lines, and five questions about
-     the situation. `rows` is the shape that came before it — four unrelated
-     sentences with a meaning question each — and is checked the same way from
-     the sentence loop down. */
-  const scenario = !!entry.lines;
-  const rows = entry.lines || entry.rows || [];
-  if (scenario) {
+     the situation. */
+  const rows = entry.lines || [];
+  if (!entry.lines) errors.push("no lines — this is not a scenario");
+  {
     const cast = entry.cast || [];
     if (cast.length < CAST_MIN || cast.length > CAST_MAX) {
       errors.push(`${cast.length} speakers, wanted ${CAST_MIN}-${CAST_MAX}`);
@@ -175,12 +178,10 @@ export function checkOne(brief, entry) {
         errors.push(`${where}: answer ${q.answer} is not one of the options`);
       }
     });
-  } else if (rows.length < MIN_ROWS || rows.length > MAX_ROWS) {
-    errors.push(`${rows.length} sentences, wanted ${MIN_ROWS}-${MAX_ROWS}`);
   }
 
   rows.forEach((row, k) => {
-    const where = scenario ? `line ${k + 1}` : `sentence ${k + 1}`;
+    const where = `line ${k + 1}`;
     if (!row || !row.ru || !row.en) { errors.push(`${where}: missing ru or en`); return; }
     if (!/[.?!…]$/.test(row.ru.trim())) errors.push(`${where}: no end punctuation — "${row.ru}"`);
     if (/[̀́]/.test(row.ru)) errors.push(`${where}: stress marks belong on headwords, not in a spoken line`);
@@ -245,15 +246,14 @@ export function checkAll(scripts, { strict = false } = {}) {
   const all = briefs();
   const byKey = new Map(all.map((b) => [b.key, b]));
   const report = { lessons: 0, missing: [], errors: [], warnings: [], covered: 0,
-                   of: all.length, scenarios: 0, legacy: [], seconds: [] };
+                   of: all.length, seconds: [] };
   const seen = new Map();
 
   for (const [key, entry] of Object.entries(scripts)) {
     const brief = byKey.get(key);
     if (!brief) { report.errors.push(`${key}: no such lesson on the path`); continue; }
     report.lessons++;
-    if (entry.lines) { report.scenarios++; report.seconds.push(runSeconds(entry.lines)); }
-    else report.legacy.push(key);
+    if (entry.lines) report.seconds.push(runSeconds(entry.lines));
     const r = checkOne(brief, entry);
     r.errors.forEach((e) => report.errors.push(`${key}: ${e}`));
     r.warnings.forEach((w) => report.warnings.push(`${key}: ${w}`));
@@ -262,7 +262,7 @@ export function checkAll(scripts, { strict = false } = {}) {
        each other, and a rule that forbids them across 168 scenarios would be a
        rule against writing dialogue. Anything of three words or more still has
        to be written once. */
-    for (const row of entry.lines || entry.rows || []) {
+    for (const row of entry.lines || []) {
       const f = fold(row.ru || "");
       if (tokensOf(row.ru || "").length < 3) continue;
       if (seen.has(f)) report.errors.push(`${key}: "${row.ru}" is already used by ${seen.get(f)}`);
@@ -273,12 +273,6 @@ export function checkAll(scripts, { strict = false } = {}) {
   for (const b of all) if (!scripts[b.key]) report.missing.push(b.key);
   if (strict && report.missing.length) {
     report.errors.push(`${report.missing.length} lessons have no script: ${report.missing.slice(0, 8).join(", ")}…`);
-  }
-  // The `rows` shape is what the scenarios replaced. Strict is where the
-  // migration is finished rather than merely intended.
-  if (strict && report.legacy.length) {
-    report.errors.push(`${report.legacy.length} lessons are still four loose sentences`
-                       + `: ${report.legacy.slice(0, 8).join(", ")}…`);
   }
   return report;
 }
@@ -298,7 +292,7 @@ if (process.argv[1] && process.argv[1].endsWith("check_scripts.mjs")) {
   const secs = report.seconds.slice().sort((a, b) => a - b);
   console.log(`\n${report.lessons} lessons checked, ${report.of - report.lessons} without a script`
               + `, ${report.errors.length} errors, ${report.warnings.length} warnings`);
-  console.log(`${report.scenarios} scenarios, ${report.legacy.length} still loose sentences`
+  console.log(`${report.seconds.length} scenarios`
               + (secs.length ? `; ${secs[0]}-${secs[secs.length - 1]}s, median ${secs[secs.length >> 1]}s` : ""));
   process.exit(report.errors.length ? 1 : 0);
 }

@@ -1,135 +1,466 @@
 {
  "chapter": 10,
- "name": "Law and Faith",
+ "name": "Thought & Society",
  "lessons": {
   "core10:0": {
-   "title": "Near the old house",
-   "rows": [
-    { "ru": "Однажды я работал рядом с этим домом.", "en": "One day I was working near this house." },
-    { "ru": "Эта часть города очень большая.", "en": "This part of the city is very big." },
-    { "ru": "Там постоянно много машин.", "en": "There are always a lot of cars there." },
-    { "ru": "Примерно час я стоял у двери.", "en": "I stood by the door for about an hour." },
-    { "ru": "Ждать до конца я не мог.", "en": "I couldn't wait until the end." }
+   "title": "Always here, always alone",
+   "cast": [
+    { "id": "a", "ru": "Аня", "en": "Anya" },
+    { "id": "b", "ru": "Борис", "en": "Boris" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Аня, ты тут постоянно?", "en": "Anya, are you here all the time?" },
+    { "s": "a", "ru": "Постоянно. Уже примерно год.", "en": "All the time. For about a year now." },
+    { "s": "b", "ru": "Год! А это часть работы?", "en": "A year! And is that part of the job?" },
+    { "s": "a", "ru": "Часть. И самая большая.", "en": "Part of it. And the biggest part." },
+    { "s": "b", "ru": "Большая! А конец?", "en": "The biggest! And the end of it?" },
+    { "s": "a", "ru": "Конец будет. Однажды.", "en": "There will be an end. One day." },
+    { "s": "b", "ru": "Однажды... А рядом кто?", "en": "One day... And who is there with you?" },
+    { "s": "a", "ru": "Рядом никто. Только я.", "en": "Nobody. Only me." },
+    { "s": "b", "ru": "Только ты! Нельзя так.", "en": "Only you! You cannot go on like that." },
+    { "s": "a", "ru": "Нельзя? Я так работаю.", "en": "Cannot? That is how I work." },
+    { "s": "b", "ru": "Постоянно одна... Это нельзя.", "en": "Alone all the time... That will not do." },
+    { "s": "a", "ru": "Можно, Борис. Однажды будет конец.", "en": "It will do, Boris. One day it will end." }
+   ],
+   "questions": [
+    { "ask": "How long has Anya been at it?",
+      "options": ["About a year", "A month", "Since yesterday", "She does not say"], "answer": 0 },
+    { "ask": "How much of the job is it?",
+      "options": ["The biggest part", "A small part", "All of it", "None of it"], "answer": 0 },
+    { "ask": "Who is there with her?",
+      "options": ["Nobody", "Boris", "A colleague", "Several people"], "answer": 0 },
+    { "ask": "What does Boris think of that?",
+      "options": ["She cannot go on like that", "It is admirable", "It is normal", "He says nothing"],
+      "answer": 0 },
+    { "ask": "How does she answer him?",
+      "options": ["It will end one day", "She agrees to stop", "She asks for help", "She is angry"],
+      "answer": 0 }
    ]
   },
+
   "core10:1": {
-   "title": "Starting the day early",
-   "rows": [
-    { "ru": "Я начинаю работать очень рано.", "en": "I start work very early." },
-    { "ru": "Некоторые приходят лишь через час.", "en": "Some people only turn up an hour later." },
-    { "ru": "Так у меня есть возможность думать о работе.", "en": "That way I get a chance to think about the work." },
-    { "ru": "Я считаю, что это очень хорошо.", "en": "I think that is a very good thing." },
-    { "ru": "Но не каждый может работать так рано.", "en": "But not everyone can work that early." }
+   "title": "The ones who come early",
+   "cast": [
+    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "b", "ru": "Миша", "en": "Misha" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Катя, ты рано начинаешь?", "en": "Katya, do you start early?" },
+    { "s": "a", "ru": "Рано. Каждый день.", "en": "Early. Every day." },
+    { "s": "b", "ru": "Каждый день! А возможность?", "en": "Every day! And the opportunity?" },
+    { "s": "a", "ru": "Возможность есть. Лишь одна.", "en": "There is an opportunity. Only one." },
+    { "s": "b", "ru": "Лишь одна? Какая?", "en": "Only one? What is it?" },
+    { "s": "a", "ru": "Некоторые приходят рано. Я тоже.", "en": "Some people come early. So do I." },
+    { "s": "b", "ru": "Приходят... И ты считаешь это работой?", "en": "They come... And you count that as work?" },
+    { "s": "a", "ru": "Считаю. Это работа.", "en": "I do. It is work." },
+    { "s": "b", "ru": "Работа! А некоторые считают не так.", "en": "Work! And some think otherwise." },
+    { "s": "a", "ru": "Не так. Но они не приходят.", "en": "Otherwise. But they do not come." },
+    { "s": "b", "ru": "Не приходят! Тогда у тебя возможность.", "en": "They do not come! Then the opportunity is yours." },
+    { "s": "a", "ru": "Возможность, Миша. Я начинаю рано.", "en": "The opportunity, Misha. I start early." }
+   ],
+   "questions": [
+    { "ask": "When does Katya start?",
+      "options": ["Early, every day", "Late", "Only when asked", "She does not say"], "answer": 0 },
+    { "ask": "What is the one opportunity?",
+      "options": ["Being one of the few who come early", "A promotion", "A new job", "More pay"],
+      "answer": 0 },
+    { "ask": "Does she count it as work?",
+      "options": ["Yes", "No", "Only sometimes", "Misha does"], "answer": 0 },
+    { "ask": "What do the others do?",
+      "options": ["They do not come", "They come later", "They argue", "They work harder"],
+      "answer": 0 },
+    { "ask": "What is Misha's conclusion?",
+      "options": ["The opportunity is hers", "She works too much", "She should stop", "Nothing"],
+      "answer": 0 }
    ]
   },
+
   "core10:2": {
-   "title": "How the company works",
-   "rows": [
-    { "ru": "В нашей компании своя система.", "en": "Our company has its own system." },
-    { "ru": "Приходится выходить из дома очень рано.", "en": "You have to leave the house very early." },
-    { "ru": "Работать таким образом могут не все.", "en": "Not everyone can work that way." },
-    { "ru": "Но именно поэтому мы всё делаем быстро.", "en": "But that is exactly why we get everything done quickly." },
-    { "ru": "Также у нас есть время для семьи.", "en": "We also have time for our families." }
+   "title": "That is the system",
+   "cast": [
+    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "b", "ru": "Олег", "en": "Oleg" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Лена, почему ты выходишь?", "en": "Lena, why are you going out?" },
+    { "s": "a", "ru": "Выхожу? Приходится.", "en": "Going out? I have to." },
+    { "s": "b", "ru": "Приходится! Почему именно сейчас?", "en": "You have to! Why just now?" },
+    { "s": "a", "ru": "Именно сейчас. Поэтому и выхожу.", "en": "Precisely now. That is why I am going." },
+    { "s": "b", "ru": "Поэтому... А система?", "en": "That is why... And the system?" },
+    { "s": "a", "ru": "Система тут такая. Всегда была.", "en": "That is the system here. It always was." },
+    { "s": "b", "ru": "Была! А образ работы?", "en": "It was! And the way of working?" },
+    { "s": "a", "ru": "Образ работы другой. Также и дело.", "en": "The way of working is different. So is the business." },
+    { "s": "b", "ru": "И дело! Так что же?", "en": "The business too! So what then?" },
+    { "s": "a", "ru": "Так что приходится выходить.", "en": "So I have to go out." },
+    { "s": "b", "ru": "Выходить... Именно поэтому?", "en": "Go out... For exactly that reason?" },
+    { "s": "a", "ru": "Именно, Олег. Такая система.", "en": "Exactly, Oleg. That is the system." }
+   ],
+   "questions": [
+    { "ask": "Why is Lena going out?",
+      "options": ["She has to", "She wants to", "Oleg asked her", "To avoid him"], "answer": 0 },
+    { "ask": "What does she blame?",
+      "options": ["The system", "Oleg", "The weather", "Herself"], "answer": 0 },
+    { "ask": "Has the system changed?",
+      "options": ["No, it always was like that", "Yes, recently", "It is about to", "She does not know"],
+      "answer": 0 },
+    { "ask": "What is different?",
+      "options": ["The way of working", "The system", "The people", "Nothing"], "answer": 0 },
+    { "ask": "How does Oleg take it?",
+      "options": ["He keeps pressing for the reason", "He accepts it at once", "He goes with her", "He is angry"],
+      "answer": 0 }
    ]
   },
+
   "core10:3": {
-   "title": "A colleague who says nothing",
-   "rows": [
-    { "ru": "Он вообще не отвечает на мои вопросы.", "en": "He doesn't answer my questions at all." },
-    { "ru": "Хотя я знаю, что он всё слышит.", "en": "Even though I know he hears everything." },
-    { "ru": "У него такое отношение к работе.", "en": "That is his attitude to work." },
-    { "ru": "Ничто не может ему помочь.", "en": "Nothing can help him." },
-    { "ru": "Однако он, конечно, хороший человек.", "en": "He is a good man, though, of course." }
+   "title": "Answering all the same",
+   "cast": [
+    { "id": "a", "ru": "Нина", "en": "Nina" },
+    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Нина, ты отвечаешь?", "en": "Nina, are you answering?" },
+    { "s": "a", "ru": "Отвечаю. Конечно.", "en": "I am. Of course." },
+    { "s": "b", "ru": "Конечно! Хотя вопрос большой.", "en": "Of course! Though it is a big question." },
+    { "s": "a", "ru": "Большой. Однако я отвечаю.", "en": "Big. However, I am answering it." },
+    { "s": "b", "ru": "Есть! А отношение?", "en": "There is! And your attitude?" },
+    { "s": "a", "ru": "Отношение у меня хорошее.", "en": "My attitude is a good one." },
+    { "s": "b", "ru": "Хорошее! А вообще?", "en": "Good! And in general?" },
+    { "s": "a", "ru": "Вообще ничто не идёт.", "en": "In general, nothing is moving." },
+    { "s": "b", "ru": "Не идёт! Хотя ты работаешь.", "en": "Not moving! Though you are working." },
+    { "s": "a", "ru": "Работаю. Однако результата нет.", "en": "I am working. However, there is no result." },
+    { "s": "b", "ru": "Нет результата... И ты отвечаешь?", "en": "No result... And you still answer?" },
+    { "s": "a", "ru": "Отвечаю, Пётр. Конечно, отвечаю.", "en": "I answer, Pyotr. Of course I answer." }
+   ],
+   "questions": [
+    { "ask": "What is Nina doing?",
+      "options": ["Answering questions", "Asking them", "Refusing to speak", "Leaving"],
+      "answer": 0 },
+    { "ask": "How does she describe her attitude?",
+      "options": ["Good", "Poor", "Indifferent", "She does not say"], "answer": 0 },
+    { "ask": "What does she say about progress?",
+      "options": ["Nothing is moving", "It is going well", "It is nearly finished", "It is not her concern"],
+      "answer": 0 },
+    { "ask": "Does her work show a result?",
+      "options": ["No", "Yes", "Only a small one", "She will not say"], "answer": 0 },
+    { "ask": "Does she stop answering?",
+      "options": ["No, she keeps answering", "Yes", "She answers once more", "She asks Pyotr to stop"],
+      "answer": 0 }
    ]
   },
+
   "core10:4": {
-   "title": "Deciding things every day",
-   "rows": [
-    { "ru": "Каждый день приходится решать новые задачи.", "en": "Every day there are new problems to solve." },
-    { "ru": "Иногда это становится большой проблемой.", "en": "Sometimes that becomes a real problem." },
-    { "ru": "Но я решаю почти всё сам.", "en": "But I decide almost everything myself." },
-    { "ru": "Конечно, некоторые вопросы решает мой друг.", "en": "Of course, my friend handles some of the questions." },
-    { "ru": "Так человек постоянно становится лучше.", "en": "That is how a person keeps getting better." }
+   "title": "She is the one deciding",
+   "cast": [
+    { "id": "a", "ru": "Соня", "en": "Sonya" },
+    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Соня, кто решает?", "en": "Sonya, who decides?" },
+    { "s": "a", "ru": "Решаю я. Как всегда.", "en": "I decide. As always." },
+    { "s": "b", "ru": "Всегда! И это становится системой.", "en": "Always! And it is becoming a system." },
+    { "s": "a", "ru": "Становится. Но я решаю.", "en": "It is. But I decide." },
+    { "s": "b", "ru": "Решаешь... А если нельзя?", "en": "You decide... And if you cannot?" },
+    { "s": "a", "ru": "Тогда тоже решаю.", "en": "Then I decide as well." },
+    { "s": "b", "ru": "Тоже! И что становится?", "en": "As well! And what becomes of it?" },
+    { "s": "a", "ru": "Становится лучше. Примерно так.", "en": "It gets better. More or less." },
+    { "s": "b", "ru": "Примерно! Хотя ты одна.", "en": "More or less! Though you are on your own." },
+    { "s": "a", "ru": "Одна. Но я решаю.", "en": "On my own. But I decide." },
+    { "s": "b", "ru": "Решаешь, и всё становится...", "en": "You decide, and everything becomes..." },
+    { "s": "a", "ru": "Всё становится, Виктор. Однажды.", "en": "Everything becomes something, Viktor. One day." }
+   ],
+   "questions": [
+    { "ask": "Who makes the decisions?",
+      "options": ["Sonya", "Viktor", "Nobody", "They take turns"], "answer": 0 },
+    { "ask": "What does Viktor call it?",
+      "options": ["A system", "A mistake", "A habit of his", "Good work"], "answer": 0 },
+    { "ask": "What happens when she is not allowed to?",
+      "options": ["She decides anyway", "She waits", "She asks Viktor", "Nothing happens"],
+      "answer": 0 },
+    { "ask": "Does it get better?",
+      "options": ["More or less", "No", "Much worse", "She cannot tell"], "answer": 0 },
+    { "ask": "What does Viktor point out about her?",
+      "options": ["She is on her own", "She is wrong", "She is too slow", "She is new"],
+      "answer": 0 }
    ]
   },
+
   "law:0": {
-   "title": "An illegal agreement",
-   "rows": [
-    { "ru": "Однажды полиция нашла незаконный договор.", "en": "One day the police found an illegal agreement." },
-    { "ru": "По закону так делать нельзя.", "en": "By law you cannot do that." },
-    { "ru": "Преступник говорил, что ничего не знает.", "en": "The criminal kept saying he knew nothing." },
-    { "ru": "Но для полиции закон есть закон.", "en": "But for the police the law is the law." },
-    { "ru": "В конце концов будет суд.", "en": "In the end there will be a trial." }
+   "title": "An unlawful agreement",
+   "cast": [
+    { "id": "a", "ru": "Аня", "en": "Anya" },
+    { "id": "b", "ru": "Иван", "en": "Ivan" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Аня, это суд?", "en": "Anya, is this a court?" },
+    { "s": "a", "ru": "Суд. Тут закон.", "en": "A court. The law is here." },
+    { "s": "b", "ru": "Закон! А преступник?", "en": "The law! And the offender?" },
+    { "s": "a", "ru": "Преступник тут. Полиция его взяла.", "en": "The offender is here. The police took him." },
+    { "s": "b", "ru": "Полиция! А договор?", "en": "The police! And the agreement?" },
+    { "s": "a", "ru": "Договор был. Но он незаконный.", "en": "There was an agreement. But it is unlawful." },
+    { "s": "b", "ru": "Незаконный договор! И что теперь?", "en": "An unlawful agreement! And now what?" },
+    { "s": "a", "ru": "Теперь суд решает.", "en": "Now the court decides." },
+    { "s": "b", "ru": "Решает... А он убил?", "en": "Decides... And did he kill anyone?" },
+    { "s": "a", "ru": "Нет. Он не убил.", "en": "No. He did not." },
+    { "s": "b", "ru": "Не убил! Тогда что?", "en": "He did not! Then what is it?" },
+    { "s": "a", "ru": "Договор, Иван. Незаконный договор.", "en": "The agreement, Ivan. An unlawful agreement." }
+   ],
+   "questions": [
+    { "ask": "Where are they?",
+      "options": ["At a court", "At a police station", "At a prison", "At an office"], "answer": 0 },
+    { "ask": "Who took the man in?",
+      "options": ["The police", "The court", "Nobody", "Anya does not say"], "answer": 0 },
+    { "ask": "What is the case about?",
+      "options": ["An unlawful agreement", "A killing", "A theft", "A bribe"], "answer": 0 },
+    { "ask": "Did he kill anyone?",
+      "options": ["No", "Yes", "It is not known", "That is the charge"], "answer": 0 },
+    { "ask": "Who decides now?",
+      "options": ["The court", "The police", "Anya", "Nobody"], "answer": 0 }
    ]
   },
+
   "law:1": {
-   "title": "The murder case",
-   "rows": [
-    { "ru": "Это дело об убийстве.", "en": "This is a murder case." },
-    { "ru": "Преступление произошло рядом с нашим городом.", "en": "The crime happened near our city." },
-    { "ru": "Судья говорил об этом преступлении.", "en": "The judge spoke about this crime." },
-    { "ru": "Виновный уже знает своё наказание.", "en": "The guilty man already knows his punishment." },
-    { "ru": "Его ждёт тюрьма.", "en": "Prison is waiting for him." }
+   "title": "The judge decides the punishment",
+   "cast": [
+    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "b", "ru": "Борис", "en": "Boris" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Катя, кто судья?", "en": "Katya, who is the judge?" },
+    { "s": "a", "ru": "Судья? Он тут. Слушает.", "en": "The judge? He is here. Listening." },
+    { "s": "b", "ru": "Слушает! А преступление?", "en": "Listening! And the crime?" },
+    { "s": "a", "ru": "Преступление было. Но не убийство.", "en": "There was a crime. But not a murder." },
+    { "s": "b", "ru": "Не убийство! А виновный?", "en": "Not a murder! And the guilty party?" },
+    { "s": "a", "ru": "Виновный есть. Он в суде.", "en": "There is one. He is in court." },
+    { "s": "b", "ru": "В суде... А наказание?", "en": "In court... And the punishment?" },
+    { "s": "a", "ru": "Наказание будет. Юридический вопрос.", "en": "There will be a punishment. It is a legal question." },
+    { "s": "b", "ru": "Юридический! А тюрьма?", "en": "Legal! And prison?" },
+    { "s": "a", "ru": "Тюрьма? Может быть. Судья решает.", "en": "Prison? Perhaps. The judge decides." },
+    { "s": "b", "ru": "Судья решает... Всегда он?", "en": "The judge decides... Always him?" },
+    { "s": "a", "ru": "Всегда, Борис. Это закон.", "en": "Always, Boris. That is the law." }
+   ],
+   "questions": [
+    { "ask": "What is the judge doing?",
+      "options": ["Listening", "Sentencing", "Away", "Speaking to Katya"], "answer": 0 },
+    { "ask": "Was it a murder?",
+      "options": ["No", "Yes", "Nobody knows", "That is what is being decided"], "answer": 0 },
+    { "ask": "Is there a guilty party?",
+      "options": ["Yes, and he is in court", "No", "He has fled", "There are several"],
+      "answer": 0 },
+    { "ask": "Will there be prison?",
+      "options": ["Perhaps — the judge decides", "Certainly", "Certainly not", "It is already settled"],
+      "answer": 0 },
+    { "ask": "Who always decides?",
+      "options": ["The judge", "The police", "The public", "It varies"], "answer": 0 }
    ]
   },
+
   "law:2": {
-   "title": "The thief in our building",
-   "rows": [
-    { "ru": "В нашем доме жил вор.", "en": "A thief used to live in our building." },
-    { "ru": "Он взял деньги в магазине.", "en": "He took money from the shop." },
-    { "ru": "Полиция быстро нашла свидетеля.", "en": "The police quickly found a witness." },
-    { "ru": "Арест был вчера.", "en": "The arrest was yesterday." },
-    { "ru": "Женщина из магазина будет свидетельствовать в суде.", "en": "The woman from the shop is going to testify in court." }
+   "title": "She saw the arrest",
+   "cast": [
+    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "b", "ru": "Юра", "en": "Yura" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Лена, ты свидетель?", "en": "Lena, are you a witness?" },
+    { "s": "a", "ru": "Свидетель. Я свидетельствую.", "en": "A witness. I am giving evidence." },
+    { "s": "b", "ru": "Свидетельствуешь! А свидетельство?", "en": "Giving evidence! And the statement?" },
+    { "s": "a", "ru": "Свидетельство есть. Оно тут.", "en": "There is a statement. It is here." },
+    { "s": "b", "ru": "Тут! А судебный день?", "en": "Here! And the court day?" },
+    { "s": "a", "ru": "Судебный день сегодня.", "en": "The court day is today." },
+    { "s": "b", "ru": "Сегодня! А вор?", "en": "Today! And the thief?" },
+    { "s": "a", "ru": "Вор? Он не убийца.", "en": "The thief? He is no killer." },
+    { "s": "b", "ru": "Не убийца... А арест?", "en": "No killer... And the arrest?" },
+    { "s": "a", "ru": "Арест был. Вчера.", "en": "There was an arrest. Yesterday." },
+    { "s": "b", "ru": "Вчера! И ты видела?", "en": "Yesterday! And you saw it?" },
+    { "s": "a", "ru": "Видела, Юра. Я свидетель.", "en": "I saw it, Yura. I am a witness." }
+   ],
+   "questions": [
+    { "ask": "What is Lena's part in it?",
+      "options": ["She is a witness", "She is the accused", "She is the judge", "She is a lawyer"],
+      "answer": 0 },
+    { "ask": "When is the court day?",
+      "options": ["Today", "Tomorrow", "It has passed", "Not fixed"], "answer": 0 },
+    { "ask": "What is the man accused of?",
+      "options": ["Theft", "Murder", "Bribery", "Nothing"], "answer": 0 },
+    { "ask": "When was the arrest?",
+      "options": ["Yesterday", "Today", "A week ago", "There has been none"], "answer": 0 },
+    { "ask": "Did she see it herself?",
+      "options": ["Yes", "No", "Only part of it", "She heard about it"], "answer": 0 }
    ]
   },
+
   "law:3": {
-   "title": "The stolen money",
-   "rows": [
-    { "ru": "Этот человек воровал деньги.", "en": "This man was stealing money." },
-    { "ru": "Полиция нашла все доказательства.", "en": "The police found all the proof." },
-    { "ru": "Его показания помогли полиции.", "en": "His testimony helped the police." },
-    { "ru": "Судить его будут в этом году.", "en": "He will be tried this year." },
-    { "ru": "Контракт тоже был преступный.", "en": "The contract was criminal too." }
+   "title": "The proof and the contract",
+   "cast": [
+    { "id": "a", "ru": "Нина", "en": "Nina" },
+    { "id": "b", "ru": "Миша", "en": "Misha" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Нина, есть доказательство?", "en": "Nina, is there proof?" },
+    { "s": "a", "ru": "Доказательство есть. И показание.", "en": "There is proof. And testimony." },
+    { "s": "b", "ru": "Показание! А контракт?", "en": "Testimony! And the contract?" },
+    { "s": "a", "ru": "Контракт был. Преступный.", "en": "There was a contract. A criminal one." },
+    { "s": "b", "ru": "Преступный контракт! А кто воровал?", "en": "A criminal contract! And who was stealing?" },
+    { "s": "a", "ru": "Воровал один. Он тут.", "en": "One man was. He is here." },
+    { "s": "b", "ru": "Тут! А судить будут?", "en": "Here! And will he be tried?" },
+    { "s": "a", "ru": "Судить будут. Завтра.", "en": "He will be tried. Tomorrow." },
+    { "s": "b", "ru": "Завтра... А самоубийство?", "en": "Tomorrow... And the suicide?" },
+    { "s": "a", "ru": "Самоубийства не было.", "en": "There was no suicide." },
+    { "s": "b", "ru": "Не было! Тогда доказательство?", "en": "There was not! Then the proof?" },
+    { "s": "a", "ru": "Доказательство, Миша. Оно главное.", "en": "The proof, Misha. That is the main thing." }
+   ],
+   "questions": [
+    { "ask": "What does the case rest on?",
+      "options": ["Proof and testimony", "A confession", "Nothing", "One witness"], "answer": 0 },
+    { "ask": "What sort of contract was it?",
+      "options": ["A criminal one", "A lawful one", "There was none", "An old one"], "answer": 0 },
+    { "ask": "How many people were stealing?",
+      "options": ["One", "Several", "Nobody", "Nina does not know"], "answer": 0 },
+    { "ask": "When is the trial?",
+      "options": ["Tomorrow", "Today", "Next year", "It is over"], "answer": 0 },
+    { "ask": "Was there a suicide?",
+      "options": ["No", "Yes", "It is being investigated", "Nina will not say"], "answer": 0 }
    ]
   },
+
   "law:4": {
-   "title": "A detective novel",
-   "rows": [
-    { "ru": "Вчера я читал новый детектив.", "en": "Yesterday I was reading a new detective novel." },
-    { "ru": "В книге были вор и уголовное дело.", "en": "There was a thief and a criminal case in the book." },
-    { "ru": "Полиция не могла найти убийцу.", "en": "The police could not find the killer." },
-    { "ru": "Юристу хотели дать взятку.", "en": "Somebody tried to give the lawyer a bribe." },
-    { "ru": "Такие книги я очень люблю.", "en": "I really love books like that." }
+   "title": "The detective found bribes",
+   "cast": [
+    { "id": "a", "ru": "Соня", "en": "Sonya" },
+    { "id": "b", "ru": "Олег", "en": "Oleg" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Соня, кто этот юрист?", "en": "Sonya, who is that lawyer?" },
+    { "s": "a", "ru": "Юрист? Он работает тут.", "en": "The lawyer? He works here." },
+    { "s": "b", "ru": "Тут! А уголовное дело?", "en": "Here! And the criminal case?" },
+    { "s": "a", "ru": "Уголовное дело есть. Большое.", "en": "There is a criminal case. A big one." },
+    { "s": "b", "ru": "Большое! А взятка?", "en": "A big one! And the bribe?" },
+    { "s": "a", "ru": "Взятка была. Так говорят.", "en": "There was a bribe. So they say." },
+    { "s": "b", "ru": "Говорят... А детектив?", "en": "So they say... And the detective?" },
+    { "s": "a", "ru": "Детектив работает. Уже год.", "en": "The detective is working. For a year now." },
+    { "s": "b", "ru": "Год! И что он нашёл?", "en": "A year! And what has he found?" },
+    { "s": "a", "ru": "Нашёл взятку. И не одну.", "en": "He found a bribe. And not just one." },
+    { "s": "b", "ru": "Не одну! Это уголовное дело.", "en": "Not just one! That is a criminal matter." },
+    { "s": "a", "ru": "Уголовное, Олег. Юрист это знает.", "en": "Criminal, Oleg. The lawyer knows it." }
+   ],
+   "questions": [
+    { "ask": "Who is the man they see first?",
+      "options": ["A lawyer", "A detective", "A judge", "The accused"], "answer": 0 },
+    { "ask": "How long has the detective been on it?",
+      "options": ["A year", "A week", "He has just started", "Sonya does not know"], "answer": 0 },
+    { "ask": "What did he find?",
+      "options": ["More than one bribe", "Nothing", "A contract", "A witness"], "answer": 0 },
+    { "ask": "How big is the case?",
+      "options": ["A big one", "Small", "It has been dropped", "Nobody knows yet"], "answer": 0 },
+    { "ask": "Does the lawyer know about it?",
+      "options": ["Yes", "No", "He is the accused", "Sonya will not say"], "answer": 0 }
    ]
   },
+
   "religion:0": {
-   "title": "The temple near our house",
-   "rows": [
-    { "ru": "Рядом с нашим домом есть большой храм.", "en": "There is a big church near our house." },
-    { "ru": "Однажды там была свадьба моего друга.", "en": "My friend's wedding was held there once." },
-    { "ru": "В храме много икон.", "en": "There are many icons in the church." },
-    { "ru": "Некоторые приходят в храм молиться.", "en": "Some people come to the church to pray." },
-    { "ru": "Хотя я не религиозный человек, мне там хорошо.", "en": "Although I am not a religious man, I feel good there." }
+   "title": "The wedding at the temple",
+   "cast": [
+    { "id": "a", "ru": "Аня", "en": "Anya" },
+    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Аня, это храм?", "en": "Anya, is this a temple?" },
+    { "s": "a", "ru": "Храм. Тут икона.", "en": "A temple. There is an icon here." },
+    { "s": "b", "ru": "Икона! А свадьба?", "en": "An icon! And the wedding?" },
+    { "s": "a", "ru": "Свадьба была. Вчера.", "en": "There was a wedding. Yesterday." },
+    { "s": "b", "ru": "Вчера! А религия?", "en": "Yesterday! And religion?" },
+    { "s": "a", "ru": "Религия? Это их дело.", "en": "Religion? That is their own affair." },
+    { "s": "b", "ru": "Их дело... А они молятся?", "en": "Their affair... And do they pray?" },
+    { "s": "a", "ru": "Молятся. Каждый день.", "en": "They pray. Every day." },
+    { "s": "b", "ru": "Каждый день! Они религиозные.", "en": "Every day! They are religious, then." },
+    { "s": "a", "ru": "Религиозные. Но не все.", "en": "Religious. But not all of them." },
+    { "s": "b", "ru": "Не все... А чёрт?", "en": "Not all... And the devil?" },
+    { "s": "a", "ru": "Чёрт? Это другая история, Виктор.", "en": "The devil? That is another story, Viktor." }
+   ],
+   "questions": [
+    { "ask": "Where are they?",
+      "options": ["At a temple", "At a wedding party", "At home", "At a museum"], "answer": 0 },
+    { "ask": "When was the wedding?",
+      "options": ["Yesterday", "Today", "It is about to begin", "There was none"], "answer": 0 },
+    { "ask": "How does Anya treat the question of religion?",
+      "options": ["As their own affair", "As her own", "As nonsense", "She refuses to speak of it"],
+      "answer": 0 },
+    { "ask": "How often do they pray?",
+      "options": ["Every day", "Once a week", "Never", "Only at weddings"], "answer": 0 },
+    { "ask": "Are they all religious?",
+      "options": ["Not all of them", "All of them", "None of them", "She does not know"],
+      "answer": 0 }
    ]
   },
+
   "religion:1": {
-   "title": "Easter at home",
-   "rows": [
-    { "ru": "Завтра пасха, и все идут в храм.", "en": "Tomorrow is Easter, and everyone is going to church." },
-    { "ru": "Это самый главный христианский день.", "en": "It is the most important Christian day." },
-    { "ru": "Мама читает библию каждый день.", "en": "Mum reads the Bible every day." },
-    { "ru": "Без веры она жить не может.", "en": "She could not live without her faith." },
-    { "ru": "На той иконе ангел, а рядом распятие.", "en": "There is an angel on that icon, and a crucifix beside it." }
+   "title": "Faith, and who holds it",
+   "cast": [
+    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Катя, когда пасха?", "en": "Katya, when is Easter?" },
+    { "s": "a", "ru": "Пасха? Она будет.", "en": "Easter? It is coming." },
+    { "s": "b", "ru": "Будет! А вера?", "en": "Coming! And faith?" },
+    { "s": "a", "ru": "Вера есть. У некоторых.", "en": "There is faith. In some people." },
+    { "s": "b", "ru": "У некоторых... А библия?", "en": "In some... And the Bible?" },
+    { "s": "a", "ru": "Библия тут. Христианская книга.", "en": "The Bible is here. A Christian book." },
+    { "s": "b", "ru": "Христианская! А ангел?", "en": "Christian! And the angel?" },
+    { "s": "a", "ru": "Ангел на иконе. И распятие.", "en": "The angel is on the icon. And the crucifix." },
+    { "s": "b", "ru": "Распятие... А ад?", "en": "The crucifix... And hell?" },
+    { "s": "a", "ru": "Ад? Это тоже часть веры.", "en": "Hell? That is part of the faith too." },
+    { "s": "b", "ru": "Часть веры! Хотя не все тут.", "en": "Part of the faith! Though not everyone is here." },
+    { "s": "a", "ru": "Не все, Пётр. Но вера есть.", "en": "Not everyone, Pyotr. But the faith is there." }
+   ],
+   "questions": [
+    { "ask": "What does Pyotr ask about first?",
+      "options": ["When Easter is", "The Bible", "The angel", "Katya's faith"], "answer": 0 },
+    { "ask": "Who has faith, in her answer?",
+      "options": ["Some people", "Everyone", "Nobody", "Only she does"], "answer": 0 },
+    { "ask": "What is on the icon?",
+      "options": ["An angel", "A crucifix only", "Nothing", "She does not say"], "answer": 0 },
+    { "ask": "What does she say hell is?",
+      "options": ["Part of the faith", "A story", "Not spoken of", "The main thing"],
+      "answer": 0 },
+    { "ask": "Is everybody there?",
+      "options": ["No", "Yes", "Only the believers", "Pyotr does not ask"], "answer": 0 }
    ]
   },
+
   "religion:2": {
-   "title": "What my mother believes",
-   "rows": [
-    { "ru": "Моя мама постоянно говорит о боге.", "en": "My mother talks about God all the time." },
-    { "ru": "Она считает, что вера — это доверие.", "en": "She thinks that faith means trust." },
-    { "ru": "Грех есть у каждого человека.", "en": "Every person has their sins." },
-    { "ru": "Дьявол и грех — это одно и то же.", "en": "The devil and sin are one and the same thing." },
-    { "ru": "Господь всё видит и всё знает.", "en": "The Lord sees everything and knows everything." }
+   "title": "The same word for God",
+   "cast": [
+    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "b", "ru": "Борис", "en": "Boris" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Лена, ты знаешь этот храм?", "en": "Lena, do you know this temple?" },
+    { "s": "a", "ru": "Знаю. Тут говорят о Боге.", "en": "I do. They speak of God here." },
+    { "s": "b", "ru": "О Боге! А господь?", "en": "Of God! And the Lord?" },
+    { "s": "a", "ru": "Господь — это то же слово.", "en": "The Lord is the same word." },
+    { "s": "b", "ru": "То же... А грех?", "en": "The same... And sin?" },
+    { "s": "a", "ru": "Грех? О нём тоже говорят.", "en": "Sin? They speak of that too." },
+    { "s": "b", "ru": "Говорят! А доверие?", "en": "They do! And trust?" },
+    { "s": "a", "ru": "Доверие есть. Между нами.", "en": "There is trust. Between us." },
+    { "s": "b", "ru": "Между нами... А дьявол?", "en": "Between us... And the devil?" },
+    { "s": "a", "ru": "Дьявол? Это другая часть.", "en": "The devil? That is another part of it." },
+    { "s": "b", "ru": "Другая часть! А еврейский храм?", "en": "Another part! And the Jewish temple?" },
+    { "s": "a", "ru": "Он тоже тут, Борис. Божий дом.", "en": "That is here too, Boris. A house of God." }
+   ],
+   "questions": [
+    { "ask": "What is spoken of at the temple?",
+      "options": ["God", "Politics", "Nothing", "The wedding"], "answer": 0 },
+    { "ask": "What does Lena say about the two words?",
+      "options": ["They mean the same", "They are opposites", "One is older", "She does not know"],
+      "answer": 0 },
+    { "ask": "What else is spoken of there?",
+      "options": ["Sin", "Money", "The law", "Science"], "answer": 0 },
+    { "ask": "What does she say about trust?",
+      "options": ["There is trust between them", "There is none", "It is a sin", "Boris has none"],
+      "answer": 0 },
+    { "ask": "Is there a Jewish temple nearby?",
+      "options": ["Yes", "No", "It has closed", "She does not say"], "answer": 0 }
    ]
   }
  }

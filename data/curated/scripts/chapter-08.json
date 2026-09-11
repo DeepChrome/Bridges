@@ -1,235 +1,818 @@
 {
  "chapter": 8,
- "name": "Conflict, Tech and Sport",
+ "name": "Things & Happenings",
  "lessons": {
   "core8:0": {
-   "title": "A young mother at work",
-   "rows": [
-    { "ru": "Моя мать ещё очень молодая.", "en": "My mother is still very young." },
-    { "ru": "Новый день начался, и она уже за компьютером.", "en": "A new day has begun, and she is already at her computer." },
-    { "ru": "Её компания делает новый продукт.", "en": "Her company is making a new product." },
-    { "ru": "Она часто смотрит в окно.", "en": "She often looks out of the window." },
-    { "ru": "Да, этот продукт уже знают в Москве.", "en": "Yes, people in Moscow already know this product." }
+   "title": "The computer her mother bought",
+   "cast": [
+    { "id": "a", "ru": "Аня", "en": "Anya" },
+    { "id": "b", "ru": "Борис", "en": "Boris" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Аня, это твой компьютер?", "en": "Anya, is that your computer?" },
+    { "s": "a", "ru": "Да, мой. Он не новый.", "en": "Yes, mine. It is not new." },
+    { "s": "b", "ru": "Не новый, но главный?", "en": "Not new, but the main one?" },
+    { "s": "a", "ru": "Главный. На нём вся работа.", "en": "The main one. All the work is on it." },
+    { "s": "b", "ru": "А кто его купил?", "en": "And who bought it?" },
+    { "s": "a", "ru": "Моя мать. Она всё может.", "en": "My mother. She can do anything." },
+    { "s": "b", "ru": "Мать! А продукт?", "en": "Your mother! And the product?" },
+    { "s": "a", "ru": "Продукт ещё не готов.", "en": "The product is not ready yet." },
+    { "s": "b", "ru": "Не готов? А когда это началось?", "en": "Not ready? And when did it start?" },
+    { "s": "a", "ru": "Началось вчера. Работа идёт.", "en": "It started yesterday. The work is going on." },
+    { "s": "b", "ru": "А молодой человек тоже работает?", "en": "And the young man is working too?" },
+    { "s": "a", "ru": "Да, Борис. Он самый молодой.", "en": "Yes, Boris. He is the youngest." }
+   ],
+   "questions": [
+    { "ask": "Whose computer is it?",
+      "options": ["Anya's", "Boris's", "Her mother's", "The company's"], "answer": 0 },
+    { "ask": "Who bought it?",
+      "options": ["Her mother", "She did", "Boris", "Her employer"], "answer": 0 },
+    { "ask": "Is the product finished?",
+      "options": ["Not yet", "Yes", "It was cancelled", "She does not say"], "answer": 0 },
+    { "ask": "When did the work begin?",
+      "options": ["Yesterday", "A year ago", "Today", "It has not begun"], "answer": 0 },
+    { "ask": "What does she say about the young man?",
+      "options": ["He is the youngest and is working", "He has left", "He is her brother", "He does nothing"],
+      "answer": 0 }
    ]
   },
+
   "core8:1": {
-   "title": "Nobody hears a thing",
-   "rows": [
-    { "ru": "Мама сегодня не ходит в магазин.", "en": "Mum isn't going to the shop today." },
-    { "ru": "Она весь день в своей комнате.", "en": "She has been in her room all day." },
-    { "ru": "Мы вызвали врача.", "en": "We called a doctor." },
-    { "ru": "Мы не слышим, что они говорят.", "en": "We can't hear what they are saying." },
-    { "ru": "Никто не видит её весь день.", "en": "Nobody sees her all day." }
+   "title": "Nobody heard him",
+   "cast": [
+    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "b", "ru": "Миша", "en": "Misha" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Катя, ты слышишь самолёт?", "en": "Katya, can you hear the aircraft?" },
+    { "s": "a", "ru": "Слышу. Он всегда тут.", "en": "I can. It is always here." },
+    { "s": "b", "ru": "Всегда! А кто в комнате?", "en": "Always! And who is in the room?" },
+    { "s": "a", "ru": "Никто. Никто не пришёл.", "en": "Nobody. Nobody came." },
+    { "s": "b", "ru": "Никто? А я вызвал всех.", "en": "Nobody? But I called everyone in." },
+    { "s": "a", "ru": "Вызвал, Миша? И никто не слышал.", "en": "You called them, Misha? And nobody heard." },
+    { "s": "b", "ru": "Не слышали... А ты ходишь в магазин?", "en": "They did not hear... And do you go to the shop?" },
+    { "s": "a", "ru": "Хожу. Каждый день.", "en": "I do. Every day." },
+    { "s": "b", "ru": "Каждый день в магазин!", "en": "To the shop every day!" },
+    { "s": "a", "ru": "Да. А самолёт — каждый час.", "en": "Yes. And the aircraft — every hour." },
+    { "s": "b", "ru": "Самолёт каждый час, Катя!", "en": "An aircraft every hour, Katya!" },
+    { "s": "a", "ru": "Каждый час. Я уже не слышу.", "en": "Every hour. I do not hear it any more." }
+   ],
+   "questions": [
+    { "ask": "What can be heard?",
+      "options": ["An aircraft", "A telephone", "A crowd", "Nothing at all"], "answer": 0 },
+    { "ask": "Who is in the room?",
+      "options": ["Nobody", "Everyone Misha called", "Only Katya", "A few people"], "answer": 0 },
+    { "ask": "What had Misha done?",
+      "options": ["Called everyone in", "Gone to the shop", "Waited outside", "Nothing"], "answer": 0 },
+    { "ask": "How often does Katya go to the shop?",
+      "options": ["Every day", "Once a week", "Never", "Every hour"], "answer": 0 },
+    { "ask": "Why does the aircraft not bother her?",
+      "options": ["She is used to it", "It is far away", "She is deaf", "It only comes at night"],
+      "answer": 0 }
    ]
   },
+
   "core8:2": {
-   "title": "The program stopped in the night",
-   "rows": [
-    { "ru": "Что произошло вчера?", "en": "What happened yesterday?" },
-    { "ru": "Ночью новая программа не работала.", "en": "The new program wasn't working during the night." },
-    { "ru": "Мы вызвали помощь, и она пришла очень быстро.", "en": "We called for help and it came very quickly." },
-    { "ru": "Пока мы ждали, они сделали свою работу.", "en": "While we waited, they did their work." },
-    { "ru": "Сейчас всё работает, и мы вернулись.", "en": "Everything is running now, and we are back." }
+   "title": "The programme is running",
+   "cast": [
+    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "b", "ru": "Олег", "en": "Oleg" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Лена, что произошло?", "en": "Lena, what has happened?" },
+    { "s": "a", "ru": "Произошло? Ничего. Пока.", "en": "Happened? Nothing. So far." },
+    { "s": "b", "ru": "Пока! А программа?", "en": "So far! And the programme?" },
+    { "s": "a", "ru": "Программа работает. Быстро.", "en": "The programme is running. Fast." },
+    { "s": "b", "ru": "Быстро? А помощь?", "en": "Fast? And help?" },
+    { "s": "a", "ru": "Помощь? Она всегда идёт.", "en": "Help? It is always on the way." },
+    { "s": "b", "ru": "Идёт? Я вернусь.", "en": "On the way? I will come back." },
+    { "s": "a", "ru": "Вернёшься? Когда?", "en": "Come back? When?" },
+    { "s": "b", "ru": "Быстро. Через час.", "en": "Quickly. In an hour." },
+    { "s": "a", "ru": "Через час... Весь мир ждёт.", "en": "In an hour... The whole world is waiting." },
+    { "s": "b", "ru": "Весь мир! Это программа.", "en": "The whole world! It is only a programme." },
+    { "s": "a", "ru": "Программа, Олег. Пока.", "en": "A programme, Oleg. See you." }
+   ],
+   "questions": [
+    { "ask": "Has anything gone wrong?",
+      "options": ["Not so far", "Yes, badly", "The programme stopped", "Lena will not say"],
+      "answer": 0 },
+    { "ask": "How is the programme running?",
+      "options": ["Fast", "Slowly", "Not at all", "Nobody has checked"], "answer": 0 },
+    { "ask": "What does Lena say about help?",
+      "options": ["It is always on the way", "She needs none", "It never comes", "She will ask later"], "answer": 0 },
+    { "ask": "When will Oleg be back?",
+      "options": ["In an hour", "Tomorrow", "Never", "He is not leaving"], "answer": 0 },
+    { "ask": "What does Lena say is waiting?",
+      "options": ["The whole world", "Her boss", "Nobody", "The programme"], "answer": 0 }
    ]
   },
+
   "core8:3": {
-   "title": "Cooking and packing",
-   "rows": [
-    { "ru": "Мама готовит уже час.", "en": "Mum has been cooking for an hour now." },
-    { "ru": "Я взял несколько вещей из комнаты.", "en": "I took a few things out of the room." },
-    { "ru": "Отец даёт мне свой телефон.", "en": "Dad hands me his phone." },
-    { "ru": "Я тоже хочу помочь маме.", "en": "I want to help Mum too." },
-    { "ru": "А эти вещи мы возьмём завтра.", "en": "And we'll take these things tomorrow." }
+   "title": "Cooking instead of sleeping",
+   "cast": [
+    { "id": "a", "ru": "Нина", "en": "Nina" },
+    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Нина, ты спишь?", "en": "Nina, are you asleep?" },
+    { "s": "a", "ru": "Не сплю. Я готовлю.", "en": "Not asleep. I am cooking." },
+    { "s": "b", "ru": "Готовишь? А телефон?", "en": "Cooking? And your telephone?" },
+    { "s": "a", "ru": "Телефон? Я его не взяла.", "en": "My telephone? I did not take it." },
+    { "s": "b", "ru": "Не взяла! А несколько вещей?", "en": "You did not! And the few things?" },
+    { "s": "a", "ru": "Несколько вещей тут. Я их даю тебе.", "en": "The few things are here. I am giving them to you." },
+    { "s": "b", "ru": "Даёшь? Мне?", "en": "Giving them? To me?" },
+    { "s": "a", "ru": "Тебе. Возьми.", "en": "To you. Take them." },
+    { "s": "b", "ru": "Возьму. А ты спать?", "en": "I will. And you — to bed?" },
+    { "s": "a", "ru": "Спать. Но я ещё готовлю.", "en": "To bed. But I am still cooking." },
+    { "s": "b", "ru": "Готовишь и не спишь.", "en": "Cooking and not sleeping." },
+    { "s": "a", "ru": "Не сплю, Пётр. Телефон у тебя.", "en": "Not sleeping, Pyotr. You have the telephone." }
+   ],
+   "questions": [
+    { "ask": "What is Nina doing?",
+      "options": ["Cooking", "Sleeping", "On the telephone", "Packing"], "answer": 0 },
+    { "ask": "Where is her telephone?",
+      "options": ["She left it — Pyotr has it", "In her hand", "Lost", "At the shop"], "answer": 0 },
+    { "ask": "What does she give him?",
+      "options": ["A few things", "The telephone only", "Food", "Nothing"], "answer": 0 },
+    { "ask": "Is she going to bed?",
+      "options": ["Not yet, she is still cooking", "Yes, at once", "She never sleeps", "After Pyotr leaves"],
+      "answer": 0 },
+    { "ask": "Who does most of the asking?",
+      "options": ["Pyotr", "Nina", "Both equally", "Neither"], "answer": 0 }
    ]
   },
+
   "core8:4": {
-   "title": "Too expensive at the shop",
-   "rows": [
-    { "ru": "Вчера мы были в большом магазине.", "en": "Yesterday we were at a big shop." },
-    { "ru": "Там мы видели очень хороший компьютер.", "en": "There we saw a very good computer." },
-    { "ru": "Но его цена очень большая.", "en": "But its price is very high." },
-    { "ru": "Отец сказал, что мы его не возьмём.", "en": "Dad said we would not take it." },
-    { "ru": "Мама тоже думает, что это много.", "en": "Mum thinks it is a lot as well." }
+   "title": "A good day, for today",
+   "cast": [
+    { "id": "a", "ru": "Соня", "en": "Sonya" },
+    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Соня, это хороший день?", "en": "Sonya, is this a good day?" },
+    { "s": "a", "ru": "Хороший. И ты тоже.", "en": "A good one. And so are you." },
+    { "s": "b", "ru": "Я тоже? Хороший?", "en": "Me too? Good?" },
+    { "s": "a", "ru": "Хороший. Как и день.", "en": "Good. Like the day." },
+    { "s": "b", "ru": "А программа? Она хорошая?", "en": "And the programme? Is that good?" },
+    { "s": "a", "ru": "Программа тоже хорошая.", "en": "The programme is good as well." },
+    { "s": "b", "ru": "Всё хорошее! И мир?", "en": "Everything is good! And the world?" },
+    { "s": "a", "ru": "Мир тоже. Сегодня.", "en": "The world too. Today." },
+    { "s": "b", "ru": "Только сегодня?", "en": "Only today?" },
+    { "s": "a", "ru": "Только. Завтра не знаю.", "en": "Only. Tomorrow I do not know." },
+    { "s": "b", "ru": "Завтра тоже будет хороший день.", "en": "Tomorrow will be a good day too." },
+    { "s": "a", "ru": "Может быть, Виктор. Может быть.", "en": "Maybe, Viktor. Maybe." }
+   ],
+   "questions": [
+    { "ask": "What is the mood between them?",
+      "options": ["Light and warm", "Tense", "Sad", "Formal"], "answer": 0 },
+    { "ask": "What does Sonya say about Viktor?",
+      "options": ["He is good too", "He is late", "He is wrong", "Nothing"], "answer": 0 },
+    { "ask": "How far does her good opinion of the world stretch?",
+      "options": ["Only to today", "For ever", "Not at all", "Until the programme ends"],
+      "answer": 0 },
+    { "ask": "What does Viktor predict?",
+      "options": ["Tomorrow will be good too", "Rain", "Trouble", "Nothing"], "answer": 0 },
+    { "ask": "Does she agree?",
+      "options": ["Only 'maybe'", "Completely", "Not at all", "She changes the subject"],
+      "answer": 0 }
    ]
   },
+
   "military:0": {
-   "title": "My father in the army",
-   "rows": [
-    { "ru": "Мой отец был солдатом.", "en": "My father was a soldier." },
-    { "ru": "Он был в армии два года.", "en": "He spent two years in the army." },
-    { "ru": "Его командир был очень молодой человек.", "en": "His commander was a very young man." },
-    { "ru": "Защита страны была их главным делом.", "en": "Defending the country was their main business." },
-    { "ru": "Для них это была борьба за мир.", "en": "For them it was a struggle for peace." }
+   "title": "A soldier and his commander",
+   "cast": [
+    { "id": "a", "ru": "Аня", "en": "Anya" },
+    { "id": "b", "ru": "Иван", "en": "Ivan" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Аня, кто этот человек? Солдат?", "en": "Anya, who is that man? A soldier?" },
+    { "s": "a", "ru": "Солдат. Он в армии.", "en": "A soldier. He is in the army." },
+    { "s": "b", "ru": "В армии! А командир?", "en": "In the army! And the commander?" },
+    { "s": "a", "ru": "Командир тут. Он военный.", "en": "The commander is here. He is a military man." },
+    { "s": "b", "ru": "Военный... А война?", "en": "A military man... And the war?" },
+    { "s": "a", "ru": "Война была. Но не тут.", "en": "There was a war. But not here." },
+    { "s": "b", "ru": "Хорошо, что не тут.", "en": "It is good that it is not here." },
+    { "s": "a", "ru": "Хорошо. Есть защита.", "en": "Good. There is a defence." },
+    { "s": "b", "ru": "Защита? От кого?", "en": "A defence? Against whom?" },
+    { "s": "a", "ru": "От всех. Это борьба.", "en": "Against everyone. It is a struggle." },
+    { "s": "b", "ru": "Борьба каждый день?", "en": "A struggle every day?" },
+    { "s": "a", "ru": "Каждый день, Иван. Армия работает.", "en": "Every day, Ivan. The army is at work." }
+   ],
+   "questions": [
+    { "ask": "Who is the man?",
+      "options": ["A soldier", "The commander", "A veteran", "A civilian"], "answer": 0 },
+    { "ask": "Was there a war?",
+      "options": ["Yes, but not there", "No", "It is going on there", "Anya will not say"],
+      "answer": 0 },
+    { "ask": "Who else is there?",
+      "options": ["The commander", "Nobody", "The whole army", "A general"], "answer": 0 },
+    { "ask": "What is the defence against?",
+      "options": ["Everyone", "One enemy", "Nothing in particular", "The weather"], "answer": 0 },
+    { "ask": "How often is the struggle?",
+      "options": ["Every day", "Once a year", "It is over", "It has not begun"], "answer": 0 }
    ]
   },
+
   "military:1": {
-   "title": "An order at the front",
-   "rows": [
-    { "ru": "Командир дал новый приказ.", "en": "The commander gave a new order." },
-    { "ru": "Солдаты пошли на фронт.", "en": "The soldiers set off for the front." },
-    { "ru": "У противника было хорошее оружие.", "en": "The enemy had good weapons." },
-    { "ru": "Мы слышали первый выстрел.", "en": "We heard the first shot." },
-    { "ru": "Победа была не за нами.", "en": "The victory was not ours." }
+   "title": "A shot at the front",
+   "cast": [
+    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "b", "ru": "Борис", "en": "Boris" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Катя, ты слышала выстрел?", "en": "Katya, did you hear a shot?" },
+    { "s": "a", "ru": "Выстрел? Слышала. Это фронт.", "en": "A shot? I heard it. That is the front." },
+    { "s": "b", "ru": "Фронт! А противник?", "en": "The front! And the enemy?" },
+    { "s": "a", "ru": "Противник там. Не тут.", "en": "The enemy is over there. Not here." },
+    { "s": "b", "ru": "Не тут. А оружие?", "en": "Not here. And the weapons?" },
+    { "s": "a", "ru": "Оружие есть. И приказ есть.", "en": "There are weapons. And there is an order." },
+    { "s": "b", "ru": "Приказ? Какой?", "en": "An order? What order?" },
+    { "s": "a", "ru": "Ждать. Только ждать.", "en": "To wait. Only to wait." },
+    { "s": "b", "ru": "Ждать... А флот?", "en": "To wait... And the fleet?" },
+    { "s": "a", "ru": "Флот идёт. Это победа.", "en": "The fleet is coming. That is victory." },
+    { "s": "b", "ru": "Победа! Уже?", "en": "Victory! Already?" },
+    { "s": "a", "ru": "Уже, Борис. Флот идёт.", "en": "Already, Boris. The fleet is coming." }
+   ],
+   "questions": [
+    { "ask": "What did they hear?",
+      "options": ["A shot", "An aircraft", "Nothing", "The fleet"], "answer": 0 },
+    { "ask": "Where is the enemy?",
+      "options": ["Some way off", "Right there", "Behind them", "Nobody knows"], "answer": 0 },
+    { "ask": "What is the order?",
+      "options": ["To wait", "To attack", "To retreat", "There is none"], "answer": 0 },
+    { "ask": "What changes things?",
+      "options": ["The fleet is coming", "The enemy retreats", "A new commander", "Nothing"],
+      "answer": 0 },
+    { "ask": "How does Katya sound about the outcome?",
+      "options": ["Sure of victory", "Doubtful", "Frightened", "Indifferent"], "answer": 0 }
    ]
   },
+
   "military:2": {
-   "title": "A veteran remembers",
-   "rows": [
-    { "ru": "Этот человек — ветеран войны.", "en": "This man is a war veteran." },
-    { "ru": "Он был капитаном на фронте.", "en": "He was a captain at the front." },
-    { "ru": "Он боролся с врагом за свою страну.", "en": "He fought the enemy for his country." },
-    { "ru": "Пуля прошла через его руку.", "en": "A bullet went through his hand." },
-    { "ru": "Он не забыл это поражение.", "en": "He never forgot that defeat." }
+   "title": "The captain is a veteran",
+   "cast": [
+    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "b", "ru": "Юра", "en": "Yura" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Лена, кто этот капитан?", "en": "Lena, who is that captain?" },
+    { "s": "a", "ru": "Капитан? Он ветеран.", "en": "The captain? He is a veteran." },
+    { "s": "b", "ru": "Ветеран! Он много боролся.", "en": "A veteran! He has fought a great deal." },
+    { "s": "a", "ru": "Боролся. И победа была.", "en": "He has. And there was a victory." },
+    { "s": "b", "ru": "А поражение? Оно было?", "en": "And a defeat? Was there one?" },
+    { "s": "a", "ru": "Было. Один раз.", "en": "There was. Once." },
+    { "s": "b", "ru": "Один раз... А враг?", "en": "Once... And the enemy?" },
+    { "s": "a", "ru": "Враг теперь не тут.", "en": "The enemy is not here now." },
+    { "s": "b", "ru": "Не тут. А пуля? И мина?", "en": "Not here. And a bullet? And a mine?" },
+    { "s": "a", "ru": "Пуля была. Мина тоже.", "en": "There was a bullet. And a mine." },
+    { "s": "b", "ru": "И капитан тут!", "en": "And the captain is still here!" },
+    { "s": "a", "ru": "Тут, Юра. Он ветеран.", "en": "Here, Yura. He is a veteran." }
+   ],
+   "questions": [
+    { "ask": "Who are they talking about?",
+      "options": ["A captain who is a veteran", "A young soldier", "The enemy", "A general"],
+      "answer": 0 },
+    { "ask": "How many defeats has he had?",
+      "options": ["One", "None", "Many", "Lena does not know"], "answer": 0 },
+    { "ask": "Where is the enemy now?",
+      "options": ["Gone from there", "Close by", "In the fortress", "Unknown"], "answer": 0 },
+    { "ask": "What has he survived?",
+      "options": ["A bullet and a mine", "Nothing", "Only a mine", "A whole war unharmed"],
+      "answer": 0 },
+    { "ask": "What is remarkable to Yura?",
+      "options": ["That he is still there", "That he is a captain", "That he lost once", "Nothing"],
+      "answer": 0 }
    ]
   },
+
   "military:3": {
-   "title": "Waiting for the offensive",
-   "rows": [
-    { "ru": "Полковник приказал офицерам ждать.", "en": "The colonel ordered the officers to wait." },
-    { "ru": "У молодого офицера был только пистолет.", "en": "The young officer had only a pistol." },
-    { "ru": "Наступление началось ночью.", "en": "The offensive began at night." },
-    { "ru": "Полк пошёл в атаку.", "en": "The regiment went into the attack." },
-    { "ru": "Никто не знал, что произойдёт.", "en": "Nobody knew what would happen." }
+   "title": "The colonel gave the order",
+   "cast": [
+    { "id": "a", "ru": "Нина", "en": "Nina" },
+    { "id": "b", "ru": "Миша", "en": "Misha" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Нина, что за атака?", "en": "Nina, what is this attack?" },
+    { "s": "a", "ru": "Атака? Это наступление.", "en": "An attack? It is an offensive." },
+    { "s": "b", "ru": "Наступление! Кто приказал?", "en": "An offensive! Who ordered it?" },
+    { "s": "a", "ru": "Полковник. Он тут главный.", "en": "The colonel. He is in charge here." },
+    { "s": "b", "ru": "Полковник... А офицеры?", "en": "The colonel... And the officers?" },
+    { "s": "a", "ru": "Офицеры в полку. Все.", "en": "The officers are with the regiment. All of them." },
+    { "s": "b", "ru": "Весь полк? А пистолет?", "en": "The whole regiment? And the pistol?" },
+    { "s": "a", "ru": "Пистолет у офицера.", "en": "The officer has the pistol." },
+    { "s": "b", "ru": "У офицера... И что теперь?", "en": "The officer has it... And now what?" },
+    { "s": "a", "ru": "Теперь ждём. Он приказал ждать.", "en": "Now we wait. He ordered us to wait." },
+    { "s": "b", "ru": "Приказал ждать, а атака идёт.", "en": "Ordered you to wait, and the attack is going on." },
+    { "s": "a", "ru": "Идёт, Миша. Наступление идёт быстро.", "en": "It is, Misha. The offensive is moving fast." }
+   ],
+   "questions": [
+    { "ask": "What is happening?",
+      "options": ["An offensive", "A retreat", "A parade", "Nothing yet"], "answer": 0 },
+    { "ask": "Who ordered it?",
+      "options": ["The colonel", "The officers", "A general", "Nobody"], "answer": 0 },
+    { "ask": "Where are the officers?",
+      "options": ["With the regiment", "At headquarters", "Gone", "With Nina"], "answer": 0 },
+    { "ask": "What have they been told to do?",
+      "options": ["Wait", "Attack", "Fall back", "Follow the colonel"], "answer": 0 },
+    { "ask": "What is the contradiction Misha points out?",
+      "options": ["They wait while the attack runs", "The colonel is absent", "There is no pistol", "Nobody gave an order"],
+      "answer": 0 }
    ]
   },
+
   "military:4": {
-   "title": "The general and the battle",
-   "rows": [
-    { "ru": "Генерал говорил о большой битве.", "en": "The general spoke about a great battle." },
-    { "ru": "Его войско воевало два года.", "en": "His army had been at war for two years." },
-    { "ru": "Ночью они атаковали большой город.", "en": "At night they attacked a large city." },
-    { "ru": "Солдаты дрались на улицах города.", "en": "The soldiers fought in the streets of the town." },
-    { "ru": "Эта война была для них последней.", "en": "That war was their last." }
+   "title": "A battle lasting all day",
+   "cast": [
+    { "id": "a", "ru": "Соня", "en": "Sonya" },
+    { "id": "b", "ru": "Олег", "en": "Oleg" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Соня, кто атакует?", "en": "Sonya, who is attacking?" },
+    { "s": "a", "ru": "Атакует войско. Генерал приказал.", "en": "The army is attacking. The general ordered it." },
+    { "s": "b", "ru": "Генерал! А битва?", "en": "The general! And the battle?" },
+    { "s": "a", "ru": "Битва идёт. Уже день.", "en": "The battle is going on. A day now." },
+    { "s": "b", "ru": "День! А бомба?", "en": "A day! And the bomb?" },
+    { "s": "a", "ru": "Бомба была. Одна.", "en": "There was a bomb. One." },
+    { "s": "b", "ru": "Одна бомба... А ты?", "en": "One bomb... And you?" },
+    { "s": "a", "ru": "Я не воюю. Я тут.", "en": "I am not fighting. I am here." },
+    { "s": "b", "ru": "Не воюешь? А они дерутся.", "en": "Not fighting? And they are fighting." },
+    { "s": "a", "ru": "Дерутся. Каждый день.", "en": "They are. Every day." },
+    { "s": "b", "ru": "Каждый день битва!", "en": "A battle every day!" },
+    { "s": "a", "ru": "Каждый, Олег. Войско там.", "en": "Every day, Oleg. The army is out there." }
+   ],
+   "questions": [
+    { "ask": "Who ordered the attack?",
+      "options": ["The general", "The colonel", "Sonya", "Nobody"], "answer": 0 },
+    { "ask": "How long has the battle lasted?",
+      "options": ["A day", "An hour", "A week", "It has not started"], "answer": 0 },
+    { "ask": "How many bombs were there?",
+      "options": ["One", "Many", "None", "She does not know"], "answer": 0 },
+    { "ask": "Is Sonya fighting?",
+      "options": ["No", "Yes", "She was", "She is about to"], "answer": 0 },
+    { "ask": "How often does the fighting happen?",
+      "options": ["Every day", "Rarely", "Only that day", "It has stopped"], "answer": 0 }
    ]
   },
+
   "military:5": {
-   "title": "The night attack on the fortress",
-   "rows": [
-    { "ru": "Нападение произошло ночью.", "en": "The attack came at night." },
-    { "ru": "Враг напал на крепость.", "en": "The enemy attacked the fortress." },
-    { "ru": "Обороной командовал молодой офицер.", "en": "A young officer was in command of the defence." },
-    { "ru": "Он командовал полком уже два года.", "en": "He had been commanding the regiment for two years." },
-    { "ru": "Крепость стояла до последнего дня.", "en": "The fortress held out to the very last day." }
+   "title": "The fortress held",
+   "cast": [
+    { "id": "a", "ru": "Аня", "en": "Anya" },
+    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Аня, это крепость?", "en": "Anya, is this a fortress?" },
+    { "s": "a", "ru": "Крепость. Тут оборона.", "en": "A fortress. This is the defence." },
+    { "s": "b", "ru": "Оборона! Кто командует?", "en": "The defence! Who is in command?" },
+    { "s": "a", "ru": "Командует командир. Как всегда.", "en": "The commander commands. As always." },
+    { "s": "b", "ru": "А нападение? Оно было?", "en": "And an attack? Was there one?" },
+    { "s": "a", "ru": "Было. Они напали вчера.", "en": "There was. They attacked yesterday." },
+    { "s": "b", "ru": "Напали! И что?", "en": "They attacked! And?" },
+    { "s": "a", "ru": "И ничего. Крепость тут.", "en": "And nothing. The fortress is still here." },
+    { "s": "b", "ru": "Крепость тут... А они?", "en": "The fortress is here... And they?" },
+    { "s": "a", "ru": "Они тоже тут. Ждут.", "en": "They are here too. Waiting." },
+    { "s": "b", "ru": "Ждут нападения?", "en": "Waiting to attack?" },
+    { "s": "a", "ru": "Ждут, Пётр. Оборона готова.", "en": "Waiting, Pyotr. The defence is ready." }
+   ],
+   "questions": [
+    { "ask": "Where are they?",
+      "options": ["At a fortress", "At the front", "In a town", "On a ship"], "answer": 0 },
+    { "ask": "When was the attack?",
+      "options": ["Yesterday", "Today", "A year ago", "There has not been one"], "answer": 0 },
+    { "ask": "What came of it?",
+      "options": ["Nothing — the fortress held", "The fortress fell", "Both sides left", "Anya does not say"],
+      "answer": 0 },
+    { "ask": "Where is the other side now?",
+      "options": ["Still there, waiting", "Gone", "Inside the fortress", "Unknown"], "answer": 0 },
+    { "ask": "How ready is the defence?",
+      "options": ["Ready", "Unprepared", "Without a commander", "Short of men"], "answer": 0 }
    ]
   },
+
   "tech:0": {
-   "title": "News at home",
-   "rows": [
-    { "ru": "Отец читает газету каждый день.", "en": "Dad reads the paper every day." },
-    { "ru": "Я читаю статьи в интернете.", "en": "I read articles online." },
-    { "ru": "В этом журнале очень хорошие фотографии.", "en": "This magazine has very good photographs." },
-    { "ru": "Мама слушает радио, когда готовит.", "en": "Mum listens to the radio while she cooks." },
-    { "ru": "Камера в моём телефоне тоже хорошая.", "en": "The camera on my phone is good too." }
+   "title": "The article and the camera",
+   "cast": [
+    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Катя, ты читала статью?", "en": "Katya, have you read the article?" },
+    { "s": "a", "ru": "Статью? В газете?", "en": "The article? In the newspaper?" },
+    { "s": "b", "ru": "В газете. Или в журнале.", "en": "In the newspaper. Or the magazine." },
+    { "s": "a", "ru": "Не читала. Я слушаю радио.", "en": "I have not. I listen to the radio." },
+    { "s": "b", "ru": "Радио! А интернет?", "en": "The radio! And the internet?" },
+    { "s": "a", "ru": "Интернет тоже. Но не часто.", "en": "The internet too. But not often." },
+    { "s": "b", "ru": "Не часто... А фотография?", "en": "Not often... And the photograph?" },
+    { "s": "a", "ru": "Фотография моя. Камера тоже.", "en": "The photograph is mine. So is the camera." },
+    { "s": "b", "ru": "Камера! Хорошая?", "en": "A camera! A good one?" },
+    { "s": "a", "ru": "Хорошая. Я её взяла вчера.", "en": "A good one. I got it yesterday." },
+    { "s": "b", "ru": "Вчера! Так сделай фотографию.", "en": "Yesterday! Take a photograph, then." },
+    { "s": "a", "ru": "Сделаю, Виктор. Для газеты.", "en": "I will, Viktor. For the newspaper." }
+   ],
+   "questions": [
+    { "ask": "Has Katya read the article?",
+      "options": ["No", "Yes, in the newspaper", "Yes, in the magazine", "She wrote it"],
+      "answer": 0 },
+    { "ask": "Where does she get her news?",
+      "options": ["The radio, mostly", "The newspaper", "Television", "From Viktor"], "answer": 0 },
+    { "ask": "Whose is the photograph?",
+      "options": ["Katya's", "Viktor's", "The newspaper's", "Nobody's"], "answer": 0 },
+    { "ask": "When did she get the camera?",
+      "options": ["Yesterday", "A year ago", "It is not hers", "Today"], "answer": 0 },
+    { "ask": "What is the photograph for?",
+      "options": ["The newspaper", "Herself", "The magazine", "The internet"], "answer": 0 }
    ]
   },
+
   "tech:1": {
    "title": "A message on the screen",
-   "rows": [
-    { "ru": "На экране моего телефона новое сообщение.", "en": "There's a new message on my phone screen." },
-    { "ru": "Это новость о нашем городе.", "en": "It is news about our city." },
-    { "ru": "В сети об этом уже все говорят.", "en": "Everyone online is talking about it already." },
-    { "ru": "Этот сайт я читаю каждый день.", "en": "I read that site every day." },
-    { "ru": "Моё новое устройство работает очень быстро.", "en": "My new device runs very fast." }
+   "cast": [
+    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "b", "ru": "Иван", "en": "Ivan" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Лена, что на экране?", "en": "Lena, what is on the screen?" },
+    { "s": "a", "ru": "На экране? Сообщение.", "en": "On the screen? A message." },
+    { "s": "b", "ru": "Сообщение! От кого?", "en": "A message! Who from?" },
+    { "s": "a", "ru": "С сайта. Это новость.", "en": "From the website. It is news." },
+    { "s": "b", "ru": "Новость? Какая?", "en": "News? What news?" },
+    { "s": "a", "ru": "Сеть не работает. Вот кнопка.", "en": "The network is down. Here is the button." },
+    { "s": "b", "ru": "Кнопка? Эта?", "en": "The button? This one?" },
+    { "s": "a", "ru": "Эта. Устройство не новое.", "en": "That one. The device is not new." },
+    { "s": "b", "ru": "Не новое... А сеть?", "en": "Not new... And the network?" },
+    { "s": "a", "ru": "Сеть теперь работает. Вот новость.", "en": "The network is working now. There is your news." },
+    { "s": "b", "ru": "Хорошая новость!", "en": "Good news!" },
+    { "s": "a", "ru": "Хорошая, Иван. Сайт тоже работает.", "en": "Good, Ivan. The website is working too." }
+   ],
+   "questions": [
+    { "ask": "What was on the screen?",
+      "options": ["A message from a website", "A photograph", "Nothing", "An article"], "answer": 0 },
+    { "ask": "What was wrong?",
+      "options": ["The network was down", "The screen was broken", "The button was missing", "Nothing"],
+      "answer": 0 },
+    { "ask": "What does Lena point him to?",
+      "options": ["A button", "The screen", "The website", "Nothing"], "answer": 0 },
+    { "ask": "What does she say about the device?",
+      "options": ["It is not new", "It is brand new", "It is Ivan's", "It is broken for good"],
+      "answer": 0 },
+    { "ask": "How does it end?",
+      "options": ["Everything works again", "It stays broken", "They give up", "Ivan leaves"],
+      "answer": 0 }
    ]
   },
+
   "tech:2": {
-   "title": "Filing a report",
-   "rows": [
-    { "ru": "Учёный сделал новый доклад.", "en": "The scientist has made a new report." },
-    { "ru": "Его новый прибор видит очень маленький сигнал.", "en": "His new instrument picks up a very small signal." },
-    { "ru": "Но здесь нет телефонного сигнала.", "en": "But there is no phone signal here." },
-    { "ru": "Сотовый телефон в этом месте не работает.", "en": "A mobile phone doesn't work in this spot." },
-    { "ru": "В редакции об этом докладе ещё не знают.", "en": "At the editorial office they don't know about the report yet." }
+   "title": "No signal on the mobile",
+   "cast": [
+    { "id": "a", "ru": "Нина", "en": "Nina" },
+    { "id": "b", "ru": "Борис", "en": "Boris" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Нина, есть сигнал?", "en": "Nina, is there a signal?" },
+    { "s": "a", "ru": "Сигнал? Сотовый не работает.", "en": "A signal? The mobile is not working." },
+    { "s": "b", "ru": "Сотовый! А телефонный?", "en": "The mobile! And the landline?" },
+    { "s": "a", "ru": "Телефонный работает. Нажми тут.", "en": "The landline works. Press here." },
+    { "s": "b", "ru": "Нажал. И что?", "en": "I have pressed it. And?" },
+    { "s": "a", "ru": "И прибор говорит. Слушай.", "en": "And the device talks. Listen." },
+    { "s": "b", "ru": "Прибор говорит! А доклад?", "en": "The device talks! And the report?" },
+    { "s": "a", "ru": "Доклад в редакции.", "en": "The report is at the editorial office." },
+    { "s": "b", "ru": "В редакции? Кто его взял?", "en": "At the office? Who took it?" },
+    { "s": "a", "ru": "Редакция взяла. Все там.", "en": "The office took it. They are all there." },
+    { "s": "b", "ru": "Все в редакции, а сигнала нет.", "en": "Everyone is at the office, and there is no signal." },
+    { "s": "a", "ru": "Нет, Борис. Только телефонный.", "en": "None, Boris. Only the landline." }
+   ],
+   "questions": [
+    { "ask": "What is not working?",
+      "options": ["The mobile", "The landline", "The device", "Everything"], "answer": 0 },
+    { "ask": "What does work?",
+      "options": ["The landline", "Nothing", "The mobile", "Only the radio"], "answer": 0 },
+    { "ask": "What happens when he presses?",
+      "options": ["The device speaks", "Nothing", "It rings", "It breaks"], "answer": 0 },
+    { "ask": "Where is the report?",
+      "options": ["At the editorial office", "With Boris", "Lost", "On the device"], "answer": 0 },
+    { "ask": "Where is everybody?",
+      "options": ["At the editorial office", "At home", "With Nina", "Nobody says"], "answer": 0 }
    ]
   },
+
   "tech:3": {
-   "title": "A journalist and his laptop",
-   "rows": [
-    { "ru": "Журналист взял свой ноутбук и пошёл на работу.", "en": "The journalist took his laptop and set off for work." },
-    { "ru": "Он читал этот файл весь день.", "en": "He read that file all day." },
-    { "ru": "Он пишет о новых технологиях.", "en": "He writes about new technologies." },
-    { "ru": "Вчера на телевидении говорили об электроэнергии.", "en": "Yesterday they were talking about electric power on television." },
-    { "ru": "Автомат делает эту работу быстро.", "en": "A machine does this job quickly." }
+   "title": "No power for the laptop",
+   "cast": [
+    { "id": "a", "ru": "Соня", "en": "Sonya" },
+    { "id": "b", "ru": "Юра", "en": "Yura" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Соня, где файл?", "en": "Sonya, where is the file?" },
+    { "s": "a", "ru": "Файл? В ноутбуке.", "en": "The file? On the laptop." },
+    { "s": "b", "ru": "В ноутбуке! А электроэнергия есть?", "en": "On the laptop! And is there any power?" },
+    { "s": "a", "ru": "Электроэнергии нет. Уже час.", "en": "There is no power. For an hour now." },
+    { "s": "b", "ru": "Час! А телевидение?", "en": "An hour! And television?" },
+    { "s": "a", "ru": "Телевидение тоже не работает.", "en": "Television is not working either." },
+    { "s": "b", "ru": "Не работает... А журналист?", "en": "Not working... And the journalist?" },
+    { "s": "a", "ru": "Журналист ждёт. Файл у меня.", "en": "The journalist is waiting. I have the file." },
+    { "s": "b", "ru": "У тебя! А технология?", "en": "You have it! And the technology?" },
+    { "s": "a", "ru": "Технология новая. Но не работает.", "en": "The technology is new. But it is not working." },
+    { "s": "b", "ru": "Не работает! А автомат?", "en": "Not working! And the machine?" },
+    { "s": "a", "ru": "Автомат работает, Юра. Один он.", "en": "The machine works, Yura. It alone." }
+   ],
+   "questions": [
+    { "ask": "Where is the file?",
+      "options": ["On the laptop", "With the journalist", "On television", "Lost"], "answer": 0 },
+    { "ask": "What is the problem?",
+      "options": ["There is no power", "The file is missing", "The journalist has gone", "Nothing works ever"],
+      "answer": 0 },
+    { "ask": "How long has it been like that?",
+      "options": ["An hour", "All day", "A minute", "She does not say"], "answer": 0 },
+    { "ask": "Who is waiting?",
+      "options": ["A journalist", "Yura", "Nobody", "The whole office"], "answer": 0 },
+    { "ask": "What is still working?",
+      "options": ["One machine", "Everything but the laptop", "Television", "Nothing"], "answer": 0 }
    ]
   },
+
   "tech:4": {
-   "title": "Nothing but the answering machine",
-   "rows": [
-    { "ru": "Батарея в моём ноутбуке уже не работает.", "en": "The battery in my laptop has stopped working." },
-    { "ru": "Одна клавиша на клавиатуре тоже не работает.", "en": "One key on the keyboard doesn't work either." },
-    { "ru": "Я вызвал друга по телефону.", "en": "I called a friend on the phone." },
-    { "ru": "Но там был только автоответчик.", "en": "But all I got was the answering machine." },
-    { "ru": "Про фото я сообщу ему завтра.", "en": "I'll tell him about the photo tomorrow." }
+   "title": "One key and no battery",
+   "cast": [
+    { "id": "a", "ru": "Аня", "en": "Anya" },
+    { "id": "b", "ru": "Миша", "en": "Misha" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Аня, что с клавиатурой?", "en": "Anya, what is wrong with the keyboard?" },
+    { "s": "a", "ru": "Клавиатура? Одна клавиша не работает.", "en": "The keyboard? One key does not work." },
+    { "s": "b", "ru": "Одна клавиша! А батарея?", "en": "One key! And the battery?" },
+    { "s": "a", "ru": "Батарея тоже. Её нет.", "en": "The battery too. There is none." },
+    { "s": "b", "ru": "Нет батареи... А радиоприёмник?", "en": "No battery... And the radio set?" },
+    { "s": "a", "ru": "Радиоприёмник работает. Всегда.", "en": "The radio set works. Always." },
+    { "s": "b", "ru": "Всегда! А автоответчик?", "en": "Always! And the answering machine?" },
+    { "s": "a", "ru": "Автоответчик тоже. Там сообщение.", "en": "The answering machine too. There is a message on it." },
+    { "s": "b", "ru": "Сообщение? От кого?", "en": "A message? Who from?" },
+    { "s": "a", "ru": "Они сообщили о фото.", "en": "They left word about the photo." },
+    { "s": "b", "ru": "О фото! Каком?", "en": "About the photo! Which one?" },
+    { "s": "a", "ru": "О том, Миша. Оно у них.", "en": "That one, Misha. They have it." }
+   ],
+   "questions": [
+    { "ask": "What is wrong with the keyboard?",
+      "options": ["One key does not work", "It is missing", "It is wet", "Nothing"], "answer": 0 },
+    { "ask": "What else is missing?",
+      "options": ["The battery", "The radio", "The answering machine", "Nothing"], "answer": 0 },
+    { "ask": "What still works?",
+      "options": ["The radio set and the answering machine", "Only the keyboard", "Nothing", "The camera"],
+      "answer": 0 },
+    { "ask": "What was the message about?",
+      "options": ["A photo", "The battery", "A meeting", "The keyboard"], "answer": 0 },
+    { "ask": "Who has the photo?",
+      "options": ["They do", "Anya", "Misha", "It is lost"], "answer": 0 }
    ]
   },
+
   "tech:5": {
-   "title": "The night without electricity",
-   "rows": [
-    { "ru": "Вчера в доме не было электричества.", "en": "Yesterday there was no electricity in the building." },
-    { "ru": "Провод у окна не работал.", "en": "The wire by the window wasn't working." },
-    { "ru": "Ни один канал на телевизоре не работал.", "en": "Not a single channel on the television worked." },
-    { "ru": "Каждый абонент в этом доме ждал помощи.", "en": "Every subscriber in the building was waiting for help." },
-    { "ru": "Я взял фотоаппарат и вышел на улицу.", "en": "I took my camera and went out into the street." }
+   "title": "The wire is the wrong one",
+   "cast": [
+    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "b", "ru": "Олег", "en": "Oleg" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Катя, есть электричество?", "en": "Katya, is there electricity?" },
+    { "s": "a", "ru": "Электричества нет. Провод не тот.", "en": "There is no electricity. The wire is the wrong one." },
+    { "s": "b", "ru": "Провод! А фотоаппарат?", "en": "The wire! And the camera?" },
+    { "s": "a", "ru": "Фотоаппарат работает. Он не от провода.", "en": "The camera works. It does not run off the wire." },
+    { "s": "b", "ru": "Не от провода... А канал?", "en": "Not off the wire... And the channel?" },
+    { "s": "a", "ru": "Канал тут. Но без электричества нет.", "en": "The channel is there. But without electricity there is nothing." },
+    { "s": "b", "ru": "Нет канала... А абонент?", "en": "No channel... And the subscriber?" },
+    { "s": "a", "ru": "Абонент не говорит.", "en": "The subscriber is not answering." },
+    { "s": "b", "ru": "Не говорит! Он тут?", "en": "Not answering! Is he there?" },
+    { "s": "a", "ru": "Тут. Но телефон не работает.", "en": "He is. But the telephone does not work." },
+    { "s": "b", "ru": "Провод, канал, электричество.", "en": "The wire, the channel, the electricity." },
+    { "s": "a", "ru": "Всё, Олег. И фотоаппарат.", "en": "All of it, Oleg. And the camera." }
+   ],
+   "questions": [
+    { "ask": "Why is there no electricity?",
+      "options": ["The wire is the wrong one", "A storm", "They did not pay", "Katya does not know"],
+      "answer": 0 },
+    { "ask": "What works anyway?",
+      "options": ["The camera", "The telephone", "The channel", "Nothing"], "answer": 0 },
+    { "ask": "Why is there no channel?",
+      "options": ["No electricity", "The wire is cut", "It was never set up", "The subscriber took it"],
+      "answer": 0 },
+    { "ask": "Is the subscriber there?",
+      "options": ["Yes, but unreachable", "No", "He left", "Nobody knows"], "answer": 0 },
+    { "ask": "How much is affected?",
+      "options": ["Nearly everything", "Only the telephone", "Only the camera", "Nothing important"],
+      "answer": 0 }
    ]
   },
+
   "sport:0": {
-   "title": "A friend who loves sport",
-   "rows": [
-    { "ru": "Мой друг очень любит спорт.", "en": "My friend really loves sport." },
-    { "ru": "Он играет в футбол каждый день.", "en": "He plays football every day." },
-    { "ru": "Ещё он хорошо плавает и играет в теннис.", "en": "He also swims well and plays tennis." },
-    { "ru": "Вчера он выиграл первый раз.", "en": "Yesterday he won for the first time." },
-    { "ru": "Он делает эти упражнения каждый день.", "en": "He does these exercises every day." }
+   "title": "The match is today",
+   "cast": [
+    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Лена, ты играешь в теннис?", "en": "Lena, do you play tennis?" },
+    { "s": "a", "ru": "В теннис? Играю. И в футбол.", "en": "Tennis? I do. And football." },
+    { "s": "b", "ru": "В футбол! А матч когда?", "en": "Football! And when is the match?" },
+    { "s": "a", "ru": "Матч сегодня. Мы выиграем.", "en": "The match is today. We will win." },
+    { "s": "b", "ru": "Выиграете? Так быстро?", "en": "You will win? Just like that?" },
+    { "s": "a", "ru": "Быстро. Спорт — это работа.", "en": "Just like that. Sport is work." },
+    { "s": "b", "ru": "Работа! А упражнения?", "en": "Work! And exercises?" },
+    { "s": "a", "ru": "Упражнения каждый день.", "en": "Exercises every day." },
+    { "s": "b", "ru": "Каждый день... А плавать?", "en": "Every day... And swimming?" },
+    { "s": "a", "ru": "Плаваю. Но не часто.", "en": "I swim. But not often." },
+    { "s": "b", "ru": "Не часто. А матч?", "en": "Not often. And the match?" },
+    { "s": "a", "ru": "Матч сегодня, Пётр. Иди с нами.", "en": "The match is today, Pyotr. Come with us." }
+   ],
+   "questions": [
+    { "ask": "Which sports does Lena play?",
+      "options": ["Tennis and football", "Only tennis", "Swimming only", "Basketball"], "answer": 0 },
+    { "ask": "When is the match?",
+      "options": ["Today", "Tomorrow", "Next week", "It is over"], "answer": 0 },
+    { "ask": "How confident is she?",
+      "options": ["Sure they will win", "Doubtful", "She will not play", "She does not care"],
+      "answer": 0 },
+    { "ask": "How often does she train?",
+      "options": ["Every day", "Once a week", "Before matches only", "She does not"], "answer": 0 },
+    { "ask": "What does she invite him to do?",
+      "options": ["Come to the match", "Play tennis", "Swim with her", "Nothing"], "answer": 0 }
    ]
   },
+
   "sport:1": {
-   "title": "Watching the match",
-   "rows": [
-    { "ru": "Вчера мы смотрели большой матч.", "en": "Yesterday we watched a big match." },
-    { "ru": "Наша команда играла очень хорошо.", "en": "Our team played very well." },
-    { "ru": "Один игрок играл очень хорошо.", "en": "One player played very well." },
-    { "ru": "Он хочет завоевать чемпионат.", "en": "He wants to win the championship." },
-    { "ru": "Через год у нас будет большой чемпионат.", "en": "In a year we'll have a big championship here." }
+   "title": "The team and the toy",
+   "cast": [
+    { "id": "a", "ru": "Нина", "en": "Nina" },
+    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Нина, где твоя команда?", "en": "Nina, where is your team?" },
+    { "s": "a", "ru": "Команда там. Все игроки.", "en": "The team is over there. All the players." },
+    { "s": "b", "ru": "Все игроки! А чемпионат?", "en": "All the players! And the championship?" },
+    { "s": "a", "ru": "Чемпионат завтра. Олимпийский.", "en": "The championship is tomorrow. An Olympic one." },
+    { "s": "b", "ru": "Олимпийский чемпионат! Вы завоюете его?", "en": "An Olympic championship! Will you take it?" },
+    { "s": "a", "ru": "Завоюем. Я так думаю.", "en": "We will. I think so." },
+    { "s": "b", "ru": "Думаешь... А что ты бросаешь?", "en": "You think so... And what are you throwing?" },
+    { "s": "a", "ru": "Это? Это игрушка.", "en": "This? This is a toy." },
+    { "s": "b", "ru": "Игрушка! А не спорт?", "en": "A toy! Not sports kit?" },
+    { "s": "a", "ru": "Не спорт. Она для ребёнка.", "en": "Not kit. It is for a child." },
+    { "s": "b", "ru": "Для ребёнка... А команда ждёт.", "en": "For a child... And the team is waiting." },
+    { "s": "a", "ru": "Ждёт, Виктор. Чемпионат завтра.", "en": "They are waiting, Viktor. The championship is tomorrow." }
+   ],
+   "questions": [
+    { "ask": "When is the championship?",
+      "options": ["Tomorrow", "Today", "Next year", "It has finished"], "answer": 0 },
+    { "ask": "Does Nina expect to win it?",
+      "options": ["Yes, she thinks so", "No", "She will not say", "She is not playing"],
+      "answer": 0 },
+    { "ask": "What is she throwing?",
+      "options": ["A toy", "A ball", "Nothing", "Her kit"], "answer": 0 },
+    { "ask": "Who is it for?",
+      "options": ["A child", "The team", "Viktor", "Herself"], "answer": 0 },
+    { "ask": "What is the team doing?",
+      "options": ["Waiting for her", "Playing", "Going home", "Watching"], "answer": 0 }
    ]
   },
+
   "sport:2": {
-   "title": "The basketball players",
-   "rows": [
-    { "ru": "Наши игроки уже играют в баскетбол.", "en": "Our players are already out on the basketball court." },
-    { "ru": "Один игрок хорошо ловит, другой хорошо бросает.", "en": "One player catches well, another throws well." },
-    { "ru": "Наша команда хочет стать первой.", "en": "Our team wants to come first." },
-    { "ru": "Но победить в этом чемпионате будет не просто.", "en": "But winning this championship won't be easy." },
-    { "ru": "Место в чемпионате — это работа команды.", "en": "A place in the championship is the team's own work." }
+   "title": "She catches, they throw",
+   "cast": [
+    { "id": "a", "ru": "Соня", "en": "Sonya" },
+    { "id": "b", "ru": "Борис", "en": "Boris" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Соня, ты в бассейне?", "en": "Sonya, are you at the pool?" },
+    { "s": "a", "ru": "В бассейне. Плавание — мой спорт.", "en": "At the pool. Swimming is my sport." },
+    { "s": "b", "ru": "Плавание! А баскетбол?", "en": "Swimming! And basketball?" },
+    { "s": "a", "ru": "Баскетбол тоже. Я ловлю.", "en": "Basketball too. I catch." },
+    { "s": "b", "ru": "Ловишь! А кто бросает?", "en": "You catch! And who throws?" },
+    { "s": "a", "ru": "Они бросают. Я ловлю.", "en": "They throw. I catch." },
+    { "s": "b", "ru": "А кто победит?", "en": "And who will win?" },
+    { "s": "a", "ru": "Мы победим. Как всегда.", "en": "We will win. As always." },
+    { "s": "b", "ru": "Как всегда! А это что?", "en": "As always! And what is this?" },
+    { "s": "a", "ru": "Это? Я это выбрасываю.", "en": "This? I am throwing this out." },
+    { "s": "b", "ru": "Выбрасываешь? Почему?", "en": "Throwing it out? Why?" },
+    { "s": "a", "ru": "Так, Борис. Я его бросила.", "en": "Just so, Boris. I have dropped it." }
+   ],
+   "questions": [
+    { "ask": "What is Sonya's main sport?",
+      "options": ["Swimming", "Basketball", "Tennis", "Football"], "answer": 0 },
+    { "ask": "What is her part in the basketball?",
+      "options": ["She catches", "She throws", "She watches", "She coaches"], "answer": 0 },
+    { "ask": "Who does she expect to win?",
+      "options": ["Her side", "The other side", "Nobody", "She does not know"], "answer": 0 },
+    { "ask": "What is she doing with the thing in her hand?",
+      "options": ["Throwing it away", "Keeping it", "Giving it to Boris", "Catching it"],
+      "answer": 0 },
+    { "ask": "Does she explain why?",
+      "options": ["No, not really", "Yes, at length", "Boris explains", "It is broken"],
+      "answer": 0 }
    ]
   },
+
   "sport:3": {
-   "title": "By the pool with a ball",
-   "rows": [
-    { "ru": "Мы играем в мяч у бассейна.", "en": "We play ball by the pool." },
-    { "ru": "Он бросил мяч, и я его поймал.", "en": "He threw the ball and I caught it." },
-    { "ru": "Эти мячи мы выбрасываем каждый год.", "en": "We throw these balls out every year." },
-    { "ru": "Наша команда часто проигрывает.", "en": "Our team loses often." },
-    { "ru": "Но на олимпиаде они хотят выиграть.", "en": "But at the Olympics they want to win." }
+   "title": "The ball is on the pitch",
+   "cast": [
+    { "id": "a", "ru": "Аня", "en": "Anya" },
+    { "id": "b", "ru": "Юра", "en": "Yura" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Аня, где мяч?", "en": "Anya, where is the ball?" },
+    { "s": "a", "ru": "Мяч на стадионе.", "en": "The ball is at the stadium." },
+    { "s": "b", "ru": "На стадионе! А тренер?", "en": "At the stadium! And the coach?" },
+    { "s": "a", "ru": "Тренер в спортзале. Ждёт.", "en": "The coach is in the gym. Waiting." },
+    { "s": "b", "ru": "Ждёт... А олимпиада?", "en": "Waiting... And the Olympics?" },
+    { "s": "a", "ru": "Олимпиада будет. Через год.", "en": "There will be an Olympics. In a year." },
+    { "s": "b", "ru": "Через год! А мы проигрываем.", "en": "In a year! And we are losing." },
+    { "s": "a", "ru": "Проигрываем. Но не всегда.", "en": "We are losing. But not always." },
+    { "s": "b", "ru": "Не всегда... Кто поймал мяч?", "en": "Not always... Who caught the ball?" },
+    { "s": "a", "ru": "Никто. Он на стадионе.", "en": "Nobody. It is at the stadium." },
+    { "s": "b", "ru": "Тогда я поймаю.", "en": "Then I will catch it." },
+    { "s": "a", "ru": "Поймай, Юра. Тренер смотрит.", "en": "Catch it, Yura. The coach is watching." }
+   ],
+   "questions": [
+    { "ask": "Where is the ball?",
+      "options": ["At the stadium", "In the gym", "With the coach", "Yura has it"], "answer": 0 },
+    { "ask": "Where is the coach?",
+      "options": ["In the gym", "At the stadium", "At home", "Watching the Olympics"],
+      "answer": 0 },
+    { "ask": "When are the Olympics?",
+      "options": ["In a year", "Tomorrow", "They are on now", "They are over"], "answer": 0 },
+    { "ask": "How is the team doing?",
+      "options": ["Losing, though not always", "Winning everything", "Not playing", "Anya does not say"],
+      "answer": 0 },
+    { "ask": "Who caught the ball?",
+      "options": ["Nobody", "Yura", "The coach", "Anya"], "answer": 0 }
    ]
   },
+
   "sport:4": {
-   "title": "The gym and the stadium",
-   "rows": [
-    { "ru": "Каждый день он ходит в спортзал.", "en": "He goes to the gym every day." },
-    { "ru": "Его тренер был чемпионом мира.", "en": "His coach was a world champion." },
-    { "ru": "На стадионе они играют в волейбол.", "en": "At the stadium they play volleyball." },
-    { "ru": "А дома он играет в шахматы.", "en": "And at home he plays chess." },
-    { "ru": "А завтра у него бег на стадионе.", "en": "And tomorrow he has a run at the stadium." }
+   "title": "Champion at chess",
+   "cast": [
+    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "b", "ru": "Иван", "en": "Ivan" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Катя, ты играешь в шахматы?", "en": "Katya, do you play chess?" },
+    { "s": "a", "ru": "В шахматы? Играю. И в волейбол.", "en": "Chess? I do. And volleyball." },
+    { "s": "b", "ru": "В волейбол! А бег?", "en": "Volleyball! And running?" },
+    { "s": "a", "ru": "Бег каждый день.", "en": "Running every day." },
+    { "s": "b", "ru": "Каждый день бег! Ты чемпион?", "en": "Running every day! Are you a champion?" },
+    { "s": "a", "ru": "Чемпион. В шахматах.", "en": "A champion. At chess." },
+    { "s": "b", "ru": "В шахматах! А в волейболе?", "en": "At chess! And at volleyball?" },
+    { "s": "a", "ru": "Там я просто играю.", "en": "There I just play." },
+    { "s": "b", "ru": "Просто играешь... А он?", "en": "Just play... And him?" },
+    { "s": "a", "ru": "Он бросается на мяч.", "en": "He throws himself at the ball." },
+    { "s": "b", "ru": "Бросился! И вскинул руки.", "en": "He threw himself! And flung up his arms." },
+    { "s": "a", "ru": "Вскинул, Иван. Это волейбол.", "en": "He flung them up, Ivan. That is volleyball." }
+   ],
+   "questions": [
+    { "ask": "What is Katya champion at?",
+      "options": ["Chess", "Volleyball", "Running", "Nothing"], "answer": 0 },
+    { "ask": "How often does she run?",
+      "options": ["Every day", "Never", "Before matches", "Once a week"], "answer": 0 },
+    { "ask": "How does she describe her volleyball?",
+      "options": ["She just plays", "She is the best", "She hates it", "She coaches it"],
+      "answer": 0 },
+    { "ask": "What does the other player do?",
+      "options": ["Throws himself at the ball", "Stands still", "Leaves", "Argues"], "answer": 0 },
+    { "ask": "Who is watching whom?",
+      "options": ["They are both watching a game", "Katya is playing", "Ivan is playing", "Neither is there"],
+      "answer": 0 }
    ]
   },
+
   "sport:5": {
-   "title": "The runner who always wins",
-   "rows": [
-    { "ru": "Бег — это его любимый спорт.", "en": "Running is his favourite sport." },
-    { "ru": "Он выигрывает уже два года.", "en": "He has been winning for two years now." },
-    { "ru": "Вчера на стадионе все бросились за ним.", "en": "Yesterday at the stadium everyone rushed after him." },
-    { "ru": "Люди всегда бросаются к нему после бега.", "en": "People always rush over to him after a race." },
-    { "ru": "Он вскинул руки и не сказал ни слова.", "en": "He threw up his hands and did not say a word." }
+   "title": "An hour in front",
+   "cast": [
+    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "b", "ru": "Миша", "en": "Misha" }
+   ],
+   "lines": [
+    { "s": "b", "ru": "Лена, вы выигрываете?", "en": "Lena, are you winning?" },
+    { "s": "a", "ru": "Выигрываем. Уже час.", "en": "We are winning. For an hour now." },
+    { "s": "b", "ru": "Час! А они?", "en": "An hour! And them?" },
+    { "s": "a", "ru": "Они проигрывают. Но играют.", "en": "They are losing. But they are playing." },
+    { "s": "b", "ru": "Играют! А тренер?", "en": "Playing! And the coach?" },
+    { "s": "a", "ru": "Тренер смотрит. Как всегда.", "en": "The coach is watching. As always." },
+    { "s": "b", "ru": "Как всегда... А ты?", "en": "As always... And you?" },
+    { "s": "a", "ru": "Я выигрываю, Миша. Это спорт.", "en": "I am winning, Misha. That is sport." },
+    { "s": "b", "ru": "Спорт! А завтра?", "en": "Sport! And tomorrow?" },
+    { "s": "a", "ru": "Завтра тоже выиграем.", "en": "Tomorrow we will win as well." },
+    { "s": "b", "ru": "Выиграете, Лена. Я знаю.", "en": "You will win, Lena. I know it." },
+    { "s": "a", "ru": "Знаешь? Тогда иди с нами.", "en": "You know it? Then come with us." }
+   ],
+   "questions": [
+    { "ask": "Who is ahead?",
+      "options": ["Lena's side", "The other side", "It is level", "The game has not started"],
+      "answer": 0 },
+    { "ask": "How long has it been going?",
+      "options": ["An hour", "A day", "It has just begun", "She does not say"], "answer": 0 },
+    { "ask": "What are the losing side doing?",
+      "options": ["Still playing", "Walking off", "Arguing", "Winning now"], "answer": 0 },
+    { "ask": "What is the coach doing?",
+      "options": ["Watching, as always", "Shouting", "Playing", "Away"], "answer": 0 },
+    { "ask": "How does the conversation end?",
+      "options": ["She invites him along", "He leaves", "They argue", "The match ends"],
+      "answer": 0 }
    ]
   }
  }

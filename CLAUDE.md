@@ -1468,7 +1468,7 @@ improve as needed. Remove that from the doctrine."*
 He was right about the corpus. Its listening pool is whatever his decks and the
 harvested videos happen to contain, so a beginner got either three-word fragments
 or forty-five seconds of a native speaker using words the first three chapters
-never teach. **168 lessons, 839 sentences**, one passage each, now live in
+never teach. **168 lessons**, one written listening piece each, now live in
 `data/curated/scripts/chapter-NN.json` — authored, and the tooling is what keeps
 that honest:
 
@@ -1483,46 +1483,84 @@ that honest:
   «город» and «работать», so a "free top 100" let lesson one write about loving
   a new city. Content words are gated, always. That gate *is* the level match.
 - `tools/check_scripts.mjs` runs over the lot and fails the build's honesty
-  check if any word is not a form of a lemma that lesson has taught, if a
-  sentence outruns its chapter's length, if a passage does not use at least
-  three of its lesson's own words, or if a sentence is used twice anywhere.
-  `--strict` also requires all 169 to be present. What it **cannot** check is
-  whether the Russian is idiomatic; that is read by a person, and the owner
-  accepted the trade when he asked for these.
+  check if any word is not a form of a lemma that lesson has taught, if a line
+  outruns its chapter's length, or if a lesson does not use at least three of
+  its own words. `--strict` also requires all 168 to be present. What it
+  **cannot** check is whether the Russian is idiomatic; that is read by a
+  person, and the owner accepted the trade when he asked for these.
+
+### …and what they became: the scenario (2026-09-10, later)
+
+The first cut of this was four or five *unrelated* sentences with "what does
+this one mean?" under each. The owner read it and said what it should be:
+
+> "There is a single audio clip. It will last about 30-45 seconds. It's like a
+> scenario where the learner listens to a conversation and then is asked
+> questions about what they heard. The questions aren't focused on identifying
+> the word or translating a specific sentence. They're questions about the
+> scenario — who is talking? Are they friends? Where are they going? What is
+> their problem? … The questions are available for them before the audio even
+> starts so they can familiarize themselves. They'll have the controls to back
+> up a few seconds … Just one scenario with a few people talking to each other
+> (different voices are key) and then 5 questions."
+
+He was right: four sentences with a meaning question each tests translation of
+a sentence in isolation, which is not listening. **All 168 lessons were
+rewritten** — 2,136 lines across ten files — and the per-sentence shape is
+gone, not kept beside it.
+
+A lesson's entry is now `{ title, cast, lines, questions }`: two or three named
+speakers, eight to sixteen speaker-tagged turns, and five authored questions
+about the situation with four English options each. The questions are authored
+*with* the scenario because they cannot be generated — nothing in the corpus
+knows a situation.
+
+`tools/check_scripts.mjs` grew the rules that keep that shape honest, on top of
+the vocabulary gate above: two or three speakers, each saying something, none
+saying nearly everything, **each named out loud** (or "who is talking?" is a
+guess against a cast list on screen); the run estimated at 22–70 seconds from
+line lengths; five questions with four distinct options and the answer among
+them; and no line of three words or more written twice anywhere. Short turns —
+«Да.», «А ты?» — may repeat, because a rule against them is a rule against
+writing dialogue. First names now decline (`nameForms`), since a conversation
+cannot keep every name in the nominative and the lexicon carries no personal
+names at all.
+
+**Different voices are key, and there is no audio file.** `castVoices(n)` in
+`native/src/audio.js` hands each speaker one of the phone's Russian voices, and
+falls back to pitch (±15 %) where the phone has only one. `speakLine()` speaks
+one line and resolves when it ends; it deliberately does **not** reach for a
+recording the way `say()` does — one studio line inside a conversation would
+change a speaker's voice mid-exchange, so a written scenario is the device
+throughout and the screen says "device voices" (§27).
+
+**The timeline is built, not read.** `native/src/scenario.js`: every line has an
+estimate from its length, every line that plays is measured and the measurement
+replaces the estimate, so by the end of the first listen the timeline is the
+real one. Seeking lands on a **line boundary**, because that is the only place
+speech can be resumed — five seconds back from the middle of a sentence replays
+from the start of the sentence five seconds ago, which is what a listener
+wanted anyway. The transport is three controls: back five, play/pause, from the
+start. Replays are unlimited and uncounted, as they have always been.
+
+**Grading is the old rule applied whole.** A comprehension question missed says
+nothing about any one word, so a scenario's content words are graded Good only
+when four of the five questions were right, and graded not at all otherwise.
+Credit is still the share right.
 
 In the app: `payload.scripts`, keyed `"unitId:lessonIndex"`, in `data.json` at
-boot (tens of kilobytes, and a lesson quiz asks for one before its first card).
-`scriptScene(unit, index)` in `core/questions.js` turns one into an ordinary
-`scene` question, and `speechPrompt("scene", …)` prefers it over the corpus
-scene; `writtenPassage(units, reached)` is what Practice → Listening draws,
-against the lessons actually **finished**, so the level follows progress rather
-than unlocks. The corpus scene remains the fallback and is not deleted.
+boot. `scriptScene(unit, index)` in `core/questions.js` builds the question and
+`speechPrompt("scene", …)` prefers it over the corpus scene; `writtenPassage`
+is what Practice → Listening draws — **one** scenario, not five, since a
+half-minute conversation with five questions is a session of its own.
+`sceneFor` (pooled sentences, real recordings, a meaning question each) remains
+for the units a script cannot cover, and renders through the same view with no
+cast.
 
-Two rules the build already had, which these passages tightened:
-
-- **The Russian options must be words the learner has met.** "Which word did
-  you hear?" puts four Cyrillic words on screen. Drawing the wrong three from
-  earlier passages was not enough — those legitimately contain proper nouns
-  («Москва») and closed-class glue («да»), and both appeared as options. They
-  come from the curriculum's own word lists up to that lesson now. The *English*
-  distractors may come from anywhere: English gives no Russian away.
-- **The voice note is counted, not declared.** A written passage was assumed to
-  be device voice throughout, since nobody has said these sentences — but the
-  collection holds recordings for some of them anyway («Кто это?» is a thing
-  people say), found through the same folded key as any other audio. §27 says
-  TTS is never passed off as a recording; announcing a device voice over a real
-  one is the same failure pointed the other way. `Scene.js` counts the rows that
-  have audio and says "device voice", "device voice for some lines", or nothing.
-
-Sentences carry **no stress marks** — they are read aloud, and a combining acute
-is for a headword on a page. Playback pauses `GAP_MS` (1.2 s) between sentences
-and there is a numbered button per sentence: ±5 seconds is the right control for
-one continuous recording, but for five separate ones the sentence is the unit a
-listener wants to go back to.
-
-**These have not been read by a Russian speaker.** Every one is machine-checked
-for level and for words that exist; none is checked for idiom. That is the open
-item, and the file is meant to be corrected in place.
+**These have not been read by a Russian speaker.** Every line is machine-checked
+for level and for words that exist; none is checked for idiom, and no question
+is checked for being answerable from the audio. That is the open item, and the
+file is meant to be corrected in place.
 
 ## 30m. Yuri, and the motion the lesson never had (2026-09-10)
 
@@ -1703,7 +1741,7 @@ check those would be checking the framework and passing for the wrong reason.
 Screen transitions are set once, in `withMe` in `App.js`. They were unset, so a
 lesson, a drill and a dictionary entry each arrived however Android felt like it.
 
-## 30n. Production, and Russian from outside (Phase 10 finished, 2026-09-10)
+## 30o. Production, and Russian from outside (Phase 10 finished, 2026-09-10)
 
 Four activities, all of them production or input the corpus did not supply.
 Each has one rule that is the whole reason it is not just another quiz, and in
@@ -1756,6 +1794,38 @@ even at four times the weight the lesson was the subject of 9 % of draws.
 And **`c.find("type") || c.find("cloze")` can never reach its second branch**,
 because `candidates` always ends with a `type`: every guaranteed production slot
 in the app was a typed one and the gap-fill was unreachable there for months.
+
+## 30p. The way in (2026-09-10)
+
+The owner: *"Can you work on a clean login screen and animation?"*
+
+**There are no server accounts and there should not be.** A profile is a name, a
+character and a learner state on this phone; the material is his own (§1). So
+what he asked for is the screen the app opens on, and it was a bare `Title` over
+a `List` — the same screen every settings page already is. `src/screens/Gate.js`
+now holds three states, one screen each:
+
+- **Sign in** — the mark, then the faces, largest thing on the screen, one tap
+  in. That is the login: picking a profile *is* the whole interaction.
+- **New here** — the bridge draws itself, Yuri waves and introduces himself
+  (`LINES.hello`, the only screen besides the end of a lesson where he says
+  anything at all — `core/guide.js`), then a character and a name.
+- **Where to start** — the placement offer. The profile is still created by
+  *that* choice, not by Continue: an account existing is what the shell watches
+  to leave the gate, so creating it earlier unmounts the screen mid-question.
+
+The animation is stagger and nothing else — everything rises into place top
+down about a tenth of a second apart, over inside half a second, and every
+control is pressable on the first frame (§25). `src/mark.js` is the app icon
+redrawn as SVG from `make_app_icon.py`'s own geometry, so the launcher and the
+screen behind it are one drawing; `useDraw()` in `motion.js` is the stroke that
+lays itself down.
+
+One real bug fell out of it: `creating` was seeded from the profile list on the
+first render, and that list arrives from storage a tick later. It only ever
+worked because the shell waits for `ready` before drawing the gate. **State that
+is correct only because of what a caller does elsewhere is the bug, not the
+symptom** — it is derived now.
 
 ## 31. Verification
 

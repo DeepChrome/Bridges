@@ -162,17 +162,19 @@ function simulate(profileName, seed) {
     }
     if (q.kind === "cloze" && !/_____/.test(q.prompt)) bad("cloze without a gap");
     if (q.kind === "scene") {
-      if (!q.rows || !q.questions || q.questions.length < q.rows.length) bad("scene without a question per sentence");
-      // A corpus scene is cut from sentences that have a recording, so one
-      // without audio there is a broken join. A written passage (§30l) has no
-      // recording by nature — nobody has said the sentence — and is read by the
-      // device voice, which the screen says. Counted, not faulted.
+      if (!q.lines || !q.lines.length || !q.questions) bad("scene without lines or questions");
+      else if (q.scenario && q.questions.length !== 5) bad("scenario without five questions");
+      else if (!q.scenario && q.questions.length < q.lines.length) bad("scene without a question per sentence");
+      /* A corpus scene is cut from sentences that have a recording, so one
+         without audio there is a broken join. A written scenario (§30k) has
+         no recording by nature — nobody has said the line — and is read by
+         the device voices, which the screen says. Counted, not faulted. */
       if (!q.written) {
-        for (const row of q.rows || []) if (!DATA.audio.files[fold(row.ru)]) bad("scene sentence without audio");
+        for (const row of q.lines) if (!DATA.audio.files[fold(row.ru)]) bad("scene sentence without audio");
       } else {
         written.scenes++;
-        written.rows += (q.rows || []).length;
-        written.withAudio += (q.rows || []).filter((r) => DATA.audio.files[fold(r.ru)]).length;
+        written.rows += q.lines.length;
+        written.withAudio += q.lines.filter((r) => DATA.audio.files[fold(r.ru)]).length;
       }
       for (const qq of q.questions || []) if (qq.options.filter((o) => o.right).length !== 1) bad("scene question without one right option");
     }
@@ -210,10 +212,17 @@ function simulate(profileName, seed) {
       for (const qq of q.questions) {
         const ok = rand() < chance("hear", qq.i);
         if (ok) right++;
-        const lem = typeof qq.row === "number" ? (q.rows[qq.row].lemmas || []) : [qq.i];
+        /* A scenario is judged whole, as the activity judges it: its content
+           words are graded by whether the conversation was followed, not by
+           any one question. */
+        const lem = q.scenario ? [] 
+          : typeof qq.row === "number" ? (q.lines[qq.row].lemmas || []) : [qq.i];
         for (const i of lem) { grade(i, ok); met.set(i, (met.get(i) || 0) + 1); words.push(i); }
       }
       correct = right === q.questions.length;
+      if (q.scenario && right / q.questions.length >= 0.8) {
+        for (const i of (q.lemmas || [])) { grade(i, true); met.set(i, (met.get(i) || 0) + 1); words.push(i); }
+      }
     } else {
       const i = q.i;
       correct = rand() < chance(q.kind, i);

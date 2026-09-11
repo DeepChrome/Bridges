@@ -71,9 +71,6 @@ export const SCENE_ROWS = [2, 3];
 export const LESSON_LINES = 5;
 /* Below this frequency rank a lemma is a function word, not a word to listen for. */
 export const SCENE_SKIP_TOP = 100;
-/* How far into the route a lesson with nothing behind it may reach for wrong
-   answers: about the first five lessons, which is the same register. */
-export const TOPUP_ROWS = 24;
 
 /* What a learner may put in a quiz of their own (Practice → Quiz). */
 export const QUIZ_KINDS = [
@@ -488,45 +485,6 @@ export function makeQuestions(env) {
    * `written: true` rides on the question: there is no recording for a sentence
    * nobody has said, so the device voice reads it and the screen says so (§27).
    */
-  /* Every written sentence in route order, built once. The head of this list is
-     the opening of chapter 1, which is what an early lesson borrows its wrong
-     answers from. */
-  let routeRowsCache = null;
-  function routeRows() {
-    if (routeRowsCache) return routeRowsCache;
-    routeRowsCache = [];
-    for (const s of STAGES) {
-      for (const u of [s.core].concat(s.branches || [])) {
-        for (let i = 0; i < lessonCount(u); i++) {
-          const x = SCRIPTS[`${u.id}:${i}`];
-          if (x) routeRowsCache.push(...(x.lines || x.rows || []));
-        }
-      }
-    }
-    return routeRowsCache;
-  }
-
-  /* Every word taught on the route up to and including this lesson. */
-  function wordsUpTo(unit, index) {
-    const out = [];
-    for (const u of unitsUpTo(unit)) {
-      out.push(...(u === unit ? u.w.slice(0, (index + 1) * lessonWords(u, 0).length) : u.w));
-    }
-    return new Set(out);
-  }
-
-  function scriptKeysUpTo(unit, index) {
-    const out = [];
-    for (const u of unitsUpTo(unit)) {
-      const n = lessonCount(u);
-      for (let i = 0; i < n; i++) {
-        if (u === unit && i > index) break;
-        if (SCRIPTS[`${u.id}:${i}`]) out.push(`${u.id}:${i}`);
-      }
-    }
-    return out;
-  }
-
   /* One written conversation, and five questions about the situation in it
      (the owner, 2026-09-10 — §30k).
    *
@@ -557,66 +515,7 @@ export function makeQuestions(env) {
   }
 
   function scriptScene(unit, index) {
-    if (!SCRIPTS) return null;
-    const scenario = scenarioFor(unit, index);
-    if (scenario) return scenario;
-    const s = SCRIPTS[`${unit.id}:${index}`];
-    if (!s || !s.rows || s.rows.length < 3) return null;
-
-    const mine = new Set(s.rows.map((r) => r.en));
-    const reached = scriptKeysUpTo(unit, index)
-      .flatMap((k) => SCRIPTS[k].lines || SCRIPTS[k].rows || [])
-      .filter((r) => !mine.has(r.en));
-    /* The first lesson has nothing behind it, so its wrong answers have to come
-       from somewhere else. Taking them from the whole file was the obvious move
-       and made the question free: on the emulator, «Это я.» was offered against
-       "Our customer is an entrepreneur from Moscow." — the right answer was the
-       short one, no listening required. The top-up comes off the front of the
-       route instead, where the sentences are the same size and shape.
-       English distractors are safe to borrow at all because English gives no
-       Russian away; the *Russian* options below are not, and never leave the
-       curriculum the learner has actually met. */
-    const meanings = reached.length >= 3 ? reached
-      : reached.concat(routeRows().filter((r) => !mine.has(r.en)).slice(0, TOPUP_ROWS));
-
-    const rows = s.rows.map((r) => ({ ru: r.ru, en: r.en, lemmas: sentenceLemmas(r.ru, IX) }));
-    const questions = rows.map((row, k) => {
-      const wrong = unique(shuffle(meanings.slice()).map((o) => o.en))
-        .filter((m) => m && m !== row.en).slice(0, 3);
-      if (wrong.length < 3) return null;
-      return {
-        ask: `Sentence ${k + 1}: what does it mean?`, row: k,
-        options: shuffle([{ label: row.en, right: true }]
-          .concat(wrong.map((m) => ({ label: m, right: false })))),
-      };
-    });
-    if (questions.some((q) => !q)) return null;
-
-    /* "Which word did you hear?" puts four Russian words on the screen, so all
-       four have to be words this learner has been taught — including the wrong
-       ones. Drawing them from the earlier passages alone was not enough: those
-       passages legitimately contain proper nouns («Москва») and closed-class
-       glue («да»), neither of which any lesson teaches, and both turned up as
-       options. The curriculum's own word lists up to this lesson are the
-       authority on what has been met. */
-    const met = wordsUpTo(unit, index);
-    const heardAll = unique(rows.flatMap((r) => r.lemmas));
-    const heard = heardAll.filter((i) => i >= SCENE_SKIP_TOP && met.has(i));
-    const absent = unique(reached.flatMap((r) => sentenceLemmas(r.ru, IX)))
-      .filter((i) => i >= SCENE_SKIP_TOP && met.has(i) && !heardAll.includes(i));
-    if (heard.length && absent.length >= 3) {
-      const h = pickOne(heard);
-      questions.push({
-        ask: "Which word did you hear?", i: h, cyr: true,
-        options: shuffle([{ label: L[h].w, right: true, i: h }]
-          .concat(shuffle(absent).slice(0, 3).map((i) => ({ label: L[i].w, right: false, i })))),
-      });
-    }
-    return {
-      kind: "scene", ask: "Listen, then answer", prompt: "", cyr: true,
-      unit: unit.id, cast: [], lines: rows, lemmas: heardAll, questions,
-      level: unit.name, topic: s.title, written: true,
-    };
+    return SCRIPTS ? scenarioFor(unit, index) : null;
   }
 
   /* The written passage for the latest lesson a learner has reached, for the

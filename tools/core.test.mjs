@@ -687,9 +687,6 @@ group("scenes and custom quizzes");
        "with a cast, and every line belongs to one of them", s.cast.map((c) => c.ru).join(", "));
     ok(s.questions.length === 5, "and five questions about what happened", String(s.questions.length));
     ok(s.topic && s.level, "and says what it is about and where it is from", `${s.topic} / ${s.level}`);
-  } else if (s.written) {
-    ok(s.lines.length >= 4 && s.lines.length <= 5, "a written passage is four or five sentences", String(s.lines.length));
-    ok(s.topic && s.level, "and says what it is about and where it is from", `${s.topic} / ${s.level}`);
   } else {
     ok(s.lines.length >= 2 && s.lines.length <= 3, "two or three sentences", String(s.lines.length));
     ok(s.lines.every((r) => DATA.audio.files[fold(r.ru)]), "every sentence has a recording");
@@ -876,21 +873,7 @@ group("the guide");
   ok(poseFor("failed") !== poseFor("passed"), "and failing does not get the cheer");
 }
 
-/* The first n written sentences in route order, as the app walks them. */
-function routeOpening(n) {
-  const out = [];
-  for (const s of STAGES) {
-    for (const u of [s.core].concat(s.branches || [])) {
-      for (let i = 0; i < lessonCount(u) && out.length < n; i++) {
-        const x = SCRIPTS[`${u.id}:${i}`];
-        if (x) out.push(...(x.lines || x.rows).map((r) => r.en));
-      }
-    }
-  }
-  return out.slice(0, n);
-}
-
-group("written lesson passages");
+group("written listening scenarios");
 {
   const keys = Object.keys(SCRIPTS);
   ok(keys.length > 0, "the payload ships them", String(keys.length));
@@ -911,66 +894,19 @@ group("written lesson passages");
     const scene = Q.scriptScene(byId.get(id), Number(i));
     if (!scene) { bad.push(k); continue; }
     built++;
-    const written = SCRIPTS[k].lines || SCRIPTS[k].rows;
-    if (scene.lines.length !== written.length) bad.push(`${k}: lost a line`);
-    if (!scene.written) bad.push(`${k}: not marked written`);
-    if (scene.scenario) {
-      if (scene.questions.length !== 5) bad.push(`${k}: ${scene.questions.length} questions`);
-      if (!scene.cast.length) bad.push(`${k}: no cast`);
-    } else if (scene.questions.length < scene.lines.length) bad.push(`${k}: too few questions`);
+    if (scene.lines.length !== SCRIPTS[k].lines.length) bad.push(`${k}: lost a line`);
+    if (!scene.written || !scene.scenario) bad.push(`${k}: not marked as a written scenario`);
+    if (scene.questions.length !== 5) bad.push(`${k}: ${scene.questions.length} questions`);
+    if (!scene.cast.length) bad.push(`${k}: no cast`);
+    if (scene.lines.some((l) => !scene.cast.some((c) => c.id === l.s))) bad.push(`${k}: a line with no speaker`);
     for (const q of scene.questions) {
       if (q.options.length !== 4) bad.push(`${k}: ${q.options.length} options`);
       if (q.options.filter((o) => o.right).length !== 1) bad.push(`${k}: not one right answer`);
       if (new Set(q.options.map((o) => o.label)).size !== 4) bad.push(`${k}: a repeated option`);
     }
   }
-  ok(built === keys.length, "every one of them builds into a scene", `${built} of ${keys.length}`);
+  ok(built === keys.length, "every one of them builds into a scenario", `${built} of ${keys.length}`);
   ok(!bad.length, "and each is answerable: four distinct options, one right", bad.slice(0, 4).join(" | "));
-
-  // The Russian distractors in "which word did you hear?" are words on screen,
-  // so they must be words this learner has met — the English ones may come from
-  // anywhere, because English gives no Russian away.
-  const offLevel = [];
-  for (const k of keys.slice(0, 40)) {
-    const [id, i] = k.split(":");
-    const u = byId.get(id);
-    const met = new Set(Q.unitsUpTo(u).flatMap((x) => x.w));
-    const scene = Q.scriptScene(u, Number(i));
-    for (const q of (scene.questions || [])) {
-      if (typeof q.i !== "number") continue;
-      for (const o of q.options) if (typeof o.i === "number" && !met.has(o.i)) offLevel.push(`${k}: ${o.label}`);
-    }
-  }
-  ok(!offLevel.length, "no Russian option is a word the learner has not reached",
-     offLevel.slice(0, 4).join(", "));
-
-  // The very first lesson has nothing behind it to draw wrong answers from, so
-  // it borrows from the front of the route rather than the whole file. Borrowing
-  // at large put "Our customer is an entrepreneur from Moscow." beside «Это я.»
-  // on the emulator, and the right answer was simply the short one.
-  /* A scenario's wrong answers are authored beside its questions, so there is
-     nothing to borrow and nothing to get wrong; this is the rule for the
-     generated per-sentence questions that remain where no scenario exists. */
-  if (!Q.scriptScene(STAGES[0].core, 0).scenario) {
-    const opener = STAGES[0].core;
-    const scene = Q.scriptScene(opener, 0);
-    // A generous window on purpose: the contract is "early in the route", not an
-    // exact slice. Forty sentences is the first seven or eight lessons; a
-    // chapter-10 sentence about entrepreneurs is nowhere near it.
-    const early = new Set(routeOpening(40));
-    const far = [];
-    for (const q of scene.questions) {
-      if (typeof q.i === "number") continue;
-      for (const o of q.options) {
-        const own = SCRIPTS[`${opener.id}:0`];
-        if (!o.right && !early.has(o.label) && !(own.lines || own.rows).some((r) => r.en === o.label)) {
-          far.push(o.label);
-        }
-      }
-    }
-    ok(!far.length, "the first lesson's wrong answers come from the opening of the route",
-       far.slice(0, 2).join(" | "));
-  }
 
   // A scripted lesson's quiz gets the written passage, not a corpus scene.
   const scripted = keys.map((k) => k.split(":")).find(([id, i]) => {

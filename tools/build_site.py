@@ -910,26 +910,20 @@ def load_scripts(stats):
         for key, entry in (obj.get("lessons") or obj).items():
             if key in out:
                 raise SystemExit(f"{path.name}: {key} is written twice")
-            if entry.get("lines"):
-                # The scenario shape (CLAUDE.md 30k): who is in it, what they
-                # say, and the questions about the situation. Only the fields
-                # the app reads are shipped.
-                out[key] = {
-                    "title": entry["title"],
-                    "cast": [{"id": c["id"], "ru": c["ru"], "en": c["en"]}
-                             for c in entry.get("cast", [])],
-                    "lines": [{"s": l["s"], "ru": l["ru"], "en": l["en"]}
-                              for l in entry["lines"]],
-                    "questions": [{"ask": q["ask"], "options": list(q["options"]),
-                                   "answer": int(q["answer"])}
-                                  for q in entry.get("questions", [])],
-                }
-            else:
-                out[key] = {"title": entry["title"],
-                            "rows": [{"ru": r["ru"], "en": r["en"]} for r in entry["rows"]]}
+            # Who is in it, what they say, and the questions about the
+            # situation. Only the fields the app reads are shipped.
+            out[key] = {
+                "title": entry["title"],
+                "cast": [{"id": c["id"], "ru": c["ru"], "en": c["en"]}
+                         for c in entry["cast"]],
+                "lines": [{"s": l["s"], "ru": l["ru"], "en": l["en"]}
+                          for l in entry["lines"]],
+                "questions": [{"ask": q["ask"], "options": list(q["options"]),
+                               "answer": int(q["answer"])}
+                              for q in entry["questions"]],
+            }
     stats["written"] = len(out)
-    stats["written_lines"] = sum(len(e.get("lines") or e.get("rows") or []) for e in out.values())
-    stats["scenarios"] = sum(1 for e in out.values() if e.get("lines"))
+    stats["written_lines"] = sum(len(e["lines"]) for e in out.values())
     return out
 
 

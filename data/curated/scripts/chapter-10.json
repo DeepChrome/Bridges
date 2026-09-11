@@ -41,8 +41,8 @@
   "core10:1": {
    "title": "The ones who come early",
    "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
+    { "id": "a", "ru": "Катя", "en": "Katya" },    { "id": "b", "ru": "Миша", "en": "Misha" },
+    { "id": "c", "ru": "Олег", "en": "Oleg" }
    ],
    "lines": [
     { "s": "b", "ru": "Катя, ты рано начинаешь?", "en": "Katya, do you start early?" },
@@ -55,8 +55,10 @@
     { "s": "a", "ru": "Считаю. Это работа.", "en": "I do. It is work." },
     { "s": "b", "ru": "Работа! А некоторые считают не так.", "en": "Work! And some think otherwise." },
     { "s": "a", "ru": "Не так. Но они не приходят.", "en": "Otherwise. But they do not come." },
-    { "s": "b", "ru": "Не приходят! Тогда у тебя возможность.", "en": "They do not come! Then the opportunity is yours." },
-    { "s": "a", "ru": "Возможность, Миша. Я начинаю рано.", "en": "The opportunity, Misha. I start early." }
+    { "s": "b", "ru": "Не приходят! Тогда у тебя возможность.", "en": "They do not come! Then the opportunity is yours." },    { "s": "a", "ru": "Возможность, Миша. Я начинаю рано.", "en": "The opportunity, Misha. I start early." },
+    { "s": "c", "ru": "Я тоже прихожу рано.", "en": "I come early too." },
+    { "s": "b", "ru": "Олег! И ты?", "en": "Oleg! You as well?" },
+    { "s": "c", "ru": "И я. Это работа.", "en": "Me as well. It is work." }
    ],
    "questions": [
     { "ask": "When does Katya start?",
@@ -68,10 +70,8 @@
       "options": ["Yes", "No", "Only sometimes", "Misha does"], "answer": 0 },
     { "ask": "What do the others do?",
       "options": ["They do not come", "They come later", "They argue", "They work harder"],
-      "answer": 0 },
-    { "ask": "What is Misha's conclusion?",
-      "options": ["The opportunity is hers", "She works too much", "She should stop", "Nothing"],
-      "answer": 0 }
+      "answer": 0 },    { "ask": "Who else comes in early?",
+      "options": ["Oleg", "Misha", "Nobody", "Everyone does"], "answer": 0 }
    ]
   },
 
@@ -113,12 +113,11 @@
 
   "core10:3": {
    "title": "Answering all the same",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
+   "cast": [    { "id": "a", "ru": "Иван", "en": "Ivan" },
     { "id": "b", "ru": "Пётр", "en": "Pyotr" }
    ],
    "lines": [
-    { "s": "b", "ru": "Нина, ты отвечаешь?", "en": "Nina, are you answering?" },
+    { "s": "b", "ru": "Иван, ты отвечаешь?", "en": "Ivan, are you answering?" },
     { "s": "a", "ru": "Отвечаю. Конечно.", "en": "I am. Of course." },
     { "s": "b", "ru": "Конечно! Хотя вопрос большой.", "en": "Of course! Though it is a big question." },
     { "s": "a", "ru": "Большой. Однако я отвечаю.", "en": "Big. However, I am answering it." },
@@ -132,18 +131,15 @@
     { "s": "a", "ru": "Отвечаю, Пётр. Конечно, отвечаю.", "en": "I answer, Pyotr. Of course I answer." }
    ],
    "questions": [
-    { "ask": "What is Nina doing?",
+    { "ask": "What is Ivan doing?",
       "options": ["Answering questions", "Asking them", "Refusing to speak", "Leaving"],
-      "answer": 0 },
-    { "ask": "How does she describe her attitude?",
-      "options": ["Good", "Poor", "Indifferent", "She does not say"], "answer": 0 },
-    { "ask": "What does she say about progress?",
+      "answer": 0 },    { "ask": "How does he describe his attitude?",
+      "options": ["Good", "Poor", "Indifferent", "He does not say"], "answer": 0 },
+    { "ask": "What does he say about progress?",
       "options": ["Nothing is moving", "It is going well", "It is nearly finished", "It is not her concern"],
-      "answer": 0 },
-    { "ask": "Does her work show a result?",
-      "options": ["No", "Yes", "Only a small one", "She will not say"], "answer": 0 },
-    { "ask": "Does she stop answering?",
-      "options": ["No, she keeps answering", "Yes", "She answers once more", "She asks Pyotr to stop"],
+      "answer": 0 },    { "ask": "Does his work show a result?",
+      "options": ["No", "Yes", "Only a small one", "He will not say"], "answer": 0 },    { "ask": "Does he stop answering?",
+      "options": ["No, he keeps answering", "Yes", "He answers once more", "He asks Pyotr to stop"],
       "answer": 0 }
    ]
   },
@@ -257,8 +253,8 @@
   "law:2": {
    "title": "She saw the arrest",
    "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
+    { "id": "a", "ru": "Лена", "en": "Lena" },    { "id": "b", "ru": "Юра", "en": "Yura" },
+    { "id": "c", "ru": "Нина", "en": "Nina" }
    ],
    "lines": [
     { "s": "b", "ru": "Лена, ты свидетель?", "en": "Lena, are you a witness?" },
@@ -271,8 +267,10 @@
     { "s": "a", "ru": "Вор? Он не убийца.", "en": "The thief? He is no killer." },
     { "s": "b", "ru": "Не убийца... А арест?", "en": "No killer... And the arrest?" },
     { "s": "a", "ru": "Арест был. Вчера.", "en": "There was an arrest. Yesterday." },
-    { "s": "b", "ru": "Вчера! И ты видела?", "en": "Yesterday! And you saw it?" },
-    { "s": "a", "ru": "Видела, Юра. Я свидетель.", "en": "I saw it, Yura. I am a witness." }
+    { "s": "b", "ru": "Вчера! И ты видела?", "en": "Yesterday! And you saw it?" },    { "s": "a", "ru": "Видела, Юра. Я свидетель.", "en": "I saw it, Yura. I am a witness." },
+    { "s": "c", "ru": "Я тоже видела арест.", "en": "I saw the arrest too." },
+    { "s": "b", "ru": "Нина! Ты свидетель?", "en": "Nina! Are you a witness?" },
+    { "s": "c", "ru": "Свидетель. Как Лена.", "en": "A witness. Like Lena." }
    ],
    "questions": [
     { "ask": "What is Lena's part in it?",
@@ -283,9 +281,8 @@
     { "ask": "What is the man accused of?",
       "options": ["Theft", "Murder", "Bribery", "Nothing"], "answer": 0 },
     { "ask": "When was the arrest?",
-      "options": ["Yesterday", "Today", "A week ago", "There has been none"], "answer": 0 },
-    { "ask": "Did she see it herself?",
-      "options": ["Yes", "No", "Only part of it", "She heard about it"], "answer": 0 }
+      "options": ["Yesterday", "Today", "A week ago", "There has been none"], "answer": 0 },    { "ask": "Who else saw the arrest?",
+      "options": ["Nina", "Yura", "Nobody", "The thief"], "answer": 0 }
    ]
   },
 
@@ -326,8 +323,7 @@
   "law:4": {
    "title": "The detective found bribes",
    "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
+    { "id": "a", "ru": "Соня", "en": "Sonya" },    { "id": "b", "ru": "Маша", "en": "Masha" }
    ],
    "lines": [
     { "s": "b", "ru": "Соня, кто этот юрист?", "en": "Sonya, who is that lawyer?" },
@@ -341,7 +337,7 @@
     { "s": "b", "ru": "Год! И что он нашёл?", "en": "A year! And what has he found?" },
     { "s": "a", "ru": "Нашёл взятку. И не одну.", "en": "He found a bribe. And not just one." },
     { "s": "b", "ru": "Не одну! Это уголовное дело.", "en": "Not just one! That is a criminal matter." },
-    { "s": "a", "ru": "Уголовное, Олег. Юрист это знает.", "en": "Criminal, Oleg. The lawyer knows it." }
+    { "s": "a", "ru": "Уголовное, Маша. Юрист это знает.", "en": "Criminal, Masha. The lawyer knows it." }
    ],
    "questions": [
     { "ask": "Who is the man they see first?",
@@ -360,8 +356,8 @@
   "religion:0": {
    "title": "The wedding at the temple",
    "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+    { "id": "a", "ru": "Аня", "en": "Anya" },    { "id": "b", "ru": "Виктор", "en": "Viktor" },
+    { "id": "c", "ru": "Соня", "en": "Sonya" }
    ],
    "lines": [
     { "s": "b", "ru": "Аня, это храм?", "en": "Anya, is this a temple?" },
@@ -374,8 +370,10 @@
     { "s": "a", "ru": "Молятся. Каждый день.", "en": "They pray. Every day." },
     { "s": "b", "ru": "Каждый день! Они религиозные.", "en": "Every day! They are religious, then." },
     { "s": "a", "ru": "Религиозные. Но не все.", "en": "Religious. But not all of them." },
-    { "s": "b", "ru": "Не все... А чёрт?", "en": "Not all... And the devil?" },
-    { "s": "a", "ru": "Чёрт? Это другая история, Виктор.", "en": "The devil? That is another story, Viktor." }
+    { "s": "b", "ru": "Не все... А чёрт?", "en": "Not all... And the devil?" },    { "s": "a", "ru": "Чёрт? Это другая история, Виктор.", "en": "The devil? That is another story, Viktor." },
+    { "s": "c", "ru": "Аня, свадьба была тут?", "en": "Anya, was the wedding here?" },
+    { "s": "a", "ru": "Соня! Была. Вчера.", "en": "Sonya! It was. Yesterday." },
+    { "s": "c", "ru": "Вчера. И они молятся.", "en": "Yesterday. And they pray." }
    ],
    "questions": [
     { "ask": "Where are they?",
@@ -386,10 +384,8 @@
       "options": ["As their own affair", "As her own", "As nonsense", "She refuses to speak of it"],
       "answer": 0 },
     { "ask": "How often do they pray?",
-      "options": ["Every day", "Once a week", "Never", "Only at weddings"], "answer": 0 },
-    { "ask": "Are they all religious?",
-      "options": ["Not all of them", "All of them", "None of them", "She does not know"],
-      "answer": 0 }
+      "options": ["Every day", "Once a week", "Never", "Only at weddings"], "answer": 0 },    { "ask": "Who joins them at the end?",
+      "options": ["Sonya", "The bride", "Nobody", "The priest"], "answer": 0 }
    ]
   },
 
@@ -431,8 +427,7 @@
   "religion:2": {
    "title": "The same word for God",
    "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
+    { "id": "a", "ru": "Лена", "en": "Lena" },    { "id": "b", "ru": "Таня", "en": "Tanya" }
    ],
    "lines": [
     { "s": "b", "ru": "Лена, ты знаешь этот храм?", "en": "Lena, do you know this temple?" },
@@ -446,7 +441,7 @@
     { "s": "b", "ru": "Между нами... А дьявол?", "en": "Between us... And the devil?" },
     { "s": "a", "ru": "Дьявол? Это другая часть.", "en": "The devil? That is another part of it." },
     { "s": "b", "ru": "Другая часть! А еврейский храм?", "en": "Another part! And the Jewish temple?" },
-    { "s": "a", "ru": "Он тоже тут, Борис. Божий дом.", "en": "That is here too, Boris. A house of God." }
+    { "s": "a", "ru": "Он тоже тут, Таня. Божий дом.", "en": "That is here too, Tanya. A house of God." }
    ],
    "questions": [
     { "ask": "What is spoken of at the temple?",
@@ -455,12 +450,9 @@
       "options": ["They mean the same", "They are opposites", "One is older", "She does not know"],
       "answer": 0 },
     { "ask": "What else is spoken of there?",
-      "options": ["Sin", "Money", "The law", "Science"], "answer": 0 },
-    { "ask": "What does she say about trust?",
-      "options": ["There is trust between them", "There is none", "It is a sin", "Boris has none"],
-      "answer": 0 },
-    { "ask": "Is there a Jewish temple nearby?",
-      "options": ["Yes", "No", "It has closed", "She does not say"], "answer": 0 }
+      "options": ["Sin", "Money", "The law", "Science"], "answer": 0 },    { "ask": "What does Lena say about trust?",
+      "options": ["There is trust between them", "There is none", "It is a sin", "Tanya has none"], "answer": 0 },    { "ask": "Is there a Jewish temple nearby?",
+      "options": ["Yes", "No", "It has closed", "Lena does not say"], "answer": 0 }
    ]
   }
  }

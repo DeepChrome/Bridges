@@ -41,8 +41,8 @@
   "core7:1": {
    "title": "A small television, all night",
    "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
+    { "id": "a", "ru": "Катя", "en": "Katya" },    { "id": "b", "ru": "Борис", "en": "Boris" },
+    { "id": "c", "ru": "Юра", "en": "Yura" }
    ],
    "lines": [
     { "s": "b", "ru": "Катя, вот телевизор.", "en": "Katya, here is the television." },
@@ -55,8 +55,10 @@
     { "s": "a", "ru": "Забыл? Расскажи мне.", "en": "Forgotten? Tell me about it." },
     { "s": "b", "ru": "Расскажу. Но это маленькая история.", "en": "I will. But it is a small story." },
     { "s": "a", "ru": "Борис, маленькая история — тоже история.", "en": "Boris, a small story is still a story." },
-    { "s": "b", "ru": "Вот. Была ночь, и телевизор.", "en": "Here it is. There was a night, and a television." },
-    { "s": "a", "ru": "И всё? Ты просто забыл.", "en": "Is that all? You simply forgot." }
+    { "s": "b", "ru": "Вот. Была ночь, и телевизор.", "en": "Here it is. There was a night, and a television." },    { "s": "a", "ru": "И всё? Ты просто забыл.", "en": "Is that all? You simply forgot." },
+    { "s": "c", "ru": "Была ночь. Я тоже смотрел.", "en": "There was a night. I was watching too." },
+    { "s": "a", "ru": "Юра? И ты смотрел телевизор?", "en": "Yura? You were watching the television too?" },
+    { "s": "c", "ru": "Смотрел. И тоже забыл.", "en": "I was. And I have forgotten too." }
    ],
    "questions": [
     { "ask": "What are they talking about?",
@@ -67,9 +69,9 @@
       "options": ["No, he has forgotten", "Yes, in detail", "He will not say", "Katya tells him"],
       "answer": 0 },
     { "ask": "What does Katya ask him to do?",
-      "options": ["Tell her the story", "Turn it off", "Lend it to her", "Go to bed"], "answer": 0 },
-    { "ask": "How much of a story is there?",
-      "options": ["Almost none", "A long one", "Two stories", "He tells it well"], "answer": 0 }
+      "options": ["Tell her the story", "Turn it off", "Lend it to her", "Go to bed"], "answer": 0 },    { "ask": "What does Yura add at the end?",
+      "options": ["He watched too, and forgot too", "He remembers it all", "He was asleep", "He has no television"],
+      "answer": 0 }
    ]
   },
 
@@ -147,12 +149,11 @@
 
   "core7:4": {
    "title": "The price has changed",
-   "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
+   "cast": [    { "id": "a", "ru": "Иван", "en": "Ivan" },
     { "id": "b", "ru": "Виктор", "en": "Viktor" }
    ],
    "lines": [
-    { "s": "b", "ru": "Соня, ты слушаешь?", "en": "Sonya, are you listening?" },
+    { "s": "b", "ru": "Иван, ты слушаешь?", "en": "Ivan, are you listening?" },
     { "s": "a", "ru": "Слушаю. Говори.", "en": "I am. Go on." },
     { "s": "b", "ru": "Цена. Она теперь другая.", "en": "The price. It is different now." },
     { "s": "a", "ru": "Другая цена? Больше?", "en": "A different price? Higher?" },
@@ -169,14 +170,12 @@
     { "ask": "What has happened to the price?",
       "options": ["It has doubled", "It has halved", "It is unchanged", "It was cancelled"], "answer": 0 },
     { "ask": "Who set it?",
-      "options": ["Somebody else, not Viktor", "Viktor", "Sonya", "Nobody knows"], "answer": 0 },
-    { "ask": "How does Sonya react at first?",
-      "options": ["She refuses to listen", "She agrees at once", "She laughs", "She offers to pay"],
-      "answer": 0 },
+      "options": ["Somebody else, not Viktor", "Viktor", "Ivan", "Nobody knows"], "answer": 0 },    { "ask": "How does Ivan react at first?",
+      "options": ["He refuses to listen", "He agrees at once", "He laughs", "He offers to pay"], "answer": 0 },
     { "ask": "What are the choices?",
       "options": ["Take the price or leave it", "Pay half", "Wait a year", "Complain"], "answer": 0 },
     { "ask": "Where does it end?",
-      "options": ["She is listening, but unhappy", "They pay", "They refuse", "Viktor leaves"],
+      "options": ["He is listening, but unhappy", "They pay", "They refuse", "Viktor leaves"],
       "answer": 0 }
    ]
   },
@@ -184,8 +183,7 @@
   "emotion:0": {
    "title": "Which idea she prefers",
    "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+    { "id": "a", "ru": "Аня", "en": "Anya" },    { "id": "b", "ru": "Таня", "en": "Tanya" }
    ],
    "lines": [
     { "s": "b", "ru": "Аня, тебе нравится эта идея?", "en": "Anya, do you like this idea?" },
@@ -194,21 +192,21 @@
     { "s": "a", "ru": "Моё мнение — я помню другую идею.", "en": "My opinion is that I remember a different idea." },
     { "s": "b", "ru": "Другую? Какую?", "en": "A different one? Which?" },
     { "s": "a", "ru": "Ту, что была вчера. Ты помнишь?", "en": "The one from yesterday. Do you remember?" },
-    { "s": "b", "ru": "Помню. Но я её не понял.", "en": "I do. But I did not understand it." },
-    { "s": "a", "ru": "Не понял? Я тоже.", "en": "You did not? Neither did I." },
+    { "s": "b", "ru": "Помню. Но я её не поняла.", "en": "I do. But I did not understand it." },
+    { "s": "a", "ru": "Не поняла? Я тоже.", "en": "You did not? Neither did I." },
     { "s": "b", "ru": "Тогда я за эту идею.", "en": "Then I am for this idea." },
     { "s": "a", "ru": "И я. Я счастливая.", "en": "So am I. I am happy." },
     { "s": "b", "ru": "Счастливая? Почему?", "en": "Happy? Why?" },
-    { "s": "a", "ru": "Так, Пётр. Идея интересная.", "en": "Just so, Pyotr. The idea is interesting." }
+    { "s": "a", "ru": "Так, Таня. Идея интересная.", "en": "Just so, Tanya. The idea is interesting." }
    ],
    "questions": [
     { "ask": "What do they think of today's idea?",
-      "options": ["They both like it", "They both dislike it", "Only Anya likes it", "Only Pyotr likes it"],
+      "options": ["They both like it", "They both dislike it", "Only Anya likes it", "Only Tanya likes it"],
       "answer": 0 },
     { "ask": "What does Anya keep thinking of?",
-      "options": ["Yesterday's idea", "A book", "Her opinion of Pyotr", "Nothing"], "answer": 0 },
+      "options": ["Yesterday's idea", "A book", "Her opinion of Tanya", "Nothing"], "answer": 0 },
     { "ask": "Did either of them understand that one?",
-      "options": ["Neither did", "Both did", "Only Pyotr", "Only Anya"], "answer": 0 },
+      "options": ["Neither did", "Both did", "Only Tanya", "Only Anya"], "answer": 0 },
     { "ask": "What do they settle on?",
       "options": ["The new idea", "The old idea", "Neither", "They do not settle"], "answer": 0 },
     { "ask": "How does Anya end up feeling?",
@@ -255,8 +253,8 @@
   "emotion:2": {
    "title": "What she dreams about",
    "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
+    { "id": "a", "ru": "Лена", "en": "Lena" },    { "id": "b", "ru": "Миша", "en": "Misha" },
+    { "id": "c", "ru": "Аня", "en": "Anya" }
    ],
    "lines": [
     { "s": "b", "ru": "Лена, о чём ты мечтаешь?", "en": "Lena, what do you dream about?" },
@@ -269,8 +267,10 @@
     { "s": "a", "ru": "Любовь... Может быть. И радость.", "en": "Love... Perhaps. And joy." },
     { "s": "b", "ru": "Радость и любовь. Ты мечтаешь о них?", "en": "Joy and love. Is that what you dream of?" },
     { "s": "a", "ru": "Мечтаю. Но я спокойная.", "en": "I do. But I am calm about it." },
-    { "s": "b", "ru": "Спокойная — и мечтаешь?", "en": "Calm — and dreaming?" },
-    { "s": "a", "ru": "Да, Миша. Подумай сам.", "en": "Yes, Misha. Work it out yourself." }
+    { "s": "b", "ru": "Спокойная — и мечтаешь?", "en": "Calm — and dreaming?" },    { "s": "a", "ru": "Да, Миша. Подумай сам.", "en": "Yes, Misha. Work it out yourself." },
+    { "s": "c", "ru": "А меня интересует радость.", "en": "And joy is what interests me." },
+    { "s": "b", "ru": "Аня! Ты тоже мечтаешь?", "en": "Anya! Do you dream too?" },
+    { "s": "c", "ru": "Мечтаю. О радости.", "en": "I do. About joy." }
    ],
    "questions": [
     { "ask": "What does Misha ask her?",
@@ -279,9 +279,8 @@
     { "ask": "What surprises Lena?",
       "options": ["How calm he is", "The question", "That he stayed", "Nothing"], "answer": 0 },
     { "ask": "What does she name in the end?",
-      "options": ["Love and joy", "Work", "Travel", "She refuses to answer"], "answer": 0 },
-    { "ask": "How does she describe herself?",
-      "options": ["Calm", "Anxious", "Happy", "Tired"], "answer": 0 },
+      "options": ["Love and joy", "Work", "Travel", "She refuses to answer"], "answer": 0 },    { "ask": "Who else joins in?",
+      "options": ["Anya, who dreams of joy", "Nobody", "Misha's brother", "Lena's sister"], "answer": 0 },
     { "ask": "What does she tell him to do?",
       "options": ["Work it out himself", "Stop asking", "Dream too", "Come back tomorrow"],
       "answer": 0 }
@@ -400,33 +399,28 @@
 
   "speech:0": {
    "title": "The letter she has not answered",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
+   "cast": [    { "id": "a", "ru": "Олег", "en": "Oleg" },
     { "id": "b", "ru": "Виктор", "en": "Viktor" }
    ],
    "lines": [
-    { "s": "b", "ru": "Катя, можно спросить?", "en": "Katya, may I ask you something?" },
+    { "s": "b", "ru": "Олег, можно спросить?", "en": "Oleg, may I ask you something?" },
     { "s": "a", "ru": "Спроси, Виктор. Я отвечу.", "en": "Ask, Viktor. I will answer." },
-    { "s": "b", "ru": "Ты получила письмо?", "en": "Did you get the letter?" },
-    { "s": "a", "ru": "Письмо? Получила. Но я не ответила.", "en": "The letter? I got it. But I did not answer." },
-    { "s": "b", "ru": "Не ответила! Почему?", "en": "You did not answer! Why?" },
+    { "s": "b", "ru": "Ты получил письмо?", "en": "Did you get the letter?" },
+    { "s": "a", "ru": "Письмо? Получил. Но я не ответил.", "en": "The letter? I got it. But I did not answer." },
+    { "s": "b", "ru": "Не ответил! Почему?", "en": "You did not answer! Why?" },
     { "s": "a", "ru": "Не могу объяснять. Это не просто.", "en": "I cannot explain. It is not simple." },
     { "s": "b", "ru": "Не просто... А кто тебе пишет?", "en": "Not simple... And who writes to you?" },
-    { "s": "a", "ru": "Тот, с кем я разговаривала.", "en": "The man I was talking to." },
-    { "s": "b", "ru": "Разговаривала! И о чём?", "en": "Talking to! And about what?" },
-    { "s": "a", "ru": "Я рассказывала о работе.", "en": "I was telling him about work." },
-    { "s": "b", "ru": "О работе. И он попросил, чтобы ты ответила?", "en": "About work. And he asked you to answer?" },
-    { "s": "a", "ru": "Попросил. А я не ответила.", "en": "He did. And I have not answered." }
+    { "s": "a", "ru": "Тот, с кем я разговаривал.", "en": "The man I was talking to." },
+    { "s": "b", "ru": "Разговаривал! И о чём?", "en": "Talking to! And about what?" },
+    { "s": "a", "ru": "Я рассказывал о работе.", "en": "I was telling him about work." },
+    { "s": "b", "ru": "О работе. И он попросил, чтобы ты ответил?", "en": "About work. And he asked you to answer?" },
+    { "s": "a", "ru": "Попросил. А я не ответил.", "en": "He did. And I have not answered." }
    ],
-   "questions": [
-    { "ask": "What has Katya not done?",
-      "options": ["Answered a letter", "Written a letter", "Spoken to Viktor", "Gone to work"],
-      "answer": 0 },
-    { "ask": "Will she explain why?",
-      "options": ["No, she says it is not simple", "Yes, at length", "She blames the post", "She says she forgot"],
-      "answer": 0 },
-    { "ask": "Who wrote to her?",
-      "options": ["Someone she had talked to", "Her boss", "Viktor", "She does not know"], "answer": 0 },
+   "questions": [    { "ask": "What has Oleg not done?",
+      "options": ["Answered a letter", "Written a letter", "Spoken to Viktor", "Gone to work"], "answer": 0 },    { "ask": "Will Oleg explain why?",
+      "options": ["No, he says it is not simple", "Yes, at length", "He blames the post", "He says he forgot"],
+      "answer": 0 },    { "ask": "Who wrote to him?",
+      "options": ["Someone he had talked to", "His boss", "Viktor", "He does not know"], "answer": 0 },
     { "ask": "What had they talked about?",
       "options": ["Work", "The letter", "Viktor", "Nothing in particular"], "answer": 0 },
     { "ask": "What did he ask for?",
@@ -511,8 +505,8 @@
   "speech:3": {
    "title": "After the quarrel, silence",
    "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
+    { "id": "a", "ru": "Соня", "en": "Sonya" },    { "id": "b", "ru": "Борис", "en": "Boris" },
+    { "id": "c", "ru": "Нина", "en": "Nina" }
    ],
    "lines": [
     { "s": "b", "ru": "Соня, почему ты молчишь?", "en": "Sonya, why are you silent?" },
@@ -525,8 +519,10 @@
     { "s": "a", "ru": "Его. Он проговорил всё.", "en": "His. He said the whole of it." },
     { "s": "b", "ru": "Проговорил — и что теперь?", "en": "He said it — and now what?" },
     { "s": "a", "ru": "Теперь я молчу.", "en": "Now I am silent." },
-    { "s": "b", "ru": "Молчишь. Но надо объясняться.", "en": "You are silent. But it needs talking out." },
-    { "s": "a", "ru": "Объясняться? Не сегодня, Борис.", "en": "Talking out? Not today, Boris." }
+    { "s": "b", "ru": "Молчишь. Но надо объясняться.", "en": "You are silent. But it needs talking out." },    { "s": "a", "ru": "Объясняться? Не сегодня, Борис.", "en": "Talking out? Not today, Boris." },
+    { "s": "c", "ru": "Ссора была и у меня.", "en": "I had a quarrel too." },
+    { "s": "b", "ru": "Нина! И ты молчишь?", "en": "Nina! Are you silent too?" },
+    { "s": "c", "ru": "Не молчу. Я объясняюсь.", "en": "I am not. I talk it out." }
    ],
    "questions": [
     { "ask": "Why is Sonya not speaking?",
@@ -538,9 +534,8 @@
       "options": ["The other man's", "Sonya's", "Boris's", "Nobody's"], "answer": 0 },
     { "ask": "What does Boris think should happen?",
       "options": ["It should be talked out", "She should stay silent", "She should leave", "He should speak to the man"],
-      "answer": 0 },
-    { "ask": "What does she answer?",
-      "options": ["Not today", "Never", "Right now", "She agrees at once"], "answer": 0 }
+      "answer": 0 },    { "ask": "What does Nina do about her own quarrel?",
+      "options": ["She talks it out", "She stays silent too", "She left", "She agrees with Sonya"], "answer": 0 }
    ]
   },
 
@@ -651,8 +646,8 @@
   "business:1": {
    "title": "Budget, credit and a fund",
    "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+    { "id": "a", "ru": "Нина", "en": "Nina" },    { "id": "b", "ru": "Пётр", "en": "Pyotr" },
+    { "id": "c", "ru": "Виктор", "en": "Viktor" }
    ],
    "lines": [
     { "s": "b", "ru": "Нина, какой у вас бюджет?", "en": "Nina, what is your budget?" },
@@ -665,8 +660,10 @@
     { "s": "a", "ru": "Экономика... Это деловой вопрос.", "en": "The economy... That is a business question." },
     { "s": "b", "ru": "Деловой! Ты деловая женщина.", "en": "A business question! You are a businesswoman." },
     { "s": "a", "ru": "Деловая. Бюджет, кредит, фонд.", "en": "I am. Budget, credit, fund." },
-    { "s": "b", "ru": "И доход. Не забудь.", "en": "And income. Do not forget." },
-    { "s": "a", "ru": "Не забуду, Пётр. Доход тоже.", "en": "I will not forget, Pyotr. Income too." }
+    { "s": "b", "ru": "И доход. Не забудь.", "en": "And income. Do not forget." },    { "s": "a", "ru": "Не забуду, Пётр. Доход тоже.", "en": "I will not forget, Pyotr. Income too." },
+    { "s": "c", "ru": "А акции? Они и мои.", "en": "And the shares? Some are mine." },
+    { "s": "b", "ru": "Виктор! Твои акции тут?", "en": "Viktor! Your shares are here?" },
+    { "s": "c", "ru": "Тут. В фонде.", "en": "Here. In the fund." }
    ],
    "questions": [
     { "ask": "How big is the budget?",
@@ -677,9 +674,8 @@
       "options": ["They keep them", "They sell them", "They are in the fund", "There are none"],
       "answer": 0 },
     { "ask": "What does Pyotr call her?",
-      "options": ["A businesswoman", "An optimist", "A borrower", "A fund manager"], "answer": 0 },
-    { "ask": "What does he remind her of?",
-      "options": ["The income", "The credit", "The budget", "The economy"], "answer": 0 }
+      "options": ["A businesswoman", "An optimist", "A borrower", "A fund manager"], "answer": 0 },    { "ask": "What does Viktor turn out to own?",
+      "options": ["Some of the shares", "The fund", "The whole budget", "Nothing"], "answer": 0 }
    ]
   },
 
@@ -758,8 +754,7 @@
   "business:4": {
    "title": "A loss, and rising prices",
    "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
+    { "id": "a", "ru": "Катя", "en": "Katya" },    { "id": "b", "ru": "Маша", "en": "Masha" }
    ],
    "lines": [
     { "s": "b", "ru": "Катя, у вас убыток?", "en": "Katya, are you making a loss?" },
@@ -769,7 +764,7 @@
     { "s": "b", "ru": "В фирму! И что теперь?", "en": "In the firm! And now what?" },
     { "s": "a", "ru": "Теперь всё дорожает.", "en": "Now everything is going up in price." },
     { "s": "b", "ru": "Дорожает... А богатство?", "en": "Going up... And the riches?" },
-    { "s": "a", "ru": "Богатство? Юра, у нас убыток!", "en": "Riches? Yura, we are making a loss!" },
+    { "s": "a", "ru": "Богатство? Маша, у нас убыток!", "en": "Riches? Masha, we are making a loss!" },
     { "s": "b", "ru": "Убыток. Но вложение работает?", "en": "A loss. But is the investment working?" },
     { "s": "a", "ru": "Работает. Только не сегодня.", "en": "It is working. Only not today." },
     { "s": "b", "ru": "Не сегодня? Тогда завтра.", "en": "Not today? Tomorrow, then." },
@@ -777,17 +772,15 @@
    ],
    "questions": [
     { "ask": "How is the firm doing?",
-      "options": ["Making a small loss", "Making a large profit", "Breaking even", "She will not say"],
+      "options": ["Making a small loss", "Making a large profit", "Breaking even", "Katya will not say"],
       "answer": 0 },
     { "ask": "Where did the investment go?",
       "options": ["Into the firm", "Into shares", "Into a fund", "There was none"], "answer": 0 },
     { "ask": "What is happening to prices?",
       "options": ["They are rising", "They are falling", "They are steady", "Nobody mentions them"],
-      "answer": 0 },
-    { "ask": "Why does she object to the word \"riches\"?",
-      "options": ["They are losing money", "She dislikes Yura", "It is a secret", "It is not her firm"],
-      "answer": 0 },
-    { "ask": "When does she expect it to work?",
+      "answer": 0 },    { "ask": "Why does Katya object to the word \"riches\"?",
+      "options": ["They are losing money", "She dislikes Masha", "It is a secret", "It is not her firm"], "answer": 0 },
+    { "ask": "When does Katya expect it to work?",
       "options": ["Tomorrow, if the loss stops", "Never", "Today", "In a year"], "answer": 0 }
    ]
   }

@@ -6,7 +6,8 @@
    "title": "Waiting for Oleg",
    "cast": [
     { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
+    { "id": "b", "ru": "Иван", "en": "Ivan" },
+    { "id": "c", "ru": "Олег", "en": "Oleg" }
    ],
    "lines": [
     { "s": "a", "ru": "Иван, это ты?", "en": "Ivan, is that you?" },
@@ -19,23 +20,23 @@
     { "s": "b", "ru": "Нет, ещё нет.", "en": "No, not yet." },
     { "s": "a", "ru": "А где же он?", "en": "So where is he?" },
     { "s": "b", "ru": "Он там.", "en": "He is over there." },
-    { "s": "a", "ru": "Там? Не тут?", "en": "There? Not here?" },
-    { "s": "b", "ru": "Да, он там.", "en": "Yes, he is there." },
     { "s": "a", "ru": "Вот он, Иван!", "en": "There he is, Ivan!" },
     { "s": "b", "ru": "Да, это он.", "en": "Yes, that is him." },
     { "s": "a", "ru": "Олег, ты уже здесь!", "en": "Oleg, you are here already!" },
-    { "s": "b", "ru": "Вот и все.", "en": "That is everyone, then." }
+    { "s": "c", "ru": "Я тут. Это я.", "en": "I am here. It is me." },
+    { "s": "b", "ru": "А мы тут, Олег.", "en": "And we are here, Oleg." },
+    { "s": "c", "ru": "Все тут. Вот и все.", "en": "Everyone is here. That is all of us." }
    ],
    "questions": [
-    { "ask": "Who are the two people talking?",
-      "options": ["Anya and Ivan", "Anya and Oleg", "Ivan and Oleg", "Oleg and Masha"],
+    { "ask": "Who is doing the waiting?",
+      "options": ["Anya and Ivan", "Anya and Oleg", "Ivan and Oleg", "All three of them"],
       "answer": 0 },
     { "ask": "Who are they waiting for?",
       "options": ["Oleg", "Ivan", "Anya", "Nobody"], "answer": 0 },
     { "ask": "At first, where does Ivan say he is?",
       "options": ["Over there", "Right here", "At home", "In Moscow"], "answer": 0 },
     { "ask": "Does he arrive?",
-      "options": ["Yes, at the end", "No, he never comes", "He was there all along", "He telephones instead"],
+      "options": ["Yes, and he speaks", "No, he never comes", "He was there all along", "He telephones instead"],
       "answer": 0 },
     { "ask": "How does Anya sound when she sees him?",
       "options": ["Surprised he is already there", "Angry that he is late", "Bored", "Worried about Ivan"],
@@ -47,7 +48,8 @@
    "title": "Who is coming with us",
    "cast": [
     { "id": "a", "ru": "Маша", "en": "Masha" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
+    { "id": "b", "ru": "Олег", "en": "Oleg" },
+    { "id": "c", "ru": "Пётр", "en": "Pyotr" }
    ],
    "lines": [
     { "s": "b", "ru": "Маша, ты с нами?", "en": "Masha, are you with us?" },
@@ -58,10 +60,11 @@
     { "s": "a", "ru": "А этот? Кто он?", "en": "And this one? Who is he?" },
     { "s": "b", "ru": "Этот? Это Пётр.", "en": "This one? That is Pyotr." },
     { "s": "a", "ru": "Пётр не с вами?", "en": "Pyotr is not with you?" },
-    { "s": "b", "ru": "Нет, он не с нами.", "en": "No, he is not with us." },
-    { "s": "a", "ru": "Почему, Олег?", "en": "Why, Oleg?" },
-    { "s": "b", "ru": "Он уже там.", "en": "He is already there." },
-    { "s": "a", "ru": "А, вот как.", "en": "Ah, I see." },
+    { "s": "c", "ru": "Я не с вами.", "en": "I am not with you." },
+    { "s": "a", "ru": "Пётр! Ты тут?", "en": "Pyotr! You are here?" },
+    { "s": "c", "ru": "Тут. Но я уже там.", "en": "Here. But I am already on my way there." },
+    { "s": "b", "ru": "Он уже там, Маша.", "en": "He is already there, Masha." },
+    { "s": "a", "ru": "А, вот как, Олег.", "en": "Ah, I see, Oleg." },
     { "s": "b", "ru": "Так что, ты с нами?", "en": "So then, are you coming with us?" },
     { "s": "a", "ru": "Да, я с вами.", "en": "Yes, I am with you." }
    ],
@@ -69,7 +72,7 @@
     { "ask": "Who does Oleg name as coming with him?",
       "options": ["Ivan and Anya", "Pyotr and Anya", "Only Ivan", "Nobody"], "answer": 0 },
     { "ask": "Why is Pyotr not with them?",
-      "options": ["He is already there", "He is ill", "He was not asked", "He is with Anya"],
+      "options": ["He is already on his way there", "He is ill", "He was not asked", "He is with Anya"],
       "answer": 0 },
     { "ask": "What does Masha want to know first?",
       "options": ["Who \"us\" means", "Where they are going", "When they leave", "Whether Oleg is driving"],
@@ -77,8 +80,8 @@
     { "ask": "What does Masha decide?",
       "options": ["She goes with them", "She stays behind", "She goes with Pyotr", "She cannot decide"],
       "answer": 0 },
-    { "ask": "Who asks the last question?",
-      "options": ["Oleg", "Masha", "Ivan", "Pyotr"], "answer": 0 }
+    { "ask": "Who answers for himself, unasked?",
+      "options": ["Pyotr", "Ivan", "Oleg", "Nobody does"], "answer": 0 }
    ]
   },
 
@@ -125,16 +128,16 @@
    "title": "Where they are from",
    "cast": [
     { "id": "a", "ru": "Таня", "en": "Tanya" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
+    { "id": "b", "ru": "Нина", "en": "Nina" }
    ],
    "lines": [
-    { "s": "a", "ru": "Борис, кто они?", "en": "Boris, who are they?" },
+    { "s": "a", "ru": "Нина, кто они?", "en": "Nina, who are they?" },
     { "s": "b", "ru": "Они? Они из Москвы.", "en": "Them? They are from Moscow." },
     { "s": "a", "ru": "Все из Москвы?", "en": "All of them from Moscow?" },
     { "s": "b", "ru": "Нет, не все.", "en": "No, not all of them." },
     { "s": "a", "ru": "А тот? Он тоже?", "en": "And that one? Him too?" },
     { "s": "b", "ru": "Тот не из Москвы.", "en": "That one is not from Moscow." },
-    { "s": "a", "ru": "А ты, Борис?", "en": "And you, Boris?" },
+    { "s": "a", "ru": "А ты, Нина?", "en": "And you, Nina?" },
     { "s": "b", "ru": "Я? Я из Москвы.", "en": "Me? I am from Moscow." },
     { "s": "a", "ru": "И они у тебя?", "en": "And they are staying at your place?" },
     { "s": "b", "ru": "Да, они у меня.", "en": "Yes, they are at mine." },
@@ -146,15 +149,15 @@
    "questions": [
     { "ask": "Where are most of them from?",
       "options": ["Moscow", "Siberia", "Kiev", "Nowhere in particular"], "answer": 0 },
-    { "ask": "Is Boris from Moscow?",
-      "options": ["Yes", "No", "He does not say", "He is from Kiev"], "answer": 0 },
+    { "ask": "Is Nina from Moscow?",
+      "options": ["Yes", "No", "She does not say", "She is from Kiev"], "answer": 0 },
     { "ask": "Where are they all staying?",
-      "options": ["At Boris's place", "At Tanya's place", "In Moscow", "They have gone home"],
+      "options": ["At Nina's place", "At Tanya's place", "In Moscow", "They have gone home"],
       "answer": 0 },
     { "ask": "Is Anya from Moscow?",
-      "options": ["No", "Yes", "She is Boris's sister", "Nobody asks"], "answer": 0 },
+      "options": ["No", "Yes", "She is Nina's sister", "Nobody asks"], "answer": 0 },
     { "ask": "Who is asking all the questions?",
-      "options": ["Tanya", "Boris", "Anya", "The man over there"], "answer": 0 }
+      "options": ["Tanya", "Nina", "Anya", "Somebody else"], "answer": 0 }
    ]
   },
 
@@ -310,12 +313,12 @@
   "family:2": {
    "title": "Guests at the house",
    "cast": [
-    { "id": "a", "ru": "Таня", "en": "Tanya" },
+    { "id": "a", "ru": "Юра", "en": "Yura" },
     { "id": "b", "ru": "Миша", "en": "Misha" }
    ],
    "lines": [
     { "s": "a", "ru": "Миша, кто у вас?", "en": "Misha, who is at your place?" },
-    { "s": "b", "ru": "У нас гости, Таня.", "en": "We have guests, Tanya." },
+    { "s": "b", "ru": "У нас гости, Юра.", "en": "We have guests, Yura." },
     { "s": "a", "ru": "Гости? Кто?", "en": "Guests? Who?" },
     { "s": "b", "ru": "Бабушка и её гость.", "en": "My grandmother and her guest." },
     { "s": "a", "ru": "А тот мальчик?", "en": "And that boy?" },
@@ -334,13 +337,13 @@
       "options": ["Misha has guests", "It is a shop", "They are waiting for a bus", "Nobody says"],
       "answer": 0 },
     { "ask": "Who is the boy?",
-      "options": ["Misha's son", "A guest", "Tanya's son", "The old man's grandson"], "answer": 0 },
+      "options": ["Misha's son", "A guest", "Yura's son", "The old man's grandson"], "answer": 0 },
     { "ask": "Who is the old man?",
       "options": ["The grandmother's brother", "Misha's father", "A guest from Moscow", "Nobody knows"],
       "answer": 0 },
     { "ask": "Are Misha's parents there?",
       "options": ["Yes", "No", "Only his mother", "They are on their way"], "answer": 0 },
-    { "ask": "Who does Tanya ask about last?",
+    { "ask": "Who does Yura ask about last?",
       "options": ["The old man", "The boy", "The grandmother", "Misha's parents"], "answer": 0 }
    ]
   },
@@ -386,7 +389,8 @@
    "title": "Evening this week",
    "cast": [
     { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+    { "id": "b", "ru": "Виктор", "en": "Viktor" },
+    { "id": "c", "ru": "Аня", "en": "Anya" }
    ],
    "lines": [
     { "s": "a", "ru": "Виктор, уже пора?", "en": "Viktor, is it time yet?" },
@@ -402,7 +406,9 @@
     { "s": "a", "ru": "А номер? Я не знаю.", "en": "And the number? I do not know it." },
     { "s": "b", "ru": "Мой номер у Ани.", "en": "Anya has my number." },
     { "s": "a", "ru": "У Ани? Я её знаю.", "en": "Anya has it? I know her." },
-    { "s": "b", "ru": "Вот и всё. Вечером.", "en": "That is settled, then. This evening." }
+    { "s": "c", "ru": "Я тут. Номер у меня.", "en": "I am here. I have the number." },
+    { "s": "a", "ru": "Аня! А номер?", "en": "Anya! The number, then?" },
+    { "s": "c", "ru": "Вот он. Вечером, у Виктора.", "en": "Here it is. This evening, at Viktor's." }
    ],
    "questions": [
     { "ask": "When are they meeting?",
@@ -414,8 +420,9 @@
     { "ask": "Why can Lena not do the morning?",
       "options": ["She says she cannot", "She is away", "She has guests", "She gives no reason at all"],
       "answer": 0 },
-    { "ask": "Who has Viktor's number?",
-      "options": ["Anya", "Lena", "Nobody", "His brother"], "answer": 0 }
+    { "ask": "Who turns out to be listening?",
+      "options": ["Anya, who has the number", "Nobody else", "Viktor's brother", "Lena's mother"],
+      "answer": 0 }
    ]
   },
 
@@ -460,14 +467,14 @@
    "title": "In time for Monday",
    "cast": [
     { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
+    { "id": "b", "ru": "Лена", "en": "Lena" }
    ],
    "lines": [
-    { "s": "a", "ru": "Юра, ты успеешь?", "en": "Yura, will you be in time?" },
+    { "s": "a", "ru": "Лена, ты успеешь?", "en": "Lena, will you be in time?" },
     { "s": "b", "ru": "Когда? В понедельник?", "en": "When? On Monday?" },
     { "s": "a", "ru": "Да, в понедельник.", "en": "Yes, on Monday." },
     { "s": "b", "ru": "А это ещё март?", "en": "And is it still March?" },
-    { "s": "a", "ru": "Нет, Юра, уже апрель.", "en": "No, Yura, it is April already." },
+    { "s": "a", "ru": "Нет, Лена, уже апрель.", "en": "No, Lena, it is April already." },
     { "s": "b", "ru": "Апрель? Уже апрель?", "en": "April? April already?" },
     { "s": "a", "ru": "Да, апрель. Ты успеешь?", "en": "Yes, April. Will you be in time?" },
     { "s": "b", "ru": "Не знаю. Может, успею.", "en": "I do not know. Maybe I will." },
@@ -475,7 +482,7 @@
     { "s": "b", "ru": "Миллион? Это не год.", "en": "A million? That is not a year." },
     { "s": "a", "ru": "Не год. Но месяц.", "en": "Not a year. But a month." },
     { "s": "b", "ru": "Месяц? Я успею, Катя.", "en": "A month? I will be in time, Katya." },
-    { "s": "a", "ru": "В понедельник, Юра.", "en": "On Monday, Yura." },
+    { "s": "a", "ru": "В понедельник, Лена.", "en": "On Monday, Lena." },
     { "s": "b", "ru": "В понедельник. Я успею.", "en": "On Monday. I will make it." }
    ],
    "questions": [
@@ -483,10 +490,10 @@
       "options": ["Monday", "Wednesday", "The weekend", "They never say"], "answer": 0 },
     { "ask": "What month is it now?",
       "options": ["April", "March", "June", "September"], "answer": 0 },
-    { "ask": "What did Yura think the month was?",
-      "options": ["March", "April", "December", "He had no idea"], "answer": 0 },
-    { "ask": "Will Yura be ready in time?",
-      "options": ["Yes, he decides he will", "No", "He refuses", "He asks for another month"],
+    { "ask": "What did Lena think the month was?",
+      "options": ["March", "April", "December", "She had no idea"], "answer": 0 },
+    { "ask": "Will Lena be ready in time?",
+      "options": ["Yes, she decides she will", "No", "She refuses", "She asks for another month"],
       "answer": 0 },
     { "ask": "Roughly how long is a million seconds?",
       "options": ["About a month", "About a year", "About a week", "About a day"], "answer": 0 }

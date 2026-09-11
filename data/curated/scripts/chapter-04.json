@@ -6,15 +6,14 @@
    "title": "A question about the car",
    "cast": [
     { "id": "a", "ru": "Маша", "en": "Masha" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
+    { "id": "b", "ru": "Иван", "en": "Ivan" },
+    { "id": "c", "ru": "Олег", "en": "Oleg" }
    ],
    "lines": [
     { "s": "b", "ru": "Маша, у меня вопрос.", "en": "Masha, I have a question." },
     { "s": "a", "ru": "Вопрос? Какой, Иван?", "en": "A question? What is it, Ivan?" },
     { "s": "b", "ru": "Твоя машина тут?", "en": "Is your car here?" },
     { "s": "a", "ru": "Машина? Она всегда тут.", "en": "The car? It is always here." },
-    { "s": "b", "ru": "Всегда? Каждый день?", "en": "Always? Every day?" },
-    { "s": "a", "ru": "Каждый день. Она моя.", "en": "Every day. It is mine." },
     { "s": "b", "ru": "А кто придёт сегодня?", "en": "And who is coming today?" },
     { "s": "a", "ru": "Придёт Олег. Как всегда.", "en": "Oleg is coming. As always." },
     { "s": "b", "ru": "Олег же не в России?", "en": "But Oleg is not in Russia, is he?" },
@@ -22,7 +21,10 @@
     { "s": "b", "ru": "Год! А у меня вопрос.", "en": "A year! And I have a question." },
     { "s": "a", "ru": "Ещё вопрос? Какой?", "en": "Another question? What?" },
     { "s": "b", "ru": "Машина. Она для всех?", "en": "The car. Is it for everybody?" },
-    { "s": "a", "ru": "Для всех, кто придёт.", "en": "For everybody who comes." }
+    { "s": "a", "ru": "Для всех, кто придёт.", "en": "For everybody who comes." },
+    { "s": "c", "ru": "Я уже тут. Я Олег.", "en": "I am here already. I am Oleg." },
+    { "s": "b", "ru": "Олег! А машина?", "en": "Oleg! And the car?" },
+    { "s": "c", "ru": "Машина не моя. Она Маши.", "en": "The car is not mine. It is Masha's." }
    ],
    "questions": [
     { "ask": "What does Ivan want to know about?",
@@ -34,8 +36,8 @@
     { "ask": "What surprises Ivan about Oleg?",
       "options": ["That he is in Russia", "That he has a car", "That he is late", "That he is a friend"],
       "answer": 0 },
-    { "ask": "Who may use the car?",
-      "options": ["Anyone who turns up", "Only Masha", "Only Ivan", "Nobody"], "answer": 0 }
+    { "ask": "Who does Oleg say the car belongs to?",
+      "options": ["Masha", "Himself", "Ivan", "Nobody in particular"], "answer": 0 }
    ]
   },
 
@@ -43,7 +45,7 @@
    "title": "The book in her hand",
    "cast": [
     { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
+    { "id": "b", "ru": "Соня", "en": "Sonya" }
    ],
    "lines": [
     { "s": "b", "ru": "Катя, можно вопрос?", "en": "Katya, may I ask something?" },
@@ -57,23 +59,23 @@
     { "s": "b", "ru": "Через час? А я хочу сейчас.", "en": "In an hour? But I want it now." },
     { "s": "a", "ru": "Сейчас она в моих руках.", "en": "Right now it is in my hands." },
     { "s": "b", "ru": "В твоих руках всегда книга.", "en": "There is always a book in your hands." },
-    { "s": "a", "ru": "Всегда, Юра. Я люблю читать.", "en": "Always, Yura. I love reading." },
+    { "s": "a", "ru": "Всегда, Соня. Я люблю читать.", "en": "Always, Sonya. I love reading." },
     { "s": "b", "ru": "А почему там, а не тут?", "en": "And why over there, not here?" },
     { "s": "a", "ru": "Там я всегда читаю.", "en": "That is where I always read." }
    ],
    "questions": [
     { "ask": "What is in Katya's hand?",
       "options": ["A book", "A key", "Money", "Nothing"], "answer": 0 },
-    { "ask": "May Yura read it?",
-      "options": ["Not for another hour", "Yes, at once", "Never", "Only if he asks again"], "answer": 0 },
+    { "ask": "May Sonya read it?",
+      "options": ["Not for another hour", "Yes, at once", "Never", "Only if she asks again"], "answer": 0 },
     { "ask": "Why not now?",
       "options": ["She is reading it herself", "It is not hers", "It is in Russian", "She will not say"],
       "answer": 0 },
-    { "ask": "What does Yura say about her?",
+    { "ask": "What does Sonya say about her?",
       "options": ["She always has a book", "She never reads", "She reads too slowly", "She should sit down"],
       "answer": 0 },
     { "ask": "Why does she sit over there?",
-      "options": ["It is where she always reads", "It is quieter", "Yura is here", "There is more light"],
+      "options": ["It is where she always reads", "It is quieter", "Sonya is here", "There is more light"],
       "answer": 0 }
    ]
   },
@@ -196,15 +198,12 @@
   "city:0": {
    "title": "Looking for the bank",
    "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
+    { "id": "a", "ru": "Аня", "en": "Anya" },    { "id": "b", "ru": "Олег", "en": "Oleg" },
+    { "id": "c", "ru": "Нина", "en": "Nina" }
    ],
    "lines": [
     { "s": "a", "ru": "Олег, я ищу банк.", "en": "Oleg, I am looking for a bank." },
-    { "s": "b", "ru": "Банк? Аня, он в центре.", "en": "A bank? Anya, it is in the centre." },
-    { "s": "a", "ru": "В центре? Какая дорога?", "en": "In the centre? Which road?" },
-    { "s": "b", "ru": "Эта дорога. Она первая.", "en": "This road. It is the first one." },
-    { "s": "a", "ru": "А отель? Где мой отель?", "en": "And the hotel? Where is my hotel?" },
+    { "s": "b", "ru": "Банк? Аня, он в центре.", "en": "A bank? Anya, it is in the centre." },{ "s": "a", "ru": "А отель? Где мой отель?", "en": "And the hotel? Where is my hotel?" },
     { "s": "b", "ru": "Отель тоже в центре.", "en": "The hotel is in the centre too." },
     { "s": "a", "ru": "А рынок? Он там же?", "en": "And the market? Is that there as well?" },
     { "s": "b", "ru": "Рынок не в центре. Он тут.", "en": "The market is not in the centre. It is here." },
@@ -212,8 +211,10 @@
     { "s": "b", "ru": "Кино в центре. Все там.", "en": "The cinema is in the centre. Everything is there." },
     { "s": "a", "ru": "Так мне в центр, Олег.", "en": "So it is the centre for me, Oleg." },
     { "s": "b", "ru": "Так. Иди по этой дороге.", "en": "That is right. Go along this road." },
-    { "s": "a", "ru": "По дороге — и банк?", "en": "Along the road — and there is the bank?" },
-    { "s": "b", "ru": "Банк, отель и кино. Всё там.", "en": "Bank, hotel and cinema. All of it is there." }
+    { "s": "a", "ru": "По дороге — и банк?", "en": "Along the road — and there is the bank?" },    { "s": "b", "ru": "Банк, отель и кино. Всё там.", "en": "Bank, hotel and cinema. All of it is there." },
+    { "s": "c", "ru": "Аня, я тоже иду в центр.", "en": "Anya, I am going to the centre too." },
+    { "s": "a", "ru": "Нина! Ты знаешь дорогу?", "en": "Nina! Do you know the way?" },
+    { "s": "c", "ru": "Знаю. Иди со мной.", "en": "I do. Come with me." }
    ],
    "questions": [
     { "ask": "What is Anya looking for?",
@@ -223,9 +224,8 @@
     { "ask": "Which thing is not in the centre?",
       "options": ["The market", "The bank", "The hotel", "The cinema"], "answer": 0 },
     { "ask": "How does Oleg tell her to get there?",
-      "options": ["Along this road", "By taxi", "Ask at the hotel", "Follow him"], "answer": 0 },
-    { "ask": "What else will she find in the centre?",
-      "options": ["Her hotel and a cinema", "Only the bank", "The market", "Nothing else"], "answer": 0 }
+      "options": ["Along this road", "By taxi", "Ask at the hotel", "Follow him"], "answer": 0 },    { "ask": "Who offers to take her there?",
+      "options": ["Nina", "Oleg", "Nobody", "A taxi driver"], "answer": 0 }
    ]
   },
 
@@ -270,10 +270,10 @@
    "title": "New to the town",
    "cast": [
     { "id": "a", "ru": "Таня", "en": "Tanya" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
+    { "id": "b", "ru": "Маша", "en": "Masha" }
    ],
    "lines": [
-    { "s": "a", "ru": "Юра, где почта?", "en": "Yura, where is the post office?" },
+    { "s": "a", "ru": "Маша, где почта?", "en": "Masha, where is the post office?" },
     { "s": "b", "ru": "Почта? У вокзала.", "en": "The post office? By the station." },
     { "s": "a", "ru": "У вокзала? А библиотека?", "en": "By the station? And the library?" },
     { "s": "b", "ru": "Библиотека в центре. У церкви.", "en": "The library is in the centre. By the church." },
@@ -456,7 +456,7 @@
   "travel:1": {
    "title": "The ticket is with the driver",
    "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
+    { "id": "a", "ru": "Иван", "en": "Ivan" },
     { "id": "b", "ru": "Олег", "en": "Oleg" }
    ],
    "lines": [
@@ -471,20 +471,20 @@
     { "s": "a", "ru": "А корабль? Есть корабль?", "en": "And a ship? Is there a ship?" },
     { "s": "b", "ru": "Корабль? Ты же не турист.", "en": "A ship? You are not a tourist." },
     { "s": "a", "ru": "Не турист. Но я хочу.", "en": "Not a tourist. But I would like to." },
-    { "s": "b", "ru": "Хочешь — иди к водителю, Катя.", "en": "If you want it, go to the driver, Katya." },
+    { "s": "b", "ru": "Хочешь — иди к водителю, Иван.", "en": "If you want it, go to the driver, Ivan." },
     { "s": "a", "ru": "Иду. Билет на автобус.", "en": "I am going. A ticket for the bus." },
     { "s": "b", "ru": "На автобус. Поезд уйдёт.", "en": "For the bus, then. The train will be gone." }
    ],
    "questions": [
-    { "ask": "What is Katya looking for?",
-      "options": ["Her ticket", "The driver", "A ship", "The station"], "answer": 0 },
+    { "ask": "What is Ivan looking for?",
+      "options": ["His ticket", "The driver", "A ship", "The station"], "answer": 0 },
     { "ask": "Who has it?",
       "options": ["The driver", "Oleg", "Nobody", "The tourist office"], "answer": 0 },
     { "ask": "When does the bus leave?",
       "options": ["In an hour", "Straight away", "Tomorrow", "It has gone"], "answer": 0 },
     { "ask": "Why does Oleg dismiss the ship?",
-      "options": ["She is not a tourist", "It is too expensive", "There is none", "It has sailed"], "answer": 0 },
-    { "ask": "What does she decide to take?",
+      "options": ["He is not a tourist", "It is too expensive", "There is none", "It has sailed"], "answer": 0 },
+    { "ask": "What does he decide to take?",
       "options": ["The bus", "The train", "The ship", "Nothing"], "answer": 0 }
    ]
   },
@@ -602,24 +602,23 @@
   "travel:5": {
    "title": "A year on a bicycle",
    "cast": [
-    { "id": "a", "ru": "Таня", "en": "Tanya" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
+    { "id": "a", "ru": "Таня", "en": "Tanya" },    { "id": "b", "ru": "Иван", "en": "Ivan" },
+    { "id": "c", "ru": "Виктор", "en": "Viktor" }
    ],
    "lines": [
     { "s": "b", "ru": "Таня, ты в командировке?", "en": "Tanya, are you here on business?" },
     { "s": "a", "ru": "В командировке. Уже год.", "en": "On business. For a year now." },
     { "s": "b", "ru": "Год! А как ты ездишь?", "en": "A year! And how do you get around?" },
     { "s": "a", "ru": "На велосипеде, Иван. Всегда.", "en": "By bicycle, Ivan. Always." },
-    { "s": "b", "ru": "На велосипеде? А двигатель?", "en": "By bicycle? What about an engine?" },
-    { "s": "a", "ru": "Двигатель? Это автомобильный.", "en": "An engine? That is for cars." },
-    { "s": "b", "ru": "Автомобильный — это не для тебя?", "en": "Cars are not for you, then?" },
-    { "s": "a", "ru": "Не для меня. Я люблю велосипед.", "en": "Not for me. I love the bicycle." },
+    { "s": "b", "ru": "На велосипеде? А двигатель?", "en": "By bicycle? What about an engine?" },{ "s": "a", "ru": "Не для меня. Я люблю велосипед.", "en": "Not for me. I love the bicycle." },
     { "s": "b", "ru": "А когда ты выедешь?", "en": "And when do you set off?" },
     { "s": "a", "ru": "Выеду сегодня. Или лечу.", "en": "I set off today. Or I fly." },
     { "s": "b", "ru": "Летишь? В командировку?", "en": "You are flying? On business?" },
     { "s": "a", "ru": "В командировку. Так надо.", "en": "On business. It has to be done." },
-    { "s": "b", "ru": "Надо... А велосипед, Таня?", "en": "Has to be... And the bicycle, Tanya?" },
-    { "s": "a", "ru": "Велосипед тут. Я приеду.", "en": "The bicycle stays here. I will be back." }
+    { "s": "b", "ru": "Надо... А велосипед, Таня?", "en": "Has to be... And the bicycle, Tanya?" },    { "s": "a", "ru": "Велосипед тут. Я приеду.", "en": "The bicycle stays here. I will be back." },
+    { "s": "c", "ru": "Таня, велосипед тут?", "en": "Tanya, is the bicycle staying here?" },
+    { "s": "a", "ru": "Виктор! Тут. Я приеду.", "en": "Viktor! It is. I will be back." },
+    { "s": "c", "ru": "Я тоже езжу на велосипеде.", "en": "I ride a bicycle too." }
    ],
    "questions": [
     { "ask": "Why is Tanya there?",
@@ -629,10 +628,8 @@
     { "ask": "How does she get about?",
       "options": ["By bicycle", "By car", "By plane", "On foot"], "answer": 0 },
     { "ask": "What may she do instead of setting off today?",
-      "options": ["Fly", "Wait a week", "Take the train", "Stay"], "answer": 0 },
-    { "ask": "What happens to the bicycle?",
-      "options": ["It stays there for her return", "She takes it with her", "She sells it to Ivan", "She leaves it for good"],
-      "answer": 0 }
+      "options": ["Fly", "Wait a week", "Take the train", "Stay"], "answer": 0 },    { "ask": "Who else rides a bicycle?",
+      "options": ["Viktor", "Ivan", "Nobody", "Tanya's colleague"], "answer": 0 }
    ]
   }
  }

@@ -6,13 +6,12 @@
    "title": "The missing book",
    "cast": [
     { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
+    { "id": "b", "ru": "Миша", "en": "Misha" },
+    { "id": "c", "ru": "Иван", "en": "Ivan" }
    ],
    "lines": [
     { "s": "a", "ru": "Миша, где моя книга?", "en": "Misha, where is my book?" },
     { "s": "b", "ru": "Твоя книга? Её нет.", "en": "Your book? It is not here." },
-    { "s": "a", "ru": "Нет? Как нет?", "en": "Not here? How can it not be?" },
-    { "s": "b", "ru": "Так. Тут её нет.", "en": "Like that. It is not here." },
     { "s": "a", "ru": "А кто тут?", "en": "And who is here?" },
     { "s": "b", "ru": "Тут только я, Аня.", "en": "Only me, Anya." },
     { "s": "a", "ru": "Только ты? И книги нет.", "en": "Only you? And no book." },
@@ -22,7 +21,10 @@
     { "s": "a", "ru": "А книга? Она о чём?", "en": "And the book? What is it about?" },
     { "s": "b", "ru": "О стране. О нашей стране.", "en": "About the country. About our country." },
     { "s": "a", "ru": "Я бы хотела эту книгу.", "en": "I would like that book." },
-    { "s": "b", "ru": "Книга у Ивана. Иди к нему.", "en": "Ivan has it. Go to him." }
+    { "s": "b", "ru": "Книга у Ивана. Иди к нему.", "en": "Ivan has it. Go to him." },
+    { "s": "c", "ru": "Аня, книга у меня.", "en": "Anya, I have the book." },
+    { "s": "a", "ru": "Иван! Книга у тебя?", "en": "Ivan! You have the book?" },
+    { "s": "c", "ru": "У меня. Но она твоя.", "en": "I do. But it is yours." }
    ],
    "questions": [
     { "ask": "What is Anya looking for?",
@@ -33,8 +35,9 @@
       "options": ["Only Misha", "Nobody", "Ivan", "Several people"], "answer": 0 },
     { "ask": "What is the book about?",
       "options": ["Their country", "A person", "A city", "Misha does not say"], "answer": 0 },
-    { "ask": "What does Misha tell her to do?",
-      "options": ["Go and see Ivan", "Wait there", "Look again", "Forget about it"], "answer": 0 }
+    { "ask": "How does she get the book back?",
+      "options": ["Ivan brings it himself", "Misha finds it", "She buys another", "She does not get it"],
+      "answer": 0 }
    ]
   },
 
@@ -192,24 +195,23 @@
   "home:0": {
    "title": "The key in the kitchen",
    "cast": [
-    { "id": "a", "ru": "Маша", "en": "Masha" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+    { "id": "a", "ru": "Маша", "en": "Masha" },    { "id": "b", "ru": "Пётр", "en": "Pyotr" },
+    { "id": "c", "ru": "Иван", "en": "Ivan" }
    ],
    "lines": [
     { "s": "b", "ru": "Маша, где ключ?", "en": "Masha, where is the key?" },
     { "s": "a", "ru": "Ключ? На кухне.", "en": "The key? In the kitchen." },
     { "s": "b", "ru": "На кухне? Где там?", "en": "In the kitchen? Whereabouts?" },
-    { "s": "a", "ru": "Он лежит у стены.", "en": "It is lying by the wall." },
-    { "s": "b", "ru": "У стены... Я не вижу.", "en": "By the wall... I cannot see it." },
-    { "s": "a", "ru": "А ты смотри. Он там лежит.", "en": "Well, look. It is lying there." },
-    { "s": "b", "ru": "Нет его тут. Кто сидит на кухне?", "en": "It is not here. Who is sitting in the kitchen?" },
+    { "s": "a", "ru": "Он лежит у стены.", "en": "It is lying by the wall." },{ "s": "b", "ru": "Нет его тут. Кто сидит на кухне?", "en": "It is not here. Who is sitting in the kitchen?" },
     { "s": "a", "ru": "Там Иван. Он сидит.", "en": "Ivan is there. He is sitting." },
     { "s": "b", "ru": "Иван? На каком этаже?", "en": "Ivan? On which floor?" },
     { "s": "a", "ru": "На нашем этаже. Первый.", "en": "On our floor. The first." },
     { "s": "b", "ru": "Первый этаж? А лестница?", "en": "The first floor? And the stairs?" },
     { "s": "a", "ru": "Лестница тут, Пётр. Иди.", "en": "The stairs are here, Pyotr. Go on." },
-    { "s": "b", "ru": "Иду. Ключ у Ивана?", "en": "I am going. Does Ivan have the key?" },
-    { "s": "a", "ru": "Может быть. Он там сидит.", "en": "He may have. He is sitting there." }
+    { "s": "b", "ru": "Иду. Ключ у Ивана?", "en": "I am going. Does Ivan have the key?" },    { "s": "a", "ru": "Может быть. Он там сидит.", "en": "He may have. He is sitting there." },
+    { "s": "c", "ru": "Ключ у меня. Он был на кухне.", "en": "I have the key. It was in the kitchen." },
+    { "s": "b", "ru": "Иван! Ключ у тебя?", "en": "Ivan! You have the key?" },
+    { "s": "c", "ru": "У меня. Я тут сижу.", "en": "I do. I am sitting right here." }
    ],
    "questions": [
     { "ask": "What is Pyotr looking for?",
@@ -219,9 +221,8 @@
     { "ask": "Does he find it there?",
       "options": ["No", "Yes", "He does not look", "Masha finds it"], "answer": 0 },
     { "ask": "Who is sitting in the kitchen?",
-      "options": ["Ivan", "Nobody", "Masha", "A guest"], "answer": 0 },
-    { "ask": "Which floor is it on?",
-      "options": ["The first", "The third", "The top one", "Nobody says"], "answer": 0 }
+      "options": ["Ivan", "Nobody", "Masha", "A guest"], "answer": 0 },    { "ask": "Who has the key?",
+      "options": ["Ivan", "Masha", "Pyotr had it all along", "Nobody"], "answer": 0 }
    ]
   },
 
@@ -229,10 +230,10 @@
    "title": "Furniture in the wrong places",
    "cast": [
     { "id": "a", "ru": "Таня", "en": "Tanya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
+    { "id": "b", "ru": "Нина", "en": "Nina" }
    ],
    "lines": [
-    { "s": "a", "ru": "Миша, где мой стул?", "en": "Misha, where is my chair?" },
+    { "s": "a", "ru": "Нина, где мой стул?", "en": "Nina, where is my chair?" },
     { "s": "b", "ru": "Стул? Он во дворе.", "en": "The chair? It is in the yard." },
     { "s": "a", "ru": "Во дворе? Почему там?", "en": "In the yard? Why there?" },
     { "s": "b", "ru": "Там сейчас все стулья.", "en": "All the chairs are out there now." },
@@ -254,8 +255,8 @@
       "options": ["The armchair and the bed", "Only the bed", "Nothing at all", "The chairs"], "answer": 0 },
     { "ask": "Where is the mirror?",
       "options": ["On the wall", "On the floor", "In the yard", "There is no mirror"], "answer": 0 },
-    { "ask": "How does Misha explain it?",
-      "options": ["He calls it a day at home", "He blames Tanya", "He does not explain", "He says it was an accident"],
+    { "ask": "How does Nina explain it?",
+      "options": ["She calls it a day at home", "She blames Tanya", "She does not explain", "She says it was an accident"],
       "answer": 0 },
     { "ask": "How does Tanya sound about her chair?",
       "options": ["Unimpressed", "Delighted", "Indifferent", "Frightened"], "answer": 0 }
@@ -378,7 +379,7 @@
   "clothes:2": {
    "title": "The beard is not fashion",
    "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
+    { "id": "a", "ru": "Борис", "en": "Boris" },
     { "id": "b", "ru": "Олег", "en": "Oleg" }
    ],
    "lines": [
@@ -387,7 +388,7 @@
     { "s": "a", "ru": "Рубашка красивая. А кольцо?", "en": "A good shirt. And the ring?" },
     { "s": "b", "ru": "Кольцо? Это не моё.", "en": "The ring? That is not mine." },
     { "s": "a", "ru": "Не твоё? А чьё кольцо?", "en": "Not yours? Whose ring is it?" },
-    { "s": "b", "ru": "Не знаю, Соня. Оно тут.", "en": "I do not know, Sonya. It was just here." },
+    { "s": "b", "ru": "Не знаю, Борис. Оно тут.", "en": "I do not know, Boris. It was just here." },
     { "s": "a", "ru": "А майка? Где твоя майка?", "en": "And your T-shirt? Where is that?" },
     { "s": "b", "ru": "Майка? Я её не ношу.", "en": "The T-shirt? I do not wear it." },
     { "s": "a", "ru": "Не носишь? Это мода?", "en": "You do not? Is that fashion?" },
@@ -401,14 +402,14 @@
     { "ask": "What is Oleg wearing?",
       "options": ["A jacket and shirt", "A T-shirt", "A coat", "A suit and tie"], "answer": 0 },
     { "ask": "Whose is the ring?",
-      "options": ["He does not know", "His", "Sonya's", "His brother's"], "answer": 0 },
+      "options": ["He does not know", "His", "Boris's", "His brother's"], "answer": 0 },
     { "ask": "Why has he no T-shirt on?",
-      "options": ["He never wears one", "It is in the wash", "Sonya has it", "It is too cold"], "answer": 0 },
+      "options": ["He never wears one", "It is in the wash", "Boris has it", "It is too cold"], "answer": 0 },
     { "ask": "What does he say about fashion?",
-      "options": ["He does not think about it", "He follows it closely", "The beard is fashion", "Sonya knows better"],
+      "options": ["He does not think about it", "He follows it closely", "The beard is fashion", "Boris knows better"],
       "answer": 0 },
     { "ask": "What does he say the beard is?",
-      "options": ["Simply himself", "This year's fashion", "For work", "Sonya's idea"], "answer": 0 }
+      "options": ["Simply himself", "This year's fashion", "For work", "Boris's idea"], "answer": 0 }
    ]
   }
  }

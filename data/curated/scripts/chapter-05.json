@@ -44,8 +44,8 @@
   "core5:1": {
    "title": "Waiting at the door",
    "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
+    { "id": "a", "ru": "Катя", "en": "Katya" },    { "id": "b", "ru": "Борис", "en": "Boris" },
+    { "id": "c", "ru": "Нина", "en": "Nina" }
    ],
    "lines": [
     { "s": "b", "ru": "Катя, сколько ты ждёшь?", "en": "Katya, how long have you been waiting?" },
@@ -58,8 +58,10 @@
     { "s": "a", "ru": "Москва. Тут всегда ждут.", "en": "Moscow. People always wait here." },
     { "s": "b", "ru": "Сколько ещё ждать?", "en": "How much longer do you have to wait?" },
     { "s": "a", "ru": "Не знаю, Борис. Может, час.", "en": "I do not know, Boris. Maybe an hour." },
-    { "s": "b", "ru": "Час! А дверь всё стоит.", "en": "An hour! And the door has not moved." },
-    { "s": "a", "ru": "Дверь стоит. И я стою.", "en": "The door stands. And so do I." }
+    { "s": "b", "ru": "Час! А дверь всё стоит.", "en": "An hour! And the door has not moved." },    { "s": "a", "ru": "Дверь стоит. И я стою.", "en": "The door stands. And so do I." },
+    { "s": "c", "ru": "Катя? Вот книга.", "en": "Katya? Here is the book." },
+    { "s": "a", "ru": "Нина! Книга?", "en": "Nina! The book?" },
+    { "s": "c", "ru": "Книга. Самая новая.", "en": "The book. The newest one." }
    ],
    "questions": [
     { "ask": "How long has Katya been waiting?",
@@ -70,9 +72,8 @@
       "options": ["A book from a woman", "A friend", "A door to be fixed", "A bus"], "answer": 0 },
     { "ask": "What does Boris say about Moscow?",
       "options": ["Everybody waits there", "Nobody waits there", "It is too big", "He has never been"],
-      "answer": 0 },
-    { "ask": "How much longer might she wait?",
-      "options": ["Perhaps another hour", "A minute", "She is leaving now", "She does not mind"],
+      "answer": 0 },    { "ask": "How does the wait end?",
+      "options": ["Nina comes out with the book", "She gives up", "She waits another hour", "The door stays shut"],
       "answer": 0 }
    ]
   },
@@ -80,11 +81,11 @@
   "core5:2": {
    "title": "The whole family at home",
    "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
+    { "id": "a", "ru": "Борис", "en": "Boris" },
     { "id": "b", "ru": "Олег", "en": "Oleg" }
    ],
    "lines": [
-    { "s": "b", "ru": "Лена, ты дома?", "en": "Lena, are you at home?" },
+    { "s": "b", "ru": "Борис, ты дома?", "en": "Boris, are you at home?" },
     { "s": "a", "ru": "Дома. Вся семья дома.", "en": "At home. The whole family is at home." },
     { "s": "b", "ru": "Вся семья? А где находится ваш дом?", "en": "The whole family? And where is your house?" },
     { "s": "a", "ru": "Наш дом находится у воды.", "en": "Our house is by the water." },
@@ -98,10 +99,10 @@
     { "s": "a", "ru": "Выйди, Олег. Мы дома ждём.", "en": "Come out, Oleg. We are waiting at home." }
    ],
    "questions": [
-    { "ask": "Where is Lena?",
-      "options": ["At home with her family", "At a friend's", "By the river alone", "At work"], "answer": 0 },
+    { "ask": "Where is Boris?",
+      "options": ["At home with his family", "At a friend's", "By the river alone", "At work"], "answer": 0 },
     { "ask": "Where is the house?",
-      "options": ["By the water", "In the centre", "By the station", "She does not say"], "answer": 0 },
+      "options": ["By the water", "In the centre", "By the station", "He does not say"], "answer": 0 },
     { "ask": "What does the family want to do?",
       "options": ["Go out", "Stay in", "Move house", "Wait for Oleg to leave"], "answer": 0 },
     { "ask": "Who else is with them?",
@@ -226,7 +227,7 @@
    "title": "No sleep with that shoulder",
    "cast": [
     { "id": "a", "ru": "Маша", "en": "Masha" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
+    { "id": "b", "ru": "Катя", "en": "Katya" }
    ],
    "lines": [
     { "s": "b", "ru": "Маша, у тебя болит зуб?", "en": "Masha, is it your tooth that hurts?" },
@@ -238,7 +239,7 @@
     { "s": "b", "ru": "Нет сна? А кровь?", "en": "No sleep? And any blood?" },
     { "s": "a", "ru": "Кровь? Нет, крови нет.", "en": "Blood? No, there is no blood." },
     { "s": "b", "ru": "Хорошо. А волосы?", "en": "Good. And your hair?" },
-    { "s": "a", "ru": "Волосы? Иван, это не боль!", "en": "My hair? Ivan, that is not a pain!" },
+    { "s": "a", "ru": "Волосы? Катя, это не боль!", "en": "My hair? Katya, that is not a pain!" },
     { "s": "b", "ru": "Не боль. Это я так.", "en": "No, it is not. I was only asking." },
     { "s": "a", "ru": "Так... Боль есть. Сна нет.", "en": "Well... there is pain. There is no sleep." }
    ],
@@ -248,12 +249,12 @@
     { "ask": "How is she sleeping?",
       "options": ["She is not", "Very well", "Only in the day", "She does not say"], "answer": 0 },
     { "ask": "Is there any blood?",
-      "options": ["No", "Yes", "She will not look", "Ivan does not ask"], "answer": 0 },
-    { "ask": "Why does she snap at Ivan?",
-      "options": ["He asks about her hair", "He does not believe her", "He will not fetch a doctor", "He is late"],
+      "options": ["No", "Yes", "She will not look", "Katya does not ask"], "answer": 0 },
+    { "ask": "Why does she snap at Katya?",
+      "options": ["She asks about her hair", "She does not believe her", "She will not fetch a doctor", "She is late"],
       "answer": 0 },
     { "ask": "Who is doing the asking?",
-      "options": ["Ivan", "Masha", "Both equally", "A doctor"], "answer": 0 }
+      "options": ["Katya", "Masha", "Both equally", "A doctor"], "answer": 0 }
    ]
   },
 
@@ -367,11 +368,11 @@
   "nature:0": {
    "title": "A walk by the river",
    "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
+    { "id": "a", "ru": "Иван", "en": "Ivan" },
     { "id": "b", "ru": "Юра", "en": "Yura" }
    ],
    "lines": [
-    { "s": "b", "ru": "Соня, ты гуляешь?", "en": "Sonya, are you out walking?" },
+    { "s": "b", "ru": "Иван, ты гуляешь?", "en": "Ivan, are you out walking?" },
     { "s": "a", "ru": "Гуляю. У реки.", "en": "I am. By the river." },
     { "s": "b", "ru": "У реки? А не у моря?", "en": "By the river? Not by the sea?" },
     { "s": "a", "ru": "Море не тут. Река тут.", "en": "The sea is not here. The river is." },
@@ -385,17 +386,17 @@
     { "s": "a", "ru": "Гуляй, Юра. Солнце для всех.", "en": "Come along, Yura. The sun is for everyone." }
    ],
    "questions": [
-    { "ask": "Where is Sonya walking?",
+    { "ask": "Where is Ivan walking?",
       "options": ["By the river", "By the sea", "In the forest", "In town"], "answer": 0 },
     { "ask": "What is the weather like?",
       "options": ["Sunny and warm", "Cold", "Raining", "Windy"], "answer": 0 },
     { "ask": "What does Yura ask about besides the weather?",
-      "options": ["A big tree", "The sea", "Her family", "The time"], "answer": 0 },
-    { "ask": "What does she say about the tree?",
+      "options": ["A big tree", "The sea", "His family", "The time"], "answer": 0 },
+    { "ask": "What does he say about the tree?",
       "options": ["It is the biggest one", "It has fallen", "It is by the sea", "There is no tree"],
       "answer": 0 },
     { "ask": "How does the conversation end?",
-      "options": ["She invites him along", "She goes home", "He refuses", "They arrange another day"],
+      "options": ["He invites Yura along", "He goes home", "Yura refuses", "They arrange another day"],
       "answer": 0 }
    ]
   },
@@ -403,8 +404,8 @@
   "nature:1": {
    "title": "Summer on the shore",
    "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+    { "id": "a", "ru": "Аня", "en": "Anya" },    { "id": "b", "ru": "Виктор", "en": "Viktor" },
+    { "id": "c", "ru": "Соня", "en": "Sonya" }
    ],
    "lines": [
     { "s": "b", "ru": "Аня, какая погода?", "en": "Anya, what is the weather like?" },
@@ -417,8 +418,10 @@
     { "s": "a", "ru": "На берегу ветер. И солнце.", "en": "On the shore there is wind. And sun." },
     { "s": "b", "ru": "Солнечный день на берегу.", "en": "A sunny day on the shore." },
     { "s": "a", "ru": "Солнечный. Море тёплое.", "en": "Sunny. The sea is warm." },
-    { "s": "b", "ru": "Тёплое море! Я иду.", "en": "A warm sea! I am on my way." },
-    { "s": "a", "ru": "Иди. Погода для тебя.", "en": "Come. The weather is made for you." }
+    { "s": "b", "ru": "Тёплое море! Я иду.", "en": "A warm sea! I am on my way." },    { "s": "a", "ru": "Иди. Погода для тебя.", "en": "Come. The weather is made for you." },
+    { "s": "c", "ru": "Аня, море тёплое?", "en": "Anya, is the sea warm?" },
+    { "s": "a", "ru": "Соня! Тёплое. И солнце.", "en": "Sonya! It is. And there is sun." },
+    { "s": "c", "ru": "И я иду. На берег.", "en": "I am coming too. To the shore." }
    ],
    "questions": [
     { "ask": "What is the weather?",
@@ -427,9 +430,8 @@
       "options": ["Summer", "Winter", "Spring", "They disagree"], "answer": 0 },
     { "ask": "Why does Anya object to Viktor's question?",
       "options": ["He asks about snow in summer", "He asks the temperature", "He is not listening", "He wants to stay in"],
-      "answer": 0 },
-    { "ask": "What is the sea like?",
-      "options": ["Warm", "Cold", "Rough", "Nobody mentions it"], "answer": 0 },
+      "answer": 0 },    { "ask": "Who else sets off for the shore?",
+      "options": ["Sonya", "Viktor only", "Nobody", "Anya"], "answer": 0 },
     { "ask": "What does Viktor do?",
       "options": ["Sets off to join her", "Stays where he is", "Goes home", "Waits for better weather"],
       "answer": 0 }
@@ -578,8 +580,8 @@
   "medicine:0": {
    "title": "A patient in the hospital",
    "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
+    { "id": "a", "ru": "Аня", "en": "Anya" },    { "id": "b", "ru": "Олег", "en": "Oleg" },
+    { "id": "c", "ru": "Пётр", "en": "Pyotr" }
    ],
    "lines": [
     { "s": "b", "ru": "Аня, ты в больнице?", "en": "Anya, are you in hospital?" },
@@ -592,8 +594,10 @@
     { "s": "a", "ru": "Уже сегодня.", "en": "Today." },
     { "s": "b", "ru": "А сколько ты тут, Аня?", "en": "And how long have you been here, Anya?" },
     { "s": "a", "ru": "Уже день. Больница большая.", "en": "A day now. It is a big hospital." },
-    { "s": "b", "ru": "Большая. И докторов много.", "en": "Big. And plenty of doctors." },
-    { "s": "a", "ru": "Много, Олег. Все тут.", "en": "Plenty, Oleg. They are all here." }
+    { "s": "b", "ru": "Большая. И докторов много.", "en": "Big. And plenty of doctors." },    { "s": "a", "ru": "Много, Олег. Все тут.", "en": "Plenty, Oleg. They are all here." },
+    { "s": "c", "ru": "Аня, доктор идёт.", "en": "Anya, the doctor is coming." },
+    { "s": "b", "ru": "Пётр? И ты тут?", "en": "Pyotr? You are here too?" },
+    { "s": "c", "ru": "Тут. Операция сегодня.", "en": "Here. The operation is today." }
    ],
    "questions": [
     { "ask": "Where is Anya?",
@@ -601,9 +605,8 @@
     { "ask": "What is wrong with her?",
       "options": ["A virus or some illness", "A broken leg", "Nothing", "She will not say"], "answer": 0 },
     { "ask": "What has the doctor decided?",
-      "options": ["An operation", "Tablets", "To send her home", "To wait a week"], "answer": 0 },
-    { "ask": "When is it?",
-      "options": ["Today", "Tomorrow", "Next week", "It is not settled"], "answer": 0 },
+      "options": ["An operation", "Tablets", "To send her home", "To wait a week"], "answer": 0 },    { "ask": "Who brings word that the doctor is coming?",
+      "options": ["Pyotr", "Oleg", "Another patient", "Nobody does"], "answer": 0 },
     { "ask": "How long has she been there?",
       "options": ["A day", "An hour", "A week", "She does not say"], "answer": 0 }
    ]
@@ -613,7 +616,7 @@
    "title": "Medicine, not an injury",
    "cast": [
     { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
+    { "id": "b", "ru": "Лена", "en": "Lena" }
    ],
    "lines": [
     { "s": "b", "ru": "Катя, у тебя есть лекарство?", "en": "Katya, have they given you medicine?" },
@@ -627,7 +630,7 @@
     { "s": "b", "ru": "А вакцина? Она есть?", "en": "And a vaccine? Is there one?" },
     { "s": "a", "ru": "Вакцина есть. Я её получу.", "en": "There is a vaccine. I will get it." },
     { "s": "b", "ru": "Получишь — и всё?", "en": "You get that and it is over?" },
-    { "s": "a", "ru": "И всё, Юра. Лекарство и вакцина.", "en": "That is all, Yura. Medicine and a vaccine." }
+    { "s": "a", "ru": "И всё, Лена. Лекарство и вакцина.", "en": "That is all, Lena. Medicine and a vaccine." }
    ],
    "questions": [
     { "ask": "What is Katya being given?",

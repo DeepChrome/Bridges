@@ -1544,27 +1544,48 @@ separate facts were missing, and both are now data rather than inference:
   validates every cast entry against it (a name it does not carry has no sex,
   which is the bug), and the app reads the same table. It replaced a duplicate
   name list that the checker used to keep privately.
-- **Which voice is which.** `voiceSex(v)` reads Google's `#female_1` marker
-  where there is one and answers `null` otherwise. **It never guesses from the
-  code**: `ru-ru-x-ruf-local` looks like it might mean something and does not.
-  Measured on the owner's Pixel 9: **nineteen Russian voices, and not one of
-  them states a sex** — four `ru[c-f]` families, eight `star` voices, `dfc`,
-  and the `ru-RU-language` alias. So the app cannot know, and a setting asks:
-  Settings → **Women's voice / Men's voice**, the voices numbered because their
-  names say nothing, each tap speaking a line in that voice *and* choosing it.
-  Stored as `st.voices = { f, m }` and handed to playback by `configureAudio`
-  like the speed and the cue; `voiceSex` reports the learner's answer first,
-  because they have heard the voice and the platform has not.
+- **Which voice is which**, in `core/voices.js`. Android states it outright
+  only sometimes (Google's newer names carry `#female_1`), and the owner's
+  Pixel 9 offers **nineteen Russian voices that state nothing at all**. So he
+  listened to all nineteen and said what each was, and *that* is the table.
 
-Allocation is in that order — the learner's choice, then a stated sex, then
-whatever is free — and it is settled for the whole cast **before** anybody
-takes a voice that is not theirs. Doing it in cast order instead let the first
-speaker walk off with the only male voice, leaving the man who owned it to be
-the one pitched about. Only what is left over is separated by pitch (±%): it
-cannot make a man a woman, but it points the right way and keeps two speakers
-apart, which is the one thing a conversation cannot do without. The lab screen
-lists what the phone reports and what the app made of it, because none of this
-can be seen from a desk.
+  **It is a measurement, not inference from the letters.** Google ships each
+  voice twice, `-local` and `-network`, and he never once split a pair —
+  `rud` was a man both times, `rue` a woman both times, down the list. He could
+  not have arranged that, which is what makes it trustworthy, and it is why it
+  generalises: the three-letter code is the voice's identity and the suffix is
+  only how it is delivered. `ruc`, `rue`, `dfc` are women; `rud`, `ruf` men.
+
+  **Eight of the nineteen are silent.** Every `ru-ru-x-starNN-local` said
+  nothing when tapped. They are listed by the platform and cannot speak, which
+  is the worst kind of option — a character assigned one simply does not talk
+  and nothing reports an error. Ranked last, not banned: a device with only
+  those is better served trying them than being silent on purpose.
+
+  `ru-RU-language` is **not** in the table. It aliases whichever voice the
+  phone is set to by default, so its sex is a fact about that phone; he heard a
+  woman and another device would hear whatever it points at.
+
+Allocation: a stated sex, then the table, then whatever is free — settled for
+the whole cast **before** anybody takes a voice that is not theirs. Doing it in
+cast order instead let the first speaker walk off with the only male voice,
+leaving the man who owned it to be the one pitched about. Only what is left
+over is separated by pitch (±%): it cannot make a man a woman, but it points
+the right way and keeps two speakers apart, which is the one thing a
+conversation cannot do without. `-local` is preferred over `-network`, because
+local speaks with no connection.
+
+**A lesson draws its own pair.** The pools are rotated by a hash of the lesson,
+so 168 conversations do not all sound like the same two people, and a scenario
+sounds the same every time it is replayed.
+
+There is **no setting for any of this** — the owner, 2026-09-11: *"you can
+choose from the pool of voices based on whatever genders you need… you can
+remove the voice selectors in the settings screen. It can all be handled on the
+back end."* The picker that briefly existed is gone with its state key. What
+remains is the lab's readout, listing what the phone reports and what the app
+made of each, because an unfamiliar device needs the same treatment and a
+listed-but-silent voice can be found no other way.
 
 **The timeline is built, not read.** `native/src/scenario.js`: every line has an
 estimate from its length, every line that plays is measured and the measurement

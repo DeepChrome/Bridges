@@ -10,6 +10,7 @@ import { audioUrl } from "./data";
 import { cachedUri, dropCached } from "./cache";
 import { bare } from "@core/util";
 import { sexOf } from "@core/names";
+import { knownVoiceSex, rankVoice } from "@core/voices";
 
 /* When nothing could play — the stream failed and there is no Russian voice —
    whoever drew the speaker is told, so the learner sees "No audio right now"
@@ -102,18 +103,13 @@ export function refreshVoices() {
  * where there is one, and otherwise answer `null` and let the caller cope.
  * Never guess. */
 export function voiceSex(v) {
-  const id = v && v.identifier;
-  /* What the learner said, first. On a phone whose voices state nothing — the
-     owner's offers nineteen Russian voices and names none of them — their ear
-     is the only source there is, and it is a better one than the platform's. */
-  if (id && prefs.voices) {
-    if (prefs.voices.f === id) return "f";
-    if (prefs.voices.m === id) return "m";
-  }
-  const s = `${id || ""} ${(v && v.name) || ""}`.toLowerCase();
+  const id = (v && v.identifier) || "";
+  const s = `${id} ${(v && v.name) || ""}`.toLowerCase();
+  // Where the platform states it outright, that is the answer.
   if (/#?female/.test(s)) return "f";
   if (/#?male/.test(s)) return "m";
-  return null;
+  // Otherwise what was heard on a real phone (core/voices.js).
+  return knownVoiceSex(id);
 }
 
 /* How far pitch is moved when a voice of the right sex is not available.
@@ -143,25 +139,44 @@ const PITCH_UP = 1.18, PITCH_DOWN = 0.86;
  *
  * Deterministic in the cast, so a character keeps their voice for the whole
  * scenario and across every replay. */
-export function castVoices(cast) {
+/* Stable, small, and spread — enough to turn a lesson's name into a number
+   that does not correlate with the next lesson's. */
+function hash(s) {
+  let h = 2166136261;
+  for (let i = 0; i < String(s).length; i++) {
+    h ^= String(s).charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
+
+export function castVoices(cast, seed = "") {
   const list = Array.isArray(cast) ? cast : [];
   const want = list.map((c) => (c && (c.sex || sexOf(c.ru))) || null);
+
+  /* Best voices first, and **rotated by the lesson**. Taking the same first
+     woman every time would make 168 conversations sound like the same two
+     people; the phone has half a dozen of each, so a lesson gets its own pair
+     and keeps them for every replay. Rotation rather than randomness because a
+     scenario must sound the same the second time it is played. */
   const pools = { f: [], m: [], u: [] };
-  ruVoices.forEach((v) => pools[voiceSex(v) || "u"].push(v));
+  ruVoices.slice()
+    .sort((a, b) => rankVoice(a.identifier) - rankVoice(b.identifier))
+    .forEach((v) => pools[voiceSex(v) || "u"].push(v));
+  const turn = hash(seed);
+  Object.keys(pools).forEach((k) => {
+    const p = pools[k];
+    if (p.length > 1) pools[k] = p.slice(turn % p.length).concat(p.slice(0, turn % p.length));
+  });
+  /* Last of all, and only if nothing else is left: the voices that are listed
+     and say nothing (core/voices.js). A silent speaker is worse than a wrong
+     one, so they sit behind even a voice of the other sex. */
+  const rest = ruVoices.slice().sort((a, b) => rankVoice(a.identifier) - rankVoice(b.identifier));
 
   const used = new Set();
   const mine = new Array(list.length);
 
-  /* What the learner actually chose comes first, ahead of anything the
-     platform implies about any other voice: they have heard these and it has
-     not. */
-  want.forEach((sex, k) => {
-    const id = sex && prefs.voices && prefs.voices[sex];
-    const v = id && ruVoices.find((x) => x.identifier === id && !used.has(x.identifier));
-    if (v) { used.add(v.identifier); mine[k] = v; }
-  });
-
-  /* Then sex matches, settled **before** anybody takes a voice that is not
+  /* Sex matches are settled **before** anybody takes a voice that is not
      theirs. Doing it in cast order instead let the first speaker walk off with
      the only male voice, and the man who owned it was then the one pitched
      about — which is the same bug as the original, one step along. */
@@ -172,7 +187,7 @@ export function castVoices(cast) {
   });
   want.forEach((sex, k) => {
     if (mine[k]) return;
-    const v = ruVoices.find((x) => !used.has(x.identifier));
+    const v = rest.find((x) => !used.has(x.identifier));
     if (v) { used.add(v.identifier); mine[k] = v; }
   });
 
@@ -180,7 +195,7 @@ export function castVoices(cast) {
   return list.map((c, k) => {
     const sex = want[k];
     // Still nothing means there are fewer voices than speakers: share one.
-    const v = mine[k] || (ruVoices.length ? ruVoices[k % ruVoices.length] : null);
+    const v = mine[k] || (rest.length ? rest[k % rest.length] : null);
     let pitch = 1;
     if (v && sex && voiceSex(v) !== sex) {
       // Not the sex this character is. Pitch cannot make a man a woman, but it
@@ -239,13 +254,11 @@ export const SPEEDS = [
    the third at full again: hear it, then hear it slowly, without a control. */
 const REPEAT_RATE = 0.75;
 const REPEAT_WINDOW_MS = 6000;
-const prefs = { rate: 1.0, cue: "bell", voices: {} };
-export function configureAudio({ speed, cue: cueId, voices } = {}) {
+const prefs = { rate: 1.0, cue: "bell" };
+export function configureAudio({ speed, cue: cueId } = {}) {
   const s = SPEEDS.find((x) => x.id === speed);
   prefs.rate = s ? s.rate : 1.0;
   if (cueId && CUES.right[cueId]) prefs.cue = cueId;
-  // Which voice reads the women and which the men, when the learner has said.
-  if (voices) prefs.voices = voices;
 }
 export const audioPrefs = () => ({ ...prefs });
 
@@ -323,19 +336,6 @@ export function speakLine(text, opts = {}) {
       finish(false);
     }
   });
-}
-
-/* One voice, saying one line, so the learner can hear which it is.
- *
- * The sentence is a real one from the first chapter rather than a made-up
- * sample: the app has 2,136 lines of Russian it wrote for exactly this level,
- * and inventing a nineteenth for a settings screen would be careless. */
-const VOICE_SAMPLE = "Это я.";
-export function previewVoice(identifier) {
-  const v = ruVoices.find((x) => x.identifier === identifier);
-  if (!v) return false;
-  speakLine(VOICE_SAMPLE, { voice: v.identifier, language: v.language, pitch: 1 });
-  return true;
 }
 
 /* Plays the real recording when the collection has one, otherwise the device voice.

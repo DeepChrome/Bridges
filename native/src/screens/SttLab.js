@@ -23,38 +23,43 @@ import { Alignment } from "../activities/Alignment";
 import { STT_SET } from "../sttset";
 import { compare } from "@core/compare";
 import { refreshVoices, russianVoices, voiceSex } from "../audio";
+import { isSilentVoice } from "@core/voices";
 import { recordAttempt } from "@core/state";
 import { fold } from "@core/util";
 
 const LANG = "ru-RU";
 const SRC_NAME = { t: "Tatoeba", l: "Languages on Fire", y: "Yandex", c: "Core 5000" };
 
-/* What Russian voices this phone has, and what the app made of each.
+/* What Russian voices this phone has, and what the app makes of each.
  *
  * A scenario is read by the device's voices (§30l), one per speaker by sex,
- * and *which* voices a phone has is the thing that decides whether that works
- * — but it is invisible from here and unanswerable from a desk. The owner
- * heard the first build and said "Masha clearly sounds like a guy": the only
- * way to know whether that was the assignment or the phone was to ask the
- * phone. This is the readout. It lives in the lab because it is a diagnostic,
- * not a feature, and the lab is already developer-mode only. */
+ * and which voices a phone has is the thing that decides whether that works —
+ * but it is invisible from here and unanswerable from a desk. The owner heard
+ * the first build and said "Masha clearly sounds like a guy"; this readout is
+ * what he then listened through to produce the table in `core/voices.js`.
+ *
+ * It stays because the next unfamiliar device needs the same treatment, and
+ * because a voice that is listed and silent can be found no other way. The lab
+ * is developer-mode only, which is where a diagnostic belongs. */
 function Voices() {
   const t = useTheme();
   const [voices, setVoices] = useState(null);
   useEffect(() => { refreshVoices().then(() => setVoices(russianVoices())); }, []);
   if (!voices) return null;
-  const label = { f: "female", m: "male" };
+  const label = { f: "woman", m: "man" };
+  const unknown = voices.filter((v) => !voiceSex(v) && !isSilentVoice(v.identifier));
   return (
     <Card>
       <Muted size={12}>{`${voices.length} Russian voices`}</Muted>
-      {voices.map((v) => (
+      {voices.map((v, k) => (
         <Text key={v.identifier} style={{ color: t.ink2, fontSize: 11, marginTop: 3 }}>
-          {`${v.identifier}  ·  ${label[voiceSex(v)] || "sex not stated"}`}
+          {`${k + 1}. ${v.identifier}  ·  ${isSilentVoice(v.identifier) ? "silent, not used"
+            : label[voiceSex(v)] || "unknown"}`}
         </Text>
       ))}
-      {voices.length && !voices.some((v) => voiceSex(v) === "f") ? (
+      {unknown.length ? (
         <Muted size={12} style={{ marginTop: 6 }}>
-          No female voice: women are pitched up instead.
+          {`${unknown.length} unheard: listen, then add them to core/voices.js`}
         </Muted>
       ) : null}
     </Card>

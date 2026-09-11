@@ -335,10 +335,8 @@ function Shell() {
   const [splashDone, setSplashDone] = useState(false);
   const [placement, setPlacement] = useState(null);
 
-  /* Playback reads its settings from here rather than from state. */
-  useEffect(() => {
-    configureAudio({ speed: st.speed, cue: st.cue, voices: st.voices });
-  }, [st.speed, st.cue, st.voices]);
+  /* Playback reads its two settings from here rather than from state. */
+  useEffect(() => { configureAudio({ speed: st.speed, cue: st.cue }); }, [st.speed, st.cue]);
 
   /* Acting on the gate's answer. The navigator only exists once there is an
      account, so this runs on the render after the profile is created: effects fire

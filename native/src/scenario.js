@@ -70,7 +70,7 @@ export const clock = (ms) => {
 
 /* Drives the conversation. `lines` is `[{ s, ru }]` and `cast` the speakers in
    the order their voices are handed out. */
-export function useScenario(lines, cast) {
+export function useScenario(lines, cast, seed = "") {
   const [playing, setPlaying] = useState(false);
   const [at, setAt] = useState(-1);          // the line sounding, -1 for none
   const [pos, setPos] = useState(0);         // milliseconds into the scenario
@@ -96,8 +96,12 @@ export function useScenario(lines, cast) {
   /* By the cast, not by how many there are: a voice is chosen for *who* is
      speaking (core/names.js knows each character's sex), so the same character
      keeps the same voice across every replay. A corpus scene has no cast and
-     is read by one voice, which is what `[{}]` asks for. */
-  const voices = castVoices((cast || []).length ? cast : [{}]);
+     is read by one voice, which is what `[{}]` asks for.
+   *
+   * `seed` is the lesson. The phone has several voices of each sex, and taking
+   * the same first woman every time would make 168 conversations sound like
+   * the same two people — so each lesson draws its own pair, and keeps them. */
+  const voices = castVoices((cast || []).length ? cast : [{}], seed);
   const voiceFor = (line) => {
     const k = (cast || []).findIndex((c) => c.id === line.s);
     return voices[k < 0 ? 0 : k % voices.length];

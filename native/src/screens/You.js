@@ -10,59 +10,12 @@ import {
   Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet,
 } from "../ui";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
-import {
-  CUE_NAMES, SPEEDS, previewCue, probeVoices, russianVoices, onVoicesChanged, previewVoice,
-} from "../audio";
+import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { cacheStats, clearCache } from "../cache";
 import { backupProfile, restoreProfile } from "../backup";
 import { troubleWords } from "./Study";
 import { today } from "@core/util";
 import { tagInfo } from "@core/errortags";
-
-/* Which of the phone's voices reads the women in a conversation, and which the
- * men (§30l).
- *
- * This is a setting because the platform will not answer it. A scenario gives
- * each speaker a voice by sex, and Android states the sex of a voice only
- * sometimes — the owner's Pixel offers nineteen Russian voices and names the
- * sex of none of them, so the app read the list in order and gave a woman a
- * man's voice: *"Masha clearly sounds like a guy instead of a girl."* Reading
- * sex out of `ru-ru-x-star11-local` would be inventing it. His ear can settle
- * in ten seconds what no amount of parsing can settle at all.
- *
- * The voices are numbered rather than named because their names say nothing to
- * anybody; tapping one speaks a line in it and chooses it at the same time, so
- * the whole interaction is "tap until it sounds right".
- */
-function VoiceChoice({ sex, label, st, update }) {
-  const t = useTheme();
-  const [voices, setVoices] = useState(russianVoices());
-  useEffect(() => {
-    probeVoices().then(() => setVoices(russianVoices()));
-    return onVoicesChanged(() => setVoices(russianVoices()));
-  }, []);
-  if (voices.length < 2) return null;
-  const options = voices.map((v, k) => ({ id: v.identifier, name: String(k + 1) }));
-  const chosen = (st.voices || {})[sex] || null;
-  return (
-    <Row>
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: t.ink, fontSize: 15 }}>{label}</Text>
-        <Muted>Tap to hear</Muted>
-        <Choice
-          testID={`voice-${sex}`}
-          options={options}
-          value={chosen}
-          style={{ marginTop: 8 }}
-          onPick={(id) => {
-            previewVoice(id);
-            update((p) => ({ ...p, voices: { ...(p.voices || {}), [sex]: id } }));
-          }}
-        />
-      </View>
-    </Row>
-  );
-}
 
 /* The grammar the learner keeps getting wrong, from the tags the speech feedback
    attaches to attempts (ROADMAP P5.11). Counted in state by recordAttempt; shown
@@ -146,8 +99,6 @@ function Settings({ visible, onClose, onLab, onTour }) {
                           onPick={(id) => update((p) => ({ ...p, speed: id }))} />
                 </View>
               </Row>
-              <VoiceChoice sex="f" label="Women's voice" st={st} update={update} />
-              <VoiceChoice sex="m" label="Men's voice" st={st} update={update} />
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Right-answer sound</Text>

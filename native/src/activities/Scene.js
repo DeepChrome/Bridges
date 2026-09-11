@@ -187,7 +187,8 @@ export function Scene({ q, r }) {
   const [picks, setPicks] = useState({});
   const lines = q.lines || [];
   const cast = q.cast || [];
-  const s = useScenario(lines, cast);
+  // The lesson is the seed: its own pair of voices, the same on every replay.
+  const s = useScenario(lines, cast, `${q.unit || ""}:${q.topic || ""}`);
   useEffect(() => () => { stop(); }, []);
 
   const allPicked = q.questions.every((_, k) => picks[k] !== undefined);

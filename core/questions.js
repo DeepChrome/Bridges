@@ -464,8 +464,11 @@ export function makeQuestions(env) {
     }
     return {
       kind: "scene", ask: "Listen, then answer", prompt: "", cyr: true, unit: unitIds[0],
-      rows: chosen.map((ri) => ({ ru: rows[ri][0], en: rows[ri][1],
-                                  lemmas: sentenceLemmas(rows[ri][0], IX) })),
+      // No cast: a corpus scene is unrelated sentences from the pool, not a
+      // conversation. The activity draws it as one voice with no speakers.
+      cast: [],
+      lines: chosen.map((ri) => ({ ru: rows[ri][0], en: rows[ri][1],
+                                   lemmas: sentenceLemmas(rows[ri][0], IX) })),
       lemmas: heardAll, questions,
     };
   }
@@ -496,7 +499,7 @@ export function makeQuestions(env) {
       for (const u of [s.core].concat(s.branches || [])) {
         for (let i = 0; i < lessonCount(u); i++) {
           const x = SCRIPTS[`${u.id}:${i}`];
-          if (x) routeRowsCache.push(...x.rows);
+          if (x) routeRowsCache.push(...(x.lines || x.rows || []));
         }
       }
     }
@@ -524,14 +527,46 @@ export function makeQuestions(env) {
     return out;
   }
 
+  /* One written conversation, and five questions about the situation in it
+     (the owner, 2026-09-10 — §30k).
+   *
+   * The questions are authored with the scenario rather than generated from it,
+   * because what he asked for cannot be generated: "who is talking? are they
+   * friends? where are they going? what is their problem?" are questions about
+   * a situation, and nothing in the corpus knows a situation. The options are
+   * shuffled here so a learner cannot learn the answer's position, and the
+   * whole conversation rides on the question so the activity can play it, move
+   * around inside it, and show it word-linked afterwards.
+   */
+  function scenarioFor(unit, index) {
+    const s = SCRIPTS[`${unit.id}:${index}`];
+    if (!s || !s.lines || !s.lines.length || !s.questions || !s.questions.length) return null;
+    const lines = s.lines.map((l) => ({
+      s: l.s, ru: l.ru, en: l.en, lemmas: sentenceLemmas(l.ru, IX),
+    }));
+    const questions = s.questions.map((q) => ({
+      ask: q.ask,
+      options: shuffle(q.options.map((label, n) => ({ label, right: n === (q.answer || 0) }))),
+    }));
+    return {
+      kind: "scene", scenario: true, ask: "Listen, then answer", prompt: "", cyr: true,
+      unit: unit.id, cast: s.cast || [], lines, questions,
+      lemmas: unique(lines.flatMap((l) => l.lemmas)),
+      level: unit.name, topic: s.title, written: true,
+    };
+  }
+
   function scriptScene(unit, index) {
     if (!SCRIPTS) return null;
+    const scenario = scenarioFor(unit, index);
+    if (scenario) return scenario;
     const s = SCRIPTS[`${unit.id}:${index}`];
     if (!s || !s.rows || s.rows.length < 3) return null;
 
     const mine = new Set(s.rows.map((r) => r.en));
     const reached = scriptKeysUpTo(unit, index)
-      .flatMap((k) => SCRIPTS[k].rows).filter((r) => !mine.has(r.en));
+      .flatMap((k) => SCRIPTS[k].lines || SCRIPTS[k].rows || [])
+      .filter((r) => !mine.has(r.en));
     /* The first lesson has nothing behind it, so its wrong answers have to come
        from somewhere else. Taking them from the whole file was the obvious move
        and made the question free: on the emulator, «Это я.» was offered against
@@ -579,7 +614,7 @@ export function makeQuestions(env) {
     }
     return {
       kind: "scene", ask: "Listen, then answer", prompt: "", cyr: true,
-      unit: unit.id, rows, lemmas: heardAll, questions,
+      unit: unit.id, cast: [], lines: rows, lemmas: heardAll, questions,
       level: unit.name, topic: s.title, written: true,
     };
   }
@@ -776,8 +811,8 @@ export function makeQuestions(env) {
     const out = [], seen = new Set();
     for (let k = 0; k < n * 6 && out.length < n; k++) {
       const s = sceneFor(ids, want && want.size ? want : null);
-      if (!s || seen.has(s.rows[0].ru)) continue;
-      seen.add(s.rows[0].ru);
+      if (!s || !s.lines.length || seen.has(s.lines[0].ru)) continue;
+      seen.add(s.lines[0].ru);
       out.push(s);
     }
     return out;

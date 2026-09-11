@@ -310,7 +310,7 @@ export function DrillList({ navigation }) {
           <Thumb id="speech" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Listening</Text>
-            <Muted>Five short sentences from the unit you are on</Muted>
+            <Muted>A conversation at the level you are on</Muted>
           </View>
           {((st.drills || {}).listening || {}).best
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
@@ -448,7 +448,12 @@ const bestOf = (prev, key, score, xp) => {
 
 /* ------------------------------------------------------------- listening */
 
-export const LISTENING_N = 5;
+/* One scenario, not five. The owner, 2026-09-10: "just one audio is sufficient
+   per lesson. It doesn't need to be a series of 5 sets of 5 questions." A
+   scenario is half a minute of conversation and five questions about it, which
+   is a session of its own — five of them was the old four-sentence scene
+   repeated until it read as a drill. */
+export const LISTENING_N = 1;
 
 /* The passages on offer: half a minute of one speaker each, ranked by how many of
    this learner's own words they say (ROADMAP P10.3). Grouped by the video they
@@ -562,8 +567,8 @@ export function ListeningFlow({ navigation }) {
     const seen = new Set();
     for (let k = 0; k < LISTENING_N * 6 && out.length < LISTENING_N; k++) {
       const p = Q.writtenPassage(units, done) || Q.lessonPassage(units, want);
-      if (!p || seen.has(p.rows[0].ru)) continue;
-      seen.add(p.rows[0].ru);
+      if (!p || !p.lines.length || seen.has(p.lines[0].ru)) continue;
+      seen.add(p.lines[0].ru);
       out.push(p);
     }
     return out;
@@ -577,7 +582,7 @@ export function ListeningFlow({ navigation }) {
   }
   if (result) {
     return (
-      <Done title="Listening" detail={`${result.right} of ${result.total} scenes clean`}
+      <Done title="Listening" detail={steps[0] ? steps[0].topic : null}
             score={result.score} passed={result.score >= 80}
             onAgain={() => { setResult(null); setSeed(seed + 1); }}
             onBack={() => navigation.goBack()} />

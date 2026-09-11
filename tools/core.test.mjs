@@ -674,37 +674,48 @@ group("scenes and custom quizzes");
   ok(scenes.length === SPEECH_MIX.scene.perQuiz, `${later.id}: one scene per quiz`, String(scenes.length));
   ok(!Q.quizSteps(STAGES[0].core, 0).some((q) => q.kind === "scene"), "none in the first chapter");
   const s = scenes[0];
-  // Two shapes now share the kind: the corpus scene, which is short and every
-  // sentence of which has a real recording, and the passage written for the
-  // lesson (§30l), which is longer and read by the device voice because nobody
-  // has ever said it. A scene must be one or the other, never a corpus scene
-  // claiming to be written or a written one claiming a recording it lacks.
-  if (s.written) {
-    ok(s.rows.length >= 4 && s.rows.length <= 5, "a written passage is four or five sentences", String(s.rows.length));
+  /* Two shapes share the kind. The **scenario** (§30k) is the one a lesson
+     with a script gets: a written conversation between named people and five
+     questions about the situation, read by the device voices. The **corpus
+     scene** is the fallback where no script exists — a few pooled sentences,
+     each with a recording, each with a meaning question. A scene must be one
+     or the other, never a corpus scene claiming to be written or a written one
+     claiming a recording it lacks. */
+  if (s.scenario) {
+    ok(s.lines.length >= 8 && s.lines.length <= 16, "a scenario is a conversation of 8-16 turns", String(s.lines.length));
+    ok(s.cast.length >= 2 && s.lines.every((l) => s.cast.some((c) => c.id === l.s)),
+       "with a cast, and every line belongs to one of them", s.cast.map((c) => c.ru).join(", "));
+    ok(s.questions.length === 5, "and five questions about what happened", String(s.questions.length));
+    ok(s.topic && s.level, "and says what it is about and where it is from", `${s.topic} / ${s.level}`);
+  } else if (s.written) {
+    ok(s.lines.length >= 4 && s.lines.length <= 5, "a written passage is four or five sentences", String(s.lines.length));
     ok(s.topic && s.level, "and says what it is about and where it is from", `${s.topic} / ${s.level}`);
   } else {
-    ok(s.rows.length >= 2 && s.rows.length <= 3, "two or three sentences", String(s.rows.length));
-    ok(s.rows.every((r) => DATA.audio.files[fold(r.ru)]), "every sentence has a recording");
+    ok(s.lines.length >= 2 && s.lines.length <= 3, "two or three sentences", String(s.lines.length));
+    ok(s.lines.every((r) => DATA.audio.files[fold(r.ru)]), "every sentence has a recording");
   }
-  ok(s.questions.length >= s.rows.length, "a question per sentence at least");
   ok(s.questions.every((q) => q.options.length === 4 && q.options.filter((o) => o.right).length === 1),
      "four options, one right, on every question");
-  s.rows.forEach((r, k) => {
-    const q = s.questions[k];
-    ok(q.row === k && q.options.find((o) => o.right).label === r.en,
-       `question ${k + 1} asks the meaning of sentence ${k + 1}`);
-    ok(new Set(q.options.map((o) => o.label)).size === 4, "and its options are distinct");
-  });
-  const heardQ = s.questions.find((q) => typeof q.i === "number");
-  if (heardQ) {
-    ok(s.lemmas.includes(heardQ.i) && !heardQ.options.some((o) => !o.right && s.lemmas.includes(o.i)),
-       "the heard word was said and the wrong ones were not");
+  ok(s.questions.every((q) => new Set(q.options.map((o) => o.label)).size === 4),
+     "and no question offers the same answer twice");
+  if (!s.scenario) {
+    ok(s.questions.length >= s.lines.length, "a question per sentence at least");
+    s.lines.forEach((r, k) => {
+      const q = s.questions[k];
+      ok(q.row === k && q.options.find((o) => o.right).label === r.en,
+         `question ${k + 1} asks the meaning of sentence ${k + 1}`);
+    });
+    const heardQ = s.questions.find((q) => typeof q.i === "number");
+    if (heardQ) {
+      ok(s.lemmas.includes(heardQ.i) && !heardQ.options.some((o) => !o.right && s.lemmas.includes(o.i)),
+         "the heard word was said and the wrong ones were not");
+    }
   }
   ok(!s.autoplay, "nothing plays before the learner presses Play");
   ok(!answerable({ kind: "scene", questions: [{}] }), "a scene without options is not answerable");
 
   const drill = Q.listeningDrill(Q.unitsUpTo(later), 4);
-  ok(drill.length === 4 && new Set(drill.map((d) => d.rows[0].ru)).size === 4,
+  ok(drill.length === 4 && new Set(drill.map((d) => d.lines[0].ru)).size === 4,
      "a listening drill of four distinct scenes", String(drill.length));
 
   const units = Q.unitsUpTo(later);
@@ -872,7 +883,7 @@ function routeOpening(n) {
     for (const u of [s.core].concat(s.branches || [])) {
       for (let i = 0; i < lessonCount(u) && out.length < n; i++) {
         const x = SCRIPTS[`${u.id}:${i}`];
-        if (x) out.push(...x.rows.map((r) => r.en));
+        if (x) out.push(...(x.lines || x.rows).map((r) => r.en));
       }
     }
   }
@@ -900,9 +911,13 @@ group("written lesson passages");
     const scene = Q.scriptScene(byId.get(id), Number(i));
     if (!scene) { bad.push(k); continue; }
     built++;
-    if (scene.rows.length !== SCRIPTS[k].rows.length) bad.push(`${k}: lost a sentence`);
+    const written = SCRIPTS[k].lines || SCRIPTS[k].rows;
+    if (scene.lines.length !== written.length) bad.push(`${k}: lost a line`);
     if (!scene.written) bad.push(`${k}: not marked written`);
-    if (scene.questions.length < scene.rows.length) bad.push(`${k}: too few questions`);
+    if (scene.scenario) {
+      if (scene.questions.length !== 5) bad.push(`${k}: ${scene.questions.length} questions`);
+      if (!scene.cast.length) bad.push(`${k}: no cast`);
+    } else if (scene.questions.length < scene.lines.length) bad.push(`${k}: too few questions`);
     for (const q of scene.questions) {
       if (q.options.length !== 4) bad.push(`${k}: ${q.options.length} options`);
       if (q.options.filter((o) => o.right).length !== 1) bad.push(`${k}: not one right answer`);
@@ -933,7 +948,10 @@ group("written lesson passages");
   // it borrows from the front of the route rather than the whole file. Borrowing
   // at large put "Our customer is an entrepreneur from Moscow." beside «Это я.»
   // on the emulator, and the right answer was simply the short one.
-  {
+  /* A scenario's wrong answers are authored beside its questions, so there is
+     nothing to borrow and nothing to get wrong; this is the rule for the
+     generated per-sentence questions that remain where no scenario exists. */
+  if (!Q.scriptScene(STAGES[0].core, 0).scenario) {
     const opener = STAGES[0].core;
     const scene = Q.scriptScene(opener, 0);
     // A generous window on purpose: the contract is "early in the route", not an
@@ -944,7 +962,8 @@ group("written lesson passages");
     for (const q of scene.questions) {
       if (typeof q.i === "number") continue;
       for (const o of q.options) {
-        if (!o.right && !early.has(o.label) && !SCRIPTS[`${opener.id}:0`].rows.some((r) => r.en === o.label)) {
+        const own = SCRIPTS[`${opener.id}:0`];
+        if (!o.right && !early.has(o.label) && !(own.lines || own.rows).some((r) => r.en === o.label)) {
           far.push(o.label);
         }
       }
@@ -969,10 +988,10 @@ group("written lesson passages");
   // one that has not been reached.
   const units = Q.unitsUpTo(STAGES[2].core);
   const p = Q.writtenPassage(units, () => 2);
-  ok(p && p.written && p.rows.length >= 4, "Practice draws a written passage too");
+  ok(p && p.written && p.lines.length >= 4, "Practice draws a written scenario too");
   const first = Q.writtenPassage([STAGES[0].core], (u) => 1);
-  ok(first && first.unit === STAGES[0].core.id && first.rows.length >= 4,
-     "one lesson in, the first lesson's passage is available");
+  ok(first && first.unit === STAGES[0].core.id && first.lines.length >= 4,
+     "one lesson in, the first lesson's scenario is available");
   ok(Q.writtenPassage(units, () => 0) === null, "no lessons finished, no passage");
 }
 

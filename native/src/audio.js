@@ -41,6 +41,7 @@ async function prepare() {
  * Probed once, asynchronously. Until it resolves there is no voice, so a recording
  * still plays and TTS stays quiet — the safe way round. */
 let ruVoice = null;
+let ruVoices = [];
 let probe = null;
 const voiceListeners = new Set();
 
@@ -48,13 +49,23 @@ export function hasRussianVoice() {
   return !!ruVoice;
 }
 
+/* Every Russian voice the device has, in the order the platform lists them.
+   A conversation needs more than one (§30k′): the scenario activity gives each
+   speaker a voice of their own from here, and falls back to pitch when the
+   phone only has one installed. */
+export function russianVoices() {
+  return ruVoices;
+}
+
 export function probeVoices() {
   if (!probe) {
     probe = (async () => {
       try {
         const voices = await Speech.getAvailableVoicesAsync();
-        ruVoice = (voices || []).find((v) => v.language && /^ru/i.test(v.language)) || null;
+        ruVoices = (voices || []).filter((v) => v.language && /^ru/i.test(v.language));
+        ruVoice = ruVoices[0] || null;
       } catch (e) {
+        ruVoices = [];
         ruVoice = null;                 // no enumeration: treat as no voice
       }
       voiceListeners.forEach((fn) => fn());
@@ -76,7 +87,34 @@ export function onVoicesChanged(fn) {
 export function refreshVoices() {
   probe = null;
   ruVoice = null;
+  ruVoices = [];
   return probeVoices();
+}
+
+/* How a cast of speakers is shared out over the voices this phone has.
+ *
+ * Different voices are what make a recorded conversation followable — the
+ * owner, 2026-09-10: *"different voices are key"*. Android usually carries
+ * three or four Russian voices, so the first choice is a real voice each. A
+ * phone with one voice still has to sound like two people, and pitch is the
+ * only lever left: ±15% is plainly a different speaker without sounding like a
+ * cartoon, and it is honest, because nothing here is claiming to be a
+ * recording of anybody (§27).
+ *
+ * Deterministic in the number of speakers, so the same character keeps the same
+ * voice for the whole scenario and across replays. */
+const PITCH = [1, 0.85, 1.15, 0.92];
+export function castVoices(n) {
+  const out = [];
+  for (let k = 0; k < n; k++) {
+    const own = ruVoices[k];
+    out.push(own
+      ? { voice: own.identifier, language: own.language, pitch: 1 }
+      : { voice: ruVoice ? ruVoice.identifier : null,
+          language: ruVoice ? ruVoice.language : "ru-RU",
+          pitch: PITCH[k % PITCH.length] });
+  }
+  return out;
 }
 
 probeVoices();
@@ -157,6 +195,48 @@ export function speakTTS(text, opts = {}) {
     if (settle) settle();
     return false;
   }
+}
+
+/* One line of a conversation, in a named voice, awaited to its end.
+ *
+ * Deliberately not `say()`: that prefers a recording from the collection when
+ * there is one, and a scenario where one line is a studio recording and the
+ * rest are the device reading two parts is not a conversation — the speaker a
+ * line belongs to would change voice mid-exchange. A written scenario is the
+ * device throughout, and the screen says so (§27).
+ *
+ * Resolves when the line has been spoken, been stopped, or failed, so the
+ * caller can run the next one. The watchdog is the same idea as `STALL_MS` and
+ * for the same reason: a platform that never reports `onDone` would otherwise
+ * hold the scenario forever. */
+export function speakLine(text, opts = {}) {
+  if (!ruVoice) return Promise.resolve(false);
+  return new Promise((resolve) => {
+    let done = false;
+    const end = begin();
+    const finish = (ok) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      end();
+      resolve(ok);
+    };
+    const timer = setTimeout(() => finish(false), 4000 + text.length * 400);
+    try {
+      Speech.stop();
+      Speech.speak(bare(text), {
+        language: opts.language || ruVoice.language,
+        voice: opts.voice || ruVoice.identifier,
+        pitch: opts.pitch || 1,
+        rate: 0.9 * (opts.rate || prefs.rate),
+        onDone: () => finish(true),
+        onStopped: () => finish(false),
+        onError: () => finish(false),
+      });
+    } catch (e) {
+      finish(false);
+    }
+  });
 }
 
 /* Plays the real recording when the collection has one, otherwise the device voice.

@@ -42,6 +42,36 @@ export const NAMES = new Set([
   "москва", "россия", "петербург", "сибирь", "киев", "волга", "джаред",
 ]);
 
+/* …and the forms those names take.
+ *
+ * A conversation cannot keep every name in the nominative — "who is Anya?",
+ * "I know Ivan", "Masha's brother" are the sentences a scenario is made of —
+ * and the lexicon carries no personal names at all, so nothing resolves them
+ * the way «Москвы» resolves through «Москва». The declensions of a first name
+ * are regular enough to generate: first-declension in -а/-я (Аня, Маша, and
+ * Миша, which declines the same way), and masculine consonant stems. Being
+ * over-generous here costs nothing — the set only ever admits names, and a
+ * misspelled name is still a name.
+ *
+ * Everything is folded (ё→е), which is what the token check compares against;
+ * «Пётр» would otherwise have failed against its own entry. */
+const HUSH = /[шжчщкгх]$/;
+function nameForms(name) {
+  const n = name.toLowerCase();
+  if (/[ая]$/.test(n)) {
+    const s = n.slice(0, -1);
+    const soft = n.endsWith("я");
+    return [n, s + (soft || HUSH.test(s) ? "и" : "ы"), s + "е",
+            s + (soft ? "ю" : "у"), s + (soft ? "ей" : "ой")];
+  }
+  if (n.endsWith("ь")) { const s = n.slice(0, -1); return [n, s + "и"]; }
+  return [n, n + "а", n + "у", n + "ом", n + "е"];
+}
+/* Пётр loses its vowel outside the nominative, which no rule above knows. */
+const NAME_ODD = ["петра", "петру", "петром", "петре"];
+export const NAME_KEYS = new Set(
+  [...NAMES].flatMap(nameForms).concat(NAME_ODD).map((n) => fold(n)));
+
 /* How long a sentence may run, by chapter. Five words in the first chapter is
    about all thirty words of Russian can say; the allowance grows with the
    palette so chapter 10 is not still writing baby talk. */
@@ -56,6 +86,21 @@ export function tokensOf(ru) {
    index[key][0] is what a tap on the word opens. */
 const candidatesFor = (key) => IX[key] || [];
 
+/* How long the conversation will run on the device, in seconds — the same
+   estimate the app plays it against (native/src/scenario.js). A scenario is
+   meant to be 30–45 seconds; anything far outside that is either two exchanges
+   pretending to be a scene or a monologue. */
+export const GAP_MS = 420;
+export const estimateMs = (text) => 400 + String(text || "").length * 70;
+export const runSeconds = (lines) =>
+  Math.round((lines.reduce((n, l) => n + estimateMs(l.ru) + GAP_MS, 0) - GAP_MS) / 1000);
+export const MIN_SECONDS = 22, MAX_SECONDS = 70;
+
+/* A conversation, not a reading: two or three people, eight to sixteen turns. */
+export const MIN_LINES = 8, MAX_LINES = 16;
+export const CAST_MIN = 2, CAST_MAX = 3;
+export const QUESTIONS = 5, OPTIONS = 4;
+
 export function checkOne(brief, entry) {
   const errors = [], warnings = [];
   const allow = new Set(brief.palette.map((w) => w.i));
@@ -66,13 +111,76 @@ export function checkOne(brief, entry) {
   else if (entry.title.trim().split(/\s+/).length > 6) errors.push(`title too long: "${entry.title}"`);
   if (/[а-яё]/i.test(entry.title || "")) errors.push("the title is the English topic, not Russian");
 
-  const rows = entry.rows || [];
-  if (rows.length < MIN_ROWS || rows.length > MAX_ROWS) {
+  /* The scenario shape (§30k): a cast, their lines, and five questions about
+     the situation. `rows` is the shape that came before it — four unrelated
+     sentences with a meaning question each — and is checked the same way from
+     the sentence loop down. */
+  const scenario = !!entry.lines;
+  const rows = entry.lines || entry.rows || [];
+  if (scenario) {
+    const cast = entry.cast || [];
+    if (cast.length < CAST_MIN || cast.length > CAST_MAX) {
+      errors.push(`${cast.length} speakers, wanted ${CAST_MIN}-${CAST_MAX}`);
+    }
+    const ids = new Set();
+    cast.forEach((c, k) => {
+      if (!c.id) errors.push(`speaker ${k + 1}: no id`);
+      else if (ids.has(c.id)) errors.push(`two speakers share the id "${c.id}"`);
+      ids.add(c.id);
+      if (!c.ru || !/^[А-ЯЁ][а-яё]+$/.test(c.ru)) errors.push(`speaker ${c.id}: "${c.ru}" is not a Russian given name`);
+      else if (!NAMES.has(c.ru.toLowerCase())) errors.push(`speaker ${c.id}: "${c.ru}" is not in the allowed names`);
+      if (!c.en || /[а-яё]/i.test(c.en)) errors.push(`speaker ${c.id}: no English name`);
+    });
+    if (rows.length < MIN_LINES || rows.length > MAX_LINES) {
+      errors.push(`${rows.length} lines, wanted ${MIN_LINES}-${MAX_LINES}`);
+    }
+    rows.forEach((l, k) => {
+      if (!l.s || !ids.has(l.s)) errors.push(`line ${k + 1}: "${l.s}" is not one of the speakers`);
+    });
+    // Nobody says every line, and nobody is in the cast to say nothing.
+    cast.forEach((c) => {
+      const n = rows.filter((l) => l.s === c.id).length;
+      if (!n) errors.push(`speaker ${c.id} never says anything`);
+      else if (n > rows.length - 2) errors.push(`speaker ${c.id} says nearly everything`);
+      /* "Who is talking?" is one of the five questions, and it can only be
+         answered from the audio if somebody says the name out loud. The screen
+         shows the cast, so a name never said makes the question a guess. */
+      const said = rows.some((l) => tokensOf(l.ru || "").some(
+        (k) => nameForms(c.ru || "").map((f) => fold(f)).includes(k)));
+      if (!said) errors.push(`nobody says "${c.ru}" out loud`);
+    });
+    const secs = runSeconds(rows);
+    if (secs < MIN_SECONDS || secs > MAX_SECONDS) {
+      errors.push(`runs about ${secs}s, wanted ${MIN_SECONDS}-${MAX_SECONDS}s`);
+    }
+
+    const qs = entry.questions || [];
+    if (qs.length !== QUESTIONS) errors.push(`${qs.length} questions, wanted ${QUESTIONS}`);
+    const asked = new Set();
+    qs.forEach((q, k) => {
+      const where = `question ${k + 1}`;
+      if (!q.ask || !q.ask.trim()) { errors.push(`${where}: nothing asked`); return; }
+      if (/[а-яё]/i.test(q.ask)) errors.push(`${where}: the questions are in English`);
+      if (q.ask.trim().split(/\s+/).length > 12) errors.push(`${where}: too long — "${q.ask}"`);
+      if (asked.has(q.ask)) errors.push(`${where}: asked twice`);
+      asked.add(q.ask);
+      const opts = q.options || [];
+      if (opts.length !== OPTIONS) errors.push(`${where}: ${opts.length} options, wanted ${OPTIONS}`);
+      if (new Set(opts).size !== opts.length) errors.push(`${where}: two options are the same`);
+      opts.forEach((o) => {
+        if (/[а-яё]/i.test(o)) errors.push(`${where}: Cyrillic in an option — "${o}"`);
+        if (String(o).split(/\s+/).length > 8) errors.push(`${where}: option too long — "${o}"`);
+      });
+      if (typeof q.answer !== "number" || q.answer < 0 || q.answer >= opts.length) {
+        errors.push(`${where}: answer ${q.answer} is not one of the options`);
+      }
+    });
+  } else if (rows.length < MIN_ROWS || rows.length > MAX_ROWS) {
     errors.push(`${rows.length} sentences, wanted ${MIN_ROWS}-${MAX_ROWS}`);
   }
 
   rows.forEach((row, k) => {
-    const where = `sentence ${k + 1}`;
+    const where = scenario ? `line ${k + 1}` : `sentence ${k + 1}`;
     if (!row || !row.ru || !row.en) { errors.push(`${where}: missing ru or en`); return; }
     if (!/[.?!…]$/.test(row.ru.trim())) errors.push(`${where}: no end punctuation — "${row.ru}"`);
     if (/[̀́]/.test(row.ru)) errors.push(`${where}: stress marks belong on headwords, not in a spoken line`);
@@ -91,7 +199,7 @@ export function checkOne(brief, entry) {
       // genitive, and matching the folded token alone let the gate reject a
       // name it had been given. Names the lexicon does not carry at all still
       // pass on the surface form.
-      if (NAMES.has(key) || cand.some((i) => NAMES.has(L[i].b.toLowerCase()))) continue;
+      if (NAME_KEYS.has(key) || cand.some((i) => NAMES.has(L[i].b.toLowerCase()))) continue;
       if (!cand.length) {
         errors.push(`${where}: "${key}" is not a form of any word the app knows — "${row.ru}"`);
         continue;
@@ -136,18 +244,27 @@ export function loadScripts(dir = SCRIPT_DIR) {
 export function checkAll(scripts, { strict = false } = {}) {
   const all = briefs();
   const byKey = new Map(all.map((b) => [b.key, b]));
-  const report = { lessons: 0, missing: [], errors: [], warnings: [], covered: 0, of: all.length };
+  const report = { lessons: 0, missing: [], errors: [], warnings: [], covered: 0,
+                   of: all.length, scenarios: 0, legacy: [], seconds: [] };
   const seen = new Map();
 
   for (const [key, entry] of Object.entries(scripts)) {
     const brief = byKey.get(key);
     if (!brief) { report.errors.push(`${key}: no such lesson on the path`); continue; }
     report.lessons++;
+    if (entry.lines) { report.scenarios++; report.seconds.push(runSeconds(entry.lines)); }
+    else report.legacy.push(key);
     const r = checkOne(brief, entry);
     r.errors.forEach((e) => report.errors.push(`${key}: ${e}`));
     r.warnings.forEach((w) => report.warnings.push(`${key}: ${w}`));
-    for (const row of entry.rows || []) {
+    /* No two lessons may share a sentence — but a conversation is allowed its
+       small change. «Да.», «Хорошо.», «А ты?» are how people actually answer
+       each other, and a rule that forbids them across 168 scenarios would be a
+       rule against writing dialogue. Anything of three words or more still has
+       to be written once. */
+    for (const row of entry.lines || entry.rows || []) {
       const f = fold(row.ru || "");
+      if (tokensOf(row.ru || "").length < 3) continue;
       if (seen.has(f)) report.errors.push(`${key}: "${row.ru}" is already used by ${seen.get(f)}`);
       else seen.set(f, key);
     }
@@ -156,6 +273,12 @@ export function checkAll(scripts, { strict = false } = {}) {
   for (const b of all) if (!scripts[b.key]) report.missing.push(b.key);
   if (strict && report.missing.length) {
     report.errors.push(`${report.missing.length} lessons have no script: ${report.missing.slice(0, 8).join(", ")}…`);
+  }
+  // The `rows` shape is what the scenarios replaced. Strict is where the
+  // migration is finished rather than merely intended.
+  if (strict && report.legacy.length) {
+    report.errors.push(`${report.legacy.length} lessons are still four loose sentences`
+                       + `: ${report.legacy.slice(0, 8).join(", ")}…`);
   }
   return report;
 }
@@ -172,7 +295,10 @@ if (process.argv[1] && process.argv[1].endsWith("check_scripts.mjs")) {
 
   report.warnings.forEach((w) => console.log(`warn  ${w}`));
   report.errors.forEach((e) => console.log(`FAIL  ${e}`));
+  const secs = report.seconds.slice().sort((a, b) => a - b);
   console.log(`\n${report.lessons} lessons checked, ${report.of - report.lessons} without a script`
               + `, ${report.errors.length} errors, ${report.warnings.length} warnings`);
+  console.log(`${report.scenarios} scenarios, ${report.legacy.length} still loose sentences`
+              + (secs.length ? `; ${secs[0]}-${secs[secs.length - 1]}s, median ${secs[secs.length >> 1]}s` : ""));
   process.exit(report.errors.length ? 1 : 0);
 }

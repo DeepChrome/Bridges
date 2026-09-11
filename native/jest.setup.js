@@ -54,20 +54,40 @@ global.__audioFinish = () => {
 /* A device with a Russian voice, by default. `global.__voices` lets a test take it
    away — the case that matters, since without one the platform substitutes another
    language rather than failing. */
-jest.mock("expo-speech", () => ({
-  speak: (text, opts) => {
-    global.__spoke = global.__spoke || [];
-    global.__spoke.push(text);
-    global.__spokeOpts = global.__spokeOpts || [];
-    global.__spokeOpts.push(opts);
-  },
-  stop: jest.fn(),
-  getAvailableVoicesAsync: jest.fn(async () =>
-    global.__voices !== undefined ? global.__voices : [
-      { identifier: "ru-RU-x-ruf-local", name: "Russian", quality: "Default", language: "ru-RU" },
-      { identifier: "en-US-x-sfg-local", name: "English", quality: "Default", language: "en-US" },
-    ]),
-}));
+/* An utterance finishes on the tick after speak() unless a test holds it
+   (global.__speechHold, released by global.__speechFinish()), and stop() ends
+   whatever is outstanding. Without this, anything that awaits the end of a
+   spoken line — a scenario running a conversation turn by turn — never gets
+   its second line, which looks like a hang rather than a missing stub. */
+jest.mock("expo-speech", () => {
+  const pending = [];
+  const settle = (opts, how) => {
+    const fn = opts && opts[how];
+    if (fn) fn();
+  };
+  global.__speechFinish = () => {
+    while (pending.length) settle(pending.shift(), "onDone");
+  };
+  return {
+    speak: (text, opts) => {
+      global.__spoke = global.__spoke || [];
+      global.__spoke.push(text);
+      global.__spokeOpts = global.__spokeOpts || [];
+      global.__spokeOpts.push(opts);
+      if (global.__speechHold) { pending.push(opts); return; }
+      setTimeout(() => settle(opts, "onDone"), 0);
+    },
+    stop: jest.fn(() => {
+      while (pending.length) settle(pending.pop(), "onStopped");
+    }),
+    getAvailableVoicesAsync: jest.fn(async () =>
+      global.__voices !== undefined ? global.__voices : [
+        { identifier: "ru-RU-x-ruf-local", name: "Russian", quality: "Default", language: "ru-RU" },
+        { identifier: "ru-RU-x-rum-local", name: "Russian 2", quality: "Default", language: "ru-RU" },
+        { identifier: "en-US-x-sfg-local", name: "English", quality: "Default", language: "en-US" },
+      ]),
+  };
+});
 
 /* Speech recognition: the native module is replaced by one that records what it was
    asked to do and lets a test deliver a result. A test calls

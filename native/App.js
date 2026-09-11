@@ -9,14 +9,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, Animated, Pressable, useColorScheme } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
+import { NavigationContainer, DefaultTheme, DarkTheme,
+         getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import Svg, { Path } from "react-native-svg";
 
 import { SessionProvider, useSession } from "./src/session";
 import { light, dark } from "./src/theme";
+import { swipeAllowed } from "./src/tabs";
 import { Loading, Avatar, HeaderTitle } from "./src/ui";
 import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
@@ -42,7 +44,7 @@ import {
   ShadowFlow,
 } from "./src/screens/Flows";
 
-const Tabs = createBottomTabNavigator();
+const Tabs = createMaterialTopTabNavigator();
 const Stack = createNativeStackNavigator();
 
 const icon = (d) => ({ color, size }) => (
@@ -372,9 +374,51 @@ function Shell() {
   );
 }
 
+/* The five tabs, swiped rather than only pressed (the owner, 2026-09-11: *"I'd
+ * like the menus swipeable side to side and have an animation that reflects
+ * this motion… almost like an android home screen"*).
+ *
+ * A bottom tab navigator cannot do that: it cross-fades between screens and has
+ * no gesture at all. This is the top-tab navigator — which is a pager, and is
+ * what carries the page under the finger — pinned to the bottom and dressed as
+ * the bar it replaces. The indicator is the animation he asked for: it is the
+ * one part of the bar that tracks the drag continuously rather than snapping
+ * when the drag ends.
+ *
+ * `react-native-pager-view` is the dependency this adds, and it earns its place
+ * by rule 20.5: a paging gesture that hands scroll back to a list at the edges,
+ * follows the finger, and settles with the right velocity is precisely the
+ * well-solved problem that rule says not to reinvent. */
 function TabShell() {
+  const scheme = useColorScheme();
+  const p = scheme === "light" ? light : dark;
+  const insets = useSafeAreaInsets();
   return (
-    <Tabs.Navigator screenOptions={{ headerShown: false }}>
+    <Tabs.Navigator
+      tabBarPosition="bottom"
+      screenOptions={({ route }) => {
+        return {
+          swipeEnabled: swipeAllowed(route.name, getFocusedRouteNameFromRoute(route)),
+          tabBarShowIcon: true,
+          tabBarActiveTintColor: p.brand,
+          tabBarInactiveTintColor: p.ink3,
+          // No ripple: the page following the finger is the feedback.
+          tabBarPressColor: "transparent",
+          tabBarStyle: {
+            backgroundColor: p.surface,
+            borderTopWidth: 1, borderTopColor: p.line,
+            paddingBottom: insets.bottom,
+            elevation: 0, shadowOpacity: 0,
+          },
+          // On a bar at the bottom of the screen the indicator belongs on its
+          // top edge, against the content it refers to.
+          tabBarIndicatorStyle: { top: 0, height: 2, backgroundColor: p.brand },
+          tabBarItemStyle: { flexDirection: "column", gap: 2, paddingVertical: 6 },
+          tabBarLabelStyle: { fontSize: 11, fontWeight: "600", textTransform: "none",
+                              margin: 0 },
+        };
+      }}
+    >
       <Tabs.Screen name="Learn" component={LearnStack}
                    options={{ tabBarIcon: LearnIcon }} />
       <Tabs.Screen name="Study" component={StudyStack}

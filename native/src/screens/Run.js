@@ -11,7 +11,8 @@ import { View, Text, Pressable, ScrollView, Alert, Animated } from "react-native
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet } from "../ui";
-import { GuidePop, useEnter, usePop } from "../guide";
+import { GuidePop } from "../guide";
+import { useEnter, usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, LINES } from "@core/guide";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
 import { RuInput } from "../keyboard";
@@ -38,31 +39,47 @@ function gradeInto(st, idx, grade) {
 }
 
 function Options({ q, answered, picked, onPick }) {
-  const t = useTheme();
   return (
     <View style={{ gap: 9 }}>
-      {q.options.map((o, i) => {
-        const isPicked = picked === i;
-        const show = answered && (o.right || isPicked);
-        const border = !show ? t.line : o.right ? t.good : t.bad;
-        const bg = !show ? t.surface : o.right ? t.goodBg : t.badBg;
-        return (
-          <Pressable
-            key={i}
-            disabled={answered}
-            onPress={() => onPick(i, o)}
-            style={({ pressed }) => ({
-              backgroundColor: bg, borderColor: border, borderWidth: 1,
-              borderBottomWidth: pressed ? 1 : 3, borderRadius: radius.md,
-              paddingVertical: 15, paddingHorizontal: 16, minHeight: 54,
-              justifyContent: "center",
-            })}
-          >
-            <Text style={{ color: t.ink, fontSize: 16 }}>{o.label}</Text>
-          </Pressable>
-        );
-      })}
+      {q.options.map((o, i) => (
+        <Option key={i} o={o} i={i} answered={answered} picked={picked} onPick={onPick} />
+      ))}
     </View>
+  );
+}
+
+/* One option. Its own component because a hook cannot live in a `map`, and it
+   needs one: an answer is the thing a learner touches most in this app, so if
+   anything is going to feel physical it is this. */
+function Option({ o, i, answered, picked, onPick }) {
+  const t = useTheme();
+  const press = usePress();
+  const isPicked = picked === i;
+  const show = answered && (o.right || isPicked);
+  const border = !show ? t.line : o.right ? t.good : t.bad;
+  const bg = !show ? t.surface : o.right ? t.goodBg : t.badBg;
+  /* The right answer pops when it is revealed — including when the learner
+     picked something else, because that is the moment they need their eye taken
+     to it. Nothing pops on a wrong pick: the colour says enough, and bouncing
+     the thing someone just got wrong is gloating. */
+  const reveal = usePop([answered && o.right]);
+  return (
+    <Animated.View style={[answered && o.right ? reveal : null, answered ? null : press.style]}>
+      <Pressable
+        disabled={answered}
+        onPress={() => onPick(i, o)}
+        onPressIn={answered ? undefined : press.onPressIn}
+        onPressOut={answered ? undefined : press.onPressOut}
+        style={({ pressed }) => ({
+          backgroundColor: bg, borderColor: border, borderWidth: 1,
+          borderBottomWidth: pressed ? 1 : 3, borderRadius: radius.md,
+          paddingVertical: 15, paddingHorizontal: 16, minHeight: 54,
+          justifyContent: "center",
+        })}
+      >
+        <Text style={{ color: t.ink, fontSize: 16 }}>{o.label}</Text>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -424,6 +441,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
      because of them, and it used to be indistinguishable from a re-render.
      Keyed on the step as well as `answered` so it plays once per question. */
   const verdictIn = useEnter([answered, at], { distance: 14 });
+  /* Keyed on the question rather than on the index: a recycled question comes
+     back at a different position, and a learner who has just been handed the
+     same word again should see it arrive rather than find it already there. */
+  const questionIn = useSwap(`${at}:${q.kind}:${q.prompt}`);
+  const answerIn = useSwap(`${at}:answer`, { distance: 22 });
 
   return (
     <Screen fill>
@@ -437,7 +459,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         </Pill>
       </View>
 
-      <View style={{ alignItems: "center", marginBottom: 20 }}>
+      {/* The question slides in from the right as the last one leaves. Eight
+          questions with a hard cut between them read as one question whose
+          words keep changing; this is what gives a quiz the sense of moving
+          through something. */}
+      <Animated.View style={[questionIn, { alignItems: "center", marginBottom: 20 }]}>
         <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "600", letterSpacing: 1,
                        textTransform: "uppercase", marginBottom: 12,
                        textAlign: "center" }}>
@@ -451,7 +477,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         ) : null}
         {q.sub ? <Muted style={{ marginTop: 6, textAlign: "center" }}>{q.sub}</Muted> : null}
         {q.say ? <View style={{ marginTop: 12 }}><Speaker text={q.say} /></View> : null}
-      </View>
+      </Animated.View>
 
       {/* A hint — the table, or the meaning of what was heard — costs the grade:
           right with a hint is Hard, not Good. The label says so beforehand;
@@ -480,9 +506,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       {/* Keyed by position so a view is remounted for every step: two typed
           questions in a row otherwise share one input, and the second opens with
           the first's answer still in it. */}
-      <View key={at}>
+      <Animated.View key={at} style={answerIn}>
         {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip, usedHint }) : null}
-      </View>
+      </Animated.View>
 
       {answered ? (
         // Anchored to the foot of the screen against Screen's flexGrow, so Continue

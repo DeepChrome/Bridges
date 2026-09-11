@@ -99,9 +99,21 @@ function HeaderRight({ navigation, route }) {
   );
 }
 
+/* Every stack shares one transition, set here rather than left to whatever each
+   platform defaults to. It was unset, so a lesson, a drill and a dictionary
+   entry each arrived slightly differently depending on what Android felt like
+   doing, which is one of the ways an app reads as assembled rather than made
+   (the owner on making it feel professional, 2026-09-10).
+
+   `slide_from_right` on both because the whole app is a stack you go *into* and
+   come back out of: a lesson from the path, a word from a sentence, a drill
+   from Practice. `fade` would be flatter and cheaper to run, and would also
+   lose the only cue that says which direction you just went. */
 const withMe = ({ navigation, route }) => ({
   headerRight: () => <HeaderRight navigation={navigation} route={route} />,
   headerBackButtonDisplayMode: "minimal",
+  animation: "slide_from_right",
+  animationDuration: 260,
 });
 
 /* A screen's header names the screen and what it belongs to, both read from the

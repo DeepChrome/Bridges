@@ -14,7 +14,7 @@ import Svg, { Path, SvgXml } from "react-native-svg";
 import { iconFor } from "@core/icons";
 import { AV, AV_IDS } from "@core/avatars";
 import { useTheme, radius, space } from "./theme";
-import { useFill } from "./guide";
+import { useFill, usePress } from "./motion";
 import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
 
 /* `fill` makes the content container grow to the height of the screen, which is what
@@ -100,21 +100,33 @@ export function List({ children }) {
 
 export function Row({ children, onPress, disabled, last, testID }) {
   const t = useTheme();
+  /* A row presses less than a button does: it sits in a group, and a row that
+     shrinks as much as a standalone control makes the whole list look loose. */
+  const press = usePress({ to: 0.985 });
+  const live = !disabled && !!onPress;
+  /* The scale lives on a wrapper, not on the Pressable. Making the Pressable
+     itself animated hid its resolved style from the render tree, and §20a says
+     a native visual contract is held there — three tests that read a hairline
+     and a fill colour went blind in the same commit that added the animation. */
   return (
-    <Pressable
-      testID={testID}
-      onPress={disabled ? undefined : onPress}
-      style={({ pressed }) => ({
-        flexDirection: "row", alignItems: "center", gap: 12,
-        paddingVertical: 13, paddingHorizontal: 15,
-        borderBottomWidth: last ? 0 : 1, borderBottomColor: t.lineSoft,
-        backgroundColor: pressed && !disabled ? t.surface2 : "transparent",
-        opacity: disabled ? 0.5 : 1,
-        minHeight: 56,
-      })}
-    >
-      {children}
-    </Pressable>
+    <Animated.View style={live ? press.style : null}>
+      <Pressable
+        testID={testID}
+        onPress={disabled ? undefined : onPress}
+        onPressIn={live ? press.onPressIn : undefined}
+        onPressOut={live ? press.onPressOut : undefined}
+        style={({ pressed }) => ({
+          flexDirection: "row", alignItems: "center", gap: 12,
+          paddingVertical: 13, paddingHorizontal: 15,
+          borderBottomWidth: last ? 0 : 1, borderBottomColor: t.lineSoft,
+          backgroundColor: pressed && !disabled ? t.surface2 : "transparent",
+          opacity: disabled ? 0.5 : 1,
+          minHeight: 56,
+        })}
+      >
+        {children}
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -127,21 +139,35 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
     bad: { bg: t.bad, border: t.badDim, fg: t.badOn },
     ghost: { bg: "transparent", border: "transparent", fg: t.ink2 },
   }[kind];
+  /* The three-pixel bottom border is the button's weight; pressing takes it to
+     one and drops the button by two, which is the shape of something being
+     pushed down. That part was already right — what was missing is that it
+     happened in one frame. The scale spring is what makes it read as physical
+     rather than as a redraw. */
+  const press = usePress();
+  /* The caller's `style` is always layout — a margin, or `flex: 1` in a row of
+     two buttons — so it goes on the wrapper with the transform, and the
+     Pressable keeps only what it looks like. That split is also what keeps the
+     button's own style readable in the render tree (§20a). */
   return (
-    <Pressable
-      testID={testID}
-      onPress={disabled ? undefined : onPress}
-      style={({ pressed }) => [{
-        backgroundColor: tone.bg, borderColor: tone.border,
-        borderWidth: 1, borderBottomWidth: pressed ? 1 : 3,
-        marginBottom: pressed ? 2 : 0,
-        borderRadius: radius.md, paddingVertical: 13, paddingHorizontal: 18,
-        alignItems: "center", opacity: disabled ? 0.45 : 1, minHeight: 48,
-        justifyContent: "center",
-      }, style]}
-    >
-      <Text style={{ color: tone.fg, fontWeight: "600", fontSize: 15 }}>{label}</Text>
-    </Pressable>
+    <Animated.View style={[style, disabled ? null : press.style]}>
+      <Pressable
+        testID={testID}
+        onPress={disabled ? undefined : onPress}
+        onPressIn={disabled ? undefined : press.onPressIn}
+        onPressOut={disabled ? undefined : press.onPressOut}
+        style={({ pressed }) => ({
+          backgroundColor: tone.bg, borderColor: tone.border,
+          borderWidth: 1, borderBottomWidth: pressed ? 1 : 3,
+          marginBottom: pressed ? 2 : 0,
+          borderRadius: radius.md, paddingVertical: 13, paddingHorizontal: 18,
+          alignItems: "center", opacity: disabled ? 0.45 : 1, minHeight: 48,
+          justifyContent: "center",
+        })}
+      >
+        <Text style={{ color: tone.fg, fontWeight: "600", fontSize: 15 }}>{label}</Text>
+      </Pressable>
+    </Animated.View>
   );
 }
 

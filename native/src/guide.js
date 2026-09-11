@@ -1,94 +1,17 @@
-/* Yuri on screen, and the motion primitives the lesson screens are built from.
+/* Yuri on screen.
  *
  * The art and the rules about when he speaks live in `core/guide.js`; this is
- * the React Native side of it plus two small animation helpers, which live here
- * because Yuri was the first thing that needed them and everything in the
- * redesigned lesson uses them now.
- *
- * `Animated` from React Native, not Reanimated: every animation here is opacity
- * and transform, which the native driver handles, so a second animation library
- * would be a runtime dependency earning nothing (rule 20.5).
+ * the React Native side of it. The animation helpers he was the first thing to
+ * need have moved to `motion.js` now that the rest of the app needs them too —
+ * a file named after a monkey is not where a press animation belongs.
  */
 
-import React, { useEffect, useRef } from "react";
-import { Animated, Easing, View, Text, AccessibilityInfo } from "react-native";
+import React from "react";
+import { Animated, View, Text } from "react-native";
 import { SvgXml } from "react-native-svg";
 import { guideSvg, VIEW_BOX, GUIDE } from "@core/guide";
-import { useTheme, motion, radius, type as T } from "./theme";
-
-/* Whether the platform has been asked to cut animation. Read once and cached:
-   §25 lists reduced-motion under accessibility, and a learner who has turned
-   motion off should get the end state immediately rather than a shorter
-   version of the same movement. */
-let reduceMotion = false;
-AccessibilityInfo.isReduceMotionEnabled()
-  .then((on) => { reduceMotion = !!on; })
-  .catch(() => {});
-AccessibilityInfo.addEventListener("reduceMotionChanged", (on) => { reduceMotion = !!on; });
-export const motionOff = () => reduceMotion;
-
-/* ------------------------------------------------------------- primitives */
-
-/* Fade up: the standard way anything new arrives. A short rise from below
-   reads as "this is the next thing" where a plain fade reads as a repaint.
-   `delay` staggers a list without needing a library. */
-export function useEnter(deps = [], { delay = 0, distance = 10 } = {}) {
-  const v = useRef(new Animated.Value(reduceMotion ? 1 : 0)).current;
-  useEffect(() => {
-    if (reduceMotion) { v.setValue(1); return undefined; }
-    v.setValue(0);
-    const a = Animated.timing(v, {
-      toValue: 1, duration: motion.enter, delay,
-      easing: Easing.out(Easing.cubic), useNativeDriver: true,
-    });
-    a.start();
-    return () => a.stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-  return {
-    opacity: v,
-    transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [distance, 0] }) }],
-  };
-}
-
-/* A pop: overshoot slightly, then settle. For the one thing on a screen that is
-   the reward — the verdict's tick, the score disc at the end of a lesson. */
-export function usePop(deps = [], { delay = 0 } = {}) {
-  const v = useRef(new Animated.Value(reduceMotion ? 1 : 0)).current;
-  useEffect(() => {
-    if (reduceMotion) { v.setValue(1); return undefined; }
-    v.setValue(0);
-    const a = Animated.spring(v, {
-      toValue: 1, delay, friction: 5, tension: 120, useNativeDriver: true,
-    });
-    a.start();
-    return () => a.stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-  return {
-    opacity: v.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] }),
-    transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }],
-  };
-}
-
-/* A bar that fills rather than jumps. Width cannot use the native driver, so
-   this one runs on the JS thread — it is one interpolation on one view, which
-   is well inside what that can carry. */
-export function useFill(value) {
-  const v = useRef(new Animated.Value(value)).current;
-  useEffect(() => {
-    if (reduceMotion) { v.setValue(value); return undefined; }
-    const a = Animated.timing(v, {
-      toValue: value, duration: motion.settle,
-      easing: Easing.out(Easing.cubic), useNativeDriver: false,
-    });
-    a.start();
-    return () => a.stop();
-  }, [value, v]);
-  return v.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"], extrapolate: "clamp" });
-}
-
-/* ------------------------------------------------------------------ Yuri */
+import { useTheme, radius, type as T } from "./theme";
+import { useEnter, usePop } from "./motion";
 
 /* The figure. `pose` is one of core/guide.js POSES; the scarf takes the theme's
    brand colour so he is the same character in both palettes. */

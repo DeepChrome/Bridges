@@ -1537,10 +1537,10 @@ was two clear steps away from anything else.
 - `theme.js` gained `type` and `motion`. New and rebuilt screens size from them;
   existing literals are deliberately **not** swept, since a blind find-and-replace
   across every screen is the refactor §12 warns about.
-- `native/src/guide.js` — `useEnter`, `usePop`, `useFill`, built on React
-  Native's own `Animated`. Reanimated would be a runtime dependency earning
-  nothing here: every animation is opacity and transform. Reduced motion is
-  honoured by jumping to the end state.
+- `native/src/motion.js` — the motion system, built on React Native's own
+  `Animated`. Reanimated would be a runtime dependency earning nothing here:
+  everything is opacity and transform bar one width and one stroke. Reduced
+  motion is honoured by jumping to the end state, read once from the platform.
 - `Bar` takes `animate` — opt-in, because `Passage.js` drives its bar from a
   position poll four times a second and an ease on top of that lags the video.
 
@@ -1634,6 +1634,58 @@ its own that a word has left it.
   ~60 sentences, all repaired by editing the Russian; `check_scripts.mjs --strict`
   is what says when it is done, and a unit that loses words can lose a lesson
   outright, which orphans that lesson's passage.
+
+## 30n′. Motion (2026-09-10)
+
+The owner: *"How can we develop animations that smooth everything out and make
+it look professional?"* The answer that mattered is that polish is not a layer
+added on top — **it is the absence of things snapping**, and what was missing was
+not grand animation but the small stuff nothing had.
+
+`native/src/motion.js` is the one home. It was carved out of `guide.js`, which
+had the first three helpers because Yuri happened to need them first; a file
+named after a monkey is not where a press animation belongs.
+
+| hook | for | driver |
+|---|---|---|
+| `useEnter` | anything arriving — a card, a verdict, a row | native |
+| `usePop` | the one thing on a screen that is the reward | native |
+| `usePress` | every control under a finger | native |
+| `useSwap` | one thing replacing another in the same place | native |
+| `useCount` | a number that must not change unseen | JS |
+| `useFill` | a bar | JS |
+| `useSweep` | a progress ring | JS |
+
+Four rules, and they are the reason it is one file:
+
+1. **One set of durations** (`motion` in `theme.js`), so a card that rises and a
+   bar that fills agree. A screen that invents its own timing is why an
+   interface feels assembled.
+2. **Transform and opacity wherever possible**, so the native driver runs them
+   off the JS thread. The three that cannot are used one at a time.
+3. **Nothing waits on an animation to become usable** (§25). Every control is
+   pressable on the first frame, and `motion.test.js` asserts it with no
+   settling and no `waitFor`.
+4. **Reduced motion is the end state**, not a faster version of the journey.
+
+**The trap this cost an hour on.** `usePress` was first written by making the
+control itself animated — `Animated.createAnimatedComponent(Pressable)`. That
+hides the Pressable's resolved style from the render tree, and §20a says a
+native visual contract is held there: three existing tests that read a hairline
+and a fill colour went blind in the same commit that added the animation, and
+none of them failed in a way that named the cause. **The scale goes on a wrapper
+around the control, never on the control.** A caller's `style` is always layout,
+so it goes on the wrapper too and the Pressable keeps only what it looks like.
+
+What is deliberately not asserted in `motion.test.js`, with the reason in the
+file: that a disabled control ignores a press, and that a row without `onPress`
+has no handlers. Both are true on a device and neither is observable — RNTL
+walks the fibre to a wrapper's own props (§23), and Pressable turns its handlers
+into responder callbacks the host node does not carry. A test that appeared to
+check those would be checking the framework and passing for the wrong reason.
+
+Screen transitions are set once, in `withMe` in `App.js`. They were unset, so a
+lesson, a drill and a dictionary entry each arrived however Android felt like it.
 
 ## 30n. Production, and Russian from outside (Phase 10 finished, 2026-09-10)
 

@@ -25,6 +25,10 @@ import {
 } from "../data";
 import { reviewFirst } from "@core/state";
 import { taskFor } from "@core/tasks";
+import { useSweep, useCount } from "../motion";
+
+/* An SVG circle whose stroke offset can be animated. */
+const ASvgCircle = Animated.createAnimatedComponent(Circle);
 
 /* The chapter's task, offered once its spine is finished (ROADMAP P10.5).
    Nothing at all until then: an offer to "say who you are" before the chapter
@@ -120,6 +124,7 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
   const r = (size - STROKE) / 2;
   const c = 2 * Math.PI * r;
   const drop = pressed && open ? 2 : 0;
+  const sweep = useSweep(c * (1 - Math.min(1, tone.p)));
 
   return (
     <Pressable
@@ -151,12 +156,18 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
           <Svg width={size} height={size} style={{ position: "absolute" }}>
             <Circle cx={size / 2} cy={size / 2} r={r} stroke={tone.track}
                     strokeWidth={STROKE} fill="none" />
+            {/* The ring sweeps to its new value instead of being redrawn at it.
+                Coming back to the path after a lesson, this is the only thing
+                on the screen that says the lesson counted, and it used to
+                simply already be further round. An SVG stroke offset is not a
+                transform, so this one is off the native driver — one value on
+                one circle per unit, which is what that can carry. */}
             {tone.arc && tone.p > 0 ? (
-              <Circle testID={`arc-${unit.id}`}
+              <ASvgCircle testID={`arc-${unit.id}`}
                       cx={size / 2} cy={size / 2} r={r} stroke={tone.arc}
                       strokeWidth={STROKE} fill="none" strokeLinecap="round"
                       strokeDasharray={`${c} ${c}`}
-                      strokeDashoffset={c * (1 - Math.min(1, tone.p))}
+                      strokeDashoffset={sweep}
                       rotation={-90} originX={size / 2} originY={size / 2} />
             ) : null}
           </Svg>
@@ -278,15 +289,19 @@ export default function Learn({ navigation }) {
   const next = nextStep(st);
   const due = dueCount(st);
   const holdBack = reviewFirst(due);
+  const xp = useCount(st.xp || 0);
   const openUnit = (unit) => navigation.navigate("Unit", { unitId: unit.id });
 
   return (
     <Screen>
       {/* The score line, centred at the top; the button under it names what it
           opens and no more (the owner, 2026-09-07). */}
+      {/* XP counts up to its new value. Coming back from a lesson, this line
+          and the ring above are the only two things that say it counted, and
+          both of them used to have simply changed while you were away. */}
       <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 6 }}>
-        <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
-          {(st.xp || 0).toLocaleString("en-US")}
+        <Text testID="xp" style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
+          {xp.toLocaleString("en-US")}
         </Text>
         <Muted size={14}>XP</Muted>
         <Text style={{ color: t.ink3, marginHorizontal: 4 }}>·</Text>

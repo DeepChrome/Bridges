@@ -543,6 +543,22 @@ Each of these cost real time. Do not relearn them.
   distractors. **After touching `core/`, delete
   `native/android/app/build/generated/assets/react/release` before assembling**,
   or check the build took long enough to have run Metro.
+- **A paused `expo-audio` player still holds the Android audio session.** It is
+  not enough to `pause()` on the way out; the player has to be `remove()`d.
+  `stop()` only paused, so after any lesson that played a recording the app kept
+  the session, and the next thing that wanted sound got silence with no way to
+  say why. What surfaced was the owner opening a video: *"the audio on the
+  youtube video doesn't play unless I restart the app"* — and restarting working
+  is the tell that the state needing to be cleared is yours.
+  It read as intermittent because `say()` already removed the previous player
+  before making a new one, so the leak was invisible anywhere something played
+  next; it only bit on the path out of a flow. The cue players are worse: they
+  are cached for the life of the process by design, so `stop()` cannot reach
+  them at all. `releaseAudio()` exists for that and any screen whose audio is
+  not the app's own should call it. **None of this shows in the render tree**,
+  so `jest.setup.js` records every player in `global.__players` and
+  `audiofocus.test.js` watches the lifecycle. Verified the only way worth
+  trusting: the test fails against the old `pause()`-only code.
 - **`Get-Content -Raw` misreads UTF-8 without a BOM**, so grepping a built page for
   Cyrillic from PowerShell reports a false negative. Check with `node -e` instead.
 - **…and PowerShell 5.1 misreads a `.ps1` the same way, which stops the script

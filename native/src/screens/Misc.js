@@ -1,6 +1,6 @@
 /* Immerse (the video library), the video player, and the profile gate. */
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, TextInput, Pressable, ScrollView, Image } from "react-native";
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
@@ -10,6 +10,7 @@ import {
   UN, STATS, unitState, markComponent, L, videos, videoById, videoWatched, unitById,
   idxOfWord,
 } from "../data";
+import { releaseAudio } from "../audio";
 import { fold, today, firstSense } from "@core/util";
 import { Intro } from "./Intro";
 
@@ -193,6 +194,12 @@ export function Video({ route, navigation }) {
   const player = useRef(null);
   // A moment asked for before the player exists is held for onReady.
   const pending = useRef(focus ? [Math.max(0, focus.t - LEAD_MS), HOLD_MS] : null);
+  /* The audio on this screen belongs to the video, not to us. Whatever a lesson
+     left holding the session is handed back before the player loads, or the
+     WebView plays silently and has no way to say why (the owner, 2026-09-10).
+     Done here rather than only on the way out of a lesson because the order of
+     unmount and mount is not ours to rely on. */
+  useEffect(() => { releaseAudio(); }, []);
   if (!v) return null;
 
   const unit = v.unit ? unitById(v.unit) : null;

@@ -24,7 +24,13 @@ jest.mock("expo-audio", () => ({
     // A test makes the most recent stream fail the way a 404 or a dropped
     // connection does: an error status after play() started.
     global.__audioError = () => listeners.forEach((fn) => fn({ error: "failed", playing: false }));
-    return {
+    /* Every player made is kept in `global.__players` so a test can assert it
+       was released. A paused-but-allocated player holds the Android audio
+       session and silences whatever plays next, which is a bug that leaves no
+       trace in the render tree — the only way to catch it is to watch the
+       lifecycle. */
+    const p = {
+      uri: src && src.uri,
       play: jest.fn(() => {
         if (global.__audioHold) global.__audioPending.push(finish);
         else if (!global.__audioNeverFinish) setTimeout(finish, 0);
@@ -33,6 +39,9 @@ jest.mock("expo-audio", () => ({
       remove: jest.fn(),
       addListener: (name, fn) => { listeners.push(fn); return { remove: () => {} }; },
     };
+    global.__players = global.__players || [];
+    global.__players.push(p);
+    return p;
   },
   setAudioModeAsync: jest.fn(async () => {}),
 }));

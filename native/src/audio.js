@@ -211,10 +211,39 @@ export async function say(text, opts = {}) {
   }
 }
 
+/* Stop, and give the audio back.
+ *
+ * This used to pause the player and leave it allocated. A paused `expo-audio`
+ * player still holds the Android audio session, so the next thing that wants
+ * sound is handed silence — and the next thing is usually the YouTube WebView
+ * on the video screen, which has no way to say why it has no audio. The owner,
+ * 2026-09-10: "going from a lesson into a youtube video, the audio doesn't play
+ * unless I restart the app". Restarting worked because it tore the player down,
+ * which is the tell: the state that had to be cleared was ours.
+ *
+ * `say()` always removed the previous player before making a new one, so this
+ * only ever leaked on the path where nothing plays next — leaving a flow. That
+ * is also why it was intermittent: go to a video without having played anything
+ * and there is nothing held. */
 export function stop() {
   try { Speech.stop(); } catch (e) {}
-  try { if (player) player.pause(); } catch (e) {}
+  try { if (player) { player.pause(); player.remove(); } } catch (e) {}
+  player = null;
   if (settle) settle();
+}
+
+/* Everything the app holds, handed back — the cue players too, which are cached
+   for the life of the process by design (see playCue) and are therefore the one
+   thing `stop()` cannot reach. Called by any screen whose audio is not ours to
+   play, so it starts from a clean session whatever came before it.
+   `ready` is cleared so the next `prepare()` re-arms the session. */
+export function releaseAudio() {
+  stop();
+  for (const key of Object.keys(cuePlayers)) {
+    try { cuePlayers[key].remove(); } catch (e) {}
+    delete cuePlayers[key];
+  }
+  ready = false;
 }
 
 export const hasRealAudio = (text) => !!audioUrl(text);

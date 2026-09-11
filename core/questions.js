@@ -101,7 +101,13 @@ export const SECTION_N = 30;
 export const TEST_OUT = 0.8;
 
 const VOWELS_RU = "аеёиоуыэюяАЕЁИОУЫЭЮЯ";
-const realPartner = (p) => !!p && p.trim() && p.trim() !== "-" && /[а-яё]/i.test(p);
+/* A partner worth asking about: present, Cyrillic, and **not the verb itself**.
+   Some rows record a biaspectual verb as its own partner, and the drill then
+   asked the learner to produce the word printed above the question — caught by
+   the typed-drill check, which only fails on the runs that happen to draw one
+   (`w` is optional so the old one-argument calls still read the same). */
+const realPartner = (p, w) => !!p && p.trim() && p.trim() !== "-" && /[а-яё]/i.test(p)
+  && (!w || fold(p) !== fold(w));
 const tableTitled = (w, re) => (w.t || []).find((t) => re.test(t.title));
 const cellsOf = (row) => row.slice(1);
 
@@ -169,13 +175,30 @@ export function makeQuestions(env) {
     const want = key(L[correctIdx]);
     const pos = (L[correctIdx] || {}).p;
     const out = [];
+    /* Within a tier, the options nearest the answer in length.
+     *
+     * Class was the first tell to go (the 23.7 % above); length is the one left.
+     * Measured over 500 questions, the answer was three characters longer or
+     * shorter than every distractor in 14 % of "choose the meaning" sets —
+     * "to make somebody's acquaintance" standing against "bread", "five" and
+     * "here", which needs no Russian at all. Picking from the nearest eight
+     * rather than the nearest three keeps the option sets varied
+     * (tools/audit_options.mjs). */
     const take = (accept) => {
-      for (const i of shuffle(pool.slice())) {
-        if (out.length === n) return;
+      if (out.length === n) return;
+      const fit = [];
+      for (const i of pool) {
         if (i === correctIdx || out.includes(i)) continue;
         const v = key(L[i]);
         if (!v || v === want || out.some((o) => key(L[o]) === v)) continue;
         if (!accept(i)) continue;
+        fit.push(i);
+      }
+      const near = fit.sort((a, b) => Math.abs(String(key(L[a])).length - String(want).length)
+                                    - Math.abs(String(key(L[b])).length - String(want).length));
+      for (const i of shuffle(near.slice(0, Math.max(n * 2, 8)))) {
+        if (out.length === n) return;
+        if (out.some((o) => key(L[o]) === key(L[i]))) continue;
         out.push(i);
       }
     };
@@ -1282,7 +1305,20 @@ export function makeQuestions(env) {
     const base = { kind: "cases", i: L.indexOf(w), cyr: true,
                    prompt: w.w, sub: w.e || "", table: t };
     if (typed) return written(base, `Write ${what}`, target.label, target.alts);
-    const wrong = shuffle(opts.filter((o) => o.label !== target.label)).slice(0, 3);
+    /* One option per *form*, not per cell. A paradigm repeats itself — an
+       inanimate noun's accusative is its nominative, an animate one's is its
+       genitive — so taking three cells at random put the same word on screen
+       twice in 18 % of questions (tools/audit_options.mjs). Two identical
+       options are one option: the learner is choosing from three, and the
+       repeat tells them it is not the answer. */
+    const wrong = [];
+    const shown = new Set([target.label]);
+    for (const o of shuffle(opts.slice())) {
+      if (shown.has(o.label)) continue;
+      shown.add(o.label);
+      wrong.push(o);
+      if (wrong.length === 3) break;
+    }
     if (wrong.length < 3) return null;
     return {
       ...base, ask: `Choose ${what}`,
@@ -1332,7 +1368,7 @@ export function makeQuestions(env) {
      have one — seven after the first chapter — so the second shape carries the
      drill early on, where any verb marked for aspect qualifies. */
   function qAspectPartner(_cells, typed) {
-    const w = pickWhere((x) => x.p === "verb" && realPartner(x.pt) && x.a);
+    const w = pickWhere((x) => x.p === "verb" && realPartner(x.pt, x.w) && x.a);
     if (!w) return null;
     const want = w.a === "imperfective" ? "perfective" : "imperfective";
     if (typed) {
@@ -1340,10 +1376,7 @@ export function makeQuestions(env) {
                        sub: w.e || "", note: (UN.find((u) => u.id === "core8") || {}).g },
                      `Write the ${want} partner`, w.pt.trim());
     }
-    const wrong = threeWrong(w.pt.trim(), [], () => {
-      const o = pickWhere((x) => x.p === "verb" && realPartner(x.pt) && x.pt !== w.pt, 60, true);
-      return o ? o.pt.trim() : null;
-    });
+    const wrong = partnerWrong(w.w, w.pt.trim());
     if (!wrong) return null;
     return {
       kind: "aspect", i: L.indexOf(w), cyr: true,
@@ -1351,6 +1384,92 @@ export function makeQuestions(env) {
       note: (UN.find((u) => u.id === "core8") || {}).g,
       options: optionsOf(w.pt.trim(), wrong),
     };
+  }
+
+  /* Wrong partners that are actually in the running.
+   *
+   * The owner, 2026-09-11: *"selecting the perfective pair is obvious because
+   * one option usually shares the root word"*. Measured over 400 questions, the
+   * answer was the only option sharing a stem with the prompt in 23 % of them,
+   * and no distractor shared one in any of them (kin 0.0 of 3).
+   *
+   * An aspect partner *is* the verb with a prefix added or a stem changed, so
+   * the answer cannot be made to look unlike the prompt — that is what a partner
+   * is. The distractors have to be made to look like it instead: verbs carrying
+   * the same prefix, then verbs built on the same root, then verbs of about the
+   * same length. «передавать» → «передать» now stands against «переходить» and
+   * «переписать» rather than «поужинать» and «делать».
+   *
+   * The honest limit: this makes the shape stop giving the answer away, not the
+   * question easy to answer by reasoning. Where a learner should produce the
+   * partner rather than spot it, the written drill is the better instrument
+   * (Settings → "Write drill answers"), and it is on by default. */
+  /* Two verbs are related when they share a run of letters that is not just the
+   * infinitive ending.
+   *
+   * Stripping the prefix and comparing what is left was the obvious way and it
+   * does not work: Russian prefixes are ambiguous, so «вступать» loses «вс» and
+   * «наступать» loses «на», and the same root comes out as two different stems.
+   * Cutting the *ending* instead is unambiguous — every infinitive ends in one
+   * of a handful of ways — and then the longest run the two share finds the
+   * root wherever it sits. «вступать»/«наступать» share «ступа»;
+   * «рисовать»/«танцевать» share only «ва», which is why the ending has to go
+   * first or every pair of infinitives would look related. */
+  const verbStem = (word) => fold(word).replace(/(ться|тся|ть|ти|чь)$/, "");
+  function commonRun(a, b) {
+    const x = verbStem(a), y = verbStem(b);
+    let best = 0;
+    for (let i = 0; i < x.length; i++) {
+      for (let j = 0; j < y.length; j++) {
+        let n = 0;
+        while (i + n < x.length && j + n < y.length && x[i + n] === y[j + n]) n++;
+        if (n > best) best = n;
+      }
+    }
+    return best;
+  }
+
+  function partnerWrong(promptWord, answer) {
+    const seen = new Set([fold(answer), fold(promptWord)]);
+    const scored = [];
+    const from = drillPool && drillPool.length ? drillPool : L;
+    for (const x of from) {
+      if (x.p !== "verb" || !realPartner(x.pt)) continue;
+      const cand = x.pt.trim();
+      const f = fold(cand);
+      if (seen.has(f)) continue;
+      seen.add(f);
+      let score = 0;
+      // Built on the prompt's root — the one a learner cannot tell apart by shape.
+      if (commonRun(cand, promptWord) >= 4) score += 3;
+      // Or on the answer's, which is usually the same root seen from the
+      // other side of the pair.
+      else if (commonRun(cand, answer) >= 4) score += 2;
+      if (Math.abs(f.length - fold(answer).length) <= 2) score += 1;
+      scored.push({ cand, score, r: Math.random() });
+    }
+    if (scored.length < 3) return null;
+    /* Related first, and only then anything else.
+     *
+     * Ranking by score and taking the best dozen shuffled was the first attempt
+     * and it did nothing: a handful of verbs share the answer's root and dozens
+     * merely match its length, so the shuffle almost always drew the latter.
+     * Measured on the curriculum's 693 verbs with a recorded partner: 227 have
+     * three or more same-root alternatives to stand against, 224 have one or
+     * two, and **242 have none at all**. Where there are none this question
+     * cannot be made unguessable from this data, which is the case for asking
+     * the learner to write the partner instead. */
+    /* Within a tier, the ones closest in length: the answer used to be the
+       longest or shortest thing on screen in 13 % of these, which is a second
+       free elimination on top of the first. Six to choose three from, so the
+       same three do not come back every time the verb does. */
+    const near = (xs) => shuffle(xs
+      .sort((a, b) => Math.abs(fold(a.cand).length - fold(answer).length)
+                    - Math.abs(fold(b.cand).length - fold(answer).length))
+      .slice(0, 6)).map((x) => x.cand);
+    const strong = near(scored.filter((s) => s.score >= 2));
+    const rest = near(scored.filter((s) => s.score < 2));
+    return strong.concat(rest).slice(0, 3);
   }
 
   function qAspectWhich() {
@@ -1547,7 +1666,15 @@ export function makeQuestions(env) {
     if (withNotes.length < 4) return null;
     const pick = withNotes[Math.floor(Math.random() * withNotes.length)];
     const ex = pick.g.examples[Math.floor(Math.random() * pick.g.examples.length)];
-    const others = shuffle(withNotes.filter((u) => u.g.title !== pick.g.title)).slice(0, 3);
+    /* Rule titles run from "Believing in" to "What someone is, was, or became",
+       and taking three at random left the answer the longest or shortest line on
+       screen in 24 % of questions (tools/audit_options.mjs) — which is a tell
+       that costs nothing to remove: pick from the titles nearest it in length.
+       Eight to choose three from, so the same three do not recur. */
+    const near = withNotes.filter((u) => u.g.title !== pick.g.title)
+      .sort((a, b) => Math.abs(a.g.title.length - pick.g.title.length)
+                    - Math.abs(b.g.title.length - pick.g.title.length));
+    const others = shuffle(near.slice(0, 8)).slice(0, 3);
     if (others.length < 3) return null;
     return {
       kind: "grammar", cyr: true, ask: "Choose the rule this shows",

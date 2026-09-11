@@ -53,7 +53,24 @@ export function failureText(reply) {
   }
   if (r.reason === "offline") return { text: "No connection. Try again when you are online.", retry: true };
   if (r.reason === "timeout") return { text: "The tutor took too long. Try again.", retry: true };
-  return { text: "The tutor could not answer. Try again.", retry: true };
+  /* Every remaining failure used to come out as "The tutor could not answer",
+     which is four different faults wearing one coat — and the owner saw it often
+     enough to ask what it meant (2026-09-11). Each is named now, and `detail`
+     carries what the server actually said, under the message in smaller type:
+     a validator complaint ("reply cut off at 1000 tokens") is the difference
+     between a bug to fix and a connection to retry. */
+  const why = Array.isArray(r.errors) && r.errors.length ? String(r.errors[0])
+            : r.detail ? String(r.detail) : null;
+  if (r.reason === "parse") {
+    return { text: "The tutor's answer came back malformed.", detail: why, retry: true };
+  }
+  if (r.reason === "upstream") {
+    return { text: "The tutor's service did not answer.", detail: why, retry: true };
+  }
+  if (r.status) {
+    return { text: `The tutor answered with an error (${r.status}).`, detail: why, retry: true };
+  }
+  return { text: "The tutor could not answer. Try again.", detail: why, retry: true };
 }
 
 /* Talk opens once chapter 2's spine is done (it was chapter 5's — ninety
@@ -554,7 +571,15 @@ export default function Talk({ navigation, route }) {
         {hint ? <HintCard hint={hint} en={en} onClose={() => setHint(null)} /> : null}
         {failure ? (
           <View style={{ alignItems: "center", gap: 8, marginTop: 8 }}>
-            <Muted>{failure.text}</Muted>
+            <Muted testID="talk-failure">{failure.text}</Muted>
+            {/* What the server actually said, under it and smaller: the
+                difference between something to retry and something to fix. */}
+            {failure.detail ? (
+              <Muted testID="talk-failure-why" size={11} numberOfLines={3}
+                     style={{ textAlign: "center", opacity: 0.85 }}>
+                {failure.detail}
+              </Muted>
+            ) : null}
             {failure.retry ? (
               <Btn label="Try again" onPress={() => {
                 const lastLearner = [...turns].reverse().find((x) => x.who === "learner");

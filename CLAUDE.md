@@ -1999,6 +1999,57 @@ four and the entry shows all of them. `Senses` (the gloss splitter) stays for th
 `meta` rows, like OpenRussian's and Tatoeba's, so it cannot drift from what
 shipped (rule 20.10).
 
+## 30r. Options that are not free eliminations (2026-09-11)
+
+The owner: *"selecting the perfective pair is obvious because one option usually
+shares the root word… make sure our multiple choice options throughout aren't
+brainless."*
+
+`tools/audit_options.mjs` samples every generator and counts the tells a learner
+could use **without knowing any Russian**: `root` (the answer is the only option
+built on the prompt's root), `alone` (the only one of its word class — the 23.7 %
+§30o fixed), `length` (longer or shorter than every distractor by three
+characters), `script`, `dupes` (two options that read the same on screen), and
+`kin`, which is not a tell but the measure behind them: how many of the three
+distractors are even in the running. Run it after touching a generator.
+
+| | before | after |
+|---|---|---|
+| cases: two identical options | 18 % | **0 %** |
+| aspect: answer the only one on the root | 23 % | 16 % |
+| aspect: distractors related to the prompt | 0.0 / 3 | **1.3 / 3** |
+| grammar: length gives it away | 24 % | 17 % |
+| choose-en: length gives it away | 14 % | **8 %** |
+
+**Two of the metrics were wrong first and said so loudly.** `shape` flagged 97 %
+of the cases drill — it was detecting "the options are different words", which
+is the question, not a flaw; it is gone. `dupes` compared **folded** labels and
+so called every stress question broken, folding away the stress mark that *is*
+the answer. A metric that cannot tell the skill from the flaw is worse than none.
+
+**Prefix-stripping does not find a Russian root.** The first cut of relatedness
+stripped a verbal prefix and compared the rest, and Russian would not have it:
+«вступать» loses «вс» while «наступать» loses «на», so one root becomes two
+stems and the fix measured as doing nothing. Cutting the *infinitive ending* is
+unambiguous; the longest run the two then share finds the root wherever it sits
+(«ступа»), and the ending has to go first or every pair of infinitives looks
+related through «-вать».
+
+**The aspect pair cannot be fully fixed from this data, and that is the finding.**
+A partner *is* the verb with a prefix added, so it always resembles the prompt;
+the only cure is distractors that resemble it too. Of the 693 curriculum verbs
+with a recorded partner, **227 have three or more same-root alternatives, 224
+have one or two, and 242 have none at all** — so a third of these questions have
+nothing plausible to stand against. That is the case for the owner's other
+suggestion, a different mechanism: with **Settings → "Write drill answers"** (on
+by default) the drill asks for the partner instead of offering it, and there is
+nothing to eliminate.
+
+`realPartner` also refuses a partner equal to the verb itself — some rows record
+a biaspectual verb as its own partner, and the typed drill was asking the learner
+to write the word printed above the question. Found by the typed-drill check,
+which only fails on a run that happens to draw one.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

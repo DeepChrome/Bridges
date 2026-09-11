@@ -16,7 +16,7 @@ import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN 
 import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
   from "../core/fsrs.js";
 import { SCENARIOS } from "../core/scenarios.js";
-import { quizPassed } from "../core/state.js";
+import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP,
          talkAllowance, startTalkSession, TALK_SESSIONS_PER_DAY, TALK_TURNS }
   from "../core/state.js";
@@ -222,9 +222,18 @@ group("state schema");
   ok(migrate({ v: 5, watched: { abc: 3 } }, 5).watched.abc === 3, "an existing watched slot is kept");
   ok(migrate({ v: 6, mined: { дом: { v: "abc", t: 12 } } }, 6).mined["дом"].t === 12,
      "an existing mined map is kept, not reset");
-  ok(quizPassed({ q: 80 }) && !quizPassed({ q: 79, tries: 2 }) && quizPassed({ q: 70, tries: 3 })
-     && !quizPassed({ q: 69, tries: 5 }) && !quizPassed(undefined),
+  /* Written against the constants, not against 80 and 79: the mark is a number
+     chosen by sweeping (it moved to 75 on 2026-09-11) and a test that pins it
+     fails on the change instead of on the rule. What must hold is the rule. */
+  ok(quizPassed({ q: PASS_MARK })
+     && !quizPassed({ q: PASS_MARK - 1, tries: 2 })
+     && quizPassed({ q: RELIEF_MARK, tries: RELIEF_AFTER })
+     && !quizPassed({ q: RELIEF_MARK - 1, tries: RELIEF_AFTER + 2 })
+     && !quizPassed(undefined),
      "a quiz passes at the mark, or at the relief mark from the third try");
+  ok(PASS_MARK > RELIEF_MARK,
+     "and relief is relief: the later bar is the lower one",
+     `${PASS_MARK} vs ${RELIEF_MARK}`);
   ok(Array.isArray(v5.speech.attempts) && v5.speech.attempts.length === 0 &&
      Object.keys(v5.speech.tagCounts).length === 0, "with an empty speech slot");
   ok(v5.seen["книга"].reps === 3 && v5.trouble["стол"] === 2 && v5.pinned[0] === "дом" &&

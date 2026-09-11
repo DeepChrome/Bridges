@@ -26,9 +26,10 @@ import { fileURLToPath } from "node:url";
 import { fold, TOKEN } from "../core/util.js";
 import { makeQuestions, QUIZ_N, SPEECH_MIX, lessonSize } from "../core/questions.js";
 import { gradeFor, applyGrade, isTrouble, fsrsReview } from "../core/fsrs.js";
-import { quizPassed, RELIEF_AFTER, reviewFirst, REVIEW_FIRST } from "../core/state.js";
+import { RELIEF_AFTER, RELIEF_MARK, PASS_MARK, reviewFirst, REVIEW_FIRST }
+  from "../core/state.js";
 import { compare } from "../core/compare.js";
-import { gradeAlignment, sentenceLemmas } from "../core/speech.js";
+import { gradeAlignment, sentenceLemmas, SCENE_FOLLOWED } from "../core/speech.js";
 import { parseDeep } from "../core/search.js";
 import { makeHydrator } from "../core/entry.js";
 import { loadPayload } from "./payload.mjs";
@@ -44,6 +45,24 @@ const ONLY = arg("--profile", null);
    turns the rule off, which is how the before/after comparison is made. */
 const HOLD_AT = parseInt(arg("--review-first", String(REVIEW_FIRST)), 10);
 const holdNow = (due) => HOLD_AT > 0 && due >= HOLD_AT;
+
+/* The pass mark (core/state.js PASS_MARK), overridable for the same reason.
+ *
+ * The nine-learner run put the quick profile's mean quiz accuracy at .79
+ * against a mark of .80, which means the app's own strongest learner passes
+ * fewer than half their lessons first time and relief carries the rest. That is
+ * either a mark set a point too high or quizzes pitched a point too hard, and
+ * the way to tell them apart is to sweep the mark and read what moves. */
+const MARK = parseInt(arg("--pass-mark", String(PASS_MARK)), 10);
+
+/* How much of a scenario has to be followed for its words to count as met
+   (core/speech.js SCENE_FOLLOWED). Swept for the same reason: it is the rule
+   behind most of the review load, and the trade it makes was never priced. */
+const FOLLOWED = Number(arg("--scene-followed", String(SCENE_FOLLOWED)));
+const passed = (slot) => {
+  if (!slot || typeof slot.q !== "number") return false;
+  return slot.q >= MARK || ((slot.tries || 0) >= RELIEF_AFTER && slot.q >= RELIEF_MARK);
+};
 
 /* ------------------------------------------------------------ the world */
 
@@ -220,7 +239,7 @@ function simulate(profileName, seed) {
         for (const i of lem) { grade(i, ok); met.set(i, (met.get(i) || 0) + 1); words.push(i); }
       }
       correct = right === q.questions.length;
-      if (q.scenario && right / q.questions.length >= 0.8) {
+      if (q.scenario && right / q.questions.length >= FOLLOWED) {
         for (const i of (q.lemmas || [])) { grade(i, true); met.set(i, (met.get(i) || 0) + 1); words.push(i); }
       }
     } else {
@@ -303,10 +322,10 @@ function simulate(profileName, seed) {
       best = Math.max(best, score);
       tries++;
       slot = { q: best, tries };
-    } while (!quizPassed(slot) && tries <= RELIEF_AFTER);
+    } while (!passed(slot) && tries <= RELIEF_AFTER);
 
-    perLesson.push({ ...ctx, newWords, quizLen, score: best, tries, passed: quizPassed(slot),
-                     relieved: quizPassed(slot) && best < 80, kinds });
+    perLesson.push({ ...ctx, newWords, quizLen, score: best, tries, passed: passed(slot),
+                     relieved: passed(slot) && best < MARK, kinds });
     lessons++;
     if (lessons % 2 === 0) {                   // two lessons a day, then the day's review
       day++;
@@ -425,7 +444,8 @@ const results = runs.map((r) => ({ profile: r.profile, seed: r.seed, metrics: me
 
 const lines = [];
 const out = (s = "") => lines.push(s);
-out(`# Simulated learners — ${new Date().toISOString().slice(0, 10)}, seed ${SEED}, ${LESSONS} lessons each`);
+out(`# Simulated learners — ${new Date().toISOString().slice(0, 10)}, seed ${SEED}, `
+    + `${LESSONS} lessons each, pass mark ${MARK}`);
 out();
 out("Same seed, same trial. Change the app, rerun, diff this file.");
 out();

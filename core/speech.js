@@ -69,6 +69,36 @@ export function feedbackTags(fb) {
    screen and not what a sentence activity is evidence about. */
 export const SPEECH_SKIP_TOP = 100;
 
+/* How much of a written scenario has to be followed before its words count as
+ * met (§30l). A question missed is not evidence about any one word, so the
+ * conversation is judged whole: above this share the content words are Good,
+ * below it they are graded not at all.
+ *
+ * Here rather than in the activity because the simulator grades the same way,
+ * and it had its own `0.8` written into it — two copies of a learning rule, so
+ * a sweep of one would have measured the other unchanged (§22).
+ *
+ * **Three of five, swept** (2026-09-11, `--scene-followed`, two bars × three
+ * seeds × 168 lessons). At four of five the scenario was withholding most of
+ * its reinforcement: a word came back 22–39 % less often than under the
+ * per-sentence passages it replaced, which was most of why the review load fell
+ * and is not something to be pleased about.
+ *
+ *   bar   struggling passed   asked again   leeches   backlog days
+ *   0.6         116.3            10,968       8.3         0.3
+ *   0.8         111.3             7,893      11.3         1.7
+ *
+ * **It is a trade and not a free win.** The learner who needs it gains five
+ * lessons, three fewer leeches and its backlog; the steady learner loses about
+ * two lessons (164.3 → 162.0), because words that now enter the scheduler are
+ * words that can be asked and missed. Taken because the struggling learner is
+ * the standing open problem and the steady one is not.
+ *
+ * The honest cost in meaning: three of five is a weaker claim to have followed
+ * a conversation than four of five. It is above chance on four options, and it
+ * is not comprehension. */
+export const SCENE_FOLLOWED = 0.6;
+
 /* A substituted word that is the same lemma a letter or two off — «книга» for
    «книгу» — is the word known and the ending not: half credit and Hard, with
    the expected form named, rather than a whole-word lapse (the pedagogy

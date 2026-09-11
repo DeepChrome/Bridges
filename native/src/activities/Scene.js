@@ -24,8 +24,9 @@
  *
  * Grading (§30c's rule, applied to a scenario): comprehension is judged whole.
  * A question missed is not evidence about any particular word, so a word is
- * only graded when the learner followed the conversation — four of five — and
- * then it is Good, never Easy. Credit is the share right, as everywhere else.
+ * only graded when the learner followed the conversation — three of five, swept
+ * (core/speech.js SCENE_FOLLOWED) — and then it is Good, never Easy. Credit is
+ * the share right, as everywhere else.
  *
  * The corpus scene (a lesson with no written scenario) arrives here with no
  * cast and per-sentence questions; both render through the same view.
@@ -42,12 +43,13 @@ import { useScenario, trackWhenCurrent, msFor, SKIP_MS, clock } from "../scenari
 import { Linked } from "../words";
 import { useEnter } from "../motion";
 import { recordAttempt } from "@core/state";
-import { SPEECH_SKIP_TOP } from "@core/speech";
+import { SPEECH_SKIP_TOP, SCENE_FOLLOWED } from "@core/speech";
 import { fold } from "@core/util";
 
 /* How much of the conversation has to be followed before its words count as
-   met. Four of five: one question missed is a detail, three is not following. */
-const FOLLOWED = 0.8;
+   met. In core/speech.js, which carries the number and why it is that number,
+   because the simulator grades the same way and used to hold its own copy. */
+const FOLLOWED = SCENE_FOLLOWED;
 
 function Icon({ d, size = 22, color }) {
   return (

@@ -20,6 +20,8 @@ back.
 | YouTube metadata | `data/raw/youtube/meta/` + `catalogue.json` | ~30 MB, 395 files | Same tool, same caveat; the catalogue is rebuilt from the cache with `--no-fetch`. |
 | Easy Russian episode list | `data/raw/youtube/easyrussian.tsv` | small | Hand-curated input; merged into the harvest so the unit videos never depend on today's network. Channels themselves are curated in `data/curated/channels.json` (tracked). |
 | Tatoeba dumps + audio | `data/raw/tatoeba/` | 53.4 MB | Dumps re-download in minutes (`ingest_tatoeba.py` fetches them). The 185 recordings were fetched one by one with a pause; `ATTRIBUTION.txt` beside them is a licence record. |
+| Wiktionary extract | `data/raw/wiktionary/russian.jsonl` | 895 MB | Yes, from kaikki.org — but it is nearly a gigabyte over the wire, so back it up rather than re-fetch it (§30q). |
+| **The bought scenario audio** | `data/scenario_audio/` (**tracked**, 22.6 MB) | 2,213 clips | **No — it was paid for.** $1.49 of Google Chirp3-HD, keyed by voice and text, and re-buying is the only way back. In git deliberately, unlike everything else generated here. |
 
 ## Generated — regenerable, kept for convenience
 
@@ -34,6 +36,9 @@ back.
 | `data/videos.json` (tracked) | `build_videos.py` | 0.4 MB | seconds |
 | `site/` incl. `site/audio/` | `build_site.py`, `build_audio.py` | 15.6 MB page + 208.8 MB audio | ~1 min each, from the databases and the media dir |
 | `native/assets/data.json` | `build_site.py` | 15.5 MB | with the page |
+| `native/assets/{deep,sent,videos,listening,senses}.json` | `build_site.py` | 12.3 MB | with the page. All six parts are gitignored as of 2026-09-11 — two of them were tracked and four were not, which is how a clone builds differently from the machine that made it |
+| `data/senses.db` | `ingest_wiktionary.py` | 11.6 MB | ~2 min, **from the 895 MB extract above** |
+| `native/assets/scenes/` + `native/src/scenetracks.js` | `build_scene_tracks.mjs` | 27.5 MB | seconds, with ffmpeg, from the bought clips |
 
 Full rebuild order, from sources only:
 `ingest_anki → build_lexicon → ingest_tatoeba → build_topics → build_audio → build_site`.

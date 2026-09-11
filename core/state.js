@@ -21,8 +21,25 @@ export const SCHEMA_VERSION = 7;
    is not learning. The bar is not lowered for anyone who clears it — only from
    the third try on, and the score itself is still recorded (ROADMAP A29, the
    agent's decision, reversible by setting RELIEF_AFTER to Infinity). One rule
-   for both apps and the simulator; `l` is the lesson slot {q, tries}. */
-export const PASS_MARK = 80;
+   for both apps and the simulator; `l` is the lesson slot {q, tries}.
+
+   **75, swept rather than chosen** (2026-09-11, `--pass-mark`, three marks ×
+   three seeds × 168 lessons). At 80 the mark sat above the quick profile's own
+   mean accuracy of .79, and the measurement showed what that actually cost —
+   not lessons failed, which relief already absorbed, but repetition:
+
+     mark  quick passed  retakes  steady on relief
+      74      168.0        54.7        2.0
+      77      167.3       127.7       44.0
+      80      167.3       122.7       44.3
+
+   Who passes barely moves. What moves is that at 80 a learner retakes every
+   other lesson and **passes most of them on relief** — a rule written for the
+   learner who is drowning, doing the everyday work of the two who are not.
+   Below ~75 it would start being a mark nobody could miss; 77 is strictly worse
+   than both neighbours. Leeches were unchanged within noise (quick 1.0 → 0.0,
+   steady 2.0 → 2.0, struggling 9.0 → 11.3). */
+export const PASS_MARK = 75;
 export const RELIEF_MARK = 70;
 export const RELIEF_AFTER = 3;
 export const quizPassed = (l) => {

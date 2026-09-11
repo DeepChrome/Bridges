@@ -98,6 +98,30 @@ worked.
    failing in front of them more often. Measure: chapter accuracy for the
    struggling profile, which currently declines from .68 to .56.
 
+## The pass mark, swept the same day
+
+Finding 1 said the mark was set above the app's own curve. It was, and the sweep
+said the consequence was not the one I predicted — `--pass-mark`, three marks ×
+three seeds × 168 lessons:
+
+| mark | quick passed | quick retakes | steady on relief | struggling passed |
+|---|---|---|---|---|
+| 74 | 168.0 | **54.7** | **2.0** | 111.3 |
+| 77 | 167.3 | 127.7 | 44.0 | 108.3 |
+| 80 | 167.3 | 122.7 | 44.3 | 112.0 |
+
+**Who passes barely moves** — relief was already absorbing it. What moves is the
+repetition on the way, and what relief *means*: at 80 the quick learner passed
+16 lessons on a rule written for a learner who is drowning, and the steady one
+44. Lowering the mark does not let anyone through who was not getting through; it
+stops the safety net doing the everyday work.
+
+**PASS_MARK is 75 now.** Leeches were unchanged within noise. Re-measured at 75
+across the same three seeds: quick 168/168 with 0–3 on relief (was 15–25) and
+50–58 retakes (was ~130); steady 162–166 with 1–4 on relief (was 44–51);
+struggling 102–118, which is what finding 2 predicts — their limit is an accuracy
+of .57, and no mark fixes that.
+
 ## Not covered
 
 Whether the Russian is idiomatic. Whether a scenario's five questions can be

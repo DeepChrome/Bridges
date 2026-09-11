@@ -38,12 +38,21 @@ const question = (() => {
   return null;
 })();
 
+/* The same scenario with one word changed, so its text no longer hashes to the
+   audio that was bought for it. That is how a lesson reaches the device voices
+   now: a corpus scene, a phone without the assets, or a script edited without
+   re-running the audio tools. Both paths ship, so both are tested. */
+const spoken = question && {
+  ...question,
+  lines: question.lines.map((l, i) => (i ? l : { ...l, ru: `${l.ru} Правда?` })),
+};
+
 const base = {
   v: 5, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, xp: 0, streak: 0,
 };
 
-async function withScene(onFinish = jest.fn()) {
+async function withScene(onFinish = jest.fn(), step = question) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
     list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }],
     active: "p1",
@@ -51,7 +60,7 @@ async function withScene(onFinish = jest.fn()) {
   await AsyncStorage.setItem("rb.state.p1", JSON.stringify(base));
   return await render(
     <SessionProvider>
-      <Runner steps={[question]} recycle={false} onFinish={onFinish} />
+      <Runner steps={[step]} recycle={false} onFinish={onFinish} />
     </SessionProvider>
   );
 }
@@ -99,25 +108,44 @@ describe("the listening scenario", () => {
     expect(screen.queryByText(question.lines[0].ru)).toBeNull();
   });
 
-  it("says what this is and whose voices read it", async () => {
+  it("says what this is, and says nothing about voices when the audio is real", async () => {
     await withScene();
     await screen.findByTestId("scene-play");
-    // Nobody has ever said these sentences, so this is the device — §27 says
-    // that is never left to be assumed.
-    expect(String(screen.getByTestId("scene-voice").props.children)).toContain("device voice");
+    /* The conversation is played from a file made for it, so there is nothing
+       to disclose: §27's note exists to stop the phone's own reading being
+       mistaken for a recording, and a note over audio that is neither the
+       phone's nor the collection's would be the same lie pointed the other
+       way. The recorded line is the one that needs no note. */
+    expect(screen.queryByTestId("scene-voice")).toBeNull();
     const about = String(screen.getByTestId("scene-about").props.children);
     expect(about).toContain(question.topic);
   });
 
-  it("runs the conversation from the top, each speaker in their own voice", async () => {
+  it("says it is the device when the text has moved on from the audio", async () => {
+    await withScene(jest.fn(), spoken);
+    await screen.findByTestId("scene-play");
+    expect(String(screen.getByTestId("scene-voice").props.children)).toContain("device voice");
+  });
+
+  it("plays the conversation as one piece", async () => {
     await withScene();
     const play = await screen.findByTestId("scene-play");
     await act(async () => { fireEvent.press(play); });
+    // One file, one player — not a line at a time, and not the device.
+    await waitFor(() => expect(global.__played.length).toBe(1));
+    expect(global.__spoke).toHaveLength(0);
+    expect(global.__players[0].play).toHaveBeenCalled();
+  });
+
+  it("reads each speaker in their own voice when it falls back", async () => {
+    await withScene(jest.fn(), spoken);
+    const play = await screen.findByTestId("scene-play");
+    await act(async () => { fireEvent.press(play); });
     await waitFor(() => expect(global.__spoke.length).toBeGreaterThan(1));
-    expect(global.__spoke[0]).toBe(question.lines[0].ru);
-    expect(global.__spoke[1]).toBe(question.lines[1].ru);
+    expect(global.__spoke[0]).toBe(spoken.lines[0].ru);
+    expect(global.__spoke[1]).toBe(spoken.lines[1].ru);
     // The first two lines are different people, and they do not sound the same.
-    expect(question.lines[0].s).not.toBe(question.lines[1].s);
+    expect(spoken.lines[0].s).not.toBe(spoken.lines[1].s);
     const voiceOf = (o) => `${o.voice}/${o.pitch}`;
     expect(voiceOf(global.__spokeOpts[0])).not.toBe(voiceOf(global.__spokeOpts[1]));
   });
@@ -129,10 +157,14 @@ describe("the listening scenario", () => {
     expect(screen.getByTestId("scene-back")).toBeTruthy();
     expect(screen.getByTestId("scene-restart")).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByTestId("scene-back")); });
-    await waitFor(() => expect(global.__spoke.length).toBeGreaterThan(0));
-    const after = global.__spoke.length;
+    await waitFor(() => expect(global.__played.length).toBeGreaterThan(0));
+    const after = global.__played.length;
+    const first = global.__players[global.__players.length - 1];
     await act(async () => { fireEvent.press(screen.getByTestId("scene-restart")); });
-    await waitFor(() => expect(global.__spoke.length).toBeGreaterThan(after));
+    await waitFor(() => expect(global.__played.length).toBeGreaterThan(after));
+    /* Every replay is a new player: the one before it is removed rather than
+       paused, or it would sit on the Android audio session (§23). */
+    expect(first.remove).toHaveBeenCalled();
     // Replays are never counted against the learner (the owner's rule, §30c).
     expect(screen.queryByText(/replay/i)).toBeNull();
   });

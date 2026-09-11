@@ -141,7 +141,7 @@ const PITCH_UP = 1.18, PITCH_DOWN = 0.86;
  * scenario and across every replay. */
 /* Stable, small, and spread — enough to turn a lesson's name into a number
    that does not correlate with the next lesson's. */
-function hash(s) {
+export function hash(s) {
   let h = 2166136261;
   for (let i = 0; i < String(s).length; i++) {
     h ^= String(s).charCodeAt(i);
@@ -336,6 +336,62 @@ export function speakLine(text, opts = {}) {
       finish(false);
     }
   });
+}
+
+/* One scenario, played as one file (§30l).
+ *
+ * A written conversation is now bought as audio rather than read by the phone
+ * (tools/build_scenario_audio.mjs), and stitched into a track per lesson, so
+ * this is a single player over a known timeline instead of a queue of
+ * utterances — which is what makes the position real and a seek land anywhere
+ * rather than on a line boundary.
+ *
+ * Returns a handle, or null when nothing could be played: the caller then falls
+ * back to the device voices, which is also what happens on a phone that never
+ * gets the assets. `pos()` is milliseconds; `stop()` **removes** the player
+ * rather than pausing it, because a paused one keeps the Android audio session
+ * (§23) — resuming re-creates it and seeks, which costs nothing audible. */
+export async function playTrack(source, from = 0) {
+  if (!source) return null;
+  await prepare();
+  try {
+    Speech.stop();
+    if (player) { player.remove(); player = null; }
+    const end = begin();
+    const mine = createAudioPlayer(source);
+    player = mine;
+    let over = false;
+    if (mine.addListener) {
+      mine.addListener("playbackStatusUpdate", (s) => {
+        if (!s) return;
+        if (s.error && player === mine) { over = true; end(); }
+        else if (s.didJustFinish) { over = true; end(); }
+      });
+    }
+    if (from > 0 && typeof mine.seekTo === "function") {
+      try { await mine.seekTo(from / 1000); } catch (e) {}
+    }
+    const rate = prefs.rate;
+    if (rate !== 1 && typeof mine.setPlaybackRate === "function") {
+      try { mine.shouldCorrectPitch = true; mine.setPlaybackRate(rate, "high"); } catch (e) {}
+    }
+    mine.play();
+    return {
+      /* Where the track is, in milliseconds. `currentTime` is seconds and is
+         the player's own, so a slowed rate reports the right place. */
+      pos: () => Math.round(((mine.currentTime || 0) * 1000) || from),
+      ended: () => over,
+      live: () => player === mine,
+      stop: () => {
+        if (player === mine) { player = null; }
+        try { mine.remove(); } catch (e) {}
+        if (settle) settle();
+      },
+    };
+  } catch (e) {
+    if (settle) settle();
+    return null;
+  }
 }
 
 /* Plays the real recording when the collection has one, otherwise the device voice.

@@ -5,10 +5,16 @@
  * what they heard … the audio can be replayed as many times as they need …
  * they'll have the controls to back up a few seconds."*
  *
- * There is no audio file. The conversation is written (§30l) and read by the
- * device's Russian voices, one per speaker, which means there is no timeline to
- * seek in either — `expo-speech` speaks a string and tells you when it stopped.
- * So the timeline is built rather than read:
+ * A written conversation is now **bought** as audio (tools/build_scenario_audio
+ * and build_scene_tracks): one file per lesson, with the start of every line
+ * measured from the clips it was stitched from. That is one player over a real
+ * timeline, and a seek lands anywhere.
+ *
+ * The device voices remain the other half of this file, and not as a leftover:
+ * they read a corpus scene, which has no script and therefore no track, and any
+ * lesson whose text no longer matches its audio. They speak a line at a time
+ * and `expo-speech` only says when it stopped, so there the timeline is built
+ * rather than read:
  *
  *   - every line has an estimate from its length, which is what the progress bar
  *     and "back five seconds" work against before anything has played;
@@ -17,14 +23,15 @@
  *   - seeking lands on a line boundary, because that is the only place speech
  *     can actually be resumed. Five seconds back from the middle of a sentence
  *     therefore replays from the start of the sentence five seconds ago, which
- *     is what a listener wanted anyway.
+ *     is what a listener wanted anyway. A track has no such limit.
  *
  * Everything above the hook is pure and tested directly (scenario.test.js);
  * the hook is the part that owns the speaking.
  */
 
-import { useEffect, useRef, useState } from "react";
-import { speakLine, stop, castVoices } from "./audio";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { speakLine, stop, castVoices, playTrack, hash } from "./audio";
+import { trackFor } from "./scenetracks";
 
 /* The breath between two turns. Long enough to hear one speaker stop and
    another start; short enough that a dozen lines still run under a minute. */
@@ -68,8 +75,29 @@ export const clock = (ms) => {
 
 /* ------------------------------------------------------------------ hook */
 
+/* The bought track for this lesson, when there is one and it still matches the
+ * text (§30l). The hash is the guard: the track was stitched from clips of
+ * particular sentences, so a script edited without re-running the audio tools
+ * would play the wrong words under the questions — and nothing on screen would
+ * say so. A mismatch is not an error, it is the device voices again. */
+export function trackWhenCurrent(key, lines) {
+  const t = trackFor(key);
+  if (!t || !lines || t.lines.length !== lines.length) return null;
+  if (t.h !== hash(lines.map((l) => l.ru).join("|"))) return null;
+  // The generated module stores each line as [start, ms] to keep the bundle
+  // small; the rest of this file talks in spans.
+  return { src: t.src, total: t.total, spans: t.lines.map(([start, ms]) => ({ start, ms })) };
+}
+
 /* Drives the conversation. `lines` is `[{ s, ru }]` and `cast` the speakers in
-   the order their voices are handed out. */
+ * the order their voices are handed out. `seed` is the lesson's key — which
+ * voices it draws and which track it owns are both properties of the lesson.
+ *
+ * Two ways to play, and the difference is visible to the learner in one place
+ * only, the accuracy of the position: a bought track is one file with a
+ * measured timeline, so it seeks anywhere; the device voices speak a line at a
+ * time, so the timeline is estimated until it has been heard and a seek lands
+ * on a line boundary. */
 export function useScenario(lines, cast, seed = "") {
   const [playing, setPlaying] = useState(false);
   const [at, setAt] = useState(-1);          // the line sounding, -1 for none
@@ -80,18 +108,41 @@ export function useScenario(lines, cast, seed = "") {
   const alive = useRef(true);
   const run = useRef(0);                     // the current playback; bumped to abandon one
   const mark = useRef({ base: 0, at: 0 });   // where the line sounding began
+  // Hashed once per lesson, not once per frame: the position poll re-renders
+  // this five times a second.
+  const track = useMemo(() => trackWhenCurrent(seed, lines), [seed, lines]);
+  const handle = useRef(null);               // the track's player, while one is open
 
-  useEffect(() => () => { alive.current = false; run.current++; stop(); }, []);
+  useEffect(() => () => {
+    alive.current = false;
+    run.current++;
+    if (handle.current) { handle.current.stop(); handle.current = null; }
+    stop();
+  }, []);
 
   /* The bar moves while a line is being spoken, which is most of the time —
-     without this it would step once a sentence and read as broken. */
+     without this it would step once a sentence and read as broken. A track
+     reports its own position; the device voices are timed from when the line
+     began, because expo-speech has nothing to ask. */
   useEffect(() => {
     if (!playing) return undefined;
     const id = setInterval(() => {
-      setPos(mark.current.base + (Date.now() - mark.current.at));
+      const h = handle.current;
+      if (!h) return setPos(mark.current.base + (Date.now() - mark.current.at));
+      const ms = h.pos();
+      setPos(ms);
+      setAt(lineAt(track.spans, ms));
+      if (h.ended()) {
+        h.stop();
+        handle.current = null;
+        setPlaying(false);
+        setAt(-1);
+        setPos(track.total);
+      }
+      return undefined;
     }, 200);
     return () => clearInterval(id);
-  }, [playing]);
+  }, [playing, track]);
 
   /* By the cast, not by how many there are: a voice is chosen for *who* is
      speaking (core/names.js knows each character's sex), so the same character
@@ -107,13 +158,26 @@ export function useScenario(lines, cast, seed = "") {
     return voices[k < 0 ? 0 : k % voices.length];
   };
 
-  const spans = () => timeline(lines, measured.current);
+  const spans = () => (track ? { spans: track.spans, total: track.total }
+                             : timeline(lines, measured.current));
 
   const play = async (fromMs = 0) => {
     const id = ++run.current;
+    if (handle.current) { handle.current.stop(); handle.current = null; }
     stop();
     setPlaying(true);
     setPlays((n) => n + 1);
+
+    if (track) {
+      const h = await playTrack(track.src, fromMs);
+      if (!alive.current || run.current !== id) { if (h) h.stop(); return; }
+      if (!h) { setPlaying(false); return; }   // nothing played; the transport stays put
+      handle.current = h;
+      setPos(fromMs);
+      setAt(lineAt(track.spans, fromMs));
+      return;
+    }
+
     const tl = spans();
     let k = lineAt(tl.spans, fromMs);
     let base = tl.spans.length ? tl.spans[k].start : 0;
@@ -151,6 +215,17 @@ export function useScenario(lines, cast, seed = "") {
      again repeats that line rather than skipping what was cut off. */
   const pause = () => {
     run.current++;
+    if (handle.current) {
+      /* A track resumes exactly where it stopped, so the position is kept as it
+         is. The player is removed rather than paused: a paused one holds the
+         Android audio session (§23), and re-creating it to resume is free. */
+      setPos(handle.current.pos());
+      handle.current.stop();
+      handle.current = null;
+      setPlaying(false);
+      setAt(-1);
+      return;
+    }
     stop();
     setPlaying(false);
     const tl = spans();

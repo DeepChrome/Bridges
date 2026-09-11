@@ -508,6 +508,11 @@ export function makeQuestions(env) {
     }));
     return {
       kind: "scene", scenario: true, ask: "Listen, then answer", prompt: "", cyr: true,
+      // The lesson's own key, which is also the key its audio track is built
+      // under (tools/build_scene_tracks.mjs) and the seed its voices are drawn
+      // from. It rides on the question so the activity never has to rebuild it
+      // out of a display title.
+      script: `${unit.id}:${index}`,
       unit: unit.id, cast: s.cast || [], lines, questions,
       lemmas: unique(lines.flatMap((l) => l.lemmas)),
       level: unit.name, topic: s.title, written: true,

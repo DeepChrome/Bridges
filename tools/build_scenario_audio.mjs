@@ -52,10 +52,13 @@ const MANIFEST = join(OUT, "manifest.json");
 const API = "https://texttospeech.googleapis.com/v1";
 const LANG = "ru-RU";
 
-/* Which family of voices to buy. Left as an argument rather than decided here
-   because the account is the authority on what exists — `--list-voices` prints
-   it — and because the good ones are renamed every couple of years. */
-const DEFAULT_TIER = "Wavenet";
+/* Which family of voices to buy. Chirp3-HD is the top tier that exists in
+   Russian at all — all 2,066 voices were listed and Studio, Neural2, News,
+   Polyglot and Casual have no ru-RU voice — so it is the default rather than
+   something a caller has to remember. `--tier` overrides it, because the
+   account is the authority on what exists (`--list-voices`) and the good
+   families are renamed every couple of years. */
+const DEFAULT_TIER = "Chirp3-HD";
 
 /* Speaking rate and pitch are the two things that make a synthesised
    conversation sound like a station announcement. Slightly under a natural
@@ -69,7 +72,7 @@ const EXT = "mp3";
    cost model goes stale (ROADMAP §9). This is only for the estimate the run
    prints, and it says so. Both Google and Azure also have a monthly free
    allowance that 48,000 characters may well fall inside. */
-const RATE_PER_M_CHARS = 16;
+const RATE_PER_M_CHARS = 30;
 
 const arg = (name, fallback = null) => {
   const i = process.argv.indexOf(name);

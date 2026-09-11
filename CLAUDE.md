@@ -591,6 +591,18 @@ Each of these cost real time. Do not relearn them.
   or mapped, listen to a sample — `faster-whisper` in a scratch venv language-detects
   a sentence in seconds, and the Windows `System.Speech` dictation recogniser tells
   English from noise with no install at all.
+- **An MP3 says how long it meant to be; it holds whole frames.** The scenario
+  tracks are stitched with `-c copy`, so what a player hears is the frames, and
+  at 24 kHz an MPEG-2 Layer III frame is 24 ms. `ffmpeg -t 0.42` for the silence
+  between two turns therefore writes a header saying 420 ms over 478 ms of
+  audio, and `ffprobe -show_entries format=duration` reports the header. Trusting
+  it put every gap 58 ms adrift — by the end of a sixteen-line conversation,
+  nearly a second, landing exactly where somebody scrubbing back to catch the
+  last line ends up. Speech from the API agreed with its own header, which is
+  why only the silence was wrong and why the error looked like a stitching bug.
+  **Count packets** (`-count_packets`, × 576 samples under 32 kHz, × 1152 above)
+  rather than reading the duration. `build_scene_tracks.mjs` checks the whole
+  against the sum of its parts on every run and says so when they disagree.
 - **A form key is not a lemma.** 8,404 of the lexicon's 567,526 form keys belong to
   more than one lemma, and they carry 16 % of everything said in a video: «нет» is
   listed as a form of «житься», «просто» of «простой», «лет» of «лёт», «уже» of
@@ -1526,7 +1538,47 @@ writing dialogue. First names now decline (`nameForms`), since a conversation
 cannot keep every name in the nominative and the lexicon carries no personal
 names at all.
 
-**Different voices are key, and there is no audio file.** `castVoices(cast)` in
+**The audio is bought** (2026-09-11). Google Cloud's **Chirp3-HD** is the top
+tier that exists in Russian at all — all 2,066 voices were listed, and Studio,
+Neural2, News, Polyglot and Casual have no `ru-RU` voice — and it offers eight,
+four women and four men, which is the cast the owner asked for. Two tools, in
+order, both idempotent:
+
+1. `tools/build_scenario_audio.mjs` buys **one clip per line**, keyed
+   `sha1(google|voice|rate|text)` under `data/scenario_audio/`. A line is what a
+   voice and a piece of text make, so that is what a content hash can key on and
+   what a re-run can skip: editing one sentence re-buys one sentence.
+   `--list-voices`, `--dry-run`, `--chapter N`, `--limit N`, `--tier`.
+   The whole course is 2,213 clips, 49,561 characters, **$1.49** at $30/M.
+2. `tools/build_scene_tracks.mjs` stitches each lesson's clips into **one track**
+   with `GAP_MS` of silence between turns, writing `native/assets/scenes/` and
+   the generated `native/src/scenetracks.js` (a `require` per lesson, because
+   Metro resolves assets at build time, plus the start and length of every line).
+   168 tracks, 27.5 MB, shipped in the APK — small enough to bundle, unlike the
+   209 MB of collection audio, and a listening exercise that needs the network
+   is a listening exercise that fails on a train.
+
+**The clips are committed and the tracks are not.** The clips cost money; the
+tracks are ffmpeg away from them.
+
+`scenetracks.js` carries a hash of each lesson's Russian and `trackWhenCurrent`
+refuses a track whose text has moved on, because a track played against edited
+lines would say different words from the ones the questions ask about and look
+perfectly normal doing it. `scenario.test.js` asserts every shipped lesson still
+matches, which is what turns "re-run the audio tools after editing a script"
+from a note in a file into something that fails.
+
+**Nothing on screen says whose voice this is any more** — for these lessons.
+§27's note exists so the phone's own reading is never mistaken for a recording
+from the collection; bought audio is neither, and labelling it "device voices"
+would be the same lie pointed the other way. The note stays wherever the device
+is actually reading.
+
+**The device voices are still here, and not as a leftover.** They read a corpus
+scene, which has no script and so no track, and any lesson whose text no longer
+matches its audio. Everything below is that path.
+
+**Different voices are key.** `castVoices(cast)` in
 `native/src/audio.js` gives each speaker a voice. `speakLine()` speaks one line
 and resolves when it ends; it deliberately does **not** reach for a recording
 the way `say()` does — one studio line inside a conversation would change a

@@ -17,7 +17,10 @@ jest.mock("@react-native-async-storage/async-storage", () =>
 jest.mock("expo-audio", () => ({
   createAudioPlayer: (src) => {
     global.__played = global.__played || [];
-    global.__played.push(src && src.uri);
+    /* A stream is identified by its uri; a bundled asset — a cue, or a scenario
+       track — arrives as whatever Metro resolved the require to, so it is
+       recorded under one name. Always a string: callers match on the path. */
+    global.__played.push(src && src.uri ? src.uri : "asset");
     const listeners = [];
     const finish = () => listeners.forEach((fn) => fn({ didJustFinish: true, playing: false }));
     global.__audioPending = global.__audioPending || [];
@@ -31,6 +34,12 @@ jest.mock("expo-audio", () => ({
        lifecycle. */
     const p = {
       uri: src && src.uri,
+      /* A scenario track is one file played over a known timeline, so the code
+         asks the player where it is and tells it where to go (audio.js
+         playTrack). Seconds, as expo-audio reports them. */
+      currentTime: 0,
+      seekTo: jest.fn(async (sec) => { p.currentTime = sec; }),
+      setPlaybackRate: jest.fn(),
       play: jest.fn(() => {
         if (global.__audioHold) global.__audioPending.push(finish);
         else if (!global.__audioNeverFinish) setTimeout(finish, 0);

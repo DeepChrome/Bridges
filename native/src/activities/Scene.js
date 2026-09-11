@@ -38,7 +38,7 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Btn, Muted, Bar } from "../ui";
 import { stop, hasRealAudio, hasRussianVoice } from "../audio";
-import { useScenario, SKIP_MS, clock } from "../scenario";
+import { useScenario, trackWhenCurrent, SKIP_MS, clock } from "../scenario";
 import { Linked } from "../words";
 import { useEnter } from "../motion";
 import { recordAttempt } from "@core/state";
@@ -187,8 +187,10 @@ export function Scene({ q, r }) {
   const [picks, setPicks] = useState({});
   const lines = q.lines || [];
   const cast = q.cast || [];
-  // The lesson is the seed: its own pair of voices, the same on every replay.
-  const s = useScenario(lines, cast, `${q.unit || ""}:${q.topic || ""}`);
+  /* The lesson's key: which track this scenario owns, and — when there is no
+     track — which pair of device voices it draws, the same on every replay. */
+  const key = q.script || `${q.unit || ""}:${q.topic || ""}`;
+  const s = useScenario(lines, cast, key);
   useEffect(() => () => { stop(); }, []);
 
   const allPicked = q.questions.every((_, k) => picks[k] !== undefined);
@@ -200,7 +202,13 @@ export function Scene({ q, r }) {
      saying "device voice" over a real one is the same failure pointed the other
      way. */
   const real = q.scenario ? 0 : lines.filter((l) => hasRealAudio(l.ru)).length;
-  const voiceNote = !hasRussianVoice() ? "No Russian voice on this phone"
+  /* A bought track is neither: it is synthesised, so it must not be presented as
+     a recording from the collection, but it is not the phone reading either and
+     saying "device voices" over it would be the same lie pointed the other way.
+     The recorded line is the one that needs no note. */
+  const bought = !!trackWhenCurrent(key, lines);
+  const voiceNote = bought ? null
+    : !hasRussianVoice() ? "No Russian voice on this phone"
     : real === lines.length && lines.length ? null
     : real ? "device voice for some lines"
     : cast.length > 1 ? "device voices" : "device voice";

@@ -1,15 +1,24 @@
 /* The scenario timeline.
  *
- * There is no audio file behind a written conversation, so there is no
- * timeline to read — the one the progress bar and "back five seconds" work
- * against is built from line lengths and then corrected by what each line
- * actually took to speak. That arithmetic is the part that can be wrong
- * silently: a bar that creeps, a back button that lands in the wrong place, a
- * total that never matches what was heard. None of it shows in a render tree,
- * so it is tested here rather than through the screen.
+ * Where a conversation has no bought track — a corpus scene, or a lesson whose
+ * text has moved on from its audio — it is read by the device voices and there
+ * is no timeline to read either: the one the progress bar and "back five
+ * seconds" work against is built from line lengths and then corrected by what
+ * each line actually took to speak. That arithmetic is the part that can be
+ * wrong silently: a bar that creeps, a back button that lands in the wrong
+ * place, a total that never matches what was heard. None of it shows in a
+ * render tree, so it is tested here rather than through the screen.
+ *
+ * And the switch between the two is itself a silent failure: a track played
+ * against lines it was not made from would say different words from the ones
+ * the questions ask about, and look perfectly normal doing it.
  */
 
-import { estimateMs, timeline, lineAt, clock, GAP_MS, SKIP_MS } from "../src/scenario";
+import { estimateMs, timeline, lineAt, clock, GAP_MS, SKIP_MS, trackWhenCurrent }
+  from "../src/scenario";
+import { TRACKS } from "../src/scenetracks";
+import { hash } from "../src/audio";
+import { SCRIPTS } from "../src/data";
 
 const LINES = [
   { s: "a", ru: "Кто это?" },
@@ -92,5 +101,54 @@ describe("the clock", () => {
 
   it("never shows a negative position", () => {
     expect(clock(-4000)).toBe("0:00");
+  });
+});
+
+describe("the bought track", () => {
+  const keys = Object.keys(TRACKS);
+  const first = keys[0];
+  const linesOf = (key) => (SCRIPTS[key] || { lines: [] }).lines;
+
+  it("ships one per written scenario, with a span for every line", () => {
+    expect(keys.length).toBe(Object.keys(SCRIPTS).length);
+    for (const [k, t] of Object.entries(TRACKS)) {
+      expect(t.lines.length).toBe(SCRIPTS[k].lines.length);
+      expect(t.total).toBeGreaterThan(15_000);
+      // Every line ends inside the file, and they run in order.
+      let prev = -1;
+      for (const [start, ms] of t.lines) {
+        expect(start).toBeGreaterThan(prev);
+        expect(start + ms).toBeLessThanOrEqual(t.total + 200);
+        prev = start;
+      }
+    }
+  });
+
+  /* The whole point of the hash: the shipped audio and the shipped text are
+     built from the same file, and this is what says they still agree. It fails
+     if a script is edited and the audio tools are not re-run — which is the
+     one way this feature can go wrong without anything looking wrong. */
+  it("matches the text of every lesson that ships", () => {
+    const stale = keys.filter((k) => !trackWhenCurrent(k, linesOf(k)));
+    expect(stale).toEqual([]);
+  });
+
+  it("is refused when the script has moved on from the audio", () => {
+    const lines = linesOf(first);
+    const changed = lines.map((l, i) => (i ? l : { ...l, ru: `${l.ru} и ещё` }));
+    expect(trackWhenCurrent(first, changed)).toBe(null);
+    expect(trackWhenCurrent(first, lines.concat([{ s: "a", ru: "Да." }]))).toBe(null);
+  });
+
+  it("is refused for a lesson that has none", () => {
+    expect(trackWhenCurrent("nosuch:9", LINES)).toBe(null);
+    expect(trackWhenCurrent(null, LINES)).toBe(null);
+  });
+
+  it("hashes the lines, not their order", () => {
+    // Guard on the guard: two different conversations must not share a hash.
+    const a = hash(linesOf(keys[0]).map((l) => l.ru).join("|"));
+    const b = hash(linesOf(keys[1]).map((l) => l.ru).join("|"));
+    expect(a).not.toBe(b);
   });
 });

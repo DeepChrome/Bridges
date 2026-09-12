@@ -64,6 +64,39 @@ export const quizPassed = (l) => {
 export const REVIEW_FIRST = 40;
 export const reviewFirst = (due) => (due || 0) >= REVIEW_FIRST;
 
+/* …and there is such a thing as enough for one day.
+ *
+ * The measured way people leave a language app is not boredom, it is bingeing:
+ * learners who take many lessons at once are markedly likelier to stop
+ * altogether, and the ones who last commit to a few minutes a day. Bridges had
+ * nothing that ever said "you are square" — the next lesson was the blue button
+ * on every screen at every hour, so the only two options it offered were carry
+ * on and stop for no reason.
+ *
+ * A day is done when the learner has answered something today and nothing is
+ * waiting. Both facts are already on the record, so this invents no state and
+ * no metric — and it cannot be gamed, because clearing the reviews is the work.
+ *
+ * **Not `state.day`**, which is what this first used and is a different fact.
+ * `touchStreak` runs from the session loader, so `day` is stamped by *opening*
+ * the app; a learner with an empty queue would have been told they were done
+ * before they had answered anything, and the streak beside it counts
+ * attendance rather than work for the same reason. What does mean work is the
+ * scheduler's own record: `applyGrade` stamps `last` on every card it grades,
+ * so a card last seen today is a question answered today.
+ *
+ * It shows the way REVIEW_FIRST shows: the next lesson's button goes quiet.
+ * Nothing is locked, nothing is said. One button being blue and the other not
+ * is the whole message (§25), and it is the same mechanism the fork, developer
+ * mode and review-first already use. */
+export function workedOn(state, day) {
+  const seen = (state && state.seen) || {};
+  for (const w in seen) if (seen[w] && seen[w].last === day) return true;
+  return false;
+}
+export const dayDone = (state, due, day) =>
+  (due || 0) === 0 && workedOn(state, day);
+
 /* What the speaking activities record. Attempts are capped so state stays a small
    JSON blob; tagCounts is the long-term memory of what kinds of error recur. No
    audio is ever stored here. */

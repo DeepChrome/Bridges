@@ -23,7 +23,8 @@ import {
   STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress, unitState,
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, FORK_AT, dueCount,
 } from "../data";
-import { reviewFirst } from "@core/state";
+import { reviewFirst, dayDone } from "@core/state";
+import { today } from "@core/util";
 import { taskFor } from "@core/tasks";
 import { useSweep, useCount } from "../motion";
 
@@ -289,6 +290,7 @@ export default function Learn({ navigation }) {
   const next = nextStep(st);
   const due = dueCount(st);
   const holdBack = reviewFirst(due);
+  const done = dayDone(st, due, today());
   const xp = useCount(st.xp || 0);
   const openUnit = (unit) => navigation.navigate("Unit", { unitId: unit.id });
 
@@ -305,10 +307,20 @@ export default function Learn({ navigation }) {
         </Text>
         <Muted size={14}>XP</Muted>
         <Text style={{ color: t.ink3, marginHorizontal: 4 }}>·</Text>
-        <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
+        <Text testID="streak"
+              style={{ color: done ? t.good : t.ink, fontSize: 20, fontWeight: "700" }}>
           {st.streak || 0}
         </Text>
         <Muted size={14}>{st.streak === 1 ? "day" : "days"} in a row</Muted>
+        {/* The day is closed: something was finished and nothing is waiting.
+            A tick, not a sentence — the streak turning green beside it is the
+            rest of the message (§25). */}
+        {done ? (
+          <Svg testID="day-done" width={15} height={15} viewBox="0 0 24 24" fill="none"
+               stroke={t.good} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M4 13l5 5L20 7" />
+          </Svg>
+        ) : null}
       </View>
 
       {/* What is due sits on the path, above the lesson: review is part of
@@ -341,7 +353,11 @@ export default function Learn({ navigation }) {
         // Straight to the next undone step of the next lesson — a question
         // within seconds, not a unit list and a lesson list first.
         <Btn
-          kind={holdBack ? "plain" : "pri"}
+          // Quiet once the day is done, for the same reason and by the same
+          // means as review-first: the learner may carry on and nothing says
+          // they should not, but the app stops pushing.
+          kind={holdBack || done ? "plain" : "pri"}
+          testID="next-step"
           style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
           label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} (${next.unit.name})`}
           onPress={() => navigation.navigate(STEP_ROUTE[next.step] || "Vocab",

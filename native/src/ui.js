@@ -59,7 +59,19 @@ export function TextInput({ style, ...rest }) {
    taking it a second time put an empty band the height of the status bar at the
    top of every screen in the app — about 48 px of nothing under every header,
    which is most of why the screens read as floating. */
-export function Screen({ children, scroll = true, fill = false, safeTop = false }) {
+/* `footer` pins a screen's action to the bottom, off the scroll.
+ *
+ * `fill` puts it at the foot of the *content*, which is right when the content
+ * is shorter than the screen and wrong when it is longer: the quiz builder's
+ * Start sat under thirty-four chapters of unit chips, so the one thing the
+ * screen is for could only be reached by scrolling past everything it offers.
+ *
+ * For a screen that keeps the tab bar — which is every screen long enough to
+ * want this, since a run has no tab bar and its action already sits at the foot
+ * via `fill`. A run that wants a pinned footer would need to add the bottom
+ * safe-area inset itself; nothing does yet, and guessing at it here is how the
+ * inset came to be applied twice in the first place. */
+export function Screen({ children, scroll = true, fill = false, safeTop = false, footer }) {
   const t = useTheme();
   const Body = scroll ? ScrollView : View;
   /* Every screen's content arrives rather than appearing. The stack already
@@ -76,7 +88,9 @@ export function Screen({ children, scroll = true, fill = false, safeTop = false 
         testID="screen-body"
         style={{ flex: 1 }}
         contentContainerStyle={scroll
-          ? { padding: space.pad, paddingBottom: 40, ...(fill ? { flexGrow: 1 } : null) }
+          // Clear of the footer, so the last row is not sitting under it.
+          ? { padding: space.pad, paddingBottom: footer ? 24 : 40,
+              ...(fill ? { flexGrow: 1 } : null) }
           : null}
         // With the keyboard up, a ScrollView's default is to spend the first touch
         // dismissing it and deliver nothing. Every typed answer's Check, the gate's
@@ -86,6 +100,14 @@ export function Screen({ children, scroll = true, fill = false, safeTop = false 
       >
         {children}
       </Body>
+      {footer ? (
+        <View testID="screen-footer"
+              style={{ borderTopWidth: 1, borderTopColor: t.line,
+                       backgroundColor: t.bg,
+                       paddingHorizontal: space.pad, paddingTop: 10, paddingBottom: 12 }}>
+          {footer}
+        </View>
+      ) : null}
       </Animated.View>
     </SafeAreaView>
   );

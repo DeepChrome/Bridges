@@ -776,7 +776,16 @@ export function QuizSetup({ navigation }) {
   const Section = ({ label }) => <SectionLabel style={{ marginTop: 18 }}>{label}</SectionLabel>;
 
   return (
-    <Screen>
+    /* Start is pinned: it used to sit under every chapter's unit chips, so on a
+       profile with the whole path open the one thing this screen is for was
+       thirty-four sections down. */
+    <Screen
+      footer={
+        <Btn kind="pri" label={ready ? "Start" : "Pick a question type and a section"}
+             disabled={!ready} testID="quiz-start"
+             onPress={() => navigation.navigate("CustomQuiz", { kinds, units, n })} />
+      }
+    >
       <Section label="Questions" />
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
         {QUIZ_KINDS.map((k) => (
@@ -807,9 +816,6 @@ export function QuizSetup({ navigation }) {
                 testID={`len-${len}`} />
         ))}
       </View>
-      <Btn kind="pri" label={ready ? "Start" : "Pick a question type and a section"}
-           disabled={!ready} style={{ marginTop: 22 }}
-           onPress={() => navigation.navigate("CustomQuiz", { kinds, units, n })} />
     </Screen>
   );
 }

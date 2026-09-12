@@ -1347,6 +1347,11 @@ export function makeQuestions(env) {
      is what a learner confuses), topped up by `more()` (other words), never
      equal to the answer or to each other. Null when three cannot be found —
      two options is a coin flip, not a drill. */
+  /* How many near-length candidates to choose the three from. Wide enough that
+     the same three do not come back every time a word does, narrow enough to
+     keep the answer off both ends of the screen. */
+  const NEAR_WINDOW = 8;
+
   function threeWrong(right, from, more) {
     const seen = new Set([fold(right)]);
     const out = [];
@@ -1355,7 +1360,20 @@ export function makeQuestions(env) {
       seen.add(fold(f));
       out.push(f);
     };
-    shuffle(from.slice()).forEach(take);
+    /* Nearest in length first, then the rest.
+     *
+     * Taking three at random let the answer be the longest or shortest line on
+     * screen — "instrumental singular" against "dative plural", and whole
+     * sentences where «Э́то он.» stood against «у́лицы и пло́щади». Measured at
+     * 17 % of the grammar drill, which is the drill a learner meets with the
+     * shipped settings, since the other four are written rather than chosen.
+     * `partnerWrong` already did this for the aspect pair; doing it here covers
+     * every generator that asks for three wrong labels. */
+    const byLength = from.slice().sort((a, b) =>
+      Math.abs(String(a).length - String(right).length)
+      - Math.abs(String(b).length - String(right).length));
+    shuffle(byLength.slice(0, NEAR_WINDOW)).forEach(take);
+    shuffle(byLength.slice(NEAR_WINDOW)).forEach(take);
     for (let n = 0; n < 80 && out.length < 3 && more; n++) take(more());
     return out.length >= 3 ? out.slice(0, 3) : null;
   }
@@ -1416,6 +1434,17 @@ export function makeQuestions(env) {
    * «рисовать»/«танцевать» share only «ва», which is why the ending has to go
    * first or every pair of infinitives would look related. */
   const verbStem = (word) => fold(word).replace(/(ться|тся|ть|ти|чь)$/, "");
+  /* Two verbs look alike enough that neither can be eliminated on shape: they
+     share four letters somewhere outside the infinitive ending.
+   *
+   * A proportional rule was tried — a run covering most of the shorter stem, to
+   * catch «дать»/«давать» (sharing «да») — and it was wrong twice over. It let
+   * any two-letter stem match anywhere, so «бить» counted as a lookalike of
+   * «любить»; and the case it was for cannot be a giveaway in the first place,
+   * because the answer only stands out when *it* shares four or more with the
+   * prompt, which a two-letter stem never does. Measured: kin fell 1.8 → 0.8
+   * and root moved 16 % → 14 %. Four letters, then. */
+  const related = (a, b) => commonRun(a, b) >= 4;
   function commonRun(a, b) {
     const x = verbStem(a), y = verbStem(b);
     let best = 0;
@@ -1432,21 +1461,42 @@ export function makeQuestions(env) {
   function partnerWrong(promptWord, answer) {
     const seen = new Set([fold(answer), fold(promptWord)]);
     const scored = [];
-    const from = drillPool && drillPool.length ? drillPool : L;
-    for (const x of from) {
-      if (x.p !== "verb" || !realPartner(x.pt)) continue;
-      const cand = x.pt.trim();
-      const f = fold(cand);
-      if (seen.has(f)) continue;
-      seen.add(f);
-      let score = 0;
-      // Built on the prompt's root — the one a learner cannot tell apart by shape.
-      if (commonRun(cand, promptWord) >= 4) score += 3;
-      // Or on the answer's, which is usually the same root seen from the
-      // other side of the pair.
-      else if (commonRun(cand, answer) >= 4) score += 2;
-      if (Math.abs(f.length - fold(answer).length) <= 2) score += 1;
-      scored.push({ cand, score, r: Math.random() });
+    /* Every verb the curriculum knows, not the learner's own handful.
+     *
+     * Two restrictions were narrowing this to almost nothing, and both were
+     * accidents rather than decisions:
+     *
+     * - It read `drillPool`, so the distractors came from the words this
+     *   learner has met. The rule three hundred lines up says the opposite in
+     *   as many words — *"Distractors still come from anywhere — a wrong option
+     *   needs no acquaintance"* — and `qAspectWhich` already passes `anywhere`
+     *   for exactly this reason. A learner forty words in had four verbs to
+     *   stand against, so the answer was the only one on the prompt's root
+     *   however well this scored them.
+     * - It considered only other verbs' *recorded partners* (`x.pt`), so a verb
+     *   with no partner in the data could never be a wrong answer, though it is
+     *   a perfectly good-looking one. Measured over the 691 verbs that can be
+     *   asked: candidates with the same root go 687 → 1,413, and the verbs with
+     *   nothing at all to stand against go 42 → 25.
+     *
+     * What a distractor has to be is a Russian verb that looks like it could be
+     * the partner. It does not have to be a word anybody has taught. */
+    for (const x of L) {
+      if (x.p !== "verb") continue;
+      for (const cand of [x.w, realPartner(x.pt) ? x.pt.trim() : null]) {
+        if (!cand) continue;
+        const f = fold(cand);
+        if (seen.has(f)) continue;
+        seen.add(f);
+        let score = 0;
+        // Built on the prompt's root — the one a learner cannot tell apart by shape.
+        if (related(cand, promptWord)) score += 3;
+        // Or on the answer's, which is usually the same root seen from the
+        // other side of the pair.
+        else if (related(cand, answer)) score += 2;
+        if (Math.abs(f.length - fold(answer).length) <= 2) score += 1;
+        scored.push({ cand, score, r: Math.random() });
+      }
     }
     if (scored.length < 3) return null;
     /* Related first, and only then anything else.
@@ -1671,10 +1721,13 @@ export function makeQuestions(env) {
        screen in 24 % of questions (tools/audit_options.mjs) — which is a tell
        that costs nothing to remove: pick from the titles nearest it in length.
        Eight to choose three from, so the same three do not recur. */
+    /* Six, not eight: there are only about a dozen cards with notes, so a
+       window of eight was most of them and "Believing in" still went up
+       against "Places in the plural". */
     const near = withNotes.filter((u) => u.g.title !== pick.g.title)
       .sort((a, b) => Math.abs(a.g.title.length - pick.g.title.length)
                     - Math.abs(b.g.title.length - pick.g.title.length));
-    const others = shuffle(near.slice(0, 8)).slice(0, 3);
+    const others = shuffle(near.slice(0, 6)).slice(0, 3);
     if (others.length < 3) return null;
     return {
       kind: "grammar", cyr: true, ask: "Choose the rule this shows",

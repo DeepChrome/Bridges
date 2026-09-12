@@ -196,10 +196,20 @@ function tells(q) {
   return { tells: out, q, right, wrong, kin };
 }
 
+/* `--typed` asks the drills for the shape the app actually ships.
+ *
+ * Settings → "Write drill answers" is **on by default** (DrillFlow passes
+ * `st.typedDrills !== false`), so the default aspect question has no options at
+ * all — and this tool was only ever measuring the path a learner reaches by
+ * turning that off. Quoting "the aspect pair is 16 % guessable" without saying
+ * so overstates it. A production question has nothing to eliminate, so the
+ * report counts those separately rather than scoring them. */
+const TYPED = process.argv.includes("--typed");
+
 function sampleDrill(type) {
   const out = [];
   while (out.length < SAMPLE) {
-    const got = Q.drillQuestions(type, Math.min(40, SAMPLE - out.length));
+    const got = Q.drillQuestions(type, Math.min(40, SAMPLE - out.length), null, null, TYPED);
     if (!got.length) break;
     out.push(...got);
   }
@@ -229,8 +239,15 @@ const flatten = (qs) => qs.flatMap((q) => (Array.isArray(q.questions)
   : [q]));
 
 function report(name, questions) {
-  const mc = flatten(questions).filter((q) => q.options && q.options.length >= 2);
-  if (!mc.length) return null;
+  const all = flatten(questions);
+  const mc = all.filter((q) => q.options && q.options.length >= 2);
+  const produced = all.length - mc.length;
+  if (!mc.length) {
+    // Nothing to eliminate is the best possible answer to "is this guessable?".
+    console.log(`${name.padEnd(14)} ${String(all.length).padStart(5)} asked  `
+      + `written — no options to eliminate`);
+    return null;
+  }
   const rows = mc.map(tells).filter(Boolean);
   const counts = Object.fromEntries(TELLS.map((t) => [t, 0]));
   let any = 0;
@@ -245,7 +262,8 @@ function report(name, questions) {
   const pct = (n) => `${((n / rows.length) * 100).toFixed(0)}%`.padStart(4);
   console.log(`${name.padEnd(14)} ${String(rows.length).padStart(5)} asked  `
     + TELLS.map((t) => `${t} ${pct(counts[t])}`).join("  ")
-    + `   any ${pct(any)}   kin ${String(kin).padStart(3)}/3`);
+    + `   any ${pct(any)}   kin ${String(kin).padStart(3)}/3`
+    + (produced ? `   (+${produced} written)` : ""));
   /* Where a generator mixes authored options with generated ones — the scene
      does: a written scenario carries five questions somebody wrote, and the
      corpus fallback builds its own from other sentences' English. They fail in

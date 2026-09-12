@@ -112,17 +112,17 @@ const tableTitled = (w, re) => (w.t || []).find((t) => re.test(t.title));
 const cellsOf = (row) => row.slice(1);
 
 export const DRILL_TYPES = [
-  { id: "cases", name: "Cases", icon: "city",
+  { id: "cases", name: "Cases", icon: "cases",
     blurb: "Put a noun in the case a sentence needs" },
-  { id: "aspect", name: "Aspect pairs", icon: "time",
+  { id: "aspect", name: "Aspect pairs", icon: "aspect",
     blurb: "Match imperfective and perfective partners" },
-  { id: "agreement", name: "Agreement", icon: "family",
+  { id: "agreement", name: "Agreement", icon: "agreement",
     blurb: "Make adjectives agree with their noun" },
-  { id: "conjugation", name: "Conjugation", icon: "speech",
+  { id: "conjugation", name: "Conjugation", icon: "conjugation",
     blurb: "Put a verb with the right person" },
-  { id: "stress", name: "Stress", icon: "art",
+  { id: "stress", name: "Stress", icon: "stress",
     blurb: "Hear where the emphasis falls" },
-  { id: "grammar", name: "Grammar rules", icon: "school",
+  { id: "grammar", name: "Grammar rules", icon: "rules",
     blurb: "Spot the rule a sentence is showing" },
 ];
 

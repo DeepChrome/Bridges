@@ -9,7 +9,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Pressable, ScrollView, Alert, Animated } from "react-native";
 import { useSession } from "../session";
-import { useTheme, radius } from "../theme";
+import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Text } from "../ui";
 import { GuidePop } from "../guide";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
@@ -595,35 +595,44 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
   const kind = guide && GUIDE_KINDS.includes(guide) ? guide : null;
   const line = kind ? guideLine(kind, (title || "").length) : null;
   const pop = usePop([kind, title]);
+  /* The end of a run is the one moment on the whole route that is a reward, and
+     it was a panel at the top of an empty screen — the same bordered white box
+     the verdict, the word card and the settings rows are, with three quarters of
+     the screen blank underneath it. There is nothing here to group against, so
+     there is nothing for a container to say. The result takes the middle of the
+     screen and the actions sit at the foot of it, where a thumb is (§25). */
   return (
-    <Screen>
-      <Card style={{ alignItems: "center", paddingVertical: 30 }}>
+    <Screen fill>
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center",
+                     paddingHorizontal: 16, paddingVertical: 24 }}>
         {kind ? (
-          <GuidePop pose={poseFor(kind)} size={92} style={{ marginBottom: 6 }} />
+          <GuidePop pose={poseFor(kind)} size={108} style={{ marginBottom: 10 }} />
         ) : null}
         <Animated.View
-          style={[pop, { width: 76, height: 76, borderRadius: 38, marginBottom: 14,
+          style={[pop, { width: 104, height: 104, borderRadius: 52, marginBottom: 20,
                          alignItems: "center", justifyContent: "center",
                          backgroundColor: tone.bg }]}>
-          <Text style={{ color: tone.fg, fontSize: 22, fontWeight: "700" }}>
+          <Text style={{ color: tone.fg, fontSize: 30, fontWeight: "800",
+                         letterSpacing: -0.5 }}>
             {score !== undefined ? `${score}%` : "✓"}
           </Text>
         </Animated.View>
-        <Text style={{ color: t.ink, fontSize: 16, fontWeight: "600" }}>{title}</Text>
-        {detail ? <Muted style={{ marginTop: 6, textAlign: "center" }}>{detail}</Muted> : null}
+        <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700",
+                       textAlign: "center", letterSpacing: -0.3 }}>{title}</Text>
+        {detail ? <Muted style={{ marginTop: 8, textAlign: "center" }}>{detail}</Muted> : null}
         {line ? (
-          <Muted testID="done-line" style={{ marginTop: 10, textAlign: "center", fontStyle: "italic" }}>
+          <Muted testID="done-line" style={{ marginTop: 12, textAlign: "center", fontStyle: "italic" }}>
             {line}
           </Muted>
         ) : null}
-      </Card>
+      </View>
       {forward ? (
         <Btn kind="pri" label={onContinue ? (continueLabel || "Continue") : "Done"}
-             style={{ marginTop: 16 }} onPress={onContinue || onBack} />
+             onPress={onContinue || onBack} />
       ) : null}
       {onAgain ? (
         <Btn kind={forward ? "ghost" : "pri"} label={againLabel || "Again"}
-             style={{ marginTop: forward ? 8 : 16 }} onPress={onAgain} />
+             style={{ marginTop: 8 }} onPress={onAgain} />
       ) : null}
       {!forward || onContinue ? (
         <Btn kind="ghost" label="Back" style={{ marginTop: 8 }} onPress={onBack} />

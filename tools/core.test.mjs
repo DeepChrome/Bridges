@@ -33,7 +33,7 @@ import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
 import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
-import { ICONS, iconFor } from "../core/icons.js";
+import { ICONS, ACTIVITY_ICONS, iconFor } from "../core/icons.js";
 import { AV, AV_IDS } from "../core/avatars.js";
 import { POSES, guideSvg, LINES, MAX_WORDS, guideLine, poseFor } from "../core/guide.js";
 
@@ -359,6 +359,20 @@ group("shared artwork");
 ok(Object.keys(ICONS).length >= 18, "an icon per subject", String(Object.keys(ICONS).length));
 ok(iconFor("core3") === ICONS.core, "core stages fall back to the core mark");
 ok(iconFor("nonsense") === ICONS.speech, "an unknown id still yields a path");
+/* The drills used to borrow the subjects' icons — `city` for Cases, `art` for
+   Stress, `family` for Agreement — so Practice carried pictures about nothing,
+   and Stress shared its drawing with Shadowing. An icon that says the wrong
+   thing is worse than no icon (§25): each drill draws its own, and no two the
+   same. */
+{
+  const marks = DRILL_TYPES.map((d) => iconFor(d.icon));
+  ok(DRILL_TYPES.every((d) => ACTIVITY_ICONS[d.icon]),
+     "every drill's icon is one of the activity marks");
+  ok(new Set(marks).size === DRILL_TYPES.length,
+     "and no two drills are drawn the same", String(new Set(marks).size));
+  ok(new Set(Object.values(ACTIVITY_ICONS)).size === Object.keys(ACTIVITY_ICONS).length,
+     "no activity mark is a copy of another");
+}
 ok(AV_IDS.length === 10, "ten avatars", String(AV_IDS.length));
 ok(AV_IDS.every((id) => AV[id].svg && AV[id].bg && AV[id].name),
    "each avatar has art, a background and a name");

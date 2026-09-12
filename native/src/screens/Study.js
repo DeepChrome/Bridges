@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Pressable, Alert } from "react-native";
 import { useSession } from "../session";
-import { useTheme, radius } from "../theme";
+import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Text, TextInput } from "../ui";
 import { L, UN, STAGES, unitUnlocked, idxOfWord, sensesOf } from "../data";
 import { Linked } from "../words";
@@ -321,62 +321,51 @@ export default function Study({ navigation }) {
 
   return (
     <Screen>
-      <List>
-        <Row onPress={() => setPicker(true)}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15 }}>
-              {names.length ? (names.length === 1 ? names[0] : `${names.length} sets`)
-                            : "Choose what to practise"}
-            </Text>
-            <Muted>{queue.length ? `${queue.length} cards` : "Nothing selected"}</Muted>
-          </View>
-          <Btn kind="ghost" label="Change" style={{ paddingHorizontal: 8 }} onPress={() => setPicker(true)} />
-        </Row>
-      </List>
-
-      {/* Nothing to shuffle or cut when there is no queue: the empty state has
-          one action, choosing a set, not two dead buttons above it. */}
-      {queue.length ? (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12 }}>
-          <Btn label="Shuffle" style={{ flex: 1 }}
-               onPress={() => { setQueue(shuffle(queue.slice())); setAt(0); setShown(false); }} />
-          {/* "20 most urgent" said what the code does — it sorts by weight and
-              cuts. What a learner wants is a short pile picked for them, and how
-              short is theirs to say (the owner, 2026-09-11). */}
-          <Btn label="For you" style={{ flex: 1 }} onPress={() => rebuild(pickN(howMany))} />
-          <TextInput
-            testID="study-n"
-            value={howMany}
-            onChangeText={(v) => setHowMany(v.replace(/[^0-9]/g, "").slice(0, 3))}
-            onBlur={() => setHowMany(String(pickN(howMany)))}
-            keyboardType="number-pad"
-            selectTextOnFocus
-            style={{ width: 58, textAlign: "center", color: t.ink, fontSize: 15,
-                     borderWidth: 1, borderColor: t.line, borderRadius: radius.md,
-                     backgroundColor: t.surface, paddingVertical: 11 }}
-          />
-        </View>
+      {/* A summary of what is ticked — so it only exists once something is.
+          With nothing chosen it said "Choose what to practise / Nothing
+          selected / Change" above an empty state saying "Pick a set to
+          practise" with a button saying "Choose what to review": one thought,
+          three controls, two of them boxes. The empty state's button is the
+          way in; this row is the way back. */}
+      {names.length ? (
+        <List>
+          <Row onPress={() => setPicker(true)}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15 }}>
+                {names.length === 1 ? names[0] : `${names.length} sets`}
+              </Text>
+              <Muted>{queue.length ? `${queue.length} cards` : `${chosen} cards`}</Muted>
+            </View>
+            <Btn kind="ghost" label="Change" style={{ paddingHorizontal: 8 }} onPress={() => setPicker(true)} />
+          </Row>
+        </List>
       ) : null}
 
       {!w ? (
-        <Card style={{ marginTop: 16, alignItems: "center" }}>
-          <Text style={{ color: t.ink, fontSize: 16 }}>
+        /* A sentence and one action, with air around them — not a panel.
+           A card groups things that belong together; one line of text and the
+           button under it are not a group, and drawing a container round them
+           made the empty Study screen read as two grey boxes stacked (§25, and
+           the owner on getting away from blocky squares). */
+        <View style={{ marginTop: 56, alignItems: "center", paddingHorizontal: 24 }}>
+          <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700",
+                         textAlign: "center" }}>
             {queue.length ? "Set finished."
               : chosen ? "Nothing due today." : "Pick a set to practise."}
           </Text>
           {queue.length ? (
-            <Btn kind="pri" label="Go again" style={{ marginTop: 14 }}
+            <Btn kind="pri" label="Go again" style={{ marginTop: 20, minWidth: 200 }}
                  onPress={() => rebuild()} />
           ) : chosen ? (
             // The scheduler has nothing to ask; studying ahead is the learner's
             // choice, said as such, not the default.
-            <Btn label={`Study ahead · ${chosen} cards`} style={{ marginTop: 14 }}
+            <Btn label={`Study ahead · ${chosen} cards`} style={{ marginTop: 20, minWidth: 200 }}
                  onPress={() => rebuild(undefined, true)} />
           ) : (
-            <Btn kind="pri" label="Choose what to review" style={{ marginTop: 14 }}
+            <Btn kind="pri" label="Choose what to review" style={{ marginTop: 20, minWidth: 200 }}
                  onPress={() => setPicker(true)} />
           )}
-        </Card>
+        </View>
       ) : (
         <>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12,
@@ -394,8 +383,14 @@ export default function Study({ navigation }) {
                   : <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600" }}>—</Text>
             ) : (
               <>
-                <Text style={{ color: t.ink, fontSize: w.w.length > 18 ? 24 : 34, fontWeight: "600",
-                               textAlign: "center" }}>{w.w}</Text>
+                {/* The word is the card. At 34 it sat small in the middle of a
+                    tall white panel; a flashcard's face should be the largest
+                    thing on the screen, and it steps down only when the word is
+                    long enough to need the room. */}
+                <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center",
+                               fontSize: w.w.length > 18 ? 26 : w.w.length > 11 ? 34 : 44 }}>
+                  {w.w}
+                </Text>
                 <View style={{ marginTop: 10 }}><Speaker text={w.b} /></View>
               </>
             )}
@@ -495,6 +490,33 @@ export default function Study({ navigation }) {
           </View>
         </>
       )}
+
+      {/* How the pile is dealt, under the pile rather than over it. These three
+          sat between the summary row and the card, so a screen whose subject is
+          one word had two filled buttons and a number box above it and the card
+          began below the halfway mark. They are settings for the session, not
+          the session — and nothing to shuffle or cut when there is no queue. */}
+      {queue.length ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 22 }}>
+          <Btn kind="ghost" label="Shuffle" style={{ flex: 1 }}
+               onPress={() => { setQueue(shuffle(queue.slice())); setAt(0); setShown(false); }} />
+          {/* "20 most urgent" said what the code does — it sorts by weight and
+              cuts. What a learner wants is a short pile picked for them, and how
+              short is theirs to say (the owner, 2026-09-11). */}
+          <Btn kind="ghost" label="For you" style={{ flex: 1 }} onPress={() => rebuild(pickN(howMany))} />
+          <TextInput
+            testID="study-n"
+            value={howMany}
+            onChangeText={(v) => setHowMany(v.replace(/[^0-9]/g, "").slice(0, 3))}
+            onBlur={() => setHowMany(String(pickN(howMany)))}
+            keyboardType="number-pad"
+            selectTextOnFocus
+            style={{ width: 58, textAlign: "center", color: t.ink, fontSize: 15,
+                     borderWidth: 1, borderColor: t.line, borderRadius: radius.md,
+                     backgroundColor: t.surface, paddingVertical: 11 }}
+          />
+        </View>
+      ) : null}
 
       <SetPicker visible={picker} onClose={() => setPicker(false)} />
     </Screen>

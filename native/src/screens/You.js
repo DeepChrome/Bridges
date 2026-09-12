@@ -5,8 +5,8 @@ import { View, Switch, Alert } from "react-native";
 import { useSession } from "../session";
 import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
-import { useTheme, radius } from "../theme";
-import { Screen, Card, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text } from "../ui";
+import { useTheme } from "../theme";
+import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text } from "../ui";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
 import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { cacheStats, clearCache } from "../cache";
@@ -26,13 +26,21 @@ export function grammarTrouble(st) {
     .sort((a, b) => b.n - a.n || a.id.localeCompare(b.id));
 }
 
-function Stat({ value, label }) {
+/* One figure in a band of four.
+ *
+ * These were four rounded boxes in a 2×2 grid — the "card, card, card, three
+ * statistics" screen §25 names outright, and what the owner meant by blocky
+ * squares. A number does not need a container to be read as a number; what it
+ * needs is to be the largest thing in its column. The band is separated from
+ * the figures beside it by a hairline, not by a box each. */
+function Stat({ value, label, first }) {
   const t = useTheme();
   return (
-    <View style={{ flex: 1, backgroundColor: t.surface, borderColor: t.line,
-                   borderWidth: 1, borderRadius: radius.md, padding: 13 }}>
-      <Text style={{ color: t.ink, fontSize: 22, fontWeight: "700" }}>{value}</Text>
-      <Muted size={12}>{label}</Muted>
+    <View style={{ flex: 1, alignItems: "center", paddingHorizontal: 4,
+                   borderLeftWidth: first ? 0 : 1, borderLeftColor: t.lineSoft }}>
+      <Text style={{ color: t.ink, fontSize: 26, fontWeight: "800",
+                     letterSpacing: -0.5 }}>{value}</Text>
+      <Muted size={12} style={{ textAlign: "center", marginTop: 2 }}>{label}</Muted>
     </View>
   );
 }
@@ -236,10 +244,15 @@ export default function You({ navigation }) {
 
   return (
     <Screen>
-      <Card style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
-        <Avatar id={account ? account.avatar : "monkeynaut"} size={52} />
+      {/* The person, not a card of the person. This is the top of their own
+          screen and there is nothing beside it to be grouped against, so the
+          border and fill were doing no work — they only made the learner's name
+          look like the first row of a settings list. */}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+        <Avatar id={account ? account.avatar : "monkeynaut"} size={64} />
         <View style={{ flex: 1 }}>
-          <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>
+          <Text style={{ color: t.ink, fontSize: 24, fontWeight: "700",
+                         letterSpacing: -0.4 }}>
             {account ? account.name : "Learner"}
           </Text>
           <Muted>
@@ -248,13 +261,11 @@ export default function You({ navigation }) {
           </Muted>
         </View>
         <Btn kind="ghost" label="Settings" onPress={() => setSettings(true)} />
-      </Card>
-
-      <View style={{ flexDirection: "row", gap: 10, marginTop: 14 }}>
-        <Stat value={String(st.streak || 0)} label="day streak" />
-        <Stat value={learned.toLocaleString("en-US")} label="words seen" />
       </View>
-      <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+
+      <View style={{ flexDirection: "row", marginTop: 26, paddingVertical: 4 }}>
+        <Stat first value={String(st.streak || 0)} label="day streak" />
+        <Stat value={learned.toLocaleString("en-US")} label="words seen" />
         <Stat value={String(lessons)} label="lessons cleared" />
         <Stat value={due.toLocaleString("en-US")} label="due now" />
       </View>

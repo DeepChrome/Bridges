@@ -135,25 +135,40 @@ export function List({ children }) {
                     borderRadius: radius.lg, overflow: "hidden" }, raised]}>
       {rows.map((row, k) => (
         React.isValidElement(row)
-          ? React.cloneElement(row, { last: k === rows.length - 1 })
+          // `at` staggers the arrival; the row decides what to do with it.
+          ? React.cloneElement(row, { last: k === rows.length - 1, at: k })
           : row
       ))}
     </View>
   );
 }
 
-export function Row({ children, onPress, disabled, last, testID }) {
+export function Row({ children, onPress, disabled, last, testID, at = 0 }) {
   const t = useTheme();
   /* A row presses less than a button does: it sits in a group, and a row that
      shrinks as much as a standalone control makes the whole list look loose. */
   const press = usePress({ to: 0.985 });
   const live = !disabled && !!onPress;
+  /* Rows arrive one after another rather than all at once — a short stagger
+     inside the screen's own arrival, so a list reads as filling in rather than
+     as a block that was already there. Capped at six: beyond that the last rows
+     would still be moving after the learner had started reading the first, and
+     a stagger that outlasts attention is decoration (§25). Six pixels, not ten,
+     because the screen is already rising underneath it. */
+  const enter = useEnter([], { delay: Math.min(at, 5) * 35, distance: 6 });
   /* The scale lives on a wrapper, not on the Pressable. Making the Pressable
      itself animated hid its resolved style from the render tree, and §20a says
      a native visual contract is held there — three tests that read a hairline
      and a fill colour went blind in the same commit that added the animation. */
+  /* Both transforms in one list, not two styles in an array. A style array
+     merges by property, so `transform` from the second would have replaced the
+     first outright: the rows would have faded in without moving, and every test
+     here would still have passed. */
+  const arriving = live
+    ? { opacity: enter.opacity, transform: enter.transform.concat(press.style.transform) }
+    : enter;
   return (
-    <Animated.View style={live ? press.style : null}>
+    <Animated.View style={arriving}>
       <Pressable
         testID={testID}
         onPress={disabled ? undefined : onPress}
@@ -177,7 +192,12 @@ export function Row({ children, onPress, disabled, last, testID }) {
 export function Btn({ label, onPress, kind = "plain", disabled, style, testID }) {
   const t = useTheme();
   const tone = {
-    plain: { bg: t.surface, border: t.line, fg: t.ink },
+    /* Tinted, not white. A plain button used to carry the surface colour, the
+       line colour and the card radius — which is a card, and on the unit screen
+       "Test out of this section" read as an empty panel somebody had forgotten
+       to fill in. A control has to differ from a container somewhere, and the
+       cheapest place is its fill. */
+    plain: { bg: t.surface2, border: t.line, fg: t.ink },
     pri: { bg: t.brand, border: t.brandDim, fg: t.brandOn },
     good: { bg: t.good, border: t.goodDim, fg: t.goodOn },
     bad: { bg: t.bad, border: t.badDim, fg: t.badOn },
@@ -194,7 +214,13 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
      way-in screen (§30p) the Continue looked live until you pressed it. A
      disabled control takes the neutral tone whatever kind it was asked for,
      which is the difference between "not yet" and "broken". */
-  const shown = disabled ? { bg: t.surface2, border: t.line, fg: t.ink3 } : tone;
+  /* …except a ghost, which has no box to keep. Giving it the neutral fill drew
+     a grey panel where there had been bare text, so "◀ Previous" on the first
+     card of Study sat in a box beside a boxless "Skip ▶" — a pair of controls
+     that stopped looking like a pair the moment one of them was unavailable. */
+  const shown = disabled
+    ? (kind === "ghost" ? { ...tone, fg: t.ink3 } : { bg: t.surface2, border: t.line, fg: t.ink3 })
+    : tone;
   /* The caller's `style` is always layout — a margin, or `flex: 1` in a row of
      two buttons — so it goes on the wrapper with the transform, and the
      Pressable keeps only what it looks like. That split is also what keeps the
@@ -394,8 +420,18 @@ export function UnitIcon({ id, size = 22, color }) {
   );
 }
 
+/* The tile at the head of a row.
+ *
+ * `n` alone is a numbered step; `id` alone is a subject. **Not both.** A unit's
+ * six lessons all belong to the same unit, so drawing its icon six times down
+ * the screen and hanging a different number off each one meant six identical
+ * pictures and one small digit doing all the work — decoration with a fact
+ * stuck to it (§25: every visible element must earn its place). Where a row is
+ * one of a numbered sequence the number is the whole tile, at a size worth
+ * reading. */
 export function Thumb({ id, done, locked, n }) {
   const t = useTheme();
+  const numbered = n !== undefined && !locked;
   return (
     <View style={{ width: 44, height: 44, borderRadius: 12, alignItems: "center",
                    justifyContent: "center",
@@ -406,17 +442,13 @@ export function Thumb({ id, done, locked, n }) {
              strokeWidth={1.8}>
           <Path d="M5 11h14v9H5zM8 11V8a4 4 0 0 1 8 0v3" />
         </Svg>
+      ) : numbered ? (
+        <Text style={{ fontSize: 17, fontWeight: "700", color: done ? t.good : t.ink2 }}>
+          {n}
+        </Text>
       ) : (
         <UnitIcon id={id} color={done ? t.good : t.ink3} />
       )}
-      {n !== undefined ? (
-        <View style={{ position: "absolute", right: -3, bottom: -3, minWidth: 17,
-                       height: 17, borderRadius: 9, backgroundColor: t.surface,
-                       borderWidth: 1, borderColor: t.line, alignItems: "center",
-                       justifyContent: "center", paddingHorizontal: 3 }}>
-          <Text style={{ fontSize: 10, fontWeight: "700", color: t.ink2 }}>{n}</Text>
-        </View>
-      ) : null}
     </View>
   );
 }

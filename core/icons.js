@@ -23,4 +23,34 @@ export const ICONS = {
   emotion: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8.5 14a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01",
   speech: "M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-5 4z",
 };
-export const iconFor = (id) => ICONS[id] || (id.startsWith("core") ? ICONS.core : ICONS.speech);
+
+/* The activities and the drills draw their own marks, because they were drawing
+ * the subjects'. Practice borrowed `speech` for Listening *and* for Sounds, `art`
+ * for Shadowing and for the Stress drill, `city` for Cases, `family` for
+ * Agreement — so a screen of eleven rows carried eight pictures, two of them
+ * twice, none of them about what the row does. An icon that is wrong is worse
+ * than no icon: it is decoration that has to be read past (§25).
+ *
+ * Each of these says what the row asks of the learner: headphones for listening,
+ * a waveform for a native speaker at speed, a microphone for saying it back, a
+ * table for the conjugation table. Same 24×24 box and same stroke as above, so
+ * they sit in a `Thumb` beside a subject icon without looking imported. */
+export const ACTIVITY_ICONS = {
+  quiz: "M4 6h8M4 12h8M4 18h8M16 6l1.5 1.5L21 4M16 12l1.5 1.5L21 10M16 18l1.5 1.5L21 16",
+  listen: "M4 14v-2a8 8 0 0 1 16 0v2M6 12h1v6H6a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2zM18 12h-1v6h1a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2z",
+  native: "M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2",
+  shadow: "M12 4a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3zM6 11a6 6 0 0 0 12 0M12 17v3M9 20h6",
+  talk: "M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1zM8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01",
+  letters: "M5 19l6-14h2l6 14M8.5 14h7",
+  // A word turning into another word: what a case, and a case drill, is.
+  cases: "M4 9h11l-3-3M15 9l-3 3M20 15H9l3-3M9 15l3 3",
+  aspect: "M12 21a9 9 0 1 1 0-18M12 3a9 9 0 0 1 8.6 6.5M8 12l3 3 5-6",
+  agreement: "M10 12a3 3 0 0 1 3-3h3a3 3 0 0 1 0 6h-1M14 12a3 3 0 0 1-3 3H8a3 3 0 0 1 0-6h1",
+  conjugation: "M4 6h16v12H4zM4 12h16M12 6v12",
+  stress: "M8 8l4-4 4 4M5 14h14M5 14v4M19 14v4",
+  rules: "M5 4h10a2 2 0 0 1 2 2v6M5 4a2 2 0 0 0 0 4h10M5 4v14a2 2 0 0 0 2 2h5M15 18l2 2 4-4",
+};
+
+export const iconFor = (id) =>
+  ICONS[id] || ACTIVITY_ICONS[id] ||
+  (id.startsWith("core") ? ICONS.core : ICONS.speech);

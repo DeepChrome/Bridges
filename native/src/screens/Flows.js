@@ -293,7 +293,7 @@ export function DrillList({ navigation }) {
           opacity: pressed ? 0.7 : 1,
         })}
       >
-        <Thumb id="core" />
+        <Thumb id="quiz" />
         <View style={{ flex: 1 }}>
           <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700" }}>Build a quiz</Text>
           <Muted>Choose the questions and the sections</Muted>
@@ -308,7 +308,7 @@ export function DrillList({ navigation }) {
             one says plainly that it is harder. The owner found the video
             passages "way too advanced" and nothing on the row warned him. */}
         <Row onPress={() => navigation.navigate("SceneList")}>
-          <Thumb id="speech" />
+          <Thumb id="listen" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Listening</Text>
             <Muted>Conversations at the level you are on</Muted>
@@ -317,7 +317,7 @@ export function DrillList({ navigation }) {
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
         </Row>
         <Row onPress={() => navigation.navigate("Listening")}>
-          <Thumb id="tech" />
+          <Thumb id="native" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
               Native speed
@@ -329,14 +329,14 @@ export function DrillList({ navigation }) {
             rows and Talk because that is what it is: the step from taking
             Russian in to putting it out, with the model still in your ear. */}
         <Row onPress={() => navigation.navigate("Shadow")}>
-          <Thumb id="art" />
+          <Thumb id="shadow" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Shadowing</Text>
             <Muted>Hear a sentence and say it straight back</Muted>
           </View>
         </Row>
         <Row onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
-          <Thumb id="emotion" locked={!talkOpen} />
+          <Thumb id="talk" locked={!talkOpen} />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Talk</Text>
             <Muted>{talkOpen ? "A short conversation on a topic" : `Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}</Muted>
@@ -345,7 +345,7 @@ export function DrillList({ navigation }) {
         {/* The letters and the mouth behind them (ROADMAP P10.2). Open from the
             first screen: nothing else in the app teaches the alphabet. */}
         <Row last onPress={() => navigation.navigate("Sounds")}>
-          <Thumb id="speech" />
+          <Thumb id="letters" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Sounds</Text>
             <Muted>The alphabet, the vowel pairs and the vowel chart</Muted>
@@ -488,7 +488,9 @@ export function ListeningList({ navigation }) {
           return (
             <Row key={p.id} last={k === shown.length - 1} testID={`passage-${p.id}`}
                  onPress={() => navigation.navigate("Passage", { id: p.id })}>
-              <Thumb id="speech" />
+              {/* No tile. Every row here is the same kind of thing, so one icon
+                  repeated down the list marks nothing — it is a column of grey
+                  squares beside the titles that are the actual information. */}
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}
                       numberOfLines={2}>
@@ -581,7 +583,6 @@ export function ScenesList({ navigation }) {
                 return (
                   <Row key={s.key} testID={`scene-row-${s.key}`}
                        onPress={() => navigation.navigate("Scenes", { key: s.key })}>
-                    <Thumb id="speech" />
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}
                             numberOfLines={2}>

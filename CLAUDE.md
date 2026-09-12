@@ -2037,13 +2037,19 @@ related through «-вать».
 
 **The aspect pair cannot be fully fixed from this data, and that is the finding.**
 A partner *is* the verb with a prefix added, so it always resembles the prompt;
-the only cure is distractors that resemble it too. Of the 693 curriculum verbs
-with a recorded partner, **227 have three or more same-root alternatives, 224
-have one or two, and 242 have none at all** — so a third of these questions have
-nothing plausible to stand against. That is the case for the owner's other
-suggestion, a different mechanism: with **Settings → "Write drill answers"** (on
-by default) the drill asks for the partner instead of offering it, and there is
-nothing to eliminate.
+the only cure is distractors that resemble it too. That is the case for the
+owner's other suggestion, a different mechanism: with **Settings → "Write drill
+answers"** (on by default) the drill asks for the partner instead of offering
+it, and there is nothing to eliminate — which, as §30t records, is what a
+learner actually gets, and is why the guessable figure quoted here describes an
+opt-out path rather than the product.
+
+*(The counts once given here — 227 / 224 / **242 with none at all** — were
+measured while `partnerWrong` was reading `drillPool` and looking only at other
+verbs' recorded partners. Against the whole curriculum, which is what the rule
+above it always said to use, it is **540 / 109 / 42**, and after widening the
+candidates to every verb rather than only those with a partner, **591 / 75 /
+25**. The shape of the finding survives; the number was an artefact of the bug.)*
 
 `realPartner` also refuses a partner equal to the verb itself — some rows record
 a biaspectual verb as its own partner, and the typed drill was asking the learner
@@ -2098,6 +2104,60 @@ Not done here, and deliberately: the fifteen inline font sizes §30m left alone
 are still not swept, and a quiz's four option boxes were measured rather than
 redrawn — they are 54 dp as designed, and they look empty because a one-word
 answer is short, not because the control is wrong.
+
+## 30t. Five moves, measured first (2026-09-12)
+
+The owner: *"Plan the next 5 best possible moves and then go ahead and execute
+them… Do market research. Do user testing."* Research filed below; the three
+findings that changed what got built are that **apps fail at Russian by
+oversimplifying case and ignoring aspect**, that **production beats
+recognition** (Duolingo's tile-tapping trains the wrong pathway), and that the
+measured way people leave a language app is **bingeing, not boredom** — the
+learners who last commit to a few minutes a day. Bridges already bets on the
+first two (§30j). The third it had nothing for.
+
+- **266 of 840 authored listening options gave the answer away by length**
+  (§30l). The right answer was written out and specific, the wrong ones written
+  short: "Ivan brings it himself" against "Nobody", "Never", "Yes". A learner
+  who reads no Russian could play the flagship feature. All 266 rewritten in
+  context; `check_scripts.mjs` promotes the rule from warning to **error**,
+  which it could not be while a third of the file broke it.
+- **Every one of the 840 answers is at index 0.** That is the files' convention
+  and it is safe *only* because `scenarioFor` shuffles on the way out — which
+  nothing asserted. "Tap the first option" would have scored 100 % on every
+  listening exercise with every suite green. `core.test.mjs` now checks the
+  convention and the shuffle, over the whole corpus.
+- **A failed lesson re-asked the missed words without ever re-teaching them.**
+  `quizSteps` always asks the lesson's own words, so they came back; the
+  teaching did not. Measured over the full route: the struggling learner retakes
+  357 times and passes 109 of 168, 0–4 per chapter first try. `Reteach` in
+  `Flows.js` walks up to `RETEACH_MAX` (4) missed words on a card before the
+  retake. A *skipped* step is not a failure — Say with no microphone is left out
+  of the total so a phone without one scores the same quiz, and re-teaching a
+  word nobody was asked would undo that.
+- **`partnerWrong` read `drillPool`**, though the rule three hundred lines above
+  it says *"Distractors still come from anywhere — a wrong option needs no
+  acquaintance"*, and it considered only other verbs' recorded partners. Both
+  fixed: same-root candidates 687 → 1,413, verbs with nothing to stand against
+  42 → 25. A proportional relatedness rule was tried on top and reverted, with
+  the numbers, in the code.
+- **`dayDone`** (`core/state.js`): a day is done when something was answered
+  today and nothing is waiting, and it shows the way `REVIEW_FIRST` shows — the
+  next lesson's button goes quiet, the streak ticks. No new state, no new
+  metric, nothing to game, no copy.
+
+**Two traps worth keeping.** `state.day` is **not** "finished something today":
+`touchStreak` runs from the session loader, so it is stamped by *opening* the
+app, and the streak beside it counts attendance for the same reason. What means
+work is `seen[w].last`, which `applyGrade` stamps on every card it grades. And
+**`audit_options.mjs` was scoring a path the app does not ship** — Settings →
+"Write drill answers" is on by default, so cases, aspect, agreement and
+conjugation are written and have no options at all. Every figure it ever gave
+for those four, including §30r's "16 % guessable", describes what a learner gets
+after turning that off. It takes `--typed` now. On the shipped path the only
+drill with options left was Grammar rules at 17 %, now 9 %: `threeWrong` prefers
+candidates near the answer's length, which `partnerWrong` already did and
+nothing else did.
 
 ## 31. Verification
 

@@ -202,6 +202,16 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
     good: { bg: t.good, border: t.goodDim, fg: t.goodOn },
     bad: { bg: t.bad, border: t.badDim, fg: t.badOn },
     ghost: { bg: "transparent", border: "transparent", fg: t.ink2 },
+    /* A ghost that has nothing around it to say it is a control.
+     *
+       A `ghost` reads as a control because of where it sits — beside a row's
+       text, in a sheet's footer — and the grey is deliberate restraint. On its
+       own in the middle of a screen that context is gone, and it reads as a
+       caption: "Show the table · counts as a hint" sat above the answer box on
+       every written drill looking exactly like an instruction, so the one hint
+       the runner offers was invisible. Colour is the cheapest thing that says
+       "press me" without giving it a box back. */
+    link: { bg: "transparent", border: "transparent", fg: t.brandInk },
   }[kind];
   /* The three-pixel bottom border is the button's weight; pressing takes it to
      one and drops the button by two, which is the shape of something being

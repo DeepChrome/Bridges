@@ -25,6 +25,28 @@ describe("a button that cannot be pressed", () => {
     expect(s.borderColor).toBe("transparent");
   });
 
+  /* A `link` is a ghost that has nothing around it to mark it as a control, so
+     the one thing carrying that job is its colour. Losing it would make the
+     runner's only hint invisible again, and nothing else would fail. */
+  it("keeps a link's colour distinct from a ghost's, boxless in both cases", async () => {
+    // Both in one tree: `screen` follows the latest render, and querying the
+    // two separately is what made this fail on a control that is plainly there.
+    const view = await render(
+      <>
+        <Btn kind="ghost" label="Ghost" testID="g2" onPress={() => {}} />
+        <Btn kind="link" label="Link" testID="l" onPress={() => {}} />
+      </>
+    );
+    // Still no box — the colour is the whole of the difference.
+    for (const id of ["g2", "l"]) {
+      expect(flat(view.getByTestId(id).props.style).backgroundColor).toBe("transparent");
+      expect(flat(view.getByTestId(id).props.style).borderColor).toBe("transparent");
+    }
+    const grey = flat(view.getByText("Ghost").props.style).color;
+    const brand = flat(view.getByText("Link").props.style).color;
+    expect(brand).not.toBe(grey);
+  });
+
   it("still gives a filled button the neutral fill, so it stops looking live", async () => {
     await render(<Btn kind="pri" label="Continue" testID="p" disabled onPress={() => {}} />);
     const s = box("p");

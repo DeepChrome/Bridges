@@ -495,7 +495,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           nothing used to, and the table opened on every question. */}
       {(q.table || q.note) && !answered ? (
         <Btn
-          kind="ghost"
+          // `link`, not `ghost`: alone in the middle of the screen the grey
+          // read as a caption, so the only hint the runner offers looked like
+          // an instruction and nobody would have pressed it.
+          kind="link"
+          testID="show-table"
           label={usedHint ? "Table used · counts as a hint" : "Show the table · counts as a hint"}
           disabled={usedHint}
           style={{ marginBottom: 12 }}

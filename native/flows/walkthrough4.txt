@@ -1,0 +1,116 @@
+# Every screen, on the app as it stands (2026-09-12).
+#
+# walkthrough2.txt and 3 were written before the gate was rebuilt (30p) and go
+# off the rails at the tour, which now sits between naming a profile and the
+# placement offer. This one walks the whole app from a clean install:
+#
+#   adb shell pm clear app.bridges.russian; launch; then
+#   .\native\tools\walk.ps1 -Flow native\flows\walkthrough4.txt
+#
+# Screenshots land in native/screenshots/walk/. Read them — that is the audit.
+
+shot:00-gate
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+shot:01-tour
+tap:^Skip$
+wait:2
+shot:02-where-to-start
+tap:^Start from the beginning$
+wait:3
+shot:03-learn
+
+# The path, and a chapter's units.
+scroll
+shot:04-learn-fork
+scrolltop
+tap:^Start \(
+wait:3
+shot:05-lesson-steps
+
+# The three teaching shapes.
+tap:^Continue$
+wait:2
+shot:06-word-list
+tap:^Start learning$
+wait:2
+shot:07-word-card
+
+# One back, not two: the lesson was opened straight from the path, so the
+# second one leaves the app altogether.
+back
+wait:2
+
+# Study, both states.
+tap:^Study$
+wait:2
+shot:10-study-empty
+tap:^Choose what to review$
+wait:2
+shot:11-study-picker
+tap:^Due today$
+wait:1
+tap:^Done$
+wait:2
+shot:12-study-chosen
+
+# Practice: the list, then one of each kind of thing.
+tap:^Practice$
+wait:2
+shot:20-practice
+scroll
+shot:21-practice-drills
+scrolltop
+tap:^Sounds$
+wait:3
+shot:22-sounds
+back
+wait:2
+tap:^Listening$
+wait:3
+shot:23-listening-list
+back
+wait:2
+tap:^Build a quiz$
+wait:2
+shot:24-quiz-setup
+back
+wait:2
+
+# The drills — Cases is written by default, which is the shipped shape.
+scroll
+tap:^Cases$
+wait:3
+shot:25-drill-cases
+back
+wait:2
+scrolltop
+
+# Immerse and Search.
+tap:^Immerse$
+wait:3
+shot:30-immerse
+tap:^Search$
+wait:2
+shot:31-search
+# The tool matches what a node is labelled, not its testID — and an empty
+# TextInput is labelled by its placeholder, not by accessibilityLabel.
+tap:Russian, English or Latin
+type:kniga
+wait:2
+shot:32-search-results
+tap:^Learn$
+wait:2
+
+# You, and the settings sheet.
+tap:Your profile
+wait:2
+shot:40-you
+tap:^Settings$
+wait:2
+shot:41-settings
+scroll
+shot:42-settings-more

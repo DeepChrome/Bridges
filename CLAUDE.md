@@ -2050,6 +2050,55 @@ a biaspectual verb as its own partner, and the typed drill was asking the learne
 to write the word printed above the question. Found by the typed-drill check,
 which only fails on a run that happens to draw one.
 
+## 30q. The interface pass (2026-09-11)
+
+The owner picked this from four options. The complaint behind it, from a week of
+real use: *"ugly blocky squares"*. What the screens actually showed, read one by
+one on a device, is that **a card had become the default container** — the thing
+§25 says it must never be. Six screens were a stack of grey rounded rectangles,
+and in five of them the box was drawn around something that had nothing to be
+grouped with.
+
+Every fix is at the cause, not per screen:
+
+- **A control must differ from a container somewhere**, and the cheapest place is
+  its fill. `Btn`'s `plain` tone carried `surface`, `line` and the card radius —
+  which is a card — so "Test out of this section" read as an empty panel. It is
+  `surface2` now.
+- **…and a disabled *ghost* keeps no box.** A disabled control takes the neutral
+  tone so it reads as "not yet" rather than as a live primary with pale text, but
+  a ghost has no box to keep: giving it one put Study's "◀ Previous" in a grey
+  panel beside a boxless "Skip ▶". `controls.test.js` pins both halves.
+- **A number, a name or a figure does not need a container to be read as one.**
+  You was a profile card over four boxed statistics — "card, card, card, three
+  statistics" verbatim. The person is the top of their own screen; the figures
+  are one band separated by hairlines. Study's empty state and its "set finished"
+  state were panels around a single sentence.
+- **The one rewarding moment on the route should not be a panel at the top of an
+  empty screen.** `Done` takes the middle of the screen with the action at the
+  foot.
+- **Say a thing once.** Study with nothing ticked said it three times: a summary
+  row of an empty selection, an empty state, and a button for choosing a set. The
+  summary row exists only once there is something to summarise.
+- **Decoration that carries a fact is worse than either.** A unit's six lessons
+  drew the unit's icon six times with a small digit hung off each; `Thumb` shows
+  the number *instead* when a row is one of a numbered sequence.
+
+**An icon that says the wrong thing is worse than no icon.** Practice's eleven
+activity rows carried eight *subject* icons, two of them twice — `speech` for
+Listening and for Sounds, `art` for Shadowing and for the Stress drill, `city`
+for Cases, `family` for Agreement. `ACTIVITY_ICONS` in `core/icons.js` draws the
+twelve that were missing (headphones, a waveform, a microphone, the conjugation
+table) and `iconFor` reads both tables; `core.test.mjs` holds the invariant —
+every drill's mark resolves and no two are the same. Where a list's rows are all
+one kind (the passages, the scenarios) the tile went instead: one icon repeated
+down a list marks nothing.
+
+Not done here, and deliberately: the fifteen inline font sizes §30m left alone
+are still not swept, and a quiz's four option boxes were measured rather than
+redrawn — they are 54 dp as designed, and they look empty because a one-word
+answer is short, not because the control is wrong.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

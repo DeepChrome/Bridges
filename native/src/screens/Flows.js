@@ -193,12 +193,66 @@ export function SoundDrillFlow({ navigation }) {
 
 /* -------------------------------------------------------------- lesson quiz */
 
+/* How many words a failed quiz puts back in front of the learner before the
+   retake. Four, because more than that is the vocabulary step again — which they
+   have already done — and the point is the handful that did not stick. */
+export const RETEACH_MAX = 4;
+
+/* The lesson's own words that were got wrong, in the order the lesson teaches
+   them. A step with no lemma behind it (a scenario, a spoken sentence) grades
+   its own words and carries no `i`, so it contributes nothing here. */
+export function missedWords(results, words) {
+  const bad = new Set();
+  for (const r of results || []) {
+    // A skipped step is not a wrong answer — the microphone was off, or there
+    // was no Russian recogniser — and it is already left out of the total.
+    // Re-teaching a word the learner was never asked would punish the phone.
+    // (It carries no `credit` at all, so this held by accident before.)
+    if (r.skipped) continue;
+    if (typeof r.i === "number" && r.credit < 1) bad.add(r.i);
+  }
+  const own = (words || []).filter((i) => bad.has(i));
+  const rest = [...bad].filter((i) => !own.includes(i));
+  return own.concat(rest).slice(0, RETEACH_MAX);
+}
+
+/* The second look, before the second attempt: one card per missed word, the
+   same card the lesson taught it with rather than a new kind of screen.
+   Its own component because the inline version had no name and no test seam,
+   which is most of why the three teaching steps could not be designed either
+   (§30m) — and this is the same shape of thing. */
+export function Reteach({ words, at, onNext, onDone }) {
+  const i = words[at];
+  if (i === undefined) return null;
+  const last = at + 1 >= words.length;
+  return (
+    <Screen fill>
+      <WordCard i={i} at={at} total={words.length} />
+      <View style={{ marginTop: "auto", paddingTop: 16 }}>
+        <Btn
+          kind="pri"
+          label={last ? "Try again" : "Continue"}
+          testID="reteach-next"
+          onPress={() => (last ? onDone() : onNext(at + 1))}
+        />
+      </View>
+    </Screen>
+  );
+}
+
 export function QuizFlow({ route, navigation }) {
   const { unitId, index } = route.params;
   const unit = UN.find((u) => u.id === unitId);
   const { st, update } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
+  /* Which of the missed words is on screen, or null when the quiz is running.
+     A failed retake used to be the same quiz again five minutes later: the words
+     come back (the lesson's own words are always asked) but nothing showed them
+     again, so a learner who did not know «хотеть» was asked about «хотеть»
+     twice and told twice that they were wrong. The struggling simulated learner
+     retook 357 times over the route — that is the loop this breaks. */
+  const [reteach, setReteach] = useState(null);
   /* What the previous attempt asked. A retake used to repeat a quarter of the
      quiz as the same shape about the same word, which is not a second look at
      the material — it is the same screen again five minutes later (P11.4). Held
@@ -217,17 +271,34 @@ export function QuizFlow({ route, navigation }) {
   }, [unitId, index, seed]);
   useAudioStopOnLeave();
 
+  if (reteach !== null) {
+    return (
+      <Reteach
+        words={missedWords(result ? result.results : [], lessonWords(unit, index))}
+        at={reteach}
+        onNext={setReteach}
+        onDone={() => { setReteach(null); setResult(null); setSeed(seed + 1); }}
+      />
+    );
+  }
+
   if (result) {
     // What the lesson list will show, not the raw mark: the relief rule
     // (core/state.js quizPassed) accepts a lower score from the third try,
     // and this screen used to say "Not quite" over a quiz the list ticked.
     const { passed, relief } = result;
     const last = index + 1 >= lessonCount(unit);
+    const missed = missedWords(result.results, lessonWords(unit, index));
     return (
       <Done
         title={relief ? `Passed on the ${ordinal(result.tries)} try`
              : passed ? "Quiz passed" : `Not quite. ${PASS_MARK}% to pass`}
-        detail={`${result.right} of ${result.total} right`}
+        /* Which words, not just how many: a score says a learner failed, the
+           words say what to do about it. Language material, so it is not the
+           explanatory copy rule 20.7 bans. */
+        detail={missed.length && !passed
+          ? `${result.right} of ${result.total} right · ${missed.map((i) => L[i].w).join(", ")}`
+          : `${result.right} of ${result.total} right`}
         score={result.score}
         passed={passed}
         /* The end of a lesson quiz is where Yuri belongs and the drills are
@@ -235,7 +306,13 @@ export function QuizFlow({ route, navigation }) {
            worth seeing only by not being on every results screen in the app. */
         guide={relief ? "scraped" : passed ? "passed" : "failed"}
         againLabel="Try again"
-        onAgain={() => { setResult(null); setSeed(seed + 1); }}
+        onAgain={() => {
+          // Straight back into the quiz when there is nothing to show again —
+          // a pass being retaken for the mark, or a fail on steps that grade
+          // their own words and carry no lemma.
+          if (missed.length && !passed) setReteach(0);
+          else { setResult(null); setSeed(seed + 1); }
+        }}
         onContinue={passed && !last
           ? () => navigation.replace("Vocab", { unitId, index: index + 1 })
           : undefined}

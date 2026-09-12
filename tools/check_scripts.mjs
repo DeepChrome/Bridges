@@ -192,6 +192,29 @@ export function checkOne(brief, entry) {
       if (typeof q.answer !== "number" || q.answer < 0 || q.answer >= opts.length) {
         errors.push(`${where}: answer ${q.answer} is not one of the options`);
       }
+      /* The answer must not be the longest or shortest line on the screen.
+       *
+       * Measured over 770 of these on 2026-09-11 (tools/audit_options.mjs):
+       * in 33 % the right answer was three or more characters longer or shorter
+       * than every wrong one — "Ivan brings it himself" against "Nobody",
+       * "Never", "Yes". A learner who reads no Russian can play that, and these
+       * options are authored, so it is a writing habit rather than a generator
+       * to fix: the specific answer gets written out and the wrong ones get
+       * written short.
+       *
+       * A warning, not an error: it is true of a third of the questions that
+       * ship, and failing the build on it would fail it on work already done.
+       * What it does is stop the next one being written that way. */
+      const right = opts[q.answer];
+      const others = opts.filter((_, n) => n !== q.answer);
+      if (typeof right === "string" && others.length) {
+        const len = (s) => String(s).length;
+        const longest = Math.max(...others.map(len));
+        const shortest = Math.min(...others.map(len));
+        if (len(right) - longest >= 3 || shortest - len(right) >= 3) {
+          warnings.push(`${where}: the answer is the odd one out by length — "${right}"`);
+        }
+      }
     });
   }
 

@@ -158,6 +158,19 @@ function tells(q) {
   const cyr = opts.filter(isCyr).length;
   if ((isCyr(right) && cyr === 1) || (!isCyr(right) && cyr === opts.length - 1)) out.push("script");
 
+  /* same: two options that mean the same thing, differing only in how they are
+     written. A scene's wrong answers are other sentences' English, and the
+     collection holds one English over two Russian sentences often enough to
+     matter — «Он наконец нашёл работу» and «Она наконец нашла работу» share a
+     translation, so one of them appears as a wrong answer to the other and is
+     not wrong. Exact-match filtering does not see it through a full stop. */
+  /* Lower-cased and stripped of punctuation, but **not folded**: folding takes
+     the stress mark off, and the stress drill's options are one word with the
+     stress in four places. That is the third time a metric here has been caught
+     folding away the thing being tested. */
+  const plain = (s) => String(s).toLowerCase().replace(/[.,!?;:"'«»]/g, "").replace(/\s+/g, " ").trim();
+  if (wrong.some((w) => plain(w) === plain(right))) out.push("same");
+
   /* dupes: two options that read the same **on screen**.
      Not folded: folding strips the stress mark, and the stress drill's whole
      question is which vowel carries it — «сто́ла» and «стола́» are two different
@@ -205,10 +218,18 @@ function sampleQuiz() {
   return out;
 }
 
-const TELLS = ["root", "alone", "length", "script", "dupes"];
+const TELLS = ["root", "alone", "length", "script", "dupes", "same"];
+
+/* A scene is one step holding five questions of its own, so its options were
+   invisible to this until now — the very place a second correct answer was
+   known to be hiding (ROADMAP P12.5). */
+const flatten = (qs) => qs.flatMap((q) => (Array.isArray(q.questions)
+  ? q.questions.map((sub) => ({ ...sub, kind: q.kind, prompt: sub.prompt || "",
+                                authored: !!q.scenario }))
+  : [q]));
 
 function report(name, questions) {
-  const mc = questions.filter((q) => q.options && q.options.length >= 2);
+  const mc = flatten(questions).filter((q) => q.options && q.options.length >= 2);
   if (!mc.length) return null;
   const rows = mc.map(tells).filter(Boolean);
   const counts = Object.fromEntries(TELLS.map((t) => [t, 0]));
@@ -225,6 +246,18 @@ function report(name, questions) {
   console.log(`${name.padEnd(14)} ${String(rows.length).padStart(5)} asked  `
     + TELLS.map((t) => `${t} ${pct(counts[t])}`).join("  ")
     + `   any ${pct(any)}   kin ${String(kin).padStart(3)}/3`);
+  /* Where a generator mixes authored options with generated ones — the scene
+     does: a written scenario carries five questions somebody wrote, and the
+     corpus fallback builds its own from other sentences' English. They fail in
+     different ways and a single percentage hides which. */
+  const authored = rows.filter((r) => r.q.authored);
+  if (authored.length && authored.length < rows.length) {
+    const share = (xs, t) => `${((xs.filter((r) => r.tells.includes(t)).length / xs.length) * 100).toFixed(0)}%`;
+    console.log(`${"".padEnd(14)} ${String(authored.length).padStart(5)} authored  `
+      + TELLS.map((t) => `${t} ${share(authored, t).padStart(4)}`).join("  "));
+  } else if (authored.length) {
+    console.log(`${"".padEnd(14)}       (all ${authored.length} of them authored, not generated)`);
+  }
   return { name, rows, counts, any };
 }
 
@@ -237,6 +270,11 @@ for (const d of DRILL_TYPES) {
   if (r) results.push(r);
 }
 const quiz = sampleQuiz();
+if (argv.includes("--kinds")) {
+  const n = {};
+  for (const q of quiz) n[q.kind] = (n[q.kind] || 0) + 1;
+  console.log("kinds drawn:", JSON.stringify(n), "\n");
+}
 const byKind = {};
 for (const q of quiz) (byKind[q.kind] = byKind[q.kind] || []).push(q);
 for (const kind of Object.keys(byKind).sort()) {

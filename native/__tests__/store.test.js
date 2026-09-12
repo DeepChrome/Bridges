@@ -12,6 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider, useSession, ERRORS } from "../src/session";
 import { flushState, loadState, saveState, DECK_CHUNK } from "../src/store";
+import { SCHEMA_VERSION } from "@core/state";
 
 function Probe() {
   const { st, update, error, clearError } = useSession();
@@ -86,5 +87,73 @@ describe("the save layer", () => {
       v: 6, decks: [{ id: "k0", name: "Old", cards: [{ ru: "да", en: "yes" }] }] }));
     const { state } = await loadState("p1");
     expect(state.decks[0].cards[0].ru).toBe("да");
+  });
+});
+
+/* Every schema a real profile could be sitting at, through the save layer that
+ * actually loads it (ROADMAP P12.9: this file migrated only v6, so v1 to v5 had
+ * no fixture here at all).
+ *
+ * core.test.mjs proves `migrate` in isolation. What it cannot see is this path:
+ * a row on disk, `normalise` deciding which version it is, the result handed to
+ * a screen — and the rule that a profile only loaded is never re-saved, which
+ * means a migration that drops something drops it the moment anything else is
+ * written. The learner's month is the thing at stake (rule 20.4), so the
+ * assertion is the same for every version: the words they have studied are
+ * still there afterwards.
+ */
+describe("a profile from an older version of the app", () => {
+  const rows = {
+    // v1 kept Leitner counters; FSRS cannot be derived from them, so the word
+    // comes back as new with its repetitions kept as history.
+    1: { v: 1, xp: 12, seen: { книга: { n: 4, due: 20000 } }, unit: { core1: { lessons: { 0: 90 } } } },
+    2: { v: 2, xp: 12, seen: { книга: { s: 3, d: 5, due: 20000, last: 0, reps: 4, lapses: 1 } },
+         trouble: { стол: 2 }, pinned: ["дом"], unit: { core1: { lessons: { 0: 90 } } } },
+    3: { v: 3, xp: 12, seen: { книга: { s: 3, d: 5, due: 20000, last: 0, reps: 4, lapses: 1 } },
+         trouble: { стол: 2 }, pinned: ["дом"], unit: { core1: { lessons: { 0: 90 } } } },
+    4: { v: 4, xp: 12, seen: { книга: { s: 3, d: 5, due: 20000, last: 0, reps: 4, lapses: 1 } },
+         trouble: { стол: 2 }, pinned: ["дом"], unit: { core1: { lessons: { 0: { v: true, q: 90 } } } } },
+    5: { v: 5, xp: 12, seen: { книга: { s: 3, d: 5, due: 20000, last: 0, reps: 4, lapses: 1 } },
+         trouble: { стол: 2 }, pinned: ["дом"], speech: { attempts: [], tagCounts: { CASE: 2 } },
+         unit: { core1: { lessons: { 0: { v: true, q: 90 } } } } },
+    6: { v: 6, xp: 12, seen: { книга: { s: 3, d: 5, due: 20000, last: 0, reps: 4, lapses: 1 } },
+         trouble: { стол: 2 }, pinned: ["дом"], speech: { attempts: [], tagCounts: { CASE: 2 } },
+         watched: { abc: 3 }, decks: [], unit: { core1: { lessons: { 0: { v: true, q: 90 } } } } },
+  };
+
+  for (const [from, row] of Object.entries(rows)) {
+    it(`v${from} keeps the learner's words, and arrives at the current schema`, async () => {
+      await AsyncStorage.setItem("rb.accounts", JSON.stringify(accounts));
+      await AsyncStorage.setItem("rb.state.p1", JSON.stringify(row));
+      const { state, error } = await loadState("p1");
+
+      expect(error).toBeFalsy();
+      expect(state.v).toBe(SCHEMA_VERSION);
+      // The month itself: a studied word is still studied, whatever shape it
+      // was stored in. v1 has no stability to carry, but it keeps the history.
+      expect(state.seen["книга"]).toBeTruthy();
+      expect(state.seen["книга"].reps).toBe(4);
+      expect(state.xp).toBe(12);
+      // Every slot the app reads exists, so no screen meets an undefined.
+      expect(Array.isArray(state.pinned)).toBe(true);
+      expect(state.trouble && typeof state.trouble).toBe("object");
+      expect(state.speech && Array.isArray(state.speech.attempts)).toBe(true);
+      expect(state.watched && typeof state.watched).toBe("object");
+      expect(state.mined && typeof state.mined).toBe("object");
+      expect(Array.isArray(state.decks)).toBe(true);
+      // A lesson that was passed is still passed, in whichever shape it was
+      // written: v3 and earlier stored one number where v4 stores components.
+      expect(state.unit.core1.lessons[0].q).toBe(90);
+    });
+  }
+
+  /* Loading must not write. If a migration is wrong, an unwritten row is a row
+     that can still be recovered from the phone; a re-saved one is not. */
+  it("does not write the migrated row back on the way in", async () => {
+    await AsyncStorage.setItem("rb.accounts", JSON.stringify(accounts));
+    await AsyncStorage.setItem("rb.state.p1", JSON.stringify(rows[1]));
+    await loadState("p1");
+    await flushState();
+    expect(JSON.parse(await AsyncStorage.getItem("rb.state.p1")).v).toBe(1);
   });
 });

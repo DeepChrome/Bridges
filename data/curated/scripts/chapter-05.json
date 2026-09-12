@@ -26,10 +26,10 @@
    ],
    "questions": [
     { "ask": "What does Anya want to buy?",
-      "options": ["The biggest one there is", "The cheapest one", "Nothing", "Whatever Misha says"],
+      "options": ["The biggest one there is", "The cheapest one there", "Nothing at all today", "Whatever Misha says"],
       "answer": 0 },
     { "ask": "Who else is talking about it?",
-      "options": ["A woman standing nearby", "Misha's mother", "Nobody", "The shopkeeper"], "answer": 0 },
+      "options": ["A woman standing nearby", "Misha's mother, nearby", "The shopkeeper himself", "Nobody else at all"], "answer": 0 },
     { "ask": "What does the woman say?",
       "options": ["That it is the biggest", "That it is too expensive", "Nothing useful", "That it is sold"],
       "answer": 0 },
@@ -67,13 +67,13 @@
     { "ask": "How long has Katya been waiting?",
       "options": ["An hour", "A minute", "All day", "She has just arrived"], "answer": 0 },
     { "ask": "Where is she?",
-      "options": ["In front of a door", "At home", "In a shop", "On a train"], "answer": 0 },
+      "options": ["In front of a door", "On a train to Moscow", "In a shop in town", "At home, waiting"], "answer": 0 },
     { "ask": "What is she waiting for?",
       "options": ["A book from a woman", "A friend", "A door to be fixed", "A bus"], "answer": 0 },
     { "ask": "What does Boris say about Moscow?",
-      "options": ["Everybody waits there", "Nobody waits there", "It is too big", "He has never been"],
+      "options": ["Everybody waits there", "Nobody ever waits there", "He has never been there", "It is far too big now"],
       "answer": 0 },    { "ask": "How does the wait end?",
-      "options": ["Nina comes out with the book", "She gives up", "She waits another hour", "The door stays shut"],
+      "options": ["Nina comes out with the book", "She waits another whole hour", "The door stays shut all day", "She gives up and leaves"],
       "answer": 0 }
    ]
   },
@@ -100,13 +100,13 @@
    ],
    "questions": [
     { "ask": "Where is Boris?",
-      "options": ["At home with his family", "At a friend's", "By the river alone", "At work"], "answer": 0 },
+      "options": ["At home with his family", "Down by the river alone", "At work, as every day", "At a friend's house"], "answer": 0 },
     { "ask": "Where is the house?",
       "options": ["By the water", "In the centre", "By the station", "He does not say"], "answer": 0 },
     { "ask": "What does the family want to do?",
       "options": ["Go out", "Stay in", "Move house", "Wait for Oleg to leave"], "answer": 0 },
     { "ask": "Who else is with them?",
-      "options": ["A girl Oleg does not know", "Oleg's sister", "Nobody", "Two children"], "answer": 0 },
+      "options": ["A girl Oleg does not know", "Two children from next door", "Oleg's younger sister", "Nobody else is there"], "answer": 0 },
     { "ask": "What does Oleg decide?",
       "options": ["To join them", "To stay away", "To meet them later", "To ask who the girl is first"],
       "answer": 0 }
@@ -145,7 +145,7 @@
       "options": ["Tell her everything", "Come back later", "Learn on his own", "Speak to the company"],
       "answer": 0 },
     { "ask": "How does she offer to help?",
-      "options": ["Her mother could teach him", "She will speak for him", "She will not help", "She offers him a job"],
+      "options": ["Her mother could teach him", "She will speak to them for him", "She offers him a job there", "She will not help at all"],
       "answer": 0 }
    ]
   },
@@ -179,10 +179,10 @@
     { "ask": "How long does she keep asking for?",
       "options": ["One more minute", "An hour", "All day", "She does not say"], "answer": 0 },
     { "ask": "How patient is Viktor?",
-      "options": ["He says he will not wait any longer", "He is very patient", "He goes to help", "He does not mind"],
+      "options": ["He will not wait any longer", "He is very patient about it", "He goes to help her look", "He does not mind at all"],
       "answer": 0 },
     { "ask": "How does it end?",
-      "options": ["She insists she will find it", "She gives up", "He finds it", "They leave without it"],
+      "options": ["She insists she will find it", "They leave without it at all", "She gives up looking for it", "He finds it for her himself"],
       "answer": 0 }
    ]
   },
@@ -213,12 +213,12 @@
     { "ask": "How long has it been like that?",
       "options": ["A day", "A week", "Since this morning only", "He does not say"], "answer": 0 },
     { "ask": "Does he think of himself as ill?",
-      "options": ["No, he says he is healthy", "Yes, very", "He is not sure", "He says Anya is ill"],
+      "options": ["No, he says he is healthy", "Yes, he says he is very ill", "He says Anya is the ill one", "He is not sure either way"],
       "answer": 0 },
     { "ask": "What else does Anya ask about?",
       "options": ["His skin", "His teeth", "His work", "His family"], "answer": 0 },
     { "ask": "What is his last word on it?",
-      "options": ["Only the leg, only today", "Everything hurts", "He needs a doctor", "It is getting worse"],
+      "options": ["Only the leg, only today", "Everything hurts, he says", "He needs to see a doctor", "It is getting worse now"],
       "answer": 0 }
    ]
   },
@@ -245,7 +245,7 @@
    ],
    "questions": [
     { "ask": "What hurts?",
-      "options": ["Her shoulder and knee", "Her tooth", "Her hair", "Her back"], "answer": 0 },
+      "options": ["Her shoulder and knee", "Her tooth and her jaw", "Her back and her neck", "Her hair, she jokes"], "answer": 0 },
     { "ask": "How is she sleeping?",
       "options": ["She is not", "Very well", "Only in the day", "She does not say"], "answer": 0 },
     { "ask": "Is there any blood?",
@@ -280,11 +280,11 @@
    ],
    "questions": [
     { "ask": "What hurts Misha?",
-      "options": ["His back and stomach", "His chest", "His head", "A tooth"], "answer": 0 },
+      "options": ["His back and stomach", "His chest and throat", "A tooth at the back", "His head, badly"], "answer": 0 },
     { "ask": "Has he a headache?",
       "options": ["No", "Yes", "Only in the morning", "He is not sure"], "answer": 0 },
     { "ask": "How does he describe it in the end?",
-      "options": ["His whole body aches", "Only his back", "It is passing", "It is nothing"], "answer": 0 },
+      "options": ["His whole body aches", "It is passing off now", "It is nothing at all", "Only his back hurts"], "answer": 0 },
     { "ask": "What does Katya suggest?",
       "options": ["A doctor", "Rest", "Medicine she has", "Waiting a day"], "answer": 0 },
     { "ask": "What will he do?",
@@ -314,7 +314,7 @@
    ],
    "questions": [
     { "ask": "What is wrong with Lena?",
-      "options": ["She is cold and her throat hurts", "Toothache", "Her stomach", "Nothing serious"],
+      "options": ["She is cold and her throat hurts", "She has terrible toothache today", "Her stomach has been hurting", "Nothing serious is wrong yet"],
       "answer": 0 },
     { "ask": "What does Boris think will happen?",
       "options": ["She will fall ill", "She will be fine", "She needs an operation", "She is imagining it"],
@@ -325,7 +325,7 @@
       "options": ["He is teasing her", "He is a doctor", "She hit her head", "She was not making sense"],
       "answer": 0 },
     { "ask": "How does it end?",
-      "options": ["She is still cold and sore", "She goes indoors", "The pain passes", "Boris fetches help"],
+      "options": ["She is still cold and sore", "She goes indoors to warm up", "The pain passes off at last", "Boris fetches help for her"],
       "answer": 0 }
    ]
   },
@@ -352,15 +352,15 @@
    ],
    "questions": [
     { "ask": "How is Nina feeling?",
-      "options": ["Very tired, with aches", "Perfectly well", "Frightened", "Happy"], "answer": 0 },
+      "options": ["Very tired, with aches", "Happy enough, she says", "Perfectly well today", "Frightened by it all"], "answer": 0 },
     { "ask": "What hurts her?",
-      "options": ["Neck, temple and lip", "Her heart", "Her legs", "Her back"], "answer": 0 },
+      "options": ["Neck, temple and lip", "Heart, chest and arm", "Legs, back and feet", "Back, head and hand"], "answer": 0 },
     { "ask": "Is her heart all right?",
       "options": ["Yes", "No", "She does not know", "Oleg does not ask"], "answer": 0 },
     { "ask": "Who else is unwell?",
       "options": ["The child", "Oleg", "Her mother", "Nobody"], "answer": 0 },
     { "ask": "How does she sum it up?",
-      "options": ["The whole family is worn out", "It will pass", "They need a doctor", "Only she is suffering"],
+      "options": ["The whole family is worn out", "They all need to see a doctor", "It will pass soon enough now", "Only she is really suffering"],
       "answer": 0 }
    ]
   },
@@ -389,11 +389,11 @@
     { "ask": "Where is Ivan walking?",
       "options": ["By the river", "By the sea", "In the forest", "In town"], "answer": 0 },
     { "ask": "What is the weather like?",
-      "options": ["Sunny and warm", "Cold", "Raining", "Windy"], "answer": 0 },
+      "options": ["Sunny and warm", "Cold and grey", "Windy and wet", "Raining hard"], "answer": 0 },
     { "ask": "What does Yura ask about besides the weather?",
       "options": ["A big tree", "The sea", "His family", "The time"], "answer": 0 },
     { "ask": "What does he say about the tree?",
-      "options": ["It is the biggest one", "It has fallen", "It is by the sea", "There is no tree"],
+      "options": ["It is the biggest one", "It is over by the sea", "There is no tree here", "It has fallen over"],
       "answer": 0 },
     { "ask": "How does the conversation end?",
       "options": ["He invites Yura along", "He goes home", "Yura refuses", "They arrange another day"],
@@ -425,11 +425,11 @@
    ],
    "questions": [
     { "ask": "What is the weather?",
-      "options": ["Sunny with a wind", "Snowy", "Cold and wet", "Foggy"], "answer": 0 },
+      "options": ["Sunny with a wind", "Foggy all morning", "Snowy and bitter", "Cold and wet out"], "answer": 0 },
     { "ask": "What season is it?",
       "options": ["Summer", "Winter", "Spring", "They disagree"], "answer": 0 },
     { "ask": "Why does Anya object to Viktor's question?",
-      "options": ["He asks about snow in summer", "He asks the temperature", "He is not listening", "He wants to stay in"],
+      "options": ["He asks about snow in summer", "He asks about the temperature", "He is not listening to her", "He wants to stay indoors"],
       "answer": 0 },    { "ask": "Who else sets off for the shore?",
       "options": ["Sonya", "Viktor only", "Nobody", "Anya"], "answer": 0 },
     { "ask": "What does Viktor do?",
@@ -462,13 +462,13 @@
     { "ask": "Where are they?",
       "options": ["On an island", "By a river", "In a forest", "In a field"], "answer": 0 },
     { "ask": "What is underfoot?",
-      "options": ["Stone and sand", "Snow", "Grass only", "Ice"], "answer": 0 },
+      "options": ["Stone and sand", "Grass only here", "Ice and water", "Snow and ice"], "answer": 0 },
     { "ask": "How often does it rain there?",
       "options": ["Every day", "Never", "Only in winter", "They do not know"], "answer": 0 },
     { "ask": "Is there frost?",
       "options": ["No, it is summer", "Yes", "Only at night", "Pyotr thinks so"], "answer": 0 },
     { "ask": "What does Pyotr make of the place?",
-      "options": ["He likes it", "He wants to leave", "He finds it cold", "He says nothing"], "answer": 0 }
+      "options": ["He likes it", "He hates it", "He says nothing", "He is cold"], "answer": 0 }
    ]
   },
 
@@ -502,7 +502,7 @@
     { "ask": "What is always on the mountain?",
       "options": ["Snow", "Fog", "People", "Trees"], "answer": 0 },
     { "ask": "Why does Misha object?",
-      "options": ["She talks of sleeping in the forest", "She is going too far", "It is too cold", "He wants to come"],
+      "options": ["She talks of sleeping there", "He wants to come along too", "It is far too cold for it", "She is going much too far"],
       "answer": 0 }
    ]
   },
@@ -531,14 +531,14 @@
     { "ask": "Where are they standing?",
       "options": ["In a field", "On a beach", "In a forest", "By a lake"], "answer": 0 },
     { "ask": "What is the weather doing?",
-      "options": ["Fog, and everything is wet", "Bright sun", "Snowing", "A storm"], "answer": 0 },
+      "options": ["Fog, and everything is wet", "Bright sun over the field", "Snowing hard out there", "A storm on the way in"], "answer": 0 },
     { "ask": "What is remarkable about the place?",
       "options": ["A hot spring", "A waterfall", "An old tree", "Nothing"], "answer": 0 },
     { "ask": "Where exactly is it?",
-      "options": ["At the edge of the field", "In the middle", "By the road", "Nina will not say"],
+      "options": ["At the edge of the field", "Nina will not say where", "By the road, near by", "In the middle of it"],
       "answer": 0 },
     { "ask": "Is the fog unusual?",
-      "options": ["No, it is always there", "Yes, very", "Only in summer", "Boris thinks so"], "answer": 0 }
+      "options": ["No, it is always there", "Boris seems to think so", "Yes, very unusual here", "Only in the summer"], "answer": 0 }
    ]
   },
 
@@ -564,13 +564,13 @@
    ],
    "questions": [
     { "ask": "What are they watching?",
-      "options": ["A storm coming in", "A sunrise", "A fire", "The sea"], "answer": 0 },
+      "options": ["A storm coming in", "A sunrise, slowly", "A fire over there", "The sea at night"], "answer": 0 },
     { "ask": "What is hiding the stars?",
       "options": ["A cloud", "Fog", "Rain", "Nothing"], "answer": 0 },
     { "ask": "What surprises Ivan?",
-      "options": ["Cold weather in summer", "The lightning", "That she is outside", "The time"], "answer": 0 },
+      "options": ["Cold weather in summer", "The lightning itself", "That she is outside", "The time of night"], "answer": 0 },
     { "ask": "Are the stars still there?",
-      "options": ["Yes, behind the cloud", "No, they have gone", "Only one", "They cannot tell"],
+      "options": ["Yes, behind the cloud", "No, they have all gone", "They cannot tell yet", "Only one is visible"],
       "answer": 0 },
     { "ask": "Where is the storm?",
       "options": ["Right over them", "Far away", "Passing off", "Coming tomorrow"], "answer": 0 }
@@ -603,7 +603,7 @@
     { "ask": "Where is Anya?",
       "options": ["In hospital", "At a clinic", "At home", "At the doctor's office"], "answer": 0 },
     { "ask": "What is wrong with her?",
-      "options": ["A virus or some illness", "A broken leg", "Nothing", "She will not say"], "answer": 0 },
+      "options": ["A virus or some illness", "A broken leg, she says", "She will not say what", "Nothing much at all"], "answer": 0 },
     { "ask": "What has the doctor decided?",
       "options": ["An operation", "Tablets", "To send her home", "To wait a week"], "answer": 0 },    { "ask": "Who brings word that the doctor is coming?",
       "options": ["Pyotr", "Oleg", "Another patient", "Nobody does"], "answer": 0 },
@@ -634,15 +634,15 @@
    ],
    "questions": [
     { "ask": "What is Katya being given?",
-      "options": ["Medicine and tablets", "An operation", "Nothing yet", "A vaccine only"], "answer": 0 },
+      "options": ["Medicine and tablets", "An operation, today", "Nothing at all yet", "A vaccine only"], "answer": 0 },
     { "ask": "Is it an injury?",
       "options": ["No, a disease", "Yes", "Both", "She does not know"], "answer": 0 },
     { "ask": "Is there any damage?",
-      "options": ["None", "Yes, serious", "A little", "They are still looking"], "answer": 0 },
+      "options": ["None at all", "Yes, serious", "A little bit", "Not checked"], "answer": 0 },
     { "ask": "What is still to come?",
       "options": ["A vaccine", "An operation", "A second opinion", "Nothing"], "answer": 0 },
     { "ask": "How does she expect it to end?",
-      "options": ["That will be the end of it", "Badly", "With more tests", "She cannot say"],
+      "options": ["That will be the end of it", "With a good many more tests", "Badly, she seems to think", "She cannot say at all yet"],
       "answer": 0 }
    ]
   },
@@ -677,7 +677,7 @@
     { "ask": "Is she wounded?",
       "options": ["No", "Yes", "Only slightly", "Pyotr thinks so"], "answer": 0 },
     { "ask": "What does she credit for it?",
-      "options": ["Medicine", "Luck", "Rest", "Pyotr"], "answer": 0 }
+      "options": ["Medicine", "Plain rest", "Good luck", "Pyotr"], "answer": 0 }
    ]
   }
  }

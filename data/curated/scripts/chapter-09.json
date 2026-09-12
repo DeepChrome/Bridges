@@ -29,7 +29,7 @@
       "options": ["Opposite the first", "Next to the first", "Further on", "There is no second house"],
       "answer": 0 },    { "ask": "What does Anya complain about?",
       "options": ["Sonya walks too fast", "Sonya is too slow", "Sonya will not talk", "The house"], "answer": 0 },    { "ask": "Why should Sonya look down?",
-      "options": ["There is water on the ground", "It is dark", "She dropped something", "No reason is given"],
+      "options": ["There is water on the ground", "It is too dark to see well", "She has dropped something", "No reason is given at all"],
       "answer": 0 },
     { "ask": "What is Sonya looking at instead?",
       "options": ["The house", "The ground", "Anya", "Nothing"], "answer": 0 }
@@ -66,7 +66,7 @@
       "options": ["She tells him to say it", "She refuses", "She walks off", "She changes the subject"],
       "answer": 0 },
     { "ask": "What does he say it is?",
-      "options": ["Between the two of them", "Public knowledge", "A joke", "Urgent"], "answer": 0 },
+      "options": ["Between the two of them", "Urgent, he insists so", "Common knowledge now", "A joke he has heard"], "answer": 0 },
     { "ask": "Does she promise it will stay between them?",
       "options": ["Nearly always, she says", "Absolutely never", "She will not promise", "She tells him it will not"],
       "answer": 0 }
@@ -132,7 +132,7 @@
    ],
    "questions": [
     { "ask": "Why is Nina moving slowly?",
-      "options": ["She has no strength left", "It is dark", "She is not in a hurry", "Her leg hurts"],
+      "options": ["She has no strength left", "Her leg hurts her badly", "It is dark on the way", "She is in no hurry now"],
       "answer": 0 },
     { "ask": "Is she going home now?",
       "options": ["Not for another hour", "Yes, at once", "She is staying all night", "She has already gone"],
@@ -141,7 +141,7 @@
       "options": ["It always passes", "It never passes", "It is getting worse", "She does not notice it"],
       "answer": 0 },
     { "ask": "What does she get out of the work?",
-      "options": ["Nothing but the work itself", "Good money", "Praise", "Time off"], "answer": 0 },
+      "options": ["Nothing but the work itself", "Good money for all the hours", "Praise from the others", "Time off in the summer"], "answer": 0 },
     { "ask": "Does she ever get strength from it?",
       "options": ["Sometimes", "Never", "Always", "Only at home"], "answer": 0 }
    ]
@@ -169,14 +169,14 @@
    ],
    "questions": [
     { "ask": "How is Sonya feeling?",
-      "options": ["Bad, for the last hour", "Perfectly well", "Tired but happy", "She will not say"],
+      "options": ["Bad, for the last hour", "She will not say at all", "Perfectly well today", "Tired but happy now"],
       "answer": 0 },
     { "ask": "Does she accept help?",
       "options": ["Only sometimes", "Always", "Never", "Only from Pyotr"], "answer": 0 },
     { "ask": "What does she do when she feels bad?",
       "options": ["Works anyway", "Goes home", "Sleeps", "Asks for help"], "answer": 0 },
     { "ask": "How does Pyotr respond?",
-      "options": ["He says he understands", "He tells her off", "He leaves", "He laughs"],
+      "options": ["He says he understands", "He leaves without a word", "He laughs it off at her", "He tells her off badly"],
       "answer": 0 },
     { "ask": "What does she expect of tomorrow?",
       "options": ["It will be better", "It will be worse", "The same", "She has not thought about it"],
@@ -206,11 +206,11 @@
    ],
    "questions": [
     { "ask": "Who is the author?",
-      "options": ["A writer who is there", "Anya", "Oleg", "Nobody knows"], "answer": 0 },
+      "options": ["A writer who is there", "Anya herself, she says", "Nobody seems to know", "Oleg, he admits it"], "answer": 0 },
     { "ask": "What is Anya doing with the novel?",
       "options": ["Reading it", "Writing it", "Selling it", "Nothing"], "answer": 0 },
     { "ask": "Where is the theatre?",
-      "options": ["Close by", "Across town", "In another city", "There is none"], "answer": 0 },
+      "options": ["Close by", "Far off", "In town", "Nowhere"], "answer": 0 },
     { "ask": "When is the exhibition?",
       "options": ["Tomorrow", "Today", "It is over", "Next year"], "answer": 0 },
     { "ask": "What does she say about the singer's voice?",
@@ -241,13 +241,13 @@
    ],
    "questions": [
     { "ask": "What else is the artist?",
-      "options": ["A poet and a musician", "A singer", "A writer only", "Nothing else"],
+      "options": ["A poet and a musician", "A writer, and that is all", "A singer and an actor", "Nothing else at all"],
       "answer": 0 },
     { "ask": "Is the singer the same man?",
       "options": ["No, someone else", "Yes", "Katya does not know", "There is no singer"],
       "answer": 0 },
     { "ask": "How did they get the picture?",
-      "options": ["The artist gave it to them", "They bought it", "It is on loan", "Katya painted it"],
+      "options": ["The artist gave it to them", "They bought it from a shop", "Katya painted it herself", "It is on loan to them"],
       "answer": 0 },
     { "ask": "Is the picture new?",
       "options": ["Yes", "No", "It is a copy", "Nobody says"], "answer": 0 },
@@ -278,17 +278,17 @@
    ],
    "questions": [
     { "ask": "When is the concert?",
-      "options": ["Today", "Tomorrow", "Last night", "Nobody knows"], "answer": 0 },
+      "options": ["Today", "Sunday", "Last week", "Not known"], "answer": 0 },
     { "ask": "Who is performing?",
-      "options": ["A singer, an actress and an actor", "Only a singer", "Lena", "A whole orchestra"],
+      "options": ["A singer, an actress, an actor", "Only a singer and nobody else", "Lena herself, on the stage", "A whole orchestra of them"],
       "answer": 0 },
     { "ask": "What is said about the actor?",
-      "options": ["Performing is his life", "He is retiring", "He is late", "He cannot act"],
+      "options": ["Performing is his life", "He is retiring from it", "He cannot act at all", "He is late as usual"],
       "answer": 0 },
     { "ask": "Does Lena sing?",
-      "options": ["Yes, but only at home", "No", "Only at concerts", "She used to"], "answer": 0 },
+      "options": ["Yes, but only at home", "Only at the concerts", "She used to, not now", "No, she never sings"], "answer": 0 },
     { "ask": "Does she explain why?",
-      "options": ["Not really", "Yes, in detail", "Boris explains", "She has stage fright"],
+      "options": ["Not really, no", "Yes, in detail", "Boris explains", "She is nervous"],
       "answer": 0 }
    ]
   },
@@ -321,7 +321,7 @@
     { "ask": "What did she think of the performers?",
       "options": ["Very good", "Poor", "She could not see them", "She does not say"], "answer": 0 },
     { "ask": "Where does she find beauty?",
-      "options": ["In both ballet and painting", "Only in ballet", "Only in painting", "Nowhere"],
+      "options": ["In both ballet and painting", "Only in painting, she says", "Only in the ballet itself", "Nowhere in either of them"],
       "answer": 0 },
     { "ask": "What word does Yura use for it?",
       "options": ["Culture", "Fashion", "Work", "Money"], "answer": 0 },    { "ask": "Who else has been to the ballet?",
@@ -350,15 +350,15 @@
    ],
    "questions": [    { "ask": "What does Pyotr play?",
       "options": ["The guitar", "The piano", "Nothing", "He sings only"], "answer": 0 },    { "ask": "What does he say about genre?",
-      "options": ["Any genre; he does not think about it", "Only one", "He dislikes the question", "Classical only"],
+      "options": ["Any genre at all", "He dislikes it", "Classical only", "Only the one"],
       "answer": 0 },
     { "ask": "What is he reading?",
-      "options": ["A play and a poem", "A novel", "A newspaper", "Nothing"], "answer": 0 },
+      "options": ["A play and a poem", "A novel and a poem", "Nothing at all now", "A newspaper today"], "answer": 0 },
     { "ask": "What is being done to the statue?",
       "options": ["It is being painted", "It is being moved", "It is being sold", "Nothing"],
       "answer": 0 },
     { "ask": "Who is doing it?",
-      "options": ["The performers", "Pyotr", "Viktor", "Workmen"], "answer": 0 }
+      "options": ["The performers", "Pyotr himself", "Viktor alone", "Some workmen"], "answer": 0 }
    ]
   },
 
@@ -394,7 +394,7 @@
     { "ask": "Has Misha been there?",
       "options": ["Yes", "No", "He is going tomorrow", "He does not remember"], "answer": 0 },
     { "ask": "What did he see there?",
-      "options": ["Pictures and a statue", "A choir", "A film", "Nothing"], "answer": 0 }
+      "options": ["Pictures and a statue", "A choir on the stage", "Nothing much at all", "A film about art"], "answer": 0 }
    ]
   },
 
@@ -421,15 +421,15 @@
     { "s": "c", "ru": "Тут. Это официально.", "en": "Here. That is official." }
    ],
    "questions": [    { "ask": "Where is the president at first?",
-      "options": ["Not there", "There from the start", "Nobody mentions him", "Katya is the president"],
+      "options": ["Not there at all", "There from the start", "Nobody mentions him", "Katya is president"],
       "answer": 0 },
     { "ask": "What is there?",
-      "options": ["A political party", "A parliament", "An embassy", "Nothing"], "answer": 0 },
+      "options": ["A political party", "Nothing much at all", "A parliament there", "An embassy nearby"], "answer": 0 },
     { "ask": "What sort of matter is it?",
       "options": ["A public one", "A private one", "A criminal one", "A family one"], "answer": 0 },
     { "ask": "Is the state's side the same thing?",
       "options": ["No, another matter", "Yes", "Nobody knows", "Pyotr says it is"], "answer": 0 },    { "ask": "What happens at the end?",
-      "options": ["Anya says the president has arrived", "They give up", "Pyotr leaves", "Nothing changes"],
+      "options": ["Anya says he has arrived", "They give up on it all", "Nothing changes at all", "Pyotr leaves the room"],
       "answer": 0 }
    ]
   },
@@ -493,12 +493,12 @@
    ],
    "questions": [
     { "ask": "How does Nina define a republic?",
-      "options": ["A state with a constitution", "A parliament", "A party", "She does not"],
+      "options": ["A state with a constitution", "A parliament with a party", "A party with a chairman", "She does not define it"],
       "answer": 0 },
     { "ask": "Who comes first, in her account?",
       "options": ["The people", "The government", "The party", "The president"], "answer": 0 },
     { "ask": "Where is freedom to be found?",
-      "options": ["In the constitution", "Nowhere", "In the party", "In the courts"], "answer": 0 },
+      "options": ["In the constitution", "In the party itself", "In the courts there", "Nowhere, she says"], "answer": 0 },
     { "ask": "When is polling day?",
       "options": ["Tomorrow", "Today", "Last week", "There is none"], "answer": 0 },
     { "ask": "What else does she admit exists?",
@@ -567,13 +567,13 @@
     { "ask": "What else is under him?",
       "options": ["Health care", "The army", "The courts", "Nothing"], "answer": 0 },
     { "ask": "Was there a revolution there?",
-      "options": ["Not there", "Yes, recently", "It is happening now", "Anya will not say"],
+      "options": ["Not there, no", "She will not say", "Yes, recently", "It is now on"],
       "answer": 0 },
     { "ask": "How does she treat the question of nationality?",
       "options": ["She says it is not an issue", "She says it is the main issue", "She avoids it", "She asks Yura"],
       "answer": 0 },
     { "ask": "How big is the staff?",
-      "options": ["Large, and all working", "Tiny", "Nobody counts", "It has been cut"], "answer": 0 }
+      "options": ["Large, and all working", "Tiny, only a few there", "It has been cut back", "Nobody counts them"], "answer": 0 }
    ]
   },
 
@@ -608,7 +608,7 @@
     { "ask": "What does Katya call it when the public can?",
       "options": ["Democracy", "Politics", "Freedom", "A problem"], "answer": 0 },
     { "ask": "Where is the embassy?",
-      "options": ["Close by", "Across the city", "In another country", "She does not say"],
+      "options": ["Close by", "Far off", "Abroad", "Unsaid"],
       "answer": 0 }
    ]
   },
@@ -676,12 +676,12 @@
       "options": ["In a laboratory", "At an observatory", "At a launch site", "At home"],
       "answer": 0 },
     { "ask": "What is she working with?",
-      "options": ["A chemical element", "A telescope", "A planet", "Nothing"], "answer": 0 },
+      "options": ["A chemical element", "A planet, she says", "A telescope there", "Nothing much yet"], "answer": 0 },
     { "ask": "How does she treat the question about planets?",
       "options": ["As a different field", "As her own work", "As nonsense", "She answers it fully"],
       "answer": 0 },
     { "ask": "What does she say about discipline?",
-      "options": ["There is always discipline there", "There is none", "It is too strict", "Oleg has none"],
+      "options": ["There is always discipline", "There is none of it there", "It is far too strict here", "Oleg has none of it"],
       "answer": 0 },    { "ask": "Whose laboratory is it?",
       "options": ["Viktor's", "Nina's", "Oleg's", "Nobody says"], "answer": 0 }
    ]
@@ -709,7 +709,7 @@
    ],
    "questions": [
     { "ask": "What is Sonya working on?",
-      "options": ["Theory and chemistry", "A rocket", "A laboratory move", "Nothing"], "answer": 0 },
+      "options": ["Theory and chemistry", "Moving the laboratory", "A rocket for launch", "Nothing much at all"], "answer": 0 },
     { "ask": "What will they do with the invention?",
       "options": ["Measure it", "Sell it", "Hide it", "Abandon it"], "answer": 0 },
     { "ask": "Is the launch site there?",
@@ -749,7 +749,7 @@
     { "ask": "Which field does Anya assign the atom to?",
       "options": ["Chemistry", "Biology", "Her own", "None"], "answer": 0 },
     { "ask": "How does Anya describe evolution?",
-      "options": ["As a matter of time", "As a hypothesis", "As chemistry", "As unproven"],
+      "options": ["As a matter of time", "As unproven, she says", "As a hypothesis only", "As chemistry, mainly"],
       "answer": 0 },
     { "ask": "How long has the experiment been running?",
       "options": ["A year", "A day", "Three years", "It has not started"], "answer": 0 }

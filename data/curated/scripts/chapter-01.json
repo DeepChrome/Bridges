@@ -39,7 +39,7 @@
       "options": ["Yes, and he speaks", "No, he never comes", "He was there all along", "He telephones instead"],
       "answer": 0 },
     { "ask": "How does Anya sound when she sees him?",
-      "options": ["Surprised he is already there", "Angry that he is late", "Bored", "Worried about Ivan"],
+      "options": ["Surprised he is already there", "Annoyed that he came so late", "Worried that he is not there", "Bored of waiting for him now"],
       "answer": 0 }
    ]
   },
@@ -72,7 +72,7 @@
     { "ask": "Who does Oleg name as coming with him?",
       "options": ["Ivan and Anya", "Pyotr and Anya", "Only Ivan", "Nobody"], "answer": 0 },
     { "ask": "Why is Pyotr not with them?",
-      "options": ["He is already on his way there", "He is ill", "He was not asked", "He is with Anya"],
+      "options": ["He is already on his way there", "He does not want to go at all", "He is waiting for Anya to come", "He was never told about the plan"],
       "answer": 0 },
     { "ask": "What does Masha want to know first?",
       "options": ["Who \"us\" means", "Where they are going", "When they leave", "Whether Oleg is driving"],
@@ -119,7 +119,7 @@
     { "ask": "Who else is there?",
       "options": ["Anya", "Oleg", "Ivan", "Masha"], "answer": 0 },
     { "ask": "Is Misha there with her?",
-      "options": ["Yes", "No, he came alone", "He does not know her", "She has left"],
+      "options": ["Yes, he is there too", "No, he arrived alone", "He does not know her", "She has already left"],
       "answer": 0 }
    ]
   },
@@ -193,7 +193,7 @@
     { "ask": "Whose side is Pyotr on?",
       "options": ["Theirs", "Nobody's", "The other side", "He has not said"], "answer": 0 },
     { "ask": "What is Nina doing in this conversation?",
-      "options": ["Checking who is coming", "Giving directions", "Refusing to come", "Asking for money"],
+      "options": ["Checking who is coming", "Giving him directions", "Refusing to come along", "Asking him for money"],
       "answer": 0 }
    ]
   },
@@ -228,7 +228,7 @@
     { "ask": "How long has Pyotr known Ivan?",
       "options": ["A year", "A week", "A month", "They have just met"], "answer": 0 },
     { "ask": "What does Pyotr say about Ivan?",
-      "options": ["He is one of their own", "He is a stranger", "He is always late", "He is angry"],
+      "options": ["He is one of their own", "He is a total stranger", "He is very often late", "He is angry with Lena"],
       "answer": 0 },
     { "ask": "What does Lena decide to do?",
       "options": ["Talk to him", "Wait and see", "Refuse", "Ask Anya first"], "answer": 0 }
@@ -301,7 +301,7 @@
       "options": ["Oleg's brother", "Oleg's son", "Katya's son", "A friend of the family"],
       "answer": 0 },
     { "ask": "Who is Nina?",
-      "options": ["The daughter's friend", "Oleg's daughter", "Katya's friend", "Oleg's sister"],
+      "options": ["The daughter's friend", "Oleg's other daughter", "Katya's younger sister", "The grandmother's guest"],
       "answer": 0 },
     { "ask": "Is Oleg's son there?",
       "options": ["No", "Yes", "He is the boy", "He is with Nina"], "answer": 0 },
@@ -339,7 +339,7 @@
     { "ask": "Who is the boy?",
       "options": ["Misha's son", "A guest", "Yura's son", "The old man's grandson"], "answer": 0 },
     { "ask": "Who is the old man?",
-      "options": ["The grandmother's brother", "Misha's father", "A guest from Moscow", "Nobody knows"],
+      "options": ["The grandmother's brother", "Misha's father, visiting", "A guest from another town", "The boy's grandfather"],
       "answer": 0 },
     { "ask": "Are Misha's parents there?",
       "options": ["Yes", "No", "Only his mother", "They are on their way"], "answer": 0 },
@@ -372,7 +372,7 @@
    ],
    "questions": [
     { "ask": "Who is the young man?",
-      "options": ["A guest", "Boris's son", "Nina's brother", "A neighbour"], "answer": 0 },
+      "options": ["A guest at the house", "Boris's younger son", "Nina's older brother", "A neighbour's child"], "answer": 0 },
     { "ask": "Does Boris know his surname?",
       "options": ["No", "Yes", "He says it twice", "He asks Nina for it"], "answer": 0 },
     { "ask": "Who is the small child?",
@@ -381,7 +381,7 @@
     { "ask": "How long has he had a family?",
       "options": ["A year", "Three years", "A month", "He has not said"], "answer": 0 },
     { "ask": "Where is the child's mother?",
-      "options": ["There, with the child", "At home", "In Moscow", "She did not come"], "answer": 0 }
+      "options": ["There, with the child", "At home, on her own", "Away, in another town", "She did not come today"], "answer": 0 }
    ]
   },
 
@@ -421,7 +421,7 @@
       "options": ["She says she cannot", "She is away", "She has guests", "She gives no reason at all"],
       "answer": 0 },
     { "ask": "Who turns out to be listening?",
-      "options": ["Anya, who has the number", "Nobody else", "Viktor's brother", "Lena's mother"],
+      "options": ["Anya, who has the number", "Nobody else is there", "Viktor's older brother", "Lena's mother, nearby"],
       "answer": 0 }
    ]
   },
@@ -487,7 +487,7 @@
    ],
    "questions": [
     { "ask": "What day are they talking about?",
-      "options": ["Monday", "Wednesday", "The weekend", "They never say"], "answer": 0 },
+      "options": ["Monday", "Friday", "Sunday", "Tuesday"], "answer": 0 },
     { "ask": "What month is it now?",
       "options": ["April", "March", "June", "September"], "answer": 0 },
     { "ask": "What did Lena think the month was?",
@@ -526,7 +526,7 @@
     { "ask": "Which month do they settle on?",
       "options": ["June", "December", "March", "April"], "answer": 0 },
     { "ask": "How long has Pyotr been there?",
-      "options": ["Nearly three years", "One year", "Three months", "Since December"], "answer": 0 },
+      "options": ["Nearly three years", "Just over one year", "About three months", "Since last December"], "answer": 0 },
     { "ask": "Which day do they choose?",
       "options": ["Wednesday", "Monday", "They do not choose a day", "The weekend"], "answer": 0 },
     { "ask": "What does Pyotr say about himself?",

@@ -30,9 +30,9 @@
     { "ask": "Where does Anya live?",
       "options": ["On that street", "By the station", "Out of town", "She will not say"], "answer": 0 },
     { "ask": "How often does Boris see her there?",
-      "options": ["Often", "Never before", "Once a year", "Only today"], "answer": 0 },
+      "options": ["Often", "Rarely", "Never", "Daily"], "answer": 0 },
     { "ask": "Will he see the flat?",
-      "options": ["Some day, but not today", "Right now", "Never", "Tomorrow"], "answer": 0 },
+      "options": ["Some day, but not today", "Right now, she says so", "Never, she refuses him", "Tomorrow, she promises"], "answer": 0 },
     { "ask": "What does he notice about her?",
       "options": ["The look on her face", "That she is in a hurry", "Her new coat", "Nothing"], "answer": 0 },
     { "ask": "Who turns out to live on the same street?",
@@ -64,16 +64,16 @@
    ],
    "questions": [
     { "ask": "Whose dog is it?",
-      "options": ["Ivan's and his wife's", "Katya's", "Nobody's", "His mother's"], "answer": 0 },
+      "options": ["Ivan's and his wife's", "Nobody's in particular", "His mother's, at home", "Katya's, she says so"], "answer": 0 },
     { "ask": "How long has he been married?",
-      "options": ["A year", "Ten years", "He is not married", "He does not say"], "answer": 0 },
+      "options": ["A year", "A month", "Six years", "Not long"], "answer": 0 },
     { "ask": "What does he say his business is?",
-      "options": ["Simply working", "A shop", "The dog", "He has none"], "answer": 0 },
+      "options": ["Simply working", "A shop in town", "Dogs, he says", "He has none"], "answer": 0 },
     { "ask": "What does he say is in his head?",
       "options": ["Business", "The dog", "His wife", "Nothing at all"],
       "answer": 0 },
     { "ask": "How does he describe himself at the end?",
-      "options": ["A man who works", "A husband", "A dog owner", "A tired man"], "answer": 0 }
+      "options": ["A man who works", "A dog owner, he says", "A husband, mainly", "A very tired man"], "answer": 0 }
    ]
   },
 
@@ -103,11 +103,11 @@
     { "ask": "For how long?",
       "options": ["Two hours", "All day", "A few minutes", "More than two hours"], "answer": 0 },
     { "ask": "Did anything happen while he was away?",
-      "options": ["Nothing", "A great deal", "She will not say", "Someone came"], "answer": 0 },
+      "options": ["Nothing at all", "A great deal did", "She will not say", "Someone came by"], "answer": 0 },
     { "ask": "Where is the money?",
       "options": ["Under the door", "With Lena", "Lost", "In his pocket"], "answer": 0 },
     { "ask": "How many lots of it are there?",
-      "options": ["She is not sure", "Exactly two", "Exactly one", "None"], "answer": 0 }
+      "options": ["She is not sure", "Exactly two lots", "Exactly one lot", "None at all now"], "answer": 0 }
    ]
   },
 
@@ -137,9 +137,9 @@
     { "ask": "What can he do?",
       "options": ["Play music", "Cook", "Sing", "Nothing special"], "answer": 0 },
     { "ask": "Can Yura play?",
-      "options": ["No", "Yes, better than Pyotr", "He used to", "He will not say"], "answer": 0 },
+      "options": ["No, he cannot", "Yes, very well", "He used to do", "He will not say"], "answer": 0 },
     { "ask": "What does Pyotr tell Yura?",
-      "options": ["He could learn if he wanted", "It is too late for him", "He should not bother", "To listen instead"],
+      "options": ["He could learn if he wanted", "He should not bother at all", "It is far too late for him", "To listen to it instead"],
       "answer": 0 },
     { "ask": "What stops Yura?",
       "options": ["It takes time", "Money", "He has no instrument", "Nothing"], "answer": 0 }
@@ -175,7 +175,7 @@
     { "ask": "Is it the biggest one?",
       "options": ["No", "Yes", "She does not know", "Misha says it is"], "answer": 0 },
     { "ask": "What does Misha ask at the end?",
-      "options": ["What if she does not find it", "Whether he can help", "How much it costs", "When she will move"],
+      "options": ["What if she does not find it", "Whether he can help her look", "How much the house will cost", "When she is going to move in"],
       "answer": 0 },
     { "ask": "How sure is she?",
       "options": ["Quite sure she will", "Not at all", "She is giving up", "She wants Misha to do it"],
@@ -213,7 +213,7 @@
     { "ask": "Is Anya rich?",
       "options": ["No", "Yes", "She will not say", "Lena thinks so and she agrees"], "answer": 0 },
     { "ask": "What is the irony Anya points out?",
-      "options": ["Expensive goods, poor pay", "Cheap goods, good pay", "No goods at all", "Nobody buys them"],
+      "options": ["Expensive goods, poor pay", "Cheap goods, but good pay", "No goods at all to sell", "Nobody buys them anyway"],
       "answer": 0 }
    ]
   },
@@ -242,7 +242,7 @@
     { "ask": "Who is the meeting with?",
       "options": ["The director", "A colleague", "The whole company", "Nobody yet"], "answer": 0 },
     { "ask": "Has Katya got her task?",
-      "options": ["Yes, and she is doing it", "Not yet", "She refused it", "It is Oleg's task"],
+      "options": ["Yes, and she is doing it", "It is Oleg's task instead", "She turned it down", "No, not yet at all"],
       "answer": 0 },
     { "ask": "What is she paid in?",
       "options": ["Dollars", "Roubles", "She is not paid", "She does not say the currency"],
@@ -250,7 +250,7 @@
     { "ask": "How much does she earn?",
       "options": ["She will not say", "A great deal", "Very little", "The same as Oleg"], "answer": 0 },
     { "ask": "What is new about the work?",
-      "options": ["Both the work and the task", "The office", "The director", "Nothing is new"],
+      "options": ["Both the work and the task", "Only the office they use", "Only the director is new", "Nothing at all is new"],
       "answer": 0 }
    ]
   },
@@ -321,11 +321,11 @@
     { "ask": "Where is the manager?",
       "options": ["With the team", "At the desk", "Away", "He is the administrator"], "answer": 0 },
     { "ask": "How many workers are there?",
-      "options": ["Many — a whole industry", "Two", "None", "Nina does not know"], "answer": 0 },
+      "options": ["Many, a whole industry", "Nina does not know yet", "Two, she says exactly", "None at all there now"], "answer": 0 },
     { "ask": "What do they do every day?",
       "options": ["Buy goods", "Sell goods", "Hold meetings", "Count the money"], "answer": 0 },
     { "ask": "Who does Nina say knows everything?",
-      "options": ["The administrator", "The manager", "She does", "Nobody"], "answer": 0 }
+      "options": ["The administrator", "Nobody at all does", "The manager there", "She does herself"], "answer": 0 }
    ]
   },
 
@@ -351,16 +351,16 @@
    ],
    "questions": [
     { "ask": "What is taking up Sonya's day?",
-      "options": ["A meeting and a session", "Travel", "An operation", "Nothing"], "answer": 0 },
+      "options": ["A meeting and a session", "An operation, she says", "Travelling, all day", "Nothing much at all"], "answer": 0 },
     { "ask": "What is her profession?",
       "options": ["Engineer", "Manager", "Nurse", "Accountant"], "answer": 0 },
     { "ask": "How long will she work there?",
       "options": ["A year, perhaps longer", "A month", "Until the meeting ends", "She has not decided"],
       "answer": 0 },
     { "ask": "What does Ivan ask about?",
-      "options": ["A coin", "Her salary", "The director", "Her office"], "answer": 0 },
+      "options": ["A coin", "Her pay", "Her boss", "The desk"], "answer": 0 },
     { "ask": "What does she say about it?",
-      "options": ["It is cheap but hers", "It is valuable", "It is Ivan's", "She found it"], "answer": 0 }
+      "options": ["It is cheap but hers", "It is worth a great deal", "She found it somewhere", "It belongs to Ivan"], "answer": 0 }
    ]
   },
 
@@ -395,7 +395,7 @@
     { "ask": "Does being a manager solve it?",
       "options": ["No", "Yes", "She thinks so", "Yura thinks so"], "answer": 0 },
     { "ask": "What does she say about the nanny?",
-      "options": ["She is paid and works hard", "She is not paid", "She is family", "She is leaving"],
+      "options": ["She is paid and works hard", "She is not paid anything", "She is one of the family", "She is leaving them soon"],
       "answer": 0 }
    ]
   },
@@ -422,11 +422,11 @@
    ],
    "questions": [
     { "ask": "What animals does Katya have?",
-      "options": ["Two cats and a bird", "A cow", "A dog and a cat", "Only a bird"], "answer": 0 },
+      "options": ["Two cats and a bird", "A cow and a horse", "A dog and a cat", "Only a bird now"], "answer": 0 },
     { "ask": "Who feeds them?",
       "options": ["Katya", "Misha", "Nobody", "The neighbours"], "answer": 0 },
     { "ask": "Where is the bird?",
-      "options": ["In a cage", "Out of doors", "On the table", "There is no bird"], "answer": 0 },
+      "options": ["In a cage", "Out of doors", "On the table", "In the yard"], "answer": 0 },
     { "ask": "Why does she laugh at the cow question?",
       "options": ["They live in a city", "She hates cows", "She has three", "It is a joke of Misha's"],
       "answer": 0 },
@@ -461,16 +461,16 @@
    ],
    "questions": [
     { "ask": "What two small creatures are there?",
-      "options": ["A mouse and a butterfly", "A goat and a horse", "Wolves", "A cat and a bird"],
+      "options": ["A mouse and a butterfly", "Wolves, out in the woods", "A goat and a horse too", "A cat and a bird there"],
       "answer": 0 },
     { "ask": "Which of them is an insect?",
-      "options": ["The butterfly", "The mouse", "Both", "Neither"], "answer": 0 },
+      "options": ["The butterfly", "Both of them", "Neither one", "The mouse"], "answer": 0 },
     { "ask": "What larger animals does Lena have?",
-      "options": ["A horse and a goat", "A cow", "A dog", "None"], "answer": 0 },
+      "options": ["A horse and a goat", "None at all there", "A cow and a pig", "A dog and a cat"], "answer": 0 },
     { "ask": "Does she know the goat's breed?",
       "options": ["No", "Yes", "She asks Viktor", "It has none"], "answer": 0 },
     { "ask": "What does Oleg say about the wolves?",
-      "options": ["They exist, but not here", "There are none at all", "They are by the goat", "He has seen one"],
+      "options": ["They exist, but not here", "He has seen one himself", "There are none at all", "They are by the goat"],
       "answer": 0 }
    ]
   },
@@ -501,7 +501,7 @@
     { "ask": "What is wrong with it?",
       "options": ["Its wing", "Its foot", "Nothing", "They cannot tell"], "answer": 0 },
     { "ask": "What other animals are there?",
-      "options": ["A horse and a pig", "A bear", "Only birds", "A cow"], "answer": 0 },
+      "options": ["A horse and a pig", "A bear, she says", "Only birds here", "A cow and a hen"], "answer": 0 },
     { "ask": "Is there a bear?",
       "options": ["No", "Yes", "Nina saw one", "They are looking for one"], "answer": 0 },
     { "ask": "What is the little mouse doing?",
@@ -531,7 +531,7 @@
    ],
    "questions": [
     { "ask": "What are they looking at?",
-      "options": ["A nest with a bird in it", "A cage", "A cat asleep", "An empty nest"], "answer": 0 },
+      "options": ["A nest with a bird in it", "A cage with a bird in it", "A cat asleep by the wall", "An empty nest in a tree"], "answer": 0 },
     { "ask": "What is the animal running about?",
       "options": ["A cat", "A mouse", "A dog", "A hen"], "answer": 0 },
     { "ask": "Why does the bird stay put?",
@@ -540,7 +540,7 @@
     { "ask": "What is the cat doing?",
       "options": ["Waiting", "Sleeping", "Leaving", "Eating"], "answer": 0 },
     { "ask": "How long has this been going on?",
-      "options": ["All day", "A few minutes", "Since yesterday", "They have just noticed"],
+      "options": ["All day", "Since six", "A minute", "Just now"],
       "answer": 0 }
    ]
   }

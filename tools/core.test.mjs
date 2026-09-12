@@ -931,6 +931,33 @@ group("written listening scenarios");
   ok(built === keys.length, "every one of them builds into a scenario", `${built} of ${keys.length}`);
   ok(!bad.length, "and each is answerable: four distinct options, one right", bad.slice(0, 4).join(" | "));
 
+  /* The options are shuffled on the way out, and that is load-bearing.
+   *
+   * All 840 authored questions put the answer at index 0 — it is the file's
+   * convention, and `scenarioFor` shuffling is the only reason it is not also
+   * the app's behaviour. Nothing asserted it, so "tap the first option" would
+   * have scored 100 % on every listening exercise in the product and every
+   * suite would still have been green. Checked over the whole corpus rather
+   * than one lesson: a shuffle of four can leave the answer in place, and with
+   * 840 of them the right answer lands first about a quarter of the time by
+   * chance and essentially never much more. */
+  {
+    const authored = keys.every((k) =>
+      SCRIPTS[k].questions.every((q) => (q.answer || 0) === 0));
+    ok(authored, "every authored answer is written first, as the files' convention");
+    let firstOfFour = 0, total = 0;
+    for (const k of keys) {
+      const [id, i] = k.split(":");
+      for (const q of Q.scriptScene(byId.get(id), Number(i)).questions) {
+        total++;
+        if (q.options[0].right) firstOfFour++;
+      }
+    }
+    const share = firstOfFour / total;
+    ok(share < 0.45, "and the app shuffles them, so the answer is not always first",
+       `${(share * 100).toFixed(0)}% first of ${total}`);
+  }
+
   // A scripted lesson's quiz gets the written passage, not a corpus scene.
   const scripted = keys.map((k) => k.split(":")).find(([id, i]) => {
     const u = byId.get(id);

@@ -32,7 +32,7 @@
     { "ask": "When did the work begin?",
       "options": ["Yesterday", "A year ago", "Today", "It has not begun"], "answer": 0 },
     { "ask": "What does she say about the young man?",
-      "options": ["He is the youngest and is working", "He has left", "He is her brother", "He does nothing"],
+      "options": ["He is the youngest and works", "He has left the firm for good", "He does nothing at all there", "He is her younger brother"],
       "answer": 0 }
    ]
   },
@@ -61,7 +61,7 @@
     { "ask": "What can be heard?",
       "options": ["An aircraft", "A telephone", "A crowd", "Nothing at all"], "answer": 0 },
     { "ask": "Who is in the room?",
-      "options": ["Nobody", "Everyone Misha called", "Only Katya", "A few people"], "answer": 0 },
+      "options": ["Nobody at all", "Everyone he called", "Only Katya is", "A few people"], "answer": 0 },
     { "ask": "What had Misha done?",
       "options": ["Called everyone in", "Gone to the shop", "Waited outside", "Nothing"], "answer": 0 },
     { "ask": "How often does Katya go to the shop?",
@@ -101,10 +101,10 @@
     { "ask": "How is the programme running?",
       "options": ["Fast", "Slowly", "Not at all", "Nobody has checked"], "answer": 0 },
     { "ask": "What does Lena say about help?",
-      "options": ["It is always on the way", "She needs none", "It never comes", "She will ask later"], "answer": 0 },
+      "options": ["It is always on the way", "She will ask for it later", "It never comes at all", "She needs none of it"], "answer": 0 },
     { "ask": "When will Oleg be back?",
       "options": ["In an hour", "Tomorrow", "Never", "He is not leaving"], "answer": 0 },    { "ask": "Who arrives at the end?",
-      "options": ["Anya, with the help", "Oleg, back early", "Nobody", "The boss"], "answer": 0 }
+      "options": ["Anya, with the help", "Oleg, back early on", "Nobody arrives then", "The boss himself"], "answer": 0 }
    ]
   },
 
@@ -132,11 +132,11 @@
     { "ask": "What is Nina doing?",
       "options": ["Cooking", "Sleeping", "On the telephone", "Packing"], "answer": 0 },
     { "ask": "Where is her telephone?",
-      "options": ["She left it — Pyotr has it", "In her hand", "Lost", "At the shop"], "answer": 0 },
+      "options": ["Pyotr has it now", "At the shop still", "In her own hand", "Lost somewhere"], "answer": 0 },
     { "ask": "What does she give him?",
       "options": ["A few things", "The telephone only", "Food", "Nothing"], "answer": 0 },
     { "ask": "Is she going to bed?",
-      "options": ["Not yet, she is still cooking", "Yes, at once", "She never sleeps", "After Pyotr leaves"],
+      "options": ["Not yet, still cooking", "She never sleeps at all", "Yes, at once she says", "After Pyotr has left"],
       "answer": 0 },
     { "ask": "Who does most of the asking?",
       "options": ["Pyotr", "Nina", "Both equally", "Neither"], "answer": 0 }
@@ -164,14 +164,14 @@
    ],
    "questions": [
     { "ask": "What is the mood between them?",
-      "options": ["Light and warm", "Tense", "Sad", "Formal"], "answer": 0 },
+      "options": ["Light and warm", "Formal and stiff", "Tense and cold", "Sad throughout"], "answer": 0 },
     { "ask": "What does Oleg say about Viktor?",
-      "options": ["He is good too", "He is late", "He is wrong", "Nothing"], "answer": 0 },
+      "options": ["He is good too", "He is quite wrong", "He is late again", "He says nothing"], "answer": 0 },
     { "ask": "How far does his good opinion of the world stretch?",
       "options": ["Only to today", "For ever", "Not at all", "Until the programme ends"],
       "answer": 0 },
     { "ask": "What does Viktor predict?",
-      "options": ["Tomorrow will be good too", "Rain", "Trouble", "Nothing"], "answer": 0 },    { "ask": "Does he agree?",
+      "options": ["Tomorrow will be good too", "Rain for the whole week", "Nothing at all, he says", "Trouble of some kind"], "answer": 0 },    { "ask": "Does he agree?",
       "options": ["Only 'maybe'", "Completely", "Not at all", "He changes the subject"], "answer": 0 }
    ]
   },
@@ -269,7 +269,7 @@
    ],
    "questions": [
     { "ask": "Who are they talking about?",
-      "options": ["A captain who is a veteran", "A young soldier", "The enemy", "A general"],
+      "options": ["A captain who is a veteran", "A very young soldier there", "The enemy, somewhere else", "A general in the regiment"],
       "answer": 0 },
     { "ask": "How many defeats has he had?",
       "options": ["One", "None", "Many", "Lena does not know"], "answer": 0 },
@@ -314,7 +314,7 @@
     { "ask": "What have they been told to do?",
       "options": ["Wait", "Attack", "Fall back", "Follow the colonel"], "answer": 0 },
     { "ask": "What is the contradiction Misha points out?",
-      "options": ["They wait while the attack runs", "The colonel is absent", "There is no pistol", "Nobody gave an order"],
+      "options": ["They wait while the attack runs", "The colonel is not there at all", "There is no pistol to be had", "Nobody gave an order at all"],
       "answer": 0 }
    ]
   },
@@ -378,12 +378,12 @@
     { "ask": "When was the attack?",
       "options": ["Yesterday", "Today", "A year ago", "There has not been one"], "answer": 0 },
     { "ask": "What came of it?",
-      "options": ["Nothing — the fortress held", "The fortress fell", "Both sides left", "Anya does not say"],
+      "options": ["Nothing, the fortress held", "The fortress fell to them", "Both sides left the field", "Anya does not say at all"],
       "answer": 0 },
     { "ask": "Where is the other side now?",
       "options": ["Still there, waiting", "Gone", "Inside the fortress", "Unknown"], "answer": 0 },
     { "ask": "How ready is the defence?",
-      "options": ["Ready", "Unprepared", "Without a commander", "Short of men"], "answer": 0 }
+      "options": ["Ready", "Weak", "Idle", "Poor"], "answer": 0 }
    ]
   },
 
@@ -407,8 +407,8 @@
     { "s": "a", "ru": "Сделаю, Виктор. Для газеты.", "en": "I will, Viktor. For the newspaper." }
    ],
    "questions": [    { "ask": "Has Yura read the article?",
-      "options": ["No", "Yes, in the newspaper", "Yes, in the magazine", "He wrote it"], "answer": 0 },    { "ask": "Where does he get his news?",
-      "options": ["The radio, mostly", "The newspaper", "Television", "From Viktor"], "answer": 0 },
+      "options": ["No, he has not", "Yes, in a magazine", "Yes, in the paper", "He wrote it"], "answer": 0 },    { "ask": "Where does he get his news?",
+      "options": ["The radio, mostly", "From Viktor, he says", "The newspaper only", "Television, mainly"], "answer": 0 },
     { "ask": "Whose is the photograph?",
       "options": ["Yura's", "Viktor's", "The newspaper's", "Nobody's"], "answer": 0 },    { "ask": "When did he get the camera?",
       "options": ["Yesterday", "A year ago", "It is not his", "Today"], "answer": 0 },
@@ -439,7 +439,7 @@
    ],
    "questions": [
     { "ask": "What was on the screen?",
-      "options": ["A message from a website", "A photograph", "Nothing", "An article"], "answer": 0 },
+      "options": ["A message from a website", "An article from a paper", "A photograph from Ivan", "Nothing at all there"], "answer": 0 },
     { "ask": "What was wrong?",
       "options": ["The network was down", "The screen was broken", "The button was missing", "Nothing"],
       "answer": 0 },
@@ -449,7 +449,7 @@
       "options": ["It is not new", "It is brand new", "It is Ivan's", "It is broken for good"],
       "answer": 0 },
     { "ask": "How does it end?",
-      "options": ["Everything works again", "It stays broken", "They give up", "Ivan leaves"],
+      "options": ["Everything works again", "It stays broken still", "Ivan leaves annoyed", "They give up on it"],
       "answer": 0 }
    ]
   },
@@ -480,11 +480,11 @@
     { "ask": "What does work?",
       "options": ["The landline", "Nothing", "The mobile", "Only the radio"], "answer": 0 },
     { "ask": "What happens when he presses?",
-      "options": ["The device speaks", "Nothing", "It rings", "It breaks"], "answer": 0 },
+      "options": ["The device speaks", "It breaks at once", "Nothing happens", "It rings loudly"], "answer": 0 },
     { "ask": "Where is the report?",
-      "options": ["At the editorial office", "With Boris", "Lost", "On the device"], "answer": 0 },
+      "options": ["At the editorial office", "With Boris, he says so", "Lost somewhere in town", "On the device itself"], "answer": 0 },
     { "ask": "Where is everybody?",
-      "options": ["At the editorial office", "At home", "With Nina", "Nobody says"], "answer": 0 }
+      "options": ["At the editorial office", "With Nina, at her place", "At home, all of them", "Nobody says where"], "answer": 0 }
    ]
   },
 
@@ -547,11 +547,11 @@
    ],
    "questions": [
     { "ask": "What is wrong with the keyboard?",
-      "options": ["One key does not work", "It is missing", "It is wet", "Nothing"], "answer": 0 },
+      "options": ["One key does not work", "It is missing entirely", "It is wet all through", "Nothing is wrong now"], "answer": 0 },
     { "ask": "What else is missing?",
       "options": ["The battery", "The radio", "The answering machine", "Nothing"], "answer": 0 },
     { "ask": "What still works?",
-      "options": ["The radio set and the answering machine", "Only the keyboard", "Nothing", "The camera"],
+      "options": ["The radio and the machine", "The camera and nothing else", "Only the keyboard itself", "Nothing at all works now"],
       "answer": 0 },
     { "ask": "What was the message about?",
       "options": ["A photo", "The battery", "A meeting", "The keyboard"], "answer": 0 },
@@ -582,7 +582,7 @@
    ],
    "questions": [
     { "ask": "Why is there no electricity?",
-      "options": ["The wire is the wrong one", "A storm", "They did not pay", "Katya does not know"],
+      "options": ["The wire is the wrong one", "They did not pay the bill", "A storm brought it down", "Katya does not know why"],
       "answer": 0 },
     { "ask": "What works anyway?",
       "options": ["The camera", "The telephone", "The channel", "Nothing"], "answer": 0 },
@@ -590,7 +590,7 @@
       "options": ["No electricity", "The wire is cut", "It was never set up", "The subscriber took it"],
       "answer": 0 },
     { "ask": "Is the subscriber there?",
-      "options": ["Yes, but unreachable", "No", "He left", "Nobody knows"], "answer": 0 },
+      "options": ["Yes, but unreachable", "No, he has gone out", "He left a while ago", "Nobody knows at all"], "answer": 0 },
     { "ask": "How much is affected?",
       "options": ["Nearly everything", "Only the telephone", "Only the camera", "Nothing important"],
       "answer": 0 }
@@ -619,16 +619,16 @@
    ],
    "questions": [
     { "ask": "Which sports does Lena play?",
-      "options": ["Tennis and football", "Only tennis", "Swimming only", "Basketball"], "answer": 0 },
+      "options": ["Tennis and football", "Only tennis, she says", "Swimming and running", "Basketball and chess"], "answer": 0 },
     { "ask": "When is the match?",
-      "options": ["Today", "Tomorrow", "Next week", "It is over"], "answer": 0 },
+      "options": ["Today", "It ended", "Sunday", "Friday"], "answer": 0 },
     { "ask": "How confident is she?",
       "options": ["Sure they will win", "Doubtful", "She will not play", "She does not care"],
       "answer": 0 },
     { "ask": "How often does she train?",
       "options": ["Every day", "Once a week", "Before matches only", "She does not"], "answer": 0 },
     { "ask": "What does she invite him to do?",
-      "options": ["Come to the match", "Play tennis", "Swim with her", "Nothing"], "answer": 0 }
+      "options": ["Come to the match", "Nothing in particular", "Play tennis with her", "Swim with her later"], "answer": 0 }
    ]
   },
 
@@ -664,7 +664,7 @@
       "options": ["A toy", "A ball", "Nothing", "Her kit"], "answer": 0 },
     { "ask": "Who is it for?",
       "options": ["A child", "The team", "Viktor", "Herself"], "answer": 0 },    { "ask": "Who comes to fetch her?",
-      "options": ["Ivan, a player too", "Viktor", "The child", "Nobody"], "answer": 0 }
+      "options": ["Ivan, a player too", "The child she knows", "Nobody comes at all", "Viktor, in the end"], "answer": 0 }
    ]
   },
 
@@ -728,7 +728,7 @@
     { "ask": "When are the Olympics?",
       "options": ["In a year", "Tomorrow", "They are on now", "They are over"], "answer": 0 },
     { "ask": "How is the team doing?",
-      "options": ["Losing, though not always", "Winning everything", "Not playing", "Anya does not say"],
+      "options": ["Losing, though not always", "Winning everything lately", "Not playing at all now", "Anya does not say"],
       "answer": 0 },
     { "ask": "Who caught the ball?",
       "options": ["Nobody", "Yura", "The coach", "Anya"], "answer": 0 }
@@ -766,7 +766,7 @@
       "options": ["She just plays", "She is the best", "She hates it", "She coaches it"],
       "answer": 0 },
     { "ask": "What does the other player do?",
-      "options": ["Throws himself at the ball", "Stands still", "Leaves", "Argues"], "answer": 0 },    { "ask": "What is Tanya champion at?",
+      "options": ["Throws himself at the ball", "Stands quite still there", "Leaves the court at once", "Argues with the coach"], "answer": 0 },    { "ask": "What is Tanya champion at?",
       "options": ["Running", "Chess", "Volleyball", "Nothing"], "answer": 0 }
    ]
   },
@@ -800,9 +800,9 @@
     { "ask": "What are the losing side doing?",
       "options": ["Still playing", "Walking off", "Arguing", "Winning now"], "answer": 0 },
     { "ask": "What is the coach doing?",
-      "options": ["Watching, as always", "Shouting", "Playing", "Away"], "answer": 0 },
+      "options": ["Watching, as always", "Playing with the team", "Shouting at them all", "Away from the ground"], "answer": 0 },
     { "ask": "How does the conversation end?",
-      "options": ["She invites him along", "He leaves", "They argue", "The match ends"],
+      "options": ["She invites him along", "The match comes to an end", "He leaves before her", "They argue about it"],
       "answer": 0 }
    ]
   }

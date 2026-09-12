@@ -66,11 +66,11 @@
     { "ask": "How long does Boris watch it?",
       "options": ["All night", "An hour", "He does not watch it", "Only in the day"], "answer": 0 },
     { "ask": "Can he say what he watches?",
-      "options": ["No, he has forgotten", "Yes, in detail", "He will not say", "Katya tells him"],
+      "options": ["No, he has forgotten", "Yes, in great detail", "He will not say now", "Katya tells him it"],
       "answer": 0 },
     { "ask": "What does Katya ask him to do?",
-      "options": ["Tell her the story", "Turn it off", "Lend it to her", "Go to bed"], "answer": 0 },    { "ask": "What does Yura add at the end?",
-      "options": ["He watched too, and forgot too", "He remembers it all", "He was asleep", "He has no television"],
+      "options": ["Tell her the story", "Turn the set off", "Go to bed early", "Lend it to her"], "answer": 0 },    { "ask": "What does Yura add at the end?",
+      "options": ["He watched too, and forgot too", "He remembers all of it clearly", "He was asleep the whole time", "He has no television at all"],
       "answer": 0 }
    ]
   },
@@ -100,14 +100,14 @@
       "options": ["Going through the window", "Going through the door", "Waiting a year", "Staying in"],
       "answer": 0 },
     { "ask": "What is Lena's objection?",
-      "options": ["The window is too small", "It is dark", "She is not ready", "The house is too big"],
+      "options": ["The window is too small", "It is too dark to see", "She is not ready yet", "The house is too big"],
       "answer": 0 },
     { "ask": "What is his other plan?",
-      "options": ["The door, tomorrow", "The door, now", "Another window", "Give up"], "answer": 0 },
+      "options": ["The door, tomorrow", "The door, right now", "To give up on it", "Another window"], "answer": 0 },
     { "ask": "What does Lena say about the house?",
       "options": ["It is enormous", "It is small", "It is not theirs", "It is empty"], "answer": 0 },
     { "ask": "What do they decide?",
-      "options": ["To leave it until tomorrow", "To climb through", "To use the door now", "Nothing"],
+      "options": ["To leave it until tomorrow", "To climb through the window", "To use the door right now", "To do nothing about it"],
       "answer": 0 }
    ]
   },
@@ -136,7 +136,7 @@
     { "ask": "What does it cost now?",
       "options": ["Two roubles", "Nothing", "More than yesterday", "Nina will not say"], "answer": 0 },
     { "ask": "Why was yesterday different?",
-      "options": ["A scientist paid himself", "There was a sale", "It was closed", "Yura was not there"],
+      "options": ["A scientist paid himself", "There was a sale on then", "The place was closed up", "Yura was not there then"],
       "answer": 0 },
     { "ask": "How does Yura place the man?",
       "options": ["By his eyes", "By his name", "By his coat", "He never does"], "answer": 0 },
@@ -170,12 +170,12 @@
     { "ask": "What has happened to the price?",
       "options": ["It has doubled", "It has halved", "It is unchanged", "It was cancelled"], "answer": 0 },
     { "ask": "Who set it?",
-      "options": ["Somebody else, not Viktor", "Viktor", "Ivan", "Nobody knows"], "answer": 0 },    { "ask": "How does Ivan react at first?",
-      "options": ["He refuses to listen", "He agrees at once", "He laughs", "He offers to pay"], "answer": 0 },
+      "options": ["Somebody else, not Viktor", "Viktor himself, he admits", "Ivan, without knowing it", "Nobody seems to know it"], "answer": 0 },    { "ask": "How does Ivan react at first?",
+      "options": ["He refuses to listen", "He agrees to it at once", "He offers to pay it", "He laughs it off"], "answer": 0 },
     { "ask": "What are the choices?",
-      "options": ["Take the price or leave it", "Pay half", "Wait a year", "Complain"], "answer": 0 },
+      "options": ["Take the price or leave it", "Wait a year for it to fall", "Complain to somebody else", "Pay half of it and wait"], "answer": 0 },
     { "ask": "Where does it end?",
-      "options": ["He is listening, but unhappy", "They pay", "They refuse", "Viktor leaves"],
+      "options": ["He is listening, but unhappy", "They pay it without a word", "They refuse it altogether", "Viktor leaves in a temper"],
       "answer": 0 }
    ]
   },
@@ -238,15 +238,15 @@
     { "ask": "How is Katya feeling?",
       "options": ["Upset and afraid", "Cheerful", "Angry with Ivan", "Perfectly calm"], "answer": 0 },
     { "ask": "What keeps her going?",
-      "options": ["She believes it will come right", "Ivan's money", "Nothing", "Her work"],
+      "options": ["Believing it will come right", "Ivan's money, she admits it", "Nothing much at all now", "Her work at the factory"],
       "answer": 0 },
     { "ask": "What does Ivan say about her?",
       "options": ["He is proud of her", "She worries too much", "She should leave", "He does not understand her"],
       "answer": 0 },
     { "ask": "What does Ivan hate?",
-      "options": ["Fear", "Katya's mood", "Being proud", "Talking about it"], "answer": 0 },
+      "options": ["Fear", "Moods", "Pride", "Talk"], "answer": 0 },
     { "ask": "How does the conversation end?",
-      "options": ["Lighter than it began", "In an argument", "With her leaving", "Unchanged"], "answer": 0 }
+      "options": ["Lighter than it began", "In an argument, badly", "With her leaving him", "Exactly as it began"], "answer": 0 }
    ]
   },
 
@@ -280,7 +280,7 @@
       "options": ["How calm he is", "The question", "That he stayed", "Nothing"], "answer": 0 },
     { "ask": "What does she name in the end?",
       "options": ["Love and joy", "Work", "Travel", "She refuses to answer"], "answer": 0 },    { "ask": "Who else joins in?",
-      "options": ["Anya, who dreams of joy", "Nobody", "Misha's brother", "Lena's sister"], "answer": 0 },
+      "options": ["Anya, who dreams of joy", "Misha's younger brother", "Nobody else joins them", "Lena's sister, briefly"], "answer": 0 },
     { "ask": "What does she tell him to do?",
       "options": ["Work it out himself", "Stop asking", "Dream too", "Come back tomorrow"],
       "answer": 0 }
@@ -311,7 +311,7 @@
     { "ask": "What does Nina admit to?",
       "options": ["Doubts", "Fear", "Anger", "Nothing"], "answer": 0 },
     { "ask": "What does Boris hope?",
-      "options": ["That it will all pass", "That she will stay", "For money", "He does not say"],
+      "options": ["That it will all pass", "That she will stay on", "For money, he admits", "He does not say what"],
       "answer": 0 },
     { "ask": "Who has the worry, in his view?",
       "options": ["Everyone", "Only Nina", "Only him", "Nobody"], "answer": 0 },
@@ -345,14 +345,14 @@
    ],
    "questions": [
     { "ask": "What has Sonya got?",
-      "options": ["A thought she wants to share", "A complaint", "A new job", "Nothing to say"],
+      "options": ["A thought to share", "A complaint to make", "Nothing much to say", "A new job in town"],
       "answer": 0 },
     { "ask": "What does she need Oleg for?",
-      "options": ["Her memory is failing her", "Money", "A lift", "Company"], "answer": 0 },
+      "options": ["Her memory is failing", "Money, she admits it", "A lift into the town", "Company, she says so"], "answer": 0 },
     { "ask": "How does Oleg describe that?",
       "options": ["Worrying", "Funny", "Normal", "Her own fault"], "answer": 0 },
     { "ask": "How does she feel about the work?",
-      "options": ["She has come to love it", "She hates it", "She is leaving it", "It bores her"],
+      "options": ["She has come to love it", "She has come to hate it", "It bores her completely", "She is leaving it soon"],
       "answer": 0 },
     { "ask": "What was her thought all along?",
       "options": ["Getting him to help", "Leaving the job", "Asking for money", "Telling him the truth"],
@@ -382,9 +382,9 @@
    ],
    "questions": [
     { "ask": "How is Anya?",
-      "options": ["Sad and worried", "Cheerful", "Angry", "Frightened"], "answer": 0 },
+      "options": ["Sad and worried", "Cheerful enough", "Angry with Yura", "Frightened now"], "answer": 0 },
     { "ask": "What has she remembered?",
-      "options": ["A man who was in love with her", "An argument", "Something she forgot to do", "A dream"],
+      "options": ["A man who was in love with her", "An argument she had with him", "Something she forgot to do", "A dream she had last night"],
       "answer": 0 },
     { "ask": "Who was he in love with?",
       "options": ["Anya", "Somebody else", "Nobody", "She will not say"], "answer": 0 },
@@ -392,7 +392,7 @@
       "options": ["Not to worry, he is there", "That she should forget him", "That he is jealous", "Nothing"],
       "answer": 0 },
     { "ask": "How does she answer him?",
-      "options": ["She says she remembers that too", "She sends him away", "She changes the subject", "She laughs"],
+      "options": ["She says she remembers that", "She sends him away at once", "She laughs it off at him", "She changes the subject"],
       "answer": 0 }
    ]
   },
@@ -418,9 +418,9 @@
    ],
    "questions": [    { "ask": "What has Oleg not done?",
       "options": ["Answered a letter", "Written a letter", "Spoken to Viktor", "Gone to work"], "answer": 0 },    { "ask": "Will Oleg explain why?",
-      "options": ["No, he says it is not simple", "Yes, at length", "He blames the post", "He says he forgot"],
+      "options": ["No, he says it is not simple", "Yes, at considerable length", "He blames the post for it", "He says he simply forgot"],
       "answer": 0 },    { "ask": "Who wrote to him?",
-      "options": ["Someone he had talked to", "His boss", "Viktor", "He does not know"], "answer": 0 },
+      "options": ["Someone he had talked to", "His boss at the office", "He does not know who", "Viktor, he says so"], "answer": 0 },
     { "ask": "What had they talked about?",
       "options": ["Work", "The letter", "Viktor", "Nothing in particular"], "answer": 0 },
     { "ask": "What did he ask for?",
@@ -452,7 +452,7 @@
     { "ask": "How often has Pyotr been ringing?",
       "options": ["Every day", "Once", "Never", "Only yesterday"], "answer": 0 },
     { "ask": "Why has Lena not answered?",
-      "options": ["She did not hear the calls", "She was angry", "She lost her phone", "She was away"],
+      "options": ["She did not hear the calls", "She was angry with him then", "She has lost her phone", "She was away all week"],
       "answer": 0 },
     { "ask": "What does he ask of her?",
       "options": ["Just to listen", "To come at once", "To forgive him", "To stop ringing"],
@@ -460,7 +460,7 @@
     { "ask": "What does he say makes the difference?",
       "options": ["One letter", "One day", "One word from her", "Nothing"], "answer": 0 },
     { "ask": "How is it left?",
-      "options": ["She will ring him today", "He will call again", "They meet tomorrow", "She refuses"],
+      "options": ["She will ring him today", "He will call her again", "They meet up tomorrow", "She refuses to ring"],
       "answer": 0 }
    ]
   },
@@ -489,15 +489,15 @@
     { "ask": "What does Nina call it?",
       "options": ["A conversation", "A discussion", "An argument", "A meeting"], "answer": 0 },
     { "ask": "What happened during it?",
-      "options": ["Everyone shouted and she cried", "Nobody spoke", "They agreed at once", "It was called off"],
+      "options": ["Everyone shouted and she cried", "Nobody spoke a word the whole time", "They agreed almost at once", "It was called off early on"],
       "answer": 0 },
     { "ask": "Did they agree?",
       "options": ["No", "Yes", "Only about the name", "Misha does not ask"], "answer": 0 },
     { "ask": "What does she promise?",
-      "options": ["That there is a name for it", "To apologise", "Not to cry again", "To keep quiet"],
+      "options": ["That there is a name for it", "Not to cry about it again", "To apologise to everyone", "To keep quiet in future"],
       "answer": 0 },
     { "ask": "What do they settle on at the end?",
-      "options": ["To reach an agreement without another talk", "To meet again", "To give up", "To ask someone else"],
+      "options": ["To agree without another talk", "To meet again and discuss it", "To ask somebody else to help", "To give up on it altogether"],
       "answer": 0 }
    ]
   },
@@ -526,12 +526,12 @@
    ],
    "questions": [
     { "ask": "Why is Sonya not speaking?",
-      "options": ["There was a quarrel yesterday", "She is ill", "Boris annoyed her", "She is thinking"],
+      "options": ["There was a quarrel yesterday", "She is ill and cannot speak", "Boris has annoyed her badly", "She is thinking about it"],
       "answer": 0 },
     { "ask": "What was the quarrel about?",
       "options": ["A promise", "Money", "Boris", "Nothing in particular"], "answer": 0 },
     { "ask": "Whose promise was it?",
-      "options": ["The other man's", "Sonya's", "Boris's", "Nobody's"], "answer": 0 },
+      "options": ["The other man's", "Boris's, it seems", "Sonya's, she says", "Nobody's at all"], "answer": 0 },
     { "ask": "What does Boris think should happen?",
       "options": ["It should be talked out", "She should stay silent", "She should leave", "He should speak to the man"],
       "answer": 0 },    { "ask": "What does Nina do about her own quarrel?",
@@ -561,7 +561,7 @@
    ],
    "questions": [
     { "ask": "Who shouted?",
-      "options": ["The man who makes claims", "Ivan", "Anya", "Nobody did"], "answer": 0 },
+      "options": ["The man who makes claims", "Ivan, by his own account", "Anya, she admits it now", "Nobody shouted at all"], "answer": 0 },
     { "ask": "What did he do after shouting?",
       "options": ["Talked with them", "Left", "Shouted again", "Wrote a letter"], "answer": 0 },
     { "ask": "What was he pointing at?",
@@ -569,7 +569,7 @@
     { "ask": "Did Ivan shout back?",
       "options": ["No", "Yes", "He left the room", "He does not say"], "answer": 0 },
     { "ask": "How does Ivan describe himself?",
-      "options": ["Someone who talks rather than shouts", "A shouter", "A quiet man", "The one in the wrong"],
+      "options": ["Someone who talks, not shouts", "Someone who shouts a great deal", "A quiet man who says little", "The one who is in the wrong"],
       "answer": 0 }
    ]
   },
@@ -598,13 +598,13 @@
     { "ask": "What are they discussing?",
       "options": ["A single word", "A whole letter", "A meeting", "A price"], "answer": 0 },
     { "ask": "What has to be done with it?",
-      "options": ["Translated into Russian", "Written down", "Forgotten", "Shouted"], "answer": 0 },
+      "options": ["Translated into Russian", "Forgotten about entirely", "Shouted out to everyone", "Written down carefully"], "answer": 0 },
     { "ask": "How many times must it be repeated?",
       "options": ["Twice or more", "Once", "Never", "Until Katya understands"], "answer": 0 },
     { "ask": "Who keeps asking for an explanation?",
       "options": ["Katya", "Oleg", "Both", "Neither"], "answer": 0 },
     { "ask": "How patient is Oleg?",
-      "options": ["He keeps explaining", "He refuses", "He shouts", "He walks off"], "answer": 0 }
+      "options": ["He keeps explaining", "He walks off at last", "He refuses to go on", "He shouts at her"], "answer": 0 }
    ]
   },
 
@@ -632,7 +632,7 @@
     { "ask": "Whose firm is it?",
       "options": ["Lena's", "Viktor's", "Theirs together", "A client's"], "answer": 0 },
     { "ask": "What does the business lack?",
-      "options": ["Advertising", "Clients", "Staff", "Premises"], "answer": 0 },
+      "options": ["Advertising", "Enough staff", "Any clients", "Premises"], "answer": 0 },
     { "ask": "What is the problem with the costs?",
       "options": ["They are high", "Nobody knows them", "They are falling", "There are none"],
       "answer": 0 },
@@ -667,7 +667,7 @@
    ],
    "questions": [
     { "ask": "How big is the budget?",
-      "options": ["Small", "Enormous", "She will not say", "There is none"], "answer": 0 },
+      "options": ["Small", "Large", "Huge", "None"], "answer": 0 },
     { "ask": "Where does the income go?",
       "options": ["Into a fund", "To the shareholders", "On advertising", "Nowhere"], "answer": 0 },
     { "ask": "What happens to the shares?",
@@ -703,14 +703,14 @@
     { "ask": "What is Sonya's line of work?",
       "options": ["Trade", "Banking", "Advertising", "Teaching"], "answer": 0 },
     { "ask": "Who sets the prices?",
-      "options": ["They do themselves", "The tax office", "Misha", "The customers"], "answer": 0 },
+      "options": ["They do themselves", "Misha does it for them", "The tax office does", "The customers do"], "answer": 0 },
     { "ask": "What two burdens does she name?",
       "options": ["Tax and debt", "Rent and wages", "Advertising and rent", "Neither"], "answer": 0 },
     { "ask": "What is her plan?",
-      "options": ["Keep working and keep trading", "Sell the business", "Stop trading", "Borrow more"],
+      "options": ["Keep working and keep trading", "Sell the whole business off", "Stop trading altogether now", "Borrow a great deal more"],
       "answer": 0 },
     { "ask": "What does she take comfort in?",
-      "options": ["The products are theirs", "The debt is small", "There is no tax", "Misha's help"],
+      "options": ["The products are theirs", "The debt is a small one", "There is no tax to pay", "Misha's help with it"],
       "answer": 0 }
    ]
   },
@@ -739,14 +739,14 @@
     { "ask": "Who was the deal with?",
       "options": ["A customer", "A bank", "Boris", "Nobody yet"], "answer": 0 },
     { "ask": "How big is the profit?",
-      "options": ["Small", "Enormous", "There is none", "She will not say"], "answer": 0 },
+      "options": ["Small", "Large", "Huge", "None"], "answer": 0 },
     { "ask": "Was there any loss?",
-      "options": ["None", "A large one", "A small one", "They do not know yet"], "answer": 0 },
+      "options": ["None", "A lot", "A bit", "Some"], "answer": 0 },
     { "ask": "What is unusual about the arrangement?",
-      "options": ["They share the profit with the customer", "There is no tax", "It is not written down", "Boris is in it"],
+      "options": ["The customer shares the profit", "It is not written down at all", "There is no tax to pay on it", "Boris has a share in it too"],
       "answer": 0 },
     { "ask": "How does Anya feel about it?",
-      "options": ["It is theirs and she is content", "She regrets it", "She wants out", "She is worried about tax"],
+      "options": ["It is theirs, and she is content", "She regrets the whole thing now", "She wants out of it altogether", "She is worried about the tax"],
       "answer": 0 }
    ]
   },
@@ -779,9 +779,9 @@
     { "ask": "What is happening to prices?",
       "options": ["They are rising", "They are falling", "They are steady", "Nobody mentions them"],
       "answer": 0 },    { "ask": "Why does Katya object to the word \"riches\"?",
-      "options": ["They are losing money", "She dislikes Masha", "It is a secret", "It is not her firm"], "answer": 0 },
+      "options": ["They are losing money", "It is not her firm at all", "It is meant to be secret", "She dislikes Masha"], "answer": 0 },
     { "ask": "When does Katya expect it to work?",
-      "options": ["Tomorrow, if the loss stops", "Never", "Today", "In a year"], "answer": 0 }
+      "options": ["Tomorrow, if the loss stops", "Never, she seems to think", "In a year or so, perhaps", "Today, she says firmly"], "answer": 0 }
    ]
   }
  }

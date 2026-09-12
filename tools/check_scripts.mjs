@@ -202,9 +202,12 @@ export function checkOne(brief, entry) {
        * to fix: the specific answer gets written out and the wrong ones get
        * written short.
        *
-       * A warning, not an error: it is true of a third of the questions that
-       * ship, and failing the build on it would fail it on work already done.
-       * What it does is stop the next one being written that way. */
+       * It was a warning while 266 of the 840 were like that, because failing
+       * the build on it would have failed it on work already done. All 266 were
+       * rewritten on 2026-09-12 — the distractors were made the same length and
+       * the same degree of specific as the answer, in context, one lesson at a
+       * time — so the count is 0 and this is an **error** now. A rule nobody can
+       * break is worth more than a rule everybody is already breaking. */
       const right = opts[q.answer];
       const others = opts.filter((_, n) => n !== q.answer);
       if (typeof right === "string" && others.length) {
@@ -212,7 +215,8 @@ export function checkOne(brief, entry) {
         const longest = Math.max(...others.map(len));
         const shortest = Math.min(...others.map(len));
         if (len(right) - longest >= 3 || shortest - len(right) >= 3) {
-          warnings.push(`${where}: the answer is the odd one out by length — "${right}"`);
+          errors.push(`${where}: the answer is the odd one out by length — "${right}" ` +
+                      `(${len(right)} against ${others.map(len).join("/")})`);
         }
       }
     });

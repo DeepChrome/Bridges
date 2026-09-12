@@ -2050,7 +2050,7 @@ a biaspectual verb as its own partner, and the typed drill was asking the learne
 to write the word printed above the question. Found by the typed-drill check,
 which only fails on a run that happens to draw one.
 
-## 30q. The interface pass (2026-09-11)
+## 30s. The interface pass (2026-09-11)
 
 The owner picked this from four options. The complaint behind it, from a week of
 real use: *"ugly blocky squares"*. What the screens actually showed, read one by

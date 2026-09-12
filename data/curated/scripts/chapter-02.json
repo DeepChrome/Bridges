@@ -29,9 +29,9 @@
    ],
    "questions": [
     { "ask": "Who sent the man?", "options": ["Ivan", "Boris", "Anya", "Nobody sent him"], "answer": 0 },
-    { "ask": "Who has he come for?", "options": ["The two of them", "Ivan", "Anya only", "He is lost"], "answer": 0 },
+    { "ask": "Who has he come for?", "options": ["The two of them", "Ivan and nobody else", "Anya, on her own", "Nobody in particular"], "answer": 0 },
     { "ask": "How well does Boris know him?",
-      "options": ["Not well, only by reputation", "Very well", "They are brothers", "Not at all"], "answer": 0 },
+      "options": ["Not well, only by reputation", "Very well, they are friends", "They are actually brothers", "Not at all, they never met"], "answer": 0 },
     { "ask": "What does Ivan say about him, once he turns up?",
       "options": ["He is one of ours", "He is an outsider", "He talks too much", "Nothing at all"], "answer": 0 },
     { "ask": "How long has the man been there?",
@@ -64,13 +64,13 @@
    "questions": [
     { "ask": "Whose child is it?", "options": ["Masha's", "Viktor's", "Anya's", "Nobody knows"], "answer": 0 },
     { "ask": "Is the child there alone?",
-      "options": ["No, his mother is with him", "Yes", "He is with Viktor", "He is at home"], "answer": 0 },
+      "options": ["No, his mother is with him", "Yes, he is there on his own", "No, he is there with Viktor", "No, he was left at home"], "answer": 0 },
     { "ask": "How much of her time does he take?",
       "options": ["All of it", "An hour a day", "None", "Only the evenings"], "answer": 0 },
     { "ask": "Where is everyone else?",
       "options": ["Somewhere else", "Right there", "With the child", "At Viktor's"], "answer": 0 },
     { "ask": "What does Viktor offer to do?",
-      "options": ["Stay there with her", "Take the child", "Come back later", "Nothing"], "answer": 0 }
+      "options": ["Stay there with her", "Take the child home", "Come back later on", "Nothing much at all"], "answer": 0 }
    ]
   },
 
@@ -106,7 +106,7 @@
     { "ask": "How old is the child?",
       "options": ["A year", "A month", "Three", "She does not say"], "answer": 0 },
     { "ask": "What does Oleg say about Ivan?",
-      "options": ["He has been there longer than them", "He works too much", "He is Katya's brother", "He has left"],
+      "options": ["He has been there longer than them", "He works far too much these days", "He is Katya's older brother", "He left the place a year ago"],
       "answer": 0 },
     { "ask": "Which of them is still working?",
       "options": ["Oleg", "Katya", "Neither", "Both"], "answer": 0 }
@@ -137,15 +137,15 @@
    ],
    "questions": [
     { "ask": "What does Pyotr say he can do?",
-      "options": ["Anything", "Very little", "Only his own work", "He does not answer"], "answer": 0 },
+      "options": ["Anything at all", "Very little now", "Only his own work", "He will not say"], "answer": 0 },
     { "ask": "How long is his day?",
       "options": ["All day", "An hour", "Half a day", "He does not say"], "answer": 0 },
     { "ask": "Who is with him all day?",
       "options": ["His child", "Yura", "Nobody", "His wife"], "answer": 0 },
     { "ask": "Who does he say he does it for?",
-      "options": ["His child, and for Yura too", "Himself", "Ivan", "Nobody at all"], "answer": 0 },
+      "options": ["His child, and for Yura too", "Only for himself, he says", "For nobody in particular", "For Ivan, who asked him"], "answer": 0 },
     { "ask": "How does Yura take that?",
-      "options": ["He can hardly believe it", "He is annoyed", "He walks away", "He says nothing"], "answer": 0 }
+      "options": ["He can hardly believe it", "He is annoyed by it all", "He walks away from him", "He says nothing at all"], "answer": 0 }
    ]
   },
 
@@ -179,9 +179,9 @@
     { "ask": "Who does she say the work is for?",
       "options": ["Everyone", "Herself", "Misha", "Her family"], "answer": 0 },
     { "ask": "Is anyone going with her?",
-      "options": ["No, she goes alone", "Misha", "Her child", "Ivan"], "answer": 0 },
+      "options": ["No, she goes alone", "Yes, Misha comes too", "Yes, her child does", "Yes, Ivan goes too"], "answer": 0 },
     { "ask": "How does the conversation end?",
-      "options": ["She leaves straight away", "She waits", "She changes her mind", "Misha goes instead"],
+      "options": ["She leaves straight away", "She waits a little longer", "She changes her mind", "Misha goes there instead"],
       "answer": 0 }
    ]
   },
@@ -210,9 +210,9 @@
    ],
    "questions": [
     { "ask": "What is Oleg having?",
-      "options": ["Coffee and nothing else", "Beer", "Lunch", "Nothing at all"], "answer": 0 },
+      "options": ["Coffee and nothing else", "A beer with his lunch", "Lunch, like Anya", "Nothing at all today"], "answer": 0 },
     { "ask": "Why will he not have a beer?",
-      "options": ["It is the middle of the day", "He does not like it", "There is none", "He is driving"],
+      "options": ["It is the middle of the day", "He does not like the taste", "There is none left today", "He has to drive later on"],
       "answer": 0 },
     { "ask": "What does Anya want to do?",
       "options": ["Try everything", "Order coffee", "Go home", "Have a beer"], "answer": 0 },
@@ -250,16 +250,16 @@
    ],
    "questions": [
     { "ask": "Where are they?",
-      "options": ["In a new restaurant", "At Boris's flat", "In a shop", "At work"], "answer": 0 },
+      "options": ["In a new restaurant", "In a shop near by", "At work, as usual", "At Boris's flat"], "answer": 0 },
     { "ask": "What does Katya want?",
       "options": ["Cake and tea", "Bread and butter", "Only tea", "Nothing"], "answer": 0 },
     { "ask": "What is Boris having?",
-      "options": ["Tea, bread and butter", "Only cake", "Only tea", "Nothing yet"], "answer": 0 },
+      "options": ["Tea, bread and butter", "Only cake and water", "Only tea, he says", "Nothing yet at all"], "answer": 0 },
     { "ask": "How often does Boris eat there?",
       "options": ["All year round", "It is his first time", "Once a month", "Only in the evening"],
       "answer": 0 },
     { "ask": "Who joins them at the end?",
-      "options": ["Anya, who also wants cake", "Nobody", "The waiter", "Boris's brother"], "answer": 0 }
+      "options": ["Anya, who also wants cake", "Boris's younger brother", "The waiter, bringing tea", "Nobody joins them at all"], "answer": 0 }
    ]
   },
 
@@ -296,7 +296,7 @@
       "options": ["She agrees it is tasty", "She does not like fish", "She says it is too much", "She says nothing"],
       "answer": 0 },
     { "ask": "Is Sonya eating too?",
-      "options": ["Not yet", "Yes, with her", "She has already eaten", "She only drinks milk"], "answer": 0 }
+      "options": ["Not yet, she says", "Yes, along with her", "She has already eaten", "She only drinks milk"], "answer": 0 }
    ]
   },
 
@@ -326,7 +326,7 @@
     { "ask": "What does Pyotr want to eat?",
       "options": ["Salad", "Fish", "Cake", "Bread and butter"], "answer": 0 },
     { "ask": "What does Masha think of that as a lunch?",
-      "options": ["She says it is not a lunch", "She agrees", "She offers him cake", "She says nothing"],
+      "options": ["She says it is not a lunch", "She offers him cake instead", "She says nothing about it", "She agrees that it is"],
       "answer": 0 },
     { "ask": "Why does he refuse the fish?",
       "options": ["He does not eat fish", "He has already eaten", "It is not tasty", "There is none left"],
@@ -368,7 +368,7 @@
     { "ask": "What is Lena doing there?",
       "options": ["Studying", "Teaching", "Working", "Visiting Misha"], "answer": 0 },
     { "ask": "How does she choose what to study?",
-      "options": ["She studies what she loves", "Her teacher chooses", "By the timetable", "She has no choice"],
+      "options": ["She studies what she loves", "Her teacher chooses for her", "She follows the timetable", "She has no choice at all"],
       "answer": 0 },
     { "ask": "Does she make mistakes?",
       "options": ["Yes, like everyone", "No, never", "Only in one subject", "She will not say"], "answer": 0 },
@@ -403,13 +403,13 @@
    ],
    "questions": [
     { "ask": "Where is Sonya?",
-      "options": ["At the university", "At school", "At home", "At work"], "answer": 0 },
+      "options": ["At the university", "At school, teaching", "At home, studying", "At work, as usual"], "answer": 0 },
     { "ask": "What does she think of the subject?",
       "options": ["She loves it", "She finds it dull", "It is too hard", "She has not started it"], "answer": 0 },
     { "ask": "Is the whole class there?",
-      "options": ["Yes", "No, only half", "Only she is", "She does not know"], "answer": 0 },
+      "options": ["Yes, everyone is", "No, only half of it", "Only she is there", "She does not say"], "answer": 0 },
     { "ask": "How many lectures are there?",
-      "options": ["One after another, all day", "One", "Two a week", "None today"], "answer": 0 },
+      "options": ["One after another, all day", "Just the one this morning", "Two of them every week", "None at all today"], "answer": 0 },
     { "ask": "Does Sonya mind the long day?",
       "options": ["No, she loves it", "Yes, she is tired", "She is leaving early", "She says nothing"],
       "answer": 0 }
@@ -442,7 +442,7 @@
     { "ask": "What is Boris's lesson?",
       "options": ["English", "Russian", "History", "Nothing today"], "answer": 0 },
     { "ask": "What is new about it?",
-      "options": ["The teacher and the course", "The room", "The time", "Nothing is new"], "answer": 0 },
+      "options": ["The teacher and the course", "The time the class starts", "The room they are using", "Nothing at all is new here"], "answer": 0 },
     { "ask": "What can he already do?",
       "options": ["Read anything", "Write letters", "Speak with a teacher", "Nothing yet"], "answer": 0 },
     { "ask": "How long does he think it will take?",
@@ -479,7 +479,7 @@
     { "ask": "Who is the man they are talking about?",
       "options": ["Their professor", "A student", "Nina's father", "A new teacher"], "answer": 0 },
     { "ask": "What is Nina doing?",
-      "options": ["Writing down the lecture", "Reading a book", "Asking questions", "Waiting to leave"],
+      "options": ["Writing down the lecture", "Reading a book quietly", "Asking him questions", "Waiting to leave early"],
       "answer": 0 },
     { "ask": "How much does she write?",
       "options": ["Everything he says", "Only the subject", "A few words", "Nothing yet"], "answer": 0 },

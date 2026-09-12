@@ -69,13 +69,13 @@
     { "ask": "May Sonya read it?",
       "options": ["Not for another hour", "Yes, at once", "Never", "Only if she asks again"], "answer": 0 },
     { "ask": "Why not now?",
-      "options": ["She is reading it herself", "It is not hers", "It is in Russian", "She will not say"],
+      "options": ["She is reading it herself", "It is not hers to lend out", "It is written in Russian", "She will not give a reason"],
       "answer": 0 },
     { "ask": "What does Sonya say about her?",
       "options": ["She always has a book", "She never reads", "She reads too slowly", "She should sit down"],
       "answer": 0 },
     { "ask": "Why does she sit over there?",
-      "options": ["It is where she always reads", "It is quieter", "Sonya is here", "There is more light"],
+      "options": ["It is where she always reads", "It is quieter than in here", "There is more light over there", "Sonya is sitting in here"],
       "answer": 0 }
    ]
   },
@@ -147,7 +147,7 @@
       "options": ["A lot — she will not say more", "Nothing, it was her father's", "Very little", "She gives the exact sum"],
       "answer": 0 },
     { "ask": "Who lives in it?",
-      "options": ["Nina and her father", "Nina alone", "Her whole family", "Her father alone"], "answer": 0 },
+      "options": ["Nina and her father", "Nina, all on her own", "Her whole family too", "Her father, alone"], "answer": 0 },
     { "ask": "What does her father need most?",
       "options": ["Time", "Money", "A new house", "Company"], "answer": 0 },
     { "ask": "When does Nina play?",
@@ -179,16 +179,16 @@
    ],
    "questions": [
     { "ask": "Why will Viktor not go?",
-      "options": ["He does not like the place", "He has no money", "He is working", "He is not invited"],
+      "options": ["He does not like the place", "He has no money for it now", "He is working that evening", "He was not invited at all"],
       "answer": 0 },
     { "ask": "Does Sonya usually go with anyone?",
-      "options": ["No, she always goes alone", "Always with Viktor", "With her family", "She never goes"],
+      "options": ["No, she always goes alone", "Yes, always with Viktor", "No, she never goes there", "Yes, with her family"],
       "answer": 0 },
     { "ask": "What changes Viktor's mind?",
-      "options": ["That she would go alone", "That she asks him", "That it is today", "Nothing changes it"],
+      "options": ["That she would go alone", "That she asks him along", "That it is happening today", "Nothing changes it at all"],
       "answer": 0 },
     { "ask": "How does Sonya take his change of heart?",
-      "options": ["She points out he never goes", "She tells him to stay", "She is annoyed", "She does not notice"],
+      "options": ["She points out he never goes", "She tells him to stay at home", "She is annoyed with him", "She does not notice it"],
       "answer": 0 },
     { "ask": "How does it end?",
       "options": ["They go together", "She goes alone", "Neither goes", "They argue"], "answer": 0 }
@@ -253,7 +253,7 @@
    ],
    "questions": [
     { "ask": "Where is Katya staying?",
-      "options": ["At a hotel on the square", "With Boris", "By the airport", "In the park"], "answer": 0 },
+      "options": ["At a hotel on the square", "With Boris, in the centre", "Out by the airport road", "In a flat by the park"], "answer": 0 },
     { "ask": "What is next to her hotel?",
       "options": ["The museum", "Her office", "The airport", "Nothing at all"], "answer": 0 },
     { "ask": "Where is the park?",
@@ -261,7 +261,7 @@
     { "ask": "Where does she work?",
       "options": ["By the airport", "On the square", "In the museum", "At the hotel"], "answer": 0 },
     { "ask": "What does Boris think of the office being there?",
-      "options": ["He points out it is not central", "He thinks it is convenient", "He has an office there too", "He says nothing"],
+      "options": ["He points out it is not central", "He says it is very convenient", "He has an office there too", "He says nothing about it"],
       "answer": 0 }
    ]
   },
@@ -298,7 +298,7 @@
     { "ask": "How long has the building work been going on?",
       "options": ["A year", "Always", "A month", "It has just begun"], "answer": 0 },
     { "ask": "What does her village not have?",
-      "options": ["A station or a post office", "A church", "Any people", "A library"], "answer": 0 }
+      "options": ["A station or a post office", "A church or a proper shop", "Any people living there", "A library or a school"], "answer": 0 }
    ]
   },
 
@@ -368,12 +368,12 @@
       "options": ["By the monument", "In the next block", "Behind the shop window", "There is none"],
       "answer": 0 },
     { "ask": "Where exactly is the pharmacy?",
-      "options": ["Behind the shop window", "By the monument", "In the next block", "Next to the cinema"],
+      "options": ["Behind the shop window", "By the monument, left", "In the very next block", "Right next to the cinema"],
       "answer": 0 },
     { "ask": "What is happening in this block?",
       "options": ["It is being built", "It is being pulled down", "Nothing", "A market is on"], "answer": 0 },
     { "ask": "What do they agree about the place?",
-      "options": ["It is a city, not a small town", "It is too quiet", "It has changed little", "It is a village"],
+      "options": ["It is a city, not a small town", "It is much too quiet for them", "It has changed very little here", "It is really a village at heart"],
       "answer": 0 }
    ]
   },
@@ -402,7 +402,7 @@
    ],
    "questions": [
     { "ask": "Where is the cathedral?",
-      "options": ["In a lane behind the market", "By the highway", "In the village", "On the square"],
+      "options": ["In a lane behind the market", "Out in the village, beyond", "On the square in the centre", "Beside the highway in town"],
       "answer": 0 },
     { "ask": "What is the lane called?",
       "options": ["Market Lane", "Village Lane", "Cathedral Lane", "It has no name"], "answer": 0 },
@@ -444,7 +444,7 @@
       "options": ["He does not like cars", "He has no money", "He is working", "He is afraid of flying"],
       "answer": 0 },
     { "ask": "How does he travel instead?",
-      "options": ["He flies or goes by water", "He walks", "He takes the train", "He stays at home"],
+      "options": ["He flies or goes by water", "He takes the train there", "He simply stays at home", "He walks the whole way"],
       "answer": 0 },
     { "ask": "When will he get there?",
       "options": ["In a day", "Before her", "At the same time", "He is not going at all"], "answer": 0 },
@@ -513,7 +513,7 @@
    ],
    "questions": [
     { "ask": "What is Boris checking?",
-      "options": ["Her passport and visa", "Her ticket", "The taxi", "Her luggage"], "answer": 0 },
+      "options": ["Her passport and visa", "The taxi she ordered", "Her luggage and bags", "Her ticket and seat"], "answer": 0 },
     { "ask": "How old is the visa?",
       "options": ["A year", "A month", "It is brand new", "She has none"], "answer": 0 },
     { "ask": "How is she travelling?",
@@ -550,9 +550,9 @@
    ],
    "questions": [
     { "ask": "When is Sonya leaving?",
-      "options": ["Today", "Tomorrow", "In a week", "She is not leaving"], "answer": 0 },
+      "options": ["Today", "Sunday", "Friday", "At six"], "answer": 0 },
     { "ask": "Where is her luggage?",
-      "options": ["In the first carriage", "Still at home", "With Yura", "She has none"], "answer": 0 },
+      "options": ["In the first carriage", "Still back at her home", "With Yura, on the platform", "She has none with her"], "answer": 0 },
     { "ask": "Has she a map?",
       "options": ["Yes", "No", "Yura gives her one", "She does not need one"], "answer": 0 },
     { "ask": "How does she feel about travelling?",
@@ -595,7 +595,7 @@
     { "ask": "When will she be back?",
       "options": ["In a year", "Tomorrow", "Never", "She does not say"], "answer": 0 },
     { "ask": "What is the mood at the end?",
-      "options": ["A goodbye, but not for good", "A row", "Indifference", "A celebration"], "answer": 0 }
+      "options": ["A goodbye, but not for good", "A row about the motorcycle", "Indifference on both sides", "A celebration of some kind"], "answer": 0 }
    ]
   },
 

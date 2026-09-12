@@ -54,7 +54,12 @@ export function TextInput({ style, ...rest }) {
    lets a step's primary action sit at the foot of it with marginTop:"auto" instead of
    floating wherever the card happens to end. Opt-in per screen: a list does not want
    its last row shoved to the bottom. */
-export function Screen({ children, scroll = true, fill = false }) {
+/* `safeTop` keeps the status-bar inset. Only the gate wants it: every other
+   screen sits under a navigation header that has already taken that space, and
+   taking it a second time put an empty band the height of the status bar at the
+   top of every screen in the app — about 48 px of nothing under every header,
+   which is most of why the screens read as floating. */
+export function Screen({ children, scroll = true, fill = false, safeTop = false }) {
   const t = useTheme();
   const Body = scroll ? ScrollView : View;
   /* Every screen's content arrives rather than appearing. The stack already
@@ -65,7 +70,7 @@ export function Screen({ children, scroll = true, fill = false }) {
      (§30n′), so nothing has to settle before it can be pressed or found. */
   const enter = useEnter();
   return (
-    <SafeAreaView edges={["top"]} style={{ flex: 1, backgroundColor: t.bg }}>
+    <SafeAreaView edges={safeTop ? ["top"] : []} style={{ flex: 1, backgroundColor: t.bg }}>
       <Animated.View style={[{ flex: 1 }, enter]}>
       <Body
         testID="screen-body"

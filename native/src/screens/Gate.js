@@ -71,8 +71,10 @@ function Middle({ children }) {
     const hide = Keyboard.addListener("keyboardDidHide", () => setPad(0));
     return () => { show.remove(); hide.remove(); };
   }, []);
+  // `safeTop`: the one screen with no navigation header above it, so the one
+  // that has to take the status-bar inset itself.
   return (
-    <Screen fill>
+    <Screen fill safeTop>
       <View style={{ flex: 1, justifyContent: "center", paddingBottom: pad }}>
         {children}
       </View>

@@ -825,6 +825,31 @@ a hard problem:
    measurement gets reviewed like code, or it is just a number with a decimal
    point.
 
+### Open, found on 2026-09-16 and deliberately not fixed in Phase 5
+
+- **13.34 — a flashcard's back can be a paragraph of Tolstoy.** The back of «вы»
+  drew a 25-word sentence from *War and Peace*, its English cut off mid-word
+  ("and using th"), above three short example sentences that were all perfectly
+  level-matched. The card takes its examples in rank order with no length or
+  level filter, and `numberOfLines` clips without an ellipsis. Two separate
+  faults, both in the example ranking rather than in Study. Read
+  `rank_examples` in `build_site.py` and the sense examples from `senses.db`
+  (§30q) together before touching either.
+- **13.35 — a wall-clock budget asserted inside a parallel jest run measures the
+  machine.** `dayend.test.js`'s "scans 10,000 cards in under 5 ms" passes alone
+  (0.9 ms, §30u) and failed once in a full 59-suite run, then passed on the
+  re-run. It is not yet a §23 flake with a cause — it is a budget with no
+  headroom for contention. The fix is to measure the work rather than the clock,
+  or to give the budget a margin that says so; weakening the number to silence
+  it is the thing not to do.
+- **13.36 — `last={k === xs.length - 1}` is still computed at six call sites.**
+  §30i says `List` decides which of its rows is last and no call site should
+  claim it; `List` overrides what a row claims, so these are inert rather than
+  wrong — which is exactly why nobody has removed them. Five in `Flows.js` and
+  `Misc.js` over `.map`ped lists, one in `lesson.js`. Dead arithmetic that reads
+  as load-bearing, and the next person to copy the pattern into a list with a
+  conditional row writes the Settings hairline bug again.
+
 ## Phase 12 — What is actually left (2026-09-10)
 
 **Superseded by Phase 13 above; kept because the reasoning still reads.**

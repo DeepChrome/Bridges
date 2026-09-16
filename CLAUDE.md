@@ -2756,6 +2756,96 @@ were plausible; that is what pricing is for.
   worst, or two of three) as a judgement about what the list is for, and not
   the threshold as a way of making a metric smaller.
 
+## 30ab. Phase 5, and the speaking section (2026-09-16)
+
+**Haptics** — `native/src/haptics.js`, one file for the same reason `motion.js`
+is one. Four calls: `right()`, `wrong()`, `done()` (a run passed) and `tap()`
+(the weight of a grade button). **Nothing else vibrates.** A phone that buzzes
+at everything is a phone whose owner turns the motor off, and then the three
+that carry meaning are gone with it, so rows, links, tabs and the transport are
+silent. The switch is read once in `App.js` (`setHaptics`), never at a call
+site; `Settings → Vibration`. A buzz leaves nothing in the render tree, so
+`jest.setup.js` records every call on `global.__buzz` — the same blind spot the
+audio session had (§30h′), fixed the same way — and the suite asserts the
+**silences** as much as the buzzes: off when the setting is off, and never on a
+`Done` used as an empty-state message box.
+
+**Accessibility, measured.** The playbook asked for an `accessibilityLabel` on
+every pressable and that is the wrong rule here: **a label replaces the text a
+reader would otherwise announce**, so one on a button that already says
+"Continue" makes it worse and a stale one makes it a lie. The question is
+whether a reader can *name* a control and know it is one. Of 55 hand-rolled
+Pressables, exactly **one** was icon-only and unnamed and **twelve** carried no
+role. Three of the twelve were `Btn`, `Row` and the sheet backdrop, which draw
+most of the controls in the app — fixing the primitives covered nearly all of
+it. `Row` takes the role only when it has an `onPress`: a row that is a place to
+put two pieces of text is not a control, and calling it one sends a reader
+hunting for what it does.
+
+**The streak calendar** (`Stats.js`, `CAL_WEEKS` 12) is drawn from the review
+log and never from `st.streak`, which `touchStreak` stamps from the session
+loader and so counts *opening the app* (§30t). Days after today are marked
+`future` and drawn as nothing — a zero and a day that has not arrived are not
+the same thing, and painting them alike reads as four missed days every Monday.
+
+**Two defects came off the walkthrough shots**, which is what §31 says they are
+for:
+
+- **Study's four grade buttons were below the fold.** The back of «этот»
+  carries a four-line sense, two example pairs and three sentences, so the one
+  thing the screen is *for* could only be reached by scrolling past everything
+  it shows. `Screen`'s `footer` was built for exactly this (the quiz builder's
+  Start under thirty-four chapters of chips) and is the fix; `controls.test.js`
+  pins them off the scroll.
+- **A question with no prompt has nothing to centre.** `question-block` grew to
+  take the slack, so the build-up drill put one small grey caption in the middle
+  of the screen and the whole drill under the fold with six hundred pixels
+  between them. The slack goes to the activity instead.
+
+### The speaking section, and word building rebuilt (the owner, same day)
+
+"Listening and speaking" was one section of five rows and he could not find the
+mouth drills in it. Split: **Listening** (Conversations, Native speed) and
+**Speaking** (Repeat a sentence, Word building, Talk, Alphabet). *Sounds* became
+*Alphabet* — the old name described the vowel chart and hid the thirty-three
+letters under it. **Word building has a row of its own**: it was reachable only
+from a second button inside Sounds, which is how he studied for a week without
+meeting it (rule 20.8 — one home).
+
+`core/buildup.js` now builds **forwards**, on his instruction, given twice, the
+second time after using the drill. The tradeoff is recorded in the file rather
+than argued with: Pimsleur builds backwards so the ending — where the stress
+sits and where a learner's pronunciation collapses — is right from the first
+repetition, and forwards the learner reaches it last, having said the front four
+times. It is three lines in one function if the endings start slipping.
+
+Four more rules the activity now holds, each because he named it:
+
+- **One voice.** He heard the finished word arrive in a woman's voice after
+  four fragments in the phone's: `say()` prefers a recording from the collection
+  and the whole word has one. `speakLine` is the device throughout — the rule a
+  written scenario already follows (§30l) — and the test asserts **no player is
+  ever opened**, because a recording is what a second voice would have been.
+- **A new word is read whole, twice, with a pause, before any syllable.** You
+  cannot aim at a target you have not heard. `Start` skips it.
+- **The word and its meaning stay at the top** for the length of it.
+- **The word before and the word after.** `allowBack` is opt-in on the Runner
+  and only the mouth drills pass it: in a quiz, going back is a way to re-answer
+  something already marked, and the mark is the point.
+- **"Should the phone listen?"**, asked once on the way in and rides on each
+  question as `listen`. It reports what it heard and never marks anyone wrong,
+  and it listens **only for the finished word** — the recogniser was measured on
+  2–4-word sentences (§30c) and scoring «пони» would be inventing a verdict out
+  of noise, which is the rule the Pair drill made (§30o). A choice per run
+  rather than a setting, because some days you are somewhere you can talk aloud.
+
+**And the trap.** The chooser used `T.title` in a file that had never imported
+`type as T`, and the release build died on the tap that opens the drill. Every
+suite drove the *activity* through a hand-made `steps` array; none had ever
+mounted the flow around it. **A screen no test mounts has no coverage at all,
+whatever the count says** — when an activity gets a flow of its own, mount the
+flow.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

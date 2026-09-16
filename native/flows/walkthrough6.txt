@@ -1,0 +1,78 @@
+# Practice split into Listening and Speaking, and the word-building drill
+# rebuilt (the owner, 2026-09-16).
+#
+#   adb shell pm clear app.bridges.russian; launch; then
+#   .\native\tools\walk.ps1 -Flow native\flows\walkthrough6.txt -Device emulator-5554
+#
+# Screenshots land in native/screenshots/walk/. Read them — that is the audit.
+# The emulator needs a universal APK; the arm64 build that goes to the phone
+# will not install on it (§31).
+
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+tap:^Skip$
+wait:2
+tap:^Start from the beginning$
+wait:3
+
+# Developer mode ships on (rule 20.9), so the drill pool is the whole
+# curriculum and there are long words to build from the first screen.
+tap:^Practice$
+wait:3
+shot:70-practice-sections
+expect:^Speaking$
+expect:^Listening$
+expect:^Word building$
+expect:^Alphabet$
+expect:^Repeat a sentence$
+
+# The question on the way in. Two buttons, nothing else on the screen.
+# Alphabet first: renamed, and the build-up button that used to hide inside it
+# is gone. Checked before the drill rather than after, because leaving a run
+# that has answered something asks the learner to confirm, and the walk tool
+# has no way to answer a question it cannot predict.
+tap:^Alphabet$
+wait:3
+shot:78-alphabet
+expect:^Practise these sounds$
+back
+wait:2
+
+tap:^Word building$
+wait:3
+shot:71-build-listen-ask
+expect:^Should the phone listen\?$
+tap:^Just play it$
+
+# A new word opens with the whole word read twice. The card shows the word,
+# not a syllable, while that is happening. No `expect` on the button: the
+# intro is a second or two and the shot is the record — asserting on a state
+# that is meant to pass would be asserting on the walk tool's own latency.
+shot:72-build-intro
+wait:4
+
+# …then the first syllable, with the whole word and its meaning still above it.
+shot:73-build-first-syllable
+expect:^Add a syllable$
+tap:^Add a syllable$
+wait:2
+shot:74-build-two-syllables
+tap:^Add a syllable$
+wait:2
+shot:75-build-three-syllables
+
+# The controls: skip to the next word, then back to the one before.
+tap:^Skip ▶$
+wait:2
+tap:^Continue$
+wait:3
+shot:76-build-second-word
+tap:^◀ Previous$
+wait:3
+shot:77-build-back
+# No `expect` on the word itself: which six words the drill draws is random,
+# and a Cyrillic literal in a flow file is a PowerShell encoding trap (§23).
+expect:^Add a syllable$

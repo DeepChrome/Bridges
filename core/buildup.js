@@ -1,19 +1,17 @@
-/* Backward build-up: a long word learned from its end (the owner, 2026-09-16).
+/* Word building: a long word said a syllable at a time (the owner, 2026-09-16).
  *
- * Pimsleur's technique, and it runs **backwards** for a reason. To learn
- * «понимаю» you hear "ю", then "маю", then "нимаю", then "понимаю" — each
- * fragment a syllable longer, and always anchored at the end of the word.
- * Building forwards instead ("по", "пони", "понима") trains the opposite
- * habit: the learner arrives at the ending last, tired, and swallows it, and
- * a swallowed ending is the most common way a Russian word comes out wrong.
- * Starting from the end keeps the word's stress and its intonation contour
- * right from the first repetition and adds to the front of something already
- * correct.
+ * It runs **forwards** — «по», «пони», «понима», «понимаю» — because the owner
+ * asked for it that way twice, the second time after using the drill.
  *
- * (The owner described it forwards. This is the one place the implementation
- * deliberately does not follow the brief, because the direction *is* the
- * technique; the note is here so the difference is visible rather than a
- * silent correction.)
+ * The tradeoff is recorded rather than argued, because it is real and it is
+ * his to make. Pimsleur's own build-up runs backwards ("ю", "маю", "нимаю"),
+ * and the reason is that a fragment anchored at the *end* of the word gets the
+ * stress and the final vowel right from the first repetition; building
+ * forwards the learner reaches the ending last, having already said the front
+ * four times, and a swallowed ending is the commonest way a Russian word comes
+ * out wrong. Forwards is easier to follow and reads as "the word so far",
+ * which is what he wanted. The direction lives in this one function, so it is
+ * a three-line change if the endings start slipping.
  *
  * Nothing here is vocabulary. Like `pairDrill` in core/alphabet.js, these
  * questions carry no lemma index: pronouncing «понимаю» is not the same claim
@@ -91,12 +89,12 @@ export function syllables(word) {
   return out.filter((s) => s.length);
 }
 
-/* The fragments, shortest last-syllable first, ending in the whole word.
+/* The fragments: the first syllable, then the first two, up to the whole word.
    A word of one syllable has nothing to build and returns just itself. */
 export function buildup(word) {
   const syl = syllables(word);
   const out = [];
-  for (let i = syl.length - 1; i >= 0; i--) out.push(syl.slice(i).join(""));
+  for (let i = 1; i <= syl.length; i++) out.push(syl.slice(0, i).join(""));
   return out;
 }
 
@@ -107,8 +105,13 @@ export const worthBuilding = (word) => syllables(word).length >= MIN_SYLLABLES;
 
 /* `words` is [{ ru, en }] — the caller decides which (the app hands in what
    the learner is studying). Longest first inside the shuffle would make the
-   drill front-load its hardest; it is shuffled and left alone. */
-export function buildupDrill(words, n = 6) {
+   drill front-load its hardest; it is shuffled and left alone.
+
+   `prompt` stays empty on purpose. The whole word and its meaning are drawn by
+   the activity itself, at the top, where they stay for the length of the word
+   — the runner's prompt block would centre them in the slack and push the
+   drill under the fold. */
+export function buildupDrill(words, n = 6, opts = {}) {
   const usable = (words || []).filter((w) => w && w.ru && worthBuilding(w.ru));
   return shuffle(usable.slice()).slice(0, n).map((w) => ({
     kind: "buildup",
@@ -116,7 +119,10 @@ export function buildupDrill(words, n = 6) {
     en: w.en || "",
     steps: buildup(w.ru),
     cyr: true,
-    ask: "Listen, then say it back",
+    /* Whether the learner asked to be listened to. Decided once, on the way in
+       (Flows.js), because a question per word would be the drill. */
+    listen: !!opts.listen,
+    ask: opts.listen ? "Listen, then say it back" : "Listen, then say it out loud",
     prompt: "",
   }));
 }

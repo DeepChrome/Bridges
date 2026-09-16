@@ -66,11 +66,11 @@ export default function Sounds({ navigation }) {
           belongs with the letters (rule 20.8). */}
       <Btn kind="pri" testID="sound-drill" label="Practise these sounds"
            onPress={() => navigation.navigate("SoundDrill")} />
-      {/* The other half of a mouth: the sounds above are single contrasts, and
-          this is a whole long word, taken from its end (core/buildup.js). */}
-      <Btn testID="build-drill" label="Build up a long word"
-           style={{ marginTop: 8, marginBottom: 20 }}
-           onPress={() => navigation.navigate("BuildDrill")} />
+      {/* Word building used to be a second button here and nowhere else, which
+          is how the owner came to be studying for a week without meeting it.
+          It is a row under Practice → Speaking now, with the rest of the mouth
+          work, and one home is all it gets (rule 20.8). */}
+      <View style={{ marginBottom: 20 }} />
 
       <SectionLabel>The six vowel sounds</SectionLabel>
       <VowelChart />

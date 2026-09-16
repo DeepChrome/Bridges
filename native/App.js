@@ -196,15 +196,15 @@ function PracticeStack() {
       <Stack.Screen name="Listening" component={ListeningList} options={{ title: "Native speed" }} />
       <Stack.Screen name="Passage" component={PassageFlow} options={{ title: "Listening" }} />
       {/* The conversations to choose from, and one of them being listened to. */}
-      <Stack.Screen name="SceneList" component={ScenesList} options={{ title: "Listening" }} />
+      <Stack.Screen name="SceneList" component={ScenesList} options={{ title: "Conversations" }} />
       <Stack.Screen name="Scenes" component={ListeningFlow} options={{ title: "Listening" }} />
-      <Stack.Screen name="Sounds" component={Sounds} options={{ title: "Sounds" }} />
+      <Stack.Screen name="Sounds" component={Sounds} options={{ title: "Alphabet" }} />
       {/* The pronunciation drill, reached from Sounds (ROADMAP P10.8). */}
       <Stack.Screen name="SoundDrill" component={SoundDrillFlow}
                     options={{ title: "Practise sounds" }} />
-      {/* A long word from its end, a syllable at a time (core/buildup.js). */}
+      {/* A long word a syllable at a time, front to back (core/buildup.js). */}
       <Stack.Screen name="BuildDrill" component={BuildDrillFlow}
-                    options={{ title: "Build-up" }} />
+                    options={{ title: "Word building" }} />
       {/* Hear a sentence and say it back (ROADMAP P10.6). */}
       <Stack.Screen name="Shadow" component={ShadowFlow} options={{ title: "Shadowing" }} />
       <Stack.Screen name="Drill" component={DrillFlow}

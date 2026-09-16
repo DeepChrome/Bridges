@@ -586,11 +586,15 @@ group("backward build-up");
      "no fragment begins with a floating stress mark");
   ok(s("понима́ю").includes("ма́"), "and the mark stays on the vowel it belongs to");
 
+  /* Forwards, on the owner's instruction of 2026-09-16 — he asked twice, the
+     second time having used the drill. The tradeoff (Pimsleur builds backwards,
+     and an ending reached last is an ending that gets swallowed) is written
+     down in core/buildup.js rather than argued with here. */
   const b = buildup("понима́ю");
-  ok(b.length === 4 && b[0] === "ю" && b[b.length - 1] === "понима́ю",
-     "the build runs ю → ма́ю → нима́ю → понима́ю", b.join(" | "));
-  ok(b.every((f, i) => i === 0 || f.endsWith(b[i - 1])),
-     "every step ends with the step before it — that is what backwards means");
+  ok(b.length === 4 && b[0] === "по" && b[b.length - 1] === "понима́ю",
+     "the build runs по → пони → понима́ → понима́ю", b.join(" | "));
+  ok(b.every((f, i) => i === 0 || f.startsWith(b[i - 1])),
+     "every step begins with the step before it — that is what forwards means");
   ok(b.every((f, i) => i === 0 || f.length > b[i - 1].length), "and each is longer than the last");
 
   ok(!worthBuilding("дом") && !worthBuilding("до́ма") && worthBuilding("понима́ю"),

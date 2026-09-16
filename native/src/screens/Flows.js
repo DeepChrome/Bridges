@@ -4,7 +4,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { View, Pressable } from "react-native";
 import { useSession } from "../session";
-import { useTheme, radius } from "../theme";
+import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Text } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
@@ -198,40 +198,70 @@ export function SoundDrillFlow({ navigation }) {
   );
 }
 
-/* Backward build-up (core/buildup.js): the long words the learner is actually
-   studying, each taken apart from its end. Drawn from `drillPool` like every
-   other drill, so nobody is asked to pronounce a word they have not met. */
+/* Word building (core/buildup.js): the long words the learner is actually
+   studying, each said a syllable at a time. Drawn from `drillPool` like every
+   other drill, so nobody is asked to pronounce a word they have not met.
+
+   One question on the way in — should the phone listen? — and then it is not
+   asked again (the owner, 2026-09-16). It is a choice and not a setting because
+   it is a choice about *this run*: some days you are somewhere you can talk out
+   loud and some days you are not. `listen` rides on each question rather than
+   being read from state inside the activity, which keeps the activity a
+   function of its question (registry.test.js). */
 export function BuildDrillFlow({ navigation }) {
   const { st } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
-  const steps = useMemo(() => buildupDrill(
-    drillPool(st).map((i) => ({ ru: L[i].w, en: firstSense(L[i]) })), BUILD_DRILL_N,
-  ), [seed, st.seen]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const [listen, setListen] = useState(null);      // null until the question is answered
+  const t = useTheme();
+  const words = useMemo(
+    () => drillPool(st).map((i) => ({ ru: L[i].w, en: firstSense(L[i]) })),
+    [st.seen]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const steps = useMemo(() => buildupDrill(words, BUILD_DRILL_N, { listen: !!listen }),
+                        [words, seed, listen]);
   useAudioStopOnLeave();
 
   if (result) {
     return (
       <Done
-        title="Build-up"
-        detail={`${result.total} ${result.total === 1 ? "word" : "words"}, end first`}
-        onAgain={() => { setResult(null); setSeed(seed + 1); }}
+        title="Word building"
+        detail={`${result.total} ${result.total === 1 ? "word" : "words"}`}
+        onAgain={() => { setResult(null); setListen(null); setSeed(seed + 1); }}
         againLabel="Again"
         onBack={() => navigation.goBack()}
       />
     );
   }
-  if (!steps.length) {
+  if (!buildupDrill(words, BUILD_DRILL_N).length) {
     return (
       <Done
-        title="Build-up"
+        title="Word building"
         detail="No long words yet"
         onBack={() => navigation.goBack()}
       />
     );
   }
+  if (listen === null) {
+    /* Two buttons and the question, in the middle of the screen. Not a sheet:
+       there is nothing behind it yet. */
+    return (
+      <Screen fill>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 16 }}>
+          <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
+            Should the phone listen?
+          </Text>
+          <Muted style={{ textAlign: "center", marginTop: 8 }}>
+            It says what it heard, and never marks you wrong
+          </Muted>
+        </View>
+        <Btn kind="pri" testID="build-listen-yes" label="Listen" onPress={() => setListen(true)} />
+        <Btn kind="ghost" testID="build-listen-no" label="Just play it" style={{ marginTop: 8 }}
+             onPress={() => setListen(false)} />
+      </Screen>
+    );
+  }
   return (
-    <Runner steps={steps} recycle={false} navigation={navigation}
+    <Runner steps={steps} recycle={false} allowBack navigation={navigation}
             onFinish={(r) => setResult(r)} />
   );
 }
@@ -424,7 +454,13 @@ export function DrillList({ navigation }) {
           ? <Pill tone="good">{(st.drills.quiz.best) + "%"}</Pill> : null}
       </Pressable>
 
-      <SectionLabel>Listening and speaking</SectionLabel>
+      {/* Listening and speaking used to be one section of five rows, and the
+          owner could not find the mouth drills in it (2026-09-16): taking
+          Russian in and putting it out are two different things to sit down to,
+          and a learner deciding "I want to practise speaking" was reading past
+          two listening rows to get there. Split, with speaking second because
+          that is the order the skills arrive in. */}
+      <SectionLabel>Listening</SectionLabel>
       <List>
         {/* Listening at the learner's level comes first, and the native-speed
             one says plainly that it is harder. The owner found the video
@@ -432,8 +468,8 @@ export function DrillList({ navigation }) {
         <Row onPress={() => navigation.navigate("SceneList")}>
           <Thumb id="listen" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Listening</Text>
-            <Muted>Conversations at the level you are on</Muted>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Conversations</Text>
+            <Muted>At the level you are on</Muted>
           </View>
           {((st.drills || {}).listening || {}).best
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
@@ -447,14 +483,26 @@ export function DrillList({ navigation }) {
             <Muted>Half a minute of a real speaker · much harder</Muted>
           </View>
         </Row>
-        {/* Listen, then say it back (P10.6). Sits between the two listening
-            rows and Talk because that is what it is: the step from taking
-            Russian in to putting it out, with the model still in your ear. */}
+      </List>
+
+      <SectionLabel style={{ marginTop: 18 }}>Speaking</SectionLabel>
+      <List>
+        {/* Hear it, say it back (P10.6) — the step from taking Russian in to
+            putting it out, with the model still in your ear. */}
         <Row onPress={() => navigation.navigate("Shadow")}>
           <Thumb id="shadow" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Shadowing</Text>
-            <Muted>Hear a sentence and say it straight back</Muted>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Repeat a sentence</Text>
+            <Muted>Hear it and say it straight back</Muted>
+          </View>
+        </Row>
+        {/* A row of its own, rather than a button inside Alphabet. It was
+            reachable only from there and the owner never found it. */}
+        <Row onPress={() => navigation.navigate("BuildDrill")}>
+          <Thumb id="buildup" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Word building</Text>
+            <Muted>A long word, a syllable at a time</Muted>
           </View>
         </Row>
         <Row onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
@@ -465,12 +513,14 @@ export function DrillList({ navigation }) {
           </View>
         </Row>
         {/* The letters and the mouth behind them (ROADMAP P10.2). Open from the
-            first screen: nothing else in the app teaches the alphabet. */}
-        <Row last onPress={() => navigation.navigate("Sounds")}>
+            first screen: nothing else in the app teaches the alphabet. Named
+            for the letters rather than for "sounds", which described the vowel
+            chart and hid the thirty-three characters underneath it. */}
+        <Row onPress={() => navigation.navigate("Sounds")}>
           <Thumb id="letters" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Sounds</Text>
-            <Muted>The alphabet, the vowel pairs and the vowel chart</Muted>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Alphabet</Text>
+            <Muted>The letters, the vowel pairs and the chart</Muted>
           </View>
         </Row>
       </List>

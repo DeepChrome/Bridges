@@ -355,7 +355,8 @@ export function useAudioStopOnLeave() {
    only, so the retake is practice, not a second chance at the mark; the retake
    is still a review for the scheduler. Off for the placement and section tests,
    which measure rather than teach, and for the one-question vocabulary runner. */
-export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true, navigation }) {
+export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true,
+                         allowBack = false, navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
   const [queue, setQueue] = useState(() => steps.slice());
@@ -498,6 +499,23 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setUsedHint(false);
   };
 
+  /* A step backwards, for a run where that is a sensible thing to want.
+   *
+   * Opt-in (`allowBack`) and nothing but the mouth drills passes it: in a quiz
+   * this would be a way to re-answer a question already marked, and the mark is
+   * the point. In a pronunciation drill there is no mark — the learner wants
+   * the word before because they want to say it again, which is the method.
+   * Nothing is un-tallied: a step already answered stays answered in the
+   * record, and revisiting it cannot score twice (`q.retry` guards that). */
+  const back = !allowBack || at === 0 ? undefined : () => {
+    if (sayTimer.current) { clearTimeout(sayTimer.current); sayTimer.current = null; }
+    setAt(at - 1);
+    setAnswered(false);
+    setVerdict(null);
+    setPicked(null);
+    setUsedHint(false);
+  };
+
   const answer = q.options ? q.options.find((o) => o.right) : null;
   const right = verdict ? verdict.right : null;
   const partial = verdict && verdict.right === false && verdict.credit > 0;
@@ -601,7 +619,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       <Animated.View key={at} testID="answer-block"
                      style={[answerIn, !q.prompt && !hasInput(q)
                        ? { flexGrow: 1, justifyContent: "center" } : null]}>
-        {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip, usedHint }) : null}
+        {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip, usedHint, back, next }) : null}
       </Animated.View>
 
       {answered ? (

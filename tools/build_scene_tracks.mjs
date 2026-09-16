@@ -26,7 +26,7 @@
  * compares the hash and falls back to the device voices instead (§27).
  */
 
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -37,6 +37,11 @@ const SCRIPTS = join(ROOT, "data", "curated", "scripts");
 const TRACKS = join(ROOT, "native", "assets", "scenes");
 const MODULE = join(ROOT, "native", "src", "scenetracks.js");
 const WORK = join(ROOT, "data", "_work", "scenes");
+/* Levelled copies of the clips, cached: a clip is keyed by a content hash and
+   never changes unless its text does, so this is computed once per line for
+   the life of the script. Under _work because it is derived — the purchase is
+   `data/scenario_audio`, and nothing here may touch it (rule 20.3). */
+const LEVELS = join(WORK, "levelled");
 
 /* Must equal GAP_MS in native/src/scenario.js — the breath between two turns.
    It is baked into the file here rather than left to the player, because a gap
@@ -54,6 +59,77 @@ function hash32(s) {
 }
 
 const ff = (bin, args) => execFileSync(bin, args, { stdio: ["ignore", "pipe", "pipe"] }).toString();
+/* ffmpeg reports on **stderr** and exits 0 doing it, so anything that reads a
+   filter's output has to look there. */
+const ffBoth = (bin, args) => {
+  const r = spawnSync(bin, args, { encoding: "utf8", timeout: 120000 });
+  return String(r.stderr || "") + String(r.stdout || "");
+};
+
+/* One level for every line (PLAYBOOK 4.2).
+ *
+ * Measured 2026-09-16, before this existed: the loudness swings **6.5 to 7.6 dB
+ * inside a single conversation** — one speaker plainly quieter than the other —
+ * and every one of the 168 tracks peaked at or above full scale (median 0.0
+ * dBTP, worst +0.3), which is clipping, and it is what makes speech sound
+ * crunchy through a phone speaker. Neither is a fault of the voices, which is
+ * why this is the fix rather than a different provider.
+ *
+ * **Linear**, not dynamic: `loudnorm` in one pass rides the level and pumps on
+ * speech. Two passes with the measurement handed back apply a single gain to
+ * the whole clip, which changes nothing but how loud it is.
+ *
+ * **Per clip, not per track**, because the swing is inside the conversation;
+ * normalising the finished track would leave the quiet speaker quiet.
+ *
+ * The clips' own format is kept (24 kHz mono, 32 kbps) so the stitch below is
+ * still a frame copy and the bundle does not grow. That costs one encode
+ * generation, which is the price of touching the level at all, and it buys a
+ * conversation that does not distort and does not need the volume adjusted
+ * mid-sentence.
+ *
+ * **-19 LUFS, not the playbook's -16.** A linear gain may not push the true
+ * peak past the ceiling, so a quiet clip with a sharp peak simply cannot
+ * reach a loud target and is left where it is — which leaves the spread the
+ * normalising was for. Measured over 40 clips: at -16, **38 of 40 fall
+ * short** and the spread stays 5.4 dB; at -19 it is 2.4 dB; at -21, 0.4 dB.
+ * -19 is the point where the spread stops mattering to an ear and the
+ * scenarios still sit within a decibel of the collection recordings' own
+ * median of -18, so moving from a vocabulary word to a conversation is not a
+ * jump in volume. Going quieter would buy tenths of a decibel and lose that.
+ * Closing the rest would need compression, which changes how a voice sounds
+ * to fix a number. */
+const LEVEL = { i: -19, tp: -1.5, lra: 11 };
+
+function measureLevel(file) {
+  const s = ffBoth("ffmpeg", ["-hide_banner", "-nostats", "-i", file,
+    "-af", `loudnorm=I=${LEVEL.i}:TP=${LEVEL.tp}:LRA=${LEVEL.lra}:print_format=json`,
+    "-f", "null", "-"]);
+  const open = s.lastIndexOf("{"), close = s.lastIndexOf("}");
+  if (open < 0 || close < open) return null;
+  try {
+    const p = JSON.parse(s.slice(open, close + 1));
+    const n = (k) => Number(p[k]);
+    if (!Number.isFinite(n("input_i")) || n("input_i") < -70) return null;   // silence
+    return { i: n("input_i"), tp: n("input_tp"), lra: n("input_lra"),
+             thresh: n("input_thresh"), offset: n("target_offset") };
+  } catch (e) { return null; }
+}
+
+function levelled(src, id) {
+  const out = join(LEVELS, `${id}.mp3`);
+  if (existsSync(out)) return out;
+  const m = measureLevel(src);
+  // Unmeasurable (a clip that is silence, or ffmpeg refusing it): ship what
+  // was bought rather than ship nothing, and let the QA tool say so.
+  if (!m) return src;
+  ff("ffmpeg", ["-y", "-i", src, "-af",
+    `loudnorm=I=${LEVEL.i}:TP=${LEVEL.tp}:LRA=${LEVEL.lra}`
+    + `:measured_I=${m.i}:measured_TP=${m.tp}:measured_LRA=${m.lra}`
+    + `:measured_thresh=${m.thresh}:offset=${m.offset}:linear=true`,
+    "-ar", "24000", "-ac", "1", "-b:a", "32k", out]);
+  return existsSync(out) ? out : src;
+}
 
 /* Length in milliseconds, counted in **frames** rather than read from the header.
  *
@@ -95,6 +171,13 @@ function main() {
 
   mkdirSync(TRACKS, { recursive: true });
   mkdirSync(WORK, { recursive: true });
+  mkdirSync(LEVELS, { recursive: true });
+
+  /* `--raw` ships the clips at the level they were bought at. Here so the
+     change can be listened to against what it replaced, not because there is
+     a reason to prefer it. */
+  const raw = process.argv.includes("--raw");
+  let done = 0;
 
   /* One silence, reused. Made once at the clips' own sample rate so the stitch
      can copy frames rather than re-encode. */
@@ -111,8 +194,12 @@ function main() {
   for (const [key, entry] of Object.entries(manifest.lessons)) {
     const script = scripts[key];
     if (!script) { missing++; continue; }
-    const files = entry.lines.map((l) => join(CLIPS, `${l.id}.mp3`));
-    if (files.some((f) => !existsSync(f))) { missing++; continue; }
+    const bought = entry.lines.map((l) => join(CLIPS, `${l.id}.mp3`));
+    if (bought.some((f) => !existsSync(f))) { missing++; continue; }
+    const files = raw ? bought : entry.lines.map((l, i) => levelled(bought[i], l.id));
+    done++;
+    process.stdout.write(`\r  ${done} of ${Object.keys(manifest.lessons).length} lessons`
+                         + (done === Object.keys(manifest.lessons).length ? "\n" : ""));
 
     const name = `${key.replace(":", "-")}.mp3`;
     const out = join(TRACKS, name);

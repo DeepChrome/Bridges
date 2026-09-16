@@ -2495,6 +2495,74 @@ Claude pass over every row is 💰 and waits for him.
 **Gate 3 cannot be closed here.** It needs a reviewed file back from a person.
 What is ready is the CSV, with the machine-findable problems already at zero.
 
+## 30y. Phase 4 — the audio was not the voices, it was the levels (2026-09-16)
+
+The playbook's fourth phase is "audio that doesn't sound like crap", and its
+recommendation is ElevenLabs for the scenarios. The owner's standing rule is
+that an ElevenLabs upgrade happens **only if it improves the product**, so the
+first job was to find out what is actually wrong. Measured, before anything
+was changed:
+
+| | measured |
+|---|---|
+| loudness swing **inside one conversation** | 6.5–7.6 dB, every conversation sampled |
+| peak of the 168 stitched tracks | median **0.0 dBTP**, worst **+0.3** — clipping |
+| collection recordings, four sources | 7.3 dB apart |
+| curriculum words with a real recording | 984 of 1,045 (61 without, mostly perfectives) |
+
+**None of that is a fault of the voices.** Chirp3-HD is good and he accepted
+it; what a learner hears as "crunchy" is a track at full scale, and what they
+hear as one speaker mumbling is a 7 dB gap between two lines of the same
+conversation. Both are free to fix, so **ElevenLabs was not bought** — the
+recommendation is to fix the levels, listen again, and spend only if the
+voices still disappoint. That is the honest reading of his rule.
+
+- **The levelling happens at stitch time, never in the purchase.**
+  `data/scenario_audio` is what $1.49 bought and rule 20.3 keeps it; the
+  levelled copies live in `data/_work/scenes/levelled`, cached by the clip's
+  own content id, and `build_scene_tracks.mjs` stitches those. `--raw` ships
+  the bought levels, so the change can be listened to against what it replaced.
+- **Linear, not dynamic.** One pass of `loudnorm` rides the level and pumps on
+  speech; two passes with the measurement handed back apply a single gain,
+  which changes nothing but how loud the clip is.
+- **Per clip, not per track**, because the swing is *inside* the conversation.
+  Normalising the finished track would have left the quiet speaker quiet.
+- **-19 LUFS, not the playbook's -16.** A linear gain may not push the peak
+  past the ceiling, so a quiet clip with a sharp peak cannot reach a loud
+  target and is simply left behind — which leaves the spread that the
+  normalising was for. Measured over 40 clips: at -16, **38 of 40 fall short**
+  and 5.4 dB of spread survives; at -19, 2.4 dB; at -21, 0.4 dB. -19 is where
+  the spread stops mattering to an ear while the scenarios still sit within a
+  decibel of the collection's own median of -18, so moving from a vocabulary
+  word to a conversation is not a jump. Closing the rest needs compression,
+  which changes how a voice sounds in order to fix a number.
+
+**After: loudness across all 168 tracks spans 1.0 dB (-20.2 to -19.2) and
+peaks run -2.3 to -0.9 dBTP.** 28.0 MB, up 1.7 MB from the encoder padding a
+re-encode adds to each clip.
+
+`tools/audio_qa.mjs` is the gate (PLAYBOOK 4.2): a track for every script, its
+hash still matching its text, a sane length, and nothing near full scale.
+Two bounds in it were wrong the first time and both are worth keeping in mind:
+
+- **"Nothing over 30 s" is a rule for a word, not for a conversation.** These
+  are *designed* to run 30–45 s, and `check_scripts` already fixes the window
+  at 22–70 s from the line lengths — so the QA imports that rather than
+  inventing a second bound that contradicted it. 143 of 168 "failed" until it
+  did.
+- **The track ceiling is -0.5 dBTP, not -1.0.** Clips are limited to -1.5, but
+  a track is those frames decoded back to samples and decoding overshoots by a
+  few tenths. Two tracks reach -0.9, which is the margin working; clipping is
+  0.0. The gate still fails everything this phase was written to fix.
+
+Not done, and why: the 208 MB of collection recordings are 7.3 dB apart too,
+but re-levelling them means re-exporting and a Netlify deploy, which costs
+credits (13.31). Opus would shrink the bundle but the format is a risk on
+device and an app bundle is the better answer to size (13.8). The 61 words
+with no recording are 13.32.
+
+**Gate 4 ends with him listening** — 20 scenarios and 50 words on the phone.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -2521,6 +2589,7 @@ stylesheet's `[hidden] { display:none }`. Layout bugs need the browser.
 ```
 python tools/build_site.py     # or the full pipeline if data changed
 node tools/check_scripts.mjs --strict   # the written passages: level, coverage, no repeats
+node tools/audio_qa.mjs        # a track per lesson, its hash current, its length sane
 node tools/copy.mjs            # labels, not prose (rule 20.7), capped and checked
 node tools/core.test.mjs       # the shared logic: generators, scheduler, state
 node tools/smoke.js            # must be all-pass

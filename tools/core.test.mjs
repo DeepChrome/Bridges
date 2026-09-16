@@ -1165,6 +1165,21 @@ for (const d of DRILL_TYPES) {
   }
   if (d.id === "aspect") {
     ok(qs.every((q) => q.note), "aspect: the rule is available as a hint");
+    /* The multiple-choice partner question scores about 1,400 candidates each
+       time. Measured at 5.7 ms a question before the candidates were cached
+       with their stems (2026-09-15); the budget docs/PLAYBOOK.md set is a
+       hundred questions in 50 ms, and holding it here is what stops a later
+       change to the scoring from quietly costing a drill a tenth of a second. */
+    let n = 0;
+    const t0 = performance.now();
+    while (n < 100) {
+      const got = Q.drillQuestions("aspect", 20, null, null, false);
+      if (!got.length) break;
+      n += got.length;
+    }
+    const ms = performance.now() - t0;
+    ok(n >= 100 && ms < 50, "aspect: a hundred partner questions inside 50 ms",
+       `${n} in ${ms.toFixed(1)} ms`);
   }
 }
 

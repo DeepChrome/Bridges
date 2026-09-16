@@ -35,6 +35,23 @@ export const RUNS = [
   "Video",        // an episode, which wants the whole screen
 ];
 
+/* The screens that keep the bar: the ones you choose from.
+ *
+ * Listed rather than implied, so that every screen in the five tab stacks is in
+ * exactly one of the two lists and a new screen in neither is a failing test —
+ * `fullscreen.test.js` reads App.js and checks. Before this the test only
+ * checked that RUNS named real screens; a run screen added without being listed
+ * here would have kept the bar and nothing would have said so (docs/PLAYBOOK.md
+ * Phase 0.3: completeness, not existence). */
+export const TAB_BAR_SCREENS = [
+  "Path", "Unit", "Lesson",                            // Learn
+  "Drills", "QuizSetup", "Listening", "SceneList", "Sounds",  // Practice
+  "Episodes", "Read",                                  // Immerse
+  "Cards",                                             // Study
+  "Words",                                             // Search
+  "You",                                               // in every stack
+];
+
 const SET = new Set(RUNS);
 
 /* `focused` is what `getFocusedRouteNameFromRoute` gives: the screen showing

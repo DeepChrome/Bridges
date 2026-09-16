@@ -12,16 +12,34 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 
-import { RUNS, hidesTabBar } from "../src/fullscreen";
+import { RUNS, TAB_BAR_SCREENS, hidesTabBar } from "../src/fullscreen";
 
 const APP = readFileSync(join(__dirname, "..", "App.js"), "utf8");
 const declared = new Set(
   [...APP.matchAll(/<(?:Stack|Root|Tabs)\.Screen\s+name="([A-Za-z]+)"/g)].map((m) => m[1]));
+/* Only the five tab stacks: a `Root.Screen` sits above the tabs and has no bar
+   to hide, so the question does not arise there. */
+const inStacks = [...new Set(
+  [...APP.matchAll(/<Stack\.Screen\s+name="([A-Za-z]+)"/g)].map((m) => m[1]))];
 
 describe("the screens that hide the tab bar", () => {
   it("are all screens the app actually declares", () => {
-    const missing = RUNS.filter((name) => !declared.has(name));
-    expect(missing).toEqual([]);
+    expect(RUNS.filter((name) => !declared.has(name))).toEqual([]);
+    expect(TAB_BAR_SCREENS.filter((name) => !declared.has(name))).toEqual([]);
+  });
+
+  /* Completeness, not existence (docs/PLAYBOOK.md Phase 0.3). The test above
+     proves RUNS names real screens; it cannot notice a run screen that was
+     added and never listed, which keeps the bar and fails nothing. So every
+     screen registered in a tab stack has to be in one list or the other. */
+  it("together with the browsing screens, cover every screen in the tab stacks", () => {
+    const placed = new Set([...RUNS, ...TAB_BAR_SCREENS]);
+    expect(inStacks.filter((name) => !placed.has(name))).toEqual([]);
+    expect(inStacks.length).toBeGreaterThan(20);   // the regex found the stacks at all
+  });
+
+  it("never put a screen in both lists", () => {
+    expect(RUNS.filter((name) => TAB_BAR_SCREENS.includes(name))).toEqual([]);
   });
 
   it("are runs, not the screens you choose from", () => {

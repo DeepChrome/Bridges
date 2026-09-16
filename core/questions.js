@@ -1444,23 +1444,56 @@ export function makeQuestions(env) {
    * because the answer only stands out when *it* shares four or more with the
    * prompt, which a two-letter stem never does. Measured: kin fell 1.8 → 0.8
    * and root moved 16 % → 14 %. Four letters, then. */
-  const related = (a, b) => commonRun(a, b) >= 4;
-  function commonRun(a, b) {
-    const x = verbStem(a), y = verbStem(b);
-    let best = 0;
-    for (let i = 0; i < x.length; i++) {
-      for (let j = 0; j < y.length; j++) {
-        let n = 0;
-        while (i + n < x.length && j + n < y.length && x[i + n] === y[j + n]) n++;
-        if (n > best) best = n;
+  const RELATED_RUN = 4;
+  /* The four-letter pieces of a stem. Two stems share a run of four or more
+     letters exactly when they share one of these, so "related" becomes a set
+     lookup rather than a character-by-character search of every candidate. */
+  function grams(stem) {
+    const out = new Set();
+    for (let i = 0; i + RELATED_RUN <= stem.length; i++) out.add(stem.slice(i, i + RELATED_RUN));
+    return out;
+  }
+
+  /* Every verb the curriculum knows and every recorded partner, indexed once:
+     by the four-letter pieces of its stem, and by its length.
+   *
+   * Measured before this existed (2026-09-15): 5.7 ms a question, 57 ms when a
+   * drill opened. Caching the folded stems alone took it to 4.7 — the cost was
+   * the run comparison itself, done about 1,400 × 2 times a question. With the
+   * pieces indexed a question touches only the candidates that can qualify
+   * (usually tens), and the ones nearest the answer in length come out of the
+   * length buckets rather than a sort of everything. docs/PLAYBOOK.md Phase
+   * 0.3 asked for the length index; the piece index is what the measurement
+   * said was needed. `L` is fixed for the life of `makeQuestions`, so once is
+   * right. */
+  let verbIndex = null;
+  function verbIndexed() {
+    if (verbIndex) return verbIndex;
+    const have = new Set();
+    const cands = [], byGram = new Map(), byLen = new Map();
+    for (const x of L) {
+      if (x.p !== "verb") continue;
+      for (const cand of [x.w, realPartner(x.pt) ? x.pt.trim() : null]) {
+        if (!cand) continue;
+        const f = fold(cand);
+        if (have.has(f)) continue;
+        have.add(f);
+        const i = cands.push({ cand, f }) - 1;
+        for (const g of grams(verbStem(cand))) {
+          if (!byGram.has(g)) byGram.set(g, []);
+          byGram.get(g).push(i);
+        }
+        if (!byLen.has(f.length)) byLen.set(f.length, []);
+        byLen.get(f.length).push(i);
       }
     }
-    return best;
+    verbIndex = { cands, byGram, byLen };
+    return verbIndex;
   }
 
   function partnerWrong(promptWord, answer) {
-    const seen = new Set([fold(answer), fold(promptWord)]);
-    const scored = [];
+    const pf = fold(promptWord), af = fold(answer);
+    const ps = verbStem(promptWord), as = verbStem(answer);
     /* Every verb the curriculum knows, not the learner's own handful.
      *
      * Two restrictions were narrowing this to almost nothing, and both were
@@ -1481,24 +1514,22 @@ export function makeQuestions(env) {
      *
      * What a distractor has to be is a Russian verb that looks like it could be
      * the partner. It does not have to be a word anybody has taught. */
-    for (const x of L) {
-      if (x.p !== "verb") continue;
-      for (const cand of [x.w, realPartner(x.pt) ? x.pt.trim() : null]) {
-        if (!cand) continue;
-        const f = fold(cand);
-        if (seen.has(f)) continue;
-        seen.add(f);
-        let score = 0;
-        // Built on the prompt's root — the one a learner cannot tell apart by shape.
-        if (related(cand, promptWord)) score += 3;
-        // Or on the answer's, which is usually the same root seen from the
-        // other side of the pair.
-        else if (related(cand, answer)) score += 2;
-        if (Math.abs(f.length - fold(answer).length) <= 2) score += 1;
-        scored.push({ cand, score, r: Math.random() });
+    const { cands, byGram, byLen } = verbIndexed();
+    if (cands.length < 3) return null;
+    /* Related: built on the prompt's root — the one a learner cannot tell apart
+       by shape — or on the answer's, which is usually the same root seen from
+       the other side of the pair. (These used to score 3 and 2; both counted
+       as "related" and the order within that tier was by length, so the two
+       scores never told the output apart. One set, then.) */
+    const related = new Set();
+    for (const stem of [ps, as]) {
+      for (const g of grams(stem)) {
+        for (const i of byGram.get(g) || []) {
+          const f = cands[i].f;
+          if (f !== af && f !== pf) related.add(i);
+        }
       }
     }
-    if (scored.length < 3) return null;
     /* Related first, and only then anything else.
      *
      * Ranking by score and taking the best dozen shuffled was the first attempt
@@ -1513,13 +1544,26 @@ export function makeQuestions(env) {
        longest or shortest thing on screen in 13 % of these, which is a second
        free elimination on top of the first. Six to choose three from, so the
        same three do not come back every time the verb does. */
-    const near = (xs) => shuffle(xs
-      .sort((a, b) => Math.abs(fold(a.cand).length - fold(answer).length)
-                    - Math.abs(fold(b.cand).length - fold(answer).length))
-      .slice(0, 6)).map((x) => x.cand);
-    const strong = near(scored.filter((s) => s.score >= 2));
-    const rest = near(scored.filter((s) => s.score < 2));
-    return strong.concat(rest).slice(0, 3);
+    const strong = shuffle([...related]
+      .sort((a, b) => Math.abs(cands[a].f.length - af.length)
+                    - Math.abs(cands[b].f.length - af.length))
+      .slice(0, 6)).map((i) => cands[i].cand);
+    /* The rest come out of the length buckets, nearest ring first, until there
+       are six to choose from — the same rule, without sorting 1,400 verbs to
+       find six. Within a ring the order is random where the sort's was table
+       order, which is more variety at the boundary, not less. */
+    const rest = [];
+    for (let d = 0; rest.length < 6 && d <= 24; d++) {
+      const ring = [];
+      for (const len of d === 0 ? [af.length] : [af.length - d, af.length + d]) {
+        for (const i of byLen.get(len) || []) {
+          const f = cands[i].f;
+          if (!related.has(i) && f !== af && f !== pf) ring.push(i);
+        }
+      }
+      for (const i of shuffle(ring)) if (rest.length < 6) rest.push(i);
+    }
+    return strong.concat(shuffle(rest).map((i) => cands[i].cand)).slice(0, 3);
   }
 
   function qAspectWhich() {

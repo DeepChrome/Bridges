@@ -71,6 +71,15 @@ export function TextInput({ style, ...rest }) {
  * via `fill`. A run that wants a pinned footer would need to add the bottom
  * safe-area inset itself; nothing does yet, and guessing at it here is how the
  * inset came to be applied twice in the first place. */
+/* The three together (screen.test.js renders all eight combinations):
+ *
+ *   prop     | on                                    | off
+ *   ---------|---------------------------------------|---------------------------
+ *   fill     | content container grows to the screen | content is as tall as it is
+ *   safeTop  | the status-bar inset is taken here    | a header above took it
+ *   footer   | a bar off the scroll, hairline above, | nothing; scroll padding 40
+ *            | scroll padding 24 to clear it         |
+ */
 export function Screen({ children, scroll = true, fill = false, safeTop = false, footer }) {
   const t = useTheme();
   const Body = scroll ? ScrollView : View;
@@ -82,7 +91,8 @@ export function Screen({ children, scroll = true, fill = false, safeTop = false,
      (§30n′), so nothing has to settle before it can be pressed or found. */
   const enter = useEnter();
   return (
-    <SafeAreaView edges={safeTop ? ["top"] : []} style={{ flex: 1, backgroundColor: t.bg }}>
+    <SafeAreaView testID="screen-root" edges={safeTop ? ["top"] : []}
+                  style={{ flex: 1, backgroundColor: t.bg }}>
       <Animated.View style={[{ flex: 1 }, enter]}>
       <Body
         testID="screen-body"

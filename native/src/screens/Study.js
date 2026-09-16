@@ -21,6 +21,7 @@ import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf 
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";
 import { say } from "../audio";
+import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
 import { applyGrade, reviewRows, preview, schedulerOpts, wanted, wordTrouble, maxLapses, DIRECTIONS } from "@core/scheduler";
 import { buildSession, requeue, bury, dailyFor } from "@core/queue";
@@ -395,6 +396,10 @@ export default function Study({ navigation }) {
   }, [at, shown]);
 
   const grade = (g) => {
+    /* The weight of the button, not a verdict. Nothing here is right or wrong
+       — the learner is reporting how it went, and a phone that buzzed "wrong"
+       at an honest Again would be arguing with them. */
+    buzzTap();
     const now = Date.now();
     const word = item.word, direction = item.direction;
     const rows = reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
@@ -439,8 +444,65 @@ export default function Study({ navigation }) {
   const finished = session && at >= items.length;
   const doneToday = session && session.done;
 
+  /* The controls belong to the screen, not to the card, and they are pinned
+     off the scroll (`Screen footer`).
+
+     They used to sit under the card inside it, which is fine while a card is
+     short and wrong the moment it is not: the back of «этот» carries a
+     four-line sense, two example pairs and three sentences, so Again / Hard /
+     Good / Easy were below the fold and the one thing the screen is *for* could
+     only be reached by scrolling past everything it shows. The quiz builder had
+     exactly this bug and `footer` is the fix that was built for it — found
+     again here by reading the walkthrough shots (§31), which is what they are
+     for. Nothing while there is no card: an empty state has nothing to grade. */
+  const controls = !item ? null : (
+    <>
+      {!shown ? (
+        <Btn kind="pri" label="Show" onPress={() => setShown(true)} />
+      ) : (
+        <View style={{ flexDirection: "row", gap: 6 }}>
+          {[[1, "Again", "bad"], [2, "Hard", "plain"],
+            [3, "Good", "good"], [4, "Easy", "pri"]].map(([g, label, kind]) => (
+            <Pressable
+              key={g}
+              testID={`grade-${g}`}
+              accessibilityRole="button"
+              onPress={() => grade(g)}
+              style={{ flex: 1, alignItems: "center", paddingVertical: 11,
+                       borderRadius: radius.md, borderWidth: 1, borderBottomWidth: 3,
+                       borderColor: kind === "bad" ? t.badDim : kind === "good" ? t.goodDim
+                                  : kind === "pri" ? t.brandDim : t.line,
+                       backgroundColor: kind === "bad" ? t.bad : kind === "good" ? t.good
+                                      : kind === "pri" ? t.brand : t.surface }}
+            >
+              <Text style={{ fontWeight: "600", fontSize: 13,
+                             color: kind === "plain" ? t.ink
+                                  : kind === "pri" ? t.brandOn
+                                  : kind === "good" ? t.goodOn : t.badOn }}>
+                {label}
+              </Text>
+              <Text style={{ fontSize: 12, fontWeight: "500",
+                             color: kind === "plain" ? t.ink2
+                                  : kind === "pri" ? t.brandOn
+                                  : kind === "good" ? t.goodOn : t.badOn }}>
+                {iv[g].label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      )}
+
+      <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+        <Btn kind="ghost" label="Undo" testID="undo" style={{ flex: 1 }}
+             disabled={!last} onPress={undo} />
+        <Btn kind="ghost" label="Skip ▶" style={{ flex: 1 }}
+             onPress={() => { setAt(at + 1); setShown(false); }} />
+      </View>
+    </>
+  );
+
   return (
-    <Screen>
+    <Screen footer={controls}>
       {/* A summary of what is ticked — so it only exists once something is.
           The empty state's button is the way in; this row is the way back. */}
       {names.length ? (
@@ -574,48 +636,6 @@ export default function Study({ navigation }) {
             )}
           </Card>
           </Animated.View>
-
-          {!shown ? (
-            <Btn kind="pri" label="Show" style={{ marginTop: 14 }}
-                 onPress={() => setShown(true)} />
-          ) : (
-            <View style={{ flexDirection: "row", gap: 6, marginTop: 14 }}>
-              {[[1, "Again", "bad"], [2, "Hard", "plain"],
-                [3, "Good", "good"], [4, "Easy", "pri"]].map(([g, label, kind]) => (
-                <Pressable
-                  key={g}
-                  testID={`grade-${g}`}
-                  onPress={() => grade(g)}
-                  style={{ flex: 1, alignItems: "center", paddingVertical: 11,
-                           borderRadius: radius.md, borderWidth: 1, borderBottomWidth: 3,
-                           borderColor: kind === "bad" ? t.badDim : kind === "good" ? t.goodDim
-                                      : kind === "pri" ? t.brandDim : t.line,
-                           backgroundColor: kind === "bad" ? t.bad : kind === "good" ? t.good
-                                          : kind === "pri" ? t.brand : t.surface }}
-                >
-                  <Text style={{ fontWeight: "600", fontSize: 13,
-                                 color: kind === "plain" ? t.ink
-                                      : kind === "pri" ? t.brandOn
-                                      : kind === "good" ? t.goodOn : t.badOn }}>
-                    {label}
-                  </Text>
-                  <Text style={{ fontSize: 12, fontWeight: "500",
-                                 color: kind === "plain" ? t.ink2
-                                      : kind === "pri" ? t.brandOn
-                                      : kind === "good" ? t.goodOn : t.badOn }}>
-                    {iv[g].label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
-
-          <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
-            <Btn kind="ghost" label="Undo" testID="undo" style={{ flex: 1 }}
-                 disabled={!last} onPress={undo} />
-            <Btn kind="ghost" label="Skip ▶" style={{ flex: 1 }}
-                 onPress={() => { setAt(at + 1); setShown(false); }} />
-          </View>
         </>
       )}
 

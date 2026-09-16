@@ -208,6 +208,13 @@ export function Row({ children, onPress, disabled, last, testID, at = 0 }) {
     <Animated.View style={arriving}>
       <Pressable
         testID={testID}
+        /* A row that does something is a button and has to say so. Without a
+           role a screen reader reads the text inside and gives no hint that
+           it can be activated — the control is invisible to exactly the
+           person who most needs telling. A row with no `onPress` is not a
+           button and must not claim to be. */
+        accessibilityRole={onPress ? "button" : undefined}
+        accessibilityState={onPress ? { disabled: !!disabled } : undefined}
         onPress={disabled ? undefined : onPress}
         onPressIn={live ? press.onPressIn : undefined}
         onPressOut={live ? press.onPressOut : undefined}
@@ -281,6 +288,14 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
                            kind === "pri" && !disabled ? lift : null]}>
       <Pressable
         testID={testID}
+        /* The label is read off the text inside, so it is deliberately not
+           repeated as an `accessibilityLabel` — one there would *replace*
+           what the button says rather than add to it. What was missing is the
+           role and the state: a control that looks greyed out has to announce
+           that it is, and a reader that cannot tell a button from a caption
+           cannot use the app at all. */
+        accessibilityRole="button"
+        accessibilityState={{ disabled: !!disabled }}
         onPress={disabled ? undefined : onPress}
         onPressIn={disabled ? undefined : press.onPressIn}
         onPressOut={disabled ? undefined : press.onPressOut}
@@ -310,12 +325,17 @@ export function Sheet({ visible = true, onClose, title, header, children, footer
   return (
     <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
       <Pressable
+        accessibilityRole="button"
         accessibilityLabel="Close"
         onPress={onClose}
         style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" }}
       >
-        {/* The sheet itself swallows the press, so only the backdrop closes. */}
+        {/* The sheet itself swallows the press, so only the backdrop closes.
+            `accessible={false}` because it is not a control: without it a
+            screen reader announces the whole sheet as one button that does
+            nothing, and the rows inside it stop being reachable one by one. */}
         <Pressable
+          accessible={false}
           onPress={() => {}}
           testID={testID}
           style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.lg,
@@ -423,13 +443,16 @@ export function Tick({ on, size = 26 }) {
   );
 }
 
-export function Pill({ children, tone }) {
+/* `testID` is passed through deliberately: a component that silently drops one
+   is §30m's `Card` bug, and it leaves the thing untestable with nothing
+   failing to say so. */
+export function Pill({ children, tone, testID }) {
   const t = useTheme();
   const c = tone === "good" ? { bg: t.goodBg, fg: t.good }
           : tone === "brand" ? { bg: t.brandBg, fg: t.brandInk }
           : { bg: t.surface2, fg: t.ink2 };
   return (
-    <View style={{ backgroundColor: c.bg, borderRadius: 99,
+    <View testID={testID} style={{ backgroundColor: c.bg, borderRadius: 99,
                    paddingHorizontal: 8, paddingVertical: 3 }}>
       <Text style={{ color: c.fg, fontSize: 11, fontWeight: "600" }}>{children}</Text>
     </View>

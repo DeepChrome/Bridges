@@ -148,6 +148,18 @@ function Settings({ visible, onClose, onLab, onTour }) {
               </Row>
               <Row>
                 <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Vibration</Text>
+                  <Muted>A buzz on an answer</Muted>
+                </View>
+                <Switch
+                  testID="haptics-switch"
+                  value={st.haptics !== false}
+                  onValueChange={(v) => update((p) => ({ ...p, haptics: v }))}
+                  trackColor={{ true: t.good, false: t.surface3 }}
+                />
+              </Row>
+              <Row>
+                <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Audio for offline</Text>
                   <Muted>{`Downloads a unit's recordings when you open it · ${cacheLine}`}</Muted>
                   {cache.files ? (

@@ -42,6 +42,7 @@ import { ChapterTask } from "./src/screens/Task";
 import { Read } from "./src/screens/Read";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
+import { setHaptics } from "./src/haptics";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
   QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, ListeningList, PassageFlow, SoundDrillFlow,
@@ -353,6 +354,10 @@ function Shell() {
 
   /* Playback reads its two settings from here rather than from state. */
   useEffect(() => { configureAudio({ speed: st.speed, cue: st.cue }); }, [st.speed, st.cue]);
+  /* …and so does the vibration motor, for the same reason: a call site that
+     had to read state to decide whether to buzz would be a call site that
+     could get it wrong. */
+  useEffect(() => { setHaptics(st.haptics !== false); }, [st.haptics]);
 
   /* Acting on the gate's answer. The navigator only exists once there is an
      account, so this runs on the render after the profile is created: effects fire

@@ -77,6 +77,10 @@ export const DEFAULTS = {
   talkLevel: null,      // how the Talk tutor pitches its Russian; null = by chapter reached
   talkSpeed: "normal",  // how fast the tutor is read out (audio.js SPEEDS)
   talkEn: true,         // English under the tutor's turns
+  /* The phone's answer to an answer (haptics.js). On by default: it is the
+     feedback that arrives before the sound and before the colour, and a
+     learner studying with the volume down has nothing else. */
+  haptics: true,
 };
 
 export function normalise(raw, assumedVersion) {

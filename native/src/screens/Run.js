@@ -15,6 +15,7 @@ import { GuidePop } from "../guide";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, LINES } from "@core/guide";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
+import { right as buzzRight, wrong as buzzWrong, done as buzzDone } from "../haptics";
 import { RuInput } from "../keyboard";
 import { charDistance } from "@core/compare";
 import { Linked } from "../words";
@@ -422,6 +423,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setAnswered(true);
     setVerdict({ right: !!correct, credit, note });
 
+    /* The verdict reaches three senses at once, and the buzz is the one that
+       arrives first — a learner with the volume down has only this and the
+       colour. It is fired beside the cue rather than inside it because a cue
+       is a sound and this is not one. */
+    (correct ? buzzRight : buzzWrong)();
     cue(correct ? "right" : "wrong");
     // The word itself, just behind the cue so the two do not talk over each
     // other. Only on a correct answer: hearing the right form is the reward,
@@ -535,8 +541,16 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           questions with a hard cut between them read as one question whose
           words keep changing; this is what gives a quiz the sense of moving
           through something. */}
+      {/* …and a question with no prompt has nothing to centre. The build-up
+          drill's `ask` is a caption for the activity below it, not a question
+          in its own right, so growing the block put one small grey line in the
+          middle of the screen with the whole drill crammed under the fold and
+          six hundred pixels of nothing between them. The slack goes to the
+          activity instead (below), which is what the learner is looking at.
+          Read off the walkthrough shots, 2026-09-16. */}
       <Animated.View testID="question-block"
-                     style={[questionIn, { flexGrow: hasInput(q) ? 0 : 1, justifyContent: "center",
+                     style={[questionIn, { flexGrow: hasInput(q) || !q.prompt ? 0 : 1,
+                                           justifyContent: "center",
                                            alignItems: "center", marginBottom: 20 }]}>
         <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "600", letterSpacing: 1,
                        textTransform: "uppercase", marginBottom: 12,
@@ -584,7 +598,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       {/* Keyed by position so a view is remounted for every step: two typed
           questions in a row otherwise share one input, and the second opens with
           the first's answer still in it. */}
-      <Animated.View key={at} style={answerIn}>
+      <Animated.View key={at} testID="answer-block"
+                     style={[answerIn, !q.prompt && !hasInput(q)
+                       ? { flexGrow: 1, justifyContent: "center" } : null]}>
         {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip, usedHint }) : null}
       </Animated.View>
 
@@ -665,6 +681,10 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
   const kind = guide && GUIDE_KINDS.includes(guide) ? guide : null;
   const line = kind ? guideLine(kind, (title || "").length) : null;
   const pop = usePop([kind, title]);
+  /* Only a real pass. Half a dozen screens reuse `Done` as an empty-state
+     message box and those pass no `passed` at all — a phone that buzzed to
+     announce "no questions available" would be celebrating a dead end. */
+  useEffect(() => { if (passed === true) buzzDone(); }, [passed]);
   /* The end of a run is the one moment on the whole route that is a reward, and
      it was a panel at the top of an empty screen — the same bordered white box
      the verdict, the word card and the settings rows are, with three quarters of

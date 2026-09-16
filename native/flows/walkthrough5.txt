@@ -1,0 +1,107 @@
+# Phase 5 — what the interface pass changed, and the two activities the owner
+# asked where to find (2026-09-16).
+#
+# walkthrough4.txt still walks every screen and is the one to run after a
+# broad change. This one is narrower on purpose: it goes to the four places
+# Phase 5 touched and photographs them, and on the way it answers "where do I
+# see the syllable drill and the sentence cards".
+#
+#   adb shell pm clear app.bridges.russian; launch; then
+#   .\native\tools\walk.ps1 -Flow native\flows\walkthrough5.txt -Device emulator-5554
+#
+# Screenshots land in native/screenshots/walk/. Read them — that is the audit.
+#
+# The emulator needs a universal APK; the arm64 build that goes to the phone
+# will not install on it (§31).
+
+shot:50-gate
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+tap:^Skip$
+wait:2
+tap:^Start from the beginning$
+wait:3
+
+# Study: choose a unit, then grade a few cards. This is what fills the review
+# log, and the log is what the calendar is drawn from — an empty calendar
+# would photograph identically whether the feature worked or not.
+tap:^Study$
+wait:2
+tap:^Choose what to review$
+wait:2
+shot:51-study-picker
+tap:^Pronouns & Being$
+tap:^Done$
+wait:2
+shot:52-study-card
+
+# Four cards graded. The grade buttons are the second haptic call site: a tap,
+# not a verdict — nothing here is right or wrong, the learner is reporting.
+tap:^Show$
+wait:1
+shot:53-study-answer
+tap:^Good$
+wait:2
+tap:^Show$
+wait:1
+tap:^Good$
+wait:2
+tap:^Show$
+wait:1
+tap:^Again$
+wait:2
+tap:^Show$
+wait:1
+tap:^Easy$
+wait:2
+
+# Statistics, with the calendar at the top. Today should be the only lit
+# square, in the last column, with the rest of this week left blank rather
+# than drawn as days that were missed.
+tap:Your profile
+wait:2
+tap:^Statistics$
+wait:3
+shot:54-stats-calendar
+expect:^Days studied$
+scroll
+shot:55-stats-rest
+back
+wait:2
+
+# The Vibration switch, new in this phase. It is the last of the three
+# answer-feedback settings, under the Russian keyboard.
+tap:^Settings$
+wait:2
+scroll
+shot:56-settings-vibration
+expect:^Vibration$
+back
+wait:2
+back
+wait:2
+
+# Practice → Sounds → the build-up drill. This is the Pimsleur activity, and
+# the owner could not find it: it is the second button on Sounds, not a row in
+# the Practice list, because it belongs with the letters (rule 20.8).
+tap:^Practice$
+wait:2
+tap:^Sounds$
+wait:3
+shot:57-sounds-buttons
+expect:^Build up a long word$
+tap:^Build up a long word$
+wait:4
+shot:58-buildup
+# The fragment is drawn inside an Animated.View, never on the Text itself —
+# an animated style on a plain component crashes on a device and passes every
+# test (§23). This screenshot is the only thing that would show it.
+tap:^Add a syllable$
+wait:2
+shot:59-buildup-grown
+tap:^Add a syllable$
+wait:2
+shot:60-buildup-grown-again

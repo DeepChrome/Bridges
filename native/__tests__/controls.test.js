@@ -6,9 +6,13 @@
  */
 
 import React from "react";
-import { render, screen } from "@testing-library/react-native";
+import { render, screen, fireEvent, within } from "@testing-library/react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Btn } from "../src/ui";
+import { SessionProvider } from "../src/session";
+import { flushState } from "../src/store";
+import Study from "../src/screens/Study";
 
 const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : (s || {}));
 const box = (testID) => flat(screen.getByTestId(testID).props.style);
@@ -55,5 +59,38 @@ describe("a button that cannot be pressed", () => {
     const live = await render(<Btn kind="pri" label="Continue" testID="p2" onPress={() => {}} />);
     expect(box("p2").backgroundColor).not.toBe(s.backgroundColor);
     live.unmount();
+  });
+});
+
+describe("a control that must not scroll away", () => {
+  /* Found by reading a walkthrough shot (§31): the back of «этот» carries a
+     four-line sense, two example pairs and three sentences, and the four grade
+     buttons sat under all of it. The one thing the screen is *for* could only
+     be reached by scrolling past everything it shows — the same bug the quiz
+     builder's Start had, which is why `Screen footer` exists. */
+  it("keeps Study's grade buttons off the scroll", async () => {
+    await AsyncStorage.setItem("rb.accounts", JSON.stringify({
+      list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
+    await AsyncStorage.setItem("rb.state.p1", JSON.stringify({
+      v: 6, seen: { "я": { recognise: { dueAt: Date.now() - 1000, s: 0, d: 0, state: 0, steps: 0, reps: 0, lapses: 0 } } },
+      trouble: {}, pinned: [], sets: ["__due__"], drills: {}, unit: {}, watched: {},
+      speech: { attempts: [], tagCounts: {} }, xp: 0, streak: 0,
+      flash: ["recognise"], newPerDay: 15, reviewsPerDay: 200, learnAhead: 20,
+    }));
+    const view = await render(<SessionProvider><Study /></SessionProvider>);
+
+    // Turn the card over: the grade buttons only exist once there is an answer.
+    fireEvent.press(await view.findByText("Show"));
+    const footer = await view.findByTestId("screen-footer");
+    expect(footer).toBeTruthy();
+    /* The assertion that matters is *where*: inside `screen-body` is inside the
+       ScrollView, which is what put them below the fold. */
+    for (const id of ["grade-1", "grade-2", "grade-3", "grade-4", "undo"]) {
+      expect(within(footer).getByTestId(id)).toBeTruthy();
+      expect(within(view.getByTestId("screen-body")).queryByTestId(id)).toBeNull();
+    }
+    // Hand-rolled Pressables, so the role is theirs to carry (a11y.test.js).
+    expect(within(footer).getByTestId("grade-3").props.accessibilityRole).toBe("button");
+    await flushState();
   });
 });

@@ -189,6 +189,18 @@ jest.mock("react-native-webview", () => {
   return { WebView: (props) => React.createElement(View, { testID: "webview", ...props }) };
 });
 
+/* The vibration motor. Recorded rather than stubbed: a buzz leaves no trace in
+   the render tree, so `global.__buzz` is the only way a test can ask whether
+   the app answered an answer — and whether it stayed quiet when it should.
+   Each entry is "impact:Light", "notification:Success" and so on. */
+global.__buzz = [];
+jest.mock("expo-haptics", () => ({
+  ImpactFeedbackStyle: { Light: "Light", Medium: "Medium", Heavy: "Heavy" },
+  NotificationFeedbackType: { Success: "Success", Warning: "Warning", Error: "Error" },
+  impactAsync: jest.fn(async (s) => { global.__buzz.push(`impact:${s}`); }),
+  notificationAsync: jest.fn(async (s) => { global.__buzz.push(`notification:${s}`); }),
+}));
+
 /* The Anki import/export modules: files, the picker, SQLite and the share sheet
    are all injected by anki.js, so the packages only need to load. */
 jest.mock("expo-sqlite", () => ({ deserializeDatabaseAsync: jest.fn(), openDatabaseAsync: jest.fn() }));

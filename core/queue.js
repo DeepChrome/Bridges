@@ -23,7 +23,7 @@
  * answered live in the learner's `daily` slot (core/state.js).
  */
 
-import { DIRECTIONS, kindOf, isDue, retrievability, dayOf } from "./scheduler.js";
+import { DIRECTIONS, kindOf, isDue, retrievability, dayOf, readyFor } from "./scheduler.js";
 
 export const QUEUE_DEFAULTS = { newPerDay: 15, sessionSize: 20, reviewsPerDay: 200, learnAhead: 20, minGap: 3 };
 
@@ -85,10 +85,28 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }
   const learning = [], reviews = [], fresh = [];
   for (const w of words || []) {
     const entry = (seen && seen[w]) || {};
-    for (const d of directions) {
+    /* **Every card that exists is reviewable; `dirs` gates only what is new.**
+     *
+     * A lesson grades the direction its question exercised (a typed answer is
+     * production) whatever the flashcards are set to, so a learner who turns
+     * a direction off still accumulates cards in it. Letting `dirs` filter
+     * reviews as well made those cards unreachable: due for ever, counted by
+     * the tab badge, and never dealt by the screen that owed them. Measured
+     * over the full route with `--dirs recognise`: 1,964 cards still due at
+     * the end and a backlog on every day of the run. A setting may decide
+     * what a learner takes on; it must not strand what they already have. */
+    for (const d of DIRECTIONS) {
       const card = entry[d];
       const kind = kindOf(card);
-      if (kind === "new") { fresh.push({ word: w, direction: d, card: card || null, kind: kind }); continue; }
+      if (kind === "new") {
+        if (!directions.includes(d)) continue;
+        /* A word earns produce and listen by holding its recognise card
+           (core/scheduler.js `readyFor`). Without this every word arrives as
+           three cards at once and the day it is met costs three reviews. */
+        if (!readyFor(entry, d, o.ladder)) continue;
+        fresh.push({ word: w, direction: d, card: card || null, kind: kind });
+        continue;
+      }
       if (!isDue(card, now, o.learnAhead)) continue;
       const item = { word: w, direction: d, card: card, kind: kind, r: retrievability(card, now, o.scheduler) };
       (kind === "learning" ? learning : reviews).push(item);

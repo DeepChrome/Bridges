@@ -25,7 +25,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fold, TOKEN } from "../core/util.js";
 import { makeQuestions, QUIZ_N, SPEECH_MIX, lessonSize } from "../core/questions.js";
-import { gradeFor, applyGrade, directionOfKind, dueCards, wordTrouble, DAY } from "../core/scheduler.js";
+import { gradeFor, applyGrade, directionOfKind, dueCards, wordTrouble, DAY, DIRECTIONS, LADDER_AT }
+  from "../core/scheduler.js";
+import { buildSession, dailyFor, QUEUE_DEFAULTS } from "../core/queue.js";
 import { RELIEF_AFTER, RELIEF_MARK, PASS_MARK, reviewFirst, REVIEW_FIRST }
   from "../core/state.js";
 import { compare } from "../core/compare.js";
@@ -59,6 +61,16 @@ const MARK = parseInt(arg("--pass-mark", String(PASS_MARK)), 10);
    (core/speech.js SCENE_FOLLOWED). Swept for the same reason: it is the rule
    behind most of the review load, and the trade it makes was never priced. */
 const FOLLOWED = Number(arg("--scene-followed", String(SCENE_FOLLOWED)));
+
+/* Days of stability a word's recognise card must hold before its produce and
+   listen cards are dealt (core/scheduler.js LADDER_AT). `--ladder 0` turns the
+   rule off, which is how it is priced. */
+const LADDER = Number(arg("--ladder", String(LADDER_AT)));
+
+/* Which directions the flashcards deal (`st.flash`, Settings). Three is the
+   default and three cards a word is three times the review load, so what that
+   actually costs is worth being able to measure rather than argue about. */
+const DIRS = arg("--dirs", DIRECTIONS.join(",")).split(",").filter(Boolean);
 const passed = (slot) => {
   if (!slot || typeof slot.q !== "number") return false;
   return slot.q >= MARK || ((slot.tries || 0) >= RELIEF_AFTER && slot.q >= RELIEF_MARK);
@@ -124,11 +136,27 @@ const PROFILES = {
   steady:     { base: 0.80, growth: 0.05, speech: 0.14 },
   struggling: { base: 0.58, growth: 0.06, speech: 0.30 },
 };
-const KIND_DIFFICULTY = {           // multiplier on the chance of being right
+/* How much harder each kind is than picking an English meaning.
+ *
+ * **A penalty that fades, not a multiplier.** This used to multiply the
+ * learner's familiarity, which capped a typed answer at 0.70 of whatever they
+ * knew — so a `type` card could never exceed 69 % however many times the word
+ * had been produced correctly, and a production card lapsed a third of the
+ * time for ever. That did no harm while it only had to rank kinds inside one
+ * quiz, and it was invisible until Phase 2 gave production a card of its own:
+ * the honest session model (13.26) then showed every profile in permanent
+ * backlog with 113 leeches, all of it manufactured by a model nobody would
+ * defend out loud. Producing a well-drilled word is not a coin flip.
+ *
+ * So difficulty is a handicap on a word the learner has barely met, and it is
+ * gone by `FLUENT_AT` meetings — which is what "production is hard at first
+ * and becomes automatic" means, and is the premise §30j rests on. */
+const KIND_DIFFICULTY = {
   "choose-en": 1.00, listen: 0.95, "choose-ru": 0.92, cloze: 0.85, type: 0.70,
   match: 0.95, cases: 0.85, aspect: 0.8, agreement: 0.85, conjugation: 0.85,
   stress: 0.8, grammar: 0.85, form: 0.8,
 };
+const FLUENT_AT = 8;
 
 /* --------------------------------------------------------------- a run */
 
@@ -140,7 +168,7 @@ function simulate(profileName, seed) {
 
   const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH,
                             SCRIPTS: DATA.scripts || {}, hasVoice: () => true });
-  let st = { seen: {}, trouble: {}, speech: { attempts: [] } };
+  let st = { seen: {}, trouble: {}, speech: { attempts: [] }, daily: null };
   const met = new Map();                 // lemma idx -> times seen in any question
   const log = [];                        // every question asked, in order
   const structural = [];                 // generated questions that are wrong
@@ -154,8 +182,11 @@ function simulate(profileName, seed) {
 
   const chance = (kind, idx) => {
     const n = met.get(idx) || 0;
-    const p = Math.min(0.99, P.base + P.growth * n) * (KIND_DIFFICULTY[kind] || 0.85);
-    return p;
+    const familiar = P.base + P.growth * n;
+    // The kind's handicap, worn away by meeting the word (KIND_DIFFICULTY).
+    const ease = KIND_DIFFICULTY[kind] === undefined ? 0.85 : KIND_DIFFICULTY[kind];
+    const penalty = (1 - ease) * Math.max(0, 1 - n / FLUENT_AT);
+    return Math.min(0.99, Math.max(0.05, familiar - penalty));
   };
 
   /* A grade lands on the card of the direction the question exercises, as
@@ -260,27 +291,67 @@ function simulate(profileName, seed) {
     return correct;
   };
 
-  /* The day's Study session: every card due today, graded Again/Good/Easy by the
-     profile's chance on a plain meaning question, through the same FSRS review
-     the Study screen runs. Capped at REVIEW_CAP a day — what a learner will sit
-     through — so the backlog that builds past it is visible in the report. */
+  /* The day's Study, dealt by the app's own session builder (core/queue.js).
+   *
+   * It used to take every due card in whatever order `seen` enumerated them,
+   * up to a cap — which measured a screen the app has not had since Phase 2
+   * and, worse, never introduced the *new* cards a session deals. A word met
+   * in a lesson gets the card for whichever direction that question exercised;
+   * its other two directions come into existence when Study deals them as new,
+   * rationed at `newPerDay`. A simulator that skips that is measuring a third
+   * of the schedule (ROADMAP 13.26).
+   *
+   * A learner sits through more than one twenty-card session in a sitting, so
+   * the day loops until the pile is empty or REVIEW_CAP answers have been
+   * given — REVIEW_CAP being what somebody will actually do in a day, not a
+   * setting in the app.
+   */
   const REVIEW_CAP = 60;
-  const reviews = [];                    // per day: { day, due, done, again }
+  const NEW_PER_DAY = QUEUE_DEFAULTS.newPerDay;
+  const reviews = [];                    // per day: { day, due, done, again, fresh }
   const dueNow = () => dueCards(st.seen, nowMs());
+  const answerCard = (word, direction) => {
+    const i = L.findIndex((e) => e.b === word);
+    /* Recognition is the easiest direction and production the hardest, which
+       is the whole reason for splitting them (§30j); a model that graded all
+       three alike would flatter the split it is measuring. */
+    const kind = direction === "produce" ? "type" : direction === "listen" ? "listen" : "choose-en";
+    const ok = rand() < chance(kind, i >= 0 ? i : -1);
+    const g = ok ? (rand() < 0.3 ? 4 : 3) : 1;
+    const r = applyGrade(st.seen, st.trouble, word, direction, g, nowMs());
+    st = { ...st, seen: r.seen, trouble: r.trouble };
+    if (i >= 0) met.set(i, (met.get(i) || 0) + 1);
+    return ok;
+  };
   const review = () => {
-    const due = dueNow();
-    let done = 0, again = 0;
-    for (const { word, direction } of due.slice(0, REVIEW_CAP)) {
-      const i = L.findIndex((e) => e.b === word);
-      const ok = rand() < chance("choose-en", i >= 0 ? i : -1);
-      const g = ok ? (rand() < 0.3 ? 4 : 3) : 1;
-      const r = applyGrade(st.seen, st.trouble, word, direction, g, nowMs());
-      st = { ...st, seen: r.seen, trouble: r.trouble };
-      if (i >= 0) met.set(i, (met.get(i) || 0) + 1);
-      done++;
-      if (!ok) again++;
+    const dueAtStart = dueNow().length;
+    let done = 0, again = 0, fresh = 0;
+    // Everything the learner has met is what the Study picker would hold.
+    const words = () => Object.keys(st.seen);
+    for (let round = 0; done < REVIEW_CAP && round < 20; round++) {
+      const s = buildSession({
+        seen: st.seen, words: words(), dirs: DIRS, now: nowMs(), daily: st.daily,
+        opts: { newPerDay: NEW_PER_DAY, sessionSize: QUEUE_DEFAULTS.sessionSize,
+                reviewsPerDay: REVIEW_CAP, learnAhead: 20, ladder: LADDER,
+                scheduler: { fuzz: false } },
+        rng: rand,
+      });
+      if (!s.items.length) break;
+      const answered = new Set();
+      for (const item of s.items) {
+        if (done >= REVIEW_CAP) break;
+        // Siblings are buried for the session, as the screen buries them.
+        if (answered.has(item.word)) continue;
+        answered.add(item.word);
+        if (item.kind === "new") fresh++;
+        if (!answerCard(item.word, item.direction)) again++;
+        done++;
+      }
+      const daily = dailyFor(st.daily, nowMs());
+      st = { ...st, daily: { ...daily, reviews: daily.reviews + answered.size,
+                             new: daily.new + fresh } };
     }
-    reviews.push({ day, due: due.length, done, again });
+    reviews.push({ day, due: dueAtStart, done, again, fresh });
   };
 
   let lessons = 0, heldDays = 0;

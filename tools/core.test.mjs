@@ -464,6 +464,22 @@ group("the scheduler");
      "dueCards counts the learning step when its minute comes, or inside the learn-ahead window");
   ok(S.strength({ recognise: good, produce: easy }) === Math.max(good.s, easy.s) && S.maxLapses({ produce: lapsed }) === 1,
      "strength is the strongest direction; lapses the worst");
+  /* A word earns its harder directions (LADDER_AT). Recognition is always
+     available; produce and listen wait for the recognise card to hold. */
+  const young = { recognise: { s: 1, d: 5, dueAt: T0, state: S.REVIEW, steps: 0, reps: 1, lapses: 0 } };
+  const held = { recognise: { s: S.LADDER_AT + 1, d: 5, dueAt: T0, state: S.REVIEW, steps: 0, reps: 4, lapses: 0 } };
+  ok(S.readyFor(undefined, "recognise") && S.readyFor(young, "recognise"),
+     "recognition is always dealt — it is how a word is met");
+  ok(!S.readyFor(young, "produce") && !S.readyFor(young, "listen"),
+     "a word met once does not also arrive as a typing card and a listening card");
+  ok(S.readyFor(held, "produce") && S.readyFor(held, "listen"),
+     "…and does once its recognise card has held");
+  ok(!S.readyFor(undefined, "produce") && !S.readyFor({}, "produce"),
+     "a word with no recognise card at all has earned nothing");
+  ok(S.readyFor({ produce: young.recognise }, "produce"),
+     "a card that already exists is never withdrawn — the gate is only on new ones");
+  ok(S.readyFor(young, "produce", 0), "and the ladder can be turned off, which is how it was priced");
+
   ok(Object.values(S.DIRECTION_OF_KIND).every(S.isDirection) && S.directionOfKind("choose-en") === "recognise"
      && S.directionOfKind("type") === "produce" && S.directionOfKind("hear") === "listen"
      && S.directionOfKind("nothing") === "recognise",

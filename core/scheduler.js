@@ -69,6 +69,48 @@ export function schedulerFor(opts) {
   return f;
 }
 
+/* A word earns its harder directions (2026-09-16).
+ *
+ * Three cards a word, all three starting at once, is three times the review
+ * load on the day a word is met — and the simulator, once it was honest
+ * enough to model them (ROADMAP 13.26), said what that costs: at 40 lessons
+ * every profile sat permanently in backlog, 113 leeches for the *quick*
+ * learner against 8 before, and 39 of 59 days spent clearing rather than
+ * learning. A learner cannot be asked to produce and to transcribe a word on
+ * the same day they first see it.
+ *
+ * So the ladder is the one the app already believes in (§30j `PRODUCE_AT`):
+ * recognition meets a word, production keeps it. A word's `produce` and
+ * `listen` cards are not dealt until its `recognise` card has held for
+ * LADDER_AT days of stability — the same four days, and for the same reason:
+ * it is roughly the third or fourth correct recall, late enough that the word
+ * is known and early enough that it is still being learned.
+ *
+ * **Swept, and it buys less than it first appeared to.** `simulate.mjs
+ * --ladder N`, four seeds, the struggling profile at 40 lessons:
+ *
+ *     ladder   leeches (per seed)      backlog days
+ *       0      50, 43, 45, 53  (47.8)  26, 21, 24, 20  (22.8)
+ *       4      35, 49, 48, 39  (42.8)  18, 20, 19, 19  (19.0)
+ *
+ * The leech count is **noise** — the ladder is worse on two of the four seeds
+ * and the means are a few cards apart. What is real is the backlog: fewer
+ * days overflow the cap on *every* seed, which is what gating new cards
+ * behind maturity should do, since it spreads the load rather than making any
+ * one card easier. The rule is kept on that evidence and no more; anyone
+ * tempted to claim it cures leeches should re-read this table.
+ *
+ * Cards already created are never withdrawn; this gates only what is *new*,
+ * so a profile migrated from Phase 1 keeps everything it had. */
+export const LADDER_AT = 4;
+export const LADDER_FROM = "recognise";
+export function readyFor(entry, direction, at = LADDER_AT) {
+  if (direction === LADDER_FROM) return true;
+  if (entry && entry[direction]) return true;          // it exists; it is not new
+  const base = entry && entry[LADDER_FROM];
+  return !!base && typeof base.s === "number" && base.s >= at;
+}
+
 /* The scheduler's options as the learner's state holds them: the retention
    they chose, and a fitted `w` once an optimiser has produced one. */
 export const schedulerOpts = (st) => ({

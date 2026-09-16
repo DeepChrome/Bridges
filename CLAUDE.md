@@ -2647,6 +2647,67 @@ it, and saying «понимаю» is not the claim that you know it. Replays are
 unlimited and uncounted. Reached from Sounds, beside the minimal pairs, because
 a drill on the mouth belongs with the letters (rule 20.8).
 
+## 30aa. What an honest simulator said about Phase 2 (2026-09-16)
+
+ROADMAP 13.26 said the simulator did not model the daily rations. That was
+understated: it never dealt a **new** card at all. A word got the card for
+whichever direction a lesson question happened to exercise, and the other two
+directions of every word in the course simply did not exist. The simulator was
+measuring a third of the schedule and reporting it as the whole thing.
+
+Wiring `buildSession` in (the app's own session builder, the daily counts, the
+burying, the ordering) changed the picture completely, and then three separate
+things had to be fixed before the numbers meant anything. All three were found
+by measuring, and two of them were defects rather than tuning.
+
+**1. The learner model capped production at 69 % for ever.** `chance` was
+`familiarity × KIND_DIFFICULTY`, so a `type` question was never more than 0.70
+of whatever the learner knew, however many times they had produced the word
+correctly. Harmless while it only ranked kinds inside one quiz; fatal as a
+long-run model, because a production card then lapsed a third of the time
+for ever and generated leeches without limit. It is a **handicap that fades** now
+— full weight on a word just met, gone by `FLUENT_AT` (8) meetings — which is
+what "production is hard at first and becomes automatic" means and is the
+premise §30j rests on. Quick learner at 40 lessons: **113 leeches → 2**, again
+rate 0.21 → 0.02.
+
+**2. A flashcard setting could strand cards for ever.** `buildSession` filtered
+*reviews* by the learner's chosen directions, and lessons grade a direction
+whatever the flashcards are set to — so turning "produce" off in Settings left
+every produce card the lessons had created due, counted by the Study tab's
+badge, and never dealt by the screen that owed them. Over the full route with
+one direction: **1,964 cards still due at the end** and a backlog on every day
+of the run. `dirs` gates **only new cards** now; anything that exists is always
+reviewable. *A setting may decide what a learner takes on; it must not strand
+what they already have.*
+
+**3. A word earns its harder directions** — `LADDER_AT` in core/scheduler.js,
+and the one genuine tuning change. Three cards from the day a word is met is
+three times the load on that day. The rule is §30j's own (recognition meets a
+word, production keeps it): produce and listen are not dealt until the
+recognise card has held four days of stability. **Swept over four seeds, and
+it buys less than it looked like** — the leech count is noise (worse on two
+seeds of four) while backlog days fall on *every* seed, 22.8 → 19.0. The table
+is in the file; anyone tempted to say it cures leeches should read it.
+
+**Where the route stands now** (seed 1, 168 lessons, against §30i's
+pre-Phase-2 baseline):
+
+| | lessons passed | leeches |
+|---|---|---|
+| quick | 168 of 168 (was 167) | 3 (was 1) |
+| steady | 168 (was 163) | 29 (was 2) |
+| struggling | 159 (was 121) | 191 (was 96) |
+
+**Everyone passes more and the struggling learner pays for it**, and the
+review load now sits at the 60-a-day cap on 135–206 days of the run. That is
+the true price of three cards a word, and it is not obviously wrong — it is
+three times the material — but it is the thing to watch. A useful negative
+result while looking: the flashcard direction setting barely moves the total
+load (leeches 184/183/177 for one, two and three directions), because the
+lesson quizzes create most of the cards regardless. So the default of three
+stays.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

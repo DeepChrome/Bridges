@@ -88,10 +88,22 @@ describe("which cards a set holds", () => {
     expect(cardsIn(far, [UNIT_WITH_WORDS]).some((c) => c.sentence)).toBe(false);
   });
 
-  it("deals a word once per direction the learner studies", () => {
+  /* A word earns its harder directions (core/scheduler.js LADDER_AT): meeting
+     it does not also cost a typing card and a listening card the same day. */
+  it("deals the harder directions only once a word's recognise card has held", () => {
     const both = sessionFor({ ...st, sets: ["__due__"], flash: ["recognise", "produce"] });
-    const дом = both.items.filter((x) => x.word === "дом");
-    expect(дом.map((x) => x.direction).sort()).toEqual(["produce", "recognise"]);
-    expect(both.items.filter((x) => x.word === "я" && x.direction === "produce")[0].kind).toBe("new");
+    // «дом» is new and «я» has a day of stability: neither has earned produce.
+    for (const w of ["дом", "я"]) {
+      expect({ word: w, dirs: both.items.filter((x) => x.word === w).map((x) => x.direction) })
+        .toEqual({ word: w, dirs: ["recognise"] });
+    }
+
+    // A word the learner has held for a month has.
+    const mature = { ...st, sets: ["__due__"], flash: ["recognise", "produce"],
+                     seen: { ...st.seen, "город": { recognise: review(-1, 30) } } };
+    const dirs = sessionFor(mature).items.filter((x) => x.word === "город").map((x) => x.direction).sort();
+    expect(dirs).toEqual(["produce", "recognise"]);
+    expect(sessionFor(mature).items.find((x) => x.word === "город" && x.direction === "produce").kind)
+      .toBe("new");
   });
 });

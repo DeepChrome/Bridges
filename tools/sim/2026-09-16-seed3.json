@@ -1,0 +1,113 @@
+[
+ {
+  "profile": "struggling",
+  "seed": 3000,
+  "metrics": {
+   "recurrence": {
+    "quizQuestions": 1057,
+    "askedAgain": 1290,
+    "backToBack": 31,
+    "within3": 271,
+    "sameQuizTwice": 362,
+    "medianGap": 10,
+    "quizzes": 100
+   },
+   "mix": {
+    "choose-en": 133,
+    "type": 217,
+    "listen": 116,
+    "cloze": 207,
+    "choose-ru": 120,
+    "hear": 86,
+    "form": 41,
+    "scene": 71,
+    "agreement": 30,
+    "say": 36
+   },
+   "chapters": [
+    {
+     "chapter": 1,
+     "title": "People and Time",
+     "lessons": 14,
+     "newWordsPerLesson": 5,
+     "quizAccuracy": 0.7,
+     "passFirstTry": 5,
+     "failedThrice": 0,
+     "speechSteps": 15,
+     "speechTokensMean": 3.7,
+     "speechTokensMax": 5
+    },
+    {
+     "chapter": 2,
+     "title": "Food and School",
+     "lessons": 13,
+     "newWordsPerLesson": 4.8,
+     "quizAccuracy": 0.68,
+     "passFirstTry": 1,
+     "failedThrice": 0,
+     "speechSteps": 35,
+     "speechTokensMean": 3.3,
+     "speechTokensMax": 4
+    },
+    {
+     "chapter": 3,
+     "title": "Home and Clothes",
+     "lessons": 11,
+     "newWordsPerLesson": 5.8,
+     "quizAccuracy": 0.64,
+     "passFirstTry": 2,
+     "failedThrice": 1,
+     "speechSteps": 60,
+     "speechTokensMean": 3.9,
+     "speechTokensMax": 5
+    },
+    {
+     "chapter": 4,
+     "title": "Town and Travel",
+     "lessons": 2,
+     "newWordsPerLesson": 5.5,
+     "quizAccuracy": 0.67,
+     "passFirstTry": 0,
+     "failedThrice": 0,
+     "speechSteps": 12,
+     "speechTokensMean": 3.7,
+     "speechTokensMax": 5
+    }
+   ],
+   "words": {
+    "taught": 224,
+    "everAsked": 224,
+    "taughtButNeverAsked": 0,
+    "inSeen": 240,
+    "cards": 711,
+    "trouble": 42,
+    "leeches": 48
+   },
+   "review": {
+    "simulatedDays": 30,
+    "dueAtEnd": 31,
+    "duePerDay": 1,
+    "sessions": 30,
+    "reviewsPerDay": 57.9,
+    "maxDueInADay": 107,
+    "againRate": 0.06,
+    "backlogDays": 19,
+    "heldDays": 10
+   },
+   "lessons": {
+    "total": 40,
+    "passed": 39,
+    "relieved": 2,
+    "retakes": 60,
+    "shortQuizzes": 3
+   },
+   "structural": 0
+  },
+  "written": {
+   "scenes": 71,
+   "rows": 1019,
+   "withAudio": 5
+  },
+  "structural": []
+ }
+]

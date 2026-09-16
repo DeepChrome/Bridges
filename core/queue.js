@@ -1,0 +1,139 @@
+/* The session builder (docs/PLAYBOOK.md 2.2).
+ *
+ * This is the bug the owner hit — "131 cards, sequential": the flashcard
+ * queue was the ticked sets in unit order, filtered to what was due, Again
+ * sent to the very end. A session is built here instead, and the rules are
+ * Anki's:
+ *
+ *   1. due reviews, most forgotten first (retrievability ascending), ties
+ *      shuffled — never storage order;
+ *   2. learning cards whose step is due, or due within the learn-ahead window;
+ *   3. new cards up to `newPerDay`, less what today already introduced;
+ *   4. reviews and new cards interleaved evenly — never all of one then all
+ *      of the other;
+ *   5. siblings buried: once a word is answered, its other directions wait for
+ *      the next session;
+ *   6. capped at `sessionSize`, with what remains reported so the screen can
+ *      offer the next chunk;
+ *   7. `reviewsPerDay`, past which the day is done;
+ *   8. Again re-enters the same session after at least `minGap` other cards.
+ *
+ * Pure: state and clock in, an ordered list out. The screen owns the session
+ * as it runs (`requeue`, `bury`); the counts of what today introduced and
+ * answered live in the learner's `daily` slot (core/state.js).
+ */
+
+import { DIRECTIONS, kindOf, isDue, retrievability, dayOf } from "./scheduler.js";
+
+export const QUEUE_DEFAULTS = { newPerDay: 15, sessionSize: 20, reviewsPerDay: 200, learnAhead: 20, minGap: 3 };
+
+/* Today's counts, or a fresh slot when the day has moved on. */
+export function dailyFor(daily, now) {
+  const day = dayOf(now);
+  return daily && daily.day === day ? daily : { day: day, new: 0, reviews: 0 };
+}
+
+/* Fisher–Yates on a copy, with the caller's random source so a test and the
+   simulator are repeatable. */
+function shuffled(list, rng) {
+  const a = list.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+/* Reviews and new cards spread evenly, the way Anki's "mix" does: with R
+   reviews and N new the new ones land every R/N places, never bunched at
+   either end. Learning cards go first — their step is due now. */
+export function interleave(learning, reviews, fresh) {
+  const out = learning.slice();
+  if (!fresh.length) return out.concat(reviews);
+  if (!reviews.length) return out.concat(fresh);
+  const step = (reviews.length + fresh.length) / fresh.length;
+  let nextNew = step / 2, r = 0, n = 0;
+  for (let i = 0; i < reviews.length + fresh.length; i++) {
+    if (n < fresh.length && (i >= nextNew || r >= reviews.length)) { out.push(fresh[n++]); nextNew += step; }
+    else out.push(reviews[r++]);
+  }
+  return out;
+}
+
+/* -> { items, due, remaining, newLeft, reviewsLeft, done }
+ *
+ *   seen     the learner's schedule (seen[word][direction])
+ *   words    the words the session may draw on (the ticked sets)
+ *   dirs     which directions the learner studies on cards
+ *   now      the clock, ms
+ *   daily    today's counts (dailyFor)
+ *   opts     QUEUE_DEFAULTS overrides; `ahead` lifts the new-card ration for
+ *            one session (the learner chose to study ahead)
+ *   rng      random source, Math.random by default
+ */
+export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }) {
+  // An option left unset is the default — `Object.assign` would let an
+  // `undefined` through and turn the ration into NaN, which dealt nothing.
+  const o = Object.assign({}, QUEUE_DEFAULTS);
+  for (const k in opts || {}) if (opts[k] !== undefined) o[k] = opts[k];
+  const random = rng || Math.random;
+  const directions = (dirs && dirs.length ? dirs : DIRECTIONS).filter((d) => DIRECTIONS.includes(d));
+  const today = dailyFor(daily, now);
+  const reviewsLeft = Math.max(0, o.reviewsPerDay - today.reviews);
+  const newLeft = ahead ? Infinity : Math.max(0, o.newPerDay - today.new);
+
+  const learning = [], reviews = [], fresh = [];
+  for (const w of words || []) {
+    const entry = (seen && seen[w]) || {};
+    for (const d of directions) {
+      const card = entry[d];
+      const kind = kindOf(card);
+      if (kind === "new") { fresh.push({ word: w, direction: d, card: card || null, kind: kind }); continue; }
+      if (!isDue(card, now, o.learnAhead)) continue;
+      const item = { word: w, direction: d, card: card, kind: kind, r: retrievability(card, now, o.scheduler) };
+      (kind === "learning" ? learning : reviews).push(item);
+    }
+  }
+  // Most forgotten first; equal retrievability in a random order — never
+  // the order the words were stored in.
+  const byR = (a, b) => a.r - b.r;
+  const sortedReviews = shuffled(reviews, random).sort(byR);
+  const sortedLearning = shuffled(learning, random).sort((a, b) => a.card.dueAt - b.card.dueAt);
+  const due = sortedReviews.length + sortedLearning.length;
+
+  const done = reviewsLeft === 0 && due > 0;
+  /* The day's load is what is due (within the day's cap) plus the new cards
+     it may introduce; one session takes its share of each in that ratio, so
+     a backlog of 131 still lets a couple of new words in, and an empty pile
+     is new words alone. */
+  const todayReviews = Math.min(due, reviewsLeft);
+  const todayNew = Math.min(fresh.length, newLeft);
+  const load = todayReviews + todayNew;
+  const size = Math.min(o.sessionSize, load);
+  const newInSession = load ? Math.min(todayNew, Math.round(size * todayNew / load)) : 0;
+  const reviewsInSession = Math.min(todayReviews, size - newInSession);
+  const pickedLearning = sortedLearning.slice(0, reviewsInSession);
+  const pickedReviews = sortedReviews.slice(0, reviewsInSession - pickedLearning.length);
+  const pickedNew = shuffled(fresh, random).slice(0, newInSession);
+  const items = interleave(pickedLearning, pickedReviews, pickedNew).slice(0, o.sessionSize);
+
+  return { items: items, due: due, remaining: todayReviews - reviewsInSession,
+           newLeft: newLeft === Infinity ? fresh.length : newLeft, reviewsLeft: reviewsLeft, done: done };
+}
+
+/* Again: the card comes back after at least `minGap` other cards — a
+   learning step inside the session, not the end of the pile. `at` is the
+   index of the card just answered; the copy is placed after the gap, or at
+   the end when the session is shorter than that. */
+export function requeue(items, at, item, minGap) {
+  const gap = minGap === undefined ? QUEUE_DEFAULTS.minGap : minGap;
+  const pos = Math.min(items.length, at + 1 + gap);
+  return items.slice(0, pos).concat([Object.assign({}, item, { again: true })], items.slice(pos));
+}
+
+/* A word answered buries its siblings for the rest of the session: nothing
+   after `from` may be another direction of the same word. A re-queued copy of
+   the very card just answered is not a sibling and stays. */
+export function bury(items, from, word, direction) {
+  return items.filter((x, i) => i <= from || x.word !== word || x.direction === direction);
+}

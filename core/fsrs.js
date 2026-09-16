@@ -127,42 +127,6 @@ export function applyGrade(seen, trouble, word, grade, now) {
   return { seen: nextSeen, trouble: nextTrouble, card: card };
 }
 
-/* The row a review leaves behind: the card as it *was*, the grade, and when.
- *
- * FSRS's optimiser fits its weights to exactly this — what the learner had
- * remembered up to the moment and what they then said — and none of it can be
- * read back off the card afterwards, since fsrsReview overwrites the memory
- * state. So the row is built before applyGrade runs, from the same card.
- *
- * `now` is the day number the scheduler was given; `at` the clock in
- * milliseconds, kept because two reviews on one day are two rows and the day
- * cannot tell them apart. `elapsed` is the days since the last review, null
- * for a card with no memory yet. `source` names what asked the question.
- * Columns FSRS-4.5 has no value for (a learning state, the interval that was
- * scheduled) are not invented here; the scheduler that fills them adds them. */
-export function reviewRow(card, word, grade, now, at, source) {
-  const g = Math.min(4, Math.max(1, grade | 0));
-  const c = card && card.s ? card : null;
-  return {
-    word: word, grade: g, day: now, at: at,
-    s: c ? c.s : null, d: c ? c.d : null, due: c ? c.due : null, last: c ? c.last : null,
-    reps: card ? (card.reps || 0) : 0, lapses: card ? (card.lapses || 0) : 0,
-    elapsed: c && c.last !== undefined ? Math.max(0, now - c.last) : null,
-    source: source || null,
-  };
-}
-
-/* The rows for a batch of grades applied in order — a question that grades
-   several words, a conversation turn. A word graded twice in one batch gets
-   two rows, the second built on the card the first produced, and each row
-   takes its own millisecond so no two share a key. */
-export function reviewRows(seen, list, now, at, source) {
-  let cur = seen || {};
-  const rows = [];
-  for (const it of list || []) {
-    if (!it || !it.word) continue;
-    rows.push(reviewRow(cur[it.word], it.word, it.grade, now, at + rows.length, source));
-    cur = Object.assign({}, cur, { [it.word]: fsrsReview(cur[it.word], it.grade, now) });
-  }
-  return rows;
-}
+/* Since Phase 2 (2026-09-16) this file schedules the web app only. The native
+   app runs ts-fsrs through core/scheduler.js, which also builds the review
+   log's rows; the web is frozen on this shape and this algorithm. */

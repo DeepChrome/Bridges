@@ -13,10 +13,12 @@ import { dirname, join } from "node:path";
 
 import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN }
   from "../core/util.js";
-import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade, reviewRow, reviewRows }
+import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
   from "../core/fsrs.js";
 import { split, merge, diff, isEmpty, memoryRepo, validLog, cardRow, rowCard, SETTING_KEYS }
   from "../core/repo.js";
+import * as S from "../core/scheduler.js";
+import { buildSession, requeue, bury, interleave, dailyFor, QUEUE_DEFAULTS } from "../core/queue.js";
 import { SCENARIOS } from "../core/scenarios.js";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP,
@@ -285,65 +287,73 @@ group("the state as rows");
     : x && typeof x === "object" ? Object.fromEntries(Object.keys(x).sort().map((k) => [k, canon(x[k])])) : x);
   const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
 
+  const DAY = S.DAY, T0 = 20700 * DAY + 12 * 3600000;    // a noon, in ms
   const st = {
     v: 7, dev: true, theme: "auto", talkLevel: null, xp: 42, streak: 3, sets: [], pinned: ["дом"],
     trouble: { стол: 2 }, unit: { core1: { lessons: { 0: { v: true, q: 90 } } } }, speech: speechDefault(),
     watched: {}, mined: {},
-    seen: { книга: { s: 5, d: 4.2, due: 20710, last: 20700, reps: 2, lapses: 0 },
-            нет: { s: 1, d: 5, due: 3, reps: 1, lapses: 0 } },
+    seen: { книга: { recognise: { dueAt: T0 + 10 * DAY, lastAt: T0, s: 5, d: 4.2, state: S.REVIEW, steps: 0, reps: 2, lapses: 0, elapsed: 0, scheduled: 10 },
+                     produce: { dueAt: T0 + 2 * DAY, lastAt: T0 - DAY, s: 2, d: 6, state: S.REVIEW, steps: 0, reps: 3, lapses: 1, elapsed: 1, scheduled: 3 } },
+            нет: { listen: { dueAt: T0 + 3 * DAY, s: 1, d: 5, state: S.REVIEW, steps: 0, reps: 1, lapses: 0, elapsed: 0, scheduled: 0 } } },
     decks: [{ id: "k1", name: "D", cards: [{ ru: "да", en: "yes" }] }],
     later: { unknown: true },      // a key this build has never heard of
     gone: undefined,
   };
   const { gone, ...expected } = st;
 
-  ok(SETTING_KEYS.length === 12 && !SETTING_KEYS.includes("decks") && !SETTING_KEYS.includes("seen"),
-     "the settings are the twelve keys a reset keeps; decks and cards are tables");
+  ok(!SETTING_KEYS.includes("decks") && !SETTING_KEYS.includes("seen") && SETTING_KEYS.includes("retention"),
+     "the settings are the keys a reset keeps; decks and cards are tables");
   const rows = split(st);
-  ok(Object.keys(rows.cards).length === 2 && rows.decks.length === 1
+  ok(rows.cards.length === 3 && rows.decks.length === 1
      && Object.keys(rows.settings).sort().join() === "dev,talkLevel,theme"
      && rows.progress.later.unknown === true && !("gone" in rows.progress) && !("seen" in rows.progress),
-     "split: cards, decks, settings and progress; an unknown key kept, undefined dropped");
-  ok(same(merge(rows), expected), "merge is split's inverse");
-  ok(cardRow("нет", st.seen["нет"]).last === null && !("last" in rowCard(cardRow("нет", st.seen["нет"]))),
-     "a card without `last` is a null column and comes back without the field");
+     "split: a card row per (word, direction), decks, settings and progress; an unknown key kept, undefined dropped");
+  ok(same(merge(Object.assign({}, rows, { cards: st.seen })), expected), "merge is split's inverse");
+  const нет = cardRow("нет", "listen", st.seen["нет"].listen);
+  ok(нет.last === null && нет.due === T0 + 3 * DAY && !("lastAt" in rowCard(нет)) && rowCard(нет).dueAt === T0 + 3 * DAY,
+     "a card without `lastAt` is a null column and comes back without the field");
 
   ok(isEmpty(diff(st, st)), "an unchanged state writes nothing");
   const full = diff(null, st);
-  ok(full.cards.put.length === 2 && full.decks.put.length === 1
+  ok(full.cards.put.length === 3 && full.decks.put.length === 1
      && Object.keys(full.progress.put).length === Object.keys(rows.progress).length
      && Object.keys(full.settings.put).length === 3, "from nothing, all of it");
-  const now = 20705, at = 1e12;
-  const r = applyGrade(st.seen, st.trouble, "книга", 3, now);
+  const now = T0 + 5 * DAY, at = now;
+  const r = S.applyGrade(st.seen, st.trouble, "книга", "recognise", 3, now, { fuzz: false });
   const next = Object.assign({}, st, { seen: r.seen, trouble: r.trouble, xp: 43 });
   const d = diff(st, next);
-  ok(d.cards.put.length === 1 && d.cards.put[0].word === "книга" && d.cards.del.length === 0
-     && d.decks === null && Object.keys(d.progress.put).join() === "xp" && Object.keys(d.settings.put).length === 0,
+  ok(d.cards.put.length === 1 && d.cards.put[0].word === "книга" && d.cards.put[0].direction === "recognise"
+     && d.cards.del.length === 0 && d.decks === null && Object.keys(d.progress.put).join() === "xp"
+     && Object.keys(d.settings.put).length === 0,
      "one grade: one card row and the xp key, nothing else", JSON.stringify(d));
   const rebuilt = Object.assign({}, st, { seen: Object.assign({}, st.seen), unit: JSON.parse(JSON.stringify(st.unit)) });
   ok(isEmpty(diff(st, rebuilt)), "new objects with the same content write nothing");
-  const fewer = Object.assign({}, next, { seen: { книга: next.seen["книга"] }, decks: [] });
+  const fewer = Object.assign({}, next, { seen: { книга: { recognise: next.seen["книга"].recognise } }, decks: [] });
   const d2 = diff(next, fewer);
-  ok(d2.cards.del.join() === "нет" && d2.decks && d2.decks.del.join() === "k1" && d2.decks.put.length === 0,
-     "what went is deleted: a card, a deck");
+  ok(d2.cards.del.map((k) => k.word + "/" + k.direction).sort().join() === "книга/produce,нет/listen"
+     && d2.decks && d2.decks.del.join() === "k1" && d2.decks.put.length === 0,
+     "what went is deleted: two cards, a deck", JSON.stringify(d2.cards.del));
   const d3 = diff(st, Object.assign({}, st, { decks: st.decks.concat([{ id: "k2", name: "E", cards: [] }]) }));
   ok(d3.decks.put.length === 1 && d3.decks.put[0].id === "k2" && d3.decks.put[0].ord === 1 && d3.decks.del.length === 0,
      "a deck added is the only deck written");
   ok(diff(st, expected).progress.del.length === 0 && diff(st, Object.assign({}, expected, { later: undefined })).progress.del.join() === "later",
      "a key removed is deleted; one that was never there is not");
 
-  const one = reviewRow(st.seen["книга"], "книга", 3, now, at, "study");
-  ok(one.s === 5 && one.d === 4.2 && one.due === 20710 && one.last === 20700 && one.reps === 2 && one.lapses === 0
-     && one.elapsed === 5 && one.grade === 3 && one.day === now && one.at === at && one.source === "study",
-     "a review row is the card before the grade, the grade, and when");
-  const first = reviewRow(undefined, "новый", 1, now, at, null);
-  ok(first.s === null && first.elapsed === null && first.reps === 0 && first.source === null,
+  const one = S.reviewRow(st.seen["книга"].recognise, "книга", "recognise", 3, now, at, "study");
+  ok(one.s === 5 && one.d === 4.2 && one.due === T0 + 10 * DAY && one.last === T0 && one.reps === 2 && one.lapses === 0
+     && one.elapsed === 5 && one.grade === 3 && one.day === S.dayOf(now) && one.at === at && one.source === "study"
+     && one.state === S.REVIEW && one.steps === 0 && one.scheduled === 10 && one.direction === "recognise",
+     "a review row is the card before the grade, the grade, and when", JSON.stringify(one));
+  const first = S.reviewRow(undefined, "новый", "produce", 1, now, at, null);
+  ok(first.s === null && first.elapsed === null && first.reps === 0 && first.source === null && first.state === S.NEW,
      "a first review has no memory to record");
-  const two = reviewRows(st.seen, [{ word: "книга", grade: 1 }, { word: "книга", grade: 3 }], now, at, "run");
-  ok(two.length === 2 && two[0].at === at && two[1].at === at + 1 && two[1].reps === 3 && two[1].lapses === 1 && two[1].s < 5,
-     "a word graded twice in one batch: the second row stands on the first's card, one millisecond on");
-  ok(reviewRow(st.seen["книга"], "книга", 9, now, at).grade === 4 && reviewRow(st.seen["книга"], "книга", 0, now, at).grade === 1,
-     "grades are clamped as applyGrade clamps them");
+  const two = S.reviewRows(st.seen, [{ word: "книга", direction: "recognise", grade: 1 },
+                                     { word: "книга", direction: "recognise", grade: 3 }], now, "run", { fuzz: false });
+  ok(two.length === 2 && two[0].at === at && two[1].at === at + 1 && two[1].reps === 3 && two[1].lapses === 1 && two[1].s < 5
+     && two[1].state === S.RELEARNING,
+     "a card graded twice in one batch: the second row stands on the first's card, one millisecond on", JSON.stringify(two[1]));
+  ok(S.reviewRows(st.seen, [{ word: "книга", direction: "sideways", grade: 3 }], now, "run").length === 0,
+     "a row with no direction is not a row");
   ok(validLog([{ word: "да", grade: 3, day: 1, at: 5 }, { word: "", grade: 3, day: 1, at: 6 },
                { word: "x", grade: 2.5, day: 1, at: 7 }, { word: "y", grade: 5, day: 1, at: 8 },
                null, "no", { word: "z", grade: 4, day: 1 }]).length === 1
@@ -355,19 +365,182 @@ group("the state as rows");
   await repo.replace(st, [one]);
   ok(same(merge(await repo.load()), expected), "replace then load is the state");
   const c = await repo.counts();
-  ok(c.cards === 2 && c.decks === 1 && c.deckCards === 1 && c.log === 1 && c.settings === 3, "and the counts say so", JSON.stringify(c));
+  ok(c.cards === 3 && c.decks === 1 && c.deckCards === 1 && c.log === 1 && c.settings === 3, "and the counts say so", JSON.stringify(c));
   await repo.apply(d, [one, Object.assign({}, one, { at: at + 1 })]);
   const after = merge(await repo.load());
-  ok((await repo.counts()).log === 2 && after.seen["книга"].reps === 3 && after.xp === 43,
+  ok((await repo.counts()).log === 2 && after.seen["книга"].recognise.reps === 3 && after.xp === 43,
      "apply writes the diff and ignores a log row it already has");
-  ok((await repo.readLog({ since: at + 1 })).length === 1 && (await repo.readLog({ limit: 1 }))[0].at === at,
-     "readLog from a moment on, and capped");
+  ok((await repo.readLog({ since: at + 1 })).length === 1 && (await repo.readLog({ limit: 1 }))[0].at === at
+     && (await repo.readLog({ word: "нет" })).length === 0 && (await repo.readLog({ word: "книга" })).length === 2,
+     "readLog from a moment on, capped, or for one word");
+  await repo.apply(diff(next, next), [], [{ word: "книга", direction: "recognise", at: at + 1 }]);
+  ok((await repo.counts()).log === 1, "a dropped row is gone — an undone review");
   ok((await repo.getMeta("x")) === null, "a note never made is null");
   await repo.setMeta("x", 1);
   ok((await repo.getMeta("x")) === "1", "a note is text");
   const loaded = await repo.load();
   loaded.progress.unit.core1 = "changed";
   ok((await repo.load()).progress.unit.core1 !== "changed", "what load returns is the caller's to change");
+}
+
+/* ---------------------------------------------------------- scheduler */
+/* ts-fsrs behind the app's card (core/scheduler.js): the library's formulas
+   are not re-tested here — what is, is the card round trip, the conversion of
+   the old shape, what "due" means for each state, and the trouble rule. */
+
+group("the scheduler");
+{
+  const DAY = S.DAY, MIN = S.MINUTE, T0 = 20700 * DAY + 12 * 3600000;
+  const opts = { fuzz: false };
+  const fresh = S.newCard(T0);
+  ok(fresh.state === S.NEW && fresh.dueAt === T0 && fresh.reps === 0 && fresh.lastAt === undefined,
+     "a new card is new, due now, never reviewed");
+  ok(S.kindOf(undefined) === "new" && S.kindOf(fresh) === "new" && !S.isDue(fresh, T0),
+     "a card that does not exist is new, and new is not due — it is rationed");
+
+  const good = S.review(undefined, 3, T0, opts);
+  ok(good.state === S.LEARNING && good.dueAt - T0 === 10 * MIN && good.reps === 1 && good.lastAt === T0 && good.s > 0,
+     "Good on a new card is a learning step ten minutes on", JSON.stringify(good));
+  ok(S.isDue(good, T0 + 10 * MIN) && !S.isDue(good, T0 + 5 * MIN, 0) && S.isDue(good, T0 + 5 * MIN, 20),
+     "a learning card is due at its minute, or inside the learn-ahead window");
+  const easy = S.review(undefined, 4, T0, opts);
+  ok(easy.state === S.REVIEW && S.dayOf(easy.dueAt) > S.dayOf(T0) + 1, "Easy on a new card graduates it to review, days out");
+  ok(!S.isDue(easy, easy.dueAt - 26 * 3600000) && S.isDue(easy, S.dayOf(easy.dueAt) * DAY + 1),
+     "a review card is due on its day, from its first minute");
+
+  const pv = S.preview(easy, easy.dueAt, opts);
+  ok(pv[2].card.dueAt < pv[3].card.dueAt && pv[3].card.dueAt < pv[4].card.dueAt && pv[1].card.dueAt < pv[2].card.dueAt,
+     "intervals are monotonic: Again < Hard < Good < Easy", [1, 2, 3, 4].map((g) => pv[g].label).join(" · "));
+  ok(/^\d+m$/.test(pv[1].label) && /^\d+(d|mo)$/.test(pv[4].label), "labels read as minutes, days or months", pv[1].label + " " + pv[4].label);
+  ok(S.intervalLabel(30 * 1000) === "now" && S.intervalLabel(10 * MIN) === "10m" && S.intervalLabel(3 * 3600000) === "3h"
+     && S.intervalLabel(4 * DAY) === "4d" && S.intervalLabel(60 * DAY) === "2mo" && S.intervalLabel(400 * DAY) === "1.1y",
+     "interval labels", [30 * 1000, 10 * MIN, 3 * 3600000, 4 * DAY, 60 * DAY, 400 * DAY].map(S.intervalLabel).join(" "));
+
+  const lapsed = S.review(easy, 1, easy.dueAt, opts);
+  ok(lapsed.state === S.RELEARNING && lapsed.lapses === 1 && lapsed.s < easy.s, "Again on a kept card is a lapse and a relearning step");
+  const stepAgain = S.review(good, 1, T0 + 10 * MIN, opts);
+  ok(stepAgain.lapses === 0 && stepAgain.state === S.LEARNING, "Again inside a learning step is not a lapse");
+  ok(S.retrievability(easy, easy.dueAt) < S.retrievability(easy, T0 + DAY) && S.retrievability(undefined, T0) === 0,
+     "recall decays with time and a card with no memory has none");
+
+  // The old shape, as every backup and the web app still write it.
+  const old = { s: 5, d: 4.2, due: 20710, last: 20700, reps: 2, lapses: 0 };
+  const conv = S.fromLegacy(old);
+  ok(S.isLegacyCard(old) && !S.isLegacyCard(conv) && conv.dueAt === 20710 * DAY && conv.lastAt === 20700 * DAY
+     && conv.state === S.REVIEW && conv.scheduled === 10 && conv.s === 5 && conv.d === 4.2 && conv.reps === 2,
+     "a day-numbered card becomes a review card timed in ms", JSON.stringify(conv));
+  const v1 = S.fromLegacy({ s: 0, d: 0, due: 0, last: 0, reps: 4, lapses: 0 });
+  ok(v1.state === S.NEW && v1.lastAt === undefined && v1.reps === 4, "a card with no memory (the v1 migration's) is new, history kept");
+  ok(S.isLegacyCard({ dueAt: 20710, lastAt: 20700, s: 5 }) && S.fromLegacy({ dueAt: 20710, lastAt: 20700, s: 5 }).dueAt === 20710 * DAY,
+     "a Phase 1 row read back with day numbers under the new names is the same case");
+  const seen = { книга: old, дом: { recognise: conv }, нет: { produce: { s: 1, due: 3, last: 2, reps: 1 } } };
+  const ns = S.normaliseSeen(seen);
+  ok(ns !== seen && ns["книга"].recognise.dueAt === conv.dueAt && ns["дом"] === seen["дом"]
+     && ns["нет"].produce.dueAt === 3 * DAY && !("listen" in ns["книга"]),
+     "normaliseSeen: one old card becomes the recognise card, a converted entry is left as it is");
+  ok(S.normaliseSeen(ns) === ns && S.normaliseSeen({}) !== null, "and it returns the same object when nothing needed converting");
+
+  // The trouble rule, per card, and the word's entry.
+  let e = {}, tr = {};
+  let t = T0;
+  for (let i = 0; i < 5; i++) { ({ seen: e, trouble: tr } = S.applyGrade(e, tr, "слово", "produce", 1, t, opts)); t += 2 * DAY; }
+  ok(S.wordTrouble(e["слово"]) && tr["слово"] >= 1, "repeated Again banks a word as trouble through its direction");
+  ok(!S.wordTrouble({ recognise: good }), "a word answered once is not");
+  const g2 = S.applyGrade(e, tr, "слово", "recognise", 3, t, opts);
+  ok(g2.seen["слово"].recognise && g2.seen["слово"].produce === e["слово"].produce && g2.prev === undefined,
+     "a grade in one direction leaves the other's card alone and reports no previous card");
+  let threw = false;
+  try { S.applyGrade({}, {}, "x", "sideways", 3, T0); } catch (err) { threw = true; }
+  ok(threw, "a direction the scheduler does not know is refused");
+
+  // Enough for one day (§30t), on the new clock.
+  const day = S.dayOf(T0);
+  const worked = { seen: { дом: { recognise: S.review(undefined, 3, T0, opts) } } };
+  ok(S.dayDone(worked, 0, day) && !S.dayDone(worked, 7, day) && !S.dayDone({ seen: {} }, 0, day)
+     && !S.dayDone({ day: day, seen: { дом: { recognise: S.review(undefined, 3, T0 - DAY, opts) } } }, 0, day),
+     "a day is done when something was answered today and nothing is waiting — not when the app was opened");
+  ok(S.dueCards(worked.seen, T0 + 10 * MIN, 0).length === 1 && S.dueCards(worked.seen, T0, 0).length === 0
+     && S.dueCards(worked.seen, T0).length === 1,
+     "dueCards counts the learning step when its minute comes, or inside the learn-ahead window");
+  ok(S.strength({ recognise: good, produce: easy }) === Math.max(good.s, easy.s) && S.maxLapses({ produce: lapsed }) === 1,
+     "strength is the strongest direction; lapses the worst");
+  ok(Object.values(S.DIRECTION_OF_KIND).every(S.isDirection) && S.directionOfKind("choose-en") === "recognise"
+     && S.directionOfKind("type") === "produce" && S.directionOfKind("hear") === "listen"
+     && S.directionOfKind("nothing") === "recognise",
+     "every question kind names a direction");
+}
+
+/* ------------------------------------------------------------ session */
+/* core/queue.js: the rules the owner's "131 cards, sequential" needed. */
+
+group("the session");
+{
+  const DAY = S.DAY, T0 = 20700 * DAY + 12 * 3600000;
+  const rng = (() => { let a = 7; return () => { a = (a + 0x6D2B79F5) >>> 0; let x = a; x = Math.imul(x ^ (x >>> 15), x | 1); x ^= x + Math.imul(x ^ (x >>> 7), x | 61); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; })();
+  // 131 review cards, all due today, stored in alphabetical order, with
+  // memories of every strength.
+  const words = Array.from({ length: 131 }, (_, i) => "w" + String(i).padStart(3, "0"));
+  const seen = {};
+  words.forEach((w, i) => {
+    const s = 1 + ((i * 37) % 60);                       // stability 1–60 days
+    seen[w] = { recognise: { dueAt: T0 - DAY, lastAt: T0 - (s + 5) * DAY, s: s, d: 5, state: S.REVIEW, steps: 0, reps: 3, lapses: 0, elapsed: 0, scheduled: s } };
+  });
+  const fresh = Array.from({ length: 40 }, (_, i) => "n" + i);
+  const all = words.concat(fresh);
+  const opts = { newPerDay: 15, sessionSize: 20, reviewsPerDay: 200, learnAhead: 20, scheduler: { fuzz: false } };
+  const ses = buildSession({ seen, words: all, dirs: ["recognise"], now: T0, daily: null, opts, rng });
+  ok(ses.items.length === 20 && ses.due === 131, "a session is twenty of the 131 due", `${ses.items.length} of ${ses.due}`);
+  const order = ses.items.map((x) => x.word);
+  ok(order.join() !== words.slice(0, 20).join(), "and not in storage order", order.slice(0, 5).join(" "));
+  const rOf = (w) => S.retrievability(seen[w].recognise, T0);
+  const reviewsIn = ses.items.filter((x) => x.kind === "review");
+  const lowest = Math.min(...words.map(rOf));
+  ok(rOf(reviewsIn[0].word) === lowest,
+     "the first review is a most-forgotten card of the whole pile", `${reviewsIn[0].word} r=${rOf(reviewsIn[0].word).toFixed(3)} vs ${lowest.toFixed(3)}`);
+  ok(reviewsIn.every((x, i) => i === 0 || rOf(x.word) >= rOf(reviewsIn[i - 1].word)), "and reviews rise in retrievability");
+  const newIn = ses.items.filter((x) => x.kind === "new");
+  ok(newIn.length === Math.round(20 * 15 / 146) && newIn.length === 2, "new cards take the day's share of the session", String(newIn.length));
+  const newAt = ses.items.map((x, i) => (x.kind === "new" ? i : -1)).filter((i) => i >= 0);
+  ok(newAt[0] >= 3 && newAt[1] - newAt[0] >= 8 && newAt[1] - newAt[0] <= 11, "and are spread through it", newAt.join(","));
+  ok(ses.remaining === 113 && reviewsIn.length === 18, "eighteen reviews dealt, 113 left for the next chunk", `${reviewsIn.length} / ${ses.remaining}`);
+
+  const only = buildSession({ seen: {}, words: fresh, dirs: ["recognise"], now: T0, daily: null, opts, rng });
+  ok(only.items.length === 15 && only.items.every((x) => x.kind === "new") && only.remaining === 0,
+     "with nothing due a session is the day's new cards and no more", String(only.items.length));
+  const spent = buildSession({ seen: {}, words: fresh, dirs: ["recognise"], now: T0, daily: { day: S.dayOf(T0), new: 15, reviews: 0 }, opts, rng });
+  ok(spent.items.length === 0 && spent.newLeft === 0, "…and none once today's have been introduced");
+  const aheadS = buildSession({ seen: {}, words: fresh, dirs: ["recognise"], now: T0, daily: { day: S.dayOf(T0), new: 15, reviews: 0 }, opts, rng, ahead: true });
+  ok(aheadS.items.length === 20, "unless the learner chose to study ahead");
+  const capped = buildSession({ seen, words: all, dirs: ["recognise"], now: T0, daily: { day: S.dayOf(T0), new: 0, reviews: 200 }, opts, rng });
+  ok(capped.done && capped.items.filter((x) => x.kind === "review").length === 0,
+     "past the day's review cap the day is done");
+  ok(dailyFor({ day: S.dayOf(T0) - 1, new: 9, reviews: 50 }, T0).new === 0 && dailyFor({ day: S.dayOf(T0), new: 9 }, T0).new === 9,
+     "a new day starts the counts over");
+
+  // Interleave: R reviews, N new, spread evenly.
+  const mixed = interleave([], [1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({ i })), ["a", "b"].map((i) => ({ i })));
+  const at = mixed.map((x, i) => (typeof x.i === "string" ? i : -1)).filter((i) => i >= 0);
+  ok(mixed.length === 10 && at.length === 2 && at[1] - at[0] === 5, "two new among eight reviews sit five apart", at.join(","));
+  ok(interleave([{ i: "L" }], [{ i: 1 }], [])[0].i === "L", "learning steps come first");
+
+  // Siblings and Again.
+  const twoDirs = buildSession({ seen: { дом: { recognise: seen.w000.recognise, produce: seen.w001.recognise } },
+                                 words: ["дом"], dirs: ["recognise", "produce"], now: T0, daily: null, opts, rng });
+  ok(twoDirs.items.length === 2, "both directions of a word are dealt");
+  const buried = bury(twoDirs.items, 0, "дом", twoDirs.items[0].direction);
+  ok(buried.length === 1 && buried[0] === twoDirs.items[0], "answering one buries the other for the session");
+  const again = requeue(twoDirs.items, 0, twoDirs.items[0], 3);
+  ok(again.length === 3 && again[2].word === "дом" && again[2].again === true,
+     "Again comes back at the end of a short session");
+  const long = requeue(ses.items, 0, ses.items[0], 3);
+  ok(long[4] !== ses.items[0] && long[4].word === ses.items[0].word && long[4].again && long.length === 21,
+     "and after three other cards in a long one");
+  ok(bury(again, 2, "дом", again[2].direction).length === 3, "a re-queued copy of the card itself is not a sibling");
+  ok(QUEUE_DEFAULTS.sessionSize === 20 && QUEUE_DEFAULTS.newPerDay === 15 && QUEUE_DEFAULTS.reviewsPerDay === 200,
+     "the defaults are the playbook's");
+  const unset = buildSession({ seen: {}, words: fresh, dirs: ["recognise"], now: T0, daily: null,
+                               opts: { newPerDay: undefined, sessionSize: undefined }, rng });
+  ok(unset.items.length === 15, "an option left unset is the default, not NaN", String(unset.items.length));
 }
 
 /* ------------------------------------------------------------ compare */
@@ -1453,7 +1626,7 @@ group("production on a known word");
 
   // The same words, now held by the scheduler past PRODUCE_AT.
   const known = {};
-  for (const i of words) known[L[i].b] = { s: PRODUCE_AT + 2, d: 5, due: 0, last: -1, reps: 4, lapses: 0 };
+  for (const i of words) known[L[i].b] = { recognise: { s: PRODUCE_AT + 2, d: 5, dueAt: 0, state: 2, reps: 4, lapses: 0 } };
   const mature = kindsFor(known);
   ok(!RECOGNITION.some((k) => mature.has(k)),
      "a word the scheduler holds is never asked by multiple choice", [...mature].join(","));
@@ -1462,7 +1635,7 @@ group("production on a known word");
 
   // Just below the line it is still recognition: the rule is stability, not age.
   const young = {};
-  for (const i of words) young[L[i].b] = { s: PRODUCE_AT - 1, d: 5, due: 0, last: -1, reps: 2, lapses: 0 };
+  for (const i of words) young[L[i].b] = { produce: { s: PRODUCE_AT - 1, d: 5, dueAt: 0, state: 2, reps: 2, lapses: 0 } };
   ok(RECOGNITION.some((k) => kindsFor(young).has(k)),
      `below ${PRODUCE_AT} days of stability recognition is still offered`);
   // And a platform that passes no schedule behaves exactly as before.

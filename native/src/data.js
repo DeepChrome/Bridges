@@ -25,6 +25,7 @@ import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize } from "@core/questions";
 import { quizPassed } from "@core/state";
+import { dueCards, wanted } from "@core/scheduler";
 
 export const L = DATA.lemmas;
 export const IX = DATA.index;
@@ -369,23 +370,19 @@ export const idxOfWord = (w) => {
    first, then everything due. What a quiz tops up with and a drill asks for
    before anything else — review on the path, not only in the Study tab. */
 export function reviewWords(st) {
-  const t = today();
+  const now = Date.now();
   const out = [], have = new Set();
   const add = (w) => { const i = idxOfWord(w); if (i >= 0 && !have.has(i)) { have.add(i); out.push(i); } };
   for (const w in (st.trouble || {})) add(w);
-  for (const w in (st.seen || {})) if (st.seen[w].due <= t) add(w);
+  for (const w in (st.seen || {})) if (wanted(st.seen[w], now, st.learnAhead)) add(w);
   return out;
 }
 /* Every word the learner has actually met, as bare forms — the scheduler's own
    record, which is the honest answer to "what do they know". */
 export const knownWords = (st) => Object.keys((st && st.seen) || {});
 
-export const dueCount = (st) => {
-  const t = today();
-  let n = 0;
-  for (const w in (st.seen || {})) if (st.seen[w].due <= t) n++;
-  return n;
-};
+/* Cards due now, across every direction — what "Review · N due" counts. */
+export const dueCount = (st) => dueCards(st.seen, Date.now(), st.learnAhead).length;
 
 /* What a practice drill may ask about: the words the learner has met, widened
    along the route until there are enough to drill. A fresh learner gets the first

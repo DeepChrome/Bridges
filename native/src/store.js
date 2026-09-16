@@ -25,6 +25,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { today } from "@core/util";
 import { SCHEMA_VERSION, migrate, speechDefault } from "@core/state";
 import { SETTING_KEYS, merge, diff, isEmpty } from "@core/repo";
+import { normaliseSeen, DIRECTIONS } from "@core/scheduler";
 import { openRepo } from "./db";
 
 /* The schema and its migrations live in core/state.js since v5, shared with the web
@@ -41,10 +42,18 @@ export const DEFAULTS = {
   v: SCHEMA_VERSION,
   dev: true,            // ships on, as on the web
   theme: "auto",
-  dir: 0,
   sets: [],
-  seen: {},             // word -> FSRS card {s, d, due, last, reps, lapses}
+  seen: {},             // word -> { recognise, produce, listen }: a card each (core/scheduler.js)
   trouble: {},
+  daily: { day: null, new: 0, reviews: 0 },   // today's counts (core/queue.js dailyFor)
+  /* The scheduler's settings (docs/PLAYBOOK.md 2.3): which directions the
+     flashcards deal, the daily rations, the retention asked of the scheduler,
+     and how far ahead a learning step may be taken, in minutes. */
+  flash: DIRECTIONS.slice(),
+  newPerDay: 15,
+  reviewsPerDay: 200,
+  retention: 0.9,
+  learnAhead: 20,
   pinned: [],
   unit: {},             // unitId -> {best, done, video, lessons:{i:{v,q}}}
   drills: {},
@@ -72,7 +81,11 @@ export const DEFAULTS = {
 
 export function normalise(raw, assumedVersion) {
   if (!raw || typeof raw !== "object") return { ...DEFAULTS };
-  return { ...DEFAULTS, ...migrate(raw, raw.v || assumedVersion || 2), v: SCHEMA_VERSION };
+  const s = { ...DEFAULTS, ...migrate(raw, raw.v || assumedVersion || 2), v: SCHEMA_VERSION };
+  // Cards from before Phase 2 — one a word, timed in days — become the
+  // recognise card, timed in milliseconds. Untouched when already so.
+  s.seen = normaliseSeen(s.seen);
+  return s;
 }
 
 /* ---------------------------------------------------------------- profiles */
@@ -230,22 +243,24 @@ export async function setAside(accountId, raw) {
    way to the background must not start a transaction while the timer's write
    is still inside one. Review rows queue beside the state and ride with the
    next write; a write that fails keeps them for the one after. */
-let pending = null, timer = null, pendingLog = [];
+let pending = null, timer = null, pendingLog = [], pendingDrops = [];
 let chain = Promise.resolve();
 const writeListeners = new Set();
 export function onWriteError(fn) { writeListeners.add(fn); return () => writeListeners.delete(fn); }
 
 async function write(job) {
-  const rows = pendingLog;
+  const rows = pendingLog, drops = pendingDrops;
   pendingLog = [];
+  pendingDrops = [];
   try {
     const repo = await repoFor(job.accountId);
     const d = diff(cur.saved, job.state);
-    if (isEmpty(d) && !rows.length) return;
-    await repo.apply(d, rows);
+    if (isEmpty(d) && !rows.length && !drops.length) return;
+    await repo.apply(d, rows, drops);
     cur.saved = job.state;
   } catch (e) {
     pendingLog = rows.concat(pendingLog);
+    pendingDrops = drops.concat(pendingDrops);
     writeListeners.forEach((fn) => fn(e));
   }
 }
@@ -255,8 +270,11 @@ function enqueue(job) {
   return chain;
 }
 
-export function saveState(accountId, state, log) {
+/* `log` rows ride with the next write; `drops` are log rows to remove — an
+   undone review (core/scheduler.js reviewRow's key: word, direction, at). */
+export function saveState(accountId, state, log, drops) {
   if (log && log.length) pendingLog = pendingLog.concat(log);
+  if (drops && drops.length) pendingDrops = pendingDrops.concat(drops);
   pending = { accountId, state };
   if (timer) return;
   timer = setTimeout(() => {
@@ -285,6 +303,7 @@ export function resetStore() {
   timer = null;
   pending = null;
   pendingLog = [];
+  pendingDrops = [];
   cur = { id: null, repo: null, saved: null, recovered: null };
 }
 

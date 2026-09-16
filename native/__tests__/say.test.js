@@ -17,8 +17,8 @@ import { flushState } from "../src/store";
 import { Runner } from "../src/screens/Run";
 import { Q, SPEECH_MIX } from "../src/questions";
 import { L, IX, STAGES, SPEECH } from "../src/data";
-import { fold, today } from "@core/util";
-import { applyGrade } from "@core/fsrs";
+import { fold } from "@core/util";
+import { MINUTE } from "@core/scheduler";
 import { getFeedback } from "../src/lib/feedback";
 import { WATCHDOG_MS } from "../src/speech";
 import { SPEECH_SKIP_TOP } from "@core/speech";
@@ -45,7 +45,9 @@ function withContent(kind) {
 const question = withContent("say");
 const heard = fold(question.target).replace(/[^а-яё\s-]/g, "").trim();
 const content = question.lemmas.filter((i) => i >= SPEECH_SKIP_TOP);
-const dueFor = (grade) => applyGrade({}, {}, "x", grade, today()).card.due;
+/* A first grade is a learning step: Again one minute, Hard six, Good ten. A
+   sentence said grades the produce card. */
+const stepOf = (st, i) => st.seen[L[i].b].produce.dueAt - st.seen[L[i].b].produce.lastAt;
 
 const base = {
   v: 5, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
@@ -123,7 +125,7 @@ describe("say", () => {
     const st = await saved();
     expect(content.length).toBeGreaterThan(0);
     // Good, capped: one sentence said right is not Easy for every word in it.
-    for (const i of content) expect(st.seen[L[i].b].due).toBe(dueFor(3));
+    for (const i of content) expect(stepOf(st, i)).toBe(10 * MINUTE);
     expect(st.speech.attempts).toHaveLength(1);
     expect(st.speech.attempts[0]).toMatchObject({ kind: "say", wer: 0, attempt: 1, unit: later.id });
 
@@ -168,7 +170,7 @@ describe("say", () => {
     expect(await screen.findByText("Correct")).toBeTruthy();
 
     const st = await saved();
-    for (const i of content) expect(st.seen[L[i].b].due).toBe(dueFor(3));
+    for (const i of content) expect(stepOf(st, i)).toBe(10 * MINUTE);
     expect(st.speech.attempts).toHaveLength(2);
     expect(st.speech.attempts[1]).toMatchObject({ attempt: 2, wer: 0 });
   });
@@ -188,8 +190,8 @@ describe("say", () => {
     // The dropped word is Again (due again today); the rest are due later. A
     // first Again on a new card is a learning step, not a lapse.
     for (const i of content) {
-      expect({ lemma: L[i].b, when: st.seen[L[i].b].due === today() ? "today" : "later" })
-        .toEqual({ lemma: L[i].b, when: i === dropped ? "today" : "later" });
+      expect({ lemma: L[i].b, step: stepOf(st, i) === MINUTE ? "again" : "later" })
+        .toEqual({ lemma: L[i].b, step: i === dropped ? "again" : "later" });
     }
     expect(st.seen[L[dropped].b]).toBeTruthy();
   });

@@ -105,9 +105,10 @@ describe("the screen", () => {
     await flushState();
     const st = (await global.__db.saved("p1"));
     expect(st.pinned).toContain(word.b);
-    // Due today, not at some unspecified later point: the same route the video
-    // miner uses (P10.4).
-    expect(st.seen[word.b].due).toBe(today());
+    // A new card, due now, not at some unspecified later point: the same route
+    // the video miner uses (P10.4).
+    expect(st.seen[word.b].recognise).toMatchObject({ state: 0, reps: 0 });
+    expect(st.seen[word.b].recognise.dueAt).toBeLessThanOrEqual(Date.now());
   });
 
   it("opens a library video from its link instead of trying to read the link", async () => {

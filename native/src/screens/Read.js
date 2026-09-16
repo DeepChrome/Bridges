@@ -23,7 +23,8 @@ import { RuInput } from "../keyboard";
 import { Linked } from "../words";
 import { L, IX, videoById } from "../data";
 import { analyse, readVerdict, youtubeId, MAX_CHARS } from "@core/read";
-import { firstSense, today } from "@core/util";
+import { firstSense } from "@core/util";
+import { newCard } from "@core/scheduler";
 
 export function Read({ navigation }) {
   const { st, update } = useSession();
@@ -52,7 +53,7 @@ export function Read({ navigation }) {
       pinned: prev.pinned.includes(bare) ? prev.pinned : prev.pinned.concat(bare),
       seen: prev.seen[bare] ? prev.seen : {
         ...prev.seen,
-        [bare]: { s: 0, d: 0, due: today(), last: 0, reps: 0, lapses: 0 },
+        [bare]: { recognise: newCard(Date.now()) },
       },
     }));
   };

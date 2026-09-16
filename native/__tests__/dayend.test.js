@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { dayDone, workedOn } from "@core/state";
+import { dayDone, workedOn, DAY, REVIEW } from "@core/scheduler";
 import { today } from "@core/util";
 import Learn from "../src/screens/Learn";
 
@@ -40,10 +40,15 @@ const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) 
 beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.clearAllMocks(); });
 afterEach(async () => { await flushState(); });
 
+/* A card on the new clock (core/scheduler.js): reviewed at noon on `day`,
+   due `plus` days on. */
+const card = (day, plus) => ({ recognise: { lastAt: day * DAY + 12 * 3600000, dueAt: (day + plus) * DAY + 12 * 3600000,
+                                            s: 5, d: 5, state: REVIEW, steps: 0, reps: 1, lapses: 0 } });
+
 describe("when a day counts as done", () => {
   const t = today();
-  const worked = { seen: { дом: { last: t, due: t + 3 } } };
-  const yesterday = { seen: { дом: { last: t - 1, due: t + 3 } } };
+  const worked = { seen: { дом: card(t, 3) } };
+  const yesterday = { seen: { дом: card(t - 1, 4) } };
 
   it("needs both halves: answered something today, and nothing waiting", () => {
     expect(dayDone(worked, 0, t)).toBe(true);
@@ -70,7 +75,7 @@ describe("what Learn shows", () => {
   it("ticks, turns the streak and quiets the next lesson once the day is done", async () => {
     // Nothing answered today: a card last seen yesterday, and not due again yet
     // (so the queue is empty and only the "worked today" half is missing).
-    const open = await withProfile({ seen: { дом: { last: today() - 1, due: today() + 3 } } });
+    const open = await withProfile({ seen: { дом: card(today() - 1, 4) } });
     await screen.findByTestId("next-step");
     expect(screen.queryByTestId("day-done")).toBeNull();
     const openStreak = flat(screen.getByTestId("streak").props.style).color;
@@ -82,7 +87,7 @@ describe("what Learn shows", () => {
     // the first (store.test.js: the database wins over the row), so the
     // platform is cleared between the two, as beforeEach does.
     await AsyncStorage.clear();
-    await withProfile({ seen: { дом: { last: today(), due: today() + 3 } } });
+    await withProfile({ seen: { дом: card(today(), 3) } });
     expect(await screen.findByTestId("day-done")).toBeTruthy();
     expect(flat(screen.getByTestId("streak").props.style).color).not.toBe(openStreak);
     // Advice, not a lock: the lesson is still there, it is simply not the blue

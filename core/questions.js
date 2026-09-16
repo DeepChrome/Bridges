@@ -278,7 +278,11 @@ export function makeQuestions(env) {
      times, and from then on the word is asked by typing or by a gap to fill.
      Stability rather than a count of reviews, because that is what the scheduler
      actually believes about the memory. */
-  const mature = (card) => !!card && typeof card.s === "number" && card.s >= PRODUCE_AT;
+  /* `known` is the word's entry — up to three cards, one a direction
+     (core/scheduler.js) — and the strongest of them is what the scheduler
+     believes about the memory. */
+  const mature = (entry) => !!entry && Object.keys(entry).some((d) =>
+    entry[d] && typeof entry[d].s === "number" && entry[d].s >= PRODUCE_AT);
   const PRODUCTION = ["type", "cloze"];
   /* Not a reordering — a restriction. The quiz picks at random from what this
      returns, so leaving the recognition kinds in the list would leave them in

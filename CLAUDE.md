@@ -394,7 +394,9 @@ bridges/                          (directory is still named russian-blocks on di
   BACKUP.md            <- what git does not hold, and where the second copy is
   core/                <- shared by both apps; ES modules, no DOM, no storage
     util.js            <- fold, translit, tokens — the join key for everything
-    fsrs.js            <- FSRS-4.5, gradeFor, applyGrade
+    scheduler.js       <- ts-fsrs (FSRS-6) behind the app's card; three directions a word (§30w)
+    queue.js           <- the study session: order, rations, interleave, bury, Again (§30w)
+    fsrs.js            <- FSRS-4.5, the frozen web app's scheduler only
     state.js           <- learner-state schema, migrations, recordAttempt
     repo.js            <- the state as rows: split, diff, the in-memory store (§30v)
     questions.js       <- question generation for lessons, tests and drills
@@ -2320,6 +2322,95 @@ and one from the shell:
   `VALUES` line scanned as eleven-word sentences. `copy.mjs` now knows the
   upper-case type words, which never occur in copy.
 - **`gradlew.bat` by its bare name through `cmd /c`** — §23.
+
+## 30w. Phase 2 — the scheduler, the session, three cards a word (2026-09-16)
+
+The playbook's second phase: meet or beat Anki. What was there is worth
+stating exactly, because it is what the owner had been using for a week. A
+hand-rolled FSRS-4.5 in `core/fsrs.js`, day-granular, no learning steps, no
+fuzz; one card per word, whatever asked it; and a flashcard pile that was the
+ticked sets **in unit order**, filtered to due — "131 cards, sequential" is
+that, not a mystery — with Again sent to the very end, no cap, no ration.
+
+- **The scheduler is ts-fsrs 5.4.2 (FSRS-6)**, behind the app's own card in
+  `core/scheduler.js`: retention 0.9, a year at most, fuzz on, the 1 m / 10 m
+  learning steps on. The formulas are the library's. `core/fsrs.js` is the
+  frozen web app's now and nothing else reads it; a native backup carries
+  cards the web cannot read, so profiles move native-ward only (ROADMAP
+  13.27).
+- **The card is timed in milliseconds** — a card answered Again comes back in
+  a minute, not tomorrow — and its fields are **renamed** (`dueAt`, `lastAt`)
+  so a reader still comparing `due` to a day number fails loudly instead of
+  finding nothing due. The old shape is recognised by having no `state` and
+  converted on the way in (`fromLegacy`, `normaliseSeen`); a Phase 1 database
+  is brought forward by schema step 2 in SQL by the same rule, and
+  `sqlite.test.js` asserts the two agree. A review card is due on its day
+  whatever the hour, a learning card at its minute or inside the learn-ahead
+  window, and a new card is not due — it is rationed.
+- **Three cards a word**: recognise (Russian shown), produce (meaning shown),
+  listen (Russian heard). `DIRECTION_OF_KIND` maps the runner's twenty-one
+  kinds to one each and `registry.test.js` holds the table complete; Talk is
+  production; a flashcard uses its own card's. **The blended card became the
+  recognise card** and the other two start new — a single card was proof of
+  recognition and no more — which is the one decision that changes his
+  schedule, and it is reversible only by hand. A word is trouble if any of its
+  cards is; `strength` is its strongest; `wanted` (due, or a new card the
+  learner added themselves) is what a quiz tops up with, `dueCards` what is
+  counted.
+- **The session** (`core/queue.js buildSession`) is Anki's: due reviews most
+  forgotten first with ties shuffled, learning steps first, new cards up to the
+  day's ration mixed in evenly, siblings buried, twenty at a time with what
+  remains offered next, a daily review cap with a done-for-today state, and
+  Again back after three others. The day's load is reviews-within-cap plus
+  new-within-ration and a session takes its share of each in that ratio, so a
+  131-card backlog still lets two new words in. Today's counts live in
+  `st.daily` and roll over with the day.
+- **Study deals what it is handed.** Undo puts the previous card back (it is
+  returned by `applyGrade`) and drops the log row in the same write
+  (`update(fn, rows, undo)` → `repo.apply(diff, rows, drops)`). The turn is
+  two half-turns on `Animated` (`useFlip`), so the two faces need not share a
+  height; the Russian side reads itself out on arrival or on the turn. The
+  Study tab carries the due count as a badge. "For you", "Shuffle" and the
+  number box went: the session is the pile.
+- **Settings** lost "Card side" and gained the three directions as switches,
+  new cards a day, reviews a day, retention (0.8–0.95) and learn-ahead; the
+  **Stats** screen off You reads due today and a seven-day forecast off the
+  cards, retention and the week's reviews off the log.
+- **Measured at the gate** on the emulator: four cards graded on the Phase 1
+  build, this build installed over them — four words seen, one due, badge 1,
+  the four rows listed under recognise; a session of 1 due + 15 new with
+  «на» (the Again card) first and "10m · 1d · 2d · 3d" on the buttons; Good
+  advanced it and cleared the badge, Undo brought it back face up with the
+  badge, and after a kill the review was gone from the log. Suites: core 504,
+  native 360, smoke 159, visual 54, contrast 99, Worker 49, copy cap 0 over,
+  scripts 0 errors, walkthrough 26 of 26 from a clean install.
+- **The simulator, rewired** (seed 1, 168 lessons, no daily rations modelled —
+  13.26): quick 168 passed, 17 leeches, 55 reviews a day; steady 167, 48, 56;
+  struggling 114, **278**, 59. Against FSRS-4.5 and one card (§30i: 167 / 163
+  / 121 with 96 leeches) the passes hold and the leeches and the load rise —
+  three memories where there was one, and a leech rule set for the old
+  difficulty scale (13.25). The again rate in the daily review is 0.01 for
+  every profile, which says the profiles' chance model is too kind once a word
+  has been met a few times, not that the scheduler is.
+
+Deliberately not done: the optimiser button (13.23 — the engine cannot run on
+the phone and there are four reviews to fit), Reanimated (Phase 5), a local
+day boundary (13.24).
+
+Traps met:
+
+- **`Object.assign(defaults, opts)` lets `undefined` through.** A state with
+  no `newPerDay` handed the builder `newPerDay: undefined`, the ration became
+  NaN, and the session dealt nothing. The anki suite caught it; an unset
+  option is the default now, and a core check says so.
+- **A converted card must be told apart by a field, not a magnitude.** The
+  first `isLegacyCard` said "due before 1e9 ms is a day count", and a card the
+  v1 migration had left on day 0 converted to 0 ms and was legacy forever. A
+  card is legacy when it has no `state`.
+- **Learning steps change what a test can assert.** Good on a new card is due
+  in ten minutes, not days; the speech suites that read "due later than today"
+  off a card now read the step (`dueAt - lastAt`), and a session's first card
+  is "a" most-forgotten card, since equal retrievability is shuffled.
 
 ## 31. Verification
 

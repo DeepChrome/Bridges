@@ -34,7 +34,7 @@ import { Alignment } from "../activities/Alignment";
 import { SCENARIOS } from "@core/scenarios";
 import { feedbackTags } from "@core/speech";
 import { recordAttempt, talkAllowance, startTalkSession, TALK_TURNS } from "@core/state";
-import { applyGrade, reviewRows } from "@core/fsrs";
+import { applyGrade, reviewRows, strength, schedulerOpts } from "@core/scheduler";
 import { fold, today, firstSense } from "@core/util";
 
 /* What a failed turn says. The reasons that will not fix themselves are named
@@ -85,7 +85,7 @@ export const talkUnlocked = (st) => !!st.dev || stageDone(st, STAGES[TALK_UNLOCK
    first — by the scheduler's stability, not the order they were met in —
    topped up along the route (the same pool the drills use). */
 const studiedFor = (st) => {
-  const s = (i) => ((st.seen || {})[L[i].b] || {}).s || 0;
+  const s = (i) => strength((st.seen || {})[L[i].b]);
   return drillPool(st).slice().sort((a, b) => s(b) - s(a)).map((i) => L[i].b).slice(0, 300);
 };
 
@@ -352,12 +352,14 @@ export default function Talk({ navigation, route }) {
       status: w.status === "ins" ? "ins" : w.status }));
     const grades = gradeTurn(words);
     const tags = feedbackTags(feedback);
-    const rows = reviewRows(st.seen, grades.map((g) => ({ word: L[g.i].b, grade: g.grade })),
-                            day, Date.now(), "talk");
+    // A spoken turn is production: the learner found the word, nobody showed it.
+    const now = Date.now();
+    const rows = reviewRows(st.seen, grades.map((g) => ({ word: L[g.i].b, direction: "produce", grade: g.grade })),
+                            now, "talk", schedulerOpts(st));
     update((prev) => {
       let next = prev;
       for (const g of grades) {
-        const r = applyGrade(next.seen, next.trouble, L[g.i].b, g.grade, day);
+        const r = applyGrade(next.seen, next.trouble, L[g.i].b, "produce", g.grade, now, schedulerOpts(prev));
         next = { ...next, seen: r.seen, trouble: r.trouble };
       }
       return {

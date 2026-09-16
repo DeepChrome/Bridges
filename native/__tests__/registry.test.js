@@ -11,6 +11,7 @@
 import { VIEWS } from "../src/screens/Run";
 import { Q, DRILL_TYPES, SPEECH_MIX, FORM_MIX } from "../src/questions";
 import { STAGES, SPEECH } from "../src/data";
+import { DIRECTION_OF_KIND, isDirection } from "@core/scheduler";
 
 const kindsOf = (qs) => new Set(qs.filter(Boolean).map((q) => q.kind));
 const expectViews = (kinds) => {
@@ -26,6 +27,17 @@ describe("activity registry", () => {
   it("every registered view is a render function", () => {
     expect(Object.keys(VIEWS).length).toBeGreaterThanOrEqual(12);
     for (const k of Object.keys(VIEWS)) expect(typeof VIEWS[k]).toBe("function");
+  });
+
+  /* Every kind grades through a direction's card (core/scheduler.js). A kind
+     missing from the table would fall to recognise silently, so the table is
+     checked against the registry rather than trusted. */
+  it("every kind names the direction it exercises", () => {
+    for (const k of Object.keys(VIEWS)) {
+      expect({ kind: k, direction: DIRECTION_OF_KIND[k] })
+        .toEqual({ kind: k, direction: expect.any(String) });
+      expect(isDirection(DIRECTION_OF_KIND[k])).toBe(true);
+    }
   });
 
   it("covers every kind a drill can emit", () => {

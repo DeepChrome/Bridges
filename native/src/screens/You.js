@@ -12,8 +12,8 @@ import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { cacheStats, clearCache } from "../cache";
 import { backupProfile, restoreProfile } from "../backup";
 import { troubleWords } from "./Study";
-import { today } from "@core/util";
 import { tagInfo } from "@core/errortags";
+import { cardsOf, dueCards, maxLapses, DIRECTIONS, RETENTION_MIN, RETENTION_MAX } from "@core/scheduler";
 
 /* The grammar the learner keeps getting wrong, from the tags the speech feedback
    attaches to attempts (ROADMAP P5.11). Counted in state by recordAttempt; shown
@@ -58,16 +58,64 @@ function Settings({ visible, onClose, onLab, onTour }) {
     <Sheet visible={visible} onClose={onClose} title="Settings"
            footer={<Btn kind="pri" label="Done" style={{ marginTop: 14 }} onPress={onClose} />}>
             <List>
+              {/* The flashcards' three directions, each a card of its own
+                  (core/scheduler.js). "Card side" used to flip every card the
+                  same way; now a word is asked each way it is studied. */}
+              {[["recognise", "Recognise", "Russian shown, meaning asked"],
+                ["produce", "Produce", "Meaning shown, Russian asked"],
+                ["listen", "Listen", "Russian heard, nothing shown"]].map(([id, name, sub]) => (
+                <Row key={id}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.ink, fontSize: 15 }}>{`Cards: ${name.toLowerCase()}`}</Text>
+                    <Muted>{sub}</Muted>
+                  </View>
+                  <Switch
+                    testID={`flash-${id}`}
+                    value={(st.flash || DIRECTIONS).includes(id)}
+                    onValueChange={(v) => update((p) => {
+                      const cur = p.flash || DIRECTIONS;
+                      const next = v ? DIRECTIONS.filter((d) => d === id || cur.includes(d)) : cur.filter((d) => d !== id);
+                      return { ...p, flash: next };
+                    })}
+                    trackColor={{ true: t.good, false: t.surface3 }}
+                  />
+                </Row>
+              ))}
+              {/* The scheduler's rations and its target (docs/PLAYBOOK.md 2.3).
+                  Retention is what the scheduler aims for: higher means more
+                  reviews for fewer lapses. */}
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Card side</Text>
-                  <Muted>{st.dir ? "English first" : "Russian first"}</Muted>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>New cards a day</Text>
+                  <Choice testID="new-per-day" value={st.newPerDay || 15} style={{ marginTop: 8 }}
+                          options={[5, 10, 15, 20, 30].map((n) => ({ id: n, name: String(n) }))}
+                          onPick={(id) => update((p) => ({ ...p, newPerDay: id }))} />
                 </View>
-                <Switch
-                  value={!!st.dir}
-                  onValueChange={(v) => update((p) => ({ ...p, dir: v ? 1 : 0 }))}
-                  trackColor={{ true: t.good, false: t.surface3 }}
-                />
+              </Row>
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Reviews a day</Text>
+                  <Choice testID="reviews-per-day" value={st.reviewsPerDay || 200} style={{ marginTop: 8 }}
+                          options={[50, 100, 200, 500].map((n) => ({ id: n, name: String(n) }))}
+                          onPick={(id) => update((p) => ({ ...p, reviewsPerDay: id }))} />
+                </View>
+              </Row>
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Retention</Text>
+                  <Choice testID="retention" value={st.retention || 0.9} style={{ marginTop: 8 }}
+                          options={[0.8, 0.85, 0.9, 0.95].filter((r) => r >= RETENTION_MIN && r <= RETENTION_MAX)
+                            .map((r) => ({ id: r, name: `${Math.round(r * 100)} %` }))}
+                          onPick={(id) => update((p) => ({ ...p, retention: id }))} />
+                </View>
+              </Row>
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Learn ahead</Text>
+                  <Choice testID="learn-ahead" value={st.learnAhead === undefined ? 20 : st.learnAhead} style={{ marginTop: 8 }}
+                          options={[0, 10, 20, 60].map((n) => ({ id: n, name: n ? `${n} min` : "Off" }))}
+                          onPick={(id) => update((p) => ({ ...p, learnAhead: id }))} />
+                </View>
               </Row>
               {/* Drills used to be four options and nothing else. Writing the
                   form is the same question without the eliminations, which is
@@ -231,14 +279,14 @@ export default function You({ navigation }) {
   const t = useTheme();
   const [settings, setSettings] = useState(false);
 
-  const learned = Object.values(st.seen).filter((c) => (c.reps || 0) > 0).length;
+  const learned = Object.values(st.seen).filter((e) => cardsOf(e).some(({ card }) => (card.reps || 0) > 0)).length;
   // Cleared means done — vocabulary met and the quiz passed — not merely attempted.
   const lessons = UN.reduce((a, u) => {
     let n = 0;
     for (let i = 0; i < lessonCount(u); i++) if (lessonDone(st, u, i)) n++;
     return a + n;
   }, 0);
-  const due = Object.keys(st.seen).filter((w) => st.seen[w].due <= today()).length;
+  const due = dueCards(st.seen, Date.now(), st.learnAhead).length;
   const trouble = troubleWords(st);
   const grammar = grammarTrouble(st);
   const level = Math.floor((st.xp || 0) / 100) + 1;
@@ -272,6 +320,10 @@ export default function You({ navigation }) {
         <Stat value={String(lessons)} label="lessons cleared" />
         <Stat value={due.toLocaleString("en-US")} label="due now" />
       </View>
+      {/* The numbers behind the band — what is coming, how much sticks, what
+          was answered — on a screen of their own (docs/PLAYBOOK.md 2.3). */}
+      <Btn kind="ghost" label="Statistics" testID="open-stats" style={{ alignSelf: "center", marginTop: 6 }}
+           onPress={() => navigation.navigate("Stats")} />
 
       <SectionLabel style={{ marginTop: 22 }}>Trouble words</SectionLabel>
       {!trouble.length ? (
@@ -300,7 +352,7 @@ export default function You({ navigation }) {
                       </Text>
                       {i >= 0 ? <Muted>{L[i].e}</Muted> : null}
                     </View>
-                    <Pill>{`${(st.seen[w] || {}).lapses || 0}×`}</Pill>
+                    <Pill>{`${maxLapses(st.seen[w])}×`}</Pill>
                   </Row>
                 );
               })}

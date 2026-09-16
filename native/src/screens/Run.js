@@ -25,16 +25,18 @@ import { Passage } from "../activities/Passage";
 import { PairHear, PairSay } from "../activities/Pair";
 import { Shadow } from "../activities/Shadow";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
-import { gradeFor, applyGrade, reviewRows } from "@core/fsrs";
-import { fold, translit, today, translitBack, firstSense } from "@core/util";
+import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts } from "@core/scheduler";
+import { fold, translit, translitBack, firstSense } from "@core/util";
 
 /* One review into state. The grade comes from gradeFor (right or wrong, table used or
    not) or is handed in directly by an activity that scores itself, as the speaking
-   activities will. Both go through core's applyGrade, so the trouble rule lives once
-   for both platforms. */
-function gradeInto(st, idx, grade) {
+   activities do. Every grade goes through core's applyGrade, so the trouble rule
+   lives once; the direction is the question's (core/scheduler.js
+   DIRECTION_OF_KIND) — a meaning chosen is recognition, a word typed is
+   production, a sentence heard is listening. */
+function gradeInto(st, idx, grade, direction, now) {
   if (typeof idx !== "number" || !L[idx]) return st;
-  const r = applyGrade(st.seen, st.trouble, L[idx].b, grade, today());
+  const r = applyGrade(st.seen, st.trouble, L[idx].b, direction, grade, now, schedulerOpts(st));
   return { ...st, seen: r.seen, trouble: r.trouble };
 }
 
@@ -444,13 +446,15 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       const entries = words || (typeof q.i === "number" ? [q.i] : []);
       if (entries.length) {
         const g = grade || gradeFor(correct, usedHint);
+        const dir = directionOfKind(q.kind), now = Date.now();
         // The log rows are built here, from the cards as they stand, and
         // handed in beside the update — never from inside it (session.js).
         const list = entries.map((e) => (typeof e === "number" ? { i: e, grade: g } : { i: e.i, grade: e.grade }))
-          .filter((e) => typeof e.i === "number" && L[e.i]).map((e) => ({ word: L[e.i].b, grade: e.grade }));
-        const rows = reviewRows(st.seen, list, today(), Date.now(), q.kind);
+          .filter((e) => typeof e.i === "number" && L[e.i])
+          .map((e) => ({ word: L[e.i].b, direction: dir, grade: e.grade }));
+        const rows = reviewRows(st.seen, list, now, q.kind, schedulerOpts(st));
         update((prev) => entries.reduce((acc, e) => (
-          typeof e === "number" ? gradeInto(acc, e, g) : gradeInto(acc, e.i, e.grade)
+          typeof e === "number" ? gradeInto(acc, e, g, dir, now) : gradeInto(acc, e.i, e.grade, dir, now)
         ), prev), rows);
       }
     }

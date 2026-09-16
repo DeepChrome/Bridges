@@ -15,16 +15,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider, useSession, ERRORS } from "../src/session";
 import { flushState, loadState, saveState } from "../src/store";
 import { SCHEMA_VERSION } from "@core/state";
-import { reviewRows } from "@core/fsrs";
-import { applyGrade } from "@core/fsrs";
-import { today } from "@core/util";
+import { reviewRows, applyGrade, fromLegacy } from "@core/scheduler";
 
 function Probe() {
   const { st, update, restore, error, clearError } = useSession();
   const review = () => {
-    const rows = reviewRows(st.seen, [{ word: "книга", grade: 3 }], today(), Date.now(), "probe");
+    const now = Date.now();
+    const rows = reviewRows(st.seen, [{ word: "книга", direction: "recognise", grade: 3 }], now, "probe");
     update((p) => {
-      const r = applyGrade(p.seen, p.trouble, "книга", 3, today());
+      const r = applyGrade(p.seen, p.trouble, "книга", "recognise", 3, now);
       return { ...p, seen: r.seen, trouble: r.trouble };
     }, rows);
   };
@@ -80,7 +79,8 @@ describe("the save layer", () => {
     expect(await AsyncStorage.getItem("rb.state.p1")).toBe(row);
     const saved = await global.__db.saved("p1");
     expect(saved.xp).toBe(7);
-    expect(saved.seen["книга"]).toEqual(card);
+    // The one blended card became the recognise card, on the new clock.
+    expect(saved.seen["книга"]).toEqual({ recognise: fromLegacy(card) });
     // The streak moved on (a new day), which is the one write a load earns.
     expect(saved.streak).toBe(1);
     const stamp = JSON.parse(await repo().getMeta("migrated"));
@@ -96,7 +96,7 @@ describe("the save layer", () => {
     await AsyncStorage.setItem("rb.state.p1", JSON.stringify({ v: 6, xp: 99, seen: {} }));
     const again = await loadState("p1");
     expect(again.state.xp).toBe(7);
-    expect(again.state.seen["книга"]).toEqual(card);
+    expect(again.state.seen["книга"]).toEqual({ recognise: fromLegacy(card) });
     expect(again.bad).toBeNull();
   });
 
@@ -136,8 +136,8 @@ describe("the save layer", () => {
     await flushState();
     const log = await global.__db.log("p1");
     expect(log.length).toBe(1);
-    expect(log[0]).toMatchObject({ word: "книга", grade: 3, reps: 4, lapses: 1, s: 3, source: "probe" });
-    expect((await global.__db.saved("p1")).seen["книга"].reps).toBe(5);
+    expect(log[0]).toMatchObject({ word: "книга", direction: "recognise", grade: 3, reps: 4, lapses: 1, s: 3, source: "probe" });
+    expect((await global.__db.saved("p1")).seen["книга"].recognise.reps).toBe(5);
     expect((await repo().counts()).cards).toBe(1);
   });
 
@@ -200,9 +200,11 @@ describe("a profile from an older version of the app", () => {
       expect(bad).toBeNull();
       expect(state.v).toBe(SCHEMA_VERSION);
       // The month itself: a studied word is still studied, whatever shape it
-      // was stored in. v1 has no stability to carry, but it keeps the history.
+      // was stored in — as the recognise card now. v1 has no stability to
+      // carry, but it keeps the history.
       expect(state.seen["книга"]).toBeTruthy();
-      expect(state.seen["книга"].reps).toBe(4);
+      expect(state.seen["книга"].recognise.reps).toBe(4);
+      expect(state.seen["книга"].recognise.dueAt).toBeGreaterThan(1e9);
       expect(state.xp).toBe(12);
       // Every slot the app reads exists, so no screen meets an undefined.
       expect(Array.isArray(state.pinned)).toBe(true);

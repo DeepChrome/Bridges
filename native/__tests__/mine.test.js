@@ -12,6 +12,7 @@ import Study from "../src/screens/Study";
 import { videos, unitById, L, idxOfWord } from "../src/data";
 import { migrate, SCHEMA_VERSION } from "@core/state";
 import { today } from "@core/util";
+import { fromLegacy } from "@core/scheduler";
 
 jest.mock("../src/youtube", () => {
   const React = require("react");
@@ -67,11 +68,12 @@ describe("mining a word from a video", () => {
     /* "Add to review" has to mean the scheduler owns it: the word gets a card,
        due today, so it is counted by "Review · N due" and reached by the quiz
        top-up. Pinning alone was read only by the Study picker's Trouble set. */
-    expect(saved.seen[word]).toMatchObject({ s: 0, reps: 0, lapses: 0 });
-    expect(saved.seen[word].due).toBeLessThanOrEqual(today());
-    const { dueCount, reviewWords } = require("../src/data");
-    expect(dueCount(saved)).toBeGreaterThan(0);
+    expect(saved.seen[word].recognise).toMatchObject({ s: 0, reps: 0, lapses: 0, state: 0 });
+    expect(saved.seen[word].recognise.dueAt).toBeLessThanOrEqual(Date.now());
+    const { reviewWords } = require("../src/data");
+    const { cardsIn } = require("../src/screens/Study");
     expect(reviewWords(saved)).toContain(idxOfWord(word));
+    expect(cardsIn(saved, ["__due__"]).map((c) => c.b)).toContain(word);
     // Said once, and it says so rather than offering to add it again.
     expect(await screen.findByTestId("mined")).toBeTruthy();
     expect(screen.queryByTestId("mine")).toBeNull();
@@ -97,7 +99,7 @@ describe("mining a word from a video", () => {
     await act(async () => { fireEvent.press(await screen.findByTestId("mine")); });
     await flushState();
     const saved = (await global.__db.saved("p1"));
-    expect(saved.seen[word]).toEqual(card);
+    expect(saved.seen[word]).toEqual({ recognise: fromLegacy(card) });
     expect(saved.mined[word]).toBeTruthy();
   });
 });

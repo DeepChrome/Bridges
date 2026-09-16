@@ -149,6 +149,11 @@ wait:2
 tap:Your profile
 wait:2
 shot:40-you
+tap:^Statistics$
+wait:2
+shot:40b-stats
+back
+wait:2
 tap:^Settings$
 wait:2
 shot:41-settings

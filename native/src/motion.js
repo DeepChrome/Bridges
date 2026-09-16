@@ -89,6 +89,36 @@ export function usePop(deps = [], { delay = 0 } = {}) {
   };
 }
 
+/* A flashcard turning over. Two half-turns rather than one: the face folds to
+   its edge, the content swaps, the other face unfolds — so the two sides need
+   not be the same height, and a back full of senses and sentences can be
+   taller than a front that is one word. `face` is which side is drawn, and it
+   changes at the edge, when nothing is visible. `key` is the card: a new card
+   arrives face down with no turn. */
+export function useFlip(shown, key) {
+  const v = useRef(new Animated.Value(0)).current;      // 0 front, 0.5 edge-on, 1 back
+  const [face, setFace] = useState(!!shown);
+  const card = useRef(key);
+  useEffect(() => {
+    if (card.current !== key) { card.current = key; v.setValue(shown ? 1 : 0); setFace(!!shown); return undefined; }
+    if (reduceMotion) { v.setValue(shown ? 1 : 0); setFace(!!shown); return undefined; }
+    const half = motion.enter / 2;
+    const fold = Animated.timing(v, { toValue: 0.5, duration: half, easing: Easing.in(Easing.quad), useNativeDriver: true });
+    fold.start(({ finished }) => {
+      if (!finished) return;
+      setFace(!!shown);
+      Animated.timing(v, { toValue: shown ? 1 : 0, duration: half, easing: OUT, useNativeDriver: true }).start();
+    });
+    return () => fold.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shown, key]);
+  return {
+    face,
+    style: { transform: [{ perspective: 900 },
+                         { rotateY: v.interpolate({ inputRange: [0, 0.5, 1], outputRange: ["0deg", "90deg", "0deg"] }) }] },
+  };
+}
+
 /* ------------------------------------------------------------------ touch */
 
 /* What a control does under a finger.

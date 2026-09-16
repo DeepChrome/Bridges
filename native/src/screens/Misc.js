@@ -12,6 +12,7 @@ import {
 } from "../data";
 import { releaseAudio } from "../audio";
 import { fold, today, firstSense } from "@core/util";
+import { newCard } from "@core/scheduler";
 
 /* ------------------------------------------------------------- immerse */
 
@@ -220,7 +221,7 @@ export function Video({ route, navigation }) {
   const mine = (f) => update((prev) => {
     const seen = { ...(prev.seen || {}) };
     if (!seen[f.word]) {
-      seen[f.word] = { s: 0, d: 0, due: today(), last: 0, reps: 0, lapses: 0 };
+      seen[f.word] = { recognise: newCard(Date.now()) };
     }
     return {
       ...prev,

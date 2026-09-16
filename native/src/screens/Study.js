@@ -2,42 +2,40 @@
  *
  * A card is a curriculum word or, since 2026-09-07, a card from an imported Anki
  * deck (You → decks). Both key their schedule on the Russian string (rule 20.4),
- * so a deck card that is also a curriculum word shares one memory. */
+ * so a deck card that is also a curriculum word shares one memory — three
+ * memories since Phase 2, one a direction (core/scheduler.js): the word
+ * shown, the meaning shown, the word heard.
+ *
+ * The session is built by core/queue.js, which is where the owner's "131
+ * cards, sequential" went: most forgotten first, learning steps when due, new
+ * cards rationed and mixed in, siblings buried, twenty at a time, Again back
+ * after three others. This screen deals what it is handed and grades what
+ * is answered; it does not decide order. */
 
-import React, { useEffect, useState } from "react";
-import { View, Pressable, Alert } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { View, Pressable, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Text, TextInput } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Text } from "../ui";
 import { L, UN, STAGES, unitUnlocked, idxOfWord, sensesOf } from "../data";
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";
-import { fsrsPreview, isTrouble, applyGrade, reviewRows } from "@core/fsrs";
-import { shuffle, today } from "@core/util";
+import { say } from "../audio";
+import { useFlip } from "../motion";
+import { applyGrade, reviewRows, preview, schedulerOpts, wanted, wordTrouble, maxLapses, DIRECTIONS } from "@core/scheduler";
+import { buildSession, requeue, bury, dailyFor } from "@core/queue";
+import { today } from "@core/util";
 
 export function troubleWords(st) {
   const out = [];
-  for (const w in st.seen) if (isTrouble(st.seen[w])) out.push(w);
+  for (const w in st.seen) if (wordTrouble(st.seen[w])) out.push(w);
   (st.pinned || []).forEach((w) => { if (!out.includes(w)) out.push(w); });
-  return out.sort((a, b) => ((st.seen[b] || {}).lapses || 0) -
-                            ((st.seen[a] || {}).lapses || 0));
+  return out.sort((a, b) => maxLapses(st.seen[b]) - maxLapses(st.seen[a]));
 }
 
 /* A card as the screen draws it: `b` is the schedule key, `w` the face. */
 const cardOf = (i) => ({ key: "w" + i, w: L[i].w, b: L[i].b, e: L[i].e, x: L[i].x });
 const deckCard = (c) => ({ key: "d" + c.ru, w: c.ru, b: c.ru, e: c.en });
-
-/* Higher is more urgent: banked trouble first, then most overdue, then unseen. */
-function weight(st, card) {
-  const w = card.b;
-  const c = st.seen[w];
-  let score = 0;
-  if (st.trouble[w] || (c && isTrouble(c))) score += 1000;
-  if (!c) return score + 50;
-  score += Math.max(0, today() - c.due) * 10;
-  score += (c.lapses || 0) * 20 + (c.d || 0);
-  return score;
-}
 
 /* Every card the ticked sets hold, one of each. */
 export function cardsIn(st, sets) {
@@ -54,8 +52,8 @@ export function cardsIn(st, sets) {
     // Everything the scheduler wants today, whichever set it came from — what
     // "Review · N due" on the path opens.
     if (id === "__due__") {
-      const t = today();
-      for (const w in st.seen) if (st.seen[w].due <= t) byWord(w);
+      const now = Date.now();
+      for (const w in st.seen) if (wanted(st.seen[w], now, st.learnAhead)) byWord(w);
       return;
     }
     if (id.startsWith("deck:")) {
@@ -69,28 +67,22 @@ export function cardsIn(st, sets) {
   return pool;
 }
 
-/* Only what is ticked. With nothing ticked the queue is empty and the screen says
-   so — it used to fall back to the first unit's words, which read as a set of
-   common words that could not be switched off (the owner, 2026-09-07). */
-export function buildQueue(st, limit, ahead) {
-  const pool = cardsIn(st, st.sets);
-  const t = today();
-  // What is due, and new cards; the whole set only when asked to study ahead —
-  // it used to fall through to everything silently, so "nothing due" never showed.
-  let q = pool.filter((c) => { const s = st.seen[c.b]; return !s || s.due <= t; });
-  if (ahead) q = pool.slice();
-  if (limit) {
-    q.sort((a, b) => weight(st, b) - weight(st, a));
-    q = q.slice(0, limit);
-  }
-  return q;
-}
-
 /* The cards a set holds, for export — every card, due or not. (It used to blank
    `seen` to get past the due filter, which emptied the Trouble set: its words
    are found *through* `seen`.) */
 export function cardsOfSets(st, ids) {
   return cardsIn(st, ids).map((c) => ({ ru: c.b, en: c.e || "" }));
+}
+
+/* The session for what is ticked, from the learner's state. Exported so a test
+   can ask for the same session the screen deals. */
+export function sessionFor(st, { ahead, rng } = {}) {
+  const words = cardsIn(st, st.sets).map((c) => c.b);
+  return buildSession({
+    seen: st.seen, words, dirs: st.flash || DIRECTIONS, now: Date.now(), daily: st.daily, rng, ahead,
+    opts: { newPerDay: st.newPerDay, reviewsPerDay: st.reviewsPerDay, learnAhead: st.learnAhead,
+            scheduler: schedulerOpts(st) },
+  });
 }
 
 export const newDeckId = () => "k" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
@@ -260,74 +252,141 @@ function SetPicker({ visible, onClose }) {
   );
 }
 
-/* How many cards "For you" deals. Twenty unless the learner says otherwise; an
-   empty or nonsense box falls back to twenty rather than to nothing, because a
-   pile of zero cards is not a thing anybody asked for. */
-export const FOR_YOU_N = 20;
-export const pickN = (text) => {
-  const n = parseInt(String(text), 10);
-  return Number.isFinite(n) && n > 0 ? Math.min(n, 999) : FOR_YOU_N;
-};
+/* The word as this direction shows it before the turn: the Russian, its
+   meaning, or only the sound. */
+function Front({ face, direction }) {
+  const t = useTheme();
+  if (direction === "produce") {
+    // Meaning first: the same numbered senses, since the question is "which
+    // word means all of these?" and one of nine synonyms is a different question.
+    return face.e ? <Senses e={face.e} size={20} style={{ marginTop: 0 }} />
+                  : <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600" }}>—</Text>;
+  }
+  if (direction === "listen") {
+    return (
+      <View style={{ alignItems: "center", paddingVertical: 12 }}>
+        <Speaker text={face.b} size={64} />
+      </View>
+    );
+  }
+  return (
+    <>
+      {/* The word is the card. At 34 it sat small in the middle of a tall white
+          panel; a flashcard's face should be the largest thing on the screen,
+          and it steps down only when the word is long enough to need the room. */}
+      <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center",
+                     fontSize: face.w.length > 18 ? 26 : face.w.length > 11 ? 34 : 44 }}>
+        {face.w}
+      </Text>
+      <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
+    </>
+  );
+}
 
 export default function Study({ navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
   const [picker, setPicker] = useState(false);
-  const [howMany, setHowMany] = useState(String(FOR_YOU_N));
-  const [queue, setQueue] = useState(() => buildQueue(st));
+  const [session, setSession] = useState(null);   // core/queue.js buildSession
   const [at, setAt] = useState(0);
   const [shown, setShown] = useState(false);
-  const [back, setBack] = useState(false);       // reading a card already graded
+  const [last, setLast] = useState(null);         // the answer just given, for Undo
 
-  const rebuild = (limit, ahead) => {
-    setQueue(buildQueue(st, limit, ahead));
+  const faces = useMemo(() => {
+    const m = {};
+    for (const c of cardsIn(st, st.sets)) m[c.b] = c;
+    return m;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [st.sets, st.decks, st.seen === undefined]);
+  const chosen = Object.keys(faces).length;        // cards in the sets, due or not
+
+  const deal = (ahead) => {
+    setSession(sessionFor(st, { ahead }));
     setAt(0);
     setShown(false);
-    setBack(false);
+    setLast(null);
   };
-  const chosen = cardsIn(st, st.sets).length;      // cards in the sets, due or not
   // The profile arrives after the first render, and a set or a deck can change
-  // from the picker: the queue follows what is ticked.
-  const setsKey = st.sets.join(",") + "|" + (st.decks || []).map((d) => d.id + d.cards.length).join(",");
-  useEffect(() => { rebuild(); }, [setsKey]);
+  // from the picker: the session follows what is ticked. Not what is graded —
+  // a session is dealt once and played through.
+  const setsKey = st.sets.join(",") + "|" + (st.decks || []).map((d) => d.id + d.cards.length).join(",")
+    + "|" + (st.flash || []).join(",");
+  useEffect(() => { deal(false); }, [setsKey]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const names = st.sets.map((id) => id === "__trouble__" ? "Trouble words"
     : id === "__due__" ? "Due today"
     : id.startsWith("deck:") ? ((st.decks || []).find((d) => "deck:" + d.id === id) || {}).name
     : (UN.find((u) => u.id === id) || {}).name).filter(Boolean);
 
-  const w = queue[at] !== undefined ? queue[at] : null;
-  const iv = w ? fsrsPreview(st.seen[w.b], today()) : {};
-  // A deck card has no lemma behind it and so no entry: `idxOfWord` is -1 and
-  // `sensesOf` says nothing, which is the honest answer for a card the learner
-  // wrote themselves.
-  const senses = w ? sensesOf(idxOfWord(w.b)) : null;
+  const items = session ? session.items : [];
+  const item = items[at] || null;
+  const face = item ? faces[item.word] : null;
+  // The card as it stands now — a re-queued Again is not the card it was
+  // when the session was dealt.
+  const current = item ? ((st.seen[item.word] || {})[item.direction] || null) : null;
+  const iv = item ? preview(current, Date.now(), schedulerOpts(st)) : null;
+  const senses = face ? sensesOf(idxOfWord(face.b)) : null;
+  const flip = useFlip(shown, at);
 
-  /* One trouble rule for the cards and the runners (core/fsrs.js applyGrade):
-     a card used to clear only on Good or better here and on any recall there,
-     so a word could be trouble on the path and not on the cards. */
+  /* The Russian side reads itself out: on arrival when it is the front, on
+     the turn when it is the back, and a listening card is the recording. A
+     tap on the speaker plays it again (audio.js). */
+  useEffect(() => {
+    if (!item || !face) return;
+    const russianShowing = item.direction === "produce" ? shown : !shown;
+    if (russianShowing) say(face.b, { repeat: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [at, shown]);
+
   const grade = (g) => {
-    const word = w.b;
-    const rows = reviewRows(st.seen, [{ word, grade: g }], today(), Date.now(), "study");
+    const now = Date.now();
+    const word = item.word, direction = item.direction;
+    const rows = reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
+    const before = { items: items, at, prev: current, trouble: st.trouble, xp: st.xp, daily: st.daily,
+                     row: rows[0] };
     update((prev) => {
-      const r = applyGrade(prev.seen, prev.trouble, word, g, today());
-      return { ...prev, seen: r.seen, trouble: r.trouble,
-               xp: (prev.xp || 0) + (g === 1 ? 0 : 1) };
+      const r = applyGrade(prev.seen, prev.trouble, word, direction, g, now, schedulerOpts(prev));
+      const daily = dailyFor(prev.daily, now);
+      return {
+        ...prev, seen: r.seen, trouble: r.trouble,
+        xp: (prev.xp || 0) + (g === 1 ? 0 : 1),
+        daily: { ...daily, reviews: daily.reviews + 1,
+                 new: daily.new + (item.kind === "new" && !item.again ? 1 : 0) },
+      };
     }, rows);
-    if (g === 1) setQueue(queue.concat(queue[at]));
+    setLast(before);
+    let next = bury(items, at, word, direction);
+    if (g === 1) next = requeue(next, at, item);
+    setSession({ ...session, items: next });
     setAt(at + 1);
     setShown(false);
-    setBack(false);
   };
+
+  /* The last answer taken back: the card as it was, the log row gone, the
+     session as it stood — the card is in front again, face up. */
+  const undo = () => {
+    if (!last) return;
+    const { row, prev } = last;
+    update((p) => {
+      const entry = { ...(p.seen[row.word] || {}) };
+      if (prev) entry[row.direction] = prev; else delete entry[row.direction];
+      const seen = { ...p.seen };
+      if (Object.keys(entry).length) seen[row.word] = entry; else delete seen[row.word];
+      return { ...p, seen, trouble: last.trouble, xp: last.xp, daily: last.daily };
+    }, [], [{ word: row.word, direction: row.direction, at: row.at }]);
+    setSession({ ...session, items: last.items });
+    setAt(last.at);
+    setShown(true);
+    setLast(null);
+  };
+
+  const finished = session && at >= items.length;
+  const doneToday = session && session.done;
 
   return (
     <Screen>
       {/* A summary of what is ticked — so it only exists once something is.
-          With nothing chosen it said "Choose what to practise / Nothing
-          selected / Change" above an empty state saying "Pick a set to
-          practise" with a button saying "Choose what to review": one thought,
-          three controls, two of them boxes. The empty state's button is the
-          way in; this row is the way back. */}
+          The empty state's button is the way in; this row is the way back. */}
       {names.length ? (
         <List>
           <Row onPress={() => setPicker(true)}>
@@ -335,33 +394,36 @@ export default function Study({ navigation }) {
               <Text style={{ color: t.ink, fontSize: 15 }}>
                 {names.length === 1 ? names[0] : `${names.length} sets`}
               </Text>
-              <Muted>{queue.length ? `${queue.length} cards` : `${chosen} cards`}</Muted>
+              <Muted testID="pile">
+                {session && session.due ? `${session.due} due` + (session.newLeft ? ` · ${Math.min(session.newLeft, chosen)} new` : "")
+                  : `${chosen} cards`}
+              </Muted>
             </View>
             <Btn kind="ghost" label="Change" style={{ paddingHorizontal: 8 }} onPress={() => setPicker(true)} />
           </Row>
         </List>
       ) : null}
 
-      {!w ? (
-        /* A sentence and one action, with air around them — not a panel.
-           A card groups things that belong together; one line of text and the
-           button under it are not a group, and drawing a container round them
-           made the empty Study screen read as two grey boxes stacked (§25, and
-           the owner on getting away from blocky squares). */
+      {!item ? (
+        /* A sentence and one action, with air around them — not a panel. */
         <View style={{ marginTop: 56, alignItems: "center", paddingHorizontal: 24 }}>
-          <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700",
-                         textAlign: "center" }}>
-            {queue.length ? "Set finished."
+          <Text testID="study-state" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
+            {finished && items.length && session.remaining ? `${session.remaining} to go.`
+              : finished && items.length ? "Set finished."
+              : doneToday ? "Done for today."
               : chosen ? "Nothing due today." : "Pick a set to practise."}
           </Text>
-          {queue.length ? (
+          {finished && items.length && session.remaining ? (
+            <Btn kind="pri" testID="continue" label={`Continue · ${session.remaining} left`} style={{ marginTop: 20, minWidth: 200 }}
+                 onPress={() => deal(false)} />
+          ) : finished && items.length ? (
             <Btn kind="pri" label="Go again" style={{ marginTop: 20, minWidth: 200 }}
-                 onPress={() => rebuild()} />
-          ) : chosen ? (
+                 onPress={() => deal(false)} />
+          ) : doneToday ? null : chosen ? (
             // The scheduler has nothing to ask; studying ahead is the learner's
             // choice, said as such, not the default.
             <Btn label={`Study ahead · ${chosen} cards`} style={{ marginTop: 20, minWidth: 200 }}
-                 onPress={() => rebuild(undefined, true)} />
+                 onPress={() => deal(true)} />
           ) : (
             <Btn kind="pri" label="Choose what to review" style={{ marginTop: 20, minWidth: 200 }}
                  onPress={() => setPicker(true)} />
@@ -369,44 +431,34 @@ export default function Study({ navigation }) {
         </View>
       ) : (
         <>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 12,
-                         marginTop: 16 }}>
-            <View style={{ flex: 1 }}><Bar value={at / queue.length} /></View>
-            <Pill>{`${at + 1}/${queue.length}`}</Pill>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginTop: 16 }}>
+            <View style={{ flex: 1 }}><Bar value={at / items.length} /></View>
+            <Pill testID="progress">{`${at + 1}/${items.length}`}</Pill>
           </View>
 
-          <Card style={{ marginTop: 12, alignItems: "center", paddingVertical: 28 }}>
-            {!shown && st.dir ? (
-              // English first: the same numbered senses, since the question is
-              // "which word means all of these?" and one of nine synonyms is a
-              // different question.
-              w.e ? <Senses e={w.e} size={20} style={{ marginTop: 0 }} />
-                  : <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600" }}>—</Text>
-            ) : (
+          <Animated.View style={flip.style}>
+          <Card testID={`card-${item.direction}`} style={{ marginTop: 12, alignItems: "center", paddingVertical: 28 }}>
+            {!flip.face ? <Front face={face} direction={item.direction} /> : (
               <>
-                {/* The word is the card. At 34 it sat small in the middle of a
-                    tall white panel; a flashcard's face should be the largest
-                    thing on the screen, and it steps down only when the word is
-                    long enough to need the room. */}
-                <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center",
-                               fontSize: w.w.length > 18 ? 26 : w.w.length > 11 ? 34 : 44 }}>
-                  {w.w}
-                </Text>
-                <View style={{ marginTop: 10 }}><Speaker text={w.b} /></View>
-              </>
-            )}
-            {shown ? (
-              <>
+                {item.direction !== "recognise" ? (
+                  <>
+                    <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center",
+                                   fontSize: face.w.length > 18 ? 26 : face.w.length > 11 ? 34 : 44 }}>
+                      {face.w}
+                    </Text>
+                    <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
+                  </>
+                ) : null}
                 {/* Every meaning the word has, numbered and laid out as a
                     dictionary lays them (§30q) — labels and all. Where there are
                     no senses for a word (2% of the curriculum, and every deck
                     card) the translation stands on its own, which is all there
                     is to show. Four at most here: the card is a card, and the
                     full entry is one press away below. */}
-                {senses
-                  ? <SenseList senses={senses} size={16} max={4} style={{ marginTop: 10 }} />
-                  : <Senses e={w.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
-                {(w.x || []).slice(0, 3).map((ex, k) => (
+                {item.direction === "produce" && !senses ? null
+                  : senses ? <SenseList senses={senses} size={16} max={4} style={{ marginTop: 10 }} />
+                  : <Senses e={face.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
+                {(face.x || []).slice(0, 3).map((ex, k) => (
                   // The word in use, three ways: the entry reads like a dictionary,
                   // not a gloss (the owner, 2026-09-07).
                   <View key={k} style={{ marginTop: k ? 10 : 14, alignSelf: "stretch",
@@ -417,46 +469,50 @@ export default function Study({ navigation }) {
                 ))}
                 {/* A word taken from a video keeps its source, and the card sends
                     you back to the second it was said (ROADMAP P10.4). */}
-                {(st.mined || {})[w.b] ? (
+                {(st.mined || {})[face.b] ? (
                   <Pressable
                     testID="from-video"
                     accessibilityRole="button"
                     onPress={() => navigation.navigate("Video", {
-                      videoId: st.mined[w.b].v, word: w.b, at: st.mined[w.b].t })}
+                      videoId: st.mined[face.b].v, word: face.b, at: st.mined[face.b].t })}
                     style={{ marginTop: 14, alignSelf: "stretch", paddingTop: 12,
                              borderTopWidth: 1, borderTopColor: t.lineSoft }}
                   >
-                    <Muted numberOfLines={2}>{st.mined[w.b].s}</Muted>
+                    <Muted numberOfLines={2}>{st.mined[face.b].s}</Muted>
                     <Text style={{ color: t.brandInk, fontSize: 13, marginTop: 4 }}>
                       Where you heard it
                     </Text>
                   </Pressable>
                 ) : null}
-                {/* And the rest of what a dictionary holds — the paradigm, the
-                    frequency, every example — is one tap away rather than
-                    copied onto the card. A deck card has no entry to open. */}
-                {idxOfWord(w.b) >= 0 ? (
+                {/* This card's own record: how often it has come round and when
+                    it comes next. The paradigm, the frequency, every example —
+                    the full entry — is one tap away rather than copied here. */}
+                {current && current.reps ? (
+                  <Muted testID="card-history" size={12} style={{ marginTop: 12 }}>
+                    {`${current.reps} ${current.reps === 1 ? "review" : "reviews"}`
+                     + (current.lapses ? ` · ${current.lapses} ${current.lapses === 1 ? "lapse" : "lapses"}` : "")}
+                  </Muted>
+                ) : null}
+                {idxOfWord(face.b) >= 0 ? (
                   <Btn kind="ghost" label="Full entry" testID="full-entry"
                        style={{ marginTop: 12 }}
-                       onPress={() => navigation.navigate("Word", { word: w.b })} />
+                       onPress={() => navigation.navigate("Word", { word: face.b })} />
                 ) : null}
               </>
-            ) : null}
+            )}
           </Card>
+          </Animated.View>
 
           {!shown ? (
             <Btn kind="pri" label="Show" style={{ marginTop: 14 }}
                  onPress={() => setShown(true)} />
-          ) : back ? (
-            // Looking back at a graded card: read it, do not grade it twice.
-            <Btn kind="pri" label="Next" style={{ marginTop: 14 }}
-                 onPress={() => { setBack(false); setAt(at + 1); setShown(false); }} />
           ) : (
             <View style={{ flexDirection: "row", gap: 6, marginTop: 14 }}>
               {[[1, "Again", "bad"], [2, "Hard", "plain"],
                 [3, "Good", "good"], [4, "Easy", "pri"]].map(([g, label, kind]) => (
                 <Pressable
                   key={g}
+                  testID={`grade-${g}`}
                   onPress={() => grade(g)}
                   style={{ flex: 1, alignItems: "center", paddingVertical: 11,
                            borderRadius: radius.md, borderWidth: 1, borderBottomWidth: 3,
@@ -475,7 +531,7 @@ export default function Study({ navigation }) {
                                  color: kind === "plain" ? t.ink2
                                       : kind === "pri" ? t.brandOn
                                       : kind === "good" ? t.goodOn : t.badOn }}>
-                    {iv[g]}
+                    {iv[g].label}
                   </Text>
                 </Pressable>
               ))}
@@ -483,41 +539,13 @@ export default function Study({ navigation }) {
           )}
 
           <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
-            <Btn kind="ghost" label="◀ Previous" style={{ flex: 1 }}
-                 disabled={at === 0}
-                 onPress={() => { setAt(at - 1); setShown(true); setBack(true); }} />
+            <Btn kind="ghost" label="Undo" testID="undo" style={{ flex: 1 }}
+                 disabled={!last} onPress={undo} />
             <Btn kind="ghost" label="Skip ▶" style={{ flex: 1 }}
-                 onPress={() => { setAt(at + 1); setShown(false); setBack(false); }} />
+                 onPress={() => { setAt(at + 1); setShown(false); }} />
           </View>
         </>
       )}
-
-      {/* How the pile is dealt, under the pile rather than over it. These three
-          sat between the summary row and the card, so a screen whose subject is
-          one word had two filled buttons and a number box above it and the card
-          began below the halfway mark. They are settings for the session, not
-          the session — and nothing to shuffle or cut when there is no queue. */}
-      {queue.length ? (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 22 }}>
-          <Btn kind="ghost" label="Shuffle" style={{ flex: 1 }}
-               onPress={() => { setQueue(shuffle(queue.slice())); setAt(0); setShown(false); }} />
-          {/* "20 most urgent" said what the code does — it sorts by weight and
-              cuts. What a learner wants is a short pile picked for them, and how
-              short is theirs to say (the owner, 2026-09-11). */}
-          <Btn kind="ghost" label="For you" style={{ flex: 1 }} onPress={() => rebuild(pickN(howMany))} />
-          <TextInput
-            testID="study-n"
-            value={howMany}
-            onChangeText={(v) => setHowMany(v.replace(/[^0-9]/g, "").slice(0, 3))}
-            onBlur={() => setHowMany(String(pickN(howMany)))}
-            keyboardType="number-pad"
-            selectTextOnFocus
-            style={{ width: 58, textAlign: "center", color: t.ink, fontSize: 15,
-                     borderWidth: 1, borderColor: t.line, borderRadius: radius.md,
-                     backgroundColor: t.surface, paddingVertical: 11 }}
-          />
-        </View>
-      ) : null}
 
       <SetPicker visible={picker} onClose={() => setPicker(false)} />
     </Screen>

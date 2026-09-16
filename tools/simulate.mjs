@@ -25,7 +25,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fold, TOKEN } from "../core/util.js";
 import { makeQuestions, QUIZ_N, SPEECH_MIX, lessonSize } from "../core/questions.js";
-import { gradeFor, applyGrade, isTrouble, fsrsReview } from "../core/fsrs.js";
+import { gradeFor, applyGrade, directionOfKind, dueCards, wordTrouble, DAY } from "../core/scheduler.js";
 import { RELIEF_AFTER, RELIEF_MARK, PASS_MARK, reviewFirst, REVIEW_FIRST }
   from "../core/state.js";
 import { compare } from "../core/compare.js";
@@ -146,6 +146,11 @@ function simulate(profileName, seed) {
   const structural = [];                 // generated questions that are wrong
   const perLesson = [];
   let day = 0, qn = 0;
+  /* The scheduler keeps the clock in ms (core/scheduler.js); a simulated day
+     is noon on that day, counted from a fixed epoch so a run is the same run.
+     The library's fuzz is seeded from the review time, so it is repeatable too. */
+  const BASE_DAY = 20700;
+  const nowMs = () => (BASE_DAY + day) * DAY + 12 * 3600000;
 
   const chance = (kind, idx) => {
     const n = met.get(idx) || 0;
@@ -153,9 +158,11 @@ function simulate(profileName, seed) {
     return p;
   };
 
-  const grade = (idx, correct) => {
+  /* A grade lands on the card of the direction the question exercises, as
+     the runner's does (DIRECTION_OF_KIND). */
+  const grade = (idx, correct, kind) => {
     if (typeof idx !== "number" || !L[idx]) return;
-    const r = applyGrade(st.seen, st.trouble, L[idx].b, gradeFor(correct, false), day);
+    const r = applyGrade(st.seen, st.trouble, L[idx].b, directionOfKind(kind), gradeFor(correct, false), nowMs());
     st = { ...st, seen: r.seen, trouble: r.trouble };
   };
 
@@ -215,7 +222,7 @@ function simulate(profileName, seed) {
       correct = out.wer === 0;
       const grades = gradeAlignment(out.alignment, IX, { perfect: correct, firstTry: true });
       for (const g of grades) {
-        const r = applyGrade(st.seen, st.trouble, L[g.i].b, g.grade, day);
+        const r = applyGrade(st.seen, st.trouble, L[g.i].b, directionOfKind(q.kind), g.grade, nowMs());
         st = { ...st, seen: r.seen, trouble: r.trouble };
         met.set(g.i, (met.get(g.i) || 0) + 1);
       }
@@ -223,7 +230,7 @@ function simulate(profileName, seed) {
     } else if (q.kind === "match") {
       words = q.pairs.map((p) => p.i);
       correct = words.every((i) => rand() < chance("match", i));
-      for (const i of words) { grade(i, correct); met.set(i, (met.get(i) || 0) + 1); }
+      for (const i of words) { grade(i, correct, "match"); met.set(i, (met.get(i) || 0) + 1); }
     } else if (q.kind === "scene") {
       // Each question answered with the profile's listening chance; a sentence's
       // words graded by its question, as the activity does.
@@ -236,16 +243,16 @@ function simulate(profileName, seed) {
            any one question. */
         const lem = q.scenario ? [] 
           : typeof qq.row === "number" ? (q.lines[qq.row].lemmas || []) : [qq.i];
-        for (const i of lem) { grade(i, ok); met.set(i, (met.get(i) || 0) + 1); words.push(i); }
+        for (const i of lem) { grade(i, ok, "scene"); met.set(i, (met.get(i) || 0) + 1); words.push(i); }
       }
       correct = right === q.questions.length;
       if (q.scenario && right / q.questions.length >= FOLLOWED) {
-        for (const i of (q.lemmas || [])) { grade(i, true); met.set(i, (met.get(i) || 0) + 1); words.push(i); }
+        for (const i of (q.lemmas || [])) { grade(i, true, "scene"); met.set(i, (met.get(i) || 0) + 1); words.push(i); }
       }
     } else {
       const i = q.i;
       correct = rand() < chance(q.kind, i);
-      if (typeof i === "number") { grade(i, correct); met.set(i, (met.get(i) || 0) + 1); words = [i]; }
+      if (typeof i === "number") { grade(i, correct, q.kind); met.set(i, (met.get(i) || 0) + 1); words = [i]; }
     }
     const speech = q.kind === "hear" || q.kind === "say";
     log.push({ n: qn, kind: q.kind, words, correct, ...ctx,
@@ -259,20 +266,21 @@ function simulate(profileName, seed) {
      through — so the backlog that builds past it is visible in the report. */
   const REVIEW_CAP = 60;
   const reviews = [];                    // per day: { day, due, done, again }
+  const dueNow = () => dueCards(st.seen, nowMs());
   const review = () => {
-    const dueWords = Object.keys(st.seen).filter((w) => st.seen[w].due <= day);
+    const due = dueNow();
     let done = 0, again = 0;
-    for (const w of dueWords.slice(0, REVIEW_CAP)) {
-      const i = L.findIndex((e) => e.b === w);
+    for (const { word, direction } of due.slice(0, REVIEW_CAP)) {
+      const i = L.findIndex((e) => e.b === word);
       const ok = rand() < chance("choose-en", i >= 0 ? i : -1);
       const g = ok ? (rand() < 0.3 ? 4 : 3) : 1;
-      const card = fsrsReview(st.seen[w], g, day);
-      st = { ...st, seen: { ...st.seen, [w]: card } };
+      const r = applyGrade(st.seen, st.trouble, word, direction, g, nowMs());
+      st = { ...st, seen: r.seen, trouble: r.trouble };
       if (i >= 0) met.set(i, (met.get(i) || 0) + 1);
       done++;
       if (!ok) again++;
     }
-    reviews.push({ day, due: dueWords.length, done, again });
+    reviews.push({ day, due: due.length, done, again });
   };
 
   let lessons = 0, heldDays = 0;
@@ -285,8 +293,7 @@ function simulate(profileName, seed) {
        days until the backlog is under the line. Without this the learner took
        two lessons a day into a 239-card backlog. */
     let guard = 0;
-    while (holdNow(Object.keys(st.seen).filter((w) => st.seen[w].due <= day).length)
-           && guard++ < 40) {
+    while (holdNow(dueNow().length) && guard++ < 40) {
       day++;
       heldDays++;
       review();
@@ -333,7 +340,7 @@ function simulate(profileName, seed) {
     }
   }
 
-  const due = Object.values(st.seen).filter((c) => c.due <= day).length;
+  const due = dueNow().length;
   Math.random = restore;
   return { profile: profileName, seed, log, perLesson, structural, st, met, day, due,
            reviews, heldDays, written };
@@ -413,8 +420,9 @@ function metrics(run) {
   m.words = {
     taught: taught.size, everAsked: [...taught].filter((i) => met.get(i) > 1).length,
     taughtButNeverAsked: askedOnce, inSeen: Object.keys(st.seen).length,
+    cards: Object.values(st.seen).reduce((a, e) => a + Object.keys(e).length, 0),
     trouble: Object.keys(st.trouble).length,
-    leeches: Object.values(st.seen).filter(isTrouble).length,
+    leeches: Object.values(st.seen).filter(wordTrouble).length,
   };
   const rv = run.reviews || [];
   m.review = { simulatedDays: run.day, dueAtEnd: run.due,

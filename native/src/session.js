@@ -39,6 +39,7 @@ export function SessionProvider({ children }) {
      update rather than produced inside it: an updater may run twice, and a
      row pushed from inside one would be a review logged twice. */
   const log = useRef([]);
+  const drops = useRef([]);          // log rows to remove: an undone review
 
   const adopt = async (id) => {
     const { state, bad, recovered } = await loadState(id);
@@ -84,9 +85,10 @@ export function SessionProvider({ children }) {
 
   useEffect(() => {
     if (!ready || !accounts.active || !dirty.current) return;
-    const rows = log.current;
+    const rows = log.current, gone = drops.current;
     log.current = [];
-    saveState(accounts.active, st, rows);
+    drops.current = [];
+    saveState(accounts.active, st, rows, gone);
   }, [st, ready, accounts.active]);
 
   const value = useMemo(() => ({
@@ -96,11 +98,13 @@ export function SessionProvider({ children }) {
     account: accounts.list.find((a) => a.id === accounts.active) || null,
     st,
 
-    /* `rows` are the review-log rows this change earns (core/fsrs.js
-       reviewRows), built by the caller from the state it graded. */
-    update(fn, rows) {
+    /* `rows` are the review-log rows this change earns (core/scheduler.js
+       reviewRows), built by the caller from the state it graded; `undo` the
+       keys of rows this change takes back. */
+    update(fn, rows, undo) {
       dirty.current = true;
       if (rows && rows.length) log.current.push(...rows);
+      if (undo && undo.length) drops.current.push(...undo);
       // The learner has acted on what is shown; from here on it is saved.
       setError((e) => (e && e.kind === "unreadable" ? null : e));
       setSt((prev) => fn(prev));

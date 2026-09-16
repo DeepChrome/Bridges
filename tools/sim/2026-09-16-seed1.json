@@ -1,0 +1,554 @@
+[
+ {
+  "profile": "quick",
+  "seed": 1000,
+  "metrics": {
+   "recurrence": {
+    "quizQuestions": 2509,
+    "askedAgain": 6197,
+    "backToBack": 261,
+    "within3": 1253,
+    "sameQuizTwice": 1931,
+    "medianGap": 11,
+    "quizzes": 215
+   },
+   "mix": {
+    "type": 472,
+    "choose-en": 272,
+    "listen": 283,
+    "cloze": 430,
+    "choose-ru": 260,
+    "hear": 209,
+    "scene": 201,
+    "form": 177,
+    "say": 181,
+    "agreement": 15,
+    "aspect": 9
+   },
+   "chapters": [
+    {
+     "chapter": 1,
+     "title": "People and Time",
+     "lessons": 14,
+     "newWordsPerLesson": 5,
+     "quizAccuracy": 0.91,
+     "passFirstTry": 14,
+     "failedThrice": 0,
+     "speechSteps": 8,
+     "speechTokensMean": 3.6,
+     "speechTokensMax": 5
+    },
+    {
+     "chapter": 2,
+     "title": "Food and School",
+     "lessons": 13,
+     "newWordsPerLesson": 4.8,
+     "quizAccuracy": 0.8,
+     "passFirstTry": 8,
+     "failedThrice": 0,
+     "speechSteps": 20,
+     "speechTokensMean": 3.3,
+     "speechTokensMax": 4
+    },
+    {
+     "chapter": 3,
+     "title": "Home and Clothes",
+     "lessons": 11,
+     "newWordsPerLesson": 5.8,
+     "quizAccuracy": 0.79,
+     "passFirstTry": 8,
+     "failedThrice": 0,
+     "speechSteps": 30,
+     "speechTokensMean": 3.6,
+     "speechTokensMax": 5
+    },
+    {
+     "chapter": 4,
+     "title": "Town and Travel",
+     "lessons": 17,
+     "newWordsPerLesson": 5.9,
+     "quizAccuracy": 0.76,
+     "passFirstTry": 12,
+     "failedThrice": 0,
+     "speechSteps": 46,
+     "speechTokensMean": 4.2,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 5,
+     "title": "Health and Nature",
+     "lessons": 19,
+     "newWordsPerLesson": 6.1,
+     "quizAccuracy": 0.78,
+     "passFirstTry": 14,
+     "failedThrice": 0,
+     "speechSteps": 50,
+     "speechTokensMean": 4,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 6,
+     "title": "Work and Animals",
+     "lessons": 15,
+     "newWordsPerLesson": 5.9,
+     "quizAccuracy": 0.8,
+     "passFirstTry": 12,
+     "failedThrice": 0,
+     "speechSteps": 40,
+     "speechTokensMean": 4,
+     "speechTokensMax": 7
+    },
+    {
+     "chapter": 7,
+     "title": "Mind and Language",
+     "lessons": 22,
+     "newWordsPerLesson": 6.2,
+     "quizAccuracy": 0.78,
+     "passFirstTry": 17,
+     "failedThrice": 0,
+     "speechSteps": 56,
+     "speechTokensMean": 4.1,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 8,
+     "title": "Conflict, Tech and Sport",
+     "lessons": 23,
+     "newWordsPerLesson": 6,
+     "quizAccuracy": 0.8,
+     "passFirstTry": 19,
+     "failedThrice": 0,
+     "speechSteps": 58,
+     "speechTokensMean": 4.1,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 9,
+     "title": "Culture and Society",
+     "lessons": 21,
+     "newWordsPerLesson": 6.2,
+     "quizAccuracy": 0.8,
+     "passFirstTry": 18,
+     "failedThrice": 0,
+     "speechSteps": 50,
+     "speechTokensMean": 4.3,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 10,
+     "title": "Law and Faith",
+     "lessons": 13,
+     "newWordsPerLesson": 6.3,
+     "quizAccuracy": 0.77,
+     "passFirstTry": 11,
+     "failedThrice": 0,
+     "speechSteps": 32,
+     "speechTokensMean": 5.1,
+     "speechTokensMax": 7
+    }
+   ],
+   "words": {
+    "taught": 1045,
+    "everAsked": 1045,
+    "taughtButNeverAsked": 0,
+    "inSeen": 1080,
+    "cards": 2525,
+    "trouble": 15,
+    "leeches": 17
+   },
+   "review": {
+    "simulatedDays": 104,
+    "dueAtEnd": 45,
+    "duePerDay": 0.4,
+    "sessions": 104,
+    "reviewsPerDay": 55.1,
+    "maxDueInADay": 126,
+    "againRate": 0.01,
+    "backlogDays": 84,
+    "heldDays": 20
+   },
+   "lessons": {
+    "total": 168,
+    "passed": 168,
+    "relieved": 0,
+    "retakes": 47,
+    "shortQuizzes": 3
+   },
+   "structural": 0
+  },
+  "written": {
+   "scenes": 201,
+   "rows": 2641,
+   "withAudio": 4
+  },
+  "structural": []
+ },
+ {
+  "profile": "steady",
+  "seed": 1001,
+  "metrics": {
+   "recurrence": {
+    "quizQuestions": 3268,
+    "askedAgain": 7820,
+    "backToBack": 297,
+    "within3": 1638,
+    "sameQuizTwice": 2447,
+    "medianGap": 9,
+    "quizzes": 280
+   },
+   "mix": {
+    "type": 606,
+    "cloze": 609,
+    "listen": 349,
+    "choose-ru": 368,
+    "choose-en": 304,
+    "hear": 272,
+    "form": 242,
+    "scene": 262,
+    "agreement": 14,
+    "say": 236,
+    "aspect": 6
+   },
+   "chapters": [
+    {
+     "chapter": 1,
+     "title": "People and Time",
+     "lessons": 14,
+     "newWordsPerLesson": 5,
+     "quizAccuracy": 0.83,
+     "passFirstTry": 10,
+     "failedThrice": 0,
+     "speechSteps": 10,
+     "speechTokensMean": 3.7,
+     "speechTokensMax": 5
+    },
+    {
+     "chapter": 2,
+     "title": "Food and School",
+     "lessons": 13,
+     "newWordsPerLesson": 4.9,
+     "quizAccuracy": 0.76,
+     "passFirstTry": 4,
+     "failedThrice": 0,
+     "speechSteps": 26,
+     "speechTokensMean": 3.2,
+     "speechTokensMax": 4
+    },
+    {
+     "chapter": 3,
+     "title": "Home and Clothes",
+     "lessons": 11,
+     "newWordsPerLesson": 5.8,
+     "quizAccuracy": 0.78,
+     "passFirstTry": 8,
+     "failedThrice": 0,
+     "speechSteps": 28,
+     "speechTokensMean": 3.9,
+     "speechTokensMax": 5
+    },
+    {
+     "chapter": 4,
+     "title": "Town and Travel",
+     "lessons": 17,
+     "newWordsPerLesson": 6.1,
+     "quizAccuracy": 0.72,
+     "passFirstTry": 8,
+     "failedThrice": 1,
+     "speechSteps": 62,
+     "speechTokensMean": 4.4,
+     "speechTokensMax": 9
+    },
+    {
+     "chapter": 5,
+     "title": "Health and Nature",
+     "lessons": 19,
+     "newWordsPerLesson": 6.1,
+     "quizAccuracy": 0.72,
+     "passFirstTry": 9,
+     "failedThrice": 0,
+     "speechSteps": 66,
+     "speechTokensMean": 4.2,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 6,
+     "title": "Work and Animals",
+     "lessons": 15,
+     "newWordsPerLesson": 5.7,
+     "quizAccuracy": 0.69,
+     "passFirstTry": 6,
+     "failedThrice": 0,
+     "speechSteps": 60,
+     "speechTokensMean": 4,
+     "speechTokensMax": 9
+    },
+    {
+     "chapter": 7,
+     "title": "Mind and Language",
+     "lessons": 22,
+     "newWordsPerLesson": 6.2,
+     "quizAccuracy": 0.73,
+     "passFirstTry": 14,
+     "failedThrice": 0,
+     "speechSteps": 64,
+     "speechTokensMean": 4.3,
+     "speechTokensMax": 7
+    },
+    {
+     "chapter": 8,
+     "title": "Conflict, Tech and Sport",
+     "lessons": 23,
+     "newWordsPerLesson": 5.7,
+     "quizAccuracy": 0.71,
+     "passFirstTry": 12,
+     "failedThrice": 0,
+     "speechSteps": 88,
+     "speechTokensMean": 5,
+     "speechTokensMax": 10
+    },
+    {
+     "chapter": 9,
+     "title": "Culture and Society",
+     "lessons": 21,
+     "newWordsPerLesson": 6.2,
+     "quizAccuracy": 0.73,
+     "passFirstTry": 13,
+     "failedThrice": 0,
+     "speechSteps": 66,
+     "speechTokensMean": 4.4,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 10,
+     "title": "Law and Faith",
+     "lessons": 13,
+     "newWordsPerLesson": 6.1,
+     "quizAccuracy": 0.74,
+     "passFirstTry": 9,
+     "failedThrice": 0,
+     "speechSteps": 38,
+     "speechTokensMean": 4.6,
+     "speechTokensMax": 8
+    }
+   ],
+   "words": {
+    "taught": 1045,
+    "everAsked": 1045,
+    "taughtButNeverAsked": 0,
+    "inSeen": 1083,
+    "cards": 2554,
+    "trouble": 47,
+    "leeches": 48
+   },
+   "review": {
+    "simulatedDays": 115,
+    "dueAtEnd": 26,
+    "duePerDay": 0.2,
+    "sessions": 115,
+    "reviewsPerDay": 56.3,
+    "maxDueInADay": 132,
+    "againRate": 0.01,
+    "backlogDays": 91,
+    "heldDays": 31
+   },
+   "lessons": {
+    "total": 168,
+    "passed": 167,
+    "relieved": 2,
+    "retakes": 112,
+    "shortQuizzes": 3
+   },
+   "structural": 0
+  },
+  "written": {
+   "scenes": 262,
+   "rows": 3446,
+   "withAudio": 2
+  },
+  "structural": []
+ },
+ {
+  "profile": "struggling",
+  "seed": 1002,
+  "metrics": {
+   "recurrence": {
+    "quizQuestions": 6076,
+    "askedAgain": 11466,
+    "backToBack": 355,
+    "within3": 2425,
+    "sameQuizTwice": 3505,
+    "medianGap": 10,
+    "quizzes": 519
+   },
+   "mix": {
+    "type": 1175,
+    "choose-en": 657,
+    "choose-ru": 637,
+    "cloze": 1014,
+    "listen": 662,
+    "hear": 507,
+    "form": 442,
+    "scene": 488,
+    "say": 448,
+    "agreement": 31,
+    "aspect": 15
+   },
+   "chapters": [
+    {
+     "chapter": 1,
+     "title": "People and Time",
+     "lessons": 14,
+     "newWordsPerLesson": 5,
+     "quizAccuracy": 0.66,
+     "passFirstTry": 5,
+     "failedThrice": 2,
+     "speechSteps": 19,
+     "speechTokensMean": 3.8,
+     "speechTokensMax": 5
+    },
+    {
+     "chapter": 2,
+     "title": "Food and School",
+     "lessons": 13,
+     "newWordsPerLesson": 4.8,
+     "quizAccuracy": 0.6,
+     "passFirstTry": 0,
+     "failedThrice": 2,
+     "speechSteps": 40,
+     "speechTokensMean": 3.3,
+     "speechTokensMax": 4
+    },
+    {
+     "chapter": 3,
+     "title": "Home and Clothes",
+     "lessons": 11,
+     "newWordsPerLesson": 5.8,
+     "quizAccuracy": 0.58,
+     "passFirstTry": 2,
+     "failedThrice": 3,
+     "speechSteps": 62,
+     "speechTokensMean": 4,
+     "speechTokensMax": 5
+    },
+    {
+     "chapter": 4,
+     "title": "Town and Travel",
+     "lessons": 17,
+     "newWordsPerLesson": 5.8,
+     "quizAccuracy": 0.6,
+     "passFirstTry": 4,
+     "failedThrice": 6,
+     "speechSteps": 104,
+     "speechTokensMean": 4.5,
+     "speechTokensMax": 9
+    },
+    {
+     "chapter": 5,
+     "title": "Health and Nature",
+     "lessons": 19,
+     "newWordsPerLesson": 5.5,
+     "quizAccuracy": 0.61,
+     "passFirstTry": 2,
+     "failedThrice": 5,
+     "speechSteps": 120,
+     "speechTokensMean": 4.2,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 6,
+     "title": "Work and Animals",
+     "lessons": 15,
+     "newWordsPerLesson": 5.8,
+     "quizAccuracy": 0.62,
+     "passFirstTry": 1,
+     "failedThrice": 3,
+     "speechSteps": 96,
+     "speechTokensMean": 4.2,
+     "speechTokensMax": 9
+    },
+    {
+     "chapter": 7,
+     "title": "Mind and Language",
+     "lessons": 22,
+     "newWordsPerLesson": 5.9,
+     "quizAccuracy": 0.58,
+     "passFirstTry": 1,
+     "failedThrice": 7,
+     "speechSteps": 142,
+     "speechTokensMean": 4.5,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 8,
+     "title": "Conflict, Tech and Sport",
+     "lessons": 23,
+     "newWordsPerLesson": 5.7,
+     "quizAccuracy": 0.59,
+     "passFirstTry": 2,
+     "failedThrice": 11,
+     "speechSteps": 156,
+     "speechTokensMean": 4.5,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 9,
+     "title": "Culture and Society",
+     "lessons": 21,
+     "newWordsPerLesson": 6.1,
+     "quizAccuracy": 0.59,
+     "passFirstTry": 2,
+     "failedThrice": 8,
+     "speechSteps": 132,
+     "speechTokensMean": 4.5,
+     "speechTokensMax": 8
+    },
+    {
+     "chapter": 10,
+     "title": "Law and Faith",
+     "lessons": 13,
+     "newWordsPerLesson": 5.5,
+     "quizAccuracy": 0.6,
+     "passFirstTry": 3,
+     "failedThrice": 7,
+     "speechSteps": 84,
+     "speechTokensMean": 5.1,
+     "speechTokensMax": 8
+    }
+   ],
+   "words": {
+    "taught": 1045,
+    "everAsked": 1045,
+    "taughtButNeverAsked": 0,
+    "inSeen": 1088,
+    "cards": 2793,
+    "trouble": 270,
+    "leeches": 278
+   },
+   "review": {
+    "simulatedDays": 164,
+    "dueAtEnd": 33,
+    "duePerDay": 0.2,
+    "sessions": 164,
+    "reviewsPerDay": 58.7,
+    "maxDueInADay": 121,
+    "againRate": 0.01,
+    "backlogDays": 151,
+    "heldDays": 80
+   },
+   "lessons": {
+    "total": 168,
+    "passed": 114,
+    "relieved": 8,
+    "retakes": 351,
+    "shortQuizzes": 3
+   },
+   "structural": 0
+  },
+  "written": {
+   "scenes": 488,
+   "rows": 6388,
+   "withAudio": 7
+  },
+  "structural": []
+ }
+]

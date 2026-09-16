@@ -23,7 +23,8 @@ import {
   STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress, unitState,
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, FORK_AT, dueCount,
 } from "../data";
-import { reviewFirst, dayDone } from "@core/state";
+import { reviewFirst } from "@core/state";
+import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
 import { taskFor } from "@core/tasks";
 import { useSweep, useCount } from "../motion";

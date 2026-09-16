@@ -90,7 +90,7 @@ describe("a list's hairlines", () => {
     // place and the sound row still carried it.
     await withProfile(<You navigation={nav} />, { dev: true });
     await act(async () => { fireEvent.press(await screen.findByText("Settings")); });
-    const group = ["Card side", "Russian keyboard", "Audio for offline", "Reading speed",
+    const group = ["Cards: recognise", "Russian keyboard", "Audio for offline", "Reading speed",
                    "Right-answer sound", "Show the tour", "Developer mode", "STT Lab"];
     for (const label of group.slice(0, -1)) expect(rowAround(label)).toBe(1);
     expect(rowAround("STT Lab")).toBe(0);

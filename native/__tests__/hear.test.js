@@ -16,9 +16,9 @@ import { flushState } from "../src/store";
 import { Runner } from "../src/screens/Run";
 import { Q, SPEECH_MIX } from "../src/questions";
 import { L, IX, STAGES, SPEECH, lessonCount } from "../src/data";
-import { fold, today } from "@core/util";
+import { fold } from "@core/util";
+import { MINUTE } from "@core/scheduler";
 import { words } from "@core/compare";
-import { applyGrade } from "@core/fsrs";
 import { SPEECH_SKIP_TOP } from "@core/speech";
 
 /* The earliest lesson whose Hear pool can actually supply a sentence with a
@@ -121,10 +121,13 @@ describe("hear", () => {
     expect(screen.getByText(`${words.length - 1} of ${words.length} words`)).toBeTruthy();
     const st = await saved();
     expect(st.speech.attempts[0].hinted).toBe(true);
-    // Hinted right words are Hard (2): due no further out than an unhinted Good.
+    // Hinted right words are Hard (2): a six-minute learning step, where an
+    // unhinted Good is ten. A sentence heard grades the listen card.
     const okLemmas = content.filter((i) => fold(L[i].b) !== fold(words[words.length - 1]));
-    const good = applyGrade({}, {}, "x", 3, today()).card.due;
-    for (const i of okLemmas) if (st.seen[L[i].b].due > today()) expect(st.seen[L[i].b].due).toBeLessThan(good);
+    for (const i of okLemmas) {
+      const c = st.seen[L[i].b].listen;
+      if (c.dueAt - c.lastAt > MINUTE) expect(c.dueAt - c.lastAt).toBe(6 * MINUTE);
+    }
   });
 
   it("a perfect answer is Correct, every content word Good, and the attempt is logged", async () => {
@@ -144,10 +147,10 @@ describe("hear", () => {
     const st = await saved();
     expect(content.length).toBeGreaterThan(0);
     for (const i of content) {
-      const card = st.seen[L[i].b];
+      const card = st.seen[L[i].b] && st.seen[L[i].b].listen;
       expect(card).toBeTruthy();
       expect(card.reps).toBe(1);
-      expect(card.due).toBe(applyGrade({}, {}, "x", 3, today()).card.due);   // Good, not Easy
+      expect(card.dueAt - card.lastAt).toBe(10 * MINUTE);   // Good, not Easy: the ten-minute step
     }
     // Function words are no evidence either way and get no card from a sentence.
     for (const i of question.lemmas) if (i < SPEECH_SKIP_TOP) expect(st.seen[L[i].b]).toBeUndefined();
@@ -179,8 +182,9 @@ describe("hear", () => {
     // not a lapse, so the schedule is what shows the grade.
     const wrongLemma = IX[words[k]][0];
     for (const i of content) {
-      expect({ lemma: L[i].b, when: st.seen[L[i].b].due === today() ? "today" : "later" })
-        .toEqual({ lemma: L[i].b, when: i === wrongLemma ? "today" : "later" });
+      const c = st.seen[L[i].b].listen;
+      expect({ lemma: L[i].b, step: c.dueAt - c.lastAt === MINUTE ? "again" : "later" })
+        .toEqual({ lemma: L[i].b, step: i === wrongLemma ? "again" : "later" });
     }
   });
 });

@@ -11,7 +11,7 @@ import { unzipSync, zipSync, strToU8, strFromU8 } from "fflate";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Study, { buildQueue, cardsOfSets } from "../src/screens/Study";
+import Study, { sessionFor, cardsOfSets, cardsIn } from "../src/screens/Study";
 import { importDeck, apkgBytes, exportDeck, readCollection } from "../src/anki";
 import { cardFromFields, decksFromNotes, parseTextDeck, apkgRows, toTsv } from "@core/anki";
 import { UN, L } from "../src/data";
@@ -161,23 +161,25 @@ describe("flashcards from a deck", () => {
   const deck = { id: "k1", name: "My deck", cards: [{ ru: "привет", en: "hi" }, { ru: "пока", en: "bye" }], added: 1 };
 
   it("queues a deck's cards under their Russian, alongside a unit's", () => {
-    const st = { ...base, decks: [deck], sets: ["deck:k1"] };
-    const q = buildQueue(st);
-    expect(q.map((c) => c.b)).toEqual(["привет", "пока"]);
-    const both = buildQueue({ ...st, sets: ["deck:k1", UN[0].id] });
+    const st = { ...base, decks: [deck], sets: ["deck:k1"], flash: ["recognise"] };
+    const q = sessionFor(st).items;
+    expect(q.map((c) => c.word).sort()).toEqual(["пока", "привет"]);
+    expect(q.every((c) => c.kind === "new" && c.direction === "recognise")).toBe(true);
+    const both = cardsIn({ ...st, sets: ["deck:k1", UN[0].id] }, ["deck:k1", UN[0].id]);
     expect(both.length).toBe(2 + UN[0].w.length);
     expect(cardsOfSets(st, ["deck:k1"])).toEqual(deck.cards);
     expect(cardsOfSets(st, [UN[0].id])[0]).toEqual({ ru: L[UN[0].w[0]].b, en: L[UN[0].w[0]].e });
   });
 
   it("shows a deck card, grades it into the schedule, and lists the deck in the picker", async () => {
-    await withProfile(<Study />, { decks: [deck], sets: ["deck:k1"] });
-    expect(await screen.findByText("привет")).toBeTruthy();
-    expect(screen.getByText("2 cards")).toBeTruthy();
+    await withProfile(<Study />, { decks: [deck], sets: ["deck:k1"], flash: ["recognise"] });
+    const first = await screen.findByText(/^(привет|пока)$/);
+    const word = first.props.children;
+    expect(screen.getByTestId("pile")).toHaveTextContent("2 cards");
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
     await act(async () => { fireEvent.press(screen.getByText("Good")); });
     const st = await saved();
-    expect(st.seen["привет"].reps).toBe(1);
+    expect(st.seen[word].recognise.reps).toBe(1);
     await act(async () => { fireEvent.press(screen.getByText("Change")); });
     expect((await screen.findAllByText("My deck")).length).toBeGreaterThanOrEqual(2);  // the set row and the picker
     expect(screen.getByText("Import")).toBeTruthy();

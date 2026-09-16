@@ -4,6 +4,7 @@
 
 import { backupProfile, restoreProfile, backupText, BACKUP_KIND } from "../src/backup";
 import { normalise, SCHEMA_VERSION } from "../src/store";
+import { DAY } from "@core/scheduler";
 
 const state = normalise({ v: 6, xp: 42, streak: 3, seen: { книга: { s: 5, d: 4, due: 100, last: 96, reps: 2, lapses: 0 } },
                           decks: [{ id: "k1", name: "D", cards: [{ ru: "да", en: "yes" }] }] });
@@ -22,7 +23,8 @@ describe("backup and restore", () => {
     expect(written[0].name).toBe(r.file);
     const parsed = JSON.parse(written[0].text);
     expect(parsed.kind).toBe(BACKUP_KIND);
-    expect(parsed.state.seen["книга"].due).toBe(100);
+    // Written as the app keeps it now: the recognise card, on the ms clock.
+    expect(parsed.state.seen["книга"].recognise.dueAt).toBe(100 * DAY);
     expect(parsed.log).toEqual(log);
 
     const back = await restoreProfile({
@@ -41,7 +43,7 @@ describe("backup and restore", () => {
     const r = await restoreProfile({ pick: async () => ({ assets: [{ uri: "u" }] }), readText: async () => old });
     expect(r.state.v).toBe(SCHEMA_VERSION);
     expect(r.state.speech).toBeTruthy();                    // added by the v5 migration
-    expect(r.state.seen["да"].due).toBe(3);
+    expect(r.state.seen["да"].recognise.dueAt).toBe(3 * DAY);   // converted on the way in
     expect(r.log).toEqual([]);                              // a file from before the log has none
 
     // A log entry that is not a review is dropped, not stored.

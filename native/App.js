@@ -25,11 +25,12 @@ import { hidesTabBar } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
-import { unitById, chapterOf, L, resolveWord } from "./src/data";
+import { unitById, chapterOf, L, resolveWord, dueCount } from "./src/data";
 import Learn from "./src/screens/Learn";
 import Search from "./src/screens/Search";
 import Study from "./src/screens/Study";
 import You from "./src/screens/You";
+import Stats from "./src/screens/Stats";
 import { UnitScreen, LessonScreen } from "./src/screens/Unit";
 import { Immerse, Video } from "./src/screens/Misc";
 import { Gate } from "./src/screens/Gate";
@@ -175,6 +176,7 @@ function LearnStack() {
       <Stack.Screen name="Placement" component={PlacementFlow}
                     options={{ title: "Placement" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
+      <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
     </Stack.Navigator>
   );
 }
@@ -214,6 +216,7 @@ function PracticeStack() {
                       ),
                     })} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
+      <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
     </Stack.Navigator>
   );
 }
@@ -226,6 +229,7 @@ function ImmerseStack() {
       <Stack.Screen name="Read" component={Read} options={{ title: "Read" }} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
+      <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
     </Stack.Navigator>
   );
 }
@@ -235,6 +239,7 @@ function StudyStack() {
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Cards" component={Study} options={{ title: "Study" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
+      <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
     </Stack.Navigator>
   );
 }
@@ -244,6 +249,7 @@ function SearchStack() {
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Words" component={Search} options={{ title: "Search" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
+      <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
     </Stack.Navigator>
   );
 }
@@ -402,6 +408,10 @@ function TabShell() {
   const scheme = useColorScheme();
   const p = scheme === "light" ? light : dark;
   const insets = useSafeAreaInsets();
+  // What is waiting, on the tab itself (docs/PLAYBOOK.md 2.2): the count
+  // Anki shows beside a deck, so the pile is known before it is opened.
+  const { st } = useSession();
+  const due = dueCount(st);
   return (
     <Tabs.Navigator
       screenOptions={({ route }) => ({
@@ -428,7 +438,8 @@ function TabShell() {
       <Tabs.Screen name="Learn" component={LearnStack}
                    options={{ tabBarIcon: LearnIcon }} />
       <Tabs.Screen name="Study" component={StudyStack}
-                   options={{ tabBarIcon: StudyIcon }} />
+                   options={{ tabBarIcon: StudyIcon, tabBarBadge: due > 0 ? (due > 999 ? "999+" : due) : undefined,
+                              tabBarBadgeStyle: { backgroundColor: p.brand, color: p.brandOn, fontSize: 11 } }} />
       <Tabs.Screen name="Practice" component={PracticeStack}
                    options={{ tabBarIcon: PracticeIcon }} />
       <Tabs.Screen name="Immerse" component={ImmerseStack}

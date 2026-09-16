@@ -18,8 +18,9 @@
  *
  *   load()                -> rows or null when nothing was ever written
  *   replace(state, log)   -> everything, in one transaction (a restore, a migration)
- *   apply(diff, log)      -> one save's changes, in one transaction
- *   readLog({since,limit}) -> review rows, oldest first
+ *   apply(diff, log, drops) -> one save's changes, in one transaction; `drops`
+ *                            are log rows to remove (an undone review)
+ *   readLog({since,limit,word}) -> review rows, oldest first
  *   counts()              -> how many of each, for a gate and a migration stamp
  *   getMeta(k) / setMeta(k, v)   notes about the store itself, not the learner
  *   close()
@@ -27,60 +28,77 @@
  * Progress and settings are JSON text keyed by the state's own key names, so
  * a key this file has never heard of still round-trips — the shape is
  * `core/state.js`'s to change, and a store must not lose what it does not
- * understand. The card table has a `direction` column held at one value:
- * Phase 2 splits a word's memory by direction without a schema change.
+ * understand. Cards are one row per (word, direction), since Phase 2:
+ * `seen[word][direction]` in memory (core/scheduler.js).
  */
 
 /* The keys that are settings rather than progress: what "Reset progress"
    keeps and what the settings table holds. Imported decks are kept by a reset
    too, but they are their own table, not a setting. */
-export const SETTING_KEYS = ["dev", "theme", "dir", "name", "speed", "cue", "osk",
-                             "typedDrills", "offline", "talkLevel", "talkSpeed", "talkEn"];
+export const SETTING_KEYS = ["dev", "theme", "name", "speed", "cue", "osk",
+                             "typedDrills", "offline", "talkLevel", "talkSpeed", "talkEn",
+                             "flash", "newPerDay", "reviewsPerDay", "retention", "learnAhead"];
 
-/* One card serves both directions today. */
-export const DIRECTION = "both";
-
-const CARD_FIELDS = ["s", "d", "due", "last", "reps", "lapses"];
-const LOG_FIELDS = ["word", "grade", "day", "at", "s", "d", "due", "last", "reps", "lapses", "elapsed", "source"];
+/* A card row's columns, and the card field each holds. `due` and `last` are
+   the clock in ms since Phase 2 (`dueAt`, `lastAt` on the card). */
+const CARD_COLS = [["s", "s"], ["d", "d"], ["due", "dueAt"], ["last", "lastAt"], ["reps", "reps"],
+                   ["lapses", "lapses"], ["state", "state"], ["steps", "steps"],
+                   ["elapsed", "elapsed"], ["scheduled", "scheduled"]];
+const COUNTERS = ["reps", "lapses", "state", "steps"];
+const LOG_FIELDS = ["word", "grade", "day", "at", "s", "d", "due", "last", "reps", "lapses",
+                    "elapsed", "state", "steps", "scheduled", "source"];
 
 /* A card as a row: every column present, null where the card has no field.
-   The two counters are 0 rather than null, which is what every reader makes
-   of a missing one (`card.reps || 0`) and what the table's NOT NULL means. */
-export function cardRow(word, c) {
-  const r = { word: word };
-  for (const k of CARD_FIELDS) r[k] = c && c[k] !== undefined ? c[k] : null;
-  r.reps = (c && c.reps) || 0;
-  r.lapses = (c && c.lapses) || 0;
+   The counters are 0 rather than null, which is what every reader makes of a
+   missing one and what the table's NOT NULL means. */
+export function cardRow(word, direction, c) {
+  const r = { word: word, direction: direction };
+  for (const [col, field] of CARD_COLS) r[col] = c && c[field] !== undefined ? c[field] : null;
+  for (const k of COUNTERS) r[k] = (c && c[k]) || 0;
   return r;
 }
 
 /* A row as a card. A null column is a field the card never had, and it must
-   come back absent rather than null: fsrsReview reads `card.last === undefined`
-   to mean "never reviewed", and a null there would make the first review look
-   like one after `now` days. */
+   come back absent rather than null: `lastAt` in particular, which the
+   scheduler reads as "never reviewed" when absent. */
 export function rowCard(r) {
   const c = {};
-  for (const k of CARD_FIELDS) if (r[k] !== null && r[k] !== undefined) c[k] = r[k];
+  for (const [col, field] of CARD_COLS) if (r[col] !== null && r[col] !== undefined) c[field] = r[col];
   return c;
 }
 
-const sameCard = (a, b) => CARD_FIELDS.every((k) => a[k] === b[k]);
+const sameCard = (a, b) => CARD_COLS.every(([, f]) => a[f] === b[f]);
 
-/* -> { cards, decks, progress, settings }. `undefined` values are dropped:
-   they are not JSON, and a store that tried to keep one would fail to bind it. */
+/* -> { cards, decks, progress, settings }. `cards` is a list of rows.
+   `undefined` values are dropped: they are not JSON, and a store that tried
+   to keep one would fail to bind it. */
 export function split(state) {
-  const cards = {}, progress = {}, settings = {};
+  const cards = [], progress = {}, settings = {};
   for (const k in state) {
     if (k === "seen" || k === "decks" || state[k] === undefined) continue;
     (SETTING_KEYS.includes(k) ? settings : progress)[k] = state[k];
   }
   const seen = state.seen || {};
-  for (const w in seen) if (seen[w]) cards[w] = seen[w];
+  for (const w in seen) {
+    const entry = seen[w];
+    if (!entry) continue;
+    for (const d in entry) if (entry[d]) cards.push(cardRow(w, d, entry[d]));
+  }
   return { cards: cards, decks: state.decks || [], progress: progress, settings: settings };
 }
 
+/* Card rows back into `seen[word][direction]`. */
+export function nestCards(rows) {
+  const seen = {};
+  for (const r of rows) {
+    if (!seen[r.word]) seen[r.word] = {};
+    seen[r.word][r.direction] = rowCard(r);
+  }
+  return seen;
+}
+
 /* The rows a store loaded, back as one state object — the shape `normalise`
-   in the native store and the web app's loader both expect. */
+   in the native store expects. `rows.cards` is already nested. */
 export function merge(rows) {
   return Object.assign({}, rows.settings, rows.progress, { seen: rows.cards, decks: rows.decks });
 }
@@ -94,7 +112,7 @@ export function merge(rows) {
  * only ever replaced on import or removal and comparing twenty thousand cards
  * to learn nothing changed is what identity is for.
  *
- *   { cards:    { put: [row], del: [word] },
+ *   { cards:    { put: [row], del: [{ word, direction }] },
  *     decks:    { put: [{ id, ord, name, n, json }], del: [id] }  — null when untouched
  *     progress: { put: { key: json }, del: [key] },
  *     settings: { put: { key: json }, del: [key] } }
@@ -105,10 +123,18 @@ export function diff(prev, next) {
   const ps = (prev && prev.seen) || {}, ns = next.seen || {};
   if (ps !== ns) {
     for (const w in ns) {
-      if (!ns[w]) continue;
-      if (!ps[w] || (ps[w] !== ns[w] && !sameCard(ps[w], ns[w]))) out.cards.put.push(cardRow(w, ns[w]));
+      const ne = ns[w], pe = ps[w];
+      if (!ne || ne === pe) continue;
+      for (const d in ne) {
+        if (!ne[d]) continue;
+        const pc = pe && pe[d];
+        if (!pc || (pc !== ne[d] && !sameCard(pc, ne[d]))) out.cards.put.push(cardRow(w, d, ne[d]));
+      }
+      if (pe) for (const d in pe) if (pe[d] && !ne[d]) out.cards.del.push({ word: w, direction: d });
     }
-    for (const w in ps) if (ps[w] && !ns[w]) out.cards.del.push(w);
+    for (const w in ps) {
+      if (ps[w] && !ns[w]) for (const d in ps[w]) if (ps[w][d]) out.cards.del.push({ word: w, direction: d });
+    }
   }
   const pd = (prev && prev.decks) || null, nd = next.decks || [];
   if (!prev || pd !== nd) {
@@ -161,9 +187,10 @@ export function validLog(rows) {
 /* A log row with every column present, null where absent, the counters 0.
    Refuses what the table's own rules would refuse — a grade outside 1–4, no
    word, no time — so the store in memory and the one on disk fail alike, and
-   before anything is written. */
+   before anything is written. A row from before Phase 2 named no direction:
+   it was the one blended card, which became `recognise`. */
 export function logRow(r) {
-  const out = { direction: (r && r.direction) || DIRECTION };
+  const out = { direction: (r && r.direction) || "recognise" };
   for (const k of LOG_FIELDS) out[k] = r && r[k] !== undefined ? r[k] : null;
   out.reps = (r && r.reps) || 0;
   out.lapses = (r && r.lapses) || 0;
@@ -180,6 +207,7 @@ export function logRow(r) {
 export function memoryRepo() {
   const cards = new Map(), decks = new Map(), progress = new Map(), settings = new Map(), meta = new Map();
   const log = [], logKeys = new Set();
+  const cardKey = (w, d) => `${w}${d}`;
   const logKey = (r) => `${r.word}${r.direction}${r.at}`;
   /* Rows are checked before anything is applied, so a bad one leaves the
      store as it was — the transaction SQLite gives for nothing. */
@@ -192,9 +220,18 @@ export function memoryRepo() {
       log.push(Object.assign({ id: log.length + 1 }, r));
     }
   };
+  const drop = (keys) => {
+    for (const k of keys || []) {
+      const key = logKey(Object.assign({ direction: "recognise" }, k));
+      if (!logKeys.has(key)) continue;
+      logKeys.delete(key);
+      const i = log.findIndex((r) => logKey(r) === key);
+      if (i >= 0) log.splice(i, 1);
+    }
+  };
   const applyDiff = (d) => {
-    for (const r of d.cards.put) cards.set(r.word, Object.assign({}, r));
-    for (const w of d.cards.del) cards.delete(w);
+    for (const r of d.cards.put) cards.set(cardKey(r.word, r.direction), Object.assign({}, r));
+    for (const k of d.cards.del) cards.delete(cardKey(k.word, k.direction));
     if (d.decks) {
       for (const r of d.decks.put) decks.set(r.id, Object.assign({}, r));
       for (const id of d.decks.del) decks.delete(id);
@@ -212,10 +249,8 @@ export function memoryRepo() {
   return {
     async load() {
       if (!progress.has("v")) return null;
-      const c = {};
-      for (const [w, r] of cards) c[w] = rowCard(r);
       const ds = [...decks.values()].sort((a, b) => a.ord - b.ord).map((r) => JSON.parse(r.json));
-      return { cards: c, decks: ds, progress: parsed(progress), settings: parsed(settings) };
+      return { cards: nestCards([...cards.values()]), decks: ds, progress: parsed(progress), settings: parsed(settings) };
     },
     async replace(state, rows) {
       const ok = checked(rows);
@@ -223,14 +258,15 @@ export function memoryRepo() {
       applyDiff(diff(null, state));
       append(ok);
     },
-    async apply(d, rows) {
+    async apply(d, rows, drops) {
       const ok = checked(rows);
       applyDiff(d);
       append(ok);
+      drop(drops);
     },
     async readLog(opts) {
       const o = opts || {};
-      let rows = log.filter((r) => o.since === undefined || r.at >= o.since);
+      let rows = log.filter((r) => (o.since === undefined || r.at >= o.since) && (o.word === undefined || r.word === o.word));
       if (o.limit !== undefined) rows = rows.slice(0, o.limit);
       return rows.map((r) => Object.assign({}, r));
     },

@@ -34,7 +34,8 @@
       "expo-speech-recognition",
       "expo-sharing",
       "expo-sqlite",
-      "expo-font"
+      "expo-font",
+      "expo-asset"
     ],
     "extra": {
       "eas": {

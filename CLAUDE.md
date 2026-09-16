@@ -2159,6 +2159,72 @@ drill with options left was Grammar rules at 17 %, now 9 %: `threeWrong` prefers
 candidates near the answer's length, which `partnerWrong` already did and
 nothing else did.
 
+## 30u. The playbook, and Phase 0 (2026-09-15)
+
+`docs/PLAYBOOK.md` is the owner's review-and-ship plan: phases in order, each
+ending at a gate, each opening with a **written audit posted before any edit**.
+It was written without the repo, so the audit is the code review — and where
+the playbook and the measurement disagree, the measurement wins and the note
+says why. Phase 0 was that audit plus four parts; what it found:
+
+- **The uncommitted question-block change had the bug the review predicted.**
+  `flexGrow: 1` on the block centred the prompt in a window the keyboard had
+  shrunk, and the input and Check sat below the fold — "abc" typed into a
+  field the learner could not see. `hasInput(q)` in `Run.js` names the kinds
+  that open a keyboard (`type`, `hear`, any written drill) and those stack
+  from the top. **Not `KeyboardAvoidingView`**: Android already resizes the
+  window here (`app.json` sets no keyboard mode, so Expo's default), and
+  "height" behaviour on top of that shrinks it twice. The review's suggested
+  ceiling of 28 px for the prompt would have undone the change — «в» at 28 is
+  the "smallest thing on the screen" the change exists to fix; the sizes are
+  44 / 34 / 26 / 22 by length and `prompt.test.js` pins them.
+- **Measure before optimising, and say what the measurement said.** `workedOn`
+  scans 10,000 cards in 0.9 ms — five times under the playbook's budget — so
+  it is not memoised; the budget is a test. `partnerWrong` was 5.7 ms a
+  question; caching the folded stems alone took it to 4.7, because the cost
+  was the run comparison itself over ~1,400 candidates. A shared run of four
+  letters is exactly a shared four-letter piece, so the candidates are indexed
+  once by their pieces and by length: **0.06 ms** now, same distractors
+  (audit root 14–18 %, kin 1.6–1.7, the band it was in). The playbook asked
+  for a length index; the piece index is what the numbers wanted.
+- **Toolchain.** Already on the latest stable line — **Expo SDK 57, RN 0.86,
+  New Architecture and Hermes on** — so "upgrade" was `npx expo install
+  --fix` (eight packages a patch behind), a dedupe of `expo-constants`, and
+  `expo-asset`, which `expo-doctor` named as a missing *required* peer of an
+  installed native module. Doctor 21/21. **Four of the playbook's five
+  additions are deferred to Phase 5** (ROADMAP 13.17): Reanimated,
+  gesture-handler, haptics, Lottie. Rule 20.5 and §30m; nothing before Phase 5
+  uses them; added together then they cost the same one rebuild. `svg` and
+  `sqlite` were already here.
+- **The EAS build at the gate did not run.** The free plan's Android builds
+  for the month were already spent (resets 1 Oct); the audit had called it
+  "free-tier quota, no money" and was wrong about the first half. The local
+  Gradle build stood in, as §31 says it should when the quota is gone, and the
+  clean-install walkthrough ran on it. ROADMAP 13.18; and the 295 MB upload
+  archive the attempt revealed is 13.19.
+- **The remote needs him.** `gh` is not installed; his key is passphrase-
+  protected and the Windows `ssh-agent` service is disabled, so the passphrase
+  has to be typed once into an agent he starts. Nothing secret is tracked
+  (`.env`, `native/.env`, `backend/.dev.vars`, `native/build-out/`,
+  `native/android/` are all ignored); the repo is 65 MB.
+
+Traps met on the way, each now a test or a line in a flow file:
+
+- **`SafeAreaView` resolves `edges` on the host node** to a per-edge mode —
+  `{ top: "additive" | "off", … }` — not the array you passed. Assert the mode.
+- **`Screen scroll={false}` passes `contentContainerStyle: null`**, not
+  undefined.
+- **The tab bar hides under the keyboard** (`tabBarHideOnKeyboard`), so a
+  walkthrough that has just typed into a field has no tab to tap until one
+  `back` has closed it.
+- **`git commit --amend -m "$m"` in PowerShell loses a multi-line body**: the
+  earlier `git log --format=%B` came back as an array of lines and was joined
+  with spaces. Write the message to a file and use `-F`.
+- **A sentence-initial gap capitalises the answer** and the audit does not
+  measure it (ROADMAP 13.15); **`debug.keystore` is backed up nowhere**
+  (13.16). Both found by reading the walkthrough, neither fixed in Phase 0 —
+  the playbook's phases are the point.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -2193,7 +2259,7 @@ node tools/contrast.js         # palette: contrast minimums + the two platforms 
 cd native && npx jest          # the native suite
 cd backend && npm test         # the Worker
 node tools/simulate.mjs        # seeded learners; diff tools/sim/ against the last run
-.\native\tools\walk.ps1 -Flow native\flows\walkthrough2.txt   # the emulator; read the shots
+.\native\tools\walk.ps1 -Flow native\flows\walkthrough4.txt -Device emulator-5554   # every screen; read the shots
 python tools/serve.py          # test on the phone over the LAN
 ```
 

@@ -71,6 +71,11 @@ const LADDER = Number(arg("--ladder", String(LADDER_AT)));
    default and three cards a word is three times the review load, so what that
    actually costs is worth being able to measure rather than argue about. */
 const DIRS = arg("--dirs", DIRECTIONS.join(",")).split(",").filter(Boolean);
+
+/* New cards a day (core/queue.js). Fifteen cards is five *words* when every
+   word is three cards, so what this costs is worth pricing rather than
+   inheriting from a default written when a word was one card. */
+const NEW_PER_DAY_ARG = Number(arg("--new-per-day", String(QUEUE_DEFAULTS.newPerDay)));
 const passed = (slot) => {
   if (!slot || typeof slot.q !== "number") return false;
   return slot.q >= MARK || ((slot.tries || 0) >= RELIEF_AFTER && slot.q >= RELIEF_MARK);
@@ -306,8 +311,12 @@ function simulate(profileName, seed) {
    * given — REVIEW_CAP being what somebody will actually do in a day, not a
    * setting in the app.
    */
-  const REVIEW_CAP = 60;
-  const NEW_PER_DAY = QUEUE_DEFAULTS.newPerDay;
+  /* What a learner will sit through in a day. A model assumption, not a
+     setting in the app — `--review-cap` exists to ask whether a backlog is
+     structural (the route generates more than anyone could clear) or merely
+     capped (it would clear, given the time). */
+  const REVIEW_CAP = Number(arg("--review-cap", "60"));
+  const NEW_PER_DAY = NEW_PER_DAY_ARG;
   const reviews = [];                    // per day: { day, due, done, again, fresh }
   const dueNow = () => dueCards(st.seen, nowMs());
   const answerCard = (word, direction) => {

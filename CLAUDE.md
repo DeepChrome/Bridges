@@ -2708,6 +2708,33 @@ load (leeches 184/183/177 for one, two and three directions), because the
 lesson quizzes create most of the cards regardless. So the default of three
 stays.
 
+**Then the levers were priced, and two of the three do nothing.** All three
+were plausible; that is what pricing is for.
+
+- **`newPerDay` is not the lever.** Struggling learner over the full route at
+  6, 10, 15 and 25 new cards a day: leeches 205 / 193 / 177 / 195, backlog
+  days 216 / 210 / 207 / 209. Flat, across a fourfold range — because the
+  **lesson quizzes create most of the cards**, not the flashcard ration. Two
+  lessons a day of five to seven words, asked several ways, is ten to fourteen
+  cards before Study deals a single new one.
+- **The backlog is not structural, it is capped.** `--review-cap` asks whether
+  the route generates more than anyone could clear, and it does not: at 60 a
+  day the struggling learner is behind on 207 of 220 days; at 120 they are
+  behind on 41 of 101 and finish with nothing owed. **The route wants about
+  120 reviews a day at its peak for that learner**, and the 220-day figure is
+  what happens when they can only give it 60. That is a real statement about
+  the route's size, not a defect in the scheduler.
+- **The leech rule is sound and 13.25's premise was wrong.** Per *card* the
+  rate fell: struggling 8.9 % before Phase 2 → **5.9 %** now (3,251 cards,
+  191 leeches); quick 0.1 %, steady 0.9 %. The count tripled because
+  `wordTrouble` flags a word when **any** of its three cards is a leech, so a
+  word now has three chances to be listed rather than one. That is defensible
+  — a word recognised but not producible is exactly what a trouble bank is
+  for — and the threshold does not want re-tuning to chase the number down.
+  Anyone who comes back to this should change the *rule* (any card, or the
+  worst, or two of three) as a judgement about what the list is for, and not
+  the threshold as a way of making a metric smaller.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

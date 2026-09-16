@@ -38,11 +38,49 @@ function gradeInto(st, idx, grade) {
   return { ...st, seen: r.seen, trouble: r.trouble };
 }
 
+/* The prompt is the subject of the question, so it should be the largest thing
+   on the screen — but a prompt is anything from «в» to a whole sentence with a
+   gap in it. Sized to its length, the way the lesson card's band already is
+   (lesson.js bandSize): one word gets to be big, a sentence steps down until it
+   fits. Latin prompts (an English word to translate) stay smaller — they are
+   read at a glance and it is the Russian that is worth looking at. */
+export function promptSize(q) {
+  const n = String(q.prompt || "").length;
+  if (!q.cyr) return n > 28 ? 19 : 22;
+  if (n > 40) return 22;
+  if (n > 22) return 26;
+  if (n > 11) return 34;
+  return 44;
+}
+
+/* Whether a question's view carries a text input, and so a keyboard.
+ *
+ * The question block takes the slack above the answers (`flexGrow`), which is
+ * right when the answers are four options and wrong the moment a keyboard
+ * opens: Android resizes the window, the block centres itself in what is left,
+ * and the input and Check sit below the fold — the learner types into a field
+ * they cannot see. Seen on the emulator on 2026-09-15 before it shipped. A
+ * question that will open a keyboard stacks from the top instead, which is
+ * what every keyboard-first exercise does, and it is the layout the learner
+ * sees first in any case: neither input auto-focuses, so there is no jump when
+ * the keyboard arrives.
+ *
+ * Not `KeyboardAvoidingView`: with the window already resizing for the
+ * keyboard, "height" behaviour shrinks it a second time. */
+export const hasInput = (q) => !!q.typed || q.kind === "type" || q.kind === "hear";
+
 function Options({ q, answered, picked, onPick }) {
+  /* One- and two-word answers are centred; sentences are not. A short label
+     left-aligned in a full-width box leaves the word marooned at one end, and
+     four of them read as an empty list — which is what "in / from / this is /
+     with" looked like. A sentence has to start at the left or the eye has
+     nowhere to return to. */
+  const centred = q.options.every((o) => String(o.label).length <= 18);
   return (
     <View style={{ gap: 9 }}>
       {q.options.map((o, i) => (
-        <Option key={i} o={o} i={i} answered={answered} picked={picked} onPick={onPick} />
+        <Option key={i} o={o} i={i} answered={answered} picked={picked} onPick={onPick}
+                centred={centred} />
       ))}
     </View>
   );
@@ -51,7 +89,7 @@ function Options({ q, answered, picked, onPick }) {
 /* One option. Its own component because a hook cannot live in a `map`, and it
    needs one: an answer is the thing a learner touches most in this app, so if
    anything is going to feel physical it is this. */
-function Option({ o, i, answered, picked, onPick }) {
+function Option({ o, i, answered, picked, onPick, centred }) {
   const t = useTheme();
   const press = usePress();
   const isPicked = picked === i;
@@ -75,9 +113,11 @@ function Option({ o, i, answered, picked, onPick }) {
           borderBottomWidth: pressed ? 1 : 3, borderRadius: radius.md,
           paddingVertical: 15, paddingHorizontal: 16, minHeight: 54,
           justifyContent: "center",
+          alignItems: centred ? "center" : "flex-start",
         })}
       >
-        <Text style={{ color: t.ink, fontSize: 16 }}>{o.label}</Text>
+        <Text style={{ color: t.ink, fontSize: 16,
+                       textAlign: centred ? "center" : "left" }}>{o.label}</Text>
       </Pressable>
     </Animated.View>
   );
@@ -470,11 +510,22 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         </Pill>
       </View>
 
-      {/* The question slides in from the right as the last one leaves. Eight
+      {/* The question takes the space above the answers rather than sitting on
+          top of them.
+       *
+          Everything used to stack from the top, so on a one-word question the
+          options finished halfway down and the bottom half of the screen was
+          empty — and the word being *asked about* was the smallest thing on it,
+          «в» at 30 px against option boxes of 54. Now the question is centred in
+          whatever room is left and the answers sit low, where the thumb is.
+
+          The question slides in from the right as the last one leaves. Eight
           questions with a hard cut between them read as one question whose
           words keep changing; this is what gives a quiz the sense of moving
           through something. */}
-      <Animated.View style={[questionIn, { alignItems: "center", marginBottom: 20 }]}>
+      <Animated.View testID="question-block"
+                     style={[questionIn, { flexGrow: hasInput(q) ? 0 : 1, justifyContent: "center",
+                                           alignItems: "center", marginBottom: 20 }]}>
         <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "600", letterSpacing: 1,
                        textTransform: "uppercase", marginBottom: 12,
                        textAlign: "center" }}>
@@ -482,7 +533,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         </Text>
         {q.prompt ? (
           <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center",
-                         fontSize: q.cyr ? 30 : 22, lineHeight: q.cyr ? 38 : 30 }}>
+                         fontSize: promptSize(q), lineHeight: promptSize(q) + 8 }}>
             {q.prompt}
           </Text>
         ) : null}
@@ -526,12 +577,15 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       </Animated.View>
 
       {answered ? (
-        // Anchored to the foot of the screen against Screen's flexGrow, so Continue
-        // sits in the same place on every question instead of wherever the options
-        // happened to end — the same rule Flows.js and the web runner already follow.
-        // The gap lives on the wrapper, not the card.
-        <Animated.View testID="verdict"
-                       style={[verdictIn, { marginTop: "auto", paddingTop: 18 }]}>
+        // At the foot of the screen, so Continue sits in the same place on every
+        // question instead of wherever the options happened to end — the same
+        // rule Flows.js and the web runner already follow. The gap lives on the
+        // wrapper, not the card.
+        //
+        // `paddingTop`, not `marginTop: "auto"`: the question block above now
+        // carries flexGrow and takes the slack, so the verdict is already at the
+        // foot and an auto margin would have nothing left to push against.
+        <Animated.View testID="verdict" style={[verdictIn, { paddingTop: 18 }]}>
           <Card style={tone ? { backgroundColor: tone.bg, borderColor: tone.line } : undefined}>
             {/* Yuri turns up for a clean answer and nowhere else in the runner.
                 He is the reward, so he has to stay rare: on every verdict he

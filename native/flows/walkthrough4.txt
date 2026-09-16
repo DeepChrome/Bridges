@@ -77,6 +77,31 @@ wait:2
 tap:^Build a quiz$
 wait:2
 shot:24-quiz-setup
+
+# Gap-fill only, from the last chapters, so a long cloze is photographed every
+# run: the prompt is sized by its length and must not push the answers off
+# (Phase 0.2). Which cloze is random; that one is long is not.
+tap:^Meaning$
+tap:^Russian$
+tap:^Hear a word$
+tap:^Type it$
+tap:^Forms$
+tap:^Hear a sentence$
+tap:^Say it$
+tap:^Listening scene$
+tap:^Pronouns & Being$
+scroll
+scroll
+scroll
+tap:^Politics & Society$
+tap:^Business & Finance$
+tap:^Science$
+tap:^Start$
+wait:4
+shot:24b-cloze-long
+# Nothing answered yet, so back leaves the run without the leave guard.
+back
+wait:2
 back
 wait:2
 
@@ -85,6 +110,17 @@ scroll
 tap:^Cases$
 wait:3
 shot:25-drill-cases
+# Keyboard up on a typed answer: the input and Check must stay in view. This
+# is the screenshot that caught the question block taking the slack above an
+# input (Phase 0.2) — read it every run.
+tap:Cyrillic or Latin
+wait:2
+type:abc
+wait:1
+shot:25b-drill-keyboard
+# One back closes the keyboard, the next leaves the drill.
+back
+wait:1
 back
 wait:2
 scrolltop
@@ -102,6 +138,10 @@ tap:Russian, English or Latin
 type:kniga
 wait:2
 shot:32-search-results
+# The tab bar hides while the keyboard is up (App.js tabBarHideOnKeyboard), so
+# there is no Learn tab to tap until one back has closed it.
+back
+wait:1
 tap:^Learn$
 wait:2
 

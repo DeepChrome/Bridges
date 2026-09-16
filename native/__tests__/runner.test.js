@@ -50,9 +50,16 @@ describe("runner verdict", () => {
     await withRunner();
     fireEvent.press(await screen.findByText("book"));
     const verdict = await screen.findByTestId("verdict");
-    // marginTop:"auto" only anchors if the container grows — both halves matter,
-    // which is how the web port went wrong the first time.
-    expect(verdict.props.style.marginTop).toBe("auto");
+    /* What holds the verdict down changed on 2026-09-12 and the contract did
+       not: the question block above now carries `flexGrow: 1`, so it takes the
+       slack and everything below it sits at the foot. The verdict used to do it
+       with `marginTop: "auto"`, which would now have nothing to push against.
+       Both halves still matter — a grower and a filling container — which is
+       how the web port went wrong the first time. */
+    expect(verdict.props.style.marginTop).toBeUndefined();
+    const question = screen.getByTestId("question-block");
+    const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : (s || {}));
+    expect(flat(question.props.style).flexGrow).toBe(1);
     // No UNSAFE_getByType in this RNTL; Screen's body carries a testID instead.
     const scroll = screen.getByTestId("screen-body");
     expect(scroll.props.contentContainerStyle.flexGrow).toBe(1);

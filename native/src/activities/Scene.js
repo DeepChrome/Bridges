@@ -100,6 +100,27 @@ function Transport({ s }) {
         >
           <Icon d={s.playing ? PAUSE : PLAY} size={30} color={t.brandOn} />
         </Pressable>
+        {/* Three-quarter speed (PLAYBOOK 3.4). A toggle rather than a menu of
+            rates: the question a listener has is "say that again, slower",
+            and it wants one press. It shows what it will do, not what is on,
+            in the same way the rest of the transport does. */}
+        <Pressable
+          testID="scene-slow"
+          accessibilityRole="button"
+          accessibilityState={{ selected: !!s.slow }}
+          accessibilityLabel={s.slow ? "Play at full speed" : "Play slower"}
+          onPress={s.toggleSlow}
+          style={({ pressed }) => ({
+            width: 52, height: 52, borderRadius: 26, alignItems: "center",
+            justifyContent: "center", borderWidth: 1,
+            borderColor: s.slow ? t.brand : t.line,
+            backgroundColor: s.slow ? t.brandBg : pressed ? t.surface2 : t.surface,
+          })}
+        >
+          <Text style={{ color: s.slow ? t.brandInk : t.ink2, fontSize: 13, fontWeight: "700" }}>
+            {s.slow ? "1×" : "¾×"}
+          </Text>
+        </Pressable>
         <Pressable
           testID="scene-restart"
           accessibilityRole="button"

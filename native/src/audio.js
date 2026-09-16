@@ -375,8 +375,12 @@ export function speakLine(text, opts = {}) {
  * back to the device voices, which is also what happens on a phone that never
  * gets the assets. `pos()` is milliseconds; `stop()` **removes** the player
  * rather than pausing it, because a paused one keeps the Android audio session
- * (§23) — resuming re-creates it and seeks, which costs nothing audible. */
-export async function playTrack(source, from = 0) {
+ * (§23) — resuming re-creates it and seeks, which costs nothing audible.
+ *
+ * `rateOverride` is the scenario's slow button (PLAYBOOK 3.4). `pos()` reads
+ * the player's own `currentTime`, which is a position in the media rather
+ * than elapsed wall time, so a slowed track still reports where it is. */
+export async function playTrack(source, from = 0, rateOverride) {
   if (!source) return null;
   /* Nothing here is audible until two awaits have passed — the audio session,
      then the seek — and a finger on "back five seconds" arrives inside that gap.
@@ -414,7 +418,10 @@ export async function playTrack(source, from = 0) {
       try { await mine.seekTo(from / 1000); } catch (e) {}
       if (abandoned()) return drop();
     }
-    const rate = prefs.rate;
+    /* The learner's Reading speed setting, unless the caller asked for a
+       particular rate — the scenario's slow button does, and it has to win
+       over the global setting rather than multiply with it. */
+    const rate = rateOverride || prefs.rate;
     if (rate !== 1 && typeof mine.setPlaybackRate === "function") {
       try { mine.shouldCorrectPitch = true; mine.setPlaybackRate(rate, "high"); } catch (e) {}
     }

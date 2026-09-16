@@ -143,6 +143,28 @@ describe("the listening scenario", () => {
     expect(global.__players[0].play).toHaveBeenCalled();
   });
 
+  /* Three-quarter speed (PLAYBOOK 3.4). The slow button is the one control a
+     listener reaches for that the app did not have; what it has to do is
+     reach the player, not merely change its own label. */
+  it("plays slower when asked, and back at full speed when asked again", async () => {
+    await withScene();
+    const slow = await screen.findByTestId("scene-slow");
+    // It offers the thing it will do, not the state it is in.
+    expect(slow).toHaveTextContent("¾×");
+    await act(async () => { fireEvent.press(slow); });
+    expect(screen.getByTestId("scene-slow")).toHaveTextContent("1×");
+
+    await act(async () => { fireEvent.press(screen.getByTestId("scene-play")); });
+    // `global.__players` accumulates across this file (only `__played` is
+    // cleared between tests), so the one that matters is the newest.
+    await waitFor(() => expect(global.__played).toHaveLength(1));
+    const player = global.__players[global.__players.length - 1];
+    expect(player.setPlaybackRate).toHaveBeenCalledWith(0.75, "high");
+
+    await act(async () => { fireEvent.press(screen.getByTestId("scene-slow")); });
+    expect(screen.getByTestId("scene-slow")).toHaveTextContent("¾×");
+  });
+
   it("reads each speaker in their own voice when it falls back", async () => {
     await withScene(jest.fn(), spoken);
     const play = await screen.findByTestId("scene-play");

@@ -543,6 +543,65 @@ group("the session");
   ok(unset.items.length === 15, "an option left unset is the default, not NaN", String(unset.items.length));
 }
 
+/* ------------------------------------------------- the review round trip */
+/* PLAYBOOK 3.1–3.3: every authored string goes out as a CSV, a person
+   corrects it, and it comes back by id. The parsing and the planning are
+   what stand between a reviewer's spreadsheet and the curated data, so they
+   are tested rather than trusted (rule 20.3: those files are hand-authored
+   and a rebuild must never clobber them). */
+
+group("the review round trip");
+{
+  const { parseCsv, locate, plan } = await import("./import_review.mjs");
+  const { YO_ONLY, cognate } = await import("./check_scripts.mjs");
+
+  // A reviewer's file is full of commas, quotes and newlines. split(",")
+  // would shred it silently, which in a tool that edits curated data is the
+  // worst kind of bug.
+  const csv = 'id,ru,fix,note\r\n'
+    + 'a,"Да, конечно.","Да, конечно!","a comma, and ""quotes"""\r\n'
+    + 'b,нет,,"two\nlines"\r\n';
+  const rows = parseCsv(csv);
+  ok(rows.length === 2, "two rows out of a file with a newline inside a cell", String(rows.length));
+  ok(rows[0].ru === "Да, конечно." && rows[0].fix === "Да, конечно!", "a quoted comma survives");
+  ok(rows[0].note === 'a comma, and "quotes"', "and a doubled quote is one quote", rows[0].note);
+  ok(rows[1].note === "two\nlines", "and a newline inside quotes is not a new row");
+  ok(parseCsv("﻿id,ru\r\nx,да\r\n")[0].id === "x", "the BOM Excel needs is not part of the first id");
+
+  ok(locate("script:core1:0:line:3").path.join(".") === "lines.3.ru", "an id names a place in the file");
+  ok(locate("script:core1:0:q:2:opt:1").path.join(".") === "questions.2.options.1", "…including an option");
+  ok(locate("name:Аня") === null && locate("nonsense") === null,
+     "and an id it cannot place is not guessed at");
+
+  const docs = { core1: { lessons: { "core1:0": {
+    title: "A title", lines: [{ s: "a", ru: "Это дом.", en: "This is a house." }],
+    questions: [{ ask: "Whose?", options: ["His", "Hers"], answer: 0 }],
+  } } } };
+  const row = (o) => Object.assign({ id: "", ru: "", en: "", fix: "", note: "" }, o);
+
+  const good = plan([row({ id: "script:core1:0:line:0", ru: "Это дом.", fix: "Это мой дом." })], docs);
+  ok(good.changes.length === 1 && good.changes[0].before === "Это дом." && good.changes[0].after === "Это мой дом."
+     && !good.refused.length, "a correction is planned against what the file holds");
+  ok(docs.core1.lessons["core1:0"].lines[0].ru === "Это дом.", "and planning writes nothing");
+
+  const stale = plan([row({ id: "script:core1:0:line:0", ru: "Это была другая строка.", fix: "Это мой дом." })], docs);
+  ok(!stale.changes.length && /older export/.test(stale.refused[0]),
+     "a row reviewed against an older export is refused, not applied", stale.refused[0]);
+  const latin = plan([row({ id: "script:core1:0:line:0", ru: "Это дом.", fix: "Eto moy dom." })], docs);
+  ok(!latin.changes.length && /Latin/.test(latin.refused[0]), "and so is a correction typed in Latin letters");
+  const gone = plan([row({ id: "script:core1:0:line:9", fix: "Привет." })], docs);
+  ok(!gone.changes.length && gone.refused.length, "and a line that is no longer there");
+  const same = plan([row({ id: "script:core1:0:line:0", ru: "Это дом.", fix: "Это дом." })], docs);
+  ok(!same.changes.length && !same.refused.length, "a row the reviewer left alone is not a change");
+
+  // The two rules added for PLAYBOOK 3.2, each proved to fire.
+  ok(YO_ONLY.get("еще") === "ещё" && YO_ONLY.get("ребенок") === "ребёнок",
+     "ё is required where the lexicon spells a word only that way");
+  ok(!YO_ONLY.has("все"), "…and never where both spellings are real words — «все» is not «всё»");
+  ok(cognate("parliament", "parlament") && !cognate("house", "dom") && !cognate("who", "kto"),
+     "the cognate test detects the case it is named after, and not everything else");
+}
+
 /* ------------------------------------------------------------ compare */
 /* A recogniser's transcript against the target sentence, word by word. */
 

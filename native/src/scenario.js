@@ -40,6 +40,11 @@ export const GAP_MS = 420;
 /* How far a press of the back button moves. */
 export const SKIP_MS = 5000;
 
+/* The slow button (PLAYBOOK 3.4). Three quarters is the rate the app already
+   uses for a second press of a speaker (§30h `rateFor`), so a learner who
+   has met "press it twice for slower" meets the same speed here. */
+export const SLOW_RATE = 0.75;
+
 /* How long a line will take to say, before it has ever been said.
  *
  * Calibrated against the device voice at rate 1.0, which reads Russian at
@@ -112,8 +117,20 @@ export function useScenario(lines, cast, seed = "") {
   const [at, setAt] = useState(-1);          // the line sounding, -1 for none
   const [pos, setPos] = useState(0);         // milliseconds into the scenario
   const [plays, setPlays] = useState(0);     // how many times it was started
+  const [slow, setSlow] = useState(false);   // three-quarter speed
 
-  const measured = useRef({});
+  /* Measured line lengths, **by rate**: the same line takes a third longer at
+     three quarters speed, and the rule that a measurement is never overwritten
+     (below) would otherwise leave the slow durations standing after the
+     learner went back to full speed, and the conversation would appear to
+     change length while they were looking at it. */
+  const measuredAt = useRef({});
+  const rate = slow ? SLOW_RATE : 1;
+  const measured = { get current() {
+    const k = String(rate);
+    if (!measuredAt.current[k]) measuredAt.current[k] = {};
+    return measuredAt.current[k];
+  } };
   const alive = useRef(true);
   const run = useRef(0);                     // the current playback; bumped to abandon one
   const mark = useRef({ base: 0, at: 0 });   // where the line sounding began
@@ -178,7 +195,7 @@ export function useScenario(lines, cast, seed = "") {
     setPlays((n) => n + 1);
 
     if (track) {
-      const h = await playTrack(track.src, fromMs);
+      const h = await playTrack(track.src, fromMs, rate);
       if (!alive.current || run.current !== id) { if (h) h.stop(); return; }
       if (h) {
         handle.current = h;
@@ -200,7 +217,7 @@ export function useScenario(lines, cast, seed = "") {
       mark.current = { base, at: Date.now() };
       setPos(base);
       const t0 = Date.now();
-      await speakLine(lines[k].ru, voiceFor(lines[k]));
+      await speakLine(lines[k].ru, { ...voiceFor(lines[k]), rate });
       if (!alive.current || run.current !== id) return;
       const took = Date.now() - t0;
       /* A line that came back at once was not spoken — no voice, or stopped
@@ -276,5 +293,24 @@ export function useScenario(lines, cast, seed = "") {
     else play(pos >= spans().total ? 0 : pos);
   };
 
-  return { playing, at, pos, plays, total: spans().total, play, pause, back, toggle, seek };
+  /* Three-quarter speed, on and off. Changing it while the conversation is
+     sounding restarts from the line that is sounding rather than from the
+     top: the learner pressed it because they did not catch *that* line, and
+     sending them back to the beginning is the opposite of what they asked
+     for. `play` rounds to a line boundary for the device voices and lands
+     exactly for a bought track, which is the behaviour the back button
+     already has. */
+  const toggleSlow = () => {
+    const next = !slow;
+    setSlow(next);
+    if (!playing) return;
+    const tl = spans();
+    const from = at >= 0 && tl.spans[at] ? tl.spans[at].start : pos;
+    // `play` reads `rate` through the closure, so it has to run after the
+    // state has actually changed.
+    setTimeout(() => play(from), 0);
+  };
+
+  return { playing, at, pos, plays, slow, total: spans().total,
+           play, pause, back, toggle, toggleSlow, seek };
 }

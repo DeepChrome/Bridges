@@ -30,7 +30,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadPayload } from "./payload.mjs";
-import { fold, TOKEN } from "../core/util.js";
+import { fold, TOKEN, translit } from "../core/util.js";
 import { PEOPLE } from "../core/names.js";
 import { briefs, FREE } from "./lesson_brief.mjs";
 
@@ -82,6 +82,51 @@ function nameForms(name) {
 const NAME_ODD = ["петра", "петру", "петром", "петре"];
 export const NAME_KEYS = new Set(
   [...NAMES].flatMap(nameForms).concat(NAME_ODD).map((n) => fold(n)));
+
+/* Words the lexicon spells with ё and never with е (PLAYBOOK 3.2).
+ *
+ * ё written as е is a real authoring slip: it changes the pronunciation, and
+ * the bought audio is generated from this text, so the voice says the wrong
+ * vowel and nothing on screen looks wrong.
+ *
+ * **Only where there is no choice.** «все» is not a misspelling of «всё» —
+ * they are different words that differ in exactly those two dots, and a
+ * check that folds them together reports 48 errors in text that is correct
+ * (measured 2026-09-16). A key the lexicon spells both ways is the writer's
+ * call; a key it only ever spells with ё is not.
+ *
+ * Headwords only, deliberately: reaching every inflected form means
+ * hydrating all 4,017 paradigms on a check that runs on every build, and the
+ * slip this catches is nearly always the dictionary form («еще», «ребенок»).
+ */
+export const YO_ONLY = (() => {
+  const yo = new Map(), eh = new Set();
+  const plain = (s) => String(s).normalize("NFD").replace(/[̀́]/g, "").normalize("NFC");
+  for (const w of L) {
+    for (const form of [w.w, w.b]) {
+      if (!form) continue;
+      const b = plain(form);
+      const k = fold(b);
+      if (/ё/i.test(b)) { if (!yo.has(k)) yo.set(k, b); }
+      else if (/е/i.test(b)) eh.add(k);
+    }
+  }
+  for (const k of eh) yo.delete(k);
+  return yo;
+})();
+
+/* Whether an English word reads like a Russian one said out loud — "parliament"
+   for «парламент». The bar is a shared opening of four letters on words of
+   five or more, which is what it takes to detect the case the rule is named
+   after; a stricter test reported nothing on a corpus where nothing is wrong,
+   which is a metric that cannot tell the skill from the flaw (§30r). */
+export function cognate(englishWord, saidTranslit) {
+  if (englishWord.length < 5 || saidTranslit.length < 5) return false;
+  const n = Math.min(englishWord.length, saidTranslit.length);
+  let same = 0;
+  for (let i = 0; i < n; i++) { if (englishWord[i] !== saidTranslit[i]) break; same++; }
+  return same >= 4;
+}
 
 /* How long a sentence may run, by chapter. Five words in the first chapter is
    about all thirty words of Russian can say; the allowance grows with the
@@ -220,6 +265,28 @@ export function checkOne(brief, entry) {
         }
       }
     });
+
+    /* At least one question that cannot be answered by spotting a cognate
+       (PLAYBOOK 3.4). A learner who hears «парламент» and sees "parliament"
+       among the options has answered without understanding anything, and a
+       scenario made entirely of those tests nothing.
+       Measured 2026-09-16: 0 of 840 questions are like that, because the
+       questions ask about the situation rather than about words (§30l). The
+       rule exists so that stays true. */
+    if (qs.length) {
+      const said = new Set();
+      for (const l of rows) {
+        for (const m of String(l.ru || "").match(TOKEN) || []) said.add(translit(fold(m)).toLowerCase());
+      }
+      const guessable = (q) => {
+        const right = String((q.options || [])[q.answer] || "").toLowerCase();
+        return right.split(/[^a-z]+/).filter((w) => w.length >= 5)
+          .some((w) => [...said].some((s) => cognate(w, s)));
+      };
+      if (qs.every(guessable)) {
+        errors.push("every question can be answered by spotting a cognate — none of them tests listening");
+      }
+    }
   }
 
   rows.forEach((row, k) => {
@@ -229,6 +296,17 @@ export function checkOne(brief, entry) {
     if (/[̀́]/.test(row.ru)) errors.push(`${where}: stress marks belong on headwords, not in a spoken line`);
     if (/[a-z]/i.test(row.ru)) errors.push(`${where}: Latin letters in the Russian — "${row.ru}"`);
     if (/[а-яё]/i.test(row.en)) errors.push(`${where}: Cyrillic in the English — "${row.en}"`);
+
+    /* ё written as е, where the lexicon leaves no choice (see YO_ONLY). The
+       audio is generated from this text, so the voice says the wrong vowel. */
+    for (const raw of String(row.ru).match(TOKEN) || []) {
+      if (/ё/i.test(raw)) continue;
+      const real = YO_ONLY.get(fold(raw));
+      if (!real) continue;
+      const keepCase = raw[0] === raw[0].toUpperCase()
+        ? real[0].toUpperCase() + real.slice(1) : real;
+      errors.push(`${where}: "${raw}" is spelled "${keepCase}" — ё, not е`);
+    }
 
     const toks = tokensOf(row.ru);
     if (toks.length > maxWords(brief.chapter)) {

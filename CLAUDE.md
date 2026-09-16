@@ -2412,6 +2412,89 @@ Traps met:
   off a card now read the step (`dueAt - lastAt`), and a session's first card
   is "a" most-forgotten card, since equal retrievability is shuffled.
 
+## 30x. Phase 3 — content accuracy, up to the point a person is needed (2026-09-16)
+
+The playbook's rule is that no authored Russian ships without a native-speaker
+read, and §30l already conceded the hole this fills: the level and the
+vocabulary of the 168 scenarios are machine-checked on every build, but
+nothing checks whether the Russian is *idiomatic*, and no machine can. This
+phase builds everything up to the person, and stops there.
+
+- **`tools/export_review.mjs`** writes `review/content_v1.csv`: every authored
+  string, one per row, with an id that names where it lives, the context a
+  reviewer needs, the track to listen to, and two empty columns (`fix`,
+  `note`) for the answer. **6,853 rows** — 2,213 scenario lines, 840
+  questions, 3,360 options, 168 situations, and the alphabet, tasks, grammar
+  notes, Talk situations and cast names. The dictionary is deliberately not in
+  it: those glosses and sentences are OpenRussian's, Wiktionary's and
+  Tatoeba's under licence, already edited, and 46,000 of them would bury the
+  2,213 that are ours.
+- **`needs` is a column, because it is what decides the bill.** 2,353 rows
+  need a Russian native; the other 4,500 are English and need a careful
+  reader. The playbook budgets $600–1,400 for ~5,000 mixed rows; scoped to the
+  Russian it is nearer 11 hours, **$220–385**.
+- **The free pre-pass runs before anyone is paid.** Yandex.Speller, keyless,
+  over all 2,353 Russian rows: **10 flagged**. Two things had to be right or
+  it reports nonsense — the combining stress marks come off before sending
+  (§23), and names are compared against `NAME_KEYS`, every declined form, not
+  the nominatives. Comparing against the nominatives alone is what made the
+  first run flag «Маши».
+- **`tools/import_review.mjs`** applies a returned CSV by id, prints the diff,
+  and writes nothing without `--apply` — rule 20.3, these are the hand-authored
+  files. It refuses an id it cannot place, a row whose `ru` no longer matches
+  the file (reviewed against an older export), and a correction typed in Latin
+  letters. Parsing and planning are exported and tested; only the writing is
+  behind the command line.
+
+**Two rules added to `check_scripts.mjs`, both measured before they were
+written, and both measuring zero — which is the point (§30r: a rule nobody can
+break is worth more than a rule everybody is already breaking).**
+
+- **ё written as е**, where the lexicon leaves no choice. The audio is
+  generated from this text, so the wrong vowel is *spoken* and nothing on
+  screen looks wrong. The naive version reported **48 errors in correct text**:
+  «все» is not a misspelling of «всё», they are different words separated by
+  exactly those two dots, and folding them together cannot tell a choice from
+  a mistake. Restricted to keys the lexicon only ever spells with ё: **0 of
+  8,992 tokens**.
+- **A scenario whose every question can be answered by spotting a cognate.**
+  0 of 840 questions are, because the questions ask about the situation rather
+  than about words (§30l) — the rule keeps that true. Its first detector
+  could not match «парламент» to "parliament" and so reported nothing on a
+  corpus where nothing is wrong, which is a metric that cannot tell the skill
+  from the flaw; it is sanity-checked against its own named case now.
+
+**Three findings from measuring the playbook's other two rules**, none of
+which became a build gate because none of them is about the scenarios:
+
+| asked | measured | what it is |
+|---|---|---|
+| every noun has gender | 19 of 611 have none | one (деньги) is correct; 18 are a real gap (13.28) |
+| every word has stress | 1 of 885 | the other ten "gaps" were ё, which is always stressed and needs no mark |
+| every verb has an aspect pair | 4 of 209 | all four correct: быть, иметь, спать have no perfective, атаковать is biaspectual |
+
+**PLAYBOOK 3.4, item by item.** The situation line, two voices of the right
+sex, unlimited replay, back-five, transcript hidden until answered and every
+word in it tappable were all already built (§30l). Added: **a ¾× slow
+button** on the transport, which overrides the global Reading speed rather
+than multiplying with it, and keeps its measured line lengths *per rate* —
+otherwise the first slow listen would leave the conversation appearing to
+change length when the learner went back to full speed. Not added: a second
+exercise type, because **all 154 quizzes containing a scenario already carry a
+listen-and-type step** (measured; `SPEECH_MIX.hear` from chapter 1 lesson 3),
+and that step plays a real recording from the collection where a scenario line
+would play bought synthesis.
+
+**Where this diverges from the playbook, and why.** It says audio should play
+*before* the options appear; the owner designed the opposite and said why —
+the questions are there first so the learner knows what to listen for — and
+his rule stands. LanguageTool is skipped: it wants Docker, which is not
+installed, and the speller plus the existing rules cover most of it. The
+Claude pass over every row is 💰 and waits for him.
+
+**Gate 3 cannot be closed here.** It needs a reviewed file back from a person.
+What is ready is the CSV, with the machine-findable problems already at zero.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

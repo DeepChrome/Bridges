@@ -68,3 +68,9 @@ native/build-out/
 # are committed: they were bought, and buying them again costs money.
 native/assets/scenes/
 native/src/scenetracks.js
+
+# The content export (tools/export_review.mjs) is 1.2 MB of rows rebuilt from
+# the curated data in seconds, so it is an artifact (rule 20.3). What comes
+# *back* from a reviewer is not — it is a person's work and the only copy.
+review/*.csv
+!review/*reviewed*.csv

@@ -2295,7 +2295,12 @@ under a millisecond because every screen reads memory, and that has not changed.
   expo-sqlite — one file per profile, WAL, `cards`, `review_log`, `decks`,
   `progress`, `settings`, `meta`; every write one transaction.
   `native/src/db.js`: the only place a file is opened, and where one that will
-  not open is moved aside, never deleted. `store.js`: the diffed, debounced,
+  not open is moved aside, never deleted — **verified on a device**
+  (2026-09-16, ROADMAP 13.22): a profile's `.db` overwritten with rubbish
+  leaves the app running, the wreck kept as `bridges-<id>.bad-<ts>.db`, a
+  fresh database in its place and a banner that says plainly this is a fresh
+  start. The files live in `files/SQLite/`, not `databases/`, and `adb root`
+  on the emulator is what makes the test possible at all. `store.js`: the diffed, debounced,
   **serialised** save — a flush on the way to the background must not open a
   transaction inside the timer's — with the JSON row as a read-only source.
   `reviewRow`/`reviewRows` in `core/fsrs.js` build the row *before* the grade,

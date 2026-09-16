@@ -65,8 +65,12 @@ export default function Sounds({ navigation }) {
           rather than as a twelfth row on Practice: a drill on the letters
           belongs with the letters (rule 20.8). */}
       <Btn kind="pri" testID="sound-drill" label="Practise these sounds"
-           style={{ marginBottom: 20 }}
            onPress={() => navigation.navigate("SoundDrill")} />
+      {/* The other half of a mouth: the sounds above are single contrasts, and
+          this is a whole long word, taken from its end (core/buildup.js). */}
+      <Btn testID="build-drill" label="Build up a long word"
+           style={{ marginTop: 8, marginBottom: 20 }}
+           onPress={() => navigation.navigate("BuildDrill")} />
 
       <SectionLabel>The six vowel sounds</SectionLabel>
       <VowelChart />

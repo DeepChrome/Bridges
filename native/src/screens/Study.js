@@ -17,7 +17,7 @@ import { View, Pressable, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Text } from "../ui";
-import { L, UN, STAGES, unitUnlocked, idxOfWord, sensesOf } from "../data";
+import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf } from "../data";
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";
 import { say } from "../audio";
@@ -37,6 +37,39 @@ export function troubleWords(st) {
 const cardOf = (i) => ({ key: "w" + i, w: L[i].w, b: L[i].b, e: L[i].e, x: L[i].x });
 const deckCard = (c) => ({ key: "d" + c.ru, w: c.ru, b: c.ru, e: c.en });
 
+/* A whole sentence as a card (the owner, 2026-09-16: *"not just vocabulary
+   (individual words) but also sentences… Complete sentences are very
+   helpful"* — which is how his own decks are built).
+ *
+ * The 1,987 rows of `payload.speech` are the right source and not the corpus
+ * at large: every one has a real recording, every one is cut to a unit by the
+ * coverage rule (§30b), so a sentence card is level-matched and can be *heard*
+ * rather than read by the phone. `sentence: true` is what the screen reads to
+ * link the Russian and to skip the dictionary entry a sentence does not have.
+ *
+ * It keys on the sentence string, like a deck card — rule 20.4 keys on what is
+ * written, not on an index, so the scheduler needs nothing new to hold one. */
+const sentenceCard = (row) => ({ key: "s" + row[0], w: row[0], b: row[0], e: row[1], sentence: true });
+
+/* Every sentence the learner has reached, newest units first so the set leads
+   with what they are working on. Both pools: a sentence worth hearing is worth
+   saying, and the two overlap by design (§30b stores a shared row list). */
+export function sentencesFor(st) {
+  const out = [], have = new Set();
+  const units = reachedUnits(st);
+  for (const u of [...units].reverse()) {
+    for (const pool of [SPEECH.listen, SPEECH.speak]) {
+      for (const i of (pool || {})[u.id] || []) {
+        const row = SPEECH.rows[i];
+        if (!row || have.has(row[0])) continue;
+        have.add(row[0]);
+        out.push(sentenceCard(row));
+      }
+    }
+  }
+  return out;
+}
+
 /* Every card the ticked sets hold, one of each. */
 export function cardsIn(st, sets) {
   const pool = [];
@@ -45,10 +78,14 @@ export function cardsIn(st, sets) {
   const byWord = (w) => {
     const i = idxOfWord(w);
     if (i >= 0) add(cardOf(i));
-    else add({ key: "d" + w, w, b: w, e: "" });
+    // A word the curriculum does not carry: a deck card, or a sentence that
+    // is due and whose set is not ticked. Either way the schedule knows it by
+    // its Russian and that is all the card needs.
+    else add({ key: "d" + w, w, b: w, e: "", sentence: /\s/.test(w) });
   };
   sets.forEach((id) => {
     if (id === "__trouble__") { troubleWords(st).forEach(byWord); return; }
+    if (id === "__sentences__") { sentencesFor(st).forEach(add); return; }
     // Everything the scheduler wants today, whichever set it came from — what
     // "Review · N due" on the path opens.
     if (id === "__due__") {
@@ -96,6 +133,7 @@ function SetPicker({ visible, onClose }) {
     sets: p.sets.includes(id) ? p.sets.filter((x) => x !== id) : p.sets.concat(id),
   }));
   const dueCount = cardsIn(st, ["__due__"]).length;
+  const sentenceCount = sentencesFor(st).length;
 
   const doImport = async () => {
     setBusy(true);
@@ -185,6 +223,17 @@ function SetPicker({ visible, onClose }) {
                     </View>
                   </Row>
                 ) : null}
+                {/* Whole sentences, which is how his own decks are built and
+                    the unit a word is actually used in (§26). */}
+                {sentenceCount ? (
+                  <Row testID="set-sentences" onPress={() => toggle("__sentences__")}>
+                    <Tick on={st.sets.includes("__sentences__")} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.ink, fontSize: 15 }}>Sentences</Text>
+                      <Muted>{sentenceCount + " you have reached"}</Muted>
+                    </View>
+                  </Row>
+                ) : null}
               </List>
             </View>
 
@@ -252,13 +301,24 @@ function SetPicker({ visible, onClose }) {
   );
 }
 
-/* The word as this direction shows it before the turn: the Russian, its
-   meaning, or only the sound. */
+/* How big the Russian sits on the card. A word is the card and should be the
+   largest thing on the screen; a sentence is a line to read and wants to stay
+   on three lines rather than seven. */
+const faceSize = (face) => (face.sentence ? (face.w.length > 46 ? 20 : 24)
+  : face.w.length > 18 ? 26 : face.w.length > 11 ? 34 : 44);
+
+/* The card's front, by direction: the Russian, its meaning, or only the sound.
+   A sentence is plain text here and word-linked on the back — tapping a word
+   before answering would hand over the answer. */
 function Front({ face, direction }) {
   const t = useTheme();
   if (direction === "produce") {
     // Meaning first: the same numbered senses, since the question is "which
     // word means all of these?" and one of nine synonyms is a different question.
+    // A sentence has a translation rather than senses, so it reads as one line.
+    if (face.sentence) {
+      return <Text style={{ color: t.ink, fontSize: 20, textAlign: "center" }}>{face.e || "—"}</Text>;
+    }
     return face.e ? <Senses e={face.e} size={20} style={{ marginTop: 0 }} />
                   : <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600" }}>—</Text>;
   }
@@ -271,11 +331,7 @@ function Front({ face, direction }) {
   }
   return (
     <>
-      {/* The word is the card. At 34 it sat small in the middle of a tall white
-          panel; a flashcard's face should be the largest thing on the screen,
-          and it steps down only when the word is long enough to need the room. */}
-      <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center",
-                     fontSize: face.w.length > 18 ? 26 : face.w.length > 11 ? 34 : 44 }}>
+      <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center", fontSize: faceSize(face) }}>
         {face.w}
       </Text>
       <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
@@ -442,12 +498,25 @@ export default function Study({ navigation }) {
               <>
                 {item.direction !== "recognise" ? (
                   <>
-                    <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center",
-                                   fontSize: face.w.length > 18 ? 26 : face.w.length > 11 ? 34 : 44 }}>
-                      {face.w}
-                    </Text>
+                    {/* Word-linked once it has been answered: the sentence is
+                        the reason to study a sentence, and a word inside it
+                        that the learner did not know is one tap from its
+                        entry (§26 — vocabulary lives in context). */}
+                    {face.sentence
+                      ? <Linked text={face.w} size={faceSize(face)} />
+                      : (
+                        <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center", fontSize: faceSize(face) }}>
+                          {face.w}
+                        </Text>
+                      )}
                     <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
                   </>
+                ) : face.sentence ? (
+                  // Shown on the front already, but as plain text; the linked
+                  // copy is what makes its words reachable.
+                  <View style={{ alignSelf: "stretch", marginTop: 4 }}>
+                    <Linked text={face.w} size={faceSize(face)} />
+                  </View>
                 ) : null}
                 {/* Every meaning the word has, numbered and laid out as a
                     dictionary lays them (§30q) — labels and all. Where there are
@@ -455,7 +524,10 @@ export default function Study({ navigation }) {
                     card) the translation stands on its own, which is all there
                     is to show. Four at most here: the card is a card, and the
                     full entry is one press away below. */}
-                {item.direction === "produce" && !senses ? null
+                {face.sentence ? (
+                  item.direction === "produce" ? null
+                    : <Muted size={16} style={{ marginTop: 10, textAlign: "center" }}>{face.e}</Muted>
+                ) : item.direction === "produce" && !senses ? null
                   : senses ? <SenseList senses={senses} size={16} max={4} style={{ marginTop: 10 }} />
                   : <Senses e={face.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
                 {(face.x || []).slice(0, 3).map((ex, k) => (

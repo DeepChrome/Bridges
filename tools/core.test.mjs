@@ -543,6 +543,53 @@ group("the session");
   ok(unset.items.length === 15, "an option left unset is the default, not NaN", String(unset.items.length));
 }
 
+/* ----------------------------------------------------- backward build-up */
+/* Pimsleur's technique (core/buildup.js): a long word learned from its end.
+   The splitting is the whole feature — a fragment nobody can say is worse
+   than no drill. */
+
+group("backward build-up");
+{
+  const { syllables, buildup, worthBuilding, buildupDrill, MIN_SYLLABLES }
+    = await import("../core/buildup.js");
+  const s = (w) => syllables(w).join("-");
+
+  ok(s("понима́ю") === "по-ни-ма́-ю", "по-ни-ма-ю: a consonant between vowels opens the next syllable", s("понима́ю"));
+  ok(s("спаси́бо") === "спа-си́-бо", "спа-си-бо", s("спаси́бо"));
+  ok(s("хорошо́") === "хо-ро-шо́", "хо-ро-шо", s("хорошо́"));
+  ok(s("ру́сский") === "ру́с-ский", "a doubled consonant splits between the two", s("ру́сский"));
+  ok(s("карти́на") === "кар-ти́-на", "a sonorant closes the syllable before it", s("карти́на"));
+  ok(s("здра́вствуйте") === "здра́в-ствуй-те", "a cluster of three or more leaves its first behind", s("здра́вствуйте"));
+  ok(s("чу́вствовать") === "чу́в-ство-вать", "…which is what makes «чувствовать» sayable", s("чу́вствовать"));
+  ok(s("учи́тель") === "у-чи́-тель", "a trailing soft sign stays where it is", s("учи́тель"));
+  ok(syllables("дом").length === 1 && syllables("я").length === 1, "one vowel is one syllable");
+  ok(syllables("").length === 0, "and nothing is nothing");
+
+  // The stress mark belongs to its vowel; a fragment must never open with one.
+  ok(buildup("понима́ю").every((f) => !/^[̀́]/.test(f.normalize("NFD"))),
+     "no fragment begins with a floating stress mark");
+  ok(s("понима́ю").includes("ма́"), "and the mark stays on the vowel it belongs to");
+
+  const b = buildup("понима́ю");
+  ok(b.length === 4 && b[0] === "ю" && b[b.length - 1] === "понима́ю",
+     "the build runs ю → ма́ю → нима́ю → понима́ю", b.join(" | "));
+  ok(b.every((f, i) => i === 0 || f.endsWith(b[i - 1])),
+     "every step ends with the step before it — that is what backwards means");
+  ok(b.every((f, i) => i === 0 || f.length > b[i - 1].length), "and each is longer than the last");
+
+  ok(!worthBuilding("дом") && !worthBuilding("до́ма") && worthBuilding("понима́ю"),
+     `a word is worth building at ${MIN_SYLLABLES} syllables, not before`);
+
+  const drill = buildupDrill([{ ru: "понима́ю", en: "I understand" }, { ru: "дом", en: "house" },
+                              { ru: "спаси́бо", en: "thank you" }], 5);
+  ok(drill.length === 2, "the drill takes only the words long enough", String(drill.length));
+  ok(drill.every((q) => q.kind === "buildup" && q.steps.length >= MIN_SYLLABLES),
+     "each question carries its own fragments");
+  ok(drill.every((q) => q.i === undefined),
+     "and none carries a lemma index — saying a word is not knowing it (core/alphabet.js says the same)");
+  ok(buildupDrill([], 5).length === 0 && buildupDrill(null, 5).length === 0, "nothing in, nothing out");
+}
+
 /* ------------------------------------------------- the review round trip */
 /* PLAYBOOK 3.1–3.3: every authored string goes out as a CSV, a person
    corrects it, and it comes back by id. The parsing and the planning are

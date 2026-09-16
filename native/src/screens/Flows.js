@@ -17,6 +17,8 @@ import {
 } from "../data";
 import { quizPassed } from "@core/state";
 import { pairDrill } from "@core/alphabet";
+import { buildupDrill } from "@core/buildup";
+import { firstSense } from "@core/util";
 import { touchStreak } from "../store";
 
 /* The mark for a run: partial credit summed over first attempts, as a percentage. */
@@ -31,6 +33,11 @@ export const VOCAB_XP = 5;
 /* Pairs in one run of the pronunciation drill: five heard and five said, which
    is about a minute and a half and does not outstay a contrast. */
 export const SOUND_DRILL_N = 10;
+
+/* Words in one build-up run. Six, because each is four or five repetitions of
+   the same mouth shape and the value is in doing them properly rather than in
+   getting through a list. */
+export const BUILD_DRILL_N = 6;
 
 /* Sentences in a shadowing run. Fewer than a quiz: each one is a recording, a
    hold, a wait for the recogniser and usually a second go. */
@@ -181,6 +188,44 @@ export function SoundDrillFlow({ navigation }) {
           : "Nothing the phone could hear"}
         onAgain={() => { setResult(null); setSeed(seed + 1); }}
         againLabel="Again"
+        onBack={() => navigation.goBack()}
+      />
+    );
+  }
+  return (
+    <Runner steps={steps} recycle={false} navigation={navigation}
+            onFinish={(r) => setResult(r)} />
+  );
+}
+
+/* Backward build-up (core/buildup.js): the long words the learner is actually
+   studying, each taken apart from its end. Drawn from `drillPool` like every
+   other drill, so nobody is asked to pronounce a word they have not met. */
+export function BuildDrillFlow({ navigation }) {
+  const { st } = useSession();
+  const [result, setResult] = useState(null);
+  const [seed, setSeed] = useState(0);
+  const steps = useMemo(() => buildupDrill(
+    drillPool(st).map((i) => ({ ru: L[i].w, en: firstSense(L[i]) })), BUILD_DRILL_N,
+  ), [seed, st.seen]);   // eslint-disable-line react-hooks/exhaustive-deps
+  useAudioStopOnLeave();
+
+  if (result) {
+    return (
+      <Done
+        title="Build-up"
+        detail={`${result.total} ${result.total === 1 ? "word" : "words"}, end first`}
+        onAgain={() => { setResult(null); setSeed(seed + 1); }}
+        againLabel="Again"
+        onBack={() => navigation.goBack()}
+      />
+    );
+  }
+  if (!steps.length) {
+    return (
+      <Done
+        title="Build-up"
+        detail="No long words yet"
         onBack={() => navigation.goBack()}
       />
     );

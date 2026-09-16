@@ -335,5 +335,8 @@ export const DIRECTION_OF_KIND = {
   say: "produce", "pair-say": "produce",
   listen: "listen", hear: "listen", scene: "listen", passage: "listen", heard: "listen",
   "pair-hear": "listen", shadow: "listen",
+  /* A mouth drill that grades no word (core/buildup.js) — it is here because
+     every kind must name a direction, not because a card is ever written. */
+  buildup: "produce",
 };
 export const directionOfKind = (kind) => DIRECTION_OF_KIND[kind] || "recognise";

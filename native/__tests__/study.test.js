@@ -10,10 +10,13 @@
  * Own file, per the timeout note in screens.test.js.
  */
 
-import { cardsIn, sessionFor } from "../src/screens/Study";
+import { cardsIn, sessionFor, sentencesFor } from "../src/screens/Study";
 import { DAY, REVIEW, NEW } from "@core/scheduler";
+import { SPEECH, STAGES } from "../src/data";
+import { hasRealAudio } from "../src/audio";
 
 const now = Date.now();
+const UNIT_WITH_WORDS = STAGES[0].core.id;
 const review = (plus, s = 1) => ({ dueAt: now + plus * DAY, lastAt: now - s * DAY, s, d: 5, state: REVIEW, steps: 0, reps: 2, lapses: 0 });
 const base = {
   v: 5, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {}, decks: [],
@@ -53,6 +56,36 @@ describe("which cards a set holds", () => {
     // Not due, so not asked — and not in the set at all.
     expect(words).not.toContain("город");
     expect(s.due).toBe(2);
+  });
+
+  /* Whole sentences as cards (the owner, 2026-09-16: *"Complete sentences are
+     very helpful"*). Drawn from the speech pool rather than the corpus at
+     large, which is what makes every one of them level-matched and audible. */
+  it("offers sentences the learner has reached, and every one can be heard", () => {
+    // Far enough along that several units are open.
+    const far = { ...base, unit: Object.fromEntries(STAGES.slice(0, 3).flatMap((s) =>
+      [s.core, ...s.branches].map((u) => [u.id, { lessons: { 0: { v: true, q: 100 } } }]))) };
+    const sentences = sentencesFor(far);
+    expect(sentences.length).toBeGreaterThan(20);
+    for (const c of sentences.slice(0, 15)) {
+      // It is a sentence, it keys on itself (rule 20.4), and it has a real
+      // recording — the whole reason this pool is the source.
+      expect(c.sentence).toBe(true);
+      expect(c.b).toBe(c.w);
+      expect(c.w.split(/\s+/).length).toBeGreaterThan(1);
+      expect(c.e).toBeTruthy();
+      expect(hasRealAudio(c.b)).toBe(true);
+    }
+    // No duplicates: the listen and speak pools share rows by design.
+    const keys = sentences.map((c) => c.b);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it("puts sentences in the pile only when their set is ticked", () => {
+    const far = { ...base, unit: Object.fromEntries(STAGES.slice(0, 3).flatMap((s) =>
+      [s.core, ...s.branches].map((u) => [u.id, { lessons: { 0: { v: true, q: 100 } } }]))) };
+    expect(cardsIn(far, ["__sentences__"]).every((c) => c.sentence)).toBe(true);
+    expect(cardsIn(far, [UNIT_WITH_WORDS]).some((c) => c.sentence)).toBe(false);
   });
 
   it("deals a word once per direction the learner studies", () => {

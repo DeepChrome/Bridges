@@ -569,6 +569,22 @@ Each of these cost real time. Do not relearn them.
   so `jest.setup.js` records every player in `global.__players` and
   `audiofocus.test.js` watches the lifecycle. Verified the only way worth
   trusting: the test fails against the old `pause()`-only code.
+- **An animated style on a plain component crashes the app on a device, and
+  every test passes.** `useEnter()` and its siblings return `Animated.Value`s;
+  handing that style to a `Text` or a `View` rather than an `Animated.Text` or
+  `Animated.View` sends an animated node across the bridge where a float is
+  expected, and the process dies with
+  `ClassCastException: ReadableNativeMap cannot be cast to java.lang.Double`
+  the moment the view is created. Nothing catches it earlier: `jest.setup.js`
+  settles animations to their end value and RNTL never performs the native
+  cast, so the render tree looks perfect and the assertions pass (§20a —
+  native has no visual suite). It shipped to the owner's phone for five
+  minutes on 2026-09-16 in the new build-up drill.
+  §30n′ already said the scale goes on a wrapper *around* a control and not on
+  it, for a different reason — a test going blind. This is the same rule with
+  teeth: **anything from `motion.js` goes on an `Animated.*` component, always,
+  and the plain one goes inside it.** A new screen that animates has to be
+  opened on the emulator once; a passing suite says nothing about this.
 - **`Get-Content -Raw` misreads UTF-8 without a BOM**, so grepping a built page for
   Cyrillic from PowerShell reports a false negative. Check with `node -e` instead.
 - **…and PowerShell 5.1 misreads a `.ps1` the same way, which stops the script
@@ -2562,6 +2578,74 @@ device and an app bundle is the better answer to size (13.8). The 61 words
 with no recording are 13.32.
 
 **Gate 4 ends with him listening** — 20 scenarios and 50 words on the phone.
+
+## 30z. Sentences as cards, and a word built from its end (2026-09-16)
+
+The owner, after four phases of the playbook, asked four things at once. Two
+were questions with answers already in the code, and the honest reply was to
+say so rather than build something:
+
+- **Conjugation is there twice.** The Conjugation drill in Practice ("put a
+  verb with the right person"), written or chosen by the Settings switch
+  (§30t), and the chapter's `form` question inside a lesson quiz whenever that
+  chapter's grammar card names a verb table (§30i P9.20).
+- **Listening is in every lesson, not beside it.** `SPEECH_MIX` splices it
+  into the quiz itself: type-what-you-hear from chapter 1 lesson 3, the 30–45 s
+  conversation with five questions from chapter 2, say-it-aloud from chapter 3.
+
+The other two were real gaps.
+
+### Sentence cards
+
+*"not just vocabulary (individual words) but also sentences… Complete
+sentences are very helpful"* — and he is right twice over: his own Anki decks
+are sentence-based, and §26 already says vocabulary lives in context.
+
+Study dealt words only. It deals sentences now, from **`payload.speech`'s 1,987
+rows** and deliberately not from the corpus at large: every one of those has a
+real recording and every one is cut to a unit by the coverage rule (§30b), so
+a sentence card is level-matched and can be *heard* rather than read by the
+phone. `sentencesFor` walks the units the learner has reached, newest first.
+
+It needed almost no new machinery, which is the tell that the model was right:
+a sentence card keys on its own Russian string exactly as a deck card does
+(rule 20.4 keys on what is written, never an index), so the scheduler, the
+three directions and the session builder all took it unchanged. What the
+screen adds is that **the Russian is word-linked once the card is turned** —
+the sentence is the reason to study a sentence, and a word inside it that the
+learner did not know is one tap from its entry.
+
+### Backward build-up (Pimsleur)
+
+*"pimsleur approach where you start with an individual syllable and then slowly
+add a syllable… Look up pimsleurs approach and see if you can implement that."*
+
+Looked up, and **it runs the other way**. Pimsleur's build-up is backward: for
+«понимаю» the learner hears "ю", then "маю", then "нимаю", then the whole word.
+Every fragment ends where the word ends, so the stress and the intonation are
+right from the first repetition and each step adds to something already
+correct. Forwards, the ending arrives last and least practised — and a
+swallowed ending is the commonest way a Russian word comes out wrong. He
+described it forwards; `core/buildup.js` does it backwards and says so in the
+file, because the direction *is* the technique and a silent correction would
+have looked like a bug.
+
+**The splitting is the feature**, since a fragment nobody can say is worse than
+no drill. Russian prefers an open syllable, so a consonant between two vowels
+goes forward (по-ни-ма-ю), with three exceptions that each came from a word
+the naive rule broke: a doubled consonant splits (**рус-ский**, not ру-сский),
+a sonorant closes the syllable before it (**кар-ти-на**), and a cluster of
+three or more leaves its first behind (**здрав-ствуй-те** and
+**чув-ство-вать**, where the first version produced "вствуйте"). й, ь and ъ
+can never open a fragment. Stress marks travel with their vowel, or a fragment
+would begin with a floating accent.
+
+**Nothing is graded and no word enters the scheduler.** `pairDrill` set that
+rule for pronunciation (§30o) and it holds harder here: the recogniser was
+measured on 2–4-word sentences and a single syllable is a far harder ask of
+it, and saying «понимаю» is not the claim that you know it. Replays are
+unlimited and uncounted. Reached from Sounds, beside the minimal pairs, because
+a drill on the mouth belongs with the letters (rule 20.8).
 
 ## 31. Verification
 

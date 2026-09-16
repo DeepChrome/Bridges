@@ -28,6 +28,7 @@ export const RUNS = [
   "CustomQuiz",   // a quiz the learner built
   "Drill",        // any grammar drill
   "SoundDrill",   // the pronunciation pairs
+  "BuildDrill",   // a long word built from its end
   "Shadow",       // shadowing
   "Scenes",       // a written listening scenario
   "Passage",      // native-speed listening

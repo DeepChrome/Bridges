@@ -24,6 +24,7 @@ import { Scene } from "../activities/Scene";
 import { Passage } from "../activities/Passage";
 import { PairHear, PairSay } from "../activities/Pair";
 import { Shadow } from "../activities/Shadow";
+import { Build } from "../activities/Build";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts } from "@core/scheduler";
 import { fold, translit, translitBack, firstSense } from "@core/util";
@@ -331,6 +332,8 @@ export const VIEWS = {
   "pair-say": (q, r) => <PairSay q={q} r={r} />,
   // Hear a sentence and say it straight back (P10.6).
   shadow: (q, r) => <Shadow q={q} r={r} />,
+  // A long word built from its end, a syllable at a time (core/buildup.js).
+  buildup: (q, r) => <Build q={q} r={r} />,
 };
 
 /* ------------------------------------------------------------------ runner */

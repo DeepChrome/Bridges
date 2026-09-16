@@ -45,7 +45,7 @@ import { configureAudio } from "./src/audio";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
   QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, ListeningList, PassageFlow, SoundDrillFlow,
-  ShadowFlow,
+  ShadowFlow, BuildDrillFlow,
 } from "./src/screens/Flows";
 
 const Tabs = createBottomTabNavigator();
@@ -201,6 +201,9 @@ function PracticeStack() {
       {/* The pronunciation drill, reached from Sounds (ROADMAP P10.8). */}
       <Stack.Screen name="SoundDrill" component={SoundDrillFlow}
                     options={{ title: "Practise sounds" }} />
+      {/* A long word from its end, a syllable at a time (core/buildup.js). */}
+      <Stack.Screen name="BuildDrill" component={BuildDrillFlow}
+                    options={{ title: "Build-up" }} />
       {/* Hear a sentence and say it back (ROADMAP P10.6). */}
       <Stack.Screen name="Shadow" component={ShadowFlow} options={{ title: "Shadowing" }} />
       <Stack.Screen name="Drill" component={DrillFlow}

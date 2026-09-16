@@ -85,7 +85,7 @@ describe("the drill's shape", () => {
     await act(async () => { fireEvent.press(screen.getByTestId(`pair-option-${right}`)); });
     await screen.findByTestId("verdict");
     await flushState();
-    const st = JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+    const st = (await global.__db.saved("p1"));
     expect(Object.keys(st.seen)).toHaveLength(0);
   });
 });

@@ -1,9 +1,13 @@
-/* Learner state on AsyncStorage.
+/* Learner state: one database per profile, memory as the working copy.
  *
- * Same schema and the same migrations as the web app — a profile exported from one
- * imports into the other. The difference that matters: AsyncStorage is async, so the
- * state is read once at boot into memory and written back through a debounced save
- * rather than synchronously on every keystroke like localStorage allowed.
+ * Same schema and the same migrations as the web app — a profile exported from
+ * one imports into the other. The state is read once at boot into memory and
+ * written back through a debounced save; what changed on 2026-09-15 (the
+ * playbook's Phase 1) is where it is written: an SQLite file (sqlite.js, on
+ * the contract in core/repo.js) instead of one JSON row in AsyncStorage. A
+ * save writes only what changed, and a review's log row lands in the same
+ * transaction as the card it changed — the log is what the scheduler's
+ * optimiser needs and the one thing a card cannot give back.
  *
  * Two rules protect the month of FSRS history that lives here (rule 20.4):
  *
@@ -11,29 +15,27 @@
  *    (`bad`), the raw value is copied aside, and nothing is written until the
  *    learner acts. It used to return a fresh profile that the boot path saved
  *    back 250 ms later, over the top of the unreadable one.
- *  - Imported Anki decks live in their own rows, in chunks. Android reads a
- *    row through a 2 MB cursor window, and a 20,000-card deck inline in the
- *    profile row is 2.4 MB: the write succeeds, the next read fails, and rule
- *    one's failure follows. `st.decks` is still the whole array in memory;
- *    only the storage layout changed.
+ *  - The JSON row a profile lived in before the database is read once, moved
+ *    into the database, and left exactly as it was. It is the copy that
+ *    survives a migration that turns out wrong; ROADMAP 13.20 says when it
+ *    goes. Nothing writes to AsyncStorage but the profile list.
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { today } from "@core/util";
 import { SCHEMA_VERSION, migrate, speechDefault } from "@core/state";
+import { SETTING_KEYS, merge, diff, isEmpty } from "@core/repo";
+import { openRepo } from "./db";
 
 /* The schema and its migrations live in core/state.js since v5, shared with the web
    app so an exported profile imports into either without two copies of the steps
    having to agree. Re-exported: callers here import them from the store. */
-export { SCHEMA_VERSION, migrate };
+export { SCHEMA_VERSION, migrate, SETTING_KEYS };
 export const ACC_KEY = "rb.accounts";
 const stateKey = (id) => "rb.state." + id;
 const deckIndexKey = (id) => "rb.decks." + id;
 const deckChunkKey = (id, deckId, n) => `rb.deck.${id}.${deckId}.${n}`;
 const badKey = (id) => `rb.state.${id}.bad-${Date.now()}`;
-/* Cards per row: 4,000 of the owner's real cards measure ~500 KB, a quarter of
-   the window. */
-export const DECK_CHUNK = 4000;
 
 export const DEFAULTS = {
   v: SCHEMA_VERSION,
@@ -68,10 +70,6 @@ export const DEFAULTS = {
   talkEn: true,         // English under the tutor's turns
 };
 
-/* The keys that are settings, not progress: what "Reset progress" keeps. */
-export const SETTING_KEYS = ["dev", "theme", "dir", "name", "decks", "speed", "cue", "osk",
-                             "typedDrills", "offline", "talkLevel", "talkSpeed", "talkEn"];
-
 export function normalise(raw, assumedVersion) {
   if (!raw || typeof raw !== "object") return { ...DEFAULTS };
   return { ...DEFAULTS, ...migrate(raw, raw.v || assumedVersion || 2), v: SCHEMA_VERSION };
@@ -95,8 +93,34 @@ export function newId() {
   return "p" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
 }
 
-/* ------------------------------------------------------------------ decks */
+/* ------------------------------------------------------------ the database */
 
+/* One open profile at a time. `saved` is the state as the database has it,
+   which is what a save is diffed against; null means the next save writes all
+   of it. Opening another profile closes this one and forgets `saved` with it. */
+let cur = { id: null, repo: null, saved: null, recovered: null };
+
+async function repoFor(id) {
+  if (cur.repo && cur.id === id) return cur.repo;
+  const old = cur.repo;
+  cur = { id: null, repo: null, saved: null, recovered: null };
+  if (old) { try { await old.close(); } catch (e) { /* a handle that will not close is not this profile's problem */ } }
+  const { repo, recovered } = await openRepo(id);
+  cur = { id: id, repo: repo, saved: null, recovered: recovered };
+  return repo;
+}
+
+/* The review log, for a backup. Empty when no profile is open. */
+export async function readLog(opts) {
+  return cur.repo ? cur.repo.readLog(opts) : [];
+}
+
+/* --------------------------------------------- the row it used to live in */
+
+/* Read only. A profile saved by an older build is one JSON row, its decks in
+   chunked rows beside it — Android reads a row through a 2 MB cursor window,
+   and a 20,000-card deck inline was a row that wrote and then would not read.
+   The database has no such window, so a deck is one row there. */
 async function loadDecks(accountId) {
   const raw = await AsyncStorage.getItem(deckIndexKey(accountId));
   if (!raw) return null;
@@ -113,40 +137,17 @@ async function loadDecks(accountId) {
   return decks;
 }
 
-async function saveDecks(accountId, decks) {
-  const index = [];
-  const keep = new Set();
-  for (const d of decks || []) {
-    const cards = d.cards || [];
-    const chunks = Math.ceil(cards.length / DECK_CHUNK);
-    for (let n = 0; n < chunks; n++) {
-      const k = deckChunkKey(accountId, d.id, n);
-      keep.add(k);
-      await AsyncStorage.setItem(k, JSON.stringify(cards.slice(n * DECK_CHUNK, (n + 1) * DECK_CHUNK)));
-    }
-    index.push({ ...d, cards: undefined, chunks });
-  }
-  await AsyncStorage.setItem(deckIndexKey(accountId), JSON.stringify(index));
-  // Rows of a deck that was removed or shrank.
-  const prefix = `rb.deck.${accountId}.`;
-  const all = await AsyncStorage.getAllKeys();
-  const stale = all.filter((k) => k.startsWith(prefix) && !keep.has(k));
-  if (stale.length) await AsyncStorage.multiRemove(stale);
-}
-
-/* ------------------------------------------------------------------ state */
-
-/* -> { state, bad }: `bad` is the raw row when it could not be read, and the
-   state is then the defaults — to show, not to save. A missing row is simply a
-   new profile (`bad` null). */
-export async function loadState(accountId) {
+/* -> { state, bad }, or null when there is no row. `bad` is the raw row when
+   it could not be read, and the state is then the defaults — to show, not to
+   save. */
+async function loadBlob(accountId) {
   let raw = null;
   try {
     raw = await AsyncStorage.getItem(stateKey(accountId));
   } catch (e) {
     return { state: { ...DEFAULTS }, bad: `(unreadable: ${e && e.message})` };
   }
-  if (!raw) return { state: { ...DEFAULTS }, bad: null };
+  if (!raw) return null;
   let parsed;
   try {
     parsed = JSON.parse(raw);
@@ -163,55 +164,129 @@ export async function loadState(accountId) {
   return { state, bad: null };
 }
 
+/* ------------------------------------------------------------------ state */
+
+/* -> { state, bad, recovered }.
+ *
+ * The database first. Failing that, the JSON row: read through the same
+ * migrations as ever, written into the database in one transaction with a
+ * stamp saying so, and left untouched. Failing that, a new profile.
+ *
+ * `bad` is the raw row when a row could not be read (the state is then the
+ * defaults, to show and never save — session.js). `recovered` is a note when
+ * the database file could not be opened and was set aside (db.js): the older
+ * row then stands in, and the learner is told what happened rather than
+ * shown a fresh start with no word. */
+export async function loadState(accountId) {
+  let repo;
+  try {
+    repo = await repoFor(accountId);
+  } catch (e) {
+    return { state: { ...DEFAULTS }, bad: `(database: ${e && e.message})`, recovered: null };
+  }
+  let rows;
+  try {
+    rows = await repo.load();
+  } catch (e) {
+    return { state: { ...DEFAULTS }, bad: `(database: ${e && e.message})`, recovered: null };
+  }
+  if (rows) {
+    cur.saved = merge(rows);
+    return { state: normalise(cur.saved), bad: null, recovered: cur.recovered };
+  }
+  const legacy = await loadBlob(accountId);
+  if (legacy && legacy.bad) return { ...legacy, recovered: null };
+  if (legacy) {
+    try {
+      await repo.replace(legacy.state, []);
+      const c = await repo.counts();
+      const stamp = { at: Date.now(), cards: c.cards, decks: c.decks, deckCards: c.deckCards };
+      await repo.setMeta("migrated", JSON.stringify(stamp));
+      cur.saved = legacy.state;
+      console.log(`[store] ${accountId}: moved into the database — ${c.cards} cards, ${c.decks} decks (${c.deckCards} cards); the row is kept`);
+    } catch (e) {
+      // The row is intact and the state is on screen; the next save writes all of it.
+      cur.saved = null;
+      writeListeners.forEach((fn) => fn(e));
+    }
+    return { state: legacy.state, bad: null, recovered: cur.recovered };
+  }
+  cur.saved = null;
+  if (cur.recovered) {
+    // A database set aside and no older row to stand in: this is the fresh start.
+    return { state: { ...DEFAULTS }, bad: `(database set aside: ${cur.recovered})`, recovered: null };
+  }
+  return { state: { ...DEFAULTS }, bad: null, recovered: null };
+}
+
 /* Keep the unreadable row where a person can find it, out of the way of the
    next save. */
 export async function setAside(accountId, raw) {
   try { await AsyncStorage.setItem(badKey(accountId), String(raw)); } catch (e) {}
 }
 
-/* Writes are coalesced: grading a card touches state several times in a frame, and
-   AsyncStorage is a real round trip. Decks are written only when the array
-   changed — they are the bulk, and they change on an import. */
-let pending = null, timer = null;
-let lastDecks = null;
+/* Writes are coalesced: grading a card touches state several times in a frame,
+   and a write is a real round trip. They are also serialised — a flush on the
+   way to the background must not start a transaction while the timer's write
+   is still inside one. Review rows queue beside the state and ride with the
+   next write; a write that fails keeps them for the one after. */
+let pending = null, timer = null, pendingLog = [];
+let chain = Promise.resolve();
 const writeListeners = new Set();
 export function onWriteError(fn) { writeListeners.add(fn); return () => writeListeners.delete(fn); }
 
 async function write(job) {
-  const { decks, ...rest } = job.state;
+  const rows = pendingLog;
+  pendingLog = [];
   try {
-    await AsyncStorage.setItem(stateKey(job.accountId), JSON.stringify(rest));
-    if (decks !== lastDecks) {
-      await saveDecks(job.accountId, decks);
-      lastDecks = decks;
-    }
+    const repo = await repoFor(job.accountId);
+    const d = diff(cur.saved, job.state);
+    if (isEmpty(d) && !rows.length) return;
+    await repo.apply(d, rows);
+    cur.saved = job.state;
   } catch (e) {
+    pendingLog = rows.concat(pendingLog);
     writeListeners.forEach((fn) => fn(e));
   }
 }
 
-export function saveState(accountId, state) {
+function enqueue(job) {
+  chain = chain.then(() => write(job));
+  return chain;
+}
+
+export function saveState(accountId, state, log) {
+  if (log && log.length) pendingLog = pendingLog.concat(log);
   pending = { accountId, state };
   if (timer) return;
-  timer = setTimeout(async () => {
+  timer = setTimeout(() => {
     const job = pending;
     timer = null;
     pending = null;
-    await write(job);
+    enqueue(job);
   }, 250);
 }
 
 export async function flushState() {
-  if (!pending) return;
-  const job = pending;
+  if (pending) {
+    const job = pending;
+    clearTimeout(timer);
+    timer = null;
+    pending = null;
+    enqueue(job);
+  }
+  await chain;
+}
+
+/* For the test setup only: forget the open profile and anything waiting, so
+   one test's store cannot leak into the next. */
+export function resetStore() {
   clearTimeout(timer);
   timer = null;
   pending = null;
-  await write(job);
+  pendingLog = [];
+  cur = { id: null, repo: null, saved: null, recovered: null };
 }
-
-/* A profile switch must not carry the last profile's deck reference over. */
-export function forgetDecks() { lastDecks = null; }
 
 export function touchStreak(state) {
   const t = today();

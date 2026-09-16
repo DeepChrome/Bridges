@@ -105,7 +105,7 @@ describe("the audio cache", () => {
     expect(screen.getByText(/nothing saved yet/)).toBeTruthy();
     await act(async () => { fireEvent(screen.getByTestId("offline-switch"), "valueChange", true); });
     await flushState();
-    expect(JSON.parse(await AsyncStorage.getItem("rb.state.p1")).offline).toBe(true);
+    expect((await global.__db.saved("p1")).offline).toBe(true);
   });
 });
 

@@ -125,7 +125,7 @@ describe("finishing the vocabulary of a lesson", () => {
     }
     // Whether or not the walk reached the end, XP must never have gone down.
     await flushState();
-    const st = JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+    const st = (await global.__db.saved("p1"));
     expect(st.xp === 0 || st.xp === VOCAB_XP).toBe(true);
   });
 

@@ -14,12 +14,14 @@
 import * as Picker from "expo-document-picker";
 import * as Sharing from "expo-sharing";
 import { File, Paths } from "expo-file-system";
-import { normalise } from "./store";
+import { normalise, readLog } from "./store";
+import { validLog } from "@core/repo";
 
 const defaultDeps = {
   pick: () => Picker.getDocumentAsync({ copyToCacheDirectory: true, multiple: false,
                                         type: ["application/json", "text/*", "*/*"] }),
   readText: async (uri) => new File(uri).text(),
+  readLog: () => readLog(),
   writeShare: async (name, text) => {
     const file = new File(Paths.cache, name);
     if (file.exists) file.delete();
@@ -32,10 +34,12 @@ const defaultDeps = {
 export const BACKUP_KIND = "bridges-profile";
 
 /* What goes in the file: the state as saved, with a header naming the app and
-   the profile so a restore can tell it from any other JSON. */
-export function backupText(state, account, now = Date.now()) {
+   the profile so a restore can tell it from any other JSON, and the review
+   log since 2026-09-15 — the one record a card cannot give back. A file from
+   before then has no `log` and restores with an empty one. */
+export function backupText(state, account, now = Date.now(), log = []) {
   return JSON.stringify({ kind: BACKUP_KIND, made: now,
-                          name: account ? account.name : "", state }, null, 1);
+                          name: account ? account.name : "", state, log }, null, 1);
 }
 
 export async function backupProfile(state, account, deps = {}) {
@@ -43,11 +47,12 @@ export async function backupProfile(state, account, deps = {}) {
   const stamp = new Date().toISOString().slice(0, 10);
   const who = (account && account.name ? account.name : "profile").replace(/[^\wЀ-ӿ -]+/g, "").trim();
   const file = `bridges-${who}-${stamp}.json`;
-  await d.writeShare(file, backupText(state, account));
-  return { file };
+  const log = await d.readLog();
+  await d.writeShare(file, backupText(state, account, Date.now(), log));
+  return { file, log: log.length };
 }
 
-/* -> { state } or { cancelled: true } or { error } */
+/* -> { state, log } or { cancelled: true } or { error } */
 export async function restoreProfile(deps = {}) {
   const d = { ...defaultDeps, ...deps };
   let res;
@@ -62,5 +67,5 @@ export async function restoreProfile(deps = {}) {
   if (!state || typeof state !== "object" || !("seen" in state)) {
     return { error: "This is not a Bridges backup." };
   }
-  return { state: normalise(state), made: raw.made, name: raw.name };
+  return { state: normalise(state), log: validLog(raw.log), made: raw.made, name: raw.name };
 }

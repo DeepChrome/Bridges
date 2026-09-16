@@ -64,7 +64,7 @@ async function withTalk(state) {
   await AsyncStorage.setItem("rb.state.p1", JSON.stringify({ ...base, ...state }));
   return await render(<SessionProvider><Talk navigation={nav} /></SessionProvider>);
 }
-async function saved() { await flushState(); return JSON.parse(await AsyncStorage.getItem("rb.state.p1")); }
+async function saved() { await flushState(); return (await global.__db.saved("p1")); }
 
 beforeEach(async () => {
   await flushState(); await AsyncStorage.clear(); jest.clearAllMocks(); global.__stt.reset();

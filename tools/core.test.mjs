@@ -13,8 +13,10 @@ import { dirname, join } from "node:path";
 
 import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN }
   from "../core/util.js";
-import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
+import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade, reviewRow, reviewRows }
   from "../core/fsrs.js";
+import { split, merge, diff, isEmpty, memoryRepo, validLog, cardRow, rowCard, SETTING_KEYS }
+  from "../core/repo.js";
 import { SCENARIOS } from "../core/scenarios.js";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP,
@@ -270,6 +272,102 @@ group("state schema");
   ok(recordAttempt(budgeted, { ts: 1, tags: [] }).talk.sessions === 2
      && tagAttempt(recordAttempt(budgeted, { ts: 1, tags: [] }), 1, ["CASE"]).talk.day === 7,
      "an attempt recorded mid-conversation keeps the day's talk budget");
+}
+
+/* --------------------------------------------------------------- rows */
+/* The state as the database holds it (core/repo.js): the split into tables,
+   what one save writes, the row a review leaves, and the in-memory store that
+   every native suite runs on. The real SQL is native/__tests__/sqlite.test.js. */
+
+group("the state as rows");
+{
+  const canon = (x) => (Array.isArray(x) ? x.map(canon)
+    : x && typeof x === "object" ? Object.fromEntries(Object.keys(x).sort().map((k) => [k, canon(x[k])])) : x);
+  const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
+
+  const st = {
+    v: 7, dev: true, theme: "auto", talkLevel: null, xp: 42, streak: 3, sets: [], pinned: ["дом"],
+    trouble: { стол: 2 }, unit: { core1: { lessons: { 0: { v: true, q: 90 } } } }, speech: speechDefault(),
+    watched: {}, mined: {},
+    seen: { книга: { s: 5, d: 4.2, due: 20710, last: 20700, reps: 2, lapses: 0 },
+            нет: { s: 1, d: 5, due: 3, reps: 1, lapses: 0 } },
+    decks: [{ id: "k1", name: "D", cards: [{ ru: "да", en: "yes" }] }],
+    later: { unknown: true },      // a key this build has never heard of
+    gone: undefined,
+  };
+  const { gone, ...expected } = st;
+
+  ok(SETTING_KEYS.length === 12 && !SETTING_KEYS.includes("decks") && !SETTING_KEYS.includes("seen"),
+     "the settings are the twelve keys a reset keeps; decks and cards are tables");
+  const rows = split(st);
+  ok(Object.keys(rows.cards).length === 2 && rows.decks.length === 1
+     && Object.keys(rows.settings).sort().join() === "dev,talkLevel,theme"
+     && rows.progress.later.unknown === true && !("gone" in rows.progress) && !("seen" in rows.progress),
+     "split: cards, decks, settings and progress; an unknown key kept, undefined dropped");
+  ok(same(merge(rows), expected), "merge is split's inverse");
+  ok(cardRow("нет", st.seen["нет"]).last === null && !("last" in rowCard(cardRow("нет", st.seen["нет"]))),
+     "a card without `last` is a null column and comes back without the field");
+
+  ok(isEmpty(diff(st, st)), "an unchanged state writes nothing");
+  const full = diff(null, st);
+  ok(full.cards.put.length === 2 && full.decks.put.length === 1
+     && Object.keys(full.progress.put).length === Object.keys(rows.progress).length
+     && Object.keys(full.settings.put).length === 3, "from nothing, all of it");
+  const now = 20705, at = 1e12;
+  const r = applyGrade(st.seen, st.trouble, "книга", 3, now);
+  const next = Object.assign({}, st, { seen: r.seen, trouble: r.trouble, xp: 43 });
+  const d = diff(st, next);
+  ok(d.cards.put.length === 1 && d.cards.put[0].word === "книга" && d.cards.del.length === 0
+     && d.decks === null && Object.keys(d.progress.put).join() === "xp" && Object.keys(d.settings.put).length === 0,
+     "one grade: one card row and the xp key, nothing else", JSON.stringify(d));
+  const rebuilt = Object.assign({}, st, { seen: Object.assign({}, st.seen), unit: JSON.parse(JSON.stringify(st.unit)) });
+  ok(isEmpty(diff(st, rebuilt)), "new objects with the same content write nothing");
+  const fewer = Object.assign({}, next, { seen: { книга: next.seen["книга"] }, decks: [] });
+  const d2 = diff(next, fewer);
+  ok(d2.cards.del.join() === "нет" && d2.decks && d2.decks.del.join() === "k1" && d2.decks.put.length === 0,
+     "what went is deleted: a card, a deck");
+  const d3 = diff(st, Object.assign({}, st, { decks: st.decks.concat([{ id: "k2", name: "E", cards: [] }]) }));
+  ok(d3.decks.put.length === 1 && d3.decks.put[0].id === "k2" && d3.decks.put[0].ord === 1 && d3.decks.del.length === 0,
+     "a deck added is the only deck written");
+  ok(diff(st, expected).progress.del.length === 0 && diff(st, Object.assign({}, expected, { later: undefined })).progress.del.join() === "later",
+     "a key removed is deleted; one that was never there is not");
+
+  const one = reviewRow(st.seen["книга"], "книга", 3, now, at, "study");
+  ok(one.s === 5 && one.d === 4.2 && one.due === 20710 && one.last === 20700 && one.reps === 2 && one.lapses === 0
+     && one.elapsed === 5 && one.grade === 3 && one.day === now && one.at === at && one.source === "study",
+     "a review row is the card before the grade, the grade, and when");
+  const first = reviewRow(undefined, "новый", 1, now, at, null);
+  ok(first.s === null && first.elapsed === null && first.reps === 0 && first.source === null,
+     "a first review has no memory to record");
+  const two = reviewRows(st.seen, [{ word: "книга", grade: 1 }, { word: "книга", grade: 3 }], now, at, "run");
+  ok(two.length === 2 && two[0].at === at && two[1].at === at + 1 && two[1].reps === 3 && two[1].lapses === 1 && two[1].s < 5,
+     "a word graded twice in one batch: the second row stands on the first's card, one millisecond on");
+  ok(reviewRow(st.seen["книга"], "книга", 9, now, at).grade === 4 && reviewRow(st.seen["книга"], "книга", 0, now, at).grade === 1,
+     "grades are clamped as applyGrade clamps them");
+  ok(validLog([{ word: "да", grade: 3, day: 1, at: 5 }, { word: "", grade: 3, day: 1, at: 6 },
+               { word: "x", grade: 2.5, day: 1, at: 7 }, { word: "y", grade: 5, day: 1, at: 8 },
+               null, "no", { word: "z", grade: 4, day: 1 }]).length === 1
+     && validLog(null).length === 0 && validLog("x").length === 0,
+     "validLog keeps only rows with the fields a review cannot lack");
+
+  const repo = memoryRepo();
+  ok((await repo.load()) === null, "an empty store loads null");
+  await repo.replace(st, [one]);
+  ok(same(merge(await repo.load()), expected), "replace then load is the state");
+  const c = await repo.counts();
+  ok(c.cards === 2 && c.decks === 1 && c.deckCards === 1 && c.log === 1 && c.settings === 3, "and the counts say so", JSON.stringify(c));
+  await repo.apply(d, [one, Object.assign({}, one, { at: at + 1 })]);
+  const after = merge(await repo.load());
+  ok((await repo.counts()).log === 2 && after.seen["книга"].reps === 3 && after.xp === 43,
+     "apply writes the diff and ignores a log row it already has");
+  ok((await repo.readLog({ since: at + 1 })).length === 1 && (await repo.readLog({ limit: 1 }))[0].at === at,
+     "readLog from a moment on, and capped");
+  ok((await repo.getMeta("x")) === null, "a note never made is null");
+  await repo.setMeta("x", 1);
+  ok((await repo.getMeta("x")) === "1", "a note is text");
+  const loaded = await repo.load();
+  loaded.progress.unit.core1 = "changed";
+  ok((await repo.load()).progress.unit.core1 !== "changed", "what load returns is the caller's to change");
 }
 
 /* ------------------------------------------------------------ compare */

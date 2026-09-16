@@ -34,7 +34,7 @@ import { Alignment } from "../activities/Alignment";
 import { SCENARIOS } from "@core/scenarios";
 import { feedbackTags } from "@core/speech";
 import { recordAttempt, talkAllowance, startTalkSession, TALK_TURNS } from "@core/state";
-import { applyGrade } from "@core/fsrs";
+import { applyGrade, reviewRows } from "@core/fsrs";
 import { fold, today, firstSense } from "@core/util";
 
 /* What a failed turn says. The reasons that will not fix themselves are named
@@ -352,6 +352,8 @@ export default function Talk({ navigation, route }) {
       status: w.status === "ins" ? "ins" : w.status }));
     const grades = gradeTurn(words);
     const tags = feedbackTags(feedback);
+    const rows = reviewRows(st.seen, grades.map((g) => ({ word: L[g.i].b, grade: g.grade })),
+                            day, Date.now(), "talk");
     update((prev) => {
       let next = prev;
       for (const g of grades) {
@@ -367,7 +369,7 @@ export default function Talk({ navigation, route }) {
           tags, grade: feedback.overall === "ok" ? 3 : 1,
         }),
       };
-    });
+    }, rows);
     setTurns((prev) => prev.map((x) => (x.pending
       ? { ...x, pending: false, alignment: alignment.length ? alignment : null, feedback }
       : x)));

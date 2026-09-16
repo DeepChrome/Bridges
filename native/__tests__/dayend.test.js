@@ -78,6 +78,10 @@ describe("what Learn shows", () => {
     open.unmount();
 
     await flushState();
+    // A second profile row for the same id is not read once the database has
+    // the first (store.test.js: the database wins over the row), so the
+    // platform is cleared between the two, as beforeEach does.
+    await AsyncStorage.clear();
     await withProfile({ seen: { дом: { last: today(), due: today() + 3 } } });
     expect(await screen.findByTestId("day-done")).toBeTruthy();
     expect(flat(screen.getByTestId("streak").props.style).color).not.toBe(openStreak);

@@ -59,7 +59,7 @@ describe("mining a word from a video", () => {
     await act(async () => { fireEvent.press(await screen.findByTestId("mine")); });
 
     await flushState();
-    const saved = JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+    const saved = (await global.__db.saved("p1"));
     expect(saved.pinned).toContain(word);
     expect(saved.mined[word]).toMatchObject({ v: unitVideo.id });
     expect(saved.mined[word].t).toBe(unit.v.heard[word][0].t);
@@ -96,7 +96,7 @@ describe("mining a word from a video", () => {
     await act(async () => { fireEvent.press(screen.getByTestId(`heard-${word}`)); });
     await act(async () => { fireEvent.press(await screen.findByTestId("mine")); });
     await flushState();
-    const saved = JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+    const saved = (await global.__db.saved("p1"));
     expect(saved.seen[word]).toEqual(card);
     expect(saved.mined[word]).toBeTruthy();
   });

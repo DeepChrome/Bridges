@@ -7,6 +7,42 @@
 jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock"));
 
+/* The database: one in-memory store per profile — the repository contract
+   (core/repo.js) without SQLite, which sqlite.test.js covers on Node's own
+   engine. `global.__db.saved(id)` reads a profile back the way the next boot
+   would see it; `global.__db.log(id)` is its review log. */
+jest.mock("./src/db", () => {
+  const { memoryRepo, merge } = require("@core/repo");
+  const repos = new Map();
+  const repoOf = (id) => {
+    if (!repos.has(id)) repos.set(id, memoryRepo());
+    return repos.get(id);
+  };
+  global.__db = {
+    repos,
+    saved: async (id) => {
+      const rows = await repoOf(id).load();
+      return rows ? merge(rows) : null;
+    },
+    log: async (id) => repoOf(id).readLog(),
+  };
+  return { openRepo: async (id) => ({ repo: repoOf(id), recovered: null }) };
+});
+
+/* Clearing the platform clears all of it: the suites start a test with
+   `AsyncStorage.clear()`, and the database and the store's memory of what it
+   last wrote have to go with the rows or one test's profile leaks into the
+   next. */
+{
+  const AS = require("@react-native-async-storage/async-storage");
+  const clear = AS.clear;
+  AS.clear = jest.fn(async (...args) => {
+    global.__db.repos.clear();
+    require("./src/store").resetStore();
+    return clear(...args);
+  });
+}
+
 /* Playback is asserted by what it was asked to play, not by any sound. Recorded on
    globals rather than exports: an `export` here would make this file an ES module,
    which changes how Babel hoists the jest.mock calls above it. */

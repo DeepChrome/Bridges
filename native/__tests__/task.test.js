@@ -96,7 +96,7 @@ describe("the chapter task", () => {
     await act(async () => { fireEvent.press(screen.getByTestId("task-send")); });
     await waitFor(() => expect(screen.getByText("Not there yet")).toBeTruthy());
     await flushState();
-    const st = JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+    const st = (await global.__db.saved("p1"));
     expect((st.tasks || {})["1"]).toBeUndefined();
   });
 

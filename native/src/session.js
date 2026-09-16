@@ -15,7 +15,7 @@ import React, { createContext, useContext, useEffect, useMemo, useRef, useState 
 import { AppState } from "react-native";
 import {
   DEFAULTS, loadAccounts, saveAccounts, loadState, saveState, flushState, setAside,
-  onWriteError, forgetDecks, newId, touchStreak,
+  onWriteError, newId, touchStreak,
 } from "./store";
 
 const Ctx = createContext(null);
@@ -26,6 +26,7 @@ export const ERRORS = {
   unreadable: "Your saved progress could not be read. It has been kept aside; "
     + "this is a fresh start unless you restore a backup.",
   write: "Progress could not be saved. Check the phone's storage.",
+  recovered: "Progress was restored from an older copy.",
 };
 
 export function SessionProvider({ children }) {
@@ -34,14 +35,19 @@ export function SessionProvider({ children }) {
   const [accounts, setAccounts] = useState({ list: [], active: null });
   const [st, setSt] = useState(DEFAULTS);
   const dirty = useRef(false);
+  /* Review rows waiting for the next save. They are handed in beside an
+     update rather than produced inside it: an updater may run twice, and a
+     row pushed from inside one would be a review logged twice. */
+  const log = useRef([]);
 
   const adopt = async (id) => {
-    const { state, bad } = await loadState(id);
+    const { state, bad, recovered } = await loadState(id);
     if (bad) {
       await setAside(id, bad);
       setError({ kind: "unreadable", text: ERRORS.unreadable });
       return state;                                  // shown, not saved
     }
+    if (recovered) setError({ kind: "recovered", text: ERRORS.recovered });
     const touched = touchStreak(state);
     // The streak advanced: that is a change worth writing.
     if (touched !== state) { dirty.current = true; }
@@ -78,7 +84,9 @@ export function SessionProvider({ children }) {
 
   useEffect(() => {
     if (!ready || !accounts.active || !dirty.current) return;
-    saveState(accounts.active, st);
+    const rows = log.current;
+    log.current = [];
+    saveState(accounts.active, st, rows);
   }, [st, ready, accounts.active]);
 
   const value = useMemo(() => ({
@@ -88,8 +96,11 @@ export function SessionProvider({ children }) {
     account: accounts.list.find((a) => a.id === accounts.active) || null,
     st,
 
-    update(fn) {
+    /* `rows` are the review-log rows this change earns (core/fsrs.js
+       reviewRows), built by the caller from the state it graded. */
+    update(fn, rows) {
       dirty.current = true;
+      if (rows && rows.length) log.current.push(...rows);
       // The learner has acted on what is shown; from here on it is saved.
       setError((e) => (e && e.kind === "unreadable" ? null : e));
       setSt((prev) => fn(prev));
@@ -111,7 +122,6 @@ export function SessionProvider({ children }) {
       const acc = { list: accounts.list.concat(a), active: a.id };
       setAccounts(acc);
       await saveAccounts(acc);
-      forgetDecks();
       const fresh = touchStreak({ ...DEFAULTS });
       dirty.current = true;
       setSt(fresh);
@@ -124,15 +134,16 @@ export function SessionProvider({ children }) {
       const acc = { ...accounts, active: id };
       setAccounts(acc);
       await saveAccounts(acc);
-      forgetDecks();
       dirty.current = false;
       const loaded = await adopt(id);
       setSt(loaded);
     },
 
-    /* Replace the whole state — a restored backup. Saved at once. */
-    restore(state) {
+    /* Replace the whole state — a restored backup — with the review log it
+       carried, if any. Saved at once. */
+    restore(state, rows) {
       dirty.current = true;
+      if (rows && rows.length) log.current.push(...rows);
       setError(null);
       setSt(touchStreak(state));
     },

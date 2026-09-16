@@ -69,7 +69,7 @@ async function withSay() {
 
 async function saved() {
   await flushState();
-  return JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+  return (await global.__db.saved("p1"));
 }
 
 /* Hold, let the permission resolve, release. */

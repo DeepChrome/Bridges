@@ -178,7 +178,7 @@ function Settings({ visible, onClose, onLab, onTour }) {
                      Alert.alert("Restore this backup?",
                        `${res.name ? res.name + ", " : ""}${words} words with a schedule. It replaces this profile's progress.`,
                        [{ text: "Cancel", style: "cancel" },
-                        { text: "Restore", style: "destructive", onPress: () => { restore(res.state); onClose(); } }]);
+                        { text: "Restore", style: "destructive", onPress: () => { restore(res.state, res.log); onClose(); } }]);
                    }} />
             </View>
             <Btn label="Switch profile" style={{ marginTop: 8 }}
@@ -193,10 +193,13 @@ function Settings({ visible, onClose, onLab, onTour }) {
                  { text: "Erase", style: "destructive",
                    // Everything that is progress goes — the schedule, the
                    // lessons, the speaking record, what was watched — and
-                   // only settings and imported decks stay.
+                   // only settings and imported decks stay. The review log
+                   // stays too: it is a record of what happened, not a
+                   // score, and it is what the scheduler learns from.
                    onPress: () => update((p) => ({
                      ...DEFAULTS,
                      ...Object.fromEntries(SETTING_KEYS.map((k) => [k, p[k]])),
+                     decks: p.decks || [],
                      speech: speechDefault(),
                    })) }])}
             />

@@ -81,7 +81,7 @@ describe("a quiz, end to end", () => {
       expect(screen.getByText("4 of 4 right")).toBeTruthy();
 
       await flushState();
-      const saved = JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+      const saved = (await global.__db.saved("p1"));
       expect(saved.unit[unit.id].lessons[0]).toMatchObject({ v: true, q: 100, tries: 1 });
       expect(lessonDone(saved, unit, 0)).toBe(true);
       expect(nextStep(saved)).toMatchObject({ index: 1, step: "vocab" });

@@ -396,6 +396,7 @@ bridges/                          (directory is still named russian-blocks on di
     util.js            <- fold, translit, tokens — the join key for everything
     fsrs.js            <- FSRS-4.5, gradeFor, applyGrade
     state.js           <- learner-state schema, migrations, recordAttempt
+    repo.js            <- the state as rows: split, diff, the in-memory store (§30v)
     questions.js       <- question generation for lessons, tests and drills
     search.js          <- both dictionary tiers, one ranking
     entry.js paradigm.js forms.js   <- entry hydration, paradigm rebuild, form names
@@ -410,6 +411,7 @@ bridges/                          (directory is still named russian-blocks on di
     src/lib/feedback.js<- client for the Worker (§30d)
     src/anki.js        <- .apkg in and out: zip, zstd, SQLite in memory (§30h)
     src/keyboard.js    <- the on-screen Russian keyboard (§30h)
+    src/store.js sqlite.js db.js <- the profile database, and the JSON row it replaced (§30v)
     __tests__/         <- jest; path.test.js and registry.test.js are the patterns
     eas.json app.json  <- build profiles; Android package and mic permission
   backend/             <- the feedback Worker (§30d): src/, test/, eval/, wrangler.toml
@@ -543,6 +545,12 @@ Each of these cost real time. Do not relearn them.
   distractors. **After touching `core/`, delete
   `native/android/app/build/generated/assets/react/release` before assembling**,
   or check the build took long enough to have run Metro.
+- **`gradlew.bat` through `cmd /c` is "not recognized" from a PowerShell
+  `cd`.** `Set-Location` moves PowerShell's location and not reliably the
+  process's, so a batch file named bare was not found twice running
+  (2026-09-15). Call it by its full path and pass the project with `-p
+  C:\…\native\android`; the log goes to a file, since PowerShell wraps a
+  native command's stderr.
 - **A paused `expo-audio` player still holds the Android audio session.** It is
   not enough to `pause()` on the way out; the player has to be `remove()`d.
   `stop()` only paused, so after any lesson that played a recording the app kept
@@ -1375,14 +1383,15 @@ Phase 9) and the rules they left behind. The A37 log entry carries the numbers.
   using a word taught later or never — read the build output after touching
   a card. Hear from chapter 1 lesson 3; `pickPrompt` draws from the easiest
   half of what fits.
-- **A session cannot lose the month.** The profile row `rb.state.<id>` carries
-  no decks; decks live in `rb.decks.<id>` + `rb.deck.<id>.<deckId>.<n>` chunks
-  (`DECK_CHUNK`); an unreadable row is set aside as `rb.state.<id>.bad-<ts>`,
-  the boot shows `StateBanner`, and nothing is written until the learner
-  chooses; saves run from an effect only when dirty and flush on background;
-  backup and restore through the share sheet (`backup.js`). A stream that
-  fails falls back to the device voice, then says so; the recogniser has an
-  8 s watchdog; a queued autoplay never fires after the runner is gone.
+- **A session cannot lose the month.** An unreadable save is set aside as
+  `rb.state.<id>.bad-<ts>`, the boot shows `StateBanner`, and nothing is
+  written until the learner chooses; saves run from an effect only when dirty
+  and flush on background; backup and restore through the share sheet
+  (`backup.js`). *(The row itself, and the chunked deck rows beside it, are
+  read-only since Phase 1 — the state lives in a database now, §30v.)* A
+  stream that fails falls back to the device voice, then says so; the
+  recogniser has an 8 s watchdog; a queued autoplay never fires after the
+  runner is gone.
 - **Boot reads nothing it does not need** (P9.24): every studied row carries
   its compressed paradigm record (the 21 glossless rows an empty one), `t`
   and `x` are memoised getters built on first read, and the payload is split
@@ -2229,6 +2238,88 @@ Traps met on the way, each now a test or a line in a flow file:
   measure it (ROADMAP 13.15); **`debug.keystore` is backed up nowhere**
   (13.16). Both found by reading the walkthrough, neither fixed in Phase 0 —
   the playbook's phases are the point.
+
+## 30v. Phase 1 — the database (2026-09-15 → 16)
+
+The playbook's first phase moves the learner's state off one JSON row and into
+SQLite, for one reason that mattered and two that were already true. The one
+that mattered: **there was no review log.** A grade overwrote the card, so what
+the learner had remembered up to that moment and what they then said — which is
+exactly what the FSRS optimiser fits its weights to — was gone as it happened.
+"Fast reads" and "a schema for sync" were the other two: reads were already
+under a millisecond because every screen reads memory, and that has not changed.
+
+- **Memory is still the working copy.** `st` in `session.js` is what screens
+  read, synchronously; the database is what it is written *to*. The playbook's
+  repository interface is the save-and-load boundary, not the read path —
+  making every screen `await` a query would be the broad rewrite §13 warns
+  against, for nothing anyone could measure.
+- **The pieces.** `core/repo.js`: the state as five kinds of row (`split` /
+  `merge`), what one save writes (`diff` — one grade is one card row and the
+  keys that changed), the review-row guard (`logRow`), and `memoryRepo`, the
+  contract in memory. `native/src/sqlite.js`: the same contract on
+  expo-sqlite — one file per profile, WAL, `cards`, `review_log`, `decks`,
+  `progress`, `settings`, `meta`; every write one transaction.
+  `native/src/db.js`: the only place a file is opened, and where one that will
+  not open is moved aside, never deleted. `store.js`: the diffed, debounced,
+  **serialised** save — a flush on the way to the background must not open a
+  transaction inside the timer's — with the JSON row as a read-only source.
+  `reviewRow`/`reviewRows` in `core/fsrs.js` build the row *before* the grade,
+  from the same card; `session.update(fn, rows)` carries them.
+- **The row is read once, written never, deleted not yet.** The first boot on
+  this build reads `rb.state.<id>` through the same migrations as ever, writes
+  it into the database in one transaction, stamps `meta.migrated` with the
+  counts, and leaves the row byte for byte as it was — the copy that survives a
+  wrong migration (rule 20.4). ROADMAP 13.20 says when it goes. The database
+  wins from then on, so a test that seeds the same profile id twice must
+  `AsyncStorage.clear()` between (the day-end test learnt this).
+- **Log rows are built outside the updater.** React may run an updater twice,
+  and a row pushed from inside one is a review logged twice. So the three
+  grade sites (`Run.js`, `Talk.js`, `Study.js`) build the rows from the state
+  they hold and hand them in beside the update; the store queues them and they
+  ride in the same transaction as the card. `source` is the question kind on
+  the runner, `study` or `talk` elsewhere.
+- **What a row records** is the card as it was, the grade, the day, the clock,
+  the days elapsed and the source. Nothing FSRS-4.5 has no value for is
+  invented — a learning state, the interval scheduled — the scheduler that
+  fills them adds the columns, gated on `PRAGMA user_version` in one place.
+  `direction` is on every card row at one value, `both`, so Phase 2 can split
+  a word's memory without a schema step (13.21). **A reset keeps the log**: it
+  is a record of what happened, not a score, and it is what the scheduler
+  learns from — Anki's own default.
+- **Backups carry the log** (`log` in the file; an older file restores with
+  none), and a restore merges rows on `(word, direction, at)`, so restoring
+  twice adds nothing twice. Nothing else in the file changed: the frozen web
+  app and every old backup still read.
+- **The tests run the real SQL.** `sqlite.test.js` drives `sqliteRepo` on
+  Node's own `node:sqlite` (in Node since 22.5; no package) behind the slice of
+  expo-sqlite's async API the adapter uses. Every other suite runs on
+  `memoryRepo` through the `./src/db` mock in `jest.setup.js`, and
+  `AsyncStorage.clear()` clears the store along with the rows. The fourteen
+  suites that read a profile back out of its row read `global.__db.saved(id)`.
+  The in-memory store keeps values as JSON text exactly as SQLite does, so a
+  store that "worked" by sharing an object with its caller cannot exist.
+- **Measured at the gate**, on the emulator: the Gate 0 build's profile with
+  three graded cards; this build installed over it; `[store] …: moved into the
+  database — 3 cards, 0 decks; the row is kept` in logcat; the same 3 XP and
+  3 words on You; a fourth card graded, the app killed and relaunched, and You
+  shows 4 — the row holds 3, so it is the database that answered. Suites: core
+  457, native 359, smoke 159, visual 54, contrast 99, Worker 49, copy cap 0
+  over, scripts 0 errors, walkthrough 25 of 25 from a clean install.
+
+Two traps, both caught by the real-engine test before the emulator saw them,
+and one from the shell:
+
+- **`INSERT OR IGNORE` ignores more than a duplicate key.** It swallows a CHECK
+  and a NOT NULL violation too, so a bad row vanished instead of failing the
+  write, and rows without the counters were silently dropped. `ON CONFLICT (…)
+  DO NOTHING` ignores exactly one thing. The in-memory store refuses the same
+  rows *before* applying anything, so the two fail alike.
+- **The copy cap read SQL as prose.** A `CREATE TABLE` runs over several lines
+  and only its first carries a keyword; the column lines and an `INSERT`'s
+  `VALUES` line scanned as eleven-word sentences. `copy.mjs` now knows the
+  upper-case type words, which never occur in copy.
+- **`gradlew.bat` by its bare name through `cmd /c`** — §23.
 
 ## 31. Verification
 

@@ -115,7 +115,7 @@ describe("the shadowing drill", () => {
     await speak(step.target);
     await screen.findByTestId("verdict");
     await flushState();
-    const st = JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+    const st = (await global.__db.saved("p1"));
     const last = st.speech.attempts[st.speech.attempts.length - 1];
     expect(last.kind).toBe("shadow");
     expect(typeof last.plays).toBe("number");

@@ -12,7 +12,7 @@ import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseL
 import { L, UN, STAGES, unitUnlocked, idxOfWord, sensesOf } from "../data";
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";
-import { fsrsPreview, isTrouble, applyGrade } from "@core/fsrs";
+import { fsrsPreview, isTrouble, applyGrade, reviewRows } from "@core/fsrs";
 import { shuffle, today } from "@core/util";
 
 export function troubleWords(st) {
@@ -308,11 +308,12 @@ export default function Study({ navigation }) {
      so a word could be trouble on the path and not on the cards. */
   const grade = (g) => {
     const word = w.b;
+    const rows = reviewRows(st.seen, [{ word, grade: g }], today(), Date.now(), "study");
     update((prev) => {
       const r = applyGrade(prev.seen, prev.trouble, word, g, today());
       return { ...prev, seen: r.seen, trouble: r.trouble,
                xp: (prev.xp || 0) + (g === 1 ? 0 : 1) };
-    });
+    }, rows);
     if (g === 1) setQueue(queue.concat(queue[at]));
     setAt(at + 1);
     setShown(false);

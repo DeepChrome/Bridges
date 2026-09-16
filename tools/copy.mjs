@@ -72,6 +72,11 @@ const NOT_COPY = [
   /^(https?:|file:|data:|#[0-9A-Fa-f]{3,8}$)/i,
   /^[Mm][\s\d.,-]/,                            // an SVG path
   /\b(select|insert|update|delete|create table)\b/i,
+  // The later lines of a statement that runs on: a column definition inside a
+  // CREATE TABLE, the VALUES of an INSERT. The statement's own keyword is on
+  // an earlier line, and these words are only ever upper case in SQL, never
+  // in copy.
+  /\b(TEXT|INTEGER|REAL|PRIMARY KEY|NOT NULL|VALUES|ON CONFLICT)\b/,
   /[{}<>]|=>|\bimport\b|\brequire\(|: *["'#]|^[a-zA-Z]+: /,
   // A comma-separated list of identifiers — a destructured import spilled over
   // several lines reads as prose to a line-based scanner, and it is not.

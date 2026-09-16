@@ -25,7 +25,7 @@ import { Passage } from "../activities/Passage";
 import { PairHear, PairSay } from "../activities/Pair";
 import { Shadow } from "../activities/Shadow";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
-import { gradeFor, applyGrade } from "@core/fsrs";
+import { gradeFor, applyGrade, reviewRows } from "@core/fsrs";
 import { fold, translit, today, translitBack, firstSense } from "@core/util";
 
 /* One review into state. The grade comes from gradeFor (right or wrong, table used or
@@ -350,7 +350,7 @@ export function useAudioStopOnLeave() {
    is still a review for the scheduler. Off for the placement and section tests,
    which measure rather than teach, and for the one-question vocabulary runner. */
 export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true, navigation }) {
-  const { update } = useSession();
+  const { st, update } = useSession();
   const t = useTheme();
   const [queue, setQueue] = useState(() => steps.slice());
   const [at, setAt] = useState(0);
@@ -444,9 +444,14 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       const entries = words || (typeof q.i === "number" ? [q.i] : []);
       if (entries.length) {
         const g = grade || gradeFor(correct, usedHint);
+        // The log rows are built here, from the cards as they stand, and
+        // handed in beside the update — never from inside it (session.js).
+        const list = entries.map((e) => (typeof e === "number" ? { i: e, grade: g } : { i: e.i, grade: e.grade }))
+          .filter((e) => typeof e.i === "number" && L[e.i]).map((e) => ({ word: L[e.i].b, grade: e.grade }));
+        const rows = reviewRows(st.seen, list, today(), Date.now(), q.kind);
         update((prev) => entries.reduce((acc, e) => (
           typeof e === "number" ? gradeInto(acc, e, g) : gradeInto(acc, e.i, e.grade)
-        ), prev));
+        ), prev), rows);
       }
     }
   };

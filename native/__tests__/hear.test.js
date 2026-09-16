@@ -74,7 +74,7 @@ async function withHear() {
 
 async function saved() {
   await flushState();
-  return JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+  return (await global.__db.saved("p1"));
 }
 
 beforeEach(async () => {

@@ -103,7 +103,7 @@ describe("the screen", () => {
     await act(async () => { fireEvent.press(screen.getByTestId("read-go")); });
     await act(async () => { fireEvent.press(screen.getByTestId(`read-add-${word.b}`)); });
     await flushState();
-    const st = JSON.parse(await AsyncStorage.getItem("rb.state.p1"));
+    const st = (await global.__db.saved("p1"));
     expect(st.pinned).toContain(word.b);
     // Due today, not at some unspecified later point: the same route the video
     // miner uses (P10.4).

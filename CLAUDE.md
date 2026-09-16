@@ -2202,9 +2202,14 @@ says why. Phase 0 was that audit plus four parts; what it found:
   Gradle build stood in, as §31 says it should when the quota is gone, and the
   clean-install walkthrough ran on it. ROADMAP 13.18; and the 295 MB upload
   archive the attempt revealed is 13.19.
-- **The remote needs him.** `gh` is not installed; his key is passphrase-
-  protected and the Windows `ssh-agent` service is disabled, so the passphrase
-  has to be typed once into an agent he starts. Nothing secret is tracked
+- **The remote is `git@github.com:DeepChrome/bridges.git`** (private; pushed
+  2026-09-15). `gh` is not installed and the key is passphrase-protected, so
+  git reaches GitHub through the Windows `ssh-agent` service, which he enabled
+  and loaded the key into; `core.sshCommand` in this repo's `.git/config`
+  points git at `C:/Windows/System32/OpenSSH/ssh.exe`, because PortableGit's
+  own ssh cannot see that agent. The Windows agent keeps its keys across
+  reboots. If a push ever says "Permission denied (publickey)", it is the
+  agent: `ssh-add -l` should list one ED25519 key. Nothing secret is tracked
   (`.env`, `native/.env`, `backend/.dev.vars`, `native/build-out/`,
   `native/android/` are all ignored); the repo is 65 MB.
 

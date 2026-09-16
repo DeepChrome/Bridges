@@ -1892,9 +1892,63 @@ group("drills the learner writes");
        `${type}: a written question carries its answer and offers no options`);
     ok(written.every((q) => /^Write /.test(q.ask)),
        `${type}: and says so`, written.map((q) => q.ask)[0]);
-    // The answer must never be sitting on the screen already.
-    ok(written.every((q) => fold(q.target) !== fold(q.prompt || "")),
-       `${type}: never asks for the word it is showing`);
+  }
+
+  /* The answer must never be sitting on the screen already — and this check
+   * used to sample eight questions a type, so it failed about **one run in
+   * six** and passed the rest. That is the worst kind of test: it reported a
+   * real defect (the imperative of «расти» is «расти», so "write the
+   * imperative for ты" printed its own answer) as noise, and the reflex it
+   * trains is to re-run and move on. It was committed over once, which is how
+   * it got found.
+   *
+   * Two changes make it say the same thing every time: the draw is **seeded**,
+   * and the sample is large enough that a defect at the rate this one ran at
+   * (3 in 3,200) cannot hide in it. */
+  {
+    /* **Aimed, not sampled.** A random draw finds this about once in a
+       thousand questions, which is why the first version of the check failed
+       one run in six and why raising the sample did not fix it — a seeded run
+       of 1,200 per type still walked straight past the defect and passed.
+       `drillQuestions` takes a pool, so the test hands it exactly the verbs
+       that can trigger the trap and every draw is a real attempt at it. */
+    const trapped = DATA.lemmas
+      .map((w, i) => [w, i])
+      .filter(([w]) => w.p === "verb" && (w.t || []).some((t) =>
+        (t.rows || []).some((r) => {
+          const form = Array.isArray(r[1]) ? r[1][0] : r[1];
+          return form && fold(form) === fold(w.w);
+        })));
+    ok(trapped.length > 0,
+       "some verb spells a form exactly like its headword — the guard has something to guard",
+       trapped.slice(0, 4).map(([w]) => w.b).join(", "));
+
+    const pool = trapped.map(([, i]) => i);
+    const bad = [];
+    let drawn = 0;
+    for (let run = 0; run < 40; run++) {
+      for (const q of Q.drillQuestions("conjugation", 8, pool, undefined, true)) {
+        if (!q.typed) continue;
+        drawn++;
+        if (fold(q.target) === fold(q.prompt || "")) bad.push(`${q.prompt} → ${q.target} (${q.ask})`);
+      }
+    }
+    ok(drawn > 50, "the aimed pool really does produce conjugation questions", String(drawn));
+    ok(!bad.length,
+       `conjugation: never asks for the word it is showing (${drawn} drawn from the verbs that can)`,
+       bad.slice(0, 3).join("; "));
+  }
+
+  // And the same invariant across the other three, where nothing has ever
+  // broken it — sampled, because there is no trap to aim at.
+  for (const type of ["cases", "agreement", "aspect"]) {
+    const bad = [];
+    for (let run = 0; run < 25; run++) {
+      for (const q of Q.drillQuestions(type, 8, null, undefined, true)) {
+        if (q.typed && fold(q.target) === fold(q.prompt || "")) bad.push(`${q.prompt} → ${q.target}`);
+      }
+    }
+    ok(!bad.length, `${type}: never asks for the word it is showing`, bad.slice(0, 3).join("; "));
   }
 
   /* Two shapes cannot be written — "which of these is perfective?" and "whose

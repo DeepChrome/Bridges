@@ -1655,7 +1655,20 @@ export function makeQuestions(env) {
     const pick = verbTable();
     if (!pick) return null;
     const { w, t } = pick;
-    const rows = t.rows.filter((r) => r[1] && r[1].length);
+    /* Never ask for the word that is on the screen.
+     *
+     * The imperative of «расти» is «расти», and of «вырасти» «вырасти» — so
+     * "write the imperative for ты" printed the answer above the question and
+     * the learner copied it. 3 of 3,200 typed conjugation questions, which is
+     * why it surfaced as a core check that failed about one run in six rather
+     * than as anything anybody noticed.
+     *
+     * §30r fixed exactly this for the aspect drill (`realPartner` refusing a
+     * partner equal to the verb) and the same trap was left standing here.
+     * Filtering the rows covers both shapes at once: the typed answer, and the
+     * right option in the chosen one. A verb with nothing left to ask returns
+     * null and the caller draws another. */
+    const rows = t.rows.filter((r) => r[1] && r[1].length && fold(r[1][0]) !== fold(w.w));
     if (!rows.length) return null;
     const target = rows[Math.floor(Math.random() * rows.length)];
     const right = target[1][0];
@@ -1674,7 +1687,10 @@ export function makeQuestions(env) {
       if (!o) return null;
       const ot = tableTitled(o, new RegExp("^" + t.title.split(" ")[0]));
       const or = ot && ot.rows.find((r) => r[0] === target[0]);
-      return or && or[1] && or[1].length ? or[1][0] : null;
+      if (!or || !or[1] || !or[1].length) return null;
+      // …nor offer it as a wrong one: an option the learner can rule out by
+      // reading the prompt is a free elimination (§30r).
+      return fold(or[1][0]) === fold(w.w) ? null : or[1][0];
     });
     if (!wrong) return null;
     const what = t.title === "Imperative" ? "imperative"

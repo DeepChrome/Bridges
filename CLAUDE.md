@@ -585,6 +585,22 @@ Each of these cost real time. Do not relearn them.
   teeth: **anything from `motion.js` goes on an `Animated.*` component, always,
   and the plain one goes inside it.** A new screen that animates has to be
   opened on the emulator once; a passing suite says nothing about this.
+- **A sampling test that fails one run in six is reporting a real defect, not
+  noise — and raising the sample does not fix it.** "Never asks for the word it
+  is showing" drew eight questions a drill and failed about a sixth of the
+  time, because the conjugation drill asked for the imperative of «расти»,
+  which *is* «расти», at a rate of 3 in 3,200. The reflex a flaky check trains
+  is to re-run and move on, and that is what happened: it was committed over.
+  Two wrong fixes were tried first and both **passed while the bug was still
+  there** — seeding the draw, then seeding *and* sampling 1,200 a type, which
+  walked straight past a one-in-a-thousand event. What works is to stop
+  sampling and **aim**: `drillQuestions` takes a pool, so the test hands it
+  exactly the verbs whose paradigm repeats their headword and every draw is a
+  real attempt at the trap. Verified the only way worth trusting — it fails
+  against the unfixed generator and names «расти́ → расти́».
+  The generator's own fix is the one §30r already made for the aspect drill
+  (`realPartner` refusing a partner equal to the verb); the same trap was left
+  standing in conjugation for months.
 - **`Get-Content -Raw` misreads UTF-8 without a BOM**, so grepping a built page for
   Cyrillic from PowerShell reports a false negative. Check with `node -e` instead.
 - **…and PowerShell 5.1 misreads a `.ps1` the same way, which stops the script

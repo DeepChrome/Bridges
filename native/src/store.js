@@ -213,6 +213,11 @@ export async function loadState(accountId) {
   }
   if (rows) {
     cur.saved = merge(rows);
+    /* The database answered, so the old row may have had its week (below).
+       Awaited rather than fired off: the common path is one `meta` read that
+       returns early, and a boot that half-finished a tidy-up is a boot that
+       leaves a deck index without its chunks. */
+    await retireBlob(accountId, repo);
     return { state: normalise(cur.saved), bad: null, recovered: cur.recovered };
   }
   const legacy = await loadBlob(accountId);
@@ -238,6 +243,53 @@ export async function loadState(accountId) {
     return { state: { ...DEFAULTS }, bad: `(database set aside: ${cur.recovered})`, recovered: null };
   }
   return { state: { ...DEFAULTS }, bad: null, recovered: null };
+}
+
+/* How long the JSON row is kept after the database takes over (ROADMAP 13.20).
+ *
+ * Phase 1 moved the learner's state into SQLite and **left the row alone** —
+ * rule 20.4: FSRS state is high-integrity data and the copy that survives a
+ * wrong migration is worth more than the bytes it costs. But two copies where
+ * only one is written is a thing that rots: the row is a month out of date
+ * within a month, and a future reader who finds it has to work out which is
+ * real.
+ *
+ * So it retires itself. A week of the database actually answering, on the
+ * learner's own phone, is the evidence that the migration held — and a week is
+ * long enough that a bad migration would have been noticed and restored from a
+ * backup by then (Settings → Back up progress writes a file the row could never
+ * be recovered from anyway).
+ *
+ * Deliberately not a prompt, and deliberately not on the migration itself. */
+export const BLOB_KEEP_MS = 7 * 86400000;
+
+async function retireBlob(accountId, repo) {
+  try {
+    const raw = await repo.getMeta("migrated");
+    if (!raw) return;                      // never migrated: nothing of ours to drop
+    const stamp = JSON.parse(raw);
+    if (!stamp || !stamp.at || Date.now() - stamp.at < BLOB_KEEP_MS) return;
+    /* The database has to be carrying something. A migration that produced an
+       empty database and a week of silence is exactly the case where the row
+       is the only copy left, and dropping it then would be the bug this whole
+       delay exists to avoid.
+       `counts()` rather than the loaded rows: `load()` hands back `cards` as
+       the nested `seen` object, not a list, so `rows.cards.length` is
+       `undefined` and a length check on it silently never fires. It did
+       exactly that until the tests said so. */
+    const c = await repo.counts();
+    if (!c || !c.cards) return;
+    const keys = [stateKey(accountId), deckIndexKey(accountId)];
+    const all = await AsyncStorage.getAllKeys();
+    const chunk = `rb.deck.${accountId}.`;
+    for (const k of all) if (k.startsWith(chunk)) keys.push(k);
+    await AsyncStorage.multiRemove(keys);
+    await repo.setMeta("migrated", JSON.stringify({ ...stamp, retired: Date.now() }));
+    console.log(`[store] ${accountId}: the pre-database row retired after ${Math.round((Date.now() - stamp.at) / 86400000)} days, ${keys.length} keys`);
+  } catch (e) {
+    /* Never fatal. Failing to tidy up is not a reason to fail a boot, and the
+       next launch tries again. */
+  }
 }
 
 /* Keep the unreadable row where a person can find it, out of the way of the

@@ -426,6 +426,7 @@ bridges/                          (directory is still named russian-blocks on di
     build_site.py      <- everything -> site/ and native/assets/{data,deep,sent,videos}.json
     payload.mjs        <- the four native files read back as one, for the tools
     simulate.mjs       <- seeded learners through the real generators and scheduler -> tools/sim/
+    audit_banks.mjs    <- distinct questions per drill, per pool size (§30ac)
     harvest_videos.py  <- YouTube listings, metadata, captions -> data/raw (§30g)
     build_transcripts.py <- captions -> data/transcripts.json, lemma resolved (§30g)
     build_videos.py    <- catalogue + index -> data/videos.json (§30g)
@@ -2812,12 +2813,17 @@ letters under it. **Word building has a row of its own**: it was reachable only
 from a second button inside Sounds, which is how he studied for a week without
 meeting it (rule 20.8 — one home).
 
-`core/buildup.js` now builds **forwards**, on his instruction, given twice, the
-second time after using the drill. The tradeoff is recorded in the file rather
-than argued with: Pimsleur builds backwards so the ending — where the stress
-sits and where a learner's pronunciation collapses — is right from the first
-repetition, and forwards the learner reaches it last, having said the front four
-times. It is three lines in one function if the endings start slipping.
+`core/buildup.js` builds **backwards** — Pimsleur's own direction, and where he
+settled once the rest of the drill was right: *"You can go back to backwards if
+that's the approach. I mainly just want to make sure definitions are clear,
+controls are in place, and the full word is available to them, and assessment is
+available."* It went forwards for an hour in between, on his earlier
+instruction. **The direction has now changed twice, and that is the lesson**:
+it is three lines in one function, and the value is in the four things he
+listed, not in which end it starts from. The dots fill from the right, the way
+the word is being built; `ACTIVITY_ICONS.buildup` deliberately encodes no
+direction, because an icon that did would be a second place to keep the fact in
+step.
 
 Four more rules the activity now holds, each because he named it:
 
@@ -2846,6 +2852,79 @@ mounted the flow around it. **A screen no test mounts has no coverage at all,
 whatever the count says** — when an activity gets a flow of its own, mount the
 flow.
 
+## 30ac. Banks, and choosing what a drill asks (2026-09-16)
+
+### The primary definition is set apart
+
+The owner: *"let's make sure on our cards, primary definitions are a different
+color or shade so they stand out from the card itself. A bit of formatting goes
+a long way."* «не» has three senses and all three were `ink2` at one weight, so
+the meaning being taught looked exactly like the two that were not. Sense one
+takes the full `ink`, a heavier face and a brand-coloured number; the rest stay
+quiet. **Shade, not a new colour** — `ink` and `ink2` are both audited against
+every surface they sit on (`tools/contrast.js`), and picking a value by eye is
+what §31 forbids. `SenseList` and `Senses` both do it, so a word with no
+Wiktionary entry and a deck card read the same way as the other 98 %.
+
+### How big a bank really is
+
+*"Ensure that for all exercises, you have banks of questions and not just the
+same 10 questions every time."* `tools/audit_banks.mjs` answers it, and the
+distinction it draws is the whole point: **`drillQuestions` already dedupes
+within a run**, so no sitting repeats itself and every screen looks varied.
+What matters is *across* runs, and what the tool counts is the distinct
+questions seen over many of them — plus whether that count is still growing at
+the end, because a bank that has stopped growing has been exhausted.
+
+Against the whole curriculum every drill is deep: 374–800 distinct in 800
+draws, all still finding new questions on the last run. Against **what a
+learner actually has**, one drill was exactly what he described:
+
+| words met | aspect: distinct questions in total |
+|---|---|
+| 40 | **7** |
+| 150 | 25 |
+| 800 | 143 |
+
+**`drillPool` puts a floor under the number of words (40), and that is not a
+floor under the number of questions.** The aspect drill needs verbs carrying a
+recorded partner and there are barely any that early, so ten sittings is the
+same seven questions. `DrillFlow` now walks `DRILL_POOL_STEPS` — further along
+the route each time — until a full run comes back, ending at the whole
+curriculum. Reaching past what the learner has met is the lesser wrong, and
+§30e's rule already bends that way at `DRILL_POOL_MIN`. `drillgate.test.js`
+pins both halves: the defect still present at the floor, and the run filling
+after the walk. Run the audit after touching a generator or a pool.
+
+### "What to practise", before a drill starts
+
+*"Before starting an exercise, I like the option to toggle what type of
+questions will be on the pool. Like imagine I want to focus on imperative only,
+then I can just ensure that's checked."*
+
+`drillFocus(type, units)` says what each drill can be narrowed to and
+`drillQuestions` takes the ticked ids as its sixth argument; `DrillSetup` in
+`Flows.js` is the screen. Conjugation narrows to a tense or to reading a form;
+aspect to either of its two shapes; **cases and agreement to the cases the route
+has taught**, not all six — the drill may not ask for the instrumental in
+chapter 3, so it may not offer it either. Stress and grammar have nothing to
+narrow and go straight in, as does cases before chapter 4: a setup screen
+offering one choice is a tap that buys nothing.
+
+Three rules hold it honest:
+
+- **Everything is ticked**, so the default is exactly what it was and nobody
+  has to make a decision in order to practise.
+- **The last tick cannot be removed.** An empty selection is a drill with
+  nothing to ask, and a screen that lets you build one and then apologises is
+  worse than one that will not. An empty set is read as "everything" anyway, so
+  a stale call site cannot produce a dead drill either.
+- **Every focus still has to fill a run**, asserted per id. That is the thing a
+  toggle quietly breaks, and it broke here: narrowing to "whose form is this?"
+  — a *shape*, not a tense — left `verbTable` with no table to draw from and
+  the generator returned nothing every time. A shape-only selection puts every
+  table back in play.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -2873,6 +2952,7 @@ stylesheet's `[hidden] { display:none }`. Layout bugs need the browser.
 python tools/build_site.py     # or the full pipeline if data changed
 node tools/check_scripts.mjs --strict   # the written passages: level, coverage, no repeats
 node tools/audio_qa.mjs        # a track per lesson, its hash current, its length sane
+node tools/audit_banks.mjs --pool 150   # how many distinct questions a learner meets (§30ac)
 node tools/copy.mjs            # labels, not prose (rule 20.7), capped and checked
 node tools/core.test.mjs       # the shared logic: generators, scheduler, state
 node tools/smoke.js            # must be all-pass

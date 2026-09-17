@@ -2970,7 +2970,7 @@ either way. ROADMAP 13.37 carries the decision for him.
 | | budget | measured |
 |---|---|---|
 | session built from 12,000 due cards | 50 ms | **14.6 ms** |
-| cold start to first frame | 2 s | **~0.50 s** (emulator; his phone not measured) |
+| cold start to first frame | 2 s | **0.18 s** on his Pixel 9 (~0.50 s on the emulator) |
 
 **Offline is real and was driven with the radios off** (`native/flows/offline.txt`,
 2026-09-16): lessons, the word cards, the conversations list, the drills and the

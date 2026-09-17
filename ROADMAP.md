@@ -870,10 +870,10 @@ a hard problem:
   changes, and Sentry would go on top of the boundary rather than replace it.
   Cost if he wants it: £0 on free tiers, two dependencies, a privacy policy URL
   and a Data Safety form.
-- **13.38 — the cold start on his phone has not been measured.** The emulator
-  number above is indicative and the playbook's budget names his device. It
-  needs the phone plugged in and `adb shell am start -W`; it was unplugged when
-  this was run.
+- ~~**13.38**~~ — **measured on his phone, 2026-09-17: 179, 189, 189 ms** cold
+  to first frame (Pixel 9, `am start -W`, three force-stopped launches). The
+  playbook's budget is 2 s and the emulator had suggested ~500 ms; his device is
+  nearly three times quicker than that. Closed.
 
 ### Phase 7 pre-flight, 2026-09-17 — `docs/play-preflight.md`
 

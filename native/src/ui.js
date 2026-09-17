@@ -627,12 +627,33 @@ export function senseGroups(e) {
  * Left-aligned always. A numbered list centred on the screen is not a list, and
  * that is how the glosses used to read on a card.
  */
-export function SenseList({ senses, size = 15, style, max, testID }) {
+/* How long an example may be before a *card* declines to show it.
+ *
+ * A dictionary entry may quote; a flashcard may not. Wiktionary illustrates
+ * common words with literature — the owner met the back of «вы» carrying
+ * twenty-five words of War and Peace (ROADMAP 13.34). The ingest now refuses
+ * anything it would have had to truncate, and 391 of the 3,714 that remain are
+ * still over fifteen words: real examples, fine in an entry, wrong on a card
+ * you are trying to answer in three seconds.
+ *
+ * Twelve words, from the distribution: the median example is 4 and three
+ * quarters are inside 10, so this keeps almost all of them and excludes the
+ * quotations. */
+export const BRIEF_EXAMPLE_WORDS = 12;
+const isBrief = (x) => String((x && x.ru) || "").trim().split(/\s+/).length <= BRIEF_EXAMPLE_WORDS;
+
+/* `brief` is a card rather than an entry: one example per sense at most, and
+   only a short one. The entry passes nothing and shows everything. */
+export function SenseList({ senses, size = 15, style, max, brief, testID }) {
   const t = useTheme();
   if (!senses || !senses.length) return null;
   const shown = max && senses.length > max ? senses.slice(0, max) : senses;
   const rest = senses.length - shown.length;
   const many = senses.length > 1;
+  const examplesOf = (s) => {
+    const xs = s.x || [];
+    return brief ? xs.filter(isBrief).slice(0, 1) : xs;
+  };
   return (
     <View testID={testID || "sense-list"} style={[{ alignSelf: "stretch", gap: 10 }, style]}>
       {/* The first sense is the word's primary meaning and it is set apart —
@@ -665,9 +686,10 @@ export function SenseList({ senses, size = 15, style, max, testID }) {
               ) : null}
               {s.g}
             </Text>
-            {(s.x || []).map((x, n) => (
-              <View key={n} style={{ marginTop: 5, paddingLeft: 10, borderLeftWidth: 2,
-                                     borderLeftColor: t.lineSoft }}>
+            {examplesOf(s).map((x, n) => (
+              <View key={n} testID="sense-example"
+                    style={{ marginTop: 5, paddingLeft: 10, borderLeftWidth: 2,
+                             borderLeftColor: t.lineSoft }}>
                 <Text style={{ color: t.ink, fontSize: size - 1 }}>{x.ru}</Text>
                 <Text style={{ color: t.ink3, fontSize: size - 2 }}>{x.en}</Text>
               </View>

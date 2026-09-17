@@ -13,7 +13,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react-native";
 
 import { sensesOf, idxOfWord, L } from "../src/data";
-import { SenseList } from "../src/ui";
+import { SenseList, BRIEF_EXAMPLE_WORDS } from "../src/ui";
 
 describe("what a word means", () => {
   it("ships senses for nearly every studied word", () => {
@@ -95,5 +95,65 @@ describe("how they are drawn", () => {
     await render(<SenseList senses={senses} max={2} />);
     expect(screen.getByText("+1 more")).toBeTruthy();
     expect(screen.queryByText("department")).toBeNull();
+  });
+
+  /* A dictionary entry may quote; a flashcard may not (ROADMAP 13.34).
+     Wiktionary illustrates common words with literature, and the owner met the
+     back of a card carrying twenty-five words of War and Peace. */
+  describe("a card, not an entry", () => {
+    const long = { ru: new Array(BRIEF_EXAMPLE_WORDS + 4).fill("слово").join(" "),
+                   en: "a sentence far too long to read on a flashcard" };
+    const short = { ru: "Это стол.", en: "This is a table." };
+
+    /* **Do not call `unmount()` here.** In this project's RNTL, unmounting
+       tears down the root that every later `render` in the same file draws
+       into: the next render returns a tree of `null` and every query on it
+       fails. These two tests passed on their own and failed together for
+       exactly that reason, and it looked like a bug in the filter rather than
+       in the test. Each render below uses a different gloss instead, so
+       `screen` can never be ambiguous about which one it is reading. */
+    it("leaves a quotation off a card", async () => {
+      await render(<SenseList senses={[{ g: "quotation-card", x: [long] }]} brief />);
+      expect(screen.queryByTestId("sense-example")).toBeNull();
+      expect(screen.getByText("quotation-card")).toBeTruthy();   // the meaning still shows
+    });
+
+    it("…and keeps it in an entry, which may quote", async () => {
+      await render(<SenseList senses={[{ g: "quotation-entry", x: [long] }]} />);
+      expect(screen.getAllByTestId("sense-example").length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("keeps a short one, and only one", async () => {
+      const two = { ru: "Это дом.", en: "This is a house." };
+      await render(<SenseList senses={[{ g: "desk", x: [short, two, long] }]} brief />);
+      expect(screen.getByText("This is a table.")).toBeTruthy();
+      expect(screen.queryByText("This is a house.")).toBeNull();   // only the first
+    });
+
+    /* The bound is a measurement, not a guess: the median shipped example is
+       four words and three quarters are inside ten. */
+    it("draws the line where the examples actually are", () => {
+      expect(BRIEF_EXAMPLE_WORDS).toBeGreaterThanOrEqual(10);
+      expect(BRIEF_EXAMPLE_WORDS).toBeLessThanOrEqual(15);
+    });
+  });
+});
+
+/* The pipeline's half of it: nothing shipped may be a cut-off translation.
+   `clean()` in ingest_wiktionary.py used to end `s[:MAX_GLOSS]`, which applied
+   a gloss cap to example sentences and sliced 504 of them mid-word. */
+describe("what the pipeline shipped", () => {
+  it("carries no example longer than the ingest's bound", () => {
+    let total = 0, over = 0;
+    for (let i = 0; i < L.length; i++) {
+      for (const s of sensesOf(i) || []) {
+        for (const x of s.x || []) {
+          total++;
+          if (String(x.ru || "").length > 180 || String(x.en || "").length > 180) over++;
+        }
+      }
+    }
+    expect(total).toBeGreaterThan(1000);
+    expect(over).toBe(0);
   });
 });

@@ -590,7 +590,7 @@ export default function Study({ navigation }) {
                   item.direction === "produce" ? null
                     : <Muted size={16} style={{ marginTop: 10, textAlign: "center" }}>{face.e}</Muted>
                 ) : item.direction === "produce" && !senses ? null
-                  : senses ? <SenseList senses={senses} size={16} max={4} style={{ marginTop: 10 }} />
+                  : senses ? <SenseList senses={senses} size={16} max={4} brief style={{ marginTop: 10 }} />
                   : <Senses e={face.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
                 {(face.x || []).slice(0, 3).map((ex, k) => (
                   // The word in use, three ways: the entry reads like a dictionary,

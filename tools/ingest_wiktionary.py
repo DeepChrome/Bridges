@@ -66,6 +66,11 @@ SKIP_POS = {"character", "punct", "symbol", "romanization"}
 MAX_SENSES = 8          # a dictionary entry, not a concordance
 MAX_EXAMPLES = 2        # per sense
 MAX_GLOSS = 180
+# An example is kept whole or not at all, so this is a keep/drop bound rather
+# than a cut. 180 was the old implicit one and it truncated rather than
+# rejecting. Named for what it measures and not `MAX_EXAMPLE`, which differs
+# from `MAX_EXAMPLES` above by one letter and would be read wrong eventually.
+MAX_EXAMPLE_CHARS = 180
 MAX_TAGS = 3
 
 # Labels worth showing. Wiktionary's tag vocabulary is large and much of it is
@@ -87,8 +92,31 @@ def fold(s):
 
 
 def clean(s):
-    s = re.sub(r"\s+", " ", str(s or "")).strip()
-    return s[:MAX_GLOSS]
+    """Whitespace normalised, and nothing else.
+
+    This used to end `return s[:MAX_GLOSS]`, and it is called on glosses *and*
+    on both halves of an example, so a 180-character cap meant for definitions
+    was cutting translations in the middle of a word with no ellipsis. 504 of
+    the 4,016 examples shipped that way; the owner met one on a flashcard —
+    a passage of War and Peace ending "he speaks of a Divinity hit"
+    (ROADMAP 13.34, found 2026-09-16).
+
+    A gloss and an example want different treatment, so neither is done here.
+    """
+    return re.sub(r"\s+", " ", str(s or "")).strip()
+
+
+def capped(s, n):
+    """A gloss short enough to read, cut at a word boundary and marked.
+
+    A definition that runs long is still a definition, so it is shortened
+    rather than dropped — but at a space, and with an ellipsis, so a reader can
+    see that there was more. Cutting mid-word silently is what this replaces.
+    """
+    if len(s) <= n:
+        return s
+    head = s[:n].rsplit(" ", 1)[0].rstrip(" ,;:—-")
+    return (head or s[:n]) + "…"
 
 
 def sense_of(raw):
@@ -96,7 +124,7 @@ def sense_of(raw):
     glosses = raw.get("glosses") or raw.get("raw_glosses") or []
     if not glosses:
         return None
-    text = clean(glosses[-1] if len(glosses) > 1 else glosses[0])
+    text = capped(clean(glosses[-1] if len(glosses) > 1 else glosses[0]), MAX_GLOSS)
     if not text or FORM_OF.match(text):
         return None
     # wiktextract marks these structurally too, which catches the ones whose
@@ -113,7 +141,15 @@ def sense_of(raw):
         # Only a pair: a Russian example with no translation is no use to a
         # learner reading an English entry, and an English-only line is not an
         # example of a Russian word.
-        if ru and en and re.search(r"[а-яё]", ru):
+        #
+        # …and only a pair that fits. An example too long to carry whole is
+        # **dropped, never cut**: half a translation is worse than none, and
+        # Wiktionary illustrates common words with Tolstoy and song lyrics —
+        # 38 words for «жизнь». Six candidates are examined and two kept, so
+        # rejecting a long one usually admits a shorter one from the same
+        # sense rather than costing the example altogether.
+        if (ru and en and re.search(r"[а-яё]", ru)
+                and len(ru) <= MAX_EXAMPLE_CHARS and len(en) <= MAX_EXAMPLE_CHARS):
             ex.append({"ru": ru, "en": en})
         if len(ex) >= MAX_EXAMPLES:
             break

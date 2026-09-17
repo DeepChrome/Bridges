@@ -827,14 +827,22 @@ a hard problem:
 
 ### Open, found on 2026-09-16 and deliberately not fixed in Phase 5
 
-- **13.34 — a flashcard's back can be a paragraph of Tolstoy.** The back of «вы»
-  drew a 25-word sentence from *War and Peace*, its English cut off mid-word
-  ("and using th"), above three short example sentences that were all perfectly
-  level-matched. The card takes its examples in rank order with no length or
-  level filter, and `numberOfLines` clips without an ellipsis. Two separate
-  faults, both in the example ranking rather than in Study. Read
-  `rank_examples` in `build_site.py` and the sense examples from `senses.db`
-  (§30q) together before touching either.
+- ~~**13.34**~~ — **done 2026-09-17, and it was two faults, neither where the
+  note guessed.** They were in `ingest_wiktionary.py`, not in the ranking.
+  **(1)** `clean()` ended `return s[:MAX_GLOSS]` and was called on glosses *and*
+  on both halves of every example, so a 180-character cap meant for definitions
+  sliced translations mid-word with no ellipsis — **504 of 4,016 shipped that
+  way**, including the "he speaks of a Divinity hit" he met on «вы». An example
+  too long to carry whole is now **dropped, never cut**; six candidates are
+  examined per sense and two kept, so rejecting a long one usually admits a
+  shorter one instead. Glosses are shortened at a word boundary with an
+  ellipsis (269 of 86,957). **(2)** Even within the bound, 391 examples run past
+  fifteen words — real quotations, right in an entry and wrong on a card. The
+  card passes `brief` to `SenseList` now: at most one example per sense, and
+  only under `BRIEF_EXAMPLE_WORDS` (12, from the distribution — the median is 4
+  and three quarters are inside 10). The entry still shows everything.
+  senses.db and the whole payload were rebuilt; coverage is unchanged at 3,968
+  words and 58 % with more than one sense.
 - **13.35 — a wall-clock budget asserted inside a parallel jest run measures the
   machine.** `dayend.test.js`'s "scans 10,000 cards in under 5 ms" passes alone
   (0.9 ms, §30u) and failed once in a full 59-suite run, then passed on the

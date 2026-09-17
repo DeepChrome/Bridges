@@ -602,6 +602,17 @@ Each of these cost real time. Do not relearn them.
   The generator's own fix is the one §30r already made for the aspect drill
   (`realPartner` refusing a partner equal to the verb); the same trap was left
   standing in conjugation for months.
+- **A render that comes back `null` with no error means something unmounted
+  earlier in the file.** `unmount()` can leave every later `render` in the same
+  test file drawing into a dead root: the new view's `toJSON()` is `null`, every
+  query on it fails, and the failure reads as a bug in the component. It cost
+  three wrong diagnoses in `senses.test.js` on 2026-09-17 — the two tests passed
+  individually and failed together, which pointed at everything except the
+  cleanup. **Not universal**: `build.test.js` unmounts mid-test and renders
+  again quite happily, so this is a symptom to recognise rather than a rule to
+  apply. When a tree is unexpectedly empty, look for an `unmount()` above it
+  before looking at the component. Where several renders share a file, give each
+  one distinct text and query with `screen` rather than unmounting.
 - **`Get-Content -Raw` misreads UTF-8 without a BOM**, so grepping a built page for
   Cyrillic from PowerShell reports a false negative. Check with `node -e` instead.
 - **…and PowerShell 5.1 misreads a `.ps1` the same way, which stops the script

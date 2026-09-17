@@ -156,9 +156,25 @@ const DATA = loadPayload(ROOT);
 const files = (DATA.audio && DATA.audio.files) || {};
 const taught = new Set();
 for (const u of DATA.units) for (const i of u.w) taught.add(i);
-const missing = [...taught].filter((i) => !files[fold(DATA.lemmas[i].b)]);
-notes.push(`curriculum words with a recording: ${taught.size - missing.length} of ${taught.size}`
-           + ` (${Math.round((taught.size - missing.length) / taught.size * 100)}%)`);
+/* …and the clips bought for the words the collection never had (13.32). They
+   are bundled in the app rather than in `site/audio`, so a count that only
+   looked at the collection's manifest now understates the coverage by 61 and
+   names words that are no longer read by the device voice. */
+let bought = {};
+try {
+  bought = JSON.parse(readFileSync(join(ROOT, "data", "word_audio", "manifest.json"), "utf8")).files || {};
+} catch (e) { bought = {}; }
+const boughtKeys = new Set(Object.keys(bought).map(fold));
+
+const fromCollection = [...taught].filter((i) => files[fold(DATA.lemmas[i].b)]).length;
+const missing = [...taught].filter((i) => {
+  const k = fold(DATA.lemmas[i].b);
+  return !files[k] && !boughtKeys.has(k);
+});
+const covered = taught.size - missing.length;
+notes.push(`curriculum words with a recording: ${covered} of ${taught.size}`
+           + ` (${Math.round(covered / taught.size * 100)}%)`
+           + ` — ${fromCollection} from the collection, ${covered - fromCollection} bought and bundled`);
 if (missing.length) {
   notes.push(`  without one, read by the device voice (§27): ${missing.slice(0, 8).map((i) => DATA.lemmas[i].b).join(", ")}`
              + (missing.length > 8 ? `, and ${missing.length - 8} more` : ""));

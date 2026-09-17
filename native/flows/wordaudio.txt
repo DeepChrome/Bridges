@@ -1,0 +1,25 @@
+# One of the 61 bought word clips, on a device (ROADMAP 13.32).
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\wordaudio.txt -Device emulator-5554
+#
+# «дать» is one of the words his collection has no recording for. Before this
+# it was read by the phone and the entry said "device voice"; it is a bundled
+# clip now, so the speaker should be the brand colour and no such note should
+# appear. The clip plays from inside the APK, so this works with no network.
+
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+tap:^Skip$
+wait:2
+tap:^Start from the beginning$
+wait:3
+
+tap:^Search$
+wait:2
+tap:Russian, English or Latin
+type:dat
+wait:3
+shot:C0-search-dat

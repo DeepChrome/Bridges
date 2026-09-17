@@ -8,7 +8,8 @@ import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Speech from "expo-speech";
 import { audioUrl } from "./data";
 import { cachedUri, dropCached } from "./cache";
-import { bare } from "@core/util";
+import { bare, fold } from "@core/util";
+import { wordClip } from "./wordaudio";
 import { sexOf } from "@core/names";
 import { knownVoiceSex, rankVoice } from "@core/voices";
 
@@ -459,10 +460,21 @@ export async function playTrack(source, from = 0, rateOverride) {
    anything started; the playback itself is tracked by whenIdle(). */
 export async function say(text, opts = {}) {
   const rate = rateFor(text, opts);
+  /* Bundled first (ROADMAP 13.32). 61 curriculum words have no recording in
+     the collection at all — mostly perfective verbs, which is what the aspect
+     drill asks about — and they were read by the device voice. They are bought
+     clips shipped inside the app, so they need no network and cannot 404;
+     `wordaudio.js` keys them by the folded word, as the collection's manifest
+     is keyed (rule 20.2). */
+  const bundled = wordClip(fold(text));
   // The offline copy when there is one (cache.js), else the stream.
-  const local = cachedUri(text);
-  const url = local || audioUrl(text);
-  if (!url) {
+  const local = bundled ? null : cachedUri(text);
+  const streamed = bundled ? null : audioUrl(text);
+  /* A bundled clip is a `require`, which expo-audio takes as it is — the same
+     way `playTrack` and the answer cues pass theirs. Only a URL needs the
+     `{ uri }` wrapper, and wrapping a module id in one plays silence. */
+  const source = bundled || (local ? { uri: local } : streamed ? { uri: streamed } : null);
+  if (!source) {
     const spoke = speakTTS(text, { ...opts, rate });
     if (!spoke) failed(text);
     return spoke;
@@ -475,14 +487,15 @@ export async function say(text, opts = {}) {
   if (seq !== trackSeq) return false;
   const fallback = () => {
     if (seq !== trackSeq) return;       // superseded: the fallback would overlap
-    if (local) dropCached(text);
+    // A bundled clip cannot be a stale download, so there is nothing to drop.
+    if (local && !bundled) dropCached(text);
     if (!speakTTS(text, { ...opts, rate })) failed(text);
   };
   try {
     Speech.stop();
     if (player) { release(player); player = null; }
     const end = begin();
-    const mine = createAudioPlayer({ uri: url });
+    const mine = createAudioPlayer(source);
     player = mine;
     if (mine.addListener) {
       mine.addListener("playbackStatusUpdate", (s) => {
@@ -548,7 +561,17 @@ export function releaseAudio() {
   ready = false;
 }
 
-export const hasRealAudio = (text) => !!audioUrl(text);
+/* Whether a fixed recording exists for this, rather than the phone reading it
+ * aloud — which is the distinction §27's rule actually draws, and the one the
+ * speaker's colour shows. It has never meant "a human said this": the
+ * collection is mostly TTS already (10,314 Core 5000 utterances and 2,334
+ * Yandex), and what the label protects against is the *device voice* being
+ * mistaken for a prepared recording.
+ *
+ * The 61 bundled clips (ROADMAP 13.32) are prepared recordings of exactly that
+ * kind, bought from the same voices as the scenarios, so they count. Nothing
+ * anywhere claims a human said them. */
+export const hasRealAudio = (text) => !!wordClip(fold(text)) || !!audioUrl(text);
 
 /* ------------------------------------------------------------------- cues */
 

@@ -795,6 +795,35 @@ Only ship what exists: the build filters the manifest to files actually present,
 partial export cannot promise audio the build does not carry. Report real coverage,
 never an optimistic estimate.
 
+**The 61 the collection never had** (ROADMAP 13.32, 2026-09-17). 61 of the 1,045
+words the units teach had no file at all — mostly perfective verbs, which is
+exactly what the aspect drill asks about — and were read by the device voice.
+The free route was tried first as the roadmap said: a re-run of `build_audio.py
+--dry-run` still reported 13,183 utterances, so no AnkiDroid sync had brought
+them. `tools/build_word_audio.mjs` buys them from the same Chirp3-HD voice as
+the scenarios for **$0.013**, into `data/word_audio/` keyed by content hash and
+committed because they cost money; `tools/build_word_assets.mjs` copies them to
+`native/assets/words/` and writes `native/src/wordaudio.js`.
+
+**Bundled, not uploaded.** The collection's recordings stream from the web host
+and adding files there means a Netlify deploy, which costs credits (§31). 332 KB
+rides in the APK for nothing and works with no network — which, for the words a
+drill asks about, is the better answer anyway. `say()` checks the bundle first.
+
+**What the badge claims, and what it always claimed.** `hasRealAudio` means *a
+prepared recording exists*, not *a human said this* — the collection is mostly
+TTS already (10,314 Core 5000 utterances, 2,334 Yandex). What §27's rule
+protects against is the **device voice** being taken for a prepared recording,
+and these are prepared recordings of exactly the kind already there. Nothing
+claims a person said them.
+
+**The trap this nearly fell into is rule 20.2.** The manifest is keyed by the
+*folded* utterance (ё→е); a lemma's bare form keeps its ё. Looking a word up
+unfolded reported **75** words to buy rather than 61, the extra fourteen being
+ё-words that have had recordings all along — «актёр», «ещё», «дешёвый». Caught
+before anything was bought, by checking the manifest rather than trusting the
+count.
+
 ## 27a. Tatoeba audio is licensed per recording
 
 The sentence text is uniformly CC BY 2.0 FR. **The recordings are not.** Of the 190

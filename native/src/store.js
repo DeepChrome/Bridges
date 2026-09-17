@@ -81,6 +81,10 @@ export const DEFAULTS = {
      feedback that arrives before the sound and before the colour, and a
      learner studying with the volume down has nothing else. */
   haptics: true,
+  /* Which "something new is open" notes have been shown (core/openings.js).
+     Progress, not a setting: it belongs to this learner's journey through the
+     route and a reset should start it over. */
+  met: [],
 };
 
 export function normalise(raw, assumedVersion) {

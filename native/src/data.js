@@ -361,6 +361,17 @@ export function reachedUnits(st) {
   return out;
 }
 
+/* Where the learner has actually reached, as the chapter and the lesson within
+   its spine — the facts `core/openings.js` needs to say when something opens.
+   Off `nextLesson`, so it is the route's own position and never developer
+   mode: unlocking every lesson is not the same as having arrived at one. */
+export function routePosition(st) {
+  const here = nextLesson(st);
+  if (!here) return { stage: STAGES.length - 1, lesson: Infinity };
+  const stage = STAGES.findIndex((s) => s.core.id === here.unit.id);
+  return { stage: stage < 0 ? 0 : stage, lesson: here.index };
+}
+
 export const idxOfWord = (w) => {
   const h = IX[fold(w)];
   return h && h.length ? h[0] : -1;

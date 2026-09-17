@@ -1941,6 +1941,70 @@ group("drill focus");
      "and everything ticked still mixes the tables");
 }
 
+/* The app says when something opens, because twelve things open along the
+   route and none of them used to (core/openings.js, 2026-09-17). */
+group("what has just opened");
+{
+  const { OPENINGS, isOpen, newlyOpen, nextOpening, markOpening }
+    = await import("../core/openings.js");
+  const drillOpensAt = (d) => Q.drillOpensAt(d);
+  const at = (stage, lesson = 0, met = []) => ({ stage, lesson, met, drillOpensAt });
+
+  ok(new Set(OPENINGS.map((o) => o.id)).size === OPENINGS.length, "every opening has its own id");
+  ok(OPENINGS.every((o) => o.name && o.blurb), "…and a name and a line");
+  /* Rule 20.7 applies to these as to everything else: they are labels. */
+  ok(OPENINGS.every((o) => o.blurb.split(/\s+/).length <= 10),
+     "no blurb runs past ten words",
+     OPENINGS.map((o) => o.blurb.split(/\s+/).length).join(","));
+
+  /* **The one that matters.** A learner on their first screen has met nothing,
+     and a wall of nine notes is the thing this feature exists to avoid. */
+  ok(newlyOpen(at(0, 0)).length === 0, "nothing is announced before anything has opened",
+     newlyOpen(at(0, 0)).map((o) => o.id).join(","));
+  ok(nextOpening(at(0, 0)) === null, "…and there is nothing to show");
+
+  // The first one is the listening question, at the first chapter's third lesson.
+  ok(nextOpening(at(0, 2)).id === "hear", "the first is listen-and-type, at lesson three",
+     String((nextOpening(at(0, 2)) || {}).id));
+  ok(nextOpening(at(0, 1)) === null, "…and not at lesson two");
+
+  /* One at a time, oldest first: somebody arriving after an update has a
+     backlog, and they should meet it one per visit. */
+  const late = at(9, 0);
+  ok(newlyOpen(late).length > 3, "a learner deep in the route has a backlog",
+     String(newlyOpen(late).length));
+  ok(nextOpening(late).id === "hear", "…and meets the oldest of it first");
+  const after = at(9, 0, ["hear"]);
+  ok(nextOpening(after).id !== "hear", "…then the next one");
+
+  /* The drill gates are the payload's. Repeating the chapter numbers here is
+     how the announcement comes to disagree with the thing it announces. */
+  const conj = OPENINGS.find((o) => o.id === "drill:conjugation");
+  ok(!isOpen(conj, at(Q.drillOpensAt("conjugation") - 1)) && isOpen(conj, at(Q.drillOpensAt("conjugation"))),
+     "a drill is announced exactly when the route opens it",
+     `opens at chapter ${Q.drillOpensAt("conjugation") + 1}`);
+  /* Stress and grammar are open from the very start and have no entry: a note
+     saying "this was always here" is noise on the first screen. */
+  ok(!OPENINGS.some((o) => o.drill === "stress" || o.drill === "grammar"),
+     "the two that were never gated are not announced");
+
+  // Everything is eventually announced, or an entry is unreachable.
+  const end = at(STAGES.length - 1, Infinity);
+  ok(newlyOpen(end).length === OPENINGS.length,
+     "every opening is reachable by the end of the route",
+     `${newlyOpen(end).length} of ${OPENINGS.length}`);
+
+  ok(markOpening(["a"], "b").join() === "a,b" && markOpening(["a"], "a").join() === "a",
+     "marking one seen is idempotent");
+  ok(markOpening(undefined, "a").join() === "a", "…and survives a profile that has none");
+
+  /* Developer mode unlocks every lesson (rule 20.9) and must not count as
+     having arrived: the facts come from `routePosition`, which reads the route
+     rather than the flag. Asserted here as the shape of the contract — nothing
+     in this module takes a `dev`. */
+  ok(!Object.keys(at(0, 0)).includes("dev"), "arrival is the route's, not developer mode's");
+}
+
 /* A drill asks only about the learner's own words when given a pool. */
 group("drill pool");
 {

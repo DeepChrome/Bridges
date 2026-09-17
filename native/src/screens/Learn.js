@@ -13,16 +13,19 @@
  * same colours, different renderer — that is the kind of difference rule 20a allows.
  */
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { View, Pressable, Animated, useWindowDimensions } from "react-native";
 import Svg, { Circle, Path, Line } from "react-native-svg";
 import { useSession } from "../session";
-import { useTheme, space } from "../theme";
+import { useTheme, space, radius } from "../theme";
 import { Screen, Btn, Pill, UnitIcon, Muted, styles, Text } from "../ui";
 import {
   STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress, unitState,
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, FORK_AT, dueCount,
+  routePosition,
 } from "../data";
+import { Q } from "../questions";
+import { nextOpening, markOpening } from "@core/openings";
 import { reviewFirst } from "@core/state";
 import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
@@ -295,6 +298,16 @@ export default function Learn({ navigation }) {
   const xp = useCount(st.xp || 0);
   const openUnit = (unit) => navigation.navigate("Unit", { unitId: unit.id });
 
+  /* The drill gates are the payload's, so they are read through `Q` rather
+     than repeated here — the announcement must not be able to disagree with
+     the thing it announces. */
+  const opening = useMemo(
+    () => nextOpening({ ...routePosition(st), met: st.met, drillOpensAt: Q.drillOpensAt }),
+    [st.unit, st.met]);
+  const seeOpening = () => {
+    if (opening) update((p) => ({ ...p, met: markOpening(p.met, opening.id) }));
+  };
+
   return (
     <Screen>
       {/* The score line, centred at the top; the button under it names what it
@@ -323,6 +336,43 @@ export default function Learn({ navigation }) {
           </Svg>
         ) : null}
       </View>
+
+      {/* Something has opened that was not open before (core/openings.js).
+       *
+       * Twelve activities appear as the route is walked and none of them used
+       * to say so — the owner studied for a week without meeting the
+       * word-building drill and asked twice where things were, for features he
+       * had commissioned days earlier. A first-run tour cannot fix that: it
+       * cannot tell anyone on day one about a drill that opens in chapter 8.
+       *
+       * So it is said once, where the learner already is, at the moment it
+       * becomes true. One at a time — someone arriving after an update has a
+       * backlog, and five of these stacked on the path is the wall this exists
+       * to avoid. A name, one line, and the way in. */}
+      {opening ? (
+        <View testID="opening"
+              style={{ marginTop: 16, borderWidth: 1, borderColor: t.brandDim,
+                       backgroundColor: t.brandBg, borderRadius: radius.lg, padding: 14 }}>
+          <Muted size={11} style={{ color: t.brandInk, fontWeight: "700", letterSpacing: 1 }}>
+            NOW OPEN
+          </Muted>
+          <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700", marginTop: 4 }}>
+            {opening.name}
+          </Text>
+          <Muted style={{ marginTop: 2 }}>{opening.blurb}</Muted>
+          <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+            {opening.screen ? (
+              <Btn kind="pri" testID="opening-go" label="Try it" style={{ flex: 1 }}
+                   onPress={() => { seeOpening(); navigation.navigate(opening.tab || "Practice",
+                     { screen: opening.screen, params: opening.params }); }} />
+            ) : null}
+            {/* "Got it" rather than a cross: the note is information, and a
+                dismiss that looks like closing an advert reads as one. */}
+            <Btn kind={opening.screen ? "ghost" : "pri"} testID="opening-seen"
+                 label="Got it" style={{ flex: 1 }} onPress={seeOpening} />
+          </View>
+        </View>
+      ) : null}
 
       {/* What is due sits on the path, above the lesson: review is part of
           the route, not a tab the learner has to remember (the pedagogy

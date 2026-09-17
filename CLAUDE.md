@@ -3012,6 +3012,48 @@ Rows written before and after therefore sit in buckets that differ by at most
 one day. That is a bucketing seam, not lost data, and it costs a hairline in one
 column of the calendar once.
 
+## 30ae. Saying when something opens (2026-09-17)
+
+The owner asked whether the roadmap had a guided tutorial and whether it needed
+one. The honest answer was **no to the tutorial and yes to the problem behind
+the question**, and the two are different things.
+
+There has been a first-run tour since P8.6 (`screens/Intro.js`): three cards on
+word links, which voice is which, and the microphone. That is the right scope
+for a tour — the things a learner could not guess — and it does not want
+extending.
+
+What was missing: **twelve activities open as the route is walked and not one
+of them ever said so.** Measured 2026-09-17 — four grammar drills by chapter
+(conjugation 2, agreement 3, cases 4, aspect 8), listen-and-type at chapter 1
+lesson 3, the conversations at 2, say-it-aloud at 3, the chapter's form
+question at 2, Talk at 2, native-speed listening, sentence cards, the chapter
+task. They simply start appearing.
+
+**A tutorial cannot fix that**, which is the point worth keeping: a tour shown
+on day one cannot tell anybody about a drill that opens in chapter 8, and coach
+marks over a live screen are exactly what §2 and §25 say this app must never
+become. The evidence that it is a real problem is the owner himself — he
+studied for a week without meeting the word-building drill, and asked twice
+where things were, for features he had commissioned days before.
+
+`core/openings.js` says it instead: once, on the path, at the moment it becomes
+true. Four rules hold it:
+
+- **One at a time, oldest first.** Someone arriving after an update has a
+  backlog; five notes stacked on the path is the wall this exists to avoid.
+- **Nothing on day one.** A new profile has opened nothing and is shown
+  nothing, which is the first thing `core.test.mjs` and `opening.test.js` both
+  check — it is the failure this feature would most easily become.
+- **Developer mode is not arrival.** Rule 20.9 unlocks every lesson, and if
+  that counted as open the app would announce all nine on the first screen.
+  The facts come from `routePosition` in `data.js`, which reads the route.
+- **The gates are passed in, never copied.** `drillOpensAt` is the payload's,
+  so the announcement cannot come to disagree with the thing it announces.
+
+`st.met` records what has been said — progress, not a setting, so a reset
+starts it over.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

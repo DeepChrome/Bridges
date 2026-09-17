@@ -1,0 +1,35 @@
+# "Now open" on the path (core/openings.js).
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\opening.txt -Device emulator-5554
+#
+# Two states matter and both are photographed: a brand new profile, which must
+# show nothing at all, and a learner far enough along to have opened something.
+# Developer mode ships on and unlocks every lesson, which is exactly why the
+# note is driven off the route instead (rule 20.9).
+
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+tap:^Skip$
+wait:2
+tap:^Start from the beginning$
+wait:3
+
+# Nothing yet: nothing has opened, so nothing is said.
+shot:B0-path-quiet
+
+# Walk the first chapter's first lessons. The listening question opens at the
+# third, which is the first thing the app has to announce.
+tap:^Start \(
+wait:3
+tap:^Continue$
+wait:2
+tap:^Start learning$
+wait:3
+back
+wait:2
+back
+wait:3
+shot:B1-path-after-lesson

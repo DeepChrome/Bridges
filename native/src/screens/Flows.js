@@ -5,13 +5,14 @@ import React, { useMemo, useRef, useState } from "react";
 import { View, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Text } from "../ui";
+import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
 import { WordList, GrammarNote, WordCard } from "../lesson";
-import { Q, DRILL_TYPES, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions";
+import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
+  DRILL_POOL_STEPS,
   reachedUnits, unitUnlocked, reviewWords, passages, knownWords, lessonsDone, nextLesson,
   scenarioLibrary,
 } from "../data";
@@ -531,14 +532,20 @@ export function DrillList({ navigation }) {
           meant asking the same fifteen questions the learner's words could fill
           (the owner, 2026-09-10). */}
       <List>
-        {DRILL_TYPES.map((d, k) => {
+        {DRILL_TYPES.map((d) => {
           const best = ((st.drills || {})[d.id] || {}).best;
           const open = st.dev || openDrills.has(d.id);
           const at = Q.drillOpensAt(d.id);
+          /* Through the focus screen when there is something to narrow, and
+             straight in when there is not — a setup screen offering one choice
+             is a tap that buys nothing. `List` decides which row is last
+             (§30i), so nothing here claims it. */
+          const focus = Q.drillFocus(d.id, reachedUnits(st));
           return (
-            <Row key={d.id} last={k === DRILL_TYPES.length - 1} disabled={!open}
+            <Row key={d.id} disabled={!open}
                  testID={`drill-${d.id}`}
-                 onPress={() => open && navigation.navigate("Drill", { type: d.id })}>
+                 onPress={() => open && navigation.navigate(
+                   focus.length > 1 ? "DrillSetup" : "Drill", { type: d.id })}>
               <Thumb id={d.icon} locked={!open} />
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
@@ -550,6 +557,56 @@ export function DrillList({ navigation }) {
             </Row>
           );
         })}
+      </List>
+    </Screen>
+  );
+}
+
+/* What a drill will ask about, chosen before it starts (the owner, 2026-09-16:
+ * *"imagine I want to focus on imperative only, then I can just ensure that's
+ * checked"*).
+ *
+ * Everything is ticked, so the default behaviour is exactly what it was and
+ * nobody has to make a decision to practise. **The last tick cannot be
+ * removed** — an empty selection is a drill with nothing to ask, and a screen
+ * that lets you build one and then apologises is worse than one that will not.
+ *
+ * Only the drills with something to narrow get this screen; the others go
+ * straight in (`drillFocus` returns nothing for stress and grammar, and for
+ * cases before the route has taught a case). A setup screen offering one
+ * choice is a tap that buys nothing.
+ */
+export function DrillSetup({ route, navigation }) {
+  const { type } = route.params;
+  const { st } = useSession();
+  const t = useTheme();
+  const options = useMemo(() => Q.drillFocus(type, reachedUnits(st)), [type]);
+  const [on, setOn] = useState(() => options.map((o) => o.id));
+  const spec = DRILL_TYPES.find((d) => d.id === type);
+
+  const toggle = (id) => setOn((prev) => (prev.includes(id)
+    ? (prev.length > 1 ? prev.filter((x) => x !== id) : prev)
+    : prev.concat([id])));
+
+  const start = () => navigation.replace("Drill", {
+    type,
+    // All of them is the same as no filter, and saying so keeps the generators
+    // on their ordinary path rather than through a set that matches everything.
+    only: on.length === options.length ? undefined : on,
+  });
+
+  return (
+    <Screen footer={<Btn kind="pri" testID="drill-start" label="Start" onPress={start} />}>
+      <SectionLabel>{spec ? spec.blurb : "What to practise"}</SectionLabel>
+      <List>
+        {options.map((o) => (
+          <Row key={o.id} testID={`focus-${o.id}`} onPress={() => toggle(o.id)}>
+            <Tick on={on.includes(o.id)} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15 }}>{o.name}</Text>
+            </View>
+          </Row>
+        ))}
       </List>
     </Screen>
   );
@@ -568,7 +625,6 @@ export function DrillFlow({ route, navigation }) {
   // chapter 1 who opens Aspect has met eight verbs, and the drill would ask the
   // same handful all run. Skipping ahead means the whole curriculum is fair game.
   const ahead = useMemo(() => !Q.drillsIntroduced(reachedUnits(st)).has(type), [type]);
-  const pool = useMemo(() => (ahead ? null : drillPool(st)), [type, seed, ahead]);
   const cells = useMemo(
     () => (type === "cases" && !ahead ? Q.formsIntroduced(reachedUnits(st)) : undefined),
     [type, seed, ahead]);
@@ -577,8 +633,32 @@ export function DrillFlow({ route, navigation }) {
      because that is §30j's own finding — recognition meets a word, production
      keeps it — and every drill question used to be four options. */
   const typed = st.typedDrills !== false;
-  const steps = useMemo(() => Q.drillQuestions(type, undefined, pool, cells, typed),
-                        [type, seed, pool, cells, typed]);
+  /* What the learner ticked on the way in, as focus ids. `null` before they
+     have been asked; a drill with nothing to narrow is never asked. */
+  const only = route.params.only || null;
+
+  /* **Widen until the run fills.**
+   *
+   * `drillPool` puts a floor under the number of *words*, which is not a floor
+   * under the number of questions: measured on 2026-09-16 (tools/audit_banks.mjs)
+   * a learner with 40 words met has **seven** distinct aspect questions in
+   * total, because the drill needs verbs carrying a recorded partner. Ten runs
+   * is then the same seven questions, which is exactly what the owner reported.
+   *
+   * So the pool steps further along the route until a full run comes back, and
+   * the last step is the whole curriculum. Reaching past what the learner has
+   * met is the lesser wrong: §30e's rule is that a drill asks about the
+   * learner's own words, and it already bends that way at DRILL_POOL_MIN. */
+  const steps = useMemo(() => {
+    if (ahead) return Q.drillQuestions(type, undefined, null, cells, typed, only);
+    let last = [];
+    for (const min of DRILL_POOL_STEPS) {
+      const p = min === Infinity ? null : drillPool(st, min);
+      last = Q.drillQuestions(type, undefined, p, cells, typed, only);
+      if (last.length >= DRILL_N) return last;
+    }
+    return last;
+  }, [type, seed, cells, typed, only, ahead]);
   const spec = DRILL_TYPES.find((d) => d.id === type);
   useAudioStopOnLeave();
 

@@ -586,15 +586,14 @@ group("backward build-up");
      "no fragment begins with a floating stress mark");
   ok(s("понима́ю").includes("ма́"), "and the mark stays on the vowel it belongs to");
 
-  /* Forwards, on the owner's instruction of 2026-09-16 — he asked twice, the
-     second time having used the drill. The tradeoff (Pimsleur builds backwards,
-     and an ending reached last is an ending that gets swallowed) is written
-     down in core/buildup.js rather than argued with here. */
+  /* Backwards, which is Pimsleur's own direction and where the owner settled
+     once the rest of the drill was right (2026-09-16). It has been changed
+     twice; the reasoning for the direction lives in core/buildup.js. */
   const b = buildup("понима́ю");
-  ok(b.length === 4 && b[0] === "по" && b[b.length - 1] === "понима́ю",
-     "the build runs по → пони → понима́ → понима́ю", b.join(" | "));
-  ok(b.every((f, i) => i === 0 || f.startsWith(b[i - 1])),
-     "every step begins with the step before it — that is what forwards means");
+  ok(b.length === 4 && b[0] === "ю" && b[b.length - 1] === "понима́ю",
+     "the build runs ю → ма́ю → нима́ю → понима́ю", b.join(" | "));
+  ok(b.every((f, i) => i === 0 || f.endsWith(b[i - 1])),
+     "every step ends with the step before it — that is what backwards means");
   ok(b.every((f, i) => i === 0 || f.length > b[i - 1].length), "and each is longer than the last");
 
   ok(!worthBuilding("дом") && !worthBuilding("до́ма") && worthBuilding("понима́ю"),
@@ -1812,6 +1811,65 @@ group("drill variety");
      "chapter 1 opens two of the six", [...first].join(","));
   ok(Q.drillsIntroduced(route).size === DRILL_TYPES.length,
      "and the whole route opens them all");
+}
+
+/* What a drill will ask about, chosen before it starts (the owner,
+   2026-09-16: *"imagine I want to focus on imperative only"*). */
+group("drill focus");
+{
+  const route = STAGES.flatMap((s) => [s.core].concat(s.branches));
+  const pool = [...new Set(route.flatMap((u) => u.w))];
+  const ids = (type, units) => Q.drillFocus(type, units || route).map((o) => o.id);
+
+  ok(ids("conjugation").join(",") === "present,past,imperative,who",
+     "conjugation narrows to a tense, or to reading a form",
+     ids("conjugation").join(","));
+  ok(ids("aspect").join(",") === "partner,which", "aspect narrows to either shape");
+  ok(!ids("stress").length && !ids("grammar").length,
+     "stress and grammar have nothing to narrow, so they are never asked");
+  /* The cases are the route's, not all six: a chapter-3 learner may not be
+     offered the instrumental, because the drill may not ask for it either. */
+  const all = ids("cases");
+  // The first point on the route where there is anything to offer at all —
+  // before it the drill is not open, and the setup screen is skipped.
+  let cut = 0;
+  while (cut < route.length && !Q.drillFocus("cases", route.slice(0, cut)).length) cut++;
+  const early = Q.drillFocus("cases", route.slice(0, cut)).map((o) => o.id);
+  ok(early.length && early.length < all.length && early.every((r) => all.includes(r)),
+     "the cases offered are the cases the route has taught",
+     `${early.length} of ${all.length} by unit ${cut}`);
+
+  /* The point of the whole feature: ticking one thing gets that thing. */
+  const imper = Q.drillQuestions("conjugation", 12, pool, undefined, true, ["imperative"]);
+  ok(imper.length >= 10 && imper.every((q) => q.table && q.table.title === "Imperative"),
+     "narrowed to the imperative, every question is an imperative",
+     `${imper.length} drawn, ${imper.filter((q) => q.table && q.table.title === "Imperative").length} imperative`);
+  const past = Q.drillQuestions("conjugation", 12, pool, undefined, false, ["past"]);
+  ok(past.length >= 10 && past.every((q) => q.table && q.table.title === "Past"),
+     "…and the same when the answers are chosen rather than written");
+
+  /* A narrowed drill still has to fill a run, or the toggle is a way to build
+     an exercise that cannot start. */
+  for (const id of ids("conjugation")) {
+    const qs = Q.drillQuestions("conjugation", 10, pool, undefined, true, [id]);
+    ok(qs.length === 10, `conjugation → ${id} still fills a run`, String(qs.length));
+  }
+  for (const id of ids("aspect")) {
+    const qs = Q.drillQuestions("aspect", 10, pool, undefined, false, [id]);
+    ok(qs.length === 10, `aspect → ${id} still fills a run`, String(qs.length));
+  }
+  /* "Which of these is perfective?" is a question about a list and has nothing
+     to write, so a typed run narrowed to it is a chosen run rather than none. */
+  const which = Q.drillQuestions("aspect", 8, pool, undefined, true, ["which"]);
+  ok(which.length === 8 && which.every((q) => !q.typed),
+     "a shape that cannot be written is still asked, as a choice", String(which.length));
+
+  ok(Q.drillQuestions("conjugation", 8, pool, undefined, true, []).length === 8,
+     "nothing ticked is read as everything, never as a dead drill");
+  const both = Q.drillQuestions("conjugation", 20, pool, undefined, true,
+                                ["present", "past", "imperative", "who"]);
+  ok(new Set(both.map((q) => q.table && q.table.title)).size > 1,
+     "and everything ticked still mixes the tables");
 }
 
 /* A drill asks only about the learner's own words when given a pool. */

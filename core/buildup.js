@@ -1,17 +1,19 @@
 /* Word building: a long word said a syllable at a time (the owner, 2026-09-16).
  *
- * It runs **forwards** — «по», «пони», «понима», «понимаю» — because the owner
- * asked for it that way twice, the second time after using the drill.
+ * It runs **backwards** — «ю», «ма́ю», «нима́ю», «понима́ю» — which is Pimsleur's
+ * own direction and the one the owner settled on once the rest of the drill
+ * was right (2026-09-16: *"You can go back to backwards if that's the
+ * approach… I mainly just want to make sure definitions are clear, controls
+ * are in place, the full word is available, and assessment is available"*).
  *
- * The tradeoff is recorded rather than argued, because it is real and it is
- * his to make. Pimsleur's own build-up runs backwards ("ю", "маю", "нимаю"),
- * and the reason is that a fragment anchored at the *end* of the word gets the
- * stress and the final vowel right from the first repetition; building
- * forwards the learner reaches the ending last, having already said the front
- * four times, and a swallowed ending is the commonest way a Russian word comes
- * out wrong. Forwards is easier to follow and reads as "the word so far",
- * which is what he wanted. The direction lives in this one function, so it is
- * a three-line change if the endings start slipping.
+ * The reason the direction matters: a fragment anchored at the *end* of the
+ * word gets the stress and the final vowel right from the first repetition,
+ * and every step adds to something already correct. Forwards, the learner
+ * reaches the ending last, having said the front four times — and a swallowed
+ * ending is the commonest way a Russian word comes out wrong.
+ *
+ * The direction lives in this one function. It has now been changed twice, so
+ * it is the *drill around it* that carries the value, not the direction.
  *
  * Nothing here is vocabulary. Like `pairDrill` in core/alphabet.js, these
  * questions carry no lemma index: pronouncing «понимаю» is not the same claim
@@ -89,12 +91,12 @@ export function syllables(word) {
   return out.filter((s) => s.length);
 }
 
-/* The fragments: the first syllable, then the first two, up to the whole word.
+/* The fragments: the last syllable, then the last two, up to the whole word.
    A word of one syllable has nothing to build and returns just itself. */
 export function buildup(word) {
   const syl = syllables(word);
   const out = [];
-  for (let i = 1; i <= syl.length; i++) out.push(syl.slice(0, i).join(""));
+  for (let i = syl.length - 1; i >= 0; i--) out.push(syl.slice(i).join(""));
   return out;
 }
 

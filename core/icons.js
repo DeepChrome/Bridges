@@ -42,9 +42,11 @@ export const ACTIVITY_ICONS = {
   shadow: "M12 4a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3zM6 11a6 6 0 0 0 12 0M12 17v3M9 20h6",
   talk: "M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1zM8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01",
   letters: "M5 19l6-14h2l6 14M8.5 14h7",
-  /* Word building: three blocks growing left to right, which is the drill —
-     one syllable, then two, then the word. The direction matters, and it is
-     the direction core/buildup.js runs in. */
+  /* Word building: three blocks, each taller than the last — one syllable,
+     then two, then the whole word. It says "a thing being built up" and
+     deliberately does not try to say which end it builds from; an icon that
+     encoded the direction would be a second place to keep that fact in step
+     with core/buildup.js, which has now changed twice. */
   buildup: "M4 16h4v4H4zM10 11h4v9h-4zM16 6h4v14h-4z",
   // A word turning into another word: what a case, and a case drill, is.
   cases: "M4 9h11l-3-3M15 9l-3 3M20 15H9l3-3M9 15l3 3",

@@ -8,8 +8,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { DrillList } from "../src/screens/Flows";
-import { STAGES, lessonCount } from "../src/data";
-import { Q } from "../src/questions";
+import { STAGES, lessonCount, drillPool, DRILL_POOL_MIN, DRILL_POOL_STEPS } from "../src/data";
+import { Q, DRILL_N } from "../src/questions";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const base = {
@@ -58,7 +58,18 @@ describe("drills open with the route", () => {
     await screen.findByText("Conjugation");
     expect(screen.getByText("Put a verb with the right person")).toBeTruthy();
     fireEvent.press(screen.getByTestId("drill-conjugation"));
-    expect(nav.navigate).toHaveBeenCalledWith("Drill", { type: "conjugation" });
+    /* Through the focus screen, because conjugation has something to narrow —
+       a tense, or reading a form (the owner, 2026-09-16). A drill with nothing
+       to narrow still goes straight in, which the stress row proves below. */
+    expect(nav.navigate).toHaveBeenCalledWith("DrillSetup", { type: "conjugation" });
+  });
+
+  it("…but a drill with nothing to choose between skips the question", async () => {
+    await withState({ unit: through(2) });
+    await screen.findByText("Stress");
+    fireEvent.press(screen.getByTestId("drill-stress"));
+    // A setup screen offering one choice is a tap that buys nothing.
+    expect(nav.navigate).toHaveBeenCalledWith("Drill", { type: "stress" });
   });
 
   it("developer mode opens every drill", async () => {
@@ -81,5 +92,31 @@ describe("drills open with the route", () => {
       Q.drillQuestions("aspect", 20, null).forEach((q) => wide.add(key(q)));
     }
     expect(wide.size).toBeGreaterThan(narrow.size * 3);
+  });
+
+  /* …and a drill the route *has* opened still has to fill a run.
+   *
+   * `drillPool` puts a floor under the number of words, which is not a floor
+   * under the number of questions: measured with tools/audit_banks.mjs on
+   * 2026-09-16, a 40-word pool yields **seven** distinct aspect questions in
+   * total, because the drill needs verbs carrying a recorded partner. Ten
+   * sittings is then the same seven questions — the owner's "not just the same
+   * 10 questions every time". DrillFlow steps the pool further along the route
+   * until a full run comes back. */
+  it("fills a run even where the learner's own words cannot", async () => {
+    const st = { ...base, unit: through(8) };
+    const floor = drillPool(st, DRILL_POOL_MIN);
+    expect(floor.length).toBeGreaterThanOrEqual(DRILL_POOL_MIN);
+    const thin = Q.drillQuestions("aspect", DRILL_N, floor, undefined, true);
+    expect(thin.length).toBeLessThan(DRILL_N);          // the defect, still there
+
+    // What DrillFlow does with it.
+    let filled = [];
+    for (const min of DRILL_POOL_STEPS) {
+      const p = min === Infinity ? null : drillPool(st, min);
+      filled = Q.drillQuestions("aspect", DRILL_N, p, undefined, true);
+      if (filled.length >= DRILL_N) break;
+    }
+    expect(filled.length).toBe(DRILL_N);
   });
 });

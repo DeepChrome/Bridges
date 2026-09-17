@@ -127,14 +127,19 @@ export function Build({ q, r }) {
         ) : null}
       </View>
 
-      {/* One dot per syllable, filling from the left — the shape of the method
-          is the shape of the progress, and it runs the way the word does. */}
+      {/* One dot per syllable, filling from the **right** — the shape of the
+          method is the shape of the progress, and the build runs from the end
+          of the word toward its front (core/buildup.js). Filling them left to
+          right would draw the opposite of what the learner is hearing. */}
       <View style={{ flexDirection: "row", justifyContent: "center", gap: 6, marginBottom: 18 }}>
-        {steps.map((_, k) => (
-          <View key={k} testID={!intro && k <= at ? "build-dot-on" : "build-dot-off"}
-                style={{ width: 8, height: 8, borderRadius: 4,
-                         backgroundColor: !intro && k <= at ? t.brand : t.line }} />
-        ))}
+        {steps.map((_, k) => {
+          const lit = !intro && k >= steps.length - 1 - at;
+          return (
+            <View key={k} testID={lit ? "build-dot-on" : "build-dot-off"}
+                  style={{ width: 8, height: 8, borderRadius: 4,
+                           backgroundColor: lit ? t.brand : t.line }} />
+          );
+        })}
       </View>
 
       <Pressable

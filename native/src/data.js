@@ -388,8 +388,14 @@ export const dueCount = (st) => dueCards(st.seen, Date.now(), st.learnAhead).len
    along the route until there are enough to drill. A fresh learner gets the first
    units' words in path order; nobody gets the genitive plural of a word they have
    never seen. DRILL_POOL_MIN is the floor below which the route is added. */
+/* …and `min` is a floor on *words*, which is not the same as a floor on
+   questions. Measured with tools/audit_banks.mjs on 2026-09-16: at 40 words the
+   aspect drill can build **seven** distinct questions in total, because it needs
+   verbs that carry a recorded partner and there are barely any that early. The
+   caller raises the floor until the run actually fills (DrillFlow), rather than
+   this guessing a number that happens to work for one drill. */
 export const DRILL_POOL_MIN = 40;
-export function drillPool(st) {
+export function drillPool(st, min = DRILL_POOL_MIN) {
   const out = [];
   const have = new Set();
   const add = (i) => { if (i >= 0 && !have.has(i)) { have.add(i); out.push(i); } };
@@ -401,16 +407,23 @@ export function drillPool(st) {
     return same !== undefined ? same : (hits.length ? hits[0] : -1);
   };
   for (const w of Object.keys(st.seen || {})) add(exact(w));
-  if (out.length >= DRILL_POOL_MIN) return out;
+  if (out.length >= min) return out;
   // The route in order: every unit up to and including where the learner is,
   // then onward until the floor is met.
   const here = nextLesson(st);
   const route = [];
   for (const s of STAGES) route.push(s.core, ...s.branches);
   const at = here ? route.indexOf(here.unit) : route.length - 1;
-  for (let k = 0; k < route.length && out.length < DRILL_POOL_MIN; k++) {
-    if (k > at && out.length >= DRILL_POOL_MIN) break;
+  for (let k = 0; k < route.length && out.length < min; k++) {
+    if (k > at && out.length >= min) break;
     for (const i of route[k].w) add(i);
   }
   return out;
 }
+
+/* The floors DrillFlow walks up when a run will not fill. Each step reaches
+   further along the route; the last is the whole curriculum, which is where a
+   drill the learner's own words genuinely cannot supply has to end up — asking
+   the same seven questions every sitting is worse than asking about a word
+   they will meet next week. */
+export const DRILL_POOL_STEPS = [DRILL_POOL_MIN, 150, 400, Infinity];

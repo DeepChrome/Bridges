@@ -62,12 +62,14 @@ beforeEach(async () => {
 afterEach(async () => { await flushState(); });
 
 describe("building a word", () => {
-  it("ships a drill whose fragments grow forwards", () => {
+  it("ships a drill whose fragments grow backwards", () => {
     expect(steps).toHaveLength(1);
     const f = buildup(WORD.ru);
-    expect(f[0]).toBe("по");
+    expect(f[0]).toBe("ю");
     expect(f[f.length - 1]).toBe(WORD.ru);
-    expect(f.every((x, i) => i === 0 || x.startsWith(f[i - 1]))).toBe(true);
+    // Every step ends where the word ends — that is what backwards means, and
+    // it is the whole reason the technique works (core/buildup.js).
+    expect(f.every((x, i) => i === 0 || x.endsWith(f[i - 1]))).toBe(true);
     expect(steps[0].steps).toEqual(f);
     // Off unless the learner asked for it on the way in (Flows.js).
     expect(steps[0].listen).toBe(false);
@@ -82,9 +84,9 @@ describe("building a word", () => {
     await waitFor(() => expect(global.__spoke.filter((s) => s === whole)).toHaveLength(2));
     // The whole word is what is on the card while it is being read, not a syllable.
     expect(screen.getByTestId("build-fragment")).toHaveTextContent(WORD.ru);
-    // …and then the first syllable, on its own.
-    await waitFor(() => expect(screen.getByTestId("build-fragment")).toHaveTextContent("по"));
-    await waitFor(() => expect(global.__spoke[global.__spoke.length - 1]).toBe("по"));
+    // …and then the last syllable, on its own.
+    await waitFor(() => expect(screen.getByTestId("build-fragment")).toHaveTextContent("ю"));
+    await waitFor(() => expect(global.__spoke[global.__spoke.length - 1]).toBe("ю"));
   });
 
   it("keeps the word and its meaning on screen the whole way", async () => {
@@ -127,7 +129,7 @@ describe("building a word", () => {
     }
     expect(global.__spoke.length).toBe(before + 4);
     // Still on the first fragment: hearing it again is not progress.
-    expect(screen.getByTestId("build-fragment")).toHaveTextContent("по");
+    expect(screen.getByTestId("build-fragment")).toHaveTextContent("ю");
   });
 
   /* "Introduce controls (like skipping a word, going back to the previous

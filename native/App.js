@@ -44,7 +44,7 @@ import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import { setHaptics } from "./src/haptics";
 import {
-  VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
+  VocabFlow, QuizFlow, DrillList, DrillFlow, DrillSetup, PlacementFlow, SectionFlow,
   QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, ListeningList, PassageFlow, SoundDrillFlow,
   ShadowFlow, BuildDrillFlow,
 } from "./src/screens/Flows";
@@ -207,6 +207,9 @@ function PracticeStack() {
                     options={{ title: "Word building" }} />
       {/* Hear a sentence and say it back (ROADMAP P10.6). */}
       <Stack.Screen name="Shadow" component={ShadowFlow} options={{ title: "Shadowing" }} />
+      {/* What a drill will ask about, before it asks anything (Flows.js). */}
+      <Stack.Screen name="DrillSetup" component={DrillSetup}
+                    options={{ title: "What to practise" }} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <HeaderRight navigation={navigation} route={route} />,

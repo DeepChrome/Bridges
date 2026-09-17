@@ -1284,10 +1284,41 @@ export function makeQuestions(env) {
     return null;
   }
 
+  /* What the learner ticked before starting, as a Set of focus ids — or nothing,
+     which means everything (the owner, 2026-09-16: *"imagine I want to focus on
+     imperative only, then I can just ensure that's checked"*). An empty set is
+     read as "everything" too: a screen where the learner has unticked the last
+     box must still be able to ask a question, and the setup screen keeps at
+     least one ticked anyway. */
+  const allows = (only, id) => !only || !only.size || only.has(id);
+
+  /* The question shapes a drill can be narrowed to. Dynamic where the route
+     decides it — the cases a chapter-3 learner may be asked are the cases the
+     route has introduced (`formsIntroduced`), not all six. Empty means the
+     drill has nothing to narrow and the setup screen is skipped for it. */
+  function drillFocus(type, units) {
+    if (type === "conjugation") {
+      return [{ id: "present", name: "Present / future" },
+              { id: "past", name: "Past" },
+              { id: "imperative", name: "Imperative" },
+              { id: "who", name: "Whose form is this?" }];
+    }
+    if (type === "aspect") {
+      return [{ id: "partner", name: "Name the partner" },
+              { id: "which", name: "Which aspect is it?" }];
+    }
+    if (type === "cases" || type === "agreement") {
+      const rows = [];
+      for (const c of formsIntroduced(units || [])) if (!rows.includes(c.row)) rows.push(c.row);
+      return rows.map((r) => ({ id: r, name: r }));
+    }
+    return [];
+  }
+
   /* `cells` ({ row, col } pairs, from formsIntroduced) limits what may be asked
      for to the cases the route has taught; the wrong answers still come from
-     the whole table. */
-  function qCases(cells, typed) {
+     the whole table. `only` narrows it further, to the cases the learner ticked. */
+  function qCases(cells, typed, only) {
     const w = pickWhere((x) => x.p === "noun" && tableTitled(x, /Declension/));
     if (!w) return null;
     const t = tableTitled(w, /Declension/);
@@ -1302,7 +1333,8 @@ export function makeQuestions(env) {
     // Never ask for the form already on screen: the headword is usually the
     // nominative singular, and asking for it answers itself.
     const askable = opts.filter((o) => fold(o.label) !== fold(w.w)
-      && (!cells || cells.some((c) => c.row === t.rows[o.ri][0] && c.col === t.columns[o.ci + 1])));
+      && (!cells || cells.some((c) => c.row === t.rows[o.ri][0] && c.col === t.columns[o.ci + 1]))
+      && allows(only, t.rows[o.ri][0]));
     if (!askable.length) return null;
     const target = askable[Math.floor(Math.random() * askable.length)];
     const what = `${t.rows[target.ri][0].toLowerCase()} ${t.columns[target.ci + 1].toLowerCase()}`;
@@ -1591,9 +1623,18 @@ export function makeQuestions(env) {
   /* Writing the partner is the only one of the two shapes that can be written:
      "which of these is perfective?" is a question about a list, and there is
      nothing to produce. A typed run is therefore all partners. */
-  const qAspect = (cells, typed) => (typed
-    ? qAspectPartner(cells, true) || qAspectWhich()
-    : oneOf([qAspectWhich, qAspectPartner]));
+  const qAspect = (cells, typed, only) => {
+    const partner = allows(only, "partner"), which = allows(only, "which");
+    if (typed) {
+      // Writing the partner is the only shape that can be written, so a typed
+      // run narrowed to "which aspect is it?" is a chosen run — saying so with
+      // a question rather than with nothing is the honest answer.
+      if (!partner) return qAspectWhich();
+      return qAspectPartner(cells, true) || (which ? qAspectWhich() : null);
+    }
+    if (partner && which) return oneOf([qAspectWhich, qAspectPartner]);
+    return partner ? qAspectPartner(cells, false) : qAspectWhich();
+  };
 
   /* Agreement in any case the adjective declines for, not the nominative alone.
      The noun is shown in that case too — «___ кни́ге» wants «но́вой» — so the
@@ -1603,7 +1644,7 @@ export function makeQuestions(env) {
      failed whenever two genders share a form, which in the oblique cases they
      usually do. */
   const GENDER_COL = { m: "Masculine", f: "Feminine", n: "Neuter" };
-  function qAgreement(_cells, typed) {
+  function qAgreement(_cells, typed, only) {
     const adj = pickWhere((x) => x.p === "adjective" && tableTitled(x, /Declension/));
     // …but not a plural-only noun: «часы» is plural, and «но́вый часы» is not
     // agreement.
@@ -1618,7 +1659,7 @@ export function makeQuestions(env) {
     // the prompt.
     const rows = shuffle(t.rows.filter((r) => {
       const nr = nt.rows.find((x) => x[0] === r[0]);
-      return r[col] && r[col].length && nr && nr[1] && nr[1].length;
+      return r[col] && r[col].length && nr && nr[1] && nr[1].length && allows(only, r[0]);
     }));
     if (!rows.length) return null;
     const row = rows[0];
@@ -1644,15 +1685,24 @@ export function makeQuestions(env) {
   /* Conjugation across all three of a verb's tables — present or future, past,
      imperative — and both directions. Asking only the present, as this did,
      left a chapter-7 learner drilling a tense they had moved past. */
-  const VERB_TABLES = [/^Present/, /^Past/, /^Imperative/];
-  function verbTable() {
-    const re = VERB_TABLES[Math.floor(Math.random() * VERB_TABLES.length)];
+  /* A verb's three tables, each with the focus id that selects it. "Present"
+     covers a perfective verb's future too — one table, two names, and the
+     question already says which it is asking for. */
+  const VERB_TABLES = [{ id: "present", re: /^Present/ }, { id: "past", re: /^Past/ },
+                       { id: "imperative", re: /^Imperative/ }];
+  function verbTable(only) {
+    /* Narrowed to a tense, that is the tense. Narrowed to *only* "whose form is
+       this?" — which is a shape, not a tense — every table is fair game again:
+       the learner asked for the reading question, not for no questions. */
+    const able = VERB_TABLES.filter((x) => allows(only, x.id));
+    const from = able.length ? able : VERB_TABLES;
+    const re = from[Math.floor(Math.random() * from.length)].re;
     const w = pickWhere((x) => x.p === "verb" && tableTitled(x, re));
     return w ? { w, t: tableTitled(w, re) } : null;
   }
 
-  function qConjugationForm(_cells, typed) {
-    const pick = verbTable();
+  function qConjugationForm(_cells, typed, only) {
+    const pick = verbTable(only);
     if (!pick) return null;
     const { w, t } = pick;
     /* Never ask for the word that is on the screen.
@@ -1705,8 +1755,8 @@ export function makeQuestions(env) {
   /* The other direction: here is a form, whose is it? Reading a conjugated verb
      is what the learner does when a sentence arrives, and it is not the same
      skill as producing one. */
-  function qConjugationWho() {
-    const pick = verbTable();
+  function qConjugationWho(_cells, _typed, only) {
+    const pick = verbTable(only);
     if (!pick) return null;
     const { w, t } = pick;
     const rows = t.rows.filter((r) => r[1] && r[1].length);
@@ -1727,9 +1777,19 @@ export function makeQuestions(env) {
 
   /* "Whose form is this?" is read, not produced — the answer is a label, not
      Russian — so a typed run asks only for forms. */
-  const qConjugation = (cells, typed) => (typed
-    ? qConjugationForm(cells, true) || qConjugationWho()
-    : oneOf([qConjugationForm, qConjugationForm, qConjugationWho]));
+  const qConjugation = (cells, typed, only) => {
+    /* "Whose form is this?" is read, not produced — the answer is a label, not
+       Russian — so a typed run asks only for forms unless the learner has
+       narrowed it to exactly that shape. `who` is the shape; the other three
+       ids are tables, and a run may mix them. */
+    const who = allows(only, "who");
+    const forms = VERB_TABLES.some((x) => allows(only, x.id));
+    if (!forms) return who ? qConjugationWho(cells, false, only) : null;
+    if (typed) return qConjugationForm(cells, true, only) || (who ? qConjugationWho(cells, false, only) : null);
+    const shapes = who ? [qConjugationForm, qConjugationForm, qConjugationWho] : [qConjugationForm];
+    const pick = shapes[Math.floor(Math.random() * shapes.length)];
+    return pick(cells, false, only);
+  };
 
   /* Move the stress to each other vowel to build the wrong answers. Any accented
      form counts, not only the headword: «рука́» and «ру́ки» shift, and that shift
@@ -1878,13 +1938,15 @@ export function makeQuestions(env) {
      these is perfective?" and "whose form is this?" are questions about a list —
      so those generators answer with their chosen shape either way, and the
      stress and grammar drills ignore the flag entirely. */
-  function drillQuestions(type, n, pool, cells, typed) {
+  /* `only`: the focus ids the learner ticked (drillFocus), or nothing for all. */
+  function drillQuestions(type, n, pool, cells, typed, only) {
     const out = [];
     const seen = new Set();
     const want = n || DRILL_N;
+    const set = only && only.length ? new Set(only) : null;
     withPool(pool, () => {
       for (let k = 0; k < want * 25 && out.length < want; k++) {
-        const q = GEN[type] && GEN[type](cells, typed);
+        const q = GEN[type] && GEN[type](cells, typed, set);
         if (!q) continue;
         const key = drillKey(q);
         if (seen.has(key)) continue;
@@ -1899,7 +1961,7 @@ export function makeQuestions(env) {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, listeningDrill, lessonPassage, scriptScene, writtenPassage, shadowDrill,
-    customQuiz, formPrompt, formSpec, formsIntroduced,
+    customQuiz, formPrompt, formSpec, formsIntroduced, drillFocus,
     drillsIntroduced, drillOpensAt, passagesFor, passageQuestions, passageFit,
   };
 }

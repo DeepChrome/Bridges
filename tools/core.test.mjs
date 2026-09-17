@@ -1941,6 +1941,40 @@ group("drill focus");
      "and everything ticked still mixes the tables");
 }
 
+/* Gender is what the agreement drill and the chapter's form question read, so
+   a noun the curriculum teaches without one cannot be asked about properly
+   (ROADMAP 13.28). OpenRussian left 18 of them blank; `build_lexicon.py`
+   derives gender from the ending where Russian makes it unambiguous, and
+   refuses where it does not (-ь, plural-only). */
+group("every noun taught has a gender");
+{
+  const taught = new Set();
+  for (const u of UN) for (const i of u.w || []) taught.add(i);
+  const gaps = [...taught].map((i) => L[i]).filter((w) => w && w.p === "noun" && !w.g);
+  /* «деньги» is correct to have none: a plural-only noun has no gender to
+     give, and inventing one would be worse than the gap. */
+  ok(gaps.every((w) => w.pl),
+     "the only nouns without a gender are the plural-only ones",
+     gaps.map((w) => w.b + (w.pl ? " (pl)" : "")).join(", ") || "none");
+  ok(taught.size > 900, `${taught.size} words taught`, String(taught.size));
+
+  /* The derivation, spot-checked on the endings it rests on. A soft sign is
+     genuinely ambiguous («дверь» f, «словарь» m) and must stay unguessed. */
+  const gOf = (bare) => {
+    const hit = (IX[fold(bare)] || [])[0];
+    return hit === undefined ? null : L[hit].g;
+  };
+  ok(gOf("сын") === "m" && gOf("рыба") === "f" && gOf("крыло") === "n",
+     "a consonant is masculine, -а feminine, -о neuter",
+     `${gOf("сын")}/${gOf("рыба")}/${gOf("крыло")}`);
+  ok(gOf("время") === "n" && gOf("имя") === "n",
+     "…and the ten nouns in -мя are neuter rather than feminine",
+     `${gOf("время")}/${gOf("имя")}`);
+  ok(gOf("дверь") === "f" && gOf("словарь") === "m",
+     "a soft sign is never guessed — these come from the source",
+     `${gOf("дверь")}/${gOf("словарь")}`);
+}
+
 /* A gap at the start of a sentence used to capitalise its own answer
    (ROADMAP 13.15). The gap-fill takes the answer from the sentence exactly as
    written, and the distractors from the paradigm and the index, which are

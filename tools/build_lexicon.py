@@ -164,6 +164,61 @@ class Builder:
         self.db = db
         self.next_id = 0
         self.stats = {}
+        # Nouns whose gender the source left blank and the ending settled
+        # (ROADMAP 13.28). Counted so a rebuild says how much was inferred.
+        self.n_gender_derived = 0
+
+    # ------------------------------------------------------------------ gender
+
+    # The ten neuter nouns in -мя. They end in -я and are not feminine, so the
+    # ending rule below has to know them by name; there are exactly ten and the
+    # list has not changed in a very long time.
+    MYA = {"имя", "время", "знамя", "племя", "семя",
+           "бремя", "стремя", "темя", "вымя", "пламя"}
+
+    @staticmethod
+    def gender_of(bare, row):
+        """The source's gender, or the one the ending makes unambiguous.
+
+        OpenRussian leaves 18 of the curriculum's nouns without one
+        (ROADMAP 13.28), and gender is what the agreement drill and the
+        chapter's form question read — a noun without it cannot be asked about
+        properly. Russian marks gender in the nominative ending clearly enough
+        to derive, *where it is clear*:
+
+            -а -я   feminine        -о -е   neuter        consonant  masculine
+
+        Three refusals, and they are the whole reason this is safe to do:
+
+          - **-ь is genuinely ambiguous** («дверь» f, «словарь» m) and is never
+            guessed. It is left without a gender exactly as before.
+          - **plural-only nouns have no gender to give.** «деньги» is correct
+            to have none, which is why the count is 18 and not 19.
+          - **natural gender beats the ending**: «папа» and «дядя» are
+            masculine. This only runs when the source said nothing at all, and
+            the source has gender for all the common ones, but the refusal is
+            stated so nobody later assumes the ending always wins.
+        """
+        stated = (row.get("gender") or "").strip()
+        if stated:
+            return stated
+        if as_int(row.get("pl_only")):
+            return None
+        w = fold(bare)
+        if not w or " " in w:
+            return None
+        if w in Builder.MYA:
+            return "n"
+        last = w[-1]
+        if last in "ая":
+            return "f"
+        if last in "ое":
+            return "n"
+        if last == "ь" or last in "иуыэю":
+            return None          # soft sign, or an indeclinable loan: not guessed
+        if last.isalpha():
+            return "m"
+        return None
 
     def load(self, filename, file_pos, meta_cols):
         path = RAW / filename
@@ -185,12 +240,17 @@ class Builder:
                 # data/curated/stress.json fills the ones the curriculum teaches.
                 if ACUTE not in unicodedata.normalize("NFD", accented) and "ё" not in accented:
                     accented = STRESS.get(fold(bare), accented)
+                # Gender from the source, or from the ending where Russian
+                # makes it unambiguous (ROADMAP 13.28).
+                gender = self.gender_of(bare, row) if pos == "noun" else (row.get("gender") or None)
+                if pos == "noun" and gender and not (row.get("gender") or "").strip():
+                    self.n_gender_derived += 1
                 self.db.execute(
                     "insert into lemmas (id, bare, key, accented, pos, gender, animate,"
                     " aspect, partner, indeclinable, sg_only, pl_only, en, de)"
                     " values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (lid, bare, fold(bare), accented, pos,
-                     row.get("gender") or None, as_int(row.get("animate")),
+                     gender, as_int(row.get("animate")),
                      row.get("aspect") or None, clean_partner(row.get("partner")),
                      as_int(row.get("indeclinable")), as_int(row.get("sg_only")),
                      as_int(row.get("pl_only")),
@@ -228,7 +288,9 @@ class Builder:
                 n_forms += len(rows_f)
         self.stats[file_pos] = (n_lemmas, n_forms)
         retyped = f"  ({n_retyped} re-typed)" if n_retyped else ""
-        print(f"  {file_pos:<11} {n_lemmas:>7,} lemmas  {n_forms:>9,} form entries{retyped}")
+        derived = f"  ({self.n_gender_derived} genders from the ending)" \
+            if file_pos == "noun" and self.n_gender_derived else ""
+        print(f"  {file_pos:<11} {n_lemmas:>7,} lemmas  {n_forms:>9,} form entries{retyped}{derived}")
 
 
     def load_curated(self, path):

@@ -240,6 +240,21 @@ export function makeQuestions(env) {
     return { ex: pick.ex, token: pick.token };
   }
 
+  /* `s`, cased like `sample`'s first letter.
+   *
+   * Both directions, because the tell runs both ways: a sentence-initial gap
+   * gives the answer a capital the distractors lack, and a mid-sentence gap
+   * whose distractor happens to be a proper noun gives *that* one away
+   * instead. Only the first letter is touched — an all-caps word is a word,
+   * not a case to normalise. */
+  const casedLike = (sample, s) => {
+    const str = String(s || "");
+    const first = String(sample || "").charAt(0);
+    if (!first || !str) return str;
+    const upper = first === first.toUpperCase() && first !== first.toLowerCase();
+    return (upper ? str.charAt(0).toUpperCase() : str.charAt(0).toLowerCase()) + str.slice(1);
+  };
+
   /* The gap replaces the token as a whole word, never a substring: «в» must not
      open a hole inside «явление». */
   function gapped(ru, token) {
@@ -385,10 +400,20 @@ export function makeQuestions(env) {
           }
         }
         const form = describeForm(w, token);
+        /* Every option cased the way the gap needs it (ROADMAP 13.15).
+           The answer is the form exactly as the sentence spelled it, and the
+           distractors come from the paradigm and the index, which are
+           lowercase — so a gap at the start of a sentence handed the answer a
+           capital letter and the other three none. «_____ Ду́ма провела́…»
+           offered «Госуда́рственная» against three lowercase forms, which is a
+           free elimination for somebody who reads no Russian at all. Found
+           reading the Phase 0 walkthrough shots, 2026-09-15. */
+        const opts = [{ label: token, right: true, cyr: true }].concat(wrong)
+          .map((o) => ({ ...o, label: casedLike(token, o.label) }));
         return {
           kind: e.t, i: e.i, ask: "Fill the gap",
           prompt: gapped(e.ex.ru, token), sub: e.ex.en, cyr: true,
-          options: shuffle([{ label: token, right: true, cyr: true }].concat(wrong)),
+          options: shuffle(opts),
           reveal: e.ex.ru, formNote: form ? `«${token}» is ${form.text.toLowerCase()}` : null,
         };
       }

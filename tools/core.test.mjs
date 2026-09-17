@@ -1941,6 +1941,45 @@ group("drill focus");
      "and everything ticked still mixes the tables");
 }
 
+/* A gap at the start of a sentence used to capitalise its own answer
+   (ROADMAP 13.15). The gap-fill takes the answer from the sentence exactly as
+   written, and the distractors from the paradigm and the index, which are
+   lowercase — so «_____ Ду́ма провела́…» offered «Госуда́рственная» against
+   three lowercase forms. Measured at **10 % of gap-fills** before the fix with
+   `tools/audit_options.mjs --sample 1500`, 0 % after. */
+group("a gap gives nothing away by its capital");
+{
+  const caps = (s) => {
+    const c = String(s).trim().charAt(0);
+    return !!c && c === c.toUpperCase() && c !== c.toLowerCase();
+  };
+  let asked = 0, tell = 0, initial = 0;
+  // Distractors come from anywhere — a wrong option needs no acquaintance.
+  const everything = Array.from({ length: L.length }, (_, n) => n);
+  for (let k = 0; k < 900; k++) {
+    const i = Math.floor(Math.random() * L.length);
+    const c = Q.clozeFor(i);
+    if (!c) continue;
+    const q = Q.present({ t: "cloze", i, ex: c.ex, token: c.token, pool: everything });
+    if (!q || !q.options) continue;
+    asked++;
+    const up = q.options.filter((o) => caps(o.label)).length;
+    const right = q.options.find((o) => o.right);
+    if (caps(c.token)) initial++;
+    /* The tell is the **answer** standing alone in its case, either way round.
+       A distractor standing alone is a different (much smaller) thing and
+       happens legitimately — a form beginning with a digit or a Latin letter
+       cannot be case-matched at all («SMS-сообщение»). Keyed on `right`, as
+       tools/audit_options.mjs is. */
+    if (right && ((caps(right.label) && up === 1)
+                  || (!caps(right.label) && up === q.options.length - 1))) tell++;
+  }
+  ok(asked > 200, `${asked} gap-fills drawn`, String(asked));
+  ok(initial > 5, "…including some whose gap is at the start of the sentence",
+     `${initial} of ${asked}`);
+  ok(tell === 0, "no option stands alone by its capital letter", `${tell} of ${asked}`);
+}
+
 /* The app says when something opens, because twelve things open along the
    route and none of them used to (core/openings.js, 2026-09-17). */
 group("what has just opened");

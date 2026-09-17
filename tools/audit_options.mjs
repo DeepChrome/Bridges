@@ -158,6 +158,21 @@ function tells(q) {
   const cyr = opts.filter(isCyr).length;
   if ((isCyr(right) && cyr === 1) || (!isCyr(right) && cyr === opts.length - 1)) out.push("script");
 
+  /* case: the only option that starts with a capital, or the only one that does
+     not. A gap-fill takes its answer from the sentence exactly as written, so a
+     gap at the start of a sentence used to hand the answer a capital letter
+     while the distractors — drawn from the paradigm and the index — stayed
+     lowercase. «_____ Ду́ма провела́…» against three lowercase forms is a free
+     elimination for a learner who reads no Russian (ROADMAP 13.15). Nothing
+     measured this until the walkthrough shots were read by eye. */
+  const caps = (s) => {
+    const c = String(s).trim().charAt(0);
+    return !!c && c === c.toUpperCase() && c !== c.toLowerCase();
+  };
+  const upper = opts.filter(caps).length;
+  if (opts.length >= 3 && ((caps(right) && upper === 1)
+                           || (!caps(right) && upper === opts.length - 1))) out.push("case");
+
   /* same: two options that mean the same thing, differing only in how they are
      written. A scene's wrong answers are other sentences' English, and the
      collection holds one English over two Russian sentences often enough to
@@ -228,7 +243,7 @@ function sampleQuiz() {
   return out;
 }
 
-const TELLS = ["root", "alone", "length", "script", "dupes", "same"];
+const TELLS = ["root", "alone", "length", "script", "case", "dupes", "same"];
 
 /* A scene is one step holding five questions of its own, so its options were
    invisible to this until now — the very place a second correct answer was

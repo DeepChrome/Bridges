@@ -1,0 +1,27 @@
+# The credits screen (rule 20.10 — attribution is a licence condition).
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\credits.txt -Device emulator-5554
+
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+tap:^Skip$
+wait:2
+tap:^Start from the beginning$
+wait:3
+
+tap:Your profile
+wait:2
+tap:^Settings$
+wait:2
+scroll
+scroll
+tap:^Credits$
+wait:3
+shot:A0-credits
+expect:CC BY-SA 4.0
+expect:Wikimedia Commons
+scroll
+shot:A1-credits-software

@@ -47,7 +47,7 @@ function Stat({ value, label, first }) {
 }
 
 
-function Settings({ visible, onClose, onLab, onTour }) {
+function Settings({ visible, onClose, onLab, onTour, onCredits }) {
   const { st, update, signOut, account, restore } = useSession();
   const t = useTheme();
   const [cache, setCache] = useState(() => cacheStats());
@@ -229,6 +229,16 @@ function Settings({ visible, onClose, onLab, onTour }) {
                   <Muted>Tap to hear</Muted>
                   <Choice testID="cue-choice" options={CUE_NAMES} value={st.cue || "bell"} style={{ marginTop: 8 }}
                           onPick={(id) => { previewCue(id); update((p) => ({ ...p, cue: id })); }} />
+                </View>
+              </Row>
+              {/* An obligation, not a feature (rule 20.10): OpenRussian,
+                  Tatoeba and Wiktionary each require the credit to travel with
+                  the material, and the native app carried none of it until
+                  2026-09-17. */}
+              <Row testID="open-credits" onPress={() => { onClose(); onCredits(); }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Credits</Text>
+                  <Muted>Where the words, voices and pictures came from</Muted>
                 </View>
               </Row>
               <Row onPress={() => { onClose(); onTour(); }}>
@@ -438,7 +448,8 @@ export default function You({ navigation }) {
 
       <Settings visible={settings} onClose={() => setSettings(false)}
                 onLab={() => navigation.navigate("SttLab")}
-                onTour={() => navigation.navigate("Tour")} />
+                onTour={() => navigation.navigate("Tour")}
+                onCredits={() => navigation.navigate("Credits")} />
     </Screen>
   );
 }

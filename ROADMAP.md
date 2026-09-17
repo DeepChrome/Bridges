@@ -875,6 +875,29 @@ a hard problem:
   needs the phone plugged in and `adb shell am start -W`; it was unplugged when
   this was run.
 
+### Phase 7 pre-flight, 2026-09-17 — `docs/play-preflight.md`
+
+Audited against the built artifacts. Three blockers, none of them code:
+
+- **13.39 — the shipped build carries his Worker token in plaintext.** Fine
+  while the only install is his; a public listing means anyone can spend his
+  Anthropic budget. Recommended: ship the first public release with the AI
+  features unconfigured (no code change — `feedback.js` already answers
+  "unconfigured" and every call site handles it), and add a first-run token
+  endpoint later if the tutor proves to be the draw.
+- **13.40 — the Play account ($25) and its closed-testing period.** His to
+  open, and the long pole: start it first, finish everything else while it runs.
+- **13.41 — an upload key that is not `debug.keystore`.** Play refuses a
+  debug-signed upload. Five minutes to generate, and it must be backed up off
+  the machine — losing it locks him out of updating his own listing.
+
+Closed in the same pass: **13.8** (a plain APK is 102 MB and over the limit;
+the app bundle delivers ~66 MB to an arm64 phone — ship the AAB),
+`SYSTEM_ALERT_WINDOW` removed from the manifest, and the attribution
+obligation (rule 20.10) finally met in the native app — Settings → Credits,
+generated from the payload's `meta` rows and from `tools/build_notices.mjs`
+rather than typed. `docs/privacy.md` written and needs a public URL.
+
 ## Phase 12 — What is actually left (2026-09-10)
 
 **Superseded by Phase 13 above; kept because the reasoning still reads.**

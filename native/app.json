@@ -19,6 +19,9 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#4D45E6",
         "foregroundImage": "./assets/android-icon-foreground.png",

@@ -50,7 +50,7 @@ export const TAB_BAR_SCREENS = [
   "Episodes", "Read",                                  // Immerse
   "Cards",                                             // Study
   "Words",                                             // Search
-  "You", "Stats",                                      // in every stack
+  "You", "Stats", "Credits",                           // in every stack
 ];
 
 const SET = new Set(RUNS);

@@ -31,6 +31,7 @@ import Search from "./src/screens/Search";
 import Study from "./src/screens/Study";
 import You from "./src/screens/You";
 import Stats from "./src/screens/Stats";
+import Credits from "./src/screens/Credits";
 import { UnitScreen, LessonScreen } from "./src/screens/Unit";
 import { Immerse, Video } from "./src/screens/Misc";
 import { Gate } from "./src/screens/Gate";
@@ -198,6 +199,7 @@ function LearnStack() {
                     options={{ title: "Placement" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
+      <Stack.Screen name="Credits" component={Credits} options={{ title: "Credits" }} />
     </Stack.Navigator>
   );
 }
@@ -244,6 +246,7 @@ function PracticeStack() {
                     })} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
+      <Stack.Screen name="Credits" component={Credits} options={{ title: "Credits" }} />
     </Stack.Navigator>
   );
 }
@@ -257,6 +260,7 @@ function ImmerseStack() {
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
+      <Stack.Screen name="Credits" component={Credits} options={{ title: "Credits" }} />
     </Stack.Navigator>
   );
 }
@@ -267,6 +271,7 @@ function StudyStack() {
       <Stack.Screen name="Cards" component={Study} options={{ title: "Study" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
+      <Stack.Screen name="Credits" component={Credits} options={{ title: "Credits" }} />
     </Stack.Navigator>
   );
 }
@@ -277,6 +282,7 @@ function SearchStack() {
       <Stack.Screen name="Words" component={Search} options={{ title: "Search" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
+      <Stack.Screen name="Credits" component={Credits} options={{ title: "Credits" }} />
     </Stack.Navigator>
   );
 }

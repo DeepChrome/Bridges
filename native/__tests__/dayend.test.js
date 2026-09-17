@@ -105,13 +105,31 @@ describe("what it costs", () => {
      on `seen` would be code for a problem that does not exist (§12). What is
      worth having is the budget, written down and enforced, so a change that
      makes this expensive is a change that fails. */
+  /* **The fastest run, not the mean** (ROADMAP 13.35).
+   *
+   * This asserted the mean of twenty calls and failed once in a full
+   * 60-suite run while passing every time on its own — jest runs suites in
+   * parallel across workers, so a wall-clock mean measures how busy the
+   * machine was as much as it measures the code. The reflex a flake like that
+   * trains is to re-run and move on, which is how a real defect gets committed
+   * over (§23 has one that cost exactly that).
+   *
+   * Taking the **minimum** is the fix, and it is not a loosened budget: the
+   * scheduler can only ever add time to a call, never remove it, so the
+   * fastest of twenty is the least contaminated estimate of what the code
+   * costs. The number stays at 5 ms against a measured 0.9 ms, so a change
+   * that makes this genuinely expensive still fails. */
   it("scans 10,000 cards in under 5 ms", () => {
     const seen = {};
     for (let i = 0; i < 10000; i++) seen["слово" + i] = { last: 100, due: 200 };
     const st = { seen };
     workedOn(st, 999);                                   // warm
-    const t0 = performance.now();
-    for (let k = 0; k < 20; k++) workedOn(st, 999);
-    expect((performance.now() - t0) / 20).toBeLessThan(5);
+    let best = Infinity;
+    for (let k = 0; k < 20; k++) {
+      const t0 = performance.now();
+      workedOn(st, 999);
+      best = Math.min(best, performance.now() - t0);
+    }
+    expect(best).toBeLessThan(5);
   });
 });

@@ -81,7 +81,7 @@ export function WordList({ unit, words, at, total }) {
       </Animated.View>
       <List>
         {words.map((i, k) => (
-          <WordRow key={i} i={i} unit={unit} last={k === words.length - 1} delay={60 + k * 45} />
+          <WordRow key={i} i={i} unit={unit} delay={60 + k * 45} />
         ))}
       </List>
     </>

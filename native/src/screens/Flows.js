@@ -738,7 +738,7 @@ export function ListeningList({ navigation }) {
           const fit = Q.passageFit(p, known);
           const best = ((st.drills || {})[`passage:${p.id}`] || {}).best;
           return (
-            <Row key={p.id} last={k === shown.length - 1} testID={`passage-${p.id}`}
+            <Row key={p.id} testID={`passage-${p.id}`}
                  onPress={() => navigation.navigate("Passage", { id: p.id })}>
               {/* No tile. Every row here is the same kind of thing, so one icon
                   repeated down the list marks nothing — it is a column of grey

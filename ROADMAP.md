@@ -846,20 +846,18 @@ a hard problem:
   and three quarters are inside 10). The entry still shows everything.
   senses.db and the whole payload were rebuilt; coverage is unchanged at 3,968
   words and 58 % with more than one sense.
-- **13.35 — a wall-clock budget asserted inside a parallel jest run measures the
-  machine.** `dayend.test.js`'s "scans 10,000 cards in under 5 ms" passes alone
-  (0.9 ms, §30u) and failed once in a full 59-suite run, then passed on the
-  re-run. It is not yet a §23 flake with a cause — it is a budget with no
-  headroom for contention. The fix is to measure the work rather than the clock,
-  or to give the budget a margin that says so; weakening the number to silence
-  it is the thing not to do.
-- **13.36 — `last={k === xs.length - 1}` is still computed at six call sites.**
-  §30i says `List` decides which of its rows is last and no call site should
-  claim it; `List` overrides what a row claims, so these are inert rather than
-  wrong — which is exactly why nobody has removed them. Five in `Flows.js` and
-  `Misc.js` over `.map`ped lists, one in `lesson.js`. Dead arithmetic that reads
-  as load-bearing, and the next person to copy the pattern into a list with a
-  conditional row writes the Settings hairline bug again.
+- ~~**13.35**~~ — **done 2026-09-17, and without weakening the number.** The
+  budget asserted the *mean* of twenty calls, and jest runs suites in parallel,
+  so it was measuring how busy the machine was as much as the code. It takes
+  the **fastest** of twenty now: the scheduler can only ever add time to a call,
+  never remove it, so the minimum is the least contaminated estimate of what the
+  code costs. Still 5 ms against a measured 0.9, so a change that makes this
+  genuinely expensive still fails.
+- ~~**13.36**~~ — **done 2026-09-17.** All five removed (the note said six; there
+  were five, and the sixth was ui.js's own comment quoting the pattern). Each was
+  checked to be a direct child of a `List` first, since a row nested inside a
+  wrapper really does keep its own `last`. `WordRow` in `lesson.js` still takes
+  the prop and forwards it — `List` clones it in, which is the point.
 
 ### Phase 6 of the playbook, 2026-09-16 — done, with one decision left to him
 

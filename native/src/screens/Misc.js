@@ -120,7 +120,7 @@ export function Immerse({ navigation }) {
             const watched = videoWatched(st, v);
             const unit = v.unit ? unitById(v.unit) : null;
             return (
-              <Row key={v.id} last={k === shown.length - 1}
+              <Row key={v.id}
                    onPress={() => navigation.navigate("Video", { videoId: v.id })}>
                 <VideoThumb id={v.id} done={watched} />
                 <View style={{ flex: 1 }}>
@@ -330,7 +330,7 @@ export function Video({ route, navigation }) {
             const active = focus && focus.word === word;
             const entry = L[idxOfWord(word)];
             return (
-              <Row key={word} testID={`heard-${word}`} last={k === words.length - 1}
+              <Row key={word} testID={`heard-${word}`}
                    onPress={() => openWord(word)}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 17, fontWeight: "600",
@@ -355,7 +355,7 @@ export function Video({ route, navigation }) {
           <SectionLabel style={{ marginTop: 18 }}>Chapters</SectionLabel>
           <List>
             {v.chapters.map((c, k) => (
-              <Row key={k} last={k === v.chapters.length - 1}
+              <Row key={k}
                    onPress={() => { setPlaying(true); jump(c.t * 1000, 0); }}>
                 <Pill>{clock(c.t * 1000)}</Pill>
                 <Text style={{ flex: 1, color: t.ink, fontSize: 15 }} numberOfLines={2}>

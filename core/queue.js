@@ -11,8 +11,10 @@
  *   3. new cards up to `newPerDay`, less what today already introduced;
  *   4. reviews and new cards interleaved evenly — never all of one then all
  *      of the other;
- *   5. siblings buried: once a word is answered, its other directions wait for
- *      the next session;
+ *   5. siblings buried **for the day**: once a word is answered, its other
+ *      directions wait until tomorrow, as they do in Anki. The card just
+ *      answered still comes back on its learning step — that is the same card,
+ *      not a sibling;
  *   6. capped at `sessionSize`, with what remains reported so the screen can
  *      offer the next chunk;
  *   7. `reviewsPerDay`, past which the day is done;
@@ -25,7 +27,10 @@
 
 import { DIRECTIONS, kindOf, isDue, retrievability, dayOf, readyFor } from "./scheduler.js";
 
-export const QUEUE_DEFAULTS = { newPerDay: 15, sessionSize: 20, reviewsPerDay: 200, learnAhead: 20, minGap: 3 };
+/* `buryNew` and `buryReview` are Anki's two sibling settings, separately,
+   because they cost very different things — see the table in `buildSession`. */
+export const QUEUE_DEFAULTS = { newPerDay: 15, sessionSize: 20, reviewsPerDay: 200, learnAhead: 20,
+                                minGap: 3, buryNew: true, buryReview: false };
 
 /* Today's counts, or a fresh slot when the day has moved on. */
 export function dailyFor(daily, now) {
@@ -83,8 +88,40 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }
   const newLeft = ahead ? Infinity : Math.max(0, o.newPerDay - today.new);
 
   const learning = [], reviews = [], fresh = [];
+  const todayNum = dayOf(now);
   for (const w of words || []) {
     const entry = (seen && seen[w]) || {};
+    /* **Siblings are buried for the day, as Anki buries them** — not merely
+     * for the session, which is all `bury()` below can do.
+     *
+     * A word is three cards (recognise, produce, listen). Answering one used
+     * to leave the other two free to be dealt tomorrow, and the day after, so
+     * a word the learner plainly knows kept arriving on consecutive days
+     * wearing a different hat. The owner, 2026-09-17: *"I shouldn't see the
+     * same basic word multiple days in a row unless the algorithm determines
+     * that it needs to be."*
+     *
+     * **New and due are two settings, because they cost very different
+     * things.** Priced with `simulate.mjs --bury-new/--bury-review`, the
+     * struggling profile, four seeds:
+     *
+     *     buried        leeches            backlog days
+     *     nothing       43.3 (35,45,48,45)  20.8 (18,23,23,19)
+     *     new only      46.3 (44,52,41,48)  22.0 (20,25,21,22)
+     *     everything    50.8 (55,54,47,47)  28.3 (29,29,28,27)
+     *
+     * Burying a **due** card defers work that was owed, and the card comes
+     * back weaker: seven more leeches and seven more backlog days, worse on
+     * every seed. Burying a **new** one defers work that had not started, and
+     * costs about three leeches — inside the seed spread. So new siblings wait
+     * and due ones do not, which is the distinction Anki draws and the one
+     * that buys what he asked for at a price worth paying.
+     *
+     * The card already answered today is **not** buried by this — a learning
+     * step is the same card coming back, which is the algorithm deciding it
+     * needs to, and burying that would break the 1m/10m steps entirely. */
+    const answeredToday = DIRECTIONS.filter((d) => entry[d] && entry[d].lastAt !== undefined
+                                                   && dayOf(entry[d].lastAt) === todayNum);
     /* **Every card that exists is reviewable; `dirs` gates only what is new.**
      *
      * A lesson grades the direction its question exercised (a typed answer is
@@ -98,6 +135,11 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }
     for (const d of DIRECTIONS) {
       const card = entry[d];
       const kind = kindOf(card);
+      /* Buried: another direction of this word was answered today. Which kinds
+         are buried is two settings, as it is in Anki, because they cost very
+         different things — the table in the comment above `buryNew`. */
+      const buried = answeredToday.length && !answeredToday.includes(d);
+      if (buried && (kind === "new" ? o.buryNew : o.buryReview)) continue;
       if (kind === "new") {
         if (!directions.includes(d)) continue;
         /* A word earns produce and listen by holding its recognise card

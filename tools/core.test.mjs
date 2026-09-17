@@ -562,6 +562,65 @@ group("the session");
   ok(newAt[0] >= 3 && newAt[1] - newAt[0] >= 8 && newAt[1] - newAt[0] <= 11, "and are spread through it", newAt.join(","));
   ok(ses.remaining === 113 && reviewsIn.length === 18, "eighteen reviews dealt, 113 left for the next chunk", `${reviewsIn.length} / ${ses.remaining}`);
 
+  /* Siblings are buried for the **day**, as Anki buries them (the owner,
+     2026-09-17: *"I shouldn't see the same basic word multiple days in a
+     row"*). A word is three cards, and answering one used to leave the other
+     two free to arrive tomorrow and the day after. */
+  {
+    const day = S.dayOf(T0);
+    /* Answered an hour ago and scheduled nine days out, which is what a real
+       answered review card looks like — it is not itself due again. */
+    const answered = { dueAt: T0 + 9 * DAY, lastAt: T0 - 3600000, s: 9, d: 5, state: S.REVIEW,
+                       steps: 0, reps: 3, lapses: 0, elapsed: 0, scheduled: 9 };
+    const sibling = { dueAt: T0 - DAY, lastAt: T0 - 9 * DAY, s: 4, d: 5, state: S.REVIEW,
+                      steps: 0, reps: 2, lapses: 0, elapsed: 0, scheduled: 4 };
+    /* **A new sibling waits until tomorrow.** This is the case he actually
+       meets: a word taught today, whose produce and listen cards have just
+       become available, arriving again tomorrow and the day after as something
+       "new". `recognise` answered an hour ago; the other two do not exist yet
+       and the ladder would otherwise deal them. */
+    const one = { dom: { recognise: answered } };
+    const ses = buildSession({ seen: one, words: ["dom"], dirs: S.DIRECTIONS, now: T0,
+                               daily: null, opts: { ...opts, sessionSize: 20 }, rng });
+    ok(ses.items.length === 0,
+       "a word answered today deals none of its new directions",
+       ses.items.map((x) => `${x.direction}:${x.kind}`).join(" ") || "nothing dealt");
+    ok(S.reviewedOn(one.dom, day), "…and it is 'answered today' that does it");
+
+    /* **A due sibling is not buried.** Deferring work already owed is what
+       cost seven leeches and seven backlog days a seed (the table in
+       core/queue.js), so a card the scheduler wants back today still comes. */
+    const due2 = buildSession({ seen: { dom: { recognise: answered, produce: sibling } },
+                                words: ["dom"], dirs: S.DIRECTIONS, now: T0, daily: null, opts, rng });
+    ok(due2.items.length === 1 && due2.items[0].direction === "produce",
+       "…but a sibling that is genuinely due still comes back",
+       due2.items.map((x) => `${x.direction}:${x.kind}`).join(" ") || "nothing");
+
+    /* The card that was answered is not buried by its own answer — a learning
+       step is the same card coming back, which is the scheduler deciding it
+       needs to, and burying that would break the 1m/10m steps. */
+    const step = { dueAt: T0, lastAt: T0 - 600000, s: 0.2, d: 5, state: S.LEARNING,
+                   steps: 1, reps: 1, lapses: 0, elapsed: 0, scheduled: 0 };
+    const mid = buildSession({ seen: { dom: { recognise: step } },
+                               words: ["dom"], dirs: S.DIRECTIONS, now: T0, daily: null, opts, rng });
+    ok(mid.items.length === 1 && mid.items[0].direction === "recognise",
+       "…while the card on its learning step still comes back",
+       mid.items.map((x) => x.direction).join(",") || "nothing");
+
+    /* A word untouched today is unaffected: two due cards, and the third
+       direction arrives as a new one because the recognise card has held long
+       enough for the ladder (LADDER_AT). */
+    const cold = buildSession({ seen: { dom: { recognise: sibling, produce: sibling } },
+                                words: ["dom"], dirs: S.DIRECTIONS, now: T0, daily: null, opts, rng });
+    ok(cold.items.length === 3, "a word not answered today deals every card it owes",
+       cold.items.map((x) => `${x.direction}:${x.kind}`).join(" "));
+    // …and the rule can be turned off, which is how it was priced.
+    const off = buildSession({ seen: one, words: ["dom"], dirs: S.DIRECTIONS, now: T0,
+                               daily: null, opts: { ...opts, buryNew: false, buryReview: false }, rng });
+    ok(off.items.length === 2, "and burying can be turned off, which is how it was priced",
+       off.items.map((x) => `${x.direction}:${x.kind}`).join(" ") || "nothing");
+  }
+
   const only = buildSession({ seen: {}, words: fresh, dirs: ["recognise"], now: T0, daily: null, opts, rng });
   ok(only.items.length === 15 && only.items.every((x) => x.kind === "new") && only.remaining === 0,
      "with nothing due a session is the day's new cards and no more", String(only.items.length));

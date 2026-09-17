@@ -349,12 +349,24 @@ export default function Study({ navigation }) {
   const [shown, setShown] = useState(false);
   const [last, setLast] = useState(null);         // the answer just given, for Undo
 
+  /* What each card in the session looks like, keyed by its Russian.
+   *
+   * The dependency list used to end `st.seen === undefined`, which is a
+   * **constant** — it is `false` on every render — so the map was built once
+   * and never rebuilt as cards were graded. That matters because the `__due__`
+   * set is computed *from* `st.seen`: the session is dealt fresh from
+   * `cardsIn` every time, so it can contain a word the stale map has no face
+   * for, and the card then renders with nothing on it.
+   *
+   * Keyed on what the set actually is, so a grade that changes what is due
+   * rebuilds it. `cardsIn` is a walk over the ticked sets — 1,045 words at the
+   * very most — and it runs on a render, not on a frame. */
   const faces = useMemo(() => {
     const m = {};
     for (const c of cardsIn(st, st.sets)) m[c.b] = c;
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [st.sets, st.decks, st.seen === undefined]);
+  }, [st.sets, st.decks, st.seen]);
   const chosen = Object.keys(faces).length;        // cards in the sets, due or not
 
   const deal = (ahead) => {
@@ -377,7 +389,21 @@ export default function Study({ navigation }) {
 
   const items = session ? session.items : [];
   const item = items[at] || null;
-  const face = item ? faces[item.word] : null;
+  /* A card the session holds but the face map does not know, or one whose
+     Russian is empty, must never reach the screen as a blank card — which is
+     what the owner reported on 2026-09-17. The session is built from the
+     scheduler's own record, so a word can be in it that the ticked sets cannot
+     describe: a deck card whose fields did not parse, or a word left in `seen`
+     by a payload that no longer carries it. Falling back to the word itself
+     means the worst case is a card with no meaning on it rather than a card
+     with nothing at all, and `blank` below says so plainly rather than
+     pretending. */
+  const known = item ? faces[item.word] : null;
+  const face = !item ? null
+    : known && String(known.w || "").trim() ? known
+    : { key: "x" + item.word, w: item.word, b: item.word, e: "",
+        sentence: /\s/.test(String(item.word || "")) };
+  const blank = !!item && !String(face.w || "").trim();
   // The card as it stands now — a re-queued Again is not the card it was
   // when the session was dealt.
   const current = item ? ((st.seen[item.word] || {})[item.direction] || null) : null;
@@ -556,7 +582,16 @@ export default function Study({ navigation }) {
 
           <Animated.View style={flip.style}>
           <Card testID={`card-${item.direction}`} style={{ marginTop: 12, alignItems: "center", paddingVertical: 28 }}>
-            {!flip.face ? <Front face={face} direction={item.direction} /> : (
+            {/* A card with no Russian on it at all. It should not be possible
+                and it happened, so it says what it is instead of showing an
+                empty box — a failure the learner can report is worth more than
+                a silent one (rule 20.7's third exemption). Skip moves past it
+                and grading still works, so the pile is never stuck. */}
+            {blank ? (
+              <Muted testID="card-blank" style={{ textAlign: "center" }}>
+                This card has no word on it
+              </Muted>
+            ) : !flip.face ? <Front face={face} direction={item.direction} /> : (
               <>
                 {item.direction !== "recognise" ? (
                   <>

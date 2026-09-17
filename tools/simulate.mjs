@@ -72,6 +72,12 @@ const LADDER = Number(arg("--ladder", String(LADDER_AT)));
    actually costs is worth being able to measure rather than argue about. */
 const DIRS = arg("--dirs", DIRECTIONS.join(",")).split(",").filter(Boolean);
 
+/* Whether a word answered today buries its other directions until tomorrow, as
+   Anki buries siblings (core/queue.js). On by default; `--bury 0` turns it off,
+   which is how it is priced. */
+const BURY_NEW = arg("--bury-new", "1") !== "0";
+const BURY_REVIEW = arg("--bury-review", "0") !== "0";
+
 /* New cards a day (core/queue.js). Fifteen cards is five *words* when every
    word is three cards, so what this costs is worth pricing rather than
    inheriting from a default written when a word was one card. */
@@ -342,7 +348,7 @@ function simulate(profileName, seed) {
         seen: st.seen, words: words(), dirs: DIRS, now: nowMs(), daily: st.daily,
         opts: { newPerDay: NEW_PER_DAY, sessionSize: QUEUE_DEFAULTS.sessionSize,
                 reviewsPerDay: REVIEW_CAP, learnAhead: 20, ladder: LADDER,
-                scheduler: { fuzz: false } },
+                buryNew: BURY_NEW, buryReview: BURY_REVIEW, scheduler: { fuzz: false } },
         rng: rand,
       });
       if (!s.items.length) break;

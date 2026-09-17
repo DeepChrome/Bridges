@@ -43,6 +43,18 @@ native/ios/
 native/.expo/
 native/coverage/
 
+# Local build output. `native/build-out/` holds the APKs built here and handed
+# to his phone — **101.8 MB of the 167 MB archive** when this was measured on
+# 2026-09-17, which is to say most of it, and an EAS build has no use for an
+# APK a previous build made. Gitignored, but .easignore does not consult
+# .gitignore (see the note at the top), so it has to be named again here.
+native/build-out/
+.expo-export/
+
+# Prose and the content review. Neither is read by the bundler.
+docs/
+review/
+
 # Not part of the app.
 native/__tests__/
 native/jest.setup.js

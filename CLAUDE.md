@@ -3093,6 +3093,7 @@ python tools/build_site.py     # or the full pipeline if data changed
 node tools/check_scripts.mjs --strict   # the written passages: level, coverage, no repeats
 node tools/audio_qa.mjs        # a track per lesson, its hash current, its length sane
 node tools/audit_banks.mjs --pool 150   # how many distinct questions a learner meets (§30ac)
+node tools/eas_upload.mjs      # before any EAS build: archive size, and nothing needed excluded
 node tools/copy.mjs            # labels, not prose (rule 20.7), capped and checked
 node tools/core.test.mjs       # the shared logic: generators, scheduler, state
 node tools/smoke.js            # must be all-pass

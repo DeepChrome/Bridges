@@ -1,0 +1,66 @@
+# Offline — the app with no network at all (docs/PLAYBOOK.md Phase 6).
+#
+# Run it twice: once online for the baseline, once with the radios off.
+#   adb -s emulator-5554 shell svc wifi disable
+#   adb -s emulator-5554 shell svc data disable
+# …and put them back afterwards with `enable`.
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\offline.txt -Device emulator-5554
+#
+# What is expected to work with no network: every lesson and quiz (the device
+# voice reads what the collection's recordings would have), the 168 listening
+# scenarios (their audio is bundled in the APK, §30l), flashcards, every drill,
+# the dictionary, the alphabet. What cannot work is the video library (YouTube),
+# and the three Worker features — Say's written feedback, the chapter task and
+# Talk — which say so rather than hanging.
+
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+tap:^Skip$
+wait:2
+tap:^Start from the beginning$
+wait:3
+shot:95-offline-path
+
+# A listening scenario: its audio is bundled, so it must play with no network.
+tap:^Practice$
+wait:2
+tap:^Conversations$
+wait:3
+shot:97-offline-scenes
+back
+wait:2
+
+# A drill.
+scroll
+tap:^Stress$
+wait:4
+shot:98-offline-drill
+back
+wait:2
+scrolltop
+
+# The dictionary.
+tap:^Search$
+wait:2
+tap:Russian, English or Latin
+type:dom
+wait:3
+shot:99-offline-search
+back
+wait:1
+
+# A lesson last, because a run has no tab bar to leave by and the walk tool
+# has to climb back out of it with the home button instead.
+tap:^Learn$
+wait:2
+tap:^Start \(
+wait:3
+tap:^Continue$
+wait:2
+tap:^Start learning$
+wait:3
+shot:96-offline-lesson

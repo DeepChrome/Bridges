@@ -388,6 +388,48 @@ group("the state as rows");
    are not re-tested here — what is, is the card round trip, the conversion of
    the old shape, what "due" means for each state, and the trouble rule. */
 
+/* Where the day starts (ROADMAP 13.24). It was UTC midnight, which for the
+   owner in Los Angeles is 5 pm: the streak ticked over mid-afternoon, the
+   new-card ration reset while he was at work, and an evening session landed on
+   the next day's square in the calendar. */
+group("where the day starts");
+{
+  const { setDayStart, dayOf: dayOfUtil, today } = await import("../core/util.js");
+  const { dayOf } = await import("../core/scheduler.js");
+  const at = (iso) => Date.parse(iso);
+
+  /* One function for the whole app. The streak counted UTC days in util.js
+     while the scheduler counted them separately in scheduler.js — two sources
+     of truth for one fact, waiting to disagree. */
+  ok(dayOf === dayOfUtil, "the scheduler and the streak count the same days");
+
+  // Unconfigured is exactly what it always was, which is what keeps the frozen
+  // web app and every existing test unchanged.
+  ok(dayOf(at("2026-09-16T00:00:00Z")) - dayOf(at("2026-09-15T23:00:00Z")) === 1,
+     "unconfigured, the day still rolls at UTC midnight");
+
+  setDayStart({ offsetMinutes: 420 });          // UTC−7, Los Angeles in September
+  const before = dayOf(at("2026-09-16T10:59:00Z"));   // 03:59 local
+  const after = dayOf(at("2026-09-16T11:01:00Z"));    // 04:01 local
+  ok(after - before === 1, "configured, it rolls at 4 am local", `${before} -> ${after}`);
+  /* The hour that was the bug: 5 pm local used to start a new day. */
+  ok(dayOf(at("2026-09-16T23:59:00Z")) === dayOf(at("2026-09-17T06:59:00Z")),
+     "…so 5 pm and 11 pm on the same evening are the same day");
+  /* And a session at one in the morning belongs to the day it felt like, which
+     is Anki's convention and the reason for the 4 am rollover. */
+  ok(dayOf(at("2026-09-17T08:30:00Z")) === dayOf(at("2026-09-16T23:59:00Z")),
+     "…and 1:30 am is still the night before");
+
+  ok(typeof today() === "number" && today() === dayOf(Date.now()),
+     "today() is the same function");
+
+  setDayStart({ offsetMinutes: 0, rolloverHour: 0 });
+  ok(dayOf(at("2026-09-16T00:00:00Z")) * 86400000 === at("2026-09-16T00:00:00Z"),
+     "and it can be put back");
+  // Every later group assumes the default. Leave it as found.
+  setDayStart({ offsetMinutes: 0, rolloverHour: 0 });
+}
+
 group("the scheduler");
 {
   const DAY = S.DAY, MIN = S.MINUTE, T0 = 20700 * DAY + 12 * 3600000;
@@ -532,6 +574,33 @@ group("the session");
      "past the day's review cap the day is done");
   ok(dailyFor({ day: S.dayOf(T0) - 1, new: 9, reviews: 50 }, T0).new === 0 && dailyFor({ day: S.dayOf(T0), new: 9 }, T0).new === 9,
      "a new day starts the counts over");
+
+  /* **The budget** (docs/PLAYBOOK.md Phase 6: session build under 50 ms).
+   *
+   * Measured rather than assumed, and on a pile far past anything real: 4,000
+   * words × three directions is the whole curriculum studied in every
+   * direction, which is more cards than the route can produce. The phone is
+   * slower than this machine, so the headroom is the point — a budget met by
+   * 2× here would not be a budget. If this ever fails, the fix is the ordering
+   * (it sorts the whole due pile) and not the number. */
+  const many = {};
+  for (let i = 0; i < 4000; i++) {
+    const w = "b" + i;
+    many[w] = {};
+    for (const d of S.DIRECTIONS) {
+      const s = 1 + ((i * 17) % 60);
+      many[w][d] = { dueAt: T0 - DAY, lastAt: T0 - (s + 5) * DAY, s, d: 5,
+                     state: S.REVIEW, steps: 0, reps: 3, lapses: 0, elapsed: 0, scheduled: s };
+    }
+  }
+  const bigWords = Object.keys(many);
+  const t0 = performance.now();
+  const RUNS = 5;
+  for (let k = 0; k < RUNS; k++) {
+    buildSession({ seen: many, words: bigWords, dirs: S.DIRECTIONS, now: T0, daily: null, opts, rng });
+  }
+  const ms = (performance.now() - t0) / RUNS;
+  ok(ms < 50, `a session off 12,000 due cards is built in ${ms.toFixed(1)} ms (budget 50)`, ms.toFixed(1));
 
   // Interleave: R reviews, N new, spread evenly.
   const mixed = interleave([], [1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({ i })), ["a", "b"].map((i) => ({ i })));

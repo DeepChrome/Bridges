@@ -22,12 +22,12 @@ const defaultDeps = {
                                         type: ["application/json", "text/*", "*/*"] }),
   readText: async (uri) => new File(uri).text(),
   readLog: () => readLog(),
-  writeShare: async (name, text) => {
+  writeShare: async (name, text, mimeType = "application/json") => {
     const file = new File(Paths.cache, name);
     if (file.exists) file.delete();
     file.create();
     file.write(text);
-    await Sharing.shareAsync(file.uri, { mimeType: "application/json", dialogTitle: name });
+    await Sharing.shareAsync(file.uri, { mimeType, dialogTitle: name });
   },
 };
 
@@ -50,6 +50,29 @@ export async function backupProfile(state, account, deps = {}) {
   const log = await d.readLog();
   await d.writeShare(file, backupText(state, account, Date.now(), log));
   return { file, log: log.length };
+}
+
+/* The crash log out through the same share sheet (src/crash.js).
+ *
+ * Plain text rather than JSON: nothing reads this back, a person does, and a
+ * stack trace wrapped in JSON escapes is a stack trace nobody can read. It
+ * carries no learner state and no profile name — what broke, when, and where
+ * in the component tree, which is all a fix needs. */
+export function crashText(list, now = Date.now()) {
+  const when = (ms) => new Date(ms).toISOString().replace("T", " ").slice(0, 19);
+  const head = `Bridges problem report, ${when(now)} UTC\n${(list || []).length} recorded\n`;
+  return head + (list || []).map((c, k) =>
+    `\n--- ${k + 1} --- ${when(c.at)} UTC${c.fatal ? " (fatal)" : ""}\n${c.what}\n`
+    + (c.stack ? `\n${c.stack}\n` : "")
+    + (c.where ? `\ncomponents:${c.where}\n` : "")).join("");
+}
+
+export async function shareCrashes(list, deps = {}) {
+  const d = { ...defaultDeps, ...deps };
+  const stamp = new Date().toISOString().slice(0, 10);
+  const file = `bridges-problems-${stamp}.txt`;
+  await d.writeShare(file, crashText(list), "text/plain");
+  return { file, n: (list || []).length };
 }
 
 /* -> { state, log } or { cancelled: true } or { error } */

@@ -2925,6 +2925,93 @@ Three rules hold it honest:
   the generator returned nothing every time. A shape-only selection puts every
   table back in play.
 
+## 30ad. Phase 6 — what happens when it breaks (2026-09-16)
+
+The playbook's sixth phase is reliability and observability. Audited against the
+repo first, as §30u requires, and the audit found the one thing that mattered:
+**there was no error boundary anywhere in the app.** A throw in any render path
+unmounted the whole tree, and the learner's only information was that it closed.
+
+- **`native/src/boundary.js`** sits inside `SafeAreaProvider` and outside
+  `SessionProvider` and the navigator — those are among the things that can
+  throw, and a boundary a crash can take with it is not a boundary. Its
+  fallback is a real screen: what broke, "your progress is saved", and **two**
+  ways out. Two, because "Try again" remounts the subtree and a deterministic
+  throw will simply happen again; the second button goes to the path, which is
+  a different screen reading different data. `onCrash` flushes the store at the
+  moment of the crash, since saves are debounced and a crash is not a debounce.
+- **`native/src/crash.js`** keeps the last ten, in AsyncStorage — deliberately
+  **not** the profile database, which is itself a thing that can be what broke
+  (§30v). `installCrashHandler` also takes `ErrorUtils`, so a rejected promise
+  or a native callback is recorded too; in release the default handler ends the
+  process, so that write is a race, and losing it costs a log entry rather than
+  anything the learner had. Nothing in the file throws: **a crash reporter that
+  throws inside a crash turns a recoverable screen into an unrecoverable one.**
+- It surfaces at the **top** of Settings, only when there is something to
+  report, with "Send the details" through the same share sheet as a backup.
+  Below the settings it sat under six lists and nobody would find what they did
+  not know was recorded.
+
+**Sentry and PostHog are declined for now, and it is a product decision rather
+than a technical one.** The playbook is right for an app with users. This one
+has one user, and every other decision in it went the other way — the
+recogniser runs on-device so audio never leaves the phone (§30c), the Worker
+holds no learner state (§30d), and `docs/store-listing.md` says "no accounts,
+no analytics, no advertising". Two SDKs posting to third parties would buy,
+today, telemetry about the owner reported back to the owner, against two
+dependencies (rule 20.5), a privacy disclosure and a Data Safety form that has
+to stay true. **The narrower thing that was genuinely missing — a crash away
+from the desk being unrecoverable — is what got built.** If the app ever has
+real users, Sentry goes *on top of* this; the boundary and the screen stay
+either way. ROADMAP 13.37 carries the decision for him.
+
+**Measured, not assumed:**
+
+| | budget | measured |
+|---|---|---|
+| session built from 12,000 due cards | 50 ms | **14.6 ms** |
+| cold start to first frame | 2 s | **~0.50 s** (emulator; his phone not measured) |
+
+**Offline is real and was driven with the radios off** (`native/flows/offline.txt`,
+2026-09-16): lessons, the word cards, the conversations list, the drills and the
+dictionary all work with no network. What cannot is the video library (YouTube)
+and the three Worker features — Say's written feedback, the chapter task, Talk —
+which say so rather than hanging. The collection's recordings stream, so offline
+a word is read by the device voice unless "Audio for offline" cached it; the 168
+scenario tracks are bundled in the APK and play regardless (§30l).
+
+**Gate 6 was driven on a device with a deliberate throw**
+(`native/flows/gate6.txt`, kept out of the ordinary walkthrough set because it
+only works against a broken build): the boundary screen appeared instead of a
+white one, "Back to the path" worked, and the crash was waiting at the top of
+Settings afterwards. Put the throw back to re-run it.
+
+### …and the day now starts where the learner is (ROADMAP 13.24)
+
+`dayOf` was `floor(ms / 86400000)` — a UTC day — so for the owner in Los
+Angeles the day rolled at **5 pm**: his streak ticked over mid-afternoon, the
+new-card ration reset while he was at work, and an evening session landed on the
+next day's square in the calendar.
+
+**There were two day functions**, `today()` in `core/util.js` for the streak and
+`dayOf()` in `core/scheduler.js` for scheduling, each computing the same thing
+separately — two sources of truth for one fact, waiting to disagree (§22). There
+is one now, in `core/util.js`, and the scheduler re-exports it.
+
+`setDayStart({ offsetMinutes })` is called once at **module scope** in `App.js`,
+not in an effect: the session loader stamps the streak and rolls the ration the
+moment state is read, which is before any component of ours has mounted.
+Unconfigured it is exactly the old behaviour, which is what leaves the frozen
+web app and every existing test untouched. The rollover is **4 am local**,
+Anki's convention and for Anki's reason — a session at one in the morning is the
+end of a long day, not the start of a new one.
+
+What this does *not* do is rewrite history: `dueAt` is milliseconds and is
+untouched, and the review log's existing `day` values were bucketed under UTC.
+Rows written before and after therefore sit in buckets that differ by at most
+one day. That is a bucketing seam, not lost data, and it costs a hairline in one
+column of the calendar once.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

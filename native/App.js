@@ -43,11 +43,31 @@ import { Read } from "./src/screens/Read";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import { setHaptics } from "./src/haptics";
+import { setDayStart } from "@core/util";
+import { ErrorBoundary } from "./src/boundary";
+import { installCrashHandler } from "./src/crash";
+import { flushState } from "./src/store";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, DrillSetup, PlacementFlow, SectionFlow,
   QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, ListeningList, PassageFlow, SoundDrillFlow,
   ShadowFlow, BuildDrillFlow,
 } from "./src/screens/Flows";
+
+/* Where the day starts, from this device's own clock (ROADMAP 13.24).
+ *
+ * At module scope rather than in an effect: the session loader stamps the
+ * streak and rolls the daily ration the moment state is read, which is before
+ * any component of ours has mounted. Configured late, the first read of the
+ * app's life would use UTC days and the rest would not.
+ *
+ * Not a setting. The device knows its own offset, and a learner who moves is
+ * corrected by the next launch. */
+setDayStart({ offsetMinutes: new Date().getTimezoneOffset() });
+
+/* …and the same for errors that never reach a React boundary: a rejected
+   promise, a callback from a native module. At module scope so it is in place
+   before the first screen renders (src/crash.js). */
+installCrashHandler();
 
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -482,16 +502,36 @@ export default function App() {
   });
   if (!loaded && !fontError) return null;
 
+  /* The boundary sits **inside** SafeAreaProvider and outside everything else
+   * (src/boundary.js).
+   *
+   * Inside, because its fallback is a real screen that needs the insets — a
+   * "Something broke" title under the status bar is the second thing going
+   * wrong. Outside SessionProvider and the navigator, because those are among
+   * the things that can throw, and a boundary a crash can take with it is not
+   * a boundary.
+   *
+   * The cost of being this high up is that "Try again" remounts the session,
+   * so the way out is the *other* button: back to the path, which is a
+   * different screen reading different data. A crash inside one lesson does
+   * not need the whole tree rebuilt, but a boundary per screen is a second
+   * mechanism to keep in step and the path is one tap from anywhere anyway.
+   */
   return (
     <SafeAreaProvider>
-      <SessionProvider>
-        <NavigationContainer ref={navRef} theme={navTheme}>
-          <WordsProvider>
-            <Shell />
-            <StatusBar style={scheme === "light" ? "dark" : "light"} />
-          </WordsProvider>
-        </NavigationContainer>
-      </SessionProvider>
+      <ErrorBoundary
+        onCrash={() => { flushState(); }}
+        onHome={() => { if (navRef.isReady()) navRef.navigate("Learn", { screen: "Path" }); }}
+      >
+        <SessionProvider>
+          <NavigationContainer ref={navRef} theme={navTheme}>
+            <WordsProvider>
+              <Shell />
+              <StatusBar style={scheme === "light" ? "dark" : "light"} />
+            </WordsProvider>
+          </NavigationContainer>
+        </SessionProvider>
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }

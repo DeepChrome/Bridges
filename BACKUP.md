@@ -22,6 +22,7 @@ back.
 | Tatoeba dumps + audio | `data/raw/tatoeba/` | 53.4 MB | Dumps re-download in minutes (`ingest_tatoeba.py` fetches them). The 185 recordings were fetched one by one with a pause; `ATTRIBUTION.txt` beside them is a licence record. |
 | Wiktionary extract | `data/raw/wiktionary/russian.jsonl` | 895 MB | Yes, from kaikki.org — but it is nearly a gigabyte over the wire, so back it up rather than re-fetch it (§30q). |
 | **The bought scenario audio** | `data/scenario_audio/` (**tracked**, 22.6 MB) | 2,213 clips | **No — it was paid for.** $1.49 of Google Chirp3-HD, keyed by voice and text, and re-buying is the only way back. In git deliberately, unlike everything else generated here. |
+| **The Android signing key** | `native/android/app/debug.keystore` | 2,257 bytes | **No.** It is what every local build on his phone is signed with, and Android will not let a differently-signed APK update one already installed — the only way through is to uninstall, which erases the learner's progress (§31). Losing it therefore costs a month of study, not a rebuild. Gitignored along with the rest of `native/android/`, so git is not the copy. Second copy at `C:\Users\jared\OneDrive\BridgesBackup\keystore\debug.keystore`, taken 2026-09-16, SHA-256 `221E0A3106AA4C3CCC154E0A418B55020B3F9EA6E84F92E8749CD9E2F39F5E58` — compare that before trusting a restored one. |
 
 ## Generated — regenerable, kept for convenience
 
@@ -63,5 +64,7 @@ they are separate physical disks from C: is not known.
 Refresh the copy after any Anki sync that brings new media across, and after
 `harvest_videos.py` fetches new captions or metadata.
 
-**The code itself has no second copy.** There is no git remote (ROADMAP P0.1 needs
-the owner's GitHub login). Until there is, the repository lives only on this disk.
+**The code has a second copy since 2026-09-15**: `git@github.com:DeepChrome/bridges.git`,
+private, reached through the Windows ssh-agent (CLAUDE.md §30u). Everything git tracks
+is recoverable from there. What is *not* recoverable from there is everything in the
+two tables above — and the signing key, which is why it now has a row of its own.

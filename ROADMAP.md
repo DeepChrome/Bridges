@@ -850,6 +850,31 @@ a hard problem:
   as load-bearing, and the next person to copy the pattern into a list with a
   conditional row writes the Settings hairline bug again.
 
+### Phase 6 of the playbook, 2026-09-16 — done, with one decision left to him
+
+- **13.16 — closed.** `debug.keystore` has a second copy at
+  `C:\Users\jared\OneDrive\BridgesBackup\keystore\`, with its SHA-256 recorded
+  in BACKUP.md so a restored one can be checked. Losing it costs a month of
+  study, not a rebuild: Android refuses a differently-signed update and the
+  only way through is an uninstall.
+- **13.24 — closed.** The day starts at 4 am local instead of UTC midnight,
+  which for him was 5 pm. One day function now, in `core/util.js`, configured
+  once at boot (CLAUDE.md §30ad).
+- **Error boundary, crash log, offline drive, perf budget — done** (§30ad).
+  Session build measured at 14.6 ms against a 50 ms budget; cold start ~0.50 s
+  on the emulator.
+- **13.37 — his decision: Sentry and PostHog.** The playbook asks for both.
+  Declined *for now* and the reasoning is in §30ad: one user, an app whose every
+  other decision keeps data on the device, and a local crash log that supplies
+  the one thing genuinely missing. The moment there are other users this
+  changes, and Sentry would go on top of the boundary rather than replace it.
+  Cost if he wants it: £0 on free tiers, two dependencies, a privacy policy URL
+  and a Data Safety form.
+- **13.38 — the cold start on his phone has not been measured.** The emulator
+  number above is indicative and the playbook's budget names his device. It
+  needs the phone plugged in and `adb shell am start -W`; it was unplugged when
+  this was run.
+
 ## Phase 12 — What is actually left (2026-09-10)
 
 **Superseded by Phase 13 above; kept because the reasoning still reads.**

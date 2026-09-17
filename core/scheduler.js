@@ -24,16 +24,23 @@
  * converted on the way in (`fromLegacy`); the web app still writes that shape
  * and every old backup carries it.
  *
- * Days are UTC days, as `today()` in core/util.js has always counted them
- * (`dayOf`). A review card is due on its day whatever the hour; a learning
+ * Days are whatever `dayOf` in core/util.js says they are — local days ending
+ * at 4 am on a configured device, UTC days on one that never called
+ * `setDayStart`. A review card is due on its day whatever the hour; a learning
  * card is due at its minute, or within the learn-ahead window.
  */
 
 import { fsrs, createEmptyCard, State } from "ts-fsrs";
+import { dayOf as dayOfLocal } from "./util.js";
 
 export const DAY = 86400000;
 export const MINUTE = 60000;
-export const dayOf = (ms) => Math.floor(ms / DAY);
+/* One day function for the whole app, and it lives in core/util.js because
+   `today()` there was the other half of it — the streak counted UTC days while
+   the scheduler counted UTC days separately, which is two sources of truth for
+   one fact waiting to disagree. Where the day starts is set once at boot
+   (`setDayStart`), never here. */
+export const dayOf = dayOfLocal;
 
 export const DIRECTIONS = ["recognise", "produce", "listen"];
 export const isDirection = (d) => DIRECTIONS.includes(d);

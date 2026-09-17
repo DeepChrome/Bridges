@@ -32,8 +32,39 @@ export function shuffle(a) {
 
 export const sample = (a, n) => shuffle(a.slice()).slice(0, n);
 
-/* Day number. Scheduling works in whole days, like Anki. */
-export const today = () => Math.floor(Date.now() / 86400000);
+/* Day number. Scheduling works in whole days, like Anki.
+ *
+ * **Where the day starts is configurable, and it is not UTC midnight.** It was,
+ * and for the owner in Los Angeles that put the boundary at 5 pm: his streak
+ * ticked over mid-afternoon, his new-cards ration reset while he was at work,
+ * and an evening session landed on the *next* day's square in the calendar
+ * (ROADMAP 13.24).
+ *
+ * `setDayStart` is called once at boot from the device's own clock
+ * (native/App.js), the way playback and haptics are configured — no call site
+ * decides this for itself. Unconfigured it is exactly the old behaviour, which
+ * is what keeps the frozen web app and every existing test unchanged.
+ *
+ * The rollover is **4 am local**, Anki's convention and for Anki's reason: a
+ * session at one in the morning is the end of a long day, not the start of a
+ * new one, and a learner who studies late should not lose a streak for it.
+ */
+const DAY_MS = 86400000;
+let dayShift = 0;
+
+export function setDayStart({ offsetMinutes, rolloverHour = 4 } = {}) {
+  /* `offsetMinutes` is `Date.prototype.getTimezoneOffset()`: minutes to ADD to
+     local time to reach UTC, so it is +420 for UTC−7. Local ms is therefore
+     `ms − offset`, and the rollover moves the boundary later still. */
+  const off = typeof offsetMinutes === "number" && isFinite(offsetMinutes) ? offsetMinutes : 0;
+  const roll = typeof rolloverHour === "number" && isFinite(rolloverHour)
+    ? Math.max(0, Math.min(23, rolloverHour)) : 4;
+  dayShift = off * 60000 + roll * 3600000;
+}
+export const dayStartShift = () => dayShift;
+
+export const dayOf = (ms) => Math.floor((ms - dayShift) / DAY_MS);
+export const today = () => dayOf(Date.now());
 
 /* Latin -> Cyrillic, so a keyboard without Russian still works. Longest match first. */
 const TR = [["shch", "щ"], ["sch", "щ"], ["yo", "ё"], ["zh", "ж"], ["kh", "х"],

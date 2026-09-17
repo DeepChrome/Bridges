@@ -10,7 +10,8 @@ import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Shee
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
 import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { cacheStats, clearCache } from "../cache";
-import { backupProfile, restoreProfile } from "../backup";
+import { backupProfile, restoreProfile, shareCrashes } from "../backup";
+import { readCrashes, clearCrashes } from "../crash";
 import { troubleWords } from "./Study";
 import { tagInfo } from "@core/errortags";
 import { cardsOf, dueCards, maxLapses, DIRECTIONS, RETENTION_MIN, RETENTION_MAX } from "@core/scheduler";
@@ -51,12 +52,52 @@ function Settings({ visible, onClose, onLab, onTour }) {
   const t = useTheme();
   const [cache, setCache] = useState(() => cacheStats());
   useEffect(() => { if (visible) setCache(cacheStats()); }, [visible]);
+  /* Read when the sheet opens rather than held in session state: a crash log
+     is not learner state, and putting it there would send it through the save
+     path — which is one of the things that can be what broke. */
+  const [crashes, setCrashes] = useState([]);
+  useEffect(() => {
+    if (!visible) return;
+    let live = true;
+    readCrashes().then((c) => { if (live) setCrashes(c); }).catch(() => {});
+    return () => { live = false; };
+  }, [visible]);
   const cacheLine = cache.files
     ? `${cache.files} files, ${(cache.bytes / 1048576).toFixed(1)} MB saved`
     : "nothing saved yet";
   return (
     <Sheet visible={visible} onClose={onClose} title="Settings"
            footer={<Btn kind="pri" label="Done" style={{ marginTop: 14 }} onPress={onClose} />}>
+            {/* What broke, if anything has (src/crash.js) — at the **top**.
+                It exists only once there is something to report, so a
+                permanent "no problems" line never appears (rule 20.7), and on
+                the day it does exist it is the most important thing on the
+                screen. Put below the settings it sat under six lists and a
+                learner would have to go looking for what they never knew was
+                recorded. */}
+            {crashes.length ? (
+              <View style={{ marginBottom: 16 }}>
+                <List>
+                  <Row testID="crash-row">
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.bad, fontSize: 15, fontWeight: "600" }}>
+                        {crashes.length === 1 ? "1 problem recorded" : `${crashes.length} problems recorded`}
+                      </Text>
+                      <Muted numberOfLines={2}>{crashes[0].what}</Muted>
+                    </View>
+                  </Row>
+                </List>
+                <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
+                  <Btn label="Send the details" style={{ flex: 1 }} testID="crash-share"
+                       onPress={async () => {
+                         try { await shareCrashes(crashes); }
+                         catch (e) { Alert.alert("Problems", "The report could not be written."); }
+                       }} />
+                  <Btn kind="ghost" label="Clear" style={{ flex: 1 }} testID="crash-clear"
+                       onPress={async () => { await clearCrashes(); setCrashes([]); }} />
+                </View>
+              </View>
+            ) : null}
             <List>
               {/* The flashcards' three directions, each a card of its own
                   (core/scheduler.js). "Card side" used to flip every card the

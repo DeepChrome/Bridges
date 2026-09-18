@@ -69,7 +69,7 @@ describe("which questions open a keyboard", () => {
   });
   it("and none of the ones answered by choosing or speaking", () => {
     for (const kind of ["choose-en", "choose-ru", "cloze", "listen", "cases", "form",
-                        "stress", "grammar", "scene", "passage", "say", "shadow", "match"]) {
+                        "stress", "scene", "passage", "say", "shadow", "match"]) {
       expect(hasInput({ kind })).toBe(false);
     }
   });

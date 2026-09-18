@@ -3628,6 +3628,45 @@ the owner rejected — it fires only for a lesson with no script, which is 136 o
 That last one is a content decision: write more scenarios, or accept the
 fallback's shape where there is none.
 
+## 30al. The rule as feedback, not as a quiz (2026-09-18)
+
+The owner, reading §30ak: *"Grammar rules doesn't really feel effective as a
+quiz"* — and then, better: *"maybe the grammar tips can be feedback after an
+incorrect answer on a question featuring the grammar tip."*
+
+He is right twice. "Choose the rule this sentence shows" tests recognition of a
+rule's *title* from a list of four; the sentence could be understood perfectly
+and the label still guessed, or the label matched and the sentence not read at
+all. And a rule read at the moment it was broken is a rule that sticks, where
+a rule read from a list is a label.
+
+**The drill is gone; the cards are feedback.** `DRILL_TYPES` is five. A
+question built on a chapter's grammar card now carries that card as `note` —
+`formPrompt` attaches the card it was built on (found by the spec object
+itself, so it cannot disagree with `formSpec` about inheritance), and
+`drillQuestions` attaches the card of the first unit on the route that teaches
+the drill (`noteForDrill`); aspect's generator already set its own. Stress
+carries none, because stress is not a rule the path introduces. `core.test.mjs`
+asserts every cases, agreement, conjugation and aspect question carries a rule
+with a title and a body, and that the form question's is the unit's own card.
+
+The runner shows it **under a wrong answer only** — `RuleNote`, the same
+component the hint sheet draws before an answer, so the rule reads the same
+wherever it turns up. Not under a right answer, which needs no lecture, and not
+under a skip, which was never attempted.
+
+Removed with the drill: its three generators, its `VIEWS` entry, its direction
+in `DIRECTION_OF_KIND`, its difficulty in the simulator, and six assertions
+that named it. `ACTIVITY_ICONS.rules` stays — a rules icon is a reasonable
+thing to have.
+
+**Not verified on a device**, said plainly: the verdict markup is the existing
+block plus one conditional, and the unit test drives a wrong answer through the
+runner and reads `rule-note` off the tree — but the emulator profile is on
+chapter 1, where no drill that carries a rule is open yet, and a chapter-2
+walkthrough is a longer job than the change warranted. It is one wrong answer
+on the Conjugation drill on the owner's phone.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

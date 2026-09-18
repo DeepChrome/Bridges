@@ -577,7 +577,7 @@ export function DrillList({ navigation }) {
  * that lets you build one and then apologises is worse than one that will not.
  *
  * Only the drills with something to narrow get this screen; the others go
- * straight in (`drillFocus` returns nothing for stress and grammar, and for
+ * straight in (`drillFocus` returns nothing for stress, and for
  * cases before the route has taught a case). A setup screen offering one
  * choice is a tap that buys nothing.
  */

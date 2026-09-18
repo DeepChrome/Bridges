@@ -1947,11 +1947,10 @@ group("drill variety");
      && Q.drillOpensAt("conjugation") === 1 && Q.drillOpensAt("agreement") === 2,
      "each drill opens at the chapter that teaches it",
      DRILL_TYPES.map((d) => `${d.id}:${Q.drillOpensAt(d.id) + 1}`).join(" "));
-  ok(Q.drillOpensAt("stress") === -1 && Q.drillOpensAt("grammar") === -1,
-     "stress and grammar are open from the start");
+  ok(Q.drillOpensAt("stress") === -1, "stress is open from the start");
   const first = Q.drillsIntroduced(route.slice(0, 3));
-  ok(first.has("stress") && first.has("grammar") && !first.has("aspect") && !first.has("cases"),
-     "chapter 1 opens two of the six", [...first].join(","));
+  ok(first.has("stress") && !first.has("aspect") && !first.has("cases"),
+     "chapter 1 opens one of the five", [...first].join(","));
   ok(Q.drillsIntroduced(route).size === DRILL_TYPES.length,
      "and the whole route opens them all");
 }
@@ -1968,8 +1967,7 @@ group("drill focus");
      "conjugation narrows to a tense, or to reading a form",
      ids("conjugation").join(","));
   ok(ids("aspect").join(",") === "partner,which", "aspect narrows to either shape");
-  ok(!ids("stress").length && !ids("grammar").length,
-     "stress and grammar have nothing to narrow, so they are never asked");
+  ok(!ids("stress").length, "stress has nothing to narrow, so it is never asked");
   /* The cases are the route's, not all six: a chapter-3 learner may not be
      offered the instrumental, because the drill may not ask for it either. */
   const all = ids("cases");
@@ -2130,10 +2128,9 @@ group("what has just opened");
   ok(!isOpen(conj, at(Q.drillOpensAt("conjugation") - 1)) && isOpen(conj, at(Q.drillOpensAt("conjugation"))),
      "a drill is announced exactly when the route opens it",
      `opens at chapter ${Q.drillOpensAt("conjugation") + 1}`);
-  /* Stress and grammar are open from the very start and have no entry: a note
-     saying "this was always here" is noise on the first screen. */
-  ok(!OPENINGS.some((o) => o.drill === "stress" || o.drill === "grammar"),
-     "the two that were never gated are not announced");
+  /* Stress is open from the very start and has no entry: a note saying "this
+     was always here" is noise on the first screen. */
+  ok(!OPENINGS.some((o) => o.drill === "stress"), "the one that was never gated is not announced");
 
   // Everything is eventually announced, or an entry is unreachable.
   const end = at(STAGES.length - 1, Infinity);
@@ -2293,14 +2290,31 @@ group("drills the learner writes");
     ok(!bad.length, `${type}: never asks for the word it is showing`, bad.slice(0, 3).join("; "));
   }
 
-  /* Two shapes cannot be written — "which of these is perfective?" and "whose
-     form is this?" are questions about a list, and there is nothing to produce.
-     They stay as they are rather than being dropped, so a run still fills. */
-  for (const type of ["stress", "grammar"]) {
-    const qs = Q.drillQuestions(type, 6, null, undefined, true);
+  /* Stress cannot be written — where the mark falls is a choice among copies of
+     the word — so it stays chosen, and a run still fills. */
+  {
+    const qs = Q.drillQuestions("stress", 6, null, undefined, true);
     ok(qs.length === 6 && qs.every((q) => !q.typed && q.options),
-       `${type}: nothing to write, so it is still chosen`, String(qs.length));
+       "stress: nothing to write, so it is still chosen", String(qs.length));
   }
+
+  /* The rule rides on the question (§30al): every cases, agreement and
+     conjugation question carries the chapter card that teaches it, aspect its
+     own, and the form question the card it was built on — so a wrong answer can
+     show the rule. Stress carries none: it is not a rule the path introduces. */
+  for (const type of ["cases", "agreement", "conjugation", "aspect"]) {
+    const qs = Q.drillQuestions(type, 6, null, undefined, true);
+    ok(qs.length && qs.every((q) => q.note && q.note.title && q.note.body),
+       `${type}: every question carries the rule it is about`, String(qs.filter((q) => !q.note).length));
+  }
+  ok(Q.drillQuestions("stress", 4, null, undefined, true).every((q) => !q.note), "stress carries no rule");
+  {
+    const withForm = STAGES.map((s) => s.core).find((u) => u.g && u.g.form && !u.g.form.drill);
+    const fq = withForm && Q.formPrompt(withForm, 0);
+    ok(!!fq && !!fq.note && fq.note === withForm.g,
+       "a form question carries the card it was built on", withForm ? withForm.id : "none");
+  }
+  ok(!DRILL_TYPES.some((d) => d.id === "grammar"), "the Grammar rules drill is gone");
 
   // Written questions are still told apart, or a run holds one of them.
   const many = Q.drillQuestions("cases", 12, null, undefined, true);

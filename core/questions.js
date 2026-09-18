@@ -138,8 +138,12 @@ export const DRILL_TYPES = [
     blurb: "Put a verb with the right person" },
   { id: "stress", name: "Stress", icon: "stress",
     blurb: "Hear where the emphasis falls" },
-  { id: "grammar", name: "Grammar rules", icon: "rules",
-    blurb: "Spot the rule a sentence is showing" },
+  /* There was a sixth, "Grammar rules" — choose the rule a sentence shows —
+     until 2026-09-18. The owner: *"Grammar rules doesn't really feel effective
+     as a quiz."* He is right: naming a rule's title from a list tests
+     recognition of the label, not the grammar. The rules are feedback now — a
+     question built on a chapter's card carries that card as `note`, and the
+     runner shows it under a wrong answer (§30al). */
 ];
 
 export function makeQuestions(env) {
@@ -874,13 +878,16 @@ export function makeQuestions(env) {
   function formPrompt(unit, index, only) {
     const spec = formSpec(unit);
     if (!spec) return null;
+    /* Every form question carries the card it was built on, so a wrong answer
+       can show the rule rather than only the answer. */
+    const withNote = (q) => (q && !q.note ? { ...q, note: formNote(unit) || undefined } : q);
     if (spec.drill) {
-      return withPool(unitsUpTo(unit).flatMap((u) => u.w), () => (GEN[spec.drill] ? GEN[spec.drill]() : null));
+      return withNote(withPool(unitsUpTo(unit).flatMap((u) => u.w), () => (GEN[spec.drill] ? GEN[spec.drill]() : null)));
     }
     const typed = stageOf(unit) >= FORM_MIX.typedFromStage;
     if (only !== undefined) {
       const cells = formCells(L[only], spec);
-      return cells.length ? formQuestion(only, pickOne(cells), typed) : null;
+      return cells.length ? withNote(formQuestion(only, pickOne(cells), typed)) : null;
     }
 
     /* The tiers used to be a fallback chain: the lesson's words, and only if
@@ -929,7 +936,7 @@ export function makeQuestions(env) {
     for (const p of order) {
       for (const i of shuffle(p.words.slice()).slice(0, 12)) {
         const q = formQuestion(i, pickOne(formCells(L[i], spec)), typed);
-        if (q) return q;
+        if (q) return withNote(q);
       }
     }
     return null;
@@ -939,10 +946,10 @@ export function makeQuestions(env) {
      cards that drive the form question. A learner three lessons in was being
      offered the Aspect drill, which chapter 8 teaches — and the pool of aspect
      questions their words could fill was fifteen, so it asked the same handful
-     over and over. Stress and Grammar are open from the start: both are about
-     words in general rather than a rule the path introduces. */
+     over and over. Stress is open from the start: it is about words in general
+     rather than a rule the path introduces. */
   function drillsIntroduced(units) {
-    const out = new Set(["stress", "grammar"]);
+    const out = new Set(["stress"]);
     for (const u of units) {
       const spec = formSpec(u);
       if (!spec) continue;
@@ -956,7 +963,7 @@ export function makeQuestions(env) {
   /* The first chapter (0-based) that opens a drill, for "Opens in chapter N";
      -1 when it is open from the start or never. */
   function drillOpensAt(drill) {
-    if (drill === "stress" || drill === "grammar") return -1;
+    if (drill === "stress") return -1;
     for (let s = 0; s < STAGES.length; s++) {
       const units = [STAGES[s].core].concat(STAGES[s].branches || []);
       if (drillsIntroduced(units).has(drill)) return s;
@@ -1865,81 +1872,33 @@ export function makeQuestions(env) {
     return stressQuestion(w, w.w);
   }
 
-  /* The rule a sentence shows, and the sentence a rule is shown by. The card
-     examples are a fixed set — two per unit — so this drill has a ceiling the
-     others do not; asking it in both directions is what doubles it, and the
-     naming question below draws on the paradigm instead, which does not run out. */
-  const unitsWithNotes = () => UN.filter((u) => u.g && u.g.examples && u.g.examples.length);
+  /* The Grammar rules drill — "choose the rule this shows", "which sentence
+     shows X", "what form is this" — was here until 2026-09-18 (see DRILL_TYPES).
+     Its cards are `note`s on the questions that use them now. */
 
-  function qGrammarRule() {
-    const withNotes = unitsWithNotes();
-    if (withNotes.length < 4) return null;
-    const pick = withNotes[Math.floor(Math.random() * withNotes.length)];
-    const ex = pick.g.examples[Math.floor(Math.random() * pick.g.examples.length)];
-    /* Rule titles run from "Believing in" to "What someone is, was, or became",
-       and taking three at random left the answer the longest or shortest line on
-       screen in 24 % of questions (tools/audit_options.mjs) — which is a tell
-       that costs nothing to remove: pick from the titles nearest it in length.
-       Eight to choose three from, so the same three do not recur. */
-    /* Six, not eight: there are only about a dozen cards with notes, so a
-       window of eight was most of them and "Believing in" still went up
-       against "Places in the plural". */
-    const near = withNotes.filter((u) => u.g.title !== pick.g.title)
-      .sort((a, b) => Math.abs(a.g.title.length - pick.g.title.length)
-                    - Math.abs(b.g.title.length - pick.g.title.length));
-    const others = shuffle(near.slice(0, 6)).slice(0, 3);
-    if (others.length < 3) return null;
-    return {
-      kind: "grammar", cyr: true, ask: "Choose the rule this shows",
-      prompt: ex[0], sub: ex[1], note: pick.g,
-      options: shuffle([pick].concat(others))
-        .map((u) => ({ label: u.g.title, right: u.id === pick.id })),
-    };
+  /* The card a question is built on, for the runner to show under a wrong
+     answer (§30al): the unit's own when it defines the form, else the chapter
+     spine's it inherited from — found by the spec object itself, so this cannot
+     disagree with `formSpec` about where a spec came from. */
+  function formNote(unit) {
+    const spec = formSpec(unit);
+    if (!spec) return null;
+    const owner = [unit].concat(unitsUpTo(unit)).find((u) => u.g && u.g.form === spec);
+    return owner ? owner.g : null;
   }
 
-  function qGrammarExample() {
-    const withNotes = unitsWithNotes();
-    if (withNotes.length < 4) return null;
-    const pick = withNotes[Math.floor(Math.random() * withNotes.length)];
-    const ex = pick.g.examples[Math.floor(Math.random() * pick.g.examples.length)];
-    const others = shuffle(withNotes.filter((u) => u.g.title !== pick.g.title));
-    const wrong = threeWrong(ex[0], others.map((u) => u.g.examples[0][0]).filter(Boolean));
-    if (!wrong) return null;
-    return {
-      kind: "grammar", cyr: true, ask: `Which sentence shows “${pick.g.title}”?`,
-      prompt: "", sub: "", note: pick.g,
-      options: optionsOf(ex[0], wrong),
-    };
+  /* The card that introduces a practice drill: the first unit on the route
+     whose grammar teaches it. Stress has none — it is not a rule the path
+     introduces. */
+  function noteForDrill(drill) {
+    if (drill === "stress") return null;
+    for (const s of STAGES) {
+      for (const u of [s.core].concat(s.branches || [])) {
+        if (u.g && drillsIntroduced([u]).has(drill)) return u.g;
+      }
+    }
+    return null;
   }
-
-  /* Name the form: the paradigm supplies the question, so this one grows with
-     the curriculum rather than with the number of hand-written cards. */
-  function qGrammarName() {
-    const w = pickWhere((x) => (x.p === "noun" || x.p === "adjective" || x.p === "verb")
-                               && (x.t || []).length);
-    if (!w) return null;
-    const t = (w.t || [])[Math.floor(Math.random() * w.t.length)];
-    if (!t || !t.rows.length) return null;
-    const cells = [];
-    t.rows.forEach((r, ri) => cellsOf(r).forEach((c, ci) => {
-      if (c && c.length) cells.push({ label: c[0], ri, ci });
-    }));
-    if (cells.length < 4) return null;
-    const target = cells[Math.floor(Math.random() * cells.length)];
-    const name = (o) => formName(t, o.ri, o.ci + 1, w).replace(/^the /, "");
-    const right = name(target);
-    // Only cells whose form differs, or two names would both be right.
-    const others = cells.filter((o) => fold(o.label) !== fold(target.label));
-    const wrong = threeWrong(right, unique(others.map(name)));
-    if (!wrong) return null;
-    return {
-      kind: "grammar", i: L.indexOf(w), cyr: true,
-      ask: "What form is this?", prompt: target.label, sub: firstSense(w), table: t,
-      options: shuffle([right].concat(wrong)).map((s) => ({ label: s, right: s === right })),
-    };
-  }
-
-  const qGrammar = () => oneOf([qGrammarName, qGrammarRule, qGrammarExample]);
 
   /* Try the shapes in a random order and take the first that produces a
      question: early on, a pool of seventy words cannot fill every shape. */
@@ -1952,7 +1911,7 @@ export function makeQuestions(env) {
   }
 
   const GEN = { cases: qCases, aspect: qAspect, agreement: qAgreement,
-                conjugation: qConjugation, stress: qStress, grammar: qGrammar };
+                conjugation: qConjugation, stress: qStress };
 
   /* What makes two drill questions the same question: what is shown, what is
      asked, and what the answer is. The answer has to be in it — a shape whose
@@ -1980,6 +1939,9 @@ export function makeQuestions(env) {
     const seen = new Set();
     const want = n || DRILL_N;
     const set = only && only.length ? new Set(only) : null;
+    // The chapter card that teaches this drill rides on every question, for the
+    // runner to show under a wrong answer. Aspect's generator sets its own.
+    const note = noteForDrill(type);
     withPool(pool, () => {
       for (let k = 0; k < want * 25 && out.length < want; k++) {
         const q = GEN[type] && GEN[type](cells, typed, set);
@@ -1987,7 +1949,7 @@ export function makeQuestions(env) {
         const key = drillKey(q);
         if (seen.has(key)) continue;
         seen.add(key);
-        out.push(q);
+        out.push(!q.note && note ? { ...q, note } : q);
       }
     });
     return out;

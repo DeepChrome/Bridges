@@ -373,7 +373,7 @@ export function reviewRows(seen, list, now, source, opts) {
    The runner grades a question's words through the card of this direction;
    registry.test.js holds that every kind is here. */
 export const DIRECTION_OF_KIND = {
-  "choose-en": "recognise", match: "recognise", grammar: "recognise", stress: "recognise",
+  "choose-en": "recognise", match: "recognise", stress: "recognise",
   "choose-ru": "produce", cloze: "produce", type: "produce", form: "produce",
   cases: "produce", aspect: "produce", agreement: "produce", conjugation: "produce",
   say: "produce", "pair-say": "produce",

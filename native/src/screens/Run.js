@@ -252,24 +252,34 @@ function HintSheet({ q, onClose }) {
           </ScrollView>
         </>
       ) : null}
-      {q.note ? (
-        <>
-          <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>
-            {q.note.title}
-          </Text>
-          <Text style={{ color: t.ink2, fontSize: 15, marginTop: 6 }}>
-            {q.note.body}
-          </Text>
-          {(q.note.examples || []).map(([ru, en], k) => (
-            <View key={k} style={{ marginTop: 12, borderTopWidth: 1,
-                                   borderTopColor: t.lineSoft, paddingTop: 10 }}>
-              <Linked text={ru} size={18} />
-              <Muted>{en}</Muted>
-            </View>
-          ))}
-        </>
-      ) : null}
+      {q.note ? <RuleNote note={q.note} /> : null}
     </Sheet>
+  );
+}
+
+/* A chapter's grammar card, as the runner draws it: in the hint sheet before
+   an answer, and under the verdict after a wrong one (§30al — the owner:
+   *"the grammar tips can be feedback after an incorrect answer on a question
+   featuring the grammar tip"*). One component for both, so the rule reads the
+   same wherever it turns up. */
+export function RuleNote({ note, testID }) {
+  const t = useTheme();
+  return (
+    <View testID={testID}>
+      <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>
+        {note.title}
+      </Text>
+      <Text style={{ color: t.ink2, fontSize: 15, marginTop: 6 }}>
+        {note.body}
+      </Text>
+      {(note.examples || []).map(([ru, en], k) => (
+        <View key={k} style={{ marginTop: 12, borderTopWidth: 1,
+                               borderTopColor: t.lineSoft, paddingTop: 10 }}>
+          <Linked text={ru} size={18} />
+          <Muted>{en}</Muted>
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -314,7 +324,6 @@ export const VIEWS = {
   conjugation: eitherWay,
   // Where the stress falls, and what a rule says: neither is a thing to write.
   stress: asOptions,
-  grammar: asOptions,
   type: (q, r) => <Typed q={q} answered={r.answered} onAnswer={r.record} />,
   // The chapter's form: chosen from the paradigm early, typed later — the
   // question says which (core/questions.js FORM_MIX).
@@ -667,6 +676,15 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
               <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>
                 {`Answer: ${answer ? answer.label : q.answer}`}
               </Text>
+            ) : null}
+            {/* The rule, after a wrong answer only. Right needs no lecture, and
+                a skipped question was never attempted. It replaced the Grammar
+                rules drill: a rule read at the moment it was broken is a rule
+                that sticks; a rule's title picked from four is a label. */}
+            {right === false && q.note ? (
+              <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.line }}>
+                <RuleNote note={q.note} testID="rule-note" />
+              </View>
             ) : null}
             {/* A gap-fill gives the sentence back whole, every word a link, and
                 names the form that filled it. */}

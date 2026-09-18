@@ -2,546 +2,313 @@
  "chapter": 6,
  "name": "Health & Getting Around",
  "lessons": {
-  "core6:0": {
-   "title": "The flat on this street",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Борис", "en": "Boris" },
-    { "id": "c", "ru": "Маша", "en": "Masha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, где твоя квартира?", "en": "Anya, where is your flat?" },
-    { "s": "a", "ru": "Квартира? На этой улице.", "en": "My flat? On this street." },
-    { "s": "b", "ru": "На улице? Я тебя часто тут вижу.", "en": "On this street? I often see you here." },
-    { "s": "a", "ru": "Часто. Я тут живу.", "en": "Often. I live here." },
-    { "s": "b", "ru": "А я даже не знаю, где.", "en": "And I do not even know where." },
-    { "s": "a", "ru": "Не знаешь? Вот она.", "en": "You do not? There it is." },
-    { "s": "b", "ru": "Вот эта? Я её увижу?", "en": "That one? Will I get to see it?" },
-    { "s": "a", "ru": "Увидишь. Но не сегодня.", "en": "You will. But not today." },
-    { "s": "b", "ru": "У тебя такое лицо, Аня...", "en": "You have such a look on your face, Anya..." },
-    { "s": "a", "ru": "Какое лицо, Борис?", "en": "What sort of look, Boris?" },
-    { "s": "b", "ru": "Такое, что я всё вижу.", "en": "The sort that tells me everything." },
-    { "s": "a", "ru": "Видишь? Хорошо.", "en": "You can see it? Good." },
-    { "s": "c", "ru": "Аня! Я тоже на этой улице.", "en": "Anya! I am on this street too." },
-    { "s": "b", "ru": "Маша? И ты тут живёшь?", "en": "Masha? Do you live here too?" },
-    { "s": "c", "ru": "Живу. Вот моя квартира.", "en": "I do. That is my flat." }
-   ],
-   "questions": [
-    { "ask": "Where does Anya live?",
-      "options": ["On that street", "By the station", "Out of town", "She will not say"], "answer": 0 },
-    { "ask": "How often does Boris see her there?",
-      "options": ["Often", "Rarely", "Never", "Daily"], "answer": 0 },
-    { "ask": "Will he see the flat?",
-      "options": ["Some day, but not today", "Right now, she says so", "Never, she refuses him", "Tomorrow, she promises"], "answer": 0 },
-    { "ask": "What does he notice about her?",
-      "options": ["The look on her face", "That she is in a hurry", "Her new coat", "Nothing"], "answer": 0 },
-    { "ask": "Who turns out to live on the same street?",
-      "options": ["Masha", "Boris", "Nobody else", "Anya's sister"], "answer": 0 }
-   ]
-  },
-
-  "core6:1": {
-   "title": "The dog and the business",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
-   ],
-   "lines": [
-    { "s": "a", "ru": "Иван, это твоя собака?", "en": "Ivan, is that your dog?" },
-    { "s": "b", "ru": "Собака моя. И моей жены.", "en": "The dog is mine. And my wife's." },
-    { "s": "a", "ru": "У тебя есть жена?", "en": "You have a wife?" },
-    { "s": "b", "ru": "Есть, Катя. Уже год.", "en": "I have, Katya. For a year now." },
-    { "s": "a", "ru": "Год! А собака?", "en": "A year! And the dog?" },
-    { "s": "b", "ru": "Собака тоже наша.", "en": "The dog is ours too." },
-    { "s": "a", "ru": "А что за дело у тебя?", "en": "And what is this business of yours?" },
-    { "s": "b", "ru": "Дело? Я работаю. Это моё дело.", "en": "Business? I work. That is my business." },
-    { "s": "a", "ru": "Если работа — это дело, то...", "en": "If work is business, then..." },
-    { "s": "b", "ru": "То я всегда в деле.", "en": "Then I am always in business." },
-    { "s": "a", "ru": "А голова? Что в голове?", "en": "And your head? What is in it?" },
-    { "s": "b", "ru": "Голова? Если есть дело — есть голова.", "en": "My head? If there is business, there is a head." },
-    { "s": "a", "ru": "Ты являешься... кем?", "en": "And you are... what, exactly?" },
-    { "s": "b", "ru": "Я являюсь человеком, который работает.", "en": "I am a man who works." }
-   ],
-   "questions": [
-    { "ask": "Whose dog is it?",
-      "options": ["Ivan's and his wife's", "Nobody's in particular", "His mother's, at home", "Katya's, she says so"], "answer": 0 },
-    { "ask": "How long has he been married?",
-      "options": ["A year", "A month", "Six years", "Not long"], "answer": 0 },
-    { "ask": "What does he say his business is?",
-      "options": ["Simply working", "A shop in town", "Dogs, he says", "He has none"], "answer": 0 },
-    { "ask": "What does he say is in his head?",
-      "options": ["Business", "The dog", "His wife", "Nothing at all"],
-      "answer": 0 },
-    { "ask": "How does he describe himself at the end?",
-      "options": ["A man who works", "A dog owner, he says", "A husband, mainly", "A very tired man"], "answer": 0 }
-   ]
-  },
-
   "core6:2": {
-   "title": "Two hours, and the money",
+   "title": "The dog is out",
    "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+    {
+     "id": "a",
+     "ru": "Лена",
+     "en": "Lena"
+    },
+    {
+     "id": "b",
+     "ru": "Борис",
+     "en": "Boris"
+    },
+    {
+     "id": "c",
+     "ru": "Миша",
+     "en": "Misha"
+    }
    ],
    "lines": [
-    { "s": "b", "ru": "Лена, ты была вчера тут?", "en": "Lena, were you here yesterday?" },
-    { "s": "a", "ru": "Вчера? Да, была.", "en": "Yesterday? Yes, I was." },
-    { "s": "b", "ru": "Два часа или более?", "en": "Two hours or more?" },
-    { "s": "a", "ru": "Два часа. Не более.", "en": "Two hours. No more." },
-    { "s": "b", "ru": "А без меня? Ничего?", "en": "And without me? Nothing happened?" },
-    { "s": "a", "ru": "Ничего, Пётр. Всё было хорошо.", "en": "Nothing, Pyotr. It was all fine." },
-    { "s": "b", "ru": "Хорошо... А деньги? Они под дверью?", "en": "Fine... And the money? Is it under the door?" },
-    { "s": "a", "ru": "Под дверью. Как всегда.", "en": "Under the door. As always." },
-    { "s": "b", "ru": "Как всегда... Их два?", "en": "As always... Are there two lots?" },
-    { "s": "a", "ru": "Два. Или один. Не знаю.", "en": "Two. Or one. I do not know." },
-    { "s": "b", "ru": "Ничего. Я найду.", "en": "Never mind. I will find it." },
-    { "s": "a", "ru": "Найдёшь. Деньги под дверью.", "en": "You will. The money is under the door." }
+    {
+     "s": "a",
+     "ru": "Борис, ты не видел собаку?",
+     "en": "Boris, have you seen the dog?"
+    },
+    {
+     "s": "b",
+     "ru": "Вчера видел. А что?",
+     "en": "I saw it yesterday. Why?"
+    },
+    {
+     "s": "a",
+     "ru": "Её нет в квартире.",
+     "en": "It is not in the flat."
+    },
+    {
+     "s": "b",
+     "ru": "Она вышла без тебя?",
+     "en": "It got out without you?"
+    },
+    {
+     "s": "a",
+     "ru": "Без меня. Я работала.",
+     "en": "Without me. I was working."
+    },
+    {
+     "s": "c",
+     "ru": "Я видел собаку на улице.",
+     "en": "I saw the dog on the street."
+    },
+    {
+     "s": "a",
+     "ru": "Миша! Где?",
+     "en": "Misha! Where?"
+    },
+    {
+     "s": "c",
+     "ru": "Под машиной, у дома.",
+     "en": "Under a car, by the house."
+    },
+    {
+     "s": "a",
+     "ru": "Под машиной! Она там?",
+     "en": "Under a car! Is it there now?"
+    },
+    {
+     "s": "c",
+     "ru": "Была. Два часа.",
+     "en": "It was. Two hours ago."
+    },
+    {
+     "s": "b",
+     "ru": "Или она уже дома?",
+     "en": "Or is it home already?"
+    },
+    {
+     "s": "a",
+     "ru": "Дома ничего нет.",
+     "en": "There is nothing at home."
+    },
+    {
+     "s": "b",
+     "ru": "Идём на улицу.",
+     "en": "Let us go out to the street."
+    },
+    {
+     "s": "c",
+     "ru": "Я иду с вами.",
+     "en": "I am coming with you."
+    },
+    {
+     "s": "a",
+     "ru": "Два человека — это хорошо.",
+     "en": "Two people is good."
+    },
+    {
+     "s": "b",
+     "ru": "Мы её найдём, Лена.",
+     "en": "We will find it, Lena."
+    }
    ],
    "questions": [
-    { "ask": "When was Lena there?",
-      "options": ["Yesterday", "Today", "Last week", "She was not"], "answer": 0 },
-    { "ask": "For how long?",
-      "options": ["Two hours", "All day", "A few minutes", "More than two hours"], "answer": 0 },
-    { "ask": "Did anything happen while he was away?",
-      "options": ["Nothing at all", "A great deal did", "She will not say", "Someone came by"], "answer": 0 },
-    { "ask": "Where is the money?",
-      "options": ["Under the door", "With Lena", "Lost", "In his pocket"], "answer": 0 },
-    { "ask": "How many lots of it are there?",
-      "options": ["She is not sure", "Exactly two lots", "Exactly one lot", "None at all now"], "answer": 0 }
+    {
+     "ask": "What has happened?",
+     "options": [
+      "The dog has got out",
+      "The dog is unwell",
+      "The dog has been found",
+      "The dog bit someone"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "When did Boris last see it?",
+     "options": [
+      "Yesterday",
+      "This morning",
+      "An hour ago",
+      "He cannot say"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Where did Misha see it?",
+     "options": [
+      "Under a car",
+      "On the main road",
+      "By the school",
+      "In the garden"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How long ago was that?",
+     "options": [
+      "Two hours",
+      "Two days",
+      "Ten minutes",
+      "He does not say"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What do they decide?",
+     "options": [
+      "To go out and look",
+      "To wait at home",
+      "To ring the police",
+      "To leave it till later"
+     ],
+     "answer": 0
+    }
    ]
   },
-
-  "core6:3": {
-   "title": "Wine, and music she can play",
-   "cast": [
-    { "id": "a", "ru": "Пётр", "en": "Pyotr" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Пётр, ты пьёшь вино?", "en": "Pyotr, do you drink wine?" },
-    { "s": "a", "ru": "Вино? Пью. Но не часто.", "en": "Wine? I do. But not often." },
-    { "s": "b", "ru": "А что на столе?", "en": "And what is on the table?" },
-    { "s": "a", "ru": "На столе всего вино.", "en": "On the table there is only wine." },
-    { "s": "b", "ru": "Всего вино? А музыка?", "en": "Only wine? And music?" },
-    { "s": "a", "ru": "Музыка есть. Я умею играть.", "en": "There is music. I can play." },
-    { "s": "b", "ru": "Умеешь играть! Какая история!", "en": "You can play! What a story!" },
-    { "s": "a", "ru": "История? Это не история.", "en": "A story? It is not a story." },
-    { "s": "b", "ru": "История. Ты умеешь, а я нет.", "en": "It is. You can, and I cannot." },
-    { "s": "a", "ru": "Ты тоже можешь. Если хочешь.", "en": "You could too. If you wanted to." },
-    { "s": "b", "ru": "Хочу. Но музыка — это время.", "en": "I do want to. But music takes time." },
-    { "s": "a", "ru": "Время, Юра. И вино на столе.", "en": "Time, Yura. And wine on the table." }
-   ],
-   "questions": [
-    { "ask": "How often does Pyotr drink wine?",
-      "options": ["Not often", "Every day", "Never", "Only with Yura"], "answer": 0 },
-    { "ask": "What can he do?",
-      "options": ["Play music", "Cook", "Sing", "Nothing special"], "answer": 0 },
-    { "ask": "Can Yura play?",
-      "options": ["No, he cannot", "Yes, very well", "He used to do", "He will not say"], "answer": 0 },
-    { "ask": "What does Pyotr tell Yura?",
-      "options": ["He could learn if he wanted", "He should not bother at all", "It is far too late for him", "To listen to it instead"],
-      "answer": 0 },
-    { "ask": "What stops Yura?",
-      "options": ["It takes time", "Money", "He has no instrument", "Nothing"], "answer": 0 }
-   ]
-  },
-
   "core6:4": {
-   "title": "Her task: find a house",
+   "title": "Her favourite",
    "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
+    {
+     "id": "a",
+     "ru": "Катя",
+     "en": "Katya"
+    },
+    {
+     "id": "b",
+     "ru": "Олег",
+     "en": "Oleg"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "спасибо",
+     "en": "thank you"
+    }
    ],
    "lines": [
-    { "s": "b", "ru": "Соня, какая у тебя задача?", "en": "Sonya, what is your task?" },
-    { "s": "a", "ru": "Задача? Найти дом.", "en": "My task? To find a house." },
-    { "s": "b", "ru": "Найти дом — это задача?", "en": "Finding a house is a task?" },
-    { "s": "a", "ru": "Задача. И самая большая.", "en": "It is. And the biggest one." },
-    { "s": "b", "ru": "А твой любимый дом? Какой?", "en": "And your favourite house? Which is it?" },
-    { "s": "a", "ru": "Любимый? Тот, у воды.", "en": "My favourite? The one by the water." },
-    { "s": "b", "ru": "У воды! Он самый большой?", "en": "By the water! Is it the biggest?" },
-    { "s": "a", "ru": "Не самый. Но любимый.", "en": "Not the biggest. But my favourite." },
-    { "s": "b", "ru": "Любимый дом, любимая задача.", "en": "A favourite house, a favourite task." },
-    { "s": "a", "ru": "Так и есть, Миша.", "en": "That is how it is, Misha." },
-    { "s": "b", "ru": "А если не найдёшь?", "en": "And if you do not find it?" },
-    { "s": "a", "ru": "Найду. Это моя задача.", "en": "I will. That is my task." }
+    {
+     "s": "a",
+     "ru": "Олег, это моя любимая музыка.",
+     "en": "Oleg, this is my favourite music."
+    },
+    {
+     "s": "b",
+     "ru": "Эта? Я её не знаю.",
+     "en": "This? I do not know it."
+    },
+    {
+     "s": "a",
+     "ru": "Не знаешь? Это же история!",
+     "en": "You do not know it? It is a piece of history!"
+    },
+    {
+     "s": "b",
+     "ru": "Какая история?",
+     "en": "What history?"
+    },
+    {
+     "s": "a",
+     "ru": "Моего отца. Он её любил.",
+     "en": "My father's. He loved it."
+    },
+    {
+     "s": "b",
+     "ru": "А, вот как.",
+     "en": "Ah, I see."
+    },
+    {
+     "s": "a",
+     "ru": "Вот стол. Вот вино.",
+     "en": "Here is the table. Here is the wine."
+    },
+    {
+     "s": "b",
+     "ru": "Я не пью вино.",
+     "en": "I do not drink wine."
+    },
+    {
+     "s": "a",
+     "ru": "Не пьёшь? Вот вода.",
+     "en": "You do not? Here is water."
+    },
+    {
+     "s": "b",
+     "ru": "Спасибо. А что за задача?",
+     "en": "Thank you. And what is the task?"
+    },
+    {
+     "s": "a",
+     "ru": "Задача одна — ты её любишь.",
+     "en": "The task is one thing: you love it."
+    },
+    {
+     "s": "b",
+     "ru": "Я не умею любить музыку.",
+     "en": "I do not know how to love music."
+    },
+    {
+     "s": "a",
+     "ru": "Умеешь. Все умеют.",
+     "en": "You do. Everyone does."
+    },
+    {
+     "s": "b",
+     "ru": "Хорошо, Катя. Вот я.",
+     "en": "All right, Katya. Here I am."
+    },
+    {
+     "s": "a",
+     "ru": "Это моя любимая история.",
+     "en": "This is my favourite story."
+    },
+    {
+     "s": "b",
+     "ru": "И моя, может быть.",
+     "en": "And mine, perhaps."
+    }
    ],
    "questions": [
-    { "ask": "What is Sonya's task?",
-      "options": ["To find a house", "To sell a house", "To find work", "To help Misha"], "answer": 0 },
-    { "ask": "Which house does she like best?",
-      "options": ["The one by the water", "The biggest", "The nearest", "She has not chosen"],
-      "answer": 0 },
-    { "ask": "Is it the biggest one?",
-      "options": ["No", "Yes", "She does not know", "Misha says it is"], "answer": 0 },
-    { "ask": "What does Misha ask at the end?",
-      "options": ["What if she does not find it", "Whether he can help her look", "How much the house will cost", "When she is going to move in"],
-      "answer": 0 },
-    { "ask": "How sure is she?",
-      "options": ["Quite sure she will", "Not at all", "She is giving up", "She wants Misha to do it"],
-      "answer": 0 }
-   ]
-  },
-
-  "work:0": {
-   "title": "Working at the factory",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Лена", "en": "Lena" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, ты работаешь на заводе?", "en": "Anya, do you work at the factory?" },
-    { "s": "a", "ru": "На заводе. Уже год.", "en": "At the factory. For a year now." },
-    { "s": "b", "ru": "И сколько ты зарабатываешь?", "en": "And how much do you earn?" },
-    { "s": "a", "ru": "Зарабатываю. Но не много.", "en": "I earn something. But not much." },
-    { "s": "b", "ru": "А кто платит?", "en": "And who pays?" },
-    { "s": "a", "ru": "Платит завод. Каждый день.", "en": "The factory pays. Every day." },
-    { "s": "b", "ru": "Каждый день! Ты богатая?", "en": "Every day! Are you rich?" },
-    { "s": "a", "ru": "Богатая? Нет, Лена.", "en": "Rich? No, Lena." },
-    { "s": "b", "ru": "А товар? Какой товар?", "en": "And the goods? What sort of goods?" },
-    { "s": "a", "ru": "Товар дорогой. Очень.", "en": "The goods are expensive. Very." },
-    { "s": "b", "ru": "Дорогой товар, а ты не богатая.", "en": "Expensive goods, and you are not rich." },
-    { "s": "a", "ru": "Не богатая. Но у меня есть коллеги.", "en": "Not rich. But I have colleagues." }
-   ],
-   "questions": [
-    { "ask": "Where does Anya work?",
-      "options": ["At a factory", "In a shop", "At home", "She does not work"], "answer": 0 },
-    { "ask": "How long has Anya been there?",
-      "options": ["A year", "A day", "Ten years", "She does not say"], "answer": 0 },
-    { "ask": "How often is Anya paid?",
-      "options": ["Every day", "Every month", "Never", "When there is money"], "answer": 0 },
-    { "ask": "Is Anya rich?",
-      "options": ["No", "Yes", "She will not say", "Lena thinks so and she agrees"], "answer": 0 },
-    { "ask": "What is the irony Anya points out?",
-      "options": ["Expensive goods, poor pay", "Cheap goods, but good pay", "No goods at all to sell", "Nobody buys them anyway"],
-      "answer": 0 }
-   ]
-  },
-
-  "work:1": {
-   "title": "A meeting with the director",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, когда встреча?", "en": "Katya, when is the meeting?" },
-    { "s": "a", "ru": "Встреча? Сегодня. С директором.", "en": "The meeting? Today. With the director." },
-    { "s": "b", "ru": "С директором! А задание?", "en": "With the director! And the task?" },
-    { "s": "a", "ru": "Задание уже есть. Я его делаю.", "en": "I already have the task. I am doing it." },
-    { "s": "b", "ru": "А зарплата? Она большая?", "en": "And the salary? Is it a big one?" },
-    { "s": "a", "ru": "Зарплата... Это доллары.", "en": "The salary... It is in dollars." },
-    { "s": "b", "ru": "Доллары! Сколько?", "en": "Dollars! How many?" },
-    { "s": "a", "ru": "Не скажу, Олег.", "en": "I will not say, Oleg." },
-    { "s": "b", "ru": "А сотрудники? Их много?", "en": "And the staff? Are there many?" },
-    { "s": "a", "ru": "Сотрудников много. Вся компания.", "en": "There are many. The whole company." },
-    { "s": "b", "ru": "А деятельность? Какая?", "en": "And the line of work? What is it?" },
-    { "s": "a", "ru": "Деятельность новая. Как и задание.", "en": "The work is new. So is the task." }
-   ],
-   "questions": [
-    { "ask": "Who is the meeting with?",
-      "options": ["The director", "A colleague", "The whole company", "Nobody yet"], "answer": 0 },
-    { "ask": "Has Katya got her task?",
-      "options": ["Yes, and she is doing it", "It is Oleg's task instead", "She turned it down", "No, not yet at all"],
-      "answer": 0 },
-    { "ask": "What is she paid in?",
-      "options": ["Dollars", "Roubles", "She is not paid", "She does not say the currency"],
-      "answer": 0 },
-    { "ask": "How much does she earn?",
-      "options": ["She will not say", "A great deal", "Very little", "The same as Oleg"], "answer": 0 },
-    { "ask": "What is new about the work?",
-      "options": ["Both the work and the task", "Only the office they use", "Only the director is new", "Nothing at all is new"],
-      "answer": 0 }
-   ]
-  },
-
-  "work:2": {
-   "title": "A nurse who does the books",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Борис", "en": "Boris" },
-    { "id": "c", "ru": "Таня", "en": "Tanya" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, кто твой начальник?", "en": "Lena, who is your boss?" },
-    { "s": "a", "ru": "Начальник? Он тут не часто.", "en": "My boss? He is not here often." },
-    { "s": "b", "ru": "Не часто! А ты? Ты медсестра?", "en": "Not often! And you? Are you a nurse?" },
-    { "s": "a", "ru": "Медсестра. Уже два года.", "en": "A nurse. For two years now." },
-    { "s": "b", "ru": "А служба? Она большая?", "en": "And the service? Is it a big one?" },
-    { "s": "a", "ru": "Служба большая. И бухгалтерское дело.", "en": "The service is big. And there is the book-keeping." },
-    { "s": "b", "ru": "Бухгалтерское дело? Ты умеешь?", "en": "Book-keeping? Can you do that?" },
-    { "s": "a", "ru": "Умею. Но я медсестра.", "en": "I can. But I am a nurse." },
-    { "s": "b", "ru": "А кто заплатит?", "en": "And who is going to pay?" },
-    { "s": "a", "ru": "Начальник заплатит. Он всегда платит.", "en": "The boss will pay. He always pays." },
-    { "s": "b", "ru": "А если нет? Ты бедная?", "en": "And if he does not? Are you poor?" },
-    { "s": "a", "ru": "Не бедная, Борис. Я работаю.", "en": "Not poor, Boris. I work." },
-    { "s": "c", "ru": "Лена, а я? Я тоже медсестра.", "en": "Lena, and me? I am a nurse too." },
-    { "s": "b", "ru": "Таня! И ты тут работаешь?", "en": "Tanya! Do you work here too?" },
-    { "s": "c", "ru": "Работаю. И я не бедная.", "en": "I do. And I am not poor." }
-   ],
-   "questions": [
-    { "ask": "What is Lena's job?",
-      "options": ["A nurse", "A book-keeper", "A boss", "A director"], "answer": 0 },
-    { "ask": "How long has she done it?",
-      "options": ["Two years", "A year", "Two months", "She does not say"], "answer": 0 },
-    { "ask": "What else does she do?",
-      "options": ["The book-keeping", "Nothing else", "She manages the staff", "She drives"],
-      "answer": 0 },
-    { "ask": "How often is the boss there?",
-      "options": ["Not often", "Every day", "Never", "Only to pay"], "answer": 0 },
-    { "ask": "Who else turns out to be a nurse?",
-      "options": ["Tanya", "Boris", "Nobody", "The boss"], "answer": 0 }
-   ]
-  },
-
-  "work:3": {
-   "title": "Where the cash desk is",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, где касса?", "en": "Nina, where is the cash desk?" },
-    { "s": "a", "ru": "Касса? У администратора.", "en": "The cash desk? By the administrator." },
-    { "s": "b", "ru": "У администратора... А кто руководитель?", "en": "By the administrator... And who is in charge?" },
-    { "s": "a", "ru": "Руководитель? Он в бригаде.", "en": "The manager? He is with the team." },
-    { "s": "b", "ru": "В бригаде! А работники?", "en": "With the team! And the workers?" },
-    { "s": "a", "ru": "Работников много. Вся отрасль.", "en": "There are many workers. The whole industry." },
-    { "s": "b", "ru": "Вся отрасль? Это большая работа.", "en": "The whole industry? That is a big operation." },
-    { "s": "a", "ru": "Большая. Мы покупаем товар.", "en": "Big. We buy goods." },
-    { "s": "b", "ru": "Покупаете? Каждый день?", "en": "You buy? Every day?" },
-    { "s": "a", "ru": "Каждый. И платим в кассе.", "en": "Every day. And we pay at the desk." },
-    { "s": "b", "ru": "В кассе... А администратор?", "en": "At the desk... And the administrator?" },
-    { "s": "a", "ru": "Администратор всё знает, Пётр.", "en": "The administrator knows everything, Pyotr." }
-   ],
-   "questions": [
-    { "ask": "Where is the cash desk?",
-      "options": ["With the administrator", "With the manager", "In the team room", "Pyotr never finds out"],
-      "answer": 0 },
-    { "ask": "Where is the manager?",
-      "options": ["With the team", "At the desk", "Away", "He is the administrator"], "answer": 0 },
-    { "ask": "How many workers are there?",
-      "options": ["Many, a whole industry", "Nina does not know yet", "Two, she says exactly", "None at all there now"], "answer": 0 },
-    { "ask": "What do they do every day?",
-      "options": ["Buy goods", "Sell goods", "Hold meetings", "Count the money"], "answer": 0 },
-    { "ask": "Who does Nina say knows everything?",
-      "options": ["The administrator", "Nobody at all does", "The manager there", "She does herself"], "answer": 0 }
-   ]
-  },
-
-  "work:4": {
-   "title": "Meetings and a cheap coin",
-   "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Соня, у вас собрание?", "en": "Sonya, are you having a meeting?" },
-    { "s": "a", "ru": "Собрание. И заседание тоже.", "en": "A meeting. And a session as well." },
-    { "s": "b", "ru": "Заседание и собрание! А когда работать?", "en": "A session and a meeting! When do you work?" },
-    { "s": "a", "ru": "После. Я инженер, Иван.", "en": "Afterwards. I am an engineer, Ivan." },
-    { "s": "b", "ru": "Инженер! Это профессия.", "en": "An engineer! That is a profession." },
-    { "s": "a", "ru": "Профессия. Я проработаю тут год.", "en": "A profession. I will work here a year." },
-    { "s": "b", "ru": "Год? И всё?", "en": "A year? And that is all?" },
-    { "s": "a", "ru": "И всё. Или больше.", "en": "That is all. Or more." },
-    { "s": "b", "ru": "А монета? Что это?", "en": "And that coin? What is it?" },
-    { "s": "a", "ru": "Монета? Она дешёвая.", "en": "The coin? It is a cheap one." },
-    { "s": "b", "ru": "Дешёвая монета? Она твоя?", "en": "A cheap coin? Is it yours?" },
-    { "s": "a", "ru": "Моя. Дешёвая, но моя.", "en": "Mine. Cheap, but mine." }
-   ],
-   "questions": [
-    { "ask": "What is taking up Sonya's day?",
-      "options": ["A meeting and a session", "An operation, she says", "Travelling, all day", "Nothing much at all"], "answer": 0 },
-    { "ask": "What is her profession?",
-      "options": ["Engineer", "Manager", "Nurse", "Accountant"], "answer": 0 },
-    { "ask": "How long will she work there?",
-      "options": ["A year, perhaps longer", "A month", "Until the meeting ends", "She has not decided"],
-      "answer": 0 },
-    { "ask": "What does Ivan ask about?",
-      "options": ["A coin", "Her pay", "Her boss", "The desk"], "answer": 0 },
-    { "ask": "What does she say about it?",
-      "options": ["It is cheap but hers", "It is worth a great deal", "She found it somewhere", "It belongs to Ivan"], "answer": 0 }
-   ]
-  },
-
-  "work:5": {
-   "title": "A manager and a nanny",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, какая у тебя должность?", "en": "Anya, what is your position?" },
-    { "s": "a", "ru": "Должность? Я менеджер.", "en": "My position? I am a manager." },
-    { "s": "b", "ru": "Менеджер! А трудишься много?", "en": "A manager! And do you work hard?" },
-    { "s": "a", "ru": "Тружусь. Каждый день.", "en": "I do. Every day." },
-    { "s": "b", "ru": "А няня? У вас есть няня?", "en": "And a nanny? Have you got a nanny?" },
-    { "s": "a", "ru": "Няня есть. Для ребёнка.", "en": "We have. For the child." },
-    { "s": "b", "ru": "А денежный вопрос? Как он?", "en": "And the money side of it? How is that?" },
-    { "s": "a", "ru": "Денежный вопрос всегда есть.", "en": "The money question is always there." },
-    { "s": "b", "ru": "Всегда! И у менеджера?", "en": "Always! Even for a manager?" },
-    { "s": "a", "ru": "И у менеджера, Юра.", "en": "Even for a manager, Yura." },
-    { "s": "b", "ru": "А няня? Ей платят?", "en": "And the nanny? Is she paid?" },
-    { "s": "a", "ru": "Платят. Она тоже трудится.", "en": "She is. She works hard too." }
-   ],
-   "questions": [
-    { "ask": "What does Anya do?",
-      "options": ["She is a manager", "She is a nanny", "She does not work", "She is an engineer"],
-      "answer": 0 },
-    { "ask": "Who looks after the child?",
-      "options": ["A nanny", "Anya herself", "Yura", "Nobody"], "answer": 0 },
-    { "ask": "What is always a question?",
-      "options": ["Money", "Time", "The child", "The nanny's hours"], "answer": 0 },
-    { "ask": "Does being a manager solve it?",
-      "options": ["No", "Yes", "She thinks so", "Yura thinks so"], "answer": 0 },
-    { "ask": "What does she say about the nanny?",
-      "options": ["She is paid and works hard", "She is not paid anything", "She is one of the family", "She is leaving them soon"],
-      "answer": 0 }
-   ]
-  },
-
-  "animals:0": {
-   "title": "Who feeds the cat",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, это твой кот?", "en": "Katya, is that your cat?" },
-    { "s": "a", "ru": "Кот мой. И кошка тоже.", "en": "The tomcat is mine. And the cat too." },
-    { "s": "b", "ru": "Кот и кошка! А кто их кормит?", "en": "A tomcat and a cat! And who feeds them?" },
-    { "s": "a", "ru": "Кормлю я. Каждый день.", "en": "I do. Every day." },
-    { "s": "b", "ru": "А птица? В клетке?", "en": "And the bird? In a cage?" },
-    { "s": "a", "ru": "Птица в клетке. Она тут.", "en": "The bird is in the cage. It is right here." },
-    { "s": "b", "ru": "А корова? У вас есть корова?", "en": "And a cow? Have you got a cow?" },
-    { "s": "a", "ru": "Корова? Миша, мы в городе!", "en": "A cow? Misha, we are in a city!" },
-    { "s": "b", "ru": "В городе. Но кот бегает?", "en": "In a city. But does the cat run about?" },
-    { "s": "a", "ru": "Бегает. Весь день.", "en": "It does. All day." },
-    { "s": "b", "ru": "Весь день бегает, а ты кормишь.", "en": "It runs all day and you feed it." },
-    { "s": "a", "ru": "Кормлю. Кот, кошка и птица.", "en": "I do. Tomcat, cat and bird." }
-   ],
-   "questions": [
-    { "ask": "What animals does Katya have?",
-      "options": ["Two cats and a bird", "A cow and a horse", "A dog and a cat", "Only a bird now"], "answer": 0 },
-    { "ask": "Who feeds them?",
-      "options": ["Katya", "Misha", "Nobody", "The neighbours"], "answer": 0 },
-    { "ask": "Where is the bird?",
-      "options": ["In a cage", "Out of doors", "On the table", "In the yard"], "answer": 0 },
-    { "ask": "Why does she laugh at the cow question?",
-      "options": ["They live in a city", "She hates cows", "She has three", "It is a joke of Misha's"],
-      "answer": 0 },
-    { "ask": "What does the cat do all day?",
-      "options": ["Runs about", "Sleeps", "Sits in the cage", "Follows Katya"], "answer": 0 }
-   ]
-  },
-
-  "animals:1": {
-   "title": "A mouse and a butterfly",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" },
-    { "id": "c", "ru": "Олег", "en": "Oleg" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, что это? Мышь?", "en": "Lena, what is that? A mouse?" },
-    { "s": "a", "ru": "Мышь. А там бабочка.", "en": "A mouse. And over there is a butterfly." },
-    { "s": "b", "ru": "Бабочка — это насекомое?", "en": "Is a butterfly an insect?" },
-    { "s": "a", "ru": "Насекомое. А мышь — нет.", "en": "It is. A mouse is not." },
-    { "s": "b", "ru": "А конь? У вас есть конь?", "en": "And a horse? Have you got a horse?" },
-    { "s": "a", "ru": "Конь есть. И коза.", "en": "We have a horse. And a goat." },
-    { "s": "b", "ru": "Коза! Какая порода?", "en": "A goat! What breed?" },
-    { "s": "a", "ru": "Порода? Не знаю, Виктор.", "en": "Breed? I have no idea, Viktor." },
-    { "s": "b", "ru": "А волк? Тут есть волки?", "en": "And wolves? Are there wolves here?" },
-    { "s": "a", "ru": "Волки? Они не тут.", "en": "Wolves? Not here." },
-    { "s": "b", "ru": "Не тут — это хорошо.", "en": "Not here — that is good." },
-    { "s": "a", "ru": "Хорошо. Только мышь и бабочка.", "en": "Good. Only a mouse and a butterfly." },
-    { "s": "c", "ru": "Волки есть. Но они не тут.", "en": "There are wolves. But not here." },
-    { "s": "b", "ru": "Олег! А где волки?", "en": "Oleg! And where are the wolves?" },
-    { "s": "c", "ru": "Не знаю. Но не тут.", "en": "I do not know. But not here." }
-   ],
-   "questions": [
-    { "ask": "What two small creatures are there?",
-      "options": ["A mouse and a butterfly", "Wolves, out in the woods", "A goat and a horse too", "A cat and a bird there"],
-      "answer": 0 },
-    { "ask": "Which of them is an insect?",
-      "options": ["The butterfly", "Both of them", "Neither one", "The mouse"], "answer": 0 },
-    { "ask": "What larger animals does Lena have?",
-      "options": ["A horse and a goat", "None at all there", "A cow and a pig", "A dog and a cat"], "answer": 0 },
-    { "ask": "Does she know the goat's breed?",
-      "options": ["No", "Yes", "She asks Viktor", "It has none"], "answer": 0 },
-    { "ask": "What does Oleg say about the wolves?",
-      "options": ["They exist, but not here", "He has seen one himself", "There are none at all", "They are by the goat"],
-      "answer": 0 }
-   ]
-  },
-
-  "animals:2": {
-   "title": "The hen with a bad wing",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, что с крылом птицы?", "en": "Nina, what is wrong with the bird's wing?" },
-    { "s": "a", "ru": "Крыло? Какая птица?", "en": "A wing? Which bird?" },
-    { "s": "b", "ru": "Курица. Она не бегает.", "en": "The hen. She is not running about." },
-    { "s": "a", "ru": "Курица... Борис, а лапа?", "en": "The hen... Boris, what about her foot?" },
-    { "s": "b", "ru": "С лапой всё. Только крыло.", "en": "The foot is fine. Only the wing." },
-    { "s": "a", "ru": "А лошадь? Она тут?", "en": "And the horse? Is she here?" },
-    { "s": "b", "ru": "Лошадь тут. И свинья.", "en": "The horse is here. And the pig." },
-    { "s": "a", "ru": "Свинья и лошадь! А медведь?", "en": "A pig and a horse! And a bear?" },
-    { "s": "b", "ru": "Медведь? Его тут нет.", "en": "A bear? There is no bear here." },
-    { "s": "a", "ru": "Нет медведя — хорошо.", "en": "No bear — that is good." },
-    { "s": "b", "ru": "А мышка? Она тут бегает.", "en": "And the little mouse? She runs about here." },
-    { "s": "a", "ru": "Мышка бегает. А курица нет.", "en": "The mouse runs. The hen does not." }
-   ],
-   "questions": [
-    { "ask": "Which animal is hurt?",
-      "options": ["The hen", "The horse", "The pig", "The mouse"], "answer": 0 },
-    { "ask": "What is wrong with it?",
-      "options": ["Its wing", "Its foot", "Nothing", "They cannot tell"], "answer": 0 },
-    { "ask": "What other animals are there?",
-      "options": ["A horse and a pig", "A bear, she says", "Only birds here", "A cow and a hen"], "answer": 0 },
-    { "ask": "Is there a bear?",
-      "options": ["No", "Yes", "Nina saw one", "They are looking for one"], "answer": 0 },
-    { "ask": "What is the little mouse doing?",
-      "options": ["Running about", "Sleeping", "Hiding from the hen", "Nothing"], "answer": 0 }
-   ]
-  },
-
-  "animals:3": {
-   "title": "The cat by the nest",
-   "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Маша", "en": "Masha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Соня, что это? Гнездо?", "en": "Sonya, what is that? A nest?" },
-    { "s": "a", "ru": "Гнездо. Там птица.", "en": "A nest. There is a bird in it." },
-    { "s": "b", "ru": "Птица в гнезде! А животное?", "en": "A bird in the nest! And that animal?" },
-    { "s": "a", "ru": "Какое животное, Маша?", "en": "Which animal, Masha?" },
-    { "s": "b", "ru": "То, которое бегает.", "en": "The one that is running about." },
-    { "s": "a", "ru": "Это кот. Он тут живёт.", "en": "That is the cat. He lives here." },
-    { "s": "b", "ru": "Кот у гнезда? А птица?", "en": "A cat by the nest? And the bird?" },
-    { "s": "a", "ru": "Птица в гнезде. Она не выйдет.", "en": "The bird is in the nest. She will not come out." },
-    { "s": "b", "ru": "Не выйдет... А кот?", "en": "She will not... And the cat?" },
-    { "s": "a", "ru": "Кот тоже животное. Он ждёт.", "en": "The cat is an animal too. He is waiting." },
-    { "s": "b", "ru": "Ждёт! Сколько?", "en": "Waiting! How long?" },
-    { "s": "a", "ru": "Весь день. Гнездо и кот.", "en": "All day. The nest and the cat." }
-   ],
-   "questions": [
-    { "ask": "What are they looking at?",
-      "options": ["A nest with a bird in it", "A cage with a bird in it", "A cat asleep by the wall", "An empty nest in a tree"], "answer": 0 },
-    { "ask": "What is the animal running about?",
-      "options": ["A cat", "A mouse", "A dog", "A hen"], "answer": 0 },
-    { "ask": "Why does the bird stay put?",
-      "options": ["The cat is there", "It is hurt", "It is feeding", "Sonya does not say"],
-      "answer": 0 },
-    { "ask": "What is the cat doing?",
-      "options": ["Waiting", "Sleeping", "Leaving", "Eating"], "answer": 0 },
-    { "ask": "How long has this been going on?",
-      "options": ["All day", "Since six", "A minute", "Just now"],
-      "answer": 0 }
+    {
+     "ask": "What are they disagreeing about?",
+     "options": [
+      "Music",
+      "Wine",
+      "Money",
+      "Work"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Why does it matter to Katya?",
+     "options": [
+      "It was her father's",
+      "It was her first ever",
+      "She wrote it herself",
+      "She heard it at work"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Oleg turn down?",
+     "options": [
+      "The wine",
+      "The food",
+      "The music",
+      "The chair"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How many tasks does Katya set him?",
+     "options": [
+      "One task",
+      "Two tasks",
+      "No task",
+      "Three tasks"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How does Oleg end up?",
+     "options": [
+      "Coming round to it",
+      "Walking out on her",
+      "Still refusing it",
+      "Changing the subject"
+     ],
+     "answer": 0
+    }
    ]
   }
  }

@@ -2,757 +2,302 @@
  "chapter": 9,
  "name": "Where, When & How",
  "lessons": {
-  "core9:0": {
-   "title": "On the other side",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },    { "id": "b", "ru": "Соня", "en": "Sonya" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, где это? Тут?", "en": "Anya, where is it? Here?" },
-    { "s": "a", "ru": "Тут. Около нас.", "en": "Here. Right by us." },
-    { "s": "b", "ru": "Около? Я не вижу.", "en": "By us? I cannot see it." },
-    { "s": "a", "ru": "Вот, с другой стороны.", "en": "There, on the other side." },
-    { "s": "b", "ru": "С другой стороны! А второй дом?", "en": "On the other side! And the second house?" },
-    { "s": "a", "ru": "Второй. Он против первого.", "en": "The second. It is opposite the first." },
-    { "s": "b", "ru": "Против... Ты идёшь слишком быстро.", "en": "Opposite... You are walking too fast." },
-    { "s": "a", "ru": "Быстро. А ты смотри на землю.", "en": "Fast. And you watch the ground." },
-    { "s": "b", "ru": "На землю? Почему?", "en": "The ground? Why?" },
-    { "s": "a", "ru": "Там вода. Ты не видишь.", "en": "There is water there. You are not looking." },
-    { "s": "b", "ru": "Не вижу. Я смотрю на дом.", "en": "I am not. I am looking at the house." },
-    { "s": "a", "ru": "На дом. А я на землю, Соня.", "en": "At the house. And I at the ground, Sonya." }
-   ],
-   "questions": [
-    { "ask": "Where is the place they want?",
-      "options": ["On the other side", "Straight ahead", "Behind them", "They never find it"],
-      "answer": 0 },
-    { "ask": "Where is the second house?",
-      "options": ["Opposite the first", "Next to the first", "Further on", "There is no second house"],
-      "answer": 0 },    { "ask": "What does Anya complain about?",
-      "options": ["Sonya walks too fast", "Sonya is too slow", "Sonya will not talk", "The house"], "answer": 0 },    { "ask": "Why should Sonya look down?",
-      "options": ["There is water on the ground", "It is too dark to see well", "She has dropped something", "No reason is given at all"],
-      "answer": 0 },
-    { "ask": "What is Sonya looking at instead?",
-      "options": ["The house", "The ground", "Anya", "Nothing"], "answer": 0 }
-   ]
-  },
-
-  "core9:1": {
-   "title": "Something between them",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, ты идёшь?", "en": "Katya, are you coming?" },
-    { "s": "a", "ru": "Иду. Почти готова.", "en": "I am. Almost ready." },
-    { "s": "b", "ru": "Почти! А между нами...", "en": "Almost! And between us..." },
-    { "s": "a", "ru": "Между нами? Что?", "en": "Between us? What?" },
-    { "s": "b", "ru": "Необходимо сказать одно.", "en": "There is one thing that has to be said." },
-    { "s": "a", "ru": "Скажи. Иногда это лучше.", "en": "Say it. Sometimes that is better." },
-    { "s": "b", "ru": "Лучше? Тогда в любой день.", "en": "Better? Any day will do, then." },
-    { "s": "a", "ru": "В любой? Я слушаю.", "en": "Any day? I am listening." },
-    { "s": "b", "ru": "Спасибо. Это между нами.", "en": "Thank you. This is between us." },
-    { "s": "a", "ru": "Между нами, Борис. Всегда.", "en": "Between us, Boris. Always." },
-    { "s": "b", "ru": "Всегда? Иногда это не так.", "en": "Always? Sometimes it is not." },
-    { "s": "a", "ru": "Не так. Но почти всегда.", "en": "Not always. But nearly always." }
-   ],
-   "questions": [
-    { "ask": "Is Katya ready to go?",
-      "options": ["Almost", "Yes", "No", "She is not going"], "answer": 0 },
-    { "ask": "What does Boris want?",
-      "options": ["To say something to her", "To leave", "An answer to a question", "Nothing"],
-      "answer": 0 },
-    { "ask": "How does she respond?",
-      "options": ["She tells him to say it", "She refuses", "She walks off", "She changes the subject"],
-      "answer": 0 },
-    { "ask": "What does he say it is?",
-      "options": ["Between the two of them", "Urgent, he insists so", "Common knowledge now", "A joke he has heard"], "answer": 0 },
-    { "ask": "Does she promise it will stay between them?",
-      "options": ["Nearly always, she says", "Absolutely never", "She will not promise", "She tells him it will not"],
-      "answer": 0 }
-   ]
-  },
-
   "core9:2": {
-   "title": "The result comes later",
+   "title": "I do not understand it",
    "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },    { "id": "b", "ru": "Юра", "en": "Yura" },
-    { "id": "c", "ru": "Маша", "en": "Masha" }
+    {
+     "id": "a",
+     "ru": "Олег",
+     "en": "Oleg"
+    },
+    {
+     "id": "b",
+     "ru": "Нина",
+     "en": "Nina"
+    }
    ],
    "lines": [
-    { "s": "b", "ru": "Лена, откуда ты это знаешь?", "en": "Lena, how do you know that?" },
-    { "s": "a", "ru": "Откуда? Я понимаю.", "en": "How? I understand it." },
-    { "s": "b", "ru": "Понимаешь? Ну хорошо.", "en": "You understand? Well, all right." },
-    { "s": "a", "ru": "Ну? Ты не понимаешь?", "en": "Well? Do you not understand?" },
-    { "s": "b", "ru": "Понимаю. Но результат?", "en": "I do. But the result?" },
-    { "s": "a", "ru": "Результат будет потом.", "en": "The result comes later." },
-    { "s": "b", "ru": "Потом! А три дня?", "en": "Later! And three days?" },
-    { "s": "a", "ru": "Три дня — это тоже потом.", "en": "Three days is later too." },
-    { "s": "b", "ru": "Тоже потом... А вид?", "en": "Later as well... And the view?" },
-    { "s": "a", "ru": "Вид хороший. Я его люблю.", "en": "The view is good. I love it." },
-    { "s": "b", "ru": "Любишь вид, а результат?", "en": "You love the view — and the result?" },    { "s": "a", "ru": "Результат потом, Юра. Я понимаю.", "en": "The result comes later, Yura. I understand it." },
-    { "s": "c", "ru": "Результат тут. Я его знаю.", "en": "The result is here. I know it." },
-    { "s": "b", "ru": "Маша? Откуда ты знаешь?", "en": "Masha? How do you know?" },
-    { "s": "c", "ru": "Понимаю. Как Лена.", "en": "I understand it. Like Lena." }
+    {
+     "s": "a",
+     "ru": "Нина, откуда у тебя этот результат?",
+     "en": "Nina, where did you get this result?"
+    },
+    {
+     "s": "b",
+     "ru": "От врача. Вчера пришёл.",
+     "en": "From the doctor. It came yesterday."
+    },
+    {
+     "s": "a",
+     "ru": "И ты его понимаешь?",
+     "en": "And do you understand it?"
+    },
+    {
+     "s": "b",
+     "ru": "Ну, не всё.",
+     "en": "Well, not all of it."
+    },
+    {
+     "s": "a",
+     "ru": "Тут три слова, которых я не знаю.",
+     "en": "There are three words here I do not know."
+    },
+    {
+     "s": "b",
+     "ru": "Три? Я не понимаю их.",
+     "en": "Three? I do not understand them."
+    },
+    {
+     "s": "a",
+     "ru": "Потом пойдём к врачу.",
+     "en": "We will go to the doctor later."
+    },
+    {
+     "s": "b",
+     "ru": "Потом? Я хочу знать сейчас.",
+     "en": "Later? I want to know now."
+    },
+    {
+     "s": "a",
+     "ru": "Ну, тогда читай мне.",
+     "en": "Well, read it to me then."
+    },
+    {
+     "s": "b",
+     "ru": "Читаю: всё хорошо.",
+     "en": "I am reading: all is well."
+    },
+    {
+     "s": "a",
+     "ru": "Всё хорошо! Это же результат.",
+     "en": "All is well! That is the result."
+    },
+    {
+     "s": "b",
+     "ru": "Но других слов я не понимаю.",
+     "en": "But I do not understand the other words."
+    },
+    {
+     "s": "a",
+     "ru": "Они для врача, не для нас.",
+     "en": "They are for the doctor, not for us."
+    },
+    {
+     "s": "b",
+     "ru": "Ну хорошо. Потом он скажет.",
+     "en": "All right then. He will tell us later."
+    },
+    {
+     "s": "a",
+     "ru": "Скажет. А сейчас — вода и вино.",
+     "en": "He will. And now, water and wine."
+    },
+    {
+     "s": "b",
+     "ru": "Вино? Ну, Олег!",
+     "en": "Wine? Really, Oleg!"
+    }
    ],
    "questions": [
-    { "ask": "What does Yura want to know at the start?",
-      "options": ["How she knows it", "Where she is", "What the view is", "Whether she is coming"],
-      "answer": 0 },
-    { "ask": "When will the result come?",
-      "options": ["Later", "In an hour", "It already has", "Never"], "answer": 0 },
-    { "ask": "How does she treat three days?",
-      "options": ["As 'later' too", "As too long", "As too short", "She does not answer"],
-      "answer": 0 },
-    { "ask": "What does she say about the view?",
-      "options": ["She loves it", "It is spoilt", "She cannot see it", "Nothing"], "answer": 0 },    { "ask": "Who turns out to have the result?",
-      "options": ["Masha", "Lena", "Yura", "Nobody"], "answer": 0 }
+    {
+     "ask": "Where did the result come from?",
+     "options": [
+      "The doctor",
+      "The school",
+      "Her work",
+      "A friend"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What is the trouble with it?",
+     "options": [
+      "She cannot read the words",
+      "She has lost part of it",
+      "It arrived far too late",
+      "It is not hers at all"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does it actually say?",
+     "options": [
+      "That all is well",
+      "That all is not well",
+      "That she must go back",
+      "Nothing either way"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Oleg say about the rest of it?",
+     "options": [
+      "It is meant for the doctor",
+      "It is meant for her boss",
+      "It is not important now",
+      "He will read it later"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does he suggest afterwards?",
+     "options": [
+      "Wine",
+      "A walk",
+      "A rest",
+      "Bed"
+     ],
+     "answer": 0
+    }
    ]
   },
-
-  "core9:3": {
-   "title": "No strength left",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, ты идёшь домой?", "en": "Nina, are you going home?" },
-    { "s": "a", "ru": "Домой. Но медленно.", "en": "Home. But slowly." },
-    { "s": "b", "ru": "Медленно? Почему?", "en": "Slowly? Why?" },
-    { "s": "a", "ru": "Нет силы. Уже день.", "en": "No strength left. It has been a whole day." },
-    { "s": "b", "ru": "Нет силы... А ты остаёшься?", "en": "No strength... And are you staying?" },
-    { "s": "a", "ru": "Остаюсь. Ещё час.", "en": "I am staying. Another hour." },
-    { "s": "b", "ru": "Час! А потом всё проходит?", "en": "An hour! And then it all passes?" },
-    { "s": "a", "ru": "Проходит. Всегда проходит.", "en": "It passes. It always passes." },
-    { "s": "b", "ru": "А что ты получаешь?", "en": "And what do you get out of it?" },
-    { "s": "a", "ru": "Получаю? Ничего. Только работу.", "en": "Get? Nothing. Only the work." },
-    { "s": "b", "ru": "Только работу! И вдруг силу?", "en": "Only the work! And suddenly, strength?" },
-    { "s": "a", "ru": "И силу, Виктор. Иногда.", "en": "And strength, Viktor. Sometimes." }
-   ],
-   "questions": [
-    { "ask": "Why is Nina moving slowly?",
-      "options": ["She has no strength left", "Her leg hurts her badly", "It is dark on the way", "She is in no hurry now"],
-      "answer": 0 },
-    { "ask": "Is she going home now?",
-      "options": ["Not for another hour", "Yes, at once", "She is staying all night", "She has already gone"],
-      "answer": 0 },
-    { "ask": "What does she say about the tiredness?",
-      "options": ["It always passes", "It never passes", "It is getting worse", "She does not notice it"],
-      "answer": 0 },
-    { "ask": "What does she get out of the work?",
-      "options": ["Nothing but the work itself", "Good money for all the hours", "Praise from the others", "Time off in the summer"], "answer": 0 },
-    { "ask": "Does she ever get strength from it?",
-      "options": ["Sometimes", "Never", "Always", "Only at home"], "answer": 0 }
-   ]
-  },
-
   "core9:4": {
-   "title": "Taking the day as it is",
+   "title": "He is taking it badly",
    "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
+    {
+     "id": "a",
+     "ru": "Таня",
+     "en": "Tanya"
+    },
+    {
+     "id": "b",
+     "ru": "Саша",
+     "en": "Sasha"
+    }
    ],
    "lines": [
-    { "s": "b", "ru": "Соня, тебе плохо?", "en": "Sonya, are you feeling bad?" },
-    { "s": "a", "ru": "Плохо. Уже час.", "en": "Bad. For an hour now." },
-    { "s": "b", "ru": "Час! А ты принимаешь помощь?", "en": "An hour! And do you accept help?" },
-    { "s": "a", "ru": "Принимаю. Иногда.", "en": "I do. Sometimes." },
-    { "s": "b", "ru": "Иногда? Это плохо.", "en": "Sometimes? That is bad." },
-    { "s": "a", "ru": "Плохо. Но я работаю.", "en": "Bad. But I work." },
-    { "s": "b", "ru": "Работаешь, когда плохо!", "en": "You work when you feel bad!" },
-    { "s": "a", "ru": "Работаю. Так я принимаю день.", "en": "I do. That is how I take the day." },
-    { "s": "b", "ru": "Принимаешь день... Понимаю.", "en": "You take the day... I see." },
-    { "s": "a", "ru": "Понимаешь? Спасибо, Пётр.", "en": "You see? Thank you, Pyotr." },
-    { "s": "b", "ru": "А завтра? Будет лучше?", "en": "And tomorrow? Will it be better?" },
-    { "s": "a", "ru": "Будет. Всегда лучше.", "en": "It will. It is always better." }
+    {
+     "s": "a",
+     "ru": "Саша, он принимает это плохо.",
+     "en": "Sasha, he is taking it badly."
+    },
+    {
+     "s": "b",
+     "ru": "Плохо? Что ты сказала ему?",
+     "en": "Badly? What did you tell him?"
+    },
+    {
+     "s": "a",
+     "ru": "Правду. Всю правду.",
+     "en": "The truth. The whole truth."
+    },
+    {
+     "s": "b",
+     "ru": "И он не понимает?",
+     "en": "And he does not understand?"
+    },
+    {
+     "s": "a",
+     "ru": "Понимает. Но плохо принимает.",
+     "en": "He understands. But he is taking it badly."
+    },
+    {
+     "s": "b",
+     "ru": "Ну, это его дело.",
+     "en": "Well, that is his business."
+    },
+    {
+     "s": "a",
+     "ru": "Он мой друг, Саша.",
+     "en": "He is my friend, Sasha."
+    },
+    {
+     "s": "b",
+     "ru": "Знаю. Но правда — это правда.",
+     "en": "I know. But the truth is the truth."
+    },
+    {
+     "s": "a",
+     "ru": "Я думала, он понимает быстро.",
+     "en": "I thought he understood quickly."
+    },
+    {
+     "s": "b",
+     "ru": "Три дня, Таня. Три дня.",
+     "en": "Three days, Tanya. Three days."
+    },
+    {
+     "s": "a",
+     "ru": "Три дня? Я не могу ждать.",
+     "en": "Three days? I cannot wait."
+    },
+    {
+     "s": "b",
+     "ru": "Тогда иди к нему сейчас.",
+     "en": "Then go to him now."
+    },
+    {
+     "s": "a",
+     "ru": "А если он не принимает?",
+     "en": "And if he does not take it?"
+    },
+    {
+     "s": "b",
+     "ru": "Тогда это не твоя задача.",
+     "en": "Then it is not your task."
+    },
+    {
+     "s": "a",
+     "ru": "Моя. Он мой друг.",
+     "en": "It is mine. He is my friend."
+    },
+    {
+     "s": "b",
+     "ru": "Ну, иди, Таня.",
+     "en": "Well, go on, Tanya."
+    }
    ],
    "questions": [
-    { "ask": "How is Sonya feeling?",
-      "options": ["Bad, for the last hour", "She will not say at all", "Perfectly well today", "Tired but happy now"],
-      "answer": 0 },
-    { "ask": "Does she accept help?",
-      "options": ["Only sometimes", "Always", "Never", "Only from Pyotr"], "answer": 0 },
-    { "ask": "What does she do when she feels bad?",
-      "options": ["Works anyway", "Goes home", "Sleeps", "Asks for help"], "answer": 0 },
-    { "ask": "How does Pyotr respond?",
-      "options": ["He says he understands", "He leaves without a word", "He laughs it off at her", "He tells her off badly"],
-      "answer": 0 },
-    { "ask": "What does she expect of tomorrow?",
-      "options": ["It will be better", "It will be worse", "The same", "She has not thought about it"],
-      "answer": 0 }
-   ]
-  },
-
-  "art:0": {
-   "title": "The writer is here",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, кто автор?", "en": "Anya, who is the author?" },
-    { "s": "a", "ru": "Автор? Это писатель. Он тут.", "en": "The author? He is a writer. He is here." },
-    { "s": "b", "ru": "Писатель тут! А роман?", "en": "The writer is here! And the novel?" },
-    { "s": "a", "ru": "Роман новый. Я его читаю.", "en": "The novel is new. I am reading it." },
-    { "s": "b", "ru": "Читаешь! А театр?", "en": "You are reading it! And the theatre?" },
-    { "s": "a", "ru": "Театр тоже тут. Около нас.", "en": "The theatre is here too. Right by us." },
-    { "s": "b", "ru": "Около нас! А выставка?", "en": "By us! And the exhibition?" },
-    { "s": "a", "ru": "Выставка завтра. И песня.", "en": "The exhibition is tomorrow. And a song." },
-    { "s": "b", "ru": "Песня? Чей голос?", "en": "A song? Whose voice?" },
-    { "s": "a", "ru": "Голос её. Очень хороший.", "en": "Her voice. A very good one." },
-    { "s": "b", "ru": "Хороший голос... А роман?", "en": "A good voice... And the novel?" },
-    { "s": "a", "ru": "Роман, театр, выставка. Всё, Олег.", "en": "The novel, the theatre, the exhibition. All of it, Oleg." }
-   ],
-   "questions": [
-    { "ask": "Who is the author?",
-      "options": ["A writer who is there", "Anya herself, she says", "Nobody seems to know", "Oleg, he admits it"], "answer": 0 },
-    { "ask": "What is Anya doing with the novel?",
-      "options": ["Reading it", "Writing it", "Selling it", "Nothing"], "answer": 0 },
-    { "ask": "Where is the theatre?",
-      "options": ["Close by", "Far off", "In town", "Nowhere"], "answer": 0 },
-    { "ask": "When is the exhibition?",
-      "options": ["Tomorrow", "Today", "It is over", "Next year"], "answer": 0 },
-    { "ask": "What does she say about the singer's voice?",
-      "options": ["It is very good", "It is weak", "She has not heard it", "It is the writer's"],
-      "answer": 0 }
-   ]
-  },
-
-  "art:1": {
-   "title": "The painter is also a poet",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, кто этот художник?", "en": "Katya, who is that artist?" },
-    { "s": "a", "ru": "Художник? Его картина тут.", "en": "The artist? His picture is here." },
-    { "s": "b", "ru": "Картина! А произведение?", "en": "A picture! And the work?" },
-    { "s": "a", "ru": "Произведение большое. Это литература.", "en": "The work is a big one. It is literature." },
-    { "s": "b", "ru": "Литература? Он поэт?", "en": "Literature? Is he a poet?" },
-    { "s": "a", "ru": "Поэт. И музыкант тоже.", "en": "A poet. And a musician as well." },
-    { "s": "b", "ru": "Музыкант и поэт! А певец?", "en": "A musician and a poet! And the singer?" },
-    { "s": "a", "ru": "Певец другой. Он тут не часто.", "en": "The singer is someone else. He is not here often." },
-    { "s": "b", "ru": "Не часто... А картина новая?", "en": "Not often... And is the picture new?" },
-    { "s": "a", "ru": "Новая. Художник её дал нам.", "en": "New. The artist gave it to us." },
-    { "s": "b", "ru": "Дал! Это произведение.", "en": "Gave it! That is a work of art." },
-    { "s": "a", "ru": "Произведение, Иван. И литература.", "en": "A work of art, Ivan. And literature." }
-   ],
-   "questions": [
-    { "ask": "What else is the artist?",
-      "options": ["A poet and a musician", "A writer, and that is all", "A singer and an actor", "Nothing else at all"],
-      "answer": 0 },
-    { "ask": "Is the singer the same man?",
-      "options": ["No, someone else", "Yes", "Katya does not know", "There is no singer"],
-      "answer": 0 },
-    { "ask": "How did they get the picture?",
-      "options": ["The artist gave it to them", "They bought it from a shop", "Katya painted it herself", "It is on loan to them"],
-      "answer": 0 },
-    { "ask": "Is the picture new?",
-      "options": ["Yes", "No", "It is a copy", "Nobody says"], "answer": 0 },
-    { "ask": "How often is the singer there?",
-      "options": ["Not often", "Every day", "Never", "He is there now"], "answer": 0 }
-   ]
-  },
-
-  "art:2": {
-   "title": "The concert is tonight",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, когда концерт?", "en": "Lena, when is the concert?" },
-    { "s": "a", "ru": "Концерт сегодня. Певица поёт.", "en": "The concert is today. The singer is singing." },
-    { "s": "b", "ru": "Певица! А актриса?", "en": "The singer! And the actress?" },
-    { "s": "a", "ru": "Актриса тоже тут. И актёр.", "en": "The actress is here as well. And the actor." },
-    { "s": "b", "ru": "Актёр! Театральный?", "en": "The actor! A theatre one?" },
-    { "s": "a", "ru": "Театральный. Он играет всегда.", "en": "A theatre actor. He is always performing." },
-    { "s": "b", "ru": "Всегда играет... А творчество?", "en": "Always performing... And his art?" },
-    { "s": "a", "ru": "Творчество — это его жизнь.", "en": "His art is his life." },
-    { "s": "b", "ru": "Жизнь! А ты поёшь?", "en": "His life! And do you sing?" },
-    { "s": "a", "ru": "Пою. Но не на концерте.", "en": "I sing. But not at concerts." },
-    { "s": "b", "ru": "Не на концерте? Почему?", "en": "Not at concerts? Why?" },
-    { "s": "a", "ru": "Так, Борис. Я пою дома.", "en": "Just so, Boris. I sing at home." }
-   ],
-   "questions": [
-    { "ask": "When is the concert?",
-      "options": ["Today", "Sunday", "Last week", "Not known"], "answer": 0 },
-    { "ask": "Who is performing?",
-      "options": ["A singer, an actress, an actor", "Only a singer and nobody else", "Lena herself, on the stage", "A whole orchestra of them"],
-      "answer": 0 },
-    { "ask": "What is said about the actor?",
-      "options": ["Performing is his life", "He is retiring from it", "He cannot act at all", "He is late as usual"],
-      "answer": 0 },
-    { "ask": "Does Lena sing?",
-      "options": ["Yes, but only at home", "Only at the concerts", "She used to, not now", "No, she never sings"], "answer": 0 },
-    { "ask": "Does she explain why?",
-      "options": ["Not really, no", "Yes, in detail", "Boris explains", "She is nervous"],
-      "answer": 0 }
-   ]
-  },
-
-  "art:3": {
-   "title": "Ballet and painting",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },    { "id": "b", "ru": "Юра", "en": "Yura" },
-    { "id": "c", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, ты была на балете?", "en": "Nina, have you been to the ballet?" },
-    { "s": "a", "ru": "На балете. Спектакль был большой.", "en": "To the ballet. It was a big production." },
-    { "s": "b", "ru": "Спектакль! А артисты?", "en": "A production! And the performers?" },
-    { "s": "a", "ru": "Артисты хорошие. Очень.", "en": "The performers are good. Very." },
-    { "s": "b", "ru": "Хорошие! А живопись?", "en": "Good! And painting?" },
-    { "s": "a", "ru": "Живопись — это другое. Это картинки.", "en": "Painting is another thing. That is pictures." },
-    { "s": "b", "ru": "Картинки... А красота?", "en": "Pictures... And beauty?" },
-    { "s": "a", "ru": "Красота есть. И в балете, и в живописи.", "en": "There is beauty. In ballet and in painting alike." },
-    { "s": "b", "ru": "И там, и там! Это культура.", "en": "In both! That is culture." },
-    { "s": "a", "ru": "Культура. Она у нас есть.", "en": "Culture. We have it." },
-    { "s": "b", "ru": "Есть! А спектакль завтра?", "en": "We do! And is there a production tomorrow?" },    { "s": "a", "ru": "Завтра, Юра. Балет.", "en": "Tomorrow, Yura. Ballet." },
-    { "s": "c", "ru": "Завтра балет? И я.", "en": "Ballet tomorrow? Me as well." },
-    { "s": "a", "ru": "Борис! Ты был на балете?", "en": "Boris! Have you been to the ballet?" },
-    { "s": "c", "ru": "Был. Артисты хорошие.", "en": "I have. The performers are good." }
-   ],
-   "questions": [
-    { "ask": "Where has Nina been?",
-      "options": ["To the ballet", "To an exhibition", "To a concert", "Nowhere"], "answer": 0 },
-    { "ask": "What did she think of the performers?",
-      "options": ["Very good", "Poor", "She could not see them", "She does not say"], "answer": 0 },
-    { "ask": "Where does she find beauty?",
-      "options": ["In both ballet and painting", "Only in painting, she says", "Only in the ballet itself", "Nowhere in either of them"],
-      "answer": 0 },
-    { "ask": "What word does Yura use for it?",
-      "options": ["Culture", "Fashion", "Work", "Money"], "answer": 0 },    { "ask": "Who else has been to the ballet?",
-      "options": ["Boris", "Yura", "Nobody", "The performers"], "answer": 0 }
-   ]
-  },
-
-  "art:4": {
-   "title": "Guitar, play and statue",
-   "cast": [    { "id": "a", "ru": "Пётр", "en": "Pyotr" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Пётр, ты играешь на гитаре?", "en": "Pyotr, do you play the guitar?" },
-    { "s": "a", "ru": "На гитаре. И напеваю.", "en": "The guitar. And I hum along." },
-    { "s": "b", "ru": "Напеваешь! А жанр какой?", "en": "You hum! And what genre?" },
-    { "s": "a", "ru": "Жанр? Любой. Я не думаю о нём.", "en": "Genre? Any. I do not think about it." },
-    { "s": "b", "ru": "Не думаешь... А пьеса?", "en": "You do not think about it... And the play?" },
-    { "s": "a", "ru": "Пьеса тут. Я её читаю.", "en": "The play is here. I am reading it." },
-    { "s": "b", "ru": "Читаешь пьесу! А стихотворение?", "en": "Reading a play! And the poem?" },
-    { "s": "a", "ru": "Стихотворение тоже. Оно небольшое.", "en": "The poem too. It is a short one." },
-    { "s": "b", "ru": "Небольшое... А эта статуя?", "en": "A short one... And that statue?" },
-    { "s": "a", "ru": "Статуя? Её красят.", "en": "The statue? They are painting it." },
-    { "s": "b", "ru": "Красят! Кто?", "en": "Painting it! Who is?" },
-    { "s": "a", "ru": "Артисты, Виктор. Тут все артисты.", "en": "The performers, Viktor. Everyone here is a performer." }
-   ],
-   "questions": [    { "ask": "What does Pyotr play?",
-      "options": ["The guitar", "The piano", "Nothing", "He sings only"], "answer": 0 },    { "ask": "What does he say about genre?",
-      "options": ["Any genre at all", "He dislikes it", "Classical only", "Only the one"],
-      "answer": 0 },
-    { "ask": "What is he reading?",
-      "options": ["A play and a poem", "A novel and a poem", "Nothing at all now", "A newspaper today"], "answer": 0 },
-    { "ask": "What is being done to the statue?",
-      "options": ["It is being painted", "It is being moved", "It is being sold", "Nothing"],
-      "answer": 0 },
-    { "ask": "Who is doing it?",
-      "options": ["The performers", "Pyotr himself", "Viktor alone", "Some workmen"], "answer": 0 }
-   ]
-  },
-
-  "art:5": {
-   "title": "A choir on the stage",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, что на сцене?", "en": "Anya, what is on the stage?" },
-    { "s": "a", "ru": "На сцене? Хор.", "en": "On the stage? A choir." },
-    { "s": "b", "ru": "Хор! А сюжет?", "en": "A choir! And the plot?" },
-    { "s": "a", "ru": "Сюжет тут не главный.", "en": "The plot is not the main thing here." },
-    { "s": "b", "ru": "Не главный... А боевик?", "en": "Not the main thing... And an action film?" },
-    { "s": "a", "ru": "Боевик? Это другое.", "en": "An action film? That is something else." },
-    { "s": "b", "ru": "Другое... А галерея?", "en": "Something else... And the gallery?" },
-    { "s": "a", "ru": "Галерея около театра.", "en": "The gallery is by the theatre." },
-    { "s": "b", "ru": "Около театра! Я там был.", "en": "By the theatre! I have been there." },
-    { "s": "a", "ru": "Был? И что видел?", "en": "You have? And what did you see?" },
-    { "s": "b", "ru": "Картины. И статую.", "en": "Pictures. And a statue." },
-    { "s": "a", "ru": "Статую, Миша. А тут хор.", "en": "A statue, Misha. And here, a choir." }
-   ],
-   "questions": [
-    { "ask": "What is on the stage?",
-      "options": ["A choir", "A ballet", "An actor alone", "Nothing"], "answer": 0 },
-    { "ask": "How important is the plot?",
-      "options": ["Not the main thing", "It is everything", "There is no plot at all", "Anya will not say"],
-      "answer": 0 },
-    { "ask": "Where is the gallery?",
-      "options": ["By the theatre", "In the next town", "Inside the theatre", "It is closed"],
-      "answer": 0 },
-    { "ask": "Has Misha been there?",
-      "options": ["Yes", "No", "He is going tomorrow", "He does not remember"], "answer": 0 },
-    { "ask": "What did he see there?",
-      "options": ["Pictures and a statue", "A choir on the stage", "Nothing much at all", "A film about art"], "answer": 0 }
-   ]
-  },
-
-  "politics:0": {
-   "title": "Everything is official",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },    { "id": "b", "ru": "Пётр", "en": "Pyotr" },
-    { "id": "c", "ru": "Аня", "en": "Anya" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, кто тут президент?", "en": "Katya, who is president here?" },
-    { "s": "a", "ru": "Президент? Он не тут.", "en": "The president? He is not here." },
-    { "s": "b", "ru": "Не тут! А партия?", "en": "Not here! And the party?" },
-    { "s": "a", "ru": "Партия есть. Политическая.", "en": "There is a party. A political one." },
-    { "s": "b", "ru": "Политическая партия... А общество?", "en": "A political party... And society?" },
-    { "s": "a", "ru": "Общество тоже. Общественное дело.", "en": "Society too. It is a public matter." },
-    { "s": "b", "ru": "Общественное! А государственный вопрос?", "en": "Public! And the state's side of it?" },
-    { "s": "a", "ru": "Государственный вопрос — это другое.", "en": "The state's side is another matter." },
-    { "s": "b", "ru": "Другое... А это официально?", "en": "Another matter... And is this official?" },
-    { "s": "a", "ru": "Официально. Всё официально.", "en": "Official. Everything is official." },
-    { "s": "b", "ru": "Всё! И президент?", "en": "Everything! The president too?" },    { "s": "a", "ru": "И президент, Пётр. Он тоже.", "en": "The president as well, Pyotr. Him too." },
-    { "s": "c", "ru": "Пётр, президент тут.", "en": "Pyotr, the president is here." },
-    { "s": "b", "ru": "Аня? Он тут?", "en": "Anya? He is here?" },
-    { "s": "c", "ru": "Тут. Это официально.", "en": "Here. That is official." }
-   ],
-   "questions": [    { "ask": "Where is the president at first?",
-      "options": ["Not there at all", "There from the start", "Nobody mentions him", "Katya is president"],
-      "answer": 0 },
-    { "ask": "What is there?",
-      "options": ["A political party", "Nothing much at all", "A parliament there", "An embassy nearby"], "answer": 0 },
-    { "ask": "What sort of matter is it?",
-      "options": ["A public one", "A private one", "A criminal one", "A family one"], "answer": 0 },
-    { "ask": "Is the state's side the same thing?",
-      "options": ["No, another matter", "Yes", "Nobody knows", "Pyotr says it is"], "answer": 0 },    { "ask": "What happens at the end?",
-      "options": ["Anya says he has arrived", "They give up on it all", "Nothing changes at all", "Pyotr leaves the room"],
-      "answer": 0 }
-   ]
-  },
-
-  "politics:1": {
-   "title": "Who governs",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, кто правит?", "en": "Lena, who governs?" },
-    { "s": "a", "ru": "Правит правительство. Как всегда.", "en": "The government governs. As always." },
-    { "s": "b", "ru": "Правительство! А министр?", "en": "The government! And the minister?" },
-    { "s": "a", "ru": "Министр тут. Он главный.", "en": "The minister is here. He is the senior one." },
-    { "s": "b", "ru": "Главный... А власть?", "en": "The senior one... And power?" },
-    { "s": "a", "ru": "Власть у них. Не у нас.", "en": "The power is theirs. Not ours." },
-    { "s": "b", "ru": "Не у нас! А гражданин?", "en": "Not ours! And the citizen?" },
-    { "s": "a", "ru": "Гражданин? Он тоже сила.", "en": "The citizen? He is a force too." },
-    { "s": "b", "ru": "Сила! А родина?", "en": "A force! And the homeland?" },
-    { "s": "a", "ru": "Родина одна. Для всех.", "en": "There is one homeland. For everyone." },
-    { "s": "b", "ru": "Для всех... И для правительства?", "en": "For everyone... For the government too?" },
-    { "s": "a", "ru": "И для них, Олег. Государство одно.", "en": "For them as well, Oleg. There is one state." }
-   ],
-   "questions": [
-    { "ask": "Who governs, in Lena's answer?",
-      "options": ["The government", "The minister alone", "The citizens", "Nobody"], "answer": 0 },
-    { "ask": "Where does she say the power lies?",
-      "options": ["With them, not with us", "With the citizens", "With the minister only", "Nowhere"],
-      "answer": 0 },
-    { "ask": "What does she say about the citizen?",
-      "options": ["He is a force too", "He is powerless", "He is the same as the state", "Nothing"],
-      "answer": 0 },
-    { "ask": "How many homelands are there, in her phrase?",
-      "options": ["One, for everyone", "One for each party", "None", "She does not say"],
-      "answer": 0 },
-    { "ask": "Does that include the government?",
-      "options": ["Yes", "No", "She is not sure", "Oleg says not"], "answer": 0 }
-   ]
-  },
-
-  "politics:2": {
-   "title": "What is in the constitution",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, что такое республика?", "en": "Nina, what is a republic?" },
-    { "s": "a", "ru": "Республика? Это государство. С конституцией.", "en": "A republic? It is a state. With a constitution." },
-    { "s": "b", "ru": "С конституцией! А народ?", "en": "With a constitution! And the people?" },
-    { "s": "a", "ru": "Народ тут главный. Всегда.", "en": "The people come first here. Always." },
-    { "s": "b", "ru": "Всегда! А свобода?", "en": "Always! And freedom?" },
-    { "s": "a", "ru": "Свобода есть. В конституции.", "en": "There is freedom. In the constitution." },
-    { "s": "b", "ru": "В конституции... А избирательный день?", "en": "In the constitution... And polling day?" },
-    { "s": "a", "ru": "Избирательный день будет. Завтра.", "en": "There will be a polling day. Tomorrow." },
-    { "s": "b", "ru": "Завтра! А национальный вопрос?", "en": "Tomorrow! And the national question?" },
-    { "s": "a", "ru": "Национальный вопрос тоже есть.", "en": "The national question is there too." },
-    { "s": "b", "ru": "Тоже! И отечественный?", "en": "That too! And the home-grown one?" },
-    { "s": "a", "ru": "И отечественный, Борис. Всё.", "en": "That as well, Boris. All of it." }
-   ],
-   "questions": [
-    { "ask": "How does Nina define a republic?",
-      "options": ["A state with a constitution", "A parliament with a party", "A party with a chairman", "She does not define it"],
-      "answer": 0 },
-    { "ask": "Who comes first, in her account?",
-      "options": ["The people", "The government", "The party", "The president"], "answer": 0 },
-    { "ask": "Where is freedom to be found?",
-      "options": ["In the constitution", "In the party itself", "In the courts there", "Nowhere, she says"], "answer": 0 },
-    { "ask": "When is polling day?",
-      "options": ["Tomorrow", "Today", "Last week", "There is none"], "answer": 0 },
-    { "ask": "What else does she admit exists?",
-      "options": ["A national question", "Nothing", "A war", "A new constitution"], "answer": 0 }
-   ]
-  },
-
-  "politics:3": {
-   "title": "The Duma and the governor",
-   "cast": [    { "id": "a", "ru": "Юра", "en": "Yura" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Юра, где парламент?", "en": "Yura, where is the parliament?" },
-    { "s": "a", "ru": "Парламент? Это дума.", "en": "The parliament? That is the Duma." },
-    { "s": "b", "ru": "Дума! А госдума?", "en": "The Duma! And the State Duma?" },
-    { "s": "a", "ru": "Госдума — это она и есть.", "en": "The State Duma is the very same thing." },
-    { "s": "b", "ru": "Она и есть... А губернатор?", "en": "The very same... And the governor?" },
-    { "s": "a", "ru": "Губернатор тут. Он чиновник.", "en": "The governor is here. He is an official." },
-    { "s": "b", "ru": "Чиновник! А авторитет?", "en": "An official! And authority?" },
-    { "s": "a", "ru": "Авторитет у него есть.", "en": "He has authority." },
-    { "s": "b", "ru": "Есть... А приговор?", "en": "He has... And the sentence?" },
-    { "s": "a", "ru": "Приговор будет. Не сегодня.", "en": "There will be a sentence. Not today." },
-    { "s": "b", "ru": "Не сегодня! А дума?", "en": "Not today! And the Duma?" },
-    { "s": "a", "ru": "Дума работает, Иван. Всегда.", "en": "The Duma is sitting, Ivan. Always." }
-   ],
-   "questions": [
-    { "ask": "What is the parliament called?",
-      "options": ["The Duma", "The Senate", "The council", "It has no name"], "answer": 0 },
-    { "ask": "Is the State Duma a different body?",
-      "options": ["No, the same one", "Yes", "Yura does not know", "It was abolished"],
-      "answer": 0 },
-    { "ask": "What is the governor?",
-      "options": ["An official", "A judge", "A minister", "A citizen"], "answer": 0 },
-    { "ask": "Has he authority?",
-      "options": ["Yes", "No", "Only on paper", "Yura doubts it"], "answer": 0 },
-    { "ask": "When is the sentence expected?",
-      "options": ["Not today", "Today", "It has been given", "Never"], "answer": 0 }
-   ]
-  },
-
-  "politics:4": {
-   "title": "The mayor holds everything",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, кто мэр?", "en": "Anya, who is the mayor?" },
-    { "s": "a", "ru": "Мэр? Он председатель тоже.", "en": "The mayor? He is the chairman as well." },
-    { "s": "b", "ru": "Председатель! А политика?", "en": "The chairman! And politics?" },
-    { "s": "a", "ru": "Политика — его дело.", "en": "Politics is his business." },
-    { "s": "b", "ru": "Его дело... А здравоохранение?", "en": "His business... And health care?" },
-    { "s": "a", "ru": "Здравоохранение тоже. Всё у него.", "en": "Health care too. He has it all." },
-    { "s": "b", "ru": "Всё! А революция?", "en": "All of it! And revolution?" },
-    { "s": "a", "ru": "Революция была. Но не тут.", "en": "There was a revolution. But not here." },
-    { "s": "b", "ru": "Не тут... А национальность?", "en": "Not here... And nationality?" },
-    { "s": "a", "ru": "Национальность? Это не вопрос.", "en": "Nationality? That is not an issue." },
-    { "s": "b", "ru": "Не вопрос! А штат?", "en": "Not an issue! And the staff?" },
-    { "s": "a", "ru": "Штат большой, Юра. Все работают.", "en": "The staff is large, Yura. Everyone works." }
-   ],
-   "questions": [
-    { "ask": "What two roles does the mayor hold?",
-      "options": ["Mayor and chairman", "Mayor and minister", "Mayor and governor", "Only mayor"],
-      "answer": 0 },
-    { "ask": "What else is under him?",
-      "options": ["Health care", "The army", "The courts", "Nothing"], "answer": 0 },
-    { "ask": "Was there a revolution there?",
-      "options": ["Not there, no", "She will not say", "Yes, recently", "It is now on"],
-      "answer": 0 },
-    { "ask": "How does she treat the question of nationality?",
-      "options": ["She says it is not an issue", "She says it is the main issue", "She avoids it", "She asks Yura"],
-      "answer": 0 },
-    { "ask": "How big is the staff?",
-      "options": ["Large, and all working", "Tiny, only a few there", "It has been cut back", "Nobody counts them"], "answer": 0 }
-   ]
-  },
-
-  "politics:5": {
-   "title": "The ambassador stays away",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, что за митинг?", "en": "Katya, what is this rally?" },
-    { "s": "a", "ru": "Митинг? Это общественность.", "en": "The rally? That is the public." },
-    { "s": "b", "ru": "Общественность! А демократия?", "en": "The public! And democracy?" },
-    { "s": "a", "ru": "Демократия. Она тут работает.", "en": "Democracy. It works here." },
-    { "s": "b", "ru": "Работает... А посол?", "en": "It works... And the ambassador?" },
-    { "s": "a", "ru": "Посол в посольстве. Как всегда.", "en": "The ambassador is at the embassy. As always." },
-    { "s": "b", "ru": "В посольстве! Он идёт на митинг?", "en": "At the embassy! Is he going to the rally?" },
-    { "s": "a", "ru": "Не идёт. Посол не может.", "en": "He is not. The ambassador cannot." },
-    { "s": "b", "ru": "Не может... А общественность может?", "en": "Cannot... And the public can?" },
-    { "s": "a", "ru": "Может. Это демократия.", "en": "It can. That is democracy." },
-    { "s": "b", "ru": "Демократия! А посольство?", "en": "Democracy! And the embassy?" },
-    { "s": "a", "ru": "Посольство тут, Виктор. Около нас.", "en": "The embassy is here, Viktor. Right by us." }
-   ],
-   "questions": [
-    { "ask": "Who is at the rally?",
-      "options": ["The public", "The ambassador", "The government", "Nobody"], "answer": 0 },
-    { "ask": "Where is the ambassador?",
-      "options": ["At the embassy", "At the rally", "Abroad", "Nobody knows"], "answer": 0 },
-    { "ask": "Why is he not at the rally?",
-      "options": ["He cannot go", "He does not want to", "He was not invited", "He is ill"],
-      "answer": 0 },
-    { "ask": "What does Katya call it when the public can?",
-      "options": ["Democracy", "Politics", "Freedom", "A problem"], "answer": 0 },
-    { "ask": "Where is the embassy?",
-      "options": ["Close by", "Far off", "Abroad", "Unsaid"],
-      "answer": 0 }
-   ]
-  },
-
-  "science:0": {
-   "title": "Yesterday's discovery",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, какая температура?", "en": "Lena, what is the temperature?" },
-    { "s": "a", "ru": "Температура? Это исследование.", "en": "The temperature? That is the research." },
-    { "s": "b", "ru": "Исследование! А наука?", "en": "Research! And the science?" },
-    { "s": "a", "ru": "Наука тут работает. Каждый день.", "en": "The science works here. Every day." },
-    { "s": "b", "ru": "Каждый день... А открытие?", "en": "Every day... And a discovery?" },
-    { "s": "a", "ru": "Открытие было. Вчера.", "en": "There was a discovery. Yesterday." },
-    { "s": "b", "ru": "Вчера! Какое?", "en": "Yesterday! What was it?" },
-    { "s": "a", "ru": "Новый элемент. И математика.", "en": "A new element. And the mathematics." },
-    { "s": "b", "ru": "Математика! А пространство?", "en": "Mathematics! And space?" },
-    { "s": "a", "ru": "Пространство большое. Мы о нём думаем.", "en": "Space is large. We think about it." },
-    { "s": "b", "ru": "Думаете... А температура?", "en": "You think about it... And the temperature?" },
-    { "s": "a", "ru": "Температура тут, Миша. Она главная.", "en": "The temperature is the thing, Misha. It is the main one." }
-   ],
-   "questions": [
-    { "ask": "What is the research about?",
-      "options": ["Temperature", "Space travel", "Mathematics alone", "She does not say"],
-      "answer": 0 },
-    { "ask": "When was the discovery?",
-      "options": ["Yesterday", "Today", "A year ago", "There has not been one"], "answer": 0 },
-    { "ask": "What was discovered?",
-      "options": ["A new element", "A planet", "A formula", "Nothing yet"], "answer": 0 },
-    { "ask": "What do they do about space?",
-      "options": ["Think about it", "Travel in it", "Measure it", "Ignore it"], "answer": 0 },
-    { "ask": "What matters most to Lena?",
-      "options": ["The temperature", "The mathematics", "The discovery", "Misha's questions"],
-      "answer": 0 }
-   ]
-  },
-
-  "science:1": {
-   "title": "In the laboratory",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },    { "id": "b", "ru": "Олег", "en": "Oleg" },
-    { "id": "c", "ru": "Виктор", "en": "Viktor" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, ты в лаборатории?", "en": "Nina, are you in the laboratory?" },
-    { "s": "a", "ru": "В лаборатории. Тут химический элемент.", "en": "In the laboratory. There is a chemical element here." },
-    { "s": "b", "ru": "Химический! А энергия?", "en": "Chemical! And energy?" },
-    { "s": "a", "ru": "Энергия есть. Много.", "en": "There is energy. Plenty." },
-    { "s": "b", "ru": "Много! А планета?", "en": "Plenty! And the planet?" },
-    { "s": "a", "ru": "Планета? Это космический вопрос.", "en": "The planet? That is a question for space science." },
-    { "s": "b", "ru": "Космический... А вселенная?", "en": "For space science... And the universe?" },
-    { "s": "a", "ru": "Вселенная большая. Очень.", "en": "The universe is large. Very." },
-    { "s": "b", "ru": "Очень! А дисциплина?", "en": "Very! And discipline?" },
-    { "s": "a", "ru": "Дисциплина тут есть. Всегда.", "en": "There is discipline here. Always." },
-    { "s": "b", "ru": "Всегда... И энергия?", "en": "Always... And energy?" },    { "s": "a", "ru": "И энергия, Олег. Это наука.", "en": "And energy, Oleg. This is science." },
-    { "s": "c", "ru": "Нина, энергия есть?", "en": "Nina, is there energy?" },
-    { "s": "a", "ru": "Виктор! Ты тоже тут?", "en": "Viktor! Are you here as well?" },
-    { "s": "c", "ru": "Тут. Это моя лаборатория.", "en": "Here. This is my laboratory." }
-   ],
-   "questions": [
-    { "ask": "Where is Nina?",
-      "options": ["In a laboratory", "At an observatory", "At a launch site", "At home"],
-      "answer": 0 },
-    { "ask": "What is she working with?",
-      "options": ["A chemical element", "A planet, she says", "A telescope there", "Nothing much yet"], "answer": 0 },
-    { "ask": "How does she treat the question about planets?",
-      "options": ["As a different field", "As her own work", "As nonsense", "She answers it fully"],
-      "answer": 0 },
-    { "ask": "What does she say about discipline?",
-      "options": ["There is always discipline", "There is none of it there", "It is far too strict here", "Oleg has none of it"],
-      "answer": 0 },    { "ask": "Whose laboratory is it?",
-      "options": ["Viktor's", "Nina's", "Oleg's", "Nobody says"], "answer": 0 }
-   ]
-  },
-
-  "science:2": {
-   "title": "Measuring the invention",
-   "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Соня, что ты меришь?", "en": "Sonya, what are you measuring?" },
-    { "s": "a", "ru": "Мерю? Это теория.", "en": "Measuring? This is theory." },
-    { "s": "b", "ru": "Теория! А химия?", "en": "Theory! And chemistry?" },
-    { "s": "a", "ru": "Химия тоже. Тут исследовательский день.", "en": "Chemistry too. It is a research day here." },
-    { "s": "b", "ru": "Исследовательский! А изобретение?", "en": "A research day! And the invention?" },
-    { "s": "a", "ru": "Изобретение будет. Мы его измерим.", "en": "There will be an invention. We will measure it." },
-    { "s": "b", "ru": "Измерите! А космодром?", "en": "You will measure it! And the launch site?" },
-    { "s": "a", "ru": "Космодром не тут.", "en": "The launch site is not here." },
-    { "s": "b", "ru": "Не тут... А теория?", "en": "Not here... And the theory?" },
-    { "s": "a", "ru": "Теория работает. Пока.", "en": "The theory works. So far." },
-    { "s": "b", "ru": "Пока! И химия?", "en": "So far! And the chemistry?" },
-    { "s": "a", "ru": "И химия, Борис. Всё работает.", "en": "And the chemistry, Boris. It all works." }
-   ],
-   "questions": [
-    { "ask": "What is Sonya working on?",
-      "options": ["Theory and chemistry", "Moving the laboratory", "A rocket for launch", "Nothing much at all"], "answer": 0 },
-    { "ask": "What will they do with the invention?",
-      "options": ["Measure it", "Sell it", "Hide it", "Abandon it"], "answer": 0 },
-    { "ask": "Is the launch site there?",
-      "options": ["No", "Yes", "It is being built", "She will not say"], "answer": 0 },
-    { "ask": "How well is the theory holding?",
-      "options": ["So far, so good", "It has failed", "It is untested", "It is someone else's"],
-      "answer": 0 },
-    { "ask": "What sort of day is it in the lab?",
-      "options": ["A research day", "A day off", "A day of meetings", "Moving day"], "answer": 0 }
-   ]
-  },
-
-  "science:3": {
-   "title": "A year of one experiment",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },    { "id": "b", "ru": "Таня", "en": "Tanya" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, что за эксперимент?", "en": "Anya, what is this experiment?" },
-    { "s": "a", "ru": "Эксперимент? Это биология.", "en": "The experiment? It is biology." },
-    { "s": "b", "ru": "Биология! А ген?", "en": "Biology! And the gene?" },
-    { "s": "a", "ru": "Ген тут главный. Мы его мерим.", "en": "The gene is the main thing. We measure it." },
-    { "s": "b", "ru": "Мерите! А атом?", "en": "You measure it! And the atom?" },
-    { "s": "a", "ru": "Атом — это другое. Это химия.", "en": "The atom is another thing. That is chemistry." },
-    { "s": "b", "ru": "Химия... А гипотеза?", "en": "Chemistry... And the hypothesis?" },
-    { "s": "a", "ru": "Гипотеза есть. И теория.", "en": "There is a hypothesis. And a theory." },
-    { "s": "b", "ru": "И теория! А эволюция?", "en": "A theory as well! And evolution?" },
-    { "s": "a", "ru": "Эволюция — это время. Много времени.", "en": "Evolution is time. A great deal of time." },
-    { "s": "b", "ru": "Много времени... А эксперимент?", "en": "A great deal of time... And the experiment?" },
-    { "s": "a", "ru": "Эксперимент идёт, Таня. Уже год.", "en": "The experiment is running, Tanya. For a year now." }
-   ],
-   "questions": [
-    { "ask": "What field is the experiment in?",
-      "options": ["Biology", "Chemistry", "Physics", "Mathematics"], "answer": 0 },
-    { "ask": "What is at the centre of it?",
-      "options": ["A gene", "An atom", "A planet", "A theory only"], "answer": 0 },
-    { "ask": "Which field does Anya assign the atom to?",
-      "options": ["Chemistry", "Biology", "Her own", "None"], "answer": 0 },
-    { "ask": "How does Anya describe evolution?",
-      "options": ["As a matter of time", "As unproven, she says", "As a hypothesis only", "As chemistry, mainly"],
-      "answer": 0 },
-    { "ask": "How long has the experiment been running?",
-      "options": ["A year", "A day", "Three years", "It has not started"], "answer": 0 }
+    {
+     "ask": "What did Tanya do?",
+     "options": [
+      "She told him the truth",
+      "She told him a lie",
+      "She kept it from him",
+      "She wrote him a note"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How is he taking it?",
+     "options": [
+      "Badly",
+      "Well",
+      "Calmly",
+      "He has not replied"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Did he understand her?",
+     "options": [
+      "Yes, but he took it badly",
+      "No, he misheard her",
+      "No, he would not listen",
+      "She does not know"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How long does Sasha think it will take?",
+     "options": [
+      "Three days",
+      "Three weeks",
+      "An hour",
+      "He does not say"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Tanya do?",
+     "options": [
+      "Goes to see him",
+      "Waits it out",
+      "Writes to him",
+      "Lets it go"
+     ],
+     "answer": 0
+    }
    ]
   }
  }

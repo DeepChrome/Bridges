@@ -2,682 +2,302 @@
  "chapter": 5,
  "name": "Family & Home Life",
  "lessons": {
-  "core5:0": {
-   "title": "The biggest one",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, что ты хочешь купить?", "en": "Anya, what do you want to buy?" },
-    { "s": "a", "ru": "Я? Я хочу купить самое большое.", "en": "Me? I want to buy the biggest one." },
-    { "s": "b", "ru": "Самое большое? Почему?", "en": "The biggest one? Why?" },
-    { "s": "a", "ru": "Так. Мне нужно больше.", "en": "Just because. I need more." },
-    { "s": "b", "ru": "Больше? А та женщина?", "en": "More? And what about that woman?" },
-    { "s": "a", "ru": "Какая женщина? Та, что стоит?", "en": "Which woman? The one standing there?" },
-    { "s": "b", "ru": "Та. Она говорит об этом.", "en": "That one. She is talking about it." },
-    { "s": "a", "ru": "Об этом? Что она говорит?", "en": "About it? What is she saying?" },
-    { "s": "b", "ru": "То, что это самое большое.", "en": "That this is the biggest one." },
-    { "s": "a", "ru": "Самое большое — это то, что я хочу.", "en": "The biggest one is what I want." },
-    { "s": "b", "ru": "Так купи, Аня.", "en": "Then buy it, Anya." },
-    { "s": "a", "ru": "Куплю. А ты, Миша, стоишь?", "en": "I will. And you, Misha, are you just standing there?" },
-    { "s": "b", "ru": "Стою. Я тут стою.", "en": "I am. I am standing right here." },
-    { "s": "a", "ru": "Стой. Я больше не хочу.", "en": "Stay there. I do not want any more." }
-   ],
-   "questions": [
-    { "ask": "What does Anya want to buy?",
-      "options": ["The biggest one there is", "The cheapest one there", "Nothing at all today", "Whatever Misha says"],
-      "answer": 0 },
-    { "ask": "Who else is talking about it?",
-      "options": ["A woman standing nearby", "Misha's mother, nearby", "The shopkeeper himself", "Nobody else at all"], "answer": 0 },
-    { "ask": "What does the woman say?",
-      "options": ["That it is the biggest", "That it is too expensive", "Nothing useful", "That it is sold"],
-      "answer": 0 },
-    { "ask": "What does Misha tell her to do?",
-      "options": ["Buy it", "Leave it", "Ask the woman", "Think about it"], "answer": 0 },
-    { "ask": "What is Misha doing while she decides?",
-      "options": ["Standing there", "Walking away", "Buying something himself", "Waiting outside"],
-      "answer": 0 }
-   ]
-  },
-
-  "core5:1": {
-   "title": "Waiting at the door",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },    { "id": "b", "ru": "Борис", "en": "Boris" },
-    { "id": "c", "ru": "Нина", "en": "Nina" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, сколько ты ждёшь?", "en": "Katya, how long have you been waiting?" },
-    { "s": "a", "ru": "Жду уже час. Перед дверью.", "en": "An hour already. In front of the door." },
-    { "s": "b", "ru": "Перед дверью? А кто там?", "en": "In front of the door? Who is in there?" },
-    { "s": "a", "ru": "Там женщина. Она мне даст книгу.", "en": "There is a woman. She is going to give me a book." },
-    { "s": "b", "ru": "Даст книгу? Какую книгу?", "en": "Give you a book? Which book?" },
-    { "s": "a", "ru": "Последнюю. Она самая новая.", "en": "The last one. It is the newest." },
-    { "s": "b", "ru": "А это Москва? Тут все ждут.", "en": "Well, this is Moscow. Everybody waits here." },
-    { "s": "a", "ru": "Москва. Тут всегда ждут.", "en": "Moscow. People always wait here." },
-    { "s": "b", "ru": "Сколько ещё ждать?", "en": "How much longer do you have to wait?" },
-    { "s": "a", "ru": "Не знаю, Борис. Может, час.", "en": "I do not know, Boris. Maybe an hour." },
-    { "s": "b", "ru": "Час! А дверь всё стоит.", "en": "An hour! And the door has not moved." },    { "s": "a", "ru": "Дверь стоит. И я стою.", "en": "The door stands. And so do I." },
-    { "s": "c", "ru": "Катя? Вот книга.", "en": "Katya? Here is the book." },
-    { "s": "a", "ru": "Нина! Книга?", "en": "Nina! The book?" },
-    { "s": "c", "ru": "Книга. Самая новая.", "en": "The book. The newest one." }
-   ],
-   "questions": [
-    { "ask": "How long has Katya been waiting?",
-      "options": ["An hour", "A minute", "All day", "She has just arrived"], "answer": 0 },
-    { "ask": "Where is she?",
-      "options": ["In front of a door", "On a train to Moscow", "In a shop in town", "At home, waiting"], "answer": 0 },
-    { "ask": "What is she waiting for?",
-      "options": ["A book from a woman", "A friend", "A door to be fixed", "A bus"], "answer": 0 },
-    { "ask": "What does Boris say about Moscow?",
-      "options": ["Everybody waits there", "Nobody ever waits there", "He has never been there", "It is far too big now"],
-      "answer": 0 },    { "ask": "How does the wait end?",
-      "options": ["Nina comes out with the book", "She waits another whole hour", "The door stays shut all day", "She gives up and leaves"],
-      "answer": 0 }
-   ]
-  },
-
   "core5:2": {
-   "title": "The whole family at home",
+   "title": "Nobody is home",
    "cast": [
-    { "id": "a", "ru": "Борис", "en": "Boris" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
+    {
+     "id": "a",
+     "ru": "Пётр",
+     "en": "Pyotr"
+    },
+    {
+     "id": "b",
+     "ru": "Нина",
+     "en": "Nina"
+    }
    ],
    "lines": [
-    { "s": "b", "ru": "Борис, ты дома?", "en": "Boris, are you at home?" },
-    { "s": "a", "ru": "Дома. Вся семья дома.", "en": "At home. The whole family is at home." },
-    { "s": "b", "ru": "Вся семья? А где находится ваш дом?", "en": "The whole family? And where is your house?" },
-    { "s": "a", "ru": "Наш дом находится у воды.", "en": "Our house is by the water." },
-    { "s": "b", "ru": "У воды! Это хорошо.", "en": "By the water! That is good." },
-    { "s": "a", "ru": "Хорошо. Но мы хотим выйти.", "en": "It is. But we want to go out." },
-    { "s": "b", "ru": "Выйти? Все?", "en": "Go out? All of you?" },
-    { "s": "a", "ru": "Все. И та девушка тоже.", "en": "All of us. And that girl as well." },
-    { "s": "b", "ru": "Какая девушка? Я её знаю?", "en": "Which girl? Do I know her?" },
-    { "s": "a", "ru": "Знаешь ли ты её? Не думаю.", "en": "Do you know her? I do not think so." },
-    { "s": "b", "ru": "Не знаю. Но я выйду с вами.", "en": "I do not. But I will come out with you." },
-    { "s": "a", "ru": "Выйди, Олег. Мы дома ждём.", "en": "Come out, Oleg. We are waiting at home." }
+    {
+     "s": "a",
+     "ru": "Нина, ты дома?",
+     "en": "Nina, are you at home?"
+    },
+    {
+     "s": "b",
+     "ru": "Дома. А что?",
+     "en": "At home. Why?"
+    },
+    {
+     "s": "a",
+     "ru": "Я у твоей двери.",
+     "en": "I am at your door."
+    },
+    {
+     "s": "b",
+     "ru": "Я вышла. Я не дома.",
+     "en": "I went out. I am not at home."
+    },
+    {
+     "s": "a",
+     "ru": "Ты же сказала, что дома!",
+     "en": "But you said you were at home!"
+    },
+    {
+     "s": "b",
+     "ru": "Была. Вся семья вышла, Пётр.",
+     "en": "I was. The whole family went out, Pyotr."
+    },
+    {
+     "s": "a",
+     "ru": "А где они сейчас?",
+     "en": "And where are they now?"
+    },
+    {
+     "s": "b",
+     "ru": "Не знаю, тут ли они.",
+     "en": "I do not know whether they are here."
+    },
+    {
+     "s": "a",
+     "ru": "Я стою у двери с водой.",
+     "en": "I am standing at the door with the water."
+    },
+    {
+     "s": "b",
+     "ru": "С водой? Ты купил?",
+     "en": "With the water? You bought it?"
+    },
+    {
+     "s": "a",
+     "ru": "Да. Ты хотела воду.",
+     "en": "Yes. You wanted water."
+    },
+    {
+     "s": "b",
+     "ru": "Там девушка стоит?",
+     "en": "Is there a girl standing there?"
+    },
+    {
+     "s": "a",
+     "ru": "Девушка? Да, одна.",
+     "en": "A girl? Yes, one."
+    },
+    {
+     "s": "b",
+     "ru": "Это наша. Дай ей воду.",
+     "en": "That is ours. Give her the water."
+    },
+    {
+     "s": "a",
+     "ru": "Хорошо. А ты когда?",
+     "en": "All right. And when will you be back?"
+    },
+    {
+     "s": "b",
+     "ru": "Я буду дома. Один час.",
+     "en": "I will be home. One hour."
+    }
    ],
    "questions": [
-    { "ask": "Where is Boris?",
-      "options": ["At home with his family", "Down by the river alone", "At work, as every day", "At a friend's house"], "answer": 0 },
-    { "ask": "Where is the house?",
-      "options": ["By the water", "In the centre", "By the station", "He does not say"], "answer": 0 },
-    { "ask": "What does the family want to do?",
-      "options": ["Go out", "Stay in", "Move house", "Wait for Oleg to leave"], "answer": 0 },
-    { "ask": "Who else is with them?",
-      "options": ["A girl Oleg does not know", "Two children from next door", "Oleg's younger sister", "Nobody else is there"], "answer": 0 },
-    { "ask": "What does Oleg decide?",
-      "options": ["To join them", "To stay away", "To meet them later", "To ask who the girl is first"],
-      "answer": 0 }
+    {
+     "ask": "Where is Pyotr?",
+     "options": [
+      "At Nina's door",
+      "At his own door",
+      "At the shop",
+      "On the bus"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What did Nina say that turned out to be wrong?",
+     "options": [
+      "That she was at home",
+      "That she would be late",
+      "That she had the water",
+      "That nobody was in"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Who else has gone out?",
+     "options": [
+      "Her whole family",
+      "Only her husband",
+      "Just the children",
+      "Nobody else"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What is Pyotr carrying?",
+     "options": [
+      "Water",
+      "Bread",
+      "A parcel",
+      "Nothing"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Who is standing at the door?",
+     "options": [
+      "A girl of theirs",
+      "A neighbour of hers",
+      "Nobody at all",
+      "Her mother"
+     ],
+     "answer": 0
+    }
    ]
   },
-
-  "core5:3": {
-   "title": "He needs Russian for the job",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, ты знаешь русский язык?", "en": "Nina, do you know Russian?" },
-    { "s": "a", "ru": "Русский? Знаю. Это мой язык.", "en": "Russian? I do. It is my language." },
-    { "s": "b", "ru": "Твой? А твоя мама?", "en": "Yours? And your mother?" },
-    { "s": "a", "ru": "Мама тоже. Она русская.", "en": "My mother too. She is Russian." },
-    { "s": "b", "ru": "Русская! А я только читаю.", "en": "Russian! And I can only read it." },
-    { "s": "a", "ru": "Читай. Русский язык — это время.", "en": "Keep reading. Russian takes time." },
-    { "s": "b", "ru": "Время... Я хочу получить работу.", "en": "Time... I want to get a job." },
-    { "s": "a", "ru": "Работу? В какой компании?", "en": "A job? At which company?" },
-    { "s": "b", "ru": "В данной компании. Тут.", "en": "At this very company. Here." },
-    { "s": "a", "ru": "В данной? Пожалуйста, Юра, скажи всё.", "en": "This one? Please, Yura, tell me everything." },
-    { "s": "b", "ru": "Скажу, Нина. Но нужно знать русский.", "en": "I will, Nina. But you have to know Russian." },
-    { "s": "a", "ru": "Нужно. Мама может говорить с тобой.", "en": "You do. My mother could speak with you." }
-   ],
-   "questions": [
-    { "ask": "Whose first language is Russian?",
-      "options": ["Nina's", "Yura's", "Neither of theirs", "Only her mother's"], "answer": 0 },
-    { "ask": "What does Yura want?",
-      "options": ["A job at that company", "To move to Russia", "To teach Russian", "Nothing in particular"],
-      "answer": 0 },
-    { "ask": "What is standing in his way?",
-      "options": ["His Russian", "His age", "Money", "Nina's mother"], "answer": 0 },
-    { "ask": "What does Nina ask him to do?",
-      "options": ["Tell her everything", "Come back later", "Learn on his own", "Speak to the company"],
-      "answer": 0 },
-    { "ask": "How does she offer to help?",
-      "options": ["Her mother could teach him", "She will speak to them for him", "She offers him a job there", "She will not help at all"],
-      "answer": 0 }
-   ]
-  },
-
   "core5:4": {
-   "title": "One more minute",
+   "title": "The book in her hand",
    "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
+    {
+     "id": "a",
+     "ru": "Аня",
+     "en": "Anya"
+    },
+    {
+     "id": "b",
+     "ru": "Ваня",
+     "en": "Vanya"
+    }
    ],
    "lines": [
-    { "s": "b", "ru": "Соня, ты найдёшь его?", "en": "Sonya, will you find it?" },
-    { "s": "a", "ru": "Найду. Дай мне минуту.", "en": "I will. Give me a minute." },
-    { "s": "b", "ru": "Минуту? А где он?", "en": "A minute? And where is it?" },
-    { "s": "a", "ru": "Не знаю. Но я найду.", "en": "I do not know. But I will find it." },
-    { "s": "b", "ru": "Сколько минут, Соня?", "en": "How many minutes, Sonya?" },
-    { "s": "a", "ru": "Одну минуту, Виктор.", "en": "One minute, Viktor." },
-    { "s": "b", "ru": "Одна минута? Это всё?", "en": "One minute? Is that all?" },
-    { "s": "a", "ru": "Всё. Я его найду.", "en": "That is all. I will find it." },
-    { "s": "b", "ru": "Найдёшь? Я уже не жду.", "en": "Will you? I am not waiting any more." },
-    { "s": "a", "ru": "Жди. Ещё минута.", "en": "Wait. One more minute." },
-    { "s": "b", "ru": "Ещё минута! Это уже час.", "en": "Another minute! That is an hour by now." },
-    { "s": "a", "ru": "Час? Нет. Минута — и я найду.", "en": "An hour? No. A minute, and I will have it." }
+    {
+     "s": "a",
+     "ru": "Ваня, я не могу найти книгу.",
+     "en": "Vanya, I cannot find the book."
+    },
+    {
+     "s": "b",
+     "ru": "Какую книгу?",
+     "en": "Which book?"
+    },
+    {
+     "s": "a",
+     "ru": "Русскую. Мою первую.",
+     "en": "The Russian one. My first one."
+    },
+    {
+     "s": "b",
+     "ru": "Минуту. Где ты её видела?",
+     "en": "One moment. Where did you see it?"
+    },
+    {
+     "s": "a",
+     "ru": "Дома. У двери.",
+     "en": "At home. By the door."
+    },
+    {
+     "s": "b",
+     "ru": "Я смотрел. Её там нет.",
+     "en": "I looked. It is not there."
+    },
+    {
+     "s": "a",
+     "ru": "Это книга моей мамы.",
+     "en": "It is my mother's book."
+    },
+    {
+     "s": "b",
+     "ru": "Мамы? Это проблема.",
+     "en": "Your mother's? That is a problem."
+    },
+    {
+     "s": "a",
+     "ru": "Я должна её найти.",
+     "en": "I have to find it."
+    },
+    {
+     "s": "b",
+     "ru": "Дай мне минуту.",
+     "en": "Give me a minute."
+    },
+    {
+     "s": "a",
+     "ru": "Ты её видишь?",
+     "en": "Can you see it?"
+    },
+    {
+     "s": "b",
+     "ru": "Вот! Я нашёл.",
+     "en": "There! I have found it."
+    },
+    {
+     "s": "a",
+     "ru": "Где она была?",
+     "en": "Where was it?"
+    },
+    {
+     "s": "b",
+     "ru": "У тебя в руке.",
+     "en": "In your hand."
+    },
+    {
+     "s": "a",
+     "ru": "В руке! Я не видела.",
+     "en": "In my hand! I did not see it."
+    },
+    {
+     "s": "b",
+     "ru": "Аня, книга была с тобой.",
+     "en": "Anya, the book was with you all along."
+    }
    ],
    "questions": [
-    { "ask": "What is Sonya doing?",
-      "options": ["Looking for something", "Waiting for Viktor", "Counting the minutes", "Leaving"],
-      "answer": 0 },
-    { "ask": "Does she know where it is?",
-      "options": ["No", "Yes", "Viktor knows", "It is in her hand"], "answer": 0 },
-    { "ask": "How long does she keep asking for?",
-      "options": ["One more minute", "An hour", "All day", "She does not say"], "answer": 0 },
-    { "ask": "How patient is Viktor?",
-      "options": ["He will not wait any longer", "He is very patient about it", "He goes to help her look", "He does not mind at all"],
-      "answer": 0 },
-    { "ask": "How does it end?",
-      "options": ["She insists she will find it", "They leave without it at all", "She gives up looking for it", "He finds it for her himself"],
-      "answer": 0 }
-   ]
-  },
-
-  "body:0": {
-   "title": "A healthy man, a sore leg",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
-   ],
-   "lines": [
-    { "s": "a", "ru": "Пётр, что с тобой?", "en": "Pyotr, what is the matter?" },
-    { "s": "b", "ru": "Нога болит. Уже день.", "en": "My leg hurts. For a day now." },
-    { "s": "a", "ru": "День! Ты больной?", "en": "A day! Are you ill?" },
-    { "s": "b", "ru": "Не больной. Я здоровый.", "en": "Not ill. I am healthy." },
-    { "s": "a", "ru": "Здоровый, но нога болит?", "en": "Healthy, but your leg hurts?" },
-    { "s": "b", "ru": "Болит. Я так чувствую.", "en": "It hurts. That is how it feels." },
-    { "s": "a", "ru": "Чувствуешь? А здоровье?", "en": "It feels like that? And your health?" },
-    { "s": "b", "ru": "Здоровье есть. Всё есть.", "en": "My health is fine. Everything is fine." },
-    { "s": "a", "ru": "А кожа? С кожей всё?", "en": "And your skin? Is your skin all right?" },
-    { "s": "b", "ru": "С кожей всё, Аня.", "en": "My skin is fine, Anya." },
-    { "s": "a", "ru": "Так что болит, Пётр?", "en": "So what does hurt, Pyotr?" },
-    { "s": "b", "ru": "Только нога. И только сегодня.", "en": "Only the leg. And only today." }
-   ],
-   "questions": [
-    { "ask": "What is wrong with Pyotr?",
-      "options": ["His leg hurts", "He has a bad cold", "His skin is sore", "Nothing at all"], "answer": 0 },
-    { "ask": "How long has it been like that?",
-      "options": ["A day", "A week", "Since this morning only", "He does not say"], "answer": 0 },
-    { "ask": "Does he think of himself as ill?",
-      "options": ["No, he says he is healthy", "Yes, he says he is very ill", "He says Anya is the ill one", "He is not sure either way"],
-      "answer": 0 },
-    { "ask": "What else does Anya ask about?",
-      "options": ["His skin", "His teeth", "His work", "His family"], "answer": 0 },
-    { "ask": "What is his last word on it?",
-      "options": ["Only the leg, only today", "Everything hurts, he says", "He needs to see a doctor", "It is getting worse now"],
-      "answer": 0 }
-   ]
-  },
-
-  "body:1": {
-   "title": "No sleep with that shoulder",
-   "cast": [
-    { "id": "a", "ru": "Маша", "en": "Masha" },
-    { "id": "b", "ru": "Катя", "en": "Katya" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Маша, у тебя болит зуб?", "en": "Masha, is it your tooth that hurts?" },
-    { "s": "a", "ru": "Зуб? Нет, плечо.", "en": "A tooth? No, my shoulder." },
-    { "s": "b", "ru": "Плечо! А боль большая?", "en": "Your shoulder! Is the pain bad?" },
-    { "s": "a", "ru": "Большая. И колено тоже.", "en": "Bad. And my knee as well." },
-    { "s": "b", "ru": "Колено и плечо? Это много.", "en": "Knee and shoulder? That is a lot." },
-    { "s": "a", "ru": "Много. У меня нет сна.", "en": "It is. I am getting no sleep." },
-    { "s": "b", "ru": "Нет сна? А кровь?", "en": "No sleep? And any blood?" },
-    { "s": "a", "ru": "Кровь? Нет, крови нет.", "en": "Blood? No, there is no blood." },
-    { "s": "b", "ru": "Хорошо. А волосы?", "en": "Good. And your hair?" },
-    { "s": "a", "ru": "Волосы? Катя, это не боль!", "en": "My hair? Katya, that is not a pain!" },
-    { "s": "b", "ru": "Не боль. Это я так.", "en": "No, it is not. I was only asking." },
-    { "s": "a", "ru": "Так... Боль есть. Сна нет.", "en": "Well... there is pain. There is no sleep." }
-   ],
-   "questions": [
-    { "ask": "What hurts?",
-      "options": ["Her shoulder and knee", "Her tooth and her jaw", "Her back and her neck", "Her hair, she jokes"], "answer": 0 },
-    { "ask": "How is she sleeping?",
-      "options": ["She is not", "Very well", "Only in the day", "She does not say"], "answer": 0 },
-    { "ask": "Is there any blood?",
-      "options": ["No", "Yes", "She will not look", "Katya does not ask"], "answer": 0 },
-    { "ask": "Why does she snap at Katya?",
-      "options": ["She asks about her hair", "She does not believe her", "She will not fetch a doctor", "She is late"],
-      "answer": 0 },
-    { "ask": "Who is doing the asking?",
-      "options": ["Katya", "Masha", "Both equally", "A doctor"], "answer": 0 }
-   ]
-  },
-
-  "body:2": {
-   "title": "The whole body aches",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
-   ],
-   "lines": [
-    { "s": "a", "ru": "Миша, где болит?", "en": "Misha, where does it hurt?" },
-    { "s": "b", "ru": "Спина. И живот.", "en": "My back. And my stomach." },
-    { "s": "a", "ru": "Спина и живот? А грудь?", "en": "Back and stomach? And your chest?" },
-    { "s": "b", "ru": "Грудь не болит. Только спина.", "en": "My chest is fine. Only the back." },
-    { "s": "a", "ru": "А головная боль? Есть?", "en": "And a headache? Have you got one?" },
-    { "s": "b", "ru": "Головной боли нет.", "en": "No headache." },
-    { "s": "a", "ru": "Хорошо. А рот? Зуб болит?", "en": "Good. And your mouth? A bad tooth?" },
-    { "s": "b", "ru": "Зуб не болит. Тело болит.", "en": "No bad tooth. My body aches." },
-    { "s": "a", "ru": "Всё тело? Это много.", "en": "The whole body? That is a lot." },
-    { "s": "b", "ru": "Много, Катя. Кто это лечит?", "en": "It is, Katya. Who treats that?" },
-    { "s": "a", "ru": "Лечить может врач.", "en": "A doctor can treat it." },
-    { "s": "b", "ru": "Врач... Я к нему пойду.", "en": "A doctor... I will go to one." }
-   ],
-   "questions": [
-    { "ask": "What hurts Misha?",
-      "options": ["His back and stomach", "His chest and throat", "A tooth at the back", "His head, badly"], "answer": 0 },
-    { "ask": "Has he a headache?",
-      "options": ["No", "Yes", "Only in the morning", "He is not sure"], "answer": 0 },
-    { "ask": "How does he describe it in the end?",
-      "options": ["His whole body aches", "It is passing off now", "It is nothing at all", "Only his back hurts"], "answer": 0 },
-    { "ask": "What does Katya suggest?",
-      "options": ["A doctor", "Rest", "Medicine she has", "Waiting a day"], "answer": 0 },
-    { "ask": "What will he do?",
-      "options": ["Go to the doctor", "Wait and see", "Ignore it", "Ask Katya to come"], "answer": 0 }
-   ]
-  },
-
-  "body:3": {
-   "title": "Cold, with a sore throat",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, ты мёрзнешь?", "en": "Lena, are you cold?" },
-    { "s": "a", "ru": "Мёрзну. И горло болит.", "en": "I am freezing. And my throat hurts." },
-    { "s": "b", "ru": "Горло? Ты заболеешь.", "en": "Your throat? You will fall ill." },
-    { "s": "a", "ru": "Может быть. Палец тоже болит.", "en": "Perhaps. My finger hurts too." },
-    { "s": "b", "ru": "Палец! А желудок?", "en": "Your finger! And your stomach?" },
-    { "s": "a", "ru": "Желудок не болит.", "en": "My stomach is fine." },
-    { "s": "b", "ru": "Хорошо. А зубная боль?", "en": "Good. And toothache?" },
-    { "s": "a", "ru": "Зубной боли нет.", "en": "No toothache." },
-    { "s": "b", "ru": "А мозг? Он работает?", "en": "And your brain? Is that working?" },
-    { "s": "a", "ru": "Мозг работает. Я же говорю.", "en": "My brain is working. I am talking, am I not?" },
-    { "s": "b", "ru": "Говоришь. Но ты мёрзнешь.", "en": "You are. But you are freezing." },
-    { "s": "a", "ru": "Мёрзну, Борис. И горло болит.", "en": "I am freezing, Boris. And my throat hurts." }
-   ],
-   "questions": [
-    { "ask": "What is wrong with Lena?",
-      "options": ["She is cold and her throat hurts", "She has terrible toothache today", "Her stomach has been hurting", "Nothing serious is wrong yet"],
-      "answer": 0 },
-    { "ask": "What does Boris think will happen?",
-      "options": ["She will fall ill", "She will be fine", "She needs an operation", "She is imagining it"],
-      "answer": 0 },
-    { "ask": "What else hurts?",
-      "options": ["A finger", "Her stomach", "A tooth", "Her head"], "answer": 0 },
-    { "ask": "Why does Boris ask about her brain?",
-      "options": ["He is teasing her", "He is a doctor", "She hit her head", "She was not making sense"],
-      "answer": 0 },
-    { "ask": "How does it end?",
-      "options": ["She is still cold and sore", "She goes indoors to warm up", "The pain passes off at last", "Boris fetches help for her"],
-      "answer": 0 }
-   ]
-  },
-
-  "body:4": {
-   "title": "A tired household",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, ты усталая?", "en": "Nina, are you tired?" },
-    { "s": "a", "ru": "Усталая. Очень.", "en": "Tired. Very." },
-    { "s": "b", "ru": "А сердце? Как сердце?", "en": "And your heart? How is your heart?" },
-    { "s": "a", "ru": "Сердце работает. Шея болит.", "en": "My heart is working. My neck hurts." },
-    { "s": "b", "ru": "Шея? И висок?", "en": "Your neck? And your temple?" },
-    { "s": "a", "ru": "Висок тоже. И губа.", "en": "My temple too. And my lip." },
-    { "s": "b", "ru": "Губа! Что с губой?", "en": "Your lip! What is wrong with your lip?" },
-    { "s": "a", "ru": "Не знаю, Олег. Болит.", "en": "I do not know, Oleg. It hurts." },
-    { "s": "b", "ru": "А ножка? Ножка ребёнка?", "en": "And the little one's leg?" },
-    { "s": "a", "ru": "Ножка? Она у него болит.", "en": "His leg? That hurts him too." },
-    { "s": "b", "ru": "У ребёнка тоже! Вся семья.", "en": "The child as well! The whole family." },
-    { "s": "a", "ru": "Вся семья усталая.", "en": "The whole family is worn out." }
-   ],
-   "questions": [
-    { "ask": "How is Nina feeling?",
-      "options": ["Very tired, with aches", "Happy enough, she says", "Perfectly well today", "Frightened by it all"], "answer": 0 },
-    { "ask": "What hurts her?",
-      "options": ["Neck, temple and lip", "Heart, chest and arm", "Legs, back and feet", "Back, head and hand"], "answer": 0 },
-    { "ask": "Is her heart all right?",
-      "options": ["Yes", "No", "She does not know", "Oleg does not ask"], "answer": 0 },
-    { "ask": "Who else is unwell?",
-      "options": ["The child", "Oleg", "Her mother", "Nobody"], "answer": 0 },
-    { "ask": "How does she sum it up?",
-      "options": ["The whole family is worn out", "They all need to see a doctor", "It will pass soon enough now", "Only she is really suffering"],
-      "answer": 0 }
-   ]
-  },
-
-  "nature:0": {
-   "title": "A walk by the river",
-   "cast": [
-    { "id": "a", "ru": "Иван", "en": "Ivan" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Иван, ты гуляешь?", "en": "Ivan, are you out walking?" },
-    { "s": "a", "ru": "Гуляю. У реки.", "en": "I am. By the river." },
-    { "s": "b", "ru": "У реки? А не у моря?", "en": "By the river? Not by the sea?" },
-    { "s": "a", "ru": "Море не тут. Река тут.", "en": "The sea is not here. The river is." },
-    { "s": "b", "ru": "А солнце? Есть солнце?", "en": "And the sun? Is there any sun?" },
-    { "s": "a", "ru": "Солнце есть. День тёплый.", "en": "There is sun. It is a warm day." },
-    { "s": "b", "ru": "Тёплый? Не холодный?", "en": "Warm? Not cold?" },
-    { "s": "a", "ru": "Не холодный. Очень тёплый.", "en": "Not cold. Very warm." },
-    { "s": "b", "ru": "А дерево? То, большое?", "en": "And the tree? That big one?" },
-    { "s": "a", "ru": "Дерево у реки. Оно самое большое.", "en": "The tree is by the river. It is the biggest." },
-    { "s": "b", "ru": "Самое большое! Я тоже хочу гулять.", "en": "The biggest! I want to come for a walk too." },
-    { "s": "a", "ru": "Гуляй, Юра. Солнце для всех.", "en": "Come along, Yura. The sun is for everyone." }
-   ],
-   "questions": [
-    { "ask": "Where is Ivan walking?",
-      "options": ["By the river", "By the sea", "In the forest", "In town"], "answer": 0 },
-    { "ask": "What is the weather like?",
-      "options": ["Sunny and warm", "Cold and grey", "Windy and wet", "Raining hard"], "answer": 0 },
-    { "ask": "What does Yura ask about besides the weather?",
-      "options": ["A big tree", "The sea", "His family", "The time"], "answer": 0 },
-    { "ask": "What does he say about the tree?",
-      "options": ["It is the biggest one", "It is over by the sea", "There is no tree here", "It has fallen over"],
-      "answer": 0 },
-    { "ask": "How does the conversation end?",
-      "options": ["He invites Yura along", "He goes home", "Yura refuses", "They arrange another day"],
-      "answer": 0 }
-   ]
-  },
-
-  "nature:1": {
-   "title": "Summer on the shore",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },    { "id": "b", "ru": "Виктор", "en": "Viktor" },
-    { "id": "c", "ru": "Соня", "en": "Sonya" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, какая погода?", "en": "Anya, what is the weather like?" },
-    { "s": "a", "ru": "Погода солнечная. Но ветер.", "en": "Sunny. But there is a wind." },
-    { "s": "b", "ru": "Ветер? А сколько градусов?", "en": "A wind? And how many degrees?" },
-    { "s": "a", "ru": "Градусов много. Это лето.", "en": "Plenty of degrees. It is summer." },
-    { "s": "b", "ru": "Лето! А снег?", "en": "Summer! And snow?" },
-    { "s": "a", "ru": "Снег? Виктор, это лето!", "en": "Snow? Viktor, it is summer!" },
-    { "s": "b", "ru": "Лето... А на берегу?", "en": "Summer... And on the shore?" },
-    { "s": "a", "ru": "На берегу ветер. И солнце.", "en": "On the shore there is wind. And sun." },
-    { "s": "b", "ru": "Солнечный день на берегу.", "en": "A sunny day on the shore." },
-    { "s": "a", "ru": "Солнечный. Море тёплое.", "en": "Sunny. The sea is warm." },
-    { "s": "b", "ru": "Тёплое море! Я иду.", "en": "A warm sea! I am on my way." },    { "s": "a", "ru": "Иди. Погода для тебя.", "en": "Come. The weather is made for you." },
-    { "s": "c", "ru": "Аня, море тёплое?", "en": "Anya, is the sea warm?" },
-    { "s": "a", "ru": "Соня! Тёплое. И солнце.", "en": "Sonya! It is. And there is sun." },
-    { "s": "c", "ru": "И я иду. На берег.", "en": "I am coming too. To the shore." }
-   ],
-   "questions": [
-    { "ask": "What is the weather?",
-      "options": ["Sunny with a wind", "Foggy all morning", "Snowy and bitter", "Cold and wet out"], "answer": 0 },
-    { "ask": "What season is it?",
-      "options": ["Summer", "Winter", "Spring", "They disagree"], "answer": 0 },
-    { "ask": "Why does Anya object to Viktor's question?",
-      "options": ["He asks about snow in summer", "He asks about the temperature", "He is not listening to her", "He wants to stay indoors"],
-      "answer": 0 },    { "ask": "Who else sets off for the shore?",
-      "options": ["Sonya", "Viktor only", "Nobody", "Anya"], "answer": 0 },
-    { "ask": "What does Viktor do?",
-      "options": ["Sets off to join her", "Stays where he is", "Goes home", "Waits for better weather"],
-      "answer": 0 }
-   ]
-  },
-
-  "nature:2": {
-   "title": "Stones and sand on the island",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, что это? Камень?", "en": "Katya, what is this? A stone?" },
-    { "s": "a", "ru": "Камень. А тут песок.", "en": "A stone. And here there is sand." },
-    { "s": "b", "ru": "Песок и камень... Это остров?", "en": "Sand and stone... Is this an island?" },
-    { "s": "a", "ru": "Остров. И он тут один.", "en": "An island. And it is the only one here." },
-    { "s": "b", "ru": "А трава есть?", "en": "Is there any grass?" },
-    { "s": "a", "ru": "Трава есть. И листья.", "en": "There is grass. And leaves." },
-    { "s": "b", "ru": "Листья! А дождь тут идёт?", "en": "Leaves! And does it rain here?" },
-    { "s": "a", "ru": "Дождь идёт. Каждый день.", "en": "It rains. Every day." },
-    { "s": "b", "ru": "Каждый день! А мороз?", "en": "Every day! And frost?" },
-    { "s": "a", "ru": "Мороза нет. Тут лето.", "en": "No frost. It is summer here." },
-    { "s": "b", "ru": "Лето на острове. Это хорошо.", "en": "Summer on an island. That is good." },
-    { "s": "a", "ru": "Хорошо, Пётр. Камень, песок и трава.", "en": "It is, Pyotr. Stone, sand and grass." }
-   ],
-   "questions": [
-    { "ask": "Where are they?",
-      "options": ["On an island", "By a river", "In a forest", "In a field"], "answer": 0 },
-    { "ask": "What is underfoot?",
-      "options": ["Stone and sand", "Grass only here", "Ice and water", "Snow and ice"], "answer": 0 },
-    { "ask": "How often does it rain there?",
-      "options": ["Every day", "Never", "Only in winter", "They do not know"], "answer": 0 },
-    { "ask": "Is there frost?",
-      "options": ["No, it is summer", "Yes", "Only at night", "Pyotr thinks so"], "answer": 0 },
-    { "ask": "What does Pyotr make of the place?",
-      "options": ["He likes it", "He hates it", "He says nothing", "He is cold"], "answer": 0 }
-   ]
-  },
-
-  "nature:3": {
-   "title": "Ice on the lake in spring",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, ты идёшь в лес?", "en": "Lena, are you going to the forest?" },
-    { "s": "a", "ru": "В лес. Там гора и озеро.", "en": "To the forest. There is a mountain and a lake." },
-    { "s": "b", "ru": "Гора? А пляж есть?", "en": "A mountain? Is there a beach?" },
-    { "s": "a", "ru": "Пляж у озера. Но лёд.", "en": "There is a beach by the lake. But there is ice." },
-    { "s": "b", "ru": "Лёд? Это же весна!", "en": "Ice? But it is spring!" },
-    { "s": "a", "ru": "Весна. Но лёд ещё есть.", "en": "Spring. But the ice is still there." },
-    { "s": "b", "ru": "А на горе? Там что?", "en": "And on the mountain? What is up there?" },
-    { "s": "a", "ru": "На горе снег. Всегда.", "en": "Snow on the mountain. Always." },
-    { "s": "b", "ru": "Всегда снег... А ты идёшь одна?", "en": "Always snow... And you are going alone?" },
-    { "s": "a", "ru": "Одна. Я там могу уснуть.", "en": "Alone. I could fall asleep there." },
-    { "s": "b", "ru": "Уснуть в лесу? Нет, Лена.", "en": "Fall asleep in the forest? No, Lena." },
-    { "s": "a", "ru": "В лесу хорошо, Миша. И озеро.", "en": "The forest is good, Misha. And the lake." }
-   ],
-   "questions": [
-    { "ask": "Where is Lena going?",
-      "options": ["To the forest", "To the beach in town", "Up a mountain", "Home"], "answer": 0 },
-    { "ask": "What is on the lake?",
-      "options": ["Ice", "Boats", "Nothing", "Snow"], "answer": 0 },
-    { "ask": "What season is it?",
-      "options": ["Spring", "Winter", "Summer", "They do not say"], "answer": 0 },
-    { "ask": "What is always on the mountain?",
-      "options": ["Snow", "Fog", "People", "Trees"], "answer": 0 },
-    { "ask": "Why does Misha object?",
-      "options": ["She talks of sleeping there", "He wants to come along too", "It is far too cold for it", "She is going much too far"],
-      "answer": 0 }
-   ]
-  },
-
-  "nature:4": {
-   "title": "The hot spring in the field",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, это поле?", "en": "Nina, is this a field?" },
-    { "s": "a", "ru": "Поле. А там туман.", "en": "A field. And there is fog over there." },
-    { "s": "b", "ru": "Туман! Всё мокрое.", "en": "Fog! Everything is wet." },
-    { "s": "a", "ru": "Мокрое. Это природа.", "en": "Wet. That is nature for you." },
-    { "s": "b", "ru": "Природа... А что за край?", "en": "Nature... And what part of the world is this?" },
-    { "s": "a", "ru": "Наш край. Тут есть источник.", "en": "Our part. There is a spring here." },
-    { "s": "b", "ru": "Источник? Он горячий?", "en": "A spring? Is it hot?" },
-    { "s": "a", "ru": "Горячий. Очень.", "en": "Hot. Very." },
-    { "s": "b", "ru": "Горячий источник в поле!", "en": "A hot spring in a field!" },
-    { "s": "a", "ru": "В поле, Борис. У самого края.", "en": "In the field, Boris. Right at the edge." },
-    { "s": "b", "ru": "А туман? Он всегда тут?", "en": "And the fog? Is it always here?" },
-    { "s": "a", "ru": "Всегда. Природа такая.", "en": "Always. That is how nature is here." }
-   ],
-   "questions": [
-    { "ask": "Where are they standing?",
-      "options": ["In a field", "On a beach", "In a forest", "By a lake"], "answer": 0 },
-    { "ask": "What is the weather doing?",
-      "options": ["Fog, and everything is wet", "Bright sun over the field", "Snowing hard out there", "A storm on the way in"], "answer": 0 },
-    { "ask": "What is remarkable about the place?",
-      "options": ["A hot spring", "A waterfall", "An old tree", "Nothing"], "answer": 0 },
-    { "ask": "Where exactly is it?",
-      "options": ["At the edge of the field", "Nina will not say where", "By the road, near by", "In the middle of it"],
-      "answer": 0 },
-    { "ask": "Is the fog unusual?",
-      "options": ["No, it is always there", "Boris seems to think so", "Yes, very unusual here", "Only in the summer"], "answer": 0 }
-   ]
-  },
-
-  "nature:5": {
-   "title": "Thunder in the summer night",
-   "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Соня, ты видишь звёзды?", "en": "Sonya, can you see the stars?" },
-    { "s": "a", "ru": "Вижу. Но там облако.", "en": "I can. But there is a cloud over there." },
-    { "s": "b", "ru": "Облако? И гром!", "en": "A cloud? And thunder!" },
-    { "s": "a", "ru": "Гром... И молния.", "en": "Thunder... And lightning." },
-    { "s": "b", "ru": "Молния! Я её вижу.", "en": "Lightning! I can see it." },
-    { "s": "a", "ru": "Я тоже. И холод идёт.", "en": "So can I. And the cold is coming." },
-    { "s": "b", "ru": "Холод? Летом?", "en": "Cold? In summer?" },
-    { "s": "a", "ru": "Летом, Иван. Такая погода.", "en": "In summer, Ivan. That is the weather here." },
-    { "s": "b", "ru": "А звёзды? Их уже нет?", "en": "And the stars? Are they gone?" },
-    { "s": "a", "ru": "Есть. За облаком.", "en": "They are there. Behind the cloud." },
-    { "s": "b", "ru": "За облаком... А гром?", "en": "Behind the cloud... And the thunder?" },
-    { "s": "a", "ru": "Гром тут. И молния тоже.", "en": "The thunder is here. And the lightning too." }
-   ],
-   "questions": [
-    { "ask": "What are they watching?",
-      "options": ["A storm coming in", "A sunrise, slowly", "A fire over there", "The sea at night"], "answer": 0 },
-    { "ask": "What is hiding the stars?",
-      "options": ["A cloud", "Fog", "Rain", "Nothing"], "answer": 0 },
-    { "ask": "What surprises Ivan?",
-      "options": ["Cold weather in summer", "The lightning itself", "That she is outside", "The time of night"], "answer": 0 },
-    { "ask": "Are the stars still there?",
-      "options": ["Yes, behind the cloud", "No, they have all gone", "They cannot tell yet", "Only one is visible"],
-      "answer": 0 },
-    { "ask": "Where is the storm?",
-      "options": ["Right over them", "Far away", "Passing off", "Coming tomorrow"], "answer": 0 }
-   ]
-  },
-
-  "medicine:0": {
-   "title": "A patient in the hospital",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },    { "id": "b", "ru": "Олег", "en": "Oleg" },
-    { "id": "c", "ru": "Пётр", "en": "Pyotr" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, ты в больнице?", "en": "Anya, are you in hospital?" },
-    { "s": "a", "ru": "В больнице. Я тут пациент.", "en": "In hospital. I am a patient here." },
-    { "s": "b", "ru": "Пациент? А что с тобой?", "en": "A patient? What is wrong?" },
-    { "s": "a", "ru": "Вирус. Или болезнь.", "en": "A virus. Or some illness." },
-    { "s": "b", "ru": "Вирус! А доктор что говорит?", "en": "A virus! And what does the doctor say?" },
-    { "s": "a", "ru": "Доктор говорит: операция.", "en": "The doctor says: an operation." },
-    { "s": "b", "ru": "Операция? Уже?", "en": "An operation? Already?" },
-    { "s": "a", "ru": "Уже сегодня.", "en": "Today." },
-    { "s": "b", "ru": "А сколько ты тут, Аня?", "en": "And how long have you been here, Anya?" },
-    { "s": "a", "ru": "Уже день. Больница большая.", "en": "A day now. It is a big hospital." },
-    { "s": "b", "ru": "Большая. И докторов много.", "en": "Big. And plenty of doctors." },    { "s": "a", "ru": "Много, Олег. Все тут.", "en": "Plenty, Oleg. They are all here." },
-    { "s": "c", "ru": "Аня, доктор идёт.", "en": "Anya, the doctor is coming." },
-    { "s": "b", "ru": "Пётр? И ты тут?", "en": "Pyotr? You are here too?" },
-    { "s": "c", "ru": "Тут. Операция сегодня.", "en": "Here. The operation is today." }
-   ],
-   "questions": [
-    { "ask": "Where is Anya?",
-      "options": ["In hospital", "At a clinic", "At home", "At the doctor's office"], "answer": 0 },
-    { "ask": "What is wrong with her?",
-      "options": ["A virus or some illness", "A broken leg, she says", "She will not say what", "Nothing much at all"], "answer": 0 },
-    { "ask": "What has the doctor decided?",
-      "options": ["An operation", "Tablets", "To send her home", "To wait a week"], "answer": 0 },    { "ask": "Who brings word that the doctor is coming?",
-      "options": ["Pyotr", "Oleg", "Another patient", "Nobody does"], "answer": 0 },
-    { "ask": "How long has she been there?",
-      "options": ["A day", "An hour", "A week", "She does not say"], "answer": 0 }
-   ]
-  },
-
-  "medicine:1": {
-   "title": "Medicine, not an injury",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Лена", "en": "Lena" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, у тебя есть лекарство?", "en": "Katya, have they given you medicine?" },
-    { "s": "a", "ru": "Лекарство есть. И таблетки.", "en": "I have medicine. And tablets." },
-    { "s": "b", "ru": "Таблетки? А лечение?", "en": "Tablets? And the treatment?" },
-    { "s": "a", "ru": "Лечение уже идёт.", "en": "The treatment has started." },
-    { "s": "b", "ru": "А что у тебя? Травма?", "en": "And what is the matter? An injury?" },
-    { "s": "a", "ru": "Не травма. Заболевание.", "en": "Not an injury. A disease." },
-    { "s": "b", "ru": "Заболевание... А повреждение есть?", "en": "A disease... Is there any damage?" },
-    { "s": "a", "ru": "Повреждения нет. Только заболевание.", "en": "No damage. Only the disease." },
-    { "s": "b", "ru": "А вакцина? Она есть?", "en": "And a vaccine? Is there one?" },
-    { "s": "a", "ru": "Вакцина есть. Я её получу.", "en": "There is a vaccine. I will get it." },
-    { "s": "b", "ru": "Получишь — и всё?", "en": "You get that and it is over?" },
-    { "s": "a", "ru": "И всё, Лена. Лекарство и вакцина.", "en": "That is all, Lena. Medicine and a vaccine." }
-   ],
-   "questions": [
-    { "ask": "What is Katya being given?",
-      "options": ["Medicine and tablets", "An operation, today", "Nothing at all yet", "A vaccine only"], "answer": 0 },
-    { "ask": "Is it an injury?",
-      "options": ["No, a disease", "Yes", "Both", "She does not know"], "answer": 0 },
-    { "ask": "Is there any damage?",
-      "options": ["None at all", "Yes, serious", "A little bit", "Not checked"], "answer": 0 },
-    { "ask": "What is still to come?",
-      "options": ["A vaccine", "An operation", "A second opinion", "Nothing"], "answer": 0 },
-    { "ask": "How does she expect it to end?",
-      "options": ["That will be the end of it", "With a good many more tests", "Badly, she seems to think", "She cannot say at all yet"],
-      "answer": 0 }
-   ]
-  },
-
-  "medicine:2": {
-   "title": "Getting better at the clinic",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, это клиника?", "en": "Lena, is this a clinic?" },
-    { "s": "a", "ru": "Клиника. Тут медицина.", "en": "A clinic. Medicine is done here." },
-    { "s": "b", "ru": "А диагноз? Есть диагноз?", "en": "And a diagnosis? Is there one?" },
-    { "s": "a", "ru": "Диагноз есть. Уже сегодня.", "en": "There is. As of today." },
-    { "s": "b", "ru": "И какие симптомы?", "en": "And what are the symptoms?" },
-    { "s": "a", "ru": "Симптомы есть. Но я выздоравливаю.", "en": "There are symptoms. But I am getting better." },
-    { "s": "b", "ru": "Выздоравливаешь! Это хорошо.", "en": "Getting better! That is good." },
-    { "s": "a", "ru": "Хорошо. Медицина работает.", "en": "It is. Medicine works." },
-    { "s": "b", "ru": "А ранение? Оно есть?", "en": "And a wound? Is there one?" },
-    { "s": "a", "ru": "Ранения нет, Пётр.", "en": "No wound, Pyotr." },
-    { "s": "b", "ru": "Нет ранения — нет проблемы.", "en": "No wound, no problem." },
-    { "s": "a", "ru": "Диагноз, симптомы и клиника.", "en": "A diagnosis, symptoms and a clinic." }
-   ],
-   "questions": [
-    { "ask": "Where are they?",
-      "options": ["At a clinic", "In a hospital", "At home", "In a pharmacy"], "answer": 0 },
-    { "ask": "Is there a diagnosis?",
-      "options": ["Yes, as of today", "No", "It is expected next week", "She will not say"], "answer": 0 },
-    { "ask": "How is Lena doing?",
-      "options": ["Getting better", "Getting worse", "The same", "She does not know"], "answer": 0 },
-    { "ask": "Is she wounded?",
-      "options": ["No", "Yes", "Only slightly", "Pyotr thinks so"], "answer": 0 },
-    { "ask": "What does she credit for it?",
-      "options": ["Medicine", "Plain rest", "Good luck", "Pyotr"], "answer": 0 }
+    {
+     "ask": "What is Anya looking for?",
+     "options": [
+      "A Russian book",
+      "A Russian film",
+      "Her phone",
+      "Her keys"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Whose is it?",
+     "options": [
+      "Her mother's",
+      "Vanya's",
+      "Her own",
+      "The school's"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Where had she last seen it?",
+     "options": [
+      "At home by the door",
+      "At work on her desk",
+      "In the car outside",
+      "She cannot remember"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Who finds it?",
+     "options": [
+      "Vanya",
+      "Anya",
+      "Her mother",
+      "Nobody"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Where was it?",
+     "options": [
+      "In her own hand",
+      "Behind the door",
+      "Under the bed",
+      "In her bag"
+     ],
+     "answer": 0
+    }
    ]
   }
  }

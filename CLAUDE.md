@@ -3147,9 +3147,54 @@ Two traps worth keeping:
 
 `tools/lesson_words.mjs` prints a lesson's exact content vocabulary, and
 `--intro` checks a candidate word against the lexicon without a full run of the
-168 — which is the loop the remaining 154 scenes get written in.
+168 — which is the loop every scene now gets written in.
 
-Audio for the fourteen: 199 clips, 3,316 characters, **$0.10**.
+### Then he cut the count: 168 → 32 (same day)
+
+*"I just mainly want one per chapter. Not necessarily one per lesson. You can
+also sporadically sprinkle them in."*
+
+**32 scenarios, not 168.** Chapter 1's fourteen, plus `core*:2` and `core*:4` in
+each of chapters 2–10; the other 136 are deleted rather than merely shown less
+often, because the ones he objected to *were* those 136, and thinning the
+frequency while leaving them in place would have kept the complaint alive.
+
+**They sit on the spine on purpose.** Every learner walks `core1`–`core10`; a
+branch is an optional side quest (§30e), so a conversation parked on one is met
+only by whoever takes that branch — which would make "one per chapter" a promise
+the route does not keep. Lessons 2 and 4 space them out and both clear
+`SPEECH_MIX.scene`'s `fromLesson`.
+
+Two rules changed with the data, and both would otherwise have quietly
+re-created what was removed:
+
+- **`speechPrompt("scene")` no longer falls back to a corpus scene.** The
+  fallback was safe while all 168 had a script and it could only fire on a gap.
+  A missing script is now a *decision*, and falling back answers it by dropping
+  the weaker shape into the hole — pooled sentences with a meaning question
+  each, which is translation in isolation and is the thing the written scenarios
+  replaced (§30l). `sceneFor` still serves the Listening drill; it is no longer a
+  lesson's second choice.
+- **`--strict` asks that every chapter has one, not that every lesson does.** It
+  would otherwise have failed on all 136 deliberate absences. What it protects
+  now is the promise the reduction is allowed to make — nobody walks a chapter
+  and meets no conversation — with a chapter whose scenarios all sit on side
+  quests raised as a warning. Verified the only way worth trusting: emptying
+  chapter 2 in a harness produces the error, and moving chapter 3's off the spine
+  produces the warning and no error.
+
+**The aspect trap ran through the whole job.** A perfective and its imperfective
+are different lemmas, so a lesson that taught «понимать» has not taught
+«понять», and «пройти» is not «проходить». Eight lines across four scenarios
+failed on exactly that, plus «хороший» the adjective standing in for «хорошо»
+the adverb. It is the vocabulary gate working correctly and it is the commonest
+way an authored line fails — write the aspect the lesson actually teaches.
+
+Audio: 199 clips for chapter 1 and 286 for the rest, **$0.28** all told. The
+bundled tracks fall from 27.5 MB to 5.1 MB, which takes ~22 MB out of the APK.
+The ~1,900 clips belonging to deleted scenarios stay in `data/scenario_audio`:
+they cost money, rule 20.3 treats them as sources, and keeping them makes
+restoring any of those conversations free.
 
 ## 31. Verification
 

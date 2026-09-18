@@ -448,8 +448,36 @@ export function checkAll(scripts, { strict = false } = {}) {
   }
   report.covered = report.lessons;
   for (const b of all) if (!scripts[b.key]) report.missing.push(b.key);
-  if (strict && report.missing.length) {
-    report.errors.push(`${report.missing.length} lessons have no script: ${report.missing.slice(0, 8).join(", ")}…`);
+
+  /* **`--strict` asks that every chapter has one, not that every lesson does.**
+     It meant the latter while the design was one scenario per lesson; the owner
+     cut that back (2026-09-17: "I just mainly want one per chapter. Not
+     necessarily one per lesson. You can also sporadically sprinkle them in"), so
+     a lesson without a script is now the normal case and failing on it would
+     make the gate fire on all 136 deliberate absences.
+
+     What still has to hold is that **nobody can walk a chapter and meet no
+     conversation at all** — which is the promise the reduction is allowed to
+     make and the one thing that silently breaks when a script is deleted or a
+     curriculum re-cut moves a lesson boundary (§30n). A chapter with none is an
+     error; the spine is where they belong, so a chapter whose scenarios all sit
+     on optional side quests is a warning, since a learner may take none of them
+     (§30e). */
+  const chapters = new Map();
+  for (const b of all) {
+    if (!chapters.has(b.chapter)) chapters.set(b.chapter, { has: 0, onSpine: 0 });
+    if (!scripts[b.key]) continue;
+    const c = chapters.get(b.chapter);
+    c.has++;
+    if (/^core\d+$/.test(b.key.split(":")[0])) c.onSpine++;
+  }
+  if (strict) {
+    for (const [chapter, c] of [...chapters].sort((a, b) => a[0] - b[0])) {
+      if (!c.has) report.errors.push(`chapter ${chapter} has no conversation in any of its lessons`);
+      else if (!c.onSpine) {
+        report.warnings.push(`chapter ${chapter}: all ${c.has} conversations sit on optional side quests`);
+      }
+    }
   }
   return report;
 }

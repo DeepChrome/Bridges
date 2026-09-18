@@ -1110,13 +1110,17 @@ export function makeQuestions(env) {
      word of this lesson, one from this unit, one from anywhere unlocked. */
   function speechPrompt(kind, unit, index) {
     if (kind === "scene") {
-      // The passage written for this lesson first — it is the only one certain
-      // to be at the learner's level and about this lesson's words. The corpus
-      // pools remain the fallback for a lesson with no script yet.
-      const want = new Set(lessonWords(unit, index));
-      const scene = scriptScene(unit, index)
-        || sceneFor([unit.id], want)
-        || sceneFor(unitsUpTo(unit).map((u) => u.id), want);
+      /* **A lesson has a conversation or it has no scene at all.** The corpus
+         pools used to stand in where no script existed, from when every one of
+         the 168 lessons had one and the fallback could only fire on a gap. The
+         owner cut that back to a handful on purpose (2026-09-17: "I just mainly
+         want one per chapter. Not necessarily one per lesson") — so a missing
+         script is now a *decision*, and falling back would answer it by putting
+         the weaker shape in the gap: a few pooled sentences with a meaning
+         question each, which is translation in isolation and is the very thing
+         the written scenarios replaced (§30l). `sceneFor` is still what the
+         Listening drill draws on; it is no longer a lesson's second choice. */
+      const scene = scriptScene(unit, index);
       return scene ? { t: "scene", scene } : null;
     }
     const poolName = { hear: "listen", say: "speak" }[kind];

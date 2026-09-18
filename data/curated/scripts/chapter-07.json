@@ -2,786 +2,302 @@
  "chapter": 7,
  "name": "Days, Talk & the World",
  "lessons": {
-  "core7:0": {
-   "title": "A year over one book",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, ты останешься?", "en": "Anya, are you going to stay?" },
-    { "s": "a", "ru": "Останусь. Правда, не знаю, на сколько.", "en": "I will stay. Though I do not know for how long." },
-    { "s": "b", "ru": "Правда? А многие уже дома.", "en": "Really? Most people are home already." },
-    { "s": "a", "ru": "Многие. Но я пишу.", "en": "Most people. But I am writing." },
-    { "s": "b", "ru": "Пишешь? Что ты пишешь?", "en": "Writing? What are you writing?" },
-    { "s": "a", "ru": "Я работаю над книгой уже год.", "en": "I have been working on a book for a year." },
-    { "s": "b", "ru": "Над книгой! И ты боишься?", "en": "On a book! And you are afraid?" },
-    { "s": "a", "ru": "Боюсь. Многие боятся.", "en": "I am afraid. Many people are." },
-    { "s": "b", "ru": "Я могу помочь. Правда.", "en": "I can help. Really." },
-    { "s": "a", "ru": "Поможешь? Как?", "en": "Help? How?" },
-    { "s": "b", "ru": "Останусь тут. С тобой.", "en": "I will stay here. With you." },
-    { "s": "a", "ru": "Останься, Миша. Я пишу.", "en": "Stay then, Misha. I am writing." }
-   ],
-   "questions": [
-    { "ask": "Why is Anya staying late?",
-      "options": ["She is writing", "She is waiting for Misha", "She has nowhere to go", "She is reading"],
-      "answer": 0 },
-    { "ask": "How long has she worked on it?",
-      "options": ["A year", "A month", "All night", "She does not say"], "answer": 0 },
-    { "ask": "How does she feel about it?",
-      "options": ["Afraid", "Delighted", "Bored", "Sure of herself"], "answer": 0 },
-    { "ask": "What does Misha offer?",
-      "options": ["To stay with her", "To read it", "To write it for her", "To take her home"],
-      "answer": 0 },
-    { "ask": "Does she accept?",
-      "options": ["Yes", "No", "She does not answer", "She sends him home"], "answer": 0 }
-   ]
-  },
-
-  "core7:1": {
-   "title": "A small television, all night",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },    { "id": "b", "ru": "Борис", "en": "Boris" },
-    { "id": "c", "ru": "Юра", "en": "Yura" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, вот телевизор.", "en": "Katya, here is the television." },
-    { "s": "a", "ru": "Телевизор? Маленький.", "en": "The television? It is small." },
-    { "s": "b", "ru": "Маленький, но работает. Всю ночь.", "en": "Small, but it works. All night." },
-    { "s": "a", "ru": "Всю ночь! А ты?", "en": "All night! And you?" },
-    { "s": "b", "ru": "Я? Я просто смотрю.", "en": "Me? I just watch." },
-    { "s": "a", "ru": "Просто смотришь... А что?", "en": "Just watch... Watch what?" },
-    { "s": "b", "ru": "Я забыл. Правда.", "en": "I have forgotten. Honestly." },
-    { "s": "a", "ru": "Забыл? Расскажи мне.", "en": "Forgotten? Tell me about it." },
-    { "s": "b", "ru": "Расскажу. Но это маленькая история.", "en": "I will. But it is a small story." },
-    { "s": "a", "ru": "Борис, маленькая история — тоже история.", "en": "Boris, a small story is still a story." },
-    { "s": "b", "ru": "Вот. Была ночь, и телевизор.", "en": "Here it is. There was a night, and a television." },    { "s": "a", "ru": "И всё? Ты просто забыл.", "en": "Is that all? You simply forgot." },
-    { "s": "c", "ru": "Была ночь. Я тоже смотрел.", "en": "There was a night. I was watching too." },
-    { "s": "a", "ru": "Юра? И ты смотрел телевизор?", "en": "Yura? You were watching the television too?" },
-    { "s": "c", "ru": "Смотрел. И тоже забыл.", "en": "I was. And I have forgotten too." }
-   ],
-   "questions": [
-    { "ask": "What are they talking about?",
-      "options": ["A small television", "A book", "A night out", "A story Katya told"], "answer": 0 },
-    { "ask": "How long does Boris watch it?",
-      "options": ["All night", "An hour", "He does not watch it", "Only in the day"], "answer": 0 },
-    { "ask": "Can he say what he watches?",
-      "options": ["No, he has forgotten", "Yes, in great detail", "He will not say now", "Katya tells him it"],
-      "answer": 0 },
-    { "ask": "What does Katya ask him to do?",
-      "options": ["Tell her the story", "Turn the set off", "Go to bed early", "Lend it to her"], "answer": 0 },    { "ask": "What does Yura add at the end?",
-      "options": ["He watched too, and forgot too", "He remembers all of it clearly", "He was asleep the whole time", "He has no television at all"],
-      "answer": 0 }
-   ]
-  },
-
   "core7:2": {
-   "title": "Through the window, or tomorrow",
+   "title": "Viewing the flat",
    "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
+    {
+     "id": "a",
+     "ru": "Мария",
+     "en": "Maria"
+    },
+    {
+     "id": "b",
+     "ru": "Саша",
+     "en": "Sasha"
+    }
    ],
    "lines": [
-    { "s": "b", "ru": "Лена, ты готова?", "en": "Lena, are you ready?" },
-    { "s": "a", "ru": "Готова. А ты?", "en": "Ready. And you?" },
-    { "s": "b", "ru": "Тогда идём. Через окно?", "en": "Then let us go. Through the window?" },
-    { "s": "a", "ru": "Через окно? Олег, оно небольшое!", "en": "Through the window? Oleg, it is small!" },
-    { "s": "b", "ru": "Небольшое. Но мы пройдём.", "en": "Small. But we will get through." },
-    { "s": "a", "ru": "Пройдём... А если нет?", "en": "We will get through... And if we do not?" },
-    { "s": "b", "ru": "Тогда завтра. Через дверь.", "en": "Then tomorrow. Through the door." },
-    { "s": "a", "ru": "Через дверь? Это не то же самое.", "en": "Through the door? That is not the same thing." },
-    { "s": "b", "ru": "Не то же. Но ты готова.", "en": "Not the same. But you are ready." },
-    { "s": "a", "ru": "Готова. Окно небольшое, а дом огромный.", "en": "Ready. The window is small and the house is enormous." },
-    { "s": "b", "ru": "Огромный дом, небольшое окно.", "en": "An enormous house, a small window." },
-    { "s": "a", "ru": "Тогда завтра, Олег.", "en": "Tomorrow, then, Oleg." }
+    {
+     "s": "a",
+     "ru": "Саша, пройдите. Это квартира.",
+     "en": "Sasha, come through. This is the flat."
+    },
+    {
+     "s": "b",
+     "ru": "Небольшая.",
+     "en": "Small."
+    },
+    {
+     "s": "a",
+     "ru": "Небольшая, но окно огромное.",
+     "en": "Small, but the window is enormous."
+    },
+    {
+     "s": "b",
+     "ru": "Да, окно большое. Она много стоит?",
+     "en": "Yes, the window is big. Does it cost a lot?"
+    },
+    {
+     "s": "a",
+     "ru": "Я скажу завтра. Она не готова.",
+     "en": "I will tell you tomorrow. It is not ready."
+    },
+    {
+     "s": "b",
+     "ru": "Не готова? А когда?",
+     "en": "Not ready? When, then?"
+    },
+    {
+     "s": "a",
+     "ru": "Тогда, когда выйдет семья.",
+     "en": "When the family moves out."
+    },
+    {
+     "s": "b",
+     "ru": "Там живёт семья?",
+     "en": "A family lives there?"
+    },
+    {
+     "s": "a",
+     "ru": "Да. С детьми и собакой.",
+     "en": "Yes. With children and a dog."
+    },
+    {
+     "s": "b",
+     "ru": "Собака? У меня есть собака.",
+     "en": "A dog? I have a dog."
+    },
+    {
+     "s": "a",
+     "ru": "Тогда всё хорошо.",
+     "en": "Then all is well."
+    },
+    {
+     "s": "b",
+     "ru": "А улица? Тут огромный город.",
+     "en": "And the street? This is an enormous city."
+    },
+    {
+     "s": "a",
+     "ru": "Улица небольшая. Смотрите в окно.",
+     "en": "The street is small. Look out of the window."
+    },
+    {
+     "s": "b",
+     "ru": "Вижу. Тут хорошо.",
+     "en": "I see. It is good here."
+    },
+    {
+     "s": "a",
+     "ru": "Тогда завтра, Саша?",
+     "en": "Tomorrow, then, Sasha?"
+    },
+    {
+     "s": "b",
+     "ru": "Завтра, Мария. Я готов.",
+     "en": "Tomorrow, Maria. I am ready."
+    }
    ],
    "questions": [
-    { "ask": "What does Oleg suggest?",
-      "options": ["Going through the window", "Going through the door", "Waiting a year", "Staying in"],
-      "answer": 0 },
-    { "ask": "What is Lena's objection?",
-      "options": ["The window is too small", "It is too dark to see", "She is not ready yet", "The house is too big"],
-      "answer": 0 },
-    { "ask": "What is his other plan?",
-      "options": ["The door, tomorrow", "The door, right now", "To give up on it", "Another window"], "answer": 0 },
-    { "ask": "What does Lena say about the house?",
-      "options": ["It is enormous", "It is small", "It is not theirs", "It is empty"], "answer": 0 },
-    { "ask": "What do they decide?",
-      "options": ["To leave it until tomorrow", "To climb through the window", "To use the door right now", "To do nothing about it"],
-      "answer": 0 }
+    {
+     "ask": "What is Sasha being shown?",
+     "options": [
+      "A flat",
+      "A house",
+      "An office",
+      "A shop"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does he notice first?",
+     "options": [
+      "How small it is",
+      "How big it is",
+      "How dark it is",
+      "How cold it is"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Maria point out about it?",
+     "options": [
+      "The huge window",
+      "The quiet street",
+      "The new door",
+      "The low price"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Why is it not available yet?",
+     "options": [
+      "A family still lives there",
+      "It is being painted still",
+      "The owner is abroad",
+      "The papers are not ready"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What do they agree?",
+     "options": [
+      "To speak again tomorrow",
+      "To speak again next week",
+      "To meet at the office",
+      "To leave it for now"
+     ],
+     "answer": 0
+    }
    ]
   },
-
-  "core7:3": {
-   "title": "Two roubles now",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, сколько это стоит?", "en": "Nina, how much does this cost?" },
-    { "s": "a", "ru": "Теперь? Два рубля.", "en": "Now? Two roubles." },
-    { "s": "b", "ru": "Два рубля! А вчера?", "en": "Two roubles! And yesterday?" },
-    { "s": "a", "ru": "Вчера был другой случай.", "en": "Yesterday was a different matter." },
-    { "s": "b", "ru": "Другой случай? Какой?", "en": "A different matter? How so?" },
-    { "s": "a", "ru": "Тот учёный. Он сам дал рубль.", "en": "That scientist. He put in a rouble himself." },
-    { "s": "b", "ru": "Учёный сам дал! Я его знаю?", "en": "The scientist put it in himself! Do I know him?" },
-    { "s": "a", "ru": "Знаешь. У него такие глаза.", "en": "You do. He has those eyes." },
-    { "s": "b", "ru": "Глаза... Теперь я знаю.", "en": "The eyes... Now I know the one." },
-    { "s": "a", "ru": "Знаешь. Он тут часто.", "en": "You do. He is here often." },
-    { "s": "b", "ru": "А теперь? Два рубля?", "en": "And now? Two roubles?" },
-    { "s": "a", "ru": "Два рубля, Юра. Другого случая нет.", "en": "Two roubles, Yura. There is no other arrangement." }
-   ],
-   "questions": [
-    { "ask": "What does it cost now?",
-      "options": ["Two roubles", "Nothing", "More than yesterday", "Nina will not say"], "answer": 0 },
-    { "ask": "Why was yesterday different?",
-      "options": ["A scientist paid himself", "There was a sale on then", "The place was closed up", "Yura was not there then"],
-      "answer": 0 },
-    { "ask": "How does Yura place the man?",
-      "options": ["By his eyes", "By his name", "By his coat", "He never does"], "answer": 0 },
-    { "ask": "How often is the scientist there?",
-      "options": ["Often", "Once", "Never again", "Only yesterday"], "answer": 0 },
-    { "ask": "Will Yura get the same arrangement?",
-      "options": ["No", "Yes", "If he asks again", "Nina is thinking about it"], "answer": 0 }
-   ]
-  },
-
   "core7:4": {
-   "title": "The price has changed",
-   "cast": [    { "id": "a", "ru": "Иван", "en": "Ivan" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Иван, ты слушаешь?", "en": "Ivan, are you listening?" },
-    { "s": "a", "ru": "Слушаю. Говори.", "en": "I am. Go on." },
-    { "s": "b", "ru": "Цена. Она теперь другая.", "en": "The price. It is different now." },
-    { "s": "a", "ru": "Другая цена? Больше?", "en": "A different price? Higher?" },
-    { "s": "b", "ru": "Больше. Два раза.", "en": "Higher. Twice as much." },
-    { "s": "a", "ru": "Два раза! Я не слушаю.", "en": "Twice! I am not listening." },
-    { "s": "b", "ru": "Слушай. Это не моя цена.", "en": "Listen. It is not my price." },
-    { "s": "a", "ru": "Не твоя? А чья?", "en": "Not yours? Whose then?" },
-    { "s": "b", "ru": "Их. Они её сделали.", "en": "Theirs. They set it." },
-    { "s": "a", "ru": "Сделали... И что теперь?", "en": "They set it... And now what?" },
-    { "s": "b", "ru": "Теперь цена такая. Или нет.", "en": "Now that is the price. Or it is not." },
-    { "s": "a", "ru": "Я слушаю, Виктор. Но цена большая.", "en": "I am listening, Viktor. But the price is steep." }
-   ],
-   "questions": [
-    { "ask": "What has happened to the price?",
-      "options": ["It has doubled", "It has halved", "It is unchanged", "It was cancelled"], "answer": 0 },
-    { "ask": "Who set it?",
-      "options": ["Somebody else, not Viktor", "Viktor himself, he admits", "Ivan, without knowing it", "Nobody seems to know it"], "answer": 0 },    { "ask": "How does Ivan react at first?",
-      "options": ["He refuses to listen", "He agrees to it at once", "He offers to pay it", "He laughs it off"], "answer": 0 },
-    { "ask": "What are the choices?",
-      "options": ["Take the price or leave it", "Wait a year for it to fall", "Complain to somebody else", "Pay half of it and wait"], "answer": 0 },
-    { "ask": "Where does it end?",
-      "options": ["He is listening, but unhappy", "They pay it without a word", "They refuse it altogether", "Viktor leaves in a temper"],
-      "answer": 0 }
-   ]
-  },
-
-  "emotion:0": {
-   "title": "Which idea she prefers",
+   "title": "You were not listening",
    "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },    { "id": "b", "ru": "Таня", "en": "Tanya" }
+    {
+     "id": "a",
+     "ru": "Нина",
+     "en": "Nina"
+    },
+    {
+     "id": "b",
+     "ru": "Пётр",
+     "en": "Pyotr"
+    }
    ],
    "lines": [
-    { "s": "b", "ru": "Аня, тебе нравится эта идея?", "en": "Anya, do you like this idea?" },
-    { "s": "a", "ru": "Идея? Нравится. Она интересная.", "en": "The idea? I do. It is interesting." },
-    { "s": "b", "ru": "Интересная! А твоё мнение?", "en": "Interesting! And your opinion?" },
-    { "s": "a", "ru": "Моё мнение — я помню другую идею.", "en": "My opinion is that I remember a different idea." },
-    { "s": "b", "ru": "Другую? Какую?", "en": "A different one? Which?" },
-    { "s": "a", "ru": "Ту, что была вчера. Ты помнишь?", "en": "The one from yesterday. Do you remember?" },
-    { "s": "b", "ru": "Помню. Но я её не поняла.", "en": "I do. But I did not understand it." },
-    { "s": "a", "ru": "Не поняла? Я тоже.", "en": "You did not? Neither did I." },
-    { "s": "b", "ru": "Тогда я за эту идею.", "en": "Then I am for this idea." },
-    { "s": "a", "ru": "И я. Я счастливая.", "en": "So am I. I am happy." },
-    { "s": "b", "ru": "Счастливая? Почему?", "en": "Happy? Why?" },
-    { "s": "a", "ru": "Так, Таня. Идея интересная.", "en": "Just so, Tanya. The idea is interesting." }
+    {
+     "s": "a",
+     "ru": "Пётр, ты меня слушаешь?",
+     "en": "Pyotr, are you listening to me?"
+    },
+    {
+     "s": "b",
+     "ru": "Слушаю. Говори.",
+     "en": "I am listening. Go on."
+    },
+    {
+     "s": "a",
+     "ru": "Я сказала цену. Ты не слушал.",
+     "en": "I told you the price. You were not listening."
+    },
+    {
+     "s": "b",
+     "ru": "Какая цена?",
+     "en": "What price?"
+    },
+    {
+     "s": "a",
+     "ru": "Вот. Смотри сам.",
+     "en": "Here. See for yourself."
+    },
+    {
+     "s": "b",
+     "ru": "Это много рублей.",
+     "en": "That is a lot of roubles."
+    },
+    {
+     "s": "a",
+     "ru": "Я знаю. Но случай другой.",
+     "en": "I know. But this case is different."
+    },
+    {
+     "s": "b",
+     "ru": "Другой? Как это?",
+     "en": "Different? How so?"
+    },
+    {
+     "s": "a",
+     "ru": "Эта машина — последняя.",
+     "en": "This car is the last one."
+    },
+    {
+     "s": "b",
+     "ru": "Последняя? Кто сказал?",
+     "en": "The last one? Who said so?"
+    },
+    {
+     "s": "a",
+     "ru": "Человек в компании. Он учёный.",
+     "en": "A man at the firm. He is a scientist."
+    },
+    {
+     "s": "b",
+     "ru": "Учёный и машины?",
+     "en": "A scientist, and cars?"
+    },
+    {
+     "s": "a",
+     "ru": "Он знает цены. Я его слушала.",
+     "en": "He knows prices. I listened to him."
+    },
+    {
+     "s": "b",
+     "ru": "Хорошо. Тогда я слушаю.",
+     "en": "All right. Then I am listening."
+    },
+    {
+     "s": "a",
+     "ru": "Тогда смотри мне в глаза.",
+     "en": "Then look me in the eye."
+    },
+    {
+     "s": "b",
+     "ru": "Смотрю, Нина. Говори цену.",
+     "en": "I am looking, Nina. Tell me the price."
+    }
    ],
    "questions": [
-    { "ask": "What do they think of today's idea?",
-      "options": ["They both like it", "They both dislike it", "Only Anya likes it", "Only Tanya likes it"],
-      "answer": 0 },
-    { "ask": "What does Anya keep thinking of?",
-      "options": ["Yesterday's idea", "A book", "Her opinion of Tanya", "Nothing"], "answer": 0 },
-    { "ask": "Did either of them understand that one?",
-      "options": ["Neither did", "Both did", "Only Tanya", "Only Anya"], "answer": 0 },
-    { "ask": "What do they settle on?",
-      "options": ["The new idea", "The old idea", "Neither", "They do not settle"], "answer": 0 },
-    { "ask": "How does Anya end up feeling?",
-      "options": ["Happy", "Annoyed", "Confused", "Bored"], "answer": 0 }
-   ]
-  },
-
-  "emotion:1": {
-   "title": "Fear, and a little faith",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, какое у тебя настроение?", "en": "Katya, what sort of mood are you in?" },
-    { "s": "a", "ru": "Настроение? Не очень.", "en": "My mood? Not great." },
-    { "s": "b", "ru": "Не очень... Ты переживаешь?", "en": "Not great... Are you upset?" },
-    { "s": "a", "ru": "Переживаю. Есть страх.", "en": "I am. There is fear." },
-    { "s": "b", "ru": "Страх? Ты боишься?", "en": "Fear? Are you afraid?" },
-    { "s": "a", "ru": "Боюсь. Но я верю.", "en": "I am afraid. But I believe." },
-    { "s": "b", "ru": "Веришь? Во что?", "en": "Believe? In what?" },
-    { "s": "a", "ru": "В то, что всё будет.", "en": "That everything will come right." },
-    { "s": "b", "ru": "Я тоже верю. И горжусь тобой.", "en": "I believe that too. And I am proud of you." },
-    { "s": "a", "ru": "Гордишься, Иван? Правда?", "en": "Proud, Ivan? Really?" },
-    { "s": "b", "ru": "Правда. А страх — я его ненавижу.", "en": "Really. And fear — I hate it." },
-    { "s": "a", "ru": "Ненавидишь страх! Вот это интерес.", "en": "You hate fear! Now that is interesting." }
-   ],
-   "questions": [
-    { "ask": "How is Katya feeling?",
-      "options": ["Upset and afraid", "Cheerful", "Angry with Ivan", "Perfectly calm"], "answer": 0 },
-    { "ask": "What keeps her going?",
-      "options": ["Believing it will come right", "Ivan's money, she admits it", "Nothing much at all now", "Her work at the factory"],
-      "answer": 0 },
-    { "ask": "What does Ivan say about her?",
-      "options": ["He is proud of her", "She worries too much", "She should leave", "He does not understand her"],
-      "answer": 0 },
-    { "ask": "What does Ivan hate?",
-      "options": ["Fear", "Moods", "Pride", "Talk"], "answer": 0 },
-    { "ask": "How does the conversation end?",
-      "options": ["Lighter than it began", "In an argument, badly", "With her leaving him", "Exactly as it began"], "answer": 0 }
-   ]
-  },
-
-  "emotion:2": {
-   "title": "What she dreams about",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },    { "id": "b", "ru": "Миша", "en": "Misha" },
-    { "id": "c", "ru": "Аня", "en": "Anya" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, о чём ты мечтаешь?", "en": "Lena, what do you dream about?" },
-    { "s": "a", "ru": "Мечтаю? Дай подумать.", "en": "Dream? Let me think." },
-    { "s": "b", "ru": "Подумай. Я спокойный.", "en": "Think. I am in no hurry." },
-    { "s": "a", "ru": "Спокойный! Я удивилась.", "en": "In no hurry! That surprises me." },
-    { "s": "b", "ru": "Удивилась? Почему?", "en": "Surprised? Why?" },
-    { "s": "a", "ru": "Так. Меня интересует другое.", "en": "Just so. Something else interests me." },
-    { "s": "b", "ru": "Другое? Любовь?", "en": "Something else? Love?" },
-    { "s": "a", "ru": "Любовь... Может быть. И радость.", "en": "Love... Perhaps. And joy." },
-    { "s": "b", "ru": "Радость и любовь. Ты мечтаешь о них?", "en": "Joy and love. Is that what you dream of?" },
-    { "s": "a", "ru": "Мечтаю. Но я спокойная.", "en": "I do. But I am calm about it." },
-    { "s": "b", "ru": "Спокойная — и мечтаешь?", "en": "Calm — and dreaming?" },    { "s": "a", "ru": "Да, Миша. Подумай сам.", "en": "Yes, Misha. Work it out yourself." },
-    { "s": "c", "ru": "А меня интересует радость.", "en": "And joy is what interests me." },
-    { "s": "b", "ru": "Аня! Ты тоже мечтаешь?", "en": "Anya! Do you dream too?" },
-    { "s": "c", "ru": "Мечтаю. О радости.", "en": "I do. About joy." }
-   ],
-   "questions": [
-    { "ask": "What does Misha ask her?",
-      "options": ["What she dreams of", "Why she is calm", "Whether she loves him", "What surprised her"],
-      "answer": 0 },
-    { "ask": "What surprises Lena?",
-      "options": ["How calm he is", "The question", "That he stayed", "Nothing"], "answer": 0 },
-    { "ask": "What does she name in the end?",
-      "options": ["Love and joy", "Work", "Travel", "She refuses to answer"], "answer": 0 },    { "ask": "Who else joins in?",
-      "options": ["Anya, who dreams of joy", "Misha's younger brother", "Nobody else joins them", "Lena's sister, briefly"], "answer": 0 },
-    { "ask": "What does she tell him to do?",
-      "options": ["Work it out himself", "Stop asking", "Dream too", "Come back tomorrow"],
-      "answer": 0 }
-   ]
-  },
-
-  "emotion:3": {
-   "title": "Doubt and hope",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, ты сомневаешься?", "en": "Nina, do you have doubts?" },
-    { "s": "a", "ru": "Сомневаюсь. Но есть надежда.", "en": "I do. But there is hope." },
-    { "s": "b", "ru": "Надежда! Я тоже надеюсь.", "en": "Hope! I hope too." },
-    { "s": "a", "ru": "Надеешься? На что?", "en": "You hope? For what?" },
-    { "s": "b", "ru": "На то, что всё пройдёт.", "en": "That it will all pass." },
-    { "s": "a", "ru": "Пройдёт... А волнение?", "en": "Pass... And the worry?" },
-    { "s": "b", "ru": "Волнение есть. У всех.", "en": "There is worry. Everyone has it." },
-    { "s": "a", "ru": "У всех. Но твой ум спокойный.", "en": "Everyone. But your mind is calm." },
-    { "s": "b", "ru": "Ум спокойный. Это всё.", "en": "The mind is calm. That is all there is to it." },
-    { "s": "a", "ru": "Это всё? Меня это заинтересовало.", "en": "Is that all? That interests me." },
-    { "s": "b", "ru": "Заинтересовало! Запомни это.", "en": "It interests you! Remember it, then." },
-    { "s": "a", "ru": "Запомню, Борис. И надежду тоже.", "en": "I will, Boris. And the hope as well." }
-   ],
-   "questions": [
-    { "ask": "What does Nina admit to?",
-      "options": ["Doubts", "Fear", "Anger", "Nothing"], "answer": 0 },
-    { "ask": "What does Boris hope?",
-      "options": ["That it will all pass", "That she will stay on", "For money, he admits", "He does not say what"],
-      "answer": 0 },
-    { "ask": "Who has the worry, in his view?",
-      "options": ["Everyone", "Only Nina", "Only him", "Nobody"], "answer": 0 },
-    { "ask": "What does Nina notice about him?",
-      "options": ["His mind is calm", "He is anxious", "He is not listening", "He is in a hurry"],
-      "answer": 0 },
-    { "ask": "What does he tell her to do?",
-      "options": ["Remember it", "Forget it", "Ask someone else", "Stop doubting"], "answer": 0 }
-   ]
-  },
-
-  "emotion:4": {
-   "title": "A thought and a bad memory",
-   "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Соня, ты этим интересуешься?", "en": "Sonya, does this interest you?" },
-    { "s": "a", "ru": "Интересуюсь. У меня есть мысль.", "en": "It does. I have a thought." },
-    { "s": "b", "ru": "Мысль? Какая? Я любопытный.", "en": "A thought? What is it? I am curious." },
-    { "s": "a", "ru": "Любопытный! Мысль небольшая.", "en": "Curious! It is a small thought." },
-    { "s": "b", "ru": "Небольшая мысль — это тоже мысль.", "en": "A small thought is still a thought." },
-    { "s": "a", "ru": "Так. Я нуждаюсь в тебе.", "en": "Quite. I need you." },
-    { "s": "b", "ru": "Нуждаешься? Правда?", "en": "You need me? Really?" },
-    { "s": "a", "ru": "Правда. Память у меня не та.", "en": "Really. My memory is not what it was." },
-    { "s": "b", "ru": "Не та память? Это тревожный случай.", "en": "Not what it was? That is a worrying business." },
-    { "s": "a", "ru": "Тревожный. Но я полюбила это дело.", "en": "Worrying. But I have come to love the work." },
-    { "s": "b", "ru": "Полюбила! Тогда я помогу.", "en": "Come to love it! Then I will help." },
-    { "s": "a", "ru": "Поможешь. Вот моя мысль, Олег.", "en": "You will. That was my thought, Oleg." }
-   ],
-   "questions": [
-    { "ask": "What has Sonya got?",
-      "options": ["A thought to share", "A complaint to make", "Nothing much to say", "A new job in town"],
-      "answer": 0 },
-    { "ask": "What does she need Oleg for?",
-      "options": ["Her memory is failing", "Money, she admits it", "A lift into the town", "Company, she says so"], "answer": 0 },
-    { "ask": "How does Oleg describe that?",
-      "options": ["Worrying", "Funny", "Normal", "Her own fault"], "answer": 0 },
-    { "ask": "How does she feel about the work?",
-      "options": ["She has come to love it", "She has come to hate it", "It bores her completely", "She is leaving it soon"],
-      "answer": 0 },
-    { "ask": "What was her thought all along?",
-      "options": ["Getting him to help", "Leaving the job", "Asking for money", "Telling him the truth"],
-      "answer": 0 }
-   ]
-  },
-
-  "emotion:5": {
-   "title": "What is worrying her",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, ты грустная?", "en": "Anya, are you sad?" },
-    { "s": "a", "ru": "Грустная. Я волнуюсь.", "en": "Sad. I am worried." },
-    { "s": "b", "ru": "Волнуешься? Что тебя беспокоит?", "en": "Worried? What is troubling you?" },
-    { "s": "a", "ru": "Беспокоит одно. Я вспомнила его.", "en": "One thing. I remembered him." },
-    { "s": "b", "ru": "Его? Кого?", "en": "Him? Who?" },
-    { "s": "a", "ru": "Того, который был тут. Влюблённый.", "en": "The one who was here. The one in love." },
-    { "s": "b", "ru": "Влюблённый? В тебя?", "en": "In love? With you?" },
-    { "s": "a", "ru": "В меня. И это меня беспокоит.", "en": "With me. And that is what troubles me." },
-    { "s": "b", "ru": "Беспокоит... А ты?", "en": "It troubles you... And you?" },
-    { "s": "a", "ru": "Я? Я грустная. И всё.", "en": "Me? I am sad. That is all." },
-    { "s": "b", "ru": "Не волнуйся. Я тут.", "en": "Do not worry. I am here." },
-    { "s": "a", "ru": "Тут, Юра. Я это помню.", "en": "Here, Yura. I do remember that." }
-   ],
-   "questions": [
-    { "ask": "How is Anya?",
-      "options": ["Sad and worried", "Cheerful enough", "Angry with Yura", "Frightened now"], "answer": 0 },
-    { "ask": "What has she remembered?",
-      "options": ["A man who was in love with her", "An argument she had with him", "Something she forgot to do", "A dream she had last night"],
-      "answer": 0 },
-    { "ask": "Who was he in love with?",
-      "options": ["Anya", "Somebody else", "Nobody", "She will not say"], "answer": 0 },
-    { "ask": "What does Yura say?",
-      "options": ["Not to worry, he is there", "That she should forget him", "That he is jealous", "Nothing"],
-      "answer": 0 },
-    { "ask": "How does she answer him?",
-      "options": ["She says she remembers that", "She sends him away at once", "She laughs it off at him", "She changes the subject"],
-      "answer": 0 }
-   ]
-  },
-
-  "speech:0": {
-   "title": "The letter she has not answered",
-   "cast": [    { "id": "a", "ru": "Олег", "en": "Oleg" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Олег, можно спросить?", "en": "Oleg, may I ask you something?" },
-    { "s": "a", "ru": "Спроси, Виктор. Я отвечу.", "en": "Ask, Viktor. I will answer." },
-    { "s": "b", "ru": "Ты получил письмо?", "en": "Did you get the letter?" },
-    { "s": "a", "ru": "Письмо? Получил. Но я не ответил.", "en": "The letter? I got it. But I did not answer." },
-    { "s": "b", "ru": "Не ответил! Почему?", "en": "You did not answer! Why?" },
-    { "s": "a", "ru": "Не могу объяснять. Это не просто.", "en": "I cannot explain. It is not simple." },
-    { "s": "b", "ru": "Не просто... А кто тебе пишет?", "en": "Not simple... And who writes to you?" },
-    { "s": "a", "ru": "Тот, с кем я разговаривал.", "en": "The man I was talking to." },
-    { "s": "b", "ru": "Разговаривал! И о чём?", "en": "Talking to! And about what?" },
-    { "s": "a", "ru": "Я рассказывал о работе.", "en": "I was telling him about work." },
-    { "s": "b", "ru": "О работе. И он попросил, чтобы ты ответил?", "en": "About work. And he asked you to answer?" },
-    { "s": "a", "ru": "Попросил. А я не ответил.", "en": "He did. And I have not answered." }
-   ],
-   "questions": [    { "ask": "What has Oleg not done?",
-      "options": ["Answered a letter", "Written a letter", "Spoken to Viktor", "Gone to work"], "answer": 0 },    { "ask": "Will Oleg explain why?",
-      "options": ["No, he says it is not simple", "Yes, at considerable length", "He blames the post for it", "He says he simply forgot"],
-      "answer": 0 },    { "ask": "Who wrote to him?",
-      "options": ["Someone he had talked to", "His boss at the office", "He does not know who", "Viktor, he says so"], "answer": 0 },
-    { "ask": "What had they talked about?",
-      "options": ["Work", "The letter", "Viktor", "Nothing in particular"], "answer": 0 },
-    { "ask": "What did he ask for?",
-      "options": ["An answer", "Money", "A meeting", "Nothing"], "answer": 0 }
-   ]
-  },
-
-  "speech:1": {
-   "title": "He has been ringing",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, я звонил тебе вчера.", "en": "Lena, I rang you yesterday." },
-    { "s": "a", "ru": "Звонил? Я не услышала.", "en": "You rang? I did not hear it." },
-    { "s": "b", "ru": "Не услышала! А я звоню каждый день.", "en": "You did not hear! And I ring every day." },
-    { "s": "a", "ru": "Каждый день... Тогда поговорим теперь.", "en": "Every day... Then let us talk now." },
-    { "s": "b", "ru": "Поговорим. У меня есть разговор.", "en": "Let us. I have something to say." },
-    { "s": "a", "ru": "Разговор? О чём?", "en": "Something to say? About what?" },
-    { "s": "b", "ru": "Я прошу тебя. Только слушай.", "en": "I am asking you. Just listen." },
-    { "s": "a", "ru": "Прошу... Ты просишь — я слушаю.", "en": "Asking... You ask, I listen." },
-    { "s": "b", "ru": "Одна буква — и всё другое.", "en": "One letter — and everything is different." },
-    { "s": "a", "ru": "Одна буква? Какая?", "en": "One letter? Which one?" },
-    { "s": "b", "ru": "Позвони мне, и я скажу.", "en": "Ring me, and I will tell you." },
-    { "s": "a", "ru": "Позвоню, Пётр. Сегодня.", "en": "I will ring, Pyotr. Today." }
-   ],
-   "questions": [
-    { "ask": "How often has Pyotr been ringing?",
-      "options": ["Every day", "Once", "Never", "Only yesterday"], "answer": 0 },
-    { "ask": "Why has Lena not answered?",
-      "options": ["She did not hear the calls", "She was angry with him then", "She has lost her phone", "She was away all week"],
-      "answer": 0 },
-    { "ask": "What does he ask of her?",
-      "options": ["Just to listen", "To come at once", "To forgive him", "To stop ringing"],
-      "answer": 0 },
-    { "ask": "What does he say makes the difference?",
-      "options": ["One letter", "One day", "One word from her", "Nothing"], "answer": 0 },
-    { "ask": "How is it left?",
-      "options": ["She will ring him today", "He will call her again", "They meet up tomorrow", "She refuses to ring"],
-      "answer": 0 }
-   ]
-  },
-
-  "speech:2": {
-   "title": "It was not a discussion",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, что за дискуссия?", "en": "Nina, what was that discussion?" },
-    { "s": "a", "ru": "Дискуссия? Это была беседа.", "en": "Discussion? It was a conversation." },
-    { "s": "b", "ru": "Беседа! А кто кричал?", "en": "A conversation! And who was shouting?" },
-    { "s": "a", "ru": "Кричали все. И я плакала.", "en": "Everybody shouted. And I cried." },
-    { "s": "b", "ru": "Плакала? Почему?", "en": "You cried? Why?" },
-    { "s": "a", "ru": "Так. Мы не договорились.", "en": "Because we could not agree." },
-    { "s": "b", "ru": "Не договорились... А название?", "en": "Could not agree... And the name for it?" },
-    { "s": "a", "ru": "Название? Его тоже нет.", "en": "The name? There is not one either." },
-    { "s": "b", "ru": "Нет названия, нет дискуссии.", "en": "No name, no discussion." },
-    { "s": "a", "ru": "Есть. Я обещаю.", "en": "There is one. I promise." },
-    { "s": "b", "ru": "Обещаешь? Тогда договоримся.", "en": "You promise? Then let us come to an agreement." },
-    { "s": "a", "ru": "Договоримся, Миша. И без беседы.", "en": "We will, Misha. And without a conversation." }
-   ],
-   "questions": [
-    { "ask": "What does Nina call it?",
-      "options": ["A conversation", "A discussion", "An argument", "A meeting"], "answer": 0 },
-    { "ask": "What happened during it?",
-      "options": ["Everyone shouted and she cried", "Nobody spoke a word the whole time", "They agreed almost at once", "It was called off early on"],
-      "answer": 0 },
-    { "ask": "Did they agree?",
-      "options": ["No", "Yes", "Only about the name", "Misha does not ask"], "answer": 0 },
-    { "ask": "What does she promise?",
-      "options": ["That there is a name for it", "Not to cry about it again", "To apologise to everyone", "To keep quiet in future"],
-      "answer": 0 },
-    { "ask": "What do they settle on at the end?",
-      "options": ["To agree without another talk", "To meet again and discuss it", "To ask somebody else to help", "To give up on it altogether"],
-      "answer": 0 }
-   ]
-  },
-
-  "speech:3": {
-   "title": "After the quarrel, silence",
-   "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },    { "id": "b", "ru": "Борис", "en": "Boris" },
-    { "id": "c", "ru": "Нина", "en": "Nina" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Соня, почему ты молчишь?", "en": "Sonya, why are you silent?" },
-    { "s": "a", "ru": "Молчу. Тут тишина.", "en": "I am silent. There is silence here." },
-    { "s": "b", "ru": "Тишина... А была ссора?", "en": "Silence... Was there a quarrel?" },
-    { "s": "a", "ru": "Ссора была. Вчера.", "en": "There was a quarrel. Yesterday." },
-    { "s": "b", "ru": "Вчера! И что обсуждалось?", "en": "Yesterday! And what was being discussed?" },
-    { "s": "a", "ru": "Обсуждалось одно: обещание.", "en": "One thing was: a promise." },
-    { "s": "b", "ru": "Обещание? Чьё?", "en": "A promise? Whose?" },
-    { "s": "a", "ru": "Его. Он проговорил всё.", "en": "His. He said the whole of it." },
-    { "s": "b", "ru": "Проговорил — и что теперь?", "en": "He said it — and now what?" },
-    { "s": "a", "ru": "Теперь я молчу.", "en": "Now I am silent." },
-    { "s": "b", "ru": "Молчишь. Но надо объясняться.", "en": "You are silent. But it needs talking out." },    { "s": "a", "ru": "Объясняться? Не сегодня, Борис.", "en": "Talking out? Not today, Boris." },
-    { "s": "c", "ru": "Ссора была и у меня.", "en": "I had a quarrel too." },
-    { "s": "b", "ru": "Нина! И ты молчишь?", "en": "Nina! Are you silent too?" },
-    { "s": "c", "ru": "Не молчу. Я объясняюсь.", "en": "I am not. I talk it out." }
-   ],
-   "questions": [
-    { "ask": "Why is Sonya not speaking?",
-      "options": ["There was a quarrel yesterday", "She is ill and cannot speak", "Boris has annoyed her badly", "She is thinking about it"],
-      "answer": 0 },
-    { "ask": "What was the quarrel about?",
-      "options": ["A promise", "Money", "Boris", "Nothing in particular"], "answer": 0 },
-    { "ask": "Whose promise was it?",
-      "options": ["The other man's", "Boris's, it seems", "Sonya's, she says", "Nobody's at all"], "answer": 0 },
-    { "ask": "What does Boris think should happen?",
-      "options": ["It should be talked out", "She should stay silent", "She should leave", "He should speak to the man"],
-      "answer": 0 },    { "ask": "What does Nina do about her own quarrel?",
-      "options": ["She talks it out", "She stays silent too", "She left", "She agrees with Sonya"], "answer": 0 }
-   ]
-  },
-
-  "speech:4": {
-   "title": "Who shouted",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Иван", "en": "Ivan" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, ты услышала крик?", "en": "Anya, did you hear the shout?" },
-    { "s": "a", "ru": "Крик? Услышала. Кто закричал?", "en": "The shout? I heard it. Who shouted?" },
-    { "s": "b", "ru": "Тот, который всё утверждает.", "en": "The one who is always making claims." },
-    { "s": "a", "ru": "Утверждает... И он заговорил?", "en": "Making claims... And then he started talking?" },
-    { "s": "b", "ru": "Заговорил. И беседовал с нами.", "en": "He did. And talked with us." },
-    { "s": "a", "ru": "С вами? О чём?", "en": "With you? About what?" },
-    { "s": "b", "ru": "Он указывал на дверь.", "en": "He was pointing at the door." },
-    { "s": "a", "ru": "Указывал на дверь! И что?", "en": "Pointing at the door! And then?" },
-    { "s": "b", "ru": "И назвал меня. Просто назвал.", "en": "And he named me. Just named me." },
-    { "s": "a", "ru": "Назвал... Ты закричал?", "en": "Named you... Did you shout?" },
-    { "s": "b", "ru": "Не закричал. Я беседую, не кричу.", "en": "I did not. I talk, I do not shout." },
-    { "s": "a", "ru": "Беседуешь. Вот и всё, Иван.", "en": "You talk. That is that, then, Ivan." }
-   ],
-   "questions": [
-    { "ask": "Who shouted?",
-      "options": ["The man who makes claims", "Ivan, by his own account", "Anya, she admits it now", "Nobody shouted at all"], "answer": 0 },
-    { "ask": "What did he do after shouting?",
-      "options": ["Talked with them", "Left", "Shouted again", "Wrote a letter"], "answer": 0 },
-    { "ask": "What was he pointing at?",
-      "options": ["The door", "Ivan", "A letter", "Nothing"], "answer": 0 },
-    { "ask": "Did Ivan shout back?",
-      "options": ["No", "Yes", "He left the room", "He does not say"], "answer": 0 },
-    { "ask": "How does Ivan describe himself?",
-      "options": ["Someone who talks, not shouts", "Someone who shouts a great deal", "A quiet man who says little", "The one who is in the wrong"],
-      "answer": 0 }
-   ]
-  },
-
-  "speech:5": {
-   "title": "One word to translate",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
-   ],
-   "lines": [
-    { "s": "a", "ru": "Олег, повтори это.", "en": "Oleg, say that again." },
-    { "s": "b", "ru": "Повторю. Но ты слушай.", "en": "I will. But listen." },
-    { "s": "a", "ru": "Слушаю. Объясни сам.", "en": "I am listening. Explain it yourself." },
-    { "s": "b", "ru": "Объясню. Мы обсуждаем наименование.", "en": "I will. We are discussing a name." },
-    { "s": "a", "ru": "Наименование? Какое?", "en": "A name? Which one?" },
-    { "s": "b", "ru": "То, что надо перевести.", "en": "The one that has to be translated." },
-    { "s": "a", "ru": "Перевести! На русский?", "en": "Translated! Into Russian?" },
-    { "s": "b", "ru": "На русский. И повторить.", "en": "Into Russian. And repeated." },
-    { "s": "a", "ru": "Повторить... Сколько раз?", "en": "Repeated... How many times?" },
-    { "s": "b", "ru": "Два раза. Или больше.", "en": "Twice. Or more." },
-    { "s": "a", "ru": "Тогда объясни ещё раз.", "en": "Then explain it once more." },
-    { "s": "b", "ru": "Объясняю, Катя. Мы обсуждаем одно слово.", "en": "I am explaining, Katya. We are discussing one word." }
-   ],
-   "questions": [
-    { "ask": "What are they discussing?",
-      "options": ["A single word", "A whole letter", "A meeting", "A price"], "answer": 0 },
-    { "ask": "What has to be done with it?",
-      "options": ["Translated into Russian", "Forgotten about entirely", "Shouted out to everyone", "Written down carefully"], "answer": 0 },
-    { "ask": "How many times must it be repeated?",
-      "options": ["Twice or more", "Once", "Never", "Until Katya understands"], "answer": 0 },
-    { "ask": "Who keeps asking for an explanation?",
-      "options": ["Katya", "Oleg", "Both", "Neither"], "answer": 0 },
-    { "ask": "How patient is Oleg?",
-      "options": ["He keeps explaining", "He walks off at last", "He refuses to go on", "He shouts at her"], "answer": 0 }
-   ]
-  },
-
-  "business:0": {
-   "title": "A small firm, big costs",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, это твоя фирма?", "en": "Lena, is this your firm?" },
-    { "s": "a", "ru": "Фирма моя. Бизнес небольшой.", "en": "The firm is mine. It is a small business." },
-    { "s": "b", "ru": "Небольшой бизнес! А клиенты?", "en": "A small business! And clients?" },
-    { "s": "a", "ru": "Клиенты есть. А рекламы нет.", "en": "There are clients. But no advertising." },
-    { "s": "b", "ru": "Нет рекламы? А стоимость?", "en": "No advertising? And the costs?" },
-    { "s": "a", "ru": "Стоимость? Она большая.", "en": "The costs? They are high." },
-    { "s": "b", "ru": "Большая стоимость — это финансовый вопрос.", "en": "High costs are a financial question." },
-    { "s": "a", "ru": "Финансовый. И экономический.", "en": "Financial. And economic." },
-    { "s": "b", "ru": "Экономический тоже! Что будешь делать?", "en": "Economic as well! What will you do?" },
-    { "s": "a", "ru": "Буду работать. Клиент — это всё.", "en": "I will work. The client is everything." },
-    { "s": "b", "ru": "Клиент — это всё. Правда.", "en": "The client is everything. True." },
-    { "s": "a", "ru": "Правда, Виктор. Бизнес есть бизнес.", "en": "True, Viktor. Business is business." }
-   ],
-   "questions": [
-    { "ask": "Whose firm is it?",
-      "options": ["Lena's", "Viktor's", "Theirs together", "A client's"], "answer": 0 },
-    { "ask": "What does the business lack?",
-      "options": ["Advertising", "Enough staff", "Any clients", "Premises"], "answer": 0 },
-    { "ask": "What is the problem with the costs?",
-      "options": ["They are high", "Nobody knows them", "They are falling", "There are none"],
-      "answer": 0 },
-    { "ask": "What is her answer to it?",
-      "options": ["Keep working", "Sell up", "Borrow", "Raise prices"], "answer": 0 },
-    { "ask": "What does she say matters most?",
-      "options": ["The client", "The advertising", "The costs", "Luck"], "answer": 0 }
-   ]
-  },
-
-  "business:1": {
-   "title": "Budget, credit and a fund",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },    { "id": "b", "ru": "Пётр", "en": "Pyotr" },
-    { "id": "c", "ru": "Виктор", "en": "Viktor" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, какой у вас бюджет?", "en": "Nina, what is your budget?" },
-    { "s": "a", "ru": "Бюджет? Небольшой. Есть кредит.", "en": "The budget? Small. There is credit." },
-    { "s": "b", "ru": "Кредит! А доход?", "en": "Credit! And income?" },
-    { "s": "a", "ru": "Доход есть. Но он идёт в фонд.", "en": "There is income. But it goes into the fund." },
-    { "s": "b", "ru": "В фонд? А акции?", "en": "Into the fund? And the shares?" },
-    { "s": "a", "ru": "Акции наши. Они тут.", "en": "The shares are ours. They stay here." },
-    { "s": "b", "ru": "А экономика? Она как?", "en": "And the economy? How is that?" },
-    { "s": "a", "ru": "Экономика... Это деловой вопрос.", "en": "The economy... That is a business question." },
-    { "s": "b", "ru": "Деловой! Ты деловая женщина.", "en": "A business question! You are a businesswoman." },
-    { "s": "a", "ru": "Деловая. Бюджет, кредит, фонд.", "en": "I am. Budget, credit, fund." },
-    { "s": "b", "ru": "И доход. Не забудь.", "en": "And income. Do not forget." },    { "s": "a", "ru": "Не забуду, Пётр. Доход тоже.", "en": "I will not forget, Pyotr. Income too." },
-    { "s": "c", "ru": "А акции? Они и мои.", "en": "And the shares? Some are mine." },
-    { "s": "b", "ru": "Виктор! Твои акции тут?", "en": "Viktor! Your shares are here?" },
-    { "s": "c", "ru": "Тут. В фонде.", "en": "Here. In the fund." }
-   ],
-   "questions": [
-    { "ask": "How big is the budget?",
-      "options": ["Small", "Large", "Huge", "None"], "answer": 0 },
-    { "ask": "Where does the income go?",
-      "options": ["Into a fund", "To the shareholders", "On advertising", "Nowhere"], "answer": 0 },
-    { "ask": "What happens to the shares?",
-      "options": ["They keep them", "They sell them", "They are in the fund", "There are none"],
-      "answer": 0 },
-    { "ask": "What does Pyotr call her?",
-      "options": ["A businesswoman", "An optimist", "A borrower", "A fund manager"], "answer": 0 },    { "ask": "What does Viktor turn out to own?",
-      "options": ["Some of the shares", "The fund", "The whole budget", "Nothing"], "answer": 0 }
-   ]
-  },
-
-  "business:2": {
-   "title": "Trade, tax and a debt",
-   "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Соня, ты предприниматель?", "en": "Sonya, are you in business for yourself?" },
-    { "s": "a", "ru": "Предприниматель. Торговля — моё дело.", "en": "I am. Trade is my line." },
-    { "s": "b", "ru": "Торговля! А изделия?", "en": "Trade! And the products?" },
-    { "s": "a", "ru": "Изделия наши. Мы их оцениваем.", "en": "The products are ours. We price them." },
-    { "s": "b", "ru": "Оцениваете? А налог?", "en": "You price them? And tax?" },
-    { "s": "a", "ru": "Налог есть. Большой.", "en": "There is tax. A lot of it." },
-    { "s": "b", "ru": "Большой налог... А долг?", "en": "A lot of tax... And debt?" },
-    { "s": "a", "ru": "Долг тоже есть. Кредитный.", "en": "There is debt as well. On credit." },
-    { "s": "b", "ru": "Кредитный долг! И что теперь?", "en": "Credit debt! And now what?" },
-    { "s": "a", "ru": "Теперь я работаю. Торговля идёт.", "en": "Now I work. The trade goes on." },
-    { "s": "b", "ru": "Идёт торговля — идёт и долг.", "en": "The trade goes on, and so does the debt." },
-    { "s": "a", "ru": "Идёт, Миша. Но изделия наши.", "en": "It does, Misha. But the products are ours." }
-   ],
-   "questions": [
-    { "ask": "What is Sonya's line of work?",
-      "options": ["Trade", "Banking", "Advertising", "Teaching"], "answer": 0 },
-    { "ask": "Who sets the prices?",
-      "options": ["They do themselves", "Misha does it for them", "The tax office does", "The customers do"], "answer": 0 },
-    { "ask": "What two burdens does she name?",
-      "options": ["Tax and debt", "Rent and wages", "Advertising and rent", "Neither"], "answer": 0 },
-    { "ask": "What is her plan?",
-      "options": ["Keep working and keep trading", "Sell the whole business off", "Stop trading altogether now", "Borrow a great deal more"],
-      "answer": 0 },
-    { "ask": "What does she take comfort in?",
-      "options": ["The products are theirs", "The debt is a small one", "There is no tax to pay", "Misha's help with it"],
-      "answer": 0 }
-   ]
-  },
-
-  "business:3": {
-   "title": "The deal with the customer",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, была сделка?", "en": "Anya, was there a deal?" },
-    { "s": "a", "ru": "Сделка была. С заказчиком.", "en": "There was a deal. With the customer." },
-    { "s": "b", "ru": "С заказчиком! А прибыль?", "en": "With the customer! And the profit?" },
-    { "s": "a", "ru": "Прибыль есть. Небольшая.", "en": "There is a profit. A small one." },
-    { "s": "b", "ru": "Небольшая прибыль... А ущерб?", "en": "A small profit... And any loss?" },
-    { "s": "a", "ru": "Ущерба нет. Мы торгуем.", "en": "No loss. We trade." },
-    { "s": "b", "ru": "Торгуете. А налоговый вопрос?", "en": "You trade. And the tax question?" },
-    { "s": "a", "ru": "Налоговый вопрос тоже есть.", "en": "The tax question is there too." },
-    { "s": "b", "ru": "Тоже есть! И прибылью делитесь?", "en": "That too! And do you share the profit?" },
-    { "s": "a", "ru": "Делимся. С заказчиком.", "en": "We share. With the customer." },
-    { "s": "b", "ru": "С заказчиком делитесь! Это сделка.", "en": "You share with the customer! That is a deal." },
-    { "s": "a", "ru": "Это сделка, Борис. И она наша.", "en": "It is a deal, Boris. And it is ours." }
-   ],
-   "questions": [
-    { "ask": "Who was the deal with?",
-      "options": ["A customer", "A bank", "Boris", "Nobody yet"], "answer": 0 },
-    { "ask": "How big is the profit?",
-      "options": ["Small", "Large", "Huge", "None"], "answer": 0 },
-    { "ask": "Was there any loss?",
-      "options": ["None", "A lot", "A bit", "Some"], "answer": 0 },
-    { "ask": "What is unusual about the arrangement?",
-      "options": ["The customer shares the profit", "It is not written down at all", "There is no tax to pay on it", "Boris has a share in it too"],
-      "answer": 0 },
-    { "ask": "How does Anya feel about it?",
-      "options": ["It is theirs, and she is content", "She regrets the whole thing now", "She wants out of it altogether", "She is worried about the tax"],
-      "answer": 0 }
-   ]
-  },
-
-  "business:4": {
-   "title": "A loss, and rising prices",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },    { "id": "b", "ru": "Маша", "en": "Masha" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Катя, у вас убыток?", "en": "Katya, are you making a loss?" },
-    { "s": "a", "ru": "Убыток. Небольшой, но есть.", "en": "A loss. A small one, but yes." },
-    { "s": "b", "ru": "А вложение? Оно было?", "en": "And an investment? Was there one?" },
-    { "s": "a", "ru": "Вложение было. В фирму.", "en": "There was an investment. In the firm." },
-    { "s": "b", "ru": "В фирму! И что теперь?", "en": "In the firm! And now what?" },
-    { "s": "a", "ru": "Теперь всё дорожает.", "en": "Now everything is going up in price." },
-    { "s": "b", "ru": "Дорожает... А богатство?", "en": "Going up... And the riches?" },
-    { "s": "a", "ru": "Богатство? Маша, у нас убыток!", "en": "Riches? Masha, we are making a loss!" },
-    { "s": "b", "ru": "Убыток. Но вложение работает?", "en": "A loss. But is the investment working?" },
-    { "s": "a", "ru": "Работает. Только не сегодня.", "en": "It is working. Only not today." },
-    { "s": "b", "ru": "Не сегодня? Тогда завтра.", "en": "Not today? Tomorrow, then." },
-    { "s": "a", "ru": "Завтра. Если не будет убытка.", "en": "Tomorrow. If there is no loss." }
-   ],
-   "questions": [
-    { "ask": "How is the firm doing?",
-      "options": ["Making a small loss", "Making a large profit", "Breaking even", "Katya will not say"],
-      "answer": 0 },
-    { "ask": "Where did the investment go?",
-      "options": ["Into the firm", "Into shares", "Into a fund", "There was none"], "answer": 0 },
-    { "ask": "What is happening to prices?",
-      "options": ["They are rising", "They are falling", "They are steady", "Nobody mentions them"],
-      "answer": 0 },    { "ask": "Why does Katya object to the word \"riches\"?",
-      "options": ["They are losing money", "It is not her firm at all", "It is meant to be secret", "She dislikes Masha"], "answer": 0 },
-    { "ask": "When does Katya expect it to work?",
-      "options": ["Tomorrow, if the loss stops", "Never, she seems to think", "In a year or so, perhaps", "Today, she says firmly"], "answer": 0 }
+    {
+     "ask": "What is Nina annoyed about?",
+     "options": [
+      "He was not listening",
+      "He was not answering",
+      "He arrived too late",
+      "He spent the money"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What had she told him?",
+     "options": [
+      "A price",
+      "A name",
+      "An address",
+      "A time"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What is she trying to buy?",
+     "options": [
+      "A car",
+      "A flat",
+      "A book",
+      "A phone"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Who told her about it?",
+     "options": [
+      "A scientist at a firm",
+      "A friend of her father",
+      "A man at the garage",
+      "Nobody in particular"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How does it end?",
+     "options": [
+      "He agrees to listen",
+      "He walks out on her",
+      "He buys it anyway",
+      "He says nothing more"
+     ],
+     "answer": 0
+    }
    ]
   }
  }

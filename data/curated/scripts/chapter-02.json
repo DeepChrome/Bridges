@@ -2,492 +2,339 @@
  "chapter": 2,
  "name": "Time, Life & People",
  "lessons": {
-  "core2:0": {
-   "title": "A man sent by Ivan",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Борис", "en": "Boris" },
-    { "id": "c", "ru": "Иван", "en": "Ivan" }
-   ],
-   "lines": [
-    { "s": "a", "ru": "Борис, кто этот человек?", "en": "Boris, who is that man?" },
-    { "s": "b", "ru": "Этот? Он от Ивана.", "en": "That one? He is from Ivan." },
-    { "s": "a", "ru": "От Ивана? Для нас?", "en": "From Ivan? For us?" },
-    { "s": "b", "ru": "Да, Аня, для нас.", "en": "Yes, Anya, for us." },
-    { "s": "a", "ru": "А ты знаешь его?", "en": "And do you know him?" },
-    { "s": "b", "ru": "Не очень. Я о нём знаю.", "en": "Not very well. I know of him." },
-    { "s": "b", "ru": "Иван о нём говорит.", "en": "Ivan talks about him." },
-    { "s": "a", "ru": "И что он говорит?", "en": "And what does he say?" },
-    { "s": "b", "ru": "Что этот человек свой.", "en": "That this man is one of ours." },
-    { "s": "a", "ru": "Свой? А я его не знаю.", "en": "One of ours? But I do not know him." },
-    { "s": "b", "ru": "Все его знают.", "en": "Everybody knows him." },
-    { "s": "a", "ru": "Все? Как так?", "en": "Everybody? How is that?" },
-    { "s": "b", "ru": "Он тут уже год.", "en": "He has been here a year." },
-    { "s": "c", "ru": "Я говорю о нём. Он свой.", "en": "I am the one who talks about him. He is one of ours." },
-    { "s": "b", "ru": "Иван! И ты тут?", "en": "Ivan! You are here too?" },
-    { "s": "c", "ru": "Тут. Человек от меня.", "en": "Here. The man comes from me." }
-   ],
-   "questions": [
-    { "ask": "Who sent the man?", "options": ["Ivan", "Boris", "Anya", "Nobody sent him"], "answer": 0 },
-    { "ask": "Who has he come for?", "options": ["The two of them", "Ivan and nobody else", "Anya, on her own", "Nobody in particular"], "answer": 0 },
-    { "ask": "How well does Boris know him?",
-      "options": ["Not well, only by reputation", "Very well, they are friends", "They are actually brothers", "Not at all, they never met"], "answer": 0 },
-    { "ask": "What does Ivan say about him, once he turns up?",
-      "options": ["He is one of ours", "He is an outsider", "He talks too much", "Nothing at all"], "answer": 0 },
-    { "ask": "How long has the man been there?",
-      "options": ["A year", "A week", "He has just arrived", "Nobody says"], "answer": 0 }
-   ]
-  },
-
-  "core2:1": {
-   "title": "All her time",
-   "cast": [
-    { "id": "a", "ru": "Маша", "en": "Masha" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Маша, чей это ребёнок?", "en": "Masha, whose child is this?" },
-    { "s": "a", "ru": "Это мой ребёнок.", "en": "He is my child." },
-    { "s": "b", "ru": "Он тут один?", "en": "Is he here on his own?" },
-    { "s": "a", "ru": "Нет, не один. Я здесь.", "en": "No, not alone. I am here." },
-    { "s": "b", "ru": "Сколько у тебя времени?", "en": "How much time do you have?" },
-    { "s": "a", "ru": "Всё моё время — он.", "en": "All my time is him." },
-    { "s": "b", "ru": "Всё время?", "en": "The whole time?" },
-    { "s": "a", "ru": "Да, всё время.", "en": "Yes, the whole time." },
-    { "s": "b", "ru": "А ты одна?", "en": "And you are on your own?" },
-    { "s": "a", "ru": "Одна. Все там.", "en": "On my own. Everyone else is over there." },
-    { "s": "b", "ru": "Все? А я здесь, Маша.", "en": "Everyone? Well, I am here, Masha." },
-    { "s": "a", "ru": "Ты здесь, Виктор. Это очень...", "en": "You are here, Viktor. That is really..." },
-    { "s": "b", "ru": "Я могу быть тут.", "en": "I can stay here." },
-    { "s": "a", "ru": "Ты, я и мой ребёнок.", "en": "You, me and my child." }
-   ],
-   "questions": [
-    { "ask": "Whose child is it?", "options": ["Masha's", "Viktor's", "Anya's", "Nobody knows"], "answer": 0 },
-    { "ask": "Is the child there alone?",
-      "options": ["No, his mother is with him", "Yes, he is there on his own", "No, he is there with Viktor", "No, he was left at home"], "answer": 0 },
-    { "ask": "How much of her time does he take?",
-      "options": ["All of it", "An hour a day", "None", "Only the evenings"], "answer": 0 },
-    { "ask": "Where is everyone else?",
-      "options": ["Somewhere else", "Right there", "With the child", "At Viktor's"], "answer": 0 },
-    { "ask": "What does Viktor offer to do?",
-      "options": ["Stay there with her", "Take the child home", "Come back later on", "Nothing much at all"], "answer": 0 }
-   ]
-  },
-
   "core2:2": {
-   "title": "Who still works",
+   "title": "Who collects him",
    "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
+    {
+     "id": "a",
+     "ru": "Нина",
+     "en": "Nina"
+    },
+    {
+     "id": "b",
+     "ru": "Олег",
+     "en": "Oleg"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "час",
+     "en": "hour"
+    },
+    {
+     "ru": "поздно",
+     "en": "late"
+    },
+    {
+     "ru": "мама",
+     "en": "mum"
+    },
+    {
+     "ru": "папа",
+     "en": "dad"
+    },
+    {
+     "ru": "спасибо",
+     "en": "thank you"
+    }
    ],
    "lines": [
-    { "s": "a", "ru": "Олег, ты работаешь?", "en": "Oleg, are you working?" },
-    { "s": "b", "ru": "Работаю. А ты, Катя?", "en": "I am. And you, Katya?" },
-    { "s": "a", "ru": "Я? Уже нет.", "en": "Me? Not any more." },
-    { "s": "b", "ru": "Уже нет? Как так?", "en": "Not any more? How come?" },
-    { "s": "a", "ru": "Так. У меня есть ребёнок.", "en": "That is how it is. I have a child." },
-    { "s": "b", "ru": "Ребёнок! Один?", "en": "A child! Just one?" },
-    { "s": "a", "ru": "Один. Ему год.", "en": "One. He is a year old." },
-    { "s": "b", "ru": "Год? И ты не работаешь?", "en": "A year? And you are not working?" },
-    { "s": "a", "ru": "Не работаю. Всё время он.", "en": "I am not. He takes all my time." },
-    { "s": "b", "ru": "Я работаю. Все работают.", "en": "I work. Everyone works." },
-    { "s": "a", "ru": "Все? И Иван?", "en": "Everyone? Ivan too?" },
-    { "s": "b", "ru": "Иван? Он не может работать.", "en": "Ivan? He cannot work." },
-    { "s": "a", "ru": "А Иван тут уже?", "en": "And is Ivan here already?" },
-    { "s": "b", "ru": "Иван тут до нас.", "en": "Ivan was here before us." },
-    { "s": "a", "ru": "До нас? Уже так?", "en": "Before us? Already?" },
-    { "s": "b", "ru": "Так. Он всё знает.", "en": "That is right. He knows everything." }
+    {
+     "s": "a",
+     "ru": "Олег, ты работаешь?",
+     "en": "Oleg, are you working?"
+    },
+    {
+     "s": "b",
+     "ru": "Да. А ты, Нина?",
+     "en": "Yes. And you, Nina?"
+    },
+    {
+     "s": "a",
+     "ru": "Я работаю до часа.",
+     "en": "I work until one."
+    },
+    {
+     "s": "b",
+     "ru": "А наш ребёнок?",
+     "en": "And our child?"
+    },
+    {
+     "s": "a",
+     "ru": "У меня нет времени.",
+     "en": "I have no time."
+    },
+    {
+     "s": "b",
+     "ru": "У меня есть час.",
+     "en": "I have an hour."
+    },
+    {
+     "s": "a",
+     "ru": "Так ты можешь?",
+     "en": "So you can?"
+    },
+    {
+     "s": "b",
+     "ru": "Могу. Но не весь час.",
+     "en": "I can. But not the whole hour."
+    },
+    {
+     "s": "a",
+     "ru": "А мама? Она может?",
+     "en": "And Mum? Can she?"
+    },
+    {
+     "s": "b",
+     "ru": "Мама уже работает.",
+     "en": "Mum is already at work."
+    },
+    {
+     "s": "a",
+     "ru": "А папа?",
+     "en": "And Dad?"
+    },
+    {
+     "s": "b",
+     "ru": "Папа? Он не знает.",
+     "en": "Dad? He does not know."
+    },
+    {
+     "s": "a",
+     "ru": "Так. Уже поздно.",
+     "en": "Right. It is late already."
+    },
+    {
+     "s": "b",
+     "ru": "У меня есть время.",
+     "en": "I have the time."
+    },
+    {
+     "s": "a",
+     "ru": "Спасибо, Олег.",
+     "en": "Thank you, Oleg."
+    },
+    {
+     "s": "b",
+     "ru": "Наш ребёнок, Нина.",
+     "en": "Our child, Nina."
+    }
    ],
    "questions": [
-    { "ask": "Does Katya work?",
-      "options": ["Not any more", "Yes, all day", "Only mornings", "She never has"], "answer": 0 },
-    { "ask": "Why not?",
-      "options": ["She has a child", "She is ill", "There is no work", "She is studying"], "answer": 0 },
-    { "ask": "How old is the child?",
-      "options": ["A year", "A month", "Three", "She does not say"], "answer": 0 },
-    { "ask": "What does Oleg say about Ivan?",
-      "options": ["He has been there longer than them", "He works far too much these days", "He is Katya's older brother", "He left the place a year ago"],
-      "answer": 0 },
-    { "ask": "Which of them is still working?",
-      "options": ["Oleg", "Katya", "Neither", "Both"], "answer": 0 }
+    {
+     "ask": "What are the two of them sorting out?",
+     "options": [
+      "Who collects their child",
+      "Who cooks this evening",
+      "Who rings the school",
+      "Who takes the car"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "When does Nina finish work?",
+     "options": [
+      "At one o'clock",
+      "At two o'clock",
+      "Not until late",
+      "She does not say"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How much time can Oleg spare?",
+     "options": [
+      "Part of an hour",
+      "The whole afternoon",
+      "No time at all",
+      "He does not say"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Oleg say about Mum?",
+     "options": [
+      "She is already at work",
+      "She is away this week",
+      "She is not answering",
+      "She has the car"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How does it end?",
+     "options": [
+      "He agrees to go",
+      "He refuses to go",
+      "They find nobody",
+      "They ask a neighbour"
+     ],
+     "answer": 0
+    }
    ]
   },
-
-  "core2:3": {
-   "title": "What she does all day",
-   "cast": [
-    { "id": "a", "ru": "Пётр", "en": "Pyotr" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Пётр, что вы делаете?", "en": "Pyotr, what do you do?" },
-    { "s": "a", "ru": "Я делаю то, что могу.", "en": "I do what I can." },
-    { "s": "b", "ru": "А что вы можете?", "en": "And what can you do?" },
-    { "s": "a", "ru": "Всё. Я всё могу сделать.", "en": "Everything. I can do anything." },
-    { "s": "b", "ru": "Такой человек! Весь день?", "en": "What a person! All day?" },
-    { "s": "a", "ru": "Весь день. Я это люблю.", "en": "All day. I love it." },
-    { "s": "b", "ru": "А ваш ребёнок? Он с вами?", "en": "And your child? Is he with you?" },
-    { "s": "a", "ru": "Мой ребёнок? Он здесь.", "en": "My child? He is here." },
-    { "s": "b", "ru": "Весь день здесь?", "en": "Here all day?" },
-    { "s": "a", "ru": "Весь день. Я его люблю.", "en": "All day. I love him." },
-    { "s": "b", "ru": "Вы всё делаете для него.", "en": "You do it all for him." },
-    { "s": "a", "ru": "Для него. И для вас.", "en": "For him. And for you." },
-    { "s": "b", "ru": "Для нас? Так не может быть.", "en": "For us? That cannot be." },
-    { "s": "a", "ru": "Может, Юра. Я это делаю.", "en": "It can, Yura. I am doing it." }
-   ],
-   "questions": [
-    { "ask": "What does Pyotr say he can do?",
-      "options": ["Anything at all", "Very little now", "Only his own work", "He will not say"], "answer": 0 },
-    { "ask": "How long is his day?",
-      "options": ["All day", "An hour", "Half a day", "He does not say"], "answer": 0 },
-    { "ask": "Who is with him all day?",
-      "options": ["His child", "Yura", "Nobody", "His wife"], "answer": 0 },
-    { "ask": "Who does he say he does it for?",
-      "options": ["His child, and for Yura too", "Only for himself, he says", "For nobody in particular", "For Ivan, who asked him"], "answer": 0 },
-    { "ask": "How does Yura take that?",
-      "options": ["He can hardly believe it", "He is annoyed by it all", "He walks away from him", "He says nothing at all"], "answer": 0 }
-   ]
-  },
-
   "core2:4": {
-   "title": "The new job",
+   "title": "The new one",
    "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Миша", "en": "Misha" }
+    {
+     "id": "a",
+     "ru": "Борис",
+     "en": "Boris"
+    },
+    {
+     "id": "b",
+     "ru": "Катя",
+     "en": "Katya"
+    },
+    {
+     "id": "c",
+     "ru": "Саша",
+     "en": "Sasha"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "встреча",
+     "en": "meeting"
+    },
+    {
+     "ru": "спасибо",
+     "en": "thank you"
+    }
    ],
    "lines": [
-    { "s": "b", "ru": "Соня, у тебя новая работа?", "en": "Sonya, have you got a new job?" },
-    { "s": "a", "ru": "Новая. Я уже иду.", "en": "A new one. I am on my way there." },
-    { "s": "b", "ru": "Идёшь? Уже?", "en": "Going? Already?" },
-    { "s": "a", "ru": "Только на день.", "en": "Only for the day." },
-    { "s": "b", "ru": "Только на день? И всё?", "en": "Only for a day? That is all?" },
-    { "s": "a", "ru": "И всё, Миша. Не знаю.", "en": "That is all, Misha. I do not know." },
-    { "s": "b", "ru": "А работа? Какая?", "en": "And the work? What sort?" },
-    { "s": "a", "ru": "Не для себя. Для всех.", "en": "Not for myself. For everyone." },
-    { "s": "b", "ru": "Для всех? Как это?", "en": "For everyone? How do you mean?" },
-    { "s": "a", "ru": "Так. Я это могу.", "en": "Just so. I can do it." },
-    { "s": "b", "ru": "А ты идёшь одна?", "en": "And are you going alone?" },
-    { "s": "a", "ru": "Одна. Только я.", "en": "Alone. Just me." },
-    { "s": "b", "ru": "Ещё не время, Соня.", "en": "It is not time yet, Sonya." },
-    { "s": "a", "ru": "Уже время. Я иду.", "en": "It is time. I am going." }
+    {
+     "s": "a",
+     "ru": "Катя, у нас встреча.",
+     "en": "Katya, we have a meeting."
+    },
+    {
+     "s": "b",
+     "ru": "Уже? А время?",
+     "en": "Already? What about the time?"
+    },
+    {
+     "s": "a",
+     "ru": "Время ещё есть.",
+     "en": "There is still time."
+    },
+    {
+     "s": "b",
+     "ru": "Кто идёт?",
+     "en": "Who is going?"
+    },
+    {
+     "s": "a",
+     "ru": "Мы и новый человек.",
+     "en": "Us and the new person."
+    },
+    {
+     "s": "b",
+     "ru": "Борис, а кто он?",
+     "en": "Boris, and who is he?"
+    },
+    {
+     "s": "c",
+     "ru": "Я Саша. Я новый.",
+     "en": "I am Sasha. I am the new one."
+    },
+    {
+     "s": "b",
+     "ru": "Саша! Это ваша работа?",
+     "en": "Sasha! Is this your job?"
+    },
+    {
+     "s": "c",
+     "ru": "Да, моя. Я только тут.",
+     "en": "Yes, mine. I am only here."
+    },
+    {
+     "s": "a",
+     "ru": "Он только день тут.",
+     "en": "He has only been here a day."
+    },
+    {
+     "s": "b",
+     "ru": "Один день! Я знаю.",
+     "en": "One day! I see."
+    },
+    {
+     "s": "c",
+     "ru": "Я всё хочу знать.",
+     "en": "I want to know everything."
+    },
+    {
+     "s": "a",
+     "ru": "Идём? Уже время.",
+     "en": "Shall we go? It is time."
+    },
+    {
+     "s": "b",
+     "ru": "Идём. Саша, вы с нами.",
+     "en": "Let us go. Sasha, you are with us."
+    },
+    {
+     "s": "c",
+     "ru": "Спасибо, Катя.",
+     "en": "Thank you, Katya."
+    },
+    {
+     "s": "a",
+     "ru": "Это ваша новая работа.",
+     "en": "This is your new job."
+    }
    ],
    "questions": [
-    { "ask": "What has Sonya got?",
-      "options": ["A new job", "A new flat", "A day off", "A new child"], "answer": 0 },
-    { "ask": "How long is it for?",
-      "options": ["One day", "A year", "A month", "For good"], "answer": 0 },
-    { "ask": "Who does she say the work is for?",
-      "options": ["Everyone", "Herself", "Misha", "Her family"], "answer": 0 },
-    { "ask": "Is anyone going with her?",
-      "options": ["No, she goes alone", "Yes, Misha comes too", "Yes, her child does", "Yes, Ivan goes too"], "answer": 0 },
-    { "ask": "How does the conversation end?",
-      "options": ["She leaves straight away", "She waits a little longer", "She changes her mind", "Misha goes there instead"],
-      "answer": 0 }
-   ]
-  },
-
-  "food:0": {
-   "title": "Only coffee",
-   "cast": [
-    { "id": "a", "ru": "Аня", "en": "Anya" },
-    { "id": "b", "ru": "Олег", "en": "Oleg" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Аня, ты обедаешь?", "en": "Anya, are you having lunch?" },
-    { "s": "a", "ru": "Обедаю. А ты, Олег?", "en": "I am. And you, Oleg?" },
-    { "s": "b", "ru": "Я уже. Я только кофе.", "en": "I already have. Just coffee for me." },
-    { "s": "a", "ru": "Кофе? А пиво?", "en": "Coffee? What about a beer?" },
-    { "s": "b", "ru": "Пиво? Это не для дня.", "en": "Beer? Not in the daytime." },
-    { "s": "a", "ru": "Так что ты закажешь?", "en": "So what will you order?" },
-    { "s": "b", "ru": "Кофе. Только кофе.", "en": "Coffee. Only coffee." },
-    { "s": "a", "ru": "А я хочу пробовать всё.", "en": "And I want to try everything." },
-    { "s": "b", "ru": "Всё? Так не делают.", "en": "Everything? That is not how it is done." },
-    { "s": "a", "ru": "Делают. Я так делаю.", "en": "It is. I do it that way." },
-    { "s": "b", "ru": "А ужинать? Ты ужинаешь?", "en": "And dinner? Do you have dinner?" },
-    { "s": "a", "ru": "Ужинаю. Но уже не тут.", "en": "I do. But not here." },
-    { "s": "b", "ru": "Не тут? А где?", "en": "Not here? Where then?" },
-    { "s": "a", "ru": "У себя. Одна.", "en": "At my own place. On my own." }
-   ],
-   "questions": [
-    { "ask": "What is Oleg having?",
-      "options": ["Coffee and nothing else", "A beer with his lunch", "Lunch, like Anya", "Nothing at all today"], "answer": 0 },
-    { "ask": "Why will he not have a beer?",
-      "options": ["It is the middle of the day", "He does not like the taste", "There is none left today", "He has to drive later on"],
-      "answer": 0 },
-    { "ask": "What does Anya want to do?",
-      "options": ["Try everything", "Order coffee", "Go home", "Have a beer"], "answer": 0 },
-    { "ask": "Where will Anya have dinner?",
-      "options": ["At her own place", "In the same café", "With Oleg", "She is not having dinner"],
-      "answer": 0 },
-    { "ask": "Which of them is eating right now?",
-      "options": ["Anya", "Oleg", "Both of them", "Neither"], "answer": 0 }
-   ]
-  },
-
-  "food:1": {
-   "title": "Bread, butter and cake",
-   "cast": [
-    { "id": "a", "ru": "Катя", "en": "Katya" },
-    { "id": "b", "ru": "Борис", "en": "Boris" },
-    { "id": "c", "ru": "Аня", "en": "Anya" }
-   ],
-   "lines": [
-    { "s": "a", "ru": "Борис, это ресторан?", "en": "Boris, is this a restaurant?" },
-    { "s": "b", "ru": "Ресторан. Очень новый.", "en": "A restaurant. A very new one." },
-    { "s": "a", "ru": "Что тут есть?", "en": "What do they have?" },
-    { "s": "b", "ru": "Есть хлеб, масло, торт.", "en": "There is bread, butter, cake." },
-    { "s": "a", "ru": "Торт? Я хочу торт.", "en": "Cake? I want cake." },
-    { "s": "b", "ru": "А выпить? Чай?", "en": "And to drink? Tea?" },
-    { "s": "a", "ru": "Чай. Только чай.", "en": "Tea. Just tea." },
-    { "s": "b", "ru": "Я тоже. И хлеб с маслом.", "en": "Me too. And bread and butter." },
-    { "s": "a", "ru": "Обедаешь тут весь год?", "en": "You have lunch here all year?" },
-    { "s": "b", "ru": "Весь год. Я это люблю.", "en": "All year. I love it." },
-    { "s": "a", "ru": "А торт? Тут есть торт?", "en": "And cake? Do they have cake?" },
-    { "s": "b", "ru": "Есть, Катя. Ты его пробуй.", "en": "They do, Katya. Try it." },
-    { "s": "c", "ru": "А я? Я тоже хочу торт.", "en": "And me? I want cake too." },
-    { "s": "a", "ru": "Аня! И ты тут?", "en": "Anya! You are here as well?" },
-    { "s": "c", "ru": "Тут. Торт для всех.", "en": "Here. Cake for everybody." }
-   ],
-   "questions": [
-    { "ask": "Where are they?",
-      "options": ["In a new restaurant", "In a shop near by", "At work, as usual", "At Boris's flat"], "answer": 0 },
-    { "ask": "What does Katya want?",
-      "options": ["Cake and tea", "Bread and butter", "Only tea", "Nothing"], "answer": 0 },
-    { "ask": "What is Boris having?",
-      "options": ["Tea, bread and butter", "Only cake and water", "Only tea, he says", "Nothing yet at all"], "answer": 0 },
-    { "ask": "How often does Boris eat there?",
-      "options": ["All year round", "It is his first time", "Once a month", "Only in the evening"],
-      "answer": 0 },
-    { "ask": "Who joins them at the end?",
-      "options": ["Anya, who also wants cake", "Boris's younger brother", "The waiter, bringing tea", "Nobody joins them at all"], "answer": 0 }
-   ]
-  },
-
-  "food:2": {
-   "title": "Fish for lunch",
-   "cast": [
-    { "id": "a", "ru": "Таня", "en": "Tanya" },
-    { "id": "b", "ru": "Соня", "en": "Sonya" }
-   ],
-   "lines": [
-    { "s": "a", "ru": "Соня, что на обед?", "en": "Sonya, what is for lunch?" },
-    { "s": "b", "ru": "Рыба, Таня. Очень вкусная.", "en": "Fish, Tanya. Very tasty." },
-    { "s": "a", "ru": "Вкусная рыба? Я хочу.", "en": "Tasty fish? I would like some." },
-    { "s": "b", "ru": "А напиток? Молоко?", "en": "And a drink? Milk?" },
-    { "s": "a", "ru": "Молоко? Нет. Есть чай?", "en": "Milk? No. Is there tea?" },
-    { "s": "b", "ru": "Чая нет. Есть бутылка.", "en": "There is no tea. There is a bottle." },
-    { "s": "a", "ru": "Бутылка чего, Соня?", "en": "A bottle of what, Sonya?" },
-    { "s": "b", "ru": "Бутылка молока. Только она.", "en": "A bottle of milk. That is all." },
-    { "s": "a", "ru": "Так и молоко.", "en": "Milk it is, then." },
-    { "s": "b", "ru": "Молоко и рыба?", "en": "Milk and fish?" },
-    { "s": "a", "ru": "Да. Это вкусный обед.", "en": "Yes. That is a tasty lunch." },
-    { "s": "b", "ru": "Вкусный обед. Так и есть.", "en": "A tasty lunch. So it is." },
-    { "s": "a", "ru": "А ты? Ты обедаешь?", "en": "And you? Are you having lunch?" },
-    { "s": "b", "ru": "Я ещё не обедаю.", "en": "I am not eating yet." }
-   ],
-   "questions": [
-    { "ask": "What is for lunch?",
-      "options": ["Fish", "Salad", "Bread and butter", "Cake"], "answer": 0 },
-    { "ask": "What does Tanya ask for first?",
-      "options": ["Tea", "Milk", "A beer", "Nothing"], "answer": 0 },
-    { "ask": "What is she given instead?",
-      "options": ["Milk", "Coffee", "Water", "Nothing at all"], "answer": 0 },
-    { "ask": "What does Sonya think of the meal?",
-      "options": ["She agrees it is tasty", "She does not like fish", "She says it is too much", "She says nothing"],
-      "answer": 0 },
-    { "ask": "Is Sonya eating too?",
-      "options": ["Not yet, she says", "Yes, along with her", "She has already eaten", "She only drinks milk"], "answer": 0 }
-   ]
-  },
-
-  "food:3": {
-   "title": "Just the salad",
-   "cast": [
-    { "id": "a", "ru": "Маша", "en": "Masha" },
-    { "id": "b", "ru": "Пётр", "en": "Pyotr" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Маша, где тарелка?", "en": "Masha, where is the plate?" },
-    { "s": "a", "ru": "Тарелка? Вот она.", "en": "The plate? Here it is." },
-    { "s": "b", "ru": "А салат? Салат есть?", "en": "And salad? Is there salad?" },
-    { "s": "a", "ru": "Есть. Очень вкусный.", "en": "There is. Very tasty." },
-    { "s": "b", "ru": "Вкусный салат — это обед.", "en": "A tasty salad is a lunch." },
-    { "s": "a", "ru": "Это не обед, Пётр. Это салат.", "en": "That is not lunch, Pyotr. That is a salad." },
-    { "s": "b", "ru": "Для меня это обед.", "en": "For me it is lunch." },
-    { "s": "a", "ru": "Так ты только салат?", "en": "So it is just salad for you?" },
-    { "s": "b", "ru": "Только салат. И чай.", "en": "Just salad. And tea." },
-    { "s": "a", "ru": "А рыба? Рыбу не хочешь?", "en": "And fish? You do not want fish?" },
-    { "s": "b", "ru": "Не хочу. Рыба не для меня.", "en": "I do not. Fish is not for me." },
-    { "s": "a", "ru": "Не для тебя? А молоко?", "en": "Not for you? And milk?" },
-    { "s": "b", "ru": "Молоко? Да, выпью.", "en": "Milk? Yes, I will have some." },
-    { "s": "a", "ru": "Вот тарелка. Вот салат.", "en": "Here is the plate. Here is the salad." }
-   ],
-   "questions": [
-    { "ask": "What does Pyotr want to eat?",
-      "options": ["Salad", "Fish", "Cake", "Bread and butter"], "answer": 0 },
-    { "ask": "What does Masha think of that as a lunch?",
-      "options": ["She says it is not a lunch", "She offers him cake instead", "She says nothing about it", "She agrees that it is"],
-      "answer": 0 },
-    { "ask": "Why does he refuse the fish?",
-      "options": ["He does not eat fish", "He has already eaten", "It is not tasty", "There is none left"],
-      "answer": 0 },
-    { "ask": "What does he agree to drink?",
-      "options": ["Milk", "Beer", "Coffee", "Nothing"], "answer": 0 },
-    { "ask": "Who is serving whom?",
-      "options": ["Masha serves Pyotr", "Pyotr serves Masha", "They serve themselves", "A waiter serves them"],
-      "answer": 0 }
-   ]
-  },
-
-  "school:0": {
-   "title": "Learning everything",
-   "cast": [
-    { "id": "a", "ru": "Лена", "en": "Lena" },
-    { "id": "b", "ru": "Миша", "en": "Misha" },
-    { "id": "c", "ru": "Соня", "en": "Sonya" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Лена, ты студент?", "en": "Lena, are you a student?" },
-    { "s": "a", "ru": "Студент. Я тут учусь.", "en": "I am. I study here." },
-    { "s": "b", "ru": "Что ты изучаешь?", "en": "What do you study?" },
-    { "s": "a", "ru": "Изучаю то, что люблю.", "en": "I study what I love." },
-    { "s": "a", "ru": "Всё. Я всё учу.", "en": "Everything. I learn it all." },
-    { "s": "b", "ru": "Всё? И ошибок нет?", "en": "Everything? And no mistakes?" },
-    { "s": "a", "ru": "Ошибки есть. Как у всех.", "en": "There are mistakes. Like everyone." },
-    { "s": "b", "ru": "А ответ? Ты знаешь ответ?", "en": "And the answer? Do you know the answer?" },
-    { "s": "a", "ru": "Ответ знаю. Не всё.", "en": "I know the answer. Not everything." },
-    { "s": "b", "ru": "Не всё — это ошибка?", "en": "Is not knowing it all a mistake?" },
-    { "s": "a", "ru": "Нет, Миша. Это только время.", "en": "No, Misha. It is only time." },
-    { "s": "b", "ru": "Время? Ты ещё учишься.", "en": "Time? You are still learning." },
-    { "s": "a", "ru": "Учусь. И буду учиться.", "en": "I am. And I will go on learning." },
-    { "s": "c", "ru": "Я тоже студент, Лена.", "en": "I am a student too, Lena." },
-    { "s": "b", "ru": "Соня! А ты что изучаешь?", "en": "Sonya! And what do you study?" },
-    { "s": "c", "ru": "Всё. Как и Лена.", "en": "Everything. The same as Lena." }
-   ],
-   "questions": [
-    { "ask": "What is Lena doing there?",
-      "options": ["Studying", "Teaching", "Working", "Visiting Misha"], "answer": 0 },
-    { "ask": "How does she choose what to study?",
-      "options": ["She studies what she loves", "Her teacher chooses for her", "She follows the timetable", "She has no choice at all"],
-      "answer": 0 },
-    { "ask": "Does she make mistakes?",
-      "options": ["Yes, like everyone", "No, never", "Only in one subject", "She will not say"], "answer": 0 },
-    { "ask": "What does she say she needs?",
-      "options": ["Time", "A new teacher", "Money", "Help from Misha"], "answer": 0 },
-    { "ask": "Who turns out to be a student as well?",
-      "options": ["Sonya", "Misha", "Nobody else", "The teacher"], "answer": 0 }
-   ]
-  },
-
-  "school:1": {
-   "title": "A lecture on a new subject",
-   "cast": [
-    { "id": "a", "ru": "Соня", "en": "Sonya" },
-    { "id": "b", "ru": "Виктор", "en": "Viktor" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Соня, ты в университете?", "en": "Sonya, are you at the university?" },
-    { "s": "a", "ru": "В университете. У нас лекция.", "en": "At the university. We have a lecture." },
-    { "s": "b", "ru": "Лекция? На какую тему?", "en": "A lecture? On what subject?" },
-    { "s": "a", "ru": "Тема новая. Я её люблю.", "en": "The subject is new. I love it." },
-    { "s": "b", "ru": "А класс? Весь тут?", "en": "And the class? Are they all here?" },
-    { "s": "a", "ru": "Весь класс. Все тут.", "en": "The whole class. Everyone is here." },
-    { "s": "b", "ru": "Это школьный класс?", "en": "Is it a school class?" },
-    { "s": "a", "ru": "Не школьный. Университет.", "en": "Not a school one. University." },
-    { "s": "b", "ru": "А знания? Есть знания?", "en": "And knowledge? Is there any?" },
-    { "s": "a", "ru": "Знания есть. Но не все.", "en": "There is knowledge. But not all of it." },
-    { "s": "b", "ru": "Не все? Как так?", "en": "Not all of it? How so?" },
-    { "s": "a", "ru": "Так. Ещё лекция, и ещё.", "en": "Like this. Another lecture, and another." },
-    { "s": "b", "ru": "Ещё и ещё? Весь день?", "en": "More and more? All day?" },
-    { "s": "a", "ru": "Весь день, Виктор. Я это люблю.", "en": "All day, Viktor. I love it." }
-   ],
-   "questions": [
-    { "ask": "Where is Sonya?",
-      "options": ["At the university", "At school, teaching", "At home, studying", "At work, as usual"], "answer": 0 },
-    { "ask": "What does she think of the subject?",
-      "options": ["She loves it", "She finds it dull", "It is too hard", "She has not started it"], "answer": 0 },
-    { "ask": "Is the whole class there?",
-      "options": ["Yes, everyone is", "No, only half of it", "Only she is there", "She does not say"], "answer": 0 },
-    { "ask": "How many lectures are there?",
-      "options": ["One after another, all day", "Just the one this morning", "Two of them every week", "None at all today"], "answer": 0 },
-    { "ask": "Does Sonya mind the long day?",
-      "options": ["No, she loves it", "Yes, she is tired", "She is leaving early", "She says nothing"],
-      "answer": 0 }
-   ]
-  },
-
-  "school:2": {
-   "title": "The English course",
-   "cast": [
-    { "id": "a", "ru": "Борис", "en": "Boris" },
-    { "id": "b", "ru": "Юра", "en": "Yura" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Борис, это твой урок?", "en": "Boris, is this your lesson?" },
-    { "s": "a", "ru": "Мой урок. Английский.", "en": "My lesson. English." },
-    { "s": "b", "ru": "Английский? А учитель?", "en": "English? And the teacher?" },
-    { "s": "a", "ru": "Учитель тут. Он новый.", "en": "The teacher is here. He is new." },
-    { "s": "b", "ru": "Новый учитель? Какой курс?", "en": "A new teacher? Which course?" },
-    { "s": "a", "ru": "Курс новый. Для всех.", "en": "A new course. For everyone." },
-    { "s": "b", "ru": "И ты научишься?", "en": "And will you learn it?" },
-    { "s": "a", "ru": "Научусь. Я уже могу.", "en": "I will. I can already." },
-    { "s": "b", "ru": "А что ты можешь?", "en": "What can you do?" },
-    { "s": "a", "ru": "Я могу прочитать. Всё.", "en": "I can read. Anything." },
-    { "s": "b", "ru": "Всё прочитать? За день?", "en": "Read anything? In a day?" },
-    { "s": "a", "ru": "Не за день, Юра. За год.", "en": "Not in a day, Yura. In a year." },
-    { "s": "b", "ru": "За год — это очень.", "en": "In a year — that is a lot." },
-    { "s": "a", "ru": "Очень. Но я хочу.", "en": "It is. But I want to." }
-   ],
-   "questions": [
-    { "ask": "What is Boris's lesson?",
-      "options": ["English", "Russian", "History", "Nothing today"], "answer": 0 },
-    { "ask": "What is new about it?",
-      "options": ["The teacher and the course", "The time the class starts", "The room they are using", "Nothing at all is new here"], "answer": 0 },
-    { "ask": "What can he already do?",
-      "options": ["Read anything", "Write letters", "Speak with a teacher", "Nothing yet"], "answer": 0 },
-    { "ask": "How long does he think it will take?",
-      "options": ["A year", "A day", "A month", "He has no idea"], "answer": 0 },
-    { "ask": "How does Boris feel about it?",
-      "options": ["He wants to do it anyway", "He thinks it is too much", "He is giving up", "He is bored"],
-      "answer": 0 }
-   ]
-  },
-
-  "school:3": {
-   "title": "Writing down the professor",
-   "cast": [
-    { "id": "a", "ru": "Нина", "en": "Nina" },
-    { "id": "b", "ru": "Борис", "en": "Boris" }
-   ],
-   "lines": [
-    { "s": "b", "ru": "Нина, кто этот человек?", "en": "Nina, who is that man?" },
-    { "s": "a", "ru": "Это наш профессор.", "en": "That is our professor." },
-    { "s": "b", "ru": "Профессор? Он тут?", "en": "The professor? He is here?" },
-    { "s": "a", "ru": "Тут. У нас лекция.", "en": "He is. We have a lecture." },
-    { "s": "b", "ru": "А ты? Что ты делаешь?", "en": "And you? What are you doing?" },
-    { "s": "a", "ru": "Я? Я хочу написать.", "en": "Me? I want to write it down." },
-    { "s": "b", "ru": "Написать? Что написать?", "en": "Write down? Write what down?" },
-    { "s": "a", "ru": "Всё, что он говорит.", "en": "Everything he says." },
-    { "s": "b", "ru": "Всё? Так не может быть.", "en": "Everything? That cannot be done." },
-    { "s": "a", "ru": "Может, Борис. Я так учусь.", "en": "It can, Boris. That is how I learn." },
-    { "s": "b", "ru": "А профессор? Он знает?", "en": "And the professor? Does he know?" },
-    { "s": "a", "ru": "Знает. Он это любит.", "en": "He does. He likes it." },
-    { "s": "b", "ru": "Любит? Такой профессор!", "en": "He likes it? What a professor!" },
-    { "s": "a", "ru": "Такой. Я его тему люблю.", "en": "That is him. I love his subject." }
-   ],
-   "questions": [
-    { "ask": "Who is the man they are talking about?",
-      "options": ["Their professor", "A student", "Nina's father", "A new teacher"], "answer": 0 },
-    { "ask": "What is Nina doing?",
-      "options": ["Writing down the lecture", "Reading a book quietly", "Asking him questions", "Waiting to leave early"],
-      "answer": 0 },
-    { "ask": "How much does she write?",
-      "options": ["Everything he says", "Only the subject", "A few words", "Nothing yet"], "answer": 0 },
-    { "ask": "What does Boris think of that?",
-      "options": ["He thinks it is impossible", "He does the same", "He thinks it is rude", "He is impressed by the professor"],
-      "answer": 0 },
-    { "ask": "How does the professor take it?",
-      "options": ["He likes it", "He has not noticed", "He objects", "Nina does not say"], "answer": 0 }
+    {
+     "ask": "What is about to happen?",
+     "options": [
+      "A team meeting",
+      "A lunch break",
+      "An interview",
+      "A phone call"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Who is Sasha?",
+     "options": [
+      "Someone new there",
+      "Katya's manager",
+      "A visiting client",
+      "Boris's old friend"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How long has he been there?",
+     "options": [
+      "A day",
+      "A week",
+      "A year",
+      "Nobody says"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Sasha say about himself?",
+     "options": [
+      "He wants to learn it all",
+      "He has done it all before",
+      "He is only here briefly",
+      "He would rather not go"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What happens to him?",
+     "options": [
+      "He is taken along",
+      "He is left behind",
+      "He is sent home",
+      "He is given the lead"
+     ],
+     "answer": 0
+    }
    ]
   }
  }

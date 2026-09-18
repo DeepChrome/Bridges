@@ -73,6 +73,9 @@ function ChapterTaskCard({ chapter, spineDone, done, onOpen }) {
 export const STEP_ROUTE = { vocab: "Vocab", quiz: "Quiz", video: "Video" };
 
 const STROKE = 5;
+/* The depth of every disc's edge. One number, so a spine node and a side quest
+   are pressed by the same amount. */
+const LIP = 4;
 const LANE_H = 64;          // height of the fork drawing
 const MERGE_H = 44;         // and of the lanes coming back to the road
 const ROW_GAP = 40;         // between ranks of side quests, when there is more than one
@@ -105,30 +108,60 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
   let done = 0;
   for (let i = 0; i < lessonCount(unit); i++) if (lessonDone(st, unit, i)) done++;
 
-  /* Four states, and the disc says which without a word. "Underway" keys on fine
+  /* **One disc is filled, and it is the one Continue would open.**
+   *
+   * Every open disc used to be a white circle with a pale ring, so a path of
+   * eight units was eight identical empty rings and nothing said where the
+   * learner was — the owner, 2026-09-17: *"everything looks AI generated"*, and
+   * this screen was the clearest case of it. Duolingo's path works because
+   * exactly one node is loud; the rest are quiet states around it.
+   *
+   * Filling *every* open disc is the mistake to avoid: developer mode unlocks
+   * the whole course (rule 20.9), so "open" is true almost everywhere and the
+   * screen would be a wall of indigo saying nothing. `nextStep` is the same
+   * answer the Continue button gives, so the disc and the button cannot
+   * disagree about where you are. */
+  const step = nextStep(st);
+  const current = open && !complete && !!step && step.unit.id === unit.id;
+
+  /* Five states, and the disc says which without a word. "Underway" keys on fine
      progress rather than completed lessons: a unit with a video needs that video
      watched before any lesson counts as done, so finished lesson bodies would
-     otherwise still show as untouched. */
+     otherwise still show as untouched.
+
+     The arcs keep the colours `path.test.js` pins — the ring is the progress
+     reading and this change is to the face beneath it. */
   const tone = complete
     ? { arc: t.good, p: 1, face: t.goodBg, icon: t.good, track: t.surface3,
-        lip: t.line, nm: t.ink }
+        lip: t.goodDim, nm: t.ink }
     : !open
     ? { arc: null, p: 0, face: t.surface2, icon: t.ink3, track: t.lineSoft,
         lip: t.lineSoft, nm: t.ink3 }
+    : current
+    // Where you are: filled, in the brand, with the icon reversed out of it.
+    // `brandOn` rather than white because the pair is contrast-audited (§24).
+    ? { arc: pr > 0 ? t.brand : null, p: pr, face: t.brand, icon: t.brandOn,
+        track: "transparent", lip: t.brandDim, nm: t.ink }
     : pr > 0
     ? { arc: t.brand, p: pr, face: t.surface, icon: t.brandInk, track: t.surface3,
         lip: t.line, nm: t.ink }
-    // Available but untouched: the ring stays neutral and the icon carries the
-    // invitation. A full coloured ring has to mean finished, or a fresh unit and a
-    // completed one look identical.
+    // Open but not where you are: quiet, and the icon carries the invitation. A
+    // full coloured ring has to mean finished, or a fresh unit and a completed
+    // one look identical.
     : { arc: null, p: 0, face: t.surface, icon: t.brand, track: t.surface3,
         lip: t.line, nm: t.ink };
 
-  const size = branch ? 56 : 68;
-  const iconSize = branch ? 22 : 26;
+  /* The current disc is bigger, because size is the cheapest hierarchy there
+     is and a path is read at arm's length. */
+  const size = branch ? (current ? 62 : 56) : (current ? 80 : 68);
+  const iconSize = branch ? (current ? 25 : 22) : (current ? 31 : 26);
   const r = (size - STROKE) / 2;
   const c = 2 * Math.PI * r;
-  const drop = pressed && open ? 2 : 0;
+  /* The lip, and how far the disc travels into it when pressed. Four, not
+     three: the physical press only reads if the travel is visible at arm's
+     length, and the disc must land flush on its own edge rather than hovering
+     a pixel above it. */
+  const drop = pressed && open ? LIP : 0;
   const sweep = useSweep(c * (1 - Math.min(1, tone.p)));
 
   return (
@@ -149,10 +182,12 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
         paddingBottom: 10, transform: [{ translateX: dx }],
       }}
     >
-      <View style={{ width: size, height: size + 3 }}>
+      <View style={{ width: size, height: size + LIP }}>
         {/* The lip: a solid edge under the disc, so pressing it has somewhere to go.
-            RN's shadows are blurred, so this is a plain circle rather than a shadow. */}
-        <View style={{ position: "absolute", left: 0, top: 3, width: size, height: size,
+            RN's shadows are blurred, so this is a plain circle rather than a shadow —
+            which is also the right model: the depth here is physical, a darker
+            tint of the disc's own colour, never an atmospheric blur. */}
+        <View style={{ position: "absolute", left: 0, top: LIP, width: size, height: size,
                        borderRadius: size / 2, backgroundColor: tone.lip }} />
         <View style={{ position: "absolute", left: 0, top: drop, width: size,
                        height: size, borderRadius: size / 2,

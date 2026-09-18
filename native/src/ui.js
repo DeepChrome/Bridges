@@ -499,13 +499,32 @@ export function UnitIcon({ id, size = 22, color }) {
  * stuck to it (§25: every visible element must earn its place). Where a row is
  * one of a numbered sequence the number is the whole tile, at a size worth
  * reading. */
-export function Thumb({ id, done, locked, n }) {
+/* `tone` colours the tile by what family the row belongs to — Listening,
+ * Speaking, Grammar. Practice was ten rows of identical grey glyph on identical
+ * grey tile, which is most of why the owner read the app as generated
+ * (2026-09-17): nothing on the screen was a different colour from anything
+ * else, so nothing was more important than anything else and the icons marked
+ * nothing.
+ *
+ * The hues are the four the palette already carries, so they are contrast-
+ * audited and match the web app by construction (§24, §31) — no new token, no
+ * value picked by eye. `bad` is deliberately not one of them: red means wrong,
+ * everywhere else in the app.
+ *
+ * Absent, the tile is the neutral it always was, so every existing call site is
+ * unchanged. */
+const TONES = { brand: "brand", good: "good", info: "info" };
+
+export function Thumb({ id, done, locked, n, tone }) {
   const t = useTheme();
   const numbered = n !== undefined && !locked;
+  const key = TONES[tone];
+  const hue = done ? t.good : key ? t[key] : t.ink3;
+  const face = done ? t.goodBg : key && !locked ? t[`${key}Bg`] : t.surface2;
   return (
     <View style={{ width: 44, height: 44, borderRadius: 12, alignItems: "center",
                    justifyContent: "center",
-                   backgroundColor: done ? t.goodBg : t.surface2,
+                   backgroundColor: face,
                    borderWidth: done ? 2 : 0, borderColor: t.good }}>
       {locked ? (
         <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={t.ink3}
@@ -517,7 +536,7 @@ export function Thumb({ id, done, locked, n }) {
           {n}
         </Text>
       ) : (
-        <UnitIcon id={id} color={done ? t.good : t.ink3} />
+        <UnitIcon id={id} color={hue} />
       )}
     </View>
   );

@@ -164,3 +164,47 @@ describe("path node states", () => {
     expect(screen.getByTestId("merge-family").props.strokeDasharray).toBeUndefined();
   });
 });
+
+/* Where you are, on a screen whose whole meaning is in its discs (§20a: native
+   has no visual suite, so a visual contract is asserted in the render tree).
+   The owner's complaint was that every open disc looked the same — an empty
+   white ring — so nothing said which one to press. */
+describe("the disc you are on", () => {
+  /* Any descendant View painted in this colour. The face is a child of the
+     node, not a prop on it, so this walks rather than reading `props.style`. */
+  const walk = (n, out = []) => {
+    if (!n || typeof n !== "object") return out;
+    out.push(n);
+    for (const k of n.children || []) walk(k, out);
+    return out;
+  };
+  const painted = (node, hex) =>
+    walk(node).filter((n) => {
+      const s = n.props && n.props.style;
+      const flat = Array.isArray(s) ? Object.assign({}, ...s.flat(9).filter(Boolean)) : s;
+      return !!flat && typeof flat.backgroundColor === "string"
+        && flat.backgroundColor.toUpperCase() === hex.toUpperCase();
+    }).length;
+
+  test("exactly one disc on the path is filled, and it is the one Continue opens", async () => {
+    await withState({});
+    const filled = UN.filter((u) => painted(screen.getByTestId(`node-${u.id}`), light.brand) > 0);
+    expect(filled.map((u) => u.id)).toEqual(["core1"]);
+    expect(screen.getByText(/^Start \(Pronouns & Being\)$/)).toBeTruthy();
+  });
+
+  test("a locked unit is not filled", async () => {
+    await withState({});
+    expect(painted(screen.getByTestId("node-core4"), light.brand)).toBe(0);
+  });
+
+  test("and the fill moves on with the learner", async () => {
+    /* Chapter 1's spine finished: Continue has moved to chapter 2, so the fill
+       must have moved with it rather than staying where it started. */
+    const lessons = {};
+    for (let i = 0; i < lessonCount(STAGES[0].core); i++) lessons[i] = { v: true, q: 100, tries: 1 };
+    await withState({ unit: { core1: { best: 100, done: true, video: true, lessons } } });
+    expect(painted(screen.getByTestId("node-core1"), light.brand)).toBe(0);
+    expect(painted(screen.getByTestId("node-core2"), light.brand)).toBeGreaterThan(0);
+  });
+});

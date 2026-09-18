@@ -467,7 +467,7 @@ export function DrillList({ navigation }) {
             one says plainly that it is harder. The owner found the video
             passages "way too advanced" and nothing on the row warned him. */}
         <Row onPress={() => navigation.navigate("SceneList")}>
-          <Thumb id="listen" />
+          <Thumb id="listen" tone="info" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Listening</Text>
             <Muted>At the level you are on</Muted>
@@ -476,7 +476,7 @@ export function DrillList({ navigation }) {
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
         </Row>
         <Row onPress={() => navigation.navigate("Listening")}>
-          <Thumb id="native" />
+          <Thumb id="native" tone="info" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
               Native speed
@@ -491,7 +491,7 @@ export function DrillList({ navigation }) {
         {/* Hear it, say it back (P10.6) — the step from taking Russian in to
             putting it out, with the model still in your ear. */}
         <Row onPress={() => navigation.navigate("Shadow")}>
-          <Thumb id="shadow" />
+          <Thumb id="shadow" tone="brand" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Repeat a sentence</Text>
             <Muted>Hear it and say it straight back</Muted>
@@ -500,14 +500,14 @@ export function DrillList({ navigation }) {
         {/* A row of its own, rather than a button inside Alphabet. It was
             reachable only from there and the owner never found it. */}
         <Row onPress={() => navigation.navigate("BuildDrill")}>
-          <Thumb id="buildup" />
+          <Thumb id="buildup" tone="brand" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Word building</Text>
             <Muted>A long word, a syllable at a time</Muted>
           </View>
         </Row>
         <Row onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
-          <Thumb id="talk" locked={!talkOpen} />
+          <Thumb id="talk" tone="brand" locked={!talkOpen} />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Talk</Text>
             <Muted>{talkOpen ? "A short conversation on a topic" : `Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}</Muted>
@@ -518,7 +518,7 @@ export function DrillList({ navigation }) {
             for the letters rather than for "sounds", which described the vowel
             chart and hid the thirty-three characters underneath it. */}
         <Row onPress={() => navigation.navigate("Sounds")}>
-          <Thumb id="letters" />
+          <Thumb id="letters" tone="brand" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Alphabet</Text>
             <Muted>The letters, the vowel pairs and the chart</Muted>
@@ -546,7 +546,7 @@ export function DrillList({ navigation }) {
                  testID={`drill-${d.id}`}
                  onPress={() => open && navigation.navigate(
                    focus.length > 1 ? "DrillSetup" : "Drill", { type: d.id })}>
-              <Thumb id={d.icon} locked={!open} />
+              <Thumb id={d.icon} tone="good" locked={!open} />
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
                   {d.name}

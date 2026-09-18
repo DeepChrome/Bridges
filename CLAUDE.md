@@ -3362,6 +3362,62 @@ the closed-testing clock it starts (the long pole), Play App Signing, the Data
 Safety form and content rating, a hosted privacy policy, and Gate 3's
 native-speaker read of the authored Russian, which blocks release on its own.
 
+## 30ah. "Everything looks AI generated" — the first pass (2026-09-17)
+
+The owner: *"I feel like everything looks AI generated. I want a modern feel but
+dont know how to approach it. Can you look up duolingos model."*
+
+**Read before redesigning.** The walkthrough was run on the emulator and the
+shots read one by one (§31), which is what §30s did and what turns a vague
+complaint into two specific causes:
+
+- **The path was eight identical empty rings.** Every open unit drew a white
+  disc with a pale grey ring, so nothing said where the learner was. This is the
+  screen the app opens on and the one §20a calls "the whole interface".
+- **Practice was ten identical grey rows** — grey line glyph in a grey tile,
+  bold title, grey caption, ten times. Nothing was a different colour from
+  anything else, so nothing was more important than anything else and the icons
+  marked nothing. That uniformity *is* what reads as generated.
+
+**What Duolingo actually does**, from its published tokens: the signature is not
+the green, it is a **physical depth model** — a hard 4px bottom edge in a darker
+tint of the element's *own* colour, collapsing to nothing on press, never a
+blurred shadow. Plus one loud node and quiet states around it.
+
+Bridges already had the lip — in `Btn`, and nowhere else. So the work is
+spreading a model the app already owns, not importing a new one. The brand stays
+indigo: §2 says match the polish, do not copy the product.
+
+- **One disc is filled, and it is the one Continue opens.** `nextStep` decides
+  it, so the disc and the button cannot disagree about where you are. Filling
+  every *open* disc was the trap — developer mode unlocks the course (rule
+  20.9), so "open" is true nearly everywhere and the path would have been a wall
+  of indigo saying nothing. The current disc is also larger, size being the
+  cheapest hierarchy there is. The arcs keep the colours `path.test.js` pins;
+  this changes the face beneath them.
+- **`Thumb` takes a `tone`**, so Practice reads as three families — Listening
+  blue, Speaking indigo, Grammar green. The hues are the four the palette
+  already carries, so they are contrast-audited and match the web app by
+  construction (§24, §31): no new token, nothing picked by eye. `bad` is not one
+  of them — red means wrong everywhere else. Absent, the tile is the neutral it
+  always was, so every existing call site is unchanged.
+
+Asserted in the render tree, since native has no visual suite: exactly one disc
+carries the brand fill, a locked one carries none, and the fill moves to
+chapter 2 when chapter 1 is finished.
+
+**Still open, and named so the next pass does not have to rediscover it:** every
+Practice row carries an explanatory caption (the app narrating itself, rule
+20.7); borders are 1px hairlines throughout where the model wants 2px; heading
+and button weight is 600/700 where the reference is 800; and the lip is still
+only on `Btn` and the path discs, not on rows, option buttons or cards.
+
+**A trap worth keeping.** `adb exec-out screencap -p > file.png` through
+PowerShell corrupts the PNG — the redirect adds a BOM and mangles the bytes, the
+binary form of §23's UTF-8 warning. Capture to the device and `adb pull`.
+Editing a source file with `Get-Content`/`Set-Content` adds a BOM too; check
+with node and strip it, or the diff swallows the whole file.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

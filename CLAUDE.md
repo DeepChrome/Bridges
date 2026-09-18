@@ -3519,6 +3519,63 @@ but the save effect has not run. Wrap the press in `await act(async () =>
 not the code — proved with a throwaway diagnostic that watched the Tick turn
 on and the row save, then deleted.
 
+## 30aj. The pre-beta review (2026-09-18)
+
+The owner: *"a thorough code review as a final prep before putting the beta
+out on the play store. Make sure there's no unnecessary bloat, that all the
+buttons work as intended, that everything is clean and effective."* Measured,
+not felt — each of the three has an instrument, and the review is what they
+said plus what a reader found.
+
+**Buttons.** `routes.test.js` proves every `navigate` reaches a route on the
+stack the screen is in (§23); `walkthrough4.txt` runs every screen end to end
+on the emulator, which it could not do until this week's stale taps were fixed;
+the one `onPress={() => {}}` in the app is the sheet's press-swallower, by
+design and commented. `audit_options.mjs`: no drill above 9 % guessable;
+`audit_banks.mjs --pool 150`: none exhausted.
+
+**Bloat.** `tools/audit_dead.mjs` reads every `export` in core/ and native/src
+and asks who imports it, in three bins that want three different actions:
+*dead* (referenced nowhere, not even in its own file — delete), *exported for
+nobody* (used only locally — the keyword is the litter, not the symbol), and
+*test-only* (not product, not litter). It found six dead — `PRACTICE_N`,
+`wordMet`, `anyDue`, `dayStartShift`, `GuideSays`, `hapticsOn` — all gone; 54
+needless `export`s left alone, because sweeping 25 files to remove a keyword is
+the refactor-for-aesthetics §12 warns against; and no orphan files. The four
+dependencies nothing imports directly are all transitive requirements
+(`react-native-screens` for navigation, `expo-constants` for asset and
+notifications, `expo-system-ui` for the UI style, `expo-asset` a required
+peer); `ts-fsrs` is imported by core/. The two `console.log`s in `store.js`
+are the migration's evidence in logcat (§30v) and stay.
+
+The one real bloat was in the repo, not the app: **2,210 bought clips for the
+136 deleted scenarios, 23.5 MB in every clone**, kept on the argument that
+they cost money (§30af). That argument was wrong about one thing — git holds
+every one of them, so the working tree keeping them was not insurance.
+`tools/prune_scenario_audio.mjs` drops what no script references and trims
+the manifest to match; restoring a scenario is a `git checkout`, not a
+purchase. The APK carries nothing it does not use: 17 MB of payload JSON, 9 MB
+of photographs, 5 MB of scenario tracks, the cues and the 61 bought words.
+The 22 MB JS bundle is that JSON — Metro inlines a `require`d JSON file — and
+§20a's lazy split is a parse-time split, not a download one; cold start is
+measured at 179 ms (§30ad) and this is not a problem to solve.
+
+**Not changed, and the owner's to decide before a beta reaches strangers:**
+
+- **Developer mode ships on** (rule 20.9). Every lesson unlocked, and
+  "Developer mode" and "STT Lab" in Settings, for twelve testers. That is
+  either the point of a closed test or the opposite of it, and it is a switch,
+  not a task.
+- **The Worker token is in the APK in plaintext** (13.39). A closed test is
+  twelve copies of it. Per-install tokens exist (`backend/tools/user.mjs`) and
+  are not wired to a release build.
+- **Release builds are debug-signed** until the upload key exists (§30ag);
+  `release_check.mjs` says so on every run.
+
+Still open from §30ah and named again rather than quietly dropped: the caption
+under every Practice row, and a question with no prompt still centring its
+answers in all the slack.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -3547,6 +3604,8 @@ python tools/build_site.py     # or the full pipeline if data changed
 node tools/check_scripts.mjs --strict   # the written passages: level, coverage, no repeats
 node tools/audio_qa.mjs        # a track per lesson, its hash current, its length sane
 node tools/audit_banks.mjs --pool 150   # how many distinct questions a learner meets (§30ac)
+node tools/audit_dead.mjs      # exports nothing imports, files nothing reaches (§30aj)
+node tools/release_check.mjs   # the built bundle: who signed it, size, permissions (§30ag)
 node tools/eas_upload.mjs      # before any EAS build: archive size, and nothing needed excluded
 node tools/copy.mjs            # labels, not prose (rule 20.7), capped and checked
 node tools/core.test.mjs       # the shared logic: generators, scheduler, state

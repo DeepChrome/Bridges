@@ -61,8 +61,6 @@ export function setDayStart({ offsetMinutes, rolloverHour = 4 } = {}) {
     ? Math.max(0, Math.min(23, rolloverHour)) : 4;
   dayShift = off * 60000 + roll * 3600000;
 }
-export const dayStartShift = () => dayShift;
-
 export const dayOf = (ms) => Math.floor((ms - dayShift) / DAY_MS);
 export const today = () => dayOf(Date.now());
 

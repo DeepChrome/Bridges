@@ -256,8 +256,6 @@ export function isDue(card, now, learnAhead) {
 export const cardsOf = (entry) =>
   DIRECTIONS.filter((d) => entry && entry[d]).map((d) => ({ direction: d, card: entry[d] }));
 
-export const wordMet = (seen, w) => !!(seen && seen[w] && DIRECTIONS.some((d) => seen[w][d]));
-
 /* Every (word, direction) that is due, across the whole schedule. */
 export function dueCards(seen, now, learnAhead) {
   const out = [];
@@ -268,9 +266,6 @@ export function dueCards(seen, now, learnAhead) {
   }
   return out;
 }
-
-export const anyDue = (entry, now, learnAhead) =>
-  cardsOf(entry).some(({ card }) => isDue(card, now, learnAhead));
 
 /* A word that wants attention: one with a card due, or one the learner added
    to review themselves (a new card in the schedule comes only from "Add to

@@ -8,11 +8,10 @@
 
 import React from "react";
 import { Animated, View } from "react-native";
-import { Text } from "./ui";
 import { SvgXml } from "react-native-svg";
 import { guideSvg, VIEW_BOX, GUIDE } from "@core/guide";
-import { useTheme, radius, type as T } from "./theme";
-import { useEnter, usePop } from "./motion";
+import { useTheme } from "./theme";
+import { usePop } from "./motion";
 
 /* The figure. `pose` is one of core/guide.js POSES; the scarf takes the theme's
    brand colour so he is the same character in both palettes. */
@@ -36,22 +35,7 @@ export function GuidePop({ pose = "cheer", size = 72, delay = 0, style }) {
   );
 }
 
-/* Yuri with something to say. He is silent nearly everywhere — see the note in
-   core/guide.js — so this is deliberately not a general-purpose speech bubble:
-   it takes one short line and has nowhere to put a second. */
-export function GuideSays({ pose = "idle", line, size = 64 }) {
-  const t = useTheme();
-  const anim = useEnter([line]);
-  if (!line) return null;
-  return (
-    <Animated.View style={[anim, { flexDirection: "row", alignItems: "center", gap: 10 }]}>
-      <Guide pose={pose} size={size} />
-      <View style={{ flex: 1, backgroundColor: t.surface2, borderRadius: radius.md,
-                     paddingVertical: 10, paddingHorizontal: 13 }}>
-        <Text testID="guide-line" style={{ color: t.ink2, fontSize: T.body, lineHeight: T.body + 5 }}>
-          {line}
-        </Text>
-      </View>
-    </Animated.View>
-  );
-}
+/* There was a `GuideSays` here — Yuri with a speech bubble — that nothing ever
+   rendered: the four places he speaks (§30m) draw the line beside him
+   themselves. Removed 2026-09-18 by the dead-export audit (tools/audit_dead.mjs),
+   not kept "just in case" (§12). */

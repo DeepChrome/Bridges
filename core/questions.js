@@ -111,7 +111,6 @@ export const LESSON_SIZE = 7;
 export const lessonSize = (stageIndex) =>
   (stageIndex >= 0 && stageIndex < LESSON_RAMP.length ? LESSON_RAMP[stageIndex] : LESSON_SIZE);
 
-export const PRACTICE_N = 8;
 export const DRILL_N = 10;
 export const PLACEMENT_N = 50;
 export const SECTION_N = 30;

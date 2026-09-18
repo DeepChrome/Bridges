@@ -25,7 +25,6 @@ let on = true;
 /* Off in tests and wherever the platform has nothing to offer; `setHaptics`
    is how the settings switch reaches it without every call site knowing. */
 export const setHaptics = (v) => { on = !!v; };
-export const hapticsOn = () => on;
 
 const fire = (fn) => {
   if (!on) return;

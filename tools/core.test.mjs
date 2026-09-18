@@ -1214,21 +1214,29 @@ group("form questions");
    quiz of the learner's own choosing (the owner, 2026-09-07). */
 group("scenes and custom quizzes");
 {
-  /* Read the gate rather than assume it. This used to take lesson 0 of the
-     first chapter that qualified, which was only safe while `scene` had no
-     `fromLesson`; it gained one when the conversation moved into chapter 1
-     (2026-09-17) and the draw then landed on a lesson deliberately below the
-     gate, reporting "no scene" as a failure of the generator. */
-  const sceneLesson = SPEECH_MIX.scene.fromLesson || 0;
-  const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.scene.fromStage
-                                   && (SPEECH.listen[s.core.id] || []).length >= 5).core;
-  const quiz = Q.quizSteps(later, sceneLesson);
-  const scenes = quiz.filter((q) => q.kind === "scene");
-  ok(scenes.length === SPEECH_MIX.scene.perQuiz, `${later.id}: one scene per quiz`, String(scenes.length));
-  /* The opening lessons stay reading-only: five words into the course a learner
-     is met by a word, not by half a minute of audio. */
-  ok(!Q.quizSteps(STAGES[0].core, 0).some((q) => q.kind === "scene"), "none in the opening lesson");
-  const s = scenes[0];
+  /* **A conversation is never a quiz question** (the owner, 2026-09-17: "I
+     think it's better as a standalone exercise"). The rule is worth a check of
+     its own because it is enforced by an *absence* — `SPEECH_MIX` has no
+     `scene` key, and `quizSteps` loops over that object — so re-adding one
+     would silently put half a minute of audio back inside an eight-question
+     quiz with nothing failing. Swept across the route rather than spot-checked,
+     since the splice used to be gated by chapter and a single sample would
+     have missed it. */
+  let sceneInQuiz = 0;
+  for (const s of STAGES) {
+    for (let i = 0; i < 5; i++) {
+      if (Q.quizSteps(s.core, i).some((q) => q.kind === "scene")) sceneInQuiz++;
+    }
+  }
+  ok(sceneInQuiz === 0, "no quiz anywhere splices in a conversation", String(sceneInQuiz));
+
+  /* It is still built, and still the thing Practice → Listening draws. */
+  const s = Q.writtenPassage(UN, () => 99);
+  ok(!!s, "a written conversation is what the standalone activity offers");
+
+  /* A unit far enough along to have a listening pool worth drawing from — it
+     used to be defined by the scene gate, which no longer exists. */
+  const later = STAGES.find((x) => (SPEECH.listen[x.core.id] || []).length >= 5).core;
   /* Two shapes share the kind. The **scenario** (§30k) is the one a lesson
      with a script gets: a written conversation between named people and five
      questions about the situation, read by the device voices. The **corpus
@@ -1490,16 +1498,16 @@ group("written listening scenarios");
        `${(share * 100).toFixed(0)}% first of ${total}`);
   }
 
-  // A scripted lesson's quiz gets the written passage, not a corpus scene.
-  const scripted = keys.map((k) => k.split(":")).find(([id, i]) => {
-    const u = byId.get(id);
-    return u && Q.stageOf(u) >= SPEECH_MIX.scene.fromStage;
-  });
+  /* A scripted lesson still builds its own written passage — but through
+     `scriptScene`, which is what the Conversations screen calls. `speechPrompt`
+     no longer has a scene branch at all, because the quiz does not ask for one. */
+  const scripted = keys.map((k) => k.split(":")).find(([id]) => byId.get(id));
   if (scripted) {
-    const u = byId.get(scripted[0]);
-    const step = Q.speechPrompt("scene", u, Number(scripted[1]));
-    ok(step && step.scene.written,
-       `${scripted.join(":")}: the lesson's own passage is what the quiz asks`);
+    const built = Q.scriptScene(byId.get(scripted[0]), Number(scripted[1]));
+    ok(built && built.written,
+       `${scripted.join(":")}: the lesson's own passage is what the screen draws`);
+    ok(Q.speechPrompt("scene", byId.get(scripted[0]), Number(scripted[1])) === null,
+       "and the quiz builder refuses to make one");
   }
 
   // Practice's Listening draws on the lessons actually finished, and never on

@@ -6,7 +6,7 @@
  * two platforms cannot drift apart on content or rules.
  */
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Animated, Pressable, useColorScheme } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -44,7 +44,9 @@ import { Read } from "./src/screens/Read";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import { setHaptics } from "./src/haptics";
-import { setDayStart } from "@core/util";
+import { arm as armReminders } from "./src/notify";
+import { workedOn } from "@core/scheduler";
+import { setDayStart, today } from "@core/util";
 import { ErrorBoundary } from "./src/boundary";
 import { installCrashHandler } from "./src/crash";
 import { flushState } from "./src/store";
@@ -387,6 +389,15 @@ function Shell() {
      had to read state to decide whether to buzz would be a call site that
      could get it wrong. */
   useEffect(() => { setHaptics(st.haptics !== false); }, [st.haptics]);
+
+  /* The reminder window is re-laid whenever the setting moves **or the day
+     becomes worked** — those are the only two things that change what should be
+     scheduled. Keying the effect on `st.seen` instead would re-arm on every
+     single grade, which is fourteen native calls for nothing; `workedToday`
+     flips once a day, so this runs at most twice. `workedOn` scans the cards in
+     under a millisecond (§30u measured it), so it costs nothing to derive. */
+  const workedToday = useMemo(() => workedOn(st, today()), [st.seen]);
+  useEffect(() => { armReminders(st, st.remind); }, [st.remind, workedToday]);
 
   /* Acting on the gate's answer. The navigator only exists once there is an
      account, so this runs on the render after the profile is created: effects fire

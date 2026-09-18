@@ -1,0 +1,46 @@
+Copyright (c) 2026 Jared Flood. All rights reserved.
+
+This software and the learning material written for it are proprietary. No
+permission is granted to copy, modify, distribute, sublicense, or create
+derivative works, in source or binary form, except with the copyright holder's
+prior written permission.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+THIRD-PARTY MATERIAL
+--------------------
+
+This licence covers the application code and the material authored for it. It
+does NOT cover everything the application ships, and the terms below are not
+the copyright holder's to change:
+
+  - OpenRussian dictionary data .................. CC BY-SA 4.0
+  - English Wiktionary senses (via kaikki.org) ... CC BY-SA 3.0
+  - Tatoeba sentences ........................... CC BY 2.0 FR
+  - Tatoeba recordings .......................... per recording; see below
+  - Wikimedia Commons photographs ............... per file, CC0/PD/BY/BY-SA
+  - Open-source dependencies .................... MIT and Apache-2.0
+
+Attribution for these is a licence condition and is built from the shipped
+databases' own `meta` rows rather than written down by hand, so it cannot drift
+from what was actually distributed (CLAUDE.md rule 20.10). It is shown in the
+app on the Credits screen and listed in docs/licensing.md.
+
+Two of these need care before any commercial release:
+
+  - Tatoeba recordings are licensed **per recording**, not uniformly: of the 190
+    fetched, 17 are CC BY-NC, 7 are CC BY-NC-ND, and 7 state no licence at all.
+    NC bars commercial use and ND arguably bars re-encoding. Build with
+    `tools/build_audio.py --commercial` to leave those 31 out.
+  - Photographs are filtered at harvest time to licences that permit reuse with
+    credit; NC, ND and GFDL-only files are refused.
+
+Anki decks imported by a user remain that user's own material. Bridges reads
+them on the device and never uploads them.

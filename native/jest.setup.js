@@ -201,6 +201,24 @@ jest.mock("expo-haptics", () => ({
   notificationAsync: jest.fn(async (s) => { global.__buzz.push(`notification:${s}`); }),
 }));
 
+/* A scheduled notification leaves nothing in the render tree either — the same
+   blind spot the audio session and the vibration motor had (§30h′, §30ab), and
+   fixed the same way. `global.__scheduled` is what a test should assert: the
+   silences matter more than the sends here, because the defect this feature can
+   most easily have is reminding somebody who has already studied.
+   `__notifyGranted` lets a test refuse permission. */
+global.__scheduled = [];
+global.__notifyGranted = true;
+jest.mock("expo-notifications", () => ({
+  AndroidImportance: { DEFAULT: 3 },
+  SchedulableTriggerInputTypes: { DATE: "date", DAILY: "daily" },
+  getPermissionsAsync: jest.fn(async () => ({ granted: global.__notifyGranted })),
+  requestPermissionsAsync: jest.fn(async () => ({ granted: global.__notifyGranted })),
+  setNotificationChannelAsync: jest.fn(async () => {}),
+  cancelAllScheduledNotificationsAsync: jest.fn(async () => { global.__scheduled = []; }),
+  scheduleNotificationAsync: jest.fn(async (r) => { global.__scheduled.push(r); }),
+}));
+
 /* The Anki import/export modules: files, the picker, SQLite and the share sheet
    are all injected by anki.js, so the packages only need to load. */
 jest.mock("expo-sqlite", () => ({ deserializeDatabaseAsync: jest.fn(), openDatabaseAsync: jest.fn() }));

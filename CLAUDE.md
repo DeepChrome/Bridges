@@ -1062,9 +1062,9 @@ by `core/speech.js`, so a dropped word reads the same whether it was typed or sa
   sentences not played) and one "which word did you hear?"; the questions are on
   screen before anything plays and nothing plays until Play is pressed — a
   listener who knows what to listen for listens differently. Credit is the share
-  right; a sentence's words are graded by its question. From chapter 1's third
-  lesson (2026-09-17; it was chapter 2 until chapter 1 had scenarios worth
-  playing — §30af), one per quiz; also the Listening drill in Practice
+  right; a sentence's words are graded by its question. **Not a quiz step at
+  all** since 2026-09-17 (§30af): it is a standalone exercise, Practice →
+  Listening → Conversations. Also the Listening drill in Practice
   (`listeningDrill`), five
   scenes from the units reached so far. `sceneFor` returns null when a pool
   cannot supply three wrong meanings — never a scene with two options.
@@ -2674,7 +2674,9 @@ say so rather than build something:
 - **Listening is in every lesson, not beside it.** `SPEECH_MIX` splices it
   into the quiz itself: type-what-you-hear from chapter 1 lesson 3, the 30–45 s
   conversation with five questions from chapter 2, say-it-aloud from chapter 3.
-  *(The conversation moved to chapter 1 lesson 3 on 2026-09-17 — §30af.)*
+  *(The conversation left the quiz on 2026-09-17 and is standalone — §30af. The
+  other two are still spliced, and the answer to "where is listening?" is now
+  Practice → Listening rather than "inside every lesson".)*
 
 The other two were real gaps.
 
@@ -3144,9 +3146,28 @@ find an evening, a ticket counter, a train nearly missed, a December night shift
 only route was Practice → Listening, and `writtenPassage` draws from the last
 eight lessons *reached*, so they fall out of reach the moment the learner moves
 on. The owner found this the way these things are always found: *"where can i
-find them? i dont see them."* The gate is `fromStage: 0, fromLesson: 2` now,
+find them? i dont see them."* The gate became `fromStage: 0, fromLesson: 2`,
 matching `hear`. **A feature that cannot be reached has not shipped**, and a
 content change that leaves its own display rule alone is half a change.
+
+**…and then it left the quiz entirely, three hours later.** The owner, having
+seen it in place: *"I don't know if I like the listening as embedded in the
+quiz. I think it's better as a standalone exercise."* He is right about the
+shape — a quiz is eight short retrieval questions, and half a minute of audio
+with five comprehension questions is a session of its own, which is the argument
+`writtenPassage` had already won for Practice (one scenario drawn there, not
+five — §30l). `SPEECH_MIX` has no `scene` key now, and since `quizSteps` loops
+over that object's keys, **the absence is the enforcement**; `core.test.mjs`
+sweeps every chapter and lesson for a spliced scene rather than spot-checking
+one, because the splice used to be chapter-gated and a single sample would miss
+a reintroduction. `speechPrompt`'s scene branch went with it rather than being
+left unreachable (§6) — the Conversations screen calls `scriptScene` directly,
+so a second way to build a scene would only be a second thing to keep in step.
+
+The pair of reversals is worth reading together: the first was a real bug (the
+fourteen could not be met at all), the second a design judgement that only
+became askable once they could be. Neither invalidates the other, and the
+content work stands under both.
 
 Two traps worth keeping:
 
@@ -3216,6 +3237,66 @@ the one before it and shipped all 168 tracks regardless.
 The ~1,900 clips belonging to deleted scenarios stay in `data/scenario_audio`:
 they cost money, rule 20.3 treats them as sources, and keeping them makes
 restoring any of those conversations free.
+
+## 30ag. Phase 7 — the daily reminder, and what the store still needs (2026-09-17)
+
+The playbook's last phase is the store release, and most of it is his: the $25
+Play account, the fourteen-day closed test that account gates, the Data Safety
+form, the privacy-policy host. The audit found one thing in it that is a
+*feature* rather than paperwork, and one file simply missing.
+
+**`LICENSE` did not exist.** Proprietary, content his; the third-party section
+names each source's terms and points at the two that need care before any
+commercial release — Tatoeba recordings are licensed per recording (31 of 190
+are NC, ND or unstated, and `build_audio.py --commercial` drops them), and the
+photographs are filtered at harvest. The in-app notices screen was already
+right: `Credits.js` reads a generated `notices.js` built from `node_modules`
+rather than a hand-written list, so it cannot drift from what ships.
+
+### The daily reminder
+
+`native/src/notify.js`, one file for the reason `haptics.js` and `motion.js` are
+one: the moment a second place can schedule something, the app has a second
+voice and nobody can say what it will send. Everything is swallowed — a reminder
+that fails is a reminder that did not arrive, never a session that broke.
+
+- **Off until asked for, and permission is requested at the switch**, never at
+  launch — the rule the microphone already follows (§30c). A refusal leaves the
+  switch off and says so, which is rule 20.7's third allowance; a control that
+  springs back with no explanation is a dead control.
+- **A day already worked is skipped.** This is the whole design. §30t's research
+  says people leave a language app by bingeing rather than by boredom, so the
+  reminder protects the habit — and the fastest way to burn a reminder's
+  credibility is to nag somebody who has already done the thing. It is why these
+  are **rolling one-off notifications rather than one repeating daily trigger**:
+  a repeating trigger fires whatever happened and no single instance of it can
+  be dropped. The cost is that the window has to be re-armed while the app is
+  open, so a learner who never opens Bridges stops being reminded after
+  `HORIZON` (14) days — deliberate, not a limitation to fix. Two weeks of
+  unanswered reminders is the app being asked to stop.
+- **Re-armed on the setting and on `workedToday`, not on `st.seen`.** Keying the
+  effect on the cards would re-arm on every grade, which is fourteen native
+  calls for nothing; `workedOn` flips once a day, so it runs at most twice.
+- **The skipped day is read off `dayOf`, not off "is this the first
+  iteration".** After §30ad moved the boundary to 4 am local, the clock's date
+  and the scheduler's day differ after midnight, and an evening reminder belongs
+  to the later one. The test for it must pass the offset **at that instant**
+  (`App.js` passes `getTimezoneOffset()`); modelling a UTC device applies the
+  rollover in the wrong frame and fails on correct code, which is how it was
+  first written.
+
+A scheduled notification leaves nothing in the render tree — the same blind spot
+the audio session and the vibration motor had (§30h′, §30ab) — so
+`jest.setup.js` records every send on `global.__scheduled` and
+`global.__notifyGranted` lets a test refuse permission. **Verified the only way
+worth trusting**: disabling the skip rule fails "a day already worked is
+skipped" and nothing else, which is what says the rule is load-bearing rather
+than decorative.
+
+**What Gate 7 still waits on**, none of it buildable here: the Play account and
+the closed-testing clock it starts (the long pole), Play App Signing, the Data
+Safety form and content rating, a hosted privacy policy, and Gate 3's
+native-speaker read of the authored Russian, which blocks release on its own.
 
 ## 31. Verification
 

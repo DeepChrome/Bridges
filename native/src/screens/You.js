@@ -15,6 +15,18 @@ import { readCrashes, clearCrashes } from "../crash";
 import { troubleWords } from "./Study";
 import { tagInfo } from "@core/errortags";
 import { cardsOf, dueCards, maxLapses, DIRECTIONS, RETENTION_MIN, RETENTION_MAX } from "@core/scheduler";
+import { askPermission } from "../notify";
+
+/* When the reminder may land, as minutes past midnight. Four, not twenty-four:
+   the question is which part of the day a learner studies in, and a list long
+   enough to scroll turns a two-second decision into a chore. */
+export const REMIND_TIMES = [
+  { id: 8 * 60, name: "08:00" },
+  { id: 13 * 60, name: "13:00" },
+  { id: 18 * 60, name: "18:00" },
+  { id: 21 * 60, name: "21:00" },
+];
+export const REMIND_DEFAULT = 18 * 60;
 
 /* The grammar the learner keeps getting wrong, from the tags the speech feedback
    attaches to attempts (ROADMAP P5.11). Counted in state by recordAttempt; shown
@@ -52,6 +64,9 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
   const t = useTheme();
   const [cache, setCache] = useState(() => cacheStats());
   useEffect(() => { if (visible) setCache(cacheStats()); }, [visible]);
+  /* Only ever set by a refusal from the OS, so it belongs to the sheet and not
+     to learner state — there is nothing to remember once the sheet closes. */
+  const [remindDenied, setRemindDenied] = useState(false);
   /* Read when the sheet opens rather than held in session state: a crash log
      is not learner state, and putting it there would send it through the save
      path — which is one of the things that can be what broke. */
@@ -196,6 +211,34 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   testID="haptics-switch"
                   value={st.haptics !== false}
                   onValueChange={(v) => update((p) => ({ ...p, haptics: v }))}
+                  trackColor={{ true: t.good, false: t.surface3 }}
+                />
+              </Row>
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Daily reminder</Text>
+                  <Muted>Once a day</Muted>
+                  {Number.isFinite(st.remind) ? (
+                    <Choice testID="remind-at" value={st.remind} style={{ marginTop: 8 }}
+                            options={REMIND_TIMES}
+                            onPick={(id) => update((p) => ({ ...p, remind: id }))} />
+                  ) : null}
+                  {/* One of rule 20.7's three reasons: without it the switch
+                      springs back to off and nothing says why. */}
+                  {remindDenied ? <Muted>Notifications are off for Bridges in Android settings</Muted> : null}
+                </View>
+                <Switch
+                  testID="remind-switch"
+                  value={Number.isFinite(st.remind)}
+                  onValueChange={async (v) => {
+                    if (!v) { setRemindDenied(false); update((p) => ({ ...p, remind: null })); return; }
+                    /* Asked here, at the switch, and never at launch (§30c). A
+                       refusal must leave the control off rather than showing a
+                       reminder that cannot arrive. */
+                    const ok = await askPermission();
+                    setRemindDenied(!ok);
+                    if (ok) update((p) => ({ ...p, remind: REMIND_DEFAULT }));
+                  }}
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>

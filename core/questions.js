@@ -22,23 +22,25 @@ export const QUIZ_N = 8;
    for chapter 3. The numbers live here, in one place, rather than in each
    generator.
 
-   **The conversation joins chapter 1 too, from the same third lesson** (owner,
-   2026-09-17: "embedding them into the core lessons"). It was chapter 2 while
-   chapter 1's fourteen scenarios were what the vocabulary gate could manage —
-   people asking each other who was where — and holding a 30-second conversation
-   back from the very first lessons was right for that material. Now chapter 1
-   has fourteen written situations with three to six words introduced on screen
-   (§30l, the intro allowance), and a gate at chapter 2 meant **none of the
-   fourteen ever played inside the lessons they were written for**; the only way
-   to them was Practice → Listening, which draws from the last eight lessons
-   reached and so loses them as soon as the learner moves on.
-   The first two lessons stay reading-only, matching `hear` — a learner five
-   words into the course is met by a word, not by audio. `core1:0` and `core1:1`
-   are therefore still Practice-only, which is the residue of that rule and not
-   an oversight. */
+   **There is deliberately no `scene` entry.** The 30–45-second conversation was
+   spliced into the quiz from chapter 2 (2026-09-10), then from chapter 1
+   (2026-09-17), and the owner then ruled it out of the quiz altogether the same
+   day: *"I don't know if I like the listening as embedded in the quiz. I think
+   it's better as a standalone exercise."* He is right about the shape — a quiz
+   is eight short retrieval questions and half a minute of audio with five
+   comprehension questions is a session of its own, which is the argument
+   `writtenPassage` already won for Practice → Listening, where one scenario is
+   drawn rather than five (§30l).
+
+   Removing the key is the whole change, because `quizSteps` loops over this
+   object's keys: a kind that is not named here is not spliced. The
+   conversations live on `SceneList` — Practice → Listening → Conversations,
+   which lists them by chapter — and nothing else reaches for them.
+
+   `hear` stays. It is a different exercise wearing similar clothes: one
+   sentence, a real recording from the collection, typed back. */
 export const SPEECH_MIX = {
   hear: { fromStage: 0, fromLesson: 2, perQuiz: 1 },
-  scene: { fromStage: 0, fromLesson: 2, perQuiz: 1 },
   say: { fromStage: 2, perQuiz: 1 },
 };
 export const speechFrom = (kind, stage, lesson) => {
@@ -1109,20 +1111,13 @@ export function makeQuestions(env) {
      from this unit using a word of this lesson, one from anywhere unlocked using a
      word of this lesson, one from this unit, one from anywhere unlocked. */
   function speechPrompt(kind, unit, index) {
-    if (kind === "scene") {
-      /* **A lesson has a conversation or it has no scene at all.** The corpus
-         pools used to stand in where no script existed, from when every one of
-         the 168 lessons had one and the fallback could only fire on a gap. The
-         owner cut that back to a handful on purpose (2026-09-17: "I just mainly
-         want one per chapter. Not necessarily one per lesson") — so a missing
-         script is now a *decision*, and falling back would answer it by putting
-         the weaker shape in the gap: a few pooled sentences with a meaning
-         question each, which is translation in isolation and is the very thing
-         the written scenarios replaced (§30l). `sceneFor` is still what the
-         Listening drill draws on; it is no longer a lesson's second choice. */
-      const scene = scriptScene(unit, index);
-      return scene ? { t: "scene", scene } : null;
-    }
+    /* There is no `scene` branch here any more, and its absence is the design.
+       A conversation is a standalone exercise (`SPEECH_MIX` above), reached
+       through `scriptScene` from the Conversations screen; `speechPrompt` is
+       the quiz's builder and the quiz no longer asks for one. The branch was
+       left unreachable for about an hour and is gone rather than kept "just in
+       case" (§6) — a second way to build a scene is a second thing to keep in
+       step with the first. */
     const poolName = { hear: "listen", say: "speak" }[kind];
     if (!SPEECH || !SPEECH[poolName]) return null;
     const pool = SPEECH[poolName];

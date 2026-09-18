@@ -548,6 +548,24 @@ Each of these cost real time. Do not relearn them.
   distractors. **After touching `core/`, delete
   `native/android/app/build/generated/assets/react/release` before assembling**,
   or check the build took long enough to have run Metro.
+- **…and that is only half the generated tree. The other half never prunes,
+  and it holds the media.** A `require`d asset does not go to
+  `generated/assets/react/release` at all — it is copied into
+  `generated/res/react/release/` (`raw/` for audio, `drawable-mdpi/` for
+  images), and **that copy adds files without ever removing ones that have
+  left the disk.** So deleting content shrinks the repo and changes nothing
+  about the APK: on 2026-09-17 the scenarios were cut from 168 to 32 and the
+  shipped tracks from 27.5 MB to 5.1 MB, and the APK came out at 101.8 MB —
+  *byte for byte the same size as before* — still carrying all 168, because
+  `raw/` held 257 files where 93 belonged. Nothing fails; the stale tracks are
+  simply never referenced. It had been true of every local build ever made and
+  could only surface the first time a file count went **down**.
+  **Delete `generated/res/react/release` alongside the assets directory**, and
+  when a change was meant to alter what ships, *read the APK rather than the
+  repo* — `[IO.Compression.ZipFile]::OpenRead($apk).Entries` grouped by
+  extension takes a moment and is the only thing that actually answers the
+  question. An identical APK size across a change that removed 22 MB is the
+  tell, and it is easy to skim past as a coincidence.
 - **`gradlew.bat` through `cmd /c` is "not recognized" from a PowerShell
   `cd`.** `Set-Location` moves PowerShell's location and not reliably the
   process's, so a batch file named bare was not found twice running
@@ -3191,7 +3209,10 @@ the adverb. It is the vocabulary gate working correctly and it is the commonest
 way an authored line fails — write the aspect the lesson actually teaches.
 
 Audio: 199 clips for chapter 1 and 286 for the rest, **$0.28** all told. The
-bundled tracks fall from 27.5 MB to 5.1 MB, which takes ~22 MB out of the APK.
+bundled tracks fall from 27.5 MB to 5.1 MB and the arm64 APK from 101.8 MB to
+**71 MB** — though only after the second half of the stale-build trap in §23 was
+found, because the first APK built from the reduced set was exactly as large as
+the one before it and shipped all 168 tracks regardless.
 The ~1,900 clips belonging to deleted scenarios stay in `data/scenario_audio`:
 they cost money, rule 20.3 treats them as sources, and keeping them makes
 restoring any of those conversations free.

@@ -469,8 +469,13 @@ export function DrillList({ navigation }) {
         <Row onPress={() => navigation.navigate("SceneList")}>
           <Thumb id="listen" tone="info" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Listening</Text>
-            <Muted>At the level you are on</Muted>
+            {/* The section above already says Listening — which is the feature's
+                name (§30af) — so the row says what tells the two apart. Naming
+                the row "Listening" too read as "LISTENING / Listening", and the
+                walkthrough's tap matched the header instead of the row, which
+                is how it was found. */}
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>At your level</Text>
+            <Muted>A conversation, then five questions</Muted>
           </View>
           {((st.drills || {}).listening || {}).best
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}

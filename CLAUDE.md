@@ -3454,6 +3454,71 @@ binary form of §23's UTF-8 warning. Capture to the device and `adb pull`.
 Editing a source file with `Get-Content`/`Set-Content` adds a BOM too; check
 with node and strip it, or the diff swallows the whole file.
 
+## 30ai. The flashcards say what they are (2026-09-17)
+
+The owner: *"Sometimes the flash cards are blank on the front side. Sometimes
+the audio randomly is some deep guys voice rather than the default (смотреть
+for example). Also sometimes the card starts in English."* And: *"options
+before starting where you can pick to have the front in English or Russian…
+Make sure if we do this, the card does not give the answer on the front side…
+select how many new words… a flag identifying it's a new word or… a troubled
+word."*
+
+**Three reports, and none was what it looked like.**
+
+- *"Starts in English"* is the **produce** card. *"Blank"* is the **listen**
+  card, whose front is a speaker and nothing else. Both are Phase 2's three
+  directions (§30w) doing their job, and **nothing on the card said which one
+  it was.** The card carries a caption now — Russian / Meaning / Listen — and a
+  `New` or `Trouble` flag. Flags on both faces, because a flag is about the
+  card's history and never its content; the caption is what stops a
+  speaker-only front reading as an empty box.
+- *"Some deep guy's voice"* is a **real recording**: «смотреть» has one in the
+  collection, and the collection's four sources are read by different people
+  (§27). A word with a recording gets its reader; a word without gets the
+  phone's voice. The recordings stay the default — they are the better sound —
+  and the picker offers **One voice**, which is `say(text, { device: true })`:
+  the phone on every card, through `speakTTS` like any word with no recording,
+  so it is not a second path. The speaker button then reports `speaker-tts`,
+  because "Hear it" over a device voice would be §27's lie pointed the other
+  way.
+- **And one of them was a real bug, found by the test for the fix.** The
+  autoplay effect was keyed on `[at, shown]`; dealing a session leaves both at
+  their initial values, so React never re-ran it and **the first card of every
+  session was silent.** A listen card first in the pile was a speaker button in
+  silence — a blank card by any other name. It is keyed on the card now.
+  `studyoptions.test.js` asserts the first card opens a player; it failed
+  against the old code before the fix, which is the only kind of test worth
+  having (§23).
+
+**The controls he asked for already existed** — three switches in Settings
+named "Cards: recognise / produce / listen", the scheduler's words, and a
+new-cards-a-day choice beside them — and he had studied for days without
+finding them. Same shape as Word building (§30ab) and Listening/Conversations
+(§30af): the feature was there under a name nobody would look for, in a place
+nobody starts from. They are on the **Study picker** now, named by what is on
+the **front** (Russian / English / Sound only), with "New words a day" and
+"Voice" beside them, and gone from Settings — one place, not two. The last
+front cannot be unticked (§30ac's rule: a control that lets you build an empty
+session and then apologises is worse than one that will not).
+
+`QUEUE_DEFAULTS.newPerDay` is **5**, down from 15. Safe because §30aa priced
+it — 6, 10, 15 and 25 a day moved the route's load barely at all, since the
+lesson quizzes create most of the cards. What the number does control is how
+many unfamiliar faces a flashcard session opens with, and five is a pace a
+learner can feel finishing. `core.test.mjs` now asserts the unset-option check
+against the constant rather than a literal, which is how that test went stale.
+
+Chapters and decks were already selectable in the picker (per-chapter
+"Select chapter", "Your decks" with Import); nothing there changed.
+
+**A trap from the tests.** A bare `fireEvent.press` followed by
+`global.__db.saved()` reads the state as it *was*: the press updates the tree
+but the save effect has not run. Wrap the press in `await act(async () =>
+…)`, as `anki.test.js` does. Two of three failures on the first run were this,
+not the code — proved with a throwaway diagnostic that watched the Tick turn
+on and the row save, then deleted.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

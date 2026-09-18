@@ -14,7 +14,7 @@ import { backupProfile, restoreProfile, shareCrashes } from "../backup";
 import { readCrashes, clearCrashes } from "../crash";
 import { troubleWords } from "./Study";
 import { tagInfo } from "@core/errortags";
-import { cardsOf, dueCards, maxLapses, DIRECTIONS, RETENTION_MIN, RETENTION_MAX } from "@core/scheduler";
+import { cardsOf, dueCards, maxLapses, RETENTION_MIN, RETENTION_MAX } from "@core/scheduler";
 import { askPermission } from "../notify";
 
 /* When the reminder may land, as minutes past midnight. Four, not twenty-four:
@@ -114,40 +114,13 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               </View>
             ) : null}
             <List>
-              {/* The flashcards' three directions, each a card of its own
-                  (core/scheduler.js). "Card side" used to flip every card the
-                  same way; now a word is asked each way it is studied. */}
-              {[["recognise", "Recognise", "Russian shown, meaning asked"],
-                ["produce", "Produce", "Meaning shown, Russian asked"],
-                ["listen", "Listen", "Russian heard, nothing shown"]].map(([id, name, sub]) => (
-                <Row key={id}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ color: t.ink, fontSize: 15 }}>{`Cards: ${name.toLowerCase()}`}</Text>
-                    <Muted>{sub}</Muted>
-                  </View>
-                  <Switch
-                    testID={`flash-${id}`}
-                    value={(st.flash || DIRECTIONS).includes(id)}
-                    onValueChange={(v) => update((p) => {
-                      const cur = p.flash || DIRECTIONS;
-                      const next = v ? DIRECTIONS.filter((d) => d === id || cur.includes(d)) : cur.filter((d) => d !== id);
-                      return { ...p, flash: next };
-                    })}
-                    trackColor={{ true: t.good, false: t.surface3 }}
-                  />
-                </Row>
-              ))}
-              {/* The scheduler's rations and its target (docs/PLAYBOOK.md 2.3).
-                  Retention is what the scheduler aims for: higher means more
-                  reviews for fewer lapses. */}
-              <Row>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>New cards a day</Text>
-                  <Choice testID="new-per-day" value={st.newPerDay || 15} style={{ marginTop: 8 }}
-                          options={[5, 10, 15, 20, 30].map((n) => ({ id: n, name: String(n) }))}
-                          onPick={(id) => update((p) => ({ ...p, newPerDay: id }))} />
-                </View>
-              </Row>
+              {/* The flashcards' three directions and the new-card ration are
+                  on the Study picker now, not here (§30ai): a learner sets them
+                  at the moment of starting a session, and named as "Cards:
+                  recognise" in a settings sheet they were never found. What
+                  stays are the scheduler's other rations and its target
+                  (docs/PLAYBOOK.md 2.3). Retention is what the scheduler aims
+                  for: higher means more reviews for fewer lapses. */}
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Reviews a day</Text>

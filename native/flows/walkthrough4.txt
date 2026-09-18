@@ -69,11 +69,14 @@ wait:3
 shot:22-sounds
 back
 wait:2
-tap:^Listening$
+tap:^At your level$
 wait:3
 shot:23-listening-list
 back
 wait:2
+# Back lands on Practice where it was left, which is scrolled: Build a quiz is
+# the first row and off the top. Every `back` onto a long list needs this.
+scrolltop
 tap:^Build a quiz$
 wait:2
 shot:24-quiz-setup

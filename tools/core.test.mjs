@@ -680,11 +680,14 @@ group("the session");
   ok(long[4] !== ses.items[0] && long[4].word === ses.items[0].word && long[4].again && long.length === 21,
      "and after three other cards in a long one");
   ok(bury(again, 2, "дом", again[2].direction).length === 3, "a re-queued copy of the card itself is not a sibling");
-  ok(QUEUE_DEFAULTS.sessionSize === 20 && QUEUE_DEFAULTS.newPerDay === 15 && QUEUE_DEFAULTS.reviewsPerDay === 200,
+  ok(QUEUE_DEFAULTS.sessionSize === 20 && QUEUE_DEFAULTS.newPerDay === 5 && QUEUE_DEFAULTS.reviewsPerDay === 200,
      "the defaults are the playbook's");
   const unset = buildSession({ seen: {}, words: fresh, dirs: ["recognise"], now: T0, daily: null,
                                opts: { newPerDay: undefined, sessionSize: undefined }, rng });
-  ok(unset.items.length === 15, "an option left unset is the default, not NaN", String(unset.items.length));
+  // Against the default itself, not a literal: this check is about NaN (§30w's
+  // trap), and a number written here went stale the day the default moved.
+  ok(unset.items.length === QUEUE_DEFAULTS.newPerDay, "an option left unset is the default, not NaN",
+     String(unset.items.length));
 }
 
 /* ----------------------------------------------------- backward build-up */

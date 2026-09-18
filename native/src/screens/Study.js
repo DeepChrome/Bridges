@@ -16,7 +16,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, Pressable, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Text } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Choice, Lift, Text } from "../ui";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf } from "../data";
 import { Linked } from "../words";
 import { importDeck, exportDeck } from "../anki";
@@ -24,8 +24,38 @@ import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
 import { applyGrade, reviewRows, preview, schedulerOpts, wanted, wordTrouble, maxLapses, DIRECTIONS } from "@core/scheduler";
-import { buildSession, requeue, bury, dailyFor } from "@core/queue";
+import { buildSession, requeue, bury, dailyFor, QUEUE_DEFAULTS } from "@core/queue";
 import { today } from "@core/util";
+
+/* The three directions as the learner sees them: by what is on the **front**.
+ *
+ * They were three switches in Settings named "Cards: recognise / produce /
+ * listen" — the scheduler's words, not a learner's — and the owner studied for
+ * days without finding them, reporting the produce card as "sometimes the card
+ * starts in English" and the listen card, whose front is a speaker and nothing
+ * else, as "blank". Both are the app working as designed with nothing on the
+ * card saying so. The names here say what you will see, and `KIND_LABEL` puts
+ * the same word on the card. */
+export const FRONTS = [
+  ["recognise", "Russian", "You give the meaning"],
+  ["produce", "English", "You give the Russian"],
+  ["listen", "Sound only", "You give what you heard"],
+];
+export const KIND_LABEL = { recognise: "Russian", produce: "Meaning", listen: "Listen" };
+
+/* What the reminder says a card is, on the card. `New` is the session's own
+   word for it; `Trouble` is the scheduler's (wordTrouble) or the learner's
+   (pinned). Neither names the word, so both are safe on the front — a learner
+   who is told "this one has been hard" before turning it over is being told
+   how to pay attention, not what the answer is. */
+export function flagsFor(st, item) {
+  if (!item) return { isNew: false, trouble: false };
+  const entry = st.seen[item.word];
+  return {
+    isNew: item.kind === "new",
+    trouble: (!!entry && wordTrouble(entry)) || (st.pinned || []).includes(item.word),
+  };
+}
 
 export function troubleWords(st) {
   const out = [];
@@ -195,8 +225,51 @@ function SetPicker({ visible, onClose }) {
     </>
   );
 
+  /* How the cards are asked. These lived in Settings and were never found; a
+     learner decides them at the moment of starting, so they are here, where
+     the sets are. The last front cannot be unticked — a session with no front
+     is a session with no cards, and a control that lets you build one and then
+     apologises is worse than one that will not (§30ac made the same rule for
+     the drill focus). */
+  const fronts = st.flash || DIRECTIONS;
+  const toggleFront = (id) => update((p) => {
+    const cur = p.flash || DIRECTIONS;
+    if (cur.includes(id)) return cur.length === 1 ? p : { ...p, flash: cur.filter((d) => d !== id) };
+    return { ...p, flash: DIRECTIONS.filter((d) => d === id || cur.includes(d)) };
+  });
+
   return (
     <Sheet visible={visible} onClose={onClose} header={header} footer={footer} maxHeight="88%">
+            <View style={{ marginBottom: 18 }}>
+              <SectionLabel>Front of the card</SectionLabel>
+              <List>
+                {FRONTS.map(([id, name, sub]) => (
+                  <Row key={id} testID={`flash-${id}`} onPress={() => toggleFront(id)}>
+                    <Tick on={fronts.includes(id)} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.ink, fontSize: 15 }}>{name}</Text>
+                      <Muted>{sub}</Muted>
+                    </View>
+                  </Row>
+                ))}
+              </List>
+            </View>
+            <View style={{ marginBottom: 18 }}>
+              <SectionLabel>New words a day</SectionLabel>
+              <Choice testID="new-per-day" value={st.newPerDay || QUEUE_DEFAULTS.newPerDay}
+                      options={[5, 10, 15, 25].map((n) => ({ id: n, name: String(n) }))}
+                      onPick={(id) => update((p) => ({ ...p, newPerDay: id }))} />
+            </View>
+            {/* "One voice" is the phone's voice on every card. The recordings
+                are the better sound and stay the default; what they cannot be is
+                one speaker, since the collection has four sources (§27). */}
+            <View style={{ marginBottom: 18 }}>
+              <SectionLabel>Voice</SectionLabel>
+              <Choice testID="flash-voice" value={st.flashVoice || "recording"}
+                      options={[{ id: "recording", name: "Recordings" }, { id: "device", name: "One voice" }]}
+                      onPick={(id) => update((p) => ({ ...p, flashVoice: id }))} />
+            </View>
+
             {/* Everything the picker can turn on, it can turn off.
              *
              * "Due today" is what the path's "Review · N due" switches on, and
@@ -311,7 +384,7 @@ const faceSize = (face) => (face.sentence ? (face.w.length > 46 ? 20 : 24)
 /* The card's front, by direction: the Russian, its meaning, or only the sound.
    A sentence is plain text here and word-linked on the back — tapping a word
    before answering would hand over the answer. */
-function Front({ face, direction }) {
+function Front({ face, direction, device }) {
   const t = useTheme();
   if (direction === "produce") {
     // Meaning first: the same numbered senses, since the question is "which
@@ -326,7 +399,7 @@ function Front({ face, direction }) {
   if (direction === "listen") {
     return (
       <View style={{ alignItems: "center", paddingVertical: 12 }}>
-        <Speaker text={face.b} size={64} />
+        <Speaker text={face.b} size={64} device={device} />
       </View>
     );
   }
@@ -335,7 +408,7 @@ function Front({ face, direction }) {
       <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center", fontSize: faceSize(face) }}>
         {face.w}
       </Text>
-      <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
+      <View style={{ marginTop: 10 }}><Speaker text={face.b} device={device} /></View>
     </>
   );
 }
@@ -414,12 +487,20 @@ export default function Study({ navigation }) {
   /* The Russian side reads itself out: on arrival when it is the front, on
      the turn when it is the back, and a listening card is the recording. A
      tap on the speaker plays it again (audio.js). */
+  const device = st.flashVoice === "device";
+  /* Keyed on the card, not only on the position. `[at, shown]` alone missed
+     the first card of every session: dealing leaves `at` at 0 and `shown` at
+     false — their initial values — so React never re-ran this, and only the
+     second card onward was read aloud. A listen card first in the pile was a
+     speaker button in silence, which is what the owner reported as a blank
+     card (2026-09-17). `studyoptions.test.js` holds it. */
   useEffect(() => {
     if (!item || !face) return;
     const russianShowing = item.direction === "produce" ? shown : !shown;
-    if (russianShowing) say(face.b, { repeat: false });
+    if (russianShowing) say(face.b, { repeat: false, device });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [at, shown]);
+  }, [at, shown, item && item.word, item && item.direction]);
+  const flags = flagsFor(st, item);
 
   const grade = (g) => {
     /* The weight of the button, not a verdict. Nothing here is right or wrong
@@ -487,34 +568,27 @@ export default function Study({ navigation }) {
         <Btn kind="pri" label="Show" onPress={() => setShown(true)} />
       ) : (
         <View style={{ flexDirection: "row", gap: 6 }}>
+          {/* The four most-pressed controls on the screen go through `Lift`
+              like the quiz answers (§30ah): pressed *into* an edge in their own
+              colour, not a border that thins. */}
           {[[1, "Again", "bad"], [2, "Hard", "plain"],
-            [3, "Good", "good"], [4, "Easy", "pri"]].map(([g, label, kind]) => (
-            <Pressable
-              key={g}
-              testID={`grade-${g}`}
-              accessibilityRole="button"
-              onPress={() => grade(g)}
-              style={{ flex: 1, alignItems: "center", paddingVertical: 11,
-                       borderRadius: radius.md, borderWidth: 1, borderBottomWidth: 3,
-                       borderColor: kind === "bad" ? t.badDim : kind === "good" ? t.goodDim
-                                  : kind === "pri" ? t.brandDim : t.line,
-                       backgroundColor: kind === "bad" ? t.bad : kind === "good" ? t.good
-                                      : kind === "pri" ? t.brand : t.surface }}
-            >
-              <Text style={{ fontWeight: "600", fontSize: 13,
-                             color: kind === "plain" ? t.ink
-                                  : kind === "pri" ? t.brandOn
-                                  : kind === "good" ? t.goodOn : t.badOn }}>
-                {label}
-              </Text>
-              <Text style={{ fontSize: 12, fontWeight: "500",
-                             color: kind === "plain" ? t.ink2
-                                  : kind === "pri" ? t.brandOn
-                                  : kind === "good" ? t.goodOn : t.badOn }}>
-                {iv[g].label}
-              </Text>
-            </Pressable>
-          ))}
+            [3, "Good", "good"], [4, "Easy", "pri"]].map(([g, label, kind]) => {
+            const fill = kind === "bad" ? t.bad : kind === "good" ? t.good : kind === "pri" ? t.brand : t.surface;
+            const edge = kind === "bad" ? t.badDim : kind === "good" ? t.goodDim : kind === "pri" ? t.brandDim : t.surface3;
+            const fg = kind === "plain" ? t.ink : kind === "pri" ? t.brandOn : kind === "good" ? t.goodOn : t.badOn;
+            return (
+              <Lift key={g} testID={`grade-${g}`} fill={fill} edge={edge}
+                    border={kind === "plain" ? t.line : edge} r={radius.md}
+                    style={{ flex: 1 }} onPress={() => grade(g)}>
+                <View style={{ alignItems: "center", paddingVertical: 11 }}>
+                  <Text style={{ fontWeight: "700", fontSize: 13, color: fg }}>{label}</Text>
+                  <Text style={{ fontSize: 12, fontWeight: "500", color: kind === "plain" ? t.ink2 : fg }}>
+                    {iv[g].label}
+                  </Text>
+                </View>
+              </Lift>
+            );
+          })}
         </View>
       )}
 
@@ -587,11 +661,25 @@ export default function Study({ navigation }) {
                 empty box — a failure the learner can report is worth more than
                 a silent one (rule 20.7's third exemption). Skip moves past it
                 and grading still works, so the pile is never stuck. */}
+            {/* What kind of card this is, and whether it is new or has been
+                hard. On both faces: the caption is what stops a speaker-only
+                front reading as an empty card, and a flag is about the card's
+                history, never its content, so it gives nothing away. */}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6,
+                           alignSelf: "stretch", marginBottom: 14 }}>
+              <Text testID="card-kind"
+                    style={{ flex: 1, color: t.ink3, fontSize: 12, fontWeight: "600",
+                             letterSpacing: 1, textTransform: "uppercase" }}>
+                {KIND_LABEL[item.direction] || ""}
+              </Text>
+              {flags.isNew ? <Pill testID="flag-new" tone="brand">New</Pill> : null}
+              {flags.trouble ? <Pill testID="flag-trouble" tone="bad">Trouble</Pill> : null}
+            </View>
             {blank ? (
               <Muted testID="card-blank" style={{ textAlign: "center" }}>
                 This card has no word on it
               </Muted>
-            ) : !flip.face ? <Front face={face} direction={item.direction} /> : (
+            ) : !flip.face ? <Front face={face} direction={item.direction} device={device} /> : (
               <>
                 {item.direction !== "recognise" ? (
                   <>
@@ -606,7 +694,7 @@ export default function Study({ navigation }) {
                           {face.w}
                         </Text>
                       )}
-                    <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
+                    <View style={{ marginTop: 10 }}><Speaker text={face.b} device={device} /></View>
                   </>
                 ) : face.sentence ? (
                   // Shown on the front already, but as plain text; the linked

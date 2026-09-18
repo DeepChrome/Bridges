@@ -515,6 +515,7 @@ export function Pill({ children, tone, testID }) {
   const t = useTheme();
   const c = tone === "good" ? { bg: t.goodBg, fg: t.good }
           : tone === "brand" ? { bg: t.brandBg, fg: t.brandInk }
+          : tone === "bad" ? { bg: t.badBg, fg: t.bad }
           : { bg: t.surface2, fg: t.ink2 };
   return (
     <View testID={testID} style={{ backgroundColor: c.bg, borderRadius: 99,
@@ -632,9 +633,12 @@ export { AV, AV_IDS };
    language, and offering a control that produces wrong audio is worse than offering
    none. Same rule as the web app. `disabled` is withheld from Pressable deliberately
    (see Btn): passing it makes React 19 tests drop presses. */
-export function Speaker({ text, size = 40 }) {
+export function Speaker({ text, size = 40, device = false }) {
   const t = useTheme();
-  const real = hasRealAudio(text);
+  /* With `device` the recording is deliberately not used, so the button must
+     not claim one: `real` decides the label and the testID, and "Hear it"
+     over a device voice would be §27's lie in the other direction. */
+  const real = hasRealAudio(text) && !device;
   const [voice, setVoice] = useState(hasRussianVoice());
   // A stream that failed with no voice to fall back on: the button says so
   // for a few seconds instead of doing nothing (audio.js onAudioFailure).
@@ -663,7 +667,7 @@ export function Speaker({ text, size = 40 }) {
       accessibilityLabel={real ? "Hear it"
         : live ? "Hear it (device voice)"
         : "No recording, and this device has no Russian voice"}
-      onPress={live ? () => say(text) : undefined}
+      onPress={live ? () => say(text, { device }) : undefined}
       hitSlop={8}
       style={({ pressed }) => ({
         width: size, height: size, borderRadius: size / 2, borderWidth: 1,

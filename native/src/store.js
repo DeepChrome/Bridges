@@ -50,7 +50,12 @@ export const DEFAULTS = {
      flashcards deal, the daily rations, the retention asked of the scheduler,
      and how far ahead a learning step may be taken, in minutes. */
   flash: DIRECTIONS.slice(),
-  newPerDay: 15,
+  newPerDay: 5,
+  /* Which voice the flashcards use: `recording` prefers the collection's real
+     audio and falls back to the device; `device` is the phone's voice for every
+     card. The owner heard the jump — a man from Core 5000 on «смотреть», the
+     phone's woman on the next word — and consistency is a study aid. */
+  flashVoice: "recording",
   reviewsPerDay: 200,
   retention: 0.9,
   learnAhead: 20,

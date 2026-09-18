@@ -460,6 +460,18 @@ export async function playTrack(source, from = 0, rateOverride) {
    anything started; the playback itself is tracked by whenIdle(). */
 export async function say(text, opts = {}) {
   const rate = rateFor(text, opts);
+  /* `device: true` asks for the phone's voice even where a recording exists.
+     The flashcards offer it as "one voice": the collection's recordings come
+     from four sources with different readers (§27), so a deck of them jumps
+     between a man on one card and the phone's woman on the next — the owner,
+     2026-09-17, on «смотреть». A recording is still the better sound; this is
+     the learner choosing consistency over it, and it goes through `speakTTS`
+     like any word with no recording, so nothing about it is a second path. */
+  if (opts.device) {
+    const spoke = speakTTS(text, { ...opts, rate });
+    if (!spoke) failed(text);
+    return spoke;
+  }
   /* Bundled first (ROADMAP 13.32). 61 curriculum words have no recording in
      the collection at all — mostly perfective verbs, which is what the aspect
      drill asks about — and they were read by the device voice. They are bought

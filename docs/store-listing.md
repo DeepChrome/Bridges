@@ -1,80 +1,171 @@
-# Store listing prep (ROADMAP P8.7) — 2026-09-07
+# Google Play listing — Bridges
 
-What a Google Play listing needs, drafted from the app as it is. Nothing here is
-submitted; Phase 8 waits on the owner (P8.1's audio decision comes first — the
-current recordings cannot ship publicly, see licensing.md).
+*Written for the Play Console: the copy is what gets pasted in, the checklist is
+what has to be true before Send for review. Last measured against the app on
+2026-09-17.*
+
+Nothing here is submitted. The blockers are at the bottom, and all but one are
+the owner's.
+
+---
 
 ## Name and one-liner
 
-**Bridges — Russian from your own words**
-Russian lessons built on your Anki decks: a path, real recordings, listening
-scenes, speaking practice, a short conversation with a tutor, and a video library
-that lists only the words each video actually says.
+**Bridges — Russian, properly**
 
-## Description (draft)
+Short description (80 characters, Play's limit):
 
-Bridges turns a Russian vocabulary collection into a course. Eight chapters of the
-commonest words, each with side quests — food, home, travel, health, work, law,
-science — that you take or skip. Every lesson teaches a handful of words, then asks
-for them in seven ways: meaning, the Russian, a gap in a real sentence, typing,
-hearing a word, hearing a sentence, and saying one aloud. A listening scene plays
-a few sentences with the questions on screen first. Flashcards are scheduled by
-FSRS, the same algorithm Anki uses, and any Anki deck imports straight in.
+> Russian lessons, spaced repetition and native audio, built on your own words.
 
-Tap any Russian word, anywhere, to see what it is and what form it is in; tap
-again for the full entry: meaning, every form, and the sentences it appears in,
-from a dictionary of 46,000 words.
+## Full description
 
-Immerse holds 321 YouTube episodes from seven Russian-teaching channels, searchable
-by topic, grammar point or level, each listing the study words it actually says
-and jumping to the moment it says them.
+Bridges is a Russian course built on a real vocabulary collection rather than a
+word list somebody invented.
 
-Talk is a short conversation with a tutor on a topic you choose; every sentence
-you say is corrected word by word. Three conversations a day.
+**A path, not a pile.** Ten chapters, 168 lessons, 1,045 words chosen by how
+often they actually occur. Each chapter has a spine everyone walks and side
+quests — food, travel, work, medicine, law, science — you take or skip. A lesson
+teaches a handful of words, then asks for them in several ways: the meaning, the
+Russian, a gap in a real sentence, typing it, hearing a word, hearing a whole
+sentence, and saying one aloud.
 
-## Privacy disclosure
+**Spaced repetition that matches Anki.** FSRS-6 scheduling with learning steps,
+daily limits, burying and undo. Every word is three separate memories —
+recognising it, producing it, hearing it — because knowing a word when you see
+it is not the same as being able to say it. Import an Anki deck and it schedules
+alongside everything else; export one back out whenever you like.
 
-Data handled, and where it goes:
+**Listening that is actually at your level.** Thirty-two written conversations,
+two to three speakers each, thirty to forty-five seconds, with five questions
+about the situation — who is talking, what the problem is, how it ends. The
+questions are on screen before the audio starts, replays are unlimited, and you
+can drop back five seconds or slow it to three-quarter speed.
 
-- **Your voice never leaves the phone.** Speech recognition runs on the device.
-  For Say and Talk, the *text* the recogniser heard is sent to our server
-  (a Cloudflare Worker) and from there to Anthropic's API to be graded; it is not
-  stored by us beyond a same-day request counter and a token count. Nothing is
-  sent unless you speak to one of those two activities.
-- **Your progress stays on the phone**, in the app's storage. Export it as a file
-  from Settings; nothing is uploaded.
-- **Recordings stream from our web host** when a word is played; with "Audio for
-  offline" on, they are downloaded to the phone's cache.
-- **Videos are YouTube embeds.** Playing one is subject to YouTube's terms and
-  YouTube sees the playback. The app sends YouTube nothing about you.
-- **No accounts, no analytics, no advertising.**
+**Speaking.** Say a sentence and it is checked word by word on the device.
+Repeat-after-me shadowing. A pronunciation drill on the pairs English speakers
+get wrong. A syllable-by-syllable builder for the long words. And Talk — a short
+conversation with a tutor on a situation you pick, where every sentence you say
+comes back corrected.
 
-Google Play data-safety form, as it would be filled in: data collected — none;
-data shared — "Voice or sound recordings": no; "Other user-generated content"
-(the transcript of what you said, for the two speaking activities): shared with a
-service provider, not stored, optional; encryption in transit: yes; deletion:
-nothing to delete server-side.
+**Every word is a link.** Tap any Russian anywhere in the app to see what it is
+and what form it is in; tap again for the full entry — every sense, the complete
+paradigm, example sentences, and the videos that say it. The dictionary holds
+46,000 words.
 
-## Screenshots
+**Watch real Russian.** 321 captioned episodes from seven Russian-teaching
+channels, searchable by topic, grammar point or level, each listing only the
+words it genuinely says and jumping to the moment it says them.
 
-Six from the emulator walkthrough, 1080×2400, in `docs/store/`:
+**No account. No adverts. No analytics.** Your progress lives on your phone and
+you can export it as a file whenever you want.
 
-| File | Shows |
-|---|---|
-| 41-learn-home-button.png | The path with its chapters and side quests |
-| 44-practice.png | Practice: quiz, listening, talk, the grammar drills |
-| 48-listening-scene.png | A listening scene, questions before the audio |
-| 50-immerse.png | The video library with its search bar |
-| 53-video.png | A video and the words it says |
-| 58-settings-more.png | Settings: keyboard, reading speed, the ten sounds |
+---
 
-Retake them on a real device before submission; the emulator's status bar is
-visible in these.
+## Graphics
 
-## Before submission
+| Asset | File | Notes |
+|---|---|---|
+| Feature graphic | `docs/store/feature-graphic.png` | 1024×500, generated by `tools/make_feature_graphic.py` from the launcher icon's own geometry |
+| Icon | `native/assets/icon.png` | generated by `tools/make_app_icon.py` |
+| Screenshots | `docs/store/screenshots/1-path.png` … `8-progress.png` | 1080×2400 |
 
-1. P8.1's audio decision, then P8.2 (regenerate or license) and P8.3 (`build_audio.py --commercial`).
-2. `build_site.py --public` for the payload (no caption text).
-3. Per-user tokens (P8.4, done) — the listing build must not carry the owner's token: give each install its own via `backend/tools/user.mjs`.
-4. A privacy policy URL (this section, hosted).
-5. Onboarding (P8.6, done): the tour on first run.
+Screenshots, in order: the path · a lesson's steps · a vocabulary card · a
+question · the listening list · Practice · the video library · progress.
+
+**Retake on a real device before submitting.** These are from the emulator and
+its status bar is in shot.
+
+---
+
+## Data safety form
+
+The answers, and what makes each one true:
+
+| Question | Answer | Why |
+|---|---|---|
+| Data collected | None | No account, no identifiers, no analytics SDK |
+| Data shared | Yes — "Other user-generated content" | The *text* of what you said or wrote, for the three tutor features |
+| Voice or audio recordings | **No** | Recognition runs on the device; audio never leaves it |
+| Location, contacts, photos, files | No | Not requested; the manifest has no such permission |
+| Encrypted in transit | Yes | HTTPS to the Worker and to Anthropic |
+| Users can request deletion | Nothing is stored to delete | The Worker keeps a per-day counter and a token count, nothing keyed to a person |
+| Data used for tracking | No | |
+
+Permissions in the manifest, and nothing else — `tools/release_check.mjs`
+asserts it:
+
+- `RECORD_AUDIO` — the speaking exercises
+- `MODIFY_AUDIO_SETTINGS` — the audio session for playback
+- `POST_NOTIFICATIONS` — the optional daily reminder
+
+Content rating: Everyone. No ads, no purchases, no user-to-user communication.
+
+Privacy policy: `docs/privacy-policy.md`, **needs hosting at a public URL**.
+
+---
+
+## Signing (ROADMAP 13.41)
+
+Release builds are signed with the **debug key** by default — the Expo template's
+setting, fine for side-loading and refused by Play. `node tools/release_check.mjs`
+reads the signature off the built artifact and fails when it is the debug one.
+
+Creating the upload key is the owner's, because the password is his and because
+**losing it is unrecoverable** unless Play App Signing is enabled (turn it on;
+it is the default for new apps and it means Google holds the app signing key
+while this one only signs uploads).
+
+```
+keytool -genkeypair -v -keystore <somewhere outside the repo>/bridges-upload.jks \
+  -alias upload -keyalg RSA -keysize 4096 -validity 10000
+```
+
+Then in `~/.gradle/gradle.properties` — outside the repo, rule 20.11:
+
+```
+BRIDGES_UPLOAD_STORE=C:/path/outside/repo/bridges-upload.jks
+BRIDGES_UPLOAD_STORE_PASSWORD=…
+BRIDGES_UPLOAD_ALIAS=upload
+BRIDGES_UPLOAD_KEY_PASSWORD=…
+```
+
+`gradlew bundleRelease` then signs with it, and `release_check.mjs` says so.
+**Back the keystore up somewhere that is not this machine**, alongside
+`debug.keystore` (13.16).
+
+---
+
+## Build
+
+```
+cd native/android && ./gradlew bundleRelease     # app-release.aab, ~86 MB
+node tools/release_check.mjs                      # signature, size, permissions
+```
+
+A bundle, not an APK: Play requires one for new apps, and it splits per device
+so the download is far smaller than the file uploaded.
+
+---
+
+## Before Send for review
+
+**Mine, and done:** licence file, privacy policy text, feature graphic, eight
+screenshots, permissions minimal and asserted, bundle builds, release check.
+
+**His, and none of it is code:**
+
+1. **Play developer account, $25.** The long pole: a new personal account needs
+   roughly twelve testers opted in to a closed test for fourteen days before
+   production unlocks. The clock cannot start until the account exists, so this
+   is worth doing before anything else is ready.
+2. **The upload key**, above, and Play App Signing on.
+3. **Host the privacy policy** and put the URL in the listing.
+4. **A native speaker reads the authored Russian** — `review/content_v1.csv`,
+   2,353 rows (ROADMAP 13.29, Gate 3). This blocks release on its own: the
+   conversations are machine-checked for level and vocabulary, and nothing has
+   checked whether they are idiomatic.
+5. **The Worker token.** The shipped build carries his in plaintext (13.39). A
+   public build needs per-install tokens — the mechanism exists
+   (`backend/tools/user.mjs`) and is not wired to a release.
+6. **Audio licensing** — `build_audio.py --commercial` drops the 31 Tatoeba
+   recordings that are NC, ND or unstated (13.11, licensing.md).

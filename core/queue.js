@@ -29,7 +29,13 @@ import { DIRECTIONS, kindOf, isDue, retrievability, dayOf, readyFor } from "./sc
 
 /* `buryNew` and `buryReview` are Anki's two sibling settings, separately,
    because they cost very different things — see the table in `buildSession`. */
-export const QUEUE_DEFAULTS = { newPerDay: 15, sessionSize: 20, reviewsPerDay: 200, learnAhead: 20,
+/* `newPerDay` is 5, down from 15 (the owner, 2026-09-17: "The default is maybe
+   5"). It is safe to move because it is not the lever: §30aa priced it at 6, 10,
+   15 and 25 new cards a day and the route's load barely moved — the lesson
+   quizzes create most of the cards, not the flashcard ration. What the number
+   does control is how many *unfamiliar* faces a flashcard session opens with,
+   and five is a pace a learner can feel finishing. */
+export const QUEUE_DEFAULTS = { newPerDay: 5, sessionSize: 20, reviewsPerDay: 200, learnAhead: 20,
                                 minGap: 3, buryNew: true, buryReview: false };
 
 /* Today's counts, or a fresh slot when the day has moved on. */

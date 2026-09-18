@@ -1085,8 +1085,10 @@ by `core/speech.js`, so a dropped word reads the same whether it was typed or sa
   listener who knows what to listen for listens differently. Credit is the share
   right; a sentence's words are graded by its question. **Not a quiz step at
   all** since 2026-09-17 (§30af): it is a standalone exercise, Practice →
-  Listening → Conversations. Also the Listening drill in Practice
-  (`listeningDrill`), five
+  Listening. *(There was also a `listeningDrill` here — five corpus scenes
+  for Practice — that no screen had called since the written scenarios
+  replaced it; removed 2026-09-18, §30ak.)* The corpus scene survives as the
+  fallback `lessonPassage` draws, five
   scenes from the units reached so far. `sceneFor` returns null when a pool
   cannot supply three wrong meanings — never a scene with two options.
 
@@ -3575,6 +3577,56 @@ measured at 179 ms (§30ad) and this is not a problem to solve.
 Still open from §30ah and named again rather than quietly dropped: the caption
 under every Practice row, and a question with no prompt still centring its
 answers in all the slack.
+
+## 30ak. Do the drills work? (2026-09-18)
+
+The owner: *"Can you review the efficacy of everything? Especially the
+practice drills. Which work and which dont."* Whether a button responds is
+`routes.test.js`'s question and whether a bank is deep is `audit_banks.mjs`'s;
+whether a question is *sensible* — answerable, about something worth knowing,
+with the answer actually among the options — is a reading question, and
+nothing put the questions in front of a reader. `tools/sample_drills.mjs` does:
+a handful per generator against a learner who has met 150 words, plus whether
+a run of ten fills. Read alongside the drill screens on the emulator.
+
+**Every drill produces sound questions.** Cases writes «масло → маслу» and
+offers «работа» four of its own forms; aspect pairs «хотеть → захотеть»,
+«говорить → сказать»; agreement «___ среда · ночной → ночная»; conjugation
+«звать, они, past → звали», «выпило → оно»; stress three copies of «растите»
+differing only in the mark, with the recording as the question; grammar rules
+«Он говорит на русском языке → Speaking a language». The lesson quiz mid-route
+is eleven steps across seven kinds and every one reads as a real question.
+Word building builds backwards as designed («тель → читель → учитель»).
+Shadowing draws real sentences with real recordings. The pronunciation pairs
+are real pairs. The written scenario plays with its transport, cast and five
+situational questions — it is the most finished thing in Practice.
+
+**What did not work was not a drill — it was a generator with no screen.**
+`listeningDrill` (five corpus scenes for Practice, §30c) had no caller: Practice
+→ Listening has drawn the written scenarios since §30l and falls back to
+`lessonPassage`. It was product code kept alive by one test, which is the
+*test-only* bin of `audit_dead.mjs` needing a decision rather than a deletion
+by default. Deleted, with its test; `sceneFor` stays under `lessonPassage` and
+the quiz's "scene" kind.
+
+**And one layout defect, the mirror of §30ah's.** The prompted case was fixed
+to cluster question and answers low; the *unprompted* case — shadowing,
+listen-and-choose, the build-up — still centred its activity in all the slack,
+so the shadowing screen was a "Hear it again" button and a microphone in the
+middle with seven hundred pixels above. A first fix sent it to the top, which
+put the two kinds of screen at opposite ends; read off the shots, the rule is
+one: caption at the top, the thing to touch low where the thumb is, air
+between. Both cases use `flex-end` now.
+
+**Read but left alone, named for the next pass:** the scenario's answer
+buttons are the Scene view's own flat boxes rather than `Lift`; the aspect
+drill's chosen form still lets a prefix give the perfective away, which §30r
+established the data cannot fix and the written form (the default) avoids;
+and the corpus-scene fallback asks a meaning question per sentence, the shape
+the owner rejected — it fires only for a lesson with no script, which is 136 of
+168 since §30af, so a learner past chapter 1 on a branch lesson will meet it.
+That last one is a content decision: write more scenarios, or accept the
+fallback's shape where there is none.
 
 ## 31. Verification
 

@@ -623,9 +623,18 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       {/* Keyed by position so a view is remounted for every step: two typed
           questions in a row otherwise share one input, and the second opens with
           the first's answer still in it. */}
+      {/* A question with no prompt — shadowing, a listen-and-choose, the
+          build-up — used to centre its activity in all the slack, which put a
+          "Hear it again" button and a microphone in the middle of the screen
+          with seven hundred pixels of nothing above them (the shadowing shot,
+          2026-09-18: the same defect the prompt case had, pointing the other
+          way — §30ah). One rule for both cases now: the caption at the top,
+          the thing to touch in the lower half where the thumb is, the air in
+          between. A first cut sent this case to the *top* instead, which put
+          the two kinds of screen at opposite ends — read off the shots. */}
       <Animated.View key={at} testID="answer-block"
                      style={[answerIn, !q.prompt && !hasInput(q)
-                       ? { flexGrow: 1, justifyContent: "center" } : null]}>
+                       ? { flexGrow: 1, justifyContent: "flex-end", paddingBottom: 8 } : null]}>
         {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip, usedHint, back, next }) : null}
       </Animated.View>
 

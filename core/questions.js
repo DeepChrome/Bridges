@@ -781,20 +781,12 @@ export function makeQuestions(env) {
     return out;
   }
 
-  /* A run of scenes for the listening drill, no two opening on the same
-     sentence; `want` (a Set of lemma indices — the trouble bank, say) prefers
-     scenes that open on one of those words. */
-  function listeningDrill(units, n, want) {
-    const ids = units.map((u) => u.id);
-    const out = [], seen = new Set();
-    for (let k = 0; k < n * 6 && out.length < n; k++) {
-      const s = sceneFor(ids, want && want.size ? want : null);
-      if (!s || !s.lines.length || seen.has(s.lines[0].ru)) continue;
-      seen.add(s.lines[0].ru);
-      out.push(s);
-    }
-    return out;
-  }
+  /* `listeningDrill` — five corpus scenes for Practice — lived here until
+     2026-09-18. Practice → Listening has drawn the written scenarios since
+     §30l, falling back to `lessonPassage`, and no screen called it; only a
+     test did. Removed by the efficacy review (§30ak) rather than kept for a
+     screen that does not exist. `sceneFor` stays: the lesson passage and the
+     quiz's "scene" kind are built on it. */
 
   /* ------------------------------------------------------------------ forms */
 
@@ -2004,7 +1996,7 @@ export function makeQuestions(env) {
   return {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
-    sceneFor, listeningDrill, lessonPassage, scriptScene, writtenPassage, shadowDrill,
+    sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
     customQuiz, formPrompt, formSpec, formsIntroduced, drillFocus,
     drillsIntroduced, drillOpensAt, passagesFor, passageQuestions, passageFit,
   };

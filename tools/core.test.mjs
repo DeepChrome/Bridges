@@ -1277,10 +1277,6 @@ group("scenes and custom quizzes");
   ok(!s.autoplay, "nothing plays before the learner presses Play");
   ok(!answerable({ kind: "scene", questions: [{}] }), "a scene without options is not answerable");
 
-  const drill = Q.listeningDrill(Q.unitsUpTo(later), 4);
-  ok(drill.length === 4 && new Set(drill.map((d) => d.lines[0].ru)).size === 4,
-     "a listening drill of four distinct scenes", String(drill.length));
-
   const units = Q.unitsUpTo(later);
   const own = Q.customQuiz({ units, kinds: ["choose-en", "type"], n: 10 });
   ok(own.length === 10 && own.every((q) => q.kind === "choose-en" || q.kind === "type"),

@@ -64,7 +64,7 @@ shot:20-practice
 scroll
 shot:21-practice-drills
 scrolltop
-tap:^Sounds$
+tap:^Alphabet$
 wait:3
 shot:22-sounds
 back

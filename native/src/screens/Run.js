@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Pressable, ScrollView, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Text } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text } from "../ui";
 import { GuidePop } from "../guide";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, LINES } from "@core/guide";
@@ -95,9 +95,12 @@ function Options({ q, answered, picked, onPick }) {
    anything is going to feel physical it is this. */
 function Option({ o, i, answered, picked, onPick, centred }) {
   const t = useTheme();
-  const press = usePress();
   const isPicked = picked === i;
   const show = answered && (o.right || isPicked);
+  /* Untouched, the edge is a step darker than the page rather than the hairline
+     the surface already carries — an edge the same weight as a border is not an
+     edge, which is why these read as flat boxes however thick the bottom was. */
+  const edge = !show ? t.surface3 : o.right ? t.goodDim : t.badDim;
   const border = !show ? t.line : o.right ? t.good : t.bad;
   const bg = !show ? t.surface : o.right ? t.goodBg : t.badBg;
   /* The right answer pops when it is revealed — including when the learner
@@ -106,23 +109,18 @@ function Option({ o, i, answered, picked, onPick, centred }) {
      the thing someone just got wrong is gloating. */
   const reveal = usePop([answered && o.right]);
   return (
-    <Animated.View style={[answered && o.right ? reveal : null, answered ? null : press.style]}>
-      <Pressable
-        disabled={answered}
-        onPress={() => onPick(i, o)}
-        onPressIn={answered ? undefined : press.onPressIn}
-        onPressOut={answered ? undefined : press.onPressOut}
-        style={({ pressed }) => ({
-          backgroundColor: bg, borderColor: border, borderWidth: 1,
-          borderBottomWidth: pressed ? 1 : 3, borderRadius: radius.md,
-          paddingVertical: 15, paddingHorizontal: 16, minHeight: 54,
-          justifyContent: "center",
-          alignItems: centred ? "center" : "flex-start",
-        })}
-      >
-        <Text style={{ color: t.ink, fontSize: 16,
-                       textAlign: centred ? "center" : "left" }}>{o.label}</Text>
-      </Pressable>
+    <Animated.View style={answered && o.right ? reveal : null}>
+      <Lift edge={edge} fill={bg} border={border} r={radius.md}
+            disabled={answered} onPress={() => onPick(i, o)}>
+        <View style={{ paddingVertical: 15, paddingHorizontal: 16, minHeight: 54,
+                       justifyContent: "center",
+                       alignItems: centred ? "center" : "flex-start" }}>
+          {/* Weight 600, not regular: an answer is a label on a control, not
+              body copy, and the reference sets its buttons heavy. */}
+          <Text style={{ color: t.ink, fontSize: 16, fontWeight: "600",
+                         textAlign: centred ? "center" : "left" }}>{o.label}</Text>
+        </View>
+      </Lift>
     </Animated.View>
   );
 }
@@ -566,9 +564,18 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           six hundred pixels of nothing between them. The slack goes to the
           activity instead (below), which is what the learner is looking at.
           Read off the walkthrough shots, 2026-09-16. */}
+      {/* …and the slack goes **above** the question, not around it.
+          `justifyContent: "center"` put the prompt in the middle of the block
+          while the answers stayed pinned below it, so a short question and four
+          short options sat five hundred pixels apart with nothing in between —
+          the single loudest "unfinished" signal on the screen a learner spends
+          most of their time on, and it survived three interface passes because
+          nobody read a quiz shot (2026-09-17). A question and its answers are
+          one thing and belong together; the breathing room belongs under the
+          progress bar, where it reads as air rather than as a rift. */}
       <Animated.View testID="question-block"
                      style={[questionIn, { flexGrow: hasInput(q) || !q.prompt ? 0 : 1,
-                                           justifyContent: "center",
+                                           justifyContent: "flex-end",
                                            alignItems: "center", marginBottom: 20 }]}>
         <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "600", letterSpacing: 1,
                        textTransform: "uppercase", marginBottom: 12,

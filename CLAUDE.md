@@ -3406,11 +3406,47 @@ Asserted in the render tree, since native has no visual suite: exactly one disc
 carries the brand fill, a locked one carries none, and the fill moves to
 chapter 2 when chapter 1 is finished.
 
+### The second pass, after "I don't see any differences in the UI feel"
+
+The first pass recoloured things and changed nothing anybody could feel, which
+was a fair verdict: two screens out of twenty-three, and neither of them one a
+learner spends time in. Feel is touch response and visual weight, and both are
+systemic.
+
+**Every pressable already had an edge, and the app still read as flat, because
+the control never moved.** `Btn`, `Option` and the rest thinned a bottom border
+from 3 to 1 on press. Thinning a border changes a box; it does not look like
+something being pushed. The path discs were the only place that did it properly
+— a fixed-height container with the face sliding down into the edge — and that
+model is now `Lift` in `ui.js`, carrying `Btn` and the quiz answers.
+
+Height never changes, which is the whole reason for the container: the obvious
+version (shrink the border, translate the view) reflows everything below it in a
+flex column. `edge` is a darker tint of the fill (`brandDim`, `goodDim`,
+`badDim`, `surface3` under white), never a blur — physical depth, not
+atmospheric. A `ghost` or `link` passes `flat` and keeps the scale alone,
+because a control with no box has no edge to be pressed into.
+
+**And the quiz screen was mostly empty.** `question-block` grew to take the
+slack *and centred itself in it*, while the answers stayed pinned below — so a
+short question and four short options sat five hundred pixels apart with nothing
+between them. `justifyContent: "flex-end"` clusters them: a question and its
+answers are one thing, and the breathing room belongs under the progress bar
+where it reads as air rather than as a rift. **This survived three interface
+passes because nobody had read a quiz shot** — §31 says to look at the pictures,
+and the screen a learner spends most of their time on was never among them.
+
 **Still open, and named so the next pass does not have to rediscover it:** every
 Practice row carries an explanatory caption (the app narrating itself, rule
-20.7); borders are 1px hairlines throughout where the model wants 2px; heading
-and button weight is 600/700 where the reference is 800; and the lip is still
-only on `Btn` and the path discs, not on rows, option buttons or cards.
+20.7); borders elsewhere are still 1px hairlines; `Row`, `Card` and the sheets
+have no lip; and a question with **no** prompt still centres its answers in all
+the slack, which is the same defect in the other direction.
+
+**A test that reads a fill off `parent` is coupled to structure it should not
+care about.** `Lift` puts a padding wrapper inside the Pressable, and
+`review.test.js` — asserting which button is brand-filled — started reading an
+empty style and failing on a button that was plainly blue. It walks up for the
+fill now. The assertion was right; its assumption about depth was not.
 
 **A trap worth keeping.** `adb exec-out screencap -p > file.png` through
 PowerShell corrupts the PNG — the redirect adds a BOM and mangles the bytes, the

@@ -47,13 +47,24 @@ async function withState(state) {
   return await render(<SessionProvider><Learn navigation={nav} /></SessionProvider>);
 }
 
-/* A Btn's fill says which action the screen is pushing: brand is primary. */
+/* A Btn's fill says which action the screen is pushing: brand is primary.
+ *
+ * Walks up for it rather than reading the label's immediate parent. That used
+ * to be the Pressable itself, so the fill was one hop away — and when `Btn`
+ * grew a padding wrapper inside its Pressable (the press-travel rework,
+ * 2026-09-17) the assertion started reading an empty style and failing on a
+ * button that was plainly blue. What this test is about is which control
+ * carries the brand fill, not how many Views deep it sits. */
 const fillOf = (node) => {
-  const style = node.props.style;
-  const flat = Array.isArray(style) ? Object.assign({}, ...style.filter(Boolean)) : style;
-  return (flat.backgroundColor || "").toUpperCase();
+  for (let n = node, hops = 0; n && hops < 6; n = n.parent, hops++) {
+    const style = n.props && n.props.style;
+    const flat = Array.isArray(style) ? Object.assign({}, ...style.flat(9).filter(Boolean)) : style;
+    const bg = flat && flat.backgroundColor;
+    if (typeof bg === "string" && bg) return bg.toUpperCase();
+  }
+  return "";
 };
-const btnFor = (label) => screen.getByText(label).parent;
+const btnFor = (label) => screen.getByText(label);
 
 beforeEach(async () => {
   await flushState();

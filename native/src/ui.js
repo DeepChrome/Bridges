@@ -19,6 +19,56 @@ import { useTheme, radius, space, faceFor, useShadow } from "./theme";
 import { useFill, usePress, useEnter } from "./motion";
 import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
 
+/* How deep a control's edge is, and how far it travels when pressed. One
+   number, so a quiz answer and the primary button are pressed by the same
+   amount. */
+export const LIP = 4;
+
+/* A control that is pressed *into its own edge*.
+ *
+ * Every pressable in the app already had an edge — a thicker bottom border that
+ * thinned on press — and it read as flat anyway, because **the control never
+ * moved**. Thinning a border changes the box; it does not look like something
+ * being pushed. The owner, 2026-09-17, after a pass that only recoloured
+ * things: *"I don't see any differences in the UI feel."*
+ *
+ * The model that works is the one the path discs already used: a container of
+ * fixed height painted in the edge colour, with the face sliding down into it.
+ * Height never changes, so nothing below reflows — which is the reason the
+ * naive version (shrink the border, translate the view) cannot be used in a
+ * flex column.
+ *
+ * `edge` is a darker tint of the face, never a blur: the depth here is physical.
+ * The caller owns layout, so `style` goes on the container and the face keeps
+ * only what it looks like — the same split `Btn` makes, and what keeps a
+ * control's own style readable in the render tree (§20a). */
+export function Lift({ children, edge, fill, border, r = radius.md, style, flat,
+                      onPress, disabled, testID, label, hint, role = "button", state }) {
+  const live = !disabled && !!onPress;
+  return (
+    <View style={[{ backgroundColor: flat ? "transparent" : edge, borderRadius: r,
+                    paddingBottom: flat ? 0 : LIP }, style]}>
+      <Pressable
+        testID={testID}
+        onPress={live ? onPress : undefined}
+        accessibilityRole={role}
+        accessibilityLabel={label}
+        accessibilityHint={hint}
+        accessibilityState={state}
+        style={({ pressed }) => ({
+          backgroundColor: fill,
+          borderColor: border === undefined ? edge : border,
+          borderWidth: flat ? 0 : 2,
+          borderRadius: r,
+          transform: [{ translateY: pressed && live && !flat ? LIP : 0 }],
+        })}
+      >
+        {children}
+      </Pressable>
+    </View>
+  );
+}
+
 /* The app's `Text`, and the only one anything may import.
  *
  * React Native has no global font: a `Text` that names a size and not a family
@@ -283,33 +333,48 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
      and only when it is live: a shadow under a button nobody may press says the
      opposite of what it is for. */
   const lift = useShadow("lift");
+  /* A ghost and a link have no box, so they have no edge to be pressed into;
+     they keep the scale alone. Everything with a fill goes through `Lift` and
+     actually travels — the border used to thin from 3 to 1, which changes the
+     shape of a button without ever looking like one being pushed. */
+  const flat = kind === "ghost" || kind === "link";
+  /* `edge` is a darker tint of the fill, which is what makes the depth read as
+     the control's own rather than as a grey line under it. `plain` and every
+     disabled control take the neutral line, since their fill is already a
+     neutral. */
+  const edge = disabled ? t.line
+    : kind === "pri" ? t.brandDim
+    : kind === "good" ? t.goodDim
+    : kind === "bad" ? t.badDim
+    : t.line;
   return (
     <Animated.View style={[style, disabled ? null : press.style,
                            kind === "pri" && !disabled ? lift : null]}>
-      <Pressable
+      <Lift
         testID={testID}
+        flat={flat}
+        edge={edge}
+        fill={shown.bg}
+        border={shown.border}
+        r={radius.md}
+        disabled={disabled}
+        onPress={onPress}
         /* The label is read off the text inside, so it is deliberately not
            repeated as an `accessibilityLabel` — one there would *replace*
            what the button says rather than add to it. What was missing is the
            role and the state: a control that looks greyed out has to announce
            that it is, and a reader that cannot tell a button from a caption
            cannot use the app at all. */
-        accessibilityRole="button"
-        accessibilityState={{ disabled: !!disabled }}
-        onPress={disabled ? undefined : onPress}
-        onPressIn={disabled ? undefined : press.onPressIn}
-        onPressOut={disabled ? undefined : press.onPressOut}
-        style={({ pressed }) => ({
-          backgroundColor: shown.bg, borderColor: shown.border,
-          borderWidth: 1, borderBottomWidth: pressed || disabled ? 1 : 3,
-          marginBottom: pressed || disabled ? 2 : 0,
-          borderRadius: radius.md, paddingVertical: 13, paddingHorizontal: 18,
-          alignItems: "center", minHeight: 48,
-          justifyContent: "center",
-        })}
+        state={{ disabled: !!disabled }}
       >
-        <Text style={{ color: shown.fg, fontWeight: "600", fontSize: 15 }}>{label}</Text>
-      </Pressable>
+        <View style={{ paddingVertical: 13, paddingHorizontal: 18,
+                       alignItems: "center", minHeight: 48,
+                       justifyContent: "center" }}>
+          {/* 700, not 600. The reference sets button labels heavy and it is the
+              cheapest weight a control can carry to stop reading as a caption. */}
+          <Text style={{ color: shown.fg, fontWeight: "700", fontSize: 15 }}>{label}</Text>
+        </View>
+      </Lift>
     </Animated.View>
   );
 }

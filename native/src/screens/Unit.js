@@ -82,7 +82,8 @@ export function UnitScreen({ route, navigation }) {
   );
 }
 
-const STEP_LABEL = { vocab: "Start the vocabulary", quiz: "Take the quiz", video: "Watch the video" };
+const STEP_LABEL = { vocab: "Start the vocabulary", quiz: "Take the quiz", video: "Watch the video",
+                     listen: "Listen to the conversation" };
 
 export function LessonScreen({ route, navigation }) {
   const { st } = useSession();
@@ -95,12 +96,22 @@ export function LessonScreen({ route, navigation }) {
     vocab: "Meet the new words",
     quiz: "Show you know them",
     video: "Shared across this unit",
+    listen: "Two people, and five questions",
   };
 
-  const nextId = (cs.find((c) => !c.done) || {}).id;
-  const open = (id) => navigation.navigate(
-    id === "video" ? "Video" : id === "quiz" ? "Quiz" : "Vocab",
-    { unitId: unit.id, index: i });
+  /* The brand edge goes on the next **required** step while one is left, so a
+     finished lesson does not point at its optional extra as though the lesson
+     were unfinished. Once the required work is done the extra takes it, which
+     is the right nudge and not a demand. */
+  const nextId = (cs.find((c) => !c.done && !c.optional) || cs.find((c) => !c.done) || {}).id;
+  /* One place that knows where a step goes. It was written twice — here and on
+     the primary button — which is exactly how the two come to disagree. */
+  const open = (id) => {
+    if (id === "listen") return navigation.navigate("Scenes", { key: `${unit.id}:${i}` });
+    return navigation.navigate(
+      id === "video" ? "Video" : id === "quiz" ? "Quiz" : "Vocab",
+      { unitId: unit.id, index: i });
+  };
 
   return (
     <Screen>
@@ -159,12 +170,8 @@ export function LessonScreen({ route, navigation }) {
       {/* One primary action: the next undone step, or the next lesson. */}
       {!lessonDone(st, unit, i) ? (
         <Btn kind="pri" style={{ marginTop: 16 }}
-             label={STEP_LABEL[cs.find((c) => !c.done).id]}
-             onPress={() => {
-               const c = cs.find((x) => !x.done);
-               navigation.navigate(c.id === "video" ? "Video" : c.id === "quiz" ? "Quiz" : "Vocab",
-                                   { unitId: unit.id, index: i });
-             }} />
+             label={STEP_LABEL[nextId]}
+             onPress={() => open(nextId)} />
       ) : i + 1 < lessonCount(unit) ? (
         <Btn kind="pri" style={{ marginTop: 16 }} label="Next lesson"
              onPress={() => navigation.setParams({ index: i + 1 })} />

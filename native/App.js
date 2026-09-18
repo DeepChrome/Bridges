@@ -219,8 +219,12 @@ function PracticeStack() {
           every deep link and saved navigation state for nothing. */}
       <Stack.Screen name="Listening" component={ListeningList} options={{ title: "Native speed" }} />
       <Stack.Screen name="Passage" component={PassageFlow} options={{ title: "Listening" }} />
-      {/* The conversations to choose from, and one of them being listened to. */}
-      <Stack.Screen name="SceneList" component={ScenesList} options={{ title: "Conversations" }} />
+      {/* The listening pieces to choose from, and one of them being listened to.
+          **Not "Conversations"** — that is Talk, the spoken exchange with the
+          tutor (§30f), and the owner found the two competing for the word:
+          *"what happened to the conversation with AI module??? That was
+          conversation. This one should just be called listening."* */}
+      <Stack.Screen name="SceneList" component={ScenesList} options={{ title: "Listening" }} />
       <Stack.Screen name="Scenes" component={ListeningFlow} options={{ title: "Listening" }} />
       <Stack.Screen name="Sounds" component={Sounds} options={{ title: "Alphabet" }} />
       {/* The pronunciation drill, reached from Sounds (ROADMAP P10.8). */}

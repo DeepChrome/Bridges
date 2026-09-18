@@ -206,10 +206,30 @@ export function components(st, u, i) {
     { id: "quiz", label: "Quiz", score: l.q, tries: l.tries || 0, done: quizPassed(l) },
   ];
   if (u.v) out.push({ id: "video", label: "Video", done: !!s.video, shared: true });
+  /* The lesson's conversation, where one was written for it — 32 of the 168
+     (§30af). The owner, 2026-09-17: *"you can have them listed along with the
+     lesson content..like where it says vocab lesson quiz video"*. It is listed
+     as a step because that is where a learner looks for what a lesson contains;
+     it is **optional** because making it required would un-finish lessons he has
+     already completed, shrink `lessonsDone`, and move where the path thinks he
+     is — new material appearing in old lessons must not rewrite old progress
+     (rule 20.4's spirit).
+
+     Done is read off the run the Listening flow already records for a chosen
+     conversation (`scene:<unit>:<index>` in `drills`), not a new flag: a second
+     place to record the same fact is a second thing to keep in step (§22). */
+  const key = `${u.id}:${i}`;
+  if (SCRIPTS[key]) {
+    out.push({ id: "listen", label: "Listening", optional: true,
+               done: !!((st.drills || {})[`scene:${key}`]) });
+  }
   return out;
 }
 
-export const lessonDone = (st, u, i) => components(st, u, i).every((c) => c.done);
+/* Optional steps are listed and counted on the lesson screen, but a lesson is
+   finished when its required ones are. */
+export const lessonDone = (st, u, i) =>
+  components(st, u, i).every((c) => c.optional || c.done);
 
 /* How far into a unit the learner has actually got — the count of its finished
    lessons, so a written passage can be pitched at what they have met rather

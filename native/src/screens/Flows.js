@@ -469,7 +469,7 @@ export function DrillList({ navigation }) {
         <Row onPress={() => navigation.navigate("SceneList")}>
           <Thumb id="listen" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Conversations</Text>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Listening</Text>
             <Muted>At the level you are on</Muted>
           </View>
           {((st.drills || {}).listening || {}).best

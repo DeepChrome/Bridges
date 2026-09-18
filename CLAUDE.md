@@ -3169,6 +3169,40 @@ fourteen could not be met at all), the second a design judgement that only
 became askable once they could be. Neither invalidates the other, and the
 content work stands under both.
 
+### …and it is listed with the lesson, and it is not called Conversations
+
+Two corrections from the owner the same evening, and the first is a naming
+defect worth recording because it is the kind nothing can catch:
+
+- **"Conversations" was already taken.** Talk is the spoken exchange with the
+  tutor (§30f) — *"what happened to the conversation with AI module??? That was
+  conversation. This one should just be called listening."* The listening list
+  had quietly claimed the word in Practice and in its screen title, so the app
+  had two features competing for one name and the older, more distinctive one
+  lost. It is **Listening** now, everywhere the learner can see. No suite can
+  find this: every string was short, in the right place, and passed the copy
+  cap. **Check a new label against the names already on the screens**, not only
+  against the rules.
+- **The conversation is a lesson step**, beside Vocabulary, Quiz and Video —
+  *"you can have them listed along with the lesson content"*. That is where a
+  learner looks for what a lesson contains, and it is the answer to "standalone
+  but discoverable": out of the quiz, still on the lesson.
+
+It is **optional**, and that is the load-bearing decision. Making it required
+would have un-finished every completed lesson that has a conversation, shrunk
+`lessonsDone`, and moved where the path thinks the learner is — new material
+appearing in old lessons must never rewrite old progress. So `lessonDone`
+ignores `optional: true` while the card is still listed and counted, and the
+brand edge goes on the next *required* step so a finished lesson does not point
+at its extra as though something were owed.
+
+Done is read off the run the Listening flow already records for a chosen
+conversation (`drills["scene:<unit>:<index>"]`) rather than a new flag: a second
+place to record one fact is a second thing to keep in step (§22). And `open()`
+on the lesson screen is now the only thing that knows where a step goes — it was
+written twice, there and on the primary button, which is how the two come to
+disagree.
+
 Two traps worth keeping:
 
 - **`спасибо` is not free.** `FREE_WORDS` is the closed classes — pronouns,

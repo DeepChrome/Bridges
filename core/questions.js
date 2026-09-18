@@ -565,6 +565,12 @@ export function makeQuestions(env) {
       // from. It rides on the question so the activity never has to rebuild it
       // out of a display title.
       script: `${unit.id}:${index}`,
+      /* Words the conversation uses that this lesson has not taught (§30l,
+         2026-09-17). Shown before it plays, with the cast and the questions,
+         so a learner meets them rather than guesses at them. A handful at
+         most — `INTRO_MAX` in tools/check_scripts.mjs — and every one of them
+         is really said in the lines, which the checker enforces. */
+      intro: s.intro || [],
       unit: unit.id, cast: s.cast || [], lines, questions,
       lemmas: unique(lines.flatMap((l) => l.lemmas)),
       level: unit.name, topic: s.title, written: true,

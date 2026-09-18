@@ -153,6 +153,24 @@ export const MIN_SECONDS = 22, MAX_SECONDS = 70;
 
 /* A conversation, not a reading: two or three people, eight to sixteen turns. */
 export const MIN_LINES = 8, MAX_LINES = 16;
+
+/* Words a dialogue may introduce that its lesson has not taught (the owner,
+ * 2026-09-17: *"Yes the dialogue can introduce new words"*).
+ *
+ * Why the allowance exists at all: chapter 1's whole palette is fifty words, of
+ * which the spine's content words are five — мочь, год, хотеть, знать,
+ * говорить. A conversation at a football match needs about forty nouns that do
+ * not exist yet, so under the old gate the early scenes could only be people
+ * asking each other who is where, which is what the owner reported as
+ * repetitive and barely coherent.
+ *
+ * Six is the cap, and it is a cap rather than a target. §30j's finding is that
+ * input has to be 95–98 % comprehensible to be worth listening to; six new
+ * words in a forty-second scene of sixty is right at that edge, and more would
+ * make the audio a vocabulary list read aloud. They are shown on screen with
+ * their meaning before the audio plays (native/src/activities/Scene.js) and
+ * never graded — the scenario still grades only what the lesson taught. */
+export const INTRO_MAX = 6;
 export const CAST_MIN = 2, CAST_MAX = 3;
 export const QUESTIONS = 5, OPTIONS = 4;
 
@@ -161,6 +179,36 @@ export function checkOne(brief, entry) {
   const allow = new Set(brief.palette.map((w) => w.i));
   const isNew = new Set(brief.newWords.map((w) => w.i));
   const used = new Set();
+
+  /* The words this dialogue introduces (INTRO_MAX). Checked before the lines
+     are, because they widen what the lines may say. Four rules, and each one
+     exists to stop the allowance becoming a way round the level match:
+       - a real word, not an invented one;
+       - not already taught, or the list is padding on screen;
+       - actually said in the conversation, or it is noise;
+       - and a content word, since the closed class is free anyway. */
+  const introUsed = new Set();
+  const intro = entry.intro || [];
+  if (!Array.isArray(intro)) errors.push("`intro` is not a list");
+  else if (intro.length > INTRO_MAX) {
+    errors.push(`${intro.length} new words introduced, at most ${INTRO_MAX}`);
+  }
+  const introIdx = [];
+  (Array.isArray(intro) ? intro : []).forEach((w, k) => {
+    const where = `intro ${k + 1}`;
+    if (!w || !w.ru || !w.en) { errors.push(`${where}: needs both ru and en`); return; }
+    if (/[а-яё]/i.test(w.en)) errors.push(`${where}: the gloss is in English`);
+    if (/[̀́]/.test(w.ru)) errors.push(`${where}: no stress marks here`);
+    const key = fold(w.ru);
+    const cand = candidatesFor(key);
+    if (!cand.length) { errors.push(`${where}: "${w.ru}" is not a word the app knows`); return; }
+    if (cand.some((i) => allow.has(i) || FREE.has(i))) {
+      errors.push(`${where}: "${w.ru}" is already taught by this lesson — it is not new`);
+      return;
+    }
+    introIdx.push(cand[0]);
+    cand.forEach((i) => allow.add(i));
+  });
 
   if (!entry.title || !entry.title.trim()) errors.push("no title");
   else if (entry.title.trim().split(/\s+/).length > 6) errors.push(`title too long: "${entry.title}"`);
@@ -337,8 +385,17 @@ export function checkOne(brief, entry) {
         warnings.push(`${where}: "${key}" opens ${L[cand[0]].b}, not ${L[ok[0]].b}`);
       }
       ok.forEach((i) => used.add(i));
+      ok.forEach((i) => { if (introIdx.includes(i)) introUsed.add(i); });
     }
   });
+
+  /* A word offered on screen and never said is a word the learner was asked to
+     hold in their head for nothing. */
+  for (const i of introIdx) {
+    if (!introUsed.has(i)) {
+      errors.push(`intro: "${L[i].b}" is introduced but never said in the conversation`);
+    }
+  }
 
   const hit = brief.newWords.filter((w) => used.has(w.i));
   const want = Math.min(3, brief.newWords.length);

@@ -368,6 +368,31 @@ export function Scene({ q, r }) {
         </Muted>
       ) : null}
 
+      {/* Words the conversation uses that this lesson has not taught, before a
+          note of it is played (the owner, 2026-09-17: *"Yes the dialogue can
+          introduce new words"*).
+       *
+          They are here rather than in the transcript for the same reason the
+          questions are: a listener who knows what to listen for listens
+          differently, and meeting «стадион» for the first time halfway through
+          a sentence is how a scene stops being followable. They are shown, not
+          tested — the scenario grades the words the lesson taught (§30c). */}
+      {(q.intro || []).length ? (
+        <View testID="scene-intro"
+              style={{ marginTop: 14, backgroundColor: t.surface2, borderRadius: radius.md,
+                       paddingHorizontal: 12, paddingVertical: 10 }}>
+          <Muted size={T.tiny} style={{ fontWeight: "700", letterSpacing: 0.6, marginBottom: 6 }}>
+            NEW IN THIS ONE
+          </Muted>
+          {(q.intro || []).map((w, k) => (
+            <View key={k} style={{ flexDirection: "row", gap: 8, marginTop: k ? 3 : 0 }}>
+              <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "600" }}>{w.ru}</Text>
+              <Muted style={{ flex: 1 }}>{w.en}</Muted>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
       {q.questions.map((qq, k) => (
         <Question key={k} q={qq} k={k} pick={picks[k]} answered={r.answered}
                   onPick={(n) => setPicks({ ...picks, [k]: n })} />

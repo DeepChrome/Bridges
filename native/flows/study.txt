@@ -1,0 +1,33 @@
+# Study, from a clean install: the picker with its options, then a new card's
+# front and back (§30ai). Nothing is due on a fresh profile, so every unlocked
+# unit is ticked with the pinned "Select all" — a scroll to one chapter row
+# overshoots — and the session is dealt ahead, which is also what puts a "New"
+# flag on the card.
+#
+#   adb shell pm clear app.bridges.russian; launch; then
+#   .\native\tools\walk.ps1 -Flow native\flows\study.txt
+
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+tap:^Skip$
+wait:2
+tap:^Start from the beginning$
+wait:3
+tap:^Study$
+wait:2
+tap:^Choose what to review$
+wait:2
+shot:S0-picker-top
+tap:^Select all$
+wait:1
+tap:^Done$
+wait:2
+tap:^Study ahead
+wait:3
+shot:S2-card-front
+tap:^Show$
+wait:2
+shot:S3-card-back

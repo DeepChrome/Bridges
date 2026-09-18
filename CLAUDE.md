@@ -1044,8 +1044,10 @@ by `core/speech.js`, so a dropped word reads the same whether it was typed or sa
   sentences not played) and one "which word did you hear?"; the questions are on
   screen before anything plays and nothing plays until Play is pressed — a
   listener who knows what to listen for listens differently. Credit is the share
-  right; a sentence's words are graded by its question. From the second chapter,
-  one per quiz; also the Listening drill in Practice (`listeningDrill`), five
+  right; a sentence's words are graded by its question. From chapter 1's third
+  lesson (2026-09-17; it was chapter 2 until chapter 1 had scenarios worth
+  playing — §30af), one per quiz; also the Listening drill in Practice
+  (`listeningDrill`), five
   scenes from the units reached so far. `sceneFor` returns null when a pool
   cannot supply three wrong meanings — never a scene with two options.
 
@@ -2654,6 +2656,7 @@ say so rather than build something:
 - **Listening is in every lesson, not beside it.** `SPEECH_MIX` splices it
   into the quiz itself: type-what-you-hear from chapter 1 lesson 3, the 30–45 s
   conversation with five questions from chapter 2, say-it-aloud from chapter 3.
+  *(The conversation moved to chapter 1 lesson 3 on 2026-09-17 — §30af.)*
 
 The other two were real gaps.
 
@@ -3093,6 +3096,60 @@ true. Four rules hold it:
 
 `st.met` records what has been said — progress, not a setting, so a reset
 starts it over.
+
+## 30af. Chapter 1's conversations, and the gate that hid them (2026-09-17)
+
+The owner: *"it seems like all the dialogues use almost the same exact structure
+with a lot of repitition and a lot of weird borderline noncoherent sentences.
+The dialogues should instead match a real life scenario/prompt… Lets start by
+making 1 per learning lesson and embedding them into the core lessons."*
+
+**He was right, and the cause is not an authoring habit.** Measured over the 168:
+2,213 lines, every one distinct, but 63 open «<Name>, ты…» and the median scene
+is 54 words. `core1:0` teaches five words of which **two** are content words (я,
+он). With nothing in the room to name, every early scene collapses into people
+asking each other who is where. That is the vocabulary gate (§30l) doing exactly
+what it is for, and no amount of rewriting escapes it.
+
+The **intro allowance** is what buys a setting: a scenario may introduce up to
+`INTRO_MAX` (6) words it has not been taught, shown on screen before it plays
+and validated by `check_scripts.mjs` — a real word, not one this lesson already
+teaches, actually said in the conversation, within the cap. Chapter 1's fourteen
+are the first to spend it: a locked door and a missing key, a bus that is not
+theirs, a wrong number, a bag left in a café, a car one seat short, a learner who
+wants to speak Russian, a neighbour at the door, a photograph with somebody
+missing, tea at a grandmother's, a name not on the list, two people failing to
+find an evening, a ticket counter, a train nearly missed, a December night shift.
+
+**And then none of them played.** `SPEECH_MIX.scene` was `fromStage: 1` — chapter
+2 — so the fourteen never appeared inside the lessons they were written for. The
+only route was Practice → Listening, and `writtenPassage` draws from the last
+eight lessons *reached*, so they fall out of reach the moment the learner moves
+on. The owner found this the way these things are always found: *"where can i
+find them? i dont see them."* The gate is `fromStage: 0, fromLesson: 2` now,
+matching `hear`. **A feature that cannot be reached has not shipped**, and a
+content change that leaves its own display rule alone is half a change.
+
+Two traps worth keeping:
+
+- **`спасибо` is not free.** `FREE_WORDS` is the closed classes — pronouns,
+  prepositions, conjunctions, question words, the copula — and "thank you" is an
+  interjection the lexicon files under `other`. Six scenes ended on it and six
+  failed. It is an intro word where it is used, which is honest: it is a word
+  being taught, and the learner sees it named.
+- **A warning that a word "opens a different lemma" is not always the §23 trap.**
+  Fourteen fired on «вечером» and «утром», which resolve to adverbs rather than
+  to вечер/утро — and those adverbs gloss "in the evening"/"in the morning",
+  which is what the learner wanted; the corpus already carried four of the same
+  kind. Three on «есть» were the real thing: it resolves to "there is", one tap
+  from the verb "to eat", so those lines were rewritten. **Read what the tap
+  would open before deciding whether a warning is a defect.**
+
+`tools/lesson_words.mjs` prints a lesson's exact content vocabulary, and
+`--intro` checks a candidate word against the lexicon without a full run of the
+168 — which is the loop the remaining 154 scenes get written in.
+
+Audio for the fourteen: 199 clips, 3,316 characters, **$0.10**.
 
 ## 31. Verification
 

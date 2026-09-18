@@ -20,10 +20,25 @@ export const QUIZ_N = 8;
    many per quiz. Hearing a sentence starts in chapter 1 from its third lesson
    (the first chapter used to be reading-only across 22 lessons); speaking waits
    for chapter 3. The numbers live here, in one place, rather than in each
-   generator. */
+   generator.
+
+   **The conversation joins chapter 1 too, from the same third lesson** (owner,
+   2026-09-17: "embedding them into the core lessons"). It was chapter 2 while
+   chapter 1's fourteen scenarios were what the vocabulary gate could manage —
+   people asking each other who was where — and holding a 30-second conversation
+   back from the very first lessons was right for that material. Now chapter 1
+   has fourteen written situations with three to six words introduced on screen
+   (§30l, the intro allowance), and a gate at chapter 2 meant **none of the
+   fourteen ever played inside the lessons they were written for**; the only way
+   to them was Practice → Listening, which draws from the last eight lessons
+   reached and so loses them as soon as the learner moves on.
+   The first two lessons stay reading-only, matching `hear` — a learner five
+   words into the course is met by a word, not by audio. `core1:0` and `core1:1`
+   are therefore still Practice-only, which is the residue of that rule and not
+   an oversight. */
 export const SPEECH_MIX = {
   hear: { fromStage: 0, fromLesson: 2, perQuiz: 1 },
-  scene: { fromStage: 1, perQuiz: 1 },
+  scene: { fromStage: 0, fromLesson: 2, perQuiz: 1 },
   say: { fromStage: 2, perQuiz: 1 },
 };
 export const speechFrom = (kind, stage, lesson) => {

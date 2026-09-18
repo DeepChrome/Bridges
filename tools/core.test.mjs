@@ -1214,12 +1214,20 @@ group("form questions");
    quiz of the learner's own choosing (the owner, 2026-09-07). */
 group("scenes and custom quizzes");
 {
+  /* Read the gate rather than assume it. This used to take lesson 0 of the
+     first chapter that qualified, which was only safe while `scene` had no
+     `fromLesson`; it gained one when the conversation moved into chapter 1
+     (2026-09-17) and the draw then landed on a lesson deliberately below the
+     gate, reporting "no scene" as a failure of the generator. */
+  const sceneLesson = SPEECH_MIX.scene.fromLesson || 0;
   const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.scene.fromStage
                                    && (SPEECH.listen[s.core.id] || []).length >= 5).core;
-  const quiz = Q.quizSteps(later, 0);
+  const quiz = Q.quizSteps(later, sceneLesson);
   const scenes = quiz.filter((q) => q.kind === "scene");
   ok(scenes.length === SPEECH_MIX.scene.perQuiz, `${later.id}: one scene per quiz`, String(scenes.length));
-  ok(!Q.quizSteps(STAGES[0].core, 0).some((q) => q.kind === "scene"), "none in the first chapter");
+  /* The opening lessons stay reading-only: five words into the course a learner
+     is met by a word, not by half a minute of audio. */
+  ok(!Q.quizSteps(STAGES[0].core, 0).some((q) => q.kind === "scene"), "none in the opening lesson");
   const s = scenes[0];
   /* Two shapes share the kind. The **scenario** (§30k) is the one a lesson
      with a script gets: a written conversation between named people and five

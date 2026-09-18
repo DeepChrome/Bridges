@@ -218,13 +218,28 @@ export function components(st, u, i) {
      Done is read off the run the Listening flow already records for a chosen
      conversation (`scene:<unit>:<index>` in `drills`), not a new flag: a second
      place to record the same fact is a second thing to keep in step (§22). */
-  const key = `${u.id}:${i}`;
-  if (SCRIPTS[key]) {
+  if (featuresListening(u, i)) {
     out.push({ id: "listen", label: "Listening", optional: true,
-               done: !!((st.drills || {})[`scene:${key}`]) });
+               done: !!((st.drills || {})[`scene:${u.id}:${i}`]) });
   }
   return out;
 }
+
+/* Which lessons *feature* their conversation as a step on the lesson screen.
+ *
+ * Having a script and featuring it are different questions, and conflating them
+ * put a Listening step on all fourteen of chapter 1's lessons — the owner,
+ * 2026-09-17: *"You dont have to embed it into every single lesson. just 1 or 2
+ * lessons per chapter where it's featured."* The spine's lessons 3 and 5 are
+ * the two, which is one or two per chapter everywhere and matches where the
+ * conversations for chapters 2-10 were written (§30af).
+ *
+ * Chapter 1's other twelve are **not deleted** — they are written, bought and
+ * good, and they stay in Practice → Listening, which lists every script. This
+ * only decides what a lesson puts in front of you. */
+export const FEATURED_LESSONS = [2, 4];
+export const featuresListening = (u, i) =>
+  !!SCRIPTS[`${u.id}:${i}`] && /^core\d+$/.test(u.id) && FEATURED_LESSONS.includes(i);
 
 /* Optional steps are listed and counted on the lesson screen, but a lesson is
    finished when its required ones are. */

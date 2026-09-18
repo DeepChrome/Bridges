@@ -17,19 +17,23 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { LessonScreen } from "../src/screens/Unit";
-import { components, lessonDone, SCRIPTS, UN } from "../src/data";
+import { components, lessonDone, featuresListening, SCRIPTS, UN, STAGES } from "../src/data";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn(), replace: jest.fn() };
 const base = { v: 4, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {}, dev: true };
 
-/* A lesson that has a conversation, and one that does not — found from the
-   shipped payload rather than named, so a re-cut of which lessons carry one
-   cannot leave this test asserting against a lesson that changed. */
-const scriptedKey = Object.keys(SCRIPTS)[0];
-const [scriptedUnit, scriptedIdx] = [scriptedKey.split(":")[0], Number(scriptedKey.split(":")[1])];
+/* A lesson that features a conversation, and one that does not — found from the
+   shipped payload rather than named, so a re-cut cannot leave this test
+   asserting against a lesson that changed. */
+const featured = (() => {
+  for (const u of UN) for (let i = 0; i < 6; i++) if (featuresListening(u, i)) return { u, i };
+  return null;
+})();
+const scriptedUnit = featured.u.id, scriptedIdx = featured.i;
+const scriptedKey = `${scriptedUnit}:${scriptedIdx}`;
 const plain = (() => {
   for (const u of UN) {
-    for (let i = 0; i < 5; i++) if (!SCRIPTS[`${u.id}:${i}`]) return { id: u.id, i };
+    for (let i = 0; i < 5; i++) if (!featuresListening(u, i)) return { id: u.id, i };
   }
   return null;
 })();
@@ -77,6 +81,25 @@ test("the lesson is still finished with the conversation undone", () => {
   const cs = components(st, u, scriptedIdx);
   expect(cs.some((c) => c.id === "listen" && !c.done)).toBe(true);
   expect(lessonDone(st, u, scriptedIdx)).toBe(true);
+});
+
+/* The owner's rule: one or two per chapter, not one per lesson. Chapter 1 had
+   all fourteen of its lessons carrying one, because "has a script" was being
+   read as "features it". */
+test("one or two lessons a chapter feature it, never every lesson", () => {
+  const perChapter = new Map();
+  for (const s of STAGES) {
+    let n = 0;
+    for (const u of [s.core, ...(s.branches || [])]) {
+      for (let i = 0; i < 6; i++) if (featuresListening(u, i)) n++;
+    }
+    perChapter.set(s.n ?? s.core.id, n);
+  }
+  for (const [chapter, n] of perChapter) {
+    expect({ chapter, n }).toEqual({ chapter, n: expect.any(Number) });
+    expect(n).toBeGreaterThanOrEqual(1);
+    expect(n).toBeLessThanOrEqual(2);
+  }
 });
 
 test("and is marked done once that conversation has been listened to", () => {

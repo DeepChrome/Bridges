@@ -192,6 +192,12 @@ function LearnStack() {
       <Stack.Screen name="Vocab" component={VocabFlow} options={titled("Vocabulary")} />
       <Stack.Screen name="Quiz" component={QuizFlow} options={titled("Quiz")} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
+      {/* The lesson's own conversation, opened from its Listening step. Here as
+          well as on the Practice stack for the reason `Video` is in two stacks:
+          **a route is only reachable from the stack it is registered in**, and a
+          `navigate` to one that is not there fails silently — no error, no
+          screen, a dead button. That is what shipped on 2026-09-17. */}
+      <Stack.Screen name="Scenes" component={ListeningFlow} options={{ title: "Listening" }} />
       <Stack.Screen name="TestOut" component={SectionFlow} options={titled("Test out")} />
       {/* The task at the end of a chapter (ROADMAP P10.5). On the Learn stack
           because that is where it is offered: it belongs to the chapter. */}
@@ -275,6 +281,11 @@ function StudyStack() {
   return (
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Cards" component={Study} options={{ title: "Study" }} />
+      {/* A card whose word was mined from a video offers "from video" on its
+          back, and that control was dead on this tab — the route was on Learn
+          and Immerse but not here. Found by routes.test.js, not by anybody
+          pressing it; it had been dead since the mined-word link was added. */}
+      <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
       <Stack.Screen name="Credits" component={Credits} options={{ title: "Credits" }} />

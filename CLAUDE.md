@@ -504,6 +504,27 @@ Each of these cost real time. Do not relearn them.
   `disabled` to `Pressable` (`onPress={disabled ? undefined : onPress}`); use `Btn`
   rather than a hand-rolled Pressable, and in tests `await waitFor` on the input's
   value before pressing.
+- **A route is only reachable from the stack it is registered in, and
+  navigating to one that is not there does nothing at all.** React Navigation
+  does not throw for an unknown route name — no error, no screen, a dead
+  button. The lesson's Listening step called `navigate("Scenes")` while
+  `Scenes` existed only on the Practice stack; the lesson lives on the Learn
+  stack, and it shipped to the owner's phone (2026-09-17): *"I press the button
+  and nothing happens."*
+  **A mocked navigator can never catch this.** The unit test for that step
+  asserted `nav.navigate` was called with `("Scenes", { key })` and passed
+  perfectly — it proves the call and says nothing about the destination, and no
+  test in the app mounted a real navigator. `routes.test.js` reads App.js
+  instead, which is the one place routes are declared: for every screen, every
+  route name it navigates to must be registered in the stack that screen is in.
+  It found **one more dead control nobody had reported** — a flashcard whose
+  word was mined from a video offers "from video", and `Video` was not on the
+  Study stack.
+  Its first version also reported four links that were fine, by reading
+  `navigate("Learn", { screen: "Unit" })` — a *nested* navigation — as a jump to
+  `Unit`. Only the **first argument** is the target; §30r's rule applies to a
+  test as much as to a drill metric, and a check that cannot tell the skill from
+  the flaw is worse than none.
 - **…and the reverse lie: RNTL 14's `fireEvent.press` finds a wrapper's own
   `onPress` prop.** It walks the fibre chain through composite components, so a
   `Row` or `Btn` that withholds `onPress` from its Pressable when disabled still
@@ -3187,6 +3208,15 @@ defect worth recording because it is the kind nothing can catch:
   *"you can have them listed along with the lesson content"*. That is where a
   learner looks for what a lesson contains, and it is the answer to "standalone
   but discoverable": out of the quiz, still on the lesson.
+
+**Having a script and featuring it are different questions**, and conflating
+them put a Listening step on all fourteen of chapter 1's lessons — *"You dont
+have to embed it into every single lesson. just 1 or 2 lessons per chapter where
+it's featured."* `featuresListening` in `data.js` is the one answer: the spine's
+lessons 3 and 5, which is one or two a chapter everywhere and is where the
+conversations for chapters 2–10 were written anyway. Chapter 1's other twelve
+are not deleted — they are written, bought and good, and Practice → Listening
+lists every script. This only decides what a *lesson* puts in front of you.
 
 It is **optional**, and that is the load-bearing decision. Making it required
 would have un-finished every completed lesson that has a conversation, shrunk

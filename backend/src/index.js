@@ -1,14 +1,17 @@
 /* The Bridges Worker (ROADMAP Phases 4 and 6).
  *
- * Two routes, one job each. POST /v1/feedback grades one spoken sentence;
- * POST /v1/talk takes the tutor's turn in a short conversation. Both hold the
- * Anthropic key so the app never does, check the app's bearer token, refuse past a
- * daily cap of their own, ask the model, validate the reply against a schema
- * (retrying once), and log token counts to KV. That is all this Worker does.
+ * Three model routes, one job each. POST /v1/feedback grades one spoken
+ * sentence; POST /v1/talk takes the tutor's turn in a short conversation;
+ * POST /v1/task judges a chapter's task. All hold the Anthropic key so the app
+ * never does, check the caller's bearer token, refuse past a daily cap of their
+ * own, ask the model, validate the reply against a schema (retrying once), and
+ * log token counts to KV. POST /v1/register is the one route without a token:
+ * it is where an install gets one (ROADMAP 13.39). That is all this Worker does.
  *
  * What it never does: store audio (none is sent — the app sends a transcript),
  * store learner state or a conversation (the app sends the whole exchange each
- * turn), or keep anything beyond the day's counters and token log.
+ * turn), or keep anything beyond the day's counters, the token records and the
+ * token log.
  *
  * `handle` takes its dependencies as arguments so the tests run it in plain Node
  * with a fake KV and a fake fetch; the default export is what Cloudflare calls.
@@ -26,6 +29,24 @@ const UPSTREAM_TIMEOUT_MS = 15000;
 const DEFAULT_CAP = 300;
 const DEFAULT_TALK_CAP = 240;         // a runaway backstop, not a budget (was 3 sessions of 12)
 const DAY_TTL = 60 * 60 * 48;
+
+/* Registration (ROADMAP 13.39). A public build carries no token at all: the
+   first time it needs the Worker it asks here, and what it gets is an ordinary
+   KV user record — the shape tools/user.mjs writes by hand — with the caps a
+   stranger is given. Anyone can call it, by definition, so three limits stand
+   where the bearer token would: registrations per address per day,
+   registrations per day in all, and GLOBAL_DAILY_CAP (DEFAULT_GLOBAL_CAP here),
+   which bounds what every registered install together can spend whatever
+   the number of tokens. The
+   owner's own token is outside that ceiling: it is his budget, not theirs.
+   At Haiku's prices a model call is a fraction of a cent, so the default
+   ceiling is a few dollars a day at the very worst. */
+const REGISTER_IP_CAP = 5;
+const REGISTER_DAILY_CAP = 100;
+const REGISTERED_CAPS = { feedback: 100, talk: 60 };
+const DEFAULT_GLOBAL_CAP = 1500;
+
+const envInt = (v, dflt) => parseInt(v, 10) || dflt;
 
 const json = (status, body) => new Response(JSON.stringify(body), {
   status, headers: { "content-type": "application/json; charset=utf-8" },
@@ -55,6 +76,45 @@ async function identify(given, env) {
   try { rec = JSON.parse((await env.USAGE.get(`user:${given}`)) || "null"); } catch (e) { rec = null; }
   if (!rec || rec.revoked || !rec.id) return null;
   return { id: String(rec.id), caps: rec.caps || null };
+}
+
+/* One daily counter: read, compare, write. Not atomic, which is fine for a
+   phone or a few and wrong for a fleet; every cap here is a backstop against a
+   bug in a loop or a scripted abuser, not a billing system. Returns whether
+   the request is under the cap; over it, nothing is written. */
+async function tick(env, key, cap) {
+  const count = parseInt(await env.USAGE.get(key), 10) || 0;
+  if (count >= cap) return false;
+  await env.USAGE.put(key, String(count + 1), { expirationTtl: DAY_TTL });
+  return true;
+}
+
+/* Web Crypto's randomness, base64url so the token is one bearer word. 24
+   bytes → 32 characters, twice MIN_TOKEN; the same length user.mjs mints. */
+function randomWord(bytes) {
+  const buf = new Uint8Array(bytes);
+  crypto.getRandomValues(buf);
+  let s = "";
+  for (const b of buf) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function register(request, env, now) {
+  const day = dayKey(now);
+  const ip = request.headers.get("cf-connecting-ip") || "unknown";
+  if (!(await tick(env, `reg:${day}:${ip}`, envInt(env.REGISTER_IP_CAP, REGISTER_IP_CAP)))) {
+    return json(429, { ok: false, reason: "cap", message: "Too many new installs from this address today." });
+  }
+  if (!(await tick(env, `reg:${day}`, envInt(env.REGISTER_DAILY_CAP, REGISTER_DAILY_CAP)))) {
+    return json(429, { ok: false, reason: "cap", message: "No more new installs today." });
+  }
+  const token = randomWord(24);
+  /* The id is its own random word, not a piece of the token: it rides in
+     every log line for thirty days and the token must not. */
+  const rec = { id: `app-${randomWord(6)}`, caps: { ...REGISTERED_CAPS }, created: day, via: "register" };
+  await env.USAGE.put(`user:${token}`, JSON.stringify(rec));
+  await logUsage(env, day, now, { kind: "register", user: rec.id });
+  return json(200, { ok: true, token });
 }
 
 async function askModel(fetchFn, env, system, messages, maxTokens) {
@@ -150,8 +210,9 @@ export async function handle(request, env, deps = {}) {
   const url = new URL(request.url);
 
   let route = ROUTES[url.pathname];
-  if (!route) return json(404, { ok: false, reason: "not found" });
+  if (!route && url.pathname !== "/v1/register") return json(404, { ok: false, reason: "not found" });
   if (request.method !== "POST") return json(405, { ok: false, reason: "method" });
+  if (!route) return register(request, env, now);
 
   const auth = request.headers.get("authorization") || "";
   const given = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
@@ -165,15 +226,18 @@ export async function handle(request, env, deps = {}) {
   if (problem) return json(400, { ok: false, reason: problem });
   if (route.variant) route = { ...route, ...(route.variant(body) || {}) };
 
-  // Cost guard: one counter per route per user per UTC day. Read, compare, write
-  // — not atomic, which is fine for a phone or a few and wrong for a fleet; the
-  // cap is a backstop against a bug in a loop, not a billing system.
+  // Cost guard: one counter per route per user per UTC day, and over every
+  // user but the owner one more — the ceiling on what strangers can spend.
+  // The user's own cap is checked first so a learner past it never consumes
+  // the shared allowance.
   const cap = (user.caps && user.caps[route.kind]) || route.cap(env);
   const day = dayKey(now);
-  const countKey = `${route.counter}:${day}:${user.id}`;
-  const count = parseInt(await env.USAGE.get(countKey), 10) || 0;
-  if (count >= cap) return json(429, { ok: false, reason: "cap", message: route.capMessage(cap) });
-  await env.USAGE.put(countKey, String(count + 1), { expirationTtl: DAY_TTL });
+  if (!(await tick(env, `${route.counter}:${day}:${user.id}`, cap))) {
+    return json(429, { ok: false, reason: "cap", message: route.capMessage(cap) });
+  }
+  if (user.id !== "owner" && !(await tick(env, `all:${day}`, envInt(env.GLOBAL_DAILY_CAP, DEFAULT_GLOBAL_CAP)))) {
+    return json(429, { ok: false, reason: "cap", message: "The tutor has had a busy day; resets at 00:00 UTC." });
+  }
 
   const messages = [{ role: "user", content: route.message(body) }];
   let tokensIn = 0, tokensOut = 0, result = null, lastErrors = null;

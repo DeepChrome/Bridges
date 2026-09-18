@@ -8,20 +8,77 @@
  * It never throws: a Say step calls it after its local verdict and shows nothing
  * extra on any failure, so the worst case is the same screen as offline.
  *
- * Configuration comes from EXPO_PUBLIC_FEEDBACK_URL and EXPO_PUBLIC_APP_TOKEN,
- * inlined by Expo at bundle time from native/.env (gitignored; see .env.example)
- * or, for EAS builds, from the profile's environment variables. The app token is
- * not the Anthropic key — that never leaves the Worker — but it is still not
- * committed anywhere.
+ * The Worker's address is EXPO_PUBLIC_FEEDBACK_URL, inlined by Expo at bundle
+ * time from native/.env (gitignored; see .env.example) or, for EAS builds, from
+ * the profile's environment variables. A build with no address has no tutor.
+ *
+ * The token is this install's own (ROADMAP 13.39). A public build ships none:
+ * the first request that needs one asks the Worker's /v1/register for it and
+ * keeps it on this device, per install rather than per profile, since it is
+ * the phone the Worker is admitting and not the learner. A build may instead
+ * carry EXPO_PUBLIC_APP_TOKEN — the owner's, on his own phone — and then no
+ * registration happens; that variable must never be set for a build that
+ * leaves the machine, because it is compiled in as plain text.
  */
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const TIMEOUT_MS = 8000;
 export const TALK_TIMEOUT_MS = 20000;   // a conversational turn is longer
 
+const TOKEN_KEY = "rb.worker.token";
+let installToken = null;      // this install's, once read or minted
+let obtaining = null;         // the read-or-register in flight, shared by concurrent callers
+
+/* Whether this build knows a Worker, and the token if one is already to hand.
+   The screens read this synchronously to decide whether to offer the tutor at
+   all, so it answers from the address alone: a token is a request-time detail
+   and a failure to get one is reported by the request, as offline is. */
 export function config(route = "/v1/feedback") {
-  const url = process.env.EXPO_PUBLIC_FEEDBACK_URL || "";
-  const token = process.env.EXPO_PUBLIC_APP_TOKEN || "";
-  return url && token ? { url: url.replace(/\/+$/, "") + route, token } : null;
+  const base = (process.env.EXPO_PUBLIC_FEEDBACK_URL || "").replace(/\/+$/, "");
+  if (!base) return null;
+  const token = process.env.EXPO_PUBLIC_APP_TOKEN || installToken || null;
+  return { url: base + route, base, token };
+}
+
+/* Fetch the token before the first Say asks for it, so that step waits on one
+   round trip rather than two. Nothing to do without an address, and nothing
+   is reported: a failure here is retried by the first request that needs it. */
+export function warmToken(deps = {}) {
+  const cfg = config();
+  if (cfg && !cfg.token) ensureToken(cfg.base, deps);
+}
+
+/* Drop the install's token, on device and in memory. Used when the Worker no
+   longer knows it — a wiped namespace, a revoked record — so the next request
+   registers afresh instead of failing for ever; and by the tests. */
+export async function forgetToken() {
+  installToken = null;
+  try { await AsyncStorage.removeItem(TOKEN_KEY); } catch (e) { /* nothing to keep anyway */ }
+}
+
+/* The stored token, or a newly minted one. Resolves to { token } or to
+   { error } in the shape post() returns, never rejects. Concurrent callers —
+   a Say step and a warm-up — share one attempt. */
+export function ensureToken(base, deps = {}) {
+  if (installToken) return Promise.resolve({ token: installToken });
+  if (!obtaining) obtaining = obtain(base, deps).finally(() => { obtaining = null; });
+  return obtaining;
+}
+
+async function obtain(base, deps) {
+  /* Storage is a cache of what the Worker issued: unreadable, the token is
+     minted again and the old record simply goes unused. */
+  let saved = null;
+  try { saved = await AsyncStorage.getItem(TOKEN_KEY); } catch (e) { saved = null; }
+  if (saved) { installToken = saved; return { token: saved }; }
+
+  const r = await send(base + "/v1/register", {}, null, deps, TIMEOUT_MS);
+  if (r.ok !== true) return { error: r };
+  if (typeof r.token !== "string" || !r.token) return { error: { ok: false, reason: "parse" } };
+  installToken = r.token;
+  try { await AsyncStorage.setItem(TOKEN_KEY, r.token); } catch (e) { /* re-minted next launch */ }
+  return { token: r.token };
 }
 
 export async function getFeedback({ transcript, target, unitId, topic, lemmas }, deps = {}) {
@@ -64,19 +121,34 @@ export async function markTask({ goal, must, attempt, studied, chapter }, deps =
               deps, "/v1/task", TALK_TIMEOUT_MS);
 }
 
-async function post(body, deps, route, timeoutMs) {
+async function post(body, deps, route, timeoutMs, retried = false) {
   const cfg = deps.config || config(route);
   if (!cfg) return { ok: false, reason: "unconfigured" };
+  let token = cfg.token;
+  if (!token) {
+    const got = await ensureToken(cfg.base, deps);
+    if (got.error) return got.error;
+    token = got.token;
+  }
+  const r = await send(cfg.url, body, token, deps, deps.timeoutMs || timeoutMs);
+  /* The Worker does not know this install's token any more. Once: forget it,
+     register again and resend, so a wiped namespace costs nobody a turn. A
+     build's own token is not ours to replace. */
+  if (r.reason === "http" && r.status === 401 && token === installToken && !retried) {
+    await forgetToken();
+    return post(body, deps, route, timeoutMs, true);
+  }
+  return r;
+}
+
+async function send(url, body, token, deps, timeoutMs) {
   const fetchFn = deps.fetch || globalThis.fetch;
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), deps.timeoutMs || timeoutMs);
+  const timer = setTimeout(() => ctl.abort(), timeoutMs);
   try {
-    const r = await fetchFn(cfg.url, {
-      method: "POST",
-      signal: ctl.signal,
-      headers: { "content-type": "application/json", authorization: `Bearer ${cfg.token}` },
-      body: JSON.stringify(body),
-    });
+    const headers = { "content-type": "application/json" };
+    if (token) headers.authorization = `Bearer ${token}`;
+    const r = await fetchFn(url, { method: "POST", signal: ctl.signal, headers, body: JSON.stringify(body) });
     let data = null;
     try { data = await r.json(); } catch (e) { data = null; }
     if (!r.ok) return { ok: false, reason: "http", status: r.status, detail: data && data.reason };

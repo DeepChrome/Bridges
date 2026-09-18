@@ -28,7 +28,8 @@ if (cmd === "add" && rest[0]) {
   const rec = { id, caps: { feedback: opt("--feedback", 300), talk: opt("--talk", 36) },
                 created: new Date().toISOString().slice(0, 10) };
   wrangler(["put", `user:${token}`, JSON.stringify(rec)]);
-  console.log(`user ${id} added. Their token (shown once):\n\n  ${token}\n\nGive it to them as EXPO_PUBLIC_APP_TOKEN.`);
+  console.log(`user ${id} added. Their token (shown once):\n\n  ${token}\n\n` +
+              "For a build made for them alone, as EXPO_PUBLIC_APP_TOKEN. A public build needs none: it registers itself.");
 } else if (cmd === "revoke" && rest[0]) {
   const cur = JSON.parse(wrangler(["get", `user:${rest[0]}`, "--text"]) || "{}");
   wrangler(["put", `user:${rest[0]}`, JSON.stringify({ ...cur, revoked: true })]);

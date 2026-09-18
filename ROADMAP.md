@@ -896,6 +896,18 @@ Audited against the built artifacts. Three blockers, none of them code:
   features unconfigured (no code change — `feedback.js` already answers
   "unconfigured" and every call site handles it), and add a first-run token
   endpoint later if the tutor proves to be the draw.
+  **Closed 2026-09-18, the other way round**: the endpoint was a morning's
+  work, so the first public build keeps the tutor. `POST /v1/register` mints
+  an ordinary KV user record (feedback 100, talk 60 a day) with no bearer
+  token, limited to 5 registrations an address and 100 a day; every
+  registered install together is bounded by `GLOBAL_DAILY_CAP` (1,500 model
+  calls a day, the owner's own token outside it — a few dollars a day at the
+  very worst). The app asks once, keeps the token per install in
+  AsyncStorage, and replaces it by itself if the Worker stops knowing it.
+  **`EXPO_PUBLIC_APP_TOKEN` must not be set for any build that leaves the
+  machine**; a build with only the URL registers itself. Worker 56 checks,
+  client 10. Not yet deployed — that needs his `CLOUDFLARE_API_TOKEN` in a
+  shell.
 - **13.40 — the Play account ($25) and its closed-testing period.** His to
   open, and the long pole: start it first, finish everything else while it runs.
 - **13.41 — an upload key that is not `debug.keystore`.** Play refuses a

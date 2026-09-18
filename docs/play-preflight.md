@@ -9,34 +9,23 @@ account only the owner can open. They are first, because the rest is ready.
 
 ---
 
-## 1. The shipped build carries the owner's Worker token — BLOCKER
+## 1. The shipped build carries the owner's Worker token — FIXED 2026-09-18
 
-`EXPO_PUBLIC_APP_TOKEN` is compiled into the APK in plaintext. Today that is
-fine, because the only install is his. A public listing means **anyone who
-downloads the app can spend his Anthropic budget** through the feedback and
-Talk routes, and the Worker's per-day cap is the only thing between them and
-the bill.
+`EXPO_PUBLIC_APP_TOKEN` was compiled into the APK in plaintext, so anyone who
+downloaded a public build could spend his Anthropic budget. Now the Worker
+issues each install its own token on first use (`POST /v1/register`, no
+bearer needed; ROADMAP 13.39), with a stranger's caps (100 feedback and 60
+conversation turns a day), 5 registrations an address a day, 100 a day in
+all, and a ceiling on what every registered install together can spend
+(`GLOBAL_DAILY_CAP`, 1,500 model calls a day; his own token is outside it).
 
-`docs/store-listing.md` already flagged this and proposed per-install tokens.
-That cannot be done by baking a different token into one binary, so it needs a
-real choice. Three, in increasing order of work:
-
-1. **Ship without the AI features.** `feedback.js` already answers
-   `{ ok: false, reason: "unconfigured" }` with no URL or token, and every call
-   site already handles it (§30d). Say keeps its local alignment and its native
-   recording; the chapter task and Talk disappear. **Nothing needs writing** —
-   it is an EAS environment with the two variables absent — and everything else
-   in the app is untouched.
-2. **The Worker issues a token on first run.** An unauthenticated `/v1/hello`
-   that mints a KV record and returns it, rate-limited by IP. Modest work in
-   `backend/`, and it makes the per-user caps in §30h′ actually reachable. It
-   is still abusable by anyone who scripts the endpoint, so it needs a global
-   ceiling as well as a per-user one.
-3. **Play Integrity or a paid tier.** Out of proportion to the app.
-
-**Recommendation: (1) for the first public release, (2) afterwards if the
-conversation tutor turns out to be what people come back for.** It is
-reversible either way and costs nothing to try.
+**What that means for the release build:** set `EXPO_PUBLIC_FEEDBACK_URL`
+and **do not set `EXPO_PUBLIC_APP_TOKEN`** — locally in `native/.env` before
+`bundleRelease`, or in the EAS environment. The app registers itself. His own
+phone can keep the token in `.env` for a build that never leaves the machine.
+**Deploy the Worker first** (`npx wrangler deploy` in `backend/` with
+`CLOUDFLARE_API_TOKEN` in the shell): a build pointed at the old Worker gets
+404 from `/v1/register` and the tutor reports it as an error.
 
 ## 2. Google Play developer account — BLOCKER, $25, his to open
 

@@ -42,7 +42,7 @@ Built and working today:
 - a trouble bank for vocabulary that repeatedly causes difficulty
 - installable PWA, deployed to Netlify
 - verification: 159 web smoke checks, 409 core checks, 212 native jest checks, 99
-  contrast checks, 54 visual checks, 47 Worker checks, a copy cap, a written-passage
+  contrast checks, 54 visual checks, 56 Worker checks, a copy cap, a written-passage
   gate, a seeded learner simulator and an emulator walkthrough (§31)
 
 Known gaps, stated honestly:
@@ -1196,9 +1196,26 @@ newline, the token check is length-exact, and every request came back 401 until
 the secret was re-uploaded. A real attempt answers in ~3.5 s.
 
 The native client is `native/src/lib/feedback.js`, configured by
-`EXPO_PUBLIC_FEEDBACK_URL` and `EXPO_PUBLIC_APP_TOKEN` from `native/.env` locally
-and from the EAS **preview** environment (`eas env:list --environment preview`) for
-builds; `.easignore` excludes `.env`, so an EAS build gets them only from EAS.
+`EXPO_PUBLIC_FEEDBACK_URL` from `native/.env` locally and from the EAS
+**preview** environment (`eas env:list --environment preview`) for builds;
+`.easignore` excludes `.env`, so an EAS build gets it only from EAS.
+
+**The token is the install's own** (ROADMAP 13.39, 2026-09-18). A public
+build ships none: the first request that needs one asks `POST /v1/register`,
+the one route with no bearer, which mints an ordinary `user:<token>` record
+with a stranger's caps (`REGISTERED_CAPS`, 100 feedback and 60 talk a day) and
+is itself limited per address (5 a day) and in all (100 a day). The token is
+kept per install in AsyncStorage (`rb.worker.token`), not in the profile
+database — it is the phone the Worker admits, not the learner — and an
+install answered 401 forgets it and registers again once, so a wiped
+namespace costs nobody a turn. Over every registered install together sits
+`GLOBAL_DAILY_CAP` (1,500 model calls a day; the owner's token is outside it),
+which is what bounds the bill whatever the number of tokens. `config()` still
+answers synchronously, from the address alone: whether the tutor is *offered*
+is a fact about the build, and a token is a request-time detail whose failure
+the request reports, as offline is. `EXPO_PUBLIC_APP_TOKEN` is the owner's
+token compiled in as plain text and **may be set only for a build that never
+leaves the machine**; the shipped build before this carried it (13.39).
 
 ## 30f. Talk — conversation mode (ROADMAP Phase 6, native only)
 

@@ -164,8 +164,9 @@ screenshots, permissions minimal and asserted, bundle builds, release check.
    2,353 rows (ROADMAP 13.29, Gate 3). This blocks release on its own: the
    conversations are machine-checked for level and vocabulary, and nothing has
    checked whether they are idiomatic.
-5. **The Worker token.** The shipped build carries his in plaintext (13.39). A
-   public build needs per-install tokens — the mechanism exists
-   (`backend/tools/user.mjs`) and is not wired to a release.
+5. **Deploy the Worker** before building: `npx wrangler deploy` in
+   `backend/` with `CLOUDFLARE_API_TOKEN` in the shell. The build then needs
+   only `EXPO_PUBLIC_FEEDBACK_URL` — **never `EXPO_PUBLIC_APP_TOKEN`** — and
+   each install registers for its own token (13.39, `docs/play-preflight.md`).
 6. **Audio licensing** — `build_audio.py --commercial` drops the 31 Tatoeba
    recordings that are NC, ND or unstated (13.11, licensing.md).

@@ -49,6 +49,7 @@ import { workedOn } from "@core/scheduler";
 import { setDayStart, today } from "@core/util";
 import { ErrorBoundary } from "./src/boundary";
 import { installCrashHandler } from "./src/crash";
+import { warmToken } from "./src/lib/feedback";
 import { flushState } from "./src/store";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, DrillSetup, PlacementFlow, SectionFlow,
@@ -71,6 +72,12 @@ setDayStart({ offsetMinutes: new Date().getTimezoneOffset() });
    promise, a callback from a native module. At module scope so it is in place
    before the first screen renders (src/crash.js). */
 installCrashHandler();
+
+/* …and this install's Worker token, read from the device or asked for once
+   (ROADMAP 13.39), so the first Say does not wait for two round trips. Nothing
+   happens in a build with no Worker address, and nothing is reported: the first
+   request that needs a token tries again. */
+warmToken();
 
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();

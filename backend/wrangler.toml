@@ -18,3 +18,8 @@ DAILY_CAP = "300"
 # Conversation turns a day for one user: a backstop against a runaway loop, not a
 # budget — the owner lifted the three-sessions limit on 2026-09-07.
 TALK_DAILY_CAP = "240"
+# Model calls a day across every registered install together (ROADMAP 13.39).
+# The owner's own token is outside it. At Haiku's prices this is a few dollars
+# a day at the very worst. Registrations: REGISTER_IP_CAP (5) and
+# REGISTER_DAILY_CAP (100) default in src/index.js and can be set here.
+GLOBAL_DAILY_CAP = "1500"

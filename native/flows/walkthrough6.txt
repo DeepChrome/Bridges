@@ -37,7 +37,7 @@ expect:^Repeat a sentence$
 tap:^Alphabet$
 wait:3
 shot:78-alphabet
-expect:^Practise these sounds$
+expect:^Practice these sounds$
 back
 wait:2
 

@@ -205,7 +205,7 @@ function SetPicker({ visible, onClose }) {
   const header = (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
       <Text style={{ flex: 1, color: t.ink, fontSize: 17, fontWeight: "600" }}>
-        Practise
+        Practice
       </Text>
       <Btn kind="ghost" label="Select all"
            onPress={() => update((p) => ({
@@ -510,14 +510,13 @@ export default function Study({ navigation }) {
     const now = Date.now();
     const word = item.word, direction = item.direction;
     const rows = reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
-    const before = { items: items, at, prev: current, trouble: st.trouble, xp: st.xp, daily: st.daily,
+    const before = { items: items, at, prev: current, trouble: st.trouble, daily: st.daily,
                      row: rows[0] };
     update((prev) => {
       const r = applyGrade(prev.seen, prev.trouble, word, direction, g, now, schedulerOpts(prev));
       const daily = dailyFor(prev.daily, now);
       return {
         ...prev, seen: r.seen, trouble: r.trouble,
-        xp: (prev.xp || 0) + (g === 1 ? 0 : 1),
         daily: { ...daily, reviews: daily.reviews + 1,
                  new: daily.new + (item.kind === "new" && !item.again ? 1 : 0) },
       };
@@ -540,7 +539,7 @@ export default function Study({ navigation }) {
       if (prev) entry[row.direction] = prev; else delete entry[row.direction];
       const seen = { ...p.seen };
       if (Object.keys(entry).length) seen[row.word] = entry; else delete seen[row.word];
-      return { ...p, seen, trouble: last.trouble, xp: last.xp, daily: last.daily };
+      return { ...p, seen, trouble: last.trouble, daily: last.daily };
     }, [], [{ word: row.word, direction: row.direction, at: row.at }]);
     setSession({ ...session, items: last.items });
     setAt(last.at);
@@ -629,7 +628,7 @@ export default function Study({ navigation }) {
             {finished && items.length && session.remaining ? `${session.remaining} to go.`
               : finished && items.length ? "Set finished."
               : doneToday ? "Done for today."
-              : chosen ? "Nothing due today." : "Pick a set to practise."}
+              : chosen ? "Nothing due today." : "Pick a set to practice."}
           </Text>
           {finished && items.length && session.remaining ? (
             <Btn kind="pri" testID="continue" label={`Continue · ${session.remaining} left`} style={{ marginTop: 20, minWidth: 200 }}

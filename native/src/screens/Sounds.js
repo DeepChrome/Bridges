@@ -64,7 +64,7 @@ export default function Sounds({ navigation }) {
           back to and this is what you came to do (ROADMAP P10.8). It lives here
           rather than as a twelfth row on Practice: a drill on the letters
           belongs with the letters (rule 20.8). */}
-      <Btn kind="pri" testID="sound-drill" label="Practise these sounds"
+      <Btn kind="pri" testID="sound-drill" label="Practice these sounds"
            onPress={() => navigation.navigate("SoundDrill")} />
       {/* Word building used to be a second button here and nowhere else, which
           is how the owner came to be studying for a week without meeting it.
@@ -115,7 +115,7 @@ export default function Sounds({ navigation }) {
       </List>
 
       {/* What stops a beginner reading at all. */}
-      <SectionLabel style={{ marginTop: 22 }}>Looks Latin, is not</SectionLabel>
+      <SectionLabel style={{ marginTop: 22 }}>Look-alikes</SectionLabel>
       <List>
         {TRAPS.map((row) => (
           <Row key={row.l}>

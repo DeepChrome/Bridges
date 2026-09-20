@@ -62,8 +62,6 @@ export function Table({ table }) {
 }
 
 export default function Word({ route, navigation }) {
-  const t = useTheme();
-  const [allHeard, setAllHeard] = useState(false);
   /* Addressed by the word, not by an index: lemma indices are assigned by frequency
      at build time and move on every rebuild, which is the same reason learner state
      keys on the word. The index form is still accepted for older call sites. */
@@ -78,17 +76,31 @@ export default function Word({ route, navigation }) {
       </Screen>
     );
   }
+  return (
+    <Screen>
+      <WordEntry w={w} index={p.i} navigation={navigation} />
+    </Screen>
+  );
+}
+
+/* The entry itself, which the screen wraps and the word sheet can show whole
+   when there is no navigator to push the screen onto (words.js). Without a
+   navigation object the "Heard in" list is left out: its rows open the player,
+   and a row that cannot is a dead control. */
+export function WordEntry({ w, index, navigation }) {
+  const t = useTheme();
+  const [allHeard, setAllHeard] = useState(false);
   const unit = w.u ? UN.find((u) => u.id === w.u) : null;
   const examples = w.x || [];
-  const heard = heardIn(w.b);
+  const heard = navigation ? heardIn(w.b) : [];
   /* Senses are shipped for the studied words by index, so a dictionary-only
      entry (the deep tier) has none and shows its gloss, as it always did. */
-  const senses = sensesOf(p.i !== undefined ? p.i : idxOfWord(w.b));
+  const senses = sensesOf(index !== undefined ? index : idxOfWord(w.b));
 
   const photo = IMAGES[w.b];
   const credit = CREDITS[w.b];
   return (
-    <Screen>
+    <>
       <Card>
         {photo ? (
           <Image testID="word-photo" source={photo} resizeMode="cover"
@@ -175,7 +187,7 @@ export default function Word({ route, navigation }) {
           <List>
             {(allHeard ? heard : heard.slice(0, HEARD_ROWS)).map((h) => (
               <Row key={h.id} testID={`heard-${h.id}`}
-                   onPress={() => navigation && navigation.navigate("Video", { videoId: h.id, word: w.b, at: h.t })}>
+                   onPress={() => navigation.navigate("Video", { videoId: h.id, word: w.b, at: h.t })}>
                 <Pill tone="brand">{clock(h.t)}</Pill>
                 <View style={{ flex: 1 }}>
                   <Text numberOfLines={1} style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
@@ -197,6 +209,6 @@ export default function Word({ route, navigation }) {
           </List>
         </>
       ) : null}
-    </Screen>
+    </>
   );
 }

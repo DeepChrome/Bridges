@@ -136,7 +136,7 @@ describe("the on-screen keyboard", () => {
 describe("flashcards", () => {
   it("show nothing when no set is ticked, rather than a set that cannot be switched off", async () => {
     await withProfile(<Study />);
-    expect(await screen.findByText("Pick a set to practise.")).toBeTruthy();
+    expect(await screen.findByText("Pick a set to practice.")).toBeTruthy();
     // One thought, one control: no summary row of a selection that is empty,
     // and no card to grade.
     expect(screen.queryByText("Change")).toBeNull();

@@ -9,7 +9,7 @@ import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
 import { WordList, GrammarNote, WordCard } from "../lesson";
-import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions";
+import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
   DRILL_POOL_STEPS,
@@ -24,12 +24,6 @@ import { touchStreak } from "../store";
 
 /* The mark for a run: partial credit summed over first attempts, as a percentage. */
 const scoreOf = (r) => (r.total ? Math.round(r.credit / r.total * 100) : 0);
-
-/* Meeting a lesson's words is work, and it used to pay nothing: quizzes and
-   drills moved `st.xp`, vocabulary did not, so finishing the teaching half of a
-   lesson changed nothing a learner could see on the path. Deliberately smaller
-   than a quiz — reading a set is not the same as retrieving it. */
-export const VOCAB_XP = 5;
 
 /* Pairs in one run of the pronunciation drill: five heard and five said, which
    is about a minute and a half and does not outstay a contrast. */
@@ -60,7 +54,7 @@ export function VocabFlow({ route, navigation }) {
     return (
       <Done
         title="Vocabulary done"
-        detail={`${lessonWords(unit, index).length} words met · +${VOCAB_XP} XP`}
+        detail={`${lessonWords(unit, index).length} words met`}
         guide="words"
         onBack={() => navigation.goBack()}
       />
@@ -72,10 +66,7 @@ export function VocabFlow({ route, navigation }) {
   const step = steps[at];
   const advance = () => {
     if (at + 1 >= steps.length) {
-      update((prev) => ({
-        ...markComponent(prev, unit, index, "vocab"),
-        xp: (prev.xp || 0) + VOCAB_XP,
-      }));
+      update((prev) => markComponent(prev, unit, index, "vocab"));
       setDone(true);
     } else {
       setAt(at + 1);
@@ -407,10 +398,7 @@ export function QuizFlow({ route, navigation }) {
         const before = ((st.unit[unit.id] || {}).lessons || {})[index] || {};
         const slot = { q: Math.max(before.q || 0, score), tries: (before.tries || 0) + 1 };
         const passed = quizPassed(slot);
-        update((prev) => touchStreak({
-          ...markComponent(prev, unit, index, "quiz", score),
-          xp: (prev.xp || 0) + r.right * 2 + (passed ? 10 : 0),
-        }));
+        update((prev) => touchStreak(markComponent(prev, unit, index, "quiz", score)));
         setResult({ ...r, score, passed, relief: passed && score < PASS_MARK, tries: slot.tries });
       }}
     />
@@ -449,7 +437,6 @@ export function DrillList({ navigation }) {
         <Thumb id="quiz" />
         <View style={{ flex: 1 }}>
           <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700" }}>Build a quiz</Text>
-          <Muted>Choose the questions and the sections</Muted>
         </View>
         {((st.drills || {}).quiz || {}).best
           ? <Pill tone="good">{(st.drills.quiz.best) + "%"}</Pill> : null}
@@ -475,7 +462,6 @@ export function DrillList({ navigation }) {
                 walkthrough's tap matched the header instead of the row, which
                 is how it was found. */}
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>At your level</Text>
-            <Muted>A conversation, then five questions</Muted>
           </View>
           {((st.drills || {}).listening || {}).best
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
@@ -486,7 +472,6 @@ export function DrillList({ navigation }) {
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
               Native speed
             </Text>
-            <Muted>Half a minute of a real speaker · much harder</Muted>
           </View>
         </Row>
       </List>
@@ -499,7 +484,6 @@ export function DrillList({ navigation }) {
           <Thumb id="shadow" tone="brand" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Repeat a sentence</Text>
-            <Muted>Hear it and say it straight back</Muted>
           </View>
         </Row>
         {/* A row of its own, rather than a button inside Alphabet. It was
@@ -508,14 +492,13 @@ export function DrillList({ navigation }) {
           <Thumb id="buildup" tone="brand" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Word building</Text>
-            <Muted>A long word, a syllable at a time</Muted>
           </View>
         </Row>
         <Row onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
           <Thumb id="talk" tone="brand" locked={!talkOpen} />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Talk</Text>
-            <Muted>{talkOpen ? "A short conversation on a topic" : `Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}</Muted>
+            {!talkOpen ? <Muted>{`Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}</Muted> : null}
           </View>
         </Row>
         {/* The letters and the mouth behind them (ROADMAP P10.2). Open from the
@@ -526,11 +509,10 @@ export function DrillList({ navigation }) {
           <Thumb id="letters" tone="brand" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Alphabet</Text>
-            <Muted>The letters, the vowel pairs and the chart</Muted>
           </View>
         </Row>
       </List>
-      <SectionLabel style={{ marginTop: 18 }}>Grammar drills</SectionLabel>
+      <SectionLabel style={{ marginTop: 18 }}>Grammar</SectionLabel>
       {/* A drill opens when the route has taught its rule (core/questions.js
           drillsIntroduced), read off the same grammar cards that drive the form
           question. Aspect belongs to chapter 8, and offering it in chapter 1
@@ -556,7 +538,7 @@ export function DrillList({ navigation }) {
                 <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
                   {d.name}
                 </Text>
-                <Muted>{open ? d.blurb : `Opens in chapter ${at + 1}`}</Muted>
+                {!open ? <Muted>{`Opens in chapter ${at + 1}`}</Muted> : null}
               </View>
               {open && best ? <Pill tone="good">{best + "%"}</Pill> : null}
             </Row>
@@ -602,7 +584,7 @@ export function DrillSetup({ route, navigation }) {
 
   return (
     <Screen footer={<Btn kind="pri" testID="drill-start" label="Start" onPress={start} />}>
-      <SectionLabel>{spec ? spec.blurb : "What to practise"}</SectionLabel>
+      <SectionLabel>{spec ? spec.blurb : "What to practice"}</SectionLabel>
       <List>
         {options.map((o) => (
           <Row key={o.id} testID={`focus-${o.id}`} onPress={() => toggle(o.id)}>
@@ -695,7 +677,7 @@ export function DrillFlow({ route, navigation }) {
       navigation={navigation}
       onFinish={(r) => {
         const score = scoreOf(r);
-        update((prev) => bestOf(prev, type, score, r.right));
+        update((prev) => bestOf(prev, type, score));
         setResult({ ...r, score });
       }}
     />
@@ -703,11 +685,11 @@ export function DrillFlow({ route, navigation }) {
 }
 
 /* Best and runs for a practice run, keyed like the grammar drills. */
-const bestOf = (prev, key, score, xp) => {
+const bestOf = (prev, key, score) => {
   const drills = { ...(prev.drills || {}) };
   const cur = drills[key] || { best: 0, runs: 0 };
   drills[key] = { best: Math.max(cur.best || 0, score), runs: (cur.runs || 0) + 1 };
-  return touchStreak({ ...prev, drills, xp: (prev.xp || 0) + xp });
+  return touchStreak({ ...prev, drills });
 };
 
 /* ------------------------------------------------------------- listening */
@@ -801,7 +783,7 @@ export function PassageFlow({ route, navigation }) {
     <Runner steps={steps} recycle={false} navigation={navigation}
             onFinish={(r) => {
               const score = scoreOf(r);
-              update((prev) => bestOf(prev, `passage:${passage.id}`, score, r.right * 2));
+              update((prev) => bestOf(prev, `passage:${passage.id}`, score));
               setResult({ ...r, score });
             }} />
   );
@@ -928,10 +910,10 @@ export function ListeningFlow({ route, navigation }) {
             onFinish={(r) => {
               const score = scoreOf(r);
               update((prev) => {
-                const next = bestOf(prev, "listening", score, r.right * 2);
+                const next = bestOf(prev, "listening", score);
                 // A chosen conversation also keeps its own best, so the library
-                // shows which have been done. XP is paid once, above.
-                return picked ? bestOf(next, `scene:${picked}`, score, 0) : next;
+                // shows which have been done.
+                return picked ? bestOf(next, `scene:${picked}`, score) : next;
               });
               setResult({ ...r, score });
             }} />
@@ -1025,13 +1007,41 @@ export function CustomQuizFlow({ route, navigation }) {
     <Runner steps={steps} navigation={navigation}
             onFinish={(r) => {
               const score = scoreOf(r);
-              update((prev) => bestOf(prev, "quiz", score, r.right));
+              update((prev) => bestOf(prev, "quiz", score));
               setResult({ ...r, score });
             }} />
   );
 }
 
 /* --------------------------------------------------------------- placement */
+
+/* The final test, from the foot of the path (core/questions.js finalExam).
+   Scored like a quiz and kept under `drills.final` like a practice run; it
+   unlocks nothing, because there is nothing after it. */
+export function FinalFlow({ navigation }) {
+  const { update } = useSession();
+  const [result, setResult] = useState(null);
+  const [seed, setSeed] = useState(0);
+  const steps = useMemo(() => Q.finalExam(FINAL_N), [seed]);
+  useAudioStopOnLeave();
+
+  if (result) {
+    return (
+      <Done title="Final test" detail={`${result.right} of ${result.total} right`}
+            score={result.score} passed={result.score >= PASS_MARK}
+            onAgain={() => { setResult(null); setSeed(seed + 1); }}
+            onBack={() => navigation.goBack()} />
+    );
+  }
+  return (
+    <Runner steps={steps} navigation={navigation}
+            onFinish={(r) => {
+              const score = scoreOf(r);
+              update((prev) => bestOf(prev, "final", score));
+              setResult({ ...r, score });
+            }} />
+  );
+}
 
 export function PlacementFlow({ navigation }) {
   const { update, updateAccount } = useSession();

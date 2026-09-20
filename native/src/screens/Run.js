@@ -28,7 +28,7 @@ import { Shadow } from "../activities/Shadow";
 import { Build } from "../activities/Build";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts } from "@core/scheduler";
-import { fold, translit, translitBack, firstSense } from "@core/util";
+import { fold, firstSense } from "@core/util";
 
 /* One review into state. The grade comes from gradeFor (right or wrong, table used or
    not) or is handed in directly by an activity that scores itself, as the speaking
@@ -130,10 +130,12 @@ function Typed({ q, answered, onAnswer }) {
   const [text, setText] = useState("");
   const check = () => {
     if (answered) return;
-    const given = fold(text);
+    /* Russian letters or nothing. Latin typing used to be transliterated and
+       accepted; the owner ruled it out (2026-09-19) — a spelling in the wrong
+       alphabet is not the word, and the on-screen keyboard is there for a phone
+       without a Russian layout. */
+    const typed = fold(text);
     const want = fold(q.target);
-    const typed = given === want || translit(given) === want ? want
-      : /[а-яё]/i.test(given) ? given : translit(given);
     // Another word of the pool with the same meaning is right too: "jacket"
     // is «пиджак» and «куртка», and the prompt did not say which.
     if (typed === want || (q.alts || []).includes(typed)) return onAnswer(true);
@@ -147,11 +149,6 @@ function Typed({ q, answered, onAnswer }) {
     <View>
       <RuInput value={text} onChangeText={setText} editable={!answered} onSubmit={check}
                testID="type-input" />
-      {/* The Latin spelling of the answer is shown only once it has been given —
-          before that it is the answer, in a font the learner can read. */}
-      {answered ? (
-        <Muted style={{ marginTop: 8 }}>{`Latin spelling: “${translitBack(q.target)}”`}</Muted>
-      ) : null}
       {!answered ? (
         <Btn kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} />
       ) : null}

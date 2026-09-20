@@ -1982,7 +1982,6 @@ named after a monkey is not where a press animation belongs.
 | `usePop` | the one thing on a screen that is the reward | native |
 | `usePress` | every control under a finger | native |
 | `useSwap` | one thing replacing another in the same place | native |
-| `useCount` | a number that must not change unseen | JS |
 | `useFill` | a bar | JS |
 | `useSweep` | a progress ring | JS |
 
@@ -3683,6 +3682,76 @@ runner and reads `rule-note` off the tree — but the emulator profile is on
 chapter 1, where no drill that carries a rule is open yet, and a chapter-2
 walkthrough is a longer job than the change warranted. It is one wrong answer
 on the Conjugation drill on the owner's phone.
+
+## 30am. The owner's twelve, read as one complaint (2026-09-19)
+
+Twelve items in one message, and eleven of them are the same sentence
+§2 already carries: *"i dont want things explained that dont need to be
+explained...that's a tell tale sign of AI."* What each one was, and the rule
+it left:
+
+- **The tour demonstrates what it says.** The first card described a
+  two-tap dictionary under a drawing of three underlined words. It is a real
+  `Linked` sentence now, and the second tap works *before there is a
+  navigator*: `openFull` in `words.js` checks `getCurrentRoute()`, not only
+  `isReady()` — the container is mounted long before any stack is, and a
+  `navigate` then does nothing at all — and falls back to the entry as a
+  sheet. `WordEntry` is the screen's own body, carved out of `Word.js` so it
+  is one entry, not a second; without a navigator the "Heard in" rows are
+  left out rather than left dead. **A tour card that describes a control is
+  wrong; a tour card that *is* the control is the tour.**
+- **Latin spelling stands in for Russian nowhere.** The typed answer and
+  the Hear step used to transliterate Latin and mark it right, with a "Latin
+  spelling" hint under the verdict; both gone, and the input placeholder is
+  "Russian". Search still ranks a transliterated query silently — typing
+  "kniga" *finds* книга, it never *is* книга — which is lookup, not spelling.
+  The alphabet's Latin look-alikes section is "Look-alikes".
+- **XP is gone** — "it means nothing now", and it did not: nothing read it,
+  nothing unlocked on it, and the rings say what counted. With it went
+  `useCount`, whose only user it was, the "+5 XP" on the vocabulary Done
+  screen, and "Level 1 · 0 XP" on You. `st.xp` stays in old profiles as an
+  ignored key; the store default no longer writes it.
+- **Captions were the "random non intuitive buttons".** Every Practice row,
+  most Settings rows and the lesson's three steps carried a line under the
+  title saying what tapping would do — "Hear it and say it straight back",
+  "A buzz on an answer", "Meet the new words". Cut, except the three that
+  report a *state* the learner cannot see (locked: "Opens in chapter N";
+  offline: what is saved; developer mode: "All lessons unlocked") and the one
+  gesture nothing else discloses ("Press a speaker twice for slower"). The
+  sections were already right; the captions were what made them read as
+  generated.
+- **The dictionary was right and looked wrong.** "dog" gave five words that
+  all read "dog" because each row showed `firstSense`. Measured: собака, пёс,
+  кобель, псина are all "dog"; самец, акула, барбос *mention* it. `search.scored`
+  in `core/search.js` now exposes the score and `MATCH` (= `SENSE`) is where
+  the ranking's own line falls; `Search.js` lists the whole gloss and cuts the
+  list there — the words that are the term, then "Also". 45,987 is the
+  whole of OpenRussian's glossed lexicon; making it *more* comprehensive
+  means admitting Wiktionary headwords OpenRussian lacks into the deep tier,
+  a build-time job, not a screen one.
+- **"Read something you found" is gone**, and the Read screen with it
+  (`core/read.js`, its test, its route) — a feature with no entry point is
+  dead code (§12). The library filters by **All / Unwatched / Watched** and a
+  watched row says so on the row, not only as a 16 px tick in a corner.
+- **The final test** — `finalExam` in `core/questions.js`: fifty questions,
+  cumulative and diverse *by construction* rather than by luck. Words are
+  dealt chapter by chapter in turn (so every chapter is in it whatever the
+  draw), the six word kinds rotate (so no draw is fifty of one), a fifth is
+  sentences heard and said, and only the spine is asked — a side quest is
+  optional, and a test on a chapter you were free to skip is not a fair
+  test. `FinalCard` sits at the foot of the path, locked until every
+  chapter's spine is done or developer mode is on, and scores into
+  `drills.final`. `core.test.mjs` asserts all four properties over a draw.
+- **American spelling**: practise → practice (four screens, a route title
+  and the Study picker's header), recogniser → recognizer, colour → color.
+  The scheduler's `recognise` direction id is code, not copy, and stays.
+- **Not found: "Russian in your words".** No such string exists in the app,
+  `core/`, the curated data or the flows; it is either a paraphrase of
+  something else or from the frozen web app. Asked rather than guessed.
+
+`native/flows/batch0919.txt` walks the changed screens. The tour's first
+link is tapped by its accessibility label (`open word`) because a Cyrillic
+literal in a flow file is the PowerShell trap §23 names.
 
 ## 31. Verification
 

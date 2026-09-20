@@ -1,4 +1,4 @@
-﻿# The UX walkthrough: a fresh install to every screen and question type.
+# The UX walkthrough: a fresh install to every screen and question type.
 #   adb shell pm clear app.bridges.russian; launch; then
 #   .\native\tools\walk.ps1 -Flow native\flows\walkthrough.txt
 # Screenshots land in native/screenshots/walk/. Read them — that is the audit.
@@ -60,7 +60,7 @@ wait:2
 shot:28-immerse
 tap:^Search$
 wait:2
-tap:Russian, English or Latin
+tap:Russian or English
 type:kniga
 wait:2
 shot:31-search-results

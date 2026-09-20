@@ -93,7 +93,7 @@ describe("a list's hairlines", () => {
     /* "Cards: recognise" led this list until the flashcards' directions moved
        to the Study picker (§30ai); the group now opens on the scheduler's
        rations. */
-    const group = ["Reviews a day", "Russian keyboard", "Audio for offline", "Reading speed",
+    const group = ["Reviews a day", "On-screen Russian keyboard", "Audio for offline", "Reading speed",
                    "Right-answer sound", "Show the tour", "Developer mode", "STT Lab"];
     for (const label of group.slice(0, -1)) expect(rowAround(label)).toBe(1);
     expect(rowAround("STT Lab")).toBe(0);

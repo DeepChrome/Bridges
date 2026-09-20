@@ -11,40 +11,41 @@ import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius } from "../theme";
 import { Screen, Btn, Muted, Speaker, Text } from "../ui";
+import { Linked } from "../words";
 import { hasRussianVoice } from "../audio";
 
 const PAGES = [
   {
     key: "words",
     title: "Every Russian word is a door",
-    body: "Tap a word once to see what it is and what form it is in. Tap again for the whole entry: meaning, every form, and the sentences it appears in.",
+    body: "Tap a word. Tap it again for the whole entry.",
     demo: "word",
   },
   {
     key: "voices",
     title: "Real voices, and the phone's",
-    body: "A blue speaker plays a real recording. A grey one uses the phone's own Russian voice and says so. Press any speaker twice to hear it slower.",
+    body: "Blue is a real recording; grey is the phone's own voice. Press twice for slower.",
     demo: "speaker",
   },
   {
     key: "mic",
     title: "Speaking stays on your phone",
-    body: "Some questions ask you to say a sentence. The first one will ask for the microphone. What you say is recognised on the phone and never sent anywhere; only the words it heard are checked.",
+    body: "Some questions ask you to say a sentence. The microphone is asked for then, and what you say never leaves the phone.",
     demo: "mic",
   },
 ];
 
+/* The sentence on the first card is the real control, not a picture of one:
+   `Linked` opens the same sheet as everywhere else, and a second tap the full
+   entry — at first run the entry comes as a sheet too, since there is no
+   navigator yet (words.js). The owner, 2026-09-19: "make sure the tutorial
+   actually is able to demo what it's showing." */
+export const TOUR_SENTENCE = "Я читаю книгу.";
+
 function Demo({ kind }) {
   const t = useTheme();
   if (kind === "word") {
-    return (
-      <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-        {["Я", "чита́ю", "кни́гу."].map((w, k) => (
-          <Text key={k} style={{ color: t.ink, fontSize: 26, textDecorationLine: k ? "underline" : "none",
-                                 textDecorationColor: t.brand }}>{w}</Text>
-        ))}
-      </View>
-    );
+    return <Linked testID="tour-sentence" text={TOUR_SENTENCE} size={28} />;
   }
   if (kind === "speaker") {
     // On a phone with no Russian voice the grey speaker is dead, and the card

@@ -24,6 +24,7 @@ import { Sheet, Btn, Senses, Text } from "./ui";
 import { L, IX } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise } from "@core/forms";
+import { WordEntry } from "./screens/Word";
 
 export const navRef = createNavigationContainerRef();
 
@@ -59,13 +60,13 @@ export function splitTokens(text) {
 
 /* Russian text whose recognised words are links. Underlined, because a link that
    only looks like a link once you press it is not discoverable. */
-export function Linked({ text, style, size = 17, color }) {
+export function Linked({ text, style, size = 17, color, testID }) {
   const words = useWords();
   const t = useTheme();
   const parts = useMemo(() => splitTokens(text), [text]);
 
   return (
-    <Text style={[{ color: color || t.ink, fontSize: size }, style]}>
+    <Text testID={testID} style={[{ color: color || t.ink, fontSize: size }, style]}>
       {parts.map((p, k) => (
         p.i === undefined ? (
           <Text key={k}>{p.text}</Text>
@@ -92,6 +93,18 @@ function WordSheet({ state, onClose, onFull }) {
   if (!state) return null;
   const { index, surface } = state;
   const lemma = L[index];
+  /* The full entry as a sheet: the second tap before there is a navigator to
+     push the Word screen onto — the tour runs before the first profile exists
+     (Intro.js). The same component the screen draws, so it is one entry, not
+     a second one; without a navigator the "Heard in" rows are left out
+     rather than left dead. */
+  if (state.full) {
+    return (
+      <Sheet onClose={onClose} maxHeight="92%" testID="word-full-sheet">
+        <WordEntry w={lemma} index={index} navigation={null} />
+      </Sheet>
+    );
+  }
   const s = summarise(lemma, surface);
   if (!s) return null;
 
@@ -147,10 +160,17 @@ export function WordsProvider({ children }) {
   const showing = useRef(null);
 
   const openFull = useCallback((index) => {
-    setState(null);
     showing.current = null;
-    // By word, not by index — see the note in Word.js.
-    if (navRef.isReady()) navRef.navigate("Word", { word: L[index].b });
+    /* By word, not by index — see the note in Word.js. `isReady` alone is not
+       enough: the container is mounted before any navigator is (the gate, the
+       tour), and a navigate then does nothing at all. With no current route
+       the entry opens as a sheet instead (WordSheet). */
+    if (navRef.isReady() && navRef.getCurrentRoute()) {
+      setState(null);
+      navRef.navigate("Word", { word: L[index].b });
+    } else {
+      setState({ index, surface: null, full: true });
+    }
   }, []);
 
   const open = useCallback((surface) => {

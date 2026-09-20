@@ -124,7 +124,7 @@ export const VOWEL_CHART = [
 const TIP = {};
 for (const row of LETTERS) {
   const bare = row.l.split(" ")[1];
-  if (row.trap) TIP[bare] = `${bare} is ${row.like.replace(/^the /, "")}, not the Latin letter it looks like`;
+  if (row.trap) TIP[bare] = `${bare} is ${row.like.replace(/^the /, "")}, not the letter it looks like`;
 }
 TIP["ы"] = "ы: say ee, then pull the tongue back without rounding your lips";
 TIP["щ"] = "щ is a long soft sh, further forward than ш";

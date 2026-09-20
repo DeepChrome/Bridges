@@ -164,6 +164,8 @@ const rawSearch = makeSearch({ L, IX, deep: deepList });
 const rawResolve = makeResolve({ L, IX, deep: deepList });
 
 export const searchWords = (q, limit) => rawSearch(q, limit).map(hydrate);
+export const searchWordsScored = (q, limit) =>
+  rawSearch.scored(q, limit).map((x) => ({ entry: hydrate(x.entry), score: x.score }));
 export const resolveWord = (w) => {
   const hit = rawResolve(w);
   return hit ? hydrate(hit) : null;

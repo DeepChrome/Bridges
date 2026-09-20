@@ -77,6 +77,12 @@ const WORD = 50;          // the gloss contains it as a whole word
 const PREFIX = 30;        // the headword starts with it
 const SUBSTR = 10;        // buried in the gloss
 
+/* Where a hit stops being *the* word and becomes a word that mentions it. A
+   screen laying results out as a dictionary draws the line here: собака, пёс
+   and кобель are "dog"; акула ("shark, dog-fish") only contains it. Exposed so
+   the screen and the ranking cannot come to disagree about the line. */
+export const MATCH = SENSE;
+
 export function makeSearch({ L, IX, deep }) {
   let cache = null;
   const deepList = () => {
@@ -84,7 +90,9 @@ export function makeSearch({ L, IX, deep }) {
     return cache;
   };
 
-  return function search(raw, limit = 12) {
+  /* The ranked hits with their scores; `search` below is the same list as
+     entries alone, which is what every older caller wants. */
+  function scored(raw, limit = 12) {
     const q = fold(raw || "");
     if (!q) return [];
     const tr = translit(q);
@@ -135,8 +143,12 @@ export function makeSearch({ L, IX, deep }) {
     return [...best.values()]
       .sort((a, z) => z.score - a.score || a.rank - z.rank)
       .slice(0, limit)
-      .map((x) => x.entry);
-  };
+      .map((x) => ({ entry: x.entry, score: x.score }));
+  }
+
+  const search = (raw, limit) => scored(raw, limit).map((x) => x.entry);
+  search.scored = scored;
+  return search;
 }
 
 /* Resolve one word to an entry, whichever tier holds it. Keyed on the word rather

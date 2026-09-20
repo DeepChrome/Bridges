@@ -177,6 +177,19 @@ describe("Video", () => {
     expect(screen.getByText(occ.s)).toBeTruthy();
   });
 
+  /* Watched shows on the row and the library filters by it (the owner,
+     2026-09-19: "make it more obvious once a video has been completed"). */
+  it("marks a watched row and filters the library by watched or not", async () => {
+    await withProfile(<Immerse navigation={nav} />, { watched: { [libraryVideo.id]: 20000 } });
+    expect(await screen.findByTestId(`watched-${libraryVideo.id}`)).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("Watched")); });
+    expect(await screen.findByTestId(`video-${libraryVideo.id}`)).toBeTruthy();
+    expect(screen.queryByTestId(`video-${unitVideo.id}`)).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByText("Unwatched")); });
+    expect(await screen.findByTestId(`video-${unitVideo.id}`)).toBeTruthy();
+    expect(screen.queryByTestId(`video-${libraryVideo.id}`)).toBeNull();
+  });
+
   it("records a library video as watched, and a unit episode for its unit too", async () => {
     await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={nav} />);
     await act(async () => { fireEvent.press(await screen.findByText("Mark as watched")); });

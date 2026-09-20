@@ -24,7 +24,7 @@ export const ERROR_TAGS = [
   { id: "MISSING_WORD", en: "A word the sentence needs was left out", unit: null },
   { id: "EXTRA_WORD", en: "A word the sentence does not need, often an article or “is”", unit: "core1" },
   { id: "STRESS", en: "The emphasis on the wrong syllable", unit: null },
-  { id: "UNCLEAR", en: "The recogniser could not make the word out — try again", unit: null },
+  { id: "UNCLEAR", en: "The recognizer could not make the word out — try again", unit: null },
 ];
 
 const BY_ID = Object.create(null);

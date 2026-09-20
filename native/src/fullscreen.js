@@ -26,6 +26,7 @@ export const RUNS = [
   "Placement",    // the placement test
   "ChapterTask",  // the open-ended chapter task
   "CustomQuiz",   // a quiz the learner built
+  "Final",        // the final test at the foot of the path
   "Drill",        // any grammar drill
   "SoundDrill",   // the pronunciation pairs
   "BuildDrill",   // a long word built from its end
@@ -47,7 +48,7 @@ export const RUNS = [
 export const TAB_BAR_SCREENS = [
   "Path", "Unit", "Lesson",                            // Learn
   "Drills", "QuizSetup", "DrillSetup", "Listening", "SceneList", "Sounds",  // Practice
-  "Episodes", "Read",                                  // Immerse
+  "Episodes",                                          // Immerse
   "Cards",                                             // Study
   "Words",                                             // Search
   "You", "Stats", "Credits",                           // in every stack

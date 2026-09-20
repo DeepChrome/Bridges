@@ -129,8 +129,8 @@ export default function SttLab() {
     if (/not-supported|not downloaded/i.test(`${ev.error} ${ev.message || ""}`)) {
       setNote(onDevice
         ? "Russian is supported but its offline model is not on this phone. "
-          + "Tap Download, or turn off on-device to measure the network recogniser."
-        : "The recogniser refused this language even over the network.");
+          + "Tap Download, or turn off on-device to measure the network recognizer."
+        : "The recognizer refused this language even over the network.");
     }
     setPhase("idle");
     log({ ts: Date.now(), key: fold(item.ru), kind: "lab", i, src: item.src,
@@ -219,7 +219,7 @@ export default function SttLab() {
 
       {caps ? (
         <Muted size={12} style={{ marginBottom: 10 }}>
-          {`recogniser ${caps.available ? "available" : "unavailable"} · on-device ${caps.onDevice ? "yes" : "no"} · ru ${caps.hasRu === null ? "?" : caps.hasRu ? "yes" : "no"}`}
+          {`recognizer ${caps.available ? "available" : "unavailable"} · on-device ${caps.onDevice ? "yes" : "no"} · ru ${caps.hasRu === null ? "?" : caps.hasRu ? "yes" : "no"}`}
         </Muted>
       ) : null}
 
@@ -271,7 +271,7 @@ export default function SttLab() {
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15 }}>On-device only</Text>
             <Muted size={12}>
-              {onDevice ? "Audio stays on the phone" : "Audio goes to the recogniser's servers"}
+              {onDevice ? "Audio stays on the phone" : "Audio goes to the recognizer's servers"}
             </Muted>
           </View>
           <Switch

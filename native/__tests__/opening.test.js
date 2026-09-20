@@ -53,7 +53,7 @@ describe("saying what has just opened", () => {
      reached. */
   it("says nothing at all on a brand new profile", async () => {
     const view = await withState({});
-    await view.findByTestId("xp");
+    await view.findByTestId("streak");
     expect(view.queryByTestId("opening")).toBeNull();
   });
 
@@ -100,7 +100,7 @@ describe("saying what has just opened", () => {
      their first screen. */
   it("is not fooled by developer mode", async () => {
     const view = await withState({ dev: true });
-    await view.findByTestId("xp");
+    await view.findByTestId("streak");
     expect(view.queryByTestId("opening")).toBeNull();
   });
 
@@ -108,7 +108,7 @@ describe("saying what has just opened", () => {
     const all = ["hear", "drill:conjugation", "scene", "talk", "form", "say",
                  "drill:agreement", "drill:cases", "drill:aspect"];
     const view = await withState({ unit: through(9), met: all });
-    await view.findByTestId("xp");
+    await view.findByTestId("streak");
     expect(view.queryByTestId("opening")).toBeNull();
     // …and the list in the test is the real one, not a stale copy of it.
     expect(all.length).toBe(9);

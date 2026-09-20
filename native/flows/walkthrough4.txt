@@ -116,7 +116,7 @@ shot:25-drill-cases
 # Keyboard up on a typed answer: the input and Check must stay in view. This
 # is the screenshot that caught the question block taking the slack above an
 # input (Phase 0.2) — read it every run.
-tap:Cyrillic or Latin
+tap:^Russian$
 wait:2
 type:abc
 wait:1
@@ -137,7 +137,7 @@ wait:2
 shot:31-search
 # The tool matches what a node is labelled, not its testID — and an empty
 # TextInput is labelled by its placeholder, not by accessibilityLabel.
-tap:Russian, English or Latin
+tap:Russian or English
 type:kniga
 wait:2
 shot:32-search-results

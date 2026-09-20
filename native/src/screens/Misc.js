@@ -5,7 +5,7 @@ import { View, Image } from "react-native";
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel, Text } from "../ui";
+import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel, Choice, Text } from "../ui";
 import {
   UN, STATS, unitState, markComponent, L, videos, videoById, videoWatched, unitById,
   idxOfWord,
@@ -90,13 +90,26 @@ export function searchVideos(videos, query) {
   return scored.map((x) => x.v);
 }
 
+/* The three views of the library: everything, what is left, what is done. A
+   filter rather than a sort — a watched episode in its place on the path is
+   still where it was, and "what have I not watched yet" is the question a
+   learner opening the tab is asking (the owner, 2026-09-19). */
+export const VIDEO_FILTERS = [
+  { id: "all", name: "All" }, { id: "unwatched", name: "Unwatched" }, { id: "watched", name: "Watched" },
+];
+
 export function Immerse({ navigation }) {
   const { st } = useSession();
   const t = useTheme();
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("all");
   const all = videos();
   const seen = all.filter((v) => videoWatched(st, v)).length;
-  const shown = useMemo(() => searchVideos(all, query), [query]);
+  const shown = useMemo(() => {
+    const found = searchVideos(all, query);
+    return filter === "all" ? found
+      : found.filter((v) => videoWatched(st, v) === (filter === "watched"));
+  }, [query, filter, st.watched, st.unit]);
 
   return (
     <Screen>
@@ -105,27 +118,23 @@ export function Immerse({ navigation }) {
         <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>{seen}</Text>
         <Muted size={14}>{`of ${all.length} watched`}</Muted>
       </View>
-      {/* Russian from outside the library (ROADMAP P10.7). Immerse is where
-          material the learner did not get from the curriculum comes in, so this
-          is its home rather than a sixth tab. */}
-      <Btn testID="read-anything" label="Read something you found"
-           style={{ marginBottom: 12 }}
-           onPress={() => navigation.navigate("Read")} />
       <SearchField testID="video-search" value={query} onChangeText={setQuery}
                    placeholder="Search: travel, grammar, B1, слово…" label="Search videos"
                    style={{ marginBottom: 12 }} />
+      <Choice testID="video-filter" options={VIDEO_FILTERS} value={filter} onPick={setFilter}
+              style={{ marginBottom: 12 }} />
       {shown.length ? (
         <List>
           {shown.map((v, k) => {
             const watched = videoWatched(st, v);
             const unit = v.unit ? unitById(v.unit) : null;
             return (
-              <Row key={v.id}
+              <Row key={v.id} testID={`video-${v.id}`}
                    onPress={() => navigation.navigate("Video", { videoId: v.id })}>
                 <VideoThumb id={v.id} done={watched} />
                 <View style={{ flex: 1 }}>
                   <Text numberOfLines={2}
-                        style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+                        style={{ color: watched ? t.ink2 : t.ink, fontSize: 15, fontWeight: "600" }}>
                     {short(v.title)}
                   </Text>
                   <Muted>
@@ -133,13 +142,18 @@ export function Immerse({ navigation }) {
                       .filter(Boolean).join(" · ")}
                   </Muted>
                 </View>
+                {/* Said on the row, not only on the thumbnail: a 16 px tick in a
+                    corner was the only mark and the owner asked for it to be
+                    obvious. Dimmed title, a pill, and the tick — three signs. */}
+                {watched ? <Pill tone="good" testID={`watched-${v.id}`}>watched</Pill> : null}
               </Row>
             );
           })}
         </List>
       ) : (
         <Muted style={{ textAlign: "center", marginTop: 30 }}>
-          {`Nothing matches “${query.trim()}”`}
+          {query.trim() ? `Nothing matches “${query.trim()}”`
+            : filter === "watched" ? "Nothing watched yet" : "Everything watched"}
         </Muted>
       )}
     </Screen>

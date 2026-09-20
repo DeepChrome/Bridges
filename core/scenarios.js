@@ -11,7 +11,7 @@ export const SCENARIOS = [
   { id: "flat", unit: "home", icon: "home", title: "Моя квартира", en: "My flat",
     prompt: "You are a friend visiting the learner's flat for the first time. Ask about the rooms, what is where, and what they like about it." },
   { id: "shop", unit: "clothes", icon: "clothes", title: "В магазине", en: "In a clothes shop",
-    prompt: "You are a shop assistant in a clothes shop. Ask what the learner is looking for, what size and colour, and offer things." },
+    prompt: "You are a shop assistant in a clothes shop. Ask what the learner is looking for, what size and color, and offer things." },
   { id: "way", unit: "city", icon: "city", title: "Как пройти?", en: "Asking the way",
     prompt: "You are a passer-by in a Russian town. The learner is lost. Ask where they need to go and give simple directions, one step at a time." },
   { id: "trip", unit: "travel", icon: "travel", title: "Поездка", en: "A trip",

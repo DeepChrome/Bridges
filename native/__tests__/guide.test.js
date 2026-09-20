@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { Runner, Done } from "../src/screens/Run";
-import { VocabFlow, VOCAB_XP } from "../src/screens/Flows";
+import { VocabFlow } from "../src/screens/Flows";
 import { Q } from "../src/questions";
 import { UN, STAGES, lessonWords } from "../src/data";
 import { POSES, LINES } from "@core/guide";
@@ -112,29 +112,30 @@ describe("the guide", () => {
 });
 
 describe("finishing the vocabulary of a lesson", () => {
-  it("pays XP, which it never used to", async () => {
+  /* XP was paid here until 2026-09-19 and is gone with the rest of it (the
+     owner: "it means nothing now"). What finishing still does is mark the
+     component, and nothing about the walk may write a score. */
+  it("marks the vocabulary done and pays nothing", async () => {
     await withProfile(<VocabFlow route={route} navigation={nav} />);
     const steps = Q.vocabSteps(unit, 0);
-    // Walk the teaching steps only; a question step hands off to the runner and
-    // is not what this is about.
     for (let k = 0; k < steps.length; k++) {
       const go = screen.queryByText("Start learning") || screen.queryByText("Continue")
               || screen.queryByText("Finish");
       if (!go) break;
       await act(async () => { fireEvent.press(go); });
     }
-    // Whether or not the walk reached the end, XP must never have gone down.
     await flushState();
     const st = (await global.__db.saved("p1"));
-    expect(st.xp === 0 || st.xp === VOCAB_XP).toBe(true);
+    expect(st.xp || 0).toBe(0);
   });
 
-  it("names the reward on the Done screen", async () => {
+  it("names what was done on the Done screen, not a reward", async () => {
     await withProfile(
       <Done title="Vocabulary done"
-            detail={`${lessonWords(unit, 0).length} words met · +${VOCAB_XP} XP`}
+            detail={`${lessonWords(unit, 0).length} words met`}
             guide="words" onBack={jest.fn()} />
     );
-    await waitFor(() => expect(screen.getByText(new RegExp(`\\+${VOCAB_XP} XP`))).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/words met$/)).toBeTruthy());
+    expect(screen.queryByText(/XP/)).toBeNull();
   });
 });

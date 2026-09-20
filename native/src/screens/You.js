@@ -154,7 +154,6 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Write drill answers</Text>
-                  <Muted>{st.typedDrills === false ? "Choose from four" : "Fill in the blank"}</Muted>
                 </View>
                 <Switch
                   testID="typed-drills-switch"
@@ -165,8 +164,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               </Row>
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Russian keyboard</Text>
-                  <Muted>On screen, for typed answers</Muted>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>On-screen Russian keyboard</Text>
                 </View>
                 <Switch
                   testID="osk-switch"
@@ -178,7 +176,6 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Vibration</Text>
-                  <Muted>A buzz on an answer</Muted>
                 </View>
                 <Switch
                   testID="haptics-switch"
@@ -190,7 +187,6 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Daily reminder</Text>
-                  <Muted>Once a day</Muted>
                   {Number.isFinite(st.remind) ? (
                     <Choice testID="remind-at" value={st.remind} style={{ marginTop: 8 }}
                             options={REMIND_TIMES}
@@ -218,7 +214,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Audio for offline</Text>
-                  <Muted>{`Downloads a unit's recordings when you open it · ${cacheLine}`}</Muted>
+                  <Muted>{cacheLine}</Muted>
                   {cache.files ? (
                     <Btn kind="ghost" label="Clear downloaded audio" style={{ alignSelf: "flex-start", marginTop: 4 }}
                          onPress={() => { clearCache(); setCache(cacheStats()); }} />
@@ -242,7 +238,6 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Right-answer sound</Text>
-                  <Muted>Tap to hear</Muted>
                   <Choice testID="cue-choice" options={CUE_NAMES} value={st.cue || "bell"} style={{ marginTop: 8 }}
                           onPick={(id) => { previewCue(id); update((p) => ({ ...p, cue: id })); }} />
                 </View>
@@ -254,13 +249,11 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               <Row testID="open-credits" onPress={() => { onClose(); onCredits(); }}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Credits</Text>
-                  <Muted>Where the words, voices and pictures came from</Muted>
                 </View>
               </Row>
               <Row onPress={() => { onClose(); onTour(); }}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Show the tour</Text>
-                  <Muted>Words, voices and the microphone, in three cards</Muted>
                 </View>
               </Row>
               {/* Last, not first: a new learner's settings sheet should not open on
@@ -282,7 +275,6 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                 <Row onPress={() => { onClose(); onLab(); }}>
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: t.ink, fontSize: 15 }}>STT Lab</Text>
-                    <Muted>Measure speech recognition on your voice</Muted>
                   </View>
                 </Row>
               ) : null}
@@ -368,7 +360,6 @@ export default function You({ navigation }) {
   const due = dueCards(st.seen, Date.now(), st.learnAhead).length;
   const trouble = troubleWords(st);
   const grammar = grammarTrouble(st);
-  const level = Math.floor((st.xp || 0) / 100) + 1;
   const openUnit = (unitId) =>
     navigation.navigate("Learn", { screen: "Unit", params: { unitId } });
 
@@ -385,10 +376,9 @@ export default function You({ navigation }) {
                          letterSpacing: -0.4 }}>
             {account ? account.name : "Learner"}
           </Text>
-          <Muted>
-            {`Level ${level} · ${(st.xp || 0).toLocaleString("en-US")} XP` +
-             (account && account.placed ? ` · placed at chapter ${account.placed + 1}` : "")}
-          </Muted>
+          {account && account.placed ? (
+            <Muted>{`Placed at chapter ${account.placed + 1}`}</Muted>
+          ) : null}
         </View>
         <Btn kind="ghost" label="Settings" onPress={() => setSettings(true)} />
       </View>

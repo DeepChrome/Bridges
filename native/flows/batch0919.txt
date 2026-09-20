@@ -1,0 +1,81 @@
+# The owner's 2026-09-19 batch: the tour demonstrates itself, XP is gone, the
+# captions are cut, the library filters by watched, the dictionary reads as one,
+# and the final test sits at the foot of the path. From a clean install:
+#
+#   adb shell pm clear app.bridges.russian; launch; then
+#   .\native\tools\walk.ps1 -Flow native\flows\batch0919.txt -Device emulator-5554
+
+shot:t0-gate
+tap:Monkeynaut
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+shot:t1-tour
+# The links are nodes of their own («читаю» sits at [457,236] on the 1080-wide
+# emulator), but a Cyrillic literal in a flow file is the PowerShell encoding
+# trap CLAUDE.md 23 names, and the whole-sentence node's centre falls between
+# two links. So: a raw tap on the middle word, noted as the tool asks.
+tapxy:457:236
+wait:2
+shot:t2-tour-sheet
+tap:^Full entry$
+wait:2
+shot:t3-tour-entry
+# Back closes a sheet (Modal onRequestClose); the backdrop's centre is the sheet.
+back
+wait:1
+tap:^Skip$
+wait:2
+tap:^Start from the beginning$
+wait:3
+shot:t4-learn
+scroll
+scroll
+scroll
+scroll
+scroll
+scroll
+scroll
+scroll
+scroll
+scroll
+scroll
+scroll
+shot:t5-learn-foot
+scrolltop
+tap:^Start \(
+wait:3
+shot:t6-lesson-steps
+back
+wait:2
+tap:^Practice$
+wait:2
+shot:t7-practice
+scroll
+shot:t8-practice-more
+scrolltop
+tap:^Immerse$
+wait:3
+shot:t9-immerse
+tap:^Watched$
+wait:2
+shot:t10-immerse-watched
+tap:^All$
+wait:1
+tap:^Search$
+wait:2
+tap:Russian or English
+type:dog
+wait:2
+shot:t11-search-dog
+back
+wait:1
+tap:Your profile
+wait:2
+shot:t12-you
+tap:^Settings$
+wait:2
+shot:t13-settings
+scroll
+shot:t14-settings-more

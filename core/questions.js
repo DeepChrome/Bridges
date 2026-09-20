@@ -102,6 +102,9 @@ export const QUIZ_KINDS = [
   { id: "scene", name: "Listening scene", blurb: "A few sentences, then questions" },
 ];
 export const QUIZ_LENGTHS = [10, 20, 30];
+/* The final test at the end of the path (the owner, 2026-09-19): fifty
+   questions over every chapter. */
+export const FINAL_N = 50;
 /* New words per lesson, by chapter: a ramp, not a flat seven from lesson one. The
    first chapter's lessons carry five, the second's six, then seven. Both apps and
    the simulator size lessons through this, so the lesson a state key names is the
@@ -1053,6 +1056,54 @@ export function makeQuestions(env) {
     return spread(shuffle(out)).slice(0, n);
   }
 
+  /* The final test: one paper over the whole course rather than a tenth
+     chapter's quiz. Cumulative by construction — words are dealt chapter by
+     chapter in turn, so every chapter is in it whatever the draw — and
+     diverse by construction: the word kinds rotate instead of being picked at
+     random, and a fifth of the paper is sentences heard and said. The spine
+     only, because every learner walks the spine and a side quest is optional;
+     a test on a chapter you were free to skip is not a fair test. */
+  const FINAL_WORD_KINDS = ["choose-en", "choose-ru", "listen", "cloze", "type", "form"];
+  function finalExam(n = FINAL_N) {
+    const units = STAGES.map((s) => s.core);
+    const sentenceShare = Math.round(n / 5);
+    const wordShare = n - sentenceShare;
+    const bags = units.map((u) => shuffle(u.w.slice()));
+    const picks = [];
+    for (let k = 0; picks.length < wordShare && bags.some((b) => b.length); k++) {
+      const b = bags[k % bags.length];
+      if (b.length) picks.push({ i: b.shift(), unit: units[k % units.length] });
+    }
+    const pool = unique(units.flatMap((u) => u.w));
+    const out = [];
+    picks.forEach(({ i, unit }, k) => {
+      const kind = FINAL_WORD_KINDS[k % FINAL_WORD_KINDS.length];
+      let e = { t: kind, i, pool };
+      if (kind === "cloze") {
+        const c = clozeFor(i);
+        e = c ? { t: "cloze", i, ex: c.ex, token: c.token, pool } : { t: "choose-en", i, pool };
+      } else if (kind === "form") {
+        // The word's own chapter decides the form; a word with none is typed.
+        const f = formPrompt(unit, 0, i);
+        e = f ? { t: "form", q: f } : { t: "type", i, pool };
+      }
+      const q = present(e);
+      if (q) out.push(q);
+    });
+    const unitIds = units.map((u) => u.id);
+    const seen = new Set();
+    for (let k = 0, made = 0; made < sentenceShare && k < sentenceShare * 5; k++) {
+      const q = sentencePrompt(k % 2 ? "say" : "hear", unitIds);
+      if (!q) continue;
+      const key = q.kind + "|" + q.target;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(q);
+      made++;
+    }
+    return spread(shuffle(out)).slice(0, n);
+  }
+
   /* --------------------------------------------------------- lesson sets */
 
   /* Vocabulary: see the whole list, then meet each word, then retrieve the pair
@@ -1959,7 +2010,7 @@ export function makeQuestions(env) {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
-    customQuiz, formPrompt, formSpec, formsIntroduced, drillFocus,
+    customQuiz, finalExam, formPrompt, formSpec, formsIntroduced, drillFocus,
     drillsIntroduced, drillOpensAt, passagesFor, passageQuestions, passageFit,
   };
 }

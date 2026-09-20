@@ -40,7 +40,6 @@ import SttLab from "./src/screens/SttLab";
 import TourScreen from "./src/screens/Intro";
 import Sounds from "./src/screens/Sounds";
 import { ChapterTask } from "./src/screens/Task";
-import { Read } from "./src/screens/Read";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import { setHaptics } from "./src/haptics";
@@ -54,7 +53,7 @@ import { flushState } from "./src/store";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, DrillSetup, PlacementFlow, SectionFlow,
   QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, ListeningList, PassageFlow, SoundDrillFlow,
-  ShadowFlow, BuildDrillFlow,
+  ShadowFlow, BuildDrillFlow, FinalFlow,
 } from "./src/screens/Flows";
 
 /* Where the day starts, from this device's own clock (ROADMAP 13.24).
@@ -206,6 +205,9 @@ function LearnStack() {
           screen, a dead button. That is what shipped on 2026-09-17. */}
       <Stack.Screen name="Scenes" component={ListeningFlow} options={{ title: "Listening" }} />
       <Stack.Screen name="TestOut" component={SectionFlow} options={titled("Test out")} />
+      {/* The final test, offered at the foot of the path once the spine is
+          walked; on this stack because that is where it is offered. */}
+      <Stack.Screen name="Final" component={FinalFlow} options={{ title: "Final test" }} />
       {/* The task at the end of a chapter (ROADMAP P10.5). On the Learn stack
           because that is where it is offered: it belongs to the chapter. */}
       <Stack.Screen name="ChapterTask" component={ChapterTask}
@@ -242,7 +244,7 @@ function PracticeStack() {
       <Stack.Screen name="Sounds" component={Sounds} options={{ title: "Alphabet" }} />
       {/* The pronunciation drill, reached from Sounds (ROADMAP P10.8). */}
       <Stack.Screen name="SoundDrill" component={SoundDrillFlow}
-                    options={{ title: "Practise sounds" }} />
+                    options={{ title: "Practice sounds" }} />
       {/* A long word a syllable at a time, front to back (core/buildup.js). */}
       <Stack.Screen name="BuildDrill" component={BuildDrillFlow}
                     options={{ title: "Word building" }} />
@@ -250,7 +252,7 @@ function PracticeStack() {
       <Stack.Screen name="Shadow" component={ShadowFlow} options={{ title: "Shadowing" }} />
       {/* What a drill will ask about, before it asks anything (Flows.js). */}
       <Stack.Screen name="DrillSetup" component={DrillSetup}
-                    options={{ title: "What to practise" }} />
+                    options={{ title: "What to practice" }} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <HeaderRight navigation={navigation} route={route} />,
@@ -275,7 +277,6 @@ function ImmerseStack() {
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Episodes" component={Immerse} options={{ title: "Immerse" }} />
       {/* Russian from outside the library (ROADMAP P10.7). */}
-      <Stack.Screen name="Read" component={Read} options={{ title: "Read" }} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />

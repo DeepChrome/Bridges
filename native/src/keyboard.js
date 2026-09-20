@@ -1,7 +1,8 @@
 /* An on-screen Russian keyboard for typed answers (the owner, 2026-09-07).
  *
- * A phone without a Russian layout installed can still answer in Cyrillic — the
- * activities transliterate Latin, but seeing the letters is how a learner learns
+ * A phone without a Russian layout installed can still answer in Russian — an
+ * answer is Russian letters or it is wrong (the owner, 2026-09-19: Latin spelling
+ * stands in for Russian nowhere), and seeing the letters is how a learner learns
  * to type them. Off by default; the setting (You → Settings → Russian keyboard)
  * turns it on for every typed answer, and the key beside any input flips it for
  * the moment. When it is up the system keyboard stays down.
@@ -101,7 +102,7 @@ function Toggle({ on, onPress }) {
 }
 
 export function RuInput({ value, onChangeText, onSubmit, editable = true, style, testID,
-                          placeholder = "Cyrillic or Latin", autoFocus }) {
+                          placeholder = "Russian", autoFocus }) {
   const { st } = useSession();
   const t = useTheme();
   const [show, setShow] = useState(!!st.osk);

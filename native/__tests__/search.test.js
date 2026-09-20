@@ -14,7 +14,8 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import Search from "../src/screens/Search";
 import { splitTokens, lookup } from "../src/words";
-import { L, searchWords, resolveWord } from "../src/data";
+import { L, searchWords, searchWordsScored, resolveWord } from "../src/data";
+import { MATCH } from "@core/search";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 
@@ -73,12 +74,27 @@ describe("lookup rules", () => {
     expect(searchWords("zzzzqq")).toEqual([]);
     expect(searchWords("")).toEqual([]);
   });
+
+  /* "dog" is five words that all read "dog" and a few more whose meaning
+     mentions it; the screen draws the line where the ranking does (MATCH),
+     and the score is what lets it (the owner, 2026-09-19). */
+  it("says which hits are the word and which only mention it", () => {
+    const hits = searchWordsScored("dog", 20);
+    const matches = hits.filter((h) => h.score >= MATCH).map((h) => h.entry.b);
+    const mentions = hits.filter((h) => h.score < MATCH).map((h) => h.entry.b);
+    expect(matches).toContain("собака");
+    expect(matches).toContain("пёс");
+    expect(mentions.length).toBeGreaterThan(0);
+    expect(matches).not.toContain("акула");               // "shark, dog-fish"
+    // Studied words lead the matches: собака is met on the route, кобель is not.
+    expect(matches.indexOf("собака")).toBeLessThan(matches.indexOf("кобель"));
+  });
 });
 
 describe("dictionary screen", () => {
   it("shows matches as you type, without a search button", async () => {
     await withProfile(<Search navigation={nav} />);
-    const box = await screen.findByPlaceholderText("Russian, English or Latin");
+    const box = await screen.findByPlaceholderText("Russian or English");
     expect(screen.queryByText("Search")).toBeNull();
 
     fireEvent.changeText(box, "книгу");
@@ -87,7 +103,7 @@ describe("dictionary screen", () => {
 
   it("opens the entry for a chosen match and remembers it", async () => {
     await withProfile(<Search navigation={nav} />);
-    const box = await screen.findByPlaceholderText("Russian, English or Latin");
+    const box = await screen.findByPlaceholderText("Russian or English");
     fireEvent.changeText(box, "книгу");
 
     const top = searchWords("книгу")[0];
@@ -98,7 +114,7 @@ describe("dictionary screen", () => {
 
   it("shows no recent shelf for a profile that has never looked anything up", async () => {
     await withProfile(<Search navigation={nav} />);
-    await screen.findByPlaceholderText("Russian, English or Latin");
+    await screen.findByPlaceholderText("Russian or English");
     expect(screen.queryByText("Recent")).toBeNull();
   });
 });

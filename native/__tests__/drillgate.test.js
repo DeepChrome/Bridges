@@ -45,8 +45,9 @@ describe("drills open with the route", () => {
     await withState({});
     expect(await screen.findByText("Aspect pairs")).toBeTruthy();
     expect(screen.getByText(`Opens in chapter ${Q.drillOpensAt("aspect") + 1}`)).toBeTruthy();
-    // Stress and Grammar are open from the first screen.
-    expect(screen.getByText("Hear where the emphasis falls")).toBeTruthy();
+    // Stress is open from the first screen, so it carries no "opens in" line.
+    expect(screen.getByText("Stress")).toBeTruthy();
+    expect(screen.getAllByText(/Opens in chapter/).length).toBe(4);
     // A locked row does not navigate. RNTL reads onPress off the wrapper, so the
     // guard has to be in the handler, not only on the control (CLAUDE.md §23).
     fireEvent.press(screen.getByTestId("drill-aspect"));
@@ -56,7 +57,7 @@ describe("drills open with the route", () => {
   it("opens conjugation once chapter 2 is done", async () => {
     await withState({ unit: through(2) });
     await screen.findByText("Conjugation");
-    expect(screen.getByText("Put a verb with the right person")).toBeTruthy();
+    expect(screen.getAllByText(/Opens in chapter/).length).toBeLessThan(4);   // conjugation's line is gone
     fireEvent.press(screen.getByTestId("drill-conjugation"));
     /* Through the focus screen, because conjugation has something to narrow —
        a tense, or reading a form (the owner, 2026-09-16). A drill with nothing

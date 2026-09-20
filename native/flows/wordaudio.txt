@@ -19,7 +19,7 @@ wait:3
 
 tap:^Search$
 wait:2
-tap:Russian, English or Latin
+tap:Russian or English
 type:dat
 wait:3
 shot:C0-search-dat

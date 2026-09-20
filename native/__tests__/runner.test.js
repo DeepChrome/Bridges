@@ -80,20 +80,22 @@ describe("runner verdict", () => {
     expect(screen.getByTestId("screen-body").props.keyboardShouldPersistTaps).toBe("handled");
   });
 
-  it("gives each typed question a fresh field, and the Latin hint only after", async () => {
+  it("gives each typed question a fresh field, and takes Russian letters only", async () => {
     const typed = (word, en) => ({ kind: "type", ask: "Write it in Russian", prompt: en,
                                    cyr: false, typed: true, answer: word, target: word });
     await withRunner({ steps: [typed("что", "what"), typed("он", "he")] });
-    const input = await screen.findByPlaceholderText("Cyrillic or Latin");
-    expect(screen.queryByText(/Latin spelling/)).toBeNull();      // the answer stays hidden
+    const input = await screen.findByTestId("type-input");
+    /* "chto" used to be transliterated and marked right, with a "Latin
+       spelling" hint under the verdict. The owner ruled both out (2026-09-19):
+       the wrong alphabet is not the word. */
     fireEvent.changeText(input, "chto");
-    await waitFor(() => expect(screen.getByPlaceholderText("Cyrillic or Latin").props.value).toBe("chto"));
+    await waitFor(() => expect(screen.getByTestId("type-input").props.value).toBe("chto"));
     await act(async () => { fireEvent.press(screen.getByText("Check")); });
-    expect(await screen.findByText("Correct")).toBeTruthy();
-    expect(screen.getByText("Latin spelling: “chto”")).toBeTruthy();
+    expect(await screen.findByText("Not quite")).toBeTruthy();
+    expect(screen.queryByText(/Latin/)).toBeNull();
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     // Question 8 on the emulator opened with question 7's answer still in it.
-    expect((await screen.findByPlaceholderText("Cyrillic or Latin")).props.value).toBe("");
+    expect((await screen.findByTestId("type-input")).props.value).toBe("");
   });
 
   it("shows the enclosing flow's progress when told to", async () => {
@@ -128,9 +130,9 @@ describe("runner verdict", () => {
     const typed = { kind: "type", ask: "Write it in Russian", prompt: "book", cyr: false,
                     typed: true, answer: "книга", target: "книга" };
     await withRunner({ steps: [typed], onFinish, recycle: false });
-    const input = await screen.findByPlaceholderText("Cyrillic or Latin");
+    const input = await screen.findByTestId("type-input");
     fireEvent.changeText(input, "книгу");                                      // one letter off
-    await waitFor(() => expect(screen.getByPlaceholderText("Cyrillic or Latin").props.value).toBe("книгу"));
+    await waitFor(() => expect(screen.getByTestId("type-input").props.value).toBe("книгу"));
     await act(async () => { fireEvent.press(screen.getByText("Check")); });
     expect(await screen.findByText("Almost")).toBeTruthy();
     expect(screen.getByText("One letter off")).toBeTruthy();

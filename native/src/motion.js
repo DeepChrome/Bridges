@@ -177,34 +177,6 @@ export function useSwap(key, { distance = 16 } = {}) {
   };
 }
 
-/* ---------------------------------------------------------------- numbers */
-
-/* A number that counts to its new value instead of changing while nobody is
-   looking. The path's XP did the latter, so finishing a lesson and coming back
-   to the map showed a figure that was simply different — the one moment the app
-   has to say "that did something".
- *
- * Runs on the JS thread of necessity (there is no native driver for text), which
- * is why it is only ever used on a screen that is not otherwise busy. */
-export function useCount(value, { duration = motion.settle } = {}) {
-  const v = useRef(new Animated.Value(value)).current;
-  const [shown, setShown] = useState(value);
-  const first = useRef(true);
-  useEffect(() => {
-    if (reduceMotion || first.current) {
-      first.current = false;
-      v.setValue(value);
-      setShown(value);
-      return undefined;
-    }
-    const id = v.addListener((x) => setShown(Math.round(x.value)));
-    const a = Animated.timing(v, { toValue: value, duration, easing: OUT, useNativeDriver: false });
-    a.start(() => setShown(value));
-    return () => { a.stop(); v.removeListener(id); };
-  }, [value, duration, v]);
-  return shown;
-}
-
 /* ------------------------------------------------------------------- fill */
 
 /* A bar that fills rather than jumps. Width cannot use the native driver, so

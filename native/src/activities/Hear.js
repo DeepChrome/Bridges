@@ -25,9 +25,7 @@ import { compare } from "@core/compare";
 import { gradeAlignment, alignmentCredit, nearMiss } from "@core/speech";
 import { describeForm } from "@core/forms";
 import { recordAttempt } from "@core/state";
-import { fold, translit } from "@core/util";
-
-const CYRILLIC = /[а-яё]/i;
+import { fold } from "@core/util";
 
 function PlayButton({ onPress }) {
   const t = useTheme();
@@ -70,10 +68,9 @@ export function Hear({ q, r }) {
 
   const check = () => {
     if (r.answered) return;
-    // Latin typing is transliterated, as the type activity already allows; a mix is
-    // left alone so a Cyrillic answer with a stray Latin letter is not mangled.
-    const heard = CYRILLIC.test(text) ? text : translit(text);
-    const out = compare(heard, q.target);
+    // Russian letters or nothing — Latin typing is not transliterated (Run.js
+    // Typed says why). `compare` folds both sides and counts only Russian words.
+    const out = compare(text, q.target);
     const perfect = out.wer === 0;
     setRes(out);
     // A word a letter or two off is half right (core/speech.js nearMiss), and
@@ -96,7 +93,7 @@ export function Hear({ q, r }) {
       ...prev,
       speech: recordAttempt(prev.speech, {
         ts: Date.now(), key: fold(q.target), kind: "hear", unit: q.unit,
-        transcript: heard, target: q.target, wer: out.wer, tags: [],
+        transcript: text, target: q.target, wer: out.wer, tags: [],
         grade: perfect ? (r.usedHint ? 2 : 3) : 1, plays: plays + 1, hinted: !!r.usedHint,
       }),
     }));

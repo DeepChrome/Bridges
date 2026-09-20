@@ -28,7 +28,7 @@ shot:95-offline-path
 # A listening scenario: its audio is bundled, so it must play with no network.
 tap:^Practice$
 wait:2
-tap:^Conversations$
+tap:^At your level$
 wait:3
 shot:97-offline-scenes
 back
@@ -46,7 +46,7 @@ scrolltop
 # The dictionary.
 tap:^Search$
 wait:2
-tap:Russian, English or Latin
+tap:Russian or English
 type:dom
 wait:3
 shot:99-offline-search

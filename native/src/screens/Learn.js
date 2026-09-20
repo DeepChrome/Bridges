@@ -24,13 +24,13 @@ import {
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, FORK_AT, dueCount,
   routePosition,
 } from "../data";
-import { Q } from "../questions";
+import { Q, FINAL_N } from "../questions";
 import { nextOpening, markOpening } from "@core/openings";
 import { reviewFirst } from "@core/state";
 import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
 import { taskFor } from "@core/tasks";
-import { useSweep, useCount } from "../motion";
+import { useSweep } from "../motion";
 
 /* An SVG circle whose stroke offset can be animated. */
 const ASvgCircle = Animated.createAnimatedComponent(Circle);
@@ -65,6 +65,41 @@ function ChapterTaskCard({ chapter, spineDone, done, onOpen }) {
         <Muted numberOfLines={2}>{task.goal}</Muted>
       </View>
       {done ? <Pill tone="good">done</Pill> : null}
+    </Pressable>
+  );
+}
+
+/* The final test, at the foot of the path (the owner, 2026-09-19): fifty
+   questions over every chapter. Offered once the spine is walked — the same
+   rule the chapters unlock by, since the side quests are optional — and in
+   developer mode, which unlocks everything (rule 20.9). Before that it sits
+   locked at the end of the road rather than absent, so the road is seen to
+   lead somewhere. */
+function FinalCard({ open, best, onOpen }) {
+  const t = useTheme();
+  return (
+    <Pressable
+      testID="final-test"
+      accessibilityRole="button"
+      accessibilityState={{ disabled: !open }}
+      onPress={open ? onOpen : undefined}
+      style={({ pressed }) => ({
+        alignSelf: "stretch", marginTop: 26, padding: 14, borderRadius: 20,
+        backgroundColor: !open ? t.surface2 : best ? t.goodBg : t.brandBg,
+        borderColor: !open ? t.line : best ? t.goodDim : t.brandDim, borderWidth: 1,
+        flexDirection: "row", alignItems: "center", gap: 12,
+        opacity: pressed && open ? 0.7 : 1,
+      })}
+    >
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700", letterSpacing: 0.8 }}>
+          FINAL TEST
+        </Text>
+        <Text style={{ color: open ? t.ink : t.ink3, fontSize: 16, fontWeight: "700", marginTop: 2 }}>
+          {`${FINAL_N} questions · every chapter`}
+        </Text>
+      </View>
+      {!open ? <Pill>locked</Pill> : best ? <Pill tone="good">{`${best}%`}</Pill> : null}
     </Pressable>
   );
 }
@@ -330,7 +365,6 @@ export default function Learn({ navigation }) {
   const due = dueCount(st);
   const holdBack = reviewFirst(due);
   const done = dayDone(st, due, today());
-  const xp = useCount(st.xp || 0);
   const openUnit = (unit) => navigation.navigate("Unit", { unitId: unit.id });
 
   /* The drill gates are the payload's, so they are read through `Q` rather
@@ -345,17 +379,12 @@ export default function Learn({ navigation }) {
 
   return (
     <Screen>
-      {/* The score line, centred at the top; the button under it names what it
-          opens and no more (the owner, 2026-09-07). */}
-      {/* XP counts up to its new value. Coming back from a lesson, this line
-          and the ring above are the only two things that say it counted, and
-          both of them used to have simply changed while you were away. */}
+      {/* The streak, centred at the top; the button under it names what it
+          opens and no more (the owner, 2026-09-07). An XP count sat beside it
+          until 2026-09-19 — "it means nothing now", and it did not: nothing
+          read it, nothing unlocked on it, and the rings already say what
+          counted. */}
       <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 6 }}>
-        <Text testID="xp" style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
-          {xp.toLocaleString("en-US")}
-        </Text>
-        <Muted size={14}>XP</Muted>
-        <Text style={{ color: t.ink3, marginHorizontal: 4 }}>·</Text>
         <Text testID="streak"
               style={{ color: done ? t.good : t.ink, fontSize: 20, fontWeight: "700" }}>
           {st.streak || 0}
@@ -491,6 +520,11 @@ export default function Learn({ navigation }) {
             </View>
           );
         })}
+        <FinalCard
+          open={!!st.dev || STAGES.every((s) => !!unitState(st, s.core.id).done)}
+          best={((st.drills || {}).final || {}).best}
+          onOpen={() => navigation.navigate("Final")}
+        />
       </View>
     </Screen>
   );

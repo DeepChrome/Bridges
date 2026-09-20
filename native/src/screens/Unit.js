@@ -92,12 +92,6 @@ export function LessonScreen({ route, navigation }) {
   const i = route.params.index;
   if (!unit) return null;
   const cs = components(st, unit, i);
-  const copy = {
-    vocab: "Meet the new words",
-    quiz: "Show you know them",
-    video: "Shared across this unit",
-    listen: "Two people, and five questions",
-  };
 
   /* The brand edge goes on the next **required** step while one is left, so a
      finished lesson does not point at its optional extra as though the lesson
@@ -159,7 +153,6 @@ export function LessonScreen({ route, navigation }) {
                 <Text style={{ color: t.ink, fontSize: 16, fontWeight: "600" }}>
                   {c.label}
                 </Text>
-                <Muted>{copy[c.id]}</Muted>
               </View>
               {c.id === "quiz" && typeof c.score === "number"
                 ? <Pill tone={c.done ? "good" : undefined}>{c.score + "%"}</Pill> : null}

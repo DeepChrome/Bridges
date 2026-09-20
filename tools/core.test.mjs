@@ -27,7 +27,7 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, PRODUCE_AT,
-         lessonSize, LESSON_RAMP, LESSON_SIZE }
+         lessonSize, LESSON_RAMP, LESSON_SIZE, FINAL_N }
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
@@ -1293,6 +1293,23 @@ group("scenes and custom quizzes");
      "nothing chosen, nothing asked");
   ok(Q.customQuiz({ units, kinds: ["scene"], n: 3 }).every((q) => q.kind === "scene"),
      "scenes alone make a listening-only quiz");
+
+  /* The final test (the owner, 2026-09-19): fifty questions, every chapter,
+     several shapes. Cumulative and diverse by construction, so the draw
+     cannot leave a chapter out or ask fifty of one kind. */
+  const exam = Q.finalExam(FINAL_N);
+  ok(exam.length === FINAL_N, `the final test is ${FINAL_N} questions`, exam.length);
+  const chaptersIn = STAGES.filter((s) => {
+    const own = new Set(s.core.w);
+    return exam.some((q) => typeof q.i === "number" && own.has(q.i));
+  }).length;
+  ok(chaptersIn === STAGES.length, "and every chapter is in it", chaptersIn);
+  const shapes = new Set(exam.map((q) => q.kind));
+  ok(shapes.size >= 5 && shapes.has("hear") && shapes.has("type"),
+     "in at least five shapes, sentences among them", [...shapes].join(","));
+  const sentences = exam.filter((q) => q.kind === "hear" || q.kind === "say").length;
+  ok(sentences >= 5 && sentences <= FINAL_N / 4, "a fifth of it sentences, about", sentences);
+  ok(exam.every((q) => answerable(q)), "and every question can be answered");
 }
 
 /* The written lesson passages (§30l). tools/check_scripts.mjs is what proves the

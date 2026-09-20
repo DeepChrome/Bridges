@@ -41,7 +41,7 @@ export const OPENINGS = [
     screen: null, stage: 0, lesson: 2 },
   { id: "drill:conjugation", name: "Conjugation drill", blurb: "Put a verb with the right person",
     tab: "Practice", screen: "DrillSetup", params: { type: "conjugation" }, drill: "conjugation" },
-  { id: "scene", name: "Conversations", blurb: "Half a minute, then five questions",
+  { id: "scene", name: "Listening", blurb: "Half a minute, then five questions",
     tab: "Practice", screen: "SceneList", stage: 1 },
   { id: "talk", name: "Talk", blurb: "A short conversation on a topic",
     tab: "Practice", screen: "Talk", stage: 1 },

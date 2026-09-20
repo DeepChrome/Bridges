@@ -928,6 +928,25 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### The owner's twelve, 2026-09-19 — CLAUDE.md §30am
+
+Read from the walkthrough shots, eleven of the twelve were one complaint:
+the app explaining itself. Done in one pass: the tour's first card is a live
+`Linked` sentence whose second tap opens the entry as a sheet before a
+navigator exists; Latin spelling is accepted nowhere (the typed and Hear
+answers, the "Latin spelling" hint, the "Cyrillic or Latin" placeholder);
+XP removed with `useCount`; every Practice, Settings and lesson-step caption
+cut bar the three that report a state and the one undisclosed gesture; the
+dictionary lists the whole gloss and cuts matches from mentions at the
+ranking's own line (`MATCH`); "Read something you found" and the Read screen
+deleted; the library filters All / Unwatched / Watched with a watched pill on
+the row; **`finalExam`** — fifty questions, every chapter, six kinds and a
+fifth sentences, by construction — at the foot of the path, locked until the
+spine is walked; practise → practice, recogniser → recognizer, colour →
+color. `native/flows/batch0919.txt` walks all of it. **Not found:** "Russian
+in your words" — no such string anywhere in the app; asked. Suites: core
+609, native 472 over 71, smoke 159, copy cap 0 over, dead exports 0.
+
 ## Phase 12 — What is actually left (2026-09-10)
 
 **Superseded by Phase 13 above; kept because the reasoning still reads.**

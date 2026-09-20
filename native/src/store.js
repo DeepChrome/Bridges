@@ -64,7 +64,6 @@ export const DEFAULTS = {
   drills: {},
   recent: [],           // dictionary history, newest first; keyed on the word itself
   name: "",
-  xp: 0,
   day: null,
   streak: 0,
   speech: speechDefault(),   // the speaking activities' record; never audio

@@ -128,10 +128,11 @@ export function cognate(englishWord, saidTranslit) {
   return same >= 4;
 }
 
-/* How long a sentence may run, by chapter. Five words in the first chapter is
-   about all thirty words of Russian can say; the allowance grows with the
-   palette so chapter 10 is not still writing baby talk. */
-export const maxWords = (chapter) => 4 + chapter;
+/* How long a sentence may run, by chapter. Seven words in the first chapter
+   (five until 2026-09-19, which kept every early line to a clause and read
+   as choppy); the allowance grows with the palette so chapter 10 is not
+   still writing baby talk. */
+export const maxWords = (chapter) => 6 + chapter;
 
 export function tokensOf(ru) {
   return (ru.match(TOKEN) || []).map((t) => fold(t));

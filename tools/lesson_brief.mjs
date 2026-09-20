@@ -86,7 +86,16 @@ export function briefs() {
       const n = lessonCount(u);
       for (let li = 0; li < n; li++) {
         const mine = lessonWords(u, li);
-        const own = u.w.slice(0, li * sizeOf(u));
+        /* A spine lesson's palette is its whole unit, not only the lessons so
+           far (2026-09-19). The featured conversations sit at lessons 3 and 5
+           of a spine, and at lesson 3 of chapter 1 the strict palette was
+           fifteen words, two of them content words — which is why every early
+           scene was people asking each other where they were (the owner:
+           "non sequitur, borderline without substance"). Thirty words the
+           learner meets within the same chapter is the smallest palette a
+           conversation can be written in; a branch still gets only the spine
+           it hangs off, since a side quest is optional. */
+        const own = u.kind === "spine" ? u.w : u.w.slice(0, li * sizeOf(u));
         const base = u.kind === "spine" ? earlierSpine : earlierSpine.concat(stage.core.w);
         const palette = Array.from(new Set(base.concat(own, mine)));
         out.push({
@@ -128,7 +137,9 @@ if (process.argv[1] && process.argv[1].endsWith("lesson_brief.mjs")) {
       const before = STAGES.slice(0, STAGES.indexOf(stage)).flatMap((s) => s.core.w).map(word);
       const lines = [];
       lines.push(`# Chapter ${stage.cn} — ${stage.ch}`, "");
-      lines.push(`Sentences may run to **${4 + stage.cn} words**. ${rows.length} lessons.`, "");
+      // The same number check_scripts.mjs enforces (maxWords); repeated here
+      // because the two files import each other.
+      lines.push(`Sentences may run to **${6 + stage.cn} words**. ${rows.length} lessons.`, "");
       lines.push(`## Free in every lesson (closed class, never gated)`, "", list(Array.from(FREE).map(word)), "");
       lines.push(`## Carried in from earlier chapters (their spines)`, "",
                  before.length ? list(before) : "_nothing — this is the first chapter_", "");

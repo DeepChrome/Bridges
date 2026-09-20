@@ -11,7 +11,9 @@ the owner's.
 
 ## Name and one-liner
 
-**Bridges — Russian, properly**
+Store title (30 characters, Play's limit; the keyword in the title is what
+search weighs, and "Bridges" alone is a dozen other apps — the owner,
+2026-09-19): **Bridges: Learn Russian**. The app's own label stays "Bridges".
 
 Short description (80 characters, Play's limit):
 

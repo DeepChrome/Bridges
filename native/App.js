@@ -49,6 +49,7 @@ import { setDayStart, today } from "@core/util";
 import { ErrorBoundary } from "./src/boundary";
 import { installCrashHandler } from "./src/crash";
 import { warmToken } from "./src/lib/feedback";
+import { tabIcon } from "./src/tabicons";
 import { flushState } from "./src/store";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, DrillSetup, PlacementFlow, SectionFlow,
@@ -81,18 +82,13 @@ warmToken();
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-const icon = (d) => ({ color, size }) => (
-  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color}
-       strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
-    <Path d={d} />
-  </Svg>
-);
-
-const LearnIcon = icon("M4 19V6a2 2 0 0 1 2-2h5v15H6a2 2 0 0 0-2 2zM20 19V6a2 2 0 0 0-2-2h-5v15h5a2 2 0 0 1 2 2z");
-const StudyIcon = icon("M3 6h14v12H3zM7 3h14v13");
-const PracticeIcon = icon("M6 9v6M18 9v6M4 11v2M20 11v2M8 7v10M16 7v10M8 12h8");
-const ImmerseIcon = icon("M3 5h18v14H3zm8 4.5 4 2.5-4 2.5z");
-const SearchIcon = icon("M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm9 16-3.5-3.5");
+/* The tab icons live in src/tabicons.js, where the tour's last card reads the
+   same five. */
+const LearnIcon = tabIcon("Learn");
+const StudyIcon = tabIcon("Study");
+const PracticeIcon = tabIcon("Practice");
+const ImmerseIcon = tabIcon("Immerse");
+const SearchIcon = tabIcon("Search");
 
 /* The profile avatar sits in the header, as it does on the web, rather than
    spending a tab on it. Beside it, on every screen but the path itself, a way
@@ -312,8 +308,11 @@ function SearchStack() {
   );
 }
 
-/* Three bars settle in, then the wordmark. Short enough that it never stands
-   between the user and studying. */
+/* Three bars settle in, then the wordmark, and it is gone inside a second — it
+   never stands between the learner and studying, and a tap ends it early.
+   No tagline: the mark and the name are the whole of it (the owner,
+   2026-09-19, on "Russian, from your own words"). */
+const SPLASH_MS = 900;
 function Splash({ onDone }) {
   const scheme = useColorScheme();
   const p = scheme === "light" ? light : dark;
@@ -323,11 +322,11 @@ function Splash({ onDone }) {
   const word = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.stagger(80, bars.map((b) =>
-      Animated.timing(b, { toValue: 1, duration: 380, useNativeDriver: true }))).start();
-    Animated.timing(word, { toValue: 1, duration: 420, delay: 260,
+    Animated.stagger(60, bars.map((b) =>
+      Animated.timing(b, { toValue: 1, duration: 260, useNativeDriver: true }))).start();
+    Animated.timing(word, { toValue: 1, duration: 300, delay: 180,
                             useNativeDriver: true }).start();
-    const timer = setTimeout(onDone, 1500);
+    const timer = setTimeout(onDone, SPLASH_MS);
     return () => clearTimeout(timer);
   }, []);
 
@@ -351,9 +350,6 @@ function Splash({ onDone }) {
       <Animated.Text style={{ color: p.ink, fontSize: 30, fontWeight: "700",
                               opacity: word }}>
         Bridges
-      </Animated.Text>
-      <Animated.Text style={{ color: p.ink3, fontSize: 13, marginTop: 4, opacity: word }}>
-        Russian, from your own words
       </Animated.Text>
     </Pressable>
   );

@@ -7,12 +7,14 @@
  */
 
 import React, { useState } from "react";
-import { View, Pressable } from "react-native";
+import { View, Animated } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius } from "../theme";
 import { Screen, Btn, Muted, Speaker, Text } from "../ui";
 import { Linked } from "../words";
 import { hasRussianVoice } from "../audio";
+import { TABS, TabGlyph } from "../tabicons";
+import { useSwap } from "../motion";
 
 const PAGES = [
   {
@@ -33,6 +35,15 @@ const PAGES = [
     body: "Some questions ask you to say a sentence. The microphone is asked for then, and what you say never leaves the phone.",
     demo: "mic",
   },
+  /* The five tabs before the tab bar (the owner, 2026-09-19): the same icons
+     the bar draws, one word each, on a card rather than as coach marks over
+     the live screen — a card can be skipped and blocks nothing. */
+  {
+    key: "tabs",
+    title: "Five places",
+    body: "The path, your cards, the drills, the videos, the dictionary.",
+    demo: "tabs",
+  },
 ];
 
 /* The sentence on the first card is the real control, not a picture of one:
@@ -46,6 +57,21 @@ function Demo({ kind }) {
   const t = useTheme();
   if (kind === "word") {
     return <Linked testID="tour-sentence" text={TOUR_SENTENCE} size={28} />;
+  }
+  if (kind === "tabs") {
+    return (
+      <View testID="tour-tabs" style={{ flexDirection: "row", gap: 18, alignItems: "flex-start" }}>
+        {TABS.map((tab) => (
+          <View key={tab.id} style={{ alignItems: "center", gap: 6, width: 56 }}>
+            <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: t.brandBg,
+                           alignItems: "center", justifyContent: "center" }}>
+              <TabGlyph d={tab.d} color={t.brandInk} size={26} />
+            </View>
+            <Muted size={12}>{tab.id}</Muted>
+          </View>
+        ))}
+      </View>
+    );
   }
   if (kind === "speaker") {
     // On a phone with no Russian voice the grey speaker is dead, and the card
@@ -81,6 +107,9 @@ export function Intro({ onDone }) {
   const [at, setAt] = useState(0);
   const page = PAGES[at];
   const last = at === PAGES.length - 1;
+  /* The card slides in from the right as the next one replaces it; a hard cut
+     read as one card whose words changed (motion.js useSwap). */
+  const swap = useSwap(at);
   return (
     <Screen fill>
       <View style={{ flexDirection: "row", gap: 6, marginBottom: 26 }}>
@@ -89,11 +118,13 @@ export function Intro({ onDone }) {
                                      backgroundColor: k <= at ? t.brand : t.surface3 }} />
         ))}
       </View>
-      <View testID={`intro-${page.key}`} style={{ alignItems: "center", paddingVertical: 24 }}>
-        <Demo kind={page.demo} />
-      </View>
-      <Text style={{ color: t.ink, fontSize: 22, fontWeight: "700", marginTop: 14 }}>{page.title}</Text>
-      <Text style={{ color: t.ink2, fontSize: 16, lineHeight: 24, marginTop: 10 }}>{page.body}</Text>
+      <Animated.View style={swap}>
+        <View testID={`intro-${page.key}`} style={{ alignItems: "center", paddingVertical: 24 }}>
+          <Demo kind={page.demo} />
+        </View>
+        <Text style={{ color: t.ink, fontSize: 22, fontWeight: "700", marginTop: 14 }}>{page.title}</Text>
+        <Text style={{ color: t.ink2, fontSize: 16, lineHeight: 24, marginTop: 10 }}>{page.body}</Text>
+      </Animated.View>
       <View style={{ marginTop: "auto", paddingTop: 20, gap: 8 }}>
         <Btn kind="pri" label={last ? "Start" : "Next"} onPress={() => (last ? onDone() : setAt(at + 1))} />
         {!last ? <Btn kind="ghost" label="Skip" onPress={onDone} /> : null}

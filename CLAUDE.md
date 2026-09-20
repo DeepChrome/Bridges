@@ -1138,6 +1138,21 @@ point with its tag, a better word — and nothing at all on any failure. The rep
 tags are attached to the attempt already logged (`tagAttempt` in `core/state.js`)
 and that is what the Grammar section counts.
 
+**"It almost always marks me wrong"** (the owner, 2026-09-19). Three things,
+all in the grading and none in the learner: the recogniser was asked for one
+hearing and given no hint; the verdict wanted every letter; and the STT
+export shows what that costs on *correct* speech — «Вот мой здесь», «твоя
+отец», «сделала это», «что он делать». So (1) `useRecognizer` takes `bias`,
+the words the activity expects, and hands them to Android as
+`EXTRA_BIASING_STRINGS` (API 33+; the engine being told what it is listening
+for); (2) it asks for `ALTERNATIVES` (5) hearings and Say, Shadow and the
+build-up take the closest to the target (`closestTranscript`); (3) a sentence
+**passes** when every expected word was said or was a near miss of itself
+(`sayPassed`) — the near-missed word still grades Hard and the Worker still
+names a real case error, but the learner is no longer marked wrong for the
+engine's hearing of an ending. Not re-measured on a device yet; the STT Lab
+is how to.
+
 The STT gate (P3.6) was decided 2026-09-06 on `data/stt/export-2026-09-06b.json`:
 on 2–4-word sentences the on-device recogniser is phonetically faithful to what a
 non-native says (perfect on 8 of 16 sentences, median best WER 17%), latency p50

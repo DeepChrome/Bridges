@@ -133,6 +133,29 @@ describe("say", () => {
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ right: 1, total: 1, skipped: 0 }));
   });
 
+  /* "It almost always marks me wrong" (the owner, 2026-09-19). Two of the
+     three answers: the engine is told what to listen for, and of the hearings
+     it offers the closest to the target is the one graded. */
+  it("tells the engine the sentence, and takes the closest of its alternatives", async () => {
+    await withSay();
+    await screen.findByText(question.en);
+    await speak();
+    const opts = global.__stt.calls[0];
+    expect(opts.maxAlternatives).toBe(5);
+    expect(opts.contextualStrings).toEqual(expect.arrayContaining([question.target]));
+    expect(opts.contextualStrings.length).toBeGreaterThan(1);       // and its words
+    // The top hearing is wrong; the second is the sentence.
+    await act(async () => {
+      global.__stt.emit("result", { isFinal: true, results: [
+        { transcript: "жираф " + heard.split(/\s+/).slice(1).join(" "), confidence: 0.6 },
+        { transcript: heard, confidence: 0.5 },
+      ] });
+    });
+    expect(await screen.findByText("Correct")).toBeTruthy();
+    const st = await saved();
+    expect(st.speech.attempts[0]).toMatchObject({ wer: 0, attempt: 1 });
+  });
+
   /* A recogniser that never reports back after stop() used to leave the button
      on "Listening…" for good: the watchdog gives up and says so. */
   it("gives up on a recogniser that never answers, and can be tried again", async () => {

@@ -30,8 +30,8 @@ import { say, whenIdle, stop } from "../audio";
 import { useRecognizer } from "../speech";
 import { HoldButton, Blocked, ATTEMPTS } from "./Say";
 import { Alignment } from "./Alignment";
-import { compare } from "@core/compare";
-import { gradeAlignment, alignmentCredit } from "@core/speech";
+import { compare, words } from "@core/compare";
+import { gradeAlignment, alignmentCredit, sayPassed, closestTranscript } from "@core/speech";
 import { recordAttempt } from "@core/state";
 import { fold } from "@core/util";
 
@@ -56,22 +56,27 @@ export function Shadow({ q, r }) {
   };
   useEffect(() => { play(); }, []);
 
+  /* The same pass rule as Say (core/speech.js sayPassed): every word said or
+     nearly said, the recogniser's closest hearing taken. */
   const settle = (out, n) => {
     setSettled(true);
     const c = alignmentCredit(out.alignment, IX);
-    const perfect = out.wer === 0;
-    r.record(perfect, gradeAlignment(out.alignment, IX, { perfect, firstTry: n === 1 }),
+    const passed = sayPassed(out.alignment, IX);
+    r.record(passed, gradeAlignment(out.alignment, IX, { perfect: passed, firstTry: n === 1 }),
              undefined,
-             { credit: c.credit,
-               note: perfect ? null : `${c.ok} of ${c.n} words` + (c.near ? `, ${c.near} nearly` : "") });
+             passed ? { credit: 1, note: null }
+               : { credit: c.credit,
+                   note: `${c.ok} of ${c.n} words` + (c.near ? `, ${c.near} nearly` : "") });
   };
 
   const rec = useRecognizer({
     enabled: !r.answered,
-    onFinal: (transcript, latencyMs) => {
+    bias: [q.target].concat(words(q.target)),
+    onFinal: (top, latencyMs, alternatives) => {
       const n = attemptRef.current + 1;
       attemptRef.current = n;
       setAttempt(n);
+      const transcript = closestTranscript(alternatives, q.target) || top;
       const out = compare(transcript, q.target);
       setRes(out);
       update((prev) => ({
@@ -80,10 +85,10 @@ export function Shadow({ q, r }) {
           ts: Date.now(), key: fold(q.target), kind: "shadow", unit: q.unit,
           target: q.target, transcript, wer: out.wer, attempt: n, latencyMs, plays,
           tags: [], engine: "device", onDevice: true,
-          grade: out.wer === 0 ? (n === 1 ? 4 : 3) : 1,
+          grade: sayPassed(out.alignment, IX) ? (n === 1 ? 4 : 3) : 1,
         }),
       }));
-      if (out.wer === 0 || n >= ATTEMPTS) settle(out, n);
+      if (sayPassed(out.alignment, IX) || n >= ATTEMPTS) settle(out, n);
     },
   });
 

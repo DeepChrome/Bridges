@@ -7,7 +7,7 @@
  */
 
 import { fold, TOKEN } from "./util.js";
-import { charDistance } from "./compare.js";
+import { charDistance, compare } from "./compare.js";
 
 /* The curriculum lemmas a sentence contains, each once, in order of appearance.
    Reads the same index the word links use, so a word is "in" the sentence exactly
@@ -109,6 +109,37 @@ export function nearMiss(a, IX) {
   const hs = IX[s], he = IX[e];
   if (!hs || !he || !hs.length || !he.length || hs[0] !== he[0]) return false;
   return charDistance(s, e) <= 2;
+}
+
+/* Whether a spoken sentence passes (the owner, 2026-09-19: "it almost always
+   marks me wrong"). The recogniser was measured on correct speech at a median
+   WER of 17 % (§30c) — it hears «сделала» for «сделал» and «твоя» for «твой»
+   — so a verdict that wants every letter is grading the recogniser as much as
+   the learner. A sentence passes when every expected word was said or was a
+   near miss of itself (same lemma, two letters off); the near-missed word
+   still grades Hard, so the ending is not forgotten, and the Worker's
+   feedback still names a case error when the transcript really has one. */
+export function sayPassed(alignment, IX) {
+  const expected = (alignment || []).filter((a) => a.expected);
+  if (!expected.length) return false;
+  return expected.every((a) => a.status === "ok" || nearMiss(a, IX));
+}
+
+/* Of the recogniser's alternatives, the one closest to what was asked for.
+   The learner was trying to say the target, so when the engine is unsure
+   between two hearings the one that matches is the fairer reading; a wrong
+   sentence is still wrong against every alternative. */
+export function closestTranscript(alternatives, target) {
+  let best = null, bestWer = Infinity, bestChars = Infinity;
+  for (const t of alternatives || []) {
+    if (typeof t !== "string") continue;
+    const w = compare(t, target).wer;
+    // Same number of words off: the one closer letter for letter — «чая» for
+    // «чай» over «кофе» — since that is the one a near miss can pass.
+    const ch = charDistance(t, target);
+    if (w < bestWer || (w === bestWer && ch < bestChars)) { best = t; bestWer = w; bestChars = ch; }
+  }
+  return best;
 }
 
 export function gradeAlignment(alignment, IX, opts) {

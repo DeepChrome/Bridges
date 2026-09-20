@@ -91,6 +91,9 @@ export function PairSay({ q, r }) {
 
   const rec = useRecognizer({
     enabled: !r.answered,
+    // Both words, so the engine is choosing between the pair rather than
+    // against the whole language.
+    bias: [q.target, q.other],
     onFinal: (transcript) => {
       const n = attemptRef.current + 1;
       attemptRef.current = n;

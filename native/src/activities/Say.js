@@ -27,8 +27,8 @@ import { L, IX, UN } from "../data";
 import { getFeedback, config } from "../lib/feedback";
 import { useRecognizer } from "../speech";
 import { Alignment } from "./Alignment";
-import { compare } from "@core/compare";
-import { gradeAlignment, alignmentCredit, feedbackTags } from "@core/speech";
+import { compare, words } from "@core/compare";
+import { gradeAlignment, alignmentCredit, feedbackTags, sayPassed, closestTranscript } from "@core/speech";
 import { recordAttempt, tagAttempt } from "@core/state";
 import { tagInfo } from "@core/errortags";
 import { fold } from "@core/util";
@@ -159,32 +159,39 @@ export function Say({ q, r }) {
     if (alive.current) setFb(reply);
   };
 
-  /* Hand the grades in. `n` is the attempt that produced `out`. */
+  /* Hand the grades in. `n` is the attempt that produced `out`. A pass is
+     every word said or nearly said (core/speech.js sayPassed): the near miss
+     still grades Hard and the Worker still names a real case error, but the
+     learner is not marked wrong for the recogniser's hearing of an ending. */
   const settle = (out, n, transcript, ts) => {
-    const perfect = out.wer === 0;
+    const passed = sayPassed(out.alignment, IX);
     setSettled(true);
     const c = alignmentCredit(out.alignment, IX);
-    r.record(perfect, gradeAlignment(out.alignment, IX, { perfect, firstTry: n === 1 }),
+    r.record(passed, gradeAlignment(out.alignment, IX, { perfect: passed, firstTry: n === 1 }),
              undefined,
-             { credit: c.credit,
-               note: perfect ? null : `${c.ok} of ${c.n} words` + (c.near ? `, ${c.near} nearly` : "") });
+             passed ? { credit: 1, note: null }
+               : { credit: c.credit,
+                   note: `${c.ok} of ${c.n} words` + (c.near ? `, ${c.near} nearly` : "") });
     askFeedback(transcript, ts);
   };
 
   const last = useRef({ transcript: "", ts: 0 });
   const rec = useRecognizer({
     enabled: !r.answered,
-    onFinal: (transcript, latencyMs) => {
+    // What the engine is listening for: the sentence, and its words.
+    bias: [q.target].concat(words(q.target)),
+    onFinal: (top, latencyMs, alternatives) => {
       const n = attemptRef.current + 1;
       attemptRef.current = n;
       setAttempt(n);
+      const transcript = closestTranscript(alternatives, q.target) || top;
       const out = compare(transcript, q.target);
-      const perfect = out.wer === 0;
+      const passed = sayPassed(out.alignment, IX);
       setRes(out);
       const ts = log({ transcript, wer: out.wer, attempt: n, latencyMs,
-                       grade: perfect ? (n === 1 ? 4 : 3) : 1 });
+                       grade: passed ? (n === 1 ? 4 : 3) : 1 });
       last.current = { transcript, ts };
-      if (perfect || n >= ATTEMPTS) settle(out, n, transcript, ts);
+      if (passed || n >= ATTEMPTS) settle(out, n, transcript, ts);
     },
     onError: (error, latencyMs) => {
       log({ transcript: "", wer: 1, attempt: attemptRef.current, error, latencyMs, grade: null });

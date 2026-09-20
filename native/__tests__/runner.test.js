@@ -12,6 +12,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { Runner } from "../src/screens/Run";
+import { AUDIO } from "../src/data";
+
+/* An utterance that streams from the collection. The autoplay-wait tests
+   count streamed plays, and a curriculum word plays from the bundle since
+   2026-09-19 (wordaudio.js) — so they listen for a sentence, which does not. */
+const streamed = Object.keys(AUDIO).find((k) => k.includes(" "));
 
 /* Every question present() emits carries a kind; the registry draws nothing for one
    that does not, which is what registry.test.js guards. */
@@ -144,7 +150,7 @@ describe("runner verdict", () => {
 
   it("offers a hint that costs the grade, and waits for playing audio before autoplay", async () => {
     const heard = { kind: "listen", i: 0, ask: "What did you hear?", prompt: "", cyr: true,
-                    autoplay: "книга", say: "книга", hint: "book",
+                    autoplay: streamed, say: streamed, hint: "book",
                     options: [{ label: "книга", right: true, cyr: true }, { label: "стол", cyr: true }] };
     global.__audioHold = true;
     try {
@@ -159,10 +165,11 @@ describe("runner verdict", () => {
       await act(async () => { fireEvent.press(screen.getByText("Continue")); });
       // The first recording is still "playing": the second question has not autoplayed.
       await act(async () => {});
-      expect(global.__played.filter((u) => u && u.includes("/audio/"))).toHaveLength(1);
+      const recordings = () => global.__played.filter((u) => u && u.includes("/audio/"));
+      expect(recordings()).toHaveLength(1);
       await act(async () => { global.__audioFinish(); });
       await act(async () => {});
-      expect(global.__played.filter((u) => u && u.includes("/audio/")).length).toBeGreaterThanOrEqual(2);
+      expect(recordings().length).toBeGreaterThanOrEqual(2);
     } finally {
       global.__audioHold = false;
       global.__audioFinish();
@@ -204,7 +211,7 @@ describe("runner verdict", () => {
      the next question used to play over the path (the engineering review). */
   it("never autoplays after the runner has gone", async () => {
     const heard = { kind: "listen", i: 0, ask: "What did you hear?", prompt: "", cyr: true,
-                    autoplay: "книга", say: "книга",
+                    autoplay: streamed, say: streamed,
                     options: [{ label: "книга", right: true, cyr: true }, { label: "стол", cyr: true }] };
     global.__audioHold = true;
     global.__played = [];

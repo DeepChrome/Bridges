@@ -14,7 +14,8 @@ import { UnitScreen } from "../src/screens/Unit";
 import You from "../src/screens/You";
 import { prefetchUnit, filesForUnit, nextUnit, cachedUri, cacheStats, clearCache, configureCache } from "../src/cache";
 import { say } from "../src/audio";
-import { STAGES, AUDIO, AUDIO_BASE, L, components, markComponent, UN } from "../src/data";
+import { wordClip } from "../src/wordaudio";
+import { STAGES, AUDIO, AUDIO_BASE, L, SPEECH, components, markComponent, UN } from "../src/data";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "@core/state";
 import { fold } from "@core/util";
 
@@ -40,12 +41,14 @@ afterEach(async () => { await flushState(); });
 const unit = STAGES[0].core;
 
 describe("the audio cache", () => {
-  it("knows a unit's files: its words and its pools' sentences, each once", () => {
+  it("knows a unit's files: its pools' sentences and its unbundled words, each once", () => {
     const files = filesForUnit(unit);
     expect(files.length).toBeGreaterThan(10);
     expect(new Set(files).size).toBe(files.length);
+    /* A word the app bundles (wordaudio.js) is not downloaded — `say()` would
+       never reach the copy — and the unit's first word is one of those. */
     const wordFile = AUDIO[fold(L[unit.w[0]].b)];
-    if (wordFile) expect(files).toContain(wordFile);
+    if (wordFile && wordClip(fold(L[unit.w[0]].b))) expect(files).not.toContain(wordFile);
     expect(nextUnit(unit)).toBe(STAGES[0].branches[0] || STAGES[1].core);
   });
 
@@ -60,13 +63,14 @@ describe("the audio cache", () => {
     expect(r.removed).toBe(1);
     expect(global.__fs.files.has(dir + "/stale.mp3")).toBe(false);
     expect(global.__downloads.every((u) => u.startsWith(AUDIO_BASE))).toBe(true);
-    // Playback now takes the local file for a cached word.
-    const word = L[unit.w[0]].b;
-    if (AUDIO[fold(word)]) {
-      expect(cachedUri(word)).toBe(dir + "/" + AUDIO[fold(word)]);
-      await say(word);
-      expect(global.__played[0]).toBe(dir + "/" + AUDIO[fold(word)]);
-    }
+    // Playback now takes the local file for a cached utterance — a pool
+    // sentence, since the unit's words play from the bundle regardless.
+    const sentence = ["speak", "listen"].flatMap((p) => (SPEECH[p] && SPEECH[p][unit.id]) || [])
+      .map((ri) => SPEECH.rows[ri][0]).find((s) => AUDIO[fold(s)]);
+    expect(sentence).toBeTruthy();
+    expect(cachedUri(sentence)).toBe(dir + "/" + AUDIO[fold(sentence)]);
+    await say(sentence);
+    expect(global.__played[0]).toBe(dir + "/" + AUDIO[fold(sentence)]);
     expect(cachedUri("несуществующееслово")).toBeNull();
     // A second pass downloads nothing new.
     global.__downloads = [];

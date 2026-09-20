@@ -13,6 +13,7 @@
 
 import { Directory, File, Paths } from "expo-file-system";
 import { AUDIO, AUDIO_BASE, SPEECH, UN, L, STAGES } from "./data";
+import { wordClip } from "./wordaudio";
 import { fold } from "@core/util";
 
 export const CAP_BYTES = 15 * 1024 * 1024;
@@ -64,10 +65,13 @@ export function dropCached(text) {
   return true;
 }
 
-/* Every audio file a unit needs: its words, then its pools' sentences. */
+/* Every audio file a unit needs: its words, then its pools' sentences. A word
+   the app carries as a bundled clip (wordaudio.js — nearly every curriculum
+   word since 2026-09-19) is left out: `say()` plays the bundle first, so a
+   download for it would never be heard. */
 export function filesForUnit(unit) {
   const keys = [];
-  for (const i of unit.w) if (L[i]) keys.push(L[i].b);
+  for (const i of unit.w) if (L[i] && !wordClip(fold(L[i].b))) keys.push(L[i].b);
   for (const pool of ["speak", "listen"]) {
     for (const ri of (SPEECH[pool] && SPEECH[pool][unit.id]) || []) keys.push(SPEECH.rows[ri][0]);
   }

@@ -947,6 +947,14 @@ color. `native/flows/batch0919.txt` walks all of it. **Not found:** "Russian
 in your words" — no such string anywhere in the app; asked. Suites: core
 609, native 472 over 71, smoke 159, copy cap 0 over, dead exports 0.
 
+**Same day, later:** the tour's voices card cut; the 967 Core 5000 curriculum
+words re-voiced in Chirp3-HD ($0.19, 1,028 clips bundled, 17 human ones
+kept); and Say/Shadow no longer "almost always mark me wrong" — the engine
+is biased toward the expected words, five hearings are asked for and the
+closest taken, and a sentence passes on near misses (CLAUDE.md §30c). **Not
+yet measured on the phone**: the STT Lab is the instrument; the sentence
+pool's own recordings are still Core 5000 (~$1.80 to re-voice, his call).
+
 ## Phase 12 — What is actually left (2026-09-10)
 
 **Superseded by Phase 13 above; kept because the reasoning still reads.**

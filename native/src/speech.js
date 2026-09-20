@@ -9,7 +9,7 @@
  * can be blocked before it starts — no microphone permission, no offline Russian
  * model — each named plainly.
  *
- *   const rec = useRecognizer({ onFinal(transcript, latencyMs) });
+ *   const rec = useRecognizer({ onFinal(transcript, latencyMs, alternatives), bias });
  *   rec.phase        idle | asking | listening
  *   rec.live         the partial transcript while listening
  *   rec.note         "Nothing heard" and the like; clears on the next hold
@@ -25,7 +25,17 @@ import {
 export const LANG = "ru-RU";
 export const WATCHDOG_MS = 8000;
 
-export function useRecognizer({ onFinal, onError, enabled = true } = {}) {
+/* How many hearings the engine is asked for. The top one is what is shown
+   while listening; an activity that knows what it expects (Say, Shadow) picks
+   the closest of the lot (core/speech.js closestTranscript). */
+export const ALTERNATIVES = 5;
+
+/* `bias` — the words the activity expects. On Android 13+ they go to the
+   recogniser as EXTRA_BIASING_STRINGS, which is the engine being told what
+   it is listening for; the owner's complaint (2026-09-19) that Say "almost
+   always marks me wrong" was mostly the engine hearing a plausible other
+   sentence. Read at hold time, so a changing question changes the hint. */
+export function useRecognizer({ onFinal, onError, enabled = true, bias } = {}) {
   const [phase, setPhase] = useState("idle");
   const phaseRef = useRef("idle");
   const go = (p) => { phaseRef.current = p; setPhase(p); };
@@ -37,19 +47,22 @@ export function useRecognizer({ onFinal, onError, enabled = true } = {}) {
   const releasedAt = useRef(0);
   const watchdog = useRef(null);
   const releasedEarly = useRef(false);
-  const cb = useRef({ onFinal, onError });
-  cb.current = { onFinal, onError };
+  const cb = useRef({ onFinal, onError, bias });
+  cb.current = { onFinal, onError, bias };
 
-  const finish = (text) => {
+  const finish = (text, alternatives) => {
     if (watchdog.current) { clearTimeout(watchdog.current); watchdog.current = null; }
     go("idle");
-    if (cb.current.onFinal) cb.current.onFinal(text, Date.now() - releasedAt.current);
+    if (cb.current.onFinal) {
+      cb.current.onFinal(text, Date.now() - releasedAt.current, alternatives || [text]);
+    }
   };
 
   useSpeechRecognitionEvent("result", (ev) => {
     if (phaseRef.current !== "listening") return;
-    const text = ev.results && ev.results[0] ? ev.results[0].transcript : "";
-    if (ev.isFinal) finish(text);
+    const all = (ev.results || []).map((r) => r && r.transcript).filter((t) => typeof t === "string");
+    const text = all[0] || "";
+    if (ev.isFinal) finish(text, all.length ? all : [text]);
     else setLive(text);
   });
   useSpeechRecognitionEvent("error", (ev) => {
@@ -89,8 +102,10 @@ export function useRecognizer({ onFinal, onError, enabled = true } = {}) {
     if (releasedEarly.current) { go("idle"); return; }
     go("listening");
     try {
+      const hint = (cb.current.bias || []).filter((s) => typeof s === "string" && s.trim());
       M.start({ lang: LANG, requiresOnDeviceRecognition: true, interimResults: true,
-                maxAlternatives: 1, continuous: false });
+                maxAlternatives: ALTERNATIVES, continuous: false,
+                ...(hint.length ? { contextualStrings: hint } : {}) });
     } catch (e) {
       go("idle");
       setBlock({ why: "engine", text: `Recognition failed: ${e.message || e}` });

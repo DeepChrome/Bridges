@@ -90,9 +90,12 @@ export function Build({ q, r }) {
 
   const rec = useRecognizer({
     enabled: !!q.listen && last && !intro && !r.answered,
-    onFinal: (transcript) => {
-      const words = (transcript || "").split(/\s+/).map(fold).filter(Boolean);
-      setHeard({ ok: words.includes(fold(q.ru)), transcript: transcript || "" });
+    bias: [q.ru],
+    onFinal: (transcript, latencyMs, alternatives) => {
+      // Any hearing that carries the word is the word heard.
+      const has = (t) => (t || "").split(/\s+/).map(fold).filter(Boolean).includes(fold(q.ru));
+      const hit = (alternatives || [transcript]).find(has);
+      setHeard({ ok: !!hit, transcript: hit || transcript || "" });
     },
   });
 

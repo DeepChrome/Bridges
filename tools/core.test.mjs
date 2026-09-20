@@ -31,7 +31,8 @@ import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, PRODUCE_A
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
-import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP }
+import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP,
+         sayPassed, closestTranscript }
   from "../core/speech.js";
 import { describeForm, summarise } from "../core/forms.js";
 import { parseDeep } from "../core/search.js";
@@ -1663,6 +1664,20 @@ group("speech grading");
      "credit counts it half", JSON.stringify(c));
   ok(!compare("Я пью кофе", "Я пью чай").alignment.some((a) => nearMiss(a, IX)),
      "a different word is not a near miss");
+
+  /* The pass rule for a spoken sentence (2026-09-19): every word said or
+     nearly said passes; a dropped or different word does not. And of several
+     hearings, the closest to the target is the one graded. */
+  ok(sayPassed(near.alignment, IX), "a sentence with only a near miss passes");
+  ok(sayPassed(compare("Я пью чай", "Я пью чай").alignment, IX), "and a perfect one");
+  ok(!sayPassed(compare("Я пью кофе", "Я пью чай").alignment, IX), "a different word fails it");
+  ok(!sayPassed(compare("Я пью", "Я пью чай").alignment, IX), "a dropped word fails it");
+  ok(!sayPassed([], IX), "and nothing expected is no pass");
+  ok(closestTranscript(["Я пью кофе", "Я пью чая", "Я пью чай"], "Я пью чай") === "Я пью чай",
+     "the closest hearing is the exact one");
+  ok(closestTranscript(["Я пью кофе", "Я пью чая"], "Я пью чай") === "Я пью чая",
+     "…or the nearest when none is exact");
+  ok(closestTranscript([], "Я пью чай") === null, "no hearings, nothing chosen");
 
   ok(JSON.stringify(feedbackTags({ grammar: [{ tag: "CASE" }, { tag: "ASPECT" }],
                                    words: [{ tags: ["CASE"] }, { tags: [] }, {}] }))

@@ -28,7 +28,7 @@ import { Linked } from "../words";
 import { IX } from "../data";
 import { say, whenIdle, stop } from "../audio";
 import { useRecognizer } from "../speech";
-import { HoldButton, Blocked, ATTEMPTS } from "./Say";
+import { HoldButton, Blocked } from "./Say";
 import { Alignment } from "./Alignment";
 import { compare, words } from "@core/compare";
 import { gradeAlignment, alignmentCredit, sayPassed, closestTranscript } from "@core/speech";
@@ -88,7 +88,7 @@ export function Shadow({ q, r }) {
           grade: sayPassed(out.alignment, IX) ? (n === 1 ? 4 : 3) : 1,
         }),
       }));
-      if (sayPassed(out.alignment, IX) || n >= ATTEMPTS) settle(out, n);
+      if (sayPassed(out.alignment, IX)) settle(out, n);
     },
   });
 
@@ -113,9 +113,8 @@ export function Shadow({ q, r }) {
         </View>
         {!settled ? (
           <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
-            <Btn kind="pri" label={`Try again · ${ATTEMPTS - attempt} left`}
-                 style={{ flex: 1 }} onPress={again} />
-            <Btn label="Keep" onPress={() => settle(res, attempt)} />
+            <Btn kind="pri" label="Try again" style={{ flex: 1 }} onPress={again} />
+            <Btn label="Continue" onPress={() => settle(res, attempt)} />
           </View>
         ) : null}
       </View>

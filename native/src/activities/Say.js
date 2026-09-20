@@ -33,7 +33,8 @@ import { recordAttempt, tagAttempt } from "@core/state";
 import { tagInfo } from "@core/errortags";
 import { fold } from "@core/util";
 
-export const ATTEMPTS = 3;
+/* No limit on attempts (the owner, 2026-09-19: "remove the whole 3 tries
+   thing"): a miss offers Try again and Continue, as many times as wanted. */
 
 export function HoldButton({ phase, onIn, onOut, size = 84 }) {
   const t = useTheme();
@@ -191,7 +192,7 @@ export function Say({ q, r }) {
       const ts = log({ transcript, wer: out.wer, attempt: n, latencyMs,
                        grade: passed ? (n === 1 ? 4 : 3) : 1 });
       last.current = { transcript, ts };
-      if (passed || n >= ATTEMPTS) settle(out, n, transcript, ts);
+      if (passed) settle(out, n, transcript, ts);
     },
     onError: (error, latencyMs) => {
       log({ transcript: "", wer: 1, attempt: attemptRef.current, error, latencyMs, grade: null });
@@ -217,9 +218,8 @@ export function Say({ q, r }) {
         </View>
         {!settled ? (
           <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
-            <Btn kind="pri" label={`Try again · ${ATTEMPTS - attempt} left`}
-                 style={{ flex: 1 }} onPress={again} />
-            <Btn label="Keep" onPress={keep} />
+            <Btn kind="pri" label="Try again" style={{ flex: 1 }} onPress={again} />
+            <Btn label="Continue" onPress={keep} />
           </View>
         ) : null}
         {fb === "pending" ? (
@@ -237,10 +237,9 @@ export function Say({ q, r }) {
                      textAlign: "center" }}>
         {rec.phase === "listening" ? rec.live : rec.note || ""}
       </Text>
-      {attempt > 0 ? <Muted>{`${ATTEMPTS - attempt} left`}</Muted> : null}
-      {/* A library, a cold, a sleeping child: a way past that is not three
-          wrong attempts. Skipped, like a refused microphone — graded nothing,
-          left out of the total. */}
+      {/* A library, a cold, a sleeping child: a way past without speaking.
+          Skipped, like a refused microphone — graded nothing, left out of the
+          total. */}
       {attempt === 0 ? (
         <Btn kind="ghost" label="Can't speak now" style={{ marginTop: 10 }}
              onPress={() => r.skip()} />

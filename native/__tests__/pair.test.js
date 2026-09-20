@@ -121,28 +121,33 @@ describe("saying a contrast", () => {
     expect(screen.getByText("Correct")).toBeTruthy();
   });
 
-  it("names the other word of the pair when that is what came out", async () => {
+  it("names the other word of the pair, and it is a miss only on Continue", async () => {
     const step = sayStep();
     await withStep(step);
     await speak(step.other);
     const heard = await screen.findByTestId("pair-heard");
     expect(heard).toHaveTextContent(new RegExp(step.other));
-    expect(screen.getByText("Not quite")).toBeTruthy();
+    expect(screen.queryByText("Not quite")).toBeNull();          // the learner decides
+    expect(screen.getByText("Try again")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    expect(await screen.findByText("Not quite")).toBeTruthy();
   });
 
-  it("skips rather than fails when it caught neither", async () => {
+  it("skips rather than fails when it caught neither, after as many tries as wanted", async () => {
     const step = sayStep();
     const onFinish = jest.fn();
     await withStep(step, onFinish);
-    // Three attempts, none of them either word.
-    for (let k = 0; k < 3; k++) {
+    // Four attempts, none of them either word — there is no cap (the owner,
+    // 2026-09-19: "remove the whole 3 tries thing").
+    for (let k = 0; k < 4; k++) {
       await speak("абракадабра");
-      const again = screen.queryByText(/Try again/);
-      if (again) await act(async () => { fireEvent.press(again); });
+      await waitFor(() => expect(screen.getByTestId("pair-heard")).toHaveTextContent(/Did not catch/));
+      expect(screen.getByText("Try again")).toBeTruthy();
+      if (k < 3) await act(async () => { fireEvent.press(screen.getByText("Try again")); });
     }
-    await waitFor(() => expect(screen.getByTestId("pair-heard")).toHaveTextContent(/Did not catch/));
     // A skipped step grades nothing and is left out of the total, so a phone
     // that cannot hear scores the same drill as one that can.
+    await act(async () => { fireEvent.press(screen.getByText("Skip")); });
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     await waitFor(() => expect(onFinish).toHaveBeenCalled());
     expect(onFinish.mock.calls[0][0].total).toBe(0);

@@ -8,11 +8,12 @@
  * **What the saying half can honestly claim.** The on-device recogniser was
  * measured on 2–4 word sentences (§30c), where context carries a great deal of
  * the work; a single word out of context is a harder ask of it. So this never
- * says "you said it wrong". It says which of the two words it heard, and when
- * it heard neither it says that and grades nothing — `r.skip()`, the same route
- * a phone with no microphone takes. A drill that told a learner their «люк» was
- * a «лук» when the recogniser simply had not caught it would be teaching them
- * to distrust their own mouth.
+ * says "you said it wrong". It says which of the two words it heard; the other
+ * word is a miss only when the learner continues on it, and when it heard
+ * neither it says that and offers another go or Skip — `r.skip()`, the same
+ * route a phone with no microphone takes, grading nothing. A drill that told
+ * a learner their «люк» was a «лук» when the recogniser simply had not caught
+ * it would be teaching them to distrust their own mouth. No limit on tries.
  */
 
 import React, { useRef, useState } from "react";
@@ -20,7 +21,7 @@ import { View, Pressable } from "react-native";
 import { useTheme, radius, type as T } from "../theme";
 import { Btn, Muted, Speaker, Text } from "../ui";
 import { useRecognizer } from "../speech";
-import { HoldButton, Blocked, ATTEMPTS } from "./Say";
+import { HoldButton, Blocked } from "./Say";
 import { fold } from "@core/util";
 
 /* The contrast, in one line, under whichever half is on screen. */
@@ -107,11 +108,9 @@ export function PairSay({ q, r }) {
       const hitO = words.includes(fold(q.other));
       const word = hitT && !hitO ? "target" : hitO && !hitT ? "other" : null;
       setHeard({ word, transcript });
+      // The word asked for settles it; anything else waits on the learner —
+      // Try again, or Continue (the other word: a miss) / Skip (nothing caught).
       if (word === "target") r.record(true, []);
-      else if (word === "other" || n >= ATTEMPTS) {
-        if (word === "other") r.record(false, []);
-        else r.skip();                          // never caught: nothing to grade
-      }
     },
   });
 
@@ -143,9 +142,13 @@ export function PairSay({ q, r }) {
           <Speaker text={q.target} size={36} />
         </View>
         <About text={q.about} />
-        {!r.answered && attempt < ATTEMPTS ? (
-          <Btn kind="pri" label={`Try again · ${ATTEMPTS - attempt} left`}
-               style={{ marginTop: 14 }} onPress={again} />
+        {!r.answered ? (
+          <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
+            <Btn kind="pri" label="Try again" style={{ flex: 1 }} onPress={again} />
+            {heard.word === "other"
+              ? <Btn label="Continue" onPress={() => r.record(false, [])} />
+              : <Btn label="Skip" onPress={() => r.skip()} />}
+          </View>
         ) : null}
       </View>
     );

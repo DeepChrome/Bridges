@@ -24,6 +24,13 @@ import {
 
 export const LANG = "ru-RU";
 export const WATCHDOG_MS = 8000;
+/* The engine listens for at least this long from the moment it starts, whatever
+   the finger does. A one-syllable word in the pronunciation drill is said and
+   the button let go inside half a second, and stopping the recogniser that
+   early handed it too little audio to call speech — "Did not catch that" on a
+   word plainly said (the owner, 2026-09-19). A release before this is honoured
+   this much later; a release after it stops at once. */
+export const MIN_LISTEN_MS = 900;
 
 /* How many hearings the engine is asked for. The top one is what is shown
    while listening; an activity that knows what it expects (Say, Shadow) picks
@@ -45,13 +52,16 @@ export function useRecognizer({ onFinal, onError, enabled = true, bias } = {}) {
   const [note, setNote] = useState(null);
   const [block, setBlock] = useState(null);
   const releasedAt = useRef(0);
+  const startedAt = useRef(0);
   const watchdog = useRef(null);
+  const stopTimer = useRef(null);
   const releasedEarly = useRef(false);
   const cb = useRef({ onFinal, onError, bias });
   cb.current = { onFinal, onError, bias };
 
   const finish = (text, alternatives) => {
     if (watchdog.current) { clearTimeout(watchdog.current); watchdog.current = null; }
+    if (stopTimer.current) { clearTimeout(stopTimer.current); stopTimer.current = null; }
     go("idle");
     if (cb.current.onFinal) {
       cb.current.onFinal(text, Date.now() - releasedAt.current, alternatives || [text]);
@@ -101,6 +111,7 @@ export function useRecognizer({ onFinal, onError, enabled = true, bias } = {}) {
     }
     if (releasedEarly.current) { go("idle"); return; }
     go("listening");
+    startedAt.current = Date.now();
     try {
       const hint = (cb.current.bias || []).filter((s) => typeof s === "string" && s.trim());
       M.start({ lang: LANG, requiresOnDeviceRecognition: true, interimResults: true,
@@ -119,7 +130,14 @@ export function useRecognizer({ onFinal, onError, enabled = true, bias } = {}) {
   const release = () => {
     releasedAt.current = Date.now();
     if (phaseRef.current === "listening") {
-      try { M.stop(); } catch (e) { /* the end event still arrives */ }
+      const stop = () => {
+        stopTimer.current = null;
+        if (phaseRef.current !== "listening") return;
+        try { M.stop(); } catch (e) { /* the end event still arrives */ }
+      };
+      const heldFor = Date.now() - startedAt.current;
+      if (heldFor >= MIN_LISTEN_MS) stop();
+      else stopTimer.current = setTimeout(stop, MIN_LISTEN_MS - heldFor);
       if (watchdog.current) clearTimeout(watchdog.current);
       watchdog.current = setTimeout(() => {
         watchdog.current = null;

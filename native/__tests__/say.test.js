@@ -8,7 +8,7 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ExpoSpeechRecognitionModule } from "expo-speech-recognition";
 
@@ -20,7 +20,7 @@ import { L, IX, STAGES, SPEECH } from "../src/data";
 import { fold } from "@core/util";
 import { MINUTE } from "@core/scheduler";
 import { getFeedback } from "../src/lib/feedback";
-import { WATCHDOG_MS } from "../src/speech";
+import { WATCHDOG_MS, MIN_LISTEN_MS } from "../src/speech";
 import { SPEECH_SKIP_TOP } from "@core/speech";
 
 /* The Worker is out of scope here: the client is stubbed and, unless a test says
@@ -115,7 +115,10 @@ describe("say", () => {
     });
     expect(screen.getByText("я")).toBeTruthy();
     await act(async () => { fireEvent(hold, "pressOut"); });
-    expect(ExpoSpeechRecognitionModule.stop).toHaveBeenCalledTimes(1);
+    // Let go inside MIN_LISTEN_MS: the stop is honoured that much later, so a
+    // one-syllable word is not cut off (speech.js).
+    expect(ExpoSpeechRecognitionModule.stop).not.toHaveBeenCalled();
+    await waitFor(() => expect(ExpoSpeechRecognitionModule.stop).toHaveBeenCalledTimes(1));
 
     await final(heard);
     expect(await screen.findByText("Correct")).toBeTruthy();
@@ -166,6 +169,7 @@ describe("say", () => {
       const hold = screen.getByTestId("say-hold");
       await act(async () => { fireEvent(hold, "pressIn"); });
       await act(async () => { fireEvent(hold, "pressOut"); });
+      await act(async () => { jest.advanceTimersByTime(MIN_LISTEN_MS + 10); });
       expect(ExpoSpeechRecognitionModule.stop).toHaveBeenCalledTimes(1);
       await act(async () => { jest.advanceTimersByTime(WATCHDOG_MS + 10); });
       expect(ExpoSpeechRecognitionModule.abort).toHaveBeenCalled();
@@ -183,7 +187,7 @@ describe("say", () => {
     await screen.findByText(question.en);
     await speak();
     await final("жираф " + heard.split(/\s+/).slice(1).join(" "));
-    expect(await screen.findByText(/Try again · 2 left/)).toBeTruthy();
+    expect(await screen.findByText("Try again")).toBeTruthy();       // no count: tries are unlimited
     expect(screen.getAllByTestId("align-sub")).toHaveLength(1);
     expect(screen.queryByTestId("verdict")).toBeNull();      // not settled yet
 
@@ -207,7 +211,7 @@ describe("say", () => {
     const k = words.findIndex((w) => IX[w] && IX[w].length && IX[w][0] >= SPEECH_SKIP_TOP);
     const dropped = IX[words[k]][0];
     await final(words.filter((_, j) => j !== k).join(" "));
-    await act(async () => { fireEvent.press(screen.getByText("Keep")); });
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     expect(await screen.findByText(/^(Almost|Not quite)$/)).toBeTruthy();
     const st = await saved();
     // The dropped word is Again (due again today); the rest are due later. A
@@ -254,7 +258,7 @@ describe("say", () => {
     await speak();
     await final(heard.split(/\s+/).slice(1).join(" "));
     expect(getFeedback).not.toHaveBeenCalled();                 // not before the verdict
-    await act(async () => { fireEvent.press(screen.getByText("Keep")); });
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     expect(await screen.findByText(/^(Almost|Not quite)$/)).toBeTruthy();
     expect(screen.getByTestId("feedback-pending")).toBeTruthy(); // below it, not blocking it
     expect(getFeedback).toHaveBeenCalledTimes(1);

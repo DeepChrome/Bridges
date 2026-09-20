@@ -12,6 +12,12 @@ import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { backupProfile, restoreProfile, shareCrashes } from "../backup";
 import { readCrashes, clearCrashes } from "../crash";
 import { troubleWords } from "./Study";
+import Constants from "expo-constants";
+
+/* What build this is, at the foot of Settings. The version is app.json's
+   (1.0.0-beta.1 while it is a beta), read off the build so it cannot say
+   something the binary is not. */
+const VERSION = (Constants.expoConfig && Constants.expoConfig.version) || "";
 import { tagInfo } from "@core/errortags";
 import { cardsOf, dueCards, maxLapses, RETENTION_MIN, RETENTION_MAX } from "@core/scheduler";
 import { askPermission } from "../notify";
@@ -309,6 +315,11 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                 2026-09-04 and the native app — the product — never had it.
                 Built from the databases' own meta rows, so it cannot drift from
                 what was actually shipped. */}
+            {VERSION ? (
+              <Muted testID="app-version" size={12} style={{ textAlign: "center", marginTop: 20 }}>
+                {`Bridges ${VERSION}${/beta/.test(VERSION) ? " · beta" : ""}`}
+              </Muted>
+            ) : null}
             <View style={{ marginTop: 20 }}>
               {(STATS.credits || []).map((c) => (
                 <Muted key={c.n} size={12} style={{ textAlign: "center" }}>

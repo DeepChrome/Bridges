@@ -15,11 +15,16 @@ Store title (30 characters, Play's limit; the keyword in the title is what
 search weighs, and "Bridges" alone is a dozen other apps — the owner,
 2026-09-19): **Bridges: Learn Russian**. The app's own label stays "Bridges".
 
-Short description (80 characters, Play's limit):
+Short description (80 characters, Play's limit; "Beta" first, so nobody
+installs it thinking otherwise — the owner, 2026-09-19):
 
-> Russian lessons, spaced repetition and native audio, built on your own words.
+> Beta. Russian lessons, spaced repetition and native audio, on your own words.
 
 ## Full description
+
+**Bridges is in beta.** It works end to end and it is still being shaped;
+things will move, and what breaks is worth telling us about (Settings → Send
+the details).
 
 Bridges is a Russian course built on a real vocabulary collection rather than a
 word list somebody invented.
@@ -140,12 +145,15 @@ BRIDGES_UPLOAD_KEY_PASSWORD=…
 ## Build
 
 ```
-cd native/android && ./gradlew bundleRelease     # app-release.aab, ~86 MB
+cd native/android && ./gradlew bundleRelease     # app-release.aab, ~110 MB with the bundled audio
 node tools/release_check.mjs                      # signature, size, permissions
 ```
 
 A bundle, not an APK: Play requires one for new apps, and it splits per device
-so the download is far smaller than the file uploaded.
+so the download is far smaller than the file uploaded. The version is
+`1.0.0-beta.1` / versionCode 1 (`app.json`; `npx expo prebuild --platform
+android` after changing it, since `android/` is generated); bump versionCode
+on every upload.
 
 ---
 

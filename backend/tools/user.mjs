@@ -15,8 +15,11 @@ import { spawnSync } from "node:child_process";
 const [cmd, ...rest] = process.argv.slice(2);
 const opt = (name, dflt) => (rest.includes(name) ? parseInt(rest[rest.indexOf(name) + 1], 10) : dflt);
 
+/* `--remote`, always: wrangler 4 points `kv key` at a local store by default,
+   so without it a token is minted into a file on this machine and the Worker
+   never hears of it — found 2026-09-19 reading back the first live registration. */
 function wrangler(args, input) {
-  const r = spawnSync("npx", ["wrangler", "kv", "key", ...args, "--binding", "USAGE"],
+  const r = spawnSync("npx", ["wrangler", "kv", "key", ...args, "--binding", "USAGE", "--remote"],
                       { encoding: "utf8", shell: true, input });
   if (r.status !== 0) { process.stderr.write(r.stderr || r.stdout); process.exit(1); }
   return r.stdout;

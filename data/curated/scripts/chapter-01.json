@@ -314,161 +314,180 @@
    ]
   },
   "core1:2": {
-   "title": "Wrong number",
+   "title": "Meeting Katya's family",
    "cast": [
     {
      "id": "a",
-     "ru": "Нина",
-     "en": "Nina"
+     "ru": "Катя",
+     "en": "Katya"
     },
     {
      "id": "b",
-     "ru": "Борис",
-     "en": "Boris"
+     "ru": "Олег",
+     "en": "Oleg"
+    },
+    {
+     "id": "c",
+     "ru": "Миша",
+     "en": "Misha"
     }
    ],
    "intro": [
     {
-     "ru": "телефон",
-     "en": "telephone"
+     "ru": "семья",
+     "en": "family"
     },
     {
-     "ru": "магазин",
-     "en": "shop"
+     "ru": "папа",
+     "en": "dad"
     },
     {
-     "ru": "квартира",
-     "en": "flat"
+     "ru": "брат",
+     "en": "brother"
     },
     {
-     "ru": "привет",
-     "en": "hello"
+     "ru": "друг",
+     "en": "friend"
     },
     {
-     "ru": "спасибо",
-     "en": "thank you"
+     "ru": "пять",
+     "en": "five"
+    },
+    {
+     "ru": "тридцать",
+     "en": "thirty"
     }
    ],
    "lines": [
     {
-     "s": "a",
-     "ru": "Привет! Это магазин?",
-     "en": "Hello! Is that the shop?"
-    },
-    {
      "s": "b",
-     "ru": "Нет, это не магазин.",
-     "en": "No, this is not the shop."
+     "ru": "Катя, а кто они все? Я же их не знаю.",
+     "en": "Katya, who are they all? I do not know any of them."
     },
     {
      "s": "a",
-     "ru": "А что это?",
-     "en": "Then what is it?"
+     "ru": "Это моя семья, Олег. Они все очень хотят с тобой говорить.",
+     "en": "This is my family, Oleg. They all really want to talk to you."
     },
     {
      "s": "b",
-     "ru": "Это квартира. Я Борис.",
-     "en": "It is a flat. I am Boris."
+     "ru": "А вот это кто, Катя? Твой папа, да?",
+     "en": "And who is that, Katya? Your dad, right?"
     },
     {
      "s": "a",
-     "ru": "Вы не магазин?",
-     "en": "You are not the shop?"
+     "ru": "Папа?! Нет, Олег, это же мой брат!",
+     "en": "Dad?! No, Oleg, that is my brother!"
     },
     {
      "s": "b",
-     "ru": "Нет. А вы кто?",
-     "en": "No. And who are you?"
+     "ru": "Брат?! Катя, я не знаю, что говорить...",
+     "en": "Brother?! Katya, I do not know what to say..."
+    },
+    {
+     "s": "c",
+     "ru": "А ты кто такой? Ты её друг, да?",
+     "en": "And who are you? You are her friend, right?"
+    },
+    {
+     "s": "b",
+     "ru": "Да, я Олег, я друг Кати. А ты кто?",
+     "en": "Yes, I am Oleg, I am Katya's friend. And who are you?"
+    },
+    {
+     "s": "c",
+     "ru": "Я Миша, я тоже её брат. Мне пять лет, а тебе?",
+     "en": "I am Misha, I am her brother too. I am five, and you?"
+    },
+    {
+     "s": "b",
+     "ru": "Мне? А вот это я не говорю, Миша!",
+     "en": "Me? That I am not telling, Misha!"
+    },
+    {
+     "s": "c",
+     "ru": "Почему не говоришь? Ты что, не знаешь?",
+     "en": "Why will you not say? What, do you not know?"
     },
     {
      "s": "a",
-     "ru": "Я Нина. Это мой телефон.",
-     "en": "I am Nina. This is my phone."
+     "ru": "Миша, так не говорят! Он у нас такой, Олег.",
+     "en": "Misha, you do not ask that! He is like that, Oleg."
     },
     {
      "s": "b",
-     "ru": "Нина, телефон не тот.",
-     "en": "Nina, it is the wrong number."
+     "ru": "Нет, Катя, он может. Мне уже тридцать лет, Миша.",
+     "en": "No, Katya, he can ask. I am thirty already, Misha."
+    },
+    {
+     "s": "c",
+     "ru": "Тридцать лет?! Это же как наш папа!",
+     "en": "Thirty?! That is the same as our dad!"
     },
     {
      "s": "a",
-     "ru": "Что? Не тот?",
-     "en": "What? The wrong one?"
+     "ru": "Миша, он не папа. Он Олег, и он мой друг.",
+     "en": "Misha, he is not Dad. He is Oleg, and he is my friend."
     },
     {
-     "s": "b",
-     "ru": "Да. Этот — мой.",
-     "en": "Yes. This one is mine."
-    },
-    {
-     "s": "a",
-     "ru": "А магазин? Он где?",
-     "en": "And the shop? Where is it?"
-    },
-    {
-     "s": "b",
-     "ru": "Он не тут, Нина.",
-     "en": "It is not here, Nina."
+     "s": "c",
+     "ru": "Я знаю, знаю! Олег, ты тоже мой друг.",
+     "en": "I know, I know! Oleg, you are my friend too."
     },
     {
      "s": "a",
-     "ru": "Спасибо, Борис.",
-     "en": "Thank you, Boris."
-    },
-    {
-     "s": "b",
-     "ru": "Не за что, Нина.",
-     "en": "Not at all, Nina."
+     "ru": "Вот так, Олег. Ты у нас уже свой.",
+     "en": "There you go, Oleg. You are one of us now."
     }
    ],
    "questions": [
     {
-     "ask": "Why did Nina ring?",
+     "ask": "What is Oleg doing?",
      "options": [
-      "She meant to ring a shop",
-      "She meant to ring a friend",
-      "She meant to ring her work",
-      "She wanted to speak to Boris"
+      "Meeting Katya's family",
+      "Meeting Katya's teacher",
+      "Meeting Misha's friends",
+      "Leaving Katya's family"
      ],
      "answer": 0
     },
     {
-     "ask": "Who picked up?",
+     "ask": "Who does Oleg take for Katya's father?",
      "options": [
-      "Boris, at his flat",
-      "Boris, at the shop",
-      "Nina's friend",
-      "Nobody at all"
+      "Her brother",
+      "Her uncle",
+      "Her friend",
+      "Her neighbour"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Boris tell her about the number?",
+     "ask": "What does Misha want to know?",
      "options": [
-      "It is not the right one",
-      "It is out of service",
-      "It has changed recently",
-      "It belongs to the shop"
+      "How old Oleg is",
+      "Where Oleg lives",
+      "What Oleg does",
+      "Why Oleg came"
      ],
      "answer": 0
     },
     {
-     "ask": "How does Nina react?",
+     "ask": "Why does Katya tell Misha off?",
      "options": [
-      "She thanks him",
-      "She hangs up at once",
-      "She rings again",
-      "She argues with him"
+      "For asking Oleg his age",
+      "For calling Oleg his dad",
+      "For hiding from the guest",
+      "For not saying his name"
      ],
      "answer": 0
     },
     {
-     "ask": "How does Boris come across?",
+     "ask": "How does it end?",
      "options": [
-      "Polite and helpful",
-      "Angry and short",
-      "Confused the whole time",
-      "Too busy to talk"
+      "Misha calls Oleg his friend",
+      "Misha goes to look for Dad",
+      "Oleg decides to leave early",
+      "Katya sends Misha off to bed"
      ],
      "answer": 0
     }

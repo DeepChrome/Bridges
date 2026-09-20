@@ -16,6 +16,7 @@
  *   node tools/lesson_words.mjs --intro вокзал билет рубль
  */
 import { briefs } from "./lesson_brief.mjs";
+import { maxWords } from "./check_scripts.mjs";
 import { loadPayload } from "./payload.mjs";
 import { fold } from "../core/util.js";
 import { dirname, join } from "node:path";
@@ -49,7 +50,7 @@ for (const key of wanted) {
   const b = byKey.get(key);
   if (!b) { console.log(`${key}: no such lesson`); continue; }
   const content = b.palette.filter((w) => w.p && w.p !== "other");
-  console.log(`\n=== ${key}  (chapter ${b.chapter}, up to ${4 + b.chapter} words a sentence)`);
+  console.log(`\n=== ${key}  (chapter ${b.chapter}, up to ${maxWords(b.chapter)} words a sentence)`);
   console.log(`new this lesson: ${b.newWords.map((w) => w.b).join(", ")}`);
   console.log(`content words available (${content.length}):`);
   console.log("  " + content.map((w) => `${w.b}=${(w.e || "").split(/[;,]/)[0].trim()}`).join("; "));

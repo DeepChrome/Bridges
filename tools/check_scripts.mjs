@@ -131,12 +131,24 @@ export function cognate(englishWord, saidTranslit) {
 /* How long a sentence may run, by chapter. Seven words in the first chapter
    (five until 2026-09-19, which kept every early line to a clause and read
    as choppy); the allowance grows with the palette so chapter 10 is not
-   still writing baby talk. */
+   still writing baby talk.
+
+   A *sentence*, not a turn. The brief (docs/scenario-brief.md) asks for
+   turns of one to two sentences and 600–780 characters of Russian over
+   12–16 turns, and neither is reachable if the cap lands on the whole line:
+   sixteen turns of seven short chapter-1 words come to about 530
+   characters, so the checker was refusing exactly the conversations the
+   brief asks for (2026-09-19). */
 export const maxWords = (chapter) => 6 + chapter;
 
 export function tokensOf(ru) {
   return (ru.match(TOKEN) || []).map((t) => fold(t));
 }
+
+/* The sentences of a line, for the cap above — split at end punctuation,
+   empty pieces dropped ("Брат?!" is one sentence, not two). */
+export const sentencesOf = (ru) =>
+  String(ru || "").split(/[.?!…]+/).map((s) => s.trim()).filter(Boolean);
 
 /* Which lemmas a folded form could be, in the order the app resolves them —
    index[key][0] is what a tap on the word opens. */
@@ -358,8 +370,11 @@ export function checkOne(brief, entry) {
     }
 
     const toks = tokensOf(row.ru);
-    if (toks.length > maxWords(brief.chapter)) {
-      errors.push(`${where}: ${toks.length} words, chapter ${brief.chapter} allows ${maxWords(brief.chapter)} — "${row.ru}"`);
+    for (const sentence of sentencesOf(row.ru)) {
+      const n = tokensOf(sentence).length;
+      if (n > maxWords(brief.chapter)) {
+        errors.push(`${where}: a sentence of ${n} words, chapter ${brief.chapter} allows ${maxWords(brief.chapter)} — "${sentence}"`);
+      }
     }
     if (!toks.length) errors.push(`${where}: no Russian in it`);
 

@@ -74,8 +74,14 @@ async function obtain(base, deps) {
   if (saved) { installToken = saved; return { token: saved }; }
 
   const r = await send(base + "/v1/register", {}, null, deps, TIMEOUT_MS);
-  if (r.ok !== true) return { error: r };
+  /* One line in logcat either way, like [store]'s: a registration that fails
+     is otherwise invisible until a Say step has nothing to show. */
+  if (r.ok !== true) {
+    console.log(`[worker] registration failed: ${r.reason}${r.status ? " " + r.status : ""}`);
+    return { error: r };
+  }
   if (typeof r.token !== "string" || !r.token) return { error: { ok: false, reason: "parse" } };
+  console.log("[worker] registered");
   installToken = r.token;
   try { await AsyncStorage.setItem(TOKEN_KEY, r.token); } catch (e) { /* re-minted next launch */ }
   return { token: r.token };

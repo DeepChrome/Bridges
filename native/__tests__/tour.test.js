@@ -37,7 +37,7 @@ test("the last card is the five tabs, drawn from the bar's own list", async () =
     <SessionProvider><WordsProvider><Intro onDone={jest.fn()} /></WordsProvider></SessionProvider>
   );
   await screen.findByTestId("tour-sentence");
-  for (let k = 0; k < 3; k++) await act(async () => { fireEvent.press(screen.getByText("Next")); });
+  for (let k = 0; k < 2; k++) await act(async () => { fireEvent.press(screen.getByText("Next")); });
   expect(await screen.findByTestId("tour-tabs")).toBeTruthy();
   for (const name of ["Learn", "Study", "Practice", "Immerse", "Search"]) {
     expect(screen.getByText(name)).toBeTruthy();

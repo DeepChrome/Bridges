@@ -10,9 +10,8 @@ import React, { useState } from "react";
 import { View, Animated } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius } from "../theme";
-import { Screen, Btn, Muted, Speaker, Text } from "../ui";
+import { Screen, Btn, Muted, Text } from "../ui";
 import { Linked } from "../words";
-import { hasRussianVoice } from "../audio";
 import { TABS, TabGlyph } from "../tabicons";
 import { useSwap } from "../motion";
 
@@ -23,12 +22,10 @@ const PAGES = [
     body: "Tap a word. Tap it again for the whole entry.",
     demo: "word",
   },
-  {
-    key: "voices",
-    title: "Real voices, and the phone's",
-    body: "Blue is a real recording; grey is the phone's own voice. Press twice for slower.",
-    demo: "speaker",
-  },
+  /* A card on the two speaker colours sat here until 2026-09-19 — the owner:
+     "not clear what recording vs device voice is. I don't think it really
+     needs a card." It did not: the distinction is drawn on every speaker,
+     and a card explaining a control is the thing §25 says not to write. */
   {
     key: "mic",
     title: "Speaking stays on your phone",
@@ -70,23 +67,6 @@ function Demo({ kind }) {
             <Muted size={12}>{tab.id}</Muted>
           </View>
         ))}
-      </View>
-    );
-  }
-  if (kind === "speaker") {
-    // On a phone with no Russian voice the grey speaker is dead, and the card
-    // must not describe a button that does nothing.
-    const voice = hasRussianVoice();
-    return (
-      <View style={{ flexDirection: "row", gap: 18, alignItems: "center" }}>
-        <View style={{ alignItems: "center", gap: 6 }}>
-          <Speaker text="книга" size={48} />
-          <Muted>recording</Muted>
-        </View>
-        <View style={{ alignItems: "center", gap: 6 }}>
-          <Speaker text="несуществующее слово для тура" size={48} />
-          <Muted>{voice ? "device voice" : "no Russian voice on this phone"}</Muted>
-        </View>
       </View>
     );
   }

@@ -166,7 +166,10 @@ try {
 } catch (e) { bought = {}; }
 const boughtKeys = new Set(Object.keys(bought).map(fold));
 
-const fromCollection = [...taught].filter((i) => files[fold(DATA.lemmas[i].b)]).length;
+/* A bundled clip wins over the collection's file (`say()` checks the bundle
+   first), so a word in both plays the bought one: since 2026-09-19 that is
+   every Core 5000 word, not only the 61 the collection never had. */
+const bundled = [...taught].filter((i) => boughtKeys.has(fold(DATA.lemmas[i].b))).length;
 const missing = [...taught].filter((i) => {
   const k = fold(DATA.lemmas[i].b);
   return !files[k] && !boughtKeys.has(k);
@@ -174,7 +177,7 @@ const missing = [...taught].filter((i) => {
 const covered = taught.size - missing.length;
 notes.push(`curriculum words with a recording: ${covered} of ${taught.size}`
            + ` (${Math.round(covered / taught.size * 100)}%)`
-           + ` — ${fromCollection} from the collection, ${covered - fromCollection} bought and bundled`);
+           + ` — ${bundled} bought and bundled, ${covered - bundled} streamed from the collection`);
 if (missing.length) {
   notes.push(`  without one, read by the device voice (§27): ${missing.slice(0, 8).map((i) => DATA.lemmas[i].b).join(", ")}`
              + (missing.length > 8 ? `, and ${missing.length - 8} more` : ""));

@@ -64,7 +64,7 @@ describe("profile gate", () => {
     // the first about the two-press dictionary (ROADMAP P8.6).
     expect(await screen.findByText("Every Russian word is a door")).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByText("Next")); });
-    expect(await screen.findByText("Real voices, and the phone's")).toBeTruthy();
+    expect(await screen.findByText("Speaking stays on your phone")).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByText("Skip")); });
     expect(await screen.findByText("Where should we start?")).toBeTruthy();
     expect(screen.getByText(/50 questions/)).toBeTruthy();

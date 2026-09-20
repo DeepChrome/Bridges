@@ -1,9 +1,12 @@
-/* The words the collection has no recording for (ROADMAP 13.32).
+/* The bought word clips (ROADMAP 13.32, and 2026-09-19).
  *
  * 61 of the 1,045 the units teach had no file at all — mostly perfective
  * verbs, which is precisely what the aspect drill asks about — and were read
- * by the device voice. They are bought Chirp3-HD clips now, bundled in the app
+ * by the device voice. They are bought Chirp3-HD clips, bundled in the app
  * rather than uploaded, so they need no network and cost no Netlify credits.
+ * Since 2026-09-19 the 967 words the collection had only from Core 5000 are
+ * bought the same way (the owner: "sounds pretty robotic"), and the bundle
+ * wins over the collection's file for those.
  *
  * Own file, per the timeout note in screens.test.js.
  */
@@ -53,12 +56,19 @@ describe("the words with no recording", () => {
     expect(global.__spoke).toEqual([]);
   });
 
-  it("still streams the collection's recording for everything else", async () => {
-    // A word the collection does have.
-    const known = Object.keys(AUDIO)[0];
-    expect(wordClip(fold(known))).toBeNull();
+  it("still streams the collection's recording for everything not bundled", async () => {
+    // An utterance the collection has and the bundle does not — a sentence,
+    // since every curriculum word from Core 5000 is bundled now.
+    const known = Object.keys(AUDIO).find((k) => !wordClip(k));
+    expect(known).toBeTruthy();
     await say(known);
     expect(global.__played.length).toBe(1);
+  });
+
+  it("the bundle wins over the collection's Core 5000 file for a curriculum word", () => {
+    // «книга» has a collection recording and is bundled: the bundle is what plays.
+    expect(AUDIO[fold("книга")]).toBeTruthy();
+    expect(wordClip(fold("книга"))).toBeTruthy();
   });
 
   it("still falls back to the voice for a word nobody has", async () => {

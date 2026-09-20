@@ -25,7 +25,7 @@
  * it. Nothing claims a human said them, here or anywhere.
  *
  *   node tools/build_word_audio.mjs --dry-run     # what it would buy, and the cost
- *   node tools/build_word_audio.mjs               # buy what is missing
+ *   node tools/build_word_audio.mjs               # buy what is missing or Core 5000
  *
  * Idempotent: a word whose clip is already on disk is skipped, so a re-run
  * costs nothing.
@@ -91,7 +91,18 @@ async function synth(text, key) {
 
 /* ------------------------------------------------------------------ which */
 
-/* The words the units teach that `data/audio.json` has no file for.
+/* The collection sources a bought clip replaces (2026-09-19). The owner heard
+   «книга» from the collection and called it robotic; it is Core 5000, the
+   64 kbps "uniform, unverified" TTS that voices 967 of the 1,045 curriculum
+   words, and Google TTS is the 32 kbps one below it. Both give way to the
+   Chirp3-HD voice the 61 missing words were bought in — one voice for the
+   whole word list. What stays: Languages on Fire (a human in a studio, 17
+   curriculum words), Yandex and Tatoeba. `say()` prefers a bundled clip, so
+   buying is all it takes; nothing in the app changes. */
+export const REPLACE = new Set(["core5000", "googletts"]);
+
+/* The words the units teach that `data/audio.json` has no file for, or has
+ * only from a source in REPLACE.
  *
  * **Looked up folded**, which is rule 20.2 and cost real money to nearly get
  * wrong: the manifest is keyed by the folded utterance (ё→е), while a lemma's
@@ -99,16 +110,19 @@ async function synth(text, key) {
  * a word that has one, and the first run of this tool reported 75 words to buy
  * where the truth is 61 — the difference being fourteen words with ё in them,
  * every one of which already had a recording. `say()` folds; so does this. */
-export function missingWords(payload, audio) {
+export function wordsToBuy(payload, audio, replace = REPLACE) {
   const files = (audio && audio.files) || {};
+  const src = (audio && audio.src) || {};
   const taught = new Set();
   for (const u of payload.units) for (const i of u.w || []) taught.add(i);
   const out = [];
   for (const i of taught) {
     const w = payload.lemmas[i];
     if (!w || !w.b) continue;
-    if (files[fold(w.b)]) continue;
-    out.push({ i, bare: w.b, accented: w.w || w.b, gloss: (w.e || "").split(/[;,]/)[0].trim() });
+    const file = files[fold(w.b)];
+    if (file && !replace.has(src[file])) continue;
+    out.push({ i, bare: w.b, accented: w.w || w.b, gloss: (w.e || "").split(/[;,]/)[0].trim(),
+               was: file ? src[file] : null });
   }
   return out.sort((a, b) => a.bare.localeCompare(b.bare, "ru"));
 }
@@ -116,7 +130,7 @@ export function missingWords(payload, audio) {
 async function main() {
   const payload = loadPayload(ROOT);
   const audio = JSON.parse(readFileSync(join(ROOT, "data", "audio.json"), "utf8"));
-  const missing = missingWords(payload, audio);
+  const missing = wordsToBuy(payload, audio);
 
   mkdirSync(OUT, { recursive: true });
   const have = new Set(readdirSync(OUT).filter((f) => f.endsWith(".mp3")).map((f) => f.slice(0, -4)));
@@ -128,7 +142,9 @@ async function main() {
   const todo = want.filter((m) => !have.has(m.id));
   const chars = todo.reduce((n, m) => n + m.bare.length, 0);
 
-  console.log(`${missing.length} curriculum words with no recording in the collection`);
+  const none = missing.filter((m) => !m.was).length;
+  console.log(`${missing.length} curriculum words to voice: ${none} with no recording, `
+              + `${missing.length - none} replacing ${[...REPLACE].join("/")}`);
   console.log(`${todo.length} to buy, ${chars} characters, about $${(chars / 1e6 * RATE_PER_M_CHARS).toFixed(4)}`);
   if (DRY) {
     todo.slice(0, 20).forEach((m) => console.log(`   ${m.bare.padEnd(16)} ${m.gloss}`));
@@ -161,7 +177,8 @@ async function main() {
   for (const m of want) if (onDisk.has(m.id)) files[m.bare] = m.id;
   writeFileSync(MANIFEST, JSON.stringify({
     source: "Google Cloud Text-to-Speech", voice: VOICE, rate: RATE,
-    note: "Bought for the curriculum words the collection has no recording for (ROADMAP 13.32).",
+    note: "Bought for the curriculum words the collection has no recording for (ROADMAP 13.32), "
+        + "and for those it has only from Core 5000 or Google TTS (2026-09-19).",
     files,
   }, null, 1));
 

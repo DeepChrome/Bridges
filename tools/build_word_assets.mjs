@@ -9,9 +9,9 @@
  *
  * Bundled rather than uploaded. The collection's 13,183 recordings stream from
  * the web host, and putting these there would mean a Netlify deploy, which
- * costs credits (§31). 332 KB rides along in the APK for nothing and works
- * with no network — which, for the words the aspect drill asks about, is the
- * better answer anyway.
+ * costs credits (§31). 5.3 MB (1,028 words, since the Core 5000 ones were
+ * re-voiced on 2026-09-19) rides along in the APK and works with no network —
+ * which, for the words a drill asks about, is the better answer anyway.
  *
  *   node tools/build_word_assets.mjs
  *

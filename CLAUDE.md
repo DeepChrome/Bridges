@@ -863,6 +863,15 @@ unfolded reported **75** words to buy rather than 61, the extra fourteen being
 before anything was bought, by checking the manifest rather than trusting the
 count.
 
+**…and then the Core 5000 words went the same way (2026-09-19).** The owner
+heard «книга» and called it robotic. Measured: 967 of the 1,045 curriculum
+words are voiced by Core 5000, 17 by Languages on Fire (a human), 61 bought.
+`REPLACE` in `build_word_audio.mjs` names the sources a bought clip
+supersedes — Core 5000 and Google TTS, never the human or Yandex ones — and
+the 967 cost **$0.19**; 1,028 clips, 5.3 MB in the APK. Nothing in the app
+changed: `say()` already prefers the bundle. The clips are committed, as the
+61 were.
+
 ## 27a. Tatoeba audio is licensed per recording
 
 The sentence text is uniformly CC BY 2.0 FR. **The recordings are not.** Of the 190

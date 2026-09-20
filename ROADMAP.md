@@ -906,8 +906,15 @@ Audited against the built artifacts. Three blockers, none of them code:
   AsyncStorage, and replaces it by itself if the Worker stops knowing it.
   **`EXPO_PUBLIC_APP_TOKEN` must not be set for any build that leaves the
   machine**; a build with only the URL registers itself. Worker 56 checks,
-  client 10. Not yet deployed — that needs his `CLOUDFLARE_API_TOKEN` in a
-  shell.
+  client 10. **Deployed 2026-09-19** (version a91a9d3f) and proven from the
+  emulator: a token-free upload-signed build registered itself on first launch
+  (Worker tail: okhttp → 200), and a relaunch reused the stored token.
+- **13.41 — closed 2026-09-19.** Upload keystore at
+  `OneDrive\BridgesBackup\keystore\bridges-upload.jks` (CN=Jared Flood, valid
+  to 2054), passwords in `~/.gradle/gradle.properties`, read by
+  `plugins/withUploadSigning.js`; `release_check.mjs` passes 5/5 on the AAB.
+  **Every device with a debug-signed build needs one uninstall** to take the
+  first upload-signed one — his phone included; back up in Settings first.
 - **13.40 — the Play account ($25) and its closed-testing period.** His to
   open, and the long pole: start it first, finish everything else while it runs.
 - **13.41 — an upload key that is not `debug.keystore`.** Play refuses a

@@ -872,6 +872,18 @@ the 967 cost **$0.19**; 1,028 clips, 5.3 MB in the APK. Nothing in the app
 changed: `say()` already prefers the bundle. The clips are committed, as the
 61 were.
 
+**…and the pools' sentences the same evening** — "I want everything on the app
+to sound professional." The 1,987 sentences Hear, Say, Shadow and the sentence
+cards draw on were three synthetic voices (1,564 Yandex, 288 Core 5000, 6
+Google TTS) beside the words' one; `SENTENCE_REPLACE` buys those 1,858 from
+the same Chirp3-HD voice for **$1.39** and keeps the 129 human recordings
+(Tatoeba, Languages on Fire). Stress marks come off before synthesis; the
+punctuation stays, since that is what the engine reads intonation from. The
+bundle is now every word and every sentence a lesson can play, which is why
+**the "Audio for offline" setting and `cache.js` are gone**: there was nothing
+left for it to download. What still streams from the collection: the
+dictionary's example sentences, and the human recordings.
+
 ## 27a. Tatoeba audio is licensed per recording
 
 The sentence text is uniformly CC BY 2.0 FR. **The recordings are not.** Of the 190
@@ -1366,13 +1378,11 @@ several channels carry the channel's initials where a unit has its icon.
   and Remove; "Export selected" writes any ticked sets as one deck.
 - **Icon** — `make_app_icon.py`: a suspension bridge in white on the brand
   indigo, every size Expo and the web need, no image library.
-- **Offline audio** (P5.12, 2026-09-07) — `cache.js`: with the setting on
-  (`st.offline`, Settings → "Audio for offline"), opening a unit downloads that
-  unit's words and pool sentences and the next unit's to the app cache
-  (`File.downloadFileAsync`, three at a time), and removes any other unit's
-  files; `say()` prefers the local copy (`cachedUri`, synchronous — playback
-  must not wait). Bounded to two units and `CAP_BYTES`; a failed download is
-  counted, never retried in a loop. Settings shows what is saved and clears it.
+- **Offline audio** (P5.12, 2026-09-07) — *removed 2026-09-19*: `cache.js`
+  downloaded a unit's words and pool sentences to the app cache with a
+  Settings switch. Once every one of those was a bundled clip (§27) it had
+  nothing to fetch, so the switch, the module and the `offline` setting key
+  went.
 - **The pass mark has relief** (ROADMAP A29) — `quizPassed` in `core/state.js`:
   80 % to pass, or 70 % from the third attempt on. `markComponent` counts
   `tries` on the lesson slot in both apps; the simulator uses the same rule.

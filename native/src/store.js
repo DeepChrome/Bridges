@@ -77,7 +77,6 @@ export const DEFAULTS = {
      the easier question, and §30j found production is what keeps a word. Some
      drill shapes have nothing to produce and ignore it (core/questions.js). */
   typedDrills: true,
-  offline: false,       // download a unit's audio when it is opened (cache.js)
   talkLevel: null,      // how the Talk tutor pitches its Russian; null = by chapter reached
   talkSpeed: "normal",  // how fast the tutor is read out (audio.js SPEEDS)
   talkEn: true,         // English under the tutor's turns

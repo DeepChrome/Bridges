@@ -182,6 +182,15 @@ if (missing.length) {
   notes.push(`  without one, read by the device voice (§27): ${missing.slice(0, 8).map((i) => DATA.lemmas[i].b).join(", ")}`
              + (missing.length > 8 ? `, and ${missing.length - 8} more` : ""));
 }
+/* The pools' sentences the same way (2026-09-19): bundled where bought, the
+   human recordings streamed, and nothing left to the device voice. */
+const rows = (DATA.speech && DATA.speech.rows) || [];
+const sentKeys = [...new Set(rows.map((r) => fold(r[0])))];
+const sentBundled = sentKeys.filter((k) => boughtKeys.has(k)).length;
+const sentMissing = sentKeys.filter((k) => !boughtKeys.has(k) && !files[k]);
+notes.push(`pool sentences with a recording: ${sentKeys.length - sentMissing.length} of ${sentKeys.length}`
+           + ` — ${sentBundled} bought and bundled, ${sentKeys.length - sentMissing.length - sentBundled} streamed`);
+if (sentMissing.length) errors.push(`${sentMissing.length} pool sentences have no recording at all`);
 
 /* ------------------------------------------------------------------ out */
 

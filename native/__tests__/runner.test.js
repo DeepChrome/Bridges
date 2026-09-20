@@ -13,11 +13,13 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { Runner } from "../src/screens/Run";
 import { AUDIO } from "../src/data";
+import { wordClip } from "../src/wordaudio";
 
 /* An utterance that streams from the collection. The autoplay-wait tests
-   count streamed plays, and a curriculum word plays from the bundle since
-   2026-09-19 (wordaudio.js) — so they listen for a sentence, which does not. */
-const streamed = Object.keys(AUDIO).find((k) => k.includes(" "));
+   count streamed plays, and every curriculum word and pool sentence plays
+   from the bundle since 2026-09-19 (wordaudio.js) — so they listen for a
+   dictionary sentence, which does not. */
+const streamed = Object.keys(AUDIO).find((k) => k.includes(" ") && !wordClip(k));
 
 /* Every question present() emits carries a kind; the registry draws nothing for one
    that does not, which is what registry.test.js guards. */

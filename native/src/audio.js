@@ -7,7 +7,6 @@
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Speech from "expo-speech";
 import { audioUrl } from "./data";
-import { cachedUri, dropCached } from "./cache";
 import { bare, fold } from "@core/util";
 import { wordClip } from "./wordaudio";
 import { sexOf } from "@core/names";
@@ -472,20 +471,18 @@ export async function say(text, opts = {}) {
     if (!spoke) failed(text);
     return spoke;
   }
-  /* Bundled first (ROADMAP 13.32). 61 curriculum words have no recording in
-     the collection at all — mostly perfective verbs, which is what the aspect
-     drill asks about — and they were read by the device voice. They are bought
-     clips shipped inside the app, so they need no network and cannot 404;
-     `wordaudio.js` keys them by the folded word, as the collection's manifest
-     is keyed (rule 20.2). */
+  /* Bundled first (ROADMAP 13.32, then 2026-09-19): every curriculum word and
+     every sentence the speaking and listening pools hold is a bought clip
+     shipped inside the app — no network, no 404, one voice. `wordaudio.js`
+     keys them by the folded utterance, as the collection's manifest is keyed
+     (rule 20.2). What still streams is the rest of the collection: the
+     dictionary's example sentences and the human recordings. */
   const bundled = wordClip(fold(text));
-  // The offline copy when there is one (cache.js), else the stream.
-  const local = bundled ? null : cachedUri(text);
   const streamed = bundled ? null : audioUrl(text);
   /* A bundled clip is a `require`, which expo-audio takes as it is — the same
      way `playTrack` and the answer cues pass theirs. Only a URL needs the
      `{ uri }` wrapper, and wrapping a module id in one plays silence. */
-  const source = bundled || (local ? { uri: local } : streamed ? { uri: streamed } : null);
+  const source = bundled || (streamed ? { uri: streamed } : null);
   if (!source) {
     const spoke = speakTTS(text, { ...opts, rate });
     if (!spoke) failed(text);
@@ -499,8 +496,6 @@ export async function say(text, opts = {}) {
   if (seq !== trackSeq) return false;
   const fallback = () => {
     if (seq !== trackSeq) return;       // superseded: the fallback would overlap
-    // A bundled clip cannot be a stale download, so there is nothing to drop.
-    if (local && !bundled) dropCached(text);
     if (!speakTTS(text, { ...opts, rate })) failed(text);
   };
   try {

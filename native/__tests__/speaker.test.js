@@ -21,9 +21,11 @@ import { render, screen, fireEvent, act } from "@testing-library/react-native";
 import { Speaker } from "../src/ui";
 import { AUDIO } from "../src/data";
 import { refreshVoices } from "../src/audio";
+import { wordClip } from "../src/wordaudio";
 
-// A sentence the collection has a recording for, and one it does not.
-const withAudio = Object.keys(AUDIO).find((k) => k.includes(" "));
+// A sentence the collection has a recording for and the app does not bundle
+// (the pools' sentences are bundled since 2026-09-19), and one it does not have.
+const withAudio = Object.keys(AUDIO).find((k) => k.includes(" ") && !wordClip(k));
 const noAudio = "этого предложения точно нет в коллекции сегодня";
 
 async function draw(ui) {

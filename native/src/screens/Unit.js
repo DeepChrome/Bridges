@@ -1,6 +1,6 @@
 ﻿/* A unit's lessons, and inside a lesson its three components. */
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
@@ -8,24 +8,11 @@ import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick, Text } from "../
 import {
   UN, lessonCount, lessonWords, lessonDone, components, unitFineProgress, L,
 } from "../data";
-import { prefetchUnit } from "../cache";
 
 export function UnitScreen({ route, navigation }) {
   const { st } = useSession();
   const t = useTheme();
   const unit = UN.find((u) => u.id === route.params.unitId);
-  const [fetching, setFetching] = useState(null);   // { done, total } | "done" | null
-  // Opening a unit is the moment to fetch its audio for offline use, and the
-  // next unit's; only with the setting on, and only once per visit.
-  useEffect(() => {
-    if (!unit || !st.offline) return undefined;
-    let live = true;
-    setFetching({ done: 0, total: 0 });
-    prefetchUnit(unit, (p) => { if (live) setFetching(p); })
-      .then((r) => { if (live) setFetching(r.failed && !r.fetched ? "failed" : "done"); })
-      .catch(() => { if (live) setFetching("failed"); });
-    return () => { live = false; };
-  }, [unit && unit.id, st.offline]);
   if (!unit) return null;
   const pr = unitFineProgress(st, unit);
   const n = lessonCount(unit);
@@ -37,15 +24,6 @@ export function UnitScreen({ route, navigation }) {
           {Math.round(pr * 100)}%
         </Text>
         <Muted size={14}>complete</Muted>
-        <View style={{ flex: 1 }} />
-        {fetching && fetching !== "done" ? (
-          <Muted testID="offline-status" size={12}>
-            {fetching === "failed" ? "Audio not downloaded"
-              : fetching.total ? `Downloading audio ${fetching.done}/${fetching.total}` : "Checking audio…"}
-          </Muted>
-        ) : fetching === "done" ? (
-          <Muted testID="offline-status" size={12}>Audio saved for offline</Muted>
-        ) : null}
       </View>
       <View style={{ marginTop: 8, marginBottom: 16 }}><Bar value={pr} /></View>
 

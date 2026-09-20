@@ -952,8 +952,10 @@ words re-voiced in Chirp3-HD ($0.19, 1,028 clips bundled, 17 human ones
 kept); and Say/Shadow no longer "almost always mark me wrong" — the engine
 is biased toward the expected words, five hearings are asked for and the
 closest taken, and a sentence passes on near misses (CLAUDE.md §30c). **Not
-yet measured on the phone**: the STT Lab is the instrument; the sentence
-pool's own recordings are still Core 5000 (~$1.80 to re-voice, his call).
+yet measured on the phone**: the STT Lab is the instrument. Then the pool's
+1,858 synthetic sentences re-voiced too ($1.39; the 129 human ones kept), no
+cap on spoken tries, the recognizer listening for at least 900 ms, and the
+offline-audio cache removed as having nothing left to fetch.
 
 ## Phase 12 — What is actually left (2026-09-10)
 

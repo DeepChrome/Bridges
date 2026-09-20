@@ -36,7 +36,7 @@
    keeps and what the settings table holds. Imported decks are kept by a reset
    too, but they are their own table, not a setting. */
 export const SETTING_KEYS = ["dev", "theme", "name", "speed", "cue", "osk",
-                             "typedDrills", "offline", "talkLevel", "talkSpeed", "talkEn",
+                             "typedDrills", "talkLevel", "talkSpeed", "talkEn",
                              "flash", "newPerDay", "reviewsPerDay", "retention", "learnAhead",
                              "haptics", "remind", "flashVoice"];
 

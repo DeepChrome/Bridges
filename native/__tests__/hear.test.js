@@ -93,7 +93,9 @@ describe("hear", () => {
     await withHear();
     await screen.findByTestId("hear-input");
     expect(global.__played).toHaveLength(1);
-    expect(global.__played[0]).toContain("/audio/");
+    // A pool sentence is a bundled clip since 2026-09-19 unless a person
+    // recorded it, in which case it still streams from the collection.
+    expect(global.__played[0] === "asset" || global.__played[0].includes("/audio/")).toBe(true);
     expect(screen.queryByText(question.en)).toBeNull();
     expect(screen.queryByText(question.target)).toBeNull();
   });

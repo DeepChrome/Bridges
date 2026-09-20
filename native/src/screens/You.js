@@ -9,7 +9,6 @@ import { useTheme } from "../theme";
 import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text } from "../ui";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
 import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
-import { cacheStats, clearCache } from "../cache";
 import { backupProfile, restoreProfile, shareCrashes } from "../backup";
 import { readCrashes, clearCrashes } from "../crash";
 import { troubleWords } from "./Study";
@@ -62,8 +61,6 @@ function Stat({ value, label, first }) {
 function Settings({ visible, onClose, onLab, onTour, onCredits }) {
   const { st, update, signOut, account, restore } = useSession();
   const t = useTheme();
-  const [cache, setCache] = useState(() => cacheStats());
-  useEffect(() => { if (visible) setCache(cacheStats()); }, [visible]);
   /* Only ever set by a refusal from the OS, so it belongs to the sheet and not
      to learner state — there is nothing to remember once the sheet closes. */
   const [remindDenied, setRemindDenied] = useState(false);
@@ -77,9 +74,6 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
     readCrashes().then((c) => { if (live) setCrashes(c); }).catch(() => {});
     return () => { live = false; };
   }, [visible]);
-  const cacheLine = cache.files
-    ? `${cache.files} files, ${(cache.bytes / 1048576).toFixed(1)} MB saved`
-    : "nothing saved yet";
   return (
     <Sheet visible={visible} onClose={onClose} title="Settings"
            footer={<Btn kind="pri" label="Done" style={{ marginTop: 14 }} onPress={onClose} />}>
@@ -211,22 +205,9 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>
-              <Row>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Audio for offline</Text>
-                  <Muted>{cacheLine}</Muted>
-                  {cache.files ? (
-                    <Btn kind="ghost" label="Clear downloaded audio" style={{ alignSelf: "flex-start", marginTop: 4 }}
-                         onPress={() => { clearCache(); setCache(cacheStats()); }} />
-                  ) : null}
-                </View>
-                <Switch
-                  testID="offline-switch"
-                  value={!!st.offline}
-                  onValueChange={(v) => update((p) => ({ ...p, offline: v }))}
-                  trackColor={{ true: t.good, false: t.surface3 }}
-                />
-              </Row>
+              {/* "Audio for offline" sat here until 2026-09-19. Every word and
+                  sentence a lesson plays is bundled in the app now, so there
+                  was nothing left for it to download. */}
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Reading speed</Text>

@@ -928,6 +928,16 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### Blips and look-alikes, 2026-09-21 — CLAUDE.md §30ao
+
+The owner's first evening on beta.2. «ты» on the chapter 1 test was a 216 ms
+clip: Chirp3-HD fails a one-syllable word about a third of the time, silently.
+The buyer measures every clip now and re-buys a word under 500 ms with retries;
+ten blips re-bought; the lengths are in the manifest and audio QA fails on one.
+And the wrong options of listen / choose-the-Russian questions are the words
+nearest the answer in spelling, from the whole studied list: look-alikes per
+set 0.24 → 2.99, sets with none 82 % → 0 %.
+
 ### Every definition read, 2026-09-20 — CLAUDE.md §30an
 
 All 1,045 curriculum glosses read against their Wiktionary entries after the

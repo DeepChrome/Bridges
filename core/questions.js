@@ -11,6 +11,7 @@
 // Explicit extension: Node's ESM resolver requires it, Metro tolerates either.
 import { fold, shuffle, sample, firstSense, TOKEN } from "./util.js";
 import { sentenceLemmas, pickPrompt } from "./speech.js";
+import { charDistance } from "./compare.js";
 import { describeForm, GENERIC_COLUMN } from "./forms.js";
 
 export const QUIZ_N = 8;
@@ -194,10 +195,57 @@ export function makeQuestions(env) {
      all. Same class first, then anything, then (only if the pool is too thin to
      fill four options at all) the merely-distinct. A question with three
      options is worse than one with a weak fourth. */
-  function distractors(correctIdx, pool, n, key) {
+  /* The words that look and sound like this one, nearest first — the wrong
+     answers a listening question wants (the owner, 2026-09-21: "if the word is
+     это, I'd want to hear этот, его… Multiple choice should never be that
+     obvious"). Measured before this existed: 82 % of "what did you hear?"
+     sets had no option within earshot of the answer, and a wrong option was on
+     average 5.9 letters away — «в» against «все», «из» and «и». Drawn from
+     every studied lemma, not the lesson's pool: a wrong option needs no
+     acquaintance (§30t), and the look-alikes of «это» are not in chapter 1.
+     Edit distance on the folded forms, within half the word's length; it is a
+     proxy for sound, and a fair one — Russian is spelt close to how it is
+     said, and ё/е fold together. Cached per word. */
+  const ALL = L.map((_, i) => i).filter((i) => L[i] && L[i].b);
+  const alikeCache = new Map();
+  const alikeRange = (s) => Math.max(1, Math.ceil(s.length / 2));
+  function lookalikes(idx) {
+    if (alikeCache.has(idx)) return alikeCache.get(idx);
+    const target = fold(L[idx].b);
+    const range = alikeRange(target);
+    const out = [];
+    const proper = /[А-ЯЁ]/.test(L[idx].b);
+    for (const i of ALL) {
+      if (i === idx) continue;
+      // A name or an abbreviation looks like nothing a learner hears: «США»
+      // is not what «она» sounds like on the page. Unless the answer is one.
+      if (/[А-ЯЁ]/.test(L[i].b) !== proper) continue;
+      const b = fold(L[i].b);
+      if (Math.abs(b.length - target.length) > range) continue;
+      const d = charDistance(target, b);
+      if (d > range) continue;
+      out.push({ i, d, off: Math.abs(b.length - target.length) });
+    }
+    out.sort((a, b) => a.d - b.d || a.off - b.off);
+    alikeCache.set(idx, out);
+    return out;
+  }
+
+  /* `n` of `cands` nearest `target` by spelling, drawn from the nearest 2n so a
+     retake does not repeat the set. For the "which word did you hear?" of a
+     scene and a passage, whose candidates are already fixed by a rule of their
+     own (words the audio did not say). */
+  function nearest(target, cands, keyOf, n) {
+    const ranked = cands.map((c) => ({ c, d: charDistance(target, keyOf(c)) }))
+      .sort((a, b) => a.d - b.d);
+    return shuffle(ranked.slice(0, n * 2)).slice(0, n).map((x) => x.c);
+  }
+
+  function distractors(correctIdx, pool, n, key, alike = false) {
     const want = key(L[correctIdx]);
     const pos = (L[correctIdx] || {}).p;
     const out = [];
+    const lenOff = (i) => Math.abs(String(key(L[i])).length - String(want).length);
     /* Within a tier, the options nearest the answer in length.
      *
      * Class was the first tell to go (the 23.7 % above); length is the one left.
@@ -207,27 +255,36 @@ export function makeQuestions(env) {
      * "here", which needs no Russian at all. Picking from the nearest eight
      * rather than the nearest three keeps the option sets varied
      * (tools/audit_options.mjs). */
-    const take = (accept) => {
+    const take = (from, accept, rank) => {
       if (out.length === n) return;
       const fit = [];
-      for (const i of pool) {
+      for (const i of from) {
         if (i === correctIdx || out.includes(i)) continue;
         const v = key(L[i]);
         if (!v || v === want || out.some((o) => key(L[o]) === v)) continue;
         if (!accept(i)) continue;
         fit.push(i);
       }
-      const near = fit.sort((a, b) => Math.abs(String(key(L[a])).length - String(want).length)
-                                    - Math.abs(String(key(L[b])).length - String(want).length));
+      const near = fit.sort((a, b) => rank(a) - rank(b));
       for (const i of shuffle(near.slice(0, Math.max(n * 2, 8)))) {
         if (out.length === n) return;
         if (out.some((o) => key(L[o]) === key(L[i]))) continue;
         out.push(i);
       }
     };
-    take((i) => L[i].p === pos && safeDistractor(correctIdx, i));
-    take((i) => safeDistractor(correctIdx, i));
-    take(() => true);
+    /* Look-alikes first when the options are Russian words heard, or read
+       against a meaning: nearest by spelling, whatever their class — «это»
+       against «этот», «что» and «то» is the question, and holding out for a
+       particle would have given it «но» and «по» instead. The pool tiers below
+       fill whatever is left. */
+    if (alike) {
+      const near = lookalikes(correctIdx);
+      const dist = new Map(near.map((x) => [x.i, x.d * 10 + x.off]));
+      take(near.map((x) => x.i), (i) => safeDistractor(correctIdx, i), (i) => dist.get(i));
+    }
+    take(pool, (i) => L[i].p === pos && safeDistractor(correctIdx, i), lenOff);
+    take(pool, (i) => safeDistractor(correctIdx, i), lenOff);
+    take(pool, () => true, lenOff);
     return out;
   }
 
@@ -392,7 +449,7 @@ export function makeQuestions(env) {
         };
       }
       case "choose-ru": {
-        const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, bySense)));
+        const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, bySense, true)));
         return {
           kind: e.t, i: e.i, ask: "Choose the Russian",
           prompt: firstSense(w), cyr: false,
@@ -400,7 +457,7 @@ export function makeQuestions(env) {
         };
       }
       case "listen": {
-        const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, (x) => x.b)));
+        const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, (x) => x.b, true)));
         return {
           kind: e.t, i: e.i, ask: "What did you hear?", prompt: "", cyr: true,
           autoplay: w.b, say: w.b, hint: firstSense(w),
@@ -527,7 +584,7 @@ export function makeQuestions(env) {
       .filter((i) => i >= SCENE_SKIP_TOP && !heardAll.includes(i));
     if (heard.length && absent.length >= 3) {
       const h = pickOne(heard);
-      const wrong = shuffle(absent).slice(0, 3);
+      const wrong = nearest(L[h].b, absent, (i) => L[i].b, 3);
       questions.push({
         ask: "Which word did you hear?", i: h, cyr: true,
         options: shuffle([{ label: L[h].w, right: true, i: h }]
@@ -692,8 +749,9 @@ export function makeQuestions(env) {
       .filter((b) => idx(b) !== undefined);
     const out = [];
     for (const b of heard.slice(0, PASSAGE_Q - 1)) {
-      const wrong = absent.splice(0, 3);
-      if (wrong.length < 3) break;
+      if (absent.length < 3) break;
+      const wrong = nearest(b, absent, (x) => x, 3);
+      for (const x of wrong) absent.splice(absent.indexOf(x), 1);
       const i = idx(b);
       out.push({
         kind: "heard", i, cyr: true, ask: "Which of these did you hear?",

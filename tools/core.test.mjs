@@ -1351,6 +1351,39 @@ group("question quality");
      `${(second / sets * 100).toFixed(1)}%`);
   ok(short === 0, "no option set lost a fourth option to the stricter rules", String(short));
 
+  /* The owner, 2026-09-21: "if the word is это, I'd want to hear этот, его…
+     Multiple choice should never be that obvious." The wrong options of a
+     heard word, and of a Russian word chosen against its meaning, are now the
+     words nearest it in spelling, from the whole studied list (§30ao). Measured
+     before: 82 % of sets had no option within half the word's length of the
+     answer, 0.24 look-alikes a set; after: none without, 2.99 a set. The bar
+     here is set well under the measurement so a thin pool cannot flake it. */
+  const alike = (a, b) => charDistance(a, b) <= Math.max(1, Math.ceil(fold(a).length / 2));
+  let heard = 0, bare = 0, near = 0;
+  for (const u of UN) {
+    const pool = u.w.length >= 8 ? u.w : UN.flatMap((x) => x.w).slice(0, 400);
+    for (const i of u.w.slice(0, 8)) {
+      for (const kind of ["listen", "choose-ru"]) {
+        const q = Q.present({ t: kind, i, pool });
+        if (!q || !q.options) continue;
+        heard++;
+        const right = q.options.find((o) => o.right).label;
+        const n = q.options.filter((o) => !o.right && alike(right, o.label)).length;
+        near += n;
+        if (!n) bare++;
+      }
+    }
+  }
+  ok(heard > 300 && bare / heard < 0.05, "a heard or chosen Russian word stands among look-alikes",
+     `${bare} of ${heard} sets with none; ${(near / heard).toFixed(2)} of 3 alike`);
+  const eto = L.findIndex((w) => w.b === "это");
+  if (eto >= 0) {
+    const q = Q.present({ t: "listen", i: eto, pool: UN[0].w });
+    const wrong = q.options.filter((o) => !o.right).map((o) => fold(o.label));
+    ok(wrong.length === 3 && wrong.every((w) => charDistance("это", w) <= 2),
+       "«это» is heard against its own look-alikes", wrong.join(", "));
+  }
+
   // P11.7c — a typed answer accepts any Russian word with the meaning shown, not
   // only one from the same unit. «тут» for "here" was marked wrong because the
   // unit happened to teach «здесь».

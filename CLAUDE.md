@@ -3847,6 +3847,50 @@ on the headword, which is drawn as «го́род» (§23). It now matches the a
 form. The tests that break when a data defect is fixed are the ones to look
 at hardest.
 
+## 30ao. A blip is not a word, and a wrong option should sound right (2026-09-21)
+
+Two reports from the first evening on beta.2, both about the chapter 1 test.
+
+**«ты» "doesn't make a real audio, sounds like a glitch".** It was one: the
+bought clip is **216 ms** — nine MP3 frames — where a spoken one-syllable
+word with the engine's own silence around it runs 700–1,400 ms. Measured over
+all 1,028 bought words, eleven had come back as blips (к, ли, ты, у at 216 ms;
+а, да, и, кто, при, я at 288; and «мост»). **And it is not the text.** The same «ты» resynthesised gave 216, 816 and 816 ms on three calls;
+«Ты» gave 288, 1,272 and 744. Chirp3-HD fails a one-syllable input about a
+third of the time, and nothing in the reply says so — a valid MP3 of a
+plausible size, the §23 Tatoeba lesson again. So `build_word_audio.mjs` now
+**measures what came back** (`tools/mp3.mjs`, the frame count the scenario
+stitcher already used — one copy now, not three) and buys again when a word
+is under `MIN_WORD_MS` (500): plain retries first, then the capitalised word,
+then with a full stop, keeping the first that is a word. The lengths ride in
+the manifest as `ms`, so `audio_qa.mjs` fails on a blip without probing
+anything, and a word never measured is reported rather than passed. A word
+whose good clip was a retry under a different text keeps that clip on the
+next run rather than being bought again under its bare-text id; a word the
+engine will not say after five tries is **left out of the bundle** so the
+collection's recording plays instead of a blip, listed under `skipped` in the
+manifest and not bought again without `--retry-skipped` («и» needed a second
+run to come through). Eleven re-bought for a fraction of a cent.
+
+**"If the word is это, I'd want to hear этот, его… Multiple choice should
+never be that obvious."** Measured before: 82 % of "what did you hear?" sets
+had no option within earshot of the answer, and a wrong option was on average
+5.9 letters from it — «в» against «все», «из» and «и». `lookalikes(idx)` in
+`core/questions.js` ranks every studied lemma by edit distance from the
+answer's folded form, within half its length, and `distractors(…, alike)`
+takes those first (the answer's own class before any other, `safeDistractor`
+still applied) before falling back to the pool tiers. Listen and choose-ru
+use it; the scene's and the passage's "which word did you hear?" rank their
+own candidates (words the audio did not say) the same way. Drawn from the
+whole studied list, not the lesson's pool — a wrong option needs no
+acquaintance (§30t), and the look-alikes of «это» are not in chapter 1.
+After: no set without a look-alike, 2.99 of 3 alike; «спать · **стать** ·
+сесть · ждать», «**пиво** · кино · вино · лицо», «по · то · **под** · до».
+`audit_options.mjs` unchanged on its tells (alone 2–3 %); `core.test.mjs`
+holds the bar at under 5 % of sets with none. Edit distance is a proxy for
+sound and a fair one here — Russian is spelt close to how it is said — but it
+is a proxy: «США» once stood in for «она». Not chased.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

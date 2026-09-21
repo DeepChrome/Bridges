@@ -30,6 +30,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { durationMs } from "./mp3.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CLIPS = join(ROOT, "data", "scenario_audio");
@@ -131,25 +132,8 @@ function levelled(src, id) {
   return existsSync(out) ? out : src;
 }
 
-/* Length in milliseconds, counted in **frames** rather than read from the header.
- *
- * An MP3 header states the length the encoder meant to write; the file holds
- * whole frames, and at 24 kHz a frame is 24 ms. For speech from the API the two
- * agree, but the silence made here is 420 ms of intent stored as 478 ms of
- * frames — and after `-c copy` a player hears the frames. Believing the header
- * put every gap 58 ms adrift, which by the end of a sixteen-line conversation
- * is nearly a second: the last line's start, which is exactly where somebody
- * scrubbing back to catch the ending lands. */
-const durationMs = (file) => {
-  const out = ff("ffprobe", ["-v", "error", "-select_streams", "a:0", "-count_packets",
-    "-show_entries", "stream=nb_read_packets,sample_rate", "-of", "default=nw=1", file]);
-  const get = (k) => Number((String(out).match(new RegExp(`${k}=(\\d+)`)) || [])[1]);
-  const packets = get("nb_read_packets");
-  const rate = get("sample_rate");
-  if (!packets || !rate) throw new Error(`no frames in ${file}`);
-  // MPEG-2/2.5 Layer III carries 576 samples a frame, MPEG-1 twice that.
-  return Math.round((packets * (rate < 32000 ? 576 : 1152) * 1000) / rate);
-};
+/* Length in milliseconds, counted in frames rather than read from the header
+   (tools/mp3.mjs says why; the 58 ms gap error it caught is in §23). */
 
 function loadScripts() {
   const out = {};

@@ -28,6 +28,8 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadScripts, MIN_SECONDS, MAX_SECONDS } from "./check_scripts.mjs";
 import { loadPayload } from "./payload.mjs";
+import { durationMs as mp3Ms } from "./mp3.mjs";
+import { MIN_WORD_MS } from "./build_word_audio.mjs";
 import { fold } from "../core/util.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -61,14 +63,10 @@ const ffBoth = (bin, args) => {
   return String(r.stderr || "") + String(r.stdout || "");
 };
 
-/* Frames, not the header — an MP3 states the length it meant to write (§30l). */
+/* Frames, not the header — an MP3 states the length it meant to write (§30l);
+   null for a file ffprobe cannot read, which the caller reports as a problem. */
 function durationMs(file) {
-  const out = ffBoth("ffprobe", ["-v", "error", "-select_streams", "a:0", "-count_packets",
-    "-show_entries", "stream=nb_read_packets,sample_rate", "-of", "default=nw=1", file]);
-  const get = (k) => Number((out.match(new RegExp(`${k}=(\\d+)`)) || [])[1]);
-  const packets = get("nb_read_packets"), rate = get("sample_rate");
-  if (!packets || !rate) return null;
-  return Math.round((packets * (rate < 32000 ? 576 : 1152) * 1000) / rate);
+  try { return mp3Ms(file); } catch (e) { return null; }
 }
 
 function truePeak(file) {
@@ -160,11 +158,25 @@ for (const u of DATA.units) for (const i of u.w) taught.add(i);
    are bundled in the app rather than in `site/audio`, so a count that only
    looked at the collection's manifest now understates the coverage by 61 and
    names words that are no longer read by the device voice. */
-let bought = {};
+let bought = {}, boughtMs = {};
 try {
-  bought = JSON.parse(readFileSync(join(ROOT, "data", "word_audio", "manifest.json"), "utf8")).files || {};
+  const m = JSON.parse(readFileSync(join(ROOT, "data", "word_audio", "manifest.json"), "utf8"));
+  bought = m.files || {};
+  boughtMs = m.ms || {};
 } catch (e) { bought = {}; }
 const boughtKeys = new Set(Object.keys(bought).map(fold));
+/* A bought word clip that is a blip (2026-09-21). The engine answers a
+   one-syllable word with 216 ms of nothing about one time in three — the owner
+   heard «ты» on the chapter 1 test as "a glitch" — and the buyer now measures
+   each clip and retries (build_word_audio.mjs). The lengths it measured ride in
+   the manifest, so this costs no probing; a word with no length recorded is
+   one the buyer has not measured yet, which is reported rather than passed. */
+const wordKeys = Object.keys(bought).filter((k) => !/\s/.test(k));
+const blips = wordKeys.filter((k) => boughtMs[bought[k]] !== undefined && boughtMs[bought[k]] < MIN_WORD_MS);
+const unmeasured = wordKeys.filter((k) => boughtMs[bought[k]] === undefined);
+if (blips.length) errors.push(`${blips.length} bought word clip(s) under ${MIN_WORD_MS} ms — the engine's blip, not the word: `
+                              + blips.slice(0, 12).join(", ") + (blips.length > 12 ? ", …" : ""));
+if (unmeasured.length) errors.push(`${unmeasured.length} bought word clip(s) never measured — run build_word_audio.mjs`);
 
 /* A bundled clip wins over the collection's file (`say()` checks the bundle
    first), so a word in both plays the bought one: since 2026-09-19 that is

@@ -928,6 +928,22 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### Every definition read, 2026-09-20 — CLAUDE.md §30an
+
+All 1,045 curriculum glosses read against their Wiktionary entries after the
+owner found «же» glossed "and, as for, but". ~200 glosses rewritten
+(`gloss_overrides.json` `_4`), the Wiktionary entry and sense order now chosen
+by what the lesson teaches (`pick_senses`), example sentences chosen for
+variety of form as well as readability (one-form-only words 1,168 → 1,050,
+near-duplicate pairs 999 → 622 over 3,982 words), the one-word vocabulary
+cards dropped from the examples, and the curriculum held still — sixteen words
+the rewritten glosses would have moved are pinned (`OVERRIDES`, fifth pass) and
+the unit lists diffed identical. Audio for the rewritten chapter 1
+conversation (`core1:2`, §30am) bought: 16 clips, $0.02; the read ran 71 s so
+one reaction line was cut. Version `1.0.0-beta.2` / versionCode 2. Suites:
+core 617, native 470, smoke 159, scripts 0 errors, audio QA all pass, copy 0
+over.
+
 ### The owner's twelve, 2026-09-19 — CLAUDE.md §30am
 
 Read from the walkthrough shots, eleven of the twelve were one complaint:

@@ -407,6 +407,19 @@ OVERRIDES = {
     "митинг": "politics",                     # a rally, never a business meeting
     "молодец": None,                          # "good job" is praise, not employment
     "сделка": "business",                     # a deal really is a business deal
+
+    # -- fifth pass (2026-09-20): the glosses of every curriculum word were
+    # re-read and ~200 rewritten (gloss_overrides.json "_4"), and the rules read
+    # the glosses, so sixteen words changed branch on a rebuild that was meant
+    # to change what a word *says*, not where it is taught. Each is pinned to
+    # the unit the audited curriculum already had it in; the arrivals that
+    # briefly filled their slots (океан, май, протокол…) leave again. A word
+    # that moves house takes its lesson boundary with it and the scenarios'
+    # vocabulary gate with that (§30n).
+    "ремонт": "home", "касса": "work", "наступать": "travel", "температура": "science",
+    "головной": "body", "источник": "nature", "плавание": "sport", "статья": "tech",
+    "акция": "business", "оценивать": "business", "мина": "military", "автомат": "tech",
+    "номер": "time", "волнение": "emotion", "обсуждаться": "speech", "указывать": "speech",
 }
 
 # A chapter is one spine unit plus the branches that follow it — the shape a language

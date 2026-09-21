@@ -15,7 +15,7 @@ import { troubleWords } from "./Study";
 import Constants from "expo-constants";
 
 /* What build this is, at the foot of Settings. The version is app.json's
-   (1.0.0-beta.1 while it is a beta), read off the build so it cannot say
+   (1.0.0-beta.N while it is a beta), read off the build so it cannot say
    something the binary is not. */
 const VERSION = (Constants.expoConfig && Constants.expoConfig.version) || "";
 import { tagInfo } from "@core/errortags";

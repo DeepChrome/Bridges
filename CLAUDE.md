@@ -57,9 +57,11 @@ Known gaps, stated honestly:
   desktop sync rather than any code.
 - **Topic organisation.** Heuristic classification covers ~36% of the material. The
   objective is better pedagogical organisation, *not* a higher number.
-- **Dictionary examples.** 22,440 of 45,987 glossed lemmas (48.8%) have a sentence:
-  7,488 from his own decks, the rest from Tatoeba. The other half have none, because
-  no source covers them — see §30a.
+- **Dictionary examples.** 21,269 of 45,987 glossed lemmas (46.3%) have a sentence
+  (re-read off the build 2026-09-20; the 22,440 this line carried was stale):
+  about 7,000 from his own decks, the rest from Tatoeba. The other half have
+  none, because no source covers them — see §30a. Since 2026-09-20 the four
+  shown are chosen for variety as well as readability (§30an).
 
 ## 2. Product vision
 
@@ -3786,6 +3788,64 @@ it left:
 `native/flows/batch0919.txt` walks the changed screens. The tour's first
 link is tapped by its accessibility label (`open word`) because a Cyrillic
 literal in a flow file is the PowerShell trap §23 names.
+
+## 30an. Every definition, read (2026-09-20)
+
+The owner: *"Please ensure that all definitions are accurate. Every single one.
+To have a wrong definition would tarnish our brand. I think the word же
+definition seemed suspect. Make sure the example sentences are varied too."*
+
+He was right about «же» — "and, as for, but" — and it was not alone. All
+1,045 curriculum glosses were dumped beside their Wiktionary sense 1 and read
+one by one. Three sources of wrong, and three fixes:
+
+- **The OpenRussian gloss** is the quiz prompt and the graded answer
+  (`firstSense`), and the card's primary sense. ~200 rewritten in
+  `gloss_overrides.json` (`_4`): a wrong or rare first sense («являться»
+  "is", «боевик» "hit", «посол» "salting", «ничего» "not badly, passably"), a
+  padded or garbled list («по» "hit or punch somewhere; after a age",
+  «покупать» "buy, purchase, bathe, bath"), and homographs now keyed by class
+  («напасть|verb», «рабочий|noun», «больной|adjective», and «стать» became
+  «стать|verb» — bare-keyed it had given the noun "to become" too).
+  **`build_lexicon.py` now fails on a gloss override that matches nothing**,
+  as it already did for a class override.
+- **Which Wiktionary entry, and in what order** (`pick_senses` in
+  `build_site.py`). The rule was "our part of speech, else the longest
+  entry", and the longest entry for «есть» is the verb "to eat", for «а» the
+  name of the letter, for «весь» a dated adjective ("run out, all gone").
+  Now: the entry is scored by part-of-speech match and by how many of our
+  gloss's words its senses contain; a closed-class word takes every entry
+  that has something to say, best first («же» is a particle and a
+  conjunction, and both are shown); letter names are dropped; dated, archaic,
+  obsolete and rare senses go last; and if the first sense still says nothing
+  our gloss does, the sense that matches our first sense moves up («стать»:
+  "to become" above "to stand") — failing that, **our first sense is put in
+  front**, because the entry must open on what the lesson taught («ничего»:
+  Wiktionary carries only the colloquial "so-so"). 148 of 3,968 entries open
+  that way; the list is written to `data/_work/senses_fronted.txt` on every
+  build and is meant to be read after one.
+- **The examples** (`rank_examples`). Readable-first showed «открыть» as three
+  people opening a door. The first four are now picked one at a time: within
+  one unknown word of the easiest left, a form of the word not shown yet,
+  then not a near copy of one already chosen (`NEAR_DUPLICATE` shared studied
+  words), then easiest and shortest. Measured on the build, over 3,982 words
+  with two or more sentences: shown in one form only 1,168 → 1,050,
+  near-duplicate pairs 999 → 622. And a one-word vocabulary card («читать —
+  to read») is no longer an example: it was the shortest, wholly known
+  "sentence" of every verb that had one, and it was first.
+
+**A gloss is an input to the curriculum.** The topic rules read the first two
+senses (§30e), so rewriting what a word *says* moved sixteen words between
+side quests — «температура» to Medicine, «статья» to Law, «мина» out of
+Military. Each is pinned to its audited unit in `OVERRIDES` (fifth pass) and
+the unit word lists were diffed against a snapshot taken before the rebuild:
+identical. Any future gloss pass gets the same diff.
+
+**And a test passed for the wrong reason.** `studyoptions.test.js` found
+«город» on the turned flashcard by exact text — on the one-word example, never
+on the headword, which is drawn as «го́род» (§23). It now matches the accented
+form. The tests that break when a data defect is fixed are the ones to look
+at hardest.
 
 ## 31. Verification
 

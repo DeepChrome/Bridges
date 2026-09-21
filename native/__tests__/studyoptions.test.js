@@ -27,6 +27,11 @@ import { QUEUE_DEFAULTS } from "@core/queue";
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const now = Date.now();
 const WORD = "город";
+/* The headword is drawn with its stress mark («го́род»), so it is matched with
+   the accent allowed after any letter (§23). Until 2026-09-20 the exact string
+   matched anyway — the vocabulary card's one-word "example" «город — town»,
+   which the examples no longer carry — and the test passed for the wrong reason. */
+const isWord = new RegExp("^" + WORD.split("").map((c) => c + "́?").join("") + "$");
 const due = (extra = {}) => ({ dueAt: now - DAY, lastAt: now - 2 * DAY, s: 1, d: 5, state: REVIEW,
                               steps: 0, reps: 2, lapses: 0, ...extra });
 const fresh = () => ({ dueAt: now, s: 0, d: 0, state: NEW, steps: 0, reps: 0, lapses: 0 });
@@ -88,17 +93,17 @@ describe("the front never carries the answer", () => {
   it("a produce card shows no Russian until it is turned", async () => {
     await withProfile({ seen: { [WORD]: { produce: due() } } });
     await screen.findByTestId("card-produce");
-    expect(screen.queryByText(WORD)).toBeNull();
+    expect(screen.queryAllByText(isWord)).toHaveLength(0);
     fireEvent.press(screen.getByText("Show"));
-    expect(await screen.findByText(WORD)).toBeTruthy();
+    expect((await screen.findAllByText(isWord)).length).toBeGreaterThan(0);
   });
 
   it("a listen card shows no Russian until it is turned", async () => {
     await withProfile({ seen: { [WORD]: { listen: due() } } });
     await screen.findByTestId("card-listen");
-    expect(screen.queryByText(WORD)).toBeNull();
+    expect(screen.queryAllByText(isWord)).toHaveLength(0);
     fireEvent.press(screen.getByText("Show"));
-    expect(await screen.findByText(WORD)).toBeTruthy();
+    expect((await screen.findAllByText(isWord)).length).toBeGreaterThan(0);
   });
 });
 

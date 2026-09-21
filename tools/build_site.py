@@ -56,8 +56,16 @@ def _stress_index(s):
     return -1
 
 
-def rank_examples(cands, sentences, sent_tokens, studied_keys):
-    """The sentences worth showing first, and one of each.
+# Examples shown per word, on the entry and the cards.
+N_EXAMPLES = 4
+# Two sentences sharing this many studied words (the word's own forms aside)
+# are the same sentence twice as far as a learner is concerned.
+NEAR_DUPLICATE = 2
+
+
+def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tally=None):
+    """The sentences worth showing first, and one of each — and different from
+    each other.
 
     The collection holds the same sentence twice — the Core 5000 deck's stressed
     copy of an Ultimate Guide card — so "four examples" was often two; one of
@@ -65,21 +73,70 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys):
     first: fewest words outside the curriculum, then shortest — the entry, the
     vocabulary card and the flashcard back all used to open on whatever sentence
     had the lowest id («в» on «Он лежал в гробу»).
+
+    Readable-first alone showed «open» as "I opened the door", "He opened the
+    door", "She opened the door" (the owner, 2026-09-20: "you'd want some
+    variation to display versatility in the word"). So the first N_EXAMPLES are
+    picked one at a time: among the sentences within one unknown word of the
+    easiest left, prefer a form of the word not shown yet, then a sentence that
+    is not a near copy of one already chosen, then the easiest and shortest.
+    Readability still bounds it — a rare form in a hard sentence is not what
+    "varied" means — and the rest of the list keeps the old order.
+
+    `tally`, when given, counts what the plain order would have shown against
+    what this shows, so the build can print the difference rather than claim it.
     """
     best = {}
     for iid in cands:
         ru, _en, _deck, has_audio = sentences[iid]
+        # A vocabulary card's bare headword («читать — to read») is an item in
+        # the corpus and, being the shortest and wholly known, was the first
+        # "example" of every verb it had a card for. One word is not a sentence.
+        if len(re.findall(r"[а-яёА-ЯЁ]+", ru)) < 2:
+            continue
         k = fold(ru)
         score = (sum(ru.count(c) for c in ACC_MARKS) > 0, has_audio, -iid)
         if k not in best or score > best[k][0]:
             best[k] = (score, iid)
     kept = [iid for _, iid in best.values()]
+    own = frozenset(own_keys)
+
+    info = {}
+    for iid in kept:
+        toks = sent_tokens.get(iid, ())
+        info[iid] = (sum(1 for k in toks if k not in studied_keys),
+                     len(sentences[iid][0]),
+                     frozenset(k for k in toks if k in own),
+                     frozenset(k for k in toks if k in studied_keys and k not in own))
 
     def hardness(iid):
-        toks = sent_tokens.get(iid, ())
-        unknown = sum(1 for k in toks if k not in studied_keys)
-        return (unknown, len(sentences[iid][0]), iid)
-    return sorted(kept, key=hardness)
+        return (info[iid][0], info[iid][1], iid)
+    pool = sorted(kept, key=hardness)
+    plain = pool[:N_EXAMPLES]
+
+    chosen, forms_seen = [], set()
+    while pool and len(chosen) < N_EXAMPLES:
+        base = info[pool[0]][0]
+
+        def choice(iid):
+            unknown, length, forms, rest = info[iid]
+            repeat = bool(forms) and forms <= forms_seen
+            near = any(len(rest & info[c][3]) >= NEAR_DUPLICATE for c in chosen)
+            return (unknown > base + 1, repeat, near, unknown, length, iid)
+        pick = min(pool, key=choice)
+        chosen.append(pick)
+        pool.remove(pick)
+        forms_seen |= info[pick][2]
+
+    if tally is not None and len(kept) > 1:
+        for name, shown in (("plain", plain), ("varied", chosen)):
+            forms = {f for i in shown for f in info[i][2]}
+            tally[name + "_words"] += 1
+            tally[name + "_one_form"] += len(forms) <= 1
+            tally[name + "_near"] += sum(
+                1 for a in range(len(shown)) for b in range(a)
+                if len(info[shown[a]][3] & info[shown[b]][3]) >= NEAR_DUPLICATE)
+    return chosen + pool
 
 
 def build_dictionary(db, sentences, items_of_key, keys_of, stats,
@@ -142,6 +199,7 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
     lines = []
     rec_of = {}             # lemma id -> its compressed record, for the studied rows
     ext_only = 0            # words whose only example comes from outside his decks
+    tally = Counter()       # example variety, plain order against varied
 
     for lid in sorted(meta, key=lambda x: meta[x]["b"]):
         m = meta[lid]
@@ -195,12 +253,12 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
                 if resolver is None or len(resolver.candidates(k)) < 2
                 or resolver.owner_id(k) == lid]
         cands = {i for k in keys for i in items_of_key.get(k, ()) if i in sentences}
-        ranked = (rank_examples(cands, sentences, sent_tokens or {}, studied_keys)
+        ranked = (rank_examples(cands, sentences, sent_tokens or {}, studied_keys, keys, tally)
                   if sent_tokens is not None else sorted(cands))
-        refs = [str(sentence_ref(iid)) for iid in ranked[:4]]
+        refs = [str(sentence_ref(iid)) for iid in ranked[:N_EXAMPLES]]
         own = len(refs)
-        if ext_items_of_key and len(refs) < 4:
-            spare = 4 - len(refs)
+        if ext_items_of_key and len(refs) < N_EXAMPLES:
+            spare = N_EXAMPLES - len(refs)
             ext = {x for k in keys for x in ext_items_of_key.get(k, ()) if x in ext_sentences}
             for xid in sorted(ext, key=lambda x: (len(ext_sentences[x][0]), x))[:spare]:
                 refs.append(str(ext_ref(xid)))
@@ -253,6 +311,7 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
     stats["deep_examples"] = sum(1 for x in lines if x.split("\t")[10])
     stats["deep_ext_only"] = ext_only
     stats["deep_sentences"] = len(pool)
+    stats["examples_variety"] = dict(tally)
     stats["shapes"] = len(shapes)
     return "\n".join(lines), shape_blob, slot_names, pool, sample, rec_of
 
@@ -903,10 +962,109 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             "senses": senses}
 
 
-# Our part-of-speech names against Wiktionary's. Only these three are worth
-# matching on: the rest of the curriculum is closed-class words, where the entry
-# is the same whichever label either side used.
-POS_TO_WIKT = {"noun": "noun", "verb": "verb", "adjective": "adj", "adverb": "adv"}
+# Our part-of-speech names against Wiktionary's. A closed-class word OpenRussian
+# files as an adjective is a determiner or a pronoun to Wiktionary («весь»,
+# «тот», «такой»), so those count as a match too.
+POS_TO_WIKT = {"noun": ("noun",), "verb": ("verb",), "adjective": ("adj", "det", "pron", "num"),
+               "adverb": ("adv",), "pronoun": ("pron", "det"), "possessive": ("det", "pron", "adj"),
+               "numeral": ("num",)}
+OPEN_CLASS = ("noun", "verb", "adjective")
+# Wiktionary's Russian entries include one for the letter a word is spelt with:
+# «а» opens on "The name of the Cyrillic script letter А/а", «же» on "zhe". A
+# letter is not a meaning of the word.
+LETTER_SENSE = re.compile(r"(name of|sound expressed by) the (Cyrillic|Latin|Greek)[- ]?(script )?letter", re.I)
+# A sense a learner should meet last whatever order Wiktionary gives it: «весь»
+# led with "[colloquial, dated, rare] run out, all gone".
+LATE_TAGS = {"dated", "archaic", "obsolete", "rare"}
+# Words that carry no meaning of their own, left out when two glosses are
+# compared for whether they say the same thing.
+GLOSS_STOP = {"to", "the", "a", "an", "of", "in", "on", "at", "by", "with", "or", "and",
+              "it", "is", "be", "for", "as", "from", "that", "this", "one", "one's",
+              "used", "something", "someone", "somebody", "up", "out", "off", "not"}
+
+
+def gloss_words(s):
+    """The words a gloss is made of, minus the scaffolding — unless the
+    scaffolding is all there is: a preposition's meaning *is* "on", "at", "by",
+    and stripping those left «на» matching nothing and its own gloss pushed in
+    front of Wiktionary's "onto, on"."""
+    words = set(re.findall(r"[a-z']+", (s or "").lower()))
+    return (words - GLOSS_STOP) or words
+
+
+def pick_senses(gloss, pos, by_pos):
+    """The senses to show for one word, from its Wiktionary entries.
+
+    Wiktionary files a spelling once per part of speech, and the app knows what
+    it teaches the word as — the OpenRussian gloss, with the curated overrides
+    on top, is the meaning the lesson and the quiz use. So an entry is chosen
+    by that: a part of speech that matches ours, then how many of our gloss's
+    words its senses contain. `max(..., key=len)` — the longest entry — was the
+    rule before (2026-09-20) and it handed «есть» ("there is") the verb "to
+    eat", «а» the name of the letter, and «весь» the dated adjective.
+
+    A noun, verb or adjective takes its one best entry. A closed-class word
+    takes them all, best first — «же» is a particle *and* a conjunction, and
+    both are what a learner tapping it wants — but a noun or verb entry only
+    when it says something our gloss says («есть» keeps the verb, «у» loses
+    "Wu (language)"). Letter names go, dated and rare senses go last, and if
+    the first sense still says nothing our gloss does, the sense that matches
+    our first sense moves up («стать»: "to become" above "to stand") — and if
+    none does, our first sense is put in front as sense 1, because the entry
+    must open on the meaning the lesson taught («ничего»: Wiktionary has only
+    the colloquial "so-so"; the lesson teaches "nothing").
+    """
+    want = POS_TO_WIKT.get(pos, ())
+    ours = gloss_words(gloss)
+    first_group = (gloss or "").split(";", 1)[0]
+    first = gloss_words(first_group)
+    # For "does the entry say what the lesson teaches?" the comparison is on
+    # every word, qualifiers aside: «на» is "on (place)" and Wiktionary's "onto,
+    # on" says it — "place" is a note, and "on" is the meaning, stop word or not.
+    plain = lambda s: set(re.findall(r"[a-z']+", re.sub(r"\([^)]*\)", " ", s or "").lower()))
+    taught = plain(first_group)
+
+    ranked = []
+    for wpos, js in by_pos.items():
+        senses = [s for s in json.loads(js) if not LETTER_SENSE.search(s["g"])]
+        if not senses:
+            continue
+        said = set().union(*(gloss_words(s["g"]) for s in senses))
+        overlap = len(ours & said)
+        ranked.append(((wpos in want, min(overlap, 3), len(senses)), wpos, overlap, senses))
+    if not ranked:
+        return [], False
+    # A proper-noun entry only when it is all there is («Россия», «Москва»).
+    if len(ranked) > 1:
+        ranked = [r for r in ranked if r[1] != "name"] or ranked
+    ranked.sort(key=lambda r: r[0], reverse=True)
+
+    if pos in OPEN_CLASS:
+        chosen = list(ranked[0][3])
+    else:
+        chosen = []
+        for _score, wpos, overlap, senses in ranked:
+            if wpos in OPEN_CLASS_WIKT and not overlap and chosen:
+                continue
+            chosen.extend(senses)
+        chosen = chosen[:MAX_SENSES]
+
+    late = [s for s in chosen if LATE_TAGS & set(s.get("t") or ())]
+    chosen = [s for s in chosen if s not in late] + late
+    if chosen and not (gloss_words(chosen[0]["g"]) & ours):
+        best = max(chosen, key=lambda s: len(gloss_words(s["g"]) & first))
+        if gloss_words(best["g"]) & first:
+            chosen.remove(best)
+            chosen.insert(0, best)
+    fronted = False
+    if taught and not any(plain(s["g"]) & taught for s in chosen):
+        chosen.insert(0, {"g": first_group.strip()})
+        fronted = True
+    return chosen[:MAX_SENSES], fronted
+
+
+OPEN_CLASS_WIKT = ("noun", "verb", "adj")
+MAX_SENSES = 8          # ingest_wiktionary.py's cap, kept after the entries are merged
 
 
 def load_senses(lemmas, stats):
@@ -918,15 +1076,9 @@ def load_senses(lemmas, stats):
     lemmas had exactly one sense group — so the senses come from Wiktionary,
     which has them, under CC BY-SA 3.0.
 
-    Matched on the folded headword, preferring the entry filed under the same
-    part of speech: «мочь» the verb must not inherit the noun's senses, which is
-    the same trap §30i names for the dictionary index. Where our part of speech
-    has no entry, the word's only entry is used; where there are several and
-    none matches, the longest is, because a word the curriculum teaches as a
-    noun and Wiktionary files twice is usually the noun.
-
-    Shipped as its own lazily-required file: the entry needs them when a word is
-    opened, and boot does not (§30i P9.24).
+    Matched on the folded headword; which of the spelling's entries, and in what
+    order, is `pick_senses`. Shipped as its own lazily-required file: the entry
+    needs them when a word is opened, and boot does not (§30i P9.24).
     """
     path = ROOT / "data" / "senses.db"
     if not path.exists():
@@ -939,25 +1091,30 @@ def load_senses(lemmas, stats):
     credit = dict(db.execute("SELECT k, v FROM meta").fetchall())
     db.close()
 
-    out, found, multi = {}, 0, 0
+    out, found, multi, fronted = {}, 0, 0, []
     for i, l in enumerate(lemmas):
         by_pos = rows.get(fold(l.get("b") or ""))
         if not by_pos:
             continue
-        want = POS_TO_WIKT.get(l.get("p"))
-        js = by_pos.get(want)
-        if js is None:
-            js = max(by_pos.values(), key=len) if len(by_pos) > 1 else next(iter(by_pos.values()))
-        senses = json.loads(js)
+        senses, front = pick_senses(l.get("e") or "", l.get("p"), by_pos)
         if not senses:
             continue
         out[str(i)] = senses
         found += 1
         if len(senses) > 1:
             multi += 1
+        if front:
+            fronted.append(l.get("b"))
     stats["senses"] = found
     stats["senses_multi"] = multi
+    stats["senses_fronted"] = len(fronted)
     stats["senses_credit"] = credit
+    # The words whose entry opens on our gloss rather than a Wiktionary sense —
+    # a list to read after a rebuild, since each is either a synonym the word
+    # match could not see or a real gap in Wiktionary.
+    work = ROOT / "data" / "_work"
+    work.mkdir(parents=True, exist_ok=True)
+    (work / "senses_fronted.txt").write_text("\n".join(fronted), encoding="utf-8")
     return out
 
 
@@ -1180,6 +1337,12 @@ def main():
         print(f"  {st['ext_source'].lower():13.13}: {st['ext_sentences']:,} sentences, "
               f"the only example for {st['deep_ext_only']:,} words "
               f"({st['ext_licence']})")
+    v = st.get("examples_variety") or {}
+    if v.get("plain_words"):
+        n = v["plain_words"]
+        print(f"  examples     : {n:,} words with 2+ sentences; shown in one form only "
+              f"{v['plain_one_form']:,} → {v['varied_one_form']:,}, "
+              f"near-duplicate pairs {v['plain_near']:,} → {v['varied_near']:,}")
     # The pools are cut by curriculum coverage (measure_sentences); the difficulty
     # histogram is the wider picture of how much of the corpus resolves at all.
     if st.get("sentences_measured"):
@@ -1217,7 +1380,8 @@ def main():
     if st.get("senses"):
         cr = st.get("senses_credit") or {}
         print(f"  senses       : {st['senses']:,} words, {st.get('senses_multi', 0):,} "
-              f"with more than one ({st['senses_multi']*100//max(1, st['senses'])}%)"
+              f"with more than one ({st['senses_multi']*100//max(1, st['senses'])}%), "
+              f"{st.get('senses_fronted', 0):,} opening on our gloss (data/_work/senses_fronted.txt)"
               f"; {cr.get('source', '?')}, {cr.get('licence', '?')}")
     print(f"  scripts      : {', '.join(js_files)}")
     print(f"  page         : {(args.outdir / 'index.html').stat().st_size/1_048_576:.2f} MB")

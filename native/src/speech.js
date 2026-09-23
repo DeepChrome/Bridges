@@ -9,12 +9,12 @@
  * can be blocked before it starts — no microphone permission, no offline Russian
  * model — each named plainly.
  *
- *   const rec = useRecognizer({ onFinal(transcript, latencyMs, alternatives), bias });
+ *   const rec = useRecognizer({ onFinal(transcript, latencyMs, alternatives, lang), bias });
  *   rec.phase        idle | asking | listening
  *   rec.live         the partial transcript while listening
  *   rec.note         "Nothing heard" and the like; clears on the next hold
- *   rec.block        null | { why: mic | model | engine, text }
- *   rec.hold() / rec.release() / rec.getModel() / rec.clearBlock()
+ *   rec.block        null | { why: mic | model | engine, text, name? }
+ *   rec.hold({ lang }?) / rec.release() / rec.getModel() / rec.clearBlock()
  */
 
 import { useRef, useState } from "react";
@@ -23,6 +23,11 @@ import {
 } from "expo-speech-recognition";
 
 export const LANG = "ru-RU";
+/* The one other language the recogniser is ever asked for: the English side of
+   the interpreter (screens/Translate.js, 2026-09-23). Every exercise listens
+   for Russian; `hold({ lang })` is how that one screen asks otherwise. */
+export const LANG_EN = "en-US";
+const NAME = { [LANG]: "Russian", [LANG_EN]: "English" };
 export const WATCHDOG_MS = 8000;
 /* The engine listens for at least this long from the moment it starts, whatever
    the finger does. A one-syllable word in the pronunciation drill is said and
@@ -88,13 +93,17 @@ export function useRecognizer({ onFinal, onError, enabled = true, bias } = {}) {
   const releasedEarly = useRef(false);
   const cb = useRef({ onFinal, onError, bias });
   cb.current = { onFinal, onError, bias };
+  /* The language of the hold in progress. Russian unless a hold said otherwise,
+     and it rides out on `onFinal` so a screen with two microphones knows which
+     one the words came through. */
+  const lang = useRef(LANG);
 
   const finish = (text, alternatives) => {
     if (watchdog.current) { clearTimeout(watchdog.current); watchdog.current = null; }
     if (stopTimer.current) { clearTimeout(stopTimer.current); stopTimer.current = null; }
     go("idle");
     if (cb.current.onFinal) {
-      cb.current.onFinal(text, Date.now() - releasedAt.current, alternatives || [text]);
+      cb.current.onFinal(text, Date.now() - releasedAt.current, alternatives || [text], lang.current);
     }
   };
 
@@ -110,7 +119,8 @@ export function useRecognizer({ onFinal, onError, enabled = true, bias } = {}) {
     go("idle");
     const what = `${ev.error} ${ev.message || ""}`;
     if (/not-supported|not downloaded/i.test(what)) {
-      setBlock({ why: "model", text: "Russian is not installed for offline recognition." });
+      setBlock({ why: "model", name: NAME[lang.current] || lang.current,
+                 text: `${NAME[lang.current] || lang.current} is not installed for offline recognition.` });
     } else if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
       setBlock({ why: "mic", text: "The microphone is off for Bridges." });
     } else if (TRANSIENT[ev.error]) {
@@ -129,8 +139,9 @@ export function useRecognizer({ onFinal, onError, enabled = true, bias } = {}) {
     else go("idle");
   });
 
-  const hold = async () => {
+  const hold = async (over = {}) => {
     if (!enabled || phaseRef.current !== "idle") return;
+    lang.current = (over && over.lang) || LANG;
     setLive(""); setNote(null);
     releasedEarly.current = false;
     go("asking");
@@ -146,7 +157,7 @@ export function useRecognizer({ onFinal, onError, enabled = true, bias } = {}) {
     startedAt.current = Date.now();
     try {
       const hint = (cb.current.bias || []).filter((s) => typeof s === "string" && s.trim());
-      M.start({ lang: LANG, requiresOnDeviceRecognition: true, interimResults: true,
+      M.start({ lang: lang.current, requiresOnDeviceRecognition: true, interimResults: true,
                 maxAlternatives: ALTERNATIVES, continuous: false,
                 ...(hint.length ? { contextualStrings: hint } : {}) });
     } catch (e) {
@@ -186,7 +197,7 @@ export function useRecognizer({ onFinal, onError, enabled = true, bias } = {}) {
 
   /* Android 13+ only: opens the system's model-download dialog. */
   const getModel = async () => {
-    try { await M.androidTriggerOfflineModelDownload({ locale: LANG }); } catch (e) { /* stays blocked */ }
+    try { await M.androidTriggerOfflineModelDownload({ locale: lang.current }); } catch (e) { /* stays blocked */ }
   };
 
   return { phase, live, note, block, hold, release, getModel,

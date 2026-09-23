@@ -4068,6 +4068,72 @@ word back is not a claim to know it. The step still scores for the run. That
 is the whole price of the change, paid in the one place it could have been
 charged silently.
 
+## 30ar. The interpreter, the map drawn empty, and a score off the card (2026-09-23)
+
+Four things from one evening on beta.3, and the first was not a bug in the
+app at all.
+
+**"No translation available right now."** Translate transcribed the Russian
+perfectly and then said that. The route existed in the repo and not on
+Cloudflare: `/v1/translate` had been written, tested and shipped in the APK
+without the Worker being redeployed, so every request came back 404 and the
+screen reported it as the failure it was. **A route is deployed when
+`wrangler deploy` has run, not when its test passes** — the same shape as
+§23's stale APK, one layer up. Deployed; the beta.3 build works from that
+moment without a rebuild, since the app registers its own token.
+
+**Conversation mode is the same screen with a second microphone.** *"Help a
+Russian speaker and an English speaker communicate more easily in their
+native language."* Translate carries two hold buttons now, Русский and
+English; whichever is held, the words come back in the other language, on
+screen and **read aloud** — the person on the other side of the phone is not
+reading a stranger's screen. Not a new screen and not a new route (rule
+20.8): `useRecognizer` takes `hold({ lang })`, `speakLine` takes `lang: "en"`
+(no English voice is *required*, the tag alone is enough where enumeration
+named none), and `/v1/translate` reads `{ en }` as the other direction with
+its own prompt (`SYSTEM_TRANSLATE_EN`) and a validator that refuses Russian
+not written in Cyrillic — a transliteration read by the Russian voice is
+noise. The rules are Translate's: what was said, not what was meant; no
+teaching; nothing graded. The Russian side is `Linked` whichever way it
+came, so the learner still gets the word-by-word reading offline.
+
+**The map, drawn empty.** §30ap's path hid a chapter's quests and lanes until
+its spine was finished. The owner had asked for the opposite and said so
+plainly: *"empty lines, almost like a negative track… once a lesson is
+complete, it unlocks the next node by connecting it with a line. Think of
+games like Diablo where you have to connect the nodes with a path."* So the
+whole map is on the first screen — every quest a padlocked disc at the end of
+a pale track — and **each track lights when the node it runs from is done**:
+the lanes out (and the road through the fork) on the spine, each lane back on
+its own quest, the road on to the next chapter on the chapter (`Fork` in
+`Learn.js`; `Track` draws the empty line always and `Lit` lays the brand
+colour over it with `useDraw`). The lock rule did not change — `unitUnlocked`
+and `stageDone` decide both the padlock and the light, so a lit lane and a
+locked disc cannot disagree. The lesson worth keeping is that *hiding* a node
+until it is earned and *connecting* it when it is earned are different
+designs, and the one he described is the one every skill tree uses: you can
+see where you are going. `path.test.js` reads both halves — `track-lane-x`
+present and `lane-x` absent on a fresh learner, `lane-x` in the brand colour
+after the spine, `merge-x` only after that quest, `road-on-coreN-lit` only
+after the chapter.
+
+**Familiarity, 0–100, on the flashcard.** *"The more often the user marks
+easy, the higher that score goes, up to a max of 100… colorized from red to
+yellow to green. New cards can be flagged new."* **Not a new counter.**
+FSRS already keeps the number this describes — stability, the days a memory
+holds; Good raises it, Easy more, Again knocks it back — and a second tally
+would drift from it the first time an Undo or a restore touched one and not
+the other. `familiarity(card)` in `core/scheduler.js` is the log of stability
+against the scheduler's own ceiling (a year): a day is 12, a month 58, a year
+100. Per card, not per word (a word recognised but not producible is what the
+three directions are for), null while new (the New flag says it), drawn as a
+small ring with the number inside on both faces of the card. The arc's colour
+runs `bad` → `warn` → `good`; `warn` is a new amber token in both palettes and
+both CSS blocks, audited at the accent minimum, because a gradient's middle
+that nobody measured is a colour picked by eye (§31). The number is `ink` on
+the card's surface — only the stroke takes the colour, so no text sits on an
+unaudited fill.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

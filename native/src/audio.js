@@ -69,6 +69,10 @@ async function prepare() {
  * still plays and TTS stays quiet — the safe way round. */
 let ruVoice = null;
 let ruVoices = [];
+/* The one English voice, for the interpreter's other half (2026-09-23). Not
+   required the way the Russian one is: a phone with no English voice still
+   reads the Russian side, and `speakLine` falls back to the language tag. */
+let enVoice = null;
 let probe = null;
 const voiceListeners = new Set();
 
@@ -91,9 +95,12 @@ export function probeVoices() {
         const voices = await Speech.getAvailableVoicesAsync();
         ruVoices = (voices || []).filter((v) => v.language && /^ru/i.test(v.language));
         ruVoice = ruVoices[0] || null;
+        const ens = (voices || []).filter((v) => v.language && /^en/i.test(v.language));
+        enVoice = ens.find((v) => /^en[-_]US/i.test(v.language)) || ens[0] || null;
       } catch (e) {
         ruVoices = [];
         ruVoice = null;                 // no enumeration: treat as no voice
+        enVoice = null;
       }
       voiceListeners.forEach((fn) => fn());
       return ruVoice;
@@ -115,6 +122,7 @@ export function refreshVoices() {
   probe = null;
   ruVoice = null;
   ruVoices = [];
+  enVoice = null;
   return probeVoices();
 }
 
@@ -334,7 +342,11 @@ export function speakTTS(text, opts = {}) {
  * for the same reason: a platform that never reports `onDone` would otherwise
  * hold the scenario forever. */
 export function speakLine(text, opts = {}) {
-  if (!ruVoice) return Promise.resolve(false);
+  /* `lang: "en"` reads English — the interpreter's other half. No voice is
+     required for it: English is the one language every Android engine ships,
+     so the tag alone is enough where enumeration named nothing. */
+  const en = opts.lang === "en";
+  if (!en && !ruVoice) return Promise.resolve(false);
   return new Promise((resolve) => {
     let done = false;
     const end = begin();
@@ -357,9 +369,9 @@ export function speakLine(text, opts = {}) {
          the word they came out of, which is what the owner heard. A whole word
          or a sentence carries its own cues, so everything else still strips —
          an engine that ignored the mark would otherwise read it aloud. */
-      Speech.speak(opts.stress ? text : bare(text), {
-        language: opts.language || ruVoice.language,
-        voice: opts.voice || ruVoice.identifier,
+      Speech.speak(en || opts.stress ? text : bare(text), {
+        language: en ? (enVoice ? enVoice.language : "en-US") : (opts.language || ruVoice.language),
+        voice: en ? (enVoice ? enVoice.identifier : undefined) : (opts.voice || ruVoice.identifier),
         pitch: opts.pitch || 1,
         rate: 0.9 * (opts.rate || prefs.rate),
         onDone: () => finish(true),

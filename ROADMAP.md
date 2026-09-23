@@ -928,6 +928,23 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### The interpreter, the map drawn empty, a score off the card, 2026-09-23 — CLAUDE.md §30ar
+
+Translate said "no translation right now" because the Worker on Cloudflare
+predated the route: deployed, and beta.3 works from that moment. Then the
+route grew its other direction: the screen has two microphones, Русский and
+English, and either side's words come back in the other language on screen
+and read aloud (`hold({ lang })`, `speakLine(…, { lang: "en" })`,
+`SYSTEM_TRANSLATE_EN`, Cyrillic required of the reply). The path is redrawn
+as the owner actually asked: the whole map from the first screen, every
+track empty, each lighting when the node above it is done — the spine lights
+the lanes out, a quest lights its lane back, the chapter lights the road on.
+And a familiarity score, 0–100, red → amber → green, on every flashcard:
+the log of the card's own FSRS stability against the year ceiling, never a
+second tally; new `warn` token audited. Version `1.0.0-beta.4` / versionCode
+4. Suites: core 638, native 486, smoke 159, Worker 63, contrast 103, copy 0
+over, dead exports 0.
+
 ### Dead air and a pool of six, 2026-09-23 — CLAUDE.md §30aq
 
 Chirp3-HD pads the front of every clip: median 400 ms, worst 1,087 ms, never

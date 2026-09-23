@@ -36,16 +36,19 @@ import { fold } from "@core/util";
 /* No limit on attempts (the owner, 2026-09-19: "remove the whole 3 tries
    thing"): a miss offers Try again and Continue, as many times as wanted. */
 
-export function HoldButton({ phase, onIn, onOut, size = 84 }) {
+/* `label` names the button under the microphone where one screen has two of
+   them (the interpreter's Русский and English); `active` says which of the
+   two is the one listening, so the other stays quiet while it does. */
+export function HoldButton({ phase, onIn, onOut, size = 84, testID = "say-hold", label, active = true }) {
   const t = useTheme();
-  const listening = phase === "listening";
-  const busy = phase === "asking";
+  const listening = phase === "listening" && active;
+  const busy = phase === "asking" && active;
   return (
     <View style={{ alignItems: "center" }}>
       <Pressable
-        testID="say-hold"
+        testID={testID}
         accessibilityRole="button"
-        accessibilityLabel="Hold to speak"
+        accessibilityLabel={label ? `Hold to speak ${label}` : "Hold to speak"}
         accessibilityState={{ busy }}
         onPressIn={onIn}
         onPressOut={onOut}
@@ -64,7 +67,7 @@ export function HoldButton({ phase, onIn, onOut, size = 84 }) {
           <Path d="M19 11a7 7 0 0 1-14 0M12 18v3" />
         </Svg>
       </Pressable>
-      <Muted style={{ marginTop: 10 }}>{listening ? "Listening…" : "Hold to speak"}</Muted>
+      <Muted style={{ marginTop: 10 }}>{listening ? "Listening…" : label || "Hold to speak"}</Muted>
     </View>
   );
 }
@@ -106,7 +109,7 @@ export function Blocked({ block, onGetModel, onSkip, skipLabel }) {
   return (
     <View style={{ alignItems: "center", gap: 12 }}>
       <Text style={{ color: t.ink2, fontSize: 15, textAlign: "center" }}>{block.text}</Text>
-      {block.why === "model" ? <Btn label="Get Russian" onPress={onGetModel} /> : null}
+      {block.why === "model" ? <Btn label={`Get ${block.name || "Russian"}`} onPress={onGetModel} /> : null}
       {onSkip ? (
         <Btn kind="ghost" label={skipLabel || (block.why === "mic" ? "Skip (mic off)" : "Skip")}
              onPress={onSkip} />

@@ -33,13 +33,13 @@ async function open() {
   );
 }
 
-/* Hold, let go, and let the recogniser deliver. */
-async function say(ru) {
-  const hold = await screen.findByTestId("say-hold");
+/* Hold one of the two microphones, let go, and let the recogniser deliver. */
+async function say(text, side = "ru") {
+  const hold = await screen.findByTestId(`hold-${side}`);
   await act(async () => { fireEvent(hold, "pressIn"); });
   await act(async () => { fireEvent(hold, "pressOut"); });
   await act(async () => {
-    global.__stt.emit("result", { isFinal: true, results: [{ transcript: ru, confidence: 0.9 }] });
+    global.__stt.emit("result", { isFinal: true, results: [{ transcript: text, confidence: 0.9 }] });
   });
 }
 
@@ -49,6 +49,7 @@ beforeEach(async () => {
   await forgetToken();
   jest.clearAllMocks();
   if (global.__stt) global.__stt.reset();
+  global.__spoke = []; global.__spokeOpts = [];
   global.fetch = jest.fn();
   process.env[URL_KEY] = "https://w.example";
   process.env.EXPO_PUBLIC_APP_TOKEN = "tok";
@@ -81,6 +82,30 @@ it("turns what was said into English, and keeps every word tappable", async () =
   const sent = JSON.parse(global.fetch.mock.calls[0][1].body);
   expect(sent).toEqual({ ru: "я хочу чай" });
   expect(global.fetch.mock.calls[0][0]).toMatch(/\/v1\/translate$/);
+  // The recogniser was asked for Russian, and the answer was read out in English.
+  expect(global.__stt.calls[0].lang).toBe("ru-RU");
+  expect(global.__spoke).toEqual(["I want tea."]);
+  expect(global.__spokeOpts[0].language).toMatch(/^en/);
+});
+
+/* The other microphone (2026-09-23): an English speaker's words come back as
+   Russian, word-linked for the learner and **spoken** for the person on the
+   other side of the phone, who is not reading the screen. */
+it("interprets the English speaker into Russian and says it aloud", async () => {
+  answers({ ok: true, ru: "Где вокзал?", note: "" });
+  await open();
+  await say("where is the station", "en");
+
+  expect(global.__stt.calls[0].lang).toBe("en-US");
+  expect(JSON.parse(global.fetch.mock.calls[0][1].body)).toEqual({ en: "where is the station" });
+  expect(await screen.findByTestId("translate-ru")).toBeTruthy();
+  expect(screen.getByLabelText("вокзал, open word")).toBeTruthy();
+  expect(screen.getByTestId("translate-src-en")).toHaveTextContent("where is the station");
+  expect(global.__spoke).toEqual(["Где вокзал?"]);
+  expect(global.__spokeOpts[0].language).toMatch(/^ru/);
+  // And it can be heard again.
+  fireEvent.press(screen.getByTestId("translate-replay-ru"));
+  expect(global.__spoke).toEqual(["Где вокзал?", "Где вокзал?"]);
 });
 
 it("says when the Russian was odd, without correcting it", async () => {

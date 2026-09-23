@@ -8,7 +8,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { validateTranslate, translateMessage, SYSTEM_TRANSLATE } from "../src/translate.js";
+import { validateTranslate, translateMessage, SYSTEM_TRANSLATE, SYSTEM_TRANSLATE_EN } from "../src/translate.js";
 import { handle } from "../src/index.js";
 
 const TOKEN = "test-app-token-0123456789";
@@ -72,6 +72,35 @@ test("POST /v1/translate: 401 without a token, 400 without Russian, and the answ
   assert.equal(body.en, "I want tea.");
   assert.equal(up.calls[0].max_tokens, 300);
   assert.match(up.calls[0].messages[0].content, /я хочу чай/);
+});
+
+/* The other direction (2026-09-23): an English speaker's words come back as
+   Russian for the phone to read to the Russian speaker. The prompt swaps and
+   the validator asks for Cyrillic — a Latin reply is a transliteration or the
+   English handed back, and the Russian voice would read either as noise. */
+test("English in: the interpreter prompt, Russian out, Cyrillic required, stress marks dropped", async () => {
+  assert.match(SYSTEM_TRANSLATE_EN, /Do not correct it/i);
+  assert.match(SYSTEM_TRANSLATE_EN, /no stress marks/i);
+  assert.equal(translateMessage({ en: " where is the station " }), "Transcript: where is the station");
+
+  assert.match(validateTranslate({ ru: "gde vokzal" }, "ru").errors.join(" "), /not in Cyrillic/);
+  assert.equal(validateTranslate({ ru: "", note: "not English" }, "ru").ok, true);
+  const r = validateTranslate({ ru: "Где вокза́л?" }, "ru");
+  assert.equal(r.ok, true);
+  assert.equal(r.value.ru, "Где вокзал?");
+  assert.equal(r.value.en, undefined);
+
+  const up = upstream([JSON.stringify({ ru: "Где вокзал?", note: "" })]);
+  const res = await handle(req({ en: "where is the station" }, auth), env(), { fetch: up.fetch });
+  const body = await res.json();
+  assert.equal(body.ok, true);
+  assert.equal(body.ru, "Где вокзал?");
+  assert.match(up.calls[0].system[0].text, /interpret spoken English into Russian/);
+  assert.match(up.calls[0].messages[0].content, /where is the station/);
+  // A Russian request still gets the Russian-in prompt.
+  const up2 = upstream([JSON.stringify({ en: "Tea.", note: "" })]);
+  await handle(req({ ru: "чай" }, auth), env(), { fetch: up2.fetch });
+  assert.match(up2.calls[0].system[0].text, /translate spoken Russian into English/);
 });
 
 /* It shares the feedback counter, so it is bounded by a budget that already

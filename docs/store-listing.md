@@ -54,6 +54,10 @@ get wrong. A syllable-by-syllable builder for the long words. And Talk — a sho
 conversation with a tutor on a situation you pick, where every sentence you say
 comes back corrected.
 
+**An interpreter in your pocket.** Two microphones, one for Russian and one for
+English: whatever either person says comes back in the other language, on the
+screen and read aloud, with every Russian word tappable.
+
 **Every word is a link.** Tap any Russian anywhere in the app to see what it is
 and what form it is in; tap again for the full entry — every sense, the complete
 paradigm, example sentences, and the videos that say it. The dictionary holds
@@ -151,12 +155,13 @@ node tools/release_check.mjs                      # signature, size, permissions
 
 A bundle, not an APK: Play requires one for new apps, and it splits per device
 so the download is far smaller than the file uploaded. The version is
-`1.0.0-beta.3` / versionCode 3 (`app.json`; `npx expo prebuild --platform
+`1.0.0-beta.4` / versionCode 4 (`app.json`; `npx expo prebuild --platform
 android` after changing it, since `android/` is generated); bump versionCode
 on every upload. None has been uploaded yet: beta.1 (2026-09-19) was the first
-packaged, beta.2 (2026-09-20) carried the definitions read-through, and
-beta.3 (2026-09-23) carries the path gating, the recorded-audio trim and
-Translate.
+packaged, beta.2 (2026-09-20) carried the definitions read-through, beta.3
+(2026-09-23) the path gating, the recorded-audio trim and Translate, and
+beta.4 (2026-09-23) the interpreter, the drawn-empty path and the familiarity
+ring.
 
 ---
 

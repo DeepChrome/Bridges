@@ -431,6 +431,39 @@ group("where the day starts");
   setDayStart({ offsetMinutes: 0, rolloverHour: 0 });
 }
 
+/* Familiarity (the owner, 2026-09-23): a 0–100 read off the card's own
+   stability, never a second tally. What matters is the shape he asked for —
+   nothing on a new card, up with every Easy, down with an Again, 100 at the
+   scheduler's ceiling and not before. */
+group("familiarity");
+{
+  const DAY = S.DAY, T0 = 20700 * DAY + 12 * 3600000;
+  const opts = { fuzz: false };
+  ok(S.familiarity(undefined) === null && S.familiarity(S.newCard(T0)) === null,
+     "a card that does not exist, or is new, has no score");
+  let card = S.review(undefined, 4, T0, opts);
+  const first = S.familiarity(card);
+  ok(first > 0 && first < 50, "one Easy is a low score, not a high one", String(first));
+  /* Easy after Easy, each at its due date: the score climbs and never falls. */
+  const climb = [first];
+  for (let i = 0; i < 12; i++) {
+    card = S.review(card, 4, card.dueAt, opts);
+    climb.push(S.familiarity(card));
+  }
+  ok(climb.every((v, i) => i === 0 || v >= climb[i - 1]), "Easy after Easy climbs", climb.join(" "));
+  ok(climb[climb.length - 1] === 100, "…to 100 at the scheduler's ceiling", String(climb[climb.length - 1]));
+  ok(S.familiarity({ ...card, s: S.FAMILIAR_AT / 4 }) < 100, "and not before it");
+  /* An Again knocks it back. */
+  const before = S.familiarity(card);
+  const lapsed = S.review(card, 1, card.dueAt, opts);
+  ok(S.familiarity(lapsed) < before, "Again lowers it", `${before} -> ${S.familiarity(lapsed)}`);
+  /* Log-scaled, so a day held is a real step and a week is a bigger one. */
+  ok(S.familiarity({ state: S.REVIEW, s: 1 }) >= 10 && S.familiarity({ state: S.REVIEW, s: 30 }) > 50
+     && S.familiarity({ state: S.REVIEW, s: 30 }) < 70,
+     "a day is about a tenth, a month about six tenths",
+     `${S.familiarity({ state: S.REVIEW, s: 1 })} ${S.familiarity({ state: S.REVIEW, s: 30 })}`);
+}
+
 group("the scheduler");
 {
   const DAY = S.DAY, MIN = S.MINUTE, T0 = 20700 * DAY + 12 * 3600000;

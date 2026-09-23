@@ -22,7 +22,8 @@ import { Linked } from "../words";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
-import { applyGrade, reviewRows, preview, schedulerOpts, wanted, dueCards, wordTrouble, maxLapses, DIRECTIONS } from "@core/scheduler";
+import { applyGrade, reviewRows, preview, schedulerOpts, wanted, dueCards, wordTrouble, maxLapses, DIRECTIONS, familiarity } from "@core/scheduler";
+import Svg, { Circle } from "react-native-svg";
 import { buildSession, requeue, bury, dailyFor, QUEUE_DEFAULTS } from "@core/queue";
 
 /* The three directions as the learner sees them: by what is on the **front**.
@@ -47,12 +48,50 @@ export const KIND_LABEL = { recognise: "Russian", produce: "Meaning", listen: "L
    who is told "this one has been hard" before turning it over is being told
    how to pay attention, not what the answer is. */
 export function flagsFor(st, item) {
-  if (!item) return { isNew: false, trouble: false };
+  if (!item) return { isNew: false, trouble: false, score: null };
   const entry = st.seen[item.word];
   return {
     isNew: item.kind === "new",
     trouble: (!!entry && wordTrouble(entry)) || (st.pinned || []).includes(item.word),
+    /* This card's own memory, 0–100 (core/scheduler.js familiarity); null
+       while it is new, when the New flag says everything there is to say. */
+    score: item.kind === "new" ? null : familiarity(entry && entry[item.direction]),
   };
+}
+
+/* The familiarity ring's colour at a score: red at nothing, amber halfway,
+   green at 100 — `bad`, `warn`, `good`, mixed in RGB between neighbours, so
+   every anchor is a token the audit has seen (§24). A stroke, never text. */
+export function familiarityColor(score, t) {
+  const hex = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  const mix = (a, b, k) => "#" + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * k)
+    .toString(16).padStart(2, "0")).join("").toUpperCase();
+  const s = Math.max(0, Math.min(100, score));
+  return s < 50 ? mix(t.bad, t.warn, s / 50) : mix(t.warn, t.good, (s - 50) / 50);
+}
+
+/* The score as a small ring with the number inside — a gauge, read at a
+   glance, rather than a figure the learner has to find a scale for. The
+   number is `ink` on the card's own surface; only the arc takes the colour. */
+export function Familiarity({ score }) {
+  const t = useTheme();
+  if (score === null || score === undefined) return null;
+  const size = 34, w = 3.5, r = (size - w) / 2, c = 2 * Math.PI * r;
+  const color = familiarityColor(score, t);
+  return (
+    <View testID="familiarity" accessibilityLabel={`Familiarity ${score} of 100`}
+          style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+      <Svg width={size} height={size} style={{ position: "absolute" }}>
+        <Circle cx={size / 2} cy={size / 2} r={r} stroke={t.surface3} strokeWidth={w} fill="none" />
+        <Circle testID="familiarity-arc" cx={size / 2} cy={size / 2} r={r} stroke={color}
+                strokeWidth={w} fill="none" strokeLinecap="round"
+                strokeDasharray={`${c} ${c}`} strokeDashoffset={c * (1 - score / 100)}
+                rotation={-90} originX={size / 2} originY={size / 2} />
+      </Svg>
+      <Text testID="familiarity-score"
+            style={{ color: t.ink, fontSize: 11, fontWeight: "700" }}>{score}</Text>
+    </View>
+  );
 }
 
 export function troubleWords(st) {
@@ -670,6 +709,10 @@ export default function Study({ navigation }) {
               </Text>
               {flags.isNew ? <Pill testID="flag-new" tone="brand">New</Pill> : null}
               {flags.trouble ? <Pill testID="flag-trouble" tone="bad">Trouble</Pill> : null}
+              {/* How well this card is held, off its own FSRS stability. On
+                  both faces for the same reason as the flags: it is about the
+                  card's history, so it gives nothing away. */}
+              <Familiarity score={flags.score} />
             </View>
             {blank ? (
               <Muted testID="card-blank" style={{ textAlign: "center" }}>

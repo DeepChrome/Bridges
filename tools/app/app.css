@@ -15,6 +15,7 @@
   --good:#22774D; --good-bg:#E1F3EA; --good-dim:#1F6B45;
   --bad:#B53E30; --bad-bg:#F9E6E4; --bad-dim:#A5382C;
   --info:#2967AE; --info-bg:#E2EEFB;
+  --warn:#A8730A;
   /* Text sitting *on* a filled button. It flips with the theme — the dark theme's
      accents are light ones — so it cannot be a hardcoded #fff at the call site,
      which is how dark mode ended up with white on light green at 2.25:1. */
@@ -39,6 +40,7 @@
     --good:#47C285; --good-bg:#12271D; --good-dim:#3C9F6E;
     --bad:#E16D60; --bad-bg:#2C1715; --bad-dim:#CA5649;
     --info:#639FE3; --info-bg:#152230;
+    --warn:#D9A93F;
     --brand-on:#0C0D10; --good-on:#0C0D10; --bad-on:#0C0D10;
     --shadow:rgba(0,0,0,0.45);
   }
@@ -51,6 +53,7 @@
   --good:#47C285; --good-bg:#12271D; --good-dim:#3C9F6E;
   --bad:#E16D60; --bad-bg:#2C1715; --bad-dim:#CA5649;
   --info:#639FE3; --info-bg:#152230;
+  --warn:#D9A93F;
   --brand-on:#0C0D10; --good-on:#0C0D10; --bad-on:#0C0D10;
   --shadow:rgba(0,0,0,0.45);
 }

@@ -84,6 +84,10 @@ const PAIRS = [
   ["ink", "goodBg", 4.5, "feedback heading, correct"],
   ["ink", "badBg", 4.5, "feedback heading, wrong"],
   ["brand", "bg", 3.0, "brand accent and focus ring"],
+  // The familiarity ring runs bad → warn → good; each end is audited above
+  // or below, and the middle has to clear the same bar or the ring fades out
+  // halfway round.
+  ["warn", "surface", 3.0, "the familiarity ring's amber, on a card"],
   ["line", "bg", 1.3, "hairline against the page"],
   // Label on a filled button. Missing here once, and it cost twice: a hardcoded
   // #1A1508 left over from the goldenrod brand put near-black on indigo, and a

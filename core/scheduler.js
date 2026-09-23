@@ -286,6 +286,30 @@ export const wanted = (entry, now, learnAhead, dirs) =>
 export const strength = (entry) =>
   cardsOf(entry).reduce((a, { card }) => Math.max(a, card.s || 0), 0);
 
+/* **Familiarity**, 0–100, for the flashcard (the owner, 2026-09-23: *"the
+ * more often the user marks easy, the higher that score goes up to a max of
+ * 100… colorized… from red to yellow to green"*).
+ *
+ * Not a new counter. FSRS already keeps the number this is: **stability**,
+ * the days a memory is expected to hold. Every Good raises it, Easy raises
+ * it more, Again knocks it back — which is exactly the behaviour he
+ * described, and reading it off the card means the score can never disagree
+ * with the schedule (a second tally would, the first time an Undo or a
+ * restore touched one and not the other). Log-scaled, because stability is:
+ * a memory held a day is nothing like one held a week, and a year is the
+ * scheduler's own ceiling (`maxInterval`), so that is where 100 sits.
+ *
+ *   1 day → 12   4 days → 27   a month → 58   100 days → 78   a year → 100
+ *
+ * A card that does not exist, or is still new, has no score: it is flagged
+ * New instead. Per card, not per word — a word recognised on sight and not
+ * yet producible is exactly what the three directions are for. */
+export const FAMILIAR_AT = SCHEDULER_DEFAULTS.maxInterval;
+export function familiarity(card) {
+  if (!card || card.state === NEW || !(card.s > 0)) return null;
+  return Math.round(100 * Math.min(1, Math.log1p(card.s) / Math.log1p(FAMILIAR_AT)));
+}
+
 export const maxLapses = (entry) =>
   cardsOf(entry).reduce((a, { card }) => Math.max(a, card.lapses || 0), 0);
 

@@ -1,25 +1,34 @@
 /* Learn — the path. A spine of chapters, and at each chapter a fork.
  *
  * Each unit is a disc carrying its own progress as a ring, with its name beneath
- * it. The spine runs down the centre. **Once a chapter's spine unit is finished**
- * the road forks: lanes curve out to that chapter's quests, drawn in ranks of
- * three, and the main road carries on underneath to the next chapter.
+ * it. The spine runs down the centre; at each chapter lanes curve out to that
+ * chapter's quests, drawn in ranks of three, and the main road carries on
+ * underneath to the next chapter.
  *
- * Until then there is no fork and no lanes — just road (2026-09-22, the owner:
- * *"Lines connecting two learning modes should only appear once the higher node
- * has been completed"*). And the quests are not all optional any more: the
- * chapter requires every one that `build_topics.py` did not mark `opt`, so
- * finishing them is what opens the next chapter. The optional few say so under
- * their names.
+ * **The whole map is drawn from the first screen, and every track on it is
+ * empty until the node above it is done** (the owner, 2026-09-23: *"empty
+ * lines, almost like a negative track… once a lesson is complete, it unlocks
+ * the next node by connecting it with a line. Think of games… like Diablo where
+ * you have to connect the nodes with a path"*). So a locked quest is a padlocked
+ * disc at the end of a pale track; finishing the spine lays the brand colour
+ * down that track and the disc opens. A finished quest lays its own lane back
+ * to the road, and the road runs on to the next chapter once the chapter's
+ * required quests are done. The first cut of this (2026-09-22) hid the lanes
+ * and the quests until the spine was finished — which showed nothing to
+ * connect, and was not what he asked for.
+ *
+ * The quests are not all optional: the chapter requires every one that
+ * `build_topics.py` did not mark `opt`, so finishing them is what opens the
+ * next chapter. The optional few say so under their names.
  *
  * The web app draws the ring with a conic gradient, which React Native has no
  * equivalent for; here it is a stroked circle with a dash offset. Same four states,
  * same colours, different renderer — that is the kind of difference rule 20a allows.
  */
 
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useMemo } from "react";
 import { View, Pressable, Animated, useWindowDimensions } from "react-native";
-import Svg, { Circle, Path, Line } from "react-native-svg";
+import Svg, { Circle, Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, space, radius } from "../theme";
 import { Screen, Btn, Pill, UnitIcon, Muted, styles, Text } from "../ui";
@@ -34,10 +43,11 @@ import { reviewFirst } from "@core/state";
 import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
 import { taskFor } from "@core/tasks";
-import { useSweep } from "../motion";
+import { useSweep, useDraw, useFill } from "../motion";
 
-/* An SVG circle whose stroke offset can be animated. */
+/* An SVG circle whose stroke offset can be animated; a path likewise. */
 const ASvgCircle = Animated.createAnimatedComponent(Circle);
+const ASvgPath = Animated.createAnimatedComponent(Path);
 
 /* The chapter's task, offered once its spine is finished (ROADMAP P10.5).
    Nothing at all until then: an offer to "say who you are" before the chapter
@@ -120,7 +130,7 @@ const MERGE_H = 44;         // and of the lanes coming back to the road
 const ROW_GAP = 40;         // between ranks of side quests, when there is more than one
 const ROW_H = 112;          // a rank of quest discs with their names
 const QUEST_COLS = 3;       // quests to a rank: a fourth overlaps its neighbours' names
-const TRUNK_W = 3;
+const TRUNK_W = 4;          // a track wide enough to read as empty, not as a hairline
 
 /* A chapter's side quests in ranks of QUEST_COLS, each rank centred on the road:
    eight quests read 3 · 3 · 2. Every rank keeps the curriculum's order. */
@@ -282,24 +292,79 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
   );
 }
 
-/* A stretch of the main road between things on it. */
-function Trunk({ height = 18, dim }) {
+/* A stretch of the main road between things on it: the empty track, and the
+   brand colour filling it from the top once `on` — the same model as the
+   lanes, in a View because a straight vertical stretch needs no SVG. */
+function Trunk({ height = 18, on, testID }) {
   const t = useTheme();
-  return <View style={{ width: TRUNK_W, height, backgroundColor: dim ? t.lineSoft : t.line,
-                        borderRadius: 2 }} />;
+  const fill = useFill(on ? 1 : 0);
+  return (
+    <View testID={testID}
+          style={{ width: TRUNK_W, height, backgroundColor: t.lineSoft, borderRadius: 2,
+                   overflow: "hidden" }}>
+      {on ? (
+        <Animated.View testID={testID ? `${testID}-lit` : undefined}
+                       style={{ width: TRUNK_W, height: fill, backgroundColor: t.brand }} />
+      ) : null}
+    </View>
+  );
+}
+
+/* Near enough the length of a cubic, for the draw animation's dash: twelve
+   chords. A lane is a gentle S-curve, so the error is under a percent and the
+   dash it feeds is invisible either way. */
+export function cubicLength(x0, y0, x1, y1, x2, y2, x3, y3) {
+  let len = 0, px = x0, py = y0;
+  for (let i = 1; i <= 12; i++) {
+    const s = i / 12, u = 1 - s;
+    const x = u * u * u * x0 + 3 * u * u * s * x1 + 3 * u * s * s * x2 + s * s * s * x3;
+    const y = u * u * u * y0 + 3 * u * u * s * y1 + 3 * u * s * s * y2 + s * s * s * y3;
+    len += Math.hypot(x - px, y - py);
+    px = x; py = y;
+  }
+  return len;
+}
+
+/* The lit half of a track: the same line in the brand colour, laying itself
+   down from the top. `useDraw` runs the dash offset from the whole length to
+   nothing, so coming back to the path after the lesson that opened a node is
+   the one place the connection is *seen* to be made. */
+function Lit({ d, length, testID }) {
+  const t = useTheme();
+  const offset = useDraw(length);
+  return (
+    <ASvgPath testID={testID} d={d} stroke={t.brand} strokeWidth={TRUNK_W} fill="none"
+              strokeLinecap="round" strokeDasharray={`${length} ${length}`}
+              strokeDashoffset={offset} />
+  );
+}
+
+/* One track on the map: the empty line always — `track-<id>` — and, once the
+   node it runs from is done, the lit one over it — `<id>`. The two ids are
+   what the tests read: a lane exists before it is open, and lights when it is. */
+function Track({ id, d, length, on }) {
+  const t = useTheme();
+  return (
+    <>
+      <Path testID={`track-${id}`} d={d} stroke={t.lineSoft} strokeWidth={TRUNK_W} fill="none"
+            strokeLinecap="round" />
+      {on ? <Lit testID={id} d={d} length={length} /> : null}
+    </>
+  );
 }
 
 /* Lanes fanning out from the road to a rank of quests, the road running on
-   beneath them. */
-function FanOut({ rank, xs, W, height, stroke, road, dashed }) {
+   beneath them. `roadOn` lights the road through the fork; `laneOn(unit)`
+   says whether the lane to that quest is connected yet. */
+function FanOut({ rank, xs, W, height, roadOn, laneOn }) {
   return (
     <Svg width={W} height={height}>
-      <Line x1={W / 2} y1={0} x2={W / 2} y2={height} stroke={road} strokeWidth={TRUNK_W} />
+      <Track id={`road-${rank[0].id}`} d={`M ${W / 2} 0 L ${W / 2} ${height}`} length={height} on={roadOn} />
       {xs.map((x, k) => (
-        <Path key={rank[k].id} testID={`lane-${rank[k].id}`}
-              d={`M ${W / 2} 0 C ${W / 2} ${height * 0.55}, ${x} ${height * 0.35}, ${x} ${height}`}
-              stroke={stroke} strokeWidth={TRUNK_W} fill="none" strokeLinecap="round"
-              strokeDasharray={dashed ? "4 6" : undefined} />
+        <Track key={rank[k].id} id={`lane-${rank[k].id}`}
+               d={`M ${W / 2} 0 C ${W / 2} ${height * 0.55}, ${x} ${height * 0.35}, ${x} ${height}`}
+               length={cubicLength(W / 2, 0, W / 2, height * 0.55, x, height * 0.35, x, height)}
+               on={laneOn(rank[k])} />
       ))}
     </Svg>
   );
@@ -309,84 +374,59 @@ function FanOut({ rank, xs, W, height, stroke, road, dashed }) {
    QUEST_COLS (the eighth chapter's eight quests used to sit in one row and
    their names ran into each other — the owner, 2026-09-08), and the road going
    on beneath. Each rank past the first gets its own fan of lanes from the
-   road; the last rank's lanes come back to it. Animates open the first time
-   it is drawn open — lanes fade in, the ranks rise to meet them — and sits
-   still after that. */
+   road; the last rank's lanes come back to it.
+ *
+ * What lights what — each edge is connected by the node it runs *from*:
+ *   - the lanes out to the quests, and the road through the fork, by the
+ *     spine unit being finished (`forkOpen`; developer mode counts, rule 20.9),
+ *     which is also exactly when the quest discs unlock (`unitUnlocked`), so a
+ *     lit lane and an open disc cannot disagree;
+ *   - each lane back to the road, by that quest being finished;
+ *   - the road on to the next chapter, by the chapter being done — every
+ *     required quest finished — which is when the next spine disc unlocks. */
 function Fork({ stage, chapterOpen, onOpen }) {
   const { st } = useSession();
-  const t = useTheme();
   const { width: screenW } = useWindowDimensions();
   const open = chapterOpen && forkOpen(st, stage);
+  const done = stageDone(st, stage);
   const W = Math.min(screenW - space.pad * 2, 400);
   const ranks = questRanks(stage.branches);
   const xs = ranks.map((rank) => rankXs(rank, W));
-
-  const anim = useRef(new Animated.Value(open ? 0 : 1)).current;
-  useEffect(() => {
-    if (!open) return;
-    Animated.timing(anim, { toValue: 1, duration: 650, useNativeDriver: true }).start();
-  }, [open]);
-
-  /* **Nothing until the node above it is done.** The owner, 2026-09-22:
-   * *"Lines connecting two learning modes should only appear once the higher
-   * node has been completed, thus unlocking the next node."*
-   *
-   * The lanes used to be drawn from the first screen — grey and dashed, to a
-   * rank of padlocked discs — so every chapter announced its own branches
-   * before the learner had done a lesson of it, and the road was never a road,
-   * it was a diagram of one. Now the chapter is a spine disc and a piece of
-   * road until its spine is finished; then the fan animates in, which is what
-   * the 650 ms `anim` was always for and never got to do (it only ran when a
-   * fork *became* open, which nothing was watching).
-   *
-   * Closed, this is one stretch of road. It is still the `Fork`, and it still
-   * carries the chapter's testID, so what the path is made of does not change
-   * shape between the two states. */
-  if (!open) {
-    return (
-      <View testID={`fork-${stage.core.id}`} accessibilityLabel="Side quests, after this chapter's spine"
-            style={{ alignItems: "center", alignSelf: "stretch" }}>
-        <Trunk height={LANE_H} dim />
-      </View>
-    );
-  }
-
-  const fade = { opacity: anim };
-  const rise = { transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }] };
   const last = ranks.length - 1;
+  const laneOn = (u) => unitUnlocked(st, u);
+  const backOn = (u) => unitProgress(st, u) >= 1;
+
   return (
     <View testID={`fork-${stage.core.id}`} accessibilityLabel="Side quests"
           style={{ alignItems: "center", alignSelf: "stretch" }}>
-      <Trunk height={10} />
+      <Trunk height={10} on={open} testID={`stem-${stage.core.id}`} />
       {ranks.map((rank, r) => (
         <React.Fragment key={r}>
-          <Animated.View style={fade}>
-            <FanOut rank={rank} xs={xs[r]} W={W} height={r ? ROW_GAP : LANE_H}
-                    stroke={t.brand} road={t.line} />
-          </Animated.View>
-          <Animated.View testID={`rank-${stage.core.id}-${r}`} style={[{ width: W, height: ROW_H }, fade, rise]}>
+          <FanOut rank={rank} xs={xs[r]} W={W} height={r ? ROW_GAP : LANE_H}
+                  roadOn={open} laneOn={laneOn} />
+          <View testID={`rank-${stage.core.id}-${r}`} style={{ width: W, height: ROW_H }}>
             {rank.map((u, k) => (
               <View key={u.id} style={{ position: "absolute", left: xs[r][k] - 48, top: 0 }}>
                 <PathNode unit={u} open={unitUnlocked(st, u)} branch onOpen={onOpen} />
               </View>
             ))}
-          </Animated.View>
+          </View>
         </React.Fragment>
       ))}
       {/* The lanes come back: from under each quest of the last rank to the road,
           which goes on to the next chapter. A fork that never re-joined read as
           a dead end. */}
-      <Animated.View style={fade}>
-        <Svg width={W} height={MERGE_H}>
-          <Line x1={W / 2} y1={0} x2={W / 2} y2={MERGE_H} stroke={t.line} strokeWidth={TRUNK_W} />
-          {xs[last].map((x, k) => (
-            <Path key={k} testID={`merge-${ranks[last][k].id}`}
-                  d={`M ${x} 0 C ${x} ${MERGE_H * 0.65}, ${W / 2} ${MERGE_H * 0.45}, ${W / 2} ${MERGE_H}`}
-                  stroke={t.brand} strokeWidth={TRUNK_W} fill="none" strokeLinecap="round" />
-          ))}
-        </Svg>
-      </Animated.View>
-      <Trunk height={10} dim={!chapterOpen} />
+      <Svg width={W} height={MERGE_H}>
+        <Track id={`road-out-${stage.core.id}`} d={`M ${W / 2} 0 L ${W / 2} ${MERGE_H}`}
+               length={MERGE_H} on={done} />
+        {xs[last].map((x, k) => (
+          <Track key={k} id={`merge-${ranks[last][k].id}`}
+                 d={`M ${x} 0 C ${x} ${MERGE_H * 0.65}, ${W / 2} ${MERGE_H * 0.45}, ${W / 2} ${MERGE_H}`}
+                 length={cubicLength(x, 0, x, MERGE_H * 0.65, W / 2, MERGE_H * 0.45, W / 2, MERGE_H)}
+                 on={backOn(ranks[last][k])} />
+        ))}
+      </Svg>
+      <Trunk height={10} on={done} testID={`road-on-${stage.core.id}`} />
     </View>
   );
 }
@@ -538,7 +578,9 @@ export default function Learn({ navigation }) {
               <PathNode unit={stage.core} open={open} branch={false} onOpen={openUnit} />
               {stage.branches.length ? (
                 <Fork stage={stage} chapterOpen={open} onOpen={openUnit} />
-              ) : null}
+              ) : (
+                <Trunk height={LANE_H} on={stageDone(st, stage)} testID={`road-on-${stage.core.id}`} />
+              )}
               {/* The chapter's task, once its spine is finished (ROADMAP P10.5).
                   On the path rather than in Practice because it belongs to the
                   chapter: it is the thing the chapter was for. Keyed on the

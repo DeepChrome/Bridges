@@ -53,7 +53,6 @@ export const ALLOW = new Map([
   ["No connection. Try again when you are online.", "failure with a cause"],
   ["This file is not a deck Bridges can read.", "failure with a cause"],
   ["No cards with Russian on them in this deck.", "failure with a cause"],
-  ["Russian is not installed for offline recognition.", "failure with a cause"],
   ["The owner does not allow this video to be embedded.", "failure with a cause"],
 ]);
 

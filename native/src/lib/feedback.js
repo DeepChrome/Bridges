@@ -131,8 +131,10 @@ export async function markTask({ goal, must, attempt, studied, chapter }, deps =
    hearing on-device and sends text, as everything else here does; the answer
    is { en, note }. Short in and short out, so the ordinary timeout is right —
    a conversational turn's twenty seconds would only make a failure slower. */
-export async function translate({ ru }, deps = {}) {
-  return post({ ru }, deps, "/v1/translate", TIMEOUT_MS);
+export async function translate({ ru, en }, deps = {}) {
+  /* One field or the other: Russian in for `{ en }` back, English in for
+     `{ ru }` back (the interpreter, 2026-09-23). */
+  return post(ru ? { ru } : { en }, deps, "/v1/translate", TIMEOUT_MS);
 }
 
 async function post(body, deps, route, timeoutMs, retried = false) {

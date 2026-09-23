@@ -26,6 +26,9 @@ const light = {
   good: "#22774D", goodBg: "#E1F3EA", goodDim: "#1F6B45",
   bad: "#B53E30", badBg: "#F9E6E4", badDim: "#A5382C",
   info: "#2967AE", infoBg: "#E2EEFB",
+  /* The middle of the familiarity ring's red → amber → green (2026-09-23).
+     A stroke, never text; audited at the accent minimum against the page. */
+  warn: "#A8730A",
   brandOn: "#FFFFFF", goodOn: "#FFFFFF", badOn: "#FFFFFF",
 };
 
@@ -37,6 +40,7 @@ const dark = {
   good: "#47C285", goodBg: "#12271D", goodDim: "#3C9F6E",
   bad: "#E16D60", badBg: "#2C1715", badDim: "#CA5649",
   info: "#639FE3", infoBg: "#152230",
+  warn: "#D9A93F",
   brandOn: "#0C0D10", goodOn: "#0C0D10", badOn: "#0C0D10",
 };
 

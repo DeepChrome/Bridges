@@ -82,6 +82,30 @@ describe("the card says what it is", () => {
     expect(screen.queryByTestId("flag-new")).toBeNull();
   });
 
+  /* The familiarity ring (2026-09-23): the card's own stability as a number
+     and a colour, red through amber to green. A new card has the New flag and
+     no number — two marks for one fact would be one too many. */
+  it("shows how well a card is held, coloured from red to green", async () => {
+    const { familiarityColor } = require("../src/screens/Study");
+    const { light } = require("../src/theme");
+    await withProfile({ seen: { [WORD]: { recognise: due({ s: 30 }) } } });
+    await screen.findByTestId("card-kind");
+    const score = Number(screen.getByTestId("familiarity-score").props.children);
+    expect(score).toBeGreaterThan(50);
+    expect(score).toBeLessThan(70);
+    // The ends of the scale are the audited tokens; the middle is the amber one.
+    expect(familiarityColor(0, light)).toBe(light.bad.toUpperCase());
+    expect(familiarityColor(50, light)).toBe(light.warn.toUpperCase());
+    expect(familiarityColor(100, light)).toBe(light.good.toUpperCase());
+    expect(familiarityColor(25, light)).not.toBe(familiarityColor(75, light));
+  });
+
+  it("gives a new card no score, only the flag", async () => {
+    await withProfile({ seen: { [WORD]: { recognise: fresh() } }, sets: ["__due__"] });
+    await screen.findByTestId("flag-new");
+    expect(screen.queryByTestId("familiarity")).toBeNull();
+  });
+
   it("counts a pinned word as trouble", () => {
     const st = { ...base, seen: { [WORD]: { recognise: due() } }, pinned: [WORD] };
     expect(flagsFor(st, { word: WORD, direction: "recognise", kind: "review" }).trouble).toBe(true);

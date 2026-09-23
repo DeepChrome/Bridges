@@ -22,7 +22,7 @@ import { SYSTEM, userMessage, RETRY_NUDGE } from "./prompt.js";
 import { SYSTEM_TALK, talkMessage, validateTalk, SYSTEM_HINT, hintMessage, validateHint,
          SYSTEM_REVIEW, reviewMessage, validateReview } from "./talk.js";
 import { SYSTEM_TASK, taskMessage, validateTask } from "./task.js";
-import { SYSTEM_TRANSLATE, translateMessage, validateTranslate } from "./translate.js";
+import { SYSTEM_TRANSLATE, SYSTEM_TRANSLATE_EN, translateMessage, validateTranslate, direction } from "./translate.js";
 
 const API = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
@@ -210,10 +210,16 @@ const ROUTES = {
   "/v1/translate": {
     kind: "translate", counter: "count", cap: (env) => parseInt(env.DAILY_CAP, 10) || DEFAULT_CAP,
     maxTokens: 300, system: SYSTEM_TRANSLATE,
-    check: (b) => (typeof b.ru === "string" && b.ru.trim() ? null : "ru is required"),
+    check: (b) => ((typeof b.ru === "string" && b.ru.trim()) || (typeof b.en === "string" && b.en.trim())
+      ? null : "ru or en is required"),
     message: (b) => translateMessage(b),
-    validate: (parsed) => validateTranslate(parsed),
+    validate: (parsed) => validateTranslate(parsed, "en"),
     capMessage: (cap) => `Daily limit of ${cap} reached; resets at 00:00 UTC.`,
+    /* The other way round (2026-09-23): English in, Russian out, for the
+       Russian speaker on the other side of the phone. Same counter. */
+    variant: (b) => (direction(b) === "en" ? {
+      system: SYSTEM_TRANSLATE_EN, validate: (parsed) => validateTranslate(parsed, "ru"),
+    } : null),
   },
 };
 

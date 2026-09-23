@@ -114,27 +114,68 @@ describe("path node states", () => {
     expect(screen.queryByTestId("arc-core4")).toBeNull();
   });
 
-  /* **No lines until the node above them is done** (the owner, 2026-09-22).
-     A chapter is a spine disc and a piece of road until its spine unit is
-     finished; the quests and the lanes to them are not drawn at all. They used
-     to be there from the first screen, greyed and dashed, which made every
-     chapter announce its branches before a lesson of it had been opened. */
-  it("draws no lanes and no quests until the chapter's spine is finished", async () => {
+  /* **Every track is drawn, and every track is empty until the node above it
+     is done** (the owner, 2026-09-23: "empty lines, almost like a negative
+     track… once a lesson is complete, it unlocks the next node by connecting
+     it with a line"). A fresh learner sees the whole map: the quests
+     padlocked at the end of pale tracks, nothing lit. The first cut hid the
+     quests and lanes altogether until the spine was done, which left nothing
+     to connect. */
+  it("draws every quest and every track empty until the chapter's spine is finished", async () => {
     await withState({});
     const spine = await screen.findByTestId("node-core1");
     const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : s);
     expect(flat(spine.props.style).transform[0].translateX).toBe(0);
-    // The fork is still there as a stretch of road, so the path does not change
-    // shape when it opens — but it holds nothing.
-    expect(screen.getByTestId("fork-core1").props.accessibilityLabel).toMatch(/after this chapter/);
-    expect(screen.queryByTestId("node-family")).toBeNull();
+    // The quest is on the map, locked, at the end of a track that is not lit.
+    expect(screen.getByTestId("node-family").props.accessibilityState.disabled).toBe(true);
+    expect(screen.getByTestId("rank-core1-0")).toBeTruthy();
+    expect(strokeHex(screen.getByTestId("track-lane-family"))).toBe(light.lineSoft.toUpperCase());
     expect(screen.queryByTestId("lane-family")).toBeNull();
+    expect(screen.getByTestId("track-merge-family")).toBeTruthy();
     expect(screen.queryByTestId("merge-family")).toBeNull();
-    expect(screen.queryByTestId("rank-core1-0")).toBeNull();
-    // Two lessons in is not enough any more: the whole spine is.
+    // Nor the road through the fork, nor the road on to chapter 2.
+    expect(screen.queryByTestId("road-family")).toBeNull();
+    expect(screen.queryByTestId("road-on-core1-lit")).toBeNull();
+    expect(screen.getByTestId("node-core2").props.accessibilityState.disabled).toBe(true);
+  });
+
+  it("two lessons in is not enough: the whole spine is", async () => {
     await withState(part(STAGES[0].core, 2));
     await screen.findByTestId("node-core1");
-    expect(screen.queryByTestId("node-family")).toBeNull();
+    expect(screen.getByTestId("node-family").props.accessibilityState.disabled).toBe(true);
+    expect(screen.queryByTestId("lane-family")).toBeNull();
+  });
+
+  /* A finished quest connects itself back to the road; the road runs on only
+     once the chapter's required quests are all done. Optional quests are on
+     the map like any other and light their own lane when finished. */
+  it("lights a quest's lane back when it is finished, and the road on when the chapter is", async () => {
+    const { required } = require("../src/data");
+    const first = required(STAGES[0])[0];
+    const lastRank = require("../src/screens/Learn").questRanks(STAGES[0].branches).slice(-1)[0];
+    await withState({ unit: { ...done(STAGES[0].core).unit, ...done(first).unit } });
+    await screen.findByTestId("node-core1");
+    // The lane out is lit for every quest; the lane back only for the one done.
+    for (const u of STAGES[0].branches) expect(strokeHex(screen.getByTestId(`lane-${u.id}`))).toBe(light.brand.toUpperCase());
+    for (const u of lastRank) {
+      if (u.id === first.id) expect(screen.getByTestId(`merge-${u.id}`)).toBeTruthy();
+      else expect(screen.queryByTestId(`merge-${u.id}`)).toBeNull();
+    }
+    expect(screen.queryByTestId("road-on-core1-lit")).toBeNull();
+    expect(screen.getByTestId("node-core2").props.accessibilityState.disabled).toBe(true);
+  });
+
+  it("…and the road on to the next chapter once the required quests are done", async () => {
+    const { required } = require("../src/data");
+    const all = Object.assign({}, done(STAGES[0].core).unit,
+      ...required(STAGES[0]).map((u) => done(u).unit));
+    await withState({ unit: all });
+    await screen.findByTestId("node-core1");
+    expect(screen.getByTestId("road-on-core1-lit")).toBeTruthy();
+    expect(screen.getByTestId("road-out-core1")).toBeTruthy();
+    expect(screen.getByTestId("node-core2").props.accessibilityState.disabled).toBe(false);
+    // Chapter 2's own tracks are still empty: its spine is not done.
+    expect(screen.queryByTestId(`lane-${STAGES[1].branches[0].id}`)).toBeNull();
   });
 
   /* Eight quests in one row overlapped their names (the owner, 2026-09-08):
@@ -151,8 +192,7 @@ describe("path node states", () => {
     const ranks = questRanks(big.branches);
     expect(ranks.every((r) => r.length <= 3)).toBe(true);
     expect(ranks.flat()).toEqual(big.branches);
-    // Its fork has to be open for any of it to be drawn, which now means
-    // developer mode or a finished spine all the way down to it.
+    // Developer mode, so every lane is lit as well as drawn (rule 20.9).
     await withState({ dev: true });
     await screen.findByTestId(`node-${big.core.id}`);
     const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : s);
@@ -162,18 +202,21 @@ describe("path node states", () => {
       for (let k = 1; k < lefts.length; k++) expect(lefts[k] - lefts[k - 1]).toBeGreaterThanOrEqual(96);
       for (const u of rank) expect(screen.getByTestId(`lane-${u.id}`)).toBeTruthy();
     });
-    // The road comes back from the last rank.
-    for (const u of ranks[ranks.length - 1]) expect(screen.getByTestId(`merge-${u.id}`)).toBeTruthy();
+    // The road comes back from the last rank — the track is there for each;
+    // lit only for a finished quest, which developer mode does not fake.
+    for (const u of ranks[ranks.length - 1]) expect(screen.getByTestId(`track-merge-${u.id}`)).toBeTruthy();
   });
 
-  it("opens the fork once the spine is finished, and Continue leads into it", async () => {
+  it("connects the quests once the spine is finished, and Continue leads into them", async () => {
     await withState(done(STAGES[0].core));
     await screen.findByTestId("node-core1");
-    expect(screen.getByTestId("fork-core1").props.accessibilityLabel).toBe("Side quests");
     expect(screen.getByTestId("node-family").props.accessibilityState.disabled).toBe(false);
-    // Solid, not dashed: a lane is only ever drawn open now.
-    expect(screen.getByTestId("lane-family").props.strokeDasharray).toBeUndefined();
-    expect(screen.getByTestId("merge-family").props.strokeDasharray).toBeUndefined();
+    // The lane is lit, in the brand colour, over its track; the road through
+    // the fork with it. The way back is not: nothing has been finished there.
+    expect(strokeHex(screen.getByTestId("lane-family"))).toBe(light.brand.toUpperCase());
+    expect(screen.getByTestId("stem-core1-lit")).toBeTruthy();
+    expect(screen.getByTestId("road-family")).toBeTruthy();
+    expect(screen.queryByTestId("merge-family")).toBeNull();
     // family is left of time: the row keeps the curriculum's order.
     const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : s);
     expect(flat(screen.getByTestId("node-family").parent.props.style).left)
@@ -235,10 +278,9 @@ describe("the disc you are on", () => {
 
   test("exactly one disc on the path is filled, and it is the one Continue opens", async () => {
     await withState({});
-    // Only the discs actually drawn: a chapter's quests are not on the screen
-    // until its spine is done (2026-09-22).
+    // The whole map is on the screen from the first day (2026-09-23).
     const shown = UN.filter((u) => screen.queryByTestId(`node-${u.id}`));
-    expect(shown.map((u) => u.id)).toEqual(STAGES.map((s) => s.core.id));
+    expect(shown.map((u) => u.id)).toEqual(UN.map((u) => u.id));
     const filled = shown.filter((u) => painted(screen.getByTestId(`node-${u.id}`), light.brand) > 0);
     expect(filled.map((u) => u.id)).toEqual(["core1"]);
     expect(screen.getByText(/^Start \(Pronouns & Being\)$/)).toBeTruthy();

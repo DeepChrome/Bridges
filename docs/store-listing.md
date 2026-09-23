@@ -37,10 +37,10 @@ Russian, a gap in a real sentence, typing it, hearing a word, hearing a whole
 sentence, and saying one aloud.
 
 **Spaced repetition that matches Anki.** FSRS-6 scheduling with learning steps,
-daily limits, burying and undo. Every word is three separate memories —
-recognising it, producing it, hearing it — because knowing a word when you see
-it is not the same as being able to say it. Import an Anki deck and it schedules
-alongside everything else; export one back out whenever you like.
+daily limits and undo. One card per word, asked the way you choose — Russian
+on the front, the meaning on the front, or sound only — and every lesson
+question, spoken turn and flashcard feeds the same memory. Import an Anki deck
+and it schedules alongside everything else.
 
 **Listening that is actually at your level.** Thirty-two written conversations,
 two to three speakers each, thirty to forty-five seconds, with five questions
@@ -155,14 +155,24 @@ node tools/release_check.mjs                      # signature, size, permissions
 
 A bundle, not an APK: Play requires one for new apps, and it splits per device
 so the download is far smaller than the file uploaded. The version is
-`1.0.0-beta.5` / versionCode 5 (`app.json`; `npx expo prebuild --platform
+`1.0.0-beta.6` / versionCode 6 (`app.json`; `npx expo prebuild --platform
 android` after changing it, since `android/` is generated); bump versionCode
 on every upload. None has been uploaded yet: beta.1 (2026-09-19) was the first
 packaged, beta.2 (2026-09-20) carried the definitions read-through, beta.3
 (2026-09-23) the path gating, the recorded-audio trim and Translate, beta.4
 (2026-09-23) the interpreter, the drawn-empty path and the familiarity ring,
-and beta.5 (2026-09-23) developer mode off by default, speakers everywhere,
-and the library's favorites, sort and creators' note.
+beta.5 (2026-09-23) developer mode off by default, speakers everywhere, and
+the library's favorites, sort and creators' note, and beta.6 (2026-09-23)
+one card per word and the native-speed passages removed.
+
+**Upload path, since the account exists (2026-09-23).** *Internal testing*
+first: private to up to 100 testers by email, nothing on the store, no
+review clock — it proves signing, Play App Signing and the upload key while
+the app is still being shaped. *Closed testing* is what starts the
+fourteen-day, twelve-tester clock a personal account needs before production
+unlocks, so it should start as soon as the beta looks the way the owner
+wants, not after. The console asks for the Data safety form and the privacy
+policy URL before a testing track can be published; the answers are above.
 
 ---
 

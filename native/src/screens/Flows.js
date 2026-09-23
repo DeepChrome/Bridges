@@ -13,7 +13,7 @@ import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } 
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
   DRILL_POOL_STEPS,
-  reachedUnits, unitUnlocked, reviewWords, passages, knownWords, lessonsDone, nextLesson,
+  reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
   scenarioLibrary, required,
 } from "../data";
 import { quizPassed } from "@core/state";
@@ -469,14 +469,11 @@ export function DrillList({ navigation }) {
           {((st.drills || {}).listening || {}).best
             ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
         </Row>
-        <Row onPress={() => navigation.navigate("Listening")}>
-          <Thumb id="native" tone="info" />
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
-              Native speed
-            </Text>
-          </View>
-        </Row>
+        {/* "Native speed" — 45 s of real video and "which word did you hear?"
+            — sat here until 2026-09-23. The owner: *"'what word did you hear'
+            is pretty horrible and doesn't actually teach the language."* The
+            native-speed listening is Immerse, where the same videos play
+            whole with the words they say and the moment each is said. */}
       </List>
 
       <SectionLabel style={{ marginTop: 18 }}>Speaking</SectionLabel>
@@ -714,94 +711,6 @@ const bestOf = (prev, key, score) => {
    is a session of its own — five of them was the old four-sentence scene
    repeated until it read as a drill. */
 export const LISTENING_N = 1;
-
-/* The passages on offer: half a minute of one speaker each, ranked by how many of
-   this learner's own words they say (ROADMAP P10.3). Grouped by the video they
-   come from, so the list reads as topics rather than as 900 spans. */
-export function ListeningList({ navigation }) {
-  const { st } = useSession();
-  const t = useTheme();
-  const known = useMemo(() => new Set(knownWords(st)), [st.seen]);
-  const shown = useMemo(() => Q.passagesFor(passages(), known, 30), [known]);
-
-  if (!shown.length) {
-    return (
-      <Done title="Not yet"
-            detail="Come back after a lesson or two."
-            onBack={() => navigation.goBack()} />
-    );
-  }
-  return (
-    <Screen>
-      <SectionLabel>{`${shown.length} passages`}</SectionLabel>
-      <List>
-        {shown.map((p, k) => {
-          const fit = Q.passageFit(p, known);
-          const best = ((st.drills || {})[`passage:${p.id}`] || {}).best;
-          return (
-            <Row key={p.id} testID={`passage-${p.id}`}
-                 onPress={() => navigation.navigate("Passage", { id: p.id })}>
-              {/* No tile. Every row here is the same kind of thing, so one icon
-                  repeated down the list marks nothing — it is a column of grey
-                  squares beside the titles that are the actual information. */}
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}
-                      numberOfLines={2}>
-                  {p.title}
-                </Text>
-                <Muted>{`${fit} words you know · ${Math.round((p.end - p.start) / 1000)}s`}</Muted>
-              </View>
-              {best ? <Pill tone="good">{best + "%"}</Pill> : null}
-            </Row>
-          );
-        })}
-      </List>
-    </Screen>
-  );
-}
-
-/* One passage: hear it, then answer for what you caught. */
-export function PassageFlow({ route, navigation }) {
-  const { st, update } = useSession();
-  const [result, setResult] = useState(null);
-  const [seed, setSeed] = useState(0);
-  const passage = useMemo(() => passages().find((p) => p.id === route.params.id), [route.params.id]);
-  const known = useMemo(() => new Set(knownWords(st)), [st.seen]);
-  const steps = useMemo(() => {
-    if (!passage) return [];
-    const qs = Q.passageQuestions(passage, known);
-    if (!qs.length) return [];
-    // The passage itself is the first step; the questions follow it.
-    return [{ kind: "passage", video: passage.v, title: passage.title,
-              start: passage.start, end: passage.end }].concat(qs);
-  }, [passage, seed]);
-  useAudioStopOnLeave();
-
-  if (!passage || !steps.length) {
-    return <Done title="Not yet"
-                 detail="Come back after a lesson or two."
-                 onBack={() => navigation.goBack()} />;
-  }
-  if (result) {
-    return (
-      // Named apart from the level-matched activity: the two used to share the
-      // word "Listening" across four surfaces, so one score could not be told
-      // from the other's (P11.9).
-      <Done title="Native speed" detail={`${result.right} of ${result.total} caught`}
-            score={result.score} passed={result.score >= 80}
-            onAgain={() => { setResult(null); setSeed(seed + 1); }}
-            onBack={() => navigation.goBack()} />
-    );
-  }
-  return (
-    <Runner steps={steps} recycle={false} navigation={navigation}
-            onFinish={(r) => {
-              const score = scoreOf(r);
-              update((prev) => bestOf(prev, `passage:${passage.id}`, score));
-              setResult({ ...r, score });
-            }} />
-  );
-}
 
 /* Which conversations a chapter puts forward before the rest of them: the two
    from its spine, the unit the chapter is named for. The side quests are

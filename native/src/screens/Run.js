@@ -22,7 +22,6 @@ import { Linked } from "../words";
 import { Hear } from "../activities/Hear";
 import { Say } from "../activities/Say";
 import { Scene } from "../activities/Scene";
-import { Passage } from "../activities/Passage";
 import { PairHear, PairSay } from "../activities/Pair";
 import { Shadow } from "../activities/Shadow";
 import { Build } from "../activities/Build";
@@ -341,9 +340,6 @@ export const VIEWS = {
   hear: (q, r) => <Hear q={q} r={r} />,
   say: (q, r) => <Say q={q} r={r} />,
   scene: (q, r) => <Scene q={q} r={r} />,
-  // A listening passage and the questions that follow it (ROADMAP P10.3).
-  passage: (q, r) => <Passage q={q} r={r} />,
-  heard: asOptions,
   // The pronunciation drill: hear a contrast, then produce it (P10.8).
   "pair-hear": (q, r) => <PairHear q={q} r={r} />,
   "pair-say": (q, r) => <PairSay q={q} r={r} />,

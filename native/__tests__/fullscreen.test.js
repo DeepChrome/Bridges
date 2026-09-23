@@ -48,7 +48,7 @@ describe("the screens that hide the tab bar", () => {
     // three steps are a menu, the step itself is a run.
     for (const browsing of ["Path", "Unit", "Lesson", "Drills", "SceneList",
                             "QuizSetup", "Episodes", "Cards", "Words", "You",
-                            "Sounds", "Listening"]) {
+                            "Sounds"]) {
       expect(hidesTabBar(browsing)).toBe(false);
     }
     for (const run of ["Vocab", "Quiz", "Drill", "Scenes", "Talk", "Video"]) {

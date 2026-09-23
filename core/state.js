@@ -13,7 +13,7 @@
  * single classic script, and the rest of core/ keeps to that style.
  */
 
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 
 /* A lesson quiz passes at PASS_MARK. After RELIEF_AFTER attempts it passes at
    RELIEF_MARK instead: the simulated struggling learner failed 15 of 40 lessons
@@ -125,6 +125,12 @@ export const MIGRATIONS = {
   // `faves` (favourite videos, id -> day) and `notices` (which one-time
   // notes have been seen), both new slots.
   7: (s) => Object.assign({}, s, { dev: false, faves: s.faves || {}, notices: s.notices || {}, v: 8 }),
+  // v9: a word is one card again (the owner, 2026-09-23), and the flashcards
+  // default to the Russian on the front. `flash` had defaulted to all three
+  // fronts and nobody chose that, so it is set to the new default for all;
+  // the cards themselves are merged on the way in (core/scheduler.js
+  // normaliseSeen), which needs no step here.
+  8: (s) => Object.assign({}, s, { flash: ["recognise"], v: 9 }),
 };
 
 export function migrate(raw, from) {

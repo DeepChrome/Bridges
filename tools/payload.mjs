@@ -14,7 +14,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
-export const PARTS = ["deep", "sent", "videos", "listening", "senses"];
+export const PARTS = ["deep", "sent", "videos", "senses"];
 
 export function loadPayload(root) {
   const dir = join(root, "native", "assets");

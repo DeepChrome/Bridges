@@ -25,7 +25,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fold, TOKEN } from "../core/util.js";
 import { makeQuestions, QUIZ_N, SPEECH_MIX, lessonSize } from "../core/questions.js";
-import { gradeFor, applyGrade, directionOfKind, dueCards, wordTrouble, DAY, DIRECTIONS, LADDER_AT }
+import { gradeFor, applyGrade, directionOfKind, dueCards, wordTrouble, DAY, DEFAULT_FRONTS }
   from "../core/scheduler.js";
 import { buildSession, dailyFor, QUEUE_DEFAULTS } from "../core/queue.js";
 import { RELIEF_AFTER, RELIEF_MARK, PASS_MARK, reviewFirst, REVIEW_FIRST }
@@ -62,25 +62,13 @@ const MARK = parseInt(arg("--pass-mark", String(PASS_MARK)), 10);
    behind most of the review load, and the trade it makes was never priced. */
 const FOLLOWED = Number(arg("--scene-followed", String(SCENE_FOLLOWED)));
 
-/* Days of stability a word's recognise card must hold before its produce and
-   listen cards are dealt (core/scheduler.js LADDER_AT). `--ladder 0` turns the
-   rule off, which is how it is priced. */
-const LADDER = Number(arg("--ladder", String(LADDER_AT)));
+/* Which fronts the flashcards ask through (`st.flash`, the Study picker). One
+   — the Russian — is the default since a word became one card again
+   (2026-09-23); `--dirs recognise,produce` models a learner drilling both
+   ways, which is the same card met each way in turn. */
+const DIRS = arg("--dirs", DEFAULT_FRONTS.join(",")).split(",").filter(Boolean);
 
-/* Which directions the flashcards deal (`st.flash`, Settings). Three is the
-   default and three cards a word is three times the review load, so what that
-   actually costs is worth being able to measure rather than argue about. */
-const DIRS = arg("--dirs", DIRECTIONS.join(",")).split(",").filter(Boolean);
-
-/* Whether a word answered today buries its other directions until tomorrow, as
-   Anki buries siblings (core/queue.js). On by default; `--bury 0` turns it off,
-   which is how it is priced. */
-const BURY_NEW = arg("--bury-new", "1") !== "0";
-const BURY_REVIEW = arg("--bury-review", "0") !== "0";
-
-/* New cards a day (core/queue.js). Fifteen cards is five *words* when every
-   word is three cards, so what this costs is worth pricing rather than
-   inheriting from a default written when a word was one card. */
+/* New cards a day (core/queue.js). */
 const NEW_PER_DAY_ARG = Number(arg("--new-per-day", String(QUEUE_DEFAULTS.newPerDay)));
 const passed = (slot) => {
   if (!slot || typeof slot.q !== "number") return false;
@@ -327,9 +315,9 @@ function simulate(profileName, seed) {
   const dueNow = () => dueCards(st.seen, nowMs());
   const answerCard = (word, direction) => {
     const i = L.findIndex((e) => e.b === word);
-    /* Recognition is the easiest direction and production the hardest, which
-       is the whole reason for splitting them (§30j); a model that graded all
-       three alike would flatter the split it is measuring. */
+    /* Recognition is the easiest way to be asked and production the hardest
+       (§30j); the front a card is met through is what the learner model
+       answers, and the one card takes the grade. */
     const kind = direction === "produce" ? "type" : direction === "listen" ? "listen" : "choose-en";
     const ok = rand() < chance(kind, i >= 0 ? i : -1);
     const g = ok ? (rand() < 0.3 ? 4 : 3) : 1;
@@ -347,8 +335,7 @@ function simulate(profileName, seed) {
       const s = buildSession({
         seen: st.seen, words: words(), dirs: DIRS, now: nowMs(), daily: st.daily,
         opts: { newPerDay: NEW_PER_DAY, sessionSize: QUEUE_DEFAULTS.sessionSize,
-                reviewsPerDay: REVIEW_CAP, learnAhead: 20, ladder: LADDER,
-                buryNew: BURY_NEW, buryReview: BURY_REVIEW, scheduler: { fuzz: false } },
+                reviewsPerDay: REVIEW_CAP, learnAhead: 20, scheduler: { fuzz: false } },
         rng: rand,
       });
       if (!s.items.length) break;

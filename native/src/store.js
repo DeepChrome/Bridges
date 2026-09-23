@@ -25,7 +25,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { today } from "@core/util";
 import { SCHEMA_VERSION, migrate, speechDefault } from "@core/state";
 import { SETTING_KEYS, merge, diff, isEmpty } from "@core/repo";
-import { normaliseSeen, DIRECTIONS } from "@core/scheduler";
+import { normaliseSeen, DEFAULT_FRONTS } from "@core/scheduler";
 import { openRepo } from "./db";
 
 /* The schema and its migrations live in core/state.js since v5, shared with the web
@@ -51,10 +51,12 @@ export const DEFAULTS = {
   seen: {},             // word -> { recognise, produce, listen }: a card each (core/scheduler.js)
   trouble: {},
   daily: { day: null, new: 0, reviews: 0 },   // today's counts (core/queue.js dailyFor)
-  /* The scheduler's settings (docs/PLAYBOOK.md 2.3): which directions the
-     flashcards deal, the daily rations, the retention asked of the scheduler,
-     and how far ahead a learning step may be taken, in minutes. */
-  flash: DIRECTIONS.slice(),
+  /* The scheduler's settings (docs/PLAYBOOK.md 2.3): which fronts the
+     flashcards ask through, the daily rations, the retention asked of the
+     scheduler, and how far ahead a learning step may be taken, in minutes.
+     One front by default — the Russian — since a word is one card
+     (core/scheduler.js, 2026-09-23). */
+  flash: DEFAULT_FRONTS.slice(),
   newPerDay: 5,
   /* Which voice the flashcards use: `recording` prefers the collection's real
      audio and falls back to the device; `device` is the phone's voice for every

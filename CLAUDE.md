@@ -399,8 +399,8 @@ bridges/                          (directory is still named russian-blocks on di
   BACKUP.md            <- what git does not hold, and where the second copy is
   core/                <- shared by both apps; ES modules, no DOM, no storage
     util.js            <- fold, translit, tokens — the join key for everything
-    scheduler.js       <- ts-fsrs (FSRS-6) behind the app's card; three directions a word (§30w)
-    queue.js           <- the study session: order, rations, interleave, bury, Again (§30w)
+    scheduler.js       <- ts-fsrs (FSRS-6) behind the app's card; one card a word, three fronts (§30w, §30at)
+    queue.js           <- the study session: order, rations, interleave, Again (§30w)
     fsrs.js            <- FSRS-4.5, the frozen web app's scheduler only
     state.js           <- learner-state schema, migrations, recordAttempt
     repo.js            <- the state as rows: split, diff, the in-memory store (§30v)
@@ -4189,6 +4189,68 @@ from `data/curated/channels.json` (Patreon and site, found by hand) and the
 harvest's channel urls — six of the seven have a Patreon; Boost Your Russian
 has a site and no Patreon that could be found. Data, never a list typed into
 a screen (§6), so a channel added to the harvest is added to the credit.
+
+## 30at. A word is one card (2026-09-23)
+
+The owner, on the review load §30aa measured: *"I don't want it to be a huge
+burden to them like '120 notifications'… for me a word is technically 1
+card. They can elect to drill in one way, both ways, or audio only… that's
+up to them. It should default to Russian to English though."*
+
+**This reverses Phase 2's three cards a word (§30w), and the reversal is the
+design.** Three memories per word were the honest way to model "recognising
+is not producing", and the simulator priced it honestly too: three times the
+material, the struggling learner at the daily cap for 207 of 220 days, a
+ladder (`LADDER_AT`) invented to spread it and sibling burying invented to
+hide it. He does not want that, and one card is what Anki users actually run.
+
+- **One card, in the `recognise` slot** (`CARD` in `core/scheduler.js`) — the
+  slot keeps its name so no row, backup or SQL step has to move. `cardFor`
+  reads it; `cardsOf` is a list of one; `readyFor`, `LADDER_AT`, `bury`,
+  `buryNew`/`buryReview` and the `dirs` filtering of `dueCards`/`wanted` are
+  gone, not kept beside the new rule (§13).
+- **A direction is now a front**: how the card was asked. `DIRECTION_OF_KIND`
+  still maps every question kind to one, because the review log records how
+  a word was asked; `applyGrade(seen, trouble, word, direction, …)` checks
+  the direction and grades the one card whatever it is.
+- **The fronts are the learner's** (`st.flash`, the Study picker: Russian /
+  English / Sound only, "one way, both ways, or audio only"). Default
+  `["recognise"]`. With two or three ticked, `frontFor` in `core/queue.js`
+  takes them in turn by the card's answer count, so "both ways" is the same
+  card met each way alternately — never dealt twice in a session. The
+  per-front due pills went: every front holds the same cards.
+- **Split entries merge on the way in.** `mergeEntry` keeps the strongest
+  card (most stability; ties to slot order) and `normaliseSeen` applies it,
+  so a profile from the three-card weeks is read as one card on the next
+  boot and the first save deletes the other rows (`diff` emits the `del`).
+  The review log keeps every grade of every former card — nothing FSRS
+  learns from is lost. **v9** resets `flash` to the Russian front, for the
+  same reason v8 reset developer mode: the old default was nobody's choice.
+- **Measured, full route, seed 1** (three cards → one): quick 55 → **27.9**
+  reviews a day, leeches 3 → 12; steady 56 → **34.9**, leeches 29 → 70;
+  struggling 59 → **53.1**, backlog days 207 → **60**, leeches 191 → **397**.
+  The load halves, which is what he asked for. The leech count for the
+  struggling profile roughly doubles, and it is worth saying why before
+  anyone re-tunes it: every failed *production* question in a lesson now
+  lapses the word's only card, where before it lapsed a produce card the
+  recognise card never saw. That is the model being honest about one memory,
+  not a defect in the merge. The leech threshold is unchanged (§30aa's
+  argument for changing the rule rather than the number still stands).
+
+**And "which word did you hear?" is gone.** *"'What word did you hear' is
+pretty horrible and doesn't actually teach the language… I feel like the
+listening part already covers that."* He is right, and §30k had already
+conceded it: the native-speed passages could only ask what was *caught*,
+because YouTube's captions carry no translation, and a question about which
+word went by is not comprehension. The native-speed listening the app keeps
+is Immerse — the same videos, whole, with the words they say and the moment
+each is said. Removed: `Passage.js`, `ListeningList`/`PassageFlow`, the
+"Native speed" row, the `Listening`/`Passage` routes, `passagesFor` and its
+generators, the `passage`/`heard` kinds, `tools/build_listening.py`, and
+`listening.json` from the payload (0.83 MB off the bundle). Real
+comprehension questions on native video would need a translation pass over
+the spans — a build-time model job of a few dollars — and that waits for
+someone to want it.
 
 ## 31. Verification
 

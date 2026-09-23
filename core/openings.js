@@ -9,8 +9,8 @@
  * is walked and not one of them ever says so** (measured 2026-09-17): four
  * grammar drills by chapter, listen-and-type from the first chapter's third
  * lesson, the conversations from the second, say-it-aloud from the third, the
- * chapter's form question, Talk, native-speed listening, sentence cards, the
- * chapter task. They simply start appearing.
+ * chapter's form question, Talk, sentence cards, the chapter task. They simply
+ * start appearing.
  *
  * That is not a gap a tutorial fixes. A tour shown on day one cannot tell
  * anyone about an activity that opens in chapter 8, and coach marks over a

@@ -32,7 +32,6 @@ export const RUNS = [
   "BuildDrill",   // a long word built from its end
   "Shadow",       // shadowing
   "Scenes",       // a written listening scenario
-  "Passage",      // native-speed listening
   "Talk",         // a conversation
   "Translate",    // speaking Russian to be read back in English
   "Video",        // an episode, which wants the whole screen
@@ -48,7 +47,7 @@ export const RUNS = [
  * Phase 0.3: completeness, not existence). */
 export const TAB_BAR_SCREENS = [
   "Path", "Unit", "Lesson",                            // Learn
-  "Drills", "QuizSetup", "DrillSetup", "Listening", "SceneList", "Sounds",  // Practice
+  "Drills", "QuizSetup", "DrillSetup", "SceneList", "Sounds",  // Practice
   "Episodes",                                          // Immerse
   "Cards",                                             // Study
   "Words",                                             // Search

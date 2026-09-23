@@ -42,8 +42,36 @@ export const MINUTE = 60000;
    (`setDayStart`), never here. */
 export const dayOf = dayOfLocal;
 
+/* **A word is one card** (the owner, 2026-09-23: *"for me a word is
+ * technically 1 card. They can elect to drill in one way, both ways, or audio
+ * only… It should default to Russian to English though."*).
+ *
+ * Phase 2 (§30w) gave every word three cards — recognise, produce, listen —
+ * each its own FSRS memory, and the honest simulator (§30aa) priced it: three
+ * times the material, the review load pinned at the daily cap for two hundred
+ * days, a ladder invented to spread it and sibling burying invented to hide
+ * it. He does not want that, and he is the one who studies with it.
+ *
+ * So `DIRECTIONS` are now the three **fronts** a card can be asked through —
+ * the Russian shown, the meaning shown, the Russian heard — and a direction
+ * on a log row or a session item records *how the card was asked*, never
+ * which of several memories was touched. There is one memory a word, and it
+ * lives in the `CARD` slot of `seen[word]`; the slot keeps its old name so no
+ * row, backup or migration has to move. A lesson question, a spoken turn and
+ * a flashcard all grade the same card, and a learner who ticks two fronts
+ * meets the card through each in turn. */
 export const DIRECTIONS = ["recognise", "produce", "listen"];
 export const isDirection = (d) => DIRECTIONS.includes(d);
+export const CARD = "recognise";
+/* The shipped default front: Russian on the front, the meaning behind. */
+export const DEFAULT_FRONTS = [CARD];
+/* The word's card. An entry a Phase 2 build left as several cards is read as
+   its strongest (`mergeEntry`), so every reader agrees before the save that
+   merges it for good. */
+export const cardFor = (entry) => {
+  const m = mergeEntry(entry);
+  return (m && m[CARD]) || null;
+};
 
 /* The library's states, by number as the card and the log store them. */
 export const NEW = State.New, LEARNING = State.Learning, REVIEW = State.Review, RELEARNING = State.Relearning;
@@ -76,46 +104,24 @@ export function schedulerFor(opts) {
   return f;
 }
 
-/* A word earns its harder directions (2026-09-16).
- *
- * Three cards a word, all three starting at once, is three times the review
- * load on the day a word is met — and the simulator, once it was honest
- * enough to model them (ROADMAP 13.26), said what that costs: at 40 lessons
- * every profile sat permanently in backlog, 113 leeches for the *quick*
- * learner against 8 before, and 39 of 59 days spent clearing rather than
- * learning. A learner cannot be asked to produce and to transcribe a word on
- * the same day they first see it.
- *
- * So the ladder is the one the app already believes in (§30j `PRODUCE_AT`):
- * recognition meets a word, production keeps it. A word's `produce` and
- * `listen` cards are not dealt until its `recognise` card has held for
- * LADDER_AT days of stability — the same four days, and for the same reason:
- * it is roughly the third or fourth correct recall, late enough that the word
- * is known and early enough that it is still being learned.
- *
- * **Swept, and it buys less than it first appeared to.** `simulate.mjs
- * --ladder N`, four seeds, the struggling profile at 40 lessons:
- *
- *     ladder   leeches (per seed)      backlog days
- *       0      50, 43, 45, 53  (47.8)  26, 21, 24, 20  (22.8)
- *       4      35, 49, 48, 39  (42.8)  18, 20, 19, 19  (19.0)
- *
- * The leech count is **noise** — the ladder is worse on two of the four seeds
- * and the means are a few cards apart. What is real is the backlog: fewer
- * days overflow the cap on *every* seed, which is what gating new cards
- * behind maturity should do, since it spreads the load rather than making any
- * one card easier. The rule is kept on that evidence and no more; anyone
- * tempted to claim it cures leeches should re-read this table.
- *
- * Cards already created are never withdrawn; this gates only what is *new*,
- * so a profile migrated from Phase 1 keeps everything it had. */
-export const LADDER_AT = 4;
-export const LADDER_FROM = "recognise";
-export function readyFor(entry, direction, at = LADDER_AT) {
-  if (direction === LADDER_FROM) return true;
-  if (entry && entry[direction]) return true;          // it exists; it is not new
-  const base = entry && entry[LADDER_FROM];
-  return !!base && typeof base.s === "number" && base.s >= at;
+/* A word that Phase 2 split into several cards, back to one. The card kept is
+   the **strongest memory** — the most stability, since that is what
+   `strength` always reported as the word's — and a tie goes to the slot
+   order, recognise first. Nothing is lost that mattered: the review log
+   holds every grade of every former card, and a memory weaker than the one
+   kept was a claim the kept one already covered. Returns the entry itself
+   when it is already one card, so a save can see nothing changed. */
+export function mergeEntry(entry) {
+  if (!entry || typeof entry !== "object") return entry;
+  const dirs = DIRECTIONS.filter((d) => entry[d]);
+  if (dirs.length === 0) return entry;
+  if (dirs.length === 1 && dirs[0] === CARD) return entry;
+  let best = null;
+  for (const d of dirs) {
+    const c = entry[d];
+    if (!best || (c.s || 0) > (best.s || 0)) best = c;
+  }
+  return { [CARD]: best };
 }
 
 /* The scheduler's options as the learner's state holds them: the retention
@@ -172,11 +178,10 @@ export function fromLegacy(c) {
   return out;
 }
 
-/* `seen` as the app keeps it now, whatever shape it arrived in: a word that
-   was one card becomes that card under `recognise` — recognition is the
-   weaker claim, and a single blended card is proof of no more; production
-   and listening start new. Returns the same object when nothing needed
-   converting, so a save can see that nothing changed. */
+/* `seen` as the app keeps it now, whatever shape it arrived in: a card timed
+   in days becomes one timed in milliseconds, and a word Phase 2 had split into
+   several cards becomes one again (`mergeEntry`). Returns the same object
+   when nothing needed converting, so a save can see that nothing changed. */
 export function normaliseSeen(seen) {
   if (!seen || typeof seen !== "object") return {};
   let out = null;
@@ -185,7 +190,7 @@ export function normaliseSeen(seen) {
     if (!x || typeof x !== "object") continue;
     let fixed = null;
     if (isLegacyCard(x)) {
-      fixed = { recognise: fromLegacy(x) };
+      fixed = { [CARD]: fromLegacy(x) };
     } else {
       for (const dir in x) {
         if (x[dir] && isLegacyCard(x[dir])) {
@@ -193,6 +198,8 @@ export function normaliseSeen(seen) {
           fixed[dir] = fromLegacy(x[dir]);
         }
       }
+      const merged = mergeEntry(fixed || x);
+      if (merged !== (fixed || x)) fixed = merged;
     }
     if (fixed) {
       out = out || Object.assign({}, seen);
@@ -253,36 +260,36 @@ export function isDue(card, now, learnAhead) {
   return dayOf(card.dueAt) <= dayOf(now);
 }
 
-/* `dirs`, where it is given, is the learner's chosen card fronts. It narrows
-   what *counts as owed* so that a count and the pile it describes cannot
-   disagree — see the long note in core/queue.js. Left out, it is every
-   direction, which is what `strength`, `maxLapses` and `reviewedOn` want:
-   those are facts about a word's memory, not about today's session. */
-export const cardsOf = (entry, dirs) =>
-  (dirs && dirs.length ? DIRECTIONS.filter((d) => dirs.includes(d)) : DIRECTIONS)
-    .filter((d) => entry && entry[d]).map((d) => ({ direction: d, card: entry[d] }));
+/* The cards an entry holds — one since 2026-09-23, still a list so every
+   reader that summed or scanned "a word's cards" reads the same way. An entry
+   not yet merged (a backup from the three-card weeks) answers with its
+   strongest, as `cardFor` does. */
+export const cardsOf = (entry) => {
+  const card = cardFor(entry);
+  return card ? [{ direction: CARD, card: card }] : [];
+};
 
-/* Every (word, direction) that is due, across the whole schedule. */
-export function dueCards(seen, now, learnAhead, dirs) {
+/* Every word whose card is due, across the whole schedule. */
+export function dueCards(seen, now, learnAhead) {
   const out = [];
   for (const w in seen || {}) {
-    for (const { direction, card } of cardsOf(seen[w], dirs)) {
+    for (const { direction, card } of cardsOf(seen[w])) {
       if (isDue(card, now, learnAhead)) out.push({ word: w, direction: direction, card: card });
     }
   }
   return out;
 }
 
-/* A word that wants attention: one with a card due, or one the learner added
-   to review themselves (a new card in the schedule comes only from "Add to
+/* A word that wants attention: its card is due, or the learner added it to
+   review themselves (a new card in the schedule comes only from "Add to
    review" — a word taught in a lesson has no card until it is graded). That
    is what the quiz tops up with and what the "Due today" set holds; the due
    *count* stays what is due. */
-export const wanted = (entry, now, learnAhead, dirs) =>
-  cardsOf(entry, dirs).some(({ card }) => card.state === NEW || isDue(card, now, learnAhead));
+export const wanted = (entry, now, learnAhead) =>
+  cardsOf(entry).some(({ card }) => card.state === NEW || isDue(card, now, learnAhead));
 
-/* The strongest memory a word has, in days of stability — what "strongest
-   first" means where a list is sorted by it. */
+/* A word's memory, in days of stability — what "strongest first" means where
+   a list is sorted by it. */
 export const strength = (entry) =>
   cardsOf(entry).reduce((a, { card }) => Math.max(a, card.s || 0), 0);
 
@@ -302,8 +309,7 @@ export const strength = (entry) =>
  *   1 day → 12   4 days → 27   a month → 58   100 days → 78   a year → 100
  *
  * A card that does not exist, or is still new, has no score: it is flagged
- * New instead. Per card, not per word — a word recognised on sight and not
- * yet producible is exactly what the three directions are for. */
+ * New instead. */
 export const FAMILIAR_AT = SCHEDULER_DEFAULTS.maxInterval;
 export function familiarity(card) {
   if (!card || card.state === NEW || !(card.s > 0)) return null;
@@ -328,8 +334,8 @@ export const dayDone = (state, due, day) => (due || 0) === 0 && workedOn(state, 
 
 /* ------------------------------------------------------------- trouble */
 
-/* A word is "trouble" once a card of it has lapsed repeatedly or sits at high
-   difficulty. Per card; a word is trouble if any of its directions is. */
+/* A word is "trouble" once its card has lapsed repeatedly or sits at high
+   difficulty. */
 export const LEECH_LAPSES = 4;
 export function isTrouble(card) {
   if (!card) return false;
@@ -339,15 +345,17 @@ export const wordTrouble = (entry) => cardsOf(entry).some(({ card }) => isTroubl
 
 /* One graded review applied to learner state, returned as new objects. The
    trouble rule follows the grade: a lapse on a word the scheduler now counts
-   as a leech is held against it, and any recall that lifts every direction
-   back out clears it. `prev` is the card as it was, for undo. */
+   as a leech is held against it, and a recall that lifts it back out clears
+   it. `direction` is how the card was asked — it is checked, since the log
+   row records it, and it does not choose a card: there is one. `prev` is the
+   card as it was, for undo. */
 export function applyGrade(seen, trouble, word, direction, grade, now, opts) {
   if (!isDirection(direction)) throw new Error("not a direction: " + direction);
   const g = gradeOf(grade);
-  const entry = (seen && seen[word]) || {};
-  const prev = entry[direction];
+  const entry = mergeEntry((seen && seen[word]) || {});
+  const prev = cardFor(entry) || undefined;
   const card = review(prev, g, now, opts);
-  const nextEntry = Object.assign({}, entry, { [direction]: card });
+  const nextEntry = { [CARD]: card };
   const nextSeen = Object.assign({}, seen, { [word]: nextEntry });
   const nextTrouble = Object.assign({}, trouble);
   if (g === 1 && isTrouble(card)) nextTrouble[word] = (nextTrouble[word] || 0) + 1;
@@ -392,22 +400,22 @@ export function reviewRows(seen, list, now, source, opts) {
   const rows = [];
   for (const it of list || []) {
     if (!it || !it.word || !isDirection(it.direction)) continue;
-    const entry = cur[it.word] || {};
-    rows.push(reviewRow(entry[it.direction], it.word, it.direction, it.grade, now, now + rows.length, source));
+    const entry = mergeEntry(cur[it.word] || {});
+    rows.push(reviewRow(cardFor(entry) || undefined, it.word, it.direction, it.grade, now, now + rows.length, source));
     cur = applyGrade(cur, {}, it.word, it.direction, it.grade, now, opts).seen;
   }
   return rows;
 }
 
-/* Which direction a question kind exercises (native/src/screens/Run.js VIEWS).
-   The runner grades a question's words through the card of this direction;
+/* Which front a question kind asks through (native/src/screens/Run.js VIEWS),
+   recorded on the review row so the log says how a word was asked;
    registry.test.js holds that every kind is here. */
 export const DIRECTION_OF_KIND = {
   "choose-en": "recognise", match: "recognise", stress: "recognise",
   "choose-ru": "produce", cloze: "produce", type: "produce", form: "produce",
   cases: "produce", aspect: "produce", agreement: "produce", conjugation: "produce",
   say: "produce", "pair-say": "produce",
-  listen: "listen", hear: "listen", scene: "listen", passage: "listen", heard: "listen",
+  listen: "listen", hear: "listen", scene: "listen",
   "pair-hear": "listen", shadow: "listen",
   /* A mouth drill that grades no word (core/buildup.js) — it is here because
      every kind must name a direction, not because a card is ever written. */

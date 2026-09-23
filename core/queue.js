@@ -11,24 +11,25 @@
  *   3. new cards up to `newPerDay`, less what today already introduced;
  *   4. reviews and new cards interleaved evenly — never all of one then all
  *      of the other;
- *   5. siblings buried **for the day**: once a word is answered, its other
- *      directions wait until tomorrow, as they do in Anki. The card just
- *      answered still comes back on its learning step — that is the same card,
- *      not a sibling;
- *   6. capped at `sessionSize`, with what remains reported so the screen can
+ *   5. capped at `sessionSize`, with what remains reported so the screen can
  *      offer the next chunk;
- *   7. `reviewsPerDay`, past which the day is done;
- *   8. Again re-enters the same session after at least `minGap` other cards.
+ *   6. `reviewsPerDay`, past which the day is done;
+ *   7. Again re-enters the same session after at least `minGap` other cards.
+ *
+ * A word is one card (core/scheduler.js CARD, 2026-09-23), so there are no
+ * siblings to bury and no ladder to climb — both existed only to manage the
+ * load of three cards a word, and went with them. `dirs` is which **fronts**
+ * the learner has ticked; a card is dealt through one of them, taking them in
+ * turn review by review, so "both ways" is the same card met each way
+ * alternately and "audio only" is the same card heard.
  *
  * Pure: state and clock in, an ordered list out. The screen owns the session
- * as it runs (`requeue`, `bury`); the counts of what today introduced and
- * answered live in the learner's `daily` slot (core/state.js).
+ * as it runs (`requeue`); the counts of what today introduced and answered
+ * live in the learner's `daily` slot (core/state.js).
  */
 
-import { DIRECTIONS, kindOf, isDue, retrievability, dayOf, readyFor } from "./scheduler.js";
+import { DIRECTIONS, DEFAULT_FRONTS, cardFor, kindOf, isDue, retrievability, dayOf } from "./scheduler.js";
 
-/* `buryNew` and `buryReview` are Anki's two sibling settings, separately,
-   because they cost very different things — see the table in `buildSession`. */
 /* `newPerDay` is 5, down from 15 (the owner, 2026-09-17: "The default is maybe
    5"). It is safe to move because it is not the lever: §30aa priced it at 6, 10,
    15 and 25 new cards a day and the route's load barely moved — the lesson
@@ -36,7 +37,13 @@ import { DIRECTIONS, kindOf, isDue, retrievability, dayOf, readyFor } from "./sc
    does control is how many *unfamiliar* faces a flashcard session opens with,
    and five is a pace a learner can feel finishing. */
 export const QUEUE_DEFAULTS = { newPerDay: 5, sessionSize: 20, reviewsPerDay: 200, learnAhead: 20,
-                                minGap: 3, buryNew: true, buryReview: false };
+                                minGap: 3 };
+
+/* The front a card is asked through this time: the ticked fronts in turn,
+   by how many times the card has been answered, so a learner drilling both
+   ways sees the Russian one review and the meaning the next. A new card
+   starts on the first ticked front, which by default is the Russian. */
+export const frontFor = (card, fronts) => fronts[((card && card.reps) || 0) % fronts.length];
 
 /* Today's counts, or a fresh slot when the day has moved on. */
 export function dailyFor(daily, now) {
@@ -88,89 +95,24 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }
   const o = Object.assign({}, QUEUE_DEFAULTS);
   for (const k in opts || {}) if (opts[k] !== undefined) o[k] = opts[k];
   const random = rng || Math.random;
-  const directions = (dirs && dirs.length ? dirs : DIRECTIONS).filter((d) => DIRECTIONS.includes(d));
+  const fronts = (dirs && dirs.length ? dirs : DEFAULT_FRONTS).filter((d) => DIRECTIONS.includes(d));
+  if (!fronts.length) fronts.push(DEFAULT_FRONTS[0]);
   const today = dailyFor(daily, now);
   const reviewsLeft = Math.max(0, o.reviewsPerDay - today.reviews);
   const newLeft = ahead ? Infinity : Math.max(0, o.newPerDay - today.new);
 
   const learning = [], reviews = [], fresh = [];
-  const todayNum = dayOf(now);
   for (const w of words || []) {
-    const entry = (seen && seen[w]) || {};
-    /* **Siblings are buried for the day, as Anki buries them** — not merely
-     * for the session, which is all `bury()` below can do.
-     *
-     * A word is three cards (recognise, produce, listen). Answering one used
-     * to leave the other two free to be dealt tomorrow, and the day after, so
-     * a word the learner plainly knows kept arriving on consecutive days
-     * wearing a different hat. The owner, 2026-09-17: *"I shouldn't see the
-     * same basic word multiple days in a row unless the algorithm determines
-     * that it needs to be."*
-     *
-     * **New and due are two settings, because they cost very different
-     * things.** Priced with `simulate.mjs --bury-new/--bury-review`, the
-     * struggling profile, four seeds:
-     *
-     *     buried        leeches            backlog days
-     *     nothing       43.3 (35,45,48,45)  20.8 (18,23,23,19)
-     *     new only      46.3 (44,52,41,48)  22.0 (20,25,21,22)
-     *     everything    50.8 (55,54,47,47)  28.3 (29,29,28,27)
-     *
-     * Burying a **due** card defers work that was owed, and the card comes
-     * back weaker: seven more leeches and seven more backlog days, worse on
-     * every seed. Burying a **new** one defers work that had not started, and
-     * costs about three leeches — inside the seed spread. So new siblings wait
-     * and due ones do not, which is the distinction Anki draws and the one
-     * that buys what he asked for at a price worth paying.
-     *
-     * The card already answered today is **not** buried by this — a learning
-     * step is the same card coming back, which is the algorithm deciding it
-     * needs to, and burying that would break the 1m/10m steps entirely. */
-    const answeredToday = DIRECTIONS.filter((d) => entry[d] && entry[d].lastAt !== undefined
-                                                   && dayOf(entry[d].lastAt) === todayNum);
-    /* **`dirs` is a filter on the whole pile, not only on what is new.**
-     *
-     * It used to gate new cards alone, so that a direction turned off could
-     * not strand the cards a *lesson* had already made in it — a lesson grades
-     * the direction its question exercised whatever the flashcards say, and
-     * measured over the full route with `--dirs recognise` the old filtering
-     * left 1,964 cards due at the end and a backlog on every day. That was a
-     * real defect and the fix for it was aimed at the wrong half.
-     *
-     * What it cost is a control that does not do what it says. The owner,
-     * 2026-09-22: *"the filters in the anki cards don't appear to do
-     * anything. Like if I click the Russian to English, it will still just
-     * show me the cards from before the filter was adjusted."* He is right:
-     * unticking a front left every already-scheduled card of that direction in
-     * the pile, which is a filter that filters nothing a learner can see.
-     *
-     * So the filter filters, and the stranding is answered where it actually
-     * lives — in the **counting**. `dueCards`/`wanted` in core/scheduler.js
-     * now take the same `dirs`, so the tab badge and "Due today" count only
-     * what this screen would deal. Nothing is owed that cannot be reached; a
-     * direction switched back on brings its cards back with it, and the
-     * picker says how many each front is holding. */
-    for (const d of DIRECTIONS) {
-      const card = entry[d];
-      const kind = kindOf(card);
-      if (!directions.includes(d)) continue;
-      /* Buried: another direction of this word was answered today. Which kinds
-         are buried is two settings, as it is in Anki, because they cost very
-         different things — the table in the comment above `buryNew`. */
-      const buried = answeredToday.length && !answeredToday.includes(d);
-      if (buried && (kind === "new" ? o.buryNew : o.buryReview)) continue;
-      if (kind === "new") {
-        /* A word earns produce and listen by holding its recognise card
-           (core/scheduler.js `readyFor`). Without this every word arrives as
-           three cards at once and the day it is met costs three reviews. */
-        if (!readyFor(entry, d, o.ladder)) continue;
-        fresh.push({ word: w, direction: d, card: card || null, kind: kind });
-        continue;
-      }
-      if (!isDue(card, now, o.learnAhead)) continue;
-      const item = { word: w, direction: d, card: card, kind: kind, r: retrievability(card, now, o.scheduler) };
-      (kind === "learning" ? learning : reviews).push(item);
+    const card = cardFor((seen && seen[w]) || {});
+    const kind = kindOf(card);
+    const direction = frontFor(card, fronts);
+    if (kind === "new") {
+      fresh.push({ word: w, direction: direction, card: card || null, kind: kind });
+      continue;
     }
+    if (!isDue(card, now, o.learnAhead)) continue;
+    const item = { word: w, direction: direction, card: card, kind: kind, r: retrievability(card, now, o.scheduler) };
+    (kind === "learning" ? learning : reviews).push(item);
   }
   // Most forgotten first; equal retrievability in a random order — never
   // the order the words were stored in.
@@ -233,9 +175,3 @@ export function requeue(items, at, item, minGap) {
   return items.slice(0, pos).concat([Object.assign({}, item, { again: true })], items.slice(pos));
 }
 
-/* A word answered buries its siblings for the rest of the session: nothing
-   after `from` may be another direction of the same word. A re-queued copy of
-   the very card just answered is not a sibling and stays. */
-export function bury(items, from, word, direction) {
-  return items.filter((x, i) => i <= from || x.word !== word || x.direction === direction);
-}

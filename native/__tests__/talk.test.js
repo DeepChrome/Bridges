@@ -121,10 +121,10 @@ describe("talk", () => {
     const st = await saved();
     expect(st.speech.tagCounts).toEqual({ CASE: 1 });
     expect(st.speech.attempts[0]).toMatchObject({ kind: "talk", scenario: "cafe", transcript: "я хочу вода" });
-    // A spoken turn grades the produce card: Again is a one-minute learning
+    // A spoken turn grades the word's one card: Again is a one-minute learning
     // step, Good a ten-minute one.
-    expect(st.seen["вода"].produce.dueAt - st.seen["вода"].produce.lastAt).toBe(60000);
-    expect(st.seen["хотеть"].produce.dueAt - st.seen["хотеть"].produce.lastAt).toBe(600000);
+    expect(st.seen["вода"].recognise.dueAt - st.seen["вода"].recognise.lastAt).toBe(60000);
+    expect(st.seen["хотеть"].recognise.dueAt - st.seen["хотеть"].recognise.lastAt).toBe(600000);
     expect(st.speech.talk).toEqual({ day: today(), sessions: 1 });
 
     // English off, then the summary: what went well, what to work on, the words.

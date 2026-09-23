@@ -38,9 +38,9 @@ const due = (extra = {}) => ({ dueAt: now - DAY, lastAt: now - 2 * DAY, s: 1, d:
 const fresh = () => ({ dueAt: now, s: 0, d: 0, state: NEW, steps: 0, reps: 0, lapses: 0 });
 
 const base = {
-  v: 6, seen: {}, trouble: {}, pinned: [], sets: ["__due__"], drills: {}, unit: {}, watched: {},
+  v: 9, seen: {}, trouble: {}, pinned: [], sets: ["__due__"], drills: {}, unit: {}, watched: {},
   speech: { attempts: [], tagCounts: {} }, xp: 0, streak: 0,
-  flash: ["recognise", "produce", "listen"], newPerDay: 5, reviewsPerDay: 200, learnAhead: 20,
+  flash: ["recognise"], newPerDay: 5, reviewsPerDay: 200, learnAhead: 20,
 };
 async function withProfile(state = {}) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
@@ -57,14 +57,16 @@ beforeEach(async () => {
 afterEach(async () => { await flushState(); });
 
 describe("the card says what it is", () => {
+  /* The front is the learner's choice (`flash`), and the one card is asked
+     through it (2026-09-23). */
   it("captions a listen card, whose front is otherwise only a speaker", async () => {
-    await withProfile({ seen: { [WORD]: { listen: due() } } });
+    await withProfile({ seen: { [WORD]: { recognise: due() } }, flash: ["listen"] });
     expect((await screen.findByTestId("card-kind")).props.children).toBe("Listen");
     expect(screen.getByTestId("card-listen")).toBeTruthy();
   });
 
   it("captions a produce card, which opens in English", async () => {
-    await withProfile({ seen: { [WORD]: { produce: due() } } });
+    await withProfile({ seen: { [WORD]: { recognise: due() } }, flash: ["produce"] });
     expect((await screen.findByTestId("card-kind")).props.children).toBe("Meaning");
   });
 
@@ -116,7 +118,7 @@ describe("the card says what it is", () => {
 /* The owner's condition on the whole feature. */
 describe("the front never carries the answer", () => {
   it("a produce card shows no Russian until it is turned", async () => {
-    await withProfile({ seen: { [WORD]: { produce: due() } } });
+    await withProfile({ seen: { [WORD]: { recognise: due() } }, flash: ["produce"] });
     await screen.findByTestId("card-produce");
     expect(screen.queryAllByText(isWord)).toHaveLength(0);
     fireEvent.press(screen.getByText("Show"));
@@ -124,7 +126,7 @@ describe("the front never carries the answer", () => {
   });
 
   it("a listen card shows no Russian until it is turned", async () => {
-    await withProfile({ seen: { [WORD]: { listen: due() } } });
+    await withProfile({ seen: { [WORD]: { recognise: due() } }, flash: ["listen"] });
     await screen.findByTestId("card-listen");
     expect(screen.queryAllByText(isWord)).toHaveLength(0);
     fireEvent.press(screen.getByText("Show"));
@@ -170,23 +172,24 @@ describe("the options live where a session starts", () => {
     expect((await saved()).newPerDay).toBe(12);
   });
 
-  /* **The filter filters.** The owner, 2026-09-22: *"if I click the Russian to
-     English, it will still just show me the cards from before the filter was
-     adjusted."* It gated only *new* cards, so every already-scheduled card of
-     an unticked direction stayed in the pile — and the tab badge counted them,
-     which is the half of the old rule worth keeping: nothing may be owed that
-     the screen will not deal. Both halves are asserted here. */
-  it("drops a front's due cards from the pile and from the count when it is unticked", async () => {
-    const seen = { [WORD]: { recognise: due(), produce: due() } };
+  /* **A front chooses how the card is asked, not which cards exist** (the
+     owner, 2026-09-23: a word is one card; "one way, both ways, or audio
+     only"). Ticking a second front does not double the pile, unticking one
+     drops nothing, and the badge counts words. */
+  it("asks the one card through the ticked front, and a second front does not double the pile", async () => {
+    const seen = { [WORD]: { recognise: due() } };
     await withProfile({ seen, sets: ["__due__"], flash: ["recognise", "produce"] });
     await screen.findByTestId("card-kind");
     expect(sessionFor({ ...base, seen, sets: ["__due__"], flash: ["recognise", "produce"] })
-      .items.map((i) => i.direction).sort()).toEqual(["produce", "recognise"]);
-    expect(dueCount({ ...base, seen, flash: ["recognise", "produce"] })).toBe(2);
+      .items.map((i) => i.word)).toEqual([WORD]);
+    expect(dueCount({ ...base, seen, flash: ["recognise", "produce"] })).toBe(1);
 
-    const one = { ...base, seen, sets: ["__due__"], flash: ["recognise"] };
-    expect(sessionFor(one).items.map((i) => i.direction)).toEqual(["recognise"]);
+    const one = { ...base, seen, sets: ["__due__"], flash: ["produce"] };
+    expect(sessionFor(one).items.map((i) => i.direction)).toEqual(["produce"]);
     expect(dueCount(one)).toBe(1);
+    // The default front is the Russian.
+    const { DEFAULTS } = require("../src/store");
+    expect(DEFAULTS.flash).toEqual(["recognise"]);
   });
 
   /* Commonest first. `fresh` used to be shuffled, so a beginner's opening

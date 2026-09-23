@@ -325,7 +325,7 @@ COVERAGE_FREE_RANK = 500
 
 # The parts of the payload the native app loads on first use rather than at boot,
 # each written to its own file beside data.json.
-NATIVE_PARTS = ["deep", "sent", "videos", "listening", "senses"]
+NATIVE_PARTS = ["deep", "sent", "videos", "senses"]
 
 
 def measure_sentences(sentences, sent_tokens, index, key_units, lemmas, unit_pos,
@@ -971,12 +971,6 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     # Listening passages: spans of real video, 45 s each, with the curriculum
     # words they say (tools/build_listening.py). Shipped whole — which passage
     # suits which learner is decided in the app, against what they have met.
-    listening = []
-    lpath = ROOT / "data" / "listening.json"
-    if lpath.exists():
-        listening = json.loads(lpath.read_text(encoding="utf-8")).get("passages", [])
-        stats["listening"] = len(listening)
-
     scripts = load_scripts(stats)
 
     senses = load_senses(lemmas, stats)
@@ -986,8 +980,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             "deep": deep, "shapes": shapes, "slots": slot_names,
             "sent": sent_pool, "tsample": tsample, "speech": speech,
             "videos": video_list, "channels": creators,
-            "listening": listening, "scripts": scripts,
-            "senses": senses}
+            "scripts": scripts, "senses": senses}
 
 
 # Our part-of-speech names against Wiktionary's. A closed-class word OpenRussian

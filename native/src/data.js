@@ -15,9 +15,6 @@ import { fold, today } from "@core/util";
 const deepBlob = () => require("../assets/deep.json");
 const sentPool = () => require("../assets/sent.json");
 export const videos = () => require("../assets/videos.json");
-/* Listening passages (tools/build_listening.py): spans of real video with the
-   curriculum words they say. Required when the listening screen opens. */
-export const passages = () => require("../assets/listening.json");
 /* Numbered senses for the studied words (tools/ingest_wiktionary.py, §30q).
    Required when a word is opened, which is never the first screen. */
 const sensesBlob = () => require("../assets/senses.json");
@@ -478,7 +475,7 @@ export const knownWords = (st) => Object.keys((st && st.seen) || {});
  * would not hand over is the stranding bug wearing the other hat: work owed
  * that nothing can reach. The Stats screen is the other question — what the
  * whole schedule holds — and deliberately still counts every direction. */
-export const dueCount = (st) => dueCards(st.seen, Date.now(), st.learnAhead, st.flash).length;
+export const dueCount = (st) => dueCards(st.seen, Date.now(), st.learnAhead).length;
 
 /* What a practice drill may ask about: the words the learner has met, widened
    along the route until there are enough to drill. A fresh learner gets the first

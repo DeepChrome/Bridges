@@ -18,7 +18,7 @@ import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrad
 import { split, merge, diff, isEmpty, memoryRepo, validLog, cardRow, rowCard, SETTING_KEYS }
   from "../core/repo.js";
 import * as S from "../core/scheduler.js";
-import { buildSession, requeue, bury, interleave, dailyFor, QUEUE_DEFAULTS } from "../core/queue.js";
+import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor } from "../core/queue.js";
 import { SCENARIOS } from "../core/scenarios.js";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP,
@@ -205,12 +205,17 @@ group("grading");
 
 group("state schema");
 {
-  ok(SCHEMA_VERSION === 8, "schema is at 8", String(SCHEMA_VERSION));
+  ok(SCHEMA_VERSION === 9, "schema is at 9", String(SCHEMA_VERSION));
   /* v8 turns developer mode off for everyone (2026-09-23): it had shipped on
      and no profile can say whether it chose that, so nobody keeps it. */
-  const v8 = migrate({ v: 7, dev: true, watched: {} }, 7);
+  const v8 = MIGRATIONS[7]({ v: 7, dev: true, watched: {} });
   ok(v8.v === 8 && v8.dev === false && v8.faves && v8.notices,
      "v7 → v8 turns developer mode off and adds the favourites and notices slots");
+  /* v9: a word is one card and the flashcards default to the Russian front
+     (the owner, 2026-09-23); the three-front default nobody chose is reset. */
+  const v9 = migrate({ v: 8, flash: ["recognise", "produce", "listen"] }, 8);
+  ok(v9.v === 9 && v9.flash.length === 1 && v9.flash[0] === "recognise",
+     "v8 → v9 sets the flashcards to the Russian front");
   ok([1, 2, 3, 4, 5, 6].every((k) => typeof MIGRATIONS[k] === "function"),
      "a migration step exists from every earlier version");
 
@@ -328,17 +333,21 @@ group("the state as rows");
   const r = S.applyGrade(st.seen, st.trouble, "книга", "recognise", 3, now, { fuzz: false });
   const next = Object.assign({}, st, { seen: r.seen, trouble: r.trouble, xp: 43 });
   const d = diff(st, next);
+  /* One card row put, the xp key — and, since a word is one card (2026-09-23),
+     the second card this fixture still carried for «книга» is deleted by the
+     grade that merged it. */
   ok(d.cards.put.length === 1 && d.cards.put[0].word === "книга" && d.cards.put[0].direction === "recognise"
-     && d.cards.del.length === 0 && d.decks === null && Object.keys(d.progress.put).join() === "xp"
+     && d.cards.del.map((k) => k.word + "/" + k.direction).join() === "книга/produce"
+     && d.decks === null && Object.keys(d.progress.put).join() === "xp"
      && Object.keys(d.settings.put).length === 0,
-     "one grade: one card row and the xp key, nothing else", JSON.stringify(d));
+     "one grade: one card row, the stale second card gone, and the xp key, nothing else", JSON.stringify(d));
   const rebuilt = Object.assign({}, st, { seen: Object.assign({}, st.seen), unit: JSON.parse(JSON.stringify(st.unit)) });
   ok(isEmpty(diff(st, rebuilt)), "new objects with the same content write nothing");
   const fewer = Object.assign({}, next, { seen: { книга: { recognise: next.seen["книга"].recognise } }, decks: [] });
   const d2 = diff(next, fewer);
-  ok(d2.cards.del.map((k) => k.word + "/" + k.direction).sort().join() === "книга/produce,нет/listen"
+  ok(d2.cards.del.map((k) => k.word + "/" + k.direction).sort().join() === "нет/listen"
      && d2.decks && d2.decks.del.join() === "k1" && d2.decks.put.length === 0,
-     "what went is deleted: two cards, a deck", JSON.stringify(d2.cards.del));
+     "what went is deleted: a card, a deck", JSON.stringify(d2.cards.del));
   const d3 = diff(st, Object.assign({}, st, { decks: st.decks.concat([{ id: "k2", name: "E", cards: [] }]) }));
   ok(d3.decks.put.length === 1 && d3.decks.put[0].id === "k2" && d3.decks.put[0].ord === 1 && d3.decks.del.length === 0,
      "a deck added is the only deck written");
@@ -517,19 +526,37 @@ group("the scheduler");
   const seen = { книга: old, дом: { recognise: conv }, нет: { produce: { s: 1, due: 3, last: 2, reps: 1 } } };
   const ns = S.normaliseSeen(seen);
   ok(ns !== seen && ns["книга"].recognise.dueAt === conv.dueAt && ns["дом"] === seen["дом"]
-     && ns["нет"].produce.dueAt === 3 * DAY && !("listen" in ns["книга"]),
-     "normaliseSeen: one old card becomes the recognise card, a converted entry is left as it is");
+     && ns["нет"].recognise.dueAt === 3 * DAY && !("produce" in ns["нет"]),
+     "normaliseSeen: one old card becomes the card, a card under another slot moves to the one slot, a converted entry is left as it is");
   ok(S.normaliseSeen(ns) === ns && S.normaliseSeen({}) !== null, "and it returns the same object when nothing needed converting");
 
-  // The trouble rule, per card, and the word's entry.
+  /* **A word is one card** (the owner, 2026-09-23). A Phase 2 entry with three
+     cards merges to its strongest memory; the log keeps every grade of the
+     others. */
+  const split = { recognise: { ...conv, s: 2 }, produce: { ...conv, s: 9 }, listen: { ...conv, s: 4 } };
+  const one = S.mergeEntry(split);
+  ok(Object.keys(one).length === 1 && one.recognise.s === 9, "three cards merge to the strongest, in the one slot",
+     JSON.stringify(Object.keys(one)));
+  ok(S.mergeEntry(seen["дом"]) === seen["дом"], "an entry already one card is returned as it is");
+  ok(S.normaliseSeen({ дом: split })["дом"].recognise.s === 9, "…and normaliseSeen does it on the way in");
+  ok(S.cardFor(split) === split.produce && S.cardFor({ recognise: conv }) === conv && S.cardFor(undefined) === null,
+     "cardFor reads the one card, the strongest of a still-split entry");
+
+  // The trouble rule, and the word's entry. A grade through any front lands on
+  // the one card.
   let e = {}, tr = {};
   let t = T0;
   for (let i = 0; i < 5; i++) { ({ seen: e, trouble: tr } = S.applyGrade(e, tr, "слово", "produce", 1, t, opts)); t += 2 * DAY; }
-  ok(S.wordTrouble(e["слово"]) && tr["слово"] >= 1, "repeated Again banks a word as trouble through its direction");
+  ok(S.wordTrouble(e["слово"]) && tr["слово"] >= 1, "repeated Again banks a word as trouble");
   ok(!S.wordTrouble({ recognise: good }), "a word answered once is not");
+  ok(Object.keys(e["слово"]).length === 1 && e["слово"].recognise.reps === 5,
+     "a grade asked through the meaning lands on the one card", JSON.stringify(e["слово"]));
   const g2 = S.applyGrade(e, tr, "слово", "recognise", 3, t, opts);
-  ok(g2.seen["слово"].recognise && g2.seen["слово"].produce === e["слово"].produce && g2.prev === undefined,
-     "a grade in one direction leaves the other's card alone and reports no previous card");
+  ok(g2.seen["слово"].recognise.reps === e["слово"].recognise.reps + 1 && g2.prev === e["слово"].recognise,
+     "a grade through another front continues the same card and reports it as the previous card");
+  const g3 = S.applyGrade({ дом: split }, {}, "дом", "listen", 3, T0, opts);
+  ok(Object.keys(g3.seen["дом"]).length === 1 && g3.prev === split.produce,
+     "a grade on a still-split entry merges it first and continues the strongest card");
   let threw = false;
   try { S.applyGrade({}, {}, "x", "sideways", 3, T0); } catch (err) { threw = true; }
   ok(threw, "a direction the scheduler does not know is refused");
@@ -544,22 +571,9 @@ group("the scheduler");
      && S.dueCards(worked.seen, T0).length === 1,
      "dueCards counts the learning step when its minute comes, or inside the learn-ahead window");
   ok(S.strength({ recognise: good, produce: easy }) === Math.max(good.s, easy.s) && S.maxLapses({ produce: lapsed }) === 1,
-     "strength is the strongest direction; lapses the worst");
-  /* A word earns its harder directions (LADDER_AT). Recognition is always
-     available; produce and listen wait for the recognise card to hold. */
-  const young = { recognise: { s: 1, d: 5, dueAt: T0, state: S.REVIEW, steps: 0, reps: 1, lapses: 0 } };
-  const held = { recognise: { s: S.LADDER_AT + 1, d: 5, dueAt: T0, state: S.REVIEW, steps: 0, reps: 4, lapses: 0 } };
-  ok(S.readyFor(undefined, "recognise") && S.readyFor(young, "recognise"),
-     "recognition is always dealt — it is how a word is met");
-  ok(!S.readyFor(young, "produce") && !S.readyFor(young, "listen"),
-     "a word met once does not also arrive as a typing card and a listening card");
-  ok(S.readyFor(held, "produce") && S.readyFor(held, "listen"),
-     "…and does once its recognise card has held");
-  ok(!S.readyFor(undefined, "produce") && !S.readyFor({}, "produce"),
-     "a word with no recognise card at all has earned nothing");
-  ok(S.readyFor({ produce: young.recognise }, "produce"),
-     "a card that already exists is never withdrawn — the gate is only on new ones");
-  ok(S.readyFor(young, "produce", 0), "and the ladder can be turned off, which is how it was priced");
+     "strength and lapses read an unmerged entry as its strongest card");
+  ok(S.readyFor === undefined && S.LADDER_AT === undefined,
+     "the ladder is gone with the three cards it was spreading");
 
   ok(Object.values(S.DIRECTION_OF_KIND).every(S.isDirection) && S.directionOfKind("choose-en") === "recognise"
      && S.directionOfKind("type") === "produce" && S.directionOfKind("hear") === "listen"
@@ -601,63 +615,51 @@ group("the session");
   ok(newAt[0] >= 3 && newAt[1] - newAt[0] >= 8 && newAt[1] - newAt[0] <= 11, "and are spread through it", newAt.join(","));
   ok(ses.remaining === 113 && reviewsIn.length === 18, "eighteen reviews dealt, 113 left for the next chunk", `${reviewsIn.length} / ${ses.remaining}`);
 
-  /* Siblings are buried for the **day**, as Anki buries them (the owner,
-     2026-09-17: *"I shouldn't see the same basic word multiple days in a
-     row"*). A word is three cards, and answering one used to leave the other
-     two free to arrive tomorrow and the day after. */
+  /* **A word is one card, met through the fronts the learner ticked** (the
+     owner, 2026-09-23: "one way, both ways, or audio only"). There are no
+     siblings, so nothing to bury and no ladder to climb. */
   {
-    const day = S.dayOf(T0);
-    /* Answered an hour ago and scheduled nine days out, which is what a real
-       answered review card looks like — it is not itself due again. */
     const answered = { dueAt: T0 + 9 * DAY, lastAt: T0 - 3600000, s: 9, d: 5, state: S.REVIEW,
                        steps: 0, reps: 3, lapses: 0, elapsed: 0, scheduled: 9 };
-    const sibling = { dueAt: T0 - DAY, lastAt: T0 - 9 * DAY, s: 4, d: 5, state: S.REVIEW,
-                      steps: 0, reps: 2, lapses: 0, elapsed: 0, scheduled: 4 };
-    /* **A new sibling waits until tomorrow.** This is the case he actually
-       meets: a word taught today, whose produce and listen cards have just
-       become available, arriving again tomorrow and the day after as something
-       "new". `recognise` answered an hour ago; the other two do not exist yet
-       and the ladder would otherwise deal them. */
+    const due = { dueAt: T0 - DAY, lastAt: T0 - 9 * DAY, s: 4, d: 5, state: S.REVIEW,
+                  steps: 0, reps: 2, lapses: 0, elapsed: 0, scheduled: 4 };
     const one = { dom: { recognise: answered } };
     const ses = buildSession({ seen: one, words: ["dom"], dirs: S.DIRECTIONS, now: T0,
-                               daily: null, opts: { ...opts, sessionSize: 20 }, rng });
-    ok(ses.items.length === 0,
-       "a word answered today deals none of its new directions",
+                               daily: null, opts, rng });
+    ok(ses.items.length === 0, "a word answered an hour ago is one card, and it is not due",
        ses.items.map((x) => `${x.direction}:${x.kind}`).join(" ") || "nothing dealt");
-    ok(S.reviewedOn(one.dom, day), "…and it is 'answered today' that does it");
-
-    /* **A due sibling is not buried.** Deferring work already owed is what
-       cost seven leeches and seven backlog days a seed (the table in
-       core/queue.js), so a card the scheduler wants back today still comes. */
-    const due2 = buildSession({ seen: { dom: { recognise: answered, produce: sibling } },
-                                words: ["dom"], dirs: S.DIRECTIONS, now: T0, daily: null, opts, rng });
-    ok(due2.items.length === 1 && due2.items[0].direction === "produce",
-       "…but a sibling that is genuinely due still comes back",
-       due2.items.map((x) => `${x.direction}:${x.kind}`).join(" ") || "nothing");
-
-    /* The card that was answered is not buried by its own answer — a learning
-       step is the same card coming back, which is the scheduler deciding it
-       needs to, and burying that would break the 1m/10m steps. */
+    /* Both ways: the same card, asked through the fronts in turn by how many
+       times it has been answered — never twice in one session. */
+    const both = buildSession({ seen: { dom: { recognise: due } }, words: ["dom"],
+                                dirs: ["recognise", "produce"], now: T0, daily: null, opts, rng });
+    ok(both.items.length === 1 && both.items[0].direction === "recognise",
+       "two fronts ticked deal the card once, through the front its turn falls on",
+       both.items.map((x) => `${x.direction}:${x.kind}`).join(" "));
+    const odd = buildSession({ seen: { dom: { recognise: { ...due, reps: 3 } } }, words: ["dom"],
+                               dirs: ["recognise", "produce"], now: T0, daily: null, opts, rng });
+    ok(odd.items[0].direction === "produce", "…and the other front the next time round");
+    ok(frontFor({ reps: 0 }, ["recognise"]) === "recognise" && frontFor(null, ["listen"]) === "listen"
+       && frontFor({ reps: 5 }, ["recognise", "produce", "listen"]) === "listen",
+       "frontFor rotates the ticked fronts by the card's answers; a new card starts on the first");
+    const audio = buildSession({ seen: {}, words: ["dom"], dirs: ["listen"], now: T0, daily: null, opts, rng });
+    ok(audio.items.length === 1 && audio.items[0].direction === "listen" && audio.items[0].kind === "new",
+       "audio only: a new word arrives as a listening card");
+    const none = buildSession({ seen: {}, words: ["dom"], dirs: [], now: T0, daily: null, opts, rng });
+    ok(none.items[0].direction === "recognise", "no fronts at all means the default, the Russian");
+    /* The card on its learning step still comes back — the same card, which
+       is the scheduler deciding it needs to. */
     const step = { dueAt: T0, lastAt: T0 - 600000, s: 0.2, d: 5, state: S.LEARNING,
                    steps: 1, reps: 1, lapses: 0, elapsed: 0, scheduled: 0 };
     const mid = buildSession({ seen: { dom: { recognise: step } },
                                words: ["dom"], dirs: S.DIRECTIONS, now: T0, daily: null, opts, rng });
-    ok(mid.items.length === 1 && mid.items[0].direction === "recognise",
-       "…while the card on its learning step still comes back",
+    ok(mid.items.length === 1 && mid.items[0].kind === "learning",
+       "the card on its learning step comes back",
        mid.items.map((x) => x.direction).join(",") || "nothing");
-
-    /* A word untouched today is unaffected: two due cards, and the third
-       direction arrives as a new one because the recognise card has held long
-       enough for the ladder (LADDER_AT). */
-    const cold = buildSession({ seen: { dom: { recognise: sibling, produce: sibling } },
-                                words: ["dom"], dirs: S.DIRECTIONS, now: T0, daily: null, opts, rng });
-    ok(cold.items.length === 3, "a word not answered today deals every card it owes",
-       cold.items.map((x) => `${x.direction}:${x.kind}`).join(" "));
-    // …and the rule can be turned off, which is how it was priced.
-    const off = buildSession({ seen: one, words: ["dom"], dirs: S.DIRECTIONS, now: T0,
-                               daily: null, opts: { ...opts, buryNew: false, buryReview: false }, rng });
-    ok(off.items.length === 2, "and burying can be turned off, which is how it was priced",
-       off.items.map((x) => `${x.direction}:${x.kind}`).join(" ") || "nothing");
+    /* An entry a Phase 2 build left split is read as its strongest card. */
+    const split = buildSession({ seen: { dom: { recognise: due, produce: answered } },
+                                 words: ["dom"], dirs: S.DIRECTIONS, now: T0, daily: null, opts, rng });
+    ok(split.items.length === 0, "a still-split entry is one card, its strongest — here not due",
+       split.items.map((x) => `${x.direction}:${x.kind}`).join(" ") || "nothing dealt");
   }
 
   const only = buildSession({ seen: {}, words: fresh, dirs: ["recognise"], now: T0, daily: null, opts, rng });
@@ -675,21 +677,17 @@ group("the session");
 
   /* **The budget** (docs/PLAYBOOK.md Phase 6: session build under 50 ms).
    *
-   * Measured rather than assumed, and on a pile far past anything real: 4,000
-   * words × three directions is the whole curriculum studied in every
-   * direction, which is more cards than the route can produce. The phone is
+   * Measured rather than assumed, and on a pile far past anything real:
+   * 12,000 words all due at once is three times the curriculum. The phone is
    * slower than this machine, so the headroom is the point — a budget met by
    * 2× here would not be a budget. If this ever fails, the fix is the ordering
    * (it sorts the whole due pile) and not the number. */
   const many = {};
-  for (let i = 0; i < 4000; i++) {
+  for (let i = 0; i < 12000; i++) {
     const w = "b" + i;
-    many[w] = {};
-    for (const d of S.DIRECTIONS) {
-      const s = 1 + ((i * 17) % 60);
-      many[w][d] = { dueAt: T0 - DAY, lastAt: T0 - (s + 5) * DAY, s, d: 5,
-                     state: S.REVIEW, steps: 0, reps: 3, lapses: 0, elapsed: 0, scheduled: s };
-    }
+    const s = 1 + ((i * 17) % 60);
+    many[w] = { recognise: { dueAt: T0 - DAY, lastAt: T0 - (s + 5) * DAY, s, d: 5,
+                             state: S.REVIEW, steps: 0, reps: 3, lapses: 0, elapsed: 0, scheduled: s } };
   }
   const bigWords = Object.keys(many);
   const t0 = performance.now();
@@ -706,19 +704,16 @@ group("the session");
   ok(mixed.length === 10 && at.length === 2 && at[1] - at[0] === 5, "two new among eight reviews sit five apart", at.join(","));
   ok(interleave([{ i: "L" }], [{ i: 1 }], [])[0].i === "L", "learning steps come first");
 
-  // Siblings and Again.
-  const twoDirs = buildSession({ seen: { дом: { recognise: seen.w000.recognise, produce: seen.w001.recognise } },
-                                 words: ["дом"], dirs: ["recognise", "produce"], now: T0, daily: null, opts, rng });
-  ok(twoDirs.items.length === 2, "both directions of a word are dealt");
-  const buried = bury(twoDirs.items, 0, "дом", twoDirs.items[0].direction);
-  ok(buried.length === 1 && buried[0] === twoDirs.items[0], "answering one buries the other for the session");
-  const again = requeue(twoDirs.items, 0, twoDirs.items[0], 3);
-  ok(again.length === 3 && again[2].word === "дом" && again[2].again === true,
+  // Again.
+  const pair = buildSession({ seen: { дом: seen.w000, стол: seen.w001 },
+                              words: ["дом", "стол"], dirs: ["recognise"], now: T0, daily: null, opts, rng });
+  ok(pair.items.length === 2, "two due words are two cards");
+  const again = requeue(pair.items, 0, pair.items[0], 3);
+  ok(again.length === 3 && again[2].word === pair.items[0].word && again[2].again === true,
      "Again comes back at the end of a short session");
   const long = requeue(ses.items, 0, ses.items[0], 3);
   ok(long[4] !== ses.items[0] && long[4].word === ses.items[0].word && long[4].again && long.length === 21,
      "and after three other cards in a long one");
-  ok(bury(again, 2, "дом", again[2].direction).length === 3, "a re-queued copy of the card itself is not a sibling");
   ok(QUEUE_DEFAULTS.sessionSize === 20 && QUEUE_DEFAULTS.newPerDay === 5 && QUEUE_DEFAULTS.reviewsPerDay === 200,
      "the defaults are the playbook's");
   const unset = buildSession({ seen: {}, words: fresh, dirs: ["recognise"], now: T0, daily: null,
@@ -1904,110 +1899,6 @@ for (const d of DRILL_TYPES) {
   }
 }
 
-/* Listening passages (ROADMAP P10.3): half a minute of one speaker, ranked
-   against what the learner actually knows rather than assigned a chapter. */
-group("listening passages");
-{
-  const P = DATA.listening || [];
-  ok(P.length > 200, "the build ships passages", String(P.length));
-  ok(P.every((p) => p.v && p.start >= 0 && p.end > p.start && p.title),
-     "each names a video and a span inside it");
-  const lengths = P.map((p) => p.end - p.start);
-  ok(Math.min(...lengths) >= 30000 && Math.max(...lengths) <= 62000,
-     "every passage is between thirty seconds and a minute",
-     `${Math.min(...lengths)}–${Math.max(...lengths)} ms`);
-  ok(P.every((p) => Object.keys(p.words).length >= 12),
-     "and says at least a dozen curriculum words");
-  // Every word shipped is a real curriculum word, said at a time inside the span.
-  const taught = new Set();
-  for (const u of UN) for (const i of u.w) taught.add(L[i].b);
-  let stray = 0, outside = 0;
-  for (const p of P) {
-    for (const w in p.words) {
-      if (!taught.has(w)) stray++;
-      if (p.words[w].some((ms) => ms < p.start || ms > p.end)) outside++;
-    }
-  }
-  ok(stray === 0, "every word listed is one the curriculum teaches", String(stray));
-  ok(outside === 0, "and every moment falls inside the passage", String(outside));
-
-  // No two passages from one video overlap: three windows on the same half minute
-  // would be one passage offered three times.
-  let overlaps = 0;
-  const byVideo = {};
-  for (const p of P) (byVideo[p.v] = byVideo[p.v] || []).push(p);
-  for (const v in byVideo) {
-    const list = byVideo[v].slice().sort((a, b) => a.start - b.start);
-    for (let k = 1; k < list.length; k++) if (list[k].start < list[k - 1].end) overlaps++;
-  }
-  ok(overlaps === 0, "passages from one video never overlap", String(overlaps));
-
-  /* Ranked by fit, and a learner who knows nothing is offered nothing rather
-     than a passage they cannot touch. */
-  ok(Q.passagesFor(P, new Set(), 10).length === 0, "no words known, nothing offered");
-  const someWords = new Set(UN.slice(0, 12).flatMap((u) => u.w).map((i) => L[i].b));
-  const fitted = Q.passagesFor(P, someWords, 10);
-  ok(fitted.length > 0, "a learner part-way along is offered some", String(fitted.length));
-  const fits = fitted.map((p) => Q.passageFit(p, someWords));
-  ok(fits.every((f, k) => k === 0 || fits[k - 1] >= f), "best fit first", fits.join(","));
-  ok(fits.every((f) => f >= 6), "and never one with almost nothing they know");
-
-  /* The questions: about what was caught, and answerable — both the answer and
-     the wrong options are words this learner has met. */
-  const p = fitted[0];
-  const qs = Q.passageQuestions(p, someWords);
-  ok(qs.length >= 2 && qs.length <= 5, "up to five questions a passage", String(qs.length));
-  ok(qs.every((x) => x.options.filter((o) => o.right).length === 1),
-     "exactly one right answer each");
-  // Folded on both sides: an option is printed as the stressed headword, and a
-  // capitalised one («Россия») is not its own bare form.
-  const knownFolded = new Set([...someWords].map(fold));
-  ok(qs.every((x) => x.options.every((o) => knownFolded.has(fold(o.label)))),
-     "every option is a word the learner has met",
-     qs.flatMap((x) => x.options.map((o) => o.label))
-       .filter((l) => !knownFolded.has(fold(l))).join(","));
-  const right = qs.map((x) => fold(x.options.find((o) => o.right).label));
-  ok(right.every((b) => b in p.words || qs.find((x) => x.ask === "Which came first?")),
-     "and the right answer is a word the passage says");
-  ok(qs.every((x) => typeof x.at === "number" && x.at >= p.start && x.at <= p.end),
-     "each carries the moment its word went by, for playing it back");
-
-  /* A wrong option must not be a word the passage says. `words` alone was not
-     enough: it holds only the forms the resolver could settle, so «его» went by,
-     «он» was offered as not said, and hearing correctly was marked wrong — a
-     quarter of the questions. `maybe` carries what the form could have been. */
-  let claimedUnsaid = 0, checked = 0;
-  for (const pp of Q.passagesFor(P, someWords, 40)) {
-    const spoken = new Set(Object.keys(pp.words).concat(pp.maybe || []));
-    for (const x of Q.passageQuestions(pp, someWords)) {
-      if (x.ask !== "Which of these did you hear?") continue;   // order asks about two spoken words
-      for (const o of x.options) {
-        if (o.right) continue;
-        checked++;
-        if (spoken.has(fold(o.label))) claimedUnsaid++;
-      }
-    }
-  }
-  ok(checked > 50 && claimedUnsaid === 0,
-     `no wrong option is a word the passage says (${checked} checked)`, String(claimedUnsaid));
-  ok(P.every((x) => Array.isArray(x.maybe)), "every passage ships what its forms might have been");
-
-  /* And the answers are words worth listening for. Counting «и» and «в» made
-     the ranking a function-word density ranking and 95 % of answers a function
-     word (PASSAGE_SKIP_TOP). */
-  const funcAnswer = Q.passagesFor(P, someWords, 20).flatMap((pp) =>
-    Q.passageQuestions(pp, someWords).map((x) => x.options.find((o) => o.right).label))
-    .filter((lab) => ((IX[fold(lab)] || [])[0] ?? 0) < 100);
-  ok(funcAnswer.length === 0, "and never a function word", funcAnswer.join(","));
-  ok(new Set(qs.map((x) => x.ask + "|" + right)).size >= 1
-     && qs.filter((x) => x.ask === "Which of these did you hear?").length >= 1,
-     "the bulk ask what was heard");
-}
-
-/* The alphabet and the sounds under it (ROADMAP P10.2). Hand-authored teaching
-   content, so what is checked is that it is complete and internally consistent —
-   a missing letter or a pair that does not pair is a lesson that teaches a
-   falsehood. */
 group("the writing system");
 {
   ok(LETTERS.length === 33, "all 33 letters", String(LETTERS.length));

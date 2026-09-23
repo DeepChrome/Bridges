@@ -22,9 +22,9 @@ import { Linked } from "../words";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
-import { applyGrade, reviewRows, preview, schedulerOpts, wanted, dueCards, wordTrouble, maxLapses, DIRECTIONS, familiarity } from "@core/scheduler";
+import { applyGrade, reviewRows, preview, schedulerOpts, wanted, wordTrouble, maxLapses, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity } from "@core/scheduler";
 import Svg, { Circle } from "react-native-svg";
-import { buildSession, requeue, bury, dailyFor, QUEUE_DEFAULTS } from "@core/queue";
+import { buildSession, requeue, dailyFor, QUEUE_DEFAULTS } from "@core/queue";
 
 /* The three directions as the learner sees them: by what is on the **front**.
  *
@@ -53,9 +53,9 @@ export function flagsFor(st, item) {
   return {
     isNew: item.kind === "new",
     trouble: (!!entry && wordTrouble(entry)) || (st.pinned || []).includes(item.word),
-    /* This card's own memory, 0–100 (core/scheduler.js familiarity); null
-       while it is new, when the New flag says everything there is to say. */
-    score: item.kind === "new" ? null : familiarity(entry && entry[item.direction]),
+    /* The word's memory, 0–100 (core/scheduler.js familiarity); null while it
+       is new, when the New flag says everything there is to say. */
+    score: item.kind === "new" ? null : familiarity(cardFor(entry)),
   };
 }
 
@@ -158,9 +158,7 @@ export function cardsIn(st, sets) {
     // "Review · N due" on the path opens.
     if (id === "__due__") {
       const now = Date.now();
-      // Through the chosen fronts, so "Due today · N words" counts what this
-      // screen will actually hand over (core/queue.js, 2026-09-22).
-      for (const w in st.seen) if (wanted(st.seen[w], now, st.learnAhead, st.flash)) byWord(w);
+      for (const w in st.seen) if (wanted(st.seen[w], now, st.learnAhead)) byWord(w);
       return;
     }
     if (id.startsWith("deck:")) {
@@ -179,7 +177,7 @@ export function cardsIn(st, sets) {
 export function sessionFor(st, { ahead, rng } = {}) {
   const words = cardsIn(st, st.sets).map((c) => c.b);
   return buildSession({
-    seen: st.seen, words, dirs: st.flash || DIRECTIONS, now: Date.now(), daily: st.daily, rng, ahead,
+    seen: st.seen, words, dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily, rng, ahead,
     opts: { newPerDay: st.newPerDay, reviewsPerDay: st.reviewsPerDay, learnAhead: st.learnAhead,
             scheduler: schedulerOpts(st), rank: newCardRank },
   });
@@ -208,14 +206,6 @@ function SetPicker({ visible, onClose }) {
   }));
   const dueCount = cardsIn(st, ["__due__"]).length;
   const sentenceCount = sentencesFor(st).length;
-  /* Due cards per front, whether or not that front is ticked — the number a
-     learner needs to decide whether to tick it. */
-  const dueBy = useMemo(() => {
-    const now = Date.now();
-    const out = {};
-    for (const [id] of FRONTS) out[id] = dueCards(st.seen, now, st.learnAhead, [id]).length;
-    return out;
-  }, [st.seen, st.learnAhead]);
 
   const removeDeck = (d) => Alert.alert(
     "Remove deck", `Remove “${d.name}”? Its cards' review history stays.`,
@@ -244,15 +234,18 @@ function SetPicker({ visible, onClose }) {
      and restore, which is the same family of job: bringing something in. */
   const footer = <Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />;
 
-  /* How the cards are asked. These lived in Settings and were never found; a
-     learner decides them at the moment of starting, so they are here, where
-     the sets are. The last front cannot be unticked — a session with no front
-     is a session with no cards, and a control that lets you build one and then
+  /* How the cards are asked — one way, both ways, or audio only (the owner,
+     2026-09-23). A word is one card, so a front chooses nothing about *which*
+     cards are dealt, only how each is met; two fronts ticked take turns on
+     the same card. These lived in Settings and were never found; a learner
+     decides them at the moment of starting, so they are here, where the sets
+     are. The last front cannot be unticked — a session with no front is a
+     session with no cards, and a control that lets you build one and then
      apologises is worse than one that will not (§30ac made the same rule for
      the drill focus). */
-  const fronts = st.flash || DIRECTIONS;
+  const fronts = st.flash || DEFAULT_FRONTS;
   const toggleFront = (id) => update((p) => {
-    const cur = p.flash || DIRECTIONS;
+    const cur = p.flash || DEFAULT_FRONTS;
     if (cur.includes(id)) return cur.length === 1 ? p : { ...p, flash: cur.filter((d) => d !== id) };
     return { ...p, flash: DIRECTIONS.filter((d) => d === id || cur.includes(d)) };
   });
@@ -269,12 +262,6 @@ function SetPicker({ visible, onClose }) {
                       <Text style={{ color: t.ink, fontSize: 15 }}>{name}</Text>
                       <Muted>{sub}</Muted>
                     </View>
-                    {/* How many cards this front is holding right now. It is
-                        the arithmetic behind the tab badge, which counts only
-                        the ticked ones (data.js `dueCount`) — so turning a
-                        front off is visibly a decision about a number, not a
-                        pile of work quietly vanishing. */}
-                    {dueBy[id] ? <Pill testID={`flash-due-${id}`}>{String(dueBy[id])}</Pill> : null}
                   </Row>
                 ))}
               </List>
@@ -515,7 +502,7 @@ export default function Study({ navigation }) {
   const blank = !!item && !String(face.w || "").trim();
   // The card as it stands now — a re-queued Again is not the card it was
   // when the session was dealt.
-  const current = item ? ((st.seen[item.word] || {})[item.direction] || null) : null;
+  const current = item ? cardFor(st.seen[item.word]) : null;
   const iv = item ? preview(current, Date.now(), schedulerOpts(st)) : null;
   const senses = face ? sensesOf(idxOfWord(face.b)) : null;
   const flip = useFlip(shown, at);
@@ -558,8 +545,7 @@ export default function Study({ navigation }) {
       };
     }, rows);
     setLast(before);
-    let next = bury(items, at, word, direction);
-    if (g === 1) next = requeue(next, at, item);
+    const next = g === 1 ? requeue(items, at, item) : items;
     setSession({ ...session, items: next });
     setAt(at + 1);
     setShown(false);
@@ -571,10 +557,9 @@ export default function Study({ navigation }) {
     if (!last) return;
     const { row, prev } = last;
     update((p) => {
-      const entry = { ...(p.seen[row.word] || {}) };
-      if (prev) entry[row.direction] = prev; else delete entry[row.direction];
+      // The one card, back as it was — or gone, if the grade was its first.
       const seen = { ...p.seen };
-      if (Object.keys(entry).length) seen[row.word] = entry; else delete seen[row.word];
+      if (prev) seen[row.word] = { recognise: prev }; else delete seen[row.word];
       return { ...p, seen, trouble: last.trouble, daily: last.daily };
     }, [], [{ word: row.word, direction: row.direction, at: row.at }]);
     setSession({ ...session, items: last.items });

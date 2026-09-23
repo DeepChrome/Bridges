@@ -127,7 +127,7 @@ describe("hear", () => {
     // unhinted Good is ten. A sentence heard grades the listen card.
     const okLemmas = content.filter((i) => fold(L[i].b) !== fold(words[words.length - 1]));
     for (const i of okLemmas) {
-      const c = st.seen[L[i].b].listen;
+      const c = st.seen[L[i].b].recognise;
       if (c.dueAt - c.lastAt > MINUTE) expect(c.dueAt - c.lastAt).toBe(6 * MINUTE);
     }
   });
@@ -149,7 +149,7 @@ describe("hear", () => {
     const st = await saved();
     expect(content.length).toBeGreaterThan(0);
     for (const i of content) {
-      const card = st.seen[L[i].b] && st.seen[L[i].b].listen;
+      const card = st.seen[L[i].b] && st.seen[L[i].b].recognise;
       expect(card).toBeTruthy();
       expect(card.reps).toBe(1);
       expect(card.dueAt - card.lastAt).toBe(10 * MINUTE);   // Good, not Easy: the ten-minute step
@@ -184,7 +184,7 @@ describe("hear", () => {
     // not a lapse, so the schedule is what shows the grade.
     const wrongLemma = IX[words[k]][0];
     for (const i of content) {
-      const c = st.seen[L[i].b].listen;
+      const c = st.seen[L[i].b].recognise;
       expect({ lemma: L[i].b, step: c.dueAt - c.lastAt === MINUTE ? "again" : "later" })
         .toEqual({ lemma: L[i].b, step: i === wrongLemma ? "again" : "later" });
     }

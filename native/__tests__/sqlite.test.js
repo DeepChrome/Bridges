@@ -163,7 +163,10 @@ describe("a profile in rows", () => {
     await repo.apply(d, rows);
 
     const c = await repo.counts();
-    expect(c.cards).toBe(4);
+    /* Four rows became three: a word is one card (2026-09-23), and the grade
+       that merged «книга» deleted the second row this fixture still carried. */
+    expect(d.cards.del.map((x) => x.word + "/" + x.direction)).toEqual(["книга/produce"]);
+    expect(c.cards).toBe(3);
     expect(c.log).toBe(1);
     const [row] = await repo.readLog();
     // The card as it *was*, the grade, and when.
@@ -173,7 +176,7 @@ describe("a profile in rows", () => {
     const back = merge(await repo.load());
     expect(back.seen["книга"].recognise.reps).toBe(3);
     expect(back.seen["книга"].recognise).toEqual(r.card);
-    expect(back.seen["книга"].produce).toEqual(prev.seen["книга"].produce);
+    expect(back.seen["книга"].produce).toBeUndefined();
     expect(back.xp).toBe(43);
     expect(back.decks.length).toBe(2);
 

@@ -46,8 +46,8 @@ const question = withContent("say");
 const heard = fold(question.target).replace(/[^а-яё\s-]/g, "").trim();
 const content = question.lemmas.filter((i) => i >= SPEECH_SKIP_TOP);
 /* A first grade is a learning step: Again one minute, Hard six, Good ten. A
-   sentence said grades the produce card. */
-const stepOf = (st, i) => st.seen[L[i].b].produce.dueAt - st.seen[L[i].b].produce.lastAt;
+   sentence said grades the word's one card. */
+const stepOf = (st, i) => st.seen[L[i].b].recognise.dueAt - st.seen[L[i].b].recognise.lastAt;
 
 const base = {
   v: 8, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},

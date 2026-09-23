@@ -928,6 +928,22 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### A word is one card, 2026-09-23 — CLAUDE.md §30at
+
+Phase 2's three cards a word reversed at the owner's call ("for me a word is
+technically 1 card… one way, both ways, or audio only… default to Russian
+to English"). One card in the `recognise` slot, the three directions now
+fronts the learner ticks, taken in turn by `frontFor`; ladder, burying and
+per-front filtering removed; split entries merged to the strongest on load
+and the stale rows deleted on the first save; v9 resets `flash` to the
+Russian front. Full route, seed 1: reviews a day quick 55 → 27.9, steady
+56 → 34.9, struggling 59 → 53.1 with backlog days 207 → 60; the struggling
+profile's leeches 191 → 397 because every failed production question now
+lapses the one card. And the native-speed passages ("which word did you
+hear?") are removed outright — Immerse is the native-speed listening.
+Version `1.0.0-beta.6` / versionCode 6. Suites: core 621, native 486, smoke
+159, Worker 63, copy 0 over.
+
 ### The path from the top, speakers everywhere, whose videos these are, 2026-09-23 — CLAUDE.md §30as
 
 Developer mode ships off (rule 20.9 reversed by the owner) and the v8

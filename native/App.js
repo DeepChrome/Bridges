@@ -54,7 +54,7 @@ import { tabIcon } from "./src/tabicons";
 import { flushState } from "./src/store";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, DrillSetup, PlacementFlow, SectionFlow,
-  QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, ListeningList, PassageFlow, SoundDrillFlow,
+  QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, SoundDrillFlow,
   ShadowFlow, BuildDrillFlow, FinalFlow,
 } from "./src/screens/Flows";
 
@@ -227,12 +227,10 @@ function PracticeStack() {
       <Stack.Screen name="Translate" component={Translate} options={{ title: "Translate" }} />
       <Stack.Screen name="QuizSetup" component={QuizSetup} options={{ title: "Quiz" }} />
       <Stack.Screen name="CustomQuiz" component={CustomQuizFlow} options={{ title: "Quiz" }} />
-      {/* The route names are historical: "Scenes" is the lesson-level listening
-          the learner meets first, "Listening" the native-speed passages behind
-          it. The titles say which is which; renaming the routes would break
-          every deep link and saved navigation state for nothing. */}
-      <Stack.Screen name="Listening" component={ListeningList} options={{ title: "Native speed" }} />
-      <Stack.Screen name="Passage" component={PassageFlow} options={{ title: "Listening" }} />
+      {/* "Scenes" is the historical name for the lesson-level listening;
+          renaming the route would break every saved navigation state for
+          nothing. The native-speed passages that once sat beside it were
+          removed 2026-09-23 — Immerse is the native-speed listening. */}
       {/* The listening pieces to choose from, and one of them being listened to.
           **Not "Conversations"** — that is Talk, the spoken exchange with the
           tutor (§30f), and the owner found the two competing for the word:

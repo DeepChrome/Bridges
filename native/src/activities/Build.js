@@ -38,10 +38,16 @@ import { useRecognizer } from "../speech";
 import { HoldButton, Blocked } from "./Say";
 import { fold } from "@core/util";
 
-/* Between the two readings of a new word, and between a reading and the first
-   syllable. Long enough to be a pause rather than a stutter, short enough that
-   nobody reaches for the button. */
-export const INTRO_GAP_MS = 550;
+/* Between the two readings of a new word. The owner's number, 2026-09-22:
+   *"allow for a little bit more space between the initial two demonstration of
+   the word… it's too rapid. Ensure the pause between is 3 seconds."* At 550 ms
+   the two readings ran together into one stutter, which is not two chances to
+   hear a word — it is one with an echo. */
+export const INTRO_GAP_MS = 3000;
+/* …and a shorter beat after the second reading, before the drill itself opens.
+   This one is a breath, not a demonstration; three seconds of nothing here
+   would read as the screen having hung. */
+export const INTRO_SETTLE_MS = 600;
 
 export function Build({ q, r }) {
   const t = useTheme();
@@ -55,8 +61,11 @@ export function Build({ q, r }) {
   const alive = useRef(true);
   useEffect(() => () => { alive.current = false; }, []);
 
-  /* Every fragment, and the word itself, in the one voice. */
-  const speak = (text) => speakLine(text);
+  /* Every fragment, and the word itself, in the one voice — and with its
+     stress mark kept, which `speakLine` otherwise strips (audio.js). A
+     fragment is the one place the mark earns its keep: «рошо́» alone has
+     nothing else to say where the beat falls. */
+  const speak = (text) => speakLine(text, { stress: true });
   const play = () => { speak(fragment); };
 
   /* A new word arrives: read whole, pause, read whole again, pause, then the
@@ -75,7 +84,7 @@ export function Build({ q, r }) {
       if (!alive.current || token.current !== mine) return;
       await speak(q.ru);
       if (!alive.current || token.current !== mine) return;
-      await new Promise((ok) => setTimeout(ok, INTRO_GAP_MS));
+      await new Promise((ok) => setTimeout(ok, INTRO_SETTLE_MS));
       if (!alive.current || token.current !== mine) return;
       setIntro(false);
     })();
@@ -106,6 +115,8 @@ export function Build({ q, r }) {
        claim as knowing it). */
     r.record(true, [], undefined, { credit: 1, note: null });
   };
+
+  const again = () => { setHeard(null); rec.setLive(""); rec.clearBlock(); };
 
   if (rec.block) {
     return <Blocked block={rec.block} onGetModel={rec.getModel}
@@ -145,66 +156,107 @@ export function Build({ q, r }) {
         })}
       </View>
 
-      <Pressable
-        testID="build-play"
-        accessibilityRole="button"
-        accessibilityLabel="Hear it again"
-        onPress={() => speak(intro ? q.ru : fragment)}
-        style={({ pressed }) => ({
-          alignItems: "center", paddingVertical: 28, paddingHorizontal: 16,
-          borderRadius: radius.xl, borderWidth: 1, borderColor: t.line,
-          backgroundColor: pressed ? t.surface2 : t.surface,
-        })}
-      >
-        {/* The animation goes on a wrapper, never on the Text itself. An
-            animated value handed to a plain component reaches the native side
-            as a map where a float is expected and the app dies with a
-            ClassCastException — and nothing under test sees it, because the
-            test clock settles animations instantly and never makes the cast
-            (§20a: native has no visual suite; §30n′ made the same rule for
-            `usePress`). Caught on the emulator, 2026-09-16. */}
-        <Animated.View style={enter}>
-          <Text testID="build-fragment"
-                style={{ color: intro ? t.ink3 : t.ink, fontWeight: "700", textAlign: "center",
-                         fontSize: (intro ? q.ru : fragment).length > 14 ? 30
-                                 : (intro ? q.ru : fragment).length > 8 ? 38 : 46 }}>
-            {intro ? q.ru : fragment}
-          </Text>
-        </Animated.View>
-      </Pressable>
-
-      <Muted testID="build-voice" size={12} style={{ textAlign: "center", marginTop: 8 }}>
-        device voice
+      {/* One grey word for what to do with your mouth right now (the owner,
+          2026-09-22). "Listen" while the word is being read out, "Repeat" once
+          it has been — which is also the only thing on screen that says the
+          two readings have finished, since the controls are not there yet. */}
+      <Muted testID="build-cue" size={12}
+             style={{ textAlign: "center", marginBottom: 10, letterSpacing: 0.6,
+                      textTransform: "uppercase" }}>
+        {intro ? "Listen" : "Repeat"}
       </Muted>
 
-      {/* What it heard, never a verdict on the learner (§30o). */}
-      {heard ? (
-        <Text testID="build-heard"
-              style={{ color: heard.ok ? t.good : t.ink3, fontSize: 16, fontWeight: "600",
-                       textAlign: "center", marginTop: 12 }}>
-          {heard.ok ? `Heard «${q.ru}»`
-            : heard.transcript ? `Heard «${heard.transcript}»` : "Did not catch that"}
-        </Text>
-      ) : listening && !heard ? (
-        <View style={{ alignItems: "center", marginTop: 14 }}>
-          <HoldButton phase={rec.phase} onIn={rec.hold} onOut={rec.release} />
-          <Text style={{ color: t.ink, fontSize: 18, marginTop: 12, minHeight: 24 }}>{rec.live}</Text>
-        </View>
-      ) : null}
+      {/* Nothing to press until the word has been said twice — *"fade the
+          controls in after the word has been repeated twice"*. A demonstration
+          you can tap straight past is not a demonstration, and the buttons
+          sitting live under it were an invitation to do exactly that. The
+          sequence is bounded (two readings and one 3 s pause), and the same
+          `alive`/`token` guards mean leaving the screen still works.
 
-      <Btn kind="pri" testID="build-next" style={{ marginTop: 18 }}
-           label={intro ? "Start" : last ? "Next word" : "Add a syllable"}
-           onPress={intro ? () => { token.current++; setIntro(false); } : advance} />
+          The animation goes on this wrapper, never on a Text: an animated
+          value handed to a plain component reaches the native side as a map
+          where a float is expected and the app dies with a ClassCastException
+          — and nothing under test sees it, because the test clock settles
+          animations instantly and never makes the cast (§20a, §30n′). Caught
+          on the emulator, 2026-09-16. */}
+      {intro ? (
+        /* One quiet way past the demonstration, and nothing else. A learner
+           who already knows the word should not be held for eight seconds a
+           word, six words a run — but the drill's own controls are not the
+           place to offer that, because a button that says "Add a syllable"
+           sitting live under a word being read out is an invitation to stop
+           listening. `token.current++` orphans the sequence still in flight. */
+        <Btn kind="ghost" testID="build-next" label="Start"
+             onPress={() => { token.current++; setIntro(false); }} />
+      ) : (
+        <Animated.View style={enter}>
+          <Pressable
+            testID="build-play"
+            accessibilityRole="button"
+            accessibilityLabel="Hear it again"
+            onPress={play}
+            style={({ pressed }) => ({
+              alignItems: "center", paddingVertical: 28, paddingHorizontal: 16,
+              borderRadius: radius.xl, borderWidth: 1, borderColor: t.line,
+              backgroundColor: pressed ? t.surface2 : t.surface,
+            })}
+          >
+            <Text testID="build-fragment"
+                  style={{ color: t.ink, fontWeight: "700", textAlign: "center",
+                           fontSize: fragment.length > 14 ? 30
+                                   : fragment.length > 8 ? 38 : 46 }}>
+              {fragment}
+            </Text>
+          </Pressable>
 
-      {/* The word before and the word after. A mouth drill is the one run where
-          going back is the method rather than a way round the mark, so the
-          runner hands `back` only to this and to Shadowing (`allowBack`). */}
-      <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
-        <Btn kind="ghost" label="◀ Previous" testID="build-prev" style={{ flex: 1 }}
-             disabled={!r.back} onPress={r.back} />
-        <Btn kind="ghost" label="Skip ▶" testID="build-skip" style={{ flex: 1 }}
-             onPress={() => r.record(true, [], undefined, { credit: 1, note: null })} />
-      </View>
+          <Muted testID="build-voice" size={12} style={{ textAlign: "center", marginTop: 8 }}>
+            device voice
+          </Muted>
+
+          {/* What it heard, never a verdict on the learner (§30o) — and always
+              something to say back. Until 2026-09-22 the first hearing was
+              final: `heard` unmounted the microphone and nothing put it back,
+              so a learner the engine misheard had no second go at the one
+              activity whose whole subject is saying a word again. Say, Shadow
+              and Pair had all had "Try again" since they were written. */}
+          {heard ? (
+            <View style={{ alignItems: "center", marginTop: 12 }}>
+              <Text testID="build-heard"
+                    style={{ color: heard.ok ? t.good : t.ink3, fontSize: 16, fontWeight: "600",
+                             textAlign: "center" }}>
+                {heard.ok ? `Heard «${q.ru}»`
+                  : heard.transcript ? `Heard «${heard.transcript}»` : "Did not catch that"}
+              </Text>
+              <Btn kind="ghost" label="Try again" testID="build-again"
+                   style={{ marginTop: 8 }} onPress={again} />
+            </View>
+          ) : listening ? (
+            <View style={{ alignItems: "center", marginTop: 14 }}>
+              <HoldButton phase={rec.phase} onIn={rec.hold} onOut={rec.release} />
+              <Text style={{ color: t.ink, fontSize: 18, marginTop: 12, minHeight: 24 }}>{rec.live}</Text>
+              {/* The recogniser's own word for what went wrong — "Nothing
+                  heard" and its like. Build rendered `rec.live` alone, so a
+                  hold that caught nothing looked like a hold that did nothing. */}
+              {rec.note ? <Muted testID="build-note">{rec.note}</Muted> : null}
+            </View>
+          ) : null}
+
+          <Btn kind="pri" testID="build-next" style={{ marginTop: 18 }}
+               label={last ? "Next word" : "Add a syllable"}
+               onPress={advance} />
+
+          {/* The word before and the word after. A mouth drill is the one run
+              where going back is the method rather than a way round the mark,
+              so the runner hands `back` only to this and to Shadowing
+              (`allowBack`). */}
+          <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+            <Btn kind="ghost" label="◀ Previous" testID="build-prev" style={{ flex: 1 }}
+                 disabled={!r.back} onPress={r.back} />
+            <Btn kind="ghost" label="Skip ▶" testID="build-skip" style={{ flex: 1 }}
+                 onPress={() => r.record(true, [], undefined, { credit: 1, note: null })} />
+          </View>
+        </Animated.View>
+      )}
     </View>
   );
 }

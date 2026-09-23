@@ -457,7 +457,8 @@ create table topics (
   name   text not null,
   kind   text not null,          -- 'spine' | 'branch'
   ord    integer not null,
-  n      integer not null default 0
+  n      integer not null default 0,
+  opt    integer not null default 0  -- a side quest the chapter does not require
 );
 
 create table unit_words (
@@ -716,6 +717,28 @@ def main():
     ]
     chapter_of = {b: k for k, stage in enumerate(STAGE_PLAN) for b in stage}
 
+    # --- which quests are genuinely optional -------------------------------
+    # Until 2026-09-22 *every* branch was optional and the next chapter needed
+    # only the spine (§30e). The owner changed that: *"all parallel nodes must
+    # be completed before moving down a node unless there are specifically
+    # optional lessons. Optional lessons should be about niche subjects. Like
+    # imagine the core lesson path is sports, well maybe there's an optional
+    # lesson for soccer or basketball."*
+    #
+    # So the default is now required, and this is the exception list: the
+    # subjects a learner can speak Russian without. The cut is "would someone
+    # living in the language need this to get through a week?" — a doctor, a
+    # kitchen, clothes and a bus, yes; a courtroom, a liturgy, a balance sheet
+    # and a battalion, no. They are also the four §30h added late as niche
+    # quests in the first place, plus the three hobbies.
+    #
+    # It is a judgement, and it is here rather than in the app because the
+    # path and the gate must read one source (§22). Changing it changes when
+    # chapters unlock: re-run `tools/audit_branches.py` and look at what a
+    # learner is now required to finish.
+    OPTIONAL = {"military", "sport", "art", "politics", "science", "law",
+                "religion", "business"}
+
     # --- branches: topic units --------------------------------------------
     # Capped, and capped harder in the first chapters: forty nouns of family
     # eight lessons deep is a word bank, not a lesson. A topic's own verbs
@@ -728,8 +751,8 @@ def main():
         words = verbs + others[:max(0, cap - len(verbs))]
         if len(words) < BRANCH_MIN:
             continue
-        db.execute("insert into topics (id, name, kind, ord, n) values (?,?,?,?,?)",
-                   (tid, name, "branch", ordv, len(words)))
+        db.execute("insert into topics (id, name, kind, ord, n, opt) values (?,?,?,?,?,?)",
+                   (tid, name, "branch", ordv, len(words), 1 if tid in OPTIONAL else 0))
         db.executemany(
             "insert into unit_words (topic_id, lemma_id, ord, reason) values (?,?,?,?)",
             [(tid, lid, j, why) for j, (lid, _, why) in enumerate(words)])
@@ -761,10 +784,16 @@ def main():
     print(f"  duplicate forms   : {dropped:,} rows dropped (one row per bare form; names out)")
     print(f"  placed in a topic : {len(assigned):,} ({len(assigned)/max(1,len(meta)):.0%})")
     print(f"  spine units       : {len(spine_ids)}")
-    print(f"  branch units      : {len(branch_ids)}\n")
-    for tid, name, kind, n in db.execute(
-            "select id, name, kind, n from topics order by kind, ord"):
-        print(f"    {kind:<7} {name:<22} {n:>3}")
+    opt_n = sum(1 for b in branch_ids if b in OPTIONAL)
+    print(f"  branch units      : {len(branch_ids)} "
+          f"({len(branch_ids) - opt_n} the chapter requires, {opt_n} optional)")
+    stale = sorted(OPTIONAL - set(branch_ids))
+    if stale:
+        print(f"    !! OPTIONAL names {len(stale)} unit(s) that do not exist: " + ", ".join(stale))
+    print()
+    for tid, name, kind, n, opt in db.execute(
+            "select id, name, kind, n, opt from topics order by kind, ord"):
+        print(f"    {kind:<7} {name:<22} {n:>3}{'  optional' if opt else ''}")
     db.close()
 
 

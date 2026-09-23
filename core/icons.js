@@ -55,6 +55,11 @@ export const ACTIVITY_ICONS = {
   conjugation: "M4 6h16v12H4zM4 12h16M12 6v12",
   stress: "M8 8l4-4 4 4M5 14h14M5 14v4M19 14v4",
   rules: "M5 4h10a2 2 0 0 1 2 2v6M5 4a2 2 0 0 0 0 4h10M5 4v14a2 2 0 0 0 2 2h5M15 18l2 2 4-4",
+  /* Translate: one script's glyph on the left, the letter A on the right — the
+     mark the world already reads as "this language into that one". It says
+     nothing about a microphone on purpose, because what the row offers is the
+     answer, not the way of asking for it. */
+  translate: "M4 7h6M7 7v1.5c0 3-1.2 4.8-3 5.8M5.5 11.5c1.6 2 3.2 2.8 5 3.2M13 20l3.5-8 3.5 8M14.6 17.2h4.8",
 };
 
 export const iconFor = (id) =>

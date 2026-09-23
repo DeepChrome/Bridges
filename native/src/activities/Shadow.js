@@ -92,7 +92,7 @@ export function Shadow({ q, r }) {
     },
   });
 
-  const again = () => { setRes(null); rec.setLive(""); };
+  const again = () => { setRes(null); rec.setLive(""); rec.clearBlock(); };
 
   if (rec.block) {
     return <Blocked block={rec.block} onGetModel={rec.getModel} onSkip={() => r.skip()} />;
@@ -130,8 +130,13 @@ export function Shadow({ q, r }) {
       <Muted style={{ marginTop: 8 }}>{`${plays} play${plays === 1 ? "" : "s"}`}</Muted>
       <View style={{ height: 14 }} />
       <HoldButton phase={rec.phase} onIn={rec.hold} onOut={rec.release} />
-      <Text style={{ color: t.ink, fontSize: T.head + 1, marginTop: 16, minHeight: 24 }}>
-        {rec.live}
+      {/* The recogniser's own word for an attempt that produced nothing. Say
+          and Talk have always shown it; Shadow, Pair and Build drew `live`
+          alone, so a hold the engine could not use looked like a hold that had
+          not registered (2026-09-22). */}
+      <Text testID="shadow-live"
+            style={{ color: t.ink, fontSize: T.head + 1, marginTop: 16, minHeight: 24 }}>
+        {rec.phase === "listening" ? rec.live : rec.live || rec.note || ""}
       </Text>
     </View>
   );

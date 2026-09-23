@@ -34,6 +34,7 @@ export const RUNS = [
   "Scenes",       // a written listening scenario
   "Passage",      // native-speed listening
   "Talk",         // a conversation
+  "Translate",    // speaking Russian to be read back in English
   "Video",        // an episode, which wants the whole screen
 ];
 

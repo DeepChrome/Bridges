@@ -772,13 +772,18 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
 
     units = []
     uidx = {}
-    for tid, name, kind, n in db.execute(
-            "select id, name, kind, n from topics order by ord"):
+    for tid, name, kind, n, opt in db.execute(
+            "select id, name, kind, n, opt from topics order by ord"):
         words = [pos_of[l] for (l,) in db.execute(
             "select lemma_id from t.unit_words where topic_id=? order by ord", (tid,))
             if l in pos_of]
         uidx[tid] = len(units)
         u = {"id": tid, "name": name, "kind": kind, "w": words}
+        # A side quest the chapter does not require (build_topics.py OPTIONAL,
+        # 2026-09-22). Absent on everything else, so a unit without the key is
+        # required — which is what every spine unit is by definition.
+        if opt:
+            u["opt"] = 1
         if tid in grammar:
             u["g"] = grammar[tid]
         if tid in videos:
@@ -1051,7 +1056,16 @@ def pick_senses(gloss, pos, by_pos):
 
     late = [s for s in chosen if LATE_TAGS & set(s.get("t") or ())]
     chosen = [s for s in chosen if s not in late] + late
-    if chosen and not (gloss_words(chosen[0]["g"]) & ours):
+    # **Sense 1 must be the meaning the lesson teaches** — the owner,
+    # 2026-09-22: *"make sure the topmost definition is the MOST COMMON
+    # definition."* Wiktionary orders its senses historically as often as not,
+    # and the test here used to be "does sense 1 touch our gloss *anywhere*",
+    # which any of a long gloss's later senses could satisfy: «стол» glosses
+    # "table, desk, board; diet, cooking, cuisine", so a Wiktionary sense about
+    # diet counted as a match and stayed on top. Against the **first group**
+    # alone — what `firstSense` returns, which is the quiz prompt and the
+    # graded answer — the word's commonest meaning leads or nothing does.
+    if chosen and not (gloss_words(chosen[0]["g"]) & first):
         best = max(chosen, key=lambda s: len(gloss_words(s["g"]) & first))
         if gloss_words(best["g"]) & first:
             chosen.remove(best)

@@ -446,6 +446,70 @@ export function Chip({ on, label, onPress, testID }) {
   );
 }
 
+/* A number the learner sets, with a minus, the value, and a plus.
+ *
+ * `Choice` handed out a fixed set of chips — 5, 10, 15, 25 — which is a menu
+ * pretending to be a number: the answer a learner wants is often between two
+ * of them and always invisible at a glance. The owner, 2026-09-22: *"make the
+ * 'new words per day' setting a box that takes numerical input and maybe some
+ * plus and minus signs instead of just 5 10 15."*
+ *
+ * The box is typed into as well as stepped. A half-typed value is kept as
+ * text, not pushed through `Number` on every keystroke — clearing the field to
+ * retype it would otherwise commit a 0 and, in the caller that owns this, deal
+ * a session with no new cards. It commits on blur and on every step, clamped
+ * to [min, max] so neither route can produce a value the caller must defend
+ * against. */
+export function Stepper({ value, onChange, min = 0, max = 999, step = 1, testID, label, style }) {
+  const t = useTheme();
+  const [text, setText] = useState(null);           // non-null only while typing
+  const clamp = (n) => Math.max(min, Math.min(max, n));
+  const set = (n) => { setText(null); onChange(clamp(n)); };
+  const commit = () => {
+    const n = parseInt(String(text).replace(/[^0-9]/g, ""), 10);
+    set(Number.isFinite(n) ? n : value);
+  };
+  const btn = (mark, to, name) => (
+    <Pressable
+      testID={testID ? `${testID}-${name}` : undefined}
+      accessibilityRole="button"
+      accessibilityLabel={`${name === "minus" ? "Fewer" : "More"}${label ? ", " + label : ""}`}
+      accessibilityState={{ disabled: to === value }}
+      onPress={to === value ? undefined : () => set(to)}
+      hitSlop={6}
+      style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center",
+               borderRadius: radius.md, borderWidth: 1,
+               borderColor: to === value ? t.lineSoft : t.line,
+               backgroundColor: t.surface }}
+    >
+      <Text style={{ color: to === value ? t.ink3 : t.ink, fontSize: 22, fontWeight: "600",
+                     lineHeight: 26 }}>{mark}</Text>
+    </Pressable>
+  );
+  /* The targets are clamped before they are handed to the buttons, so a button
+     that cannot move the number says so (`to === value`) rather than looking
+     live and doing nothing. */
+  return (
+    <View testID={testID} style={[{ flexDirection: "row", alignItems: "center", gap: 8 }, style]}>
+      {btn("−", clamp(value - step), "minus")}
+      <TextInput
+        testID={testID ? `${testID}-value` : undefined}
+        value={text === null ? String(value) : text}
+        onChangeText={setText}
+        onBlur={commit}
+        onSubmitEditing={commit}
+        keyboardType="number-pad"
+        returnKeyType="done"
+        accessibilityLabel={label}
+        style={{ minWidth: 72, textAlign: "center", color: t.ink, fontSize: 17, fontWeight: "600",
+                 backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
+                 borderRadius: radius.md, paddingVertical: 10, paddingHorizontal: 12 }}
+      />
+      {btn("+", clamp(value + step), "plus")}
+    </View>
+  );
+}
+
 /* A row of chips, one lit. */
 export function Choice({ options, value, onPick, testID, style }) {
   return (

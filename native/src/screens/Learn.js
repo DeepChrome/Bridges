@@ -1,12 +1,16 @@
 /* Learn — the path. A spine of chapters, and at each chapter a fork.
  *
  * Each unit is a disc carrying its own progress as a ring, with its name beneath
- * it. The spine runs down the centre. After FORK_AT lessons of a chapter's spine
- * unit the road forks: lanes curve out to that chapter's side quests, drawn in
- * ranks of three, and the main road carries on underneath to the next chapter. Side quests
- * are optional — the next chapter needs only the spine — so the fork is an offer,
- * not a gate. Before it opens the lanes are drawn dashed and the quests locked,
- * so the learner can see what is coming.
+ * it. The spine runs down the centre. **Once a chapter's spine unit is finished**
+ * the road forks: lanes curve out to that chapter's quests, drawn in ranks of
+ * three, and the main road carries on underneath to the next chapter.
+ *
+ * Until then there is no fork and no lanes — just road (2026-09-22, the owner:
+ * *"Lines connecting two learning modes should only appear once the higher node
+ * has been completed"*). And the quests are not all optional any more: the
+ * chapter requires every one that `build_topics.py` did not mark `opt`, so
+ * finishing them is what opens the next chapter. The optional few say so under
+ * their names.
  *
  * The web app draws the ring with a conic gradient, which React Native has no
  * equivalent for; here it is a stroked circle with a dash offset. Same four states,
@@ -21,7 +25,7 @@ import { useTheme, space, radius } from "../theme";
 import { Screen, Btn, Pill, UnitIcon, Muted, styles, Text } from "../ui";
 import {
   STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress, unitState,
-  stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, FORK_AT, dueCount,
+  stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, optional, dueCount,
   routePosition,
 } from "../data";
 import { Q, FINAL_N } from "../questions";
@@ -262,6 +266,18 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
                      maxWidth: branch ? 92 : 112 }}>
         {unit.name}
       </Text>
+      {/* Which of a chapter's quests it does not require. Since 2026-09-22 the
+          rest do gate the next chapter, so this is a *state the learner cannot
+          otherwise see* — rule 20.7's one allowance — and not a caption saying
+          what the row does. Without it a learner clearing a chapter has no way
+          to tell which discs they must finish and which are theirs to take. */}
+      {optional(unit) ? (
+        <Text testID={`optional-${unit.id}`}
+              style={{ color: t.ink3, fontSize: 10, fontWeight: "600", marginTop: 2,
+                       letterSpacing: 0.5, textTransform: "uppercase" }}>
+          Optional
+        </Text>
+      ) : null}
     </Pressable>
   );
 }
@@ -311,19 +327,42 @@ function Fork({ stage, chapterOpen, onOpen }) {
     Animated.timing(anim, { toValue: 1, duration: 650, useNativeDriver: true }).start();
   }, [open]);
 
-  const lane = open ? t.brand : t.lineSoft;
-  const fade = { opacity: open ? anim : 1 };
-  const rise = { transform: [{ translateY: open ? anim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) : 0 }] };
+  /* **Nothing until the node above it is done.** The owner, 2026-09-22:
+   * *"Lines connecting two learning modes should only appear once the higher
+   * node has been completed, thus unlocking the next node."*
+   *
+   * The lanes used to be drawn from the first screen — grey and dashed, to a
+   * rank of padlocked discs — so every chapter announced its own branches
+   * before the learner had done a lesson of it, and the road was never a road,
+   * it was a diagram of one. Now the chapter is a spine disc and a piece of
+   * road until its spine is finished; then the fan animates in, which is what
+   * the 650 ms `anim` was always for and never got to do (it only ran when a
+   * fork *became* open, which nothing was watching).
+   *
+   * Closed, this is one stretch of road. It is still the `Fork`, and it still
+   * carries the chapter's testID, so what the path is made of does not change
+   * shape between the two states. */
+  if (!open) {
+    return (
+      <View testID={`fork-${stage.core.id}`} accessibilityLabel="Side quests, after this chapter's spine"
+            style={{ alignItems: "center", alignSelf: "stretch" }}>
+        <Trunk height={LANE_H} dim />
+      </View>
+    );
+  }
+
+  const fade = { opacity: anim };
+  const rise = { transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [10, 0] }) }] };
   const last = ranks.length - 1;
   return (
-    <View testID={`fork-${stage.core.id}`} accessibilityLabel={open ? "Side quests" : `Side quests, after lesson ${FORK_AT}`}
+    <View testID={`fork-${stage.core.id}`} accessibilityLabel="Side quests"
           style={{ alignItems: "center", alignSelf: "stretch" }}>
-      <Trunk height={10} dim={!open} />
+      <Trunk height={10} />
       {ranks.map((rank, r) => (
         <React.Fragment key={r}>
           <Animated.View style={fade}>
             <FanOut rank={rank} xs={xs[r]} W={W} height={r ? ROW_GAP : LANE_H}
-                    stroke={lane} road={t.line} dashed={!open} />
+                    stroke={t.brand} road={t.line} />
           </Animated.View>
           <Animated.View testID={`rank-${stage.core.id}-${r}`} style={[{ width: W, height: ROW_H }, fade, rise]}>
             {rank.map((u, k) => (
@@ -334,11 +373,6 @@ function Fork({ stage, chapterOpen, onOpen }) {
           </Animated.View>
         </React.Fragment>
       ))}
-      {!open ? (
-        <Muted size={11} style={{ marginTop: -4, marginBottom: 6 }}>
-          {`Side quests · after lesson ${FORK_AT}`}
-        </Muted>
-      ) : null}
       {/* The lanes come back: from under each quest of the last rank to the road,
           which goes on to the next chapter. A fork that never re-joined read as
           a dead end. */}
@@ -348,8 +382,7 @@ function Fork({ stage, chapterOpen, onOpen }) {
           {xs[last].map((x, k) => (
             <Path key={k} testID={`merge-${ranks[last][k].id}`}
                   d={`M ${x} 0 C ${x} ${MERGE_H * 0.65}, ${W / 2} ${MERGE_H * 0.45}, ${W / 2} ${MERGE_H}`}
-                  stroke={lane} strokeWidth={TRUNK_W} fill="none" strokeLinecap="round"
-                  strokeDasharray={open ? undefined : "4 6"} />
+                  stroke={t.brand} strokeWidth={TRUNK_W} fill="none" strokeLinecap="round" />
           ))}
         </Svg>
       </Animated.View>

@@ -10,27 +10,18 @@
  * `deps` lets tests substitute the picker, the file reader, SQLite and sharing.
  */
 
-import { unzipSync, zipSync, strFromU8, strToU8 } from "fflate";
+import { unzipSync, strFromU8 } from "fflate";
 import { decompress as zstd } from "fzstd";
 import * as SQLite from "expo-sqlite";
 import * as Picker from "expo-document-picker";
-import * as Sharing from "expo-sharing";
-import { File, Paths } from "expo-file-system";
-import { decksFromNotes, parseTextDeck, apkgRows, APKG_SCHEMA } from "@core/anki";
+import { File } from "expo-file-system";
+import { decksFromNotes, parseTextDeck } from "@core/anki";
 
 const defaultDeps = {
   pick: () => Picker.getDocumentAsync({ copyToCacheDirectory: true, multiple: false,
                                         type: ["application/octet-stream", "application/zip", "text/*", "*/*"] }),
   readBytes: async (uri) => new Uint8Array(await new File(uri).bytes()),
   openBytes: (bytes) => SQLite.deserializeDatabaseAsync(bytes),
-  openMemory: () => SQLite.openDatabaseAsync(":memory:"),
-  writeShare: async (name, bytes) => {
-    const file = new File(Paths.cache, name);
-    if (file.exists) file.delete();
-    file.create();
-    file.write(bytes);
-    await Sharing.shareAsync(file.uri, { mimeType: "application/octet-stream", dialogTitle: name });
-  },
 };
 
 /* Notes with their deck name out of an Anki collection database, whichever
@@ -91,30 +82,6 @@ export async function importDeck(deps = {}) {
   }
 }
 
-/* The .apkg bytes for one deck: a fresh in-memory collection, serialised and
-   zipped with the (empty) media manifest Anki expects. */
-export async function apkgBytes(name, cards, deps = {}, now = Date.now()) {
-  const d = { ...defaultDeps, ...deps };
-  const rows = apkgRows(name, cards, now);
-  const db = await d.openMemory();
-  try {
-    await db.execAsync(APKG_SCHEMA);
-    await db.runAsync("insert into col values (?,?,?,?,?,?,?,?,?,?,?,?,?)", rows.col);
-    for (const n of rows.notes) await db.runAsync("insert into notes values (?,?,?,?,?,?,?,?,?,?,?)", n);
-    for (const c of rows.cards) {
-      await db.runAsync("insert into cards values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", c);
-    }
-    const collection = await db.serializeAsync();
-    return zipSync({ "collection.anki2": collection, media: strToU8("{}") }, { level: 6 });
-  } finally {
-    if (db.closeAsync) await db.closeAsync();
-  }
-}
-
-export async function exportDeck(name, cards, deps = {}) {
-  const d = { ...defaultDeps, ...deps };
-  const bytes = await apkgBytes(name, cards, d);
-  const file = `${name.replace(/[^\wЀ-ӿ -]+/g, "").trim() || "bridges"}.apkg`;
-  await d.writeShare(file, bytes);
-  return { file, cards: cards.length };
-}
+/* `apkgBytes` and `exportDeck` stood here and went with the export itself on
+   2026-09-22 (§30ap), along with the schema and row builders they used in
+   core/anki.js. A deck comes in; nothing goes back out. */

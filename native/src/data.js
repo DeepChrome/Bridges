@@ -333,7 +333,20 @@ export function unitFineProgress(st, u) {
   return total ? done / total : 0;
 }
 
-export const stageDone = (st, s) => unitProgress(st, s.core) >= 1;
+/* The quests a chapter *requires*, and the ones it merely offers.
+ *
+ * Every branch used to be optional and the next chapter needed only the spine.
+ * The owner, 2026-09-22: *"all parallel nodes must be completed before moving
+ * down a node unless there are specifically optional lessons. Optional lessons
+ * should be about niche subjects."* Which is which is decided in the pipeline
+ * (`OPTIONAL` in build_topics.py) and rides on the unit as `opt`, so the path
+ * and the gate cannot come to disagree about it (§22). */
+export const optional = (u) => !!(u && u.opt);
+export const required = (stage) => stage.branches.filter((u) => !optional(u));
+
+/* A chapter is done when its spine and every quest it requires are done. */
+export const stageDone = (st, s) =>
+  unitProgress(st, s.core) >= 1 && required(s).every((u) => unitProgress(st, u) >= 1);
 
 export function stageUnlocked(st, i) {
   if (st.dev) return true;
@@ -341,16 +354,19 @@ export function stageUnlocked(st, i) {
   return stageDone(st, STAGES[i - 1]);
 }
 
-/* Side quests. A chapter's branches are optional detours off the spine: the road
-   forks once this many spine lessons are done, and the learner may take any of
-   them or stay on the main path — the next chapter needs only the spine. */
-export const FORK_AT = 2;
-export const spineLessonsDone = (st, stage) => {
-  let n = 0;
-  for (let i = 0; i < lessonCount(stage.core); i++) if (lessonDone(st, stage.core, i)) n++;
-  return n;
-};
-export const forkOpen = (st, stage) => !!st.dev || spineLessonsDone(st, stage) >= FORK_AT;
+/* **The fork opens when the chapter's spine is finished**, not part way
+   through it. The owner, same message: *"Lines connecting two learning modes
+   should only appear once the higher node has been completed, thus unlocking
+   the next node."* It used to open after `FORK_AT` (2) spine lessons, so a
+   chapter's quests appeared beside a spine unit the learner was still in the
+   middle of, and the lanes to them were drawn — greyed and dashed — from the
+   first screen. Now the road is: finish the spine, the quests appear, finish
+   the ones the chapter requires, the next chapter opens.
+
+   `spineLessonsDone` counted finished lessons for the old `FORK_AT` test and
+   went with it: the question is whether the unit is done, which
+   `unitProgress` already answers. */
+export const forkOpen = (st, stage) => !!st.dev || unitProgress(st, stage.core) >= 1;
 
 export function unitUnlocked(st, u) {
   if (st.dev) return true;
@@ -361,14 +377,24 @@ export function unitUnlocked(st, u) {
   return forkOpen(st, STAGES[i]);
 }
 
-/* The first unfinished spine lesson — what "Continue" resumes. Side quests are
-   never what Continue leads to; they are chosen on the map. */
+/* The first unfinished lesson on the route — what "Continue" resumes.
+ *
+ * The chapter's spine first, then **the quests that chapter requires**, then
+ * the next chapter. Until 2026-09-22 this walked the spine alone, which was
+ * right while every branch was optional: Continue followed the road and the
+ * quests were chosen off the map. Now the required ones gate the next chapter,
+ * and a Continue that could not reach them would have run out of things to say
+ * the moment a spine was finished — the button gone, no disc filled, and the
+ * only way on being to guess which disc to press. Optional quests stay off it;
+ * those are still chosen on the map, which is the whole of what makes them
+ * optional. */
 export function nextLesson(st) {
   for (let i = 0; i < STAGES.length; i++) {
     if (!stageUnlocked(st, i)) break;
-    const u = STAGES[i].core;
-    for (let k = 0; k < lessonCount(u); k++) {
-      if (!lessonDone(st, u, k)) return { unit: u, index: k };
+    for (const u of [STAGES[i].core, ...required(STAGES[i])]) {
+      for (let k = 0; k < lessonCount(u); k++) {
+        if (!lessonDone(st, u, k)) return { unit: u, index: k };
+      }
     }
   }
   return null;
@@ -394,6 +420,9 @@ export function reachedUnits(st) {
     out.push(s.core);
     if (here && s.core.id === here.unit.id) return out;
     out.push(...s.branches);
+    // Continue can now stop on a required quest (`nextLesson`), so the route
+    // can end inside a chapter's fork rather than only at its spine.
+    if (here && s.branches.some((u) => u.id === here.unit.id)) return out;
   }
   return out;
 }
@@ -405,8 +434,17 @@ export function reachedUnits(st) {
 export function routePosition(st) {
   const here = nextLesson(st);
   if (!here) return { stage: STAGES.length - 1, lesson: Infinity };
-  const stage = STAGES.findIndex((s) => s.core.id === here.unit.id);
-  return { stage: stage < 0 ? 0 : stage, lesson: here.index };
+  /* `nextLesson` can stop on a required quest now, and a quest is part way
+     *through* its chapter, not at lesson N of the spine — so a learner on one
+     has finished the spine and is reported at the end of it. Reporting
+     `here.index` there would have said "chapter 3, lesson 2" while they were
+     in the middle of chapter 3's Home, and `core/openings.js` reads this to
+     decide what has opened. */
+  const spine = STAGES.findIndex((s) => s.core.id === here.unit.id);
+  if (spine >= 0) return { stage: spine, lesson: here.index };
+  const inFork = STAGES.findIndex((s) => s.branches.some((u) => u.id === here.unit.id));
+  if (inFork >= 0) return { stage: inFork, lesson: lessonCount(STAGES[inFork].core) };
+  return { stage: 0, lesson: here.index };
 }
 
 export const idxOfWord = (w) => {
@@ -429,8 +467,15 @@ export function reviewWords(st) {
    record, which is the honest answer to "what do they know". */
 export const knownWords = (st) => Object.keys((st && st.seen) || {});
 
-/* Cards due now, across every direction — what "Review · N due" counts. */
-export const dueCount = (st) => dueCards(st.seen, Date.now(), st.learnAhead).length;
+/* Cards due now — what "Review · N due" counts and what the Study tab badges.
+ *
+ * **Only the fronts the learner has chosen** (`st.flash`), because this number
+ * is a promise about the pile that screen will deal, and since 2026-09-22 that
+ * pile is filtered by them (core/queue.js). A badge counting cards the session
+ * would not hand over is the stranding bug wearing the other hat: work owed
+ * that nothing can reach. The Stats screen is the other question — what the
+ * whole schedule holds — and deliberately still counts every direction. */
+export const dueCount = (st) => dueCards(st.seen, Date.now(), st.learnAhead, st.flash).length;
 
 /* What a practice drill may ask about: the words the learner has met, widened
    along the route until there are enough to drill. A fresh learner gets the first

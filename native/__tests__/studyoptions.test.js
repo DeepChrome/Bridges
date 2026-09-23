@@ -18,7 +18,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Study, { flagsFor, FRONTS } from "../src/screens/Study";
+import Study, { flagsFor, FRONTS, sessionFor, newCardRank } from "../src/screens/Study";
+import { L, dueCount } from "../src/data";
 import { hasRealAudio, refreshVoices } from "../src/audio";
 import { act } from "@testing-library/react-native";
 import { DAY, REVIEW, NEW } from "@core/scheduler";
@@ -124,13 +125,70 @@ describe("the options live where a session starts", () => {
     expect((await saved()).flash).toEqual(["produce"]);
   });
 
-  it("defaults new words to five a day, and takes a choice", async () => {
+  /* A number, stepped or typed, rather than four fixed chips (the owner,
+     2026-09-22). The chips could not say 7, and the value a learner wants is
+     usually not one of four. */
+  it("defaults new words to five a day, and takes any number", async () => {
     expect(QUEUE_DEFAULTS.newPerDay).toBe(5);
     await withProfile({ sets: [], newPerDay: undefined });
     fireEvent.press(await screen.findByText("Choose what to review"));
-    const choice = await screen.findByTestId("new-per-day");
-    await act(async () => { fireEvent.press(within(choice).getByText("10")); });
-    expect((await saved()).newPerDay).toBe(10);
+    expect((await screen.findByTestId("new-per-day-value")).props.value).toBe("5");
+
+    await act(async () => { fireEvent.press(screen.getByTestId("new-per-day-plus")); });
+    expect((await saved()).newPerDay).toBe(6);
+    await act(async () => { fireEvent.press(screen.getByTestId("new-per-day-minus")); });
+    expect((await saved()).newPerDay).toBe(5);
+
+    // Typed, and committed when the field is left — not on every keystroke,
+    // or clearing it to retype would commit a 0 and deal no new cards.
+    await act(async () => { fireEvent.changeText(screen.getByTestId("new-per-day-value"), "12"); });
+    await act(async () => { fireEvent(screen.getByTestId("new-per-day-value"), "blur"); });
+    expect((await saved()).newPerDay).toBe(12);
+  });
+
+  /* **The filter filters.** The owner, 2026-09-22: *"if I click the Russian to
+     English, it will still just show me the cards from before the filter was
+     adjusted."* It gated only *new* cards, so every already-scheduled card of
+     an unticked direction stayed in the pile — and the tab badge counted them,
+     which is the half of the old rule worth keeping: nothing may be owed that
+     the screen will not deal. Both halves are asserted here. */
+  it("drops a front's due cards from the pile and from the count when it is unticked", async () => {
+    const seen = { [WORD]: { recognise: due(), produce: due() } };
+    await withProfile({ seen, sets: ["__due__"], flash: ["recognise", "produce"] });
+    await screen.findByTestId("card-kind");
+    expect(sessionFor({ ...base, seen, sets: ["__due__"], flash: ["recognise", "produce"] })
+      .items.map((i) => i.direction).sort()).toEqual(["produce", "recognise"]);
+    expect(dueCount({ ...base, seen, flash: ["recognise", "produce"] })).toBe(2);
+
+    const one = { ...base, seen, sets: ["__due__"], flash: ["recognise"] };
+    expect(sessionFor(one).items.map((i) => i.direction)).toEqual(["recognise"]);
+    expect(dueCount(one)).toBe(1);
+  });
+
+  /* Commonest first. `fresh` used to be shuffled, so a beginner's opening
+     cards were a uniform sample of everything ticked — which is how the owner
+     met «воспользоваться» ("to avail oneself") among his first. */
+  it("deals the commonest new words first", async () => {
+    const rare = L[3500] ? L[3500].b : L[L.length - 1].b;
+    const common = L[3].b;
+    const st = { ...base, seen: {}, sets: [], decks: [{ id: "k1", name: "d", cards: [
+      { ru: rare, en: "" }, { ru: common, en: "" }] }], newPerDay: 1, flash: ["recognise"] };
+    st.sets = ["deck:k1"];
+    expect(sessionFor(st).items.map((i) => i.word)).toEqual([common]);
+    expect(newCardRank(common)).toBeLessThan(newCardRank(rare));
+    // A word the curriculum does not carry sorts after it, not before.
+    expect(newCardRank("qqqq")).toBeGreaterThan(newCardRank(rare));
+  });
+
+  /* It never goes below nothing, whatever the finger does. */
+  it("clamps the new-word ration rather than letting it go negative", async () => {
+    await withProfile({ sets: [], newPerDay: 0 });
+    fireEvent.press(await screen.findByText("Choose what to review"));
+    const minus = await screen.findByTestId("new-per-day-minus");
+    expect(minus.props.accessibilityState).toMatchObject({ disabled: true });
+    await act(async () => { fireEvent.changeText(screen.getByTestId("new-per-day-value"), "-4"); });
+    await act(async () => { fireEvent(screen.getByTestId("new-per-day-value"), "blur"); });
+    expect((await saved()).newPerDay).toBe(4);
   });
 });
 

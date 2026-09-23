@@ -713,6 +713,27 @@ group("backward build-up");
   ok(syllables("дом").length === 1 && syllables("я").length === 1, "one vowel is one syllable");
   ok(syllables("").length === 0, "and nothing is nothing");
 
+  /* …and a soft sign the *cluster* rules land on, which is the same rule and
+     was broken for as long as the file has existed. The cut is walked past a
+     sign before the doubled/sonorant/three-cluster bump and had to be walked
+     again after it: «бол-ьша-я», and «ься» first out of every reflexive verb.
+     A TTS engine handed a bare sign reads its name, which is what the owner
+     heard (2026-09-22).
+
+     **Aimed, not sampled** (§23): every curriculum lemma worth drilling, every
+     fragment. Spot-checking «учи́тель» is exactly what missed it — the sign is
+     word-final there, which was never the broken case. */
+  const NO_START = "йьъ";
+  const unsayable = [];
+  for (const w of DATA.lemmas) {
+    if (!w.w || !worthBuilding(w.w)) continue;
+    for (const f of buildup(w.w)) if (NO_START.includes(f[0].toLowerCase())) unsayable.push(w.w + ": " + f);
+  }
+  ok(unsayable.length === 0, "no fragment of any curriculum word begins with й, ь or ъ",
+     `${unsayable.length}, e.g. ${unsayable.slice(0, 4).join(", ")}`);
+  ok(s("больша́я") === "боль-ша́-я", "боль-ша-я, not бол-ьша-я", s("больша́я"));
+  ok(s("учи́ться") === "у-чи́ть-ся", "у-чить-ся: -ться does not begin a fragment", s("учи́ться"));
+
   // The stress mark belongs to its vowel; a fragment must never open with one.
   ok(buildup("понима́ю").every((f) => !/^[̀́]/.test(f.normalize("NFD"))),
      "no fragment begins with a floating stress mark");
@@ -1376,6 +1397,26 @@ group("question quality");
   }
   ok(heard > 300 && bare / heard < 0.05, "a heard or chosen Russian word stands among look-alikes",
      `${bare} of ${heard} sets with none; ${(near / heard).toFixed(2)} of 3 alike`);
+  /* **No two options may read the same on screen.** Drawing look-alikes makes
+     a homograph the *nearest* candidate there is — distance 0 — so «мочь» the
+     verb was offered against «мочь» the noun. The dedupe was on the meaning,
+     which is a different string, and §30r's `dupes` metric folds its
+     comparison and could not see it either. The simulator caught it; this
+     sweeps every curriculum word rather than waiting for a seed to. */
+  let dupes = 0;
+  for (const u of UN) {
+    const pool = u.w.length >= 8 ? u.w : UN.flatMap((x) => x.w).slice(0, 400);
+    for (const i of u.w) {
+      for (const kind of ["listen", "choose-ru"]) {
+        const q = Q.present({ t: kind, i, pool });
+        if (!q || !q.options) continue;
+        const labels = q.options.map((o) => o.label);
+        if (new Set(labels).size !== labels.length) dupes++;
+      }
+    }
+  }
+  ok(dupes === 0, "no heard or chosen option set shows the same word twice", String(dupes));
+
   const eto = L.findIndex((w) => w.b === "это");
   if (eto >= 0) {
     const q = Q.present({ t: "listen", i: eto, pool: UN[0].w });

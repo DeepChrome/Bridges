@@ -3891,6 +3891,129 @@ holds the bar at under 5 % of sets with none. Edit distance is a proxy for
 sound and a fair one here — Russian is spelt close to how it is said — but it
 is a proxy: «США» once stood in for «она». Not chased.
 
+## 30ap. The owner's fifteen (2026-09-22)
+
+Fourteen corrections and one new feature, in one message. Four of them were
+real defects with causes worth keeping; the rest are decisions.
+
+**The path now gates on its own shape.** *"Lines connecting two learning modes
+should only appear once the higher node has been completed"* and *"all
+parallel nodes must be completed before moving down a node unless there are
+specifically optional lessons."* Both overrule §30e, where every branch was an
+optional detour and the fork opened after `FORK_AT` (2) spine lessons.
+
+- `forkOpen` is now "this chapter's spine is finished", and a closed fork
+  draws **nothing** — no lanes, no discs. They used to be there from the first
+  screen, greyed and dashed, so every chapter announced its branches before a
+  lesson of it had been opened. The 650 ms reveal animation was written for
+  this moment in 2026-09-08 and had never had a moment to run.
+- `stageDone` is the spine **plus every quest the chapter requires**.
+  `OPTIONAL` in `build_topics.py` is the exception list — eight of
+  twenty-four: military, sport, art, politics, science, law, religion,
+  business. The cut is "would someone living in the language need this to get
+  through a week?" It rides out as `opt` on the unit so the path and the gate
+  read one source (§22), and the optional discs say so under their names,
+  which is rule 20.7's state-nobody-can-see allowance.
+- **`nextLesson` had to learn to walk into the fork.** It followed the spine
+  alone, which was right while quests were optional — and would have left a
+  learner who finished a spine with no Continue at all, no disc filled, and
+  nothing to do but guess. Optional quests stay off it; that is what makes
+  them optional. `routePosition` reports such a learner at the end of the
+  spine rather than at "lesson 2", since `core/openings.js` reads it.
+
+**A fragment that begins with a soft sign is not a fragment.** *"On word
+building, it sometimes literally says the soft sign name (mierke snake)."* It
+did: `syllables` walked the cut past `NEVER_FIRST` **before** the cluster
+rules and not after, and the bump those rules apply lands on a soft sign
+constantly. «боль-ша-я» came out «бол-ьша-я», and «ься» was the first thing
+the drill said for every reflexive verb in -ться. **291 of the 4,017 lemmas**
+produced at least one such fragment; a TTS engine handed a bare sign reads its
+name. Found by sweeping the curriculum, not by reading — the existing test
+checked «учи́тель», where the sign is word-final, which was never the broken
+case. `core.test.mjs` sweeps all of them now.
+
+**…and a fragment keeps its stress mark.** `speakLine` strips the combining
+acute for everything, which is right for a word or a sentence and wrong for
+«рошо́»: alone it has nothing else to say where the beat falls, and an engine
+guessing "РО-шо" makes the end of «хорошо» sound unlike the word it came from.
+`speakLine(text, { stress: true })` keeps it, and only the build-up passes it.
+**Not verified by ear on a device** — the claim is that Android's Russian TTS
+honours U+0301, which is how за́мок and замо́к are told apart.
+
+**A dropped microphone is not a broken phone.** *"A lot of the time it will
+glitch out and say something like audio recognition failed."* Every recognizer
+code but `no-speech` raised a `block`, which *replaces the whole activity*,
+and **`clearBlock` was called nowhere in the app** — so a momentary loss of
+the audio session (the TTS engine that had just spoken, a notification, a
+Bluetooth route change: all `audio-capture`) ended the question with one line
+and a way out. `TRANSIENT` in `speech.js` is the list that now gets a note and
+a ready microphone instead; a block is for the three things a learner can act
+on. Every retry path calls `clearBlock`, and Shadow, Pair and Build render
+`rec.note`, which only Say and Talk ever did — so a hold that caught nothing
+used to look like a hold that had not registered.
+
+**Word building got its pacing and its second go.** Three seconds between the
+two readings (his number; 550 ms ran them into one stutter), a grey "Listen"
+that becomes "Repeat", and the drill's controls not drawn until the readings
+are done — with one quiet "Start" for a learner who has heard enough, because
+eight seconds a word over six words is otherwise a cage. And **"Try again"**:
+the first hearing used to be final in the one activity whose whole subject is
+saying a word again, while Say, Shadow and Pair had all had it from the start.
+
+**The flashcard filters now filter.** *"If I click the Russian to English, it
+will still just show me the cards from before the filter was adjusted."* Two
+causes. `setsKey` omitted every ration, so choosing a different "New words a
+day" wrote the setting and never re-dealt. And `dirs` gated **only new cards**
+— deliberately, because §30aa found that filtering reviews stranded 1,964
+cards behind a badge that still counted them. That fix was aimed at the wrong
+half: the filter now filters everything, and the *counting* is what changed
+with it. `dueCards`/`wanted`/`cardsOf` take `dirs`, `dueCount` passes
+`st.flash`, and each front row shows how many cards it is holding. Nothing is
+owed that the screen will not deal, which was the whole of the old rule.
+Stats still counts every direction: it is a report on the schedule, not on
+today's pile.
+
+**New cards come commonest first.** `shuffled(fresh).slice(0, n)` made a
+session's new words a uniform sample of everything ticked, which is how
+«воспользоваться» ("to avail oneself") reached his opening cards.
+`buildSession` takes a `rank`; the app passes the lemma index, which the build
+assigns by frequency. Rule 20.4 forbids *keying state* on that index, not
+reading it as what it is. No `rank`, no change — every other caller is as it
+was.
+
+**Smaller, and each its own decision.** Anki **export** removed, with
+`exportDeck`, `apkgBytes`, `apkgRows`, `APKG_SCHEMA`, `toTsv`, `cardsOfSets`
+and their tests — a deck comes in, nothing goes back out; **import** moved to
+Settings beside backup and restore. "Recordings" became **"As recorded"**: he
+read it as a filter, and it sat in a sheet of real filters ("there's a filter
+option for recorded...no idea what that means"). "New words a day" is a
+`Stepper` — a typed box with ± — because four chips are a menu pretending to
+be a number. The **«№ N by frequency»** pill is gone from the entry, and so is
+the per-sentence **TATOEBA** caption; §30a's rule survives where it works, in
+the section heading ("In your collection" against "Examples") and in the
+licence credit built from the databases' own meta rows. And `pick_senses` now
+requires sense 1 to match our gloss's **first group** rather than touching it
+anywhere, so the topmost definition is the one the lesson teaches.
+
+**Translate is the new feature.** Speak Russian, read it back in English:
+on-device recognition (audio never leaves the phone) into `POST /v1/translate`,
+which shares the feedback counter and cap. Two answers, and the app owes the
+first whatever happens — the transcript is `Linked`, so every word is a
+two-press dictionary entry with no network, and that is the half this app is
+actually good at. The sentence is the model's, because «Мне не до этого» is
+four words the dictionary knows and one thing it cannot say. It **translates
+and does not correct**: a learner using it as a phrasebook would never learn
+they had said something else. Nothing is scored, nothing enters the scheduler,
+nothing is praised — Say and Talk are the exercises; this is a tool.
+
+**The trap, and it was the simulator that found it.** Look-alike distractors
+(§30ao) make a **homograph the nearest candidate there is** — distance 0 — so
+«мочь» the verb was offered against «мочь» the noun. `distractors` deduped on
+the *meaning*, which is a different string, and §30r's `dupes` metric folds
+its comparison and could not see it either. Two options reading the same is
+the one thing a multiple choice may never do. `core.test.mjs` sweeps every
+curriculum word for it now rather than waiting for a seed to land on one.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

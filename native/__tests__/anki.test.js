@@ -11,9 +11,9 @@ import { unzipSync, zipSync, strToU8, strFromU8 } from "fflate";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Study, { sessionFor, cardsOfSets, cardsIn } from "../src/screens/Study";
-import { importDeck, apkgBytes, exportDeck, readCollection } from "../src/anki";
-import { cardFromFields, decksFromNotes, parseTextDeck, apkgRows, toTsv } from "@core/anki";
+import Study, { sessionFor, cardsIn } from "../src/screens/Study";
+import { importDeck, readCollection } from "../src/anki";
+import { cardFromFields, decksFromNotes, parseTextDeck } from "@core/anki";
 import { UN, L } from "../src/data";
 
 const base = {
@@ -65,26 +65,10 @@ describe("core parsing", () => {
     ]);
   });
 
-  it("reads Anki's text export and writes one back", () => {
+  it("reads Anki's text export, tab- or semicolon-separated, quoted or not", () => {
     const text = "#separator:tab\n#html:false\nдом\thouse\n\"вода\";\"water\"\n";
     expect(parseTextDeck(text, "Mine")).toEqual([{ name: "Mine",
       cards: [{ ru: "дом", en: "house" }, { ru: "вода", en: "water" }] }]);
-    expect(toTsv([{ ru: "дом", en: "house" }])).toBe("дом\thouse\n");
-  });
-
-  it("builds a legacy collection: one model, one deck, a note and a card per word", () => {
-    const rows = apkgRows("Test", [{ ru: "дом", en: "house" }, { ru: "кот", en: "cat" }], 1700000000000);
-    expect(rows.col[4]).toBe(11);                                     // schema version
-    const models = JSON.parse(rows.col[9]);
-    const model = Object.values(models)[0];
-    expect(model.flds.map((f) => f.name)).toEqual(["Front", "Back"]);
-    const decks = JSON.parse(rows.col[10]);
-    expect(Object.values(decks)[0].name).toBe("Test");
-    expect(rows.notes).toHaveLength(2);
-    expect(rows.notes[0][6]).toBe("дом\x1fhouse");
-    expect(rows.cards).toHaveLength(2);
-    expect(rows.cards[1][1]).toBe(rows.notes[1][0]);                  // card -> its note
-    expect(new Set(rows.notes.map((n) => n[1])).size).toBe(2);        // distinct guids
   });
 });
 
@@ -132,30 +116,11 @@ describe("import", () => {
   });
 });
 
-describe("export", () => {
-  it("writes an .apkg: a zip with the serialised collection and a media manifest", async () => {
-    const sql = [];
-    const db = {
-      execAsync: jest.fn(async (s) => { sql.push(s); }),
-      runAsync: jest.fn(async (s, params) => { sql.push([s, params]); }),
-      serializeAsync: jest.fn(async () => strToU8("SQLITE")),
-      closeAsync: jest.fn(async () => {}),
-    };
-    const shared = [];
-    const out = await exportDeck("Food & Drink", [{ ru: "хлеб", en: "bread" }],
-      { openMemory: async () => db, writeShare: async (name, bytes) => shared.push([name, bytes]) });
-    expect(out).toEqual({ file: "Food  Drink.apkg", cards: 1 });
-    expect(shared).toHaveLength(1);
-    const files = unzipSync(shared[0][1]);
-    expect(strFromU8(files["collection.anki2"])).toBe("SQLITE");
-    expect(strFromU8(files.media)).toBe("{}");
-    expect(sql[0]).toMatch(/CREATE TABLE col/);
-    expect(db.runAsync).toHaveBeenCalledTimes(3);                      // col, note, card
-    expect(db.closeAsync).toHaveBeenCalled();
-    const bytes = await apkgBytes("x", [], { openMemory: async () => db });
-    expect(unzipSync(bytes)["collection.anki2"]).toBeTruthy();
-  });
-});
+/* There was an "export" group here — an .apkg written back out — removed with
+   the feature on 2026-09-22 (§30ap), along with `exportDeck`, `apkgBytes`,
+   `apkgRows`, `APKG_SCHEMA`, `toTsv` and `cardsOfSets`. A test kept alive for
+   code nothing calls is what `audit_dead.mjs` files under *test-only*: not
+   product, and not a reason to keep the product. */
 
 describe("flashcards from a deck", () => {
   const deck = { id: "k1", name: "My deck", cards: [{ ru: "привет", en: "hi" }, { ru: "пока", en: "bye" }], added: 1 };
@@ -167,8 +132,6 @@ describe("flashcards from a deck", () => {
     expect(q.every((c) => c.kind === "new" && c.direction === "recognise")).toBe(true);
     const both = cardsIn({ ...st, sets: ["deck:k1", UN[0].id] }, ["deck:k1", UN[0].id]);
     expect(both.length).toBe(2 + UN[0].w.length);
-    expect(cardsOfSets(st, ["deck:k1"])).toEqual(deck.cards);
-    expect(cardsOfSets(st, [UN[0].id])[0]).toEqual({ ru: L[UN[0].w[0]].b, en: L[UN[0].w[0]].e });
   });
 
   it("shows a deck card, grades it into the schedule, and lists the deck in the picker", async () => {
@@ -182,7 +145,10 @@ describe("flashcards from a deck", () => {
     expect(st.seen[word].recognise.reps).toBe(1);
     await act(async () => { fireEvent.press(screen.getByText("Change")); });
     expect((await screen.findAllByText("My deck")).length).toBeGreaterThanOrEqual(2);  // the set row and the picker
-    expect(screen.getByText("Import")).toBeTruthy();
-    expect(screen.getByText("Export selected as an Anki deck")).toBeTruthy();
+    // Importing moved to Settings and exporting is gone (§30ap); the picker
+    // lists the deck so it can be ticked, and offers a way to remove it.
+    expect(screen.queryByText("Import")).toBeNull();
+    expect(screen.queryByText(/Export/)).toBeNull();
+    expect(screen.getByText("Remove")).toBeTruthy();
   });
 });

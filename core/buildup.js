@@ -75,12 +75,26 @@ export function syllables(word) {
   for (let v = 0; v + 1 < vowels.length; v++) {
     const from = vowels[v] + 1, to = vowels[v + 1];
     let cut = from;                      // consonants default to the next syllable
-    // …but never take one that cannot start a syllable.
-    while (cut < to && NEVER_FIRST.includes(head(ls[cut]).toLowerCase())) cut++;
+    /* …but never take one that cannot start a syllable — **checked before the
+       cluster rules below and again after them**.
+     *
+     * Only checking it first was a real defect, found 2026-09-22 by sweeping
+     * the whole curriculum rather than by reading: the bump the cluster rules
+     * apply moves the cut one letter on, and that letter is very often a soft
+     * sign. «боль-ша-я» came out «бол-ьша-я», and «ься» — an unsayable
+     * fragment — was the *first* thing the drill said for every reflexive verb
+     * in -ться. 291 of the 4,017 lemmas produced at least one such fragment.
+     * The owner heard what a TTS engine does when handed a bare soft sign:
+     * it reads the letter's name. "It sometimes literally says the soft sign
+     * name (mierke snake)" — мягкий знак. */
+    const legal = () => {
+      while (cut < to && NEVER_FIRST.includes(head(ls[cut]).toLowerCase())) cut++;
+    };
+    legal();
     const cluster = to - cut;
     if (cluster >= 2) {
       const a = head(ls[cut]).toLowerCase(), b = head(ls[cut + 1]).toLowerCase();
-      if (a === b || SONORANT.includes(a) || cluster >= 3) cut++;
+      if (a === b || SONORANT.includes(a) || cluster >= 3) { cut++; legal(); }
     }
     cuts.push(cut);
   }

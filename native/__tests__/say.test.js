@@ -20,7 +20,7 @@ import { L, IX, STAGES, SPEECH } from "../src/data";
 import { fold } from "@core/util";
 import { MINUTE } from "@core/scheduler";
 import { getFeedback } from "../src/lib/feedback";
-import { WATCHDOG_MS, MIN_LISTEN_MS } from "../src/speech";
+import { WATCHDOG_MS, MIN_LISTEN_MS, TRANSIENT } from "../src/speech";
 import { SPEECH_SKIP_TOP } from "@core/speech";
 
 /* The Worker is out of scope here: the client is stubbed and, unless a test says
@@ -305,5 +305,25 @@ describe("say", () => {
     expect(ExpoSpeechRecognitionModule.androidTriggerOfflineModelDownload)
       .toHaveBeenCalledWith({ locale: "ru-RU" });
     expect(screen.getByText("Skip")).toBeTruthy();
+  });
+
+  /* The other half of that rule, and the one that was wrong until 2026-09-22:
+     a momentary failure is a **note**, not a screen that replaces the
+     activity. Every code but `no-speech` used to raise a block and nothing
+     ever called `clearBlock`, so a lost audio session ended the question. */
+  it("treats a dropped microphone as a note and a real refusal as a block", async () => {
+    expect(TRANSIENT["audio-capture"]).toBeTruthy();
+    expect(TRANSIENT["no-speech"]).toBe("Nothing heard");
+    expect(TRANSIENT["not-allowed"]).toBeUndefined();         // the mic really is off
+
+    await withSay();
+    await screen.findByText(question.en);
+    await speak();
+    await act(async () => { global.__stt.emit("error", { error: "audio-capture" }); });
+    // Still the question, with the microphone ready and a word about it.
+    expect(screen.getByText(question.en)).toBeTruthy();
+    expect(screen.getByTestId("say-hold")).toBeTruthy();
+    expect(screen.queryByText(/Recognition failed/)).toBeNull();
+    expect(await screen.findByText(TRANSIENT["audio-capture"])).toBeTruthy();
   });
 });

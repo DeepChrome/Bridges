@@ -253,14 +253,20 @@ export function isDue(card, now, learnAhead) {
   return dayOf(card.dueAt) <= dayOf(now);
 }
 
-export const cardsOf = (entry) =>
-  DIRECTIONS.filter((d) => entry && entry[d]).map((d) => ({ direction: d, card: entry[d] }));
+/* `dirs`, where it is given, is the learner's chosen card fronts. It narrows
+   what *counts as owed* so that a count and the pile it describes cannot
+   disagree — see the long note in core/queue.js. Left out, it is every
+   direction, which is what `strength`, `maxLapses` and `reviewedOn` want:
+   those are facts about a word's memory, not about today's session. */
+export const cardsOf = (entry, dirs) =>
+  (dirs && dirs.length ? DIRECTIONS.filter((d) => dirs.includes(d)) : DIRECTIONS)
+    .filter((d) => entry && entry[d]).map((d) => ({ direction: d, card: entry[d] }));
 
 /* Every (word, direction) that is due, across the whole schedule. */
-export function dueCards(seen, now, learnAhead) {
+export function dueCards(seen, now, learnAhead, dirs) {
   const out = [];
   for (const w in seen || {}) {
-    for (const { direction, card } of cardsOf(seen[w])) {
+    for (const { direction, card } of cardsOf(seen[w], dirs)) {
       if (isDue(card, now, learnAhead)) out.push({ word: w, direction: direction, card: card });
     }
   }
@@ -272,8 +278,8 @@ export function dueCards(seen, now, learnAhead) {
    review" — a word taught in a lesson has no card until it is graded). That
    is what the quiz tops up with and what the "Due today" set holds; the due
    *count* stays what is due. */
-export const wanted = (entry, now, learnAhead) =>
-  cardsOf(entry).some(({ card }) => card.state === NEW || isDue(card, now, learnAhead));
+export const wanted = (entry, now, learnAhead, dirs) =>
+  cardsOf(entry, dirs).some(({ card }) => card.state === NEW || isDue(card, now, learnAhead));
 
 /* The strongest memory a word has, in days of stability — what "strongest
    first" means where a list is sorted by it. */

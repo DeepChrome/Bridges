@@ -16,16 +16,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, Pressable, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Choice, Lift, Text } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Choice, Stepper, Lift, Text } from "../ui";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf } from "../data";
 import { Linked } from "../words";
-import { importDeck, exportDeck } from "../anki";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
-import { applyGrade, reviewRows, preview, schedulerOpts, wanted, wordTrouble, maxLapses, DIRECTIONS } from "@core/scheduler";
+import { applyGrade, reviewRows, preview, schedulerOpts, wanted, dueCards, wordTrouble, maxLapses, DIRECTIONS } from "@core/scheduler";
 import { buildSession, requeue, bury, dailyFor, QUEUE_DEFAULTS } from "@core/queue";
-import { today } from "@core/util";
 
 /* The three directions as the learner sees them: by what is on the **front**.
  *
@@ -121,7 +119,9 @@ export function cardsIn(st, sets) {
     // "Review · N due" on the path opens.
     if (id === "__due__") {
       const now = Date.now();
-      for (const w in st.seen) if (wanted(st.seen[w], now, st.learnAhead)) byWord(w);
+      // Through the chosen fronts, so "Due today · N words" counts what this
+      // screen will actually hand over (core/queue.js, 2026-09-22).
+      for (const w in st.seen) if (wanted(st.seen[w], now, st.learnAhead, st.flash)) byWord(w);
       return;
     }
     if (id.startsWith("deck:")) {
@@ -135,13 +135,6 @@ export function cardsIn(st, sets) {
   return pool;
 }
 
-/* The cards a set holds, for export — every card, due or not. (It used to blank
-   `seen` to get past the due filter, which emptied the Trouble set: its words
-   are found *through* `seen`.) */
-export function cardsOfSets(st, ids) {
-  return cardsIn(st, ids).map((c) => ({ ru: c.b, en: c.e || "" }));
-}
-
 /* The session for what is ticked, from the learner's state. Exported so a test
    can ask for the same session the screen deals. */
 export function sessionFor(st, { ahead, rng } = {}) {
@@ -149,47 +142,41 @@ export function sessionFor(st, { ahead, rng } = {}) {
   return buildSession({
     seen: st.seen, words, dirs: st.flash || DIRECTIONS, now: Date.now(), daily: st.daily, rng, ahead,
     opts: { newPerDay: st.newPerDay, reviewsPerDay: st.reviewsPerDay, learnAhead: st.learnAhead,
-            scheduler: schedulerOpts(st) },
+            scheduler: schedulerOpts(st), rank: newCardRank },
   });
 }
+
+/* Which new word to deal first: the commoner one. Lemma indices are assigned
+   by frequency at build time (rule 20.4 is about never *keying state* on them;
+   reading one as a rank is exactly what they are). A word the curriculum does
+   not carry — a deck card the learner imported, a sentence — sorts after the
+   curriculum but keeps the order it arrived in, which is the order they chose.
+
+   This is what stops «воспользоваться» opening a beginner's pile (§30ap). */
+export const newCardRank = (w) => {
+  const i = idxOfWord(w);
+  return i >= 0 ? i : Number.MAX_SAFE_INTEGER;
+};
 
 export const newDeckId = () => "k" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
 
 function SetPicker({ visible, onClose }) {
   const { st, update } = useSession();
   const t = useTheme();
-  const [busy, setBusy] = useState(false);
   const toggle = (id) => update((p) => ({
     ...p,
     sets: p.sets.includes(id) ? p.sets.filter((x) => x !== id) : p.sets.concat(id),
   }));
   const dueCount = cardsIn(st, ["__due__"]).length;
   const sentenceCount = sentencesFor(st).length;
-
-  const doImport = async () => {
-    setBusy(true);
-    const res = await importDeck();
-    setBusy(false);
-    if (res.cancelled) return;
-    if (res.error) { Alert.alert("Import", res.error); return; }
-    const added = res.decks.map((d) => ({ id: newDeckId(), name: d.name, cards: d.cards, added: today() }));
-    update((p) => ({ ...p, decks: (p.decks || []).concat(added),
-                     sets: p.sets.concat(added.map((d) => "deck:" + d.id)) }));
-    const n = added.reduce((a, d) => a + d.cards.length, 0);
-    Alert.alert("Imported", `${n} cards in ${added.length} ${added.length === 1 ? "deck" : "decks"}.`);
-  };
-
-  const doExport = async (name, ids) => {
-    const cards = cardsOfSets(st, ids);
-    if (!cards.length) { Alert.alert("Export", "Nothing to export."); return; }
-    setBusy(true);
-    try {
-      await exportDeck(name, cards);
-    } catch (e) {
-      Alert.alert("Export", "The deck could not be written.");
-    }
-    setBusy(false);
-  };
+  /* Due cards per front, whether or not that front is ticked — the number a
+     learner needs to decide whether to tick it. */
+  const dueBy = useMemo(() => {
+    const now = Date.now();
+    const out = {};
+    for (const [id] of FRONTS) out[id] = dueCards(st.seen, now, st.learnAhead, [id]).length;
+    return out;
+  }, [st.seen, st.learnAhead]);
 
   const removeDeck = (d) => Alert.alert(
     "Remove deck", `Remove “${d.name}”? Its cards' review history stays.`,
@@ -197,10 +184,6 @@ function SetPicker({ visible, onClose }) {
      { text: "Remove", style: "destructive",
        onPress: () => update((p) => ({ ...p, decks: (p.decks || []).filter((x) => x.id !== d.id),
                                        sets: p.sets.filter((x) => x !== "deck:" + d.id) })) }]);
-
-  const selectedNames = st.sets.map((id) => id === "__trouble__" ? "Trouble words"
-    : id.startsWith("deck:") ? ((st.decks || []).find((d) => "deck:" + d.id === id) || {}).name
-    : (UN.find((u) => u.id === id) || {}).name).filter(Boolean);
 
   const header = (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
@@ -214,16 +197,13 @@ function SetPicker({ visible, onClose }) {
            onPress={() => update((p) => ({ ...p, sets: [] }))} />
     </View>
   );
-  const footer = (
-    <>
-      {st.sets.length ? (
-        <Btn label={busy ? "Working…" : "Export selected as an Anki deck"} disabled={busy}
-             style={{ marginTop: 8 }}
-             onPress={() => doExport(selectedNames.length === 1 ? selectedNames[0] : "Bridges", st.sets)} />
-      ) : null}
-      <Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />
-    </>
-  );
+  /* Just the way out. "Export selected as an Anki deck" stood here and is gone
+     (the owner, 2026-09-22: *"remove the anki deck export"*). It answered a
+     question nobody was asking in the middle of choosing what to study, and
+     the app is where the studying happens — a learner who wants their cards
+     elsewhere is a learner leaving. Import moved to Settings, beside backup
+     and restore, which is the same family of job: bringing something in. */
+  const footer = <Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />;
 
   /* How the cards are asked. These lived in Settings and were never found; a
      learner decides them at the moment of starting, so they are here, where
@@ -250,23 +230,34 @@ function SetPicker({ visible, onClose }) {
                       <Text style={{ color: t.ink, fontSize: 15 }}>{name}</Text>
                       <Muted>{sub}</Muted>
                     </View>
+                    {/* How many cards this front is holding right now. It is
+                        the arithmetic behind the tab badge, which counts only
+                        the ticked ones (data.js `dueCount`) — so turning a
+                        front off is visibly a decision about a number, not a
+                        pile of work quietly vanishing. */}
+                    {dueBy[id] ? <Pill testID={`flash-due-${id}`}>{String(dueBy[id])}</Pill> : null}
                   </Row>
                 ))}
               </List>
             </View>
             <View style={{ marginBottom: 18 }}>
               <SectionLabel>New words a day</SectionLabel>
-              <Choice testID="new-per-day" value={st.newPerDay || QUEUE_DEFAULTS.newPerDay}
-                      options={[5, 10, 15, 25].map((n) => ({ id: n, name: String(n) }))}
-                      onPick={(id) => update((p) => ({ ...p, newPerDay: id }))} />
+              <Stepper testID="new-per-day" label="New words a day" min={0} max={99}
+                       value={st.newPerDay === undefined ? QUEUE_DEFAULTS.newPerDay : st.newPerDay}
+                       onChange={(n) => update((p) => ({ ...p, newPerDay: n }))} />
             </View>
-            {/* "One voice" is the phone's voice on every card. The recordings
-                are the better sound and stay the default; what they cannot be is
-                one speaker, since the collection has four sources (§27). */}
+            {/* Which voice reads the card — never which cards there are. The
+                owner read "Recordings" as a filter and could not see what it
+                filtered ("there's a filter option for recorded...no idea what
+                that means", 2026-09-22); it sat in a sheet of real filters and
+                was named like one. "As recorded" cannot be read that way. The
+                recordings are the better sound and stay the default; what they
+                cannot be is one speaker, since the collection has four
+                sources (§27). */}
             <View style={{ marginBottom: 18 }}>
               <SectionLabel>Voice</SectionLabel>
               <Choice testID="flash-voice" value={st.flashVoice || "recording"}
-                      options={[{ id: "recording", name: "Recordings" }, { id: "device", name: "One voice" }]}
+                      options={[{ id: "recording", name: "As recorded" }, { id: "device", name: "One voice" }]}
                       onPick={(id) => update((p) => ({ ...p, flashVoice: id }))} />
             </View>
 
@@ -311,13 +302,13 @@ function SetPicker({ visible, onClose }) {
               </List>
             </View>
 
-            <View style={{ marginBottom: 18 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <SectionLabel style={{ flex: 1, marginBottom: 0 }}>Your decks</SectionLabel>
-                <Btn kind="ghost" label={busy ? "Working…" : "Import"} disabled={busy}
-                     onPress={doImport} />
-              </View>
-              {(st.decks || []).length ? (
+            {/* Only listed when there is one. An empty section headed "Your
+                decks" over a line explaining how to get some is the app
+                advertising a feature on the screen where somebody is trying to
+                start studying; importing lives in Settings now. */}
+            {(st.decks || []).length ? (
+              <View style={{ marginBottom: 18 }}>
+                <SectionLabel>Your decks</SectionLabel>
                 <List>
                   {(st.decks || []).map((d) => (
                     <Row key={d.id}
@@ -327,17 +318,13 @@ function SetPicker({ visible, onClose }) {
                         <Text style={{ color: t.ink, fontSize: 15 }}>{d.name}</Text>
                         <Muted>{d.cards.length + " cards"}</Muted>
                       </View>
-                      <Btn kind="ghost" label="Export" onPress={() => doExport(d.name, ["deck:" + d.id])}
-                           style={{ paddingHorizontal: 8 }} />
                       <Btn kind="ghost" label="Remove" onPress={() => removeDeck(d)}
                            style={{ paddingHorizontal: 8 }} />
                     </Row>
                   ))}
                 </List>
-              ) : (
-                <Muted>Import an Anki deck (.apkg) or its text export.</Muted>
-              )}
-            </View>
+              </View>
+            ) : null}
 
             {STAGES.map((s, i) => {
               const units = [s.core].concat(s.branches).filter((u) => unitUnlocked(st, u));
@@ -451,8 +438,18 @@ export default function Study({ navigation }) {
   // The profile arrives after the first render, and a set or a deck can change
   // from the picker: the session follows what is ticked. Not what is graded —
   // a session is dealt once and played through.
-  const setsKey = st.sets.join(",") + "|" + (st.decks || []).map((d) => d.id + d.cards.length).join(",")
-    + "|" + (st.flash || []).join(",");
+  /* Everything the picker can change that changes the deal. The rations were
+     missing, so picking a different "New words a day" wrote the setting and
+     left the pile alone — the owner read that, correctly, as a control that
+     did nothing (2026-09-22). `flashVoice` is deliberately absent: it changes
+     how a card is read aloud, not which cards there are, and re-dealing on it
+     would throw away a session in progress. */
+  const setsKey = [
+    st.sets.join(","),
+    (st.decks || []).map((d) => d.id + d.cards.length).join(","),
+    (st.flash || []).join(","),
+    st.newPerDay, st.reviewsPerDay, st.learnAhead, st.retention,
+  ].join("|");
   useEffect(() => { deal(false); }, [setsKey]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const names = st.sets.map((id) => id === "__trouble__" ? "Trouble words"

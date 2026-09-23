@@ -37,6 +37,36 @@ export const MIN_LISTEN_MS = 900;
    the closest of the lot (core/speech.js closestTranscript). */
 export const ALTERNATIVES = 5;
 
+/* **The errors that mean "that attempt did not work", not "this phone cannot
+ * do this"** — and what to say about each.
+ *
+ * Every code but `no-speech` used to fall through to a `block`, which
+ * *replaces the whole activity* with one line and a way out (`Blocked`). So a
+ * momentary loss of the audio session — the TTS engine that had just spoken,
+ * a notification, a Bluetooth route change, all of which Android reports as
+ * `audio-capture` — took the word, its meaning, the syllable dots, the play
+ * button and both navigation buttons off the screen, and `clearBlock` was
+ * never called anywhere, so nothing put them back. The owner, 2026-09-22:
+ * *"a lot of the time it will glitch out and say something like audio
+ * recognition failed"*. It is a glitch; it is just not a fatal one.
+ *
+ * A block is now only for the three things a learner can actually act on: the
+ * microphone is off, the Russian model is missing, or the engine reported
+ * something nobody has a name for. Everything here stays on the screen, says
+ * one short line, and leaves the button ready to hold again. */
+export const TRANSIENT = {
+  "no-speech": "Nothing heard",
+  "speech-timeout": "Nothing heard",
+  "audio-capture": "Try again",
+  "client": "Try again",
+  "busy": "Try again",
+  "network": "Try again",
+  "too-many-requests": "Try again",
+  "aborted": "Try again",
+  "interrupted": "Try again",
+  "unknown": "Try again",
+};
+
 /* `bias` — the words the activity expects. On Android 13+ they go to the
    recogniser as EXTRA_BIASING_STRINGS, which is the engine being told what
    it is listening for; the owner's complaint (2026-09-19) that Say "almost
@@ -81,8 +111,10 @@ export function useRecognizer({ onFinal, onError, enabled = true, bias } = {}) {
     const what = `${ev.error} ${ev.message || ""}`;
     if (/not-supported|not downloaded/i.test(what)) {
       setBlock({ why: "model", text: "Russian is not installed for offline recognition." });
-    } else if (ev.error === "no-speech") {
-      setNote("Nothing heard");
+    } else if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
+      setBlock({ why: "mic", text: "The microphone is off for Bridges." });
+    } else if (TRANSIENT[ev.error]) {
+      setNote(TRANSIENT[ev.error]);
     } else {
       setBlock({ why: "engine", text: `Recognition failed: ${ev.error}` });
     }

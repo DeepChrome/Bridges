@@ -348,7 +348,16 @@ export function speakLine(text, opts = {}) {
     const timer = setTimeout(() => finish(false), 4000 + text.length * 400);
     try {
       Speech.stop();
-      Speech.speak(bare(text), {
+      /* `stress: true` keeps the combining acute instead of stripping it
+         (2026-09-22, the word-building drill). A Russian TTS engine reads the
+         mark as "the stress is here" — it is how за́мок and замо́к are told
+         apart — and a **fragment** is exactly where it is needed: «рошо́» on
+         its own has nothing else to say where the beat falls, and an engine
+         guessing "РО-шо" makes the last two syllables of «хорошо» sound unlike
+         the word they came out of, which is what the owner heard. A whole word
+         or a sentence carries its own cues, so everything else still strips —
+         an engine that ignored the mark would otherwise read it aloud. */
+      Speech.speak(opts.stress ? text : bare(text), {
         language: opts.language || ruVoice.language,
         voice: opts.voice || ruVoice.identifier,
         pitch: opts.pitch || 1,

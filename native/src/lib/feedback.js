@@ -127,6 +127,14 @@ export async function markTask({ goal, must, attempt, studied, chapter }, deps =
               deps, "/v1/task", TALK_TIMEOUT_MS);
 }
 
+/* One spoken sentence, read back in English (2026-09-22). The phone does the
+   hearing on-device and sends text, as everything else here does; the answer
+   is { en, note }. Short in and short out, so the ordinary timeout is right —
+   a conversational turn's twenty seconds would only make a failure slower. */
+export async function translate({ ru }, deps = {}) {
+  return post({ ru }, deps, "/v1/translate", TIMEOUT_MS);
+}
+
 async function post(body, deps, route, timeoutMs, retried = false) {
   const cfg = deps.config || config(route);
   if (!cfg) return { ok: false, reason: "unconfigured" };

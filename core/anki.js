@@ -76,94 +76,11 @@ export function parseTextDeck(text, name) {
 
 /* ------------------------------------------------------------- writing */
 
-export const APKG_SCHEMA = `
-CREATE TABLE col (id integer primary key, crt integer not null, mod integer not null,
-  scm integer not null, ver integer not null, dty integer not null, usn integer not null,
-  ls integer not null, conf text not null, models text not null, decks text not null,
-  dconf text not null, tags text not null);
-CREATE TABLE notes (id integer primary key, guid text not null, mid integer not null,
-  mod integer not null, usn integer not null, tags text not null, flds text not null,
-  sfld integer not null, csum integer not null, flags integer not null, data text not null);
-CREATE TABLE cards (id integer primary key, nid integer not null, did integer not null,
-  ord integer not null, mod integer not null, usn integer not null, type integer not null,
-  queue integer not null, due integer not null, ivl integer not null, factor integer not null,
-  reps integer not null, lapses integer not null, left integer not null, odue integer not null,
-  odid integer not null, flags integer not null, data text not null);
-CREATE TABLE revlog (id integer primary key, cid integer not null, usn integer not null,
-  ease integer not null, ivl integer not null, lastIvl integer not null, factor integer not null,
-  time integer not null, type integer not null);
-CREATE TABLE graves (usn integer not null, oid integer not null, type integer not null);
-CREATE INDEX ix_notes_usn on notes (usn);
-CREATE INDEX ix_cards_usn on cards (usn);
-CREATE INDEX ix_revlog_usn on revlog (usn);
-CREATE INDEX ix_cards_nid on cards (nid);
-CREATE INDEX ix_cards_sched on cards (did, queue, due);
-CREATE INDEX ix_revlog_cid on revlog (cid);
-CREATE INDEX ix_notes_csum on notes (csum);
-`;
+/* There was a writing half here until 2026-09-22: APKG_SCHEMA, apkgRows and
+   toTsv, which built a fresh Anki collection so the app could hand a deck
+   back out. The owner removed the export (§30ap) and the reading half above
+   is what is left — a deck comes in, and the studying happens here. Version
+   control is the museum (§12); nothing else imported any of it.
 
-const MODEL_ID = 1700000000001;
-const DECK_ID_BASE = 1700000000100;
-
-/* SHA1 is what Anki uses for csum; a stable 32-bit hash of the sort field is
-   enough for a fresh import — Anki recomputes on its side. */
-function hash32(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
-}
-
-function guid(seed) {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&()*+,-./:;<=>?@[]^_`{|}~";
-  let h = hash32("g" + seed), out = "";
-  for (let i = 0; i < 10; i++) { out += chars[h % chars.length]; h = (Math.imul(h, 1103515245) + 12345) >>> 0; }
-  return out;
-}
-
-/* The col row and the note/card rows for one deck of { ru, en } cards, as bind
-   parameter arrays in the order of APKG_SCHEMA's columns. `now` is ms. */
-export function apkgRows(deckName, cards, now) {
-  const sec = Math.floor(now / 1000);
-  const deckId = DECK_ID_BASE + (hash32(deckName) % 1000);
-  const model = {
-    id: MODEL_ID, name: "Bridges (Russian → English)", type: 0, mod: sec, usn: -1, sortf: 0,
-    did: deckId, tmpls: [{ name: "Card 1", ord: 0, qfmt: "{{Front}}",
-      afmt: "{{FrontSide}}<hr id=answer>{{Back}}", bqfmt: "", bafmt: "", did: null, bfont: "", bsize: 0 }],
-    flds: [{ name: "Front", ord: 0, sticky: false, rtl: false, font: "Arial", size: 20, media: [] },
-           { name: "Back", ord: 1, sticky: false, rtl: false, font: "Arial", size: 20, media: [] }],
-    css: ".card { font-family: arial; font-size: 20px; text-align: center; color: black; background-color: white; }",
-    latexPre: "", latexPost: "", latexsvg: false, req: [[0, "any", [0]]], tags: [], vers: [],
-  };
-  const deck = {
-    id: deckId, name: deckName, mod: sec, usn: -1, lrnToday: [0, 0], revToday: [0, 0],
-    newToday: [0, 0], timeToday: [0, 0], collapsed: false, browserCollapsed: false,
-    desc: "Exported from Bridges", dyn: 0, conf: 1, extendNew: 10, extendRev: 50,
-  };
-  const dconf = {
-    1: { id: 1, name: "Default", mod: 0, usn: 0, maxTaken: 60, autoplay: true, timer: 0, replayq: true,
-      new: { bury: false, delays: [1, 10], initialFactor: 2500, ints: [1, 4, 7], order: 1, perDay: 20 },
-      rev: { bury: false, ease4: 1.3, ivlFct: 1, maxIvl: 36500, perDay: 200, hardFactor: 1.2 },
-      lapse: { delays: [10], leechAction: 1, leechFails: 8, minInt: 1, mult: 0 }, dyn: false },
-  };
-  const conf = {
-    nextPos: cards.length + 1, estTimes: true, activeDecks: [deckId], sortType: "noteFld",
-    timeLim: 0, sortBackwards: false, addToCur: true, curDeck: deckId, newBury: true,
-    newSpread: 0, dueCounts: true, curModel: String(MODEL_ID), collapseTime: 1200,
-  };
-  const col = [1, sec, sec, sec * 1000, 11, 0, 0, 0, JSON.stringify(conf),
-               JSON.stringify({ [MODEL_ID]: model }), JSON.stringify({ [deckId]: deck }),
-               JSON.stringify(dconf), "{}"];
-  const notes = [], cardRows = [];
-  cards.forEach((c, k) => {
-    const nid = now + k;
-    const flds = c.ru + FIELD_SEP + (c.en || "");
-    notes.push([nid, guid(c.ru + k), MODEL_ID, sec, -1, "", flds, c.ru, hash32(c.ru), 0, ""]);
-    cardRows.push([nid + 500000, nid, deckId, 0, sec, -1, 0, 0, k + 1, 0, 0, 0, 0, 0, 0, 0, 0, ""]);
-  });
-  return { col, notes, cards: cardRows };
-}
-
-/* Anki's text import format, for a spreadsheet or an older Anki. */
-export function toTsv(cards) {
-  return cards.map((c) => `${c.ru}\t${c.en || ""}`).join("\n") + "\n";
-}
+   If it ever comes back, it comes back with a caller. Keeping ninety lines of
+   schema alive on the chance is how a codebase stops meaning what it says. */

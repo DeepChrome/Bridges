@@ -246,6 +246,19 @@ export function makeQuestions(env) {
     const pos = (L[correctIdx] || {}).p;
     const out = [];
     const lenOff = (i) => Math.abs(String(key(L[i])).length - String(want).length);
+    /* **What is written on the option, as well as what it means.**
+     *
+     * `key` is the meaning for choose-ru and choose-en, and two options that
+     * mean different things can still be spelt the same — «мочь» the verb and
+     * «мочь» the noun. That was rare while distractors came from a unit's
+     * pool; drawing look-alikes makes it likely, because a homograph is at
+     * distance 0 from the answer and sorts first. The simulator caught it on
+     * the first run: «быть» offered with two identical options.
+     *
+     * Only when `alike` is on, and only over the Russian, because that is the
+     * label those two kinds render; §30r's `dupes` metric folds its
+     * comparison and so cannot see this at all. */
+    const shown = alike ? new Set([L[correctIdx].w]) : null;
     /* Within a tier, the options nearest the answer in length.
      *
      * Class was the first tell to go (the 23.7 % above); length is the one left.
@@ -262,6 +275,7 @@ export function makeQuestions(env) {
         if (i === correctIdx || out.includes(i)) continue;
         const v = key(L[i]);
         if (!v || v === want || out.some((o) => key(L[o]) === v)) continue;
+        if (shown && shown.has(L[i].w)) continue;
         if (!accept(i)) continue;
         fit.push(i);
       }
@@ -269,6 +283,8 @@ export function makeQuestions(env) {
       for (const i of shuffle(near.slice(0, Math.max(n * 2, 8)))) {
         if (out.length === n) return;
         if (out.some((o) => key(L[o]) === key(L[i]))) continue;
+        if (shown && shown.has(L[i].w)) continue;
+        if (shown) shown.add(L[i].w);
         out.push(i);
       }
     };

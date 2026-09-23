@@ -11,7 +11,9 @@ import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
 import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { backupProfile, restoreProfile, shareCrashes } from "../backup";
 import { readCrashes, clearCrashes } from "../crash";
-import { troubleWords } from "./Study";
+import { importDeck } from "../anki";
+import { today } from "@core/util";
+import { troubleWords, newDeckId } from "./Study";
 import Constants from "expo-constants";
 
 /* What build this is, at the foot of Settings. The version is app.json's
@@ -80,6 +82,24 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
     readCrashes().then((c) => { if (live) setCrashes(c); }).catch(() => {});
     return () => { live = false; };
   }, [visible]);
+
+  /* An .apkg or a text export, moved here from the Study picker (2026-09-22).
+     The imported decks are ticked on the way in, so the learner lands back on
+     a pile that has them: importing a deck and then having to go and find it
+     is two jobs where they asked for one. */
+  const [importing, setImporting] = useState(false);
+  const doImport = async () => {
+    setImporting(true);
+    const res = await importDeck();
+    setImporting(false);
+    if (res.cancelled) return;
+    if (res.error) { Alert.alert("Import", res.error); return; }
+    const added = res.decks.map((d) => ({ id: newDeckId(), name: d.name, cards: d.cards, added: today() }));
+    update((p) => ({ ...p, decks: (p.decks || []).concat(added),
+                     sets: p.sets.concat(added.map((d) => "deck:" + d.id)) }));
+    const n = added.reduce((a, d) => a + d.cards.length, 0);
+    Alert.alert("Imported", `${n} cards in ${added.length} ${added.length === 1 ? "deck" : "decks"}.`);
+  };
   return (
     <Sheet visible={visible} onClose={onClose} title="Settings"
            footer={<Btn kind="pri" label="Done" style={{ marginTop: 14 }} onPress={onClose} />}>
@@ -287,6 +307,15 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                         { text: "Restore", style: "destructive", onPress: () => { restore(res.state, res.log); onClose(); } }]);
                    }} />
             </View>
+            {/* An Anki deck in. It lived on the Study picker beside the sets
+                until 2026-09-22 — a one-off job sitting on the screen a
+                learner opens every day to choose what to practise. Here it is
+                beside backup and restore, which is the same family: something
+                from outside, brought in once. (Export went altogether; the
+                owner's call.) The decks themselves are still listed in the
+                picker, because ticking one is choosing what to study. */}
+            <Btn label={importing ? "Working…" : "Import an Anki deck"} disabled={importing}
+                 testID="import-deck" style={{ marginTop: 8 }} onPress={doImport} />
             <Btn label="Switch profile" style={{ marginTop: 8 }}
                  onPress={() => { onClose(); signOut(); }} />
             <Btn

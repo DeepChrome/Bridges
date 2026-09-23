@@ -118,12 +118,16 @@ export function WordEntry({ w, index, navigation }) {
         {senses
           ? <SenseList senses={senses} size={16} style={{ marginTop: 10 }} />
           : <Senses e={w.e} size={16} align="left" style={{ marginTop: 8 }} />}
-        {/* Words a learner reads, not codes: "feminine", not "f"; "№ 187 by
-            frequency", not "#187". */}
+        {/* Words a learner reads, not codes: "feminine", not "f".
+            The frequency rank went on 2026-09-22 (the owner: "remove the 'X by
+            frequency' in the definition details"). It was a fact about the
+            corpus, not about the word — nothing a learner does with «№ 187»,
+            and it sat in the same row as the grammar, which is the row they
+            came to read. The rank itself is not lost: it is the lemma's own
+            index, and it is what orders the new flashcards (§30ap). */}
         <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
           {[w.p, GENDER[w.g] || w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
           {w.pt ? <Pill>{`pair: ${[w.pt, w.pt2].filter(Boolean).join(", ")}`}</Pill> : null}
-          {w.fr ? <Pill>{`№ ${w.fr} by frequency`}</Pill> : null}
           {unit ? <Pill tone="brand">{unit.name}</Pill> : null}
         </View>
         {(w.t || []).map((tb, k) => <Table key={k} table={tb} />)}
@@ -143,6 +147,15 @@ export function WordEntry({ w, index, navigation }) {
 
       {examples.length ? (
         <>
+          {/* The heading is the whole of the provenance signal now (the owner,
+              2026-09-22: "no need to flag tatoeba cards"). Each borrowed
+              sentence used to carry an uppercase TATOEBA caption of its own,
+              which put a source line under half the examples of half the
+              dictionary. §30a's rule survives where it does the work: an
+              unlabelled *group* is his own collection, a mixed one says
+              "Examples", and the licence credit is built from the databases'
+              own meta rows on the Credits screen, which is what CC BY asks
+              for — a per-row caption never was. */}
           <SectionLabel style={{ marginTop: 22 }}>
             {examples.every((e) => !e.src)
               ? `In your collection · ${examples.length}`
@@ -162,15 +175,6 @@ export function WordEntry({ w, index, navigation }) {
                   <Speaker text={e.ru} size={36} />
                 </View>
                 <Muted style={{ marginTop: 4 }}>{e.en}</Muted>
-                {/* Only sentences from outside his decks carry a source, so an
-                    unlabelled one reads as his own — same rule as the web app. */}
-                {e.src ? (
-                  <Text style={{ color: t.ink3, fontSize: 10, fontWeight: "700",
-                                 letterSpacing: 0.6, textTransform: "uppercase",
-                                 marginTop: 4 }}>
-                    {e.src}
-                  </Text>
-                ) : null}
               </View>
             ))}
           </Card>

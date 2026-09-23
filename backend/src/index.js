@@ -22,6 +22,7 @@ import { SYSTEM, userMessage, RETRY_NUDGE } from "./prompt.js";
 import { SYSTEM_TALK, talkMessage, validateTalk, SYSTEM_HINT, hintMessage, validateHint,
          SYSTEM_REVIEW, reviewMessage, validateReview } from "./talk.js";
 import { SYSTEM_TASK, taskMessage, validateTask } from "./task.js";
+import { SYSTEM_TRANSLATE, translateMessage, validateTranslate } from "./translate.js";
 
 const API = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
@@ -200,6 +201,18 @@ const ROUTES = {
       ? null : "goal, must and attempt are required"),
     message: (b) => taskMessage(b),
     validate: (parsed, b) => validateTask(parsed, b.must),
+    capMessage: (cap) => `Daily limit of ${cap} reached; resets at 00:00 UTC.`,
+  },
+  /* Speak Russian, read it back in English (2026-09-22). It shares the feedback
+     counter and cap for the same reason the task does — one more budget to
+     reason about buys nothing — and it is the cheapest route here: one short
+     sentence in, one short sentence out. */
+  "/v1/translate": {
+    kind: "translate", counter: "count", cap: (env) => parseInt(env.DAILY_CAP, 10) || DEFAULT_CAP,
+    maxTokens: 300, system: SYSTEM_TRANSLATE,
+    check: (b) => (typeof b.ru === "string" && b.ru.trim() ? null : "ru is required"),
+    message: (b) => translateMessage(b),
+    validate: (parsed) => validateTranslate(parsed),
     capMessage: (cap) => `Daily limit of ${cap} reached; resets at 00:00 UTC.`,
   },
 };

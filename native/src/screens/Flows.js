@@ -494,6 +494,17 @@ export function DrillList({ navigation }) {
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Word building</Text>
           </View>
         </Row>
+        {/* Speak Russian, read it back in English (2026-09-22). Under Speaking
+            because holding a microphone is what it asks of you, and because it
+            is where a learner goes when they want to say something and are not
+            sure they said it. Open from the first screen: it teaches nothing
+            and gates nothing, so there is nothing to earn. */}
+        <Row onPress={() => navigation.navigate("Translate")}>
+          <Thumb id="translate" tone="brand" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Translate</Text>
+          </View>
+        </Row>
         <Row onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
           <Thumb id="talk" tone="brand" locked={!talkOpen} />
           <View style={{ flex: 1 }}>

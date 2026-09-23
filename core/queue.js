@@ -128,26 +128,38 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }
      * needs to, and burying that would break the 1m/10m steps entirely. */
     const answeredToday = DIRECTIONS.filter((d) => entry[d] && entry[d].lastAt !== undefined
                                                    && dayOf(entry[d].lastAt) === todayNum);
-    /* **Every card that exists is reviewable; `dirs` gates only what is new.**
+    /* **`dirs` is a filter on the whole pile, not only on what is new.**
      *
-     * A lesson grades the direction its question exercised (a typed answer is
-     * production) whatever the flashcards are set to, so a learner who turns
-     * a direction off still accumulates cards in it. Letting `dirs` filter
-     * reviews as well made those cards unreachable: due for ever, counted by
-     * the tab badge, and never dealt by the screen that owed them. Measured
-     * over the full route with `--dirs recognise`: 1,964 cards still due at
-     * the end and a backlog on every day of the run. A setting may decide
-     * what a learner takes on; it must not strand what they already have. */
+     * It used to gate new cards alone, so that a direction turned off could
+     * not strand the cards a *lesson* had already made in it — a lesson grades
+     * the direction its question exercised whatever the flashcards say, and
+     * measured over the full route with `--dirs recognise` the old filtering
+     * left 1,964 cards due at the end and a backlog on every day. That was a
+     * real defect and the fix for it was aimed at the wrong half.
+     *
+     * What it cost is a control that does not do what it says. The owner,
+     * 2026-09-22: *"the filters in the anki cards don't appear to do
+     * anything. Like if I click the Russian to English, it will still just
+     * show me the cards from before the filter was adjusted."* He is right:
+     * unticking a front left every already-scheduled card of that direction in
+     * the pile, which is a filter that filters nothing a learner can see.
+     *
+     * So the filter filters, and the stranding is answered where it actually
+     * lives — in the **counting**. `dueCards`/`wanted` in core/scheduler.js
+     * now take the same `dirs`, so the tab badge and "Due today" count only
+     * what this screen would deal. Nothing is owed that cannot be reached; a
+     * direction switched back on brings its cards back with it, and the
+     * picker says how many each front is holding. */
     for (const d of DIRECTIONS) {
       const card = entry[d];
       const kind = kindOf(card);
+      if (!directions.includes(d)) continue;
       /* Buried: another direction of this word was answered today. Which kinds
          are buried is two settings, as it is in Anki, because they cost very
          different things — the table in the comment above `buryNew`. */
       const buried = answeredToday.length && !answeredToday.includes(d);
       if (buried && (kind === "new" ? o.buryNew : o.buryReview)) continue;
       if (kind === "new") {
-        if (!directions.includes(d)) continue;
         /* A word earns produce and listen by holding its recognise card
            (core/scheduler.js `readyFor`). Without this every word arrives as
            three cards at once and the day it is met costs three reviews. */
@@ -180,7 +192,31 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }
   const reviewsInSession = Math.min(todayReviews, size - newInSession);
   const pickedLearning = sortedLearning.slice(0, reviewsInSession);
   const pickedReviews = sortedReviews.slice(0, reviewsInSession - pickedLearning.length);
-  const pickedNew = shuffled(fresh, random).slice(0, newInSession);
+  /* **The commonest words first, not a handful drawn out of the hat.**
+   *
+   * `fresh` arrives in curriculum order and was then shuffled, so the new
+   * cards of a session were a uniform sample of everything ticked — which is
+   * how «воспользоваться» turns up among a beginner's opening cards. The
+   * owner, 2026-09-22: *"prioritize feeding words by the most common and/or
+   * the most relevant to the blocks that the learner has completed… 'to avail
+   * oneself' appears as one of the initial cards. Feels a bit rushed when
+   * there are more simple words."*
+   *
+   * `rank` is supplied by the caller because only the app knows what order it
+   * means: the native screen passes the lemma's own index, which the build
+   * assigns by frequency, so lower is commoner. Ties and unranked cards (a
+   * deck card, a sentence) keep the order they arrived in, which is the
+   * curriculum's. With no `rank` the old shuffle stands, so every other
+   * caller is unchanged.
+   *
+   * It is a sort, not a filter: nothing is withheld, and a rare word is dealt
+   * the moment the commoner ones above it are done. */
+  const byRank = o.rank;
+  const ordered = byRank
+    ? fresh.map((x, i) => ({ x, i, k: byRank(x.word) }))
+        .sort((a, b) => (a.k - b.k) || (a.i - b.i)).map((e) => e.x)
+    : shuffled(fresh, random);
+  const pickedNew = ordered.slice(0, newInSession);
   const items = interleave(pickedLearning, pickedReviews, pickedNew).slice(0, o.sessionSize);
 
   return { items: items, due: due, remaining: todayReviews - reviewsInSession,

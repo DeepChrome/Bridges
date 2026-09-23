@@ -928,6 +928,26 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### The owner's fifteen, 2026-09-22 — CLAUDE.md §30ap
+
+Fourteen corrections and one feature. The path gates on itself now: no lanes
+until a chapter's spine is done, and the next chapter needs every quest the
+chapter requires (eight of twenty-four are optional, listed in
+`build_topics.py`); Continue walks into the fork, which it had to learn to do
+or a finished spine would have left nothing to press. Four real defects: a
+buildup fragment could begin with a soft sign (291 of 4,017 lemmas — the TTS
+engine reads its name), a fragment lost the stress mark that tells the engine
+where the beat is, a transient recognizer error replaced the whole activity
+and `clearBlock` was called nowhere, and the flashcard fronts filtered only
+new cards so the control did nothing a learner could see. New cards are dealt
+commonest-first. Anki export removed and import moved to Settings; the
+new-word ration is a stepper; the frequency pill and the per-sentence Tatoeba
+caption are gone; sense 1 must now match the gloss's first group. New:
+**Translate** — speak Russian, read it back in English, through
+`POST /v1/translate`. The simulator caught the one regression: look-alike
+distractors make a homograph the nearest candidate, and two options read the
+same. Suites: core 623, native 479, smoke 159, Worker 62.
+
 ### Blips and look-alikes, 2026-09-21 — CLAUDE.md §30ao
 
 The owner's first evening on beta.2. «ты» on the chapter 1 test was a 216 ms

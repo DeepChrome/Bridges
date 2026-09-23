@@ -199,7 +199,7 @@ export function Say({ q, r }) {
     },
   });
 
-  const again = () => { setRes(null); rec.setLive(""); };
+  const again = () => { setRes(null); rec.setLive(""); rec.clearBlock(); };
   const keep = () => settle(res, attempt, last.current.transcript, last.current.ts);
 
   if (rec.block) {

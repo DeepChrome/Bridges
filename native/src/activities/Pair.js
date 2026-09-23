@@ -114,7 +114,7 @@ export function PairSay({ q, r }) {
     },
   });
 
-  const again = () => { setHeard(null); rec.setLive(""); };
+  const again = () => { setHeard(null); rec.setLive(""); rec.clearBlock(); };
 
   if (rec.block) {
     return <Blocked block={rec.block} onGetModel={rec.getModel}
@@ -159,7 +159,11 @@ export function PairSay({ q, r }) {
       <Speaker text={q.target} />
       <View style={{ height: 14 }} />
       <HoldButton phase={rec.phase} onIn={rec.hold} onOut={rec.release} />
-      <Text style={{ color: t.ink, fontSize: 18, marginTop: 16, minHeight: 24 }}>{rec.live}</Text>
+      {/* …and what the engine said when it heard nothing, rather than an empty
+          line that reads as a control doing nothing (2026-09-22). */}
+      <Text testID="pair-live" style={{ color: t.ink, fontSize: 18, marginTop: 16, minHeight: 24 }}>
+        {rec.phase === "listening" ? rec.live : rec.live || rec.note || ""}
+      </Text>
       <About text={q.about} />
     </View>
   );

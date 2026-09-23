@@ -18,15 +18,19 @@ import { Runner } from "../src/screens/Run";
 import { BuildDrillFlow } from "../src/screens/Flows";
 import { probeVoices } from "../src/audio";
 import { buildupDrill, buildup } from "@core/buildup";
+import { INTRO_GAP_MS, INTRO_SETTLE_MS } from "../src/activities/Build";
 
 const WORD = { ru: "понима́ю", en: "I understand" };
 const OTHER = { ru: "спаси́бо", en: "thank you" };
 const steps = buildupDrill([WORD], 1);
 
-/* What reaches the voice: the stress marks come off on the way to the speech
-   engine (audio.js), which never sees a combining accent. The screen keeps
-   them, so the two are compared through this. */
-const spokenForm = (s) => s.normalize("NFD").replace(/[̀́]/g, "").normalize("NFC");
+/* What reaches the voice. Everywhere else in the app the stress mark comes off
+   on the way to the speech engine; **this drill keeps it** (`speakLine` with
+   `stress: true`, 2026-09-22), because a fragment is the one place the engine
+   has nothing else to tell it where the beat falls — «рошо́» read as "РО-шо"
+   does not sound like the end of «хорошо», which is what the owner heard. So
+   here the spoken form is the written one. */
+const spokenForm = (s) => s;
 
 const accounts = { list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" };
 
@@ -45,7 +49,8 @@ async function withBuild(onFinish = jest.fn(), use = steps, props = {}) {
 
 /* Past the two readings that open a word, without waiting out the pauses.
    Pressing Start is what a learner who has heard enough does, so the shortcut
-   is a real control rather than a test-only hatch. */
+   is a real control rather than a test-only hatch. It is also the *only*
+   control there is during the demonstration (2026-09-22). */
 async function begin() {
   await act(async () => { fireEvent.press(await screen.findByText("Start")); });
 }
@@ -78,16 +83,29 @@ describe("building a word", () => {
   /* "Start by having the prompt say the full word twice with a brief pause in
      between, and then starting with the syllables" — the owner, 2026-09-16.
      You cannot aim at a target you have not heard. */
-  it("reads a new word out twice before any syllable", async () => {
+  /* Three seconds between the readings is the owner's number (2026-09-22), so
+     this one test waits out the real pause rather than pressing Start — the
+     gap *is* what is under test. Everything below it takes the shortcut. */
+  it("reads a new word out twice, three seconds apart, before any syllable", async () => {
     await withBuild();
     const whole = spokenForm(WORD.ru);
-    await waitFor(() => expect(global.__spoke.filter((s) => s === whole)).toHaveLength(2));
-    // The whole word is what is on the card while it is being read, not a syllable.
-    expect(screen.getByTestId("build-fragment")).toHaveTextContent(WORD.ru);
-    // …and then the last syllable, on its own.
-    await waitFor(() => expect(screen.getByTestId("build-fragment")).toHaveTextContent("ю"));
+    const twice = () => expect(global.__spoke.filter((s) => s === whole)).toHaveLength(2);
+    // One reading lands at once; the second only after the pause.
+    await waitFor(() => expect(global.__spoke.filter((s) => s === whole)).toHaveLength(1));
+    expect(() => twice()).toThrow();
+    // Nothing to press but Start while it is being read out, and the cue says so.
+    expect(screen.getByTestId("build-cue")).toHaveTextContent("Listen");
+    expect(screen.queryByTestId("build-play")).toBeNull();
+    expect(screen.queryByTestId("build-prev")).toBeNull();
+
+    await waitFor(twice, { timeout: INTRO_GAP_MS + 2000 });
+    // …and then the last syllable, on its own, with the controls arriving.
+    await waitFor(() => expect(screen.getByTestId("build-fragment")).toHaveTextContent("ю"),
+                  { timeout: INTRO_SETTLE_MS + 2000 });
+    expect(screen.getByTestId("build-cue")).toHaveTextContent("Repeat");
+    expect(screen.getByTestId("build-play")).toBeTruthy();
     await waitFor(() => expect(global.__spoke[global.__spoke.length - 1]).toBe("ю"));
-  });
+  }, 20000);
 
   it("keeps the word and its meaning on screen the whole way", async () => {
     await withBuild();
@@ -144,10 +162,13 @@ describe("building a word", () => {
 
     await act(async () => { fireEvent.press(screen.getByTestId("build-skip")); });
     await act(async () => { fireEvent.press(await screen.findByText("Continue")); });
+    // A new word opens on its own demonstration, so past that first.
+    await begin();
     const second = screen.getByTestId("build-word").props.children;
     expect(screen.getByTestId("build-prev").props.accessibilityState).toEqual({ disabled: false });
 
     await act(async () => { fireEvent.press(screen.getByTestId("build-prev")); });
+    await begin();
     expect(screen.getByTestId("build-word").props.children).not.toBe(second);
   });
 
@@ -178,6 +199,39 @@ describe("building a word", () => {
     // A regex: `toHaveTextContent` with a string matches the whole content, and
     // the line carries the word with its stress mark (§23).
     expect(await screen.findByTestId("build-heard")).toHaveTextContent(/^Heard /);
+
+    /* …and there is always another go. Until 2026-09-22 the first hearing was
+       final here — `heard` unmounted the microphone and nothing put it back —
+       in the one activity whose whole subject is saying a word again. Say,
+       Shadow and Pair had had "Try again" since they were written. */
+    await act(async () => { fireEvent.press(screen.getByTestId("build-again")); });
+    expect(screen.queryByTestId("build-heard")).toBeNull();
+    expect(await screen.findByTestId("say-hold")).toBeTruthy();
+  });
+
+  /* A momentary loss of the audio session is not a phone that cannot listen.
+     Every code but `no-speech` used to raise a `block`, which replaces the
+     whole activity — the word, the dots, the buttons — and `clearBlock` was
+     called nowhere, so nothing put them back. The owner, 2026-09-22: "a lot of
+     the time it will glitch out and say something like audio recognition
+     failed". */
+  it("survives a dropped microphone instead of replacing the screen", async () => {
+    await withBuild(jest.fn(), buildupDrill([WORD], 1, { listen: true }));
+    await begin();
+    const want = buildup(WORD.ru);
+    for (let k = 1; k < want.length; k++) {
+      await act(async () => { fireEvent.press(screen.getByTestId("build-next")); });
+    }
+    const hold = await screen.findByTestId("say-hold");
+    await act(async () => { fireEvent(hold, "pressIn"); });
+    await act(async () => { fireEvent(hold, "pressOut"); });
+    await act(async () => { global.__stt.emit("error", { error: "audio-capture" }); });
+
+    // Still the drill, not a dead end — and it says what happened.
+    expect(screen.getByTestId("build-word")).toHaveTextContent(WORD.ru);
+    expect(await screen.findByTestId("build-note")).toHaveTextContent("Try again");
+    expect(screen.getByTestId("say-hold")).toBeTruthy();
+    expect(screen.queryByText(/Recognition failed/)).toBeNull();
   });
 
   /* The screen the drill opens on, rendered for real.

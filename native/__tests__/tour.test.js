@@ -28,7 +28,12 @@ test("tap a word for its sheet, tap again for the whole entry", async () => {
   // The entry, whole, without a screen to push it onto.
   const full = await screen.findByTestId("word-full-sheet");
   expect(full).toBeTruthy();
-  expect(screen.getByText(/№ \d+ by frequency/)).toBeTruthy();
+  /* Something only the *full* entry draws, to prove this is the entry and not
+     the glance sheet again. It used to be the «№ N by frequency» pill, which
+     the owner had removed on 2026-09-22; the grammar row it stood in is still
+     entry-only — the sheet's tags are form names from `summarise()`, never a
+     word class. */
+  expect(screen.getByText("verb")).toBeTruthy();
   expect(screen.queryByText(/Heard in/)).toBeNull();          // no player to open from here
 });
 

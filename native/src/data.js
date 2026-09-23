@@ -41,6 +41,9 @@ export const SPEECH = DATA.speech || { rows: [], speak: {}, listen: {} };
    to sit in data.json, and the lesson quiz asks for one before it has drawn a
    single card, so it must be here at boot rather than required on use. */
 export const SCRIPTS = DATA.scripts || {};
+/* The creators the library draws on — name, YouTube url, and where to support
+   them (Patreon, a site) where that was found; data/curated/channels.json. */
+export const CHANNELS = DATA.channels || [];
 /* The Immerse library (`videos()` above): every harvested video with a
    transcript, its search keywords, and the study words it actually says (with
    moments). A unit's own episode is also here, marked with `unit`. */

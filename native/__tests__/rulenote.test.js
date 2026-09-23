@@ -6,7 +6,7 @@
  * Own file, per the timeout note in screens.test.js.
  */
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react-native";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
@@ -51,6 +51,19 @@ test("a right answer does not lecture", async () => {
   fireEvent.press(await screen.findByText("book"));
   await screen.findByTestId("verdict");
   expect(screen.queryByTestId("rule-note")).toBeNull();
+});
+
+/* The right form is heard whatever the verdict (the owner, 2026-09-23: "the
+   user is always hearing the words"), and the verdict carries a speaker to
+   hear it again. It used to be read only on a correct answer. */
+test("a wrong answer still reads the right form out, and the verdict can replay it", async () => {
+  global.__players = []; global.__spoke = [];
+  await withRunner([withRule]);
+  // The prompt is Russian, so it can be heard before answering too.
+  expect(screen.getAllByTestId(/^speaker-/).length).toBeGreaterThan(0);
+  fireEvent.press(await screen.findByText("table"));
+  await screen.findByTestId("verdict-speaker");
+  await waitFor(() => expect(global.__players.length + global.__spoke.length).toBeGreaterThan(0));
 });
 
 test("a question with no rule shows none", async () => {

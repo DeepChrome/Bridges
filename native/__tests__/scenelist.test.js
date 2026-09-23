@@ -28,7 +28,7 @@ import { STAGES, SCRIPTS } from "../src/data";
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 
 const dev = {
-  v: 5, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
+  v: 8, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, xp: 0, streak: 0, dev: true,
 };
 const fresh = { ...dev, dev: false };

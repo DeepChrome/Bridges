@@ -14,7 +14,7 @@ import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
   DRILL_POOL_STEPS,
   reachedUnits, unitUnlocked, reviewWords, passages, knownWords, lessonsDone, nextLesson,
-  scenarioLibrary,
+  scenarioLibrary, required,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { pairDrill } from "@core/alphabet";
@@ -1090,12 +1090,18 @@ export function PlacementFlow({ navigation }) {
             if (!qs.length) break;
             if (qs.filter((x) => x.right).length / qs.length < TEST_OUT) break;
             placed = si + 1;
-            const core = STAGES[si].core;
-            for (let li = 0; li < lessonCount(core); li++) {
-              next = markComponent(next, core, li, "vocab");
-              next = markComponent(next, core, li, "quiz", 100);
+            /* The spine and every quest the chapter requires: since 2026-09-22
+               the next chapter opens on both (§30ap), so a placement that
+               marked the spine alone would leave the learner placed at a
+               chapter they could not reach. Optional quests are left as they
+               are — they gate nothing. */
+            for (const unit of [STAGES[si].core, ...required(STAGES[si])]) {
+              for (let li = 0; li < lessonCount(unit); li++) {
+                next = markComponent(next, unit, li, "vocab");
+                next = markComponent(next, unit, li, "quiz", 100);
+              }
+              if (unit.v) next = markComponent(next, unit, 0, "video");
             }
-            if (core.v) next = markComponent(next, core, 0, "video");
           }
           return next;
         });

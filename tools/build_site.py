@@ -843,10 +843,32 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             entry["ease"] = v["ease"]
         if v.get("cefr"):
             entry["cefr"] = v["cefr"]
+        if v.get("upload"):
+            entry["up"] = v["upload"]      # YYYYMMDD, for the library's "newest" order
         if v.get("chapters"):
             entry["chapters"] = v["chapters"]
         video_list.append(entry)
     stats["videos"] = len(video_list)
+
+    # The creators behind the library, with where to support them (the owner,
+    # 2026-09-23). The harvest's own channel rows carry the YouTube url; the
+    # curated file carries the Patreon and the site, found by hand. Shipped so
+    # the app's first-open notice on Immerse reads data rather than a list
+    # typed into a screen.
+    creators = []
+    cpath = ROOT / "data" / "curated" / "channels.json"
+    curated_ch = {}
+    if cpath.exists():
+        for c in json.loads(cpath.read_text(encoding="utf-8")).get("channels", []):
+            curated_ch[c["handle"]] = c
+    for c in channels:
+        cur = curated_ch.get(c.get("handle"), {})
+        row = {"name": c.get("name") or cur.get("name"), "url": c.get("url")}
+        if cur.get("patreon"):
+            row["patreon"] = cur["patreon"]
+        if cur.get("site"):
+            row["site"] = cur["site"]
+        creators.append(row)
     stats["channels"] = [c.get("name") for c in channels]
 
     # Chapter titles ride on the spine row that opens each chapter, which is where the
@@ -963,7 +985,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             "units": units, "path": path, "audio": {"files": audio},
             "deep": deep, "shapes": shapes, "slots": slot_names,
             "sent": sent_pool, "tsample": tsample, "speech": speech,
-            "videos": video_list, "listening": listening, "scripts": scripts,
+            "videos": video_list, "channels": creators,
+            "listening": listening, "scripts": scripts,
             "senses": senses}
 
 

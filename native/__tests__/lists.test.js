@@ -20,7 +20,7 @@ import You from "../src/screens/You";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const base = {
-  v: 6, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {}, watched: {},
+  v: 8, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {}, watched: {},
   speech: { attempts: [], tagCounts: {} }, xp: 0, streak: 0,
 };
 async function withProfile(ui, state = {}) {

@@ -23,7 +23,7 @@ import { lessonCount, UN, STAGES } from "../src/data";
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 
 const base = {
-  v: 4, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
+  v: 8, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   dev: false, xp: 0, streak: 0,
 };
 
@@ -86,10 +86,13 @@ describe("path node states", () => {
     expect(screen.queryByTestId("arc-core1")).toBeNull();
   });
 
-  it("draws a full ring in the finished colour on a completed unit", async () => {
+  /* Finished, the path encircles the disc (the owner, 2026-09-23): a full ring
+     in the brand colour — the colour the lit track arrives in — not a
+     separate green mark. */
+  it("draws a full ring in the track's colour on a completed unit", async () => {
     await withState({ unit: { core1: finished("core1") } });
     const arc = await screen.findByTestId("arc-core1");
-    expect(strokeHex(arc)).toBe(light.good.toUpperCase());
+    expect(strokeHex(arc)).toBe(light.brand.toUpperCase());
     // A finished unit's ring is closed: no dash offset left to draw.
     expect(Number(arc.props.strokeDashoffset)).toBeCloseTo(0, 5);
   });
@@ -107,11 +110,29 @@ describe("path node states", () => {
     expect(Number(arc.props.strokeDashoffset)).toBeGreaterThan(0);
   });
 
-  it("locks a later chapter and offers it no ring", async () => {
+  it("locks a later chapter, greys it, and offers it no ring", async () => {
     await withState({});
     const later = await screen.findByTestId("node-core4");
     expect(later.props.accessibilityState.disabled).toBe(true);
     expect(screen.queryByTestId("arc-core4")).toBeNull();
+    const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : s);
+    expect(flat(later.props.style).opacity).toBeLessThan(1);
+    expect(flat(screen.getByTestId("node-core1").props.style).opacity).toBe(1);
+  });
+
+  /* Developer mode is off unless switched on (2026-09-23): a fresh profile
+     walks from the top, and a profile from before is brought to the same
+     place by the v8 migration. On, it still opens everything (rule 20.9). */
+  it("ships with developer mode off, and the switch still opens the course", async () => {
+    const { DEFAULTS } = require("../src/store");
+    expect(DEFAULTS.dev).toBe(false);
+    await withState({ v: 7, dev: true });
+    expect((await screen.findByTestId("node-core4")).props.accessibilityState.disabled).toBe(true);
+  });
+
+  it("…and on, every disc opens", async () => {
+    await withState({ dev: true });
+    expect((await screen.findByTestId("node-core4")).props.accessibilityState.disabled).toBe(false);
   });
 
   /* **Every track is drawn, and every track is empty until the node above it

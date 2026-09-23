@@ -928,6 +928,21 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### The path from the top, speakers everywhere, whose videos these are, 2026-09-23 — CLAUDE.md §30as
+
+Developer mode ships off (rule 20.9 reversed by the owner) and the v8
+migration turns it off for every profile, so the path is walked from the top
+and only placement opens chapters ahead — placement now also marks the
+required quests, or a placed learner could not reach their chapter. A
+finished disc is encircled in the track's colour; locked discs are greyed.
+Every Russian sentence and drill prompt carries a speaker (flashcard
+examples, transcript lines, rule examples, the gap-fill reveal, unmarked
+drill prompts), and the right form is read on every verdict. Immerse:
+favourites with a filter, a level-first resting order behind a small sort
+control, and a first-open note naming the seven creators with Patreon and
+site links from `data/curated/channels.json`. Version `1.0.0-beta.5` /
+versionCode 5. Suites: core 639, native 493, smoke 159, copy 0 over.
+
 ### The interpreter, the map drawn empty, a score off the card, 2026-09-23 — CLAUDE.md §30ar
 
 Translate said "no translation right now" because the Worker on Cloudflare

@@ -1,12 +1,19 @@
 {
-  "_": "YouTube channels the Immerse library draws on. Hand-curated: a channel earns a place by teaching in spoken Russian with auto-captions available. `max` newest videos within the duration bounds are harvested; Easy Russian is taken whole because the unit videos come from it.",
+  "_": "YouTube channels the Immerse library draws on. Hand-curated: a channel earns a place by teaching in spoken Russian with auto-captions available. `max` newest videos within the duration bounds are harvested; Easy Russian is taken whole because the unit videos come from it. `patreon` and `site` are where a learner can support the creator (the owner, 2026-09-23: 'give more visibility to these people doing the hard work'); found by hand and shipped to the app's first-open notice on Immerse.",
   "channels": [
-    { "handle": "EasyRussianVideos",    "name": "Easy Russian",          "max": 400, "min_sec": 120, "max_sec": 2400 },
-    { "handle": "ComprehensibleRussian","name": "Comprehensible Russian","max": 40,  "min_sec": 120, "max_sec": 1800 },
-    { "handle": "BoostYourRussian",     "name": "Boost Your Russian",    "max": 40,  "min_sec": 120, "max_sec": 1800 },
-    { "handle": "RealRussianClub",      "name": "Real Russian Club",     "max": 40,  "min_sec": 120, "max_sec": 1800 },
-    { "handle": "russianfromrussia",    "name": "Russian from Russia",   "max": 40,  "min_sec": 120, "max_sec": 1800 },
-    { "handle": "RussianProgress",      "name": "Russian Progress",      "max": 40,  "min_sec": 120, "max_sec": 1800 },
-    { "handle": "RussianWithMax",       "name": "Russian With Max",      "max": 40,  "min_sec": 120, "max_sec": 1800 }
+    { "handle": "EasyRussianVideos",    "name": "Easy Russian",          "max": 400, "min_sec": 120, "max_sec": 2400,
+      "patreon": "https://www.patreon.com/easyrussian", "site": "https://www.easy-languages.org/easy-russian" },
+    { "handle": "ComprehensibleRussian","name": "Comprehensible Russian","max": 40,  "min_sec": 120, "max_sec": 1800,
+      "patreon": "https://www.patreon.com/comprehensiblerussian" },
+    { "handle": "BoostYourRussian",     "name": "Boost Your Russian",    "max": 40,  "min_sec": 120, "max_sec": 1800,
+      "site": "https://boostyourrussian.com" },
+    { "handle": "RealRussianClub",      "name": "Real Russian Club",     "max": 40,  "min_sec": 120, "max_sec": 1800,
+      "patreon": "https://www.patreon.com/realrussianclub" },
+    { "handle": "russianfromrussia",    "name": "Russian from Russia",   "max": 40,  "min_sec": 120, "max_sec": 1800,
+      "patreon": "https://www.patreon.com/RussianfromRussia", "site": "https://russianfromrussia.com" },
+    { "handle": "RussianProgress",      "name": "Russian Progress",      "max": 40,  "min_sec": 120, "max_sec": 1800,
+      "patreon": "https://www.patreon.com/russianprogress", "site": "https://russianprogress.com" },
+    { "handle": "RussianWithMax",       "name": "Russian With Max",      "max": 40,  "min_sec": 120, "max_sec": 1800,
+      "patreon": "https://www.patreon.com/russianwithmax", "site": "https://www.russianwithmax.com" }
   ]
 }

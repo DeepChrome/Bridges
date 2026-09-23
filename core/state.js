@@ -13,7 +13,7 @@
  * single classic script, and the rest of core/ keeps to that style.
  */
 
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 /* A lesson quiz passes at PASS_MARK. After RELIEF_AFTER attempts it passes at
    RELIEF_MARK instead: the simulated struggling learner failed 15 of 40 lessons
@@ -117,6 +117,14 @@ export const MIGRATIONS = {
   // v7 adds `mined`: a word taken from a video keeps where it was heard, so the
   // flashcard can send you back to the second it was said (ROADMAP P10.4).
   6: (s) => Object.assign({}, s, { mined: s.mined || {}, v: 7 }),
+  // v8: developer mode stops shipping on (the owner, 2026-09-23: the path is
+  // walked from the top, and only the placement test may open chapters
+  // ahead). Every profile so far had it on because that was the default, not
+  // because anyone chose it, and the two cannot be told apart — so it is off
+  // for all, and the switch in Settings is where it is turned back on. Also
+  // `faves` (favourite videos, id -> day) and `notices` (which one-time
+  // notes have been seen), both new slots.
+  7: (s) => Object.assign({}, s, { dev: false, faves: s.faves || {}, notices: s.notices || {}, v: 8 }),
 };
 
 export function migrate(raw, from) {

@@ -22,7 +22,7 @@ const firstHeard = fold(first).replace(/[^а-яё\s-]/g, "").trim();
 const firstWord = firstHeard.split(/\s+/)[0];
 
 const base = {
-  v: 5, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
+  v: 8, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, xp: 0, streak: 0,
 };
 

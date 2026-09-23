@@ -759,7 +759,13 @@ export default function Study({ navigation }) {
                   // not a gloss (the owner, 2026-09-07).
                   <View key={k} style={{ marginTop: k ? 10 : 14, alignSelf: "stretch",
                                          paddingTop: k ? 10 : 0, borderTopWidth: k ? 1 : 0, borderTopColor: t.lineSoft }}>
-                    <Linked text={ex.ru} size={16} />
+                    {/* Every sentence the learner can read, they can hear (the
+                        owner, 2026-09-23: "everything in the app… a speaker
+                        button… the user is always hearing the words"). */}
+                    <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+                      <View style={{ flex: 1 }}><Linked text={ex.ru} size={16} /></View>
+                      <Speaker text={ex.ru} size={32} />
+                    </View>
                     <Muted>{ex.en}</Muted>
                   </View>
                 ))}

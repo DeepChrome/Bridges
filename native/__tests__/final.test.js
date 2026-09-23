@@ -14,7 +14,7 @@ import { lessonCount, UN, STAGES } from "../src/data";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const base = {
-  v: 6, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
+  v: 8, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, streak: 0, dev: false,
 };
 async function withState(ui, state) {

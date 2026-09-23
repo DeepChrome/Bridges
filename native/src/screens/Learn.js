@@ -181,11 +181,17 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
      The arcs keep the colours `path.test.js` pins — the ring is the progress
      reading and this change is to the face beneath it. */
   const tone = complete
-    ? { arc: t.good, p: 1, face: t.goodBg, icon: t.good, track: t.surface3,
-        lip: t.goodDim, nm: t.ink }
+    /* Finished: the path encircles the disc (the owner, 2026-09-23 — "draw
+       the path to encircle the completed lesson"). The full ring is in the
+       brand colour, the same the lit track arrives in, so the road reads as
+       running into the node, round it, and on. A tick-green ring was a
+       separate mark that the track did not continue into. */
+    ? { arc: t.brand, p: 1, face: t.brandBg, icon: t.brandInk, track: t.surface3,
+        lip: t.brandDim, nm: t.ink }
     : !open
+    // Locked: greyed as a whole — face, padlock and name — not just quieter.
     ? { arc: null, p: 0, face: t.surface2, icon: t.ink3, track: t.lineSoft,
-        lip: t.lineSoft, nm: t.ink3 }
+        lip: t.lineSoft, nm: t.ink3, dim: true }
     : current
     // Where you are: filled, in the brand, with the icon reversed out of it.
     // `brandOn` rather than white because the pair is contrast-audited (§24).
@@ -229,6 +235,7 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
       style={{
         alignItems: "center", width: branch ? 96 : 118, paddingTop: 6,
         paddingBottom: 10, transform: [{ translateX: dx }],
+        opacity: tone.dim ? 0.55 : 1,
       }}
     >
       <View style={{ width: size, height: size + LIP }}>

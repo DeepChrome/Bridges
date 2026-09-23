@@ -1,14 +1,15 @@
 /* Immerse (the video library) and the video player. */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Image } from "react-native";
+import { View, Image, Pressable, Linking } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel, Choice, Text } from "../ui";
+import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel, Choice, Sheet, Tick, Text } from "../ui";
 import {
   UN, STATS, unitState, markComponent, L, videos, videoById, videoWatched, unitById,
-  idxOfWord,
+  idxOfWord, CHANNELS,
 } from "../data";
 import { releaseAudio } from "../audio";
 import { fold, today, firstSense } from "@core/util";
@@ -40,19 +41,35 @@ function VideoThumb({ id, done }) {
   );
 }
 
-/* The library in its resting order: the units' own episodes along the path, then
-   everything else easiest first. A search replaces the order with relevance:
-   every word of the query must be found in the video's keywords or title, or —
-   typed in Cyrillic — be a study word the video says. */
-export function libraryOrder(videos) {
+/* The library's orders (the owner, 2026-09-23: "default organize the immerse
+   in a logical sequence that more or less mirrors a logical learning
+   progression… but maybe have a sort by option at the top").
+
+   `level` is the resting order and the progression: the units' own episodes
+   along the path — they are keyed to chapters, so that *is* the route — then
+   everything else by its CEFR code, easiest first within a code, the unrated
+   last. The other three are plain sorts a learner may want on a given day. */
+export const VIDEO_SORTS = [
+  { id: "level", name: "By level" }, { id: "easiest", name: "Easiest" },
+  { id: "newest", name: "Newest" }, { id: "shortest", name: "Shortest" },
+];
+const CEFR_RANK = { A1: 0, A2: 1, B1: 2, "B1+": 3, B2: 4, C1: 5, C2: 6 };
+const cefrRank = (v) => (v.cefr in CEFR_RANK ? CEFR_RANK[v.cefr] : 9);
+
+export function libraryOrder(videos, sort = "level") {
   const unitPos = {};
   UN.forEach((u, k) => { unitPos[u.id] = k; });
-  return videos.slice().sort((a, b) => {
-    const ua = a.unit ? unitPos[a.unit] : Infinity;
-    const ub = b.unit ? unitPos[b.unit] : Infinity;
-    if (ua !== ub) return ua - ub;
-    return (b.ease || 0) - (a.ease || 0);
-  });
+  const byEase = (a, b) => (b.ease || 0) - (a.ease || 0);
+  const cmp = sort === "easiest" ? byEase
+    : sort === "newest" ? (a, b) => String(b.up || "").localeCompare(String(a.up || "")) || byEase(a, b)
+    : sort === "shortest" ? (a, b) => (a.dur || Infinity) - (b.dur || Infinity) || byEase(a, b)
+    : (a, b) => {
+      const ua = a.unit ? unitPos[a.unit] : Infinity;
+      const ub = b.unit ? unitPos[b.unit] : Infinity;
+      if (ua !== ub) return ua - ub;
+      return cefrRank(a) - cefrRank(b) || byEase(a, b);
+    };
+  return videos.slice().sort(cmp);
 }
 
 /* A CEFR code typed as a search term ("b1", "B1+", "a2") filters on the video's
@@ -64,9 +81,9 @@ const cefrMatches = (term, code) => {
   return term.endsWith("+") ? c === term : c === term || c === term + "+";
 };
 
-export function searchVideos(videos, query) {
+export function searchVideos(videos, query, sort) {
   const terms = fold(query).split(/\s+/).filter(Boolean);
-  if (!terms.length) return libraryOrder(videos);
+  if (!terms.length) return libraryOrder(videos, sort);
   const scored = [];
   for (const v of videos) {
     const hay = ((v.kw || "") + " " + v.title + " " + (v.ch || "")).toLowerCase();
@@ -90,26 +107,100 @@ export function searchVideos(videos, query) {
   return scored.map((x) => x.v);
 }
 
-/* The three views of the library: everything, what is left, what is done. A
-   filter rather than a sort — a watched episode in its place on the path is
-   still where it was, and "what have I not watched yet" is the question a
-   learner opening the tab is asking (the owner, 2026-09-19). */
+/* The views of the library: everything, what is left, what is done, and what
+   the learner marked (2026-09-23). A filter rather than a sort — a watched
+   episode in its place on the path is still where it was, and "what have I
+   not watched yet" is the question a learner opening the tab is asking (the
+   owner, 2026-09-19). */
 export const VIDEO_FILTERS = [
-  { id: "all", name: "All" }, { id: "unwatched", name: "Unwatched" }, { id: "watched", name: "Watched" },
+  { id: "all", name: "All" }, { id: "unwatched", name: "Unwatched" },
+  { id: "watched", name: "Watched" }, { id: "faves", name: "Favorites" },
 ];
 
+export const isFave = (st, id) => !!((st.faves || {})[id]);
+/* Toggle a favourite: id -> the day it was marked. Keyed on the video id, which
+   is YouTube's and survives a rebuild of the library. */
+export const toggleFave = (prev, id) => {
+  const faves = { ...(prev.faves || {}) };
+  if (faves[id]) delete faves[id]; else faves[id] = today();
+  return { ...prev, faves };
+};
+
+/* A heart, filled when marked. Its own control inside a row that is also a
+   control, so it names itself for a reader. */
+function Heart({ on, onPress, testID, size = 36 }) {
+  const t = useTheme();
+  return (
+    <Pressable testID={testID} accessibilityRole="button"
+               accessibilityLabel={on ? "Remove from favorites" : "Add to favorites"}
+               accessibilityState={{ selected: !!on }}
+               onPress={onPress} hitSlop={8}
+               style={({ pressed }) => ({ width: size, height: size, alignItems: "center",
+                                          justifyContent: "center", opacity: pressed ? 0.6 : 1 })}>
+      <Svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24"
+           fill={on ? t.bad : "none"} stroke={on ? t.bad : t.ink3} strokeWidth={2}
+           strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+      </Svg>
+    </Pressable>
+  );
+}
+
+/* Whose videos these are (the owner, 2026-09-23: "indicate that the works
+   featured are not my own and provide links to any patreons… give more
+   visibility to these people doing the hard work"). Shown once, the first time
+   the library opens, and again from the foot of the list. The rows are data
+   (`CHANNELS`, from data/curated/channels.json), never a list typed here. */
+export function CreatorsNote({ onClose }) {
+  const t = useTheme();
+  return (
+    <Sheet testID="creators-note" onClose={onClose}
+           footer={<Btn kind="pri" label="Got it" style={{ marginTop: 14 }} onPress={onClose} />}>
+      <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
+        Every video here is its creator's, not ours.
+      </Text>
+      <Muted style={{ marginTop: 6, marginBottom: 14 }}>Made by these channels. Support them.</Muted>
+      <List>
+        {CHANNELS.map((c) => (
+          <Row key={c.name} testID={`creator-${c.name}`}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>{c.name}</Text>
+            </View>
+            {c.patreon ? <Btn kind="plain" label="Patreon" style={{ paddingHorizontal: 12 }}
+                              onPress={() => Linking.openURL(c.patreon)} /> : null}
+            {c.site ? <Btn kind="ghost" label="Site" style={{ paddingHorizontal: 10 }}
+                           onPress={() => Linking.openURL(c.site)} /> : null}
+            {c.url ? <Btn kind="ghost" label="YouTube" style={{ paddingHorizontal: 10 }}
+                          onPress={() => Linking.openURL(c.url)} /> : null}
+          </Row>
+        ))}
+      </List>
+    </Sheet>
+  );
+}
+
 export function Immerse({ navigation }) {
-  const { st } = useSession();
+  const { st, update } = useSession();
   const t = useTheme();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [sort, setSort] = useState("level");
+  const [sorting, setSorting] = useState(false);
+  const [credits, setCredits] = useState(false);
   const all = videos();
   const seen = all.filter((v) => videoWatched(st, v)).length;
   const shown = useMemo(() => {
-    const found = searchVideos(all, query);
+    const found = searchVideos(all, query, sort);
     return filter === "all" ? found
+      : filter === "faves" ? found.filter((v) => isFave(st, v.id))
       : found.filter((v) => videoWatched(st, v) === (filter === "watched"));
-  }, [query, filter, st.watched, st.unit]);
+  }, [query, filter, sort, st.watched, st.unit, st.faves]);
+  /* The creators' note, once: the first time the library opens on this
+     profile. Recorded as seen when it is dismissed, not when it is shown, so
+     a note the learner left the screen under comes back next time. */
+  const noteDue = !(st.notices || {}).immerse;
+  const sawNote = () => update((p) => ({ ...p, notices: { ...(p.notices || {}), immerse: today() } }));
+  const sortName = (VIDEO_SORTS.find((s) => s.id === sort) || VIDEO_SORTS[0]).name;
 
   return (
     <Screen>
@@ -121,8 +212,20 @@ export function Immerse({ navigation }) {
       <SearchField testID="video-search" value={query} onChangeText={setQuery}
                    placeholder="Search: travel, grammar, B1, слово…" label="Search videos"
                    style={{ marginBottom: 12 }} />
-      <Choice testID="video-filter" options={VIDEO_FILTERS} value={filter} onPick={setFilter}
-              style={{ marginBottom: 12 }} />
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12, gap: 8 }}>
+        <View style={{ flex: 1 }}>
+          <Choice testID="video-filter" options={VIDEO_FILTERS} value={filter} onPick={setFilter} />
+        </View>
+        {/* The sort, as one small control and not a second row of chips (the
+            owner: "small little drop down dont make it a huge distractor"). */}
+        <Pressable testID="video-sort" accessibilityRole="button"
+                   accessibilityLabel={`Sort: ${sortName}`}
+                   onPress={() => setSorting(true)} hitSlop={6}
+                   style={({ pressed }) => ({ paddingVertical: 8, paddingHorizontal: 4,
+                                              opacity: pressed ? 0.6 : 1 })}>
+          <Muted size={13}>{`${sortName} ▾`}</Muted>
+        </Pressable>
+      </View>
       {shown.length ? (
         <List>
           {shown.map((v, k) => {
@@ -146,6 +249,8 @@ export function Immerse({ navigation }) {
                     corner was the only mark and the owner asked for it to be
                     obvious. Dimmed title, a pill, and the tick — three signs. */}
                 {watched ? <Pill tone="good" testID={`watched-${v.id}`}>watched</Pill> : null}
+                <Heart on={isFave(st, v.id)} testID={`fave-${v.id}`}
+                       onPress={() => update((p) => toggleFave(p, v.id))} />
               </Row>
             );
           })}
@@ -153,9 +258,33 @@ export function Immerse({ navigation }) {
       ) : (
         <Muted style={{ textAlign: "center", marginTop: 30 }}>
           {query.trim() ? `Nothing matches “${query.trim()}”`
-            : filter === "watched" ? "Nothing watched yet" : "Everything watched"}
+            : filter === "watched" ? "Nothing watched yet"
+            : filter === "faves" ? "No favorites yet" : "Everything watched"}
         </Muted>
       )}
+      {/* The creators, reachable after the first-open note is gone — a credit
+          that can be seen once and never again is not a credit. */}
+      <Btn kind="ghost" testID="creators-open" label="About the creators"
+           style={{ marginTop: 18, alignSelf: "center" }} onPress={() => setCredits(true)} />
+
+      {noteDue || credits ? (
+        <CreatorsNote onClose={() => { setCredits(false); if (noteDue) sawNote(); }} />
+      ) : null}
+      {sorting ? (
+        <Sheet testID="sort-sheet" title="Sort" onClose={() => setSorting(false)}>
+          <List>
+            {VIDEO_SORTS.map((s) => (
+              <Row key={s.id} testID={`sort-${s.id}`}
+                   onPress={() => { setSort(s.id); setSorting(false); }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>{s.name}</Text>
+                </View>
+                <Tick on={sort === s.id} />
+              </Row>
+            ))}
+          </List>
+        </Sheet>
+      ) : null}
     </Screen>
   );
 }
@@ -277,9 +406,15 @@ export function Video({ route, navigation }) {
 
   return (
     <Screen>
-      <Title sub={[v.ch, minutes(v.dur), unit ? unit.name : null, watched ? "watched" : null].filter(Boolean).join(" · ")}>
-        {short(v.title)}
-      </Title>
+      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+        <View style={{ flex: 1 }}>
+          <Title sub={[v.ch, minutes(v.dur), unit ? unit.name : null, watched ? "watched" : null].filter(Boolean).join(" · ")}>
+            {short(v.title)}
+          </Title>
+        </View>
+        <Heart on={isFave(st, v.id)} testID={`fave-${v.id}`} size={44}
+               onPress={() => update((p) => toggleFave(p, v.id))} />
+      </View>
       {playing ? (
         <View style={{ aspectRatio: 16 / 9, borderRadius: radius.md,
                        overflow: "hidden", backgroundColor: "#000" }}>

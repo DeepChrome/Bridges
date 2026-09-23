@@ -205,7 +205,12 @@ group("grading");
 
 group("state schema");
 {
-  ok(SCHEMA_VERSION === 7, "schema is at 7", String(SCHEMA_VERSION));
+  ok(SCHEMA_VERSION === 8, "schema is at 8", String(SCHEMA_VERSION));
+  /* v8 turns developer mode off for everyone (2026-09-23): it had shipped on
+     and no profile can say whether it chose that, so nobody keeps it. */
+  const v8 = migrate({ v: 7, dev: true, watched: {} }, 7);
+  ok(v8.v === 8 && v8.dev === false && v8.faves && v8.notices,
+     "v7 → v8 turns developer mode off and adds the favourites and notices slots");
   ok([1, 2, 3, 4, 5, 6].every((k) => typeof MIGRATIONS[k] === "function"),
      "a migration step exists from every earlier version");
 

@@ -37,7 +37,7 @@ import { View, Pressable, PanResponder } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Btn, Muted, Bar, Text } from "../ui";
+import { Btn, Muted, Bar, Text, Speaker } from "../ui";
 import { stop, hasRealAudio, hasRussianVoice } from "../audio";
 import { useScenario, trackWhenCurrent, msFor, SKIP_MS, clock } from "../scenario";
 import { Linked } from "../words";
@@ -409,7 +409,15 @@ export function Scene({ q, r }) {
                   {speaker(line.s).toUpperCase()}
                 </Text>
               ) : null}
-              <Linked text={line.ru} size={18} />
+              {/* Each line can be heard on its own once the transcript is
+                  open — the recording is one track, and a learner reading
+                  back a line they missed wants that line, not the whole
+                  conversation again (the owner, 2026-09-23: a speaker on
+                  every sentence). The device voice, as `Speaker` says. */}
+              <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+                <View style={{ flex: 1 }}><Linked text={line.ru} size={18} /></View>
+                <Speaker text={line.ru} size={32} />
+              </View>
               <Muted>{line.en}</Muted>
             </View>
           ))}

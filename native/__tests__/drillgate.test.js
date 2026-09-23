@@ -13,7 +13,7 @@ import { Q, DRILL_N } from "../src/questions";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const base = {
-  v: 4, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
+  v: 8, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   dev: false, xp: 0, streak: 0,
 };
 

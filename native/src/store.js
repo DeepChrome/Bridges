@@ -40,7 +40,12 @@ const badKey = (id) => `rb.state.${id}.bad-${Date.now()}`;
 
 export const DEFAULTS = {
   v: SCHEMA_VERSION,
-  dev: true,            // ships on, as on the web
+  /* Off since 2026-09-23 (the owner: the path is walked from the top; only
+     the placement test may open chapters ahead). The switch stays in
+     Settings. The frozen web app still ships it on. */
+  dev: false,
+  faves: {},            // video id -> day favourited (Immerse)
+  notices: {},          // one-time notes seen, by id (Immerse's creators note)
   theme: "auto",
   sets: [],
   seen: {},             // word -> { recognise, produce, listen }: a card each (core/scheduler.js)

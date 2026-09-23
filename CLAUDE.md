@@ -330,9 +330,12 @@ changed, `undefined` flowing silently through a render path. Hold the same bar.
    live in a titled section or the settings sheet, never scattered. New functionality
    gets a home, not a button in the corner of an existing screen.
 
-9. **Developer mode ships ON.** It unlocks every lesson. This is the owner's decision,
-   not an oversight — do not "fix" it. Gating must still be correct when off; the smoke
-   test asserts both states.
+9. **Developer mode ships OFF** (since 2026-09-23; it shipped on before that, and
+   §30as says why it changed). It unlocks every lesson, and the switch stays in
+   Settings. A learner walks the path from the top; only the placement test opens
+   chapters ahead. The v8 migration turns it off for every profile that had it, since
+   none of them chose it. The frozen web app still ships it on and its smoke test
+   asserts both states; `path.test.js` asserts both on native.
 
 10. **Attribution stays.** OpenRussian is CC BY-SA 4.0. The footer credit and the `meta`
     rows in `lexicon.db` are a licence obligation, not decoration.
@@ -4133,6 +4136,59 @@ both CSS blocks, audited at the accent minimum, because a gradient's middle
 that nobody measured is a colour picked by eye (§31). The number is `ink` on
 the card's surface — only the stroke takes the colour, so no text sits on an
 unaudited fill.
+
+## 30as. The path from the top, a speaker on everything, and whose videos these are (2026-09-23)
+
+The owner's second look at beta.4, five items.
+
+**"Chapter 2 and all other chapters are default unlocked."** They were —
+by rule 20.9, developer mode shipped on and his profile had it. That rule was
+his decision on 2026-09-04 and he has reversed it: *"The learner should have
+to start at the top and progress towards the bottom. When they do the
+placement test, that can unlock different levels for them, but no paths/nodes
+should be unlocked otherwise."* So `DEFAULTS.dev` is false, and **the v8
+migration turns it off for every existing profile**: it had been the default,
+nobody chose it, and a profile that chose it cannot be told from one that did
+not — so all of them walk from the top, and the switch in Settings is where
+it goes back on. The seven test fixtures that seeded `dev: true` at an old
+schema version found the migration doing exactly this and are seeded at v8
+now; the one that tapped a chapter-1 quest on a fresh profile taps the spine
+and asserts the locked quest does nothing.
+
+**The placement test had a hole.** It marked the spine of each cleared
+chapter done, and since §30ap the next chapter also needs the chapter's
+required quests, so a placed learner would have landed on a chapter they
+could not reach. It marks the required quests too; the optional ones gate
+nothing and are left.
+
+**A finished disc is encircled**, in the brand colour the track arrives in,
+so the road runs into the node, round it and on — not a separate green tick.
+Locked discs are greyed as a whole (opacity), not only quieter.
+
+**"Everything in the app… a speaker button… the user is always hearing the
+words."** Audited every `Linked` in the app. Missing: the flashcard's example
+sentences on the back, the conversation transcript's lines, the rule card's
+examples in the hint sheet and under a verdict, the gap-fill's revealed
+sentence, and the drill prompts the generators had not marked `say`
+(aspect, agreement, conjugation, the form question). All carry one now;
+`promptSpeech(q)` in `Run.js` reads a Russian prompt aloud unless it has a
+gap in it. And **the right form is read out on every verdict, not only a
+correct one** — the learner who got it wrong is the one who most needs to
+hear it — with a speaker on the verdict to hear it again.
+
+**Immerse.** Favourites (`st.faves`, id → day; a heart on the row and on the
+player; a fourth filter). A resting order that is a progression — the units'
+episodes along the path, then by CEFR code, unrated last — behind one small
+sort control (level, easiest, newest, shortest); `up` (the upload date) now
+ships on each video for it. And **the creators' note**, shown the first time
+the library opens and reachable after from the foot of the list: *"the works
+featured are not my own… provide links to any patreons of any of those
+content creators… I'm not monetizing this but… give more visibility to these
+people doing the hard work."* The rows come from `payload.channels`, built
+from `data/curated/channels.json` (Patreon and site, found by hand) and the
+harvest's channel urls — six of the seven have a Patreon; Boost Your Russian
+has a site and no Patreon that could be found. Data, never a list typed into
+a screen (§6), so a channel added to the harvest is added to the credit.
 
 ## 31. Verification
 

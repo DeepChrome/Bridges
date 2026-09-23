@@ -67,12 +67,28 @@ describe("the video data", () => {
     }
   });
 
-  it("puts the units' episodes first, then the rest easiest first", () => {
+  /* The resting order is a progression (the owner, 2026-09-23): the units'
+     episodes along the path, then the rest by CEFR code, unrated last. The
+     other sorts are plain. */
+  it("orders by level at rest: the units' episodes first, then A1 up, unrated last", () => {
     const order = libraryOrder(VIDEOS);
     const firstFree = order.findIndex((v) => !v.unit);
     expect(order.slice(0, firstFree).every((v) => v.unit)).toBe(true);
-    const rest = order.slice(firstFree).map((v) => v.ease || 0);
-    expect(rest.every((e, k) => k === 0 || rest[k - 1] >= e)).toBe(true);
+    const RANK = { A1: 0, A2: 1, B1: 2, "B1+": 3, B2: 4, C1: 5, C2: 6 };
+    const rest = order.slice(firstFree).map((v) => (v.cefr in RANK ? RANK[v.cefr] : 9));
+    expect(rest.every((r, k) => k === 0 || rest[k - 1] <= r)).toBe(true);
+    expect(rest[0]).toBe(0);
+    expect(rest[rest.length - 1]).toBe(9);
+
+    const ease = libraryOrder(VIDEOS, "easiest").map((v) => v.ease || 0);
+    expect(ease.every((e, k) => k === 0 || ease[k - 1] >= e)).toBe(true);
+    const up = libraryOrder(VIDEOS, "newest").map((v) => v.up || "");
+    expect(up[0] > up[up.length - 1]).toBe(true);
+    expect(up.every((u, k) => k === 0 || up[k - 1] >= u)).toBe(true);
+    const dur = libraryOrder(VIDEOS, "shortest").map((v) => v.dur);
+    expect(dur.every((d, k) => k === 0 || dur[k - 1] <= d)).toBe(true);
+    // Every video carries an upload date, or "newest" would be a guess.
+    expect(VIDEOS.every((v) => /^\d{8}$/.test(v.up))).toBe(true);
   });
 
   it("searches by keyword, by title, and by a Russian word the video says", () => {
@@ -100,8 +116,70 @@ describe("the video data", () => {
 });
 
 describe("Immerse", () => {
-  it("lists the library, filters as you type, and opens a video", async () => {
+  /* Whose videos these are, said once (the owner, 2026-09-23): the first time
+     the library opens, a note names every channel with where to support it,
+     and "Got it" is what records it as seen. The list is the payload's, from
+     data/curated/channels.json, so a channel with a Patreon has the button and
+     one without does not. */
+  it("names the creators the first time the library opens, and again on request", async () => {
+    const { CHANNELS } = require("../src/data");
+    expect(CHANNELS.length).toBe(7);
+    expect(CHANNELS.filter((c) => c.patreon).length).toBeGreaterThanOrEqual(5);
     await withProfile(<Immerse navigation={nav} />);
+    expect(await screen.findByTestId("creators-note")).toBeTruthy();
+    for (const c of CHANNELS) expect(screen.getByTestId(`creator-${c.name}`)).toBeTruthy();
+    expect(screen.getAllByText("Patreon").length).toBe(CHANNELS.filter((c) => c.patreon).length);
+    await act(async () => { fireEvent.press(screen.getByText("Got it")); });
+    expect(screen.queryByTestId("creators-note")).toBeNull();
+    expect((await saved()).notices.immerse).toEqual(expect.any(Number));
+    // And it is still reachable, from the foot of the list.
+    await act(async () => { fireEvent.press(screen.getByTestId("creators-open")); });
+    expect(screen.getByTestId("creators-note")).toBeTruthy();
+  });
+
+  it("does not repeat the note once it has been seen", async () => {
+    await withProfile(<Immerse navigation={nav} />, { notices: { immerse: 20000 } });
+    await screen.findByText(`of ${VIDEOS.length} watched`);
+    expect(screen.queryByTestId("creators-note")).toBeNull();
+  });
+
+  /* Favourites (the owner, 2026-09-23): a heart on the row and on the player,
+     kept per profile, and a filter that shows only them. */
+  it("marks a favorite from the row, filters to favorites, and keeps it on the player", async () => {
+    await withProfile(<Immerse navigation={nav} />, { notices: { immerse: 1 } });
+    await screen.findByTestId(`fave-${libraryVideo.id}`);
+    await act(async () => { fireEvent.press(screen.getByTestId(`fave-${libraryVideo.id}`)); });
+    expect((await saved()).faves[libraryVideo.id]).toEqual(expect.any(Number));
+    await act(async () => { fireEvent.press(screen.getByText("Favorites")); });
+    expect(screen.getByTestId(`video-${libraryVideo.id}`)).toBeTruthy();
+    expect(screen.queryByTestId(`video-${unitVideo.id}`)).toBeNull();
+    // Off again from the same heart.
+    await act(async () => { fireEvent.press(screen.getByTestId(`fave-${libraryVideo.id}`)); });
+    expect((await saved()).faves[libraryVideo.id]).toBeUndefined();
+    expect(screen.getByText("No favorites yet")).toBeTruthy();
+
+    await flushState(); await AsyncStorage.clear();
+    await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={nav} />,
+                      { faves: { [libraryVideo.id]: 20000 } });
+    const heart = await screen.findByTestId(`fave-${libraryVideo.id}`);
+    expect(heart.props.accessibilityState.selected).toBe(true);
+  });
+
+  it("sorts from one small control", async () => {
+    await withProfile(<Immerse navigation={nav} />, { notices: { immerse: 1 } });
+    await screen.findByTestId("video-sort");
+    expect(screen.getByTestId("video-sort").props.accessibilityLabel).toBe("Sort: By level");
+    await act(async () => { fireEvent.press(screen.getByTestId("video-sort")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("sort-newest")); });
+    expect(screen.queryByTestId("sort-sheet")).toBeNull();
+    expect(screen.getByTestId("video-sort").props.accessibilityLabel).toBe("Sort: Newest");
+    const first = libraryOrder(VIDEOS, "newest")[0];
+    const tree = JSON.stringify(screen.toJSON());
+    expect(tree.indexOf(`video-${first.id}`)).toBeLessThan(tree.indexOf(`video-${libraryOrder(VIDEOS, "newest")[5].id}`));
+  });
+
+  it("lists the library, filters as you type, and opens a video", async () => {
+    await withProfile(<Immerse navigation={nav} />, { notices: { immerse: 1 } });
     expect(await screen.findByText(`of ${VIDEOS.length} watched`)).toBeTruthy();
     // Each row carries the video's YouTube thumbnail.
     const first = libraryOrder(VIDEOS)[0];
@@ -180,7 +258,7 @@ describe("Video", () => {
   /* Watched shows on the row and the library filters by it (the owner,
      2026-09-19: "make it more obvious once a video has been completed"). */
   it("marks a watched row and filters the library by watched or not", async () => {
-    await withProfile(<Immerse navigation={nav} />, { watched: { [libraryVideo.id]: 20000 } });
+    await withProfile(<Immerse navigation={nav} />, { watched: { [libraryVideo.id]: 20000 }, notices: { immerse: 1 } });
     expect(await screen.findByTestId(`watched-${libraryVideo.id}`)).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByText("Watched")); });
     expect(await screen.findByTestId(`video-${libraryVideo.id}`)).toBeTruthy();

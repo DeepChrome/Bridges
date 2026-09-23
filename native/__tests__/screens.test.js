@@ -75,10 +75,15 @@ describe("Learn", () => {
     expect(screen.getByText(STAGES[0].title)).toBeTruthy();
   });
 
-  it("opens a unit when tapped", async () => {
+  it("opens a unit when tapped, and not a locked one", async () => {
     await withProfile(<Learn navigation={nav} />);
-    fireEvent.press(await screen.findByText("Food & Drink"));
-    expect(nav.navigate).toHaveBeenCalledWith("Unit", { unitId: "food" });
+    // Chapter 1's spine is open on day one; its quests are not (2026-09-23,
+    // developer mode off by default). A press on a locked disc does nothing.
+    fireEvent.press(await screen.findByText(STAGES[0].core.name));
+    expect(nav.navigate).toHaveBeenCalledWith("Unit", { unitId: STAGES[0].core.id });
+    nav.navigate.mockClear();
+    fireEvent.press(screen.getByText("Food & Drink"));
+    expect(nav.navigate).not.toHaveBeenCalled();
   });
 });
 
@@ -103,7 +108,7 @@ describe("unit and lesson", () => {
   it("reflects completion from stored state", async () => {
     await withProfile(<LessonScreen route={route} navigation={nav} />, {
       state: {
-        v: 4, seen: {}, trouble: {}, pinned: [], sets: [], drills: {},
+        v: 8, seen: {}, trouble: {}, pinned: [], sets: [], drills: {},
         unit: { food: { lessons: { 0: { v: true, q: 100 } }, video: true } },
       },
     });

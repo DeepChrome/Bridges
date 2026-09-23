@@ -50,7 +50,7 @@ const content = question.lemmas.filter((i) => i >= SPEECH_SKIP_TOP);
 const stepOf = (st, i) => st.seen[L[i].b].produce.dueAt - st.seen[L[i].b].produce.lastAt;
 
 const base = {
-  v: 5, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
+  v: 8, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, xp: 0, streak: 0,
 };
 
@@ -123,7 +123,8 @@ describe("say", () => {
     await final(heard);
     expect(await screen.findByText("Correct")).toBeTruthy();
     expect(screen.queryByText(/Try again/)).toBeNull();
-    expect(screen.getByTestId("speaker-real")).toBeTruthy();   // the native recording
+    // The native recording — on the sentence, and again on the verdict (2026-09-23).
+    expect(screen.getAllByTestId("speaker-real").length).toBeGreaterThanOrEqual(1);
 
     const st = await saved();
     expect(content.length).toBeGreaterThan(0);

@@ -254,6 +254,15 @@ function HintSheet({ q, onClose }) {
   );
 }
 
+/* What the prompt can be read aloud as: the generator's own `say`, else a
+   Russian prompt with no gap in it. Exported for the test. */
+const CYR = /[Ѐ-ӿ]/;
+export function promptSpeech(q) {
+  if (q.say) return q.say;
+  if (q.cyr && q.prompt && CYR.test(q.prompt) && !/_/.test(q.prompt)) return q.prompt;
+  return null;
+}
+
 /* A chapter's grammar card, as the runner draws it: in the hint sheet before
    an answer, and under the verdict after a wrong one (§30al — the owner:
    *"the grammar tips can be feedback after an incorrect answer on a question
@@ -272,7 +281,10 @@ export function RuleNote({ note, testID }) {
       {(note.examples || []).map(([ru, en], k) => (
         <View key={k} style={{ marginTop: 12, borderTopWidth: 1,
                                borderTopColor: t.lineSoft, paddingTop: 10 }}>
-          <Linked text={ru} size={18} />
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+            <View style={{ flex: 1 }}><Linked text={ru} size={18} /></View>
+            <Speaker text={ru} size={32} />
+          </View>
           <Muted>{en}</Muted>
         </View>
       ))}
@@ -434,10 +446,12 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
        is a sound and this is not one. */
     (correct ? buzzRight : buzzWrong)();
     cue(correct ? "right" : "wrong");
-    // The word itself, just behind the cue so the two do not talk over each
-    // other. Only on a correct answer: hearing the right form is the reward,
-    // and it is also the moment the learner is listening for it.
-    if (correct) {
+    // The right form, just behind the cue so the two do not talk over each
+    // other. On every answer, not only a correct one (the owner, 2026-09-23:
+    // "the user is always hearing the words to help build the association")
+    // — a learner who got it wrong is the one who most needs to hear it, and
+    // the verdict carries a speaker to hear it again.
+    {
       const opt = q.options ? q.options.find((o) => o.right) : null;
       const text = answerAudioText(q, opt);
       if (text) {
@@ -595,7 +609,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           </Text>
         ) : null}
         {q.sub ? <Muted style={{ marginTop: 6, textAlign: "center" }}>{q.sub}</Muted> : null}
-        {q.say ? <View style={{ marginTop: 12 }}><Speaker text={q.say} /></View> : null}
+        {/* Whatever Russian the question shows can be heard (the owner,
+            2026-09-23). `say` where the generator named it; otherwise the
+            prompt itself when it is Russian and whole — a gapped sentence
+            («___ среда») is not a thing to read aloud. */}
+        {promptSpeech(q) ? <View style={{ marginTop: 12 }}><Speaker text={promptSpeech(q)} /></View> : null}
       </Animated.View>
 
       {/* A hint — the table, or the meaning of what was heard — costs the grade:
@@ -674,6 +692,13 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                 {`Answer: ${answer ? answer.label : q.answer}`}
               </Text>
             ) : null}
+            {/* Hear the right form again, whatever the verdict. It was read
+                out as the verdict landed; this is the button for once more. */}
+            {right !== null && answerAudioText(q, answer) ? (
+              <View testID="verdict-speaker" style={{ marginTop: 8, alignSelf: "flex-start" }}>
+                <Speaker text={answerAudioText(q, answer)} size={36} />
+              </View>
+            ) : null}
             {/* The rule, after a wrong answer only. Right needs no lecture, and
                 a skipped question was never attempted. It replaced the Grammar
                 rules drill: a rule read at the moment it was broken is a rule
@@ -687,7 +712,10 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                 names the form that filled it. */}
             {right !== null && q.reveal ? (
               <View style={{ marginTop: 8 }}>
-                <Linked text={q.reveal} size={17} />
+                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+                  <View style={{ flex: 1 }}><Linked text={q.reveal} size={17} /></View>
+                  <Speaker text={q.reveal} size={32} />
+                </View>
                 {q.formNote ? <Muted style={{ marginTop: 3 }}>{q.formNote}</Muted> : null}
               </View>
             ) : null}

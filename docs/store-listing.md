@@ -151,11 +151,12 @@ node tools/release_check.mjs                      # signature, size, permissions
 
 A bundle, not an APK: Play requires one for new apps, and it splits per device
 so the download is far smaller than the file uploaded. The version is
-`1.0.0-beta.2` / versionCode 2 (`app.json`; `npx expo prebuild --platform
+`1.0.0-beta.3` / versionCode 3 (`app.json`; `npx expo prebuild --platform
 android` after changing it, since `android/` is generated); bump versionCode
-on every upload. beta.1 (versionCode 1) was packaged 2026-09-19 and never
-uploaded; beta.2 (2026-09-20) carries the definitions read-through and the
-rewritten chapter 1 conversation.
+on every upload. None has been uploaded yet: beta.1 (2026-09-19) was the first
+packaged, beta.2 (2026-09-20) carried the definitions read-through, and
+beta.3 (2026-09-23) carries the path gating, the recorded-audio trim and
+Translate.
 
 ---
 

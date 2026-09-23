@@ -4014,6 +4014,60 @@ its comparison and could not see it either. Two options reading the same is
 the one thing a multiple choice may never do. `core.test.mjs` sweeps every
 curriculum word for it now rather than waiting for a seed to land on one.
 
+## 30aq. Dead air, and a pool of six (2026-09-23)
+
+**Every bought clip opens with silence, and it is not a little.** The owner, of
+the shadowing drill: *"there's a HUGE pause before the guy starts speaking."*
+Measured over 250 bought sentences: **median 400 ms** before anybody speaks, 53
+of 250 over 700 ms, worst 1,087 ms. Chirp3-HD pads the front of everything it
+returns, and it had been doing so since the first clip was bought — nothing
+measured it, because a clip's *length* was all anything ever checked (§30ao
+counts frames, and 400 ms of silence is 400 ms of frames).
+
+It lands hardest on shadowing, which plays the model the moment the question
+arrives, so the learner stares at a screen for up to a second before the
+exercise begins. `build_word_assets.mjs` takes it off: `silencedetect` finds
+the lead, `ffmpeg -ss … -c copy` cuts to the nearest frame, `KEEP_MS` (80) of
+it stays so a word is not clipped against its first consonant, and the result
+is cached by the clip's own content id. **Nothing is re-encoded** — the frames
+after the cut are the frames that were bought — and **the purchase is
+untouched**, which is rule 20.3 and the arrangement §30y made for levelling.
+Over all 2,886 clips: **18 minutes of dead air**, 379 ms each, and the bundle
+falls from 22.5 MB to 19.0 MB.
+
+The blip check moved here with it. `audio_qa.mjs` reads lengths off the
+manifest, which measures the *purchase*; after trimming, a word that is mostly
+padding would pass there and arrive as a blip anyway. The tool that writes the
+shipped file is the one that can see what shipped.
+
+**Left alone, and named so it is a decision rather than an oversight:** the
+scenario clips carry the same padding, and `GAP_MS` (420) was tuned with it
+present (§30l). Trimming there would tighten every conversation and want that
+number re-tuned, which is a change to something the owner has not complained
+about. The timeline is measured from the levelled clips, so nothing there is
+*wrong*; it is just slower than it needs to be.
+
+**A drill with twenty-nine sentences in it.** *"It seems like there's only like
+10-20 options or so. I'd like to hear like 100 options min."* Measured: the
+speak pool holds 1,986 sentences, but `reachedUnits` stops at the lesson
+Continue would resume, and **chapter 1 carries 29**. Six a run out of
+twenty-nine is the same six every sitting. Chapter 2 is the first to pass a
+hundred.
+
+`shadowDrill` widens along the route until it has `SHADOW_POOL_MIN` (100),
+which is §30ac's rule for a drill pool that cannot fill, and it costs less here
+than it does there: shadowing hands the learner the model and asks only for
+their mouth (§30o), so a sentence carrying a word from next month is still a
+sentence you can say. Chapter 1 goes from 29 distinct sentences to **150**; a
+learner four chapters in has their own hundred and is never handed one from
+beyond.
+
+**What the widening must not do is enrol vocabulary nobody taught.** A widened
+step carries `beyond: true` and `Shadow.js` grades no word on one — saying a
+word back is not a claim to know it. The step still scores for the run. That
+is the whole price of the change, paid in the one place it could have been
+charged silently.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

@@ -928,6 +928,18 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### Dead air and a pool of six, 2026-09-23 — CLAUDE.md §30aq
+
+Chirp3-HD pads the front of every clip: median 400 ms, worst 1,087 ms, never
+measured because only length was ever checked. Trimmed at bundle time with a
+lossless frame copy, 80 ms kept, cached by content id, purchase untouched —
+18 minutes of dead air off 2,886 clips and 3.5 MB off the bundle. The
+scenario clips carry the same padding and are deliberately left, since GAP_MS
+was tuned around it. And shadowing drew from what the learner had reached,
+which is 29 sentences in chapter 1: it widens along the route to 100 now
+(chapter 1: 29 → 150 distinct), with widened steps grading no word into the
+scheduler. Suites: core 631, native 480, smoke 159, audio QA pass.
+
 ### The owner's fifteen, 2026-09-22 — CLAUDE.md §30ap
 
 Fourteen corrections and one feature. The path gates on itself now: no lanes

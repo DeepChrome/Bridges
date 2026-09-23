@@ -62,7 +62,17 @@ export function Shadow({ q, r }) {
     setSettled(true);
     const c = alignmentCredit(out.alignment, IX);
     const passed = sayPassed(out.alignment, IX);
-    r.record(passed, gradeAlignment(out.alignment, IX, { perfect: passed, firstTry: n === 1 }),
+    /* **A sentence from beyond the route grades nothing.**
+     *
+     * The pool a run draws from is widened when what the learner has reached
+     * is too thin to vary (core/questions.js `shadowDrill`, 2026-09-23), so a
+     * sentence here can carry words from units they have never opened. Saying
+     * one back is not a claim to know it — shadowing hands you the model and
+     * asks only for your mouth (§30o) — and enrolling it would put vocabulary
+     * nobody has taught into the scheduler, which is the one price the
+     * widening must not pay. The step still scores for the run. */
+    r.record(passed,
+             q.beyond ? [] : gradeAlignment(out.alignment, IX, { perfect: passed, firstTry: n === 1 }),
              undefined,
              passed ? { credit: 1, note: null }
                : { credit: c.credit,

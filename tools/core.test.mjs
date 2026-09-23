@@ -27,7 +27,7 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, PRODUCE_AT,
-         lessonSize, LESSON_RAMP, LESSON_SIZE, FINAL_N }
+         lessonSize, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN }
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
@@ -1632,6 +1632,44 @@ group("speaking");
      "the sentence comes from the unit's speaking pool");
   ok(!!DATA.audio.files[fold(s.target)], "and has a recording to hear afterwards");
   ok(s.lemmas.length > 0, "and lemmas to grade");
+}
+
+/* Shadowing: hear a sentence and say it straight back (§30o). What is pinned
+   here is the size of the pool it draws from — the owner, 2026-09-23: "it
+   seems like there's only like 10-20 options or so. I'd like to hear like 100
+   options min." */
+group("shadowing has something to draw from");
+{
+  const distinct = (units) => {
+    const seen = new Set();
+    for (let k = 0; k < 300; k++) for (const s of Q.shadowDrill(units, 6, UN)) seen.add(s.target);
+    return seen.size;
+  };
+  /* The thinnest a learner can be: one chapter's spine. Its own pool is 29
+     sentences, which is the same handful every sitting; widening along the
+     route is §30ac's rule for a drill pool that cannot fill. */
+  const first = [STAGES[0].core];
+  const poolOf = (us) => new Set(us.flatMap((u) => SPEECH.speak[u.id] || [])).size;
+  const own = poolOf([STAGES[0].core]);
+  ok(own < SHADOW_POOL_MIN, "chapter 1's own speaking pool is thin", String(own));
+  ok(distinct(first) >= SHADOW_POOL_MIN,
+     `a chapter-1 learner still draws from ${SHADOW_POOL_MIN}+ sentences`, String(distinct(first)));
+  ok(Q.shadowDrill(first, 6, UN).length === 6, "and a run still fills");
+
+  /* …and only when it has to. A learner with enough of their own is never
+     handed a sentence from further along. */
+  const deep = STAGES.slice(0, 4).flatMap((s) => [s.core, ...s.branches]);
+  ok(poolOf(deep) >= SHADOW_POOL_MIN, "a learner four chapters in has their own hundred");
+  ok(Q.shadowDrill(deep, 20, UN).every((s) => !s.beyond),
+     "so nothing is drawn from beyond the route");
+
+  /* A sentence from beyond it is marked, because the activity grades nothing
+     on one: saying a word back is not a claim to know a word nobody taught. */
+  const drawn = Q.shadowDrill(first, 40, UN);
+  ok(drawn.some((s) => s.beyond), "a widened pool marks what came from beyond");
+  ok(drawn.every((s) => s.target && s.lemmas), "every step still carries its sentence and lemmas");
+  ok(Q.shadowDrill(first, 6).every((s) => !s.beyond),
+     "and with no route handed in, nothing is widened and nothing is beyond");
 }
 
 /* Conversation sessions are budgeted in the learner's own state. */

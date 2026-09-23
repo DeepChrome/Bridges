@@ -133,7 +133,10 @@ export function ShadowFlow({ navigation }) {
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
   const units = useMemo(() => reachedUnits(st), [seed]);
-  const steps = useMemo(() => Q.shadowDrill(units, SHADOW_N), [units, seed]);
+  /* The whole route as well, so a thin pool can be widened along it
+     (`shadowDrill`): chapter 1 carries 29 sentences and six a run out of
+     twenty-nine is the same six every sitting. */
+  const steps = useMemo(() => Q.shadowDrill(units, SHADOW_N, UN), [units, seed]);
   useAudioStopOnLeave();
 
   if (!steps.length) {

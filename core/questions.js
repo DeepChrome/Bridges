@@ -16,6 +16,11 @@ import { describeForm, GENERIC_COLUMN } from "./forms.js";
 
 export const QUIZ_N = 8;
 
+/* The smallest pool a shadowing run will draw its sentences from, widening
+   along the route to reach it (`shadowDrill`). The owner's number, 2026-09-23:
+   a hundred so that six a sitting is not the same six. */
+export const SHADOW_POOL_MIN = 100;
+
 /* How the speech activities join a lesson quiz, on top of QUIZ_N: from which chapter
    (0-based stage index) — and, within that chapter, from which lesson — and how
    many per quiz. Hearing a sentence starts in chapter 1 from its third lesson
@@ -845,17 +850,53 @@ export function makeQuestions(env) {
    * recording and run 3–12 tokens: shadowing a device voice would be shadowing
    * a robot's rhythm, which is the one thing the exercise is for. No sentence
    * without audio can appear here, so unlike Hear there is no fallback. */
-  function shadowDrill(units, n) {
+  function shadowDrill(units, n, all) {
     if (!SPEECH || !SPEECH.speak || !SPEECH.rows) return [];
     const rows = SPEECH.rows;
-    const idxs = unique(units.flatMap((u) => SPEECH.speak[u.id] || []));
+    const pool = (us) => unique(us.flatMap((u) => SPEECH.speak[u.id] || []));
+    let reach = units;
+    let idxs = pool(reach);
+    /* **Widened until there is a pool worth drawing from.**
+     *
+     * The units a learner has reached carry very few of these early on:
+     * measured 2026-09-23, chapter 1 has **29** sentences in the speak pool
+     * and chapter 2 is the first to pass a hundred. Six a run out of
+     * twenty-nine is the same handful every sitting — the owner: *"it seems
+     * like there's only like 10-20 options or so. I'd like to hear like 100
+     * options min."*
+     *
+     * Reaching past what they have met is §30ac's rule for a thin drill pool,
+     * and it costs less here than it does there: shadowing hands the learner
+     * the model and asks only for their mouth (§30o). There is nothing to
+     * decode and nothing to retrieve, so a sentence carrying a word from next
+     * month is a sentence you can still say. What it must not do is put that
+     * word into the scheduler, which is why `known` rides on the question —
+     * see the note on `beyond` below. */
+    if (idxs.length < SHADOW_POOL_MIN && all && all.length) {
+      const seen = new Set(reach.map((u) => u.id));
+      const widened = reach.slice();
+      for (const u of all) {
+        if (seen.has(u.id)) continue;
+        seen.add(u.id);
+        widened.push(u);
+        if (pool(widened).length >= SHADOW_POOL_MIN) break;
+      }
+      reach = widened;
+      idxs = pool(reach);
+    }
     if (!idxs.length) return [];
+    /* Which sentences are within what the learner has been taught. A word met
+       in a lesson may be graded by saying it; a word from a unit they have not
+       opened may not, or the exercise would enrol vocabulary nobody taught
+       them. The activity reads this and grades nothing on a `beyond` step. */
+    const met = new Set(pool(units));
     const out = [];
     for (const ri of shuffle(idxs).slice(0, n)) {
       const [ru, en] = rows[ri];
       out.push({
         kind: "shadow", ask: "Listen, then say it back", prompt: "", cyr: true,
         autoplay: ru, target: ru, en, unit: units[units.length - 1].id,
+        beyond: !met.has(ri),
         lemmas: sentenceLemmas(ru, IX),
       });
     }

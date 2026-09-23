@@ -13,7 +13,7 @@
  * Own file, per the timeout note in screens.test.js.
  */
 import React from "react";
-import { render, screen, fireEvent, within, waitFor } from "@testing-library/react-native";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";

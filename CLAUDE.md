@@ -4252,6 +4252,32 @@ comprehension questions on native video would need a translation pass over
 the spans — a build-time model job of a few dollars — and that waits for
 someone to want it.
 
+## 30au. Practice is open, and carries no score (2026-09-23)
+
+The owner: *"For the practice exercises, nothing should be locked. Also,
+build a quiz randomly says 100%. Remember, no percentages anywhere on that
+page."*
+
+Both were rules the app had made for itself. The four grammar drills opened
+with the chapter that taught their rule (§30e, `drillsIntroduced`), Talk
+after chapter 2's spine (`TALK_UNLOCK_STAGE`), each Talk scenario with its
+unit, and every row carried an "Opens in chapter N" line while locked and a
+best-score pill once run — the pill is what "randomly says 100%" was: the
+best of any earlier run, however short. All of it is gone from Practice:
+no `disabled` rows, no padlocked tiles, no "opens" lines, no percentages.
+`drillOpensAt`/`drillsIntroduced` stay in `core/questions.js` for what still
+needs them — which grammar card a drill's rule note is, and `DrillFlow`'s
+`ahead`, which widens a drill run ahead of the route to the whole
+curriculum so an early Aspect run is not the same eight verbs. `talkUnlocked`
+and `TALK_UNLOCK_STAGE` are deleted. Scores still show where a run ends
+(`Done`) and in the scenario library; the rule is about the Practice page.
+
+`core/openings.js` lost its drill and Talk entries with it: a note on the
+path saying "the Conjugation drill has just opened" about a row that was
+never closed is exactly the noise §30ae built the feature to avoid. What it
+still announces is what genuinely arrives inside lessons — listen-and-type,
+the conversations, the form question, saying it aloud.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

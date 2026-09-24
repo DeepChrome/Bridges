@@ -40,24 +40,23 @@ async function withState(state) {
 beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.clearAllMocks(); });
 afterEach(async () => { await flushState(); });
 
-describe("drills open with the route", () => {
-  it("locks aspect in chapter 1 and says when it opens", async () => {
-    await withState({});
+describe("every drill is open from the first screen", () => {
+  /* Nothing in Practice is locked and nothing on it carries a score (the
+     owner, 2026-09-23). The drills opened with the chapter that taught their
+     rule until then — a "locks aspect in chapter 1" test stood here. */
+  it("offers aspect on day one, with no 'opens in' line and no score", async () => {
+    await withState({ drills: { aspect: { best: 100, runs: 1 }, quiz: { best: 100, runs: 1 } } });
     expect(await screen.findByText("Aspect pairs")).toBeTruthy();
-    expect(screen.getByText(`Opens in chapter ${Q.drillOpensAt("aspect") + 1}`)).toBeTruthy();
-    // Stress is open from the first screen, so it carries no "opens in" line.
-    expect(screen.getByText("Stress")).toBeTruthy();
-    expect(screen.getAllByText(/Opens in chapter/).length).toBe(4);
-    // A locked row does not navigate. RNTL reads onPress off the wrapper, so the
-    // guard has to be in the handler, not only on the control (CLAUDE.md §23).
+    expect(screen.queryByText(/Opens in chapter/)).toBeNull();
+    expect(screen.queryByText(/Opens after chapter/)).toBeNull();
+    expect(screen.queryByText(/%/)).toBeNull();
     fireEvent.press(screen.getByTestId("drill-aspect"));
-    expect(nav.navigate).not.toHaveBeenCalled();
+    expect(nav.navigate).toHaveBeenCalledWith("DrillSetup", { type: "aspect" });
   });
 
-  it("opens conjugation once chapter 2 is done", async () => {
+  it("goes through the focus screen where there is something to narrow", async () => {
     await withState({ unit: through(2) });
     await screen.findByText("Conjugation");
-    expect(screen.getAllByText(/Opens in chapter/).length).toBeLessThan(4);   // conjugation's line is gone
     fireEvent.press(screen.getByTestId("drill-conjugation"));
     /* Through the focus screen, because conjugation has something to narrow —
        a tense, or reading a form (the owner, 2026-09-16). A drill with nothing
@@ -71,12 +70,6 @@ describe("drills open with the route", () => {
     fireEvent.press(screen.getByTestId("drill-stress"));
     // A setup screen offering one choice is a tap that buys nothing.
     expect(nav.navigate).toHaveBeenCalledWith("Drill", { type: "stress" });
-  });
-
-  it("developer mode opens every drill", async () => {
-    await withState({ dev: true });
-    await screen.findByText("Aspect pairs");
-    expect(screen.queryByText(/Opens in chapter/)).toBeNull();
   });
 
   /* Opening a drill ahead of the route widens its words to the whole curriculum:

@@ -24,7 +24,7 @@ import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
 import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text } from "../ui";
 import { Linked } from "../words";
-import { L, IX, UN, STAGES, stageDone, unitUnlocked, drillPool, nextLesson } from "../data";
+import { L, IX, UN, STAGES, drillPool, nextLesson } from "../data";
 import { talk as askTutor, review as askReview, hint as askHint, config } from "../lib/feedback";
 import { say, SPEEDS } from "../audio";
 import { tagInfo } from "@core/errortags";
@@ -73,13 +73,11 @@ export function failureText(reply) {
   return { text: "The tutor could not answer. Try again.", detail: why, retry: true };
 }
 
-/* Talk opens once chapter 2's spine is done (it was chapter 5's — ninety
-   lessons in, while the café and the flat are chapter 1–3 words; the pedagogy
-   review, 2026-09-08), or in dev mode. */
-export const TALK_UNLOCK_STAGE = 1;
-// With ten chapters (2026-09-08) the level bands are: 1–4 beginner, 5–7
-// intermediate, 8–10 advanced (talkLevelFor).
-export const talkUnlocked = (st) => !!st.dev || stageDone(st, STAGES[TALK_UNLOCK_STAGE]);
+/* Talk is open from the first screen, and so is every scenario in it (the
+   owner, 2026-09-23: nothing in Practice is locked). It opened after chapter
+   2's spine until then, and each scenario with its unit. The tutor pitches
+   itself to the learner's level either way (talkLevelFor: chapters 1–4
+   beginner, 5–7 intermediate, 8–10 advanced). */
 
 /* Which words to tell the tutor the learner knows: the words met, strongest
    first — by the scheduler's stability, not the order they were met in —
@@ -428,16 +426,13 @@ export default function Talk({ navigation, route }) {
     applyReview(review && review.ok === true ? review.feedback : null, transcript);
   };
 
-  /* A scenario can start when Talk is open, its unit is, and a session is left
+  /* A scenario can start when the build has a Worker and a session is left
      today. The row reads this to dim itself and start() checks it again: the guard
      lives with the action, not only in the control that offers it. */
   // A build without the Worker's address cannot start a conversation at all;
   // the picker says so instead of spinning.
   const configured = !!config("/v1/talk");
-  const canStart = (s) => {
-    const u = UN.find((x) => x.id === s.unit);
-    return configured && talkUnlocked(st) && !!u && unitUnlocked(st, u) && allowance.left > 0;
-  };
+  const canStart = (s) => configured && !!UN.find((x) => x.id === s.unit) && allowance.left > 0;
   const [run, setRun] = useState(0);                // bumps on Restart so the opening is asked again
   const start = (s) => {
     if (!canStart(s)) return;
@@ -488,14 +483,9 @@ export default function Talk({ navigation, route }) {
 
   /* ---- picker ---- */
   if (!scenario) {
-    const open = talkUnlocked(st);
     return (
       <Screen>
-        {!open ? (
-          <Muted style={{ marginBottom: 12 }}>
-            {`Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}
-          </Muted>
-        ) : !configured ? (
+        {!configured ? (
           <Muted testID="talk-unconfigured" style={{ marginBottom: 12 }}>
             Conversation is not available in this build.
           </Muted>

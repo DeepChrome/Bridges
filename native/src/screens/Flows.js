@@ -7,7 +7,6 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
-import { talkUnlocked, TALK_UNLOCK_STAGE } from "./Talk";
 import { WordList, GrammarNote, WordCard } from "../lesson";
 import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
 import {
@@ -412,11 +411,16 @@ const ordinal = (n) => (n === 1 ? "first" : n === 2 ? "second" : n === 3 ? "thir
 
 /* ------------------------------------------------------------------ drills */
 
+/* Nothing on this screen is locked and nothing on it carries a score (the
+   owner, 2026-09-23: *"For the practice exercises, nothing should be locked…
+   no percentages anywhere on that page"*). The drills used to open with the
+   chapter that taught their rule and Talk after chapter 2, each with an
+   "Opens in chapter N" line and a best-score pill; a learner who wants to try
+   the aspect drill in week one may, and the drill widens to the whole
+   curriculum when the route has not yet supplied enough (DrillFlow `ahead`). */
 export function DrillList({ navigation }) {
   const { st } = useSession();
   const t = useTheme();
-  const talkOpen = talkUnlocked(st);
-  const openDrills = useMemo(() => Q.drillsIntroduced(reachedUnits(st)), [st.unit]);
   return (
     <Screen>
       {/* The screen was eleven identical rows under a label reading "Practise"
@@ -441,8 +445,6 @@ export function DrillList({ navigation }) {
         <View style={{ flex: 1 }}>
           <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700" }}>Build a quiz</Text>
         </View>
-        {((st.drills || {}).quiz || {}).best
-          ? <Pill tone="good">{(st.drills.quiz.best) + "%"}</Pill> : null}
       </Pressable>
 
       {/* Listening and speaking used to be one section of five rows, and the
@@ -466,8 +468,6 @@ export function DrillList({ navigation }) {
                 is how it was found. */}
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>At your level</Text>
           </View>
-          {((st.drills || {}).listening || {}).best
-            ? <Pill tone="good">{(st.drills.listening.best) + "%"}</Pill> : null}
         </Row>
         {/* "Native speed" — 45 s of real video and "which word did you hear?"
             — sat here until 2026-09-23. The owner: *"'what word did you hear'
@@ -505,11 +505,10 @@ export function DrillList({ navigation }) {
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Translate</Text>
           </View>
         </Row>
-        <Row onPress={() => navigation.navigate("Talk")} disabled={!talkOpen}>
-          <Thumb id="talk" tone="brand" locked={!talkOpen} />
+        <Row onPress={() => navigation.navigate("Talk")}>
+          <Thumb id="talk" tone="brand" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Talk</Text>
-            {!talkOpen ? <Muted>{`Opens after chapter ${TALK_UNLOCK_STAGE + 1}`}</Muted> : null}
           </View>
         </Row>
         {/* The letters and the mouth behind them (ROADMAP P10.2). Open from the
@@ -524,34 +523,23 @@ export function DrillList({ navigation }) {
         </Row>
       </List>
       <SectionLabel style={{ marginTop: 18 }}>Grammar</SectionLabel>
-      {/* A drill opens when the route has taught its rule (core/questions.js
-          drillsIntroduced), read off the same grammar cards that drive the form
-          question. Aspect belongs to chapter 8, and offering it in chapter 1
-          meant asking the same fifteen questions the learner's words could fill
-          (the owner, 2026-09-10). */}
       <List>
         {DRILL_TYPES.map((d) => {
-          const best = ((st.drills || {})[d.id] || {}).best;
-          const open = st.dev || openDrills.has(d.id);
-          const at = Q.drillOpensAt(d.id);
           /* Through the focus screen when there is something to narrow, and
              straight in when there is not — a setup screen offering one choice
              is a tap that buys nothing. `List` decides which row is last
              (§30i), so nothing here claims it. */
           const focus = Q.drillFocus(d.id, reachedUnits(st));
           return (
-            <Row key={d.id} disabled={!open}
-                 testID={`drill-${d.id}`}
-                 onPress={() => open && navigation.navigate(
+            <Row key={d.id} testID={`drill-${d.id}`}
+                 onPress={() => navigation.navigate(
                    focus.length > 1 ? "DrillSetup" : "Drill", { type: d.id })}>
-              <Thumb id={d.icon} tone="good" locked={!open} />
+              <Thumb id={d.icon} tone="good" />
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
                   {d.name}
                 </Text>
-                {!open ? <Muted>{`Opens in chapter ${at + 1}`}</Muted> : null}
               </View>
-              {open && best ? <Pill tone="good">{best + "%"}</Pill> : null}
             </Row>
           );
         })}

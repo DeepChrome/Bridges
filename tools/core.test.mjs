@@ -2195,15 +2195,15 @@ group("what has just opened");
   const after = at(9, 0, ["hear"]);
   ok(nextOpening(after).id !== "hear", "…then the next one");
 
-  /* The drill gates are the payload's. Repeating the chapter numbers here is
-     how the announcement comes to disagree with the thing it announces. */
-  const conj = OPENINGS.find((o) => o.id === "drill:conjugation");
-  ok(!isOpen(conj, at(Q.drillOpensAt("conjugation") - 1)) && isOpen(conj, at(Q.drillOpensAt("conjugation"))),
-     "a drill is announced exactly when the route opens it",
-     `opens at chapter ${Q.drillOpensAt("conjugation") + 1}`);
-  /* Stress is open from the very start and has no entry: a note saying "this
-     was always here" is noise on the first screen. */
-  ok(!OPENINGS.some((o) => o.drill === "stress"), "the one that was never gated is not announced");
+  /* Nothing in Practice is locked (2026-09-23), so no drill and not Talk is
+     announced: a note saying "this was always here" is noise on the first
+     screen. What is announced arrives inside the lessons, and the chapters
+     named here are the ones the quiz mixes actually use. */
+  ok(!OPENINGS.some((o) => o.drill || o.id === "talk"), "no drill and not Talk is announced");
+  const scene = OPENINGS.find((o) => o.id === "scene"), say = OPENINGS.find((o) => o.id === "say");
+  ok(isOpen(say, at(SPEECH_MIX.say.fromStage)) && !isOpen(say, at(SPEECH_MIX.say.fromStage - 1)),
+     "saying it aloud is announced at the chapter the quiz adds it");
+  ok(isOpen(scene, at(1)) && !isOpen(scene, at(0, 5)), "the conversations at chapter 2");
 
   // Everything is eventually announced, or an entry is unreachable.
   const end = at(STAGES.length - 1, Infinity);

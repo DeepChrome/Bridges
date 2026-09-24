@@ -155,15 +155,17 @@ node tools/release_check.mjs                      # signature, size, permissions
 
 A bundle, not an APK: Play requires one for new apps, and it splits per device
 so the download is far smaller than the file uploaded. The version is
-`1.0.0-beta.6` / versionCode 6 (`app.json`; `npx expo prebuild --platform
+`1.0.0-beta.7` / versionCode 7 (`app.json`; `npx expo prebuild --platform
 android` after changing it, since `android/` is generated); bump versionCode
-on every upload. None has been uploaded yet: beta.1 (2026-09-19) was the first
+on every upload. **beta.6 is on the Internal testing track** (uploaded
+2026-09-23, the first). Before it: beta.1 (2026-09-19) was the first
 packaged, beta.2 (2026-09-20) carried the definitions read-through, beta.3
 (2026-09-23) the path gating, the recorded-audio trim and Translate, beta.4
 (2026-09-23) the interpreter, the drawn-empty path and the familiarity ring,
 beta.5 (2026-09-23) developer mode off by default, speakers everywhere, and
-the library's favorites, sort and creators' note, and beta.6 (2026-09-23)
-one card per word and the native-speed passages removed.
+the library's favorites, sort and creators' note, beta.6 (2026-09-23) one
+card per word and the native-speed passages removed, and beta.7 (2026-09-23)
+nothing locked and no scores on Practice.
 
 **Upload path, since the account exists (2026-09-23).** *Internal testing*
 first: private to up to 100 testers by email, nothing on the store, no

@@ -928,6 +928,15 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### Practice is open and carries no score, 2026-09-23 — CLAUDE.md §30au
+
+The owner: nothing on Practice locked, no percentages on that page. The
+drills' chapter gates, Talk's chapter-2 gate and the per-scenario unit gate
+are gone, with their "Opens in chapter N" lines and the best-score pills
+(the "randomly says 100%" was the best of any earlier run). The path's "now
+open" notes drop the drills and Talk. Version `1.0.0-beta.7` / versionCode
+7. beta.6 is the first bundle on the Play Internal testing track.
+
 ### A word is one card, 2026-09-23 — CLAUDE.md §30at
 
 Phase 2's three cards a word reversed at the owner's call ("for me a word is

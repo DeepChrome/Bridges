@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Talk, { TALK_UNLOCK_STAGE } from "../src/screens/Talk";
+import Talk from "../src/screens/Talk";
 import { STAGES, L, lessonCount } from "../src/data";
 import { talk, review, hint } from "../src/lib/feedback";
 import { SCENARIOS } from "@core/scenarios";
@@ -28,10 +28,11 @@ const base = {
   v: 5, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, xp: 0, streak: 0, dev: false,
 };
-/* Chapters 1–5 done, so Talk is open and every scenario's unit is reachable. */
+/* Chapters 1–2 done: a learner with some words, so the tutor is handed a
+   studied list. Talk itself needs nothing done (2026-09-23). */
 const done = () => {
   const unit = {};
-  for (let s = 0; s <= TALK_UNLOCK_STAGE; s++) {
+  for (let s = 0; s <= 1; s++) {
     for (const u of [STAGES[s].core].concat(STAGES[s].branches)) {
       const lessons = {};
       for (let i = 0; i < lessonCount(u); i++) lessons[i] = { v: true, q: 100 };
@@ -72,14 +73,16 @@ beforeEach(async () => {
 afterEach(async () => { await flushState(); });
 
 describe("talk", () => {
-  it("is locked until chapter 5 is done, and says so", async () => {
+  /* Open from the first screen, every scenario (the owner, 2026-09-23:
+     nothing in Practice is locked). It opened after chapter 2 until then. */
+  it("is open on a brand new profile, every scenario", async () => {
+    talk.mockResolvedValueOnce(OPENING);
     await withTalk({});
-    expect(await screen.findByText(`Opens after chapter ${TALK_UNLOCK_STAGE + 1}`)).toBeTruthy();
-    const first = screen.getByText(SCENARIOS[0].title).parent;
+    expect(screen.queryByText(/Opens after chapter/)).toBeNull();
     expect(TALK_SESSIONS_PER_DAY).toBe(Infinity);                       // no daily limit any more
-    await act(async () => { fireEvent.press(screen.getByText(SCENARIOS[0].title)); });
-    expect(talk).not.toHaveBeenCalled();
-    expect(first).toBeTruthy();
+    const last = SCENARIOS[SCENARIOS.length - 1];
+    await act(async () => { fireEvent.press(await screen.findByText(last.title)); });
+    expect(talk).toHaveBeenCalledTimes(1);
   });
 
   it("opens with the tutor's turn, grades a spoken turn, counts its tag, offers a new word", async () => {

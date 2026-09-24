@@ -2,7 +2,7 @@
   "expo": {
     "name": "Bridges",
     "slug": "native",
-    "version": "1.0.0-beta.6",
+    "version": "1.0.0-beta.7",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -15,7 +15,7 @@
     },
     "android": {
       "package": "app.bridges.russian",
-      "versionCode": 6,
+      "versionCode": 7,
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",

@@ -37,7 +37,7 @@ import {
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, optional, dueCount,
   routePosition,
 } from "../data";
-import { Q, FINAL_N } from "../questions";
+import { FINAL_N } from "../questions";
 import { nextOpening, markOpening } from "@core/openings";
 import { reviewFirst } from "@core/state";
 import { dayDone } from "@core/scheduler";
@@ -447,11 +447,8 @@ export default function Learn({ navigation }) {
   const done = dayDone(st, due, today());
   const openUnit = (unit) => navigation.navigate("Unit", { unitId: unit.id });
 
-  /* The drill gates are the payload's, so they are read through `Q` rather
-     than repeated here — the announcement must not be able to disagree with
-     the thing it announces. */
   const opening = useMemo(
-    () => nextOpening({ ...routePosition(st), met: st.met, drillOpensAt: Q.drillOpensAt }),
+    () => nextOpening({ ...routePosition(st), met: st.met }),
     [st.unit, st.met]);
   const seeOpening = () => {
     if (opening) update((p) => ({ ...p, met: markOpening(p.met, opening.id) }));

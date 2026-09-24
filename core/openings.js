@@ -23,10 +23,9 @@
  * the learner already is. One at a time, oldest first, so somebody arriving
  * with a backlog meets them one per visit rather than a wall.
  *
- * Nothing here decides *whether* an activity is open — that is
- * `drillsIntroduced`, `SPEECH_MIX` and `TALK_UNLOCK_STAGE`, and duplicating
- * those numbers here is how the announcement would come to disagree with the
- * thing it announces. The gates are passed in.
+ * Nothing here decides *whether* an activity is open — that is `SPEECH_MIX`
+ * and `FORM_MIX` in core/questions.js, and the numbers here name the same
+ * chapters; `core.test.mjs` holds them together.
  */
 
 /* An opening: what to call it, the one line under it, and where "Try it" goes.
@@ -36,39 +35,30 @@
  *
  * `stage` is the 0-based chapter it opens at, or a function of the facts when
  * it is not a plain chapter number. */
+/* Since 2026-09-23 nothing in Practice is locked (the owner), so the four
+   grammar drills and Talk are no longer here: a note saying "this has just
+   opened" about a row that was always there is noise. What remains is what
+   genuinely arrives with the route — the question kinds a lesson quiz adds by
+   chapter, and the lesson's listening step. */
 export const OPENINGS = [
   { id: "hear", name: "Listening questions", blurb: "Type the sentence you hear",
     screen: null, stage: 0, lesson: 2 },
-  { id: "drill:conjugation", name: "Conjugation drill", blurb: "Put a verb with the right person",
-    tab: "Practice", screen: "DrillSetup", params: { type: "conjugation" }, drill: "conjugation" },
   { id: "scene", name: "Listening", blurb: "Half a minute, then five questions",
     tab: "Practice", screen: "SceneList", stage: 1 },
-  { id: "talk", name: "Talk", blurb: "A short conversation on a topic",
-    tab: "Practice", screen: "Talk", stage: 1 },
   { id: "form", name: "Form questions", blurb: "A word in the form its chapter teaches",
     screen: null, stage: 1 },
   { id: "say", name: "Saying it aloud", blurb: "Read a sentence to the phone",
     screen: null, stage: 2 },
-  { id: "drill:agreement", name: "Agreement drill", blurb: "Make adjectives agree with their noun",
-    tab: "Practice", screen: "DrillSetup", params: { type: "agreement" }, drill: "agreement" },
-  { id: "drill:cases", name: "Cases drill", blurb: "Put a noun in the case a sentence needs",
-    tab: "Practice", screen: "DrillSetup", params: { type: "cases" }, drill: "cases" },
-  { id: "drill:aspect", name: "Aspect drill", blurb: "Match imperfective and perfective partners",
-    tab: "Practice", screen: "DrillSetup", params: { type: "aspect" }, drill: "aspect" },
 ];
 
 /* Which of them are open, given where the learner has actually reached.
  *
  * `stage`/`lesson` are the route's own position — **not** developer mode.
  * Developer mode unlocks every lesson (rule 20.9) and if that counted as
- * "open" the app would announce all nine on the first screen, to a learner who
- * has met nothing. Unlocking is not the same as having arrived.
+ * "open" the app would announce all of them on the first screen, to a learner
+ * who has met nothing. Unlocking is not the same as having arrived.
  */
-export function isOpen(entry, { stage, lesson, drillOpensAt }) {
-  if (entry.drill) {
-    const at = drillOpensAt ? drillOpensAt(entry.drill) : -1;
-    return at >= 0 && stage >= at;
-  }
+export function isOpen(entry, { stage, lesson }) {
   if (typeof entry.stage !== "number") return false;
   if (stage > entry.stage) return true;
   if (stage < entry.stage) return false;

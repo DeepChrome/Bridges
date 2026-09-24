@@ -105,13 +105,14 @@ describe("saying what has just opened", () => {
   });
 
   it("stops entirely once they have all been seen", async () => {
-    const all = ["hear", "drill:conjugation", "scene", "talk", "form", "say",
-                 "drill:agreement", "drill:cases", "drill:aspect"];
+    // The drills and Talk left this list on 2026-09-23: nothing in Practice
+    // is locked, so nothing there ever "opens".
+    const all = ["hear", "scene", "form", "say"];
     const view = await withState({ unit: through(9), met: all });
     await view.findByTestId("streak");
     expect(view.queryByTestId("opening")).toBeNull();
     // …and the list in the test is the real one, not a stale copy of it.
-    expect(all.length).toBe(9);
-    expect(Q.drillOpensAt("aspect")).toBeGreaterThan(0);
+    const { OPENINGS } = require("@core/openings");
+    expect(OPENINGS.map((o) => o.id).sort()).toEqual(all.slice().sort());
   });
 });

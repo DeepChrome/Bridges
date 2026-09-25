@@ -88,11 +88,17 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tall
     """
     best = {}
     for iid in cands:
-        ru, _en, _deck, has_audio = sentences[iid]
+        ru, en, _deck, has_audio = sentences[iid]
         # A vocabulary card's bare headword («читать — to read») is an item in
         # the corpus and, being the shortest and wholly known, was the first
         # "example" of every verb it had a card for. One word is not a sentence.
         if len(re.findall(r"[а-яёА-ЯЁ]+", ru)) < 2:
+            continue
+        # Nor is a one-word translation an example of anything: «У телефона.» —
+        # "Speaking." is a telephone idiom, and as the first example of «у» it
+        # read as a mistranslation (the owner, 2026-09-24). A sentence whose
+        # English is a single word is an idiom or a fragment either way.
+        if len(re.findall(r"[A-Za-z']+", en or "")) < 2:
             continue
         k = fold(ru)
         score = (sum(ru.count(c) for c in ACC_MARKS) > 0, has_audio, -iid)
@@ -104,10 +110,14 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tall
     info = {}
     for iid in kept:
         toks = sent_tokens.get(iid, ())
+        # `rest` is every other token of the sentence, not only the studied
+        # ones: «Я уснул читая» and «Читая книгу, я уснул» share «читая», which
+        # the lexicon has no key for, and counting studied keys alone saw them
+        # share one word and showed both (the owner, 2026-09-24).
         info[iid] = (sum(1 for k in toks if k not in studied_keys),
                      len(sentences[iid][0]),
                      frozenset(k for k in toks if k in own),
-                     frozenset(k for k in toks if k in studied_keys and k not in own))
+                     frozenset(k for k in toks if k not in own))
 
     def hardness(iid):
         return (info[iid][0], info[iid][1], iid)
@@ -121,8 +131,13 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tall
         def choice(iid):
             unknown, length, forms, rest = info[iid]
             repeat = bool(forms) and forms <= forms_seen
-            near = any(len(rest & info[c][3]) >= NEAR_DUPLICATE for c in chosen)
-            return (unknown > base + 1, repeat, near, unknown, length, iid)
+            # How much of this sentence is a sentence already chosen: the most
+            # words shared with any of them. A threshold alone let the third
+            # example be the near-copy when nothing crossed it; a graded overlap
+            # prefers the sentence that shares least.
+            overlap = max((len(rest & info[c][3]) for c in chosen), default=0)
+            near = overlap >= NEAR_DUPLICATE
+            return (unknown > base + 1, repeat, near, overlap, unknown, length, iid)
         pick = min(pool, key=choice)
         chosen.append(pick)
         pool.remove(pick)
@@ -903,6 +918,25 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             sent_tokens.setdefault(iid, []).append(k)
     studied_keys = {k for lid in seen for k in keys_of.get(lid, ())}
 
+    # Adjective → noun pairs the corpus actually says (an adjective token
+    # immediately before a noun token, each resolved to a studied lemma), for
+    # the agreement drill: it paired any adjective with any noun and asked for
+    # «половая ягода» — "sexual berry" (the owner, 2026-09-24). Keyed by the
+    # adjective's index; a noun listed once per adjective.
+    pairs = {}
+    for iid, toks in sent_tokens.items():
+        for a, b in zip(toks, toks[1:]):
+            ia = (index.get(a) or [None])[0]
+            ib = (index.get(b) or [None])[0]
+            if ia is None or ib is None or ia == ib:
+                continue
+            if lemmas[ia].get("p") == "adjective" and lemmas[ib].get("p") == "noun":
+                lst = pairs.setdefault(ia, [])
+                if ib not in lst:
+                    lst.append(ib)
+    stats["adjective_noun_pairs"] = sum(len(v) for v in pairs.values())
+    stats["adjectives_with_pairs"] = len(pairs)
+
     deep, shapes, slot_names, sent_pool, tsample, rec_of = build_dictionary(
         db, sentences, items_of_key, keys_of, stats, ext_sentences, ext_items_of_key,
         resolver=resolver, sent_tokens=sent_tokens, studied_keys=studied_keys)
@@ -980,7 +1014,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             "deep": deep, "shapes": shapes, "slots": slot_names,
             "sent": sent_pool, "tsample": tsample, "speech": speech,
             "videos": video_list, "channels": creators,
-            "scripts": scripts, "senses": senses}
+            "scripts": scripts, "senses": senses,
+            "pairs": {str(k): v for k, v in pairs.items()}}
 
 
 # Our part-of-speech names against Wiktionary's. A closed-class word OpenRussian

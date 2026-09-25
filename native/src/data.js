@@ -38,6 +38,9 @@ export const SPEECH = DATA.speech || { rows: [], speak: {}, listen: {} };
    to sit in data.json, and the lesson quiz asks for one before it has drawn a
    single card, so it must be here at boot rather than required on use. */
 export const SCRIPTS = DATA.scripts || {};
+/* Adjective → nouns the corpus says after it (build_site.py), for the
+   agreement drill: keyed by the adjective's lemma index. */
+export const PAIRS = DATA.pairs || {};
 /* The creators the library draws on — name, YouTube url, and where to support
    them (Patreon, a site) where that was found; data/curated/channels.json. */
 export const CHANNELS = DATA.channels || [];

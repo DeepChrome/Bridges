@@ -91,6 +91,7 @@ def load_owners(db):
     for lid, bare, pos, en in db.execute("select id, bare, pos, en from lemmas"):
         lemma[lid] = {"lid": lid, "bare": bare, "pos": pos or "other",
                       "glossed": bool(en and en.strip()),
+                      "en": (en or "").strip().lower(),
                       "stub": bool(en and STUB_GLOSS.match(en)), "n": indep.get(lid, 0)}
     cands = {}
     for key, ids in key_owners.items():
@@ -136,6 +137,16 @@ def resolve(cands, override=None):
     # «пора» twice as a noun: one headword is one word, whichever row it came from.
     # The row that owns the most forms of its own stands for it.
     if len({c["bare"] for c in live}) == 1:
+        # …and a noun row glossed exactly like the adjective beside it is the
+        # adjective used as a noun («белый» "white": a White, a White Guard
+        # member), which OpenRussian files separately. The adjective is the
+        # word; the noun row is a use of it. The forms are shared so
+        # independent frequency cannot tell them apart, and the noun row won by
+        # id — so "white" opened on the White Guard (the owner, 2026-09-24).
+        # Only an *identical* gloss: «рабочий» "worker" beside "working" is two
+        # meanings and stays a real choice.
+        adj_gloss = {c["en"] for c in live if c["pos"] == "adjective"}
+        live = [c for c in live if not (c["pos"] == "noun" and c["en"] in adj_gloss)] or live
         return max(live, key=lambda c: (c["n"], c["pos"] != "other")), True
     closed_head = [c for c in live if c["head"] and c["pos"] in CLOSED]
     if closed_head:

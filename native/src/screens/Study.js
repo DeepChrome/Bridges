@@ -22,7 +22,7 @@ import { Linked } from "../words";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
-import { applyGrade, reviewRows, preview, schedulerOpts, wanted, wordTrouble, maxLapses, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity } from "@core/scheduler";
+import { applyGrade, reviewRows, preview, schedulerOpts, wanted, troubleWords as troubleBank, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity } from "@core/scheduler";
 import Svg, { Circle } from "react-native-svg";
 import { buildSession, requeue, dailyFor, QUEUE_DEFAULTS } from "@core/queue";
 
@@ -43,16 +43,17 @@ export const FRONTS = [
 export const KIND_LABEL = { recognise: "Russian", produce: "Meaning", listen: "Listen" };
 
 /* What the reminder says a card is, on the card. `New` is the session's own
-   word for it; `Trouble` is the scheduler's (wordTrouble) or the learner's
-   (pinned). Neither names the word, so both are safe on the front — a learner
-   who is told "this one has been hard" before turning it over is being told
-   how to pay attention, not what the answer is. */
+   word for it; `Trouble` is the scheduler's bank (core/scheduler.js
+   troubleWords — the worst twenty, judged only once a card has been seen
+   enough) or the learner's (pinned). Neither names the word, so both are safe
+   on the front — a learner who is told "this one has been hard" before turning
+   it over is being told how to pay attention, not what the answer is. */
 export function flagsFor(st, item) {
   if (!item) return { isNew: false, trouble: false, score: null };
   const entry = st.seen[item.word];
   return {
     isNew: item.kind === "new",
-    trouble: (!!entry && wordTrouble(entry)) || (st.pinned || []).includes(item.word),
+    trouble: troubleWords(st).includes(item.word),
     /* The word's memory, 0–100 (core/scheduler.js familiarity); null while it
        is new, when the New flag says everything there is to say. */
     score: item.kind === "new" ? null : familiarity(cardFor(entry)),
@@ -94,11 +95,12 @@ export function Familiarity({ score }) {
   );
 }
 
+/* The scheduler's bank, worst first and capped, then whatever the learner
+   pinned by hand. */
 export function troubleWords(st) {
-  const out = [];
-  for (const w in st.seen) if (wordTrouble(st.seen[w])) out.push(w);
+  const out = troubleBank(st.seen);
   (st.pinned || []).forEach((w) => { if (!out.includes(w)) out.push(w); });
-  return out.sort((a, b) => maxLapses(st.seen[b]) - maxLapses(st.seen[a]));
+  return out;
 }
 
 /* A card as the screen draws it: `b` is the schedule key, `w` the face. */
@@ -120,12 +122,19 @@ const deckCard = (c) => ({ key: "d" + c.ru, w: c.ru, b: c.ru, e: c.en });
 const sentenceCard = (row) => ({ key: "s" + row[0], w: row[0], b: row[0], e: row[1], sentence: true });
 
 /* Every sentence the learner has reached, newest units first so the set leads
-   with what they are working on. Both pools: a sentence worth hearing is worth
-   saying, and the two overlap by design (§30b stores a shared row list). */
+   with what they are working on — and then on along the route until there are
+   at least SENTENCE_POOL_MIN of them (the owner, 2026-09-24: *"sentences are
+   some of the best ways of learning… I'd like to have many many more"*; a
+   chapter-1 learner reached about fifty). A sentence from further along has a
+   word or two not yet taught, and on a card that is a tap away from its entry —
+   the same trade shadowing makes (§30aq). Both pools: a sentence worth hearing
+   is worth saying, and the two overlap by design (§30b stores a shared row
+   list). */
+export const SENTENCE_POOL_MIN = 400;
 export function sentencesFor(st) {
   const out = [], have = new Set();
   const units = reachedUnits(st);
-  for (const u of [...units].reverse()) {
+  const take = (u) => {
     for (const pool of [SPEECH.listen, SPEECH.speak]) {
       for (const i of (pool || {})[u.id] || []) {
         const row = SPEECH.rows[i];
@@ -134,6 +143,12 @@ export function sentencesFor(st) {
         out.push(sentenceCard(row));
       }
     }
+  };
+  for (const u of [...units].reverse()) take(u);
+  const reached = new Set(units.map((u) => u.id));
+  for (const u of UN) {
+    if (out.length >= SENTENCE_POOL_MIN) break;
+    if (!reached.has(u.id)) take(u);
   }
   return out;
 }
@@ -433,6 +448,12 @@ export default function Study({ navigation }) {
   const [session, setSession] = useState(null);   // core/queue.js buildSession
   const [at, setAt] = useState(0);
   const [shown, setShown] = useState(false);
+  /* Turned over at least once. The grade buttons follow this, not `shown`, so
+     a card can be turned back to its front and looked at again before it is
+     graded (the owner, 2026-09-24: "an option to flip the card back over…
+     right now it asks you to flip and then requires you grade it
+     immediately"). Tapping the card turns it either way once revealed. */
+  const [revealed, setRevealed] = useState(false);
   const [last, setLast] = useState(null);         // the answer just given, for Undo
 
   /* What each card in the session looks like, keyed by its Russian.
@@ -458,7 +479,7 @@ export default function Study({ navigation }) {
   const deal = (ahead) => {
     setSession(sessionFor(st, { ahead }));
     setAt(0);
-    setShown(false);
+    setShown(false); setRevealed(false);
     setLast(null);
   };
   // The profile arrives after the first render, and a set or a deck can change
@@ -548,7 +569,7 @@ export default function Study({ navigation }) {
     const next = g === 1 ? requeue(items, at, item) : items;
     setSession({ ...session, items: next });
     setAt(at + 1);
-    setShown(false);
+    setShown(false); setRevealed(false);
   };
 
   /* The last answer taken back: the card as it was, the log row gone, the
@@ -564,7 +585,7 @@ export default function Study({ navigation }) {
     }, [], [{ word: row.word, direction: row.direction, at: row.at }]);
     setSession({ ...session, items: last.items });
     setAt(last.at);
-    setShown(true);
+    setShown(true); setRevealed(true);
     setLast(null);
   };
 
@@ -584,8 +605,8 @@ export default function Study({ navigation }) {
      for. Nothing while there is no card: an empty state has nothing to grade. */
   const controls = !item ? null : (
     <>
-      {!shown ? (
-        <Btn kind="pri" label="Show" onPress={() => setShown(true)} />
+      {!revealed ? (
+        <Btn kind="pri" label="Show" onPress={() => { setShown(true); setRevealed(true); }} />
       ) : (
         <View style={{ flexDirection: "row", gap: 6 }}>
           {/* The four most-pressed controls on the screen go through `Lift`
@@ -616,7 +637,7 @@ export default function Study({ navigation }) {
         <Btn kind="ghost" label="Undo" testID="undo" style={{ flex: 1 }}
              disabled={!last} onPress={undo} />
         <Btn kind="ghost" label="Skip ▶" style={{ flex: 1 }}
-             onPress={() => { setAt(at + 1); setShown(false); }} />
+             onPress={() => { setAt(at + 1); setShown(false); setRevealed(false); }} />
       </View>
     </>
   );
@@ -674,6 +695,11 @@ export default function Study({ navigation }) {
             <Pill testID="progress">{`${at + 1}/${items.length}`}</Pill>
           </View>
 
+          {/* Once revealed, a tap on the card turns it — back to the front to
+              look again, and over once more — while the grade buttons stay. */}
+          <Pressable testID="card-turn" accessibilityRole={revealed ? "button" : undefined}
+                     accessibilityLabel={revealed ? "Turn the card" : undefined}
+                     onPress={revealed ? () => setShown(!shown) : undefined}>
           <Animated.View style={flip.style}>
           <Card testID={`card-${item.direction}`} style={{ marginTop: 12, alignItems: "center", paddingVertical: 28 }}>
             {/* A card with no Russian on it at all. It should not be possible
@@ -720,13 +746,21 @@ export default function Study({ navigation }) {
                       )}
                     <View style={{ marginTop: 10 }}><Speaker text={face.b} device={device} /></View>
                   </>
-                ) : face.sentence ? (
-                  // Shown on the front already, but as plain text; the linked
-                  // copy is what makes its words reachable.
-                  <View style={{ alignSelf: "stretch", marginTop: 4 }}>
-                    <Linked text={face.w} size={faceSize(face)} />
-                  </View>
-                ) : null}
+                ) : (
+                  <>
+                    {face.sentence ? (
+                      // Shown on the front already, but as plain text; the linked
+                      // copy is what makes its words reachable.
+                      <View style={{ alignSelf: "stretch", marginTop: 4 }}>
+                        <Linked text={face.w} size={faceSize(face)} />
+                      </View>
+                    ) : null}
+                    {/* The Russian can be heard from the back as well as the
+                        front (the owner, 2026-09-24) — always the Russian,
+                        never the meaning. */}
+                    <View style={{ marginTop: 10 }}><Speaker text={face.b} device={device} /></View>
+                  </>
+                )}
                 {/* Every meaning the word has, numbered and laid out as a
                     dictionary lays them (§30q) — labels and all. Where there are
                     no senses for a word (2% of the curriculum, and every deck
@@ -771,15 +805,9 @@ export default function Study({ navigation }) {
                     </Text>
                   </Pressable>
                 ) : null}
-                {/* This card's own record: how often it has come round and when
-                    it comes next. The paradigm, the frequency, every example —
-                    the full entry — is one tap away rather than copied here. */}
-                {current && current.reps ? (
-                  <Muted testID="card-history" size={12} style={{ marginTop: 12 }}>
-                    {`${current.reps} ${current.reps === 1 ? "review" : "reviews"}`
-                     + (current.lapses ? ` · ${current.lapses} ${current.lapses === 1 ? "lapse" : "lapses"}` : "")}
-                  </Muted>
-                ) : null}
+                {/* "3 reviews · 1 lapse" sat here until 2026-09-24. The count is
+                    still kept (it is what the familiarity ring and the trouble
+                    bank read); it is not something to show the learner. */}
                 {idxOfWord(face.b) >= 0 ? (
                   <Btn kind="ghost" label="Full entry" testID="full-entry"
                        style={{ marginTop: 12 }}
@@ -789,6 +817,7 @@ export default function Study({ navigation }) {
             )}
           </Card>
           </Animated.View>
+          </Pressable>
         </>
       )}
 

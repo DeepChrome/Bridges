@@ -74,6 +74,11 @@ const NOUN_COLUMNS = ["Singular", "Plural"];
    being learned. */
 export const PRODUCE_AT = 4;
 
+/* Below this rank a lemma is met from the first screen — «не», «и», «в» — and
+   never counts as a word the learner cannot read (build_site.py
+   COVERAGE_FREE_RANK draws the same line for the speech pools). */
+export const FREE_RANK = 500;
+
 export const SCENE_ROWS = [2, 3];
 /* Sentences in a lesson-level listening passage. Five of the corpus's short
    sentences with a pause between them is the half minute the owner asked for,
@@ -144,6 +149,8 @@ export const DRILL_TYPES = [
 
 export function makeQuestions(env) {
   const { L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice, SPEECH } = env;
+  // Adjective → nouns the corpus says after it, by lemma index (payload.pairs).
+  const PAIRS = env.PAIRS || {};
   // The written lesson passages (§30l), keyed "unitId:lessonIndex". Absent on a
   // platform that does not ship them, in which case the scene falls back to the
   // corpus pools as it did before.
@@ -301,10 +308,23 @@ export function makeQuestions(env) {
      the index, then the shortest. Without that rule the first example won — and
      lesson 1 asked for a gap in «Это явление продолжает оставаться в фокусе
      внимания экспертов». */
-  function clozeFor(idx) {
+  /* `known`, when given, is the set of lemma indices the learner can be
+     expected to read — the route so far — and a word outside it counts as
+     unknown the same as a word outside the curriculum. Without it, "unknown"
+     meant only "not in the curriculum at all", and a chapter-1 quiz asked
+     for the gap in «Как показало исследование, 12% покупателей ___ ноутбук по
+     весу» because every word in it is taught *somewhere* (the owner,
+     2026-09-24: keep lesson quizzes to words they would understand). */
+  function clozeFor(idx, known) {
     const w = L[idx];
     if (!w.x || !w.x.length) return null;
     const scored = [];
+    const strange = (t) => {
+      const ids = IX[fold(t)];
+      if (!ids) return true;
+      if (!known) return false;
+      return !ids.some((i) => i === idx || known.has(i) || i < FREE_RANK);
+    };
     for (const ex of w.x) {
       const toks = ex.ru.match(TOKEN) || [];
       if (toks.length < 3) continue;
@@ -313,7 +333,7 @@ export function makeQuestions(env) {
         return ids && ids.includes(idx);
       });
       if (!hit) continue;
-      const unknown = toks.filter((t) => !IX[fold(t)]).length;
+      const unknown = toks.filter(strange).length;
       scored.push({ ex, token: hit, score: unknown * 100 + toks.length });
     }
     if (!scored.length) return null;
@@ -359,11 +379,11 @@ export function makeQuestions(env) {
   /* Options for a word, easiest first: recognition before production.
      With `known` (the learner's card for this word), a word the scheduler already
      trusts is asked the other way round — see PRODUCE_AT. */
-  function candidates(idx, pool, known) {
+  function candidates(idx, pool, known, readable) {
     const list = [{ t: "choose-en", i: idx }];
     if (voice()) list.push({ t: "listen", i: idx });
     list.push({ t: "choose-ru", i: idx });
-    const c = clozeFor(idx);
+    const c = clozeFor(idx, readable);
     if (c) list.push({ t: "cloze", i: idx, ex: c.ex, token: c.token });
     list.push({ t: "type", i: idx });
     const out = list.map((e) => Object.assign(e, { pool }));
@@ -1231,7 +1251,9 @@ export function makeQuestions(env) {
       const from = fresh.length ? fresh : list;
       return from.length ? from[Math.floor(Math.random() * from.length)] : null;
     };
-    const draw = (i) => drawFrom(candidates(i, pool, card(i)), i);
+    // What this learner can read: the route up to this unit (clozeFor).
+    const readable = new Set(unitsUpTo(unit).flatMap((u) => u.w));
+    const draw = (i) => drawFrom(candidates(i, pool, card(i), readable), i);
 
     const bag = words.map(draw).filter(Boolean);
     /* Both production shapes, not just the first. `find(type) || find(cloze)`
@@ -1239,7 +1261,7 @@ export function makeQuestions(env) {
        `type`, so the gap-fill was unreachable here and every guaranteed
        production slot in the app was a typed one. */
     const production = words
-      .map((i) => drawFrom(candidates(i, pool, card(i)).filter((e) => PRODUCTION.includes(e.t)), i))
+      .map((i) => drawFrom(candidates(i, pool, card(i), readable).filter((e) => PRODUCTION.includes(e.t)), i))
       .filter(Boolean);
     shuffle(production).slice(0, 2).forEach((e) => bag.push(e));
     const review = shuffle((prefer || []).filter((i) => L[i] && !words.includes(i)));
@@ -1740,12 +1762,21 @@ export function makeQuestions(env) {
      failed whenever two genders share a form, which in the oblique cases they
      usually do. */
   const GENDER_COL = { m: "Masculine", f: "Feminine", n: "Neuter" };
+  /* The noun is one the corpus actually puts after this adjective (`PAIRS`,
+     built from adjacent tokens by build_site.py). Any adjective with any noun
+     asked for «половая ягода» — "sexual berry" (the owner, 2026-09-24); a
+     pair a sentence has said is a pair worth agreeing. An adjective with no
+     attested partner is passed over. */
+  const nounOk = (x) => x && x.p === "noun" && ["m", "f", "n"].includes(x.g) && !x.pl
+                        && tableTitled(x, /Declension/);
   function qAgreement(_cells, typed, only) {
-    const adj = pickWhere((x) => x.p === "adjective" && tableTitled(x, /Declension/));
+    const adj = pickWhere((x) => x.p === "adjective" && tableTitled(x, /Declension/)
+                                 && (PAIRS[L.indexOf(x)] || []).some((i) => nounOk(L[i])));
+    if (!adj) return null;
     // …but not a plural-only noun: «часы» is plural, and «но́вый часы» is not
     // agreement.
-    const noun = pickWhere((x) => x.p === "noun" && ["m", "f", "n"].includes(x.g) && !x.pl
-                                  && tableTitled(x, /Declension/));
+    const nouns = (PAIRS[L.indexOf(adj)] || []).map((i) => L[i]).filter(nounOk);
+    const noun = nouns.length ? nouns[Math.floor(Math.random() * nouns.length)] : null;
     if (!adj || !noun) return null;
     const t = tableTitled(adj, /Declension/);
     const nt = tableTitled(noun, /Declension/);
@@ -1818,11 +1849,12 @@ export function makeQuestions(env) {
     if (!rows.length) return null;
     const target = rows[Math.floor(Math.random() * rows.length)];
     const right = target[1][0];
+    const note = conjugationNote(w, t, target);
     if (typed) {
       const label = t.title === "Imperative" ? "imperative"
         : t.title === "Past" ? "past" : (w.a === "perfective" ? "future" : "present");
       return written({ kind: "conjugation", i: L.indexOf(w), cyr: true,
-                       prompt: w.w, sub: w.e || "", table: t },
+                       prompt: w.w, sub: w.e || "", table: t, note },
                      `Write the ${label} for “${target[0]}”`, right, target[1].slice(1));
     }
     // The verb's own other persons first — the imperative has only two rows, so
@@ -1843,8 +1875,44 @@ export function makeQuestions(env) {
       : t.title === "Past" ? "past" : (w.a === "perfective" ? "future" : "present");
     return {
       kind: "conjugation", i: L.indexOf(w), cyr: true,
-      ask: `Choose the ${what} for “${target[0]}”`, prompt: w.w, sub: w.e || "", table: t,
+      ask: `Choose the ${what} for “${target[0]}”`, prompt: w.w, sub: w.e || "", table: t, note,
       options: optionsOf(right, wrong),
+    };
+  }
+
+  /* The feedback for a conjugation miss is about *this* verb and *this* form
+     (the owner, 2026-09-24: *"the feedback on the conjugation is totally
+     irrelevant to what I got wrong… needs to be relevant to what's being
+     input"*). The chapter's "two verb patterns" card said nothing about
+     «возникнуть», so it is not attached here; the note is built from the
+     verb's own table: which pattern it follows, read off its они form, whether
+     its present is a future, and the whole paradigm as the examples with the
+     asked row first. */
+  const PERSON_EN = { "я": "I", "ты": "you", "он": "he", "она": "she", "оно": "it",
+                      "мы": "we", "вы": "you (plural)", "они": "they" };
+  function conjugationNote(w, t, target) {
+    const rows = t.rows.filter((r) => r[1] && r[1].length);
+    const they = rows.find((r) => r[0] === "они");
+    const ending = they ? fold(they[1][0]).slice(-2) : "";
+    const first = ending === "ут" || ending === "ют";
+    const second = ending === "ат" || ending === "ят";
+    const lines = [];
+    if (/^Present/.test(t.title)) {
+      lines.push(w.a === "perfective"
+        ? `«${w.w}» is perfective: these forms are its future — there is no present.`
+        : `«${w.w}» is imperfective: these forms are its present.`);
+      if (first) lines.push("First conjugation (the -е- pattern): -у/-ю, -ешь, -ет, -ем, -ете, -ут/-ют.");
+      else if (second) lines.push("Second conjugation (the -и- pattern): -у/-ю, -ишь, -ит, -им, -ите, -ат/-ят.");
+    } else if (/^Past/.test(t.title)) {
+      lines.push("The past tense agrees with the subject's gender and number, not its person.");
+    } else if (/^Imperative/.test(t.title)) {
+      lines.push("The imperative is built on the stem of the они form.");
+    }
+    const ordered = [target].concat(rows.filter((r) => r !== target));
+    return {
+      title: `«${w.w}» — ${t.title.toLowerCase()}`,
+      body: lines.join(" "),
+      examples: ordered.slice(0, 8).map((r) => [`${r[0]} ${r[1][0]}`, PERSON_EN[r[0]] || ""]),
     };
   }
 

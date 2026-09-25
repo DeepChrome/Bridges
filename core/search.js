@@ -80,8 +80,10 @@ const SUBSTR = 10;        // buried in the gloss
 /* Where a hit stops being *the* word and becomes a word that mentions it. A
    screen laying results out as a dictionary draws the line here: собака, пёс
    and кобель are "dog"; акула ("shark, dog-fish") only contains it. Exposed so
-   the screen and the ranking cannot come to disagree about the line. */
-export const MATCH = SENSE;
+   the screen and the ranking cannot come to disagree about the line. An exact
+   sense scores from SENSE down by its place in the gloss (see `glossScore`),
+   never below this. */
+export const MATCH = SENSE - 4;
 
 export function makeSearch({ L, IX, deep }) {
   let cache = null;
@@ -107,10 +109,18 @@ export function makeSearch({ L, IX, deep }) {
       best.set(entry.b, { score, rank, entry });
     };
 
+    /* An exact sense scores by *where* in the gloss it sits: a word whose first
+       sense is the term outranks one that lists it fifth, and frequency only
+       breaks ties after that. "industrious" used to open on «исполнительный»
+       (executive, industrious, painstaking…) because it is the commoner word,
+       with «трудолюбивый» — the one that *means* it — fifth (the owner,
+       2026-09-24). Half a point a place, floored so an exact sense anywhere
+       still beats a transliteration and a whole-word mention. */
     const glossScore = (gloss) => {
       if (!gloss) return 0;
       const g = gloss.toLowerCase();
-      if (g.split(/[,;]\s*/).some((s) => s.trim() === qe)) return SENSE;
+      const at = g.split(/[,;]\s*/).findIndex((s) => s.trim() === qe);
+      if (at >= 0) return SENSE - Math.min(at, 8) * 0.5;
       if (word.test(g)) return WORD;
       if (g.includes(qe)) return SUBSTR;
       return 0;

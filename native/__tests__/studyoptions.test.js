@@ -77,8 +77,11 @@ describe("the card says what it is", () => {
     expect(screen.queryByTestId("flag-trouble")).toBeNull();
   });
 
+  /* Trouble is judged only once a card has been seen enough (2026-09-24): a
+     card lapsing three times in ten answers is; four lapses on a card seen
+     twice is a card that is still being learned. */
   it("flags a troubled card, and not an untroubled one", async () => {
-    await withProfile({ seen: { [WORD]: { recognise: due({ lapses: 4 }) } } });
+    await withProfile({ seen: { [WORD]: { recognise: due({ lapses: 4, reps: 12 }) } } });
     await screen.findByTestId("card-kind");
     expect(screen.getByTestId("flag-trouble")).toBeTruthy();
     expect(screen.queryByTestId("flag-new")).toBeNull();

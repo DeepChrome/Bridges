@@ -121,16 +121,26 @@ test("an off-schema reply is retried once with a nudge, then accepted", async ()
   assert.match(second[2].content, /only the JSON object/);
 });
 
-test("two bad replies → ok:false reason parse, and an unknown tag counts as bad", async () => {
+test("three bad replies → ok:false reason parse, and an unknown tag counts as bad", async () => {
   const badTag = JSON.stringify({ ...GOOD, grammar: [{ tag: "TYPO", note: "x" }] });
-  const up = upstream([badTag, badTag]);
+  const up = upstream([badTag, badTag, badTag]);
   const r = await handle(req(attempt, auth), env(), { fetch: up.fetch });
   const body = await r.json();
   assert.equal(r.status, 200);
   assert.equal(body.ok, false);
   assert.equal(body.reason, "parse");
   assert.match(body.errors.join(" "), /unknown tag "TYPO"/);
-  assert.equal(up.calls.length, 2);
+  // Three tries since 2026-09-24: a malformed conversational turn was reaching
+  // the owner often enough to notice, and a nudge usually fixes it.
+  assert.equal(up.calls.length, 3);
+});
+
+test("…and a good third reply is taken", async () => {
+  const badTag = JSON.stringify({ ...GOOD, grammar: [{ tag: "TYPO", note: "x" }] });
+  const up = upstream([badTag, badTag, JSON.stringify(GOOD)]);
+  const r = await handle(req(attempt, auth), env(), { fetch: up.fetch });
+  assert.equal((await r.json()).ok, true);
+  assert.equal(up.calls.length, 3);
 });
 
 test("a reply cut at the token limit is named as such, and the retry is asked to be brief", async () => {

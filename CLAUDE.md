@@ -4278,6 +4278,77 @@ never closed is exactly the noise §30ae built the feature to avoid. What it
 still announces is what genuinely arrives inside lessons — listen-and-type,
 the conversations, the form question, saying it aloud.
 
+## 30av. A day on beta.6, read item by item (2026-09-24)
+
+Fourteen observations with screenshots, and three were the same fault
+wearing different clothes: a rule written for one case doing the wrong thing
+in another. What each was, and the rule it left.
+
+- **A card can be turned back.** `revealed` in `Study.js` is what the grade
+  buttons follow; `shown` is which face is up, and a tap on the card turns it
+  once revealed. The back carries a speaker too — always the Russian. "3
+  reviews · 1 lapse" is gone from the card: kept, not shown.
+- **Sentence cards widen** to `SENTENCE_POOL_MIN` (400) along the route
+  (`sentencesFor`), the trade shadowing already makes (§30aq). *"I think we
+  imported like 200… I'd like double that."* The pool holds 1,986; a
+  chapter-1 learner reached about fifty of them.
+- **Trouble is judged, not counted** (`core/scheduler.js`). *"It's very
+  normal to press Again the first 5–7 times… if you're still pressing Again
+  after many many times, especially compared to the other cards."* A card is
+  not trouble before `TROUBLE_MIN_REPS` (8) answers, and then on
+  `TROUBLE_LAPSES` (3) lapses — learning-step Agains are not lapses, which is
+  what makes the early ones free — or a difficulty near the ceiling;
+  `troubleWords` ranks the candidates by lapses per answer and keeps the
+  worst `TROUBLE_CAP` (20). The flag on a card and the "Trouble words" set
+  read one list.
+- **The path draws no road through the middle of a fork.** The centre line
+  ran behind the ranks with a gap through each, and read as a stub to
+  nowhere: *"a line should only be there if it leads to a node."* The road
+  is the lanes now — out to a rank, back from its **required** quests to a
+  point, out to the next — and an optional quest takes a lane in and none
+  out, because it unlocks nothing. `questOrder` puts the required quests
+  first so the chain has something to continue from.
+- **"white" opened on the White Guard.** OpenRussian files «белый» twice, a
+  noun ("a White, a member of the White Guard") beside the adjective, with
+  the same gloss and the same forms; independent frequency could not tell
+  them apart and the noun won by id, so it took the corpus count, the lower
+  index and the first search hit. `panel.py resolve()`: a noun row glossed
+  *identically* to the adjective beside it is that adjective used as a noun,
+  and loses. Only an identical gloss — «рабочий» "worker" beside "working"
+  is two meanings. The unit lists diffed identical across the rebuild.
+- **Search ranks an exact sense by its place in the gloss** (`core/search.js`
+  `glossScore`): half a point a position, so «трудолюбивый» (industrious,
+  diligent…) beats «исполнительный» (executive, industrious, …) for
+  "industrious" though the second is the commoner word. `MATCH` moved down
+  with it.
+- **An example whose English is one word is not an example.** «У телефона.»
+  — "Speaking." is a telephone idiom, and as the first example of «у» it
+  read as a mistranslation. `rank_examples` skips them.
+- **Example variety counts every shared word, and grades it.** «Я уснул
+  читая» and «Читая книгу, я уснул» shared «читая», which the lexicon has no
+  key for, so they counted as sharing one word and both showed. `rest` is
+  every token now, and `overlap` is a graded penalty rather than only a
+  threshold: near-duplicate pairs 1,017 → 636 over the build.
+- **The agreement drill asks only pairs the corpus says.** «половая ягода»
+  — "sexual berry" — was any adjective with any noun. `build_site.py` ships
+  `pairs` (an adjective's index → the nouns that follow it in a sentence,
+  603 adjectives) and `qAgreement` draws from them.
+- **A lesson quiz stays readable.** Two causes: the gap-fill's readability
+  counted only words outside the curriculum, so a chapter-1 quiz asked for
+  the gap in a sentence about laptop buyers (every word is taught
+  *somewhere*); `clozeFor(idx, known)` now counts a word beyond the route so
+  far as unknown too. And the top-up took anything due, which is how
+  «воспользоваться» — dealt as a flashcard weeks earlier — reached a
+  chapter-1 quiz; `QuizFlow` filters review words to `unitsUpTo(unit)`.
+- **Conjugation feedback is about the verb asked.** The chapter's "two verb
+  patterns" card said nothing about «возникнуть». `conjugationNote` builds
+  the note from the verb's own table — perfective so the present is the
+  future, first or second conjugation read off its они form — with the whole
+  paradigm as the examples, the asked row first.
+- **A malformed tutor turn is asked for again before it is reported**: the
+  Worker tries three times (was two), and `Talk.js` re-sends the turn once on
+  `parse` before showing the failure.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

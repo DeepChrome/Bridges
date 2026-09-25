@@ -35,7 +35,7 @@ import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit
          sayPassed, closestTranscript }
   from "../core/speech.js";
 import { describeForm, summarise } from "../core/forms.js";
-import { parseDeep } from "../core/search.js";
+import { parseDeep, makeSearch, MATCH } from "../core/search.js";
 import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ICONS, ACTIVITY_ICONS, iconFor } from "../core/icons.js";
@@ -542,15 +542,37 @@ group("the scheduler");
   ok(S.cardFor(split) === split.produce && S.cardFor({ recognise: conv }) === conv && S.cardFor(undefined) === null,
      "cardFor reads the one card, the strongest of a still-split entry");
 
-  // The trouble rule, and the word's entry. A grade through any front lands on
-  // the one card.
+  /* The trouble rule (the owner, 2026-09-24): Again is normal early, so a
+     card is judged only after TROUBLE_MIN_REPS answers, and then by lapses.
+     Five Agains in a row on a new card are learning steps, not a leech. */
   let e = {}, tr = {};
   let t = T0;
   for (let i = 0; i < 5; i++) { ({ seen: e, trouble: tr } = S.applyGrade(e, tr, "слово", "produce", 1, t, opts)); t += 2 * DAY; }
-  ok(S.wordTrouble(e["слово"]) && tr["слово"] >= 1, "repeated Again banks a word as trouble");
-  ok(!S.wordTrouble({ recognise: good }), "a word answered once is not");
+  ok(!S.wordTrouble(e["слово"]), "five early Agains do not bank a word as trouble");
   ok(Object.keys(e["слово"]).length === 1 && e["слово"].recognise.reps === 5,
      "a grade asked through the meaning lands on the one card", JSON.stringify(e["слово"]));
+  /* A word that keeps lapsing after it has been seen plenty is. */
+  let f = {}, ft = {};
+  let ft0 = T0;
+  for (let i = 0; i < 12; i++) {
+    const g = i % 4 === 3 ? 1 : 3;                     // Good, Good, Good, Again …
+    ({ seen: f, trouble: ft } = S.applyGrade(f, ft, "слово", "recognise", g, ft0, opts));
+    ft0 = f["слово"].recognise.dueAt + 1;
+  }
+  ok(f["слово"].recognise.reps >= S.TROUBLE_MIN_REPS && f["слово"].recognise.lapses >= S.TROUBLE_LAPSES,
+     "…the fixture is a card seen a dozen times that lapsed three", JSON.stringify(f["слово"].recognise));
+  ok(S.wordTrouble(f["слово"]) && ft["слово"] >= 1, "and that one is trouble");
+  ok(!S.wordTrouble({ recognise: good }), "a word answered once is not");
+  /* The bank is capped and ordered by how badly a word is going. */
+  const many = {};
+  for (let i = 0; i < 30; i++) {
+    many["t" + i] = { recognise: { ...f["слово"].recognise, lapses: 3 + (i % 5), reps: 12 } };
+  }
+  const bank = S.troubleWords(many);
+  ok(bank.length === S.TROUBLE_CAP, `the bank holds at most ${S.TROUBLE_CAP}`, String(bank.length));
+  ok(S.troubleRank(many[bank[0]].recognise) >= S.troubleRank(many[bank[bank.length - 1]].recognise),
+     "worst first");
+  ok(S.troubleWords({ дом: { recognise: good } }).length === 0, "and nothing in it before a word has earned it");
   const g2 = S.applyGrade(e, tr, "слово", "recognise", 3, t, opts);
   ok(g2.seen["слово"].recognise.reps === e["слово"].recognise.reps + 1 && g2.prev === e["слово"].recognise,
      "a grade through another front continues the same card and reports it as the previous card");
@@ -980,7 +1002,7 @@ const lessonWords = (u, i) => u.w.slice(i * sizeOf(u), (i + 1) * sizeOf(u));
 const SPEECH = DATA.speech;
 const SCRIPTS = DATA.scripts || {};
 const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH, SCRIPTS,
-                          hasVoice: () => true });
+                          PAIRS: DATA.pairs || {}, hasVoice: () => true });
 const answerable = (q) =>
   q.options || q.typed || q.pairs || q.kind === "hear" || q.kind === "say"
   || (q.kind === "scene" && q.questions && q.questions.every((x) => x.options));
@@ -1751,6 +1773,43 @@ group("late tags");
    every consumer takes IX[key][0] (word links, grading, cloze labels, search),
    and until 2026-09-08 «нет» opened «житься» and «лет» credited «лёт»
    (CLAUDE.md §23; panel.py resolve()). */
+/* The dictionary opens on the word that *means* the term (the owner,
+   2026-09-24: "the most common word for the search should be placed first").
+   An exact sense scores by its place in the gloss, so a word listing the
+   term first outranks a commoner word listing it fifth. */
+group("search ranks by sense position");
+{
+  const search = makeSearch({ L, IX, deep: () => parseDeep(DATA.deep) });
+  const top = (q, n = 5) => search.scored(q, n).map((x) => x.entry.b);
+  const industrious = top("industrious");
+  ok(industrious.indexOf("трудолюбивый") >= 0 && industrious.indexOf("трудолюбивый") < industrious.indexOf("исполнительный"),
+     "\"industrious\" opens on трудолюбивый before исполнительный (executive, industrious…)",
+     industrious.join(" "));
+  ok(search.scored("industrious", 1)[0].score >= MATCH, "…and a first-sense hit is still a match, not a mention");
+  const white = search.scored("white", 3);
+  ok(white[0].entry.b === "белый" && white[0].entry.p === "adjective",
+     "\"white\" opens on the adjective белый, not the White Guard noun", white.map((x) => `${x.entry.b}/${x.entry.p}`).join(" "));
+  ok(L.filter((x) => x.b === "белый").length === 1, "the studied list carries белый once");
+}
+
+/* The agreement drill pairs an adjective with a noun the corpus actually puts
+   after it — never «половая ягода» (the owner, 2026-09-24). */
+group("adjective–noun pairs");
+{
+  const pairs = DATA.pairs || {};
+  ok(Object.keys(pairs).length > 300, "the build ships attested pairs", String(Object.keys(pairs).length));
+  ok(Object.entries(pairs).every(([a, ns]) => L[a].p === "adjective" && ns.every((n) => L[n].p === "noun")),
+     "every pair is an adjective before a noun");
+  const qs = Q.drillQuestions("agreement", 20, undefined, undefined, true);
+  ok(qs.length >= 10, "the typed agreement drill still fills", String(qs.length));
+  const attested = qs.every((q) => {
+    const noun = (q.prompt || "").replace(/^___\s*/, "");
+    return (IX[fold(noun)] || []).some((n) => (pairs[q.i] || []).includes(n));
+  });
+  ok(attested, "every noun asked is one the corpus says after that adjective",
+     qs.map((q) => `${L[q.i].b} ${q.prompt}`).slice(0, 4).join(" | "));
+}
+
 group("lookup index order");
 {
   const first = (k) => L[IX[k][0]];

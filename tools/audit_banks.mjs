@@ -59,7 +59,7 @@ const stageIndex = (u) => Math.max(0, STAGES.findIndex(
 const sizeOf = (u) => lessonSize(stageIndex(u));
 
 const Q = makeQuestions({
-  L, IX: data.index, UN: data.units, STAGES,
+  L, IX: data.index, UN: data.units, STAGES, PAIRS: data.pairs || {},
   lessonWords: (u, i) => u.w.slice(i * sizeOf(u), (i + 1) * sizeOf(u)),
   lessonCount: (u) => Math.max(1, Math.ceil(u.w.length / sizeOf(u))),
   SPEECH: data.speech, SCRIPTS: data.scripts || {}, hasVoice: () => true,

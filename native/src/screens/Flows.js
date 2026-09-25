@@ -334,7 +334,13 @@ export function QuizFlow({ route, navigation }) {
   // `st.seen` rides along so a word the scheduler already trusts is asked by
   // typing rather than by four choices (ROADMAP P10.1).
   const steps = useMemo(() => {
-    const next = Q.quizSteps(unit, index, reviewWords(st), st.seen, asked.current);
+    /* Only review words from the route so far. The top-up used to take
+       anything due, so a chapter-1 quiz asked for «воспользоваться» — "avail
+       oneself", dealt weeks earlier as a flashcard — and a lesson quiz has to
+       be passable with what the lessons have taught (the owner, 2026-09-24). */
+    const within = new Set(Q.unitsUpTo(unit).flatMap((u) => u.w));
+    const review = reviewWords(st).filter((i) => within.has(i));
+    const next = Q.quizSteps(unit, index, review, st.seen, asked.current);
     asked.current = Q.stepKeys(next);
     return next;
   }, [unitId, index, seed]);

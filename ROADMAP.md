@@ -928,6 +928,20 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### A day on beta.6, fourteen items, 2026-09-24 — CLAUDE.md §30av
+
+Flashcards turn back and carry a speaker on the back; the review count is
+off the card; sentence cards widen to 400 along the route; trouble is judged
+after eight answers by lapses and capped at twenty; the path draws no road
+through a fork and no lane out of an optional quest; «белый» the White Guard
+noun loses to the adjective in `panel.py` (units identical); search ranks an
+exact sense by its place in the gloss; one-word-English examples dropped and
+example variety graded (near-duplicates 1,017 → 636); the agreement drill
+draws from 603 adjectives' attested noun partners; gap-fills and quiz top-ups
+stay within the route; conjugation feedback is the verb's own paradigm; a
+malformed Talk turn is retried (Worker 3 tries, app once). Suites: core 635,
+native green, smoke 159, Worker 64.
+
 ### Practice is open and carries no score, 2026-09-23 — CLAUDE.md §30au
 
 The owner: nothing on Practice locked, no percentages on that page. The

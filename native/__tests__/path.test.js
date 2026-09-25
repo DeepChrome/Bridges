@@ -154,8 +154,10 @@ describe("path node states", () => {
     expect(screen.queryByTestId("lane-family")).toBeNull();
     expect(screen.getByTestId("track-merge-family")).toBeTruthy();
     expect(screen.queryByTestId("merge-family")).toBeNull();
-    // Nor the road through the fork, nor the road on to chapter 2.
-    expect(screen.queryByTestId("road-family")).toBeNull();
+    // Nor the road on to chapter 2 — and there is no road drawn through the
+    // middle of the fork at all (the owner, 2026-09-24): the lanes are the road.
+    expect(screen.queryByTestId("track-road-family")).toBeNull();
+    expect(screen.queryByTestId("track-road-out-core1")).toBeNull();
     expect(screen.queryByTestId("road-on-core1-lit")).toBeNull();
     expect(screen.getByTestId("node-core2").props.accessibilityState.disabled).toBe(true);
   });
@@ -173,17 +175,36 @@ describe("path node states", () => {
   it("lights a quest's lane back when it is finished, and the road on when the chapter is", async () => {
     const { required } = require("../src/data");
     const first = required(STAGES[0])[0];
-    const lastRank = require("../src/screens/Learn").questRanks(STAGES[0].branches).slice(-1)[0];
     await withState({ unit: { ...done(STAGES[0].core).unit, ...done(first).unit } });
     await screen.findByTestId("node-core1");
     // The lane out is lit for every quest; the lane back only for the one done.
     for (const u of STAGES[0].branches) expect(strokeHex(screen.getByTestId(`lane-${u.id}`))).toBe(light.brand.toUpperCase());
-    for (const u of lastRank) {
+    for (const u of required(STAGES[0])) {
       if (u.id === first.id) expect(screen.getByTestId(`merge-${u.id}`)).toBeTruthy();
       else expect(screen.queryByTestId(`merge-${u.id}`)).toBeNull();
     }
     expect(screen.queryByTestId("road-on-core1-lit")).toBeNull();
     expect(screen.getByTestId("node-core2").props.accessibilityState.disabled).toBe(true);
+  });
+
+  /* An optional quest takes a lane in and none out — it unlocks nothing, so a
+     line leaving it would lead nowhere (the owner, 2026-09-24). Required
+     quests come first in the ranks so the chain has something to continue
+     from. */
+  it("draws no lane out of an optional quest, and puts the required ones first", async () => {
+    const { questOrder } = require("../src/screens/Learn");
+    const withOpt = STAGES.find((s) => s.branches.some((u) => u.opt) && s.branches.some((u) => !u.opt));
+    const order = questOrder(withOpt.branches);
+    const firstOpt = order.findIndex((u) => u.opt);
+    expect(order.slice(0, firstOpt).every((u) => !u.opt)).toBe(true);
+    expect(order.slice(firstOpt).every((u) => u.opt)).toBe(true);
+    await withState({ dev: true });
+    await screen.findByTestId(`node-${withOpt.core.id}`);
+    for (const u of withOpt.branches) {
+      expect(screen.getByTestId(`track-lane-${u.id}`)).toBeTruthy();
+      if (u.opt) expect(screen.queryByTestId(`track-merge-${u.id}`)).toBeNull();
+    }
+    expect(withOpt.branches.filter((u) => !u.opt).some((u) => screen.queryByTestId(`track-merge-${u.id}`))).toBe(true);
   });
 
   it("…and the road on to the next chapter once the required quests are done", async () => {
@@ -193,7 +214,6 @@ describe("path node states", () => {
     await withState({ unit: all });
     await screen.findByTestId("node-core1");
     expect(screen.getByTestId("road-on-core1-lit")).toBeTruthy();
-    expect(screen.getByTestId("road-out-core1")).toBeTruthy();
     expect(screen.getByTestId("node-core2").props.accessibilityState.disabled).toBe(false);
     // Chapter 2's own tracks are still empty: its spine is not done.
     expect(screen.queryByTestId(`lane-${STAGES[1].branches[0].id}`)).toBeNull();
@@ -223,9 +243,9 @@ describe("path node states", () => {
       for (let k = 1; k < lefts.length; k++) expect(lefts[k] - lefts[k - 1]).toBeGreaterThanOrEqual(96);
       for (const u of rank) expect(screen.getByTestId(`lane-${u.id}`)).toBeTruthy();
     });
-    // The road comes back from the last rank — the track is there for each;
-    // lit only for a finished quest, which developer mode does not fake.
-    for (const u of ranks[ranks.length - 1]) expect(screen.getByTestId(`track-merge-${u.id}`)).toBeTruthy();
+    // A required quest has a lane back — the track is there for each; lit only
+    // for a finished quest, which developer mode does not fake.
+    for (const u of big.branches.filter((u) => !u.opt)) expect(screen.getByTestId(`track-merge-${u.id}`)).toBeTruthy();
   });
 
   it("connects the quests once the spine is finished, and Continue leads into them", async () => {
@@ -236,7 +256,6 @@ describe("path node states", () => {
     // the fork with it. The way back is not: nothing has been finished there.
     expect(strokeHex(screen.getByTestId("lane-family"))).toBe(light.brand.toUpperCase());
     expect(screen.getByTestId("stem-core1-lit")).toBeTruthy();
-    expect(screen.getByTestId("road-family")).toBeTruthy();
     expect(screen.queryByTestId("merge-family")).toBeNull();
     // family is left of time: the row keeps the curriculum's order.
     const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : s);

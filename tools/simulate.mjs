@@ -166,7 +166,7 @@ function simulate(profileName, seed) {
   Math.random = rand;
 
   const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH,
-                            SCRIPTS: DATA.scripts || {}, hasVoice: () => true });
+                            SCRIPTS: DATA.scripts || {}, PAIRS: DATA.pairs || {}, hasVoice: () => true });
   let st = { seen: {}, trouble: {}, speech: { attempts: [] }, daily: null };
   const met = new Map();                 // lemma idx -> times seen in any question
   const log = [];                        // every question asked, in order

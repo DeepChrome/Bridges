@@ -398,8 +398,21 @@ export default function Talk({ navigation, route }) {
     // reported by the platform as an app error over a conversation that is fine.
     if (marking) marking.catch(() => null);
 
-    const reply = await replying;
+    let reply = await replying;
     if (!alive.current) return;
+    /* A malformed answer is asked for again once, silently, before the
+       learner is told (the owner, 2026-09-24: "need to have some error
+       handling there"). The Worker has already retried inside its own
+       request; a fresh request is a fresh draw, and it succeeds far more often
+       than not. Only for `parse` — a cap or a dead connection would fail the
+       same way twice. */
+    if (reply && reply.reason === "parse") {
+      reply = await askTutor({
+        scenario: scenario.prompt, topic: unit && unit.g ? unit.g.title : null,
+        studied: studiedFor(st), history: asHistory, transcript, level,
+      });
+      if (!alive.current) return;
+    }
     if (!reply || reply.ok !== true) {
       setTurns((prev) => prev.map((x) => (x.pending ? { ...x, pending: false } : x)));
       setFailure(failureText(reply));

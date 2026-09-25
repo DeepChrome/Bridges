@@ -73,7 +73,7 @@ const lessonWords = (u, i) => u.w.slice(i * sizeOf(u), (i + 1) * sizeOf(u));
 
 const Q = makeQuestions({
   L, IX: data.index, UN: data.units, STAGES, lessonWords, lessonCount,
-  SPEECH: data.speech, SCRIPTS: data.scripts || {}, hasVoice: () => true,
+  SPEECH: data.speech, SCRIPTS: data.scripts || {}, PAIRS: data.pairs || {}, hasVoice: () => true,
 });
 
 const bare = (s) => fold(String(s || ""));

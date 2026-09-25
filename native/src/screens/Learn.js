@@ -360,13 +360,12 @@ function Track({ id, d, length, on }) {
   );
 }
 
-/* Lanes fanning out from the road to a rank of quests, the road running on
-   beneath them. `roadOn` lights the road through the fork; `laneOn(unit)`
-   says whether the lane to that quest is connected yet. */
-function FanOut({ rank, xs, W, height, roadOn, laneOn }) {
+/* Lanes fanning out from one point to a rank of quests. `laneOn(unit)` says
+   whether the lane to that quest is connected yet. There is no road drawn
+   through the fan: the lanes *are* the road (see `Fork`). */
+function FanOut({ rank, xs, W, height, laneOn }) {
   return (
     <Svg width={W} height={height}>
-      <Track id={`road-${rank[0].id}`} d={`M ${W / 2} 0 L ${W / 2} ${height}`} length={height} on={roadOn} />
       {xs.map((x, k) => (
         <Track key={rank[k].id} id={`lane-${rank[k].id}`}
                d={`M ${W / 2} 0 C ${W / 2} ${height * 0.55}, ${x} ${height * 0.35}, ${x} ${height}`}
@@ -377,19 +376,53 @@ function FanOut({ rank, xs, W, height, roadOn, laneOn }) {
   );
 }
 
-/* The fork: lanes from the spine out to the chapter's side quests, in ranks of
-   QUEST_COLS (the eighth chapter's eight quests used to sit in one row and
-   their names ran into each other — the owner, 2026-09-08), and the road going
-   on beneath. Each rank past the first gets its own fan of lanes from the
-   road; the last rank's lanes come back to it.
+/* Lanes coming back from a rank's **required** quests to one point. An optional
+   quest has no lane out of it: it unlocks nothing, so a line leaving it would
+   lead nowhere (the owner, 2026-09-24). `backOn(unit)` lights a lane once that
+   quest is finished. */
+function Merge({ rank, xs, W, height, backOn }) {
+  return (
+    <Svg width={W} height={height}>
+      {rank.map((u, k) => (optional(u) ? null : (
+        <Track key={u.id} id={`merge-${u.id}`}
+               d={`M ${xs[k]} 0 C ${xs[k]} ${height * 0.65}, ${W / 2} ${height * 0.45}, ${W / 2} ${height}`}
+               length={cubicLength(xs[k], 0, xs[k], height * 0.65, W / 2, height * 0.45, W / 2, height)}
+               on={backOn(u)} />
+      )))}
+    </Svg>
+  );
+}
+
+/* A chapter's quests in ranks, the required ones first. The road through a
+   fork is a chain — out to a rank, back from it, out to the next — and it can
+   only continue from quests that have a lane back, so the optional ones sit
+   in the last ranks as leaves. */
+export function questOrder(branches) {
+  return branches.filter((u) => !optional(u)).concat(branches.filter(optional));
+}
+
+/* The fork: the chapter's side quests in ranks of QUEST_COLS (the eighth
+   chapter's eight quests used to sit in one row and their names ran into each
+   other — the owner, 2026-09-08), joined to the road as a chain.
  *
- * What lights what — each edge is connected by the node it runs *from*:
- *   - the lanes out to the quests, and the road through the fork, by the
- *     spine unit being finished (`forkOpen`; developer mode counts, rule 20.9),
- *     which is also exactly when the quest discs unlock (`unitUnlocked`), so a
- *     lit lane and an open disc cannot disagree;
- *   - each lane back to the road, by that quest being finished;
- *   - the road on to the next chapter, by the chapter being done — every
+ * **A line is drawn only where it leads to a node** (the owner, 2026-09-24:
+ * *"it still has this random line in the middle that goes to nothing. That's
+ * super ugly."*). The old drawing ran the road straight down the centre of
+ * the fork, behind the quests, with a gap through every rank; what was meant
+ * as "the road goes on" read as a stub to nowhere. There is no centre line
+ * now. The road out of a chapter is: the stem from the spine disc, lanes out
+ * to the first rank, lanes back from that rank's required quests to a point,
+ * lanes out from that point to the next rank, and so on; after the last rank
+ * with a required quest, the trunk on to the next chapter. Optional quests
+ * take a lane in and none out.
+ *
+ * What lights what — each edge by the node it runs *from*:
+ *   - the stem and the lanes out, by the spine unit being finished
+ *     (`forkOpen`; developer mode counts, rule 20.9), which is exactly when
+ *     the quest discs unlock (`unitUnlocked`), so a lit lane and an open disc
+ *     cannot disagree;
+ *   - each lane back, by that quest being finished;
+ *   - the trunk on to the next chapter, by the chapter being done — every
  *     required quest finished — which is when the next spine disc unlocks. */
 function Fork({ stage, chapterOpen, onOpen }) {
   const { st } = useSession();
@@ -397,11 +430,14 @@ function Fork({ stage, chapterOpen, onOpen }) {
   const open = chapterOpen && forkOpen(st, stage);
   const done = stageDone(st, stage);
   const W = Math.min(screenW - space.pad * 2, 400);
-  const ranks = questRanks(stage.branches);
+  const ranks = questRanks(questOrder(stage.branches));
   const xs = ranks.map((rank) => rankXs(rank, W));
-  const last = ranks.length - 1;
   const laneOn = (u) => unitUnlocked(st, u);
   const backOn = (u) => unitProgress(st, u) >= 1;
+  /* The last rank that has a lane back: the road on to the next chapter
+     leaves from there. A rank of optional quests below it hangs off the
+     same point with nothing after it. */
+  const lastRequired = ranks.reduce((a, rank, r) => (rank.some((u) => !optional(u)) ? r : a), -1);
 
   return (
     <View testID={`fork-${stage.core.id}`} accessibilityLabel="Side quests"
@@ -409,8 +445,7 @@ function Fork({ stage, chapterOpen, onOpen }) {
       <Trunk height={10} on={open} testID={`stem-${stage.core.id}`} />
       {ranks.map((rank, r) => (
         <React.Fragment key={r}>
-          <FanOut rank={rank} xs={xs[r]} W={W} height={r ? ROW_GAP : LANE_H}
-                  roadOn={open} laneOn={laneOn} />
+          <FanOut rank={rank} xs={xs[r]} W={W} height={r ? ROW_GAP : LANE_H} laneOn={laneOn} />
           <View testID={`rank-${stage.core.id}-${r}`} style={{ width: W, height: ROW_H }}>
             {rank.map((u, k) => (
               <View key={u.id} style={{ position: "absolute", left: xs[r][k] - 48, top: 0 }}>
@@ -418,21 +453,16 @@ function Fork({ stage, chapterOpen, onOpen }) {
               </View>
             ))}
           </View>
+          {/* Back to a point after a rank that has required quests, when there
+              is anything after it to reach: another rank, or the next chapter. */}
+          {r <= lastRequired && rank.some((u) => !optional(u)) ? (
+            <Merge rank={rank} xs={xs[r]} W={W} height={MERGE_H} backOn={backOn} />
+          ) : null}
         </React.Fragment>
       ))}
-      {/* The lanes come back: from under each quest of the last rank to the road,
-          which goes on to the next chapter. A fork that never re-joined read as
-          a dead end. */}
-      <Svg width={W} height={MERGE_H}>
-        <Track id={`road-out-${stage.core.id}`} d={`M ${W / 2} 0 L ${W / 2} ${MERGE_H}`}
-               length={MERGE_H} on={done} />
-        {xs[last].map((x, k) => (
-          <Track key={k} id={`merge-${ranks[last][k].id}`}
-                 d={`M ${x} 0 C ${x} ${MERGE_H * 0.65}, ${W / 2} ${MERGE_H * 0.45}, ${W / 2} ${MERGE_H}`}
-                 length={cubicLength(x, 0, x, MERGE_H * 0.65, W / 2, MERGE_H * 0.45, W / 2, MERGE_H)}
-                 on={backOn(ranks[last][k])} />
-        ))}
-      </Svg>
+      {/* On to the next chapter. A chapter whose quests are all optional (none
+          is) would carry the road straight from the stem, so it is drawn
+          either way. */}
       <Trunk height={10} on={done} testID={`road-on-${stage.core.id}`} />
     </View>
   );

@@ -260,7 +260,11 @@ export async function handle(request, env, deps = {}) {
 
   const messages = [{ role: "user", content: route.message(body) }];
   let tokensIn = 0, tokensOut = 0, result = null, lastErrors = null;
-  for (let attempt = 0; attempt < 2 && !result; attempt++) {
+  /* Three tries, not two (2026-09-24). A conversational turn came back
+     "malformed" often enough for the owner to see it: the reply's tokens not
+     matching the reply word for word, mostly. A nudge fixes it more often than
+     not, and a third try costs a fraction of a cent against a dead turn. */
+  for (let attempt = 0; attempt < 3 && !result; attempt++) {
     const reply = await askModel(fetchFn, env, route.system, messages, route.maxTokens);
     if (reply.error) {
       await logUsage(env, day, now, { kind: route.kind, user: user.id, error: reply.error, attempt });

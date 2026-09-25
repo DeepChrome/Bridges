@@ -334,14 +334,40 @@ export const dayDone = (state, due, day) => (due || 0) === 0 && workedOn(state, 
 
 /* ------------------------------------------------------------- trouble */
 
-/* A word is "trouble" once its card has lapsed repeatedly or sits at high
-   difficulty. */
-export const LEECH_LAPSES = 4;
+/* **Trouble** (the owner, 2026-09-24): *"it's very normal to press Again on
+ * a card for the first 5–7 times you've seen it… but if you're still pressing
+ * Again after many many times, especially in comparison to the other cards,
+ * then maybe we mark it trouble… and cap troubled words at something like
+ * 20."*
+ *
+ * So a card is not trouble until it has been *seen enough to judge* —
+ * TROUBLE_MIN_REPS answers — and then only when it keeps failing: TROUBLE_LAPSES
+ * lapses (an Again on a card that had graduated; learning-step Agains are not
+ * lapses, which is what makes the early ones free), or a difficulty the
+ * scheduler has pushed near its ceiling. `troubleRank` orders the candidates by
+ * how badly they are going — lapses per answer, then difficulty — and
+ * `troubleWords` keeps the worst TROUBLE_CAP of them: the bank is the words
+ * that stand out *against the others*, not everything that ever missed. The
+ * flag on a card and the "Trouble words" set read the same list. */
+export const TROUBLE_MIN_REPS = 8;
+export const TROUBLE_LAPSES = 3;
+export const TROUBLE_CAP = 20;
 export function isTrouble(card) {
-  if (!card) return false;
-  return (card.lapses || 0) >= LEECH_LAPSES || ((card.d || 0) >= 8.5 && (card.reps || 0) >= 3);
+  if (!card || (card.reps || 0) < TROUBLE_MIN_REPS) return false;
+  return (card.lapses || 0) >= TROUBLE_LAPSES || (card.d || 0) >= 9;
 }
+export const troubleRank = (card) =>
+  (card ? ((card.lapses || 0) / Math.max(1, card.reps || 0)) * 10 + (card.d || 0) / 10 : 0);
 export const wordTrouble = (entry) => cardsOf(entry).some(({ card }) => isTrouble(card));
+/* The bank: every word whose card is trouble, worst first, at most TROUBLE_CAP. */
+export function troubleWords(seen) {
+  const out = [];
+  for (const w in seen || {}) {
+    const card = cardFor(seen[w]);
+    if (isTrouble(card)) out.push({ w, r: troubleRank(card) });
+  }
+  return out.sort((a, b) => b.r - a.r).slice(0, TROUBLE_CAP).map((x) => x.w);
+}
 
 /* One graded review applied to learner state, returned as new objects. The
    trouble rule follows the grade: a lapse on a word the scheduler now counts

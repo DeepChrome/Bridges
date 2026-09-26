@@ -48,6 +48,10 @@ import { troubleWords, strength, familiarity, cardFor } from "@core/scheduler";
 /* How many notes the tutor may leave in the profile; the oldest goes when a
    new one arrives. Twenty short lines is a person's worth of context. */
 export const NOTES_KEPT = 20;
+/* Silent turns in a row before conversation mode gives up and puts the
+   microphone down. Two, because one is a pause for thought and a run of them
+   is an empty room. */
+export const QUIET_LIMIT = 2;
 /* Words told to the tutor as held well: familiarity at or above this. */
 const STRONG_AT = 60;
 const LIST_N = 30;
@@ -203,6 +207,15 @@ function TutorOptions({ onClose, onRestart }) {
               <Text style={{ color: t.ink, fontSize: 15 }}>English under the Russian</Text>
             </View>
           </Row>
+          <Row testID="tutor-hands-row" onPress={() => update((p) => ({ ...p, tutorHands: !p.tutorHands }))}>
+            <Tick on={!!st.tutorHands} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15 }}>Conversation mode</Text>
+              {/* One of rule 20.7's three: the microphone behaving differently
+                  is a state nothing on the button discloses. */}
+              <Muted>The microphone opens after each reply</Muted>
+            </View>
+          </Row>
         </List>
       </View>
       <Btn kind="plain" testID="tutor-restart" label="Start over" onPress={onRestart} />
@@ -221,16 +234,40 @@ export default function Tutor({ navigation }) {
   const [draft, setDraft] = useState("");
   const [lang, setLang] = useState(LANG);
   const [cog, setCog] = useState(false);
+  /* Conversation mode: the microphone opens itself after each of the tutor's
+     turns and closes when the learner stops speaking (the owner, 2026-09-26:
+     *"conversation mode where it just goes back and forth and you dont have
+     to hold the mic"*). `hands` is the setting; `going` is whether the loop is
+     actually running, which is a fact about this sitting rather than about
+     the learner, so it is not persisted and starts off. */
+  const hands = !!st.tutorHands;
+  const [going, setGoing] = useState(false);
+  const goingRef = useRef(false);
+  const setLoop = (on) => { goingRef.current = on; setGoing(on); };
+  /* Turns in a row where nobody said anything. Two and the loop stops: a
+     microphone that reopens for ever because the room is empty is the one
+     failure conversation mode must not have. */
+  const quiets = useRef(0);
   const scrollRef = useRef(null);
   const alive = useRef(true);
   const configured = !!config("/v1/tutor");
-  useEffect(() => () => { alive.current = false; stop(); }, []);
+  useEffect(() => () => { alive.current = false; goingRef.current = false; stop(); }, []);
 
   /* One turn: the profile, the studied words, the exchange so far and what
      was just said. The tutor's note, if any, goes into the profile as it
      arrives — a fact about the learner is worth keeping even if this
      conversation is abandoned a moment later. */
   const ask = async (history, text) => {
+    /* **Only the newest turn may open the microphone.** `ask` waits twice —
+       on the Worker, then on the tutor finishing speaking — and a turn
+       suspended at the second await can be resumed out of order, because
+       starting a new line stops the one before it and a stopped line resolves.
+       An older turn reaching its tail would then start listening underneath
+       the current one: two microphones, two sends. The ticket is §23's rule
+       for `playTrack` applied to a conversation — an attempt has to be able to
+       learn it was superseded. */
+    const mine = askSeq.current + 1;
+    askSeq.current = mine;
     setFailure(null);
     setPending(true);
     const reply = await askTutor({
@@ -246,11 +283,22 @@ export default function Tutor({ navigation }) {
     // The Worker refuses a turn with nothing in it; this is the app refusing too.
     if (!turn.ru && !turn.note) { setFailure(failureText({ ok: false, reason: "parse", errors: ["empty turn"] })); return; }
     setTurns((prev) => prev.concat([turn]));
-    if (turn.ru) speakLine(turn.ru);
     if (reply.remember) {
       update((prev) => ({ ...prev, tutorNotes: remember(prev.tutorNotes, reply.remember) }));
     }
+    /* **Speak, then listen — never both.** The recogniser and the TTS engine
+       contend for one audio session, and a microphone open under a speaker
+       hears the speaker (§30h′). `speakLine` resolves when it has finished,
+       which is the handshake the loop turns on. */
+    if (turn.ru) await speakLine(turn.ru);
+    if (!alive.current || askSeq.current !== mine) return;
+    /* `ask` reaches the recogniser through a ref because a conversation is a
+       cycle — the reply starts the listening that produces the next reply —
+       and the hook is created below. */
+    if (goingRef.current && recRef.current) recRef.current.listen({ lang: LANG });
   };
+  const recRef = useRef(null);
+  const askSeq = useRef(0);
 
   /* The tutor opens, from the profile alone — once the profile is here. The
      shell mounts a screen only after the session is ready, so this is belt
@@ -275,15 +323,50 @@ export default function Tutor({ navigation }) {
 
   const rec = useRecognizer({
     enabled: configured && !pending,
-    onFinal: (transcript) => send(transcript),
+    onFinal: (transcript) => {
+      quiets.current = 0;
+      const s = String(transcript || "").trim();
+      /* Heard, but nothing in it. In conversation mode that is a silent turn
+         like any other rather than a dead press. */
+      if (!s) { if (goingRef.current) listenAgain(); return; }
+      send(s);
+    },
+    /* A turn where nobody spoke: listen once more, then stop and say so. */
+    onQuiet: () => {
+      if (!goingRef.current) return;
+      quiets.current += 1;
+      if (quiets.current >= QUIET_LIMIT) { setLoop(false); return; }
+      listenAgain();
+    },
   });
+  recRef.current = rec;
+  /* A beat before reopening, so the end of one attempt and the start of the
+     next are not the same moment to the audio session. */
+  const listenAgain = () => setTimeout(() => {
+    if (alive.current && goingRef.current) rec.listen({ lang: LANG });
+  }, 300);
+
+  /* Starting and stopping the conversation. Stopping puts the microphone down
+     at once rather than after the attempt in flight: the learner pressed stop. */
+  const toggleLoop = () => {
+    if (goingRef.current) { setLoop(false); rec.cancel(); return; }
+    quiets.current = 0;
+    setLoop(true);
+    if (!pending) rec.listen({ lang: LANG });
+  };
+  /* The setting turning off mid-conversation ends the loop with it. */
+  useEffect(() => { if (!hands && goingRef.current) { setLoop(false); rec.cancel(); } },
+            [hands]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollToEnd({ animated: true });
   }, [turns.length, pending]);
 
   const restart = () => {
-    const go = () => { setCog(false); setTurns([]); setFailure(null); ask([], ""); };
+    const go = () => {
+      setCog(false); setLoop(false); rec.cancel();
+      setTurns([]); setFailure(null); ask([], "");
+    };
     if (turns.some((x) => x.who === "learner")) {
       Alert.alert("Start over?", "This conversation is wiped.",
                   [{ text: "Keep going", style: "cancel" }, { text: "Restart", style: "destructive", onPress: go }]);
@@ -355,12 +438,42 @@ export default function Tutor({ navigation }) {
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 10 }}>
               <View style={{ width: 44 }} />
-              <HoldButton testID="tutor-hold" phase={rec.phase} size={60}
-                          onIn={() => rec.hold({ lang })} onOut={rec.release} />
+              {/* Conversation mode replaces the hold with one button that runs
+                  the exchange: press once and it goes back and forth, press
+                  again and the microphone goes down. Held speech stays the
+                  default, because a room where you cannot talk freely is the
+                  ordinary case. */}
+              {hands ? (
+                <Pressable testID="tutor-loop" accessibilityRole="button"
+                           accessibilityState={{ selected: going }}
+                           accessibilityLabel={going ? "Stop the conversation" : "Start the conversation"}
+                           onPress={toggleLoop} hitSlop={8}
+                           style={({ pressed }) => ({ width: 60, height: 60, borderRadius: 30,
+                             alignItems: "center", justifyContent: "center", borderWidth: 1,
+                             borderColor: t.brand,
+                             backgroundColor: rec.phase === "listening" ? t.brand : t.brandBg,
+                             opacity: pressed ? 0.7 : 1 })}>
+                  <Svg width={24} height={24} viewBox="0 0 24 24" fill="none"
+                       stroke={rec.phase === "listening" ? t.brandOn : t.brandInk}
+                       strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    {going ? <Path d="M7 7h10v10H7z" /> : (
+                      <>
+                        <Path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z" />
+                        <Path d="M19 11a7 7 0 0 1-14 0M12 18v3" />
+                      </>
+                    )}
+                  </Svg>
+                </Pressable>
+              ) : (
+                <HoldButton testID="tutor-hold" phase={rec.phase} size={60}
+                            onIn={() => rec.hold({ lang })} onOut={rec.release} />
+              )}
               <LangToggle lang={lang} onPress={() => setLang(lang === LANG ? LANG_EN : LANG)} />
             </View>
-            <Text style={{ color: t.ink, fontSize: 15, minHeight: 20, textAlign: "center", marginTop: 4 }}>
-              {rec.phase === "listening" ? rec.live : rec.note || ""}
+            <Text testID="tutor-live"
+                  style={{ color: t.ink, fontSize: 15, minHeight: 20, textAlign: "center", marginTop: 4 }}>
+              {rec.phase === "listening" ? (rec.live || "Listening…")
+                : going ? "Your turn next" : rec.note || ""}
             </Text>
           </View>
         )}

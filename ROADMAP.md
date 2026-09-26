@@ -955,6 +955,12 @@ in brand colour at weight 700, with a Cyrillic-run fallback — used by the
 verdict, Say, Talk and the tutor. Tutor gained the cog (level, English,
 start over). Suites: core 642, native 512, Worker 73, copy 0 over, dead 0.
 
+Conversation mode in the Tutor, same day: `listen()`/`cancel()`/`onQuiet` in
+speech.js as the hands-free way into the one engine, the loop in Tutor.js
+(speak then listen, never both; `askSeq` so only the newest turn opens the
+microphone; QUIET_LIMIT 2 and LISTEN_MAX_MS 20 s so it cannot stay open in an
+empty room). `st.tutorHands`, off by default, on the cog.
+
 ### A day on beta.6, fourteen items, 2026-09-24 — CLAUDE.md §30av
 
 Flashcards turn back and carry a speaker on the back; the review count is

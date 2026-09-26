@@ -4486,6 +4486,39 @@ English under the Russian (`talkEn`, Talk's own key, so the two tutors cannot
 be pitched differently), and Start over, which used to be a link beside the
 microphone as though it were something you would want mid-sentence.
 
+**Conversation mode** (`st.tutorHands`, the cog; the owner, 2026-09-26:
+*"conversation mode where it just goes back and forth and you dont have to
+hold the mic"*, and when asked where, *"specifically for the AI tutor"*). Off
+by default, because a room where you cannot talk freely is the ordinary case.
+On, the hold becomes one button that runs the exchange: press and the
+microphone opens, the learner speaks, **Android's own endpointing** decides
+they have stopped, the turn goes, the tutor answers, and the microphone opens
+again. `listen()` and `cancel()` in `speech.js` are the second way into the
+one engine — `hold`/`release` is a finger, `listen` ends by itself — and
+`onQuiet` tells the screen an attempt produced nothing, because **a loop that
+cannot tell silence from an answer is a loop that talks over the learner.**
+
+Four rules, and each is a way a hands-free loop goes wrong:
+
+- **Speak, then listen, never both.** The recogniser and the TTS engine
+  contend for one audio session (§30h′) and an open microphone under a
+  speaker hears the speaker. `speakLine` resolving is the handshake, so `ask`
+  awaits it before listening.
+- **Only the newest turn may open the microphone.** `ask` waits twice — on
+  the Worker, then on the speaking — and a turn suspended at the second await
+  *can* be resumed out of order, because starting a line stops the one before
+  it and a stopped line resolves. An older turn reaching its tail would start
+  listening underneath the current one: two microphones, two sends. `askSeq`
+  is §23's `trackSeq` rule applied to a conversation, and the test found it
+  rather than a device.
+- **The microphone cannot stay open in an empty room.** `QUIET_LIMIT` (2)
+  silent turns in a row and the loop stops; `LISTEN_MAX_MS` (20 s) abandons an
+  attempt the engine never ends.
+- **Stopping puts it down at once, and sends nothing.** `cancel` moves the
+  phase to idle *before* aborting, because aborting raises `end` and a partial
+  still in hand would otherwise be delivered as a turn the learner never
+  finished saying.
+
 Traps: **`clearAllMocks` leaves a `mockResolvedValueOnce` queue in place**,
 so a test that does not consume all its answers hands them to the next one
 — `tutor.mockReset()` in `beforeEach`. And the opening turn must wait for

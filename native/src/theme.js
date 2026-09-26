@@ -45,7 +45,10 @@ const dark = {
 };
 
 export const radius = { sm: 8, md: 14, lg: 20, xl: 26 };
-export const space = { pad: 16, gap: 10 };
+/* On the 4-grid, like every mobile system's spacing (Material 3 included).
+   `gap` was 10, which is the sort of value that makes a row look a pixel
+   wrong without anyone being able to say why (tools/design.mjs). */
+export const space = { pad: 16, gap: 12 };
 
 /* The type scale (2026-09-10). Before this the app used fifteen inline sizes —
    38, 30, 26, 22, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10 — chosen one screen
@@ -54,9 +57,20 @@ export const space = { pad: 16, gap: 10 };
    here. Existing literals are left alone rather than swept, since a blind
    find-and-replace across every screen is exactly the refactor §12 warns about.
 
-   `hero` is the Russian word on a vocabulary card and nothing else. */
+   **Every step is the same distance apart** (2026-09-26). It was not: the
+   steps ran 1.43 · 1.40 · 1.18 · 1.13 · 1.15 · 1.18, so the top of the scale
+   leapt and the middle of it barely moved — `title` at 20 and `head` at 17
+   were not two clear steps apart, they were almost the same size, which is
+   the arithmetic behind a screen reading as flat. The text band is now a
+   steady ~1.20 anchored on a 16 body (the floor for running text on a phone,
+   and Material 3's own body-large): 28 · 23 · 19 · 16 · 13 · 11, every
+   adjacent pair within 4% of the same ratio. `tools/design.mjs` is the gate.
+
+   `hero` is the Russian word on a vocabulary card and nothing else — a
+   display one-off deliberately off the top of the band, the way Material 3
+   separates its display sizes from its text sizes. */
 export const type = {
-  hero: 40, display: 28, title: 20, head: 17, body: 15, small: 13, tiny: 11,
+  hero: 40, display: 28, title: 23, head: 19, body: 16, small: 13, tiny: 11,
 };
 
 /* The typeface (2026-09-11).
@@ -109,14 +123,20 @@ export function faceFor(weight) {
  * shadow on a tinted ground goes muddy; and `elevation` is set alongside for
  * Android, which ignores the rest. Kept off the dark theme: a shadow under a
  * dark surface on a dark ground is invisible, and the border is what separates
- * things there. */
+ * things there.
+ *
+ * **The blur is twice the distance** (2026-09-26). It was five times, and
+ * that is the difference between a thing lifted off the page and a grey haze
+ * around it — the soft halo every generated interface has. A shadow is a
+ * light source: the further a thing is from the surface, the wider and only
+ * then the softer its shadow. `tools/design.mjs` holds the ratio. */
 export const shadow = {
   raised: {
-    shadowColor: "#0B1020", shadowOpacity: 0.05, shadowRadius: 10,
+    shadowColor: "#0B1020", shadowOpacity: 0.05, shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 }, elevation: 1,
   },
   lift: {
-    shadowColor: "#0B1020", shadowOpacity: 0.13, shadowRadius: 16,
+    shadowColor: "#0B1020", shadowOpacity: 0.13, shadowRadius: 10,
     shadowOffset: { width: 0, height: 5 }, elevation: 4,
   },
 };

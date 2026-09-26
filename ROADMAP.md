@@ -965,6 +965,40 @@ pauses, so the engine is held open and the pause is measured here
 androidIntentOptions), and the control is one visible icon beside the
 microphone rather than a setting.
 
+### How a solo non-designer gets a professional UI — research, 2026-09-26
+
+Asked for reputable sources, no hype, and a Figma comparison. Reddit was not
+reachable (blocked to the crawler), so the evidence is the State of React
+Native 2025 survey, Hacker News threads, GitHub/npm APIs and primary vendor
+docs. What changed the plan:
+
+- **Component libraries are not the differentiator.** State of RN 2025
+  (n≈1,100): StyleSheet 90.3 %, inline styles 91.2 %, against react-native-
+  paper 37 %, Tamagui 17.4 %, gluestack 10.7 %. Migrating is pure cost here.
+  Expo UI is stable in SDK 56 but Expo itself says to use View/Text if you
+  want custom branding, and it has a live Compose version conflict.
+- **No AI-to-UI tool emits React Native** — v0 (confirmed by Vercel), Stitch
+  (ex-Galileo, acquired by Google), Subframe, Lovable, Uizard, Figma Make
+  are all web. Figma Make output is "HTML div soup".
+- **Figma 2026**: Full seat $16/mo, Dev $12, Collab $3; free tier is 3 files.
+  The official MCP server *can* now write to canvas (`generate_figma_design`,
+  `use_figma`) but needs a Full seat on a paid plan, is beta, will become
+  usage-based, has no image or custom-font support, and the free tier allows
+  ~6 tool calls a month. The REST API is read-only for file content; the
+  Plugin API writes but cannot run headless.
+- **Reanimated would not help**: Expo's own April 2026 benchmark on a Moto G8
+  at 50 views has RN Animated at 8.78 ms against Reanimated's 11.87 ms. The
+  existing `motion.js` is not the problem.
+- **Highest leverage** was judged to be 8–15 hours of a senior mobile
+  designer delivering *tokens* rather than screens (~$500–2,000); he ruled
+  out hiring, so the remaining free paths are Material 3's published specs
+  and Hobday's measurable rules — which is what §30ax builds into a gate.
+
+`tools/design.mjs` came out of it: the text scale evened to ~1.20 on a 16
+body, body text 15 → 16, shadows cut from 5× and 3.2× blur-to-distance down
+to 2:1, `space.gap` 10 → 12. Design audit 14 checks 0 failed, contrast 103,
+native 519, core 642.
+
 ### A day on beta.6, fourteen items, 2026-09-24 — CLAUDE.md §30av
 
 Flashcards turn back and carry a speaker on the back; the review count is

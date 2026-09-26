@@ -4548,6 +4548,68 @@ Not verified on a device: the cog sheet, the explanation and the tutor were
 driven only through jest; the Worker is deployed and the walkthrough flow
 `walkthrough7.txt` was updated to the cog and not yet re-run.
 
+## 30ax. The measurable half of "it looks AI generated" (2026-09-26)
+
+He asked for research into how a solo non-designer gets a professional UI,
+ruled out learning a tool and ruled out hiring, and asked what would actually
+work. The research is filed in ROADMAP; three findings changed what got
+built, and one of them is the reason this section exists.
+
+- **A component library is not the answer, measured rather than assumed.**
+  State of React Native 2025 (n≈1,100): **90 % of shipping RN developers use
+  StyleSheet and inline styles**, against 37 % on the most popular component
+  library. Whatever separates a professional-looking RN app from an amateur
+  one, it is empirically not "they adopted Paper/Tamagui/gluestack". This app
+  already has copy-in primitives and tokens, which is the shape those
+  libraries converge on; swapping them is a broad rewrite that buys nothing
+  it does not have and supplies no taste (§12, §13).
+- **No AI-to-UI tool outputs React Native.** v0, Subframe, Stitch, Lovable,
+  Uizard and Figma Make are all web. And the deeper point: the thing
+  producing screens that look generated is a language model's visual taste,
+  and every tool in that category is the same taste wearing a different UI.
+  Moving the drawing into Figma does not change the drawer.
+- **What is left is arithmetic, and arithmetic can be a gate.** Every look
+  fix that has landed here came from *measuring* a screen: §30s found a card
+  had become the default container, §30ah eight identical rings, §30ak an
+  activity centred in seven hundred pixels of nothing. None of those passes
+  left an instrument behind, so each rediscovered the method.
+
+**`tools/design.mjs`** is that instrument, and the sibling of
+`tools/contrast.js`: contrast owns colour legibility, this owns scale,
+rhythm and depth. The rules are the measurable subset of Anthony Hobday's
+"Visual design rules you can safely follow every time" plus Material 3,
+which is the design language of the platform this app ships on — not
+invented here, and each one cites what it is. A rule that is a web rule and
+does not survive contact with a phone is **advisory** and does not fail the
+gate: a full-width button does not care about its horizontal padding ratio.
+
+What it found on its first run, and what was fixed:
+
+- **The text scale was not a scale.** Steps ran 1.43 · 1.40 · 1.18 · 1.13 ·
+  1.15 · 1.18 — the top leapt and the middle barely moved, so `title` (20)
+  and `head` (17) were not two clear steps apart, they were nearly the same
+  size. That is the arithmetic behind a screen reading as flat. Now a steady
+  ~1.20 anchored on a 16 body: **28 · 23 · 19 · 16 · 13 · 11**, every
+  adjacent pair within 4 % of the same ratio. `hero` (40) stays off the top
+  of the band deliberately, the way Material 3 separates display sizes from
+  text sizes, and is checked separately rather than excused.
+- **Body text was 15.** Hobday's floor and Material 3's body-large are both
+  16. Running text on a phone is now 16.
+- **The shadows were a haze.** `raised` blurred 10 at a distance of 2 — five
+  times — and `lift` 16 at 5. A shadow is a light source, and blur far wider
+  than the offset is the soft grey halo every generated interface has. Both
+  are 2:1 now (4/2 and 10/5), which reads as crisp rather than foggy.
+- **`space.gap` was 10**, off the 4-grid every mobile system uses.
+
+**Left as advisory, with the numbers, because each needs a decision rather
+than a fix:** 58 inline font sizes off the scale and 277 inline spacing
+values off the grid (sweeping 30 files is the blind refactor §12 warns
+about, and the count is there to say how much the scales are actually being
+ignored); and the neutrals, which run at 12–23 % saturation on one hue
+against Hobday's 5 % — deliberate (§24) and also exactly the slate-blue cast
+every generated interface has. Changing it moves the whole app's colour and
+must be solved for rather than nudged (§31), so it is his call.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -4577,6 +4639,7 @@ node tools/check_scripts.mjs --strict   # the written passages: level, coverage,
 node tools/audio_qa.mjs        # a track per lesson, its hash current, its length sane
 node tools/audit_banks.mjs --pool 150   # how many distinct questions a learner meets (§30ac)
 node tools/audit_dead.mjs      # exports nothing imports, files nothing reaches (§30aj)
+node tools/design.mjs          # scale, rhythm and depth: the arithmetic of looking designed (§30ax)
 node tools/release_check.mjs   # the built bundle: who signed it, size, permissions (§30ag)
 node tools/eas_upload.mjs      # before any EAS build: archive size, and nothing needed excluded
 node tools/copy.mjs            # labels, not prose (rule 20.7), capped and checked

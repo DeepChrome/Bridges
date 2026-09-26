@@ -30,26 +30,30 @@ tap:^Show$
 wait:2
 shot:80-card-senses
 
-# The focus picker. Conjugation has four things to narrow to; everything is
-# ticked, and Start is pinned at the foot.
+# The cog on the drill (2026-09-26). Conjugation opens straight in; its four
+# things to narrow to are behind the cog beside the progress, everything
+# ticked, Apply pinned at the foot.
 tap:^Practice$
 wait:2
 scroll
 tap:^Conjugation$
 wait:3
+tap:^Drill options$
+wait:2
 shot:81-drill-focus
 expect:^Imperative$
 expect:^Present / future$
 expect:^Whose form is this\?$
+expect:^Your words$
 
-# Imperative only: untick the other three, then start. Every question on the
+# Imperative only: untick the other three, then Apply. Every question on the
 # run should be an imperative, which is what core.test.mjs asserts and what
 # this shot shows a learner actually gets.
 tap:^Present / future$
 tap:^Past$
 tap:^Whose form is this\?$
 shot:82-drill-focus-imperative
-tap:^Start$
+tap:^Apply$
 wait:4
 shot:83-drill-imperative
 back

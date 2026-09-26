@@ -139,7 +139,7 @@ describe("flashcards", () => {
     expect(await screen.findByText("Pick a set to practice.")).toBeTruthy();
     // One thought, one control: no summary row of a selection that is empty,
     // and no card to grade.
-    expect(screen.queryByText("Change")).toBeNull();
+    expect(screen.queryByTestId("study-cog")).toBeNull();
     expect(screen.queryByText("Show")).toBeNull();
   });
 });

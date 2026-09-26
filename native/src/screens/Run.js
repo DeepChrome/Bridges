@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Pressable, ScrollView, Alert, Animated } from "react-native";
+import { View, Pressable, ScrollView, Alert, Animated, ActivityIndicator } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text } from "../ui";
@@ -28,6 +28,23 @@ import { Build } from "../activities/Build";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts } from "@core/scheduler";
 import { fold, firstSense } from "@core/util";
+import { explain as askWhy, config as workerConfig } from "../lib/feedback";
+
+/* The kinds a wrong answer can be explained for: one right answer, one thing
+   the learner put instead. The speaking and listening activities carry their
+   own feedback and are not on the list; a match has no single answer. */
+export const EXPLAIN_KINDS = ["cases", "aspect", "agreement", "conjugation", "stress",
+                              "cloze", "type", "choose-en", "choose-ru", "listen", "form"];
+/* How many wrong answers the profile keeps for the tutor (store.js `misses`). */
+export const MISSES_KEPT = 30;
+
+/* A wrong answer, as the profile records it: what was asked, what was right,
+   what was put. Exported for the tutor's tests. */
+export function missOf(q, said) {
+  const opt = q.options ? q.options.find((o) => o.right) : null;
+  return { kind: q.kind, prompt: String(q.prompt || ""), answer: opt ? String(opt.label) : String(q.answer || ""),
+           said: said === undefined || said === null ? null : String(said), at: Date.now() };
+}
 
 /* One review into state. The grade comes from gradeFor (right or wrong, table used or
    not) or is handed in directly by an activity that scores itself, as the speaking
@@ -137,12 +154,14 @@ function Typed({ q, answered, onAnswer }) {
     const want = fold(q.target);
     // Another word of the pool with the same meaning is right too: "jacket"
     // is «пиджак» and «куртка», and the prompt did not say which.
-    if (typed === want || (q.alts || []).includes(typed)) return onAnswer(true);
+    // `said` rides on every verdict: what was put is what an explanation of
+    // the miss is about (EXPLAIN_KINDS), and what the profile keeps for the tutor.
+    if (typed === want || (q.alts || []).includes(typed)) return onAnswer(true, undefined, undefined, { said: text });
     // A letter off on a word of four or more is half credit — the word is known,
     // the spelling is not — and the verdict says which letter.
     const d = charDistance(typed, want);
-    if (d === 1 && want.length >= 4) onAnswer(false, undefined, undefined, { credit: 0.5, note: "One letter off" });
-    else onAnswer(false);
+    if (d === 1 && want.length >= 4) onAnswer(false, undefined, undefined, { credit: 0.5, note: "One letter off", said: text });
+    else onAnswer(false, undefined, undefined, { said: text });
   };
   return (
     <View>
@@ -308,7 +327,7 @@ export function RuleNote({ note, testID }) {
    (no microphone): it grades nothing and leaves the score alone. */
 const asOptions = (q, r) => (
   <Options q={q} answered={r.answered} picked={r.picked}
-           onPick={(i, o) => { r.setPicked(i); r.record(!!o.right); }} />
+           onPick={(i, o) => { r.setPicked(i); r.record(!!o.right, undefined, undefined, { said: o.label }); }} />
 );
 
 /* A question that is written when it was built to be written and chosen when it
@@ -367,8 +386,9 @@ export function useAudioStopOnLeave() {
    only, so the retake is practice, not a second chance at the mark; the retake
    is still a review for the scheduler. Off for the placement and section tests,
    which measure rather than teach, and for the one-question vocabulary runner. */
+/* `tools`: a control beside the progress — the drill's cog (Flows.js). */
 export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true,
-                         allowBack = false, navigation }) {
+                         allowBack = false, navigation, tools }) {
   const { st, update } = useSession();
   const t = useTheme();
   const [queue, setQueue] = useState(() => steps.slice());
@@ -396,6 +416,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const [picked, setPicked] = useState(null);
   const [hintOpen, setHintOpen] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
+  // Why the answer was wrong, from the Worker: null (not asked), "pending",
+  // or the text. Anything but the text draws nothing — the verdict stands alone.
+  const [why, setWhy] = useState(null);
   const results = useRef([]);
   const tally = useRef({ right: 0, wrong: 0, helped: 0, skipped: 0, credit: 0 });
   const sayTimer = useRef(null);
@@ -433,8 +456,30 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     const credit = extra && typeof extra.credit === "number"
       ? Math.max(0, Math.min(1, extra.credit)) : (correct ? 1 : 0);
     const note = extra && extra.note ? extra.note : null;
+    const said = extra && extra.said !== undefined ? extra.said : null;
     setAnswered(true);
-    setVerdict({ right: !!correct, credit, note });
+    setVerdict({ right: !!correct, credit, note, said });
+
+    /* A miss is explained, and remembered (2026-09-26). The explanation is the
+       Worker's and arrives under the verdict when it does — a failure of any
+       kind leaves the verdict exactly as drawn, the rule Say follows for its
+       online feedback. The miss itself goes to the profile whatever happens,
+       for the tutor to draw on; a recycled question is not recorded twice. */
+    if (!correct && EXPLAIN_KINDS.includes(q.kind)) {
+      const miss = missOf(q, said);
+      if (!q.retry) {
+        update((prev) => ({ ...prev, misses: [miss].concat(prev.misses || []).slice(0, MISSES_KEPT) }));
+      }
+      if (st.explain !== false && workerConfig("/v1/explain")) {
+        setWhy("pending");
+        const mine = at;
+        askWhy({ kind: q.kind, ask: q.ask, prompt: q.prompt, sub: q.sub, answer: miss.answer, said,
+                 rule: q.note ? q.note.title : null }).then((reply) => {
+          if (!alive.current || atRef.current !== mine) return;
+          setWhy(reply && reply.ok === true && reply.why ? reply.why : null);
+        });
+      }
+    }
 
     /* The verdict reaches three senses at once, and the buzz is the one that
        arrives first — a learner with the volume down has only this and the
@@ -511,6 +556,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setVerdict(null);
     setPicked(null);
     setUsedHint(false);
+    setWhy(null);
   };
 
   /* A step backwards, for a run where that is a sensible thing to want.
@@ -528,6 +574,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setVerdict(null);
     setPicked(null);
     setUsedHint(false);
+    setWhy(null);
   };
 
   const answer = q.options ? q.options.find((o) => o.right) : null;
@@ -558,6 +605,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         <Pill tone="brand">
           {progress ? `${progress.at + 1}/${progress.total}` : `${at + 1}/${queue.length}`}
         </Pill>
+        {tools || null}
       </View>
 
       {/* The question takes the space above the answers rather than sitting on
@@ -694,6 +742,17 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
               <View testID="verdict-speaker" style={{ marginTop: 8, alignSelf: "flex-start" }}>
                 <Speaker text={answerAudioText(q, answer)} size={36} />
               </View>
+            ) : null}
+            {/* Why, in a sentence or two, when the Worker has one: the rule
+                applied to this word and to what was put. A spinner while it is
+                on its way, nothing at all when it does not come. */}
+            {right === false && why === "pending" ? (
+              <ActivityIndicator testID="why-pending" color={t.ink3}
+                                 style={{ alignSelf: "flex-start", marginTop: 10 }} />
+            ) : right === false && why ? (
+              <Text testID="why" style={{ color: t.ink, fontSize: 15, marginTop: 10, lineHeight: 21 }}>
+                {why}
+              </Text>
             ) : null}
             {/* The rule, after a wrong answer only. Right needs no lecture, and
                 a skipped question was never attempted. It replaced the Grammar

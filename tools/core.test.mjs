@@ -27,7 +27,7 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, PRODUCE_AT,
-         lessonSize, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN }
+         lessonSize, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem }
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
@@ -2093,24 +2093,37 @@ group("drill focus");
 {
   const route = STAGES.flatMap((s) => [s.core].concat(s.branches));
   const pool = [...new Set(route.flatMap((u) => u.w))];
-  const ids = (type, units) => Q.drillFocus(type, units || route).map((o) => o.id);
+  const ids = (type) => Q.drillFocus(type).map((o) => o.id);
 
   ok(ids("conjugation").join(",") === "present,past,imperative,who",
      "conjugation narrows to a tense, or to reading a form",
      ids("conjugation").join(","));
   ok(ids("aspect").join(",") === "partner,which", "aspect narrows to either shape");
   ok(!ids("stress").length, "stress has nothing to narrow, so it is never asked");
-  /* The cases are the route's, not all six: a chapter-3 learner may not be
-     offered the instrumental, because the drill may not ask for it either. */
-  const all = ids("cases");
-  // The first point on the route where there is anything to offer at all —
-  // before it the drill is not open, and the setup screen is skipped.
+  /* All six cases are on offer (the owner, 2026-09-26: "select each case or
+     all cases"); the route's cases are the *default ticks*, so an untouched
+     cog is still §30i's drill — a chapter-3 learner is not asked the
+     instrumental unless they ask for it. */
+  ok(ids("cases").join(",") === CASE_ROWS.join(","), "cases offers all six", ids("cases").join(","));
+  ok(ids("agreement").join(",") === CASE_ROWS.concat(ADJ_STEMS.map((s) => s.id)).join(","),
+     "agreement offers the six cases and the three stem classes");
   let cut = 0;
-  while (cut < route.length && !Q.drillFocus("cases", route.slice(0, cut)).length) cut++;
-  const early = Q.drillFocus("cases", route.slice(0, cut)).map((o) => o.id);
-  ok(early.length && early.length < all.length && early.every((r) => all.includes(r)),
-     "the cases offered are the cases the route has taught",
-     `${early.length} of ${all.length} by unit ${cut}`);
+  while (cut < route.length && !Q.defaultFocus("cases", route.slice(0, cut))) cut++;
+  const early = Q.defaultFocus("cases", route.slice(0, cut));
+  ok(early && early.length && early.length < CASE_ROWS.length && early.every((r) => CASE_ROWS.includes(r)),
+     "the default ticks are the cases the route has taught",
+     `${early && early.length} of ${CASE_ROWS.length} by unit ${cut}`);
+  ok(Q.defaultFocus("cases", []) === null && Q.defaultFocus("conjugation", route) === null,
+     "…and nothing before the first case chapter, or for a drill without cases");
+  /* Narrowed to a stem class, every adjective is of that class. */
+  for (const s of ADJ_STEMS) {
+    const qs = Q.drillQuestions("agreement", 8, pool, undefined, true, CASE_ROWS.concat([s.id]));
+    const stemOf = (q) => adjStem(bare(q.sub.split(" ")[0]));
+    ok(qs.length === 8 && qs.every((q) => stemOf(q) === s.id),
+       `agreement → ${s.id} asks only that stem`, `${qs.length} drawn: ${[...new Set(qs.map(stemOf))].join(",")}`);
+  }
+  ok(adjStem("новый") === "stem:hard" && adjStem("русский") === "stem:soft" && adjStem("большой") === "stem:stressed",
+     "the stem class is read off the dictionary ending");
 
   /* The point of the whole feature: ticking one thing gets that thing. */
   const imper = Q.drillQuestions("conjugation", 12, pool, undefined, true, ["imperative"]);

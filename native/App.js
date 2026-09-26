@@ -25,6 +25,7 @@ import { hidesTabBar } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
+import Tutor from "./src/screens/Tutor";
 import Translate from "./src/screens/Translate";
 import { unitById, chapterOf, L, resolveWord, dueCount } from "./src/data";
 import Learn from "./src/screens/Learn";
@@ -53,7 +54,7 @@ import { warmToken } from "./src/lib/feedback";
 import { tabIcon } from "./src/tabicons";
 import { flushState } from "./src/store";
 import {
-  VocabFlow, QuizFlow, DrillList, DrillFlow, DrillSetup, PlacementFlow, SectionFlow,
+  VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
   QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, SoundDrillFlow,
   ShadowFlow, BuildDrillFlow, FinalFlow,
 } from "./src/screens/Flows";
@@ -223,6 +224,8 @@ function PracticeStack() {
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Drills" component={DrillList} options={{ title: "Practice" }} />
       <Stack.Screen name="Talk" component={Talk} options={{ title: "Talk" }} />
+      {/* The free conversation with a tutor who knows the learner (2026-09-26). */}
+      <Stack.Screen name="Tutor" component={Tutor} options={{ title: "Tutor" }} />
       {/* Speak Russian, read it back in English (2026-09-22). */}
       <Stack.Screen name="Translate" component={Translate} options={{ title: "Translate" }} />
       <Stack.Screen name="QuizSetup" component={QuizSetup} options={{ title: "Quiz" }} />
@@ -247,9 +250,8 @@ function PracticeStack() {
                     options={{ title: "Word building" }} />
       {/* Hear a sentence and say it back (ROADMAP P10.6). */}
       <Stack.Screen name="Shadow" component={ShadowFlow} options={{ title: "Shadowing" }} />
-      {/* What a drill will ask about, before it asks anything (Flows.js). */}
-      <Stack.Screen name="DrillSetup" component={DrillSetup}
-                    options={{ title: "What to practice" }} />
+      {/* What a drill asks about is on its own cog (Flows.js DrillOptions);
+          the setup screen that stood here went on 2026-09-26. */}
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <HeaderRight navigation={navigation} route={route} />,

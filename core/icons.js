@@ -60,6 +60,9 @@ export const ACTIVITY_ICONS = {
      nothing about a microphone on purpose, because what the row offers is the
      answer, not the way of asking for it. */
   translate: "M4 7h6M7 7v1.5c0 3-1.2 4.8-3 5.8M5.5 11.5c1.6 2 3.2 2.8 5 3.2M13 20l3.5-8 3.5 8M14.6 17.2h4.8",
+  /* The tutor: a mortarboard over a speech bubble — someone who teaches, in a
+     conversation. Talk's bubble is the same shape with faces in it. */
+  tutor: "M3 8l9-4 9 4-9 4-9-4zM7 10v4c0 1.5 2.2 3 5 3s5-1.5 5-3v-4M20 8v5",
 };
 
 export const iconFor = (id) =>

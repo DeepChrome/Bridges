@@ -4349,6 +4349,86 @@ in another. What each was, and the rule it left.
   Worker tries three times (was two), and `Talk.js` re-sends the turn once on
   `parse` before showing the failure.
 
+## 30aw. The cog, the why, and the tutor (2026-09-26)
+
+The owner, in one message: *"let's make sure we have a settings cog to
+customize the exercises where possible… instead of a settings cog, we have
+this sort of ugly ass top menu"*; *"I'd like to get AI feedback on incorrect
+answers"*; and *"a talk with AI mode where it's sort of just a free flowing
+conversation… builds context about the user… sort of like an AI personal
+tutor."* Three builds, each with the rule that keeps it honest.
+
+**The cog** (`CogButton` in ui.js, beside the progress on a drill and on the
+Study screen). `DrillSetup` — the screen that stood in front of conjugation
+and aspect since §30ac — is gone; every drill opens straight in and its
+options live behind the cog (`DrillOptions` in Flows.js), kept per drill in
+`st.drillPrefs`:
+
+- *Ask about*: the focus ids. **Cases offers all six** now, and agreement adds
+  the adjective's stem class (`ADJ_STEMS` — hard -ый, soft -ий, stressed -ой,
+  read off the dictionary ending). The route's cases are the **default
+  ticks** (`defaultFocus`), so an untouched cog is §30i's drill; what changed
+  is that a learner may tick the instrumental in chapter 3, and that a cases
+  drill before chapter 4 asks all six rather than saying "not yet" (§30au).
+  The `cells` gate that did that is gone with it. The last tick still cannot
+  be removed.
+- *Words from*: "Your words" (the learner's own, widened along the route
+  until a run fills — §30ac) or any set of chapters (`chapterWords`, spine
+  and quests whole). **A chosen chapter is not widened**: a run short of ten
+  is what that chapter has, and saying so beats quietly reaching past it.
+- *Answers*: written or chosen — the one `typedDrills` setting, moved here
+  from Settings, where it sat under a name nobody looked for (the §30ai
+  shape again).
+
+Apply deals a fresh run only when something changed; closing the sheet
+untouched leaves the run where it was. Study's "N sets · Change" row became
+the same cog.
+
+**The why** (`POST /v1/explain`, `backend/src/explain.js`). Under a wrong
+answer on any kind with one right answer (`EXPLAIN_KINDS` in Run.js), the
+Worker is asked why — the question as drawn, the right answer, **and what the
+learner put** — and answers in at most `WHY_WORDS` (55) of plain English,
+Russian in guillemets: the rule applied to this word, and what the learner's
+own answer would have been when it is a real form. No praise, no second
+question. It rides under the verdict when it arrives, a spinner until then,
+nothing at all on any failure — Say's rule for its online feedback. On
+unless Settings → "Explain wrong answers" is off; the feedback counter and
+cap. To carry the learner's answer, every view now passes `said` in
+`record`'s `extra`, and it rides on the verdict.
+
+**…and the miss is kept.** `st.misses` holds the last `MISSES_KEPT` (30)
+wrong answers as `{ kind, prompt, answer, said, at }`, recorded whether or
+not the Worker answers and never for a recycled question. It exists for one
+reader: the tutor.
+
+**The tutor** (`screens/Tutor.js`, `POST /v1/tutor`, `backend/src/tutor.js`).
+Not Talk: Talk is a scene at the learner's level, in Russian, graded per
+word (§30f). This is any request in either language, typed or spoken (a
+RU/EN toggle beside the microphone), and the tutor decides what to do —
+run a drill one question at a time and mark it in the next turn, say what to
+study next, play a scene and coach, explain a point. **It grades nothing and
+nothing enters the scheduler.** What makes it a *personal* tutor is
+`tutorProfile(st)`: chapter and lesson (`routePosition`), level
+(`talkLevelFor`), the trouble bank and pinned words, the words held best
+(familiarity ≥ 60), the recent misses, and `st.tutorNotes` — up to
+`NOTES_KEPT` (20) lines the tutor itself asked to keep (`remember` in the
+reply: "prefers drills", "confuses genitive and accusative"). All of it
+rides in every turn and **the Worker keeps none of it**, which is §30d's
+rule kept while still giving the tutor a memory. The Russian it marks as
+worth hearing (`ru`) is read by the device voice and every Russian word in a
+turn is `Linked`. Counted as talk; `TALK_DAILY_CAP` is the backstop.
+
+Traps: **`clearAllMocks` leaves a `mockResolvedValueOnce` queue in place**,
+so a test that does not consume all its answers hands them to the next one
+— `tutor.mockReset()` in `beforeEach`. And the opening turn must wait for
+`ready` from `useSession`: mounted before the profile arrives, it would
+greet the learner from the store's defaults, which is exactly what the test
+seeding a profile found.
+
+Not verified on a device: the cog sheet, the explanation and the tutor were
+driven only through jest; the Worker is deployed and the walkthrough flow
+`walkthrough7.txt` was updated to the cog and not yet re-run.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

@@ -137,6 +137,23 @@ export async function translate({ ru, en }, deps = {}) {
   return post(ru ? { ru } : { en }, deps, "/v1/translate", TIMEOUT_MS);
 }
 
+/* Why a wrong answer was wrong (2026-09-26): the question as the runner drew
+   it and what the learner put, one short paragraph back as { why }. Same
+   counter as feedback; the ordinary timeout, since it is one sentence out. */
+export async function explain({ kind, ask, prompt, sub, answer, said, rule }, deps = {}) {
+  return post({ kind: kind || "", ask: ask || "", prompt: prompt || "", sub: sub || null,
+                answer, said: said === undefined ? null : said, rule: rule || null },
+              deps, "/v1/explain", TIMEOUT_MS);
+}
+
+/* The free conversation with a tutor who is handed the learner's standing
+   (2026-09-26, screens/Tutor.js). The profile rides in every turn and the
+   Worker keeps none of it; the reply is { text, ru, remember }. */
+export async function tutor({ profile, studied, history, text }, deps = {}) {
+  return post({ profile: profile || {}, studied: studied || [], history: history || [], text: text || "" },
+              deps, "/v1/tutor", TALK_TIMEOUT_MS);
+}
+
 async function post(body, deps, route, timeoutMs, retried = false) {
   const cfg = deps.config || config(route);
   if (!cfg) return { ok: false, reason: "unconfigured" };

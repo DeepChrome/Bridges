@@ -1,8 +1,11 @@
 /* The Bridges Worker (ROADMAP Phases 4 and 6).
  *
- * Three model routes, one job each. POST /v1/feedback grades one spoken
- * sentence; POST /v1/talk takes the tutor's turn in a short conversation;
- * POST /v1/task judges a chapter's task. All hold the Anthropic key so the app
+ * Model routes, one job each. POST /v1/feedback grades one spoken sentence;
+ * POST /v1/talk takes the tutor's turn in a short conversation; POST /v1/task
+ * judges a chapter's task; POST /v1/translate reads a sentence back in the
+ * other language; POST /v1/explain says why a wrong answer was wrong; POST
+ * /v1/tutor is the free conversation with a tutor who knows the learner
+ * (2026-09-26). All hold the Anthropic key so the app
  * never does, check the caller's bearer token, refuse past a daily cap of their
  * own, ask the model, validate the reply against a schema (retrying once), and
  * log token counts to KV. POST /v1/register is the one route without a token:
@@ -23,6 +26,8 @@ import { SYSTEM_TALK, talkMessage, validateTalk, SYSTEM_HINT, hintMessage, valid
          SYSTEM_REVIEW, reviewMessage, validateReview } from "./talk.js";
 import { SYSTEM_TASK, taskMessage, validateTask } from "./task.js";
 import { SYSTEM_TRANSLATE, SYSTEM_TRANSLATE_EN, translateMessage, validateTranslate, direction } from "./translate.js";
+import { SYSTEM_EXPLAIN, explainMessage, validateExplain } from "./explain.js";
+import { SYSTEM_TUTOR, tutorMessage, validateTutor } from "./tutor.js";
 
 const API = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
@@ -220,6 +225,29 @@ const ROUTES = {
     variant: (b) => (direction(b) === "en" ? {
       system: SYSTEM_TRANSLATE_EN, validate: (parsed) => validateTranslate(parsed, "ru"),
     } : null),
+  },
+  /* Why a wrong answer was wrong (2026-09-26, explain.js). The feedback
+     counter again: a learner misses a dozen questions in a sitting, not a
+     hundred, and the cap is a backstop, not a budget. */
+  "/v1/explain": {
+    kind: "explain", counter: "count", cap: (env) => parseInt(env.DAILY_CAP, 10) || DEFAULT_CAP,
+    maxTokens: 250, system: SYSTEM_EXPLAIN,
+    check: (b) => (typeof b.answer === "string" && b.answer.trim() && typeof b.ask === "string"
+      ? null : "ask and answer are required"),
+    message: (b) => explainMessage(b),
+    validate: (parsed) => validateExplain(parsed),
+    capMessage: (cap) => `Daily limit of ${cap} reached; resets at 00:00 UTC.`,
+  },
+  /* The free conversation with a tutor who is handed the learner's standing
+     (tutor.js). It counts as talk: a turn of it is a turn of the tutor's time,
+     whichever screen asked. */
+  "/v1/tutor": {
+    kind: "talk", counter: "talk", cap: (env) => parseInt(env.TALK_DAILY_CAP, 10) || DEFAULT_TALK_CAP,
+    maxTokens: 700, system: SYSTEM_TUTOR,
+    check: (b) => (typeof b.text === "string" && Array.isArray(b.history) ? null : "text and history are required"),
+    message: (b) => tutorMessage(b),
+    validate: (parsed) => validateTutor(parsed),
+    capMessage: (cap) => `Daily conversation limit of ${cap} turns reached; resets at 00:00 UTC.`,
   },
 };
 

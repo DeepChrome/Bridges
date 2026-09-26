@@ -51,25 +51,20 @@ describe("every drill is open from the first screen", () => {
     expect(screen.queryByText(/Opens after chapter/)).toBeNull();
     expect(screen.queryByText(/%/)).toBeNull();
     fireEvent.press(screen.getByTestId("drill-aspect"));
-    expect(nav.navigate).toHaveBeenCalledWith("DrillSetup", { type: "aspect" });
+    expect(nav.navigate).toHaveBeenCalledWith("Drill", { type: "aspect" });
   });
 
-  it("goes through the focus screen where there is something to narrow", async () => {
+  /* Every drill goes straight in (2026-09-26). What it asks about is on the
+     drill's own cog now (drillcog.test.js); the setup screen that stood in
+     front of conjugation and aspect is gone. */
+  it("opens every drill directly, with no setup screen in front of it", async () => {
     await withState({ unit: through(2) });
     await screen.findByText("Conjugation");
     fireEvent.press(screen.getByTestId("drill-conjugation"));
-    /* Through the focus screen, because conjugation has something to narrow —
-       a tense, or reading a form (the owner, 2026-09-16). A drill with nothing
-       to narrow still goes straight in, which the stress row proves below. */
-    expect(nav.navigate).toHaveBeenCalledWith("DrillSetup", { type: "conjugation" });
-  });
-
-  it("…but a drill with nothing to choose between skips the question", async () => {
-    await withState({ unit: through(2) });
-    await screen.findByText("Stress");
+    expect(nav.navigate).toHaveBeenCalledWith("Drill", { type: "conjugation" });
     fireEvent.press(screen.getByTestId("drill-stress"));
-    // A setup screen offering one choice is a tap that buys nothing.
     expect(nav.navigate).toHaveBeenCalledWith("Drill", { type: "stress" });
+    expect(nav.navigate).not.toHaveBeenCalledWith("DrillSetup", expect.anything());
   });
 
   /* Opening a drill ahead of the route widens its words to the whole curriculum:

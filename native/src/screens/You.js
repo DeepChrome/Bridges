@@ -166,19 +166,19 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                           onPick={(id) => update((p) => ({ ...p, learnAhead: id }))} />
                 </View>
               </Row>
-              {/* Drills used to be four options and nothing else. Writing the
-                  form is the same question without the eliminations, which is
-                  §30j's finding rather than a preference — so it is on unless
-                  turned off. Two of the shapes cannot be written at all and stay
-                  as they are (core/questions.js). */}
+              {/* "Write drill answers" sat here until 2026-09-26 and is on the
+                  drill's own cog now (Flows.js DrillOptions), where a learner
+                  decides it at the moment of starting. What stays here is the
+                  one thing that touches every runner: a line from the Worker
+                  under a wrong answer saying why. */}
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Write drill answers</Text>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Explain wrong answers</Text>
                 </View>
                 <Switch
-                  testID="typed-drills-switch"
-                  value={st.typedDrills !== false}
-                  onValueChange={(v) => update((p) => ({ ...p, typedDrills: v }))}
+                  testID="explain-switch"
+                  value={st.explain !== false}
+                  onValueChange={(v) => update((p) => ({ ...p, explain: v }))}
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>

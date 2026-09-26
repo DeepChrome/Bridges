@@ -84,6 +84,21 @@ export const DEFAULTS = {
      the easier question, and §30j found production is what keeps a word. Some
      drill shapes have nothing to produce and ignore it (core/questions.js). */
   typedDrills: true,
+  /* What each drill asks about and where its words come from, chosen from the
+     cog on the drill (Flows.js DrillOptions): drill id -> { only, chapters }.
+     Absent, a drill runs as it always did. */
+  drillPrefs: {},
+  /* One short paragraph from the Worker under a wrong answer, saying why
+     (2026-09-26). On unless turned off; nothing is asked without a Worker. */
+  explain: true,
+  /* The last wrong answers, newest first, as { kind, prompt, answer, said, at }
+     (Run.js): what the tutor is handed so "drill me on what I get wrong" has
+     something to go on. Capped at MISSES_KEPT. */
+  misses: [],
+  /* What the tutor asked to remember about this learner across conversations
+     (screens/Tutor.js) — a preference, a recurring confusion. Kept here, not
+     on the Worker, like every other piece of learner state. */
+  tutorNotes: [],
   talkLevel: null,      // how the Talk tutor pitches its Russian; null = by chapter reached
   talkSpeed: "normal",  // how fast the tutor is read out (audio.js SPEEDS)
   talkEn: true,         // English under the tutor's turns

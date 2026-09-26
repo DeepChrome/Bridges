@@ -64,6 +64,26 @@ export const speechFrom = (kind, stage, lesson) => {
 export const FORM_MIX = { fromStage: 1, typedFromStage: 5, perQuiz: 1 };
 /* The columns of a noun's declension table, for a spec that names rows only. */
 const NOUN_COLUMNS = ["Singular", "Plural"];
+/* The six cases as panel.py titles a declension's rows — what the cases and
+   agreement drills can be narrowed to, all six, since the drill is open from
+   the first screen (§30au) and the learner may choose any of them (the owner,
+   2026-09-26: *"For cases, you should be able to select each case or all
+   cases"*). The route's own cases are only the default ticks (Flows.js). */
+export const CASE_ROWS = ["Nominative", "Genitive", "Dative", "Accusative", "Instrumental", "Prepositional"];
+/* An adjective's stem class, off its dictionary ending: the three shapes a
+   learner has to keep apart, and what the agreement drill narrows to ("maybe
+   you want to focus on irregulars"). Hard is the default pattern; soft covers
+   the -ий adjectives, including the spelling-rule ones after к г х ш ж ч щ;
+   stressed is the -ой set whose endings carry the stress. */
+export const ADJ_STEMS = [
+  { id: "stem:hard", name: "Hard stem, -ый", re: /ый$/ },
+  { id: "stem:soft", name: "Soft stem, -ий", re: /ий$/ },
+  { id: "stem:stressed", name: "Stressed ending, -ой", re: /ой$/ },
+];
+export const adjStem = (bare) => {
+  const s = ADJ_STEMS.find((x) => x.re.test(String(bare || "")));
+  return s ? s.id : null;
+};
 
 /* A listening scene: two or three sentences from the listening pool, played in
    a row, with a question per sentence and one about a word heard — the questions
@@ -1414,7 +1434,7 @@ export function makeQuestions(env) {
      decides it — the cases a chapter-3 learner may be asked are the cases the
      route has introduced (`formsIntroduced`), not all six. Empty means the
      drill has nothing to narrow and the setup screen is skipped for it. */
-  function drillFocus(type, units) {
+  function drillFocus(type) {
     if (type === "conjugation") {
       return [{ id: "present", name: "Present / future" },
               { id: "past", name: "Past" },
@@ -1425,12 +1445,28 @@ export function makeQuestions(env) {
       return [{ id: "partner", name: "Name the partner" },
               { id: "which", name: "Which aspect is it?" }];
     }
-    if (type === "cases" || type === "agreement") {
-      const rows = [];
-      for (const c of formsIntroduced(units || [])) if (!rows.includes(c.row)) rows.push(c.row);
-      return rows.map((r) => ({ id: r, name: r }));
+    /* All six cases, not the route's (the owner, 2026-09-26). Until then the
+       list was `formsIntroduced` and a chapter-3 learner could not be offered
+       the instrumental; now the route's cases are the default ticks and the
+       rest are there to tick. Agreement adds the adjective's stem class as a
+       second thing to narrow by. */
+    if (type === "cases") return CASE_ROWS.map((r) => ({ id: r, name: r }));
+    if (type === "agreement") {
+      return CASE_ROWS.map((r) => ({ id: r, name: r }))
+        .concat(ADJ_STEMS.map((s) => ({ id: s.id, name: s.name, group: "stem" })));
     }
     return [];
+  }
+
+  /* The cases the route so far has introduced, as focus ids — the default
+     ticks for the cases and agreement drills. Empty before any case chapter,
+     which the caller reads as "all of them". */
+  function defaultFocus(type, units) {
+    if (type !== "cases" && type !== "agreement") return null;
+    const rows = [];
+    for (const c of formsIntroduced(units || [])) if (!rows.includes(c.row)) rows.push(c.row);
+    if (!rows.length) return null;
+    return type === "agreement" ? rows.concat(ADJ_STEMS.map((s) => s.id)) : rows;
   }
 
   /* `cells` ({ row, col } pairs, from formsIntroduced) limits what may be asked
@@ -1770,7 +1806,12 @@ export function makeQuestions(env) {
   const nounOk = (x) => x && x.p === "noun" && ["m", "f", "n"].includes(x.g) && !x.pl
                         && tableTitled(x, /Declension/);
   function qAgreement(_cells, typed, only) {
-    const adj = pickWhere((x) => x.p === "adjective" && tableTitled(x, /Declension/)
+    /* Narrowed to a stem class, only adjectives of that class; a selection
+       naming no stem at all is every stem, the rule `verbTable` follows for a
+       selection naming no table. */
+    const stems = ADJ_STEMS.filter((s) => allows(only, s.id)).map((s) => s.id);
+    const stemOk = (x) => !stems.length || stems.includes(adjStem(x.b));
+    const adj = pickWhere((x) => x.p === "adjective" && stemOk(x) && tableTitled(x, /Declension/)
                                  && (PAIRS[L.indexOf(x)] || []).some((i) => nounOk(L[i])));
     if (!adj) return null;
     // …but not a plural-only noun: «часы» is plural, and «но́вый часы» is not
@@ -2080,7 +2121,7 @@ export function makeQuestions(env) {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
-    customQuiz, finalExam, formPrompt, formSpec, formsIntroduced, drillFocus,
+    customQuiz, finalExam, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus,
     drillsIntroduced, drillOpensAt,
   };
 }

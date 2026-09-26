@@ -517,6 +517,23 @@ export function drillPool(st, min = DRILL_POOL_MIN) {
   return out;
 }
 
+/* The words of the chosen chapters, spine and quests, as a drill pool — what
+   a drill draws on when the learner picked chapters on its cog rather than
+   "your words" (2026-09-26). Chapter indices are 0-based; unknown ones are
+   ignored, so a profile from a longer course cannot crash a shorter one. */
+export function chapterWords(indices) {
+  const out = [];
+  const have = new Set();
+  for (const k of indices || []) {
+    const s = STAGES[k];
+    if (!s) continue;
+    for (const u of [s.core].concat(s.branches)) {
+      for (const i of u.w) if (!have.has(i)) { have.add(i); out.push(i); }
+    }
+  }
+  return out;
+}
+
 /* The floors DrillFlow walks up when a run will not fill. Each step reaches
    further along the route; the last is the whole curriculum, which is where a
    drill the learner's own words genuinely cannot supply has to end up — asking

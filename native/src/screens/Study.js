@@ -16,7 +16,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, Pressable, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Choice, Stepper, Lift, Text } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Choice, Stepper, Lift, Text, CogButton } from "../ui";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf } from "../data";
 import { Linked } from "../words";
 import { say } from "../audio";
@@ -646,21 +646,23 @@ export default function Study({ navigation }) {
     <Screen footer={controls}>
       {/* A summary of what is ticked — so it only exists once something is.
           The empty state's button is the way in; this row is the way back. */}
+      {/* What is ticked and what the pile holds, with the cog that changes
+          both — the same control the drills carry (2026-09-26). It was a row
+          with a "Change" button, which the owner read as a menu; the cog is
+          what every other screen means by "options". */}
       {names.length ? (
-        <List>
-          <Row onPress={() => setPicker(true)}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>
-                {names.length === 1 ? names[0] : `${names.length} sets`}
-              </Text>
-              <Muted testID="pile">
-                {session && session.due ? `${session.due} due` + (session.newLeft ? ` · ${Math.min(session.newLeft, chosen)} new` : "")
-                  : `${chosen} cards`}
-              </Muted>
-            </View>
-            <Btn kind="ghost" label="Change" style={{ paddingHorizontal: 8 }} onPress={() => setPicker(true)} />
-          </Row>
-        </List>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15 }}>
+              {names.length === 1 ? names[0] : `${names.length} sets`}
+            </Text>
+            <Muted testID="pile">
+              {session && session.due ? `${session.due} due` + (session.newLeft ? ` · ${Math.min(session.newLeft, chosen)} new` : "")
+                : `${chosen} cards`}
+            </Muted>
+          </View>
+          <CogButton testID="study-cog" label="Study options" onPress={() => setPicker(true)} />
+        </View>
       ) : null}
 
       {!item ? (

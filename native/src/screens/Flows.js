@@ -5,13 +5,14 @@ import React, { useMemo, useRef, useState } from "react";
 import { View, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text } from "../ui";
+import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text,
+         Sheet, Choice, CogButton } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { WordList, GrammarNote, WordCard } from "../lesson";
 import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
-  DRILL_POOL_STEPS,
+  DRILL_POOL_STEPS, chapterWords,
   reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
   scenarioLibrary, required,
 } from "../data";
@@ -517,6 +518,15 @@ export function DrillList({ navigation }) {
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Talk</Text>
           </View>
         </Row>
+        {/* The free conversation with a tutor who knows where you are
+            (2026-09-26, screens/Tutor.js). Talk is a scene at your level in
+            Russian; this is whatever you ask for, in either language. */}
+        <Row testID="practice-tutor" onPress={() => navigation.navigate("Tutor")}>
+          <Thumb id="tutor" tone="brand" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Tutor</Text>
+          </View>
+        </Row>
         {/* The letters and the mouth behind them (ROADMAP P10.2). Open from the
             first screen: nothing else in the app teaches the alphabet. Named
             for the letters rather than for "sounds", which described the vowel
@@ -530,72 +540,18 @@ export function DrillList({ navigation }) {
       </List>
       <SectionLabel style={{ marginTop: 18 }}>Grammar</SectionLabel>
       <List>
-        {DRILL_TYPES.map((d) => {
-          /* Through the focus screen when there is something to narrow, and
-             straight in when there is not — a setup screen offering one choice
-             is a tap that buys nothing. `List` decides which row is last
-             (§30i), so nothing here claims it. */
-          const focus = Q.drillFocus(d.id, reachedUnits(st));
-          return (
-            <Row key={d.id} testID={`drill-${d.id}`}
-                 onPress={() => navigation.navigate(
-                   focus.length > 1 ? "DrillSetup" : "Drill", { type: d.id })}>
-              <Thumb id={d.icon} tone="good" />
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
-                  {d.name}
-                </Text>
-              </View>
-            </Row>
-          );
-        })}
-      </List>
-    </Screen>
-  );
-}
-
-/* What a drill will ask about, chosen before it starts (the owner, 2026-09-16:
- * *"imagine I want to focus on imperative only, then I can just ensure that's
- * checked"*).
- *
- * Everything is ticked, so the default behaviour is exactly what it was and
- * nobody has to make a decision to practise. **The last tick cannot be
- * removed** — an empty selection is a drill with nothing to ask, and a screen
- * that lets you build one and then apologises is worse than one that will not.
- *
- * Only the drills with something to narrow get this screen; the others go
- * straight in (`drillFocus` returns nothing for stress, and for
- * cases before the route has taught a case). A setup screen offering one
- * choice is a tap that buys nothing.
- */
-export function DrillSetup({ route, navigation }) {
-  const { type } = route.params;
-  const { st } = useSession();
-  const t = useTheme();
-  const options = useMemo(() => Q.drillFocus(type, reachedUnits(st)), [type]);
-  const [on, setOn] = useState(() => options.map((o) => o.id));
-  const spec = DRILL_TYPES.find((d) => d.id === type);
-
-  const toggle = (id) => setOn((prev) => (prev.includes(id)
-    ? (prev.length > 1 ? prev.filter((x) => x !== id) : prev)
-    : prev.concat([id])));
-
-  const start = () => navigation.replace("Drill", {
-    type,
-    // All of them is the same as no filter, and saying so keeps the generators
-    // on their ordinary path rather than through a set that matches everything.
-    only: on.length === options.length ? undefined : on,
-  });
-
-  return (
-    <Screen footer={<Btn kind="pri" testID="drill-start" label="Start" onPress={start} />}>
-      <SectionLabel>{spec ? spec.blurb : "What to practice"}</SectionLabel>
-      <List>
-        {options.map((o) => (
-          <Row key={o.id} testID={`focus-${o.id}`} onPress={() => toggle(o.id)}>
-            <Tick on={on.includes(o.id)} />
+        {DRILL_TYPES.map((d) => (
+          /* Straight in. What a drill asks about is on the drill's own cog now
+             (DrillOptions), not a screen in front of it — the owner, 2026-09-26:
+             *"instead of a settings cog, we have this sort of ugly ass top
+             menu."* `List` decides which row is last (§30i). */
+          <Row key={d.id} testID={`drill-${d.id}`}
+               onPress={() => navigation.navigate("Drill", { type: d.id })}>
+            <Thumb id={d.icon} tone="good" />
             <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>{o.name}</Text>
+              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+                {d.name}
+              </Text>
             </View>
           </Row>
         ))}
@@ -604,30 +560,120 @@ export function DrillSetup({ route, navigation }) {
   );
 }
 
+/* What a drill asks about and where its words come from, behind the cog on the
+ * drill itself (the owner, 2026-09-26: *"for conjugations, you should be able
+ * to select which areas to hit… for cases, you should be able to select each
+ * case or all cases… for agreement, maybe you want to focus on irregulars… for
+ * all of them, maybe you want to select which chapters"*). It replaced a setup
+ * screen that stood in front of the drill (§30ac) and that he called ugly.
+ *
+ * Three things, each with the rule that keeps it honest:
+ *
+ *   - **Ask about** — the drill's focus ids (`drillFocus`): a tense or the
+ *     reading question, the aspect shapes, each of the six cases, an
+ *     adjective's stem class. Everything the route has reached is ticked to
+ *     begin with (`defaultFocus`), so an untouched cog is exactly the drill as
+ *     it was. **The last tick cannot be removed** — an empty selection is a
+ *     drill with nothing to ask.
+ *   - **Words from** — "Your words" (the learner's own, widened along the
+ *     route until a run fills) or any set of chapters. A chapter chosen is a
+ *     chapter drawn on whole, quests included, and nothing widens it: the
+ *     learner asked for chapter 3 and a run short of ten is what chapter 3 has.
+ *   - **Answers** — written or chosen. One setting for every drill
+ *     (`typedDrills`), here rather than in Settings, where it was never found.
+ *
+ * Kept per drill in `st.drillPrefs`, so the cog remembers what it was set to.
+ * `null` for a field is "as before" and is what a profile that has never
+ * opened the cog carries.
+ */
+export function DrillOptions({ type, prefs, onChange, onClose }) {
+  const { st, update } = useSession();
+  const t = useTheme();
+  const options = useMemo(() => Q.drillFocus(type), [type]);
+  const suggested = useMemo(() => Q.defaultFocus(type, reachedUnits(st)), [type]);
+  const on = prefs.only || suggested || options.map((o) => o.id);
+  const chapters = prefs.chapters || [];
+  const typed = st.typedDrills !== false;
+
+  const toggle = (id) => {
+    const next = on.includes(id) ? (on.length > 1 ? on.filter((x) => x !== id) : on) : on.concat([id]);
+    // Everything ticked is no filter, and saying so keeps the generators on
+    // their ordinary path rather than through a set that matches everything.
+    onChange({ ...prefs, only: next.length === options.length ? null : next });
+  };
+  const toggleChapter = (k) => onChange({
+    ...prefs,
+    chapters: chapters.includes(k) ? chapters.filter((x) => x !== k) : chapters.concat([k]).sort((a, b) => a - b),
+  });
+  const groups = [["Ask about", options.filter((o) => !o.group)], ["Stem", options.filter((o) => o.group === "stem")]]
+    .filter(([, list]) => list.length > 1);
+
+  return (
+    <Sheet onClose={onClose} testID="drill-options" maxHeight="88%"
+           footer={<Btn kind="pri" testID="drill-apply" label="Apply" style={{ marginTop: 8 }} onPress={onClose} />}>
+      {groups.map(([label, list]) => (
+        <View key={label} style={{ marginBottom: 18 }}>
+          <SectionLabel>{label}</SectionLabel>
+          <List>
+            {list.map((o) => (
+              <Row key={o.id} testID={`focus-${o.id}`} onPress={() => toggle(o.id)}>
+                <Tick on={on.includes(o.id)} />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>{o.name}</Text>
+                </View>
+              </Row>
+            ))}
+          </List>
+        </View>
+      ))}
+      <View style={{ marginBottom: 18 }}>
+        <SectionLabel>Words from</SectionLabel>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+          <Chip testID="words-mine" on={!chapters.length} label="Your words"
+                onPress={() => onChange({ ...prefs, chapters: [] })} />
+          {STAGES.map((s, k) => (
+            <Chip key={s.core.id} testID={`words-ch${k + 1}`} on={chapters.includes(k)}
+                  label={`Ch ${k + 1}`} onPress={() => toggleChapter(k)} />
+          ))}
+        </View>
+      </View>
+      <View style={{ marginBottom: 6 }}>
+        <SectionLabel>Answers</SectionLabel>
+        <Choice testID="drill-answers" value={typed ? "written" : "chosen"}
+                options={[{ id: "written", name: "Written" }, { id: "chosen", name: "Multiple choice" }]}
+                onPick={(id) => update((p) => ({ ...p, typedDrills: id === "written" }))} />
+      </View>
+    </Sheet>
+  );
+}
+
 export function DrillFlow({ route, navigation }) {
   const { type } = route.params;
   const { st, update } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
+  const [cog, setCog] = useState(false);
+  const prefs = (st.drillPrefs || {})[type] || {};
+  const setPrefs = (next) => update((p) => ({ ...p, drillPrefs: { ...(p.drillPrefs || {}), [type]: next } }));
   // Only the learner's own words (data.js drillPool); the pool is fixed for the
-  // run so answering does not reshuffle the questions underneath. The cases
-  // drill asks only for the cases the route so far has taught.
+  // run so answering does not reshuffle the questions underneath.
   //
-  // Unless the drill is open only because developer mode says so: a learner in
-  // chapter 1 who opens Aspect has met eight verbs, and the drill would ask the
-  // same handful all run. Skipping ahead means the whole curriculum is fair game.
+  // Unless the drill is open ahead of the route: a learner in chapter 1 who
+  // opens Aspect has met eight verbs, and the drill would ask the same handful
+  // all run. Skipping ahead means the whole curriculum is fair game.
   const ahead = useMemo(() => !Q.drillsIntroduced(reachedUnits(st)).has(type), [type]);
-  const cells = useMemo(
-    () => (type === "cases" && !ahead ? Q.formsIntroduced(reachedUnits(st)) : undefined),
-    [type, seed, ahead]);
   /* Written or chosen (the owner, 2026-09-11: *"fill in the blank allows the
      user to generate it completely rather than guess"*). On unless turned off,
      because that is §30j's own finding — recognition meets a word, production
      keeps it — and every drill question used to be four options. */
   const typed = st.typedDrills !== false;
-  /* What the learner ticked on the way in, as focus ids. `null` before they
-     have been asked; a drill with nothing to narrow is never asked. */
-  const only = route.params.only || null;
+  /* What the cog says to ask about: the learner's ticks, else the cases the
+     route has taught (which used to be the `cells` gate, §30i), else
+     everything. A cases drill before chapter 4 therefore asks all six cases
+     rather than saying "not yet" — nothing in Practice is locked (§30au). */
+  const only = useMemo(() => prefs.only || Q.defaultFocus(type, reachedUnits(st)),
+                       [type, prefs.only]);
+  const chapters = prefs.chapters || [];
 
   /* **Widen until the run fills.**
    *
@@ -640,26 +686,42 @@ export function DrillFlow({ route, navigation }) {
    * So the pool steps further along the route until a full run comes back, and
    * the last step is the whole curriculum. Reaching past what the learner has
    * met is the lesser wrong: §30e's rule is that a drill asks about the
-   * learner's own words, and it already bends that way at DRILL_POOL_MIN. */
+   * learner's own words, and it already bends that way at DRILL_POOL_MIN.
+   *
+   * Chapters chosen on the cog are not widened: that is the learner saying
+   * where the words come from, and a short run is the honest answer. */
   const steps = useMemo(() => {
-    if (ahead) return Q.drillQuestions(type, undefined, null, cells, typed, only);
+    if (chapters.length) return Q.drillQuestions(type, undefined, chapterWords(chapters), undefined, typed, only);
+    if (ahead) return Q.drillQuestions(type, undefined, null, undefined, typed, only);
     let last = [];
     for (const min of DRILL_POOL_STEPS) {
       const p = min === Infinity ? null : drillPool(st, min);
-      last = Q.drillQuestions(type, undefined, p, cells, typed, only);
+      last = Q.drillQuestions(type, undefined, p, undefined, typed, only);
       if (last.length >= DRILL_N) return last;
     }
     return last;
-  }, [type, seed, cells, typed, only, ahead]);
+  }, [type, seed, typed, only, ahead, chapters.join(",")]);
   const spec = DRILL_TYPES.find((d) => d.id === type);
   useAudioStopOnLeave();
 
+  /* The cog: open it, change things, Apply deals a fresh run. Closing with
+     nothing changed leaves the run where it was. */
+  const before = useRef(null);
+  const openCog = () => { before.current = JSON.stringify([prefs, typed]); setCog(true); };
+  const closeCog = () => {
+    setCog(false);
+    if (JSON.stringify([prefs, typed]) !== before.current) { setResult(null); setSeed(seed + 1); }
+  };
+  const tools = <CogButton testID="drill-cog" onPress={openCog} label="Drill options" />;
+  const sheet = cog ? <DrillOptions type={type} prefs={prefs} onChange={setPrefs} onClose={closeCog} /> : null;
+
   if (!steps.length) {
-    const from = cells && !cells.length ? STAGES.findIndex((s) => Q.formsIntroduced([s.core]).length) : -1;
     return (
-      <Done title={from >= 0 ? "Not yet" : "No questions available"}
-            detail={from >= 0 ? `The cases come with chapter ${from + 1}.` : undefined}
-            onBack={() => navigation.goBack()} />
+      <>
+        <Done title="No questions available" onBack={() => navigation.goBack()}
+              onAgain={openCog} againLabel="Options" />
+        {sheet}
+      </>
     );
   }
   if (result) {
@@ -677,15 +739,20 @@ export function DrillFlow({ route, navigation }) {
   }
 
   return (
-    <Runner
-      steps={steps}
-      navigation={navigation}
-      onFinish={(r) => {
-        const score = scoreOf(r);
-        update((prev) => bestOf(prev, type, score));
-        setResult({ ...r, score });
-      }}
-    />
+    <>
+      <Runner
+        key={seed}
+        steps={steps}
+        navigation={navigation}
+        tools={tools}
+        onFinish={(r) => {
+          const score = scoreOf(r);
+          update((prev) => bestOf(prev, type, score));
+          setResult({ ...r, score });
+        }}
+      />
+      {sheet}
+    </>
   );
 }
 

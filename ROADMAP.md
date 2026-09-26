@@ -928,6 +928,22 @@ obligation (rule 20.10) finally met in the native app — Settings → Credits,
 generated from the payload's `meta` rows and from `tools/build_notices.mjs`
 rather than typed. `docs/privacy.md` written and needs a public URL.
 
+### The cog, the why, and the tutor, 2026-09-26 — CLAUDE.md §30aw
+
+A cog on every drill and on Study replaces the setup screen: what to ask
+about (all six cases, the adjective's stem class, the tenses, the aspect
+shapes; the route's cases ticked by default), which chapters the words come
+from, written or chosen — kept per drill. `POST /v1/explain`: a wrong answer
+gets one short paragraph from the Worker saying why, given the question and
+what the learner put; a Settings switch turns it off; the miss is kept in
+`st.misses` for the tutor. `POST /v1/tutor` and Practice → Tutor: a free
+conversation, typed or spoken in either language, with the learner's
+standing (route, trouble, strongest words, recent misses, the tutor's own
+notes) sent every turn and kept on the phone; drills one question at a time,
+what to study next, a scene with coaching. Nothing graded. Worker deployed.
+Suites: core 642, native 505, smoke 159, Worker 71, copy 0 over, dead
+exports 0.
+
 ### A day on beta.6, fourteen items, 2026-09-24 — CLAUDE.md §30av
 
 Flashcards turn back and carry a speaker on the back; the review count is

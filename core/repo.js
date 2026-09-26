@@ -38,8 +38,7 @@
 export const SETTING_KEYS = ["dev", "theme", "name", "speed", "cue", "osk",
                              "typedDrills", "talkLevel", "talkSpeed", "talkEn",
                              "flash", "newPerDay", "reviewsPerDay", "retention", "learnAhead",
-                             "haptics", "remind", "flashVoice", "drillPrefs", "explain",
-                             "tutorHands"];
+                             "haptics", "remind", "flashVoice", "drillPrefs", "explain"];
 
 /* A card row's columns, and the card field each holds. `due` and `last` are
    the clock in ms since Phase 2 (`dueAt`, `lastAt` on the card). */

@@ -58,11 +58,42 @@ export const MIN_LISTEN_MS = 900;
    the closest of the lot (core/speech.js closestTranscript). */
 export const ALTERNATIVES = 5;
 
-/* A hands-free attempt ends when Android decides the speaker stopped. If the
-   engine never says so at all, the attempt is abandoned here — longer than
-   the hold watchdog because nothing has been released, so this is the whole
-   turn rather than the tail of one. */
-export const LISTEN_MAX_MS = 20000;
+/* **Conversation mode does its own endpointing, and that is the whole trick.**
+ *
+ * The first cut let Android decide when the learner had stopped
+ * (`continuous: false`, which returns one result and closes). On the device it
+ * was useless: the engine cut in on a pause mid-sentence, dropped the tail of
+ * a slow word, and often returned nothing at all, so the microphone appeared
+ * to stay open and do nothing. The owner, 2026-09-26: *"the mic just stays on
+ * longer but I still have to press it on and off it seems and even then it is
+ * not capturing my words well."*
+ *
+ * So the engine is now held open (`continuous: true`) and **the pause is
+ * measured here**: every result, final or partial, restarts a timer, and when
+ * it runs out the turn is what has accumulated. That is how a voice assistant
+ * behaves, and it is tunable — Android's endpointing is not. A learner
+ * hunting for a word gets `SILENCE_MS` to find it rather than whatever the
+ * engine feels like.
+ *
+ * The three windows, and why each exists:
+ *   SILENCE_MS  quiet *after speech* — the turn is over. Long enough to think
+ *               mid-sentence in a language you do not speak well.
+ *   NOTHING_MS  no speech at all — nobody is there, so it is a silent turn.
+ *   LISTEN_MAX_MS  an absolute cap, whatever is happening; a microphone with
+ *               no ceiling is the failure a conversation must not have.
+ */
+export const SILENCE_MS = 1500;
+export const NOTHING_MS = 9000;
+export const LISTEN_MAX_MS = 45000;
+
+/* Android's own thresholds, pushed out so the platform does not close the
+   session before the timer above gets to decide. Ignored on a device that
+   does not honour them, which is why the pause is measured here as well. */
+const ANDROID_PATIENCE = {
+  EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS: 3000,
+  EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS: 3000,
+  EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS: 1500,
+};
 
 /* **The errors that mean "that attempt did not work", not "this phone cannot
  * do this"** — and what to say about each.
@@ -124,14 +155,27 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
      one the words came through. */
   const lang = useRef(LANG);
 
+  /* What conversation mode has heard so far: the finals it has been handed,
+     plus whatever partial is in flight. Android delivers a long turn in
+     segments, so a turn is the segments joined rather than the last one. */
+  const heard = useRef([]);
+  const partial = useRef("");
+  const silence = useRef(null);
+  const cap = useRef(null);
+  const spoken = () => heard.current.concat(partial.current || []).join(" ").replace(/\s+/g, " ").trim();
+
   const clearTimers = () => {
     if (watchdog.current) { clearTimeout(watchdog.current); watchdog.current = null; }
     if (stopTimer.current) { clearTimeout(stopTimer.current); stopTimer.current = null; }
+    if (silence.current) { clearTimeout(silence.current); silence.current = null; }
+    if (cap.current) { clearTimeout(cap.current); cap.current = null; }
   };
 
   const finish = (text, alternatives) => {
     clearTimers();
     selfEnding.current = false;
+    heard.current = [];
+    partial.current = "";
     go("idle");
     if (cb.current.onFinal) {
       cb.current.onFinal(text, Date.now() - releasedAt.current, alternatives || [text], lang.current);
@@ -144,16 +188,49 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
   const quiet = () => {
     clearTimers();
     selfEnding.current = false;
+    heard.current = [];
+    partial.current = "";
     go("idle");
     if (cb.current.onQuiet) cb.current.onQuiet();
+  };
+
+  /* The turn is over when the learner has been quiet for a moment. Every
+     result pushes this out; when it fires, what has accumulated is the turn.
+     Settle before stopping the engine, so the `end` that follows finds the
+     phase already idle and does not report the same turn twice. */
+  const armSilence = () => {
+    if (silence.current) clearTimeout(silence.current);
+    silence.current = setTimeout(() => {
+      silence.current = null;
+      if (phaseRef.current !== "listening" || !selfEnding.current) return;
+      const whole = spoken();
+      if (!whole) { quiet(); try { M.abort(); } catch (e) { /* nothing to abort */ } return; }
+      finish(whole, [whole]);
+      try { M.stop(); } catch (e) { /* the end event may still arrive */ }
+    }, SILENCE_MS);
   };
 
   useSpeechRecognitionEvent("result", (ev) => {
     if (phaseRef.current !== "listening") return;
     const all = (ev.results || []).map((r) => r && r.transcript).filter((t) => typeof t === "string");
     const text = all[0] || "";
-    if (ev.isFinal) finish(text, all.length ? all : [text]);
-    else setLive(text);
+    /* Held speech: the release decides, so a final result is the answer. */
+    if (!selfEnding.current) {
+      if (ev.isFinal) finish(text, all.length ? all : [text]);
+      else setLive(text);
+      return;
+    }
+    /* Conversation mode: accumulate and keep listening. A final here is one
+       segment of a turn, not the end of it. */
+    if (ev.isFinal) { if (text.trim()) heard.current.push(text.trim()); partial.current = ""; }
+    else partial.current = text;
+    const whole = spoken();
+    setLive(whole);
+    if (whole) {
+      // Speech has started, so the "nobody is there" window no longer applies.
+      if (watchdog.current) { clearTimeout(watchdog.current); watchdog.current = null; }
+      armSilence();
+    }
   });
   useSpeechRecognitionEvent("error", (ev) => {
     if (phaseRef.current !== "listening") return;
@@ -173,19 +250,30 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
       setBlock({ why: "engine", text: `Recognition failed: ${ev.error}` });
     }
     if (cb.current.onError) cb.current.onError(ev.error, Date.now() - releasedAt.current);
-    /* In conversation mode a "nothing heard" is a turn where the learner did
-       not speak, and the loop is owed that news — otherwise it waits for a
-       reply that is never coming. A real block is not silence, and the screen
-       reads `block` for those. */
-    if (wasSelf && TRANSIENT[ev.error] && cb.current.onQuiet) cb.current.onQuiet();
+    /* In conversation mode a transient error is not a lost turn if words were
+       already heard — deliver them rather than make the learner repeat
+       themselves. With nothing heard it is a silent turn, and the loop is owed
+       that news or it waits for a reply that is never coming. A real block is
+       not silence, and the screen reads `block` for those. */
+    if (wasSelf && TRANSIENT[ev.error]) {
+      const whole = spoken();
+      if (whole && cb.current.onFinal) {
+        cb.current.onFinal(whole, Date.now() - releasedAt.current, [whole], lang.current);
+      } else if (cb.current.onQuiet) cb.current.onQuiet();
+    }
   });
   useSpeechRecognitionEvent("end", () => {
     if (phaseRef.current !== "listening") return;
-    // Ended without a final result. The last partial is what the recogniser had,
-    // so use that rather than throw the attempt away; with nothing at all heard,
-    // back to idle and let the learner try again — or, hands free, say so.
+    /* Conversation mode holds the engine open, so an ending here is the
+       platform closing the session under us. Whatever was heard is the turn. */
+    if (selfEnding.current) {
+      const whole = spoken();
+      if (whole) finish(whole, [whole]); else quiet();
+      return;
+    }
+    // Held speech ended without a final result. The last partial is what the
+    // recogniser had, so use that rather than throw the attempt away.
     if (liveRef.current) finish(liveRef.current);
-    else if (selfEnding.current) quiet();
     else go("idle");
   });
 
@@ -197,6 +285,8 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     setLive(""); setNote(null);
     releasedEarly.current = false;
     selfEnding.current = !!self;
+    heard.current = [];
+    partial.current = "";
     go("asking");
     let perm;
     try { perm = await M.requestPermissionsAsync(); } catch (e) { perm = { granted: false }; }
@@ -214,20 +304,29 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     if (self) releasedAt.current = Date.now();
     try {
       const hint = (cb.current.bias || []).filter((s) => typeof s === "string" && s.trim());
-      M.start({ lang: lang.current, requiresOnDeviceRecognition: true, interimResults: true,
-                maxAlternatives: ALTERNATIVES, continuous: false,
-                ...(hint.length ? { contextualStrings: hint } : {}) });
-      /* An engine that never ends would leave the microphone open for the rest
-         of the session — the one failure a conversation must not have. */
+      const opts = { lang: lang.current, requiresOnDeviceRecognition: true, interimResults: true,
+                     maxAlternatives: ALTERNATIVES, continuous: !!self,
+                     ...(hint.length ? { contextualStrings: hint } : {}) };
+      /* The patience settings are an Android extra, so a device or a library
+         version that does not know them must not take the feature down with
+         it: one retry without them, and the timer here still endpoints. */
+      try { M.start(self ? { ...opts, androidIntentOptions: ANDROID_PATIENCE } : opts); }
+      catch (e) { M.start(opts); }
       if (self) {
+        /* Nobody is there. Cleared the moment any word arrives. */
         watchdog.current = setTimeout(() => {
           watchdog.current = null;
-          if (phaseRef.current !== "listening") return;
-          /* Settle first, abort second: aborting raises "end", and the handler
-             reads the phase to decide what an ending means. Settling moves the
-             phase to idle, so the event that follows finds nothing to do
-             rather than reporting the same turn twice. */
-          if (liveRef.current) finish(liveRef.current); else quiet();
+          if (phaseRef.current !== "listening" || !selfEnding.current) return;
+          quiet();
+          try { M.abort(); } catch (e) { /* nothing to abort */ }
+        }, NOTHING_MS);
+        /* And a ceiling whatever happens, so the microphone cannot be left
+           open for the rest of the session by an engine that never closes. */
+        cap.current = setTimeout(() => {
+          cap.current = null;
+          if (phaseRef.current !== "listening" || !selfEnding.current) return;
+          const whole = spoken();
+          if (whole) finish(whole, [whole]); else quiet();
           try { M.abort(); } catch (e) { /* nothing to abort */ }
         }, LISTEN_MAX_MS);
       }
@@ -251,6 +350,8 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
   const cancel = () => {
     clearTimers();
     selfEnding.current = false;
+    heard.current = [];
+    partial.current = "";
     const was = phaseRef.current;
     go("idle");
     setLive("");

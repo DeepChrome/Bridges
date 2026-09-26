@@ -4486,17 +4486,36 @@ English under the Russian (`talkEn`, Talk's own key, so the two tutors cannot
 be pitched differently), and Start over, which used to be a link beside the
 microphone as though it were something you would want mid-sentence.
 
-**Conversation mode** (`st.tutorHands`, the cog; the owner, 2026-09-26:
-*"conversation mode where it just goes back and forth and you dont have to
-hold the mic"*, and when asked where, *"specifically for the AI tutor"*). Off
-by default, because a room where you cannot talk freely is the ordinary case.
-On, the hold becomes one button that runs the exchange: press and the
-microphone opens, the learner speaks, **Android's own endpointing** decides
-they have stopped, the turn goes, the tutor answers, and the microphone opens
-again. `listen()` and `cancel()` in `speech.js` are the second way into the
-one engine — `hold`/`release` is a finger, `listen` ends by itself — and
-`onQuiet` tells the screen an attempt produced nothing, because **a loop that
-cannot tell silence from an answer is a loop that talks over the learner.**
+**Conversation mode** (the owner, 2026-09-26: *"conversation mode where it
+just goes back and forth and you dont have to hold the mic"*, and when asked
+where, *"specifically for the AI tutor"*). One icon beside the microphone —
+*"it doesn't have to be hidden in the settings. Think about Claude's own
+conversation mode with the little icon by itself"* — and while it is lit the
+exchange runs itself: the microphone opens, the learner speaks, the turn
+goes, the tutor answers aloud, the microphone opens again. **Not a setting
+and not persisted**: a microphone that opens itself the moment a screen is
+opened is not a preference to inherit from last week. `listen()` and
+`cancel()` in `speech.js` are the second way into the one engine —
+`hold`/`release` is a finger, `listen` ends by itself — and `onQuiet` tells
+the screen an attempt produced nothing, because **a loop that cannot tell
+silence from an answer is a loop that talks over the learner.**
+
+**The endpointing is ours, and that is the whole trick.** The first cut let
+Android decide when the learner had stopped (`continuous: false`, one result
+and close). On the device it was useless: it cut in on a pause mid-sentence,
+dropped the tail of a slow word, and often returned nothing, so the
+microphone appeared to stay open and do nothing — *"the mic just stays on
+longer but I still have to press it on and off it seems and even then it is
+not capturing my words well."* The engine is held open (`continuous: true`)
+and **the pause is measured in the hook**: every result, final or partial,
+restarts `SILENCE_MS` (1.5 s), and the turn is the segments joined when it
+runs out. Android delivers a long turn in pieces, so a final is one segment
+of a turn and not the end of it. `NOTHING_MS` (9 s) is "nobody is there" and
+`LISTEN_MAX_MS` (45 s) is the ceiling. `ANDROID_PATIENCE` pushes the
+platform's own thresholds out so it does not close the session first, with a
+retry without them, because an unknown intent extra must not take the feature
+down. **A learner hunting for a word gets a tunable window; Android's
+endpointing is not tunable.**
 
 Four rules, and each is a way a hands-free loop goes wrong:
 
@@ -4512,8 +4531,7 @@ Four rules, and each is a way a hands-free loop goes wrong:
   is §23's `trackSeq` rule applied to a conversation, and the test found it
   rather than a device.
 - **The microphone cannot stay open in an empty room.** `QUIET_LIMIT` (2)
-  silent turns in a row and the loop stops; `LISTEN_MAX_MS` (20 s) abandons an
-  attempt the engine never ends.
+  silent turns in a row and the loop stops.
 - **Stopping puts it down at once, and sends nothing.** `cancel` moves the
   phase to idle *before* aborting, because aborting raises `end` and a partial
   still in hand would otherwise be delivered as a turn the learner never

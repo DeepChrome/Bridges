@@ -178,6 +178,31 @@ function LangToggle({ lang, onPress }) {
 
 const SEND = "M4 12h14M12 5l7 7-7 7";
 
+/* Conversation mode, as one icon beside the microphone — the control the
+   owner described: *"think about Claude's own conversation mode with the
+   little icon by itself."* Four bars of a waveform, lit when the exchange is
+   running. It is the mode's only control and it is not a setting, so there is
+   nowhere else to look for it. */
+function ConverseToggle({ on, onPress }) {
+  const t = useTheme();
+  return (
+    <Pressable testID="tutor-converse" accessibilityRole="button"
+               accessibilityState={{ selected: !!on }}
+               accessibilityLabel={on ? "Leave conversation mode" : "Conversation mode"}
+               onPress={onPress} hitSlop={8}
+               style={({ pressed }) => ({ width: 44, height: 44, borderRadius: 22,
+                 alignItems: "center", justifyContent: "center", borderWidth: 1,
+                 borderColor: on ? t.brand : t.line,
+                 backgroundColor: on ? t.brandBg : t.surface,
+                 opacity: pressed ? 0.6 : 1 })}>
+      <Svg width={22} height={22} viewBox="0 0 24 24" fill="none"
+           stroke={on ? t.brandInk : t.ink2} strokeWidth={2} strokeLinecap="round">
+        <Path d="M4 10v4M8.5 6v12M15.5 6v12M20 10v4" />
+      </Svg>
+    </Pressable>
+  );
+}
+
 /* The screen's own options, behind the cog every other run screen carries
    (the owner, 2026-09-26: *"in Tutor mode there's no settings button like
    there is in other areas"*). Everything here is a fact about the tutor, not
@@ -207,15 +232,6 @@ function TutorOptions({ onClose, onRestart }) {
               <Text style={{ color: t.ink, fontSize: 15 }}>English under the Russian</Text>
             </View>
           </Row>
-          <Row testID="tutor-hands-row" onPress={() => update((p) => ({ ...p, tutorHands: !p.tutorHands }))}>
-            <Tick on={!!st.tutorHands} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>Conversation mode</Text>
-              {/* One of rule 20.7's three: the microphone behaving differently
-                  is a state nothing on the button discloses. */}
-              <Muted>The microphone opens after each reply</Muted>
-            </View>
-          </Row>
         </List>
       </View>
       <Btn kind="plain" testID="tutor-restart" label="Start over" onPress={onRestart} />
@@ -237,10 +253,14 @@ export default function Tutor({ navigation }) {
   /* Conversation mode: the microphone opens itself after each of the tutor's
      turns and closes when the learner stops speaking (the owner, 2026-09-26:
      *"conversation mode where it just goes back and forth and you dont have
-     to hold the mic"*). `hands` is the setting; `going` is whether the loop is
-     actually running, which is a fact about this sitting rather than about
-     the learner, so it is not persisted and starts off. */
-  const hands = !!st.tutorHands;
+     to hold the mic"*).
+     **It is one visible control, not a setting** — *"conversation mode doesn't
+     have to be hidden in the settings. Think about Claude's own conversation
+     mode with the little icon by itself. When that's on, you can just go back
+     and forth with the AI."* So the icon beside the microphone is the whole
+     mechanism: pressing it starts the exchange, pressing it again ends it.
+     Nothing is persisted, because a microphone that opens itself the moment a
+     screen is opened is not something to inherit from last week. */
   const [going, setGoing] = useState(false);
   const goingRef = useRef(false);
   const setLoop = (on) => { goingRef.current = on; setGoing(on); };
@@ -290,7 +310,7 @@ export default function Tutor({ navigation }) {
        contend for one audio session, and a microphone open under a speaker
        hears the speaker (§30h′). `speakLine` resolves when it has finished,
        which is the handshake the loop turns on. */
-    if (turn.ru) await speakLine(turn.ru);
+    if (turn.ru) { speakingRef.current = true; await speakLine(turn.ru); speakingRef.current = false; }
     if (!alive.current || askSeq.current !== mine) return;
     /* `ask` reaches the recogniser through a ref because a conversation is a
        cycle — the reply starts the listening that produces the next reply —
@@ -299,6 +319,10 @@ export default function Tutor({ navigation }) {
   };
   const recRef = useRef(null);
   const askSeq = useRef(0);
+  /* Whether the tutor is mid-sentence. Entering conversation mode while it is
+     talking must not open the microphone under it (§30h′); the turn already
+     in flight opens it when it finishes. */
+  const speakingRef = useRef(false);
 
   /* The tutor opens, from the profile alone — once the profile is here. The
      shell mounts a screen only after the session is ready, so this is belt
@@ -322,7 +346,11 @@ export default function Tutor({ navigation }) {
   };
 
   const rec = useRecognizer({
-    enabled: configured && !pending,
+    /* Not gated on `pending`: the loop reopens the microphone from inside a
+       turn that has just finished, and a stale `enabled` captured while the
+       request was in flight would silently swallow that call. The hold button
+       is gated at its own handler instead. */
+    enabled: configured,
     onFinal: (transcript) => {
       quiets.current = 0;
       const s = String(transcript || "").trim();
@@ -352,11 +380,10 @@ export default function Tutor({ navigation }) {
     if (goingRef.current) { setLoop(false); rec.cancel(); return; }
     quiets.current = 0;
     setLoop(true);
-    if (!pending) rec.listen({ lang: LANG });
+    /* Start listening now unless the tutor is still working or talking, in
+       which case the turn in flight opens the microphone when it is done. */
+    if (!pending && !speakingRef.current) rec.listen({ lang: LANG });
   };
-  /* The setting turning off mid-conversation ends the loop with it. */
-  useEffect(() => { if (!hands && goingRef.current) { setLoop(false); rec.cancel(); } },
-            [hands]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollToEnd({ animated: true });
@@ -437,16 +464,15 @@ export default function Tutor({ navigation }) {
               </Pressable>
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 10 }}>
-              <View style={{ width: 44 }} />
-              {/* Conversation mode replaces the hold with one button that runs
-                  the exchange: press once and it goes back and forth, press
-                  again and the microphone goes down. Held speech stays the
-                  default, because a room where you cannot talk freely is the
-                  ordinary case. */}
-              {hands ? (
+              {/* The whole of conversation mode: one icon, on or off. */}
+              <ConverseToggle on={going} onPress={toggleLoop} />
+              {/* On, the hold is replaced by what the exchange is doing —
+                  listening, thinking, speaking — and pressing it also ends the
+                  conversation, because the thing under your thumb should be
+                  the thing you want to stop. */}
+              {going ? (
                 <Pressable testID="tutor-loop" accessibilityRole="button"
-                           accessibilityState={{ selected: going }}
-                           accessibilityLabel={going ? "Stop the conversation" : "Start the conversation"}
+                           accessibilityLabel="Stop the conversation"
                            onPress={toggleLoop} hitSlop={8}
                            style={({ pressed }) => ({ width: 60, height: 60, borderRadius: 30,
                              alignItems: "center", justifyContent: "center", borderWidth: 1,
@@ -456,24 +482,21 @@ export default function Tutor({ navigation }) {
                   <Svg width={24} height={24} viewBox="0 0 24 24" fill="none"
                        stroke={rec.phase === "listening" ? t.brandOn : t.brandInk}
                        strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                    {going ? <Path d="M7 7h10v10H7z" /> : (
-                      <>
-                        <Path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z" />
-                        <Path d="M19 11a7 7 0 0 1-14 0M12 18v3" />
-                      </>
-                    )}
+                    <Path d="M7 7h10v10H7z" />
                   </Svg>
                 </Pressable>
               ) : (
                 <HoldButton testID="tutor-hold" phase={rec.phase} size={60}
-                            onIn={() => rec.hold({ lang })} onOut={rec.release} />
+                            onIn={() => !pending && rec.hold({ lang })} onOut={rec.release} />
               )}
               <LangToggle lang={lang} onPress={() => setLang(lang === LANG ? LANG_EN : LANG)} />
             </View>
             <Text testID="tutor-live"
                   style={{ color: t.ink, fontSize: 15, minHeight: 20, textAlign: "center", marginTop: 4 }}>
               {rec.phase === "listening" ? (rec.live || "Listening…")
-                : going ? "Your turn next" : rec.note || ""}
+                : going && pending ? "Thinking…"
+                : going ? "Speaking…"
+                : rec.note || ""}
             </Text>
           </View>
         )}

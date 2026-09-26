@@ -958,8 +958,12 @@ start over). Suites: core 642, native 512, Worker 73, copy 0 over, dead 0.
 Conversation mode in the Tutor, same day: `listen()`/`cancel()`/`onQuiet` in
 speech.js as the hands-free way into the one engine, the loop in Tutor.js
 (speak then listen, never both; `askSeq` so only the newest turn opens the
-microphone; QUIET_LIMIT 2 and LISTEN_MAX_MS 20 s so it cannot stay open in an
-empty room). `st.tutorHands`, off by default, on the cog.
+microphone; QUIET_LIMIT 2 so it cannot stay open in an empty room). Tried on
+the phone and rebuilt the same hour: Android's endpointing cut words and
+pauses, so the engine is held open and the pause is measured here
+(SILENCE_MS 1.5 s, NOTHING_MS 9 s, LISTEN_MAX_MS 45 s, plus
+androidIntentOptions), and the control is one visible icon beside the
+microphone rather than a setting.
 
 ### A day on beta.6, fourteen items, 2026-09-24 — CLAUDE.md §30av
 

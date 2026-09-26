@@ -4414,9 +4414,23 @@ nothing enters the scheduler.** What makes it a *personal* tutor is
 `NOTES_KEPT` (20) lines the tutor itself asked to keep (`remember` in the
 reply: "prefers drills", "confuses genitive and accusative"). All of it
 rides in every turn and **the Worker keeps none of it**, which is §30d's
-rule kept while still giving the tutor a memory. The Russian it marks as
-worth hearing (`ru`) is read by the device voice and every Russian word in a
-turn is `Linked`. Counted as talk; `TALK_DAILY_CAP` is the backstop.
+rule kept while still giving the tutor a memory. Counted as talk;
+`TALK_DAILY_CAP` is the backstop.
+
+**A turn is three parts, not one field.** The first cut asked for one mixed
+`text` and drew it through one component, and on the owner's phone the
+tutor's bubble was empty but for its speaker: *"I can't see transcriptions…
+Also, if it can have both English and Russian, that would be preferable. If
+the user wants, they can disable the English in settings."* The reply is now
+`{ ru, en, note, remember }` — what the tutor says in Russian (word-linked,
+read by the device voice, a speaker to hear again), the English of that
+Russian (owed whenever there is Russian; hidden by Settings → "English under
+the tutor", the same `talkEn` Talk's toolbar writes), and the coaching in
+English (a correction, an instruction, the answer to an English question),
+which no switch hides. The validator refuses a turn with neither `ru` nor
+`note`, and the app refuses it again. Each part is drawn the way Talk's
+bubble already draws its Russian and English, which is the rendering that
+was known to work on his phone.
 
 Traps: **`clearAllMocks` leaves a `mockResolvedValueOnce` queue in place**,
 so a test that does not consume all its answers hands them to the next one

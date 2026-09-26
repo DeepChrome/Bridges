@@ -88,22 +88,38 @@ export const remember = (notes, line) => {
 
 const CYR = /[Ѐ-ӿ]/;
 
-/* The tutor's turn: Russian words linked, a speaker when there is Russian to
-   hear. English through `Linked` too — it leaves Latin runs alone, and a turn
-   is usually both languages in one paragraph. */
-function TutorBubble({ turn }) {
+/* A turn as one string, for the history the Worker is sent. */
+export const turnText = (x) => (x.who === "learner" ? String(x.text || "")
+  : [x.ru, x.note].filter(Boolean).join(" "));
+
+/* The tutor's turn, in its parts: the Russian word-linked with a speaker, its
+   English under it in the quiet face (off with the same switch as Talk's,
+   `talkEn`), and the coaching note in English below, which no switch hides —
+   a correction or an answer to an English question is the turn's substance.
+   The first cut drew one mixed `text` through one component and reached the
+   owner's phone as an empty bubble with a speaker in it (2026-09-26); each
+   part is drawn the way Talk already draws it. */
+function TutorBubble({ turn, en }) {
   const t = useTheme();
   return (
     <View testID="tutor-turn" style={{ alignSelf: "flex-start", maxWidth: "90%", marginBottom: 10 }}>
       <View style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
                      borderRadius: radius.lg, borderBottomLeftRadius: 4, padding: 12 }}>
-        <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-          <View style={{ flex: 1 }}>
-            {CYR.test(turn.text) ? <Linked text={turn.text} size={16} />
-              : <Text style={{ color: t.ink, fontSize: 16, lineHeight: 22 }}>{turn.text}</Text>}
+        {turn.ru ? (
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+            <View style={{ flex: 1 }}><Linked text={turn.ru} size={17} testID="tutor-ru" /></View>
+            <Replay text={turn.ru} />
           </View>
-          {turn.ru ? <Replay text={turn.ru} /> : null}
-        </View>
+        ) : null}
+        {turn.ru && en && turn.en ? (
+          <Muted testID="tutor-en" style={{ marginTop: 6 }}>{turn.en}</Muted>
+        ) : null}
+        {turn.note ? (
+          <Text testID="tutor-note"
+                style={{ color: t.ink, fontSize: 15, lineHeight: 21, marginTop: turn.ru ? 10 : 0 }}>
+            {turn.note}
+          </Text>
+        ) : null}
       </View>
     </View>
   );
@@ -162,7 +178,9 @@ const SEND = "M4 12h14M12 5l7 7-7 7";
 export default function Tutor({ navigation }) {
   const { st, update, ready } = useSession();
   const t = useTheme();
-  const [turns, setTurns] = useState([]);        // { who: "tutor"|"learner", text, ru? }
+  // learner: { who, text }; tutor: { who, ru, en, note }
+  const [turns, setTurns] = useState([]);
+  const en = st.talkEn !== false;
   const [pending, setPending] = useState(false);
   const [failure, setFailure] = useState(null);
   const [draft, setDraft] = useState("");
@@ -181,13 +199,18 @@ export default function Tutor({ navigation }) {
     setPending(true);
     const reply = await askTutor({
       profile: tutorProfile(st), studied: studiedFor(st),
-      history: history.map((x) => ({ who: x.who, text: x.text })), text,
+      // A tutor turn goes back as the words it said, Russian then note, so the
+      // model reads its own past turns the way the learner did.
+      history: history.map((x) => ({ who: x.who, text: turnText(x) })), text,
     });
     if (!alive.current) return;
     setPending(false);
     if (!reply || reply.ok !== true) { setFailure(failureText(reply)); return; }
-    setTurns((prev) => prev.concat([{ who: "tutor", text: reply.text, ru: reply.ru || "" }]));
-    if (reply.ru) speakLine(reply.ru);
+    const turn = { who: "tutor", ru: reply.ru || "", en: reply.en || "", note: reply.note || "" };
+    // The Worker refuses a turn with nothing in it; this is the app refusing too.
+    if (!turn.ru && !turn.note) { setFailure(failureText({ ok: false, reason: "parse", errors: ["empty turn"] })); return; }
+    setTurns((prev) => prev.concat([turn]));
+    if (turn.ru) speakLine(turn.ru);
     if (reply.remember) {
       update((prev) => ({ ...prev, tutorNotes: remember(prev.tutorNotes, reply.remember) }));
     }
@@ -243,7 +266,7 @@ export default function Tutor({ navigation }) {
         ) : null}
         <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}
                     keyboardShouldPersistTaps="handled">
-          {turns.map((x, k) => (x.who === "tutor" ? <TutorBubble key={k} turn={x} /> : <LearnerBubble key={k} turn={x} />))}
+          {turns.map((x, k) => (x.who === "tutor" ? <TutorBubble key={k} turn={x} en={en} /> : <LearnerBubble key={k} turn={x} />))}
           {pending ? <ActivityIndicator testID="tutor-pending" color={t.ink3} style={{ alignSelf: "flex-start", marginTop: 6 }} /> : null}
           {failure ? (
             <View style={{ alignItems: "center", gap: 8, marginTop: 8 }}>

@@ -942,7 +942,9 @@ standing (route, trouble, strongest words, recent misses, the tutor's own
 notes) sent every turn and kept on the phone; drills one question at a time,
 what to study next, a scene with coaching. Nothing graded. Worker deployed.
 Suites: core 642, native 505, smoke 159, Worker 71, copy 0 over, dead
-exports 0.
+exports 0. Same evening, off his phone: the tutor's bubble drew empty; the
+reply is `{ ru, en, note, remember }` now, drawn in parts like Talk's, with
+Settings → "English under the tutor" (`talkEn`). Worker redeployed.
 
 ### A day on beta.6, fourteen items, 2026-09-24 — CLAUDE.md §30av
 

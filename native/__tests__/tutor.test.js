@@ -33,8 +33,9 @@ const base = {
   v: 9, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, streak: 0, dev: false, flash: ["recognise"],
 };
-const GREET = { ok: true, text: "Привет, Jared! Shall we work on the genitive?", ru: "Привет, Jared!", remember: "" };
-const REPLY = { ok: true, text: "Хорошо. Скажи «я хочу чай».", ru: "Хорошо. Скажи «я хочу чай».", remember: "wants drills, not chat" };
+const GREET = { ok: true, ru: "Привет, Jared!", en: "Hi, Jared!", note: "Shall we work on the genitive?", remember: "" };
+const REPLY = { ok: true, ru: "Хорошо. Скажи «я хочу чай».", en: "Good. Say «I want tea».", note: "",
+                remember: "wants drills, not chat" };
 
 async function open(state = {}) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
@@ -70,7 +71,22 @@ describe("tutor", () => {
     expect(sent.profile.notes).toEqual(["prefers drills"]);
     expect(sent.profile.misses[0]).toEqual({ kind: "cases", prompt: "книга", answer: "книги", said: "книгу" });
     expect(sent.studied.length).toBeGreaterThan(0);
+    // The three parts, each drawn: the Russian word-linked, its English, the note.
+    expect(screen.getByTestId("tutor-ru")).toHaveTextContent("Привет, Jared!");
+    expect(screen.getByTestId("tutor-en")).toHaveTextContent("Hi, Jared!");
+    expect(screen.getByTestId("tutor-note")).toHaveTextContent("Shall we work on the genitive?");
     await waitFor(() => expect(global.__spoke).toEqual(["Привет, Jared!"]));
+  });
+
+  /* The English is the learner's to switch off (Settings → "English under the
+     tutor", the same `talkEn` Talk's toolbar writes); the note never is. */
+  it("hides the English under the Russian when the setting is off, and never the note", async () => {
+    tutor.mockResolvedValueOnce(GREET);
+    await open({ talkEn: false });
+    await screen.findByTestId("tutor-turn");
+    expect(screen.getByTestId("tutor-ru")).toBeTruthy();
+    expect(screen.queryByTestId("tutor-en")).toBeNull();
+    expect(screen.getByTestId("tutor-note")).toBeTruthy();
   });
 
   it("sends a typed turn with the exchange so far, keeps the tutor's note, links its Russian", async () => {
@@ -84,8 +100,10 @@ describe("tutor", () => {
     await waitFor(() => expect(screen.getAllByTestId("tutor-turn")).toHaveLength(2));
     const sent = tutor.mock.calls[1][0];
     expect(sent.text).toBe("drill me on cases");
-    expect(sent.history).toEqual([{ who: "tutor", text: GREET.text }]);
-    expect(screen.getByTestId("learner-turn")).toBeTruthy();
+    // The tutor's own turn goes back as the words it said, Russian then note.
+    expect(sent.history).toEqual([{ who: "tutor", text: `${GREET.ru} ${GREET.note}` }]);
+    // …and what the learner typed is on screen: the transcript is the point.
+    expect(screen.getByTestId("learner-turn")).toHaveTextContent("drill me on cases");
     // Every Russian word in the reply is a dictionary link.
     expect(screen.getByLabelText("чай, open word")).toBeTruthy();
     // The note is in the profile now, and the schedule is untouched.
@@ -107,6 +125,8 @@ describe("tutor", () => {
     await waitFor(() => expect(screen.getAllByTestId("tutor-turn")).toHaveLength(2));
     expect(tutor).toHaveBeenCalledTimes(2);
     expect(tutor.mock.calls[1][0].text).toBe("я хочу чай");
+    // The spoken words are on screen, word-linked: the transcript is the point.
+    expect(screen.getByTestId("learner-turn")).toHaveTextContent("я хочу чай");
     expect(global.__stt.calls[0].lang).toBe("ru-RU");
     // The toggle switches the microphone to English.
     await act(async () => { fireEvent.press(screen.getByTestId("tutor-lang")); });

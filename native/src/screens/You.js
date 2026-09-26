@@ -182,6 +182,21 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>
+              {/* The English under the tutor's Russian, in Talk and in the
+                  Tutor (the owner, 2026-09-26: "if the user wants, they can
+                  disable the English in settings"). One key, `talkEn`; Talk's
+                  toolbar EN button writes the same one. */}
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>English under the tutor</Text>
+                </View>
+                <Switch
+                  testID="tutor-en-switch"
+                  value={st.talkEn !== false}
+                  onValueChange={(v) => update((p) => ({ ...p, talkEn: v }))}
+                  trackColor={{ true: t.good, false: t.surface3 }}
+                />
+              </Row>
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>On-screen Russian keyboard</Text>

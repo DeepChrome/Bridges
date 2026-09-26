@@ -5,7 +5,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { validateTutor, tutorMessage, SYSTEM_TUTOR, TEXT_WORDS, RU_WORDS, REMEMBER_WORDS, MAX_HISTORY }
+import { validateTutor, tutorMessage, SYSTEM_TUTOR, NOTE_WORDS, RU_WORDS, EN_WORDS, REMEMBER_WORDS, MAX_HISTORY }
   from "../src/tutor.js";
 import { handle } from "../src/index.js";
 
@@ -28,17 +28,27 @@ const upstream = (texts) => {
   } };
 };
 
-test("a turn passes with its Russian and its note; Latin 'Russian' and long fields are refused", () => {
-  const r = validateTutor({ text: "Try this: «я читаю кни́гу». What does it mean?", ru: "я читаю кни́гу", remember: "likes drills" });
+test("a turn passes in its parts; the English is owed for any Russian; empty and Latin turns are refused", () => {
+  const r = validateTutor({ ru: "Я читаю кни́гу.", en: "I am reading a book.", note: "Try saying it back.", remember: "likes drills" });
   assert.equal(r.ok, true);
-  assert.equal(r.value.ru, "я читаю книгу");                 // stress marks off, for the voice
+  assert.equal(r.value.ru, "Я читаю книгу.");                 // stress marks off, for the voice
+  assert.equal(r.value.en, "I am reading a book.");
+  assert.equal(r.value.note, "Try saying it back.");
   assert.equal(r.value.remember, "likes drills");
-  assert.equal(validateTutor({ text: "ok" }).value.ru, "");    // absent is empty
-  assert.match(validateTutor({ text: "ok", ru: "ya chitayu" }).errors.join(" "), /not in Cyrillic/);
-  assert.match(validateTutor({ text: new Array(TEXT_WORDS + 1).fill("w").join(" ") }).errors.join(" "), /over/);
-  assert.match(validateTutor({ text: "ok", ru: new Array(RU_WORDS + 1).fill("да").join(" ") }).errors.join(" "), /ru: over/);
-  assert.match(validateTutor({ text: "ok", remember: new Array(REMEMBER_WORDS + 1).fill("w").join(" ") }).errors.join(" "), /remember: over/);
-  assert.match(validateTutor({}).errors.join(" "), /text: missing/);
+  // A turn in English alone is a turn (what to study next); one with nothing is not.
+  const only = validateTutor({ note: "Work on the genitive next." });
+  assert.equal(only.ok, true);
+  assert.equal(only.value.ru, "");
+  assert.equal(only.value.en, "");
+  assert.match(validateTutor({}).errors.join(" "), /both empty/);
+  assert.match(validateTutor({ ru: "Привет!" }).errors.join(" "), /en: missing/);
+  assert.match(validateTutor({ ru: "ya chitayu", en: "I read" }).errors.join(" "), /not in Cyrillic/);
+  assert.match(validateTutor({ ru: new Array(RU_WORDS + 1).fill("да").join(" "), en: "x" }).errors.join(" "), /ru: over/);
+  assert.match(validateTutor({ ru: "да", en: new Array(EN_WORDS + 1).fill("w").join(" ") }).errors.join(" "), /en: over/);
+  assert.match(validateTutor({ note: new Array(NOTE_WORDS + 1).fill("w").join(" ") }).errors.join(" "), /note: over/);
+  assert.match(validateTutor({ note: "ok", remember: new Array(REMEMBER_WORDS + 1).fill("w").join(" ") }).errors.join(" "), /remember: over/);
+  // English given with no Russian is dropped: there is nothing for it to translate.
+  assert.equal(validateTutor({ note: "ok", en: "stray" }).value.en, "");
 });
 
 test("the profile rides in every message, trimmed, and the history is capped", () => {
@@ -64,6 +74,7 @@ test("the profile rides in every message, trimmed, and the history is capped", (
 test("the prompt asks for one question at a time, a first-turn greeting, and no dashes", () => {
   assert.match(SYSTEM_TUTOR, /one question at a time/);
   assert.match(SYSTEM_TUTOR, /Empty on the first turn/);
+  assert.match(SYSTEM_TUTOR, /Never empty when "ru" is not/);
   assert.match(SYSTEM_TUTOR, /Never use dashes/);
   assert.match(SYSTEM_TUTOR, /Never repeat a note already in "notes"/);
 });
@@ -71,12 +82,13 @@ test("the prompt asks for one question at a time, a first-turn greeting, and no 
 test("POST /v1/tutor: 401 without a token, 400 without text, the reply through, counted as talk", async () => {
   assert.equal((await handle(req({ text: "hi", history: [] }), env())).status, 401);
   assert.equal((await handle(req({ history: [] }, auth), env())).status, 400);
-  const up = upstream([JSON.stringify({ text: "Привет! Ready for a drill?", ru: "Привет!", remember: "" })]);
+  const up = upstream([JSON.stringify({ ru: "Привет!", en: "Hi!", note: "Ready for a drill?", remember: "" })]);
   const r = await handle(req({ text: "", history: [], profile: { chapter: 1 } }, auth), env(), { fetch: up.fetch });
   const body = await r.json();
   assert.equal(body.ok, true);
-  assert.equal(body.text, "Привет! Ready for a drill?");
+  assert.equal(body.note, "Ready for a drill?");
   assert.equal(body.ru, "Привет!");
+  assert.equal(body.en, "Hi!");
   assert.equal(up.calls[0].max_tokens, 700);
   assert.match(up.calls[0].system[0].text, /personal Russian tutor/);
 

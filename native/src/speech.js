@@ -95,6 +95,33 @@ const ANDROID_PATIENCE = {
   EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS: 1500,
 };
 
+/* **Both languages at once** (the owner, 2026-09-26: *"ideally it could
+ * interpret both Russian and English simultaneously… new speakers won't be
+ * able to give it commands in Russian on what they want to learn"*).
+ *
+ * He is right and it is the thing that makes a tutor usable: a beginner has
+ * to be able to say "how do I say I want tea" in English and «я хочу чай» in
+ * Russian **in the same breath**, and a recogniser pinned to one language
+ * turns the other into nonsense — an en-US engine writes Russian as
+ * approximate English words, and a ru-RU engine writes English in Cyrillic.
+ *
+ * One microphone cannot run two recognisers, so this is not two sessions: it
+ * is Android's own automatic language switching (API 34+,
+ * `EXTRA_ENABLE_LANGUAGE_SWITCH`), restricted to the two languages this app
+ * ever wants. `balanced` rather than `quick_response` because a wrong switch
+ * mid-sentence costs more than a slow one, and no `MAX_SWITCHES` because a
+ * learner reaching for a Russian word inside an English question is the
+ * normal case here rather than an edge one.
+ *
+ * It needs both language models on the device and it is silently ignored
+ * where it is not supported, which is why nothing depends on it: the reply
+ * is read by script downstream (Cyrillic is Russian), so the worst case is
+ * one language recognised instead of two rather than a broken turn. */
+const BOTH_LANGUAGES = (langs) => ({
+  EXTRA_ENABLE_LANGUAGE_SWITCH: "balanced",
+  EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES: langs,
+});
+
 /* **The errors that mean "that attempt did not work", not "this phone cannot
  * do this"** — and what to say about each.
  *
@@ -154,6 +181,11 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
      and it rides out on `onFinal` so a screen with two microphones knows which
      one the words came through. */
   const lang = useRef(LANG);
+  /* The languages a hands-free attempt will accept, or null for the one in
+     `lang`. Set per attempt, because only the tutor's conversation wants
+     both — an exercise listening for a Russian sentence should not be
+     offered an English reading of it. */
+  const both = useRef(null);
 
   /* What conversation mode has heard so far: the finals it has been handed,
      plus whatever partial is in flight. Android delivers a long turn in
@@ -282,6 +314,8 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
   const begin = async (over, self) => {
     if (!enabled || phaseRef.current !== "idle") return;
     lang.current = (over && over.lang) || LANG;
+    both.current = self && over && Array.isArray(over.langs) && over.langs.length > 1
+      ? over.langs.slice() : null;
     setLive(""); setNote(null);
     releasedEarly.current = false;
     selfEnding.current = !!self;
@@ -307,10 +341,13 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
       const opts = { lang: lang.current, requiresOnDeviceRecognition: true, interimResults: true,
                      maxAlternatives: ALTERNATIVES, continuous: !!self,
                      ...(hint.length ? { contextualStrings: hint } : {}) };
-      /* The patience settings are an Android extra, so a device or a library
-         version that does not know them must not take the feature down with
-         it: one retry without them, and the timer here still endpoints. */
-      try { M.start(self ? { ...opts, androidIntentOptions: ANDROID_PATIENCE } : opts); }
+      /* Both are Android extras, so a device or a library version that does
+         not know them must not take the feature down with it: one retry
+         without them, and the timer here still endpoints. */
+      const extras = self
+        ? { ...ANDROID_PATIENCE, ...(both.current ? BOTH_LANGUAGES(both.current) : {}) }
+        : null;
+      try { M.start(extras ? { ...opts, androidIntentOptions: extras } : opts); }
       catch (e) { M.start(opts); }
       if (self) {
         /* Nobody is there. Cleared the moment any word arrives. */
@@ -339,8 +376,9 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
 
   const hold = (over = {}) => begin(over, false);
 
-  /* Conversation mode: start listening and let Android's endpointing decide
-     when the learner has stopped. The caller must not be speaking (§30h′). */
+  /* Conversation mode. `lang` is the language the engine starts in; `langs`
+     asks it to follow the learner between those two (BOTH_LANGUAGES). The
+     caller must not be speaking (§30h′). */
   const listen = (over = {}) => begin(over, true);
 
   /* Put the microphone down, wherever it is, and report nothing: the caller

@@ -163,6 +163,24 @@ describe("tutor", () => {
     await waitFor(() => expect(screen.queryByTestId("tutor-en")).toBeNull());
   });
 
+  /* A beginner cannot ask for a genitive drill in Russian, so the tutor
+     offers and they tap (the owner, 2026-09-26). The fourth way out is the
+     app's, and the list belongs to the newest turn only. */
+  it("offers what to work on, sends a tap as a turn, and drops the list after", async () => {
+    tutor.mockResolvedValueOnce({ ...GREET, choices: ["Drill the genitive", "Practise my trouble words"] })
+         .mockResolvedValueOnce(REPLY);
+    await open();
+    await screen.findByTestId("tutor-choices");
+    expect(screen.getByTestId("tutor-choice-0")).toHaveTextContent("Drill the genitive");
+    expect(screen.getByTestId("tutor-choice-other")).toBeTruthy();
+
+    await act(async () => { fireEvent.press(screen.getByTestId("tutor-choice-0")); });
+    await waitFor(() => expect(tutor).toHaveBeenCalledTimes(2));
+    expect(tutor.mock.calls[1][0].text).toBe("Drill the genitive");
+    // The reply offered none, so the list is gone rather than left tappable.
+    await waitFor(() => expect(screen.queryByTestId("tutor-choices")).toBeNull());
+  });
+
   it("builds the profile from what the app already keeps", () => {
     const seen = { [WORD]: { recognise: { dueAt: now + 40 * DAY, lastAt: now, s: 200, d: 3, state: REVIEW, reps: 9, lapses: 0 } } };
     const p = tutorProfile({ ...base, seen, pinned: ["же"], misses: [], tutorNotes: [] });

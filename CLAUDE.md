@@ -4537,6 +4537,47 @@ Four rules, and each is a way a hands-free loop goes wrong:
   still in hand would otherwise be delivered as a turn the learner never
   finished saying.
 
+**Both languages at once, and a way in for somebody who has none.** Two
+things from the first real conversation (2026-09-26):
+
+- *"Ideally it could interpret both Russian and English simultaneously…
+  new speakers won't be able to give it commands in Russian on what they
+  want to learn."* A beginner asks in English and practises in Russian,
+  often inside one sentence, and a recogniser pinned to one writes the other
+  as nonsense — an en-US engine spells Russian as approximate English, a
+  ru-RU engine spells English in Cyrillic. One microphone cannot run two
+  recognisers, so this is **Android's own language switching**
+  (`EXTRA_ENABLE_LANGUAGE_SWITCH`, API 34+) restricted to the two languages
+  this app wants (`BOTH_LANGUAGES` in speech.js, `HEARS_BOTH` in Tutor.js).
+  `balanced` rather than `quick_response`, because a wrong switch
+  mid-sentence costs more than a slow one, and no `MAX_SWITCHES`, because
+  reaching for a Russian word inside an English question is the normal case
+  here. **Nothing depends on it**: the tutor reads whatever script arrives,
+  so an unsupported device loses a language rather than a turn. The RU/EN
+  toggle hides while the conversation runs — both are live, so a control
+  choosing between them would do nothing.
+- *"Have it prompt options when it's unsure what to do with input where it
+  will recommend 3 things based on what the AI thinks the user should work
+  on, and the fourth will be other."* `choices` on the reply: up to
+  `MAX_CHOICES` (3), each ≤ `CHOICE_WORDS` (9), written as the learner would
+  say them and drawn from the trouble bank, the recent misses and where they
+  are on the route. Offered on the first turn and whenever the tutor cannot
+  act on what it was given. **The fourth is the app's** — a way out of a list
+  is not something to ask a model for — and it focuses the input rather than
+  sending anything. Over-offering is trimmed rather than refused: a fourth
+  suggestion is not worth failing a turn over. They belong to the newest turn
+  only, because a list from three exchanges ago is not a thing to still be
+  tappable.
+
+**And a reference behind a tap, on a wrong answer** (*"make the AI able to
+pass relevant references if the user is struggling on a question where the
+user can click a box and get a little hint on the rules"*). `/v1/explain`
+answers a third field, `rule`: ≤ `RULE_WORDS` (45) on the **pattern** rather
+than on this word, with one example. It is collapsed to a single link under
+the two lines and opens where it is asked for, so the verdict stays two
+short lines for everyone else. Empty where a question has no rule behind it,
+such as where the stress falls in one word.
+
 Traps: **`clearAllMocks` leaves a `mockResolvedValueOnce` queue in place**,
 so a test that does not consume all its answers hands them to the next one
 — `tutor.mockReset()` in `beforeEach`. And the opening turn must wait for

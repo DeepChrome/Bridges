@@ -419,6 +419,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   // Why the answer was wrong, from the Worker: null (not asked), "pending",
   // or the text. Anything but the text draws nothing — the verdict stands alone.
   const [why, setWhy] = useState(null);
+  /* The reference behind the two lines, open only if it is asked for (the
+     owner, 2026-09-26: *"the user can click a box and get a little hint on
+     the rules to address the thing being drilled"*). Collapsed it costs a
+     line; open it teaches the pattern rather than fixing the one word. */
+  const [ruleOpen, setRuleOpen] = useState(false);
   const results = useRef([]);
   const tally = useRef({ right: 0, wrong: 0, helped: 0, skipped: 0, credit: 0 });
   const sayTimer = useRef(null);
@@ -477,7 +482,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                  rule: q.note ? q.note.title : null }).then((reply) => {
           if (!alive.current || atRef.current !== mine) return;
           setWhy(reply && reply.ok === true && reply.why
-            ? { why: reply.why, yours: reply.yours || "" } : null);
+            ? { why: reply.why, yours: reply.yours || "", rule: reply.rule || "" } : null);
         });
       }
     }
@@ -558,6 +563,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setPicked(null);
     setUsedHint(false);
     setWhy(null);
+    setRuleOpen(false);
   };
 
   /* A step backwards, for a run where that is a sensible thing to want.
@@ -576,6 +582,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setPicked(null);
     setUsedHint(false);
     setWhy(null);
+    setRuleOpen(false);
   };
 
   const answer = q.options ? q.options.find((o) => o.right) : null;
@@ -762,6 +769,20 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                 {why.yours ? (
                   <Marked testID="why-yours" text={why.yours} size={13} color={t.ink3}
                           italic style={{ marginTop: 5 }} />
+                ) : null}
+                {/* The reference, behind a tap. Two short lines stay two
+                    short lines for whoever does not want it. */}
+                {why.rule ? (
+                  ruleOpen ? (
+                    <View testID="why-rule" style={{ marginTop: 10, padding: 12, borderRadius: radius.md,
+                                                     backgroundColor: t.surface2 }}>
+                      <Marked text={why.rule} size={14} color={t.ink2} />
+                    </View>
+                  ) : (
+                    <Btn kind="link" testID="why-rule-open" label="The rule"
+                         style={{ marginTop: 6, alignSelf: "flex-start" }}
+                         onPress={() => setRuleOpen(true)} />
+                  )
                 ) : null}
               </View>
             ) : right === false && q.note ? (

@@ -86,6 +86,23 @@ test("a reply with nothing to say about the learner's answer shows one line", as
   await act(async () => { fireEvent.press(await screen.findByText("table")); });
   await screen.findByTestId("why");
   expect(screen.queryByTestId("why-yours")).toBeNull();
+  expect(screen.queryByTestId("why-rule-open")).toBeNull();     // no rule, no box
+});
+
+/* The reference behind the correction: a box, not another paragraph (the
+   owner, 2026-09-26: "the user can click a box and get a little hint on the
+   rules to address the thing being drilled"). */
+test("the rule is behind a tap, and opening it shows the pattern", async () => {
+  answers({ ok: true, why: "Genitive after «нет».", yours: "",
+            rule: "«нет» always takes the genitive: «нет времени»." });
+  await withRunner([chosen]);
+  await act(async () => { fireEvent.press(await screen.findByText("table")); });
+  await screen.findByTestId("why");
+  // Closed by default: two short lines stay two short lines.
+  expect(screen.queryByTestId("why-rule")).toBeNull();
+  await act(async () => { fireEvent.press(screen.getByTestId("why-rule-open")); });
+  expect(screen.getByTestId("why-rule")).toHaveTextContent(/always takes the genitive/);
+  expect(screen.queryByTestId("why-rule-open")).toBeNull();
 });
 
 test("a typed miss sends what was written", async () => {

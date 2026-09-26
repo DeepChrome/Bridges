@@ -5,8 +5,8 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { validateTutor, tutorMessage, SYSTEM_TUTOR, NOTE_WORDS, RU_WORDS, EN_WORDS, REMEMBER_WORDS, MAX_HISTORY }
-  from "../src/tutor.js";
+import { validateTutor, tutorMessage, SYSTEM_TUTOR, NOTE_WORDS, RU_WORDS, EN_WORDS, REMEMBER_WORDS,
+         MAX_HISTORY, MAX_CHOICES, CHOICE_WORDS } from "../src/tutor.js";
 import { handle } from "../src/index.js";
 
 const TOKEN = "test-app-token-0123456789";
@@ -91,6 +91,23 @@ test("the note is short, carries guillemets, and yes/no questions are refused", 
   assert.match(SYSTEM_TUTOR, /«guillemets»/);
   assert.match(SYSTEM_TUTOR, /Never ask a question the learner can answer with «да» or «нет»/);
   assert.match(SYSTEM_TUTOR, /nothing to learn from saying yes/);
+});
+
+/* What a learner who cannot yet ask in Russian taps instead of speaking. */
+test("choices are capped and trimmed rather than refused, and the prompt says when to offer them", () => {
+  const r = validateTutor({ note: "Where shall we start?",
+                            choices: ["Drill the genitive", "Practise my trouble words", "Order a coffee", "A fourth"] });
+  assert.equal(r.ok, true);
+  assert.equal(r.value.choices.length, MAX_CHOICES);          // the fourth is dropped, not fatal
+  assert.equal(r.value.choices[0], "Drill the genitive");
+  assert.deepEqual(validateTutor({ note: "ok" }).value.choices, []);   // absent is none
+  assert.equal(validateTutor({ note: "ok", choices: ["Drill the cases"] }).ok, true);
+  assert.match(validateTutor({ note: "ok", choices: [new Array(CHOICE_WORDS + 1).fill("w").join(" ")] })
+    .errors.join(" "), /choices: over/);
+  assert.match(validateTutor({ note: "ok", choices: "nope" }).errors.join(" "), /not an array/);
+  assert.match(SYSTEM_TUTOR, /Offer them on the first turn, and whenever you are not sure what they want/);
+  // And the tutor is told the learner may arrive in either language.
+  assert.match(SYSTEM_TUTOR, /may be in English or in Russian, and may mix the two/);
 });
 
 test("POST /v1/tutor: 401 without a token, 400 without text, the reply through, counted as talk", async () => {

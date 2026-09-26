@@ -52,6 +52,18 @@ export const NOTES_KEPT = 20;
    microphone down. Two, because one is a pause for thought and a run of them
    is an empty room. */
 export const QUIET_LIMIT = 2;
+
+/* **Conversation mode hears both languages.** The owner, 2026-09-26:
+ * *"ideally it could interpret both Russian and English simultaneously…
+ * new speakers won't be able to give it commands in Russian on what they
+ * want to learn."* A beginner asks in English and practises in Russian,
+ * often inside one sentence, and a recogniser pinned to one of them turns
+ * the other into nonsense. Android follows the speaker between the two
+ * (speech.js BOTH_LANGUAGES); the engine starts in Russian because that is
+ * what most turns will be. Nothing downstream depends on it working — the
+ * tutor reads the script it gets — so where the platform does not support
+ * switching the cost is one language rather than a broken turn. */
+export const HEARS_BOTH = { lang: LANG, langs: [LANG, LANG_EN] };
 /* Words told to the tutor as held well: familiarity at or above this. */
 const STRONG_AT = 60;
 const LIST_N = 30;
@@ -104,6 +116,36 @@ export const turnText = (x) => (x.who === "learner" ? String(x.text || "")
    The first cut drew one mixed `text` through one component and reached the
    owner's phone as an empty bubble with a speaker in it (2026-09-26); each
    part is drawn the way Talk already draws it. */
+/* What the learner could ask for next, when the tutor does not know what
+   they want. Tapping one says it for them, which is the whole point: a
+   beginner cannot yet ask for a genitive drill in Russian, and asking them
+   to type it in English is asking them to know what to want. The fourth is
+   the app's — a way out of a list is not something to ask a model for. */
+function Choices({ choices, onPick, onOther }) {
+  const t = useTheme();
+  return (
+    <View testID="tutor-choices" style={{ alignSelf: "flex-start", maxWidth: "92%", gap: 6, marginBottom: 10 }}>
+      {choices.map((c, k) => (
+        <Pressable key={k} testID={`tutor-choice-${k}`} accessibilityRole="button"
+                   onPress={() => onPick(c)}
+                   style={({ pressed }) => ({ borderWidth: 1, borderColor: t.brand,
+                     backgroundColor: t.brandBg, borderRadius: radius.md,
+                     paddingVertical: 10, paddingHorizontal: 14, minHeight: 44,
+                     justifyContent: "center", opacity: pressed ? 0.7 : 1 })}>
+          <Text style={{ color: t.brandInk, fontSize: 15, fontWeight: "600" }}>{c}</Text>
+        </Pressable>
+      ))}
+      <Pressable testID="tutor-choice-other" accessibilityRole="button" onPress={onOther}
+                 style={({ pressed }) => ({ borderWidth: 1, borderColor: t.line,
+                   backgroundColor: t.surface, borderRadius: radius.md,
+                   paddingVertical: 10, paddingHorizontal: 14, minHeight: 44,
+                   justifyContent: "center", opacity: pressed ? 0.7 : 1 })}>
+        <Text style={{ color: t.ink2, fontSize: 15 }}>Something else</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 function TutorBubble({ turn, en }) {
   const t = useTheme();
   return (
@@ -269,6 +311,7 @@ export default function Tutor({ navigation }) {
      failure conversation mode must not have. */
   const quiets = useRef(0);
   const scrollRef = useRef(null);
+  const inputRef = useRef(null);
   const alive = useRef(true);
   const configured = !!config("/v1/tutor");
   useEffect(() => () => { alive.current = false; goingRef.current = false; stop(); }, []);
@@ -299,7 +342,8 @@ export default function Tutor({ navigation }) {
     if (!alive.current) return;
     setPending(false);
     if (!reply || reply.ok !== true) { setFailure(failureText(reply)); return; }
-    const turn = { who: "tutor", ru: reply.ru || "", en: reply.en || "", note: reply.note || "" };
+    const turn = { who: "tutor", ru: reply.ru || "", en: reply.en || "", note: reply.note || "",
+                   choices: Array.isArray(reply.choices) ? reply.choices : [] };
     // The Worker refuses a turn with nothing in it; this is the app refusing too.
     if (!turn.ru && !turn.note) { setFailure(failureText({ ok: false, reason: "parse", errors: ["empty turn"] })); return; }
     setTurns((prev) => prev.concat([turn]));
@@ -315,7 +359,7 @@ export default function Tutor({ navigation }) {
     /* `ask` reaches the recogniser through a ref because a conversation is a
        cycle — the reply starts the listening that produces the next reply —
        and the hook is created below. */
-    if (goingRef.current && recRef.current) recRef.current.listen({ lang: LANG });
+    if (goingRef.current && recRef.current) recRef.current.listen(HEARS_BOTH);
   };
   const recRef = useRef(null);
   const askSeq = useRef(0);
@@ -371,7 +415,7 @@ export default function Tutor({ navigation }) {
   /* A beat before reopening, so the end of one attempt and the start of the
      next are not the same moment to the audio session. */
   const listenAgain = () => setTimeout(() => {
-    if (alive.current && goingRef.current) rec.listen({ lang: LANG });
+    if (alive.current && goingRef.current) rec.listen(HEARS_BOTH);
   }, 300);
 
   /* Starting and stopping the conversation. Stopping puts the microphone down
@@ -382,7 +426,7 @@ export default function Tutor({ navigation }) {
     setLoop(true);
     /* Start listening now unless the tutor is still working or talking, in
        which case the turn in flight opens the microphone when it is done. */
-    if (!pending && !speakingRef.current) rec.listen({ lang: LANG });
+    if (!pending && !speakingRef.current) rec.listen(HEARS_BOTH);
   };
 
   useEffect(() => {
@@ -401,6 +445,9 @@ export default function Tutor({ navigation }) {
   };
 
   const last = [...turns].reverse().find((x) => x.who === "learner");
+  /* The choices of the newest turn, and only while it is the newest. */
+  const tail = turns[turns.length - 1];
+  const offered = tail && tail.who === "tutor" && Array.isArray(tail.choices) ? tail.choices : [];
 
   return (
     <Screen scroll={false}>
@@ -418,6 +465,11 @@ export default function Tutor({ navigation }) {
         <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}
                     keyboardShouldPersistTaps="handled">
           {turns.map((x, k) => (x.who === "tutor" ? <TutorBubble key={k} turn={x} en={en} /> : <LearnerBubble key={k} turn={x} />))}
+          {/* Only on the turn that offered them: a list from three exchanges
+              ago is not a thing to still be tappable. */}
+          {!pending && offered.length ? (
+            <Choices choices={offered} onPick={send} onOther={() => inputRef.current && inputRef.current.focus()} />
+          ) : null}
           {pending ? <ActivityIndicator testID="tutor-pending" color={t.ink3} style={{ alignSelf: "flex-start", marginTop: 6 }} /> : null}
           {failure ? (
             <View style={{ alignItems: "center", gap: 8, marginTop: 8 }}>
@@ -443,6 +495,7 @@ export default function Tutor({ navigation }) {
                 in English; an answer to a drill is said in Russian. */}
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
               <TextInput
+                ref={inputRef}
                 testID="tutor-input"
                 value={draft}
                 onChangeText={setDraft}
@@ -489,7 +542,11 @@ export default function Tutor({ navigation }) {
                 <HoldButton testID="tutor-hold" phase={rec.phase} size={60}
                             onIn={() => !pending && rec.hold({ lang })} onOut={rec.release} />
               )}
-              <LangToggle lang={lang} onPress={() => setLang(lang === LANG ? LANG_EN : LANG)} />
+              {/* The toggle picks the language for *held* speech. In
+                  conversation mode both are live, so a control that chooses
+                  between them would be a control that does nothing. */}
+              {going ? <View style={{ width: 44 }} />
+                : <LangToggle lang={lang} onPress={() => setLang(lang === LANG ? LANG_EN : LANG)} />}
             </View>
             <Text testID="tutor-live"
                   style={{ color: t.ink, fontSize: 15, minHeight: 20, textAlign: "center", marginTop: 4 }}>

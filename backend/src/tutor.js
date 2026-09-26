@@ -37,6 +37,12 @@
  * at least one of `ru` and `note`. The first shape was one mixed `text`
  * field, and on the owner's phone it drew as an empty bubble with a speaker.
  * `plain()` takes the dashes off, as it does for every route.
+ *
+ * `choices` is the fifth: up to three things the learner could ask for next,
+ * offered when the tutor does not know what they want. It is what makes the
+ * screen usable by somebody who cannot yet say what they want in Russian —
+ * they tap instead of speaking, and the fourth option ("Something else") is
+ * the app's, because a way out of a list is not something to ask a model for.
  */
 
 import { plain } from "./schema.js";
@@ -49,6 +55,14 @@ export const RU_WORDS = 30;
 export const EN_WORDS = 40;
 export const NOTE_WORDS = 45;
 export const REMEMBER_WORDS = 20;
+/* Things the learner could ask for next, offered when the tutor does not
+   know what they want (the owner, 2026-09-26: *"have it prompt options when
+   it's unsure what to do with input where it will recommend 3 things based
+   on what the AI thinks the user should work on, and the fourth will be
+   other where the user can steer directly"*). The fourth is the app's, not
+   the model's — a way out of the list is not something to ask for. */
+export const MAX_CHOICES = 3;
+export const CHOICE_WORDS = 9;
 export const MAX_NOTES = 20;          // what the app is expected to hold
 export const MAX_HISTORY = 20;        // turns sent back each time
 const countWords = (s) => String(s).trim().split(/\s+/).filter(Boolean).length;
@@ -61,7 +75,7 @@ You receive JSON with:
 - "profile": where the learner is. "chapter" and "lesson" on a ten-chapter course; "level" (beginner, intermediate, advanced); "trouble": words that keep going wrong; "strong": words held well; "misses": recent wrong answers as {"kind","prompt","answer","said"}; "notes": things you asked to remember from earlier conversations.
 - "studied": dictionary forms of words the learner has met, most recent chapters last. Prefer these in any Russian you write; when you use a word outside them, give its meaning in brackets the first time.
 - "history": this conversation so far, oldest first, each {"who":"tutor"|"learner","text":...}.
-- "text": the learner's latest message. Empty on the first turn: then greet them in Russian ("ru") with a short English note that names one concrete thing from their profile you could work on and asks what they would like to do.
+- "text": the learner's latest message. It may be in English or in Russian, and may mix the two in one sentence; a beginner will ask for things in English and practise in Russian. Empty on the first turn: then greet them in Russian ("ru") with a short English note, and offer "choices".
 
 What you can do, when asked or when it plainly helps:
 - Run a drill one question at a time: ask one thing, wait, mark the answer in your next turn (right, or the right form and why in one sentence), then ask the next. Draw on "trouble" and "misses" unless told otherwise. The question itself goes in "ru" when it is Russian to be read or answered, the marking in "note".
@@ -76,11 +90,12 @@ Rules:
 - Write every Russian form inside «guillemets» wherever it appears in "note", like «книги». The app sets those apart for the learner.
 - At least one of "ru" and "note" must be non-empty.
 - **Never ask a question the learner can answer with «да» or «нет», or with one word they already know.** There is nothing to learn from saying yes. Ask for a sentence, a form, a choice between two things they must name, or something about themselves.
+- "choices": up to ${MAX_CHOICES} things the learner could ask for next, each at most ${CHOICE_WORDS} words, written as the learner would say them ("Drill me on the genitive", "Practise the words I keep missing"). **Offer them on the first turn, and whenever you are not sure what they want** — an unclear message, a one word answer, or a question you cannot act on. Draw them from "trouble", "misses" and where they are on the course, so they are what this learner should work on rather than a menu. Empty [] when the conversation is flowing and you know what to do next.
 - "remember": one fact about this learner worth keeping for future conversations (a preference, a recurring confusion, a goal), at most ${REMEMBER_WORDS} words, or "" when there is nothing new. Never repeat a note already in "notes".
 - Be direct and warm, never gushing. No lists of options unless asked. No emoji. Never use dashes.
 
 Reply with JSON only, no prose around it:
-{"ru":"...","en":"...","note":"...","remember":"..."}`;
+{"ru":"...","en":"...","note":"...","choices":["..."],"remember":"..."}`;
 
 const strList = (a, n) => (Array.isArray(a) ? a.filter(isStr).map((s) => s.trim()).filter(Boolean).slice(0, n) : []);
 
@@ -131,7 +146,17 @@ export function validateTutor(raw) {
   else if (countWords(en) > EN_WORDS) errors.push(`en: over ${EN_WORDS} words`);
   if (countWords(note) > NOTE_WORDS) errors.push(`note: over ${NOTE_WORDS} words`);
   if (countWords(raw.remember) > REMEMBER_WORDS) errors.push(`remember: over ${REMEMBER_WORDS} words`);
+  /* Over-offering is not a bad turn: take the first few and drop the rest
+     rather than send the whole reply back over a fourth suggestion. */
+  let choices = [];
+  if (raw.choices !== undefined && raw.choices !== null) {
+    if (!Array.isArray(raw.choices)) errors.push("choices: not an array");
+    else {
+      choices = raw.choices.filter(isStr).map((s) => plain(s)).filter(Boolean).slice(0, MAX_CHOICES);
+      if (choices.some((s) => countWords(s) > CHOICE_WORDS)) errors.push(`choices: over ${CHOICE_WORDS} words`);
+    }
+  }
   if (errors.length) return { ok: false, errors };
   return { ok: true, value: { ru: unstress(plain(ru)), en: ru ? plain(en) : "", note: plain(note),
-                              remember: plain(raw.remember) } };
+                              choices, remember: plain(raw.remember) } };
 }

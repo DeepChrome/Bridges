@@ -999,6 +999,20 @@ body, body text 15 → 16, shadows cut from 5× and 3.2× blur-to-distance down
 to 2:1, `space.gap` 10 → 12. Design audit 14 checks 0 failed, contrast 103,
 native 519, core 642.
 
+### The tutor hears both languages, and offers a way in, 2026-09-26
+
+Conversation mode listened in Russian only, which makes it unusable for a
+beginner who has to ask in English. Android's own language switching
+(EXTRA_ENABLE_LANGUAGE_SWITCH, API 34+, restricted to ru-RU and en-US) now
+follows the speaker between the two; nothing depends on it, so a device
+without it loses a language rather than a turn. The tutor also offers up to
+three things to work on, drawn from the trouble bank and recent misses, with
+a fourth "Something else" that belongs to the app — a learner who cannot yet
+ask for a genitive drill in Russian taps instead. And `/v1/explain` gained a
+`rule` field, collapsed behind a tap under the two lines, so a miss can
+teach the pattern without lengthening the verdict. Worker 75, native 521,
+copy 0 over, design 0 failed.
+
 ### A day on beta.6, fourteen items, 2026-09-24 — CLAUDE.md §30av
 
 Flashcards turn back and carry a speaker on the back; the review count is

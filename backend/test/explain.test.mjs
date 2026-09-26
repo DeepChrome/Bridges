@@ -8,7 +8,8 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { validateExplain, explainMessage, SYSTEM_EXPLAIN, WHY_WORDS, YOURS_WORDS } from "../src/explain.js";
+import { validateExplain, explainMessage, SYSTEM_EXPLAIN, WHY_WORDS, YOURS_WORDS, RULE_WORDS }
+  from "../src/explain.js";
 import { handle } from "../src/index.js";
 
 const TOKEN = "test-app-token-0123456789";
@@ -39,6 +40,20 @@ test("two short lines pass, dashes come off, and the learner's own form is optio
   assert.equal(r.value.yours, "«книгу» is the accusative.");
   // An answer that is not a Russian word leaves it empty, and absent is empty.
   assert.equal(validateExplain({ why: "Genitive after «нет»." }).value.yours, "");
+});
+
+/* The reference behind the correction, which the app keeps behind a tap so
+   the verdict stays two lines (the owner, 2026-09-26). */
+test("the rule is optional, capped, and about the pattern rather than the word", () => {
+  const r = validateExplain({ why: "Genitive after «нет».",
+                              rule: "«нет» always takes the genitive: «нет времени», «нет денег»." });
+  assert.equal(r.ok, true);
+  assert.match(r.value.rule, /«нет времени»/);
+  assert.equal(validateExplain({ why: "ok" }).value.rule, "");     // absent is empty
+  assert.match(validateExplain({ why: "ok", rule: new Array(RULE_WORDS + 1).fill("w").join(" ") }).errors.join(" "),
+               /rule: over/);
+  assert.match(SYSTEM_EXPLAIN, /Write it about the pattern, not about this word/);
+  assert.ok(RULE_WORDS > WHY_WORDS, "the reference may say more than the correction");
 });
 
 test("a verbose reply is refused, which is what keeps it short", () => {

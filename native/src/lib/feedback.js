@@ -184,7 +184,12 @@ async function send(url, body, token, deps, timeoutMs) {
     const r = await fetchFn(url, { method: "POST", signal: ctl.signal, headers, body: JSON.stringify(body) });
     let data = null;
     try { data = await r.json(); } catch (e) { data = null; }
-    if (!r.ok) return { ok: false, reason: "http", status: r.status, detail: data && data.reason };
+    /* The Worker's own words ride along on a refusal: a cap says which cap
+       and when it rolls over, and the screen has no other way to know. */
+    if (!r.ok) {
+      return { ok: false, reason: "http", status: r.status,
+               detail: data && data.reason, message: data && data.message };
+    }
     if (!data || typeof data !== "object") return { ok: false, reason: "parse" };
     if (data.ok !== true) return { ok: false, reason: data.reason || "parse" };
     return data;

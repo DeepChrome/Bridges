@@ -49,7 +49,16 @@ const DAY_TTL = 60 * 60 * 48;
    ceiling is a few dollars a day at the very worst. */
 const REGISTER_IP_CAP = 5;
 const REGISTER_DAILY_CAP = 100;
-const REGISTERED_CAPS = { feedback: 100, talk: 60 };
+/* **A day's worth of real use, not a taste of it** (2026-09-26). These were
+   100 and 60, set when a "turn" meant one scenario exchange somebody typed
+   into. Conversation mode spends a talk turn every time the learner stops
+   speaking, so the owner hit 60 inside one sitting and was told to come back
+   tomorrow — on his own app, because a public build carries no owner token
+   and registers as a stranger like anyone else (13.39). The per-user numbers
+   are friction, not the budget: `GLOBAL_DAILY_CAP` below is what actually
+   bounds the bill, and at Haiku's prices it is a few dollars a day at the
+   very worst. */
+export const REGISTERED_CAPS = { feedback: 300, talk: 400 };
 const DEFAULT_GLOBAL_CAP = 1500;
 
 const envInt = (v, dflt) => parseInt(v, 10) || dflt;
@@ -81,7 +90,15 @@ async function identify(given, env) {
   let rec = null;
   try { rec = JSON.parse((await env.USAGE.get(`user:${given}`)) || "null"); } catch (e) { rec = null; }
   if (!rec || rec.revoked || !rec.id) return null;
-  return { id: String(rec.id), caps: rec.caps || null };
+  /* **A registered install follows the current policy, not the policy it was
+     minted under.** The caps are written into the record at registration, so
+     raising them only reached installs that registered afterwards — the
+     owner's phone kept the 60 talk turns it was given in September and went
+     on being refused after the limit was raised (2026-09-26). A token minted
+     by hand (backend/tools/user.mjs) keeps the caps it was given, because
+     those were chosen for that person. */
+  const caps = rec.via === "register" ? { ...REGISTERED_CAPS } : (rec.caps || null);
+  return { id: String(rec.id), caps };
 }
 
 /* One daily counter: read, compare, write. Not atomic, which is fine for a
@@ -277,7 +294,12 @@ export async function handle(request, env, deps = {}) {
   // user but the owner one more — the ceiling on what strangers can spend.
   // The user's own cap is checked first so a learner past it never consumes
   // the shared allowance.
-  const cap = (user.caps && user.caps[route.kind]) || route.cap(env);
+  /* `||` here read a cap of **0** as "not set" and handed out the default,
+     so the one way to say "this token may do nothing" quietly said the
+     opposite (found 2026-09-26 by the test for stale caps). A number is a
+     number, including zero. */
+  const own = user.caps ? user.caps[route.kind] : undefined;
+  const cap = Number.isFinite(own) ? own : route.cap(env);
   const day = dayKey(now);
   if (!(await tick(env, `${route.counter}:${day}:${user.id}`, cap))) {
     return json(429, { ok: false, reason: "cap", message: route.capMessage(cap) });

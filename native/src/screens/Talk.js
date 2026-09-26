@@ -47,7 +47,10 @@ export function failureText(reply) {
   if (!reply || r.reason === "unconfigured") {
     return { text: "Conversation is not available in this build.", retry: false };
   }
-  if (cap) return { text: "Today's conversations are used up. Tomorrow, then.", retry: false };
+  /* Not "tomorrow": the counters roll at 00:00 UTC, which is the afternoon
+     where the owner is, so a promise about tomorrow was simply wrong. What
+     the Worker sends says when; this says what. */
+  if (cap) return { text: "Today's conversations are used up.", detail: r.message || null, retry: false };
   if (r.status === 401 || r.status === 403) {
     return { text: "This build's tutor key was refused.", retry: false };
   }

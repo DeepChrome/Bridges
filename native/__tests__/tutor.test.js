@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { WordsProvider } from "../src/words";
 import { flushState } from "../src/store";
-import Tutor, { tutorProfile, remember, NOTES_KEPT } from "../src/screens/Tutor";
+import Tutor, { tutorProfile, remember, NOTES_KEPT, CHOICES_AFTER } from "../src/screens/Tutor";
 import { tutor } from "../src/lib/feedback";
 import { L, STAGES } from "../src/data";
 import { DAY, REVIEW } from "@core/scheduler";
@@ -167,16 +167,27 @@ describe("tutor", () => {
      offers and they tap (the owner, 2026-09-26). The fourth way out is the
      app's, and the list belongs to the newest turn only. */
   it("offers what to work on, sends a tap as a turn, and drops the list after", async () => {
-    tutor.mockResolvedValueOnce({ ...GREET, choices: ["Drill the genitive", "Practise my trouble words"] })
+    const lost = { ...GREET, choices: ["Drill the genitive", "Practise my trouble words"] };
+    /* Not on the first confusion: the list waits until the tutor has come
+       back lost CHOICES_AFTER times in a row (the owner, 2026-09-26). */
+    tutor.mockResolvedValueOnce(lost).mockResolvedValueOnce(lost).mockResolvedValueOnce(lost)
          .mockResolvedValueOnce(REPLY);
     await open();
+    await screen.findByTestId("tutor-turn");
+    expect(screen.queryByTestId("tutor-choices")).toBeNull();
+    for (let k = 0; k < CHOICES_AFTER - 1; k++) {
+      const input = screen.getByTestId("tutor-input");
+      fireEvent.changeText(input, "hmm " + k);
+      await waitFor(() => expect(input.props.value).toBe("hmm " + k));
+      await act(async () => { fireEvent.press(screen.getByTestId("tutor-send")); });
+    }
     await screen.findByTestId("tutor-choices");
     expect(screen.getByTestId("tutor-choice-0")).toHaveTextContent("Drill the genitive");
     expect(screen.getByTestId("tutor-choice-other")).toBeTruthy();
 
     await act(async () => { fireEvent.press(screen.getByTestId("tutor-choice-0")); });
-    await waitFor(() => expect(tutor).toHaveBeenCalledTimes(2));
-    expect(tutor.mock.calls[1][0].text).toBe("Drill the genitive");
+    await waitFor(() => expect(tutor).toHaveBeenCalledTimes(CHOICES_AFTER + 1));
+    expect(tutor.mock.calls[CHOICES_AFTER][0].text).toBe("Drill the genitive");
     // The reply offered none, so the list is gone rather than left tappable.
     await waitFor(() => expect(screen.queryByTestId("tutor-choices")).toBeNull());
   });

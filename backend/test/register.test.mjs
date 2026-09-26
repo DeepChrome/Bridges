@@ -3,7 +3,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { handle } from "../src/index.js";
+import { handle, REGISTERED_CAPS } from "../src/index.js";
 
 const OWNER = "test-app-token-0123456789";
 
@@ -48,7 +48,13 @@ test("register mints a token that then authenticates with a stranger's caps", as
   assert.match(token, /^[A-Za-z0-9_-]+$/);
 
   const rec = JSON.parse(e.USAGE.store.get(`user:${token}`));
-  assert.deepEqual(rec.caps, { feedback: 100, talk: 60 });
+  /* Read rather than duplicated: the numbers move when real use shows they
+     are too mean (2026-09-26, 60 talk turns was one sitting), and a test
+     that pins them is a test that fails for being out of date rather than
+     for being broken. What matters is that registration writes the
+     configured caps, and that they are enough for a day of use. */
+  assert.deepEqual(rec.caps, REGISTERED_CAPS);
+  assert.ok(REGISTERED_CAPS.talk >= 200, `a day of conversation is more than ${REGISTERED_CAPS.talk} turns`);
   assert.match(rec.id, /^app-[A-Za-z0-9_-]{8}$/);
   assert.equal(rec.created, "2026-09-18");
   assert.notEqual(rec.id.slice(4), token.slice(0, 8), "the id is not a piece of the token");
@@ -62,6 +68,27 @@ test("register mints a token that then authenticates with a stranger's caps", as
   const log = [...e.USAGE.store.entries()].filter(([k]) => k.startsWith("log:")).map(([, v]) => JSON.parse(v));
   assert.ok(log.some((l) => l.kind === "register" && l.user === rec.id));
   assert.ok(!JSON.stringify(log).includes(token), "the token is never logged");
+});
+
+/* An install already out there follows the caps as they are *now*. Raising
+   them used to reach only installs that registered afterwards, because the
+   numbers are written into the record at registration — which is how the
+   owner's phone went on being refused at a limit that had already been
+   lifted (2026-09-26). A token minted by hand keeps its own caps. */
+test("a registered install follows the current caps, not the ones it was minted under", async () => {
+  const e = env();
+  const { token } = await (await handle(reg(), e, { now })).json();
+  const rec = JSON.parse(e.USAGE.store.get(`user:${token}`));
+
+  e.USAGE.store.set(`user:${token}`, JSON.stringify({ ...rec, caps: { feedback: 0, talk: 0 } }));
+  const after = await handle(attempt(token), e, { fetch: upstream(), now });
+  assert.notEqual(after.status, 429, "a stale record must not hold an install at an old cap");
+
+  // …while a hand-minted token is left exactly as it was given.
+  const hand = "hand-made-token-0123456789";
+  e.USAGE.store.set(`user:${hand}`, JSON.stringify({ id: "friend", caps: { feedback: 0, talk: 0 } }));
+  const refused = await handle(attempt(hand), e, { fetch: upstream(), now });
+  assert.equal(refused.status, 429);
 });
 
 test("two registrations are two different tokens and two different ids", async () => {

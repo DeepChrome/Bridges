@@ -105,7 +105,7 @@ test("choices are capped and trimmed rather than refused, and the prompt says wh
   assert.match(validateTutor({ note: "ok", choices: [new Array(CHOICE_WORDS + 1).fill("w").join(" ")] })
     .errors.join(" "), /choices: over/);
   assert.match(validateTutor({ note: "ok", choices: "nope" }).errors.join(" "), /not an array/);
-  assert.match(SYSTEM_TUTOR, /Offer them on the first turn, and whenever you are not sure what they want/);
+  assert.match(SYSTEM_TUTOR, /Offer them whenever you are not sure what they want/);
   // And the tutor is told the learner may arrive in either language.
   assert.match(SYSTEM_TUTOR, /may be in English or in Russian, and may mix the two/);
 });

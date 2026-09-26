@@ -64,6 +64,15 @@ export const QUIET_LIMIT = 2;
  * tutor reads the script it gets — so where the platform does not support
  * switching the cost is one language rather than a broken turn. */
 export const HEARS_BOTH = { lang: LANG, langs: [LANG, LANG_EN] };
+
+/* **How many turns in a row the tutor has to be lost before it offers a
+ * list** (the owner, 2026-09-26: *"let's have that pop-up happen after a few
+ * instances of it not knowing what the user wants"*). The model says it is
+ * unsure by sending `choices`; the app decides when that has happened often
+ * enough to be worth interrupting for, because a model asked to count its
+ * own confusions will not. One unclear answer is a conversation; three in a
+ * row is somebody who does not know what to ask for. */
+export const CHOICES_AFTER = 3;
 /* Words told to the tutor as held well: familiarity at or above this. */
 const STRONG_AT = 60;
 const LIST_N = 30;
@@ -310,6 +319,8 @@ export default function Tutor({ navigation }) {
      microphone that reopens for ever because the room is empty is the one
      failure conversation mode must not have. */
   const quiets = useRef(0);
+  /* Tutor turns in a row that came back not knowing what the learner wants. */
+  const unsure = useRef(0);
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
   const alive = useRef(true);
@@ -342,8 +353,13 @@ export default function Tutor({ navigation }) {
     if (!alive.current) return;
     setPending(false);
     if (!reply || reply.ok !== true) { setFailure(failureText(reply)); return; }
+    /* Sending choices is the tutor saying it does not know what is wanted.
+       The run of those is counted here and the list is only carried onto the
+       turn once it has happened CHOICES_AFTER times in a row. */
+    const suggested = Array.isArray(reply.choices) ? reply.choices : [];
+    unsure.current = suggested.length ? unsure.current + 1 : 0;
     const turn = { who: "tutor", ru: reply.ru || "", en: reply.en || "", note: reply.note || "",
-                   choices: Array.isArray(reply.choices) ? reply.choices : [] };
+                   choices: unsure.current >= CHOICES_AFTER ? suggested : [] };
     // The Worker refuses a turn with nothing in it; this is the app refusing too.
     if (!turn.ru && !turn.note) { setFailure(failureText({ ok: false, reason: "parse", errors: ["empty turn"] })); return; }
     setTurns((prev) => prev.concat([turn]));
@@ -436,6 +452,7 @@ export default function Tutor({ navigation }) {
   const restart = () => {
     const go = () => {
       setCog(false); setLoop(false); rec.cancel();
+      unsure.current = 0;
       setTurns([]); setFailure(null); ask([], "");
     };
     if (turns.some((x) => x.who === "learner")) {

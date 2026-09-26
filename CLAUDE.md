@@ -1244,8 +1244,36 @@ The native client is `native/src/lib/feedback.js`, configured by
 **The token is the install's own** (ROADMAP 13.39, 2026-09-18). A public
 build ships none: the first request that needs one asks `POST /v1/register`,
 the one route with no bearer, which mints an ordinary `user:<token>` record
-with a stranger's caps (`REGISTERED_CAPS`, 100 feedback and 60 talk a day) and
-is itself limited per address (5 a day) and in all (100 a day). The token is
+with a stranger's caps (`REGISTERED_CAPS`, **300 feedback and 400 talk a
+day**) and is itself limited per address (5 a day) and in all (100 a day).
+
+**Those numbers were 100 and 60 and they were wrong for the app this
+became** (2026-09-26). A "turn" used to mean one typed scenario exchange;
+conversation mode spends one every time the learner stops speaking, so the
+owner hit 60 inside a single sitting and was told to come back tomorrow — on
+his own app, because a build that leaves the machine carries no owner token
+and so registers as a stranger like anyone else. The per-user numbers are
+friction; `GLOBAL_DAILY_CAP` is the budget.
+
+Two bugs came out of raising them, and both are the kind that only show on a
+value nobody had used:
+
+- **A registered install kept the caps it was minted under.** They are
+  written into the KV record at registration, so raising the policy reached
+  only installs that registered afterwards and his phone went on being
+  refused at a limit that had already been lifted. `identify()` now reads
+  the current `REGISTERED_CAPS` for any record with `via: "register"`; a
+  token minted by hand (`backend/tools/user.mjs`) keeps the caps it was
+  given, because those were chosen for that person.
+- **A cap of `0` meant "unlimited".** `(user.caps && user.caps[kind]) ||
+  route.cap(env)` reads zero as "not set" and hands out the default, so the
+  one way to say "this token may do nothing" said the opposite. `Number.isFinite`
+  decides now. Nothing depended on it, which is exactly why it survived.
+
+And the app stopped promising the wrong day: the counters roll at 00:00
+**UTC**, which is the afternoon where the owner is, so "Tomorrow, then" was
+simply false. The line says what happened and the Worker's own message,
+carried through `send()` now rather than dropped, says when it lifts. The token is
 kept per install in AsyncStorage (`rb.worker.token`), not in the profile
 database — it is the phone the Worker admits, not the learner — and an
 install answered 401 forgets it and registers again once, so a wiped
@@ -4561,13 +4589,20 @@ things from the first real conversation (2026-09-26):
   on, and the fourth will be other."* `choices` on the reply: up to
   `MAX_CHOICES` (3), each ≤ `CHOICE_WORDS` (9), written as the learner would
   say them and drawn from the trouble bank, the recent misses and where they
-  are on the route. Offered on the first turn and whenever the tutor cannot
-  act on what it was given. **The fourth is the app's** — a way out of a list
-  is not something to ask a model for — and it focuses the input rather than
-  sending anything. Over-offering is trimmed rather than refused: a fourth
-  suggestion is not worth failing a turn over. They belong to the newest turn
-  only, because a list from three exchanges ago is not a thing to still be
-  tappable.
+  are on the route. **The fourth is the app's** — a way out of a list is not
+  something to ask a model for — and it focuses the input rather than sending
+  anything. Over-offering is trimmed rather than refused: a fourth suggestion
+  is not worth failing a turn over. They belong to the newest turn only,
+  because a list from three exchanges ago is not a thing to still be tappable.
+
+  **The model says it is lost; the app decides when that is worth
+  interrupting for.** Offering on every unclear turn was too eager (*"let's
+  have that pop-up happen after a few instances of it not knowing what the
+  user wants"*), so `choices` on a reply is only the signal, and `Tutor.js`
+  counts the run of them — the list is drawn at `CHOICES_AFTER` (3) in a row
+  and the count resets the moment a turn comes back knowing what to do. It is
+  counted in the app rather than asked of the prompt because **a model asked
+  to count its own confusions will not**.
 
 **And a reference behind a tap, on a wrong answer** (*"make the AI able to
 pass relevant references if the user is struggling on a question where the

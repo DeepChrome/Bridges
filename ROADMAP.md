@@ -1013,6 +1013,18 @@ ask for a genitive drill in Russian taps instead. And `/v1/explain` gained a
 teach the pattern without lengthening the verdict. Worker 75, native 521,
 copy 0 over, design 0 failed.
 
+Then, from a real sitting: the suggestion list was too eager, so it waits for
+`CHOICES_AFTER` (3) lost turns in a row, counted in the app because a model
+asked to count its own confusions will not. And he was refused mid-session —
+`REGISTERED_CAPS` was 100 feedback / 60 talk, set when a turn meant a typed
+exchange, and conversation mode spends one per utterance; a public build
+carries no owner token, so his own phone registers as a stranger. Raised to
+300 / 400, with `GLOBAL_DAILY_CAP` (1,500) still the budget. Two bugs fell
+out: a registered install kept the caps it was *minted* under (so raising
+them reached nobody already installed — `identify()` reads the current
+policy for `via: "register"` records now), and a cap of `0` was falsy and
+handed out the default, so "may do nothing" meant "unlimited".
+
 ### A day on beta.6, fourteen items, 2026-09-24 — CLAUDE.md §30av
 
 Flashcards turn back and carry a speaker on the back; the review count is

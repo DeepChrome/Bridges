@@ -114,7 +114,9 @@ describe("talk", () => {
     expect(review.mock.calls[0][0].studied).toBeUndefined();
     // The learner's bubble carries the alignment; the grammar note sits under it.
     expect(screen.getAllByTestId("align-sub")).toHaveLength(1);
-    expect(screen.getByText(/accusative after «хотеть»/)).toBeTruthy();
+    /* The Russian in a note is its own span now (ui.js `Marked`, 2026-09-26),
+       so the English clause is what a whole-string query can match. */
+    expect(screen.getByText(/the accusative after/)).toBeTruthy();
     expect(screen.getByText("11 turns left")).toBeTruthy();
     // The English is on by default under every tutor turn; new words do not
     // appear in the transcript (they clutter it) — they wait for the summary.
@@ -138,7 +140,9 @@ describe("talk", () => {
     expect(await screen.findByText("Went well")).toBeTruthy();
     expect(screen.getByText(/1 turn, 0 with nothing to correct/)).toBeTruthy();
     expect(screen.getByText(/2 words right as said/)).toBeTruthy();
-    expect(screen.getByText(/accusative after «хотеть»/)).toBeTruthy();
+    /* The Russian in a note is its own span now (ui.js `Marked`, 2026-09-26),
+       so the English clause is what a whole-string query can match. */
+    expect(screen.getByText(/the accusative after/)).toBeTruthy();
     expect(screen.getByText("булочка")).toBeTruthy();
     expect(screen.getByText("чай")).toBeTruthy();                        // a tutor word, from its tokens
     await act(async () => { fireEvent.press(screen.getAllByText("Add")[0]); });

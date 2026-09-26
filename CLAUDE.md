@@ -4387,14 +4387,55 @@ the same cog.
 **The why** (`POST /v1/explain`, `backend/src/explain.js`). Under a wrong
 answer on any kind with one right answer (`EXPLAIN_KINDS` in Run.js), the
 Worker is asked why — the question as drawn, the right answer, **and what the
-learner put** — and answers in at most `WHY_WORDS` (55) of plain English,
-Russian in guillemets: the rule applied to this word, and what the learner's
-own answer would have been when it is a real form. No praise, no second
-question. It rides under the verdict when it arrives, a spinner until then,
-nothing at all on any failure — Say's rule for its online feedback. On
+learner put**. It rides under the verdict when it arrives, a spinner until
+then, nothing at all on any failure — Say's rule for its online feedback. On
 unless Settings → "Explain wrong answers" is off; the feedback counter and
 cap. To carry the learner's answer, every view now passes `said` in
 `record`'s `extra`, and it rides on the verdict.
+
+**Two lines, and the card goes when they arrive** (2026-09-26, the same
+evening). The first cut allowed 55 words in one field and left the chapter's
+grammar card underneath it, so a miss drew a paragraph on top of a titled
+card with worked examples. The owner: *"now that we enabled the AI feedback
+on incorrect answers, we dont need all the extra static verbiage for anywhere
+that is getting AI feedback… Right now it's sending a large ugly verbose
+block of text."* Both halves are fixed at the cause:
+
+- The reply is `{ why, yours }` — one sentence of at most `WHY_WORDS` (24)
+  saying why the right form is right, and at most `YOURS_WORDS` (12) naming
+  what the learner's own answer is, **only when it is a real Russian form**.
+  A miss then teaches two things in two lines. A reply over the cap costs a
+  retry and then falls back, so the cap is enforced rather than requested.
+- **The rule card is the fallback, never the companion.** `RuleNote` under a
+  verdict draws only when no explanation came: the setting off, no Worker in
+  the build, the request failed, or a kind that is never explained. The
+  explanation is about the word just missed and the card is the rule in
+  general; where there is an explanation, the card is the thing to cut. While
+  the request is in flight the spinner holds the place, because drawing the
+  card and then replacing it is worse than either.
+
+**One treatment for every sentence the app writes *about* Russian**
+(`Marked` in `ui.js`). He asked for *"some sort of consistent formatting
+throughout the app… spacing, italics, bold, and maybe even colors to make
+sure the key feedback is clear"*. The rule is that **the Russian in the
+sentence is the loud part**: a form inside «guillemets» is drawn in the brand
+colour at weight 700 and the guillemets themselves are dropped, because the
+colour and the weight *are* the quoting. The eye lands on the form before it
+reads the clause around it, which is all a two-line note has to do. Used by
+the verdict's explanation, Say's feedback rows, Talk's summary notes and the
+tutor's note — the four places the app had been writing flat grey paragraphs.
+
+**It does not depend on the model remembering.** Every prompt asks for
+guillemets, and `splitMarked` falls back to marking the Cyrillic runs when a
+reply carries none. A formatting rule that only applies when the model
+behaves is a formatting rule that quietly stops applying. Guillemets win
+where both are present: the model said which part matters.
+
+**A test trap this created.** `Marked` splits a sentence into spans, so
+`getByText(/the accusative after «хотеть»/)` stops matching — no single node
+holds the whole string. Query the English clause, or the marked form, or give
+the line a testID (`why-line`). Two existing assertions failed this way and
+both were the test, not the code.
 
 **…and the miss is kept.** `st.misses` holds the last `MISSES_KEPT` (30)
 wrong answers as `{ kind, prompt, answer, said, at }`, recorded whether or
@@ -4431,6 +4472,19 @@ which no switch hides. The validator refuses a turn with neither `ru` nor
 `note`, and the app refuses it again. Each part is drawn the way Talk's
 bubble already draws its Russian and English, which is the rendering that
 was known to work on his phone.
+
+**What a tutor turn may not be** (2026-09-26, off his first real
+conversation). The note is capped at `NOTE_WORDS` (45) and the Russian at
+`RU_WORDS` (30) — *"again, it's a large block of verbose text"* — and the
+prompt refuses a list of points or a paragraph. And: **never a question the
+learner answers with «да» or «нет»**, or with one word they already know —
+*"it sometimes just requests that the user says Da or Nyet… that's not
+actually something to learn from."* A question has to ask for a sentence, a
+form, a choice they must name, or something about themselves. The screen
+carries the cog every other run screen has (`TutorOptions`): the level, the
+English under the Russian (`talkEn`, Talk's own key, so the two tutors cannot
+be pitched differently), and Start over, which used to be a link beside the
+microphone as though it were something you would want mid-sentence.
 
 Traps: **`clearAllMocks` leaves a `mockResolvedValueOnce` queue in place**,
 so a test that does not consume all its answers hands them to the next one

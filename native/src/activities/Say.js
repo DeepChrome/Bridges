@@ -21,7 +21,7 @@ import { View, Pressable, ActivityIndicator } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Btn, Muted, Pill, Speaker, Text } from "../ui";
+import { Btn, Muted, Pill, Speaker, Text, Marked } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN } from "../data";
 import { getFeedback, config } from "../lib/feedback";
@@ -93,10 +93,12 @@ export function Feedback({ fb, quiet, style }) {
       {rows.map((row) => (
         <View key={row.key} style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
           {quiet ? <Text style={[face, { fontStyle: "normal", fontWeight: "600" }]}>{row.chip}</Text> : <Pill>{row.chip}</Pill>}
-          <Text style={[face, { flex: 1 }]}
-                accessibilityLabel={row.title ? `${row.title}. ${row.text}` : row.text}>
-            {row.text}
-          </Text>
+          {/* The Russian in the note is set apart, the same way the verdict's
+              explanation and the tutor's note set it apart (ui.js `Marked`) —
+              the note already asks for «guillemets» (backend/src/prompt.js). */}
+          <Marked text={row.text} size={face.fontSize} color={face.color} italic={!!quiet}
+                  style={{ flex: 1 }}
+                  accessibilityLabel={row.title ? `${row.title}. ${row.text}` : row.text} />
         </View>
       ))}
     </View>

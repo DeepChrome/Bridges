@@ -34,14 +34,15 @@ import { View, Pressable, ScrollView, ActivityIndicator, Alert } from "react-nat
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
-import { Screen, Btn, Muted, Text, TextInput } from "../ui";
+import { Screen, Btn, Muted, Text, TextInput, Marked, CogButton, Sheet, List, Row,
+         SectionLabel, Choice, Tick } from "../ui";
 import { Linked } from "../words";
 import { L, STAGES, drillPool, routePosition } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
 import { speakLine, stop } from "../audio";
 import { useRecognizer, LANG, LANG_EN } from "../speech";
 import { HoldButton, Blocked } from "../activities/Say";
-import { failureText, talkLevelFor } from "./Talk";
+import { failureText, talkLevelFor, TALK_LEVELS } from "./Talk";
 import { troubleWords, strength, familiarity, cardFor } from "@core/scheduler";
 
 /* How many notes the tutor may leave in the profile; the oldest goes when a
@@ -115,10 +116,8 @@ function TutorBubble({ turn, en }) {
           <Muted testID="tutor-en" style={{ marginTop: 6 }}>{turn.en}</Muted>
         ) : null}
         {turn.note ? (
-          <Text testID="tutor-note"
-                style={{ color: t.ink, fontSize: 15, lineHeight: 21, marginTop: turn.ru ? 10 : 0 }}>
-            {turn.note}
-          </Text>
+          <Marked testID="tutor-note" text={turn.note} size={15}
+                  style={{ marginTop: turn.ru ? 10 : 0 }} />
         ) : null}
       </View>
     </View>
@@ -175,6 +174,42 @@ function LangToggle({ lang, onPress }) {
 
 const SEND = "M4 12h14M12 5l7 7-7 7";
 
+/* The screen's own options, behind the cog every other run screen carries
+   (the owner, 2026-09-26: *"in Tutor mode there's no settings button like
+   there is in other areas"*). Everything here is a fact about the tutor, not
+   about the app: how hard its Russian is, whether the English shows under it,
+   and starting the conversation over — which used to be a link under the
+   input, where it sat beside the microphone as though it were a control you
+   might want mid-sentence. `talkLevel` and `talkEn` are Talk's own keys, so
+   the two tutors cannot end up pitched differently. */
+function TutorOptions({ onClose, onRestart }) {
+  const { st, update } = useSession();
+  const t = useTheme();
+  const level = talkLevelFor(st);
+  const en = st.talkEn !== false;
+  return (
+    <Sheet onClose={onClose} testID="tutor-options"
+           footer={<Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />}>
+      <View style={{ marginBottom: 18 }}>
+        <SectionLabel>Level</SectionLabel>
+        <Choice testID="tutor-level" options={TALK_LEVELS} value={level}
+                onPick={(id) => update((p) => ({ ...p, talkLevel: id }))} />
+      </View>
+      <View style={{ marginBottom: 18 }}>
+        <List>
+          <Row testID="tutor-en-row" onPress={() => update((p) => ({ ...p, talkEn: !en }))}>
+            <Tick on={en} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15 }}>English under the Russian</Text>
+            </View>
+          </Row>
+        </List>
+      </View>
+      <Btn kind="plain" testID="tutor-restart" label="Start over" onPress={onRestart} />
+    </Sheet>
+  );
+}
+
 export default function Tutor({ navigation }) {
   const { st, update, ready } = useSession();
   const t = useTheme();
@@ -185,6 +220,7 @@ export default function Tutor({ navigation }) {
   const [failure, setFailure] = useState(null);
   const [draft, setDraft] = useState("");
   const [lang, setLang] = useState(LANG);
+  const [cog, setCog] = useState(false);
   const scrollRef = useRef(null);
   const alive = useRef(true);
   const configured = !!config("/v1/tutor");
@@ -247,7 +283,7 @@ export default function Tutor({ navigation }) {
   }, [turns.length, pending]);
 
   const restart = () => {
-    const go = () => { setTurns([]); setFailure(null); ask([], ""); };
+    const go = () => { setCog(false); setTurns([]); setFailure(null); ask([], ""); };
     if (turns.some((x) => x.who === "learner")) {
       Alert.alert("Start over?", "This conversation is wiped.",
                   [{ text: "Keep going", style: "cancel" }, { text: "Restart", style: "destructive", onPress: go }]);
@@ -264,6 +300,11 @@ export default function Tutor({ navigation }) {
             The tutor is not available in this build.
           </Muted>
         ) : null}
+        {/* The cog sits above the transcript, where the drills and Study put
+            theirs — options belong to the screen, not to the header. */}
+        <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 6 }}>
+          <CogButton testID="tutor-cog" label="Tutor options" onPress={() => setCog(true)} />
+        </View>
         <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}
                     keyboardShouldPersistTaps="handled">
           {turns.map((x, k) => (x.who === "tutor" ? <TutorBubble key={k} turn={x} en={en} /> : <LearnerBubble key={k} turn={x} />))}
@@ -321,12 +362,10 @@ export default function Tutor({ navigation }) {
             <Text style={{ color: t.ink, fontSize: 15, minHeight: 20, textAlign: "center", marginTop: 4 }}>
               {rec.phase === "listening" ? rec.live : rec.note || ""}
             </Text>
-            {turns.length > 1 ? (
-              <Btn kind="link" label="Start over" testID="tutor-restart" onPress={restart} />
-            ) : null}
           </View>
         )}
       </View>
+      {cog ? <TutorOptions onClose={() => setCog(false)} onRestart={restart} /> : null}
     </Screen>
   );
 }

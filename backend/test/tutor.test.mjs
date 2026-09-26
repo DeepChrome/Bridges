@@ -79,6 +79,20 @@ test("the prompt asks for one question at a time, a first-turn greeting, and no 
   assert.match(SYSTEM_TUTOR, /Never repeat a note already in "notes"/);
 });
 
+/* Two rules from the owner's first real conversation with it (2026-09-26):
+   the coaching note is a sentence or two, not a block, and a question the
+   learner answers with "yes" teaches them nothing — *"it sometimes just
+   requests that the user says Da or Nyet… that's not actually something to
+   learn from."* */
+test("the note is short, carries guillemets, and yes/no questions are refused", () => {
+  assert.ok(NOTE_WORDS <= 45, "a coaching note is a sentence or two");
+  assert.ok(RU_WORDS <= 30, "a spoken turn is short");
+  assert.match(SYSTEM_TUTOR, /Never a list of points, never a paragraph/);
+  assert.match(SYSTEM_TUTOR, /«guillemets»/);
+  assert.match(SYSTEM_TUTOR, /Never ask a question the learner can answer with «да» or «нет»/);
+  assert.match(SYSTEM_TUTOR, /nothing to learn from saying yes/);
+});
+
 test("POST /v1/tutor: 401 without a token, 400 without text, the reply through, counted as talk", async () => {
   assert.equal((await handle(req({ text: "hi", history: [] }), env())).status, 401);
   assert.equal((await handle(req({ history: [] }, auth), env())).status, 400);

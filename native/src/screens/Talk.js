@@ -22,7 +22,7 @@ import { View, Pressable, ScrollView, ActivityIndicator, Alert } from "react-nat
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
-import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text } from "../ui";
+import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text, Marked } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, drillPool, nextLesson } from "../data";
 import { talk as askTutor, review as askReview, hint as askHint, config } from "../lib/feedback";
@@ -217,7 +217,11 @@ function Summary({ scenario, turns, newWords, st, onPin, onPinAll, onAgain, onBa
           <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
             {(tagInfo(p.tag) || {}).en || p.tag.toLowerCase().replace(/_/g, " ")}{p.n > 1 ? ` ×${p.n}` : ""}
           </Text>
-          {p.notes.map((n, k) => <Muted key={k} style={{ marginTop: 2 }}>{n}</Muted>)}
+          {/* The Russian in a correction is set apart, as it is in the
+              verdict's explanation and the tutor's note (ui.js `Marked`). */}
+          {p.notes.map((n, k) => (
+            <Marked key={k} text={n} size={13} color={t.ink3} style={{ marginTop: 2 }} />
+          ))}
         </View>
       ))}
       {better.map((b, k) => <Text key={k} style={{ color: t.ink2, fontSize: 15, marginBottom: 4 }}>{b}</Text>)}

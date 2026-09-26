@@ -145,6 +145,24 @@ describe("tutor", () => {
     expect(await screen.findByTestId("tutor-turn")).toBeTruthy();
   });
 
+  /* The cog every other run screen carries (the owner, 2026-09-26: "in Tutor
+     mode there's no settings button like there is in other areas"). Start over
+     moved into it from under the microphone. */
+  it("opens its options from the cog: level, the English, and starting over", async () => {
+    tutor.mockResolvedValueOnce(GREET);
+    await open();
+    await screen.findByTestId("tutor-turn");
+    expect(screen.queryByTestId("tutor-options")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("tutor-cog")); });
+    expect(await screen.findByTestId("tutor-options")).toBeTruthy();
+    expect(screen.getByTestId("tutor-level")).toBeTruthy();
+    expect(screen.getByTestId("tutor-restart")).toBeTruthy();
+    // The English toggle writes the key Talk's own EN button writes.
+    await act(async () => { fireEvent.press(screen.getByTestId("tutor-en-row")); });
+    expect((await saved()).talkEn).toBe(false);
+    await waitFor(() => expect(screen.queryByTestId("tutor-en")).toBeNull());
+  });
+
   it("builds the profile from what the app already keeps", () => {
     const seen = { [WORD]: { recognise: { dueAt: now + 40 * DAY, lastAt: now, s: 200, d: 3, state: REVIEW, reps: 9, lapses: 0 } } };
     const p = tutorProfile({ ...base, seen, pinned: ["же"], misses: [], tutorNotes: [] });

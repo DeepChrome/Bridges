@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Pressable, ScrollView, Alert, Animated, ActivityIndicator } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked } from "../ui";
 import { GuidePop } from "../guide";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, LINES } from "@core/guide";
@@ -476,7 +476,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         askWhy({ kind: q.kind, ask: q.ask, prompt: q.prompt, sub: q.sub, answer: miss.answer, said,
                  rule: q.note ? q.note.title : null }).then((reply) => {
           if (!alive.current || atRef.current !== mine) return;
-          setWhy(reply && reply.ok === true && reply.why ? reply.why : null);
+          setWhy(reply && reply.ok === true && reply.why
+            ? { why: reply.why, yours: reply.yours || "" } : null);
         });
       }
     }
@@ -743,22 +744,30 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                 <Speaker text={answerAudioText(q, answer)} size={36} />
               </View>
             ) : null}
-            {/* Why, in a sentence or two, when the Worker has one: the rule
-                applied to this word and to what was put. A spinner while it is
-                on its way, nothing at all when it does not come. */}
+            {/* Why, when the Worker has one: two short lines, the Russian in
+                them set apart (ui.js `Marked`). A spinner while it is on its
+                way, and the chapter's rule card below **only if it does not
+                come** — the two together were the "large ugly verbose block"
+                the owner read on his phone (2026-09-26). The explanation is
+                about the word just missed and the card is the rule in
+                general, so where there is an explanation the card is the
+                thing to cut. */}
             {right === false && why === "pending" ? (
               <ActivityIndicator testID="why-pending" color={t.ink3}
-                                 style={{ alignSelf: "flex-start", marginTop: 10 }} />
+                                 style={{ alignSelf: "flex-start", marginTop: 12 }} />
             ) : right === false && why ? (
-              <Text testID="why" style={{ color: t.ink, fontSize: 15, marginTop: 10, lineHeight: 21 }}>
-                {why}
-              </Text>
-            ) : null}
-            {/* The rule, after a wrong answer only. Right needs no lecture, and
-                a skipped question was never attempted. It replaced the Grammar
-                rules drill: a rule read at the moment it was broken is a rule
-                that sticks; a rule's title picked from four is a label. */}
-            {right === false && q.note ? (
+              <View testID="why" style={{ marginTop: 12, paddingTop: 12,
+                                          borderTopWidth: 1, borderTopColor: t.line }}>
+                <Marked testID="why-line" text={why.why} size={15} />
+                {why.yours ? (
+                  <Marked testID="why-yours" text={why.yours} size={13} color={t.ink3}
+                          italic style={{ marginTop: 5 }} />
+                ) : null}
+              </View>
+            ) : right === false && q.note ? (
+              /* The fallback: no Worker in this build, the setting off, the
+                 request failed, or a kind that is never explained. A rule read
+                 at the moment it was broken is a rule that sticks (§30al). */
               <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.line }}>
                 <RuleNote note={q.note} testID="rule-note" />
               </View>

@@ -946,6 +946,15 @@ exports 0. Same evening, off his phone: the tutor's bubble drew empty; the
 reply is `{ ru, en, note, remember }` now, drawn in parts like Talk's, with
 Settings → "English under the tutor" (`talkEn`). Worker redeployed.
 
+Then, reading the explanation and the tutor on the phone: both were verbose
+blocks. `/v1/explain` answers `{ why, yours }` at 24 and 12 words; the
+chapter's rule card draws only when no explanation comes; the tutor's note is
+capped at 45 words and may not ask a yes/no question. `Marked` in ui.js is
+the one treatment for English written about Russian — the «guillemeted» form
+in brand colour at weight 700, with a Cyrillic-run fallback — used by the
+verdict, Say, Talk and the tutor. Tutor gained the cog (level, English,
+start over). Suites: core 642, native 512, Worker 73, copy 0 over, dead 0.
+
 ### A day on beta.6, fourteen items, 2026-09-24 — CLAUDE.md §30av
 
 Flashcards turn back and carry a speaker on the back; the review count is

@@ -443,6 +443,64 @@ export function CogButton({ onPress, testID = "cog", label = "Options" }) {
   );
 }
 
+/* ---- text *about* Russian: one treatment, everywhere the app writes it ---- */
+
+/* The app writes English about Russian in four places — the verdict's
+ * explanation, Say's feedback, Talk's summary, the tutor's note — and until
+ * 2026-09-26 each was a flat grey paragraph. The owner, of the first
+ * explanation to reach his phone: *"a large ugly verbose block of text… I'd
+ * like to see it be concise, and also have some sort of consistent formatting
+ * throughout the app."*
+ *
+ * The treatment is one rule: **the Russian in the sentence is the loud part.**
+ * A form inside «guillemets» is drawn in the brand colour at weight 700 and
+ * the guillemets themselves are dropped, because colour and weight are the
+ * quoting. The eye lands on «книги» before it reads the clause around it,
+ * which is the whole of what the learner needs from a two-line note.
+ *
+ * **It does not depend on the model remembering.** Every prompt asks for
+ * guillemets, and a reply that forgets them still reads right: with none in
+ * the string, the Cyrillic runs are marked instead. A renderer that only
+ * worked when the model behaved would be a formatting rule that quietly
+ * stops applying.
+ */
+/* Non-global sources: a `g` regex carries `lastIndex` between calls, so the
+   shared constants are compiled fresh per call rather than reused. */
+const MARKED = "«([^»]+)»";
+const CYR_RUN = "[\\u0400-\\u04FF\\u0300\\u0301]+(?:-[\\u0400-\\u04FF\\u0300\\u0301]+)*";
+
+/* -> [{ text, mark? }]. Exported for the test. */
+export function splitMarked(text) {
+  const s = text == null ? "" : String(text);
+  const out = [];
+  let last = 0, m;
+  const re = new RegExp(new RegExp(MARKED).test(s) ? MARKED : CYR_RUN, "g");
+  while ((m = re.exec(s))) {
+    if (m.index > last) out.push({ text: s.slice(last, m.index) });
+    out.push({ text: m[1] === undefined ? m[0] : m[1], mark: true });
+    last = m.index + m[0].length;
+  }
+  if (last < s.length) out.push({ text: s.slice(last) });
+  return out;
+}
+
+export function Marked({ text, size = 15, color, italic, style, testID, numberOfLines,
+                         accessibilityLabel }) {
+  const t = useTheme();
+  const parts = splitMarked(text);
+  /* One label for the whole line when a caller gives one: a reader announcing
+     each marked span separately would read the sentence in pieces. */
+  return (
+    <Text testID={testID} numberOfLines={numberOfLines} accessibilityLabel={accessibilityLabel}
+          style={[{ color: color || t.ink, fontSize: size, lineHeight: Math.round(size * 1.4),
+                    fontStyle: italic ? "italic" : "normal" }, style]}>
+      {parts.map((p, k) => (p.mark ? (
+        <Text key={k} style={{ color: t.brandInk, fontWeight: "700", fontStyle: "normal" }}>{p.text}</Text>
+      ) : <Text key={k}>{p.text}</Text>))}
+    </Text>
+  );
+}
+
 /* A section's heading: one style, used everywhere a screen groups things
    under a label (it was retyped inline two dozen times). */
 export function SectionLabel({ children, style, testID }) {

@@ -594,6 +594,26 @@ Each of these cost real time. Do not relearn them.
   extension takes a moment and is the only thing that actually answers the
   question. An identical APK size across a change that removed 22 MB is the
   tell, and it is easy to skim past as a coincidence.
+- **…and `:app:packageRelease` fails with no stated cause, and needs a
+  *third* directory cleared.** "A failure occurred while executing
+  PackageAndroidArtifact$IncrementalSplitterRunnable" and nothing else, even
+  with `--stacktrace`. Clearing the two generated trees above is not enough
+  and neither is adding `intermediates/incremental/release/packageRelease`
+  and `outputs/apk/release`, which is what fixed it on 2026-09-26: on
+  2026-09-27 the same failure needed **`intermediates/apk/release`** as well.
+  Clear all five, retry, and it packages. The build itself was fine both
+  times — nothing in the code was wrong, which is exactly what makes this
+  worth writing down.
+- **A Hermes bundle stores any string containing a non-ASCII character as
+  UTF-16, so grepping the APK for Cyrillic reports a false negative.**
+  `assets/index.android.bundle` is bytecode, not text: a pure-ASCII literal
+  is findable by an ordinary UTF-8 read, and «Never ы after these seven» is
+  not — and neither is the plain ASCII *around* the Cyrillic, because the
+  whole string moved to UTF-16. Checking a new screen shipped by searching
+  for one of its Russian labels therefore says MISSING on a bundle that
+  carries it. Read the entry's bytes and decode them with
+  `[Text.Encoding]::Unicode` as well, or check an ASCII-only label. Same
+  family as §23's `Get-Content -Raw` warning, one layer down.
 - **`gradlew.bat` through `cmd /c` is "not recognized" from a PowerShell
   `cd`.** `Set-Location` moves PowerShell's location and not reliably the
   process's, so a batch file named bare was not found twice running

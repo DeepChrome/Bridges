@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml } from "react-native-svg";
 import { iconFor } from "@core/icons";
 import { AV, AV_IDS } from "@core/avatars";
-import { useTheme, radius, space, faceFor, useShadow } from "./theme";
+import { useTheme, radius, space, type, faceFor, useShadow } from "./theme";
 import { useFill, usePress, useEnter } from "./motion";
 import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
 
@@ -443,6 +443,35 @@ export function CogButton({ onPress, testID = "cog", label = "Options" }) {
   );
 }
 
+/* The reference a learner can always reach for (the owner, 2026-09-27: *"when
+   you're asking them to perform a specific skill, make sure there's a
+   lightbulb available"*). Same 40 px disc as the cog, because they are the two
+   icon controls a run screen carries and two shapes would read as two
+   unrelated things; `on` lights it while its sheet is open.
+
+   The path is here rather than in Talk.js, which drew the app's only bulb
+   until now — one drawing, so the hint in a conversation and the reference in
+   a drill are visibly the same offer. */
+export const BULB_PATH = "M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.4 1 2.5h6c0-1.1.3-1.9 1-2.5A6 6 0 0 0 12 3z";
+
+export function BulbButton({ onPress, testID = "bulb", label = "Reference", on }) {
+  const t = useTheme();
+  return (
+    <Pressable onPress={onPress} testID={testID} hitSlop={6}
+               accessibilityRole="button" accessibilityLabel={label}
+               style={({ pressed }) => ({ width: 40, height: 40, borderRadius: 20,
+                 alignItems: "center", justifyContent: "center", borderWidth: 1,
+                 borderColor: on ? t.brand : t.line,
+                 backgroundColor: on ? t.brandBg : t.surface, opacity: pressed ? 0.6 : 1 })}>
+      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none"
+           stroke={on ? t.brandInk : t.ink2}
+           strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
+        <Path d={BULB_PATH} />
+      </Svg>
+    </Pressable>
+  );
+}
+
 /* ---- text *about* Russian: one treatment, everywhere the app writes it ---- */
 
 /* The app writes English about Russian in four places — the verdict's
@@ -498,6 +527,49 @@ export function Marked({ text, size = 15, color, italic, style, testID, numberOf
         <Text key={k} style={{ color: t.brandInk, fontWeight: "700", fontStyle: "normal" }}>{p.text}</Text>
       ) : <Text key={k}>{p.text}</Text>))}
     </Text>
+  );
+}
+
+/* Every sentence the app writes *about* Russian, one sentence to a line.
+ *
+ * The owner, 2026-09-27: *"One thing I really want to focus on is formatting
+ * of any text blocks. We need to get away from ugly blocks of text and
+ * verbose."* The caps on what the model may write were already tight — a
+ * verdict's why is 24 words, a tutor's note 30 — and two short sentences run
+ * together still read as a block, because nothing in a paragraph tells the eye
+ * where one fact ends and the next begins.
+ *
+ * So a note is not a paragraph: it is its sentences, each on its own line with
+ * air between them. Two facts look like two facts. `Marked` still does the
+ * work inside a line, so the Russian is the loud part of each.
+ *
+ * Splitting on a full stop is safe here because the text is English prose
+ * about Russian and the Russian inside it is never abbreviated — but a
+ * decimal or an abbreviation would split wrongly, so a fragment shorter than
+ * MIN_SENTENCE characters is joined back onto the one before it. */
+const MIN_SENTENCE = 12;
+
+export function sentences(text) {
+  const s = (text == null ? "" : String(text)).trim();
+  if (!s) return [];
+  const out = [];
+  for (const piece of s.split(/(?<=[.!?])\s+/)) {
+    if (out.length && piece.length < MIN_SENTENCE) out[out.length - 1] += " " + piece;
+    else out.push(piece);
+  }
+  return out;
+}
+
+export function Note({ text, size, color, italic, style, testID, gap = 8 }) {
+  const lines = sentences(text);
+  if (!lines.length) return null;
+  return (
+    <View testID={testID} style={[{ gap }, style]}>
+      {lines.map((line, k) => (
+        <Marked key={k} text={line} size={size === undefined ? type.body : size}
+                color={color} italic={italic} />
+      ))}
+    </View>
   );
 }
 

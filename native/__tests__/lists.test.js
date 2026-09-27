@@ -85,9 +85,10 @@ describe("a list's hairlines", () => {
      "Right-answer sound", which still carried the last row's `last={!st.dev}`,
      so with developer mode off the group lost a hairline in its middle. */
   it("draws Settings as one unbroken group, with developer mode off and on", async () => {
-    // Developer mode ships on (rule 20.9), so the group ends at STT Lab; the
-    // shipped bug was the other state, where the tour row had taken the last
-    // place and the sound row still carried it.
+    // Seeded on rather than shipped on: developer mode has been off by
+    // default since 2026-09-23 (rule 20.9). With it on the group ends at STT
+    // Lab; the shipped bug was the other state, where the tour row had taken
+    // the last place and the sound row still carried it. Both are driven here.
     await withProfile(<You navigation={nav} />, { dev: true });
     await act(async () => { fireEvent.press(await screen.findByText("Settings")); });
     /* "Cards: recognise" led this list until the flashcards' directions moved

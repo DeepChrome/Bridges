@@ -34,8 +34,8 @@ import { View, Pressable, ScrollView, ActivityIndicator, Alert } from "react-nat
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
-import { Screen, Btn, Muted, Text, TextInput, Marked, CogButton, Sheet, List, Row,
-         SectionLabel, Choice, Tick } from "../ui";
+import { Screen, Btn, Muted, Text, TextInput, Marked, Note, CogButton, BulbButton, Sheet,
+         List, Row, SectionLabel, Choice, Tick } from "../ui";
 import { Linked } from "../words";
 import { L, STAGES, drillPool, routePosition } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
@@ -170,9 +170,11 @@ function TutorBubble({ turn, en }) {
         {turn.ru && en && turn.en ? (
           <Muted testID="tutor-en" style={{ marginTop: 6 }}>{turn.en}</Muted>
         ) : null}
+        {/* One sentence to a line (ui.js `Note`): two facts run together are
+            the "large block of verbose text" the owner keeps reading. */}
         {turn.note ? (
-          <Marked testID="tutor-note" text={turn.note} size={15}
-                  style={{ marginTop: turn.ru ? 10 : 0 }} />
+          <Note testID="tutor-note" text={turn.note}
+                style={{ marginTop: turn.ru ? 10 : 0 }} />
         ) : null}
       </View>
     </View>
@@ -476,7 +478,14 @@ export default function Tutor({ navigation }) {
         ) : null}
         {/* The cog sits above the transcript, where the drills and Study put
             theirs — options belong to the screen, not to the header. */}
-        <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 6 }}>
+        <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 8, marginBottom: 6 }}>
+          {/* The rules, one tap away mid-conversation (the owner, 2026-09-27:
+              a lightbulb wherever a skill is being asked for). A conversation
+              has no one word to hold up — every Russian word in it is already
+              two presses from its own entry — so what the bulb offers here is
+              the reference itself. */}
+          <BulbButton testID="tutor-bulb" label="The rules"
+                      onPress={() => navigation.navigate("Grammar")} />
           <CogButton testID="tutor-cog" label="Tutor options" onPress={() => setCog(true)} />
         </View>
         <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}

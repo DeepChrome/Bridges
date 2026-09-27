@@ -41,6 +41,7 @@ import WordScreen from "./src/screens/Word";
 import SttLab from "./src/screens/SttLab";
 import TourScreen from "./src/screens/Intro";
 import Sounds from "./src/screens/Sounds";
+import Grammar from "./src/screens/Grammar";
 import { ChapterTask } from "./src/screens/Task";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
@@ -212,6 +213,10 @@ function LearnStack() {
                     options={{ title: "Chapter task" }} />
       <Stack.Screen name="Placement" component={PlacementFlow}
                     options={{ title: "Placement" }} />
+      {/* The grammar reference. On this stack as well as Practice because the
+          bulb inside a quiz opens it, and a quiz runs here — §23's rule: a
+          route is only reachable from the stack it is registered in. */}
+      <Stack.Screen name="Grammar" component={Grammar} options={{ title: "Grammar" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
       <Stack.Screen name="Credits" component={Credits} options={{ title: "Credits" }} />
@@ -242,6 +247,9 @@ function PracticeStack() {
       <Stack.Screen name="SceneList" component={ScenesList} options={{ title: "Listening" }} />
       <Stack.Screen name="Scenes" component={ListeningFlow} options={{ title: "Listening" }} />
       <Stack.Screen name="Sounds" component={Sounds} options={{ title: "Alphabet" }} />
+      {/* Beside Alphabet, and the same kind of thing: a reference that is open
+          from the first screen and never scored (2026-09-27). */}
+      <Stack.Screen name="Grammar" component={Grammar} options={{ title: "Grammar" }} />
       {/* The pronunciation drill, reached from Sounds (ROADMAP P10.8). */}
       <Stack.Screen name="SoundDrill" component={SoundDrillFlow}
                     options={{ title: "Practice sounds" }} />

@@ -540,6 +540,15 @@ export function DrillList({ navigation }) {
       </List>
       <SectionLabel style={{ marginTop: 18 }}>Grammar</SectionLabel>
       <List>
+        {/* The reference, first in the section it explains: the rules the
+            drills below are drilling. Open from the first screen, like the
+            alphabet, and never scored (2026-09-27). */}
+        <Row testID="open-grammar" onPress={() => navigation.navigate("Grammar")}>
+          <Thumb id="rules" tone="good" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>The rules</Text>
+          </View>
+        </Row>
         {DRILL_TYPES.map((d) => (
           /* Straight in. What a drill asks about is on the drill's own cog now
              (DrillOptions), not a screen in front of it — the owner, 2026-09-26:

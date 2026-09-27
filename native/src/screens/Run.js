@@ -10,7 +10,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Pressable, ScrollView, Alert, Animated, ActivityIndicator } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
+         BulbButton } from "../ui";
+import { RuleCard, Reference, hasReference } from "../rules";
+import { topicFor } from "@core/grammar";
 import { GuidePop } from "../guide";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, LINES } from "@core/guide";
@@ -233,43 +236,46 @@ function Match({ q, onDone }) {
   );
 }
 
-function HintSheet({ q, onClose }) {
-  const t = useTheme();
-  return (
-    <Sheet onClose={onClose}
-           footer={<Btn kind="pri" label="Got it" style={{ marginTop: 14 }} onPress={onClose} />}>
-      {q.table ? (
-        <>
-          <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600",
-                         marginBottom: 8 }}>{q.table.title}</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View>
-              <View style={{ flexDirection: "row" }}>
-                {q.table.columns.map((c) => (
-                  <Text key={c} style={{ width: 105, color: t.ink3, fontSize: 10,
-                                         fontWeight: "600", paddingVertical: 6,
-                                         textTransform: "uppercase" }}>{c}</Text>
-                ))}
-              </View>
-              {q.table.rows.map((r, ri) => (
-                <View key={ri} style={{ flexDirection: "row", borderTopWidth: 1,
-                                        borderTopColor: t.lineSoft }}>
-                  {r.map((cell, ci) => (
-                    <Text key={ci} style={{ width: 105, paddingVertical: 6,
-                                            fontSize: ci === 0 ? 12 : 15,
-                                            color: ci === 0 ? t.ink3 : t.ink }}>
-                      {Array.isArray(cell) ? cell.join(" / ") : cell}
-                    </Text>
-                  ))}
-                </View>
-              ))}
-            </View>
-          </ScrollView>
-        </>
-      ) : null}
-      {q.note ? <RuleNote note={q.note} /> : null}
-    </Sheet>
-  );
+/* What the bulb has to show for this question.
+ *
+ * The tables are the word's own — every one of them, so a verb's present, past
+ * and imperative all arrive together, which is the "answer key for that verb"
+ * the owner asked for. The one cell the question is asking for is blanked
+ * (`q.at`, set by the generator), so the sheet is a reference rather than the
+ * answer with extra steps.
+ *
+ * A word is only safe to show at all when it is already on screen. Where the
+ * Russian word *is* what the learner has to produce — a typed vocabulary
+ * answer, a stress question, anything heard and written back — there is no
+ * bulb, because the reference would be the answer. `q.cyr` marks a question
+ * whose prompt is the Russian word itself. */
+/* Kinds whose answer is a cell of the word's own paradigm. The reference shows
+   every table the word has with that one cell blanked, and it costs the grade:
+   the pattern around a missing cell is most of the way to it, which is the
+   point of looking, and FSRS should hear that the word was not known. */
+const TABLE_KINDS = ["form", "cases", "agreement", "conjugation"];
+/* Kinds where the Russian word is on screen and the answer is *not* a form of
+   it — the aspect drill asks for a different lemma, choose-en for English — so
+   the paradigm is free to read and costs nothing. */
+const OPEN_KINDS = ["aspect", "choose-en"];
+
+export function referenceFor(q) {
+  const w = q.i !== undefined && q.i !== null ? L[q.i] : null;
+  const shows = TABLE_KINDS.includes(q.kind) ? !!(q.table && q.at)
+    : OPEN_KINDS.includes(q.kind);
+  const right = q.options ? (q.options.find((o) => o.right) || {}).label : q.answer;
+  return {
+    word: shows ? w : null,
+    tables: shows && w ? w.t || [] : [],
+    blank: q.table && q.at ? { table: q.table, at: q.at } : null,
+    /* Blanking by position is not enough: a verb's three tables are shown
+       together and a paradigm repeats itself, so the answer is hidden
+       wherever it appears as well as where it was asked for. */
+    hide: right || null,
+    note: q.note || null,
+    topic: topicFor(q.kind) || (shows && w ? topicFor(w.p) : null),
+    costs: TABLE_KINDS.includes(q.kind) && !!(q.table && q.at),
+  };
 }
 
 /* What the prompt can be read aloud as: the generator's own `say`, else a
@@ -281,33 +287,13 @@ export function promptSpeech(q) {
   return null;
 }
 
-/* A chapter's grammar card, as the runner draws it: in the hint sheet before
-   an answer, and under the verdict after a wrong one (§30al — the owner:
-   *"the grammar tips can be feedback after an incorrect answer on a question
-   featuring the grammar tip"*). One component for both, so the rule reads the
-   same wherever it turns up. */
+/* A chapter's grammar card under a verdict (§30al — the owner: *"the grammar
+   tips can be feedback after an incorrect answer on a question featuring the
+   grammar tip"*). `RuleCard` in rules.js is the one renderer; this name is
+   kept because the verdict, the reference sheet and the lesson's teaching step
+   all reach for it and the tests name it. */
 export function RuleNote({ note, testID }) {
-  const t = useTheme();
-  return (
-    <View testID={testID}>
-      <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600" }}>
-        {note.title}
-      </Text>
-      <Text style={{ color: t.ink2, fontSize: 15, marginTop: 6 }}>
-        {note.body}
-      </Text>
-      {(note.examples || []).map(([ru, en], k) => (
-        <View key={k} style={{ marginTop: 12, borderTopWidth: 1,
-                               borderTopColor: t.lineSoft, paddingTop: 10 }}>
-          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-            <View style={{ flex: 1 }}><Linked text={ru} size={18} /></View>
-            <Speaker text={ru} size={32} />
-          </View>
-          <Muted>{en}</Muted>
-        </View>
-      ))}
-    </View>
-  );
+  return <RuleCard note={note} testID={testID} />;
 }
 
 /* ---------------------------------------------------------------- registry */
@@ -432,6 +418,10 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
 
   const q = queue[at];
   guard.current = at > 0 && !finished.current;
+  /* What the bulb has behind it for this question, and whether reading it
+     counts against the grade. */
+  const ref = q ? referenceFor(q) : { tables: [], note: null, topic: null, costs: false };
+  const costsGrade = ref.costs;
 
   // Autoplay waits for whatever is still playing — the previous answer's reading,
   // the previous question's recording — so nothing talks over the language audio.
@@ -665,25 +655,20 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
             2026-09-23). `say` where the generator named it; otherwise the
             prompt itself when it is Russian and whole — a gapped sentence
             («___ среда») is not a thing to read aloud. */}
-        {promptSpeech(q) ? <View style={{ marginTop: 12 }}><Speaker text={promptSpeech(q)} /></View> : null}
+        {/* The two things to do with the word on screen — hear it, look it up
+            — in one row under it, rather than a speaker here and a text link
+            adrift in the middle of the screen. */}
+        {promptSpeech(q) || (!answered && hasReference(ref)) ? (
+          <View style={{ marginTop: 12, flexDirection: "row", gap: 10, justifyContent: "center" }}>
+            {promptSpeech(q) ? <Speaker text={promptSpeech(q)} /> : null}
+            {!answered && hasReference(ref) ? (
+              <BulbButton testID="bulb" on={hintOpen}
+                          label={costsGrade ? "Reference · counts as a hint" : "Reference"}
+                          onPress={() => { if (costsGrade) setUsedHint(true); setHintOpen(true); }} />
+            ) : null}
+          </View>
+        ) : null}
       </Animated.View>
-
-      {/* A hint — the table, or the meaning of what was heard — costs the grade:
-          right with a hint is Hard, not Good. The label says so beforehand;
-          nothing used to, and the table opened on every question. */}
-      {(q.table || q.note) && !answered ? (
-        <Btn
-          // `link`, not `ghost`: alone in the middle of the screen the grey
-          // read as a caption, so the only hint the runner offers looked like
-          // an instruction and nobody would have pressed it.
-          kind="link"
-          testID="show-table"
-          label={usedHint ? "Table used · counts as a hint" : "Show the table · counts as a hint"}
-          disabled={usedHint}
-          style={{ marginBottom: 12 }}
-          onPress={() => { setUsedHint(true); setHintOpen(true); }}
-        />
-      ) : null}
 
       {q.hint && !answered ? (
         usedHint ? (
@@ -765,10 +750,10 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
             ) : right === false && why ? (
               <View testID="why" style={{ marginTop: 12, paddingTop: 12,
                                           borderTopWidth: 1, borderTopColor: t.line }}>
-                <Marked testID="why-line" text={why.why} size={15} />
+                <Note testID="why-line" text={why.why} />
                 {why.yours ? (
-                  <Marked testID="why-yours" text={why.yours} size={13} color={t.ink3}
-                          italic style={{ marginTop: 5 }} />
+                  <Marked testID="why-yours" text={why.yours} size={T.small} color={t.ink3}
+                          italic style={{ marginTop: 6 }} />
                 ) : null}
                 {/* The reference, behind a tap. Two short lines stay two
                     short lines for whoever does not want it. */}
@@ -776,7 +761,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                   ruleOpen ? (
                     <View testID="why-rule" style={{ marginTop: 10, padding: 12, borderRadius: radius.md,
                                                      backgroundColor: t.surface2 }}>
-                      <Marked text={why.rule} size={14} color={t.ink2} />
+                      <Note text={why.rule} size={T.small + 1} color={t.ink2} />
                     </View>
                   ) : (
                     <Btn kind="link" testID="why-rule-open" label="The rule"
@@ -816,7 +801,15 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         </Animated.View>
       ) : null}
 
-      {hintOpen ? <HintSheet q={q} onClose={() => setHintOpen(false)} /> : null}
+      {hintOpen ? (
+        <Reference
+          title={ref.word ? ref.word.w : null}
+          sub={ref.word ? firstSense(ref.word) : null}
+          tables={ref.tables} blank={ref.blank} hide={ref.hide}
+          note={ref.note} topic={ref.topic}
+          onTopic={(id) => navigation.navigate("Grammar", { topic: id })}
+          onClose={() => setHintOpen(false)} />
+      ) : null}
     </Screen>
   );
 }

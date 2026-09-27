@@ -278,8 +278,12 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   <Text style={{ color: t.ink, fontSize: 15 }}>Show the tour</Text>
                 </View>
               </Row>
-              {/* Last, not first: a new learner's settings sheet should not open on
-                  a switch they cannot place. It ships on (rule 20.9). */}
+              {/* Last, not first: a new learner's settings sheet should not
+                  open on a switch they cannot place. It ships **off** since
+                  2026-09-23 (rule 20.9 — a learner walks the path from the
+                  top) and lives here so the owner can still unlock the course
+                  on his own phone; the comment used to say "ships on" and had
+                  been wrong for four days. */}
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Developer mode</Text>

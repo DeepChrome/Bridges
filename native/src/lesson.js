@@ -28,6 +28,7 @@ import React from "react";
 import { Animated, View, Image } from "react-native";
 import { useTheme, radius, type as T } from "./theme";
 import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses, Text } from "./ui";
+import { RuleCard } from "./rules";
 import { Linked } from "./words";
 import { Guide } from "./guide";
 import { useEnter } from "./motion";
@@ -147,24 +148,7 @@ export function GrammarNote({ unit, note, at, total }) {
             </Text>
           </View>
         </View>
-        <Card testID="grammar-note"
-              style={{ borderLeftWidth: 4, borderLeftColor: t.brand, backgroundColor: t.brandBg,
-                       borderColor: t.brandDim }}>
-          <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700", marginBottom: 8 }}>
-            {note.title}
-          </Text>
-          <Text style={{ color: t.ink2, fontSize: T.body, lineHeight: T.body + 7 }}>{note.body}</Text>
-          {(note.examples || []).map(([ru, en], k) => (
-            <View key={k} style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1,
-                                   borderTopColor: t.brandDim }}>
-              <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-                <View style={{ flex: 1 }}><Linked text={ru} size={T.head + 2} /></View>
-                <Speaker text={ru} size={36} />
-              </View>
-              <Muted>{en}</Muted>
-            </View>
-          ))}
-        </Card>
+        <RuleCard note={note} tone="brand" testID="grammar-note" />
       </Animated.View>
     </>
   );

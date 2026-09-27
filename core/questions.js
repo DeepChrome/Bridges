@@ -889,7 +889,12 @@ export function makeQuestions(env) {
     const { table: t, ri, ci, forms } = cell;
     const target = forms[0];
     const what = formName(t, ri, ci, w);
-    const base = { kind: "form", i, cyr: true, prompt: w.w, sub: firstSense(w), table: t };
+    /* `at` is the cell the answer is in. The app's reference sheet (the bulb)
+       draws the whole paradigm with that one cell left blank, which is what
+       lets a learner look the *pattern* up without reading the answer off it
+       (the owner, 2026-09-27: "It doesn't reveal the answer, but it reveals
+       the reference for the different verb forms for that word"). */
+    const base = { kind: "form", i, cyr: true, prompt: w.w, sub: firstSense(w), table: t, at: [ri, ci] };
     if (typed) {
       return { ...base, ask: `Write ${what}`, typed: true, answer: target, target,
                alts: forms.slice(1).map(fold) };
@@ -1493,7 +1498,7 @@ export function makeQuestions(env) {
     const target = askable[Math.floor(Math.random() * askable.length)];
     const what = `${t.rows[target.ri][0].toLowerCase()} ${t.columns[target.ci + 1].toLowerCase()}`;
     const base = { kind: "cases", i: L.indexOf(w), cyr: true,
-                   prompt: w.w, sub: w.e || "", table: t };
+                   prompt: w.w, sub: w.e || "", table: t, at: [target.ri, target.ci + 1] };
     if (typed) return written(base, `Write ${what}`, target.label, target.alts);
     /* One option per *form*, not per cell. A paradigm repeats itself — an
        inanimate noun's accusative is its nominative, an animate one's is its
@@ -1833,10 +1838,11 @@ export function makeQuestions(env) {
     const row = rows[0];
     const right = row[col][0];
     const nounForm = nt.rows.find((x) => x[0] === row[0])[1][0];
+    const at = [t.rows.indexOf(row), col];
     if (typed) {
       return written({ kind: "agreement", i: L.indexOf(adj), cyr: true,
                        prompt: `___ ${nounForm}`, sub: `${adj.w} · ${adj.e || ""}`.trim(),
-                       table: t },
+                       table: t, at },
                      "Write the form that agrees", right, row[col].slice(1));
     }
     const own = t.rows.flatMap((r) => cellsOf(r).map((c) => (Array.isArray(c) ? c[0] : c)));
@@ -1845,7 +1851,7 @@ export function makeQuestions(env) {
     return {
       kind: "agreement", i: L.indexOf(adj), cyr: true,
       ask: "Choose the form that agrees", prompt: `___ ${nounForm}`,
-      sub: `${firstSense(adj)} ${firstSense(noun)} · ${row[0].toLowerCase()}`, table: t,
+      sub: `${firstSense(adj)} ${firstSense(noun)} · ${row[0].toLowerCase()}`, table: t, at,
       options: optionsOf(right, wrong),
     };
   }
@@ -1891,11 +1897,12 @@ export function makeQuestions(env) {
     const target = rows[Math.floor(Math.random() * rows.length)];
     const right = target[1][0];
     const note = conjugationNote(w, t, target);
+    const at = [t.rows.indexOf(target), 1];
     if (typed) {
       const label = t.title === "Imperative" ? "imperative"
         : t.title === "Past" ? "past" : (w.a === "perfective" ? "future" : "present");
       return written({ kind: "conjugation", i: L.indexOf(w), cyr: true,
-                       prompt: w.w, sub: w.e || "", table: t, note },
+                       prompt: w.w, sub: w.e || "", table: t, note, at },
                      `Write the ${label} for “${target[0]}”`, right, target[1].slice(1));
     }
     // The verb's own other persons first — the imperative has only two rows, so
@@ -1916,7 +1923,7 @@ export function makeQuestions(env) {
       : t.title === "Past" ? "past" : (w.a === "perfective" ? "future" : "present");
     return {
       kind: "conjugation", i: L.indexOf(w), cyr: true,
-      ask: `Choose the ${what} for “${target[0]}”`, prompt: w.w, sub: w.e || "", table: t, note,
+      ask: `Choose the ${what} for “${target[0]}”`, prompt: w.w, sub: w.e || "", table: t, note, at,
       options: optionsOf(right, wrong),
     };
   }
@@ -1974,7 +1981,11 @@ export function makeQuestions(env) {
     if (!wrong) return null;
     return {
       kind: "conjugation", i: L.indexOf(w), cyr: true,
+      // Here the answer is the row's *label*, not a form, so that is the cell
+      // the reference blanks — the paradigm is still readable, and the row the
+      // question is about is the unlabelled one.
       ask: "Whose form is this?", prompt: target[1][0], sub: firstSense(w), table: t,
+      at: [t.rows.indexOf(target), 0],
       options: shuffle([target[0]].concat(wrong))
         .map((s) => ({ label: s, right: s === target[0] })),
     };

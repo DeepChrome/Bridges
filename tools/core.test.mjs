@@ -31,6 +31,7 @@ import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, PRODUCE_A
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
+import { TOPICS, checkGrammar, russianIn, topicFor } from "../core/grammar.js";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP,
          sayPassed, closestTranscript }
   from "../core/speech.js";
@@ -2001,6 +2002,79 @@ group("the writing system");
   ok(/tongue back/.test(soundTip("ты") || ""), "«ты» explains ы", soundTip("ты"));
   ok(soundTip("да") === null, "a word with nothing tricky gets no tip", String(soundTip("да")));
   ok(soundTip("") === null && soundTip(undefined) === null, "and neither does nothing");
+}
+
+/* The grammar reference (core/grammar.js, 2026-09-27). Two things can go wrong
+   with a hand-authored reference and neither shows on a screen: a Russian word
+   that does not exist, and a rule that has quietly grown into a paragraph. */
+group("the grammar reference");
+{
+  const deepBare = new Set();
+  for (const line of (DATA.deep || "").split("\n")) {
+    const b = line.split("\t")[0];
+    if (b) deepBare.add(fold(b));
+  }
+  const known = (w) => {
+    const k = fold(w);
+    return !!DATA.index[k] || deepBare.has(k);
+  };
+  const cards = new Set(DATA.units.filter((u) => u.g).map((u) => u.id));
+  const bad = checkGrammar(known, (id) => cards.has(id));
+  ok(bad.length === 0, "every word is real and every rule is one sentence",
+     bad.slice(0, 4).join(" | "));
+
+  // The two exclusions in russianIn() are narrow on purpose: an invented word
+  // still has to be caught, or the check above passes on anything.
+  const invented = checkGrammar((w) => w !== "книжкость" && known(w), () => true);
+  const planted = { id: "x", title: "X", blurb: "x", sections: [
+    { heading: "H", rule: "R", examples: [["книжкость", "not a word"]] }] };
+  ok(russianIn(planted).some((r) => r.word === "книжкость"),
+     "a word that is not an ending and not a letter is looked up");
+  ok(invented.length === 0, "and the real file has no such word");
+
+  ok(TOPICS.some((t) => t.id === "stems"), "hard and soft stems have a topic");
+  ok(topicFor("genitive") && topicFor("genitive").id === "cases",
+     "a case name finds the cases topic");
+  ok(topicFor("conjugation").id === "verbs", "a drill finds the topic behind it");
+  ok(topicFor("nonsense") === null && topicFor(null) === null,
+     "and an unknown one finds nothing rather than the first");
+  // "When do I use the genitive" is the question this topic exists to answer,
+  // so the answer has to be in one place rather than spread over four chapters.
+  const gen = TOPICS.find((t) => t.id === "cases").sections.find((s) => s.heading === "Genitive");
+  ok(gen.uses.length >= 5, "the genitive lists every job it does", String(gen.uses.length));
+}
+
+/* The bulb blanks one cell, and the whole claim that it "does not reveal the
+   answer" rests on that cell being the right one. `at` is set by five
+   generators; a wrong index would blank an innocent cell and print the answer
+   beside it, and nothing on the screen would look wrong. So it is checked
+   against what the question is actually asking for, over a real draw. */
+group("the cell the reference blanks");
+{
+  const unit = UN.find((u) => u.id === "core4");
+  const asked = [];
+  for (let k = 0; k < 120; k++) {
+    for (const typed of [false, true]) {
+      for (const t of ["cases", "agreement", "conjugation"]) {
+        const q = Q.drillQuestions(t, 1, null, null, typed)[0];
+        if (q && q.table) asked.push(q);
+      }
+    }
+    const f = Q.formPrompt(unit, 0);
+    if (f && f.table) asked.push(f);
+  }
+  ok(asked.length > 40, "a real draw of table questions", String(asked.length));
+  const withAt = asked.filter((q) => q.at);
+  ok(withAt.length === asked.length, "every one says which cell holds the answer",
+     `${withAt.length} of ${asked.length}`);
+  const answerOf = (q) => (q.typed ? q.answer : (q.options.find((o) => o.right) || {}).label);
+  const wrong = asked.filter((q) => {
+    const cell = (q.table.rows[q.at[0]] || [])[q.at[1]];
+    const holds = Array.isArray(cell) ? cell : [cell];
+    return !holds.some((f) => f !== undefined && fold(String(f)) === fold(String(answerOf(q))));
+  });
+  ok(wrong.length === 0, "and that cell is the one holding the answer",
+     wrong.slice(0, 2).map((q) => `${q.kind}: ${answerOf(q)} not at ${q.at}`).join(" | "));
 }
 
 /* Recognition to meet a word, production to keep it (ROADMAP P10.1). */

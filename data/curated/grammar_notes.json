@@ -35,7 +35,7 @@
     "core4": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Nominative"], "cols": ["Plural"] },
       "title": "Making things plural",
-      "body": "Masculine and feminine nouns usually take -ы or -и; neuter nouns take -а or -я. (A few masculine nouns take a stressed -а́ instead — дом → дома́ — and Around Town shows them.)",
+      "body": "Masculine and feminine nouns usually take -ы or -и. Neuter nouns take -а or -я.",
       "examples": [["стол → столы́", "table → tables"], ["кни́га → кни́ги", "book → books"]]
     },
     "core5": {
@@ -71,7 +71,7 @@
     "core10": {
       "form": { "pos": "verb", "table": "Imperative" },
       "title": "Asking someone to do something",
-      "body": "The imperative is the ты form with -й, -и or -ь: чита́й, скажи́, забу́дь; add -те to one person you say вы to, or to several.",
+      "body": "The imperative is the ты form with -й, -и or -ь: чита́й, скажи́, забу́дь. Add -те for вы.",
       "examples": [["Скажи́, где ты живёшь.", "Tell me where you live."], ["Прочита́йте э́то, пожа́луйста.", "Read this, please."]]
     },
 
@@ -123,7 +123,7 @@
     },
     "nature": {
       "title": "Where in nature",
-      "body": "A few short nouns take a stressed -у́ instead of -е in the prepositional: в лесу́, в снегу́; open places take на: на мо́ре, на у́лице.",
+      "body": "A few short nouns take a stressed -у́ instead of -е: в лесу́, в снегу́. Open places take на, not в.",
       "examples": [["в лесу́", "in the forest"], ["на мо́ре", "at the sea"]]
     },
     "work": {
@@ -181,7 +181,7 @@
     },
     "medicine": {
       "title": "At the doctor's",
-      "body": "у plus a person means at their place — у врача́ — while в plus the prepositional is the building you are in: в больни́це.",
+      "body": "у plus a person means at their place: у врача́. в plus the prepositional is the building: в больни́це.",
       "examples": [["Я у врача́.", "I am at the doctor's."], ["Она́ в больни́це.", "She is in hospital."]]
     },
     "business": {

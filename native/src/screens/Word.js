@@ -7,9 +7,10 @@
  */
 
 import React, { useState } from "react";
-import { View, ScrollView, Image, Pressable, Linking } from "react-native";
+import { View, Image, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text } from "../ui";
+import { Table } from "../rules";
 import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord } from "../data";
 import { Linked } from "../words";
 import { IMAGES, CREDITS } from "../images";
@@ -21,45 +22,6 @@ import { clock, short } from "./Misc";
    screen had no way to reach (ROADMAP P11.9). */
 const HEARD_ROWS = 4;
 const GENDER = { m: "masculine", f: "feminine", n: "neuter", pl: "plural" };
-
-export function Table({ table }) {
-  const t = useTheme();
-  return (
-    <View style={{ marginTop: 16 }}>
-      <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700",
-                     letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>
-        {table.title}
-      </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View>
-          <View style={{ flexDirection: "row" }}>
-            {table.columns.map((c, ci) => (
-              <Text key={c + ci} style={{ width: 110, color: t.ink3, fontSize: 10,
-                                          fontWeight: "700", textTransform: "uppercase",
-                                          letterSpacing: 0.6, paddingVertical: 6 }}>
-                {c}
-              </Text>
-            ))}
-          </View>
-          {table.rows.map((r, ri) => (
-            <View key={ri} style={{ flexDirection: "row", borderTopWidth: 1,
-                                    borderTopColor: t.lineSoft }}>
-              {r.map((cell, ci) => (
-                <Text
-                  key={ci}
-                  style={{ width: 110, paddingVertical: 6, fontSize: ci === 0 ? 13 : 15,
-                           color: ci === 0 ? t.ink3 : t.ink }}
-                >
-                  {Array.isArray(cell) ? cell.join(" / ") : cell}
-                </Text>
-              ))}
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-    </View>
-  );
-}
 
 export default function Word({ route, navigation }) {
   /* Addressed by the word, not by an index: lemma indices are assigned by frequency

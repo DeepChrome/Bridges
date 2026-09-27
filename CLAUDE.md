@@ -410,11 +410,13 @@ bridges/                          (directory is still named russian-blocks on di
     compare.js         <- transcript vs target, word-aligned through fold()
     errortags.js       <- the closed list of learner-error tags
     scenarios.js       <- the Talk situations (§30f)
+    grammar.js         <- the grammar reference: topics, rules, endings tables (§30ay)
     anki.js            <- Anki decks: field parsing, legacy collection rows (§30h)
     icons.js avatars.js
   native/              <- THE PRODUCT (Expo / React Native); see native/README.md
     src/screens/       <- Learn, Unit, Flows, Run (the runner + VIEWS registry), You…
     src/activities/    <- Hear, Say, Scene, Alignment (§30c)
+    src/rules.js       <- the one table, rule card and reference sheet (§30ay)
     src/lib/feedback.js<- client for the Worker (§30d)
     src/anki.js        <- .apkg in and out: zip, zstd, SQLite in memory (§30h)
     src/keyboard.js    <- the on-screen Russian keyboard (§30h)
@@ -4678,13 +4680,156 @@ What it found on its first run, and what was fixed:
 - **`space.gap` was 10**, off the 4-grid every mobile system uses.
 
 **Left as advisory, with the numbers, because each needs a decision rather
-than a fix:** 58 inline font sizes off the scale and 277 inline spacing
+than a fix:** the inline font sizes off the scale and the inline spacing
 values off the grid (sweeping 30 files is the blind refactor §12 warns
 about, and the count is there to say how much the scales are actually being
 ignored); and the neutrals, which run at 12–23 % saturation on one hue
 against Hobday's 5 % — deliberate (§24) and also exactly the slate-blue cast
 every generated interface has. Changing it moves the whole app's colour and
 must be solved for rather than nudged (§31), so it is his call.
+
+**The advisory count this section first carried was wrong, and how it was
+wrong is the lesson.** It said 58 font sizes off the scale; the committed
+tree produces **125**, and the difference is exactly the 67 occurrences of
+`fontSize: 15` — which only became "off the scale" when the same commit moved
+`body` from 15 to 16. The figure was measured before the fix and written down
+after it, so the doc reported the wrong side of its own change. **Re-run an
+instrument after changing what it measures**, and quote what the committed
+tree actually prints. The numbers are left out of the prose now; `design.mjs`
+is where they live.
+
+## 30ay. The rules, gathered — and a bulb that is not an answer key (2026-09-27)
+
+The owner, in one message: developer mode back but tucked away; *"get away
+from ugly blocks of text and verbose"*; a lightbulb on any drill or
+conversation that *"reveals the reference for the different verb forms for
+that word"* without revealing the answer; and the big one — *"there's no clear
+mechanism for communicating hard vs soft stems, rules, when to use genitive,
+etc. We really just skip a lot of the rules in general… like what letters are
+indicating feminine, masculine, neutral."*
+
+**Two of those three rules were already in the app and unreachable, and that
+is the finding.** `data/curated/grammar_notes.json` holds 34 cards, one per
+unit, and they teach gender by ending, the plural, all six cases and both
+aspects. But a card is met exactly twice — inside the lesson that owns it, and
+under a wrong answer on a question it governs (§30al) — so there was nowhere
+to *look something up*. The same shape as Word building (§30ab), the
+flashcard fronts (§30ai) and Listening (§30af): built, correct, and in a
+place nobody starts from.
+
+What was genuinely absent is **hard and soft stems**, which is the fact that
+makes Russian endings stop looking irregular, and the two spelling rules under
+it. `core/grammar.js` is that content — hand-authored, beside
+`core/alphabet.js` and `core/scenarios.js`, because the lexicon knows «книга»
+takes «книги» and does not know the reason is a rule about к г х.
+
+- **Six topics, 31 sections**: gender, hard and soft, the six cases,
+  adjectives, verbs, pronouns. A section is a heading, **one** sentence of
+  rule, and then structure — a table, a list of jobs, a pair of contrasting
+  examples. `checkGrammar()` enforces both halves: `RULE_WORDS` (22) and *"a
+  section with prose and nothing under it"* is an error. That shape is the
+  whole answer to "digestible": "when do I use the genitive" is six bullets,
+  not a paragraph.
+- **It does not restate the course.** A section names the units whose cards
+  teach the point and the screen draws those cards from the payload, so the
+  reference and the lesson cannot drift (§22). `checkGrammar` fails on a card
+  id that names no unit.
+- **Nothing here may be invented** (§30a). `russianIn()` pulls every Russian
+  word out of a topic and `core.test.mjs` checks each against the shipped
+  lexicon. Its first version reported **76 failures on a sound file**, all of
+  them endings (`-ов`) and single letters naming a spelling rule — §30r's
+  metric-that-cannot-tell-the-skill-from-the-flaw, again. It skips a run of
+  one letter and a run preceded by a hyphen, and **neither exclusion opens a
+  hole**: a genuinely wrong word is two or more letters and not after a
+  hyphen. Verified by planting «книжкость», which it names.
+- **Practice → The rules**, first in the Grammar section, beside Alphabet:
+  the same kind of thing, open from the first screen, never scored.
+
+### The bulb, and why blanking is the whole design
+
+The hint that existed was a text link reading *"Show the table · counts as a
+hint"*, on four kinds of question, opening a second copy of the paradigm
+renderer. It is a lightbulb now — the same 40 px disc as the cog, and the
+**same drawing Talk already used for its hint**, so the two offers look alike
+instead of being two glyphs for one idea.
+
+**It shows every table the word has, with the answer's cell blank.** That is
+what makes it a reference rather than an answer key, and it is the generator
+that says which cell (`at` on the question, added to all five table
+generators) because only the generator knows. `core.test.mjs` checks over a
+real draw that `at` points at the cell actually holding the answer — a
+wrong index would blank an innocent cell and print the answer beside it, and
+nothing on the screen would look wrong.
+
+**Blanking by position was not enough, and the test is what said so.** Two
+leaks, both found by sweeping real draws rather than by reading:
+
+1. **A paradigm repeats itself** and a verb's three tables are shown together,
+   so the same form was printed two rows down. Every cell holding the answer
+   is blanked now, not only the one asked for.
+2. **`conjugationNote` builds its examples out of the verb's own paradigm with
+   the asked row first** (§30av), so the answer was the first thing printed
+   under the blanked table. An example containing it is **dropped, not
+   redacted** — a sentence with a dash in the middle teaches nothing. This
+   leak predates the bulb: the old hint sheet drew the same note.
+
+And a third, from the same sweep: where the form asked for *is* the dictionary
+form, the sheet's own title was the answer. The title is dropped in that case;
+the word is on the question screen behind it anyway.
+
+Both directed cases are now built by hand in `grammar.test.js` rather than
+left to a draw (§23: a check that only fails on the right draw is a check that
+gets committed over).
+
+**Where there is no bulb, and why.** `TABLE_KINDS` are the four whose answer
+is a cell of the word's paradigm — they show it, blanked, and reading it still
+costs the grade, because the pattern around a missing cell is most of the way
+to it and FSRS should hear that the word was not known. `OPEN_KINDS` (aspect,
+choose-en) show the paradigm free, since the answer is a different lemma or is
+English. **Everything else gets no paradigm at all** — for `type`, `stress`,
+`listen`, `cloze`, `hear`, `say` the Russian word *is* what the learner has to
+produce, so the reference would be the answer. Asserted per kind.
+
+In Tutor the bulb opens the reference itself: a conversation has no one word
+to hold up, and every Russian word in it is already two presses from its own
+entry. Talk keeps the bulb it had — a sentence you could say, which is the
+help a scripted scenario wants — and its toolbar stays four buttons (§30h′).
+
+### Text blocks
+
+`Note` in ui.js: **one sentence to a line.** The caps on what the model may
+write were already tight — a verdict's why is 24 words — and two short
+sentences run together still read as a block, because nothing in a paragraph
+tells the eye where one fact ends and the next begins. Two facts now look like
+two facts. `Marked` still does the work inside a line, so the Russian is the
+loud part of each. A fragment under 12 characters is joined back onto the line
+before it, so a decimal or an abbreviation cannot split one.
+
+Used by the four places that write English about Russian: the verdict's
+explanation and its rule box, the tutor's note, and every rule card. Say's
+and Talk's feedback rows are already one short note each and are left alone.
+
+Beside it: `NOTE_WORDS` in the tutor Worker is **32**, down from 45, and the
+line in its prompt inviting *"two or three sentences"* for a study plan — which
+was the turn he was reading — now says two at most. Four grammar cards that
+packed a digression into a parenthetical or a semicolon were cut to two plain
+sentences; `core4`'s parenthetical was a duplicate of the `city` card anyway.
+
+**One renderer each, finally.** There were three near-copies of two
+components: `Table` in `screens/Word.js`, a second table inside the runner's
+hint sheet, and `RuleNote` there beside `GrammarNote` in `lesson.js` — the
+same grammar card drawn two ways depending on which screen you met it on.
+`native/src/rules.js` holds one of each and the four call sites import them.
+
+### Developer mode
+
+He asked for it back, hidden in Settings. **It is already exactly that** —
+last row of the Settings sheet, off by default since 2026-09-23 (rule 20.9),
+and the switch is what unlocks the course on his own phone. Nothing was
+built. What was wrong was the comment beside it, which still said *"It ships
+on"* and had been wrong for four days, and the same claim in `lists.test.js`.
+Both corrected; the test seeds `dev: true` deliberately rather than relying on
+a default that no longer exists.
 
 ## 31. Verification
 

@@ -50,10 +50,17 @@ import { plain } from "./schema.js";
 /* Short, because a tutor in conversation speaks in short turns and the owner
    read the first version on his phone as "a large block of verbose text"
    (2026-09-26). A spoken turn is a sentence or two; a coaching note is one
-   correction, not a lesson. */
+   correction, not a lesson.
+
+   45 was still too long and he said so again on 2026-09-27 — *"we need to get
+   away from ugly blocks of text and verbose"*. Two things were wrong with it:
+   the number, and a line in the prompt below that invited "two or three
+   sentences" for a study plan, which is the turn he was reading. The app also
+   stopped running a note together as a paragraph (ui.js `Note`, one sentence
+   to a line), so the cap and the rendering are pulling the same way now. */
 export const RU_WORDS = 30;
 export const EN_WORDS = 40;
-export const NOTE_WORDS = 45;
+export const NOTE_WORDS = 32;
 export const REMEMBER_WORDS = 20;
 /* Things the learner could ask for next, offered when the tutor does not
    know what they want (the owner, 2026-09-26: *"have it prompt options when
@@ -79,14 +86,14 @@ You receive JSON with:
 
 What you can do, when asked or when it plainly helps:
 - Run a drill one question at a time: ask one thing, wait, mark the answer in your next turn (right, or the right form and why in one sentence), then ask the next. Draw on "trouble" and "misses" unless told otherwise. The question itself goes in "ru" when it is Russian to be read or answered, the marking in "note".
-- Say what to study next, from the profile, in two or three sentences of "note".
+- Say what to study next, from the profile, in two sentences of "note" at most.
 - Play a role in a scene the learner sets: your character speaks in "ru", and any correction of their mistakes goes in "note", brief, without breaking the scene for long.
 - Explain a point of grammar in "note", with one or two short examples in Russian inside it in «guillemets».
 
 Rules:
 - "ru": what you say in Russian this turn, at most ${RU_WORDS} words, or "" when there is nothing to say in Russian. Cyrillic only, no stress marks. Prefer the "studied" words.
 - "en": the natural English translation of "ru", at most ${EN_WORDS} words. "" when "ru" is "". Never empty when "ru" is not.
-- "note": what you say in English, at most ${NOTE_WORDS} words, or "" when the Russian says it all. Usually one or two sentences: a tutor in conversation speaks in short turns and asks one thing at a time. Never a list of points, never a paragraph.
+- "note": what you say in English, at most ${NOTE_WORDS} words, or "" when the Russian says it all. **Two sentences is the ceiling**, and one is usually right: a tutor in conversation speaks in short turns and asks one thing at a time. Never a list of points, never a paragraph.
 - Write every Russian form inside «guillemets» wherever it appears in "note", like «книги». The app sets those apart for the learner.
 - At least one of "ru" and "note" must be non-empty.
 - **Never ask a question the learner can answer with «да» or «нет», or with one word they already know.** There is nothing to learn from saying yes. Ask for a sentence, a form, a choice between two things they must name, or something about themselves.

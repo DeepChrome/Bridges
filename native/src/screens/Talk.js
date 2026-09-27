@@ -22,7 +22,8 @@ import { View, Pressable, ScrollView, ActivityIndicator, Alert } from "react-nat
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
-import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text, Marked } from "../ui";
+import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text,
+         Marked, BULB_PATH } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, drillPool, nextLesson } from "../data";
 import { talk as askTutor, review as askReview, hint as askHint, config } from "../lib/feedback";
@@ -173,7 +174,10 @@ const Icon = ({ d, color, size = 20 }) => (
 );
 const RESTART = "M3 12a9 9 0 1 0 3-6.7M3 4v5h5";
 const END = "M6 6h12v12H6z";
-const BULB = "M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.4 1 2.5h6c0-1.1.3-1.9 1-2.5A6 6 0 0 0 12 3z";
+/* The one bulb drawing in the app (ui.js): the hint here and the reference on
+   a drill are visibly the same offer, which they were not while each screen
+   drew its own. */
+const BULB = BULB_PATH;
 
 /* The end of a conversation, read back: what went well, what to work on, and
    a few of the words that came up, each a tap from the review bank. Vocabulary

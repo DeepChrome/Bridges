@@ -117,6 +117,20 @@ export const VIDEO_FILTERS = [
   { id: "watched", name: "Watched" }, { id: "faves", name: "Favorites" },
 ];
 
+/* The channels the library actually holds, in the order the rows will read
+   (the owner, 2026-09-28: *"filter by channel where it also prepopulates all
+   the different channels in the database"*). Read off the videos rather than
+   off `data/curated/channels.json`: the curated file is the credit list, and
+   a channel harvested but not yet credited — or credited and not yet
+   harvested — would put a filter on the screen that matches nothing. The
+   count rides along, because "Easy Russian 147" says more than a name. */
+export function channelsOf(list) {
+  const n = new Map();
+  for (const v of list) if (v.ch) n.set(v.ch, (n.get(v.ch) || 0) + 1);
+  return [...n].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+               .map(([name, count]) => ({ name, count }));
+}
+
 export const isFave = (st, id) => !!((st.faves || {})[id]);
 /* Toggle a favourite: id -> the day it was marked. Keyed on the video id, which
    is YouTube's and survives a rebuild of the library. */
@@ -186,15 +200,19 @@ export function Immerse({ navigation }) {
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState("level");
   const [sorting, setSorting] = useState(false);
+  const [channel, setChannel] = useState(null);      // null = every channel
+  const [picking, setPicking] = useState(false);
   const [credits, setCredits] = useState(false);
   const all = videos();
+  const channels = useMemo(() => channelsOf(all), [all.length]);
   const seen = all.filter((v) => videoWatched(st, v)).length;
   const shown = useMemo(() => {
     const found = searchVideos(all, query, sort);
-    return filter === "all" ? found
-      : filter === "faves" ? found.filter((v) => isFave(st, v.id))
-      : found.filter((v) => videoWatched(st, v) === (filter === "watched"));
-  }, [query, filter, sort, st.watched, st.unit, st.faves]);
+    const byChannel = channel ? found.filter((v) => v.ch === channel) : found;
+    return filter === "all" ? byChannel
+      : filter === "faves" ? byChannel.filter((v) => isFave(st, v.id))
+      : byChannel.filter((v) => videoWatched(st, v) === (filter === "watched"));
+  }, [query, filter, sort, channel, st.watched, st.unit, st.faves]);
   /* The creators' note, once: the first time the library opens on this
      profile. Recorded as seen when it is dismissed, not when it is shown, so
      a note the learner left the screen under comes back next time. */
@@ -216,8 +234,17 @@ export function Immerse({ navigation }) {
         <View style={{ flex: 1 }}>
           <Choice testID="video-filter" options={VIDEO_FILTERS} value={filter} onPick={setFilter} />
         </View>
-        {/* The sort, as one small control and not a second row of chips (the
-            owner: "small little drop down dont make it a huge distractor"). */}
+        {/* The channel and the sort, as two small drop-downs and not two more
+            rows of chips — seven channels as chips would be the "huge
+            distractor" the owner ruled out for the sort. The channel reads as
+            its own name once chosen, so the control says what it is doing. */}
+        <Pressable testID="video-channel" accessibilityRole="button"
+                   accessibilityLabel={`Channel: ${channel || "all"}`}
+                   onPress={() => setPicking(true)} hitSlop={6}
+                   style={({ pressed }) => ({ paddingVertical: 8, paddingHorizontal: 4,
+                                              opacity: pressed ? 0.6 : 1, maxWidth: 130 })}>
+          <Muted size={13} numberOfLines={1}>{`${channel || "All channels"} ▾`}</Muted>
+        </Pressable>
         <Pressable testID="video-sort" accessibilityRole="button"
                    accessibilityLabel={`Sort: ${sortName}`}
                    onPress={() => setSorting(true)} hitSlop={6}
@@ -259,7 +286,8 @@ export function Immerse({ navigation }) {
         <Muted style={{ textAlign: "center", marginTop: 30 }}>
           {query.trim() ? `Nothing matches “${query.trim()}”`
             : filter === "watched" ? "Nothing watched yet"
-            : filter === "faves" ? "No favorites yet" : "Everything watched"}
+            : filter === "faves" ? "No favorites yet"
+            : channel ? `Nothing left in ${channel}` : "Everything watched"}
         </Muted>
       )}
       {/* The creators, reachable after the first-open note is gone — a credit
@@ -269,6 +297,29 @@ export function Immerse({ navigation }) {
 
       {noteDue || credits ? (
         <CreatorsNote onClose={() => { setCredits(false); if (noteDue) sawNote(); }} />
+      ) : null}
+      {picking ? (
+        <Sheet testID="channel-sheet" title="Channel" onClose={() => setPicking(false)}>
+          <List>
+            <Row testID="channel-all" onPress={() => { setChannel(null); setPicking(false); }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: t.ink, fontSize: 15 }}>All channels</Text>
+              </View>
+              <Muted>{String(all.length)}</Muted>
+              <Tick on={channel === null} />
+            </Row>
+            {channels.map((c) => (
+              <Row key={c.name} testID={`channel-${c.name}`}
+                   onPress={() => { setChannel(c.name); setPicking(false); }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>{c.name}</Text>
+                </View>
+                <Muted>{String(c.count)}</Muted>
+                <Tick on={channel === c.name} />
+              </Row>
+            ))}
+          </List>
+        </Sheet>
       ) : null}
       {sorting ? (
         <Sheet testID="sort-sheet" title="Sort" onClose={() => setSorting(false)}>

@@ -24,9 +24,9 @@ import { flushState } from "../src/store";
 import { Runner, referenceFor } from "../src/screens/Run";
 import Grammar from "../src/screens/Grammar";
 import { sentences } from "../src/ui";
-import { Reference } from "../src/rules";
+import { hasReference } from "../src/rules";
 import { Q } from "../src/questions";
-import { L, UN } from "../src/data";
+import { UN } from "../src/data";
 import { TOPICS } from "@core/grammar";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setOptions: jest.fn(), addListener: () => () => {} };
@@ -38,17 +38,6 @@ async function withProfile(el) {
   }));
   return await render(<SessionProvider>{el}</SessionProvider>);
 }
-
-/* A stand-in paradigm, so the two directed checks below do not depend on which
-   word a generator happened to draw. */
-const TABLE = { title: "Declension", columns: ["", "Singular"], rows: [["Nominative", "кни́га"]] };
-
-/* What the runner hands the sheet, without mounting a runner to get it. */
-const refProps = (q) => {
-  const r = referenceFor(q);
-  return { title: r.word ? r.word.w : null, tables: r.tables, blank: r.blank,
-           hide: r.hide, note: r.note, topic: r.topic };
-};
 
 const drill = (type) => {
   for (let k = 0; k < 40; k++) {
@@ -92,69 +81,60 @@ describe("the grammar reference", () => {
 });
 
 describe("the bulb", () => {
-  it("is there on a question whose answer is a cell of a table", async () => {
-    const q = drill("cases");
-    await withProfile(<Runner steps={[q]} onFinish={jest.fn()} gradeWords={false} navigation={nav} />);
-    await screen.findByText(q.ask);
-    expect(screen.getByTestId("bulb")).toBeTruthy();
-    await act(async () => { fireEvent.press(screen.getByTestId("bulb")); });
-    // More than one cell may be blanked: a paradigm repeats itself, and every
-    // cell holding the answer goes, not only the one asked for.
-    expect(screen.queryAllByTestId("table-blank").length).toBeGreaterThan(0);
-  });
-
-  /* The claim the whole feature rests on: "it doesn't reveal the answer".
-     Blanking by position alone did not hold it — a verb's three tables are
-     shown together and a paradigm repeats itself — so the sheet is checked
-     against the answer over many real draws rather than one. */
-  it("never prints the answer anywhere in the sheet", async () => {
+  /* The owner reversed the blanking on 2026-09-28: *"Remove that filtering…
+     everything should be referenceable. This isn't a quiz for grade."* So the
+     answer being *present* is the contract now, and it is the thing to pin —
+     it was deliberately absent for a day and would come back the moment
+     anybody reads the old §30ay. */
+  it("shows the answer rather than hiding it", async () => {
     for (const type of ["cases", "conjugation", "agreement"]) {
-      for (let k = 0; k < 12; k++) {
-        const q = drill(type);
-        if (!q || !q.table) continue;
-        const right = q.options.find((o) => o.right).label;
-        const view = await withProfile(
-          <Runner steps={[q]} onFinish={jest.fn()} gradeWords={false} navigation={nav} />);
-        await screen.findByText(q.ask);
-        // The option buttons carry it; count them, then open the sheet and
-        // check the number has not gone up.
-        const before = screen.queryAllByText(right).length;
-        await act(async () => { fireEvent.press(screen.getByTestId("bulb")); });
-        expect(screen.queryAllByText(right).length).toBe(before);
-        expect(screen.queryAllByTestId("table-blank").length).toBeGreaterThan(0);
-        view.unmount();
-      }
+      const q = drill(type);
+      if (!q || !q.table) continue;
+      const right = q.options.find((o) => o.right).label;
+      const view = await withProfile(
+        <Runner steps={[q]} onFinish={jest.fn()} gradeWords={false} navigation={nav} />);
+      await screen.findByText(q.ask);
+      const before = screen.queryAllByText(right).length;
+      await act(async () => { fireEvent.press(screen.getByTestId("bulb")); });
+      // The table now prints it too, so it is on the screen more than it was.
+      expect(screen.queryAllByText(right).length).toBeGreaterThan(before);
+      expect(screen.queryAllByTestId("table-blank").length).toBe(0);
+      view.unmount();
     }
   });
 
-  /* The two ways it leaked, aimed at rather than sampled for (§23: a check
-     that only fails on the right draw is a check that gets committed over).
-     Both were found by the sweep above and both are constructed here, so they
-     fail whatever the draw. */
-  it("drops a rule example that contains the answer", async () => {
-    const q = {
-      kind: "cases", i: 0, cyr: true, prompt: "тест", table: TABLE, at: [0, 1],
-      options: [{ label: "кни́ги", right: true }, { label: "кни́гу", right: false }],
-      note: { title: "A rule", body: "One sentence.",
-              examples: [["Вот кни́ги.", "Here are the books."],
-                         ["Э́то дом.", "This is a house."]] },
-    };
-    await withProfile(<Reference {...refProps(q)} onClose={jest.fn()} onTopic={jest.fn()} />);
-    expect(await screen.findByText("This is a house.")).toBeTruthy();
-    expect(screen.queryByText("Here are the books.")).toBeNull();
+  it("marks the cell the question is asking for", async () => {
+    const q = drill("cases");
+    await withProfile(<Runner steps={[q]} onFinish={jest.fn()} gradeWords={false} navigation={nav} />);
+    await screen.findByText(q.ask);
+    await act(async () => { fireEvent.press(screen.getByTestId("bulb")); });
+    const asked = screen.getByTestId("table-asked");
+    const right = q.options.find((o) => o.right).label;
+    // The marked cell is the answer's own, and it reads as the answer.
+    expect(String(asked.props.children)).toContain(right);
   });
 
-  it("drops the headword as a title when the headword is the answer", async () => {
-    const w = L[0];
-    const q = {
-      kind: "agreement", i: 0, cyr: true, prompt: "___ x", table: TABLE, at: [0, 1],
-      options: [{ label: w.w, right: true }, { label: "другое", right: false }],
-    };
-    const props = refProps(q);
-    expect(props.hide).toBe(w.w);
-    await withProfile(<Reference {...props} onClose={jest.fn()} onTopic={jest.fn()} />);
-    await screen.findByText("Got it");
-    expect(screen.queryAllByText(w.w).length).toBe(0);
+  /* Every drill, not the four whose answer was safe to show: *"All drills you
+     must be able to reference the proper guide."* */
+  it("is on every kind of question that has a word", () => {
+    for (const kind of ["type", "stress", "listen", "cloze", "choose-ru", "choose-en",
+                        "aspect", "cases", "conjugation", "agreement", "form"]) {
+      const ref = referenceFor({ kind, i: 0, cyr: true, prompt: "x" });
+      expect(hasReference(ref)).toBe(true);
+    }
+    // …and nothing to offer where there is no word at all, rather than an
+    // empty sheet: a sentence step carries no `i`.
+    expect(hasReference(referenceFor({ kind: "hear", prompt: "x" }))).toBe(false);
+  });
+
+  it("carries the guide to the word, not only its table", async () => {
+    const q = drill("conjugation");
+    await withProfile(<Runner steps={[q]} onFinish={jest.fn()} gradeWords={false} navigation={nav} />);
+    await screen.findByText(q.ask);
+    await act(async () => { fireEvent.press(screen.getByTestId("bulb")); });
+    expect(screen.getByTestId("ref-facts")).toBeTruthy();
+    // A verb always has at least its aspect and its conjugation to say.
+    expect(referenceFor(q).facts.length).toBeGreaterThan(1);
   });
 
   it("leads to the topic behind the question", async () => {
@@ -164,26 +144,6 @@ describe("the bulb", () => {
     await act(async () => { fireEvent.press(screen.getByTestId("bulb")); });
     await act(async () => { fireEvent.press(screen.getByTestId("ref-topic")); });
     expect(nav.navigate).toHaveBeenCalledWith("Grammar", { topic: "verbs" });
-  });
-
-  /* The rule the whole feature rests on. Where the Russian word is what the
-     learner has to produce, its paradigm *is* the answer — so there is no
-     bulb at all, rather than a bulb that gives the game away. */
-  it("shows no paradigm where the word is the answer", () => {
-    for (const kind of ["type", "stress", "listen", "cloze", "choose-ru", "hear", "say"]) {
-      const ref = referenceFor({ kind, i: 0, cyr: true, prompt: "x" });
-      expect(ref.tables).toEqual([]);
-      expect(ref.costs).toBe(false);
-    }
-  });
-
-  it("costs the grade only when it shows the answer's own table", () => {
-    const q = drill("cases");
-    expect(referenceFor(q).costs).toBe(true);
-    // The aspect drill asks for a different lemma, so the verb's own paradigm
-    // cannot contain the answer and reading it is free.
-    const aspect = drill("aspect");
-    if (aspect) expect(referenceFor(aspect).costs).toBe(false);
   });
 });
 

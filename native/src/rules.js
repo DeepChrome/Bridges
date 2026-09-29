@@ -22,37 +22,24 @@
 
 import React from "react";
 import { View, ScrollView } from "react-native";
-import { useTheme, type as T } from "./theme";
+import { useTheme, radius, type as T } from "./theme";
 import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel } from "./ui";
 import { Linked } from "./words";
-import { fold } from "@core/util";
 
 /* A column is wide enough for a long inflected form and no wider: at 110 a
    three-column table fits a 390 px screen without scrolling, which is most of
    them, and the rest scroll sideways rather than wrapping. */
 const COL = 110;
-/* Cyrillic runs, stress marks included — the same shape as core/util's TOKEN,
-   used here only to read an example word by word. */
-const TOKENS = /[Ѐ-ӿ̀́]+/g;
 
 /* One paradigm or reference table.
  *
- * `blank` is [row, column] — the cell the question is asking for. `hide` is
- * the answer itself, and blanks *any* cell holding it: a paradigm repeats
- * (an inanimate accusative is its nominative) and a verb's three tables are
- * shown together, so blanking one cell by position would have left the same
- * form printed two rows down. Both are needed — the asked cell is blanked
- * even where it holds something else, and the answer is hidden wherever it
- * turns up.
- *
- * A blanked cell is a dash in the brand colour rather than nothing: an empty
- * cell reads as missing data, and this one is missing on purpose. */
-export function Table({ table, blank, hide, testID }) {
+ * `mark` is [row, column] — the cell the question is asking for, drawn in the
+ * brand colour so the eye lands on it. It used to *blank* that cell, and the
+ * owner reversed it (§30az): the reference is for learning, not a puzzle, so
+ * the cell it points at is the one it shows most clearly. */
+export function Table({ table, mark, testID }) {
   const t = useTheme();
-  const [br, bc] = blank || [];
-  const hidden = hide ? fold(String(hide)) : null;
-  const holds = (cell) => hidden !== null && (Array.isArray(cell) ? cell : [cell])
-    .some((f) => f !== undefined && f !== null && fold(String(f)) === hidden);
+  const [br, bc] = mark || [];
   return (
     <View testID={testID} style={{ marginTop: 14 }}>
       {table.title ? <SectionLabel>{table.title}</SectionLabel> : null}
@@ -71,15 +58,15 @@ export function Table({ table, blank, hide, testID }) {
             <View key={ri} testID={testID ? `${testID}-row-${ri}` : undefined}
                   style={{ flexDirection: "row", borderTopWidth: 1, borderTopColor: t.lineSoft }}>
               {r.map((cell, ci) => {
-                const gone = (ri === br && ci === bc) || holds(cell);
+                const asked = ri === br && (ci === bc || ci === 0);
                 return (
                   <Text key={ci}
-                        testID={gone ? "table-blank" : undefined}
+                        testID={asked && ci === bc ? "table-asked" : undefined}
                         style={{ width: COL, paddingVertical: 6,
                                  fontSize: ci === 0 ? T.small : T.body,
-                                 fontWeight: gone ? "700" : "400",
-                                 color: gone ? t.brand : ci === 0 ? t.ink3 : t.ink }}>
-                    {gone ? "—" : Array.isArray(cell) ? cell.join(" / ") : cell}
+                                 fontWeight: asked ? "700" : "400",
+                                 color: asked ? t.brandInk : ci === 0 ? t.ink3 : t.ink }}>
+                    {Array.isArray(cell) ? cell.join(" / ") : cell}
                   </Text>
                 );
               })}
@@ -97,7 +84,7 @@ export function Table({ table, blank, hide, testID }) {
  * screen and earns the coloured panel and the left edge. Plain is everywhere
  * else: inside a sheet, under a verdict. Both are the same component so the
  * rule cannot read as two different things. */
-export function RuleCard({ note, tone, hide, testID, style }) {
+export function RuleCard({ note, tone, testID, style }) {
   const t = useTheme();
   const brand = tone === "brand";
   const body = (
@@ -106,8 +93,7 @@ export function RuleCard({ note, tone, hide, testID, style }) {
         {note.title}
       </Text>
       <Note text={note.body} color={t.ink2} style={{ marginTop: 6 }} />
-      <Examples examples={note.examples} hide={hide}
-                line={brand ? t.brandDim : t.lineSoft} />
+      <Examples examples={note.examples} line={brand ? t.brandDim : t.lineSoft} />
     </>
   );
   if (!brand) return <View testID={testID} style={style}>{body}</View>;
@@ -122,21 +108,12 @@ export function RuleCard({ note, tone, hide, testID, style }) {
 
 /* Russian over its English, each with a speaker — the one way an example is
    drawn anywhere in the app (§30as: everything Russian can be heard). */
-export function Examples({ examples, hide, line }) {
+export function Examples({ examples, line }) {
   const t = useTheme();
-  /* A rule's examples are real Russian, and `conjugationNote` builds its
-     examples out of the verb's own paradigm with the asked row first — so
-     inside the reference sheet the answer was the first thing printed under
-     the blanked table. An example that says it is dropped rather than
-     redacted: a sentence with a dash in the middle of it teaches nothing. */
-  const shown = hide
-    ? examples.filter(([ru]) => !(String(ru).match(TOKENS) || [])
-        .some((w) => fold(w) === fold(String(hide))))
-    : examples;
-  if (!shown || !shown.length) return null;
+  if (!examples || !examples.length) return null;
   return (
     <>
-      {shown.map(([ru, en], k) => (
+      {examples.map(([ru, en], k) => (
         <View key={k} style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1,
                                borderTopColor: line || t.lineSoft }}>
           <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
@@ -194,37 +171,61 @@ export function TopicSection({ section, cards, testID }) {
   );
 }
 
-/* The bulb's sheet.
+/* What the app can say about this word, from its own paradigm (core/facts.js)
+   — the owner, 2026-09-28: *"If it's irregular, it should say that it's
+   irregular. There can be details about identifying stems, masculine vs
+   feminine etc."* A table says what the form is; these say why, which is the
+   half that transfers to the next word. A pill and one sentence each, never a
+   paragraph. */
+export function Facts({ facts, testID }) {
+  const t = useTheme();
+  if (!facts || !facts.length) return null;
+  return (
+    <View testID={testID} style={{ marginTop: 12, gap: 10 }}>
+      {facts.map((f, k) => (
+        <View key={k} style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
+          <View style={{ backgroundColor: t.brandBg, borderColor: t.brandDim, borderWidth: 1,
+                         borderRadius: radius.sm, paddingHorizontal: 8, paddingVertical: 3,
+                         minWidth: 92 }}>
+            <Text style={{ color: t.brandInk, fontSize: T.tiny, fontWeight: "700",
+                           textTransform: "uppercase", letterSpacing: 0.5 }}>
+              {f.label}
+            </Text>
+          </View>
+          <Note text={f.note} color={t.ink2} size={T.small + 1} style={{ flex: 1 }} gap={4} />
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/* The bulb's sheet — the word, what is true about it, its paradigms whole,
+ * the rule behind the question, and the way into the reference for the whole
+ * topic. In that order, because "feminine, hard stem" is what makes the table
+ * underneath it readable rather than a grid to memorise.
  *
- * What it may show is decided by the question, not by the screen: `tables` are
- * the word's own paradigms with `blank` applied, `note` is the rule behind the
- * question, and `topic` is the reference page for the whole subject. Any of
- * the three may be absent; the sheet is only offered when at least one is
- * there (`hasReference` below), because a bulb that opens on nothing is worse
- * than no bulb. */
-export function Reference({ title, sub, tables, blank, hide, note, topic, onTopic, onClose }) {
+ * Nothing is withheld (§30az). Any part may be absent; the sheet is only
+ * offered when at least one is there (`hasReference`), because a bulb that
+ * opens on nothing is worse than no bulb. */
+export function Reference({ title, sub, tables, mark, facts, note, topic, onTopic, onClose }) {
   const t = useTheme();
   return (
     <Sheet onClose={onClose} title="Reference"
            footer={<Btn kind="pri" label="Got it" style={{ marginTop: 14 }} onPress={onClose} />}>
-      {/* The headword names the sheet — unless it *is* the answer, which
-          happens when the form asked for is the dictionary form (an
-          adjective's masculine nominative). The word is on the question
-          screen behind this anyway, so dropping it here costs nothing and
-          keeps "the reference never prints the answer" literally true. */}
-      {title && !(hide && fold(String(title)) === fold(String(hide))) ? (
+      {title ? (
         <View style={{ marginBottom: 4 }}>
           <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700" }}>{title}</Text>
           {sub ? <Muted>{sub}</Muted> : null}
         </View>
       ) : null}
+      <Facts facts={facts} testID="ref-facts" />
       {(tables || []).map((tb, k) => (
-        <Table key={k} table={tb} testID={`ref-table-${k}`} hide={hide}
-               blank={blank && blank.table === tb ? blank.at : null} />
+        <Table key={k} table={tb} testID={`ref-table-${k}`}
+               mark={mark && mark.table === tb ? mark.at : null} />
       ))}
       {note ? (
         <View style={{ marginTop: tables && tables.length ? 20 : 0 }}>
-          <RuleCard note={note} hide={hide} testID="ref-rule" />
+          <RuleCard note={note} testID="ref-rule" />
         </View>
       ) : null}
       {topic ? (
@@ -239,6 +240,6 @@ export function Reference({ title, sub, tables, blank, hide, note, topic, onTopi
 /* Is there anything behind the bulb for this question? Exported so the runner
    draws the control only where it leads somewhere, and so a test can ask the
    question without mounting a sheet. */
-export function hasReference({ tables, note, topic }) {
-  return !!((tables && tables.length) || note || topic);
+export function hasReference({ tables, facts, note, topic }) {
+  return !!((tables && tables.length) || (facts && facts.length) || note || topic);
 }

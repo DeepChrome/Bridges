@@ -65,13 +65,13 @@ describe("form question", () => {
     await screen.findByText(q.ask);
     fireEvent.press(screen.getByTestId("bulb"));
     expect(await screen.findByText(q.table.title)).toBeTruthy();
-    /* The reference is not the answer key: the cell the question is asking
-       for is the one cell it does not show, drawn as a dash (the owner,
-       2026-09-27). That `at` really points at the answer's cell is checked
-       over every generated question in core.test.mjs — here it is only that
-       the sheet honours it. */
-    expect(screen.getByTestId("table-blank").props.children).toBe("—");
+    /* The reference shows the asked cell and marks it (the owner,
+       2026-09-28: *"everything should be referenceable… they should be
+       allowed to reference the correct answer"*). That `at` really points at
+       the answer's cell is checked over every generated question in
+       core.test.mjs — here it is only that the sheet honours it. */
     const right = q.options.find((o) => o.right).label;
+    expect(String(screen.getByTestId("table-asked").props.children)).toContain(right);
     await act(async () => { fireEvent.press(screen.getByText("Got it")); });
     await act(async () => { fireEvent.press(screen.getByText(right)); });
     /* The cost is stated on the button *before* it is pressed, which is where a

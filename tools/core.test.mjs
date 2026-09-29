@@ -32,6 +32,7 @@ import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, PRODUCE_A
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
 import { TOPICS, checkGrammar, russianIn, topicFor } from "../core/grammar.js";
+import { wordFacts, conjugation, stemChange, nounStem, genderWhy, stressAt } from "../core/facts.js";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP,
          sayPassed, closestTranscript }
   from "../core/speech.js";
@@ -2044,12 +2045,83 @@ group("the grammar reference");
   ok(gen.uses.length >= 5, "the genitive lists every job it does", String(gen.uses.length));
 }
 
-/* The bulb blanks one cell, and the whole claim that it "does not reveal the
-   answer" rests on that cell being the right one. `at` is set by five
-   generators; a wrong index would blank an innocent cell and print the answer
-   beside it, and nothing on the screen would look wrong. So it is checked
-   against what the question is actually asking for, over a real draw. */
-group("the cell the reference blanks");
+/* What the reference says about a word (core/facts.js, 2026-09-28). Every
+   line is derived from the paradigm, so every line can be wrong about a word
+   in a way no screenshot would show. The two that *were* wrong, before this
+   group existed, are the first two checks. */
+group("the facts about a word");
+{
+  const by = (b) => L.find((x) => x.b === b);
+  const labels = (w) => wordFacts(w).map((f) => f.label);
+  const noteFor = (w, label) => (wordFacts(w).find((f) => f.label === label) || {}).note || "";
+
+  /* «вре́мя» is neuter and ends in -я. The reason used to be looked up by
+     gender rather than read off the word, so the app told the learner it was
+     neuter "because nouns ending in -о or -е are neuter" — false about the
+     word in front of them. */
+  const vremya = by("время");
+  if (vremya) {
+    ok(/мя/.test(noteFor(vremya, "Neuter")), "«время» is explained by its own -мя ending",
+       noteFor(vremya, "Neuter"));
+    ok(!/-о or -е/.test(noteFor(vremya, "Neuter")), "and not by a rule that does not apply to it");
+  }
+  /* «друг» ends in г but its plural is «друзья», so the spelling rule was
+     asserting something untrue about it. The note is read off the paradigm's
+     own plural now. */
+  const drug = by("друг");
+  if (drug) ok(!labels(drug).includes("Spelling rule"),
+               "«друг» is not told its plural is -и, because it is «друзья»", labels(drug).join(", "));
+  const kniga = by("книга");
+  if (kniga) ok(labels(kniga).includes("Spelling rule"),
+                "«книга», whose plural really is -и, is", labels(kniga).join(", "));
+
+  // Gender, and the soft sign that settles nothing.
+  for (const [b, label] of [["книга", "Feminine"], ["окно", "Neuter"], ["день", "Masculine"]]) {
+    const w = by(b);
+    if (w) ok(labels(w).includes(label), `«${b}» is ${label.toLowerCase()}`, labels(w).join(", "));
+  }
+  const den = by("день"), dver = by("дверь");
+  if (den && dver) {
+    ok(/either gender/.test(noteFor(den, "Masculine")) && /either gender/.test(noteFor(dver, "Feminine")),
+       "a noun in -ь is told its ending cannot decide");
+    ok(labels(den).includes("Fleeting vowel"), "«день» loses its vowel", labels(den).join(", "));
+  }
+
+  // The verb classifications, on the words that define each class.
+  const check = (b, label) => {
+    const w = by(b);
+    if (w) ok(labels(w).includes(label), `«${b}» — ${label}`, labels(w).join(", "));
+  };
+  check("читать", "First conjugation");
+  check("говорить", "Second conjugation");
+  check("хотеть", "Irregular");            // the one verb that mixes both patterns
+  check("писать", "Stem change");
+  check("любить", "Stress moves");
+  check("учиться", "Reflexive");
+  check("хороший", "Hard stem");           // spelled -ий, declines hard
+  check("синий", "Soft stem");
+  check("большой", "Stressed ending");
+  const atak = by("атаковать");
+  if (atak) ok(/-овать/.test(noteFor(atak, "Stem change")),
+               "«атаковать» is named as the -овать class, not called irregular",
+               noteFor(atak, "Stem change"));
+
+  /* Nothing may claim a fact it cannot support, and nothing may throw on a
+     word with no paradigm at all — the closed-class rows have none. */
+  let threw = 0, empty = 0;
+  for (const w of L) {
+    try { if (!wordFacts(w).length) empty++; } catch (e) { threw++; }
+  }
+  ok(threw === 0, "no word makes it throw", String(threw));
+  ok(empty > 0 && empty < L.length, "and the words with nothing to say are the closed classes",
+     `${empty} of ${L.length}`);
+}
+
+/* `at` says which cell the question is asking for — it marks that cell in the
+   reference now rather than blanking it (§30az), but a wrong index would
+   still point the learner at the wrong row. Checked against what the question
+   is actually asking for, over a real draw. */
+group("the cell the reference marks");
 {
   const unit = UN.find((u) => u.id === "core4");
   const asked = [];

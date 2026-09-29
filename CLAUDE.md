@@ -411,6 +411,7 @@ bridges/                          (directory is still named russian-blocks on di
     errortags.js       <- the closed list of learner-error tags
     scenarios.js       <- the Talk situations (§30f)
     grammar.js         <- the grammar reference: topics, rules, endings tables (§30ay)
+    facts.js           <- what one word's own paradigm says about it (§30az)
     anki.js            <- Anki decks: field parsing, legacy collection rows (§30h)
     icons.js avatars.js
   native/              <- THE PRODUCT (Expo / React Native); see native/README.md
@@ -4767,6 +4768,12 @@ takes «книги» and does not know the reason is a rule about к г х.
 
 ### The bulb, and why blanking is the whole design
 
+> **Reversed the next day — see §30az.** The blanking described below lasted
+> one day; the owner reversed it and he was right. What is still true here is
+> the *rest* of it: the bulb, the one drawing, `at` on the five generators,
+> and the three leaks the sweep found, which are worth reading because they
+> are what "this table does not contain the answer" costs to actually mean.
+
 The hint that existed was a text link reading *"Show the table · counts as a
 hint"*, on four kinds of question, opening a second copy of the paradigm
 renderer. It is a lightbulb now — the same 40 px disc as the cog, and the
@@ -4850,6 +4857,97 @@ built. What was wrong was the comment beside it, which still said *"It ships
 on"* and had been wrong for four days, and the same claim in `lists.test.js`.
 Both corrected; the test seeds `dev: true` deliberately rather than relying on
 a default that no longer exists.
+
+## 30az. A reference you have to outwit is not a reference (2026-09-28)
+
+The owner, having used the bulb on the conjugation drill: *"I noticed that you
+hide the answer on the hints for the different drills… Remove that filtering.
+Everything should be referenceable. This isn't a quiz for grade, it's for
+learning so they should be allowed to reference the correct answer."* And:
+*"All drills you must be able to reference the proper guide. If it's
+irregular, it should say that it's irregular. There can be details about
+identifying stems, masculine vs feminine etc."*
+
+**He is right about what the thing is for, and the previous day's design had
+the wrong premise.** §30ay spent three rounds making "the reference never
+prints the answer" literally true — blanking the asked cell, then every cell
+repeating it, then dropping a rule example that contained it, then the
+sheet's own title. All of that was careful work in service of a rule nobody
+had asked for. A learner who opens a reference mid-drill is not cheating;
+they are looking something up, which is the behaviour the app should want.
+
+- **Nothing is hidden.** `hide` is gone from `Table`, `RuleCard` and
+  `Examples`; `blank` became **`mark`** and the asked cell is drawn in the
+  brand colour instead of emptied — which is what a learner wanted from it
+  anyway ("which row is this asking about"). `at` on the five generators
+  stays and now earns its keep twice over.
+- **Every drill, not four.** `TABLE_KINDS` and `OPEN_KINDS` are deleted. Any
+  question carrying a word (`q.i`) gets the bulb; a sentence step has no word
+  and so has nothing to offer, which is the rule rather than a list.
+- **It still grades the answer Hard**, and that is the one thing kept against
+  the letter of "not a quiz for grade". It is not a penalty: it is the only
+  way the scheduler hears that the word was not recalled, and FSRS state is
+  high-integrity data (rule 20.4). The cost is uniform across kinds now,
+  because the facts below can give an answer away as readily as a table —
+  the aspect drill asks for a partner and the facts name it. Nothing on
+  screen says so (rule 20.7); the owner was told plainly in the report and
+  can have it removed in a line.
+
+### The guide: what is true about this word
+
+`core/facts.js` — a pill and one sentence each, above the tables in the bulb's
+sheet and on the dictionary entry, because "feminine, hard stem" is what makes
+the grid underneath it readable rather than something to memorise.
+
+**Everything is derived from the paradigm, nothing is curated**, and that is
+§6 rather than laziness: a list of irregular verbs goes stale the first time
+the curriculum is re-cut, while a rule read off the forms cannot. Which
+conjugation a verb follows is in its ты and они endings; whether its stress
+moves is in where the acute sits; whether its stem changes is the infinitive
+against the present; a noun's fleeting vowel is its genitive being a letter
+shorter than its nominative.
+
+**And "irregular" turned out to be mostly the wrong word, which the
+measurement said before any of this was written.** 46 of the 209 curriculum
+verbs build their present tense off something other than the infinitive stem
+— and reading that list, **fourteen are «-овать» verbs swapping -ова- for
+-у-** and seven are ordinary first-conjugation consonant mutation. Those are
+*rules*, and naming the rule teaches something; calling «атакова́ть»
+irregular teaches nothing and is not even true. So a stem change is
+**classified** where its class is known (`ova`, `mutation`) and only
+*described* where it is not (`other`, 19 verbs). What is genuinely labelled
+Irregular is the one verb that mixes both conjugations — «хоте́ть» — and it is
+detected, not listed: its ты form takes a first-conjugation ending and its
+они form a second.
+
+**Two statements were false before the group that now pins them**, both found
+by dumping the output and reading it (§30an's method):
+
+- **«вре́мя» was told it is neuter "because nouns ending in -о or -е are
+  neuter".** It ends in -я. The reason was looked up **by gender** instead of
+  read **off the word**, which is a shape worth recognising: a lookup keyed on
+  the conclusion will always agree with itself and can still be wrong about
+  the thing in front of the learner. `genderWhy` reads the ending, names the
+  -мя class, and returns null where the ending genuinely does not decide —
+  the caller then says so rather than inventing a rule.
+- **«друг» was told its plural is «-и, never -ы»** because its stem ends in г.
+  Its plural is «друзья». The spelling rule is named only where the paradigm
+  *shows* -и in the nominative plural now. Asserting a rule about a word
+  without checking the word against it is the same error as the first.
+
+`stressMoves` returns null rather than false where fewer than two forms carry
+a mark, so a paradigm the lexicon never marked is reported as unknown rather
+than as fixed (§26).
+
+### The channel filter
+
+Immerse filters by channel, from a second small drop-down beside the sort —
+not a row of chips, which for seven channels would be the "huge distractor"
+he ruled out when the sort was built. `channelsOf` reads the channels **off
+the videos**, with counts, rather than off `data/curated/channels.json`: that
+file is the credit list, and a channel harvested but not yet credited — or
+credited and not yet harvested — would put a row on the sheet matching
+nothing, or hide one that matters.
 
 ## 31. Verification
 

@@ -14,6 +14,7 @@ import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked
          BulbButton } from "../ui";
 import { RuleCard, Reference, hasReference } from "../rules";
 import { topicFor } from "@core/grammar";
+import { wordFacts } from "@core/facts";
 import { GuidePop } from "../guide";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, LINES } from "@core/guide";
@@ -249,32 +250,34 @@ function Match({ q, onDone }) {
  * answer, a stress question, anything heard and written back — there is no
  * bulb, because the reference would be the answer. `q.cyr` marks a question
  * whose prompt is the Russian word itself. */
-/* Kinds whose answer is a cell of the word's own paradigm. The reference shows
-   every table the word has with that one cell blanked, and it costs the grade:
-   the pattern around a missing cell is most of the way to it, which is the
-   point of looking, and FSRS should hear that the word was not known. */
-const TABLE_KINDS = ["form", "cases", "agreement", "conjugation"];
-/* Kinds where the Russian word is on screen and the answer is *not* a form of
-   it — the aspect drill asks for a different lemma, choose-en for English — so
-   the paradigm is free to read and costs nothing. */
-const OPEN_KINDS = ["aspect", "choose-en"];
-
+/* What the bulb shows: everything the app knows about the word in the
+ * question, with nothing held back.
+ *
+ * It used to hide the answer — the asked cell blanked, any cell repeating it
+ * blanked, a rule example containing it dropped — and the owner reversed that
+ * on 2026-09-28: *"Remove that filtering… everything should be referenceable.
+ * This isn't a quiz for grade, it's for learning so they should be allowed to
+ * reference the correct answer."* He is right about what the thing is for; a
+ * reference you have to outwit is not a reference. So `at` marks the asked
+ * cell instead of emptying it, which is what a learner wanted from it anyway
+ * — "which row am I being asked about" — and every kind of question gets a
+ * bulb, not the four whose answer happened to be safe to show.
+ *
+ * **Opening it still grades the answer Hard**, and that is not a punishment:
+ * it is the only way the scheduler hears that the word was not recalled. The
+ * cost is uniform across kinds now, because the facts can give the answer
+ * away as readily as the table can — the aspect drill asks for a partner and
+ * the facts name it.
+ */
 export function referenceFor(q) {
   const w = q.i !== undefined && q.i !== null ? L[q.i] : null;
-  const shows = TABLE_KINDS.includes(q.kind) ? !!(q.table && q.at)
-    : OPEN_KINDS.includes(q.kind);
-  const right = q.options ? (q.options.find((o) => o.right) || {}).label : q.answer;
   return {
-    word: shows ? w : null,
-    tables: shows && w ? w.t || [] : [],
-    blank: q.table && q.at ? { table: q.table, at: q.at } : null,
-    /* Blanking by position is not enough: a verb's three tables are shown
-       together and a paradigm repeats itself, so the answer is hidden
-       wherever it appears as well as where it was asked for. */
-    hide: right || null,
+    word: w,
+    tables: (w && w.t) || [],
+    facts: w ? wordFacts(w) : [],
+    mark: q.table && q.at ? { table: q.table, at: q.at } : null,
     note: q.note || null,
-    topic: topicFor(q.kind) || (shows && w ? topicFor(w.p) : null),
-    costs: TABLE_KINDS.includes(q.kind) && !!(q.table && q.at),
+    topic: topicFor(q.kind) || (w ? topicFor(w.p) : null),
   };
 }
 
@@ -418,10 +421,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
 
   const q = queue[at];
   guard.current = at > 0 && !finished.current;
-  /* What the bulb has behind it for this question, and whether reading it
-     counts against the grade. */
-  const ref = q ? referenceFor(q) : { tables: [], note: null, topic: null, costs: false };
-  const costsGrade = ref.costs;
+  /* What the bulb has behind it for this question. Reading it always counts
+     as a hint — see referenceFor. */
+  const ref = q ? referenceFor(q) : { tables: [], facts: [], note: null, topic: null };
 
   // Autoplay waits for whatever is still playing — the previous answer's reading,
   // the previous question's recording — so nothing talks over the language audio.
@@ -662,9 +664,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           <View style={{ marginTop: 12, flexDirection: "row", gap: 10, justifyContent: "center" }}>
             {promptSpeech(q) ? <Speaker text={promptSpeech(q)} /> : null}
             {!answered && hasReference(ref) ? (
-              <BulbButton testID="bulb" on={hintOpen}
-                          label={costsGrade ? "Reference · counts as a hint" : "Reference"}
-                          onPress={() => { if (costsGrade) setUsedHint(true); setHintOpen(true); }} />
+              <BulbButton testID="bulb" on={hintOpen} label="Reference"
+                          onPress={() => { setUsedHint(true); setHintOpen(true); }} />
             ) : null}
           </View>
         ) : null}
@@ -805,7 +806,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         <Reference
           title={ref.word ? ref.word.w : null}
           sub={ref.word ? firstSense(ref.word) : null}
-          tables={ref.tables} blank={ref.blank} hide={ref.hide}
+          tables={ref.tables} mark={ref.mark} facts={ref.facts}
           note={ref.note} topic={ref.topic}
           onTopic={(id) => navigation.navigate("Grammar", { topic: id })}
           onClose={() => setHintOpen(false)} />

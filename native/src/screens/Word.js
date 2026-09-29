@@ -10,7 +10,8 @@ import React, { useState } from "react";
 import { View, Image, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text } from "../ui";
-import { Table } from "../rules";
+import { Table, Facts } from "../rules";
+import { wordFacts } from "@core/facts";
 import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord } from "../data";
 import { Linked } from "../words";
 import { IMAGES, CREDITS } from "../images";
@@ -92,6 +93,12 @@ export function WordEntry({ w, index, navigation }) {
           {w.pt ? <Pill>{`pair: ${[w.pt, w.pt2].filter(Boolean).join(", ")}`}</Pill> : null}
           {unit ? <Pill tone="brand">{unit.name}</Pill> : null}
         </View>
+        {/* What is true about the word, before the tables that follow from
+            it: gender and why, hard or soft stem, which conjugation, whether
+            the stress moves (core/facts.js, 2026-09-28). The entry is the
+            other place a learner comes to look something up, so it gets the
+            same guide the drill's bulb does. */}
+        <Facts facts={wordFacts(w)} testID="word-facts" />
         {(w.t || []).map((tb, k) => <Table key={k} table={tb} />)}
         {credit ? (
           // The photo's record: title, author where one is named, licence — and

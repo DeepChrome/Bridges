@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { Immerse, Video, searchVideos, libraryOrder, videoFor } from "../src/screens/Misc";
+import { Immerse, Video, searchVideos, libraryOrder, videoFor, channelsOf } from "../src/screens/Misc";
 import { UN, videos, unitById } from "../src/data";
 import { fold, firstSense } from "@core/util";
 
@@ -176,6 +176,35 @@ describe("Immerse", () => {
     const first = libraryOrder(VIDEOS, "newest")[0];
     const tree = JSON.stringify(screen.toJSON());
     expect(tree.indexOf(`video-${first.id}`)).toBeLessThan(tree.indexOf(`video-${libraryOrder(VIDEOS, "newest")[5].id}`));
+  });
+
+  /* The owner, 2026-09-28: *"Add a filter on the Immerse page where you can
+     filter by channel (where it also prepopulates all the different channels
+     in the database)."* Prepopulated off the videos, not off the curated
+     credits file — a channel harvested but not credited, or credited but not
+     harvested, would otherwise put a row on the sheet that matches nothing. */
+  it("filters by channel, listing every channel the library holds", async () => {
+    const real = channelsOf(VIDEOS);
+    expect(real.length).toBeGreaterThan(1);
+    // Every channel in the data is offered, and the counts add up to the library.
+    expect(real.reduce((n, c) => n + c.count, 0)).toBe(VIDEOS.filter((v) => v.ch).length);
+
+    await withProfile(<Immerse navigation={nav} />, { notices: { immerse: 1 } });
+    await act(async () => { fireEvent.press(await screen.findByTestId("video-channel")); });
+    for (const c of real) expect(screen.getByTestId(`channel-${c.name}`)).toBeTruthy();
+
+    const one = real[0];
+    await act(async () => { fireEvent.press(screen.getByTestId(`channel-${one.name}`)); });
+    expect(screen.queryByTestId("channel-sheet")).toBeNull();
+    expect(screen.getByTestId("video-channel").props.accessibilityLabel).toBe(`Channel: ${one.name}`);
+    // Only that channel's rows are on the screen now.
+    const shown = VIDEOS.filter((v) => screen.queryByTestId(`video-${v.id}`));
+    expect(shown.length).toBeGreaterThan(0);
+    expect(shown.every((v) => v.ch === one.name)).toBe(true);
+
+    await act(async () => { fireEvent.press(screen.getByTestId("video-channel")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("channel-all")); });
+    expect(screen.getByTestId("video-channel").props.accessibilityLabel).toBe("Channel: all");
   });
 
   it("lists the library, filters as you type, and opens a video", async () => {

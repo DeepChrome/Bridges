@@ -39,7 +39,16 @@ describe("profile gate", () => {
     // Each character is labelled, which is also what a screen reader announces.
     // Read off the cast itself, so a new set of faces cannot leave one out.
     const { AV, AV_IDS } = require("@core/avatars");
-    for (const id of AV_IDS) expect(screen.getByLabelText(AV[id].name)).toBeTruthy();
+    // (Yuri is also the guide waving on this screen — the same monkey — so a
+    // name may be found twice.)
+    for (const id of AV_IDS) expect(screen.getAllByLabelText(AV[id].name).length).toBeGreaterThan(0);
+    // The one picked is introduced by name and persona, and changes with it.
+    expect(screen.getByTestId("character-intro")).toBeTruthy();
+    expect(screen.getByText(AV[AV_IDS[0]].role)).toBeTruthy();
+    const other = AV_IDS[3];
+    await act(async () => { fireEvent.press(screen.getByLabelText(AV[other].name)); });
+    expect(screen.getByText(AV[other].role)).toBeTruthy();
+    expect(screen.queryByText(AV[AV_IDS[0]].role)).toBeNull();
   });
 
   it("holds Continue until there is a name to continue with", async () => {

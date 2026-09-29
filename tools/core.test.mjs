@@ -1023,9 +1023,17 @@ ok(AV_IDS.every((id) => AV[id].svg && AV[id].bg && AV[id].name && /^[\d.\s-]+$/.
    "each avatar has art, a viewBox, a background and a name");
 ok(new Set(AV_IDS.map((id) => AV[id].svg)).size === AV_IDS.length,
    "and no two share the same drawing");
-/* A profile made before the DiceBear faces keeps a face, and not everybody
-   the same one. */
-ok(avatarOf("monkeynaut") && avatarOf("monkeynaut") !== avatarOf("gymbun")
+/* Each is a character (2026-09-29): a name and a persona, the persona a line,
+   not a paragraph, and no two alike. No ids in the markup, since several faces
+   share one page and two alike would draw each other's shapes. */
+ok(AV_IDS.every((id) => AV[id].role && AV[id].role.split(/\s+/).length <= 8),
+   "each character has a persona of a few words");
+ok(new Set(AV_IDS.map((id) => AV[id].name)).size === AV_IDS.length, "and a name of its own");
+ok(AV_IDS.every((id) => !/\bid="/.test(AV[id].svg)), "no ids inside the art");
+/* A profile made before the animals keeps a character, and not everybody the
+   same one: the hand-drawn ids and the DiceBear ids both resolve. */
+ok(avatarOf("monkeynaut") === AV.yuri && avatarOf("monkeynaut") !== avatarOf("gymbun")
+   && avatarOf("curls") && avatarOf("sunny") !== avatarOf("curls")
    && avatarOf("nonsense") === AV[AV_IDS[0]], "old ids resolve, unknown ids fall back");
 ok(AV_CREDIT.creator && AV_CREDIT.license, "the style's licence is carried",
    `${AV_CREDIT.creator} ${AV_CREDIT.license}`);

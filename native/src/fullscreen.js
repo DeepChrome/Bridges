@@ -35,6 +35,7 @@ export const RUNS = [
   "Tutor",        // the free conversation with the tutor
   "Translate",    // speaking Russian to be read back in English
   "Video",        // an episode, which wants the whole screen
+  "ListCards",    // a lesson's or a video's words as one flashcard round
 ];
 
 /* The profile and what opens from it. The avatar in every header pushes these

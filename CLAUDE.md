@@ -5232,6 +5232,23 @@ real pile from them *before the profile loaded* and read its first card
 aloud. It deals on `ready` now; the one-voice test caught it by counting a
 player nobody asked for.
 
+## 30bd′. The characters are animals now (2026-09-29)
+
+*Superseded what follows.* The owner: *"rather than people can you make the
+avatars different animals. Each should sort of have its own little
+persona."* Fourteen, each with a Russian name and a one-line persona shown
+under the picker when chosen (`role`): Yuri the cosmonaut monkey (the guide
+himself), Belka the superhero squirrel, Zaya, Lisa the burglar fox, Tortila
+the wise turtle, Borsuk the karate honey badger, Serafim the Yorkie angel,
+Gena the cranky crocodile, then Filin, Misha, Barsik, Tsarevna, Pirozhok and
+Senya. Nine faces are Microsoft's **Fluent Emoji** (flat, MIT; the source
+SVGs and their LICENSE in `data/curated/avatars/fluent/`); the squirrel,
+turtle, badger, Yorkie and crocodile heads and every costume are drawn in
+`tools/build_avatars.mjs` in the same flat manner. No ids in the art, so
+faces sharing a page cannot collide. `--sheet` writes a contact sheet at
+140 px and at 40 px — read both after any change. Every older id, hand-drawn
+or DiceBear, maps to a character (`AV_LEGACY`); the monkeynaut is Yuri.
+
 ## 30bd. The characters are DiceBear's (2026-09-28)
 
 The ten hand-drawn faces read as clip-art (ROADMAP 13.43); the owner: *"just

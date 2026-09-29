@@ -33,6 +33,7 @@ import { View, Pressable, Animated, Keyboard } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Btn, Muted, Avatar, AV, AV_IDS, Text, TextInput } from "../ui";
+import { AV_LEGACY } from "@core/avatars";
 import { Wordmark, Mark } from "../mark";
 import { Guide } from "../guide";
 import { useEnter, usePress, usePop } from "../motion";
@@ -140,12 +141,28 @@ function SignIn({ accounts, onPick, onNew }) {
 
 /* -------------------------------------------------------------- new here */
 
+/* Each character is somebody (the owner, 2026-09-29: "each should sort of
+   have its own little persona"), so the one picked is introduced under the
+   row — its name and its line — rather than the faces going unnamed. */
 export function CharacterPicker({ value, onPick }) {
+  const t = useTheme();
+  // A profile from before the animals carries an old id; it is shown as the
+  // character it now draws as.
+  const current = AV[value] ? value : AV_LEGACY[value];
+  const picked = AV[current];
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
-      {AV_IDS.map((id) => (
-        <Character key={id} id={id} on={id === value} onPress={() => onPick(id)} />
-      ))}
+    <View>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
+        {AV_IDS.map((id) => (
+          <Character key={id} id={id} on={id === current} onPress={() => onPick(id)} />
+        ))}
+      </View>
+      {picked ? (
+        <View testID="character-intro" style={{ alignItems: "center", marginTop: 12 }}>
+          <Text style={{ color: t.ink, fontSize: 16, fontWeight: "700" }}>{picked.name}</Text>
+          <Muted>{picked.role}</Muted>
+        </View>
+      ) : null}
     </View>
   );
 }

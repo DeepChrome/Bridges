@@ -92,9 +92,9 @@ describe("the picture", () => {
     await withProfile(<PictureSection />);
     await act(async () => { fireEvent.press(await screen.findByTestId("change-picture")); });
     const { AV } = require("@core/avatars");
-    await act(async () => { fireEvent.press(await screen.findByLabelText(AV.sunny.name)); });
+    await act(async () => { fireEvent.press(await screen.findByLabelText(AV.zaya.name)); });
     const accounts = JSON.parse(await AsyncStorage.getItem("rb.accounts"));
-    expect(accounts.list[0].avatar).toBe("sunny");
+    expect(accounts.list[0].avatar).toBe("zaya");
   });
 });
 

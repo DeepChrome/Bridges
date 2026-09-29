@@ -73,6 +73,21 @@ describe("which cards a set holds", () => {
     expect(dueCount({ ...withSentence, cardKinds: ["sentences"] })).toBe(1);
   });
 
+  /* A due sentence carries its English (2026-09-29): the schedule knows it only
+     by its Russian, and it used to come back with a blank meaning, so its back
+     showed the Russian again and nothing else. */
+  it("gives a due sentence its English, and a due deck card its own", () => {
+    const row = SPEECH.rows.find((r) => r[1]);
+    const deck = { id: "k1", name: "d", cards: [{ ru: "Как дела у тебя?", en: "How are you doing?" }] };
+    const st2 = { ...st, decks: [deck], cardKinds: ["words", "sentences"],
+                  seen: { [row[0]]: { recognise: review(-1) }, "Как дела у тебя?": { recognise: review(-1) } } };
+    const cards = studyCards(st2);
+    const s = cards.find((c) => c.b === row[0]);
+    expect(s.e).toBe(row[1]);
+    expect(s.sentence).toBe(true);
+    expect(cards.find((c) => c.b === "Как дела у тебя?").e).toBe("How are you doing?");
+  });
+
   /* The trouble round: the trouble words whether or not they are due, worst
      first, as their own session. */
   it("deals a round of trouble words on request, due or not", () => {

@@ -77,7 +77,7 @@ export function troubleWords(st) {
 
 /* A card as the screen draws it: `b` is the schedule key, `w` the face. */
 const cardOf = (i) => ({ key: "w" + i, w: L[i].w, b: L[i].b, e: L[i].e, x: L[i].x });
-const deckCard = (c) => ({ key: "d" + c.ru, w: c.ru, b: c.ru, e: c.en });
+const deckCard = (c) => ({ key: "d" + c.ru, w: c.ru, b: c.ru, e: c.en, sentence: /\s/.test(c.ru) });
 
 /* A whole sentence as a card (the owner, 2026-09-16: *"not just vocabulary
    (individual words) but also sentences… Complete sentences are very
@@ -125,6 +125,24 @@ export function sentencesFor(st) {
   return out;
 }
 
+/* A pooled sentence by its own text, built once on first use. */
+let sentenceRows = null;
+const sentenceRow = (ru) => {
+  if (!sentenceRows) {
+    sentenceRows = new Map();
+    for (const row of SPEECH.rows || []) if (!sentenceRows.has(row[0])) sentenceRows.set(row[0], row);
+  }
+  return sentenceRows.get(ru) || null;
+};
+/* An imported deck's card by its Russian: the first deck that carries it. */
+const deckCardOf = (st, ru) => {
+  for (const d of st.decks || []) {
+    const c = d.cards.find((x) => x.ru === ru);
+    if (c) return deckCard(c);
+  }
+  return null;
+};
+
 /* Every card the ticked sets hold, one of each. */
 export function cardsIn(st, sets) {
   const pool = [];
@@ -132,11 +150,16 @@ export function cardsIn(st, sets) {
   const add = (card) => { if (!have.has(card.b)) { have.add(card.b); pool.push(card); } };
   const byWord = (w) => {
     const i = idxOfWord(w);
-    if (i >= 0) add(cardOf(i));
-    // A word the curriculum does not carry: a deck card, or a sentence that
-    // is due and whose set is not ticked. Either way the schedule knows it by
-    // its Russian and that is all the card needs.
-    else add({ key: "d" + w, w, b: w, e: "", sentence: /\s/.test(w) });
+    if (i >= 0) { add(cardOf(i)); return; }
+    // A card the curriculum does not carry: a pooled sentence or a deck card
+    // that is due. The schedule knows it only by its Russian, so its English
+    // is looked up where it came from. It used to be left blank, and every
+    // due sentence turned over to its Russian again with no meaning under it
+    // (the owner, 2026-09-29: "I was expecting English on the other side").
+    const row = sentenceRow(w);
+    if (row) { add(sentenceCard(row)); return; }
+    const dc = deckCardOf(st, w);
+    add(dc || { key: "d" + w, w, b: w, e: "", sentence: /\s/.test(w) });
   };
   sets.forEach((id) => {
     if (id === "__trouble__") { troubleWords(st).forEach(byWord); return; }
@@ -823,9 +846,14 @@ export default function Study({ navigation, route }) {
                     card) the translation stands on its own, which is all there
                     is to show. Four at most here: the card is a card, and the
                     full entry is one press away below. */}
+                {/* A sentence's English is the answer on its back, so it reads
+                    as one — ink, not a grey footnote under the Russian. */}
                 {face.sentence ? (
                   item.direction === "produce" ? null
-                    : <Muted size={16} style={{ marginTop: 10, textAlign: "center" }}>{face.e}</Muted>
+                    : <Text testID="card-meaning"
+                            style={{ color: t.ink, fontSize: 18, marginTop: 12, textAlign: "center" }}>
+                        {face.e || "—"}
+                      </Text>
                 ) : item.direction === "produce" && !senses ? null
                   : senses ? <SenseList senses={senses} size={16} max={4} brief style={{ marginTop: 10 }} />
                   : <Senses e={face.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}

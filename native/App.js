@@ -35,6 +35,7 @@ import You from "./src/screens/You";
 import Stats from "./src/screens/Stats";
 import Credits from "./src/screens/Credits";
 import { UnitScreen, LessonScreen } from "./src/screens/Unit";
+import Summary from "./src/screens/Summary";
 import { Immerse, Video } from "./src/screens/Misc";
 import { Gate } from "./src/screens/Gate";
 import WordScreen from "./src/screens/Word";
@@ -206,6 +207,7 @@ function LearnStack() {
                     options={titled((p) => `Lesson ${(p.index || 0) + 1}`)} />
       <Stack.Screen name="Vocab" component={VocabFlow} options={titled("Vocabulary")} />
       <Stack.Screen name="Quiz" component={QuizFlow} options={titled("Quiz")} />
+      <Stack.Screen name="Summary" component={Summary} options={{ title: "Summary" }} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       {/* A lesson's or a video's words as one flashcard round (§30bf). Pushed
           on the stack it was asked from, so Back returns there — sending it to

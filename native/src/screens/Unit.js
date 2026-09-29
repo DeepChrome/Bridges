@@ -43,7 +43,7 @@ export function UnitScreen({ route, navigation }) {
                 <Muted>{words.slice(0, 3).join(", ") + (words.length > 3 ? "…" : "")}</Muted>
               </View>
               <View style={{ flexDirection: "row", gap: 5 }}>
-                {cs.map((c) => (
+                {cs.filter((c) => !c.optional).map((c) => (
                   <View key={c.id} style={{ width: 9, height: 9, borderRadius: 5,
                                             backgroundColor: c.done ? t.good : t.surface3 }} />
                 ))}
@@ -52,15 +52,18 @@ export function UnitScreen({ route, navigation }) {
           );
         })}
       </List>
+      {/* Everything the unit teaches on one list, to study before its test. */}
+      <Btn testID="unit-summary" label="Unit summary" style={{ marginTop: 16 }}
+           onPress={() => navigation.navigate("Summary", { unitId: unit.id })} />
       {unit.kind === "spine" && unitFineProgress(st, unit) < 1 ? (
-        <Btn label="Test out of this section" style={{ marginTop: 16 }}
+        <Btn label="Test out of this section" style={{ marginTop: 10 }}
              onPress={() => navigation.navigate("TestOut", { unitId: unit.id })} />
       ) : null}
     </Screen>
   );
 }
 
-const STEP_LABEL = { vocab: "Start the vocabulary", quiz: "Take the quiz", video: "Watch the video",
+const STEP_LABEL = { vocab: "Start the vocabulary", summary: "Review the summary", quiz: "Take the quiz", video: "Watch the video",
                      listen: "Listen to the conversation" };
 
 export function LessonScreen({ route, navigation }) {
@@ -80,6 +83,7 @@ export function LessonScreen({ route, navigation }) {
      the primary button — which is exactly how the two come to disagree. */
   const open = (id) => {
     if (id === "listen") return navigation.navigate("Scenes", { key: `${unit.id}:${i}` });
+    if (id === "summary") return navigation.navigate("Summary", { unitId: unit.id, index: i });
     return navigation.navigate(
       id === "video" ? "Video" : id === "quiz" ? "Quiz" : "Vocab",
       { unitId: unit.id, index: i });
@@ -90,7 +94,7 @@ export function LessonScreen({ route, navigation }) {
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6,
                      marginBottom: 14 }}>
         <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
-          {`${cs.filter((c) => c.done).length}/${cs.length}`}
+          {`${cs.filter((c) => c.done && !c.optional).length}/${cs.filter((c) => !c.optional).length}`}
         </Text>
         <Muted size={14}>steps done</Muted>
       </View>

@@ -219,6 +219,11 @@ export function components(st, u, i) {
   const l = (s.lessons || {})[i] || {};
   const out = [
     { id: "vocab", label: "Vocabulary", done: !!l.v },
+    /* What the lesson taught, as a list to study before the quiz (2026-09-29).
+       Optional: listed so it is found, never owed — adding a required step
+       would un-finish every lesson already done (the rule the Listening step
+       set, §30af). */
+    { id: "summary", label: "Summary", optional: true, done: !!l.s },
     { id: "quiz", label: "Quiz", score: l.q, tries: l.tries || 0, done: quizPassed(l) },
   ];
   if (u.v) out.push({ id: "video", label: "Video", done: !!s.video, shared: true });
@@ -315,6 +320,7 @@ export function markComponent(st, u, i, id, extra) {
   } else {
     const l = { ...s.lessons[i] };
     if (id === "vocab") l.v = true;
+    if (id === "summary") l.s = true;
     if (id === "quiz") {
       l.q = Math.max(l.q || 0, extra || 0);
       l.tries = (l.tries || 0) + 1;            // what the relief rule counts
@@ -420,7 +426,10 @@ export function nextLesson(st) {
 export function nextStep(st) {
   const here = nextLesson(st);
   if (!here) return null;
-  const c = components(st, here.unit, here.index).find((x) => !x.done);
+  // Continue follows the required steps; the optional ones (the summary, a
+  // featured conversation) are there to be chosen, not walked through.
+  const cs = components(st, here.unit, here.index);
+  const c = cs.find((x) => !x.done && !x.optional) || cs.find((x) => !x.done);
   return { ...here, step: c ? c.id : "vocab" };
 }
 

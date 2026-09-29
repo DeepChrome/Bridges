@@ -67,7 +67,7 @@ export function profileDepth(state) {
  * here would have kept the bar and nothing would have said so (docs/PLAYBOOK.md
  * Phase 0.3: completeness, not existence). */
 export const TAB_BAR_SCREENS = [
-  "Path", "Unit", "Lesson",                            // Learn
+  "Path", "Unit", "Lesson", "Summary",                 // Learn
   "Drills", "QuizSetup", "SceneList", "Sounds", "Grammar", "Endings",  // Practice
   "Episodes",                                          // Immerse
   "Cards",                                             // Study

@@ -4,7 +4,7 @@
    Own file, per the timeout note in screens.test.js. */
 
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, within } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
@@ -62,9 +62,16 @@ describe("grammar trouble", () => {
     expect(grammarTrouble({})).toEqual([]);
   });
 
-  it("shows nothing-yet with no tags, and the counted tags otherwise", async () => {
+  /* The lists live behind tiles now (2026-09-28: "hide those personalized
+     feedback in some tiles"): the profile shows a count, the tap shows the
+     list — and an empty list says so rather than opening on nothing. */
+  it("shows a count on each tile, and nothing-yet behind an empty one", async () => {
     await withYou({});
-    expect((await screen.findAllByText("Nothing yet")).length).toBe(2);   // words, grammar
+    const tile = await screen.findByTestId("tile-grammar");
+    expect(tile.props.accessibilityLabel).toBe("Grammar to work on: 0");
+    expect(screen.getByTestId("tile-trouble").props.accessibilityLabel).toBe("Trouble words: 0");
+    await act(async () => { fireEvent.press(tile); });
+    expect(within(screen.getByTestId("grammar-sheet")).getByText("Nothing yet")).toBeTruthy();
   });
 
   it("counts a lesson as cleared only when it is done, not merely attempted", async () => {
@@ -81,6 +88,9 @@ describe("grammar trouble", () => {
 
   it("lists a tag with its count and opens the unit that teaches it", async () => {
     await withYou({ speech: { attempts: [], tagCounts: { CASE: 3, WORD_ORDER: 1 } } });
+    const tile = await screen.findByTestId("tile-grammar");
+    expect(tile.props.accessibilityLabel).toBe("Grammar to work on: 2");
+    await act(async () => { fireEvent.press(tile); });
     expect(await screen.findByText(tagInfo("CASE").en)).toBeTruthy();
     expect(screen.getByText("3×")).toBeTruthy();
     const unit = UN.find((u) => u.id === tagInfo("CASE").unit);

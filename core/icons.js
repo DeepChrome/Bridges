@@ -66,6 +66,10 @@ export const ACTIVITY_ICONS = {
   /* Word endings: a word's stem as a line, and its ending boxed off at the
      end — the part of the word the screen is about. */
   endings: "M3 12h9M14 8h7v8h-7zM17.5 11v2",
+  /* The profile's tiles (2026-09-28). Trouble: a flag, the mark a learner puts
+     on a word to come back to. Statistics: three bars on a baseline. */
+  trouble: "M5 21V4M5 4h11l-2 4 2 4H5",
+  stats: "M4 20h16M7 20v-6M12 20V8M17 20v-9",
 };
 
 export const iconFor = (id) =>

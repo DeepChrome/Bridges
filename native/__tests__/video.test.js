@@ -8,7 +8,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { Immerse, Video, searchVideos, libraryOrder, videoFor, channelsOf } from "../src/screens/Misc";
+import { Immerse, Video, searchVideos, libraryOrder, videoFor, channelsOf, VIDEO_SORTS }
+  from "../src/screens/Misc";
 import { UN, videos, unitById } from "../src/data";
 import { fold, firstSense } from "@core/util";
 
@@ -139,7 +140,7 @@ describe("Immerse", () => {
 
   it("does not repeat the note once it has been seen", async () => {
     await withProfile(<Immerse navigation={nav} />, { notices: { immerse: 20000 } });
-    await screen.findByText(`of ${VIDEOS.length} watched`);
+    await screen.findByTestId("video-search");
     expect(screen.queryByTestId("creators-note")).toBeNull();
   });
 
@@ -150,7 +151,8 @@ describe("Immerse", () => {
     await screen.findByTestId(`fave-${libraryVideo.id}`);
     await act(async () => { fireEvent.press(screen.getByTestId(`fave-${libraryVideo.id}`)); });
     expect((await saved()).faves[libraryVideo.id]).toEqual(expect.any(Number));
-    await act(async () => { fireEvent.press(screen.getByText("Favorites")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("video-filter")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("filter-faves")); });
     expect(screen.getByTestId(`video-${libraryVideo.id}`)).toBeTruthy();
     expect(screen.queryByTestId(`video-${unitVideo.id}`)).toBeNull();
     // Off again from the same heart.
@@ -168,11 +170,13 @@ describe("Immerse", () => {
   it("sorts from one small control", async () => {
     await withProfile(<Immerse navigation={nav} />, { notices: { immerse: 1 } });
     await screen.findByTestId("video-sort");
-    expect(screen.getByTestId("video-sort").props.accessibilityLabel).toBe("Sort: By level");
+    expect(screen.getByTestId("video-sort").props.accessibilityLabel).toBe(
+      `Sort: ${VIDEO_SORTS.find((s) => s.id === "level").name}`);
     await act(async () => { fireEvent.press(screen.getByTestId("video-sort")); });
     await act(async () => { fireEvent.press(screen.getByTestId("sort-newest")); });
     expect(screen.queryByTestId("sort-sheet")).toBeNull();
-    expect(screen.getByTestId("video-sort").props.accessibilityLabel).toBe("Sort: Newest");
+    expect(screen.getByTestId("video-sort").props.accessibilityLabel).toBe(
+      `Sort: ${VIDEO_SORTS.find((s) => s.id === "newest").name}`);
     const first = libraryOrder(VIDEOS, "newest")[0];
     const tree = JSON.stringify(screen.toJSON());
     expect(tree.indexOf(`video-${first.id}`)).toBeLessThan(tree.indexOf(`video-${libraryOrder(VIDEOS, "newest")[5].id}`));
@@ -204,12 +208,22 @@ describe("Immerse", () => {
 
     await act(async () => { fireEvent.press(screen.getByTestId("video-channel")); });
     await act(async () => { fireEvent.press(screen.getByTestId("channel-all")); });
-    expect(screen.getByTestId("video-channel").props.accessibilityLabel).toBe("Channel: all");
+    expect(screen.getByTestId("video-channel").props.accessibilityLabel).toBe("Channel: All channels");
+  });
+
+  /* The three filters are one control (ui.js Dropdown), and there is no tally
+     of how much is watched (the owner, 2026-09-28). */
+  it("offers three drop-downs of one shape, and no watched count", async () => {
+    await withProfile(<Immerse navigation={nav} />, { notices: { immerse: 1 } });
+    for (const id of ["video-filter", "video-channel", "video-sort"]) {
+      expect((await screen.findByTestId(id)).props.accessibilityRole).toBe("button");
+    }
+    expect(screen.queryByText(new RegExp(`of ${VIDEOS.length} watched`))).toBeNull();
   });
 
   it("lists the library, filters as you type, and opens a video", async () => {
     await withProfile(<Immerse navigation={nav} />, { notices: { immerse: 1 } });
-    expect(await screen.findByText(`of ${VIDEOS.length} watched`)).toBeTruthy();
+    await screen.findByTestId("video-search");
     // Each row carries the video's YouTube thumbnail.
     const first = libraryOrder(VIDEOS)[0];
     expect(screen.getByTestId(`thumb-${first.id}`).props.source.uri).toContain(first.id);
@@ -289,10 +303,14 @@ describe("Video", () => {
   it("marks a watched row and filters the library by watched or not", async () => {
     await withProfile(<Immerse navigation={nav} />, { watched: { [libraryVideo.id]: 20000 }, notices: { immerse: 1 } });
     expect(await screen.findByTestId(`watched-${libraryVideo.id}`)).toBeTruthy();
-    await act(async () => { fireEvent.press(screen.getByText("Watched")); });
+    const show = async (id) => {
+      await act(async () => { fireEvent.press(screen.getByTestId("video-filter")); });
+      await act(async () => { fireEvent.press(screen.getByTestId(`filter-${id}`)); });
+    };
+    await show("watched");
     expect(await screen.findByTestId(`video-${libraryVideo.id}`)).toBeTruthy();
     expect(screen.queryByTestId(`video-${unitVideo.id}`)).toBeNull();
-    await act(async () => { fireEvent.press(screen.getByText("Unwatched")); });
+    await show("unwatched");
     expect(await screen.findByTestId(`video-${unitVideo.id}`)).toBeTruthy();
     expect(screen.queryByTestId(`video-${libraryVideo.id}`)).toBeNull();
   });

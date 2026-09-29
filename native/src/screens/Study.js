@@ -16,14 +16,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, Pressable, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Choice, Stepper, Lift, Text, CogButton } from "../ui";
-import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf } from "../data";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Choice, Stepper, Lift, Text, CogButton,
+         Familiarity, familiarityColor } from "../ui";
+import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf, rankOf } from "../data";
 import { Linked } from "../words";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
 import { applyGrade, reviewRows, preview, schedulerOpts, wanted, troubleWords as troubleBank, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity } from "@core/scheduler";
-import Svg, { Circle } from "react-native-svg";
 import { buildSession, requeue, dailyFor, QUEUE_DEFAULTS } from "@core/queue";
 
 /* The three directions as the learner sees them: by what is on the **front**.
@@ -56,44 +56,15 @@ export function flagsFor(st, item) {
     trouble: troubleWords(st).includes(item.word),
     /* The word's memory, 0–100 (core/scheduler.js familiarity); null while it
        is new, when the New flag says everything there is to say. */
-    score: item.kind === "new" ? null : familiarity(cardFor(entry)),
+    score: item.kind === "new" ? null : familiarity(cardFor(entry), rankOf(item.word)),
   };
 }
 
-/* The familiarity ring's colour at a score: red at nothing, amber halfway,
-   green at 100 — `bad`, `warn`, `good`, mixed in RGB between neighbours, so
-   every anchor is a token the audit has seen (§24). A stroke, never text. */
-export function familiarityColor(score, t) {
-  const hex = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
-  const mix = (a, b, k) => "#" + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * k)
-    .toString(16).padStart(2, "0")).join("").toUpperCase();
-  const s = Math.max(0, Math.min(100, score));
-  return s < 50 ? mix(t.bad, t.warn, s / 50) : mix(t.warn, t.good, (s - 50) / 50);
-}
-
-/* The score as a small ring with the number inside — a gauge, read at a
-   glance, rather than a figure the learner has to find a scale for. The
-   number is `ink` on the card's own surface; only the arc takes the colour. */
-export function Familiarity({ score }) {
-  const t = useTheme();
-  if (score === null || score === undefined) return null;
-  const size = 34, w = 3.5, r = (size - w) / 2, c = 2 * Math.PI * r;
-  const color = familiarityColor(score, t);
-  return (
-    <View testID="familiarity" accessibilityLabel={`Familiarity ${score} of 100`}
-          style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
-      <Svg width={size} height={size} style={{ position: "absolute" }}>
-        <Circle cx={size / 2} cy={size / 2} r={r} stroke={t.surface3} strokeWidth={w} fill="none" />
-        <Circle testID="familiarity-arc" cx={size / 2} cy={size / 2} r={r} stroke={color}
-                strokeWidth={w} fill="none" strokeLinecap="round"
-                strokeDasharray={`${c} ${c}`} strokeDashoffset={c * (1 - score / 100)}
-                rotation={-90} originX={size / 2} originY={size / 2} />
-      </Svg>
-      <Text testID="familiarity-score"
-            style={{ color: t.ink, fontSize: 11, fontWeight: "700" }}>{score}</Text>
-    </View>
-  );
-}
+/* The familiarity ring and its colour live in ui.js now (2026-09-28): the
+   dictionary entry draws the same ring for the same number, and a second copy
+   here is how the two would come to disagree. Re-exported for the tests that
+   import it from here. */
+export { familiarityColor, Familiarity };
 
 /* The scheduler's bank, worst first and capped, then whatever the learner
    pinned by hand. */

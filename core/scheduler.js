@@ -309,11 +309,58 @@ export const strength = (entry) =>
  *   1 day → 12   4 days → 27   a month → 58   100 days → 78   a year → 100
  *
  * A card that does not exist, or is still new, has no score: it is flagged
- * New instead. */
-export const FAMILIAR_AT = SCHEDULER_DEFAULTS.maxInterval;
-export function familiarity(card) {
+ * New instead.
+ *
+ * **Where 100 sits was changed on 2026-09-28**, and the reason is worth
+ * keeping. The owner, of the same number shown on a dictionary entry: *"something
+ * like ETO or Kak are likely to be quickly mastered words so they should
+ * relatively quickly get a score of 100. Be intelligent in how this is
+ * calculated."* At a year of stability, 100 was a number nobody would see
+ * inside the course. Two changes, both still read off the card:
+ *
+ *   - **Mastered means a memory expected to hold about three months**
+ *     (`FAMILIAR_AT`, 90 days), not the scheduler's one-year ceiling. That is
+ *     the horizon a learner acts on.
+ *   - **The commonest words reach it sooner** (`masteryHorizon`). «это» is
+ *     heard in nearly every sentence, lesson and video the app plays, so its
+ *     memory is refreshed far more often than its reviews alone would say; the
+ *     horizon falls to `COMMON_AT` (21 days) for the hundred commonest lemmas
+ *     and rises with rarity to the full ninety by rank 1,000. Four or five good
+ *     reviews take «это» to 100; a rare word still needs months.
+ *
+ * And a card being relearned after a lapse is held at `RELEARNING_CAP`: its old
+ * stability says it was known, and the Again that just happened says it is
+ * not, and the score should agree with the Again. */
+export const FAMILIAR_AT = 90;
+export const COMMON_AT = 21;
+export const RELEARNING_CAP = 35;
+const COMMON_RANK = 100, RARE_RANK = 1000;
+
+/* Days of stability that count as mastered, for a lemma of this frequency
+   rank (1 = commonest; the lemma index is assigned by frequency). No rank — a
+   deck card, a sentence — is the full horizon. */
+export function masteryHorizon(rank) {
+  if (!(rank > 0)) return FAMILIAR_AT;
+  if (rank <= COMMON_RANK) return COMMON_AT;
+  if (rank >= RARE_RANK) return FAMILIAR_AT;
+  const k = (Math.log(rank) - Math.log(COMMON_RANK)) / (Math.log(RARE_RANK) - Math.log(COMMON_RANK));
+  return COMMON_AT + k * (FAMILIAR_AT - COMMON_AT);
+}
+
+export function familiarity(card, rank) {
   if (!card || card.state === NEW || !(card.s > 0)) return null;
-  return Math.round(100 * Math.min(1, Math.log1p(card.s) / Math.log1p(FAMILIAR_AT)));
+  const score = Math.round(100 * Math.min(1, Math.log1p(card.s) / Math.log1p(masteryHorizon(rank))));
+  return card.state === RELEARNING ? Math.min(score, RELEARNING_CAP) : score;
+}
+
+/* The score in words, for the learner reading their own entry. */
+export function familiarityLabel(score) {
+  if (score === null || score === undefined) return "New";
+  if (score >= 100) return "Mastered";
+  if (score >= 75) return "Strong";
+  if (score >= 45) return "Familiar";
+  if (score >= 20) return "Learning";
+  return "Just met";
 }
 
 export const maxLapses = (entry) =>

@@ -219,6 +219,13 @@ jest.mock("expo-notifications", () => ({
   scheduleNotificationAsync: jest.fn(async (r) => { global.__scheduled.push(r); }),
 }));
 
+/* The form recordings (ROADMAP 13.42): 9,579 asset requires, and jest reads
+   every one of those files for its cache key the first time the table loads —
+   seconds, which a suite that merely opens an entry would spend inside its own
+   timeout. Nothing here has a form clip unless a test says so (form.test.js
+   mocks its own); formaudio.test.js checks the real generated table. */
+jest.mock("./src/formaudio", () => ({ FORM_CLIPS: {}, formClip: () => null }));
+
 /* The Anki import/export modules: files, the picker, SQLite and the share sheet
    are all injected by anki.js, so the packages only need to load. */
 jest.mock("expo-sqlite", () => ({ deserializeDatabaseAsync: jest.fn(), openDatabaseAsync: jest.fn() }));

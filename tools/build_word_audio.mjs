@@ -73,7 +73,7 @@ const RETRIES = ["", "", "cap", "cap", "stop"];
 const flag = (n) => process.argv.includes(n);
 const DRY = flag("--dry-run");
 
-const apiKey = () => {
+export const apiKey = () => {
   const k = process.env.GOOGLE_TTS_API_KEY;
   if (!k) {
     console.error("GOOGLE_TTS_API_KEY is not set. It belongs in the environment,"
@@ -86,8 +86,10 @@ const apiKey = () => {
 /* Keyed on everything that changes the sound, exactly as the scenario clips
    are: re-recording at a different rate or in a different voice writes a new
    file and leaves the old one alone. */
-const clipId = (text) =>
+export const clipId = (text) =>
   createHash("sha1").update(`google|${VOICE}|${RATE}|${text}`).digest("hex").slice(0, 16);
+
+export { VOICE, RATE, RATE_PER_M_CHARS };
 
 async function synth(text, key) {
   const res = await fetch(`${API}/text:synthesize?key=${key}`, {
@@ -103,6 +105,59 @@ async function synth(text, key) {
   const body = await res.json();
   if (!body.audioContent) throw new Error("no audioContent in the reply");
   return Buffer.from(body.audioContent, "base64");
+}
+
+const pause = () => new Promise((r) => setTimeout(r, 120));   // somebody else's service
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const rendering = (text, how) => (how === "cap" ? cap(text) : how === "stop" ? cap(text) + "." : text);
+
+/* Buy one utterance, and for a word keep buying until what came back is a word.
+ *
+ * Shared by this tool and build_form_audio.mjs (2026-09-28): the retry is the
+ * fix for Chirp3 returning a nine-frame blip for a one-syllable input about a
+ * third of the time (§30ao), and a second copy of it is how that fix would
+ * quietly go missing from the next purchase.
+ *
+ * `had` is a clip already on disk for this text (a blip being replaced).
+ * Returns `{ id, ms, retries, dropped }`: the file kept, its length, how many
+ * extra calls it took, and the ids deleted along the way. `id` is null when
+ * every attempt was a blip — the file is removed, and the caller decides what
+ * reads the word instead. */
+export async function buyOne(text, { word, dir, key, had }) {
+  /* Every file this utterance has on disk by the end, by id: the blip it had,
+     and each rendering tried. A plain retry has the *same* id as the blip and
+     overwrites it in place, which is why this is a map and not a list — the
+     first cut deleted "the previous best" and took the file it had just
+     written with it. The longest stays; the rest go. */
+  const tried = new Map();
+  if (had && had.id) tried.set(had.id, had.ms);
+  let retries = 0, first = true;
+  for (const how of (word ? RETRIES : [""])) {
+    const said = rendering(text, how);
+    const id = clipId(said);
+    const file = join(dir, id + ".mp3");
+    writeFileSync(file, await synth(said, key));
+    await pause();
+    tried.set(id, durationMs(file));
+    if (!first) retries++;
+    first = false;
+    if (!word || tried.get(id) >= MIN_WORD_MS) break;
+  }
+  let best = null;
+  for (const [id, got] of tried) if (!best || got > best.ms) best = { id, ms: got };
+  const dropped = [];
+  for (const id of tried.keys()) {
+    if (id === best.id) continue;
+    const file = join(dir, id + ".mp3");
+    if (existsSync(file)) rmSync(file);
+    dropped.push(id);
+  }
+  if (word && best.ms < MIN_WORD_MS) {
+    rmSync(join(dir, best.id + ".mp3"));
+    dropped.push(best.id);
+    return { id: null, ms: best.ms, retries, dropped };
+  }
+  return { id: best.id, ms: best.ms, retries, dropped };
 }
 
 /* ------------------------------------------------------------------ which */
@@ -225,43 +280,17 @@ async function main() {
   if (!todo.length) { console.log("nothing to buy"); }
 
   const key = todo.length ? apiKey() : null;
-  const pause = () => new Promise((r) => setTimeout(r, 120));   // somebody else's service
-  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-  const rendering = (text, how) => (how === "cap" ? cap(text) : how === "stop" ? cap(text) + "." : text);
   let bought = 0, failed = 0, retried = 0, still = 0;
   for (const m of todo) {
     try {
-      /* Every file this word has on disk by the end, by id: the blip it had,
-         and each rendering tried. A plain retry has the *same* id as the blip
-         and overwrites it in place, which is why this is a map and not a
-         list — the first cut deleted "the previous best" and took the file it
-         had just written with it. The longest stays; the rest go. */
-      const tried = new Map();
-      if (have.has(m.id)) tried.set(m.id, ms[m.id]);
-      let first = true;
-      for (const how of (m.word ? RETRIES : [""])) {
-        const text = rendering(m.text, how);
-        const id = clipId(text);
-        const file = join(OUT, id + ".mp3");
-        writeFileSync(file, await synth(text, key));
-        await pause();
-        const got = durationMs(file);
-        tried.set(id, got);
-        if (!first) retried++;
-        first = false;
-        if (!m.word || got >= MIN_WORD_MS) break;
-      }
-      let best = null;
-      for (const [id, got] of tried) if (!best || got > best.ms) best = { id, ms: got };
-      for (const id of tried.keys()) {
-        if (id === best.id) continue;
-        const file = join(OUT, id + ".mp3");
-        if (existsSync(file)) rmSync(file);
-        delete ms[id];
-      }
-      m.id = best.id;
-      ms[best.id] = best.ms;
-      if (m.word && best.ms < MIN_WORD_MS) {
+      const got = await buyOne(m.text, { word: m.word, dir: OUT, key,
+                                          had: have.has(m.id) ? { id: m.id, ms: ms[m.id] } : null });
+      retried += got.retries;
+      for (const id of got.dropped) delete ms[id];
+      if (got.id) {
+        m.id = got.id;
+        ms[got.id] = got.ms;
+      } else {
         /* The engine will not say it («и» came back 216–288 ms five times).
            A blip in the bundle would play *instead of* the collection's
            recording, since `say()` prefers the bundle — so the word is left
@@ -269,11 +298,9 @@ async function main() {
            the device voice, labelled as such) reads it. Said out loud here,
            and counted by audio_qa as streamed rather than as a blip. */
         still++;
-        rmSync(join(OUT, best.id + ".mp3"));
-        delete ms[best.id];
         m.id = null;
         skipped.add(m.key);
-        console.log(`   !! ${m.text}: ${best.ms} ms after ${RETRIES.length} tries — left to the collection's recording`);
+        console.log(`   !! ${m.text}: ${got.ms} ms after ${RETRIES.length} tries — left to the collection's recording`);
       }
       bought++;
     } catch (e) {

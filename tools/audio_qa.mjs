@@ -30,6 +30,7 @@ import { loadScripts, MIN_SECONDS, MAX_SECONDS } from "./check_scripts.mjs";
 import { loadPayload } from "./payload.mjs";
 import { durationMs as mp3Ms } from "./mp3.mjs";
 import { MIN_WORD_MS } from "./build_word_audio.mjs";
+import { ambiguousSpellings } from "./build_form_audio.mjs";
 import { fold } from "../core/util.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -203,6 +204,30 @@ const sentMissing = sentKeys.filter((k) => !boughtKeys.has(k) && !files[k]);
 notes.push(`pool sentences with a recording: ${sentKeys.length - sentMissing.length} of ${sentKeys.length}`
            + ` — ${sentBundled} bought and bundled, ${sentKeys.length - sentMissing.length - sentBundled} streamed`);
 if (sentMissing.length) errors.push(`${sentMissing.length} pool sentences have no recording at all`);
+
+/* The table forms (ROADMAP 13.42, 2026-09-28). The rule that matters: **no
+   spelling in the manifest may carry two stresses.** Those were never bought
+   — the voice is handed the bare spelling and would have to guess — so one
+   appearing here means a pronunciation button playing a guessed stress, which
+   is the single thing this purchase was built to avoid. Plus the ordinary
+   checks: every file present, none a blip. */
+const FORMS = join(ROOT, "data", "word_audio", "forms.json");
+if (existsSync(FORMS)) {
+  const fm = JSON.parse(readFileSync(FORMS, "utf8"));
+  const forms = fm.files || {}, fms = fm.ms || {};
+  /* The same definition the purchase used (build_form_audio.mjs), so the gate
+     and the tool cannot come to disagree about what "two stresses" means. */
+  const twoStress = [...ambiguousSpellings(Object.keys(forms))];
+  if (twoStress.length) errors.push(`${twoStress.length} form spelling(s) bought with two stresses: `
+                                    + twoStress.slice(0, 6).join(", "));
+  const gone = Object.values(forms).filter((id) => !existsSync(join(ROOT, "data", "word_audio", id + ".mp3")));
+  if (gone.length) errors.push(`${gone.length} form clip(s) in the manifest are not on disk`);
+  const short = Object.entries(forms).filter(([, id]) => fms[id] !== undefined && fms[id] < MIN_WORD_MS);
+  if (short.length) errors.push(`${short.length} form clip(s) under ${MIN_WORD_MS} ms: `
+                                + short.slice(0, 6).map(([f]) => f).join(", "));
+  notes.push(`table forms with their own recording: ${Object.keys(forms).length}`
+             + ` (${(fm.skipped || []).length} the voice would not say)`);
+}
 
 /* ------------------------------------------------------------------ out */
 

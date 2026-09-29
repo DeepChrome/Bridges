@@ -12,7 +12,7 @@ import {
    and are what everything else imports (font.test.js). */
 import { Text as RNText, TextInput as RNTextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Path, SvgXml } from "react-native-svg";
+import Svg, { Path, SvgXml, Circle } from "react-native-svg";
 import { iconFor } from "@core/icons";
 import { AV, AV_IDS } from "@core/avatars";
 import { useTheme, radius, space, type, faceFor, useShadow } from "./theme";
@@ -589,6 +589,58 @@ export function Note({ text, size, color, italic, style, testID, gap = 8 }) {
   );
 }
 
+/* A small drop-down: the current choice and a caret, opening a sheet of the
+   options with a tick on the chosen one.
+ *
+ * Immerse carried two of these built by hand (channel, sort) beside a row of
+ * chips for the watched filter, and the owner wanted the three to match
+ * (2026-09-28: *"make those filters look more standardized. I like the two
+ * dropdowns on the right… make one for all/unwatched/watched too"*). One
+ * component, so they cannot drift apart again.
+ *
+ *   options   [{ id, name, note? }] — `note` is a quiet count on the right
+ *   testID    the trigger; the sheet is `${testID}-sheet` unless `sheetTestID`
+ *             says otherwise, and each option `${optionPrefix}${id}` */
+export function Dropdown({ testID, sheetTestID, optionPrefix, title, label, value, options, onPick,
+                           style }) {
+  const t = useTheme();
+  const [open, setOpen] = useState(false);
+  const current = options.find((o) => o.id === value) || options[0];
+  const prefix = optionPrefix === undefined ? `${testID}-` : optionPrefix;
+  return (
+    <>
+      <Pressable testID={testID} accessibilityRole="button"
+                 accessibilityLabel={`${label}: ${current ? current.name : ""}`}
+                 onPress={() => setOpen(true)} hitSlop={6}
+                 style={({ pressed }) => [{ flexDirection: "row", alignItems: "center", gap: 4,
+                   minHeight: 36, paddingHorizontal: 12, borderRadius: radius.lg,
+                   borderWidth: 1, borderColor: t.line, backgroundColor: t.surface,
+                   opacity: pressed ? 0.6 : 1 }, style]}>
+        <Text numberOfLines={1} style={{ flexShrink: 1, color: t.ink2, fontSize: 13, fontWeight: "600" }}>
+          {current ? current.name : ""}
+        </Text>
+        <Text style={{ color: t.ink3, fontSize: 11 }}>▾</Text>
+      </Pressable>
+      {open ? (
+        <Sheet testID={sheetTestID || `${testID}-sheet`} title={title} onClose={() => setOpen(false)}>
+          <List>
+            {options.map((o) => (
+              <Row key={o.id} testID={`${prefix}${o.id}`}
+                   onPress={() => { onPick(o.id); setOpen(false); }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>{o.name}</Text>
+                </View>
+                {o.note !== undefined ? <Muted>{String(o.note)}</Muted> : null}
+                <Tick on={o.id === (current && current.id)} />
+              </Row>
+            ))}
+          </List>
+        </Sheet>
+      ) : null}
+    </>
+  );
+}
+
 /* A section's heading: one style, used everywhere a screen groups things
    under a label (it was retyped inline two dozen times). */
 export function SectionLabel({ children, style, testID }) {
@@ -930,6 +982,42 @@ export function Speaker({ text, size = 40, device = false }) {
     {down ? (
       <Text testID="speaker-down" style={{ color: t.ink3, fontSize: 10, marginTop: 2 }}>No audio right now</Text>
     ) : null}
+    </View>
+  );
+}
+
+/* The familiarity ring's colour at a score: red at nothing, amber halfway,
+   green at 100 — `bad`, `warn`, `good`, mixed in RGB between neighbours, so
+   every anchor is a token the audit has seen (§24). A stroke, never text. */
+export function familiarityColor(score, t) {
+  const hex = (c) => [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16));
+  const mix = (a, b, k) => "#" + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * k)
+    .toString(16).padStart(2, "0")).join("").toUpperCase();
+  const s = Math.max(0, Math.min(100, score));
+  return s < 50 ? mix(t.bad, t.warn, s / 50) : mix(t.warn, t.good, (s - 50) / 50);
+}
+
+/* A word's familiarity (core/scheduler.js `familiarity`) as a ring with the
+   number inside — a gauge, read at a glance, rather than a figure the learner
+   has to find a scale for. The number is `ink` on the surface; only the arc
+   takes the colour. On the flashcard at 34, on the dictionary entry larger. */
+export function Familiarity({ score, size = 34 }) {
+  const t = useTheme();
+  if (score === null || score === undefined) return null;
+  const w = size > 40 ? 5 : 3.5, r = (size - w) / 2, c = 2 * Math.PI * r;
+  const color = familiarityColor(score, t);
+  return (
+    <View testID="familiarity" accessibilityLabel={`Familiarity ${score} of 100`}
+          style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
+      <Svg width={size} height={size} style={{ position: "absolute" }}>
+        <Circle cx={size / 2} cy={size / 2} r={r} stroke={t.surface3} strokeWidth={w} fill="none" />
+        <Circle testID="familiarity-arc" cx={size / 2} cy={size / 2} r={r} stroke={color}
+                strokeWidth={w} fill="none" strokeLinecap="round"
+                strokeDasharray={`${c} ${c}`} strokeDashoffset={c * (1 - score / 100)}
+                rotation={-90} originX={size / 2} originY={size / 2} />
+      </Svg>
+      <Text testID="familiarity-score"
+            style={{ color: t.ink, fontSize: size > 40 ? 15 : 11, fontWeight: "700" }}>{score}</Text>
     </View>
   );
 }

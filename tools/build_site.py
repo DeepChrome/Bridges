@@ -61,9 +61,33 @@ N_EXAMPLES = 4
 # Two sentences sharing this many studied words (the word's own forms aside)
 # are the same sentence twice as far as a learner is concerned.
 NEAR_DUPLICATE = 2
+# A word is "common" when its lemma is among this many by corpus frequency —
+# the size of vocabulary that covers most of everyday speech. An example built
+# from them is one a learner can use tomorrow (the owner, 2026-09-28: "focus on
+# using the most common words if there's a choice").
+COMMON_RANK = 1500
+# Difficulty tiers, by words and by how many uncommon words a sentence carries.
+# The first four examples aim for one of each (EXAMPLE_TIERS), so the entry
+# reads easy → medium → hard rather than four of a kind. Past LONG_WORDS a
+# sentence is shown only when nothing shorter exists: «говорить» opened on a
+# twenty-word sentence, and nobody learns a word from one.
+EASY_WORDS, MEDIUM_WORDS, LONG_WORDS = 6, 10, 15
+EXAMPLE_TIERS = (0, 1, 2, 0)
 
 
-def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tally=None):
+def example_tier(words, rare):
+    """0 easy, 1 medium, 2 hard, 3 too long or too rare to lead with."""
+    if words <= EASY_WORDS and rare == 0:
+        return 0
+    if words <= MEDIUM_WORDS and rare <= 1:
+        return 1
+    if words <= LONG_WORDS and rare <= 3:
+        return 2
+    return 3
+
+
+def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tally=None,
+                  key_rank=None):
     """The sentences worth showing first, and one of each — and different from
     each other.
 
@@ -83,9 +107,18 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tall
     Readability still bounds it — a rare form in a hard sentence is not what
     "varied" means — and the rest of the list keeps the old order.
 
+    Then the owner, 2026-09-28: examples should be *useful*, *vary in
+    difficulty*, and prefer *common words*. So difficulty is no longer "words
+    outside the curriculum" — every word is in the curriculum somewhere — but
+    how many words fall outside the commonest COMMON_RANK (`key_rank`, the
+    word's own forms excepted) and how long the sentence is, read into three
+    tiers (example_tier). The four shown aim for EXAMPLE_TIERS in turn, nearest
+    tier when one is empty, and are shown easiest first.
+
     `tally`, when given, counts what the plain order would have shown against
     what this shows, so the build can print the difference rather than claim it.
     """
+    key_rank = key_rank or {}
     best = {}
     for iid in cands:
         ru, en, _deck, has_audio = sentences[iid]
@@ -114,22 +147,30 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tall
         # ones: «Я уснул читая» and «Читая книгу, я уснул» share «читая», which
         # the lexicon has no key for, and counting studied keys alone saw them
         # share one word and showed both (the owner, 2026-09-24).
-        info[iid] = (sum(1 for k in toks if k not in studied_keys),
-                     len(sentences[iid][0]),
-                     frozenset(k for k in toks if k in own),
-                     frozenset(k for k in toks if k not in own))
+        rest = [k for k in toks if k not in own]
+        # A token with no known lemma (a name, a rare form) counts as uncommon.
+        rare = sum(1 for k in rest if key_rank.get(k, COMMON_RANK + 1) > COMMON_RANK)
+        words = len(re.findall(r"[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*", sentences[iid][0]))
+        info[iid] = (rare, words, frozenset(k for k in toks if k in own), frozenset(rest),
+                     example_tier(words, rare),
+                     sum(1 for k in toks if k not in studied_keys))
 
-    def hardness(iid):
-        return (info[iid][0], info[iid][1], iid)
-    pool = sorted(kept, key=hardness)
-    plain = pool[:N_EXAMPLES]
+    # The order this replaced, kept only to be measured against.
+    plain = sorted(kept, key=lambda i: (info[i][5], len(sentences[i][0]), i))[:N_EXAMPLES]
+    pool = sorted(kept, key=lambda i: (info[i][4], info[i][0], info[i][1], i))
+    # Too long or too rare to teach from: shown only when it is all there is.
+    # Three short examples beat three and a paragraph, and a slot left empty
+    # is filled from Tatoeba, whose sentences are short (build_dictionary).
+    if pool and info[pool[0]][4] < 3:
+        pool = [i for i in pool if info[i][4] < 3]
 
     chosen, forms_seen = [], set()
-    while pool and len(chosen) < N_EXAMPLES:
-        base = info[pool[0]][0]
+    for target in EXAMPLE_TIERS:
+        if not pool:
+            break
 
         def choice(iid):
-            unknown, length, forms, rest = info[iid]
+            rare, words, forms, rest, tier, _ = info[iid]
             repeat = bool(forms) and forms <= forms_seen
             # How much of this sentence is a sentence already chosen: the most
             # words shared with any of them. A threshold alone let the third
@@ -137,11 +178,14 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tall
             # prefers the sentence that shares least.
             overlap = max((len(rest & info[c][3]) for c in chosen), default=0)
             near = overlap >= NEAR_DUPLICATE
-            return (unknown > base + 1, repeat, near, overlap, unknown, length, iid)
+            # The nearest tier to the target, a too-long sentence last of all;
+            # within it a new form, then no near copy, then common and short.
+            return (tier == 3, abs(tier - target), near, repeat, overlap, rare, words, iid)
         pick = min(pool, key=choice)
         chosen.append(pick)
         pool.remove(pick)
         forms_seen |= info[pick][2]
+    chosen.sort(key=lambda i: (info[i][4], info[i][0], info[i][1]))
 
     if tally is not None and len(kept) > 1:
         for name, shown in (("plain", plain), ("varied", chosen)):
@@ -151,12 +195,16 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tall
             tally[name + "_near"] += sum(
                 1 for a in range(len(shown)) for b in range(a)
                 if len(info[shown[a]][3] & info[shown[b]][3]) >= NEAR_DUPLICATE)
+            tally[name + "_long"] += any(info[i][1] > LONG_WORDS for i in shown)
+            tally[name + "_rare"] += sum(info[i][0] for i in shown)
+            tally[name + "_spread"] += len({min(info[i][4], 2) for i in shown}) >= 2
     return chosen + pool
 
 
 def build_dictionary(db, sentences, items_of_key, keys_of, stats,
                      ext_sentences=None, ext_items_of_key=None,
-                     resolver=None, sent_tokens=None, studied_keys=frozenset()):
+                     resolver=None, sent_tokens=None, studied_keys=frozenset(),
+                     key_rank=None):
     """Every glossed lemma, with its paradigm and its sentences.
 
     The curriculum ships ~4,000 lemmas in full. The lexicon holds 58,844, and an
@@ -268,7 +316,8 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
                 if resolver is None or len(resolver.candidates(k)) < 2
                 or resolver.owner_id(k) == lid]
         cands = {i for k in keys for i in items_of_key.get(k, ()) if i in sentences}
-        ranked = (rank_examples(cands, sentences, sent_tokens or {}, studied_keys, keys, tally)
+        ranked = (rank_examples(cands, sentences, sent_tokens or {}, studied_keys, keys, tally,
+                                key_rank)
                   if sent_tokens is not None else sorted(cands))
         refs = [str(sentence_ref(iid)) for iid in ranked[:N_EXAMPLES]]
         own = len(refs)
@@ -917,6 +966,17 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         if iid in sentences:
             sent_tokens.setdefault(iid, []).append(k)
     studied_keys = {k for lid in seen for k in keys_of.get(lid, ())}
+    # How common each sentence token is: the corpus rank of the lemma that owns
+    # it, so an example can prefer words a learner will meet again (rank_examples).
+    lemma_rank = {lid: r for r, (lid, _) in enumerate(
+        sorted(corpus_n.items(), key=lambda x: (-x[1], x[0])), 1)}
+    # Every form of every ranked lemma; a spelling two lemmas share takes the
+    # commoner one's rank, since what is asked is how often the string is met.
+    key_rank = {}
+    for lid, r in lemma_rank.items():
+        for k in keys_of.get(lid, ()):
+            if r < key_rank.get(k, 10 ** 9):
+                key_rank[k] = r
 
     # Adjective → noun pairs the corpus actually says (an adjective token
     # immediately before a noun token, each resolved to a studied lemma), for
@@ -939,7 +999,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
 
     deep, shapes, slot_names, sent_pool, tsample, rec_of = build_dictionary(
         db, sentences, items_of_key, keys_of, stats, ext_sentences, ext_items_of_key,
-        resolver=resolver, sent_tokens=sent_tokens, studied_keys=studied_keys)
+        resolver=resolver, sent_tokens=sent_tokens, studied_keys=studied_keys,
+        key_rank=key_rank)
 
     # Every studied row carries a compressed record — the same five fields its
     # dictionary line has, or its twin's (a glossless row, the same word under
@@ -1007,7 +1068,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     # suits which learner is decided in the app, against what they have met.
     scripts = load_scripts(stats)
 
-    senses = load_senses(lemmas, stats)
+    senses = load_senses(lemmas, stats, key_rank)
 
     return {"stats": stats, "lemmas": lemmas, "index": index,
             "units": units, "path": path, "audio": {"files": audio},
@@ -1132,7 +1193,27 @@ OPEN_CLASS_WIKT = ("noun", "verb", "adj")
 MAX_SENSES = 8          # ingest_wiktionary.py's cap, kept after the entries are merged
 
 
-def load_senses(lemmas, stats):
+def sense_examples(examples, own, key_rank):
+    """A sense's examples, useful first (the owner, 2026-09-28).
+
+    Wiktionary's examples are whatever an editor quoted, and for «говорить»
+    sense 1 opened on a 22-word verse from the Gospels. Same measure as the
+    dictionary's (rank_examples): a sentence over LONG_WORDS is dropped — the
+    sense keeps its gloss, and a quotation nobody can read teaches nothing —
+    and the rest go easiest first, by tier, uncommon words, then length."""
+    out = []
+    for x in examples or ():
+        toks = [fold(t) for t in re.findall(r"[а-яёА-ЯЁ́̀]+(?:-[а-яёА-ЯЁ́̀]+)*", x.get("ru") or "")]
+        if not toks or len(toks) > LONG_WORDS:
+            continue
+        rare = sum(1 for k in toks if not k.startswith(own)
+                   and key_rank.get(k, COMMON_RANK + 1) > COMMON_RANK)
+        out.append(((example_tier(len(toks), rare), rare, len(toks)), x))
+    out.sort(key=lambda p: p[0])
+    return [x for _, x in out]
+
+
+def load_senses(lemmas, stats, key_rank=None):
     """Numbered senses for the studied words (tools/ingest_wiktionary.py).
 
     The owner, 2026-09-11, with a Merriam-Webster entry beside the app: *"every
@@ -1156,7 +1237,7 @@ def load_senses(lemmas, stats):
     credit = dict(db.execute("SELECT k, v FROM meta").fetchall())
     db.close()
 
-    out, found, multi, fronted = {}, 0, 0, []
+    out, found, multi, fronted, dropped = {}, 0, 0, [], 0
     for i, l in enumerate(lemmas):
         by_pos = rows.get(fold(l.get("b") or ""))
         if not by_pos:
@@ -1164,6 +1245,17 @@ def load_senses(lemmas, stats):
         senses, front = pick_senses(l.get("e") or "", l.get("p"), by_pos)
         if not senses:
             continue
+        # The word's own forms never count against a sentence: a stem match is
+        # enough here, since all it decides is which example reads easiest.
+        head = fold(l.get("b") or "")
+        own = head[:max(2, len(head) - 3)]
+        for s in senses:
+            if s.get("x"):
+                before = len(s["x"])
+                s["x"] = sense_examples(s["x"], own, key_rank or {})
+                dropped += before - len(s["x"])
+                if not s["x"]:
+                    del s["x"]
         out[str(i)] = senses
         found += 1
         if len(senses) > 1:
@@ -1173,6 +1265,7 @@ def load_senses(lemmas, stats):
     stats["senses"] = found
     stats["senses_multi"] = multi
     stats["senses_fronted"] = len(fronted)
+    stats["sense_examples_dropped"] = dropped
     stats["senses_credit"] = credit
     # The words whose entry opens on our gloss rather than a Wiktionary sense —
     # a list to read after a rebuild, since each is either a synonym the word
@@ -1408,6 +1501,10 @@ def main():
         print(f"  examples     : {n:,} words with 2+ sentences; shown in one form only "
               f"{v['plain_one_form']:,} → {v['varied_one_form']:,}, "
               f"near-duplicate pairs {v['plain_near']:,} → {v['varied_near']:,}")
+        print(f"  examples     : a sentence over {LONG_WORDS} words shown for "
+              f"{v['plain_long']:,} → {v['varied_long']:,}; uncommon words shown "
+              f"{v['plain_rare']:,} → {v['varied_rare']:,}; two tiers or more "
+              f"{v['plain_spread']:,} → {v['varied_spread']:,}")
     # The pools are cut by curriculum coverage (measure_sentences); the difficulty
     # histogram is the wider picture of how much of the corpus resolves at all.
     if st.get("sentences_measured"):
@@ -1448,6 +1545,8 @@ def main():
               f"with more than one ({st['senses_multi']*100//max(1, st['senses'])}%), "
               f"{st.get('senses_fronted', 0):,} opening on our gloss (data/_work/senses_fronted.txt)"
               f"; {cr.get('source', '?')}, {cr.get('licence', '?')}")
+        print(f"  senses       : {st.get('sense_examples_dropped', 0):,} examples over "
+              f"{LONG_WORDS} words dropped, the rest easiest first")
     print(f"  scripts      : {', '.join(js_files)}")
     print(f"  page         : {(args.outdir / 'index.html').stat().st_size/1_048_576:.2f} MB")
 

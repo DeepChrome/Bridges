@@ -464,6 +464,25 @@ export const idxOfWord = (w) => {
   return h && h.length ? h[0] : -1;
 };
 
+/* A studied word's frequency rank, 1 for the commonest — which is its lemma
+ * index plus one, since the build assigns indices by frequency (§30ap reads it
+ * the same way). What the familiarity score's horizon scales by
+ * (core/scheduler.js `masteryHorizon`).
+ *
+ * By the **exact headword**, not through the form index: `IX` maps a form to
+ * whichever lemma owns it, and a shared form belongs to one of its lemmas only
+ * (§23 — «нет» was once a form of «житься»). A learner's cards are keyed by
+ * headword, so the headword is the thing to look up. Undefined for a deck card
+ * or a sentence, which have no rank and take the full horizon. */
+let rankByHeadword = null;
+export function rankOf(w) {
+  if (rankByHeadword === null) {
+    rankByHeadword = new Map();
+    L.forEach((x, i) => { if (!rankByHeadword.has(x.b)) rankByHeadword.set(x.b, i + 1); });
+  }
+  return rankByHeadword.get(w);
+}
+
 /* What the scheduler wants back today, as lemma indices: the trouble bank
    first, then everything due. What a quiz tops up with and a drill asks for
    before anything else — review on the path, not only in the Study tab. */

@@ -93,10 +93,13 @@ describe("the card says what it is", () => {
   it("shows how well a card is held, coloured from red to green", async () => {
     const { familiarityColor } = require("../src/screens/Study");
     const { light } = require("../src/theme");
-    await withProfile({ seen: { [WORD]: { recognise: due({ s: 30 }) } } });
+    /* Five days held is partway whatever the word — a common word is mastered
+       at three weeks and a rare one at three months (2026-09-28) — so the
+       number sits in the middle either way. */
+    await withProfile({ seen: { [WORD]: { recognise: due({ s: 5 }) } } });
     await screen.findByTestId("card-kind");
     const score = Number(screen.getByTestId("familiarity-score").props.children);
-    expect(score).toBeGreaterThan(50);
+    expect(score).toBeGreaterThan(30);
     expect(score).toBeLessThan(70);
     // The ends of the scale are the audited tokens; the middle is the amber one.
     expect(familiarityColor(0, light)).toBe(light.bad.toUpperCase());

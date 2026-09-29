@@ -34,6 +34,7 @@ import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
 import { TOPICS, checkGrammar, russianIn, topicFor } from "../core/grammar.js";
 import { wordFacts, conjugation, stemChange, nounStem, genderWhy, stressAt } from "../core/facts.js";
 import { ENDINGS, checkEndings, rankEndings } from "../core/endings.js";
+import { ambiguousSpellings, spokenKey } from "./build_form_audio.mjs";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP,
          sayPassed, closestTranscript }
   from "../core/speech.js";
@@ -468,17 +469,30 @@ group("familiarity");
     climb.push(S.familiarity(card));
   }
   ok(climb.every((v, i) => i === 0 || v >= climb[i - 1]), "Easy after Easy climbs", climb.join(" "));
-  ok(climb[climb.length - 1] === 100, "…to 100 at the scheduler's ceiling", String(climb[climb.length - 1]));
+  ok(climb[climb.length - 1] === 100, "…to 100 once it holds past the horizon", String(climb[climb.length - 1]));
   ok(S.familiarity({ ...card, s: S.FAMILIAR_AT / 4 }) < 100, "and not before it");
-  /* An Again knocks it back. */
+  /* An Again knocks it back — and a card relearning is capped, however
+     stable it was, because it was just forgotten. */
   const before = S.familiarity(card);
   const lapsed = S.review(card, 1, card.dueAt, opts);
   ok(S.familiarity(lapsed) < before, "Again lowers it", `${before} -> ${S.familiarity(lapsed)}`);
+  ok(S.familiarity({ state: S.RELEARNING, s: 400 }) <= S.RELEARNING_CAP, "relearning is capped",
+     String(S.familiarity({ state: S.RELEARNING, s: 400 })));
   /* Log-scaled, so a day held is a real step and a week is a bigger one. */
-  ok(S.familiarity({ state: S.REVIEW, s: 1 }) >= 10 && S.familiarity({ state: S.REVIEW, s: 30 }) > 50
-     && S.familiarity({ state: S.REVIEW, s: 30 }) < 70,
-     "a day is about a tenth, a month about six tenths",
-     `${S.familiarity({ state: S.REVIEW, s: 1 })} ${S.familiarity({ state: S.REVIEW, s: 30 })}`);
+  const day = S.familiarity({ state: S.REVIEW, s: 1 }), month = S.familiarity({ state: S.REVIEW, s: 30 });
+  ok(day >= 10 && day < 25 && month > 65 && month < 90,
+     "with no rank: a day is a sixth, a month three quarters", `${day} ${month}`);
+  /* How common a word is sets how long it must hold: «это» is mastered at
+     three weeks, a rare word only at the full horizon. */
+  ok(S.masteryHorizon(5) === S.COMMON_AT && S.masteryHorizon(5000) === S.FAMILIAR_AT
+     && S.masteryHorizon(300) > S.COMMON_AT && S.masteryHorizon(300) < S.FAMILIAR_AT,
+     "the horizon runs from common to rare", `${S.masteryHorizon(300)}`);
+  const common = { state: S.REVIEW, s: S.COMMON_AT };
+  ok(S.familiarity(common, 3) === 100 && S.familiarity(common, 3000) < 80,
+     "three weeks masters a common word and not a rare one",
+     `${S.familiarity(common, 3)} ${S.familiarity(common, 3000)}`);
+  ok(S.familiarityLabel(null) === "New" && S.familiarityLabel(100) === "Mastered"
+     && S.familiarityLabel(10) === "Just met", "the words for the score");
 }
 
 group("the scheduler");
@@ -2161,6 +2175,25 @@ group("word endings");
   ok(ranked.every((e) => e.count > 0), "every ending really occurs in the app's sentences",
      ranked.filter((e) => !e.count).map((e) => e.id).join(", "));
   ok(ranked.find((e) => e.id === "yo").count > 0, "ё is counted though fold() would turn it into е");
+}
+
+/* Which table forms may be bought (tools/build_form_audio.mjs, 2026-09-28).
+   The voice is handed the bare spelling, so a spelling with two stressed
+   syllables would be a guess — those must be caught. And the first version
+   of this check, grouping by fold(), cried wolf twelve times over a live
+   manifest: ё pairs the voice tells apart, and one-syllable words marked in
+   one table and not another. Both directions are pinned. */
+group("forms that may be bought");
+{
+  ok(ambiguousSpellings(["ру́ки", "руки́"]).has("руки"), "«ру́ки» / «руки́» is caught");
+  ok(ambiguousSpellings(["лю́бите", "люби́те"]).size === 1, "and so is «лю́бите» / «люби́те»");
+  ok(ambiguousSpellings(["чем", "чём"]).size === 0, "«чем» / «чём» is not: the voice is handed the ё");
+  ok(ambiguousSpellings(["всё", "все́"]).size === 0, "nor «всё» / «все́»");
+  ok(ambiguousSpellings(["тот", "то́т", "го́д", "год"]).size === 0,
+     "nor a one-syllable word marked in one table and not another");
+  ok(ambiguousSpellings(["ру́ки", "ру́ки"]).size === 0, "and one stress twice is one stress");
+  ok(spokenKey("всё") === "всё" && spokenKey("ру́ки") === "руки",
+     "what the voice is handed keeps ё and drops the mark");
 }
 
 /* `at` says which cell the question is asking for — it marks that cell in the

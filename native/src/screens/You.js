@@ -1,12 +1,12 @@
 /* You — profile, progress, the trouble bank, and settings. */
 
 import React, { useEffect, useState } from "react";
-import { View, Switch, Alert } from "react-native";
+import { View, Switch, Alert, Pressable } from "react-native";
 import { useSession } from "../session";
 import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
-import { useTheme } from "../theme";
-import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text } from "../ui";
+import { useTheme, radius, type as T } from "../theme";
+import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb } from "../ui";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
 import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { backupProfile, restoreProfile, shareCrashes } from "../backup";
@@ -65,6 +65,40 @@ function Stat({ value, label, first }) {
   );
 }
 
+
+/* One tile of the profile: what it is, how many, and a tap for the detail.
+ *
+ * The profile used to run the trouble words and the grammar as two long lists
+ * straight down the screen (the owner, 2026-09-28: *"it's ugly with trouble
+ * words… hide those personalized feedback in some tiles"*). A list of twelve
+ * words is detail, not a summary, and it pushed everything after it off the
+ * phone. Each tile is the summary — a number — and the list opens in a sheet
+ * when it is wanted. Two to a row, so four read at a glance. */
+function Tile({ icon, tone, count, label, onPress, testID }) {
+  const t = useTheme();
+  return (
+    <Pressable testID={testID} onPress={onPress} accessibilityRole="button"
+               accessibilityLabel={count === undefined ? label : `${label}: ${count}`}
+               style={({ pressed }) => ({ flexBasis: "47%", flexGrow: 1, padding: 14, gap: 10,
+                 borderRadius: radius.lg, backgroundColor: t.surface, borderWidth: 1,
+                 borderColor: t.line, opacity: pressed ? 0.7 : 1 })}>
+      <Thumb id={icon} tone={tone} />
+      {/* A tile without a number (Statistics — the band above already shows
+          the obvious one) carries its name where the number would be, so the
+          four still read as one row of like things. */}
+      {count === undefined ? (
+        <Text style={{ color: t.ink, fontSize: T.head, fontWeight: "700" }}>{label}</Text>
+      ) : (
+        <View>
+          <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "800", letterSpacing: -0.4 }}>
+            {count}
+          </Text>
+          <Muted>{label}</Muted>
+        </View>
+      )}
+    </Pressable>
+  );
+}
 
 function Settings({ visible, onClose, onLab, onTour, onCredits }) {
   const { st, update, signOut, account, restore } = useSession();
@@ -389,6 +423,7 @@ export default function You({ navigation }) {
   const { st, account, update } = useSession();
   const t = useTheme();
   const [settings, setSettings] = useState(false);
+  const [showing, setShowing] = useState(null);      // which tile's sheet is open
 
   const learned = Object.values(st.seen).filter((e) => cardsOf(e).some(({ card }) => (card.reps || 0) > 0)).length;
   // Cleared means done — vocabulary met and the quiz passed — not merely attempted.
@@ -429,68 +464,91 @@ export default function You({ navigation }) {
         <Stat value={String(lessons)} label="lessons cleared" />
         <Stat value={due.toLocaleString("en-US")} label="due now" />
       </View>
-      {/* The numbers behind the band — what is coming, how much sticks, what
-          was answered — on a screen of their own (docs/PLAYBOOK.md 2.3). */}
-      <Btn kind="ghost" label="Statistics" testID="open-stats" style={{ alignSelf: "center", marginTop: 6 }}
-           onPress={() => navigation.navigate("Stats")} />
+      {/* What the app has learned about this learner, as four tiles: the
+          number on each, the detail a tap away (2026-09-28). Statistics was a
+          loose text link under the band; it is one of the four now. */}
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 24 }}>
+        {/* Neutral, not red: red means wrong everywhere else in the app, and
+            `Thumb` refuses it for that reason (§30ah). The count is the signal. */}
+        <Tile testID="tile-trouble" icon="trouble"
+              count={trouble.length} label="Trouble words" onPress={() => setShowing("trouble")} />
+        <Tile testID="tile-grammar" icon="rules" tone="good"
+              count={grammar.length} label="Grammar to work on" onPress={() => setShowing("grammar")} />
+        <Tile testID="open-stats" icon="stats" tone="info" label="Statistics"
+              onPress={() => navigation.navigate("Stats")} />
+        <Tile testID="tile-notes" icon="tutor" tone="brand"
+              count={(st.tutorNotes || []).length} label="What the tutor knows"
+              onPress={() => setShowing("notes")} />
+      </View>
 
-      <SectionLabel style={{ marginTop: 22 }}>Trouble words</SectionLabel>
-      {!trouble.length ? (
-        // A label, not a paragraph centred in a card: the card built a tall empty box
-        // around one sentence and pushed everything below it off the screen.
-        <Muted>Nothing yet</Muted>
-      ) : (
-        <>
-          <Btn
-            kind="pri"
-            label={`Review ${trouble.length} trouble ${trouble.length === 1 ? "word" : "words"}`}
-            onPress={() => {
-              update((p) => ({ ...p, sets: ["__trouble__"] }));
-              navigation.navigate("Study");
-            }}
-          />
-          <View style={{ marginTop: 10 }}>
+      {showing === "trouble" ? (
+        <Sheet testID="trouble-sheet" title="Trouble words" onClose={() => setShowing(null)}
+               footer={trouble.length ? (
+                 <Btn kind="pri" style={{ marginTop: 14 }}
+                      label={`Review ${trouble.length} trouble ${trouble.length === 1 ? "word" : "words"}`}
+                      onPress={() => {
+                        setShowing(null);
+                        update((p) => ({ ...p, sets: ["__trouble__"] }));
+                        navigation.navigate("Study");
+                      }} />
+               ) : null}>
+          {!trouble.length ? <Muted>Nothing yet</Muted> : (
             <List>
-              {trouble.slice(0, 12).map((w) => {
+              {trouble.map((w) => {
                 const i = idxOfWord(w);
                 return (
                   <Row key={w}>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.ink, fontSize: 16 }}>
-                        {i >= 0 ? L[i].w : w}
-                      </Text>
-                      {i >= 0 ? <Muted>{L[i].e}</Muted> : null}
+                      <Text style={{ color: t.ink, fontSize: 16 }}>{i >= 0 ? L[i].w : w}</Text>
+                      {i >= 0 ? <Muted numberOfLines={1}>{L[i].e}</Muted> : null}
                     </View>
                     <Pill>{`${maxLapses(st.seen[w])}×`}</Pill>
                   </Row>
                 );
               })}
             </List>
-          </View>
-        </>
-      )}
+          )}
+        </Sheet>
+      ) : null}
 
-      <SectionLabel style={{ marginTop: 22 }}>Grammar</SectionLabel>
-      {!grammar.length ? (
-        <Muted>Nothing yet</Muted>
-      ) : (
-        <List>
-          {grammar.map((g) => {
-            const unit = g.info.unit ? UN.find((u) => u.id === g.info.unit) : null;
-            return (
-              <Row key={g.id}
-                   onPress={unit ? () => openUnit(unit.id) : undefined}
-                   disabled={!unit}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>{g.info.en}</Text>
-                  {unit ? <Muted>{unit.name}</Muted> : null}
-                </View>
-                <Pill>{`${g.n}×`}</Pill>
-              </Row>
-            );
-          })}
-        </List>
-      )}
+      {showing === "grammar" ? (
+        <Sheet testID="grammar-sheet" title="Grammar to work on" onClose={() => setShowing(null)}>
+          {!grammar.length ? <Muted>Nothing yet</Muted> : (
+            <List>
+              {grammar.map((g) => {
+                const unit = g.info.unit ? UN.find((u) => u.id === g.info.unit) : null;
+                return (
+                  <Row key={g.id}
+                       onPress={unit ? () => { setShowing(null); openUnit(unit.id); } : undefined}
+                       disabled={!unit}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.ink, fontSize: 15 }}>{g.info.en}</Text>
+                      {unit ? <Muted>{unit.name}</Muted> : null}
+                    </View>
+                    <Pill>{`${g.n}×`}</Pill>
+                  </Row>
+                );
+              })}
+            </List>
+          )}
+        </Sheet>
+      ) : null}
+
+      {/* What the tutor has kept about this learner (§30aw `remember`) — the
+          one piece of personal feedback nothing else in the app showed. */}
+      {showing === "notes" ? (
+        <Sheet testID="notes-sheet" title="What the tutor knows" onClose={() => setShowing(null)}>
+          {!(st.tutorNotes || []).length ? <Muted>Nothing yet</Muted> : (
+            <List>
+              {(st.tutorNotes || []).map((n, k) => (
+                <Row key={k}>
+                  <Text style={{ flex: 1, color: t.ink, fontSize: 15 }}>{n}</Text>
+                </Row>
+              ))}
+            </List>
+          )}
+        </Sheet>
+      ) : null}
 
       <Settings visible={settings} onClose={() => setSettings(false)}
                 onLab={() => navigation.navigate("SttLab")}

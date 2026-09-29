@@ -18,6 +18,46 @@ import { searchWordsScored } from "../data";
 import { MATCH } from "@core/search";
 
 const RECENT_MAX = 6;
+
+/* A row that never wraps and never cuts a chip in half (the owner,
+   2026-09-28: "Recents under search should never exceed one line. It looks
+   ugly and off balance that way"). The chips are measured off-screen and only
+   as many as fit whole are drawn, most recent first — a half chip at the edge
+   is the same imbalance as a second line. Until the first measurement arrives
+   (and in a test, where layout never fires) it draws them all in one
+   unwrapped, clipped row, which is still one line. Exported for the test. */
+export function fitting(widths, avail, gap) {
+  let used = 0, n = 0;
+  for (const w of widths) {
+    if (w === undefined) break;
+    const next = used + (n ? gap : 0) + w;
+    if (next > avail) break;
+    used = next;
+    n++;
+  }
+  return n;
+}
+
+function OneLine({ items, gap, render }) {
+  const [avail, setAvail] = useState(0);
+  const [widths, setWidths] = useState({});
+  /* A chip in an unwrapped row keeps its natural width even past the edge
+     (React Native's flexShrink defaults to 0), so every chip can be measured
+     where it stands — the frame before the ones that do not fit are dropped.
+     A word not yet measured puts the whole row back for that one frame. */
+  const measured = avail > 0 && items.every((x) => widths[x] !== undefined);
+  const n = measured ? Math.max(1, fitting(items.map((x) => widths[x]), avail, gap)) : items.length;
+  return (
+    <View onLayout={(e) => setAvail(e.nativeEvent.layout.width)} style={{ overflow: "hidden" }}>
+      <View style={{ flexDirection: "row", gap, flexWrap: "nowrap" }}>
+        {items.slice(0, n).map((x) => render(x, (e) => {
+          const w = e.nativeEvent.layout.width;
+          setWidths((p) => (p[x] === w ? p : { ...p, [x]: w }));
+        }))}
+      </View>
+    </View>
+  );
+}
 const LIMIT = 20;
 
 /* The result list read like a dictionary (the owner, 2026-09-19: "dog" gave
@@ -73,11 +113,12 @@ export default function Search({ navigation }) {
       {!q && recent.length ? (
         <>
           <SectionLabel style={{ marginTop: 16 }}>Recent</SectionLabel>
-          <View style={{ flexDirection: "row", gap: 7, flexWrap: "wrap" }}>
-            {recent.map((w) => (
-              <Chip key={w} label={w} onPress={() => navigation.navigate("Word", { word: w })} />
-            ))}
-          </View>
+          <OneLine items={recent} gap={7}
+                   render={(w, onLayout) => (
+                     <View key={w} onLayout={onLayout}>
+                       <Chip label={w} onPress={() => navigation.navigate("Word", { word: w })} />
+                     </View>
+                   )} />
         </>
       ) : null}
 

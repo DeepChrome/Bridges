@@ -12,7 +12,7 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 
-import { RUNS, TAB_BAR_SCREENS, hidesTabBar } from "../src/fullscreen";
+import { RUNS, TAB_BAR_SCREENS, hidesTabBar, profileDepth, PROFILE_SCREENS } from "../src/fullscreen";
 
 const APP = readFileSync(join(__dirname, "..", "App.js"), "utf8");
 const declared = new Set(
@@ -67,5 +67,28 @@ describe("the screens that hide the tab bar", () => {
 
   it("does not name anything twice", () => {
     expect(new Set(RUNS).size).toBe(RUNS.length);
+  });
+});
+
+/* A tab press lands on the tab's own screen (the owner, 2026-09-28: the first
+   press went back to a profile left open in the tab, the second to the tab).
+   App.js pops `profileDepth` screens off the pressed tab's stack; the count is
+   the contract. */
+describe("a tab press past a profile left open", () => {
+  const st = (...names) => ({ key: "k", routes: names.map((name) => ({ name })) });
+  it("pops the profile and what opened from it", () => {
+    expect(profileDepth(st("Path", "You"))).toBe(1);
+    expect(profileDepth(st("Path", "You", "Stats"))).toBe(2);
+  });
+  it("leaves a lesson under the profile where the learner left it", () => {
+    expect(profileDepth(st("Path", "Unit", "Lesson", "You"))).toBe(1);
+    expect(profileDepth(st("Path", "Unit", "Lesson"))).toBe(0);
+  });
+  it("does nothing to a stack never visited, and never pops a stack's first screen", () => {
+    expect(profileDepth(undefined)).toBe(0);
+    expect(profileDepth(st("You"))).toBe(0);
+  });
+  it("names only screens App.js registers", () => {
+    for (const n of PROFILE_SCREENS) expect(declared.has(n)).toBe(true);
   });
 });

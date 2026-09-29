@@ -37,7 +37,7 @@ import { useTheme, radius, space } from "../theme";
 import { Screen, Btn, Muted, Text, TextInput, Marked, Note, CogButton, BulbButton, Sheet,
          List, Row, SectionLabel, Choice, Tick } from "../ui";
 import { Linked } from "../words";
-import { L, STAGES, drillPool, routePosition } from "../data";
+import { L, STAGES, drillPool, routePosition, rankOf } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
 import { speakLine, stop } from "../audio";
 import { useRecognizer, LANG, LANG_EN } from "../speech";
@@ -83,7 +83,7 @@ export function tutorProfile(st) {
   const pos = routePosition(st);
   const seen = st.seen || {};
   const strong = Object.keys(seen)
-    .map((w) => ({ w, f: familiarity(cardFor(seen[w])) }))
+    .map((w) => ({ w, f: familiarity(cardFor(seen[w]), rankOf(w)) }))
     .filter((x) => x.f !== null && x.f >= STRONG_AT)
     .sort((a, b) => b.f - a.f).slice(0, LIST_N).map((x) => x.w);
   return {

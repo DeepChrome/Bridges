@@ -28,7 +28,6 @@ import { fileURLToPath } from "node:url";
 import { loadScripts, NAME_KEYS } from "./check_scripts.mjs";
 import { SCENARIOS } from "../core/scenarios.js";
 import { LETTERS, VOWEL_PAIRS, TRAPS } from "../core/alphabet.js";
-import { TASKS } from "../core/tasks.js";
 import { PEOPLE } from "../core/names.js";
 import { fold } from "../core/util.js";
 
@@ -116,18 +115,8 @@ VOWEL_PAIRS.forEach((p) => {
   });
 });
 
-/* --------------------------------------------- the chapter tasks (§30o) */
-
-for (const t of TASKS) {
-  add({ id: `task:${t.unit}:title`, type: "ui_copy", en: t.title, needs: EN,
-        context: `Chapter ${t.chapter} task, the heading` });
-  add({ id: `task:${t.unit}:goal`, type: "ui_copy", en: t.goal, needs: EN,
-        context: `Chapter ${t.chapter} task, what the learner is asked to get across` });
-  (t.must || []).forEach((m, k) => {
-    add({ id: `task:${t.unit}:must:${k}`, type: "ui_copy", en: m, needs: EN,
-          context: `Chapter ${t.chapter} task, requirement ${k + 1} — judged by the Worker` });
-  });
-}
+/* The chapter tasks (§30o) were exported here until 2026-09-28, when they
+   left the app (§30bb). */
 
 /* ------------------------------------------ the grammar notes (§30e) */
 

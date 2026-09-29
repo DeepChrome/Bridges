@@ -24,7 +24,6 @@ export const RUNS = [
   "Quiz",         // the lesson quiz
   "TestOut",      // testing out of a section
   "Placement",    // the placement test
-  "ChapterTask",  // the open-ended chapter task
   "CustomQuiz",   // a quiz the learner built
   "Final",        // the final test at the foot of the path
   "Drill",        // any grammar drill
@@ -37,6 +36,26 @@ export const RUNS = [
   "Translate",    // speaking Russian to be read back in English
   "Video",        // an episode, which wants the whole screen
 ];
+
+/* The profile and what opens from it. The avatar in every header pushes these
+ * onto whichever tab stack is showing, and a tab keeps its stack — so leaving
+ * a tab with the profile open and coming back showed the profile again, and
+ * the tab took two presses to reach its own screen (the owner, 2026-09-28:
+ * *"the first navigates me back to the profile, the second navigates me to
+ * the module"*). A tab press pops these off the top of the tab's stack first
+ * (`profileDepth`, App.js). Only these: a lesson left half-done under them is
+ * still where the learner left it. */
+export const PROFILE_SCREENS = ["You", "Stats", "Credits"];
+
+/* How many profile screens sit on top of a stack's state — the number to pop
+   so a tab press lands on the tab's own screen. Never the stack's first
+   screen, which a stack cannot pop. */
+export function profileDepth(state) {
+  if (!state || !Array.isArray(state.routes)) return 0;
+  let n = 0;
+  for (let i = state.routes.length - 1; i > 0 && PROFILE_SCREENS.includes(state.routes[i].name); i--) n++;
+  return n;
+}
 
 /* The screens that keep the bar: the ones you choose from.
  *

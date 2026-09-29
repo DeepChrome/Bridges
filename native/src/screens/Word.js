@@ -9,10 +9,12 @@
 import React, { useState } from "react";
 import { View, Image, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text } from "../ui";
-import { Table, Facts } from "../rules";
+import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Familiarity } from "../ui";
+import { TableGroup, Facts } from "../rules";
 import { wordFacts } from "@core/facts";
-import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord } from "../data";
+import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
+import { useSession } from "../session";
+import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord, rankOf } from "../data";
 import { Linked } from "../words";
 import { IMAGES, CREDITS } from "../images";
 import { clock, short } from "./Misc";
@@ -50,6 +52,32 @@ export default function Word({ route, navigation }) {
    when there is no navigator to push the screen onto (words.js). Without a
    navigation object the "Heard in" list is left out: its rows open the player,
    and a row that cannot is a dead control. */
+/* Where the learner stands with this word: the same 0–100 the flashcard's ring
+   carries, off the same card, with a word for it (the owner, 2026-09-28). The
+   score is read against how common the word is — «это» is mastered once it has
+   held three weeks, a rare word only near three months — so the words met every
+   day reach 100 when they are genuinely known (core/scheduler.js). A word never
+   studied says so and draws no ring; a zero would claim a measurement. */
+function WordStatus({ word }) {
+  const t = useTheme();
+  const session = useSession();
+  if (!session || !session.st) return null;
+  const entry = (session.st.seen || {})[word] || null;
+  const score = familiarity(cardFor(entry), rankOf(word));
+  const label = familiarityLabel(score);
+  return (
+    <View testID="word-status" style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 12 }}
+          accessibilityLabel={score === null ? "Not studied yet" : `${label}, ${score} of 100`}>
+      {score === null ? null : <Familiarity score={score} size={40} />}
+      {/* The ring carries the colour; the word stays ink, since a mixed
+          amber is a text colour nobody audited (§31). */}
+      <Text style={{ color: score === null ? t.ink3 : t.ink, fontWeight: "700" }}>
+        {score === null ? (entry ? "New" : "Not studied yet") : label}
+      </Text>
+    </View>
+  );
+}
+
 export function WordEntry({ w, index, navigation }) {
   const t = useTheme();
   const [allHeard, setAllHeard] = useState(false);
@@ -98,8 +126,11 @@ export function WordEntry({ w, index, navigation }) {
             the stress moves (core/facts.js, 2026-09-28). The entry is the
             other place a learner comes to look something up, so it gets the
             same guide the drill's bulb does. */}
+        <WordStatus word={w.b} />
         <Facts facts={wordFacts(w)} testID="word-facts" />
-        {(w.t || []).map((tb, k) => <Table key={k} table={tb} speak />)}
+        {/* One section a table, the first open: a verb is three grids and a
+            noun twelve cells, and stacked whole they buried the rest (§30bb). */}
+        <TableGroup tables={w.t} speak testID="word-tables" />
         {credit ? (
           // The photo's record: title, author where one is named, licence — and
           // the page it came from, which is what a CC BY credit asks for.

@@ -501,7 +501,10 @@ export async function say(text, opts = {}) {
      keys them by the folded utterance, as the collection's manifest is keyed
      (rule 20.2). What still streams is the rest of the collection: the
      dictionary's example sentences and the human recordings. */
-  const bundled = wordClip(fold(text));
+  /* `clip` is a recording the caller has already chosen — a table form looks
+     its own up by the *accented* spelling (formaudio.js), because the folded
+     key below cannot tell «руки́» from «ру́ки». */
+  const bundled = opts.clip || wordClip(fold(text));
   const streamed = bundled ? null : audioUrl(text);
   /* A bundled clip is a `require`, which expo-audio takes as it is — the same
      way `playTrack` and the answer cues pass theirs. Only a URL needs the

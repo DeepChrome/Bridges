@@ -1,8 +1,9 @@
 # The Bridges Worker
 
-Three model routes, `POST /v1/feedback`, `POST /v1/talk` and `POST /v1/task`
-(CLAUDE.md §30d, §30f, §30o), and `POST /v1/register`, where an install gets its
-token. It holds the Anthropic key so the app never does.
+Model routes — `POST /v1/feedback`, `/v1/talk`, `/v1/translate`, `/v1/explain`
+and `/v1/tutor` (CLAUDE.md §30d, §30f, §30ap, §30aw) — and `POST /v1/register`,
+where an install gets its token. It holds the Anthropic key so the app never
+does. (`/v1/task`, the chapter task, was removed on 2026-09-28.)
 
 ```
 npm test                       # 56 checks in plain Node, fake KV, fake upstream

@@ -37,83 +37,46 @@ import {
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, optional, dueCount,
   routePosition,
 } from "../data";
-import { FINAL_N } from "../questions";
 import { nextOpening, markOpening } from "@core/openings";
 import { reviewFirst } from "@core/state";
 import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
-import { taskFor } from "@core/tasks";
 import { useSweep, useDraw, useFill } from "../motion";
 
 /* An SVG circle whose stroke offset can be animated; a path likewise. */
 const ASvgCircle = Animated.createAnimatedComponent(Circle);
 const ASvgPath = Animated.createAnimatedComponent(Path);
 
-/* The chapter's task, offered once its spine is finished (ROADMAP P10.5).
-   Nothing at all until then: an offer to "say who you are" before the chapter
-   that teaches it is an invitation to fail. */
-function ChapterTaskCard({ chapter, spineDone, done, onOpen }) {
-  const t = useTheme();
-  const task = taskFor(chapter);
-  if (!task || !spineDone) return null;
-  return (
-    <Pressable
-      testID={`chapter-task-${chapter}`}
-      accessibilityRole="button"
-      onPress={onOpen}
-      style={({ pressed }) => ({
-        alignSelf: "stretch", marginTop: 16, padding: 14, borderRadius: 20,
-        backgroundColor: done ? t.goodBg : t.brandBg,
-        borderColor: done ? t.goodDim : t.brandDim, borderWidth: 1,
-        flexDirection: "row", alignItems: "center", gap: 12,
-        opacity: pressed ? 0.7 : 1,
-      })}
-    >
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700", letterSpacing: 0.8 }}>
-          {done ? "TASK DONE" : "CHAPTER TASK"}
-        </Text>
-        <Text style={{ color: t.ink, fontSize: 16, fontWeight: "700", marginTop: 2 }}>
-          {task.title}
-        </Text>
-        <Muted numberOfLines={2}>{task.goal}</Muted>
-      </View>
-      {done ? <Pill tone="good">done</Pill> : null}
-    </Pressable>
-  );
-}
+/* The chapter task (ROADMAP P10.5) sat here, offered on the path once a
+   chapter's spine was finished. The owner, 2026-09-28: "Remove the random
+   introduce yourself task in the lesson tree." The path was its only way in,
+   so the screen, its content and its Worker route went with it (§12). */
 
-/* The final test, at the foot of the path (the owner, 2026-09-19): fifty
-   questions over every chapter. Offered once the spine is walked — the same
-   rule the chapters unlock by, since the side quests are optional — and in
-   developer mode, which unlocks everything (rule 20.9). Before that it sits
-   locked at the end of the road rather than absent, so the road is seen to
-   lead somewhere. */
-function FinalCard({ open, best, onOpen }) {
+/* The final test, at the foot of the path (the owner, 2026-09-19). Offered once
+   the spine is walked — the same rule the chapters unlock by, since the side
+   quests are optional — and in developer mode, which unlocks everything (rule
+   20.9). **Absent until then** (2026-09-28: "you can leave it hidden until
+   it's unlocked"): it used to sit locked at the end of the road so the road
+   was seen to lead somewhere, and a locked card saying so was one more thing
+   on a path that already shows where it goes. It says what it is and nothing
+   more — "50 questions · every chapter" went the same day. */
+function FinalCard({ best, onOpen }) {
   const t = useTheme();
   return (
     <Pressable
       testID="final-test"
       accessibilityRole="button"
-      accessibilityState={{ disabled: !open }}
-      onPress={open ? onOpen : undefined}
+      onPress={onOpen}
       style={({ pressed }) => ({
-        alignSelf: "stretch", marginTop: 26, padding: 14, borderRadius: 20,
-        backgroundColor: !open ? t.surface2 : best ? t.goodBg : t.brandBg,
-        borderColor: !open ? t.line : best ? t.goodDim : t.brandDim, borderWidth: 1,
+        alignSelf: "stretch", marginTop: 26, padding: 16, borderRadius: 20,
+        backgroundColor: best ? t.goodBg : t.brandBg,
+        borderColor: best ? t.goodDim : t.brandDim, borderWidth: 1,
         flexDirection: "row", alignItems: "center", gap: 12,
-        opacity: pressed && open ? 0.7 : 1,
+        opacity: pressed ? 0.7 : 1,
       })}
     >
-      <View style={{ flex: 1 }}>
-        <Text style={{ color: t.ink3, fontSize: 11, fontWeight: "700", letterSpacing: 0.8 }}>
-          FINAL TEST
-        </Text>
-        <Text style={{ color: open ? t.ink : t.ink3, fontSize: 16, fontWeight: "700", marginTop: 2 }}>
-          {`${FINAL_N} questions · every chapter`}
-        </Text>
-      </View>
-      {!open ? <Pill>locked</Pill> : best ? <Pill tone="good">{`${best}%`}</Pill> : null}
+      <Text style={{ flex: 1, color: t.ink, fontSize: 17, fontWeight: "700" }}>Final Test</Text>
+      {best ? <Pill tone="good">{`${best}%`}</Pill> : null}
     </Pressable>
   );
 }
@@ -615,25 +578,13 @@ export default function Learn({ navigation }) {
               ) : (
                 <Trunk height={LANE_H} on={stageDone(st, stage)} testID={`road-on-${stage.core.id}`} />
               )}
-              {/* The chapter's task, once its spine is finished (ROADMAP P10.5).
-                  On the path rather than in Practice because it belongs to the
-                  chapter: it is the thing the chapter was for. Keyed on the
-                  spine alone, the same rule the next chapter unlocks by — the
-                  side quests are optional and this is not held back by them. */}
-              <ChapterTaskCard
-                chapter={stage.n || i + 1}
-                spineDone={!!unitState(st, stage.core.id).done}
-                done={!!((st.tasks || {})[stage.n || i + 1] || {}).done}
-                onOpen={() => navigation.navigate("ChapterTask", { chapter: stage.n || i + 1 })}
-              />
             </View>
           );
         })}
-        <FinalCard
-          open={!!st.dev || STAGES.every((s) => !!unitState(st, s.core.id).done)}
-          best={((st.drills || {}).final || {}).best}
-          onOpen={() => navigation.navigate("Final")}
-        />
+        {st.dev || STAGES.every((s) => !!unitState(st, s.core.id).done) ? (
+          <FinalCard best={((st.drills || {}).final || {}).best}
+                     onOpen={() => navigation.navigate("Final")} />
+        ) : null}
       </View>
     </Screen>
   );

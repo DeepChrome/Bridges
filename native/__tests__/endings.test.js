@@ -13,6 +13,14 @@
 import React from "react";
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react-native";
 
+/* The form manifest, stood in for: which forms happen to be bought at any
+   moment is data; what the speaker does with a bought one and an unbought
+   one is the contract. «ру́ки» has a recording here and «руки́» does not —
+   the shape of the real manifest, where a second stress is never bought. */
+jest.mock("../src/formaudio", () => ({
+  formClip: (f) => (String(f).normalize("NFC") === "ру́ки".normalize("NFC") ? 4242 : null),
+}));
+
 import { Table } from "../src/rules";
 import Endings from "../src/screens/Endings";
 import { endingsByFrequency } from "../src/data";
@@ -26,17 +34,30 @@ const PARADIGM = {
 beforeEach(() => { global.__spoke = []; });
 
 describe("a table's forms", () => {
-  it("each say themselves, with the stress mark kept", async () => {
+  /* «руки́» (genitive) has no recording — in the real manifest a spelling
+     with two stresses is never bought — so the device voice reads it, and
+     the acute is the only thing telling it which of the two this is. */
+  it("say an unbought form with the device voice, stress mark kept", async () => {
     await render(<Table table={PARADIGM} speak />);
     await act(async () => { fireEvent.press(screen.getByTestId("say-1-1-0")); });
-    /* «руки́» and «ру́ки» are the same letters; the acute is the only thing
-       telling the voice which one this is, so it must reach the voice. */
     expect(global.__spoke).toContain("руки́");
-    await act(async () => { fireEvent.press(screen.getByTestId("say-0-2-0")); });
-    expect(global.__spoke).toContain("ру́ки");
+    expect(screen.getByTestId("say-1-1-0").props.accessibilityLabel).toMatch(/device voice/);
   });
 
-  it("are labelled as the phone's voice (§27)", async () => {
+  /* «ру́ки» has its own recording, found by the accented spelling. Not the
+     folded one: that is shared with «руки́», and is the key that would have
+     played the wrong stress. */
+  it("play a bought form's own recording, found by its accented spelling", async () => {
+    global.__players = [];
+    await render(<Table table={PARADIGM} speak />);
+    const cell = screen.getByTestId("say-0-2-0");
+    expect(cell.props.accessibilityLabel).not.toMatch(/device voice/);
+    await act(async () => { fireEvent.press(cell); });
+    expect(global.__spoke).not.toContain("ру́ки");
+    expect(global.__players.length).toBeGreaterThan(0);
+  });
+
+  it("label the phone's voice as the phone's voice (§27)", async () => {
     await render(<Table table={PARADIGM} speak />);
     expect(screen.getByTestId("say-0-1-0").props.accessibilityLabel).toMatch(/device voice/);
   });

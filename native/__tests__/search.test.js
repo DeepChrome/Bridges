@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Search from "../src/screens/Search";
+import Search, { fitting } from "../src/screens/Search";
 import { splitTokens, lookup } from "../src/words";
 import { L, searchWords, searchWordsScored, resolveWord } from "../src/data";
 import { MATCH } from "@core/search";
@@ -138,5 +138,28 @@ describe("word links", () => {
   it("returns null for something that is not a word", () => {
     expect(lookup("zzzz")).toBeNull();
     expect(lookup("")).toBeNull();
+  });
+});
+
+/* Recent searches on one line (the owner, 2026-09-28: "should never exceed
+   one line. It looks ugly and off balance that way"). The arithmetic is the
+   contract — layout never fires under test — so it is checked directly: whole
+   chips only, most recent first, never a second row. */
+describe("recent searches", () => {
+  it("keeps only the chips that fit whole", () => {
+    expect(fitting([60, 60, 60], 150, 7)).toBe(2);   // 60 + 7 + 60 = 127; a third would be 194
+    expect(fitting([60, 60, 60], 194, 7)).toBe(3);
+    expect(fitting([200], 150, 7)).toBe(0);           // the caller still shows one, clipped
+    expect(fitting([60, undefined, 60], 500, 7)).toBe(1);
+  });
+
+  it("never wraps", async () => {
+    await withProfile(<Search navigation={nav} />,
+                      { state: { recent: ["книга", "читать", "говорить", "дом", "время", "город"] } });
+    const chip = await screen.findByText("книга");
+    let row = chip;
+    while (row && !(row.props.style && [].concat(row.props.style).some((s) => s && s.flexWrap))) row = row.parent;
+    const style = [].concat(row.props.style).reduce((a, s) => ({ ...a, ...(s || {}) }), {});
+    expect(style.flexWrap).toBe("nowrap");
   });
 });

@@ -14,14 +14,14 @@ import { Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold,
          Nunito_800ExtraBold } from "@expo-google-fonts/nunito";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { NavigationContainer, DefaultTheme, DarkTheme,
-         getFocusedRouteNameFromRoute } from "@react-navigation/native";
+         getFocusedRouteNameFromRoute, StackActions } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Svg, { Path } from "react-native-svg";
 
 import { SessionProvider, useSession } from "./src/session";
 import { light, dark } from "./src/theme";
-import { hidesTabBar } from "./src/fullscreen";
+import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
@@ -43,7 +43,6 @@ import TourScreen from "./src/screens/Intro";
 import Sounds from "./src/screens/Sounds";
 import Grammar from "./src/screens/Grammar";
 import Endings from "./src/screens/Endings";
-import { ChapterTask } from "./src/screens/Task";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
 import { setHaptics } from "./src/haptics";
@@ -208,10 +207,6 @@ function LearnStack() {
       {/* The final test, offered at the foot of the path once the spine is
           walked; on this stack because that is where it is offered. */}
       <Stack.Screen name="Final" component={FinalFlow} options={{ title: "Final test" }} />
-      {/* The task at the end of a chapter (ROADMAP P10.5). On the Learn stack
-          because that is where it is offered: it belongs to the chapter. */}
-      <Stack.Screen name="ChapterTask" component={ChapterTask}
-                    options={{ title: "Chapter task" }} />
       <Stack.Screen name="Placement" component={PlacementFlow}
                     options={{ title: "Placement" }} />
       {/* The grammar reference. On this stack as well as Practice because the
@@ -496,6 +491,15 @@ function TabShell() {
   const due = dueCount(st);
   return (
     <Tabs.Navigator
+      /* A tab press lands on the tab's own screen, never on a profile left
+         open in it (fullscreen.js `profileDepth`). Popped by target, so it
+         reaches the pressed tab's stack whichever tab is showing. */
+      screenListeners={({ navigation, route }) => ({
+        tabPress: () => {
+          const n = profileDepth(route.state);
+          if (n) navigation.dispatch({ ...StackActions.pop(n), target: route.state.key });
+        },
+      })}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: p.brand,

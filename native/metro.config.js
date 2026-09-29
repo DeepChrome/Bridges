@@ -39,4 +39,30 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     : context.resolveRequest(context, moduleName, platform);
 };
 
+/* At most MAX_OPEN files read at once, for the whole bundling process.
+ *
+ * Metro hashes every asset in one Promise.all (metro/src/Assets.js), and since
+ * the form recordings (ROADMAP 13.42) the app carries 11,738 audio clips. A
+ * Windows process may hold 8,192 files open, so the release bundle died with
+ * EMFILE on whichever clip came past that — every time, not by chance. Linux
+ * build machines have their own limit and the same unbounded fan-out. This is
+ * the one place that runs inside that process before any reading starts, so
+ * the reads queue here instead of failing; nothing else about them changes. */
+const fs = require("fs");
+const MAX_OPEN = 1024;
+const readFile = fs.promises.readFile;
+let open = 0;
+const waiting = [];
+fs.promises.readFile = async function limitedReadFile(...args) {
+  if (open >= MAX_OPEN) await new Promise((go) => waiting.push(go));
+  open++;
+  try {
+    return await readFile.apply(this, args);
+  } finally {
+    open--;
+    const next = waiting.shift();
+    if (next) next();
+  }
+};
+
 module.exports = config;

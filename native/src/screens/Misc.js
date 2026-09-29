@@ -6,7 +6,8 @@ import Svg, { Path } from "react-native-svg";
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel, Choice, Sheet, Tick, Text } from "../ui";
+import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel, Sheet,
+         Dropdown, Text } from "../ui";
 import {
   UN, STATS, unitState, markComponent, L, videos, videoById, videoWatched, unitById,
   idxOfWord, CHANNELS,
@@ -131,6 +132,10 @@ export function channelsOf(list) {
                .map(([name, count]) => ({ name, count }));
 }
 
+/* The "every channel" choice. A named sentinel rather than null, because the
+   drop-down matches its options by id and an id has to be a value. */
+export const ALL_CHANNELS = "all";
+
 export const isFave = (st, id) => !!((st.faves || {})[id]);
 /* Toggle a favourite: id -> the day it was marked. Keyed on the video id, which
    is YouTube's and survives a rebuild of the library. */
@@ -199,16 +204,14 @@ export function Immerse({ navigation }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState("level");
-  const [sorting, setSorting] = useState(false);
-  const [channel, setChannel] = useState(null);      // null = every channel
-  const [picking, setPicking] = useState(false);
+  const [channel, setChannel] = useState(ALL_CHANNELS);
   const [credits, setCredits] = useState(false);
   const all = videos();
-  const channels = useMemo(() => channelsOf(all), [all.length]);
-  const seen = all.filter((v) => videoWatched(st, v)).length;
+  const channels = useMemo(() => [{ id: ALL_CHANNELS, name: "All channels", note: all.length }]
+    .concat(channelsOf(all).map((c) => ({ id: c.name, name: c.name, note: c.count }))), [all.length]);
   const shown = useMemo(() => {
     const found = searchVideos(all, query, sort);
-    const byChannel = channel ? found.filter((v) => v.ch === channel) : found;
+    const byChannel = channel !== ALL_CHANNELS ? found.filter((v) => v.ch === channel) : found;
     return filter === "all" ? byChannel
       : filter === "faves" ? byChannel.filter((v) => isFave(st, v.id))
       : byChannel.filter((v) => videoWatched(st, v) === (filter === "watched"));
@@ -218,40 +221,28 @@ export function Immerse({ navigation }) {
      a note the learner left the screen under comes back next time. */
   const noteDue = !(st.notices || {}).immerse;
   const sawNote = () => update((p) => ({ ...p, notices: { ...(p.notices || {}), immerse: today() } }));
-  const sortName = (VIDEO_SORTS.find((s) => s.id === sort) || VIDEO_SORTS[0]).name;
 
+  /* "2 of 321 watched" sat above the search (the owner, 2026-09-28: "Remove
+     the 2 of 321 watched. Leave the search bar"). The watched filter says the
+     same thing when it is wanted, and a tally at the top of the library read
+     as a score for not having watched enough. */
   return (
     <Screen>
-      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6,
-                     marginBottom: 12 }}>
-        <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>{seen}</Text>
-        <Muted size={14}>{`of ${all.length} watched`}</Muted>
-      </View>
       <SearchField testID="video-search" value={query} onChangeText={setQuery}
                    placeholder="Search: travel, grammar, B1, слово…" label="Search videos"
                    style={{ marginBottom: 12 }} />
+      {/* Three small drop-downs of one shape (ui.js `Dropdown`): what to show,
+          whose, and in what order. The watched filter was a row of chips beside
+          two drop-downs, and the owner asked for them to match. Each reads as
+          its current choice, so the row says what the list is doing. */}
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12, gap: 8 }}>
-        <View style={{ flex: 1 }}>
-          <Choice testID="video-filter" options={VIDEO_FILTERS} value={filter} onPick={setFilter} />
-        </View>
-        {/* The channel and the sort, as two small drop-downs and not two more
-            rows of chips — seven channels as chips would be the "huge
-            distractor" the owner ruled out for the sort. The channel reads as
-            its own name once chosen, so the control says what it is doing. */}
-        <Pressable testID="video-channel" accessibilityRole="button"
-                   accessibilityLabel={`Channel: ${channel || "all"}`}
-                   onPress={() => setPicking(true)} hitSlop={6}
-                   style={({ pressed }) => ({ paddingVertical: 8, paddingHorizontal: 4,
-                                              opacity: pressed ? 0.6 : 1, maxWidth: 130 })}>
-          <Muted size={13} numberOfLines={1}>{`${channel || "All channels"} ▾`}</Muted>
-        </Pressable>
-        <Pressable testID="video-sort" accessibilityRole="button"
-                   accessibilityLabel={`Sort: ${sortName}`}
-                   onPress={() => setSorting(true)} hitSlop={6}
-                   style={({ pressed }) => ({ paddingVertical: 8, paddingHorizontal: 4,
-                                              opacity: pressed ? 0.6 : 1 })}>
-          <Muted size={13}>{`${sortName} ▾`}</Muted>
-        </Pressable>
+        <Dropdown testID="video-filter" optionPrefix="filter-" title="Show" label="Show"
+                  value={filter} options={VIDEO_FILTERS} onPick={setFilter} />
+        <Dropdown testID="video-channel" sheetTestID="channel-sheet" optionPrefix="channel-"
+                  title="Channel" label="Channel" value={channel} options={channels}
+                  onPick={setChannel} style={{ flexShrink: 1 }} />
+        <Dropdown testID="video-sort" sheetTestID="sort-sheet" optionPrefix="sort-"
+                  title="Sort" label="Sort" value={sort} options={VIDEO_SORTS} onPick={setSort} />
       </View>
       {shown.length ? (
         <List>
@@ -287,7 +278,7 @@ export function Immerse({ navigation }) {
           {query.trim() ? `Nothing matches “${query.trim()}”`
             : filter === "watched" ? "Nothing watched yet"
             : filter === "faves" ? "No favorites yet"
-            : channel ? `Nothing left in ${channel}` : "Everything watched"}
+            : channel !== ALL_CHANNELS ? `Nothing left in ${channel}` : "Everything watched"}
         </Muted>
       )}
       {/* The creators, reachable after the first-open note is gone — a credit
@@ -297,44 +288,6 @@ export function Immerse({ navigation }) {
 
       {noteDue || credits ? (
         <CreatorsNote onClose={() => { setCredits(false); if (noteDue) sawNote(); }} />
-      ) : null}
-      {picking ? (
-        <Sheet testID="channel-sheet" title="Channel" onClose={() => setPicking(false)}>
-          <List>
-            <Row testID="channel-all" onPress={() => { setChannel(null); setPicking(false); }}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 15 }}>All channels</Text>
-              </View>
-              <Muted>{String(all.length)}</Muted>
-              <Tick on={channel === null} />
-            </Row>
-            {channels.map((c) => (
-              <Row key={c.name} testID={`channel-${c.name}`}
-                   onPress={() => { setChannel(c.name); setPicking(false); }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>{c.name}</Text>
-                </View>
-                <Muted>{String(c.count)}</Muted>
-                <Tick on={channel === c.name} />
-              </Row>
-            ))}
-          </List>
-        </Sheet>
-      ) : null}
-      {sorting ? (
-        <Sheet testID="sort-sheet" title="Sort" onClose={() => setSorting(false)}>
-          <List>
-            {VIDEO_SORTS.map((s) => (
-              <Row key={s.id} testID={`sort-${s.id}`}
-                   onPress={() => { setSort(s.id); setSorting(false); }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>{s.name}</Text>
-                </View>
-                <Tick on={sort === s.id} />
-              </Row>
-            ))}
-          </List>
-        </Sheet>
       ) : null}
     </Screen>
   );

@@ -33,30 +33,31 @@ const finished = (id) => {
 beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.clearAllMocks(); });
 afterEach(async () => { await flushState(); });
 
-test("locked at the foot of the path until the spine is walked", async () => {
+/* Hidden until it opens (the owner, 2026-09-28: "you can leave it hidden
+   until it's unlocked"). It used to sit locked at the foot of the path. */
+test("absent from the path until the spine is walked", async () => {
   await withState(<Learn navigation={nav} />, {});
-  const card = await screen.findByTestId("final-test");
-  expect(card.props.accessibilityState).toEqual({ disabled: true });
-  expect(within(card).getByText("locked")).toBeTruthy();       // the chapters say "locked" too
-  await act(async () => { fireEvent.press(card); });
-  expect(nav.navigate).not.toHaveBeenCalledWith("Final");
+  await screen.findByTestId(`node-${STAGES[0].core.id}`);
+  expect(screen.queryByTestId("final-test")).toBeNull();
 });
 
-test("open once every chapter's spine is done, and opens the test", async () => {
+/* And it says what it is and nothing else: "Don't put the random extra words
+   'every chapter' and 50 questions. It can just say Final Test." */
+test("once every chapter's spine is done: there, named, and it opens the test", async () => {
   const unit = {};
   for (const s of STAGES) unit[s.core.id] = finished(s.core.id);
   await withState(<Learn navigation={nav} />, { unit, drills: { final: { best: 84, runs: 1 } } });
   const card = await screen.findByTestId("final-test");
-  expect(card.props.accessibilityState).toEqual({ disabled: false });
+  expect(within(card).getByText("Final Test")).toBeTruthy();
+  expect(within(card).queryByText(/questions|every chapter/)).toBeNull();
   expect(screen.getByText("84%")).toBeTruthy();
   await act(async () => { fireEvent.press(card); });
   expect(nav.navigate).toHaveBeenCalledWith("Final");
 });
 
-test("developer mode opens it too (rule 20.9)", async () => {
+test("developer mode shows it too (rule 20.9)", async () => {
   await withState(<Learn navigation={nav} />, { dev: true });
-  const card = await screen.findByTestId("final-test");
-  expect(card.props.accessibilityState).toEqual({ disabled: false });
+  expect(await screen.findByTestId("final-test")).toBeTruthy();
 });
 
 test(`the run is ${FINAL_N} questions long`, async () => {

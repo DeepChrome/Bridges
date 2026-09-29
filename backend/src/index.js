@@ -1,8 +1,7 @@
 /* The Bridges Worker (ROADMAP Phases 4 and 6).
  *
  * Model routes, one job each. POST /v1/feedback grades one spoken sentence;
- * POST /v1/talk takes the tutor's turn in a short conversation; POST /v1/task
- * judges a chapter's task; POST /v1/translate reads a sentence back in the
+ * POST /v1/talk takes the tutor's turn in a short conversation; POST /v1/translate reads a sentence back in the
  * other language; POST /v1/explain says why a wrong answer was wrong; POST
  * /v1/tutor is the free conversation with a tutor who knows the learner
  * (2026-09-26). All hold the Anthropic key so the app
@@ -24,7 +23,6 @@ import { validate, extractJson } from "./schema.js";
 import { SYSTEM, userMessage, RETRY_NUDGE } from "./prompt.js";
 import { SYSTEM_TALK, talkMessage, validateTalk, SYSTEM_HINT, hintMessage, validateHint,
          SYSTEM_REVIEW, reviewMessage, validateReview } from "./talk.js";
-import { SYSTEM_TASK, taskMessage, validateTask } from "./task.js";
 import { SYSTEM_TRANSLATE, SYSTEM_TRANSLATE_EN, translateMessage, validateTranslate, direction } from "./translate.js";
 import { SYSTEM_EXPLAIN, explainMessage, validateExplain } from "./explain.js";
 import { SYSTEM_TUTOR, tutorMessage, validateTutor } from "./tutor.js";
@@ -210,25 +208,11 @@ const ROUTES = {
       message: (x) => reviewMessage(x), validate: (parsed) => validateReview(parsed),
     } : null),
   },
-  /* The task at the end of a chapter (ROADMAP P10.5). It shares the feedback
-     counter and cap rather than taking one of its own: a learner does ten of
-     these in the life of the whole course, so a separate budget would be a
-     knob with nothing on the other end of it. */
-  "/v1/task": {
-    kind: "task", counter: "count", cap: (env) => parseInt(env.DAILY_CAP, 10) || DEFAULT_CAP,
-    maxTokens: 700, system: SYSTEM_TASK,
-    check: (b) => (typeof b.goal === "string" && b.goal.trim()
-                   && Array.isArray(b.must) && b.must.length
-                   && typeof b.attempt === "string" && b.attempt.trim()
-      ? null : "goal, must and attempt are required"),
-    message: (b) => taskMessage(b),
-    validate: (parsed, b) => validateTask(parsed, b.must),
-    capMessage: (cap) => `Daily limit of ${cap} reached; resets at 00:00 UTC.`,
-  },
   /* Speak Russian, read it back in English (2026-09-22). It shares the feedback
-     counter and cap for the same reason the task does — one more budget to
+     counter and cap rather than taking one of its own — one more budget to
      reason about buys nothing — and it is the cheapest route here: one short
-     sentence in, one short sentence out. */
+     sentence in, one short sentence out. (POST /v1/task, the chapter task,
+     stood above this until 2026-09-28, when the task left the app.) */
   "/v1/translate": {
     kind: "translate", counter: "count", cap: (env) => parseInt(env.DAILY_CAP, 10) || DEFAULT_CAP,
     maxTokens: 300, system: SYSTEM_TRANSLATE,

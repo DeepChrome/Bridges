@@ -45,6 +45,36 @@ export const QUEUE_DEFAULTS = { newPerDay: 5, sessionSize: 20, reviewsPerDay: 20
    starts on the first ticked front, which by default is the Russian. */
 export const frontFor = (card, fronts) => fronts[((card && card.reps) || 0) % fronts.length];
 
+/* Words or sentences: what a learner chooses to study on cards (the owner,
+   2026-09-28: *"it can be sentences or individual words based on what the user
+   wants to study"*). Read off the card's own key — a sentence is written with a
+   space in it, a word is not — so a deck card or a pooled sentence needs no tag
+   and the badge and the session cannot classify one card two ways. */
+export const CARD_KINDS = ["words", "sentences"];
+export const DEFAULT_KINDS = ["words"];
+export const cardKind = (word) => (/\s/.test(String(word || "").trim()) ? "sentences" : "words");
+export const kindsOf = (chosen) => {
+  const k = (chosen || []).filter((x) => CARD_KINDS.includes(x));
+  return k.length ? k : DEFAULT_KINDS;
+};
+
+/* An extra round on chosen cards, due or not — the trouble words once the
+   day's pile is done (the owner, 2026-09-28: *"after the user sufficiently
+   studies for the day, they can have the option to review more trouble
+   words"*). It is practice beyond the schedule, so nothing is rationed and
+   nothing is left "remaining"; each answer is still a real review, which FSRS
+   takes early without complaint. Order is the caller's — worst first. */
+export function practiceSession({ seen, words, dirs, size }) {
+  const fronts = (dirs && dirs.length ? dirs : DEFAULT_FRONTS).filter((d) => DIRECTIONS.includes(d));
+  if (!fronts.length) fronts.push(DEFAULT_FRONTS[0]);
+  const items = (words || []).slice(0, size || QUEUE_DEFAULTS.sessionSize).map((w) => {
+    const card = cardFor((seen && seen[w]) || {});
+    return { word: w, direction: frontFor(card, fronts), card: card, kind: kindOf(card) };
+  });
+  return { items: items, due: 0, remaining: 0, newLeft: 0, reviewsLeft: Infinity, done: false,
+           practice: true };
+}
+
 /* Today's counts, or a fresh slot when the day has moved on. */
 export function dailyFor(daily, now) {
   const day = dayOf(now);

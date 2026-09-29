@@ -18,7 +18,8 @@ import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrad
 import { split, merge, diff, isEmpty, memoryRepo, validLog, cardRow, rowCard, SETTING_KEYS }
   from "../core/repo.js";
 import * as S from "../core/scheduler.js";
-import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor } from "../core/queue.js";
+import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor,
+         cardKind, kindsOf, practiceSession } from "../core/queue.js";
 import { SCENARIOS } from "../core/scenarios.js";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP,
@@ -43,7 +44,7 @@ import { parseDeep, makeSearch, MATCH } from "../core/search.js";
 import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ICONS, ACTIVITY_ICONS, iconFor } from "../core/icons.js";
-import { AV, AV_IDS } from "../core/avatars.js";
+import { AV, AV_IDS, avatarOf, AV_CREDIT } from "../core/avatars.js";
 import { POSES, guideSvg, LINES, MAX_WORDS, guideLine, poseFor } from "../core/guide.js";
 
 import { loadPayload, PARTS } from "./payload.mjs";
@@ -209,7 +210,7 @@ group("grading");
 
 group("state schema");
 {
-  ok(SCHEMA_VERSION === 9, "schema is at 9", String(SCHEMA_VERSION));
+  ok(SCHEMA_VERSION === 10, "schema is at 10", String(SCHEMA_VERSION));
   /* v8 turns developer mode off for everyone (2026-09-23): it had shipped on
      and no profile can say whether it chose that, so nobody keeps it. */
   const v8 = MIGRATIONS[7]({ v: 7, dev: true, watched: {} });
@@ -217,9 +218,20 @@ group("state schema");
      "v7 → v8 turns developer mode off and adds the favourites and notices slots");
   /* v9: a word is one card and the flashcards default to the Russian front
      (the owner, 2026-09-23); the three-front default nobody chose is reset. */
-  const v9 = migrate({ v: 8, flash: ["recognise", "produce", "listen"] }, 8);
+  const v9 = MIGRATIONS[8]({ v: 8, flash: ["recognise", "produce", "listen"] });
   ok(v9.v === 9 && v9.flash.length === 1 && v9.flash[0] === "recognise",
      "v8 → v9 sets the flashcards to the Russian front");
+  /* v10: "Due today" and "Trouble words" stop being sets (2026-09-28) — what
+     is due is every session, and trouble is a round offered after it. A
+     profile left with no source of new cards draws them from its path; one
+     with chapters ticked keeps them; a sentence tick becomes the kind. */
+  const trouble = MIGRATIONS[9]({ v: 9, sets: ["__trouble__"] });
+  ok(trouble.v === 10 && trouble.sets.join() === "__path__" && trouble.cardKinds.join() === "words",
+     "v9 → v10 gives a trouble-only profile its path", JSON.stringify(trouble));
+  const mixed = MIGRATIONS[9]({ v: 9, sets: ["__due__", "core1", "__sentences__", "deck:k1"] });
+  ok(mixed.sets.join() === "core1,deck:k1" && mixed.cardKinds.join() === "words,sentences",
+     "v9 → v10 keeps chosen chapters and decks, and a sentences tick becomes the kind",
+     JSON.stringify(mixed));
   ok([1, 2, 3, 4, 5, 6].every((k) => typeof MIGRATIONS[k] === "function"),
      "a migration step exists from every earlier version");
 
@@ -743,6 +755,17 @@ group("the session");
   ok(mixed.length === 10 && at.length === 2 && at[1] - at[0] === 5, "two new among eight reviews sit five apart", at.join(","));
   ok(interleave([{ i: "L" }], [{ i: 1 }], [])[0].i === "L", "learning steps come first");
 
+  /* Words or sentences, read off the key (2026-09-28), and the trouble round. */
+  ok(cardKind("книга") === "words" && cardKind("Где книга?") === "sentences" && cardKind(" дом ") === "words",
+     "a sentence is a card with a space in it");
+  ok(kindsOf([]).join() === "words" && kindsOf(["sentences", "x"]).join() === "sentences",
+     "no kind chosen is words; an unknown kind is dropped");
+  const later = { dueAt: Date.now() + 9 * S.DAY, lastAt: Date.now() - S.DAY, s: 3, d: 9, state: S.REVIEW,
+                  steps: 0, reps: 12, lapses: 5 };
+  const round = practiceSession({ seen: { дом: { recognise: later } }, words: ["дом", "стол"], dirs: ["recognise"] });
+  ok(round.practice && round.items.map((x) => x.word).join() === "дом,стол" && round.items[1].kind === "new",
+     "a practice round deals what it is given, due or not, in its order");
+
   // Again.
   const pair = buildSession({ seen: { дом: seen.w000, стол: seen.w001 },
                               words: ["дом", "стол"], dirs: ["recognise"], now: T0, daily: null, opts, rng });
@@ -994,11 +1017,17 @@ ok(iconFor("nonsense") === ICONS.speech, "an unknown id still yields a path");
   ok(new Set(Object.values(ACTIVITY_ICONS)).size === Object.keys(ACTIVITY_ICONS).length,
      "no activity mark is a copy of another");
 }
-ok(AV_IDS.length === 10, "ten avatars", String(AV_IDS.length));
-ok(AV_IDS.every((id) => AV[id].svg && AV[id].bg && AV[id].name),
-   "each avatar has art, a background and a name");
+ok(AV_IDS.length >= 10, "at least ten avatars", String(AV_IDS.length));
+ok(AV_IDS.every((id) => AV[id].svg && AV[id].bg && AV[id].name && /^[\d.\s-]+$/.test(AV[id].vb)),
+   "each avatar has art, a viewBox, a background and a name");
 ok(new Set(AV_IDS.map((id) => AV[id].svg)).size === AV_IDS.length,
    "and no two share the same drawing");
+/* A profile made before the DiceBear faces keeps a face, and not everybody
+   the same one. */
+ok(avatarOf("monkeynaut") && avatarOf("monkeynaut") !== avatarOf("gymbun")
+   && avatarOf("nonsense") === AV[AV_IDS[0]], "old ids resolve, unknown ids fall back");
+ok(AV_CREDIT.creator && AV_CREDIT.license, "the style's licence is carried",
+   `${AV_CREDIT.creator} ${AV_CREDIT.license}`);
 
 /* ---------------------------------------------------------- questions */
 

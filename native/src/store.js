@@ -47,7 +47,11 @@ export const DEFAULTS = {
   faves: {},            // video id -> day favourited (Immerse)
   notices: {},          // one-time notes seen, by id (Immerse's creators note)
   theme: "auto",
-  sets: [],
+  /* Where the flashcards' *new* cards come from: `__path__` (the units the
+     learner has reached), chapters, decks. What is due is always dealt,
+     whatever is ticked (core/queue.js, 2026-09-28). */
+  sets: ["__path__"],
+  cardKinds: ["words"],   // words, sentences, or both (core/queue.js cardKind)
   seen: {},             // word -> { recognise, produce, listen }: a card each (core/scheduler.js)
   trouble: {},
   daily: { day: null, new: 0, reviews: 0 },   // today's counts (core/queue.js dailyFor)

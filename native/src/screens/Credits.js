@@ -25,6 +25,7 @@ import { Screen, List, Row, Muted, SectionLabel, Text } from "../ui";
 import { useTheme } from "../theme";
 import { STATS } from "../data";
 import { NOTICES } from "../notices";
+import { AV_CREDIT } from "@core/avatars";
 
 /* The one line that is not generated: the bought scenario audio has no meta
    row to read, because it is a purchase rather than a corpus. */
@@ -65,6 +66,22 @@ export default function Credits() {
           </View>
         </Row>
       </List>
+
+      {/* Read off core/avatars.js, which the generator writes from the style's
+          own licence metadata, so the credit cannot drift from the faces. */}
+      {AV_CREDIT ? <SectionLabel style={{ marginTop: 22 }}>Characters</SectionLabel> : null}
+      {AV_CREDIT ? (
+        <List>
+          <Row onPress={AV_CREDIT.url ? () => Linking.openURL(AV_CREDIT.url) : undefined}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15 }}>
+                {`${AV_CREDIT.title} by ${AV_CREDIT.creator}`}
+              </Text>
+              <Muted>{`${AV_CREDIT.license} · ${AV_CREDIT.via}`}</Muted>
+            </View>
+          </Row>
+        </List>
+      ) : null}
 
       <SectionLabel style={{ marginTop: 22 }}>Software</SectionLabel>
       <List>

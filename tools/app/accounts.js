@@ -23,11 +23,11 @@ let ACCOUNTS = { list: [], active: null };
 /* AV and AV_IDS live in core/avatars.js, shared with the native app. */
 
 function avatarEl(id, size) {
-  const a = AV[id] || AV[AV_IDS[0]];
+  const a = avatarOf(id);
   const d = el("div", "avatar");
   if (size) d.style.cssText = "width:" + size + "px;height:" + size + "px";
   d.style.background = a.bg;
-  d.innerHTML = '<svg viewBox="0 0 64 64" aria-hidden="true">' + a.svg + "</svg>";
+  d.innerHTML = '<svg viewBox="' + a.vb + '" aria-hidden="true">' + a.svg + "</svg>";
   return d;
 }
 

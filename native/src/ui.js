@@ -14,7 +14,7 @@ import { Text as RNText, TextInput as RNTextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml, Circle } from "react-native-svg";
 import { iconFor } from "@core/icons";
-import { AV, AV_IDS } from "@core/avatars";
+import { AV, AV_IDS, avatarOf } from "@core/avatars";
 import { useTheme, radius, space, type, faceFor, useShadow } from "./theme";
 import { useFill, usePress, useEnter } from "./motion";
 import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
@@ -892,17 +892,18 @@ export function Thumb({ id, done, locked, n, tone }) {
   );
 }
 
-/* The same ten characters the web app draws, from the same source. SvgXml renders the
-   shared markup directly rather than each platform keeping its own copy of the art. */
+/* The same characters the web app draws, from the same source. SvgXml renders the
+   shared markup directly rather than each platform keeping its own copy of the art.
+   `avatarOf` resolves an id from before the DiceBear faces to a face of its own. */
 export function Avatar({ id, size = 44 }) {
-  const a = AV[id] || AV[AV_IDS[0]];
+  const a = avatarOf(id);
   return (
     <View style={{ width: size, height: size, borderRadius: size / 2,
                    backgroundColor: a.bg, overflow: "hidden" }}>
       <SvgXml
         width={size}
         height={size}
-        xml={`<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">${a.svg}</svg>`}
+        xml={`<svg viewBox="${a.vb}" xmlns="http://www.w3.org/2000/svg">${a.svg}</svg>`}
       />
     </View>
   );

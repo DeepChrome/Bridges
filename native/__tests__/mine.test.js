@@ -111,8 +111,8 @@ describe("a mined word's card", () => {
   it("sends you back to where you heard it", async () => {
     const i = idxOfWord(word);
     expect(i).toBeGreaterThanOrEqual(0);
-    await withProfile(<Study navigation={nav} />, {
-      sets: ["__trouble__"],
+    // The trouble round, as the You screen asks for it (2026-09-28).
+    await withProfile(<Study navigation={nav} route={{ params: { round: "trouble" } }} />, {
       pinned: [word],
       mined: { [word]: { v: unitVideo.id, t: 4321, s: "… что-то про это …" } },
     });

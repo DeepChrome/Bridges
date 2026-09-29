@@ -37,9 +37,9 @@ describe("profile gate", () => {
     await render(<SessionProvider><Gate onPlacement={jest.fn()} /></SessionProvider>);
     await screen.findByTestId("wordmark");
     // Each character is labelled, which is also what a screen reader announces.
-    expect(screen.getByLabelText("Monkeynaut")).toBeTruthy();
-    expect(screen.getByLabelText("Frog King")).toBeTruthy();
-    expect(screen.getByLabelText("Gym Bunny")).toBeTruthy();
+    // Read off the cast itself, so a new set of faces cannot leave one out.
+    const { AV, AV_IDS } = require("@core/avatars");
+    for (const id of AV_IDS) expect(screen.getByLabelText(AV[id].name)).toBeTruthy();
   });
 
   it("holds Continue until there is a name to continue with", async () => {

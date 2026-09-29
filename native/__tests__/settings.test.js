@@ -134,13 +134,18 @@ describe("the on-screen keyboard", () => {
 });
 
 describe("flashcards", () => {
-  it("show nothing when no set is ticked, rather than a set that cannot be switched off", async () => {
+  /* A profile with nothing chosen used to be dealt nothing — right while the
+     alternative was "the first unit, which could not be switched off"
+     (2026-09-07). Since 2026-09-28 new cards come from the learner's own place
+     on the path by default, commonest first, and "Your path" is a tick like
+     any other in the options. */
+  it("start on the learner's own path, commonest word first, with the options a tap away", async () => {
     await withProfile(<Study />);
-    expect(await screen.findByText("Pick a set to practice.")).toBeTruthy();
-    // One thought, one control: no summary row of a selection that is empty,
-    // and no card to grade.
-    expect(screen.queryByTestId("study-cog")).toBeNull();
-    expect(screen.queryByText("Show")).toBeNull();
+    expect(await screen.findByTestId("card-recognise")).toBeTruthy();
+    expect(screen.getByTestId("flag-new")).toBeTruthy();
+    expect(screen.getByTestId("study-cog")).toBeTruthy();
+    const { L } = require("../src/data");
+    expect(screen.getAllByText(L[0].w).length).toBeGreaterThan(0);
   });
 });
 

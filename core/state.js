@@ -13,7 +13,7 @@
  * single classic script, and the rest of core/ keeps to that style.
  */
 
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;
 
 /* A lesson quiz passes at PASS_MARK. After RELIEF_AFTER attempts it passes at
    RELIEF_MARK instead: the simulated struggling learner failed 15 of 40 lessons
@@ -131,6 +131,19 @@ export const MIGRATIONS = {
   // the cards themselves are merged on the way in (core/scheduler.js
   // normaliseSeen), which needs no step here.
   8: (s) => Object.assign({}, s, { flash: ["recognise"], v: 9 }),
+  // v10: the flashcard session always holds what is due (the owner,
+  // 2026-09-28: the Study badge said ~150 and the pile dealt only the trouble
+  // words ticked in a buried picker). "Due today" and "Trouble words" stop
+  // being sets — the first is every session, the second a round offered once
+  // the day is done — and "Sentences" becomes a kind of card beside words.
+  // What stays in `sets` is where new cards come from; a profile left with no
+  // source draws them from its own place on the path.
+  9: (s) => {
+    const old = s.sets || [];
+    const sets = old.filter((id) => !["__due__", "__trouble__", "__sentences__"].includes(id));
+    const cardKinds = old.includes("__sentences__") ? ["words", "sentences"] : ["words"];
+    return Object.assign({}, s, { sets: sets.length ? sets : ["__path__"], cardKinds, v: 10 });
+  },
 };
 
 export function migrate(raw, from) {

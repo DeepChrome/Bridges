@@ -24,7 +24,8 @@ import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
 import { applyGrade, reviewRows, preview, schedulerOpts, wanted, troubleWords as troubleBank, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity } from "@core/scheduler";
-import { buildSession, requeue, dailyFor, QUEUE_DEFAULTS } from "@core/queue";
+import { buildSession, practiceSession, requeue, dailyFor, QUEUE_DEFAULTS, cardKind, kindsOf, CARD_KINDS }
+  from "@core/queue";
 
 /* The three directions as the learner sees them: by what is on the **front**.
  *
@@ -140,6 +141,8 @@ export function cardsIn(st, sets) {
   sets.forEach((id) => {
     if (id === "__trouble__") { troubleWords(st).forEach(byWord); return; }
     if (id === "__sentences__") { sentencesFor(st).forEach(add); return; }
+    // Where the learner is on the path: every unit reached so far.
+    if (id === "__path__") { reachedUnits(st).forEach((u) => u.w.forEach((i) => add(cardOf(i)))); return; }
     // Everything the scheduler wants today, whichever set it came from — what
     // "Review · N due" on the path opens.
     if (id === "__due__") {
@@ -158,10 +161,42 @@ export function cardsIn(st, sets) {
   return pool;
 }
 
-/* The session for what is ticked, from the learner's state. Exported so a test
-   can ask for the same session the screen deals. */
-export function sessionFor(st, { ahead, rng } = {}) {
-  const words = cardsIn(st, st.sets).map((c) => c.b);
+/* Where new cards come from: the ticked sources (the path, chapters, decks),
+   and the sentence pool when sentences are chosen — only of the kinds chosen. */
+export function sourceCards(st) {
+  const kinds = kindsOf(st.cardKinds);
+  const ids = (st.sets || []).filter((id) => id !== "__due__" && id !== "__trouble__" && id !== "__sentences__");
+  if (kinds.includes("sentences")) ids.push("__sentences__");
+  return cardsIn(st, ids).filter((c) => kinds.includes(cardKind(c.b)));
+}
+
+/* Every card the session may deal, one of each: everything due of the chosen
+   kinds — **whatever is ticked** — then the sources' cards for new ones.
+ *
+ * The session used to be the ticked sets alone, and "Due today" was a set
+ * like any other. The owner, 2026-09-28: the Study badge said about 150 due,
+ * and the pile dealt the trouble words he had ticked in the picker and then
+ * said "Done for today". The badge counted every due card and the session
+ * could not reach them — the stranding §30aa named, from the other side.
+ * Anki's rule is the one wanted: what is due is always due, and new cards
+ * enter at the day's rate. `dueCount` filters by the same kinds, so the two
+ * numbers are one number. */
+export function studyCards(st) {
+  const kinds = kindsOf(st.cardKinds);
+  const due = cardsIn(st, ["__due__"]).filter((c) => kinds.includes(cardKind(c.b)));
+  const out = [], have = new Set();
+  for (const c of due.concat(sourceCards(st))) if (!have.has(c.b)) { have.add(c.b); out.push(c); }
+  return out;
+}
+
+/* The session from the learner's state. Exported so a test can ask for the
+   same session the screen deals. `round: "trouble"` is the extra round of
+   trouble words offered once the day is done. */
+export function sessionFor(st, { ahead, rng, round } = {}) {
+  if (round === "trouble") {
+    return practiceSession({ seen: st.seen, words: troubleWords(st), dirs: st.flash || DEFAULT_FRONTS });
+  }
+  const words = studyCards(st).map((c) => c.b);
   return buildSession({
     seen: st.seen, words, dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily, rng, ahead,
     opts: { newPerDay: st.newPerDay, reviewsPerDay: st.reviewsPerDay, learnAhead: st.learnAhead,
@@ -175,10 +210,34 @@ export function sessionFor(st, { ahead, rng } = {}) {
    not carry — a deck card the learner imported, a sentence — sorts after the
    curriculum but keeps the order it arrived in, which is the order they chose.
 
-   This is what stops «воспользоваться» opening a beginner's pile (§30ap). */
-export const newCardRank = (w) => {
+   This is what stops «воспользоваться» opening a beginner's pile (§30ap).
+
+   **A sentence is as common as its rarest word** (the owner, 2026-09-28:
+   *"words that are more useful and common should be front loaded. Same with
+   simpler sentences… when in doubt, prioritize more common and useful
+   words"*). Sentences used to sort after every word and then in the order
+   their units were reached — newest first — so the simple ones had no
+   advantage at all. Each is ranked now by the least common word in it, with
+   a little for length, on the same scale as the words, so «Где книга?» comes
+   among the commonest words and a twelve-word sentence with «одолжить» in it
+   comes near «одолжить». A word the lexicon does not resolve counts as rare. */
+export const RARE_RANK = 5000;
+const wordRank = (w) => {
+  const r = rankOf(w);
+  if (r) return r - 1;
   const i = idxOfWord(w);
-  return i >= 0 ? i : Number.MAX_SAFE_INTEGER;
+  return i >= 0 ? i : RARE_RANK;
+};
+export const newCardRank = (w) => {
+  if (cardKind(w) === "words") {
+    const r = wordRank(w);
+    // A deck card the curriculum does not carry keeps the order it came in.
+    return r === RARE_RANK && idxOfWord(w) < 0 ? Number.MAX_SAFE_INTEGER : r;
+  }
+  const toks = String(w).match(/[А-Яа-яЁё́-]+/g) || [];
+  if (!toks.length) return Number.MAX_SAFE_INTEGER;
+  const rarest = Math.max(...toks.map((t) => { const i = idxOfWord(t); return i >= 0 ? i : RARE_RANK; }));
+  return rarest + 10 * toks.length;
 };
 
 export const newDeckId = () => "k" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
@@ -190,8 +249,14 @@ function SetPicker({ visible, onClose }) {
     ...p,
     sets: p.sets.includes(id) ? p.sets.filter((x) => x !== id) : p.sets.concat(id),
   }));
-  const dueCount = cardsIn(st, ["__due__"]).length;
-  const sentenceCount = sentencesFor(st).length;
+  /* Words, sentences or both. The last one cannot be unticked — a session of
+     no kind of card is a session of nothing (§30ac's rule). */
+  const kinds = kindsOf(st.cardKinds);
+  const toggleKind = (id) => update((p) => {
+    const cur = kindsOf(p.cardKinds);
+    if (cur.includes(id)) return cur.length === 1 ? p : { ...p, cardKinds: cur.filter((k) => k !== id) };
+    return { ...p, cardKinds: CARD_KINDS.filter((k) => k === id || cur.includes(k)) };
+  });
 
   const removeDeck = (d) => Alert.alert(
     "Remove deck", `Remove “${d.name}”? Its cards' review history stays.`,
@@ -203,13 +268,8 @@ function SetPicker({ visible, onClose }) {
   const header = (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
       <Text style={{ flex: 1, color: t.ink, fontSize: 17, fontWeight: "600" }}>
-        Practice
+        Study options
       </Text>
-      <Btn kind="ghost" label="Select all"
-           onPress={() => update((p) => ({
-             ...p, sets: UN.filter((u) => unitUnlocked(p, u)).map((u) => u.id) }))} />
-      <Btn kind="ghost" label="Clear"
-           onPress={() => update((p) => ({ ...p, sets: [] }))} />
     </View>
   );
   /* Just the way out. "Export selected as an Anki deck" stood here and is gone
@@ -238,6 +298,23 @@ function SetPicker({ visible, onClose }) {
 
   return (
     <Sheet visible={visible} onClose={onClose} header={header} footer={footer} maxHeight="88%">
+            {/* Words, sentences or both (the owner, 2026-09-28). Decides the
+                due cards dealt as well as the new ones, and the badge counts
+                the same kinds. Sentences are how his own decks are built and
+                the unit a word is actually used in (§26). */}
+            <View style={{ marginBottom: 18 }}>
+              <SectionLabel>Study</SectionLabel>
+              <List>
+                {[["words", "Words"], ["sentences", "Sentences"]].map(([id, name]) => (
+                  <Row key={id} testID={`kind-${id}`} onPress={() => toggleKind(id)}>
+                    <Tick on={kinds.includes(id)} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: t.ink, fontSize: 15 }}>{name}</Text>
+                    </View>
+                  </Row>
+                ))}
+              </List>
+            </View>
             <View style={{ marginBottom: 18 }}>
               <SectionLabel>Front of the card</SectionLabel>
               <List>
@@ -273,44 +350,20 @@ function SetPicker({ visible, onClose }) {
                       onPick={(id) => update((p) => ({ ...p, flashVoice: id }))} />
             </View>
 
-            {/* Everything the picker can turn on, it can turn off.
-             *
-             * "Due today" is what the path's "Review · N due" switches on, and
-             * it had no row here — so a learner arriving that way was handed a
-             * set they could see the name of, could not find, and could not
-             * clear. The owner, 2026-09-11: *"Study mode — it defaults to
-             * having the basic set active. Every set of cards should be able to
-             * be toggled on or off."* The words it looked like were the first
-             * chapter's, because those are what is due early on. */}
+            {/* Where new cards come from. What is due is not here: it is in
+                every session whatever is ticked (studyCards), so no tick can
+                leave the badge promising cards the pile will not deal — which
+                is what "Due today" and "Trouble words" as sets did (2026-09-28).
+                Your path is the default: the units reached so far. */}
             <View style={{ marginBottom: 18 }}>
+              <SectionLabel>New cards from</SectionLabel>
               <List>
-                <Row testID="set-due" onPress={() => toggle("__due__")}>
-                  <Tick on={st.sets.includes("__due__")} />
+                <Row testID="set-path" onPress={() => toggle("__path__")}>
+                  <Tick on={st.sets.includes("__path__")} />
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: t.ink, fontSize: 15 }}>Due today</Text>
-                    <Muted>{dueCount + " words"}</Muted>
+                    <Text style={{ color: t.ink, fontSize: 15 }}>Your path</Text>
                   </View>
                 </Row>
-                {troubleWords(st).length ? (
-                  <Row testID="set-trouble" onPress={() => toggle("__trouble__")}>
-                    <Tick on={st.sets.includes("__trouble__")} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.ink, fontSize: 15 }}>Trouble words</Text>
-                      <Muted>{troubleWords(st).length + " words"}</Muted>
-                    </View>
-                  </Row>
-                ) : null}
-                {/* Whole sentences, which is how his own decks are built and
-                    the unit a word is actually used in (§26). */}
-                {sentenceCount ? (
-                  <Row testID="set-sentences" onPress={() => toggle("__sentences__")}>
-                    <Tick on={st.sets.includes("__sentences__")} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.ink, fontSize: 15 }}>Sentences</Text>
-                      <Muted>{sentenceCount + " you have reached"}</Muted>
-                    </View>
-                  </Row>
-                ) : null}
               </List>
             </View>
 
@@ -412,8 +465,8 @@ function Front({ face, direction, device }) {
   );
 }
 
-export default function Study({ navigation }) {
-  const { st, update } = useSession();
+export default function Study({ navigation, route }) {
+  const { st, update, ready } = useSession();
   const t = useTheme();
   const [picker, setPicker] = useState(false);
   const [session, setSession] = useState(null);   // core/queue.js buildSession
@@ -441,18 +494,32 @@ export default function Study({ navigation }) {
    * very most — and it runs on a render, not on a frame. */
   const faces = useMemo(() => {
     const m = {};
-    for (const c of cardsIn(st, st.sets)) m[c.b] = c;
+    for (const c of studyCards(st).concat(cardsIn(st, ["__trouble__"]))) if (!m[c.b]) m[c.b] = c;
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [st.sets, st.decks, st.seen]);
-  const chosen = Object.keys(faces).length;        // cards in the sets, due or not
+  }, [st.sets, st.decks, st.seen, st.cardKinds]);
+  // Cards not yet met that the sources could introduce — what "Study ahead" offers.
+  const unmet = useMemo(() => sourceCards(st).filter((c) => !st.seen[c.b]).length,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [st.sets, st.decks, st.seen, st.cardKinds]);
+  const trouble = troubleWords(st);
 
-  const deal = (ahead) => {
-    setSession(sessionFor(st, { ahead }));
+  const deal = (ahead, round) => {
+    setSession(sessionFor(st, { ahead, round }));
     setAt(0);
     setShown(false); setRevealed(false);
     setLast(null);
   };
+  /* The trouble round, asked for from elsewhere — You's trouble sheet. A
+     route param rather than a tick in the picker, so it is one round and
+     leaves the day's settings as they were. */
+  const round = route && route.params && route.params.round;
+  useEffect(() => {
+    if (round !== "trouble" || !ready) return;
+    deal(false, "trouble");
+    navigation.setParams({ round: undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [round, ready]);
   // The profile arrives after the first render, and a set or a deck can change
   // from the picker: the session follows what is ticked. Not what is graded —
   // a session is dealt once and played through.
@@ -463,17 +530,20 @@ export default function Study({ navigation }) {
      how a card is read aloud, not which cards there are, and re-dealing on it
      would throw away a session in progress. */
   const setsKey = [
-    st.sets.join(","),
+    st.sets.join(","), kindsOf(st.cardKinds).join(","),
     (st.decks || []).map((d) => d.id + d.cards.length).join(","),
     (st.flash || []).join(","),
     st.newPerDay, st.reviewsPerDay, st.learnAhead, st.retention,
   ].join("|");
-  useEffect(() => { deal(false); }, [setsKey]);   // eslint-disable-line react-hooks/exhaustive-deps
+  /* Not before the profile has arrived: the store's defaults now carry a
+     source of new cards (`__path__`), so a deal from them was a real pile —
+     one card read aloud from a profile nobody had loaded, then replaced. */
+  // …nor over a trouble round that was asked for, which deals itself.
+  useEffect(() => { if (ready && round !== "trouble") deal(false); }, [setsKey, ready]);   // eslint-disable-line react-hooks/exhaustive-deps
 
-  const names = st.sets.map((id) => id === "__trouble__" ? "Trouble words"
-    : id === "__due__" ? "Due today"
-    : id.startsWith("deck:") ? ((st.decks || []).find((d) => "deck:" + d.id === id) || {}).name
-    : (UN.find((u) => u.id === id) || {}).name).filter(Boolean);
+  const kinds = kindsOf(st.cardKinds);
+  const heading = session && session.practice ? "Trouble words"
+    : kinds.length === 2 ? "Words and sentences" : kinds[0] === "sentences" ? "Sentences" : "Words";
 
   const items = session ? session.items : [];
   const item = items[at] || null;
@@ -562,6 +632,17 @@ export default function Study({ navigation }) {
 
   const finished = session && at >= items.length;
   const doneToday = session && session.done;
+  /* What a fresh deal would hold once this pile is through: the rest of a
+     backlog past the session's twenty, and the learning steps that have come
+     due while it ran. Read off the scheduler rather than the finished
+     session's own count, so an Again ten minutes ago is not lost. The day's
+     pile, never the trouble round. */
+  const more = useMemo(() => {
+    if (!session || (!finished && items.length)) return 0;
+    const s = sessionFor(st);
+    return s.items.length + s.remaining;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished, items.length, st.seen, st.daily, setsKey]);
 
   /* The controls belong to the screen, not to the card, and they are pinned
      off the scroll (`Screen footer`).
@@ -621,44 +702,46 @@ export default function Study({ navigation }) {
           both — the same control the drills carry (2026-09-26). It was a row
           with a "Change" button, which the owner read as a menu; the cog is
           what every other screen means by "options". */}
-      {names.length ? (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15 }}>
-              {names.length === 1 ? names[0] : `${names.length} sets`}
-            </Text>
-            <Muted testID="pile">
-              {session && session.due ? `${session.due} due` + (session.newLeft ? ` · ${Math.min(session.newLeft, chosen)} new` : "")
-                : `${chosen} cards`}
-            </Muted>
-          </View>
-          <CogButton testID="study-cog" label="Study options" onPress={() => setPicker(true)} />
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View style={{ flex: 1 }}>
+          <Text testID="study-heading" style={{ color: t.ink, fontSize: 15 }}>{heading}</Text>
+          <Muted testID="pile">
+            {session && session.practice ? `${items.length} cards`
+              : session && (session.due || session.newLeft)
+                ? [session.due ? `${session.due} due` : "", session.newLeft ? `${Math.min(session.newLeft, unmet)} new` : ""]
+                    .filter(Boolean).join(" · ")
+                : "Nothing due"}
+          </Muted>
         </View>
-      ) : null}
+        <CogButton testID="study-cog" label="Study options" onPress={() => setPicker(true)} />
+      </View>
 
       {!item ? (
-        /* A sentence and one action, with air around them — not a panel. */
+        /* A sentence and its actions, with air around them — not a panel.
+           The day's pile first; once it is empty, the day is done and what
+           is left is the learner's choice: another round on the trouble words
+           (the owner, 2026-09-28), or new cards ahead of schedule. */
         <View style={{ marginTop: 56, alignItems: "center", paddingHorizontal: 24 }}>
           <Text testID="study-state" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
-            {finished && items.length && session.remaining ? `${session.remaining} to go.`
-              : finished && items.length ? "Set finished."
-              : doneToday ? "Done for today."
-              : chosen ? "Nothing due today." : "Pick a set to practice."}
+            {session && session.practice && finished ? "Round finished."
+              : more ? `${more} to go.`
+              : "Done for today."}
           </Text>
-          {finished && items.length && session.remaining ? (
-            <Btn kind="pri" testID="continue" label={`Continue · ${session.remaining} left`} style={{ marginTop: 20, minWidth: 200 }}
+          {more ? (
+            <Btn kind="pri" testID="continue" label={`Continue · ${more} left`} style={{ marginTop: 20, minWidth: 200 }}
                  onPress={() => deal(false)} />
-          ) : finished && items.length ? (
-            <Btn kind="pri" label="Go again" style={{ marginTop: 20, minWidth: 200 }}
-                 onPress={() => deal(false)} />
-          ) : doneToday ? null : chosen ? (
-            // The scheduler has nothing to ask; studying ahead is the learner's
-            // choice, said as such, not the default.
-            <Btn label={`Study ahead · ${chosen} cards`} style={{ marginTop: 20, minWidth: 200 }}
-                 onPress={() => deal(true)} />
           ) : (
-            <Btn kind="pri" label="Choose what to review" style={{ marginTop: 20, minWidth: 200 }}
-                 onPress={() => setPicker(true)} />
+            <>
+              {trouble.length ? (
+                <Btn kind="pri" testID="trouble-round" style={{ marginTop: 20, minWidth: 200 }}
+                     label={`Review trouble words · ${trouble.length}`}
+                     onPress={() => deal(false, "trouble")} />
+              ) : null}
+              {unmet && !doneToday ? (
+                <Btn testID="study-ahead" style={{ marginTop: 12, minWidth: 200 }}
+                     label="Study ahead · new cards" onPress={() => deal(true)} />
+              ) : null}
+            </>
           )}
         </View>
       ) : (

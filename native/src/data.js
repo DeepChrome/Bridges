@@ -24,6 +24,7 @@ import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize } from "@core/questions";
 import { quizPassed } from "@core/state";
 import { dueCards, wanted } from "@core/scheduler";
+import { cardKind, kindsOf } from "@core/queue";
 
 /* The word endings, commonest first across every sentence the app carries
    (core/endings.js). Counted once and kept: about a tenth of a second over
@@ -506,7 +507,15 @@ export const knownWords = (st) => Object.keys((st && st.seen) || {});
  * would not hand over is the stranding bug wearing the other hat: work owed
  * that nothing can reach. The Stats screen is the other question — what the
  * whole schedule holds — and deliberately still counts every direction. */
-export const dueCount = (st) => dueCards(st.seen, Date.now(), st.learnAhead).length;
+/* …and only the kinds of card chosen (words, sentences): the Study screen
+   deals exactly these, whatever sets are ticked, so this number and the pile
+   are the same number (2026-09-28 — the badge said ~150 while a buried tick
+   let the pile hand over twenty). */
+export const dueCount = (st) => {
+  const kinds = kindsOf(st.cardKinds);
+  return dueCards(st.seen, Date.now(), st.learnAhead)
+    .filter((c) => kinds.includes(cardKind(c.word))).length;
+};
 
 /* What a practice drill may ask about: the words the learner has met, widened
    along the route until there are enough to drill. A fresh learner gets the first

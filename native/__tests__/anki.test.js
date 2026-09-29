@@ -138,13 +138,13 @@ describe("flashcards from a deck", () => {
     await withProfile(<Study />, { decks: [deck], sets: ["deck:k1"], flash: ["recognise"] });
     const first = await screen.findByText(/^(привет|пока)$/);
     const word = first.props.children;
-    expect(screen.getByTestId("pile")).toHaveTextContent("2 cards");
+    expect(screen.getByTestId("pile")).toHaveTextContent("2 new");
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
     await act(async () => { fireEvent.press(screen.getByText("Good")); });
     const st = await saved();
     expect(st.seen[word].recognise.reps).toBe(1);
     await act(async () => { fireEvent.press(screen.getByTestId("study-cog")); });
-    expect((await screen.findAllByText("My deck")).length).toBeGreaterThanOrEqual(2);  // the set row and the picker
+    expect((await screen.findAllByText("My deck")).length).toBeGreaterThanOrEqual(1);  // the picker's row
     // Importing moved to Settings and exporting is gone (§30ap); the picker
     // lists the deck so it can be ticked, and offers a way to remove it.
     expect(screen.queryByText("Import")).toBeNull();

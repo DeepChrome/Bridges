@@ -517,10 +517,7 @@ export default function Learn({ navigation }) {
           testID="review-due"
           style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
           label={`Review · ${due} due`}
-          onPress={() => {
-            update((p) => ({ ...p, sets: ["__due__"] }));
-            navigation.navigate("Study");
-          }}
+          onPress={() => navigation.navigate("Study")}
         />
       ) : null}
       {/* Above REVIEW_FIRST due cards the two buttons trade places: reviewing is

@@ -10,9 +10,9 @@
  * Own file, per the timeout note in screens.test.js.
  */
 
-import { cardsIn, sessionFor, sentencesFor } from "../src/screens/Study";
+import { cardsIn, sessionFor, sentencesFor, studyCards, newCardRank } from "../src/screens/Study";
 import { DAY, REVIEW, NEW } from "@core/scheduler";
-import { SPEECH, STAGES } from "../src/data";
+import { SPEECH, STAGES, dueCount } from "../src/data";
 import { hasRealAudio } from "../src/audio";
 
 const now = Date.now();
@@ -40,22 +40,58 @@ describe("which cards a set holds", () => {
     expect(due).toEqual(["дом", "не", "я"]);
   });
 
-  /* The set the Review button switches on is a set like any other, which is the
-     whole point: the picker can now untick it. */
-  it("holds nothing when nothing is ticked", () => {
+  /* What is due is dealt whatever is ticked (2026-09-28): the Study badge
+     counted ~150 due while a trouble-words tick let the pile hand over twenty
+     and then say "Done for today". No tick may narrow the due cards away. */
+  it("deals everything due with nothing ticked, and the badge counts the same", () => {
     expect(cardsIn(st, [])).toEqual([]);
-    expect(sessionFor({ ...st, sets: [] }).items).toEqual([]);
-  });
-
-  it("deals the session from the ticked sets and no others", () => {
-    const s = sessionFor({ ...st, sets: ["__due__"] });
+    const s = sessionFor({ ...st, sets: [] });
     const words = s.items.map((x) => x.word).sort();
     expect(words).toEqual(["дом", "не", "я"]);
     expect(s.items.find((x) => x.word === "дом").kind).toBe("new");
-    expect(s.items.filter((x) => x.kind === "review").map((x) => x.word).sort()).toEqual(["не", "я"]);
-    // Not due, so not asked — and not in the set at all.
+    // Not due, so not asked.
     expect(words).not.toContain("город");
     expect(s.due).toBe(2);
+    expect(dueCount({ ...st, sets: [] })).toBe(2);
+  });
+
+  it("deals the due cards even when only the trouble words were ticked", () => {
+    const s = sessionFor({ ...st, sets: ["__trouble__"] });
+    expect(s.items.map((x) => x.word).sort()).toEqual(["дом", "не", "я"]);
+  });
+
+  /* Words, sentences, or both — for the due cards as well as the new ones, and
+     the badge follows the same choice so it never promises what is not dealt. */
+  it("studies the kinds of card chosen, and counts only those as due", () => {
+    const withSentence = { ...st, seen: { ...st.seen, "Где книга?": { recognise: review(-1) } } };
+    const wordsOnly = sessionFor({ ...withSentence, cardKinds: ["words"] }).items.map((x) => x.word);
+    expect(wordsOnly).not.toContain("Где книга?");
+    expect(dueCount({ ...withSentence, cardKinds: ["words"] })).toBe(2);
+    const sentOnly = sessionFor({ ...withSentence, cardKinds: ["sentences"] }).items.map((x) => x.word);
+    expect(sentOnly).toContain("Где книга?");
+    expect(sentOnly).not.toContain("я");
+    expect(dueCount({ ...withSentence, cardKinds: ["sentences"] })).toBe(1);
+  });
+
+  /* The trouble round: the trouble words whether or not they are due, worst
+     first, as their own session. */
+  it("deals a round of trouble words on request, due or not", () => {
+    const bad = { dueAt: now + 5 * DAY, lastAt: now - DAY, s: 2, d: 9.5, state: REVIEW, steps: 0, reps: 12, lapses: 5 };
+    const s = sessionFor({ ...st, seen: { ...st.seen, "город": { recognise: bad } } }, { round: "trouble" });
+    expect(s.practice).toBe(true);
+    expect(s.items.map((x) => x.word)).toContain("город");
+  });
+
+  /* New cards from the path come commonest first, and a sentence is ranked by
+     its rarest word (the owner, 2026-09-28: "prioritize more common and useful
+     words… same with simpler sentences"). */
+  it("introduces the commonest new cards first, simple sentences among them", () => {
+    const fresh = { ...base, sets: ["__path__"], newPerDay: 5 };
+    const ranks = sessionFor(fresh).items.map((x) => newCardRank(x.word));
+    expect(ranks.length).toBeGreaterThan(0);
+    const all = studyCards(fresh).filter((c) => !fresh.seen[c.b]).map((c) => newCardRank(c.b)).sort((a, b) => a - b);
+    expect(Math.max(...ranks)).toBeLessThanOrEqual(all[ranks.length - 1]);
+    expect(newCardRank("Где книга?")).toBeLessThan(newCardRank("Нам нужно установить наблюдение за домом этого человека."));
   });
 
   /* Whole sentences as cards (the owner, 2026-09-16: *"Complete sentences are
@@ -81,11 +117,13 @@ describe("which cards a set holds", () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it("puts sentences in the pile only when their set is ticked", () => {
-    const far = { ...base, unit: Object.fromEntries(STAGES.slice(0, 3).flatMap((s) =>
+  it("puts new sentences in the pile only when sentences are chosen", () => {
+    const far = { ...base, sets: ["__path__"], unit: Object.fromEntries(STAGES.slice(0, 3).flatMap((s) =>
       [s.core, ...s.branches].map((u) => [u.id, { lessons: { 0: { v: true, q: 100 } } }]))) };
     expect(cardsIn(far, ["__sentences__"]).every((c) => c.sentence)).toBe(true);
     expect(cardsIn(far, [UNIT_WITH_WORDS]).some((c) => c.sentence)).toBe(false);
+    expect(studyCards({ ...far, cardKinds: ["words"] }).some((c) => c.sentence)).toBe(false);
+    expect(studyCards({ ...far, cardKinds: ["words", "sentences"] }).some((c) => c.sentence)).toBe(true);
   });
 
   /* A word is one card (core/scheduler.js CARD, 2026-09-23): two fronts ticked

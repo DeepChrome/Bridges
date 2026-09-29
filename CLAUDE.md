@@ -5158,6 +5158,72 @@ Twelve items from one message. The ones with a rule behind them:
   until every chapter's spine is done (or developer mode), and says "Final
   Test" and nothing else.
 
+## 30bc. What is due is always dealt (2026-09-28)
+
+The owner: *"the study tab displays that I need to review like 150 cards,
+however when I click it, it only shows me my trouble cards then says done for
+the day. You need to use the anki mechanism where it mixes trouble cards in
+with new cards entering at a regular cadence… it can be sentences or
+individual words… after the user sufficiently studies for the day, they can
+have the option to review more trouble words."* Then: *"nvm maybe that was
+just in the settings… it's a little hidden though."*
+
+**It was the settings, and that is the defect.** The badge counted every due
+card; the session dealt only the ticked sets, and "Due today" and "Trouble
+words" were sets like any other. With trouble ticked, 150 cards were owed and
+twenty reachable. §30aa's stranding, from the other side: a tick may not
+narrow away work the badge promises.
+
+- **Every session holds everything due** of the chosen kinds (`studyCards` in
+  Study.js), whatever is ticked. `dueCount` filters by the same kinds, so the
+  badge and the pile are one number. What the picker still decides is where
+  **new** cards come from (`sourceCards`): **Your path** (`__path__`, the
+  units reached — the default), chapters, decks.
+- **Words, sentences, or both** (`st.cardKinds`, `cardKind` in
+  core/queue.js — a card with a space in its key is a sentence). The kind
+  decides the due cards as well as the new, and the last kind cannot be
+  unticked.
+- **Trouble is a round, not a set**: `practiceSession` deals the trouble
+  words due or not, offered as "Review trouble words" once the day's pile is
+  done, and from You's trouble sheet as a route param (`round: "trouble"`),
+  so it never stays ticked and narrows the next session.
+- **New cards commonest first — sentences too.** `newCardRank` ranks a
+  sentence by its rarest word plus a little for length, on the words' scale,
+  so simple sentences arrive among common words and not after all of them
+  (the owner: *"when in doubt, prioritize more common and useful words"*).
+  «посадить» is lemma 3,046 and «заплатить» 1,574; on the path they come
+  after the commoner words not yet met.
+- **v10** strips `__due__`, `__trouble__`, `__sentences__` from `sets`, turns
+  a sentences tick into the kind, and gives a profile left with no source its
+  path. `cardKinds` is a setting (repo.js `SETTING_KEYS`).
+
+**Found on the way**: with a source in the store's defaults, Study dealt a
+real pile from them *before the profile loaded* and read its first card
+aloud. It deals on `ready` now; the one-voice test caught it by counting a
+player nobody asked for.
+
+## 30bd. The characters are DiceBear's (2026-09-28)
+
+The ten hand-drawn faces read as clip-art (ROADMAP 13.43); the owner: *"just
+pick… modern cool fun avatars"*. `tools/build_avatars.mjs` renders **twelve
+faces in DiceBear's Adventurer style** (Lisa Wischofsky, CC BY 4.0) to SVG
+once and writes `core/avatars.js`; DiceBear is installed anywhere with
+`--from <dir>` and is a dependency of nothing (rule 20.5).
+
+- **Chosen by looking.** `--sheet` renders a dozen styles side by side;
+  Adventurer won on range and on reading at 40 px. Half its expressions are
+  sleepy or sulking, so `STYLE_OPTS` keeps the smiling mouths and bright or
+  winking eyes, read off a sheet of all of them; `--candidates 48` rendered
+  the pool the twelve were picked from.
+- **Ids are scoped per face.** DiceBear names its masks alike in every face,
+  and faces share a page on the web and in the picker — the first sheet drew
+  half its styles as slivers. React Native renders each face apart and would
+  never have shown it; the web would have.
+- **Old profiles keep a face**: `AV_LEGACY` maps each hand-drawn id to one of
+  the twelve, and `avatarOf` is the only way to resolve an id. The credit is
+  generated from the style's own licence metadata into `AV_CREDIT` and drawn
+  on the Credits screen (rule 20.10).
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

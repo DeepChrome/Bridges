@@ -38,7 +38,8 @@ const due = (extra = {}) => ({ dueAt: now - DAY, lastAt: now - 2 * DAY, s: 1, d:
 const fresh = () => ({ dueAt: now, s: 0, d: 0, state: NEW, steps: 0, reps: 0, lapses: 0 });
 
 const base = {
-  v: 9, seen: {}, trouble: {}, pinned: [], sets: ["__due__"], drills: {}, unit: {}, watched: {},
+  // Schema 10 with no new-card source, so the pile is exactly the cards seeded.
+  v: 10, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {}, watched: {},
   speech: { attempts: [], tagCounts: {} }, xp: 0, streak: 0,
   flash: ["recognise"], newPerDay: 5, reviewsPerDay: 200, learnAhead: 20,
 };
@@ -143,7 +144,7 @@ describe("the front never carries the answer", () => {
 describe("the options live where a session starts", () => {
   it("offers the three fronts, and keeps the last one ticked", async () => {
     await withProfile({ sets: [], flash: ["recognise"] });
-    fireEvent.press(await screen.findByText("Choose what to review"));
+    fireEvent.press(await screen.findByTestId("study-cog"));
     for (const [id] of FRONTS) expect(await screen.findByTestId(`flash-${id}`)).toBeTruthy();
     /* Each press inside `act`, so the save effect has run before the row is
        read back — a bare press followed by `saved()` reads the state as it was
@@ -163,7 +164,7 @@ describe("the options live where a session starts", () => {
   it("defaults new words to five a day, and takes any number", async () => {
     expect(QUEUE_DEFAULTS.newPerDay).toBe(5);
     await withProfile({ sets: [], newPerDay: undefined });
-    fireEvent.press(await screen.findByText("Choose what to review"));
+    fireEvent.press(await screen.findByTestId("study-cog"));
     expect((await screen.findByTestId("new-per-day-value")).props.value).toBe("5");
 
     await act(async () => { fireEvent.press(screen.getByTestId("new-per-day-plus")); });
@@ -216,12 +217,27 @@ describe("the options live where a session starts", () => {
   /* It never goes below nothing, whatever the finger does. */
   it("clamps the new-word ration rather than letting it go negative", async () => {
     await withProfile({ sets: [], newPerDay: 0 });
-    fireEvent.press(await screen.findByText("Choose what to review"));
+    fireEvent.press(await screen.findByTestId("study-cog"));
     const minus = await screen.findByTestId("new-per-day-minus");
     expect(minus.props.accessibilityState).toMatchObject({ disabled: true });
     await act(async () => { fireEvent.changeText(screen.getByTestId("new-per-day-value"), "-4"); });
     await act(async () => { fireEvent(screen.getByTestId("new-per-day-value"), "blur"); });
     expect((await saved()).newPerDay).toBe(4);
+  });
+});
+
+/* The day is done when the pile is; what is offered after it is the learner's
+   (the owner, 2026-09-28: "after the user sufficiently studies for the day,
+   they can have the option to review more trouble words"). */
+describe("after the day's pile", () => {
+  it("offers a round of trouble words, which deals them though none is due", async () => {
+    const bad = due({ dueAt: now + 5 * DAY, lapses: 5, reps: 12, d: 9.5 });
+    await withProfile({ seen: { [WORD]: { recognise: bad } } });
+    expect((await screen.findByTestId("study-state")).props.children).toBe("Done for today.");
+    await act(async () => { fireEvent.press(screen.getByTestId("trouble-round")); });
+    expect(await screen.findByTestId("card-recognise")).toBeTruthy();
+    expect(screen.getByTestId("study-heading").props.children).toBe("Trouble words");
+    expect(screen.getByTestId("flag-trouble")).toBeTruthy();
   });
 });
 

@@ -488,8 +488,9 @@ export default function You({ navigation }) {
                       label={`Review ${trouble.length} trouble ${trouble.length === 1 ? "word" : "words"}`}
                       onPress={() => {
                         setShowing(null);
-                        update((p) => ({ ...p, sets: ["__trouble__"] }));
-                        navigation.navigate("Study");
+                        // One round, asked for by name — not a tick left on
+                        // in the picker to narrow every session after it.
+                        navigation.navigate("Study", { screen: "Cards", params: { round: "trouble" } });
                       }} />
                ) : null}>
           {!trouble.length ? <Muted>Nothing yet</Muted> : (

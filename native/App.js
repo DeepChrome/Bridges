@@ -44,7 +44,7 @@ import Sounds from "./src/screens/Sounds";
 import Grammar from "./src/screens/Grammar";
 import Endings from "./src/screens/Endings";
 import { WordsProvider, navRef } from "./src/words";
-import { configureAudio } from "./src/audio";
+import { configureAudio, setRouteSource, leftFor } from "./src/audio";
 import { setHaptics } from "./src/haptics";
 import { arm as armReminders } from "./src/notify";
 import { workedOn } from "@core/scheduler";
@@ -70,6 +70,16 @@ import {
  * Not a setting. The device knows its own offset, and a learner who moves is
  * corrected by the next launch. */
 setDayStart({ offsetMinutes: new Date().getTimezoneOffset() });
+
+/* The route on screen, for audio.js to stamp every sound with. Module scope
+   for the same reason as the day start: a screen can speak before any
+   component of ours has run an effect. */
+const currentRouteKey = () => {
+  if (!navRef.isReady()) return null;
+  const r = navRef.getCurrentRoute();
+  return r ? r.key : null;
+};
+setRouteSource(currentRouteKey);
 
 /* …and the same for errors that never reach a React boundary: a rejected
    promise, a callback from a native module. At module scope so it is in place
@@ -579,7 +589,10 @@ export default function App() {
         onHome={() => { if (navRef.isReady()) navRef.navigate("Learn", { screen: "Path" }); }}
       >
         <SessionProvider>
-          <NavigationContainer ref={navRef} theme={navTheme}>
+          {/* Sound belongs to the screen that started it: any navigation to
+              another route stops it (audio.js `leftFor`, 2026-09-29). */}
+          <NavigationContainer ref={navRef} theme={navTheme}
+                               onStateChange={() => leftFor(currentRouteKey())}>
             <WordsProvider>
               <Shell />
               <StatusBar style={scheme === "light" ? "dark" : "light"} />

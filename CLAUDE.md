@@ -950,6 +950,24 @@ bundle is now every word and every sentence a lesson can play, which is why
 left for it to download. What still streams from the collection: the
 dictionary's example sentences, and the human recordings.
 
+**…and what streams is kept once fetched** (2026-09-29). «Следуйте за мной»
+had "a huge delay" — and none of 200 sampled collection files has more than
+0.13 s of lead silence, so the wait was the download, paid on every press.
+`audio.js` keeps a streamed recording in the cache directory after its first
+play, and a `Speaker` that stays on screen half a second fetches its
+recording ahead (`warm`); a copy that will not play is deleted and fetched
+again. Not a setting and not `cache.js` come back: nothing is downloaded that
+the learner did not put on the screen.
+
+**Sound belongs to the screen that started it** (same day). Stopping was
+wired into the flow screens on unmount only, so a pushed word entry, another
+tab or Settings left a lesson's recording playing. Every start records the
+focused route (`setRouteSource` in App.js) and every navigation calls
+`leftFor(key)`, which stops sound owned elsewhere; `say` and `playTrack`
+also give up if the route changed while they were opening. A new screen's
+own autoplay is already owned by it when the navigation event arrives, so it
+survives.
+
 ## 27a. Tatoeba audio is licensed per recording
 
 The sentence text is uniformly CC BY 2.0 FR. **The recordings are not.** Of the 190

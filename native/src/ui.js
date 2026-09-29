@@ -17,7 +17,7 @@ import { iconFor } from "@core/icons";
 import { AV, AV_IDS, avatarOf } from "@core/avatars";
 import { useTheme, radius, space, type, faceFor, useShadow } from "./theme";
 import { useFill, usePress, useEnter } from "./motion";
-import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
+import { say, warm, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
 import { MicButton } from "./mic";
 
 /* How deep a control's edge is, and how far it travels when pressed. One
@@ -968,6 +968,14 @@ export function Speaker({ text, size = 40, device = false }) {
     });
     return () => { alive = false; offFail(); if (timer) clearTimeout(timer); };
   }, [text]);
+  /* A speaker that stays on screen fetches its recording ahead of the press
+     (audio.js `warm`), so a streamed example plays at once. After a moment,
+     not at mount: search results change with every letter typed. */
+  useEffect(() => {
+    if (!real) return undefined;
+    const timer = setTimeout(() => warm(text), 500);
+    return () => clearTimeout(timer);
+  }, [text, real]);
 
   const live = real || voice;
   return (

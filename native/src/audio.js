@@ -5,6 +5,7 @@
  */
 
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
+import { File, Directory, Paths } from "expo-file-system";
 import * as Speech from "expo-speech";
 import { audioUrl } from "./data";
 import { bare, fold } from "@core/util";
@@ -26,6 +27,66 @@ let ready = false;
    on a promise. One counter, because there is one `player`: whoever asked last
    is what should be heard. */
 let trackSeq = 0;
+
+/* **Sound belongs to the screen that started it** (2026-09-29).
+ *
+ * The owner: *"audio will play even if I change screens… make sure the audio
+ * gets cut if you switch away from the screen"*. Stopping on leave was wired
+ * into the flow screens only, and only on unmount — so a word entry pushed
+ * over a lesson, another tab, or Settings left the lesson mounted and its
+ * recording playing. Every start now records the route it began on
+ * (`routeOf`, supplied by App.js from the navigation ref) and App.js calls
+ * `leftFor(key)` on every navigation: sound owned by any other route stops.
+ * A screen's own autoplay on arrival is started *before* the navigation event
+ * reaches the container, already owned by the new route, so it survives. */
+let routeOf = () => null;
+let owner = null;
+export function setRouteSource(fn) { routeOf = typeof fn === "function" ? fn : () => null; }
+const here = () => { try { return routeOf(); } catch (e) { return null; } };
+const claim = (route) => { owner = route === undefined ? here() : route; };
+export function leftFor(key) {
+  if (owner !== null && owner !== key) { owner = null; stop(); }
+}
+
+/* **Streamed recordings, kept on the phone once fetched** (2026-09-29).
+ *
+ * The owner: «Следуйте за мной» *"has a huge delay before it starts"*. It is a
+ * dictionary example — one of the collection's recordings that still stream
+ * from the web host (§27) — and measured, the file itself begins speaking at
+ * once: none of 200 sampled has more than a tenth of a second of lead
+ * silence. The wait was the download, paid on every press. So a streamed
+ * recording is fetched into the cache the first time it is wanted and played
+ * from there after; and a speaker that has sat on screen for a moment fetches
+ * its recording before anybody presses it (`warm`, called by `Speaker`), so
+ * the first press is usually the local copy too. Bundled clips need none of
+ * this. The cache directory is the OS's to purge, which costs a re-fetch and
+ * nothing else. */
+let cacheDir = null;
+const dirOf = () => {
+  if (!cacheDir) {
+    cacheDir = new Directory(Paths.cache, "audio");
+    try { if (!cacheDir.exists) cacheDir.create(); } catch (e) { /* played from the web instead */ }
+  }
+  return cacheDir;
+};
+const fileOf = (url) => new File(dirOf(), url.split("/").pop());
+function localCopy(url) {
+  try { const f = fileOf(url); return f.exists && f.size > 0 ? f.uri : null; } catch (e) { return null; }
+}
+const fetching = new Map();
+function fetchCopy(url) {
+  if (fetching.has(url) || localCopy(url)) return;
+  const job = File.downloadFileAsync(url, dirOf())
+    .catch(() => { try { const f = fileOf(url); if (f.exists) f.delete(); } catch (e) { /* nothing there */ } })
+    .finally(() => fetching.delete(url));
+  fetching.set(url, job);
+}
+/* Fetch ahead the recording `text` would stream, if it has one. */
+export function warm(text) {
+  if (!text || wordClip(fold(text))) return;
+  const url = audioUrl(text);
+  if (url) fetchCopy(url);
+}
 
 /* Giving a player back: **pause first, then remove**, and never one without the
  * other.
@@ -314,6 +375,7 @@ export function speakTTS(text, opts = {}) {
   if (!ruVoice) return false;
   try {
     Speech.stop();
+    claim();
     const end = begin();
     // Pin the voice, not just the language tag: the tag alone still lets the
     // platform fall back to whatever it has. `stress` keeps the acute, as
@@ -352,6 +414,7 @@ export function speakLine(text, opts = {}) {
   if (!en && !ruVoice) return Promise.resolve(false);
   return new Promise((resolve) => {
     let done = false;
+    claim();
     const end = begin();
     const finish = (ok) => {
       if (done) return;
@@ -415,7 +478,8 @@ export async function playTrack(source, from = 0, rateOverride) {
      happened to settle last: a superseded attempt never reaches `play()`, and
      says so by answering null. */
   const seq = ++trackSeq;
-  const abandoned = () => seq !== trackSeq;
+  const asked = here();
+  const abandoned = () => seq !== trackSeq || here() !== asked;
   await prepare();
   if (abandoned()) return null;
   try {
@@ -449,6 +513,7 @@ export async function playTrack(source, from = 0, rateOverride) {
     if (rate !== 1 && typeof mine.setPlaybackRate === "function") {
       try { mine.shouldCorrectPitch = true; mine.setPlaybackRate(rate, "high"); } catch (e) {}
     }
+    claim(asked);
     mine.play();
     return {
       /* Where the track is, in milliseconds. `currentTime` is seconds and is
@@ -506,10 +571,14 @@ export async function say(text, opts = {}) {
      key below cannot tell «руки́» from «ру́ки». */
   const bundled = opts.clip || wordClip(fold(text));
   const streamed = bundled ? null : audioUrl(text);
+  // The phone's own copy when there is one; otherwise the web, and fetch a
+  // copy while it plays so the next press does not wait.
+  const local = streamed ? localCopy(streamed) : null;
+  if (streamed && !local) fetchCopy(streamed);
   /* A bundled clip is a `require`, which expo-audio takes as it is — the same
      way `playTrack` and the answer cues pass theirs. Only a URL needs the
      `{ uri }` wrapper, and wrapping a module id in one plays silence. */
-  const source = bundled || (streamed ? { uri: streamed } : null);
+  const source = bundled || (local ? { uri: local } : streamed ? { uri: streamed } : null);
   if (!source) {
     const spoke = speakTTS(text, { ...opts, rate });
     if (!spoke) failed(text);
@@ -519,8 +588,10 @@ export async function say(text, opts = {}) {
      positively invites a learner to press twice (§30h: a second press within six
      seconds plays it slower). Whoever asked last is what should be heard. */
   const seq = ++trackSeq;
+  // The screen that asked. Left before the sound could start, it never starts.
+  const asked = here();
   await prepare();
-  if (seq !== trackSeq) return false;
+  if (seq !== trackSeq || here() !== asked) return false;
   const fallback = () => {
     if (seq !== trackSeq) return;       // superseded: the fallback would overlap
     if (!speakTTS(text, { ...opts, rate })) failed(text);
@@ -535,6 +606,9 @@ export async function say(text, opts = {}) {
       mine.addListener("playbackStatusUpdate", (s) => {
         if (!s) return;
         if (s.error && player === mine) {
+          // A local copy that will not play is a bad copy: gone, so the next
+          // press fetches it again rather than failing the same way.
+          if (local) { try { fileOf(streamed).delete(); } catch (e) { /* already gone */ } }
           end();
           fallback();
         } else if (s.didJustFinish) {
@@ -546,6 +620,7 @@ export async function say(text, opts = {}) {
       // Slower, not lower: pitch correction keeps the voice the same voice.
       try { mine.shouldCorrectPitch = true; mine.setPlaybackRate(rate, "high"); } catch (e) {}
     }
+    claim(asked);
     mine.play();
     return true;
   } catch (e) {

@@ -5368,6 +5368,17 @@ says why this is the frame of the whole app; this is how it is built.
 - **What the AI has left today** is on the profile under the tiles, not
   inside Settings, and counts down rather than up.
 
+**The skeleton is chosen from the videos, not fitted to the units** (ROADMAP
+Phase 14, V1; `tools/build_skeleton.py` → `data/curated/skeleton.json`, the
+decision file, rewritten only with `--write --force`). A video's difficulty
+is `r90` — how far down the frequency list a learner must know to follow 90 %
+of its speech — and pace. **Rank by the videos' own speech** (how many of the
+321 say a word): the deck corpus's independent ranks skip the closed classes,
+because «что», «это», «он» are shared forms, and every video came out 12 %
+unrankable. The order is built as a learner walks it — each goal the one
+costing the fewest new words after everything before it — and a grammar
+episode is attached beside a chapter, never made its goal.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

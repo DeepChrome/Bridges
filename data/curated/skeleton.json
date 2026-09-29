@@ -1,0 +1,109 @@
+{
+ "_comment": [
+  "The course's goal videos, chapter by chapter (ROADMAP Phase 14).",
+  "Proposed by tools/build_skeleton.py, then edited by hand: this file is the decision."
+ ],
+ "chapters": [
+  {
+   "n": 1,
+   "grammar": "basics",
+   "spine": "MSxKfCnQIAA",
+   "lesson": "c-BdQqHuTWM",
+   "quests": {
+    "family": "XjkGvceXceY",
+    "food": "oR2hGWoStZo"
+   }
+  },
+  {
+   "n": 2,
+   "grammar": "present",
+   "spine": "3-g5cBfd7pE",
+   "lesson": "F1aBhlBLwsA",
+   "quests": {
+    "tech": "gFpTVhFp6n0",
+    "home": "WVyb-CDBaBQ"
+   }
+  },
+  {
+   "n": 3,
+   "grammar": "gender",
+   "spine": "TgwXHXqdWa0",
+   "lesson": "wCzD2jitlEs",
+   "quests": {
+    "city": "7MRugTEqMo4",
+    "time": "_4MNz6X6nzE"
+   }
+  },
+  {
+   "n": 4,
+   "grammar": "plural",
+   "spine": "htHIPFhV7uc",
+   "lesson": null,
+   "quests": {
+    "travel": "-qbTumiWw98",
+    "speech": "ok09KmmxVWQ",
+    "clothes": "256FyJD5i9A"
+   }
+  },
+  {
+   "n": 5,
+   "grammar": "prepositional",
+   "spine": "-9HtYXYi3AA",
+   "lesson": "-NbTi2_5Gps",
+   "quests": {
+    "work": "P2O8HWoMEX0",
+    "business": "MPdYcyTaFfk",
+    "emotion": "1pQvYLggCWw"
+   }
+  },
+  {
+   "n": 6,
+   "grammar": "accusative",
+   "spine": "p9WDjKUZjlI",
+   "lesson": null,
+   "quests": {
+    "body": "XTMNiYPHgkQ",
+    "animals": "23PEkMd2svg",
+    "science": "Xdvn1T5Fe4c"
+   }
+  },
+  {
+   "n": 7,
+   "grammar": "past",
+   "spine": "Lv39BhZJ2mg",
+   "lesson": "38dpdR7Nq-0",
+   "quests": {
+    "school": "EjDIUtUXvtI",
+    "art": "6GqonOcxCQQ",
+    "nature": "_4k0VthuqMA"
+   }
+  },
+  {
+   "n": 8,
+   "grammar": "aspect",
+   "spine": "bzILjaOqN4U",
+   "lesson": "i7SOvgZIhIM",
+   "quests": {
+    "sport": "W9vm5pzKLRs",
+    "politics": "BxUZdClSMnM"
+   }
+  },
+  {
+   "n": 9,
+   "grammar": "future",
+   "spine": "MbvtSNMwshI",
+   "lesson": null,
+   "quests": {
+    "religion": "aBQptpP5ZOI",
+    "medicine": "hFWGPcA6r6s"
+   }
+  },
+  {
+   "n": 10,
+   "grammar": "imperative",
+   "spine": "aO3IsyGkwQk",
+   "lesson": null,
+   "quests": {}
+  }
+ ]
+}

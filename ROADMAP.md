@@ -1185,6 +1185,102 @@ yet measured on the phone**: the STT Lab is the instrument. Then the pool's
 cap on spoken tries, the recognizer listening for at least 900 ms, and the
 offline-audio cache removed as having nothing left to fetch.
 
+## Phase 14 — The video skeleton: every lesson prepares for a real video (2026-09-29)
+
+The owner: *"The emphasis is on preparing the learner for the video as best as
+possible. They don't need to learn everything, but this framework builds them
+towards content that they'll actually witness 'in the wild'. Organize those
+videos into a logical flow for a learner. Tie appropriate grammar into the
+chapter as needed."* And: *"Each lesson can have a summary before the quiz that
+is just a reference on what was learned in a quick scrollable list."*
+
+**Why this is a rebuild and not a setting.** Today the curriculum is decided
+first (frequency bands and topic rules, `build_topics.py`) and a video is
+matched to each unit afterwards (`build_videos.py`). Measured, that matching
+is weak where it matters most: chapter 1's video was 35 % followable by the end
+of chapter 1, and several side quests pointed at the wrong subject (Family →
+a video about months, Medicine → the history of Uglich). Phase 14 reverses the
+direction: the videos come first, in order, and each unit is built to reach
+its video.
+
+**What it keeps.** The ten chapters, the spine and side quests, the unit ids
+(learner state keys on them), every activity and drill, the scheduler, the
+learner's cards (keyed by the word, rule 20.4 — a word moving lessons loses
+nothing). **What it changes**: which words each unit teaches, in what order,
+which grammar card a chapter carries, which chapter a side quest sits in, and
+the lessons cut from all of that.
+
+### The steps, each with its gate
+
+| step | what | gate |
+|---|---|---|
+| **V1** | **Measure and order the videos** — the skeleton | the owner approves the order, having watched the first few |
+| V2 | **Lesson summary** — a scrollable reference before each quiz, and a chapter one before the chapter test | on the phone |
+| V3 | **Words from the video** — each unit's words chosen from what its goal video says | per-unit comprehension of its video measured before/after |
+| V4 | **Grammar from the videos** — each chapter's card set by its grammar episode and what its videos use | every card's examples pass `check_grammar_cards` |
+| V5 | **Lessons point at the video** — a word's card shows where the video says it; the gap-fill draws on the video's own lines | the walkthrough |
+| V6 | **The written conversations** re-checked against the new lessons and rewritten where they break (~$0.30 of audio) | `check_scripts --strict` |
+| V7 | **Progress carried across** — lessons re-cut, so completion is re-derived from what the learner has studied | a migration test on a real profile copy |
+| V8 | **Verify and ship** — simulator, every suite, the emulator walkthrough, an APK | the owner's review on the phone |
+
+**V1 — the skeleton** (`tools/build_skeleton.py`, `data/curated/skeleton.json`).
+Every captioned video measured: how far down the frequency list a learner must
+know to follow 90 % of what is said (`r90`), words a minute, what its title says
+it teaches and is about. **The frequency list is the videos' own** — how many
+of the 321 say a word — because the deck corpus's ranks skip the closed classes
+(«что», «это», «он» are shared forms) and left 12 % of speech unrankable; what a
+learner needs for Russian in the wild is what is said in the wild. The order is
+built chapter by chapter as a learner walks it: each chapter's goal is the
+video that is about that chapter's difficulty **and costs the fewest new words
+after everything before it** — the second is what makes it a flow rather than a
+sort — with real conversation (the street episodes) favoured more each chapter
+from chapter 4. A grammar episode, where the library has one, is attached to
+its chapter beside the card rather than made the goal: only half the chapter
+points have one (present, gender, prepositional, past, aspect; none for
+plural, accusative, future, imperative). Side quests are the topic videos
+cheapest to reach from each chapter, everyday topics first, two or three a
+chapter.
+
+Measured on the first proposal: chapter 1's goal needs **5** new words to
+follow 90 % (the old pick needed 97); the course reaches all ten goals and 22
+side quests with **~1,200** words taught (1,045 today). **Law and Military have
+no video named for them** in the library. The proposal is a draft: several
+picks are the machine's best guess and want a person — chapter 6's goal is a
+grammar talk, chapter 10's is on mushrooms, and some side quests fit their
+topic loosely (Speech → grocery phrases). `data/curated/skeleton.json` is the
+decision; the tool rewrites it only with `--write --force`.
+
+**V2 — the lesson summary.** One step between the teaching and the quiz,
+optional and never blocking: the lesson's words (meaning, speaker, irregular
+flag), the forms it asked about, its example sentences, its grammar card —
+a list to scroll, not a lesson. The chapter test gets the same, for the whole
+chapter. Independent of the rest, so it can land while the skeleton is reviewed.
+
+**V3 — words from the video.** `build_topics.py` takes each unit's words from
+its goal video: the most-said content words not yet taught, until the video is
+~90 % followable by the unit's end (counting everything earlier on the route),
+then topped up from general frequency to the unit's size. Chapters and side
+quests come from the skeleton rather than `STAGE_PLAN`. Measured per unit,
+before and after. The branch audit (`audit_branches.py`) and the gloss
+snapshot-diff (§30an) run after, as always.
+
+**V4 — grammar.** The spine cards keep the order the courses agree on
+(§30e) unless a chapter's videos lean on something else; a chapter's card
+names its grammar episode, which plays from the grammar step. What forms each
+video actually uses is measured off its spoken forms against the paradigms,
+so a chapter whose video is full of past tense is not taught the imperative.
+
+**V5 — the lessons.** A word card shows the line of the video where the word
+is said, playable at that moment; the vocabulary step ends by naming the video
+it prepares for; the gap-fill may draw a line from the video's captions (no
+translation needed for a gap-fill, which is why it is the one question the
+captions can carry).
+
+**V6–V8** as the table says. The risk worth naming now: **V3 re-cuts every
+lesson**, and lesson completion is stored by lesson index, so progress has to be
+re-derived (V7) rather than carried by position — the learner's cards are safe
+regardless, since they key on the word.
+
 ## Phase 12 — What is actually left (2026-09-10)
 
 **Superseded by Phase 13 above; kept because the reasoning still reads.**

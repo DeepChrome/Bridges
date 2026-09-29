@@ -309,10 +309,7 @@ describe("Video", () => {
     expect(screen.getByTestId("prep-met").props.children).toBe(`1 of ${heard.length} met`);
     // The whole list goes to the flashcards as one round.
     await act(async () => { fireEvent.press(screen.getByTestId("prep-cards")); });
-    expect(nav.navigate).toHaveBeenCalledWith("Tabs", {
-      screen: "Study",
-      params: { screen: "Cards", params: { round: "list", words: heard, title: "Before the video" } },
-    });
+    expect(nav.navigate).toHaveBeenCalledWith("ListCards", { round: "list", words: heard, title: "Before the video" });
   });
 
   /* From a dictionary entry (the owner, 2026-09-08): the entry lists the videos

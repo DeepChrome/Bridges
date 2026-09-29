@@ -110,11 +110,8 @@ describe("a lesson's flashcards", () => {
     const { UN, L, lessonWords } = require("../src/data");
     await withProfile(<LessonScreen route={{ params: { unitId: UN[0].id, index: 0 } }} navigation={nav} />);
     await act(async () => { fireEvent.press(await screen.findByTestId("lesson-cards")); });
-    expect(nav.navigate).toHaveBeenCalledWith("Tabs", {
-      screen: "Study",
-      params: { screen: "Cards", params: {
-        round: "list", words: lessonWords(UN[0], 0).map((x) => L[x].b), title: UN[0].name } },
-    });
+    expect(nav.navigate).toHaveBeenCalledWith("ListCards", {
+      round: "list", words: lessonWords(UN[0], 0).map((x) => L[x].b), title: UN[0].name });
   });
 });
 

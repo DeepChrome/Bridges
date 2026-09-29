@@ -207,6 +207,10 @@ function LearnStack() {
       <Stack.Screen name="Vocab" component={VocabFlow} options={titled("Vocabulary")} />
       <Stack.Screen name="Quiz" component={QuizFlow} options={titled("Quiz")} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
+      {/* A lesson's or a video's words as one flashcard round (§30bf). Pushed
+          on the stack it was asked from, so Back returns there — sending it to
+          the Study tab left Back to land on the path. On every stack Video is. */}
+      <Stack.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
       {/* The lesson's own conversation, opened from its Listening step. Here as
           well as on the Practice stack for the reason `Video` is in two stacks:
           **a route is only reachable from the stack it is registered in**, and a
@@ -294,6 +298,7 @@ function ImmerseStack() {
       <Stack.Screen name="Episodes" component={Immerse} options={{ title: "Immerse" }} />
       {/* Russian from outside the library (ROADMAP P10.7). */}
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
+      <Stack.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
       <Stack.Screen name="Credits" component={Credits} options={{ title: "Credits" }} />
@@ -310,6 +315,7 @@ function StudyStack() {
           and Immerse but not here. Found by routes.test.js, not by anybody
           pressing it; it had been dead since the mined-word link was added. */}
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
+      <Stack.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
       <Stack.Screen name="Credits" component={Credits} options={{ title: "Credits" }} />
@@ -462,6 +468,7 @@ function Shell() {
       {/* The player above the tabs too, so an entry's "Heard in" row opens the
           video over the entry and Back returns to the word, not to the library. */}
       <Root.Screen name="Video" component={Video} options={titled("Episode")} />
+      <Root.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
       {/* Developer-mode only; the screen itself refuses to render otherwise. */}
       <Root.Screen name="SttLab" component={SttLab} options={{ title: "STT Lab" }} />
       <Root.Screen name="Tour" component={TourScreen} options={{ title: "Tour" }} />

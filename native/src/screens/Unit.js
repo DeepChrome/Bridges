@@ -1,4 +1,4 @@
-﻿/* A unit's lessons, and inside a lesson its three components. */
+/* A unit's lessons, and inside a lesson its three components. */
 
 import React from "react";
 import { View, Pressable } from "react-native";
@@ -150,11 +150,8 @@ export function LessonScreen({ route, navigation }) {
       {/* The lesson's words as a round of flashcards, on the way from the
           lesson to the video it prepares for (§30bf). */}
       <Btn testID="lesson-cards" style={{ marginTop: 10 }} label="Flashcards for this lesson"
-           onPress={() => navigation.navigate("Tabs", {
-             screen: "Study",
-             params: { screen: "Cards", params: {
-               round: "list", words: lessonWords(unit, i).map((x) => L[x].b), title: unit.name } },
-           })} />
+           onPress={() => navigation.navigate("ListCards", {
+             round: "list", words: lessonWords(unit, i).map((x) => L[x].b), title: unit.name })} />
     </Screen>
   );
 }

@@ -478,10 +478,8 @@ export function Video({ route, navigation }) {
           moment it is said, and the whole list as flashcards. */}
       <PrepList words={words} seen={st.seen || {}} unit={unit}
                 focusWord={focus ? focus.word : null} onJump={openWord}
-                onCards={(list) => navigation.navigate("Tabs", {
-                  screen: "Study",
-                  params: { screen: "Cards", params: { round: "list", words: list, title: "Before the video" } },
-                })} />
+                onCards={(list) => navigation.navigate("ListCards",
+                  { round: "list", words: list, title: "Before the video" })} />
 
       {v.chapters && v.chapters.length ? (
         <>

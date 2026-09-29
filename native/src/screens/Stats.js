@@ -11,12 +11,11 @@ import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Screen, Muted, List, Row, SectionLabel, Pill, Text } from "../ui";
+import { Screen, Muted, SectionLabel, Text, Familiarity, familiarityColor } from "../ui";
 import { readLog } from "../store";
-import { L, idxOfWord } from "../data";
-import { DAY, dayOf, dueCards, cardsOf, NEW, intervalLabel } from "@core/scheduler";
+import { rankOf, dueCount } from "../data";
+import { DAY, dayOf, cardsOf, cardFor, NEW, familiarity, familiarityLabel } from "@core/scheduler";
 
-const GRADE = { 1: "Again", 2: "Hard", 3: "Good", 4: "Easy" };
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 /* Cards falling due on each of the next seven days; today carries everything
@@ -137,29 +136,86 @@ function Cal({ weeks, testID }) {
   );
 }
 
-function Figure({ value, label, first }) {
+/* **Where the words stand**, in the familiarity score's own levels (the owner,
+   2026-09-29: "the statistics are super ugly… make them more visually
+   appealing or useful"). The screen used to lead with four bare numbers and
+   end on a raw log ("recognise · 3m ago"); the one figure that says whether
+   the studying is working is how many words have climbed, so it leads now.
+   Read off the same `familiarity` the card and the entry draw, against each
+   word's own frequency, so a word is at the same level on all three screens.
+   Pure: the rank function comes in, so a test needs no payload. */
+export const LEVELS = [
+  ["New", null], ["Just met", 10], ["Learning", 32], ["Familiar", 60], ["Strong", 87], ["Mastered", 100],
+];
+export function mastery(seen, rank) {
+  const out = Object.fromEntries(LEVELS.map(([name]) => [name, 0]));
+  for (const w in seen || {}) {
+    out[familiarityLabel(familiarity(cardFor(seen[w]), rank ? rank(w) : undefined))]++;
+  }
+  return out;
+}
+
+/* One figure, large, with what it is under it. */
+function Figure({ value, label, testID }) {
   const t = useTheme();
   return (
-    <View style={{ flex: 1, alignItems: "center", paddingHorizontal: 4,
-                   borderLeftWidth: first ? 0 : 1, borderLeftColor: t.lineSoft }}>
-      <Text style={{ color: t.ink, fontSize: 26, fontWeight: "800", letterSpacing: -0.5 }}>{value}</Text>
-      <Muted size={12} style={{ textAlign: "center", marginTop: 2 }}>{label}</Muted>
+    <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8 }}>
+      <Text testID={testID} style={{ color: t.ink, fontSize: 24, fontWeight: "800", letterSpacing: -0.5,
+                                     minWidth: 44 }}>{value}</Text>
+      <Muted size={14}>{label}</Muted>
     </View>
   );
 }
 
-/* A row of bars, tallest to the ceiling of the group; a label under each. */
-function Bars({ values, labels, testID }) {
+/* The words by level as one bar, each level its colour on the familiarity
+   scale, and a legend with the counts. A level nobody is at draws nothing. */
+function Levels({ counts }) {
+  const t = useTheme();
+  const total = LEVELS.reduce((a, [name]) => a + counts[name], 0);
+  const colour = (score) => (score === null ? t.surface3 : familiarityColor(score, t));
+  if (!total) return <Muted>Nothing studied yet</Muted>;
+  return (
+    <>
+      <View testID="levels" style={{ flexDirection: "row", height: 16, borderRadius: 8, overflow: "hidden",
+                                     marginTop: 10, backgroundColor: t.surface2 }}>
+        {LEVELS.filter(([name]) => counts[name]).map(([name, score]) => (
+          <View key={name} testID={`level-${name}`}
+                style={{ flex: counts[name], backgroundColor: colour(score) }} />
+        ))}
+      </View>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 12, rowGap: 8 }}>
+        {LEVELS.map(([name, score]) => (
+          <View key={name} style={{ width: "50%", flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colour(score) }} />
+            <Text style={{ color: t.ink, fontSize: 15, flex: 1 }}>{name}</Text>
+            <Text style={{ color: t.ink2, fontSize: 15, fontWeight: "700", marginRight: 16 }}>
+              {counts[name].toLocaleString("en-US")}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </>
+  );
+}
+
+/* A row of bars, tallest to the ceiling of the group; a label under each.
+   `hot` is the one bar that is now — today — in full brand colour, the rest
+   quieter, so the eye lands where the learner is. */
+function Bars({ values, labels, testID, hot }) {
   const t = useTheme();
   const max = Math.max(1, ...values);
   return (
-    <View testID={testID} style={{ flexDirection: "row", alignItems: "flex-end", gap: 6, height: 96, marginTop: 8 }}>
+    <View testID={testID} style={{ flexDirection: "row", alignItems: "flex-end", gap: 8, height: 110, marginTop: 10 }}>
       {values.map((v, i) => (
         <View key={i} style={{ flex: 1, alignItems: "center" }}>
-          <Text style={{ color: t.ink2, fontSize: 11 }}>{v ? String(v) : ""}</Text>
-          <View style={{ width: "100%", height: Math.max(2, Math.round(60 * v / max)),
-                         backgroundColor: v ? t.brand : t.line, borderRadius: 3, marginTop: 2 }} />
-          <Muted size={11} style={{ marginTop: 4 }}>{labels[i]}</Muted>
+          <Text style={{ color: i === hot ? t.ink : t.ink2, fontSize: 12, fontWeight: i === hot ? "700" : "500" }}>
+            {v ? String(v) : ""}
+          </Text>
+          <View style={{ width: "100%", height: Math.max(3, Math.round(70 * v / max)), marginTop: 3,
+                         backgroundColor: !v ? t.surface3 : i === hot ? t.brand : t.brandBg,
+                         borderTopLeftRadius: 6, borderTopRightRadius: 6,
+                         borderBottomLeftRadius: 2, borderBottomRightRadius: 2 }} />
+          <Muted size={11} style={{ marginTop: 5, fontWeight: i === hot ? "700" : "400" }}>{labels[i]}</Muted>
         </View>
       ))}
     </View>
@@ -181,7 +237,8 @@ export default function Stats() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const due = dueCards(st.seen, now, st.learnAhead).length;
+  // The same number the Study badge shows, so the two screens agree.
+  const due = dueCount(st);
   const ahead = forecast(st.seen, now);
   const labels = ahead.map((_, k) => (k === 0 ? "Today" : DAYS[new Date(now + k * DAY).getUTCDay()]));
   // Retention stays a thirty-day figure; widening the read must not move it.
@@ -190,51 +247,43 @@ export default function Stats() {
   const days = log ? studiedDays(log) : null;
   const run = days ? runOf(days, now) : 0;
   const weekLabels = week ? week.map((_, k) => DAYS[new Date(now - (6 - k) * DAY).getUTCDay()]) : [];
-  const recent = log ? log.slice(-20).reverse() : [];
-  const cards = Object.values(st.seen || {}).reduce((a, e) => a + cardsOf(e).length, 0);
+  const levels = mastery(st.seen, rankOf);
+  const pct = retention === null ? null : Math.round(retention * 100);
 
   return (
     <Screen>
-      <View style={{ flexDirection: "row", marginTop: 8, paddingVertical: 4 }}>
-        <Figure first value={String(due)} label="due today" />
-        <Figure value={retention === null ? "–" : `${Math.round(retention * 100)} %`} label="retention" />
-        <Figure value={week ? String(week.reduce((a, b) => a + b, 0)) : "–"} label="reviews, 7 days" />
-        <Figure value={cards.toLocaleString("en-US")} label="cards" />
+      {/* How much sticks, as the same ring the cards carry; beside it the
+          three things a learner acts on. */}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 20, marginTop: 8 }}>
+        {pct === null
+          ? <View style={{ width: 84, height: 84, borderRadius: 42, borderWidth: 7, borderColor: t.surface3 }} />
+          : <Familiarity testID="retention" score={pct} size={84} text={`${pct}%`}
+                         label={`Retention ${pct} percent`} />}
+        <View style={{ flex: 1, gap: 4 }}>
+          <Figure testID="due-today" value={String(due)} label="due today" />
+          <Figure value={String(run)} label={run === 1 ? "day in a row" : "days in a row"} />
+          <Figure value={week ? String(week.reduce((a, b) => a + b, 0)) : "–"} label="reviews this week" />
+        </View>
       </View>
+      <Muted size={12} style={{ marginTop: 6 }}>Retention, last 30 days</Muted>
+
+      <SectionLabel style={{ marginTop: 26 }}>Your words</SectionLabel>
+      <Levels counts={levels} />
 
       {/* The run sits on the heading rather than under it: it is what the grid
           says, and saying it twice in two places is how a screen starts
           narrating itself (rule 20.7). */}
-      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 22 }}>
-        <SectionLabel style={{ flex: 1 }}>Days studied</SectionLabel>
-        {run ? <Pill testID="run">{run === 1 ? "1 day" : `${run} days`}</Pill> : null}
-      </View>
+      <SectionLabel style={{ marginTop: 26 }}>Coming up</SectionLabel>
+      <Bars testID="forecast" values={ahead} labels={labels} hot={0} />
+
+      <SectionLabel style={{ marginTop: 26 }}>Days studied</SectionLabel>
       {days ? <Cal testID="calendar" weeks={calendar(days, now)} /> : <Muted>Loading…</Muted>}
 
-      <SectionLabel style={{ marginTop: 22 }}>Coming up</SectionLabel>
-      <Bars testID="forecast" values={ahead} labels={labels} />
-
-      <SectionLabel style={{ marginTop: 22 }}>Answered</SectionLabel>
-      {week ? <Bars testID="per-day" values={week} labels={weekLabels} /> : <Muted>Loading…</Muted>}
-
-      <SectionLabel style={{ marginTop: 22 }}>Recent</SectionLabel>
-      {!log ? null : !recent.length ? <Muted>Nothing yet</Muted> : (
-        <List>
-          {recent.map((r) => {
-            const i = idxOfWord(r.word);
-            const ago = now - r.at;
-            return (
-              <Row key={`${r.word}|${r.direction}|${r.at}`}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 16 }}>{i >= 0 ? L[i].w : r.word}</Text>
-                  <Muted>{`${r.direction} · ${intervalLabel(ago)} ago`}</Muted>
-                </View>
-                <Pill>{GRADE[r.grade] || String(r.grade)}</Pill>
-              </Row>
-            );
-          })}
-        </List>
-      )}
+      <SectionLabel style={{ marginTop: 26 }}>This week</SectionLabel>
+      {week ? <Bars testID="per-day" values={week} labels={weekLabels} hot={6} /> : <Muted>Loading…</Muted>}
+      {/* The raw review log that ended the screen ("recognise · 3m ago") is
+          gone: it was the database talking, and every word in it is on the
+          flashcards and in the dictionary with more to say. */}
     </Screen>
   );
 }

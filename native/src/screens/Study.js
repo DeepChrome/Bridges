@@ -12,7 +12,7 @@
  * after three others. This screen deals what it is handed and grades what
  * is answered; it does not decide order. */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Pressable, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
@@ -527,7 +527,9 @@ export default function Study({ navigation, route }) {
     [st.sets, st.decks, st.seen, st.cardKinds]);
   const trouble = troubleWords(st);
 
+  const dealt = useRef(0);   // which deal this is, for "read once per card"
   const deal = (ahead, round) => {
+    dealt.current += 1;
     setSession(sessionFor(st, { ahead, round }));
     setAt(0);
     setShown(false); setRevealed(false);
@@ -539,6 +541,7 @@ export default function Study({ navigation, route }) {
   const round = route && route.params && route.params.round;
   useEffect(() => {
     if (round !== "trouble" || !ready) return;
+    dealtKey.current = setsKey;   // the round stands until the settings change
     deal(false, "trouble");
     navigation.setParams({ round: undefined });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -562,7 +565,16 @@ export default function Study({ navigation, route }) {
      source of new cards (`__path__`), so a deal from them was a real pile —
      one card read aloud from a profile nobody had loaded, then replaced. */
   // …nor over a trouble round that was asked for, which deals itself.
-  useEffect(() => { if (ready && round !== "trouble") deal(false); }, [setsKey, ready]);   // eslint-disable-line react-hooks/exhaustive-deps
+  /* …and not while the options sheet is open: every tick re-dealt, and the new
+     first card read itself aloud under the finger (the owner, 2026-09-29).
+     The pile is dealt once when the sheet closes, and only if something that
+     changes the deal did. */
+  const dealtKey = useRef(null);
+  useEffect(() => {
+    if (!ready || picker || round === "trouble" || dealtKey.current === setsKey) return;
+    dealtKey.current = setsKey;
+    deal(false);
+  }, [setsKey, ready, picker]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const kinds = kindsOf(st.cardKinds);
   const heading = session && session.practice ? "Trouble words"
@@ -602,10 +614,22 @@ export default function Study({ navigation, route }) {
      second card onward was read aloud. A listen card first in the pile was a
      speaker button in silence, which is what the owner reported as a blank
      card (2026-09-17). `studyoptions.test.js` holds it. */
+  /* **Once per card, not once per flip** (the owner, 2026-09-29: *"the card
+     audio goes off each time the card flips… not necessary"*). A card reads
+     itself when it arrives with the Russian or the sound on its front, or —
+     for an English-front card — the first time it is turned to the Russian.
+     Turning it back and forth after that is looking, and the speaker is
+     there for hearing it again. Keyed on the deal as well as the position,
+     so the same word at the same place in a new session still reads. */
+  const heard = useRef(new Set());
   useEffect(() => {
     if (!item || !face) return;
     const russianShowing = item.direction === "produce" ? shown : !shown;
-    if (russianShowing) say(face.b, { repeat: false, device });
+    const key = `${dealt.current}:${at}:${item.word}`;
+    if (russianShowing && !heard.current.has(key)) {
+      heard.current.add(key);
+      say(face.b, { repeat: false, device });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [at, shown, item && item.word, item && item.direction]);
   const flags = flagsFor(st, item);
@@ -802,7 +826,10 @@ export default function Study({ navigation, route }) {
               {/* How well this card is held, off its own FSRS stability. On
                   both faces for the same reason as the flags: it is about the
                   card's history, so it gives nothing away. */}
-              <Familiarity score={flags.score} />
+              {/* On the back only (the owner, 2026-09-29): the front is the
+                  question, and a score beside it is something else to look
+                  at before answering. */}
+              {flip.face ? <Familiarity score={flags.score} /> : null}
             </View>
             {blank ? (
               <Muted testID="card-blank" style={{ textAlign: "center" }}>

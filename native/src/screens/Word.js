@@ -81,6 +81,7 @@ function WordStatus({ word }) {
 export function WordEntry({ w, index, navigation }) {
   const t = useTheme();
   const [allHeard, setAllHeard] = useState(false);
+  const [openHeard, setOpenHeard] = useState(false);
   const unit = w.u ? UN.find((u) => u.id === w.u) : null;
   const examples = w.x || [];
   const heard = navigation ? heardIn(w.b) : [];
@@ -185,9 +186,21 @@ export function WordEntry({ w, index, navigation }) {
           the moment it is said. A tap opens the player there, the run-up
           included (the owner, 2026-09-08). Only videos that say the word are
           listed — the transcript index decides, never a guess. */}
+      {/* Closed until asked for (the owner, 2026-09-29), like the tables: the
+          entry is read top to bottom, and twenty video rows under it were the
+          longest thing on the screen for a word like «что». */}
       {heard.length ? (
         <>
-          <SectionLabel style={{ marginTop: 22 }}>{`Heard in · ${heard.length}`}</SectionLabel>
+          <Pressable testID="heard-toggle" onPress={() => setOpenHeard(!openHeard)}
+                     accessibilityRole="button" accessibilityState={{ expanded: openHeard }}
+                     style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", minHeight: 44,
+                                                marginTop: 14, opacity: pressed ? 0.6 : 1 })}>
+            <Text style={{ flex: 1, color: t.ink, fontSize: 16, fontWeight: "700" }}>
+              {`Heard in · ${heard.length}`}
+            </Text>
+            <Text style={{ color: t.ink3, fontSize: 16 }}>{openHeard ? "▾" : "▸"}</Text>
+          </Pressable>
+          {openHeard ? (
           <List>
             {(allHeard ? heard : heard.slice(0, HEARD_ROWS)).map((h) => (
               <Row key={h.id} testID={`heard-${h.id}`}
@@ -211,6 +224,7 @@ export function WordEntry({ w, index, navigation }) {
               </Row>
             ) : null}
           </List>
+          ) : null}
         </>
       ) : null}
     </>

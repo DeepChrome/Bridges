@@ -7,7 +7,8 @@
  * Own file, per the timeout note in screens.test.js.
  */
 
-import { forecast, retentionOf, perDay, studiedDays, runOf, calendar, CAL_WEEKS } from "../src/screens/Stats";
+import { forecast, retentionOf, perDay, studiedDays, runOf, calendar, CAL_WEEKS, mastery, LEVELS }
+  from "../src/screens/Stats";
 import { DAY, dayOf, NEW, REVIEW } from "@core/scheduler";
 
 const at = (ms) => ({ day: dayOf(ms), at: ms });
@@ -44,6 +45,22 @@ describe("how much sticks", () => {
   it("lays the week out oldest first, with today at the end", () => {
     const rows = [at(now), at(now), at(now - 6 * DAY), at(now - 20 * DAY)];
     expect(perDay(rows, now)).toEqual([1, 0, 0, 0, 0, 0, 2]);
+  });
+});
+
+describe("where the words stand", () => {
+  /* The same levels the card and the entry show, from the same score. */
+  it("counts every word into one level, new ones as New", () => {
+    const seen = {
+      a: { recognise: { state: NEW, dueAt: now } },
+      b: { recognise: { state: REVIEW, s: 0.3, dueAt: now } },
+      c: { recognise: { state: REVIEW, s: 400, dueAt: now } },
+    };
+    const m = mastery(seen, () => 5);
+    expect(m.New).toBe(1);
+    expect(m.Mastered).toBe(1);
+    expect(Object.values(m).reduce((x, y) => x + y, 0)).toBe(3);
+    expect(Object.keys(m)).toEqual(LEVELS.map(([name]) => name));
   });
 });
 

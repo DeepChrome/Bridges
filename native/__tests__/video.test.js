@@ -285,6 +285,7 @@ describe("Video", () => {
 
     await withProfile(<WordScreen route={{ params: { word } }} navigation={nav} />);
     expect(await screen.findByText(`Heard in · ${rows.length}`)).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByTestId("heard-toggle")); });   // closed until asked
     const first = rows[0];
     await act(async () => { fireEvent.press(screen.getAllByText(first.title.split(" | ")[0].trim())[0]); });
     expect(nav.navigate).toHaveBeenCalledWith("Video", { videoId: first.id, word, at: first.t });

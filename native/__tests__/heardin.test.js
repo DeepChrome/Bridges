@@ -53,6 +53,9 @@ describe("“Heard in” on a dictionary entry", () => {
 
     await withProfile(<Word route={{ params: { word: many.b } }} navigation={nav} />);
     expect(await screen.findByText(`Heard in · ${rows.length}`)).toBeTruthy();
+    // Closed until asked for (2026-09-29): nothing listed, then four.
+    expect(screen.queryByTestId(`heard-${rows[0].id}`)).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("heard-toggle")); });
     // Four to begin with, and the way to the rest says how many there are.
     const shown = () => rows.filter((r) => screen.queryByTestId(`heard-${r.id}`)).length;
     expect(shown()).toBe(4);

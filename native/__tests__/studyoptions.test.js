@@ -99,7 +99,8 @@ describe("the card says what it is", () => {
        number sits in the middle either way. */
     await withProfile({ seen: { [WORD]: { recognise: due({ s: 5 }) } } });
     await screen.findByTestId("card-kind");
-    const score = Number(screen.getByTestId("familiarity-score").props.children);
+    await act(async () => { fireEvent.press(screen.getByText("Show")); });   // the back carries it
+    const score = Number((await screen.findByTestId("familiarity-score")).props.children);
     expect(score).toBeGreaterThan(30);
     expect(score).toBeLessThan(70);
     // The ends of the scale are the audited tokens; the middle is the amber one.
@@ -229,6 +230,41 @@ describe("the options live where a session starts", () => {
 /* The day is done when the pile is; what is offered after it is the learner's
    (the owner, 2026-09-28: "after the user sufficiently studies for the day,
    they can have the option to review more trouble words"). */
+/* Audio once per card (the owner, 2026-09-29: "the card audio goes off each
+   time the card flips… not necessary"; "when I select the settings… it
+   re-initiated the audio each time"). */
+describe("the card reads itself once", () => {
+  it("does not read again when the card is turned back and forth", async () => {
+    await withProfile({ seen: { [WORD]: { recognise: due() } } });
+    await screen.findByTestId("card-recognise");
+    const first = global.__players.length + global.__spoke.length;
+    expect(first).toBe(1);
+    await act(async () => { fireEvent.press(screen.getByText("Show")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("card-turn")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("card-turn")); });
+    expect(global.__players.length + global.__spoke.length).toBe(first);
+  });
+
+  it("deals nothing new while the options are open, and reads nothing under the finger", async () => {
+    await withProfile({ seen: { [WORD]: { recognise: due() } } });
+    await screen.findByTestId("card-recognise");
+    const first = global.__players.length + global.__spoke.length;
+    await act(async () => { fireEvent.press(screen.getByTestId("study-cog")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("flash-produce")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("flash-listen")); });
+    expect(global.__players.length + global.__spoke.length).toBe(first);
+  });
+
+  /* The score is about the card's history; on the back only (2026-09-29). */
+  it("shows the familiarity score on the back, not the front", async () => {
+    await withProfile({ seen: { [WORD]: { recognise: due({ s: 5 }) } } });
+    await screen.findByTestId("card-recognise");
+    expect(screen.queryByTestId("familiarity")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByText("Show")); });
+    expect(await screen.findByTestId("familiarity")).toBeTruthy();
+  });
+});
+
 describe("after the day's pile", () => {
   it("offers a round of trouble words, which deals them though none is due", async () => {
     const bad = due({ dueAt: now + 5 * DAY, lapses: 5, reps: 12, d: 9.5 });

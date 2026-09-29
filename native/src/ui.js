@@ -1002,13 +1002,15 @@ export function familiarityColor(score, t) {
    number inside — a gauge, read at a glance, rather than a figure the learner
    has to find a scale for. The number is `ink` on the surface; only the arc
    takes the colour. On the flashcard at 34, on the dictionary entry larger. */
-export function Familiarity({ score, size = 34 }) {
+/* `text` and `label` let another 0–100 gauge share the drawing (Stats'
+   retention), so the app has one ring rather than two that drift apart. */
+export function Familiarity({ score, size = 34, text, label, testID = "familiarity" }) {
   const t = useTheme();
   if (score === null || score === undefined) return null;
-  const w = size > 40 ? 5 : 3.5, r = (size - w) / 2, c = 2 * Math.PI * r;
+  const w = size > 60 ? 7 : size > 40 ? 5 : 3.5, r = (size - w) / 2, c = 2 * Math.PI * r;
   const color = familiarityColor(score, t);
   return (
-    <View testID="familiarity" accessibilityLabel={`Familiarity ${score} of 100`}
+    <View testID={testID} accessibilityLabel={label || `Familiarity ${score} of 100`}
           style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}>
       <Svg width={size} height={size} style={{ position: "absolute" }}>
         <Circle cx={size / 2} cy={size / 2} r={r} stroke={t.surface3} strokeWidth={w} fill="none" />
@@ -1018,7 +1020,9 @@ export function Familiarity({ score, size = 34 }) {
                 rotation={-90} originX={size / 2} originY={size / 2} />
       </Svg>
       <Text testID="familiarity-score"
-            style={{ color: t.ink, fontSize: size > 40 ? 15 : 11, fontWeight: "700" }}>{score}</Text>
+            style={{ color: t.ink, fontSize: size > 60 ? 19 : size > 40 ? 15 : 11, fontWeight: "700" }}>
+        {text === undefined ? score : text}
+      </Text>
     </View>
   );
 }

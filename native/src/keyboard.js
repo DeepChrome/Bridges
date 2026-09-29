@@ -17,6 +17,7 @@ import { Text, TextInput } from "./ui";
 import Svg, { Path, Rect } from "react-native-svg";
 import { useSession } from "./session";
 import { useTheme, radius } from "./theme";
+import { MicButton } from "./mic";
 
 /* The standard ЙЦУКЕН layout, as on every Russian phone. */
 export const ROWS = ["йцукенгшщзхъ", "фывапролджэё", "ячсмитьбю"];
@@ -106,6 +107,7 @@ export function RuInput({ value, onChangeText, onSubmit, editable = true, style,
   const { st } = useSession();
   const t = useTheme();
   const [show, setShow] = useState(!!st.osk);
+  const [note, setNote] = useState(null);
   // The setting arrives with the profile, after the first render.
   useEffect(() => { setShow(!!st.osk); }, [st.osk]);
   const keys = show && editable;
@@ -128,8 +130,18 @@ export function RuInput({ value, onChangeText, onSubmit, editable = true, style,
                     borderBottomWidth: 3, borderRadius: radius.md, paddingHorizontal: 14,
                     paddingVertical: 13, fontSize: 20, color: t.ink }, style]}
         />
+        {/* Say it instead of typing it (the owner, 2026-09-29) — every typed
+            answer in the app comes through here, so every drill has it. Russian
+            only: an English reading of a Russian answer is not an answer. What
+            is heard is the answer as typed, and Check still decides. */}
+        {editable ? (
+          <MicButton testID={testID ? testID + "-mic" : "answer-mic"} size={44}
+                     onLive={(s) => { if (s) onChangeText(s); }}
+                     onText={(s) => onChangeText(s.replace(/[.!?…]+$/, ""))} onNote={setNote} />
+        ) : null}
         {editable ? <Toggle on={keys} onPress={() => setShow(!show)} /> : null}
       </View>
+      {note ? <Text style={{ color: t.ink3, fontSize: 13, marginTop: 6 }}>{note}</Text> : null}
       {keys ? (
         <RuKeyboard
           onKey={(ch) => onChangeText((value || "") + ch)}

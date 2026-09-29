@@ -15,6 +15,7 @@ import { useSession } from "../session";
 import { useTheme } from "../theme";
 import { Screen, Pill, Speaker, Muted, List, Row, SearchField, SectionLabel, Chip, Text } from "../ui";
 import { searchWordsScored } from "../data";
+import { LANG, LANG_EN } from "../speech";
 import { MATCH } from "@core/search";
 
 const RECENT_MAX = 6;
@@ -108,7 +109,7 @@ export default function Search({ navigation }) {
   return (
     <Screen>
       <SearchField value={text} onChangeText={setText} placeholder="Russian or English"
-                   label="Search the dictionary" testID="word-search" />
+                   label="Search the dictionary" testID="word-search" voice={[LANG, LANG_EN]} />
 
       {!q && recent.length ? (
         <>

@@ -18,6 +18,7 @@ import { AV, AV_IDS, avatarOf } from "@core/avatars";
 import { useTheme, radius, space, type, faceFor, useShadow } from "./theme";
 import { useFill, usePress, useEnter } from "./motion";
 import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
+import { MicButton } from "./mic";
 
 /* How deep a control's edge is, and how far it travels when pressed. One
    number, so a quiz answer and the primary button are pressed by the same
@@ -743,10 +744,16 @@ export function Choice({ options, value, onPick, testID, style }) {
 
 /* A search box with a way to clear it on every platform — TextInput's own clear
    button is iOS-only. */
-export function SearchField({ value, onChangeText, placeholder, label, testID, style, autoFocus }) {
+/* `voice` puts a small grey microphone in the bar (the owner, 2026-09-29):
+   one press listens, and what is said becomes the query as it is said. Its
+   value is the languages to hear — the dictionary takes Russian or English. */
+export function SearchField({ value, onChangeText, placeholder, label, testID, style, autoFocus, voice }) {
   const t = useTheme();
+  const [note, setNote] = useState(null);
+  const right = (voice ? 44 : 0) + (value ? 40 : 0);
   return (
-    <View style={[{ flexDirection: "row", alignItems: "center" }, style]}>
+    <View style={style}>
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
       <TextInput
         testID={testID}
         value={value}
@@ -760,16 +767,24 @@ export function SearchField({ value, onChangeText, placeholder, label, testID, s
         accessibilityLabel={label}
         style={{ flex: 1, backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
                  borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 12,
-                 paddingRight: value ? 44 : 14, fontSize: 16, color: t.ink }}
+                 paddingRight: 14 + right, fontSize: 16, color: t.ink }}
       />
       {value ? (
         <Pressable onPress={() => onChangeText("")} hitSlop={10} accessibilityRole="button"
                    accessibilityLabel="Clear" testID={testID ? testID + "-clear" : undefined}
-                   style={{ position: "absolute", right: 6, width: 36, height: 36, borderRadius: 18,
+                   style={{ position: "absolute", right: voice ? 46 : 6, width: 36, height: 36, borderRadius: 18,
                             alignItems: "center", justifyContent: "center" }}>
           <Text style={{ color: t.ink3, fontSize: 16 }}>✕</Text>
         </Pressable>
       ) : null}
+      {voice ? (
+        <View style={{ position: "absolute", right: 4 }}>
+          <MicButton testID={testID ? testID + "-mic" : "search-mic"} langs={voice}
+                     onLive={(s) => { if (s) onChangeText(s); }} onText={onChangeText} onNote={setNote} />
+        </View>
+      ) : null}
+    </View>
+    {note ? <Muted testID={testID ? testID + "-note" : undefined} size={13} style={{ marginTop: 6 }}>{note}</Muted> : null}
     </View>
   );
 }

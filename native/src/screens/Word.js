@@ -99,7 +99,7 @@ export function WordEntry({ w, index, navigation }) {
             other place a learner comes to look something up, so it gets the
             same guide the drill's bulb does. */}
         <Facts facts={wordFacts(w)} testID="word-facts" />
-        {(w.t || []).map((tb, k) => <Table key={k} table={tb} />)}
+        {(w.t || []).map((tb, k) => <Table key={k} table={tb} speak />)}
         {credit ? (
           // The photo's record: title, author where one is named, licence — and
           // the page it came from, which is what a CC BY credit asks for.

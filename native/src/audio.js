@@ -316,8 +316,11 @@ export function speakTTS(text, opts = {}) {
     Speech.stop();
     const end = begin();
     // Pin the voice, not just the language tag: the tag alone still lets the
-    // platform fall back to whatever it has.
-    Speech.speak(bare(text), {
+    // platform fall back to whatever it has. `stress` keeps the acute, as
+    // speakLine's does (§30ap): a single inflected form has no sentence
+    // around it to tell the engine where the beat falls, and «руки́» and
+    // «ру́ки» are the same letters.
+    Speech.speak(opts.stress ? text : bare(text), {
       language: ruVoice.language, voice: ruVoice.identifier,
       rate: 0.9 * (opts.rate || rateFor(text, opts)),
       onDone: end, onStopped: end, onError: end,

@@ -412,6 +412,7 @@ bridges/                          (directory is still named russian-blocks on di
     scenarios.js       <- the Talk situations (§30f)
     grammar.js         <- the grammar reference: topics, rules, endings tables (§30ay)
     facts.js           <- what one word's own paradigm says about it (§30az)
+    endings.js         <- how word endings are said, and how often they occur (§30ba)
     anki.js            <- Anki decks: field parsing, legacy collection rows (§30h)
     icons.js avatars.js
   native/              <- THE PRODUCT (Expo / React Native); see native/README.md
@@ -615,6 +616,30 @@ Each of these cost real time. Do not relearn them.
   carries it. Read the entry's bytes and decode them with
   `[Text.Encoding]::Unicode` as well, or check an ASCII-only label. Same
   family as §23's `Get-Content -Raw` warning, one layer down.
+- **A Pressable around a ScrollView takes the swipe.** A Pressable claims
+  the touch responder the moment a finger lands, so a scroll view *inside*
+  one only scrolls where a child happens to claim the touch first — the
+  owner, of the reference sheet: *"it's very hard to scroll by swiping. Seems
+  like I have to click in specific places"* (2026-09-28). `Sheet` had it
+  twice: the backdrop was a Pressable wrapping the sheet, and the sheet was a
+  do-nothing Pressable to stop taps reaching the backdrop. The fix is
+  structural — the backdrop is an absolutely-filled sibling *behind* the
+  sheet, so touches on the sheet never reach it and nothing needs swallowing.
+  No test can swipe, so `backnav.test.js` walks up from the scroll view and
+  fails on any ancestor carrying a responder handler; verified against the old
+  structure, where it finds both. **And give a ScrollView in a capped
+  container `flexShrink: 1`** — React Native's default is 0, so it grows to
+  its content instead of scrolling inside the cap.
+- **In React Navigation 7, `navigate` to the screen you are on replaces it.**
+  `navigate("Word", { word })` from a Word screen updates that screen's params
+  rather than pushing a new one, so reading from one entry into the next into
+  the next was *one* screen, and Back left all of them for the drill
+  underneath (the owner, 2026-09-28: *"if I hit back it takes me to the drill
+  rather than to the previous page"*). From a screen of the same name, push
+  (`StackActions.push`; `wordAction` in `words.js`). The same bug had a second
+  shape in `Grammar`, where opening a topic was a `useState` inside one
+  screen — a place the learner can go has to be a place Back can return from,
+  so it is a route param now and every topic a push.
 - **`gradlew.bat` through `cmd /c` is "not recognized" from a PowerShell
   `cd`.** `Set-Location` moves PowerShell's location and not reliably the
   process's, so a batch file named bare was not found twice running
@@ -4948,6 +4973,91 @@ the videos**, with counts, rather than off `data/curated/channels.json`: that
 file is the credit list, and a channel harvested but not yet credited — or
 credited and not yet harvested — would put a row on the sheet matching
 nothing, or hide one that matters.
+
+## 30ba. Every form heard, every ending demonstrated (2026-09-28)
+
+The owner, five things in one message. Two were bugs with causes worth
+keeping and they are in §23 (the sheet that would not scroll, and Back that
+skipped pages). One was a line of copy ("~45,000 words" under an empty search
+— *"that number doesn't matter"*; gone, with `DEEP_COUNT`). The other two:
+
+### A speaker on every form
+
+*"An audio button next to every pronunciation of a word so I can hear how the
+word is said in all forms. If you need to pay for this, just let me know how
+much it costs."*
+
+**Measured before building** (the unit words' tables): 9,885 distinct forms,
+730 with a recording. Buying the rest from Chirp3-HD is **9,155 forms, 70,218
+characters, $2.11 — call it $3 with retries for blips (§30ao) — and about
+45–54 MB of APK** on a 91 MB app. Every studied lemma would be $10–14 and
+~230 MB, too large to bundle. **Not bought**: he asked to be told the price,
+and it moves the app's size by half; it is his call (ROADMAP).
+
+So `FormSpeaker` in `rules.js` says each form with **the device voice, stress
+mark kept** — `speakTTS` takes `stress` now, as `speakLine` already did — and
+labels it as the device voice (§27). Two reasons it does not reach for the
+bundle, both measured:
+
+- **172 of those spellings are shared by two stresses** («руки́» / «ру́ки»).
+  The bundle is keyed by the *folded* spelling (rule 20.2), so it would play
+  whichever word a clip was bought for — the wrong stress for half of them,
+  on the one control whose whole point is hearing where the stress falls. If
+  the forms are ever bought, they need a manifest **keyed by the accented
+  form**, not by `fold()`.
+- A table where one cell is a studio voice and eleven are the phone is two
+  people reading one paradigm (§30ai's "one voice").
+
+The whole cell is the target with a small glyph beside the form — a 40 px
+round speaker in every cell would push a three-column table off a phone.
+36 px tall plus a 4 px hit slop either side makes the 44 (rule 20.12) without
+making every row that tall. `Table` takes `speak`, **off by default**: the
+grammar reference's tables hold endings («-ов», «-ами»), and a voice reading a
+lone ending says something no Russian would. The entry and the drill's
+reference turn it on. `useRussianVoice()` came out of `Speaker` so the two
+cannot disagree about whether the phone has a voice.
+
+### Word endings
+
+*"Demos of how word endings are pronounced… Sort in order of frequency… a
+complete list of all those types of terminations. One button will pronounce
+the termination. The other area will have maybe 3 examples of each."*
+
+`core/endings.js`, **31 endings**: the unstressed vowels (-а/-я, -о, -е),
+-ого/-его, -ться/-тся, the adjective endings, -ие/-ия, -ает/-ают, final
+devoicing of д г б з ж, -ов/-ев, soft -ть, -ешь, -чь, soft sign plus vowel,
+ё, ж and ш before и, -ция, -нн-, the silent т of -стн- and в of -вств-,
+-дц-, -гк-, -зчик/-дчик/-тчик, and the older -ою/-ею. Practice → Speaking →
+**Word endings**, its own row beside Alphabet, because things put *inside*
+another screen are the things nobody finds (§30ab).
+
+**The examples are chosen by hand, and only the order is measured — and the
+reason is the one worth keeping.** The obvious build takes the commonest words
+ending in -ого, and the commonest one in the app's sentences is «мно́го», whose
+г is a real г. The -ого → -ово rule belongs to an *ending*; «много», «до́рого»,
+«до́лго» carry those letters in the word itself, and spelling cannot tell the
+two apart. A generator would have taught the rule and then played the
+counter-example, on the words a learner hears most. What the data can say
+honestly is **how often each ending turns up**, over all 20,425 sentences
+(`rankEndings`, memoized in `data.js`, ~0.1 s in Node), and the list is
+sorted by that. The unstressed vowels lead by a distance — 15,076 for -а/-я —
+because they sit at the end of most words.
+
+**The ending's own button says a respelling, not the letters**: «ово» for
+-ого, «ца» for -ться, «от» for a final -д. Reading the ending as written is
+the mistake each entry exists to correct. It is the device voice (no one has
+recorded a bare ending), and `checkEndings` refuses a respelling with no vowel
+or one that opens on a sign — §30ap's «ьша», read out by the letter's name.
+The examples play a recording where the word has one: 60 of the 93 do.
+
+`core.test.mjs` checks every example is a real word **that carries its own
+ending**, that -ого is never illustrated by a word whose г stays a г, that
+every ending really occurs in the sentences, and that the gate can fail —
+planted bad example and planted sign both named.
+
+**Not verified by ear.** Whether the phone's voice reads «ово» or «от» as
+intended, and whether it honours a stress mark on a lone form (§30ap made the
+same claim and it is still unheard), is a listen on his phone.
 
 ## 31. Verification
 

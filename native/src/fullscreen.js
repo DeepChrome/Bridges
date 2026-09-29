@@ -48,7 +48,7 @@ export const RUNS = [
  * Phase 0.3: completeness, not existence). */
 export const TAB_BAR_SCREENS = [
   "Path", "Unit", "Lesson",                            // Learn
-  "Drills", "QuizSetup", "SceneList", "Sounds", "Grammar",  // Practice
+  "Drills", "QuizSetup", "SceneList", "Sounds", "Grammar", "Endings",  // Practice
   "Episodes",                                          // Immerse
   "Cards",                                             // Study
   "Words",                                             // Search

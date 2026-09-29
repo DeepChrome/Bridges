@@ -14,7 +14,7 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, within } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { readFileSync } from "fs";
 import { join } from "path";
@@ -51,14 +51,22 @@ beforeEach(async () => { await flushState(); await AsyncStorage.clear(); nav.nav
 afterEach(async () => { await flushState(); });
 
 describe("the grammar reference", () => {
-  it("lists every topic and opens one", async () => {
-    await withProfile(<Grammar route={{ params: {} }} />);
+  it("lists every topic and opens one as a screen of its own", async () => {
+    const push = jest.fn();
+    await withProfile(<Grammar route={{ params: {} }} navigation={{ ...nav, push }} />);
     for (const topic of TOPICS) {
       expect(await screen.findByText(topic.title)).toBeTruthy();
     }
+    /* A push, not a change of state inside this screen, or Back skips the
+       list (2026-09-28 — backnav.test.js has the rest of that contract). */
     await act(async () => { fireEvent.press(screen.getByTestId("topic-stems")); });
+    expect(push).toHaveBeenCalledWith("Grammar", { topic: "stems" });
+  });
+
+  it("draws a topic", async () => {
+    await withProfile(<Grammar route={{ params: { topic: "stems" } }} navigation={nav} />);
     // The topic the course never taught at all, which is why it is first to check.
-    expect(screen.getByText("Two of every vowel")).toBeTruthy();
+    expect(await screen.findByText("Two of every vowel")).toBeTruthy();
     expect(screen.getByTestId("topics-back")).toBeTruthy();
   });
 
@@ -111,7 +119,7 @@ describe("the bulb", () => {
     const asked = screen.getByTestId("table-asked");
     const right = q.options.find((o) => o.right).label;
     // The marked cell is the answer's own, and it reads as the answer.
-    expect(String(asked.props.children)).toContain(right);
+    expect(within(asked).getByText(right)).toBeTruthy();
   });
 
   /* Every drill, not the four whose answer was safe to show: *"All drills you

@@ -14,7 +14,7 @@ import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
 import { Screen, Pill, Speaker, Muted, List, Row, SearchField, SectionLabel, Chip, Text } from "../ui";
-import { searchWordsScored, DEEP_COUNT } from "../data";
+import { searchWordsScored } from "../data";
 import { MATCH } from "@core/search";
 
 const RECENT_MAX = 6;
@@ -104,12 +104,9 @@ export default function Search({ navigation }) {
           </List>
         </>
       ) : null}
-
-      {!q ? (
-        <Muted style={{ textAlign: "center", marginTop: recent.length ? 28 : 34 }}>
-          {`${DEEP_COUNT.toLocaleString("en-US")} words`}
-        </Muted>
-      ) : null}
+      {/* "45,987 words" sat here under an empty search (the owner,
+          2026-09-28: "that number doesn't matter"). It described the
+          database, not anything the learner could do with it. */}
     </Screen>
   );
 }

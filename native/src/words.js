@@ -18,7 +18,7 @@ import React, {
   createContext, useCallback, useContext, useMemo, useRef, useState,
 } from "react";
 import { View } from "react-native";
-import { createNavigationContainerRef } from "@react-navigation/native";
+import { createNavigationContainerRef, StackActions, CommonActions } from "@react-navigation/native";
 import { useTheme } from "./theme";
 import { Sheet, Btn, Senses, Text } from "./ui";
 import { L, IX } from "./data";
@@ -155,6 +155,26 @@ function WordSheet({ state, onClose, onFull }) {
   );
 }
 
+/* How to reach a word's entry from wherever the learner is.
+ *
+ * `navigate` is right from anywhere except another entry. From an entry, React
+ * Navigation 7 treats `navigate("Word")` as "update the screen you are already
+ * on" — so reading from «книга» into «читать» into «прочитать» replaced one
+ * screen's params three times, and Back left all of them at once for the
+ * drill underneath. The owner, 2026-09-28: *"if I hit back it takes me to the
+ * drill rather than to the previous page."*
+ *
+ * So from an entry it is a push: a new screen on the stack, which is the only
+ * thing Back can return from. The push is dispatched only when the current
+ * route *is* Word, which means the focused navigator is the Root stack that
+ * owns it — nothing depends on an action bubbling up through the tabs.
+ * Exported for the test. */
+export function wordAction(current, word) {
+  return current && current.name === "Word"
+    ? StackActions.push("Word", { word })
+    : CommonActions.navigate("Word", { word });
+}
+
 export function WordsProvider({ children }) {
   const [state, setState] = useState(null);
   const showing = useRef(null);
@@ -167,7 +187,7 @@ export function WordsProvider({ children }) {
        the entry opens as a sheet instead (WordSheet). */
     if (navRef.isReady() && navRef.getCurrentRoute()) {
       setState(null);
-      navRef.navigate("Word", { word: L[index].b });
+      navRef.dispatch(wordAction(navRef.getCurrentRoute(), L[index].b));
     } else {
       setState({ index, surface: null, full: true });
     }

@@ -20,7 +20,7 @@
  * a drill opens it at the topic behind the question.
  */
 
-import React, { useState } from "react";
+import React from "react";
 import { View } from "react-native";
 import { useTheme, type as T } from "../theme";
 import { Screen, Title, List, Row, Muted, Text } from "../ui";
@@ -39,10 +39,28 @@ function cardsFor(section) {
     .filter(Boolean);
 }
 
-export default function Grammar({ route }) {
+/* Every topic is its own screen on the stack, not a state of this one.
+ *
+ * It was a `useState` here: the list and a topic were one screen, so Back from
+ * a topic left Grammar altogether and landed on the drill the bulb had been
+ * pressed on — the owner, 2026-09-28: *"if I hit back it takes me to the drill
+ * rather than to the previous page."* A place the learner can go has to be a
+ * place Back can return from, so opening a topic pushes, and the topic comes
+ * from the route rather than from memory that Back cannot see. */
+export default function Grammar({ route, navigation }) {
   const t = useTheme();
   const asked = route && route.params ? route.params.topic : null;
-  const [open, setOpen] = useState(asked ? topicById(asked) : null);
+  const open = asked ? topicById(asked) : null;
+  const openTopic = (id) => navigation.push("Grammar", { topic: id });
+  /* "All topics" returns to the list the learner came from when there is one,
+     and opens it when the bulb brought them straight to a topic — so it never
+     stacks a second copy of a list that is one Back away. */
+  const toList = () => {
+    const routes = (navigation.getState && navigation.getState().routes) || [];
+    const prev = routes[routes.length - 2];
+    if (prev && prev.name === "Grammar" && !(prev.params && prev.params.topic)) navigation.goBack();
+    else navigation.push("Grammar", {});
+  };
 
   if (!open) {
     return (
@@ -52,7 +70,7 @@ export default function Grammar({ route }) {
           {/* No tile on these rows. Six rows of one repeated glyph marks
               nothing (§30s); the topic's name is what distinguishes it. */}
           {TOPICS.map((topic) => (
-            <Row key={topic.id} testID={`topic-${topic.id}`} onPress={() => setOpen(topic)}>
+            <Row key={topic.id} testID={`topic-${topic.id}`} onPress={() => openTopic(topic.id)}>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "700" }}>
                   {topic.title}
@@ -76,7 +94,7 @@ export default function Grammar({ route }) {
           control: this screen is two screens deep in one route, and the
           navigator's back arrow leaves Grammar altogether. */}
       <List>
-        <Row testID="topics-back" onPress={() => setOpen(null)}>
+        <Row testID="topics-back" onPress={toList}>
           <Text style={{ flex: 1, color: t.brandInk, fontSize: T.body, fontWeight: "700" }}>
             All topics
           </Text>

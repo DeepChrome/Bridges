@@ -21,23 +21,84 @@
  */
 
 import React from "react";
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, Pressable } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
-import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel } from "./ui";
+import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, useRussianVoice } from "./ui";
 import { Linked } from "./words";
+import { say, hasRealAudio } from "./audio";
 
 /* A column is wide enough for a long inflected form and no wider: at 110 a
    three-column table fits a 390 px screen without scrolling, which is most of
    them, and the rest scroll sideways rather than wrapping. */
 const COL = 110;
 
+/* One form in a table, which says itself when pressed (the owner,
+ * 2026-09-28: *"an audio button next to every pronunciation of a word so I can
+ * hear how the word is said in all forms"*).
+ *
+ * **The device voice, deliberately, with the stress mark kept.** Two reasons,
+ * both measured before this was written:
+ *   - Of the 9,885 forms the unit words' tables show, 730 have a recording,
+ *     and those are keyed by the *folded* spelling — so for the 172 spellings
+ *     two stresses share («руки́» / «ру́ки»), the bundle would play whichever
+ *     word the clip was bought for, the wrong stress for half of them, on the
+ *     one control whose whole purpose is hearing where the stress falls.
+ *   - A table where one cell is a studio voice and eleven are the phone is two
+ *     people reading one paradigm (§30ai's "one voice" argument).
+ * Recordings for every form cost about $2–3 and ~50 MB of app, and are the
+ * owner's call; this is what the table does until then, and the label says
+ * which voice it is (§27).
+ *
+ * The whole cell is the target, with a small glyph beside the form: a 40 px
+ * round speaker in every cell would push a three-column table past the width
+ * of a phone. */
+export function FormSpeaker({ form, style, testID, children, device = true }) {
+  const t = useTheme();
+  const voice = useRussianVoice();
+  /* `device={false}` lets a recording play where one exists — right for a
+     word shown on its own (the endings' examples), where there is no
+     neighbouring cell to clash with and no second stress to confuse it with.
+     The glyph takes the brand colour then, as `Speaker`'s ring does, so a
+     recording and the phone's voice never look alike (§27). */
+  const real = !device && hasRealAudio(form);
+  const live = real || voice;
+  return (
+    <Pressable testID={testID}
+               onPress={live ? () => say(form, device ? { device: true, stress: true } : {}) : undefined}
+               accessibilityRole="button"
+               accessibilityLabel={real ? `Hear ${form}` : voice ? `Hear ${form} (device voice)` : undefined}
+               // 36 tall plus 4 either side: the 44 a finger needs (rule 20.12)
+               // without making every row of a twelve-row table that tall.
+               hitSlop={4}
+               style={({ pressed }) => [{ flexDirection: "row", alignItems: "center", gap: 4,
+                                          opacity: pressed ? 0.55 : 1 }, style]}>
+      {children}
+      {live ? (
+        <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke={real ? t.brandInk : t.ink3}
+             strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+          <Path d="M11 5 6 9H3v6h3l5 4z" />
+          <Path d="M15.5 8.5a5 5 0 0 1 0 7" />
+        </Svg>
+      ) : null}
+    </Pressable>
+  );
+}
+
+const CYRILLIC = /[Ѐ-ӿ]/;
+
 /* One paradigm or reference table.
  *
  * `mark` is [row, column] — the cell the question is asking for, drawn in the
  * brand colour so the eye lands on it. It used to *blank* that cell, and the
  * owner reversed it (§30az): the reference is for learning, not a puzzle, so
- * the cell it points at is the one it shows most clearly. */
-export function Table({ table, mark, testID }) {
+ * the cell it points at is the one it shows most clearly.
+ *
+ * `speak` gives every form a speaker (FormSpeaker). Off by default: the
+ * grammar reference's tables hold *endings* — «-ов», «-ами» — and a speaker
+ * reading a lone ending aloud says something no Russian would. The entry and
+ * the drill's reference turn it on, because their tables hold real words. */
+export function Table({ table, mark, speak, testID }) {
   const t = useTheme();
   const [br, bc] = mark || [];
   return (
@@ -59,15 +120,31 @@ export function Table({ table, mark, testID }) {
                   style={{ flexDirection: "row", borderTopWidth: 1, borderTopColor: t.lineSoft }}>
               {r.map((cell, ci) => {
                 const asked = ri === br && (ci === bc || ci === 0);
+                const style = { fontSize: ci === 0 ? T.small : T.body,
+                                fontWeight: asked ? "700" : "400",
+                                color: asked ? t.brandInk : ci === 0 ? t.ink3 : t.ink };
+                const forms = (Array.isArray(cell) ? cell : [cell]).filter(Boolean);
+                /* The row label is not a form ("Genitive", "я"), and neither
+                   is anything without Cyrillic in it. */
+                if (!speak || ci === 0 || !forms.some((f) => CYRILLIC.test(f))) {
+                  return (
+                    <Text key={ci} testID={asked && ci === bc ? "table-asked" : undefined}
+                          style={[{ width: COL, paddingVertical: 6 }, style]}>
+                      {forms.join(" / ")}
+                    </Text>
+                  );
+                }
+                /* A cell may hold two forms («ру́кою / руко́й»); each says itself. */
                 return (
-                  <Text key={ci}
-                        testID={asked && ci === bc ? "table-asked" : undefined}
-                        style={{ width: COL, paddingVertical: 6,
-                                 fontSize: ci === 0 ? T.small : T.body,
-                                 fontWeight: asked ? "700" : "400",
-                                 color: asked ? t.brandInk : ci === 0 ? t.ink3 : t.ink }}>
-                    {Array.isArray(cell) ? cell.join(" / ") : cell}
-                  </Text>
+                  <View key={ci} testID={asked && ci === bc ? "table-asked" : undefined}
+                        style={{ width: COL, paddingVertical: 4, gap: 2 }}>
+                    {forms.map((f, fi) => (
+                      <FormSpeaker key={fi} form={f} testID={`say-${ri}-${ci}-${fi}`}
+                                   style={{ minHeight: 36 }}>
+                        <Text style={style}>{f}</Text>
+                      </FormSpeaker>
+                    ))}
+                  </View>
                 );
               })}
             </View>
@@ -220,7 +297,7 @@ export function Reference({ title, sub, tables, mark, facts, note, topic, onTopi
       ) : null}
       <Facts facts={facts} testID="ref-facts" />
       {(tables || []).map((tb, k) => (
-        <Table key={k} table={tb} testID={`ref-table-${k}`}
+        <Table key={k} table={tb} testID={`ref-table-${k}`} speak
                mark={mark && mark.table === tb ? mark.at : null} />
       ))}
       {note ? (

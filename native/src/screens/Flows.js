@@ -537,6 +537,15 @@ export function DrillList({ navigation }) {
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Alphabet</Text>
           </View>
         </Row>
+        {/* Its own row beside Alphabet, not a section inside it: things put
+            inside another screen are the things that do not get found (§30ab,
+            Word building). */}
+        <Row testID="open-endings" onPress={() => navigation.navigate("Endings")}>
+          <Thumb id="endings" tone="brand" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Word endings</Text>
+          </View>
+        </Row>
       </List>
       <SectionLabel style={{ marginTop: 18 }}>Grammar</SectionLabel>
       <List>

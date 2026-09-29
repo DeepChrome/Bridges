@@ -33,6 +33,7 @@ import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
 import { TOPICS, checkGrammar, russianIn, topicFor } from "../core/grammar.js";
 import { wordFacts, conjugation, stemChange, nounStem, genderWhy, stressAt } from "../core/facts.js";
+import { ENDINGS, checkEndings, rankEndings } from "../core/endings.js";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP,
          sayPassed, closestTranscript }
   from "../core/speech.js";
@@ -2115,6 +2116,51 @@ group("the facts about a word");
   ok(threw === 0, "no word makes it throw", String(threw));
   ok(empty > 0 && empty < L.length, "and the words with nothing to say are the closed classes",
      `${empty} of ${L.length}`);
+}
+
+/* How word endings are said (core/endings.js, 2026-09-28). Hand-authored,
+   so the two things that can go wrong are the ones a screen would never
+   show: an example that is not a real word, and an example that does not
+   carry the ending it is there to illustrate. */
+group("word endings");
+{
+  const deepBare = new Set();
+  for (const line of (DATA.deep || "").split("\n")) {
+    const b = line.split("\t")[0];
+    if (b) deepBare.add(fold(b));
+  }
+  const known = (w) => !!DATA.index[fold(w)] || deepBare.has(fold(w));
+  const bad = checkEndings(known);
+  ok(bad.length === 0, "every example is a real word carrying its ending", bad.slice(0, 4).join(" | "));
+  ok(ENDINGS.length >= 30, "a full list, not a sample", String(ENDINGS.length));
+
+  /* The trap the design is built around: «мно́го» ends in -ого and keeps a
+     real г. It is the commonest -ого word there is, which is exactly why a
+     list built by spelling would have chosen it. */
+  const ogo = ENDINGS.find((e) => e.id === "ogo");
+  ok(!ogo.examples.map(fold).some((x) => ["много", "дорого", "долго", "строго"].includes(x)),
+     "-ого is never illustrated by a word whose г stays a г");
+
+  /* The ending's own button must say something a voice can say: a sign on its
+     own is read out by name (§30ap). */
+  ok(ENDINGS.every((e) => /[аеёиоуыэюя]/.test(e.say) && !/^[ьъ]/.test(e.say)),
+     "every ending's button has a vowel and does not open on a sign");
+
+  // …and the checks can fail: a planted bad example and a planted sign.
+  const ogoIdx = ENDINGS.findIndex((e) => e.id === "ogo");
+  const saved = ENDINGS[ogoIdx];
+  ENDINGS[ogoIdx] = { ...saved, examples: ["стол", ...saved.examples.slice(1)], say: "ь" };
+  const caught = checkEndings(known);
+  ENDINGS[ogoIdx] = saved;
+  ok(caught.some((m) => /does not end in/.test(m)) && caught.some((m) => /sign/.test(m)),
+     "and the gate names both kinds of mistake", caught.join(" | "));
+
+  // Frequency: counted from real text, commonest first.
+  const ranked = rankEndings(DATA.sent.map((r) => r[0]));
+  ok(ranked.every((e, k) => k === 0 || ranked[k - 1].count >= e.count), "sorted commonest first");
+  ok(ranked.every((e) => e.count > 0), "every ending really occurs in the app's sentences",
+     ranked.filter((e) => !e.count).map((e) => e.id).join(", "));
+  ok(ranked.find((e) => e.id === "yo").count > 0, "ё is counted though fold() would turn it into е");
 }
 
 /* `at` says which cell the question is asking for — it marks that cell in the

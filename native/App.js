@@ -42,6 +42,7 @@ import SttLab from "./src/screens/SttLab";
 import TourScreen from "./src/screens/Intro";
 import Sounds from "./src/screens/Sounds";
 import Grammar from "./src/screens/Grammar";
+import Endings from "./src/screens/Endings";
 import { ChapterTask } from "./src/screens/Task";
 import { WordsProvider, navRef } from "./src/words";
 import { configureAudio } from "./src/audio";
@@ -250,6 +251,9 @@ function PracticeStack() {
       {/* Beside Alphabet, and the same kind of thing: a reference that is open
           from the first screen and never scored (2026-09-27). */}
       <Stack.Screen name="Grammar" component={Grammar} options={{ title: "Grammar" }} />
+      {/* How the ends of words are said (2026-09-28): the alphabet's other
+          half — a letter's sound, then what happens to it at the end of a word. */}
+      <Stack.Screen name="Endings" component={Endings} options={{ title: "Word endings" }} />
       {/* The pronunciation drill, reached from Sounds (ROADMAP P10.8). */}
       <Stack.Screen name="SoundDrill" component={SoundDrillFlow}
                     options={{ title: "Practice sounds" }} />

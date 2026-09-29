@@ -63,6 +63,9 @@ export const ACTIVITY_ICONS = {
   /* The tutor: a mortarboard over a speech bubble — someone who teaches, in a
      conversation. Talk's bubble is the same shape with faces in it. */
   tutor: "M3 8l9-4 9 4-9 4-9-4zM7 10v4c0 1.5 2.2 3 5 3s5-1.5 5-3v-4M20 8v5",
+  /* Word endings: a word's stem as a line, and its ending boxed off at the
+     end — the part of the word the screen is about. */
+  endings: "M3 12h9M14 8h7v8h-7zM17.5 11v2",
 };
 
 export const iconFor = (id) =>

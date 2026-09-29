@@ -383,25 +383,38 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
    Study picker and Settings, which each used to carry the same backdrop, handle
    and radius in their own words (P9.16). A press on the backdrop closes it;
    `title` (a string) or `header` (a node) sits above the scrolling body and
-   `footer` below it, off the scroll, so the sheet's action never scrolls away. */
+   `footer` below it, off the scroll, so the sheet's action never scrolls away.
+
+   **The backdrop is a sibling behind the sheet, not a parent around it.** It
+   used to be a Pressable wrapping the sheet, with a second, do-nothing
+   Pressable as the sheet itself to stop taps reaching the backdrop. A
+   Pressable claims the touch responder the moment a finger lands on it, so
+   every swipe that began on the sheet's content was taken by that
+   press-swallower and never reached the ScrollView — the body scrolled only
+   where a child happened to claim the touch first (a horizontal table, a word
+   link). The owner, 2026-09-28: *"it's very hard to scroll by swiping. Seems
+   like I have to click in specific places."* Stacked this way the sheet is on
+   top, touches on it never reach the backdrop at all, and there is nothing
+   between a finger and the scroll.
+
+   The ScrollView also shrinks now (`flexShrink: 1`). React Native's default is
+   0, so inside a sheet capped at `maxHeight` a long body grew to its content's
+   height instead of scrolling within the cap, and pushed the footer down with
+   it. */
 export function Sheet({ visible = true, onClose, title, header, children, footer,
                         maxHeight = "85%", testID }) {
   const t = useTheme();
   return (
     <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Close"
-        onPress={onClose}
-        style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" }}
-      >
-        {/* The sheet itself swallows the press, so only the backdrop closes.
-            `accessible={false}` because it is not a control: without it a
-            screen reader announces the whole sheet as one button that does
-            nothing, and the rows inside it stop being reachable one by one. */}
+      <View style={{ flex: 1, justifyContent: "flex-end" }}>
         <Pressable
-          accessible={false}
-          onPress={() => {}}
+          testID="sheet-backdrop"
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          onPress={onClose}
+          style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.45)" }]}
+        />
+        <View
           testID={testID}
           style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.lg,
                    borderTopRightRadius: radius.lg, padding: 16, paddingBottom: 22, maxHeight }}
@@ -413,10 +426,13 @@ export function Sheet({ visible = true, onClose, title, header, children, footer
               {title}
             </Text>
           ) : null}
-          <ScrollView>{children}</ScrollView>
+          <ScrollView testID="sheet-body" style={{ flexGrow: 0, flexShrink: 1 }}
+                      keyboardShouldPersistTaps="handled">
+            {children}
+          </ScrollView>
           {footer || null}
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
@@ -849,28 +865,40 @@ export { AV, AV_IDS };
    language, and offering a control that produces wrong audio is worse than offering
    none. Same rule as the web app. `disabled` is withheld from Pressable deliberately
    (see Btn): passing it makes React 19 tests drop presses. */
+/* Whether this phone can speak Russian, kept current as voices load. One hook
+   for every control that falls back to the device voice, so a table of forms
+   and the speaker above it cannot disagree about whether there is a voice. */
+export function useRussianVoice() {
+  const [voice, setVoice] = useState(hasRussianVoice());
+  useEffect(() => {
+    let alive = true;
+    probeVoices().then(() => { if (alive) setVoice(hasRussianVoice()); });
+    const off = onVoicesChanged(() => { if (alive) setVoice(hasRussianVoice()); });
+    return () => { alive = false; off(); };
+  }, []);
+  return voice;
+}
+
 export function Speaker({ text, size = 40, device = false }) {
   const t = useTheme();
   /* With `device` the recording is deliberately not used, so the button must
      not claim one: `real` decides the label and the testID, and "Hear it"
      over a device voice would be §27's lie in the other direction. */
   const real = hasRealAudio(text) && !device;
-  const [voice, setVoice] = useState(hasRussianVoice());
+  const voice = useRussianVoice();
   // A stream that failed with no voice to fall back on: the button says so
   // for a few seconds instead of doing nothing (audio.js onAudioFailure).
   const [down, setDown] = useState(false);
   useEffect(() => {
     let alive = true;
     let timer = null;
-    probeVoices().then(() => { if (alive) setVoice(hasRussianVoice()); });
-    const off = onVoicesChanged(() => { if (alive) setVoice(hasRussianVoice()); });
     const offFail = onAudioFailure((what) => {
       if (!alive || what !== text) return;
       setDown(true);
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => { if (alive) setDown(false); }, 4000);
     });
-    return () => { alive = false; off(); offFail(); if (timer) clearTimeout(timer); };
+    return () => { alive = false; offFail(); if (timer) clearTimeout(timer); };
   }, [text]);
 
   const live = real || voice;

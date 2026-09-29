@@ -5,7 +5,7 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, act, waitFor } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, waitFor, within } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
@@ -71,7 +71,7 @@ describe("form question", () => {
        the answer's cell is checked over every generated question in
        core.test.mjs — here it is only that the sheet honours it. */
     const right = q.options.find((o) => o.right).label;
-    expect(String(screen.getByTestId("table-asked").props.children)).toContain(right);
+    expect(within(screen.getByTestId("table-asked")).getByText(right)).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByText("Got it")); });
     await act(async () => { fireEvent.press(screen.getByText(right)); });
     /* The cost is stated on the button *before* it is pressed, which is where a

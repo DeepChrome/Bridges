@@ -18,11 +18,22 @@ export const videos = () => require("../assets/videos.json");
 /* Numbered senses for the studied words (tools/ingest_wiktionary.py, §30q).
    Required when a word is opened, which is never the first screen. */
 const sensesBlob = () => require("../assets/senses.json");
+import { rankEndings } from "@core/endings";
 import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize } from "@core/questions";
 import { quizPassed } from "@core/state";
 import { dueCards, wanted } from "@core/scheduler";
+
+/* The word endings, commonest first across every sentence the app carries
+   (core/endings.js). Counted once and kept: about a tenth of a second over
+   20,425 sentences in Node, and the pool has to be parsed on the way, so it
+   happens on the first visit to the screen and never on boot. */
+let endingsRanked = null;
+export function endingsByFrequency() {
+  if (endingsRanked === null) endingsRanked = rankEndings(sentPool().map((r) => r[0]));
+  return endingsRanked;
+}
 
 export const L = DATA.lemmas;
 export const IX = DATA.index;
@@ -148,8 +159,6 @@ const deepIndex = () => {
   if (deepMap === null) deepMap = makeDeepIndex(deepList());
   return deepMap;
 };
-
-export const DEEP_COUNT = (DATA.stats && DATA.stats.deep) || 0;
 
 /* Tables and example sentences are stored once, shared, and rebuilt per entry —
    see core/entry.js. Screens keep reading `w.t` and `w.x` as they always have. */

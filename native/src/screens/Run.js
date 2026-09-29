@@ -405,6 +405,15 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const [picked, setPicked] = useState(null);
   const [hintOpen, setHintOpen] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
+  /* The reference sheet is a native Modal, which is a window of its own: it
+     stays on top of whatever the stack shows next. A word link inside it
+     opens that word's entry on the Root stack and leaves the drill mounted
+     underneath, so without this the sheet floated over the entry it had just
+     opened. Leaving the screen, however it is left, closes it. */
+  useEffect(() => {
+    if (!navigation || typeof navigation.addListener !== "function") return undefined;
+    return navigation.addListener("blur", () => setHintOpen(false));
+  }, [navigation]);
   // Why the answer was wrong, from the Worker: null (not asked), "pending",
   // or the text. Anything but the text draws nothing — the verdict stands alone.
   const [why, setWhy] = useState(null);

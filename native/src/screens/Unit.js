@@ -147,6 +147,14 @@ export function LessonScreen({ route, navigation }) {
         <Btn kind="pri" style={{ marginTop: 16 }} label="Next lesson"
              onPress={() => navigation.setParams({ index: i + 1 })} />
       ) : null}
+      {/* The lesson's words as a round of flashcards, on the way from the
+          lesson to the video it prepares for (§30bf). */}
+      <Btn testID="lesson-cards" style={{ marginTop: 10 }} label="Flashcards for this lesson"
+           onPress={() => navigation.navigate("Tabs", {
+             screen: "Study",
+             params: { screen: "Cards", params: {
+               round: "list", words: lessonWords(unit, i).map((x) => L[x].b), title: unit.name } },
+           })} />
     </Screen>
   );
 }

@@ -44,6 +44,9 @@ ROOT = Path(__file__).resolve().parent.parent
 # Series aimed at beginners, used for the frequency-ordered Core stages which have no
 # topic of their own.
 BEGINNER_RE = re.compile(r"super easy russian", re.I)
+# The channel the skeleton prefers (2026-09-29): the most episodes, familiar
+# presenters, and made to teach.
+EASY_RE = re.compile(r"easy russian", re.I)
 
 # A unit's video is watched inside a lesson; a half-hour vlog is not that.
 UNIT_MAX_SEC = 1200
@@ -251,67 +254,82 @@ def main():
         v["kw"] = keywords(v, v["topics"], unit_name,
                            chapter_of.get(v["topics"][0]) if v["topics"] else None)
 
-    # --- one video per unit --------------------------------------------------
-    # Rank every (video, unit) pair once, then hand each unit its best unused video
-    # so two units never advertise the same clip. A video's claim on a unit is the
-    # share of that unit's vocabulary it actually speaks — coverage rather than raw
-    # count, so a long video does not win every unit simply by saying more words —
-    # with a topical title breaking ties. Title alone is the fallback for a video
-    # with no transcript.
-    ranked = []
-    for v in rows:
-        if v.get("dur") and v["dur"] > UNIT_MAX_SEC:
-            continue
-        spoken = heard.get(v["id"])
-        for tid in kw:
-            words = unit_words.get(tid) or set()
-            title_score = score_title(v["title"], kw[tid])
-            hit = len(words & spoken) if (spoken and words) else 0
-            coverage = hit / len(words) if words else 0
-            if hit >= MIN_HIT:
-                ranked.append((coverage * 1000 + title_score * 120, tid,
-                               dict(v, hit=hit, coverage=coverage)))
-            elif title_score >= args.min_score:
-                ranked.append((title_score, tid, dict(v)))
-    ranked.sort(key=lambda x: (-x[0], x[2]["title"]))
+    # --- the video skeleton ---------------------------------------------------
+    # **Each unit works towards one real video** (the owner, 2026-09-29: "the
+    # learner works their way towards being able to understand that video… use
+    # the videos to help plan the lesson content… prioritize the Easy Russian
+    # videos"). A unit's video used to be the one that said most of the unit's
+    # own words — topical, and blind to whether a learner at that point could
+    # follow it. Now the path is walked in order, the words taught so far are
+    # accumulated, and each unit takes the unused video its learner will
+    # understand best: `comp` is the share of the video's spoken, resolved
+    # words the learner has been taught by the end of the unit. Coverage of the
+    # unit's own words still counts, so the video is about what was just
+    # learned, and Easy Russian — familiar faces, teaching well — is preferred.
+    # Because what is known only grows, the videos harden along the path on
+    # their own: that is the progression, not a list somebody keeps.
+    counts = {vid: {lemma: len(occ) for lemma, occ in words.items()}
+              for vid, words in (json.loads(args.transcripts.read_text(encoding="utf-8")).get("index", {})
+                                 if args.transcripts.exists() else {}).items()}
+    order = []
+    db = sqlite3.connect(f"file:{args.topics}?mode=ro", uri=True)
+    for _r, _c, tid in db.execute("select row, col, topic_id from path order by row, col"):
+        if tid not in order:
+            order.append(tid)
+    db.close()
+    order += [tid for tid, _, _, _ in units if tid not in order]
+
+    def comprehension(vid, known):
+        c = counts.get(vid) or {}
+        total = sum(c.values())
+        return (sum(n for lemma, n in c.items() if lemma in known) / total) if total else 0
 
     by_id = {v["id"]: v for v in rows}
-    taken, assigned = set(), {}
-    for tid, vid in OVERRIDES.items():
-        v = by_id.get(vid)
-        if v:
-            assigned[tid] = dict(v, score=99)
-            taken.add(vid)
-        else:
-            print(f"  !! override video not in the catalogue: {vid} ({tid})")
-    for s, tid, v in ranked:
-        if tid in assigned or v["id"] in taken:
-            continue
-        assigned[tid] = dict(v, score=s)
-        taken.add(v["id"])
+    taken, assigned, known = set(), {}, set()
 
-    # Core stages get the beginner series, in the channel's own order (the listing
-    # is newest first, so reverse for a gentle-to-harder progression) — but only
-    # an episode that says at least MIN_HIT of the unit's words. The series used
-    # to be dealt out regardless, and a chapter's video listed none of its words
-    # (the content review, 2026-09-08); no video beats one that says nothing.
-    beginner = [v for v in reversed(rows)
-                if BEGINNER_RE.search(v["title"]) and v["id"] not in taken]
-    cores = [u for u in units if u[2] == "spine"]
-    for tid, _name, _kind, _ in cores:
-        words = unit_words.get(tid) or set()
-        for v in beginner:
-            if v["id"] in taken:
+    def pick(tid, words, min_hit):
+        best = None
+        for v in rows:
+            if v["id"] in taken or not counts.get(v["id"]):
+                continue
+            if v.get("dur") and v["dur"] > UNIT_MAX_SEC:
                 continue
             spoken = heard.get(v["id"]) or set()
-            hit = len(words & set(spoken))
-            if hit >= MIN_HIT:
-                assigned[tid] = dict(v, score=0, hit=hit,
-                                     coverage=hit / len(words) if words else 0)
-                taken.add(v["id"])
-                break
+            hit = len(words & spoken)
+            if hit < min_hit:
+                continue
+            comp = comprehension(v["id"], known)
+            cov = hit / len(words) if words else 0
+            easy = 0.12 if EASY_RE.search(v.get("channel") or "") else 0
+            # Slow, beginner episodes early: comprehension alone cannot see
+            # speed, and a street interview is fast whatever words it uses. The
+            # pull fades as the learner's vocabulary grows.
+            slow = (BEGINNER_RE.search(v["title"]) or re.search(r"\bslow\b", v["title"], re.I)
+                    or v.get("level") == "beginner")
+            early = 0.2 * max(0.0, 1 - len(known) / 400) if slow else 0
+            topical = 0.02 * score_title(v["title"], kw.get(tid, set()))
+            score = comp + 0.5 * cov + easy + early + topical
+            if best is None or score > best[0]:
+                best = (score, v, hit, cov, comp)
+        return best
 
-    keep = ("id", "title", "dur", "channel", "score", "hit", "coverage")
+    for tid in order:
+        words = unit_words.get(tid) or set()
+        known |= words
+        if tid in OVERRIDES and by_id.get(OVERRIDES[tid]):
+            v = by_id[OVERRIDES[tid]]
+            assigned[tid] = dict(v, score=99, comp=round(comprehension(v["id"], known), 3))
+            taken.add(v["id"])
+            continue
+        # A narrow side quest (Medicine, Law) is said by fewer videos; three of
+        # its words is still a video about it, and no video is worse.
+        best = pick(tid, words, MIN_HIT) or pick(tid, words, 3)
+        if best:
+            score, v, hit, cov, comp = best
+            assigned[tid] = dict(v, score=round(score, 3), hit=hit, coverage=cov, comp=round(comp, 3))
+            taken.add(v["id"])
+
+    keep = ("id", "title", "dur", "channel", "score", "hit", "coverage", "comp")
     out = {
         "channels": catalogue["channels"],
         "units": {tid: {k: v[k] for k in keep if k in v} for tid, v in assigned.items()},
@@ -333,7 +351,9 @@ def main():
     for tid, name, _kind, _ in units:
         v = assigned.get(tid)
         mark = "  " if v else "!!"
-        if v and "coverage" in v:
+        if v and "comp" in v and "hit" in v:
+            how = f"knows {v['comp']:.0%}, {v['hit']:>2} unit words"
+        elif v and "coverage" in v:
             how = f"{v['hit']:>3} words, {v['coverage']:.0%} of the unit"
         elif v:
             how = "title match      "

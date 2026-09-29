@@ -9,11 +9,12 @@ import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel, Sheet,
          Dropdown, Text } from "../ui";
 import {
-  UN, STATS, unitState, markComponent, L, videos, videoById, videoWatched, unitById,
-  idxOfWord, CHANNELS,
+  UN, STATS, unitState, markComponent, videos, videoById, videoWatched, unitById,
+  CHANNELS,
 } from "../data";
 import { releaseAudio } from "../audio";
-import { fold, today, firstSense } from "@core/util";
+import { PrepList } from "../prep";
+import { fold, today } from "@core/util";
 import { newCard } from "@core/scheduler";
 
 /* ------------------------------------------------------------- immerse */
@@ -472,36 +473,15 @@ export function Video({ route, navigation }) {
         </Card>
       ) : null}
 
-      <SectionLabel style={{ marginTop: 18 }}>Listen for</SectionLabel>
-      {/* One word a line with its meaning beside it, not a wrap of bare chips
-          (the owner, 2026-09-10): the list is read before watching, and a word
-          without its English says nothing to listen for. */}
-      {words.length ? (
-        <List>
-          {words.map((word, k) => {
-            const occ = v.words[word];
-            const active = focus && focus.word === word;
-            const entry = L[idxOfWord(word)];
-            return (
-              <Row key={word} testID={`heard-${word}`}
-                   onPress={() => openWord(word)}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 17, fontWeight: "600",
-                                 color: active ? t.brandInk : t.ink }}>
-                    {entry ? entry.w : word}
-                  </Text>
-                  {entry && firstSense(entry) ? (
-                    <Muted numberOfLines={1}>{firstSense(entry)}</Muted>
-                  ) : null}
-                </View>
-                <Muted size={12}>{occ.length > 1 ? `${occ.length}×` : ""}</Muted>
-              </Row>
-            );
-          })}
-        </List>
-      ) : (
-        <Muted>No study words are spoken in this one.</Muted>
-      )}
+      {/* The words to have in hand before pressing play (§30bf): underlined
+          for the dictionary, the learner's score beside each, an arrow to the
+          moment it is said, and the whole list as flashcards. */}
+      <PrepList words={words} seen={st.seen || {}} unit={unit}
+                focusWord={focus ? focus.word : null} onJump={openWord}
+                onCards={(list) => navigation.navigate("Tabs", {
+                  screen: "Study",
+                  params: { screen: "Cards", params: { round: "list", words: list, title: "Before the video" } },
+                })} />
 
       {v.chapters && v.chapters.length ? (
         <>

@@ -463,6 +463,13 @@ SRC_CODE = {"tatoeba": "t", "lof": "l", "yandex": "y", "core5000": "c",
 VIDEO_WORDS = 20
 VIDEO_MOMENTS = 3
 VIDEO_SKIP_TOP = 150
+# Before a unit's video (2026-09-29): how many words to review, how many of
+# those may be words the path has not taught yet, and which word classes
+# count as something to listen for.
+PREP_WORDS = 24
+PREP_OWN = 14
+PREP_NEW = 10
+PREP_POS = ("noun", "verb", "adjective", "adverb")
 
 SPEAK_TOKENS = (3, 12)
 LISTEN_TOKENS = (3, 15)     # three words is a sentence to hear in chapter 1
@@ -878,6 +885,46 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     idx_of_bare = {}
     for i, e in enumerate(lemmas):
         idx_of_bare.setdefault(e["b"], i)
+
+    # --- before the video (2026-09-29) --------------------------------------
+    # Each unit works towards its video (build_videos.py, the skeleton), and
+    # the words to review before watching are chosen off the video itself:
+    # the unit's own words it says, most-said first; then the content words
+    # it leans on that the path has not taught yet — the video shaping what
+    # the lesson brings in; then earlier words it says often. PREP_WORDS in
+    # all. The same list is what the library shows under the video, so the
+    # lesson and Immerse cannot disagree about what to listen for.
+    route = []
+    for (tid,) in db.execute("select topic_id from t.path order by row, col"):
+        if tid in uidx and uidx[tid] not in route:
+            route.append(uidx[tid])
+    taught_before = set()
+    prep_of_video = {}
+    for ui in route:
+        u = units[ui]
+        v = u.get("v")
+        spoken = heard.get(v["id"], {}) if v else {}
+        if spoken:
+            count = {b: len(o) for b, o in spoken.items()}
+            # Content words before function words, then most-said: «хотеть»
+            # is something to listen for, «и» is not, though both are taught.
+            own = sorted((i for i in u["w"] if lemmas[i]["b"] in spoken),
+                         key=lambda i: (lemmas[i]["p"] not in PREP_POS, -count[lemmas[i]["b"]]))
+            own = own[:PREP_OWN]
+            new, review = [], []
+            for b, _n in sorted(count.items(), key=lambda x: (-x[1], x[0])):
+                i = idx_of_bare.get(b)
+                if i is None or i < VIDEO_SKIP_TOP or i in own:
+                    continue
+                if lemmas[i]["p"] not in PREP_POS:
+                    continue
+                (review if i in taught_before else new).append(i)
+            prep = (own + new[:PREP_NEW] + review)[:PREP_WORDS]
+            # `heard` is the list, in order: the words and where each is said.
+            v["heard"] = {lemmas[i]["b"]: spoken[lemmas[i]["b"]][:4] for i in prep}
+            prep_of_video[v["id"]] = [lemmas[i]["b"] for i in prep]
+        taught_before |= set(u["w"])
+    stats["prep_words"] = [len((units[ui].get("v") or {}).get("heard") or {}) for ui in route]
     for v in library:
         spoken = heard.get(v["id"])
         if not spoken:
@@ -885,7 +932,9 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         chosen = []
         tid = unit_of_video.get(v["id"])
         if tid:
-            chosen = [lemmas[i]["b"] for i in unit_words_of.get(tid, []) if lemmas[i]["b"] in spoken]
+            # A unit's goal video lists exactly its prep list, as the lesson does.
+            chosen = list(prep_of_video.get(v["id"]) or
+                          [lemmas[i]["b"] for i in unit_words_of.get(tid, []) if lemmas[i]["b"] in spoken])
         pool = []
         for bare, occ in spoken.items():
             i = idx_of_bare.get(bare)
@@ -895,7 +944,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
                 continue
             pool.append((-len(occ), i, bare))
         pool.sort()
-        chosen += [bare for _, _, bare in pool[:max(0, VIDEO_WORDS - len(chosen))]]
+        if not tid or not prep_of_video.get(v["id"]):
+            chosen += [bare for _, _, bare in pool[:max(0, VIDEO_WORDS - len(chosen))]]
         entry = {"id": v["id"], "title": v["title"], "ch": v.get("ch"), "dur": v.get("dur"),
                  "kw": v.get("kw", ""), "topics": v.get("topics", []),
                  "words": {b: spoken[b][:VIDEO_MOMENTS] for b in chosen}}

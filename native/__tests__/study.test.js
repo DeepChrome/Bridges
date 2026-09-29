@@ -97,6 +97,18 @@ describe("which cards a set holds", () => {
     expect(s.items.map((x) => x.word)).toContain("город");
   });
 
+  /* A round on a list handed in by another screen — a video's words before
+     watching it (§30bf): every word, in order, new or not, each with a face
+     even when no ticked set carries it. */
+  it("deals a round on a list handed in, with a face for every card", () => {
+    const words = ["город", "хотеть", "музыка"];
+    const s = sessionFor({ ...st, sets: [] }, { round: "list", words, title: "Before the video" });
+    expect(s.practice).toBe(true);
+    expect(s.title).toBe("Before the video");
+    expect(s.items.map((x) => x.word)).toEqual(words);
+    for (const w of words) expect(s.faces[w].e).toBeTruthy();
+  });
+
   /* New cards from the path come commonest first, and a sentence is ranked by
      its rarest word (the owner, 2026-09-28: "prioritize more common and useful
      words… same with simpler sentences"). */

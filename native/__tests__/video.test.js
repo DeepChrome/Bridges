@@ -56,15 +56,21 @@ describe("the video data", () => {
     }
   });
 
-  it("lists under a unit's episode only unit words the episode says", () => {
+  /* Every unit works towards a video (§30bf), and its list is what to have in
+     hand before watching: the unit's own words the episode says, first, then
+     words the episode leans on. Every one is said, with its moment. */
+  it("gives every unit a goal video, listing its own spoken words first", () => {
+    const { L } = require("../src/data");
+    expect(UN.every((u) => u.v)).toBe(true);
     const seenUnits = UN.filter((u) => u.v && u.v.heard);
-    expect(seenUnits.length).toBeGreaterThan(10);
+    expect(seenUnits.length).toBeGreaterThan(30);
     for (const u of seenUnits) {
-      const bare = new Set(u.w.map((i) => require("../src/data").L[i].b));
-      for (const w in u.v.heard) {
-        expect(bare.has(w)).toBe(true);
-        expect(u.v.heard[w].length).toBeGreaterThan(0);
-      }
+      const own = new Set(u.w.map((i) => L[i].b));
+      const list = Object.keys(u.v.heard);
+      expect(list.length).toBeLessThanOrEqual(24);
+      const firstOther = list.findIndex((w) => !own.has(w));
+      if (firstOther >= 0) expect(list.slice(firstOther).some((w) => own.has(w))).toBe(false);
+      for (const w of list) expect(u.v.heard[w].length).toBeGreaterThan(0);
     }
   });
 
@@ -267,8 +273,46 @@ describe("Video", () => {
        held in the render tree (§20a). */
     const order = JSON.stringify(screen.toJSON());
     expect(order.indexOf("video-focus")).toBeGreaterThan(-1);
-    expect(order.indexOf("video-focus")).toBeLessThan(order.indexOf("Listen for"));
+    expect(order.indexOf("video-focus")).toBeLessThan(order.indexOf("Before you watch"));
     expect(order.indexOf("video-focus")).toBeLessThan(order.indexOf(`heard-${heard[0]}`));
+  });
+
+  /* Before you watch (the owner, 2026-09-29): the list grouped (verbs, nouns…),
+     each word underlined for the dictionary, the learner's score beside it,
+     an arrow to its moment, and the whole list as a round of flashcards. */
+  it("groups the list, scores each word, and hands it to the flashcards", async () => {
+    const { L, idxOfWord } = require("../src/data");
+    const { clusterWords } = require("../src/prep");
+    const unit = unitById(unitVideo.unit);
+    const heard = Object.keys(unit.v.heard);
+    const known = heard[0];
+    await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />, {
+      v: 10,
+      seen: { [known]: { recognise: { state: 2, s: 20, d: 5, steps: 0, reps: 4, lapses: 0,
+                                      dueAt: 9e12, lastAt: Date.now() - 86400000 } } },
+    });
+    await screen.findByTestId("prep");
+    // Clusters by part of speech, every word in exactly one.
+    const clusters = clusterWords(heard);
+    expect(clusters.reduce((n, c) => n + c.words.length, 0)).toBe(heard.length);
+    for (const c of clusters) {
+      expect(screen.getByTestId(`cluster-${c.id}`)).toBeTruthy();
+      for (const w of c.words) {
+        const p = L[idxOfWord(w)].p;
+        if (c.id === "verb") expect(p).toBe("verb");
+        if (c.id === "noun") expect(p).toBe("noun");
+      }
+    }
+    // A word studied carries its score; one never met says so.
+    expect(screen.getByTestId(`prep-score-${known}`)).toBeTruthy();
+    expect(screen.getByTestId(`prep-new-${heard[1]}`)).toBeTruthy();
+    expect(screen.getByTestId("prep-met").props.children).toBe(`1 of ${heard.length} met`);
+    // The whole list goes to the flashcards as one round.
+    await act(async () => { fireEvent.press(screen.getByTestId("prep-cards")); });
+    expect(nav.navigate).toHaveBeenCalledWith("Tabs", {
+      screen: "Study",
+      params: { screen: "Cards", params: { round: "list", words: heard, title: "Before the video" } },
+    });
   });
 
   /* From a dictionary entry (the owner, 2026-09-08): the entry lists the videos

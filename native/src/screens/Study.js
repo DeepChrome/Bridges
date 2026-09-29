@@ -147,7 +147,7 @@ const deckCardOf = (st, ru) => {
 };
 
 /* Every card the ticked sets hold, one of each. */
-export function cardsIn(st, sets) {
+export function cardsIn(st, sets, words = []) {
   const pool = [];
   const have = new Set();
   const add = (card) => { if (!have.has(card.b)) { have.add(card.b); pool.push(card); } };
@@ -184,6 +184,7 @@ export function cardsIn(st, sets) {
     const u = UN.find((x) => x.id === id);
     if (u) u.w.forEach((i) => add(cardOf(i)));
   });
+  words.forEach(byWord);   // a list handed in by word, such as a video's
   return pool;
 }
 
@@ -217,10 +218,21 @@ export function studyCards(st) {
 
 /* The session from the learner's state. Exported so a test can ask for the
    same session the screen deals. `round: "trouble"` is the extra round of
-   trouble words offered once the day is done. */
-export function sessionFor(st, { ahead, rng, round } = {}) {
+   trouble words offered once the day is done; `round: "list"` is a round on
+   `words` handed in by another screen — a video's word list before watching
+   it (§30bf) — carrying its own faces, since those words need not be in any
+   ticked set. */
+export function sessionFor(st, { ahead, rng, round, words: list, title } = {}) {
   if (round === "trouble") {
     return practiceSession({ seen: st.seen, words: troubleWords(st), dirs: st.flash || DEFAULT_FRONTS });
+  }
+  if (round === "list") {
+    const cards = cardsIn(st, [], list || []);
+    const faces = {};
+    for (const c of cards) faces[c.b] = c;
+    return { ...practiceSession({ seen: st.seen, words: cards.map((c) => c.b), dirs: st.flash || DEFAULT_FRONTS,
+                                  size: cards.length }),
+             title, faces };
   }
   const words = studyCards(st).map((c) => c.b);
   return buildSession({
@@ -522,9 +534,9 @@ export default function Study({ navigation, route }) {
   const trouble = troubleWords(st);
 
   const dealt = useRef(0);   // which deal this is, for "read once per card"
-  const deal = (ahead, round) => {
+  const deal = (ahead, round, extra) => {
     dealt.current += 1;
-    setSession(sessionFor(st, { ahead, round }));
+    setSession(sessionFor(st, { ahead, round, ...extra }));
     setAt(0);
     setShown(false); setRevealed(false);
     setLast(null);
@@ -532,12 +544,13 @@ export default function Study({ navigation, route }) {
   /* The trouble round, asked for from elsewhere — You's trouble sheet. A
      route param rather than a tick in the picker, so it is one round and
      leaves the day's settings as they were. */
-  const round = route && route.params && route.params.round;
+  const params = (route && route.params) || {};
+  const round = params.round === "trouble" || params.round === "list" ? params.round : null;
   useEffect(() => {
-    if (round !== "trouble" || !ready) return;
+    if (!round || !ready) return;
     dealtKey.current = setsKey;   // the round stands until the settings change
-    deal(false, "trouble");
-    navigation.setParams({ round: undefined });
+    deal(false, round, { words: params.words, title: params.title });
+    navigation.setParams({ round: undefined, words: undefined, title: undefined });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, ready]);
   // The profile arrives after the first render, and a set or a deck can change
@@ -565,13 +578,13 @@ export default function Study({ navigation, route }) {
      changes the deal did. */
   const dealtKey = useRef(null);
   useEffect(() => {
-    if (!ready || picker || round === "trouble" || dealtKey.current === setsKey) return;
+    if (!ready || picker || round || dealtKey.current === setsKey) return;
     dealtKey.current = setsKey;
     deal(false);
   }, [setsKey, ready, picker]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   const kinds = kindsOf(st.cardKinds);
-  const heading = session && session.practice ? "Trouble words"
+  const heading = session && session.practice ? session.title || "Trouble words"
     : kinds.length === 2 ? "Words and sentences" : kinds[0] === "sentences" ? "Sentences" : "Words";
 
   const items = session ? session.items : [];
@@ -585,7 +598,7 @@ export default function Study({ navigation, route }) {
      means the worst case is a card with no meaning on it rather than a card
      with nothing at all, and `blank` below says so plainly rather than
      pretending. */
-  const known = item ? faces[item.word] : null;
+  const known = item ? faces[item.word] || (session.faces && session.faces[item.word]) : null;
   const face = !item ? null
     : known && String(known.w || "").trim() ? known
     : { key: "x" + item.word, w: item.word, b: item.word, e: "",

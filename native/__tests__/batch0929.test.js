@@ -104,6 +104,20 @@ describe("the picture", () => {
    sheet is a native Modal, and in the test renderer a Row press inside it
    does not redraw what it opens — so the picture is checked on its own
    below, outside the Modal, where it redraws as it does on the device. */
+describe("a lesson's flashcards", () => {
+  it("hands the lesson's words to Study as one round", async () => {
+    const { LessonScreen } = require("../src/screens/Unit");
+    const { UN, L, lessonWords } = require("../src/data");
+    await withProfile(<LessonScreen route={{ params: { unitId: UN[0].id, index: 0 } }} navigation={nav} />);
+    await act(async () => { fireEvent.press(await screen.findByTestId("lesson-cards")); });
+    expect(nav.navigate).toHaveBeenCalledWith("Tabs", {
+      screen: "Study",
+      params: { screen: "Cards", params: {
+        round: "list", words: lessonWords(UN[0], 0).map((x) => L[x].b), title: UN[0].name } },
+    });
+  });
+});
+
 describe("the profile and its settings", () => {
   it("counts cards to review, explains its settings and shows the plan", async () => {
     await withProfile(<You navigation={nav} />);
@@ -111,18 +125,19 @@ describe("the profile and its settings", () => {
     await act(async () => { fireEvent.press(await screen.findByTestId("stat-due")); });
     expect(nav.navigate).toHaveBeenCalledWith("Study");
 
-    fireEvent.press(await screen.findByText("Settings"));
-    // A scheduler setting says what it does, on a tap, and not before.
-    expect(screen.queryByText(/most review cards/i)).toBeNull();
-    await act(async () => { fireEvent.press(await screen.findByTestId("info-reviews")); });
-    expect(screen.getByText(/most review cards/i)).toBeTruthy();
-
-    // The plan: Free by default, with Premium's allowance beside it.
+    // What the AI has left today is on the profile itself, not inside
+    // Settings: Free by default, with Premium's allowance beside it.
     expect((await screen.findByTestId("plan-name")).props.children).toBe("Free");
     expect(screen.getByTestId("plan-conversation")).toBeTruthy();
     // No Worker in the test build, so today's use is unknown and said as such.
     expect(screen.getByText(`– of ${PLANS.free.conversation}`)).toBeTruthy();
     expect(screen.getByText(`${PLANS.premium.conversation} Premium`)).toBeTruthy();
+
+    fireEvent.press(await screen.findByText("Settings"));
+    // A scheduler setting says what it does, on a tap, and not before.
+    expect(screen.queryByText(/most review cards/i)).toBeNull();
+    await act(async () => { fireEvent.press(await screen.findByTestId("info-reviews")); });
+    expect(screen.getByText(/most review cards/i)).toBeTruthy();
     expect(screen.getByTestId("change-picture")).toBeTruthy();
   });
 });

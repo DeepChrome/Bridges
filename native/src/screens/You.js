@@ -111,22 +111,25 @@ function Tile({ icon, tone, count, label, onPress, testID }) {
    install may ask the AI for each day, what it has, and what Premium would
    give. Asked of the Worker when Settings opens — it is the one that counts —
    and drawn from the plan table alone when it cannot be reached. */
-function PlanSection({ visible }) {
+function PlanSection({ navigation }) {
   const t = useTheme();
   const [info, setInfo] = useState(null);
+  /* Asked on arrival and every time the profile comes back into view, since
+     the allowance moves while the learner is elsewhere in the app. */
   useEffect(() => {
-    if (!visible) return undefined;
     let live = true;
-    askPlan().then((r) => { if (live) setInfo(r && r.ok ? r : null); }).catch(() => {});
-    return () => { live = false; };
-  }, [visible]);
+    const ask = () => askPlan().then((r) => { if (live) setInfo(r && r.ok ? r : null); }).catch(() => {});
+    ask();
+    const off = navigation && navigation.addListener ? navigation.addListener("focus", ask) : null;
+    return () => { live = false; if (typeof off === "function") off(); };
+  }, [navigation]);
   const plan = info ? info.plan : "free";
   const unlimited = plan === "owner" || plan === "custom";
   const caps = info && info.caps ? info.caps : PLANS[planOf(plan)];
   return (
     <View testID="plan" style={{ marginBottom: 16 }}>
       <View style={{ flexDirection: "row", alignItems: "baseline", marginBottom: 8 }}>
-        <SectionLabel style={{ flex: 1, marginBottom: 0 }}>Plan</SectionLabel>
+        <SectionLabel style={{ flex: 1, marginBottom: 0 }}>AI left today</SectionLabel>
         <Text testID="plan-name" style={{ color: t.ink, fontSize: 15, fontWeight: "700" }}>
           {unlimited ? "Unlimited" : PLAN_NAMES[planOf(plan)]}
         </Text>
@@ -139,7 +142,8 @@ function PlanSection({ visible }) {
                 {label.charAt(0).toUpperCase() + label.slice(1)}
               </Text>
               <Text style={{ color: t.ink2, fontSize: 15 }}>
-                {`${info ? info.used[counter] || 0 : "–"} of ${caps[counter]}`}
+                {info ? `${Math.max(0, caps[counter] - (info.used[counter] || 0))} of ${caps[counter]}`
+                      : `– of ${caps[counter]}`}
               </Text>
               {plan !== "premium" ? (
                 <Muted size={13} style={{ width: 70, textAlign: "right" }}>
@@ -251,7 +255,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                 </View>
               </View>
             ) : null}
-            <PlanSection visible={visible} />
+
             <PictureSection />
             <View style={{ height: 16 }} />
             <List>
@@ -573,6 +577,13 @@ export default function You({ navigation }) {
         <Tile testID="tile-notes" icon="tutor" tone="brand"
               count={(st.tutorNotes || []).length} label="What the tutor knows"
               onPress={() => setShowing("notes")} />
+      </View>
+
+      {/* What the AI has left for today, on the profile rather than inside
+          Settings (the owner, 2026-09-29: "make sure they can see how much
+          'AI juice' they have available still"). */}
+      <View style={{ marginTop: 24 }}>
+        <PlanSection navigation={navigation} />
       </View>
 
       {showing === "trouble" ? (

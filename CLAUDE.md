@@ -25,6 +25,17 @@ application rather than an unordered pile of flashcards. The differentiator is t
 **the language material is his**: a polished curriculum sitting on top of a corpus he
 already studies.
 
+**The video skeleton is the framework and the goal of everything** (the owner,
+2026-09-29). Every unit on the path works towards one real video — an ordered
+skeleton of episodes, Easy Russian first, each a little harder than the last
+(§30bf). A lesson teaches words and sentences; the flashcards review them; the
+video is where they are finally heard in the wild, understood. So a unit's
+content is chosen *with its video in view*: the words to know before watching
+are drawn off what the video actually says, and the learner reviews that list
+before pressing play. When deciding what a lesson teaches, what a flashcard
+round holds or what a screen puts first, ask what gets the learner to
+understanding the next video.
+
 Built and working today:
 
 - ~13,500 normalised sentences, ~10,000 vocabulary entries
@@ -79,7 +90,8 @@ banks · a generic SaaS interface · features without coherent interaction desig
 ## 3. North star
 
 > I open Bridges on my phone. Within seconds I am studying Russian. The app knows what
-> I have learned, what I am struggling with, and what should come next. Exercises feel
+> I have learned, what I am struggling with, and what should come next — and every
+> lesson is a step towards understanding a real Russian video I am about to watch. Exercises feel
 > varied but coherent. Real Russian audio appears naturally. Vocabulary exists inside
 > meaningful contexts. I can inspect a word deeply when I want to, but the app does not
 > constantly interrupt me with linguistic information. My progress feels tangible.
@@ -5300,6 +5312,44 @@ children when the component that owns it changes state — a toggle held in
 same file then found an empty screen. State that opens something inside a
 sheet belongs to a child component (`PictureSection`), which is also the
 tidier shape.
+
+## 30bf. The video skeleton (2026-09-29)
+
+The owner: *"have lesson content and sentences help prepare for the video
+itself… create a skeleton of videos… prioritize the Easy Russian videos…
+Have the reader review the vocab list prior to starting the video."* §1 now
+says why this is the frame of the whole app; this is how it is built.
+
+- **The skeleton** (`tools/build_videos.py`). Walking the path in order, each
+  unit takes the video it best prepares for, scored on **comprehension** —
+  the share of the video's spoken words (resolved through §23's form rule)
+  taught by the end of that unit — plus a bonus for Easy Russian and, early
+  on, for slow or beginner episodes. `OVERRIDES` still wins. Every one of the
+  34 units has a goal video now, and comprehension rises along the spine from
+  about a third to three quarters: the skeleton is a progression by
+  construction, not by label.
+- **The list before watching** (`build_site.py`, `PREP_*`). `u.v.heard` is the
+  list, in order, with each word's moments: the unit's own words the video
+  says (content words first, most-said first, up to `PREP_OWN`), then content
+  words it leans on that the path has not taught yet (`PREP_NEW`), then
+  earlier words it says often — `PREP_WORDS` (24) in all. The library entry
+  for a unit's video lists exactly this, so the lesson and Immerse cannot
+  disagree about what to listen for. Every word on it is said in the video;
+  that rule (§30g) did not move.
+- **On the screen** (`native/src/prep.js`, under the player in `Video`):
+  clustered into Verbs, Nouns, Describing words and Little words; each word
+  `Linked` (the underline is the lookup), its familiarity ring or "new", and
+  an arrow that plays the moment it is said (a second press walks to the next
+  one); a few short collection sentences using the words; the unit's grammar
+  card behind a fold; and at the top, **Flashcards** — the whole list as one
+  Study round.
+- **A round handed in** (`sessionFor(st, { round: "list", words, title })` in
+  `Study.js`): every word, new or not, as a practice session that carries its
+  own faces, because those words need not be in any ticked set. Reached from
+  the video and from each lesson ("Flashcards for this lesson"), so the lesson
+  → flashcards → video sequence is three taps, not a hunt.
+- **What the AI has left today** is on the profile under the tiles, not
+  inside Settings, and counts down rather than up.
 
 ## 31. Verification
 

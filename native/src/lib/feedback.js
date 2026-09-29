@@ -143,6 +143,12 @@ export async function tutor({ profile, studied, history, text }, deps = {}) {
               deps, "/v1/tutor", TALK_TIMEOUT_MS);
 }
 
+/* This install's plan and today's use of it (core/plans.js): { plan, caps,
+   used }. No model call; Settings asks when it opens. */
+export async function plan(deps = {}) {
+  return post({}, deps, "/v1/plan", 8000);
+}
+
 async function post(body, deps, route, timeoutMs, retried = false) {
   const cfg = deps.config || config(route);
   if (!cfg) return { ok: false, reason: "unconfigured" };
@@ -177,7 +183,8 @@ async function send(url, body, token, deps, timeoutMs) {
        and when it rolls over, and the screen has no other way to know. */
     if (!r.ok) {
       return { ok: false, reason: "http", status: r.status,
-               detail: data && data.reason, message: data && data.message };
+               detail: data && data.reason, message: data && data.message,
+               plan: data && data.plan, counter: data && data.counter, cap: data && data.cap };
     }
     if (!data || typeof data !== "object") return { ok: false, reason: "parse" };
     if (data.ok !== true) return { ok: false, reason: data.reason || "parse" };

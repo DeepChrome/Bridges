@@ -197,7 +197,7 @@ test("the talk cap is its own counter: the request past it gets 429", async () =
   for (let i = 0; i < 2; i++) assert.equal((await handle(req({ scenario: "café", history: [] }, auth), e, { fetch: up.fetch, now })).status, 200);
   const r = await handle(req({ scenario: "café", history: [] }, auth), e, { fetch: up.fetch, now });
   assert.equal(r.status, 429);
-  assert.equal(e.USAGE.store.get("talk:2026-09-06:owner"), "2");
+  assert.equal(e.USAGE.store.get("conversation:2026-09-06:owner"), "2");
   // Feedback's counter is untouched by talk.
-  assert.equal(e.USAGE.store.get("count:2026-09-06:owner"), undefined);
+  assert.equal(e.USAGE.store.get("feedback:2026-09-06:owner"), undefined);
 });

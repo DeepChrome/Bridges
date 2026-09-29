@@ -84,12 +84,24 @@ export default function Grammar({ route, navigation }) {
     );
   }
 
+  /* A link from a wrong answer names the section that states the rule
+     (core/explain.js, 2026-09-29). That section comes first, set apart by a
+     brand edge, and the topic follows in its own order without it. */
+  const want = route && route.params ? route.params.section : null;
+  const first = want ? open.sections.findIndex((s) => s.heading === want) : -1;
   return (
     <Screen>
       <Title>{open.title}</Title>
-      {open.sections.map((s, k) => (
+      {first >= 0 ? (
+        <View testID="asked-section" style={{ borderLeftWidth: 3, borderLeftColor: t.brand, paddingLeft: 12,
+                                               marginBottom: 8 }}>
+          <TopicSection section={open.sections[first]} cards={cardsFor(open.sections[first])}
+                        testID={`section-${first}`} />
+        </View>
+      ) : null}
+      {open.sections.map((s, k) => (k === first ? null : (
         <TopicSection key={k} section={s} cards={cardsFor(s)} testID={`section-${k}`} />
-      ))}
+      )))}
       {/* Back to the list, in the list's own place rather than as a header
           control: this screen is two screens deep in one route, and the
           navigator's back arrow leaves Grammar altogether. */}

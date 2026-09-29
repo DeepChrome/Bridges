@@ -6,8 +6,11 @@ import { useSession } from "../session";
 import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb } from "../ui";
-import { L, UN, STATS, idxOfWord, lessonCount, lessonDone } from "../data";
+import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb, InfoLabel } from "../ui";
+import { CharacterPicker } from "./Gate";
+import { plan as askPlan } from "../lib/feedback";
+import { PLANS, PLAN_NAMES, PREMIUM_PRICE, ALLOWANCE_LINES, planOf } from "@core/plans";
+import { L, UN, STATS, idxOfWord, lessonCount, lessonDone, dueCount } from "../data";
 import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
 import { backupProfile, restoreProfile, shareCrashes } from "../backup";
 import { readCrashes, clearCrashes } from "../crash";
@@ -21,7 +24,7 @@ import Constants from "expo-constants";
    something the binary is not. */
 const VERSION = (Constants.expoConfig && Constants.expoConfig.version) || "";
 import { tagInfo } from "@core/errortags";
-import { cardsOf, dueCards, maxLapses, RETENTION_MIN, RETENTION_MAX } from "@core/scheduler";
+import { cardsOf, maxLapses, RETENTION_MIN, RETENTION_MAX } from "@core/scheduler";
 import { askPermission } from "../notify";
 
 /* When the reminder may land, as minutes past midnight. Four, not twenty-four:
@@ -53,15 +56,19 @@ export function grammarTrouble(st) {
  * squares. A number does not need a container to be read as a number; what it
  * needs is to be the largest thing in its column. The band is separated from
  * the figures beside it by a hairline, not by a box each. */
-function Stat({ value, label, first }) {
+/* `onPress` makes a figure the way to what it counts — "cards to review"
+   opens Study, which deals exactly those cards. */
+function Stat({ value, label, first, onPress, testID }) {
   const t = useTheme();
   return (
-    <View style={{ flex: 1, alignItems: "center", paddingHorizontal: 4,
-                   borderLeftWidth: first ? 0 : 1, borderLeftColor: t.lineSoft }}>
-      <Text style={{ color: t.ink, fontSize: 26, fontWeight: "800",
+    <Pressable testID={testID} onPress={onPress} disabled={!onPress}
+               accessibilityRole={onPress ? "button" : undefined}
+               style={{ flex: 1, alignItems: "center", paddingHorizontal: 4,
+                        borderLeftWidth: first ? 0 : 1, borderLeftColor: t.lineSoft }}>
+      <Text style={{ color: onPress ? t.brandInk : t.ink, fontSize: 26, fontWeight: "800",
                      letterSpacing: -0.5 }}>{value}</Text>
       <Muted size={12} style={{ textAlign: "center", marginTop: 2 }}>{label}</Muted>
-    </View>
+    </Pressable>
   );
 }
 
@@ -97,6 +104,83 @@ function Tile({ icon, tone, count, label, onPress, testID }) {
         </View>
       )}
     </Pressable>
+  );
+}
+
+/* The plan, and today's use of it (core/plans.js, 2026-09-29): what this
+   install may ask the AI for each day, what it has, and what Premium would
+   give. Asked of the Worker when Settings opens — it is the one that counts —
+   and drawn from the plan table alone when it cannot be reached. */
+function PlanSection({ visible }) {
+  const t = useTheme();
+  const [info, setInfo] = useState(null);
+  useEffect(() => {
+    if (!visible) return undefined;
+    let live = true;
+    askPlan().then((r) => { if (live) setInfo(r && r.ok ? r : null); }).catch(() => {});
+    return () => { live = false; };
+  }, [visible]);
+  const plan = info ? info.plan : "free";
+  const unlimited = plan === "owner" || plan === "custom";
+  const caps = info && info.caps ? info.caps : PLANS[planOf(plan)];
+  return (
+    <View testID="plan" style={{ marginBottom: 16 }}>
+      <View style={{ flexDirection: "row", alignItems: "baseline", marginBottom: 8 }}>
+        <SectionLabel style={{ flex: 1, marginBottom: 0 }}>Plan</SectionLabel>
+        <Text testID="plan-name" style={{ color: t.ink, fontSize: 15, fontWeight: "700" }}>
+          {unlimited ? "Unlimited" : PLAN_NAMES[planOf(plan)]}
+        </Text>
+      </View>
+      {unlimited ? null : (
+        <List>
+          {ALLOWANCE_LINES.map(([counter, label]) => (
+            <Row key={counter} testID={`plan-${counter}`}>
+              <Text style={{ flex: 1, color: t.ink, fontSize: 15 }}>
+                {label.charAt(0).toUpperCase() + label.slice(1)}
+              </Text>
+              <Text style={{ color: t.ink2, fontSize: 15 }}>
+                {`${info ? info.used[counter] || 0 : "–"} of ${caps[counter]}`}
+              </Text>
+              {plan !== "premium" ? (
+                <Muted size={13} style={{ width: 70, textAlign: "right" }}>
+                  {`${PLANS.premium[counter]} Premium`}
+                </Muted>
+              ) : null}
+            </Row>
+          ))}
+        </List>
+      )}
+      {plan === "free" ? (
+        <Muted size={13} style={{ marginTop: 6 }}>{`Premium · ${PREMIUM_PRICE}`}</Muted>
+      ) : null}
+    </View>
+  );
+}
+
+/* The picture, changeable (the owner, 2026-09-29): the same characters the
+   profile was made with, a tap to open them and a tap to choose. Its own
+   component, holding its own open state, so it redraws on its own inside the
+   sheet. */
+export function PictureSection() {
+  const t = useTheme();
+  const { account, updateAccount } = useSession();
+  const [picking, setPicking] = useState(false);
+  return (
+    <>
+      <List>
+        <Row testID="change-picture" onPress={() => setPicking(!picking)}>
+          <Avatar id={account ? account.avatar : null} size={36} />
+          <Text style={{ flex: 1, color: t.ink, fontSize: 15 }}>Picture</Text>
+          <Muted>{picking ? "Done" : "Change"}</Muted>
+        </Row>
+      </List>
+      {picking ? (
+        <View style={{ marginTop: 12 }}>
+          <CharacterPicker value={account ? account.avatar : null}
+                           onPick={(id) => { updateAccount({ avatar: id }); }} />
+        </View>
+      ) : null}
+    </>
   );
 }
 
@@ -167,6 +251,9 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                 </View>
               </View>
             ) : null}
+            <PlanSection visible={visible} />
+            <PictureSection />
+            <View style={{ height: 16 }} />
             <List>
               {/* The flashcards' three directions and the new-card ration are
                   on the Study picker now, not here (§30ai): a learner sets them
@@ -177,7 +264,8 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   for: higher means more reviews for fewer lapses. */}
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Reviews a day</Text>
+                  <InfoLabel testID="info-reviews" label="Reviews a day"
+                             info="The most review cards dealt in a day." />
                   <Choice testID="reviews-per-day" value={st.reviewsPerDay || 200} style={{ marginTop: 8 }}
                           options={[50, 100, 200, 500].map((n) => ({ id: n, name: String(n) }))}
                           onPick={(id) => update((p) => ({ ...p, reviewsPerDay: id }))} />
@@ -185,7 +273,8 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               </Row>
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Retention</Text>
+                  <InfoLabel testID="info-retention" label="Retention"
+                             info="How much you aim to remember. Higher means more reviews." />
                   <Choice testID="retention" value={st.retention || 0.9} style={{ marginTop: 8 }}
                           options={[0.8, 0.85, 0.9, 0.95].filter((r) => r >= RETENTION_MIN && r <= RETENTION_MAX)
                             .map((r) => ({ id: r, name: `${Math.round(r * 100)} %` }))}
@@ -194,7 +283,8 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               </Row>
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Learn ahead</Text>
+                  <InfoLabel testID="info-ahead" label="Learn ahead"
+                             info="How early a card you just missed can come back." />
                   <Choice testID="learn-ahead" value={st.learnAhead === undefined ? 20 : st.learnAhead} style={{ marginTop: 8 }}
                           options={[0, 10, 20, 60].map((n) => ({ id: n, name: n ? `${n} min` : "Off" }))}
                           onPick={(id) => update((p) => ({ ...p, learnAhead: id }))} />
@@ -432,7 +522,7 @@ export default function You({ navigation }) {
     for (let i = 0; i < lessonCount(u); i++) if (lessonDone(st, u, i)) n++;
     return a + n;
   }, 0);
-  const due = dueCards(st.seen, Date.now(), st.learnAhead).length;
+  const due = dueCount(st);
   const trouble = troubleWords(st);
   const grammar = grammarTrouble(st);
   const openUnit = (unitId) =>
@@ -462,7 +552,11 @@ export default function You({ navigation }) {
         <Stat first value={String(st.streak || 0)} label="day streak" />
         <Stat value={learned.toLocaleString("en-US")} label="words seen" />
         <Stat value={String(lessons)} label="lessons cleared" />
-        <Stat value={due.toLocaleString("en-US")} label="due now" />
+        {/* "due now" said nothing about what was due (the owner, 2026-09-29).
+            It is the flashcards waiting today — the Study badge's number — and
+            a tap goes there. */}
+        <Stat testID="stat-due" value={due.toLocaleString("en-US")} label="cards to review"
+              onPress={() => navigation.navigate("Study")} />
       </View>
       {/* What the app has learned about this learner, as four tiles: the
           number on each, the detail a tap away (2026-09-28). Statistics was a

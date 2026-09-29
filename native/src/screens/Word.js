@@ -9,9 +9,9 @@
 import React, { useState } from "react";
 import { View, Image, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Familiarity } from "../ui";
+import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Familiarity, Fold } from "../ui";
 import { TableGroup, Facts } from "../rules";
-import { wordFacts } from "@core/facts";
+import { wordFacts, isIrregular } from "@core/facts";
 import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
 import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord, rankOf } from "../data";
@@ -81,7 +81,6 @@ function WordStatus({ word }) {
 export function WordEntry({ w, index, navigation }) {
   const t = useTheme();
   const [allHeard, setAllHeard] = useState(false);
-  const [openHeard, setOpenHeard] = useState(false);
   const unit = w.u ? UN.find((u) => u.id === w.u) : null;
   const examples = w.x || [];
   const heard = navigation ? heardIn(w.b) : [];
@@ -120,6 +119,9 @@ export function WordEntry({ w, index, navigation }) {
         <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
           {[w.p, GENDER[w.g] || w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
           {w.pt ? <Pill>{`pair: ${[w.pt, w.pt2].filter(Boolean).join(", ")}`}</Pill> : null}
+          {/* The first thing said about a word that breaks the rules
+              (2026-09-29); what it breaks is the facts below. */}
+          {isIrregular(w) ? <Pill tone="irregular" testID="word-irregular">Irregular</Pill> : null}
           {unit ? <Pill tone="brand">{unit.name}</Pill> : null}
         </View>
         {/* What is true about the word, before the tables that follow from
@@ -157,11 +159,13 @@ export function WordEntry({ w, index, navigation }) {
               "Examples", and the licence credit is built from the databases'
               own meta rows on the Credits screen, which is what CC BY asks
               for — a per-row caption never was. */}
-          <SectionLabel style={{ marginTop: 22 }}>
-            {examples.every((e) => !e.src)
-              ? `In your collection · ${examples.length}`
-              : `Examples · ${examples.length}`}
-          </SectionLabel>
+          {/* Folded, beside "Heard in", both closed (the owner, 2026-09-29:
+              "group 'in your collection' and 'heard in'"): the entry is the
+              word, and its uses are a tap each. */}
+          <Fold testID="examples" style={{ marginTop: 14 }}
+                title={examples.every((e) => !e.src)
+                  ? `In your collection · ${examples.length}`
+                  : `Examples · ${examples.length}`}>
           <Card>
             {examples.map((e, k) => (
               <View
@@ -179,6 +183,7 @@ export function WordEntry({ w, index, navigation }) {
               </View>
             ))}
           </Card>
+          </Fold>
         </>
       ) : null}
 
@@ -190,17 +195,7 @@ export function WordEntry({ w, index, navigation }) {
           entry is read top to bottom, and twenty video rows under it were the
           longest thing on the screen for a word like «что». */}
       {heard.length ? (
-        <>
-          <Pressable testID="heard-toggle" onPress={() => setOpenHeard(!openHeard)}
-                     accessibilityRole="button" accessibilityState={{ expanded: openHeard }}
-                     style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", minHeight: 44,
-                                                marginTop: 14, opacity: pressed ? 0.6 : 1 })}>
-            <Text style={{ flex: 1, color: t.ink, fontSize: 16, fontWeight: "700" }}>
-              {`Heard in · ${heard.length}`}
-            </Text>
-            <Text style={{ color: t.ink3, fontSize: 16 }}>{openHeard ? "▾" : "▸"}</Text>
-          </Pressable>
-          {openHeard ? (
+        <Fold testID="heard" title={`Heard in · ${heard.length}`}>
           <List>
             {(allHeard ? heard : heard.slice(0, HEARD_ROWS)).map((h) => (
               <Row key={h.id} testID={`heard-${h.id}`}
@@ -224,8 +219,7 @@ export function WordEntry({ w, index, navigation }) {
               </Row>
             ) : null}
           </List>
-          ) : null}
-        </>
+        </Fold>
       ) : null}
     </>
   );

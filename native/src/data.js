@@ -25,6 +25,7 @@ import { lessonSize } from "@core/questions";
 import { quizPassed } from "@core/state";
 import { dueCards, wanted } from "@core/scheduler";
 import { cardKind, kindsOf } from "@core/queue";
+import { isIrregular } from "@core/facts";
 
 /* The word endings, commonest first across every sentence the app carries
    (core/endings.js). Counted once and kept: about a tenth of a second over
@@ -569,6 +570,22 @@ export function chapterWords(indices) {
     }
   }
   return out;
+}
+
+/* Every word the units teach that breaks the rules (core/facts.js
+   `irregularities`), in path order — what a drill narrowed to irregulars
+   draws on, and what a lesson's word list sets apart. Built once: reading a
+   word's tables hydrates it, and 1,045 of those is a few milliseconds. */
+let irregularCache = null;
+export function irregularWords() {
+  if (irregularCache === null) {
+    const out = [], have = new Set();
+    for (const u of UN) for (const i of u.w || []) {
+      if (!have.has(i) && L[i] && isIrregular(L[i])) { have.add(i); out.push(i); }
+    }
+    irregularCache = out;
+  }
+  return irregularCache;
 }
 
 /* The floors DrillFlow walks up when a run will not fill. Each step reaches

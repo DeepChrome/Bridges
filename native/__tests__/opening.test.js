@@ -53,7 +53,7 @@ describe("saying what has just opened", () => {
      reached. */
   it("says nothing at all on a brand new profile", async () => {
     const view = await withState({});
-    await view.findByTestId("streak");
+    await view.findByText("Chapter 1");
     expect(view.queryByTestId("opening")).toBeNull();
   });
 
@@ -100,7 +100,7 @@ describe("saying what has just opened", () => {
      their first screen. */
   it("is not fooled by developer mode", async () => {
     const view = await withState({ dev: true });
-    await view.findByTestId("streak");
+    await view.findByText("Chapter 1");
     expect(view.queryByTestId("opening")).toBeNull();
   });
 
@@ -109,7 +109,7 @@ describe("saying what has just opened", () => {
     // is locked, so nothing there ever "opens".
     const all = ["hear", "scene", "form", "say"];
     const view = await withState({ unit: through(9), met: all });
-    await view.findByTestId("streak");
+    await view.findByText("Chapter 1");
     expect(view.queryByTestId("opening")).toBeNull();
     // …and the list in the test is the real one, not a stale copy of it.
     const { OPENINGS } = require("@core/openings");

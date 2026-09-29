@@ -269,34 +269,31 @@ describe("after the day's pile", () => {
   it("offers a round of trouble words, which deals them though none is due", async () => {
     const bad = due({ dueAt: now + 5 * DAY, lapses: 5, reps: 12, d: 9.5 });
     await withProfile({ seen: { [WORD]: { recognise: bad } } });
-    expect((await screen.findByTestId("study-state")).props.children).toBe("Done for today.");
+    expect((await screen.findByTestId("study-state")).props.children).toBe("Nothing due today.");
     await act(async () => { fireEvent.press(screen.getByTestId("trouble-round")); });
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
     expect(screen.getByTestId("study-heading").props.children).toBe("Trouble words");
     expect(screen.getByTestId("flag-trouble")).toBeTruthy();
   });
+
+  /* The end of the day's work is said as a goal met, with the two ways to go
+     on — and never as a count of cards "to go" between chunks (2026-09-29). */
+  it("says the daily goal is met, and offers trouble words or new words", async () => {
+    await withProfile({ seen: { [WORD]: { recognise: due() } }, sets: ["__path__"], newPerDay: 0 });
+    await screen.findByTestId("card-recognise");
+    await act(async () => { fireEvent.press(screen.getByText("Show")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("grade-3")); });
+    expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
+    expect(screen.getByTestId("study-today").props.children).toBe("1 card today");
+    expect(screen.queryByText(/to go/)).toBeNull();
+    // New words, ahead of the day's ration.
+    await act(async () => { fireEvent.press(screen.getByTestId("study-ahead")); });
+    expect(await screen.findByTestId("flag-new")).toBeTruthy();
+  });
 });
 
-describe("one voice", () => {
-  it("uses the phone's voice on a word that has a recording, and says so", async () => {
-    expect(hasRealAudio(WORD)).toBe(true);
-    /* The device voice exists only once the platform has been asked for its
-       voices, which the app does at launch; a test has to do it before the
-       card arrives or `speakTTS` has nothing to speak with (speaker.test.js
-       primes it the same way). */
-    await act(async () => { await refreshVoices(); });
-    await withProfile({ seen: { [WORD]: { recognise: due() } }, flashVoice: "device" });
-    await screen.findByTestId("card-recognise");
-    /* The front's Russian reads itself out on arrival; with "one voice" that
-       is the device, not a player. */
-    expect(global.__players).toHaveLength(0);
-    expect(global.__spoke).toContain(WORD);
-    /* And the speaker does not claim a recording it is not using. */
-    expect(screen.getByTestId("speaker-tts")).toBeTruthy();
-    expect(screen.queryByTestId("speaker-real")).toBeNull();
-  });
-
-  it("prefers the recording by default", async () => {
+describe("the card's voice", () => {
+  it("prefers the recording", async () => {
     await withProfile({ seen: { [WORD]: { recognise: due() } } });
     await screen.findByTestId("card-recognise");
     expect(screen.getByTestId("speaker-real")).toBeTruthy();

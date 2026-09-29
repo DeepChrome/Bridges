@@ -37,6 +37,7 @@ import { feedbackTags } from "@core/speech";
 import { recordAttempt, talkAllowance, startTalkSession, TALK_TURNS } from "@core/state";
 import { applyGrade, reviewRows, strength, schedulerOpts } from "@core/scheduler";
 import { fold, today, firstSense } from "@core/util";
+import { PLANS } from "@core/plans";
 
 /* What a failed turn says. The reasons that will not fix themselves are named
    as such — a build without the Worker's address, a refused key, the day's
@@ -51,6 +52,12 @@ export function failureText(reply) {
   /* Not "tomorrow": the counters roll at 00:00 UTC, which is the afternoon
      where the owner is, so a promise about tomorrow was simply wrong. What
      the Worker sends says when; this says what. */
+  /* On a plan (core/plans.js) the refusal names it, and Free is told what
+     Premium would allow — the one fact a learner at the limit can act on. */
+  if (cap && r.plan === "free") {
+    return { text: "Today's free conversation is used.",
+             detail: `Premium allows ${PLANS.premium.conversation} turns a day. More at 00:00 UTC.`, retry: false };
+  }
   if (cap) return { text: "Today's conversations are used up.", detail: r.message || null, retry: false };
   if (r.status === 401 || r.status === 403) {
     return { text: "This build's tutor key was refused.", retry: false };

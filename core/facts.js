@@ -88,8 +88,19 @@ export function stemChange(w) {
   if (!infStem || !preStem) return null;
   if (infStem.startsWith(preStem) || preStem.startsWith(infStem)) return null;
 
-  if (/ова$|ева$/.test(infStem) && preStem === infStem.replace(/(ова|ева)$/, "у")) {
-    return { kind: "ova", note: "Verbs in -овать swap -ова- for -у- in the present." };
+  /* -ева- becomes -ю- after a vowel («воева́ть» → «вою́ют»), -у- elsewhere:
+     one rule, two spellings. */
+  if (/ова$|ева$/.test(infStem) && (preStem === infStem.replace(/(ова|ева)$/, "у")
+                                    || preStem === infStem.replace(/ева$/, "ю"))) {
+    return { kind: "ova", note: "Verbs in -овать and -евать swap -ова-/-ева- for -у- (-ю-) in the present." };
+  }
+  /* ск and ст become щ right through the present («иска́ть» → «ищу́»): a
+     mutation of two letters into one, which the single-letter check below
+     cannot see. */
+  const bare2 = infStem.replace(/[аеёиоуыэюя]$/, "");
+  if (/(ск|ст)$/.test(bare2) && preStem === bare2.replace(/(ск|ст)$/, "щ")) {
+    return { kind: "mutation", from: bare2.slice(-2), to: "щ",
+             note: `The stem's ${bare2.slice(-2)} becomes щ right through the present.` };
   }
   /* A mutation is the same stem with its last consonant swapped — «писа́ть»
      to «пишу́». Checked by length as well as by letter, so a wholly different
@@ -143,6 +154,91 @@ function fleeting(w) {
   return dropped === 1 && [...nomStem].filter((c) => VOWELS.includes(c)).length
                         > [...genStem].filter((c) => VOWELS.includes(c)).length;
 }
+
+/* **Where a word breaks the rules** (the owner, 2026-09-29: "more attention
+ * on irregular words/verbs/nouns/forms… that break rules… clearly flagged on
+ * the full entries, on the answer card, and have options to drill them").
+ *
+ * Read off the word's own tables like everything else here, never a list:
+ * a curated list of irregulars goes stale on the next re-cut, and these can
+ * all be seen in the forms. What counts is what a learner applying the rules
+ * would get wrong — the classes the rules already cover (-овать, a consonant
+ * mutation, a fleeting vowel) are *not* here, because §30az's point stands:
+ * naming the rule teaches, calling it irregular does not.
+ *
+ * Each item is { kind, label, note }; an empty list is a regular word. */
+export function irregularities(w) {
+  if (!w) return [];
+  const out = [];
+  const bare = fold(w.b);
+  if (w.p === "verb") {
+    const t = table(w, /Present/);
+    const c = conjugation(w);
+    if (c === "mixed") {
+      out.push({ kind: "conjugation", label: "Mixed conjugation",
+                 note: "It takes first-conjugation endings in some persons and second in others." });
+    } else if (t && c === null && fold(formOf(t, /ты/))) {
+      out.push({ kind: "conjugation", label: "Irregular endings",
+                 note: `Its endings follow neither pattern: «${formOf(t, /ты/)}», «${formOf(t, /они/)}». Learn the table whole.` });
+    }
+    const sc = stemChange(w);
+    if (sc && sc.kind === "other") {
+      out.push({ kind: "stem", label: "Irregular stem", note: sc.note });
+    }
+    /* The past is the infinitive's stem plus -л. Where it is built on
+       something else — «идти́» → «шёл», «прийти́» → «пришёл» — the rule gives
+       a word that does not exist. */
+    const pastT = table(w, /Past/);
+    const pastM = fold(formOf(pastT, /^он/)).replace(/ся$|сь$/, "");
+    const infStem = bare.replace(/ся$|сь$/, "").replace(INF_END, "");
+    const keep = Math.max(2, infStem.length - 1);
+    if (pastM && infStem && !pastM.startsWith(infStem.slice(0, keep))
+        && !infStem.startsWith(pastM.replace(/л$/, ""))) {
+      out.push({ kind: "past", label: "Irregular past",
+                 note: `The past is not the infinitive's stem plus -л: «${formOf(pastT, /^он/)}».` });
+    }
+  }
+  if (w.p === "noun" && !w.pl) {
+    const t = table(w, /Declension/);
+    const nomRow = rowOf(t, /Nominative/) || [];
+    const sg = fold(cell(nomRow[1])), pl = fold(cell(nomRow[2]));
+    const plRaw = cell(nomRow[2]).normalize("NFC");
+    if (/мя$/.test(bare)) {
+      out.push({ kind: "declension", label: "-мя noun",
+                 note: "One of ten neuter nouns in -мя: -ени in the other cases, -ена in the plural." });
+    } else if (pl && sg) {
+      const sgStem = sg.replace(/[аяоеьйы]$/, "");
+      const plStem = pl.replace(/(ья|ья|ы|и|а|я|е)$/, "");
+      const gen = fold(cell((rowOf(t, /Genitive/) || [])[1]));
+      const genStem = gen.replace(/[аяуюыиеё]$/, "");
+      /* -ья is only a quirk when the ь is not already the stem's: «пла́тье»
+         → «пла́тья» is an ordinary -е noun. */
+      if (/ья$/.test(pl) && !/ь[её]$/.test(sg)) {
+        out.push({ kind: "plural", label: "Plural in -ья", note: `The plural is «${cell(nomRow[2])}», not the ordinary -ы/-и.` });
+      } else if (w.g === "m" && /[ая]́$/.test(plRaw)) {
+        out.push({ kind: "plural", label: "Plural in -а", note: `A stressed -а/-я plural: «${cell(nomRow[2])}», not -ы/-и.` });
+      } else if (!fleeting(w) && sgStem.length > 2 && !plStem.startsWith(sgStem.slice(0, 2))
+                 && !(genStem && plStem === genStem)) {
+        // A plural on the genitive's stem is a vowel that dropped out («лёд»
+        // → «льда», «льды»), not a different word.
+        out.push({ kind: "plural", label: "Different plural", note: `The plural is a different word: «${cell(nomRow[2])}».` });
+      }
+      if (gen && sgStem && gen.startsWith(sgStem) && gen.length - sgStem.length >= 3 && /ер/.test(gen.slice(sgStem.length))) {
+        out.push({ kind: "declension", label: "Stem grows", note: `It adds -ер- in every case but the nominative: «${cell((rowOf(t, /Genitive/) || [])[1])}».` });
+      }
+    }
+  }
+  if (w.p === "adjective") {
+    const comp = fold(formOf(table(w, /Comparison/), /Comparative/));
+    const stem = bare.replace(/(ый|ий|ой)$/, "");
+    if (comp && stem.length >= 3 && !comp.startsWith(stem.slice(0, 3))) {
+      out.push({ kind: "comparative", label: "Irregular comparative",
+                 note: `"More ${String(w.e || "").split(/[,;]/)[0].trim()}" is «${formOf(table(w, /Comparison/), /Comparative/)}», a different stem.` });
+    }
+  }
+  return out;
+}
+export const isIrregular = (w) => irregularities(w).length > 0;
 
 const GENDER_NAME = { m: "Masculine", f: "Feminine", n: "Neuter" };
 
@@ -244,9 +340,9 @@ export function wordFacts(w) {
     const c = conjugation(w);
     if (c === 1) out.push({ label: "First conjugation", note: "The -е- pattern: -ешь in the ты form, -ут or -ют in the они form." });
     if (c === 2) out.push({ label: "Second conjugation", note: "The -и- pattern: -ишь in the ты form, -ат or -ят in the они form." });
-    if (c === "mixed") out.push({ label: "Irregular", note: "It mixes the two patterns — first-conjugation endings in some persons and second in others." });
+    // Mixed and wholly different stems are irregularities, said first (below).
     const sc = stemChange(w);
-    if (sc) out.push({ label: sc.kind === "other" ? "Irregular stem" : "Stem change", note: sc.note });
+    if (sc && sc.kind !== "other") out.push({ label: "Stem change", note: sc.note });
     if (stressMoves(table(w, /Present/))) {
       out.push({ label: "Stress moves", note: "The stress is not in the same place in every person — listen for where it falls." });
     }
@@ -254,5 +350,10 @@ export function wordFacts(w) {
       out.push({ label: "Reflexive", note: "Conjugate it as normal, then add -ся after a consonant and -сь after a vowel." });
     }
   }
-  return out;
+  /* What breaks the rules goes first, marked `irregular` so a screen can
+     draw it apart. The -мя note is left to the gender line, which says the
+     same thing. */
+  const odd = irregularities(w).filter((x) => x.label !== "-мя noun")
+    .map((x) => ({ label: x.label, note: x.note, irregular: true }));
+  return odd.concat(out);
 }

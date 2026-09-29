@@ -140,7 +140,7 @@ function SignIn({ accounts, onPick, onNew }) {
 
 /* -------------------------------------------------------------- new here */
 
-function CharacterPicker({ value, onPick }) {
+export function CharacterPicker({ value, onPick }) {
   return (
     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, justifyContent: "center" }}>
       {AV_IDS.map((id) => (

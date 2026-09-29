@@ -72,13 +72,14 @@ describe("when a day counts as done", () => {
    is not exported — so this asserts the change rather than the hex: the same
    two nodes, drawn either side of the day closing. */
 describe("what Learn shows", () => {
-  it("ticks, turns the streak and quiets the next lesson once the day is done", async () => {
+  /* The streak and its tick left Learn on 2026-09-29 (the owner: the streak
+     "can just be on the profile page"); what stays is the next lesson going
+     quiet once the day is done. */
+  it("quiets the next lesson once the day is done", async () => {
     // Nothing answered today: a card last seen yesterday, and not due again yet
     // (so the queue is empty and only the "worked today" half is missing).
     const open = await withProfile({ seen: { дом: card(today() - 1, 4) } });
     await screen.findByTestId("next-step");
-    expect(screen.queryByTestId("day-done")).toBeNull();
-    const openStreak = flat(screen.getByTestId("streak").props.style).color;
     const openBtn = flat(screen.getByTestId("next-step").props.style).backgroundColor;
     open.unmount();
 
@@ -88,8 +89,8 @@ describe("what Learn shows", () => {
     // platform is cleared between the two, as beforeEach does.
     await AsyncStorage.clear();
     await withProfile({ seen: { дом: card(today(), 3) } });
-    expect(await screen.findByTestId("day-done")).toBeTruthy();
-    expect(flat(screen.getByTestId("streak").props.style).color).not.toBe(openStreak);
+    await screen.findByTestId("next-step");
+    expect(screen.queryByTestId("streak")).toBeNull();
     // Advice, not a lock: the lesson is still there, it is simply not the blue
     // button any more — the same means review-first uses.
     const btn = screen.getByTestId("next-step");

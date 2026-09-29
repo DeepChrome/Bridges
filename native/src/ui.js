@@ -789,6 +789,55 @@ export function SearchField({ value, onChangeText, placeholder, label, testID, s
   );
 }
 
+/* A section that folds: its name and a chevron, the body a tap away. The
+   word entry's tables, its examples and its videos all use it (2026-09-29),
+   so the three open and close alike and the entry reads top to bottom as a
+   list of what it holds rather than all of it at once. `open` is where it
+   starts; after that it is the learner's. */
+export function Fold({ title, open: start = false, testID, children, style }) {
+  const t = useTheme();
+  const [open, setOpen] = useState(!!start);
+  return (
+    <View style={style}>
+      <Pressable testID={testID ? `${testID}-toggle` : undefined} onPress={() => setOpen(!open)}
+                 accessibilityRole="button" accessibilityState={{ expanded: open }} accessibilityLabel={title}
+                 style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", minHeight: 44,
+                                            opacity: pressed ? 0.6 : 1 })}>
+        <Text style={{ flex: 1, color: t.ink, fontSize: 16, fontWeight: "700" }}>{title}</Text>
+        <Text style={{ color: t.ink3, fontSize: 16 }}>{open ? "▾" : "▸"}</Text>
+      </Pressable>
+      {open ? children : null}
+    </View>
+  );
+}
+
+/* A setting's name with a small circled "i" beside it; a tap shows one line
+   under it saying what the setting does (the owner, 2026-09-29: "it's not
+   clear what 'reviews a day' and 'retention' and 'learn ahead' are"). On
+   demand, not always drawn — rule 20.7's tooltip, which is where explanation
+   of a control is allowed to live. */
+export function InfoLabel({ label, info, testID }) {
+  const t = useTheme();
+  const [open, setOpen] = useState(false);
+  return (
+    <View>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+        <Text style={{ color: t.ink, fontSize: 15 }}>{label}</Text>
+        <Pressable testID={testID} onPress={() => setOpen(!open)} hitSlop={12}
+                   accessibilityRole="button" accessibilityLabel={`About ${label}`}
+                   accessibilityState={{ expanded: open }}
+                   style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 1.5,
+                            borderColor: open ? t.brandInk : t.ink3,
+                            alignItems: "center", justifyContent: "center" }}>
+          <Text style={{ color: open ? t.brandInk : t.ink3, fontSize: 12, fontWeight: "700",
+                         lineHeight: 14 }}>i</Text>
+        </Pressable>
+      </View>
+      {open ? <Muted size={13} style={{ marginTop: 4 }}>{info}</Muted> : null}
+    </View>
+  );
+}
+
 /* Done, drawn one way: a green disc with a tick. */
 export function Tick({ on, size = 26 }) {
   const t = useTheme();
@@ -812,13 +861,17 @@ export function Tick({ on, size = 26 }) {
    failing to say so. */
 export function Pill({ children, tone, testID }) {
   const t = useTheme();
+  /* `irregular`: ink on the surface inside an amber edge — the colour is
+     the stroke, which is how `warn` is audited, never the text. */
   const c = tone === "good" ? { bg: t.goodBg, fg: t.good }
           : tone === "brand" ? { bg: t.brandBg, fg: t.brandInk }
           : tone === "bad" ? { bg: t.badBg, fg: t.bad }
+          : tone === "irregular" ? { bg: t.surface, fg: t.ink, edge: t.warn }
           : { bg: t.surface2, fg: t.ink2 };
   return (
     <View testID={testID} style={{ backgroundColor: c.bg, borderRadius: 99,
-                   paddingHorizontal: 8, paddingVertical: 3 }}>
+                   borderWidth: c.edge ? 1.5 : 0, borderColor: c.edge,
+                   paddingHorizontal: 8, paddingVertical: c.edge ? 1.5 : 3 }}>
       <Text style={{ color: c.fg, fontSize: 11, fontWeight: "600" }}>{children}</Text>
     </View>
   );

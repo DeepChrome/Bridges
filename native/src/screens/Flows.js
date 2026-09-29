@@ -12,7 +12,7 @@ import { WordList, GrammarNote, WordCard } from "../lesson";
 import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
-  DRILL_POOL_STEPS, chapterWords,
+  DRILL_POOL_STEPS, chapterWords, irregularWords,
   reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
   scenarioLibrary, required,
 } from "../data";
@@ -28,6 +28,10 @@ const scoreOf = (r) => (r.total ? Math.round(r.credit / r.total * 100) : 0);
 /* Pairs in one run of the pronunciation drill: five heard and five said, which
    is about a minute and a half and does not outstay a contrast. */
 export const SOUND_DRILL_N = 10;
+
+/* The drills whose words can break the rules in a way the drill asks about:
+   a verb's conjugation and its aspect partner, a noun's cases. */
+export const IRREGULAR_DRILLS = ["conjugation", "aspect", "cases"];
 
 /* Words in one build-up run. Six, because each is four or five repetitions of
    the same mouth shape and the value is in doing them properly rather than in
@@ -644,6 +648,21 @@ export function DrillOptions({ type, prefs, onChange, onClose }) {
           </List>
         </View>
       ))}
+      {/* The words that break the rules, on their own (the owner, 2026-09-29:
+          "have options to drill them specifically"). Only where the drill's
+          words have any: verbs for conjugation and aspect, nouns for cases. */}
+      {IRREGULAR_DRILLS.includes(type) ? (
+        <View style={{ marginBottom: 18 }}>
+          <List>
+            <Row testID="irregular-only" onPress={() => onChange({ ...prefs, irregular: !prefs.irregular })}>
+              <Tick on={!!prefs.irregular} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: t.ink, fontSize: 15 }}>Irregular words only</Text>
+              </View>
+            </Row>
+          </List>
+        </View>
+      ) : null}
       <View style={{ marginBottom: 18 }}>
         <SectionLabel>Words from</SectionLabel>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
@@ -708,17 +727,23 @@ export function DrillFlow({ route, navigation }) {
    *
    * Chapters chosen on the cog are not widened: that is the learner saying
    * where the words come from, and a short run is the honest answer. */
+  /* "Rule-breakers only" (2026-09-29) narrows any pool to the words that break
+     the rules (data.js irregularWords); the widening below then ends on every
+     irregular word the course teaches rather than on the whole curriculum. */
+  const irregularOnly = !!prefs.irregular && IRREGULAR_DRILLS.includes(type);
   const steps = useMemo(() => {
-    if (chapters.length) return Q.drillQuestions(type, undefined, chapterWords(chapters), undefined, typed, only);
-    if (ahead) return Q.drillQuestions(type, undefined, null, undefined, typed, only);
+    const odd = irregularOnly ? new Set(irregularWords()) : null;
+    const narrow = (pool) => (odd ? (pool || irregularWords()).filter((i) => odd.has(i)) : pool);
+    if (chapters.length) return Q.drillQuestions(type, undefined, narrow(chapterWords(chapters)), undefined, typed, only);
+    if (ahead) return Q.drillQuestions(type, undefined, narrow(null), undefined, typed, only);
     let last = [];
     for (const min of DRILL_POOL_STEPS) {
       const p = min === Infinity ? null : drillPool(st, min);
-      last = Q.drillQuestions(type, undefined, p, undefined, typed, only);
+      last = Q.drillQuestions(type, undefined, narrow(p), undefined, typed, only);
       if (last.length >= DRILL_N) return last;
     }
     return last;
-  }, [type, seed, typed, only, ahead, chapters.join(",")]);
+  }, [type, seed, typed, only, ahead, chapters.join(","), irregularOnly]);
   const spec = DRILL_TYPES.find((d) => d.id === type);
   useAudioStopOnLeave();
 

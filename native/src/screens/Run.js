@@ -12,9 +12,10 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
          BulbButton } from "../ui";
-import { RuleCard, Reference, hasReference } from "../rules";
+import { RuleCard, Reference, hasReference, StandardWhy } from "../rules";
 import { topicFor } from "@core/grammar";
-import { wordFacts } from "@core/facts";
+import { wordFacts, isIrregular } from "@core/facts";
+import { standardExplanation } from "@core/explain";
 import { GuidePop } from "../guide";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, LINES } from "@core/guide";
@@ -22,7 +23,7 @@ import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio
 import { right as buzzRight, wrong as buzzWrong, done as buzzDone } from "../haptics";
 import { RuInput } from "../keyboard";
 import { charDistance } from "@core/compare";
-import { Linked } from "../words";
+import { Linked, useWords } from "../words";
 import { Hear } from "../activities/Hear";
 import { Say } from "../activities/Say";
 import { Scene } from "../activities/Scene";
@@ -433,6 +434,12 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   /* What the bulb has behind it for this question. Reading it always counts
      as a hint — see referenceFor. */
   const ref = q ? referenceFor(q) : { tables: [], facts: [], note: null, topic: null };
+  const qWord = ref.word;
+  const words = useWords();
+  /* The explanation a miss gets when the model gives none (core/explain.js):
+     computed once the answer is in and only for a miss. */
+  const standard = verdict && verdict.right === false && q ? standardExplanation(q, qWord) : null;
+  const irregular = !!(qWord && isIrregular(qWord));
 
   // Autoplay waits for whatever is still playing — the previous answer's reading,
   // the previous question's recording — so nothing talks over the language audio.
@@ -730,6 +737,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
               <Text style={{ color: t.ink, fontWeight: "700", fontSize: 16 }}>
                 {right === null ? "Skipped" : right ? "Correct" : partial ? "Almost" : "Not quite"}
               </Text>
+              {/* The answer card says when the word breaks the rules
+                  (2026-09-29), right or wrong — it is worth knowing either way. */}
+              {right !== null && irregular ? <Pill tone="irregular" testID="verdict-irregular">Irregular</Pill> : null}
             </View>
             {verdict && verdict.note ? (
               <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>{verdict.note}</Text>
@@ -780,10 +790,20 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                   )
                 ) : null}
               </View>
+            ) : right === false && standard ? (
+              /* Without the model — no Worker in this build, the setting off,
+                 the day's allowance spent, no connection — a miss still gets
+                 the whole answer: which form it is, what decides it, and the
+                 rule and the entry to read it in (core/explain.js). */
+              <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.line }}>
+                <StandardWhy ex={standard}
+                             onRule={navigation ? (r) => navigation.navigate("Grammar", { topic: r.topic, section: r.heading }) : null}
+                             onWord={qWord && words ? () => words.openFull(q.i) : null} />
+              </View>
             ) : right === false && q.note ? (
-              /* The fallback: no Worker in this build, the setting off, the
-                 request failed, or a kind that is never explained. A rule read
-                 at the moment it was broken is a rule that sticks (§30al). */
+              /* A kind with nothing to derive from (no word behind it): the
+                 chapter's rule card, as before. A rule read at the moment it
+                 was broken is a rule that sticks (§30al). */
               <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.line }}>
                 <RuleNote note={q.note} testID="rule-note" />
               </View>

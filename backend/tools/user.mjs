@@ -37,13 +37,27 @@ if (cmd === "add" && rest[0]) {
   const cur = JSON.parse(wrangler(["get", `user:${rest[0]}`, "--text"]) || "{}");
   wrangler(["put", `user:${rest[0]}`, JSON.stringify({ ...cur, revoked: true })]);
   console.log(`revoked ${cur.id || rest[0]}`);
+} else if (cmd === "plan" && rest[0] && ["free", "premium"].includes(rest[1])) {
+  /* Put an install on a plan (core/plans.js, 2026-09-29), found by its id —
+     the `app-…` name in the logs — so nobody has to handle the token itself.
+     Until the store sells Premium this is how it is granted. */
+  const keys = JSON.parse(wrangler(["list", "--prefix", "user:"]) || "[]");
+  let done = false;
+  for (const k of keys) {
+    const rec = JSON.parse(wrangler(["get", k.name, "--text"]) || "{}");
+    if (rec.id !== rest[0]) continue;
+    wrangler(["put", k.name, JSON.stringify({ ...rec, plan: rest[1] })]);
+    console.log(`${rec.id} is on ${rest[1]}`);
+    done = true;
+  }
+  if (!done) { console.error(`no install with id ${rest[0]}`); process.exit(1); }
 } else if (cmd === "list") {
   const keys = JSON.parse(wrangler(["list", "--prefix", "user:"]) || "[]");
   for (const k of keys) {
     const rec = JSON.parse(wrangler(["get", k.name, "--text"]) || "{}");
-    console.log(`${rec.id || "?"}\t${rec.revoked ? "revoked" : "active"}\tcaps ${JSON.stringify(rec.caps || {})}\t${k.name.slice(5, 13)}…`);
+    console.log(`${rec.id || "?"}\t${rec.revoked ? "revoked" : "active"}\t${rec.plan || (rec.via === "register" ? "free" : "custom")}\tcaps ${JSON.stringify(rec.caps || {})}\t${k.name.slice(5, 13)}…`);
   }
 } else {
-  console.log("usage: node tools/user.mjs add <id> [--feedback N] [--talk N] | revoke <token> | list");
+  console.log("usage: node tools/user.mjs add <id> [--feedback N] [--talk N] | plan <id> free|premium | revoke <token> | list");
   process.exit(2);
 }

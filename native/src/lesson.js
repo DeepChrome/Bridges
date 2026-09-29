@@ -36,6 +36,7 @@ import { L } from "./data";
 import { IMAGES, CREDITS } from "./images";
 import { firstSense } from "@core/util";
 import { soundTip } from "@core/alphabet";
+import { isIrregular } from "@core/facts";
 
 /* How big a word can be drawn in the head band, by how long it is. */
 const bandSize = (word) => {
@@ -67,6 +68,8 @@ export function StepBar({ at, total }) {
 export function WordList({ unit, words, at, total }) {
   const t = useTheme();
   const head = useEnter([unit.id, at]);
+  const odd = words.filter((i) => L[i] && isIrregular(L[i]));
+  const regular = words.filter((i) => !odd.includes(i));
   return (
     <>
       <StepBar at={at} total={total} />
@@ -80,11 +83,27 @@ export function WordList({ unit, words, at, total }) {
           <Muted numberOfLines={1}>{unit.name}</Muted>
         </View>
       </Animated.View>
+      {/* The words that break the rules, grouped under their own heading
+          (the owner, 2026-09-29: "when necessary, they should be grouped when
+          they are encountered in lesson plans"): met together, and met as
+          the exceptions they are rather than one among five. */}
       <List>
-        {words.map((i, k) => (
+        {regular.map((i, k) => (
           <WordRow key={i} i={i} unit={unit} delay={60 + k * 45} />
         ))}
       </List>
+      {odd.length ? (
+        <View testID="vocab-irregular" style={{ marginTop: regular.length ? 18 : 0 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <Pill tone="irregular">Irregular</Pill>
+          </View>
+          <List>
+            {odd.map((i, k) => (
+              <WordRow key={i} i={i} unit={unit} delay={60 + (regular.length + k) * 45} />
+            ))}
+          </List>
+        </View>
+      ) : null}
     </>
   );
 }

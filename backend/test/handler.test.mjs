@@ -76,7 +76,7 @@ test("a user token from KV is admitted with its own counter and cap, and a revok
   const capped = await handle(req(attempt, uauth), e, { fetch: up.fetch });
   assert.equal(capped.status, 429);                                   // her cap, not the owner's
   assert.equal((await handle(req(attempt, auth), e, { fetch: up.fetch })).status, 200);
-  assert.equal(e.USAGE.store.get("count:" + new Date().toISOString().slice(0, 10) + ":ann"), "1");
+  assert.equal(e.USAGE.store.get("feedback:" + new Date().toISOString().slice(0, 10) + ":ann"), "1");
   const line = [...e.USAGE.store.entries()].find(([k]) => k.startsWith("log:"));
   assert.equal(JSON.parse(line[1]).user, "ann");
   await e.USAGE.put(`user:${utoken}`, JSON.stringify({ id: "ann", revoked: true }));
@@ -106,7 +106,7 @@ test("a valid reply comes back as ok with the schema fields, tokens logged", asy
   assert.equal(up.calls[0].model, "claude-haiku-4-5-20251001");
   assert.equal(up.calls[0].max_tokens, 400);
   assert.deepEqual(JSON.parse(up.calls[0].messages[0].content).lemmas, attempt.lemmas);
-  assert.equal(e.USAGE.store.get("count:2026-09-06:owner"), "1");
+  assert.equal(e.USAGE.store.get("feedback:2026-09-06:owner"), "1");
   assert.deepEqual(JSON.parse(e.USAGE.store.get("tokens:2026-09-06:feedback")), { in: 120, out: 60, n: 1 });
 });
 

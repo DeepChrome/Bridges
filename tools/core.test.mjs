@@ -33,7 +33,8 @@ import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, PRODUCE_A
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
 import { TOPICS, checkGrammar, russianIn, topicFor } from "../core/grammar.js";
-import { wordFacts, conjugation, stemChange, nounStem, genderWhy, stressAt } from "../core/facts.js";
+import { wordFacts, conjugation, stemChange, nounStem, genderWhy, stressAt, irregularities } from "../core/facts.js";
+import { standardExplanation } from "../core/explain.js";
 import { ENDINGS, checkEndings, rankEndings } from "../core/endings.js";
 import { ambiguousSpellings, spokenKey } from "./build_form_audio.mjs";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP,
@@ -2138,7 +2139,7 @@ group("the facts about a word");
   };
   check("читать", "First conjugation");
   check("говорить", "Second conjugation");
-  check("хотеть", "Irregular");            // the one verb that mixes both patterns
+  check("хотеть", "Mixed conjugation");    // the one verb that mixes both patterns
   check("писать", "Stem change");
   check("любить", "Stress moves");
   check("учиться", "Reflexive");
@@ -2149,6 +2150,46 @@ group("the facts about a word");
   if (atak) ok(/-овать/.test(noteFor(atak, "Stem change")),
                "«атаковать» is named as the -овать class, not called irregular",
                noteFor(atak, "Stem change"));
+
+  /* What breaks the rules (2026-09-29): read off each word's tables, so the
+     checks are the words that define each kind, and the words that look
+     irregular and are not. */
+  const odd = (b) => { const w = by(b); return w ? irregularities(w).map((x) => x.label) : null; };
+  const expectOdd = (b, label) => { const got = odd(b); if (got) ok(got.includes(label), `«${b}» — ${label}`, got.join(", ")); };
+  expectOdd("хотеть", "Mixed conjugation");
+  expectOdd("дать", "Irregular endings");
+  expectOdd("пить", "Irregular stem");
+  expectOdd("идти", "Irregular past");
+  expectOdd("друг", "Plural in -ья");
+  expectOdd("город", "Plural in -а");
+  expectOdd("человек", "Different plural");
+  expectOdd("мать", "Stem grows");
+  expectOdd("хороший", "Irregular comparative");
+  for (const b of ["читать", "говорить", "атаковать", "искать", "писать", "платье", "стол", "книга", "новый", "день"]) {
+    const got = odd(b);
+    if (got) ok(got.length === 0, `«${b}» follows the rules`, got.join(", "));
+  }
+
+  /* The explanation a miss gets without the model (core/explain.js): the
+     answer's form, the facts that decide it, and a grammar section that
+     exists. */
+  const kn = by("книга");
+  if (kn) {
+    const t = kn.t.find((x) => /Declension/.test(x.title));
+    const r = t.rows.findIndex((row) => /Accusative/.test(row[0]));
+    const ex = standardExplanation({ kind: "cases", answer: [].concat(t.rows[r][1])[0], table: t, at: [r, 1] }, kn);
+    ok(ex && /accusative singular/.test(ex.what) && ex.rule && ex.rule.heading === "Accusative",
+       "a missed case names the form and links the section that states it", JSON.stringify(ex && [ex.what, ex.rule]));
+    ok(ex.why.some((f) => /Feminine/.test(f.label)), "and says what decides it", ex.why.map((f) => f.label).join(", "));
+  }
+  const hot = by("хотеть");
+  if (hot) {
+    const t = hot.t.find((x) => /Present/.test(x.title));
+    const ex = standardExplanation({ kind: "conjugation", answer: [].concat(t.rows[1][1])[0], table: t, at: [1, 1] }, hot);
+    ok(ex.why[0] && ex.why[0].irregular, "an irregular verb's miss leads with what breaks the rules",
+       ex.why.map((f) => f.label).join(", "));
+    ok(ex.rule && ex.rule.topic === "verbs", "and links the verbs topic", JSON.stringify(ex.rule));
+  }
 
   /* Nothing may claim a fact it cannot support, and nothing may throw on a
      word with no paradigm at all — the closed-class rows have none. */

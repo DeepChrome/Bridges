@@ -5242,6 +5242,65 @@ once and writes `core/avatars.js`; DiceBear is installed anywhere with
   generated from the style's own licence metadata into `AV_CREDIT` and drawn
   on the Credits screen (rule 20.10).
 
+## 30be. Plans, rule-breakers, and misses explained without the model (2026-09-29)
+
+**Free and Premium** (`core/plans.js`, shared by the Worker and the app). A
+registered install carries `plan` (`free` unless granted); each Worker route
+spends a counter (`COUNTER_OF`: conversation, review, explain, feedback,
+translate), capped per plan per UTC day. The numbers are priced off the
+Worker's own token log at Haiku 4.5's prices — a conversation turn ~$0.004,
+an explanation ~$0.001 — so Free (12 conversation turns ≈ one five-minute
+talk, 3 explanations, 3 spoken checks, 5 translations) costs ≤ 6¢ a day, and
+Premium (45 / 60 / 50 / 60) ≤ 45¢ spent to the last unit of everything,
+against $12.75 of a $15 subscription after the store's fee. A refusal
+carries `plan`, `counter`, `cap`; `POST /v1/plan` reports caps and today's
+use without a model call, and Settings shows it. Hand-minted tokens keep
+their old caps, read into the new counters (`legacyCaps`). **Premium is
+granted by `backend/tools/user.mjs plan <id> premium`** until the store sells
+it: purchasing needs a Play Billing library, a subscription product in the
+Play Console and server-side receipt checks, none of which exist yet. The
+owner's own install (`app-y3z9qam1`) is on Premium.
+
+**AI only on a miss.** Explanations already were; Say's feedback now asks
+only when the transcript differs from the target (`out.wer > 0`).
+
+**A miss without the model** (`core/explain.js`, `StandardWhy` in rules.js):
+which form the answer is, read off the paradigm cell the question was built
+on; the facts that decide it, rule-breakers first; and two references — the
+grammar section that states the rule (Grammar opens with it first) and the
+word's entry. Nothing is written about a particular word, so nothing can be
+invented. It replaces the chapter card as the fallback wherever a question
+has a word behind it.
+
+**Rule-breakers** (`irregularities` in core/facts.js), read off each word's
+tables: mixed or unrecognisable conjugation, a present or past on another
+stem, -ья and stressed -а plurals, a different plural, a stem that grows,
+the -мя nouns, a comparative on another stem. 58 of the 1,045 unit words.
+The classes the rules already name (-овать/-евать, a consonant mutation incl.
+ск/ст→щ, a fleeting vowel, -ье nouns) are **not** irregular, and the first
+measurement found each of them misfiled before it was fixed. Flagged on the
+entry, the flashcard's back and every verdict (`Pill tone="irregular"`: ink
+inside an amber stroke, because `warn` is audited as a stroke), grouped under
+their own heading in a lesson's word list, and drillable alone ("Irregular
+words only" on the conjugation, aspect and cases cogs).
+
+**Smaller**: the Learn page lost its streak and its Review button (the badge
+and You carry both); "due now" is "cards to review" and opens Study; Settings
+has circled-i explanations and a picture picker; Study's Voice choice is gone
+(every lesson word and sentence is one bought voice now); the end of the day
+is "Daily goal met" with trouble words and new words as the ways on, and the
+chunks between are dealt without a stop; the entry's examples and videos
+fold like its tables (`Fold`); the grammar reference gained Numbers, Going
+somewhere, Prepositions, Building sentences, comparatives, short forms and
+свой.
+
+**A test trap**: RN's Modal in the test renderer does not redraw its
+children when the component that owns it changes state — a toggle held in
+`Settings` fired and drew nothing, and a second Settings-opening test in the
+same file then found an empty screen. State that opens something inside a
+sheet belongs to a child component (`PictureSection`), which is also the
+tidier shape.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

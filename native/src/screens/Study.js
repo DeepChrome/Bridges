@@ -16,7 +16,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Pressable, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Choice, Stepper, Lift, Text, CogButton,
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton,
          Familiarity, familiarityColor } from "../ui";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf, rankOf } from "../data";
 import { Linked } from "../words";
@@ -24,6 +24,7 @@ import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
 import { applyGrade, reviewRows, preview, schedulerOpts, wanted, troubleWords as troubleBank, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity } from "@core/scheduler";
+import { isIrregular } from "@core/facts";
 import { buildSession, practiceSession, requeue, dailyFor, QUEUE_DEFAULTS, cardKind, kindsOf, CARD_KINDS }
   from "@core/queue";
 
@@ -58,6 +59,8 @@ export function flagsFor(st, item) {
     /* The word's memory, 0–100 (core/scheduler.js familiarity); null while it
        is new, when the New flag says everything there is to say. */
     score: item.kind === "new" ? null : familiarity(cardFor(entry), rankOf(item.word)),
+    /* A word that breaks the rules says so on the back (2026-09-29). */
+    irregular: (() => { const i = idxOfWord(item.word); return i >= 0 && isIrregular(L[i]); })(),
   };
 }
 
@@ -358,20 +361,11 @@ function SetPicker({ visible, onClose }) {
                        value={st.newPerDay === undefined ? QUEUE_DEFAULTS.newPerDay : st.newPerDay}
                        onChange={(n) => update((p) => ({ ...p, newPerDay: n }))} />
             </View>
-            {/* Which voice reads the card — never which cards there are. The
-                owner read "Recordings" as a filter and could not see what it
-                filtered ("there's a filter option for recorded...no idea what
-                that means", 2026-09-22); it sat in a sheet of real filters and
-                was named like one. "As recorded" cannot be read that way. The
-                recordings are the better sound and stay the default; what they
-                cannot be is one speaker, since the collection has four
-                sources (§27). */}
-            <View style={{ marginBottom: 18 }}>
-              <SectionLabel>Voice</SectionLabel>
-              <Choice testID="flash-voice" value={st.flashVoice || "recording"}
-                      options={[{ id: "recording", name: "As recorded" }, { id: "device", name: "One voice" }]}
-                      onPick={(id) => update((p) => ({ ...p, flashVoice: id }))} />
-            </View>
+            {/* "Voice — As recorded / One voice" stood here until 2026-09-29.
+                It existed because the collection's recordings came from four
+                readers (§27); since every curriculum word and every pooled
+                sentence is one bought voice, the choice had nothing left to
+                choose, and the owner could not tell what it did — so it went. */}
 
             {/* Where new cards come from. What is due is not here: it is in
                 every session whatever is ticked (studyCards), so no tick can
@@ -459,7 +453,7 @@ const faceSize = (face) => (face.sentence ? (face.w.length > 46 ? 20 : 24)
 /* The card's front, by direction: the Russian, its meaning, or only the sound.
    A sentence is plain text here and word-linked on the back — tapping a word
    before answering would hand over the answer. */
-function Front({ face, direction, device }) {
+function Front({ face, direction }) {
   const t = useTheme();
   if (direction === "produce") {
     // Meaning first: the same numbered senses, since the question is "which
@@ -474,7 +468,7 @@ function Front({ face, direction, device }) {
   if (direction === "listen") {
     return (
       <View style={{ alignItems: "center", paddingVertical: 12 }}>
-        <Speaker text={face.b} size={64} device={device} />
+        <Speaker text={face.b} size={64} />
       </View>
     );
   }
@@ -483,7 +477,7 @@ function Front({ face, direction, device }) {
       <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center", fontSize: faceSize(face) }}>
         {face.w}
       </Text>
-      <View style={{ marginTop: 10 }}><Speaker text={face.b} device={device} /></View>
+      <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
     </>
   );
 }
@@ -607,7 +601,6 @@ export default function Study({ navigation, route }) {
   /* The Russian side reads itself out: on arrival when it is the front, on
      the turn when it is the back, and a listening card is the recording. A
      tap on the speaker plays it again (audio.js). */
-  const device = st.flashVoice === "device";
   /* Keyed on the card, not only on the position. `[at, shown]` alone missed
      the first card of every session: dealing leaves `at` at 0 and `shown` at
      false — their initial values — so React never re-ran this, and only the
@@ -628,7 +621,7 @@ export default function Study({ navigation, route }) {
     const key = `${dealt.current}:${at}:${item.word}`;
     if (russianShowing && !heard.current.has(key)) {
       heard.current.add(key);
-      say(face.b, { repeat: false, device });
+      say(face.b, { repeat: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [at, shown, item && item.word, item && item.direction]);
@@ -678,7 +671,6 @@ export default function Study({ navigation, route }) {
   };
 
   const finished = session && at >= items.length;
-  const doneToday = session && session.done;
   /* What a fresh deal would hold once this pile is through: the rest of a
      backlog past the session's twenty, and the learning steps that have come
      due while it ran. Read off the scheduler rather than the finished
@@ -690,6 +682,17 @@ export default function Study({ navigation, route }) {
     return s.items.length + s.remaining;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished, items.length, st.seen, st.daily, setsKey]);
+  /* **The pile goes on until the day is done** (the owner, 2026-09-29: "when
+     I finish my review… it randomly says '3 to go'"). A session is dealt
+     twenty at a time and the cards just missed come back within minutes, so
+     there was a screen between chunks announcing a number nobody had asked
+     about. The next chunk is simply dealt; the only stop is the end of the
+     day's work. Not after a trouble round, which ends on its own screen. */
+  useEffect(() => {
+    if (finished && more > 0 && session && !session.practice) deal(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished, more]);
+  const reviewedToday = dailyFor(st.daily, Date.now()).reviews;
 
   /* The controls belong to the screen, not to the card, and they are pinned
      off the scroll (`Screen footer`).
@@ -768,29 +771,49 @@ export default function Study({ navigation, route }) {
            The day's pile first; once it is empty, the day is done and what
            is left is the learner's choice: another round on the trouble words
            (the owner, 2026-09-28), or new cards ahead of schedule. */
+        /* The day's goal, met — said as such (the owner, 2026-09-29: "they
+           should be congratulated and notified on meeting their daily goal
+           and presented with the option of continuing… review trouble words
+           or be exposed to new words"). Between chunks nothing is drawn: the
+           next one is dealt at once (the effect above). */
+        more && !(session && session.practice) ? null : (
         <View style={{ marginTop: 56, alignItems: "center", paddingHorizontal: 24 }}>
-          <Text testID="study-state" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
-            {session && session.practice && finished ? "Round finished."
-              : more ? `${more} to go.`
-              : "Done for today."}
-          </Text>
-          {more ? (
-            <Btn kind="pri" testID="continue" label={`Continue · ${more} left`} style={{ marginTop: 20, minWidth: 200 }}
-                 onPress={() => deal(false)} />
-          ) : (
+          {session && session.practice && finished ? (
+            <Text testID="study-state" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
+              Round finished.
+            </Text>
+          ) : reviewedToday ? (
             <>
-              {trouble.length ? (
-                <Btn kind="pri" testID="trouble-round" style={{ marginTop: 20, minWidth: 200 }}
-                     label={`Review trouble words · ${trouble.length}`}
-                     onPress={() => deal(false, "trouble")} />
-              ) : null}
-              {unmet && !doneToday ? (
-                <Btn testID="study-ahead" style={{ marginTop: 12, minWidth: 200 }}
-                     label="Study ahead · new cards" onPress={() => deal(true)} />
-              ) : null}
+              <Tick on size={56} />
+              <Text testID="study-state"
+                    style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center", marginTop: 14 }}>
+                Daily goal met
+              </Text>
+              <Muted testID="study-today" style={{ marginTop: 4 }}>
+                {`${reviewedToday} ${reviewedToday === 1 ? "card" : "cards"} today`}
+              </Muted>
             </>
+          ) : (
+            <Text testID="study-state" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
+              Nothing due today.
+            </Text>
           )}
+          {session && session.practice && more ? (
+            <Btn kind="pri" testID="continue" label={`Back to today's cards · ${more}`}
+                 style={{ marginTop: 20, minWidth: 220 }} onPress={() => deal(false)} />
+          ) : null}
+          {trouble.length ? (
+            <Btn kind={session && session.practice && more ? "plain" : "pri"} testID="trouble-round"
+                 style={{ marginTop: 20, minWidth: 220 }}
+                 label={`Review trouble words · ${trouble.length}`}
+                 onPress={() => deal(false, "trouble")} />
+          ) : null}
+          {unmet ? (
+            <Btn testID="study-ahead" style={{ marginTop: 12, minWidth: 220 }}
+                 label="Learn new words" onPress={() => deal(true)} />
+          ) : null}
         </View>
+        )
       ) : (
         <>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginTop: 16 }}>
@@ -829,13 +852,14 @@ export default function Study({ navigation, route }) {
               {/* On the back only (the owner, 2026-09-29): the front is the
                   question, and a score beside it is something else to look
                   at before answering. */}
+              {flip.face && flags.irregular ? <Pill tone="irregular" testID="flag-irregular">Irregular</Pill> : null}
               {flip.face ? <Familiarity score={flags.score} /> : null}
             </View>
             {blank ? (
               <Muted testID="card-blank" style={{ textAlign: "center" }}>
                 This card has no word on it
               </Muted>
-            ) : !flip.face ? <Front face={face} direction={item.direction} device={device} /> : (
+            ) : !flip.face ? <Front face={face} direction={item.direction} /> : (
               <>
                 {item.direction !== "recognise" ? (
                   <>
@@ -850,7 +874,7 @@ export default function Study({ navigation, route }) {
                           {face.w}
                         </Text>
                       )}
-                    <View style={{ marginTop: 10 }}><Speaker text={face.b} device={device} /></View>
+                    <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
                   </>
                 ) : (
                   <>
@@ -864,7 +888,7 @@ export default function Study({ navigation, route }) {
                     {/* The Russian can be heard from the back as well as the
                         front (the owner, 2026-09-24) — always the Russian,
                         never the meaning. */}
-                    <View style={{ marginTop: 10 }}><Speaker text={face.b} device={device} /></View>
+                    <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
                   </>
                 )}
                 {/* Every meaning the word has, numbered and laid out as a

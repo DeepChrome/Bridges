@@ -178,7 +178,11 @@ export function Say({ q, r }) {
              passed ? { credit: 1, note: null }
                : { credit: c.credit,
                    note: `${c.ok} of ${c.n} words` + (c.near ? `, ${c.near} nearly` : "") });
-    askFeedback(transcript, ts);
+    /* The model only where something was off (the owner, 2026-09-29: "AI is
+       only used for incorrect answers to limit token waste"). A sentence said
+       word for word has nothing to explain; a near miss still asks, because
+       that is where the Worker names a real case error. */
+    if (out.wer > 0) askFeedback(transcript, ts);
   };
 
   const last = useRef({ transcript: "", ts: 0 });

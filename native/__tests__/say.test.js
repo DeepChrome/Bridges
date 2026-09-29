@@ -281,6 +281,18 @@ describe("say", () => {
     expect(st.speech.attempts[0].tags).toEqual(["CASE"]);
   });
 
+  /* The model only where something was off (the owner, 2026-09-29: "AI is only
+     used for incorrect answers to limit token waste"). */
+  it("asks the feedback service nothing about a sentence said word for word", async () => {
+    await withSay();
+    await screen.findByText(question.en);
+    await speak();
+    await final(heard);
+    expect(await screen.findByText("Correct")).toBeTruthy();
+    expect(getFeedback).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("feedback-pending")).toBeNull();
+  });
+
   it("shows nothing extra when the service is unavailable", async () => {
     getFeedback.mockResolvedValueOnce({ ok: false, reason: "offline" });
     await withSay();

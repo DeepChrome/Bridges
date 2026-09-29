@@ -64,7 +64,6 @@ const fillOf = (node) => {
   }
   return "";
 };
-const btnFor = (label) => screen.getByText(label);
 
 beforeEach(async () => {
   await flushState();
@@ -73,39 +72,25 @@ beforeEach(async () => {
 });
 afterEach(async () => { await flushState(); });
 
-describe("reviews before new words", () => {
-  it("is a threshold on the due count, not a lock", () => {
+/* The path is the path (the owner, 2026-09-29: "remove the review from the
+   top of the Learn page"; the streak "can just be on the profile page"). What
+   is due is badged on the Study tab; nothing about it sits on Learn, and the
+   lesson stays the primary action however large the backlog. `reviewFirst`
+   survives in core for the simulator, which models a learner who reviews
+   first by choice. */
+describe("the top of the path", () => {
+  it("is still a threshold in core, for the simulator", () => {
     expect(reviewFirst(REVIEW_FIRST - 1)).toBe(false);
     expect(reviewFirst(REVIEW_FIRST)).toBe(true);
-    expect(reviewFirst(0)).toBe(false);
-    expect(reviewFirst(undefined)).toBe(false);
   });
 
-  it("keeps the lesson primary while the backlog is small", async () => {
-    await withState({ seen: due(REVIEW_FIRST - 1) });
+  it("carries no review button and no streak, and the lesson stays primary", async () => {
+    await withState({ seen: due(REVIEW_FIRST + 5), streak: 11 });
     const lesson = await screen.findByText(/^(Start|Continue) \(/);
     expect(fillOf(lesson.parent)).toBe(light.brand.toUpperCase());
-    expect(fillOf(btnFor(`Review · ${REVIEW_FIRST - 1} due`))).not.toBe(light.brand.toUpperCase());
-  });
-
-  /* The swap *is* the message. There used to be a line under it reading "Clear
-     these before new words", and asserting that line was really asserting that
-     the app narrates its own rule (the owner, 2026-09-10). What has to hold is
-     which button is blue and that the lesson is still one press away. */
-  it("makes reviewing primary once the backlog is real, without saying so", async () => {
-    await withState({ seen: due(REVIEW_FIRST) });
-    const review = await screen.findByText(`Review · ${REVIEW_FIRST} due`);
-    expect(fillOf(review.parent)).toBe(light.brand.toUpperCase());
-    // …and the lesson is still there, still one press away.
-    const lesson = screen.getByText(/^(Start|Continue) \(/);
-    expect(fillOf(lesson.parent)).not.toBe(light.brand.toUpperCase());
+    expect(screen.queryByTestId("review-due")).toBeNull();
+    expect(screen.queryByText(/in a row/)).toBeNull();
     fireEvent.press(lesson);
     expect(nav.navigate).toHaveBeenCalled();
-  });
-
-  it("opens the flashcards on exactly the due words", async () => {
-    await withState({ seen: due(REVIEW_FIRST) });
-    fireEvent.press(await screen.findByTestId("review-due"));
-    expect(nav.navigate).toHaveBeenCalledWith("Study");
   });
 });

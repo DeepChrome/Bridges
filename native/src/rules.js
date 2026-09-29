@@ -24,7 +24,7 @@ import React from "react";
 import { View, ScrollView, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
-import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, useRussianVoice } from "./ui";
+import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, useRussianVoice, Marked } from "./ui";
 import { Linked } from "./words";
 import { say, hasRealAudio } from "./audio";
 /* The form table is 9,579 asset requires. Loaded on the first table that
@@ -321,11 +321,16 @@ export function Facts({ facts, testID }) {
   return (
     <View testID={testID} style={{ marginTop: 12, gap: 10 }}>
       {facts.map((f, k) => (
-        <View key={k} style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
-          <View style={{ backgroundColor: t.brandBg, borderColor: t.brandDim, borderWidth: 1,
+        <View key={k} testID={f.irregular ? `${testID || "facts"}-irregular` : undefined}
+              style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
+          {/* A rule-breaker is drawn apart (2026-09-29): an amber edge — the
+              `warn` token is audited as a stroke, not as text — around ink,
+              so what does not follow the pattern is the first thing seen. */}
+          <View style={{ backgroundColor: f.irregular ? t.surface : t.brandBg,
+                         borderColor: f.irregular ? t.warn : t.brandDim, borderWidth: f.irregular ? 2 : 1,
                          borderRadius: radius.sm, paddingHorizontal: 8, paddingVertical: 3,
                          minWidth: 92 }}>
-            <Text style={{ color: t.brandInk, fontSize: T.tiny, fontWeight: "700",
+            <Text style={{ color: f.irregular ? t.ink : t.brandInk, fontSize: T.tiny, fontWeight: "700",
                            textTransform: "uppercase", letterSpacing: 0.5 }}>
               {f.label}
             </Text>
@@ -333,6 +338,31 @@ export function Facts({ facts, testID }) {
           <Note text={f.note} color={t.ink2} size={T.small + 1} style={{ flex: 1 }} gap={4} />
         </View>
       ))}
+    </View>
+  );
+}
+
+/* The explanation a wrong answer gets without the model (core/explain.js):
+ * which form the answer is, the facts that decide it — what breaks the rules
+ * first — and the two references it leans on: the grammar section that states
+ * the rule, and the word's own entry. Organised as those parts and nothing
+ * more (the owner, 2026-09-29: "keep it organized… rely on references"). */
+export function StandardWhy({ ex, onRule, onWord, testID = "standard-why" }) {
+  const t = useTheme();
+  if (!ex) return null;
+  return (
+    <View testID={testID}>
+      {ex.what ? <Marked testID={`${testID}-what`} text={ex.what} size={T.body - 1} color={t.ink} /> : null}
+      <Facts facts={ex.why} testID={`${testID}-facts`} />
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 14, marginTop: 10 }}>
+        {ex.rule && onRule ? (
+          <Btn kind="link" testID={`${testID}-rule`} label={`Rule: ${ex.rule.heading}`}
+               onPress={() => onRule(ex.rule)} />
+        ) : null}
+        {onWord ? (
+          <Btn kind="link" testID={`${testID}-word`} label="The full entry" onPress={onWord} />
+        ) : null}
+      </View>
     </View>
   );
 }

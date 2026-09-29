@@ -38,7 +38,6 @@ import {
   routePosition,
 } from "../data";
 import { nextOpening, markOpening } from "@core/openings";
-import { reviewFirst } from "@core/state";
 import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
 import { useSweep, useDraw, useFill } from "../motion";
@@ -435,9 +434,7 @@ export default function Learn({ navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
   const next = nextStep(st);
-  const due = dueCount(st);
-  const holdBack = reviewFirst(due);
-  const done = dayDone(st, due, today());
+  const done = dayDone(st, dueCount(st), today());
   const openUnit = (unit) => navigation.navigate("Unit", { unitId: unit.id });
 
   const opening = useMemo(
@@ -449,28 +446,11 @@ export default function Learn({ navigation }) {
 
   return (
     <Screen>
-      {/* The streak, centred at the top; the button under it names what it
-          opens and no more (the owner, 2026-09-07). An XP count sat beside it
-          until 2026-09-19 — "it means nothing now", and it did not: nothing
-          read it, nothing unlocked on it, and the rings already say what
-          counted. */}
-      <View style={{ flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 6 }}>
-        <Text testID="streak"
-              style={{ color: done ? t.good : t.ink, fontSize: 20, fontWeight: "700" }}>
-          {st.streak || 0}
-        </Text>
-        <Muted size={14}>{st.streak === 1 ? "day" : "days"} in a row</Muted>
-        {/* The day is closed: something was finished and nothing is waiting.
-            A tick, not a sentence — the streak turning green beside it is the
-            rest of the message (§25). */}
-        {done ? (
-          <Svg testID="day-done" width={15} height={15} viewBox="0 0 24 24" fill="none"
-               stroke={t.good} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-            <Path d="M4 13l5 5L20 7" />
-          </Svg>
-        ) : null}
-      </View>
-
+      {/* The streak and the "Review · N due" button used to open this screen.
+          Both went on 2026-09-29 (the owner: "remove the review from the top
+          of the Learn page"; the streak "can just be on the profile page").
+          The path is the path: what is due is badged on the Study tab, and
+          the run of days is on You and in Statistics. */}
       {/* Something has opened that was not open before (core/openings.js).
        *
        * Twelve activities appear as the route is walked and none of them used
@@ -508,29 +488,6 @@ export default function Learn({ navigation }) {
         </View>
       ) : null}
 
-      {/* What is due sits on the path, above the lesson: review is part of
-          the route, not a tab the learner has to remember (the pedagogy
-          review, 2026-09-08). Opens the flashcards on exactly the due words. */}
-      {due > 0 ? (
-        <Btn
-          kind={holdBack ? "pri" : "plain"}
-          testID="review-due"
-          style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
-          label={`Review · ${due} due`}
-          onPress={() => navigation.navigate("Study")}
-        />
-      ) : null}
-      {/* Above REVIEW_FIRST due cards the two buttons trade places: reviewing is
-          the primary action and the next lesson goes quiet. Advice, not a lock —
-          the lesson is still one press away, as the fork and developer mode are.
-          Without it the struggling simulated learner walked into 254 cards due in
-          a day and finished the route with 208 outstanding; holding new words
-          back halves the worst day and empties the backlog by the end.
-
-          It used to say "Clear these before new words" underneath. The swap is
-          the message: one button is blue and the other is not, which is what
-          §25 means by showing rather than explaining, and the line was the app
-          narrating its own rule at someone who could already see it. */}
       {next ? (
         // Straight to the next undone step of the next lesson — a question
         // within seconds, not a unit list and a lesson list first.
@@ -538,7 +495,7 @@ export default function Learn({ navigation }) {
           // Quiet once the day is done, for the same reason and by the same
           // means as review-first: the learner may carry on and nothing says
           // they should not, but the app stops pushing.
-          kind={holdBack || done ? "plain" : "pri"}
+          kind={done ? "plain" : "pri"}
           testID="next-step"
           style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
           label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} (${next.unit.name})`}

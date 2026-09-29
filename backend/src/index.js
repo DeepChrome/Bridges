@@ -26,6 +26,7 @@ import { SYSTEM_TALK, talkMessage, validateTalk, SYSTEM_HINT, hintMessage, valid
 import { SYSTEM_TRANSLATE, SYSTEM_TRANSLATE_EN, translateMessage, validateTranslate, direction } from "./translate.js";
 import { SYSTEM_EXPLAIN, explainMessage, validateExplain } from "./explain.js";
 import { SYSTEM_TUTOR, tutorMessage, validateTutor } from "./tutor.js";
+import { capsFor, planOf, COUNTER_OF, PLANS, PLAN_NAMES } from "../../core/plans.js";
 
 const API = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
@@ -56,8 +57,23 @@ const REGISTER_DAILY_CAP = 100;
    are friction, not the budget: `GLOBAL_DAILY_CAP` below is what actually
    bounds the bill, and at Haiku's prices it is a few dollars a day at the
    very worst. */
-export const REGISTERED_CAPS = { feedback: 300, talk: 400 };
+/* **Since 2026-09-29 a registered install has a plan** (core/plans.js): Free
+   is a taste of each AI feature a day, Premium a day's real use, priced off
+   this Worker's own token log. A record's `plan` decides its caps whenever it
+   is read — so a change to the plan table reaches every install at once, the
+   lesson of the stale caps above — and a record with none is Free. */
+export const REGISTERED_CAPS = capsFor("free");
 const DEFAULT_GLOBAL_CAP = 1500;
+
+/* A token minted by hand before plans kept caps under the two old names:
+   `feedback` covered every short call and `talk` every conversational one.
+   Read into the new counters rather than silently dropped to Free. */
+function legacyCaps(caps) {
+  if (!caps) return null;
+  if (!("feedback" in caps || "talk" in caps) || "conversation" in caps) return caps;
+  const short = caps.feedback, talk = caps.talk;
+  return { conversation: talk, review: talk, explain: short, feedback: short, translate: short };
+}
 
 const envInt = (v, dflt) => parseInt(v, 10) || dflt;
 
@@ -83,7 +99,7 @@ function tokenMatches(given, expected) {
    else is stored about a user — the counters and the token log carry the id. */
 const MIN_TOKEN = 16;
 async function identify(given, env) {
-  if (env.APP_TOKEN && tokenMatches(given, env.APP_TOKEN)) return { id: "owner", caps: null };
+  if (env.APP_TOKEN && tokenMatches(given, env.APP_TOKEN)) return { id: "owner", caps: null, plan: "owner" };
   if (!given || given.length < MIN_TOKEN) return null;
   let rec = null;
   try { rec = JSON.parse((await env.USAGE.get(`user:${given}`)) || "null"); } catch (e) { rec = null; }
@@ -95,8 +111,11 @@ async function identify(given, env) {
      on being refused after the limit was raised (2026-09-26). A token minted
      by hand (backend/tools/user.mjs) keeps the caps it was given, because
      those were chosen for that person. */
-  const caps = rec.via === "register" ? { ...REGISTERED_CAPS } : (rec.caps || null);
-  return { id: String(rec.id), caps };
+  if (rec.plan || rec.via === "register") {
+    const plan = planOf(rec.plan);
+    return { id: String(rec.id), caps: capsFor(plan), plan };
+  }
+  return { id: String(rec.id), caps: legacyCaps(rec.caps || null), plan: "custom" };
 }
 
 /* One daily counter: read, compare, write. Not atomic, which is fine for a
@@ -132,7 +151,7 @@ async function register(request, env, now) {
   const token = randomWord(24);
   /* The id is its own random word, not a piece of the token: it rides in
      every log line for thirty days and the token must not. */
-  const rec = { id: `app-${randomWord(6)}`, caps: { ...REGISTERED_CAPS }, created: day, via: "register" };
+  const rec = { id: `app-${randomWord(6)}`, plan: "free", created: day, via: "register" };
   await env.USAGE.put(`user:${token}`, JSON.stringify(rec));
   await logUsage(env, day, now, { kind: "register", user: rec.id });
   return json(200, { ok: true, token });
@@ -243,7 +262,7 @@ const ROUTES = {
      (tutor.js). It counts as talk: a turn of it is a turn of the tutor's time,
      whichever screen asked. */
   "/v1/tutor": {
-    kind: "talk", counter: "talk", cap: (env) => parseInt(env.TALK_DAILY_CAP, 10) || DEFAULT_TALK_CAP,
+    kind: "tutor", counter: "talk", cap: (env) => parseInt(env.TALK_DAILY_CAP, 10) || DEFAULT_TALK_CAP,
     maxTokens: 700, system: SYSTEM_TUTOR,
     check: (b) => (typeof b.text === "string" && Array.isArray(b.history) ? null : "text and history are required"),
     message: (b) => tutorMessage(b),
@@ -258,14 +277,26 @@ export async function handle(request, env, deps = {}) {
   const url = new URL(request.url);
 
   let route = ROUTES[url.pathname];
-  if (!route && url.pathname !== "/v1/register") return json(404, { ok: false, reason: "not found" });
+  const special = url.pathname === "/v1/register" || url.pathname === "/v1/plan";
+  if (!route && !special) return json(404, { ok: false, reason: "not found" });
   if (request.method !== "POST") return json(405, { ok: false, reason: "method" });
-  if (!route) return register(request, env, now);
+  if (url.pathname === "/v1/register") return register(request, env, now);
 
   const auth = request.headers.get("authorization") || "";
   const given = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
   const user = await identify(given, env);
   if (!user) return json(401, { ok: false, reason: "unauthorised" });
+  /* What this install may do today and what it has done: the plan's caps and
+     today's counters, read and never ticked, and no model call. The app
+     shows it in Settings (2026-09-29). */
+  if (url.pathname === "/v1/plan") {
+    const day = dayKey(now);
+    const used = {};
+    for (const counter of Object.keys(PLANS.free)) {
+      used[counter] = parseInt(await env.USAGE.get(`${counter}:${day}:${user.id}`), 10) || 0;
+    }
+    return json(200, { ok: true, plan: user.plan, caps: user.caps, used });
+  }
   if (!env.ANTHROPIC_API_KEY) return json(503, { ok: false, reason: "no upstream key" });
 
   let body;
@@ -282,11 +313,20 @@ export async function handle(request, env, deps = {}) {
      so the one way to say "this token may do nothing" quietly said the
      opposite (found 2026-09-26 by the test for stale caps). A number is a
      number, including zero. */
-  const own = user.caps ? user.caps[route.kind] : undefined;
+  /* The counter a route spends is the plan's (core/plans.js COUNTER_OF): a
+     Talk turn, a hint and a tutor turn are all conversation. */
+  const counter = COUNTER_OF[route.kind] || route.kind;
+  const own = user.caps ? user.caps[counter] : undefined;
   const cap = Number.isFinite(own) ? own : route.cap(env);
   const day = dayKey(now);
-  if (!(await tick(env, `${route.counter}:${day}:${user.id}`, cap))) {
-    return json(429, { ok: false, reason: "cap", message: route.capMessage(cap) });
+  if (!(await tick(env, `${counter}:${day}:${user.id}`, cap))) {
+    /* On a plan, the refusal says which plan and how much it allows, so the
+       app can say it plainly and offer what comes next. */
+    const onPlan = user.plan === "free" || user.plan === "premium";
+    return json(429, { ok: false, reason: "cap", plan: user.plan, counter, cap,
+                       message: onPlan
+                         ? `${PLAN_NAMES[user.plan]} plan: ${cap} a day. Resets at 00:00 UTC.`
+                         : route.capMessage(cap) });
   }
   if (user.id !== "owner" && !(await tick(env, `all:${day}`, envInt(env.GLOBAL_DAILY_CAP, DEFAULT_GLOBAL_CAP)))) {
     return json(429, { ok: false, reason: "cap", message: "The tutor has had a busy day; resets at 00:00 UTC." });

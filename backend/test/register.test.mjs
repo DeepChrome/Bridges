@@ -4,6 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { handle, REGISTERED_CAPS } from "../src/index.js";
+import { PLANS } from "../../core/plans.js";
 
 const OWNER = "test-app-token-0123456789";
 
@@ -53,8 +54,11 @@ test("register mints a token that then authenticates with a stranger's caps", as
      that pins them is a test that fails for being out of date rather than
      for being broken. What matters is that registration writes the
      configured caps, and that they are enough for a day of use. */
-  assert.deepEqual(rec.caps, REGISTERED_CAPS);
-  assert.ok(REGISTERED_CAPS.talk >= 200, `a day of conversation is more than ${REGISTERED_CAPS.talk} turns`);
+  // A new install is on the Free plan (2026-09-29, core/plans.js); the plan,
+  // not a copy of its numbers, is what the record carries.
+  assert.equal(rec.plan, "free");
+  assert.equal(rec.caps, undefined);
+  assert.deepEqual(REGISTERED_CAPS, PLANS.free);
   assert.match(rec.id, /^app-[A-Za-z0-9_-]{8}$/);
   assert.equal(rec.created, "2026-09-18");
   assert.notEqual(rec.id.slice(4), token.slice(0, 8), "the id is not a piece of the token");
@@ -64,7 +68,7 @@ test("register mints a token that then authenticates with a stranger's caps", as
   const later = () => new Date("2026-09-18T10:00:01Z");
   const used = await handle(attempt(token), e, { fetch: upstream(), now: later });
   assert.equal(used.status, 200);
-  assert.equal(e.USAGE.store.get(`count:2026-09-18:${rec.id}`), "1");
+  assert.equal(e.USAGE.store.get(`feedback:2026-09-18:${rec.id}`), "1");
   const log = [...e.USAGE.store.entries()].filter(([k]) => k.startsWith("log:")).map(([, v]) => JSON.parse(v));
   assert.ok(log.some((l) => l.kind === "register" && l.user === rec.id));
   assert.ok(!JSON.stringify(log).includes(token), "the token is never logged");

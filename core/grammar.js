@@ -356,6 +356,36 @@ export const TOPICS = [
           ["хоро́ший", "good — hard, spelled -ий"],
         ],
       },
+      {
+        heading: "Comparing: more and less",
+        rule: "Most adjectives add -ее for «more». A few common ones change their stem entirely.",
+        table: {
+          title: "Comparative",
+          columns: ["Adjective", "More", "Meaning"],
+          rows: [
+            ["но́вый", "нове́е", "newer"],
+            ["бы́стрый", "быстре́е", "faster"],
+            ["хоро́ший", "лу́чше", "better"],
+            ["плохо́й", "ху́же", "worse"],
+            ["большо́й", "бо́льше", "bigger"],
+            ["ма́ленький", "ме́ньше", "smaller"],
+          ],
+        },
+        examples: [["Э́тот дом бо́льше, чем тот.", "This house is bigger than that one."]],
+      },
+      {
+        heading: "The short form",
+        rule: "After «is» an adjective often takes a short form: the stem plus nothing, -а, -о or -ы.",
+        uses: [
+          "Only after a subject, never before a noun",
+          "Some words exist mostly in this form",
+        ],
+        examples: [
+          ["Я гото́в.", "I am ready — a man speaking"],
+          ["Она́ ра́да.", "She is glad."],
+          ["Мы должны́ идти́.", "We have to go."],
+        ],
+      },
     ],
   },
 
@@ -501,6 +531,179 @@ export const TOPICS = [
         rule: "его́, её and их are fixed. They are the easiest possessives in the language.",
         examples: [["её дом, её кни́га", "her house, her book"]],
       },
+      {
+        heading: "One's own: свой",
+        rule: "When the owner is the subject of the sentence, «my», «his», «her» are all свой.",
+        examples: [
+          ["Он лю́бит свою́ рабо́ту.", "He loves his own work."],
+          ["Он лю́бит его́ рабо́ту.", "He loves his work — someone else's."],
+        ],
+      },
+    ],
+  },
+
+  /* ------------------------------------------------------------- numbers */
+  {
+    id: "numbers",
+    title: "Numbers",
+    blurb: "Which case follows a number",
+    sections: [
+      {
+        heading: "One, a few, many",
+        rule: "The number decides the case of the noun after it: one, two to four, or five and up.",
+        table: {
+          title: "Counting",
+          columns: ["Number", "Noun", "Example"],
+          rows: [
+            ["1", "nominative singular", "оди́н стол"],
+            ["2, 3, 4", "genitive singular", "два стола́"],
+            ["5 and up", "genitive plural", "пять столо́в"],
+          ],
+        },
+        cards: ["time"],
+      },
+      {
+        heading: "The last digit decides",
+        rule: "In a long number only the last word counts: 21 is like 1, 22 like 2.",
+        examples: [
+          ["два́дцать оди́н год", "twenty-one years"],
+          ["два́дцать два го́да", "twenty-two years"],
+          ["два́дцать пять лет", "twenty-five years"],
+        ],
+      },
+      {
+        heading: "One and two have genders",
+        rule: "оди́н, одна́, одно́ agree with the noun, and two is две for feminine nouns.",
+        examples: [
+          ["оди́н брат, одна́ сестра́", "one brother, one sister"],
+          ["два бра́та, две сестры́", "two brothers, two sisters"],
+        ],
+      },
+    ],
+  },
+
+  /* ------------------------------------------------------------ movement */
+  {
+    id: "motion",
+    title: "Going somewhere",
+    blurb: "Walking, driving, one way or many",
+    sections: [
+      {
+        heading: "On foot or by transport",
+        rule: "Russian says how you go: идти́ is on foot, е́хать is by car, bus or train.",
+        examples: [
+          ["Я иду́ в шко́лу.", "I am walking to school."],
+          ["Мы е́дем домо́й.", "We are driving home."],
+        ],
+      },
+      {
+        heading: "Once, or back and forth",
+        rule: "идти́ and е́хать are one trip in one direction. ходи́ть and е́здить are round trips and habits.",
+        table: {
+          title: "The two pairs",
+          columns: ["", "One way, now", "Round trips, habits"],
+          rows: [
+            ["On foot", "идти́", "ходи́ть"],
+            ["By transport", "е́хать", "е́здить"],
+          ],
+        },
+        examples: [
+          ["Я хожу́ в шко́лу ка́ждый день.", "I go to school every day."],
+          ["Он идёт в магази́н.", "He is on his way to the shop."],
+        ],
+      },
+      {
+        heading: "A prefix gives the direction",
+        rule: "A prefix on идти́ says where the movement goes, and makes the verb perfective.",
+        table: {
+          title: "Prefixes",
+          columns: ["Prefix", "Meaning", "Example"],
+          rows: [
+            ["при-", "arrive", "прийти́"],
+            ["у-", "leave", "уйти́"],
+            ["в-", "go in", "войти́"],
+            ["вы-", "go out", "вы́йти"],
+          ],
+        },
+        examples: [
+          ["Он пришёл домо́й.", "He came home."],
+          ["Она́ ушла́.", "She has left."],
+        ],
+      },
+    ],
+  },
+
+  /* -------------------------------------------------------- prepositions */
+  {
+    id: "prepositions",
+    title: "Prepositions",
+    blurb: "Which case each one takes",
+    sections: [
+      {
+        heading: "Where, and where to",
+        rule: "в and на take the prepositional for where something is, the accusative for where it goes.",
+        examples: [
+          ["Я в шко́ле.", "I am at school — where"],
+          ["Я иду́ в шко́лу.", "I am going to school — where to"],
+        ],
+      },
+      {
+        heading: "Each one, its case",
+        rule: "Every other preposition always takes the same case. Learn the case with the word.",
+        table: {
+          title: "Prepositions",
+          columns: ["Case", "Prepositions", "Meaning"],
+          rows: [
+            ["Genitive", "из, с, от, у, без, для", "from, at, without, for"],
+            ["Dative", "к, по", "towards, along"],
+            ["Accusative", "че́рез, про", "across, about"],
+            ["Instrumental", "с, над, под, за", "with, above, under, behind"],
+            ["Prepositional", "о, при", "about, in the time of"],
+          ],
+        },
+      },
+      {
+        heading: "Out of, and away from",
+        rule: "из is out of a place entered with в; с is off one entered with на; от is from a person.",
+        examples: [
+          ["из шко́лы", "from school — you go в шко́лу"],
+          ["с рабо́ты", "from work — you go на рабо́ту"],
+          ["от бра́та", "from my brother"],
+        ],
+      },
+    ],
+  },
+
+  /* ----------------------------------------------------------- sentences */
+  {
+    id: "sentences",
+    title: "Building sentences",
+    blurb: "No, would, there is",
+    sections: [
+      {
+        heading: "No is said twice",
+        rule: "With никто́, ничего́, никогда́ the verb still takes не. Two negatives make one.",
+        examples: [
+          ["Я ничего́ не зна́ю.", "I don't know anything."],
+          ["Он никогда́ не был в Москве́.", "He has never been to Moscow."],
+        ],
+      },
+      {
+        heading: "There is, there is not",
+        rule: "есть says a thing exists or someone has it; нет says it does not, and takes the genitive.",
+        examples: [
+          ["У меня́ есть брат.", "I have a brother."],
+          ["У меня́ нет бра́та.", "I don't have a brother."],
+        ],
+      },
+      {
+        heading: "Would: бы",
+        rule: "бы and the past tense make «would», for wishes and for things that did not happen.",
+        examples: [
+          ["Я бы хоте́л ко́фе.", "I would like a coffee."],
+          ["Е́сли бы я знал, я бы пришёл.", "If I had known, I would have come."],
+        ],
+      },
     ],
   },
 ];
@@ -528,6 +731,8 @@ const TOPIC_OF = {
   adjective: "adjectives",
   verb: "verbs",
   pronoun: "pronouns",
+  numeral: "numbers",
+  preposition: "prepositions",
 };
 
 export function topicFor(what) {

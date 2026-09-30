@@ -65,11 +65,11 @@ LENGTH AND LEVEL
 CAST — the conversations are episodes of one story (docs/cast.md)
 - The speakers are the app's characters and nobody else: Тедди (Teddy, a
   small Yorkshire terrier, the hero), his mother Нежа (Nezha, a glamorous,
-  loving rabbit), his father Ярик (Yarik, a big soft-hearted wolf), Нежа's
-  best friend Белка (Belka, a chatty squirrel), and Монька (Monka, a small goofy
+  loving rabbit), his father Ярик (Yarik, a big soft-hearted wolf), and Монька (Monka, a small goofy
   cosmonaut monkey who schemes to spoil the family's plans out of jealousy —
   and every scheme backfires on him, like the coyote's; unlucky, never
-  humiliated, secretly kind). Neighbours for other roles: Тортила (Tortila,
+  humiliated, secretly kind). Supporting characters who come and go: Белка
+  (Belka, Нежа's chatty squirrel best friend), Тортила (Tortila,
   wise old turtle), Гена (Gena, grumpy crocodile shopkeeper), Лиса (Lisa, sly
   fox), Миша (Misha, warm bear).
 - Teddy is in most conversations. Monka appears in about half; when he does,

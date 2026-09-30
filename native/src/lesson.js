@@ -33,7 +33,7 @@ import { Linked } from "./words";
 import { Guide } from "./guide";
 import { useEnter } from "./motion";
 import { L, linesWith } from "./data";
-import { IMAGES, CREDITS } from "./images";
+import { pictureOf } from "./pictures";
 import { firstSense } from "@core/util";
 import { soundTip } from "@core/alphabet";
 import { isIrregular } from "@core/facts";
@@ -116,13 +116,15 @@ function WordRow({ i, unit, last, delay }) {
   // Staggered by position, so the eye is led down the list once. The distance is
   // small: a list that flies in from far away is a toy, not a lesson.
   const anim = useEnter([i], { delay, distance: 6 });
+  const pic = pictureOf(word.b);
   return (
     <Animated.View style={anim}>
       <Row testID={`new-${word.b}`} last={last}>
-        {IMAGES[word.b] ? (
-          <Image source={IMAGES[word.b]} resizeMode="cover"
-                 accessibilityLabel={`Photo: ${firstSense(word)}`}
-                 style={{ width: 46, height: 46, borderRadius: radius.sm }} />
+        {pic ? (
+          <Image source={pic.source} resizeMode={pic.drawn ? "contain" : "cover"}
+                 accessibilityLabel={`Picture: ${firstSense(word)}`}
+                 style={{ width: 46, height: 46, borderRadius: radius.sm,
+                          backgroundColor: pic.drawn ? t.brandBg : undefined }} />
         ) : (
           /* The unit's icon used to stand in, which meant a lesson of function
              words was five identical grey tiles down the left of the list — the
@@ -201,8 +203,9 @@ export function WordCard({ i, at, total, unit, onMoment }) {
   const anim = useEnter([i]);
   const pad = 16;                                  // Card's own padding, cancelled for the photo
   const tip = soundTip(w.b);
-  const photo = IMAGES[w.b];
-  const credit = CREDITS[w.b];
+  const pic = pictureOf(w.b);
+  const photo = pic && pic.source;
+  const credit = pic && pic.credit;
   const tags = [w.p, w.g, w.a].filter(Boolean).filter((x) => x !== "other");
   // Where the unit's video says this word (Phase 14): the lesson is preparing
   // for that video, so the card shows the word in it and plays the moment.
@@ -235,9 +238,12 @@ export function WordCard({ i, at, total, unit, onMoment }) {
                the picture appears, not only on the entry (rule 20.10). */
             <View style={{ marginHorizontal: -pad, marginTop: -pad, marginBottom: 14,
                            alignSelf: "stretch" }}>
-              <Image testID="word-photo" source={photo} resizeMode="cover"
-                     accessibilityLabel={`Photo: ${firstSense(w)}`}
-                     style={{ width: "100%", height: 190 }} />
+              {/* A drawn picture is a cut-out of the cast (pictures.js): shown
+                  whole on the brand band, where a photograph is cropped to fill. */}
+              <Image testID="word-photo" source={photo} resizeMode={pic.drawn ? "contain" : "cover"}
+                     accessibilityLabel={`Picture: ${firstSense(w)}`}
+                     style={{ width: "100%", height: pic.drawn ? 210 : 190,
+                              backgroundColor: pic.drawn ? t.brandBg : undefined }} />
               {credit ? (
                 <Muted testID="photo-credit" size={T.tiny}
                        style={{ textAlign: "center", paddingTop: 6, paddingHorizontal: pad }}>

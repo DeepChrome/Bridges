@@ -16,7 +16,7 @@ import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
 import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord, rankOf } from "../data";
 import { Linked } from "../words";
-import { IMAGES, CREDITS } from "../images";
+import { pictureOf } from "../pictures";
 import { clock, short } from "./Misc";
 
 /* How many videos an entry lists under "Heard in" before it asks. Four is a
@@ -88,15 +88,17 @@ export function WordEntry({ w, index, navigation }) {
      entry (the deep tier) has none and shows its gloss, as it always did. */
   const senses = sensesOf(index !== undefined ? index : idxOfWord(w.b));
 
-  const photo = IMAGES[w.b];
-  const credit = CREDITS[w.b];
+  const pic = pictureOf(w.b);
+  const photo = pic && pic.source;
+  const credit = pic && pic.credit;
   return (
     <>
       <Card>
         {photo ? (
-          <Image testID="word-photo" source={photo} resizeMode="cover"
-                 accessibilityLabel={`Photo: ${(w.e || "").split(/[,;]/)[0]}`}
-                 style={{ width: "100%", height: 160, borderRadius: radius.md, marginBottom: 12 }} />
+          <Image testID="word-photo" source={photo} resizeMode={pic.drawn ? "contain" : "cover"}
+                 accessibilityLabel={`Picture: ${(w.e || "").split(/[,;]/)[0]}`}
+                 style={{ width: "100%", height: pic.drawn ? 180 : 160, borderRadius: radius.md, marginBottom: 12,
+                          backgroundColor: pic.drawn ? t.brandBg : undefined }} />
         ) : null}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           <Text style={{ color: t.ink, fontSize: 32, fontWeight: "600", flex: 1 }}>

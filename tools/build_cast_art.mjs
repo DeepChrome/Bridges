@@ -29,6 +29,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { castById } from "../core/cast.js";
 
@@ -100,24 +101,77 @@ export const SCENES = {
   military: "a friendly game of capture-the-flag in the park, Teddy and Yarik's team against Belka's; Monka camouflaged as a bush, the flag stuck to his own back.",
 };
 
+/* Pictures for single words, drawn with the cast (the owner, 2026-09-30:
+   "make him interact with the material"). Two kinds, both from
+   docs/reviews/2026-09-30-content.md: where a word *is* a character, the
+   character (мама → Nezha); and where a photograph cannot show a word — a
+   verb, a feeling, a food a beginner meets first — a character doing it.
+   `who` are the sheets handed in as references. A drawn picture wins over a
+   photograph on the word's card (native/src/pictures.js). */
+export const WORDS = {
+  // the family as the vocabulary
+  "мама": { who: ["nezha"], what: "Nezha smiling warmly, a loving mother, waving hello" },
+  "папа": { who: ["yarik"], what: "Yarik smiling proudly, a kind father, arms folded" },
+  "сын": { who: ["teddy", "yarik"], what: "Yarik proudly hugging his little son Teddy" },
+  "семья": { who: ["teddy", "nezha", "yarik"], what: "the whole family together, Nezha and Yarik with Teddy between them, a happy family portrait" },
+  "подруга": { who: ["nezha", "belka"], what: "Nezha and Belka arm in arm, best friends laughing" },
+  "обезьяна": { who: ["monka"], what: "Monka the monkey grinning" },
+  "собака": { who: ["teddy"], what: "Teddy the dog sitting and wagging his tail" },
+  "волк": { who: ["yarik"], what: "Yarik the wolf howling happily at the moon" },
+  // chapter 1: what a photograph cannot show
+  "хотеть": { who: ["teddy"], what: "Teddy staring longingly at a pizza in a café window, clearly wanting it" },
+  "знать": { who: ["teddy"], what: "Teddy raising a paw confidently, he knows the answer" },
+  "говорить": { who: ["teddy", "belka"], what: "Teddy and Belka talking to each other, speech bubbles with no letters" },
+  "любить": { who: ["teddy", "nezha"], what: "Nezha hugging Teddy, little hearts around them" },
+  "жить": { who: ["teddy", "nezha", "yarik"], what: "the family in front of their cosy little house where they live" },
+  "звать": { who: ["teddy"], what: "Teddy introducing himself with a paw on his chest, a name tag with no letters" },
+  "родиться": { who: ["nezha", "yarik"], what: "Nezha and Yarik looking tenderly at a newborn puppy Teddy in a basket" },
+  "расти": { who: ["teddy", "yarik"], what: "Yarik marking Teddy's height on a door frame, Teddy standing proudly tall" },
+  "пить": { who: ["teddy"], what: "Teddy drinking from a glass of water" },
+  "готовить": { who: ["nezha"], what: "Nezha cooking at a stove, stirring a pot" },
+  "пробовать": { who: ["teddy"], what: "Teddy tasting a spoonful of soup carefully" },
+  "заказать": { who: ["teddy"], what: "Teddy pointing at a menu, ordering at a café counter" },
+  "обедать": { who: ["teddy", "nezha", "yarik"], what: "the family eating lunch at a table in the middle of the day" },
+  "ужинать": { who: ["teddy", "nezha", "yarik"], what: "the family eating dinner in the evening, a window showing the night sky" },
+  "вкусный": { who: ["teddy"], what: "Teddy licking his lips over a delicious cake" },
+  "горячий": { who: ["teddy"], what: "Teddy blowing on a very hot cup of tea, steam rising" },
+  "хлеб": { who: ["teddy"], what: "Teddy holding a fresh round loaf of bread" },
+  "молоко": { who: ["teddy"], what: "Teddy with a glass of milk and a milk moustache" },
+  "рыба": { who: ["yarik"], what: "Yarik proudly holding up a big fish" },
+  "вода": { who: ["teddy"], what: "a glass of clear water on a table, Teddy reaching for it" },
+  "еда": { who: ["teddy"], what: "Teddy at a table full of food, delighted" },
+};
+
 function key() {
   const k = process.env.OPENAI_API_KEY;
   if (!k) { console.error("OPENAI_API_KEY is not set"); process.exit(2); }
   return k;
 }
 
-async function edit(prompt, refs, file, { size = "1024x1024", transparent = true } = {}) {
+async function edit(prompt, refs, file, { size = "1024x1024", transparent = true, quality = "high" } = {}) {
   const form = new FormData();
   form.append("model", MODEL);
   form.append("prompt", prompt);
   form.append("size", size);
-  form.append("quality", "high");
+  form.append("quality", quality);
   form.append("background", transparent ? "transparent" : "opaque");
   form.append("output_format", "png");
   for (const r of refs) form.append("image[]", new Blob([fs.readFileSync(r)], { type: "image/png" }), path.basename(r));
-  const res = await fetch("https://api.openai.com/v1/images/edits", {
-    method: "POST", headers: { Authorization: `Bearer ${key()}` }, body: form,
-  });
+  // A connection that times out is the network, not the request: try again,
+  // since a batch of thirty should not die on one blip.
+  let res;
+  for (let tries = 1; ; tries++) {
+    try {
+      res = await fetch("https://api.openai.com/v1/images/edits", {
+        method: "POST", headers: { Authorization: `Bearer ${key()}` }, body: form,
+      });
+      break;
+    } catch (e) {
+      if (tries >= 3) throw e;
+      console.log(`  network (${e.cause ? e.cause.code : e.message}); retrying`);
+      await new Promise((r) => setTimeout(r, 5000 * tries));
+    }
+  }
   const j = await res.json();
   if (!res.ok) throw new Error(`${res.status} ${JSON.stringify(j.error || j).slice(0, 300)}`);
   fs.writeFileSync(file, Buffer.from(j.data[0].b64_json, "base64"));
@@ -168,13 +222,35 @@ async function scenes() {
   const dir = path.join(ART, "scenes");
   fs.mkdirSync(dir, { recursive: true });
   const only = arg("--only");
-  const names = cast.map((id, k) => `image ${k + 1} is ${castById[id].en} (${castById[id].species})`).join("; ");
   for (const [unit, what] of Object.entries(SCENES)) {
     if (only && !only.split(",").includes(unit)) continue;
     const file = path.join(dir, `${unit}.png`);
     if (fs.existsSync(file) && !has("--again")) { console.log(`kept ${rel(file)}`); continue; }
-    const prompt = `A wide cartoon scene for a language-learning app, starring the characters in the reference images (${names}); draw each exactly as in their reference — same design, colours and style. The scene: ${what} Warm, friendly and funny; the family is happy and Monka's mishap is comic, never cruel. Soft simple background, the characters large and clear. ${STYLE.replace("exactly the style of the cartoon monkey in the style reference image", "exactly the style of the reference images")}`;
-    await edit(prompt, cast.map(sheet), file, { size: "1536x1024", transparent: false });
+    /* Only the characters the scene names are handed over: given every sheet,
+       the model draws every character, and Belka — a supporting character who
+       comes and goes (docs/cast.md) — turned up in all of them. */
+    const family = /\bthe (whole )?family\b/i.test(what) ? ["teddy", "nezha", "yarik"] : [];
+    const who = cast.filter((id) => family.includes(id) || new RegExp(`\\b${castById[id].en}\\b`).test(what));
+    const names = who.map((id, k) => `image ${k + 1} is ${castById[id].en} (${castById[id].species})`).join("; ");
+    const prompt = `A wide cartoon scene for a language-learning app, starring the characters in the reference images (${names}); draw each exactly as in their reference — same design, colours and style, and no other character from the references. The scene: ${what} Warm, friendly and funny; the family is happy and Monka's mishap is comic, never cruel. Soft simple background, the characters large and clear. ${STYLE.replace("exactly the style of the cartoon monkey in the style reference image", "exactly the style of the reference images")}`;
+    await edit(prompt, who.map(sheet), file, { size: "1536x1024", transparent: false });
+  }
+}
+
+async function words() {
+  const dir = path.join(ART, "words");
+  fs.mkdirSync(dir, { recursive: true });
+  const only = arg("--only");
+  for (const [word, { who, what }] of Object.entries(WORDS)) {
+    if (only && !only.split(",").includes(word)) continue;
+    const file = path.join(dir, `${word}.png`);
+    if (fs.existsSync(file) && !has("--again")) { console.log(`kept ${rel(file)}`); continue; }
+    const refs = who.length ? who.map((id) => need(sheet(id))) : [STYLE_REF];
+    const names = who.map((id, k) => `image ${k + 1} is ${castById[id].en} (${castById[id].species})`).join("; ");
+    const prompt = `A picture for a language-learning vocabulary card: ${what}.` +
+      (names ? ` The characters are exactly as in the reference images (${names}) — same design, colours and style.` : "") +
+      ` The subject large and centred with only the props it needs, on a perfectly flat solid pure green (#00FF00) chroma-key background filling the whole frame: no ground, no shadow, no scenery, and nothing else bright green. Friendly and funny. ${STYLE.replace("exactly the style of the cartoon monkey in the style reference image", "exactly the style of the reference images")}`;
+    await edit(prompt, refs, file, { transparent: false, quality: arg("--quality") || "medium" });
   }
 }
 
@@ -224,6 +300,28 @@ function ship() {
     execFileSync("ffmpeg", ["-v", "error", "-y", "-i", src, "-vf", `scale=${SCENE_W}:-2:flags=lanczos`, "-q:v", "4", dst]);
     shipped.push(unit);
   }
+  // Word pictures: 400 px cut-outs,
+  // named by a short hash so the file name is ASCII (Android resources want it).
+  const wdir = path.join(ROOT, "native", "assets", "wordart");
+  fs.mkdirSync(wdir, { recursive: true });
+  const wlines = [];
+  for (const word of Object.keys(WORDS)) {
+    const src = path.join(ART, "words", `${word}.png`);
+    if (!fs.existsSync(src)) continue;
+    const name = "w" + createHash("sha1").update(word).digest("hex").slice(0, 10);
+    execFileSync("ffmpeg", ["-v", "error", "-y", "-i", src, "-vf",
+      // The model will not paint transparency, so the words are drawn on a
+      // green screen and keyed out here.
+      `chromakey=0x00FF00:0.13:0.06,despill=type=green,format=rgba,scale=400:400:flags=lanczos`,
+      "-pix_fmt", "rgba", path.join(wdir, `${name}.png`)]);
+    wlines.push(`  ${JSON.stringify(word)}: require("../assets/wordart/${name}.png"),`);
+  }
+  fs.writeFileSync(path.join(ROOT, "native", "src", "wordart.js"),
+    "/* Generated by tools/build_cast_art.mjs --ship. Do not edit. Words drawn\n" +
+    "   with the cast, preferred over a photograph (native/src/pictures.js). */\n" +
+    `export const WORD_ART = {\n${wlines.join("\n")}\n};\n`);
+  console.log(`${wlines.length} word pictures -> native/src/wordart.js`);
+
   const lines = shipped.map((u) => `  ${JSON.stringify(u)}: require("../assets/episodes/${u}.jpg"),`);
   fs.writeFileSync(path.join(ROOT, "native", "src", "sceneart.js"),
     "/* Generated by tools/build_cast_art.mjs --ship. Do not edit. One picture a\n" +
@@ -235,5 +333,6 @@ function ship() {
 if (has("--sheet")) await sheets(arg("--sheet"), +(arg("--n") || 3));
 else if (has("--poses")) await poses();
 else if (has("--scenes")) await scenes();
+else if (has("--words")) await words();
 else if (has("--ship")) ship();
-else console.log("usage: --sheet <id> [--n 3] | --poses [--again] | --scenes [--only a,b] [--again] | --ship");
+else console.log("usage: --sheet <id> [--n 3] | --poses [--again] | --scenes [--only a,b] [--again] | --words [--only a,b] [--quality high] | --ship");

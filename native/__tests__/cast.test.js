@@ -32,3 +32,24 @@ describe("a unit's episode picture", () => {
     expect(SCENE_ART.sport).toBeTruthy();
   });
 });
+
+describe("a word drawn with the cast", () => {
+  const { WORD_ART } = require("../src/wordart");
+  const { pictureOf } = require("../src/pictures");
+  const { IMAGES } = require("../src/images");
+  const { L } = require("../src/data");
+
+  it("is only ever a word the course teaches", () => {
+    const taught = new Set(L.map((w) => w.b));
+    for (const k of Object.keys(WORD_ART)) expect(taught.has(k)).toBe(true);
+  });
+
+  it("wins over a photograph, and carries no credit because it is ours", () => {
+    for (const k of Object.keys(WORD_ART)) {
+      expect(pictureOf(k)).toEqual({ source: WORD_ART[k], credit: null, drawn: true });
+    }
+    const photo = Object.keys(IMAGES).find((k) => !WORD_ART[k]);
+    expect(pictureOf(photo).drawn).toBe(false);
+    expect(pictureOf("такого-слова-нет")).toBeNull();
+  });
+});

@@ -29,9 +29,11 @@
  *
  * `look` is the art prompt and describes only what is always true of the
  * character. `persona` is how they behave, for writers and for the tutor.
- * The five family and rival entries are the cast; `supporting` are the
- * avatar characters (core/avatars.js), who turn up in scenes as neighbours,
- * shopkeepers and friends.
+ * The four family and rival entries are the cast; `supporting` are the
+ * characters who come and go — Belka and the other avatar characters
+ * (core/avatars.js) — as friends, neighbours and shopkeepers (the owner,
+ * 2026-09-30: *"The main characters are the 4 wolf, rabbit, monkey,
+ * yorkie… the others are 'come and go' supporting characters"*).
  */
 
 export const CAST = [
@@ -64,17 +66,14 @@ export const CAST = [
     /* The avatar keeps its old id: profiles store it (rule 20.4's spirit). */
     voice: "ru-RU-Chirp3-HD-Fenrir", tone: { pitch: 1.1, tempo: 0.86 }, avatar: "yuri",
   },
-  {
-    id: "belka", ru: "Белка", en: "Belka", sex: "f", species: "squirrel",
-    role: "friend",
-    persona: "Nezha's best friend. A quick, chatty red squirrel who knows everyone's news, saves the day at the last minute and hides snacks everywhere.",
-    look: "a small bright red squirrel with a huge fluffy tail, big sparkling eyes and a mischievous grin, wearing a little green scarf",
-    voice: "ru-RU-Chirp3-HD-Zephyr", avatar: "belka",
-  },
 ];
 
 /* The neighbourhood: the avatar characters, available to any scene. */
 export const SUPPORTING = [
+  { id: "belka", ru: "Белка", en: "Belka", sex: "f", species: "squirrel",
+    persona: "Nezha's best friend. A quick, chatty red squirrel who knows everyone's news and hides snacks everywhere.",
+    look: "a small bright red squirrel with a huge fluffy tail, big sparkling eyes and a mischievous grin, wearing a little green scarf",
+    voice: "ru-RU-Chirp3-HD-Zephyr", avatar: "belka" },
   { id: "tortila", ru: "Тортила", en: "Tortila", sex: "f", species: "turtle",
     persona: "The old wise turtle next door. Slow, patient, never wrong.",
     voice: "ru-RU-Chirp3-HD-Kore", avatar: "tortila" },

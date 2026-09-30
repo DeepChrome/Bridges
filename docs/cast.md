@@ -25,10 +25,6 @@ Voice: Aoede.
 fearsome to strangers and a complete softie at home. Calm, protective, dry
 jokes, unable to hide how proud he is. Short for Ярослав. Voice: Charon.
 
-**Белка — Belka** (a squirrel, she). Nezha's best friend. Quick, chatty,
-knows everyone's news, saves the day at the last minute, hides snacks
-everywhere. Voice: Zephyr.
-
 ## The rival
 
 **Монька — Monka** (a monkey, he). The cosmonaut monkey in a space suit a size
@@ -52,8 +48,11 @@ The rules for Monka, because this is the part that can go wrong:
 ## The neighbourhood
 
 The avatar characters (`core/avatars.js`) live next door and fill the other
-roles in a scene — shopkeeper, doctor, teacher, driver:
+roles in a scene — shopkeeper, doctor, teacher, driver. They come and go;
+the four above are the story.
 
+- **Белка — Belka**, a red squirrel, Nezha's best friend. Quick, chatty,
+  knows everyone's news, hides snacks everywhere. Voice: Zephyr.
 - **Тортила — Tortila**, the old wise turtle. Slow, patient, never wrong.
 - **Гена — Gena**, the grumpy crocodile at the corner shop.
 - **Лиса — Lisa**, a sly fox; sometimes Monka's partner in a scheme, and

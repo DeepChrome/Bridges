@@ -425,7 +425,7 @@ bridges/                          (directory is still named russian-blocks on di
     compare.js         <- transcript vs target, word-aligned through fold()
     errortags.js       <- the closed list of learner-error tags
     scenarios.js       <- the Talk situations (§30f), each played by a character
-    cast.js            <- the cast: Teddy, Nezha, Yarik, Belka, Monka (§30bg; docs/cast.md)
+    cast.js            <- the cast: Teddy, Nezha, Yarik, Monka, and who comes and goes (§30bg; docs/cast.md)
     grammar.js         <- the grammar reference: topics, rules, endings tables (§30ay)
     facts.js           <- what one word's own paradigm says about it (§30az)
     endings.js         <- how word endings are said, and how often they occur (§30ba)
@@ -5470,12 +5470,14 @@ read the bible before writing any scene, line, prompt or picture.
   short for Нежана, "tender", and echoes the owner's "Coneja".
 - **Ярик Yarik** (wolf, he) — his father; short for Ярослав (the owner's
   "Lobo or Jared, Russianified").
-- **Белка Belka** (squirrel, she) — Nezha's best friend.
 - **Монька Monka** (cosmonaut monkey, he) — the rival. Every scheme
   backfires on him; **unlucky, never humiliated, never cruel**, and now and
   then kind where nobody sees. His avatar keeps the id `yuri`, because
   profiles store it.
-- Neighbours for other roles: Тортила, Гена, Лиса, Миша.
+- **Four, not five** (the owner, same day: *"The main characters are the 4 wolf,
+  rabbit, monkey, yorkie… the others are 'come and go' supporting
+  characters"*). Белка (Belka, Nezha's squirrel friend), Тортила, Гена, Лиса
+  and Миша are SUPPORTING: they fill other roles in a scene.
 
 What holds it together, and each is enforced rather than hoped for:
 
@@ -5511,6 +5513,18 @@ What holds it together, and each is enforced rather than hoped for:
   episode picture per unit (`native/src/sceneart.js`, drawn at the top of
   the Unit screen). The model's faint alpha halo is cut on the way out
   (`HALO`) — invisible on white, an orange glow on the dark theme.
+- **A scene is handed only the characters it names.** Given every sheet the
+  model drew every character: Belka stood in all 34 unit scenes, and 30 were
+  redrawn. "The family" names Teddy, Nezha and Yarik.
+- **Words drawn with the cast** (`WORDS`, `--words`, medium quality, about
+  $0.05): the family as its own vocabulary (мама → Nezha, собака → Teddy) and
+  what a photograph cannot show (хотеть, вкусный, обедать). `pictureOf` in
+  `native/src/pictures.js` is the one lookup; a drawing wins over a
+  photograph and needs no credit. **gpt-image-2 will not paint
+  transparency** (`background: transparent` is refused, `auto` comes back
+  opaque with a painted checkerboard), so a word is drawn on a #00FF00
+  screen and keyed out at ship (`chromakey`, `despill`); nothing bright green
+  may be in the picture. Only taught words, which `cast.test.js` holds.
 - **The safety filter refuses "sexy".** The owner's brief for Nezha said
   "kind of sexy"; the prompt that leaned on it was refused, and "glamorous…
   a classic cartoon leading lady" drew what he meant.

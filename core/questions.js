@@ -62,6 +62,10 @@ export const speechFrom = (kind, stage, lesson) => {
    its chapter's. Chapter 1's card ("no is") teaches nothing a table can ask, so
    the question starts with chapter 2. */
 export const FORM_MIX = { fromStage: 1, typedFromStage: 5, perQuiz: 1 };
+
+/* Practice's drills inside a lesson quiz: this many, of the drills the route
+   has opened, on the chapter's own words (quizSteps). */
+export const DRILL_MIX = { perQuiz: 2 };
 /* The columns of a noun's declension table, for a spec that names rows only. */
 const NOUN_COLUMNS = ["Singular", "Plural"];
 /* The six cases as panel.py titles a declension's rows — what the cases and
@@ -1321,6 +1325,23 @@ export function makeQuestions(env) {
       for (let k = 0; k < FORM_MIX.perQuiz; k++) {
         const q = formPrompt(unit, index);
         if (q) out.splice(slotApart(out, q), 0, q);
+      }
+    }
+    /* And Practice's drills, the ones the route has opened, on this chapter's
+       own words (the owner, 2026-09-29: *"embed some of the exercises using
+       the words from the chapter into each lesson"*). Different drills each
+       time; a drill the chapter's words cannot fill reaches back along the
+       route, as Practice does. */
+    const reached = unitsUpTo(unit);
+    const types = shuffle([...drillsIntroduced(reached)]).slice(0, DRILL_MIX.perQuiz);
+    if (types.length) {
+      const chapter = reached.filter((u) => stageOf(u) === stage).flatMap((u) => u.w);
+      const route = reached.flatMap((u) => u.w);
+      const cells = formsIntroduced(reached);
+      for (const type of types) {
+        const q = drillQuestions(type, 1, chapter, cells, false)[0]
+          || drillQuestions(type, 1, route, cells, false)[0];
+        if (q) out.splice(slotApart(out, q), 0, { ...q, drill: true });
       }
     }
     return out;

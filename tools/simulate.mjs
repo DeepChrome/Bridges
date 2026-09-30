@@ -206,6 +206,10 @@ function simulate(profileName, seed) {
      and how much of the written material turns out to have a real recording
      anyway (the collection holds one for sentences people actually say). */
   const written = { scenes: 0, rows: 0, withAudio: 0 };
+/* A recording is the collection's or one bought and bundled (the app's own
+   hasRealAudio): the video's sentences carry the second kind (2026-09-29). */
+const BOUGHT = new Set(Object.keys(JSON.parse(readFileSync(new URL("../data/word_audio/manifest.json", import.meta.url), "utf8")).files || {}));
+const recorded = (ru) => !!DATA.audio.files[fold(ru)] || BOUGHT.has(fold(ru));
 
   const check = (q, where) => {
     const bad = (why) => structural.push({ where, kind: q.kind, why, prompt: q.prompt });
@@ -235,7 +239,7 @@ function simulate(profileName, seed) {
       for (const qq of q.questions || []) if (qq.options.filter((o) => o.right).length !== 1) bad("scene question without one right option");
     }
     if (q.kind === "type" && (!q.target || !q.answer)) bad("type without target/answer");
-    if ((q.kind === "hear" || q.kind === "say") && !DATA.audio.files[fold(q.target)]) bad("speech step without audio");
+    if ((q.kind === "hear" || q.kind === "say") && !recorded(q.target)) bad("speech step without audio");
     if (q.kind === "hear" || q.kind === "say") {
       const lem = sentenceLemmas(q.target, IX);
       if (!lem.length) bad("speech step grades no lemma");

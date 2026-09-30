@@ -4,92 +4,95 @@
   "seed": 1000,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 410,
-    "askedAgain": 178,
+    "quizQuestions": 458,
+    "askedAgain": 235,
     "backToBack": 0,
-    "within3": 66,
-    "sameQuizTwice": 109,
-    "medianGap": 5,
-    "quizzes": 42
+    "within3": 51,
+    "sameQuizTwice": 121,
+    "medianGap": 8,
+    "quizzes": 40
    },
    "mix": {
-    "listen": 44,
-    "cloze": 88,
-    "choose-ru": 62,
-    "type": 88,
-    "choose-en": 52,
-    "hear": 35,
+    "listen": 43,
+    "cloze": 98,
+    "choose-ru": 43,
+    "type": 82,
+    "stress": 37,
+    "choose-en": 53,
+    "hear": 34,
     "form": 14,
-    "agreement": 13,
-    "say": 14
+    "conjugation": 21,
+    "agreement": 19,
+    "say": 13,
+    "cases": 1
    },
    "chapters": [
     {
      "chapter": 1,
      "title": "Family and Food",
      "lessons": 14,
-     "newWordsPerLesson": 5,
-     "quizAccuracy": 0.87,
-     "passFirstTry": 13,
+     "newWordsPerLesson": 4.5,
+     "quizAccuracy": 0.91,
+     "passFirstTry": 14,
      "failedThrice": 0,
      "speechSteps": 8,
-     "speechTokensMean": 3.1,
-     "speechTokensMax": 4
+     "speechTokensMean": 3.6,
+     "speechTokensMax": 7
     },
     {
      "chapter": 2,
      "title": "Phones and Home",
      "lessons": 13,
-     "newWordsPerLesson": 5.4,
-     "quizAccuracy": 0.93,
+     "newWordsPerLesson": 4.6,
+     "quizAccuracy": 0.91,
      "passFirstTry": 13,
      "failedThrice": 0,
      "speechSteps": 13,
-     "speechTokensMean": 3.5,
+     "speechTokensMean": 3.3,
      "speechTokensMax": 4
     },
     {
      "chapter": 3,
      "title": "Town and Time",
      "lessons": 12,
-     "newWordsPerLesson": 6.4,
-     "quizAccuracy": 0.89,
-     "passFirstTry": 11,
+     "newWordsPerLesson": 6.1,
+     "quizAccuracy": 0.91,
+     "passFirstTry": 12,
      "failedThrice": 0,
-     "speechSteps": 26,
-     "speechTokensMean": 3.5,
-     "speechTokensMax": 5
+     "speechSteps": 24,
+     "speechTokensMean": 3.7,
+     "speechTokensMax": 6
     },
     {
      "chapter": 4,
      "title": "Travel, Talk and Clothes",
      "lessons": 1,
      "newWordsPerLesson": 7,
-     "quizAccuracy": 1,
+     "quizAccuracy": 0.92,
      "passFirstTry": 1,
      "failedThrice": 0,
      "speechSteps": 2,
-     "speechTokensMean": 3.5,
-     "speechTokensMax": 4
+     "speechTokensMean": 3,
+     "speechTokensMax": 3
     }
    ],
    "words": {
     "taught": 227,
     "everAsked": 227,
     "taughtButNeverAsked": 0,
-    "inSeen": 228,
-    "cards": 228,
+    "inSeen": 229,
+    "cards": 229,
     "trouble": 0,
-    "leeches": 1
+    "leeches": 0
    },
    "review": {
     "simulatedDays": 20,
     "dueAtEnd": 0,
     "duePerDay": 0,
     "sessions": 20,
-    "reviewsPerDay": 14.9,
-    "maxDueInADay": 28,
-    "againRate": 0.01,
+    "reviewsPerDay": 14.7,
+    "maxDueInADay": 37,
+    "againRate": 0,
     "backlogDays": 0,
     "heldDays": 0
    },
@@ -97,8 +100,8 @@
     "total": 40,
     "passed": 40,
     "relieved": 0,
-    "retakes": 2,
-    "shortQuizzes": 1
+    "retakes": 0,
+    "shortQuizzes": 0
    },
    "structural": 0
   },
@@ -114,72 +117,75 @@
   "seed": 1001,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 555,
-    "askedAgain": 312,
+    "quizQuestions": 528,
+    "askedAgain": 306,
     "backToBack": 0,
-    "within3": 99,
-    "sameQuizTwice": 145,
-    "medianGap": 5,
-    "quizzes": 56
+    "within3": 71,
+    "sameQuizTwice": 140,
+    "medianGap": 8,
+    "quizzes": 46
    },
    "mix": {
-    "type": 124,
-    "cloze": 131,
-    "listen": 71,
-    "choose-en": 61,
-    "hear": 49,
-    "choose-ru": 60,
-    "form": 24,
-    "agreement": 16,
-    "say": 19
+    "type": 111,
+    "cloze": 104,
+    "stress": 41,
+    "choose-ru": 49,
+    "choose-en": 46,
+    "listen": 57,
+    "hear": 40,
+    "conjugation": 25,
+    "form": 16,
+    "agreement": 23,
+    "say": 15,
+    "cases": 1
    },
    "chapters": [
     {
      "chapter": 1,
      "title": "Family and Food",
      "lessons": 14,
-     "newWordsPerLesson": 5,
-     "quizAccuracy": 0.85,
+     "newWordsPerLesson": 4.5,
+     "quizAccuracy": 0.81,
      "passFirstTry": 12,
      "failedThrice": 0,
-     "speechSteps": 9,
-     "speechTokensMean": 3,
-     "speechTokensMax": 3
+     "speechSteps": 10,
+     "speechTokensMean": 3.3,
+     "speechTokensMax": 5
     },
     {
      "chapter": 2,
      "title": "Phones and Home",
      "lessons": 13,
-     "newWordsPerLesson": 5.2,
-     "quizAccuracy": 0.82,
-     "passFirstTry": 7,
+     "newWordsPerLesson": 4.5,
+     "quizAccuracy": 0.86,
+     "passFirstTry": 12,
      "failedThrice": 0,
-     "speechSteps": 21,
-     "speechTokensMean": 3.6,
+     "speechSteps": 15,
+     "speechTokensMean": 3.1,
      "speechTokensMax": 4
     },
     {
      "chapter": 3,
      "title": "Town and Time",
      "lessons": 12,
-     "newWordsPerLesson": 6.6,
-     "quizAccuracy": 0.84,
-     "passFirstTry": 9,
+     "newWordsPerLesson": 5.8,
+     "quizAccuracy": 0.8,
+     "passFirstTry": 10,
      "failedThrice": 0,
-     "speechSteps": 32,
-     "speechTokensMean": 3.4,
-     "speechTokensMax": 4
+     "speechSteps": 28,
+     "speechTokensMean": 3.9,
+     "speechTokensMax": 6
     },
     {
      "chapter": 4,
      "title": "Travel, Talk and Clothes",
      "lessons": 1,
      "newWordsPerLesson": 7,
-     "quizAccuracy": 0.73,
-     "passFirstTry": 0,
+     "quizAccuracy": 0.77,
+     "passFirstTry": 1,
      "failedThrice": 0,
-     "speechSteps": 6,
-     "speechTokensMean": 3.7,
+     "speechSteps": 2,
+     "speechTokensMean": 3.5,
      "speechTokensMax": 4
     }
    ],
@@ -187,9 +193,9 @@
     "taught": 227,
     "everAsked": 227,
     "taughtButNeverAsked": 0,
-    "inSeen": 231,
-    "cards": 231,
-    "trouble": 1,
+    "inSeen": 230,
+    "cards": 230,
+    "trouble": 0,
     "leeches": 4
    },
    "review": {
@@ -197,7 +203,7 @@
     "dueAtEnd": 0,
     "duePerDay": 0,
     "sessions": 20,
-    "reviewsPerDay": 18.5,
+    "reviewsPerDay": 20.1,
     "maxDueInADay": 32,
     "againRate": 0.02,
     "backlogDays": 0,
@@ -207,8 +213,8 @@
     "total": 40,
     "passed": 40,
     "relieved": 0,
-    "retakes": 16,
-    "shortQuizzes": 1
+    "retakes": 6,
+    "shortQuizzes": 0
    },
    "structural": 0
   },
@@ -224,101 +230,104 @@
   "seed": 1002,
   "metrics": {
    "recurrence": {
-    "quizQuestions": 895,
-    "askedAgain": 628,
+    "quizQuestions": 956,
+    "askedAgain": 728,
     "backToBack": 0,
-    "within3": 165,
-    "sameQuizTwice": 228,
-    "medianGap": 7,
-    "quizzes": 90
+    "within3": 152,
+    "sameQuizTwice": 243,
+    "medianGap": 9,
+    "quizzes": 84
    },
    "mix": {
-    "cloze": 195,
-    "type": 208,
-    "choose-ru": 112,
-    "choose-en": 103,
-    "listen": 100,
-    "hear": 81,
-    "form": 35,
-    "say": 32,
-    "agreement": 29
+    "cloze": 182,
+    "type": 191,
+    "stress": 71,
+    "choose-ru": 104,
+    "listen": 89,
+    "choose-en": 102,
+    "hear": 69,
+    "conjugation": 44,
+    "form": 24,
+    "agreement": 47,
+    "say": 31,
+    "cases": 2
    },
    "chapters": [
     {
      "chapter": 1,
      "title": "Family and Food",
      "lessons": 14,
-     "newWordsPerLesson": 5,
-     "quizAccuracy": 0.68,
-     "passFirstTry": 6,
+     "newWordsPerLesson": 4.3,
+     "quizAccuracy": 0.71,
+     "passFirstTry": 1,
      "failedThrice": 0,
      "speechSteps": 17,
      "speechTokensMean": 3.1,
-     "speechTokensMax": 4
+     "speechTokensMax": 5
     },
     {
      "chapter": 2,
      "title": "Phones and Home",
      "lessons": 13,
-     "newWordsPerLesson": 4.9,
-     "quizAccuracy": 0.68,
-     "passFirstTry": 2,
+     "newWordsPerLesson": 4.4,
+     "quizAccuracy": 0.71,
+     "passFirstTry": 7,
      "failedThrice": 0,
-     "speechSteps": 32,
-     "speechTokensMean": 3.5,
-     "speechTokensMax": 4
+     "speechSteps": 21,
+     "speechTokensMean": 3.4,
+     "speechTokensMax": 6
     },
     {
      "chapter": 3,
      "title": "Town and Time",
      "lessons": 12,
-     "newWordsPerLesson": 6.4,
+     "newWordsPerLesson": 5.5,
      "quizAccuracy": 0.7,
-     "passFirstTry": 2,
-     "failedThrice": 0,
-     "speechSteps": 58,
-     "speechTokensMean": 3.4,
-     "speechTokensMax": 4
+     "passFirstTry": 3,
+     "failedThrice": 1,
+     "speechSteps": 56,
+     "speechTokensMean": 3.8,
+     "speechTokensMax": 6
     },
     {
      "chapter": 4,
      "title": "Travel, Talk and Clothes",
      "lessons": 1,
      "newWordsPerLesson": 7,
-     "quizAccuracy": 0.7,
+     "quizAccuracy": 0.59,
      "passFirstTry": 0,
      "failedThrice": 0,
      "speechSteps": 6,
-     "speechTokensMean": 3.3,
-     "speechTokensMax": 4
+     "speechTokensMean": 3,
+     "speechTokensMax": 3
     }
    ],
    "words": {
     "taught": 227,
     "everAsked": 227,
     "taughtButNeverAsked": 0,
-    "inSeen": 231,
-    "cards": 231,
+    "inSeen": 237,
+    "cards": 237,
     "trouble": 6,
-    "leeches": 43
+    "leeches": 49
    },
    "review": {
     "simulatedDays": 20,
     "dueAtEnd": 0,
     "duePerDay": 0,
     "sessions": 20,
-    "reviewsPerDay": 30.9,
-    "maxDueInADay": 43,
-    "againRate": 0.07,
+    "reviewsPerDay": 32.8,
+    "maxDueInADay": 49,
+    "againRate": 0.09,
     "backlogDays": 0,
     "heldDays": 0
    },
    "lessons": {
     "total": 40,
-    "passed": 40,
-    "relieved": 5,
-    "retakes": 50,
-    "shortQuizzes": 1
+    "passed": 39,
+    "relieved": 1,
+    "retakes": 44,
+    "shortQuizzes": 0
    },
    "structural": 0
   },

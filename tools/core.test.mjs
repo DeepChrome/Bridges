@@ -27,7 +27,7 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
   from "../core/state.js";
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
-import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, QUIZ_KINDS, PRODUCE_AT,
+import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, QUIZ_KINDS, PRODUCE_AT,
          lessonSize, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem }
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
@@ -1111,9 +1111,17 @@ group("lesson generation");
 
   const quiz = Q.quizSteps(unit, 0);
   const speechN = quiz.filter((q) => SPEECH_KINDS.includes(q.kind)).length;
-  const formN = quiz.filter((q) => q.kind === "form").length;
-  ok(quiz.length === 8 + speechN + formN, "a lesson quiz is 8 questions plus its speech and form steps",
+  const formN = quiz.filter((q) => q.kind === "form" && !q.drill).length;
+  const drillN = quiz.filter((q) => q.drill).length;
+  ok(quiz.length === 8 + speechN + formN + drillN, "a lesson quiz is 8 questions plus its speech, form and drill steps",
      String(quiz.length));
+  /* Practice's drills ride in every quiz, on the chapter's own words where
+     they can (2026-09-29): as many as DRILL_MIX says, of drills the route has
+     opened, and never two of the same drill. */
+  ok(drillN === Math.min(DRILL_MIX.perQuiz, Q.drillsIntroduced(Q.unitsUpTo(unit)).size),
+     "each quiz carries the chapter's drills", String(drillN));
+  ok(quiz.filter((q) => q.drill).every((q) => Q.drillsIntroduced(Q.unitsUpTo(unit)).has(q.kind)),
+     "…only drills the route has opened");
   ok(quiz.every(answerable), "every quiz question is answerable");
   ok(quiz.every((q) => !q.options || q.options.filter((o) => o.right).length === 1),
      "each has exactly one right answer");
@@ -1240,7 +1248,7 @@ group("form questions");
   STAGES.slice(1).forEach((s, k) => {
     const spec = Q.formSpec(s.core);
     const quiz = Q.quizSteps(s.core, 0);
-    const forms = quiz.filter(isForm(spec));
+    const forms = quiz.filter((q) => !q.drill).filter(isForm(spec));
     ok(forms.length === FORM_MIX.perQuiz, `${s.core.id}: one form question per quiz (${spec.drill || spec.table})`,
        String(forms.length));
     if (quiz[0] && isForm(spec)(quiz[0])) firstNotFirst = false;

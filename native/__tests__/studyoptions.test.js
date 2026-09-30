@@ -78,13 +78,12 @@ describe("the card says what it is", () => {
     expect(screen.queryByTestId("flag-trouble")).toBeNull();
   });
 
-  /* Trouble is judged only once a card has been seen enough (2026-09-24): a
-     card lapsing three times in ten answers is; four lapses on a card seen
-     twice is a card that is still being learned. */
-  it("flags a troubled card, and not an untroubled one", async () => {
+  /* A troubled card does not say so (2026-09-29, the owner: "the user doesn't
+     need to be reminded"); it is in the bank, not on the card. */
+  it("does not flag a troubled card", async () => {
     await withProfile({ seen: { [WORD]: { recognise: due({ lapses: 4, reps: 12 }) } } });
     await screen.findByTestId("card-kind");
-    expect(screen.getByTestId("flag-trouble")).toBeTruthy();
+    expect(screen.queryByTestId("flag-trouble")).toBeNull();
     expect(screen.queryByTestId("flag-new")).toBeNull();
   });
 
@@ -118,8 +117,9 @@ describe("the card says what it is", () => {
 
   it("counts a pinned word as trouble", () => {
     const st = { ...base, seen: { [WORD]: { recognise: due() } }, pinned: [WORD] };
-    expect(flagsFor(st, { word: WORD, direction: "recognise", kind: "review" }).trouble).toBe(true);
-    expect(flagsFor({ ...st, pinned: [] }, { word: WORD, direction: "recognise", kind: "review" }).trouble).toBe(false);
+    const { troubleWords } = require("../src/screens/Study");
+    expect(troubleWords(st)).toContain(WORD);
+    expect(troubleWords({ ...st, pinned: [] })).not.toContain(WORD);
   });
 });
 
@@ -273,7 +273,33 @@ describe("after the day's pile", () => {
     await act(async () => { fireEvent.press(screen.getByTestId("trouble-round")); });
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
     expect(screen.getByTestId("study-heading").props.children).toBe("Trouble words");
-    expect(screen.getByTestId("flag-trouble")).toBeTruthy();
+  });
+
+  /* "Daily goal met" beside 157 owed (the owner, 2026-09-29). Two causes: a
+     daily review cap, and a due card whose word folds onto another lemma
+     («всё» → «все»), which the pile looked up under the other word's schedule
+     and never dealt. The badge and the pile are one number. */
+  it("deals every card the badge counts, whatever was answered today", () => {
+    const today = require("@core/queue").dailyFor(null, now);
+    const st = { ...base, sets: [], cardKinds: ["words"],
+                 seen: { "всё": { recognise: due() }, [WORD]: { recognise: due() } },
+                 daily: { ...today, reviews: 500 } };
+    const s = sessionFor(st);
+    expect(s.items.map((x) => x.word).sort()).toEqual(["всё", WORD].sort());
+    expect(s.items.length + s.remaining).toBe(dueCount(st));
+  });
+
+  it("offers a round of known words, least held first", async () => {
+    const { knownWords } = require("../src/screens/Study");
+    const later = (s) => due({ dueAt: now + 5 * DAY, s });
+    const st = { seen: { "да": { recognise: later(30) }, "нет": { recognise: later(2) },
+                         [WORD]: { recognise: fresh() } }, cardKinds: ["words"], learnAhead: 20 };
+    expect(knownWords(st)).toEqual(["нет", "да"]);
+    await withProfile({ seen: { "да": st.seen["да"], "нет": st.seen["нет"] } });
+    expect((await screen.findByTestId("study-state")).props.children).toBe("Nothing due today.");
+    await act(async () => { fireEvent.press(screen.getByTestId("known-round")); });
+    expect(await screen.findByTestId("card-recognise")).toBeTruthy();
+    expect(screen.getByTestId("study-heading").props.children).toBe("Known words");
   });
 
   /* The end of the day's work is said as a goal met, with the two ways to go

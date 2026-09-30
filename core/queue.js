@@ -36,7 +36,12 @@ import { DIRECTIONS, DEFAULT_FRONTS, cardFor, kindOf, isDue, retrievability, day
    quizzes create most of the cards, not the flashcard ration. What the number
    does control is how many *unfamiliar* faces a flashcard session opens with,
    and five is a pace a learner can feel finishing. */
-export const QUEUE_DEFAULTS = { newPerDay: 5, sessionSize: 20, reviewsPerDay: 200, learnAhead: 20,
+/* `reviewsPerDay` is unlimited in the app (2026-09-30). A cap meant the day
+   could be "done" with cards still due, and the Study badge — which counts
+   what is due — went on showing them: the owner met "Daily goal met" beside
+   157 owed. What is due is owed until it is answered. The simulator still
+   passes a cap, to price what a learner with limited time faces (§30aa). */
+export const QUEUE_DEFAULTS = { newPerDay: 5, sessionSize: 20, reviewsPerDay: Infinity, learnAhead: 20,
                                 minGap: 3 };
 
 /* The front a card is asked through this time: the ticked fronts in turn,

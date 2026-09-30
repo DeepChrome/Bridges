@@ -54,4 +54,27 @@ describe("a streamed recording", () => {
     warm(fresh);
     expect(global.__downloads.length).toBe(1);
   });
+  /* A download writes as it goes. A copy still arriving is not a copy: the
+     press plays the web, never the half-written file (the owner, 2026-09-29:
+     *"it sort of cuts out mid sentence and then sometimes comes back"*). */
+  it("never plays a copy that is still downloading", async () => {
+    const third = examples[2];
+    let open;
+    global.__downloadHold = new Promise((r) => { open = r; });
+    warm(third);
+    await new Promise((r) => setTimeout(r, 0));
+    await say(third, { repeat: false });
+    const during = global.__players[global.__players.length - 1];
+    expect(String(during.uri)).not.toMatch(/^file:\/\/\/cache\//);
+    // Nothing sits under the final name while it arrives.
+    const name = global.__downloads[global.__downloads.length - 1].split("/").pop();
+    expect(global.__fs.files.has(`file:///cache/audio/${name}`)).toBe(false);
+    open();
+    global.__downloadHold = null;
+    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 0));
+    await say(third, { repeat: false });
+    const after = global.__players[global.__players.length - 1];
+    expect(String(after.uri)).toMatch(/^file:\/\/\/cache\/audio\//);
+  });
 });

@@ -1,4 +1,4 @@
-﻿/* Playback: the collection's own recordings first, the device voice only for gaps.
+/* Playback: the collection's own recordings first, the device voice only for gaps.
  *
  * Same rule as the web app. expo-audio replaces the Audio element, expo-speech
  * replaces SpeechSynthesis; the decision of what to play is unchanged.
@@ -70,14 +70,37 @@ const dirOf = () => {
   return cacheDir;
 };
 const fileOf = (url) => new File(dirOf(), url.split("/").pop());
+/* **A copy is the phone's only once it is whole** (2026-09-29, the owner:
+   *"it sort of cuts out mid sentence and then sometimes comes back… then the
+   same card had a different voice"*). The download used to write straight into
+   the file the player reads, and a copy counted as there the moment it was
+   non-empty — so a press during the download played half a recording, stalled
+   where the bytes ran out, and sometimes caught up; and a stall that errored
+   fell back to the phone's own voice, which is the other voice he heard. It is
+   fetched into a directory of its own and moved into place when complete,
+   and nothing still being fetched is ever a local copy. */
+let tmpDir = null;
+const tmpOf = () => {
+  if (!tmpDir) {
+    tmpDir = new Directory(Paths.cache, "audio-partial");
+    try { if (!tmpDir.exists) tmpDir.create(); } catch (e) { /* downloads then fail, and the web plays */ }
+  }
+  return tmpDir;
+};
 function localCopy(url) {
+  if (fetching.has(url)) return null;
   try { const f = fileOf(url); return f.exists && f.size > 0 ? f.uri : null; } catch (e) { return null; }
 }
 const fetching = new Map();
 function fetchCopy(url) {
   if (fetching.has(url) || localCopy(url)) return;
-  const job = File.downloadFileAsync(url, dirOf())
-    .catch(() => { try { const f = fileOf(url); if (f.exists) f.delete(); } catch (e) { /* nothing there */ } })
+  const part = () => new File(tmpOf(), url.split("/").pop());
+  const job = File.downloadFileAsync(url, tmpOf())
+    .then(async (got) => {
+      const done = got && typeof got.move === "function" ? got : part();
+      await Promise.resolve(done.move(fileOf(url)));
+    })
+    .catch(() => { try { const f = part(); if (f.exists) f.delete(); } catch (e) { /* nothing there */ } })
     .finally(() => fetching.delete(url));
   fetching.set(url, job);
 }

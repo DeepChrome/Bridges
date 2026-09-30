@@ -268,8 +268,16 @@ jest.mock("expo-file-system", () => {
     delete() { fs.files.delete(this.uri); }
     write(bytes) { fs.files.set(this.uri, bytes.length || 0); }
     async bytes() { return new Uint8Array(0); }
+    move(dest) {
+      const to = dest instanceof Directory ? new File(dest, this.name) : dest;
+      fs.files.set(to.uri, fs.files.get(this.uri) || 0);
+      fs.files.delete(this.uri);
+      this.uri = to.uri;
+    }
     static async downloadFileAsync(url, dest) {
       global.__downloads.push(url);
+      // A test may hold a download open, to see what plays meanwhile.
+      if (global.__downloadHold) await global.__downloadHold;
       if (global.__downloadFail && global.__downloadFail(url)) throw new Error("offline");
       const f = new File(dest, url.split("/").pop());
       fs.files.set(f.uri, 40000);

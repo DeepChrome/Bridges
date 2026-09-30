@@ -551,6 +551,16 @@ export const idxOfWord = (w) => {
   return h && h.length ? h[0] : -1;
 };
 
+/* The lemma whose bare form *is* `w`, or -1. State keys on that string (rule
+   20.4), and fold() does not preserve it: «всё» and «все» share a key, and a
+   form shares one with its lemma. Anything reading a card's schedule by its
+   word needs this, not idxOfWord's first hit. */
+export const exactIdx = (w) => {
+  const hits = IX[fold(w)] || [];
+  const same = hits.find((i) => L[i] && L[i].b === w);
+  return same === undefined ? -1 : same;
+};
+
 /* A studied word's frequency rank, 1 for the commonest — which is its lemma
  * index plus one, since the build assigns indices by frequency (§30ap reads it
  * the same way). What the familiarity score's horizon scales by
@@ -618,14 +628,10 @@ export function drillPool(st, min = DRILL_POOL_MIN) {
   const out = [];
   const have = new Set();
   const add = (i) => { if (i >= 0 && !have.has(i)) { have.add(i); out.push(i); } };
-  // State keys on the lemma's bare form; where two lemmas share a folded form
-  // (все/всё), take the one whose bare form is the key, not the index's first.
-  const exact = (w) => {
-    const hits = IX[fold(w)] || [];
-    const same = hits.find((i) => L[i] && L[i].b === w);
-    return same !== undefined ? same : (hits.length ? hits[0] : -1);
-  };
-  for (const w of Object.keys(st.seen || {})) add(exact(w));
+  for (const w of Object.keys(st.seen || {})) {
+    const i = exactIdx(w);
+    add(i >= 0 ? i : idxOfWord(w));
+  }
   if (out.length >= min) return out;
   // The route in order: every unit up to and including where the learner is,
   // then onward until the floor is met.

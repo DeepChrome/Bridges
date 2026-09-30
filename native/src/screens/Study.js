@@ -18,12 +18,12 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton,
          Familiarity, familiarityColor } from "../ui";
-import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf, rankOf, videoLines } from "../data";
+import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines } from "../data";
 import { Linked } from "../words";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
-import { applyGrade, reviewRows, preview, schedulerOpts, wanted, troubleWords as troubleBank, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity } from "@core/scheduler";
+import { applyGrade, reviewRows, preview, schedulerOpts, wanted, troubleWords as troubleBank, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity, kindOf, retrievability } from "@core/scheduler";
 import { isIrregular } from "@core/facts";
 import { buildSession, practiceSession, requeue, dailyFor, QUEUE_DEFAULTS, cardKind, kindsOf, CARD_KINDS }
   from "@core/queue";
@@ -44,18 +44,15 @@ export const FRONTS = [
 ];
 export const KIND_LABEL = { recognise: "Russian", produce: "Meaning", listen: "Listen" };
 
-/* What the reminder says a card is, on the card. `New` is the session's own
-   word for it; `Trouble` is the scheduler's bank (core/scheduler.js
-   troubleWords — the worst twenty, judged only once a card has been seen
-   enough) or the learner's (pinned). Neither names the word, so both are safe
-   on the front — a learner who is told "this one has been hard" before turning
-   it over is being told how to pay attention, not what the answer is. */
+/* What the card says about itself. `New` is the session's own word for it.
+   There was a `Trouble` flag too, and it went (the owner, 2026-09-29: "the
+   user doesn't need to be reminded that a word is a troubled word"): the bank
+   still exists — its round, You's sheet — but a card does not announce it. */
 export function flagsFor(st, item) {
-  if (!item) return { isNew: false, trouble: false, score: null };
+  if (!item) return { isNew: false, score: null };
   const entry = st.seen[item.word];
   return {
     isNew: item.kind === "new",
-    trouble: troubleWords(st).includes(item.word),
     /* The word's memory, 0–100 (core/scheduler.js familiarity); null while it
        is new, when the New flag says everything there is to say. */
     score: item.kind === "new" ? null : familiarity(cardFor(entry), rankOf(item.word)),
@@ -152,7 +149,13 @@ export function cardsIn(st, sets, words = []) {
   const have = new Set();
   const add = (card) => { if (!have.has(card.b)) { have.add(card.b); pool.push(card); } };
   const byWord = (w) => {
-    const i = idxOfWord(w);
+    /* Only the lemma that *is* this string. `idxOfWord` goes through fold(),
+       which maps «всё» to «все» and a form to its lemma, and the card it gives
+       is keyed on that other word: the session then read the other word's
+       schedule, found nothing due, and the card was never dealt while the
+       badge went on counting it (the owner, 2026-09-29: "Daily goal met" with
+       157 still owed). */
+    const i = exactIdx(w);
     if (i >= 0) { add(cardOf(i)); return; }
     // A card the curriculum does not carry: a pooled sentence or a deck card
     // that is due. The schedule knows it only by its Russian, so its English
@@ -222,6 +225,23 @@ export function studyCards(st) {
   return out;
 }
 
+/* Cards already learned and not yet due, of the chosen kinds, the least firmly
+   held first: the third way on once the day's pile is clear (the owner,
+   2026-09-29: "learn some new words, review trouble words, or review known
+   words"). Each answer is a real review, taken early. */
+export function knownWords(st, now = Date.now()) {
+  const kinds = kindsOf(st.cardKinds);
+  const opts = schedulerOpts(st);
+  const out = [];
+  for (const w in st.seen || {}) {
+    if (!kinds.includes(cardKind(w))) continue;
+    const card = cardFor(st.seen[w]);
+    if (!card || kindOf(card) === "new" || wanted(st.seen[w], now, st.learnAhead)) continue;
+    out.push([w, retrievability(card, now, opts)]);
+  }
+  return out.sort((a, b) => a[1] - b[1]).map((x) => x[0]);
+}
+
 /* The session from the learner's state. Exported so a test can ask for the
    same session the screen deals. `round: "trouble"` is the extra round of
    trouble words offered once the day is done; `round: "list"` is a round on
@@ -232,18 +252,18 @@ export function sessionFor(st, { ahead, rng, round, words: list, title } = {}) {
   if (round === "trouble") {
     return practiceSession({ seen: st.seen, words: troubleWords(st), dirs: st.flash || DEFAULT_FRONTS });
   }
-  if (round === "list") {
-    const cards = cardsIn(st, [], list || []);
+  if (round === "list" || round === "known") {
+    const cards = cardsIn(st, [], round === "known" ? knownWords(st).slice(0, QUEUE_DEFAULTS.sessionSize) : (list || []));
     const faces = {};
     for (const c of cards) faces[c.b] = c;
     return { ...practiceSession({ seen: st.seen, words: cards.map((c) => c.b), dirs: st.flash || DEFAULT_FRONTS,
-                                  size: cards.length }),
-             title, faces };
+                                  size: round === "known" ? QUEUE_DEFAULTS.sessionSize : cards.length }),
+             title: round === "known" ? "Known words" : title, faces };
   }
   const words = studyCards(st).map((c) => c.b);
   return buildSession({
     seen: st.seen, words, dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily, rng, ahead,
-    opts: { newPerDay: st.newPerDay, reviewsPerDay: st.reviewsPerDay, learnAhead: st.learnAhead,
+    opts: { newPerDay: st.newPerDay, learnAhead: st.learnAhead,
             scheduler: schedulerOpts(st), rank: newCardRank },
   });
 }
@@ -538,6 +558,9 @@ export default function Study({ navigation, route }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [st.sets, st.decks, st.seen, st.cardKinds]);
   const trouble = troubleWords(st);
+  const knownCount = useMemo(() => knownWords(st).length,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [st.seen, st.cardKinds]);
 
   const dealt = useRef(0);   // which deal this is, for "read once per card"
   const deal = (ahead, round, extra) => {
@@ -572,7 +595,7 @@ export default function Study({ navigation, route }) {
     st.sets.join(","), kindsOf(st.cardKinds).join(","),
     (st.decks || []).map((d) => d.id + d.cards.length).join(","),
     (st.flash || []).join(","),
-    st.newPerDay, st.reviewsPerDay, st.learnAhead, st.retention,
+    st.newPerDay, st.learnAhead, st.retention,
   ].join("|");
   /* Not before the profile has arrived: the store's defaults now carry a
      source of new cards (`__path__`), so a deal from them was a real pile —
@@ -831,6 +854,10 @@ export default function Study({ navigation, route }) {
             <Btn testID="study-ahead" style={{ marginTop: 12, minWidth: 220 }}
                  label="Learn new words" onPress={() => deal(true)} />
           ) : null}
+          {knownCount ? (
+            <Btn testID="known-round" style={{ marginTop: 12, minWidth: 220 }}
+                 label="Review known words" onPress={() => deal(false, "known")} />
+          ) : null}
         </View>
         )
       ) : (
@@ -864,7 +891,6 @@ export default function Study({ navigation, route }) {
                 {KIND_LABEL[item.direction] || ""}
               </Text>
               {flags.isNew ? <Pill testID="flag-new" tone="brand">New</Pill> : null}
-              {flags.trouble ? <Pill testID="flag-trouble" tone="bad">Trouble</Pill> : null}
               {/* How well this card is held, off its own FSRS stability. On
                   both faces for the same reason as the flags: it is about the
                   card's history, so it gives nothing away. */}

@@ -62,7 +62,6 @@ export const DEFAULTS = {
      (core/scheduler.js, 2026-09-23). */
   flash: DEFAULT_FRONTS.slice(),
   newPerDay: 5,
-  reviewsPerDay: 200,
   retention: 0.9,
   learnAhead: 20,
   pinned: [],

@@ -777,8 +777,8 @@ group("the session");
   const long = requeue(ses.items, 0, ses.items[0], 3);
   ok(long[4] !== ses.items[0] && long[4].word === ses.items[0].word && long[4].again && long.length === 21,
      "and after three other cards in a long one");
-  ok(QUEUE_DEFAULTS.sessionSize === 20 && QUEUE_DEFAULTS.newPerDay === 5 && QUEUE_DEFAULTS.reviewsPerDay === 200,
-     "the defaults are the playbook's");
+  ok(QUEUE_DEFAULTS.sessionSize === 20 && QUEUE_DEFAULTS.newPerDay === 5 && QUEUE_DEFAULTS.reviewsPerDay === Infinity,
+     "the defaults: twenty a session, five new a day, and no cap on what is due");
   const unset = buildSession({ seen: {}, words: fresh, dirs: ["recognise"], now: T0, daily: null,
                                opts: { newPerDay: undefined, sessionSize: undefined }, rng });
   // Against the default itself, not a literal: this check is about NaN (§30w's

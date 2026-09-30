@@ -1,26 +1,31 @@
 /* Yuri on screen.
  *
- * The art and the rules about when he speaks live in `core/guide.js`; this is
- * the React Native side of it. The animation helpers he was the first thing to
- * need have moved to `motion.js` now that the rest of the app needs them too —
- * a file named after a monkey is not where a press animation belongs.
+ * The rules about when he speaks live in `core/guide.js`; the pictures are
+ * bought by tools/build_guide_art.mjs (2026-09-30) and replaced a hand-written
+ * SVG the owner found not clean enough. One picture a pose, each made from
+ * the same base drawing. The animation helpers he was the first thing to need
+ * live in `motion.js`.
  */
 
 import React from "react";
-import { Animated, View } from "react-native";
-import { SvgXml } from "react-native-svg";
-import { guideSvg, VIEW_BOX, GUIDE } from "@core/guide";
-import { useTheme } from "./theme";
+import { Animated, Image, View } from "react-native";
+import { POSES, GUIDE } from "@core/guide";
 import { usePop } from "./motion";
 
-/* The figure. `pose` is one of core/guide.js POSES; the scarf takes the theme's
-   brand colour so he is the same character in both palettes. */
+const ART = {
+  idle: require("../assets/guide/idle.png"),
+  wave: require("../assets/guide/wave.png"),
+  point: require("../assets/guide/point.png"),
+  think: require("../assets/guide/think.png"),
+  cheer: require("../assets/guide/cheer.png"),
+};
+
+/* The figure. `pose` is one of core/guide.js POSES; an unknown one is idle. */
 export function Guide({ pose = "idle", size = 72, style }) {
-  const t = useTheme();
-  const xml = `<svg viewBox="${VIEW_BOX}" xmlns="http://www.w3.org/2000/svg">${guideSvg(pose, t.brand)}</svg>`;
+  const p = POSES.includes(pose) ? pose : "idle";
   return (
-    <View testID={`guide-${pose}`} accessibilityLabel={GUIDE.name} style={style}>
-      <SvgXml width={size} height={size} xml={xml} />
+    <View testID={`guide-${p}`} accessibilityLabel={GUIDE.name} style={style}>
+      <Image source={ART[p]} style={{ width: size, height: size }} resizeMode="contain" />
     </View>
   );
 }
@@ -34,8 +39,3 @@ export function GuidePop({ pose = "cheer", size = 72, delay = 0, style }) {
     </Animated.View>
   );
 }
-
-/* There was a `GuideSays` here — Yuri with a speech bubble — that nothing ever
-   rendered: the four places he speaks (§30m) draw the line beside him
-   themselves. Removed 2026-09-18 by the dead-export audit (tools/audit_dead.mjs),
-   not kept "just in case" (§12). */

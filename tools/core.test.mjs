@@ -46,7 +46,7 @@ import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ICONS, ACTIVITY_ICONS, iconFor } from "../core/icons.js";
 import { AV, AV_IDS, avatarOf, AV_CREDIT } from "../core/avatars.js";
-import { POSES, guideSvg, LINES, MAX_WORDS, guideLine, poseFor } from "../core/guide.js";
+import { POSES, LINES, MAX_WORDS, guideLine, poseFor } from "../core/guide.js";
 
 import { loadPayload, PARTS } from "./payload.mjs";
 
@@ -1619,22 +1619,13 @@ group("minimal pairs");
 }
 
 /* Yuri (§30m). The art is judged by eye; what a suite can hold is that every
-   pose actually draws, that he recolours with the theme, and that his one line
-   of copy stays one line. */
+   pose ships a picture, and that his one line of copy stays one line. */
 group("the guide");
 {
   ok(POSES.length === 5 && new Set(POSES).size === 5, "five distinct poses", POSES.join(", "));
-  const bad = POSES.filter((p) => {
-    const svg = guideSvg(p, "#4D45E6");
-    return !svg || svg.length < 400 || !/<circle cx="48" cy="32"/.test(svg);
-  });
-  ok(!bad.length, "every pose draws a whole figure", bad.join(", "));
-  ok(new Set(POSES.map((p) => guideSvg(p))).size === POSES.length,
-     "and no two poses are the same drawing");
-  ok(guideSvg("idle", "#AABBCC").includes("#AABBCC")
-     && !guideSvg("idle", "#AABBCC").includes("#4D45E6"),
-     "the scarf takes the accent it is given");
-  ok(guideSvg("nonsense") === guideSvg("idle"), "an unknown pose falls back to idle");
+  const shipped = new Set(readdirSync(join(ROOT, "native", "assets", "guide")));
+  const missing = POSES.filter((p) => !shipped.has(`${p}.png`));
+  ok(!missing.length, "every pose ships a picture", missing.join(", "));
 
   // The cap is the point: mascot copy grows a word at a time until it is a
   // paragraph, and this app's rule is labels, not prose (rule 20.7).

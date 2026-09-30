@@ -2033,11 +2033,16 @@ was two clear steps away from anything else.
 - `Bar` takes `animate` — opt-in, because `Passage.js` drives its bar from a
   position poll four times a second and an ease on top of that lags the video.
 
-**Yuri** (`core/guide.js`) is drawn in flat SVG like the avatars, in the
-`monkeynaut` palette — the owner's own profile picture — so he reads as that
-monkey with the helmet off; the scarf takes the theme's brand colour. Five poses,
-switched mostly by the **silhouette**: a raised arm reads as a wave at 40 px
-where an eyebrow does not.
+**Yuri** (`core/guide.js`) was first drawn in flat SVG; the owner found it
+"not as clean as he should be", and since 2026-09-30 he is five pictures from
+OpenAI's `gpt-image-2` (`tools/build_guide_art.mjs`, key from `OPENAI_API_KEY`
+in the environment, never printed). One base drawing is chosen by eye and every
+pose is made *from* it as a reference, which is what keeps five images one
+character. The originals are committed in `data/guide_art/` because they cost
+money; `--ship` writes 324 px copies to `native/assets/guide/` and **cuts the
+model's alpha halo** (alpha under 96 to zero) — invisible on white, an orange
+glow on the dark theme. The poses still differ mostly by **silhouette**: a
+raised arm reads as a wave at 40 px where an eyebrow does not.
 
 **He is almost silent, and that is the design.** Rule 20.7 is labels, not prose,
 and §25 says a polished learning screen may carry almost no text outside the

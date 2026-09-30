@@ -5515,6 +5515,35 @@ What holds it together, and each is enforced rather than hoped for:
   "kind of sexy"; the prompt that leaned on it was refused, and "glamorous…
   a classic cartoon leading lady" drew what he meant.
 
+## 30bh. The content review: a side quest teaches its topic (2026-09-30)
+
+The owner: *"When in doubt, stick to the most useful/common words. Build
+towards the videos… They don't need to know every single word."* Built from
+their videos alone (§30bf), side quests taught what an episode happened to
+say: Sport «автомат» and «трагический», Animals «банкомат», Faith «скидка».
+The notes are `docs/reviews/2026-09-30-content.md`.
+
+- **An off-topic video word joins a quest only if it is common**
+  (`OFFTOPIC_RANK`, the thousand words the most videos say) **and only up to
+  a quarter of the quest** (`OFFTOPIC_SHARE`). The cap is the load-bearing
+  half: without it, every word a reader dropped drifted to the next quest
+  («блин» Emotion → Body, «салат» → Faith), because a quest filled its video
+  room with whatever was left. With it, spare common words fall to the
+  spine.
+- **`data/curated/unit_words.json`** is a reader's `keep` and `drop` per
+  unit, applied on every build. A frequency rule cannot tell «праздновать» in
+  an Easter episode from «скидка» in the same one; a reader can. Keeps are
+  taken first, but a unit earlier on the route that already teaches the word
+  wins, and a side quest still cannot take an adverb or a numeral
+  (`BRANCH_POS`) — «завтра» stays on the spine.
+- **Change it by reading the unit, then diff.** `build_topics` prints each
+  goal video's followability before → after; the review moved 356 words and
+  most units moved 0–3 points.
+- **A re-cut breaks the conversations** (§30n) — 98 errors this time, all
+  repaired by editing the Russian — and **shifts the curriculum stamp**, so
+  every learner's progress is re-mapped on the next launch (§30bf, V7). Do a
+  review's rebuild once, not a unit at a time.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

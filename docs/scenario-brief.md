@@ -46,9 +46,11 @@ WHAT A CONVERSATION IS
   Lines that follow each other without following FROM each other.
 
 LENGTH AND LEVEL
-- 12 to 16 turns. 550 to 680 characters of Russian in total (that is 50–65
-  seconds as the cast read it — Monka speaks slowly, so a scene he is in
-  wants the lower end). Every turn is one to two sentences.
+- 12 to 16 turns, about 480 to 620 characters of Russian in total (that is
+  50–65 seconds as the cast read it). **Monka speaks slowly**, so a scene he
+  is in wants the lower end; the real limit is 70 seconds of voiced audio,
+  measured by tools/audio_qa.mjs, and padding a scene to reach a length only
+  pushes it over. Every turn is one to two sentences.
 - A single sentence never exceeds the word cap lesson_words.mjs prints.
 - The level starts at absolute beginner in chapter 1 (present tense, simple
   statements, questions with где/кто/что) and grows chapter by chapter, using

@@ -35,13 +35,13 @@
     },
     {
      "s": "b",
-     "ru": "Мешки, Нежа. На концерте Тедди всегда что-то хочет.",
-     "en": "Bags, Nezha. At a concert Teddy always wants something."
+     "ru": "Мешки, Нежа. На любом концерте Тедди всегда что-то хочет.",
+     "en": "Bags, Nezha. At any concert Teddy always wants something."
     },
     {
      "s": "a",
-     "ru": "Белка, на концерт мы не можем взять обед. Такой у меня принцип.",
-     "en": "Belka, we can't take lunch to a concert. That's my principle."
+     "ru": "Белка, обед на концерт мы не носим. Такой у меня принцип.",
+     "en": "Belka, we don't carry lunch to a concert. That's my principle."
     },
     {
      "s": "b",
@@ -60,7 +60,7 @@
     },
     {
      "s": "b",
-     "ru": "Нежа, ты имеешь в виду тот концерт в декабре?",
+     "ru": "Нежа, ты про тот концерт в декабре?",
      "en": "Nezha, do you mean that concert in December?"
     },
     {
@@ -70,8 +70,8 @@
     },
     {
      "s": "c",
-     "ru": "Тогда давайте так: сначала обед, потом концерт!",
-     "en": "Then let's do this: lunch first, then the concert!"
+     "ru": "Тогда так: сначала обед, потом концерт!",
+     "en": "Then here's the plan: lunch first, then the concert!"
     },
     {
      "s": "b",
@@ -80,13 +80,13 @@
     },
     {
      "s": "a",
-     "ru": "Хорошо. Только все мешки, Белка. Я считаю.",
-     "en": "All right. But all the bags, Belka. I'm counting."
+     "ru": "Хорошо. Только все мешки, Белка. Ставь их вот тут.",
+     "en": "All right. But all the bags, Belka. Put them right here."
     },
     {
      "s": "b",
-     "ru": "Все, Нежа. Ну... один орех можно?",
-     "en": "All of them, Nezha. Well... may I have one nut?"
+     "ru": "Все, Нежа. Хотя... один орех можно?",
+     "en": "All of them, Nezha. Although... may I keep one nut?"
     },
     {
      "s": "a",
@@ -178,6 +178,10 @@
     {
      "ru": "чай",
      "en": "tea"
+    },
+    {
+     "ru": "соль",
+     "en": "salt"
     }
    ],
    "lines": [
@@ -248,8 +252,8 @@
     },
     {
      "s": "b",
-     "ru": "Монька, давай мою кашу вместе. Она без соли.",
-     "en": "Monka, let's share my porridge. It has no salt in it."
+     "ru": "Монька, моя каша и для тебя. Она без соли.",
+     "en": "Monka, my porridge is for you too. It has no salt in it."
     }
    ],
    "questions": [

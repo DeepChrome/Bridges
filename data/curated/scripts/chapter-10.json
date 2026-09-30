@@ -23,10 +23,6 @@
    ],
    "intro": [
     {
-     "ru": "папа",
-     "en": "dad"
-    },
-    {
      "ru": "карман",
      "en": "pocket"
     },
@@ -38,8 +34,8 @@
    "lines": [
     {
      "s": "a",
-     "ru": "Папа, смотри, какой огромный гриб! Можно его попробовать?",
-     "en": "Dad, look what a huge mushroom! Can I try it?"
+     "ru": "Папа, смотри, какой огромный гриб! Можно его на обед?",
+     "en": "Dad, look what a huge mushroom! Can I have it for lunch?"
     },
     {
      "s": "b",
@@ -53,7 +49,7 @@
     },
     {
      "s": "a",
-     "ru": "Почему? Он почти как тот, который собрал папа.",
+     "ru": "Почему? Он почти как тот, что собрал папа.",
      "en": "Why? It's almost like the one Dad picked."
     },
     {
@@ -185,14 +181,6 @@
      "en": "mom"
     },
     {
-     "ru": "папа",
-     "en": "dad"
-    },
-    {
-     "ru": "ягода",
-     "en": "berry"
-    },
-    {
      "ru": "карта",
      "en": "map"
     },
@@ -259,8 +247,8 @@
     },
     {
      "s": "a",
-     "ru": "Иди к нам, здесь сухо. Ты же наш друг, Монька.",
-     "en": "Come over to us, it's dry here. You're our friend, Monka."
+     "ru": "Иди к нам, здесь сухо. Ты же наш друг, Монька. И завтра приходи!",
+     "en": "Come over to us, it's dry here. You're our friend, Monka. And come tomorrow too!"
     },
     {
      "s": "b",

@@ -43,8 +43,8 @@
      "en": "first"
     },
     {
-     "ru": "папа",
-     "en": "dad"
+     "ru": "курица",
+     "en": "chicken"
     }
    ],
    "lines": [
@@ -70,13 +70,13 @@
     },
     {
      "s": "a",
-     "ru": "Поэтому я делаю всё быстро. Огонь у меня огромный.",
-     "en": "That's why I'm doing it all fast. My heat is enormous."
+     "ru": "Долго — это не для меня. Огонь у меня огромный.",
+     "en": "Slow is not for me. My heat is enormous."
     },
     {
      "s": "b",
-     "ru": "Огромный огонь — это слишком, Тедди.",
-     "en": "Enormous heat is too much, Teddy."
+     "ru": "Огромный огонь — это плохо, Тедди.",
+     "en": "Enormous heat is bad, Teddy."
     },
     {
      "s": "c",
@@ -90,8 +90,8 @@
     },
     {
      "s": "c",
-     "ru": "Её можно снимать. Может быть, она ещё ничего.",
-     "en": "We can take it off. Maybe it's still all right."
+     "ru": "Её можно снимать. Тедди, такое у нас дома бывает постоянно.",
+     "en": "We can take it off. Teddy, that happens in our house all the time."
     },
     {
      "s": "a",
@@ -110,8 +110,8 @@
     },
     {
      "s": "a",
-     "ru": "Мама тоже? Тогда это не ошибка, а возможность!",
-     "en": "Mum too? Then it's not a mistake, it's an opportunity!"
+     "ru": "Мама тоже? Тогда это не ошибка, а урок! Ещё раз!",
+     "en": "Mum too? Then it's not a mistake, it's a lesson! Once more!"
     },
     {
      "s": "b",
@@ -211,6 +211,10 @@
     {
      "ru": "мама",
      "en": "mum"
+    },
+    {
+     "ru": "соль",
+     "en": "salt"
     }
    ],
    "lines": [
@@ -221,8 +225,8 @@
     },
     {
      "s": "b",
-     "ru": "Мясо с картошкой. Нежа его делает только на праздник.",
-     "en": "Meat with potatoes. Nezha only makes it for a celebration."
+     "ru": "Московская картошка. Нежа её делает только на праздник.",
+     "en": "Moscow potatoes. Nezha only makes them for a celebration."
     },
     {
      "s": "a",
@@ -236,8 +240,8 @@
     },
     {
      "s": "a",
-     "ru": "Мёд… А соль? Без соли мясо не мясо.",
-     "en": "Honey... And salt? Meat without salt isn't meat."
+     "ru": "Мёд… А соль? Без соли картошка не картошка.",
+     "en": "Honey... And salt? Potatoes without salt aren't potatoes."
     },
     {
      "s": "b",
@@ -246,8 +250,8 @@
     },
     {
      "s": "a",
-     "ru": "Вот моя возможность. Много соли — и праздника нет!",
-     "en": "Here's my chance. Lots of salt, and no celebration!"
+     "ru": "А вот мой секрет: много соли — и праздника нет!",
+     "en": "And here's my secret: lots of salt, and no celebration!"
     },
     {
      "s": "c",
@@ -284,7 +288,7 @@
     {
      "ask": "What is Belka looking after?",
      "options": [
-      "Nezha's holiday meat dish",
+      "Nezha's holiday potatoes",
       "Nezha's garden flowers",
       "Yarik's broken red car",
       "Teddy's big birthday cake"
@@ -326,7 +330,7 @@
      "options": [
       "More potatoes in it",
       "More honey on top",
-      "A new piece of meat",
+      "A new dish from Gena",
       "Throwing it away"
      ],
      "answer": 0

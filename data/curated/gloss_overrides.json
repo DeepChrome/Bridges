@@ -90,10 +90,8 @@
   "уехать": "to leave, to go away (by transport, perfective)",
   "уходить": "to leave, to go away (on foot, imperfective)",
   "жёлтый": "yellow",
-
   "_3": "2026-09-10, ROADMAP P11.5: «перед» now reaches the spine as the preposition rather than the paradigm-less noun glossed 'before'. OpenRussian's own gloss for the preposition names the case it takes, which is a grammar note and not a meaning; the case belongs on the grammar card.",
   "перед|other": "in front of, before",
-
   "_4": "2026-09-20, the owner's read of every curriculum gloss ('a wrong definition would tarnish our brand'). Every one of the 1,045 words the units teach was read against its Wiktionary entry. Three kinds of fix: a first sense that was wrong or a rare reading («же» 'and, as for, but', «являться» 'is', «боевик» 'hit', «посол» 'salting'); a garbled or padded list from OpenRussian («по» 'hit or punch somewhere; after a age', «покупать» 'buy, purchase, bathe, bath', «квартира» 'billets, quarters'); and a homograph keyed by class so the other row keeps its own meaning («напасть|verb», «рабочий|noun», «больной|adjective»). The first sense is still the quiz prompt, so it is the meaning the lesson teaches and never a parenthetical alone; Cyrillic stays out of the first sense or the prompt would carry the answer.",
   "же": "(emphatic) but, then; the same, the very",
   "по": "along, on, around; by, via (a means); according to; each (distributive)",
@@ -310,5 +308,7 @@
   "делиться": "to share; to be divided",
   "напасть|verb": "to attack",
   "ужинать": "to have dinner (the evening meal), to have supper",
-  "случай": "case, incident; occasion, chance"
+  "случай": "case, incident; occasion, chance",
+  "мясо": "meat",
+  "получиться": "to turn out, to work out"
 }

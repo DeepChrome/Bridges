@@ -60,41 +60,42 @@ const POSE_TEXT = {
 };
 
 /* One picture a unit: the family doing the unit's subject, and Monka's scheme
-   going wrong somewhere in the frame (docs/cast.md). Gentle throughout —
+   going wrong somewhere in the frame (docs/cast.md). A spine's picture echoes
+   its chapter's own conversations (docs/reviews/2026-09-30-content.md). Gentle throughout —
    Military, Law and Politics are played as games and neighbourhood life. */
 export const SCENES = {
-  core1: "Teddy meeting the viewer for the first time, waving, with Nezha and Yarik behind him at the front door of their cosy home; Monka peeks from a bush, and the bush is full of bees.",
+  core1: "Teddy and Nezha at Gena the crocodile's cosy café table with bowls of borscht and a pizza; Monka at the next table grimacing at his spoonful of borscht, the sugar bowl he swapped for the salt beside him.",
   family: "a family photo in the living room: Nezha, Yarik and Teddy posing on the sofa; Monka tries to photobomb from behind and topples off the back of the sofa.",
   food: "the family at a kitchen table with pancakes and tea; Monka, hiding under the table, has swapped the sugar for salt and is spluttering on his own stolen pancake.",
-  core2: "Teddy and Yarik walking along a small town street with a bakery and a bus stop; Monka disguised as a lamp post, a pigeon sitting on his helmet.",
+  core2: "outside a friendly town bank, Yarik and Teddy happily carrying pizza boxes; Monka looks on from the steps of a university across the street, empty-handed, his scheme backfired.",
   tech: "Teddy video-calling Belka on a tablet; Monka's remote-control drone, meant to spy on them, is tangled in his own space-suit cable.",
   home: "Nezha and Teddy arranging a cosy room with a rug and plants; Monka hiding in a cardboard box that Yarik is carrying out to the recycling.",
-  core3: "Teddy reading a picture book about little words with Nezha on a window seat; Monka outside the window, fogging the glass as he spies.",
+  core3: "the family ready to go out; Monka stuck on the roof of the house holding Teddy's little red hat, the ladder lying far away by the car.",
   city: "the family walking through a colourful town square with a fountain and shops; Monka's fake arrow sign points to a street where he himself has fallen into the fountain.",
   time: "Teddy and Yarik looking at a big wall clock and a calendar; Monka, who set all the clocks wrong, has overslept in a hammock.",
-  core4: "winter: the family decorating a New Year tree with gifts under it; Monka disguised as a present, the ribbon tied so tight he cannot move.",
+  core4: "a snowy bus stop with a big New Year tree glowing in the town behind; Monka sliding on the patch of ice he made himself, Yarik and Teddy stepping onto the bus.",
   travel: "the family at a train station with suitcases, Teddy holding the tickets; Monka's getaway scooter is on the wrong platform as the train leaves.",
   speech: "Teddy practising words with Belka, speech bubbles of hearts and stars (no letters); Monka with a megaphone that only blows his own helmet off.",
   clothes: "Nezha trying on elegant hats in a boutique while Teddy models a tiny scarf; Monka stuck in a jumper pulled over his helmet.",
-  core5: "Teddy counting coins into a piggy bank with Yarik; Monka's fishing line for the coins has hooked his own tail.",
+  core5: "Teddy holding a bag of coins at the bank counter with Yarik; Monka offering one old rouble coin with a sly grin, the coin sparkling as if it were treasure.",
   work: "Yarik at his desk in a friendly office with Teddy visiting; Monka as a fake cleaner has mopped himself into a corner.",
   business: "Teddy and Belka running a lemonade stand with a queue of neighbours; Monka's rival stand next door has one customer, a sleepy turtle.",
   emotion: "Nezha hugging Teddy, who looks a little sad, then smiling; in the corner Monka looks on, lonely, holding a small flower behind his back.",
-  core6: "a before-and-after of the garden: Teddy and Yarik planting seeds, then sunflowers; Monka's seeds grew into a giant cactus next to him.",
+  core6: "a breakfast table: Belka serving porridge, Teddy happily eating; Monka pulling a face at his very salty bowl, the sugar and salt bags swapped behind him.",
   body: "the family doing morning stretches in the park; Monka copying them has tied himself in a knot.",
   animals: "Teddy at a petting farm with a goat, ducks and a pony; Monka chased by a goose.",
   science: "Teddy and Yarik with a telescope and a small rocket model at night; Monka's own rocket fizzles and he dangles from a parachute in a tree.",
-  core7: "a stormy night: Teddy a little scared under a blanket fort with Nezha and a torch, being brave; Monka outside in a ghost sheet, himself scared by a hooting owl.",
+  core7: "a forest path at dusk with a trail of white stones leading the wrong way; Yarik confidently leading Teddy home, Monka lost and sheepish holding a basket of mushrooms.",
   school: "Teddy at a school desk with a friendly bear teacher at the board; Monka's paper airplane has boomeranged into his own helmet.",
   art: "Teddy painting a portrait of Nezha while Yarik plays guitar; Monka, sneaking by, has walked through the wet paint and is covered in colourful paw prints.",
   nature: "the family on a picnic by a lake under a big sky with a rainbow; Monka's rain cloud machine is raining only on himself.",
-  core8: "a birthday party in the garden with a big cake, balloons and Belka; Monka's plan to steal the cake has ended with his face in it.",
+  core8: "a kitchen with a slightly burnt chicken on a platter, Nezha laughing warmly with Teddy in an apron; Monka at the table peeling a mountain of potatoes.",
   sport: "Teddy playing football in a park, kicking the ball past goalkeeper Yarik while Nezha cheers; Monka's trick ball has bounced back and knocked him over.",
   politics: "a neighbourhood meeting in the park where the animals vote with raised paws for Teddy's idea of a new playground; Monka voting against, alone, holding his own banner upside down.",
-  core9: "a little fashion show on the patio with Nezha, Belka and Teddy in stylish outfits; Monka's attempt to trip them with a banana peel has sent him sliding off the runway.",
+  core9: "Teddy proudly wearing bright red trousers at a woodland party with Nezha and Belka; Monka in baggy trousers sitting in a muddy puddle.",
   religion: "the family painting Easter eggs and baking kulich at a festive table; Monka tries to swap an egg and it is a raw one cracked on his helmet.",
   medicine: "Teddy at a friendly doctor's with the bear doctor and a toy stethoscope, Nezha holding his paw; Monka in the waiting room with a bandage on his tail.",
-  core10: "an autumn forest walk with colourful leaves, the family collecting mushrooms; Monka buried to his helmet in a leaf pile he meant as a trap.",
+  core10: "a picnic at the edge of a swamp in autumn; the family pulling Monka out of the swamp with a stick, Monka holding out a handful of berries for them.",
   law: "a neighbourhood court in the park with the old turtle as judge; Monka has been caught with a sack of stolen carrots, looking sheepish, while Teddy asks the judge to give him another chance.",
   military: "a friendly game of capture-the-flag in the park, Teddy and Yarik's team against Belka's; Monka camouflaged as a bush, the flag stuck to his own back.",
 };

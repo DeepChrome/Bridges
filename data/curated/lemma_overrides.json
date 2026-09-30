@@ -63,5 +63,6 @@
   "дорога": "дорога|noun",
   "_p11.5": "Two rows where the closed-class reading is the word and the content row is a rarity or an inflection: «перед» the preposition against a paradigm-less noun glossed 'before', and «зовут» — a form of «звать» that others.csv carries as a headword of its own.",
   "перед": "перед|other",
-  "зовут": "звать|verb"
+  "зовут": "звать|verb",
+  "уж": "уж|other"
 }

@@ -36,6 +36,10 @@
     {
      "ru": "триста",
      "en": "three hundred"
+    },
+    {
+     "ru": "вода",
+     "en": "water"
     }
    ],
    "lines": [
@@ -71,13 +75,13 @@
     },
     {
      "s": "a",
-     "ru": "Нет, спасибо, так нельзя. Подарок от меня, и деньги тоже мои.",
-     "en": "No, thanks, that won't do. The present is from me, so the money is mine too."
+     "ru": "Нет, спасибо. Подарок от меня, значит, и деньги мои.",
+     "en": "No, thanks. The present is from me, so the money has to be mine."
     },
     {
      "s": "b",
-     "ru": "Тогда я знаю, где такие цветы есть. У воды, на той стороне.",
-     "en": "Then I know where there are flowers like that. By the water, on the other side."
+     "ru": "Тогда я знаю, где такие цветы бывают. У воды, на той стороне.",
+     "en": "Then I know where flowers like that grow. By the water, on the other side."
     },
     {
      "s": "a",
@@ -86,8 +90,8 @@
     },
     {
      "s": "b",
-     "ru": "Можно. Там они ничего не стоят, и никто не говорит «нельзя».",
-     "en": "You can. There they cost nothing, and nobody says \"you can't\"."
+     "ru": "Можно. Там они ничего не стоят — и конец истории.",
+     "en": "You can. There they cost nothing, and that's the end of it."
     },
     {
      "s": "a",

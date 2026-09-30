@@ -27,8 +27,8 @@
      "en": "mom"
     },
     {
-     "ru": "вечер",
-     "en": "evening"
+     "ru": "соль",
+     "en": "salt"
     },
     {
      "ru": "сахар",
@@ -37,33 +37,37 @@
     {
      "ru": "сладкий",
      "en": "sweet"
+    },
+    {
+     "ru": "кафе",
+     "en": "café"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Мама, я хочу борщ. Очень хочу!",
-     "en": "Mom, I want borscht. I really want it!"
+     "ru": "Мама, я хочу борщ!",
+     "en": "Mom, I want borscht!"
     },
     {
      "s": "b",
-     "ru": "Хорошо, Тедди. Тебе борщ, а мне пиццу.",
-     "en": "All right, Teddy. Borscht for you, and pizza for me."
+     "ru": "Да, Тедди. Тебе борщ, а мне пиццу.",
+     "en": "Yes, Teddy. Borscht for you, and pizza for me."
     },
     {
      "s": "c",
-     "ru": "Они хотят борщ? Их соль… Нет, тут уже сахар!",
-     "en": "They want borscht? Their salt… No, it's sugar in there now!"
+     "ru": "Они хотят соль? Тут уже сахар!",
+     "en": "They want salt? It's sugar in there now!"
     },
     {
      "s": "a",
-     "ru": "Монька? Добрый вечер, Монька! Ты тоже тут?",
-     "en": "Monka? Good evening, Monka! You're here too?"
+     "ru": "Монька? Привет, Монька! Ты тоже тут?",
+     "en": "Monka? Hi, Monka! You're here too?"
     },
     {
      "s": "c",
-     "ru": "Я? Да… Я тоже хочу борщ. Все хотят!",
-     "en": "Me? Yes… I want borscht too. Everybody does!"
+     "ru": "Я? Да… Я тоже хочу борщ.",
+     "en": "Me? Yes… I want borscht too."
     },
     {
      "s": "b",
@@ -77,8 +81,8 @@
     },
     {
      "s": "c",
-     "ru": "Ваша соль? Нет, нет, я не хочу!",
-     "en": "Your salt? No, no, I don't want it!"
+     "ru": "Нет, нет, я не хочу!",
+     "en": "No, no, I don't want it!"
     },
     {
      "s": "a",
@@ -107,8 +111,18 @@
     },
     {
      "s": "c",
-     "ru": "Пиццу? Да, спасибо, Нежа. Сладкий борщ я не могу.",
-     "en": "Pizza? Yes, thank you, Nezha. I can't eat sweet borscht."
+     "ru": "Да, спасибо, Нежа. Сладкий борщ я не могу.",
+     "en": "Yes, thank you, Nezha. I can't eat sweet borscht."
+    },
+    {
+     "s": "a",
+     "ru": "Мама, а сладкий борщ — мой?",
+     "en": "Mom, so is the sweet borscht mine?"
+    },
+    {
+     "s": "b",
+     "ru": "Тедди, ты всё хочешь!",
+     "en": "Teddy, you want everything!"
     }
    ],
    "questions": [
@@ -191,6 +205,18 @@
     {
      "ru": "папа",
      "en": "dad"
+    },
+    {
+     "ru": "кафе",
+     "en": "café"
+    },
+    {
+     "ru": "колбаса",
+     "en": "sausage"
+    },
+    {
+     "ru": "молодец",
+     "en": "well done"
     }
    ],
    "lines": [
@@ -206,8 +232,8 @@
     },
     {
      "s": "a",
-     "ru": "А её тут нет, папа!",
-     "en": "But she isn't here, Dad!"
+     "ru": "А её тут нет, папа! Мама не в ресторане?",
+     "en": "But she isn't here, Dad! Isn't Mom at the restaurant?"
     },
     {
      "s": "c",
@@ -216,8 +242,8 @@
     },
     {
      "s": "b",
-     "ru": "Белка? Ты знаешь, где Нежа?",
-     "en": "Belka? Do you know where Nezha is?"
+     "ru": "Белка, привет! Ты знаешь, где Нежа?",
+     "en": "Belka, hi! Do you know where Nezha is?"
     },
     {
      "s": "c",
@@ -241,8 +267,8 @@
     },
     {
      "s": "c",
-     "ru": "Там пицца с колбасой, Тедди. И борщ.",
-     "en": "There's pizza with sausage there, Teddy. And borscht."
+     "ru": "Там пицца с колбасой, Тедди. И борщ тоже.",
+     "en": "There's pizza with sausage there, Teddy. And borscht too."
     },
     {
      "s": "b",
@@ -261,13 +287,18 @@
     },
     {
      "s": "b",
-     "ru": "Хорошо, Тедди. Белка, ты с нами?",
-     "en": "All right, Teddy. Belka, are you coming with us?"
+     "ru": "Да, Тедди, да! Белка, ты с нами?",
+     "en": "Yes, Teddy, yes! Belka, are you coming with us?"
     },
     {
      "s": "c",
      "ru": "С вами? Да! Я тоже хочу борщ.",
      "en": "With you? Yes! I want borscht too."
+    },
+    {
+     "s": "a",
+     "ru": "Папа, и борщ, и пиццу! Я всё могу!",
+     "en": "Dad, borscht and pizza! I can manage it all!"
     }
    ],
    "questions": [

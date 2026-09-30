@@ -98,8 +98,8 @@
     },
     {
      "s": "a",
-     "ru": "Два билета, мешок, орехи... Всё, идём!",
-     "en": "Two tickets, the bag, the nuts... That's everything, let's go!"
+     "ru": "Два билета, мешок, орехи... Всё, идём к деду!",
+     "en": "Two tickets, the bag, the nuts... That's everything, off to Grandad's!"
     }
    ],
    "questions": [
@@ -194,10 +194,6 @@
     {
      "ru": "упасть",
      "en": "to fall"
-    },
-    {
-     "ru": "папа",
-     "en": "dad"
     }
    ],
    "lines": [
@@ -223,18 +219,18 @@
     },
     {
      "s": "a",
-     "ru": "В город, Монька. А ты? Ты с нами?",
-     "en": "To town, Monka. What about you? Are you coming with us?"
+     "ru": "В город, Монька. Ты с нами?",
+     "en": "To town, Monka. Are you coming with us?"
     },
     {
      "s": "c",
-     "ru": "Нет, у меня тут дело. Идите, идите!",
-     "en": "No, I've got something to do here. Go on, go on!"
+     "ru": "Нет, у меня тут дело. Идите!",
+     "en": "No, I've got something to do here. Off you go!"
     },
     {
      "s": "b",
-     "ru": "Папа, смотри! Что это перед автобусом? Лёд?",
-     "en": "Dad, look! What's that in front of the bus? Ice?"
+     "ru": "Папа, смотри! Что это? Лёд?",
+     "en": "Dad, look! What's that? Ice?"
     },
     {
      "s": "a",
@@ -248,18 +244,28 @@
     },
     {
      "s": "b",
-     "ru": "Монька упал! Монька, ты можешь идти?",
-     "en": "Monka fell! Monka, can you walk?"
+     "ru": "Монька упал! Ты можешь идти?",
+     "en": "Monka fell! Can you walk?"
     },
     {
      "s": "c",
-     "ru": "Могу, могу. Это мороз, Тедди. Всё мороз.",
-     "en": "I can, I can. It's the frost, Teddy. It's all the frost."
+     "ru": "Могу. Это мороз, Тедди.",
+     "en": "I can. It's the frost, Teddy."
+    },
+    {
+     "s": "a",
+     "ru": "А кто оставляет лёд перед автобусом?",
+     "en": "And who leaves ice in front of a bus?"
+    },
+    {
+     "s": "c",
+     "ru": "Может, это подарок деду Морозу?",
+     "en": "Maybe it's a present for Ded Moroz?"
     },
     {
      "s": "b",
-     "ru": "Монька, я скажу деду Морозу, что ты тут!",
-     "en": "Monka, I'll tell Ded Moroz that you're here!"
+     "ru": "Я скажу деду Морозу, что ты тут!",
+     "en": "I'll tell Ded Moroz that you're here!"
     },
     {
      "s": "c",
@@ -268,8 +274,8 @@
     },
     {
      "s": "a",
-     "ru": "Скажем, Монька. Тедди, идём!",
-     "en": "We will, Monka. Teddy, let's go!"
+     "ru": "Скажем. Тедди, идём!",
+     "en": "We will. Teddy, let's go!"
     }
    ],
    "questions": [

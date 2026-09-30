@@ -42,7 +42,11 @@ BRANCH_POS = {"noun", "verb", "adjective", "adverb"}   # a side quest's words; t
 COVER = 0.9          # a unit teaches off its video until this share of the speech is followable
 SPINE_RESERVE = 0.25   # …in at most this much less than the whole unit: the rest is the commonest words
 BRANCH_RESERVE = 0.3   # …and for a side quest, its topic's core words
+OFFTOPIC_RANK = 1000   # an off-topic video word joins a side quest only if this common (by how many videos say it)
+OFFTOPIC_SHARE = 0.25  # …and at most this share of the quest is such words
 SKELETON = ROOT / "data" / "curated" / "skeleton.json"
+# A reader's per-unit keeps and drops from the chapter content reviews.
+UNIT_WORDS = json.loads((ROOT / "data" / "curated" / "unit_words.json").read_text(encoding="utf-8"))
 # Words a video says that are not Russian to learn from it: the channel's own
 # boilerplate (subscribe, like, the link below) and the grammar metalanguage a
 # lesson-video talks in. They are real words, and the second kind is taught by
@@ -724,11 +728,36 @@ def main():
         size = ((SPINE_UNIT if k < EARLY_SPINE else SPINE_UNIT_LATER) if kind == "spine"
                 else (BRANCH_SIZE_EARLY if k < EARLY_CHAPTERS else BRANCH_SIZE))
         chosen, why = [], {}
+        curated_keep = set((UNIT_WORDS.get(tid) or {}).get("keep", []))
+        curated_drop = set((UNIT_WORDS.get(tid) or {}).get("drop", []))
 
         def take(lid, reason):
             if lid in taught or lid in why or lid not in dedup_set:
                 return False
             if reason == "video" and meta[lid]["bare"] in VIDEO_NOISE:
+                return False
+            # A side quest takes a video word that is off its topic only when
+            # the word is common. The owner, 2026-09-30: "When in doubt, stick
+            # to the most useful/common words. Build towards the videos… They
+            # don't need to know every single word." Built from the video
+            # alone, Sport taught «автомат» and «трагический», Animals
+            # «банкомат», Faith «скидка» — words an episode happened to say,
+            # rare and off the subject. A common one («кофе», «война») still
+            # earns its place: it helps with the video and with everything else.
+            bare = meta[lid]["bare"]
+            if bare in curated_drop:
+                return False
+            offtopic = (reason == "video" and kind == "branch" and topic_of.get(lid) != tid
+                        and bare not in curated_keep)
+            if offtopic and spoken.get(bare, 10 ** 6) > OFFTOPIC_RANK:
+                return False
+            # …and only a share of the quest. Uncapped, a quest filled its video
+            # room with whatever common words its episode said, and each word a
+            # review dropped only drifted to the next quest («блин» from
+            # Emotion to Body, «салат» to Faith). The common words fall to the
+            # spine, which takes the commonest words anyway.
+            if offtopic and sum(1 for l in chosen if why.get(l) == "video" and topic_of.get(l) != tid
+                                and meta[l]["bare"] not in curated_keep) >= round(size * OFFTOPIC_SHARE):
                 return False
             if kind == "branch" and meta[lid]["pos"] not in BRANCH_POS:
                 return False     # the closed classes are the spine's to teach
@@ -743,6 +772,12 @@ def main():
         # not to say them — and a unit on a subject without its first word is
         # not a unit on that subject.
         video_room = size - round(size * (SPINE_RESERVE if kind == "spine" else BRANCH_RESERVE))
+        # A reader's keeps first (data/curated/unit_words.json): the frequency
+        # rule cannot tell «праздновать» in an Easter episode from «скидка» in
+        # the same one, and the chapter reviews can.
+        for bare in (UNIT_WORDS.get(tid) or {}).get("keep", []):
+            for lid in by_bare.get(bare, [])[:1]:
+                take(lid, "curated")
         if vid:
             c = counts.get(vid) or {}
             total = sum(c.values()) or 1

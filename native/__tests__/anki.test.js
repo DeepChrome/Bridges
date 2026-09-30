@@ -131,8 +131,11 @@ describe("flashcards from a deck", () => {
     expect(q.map((c) => c.word).sort()).toEqual(["пока", "привет"]);
     expect(q.every((c) => c.kind === "new" && c.direction === "recognise")).toBe(true);
     const both = cardsIn({ ...st, sets: ["deck:k1", UN[0].id] }, ["deck:k1", UN[0].id]);
-    // The unit's words, and its video's sentences beside them (2026-09-29).
-    expect(both.filter((c) => !c.sentence).length).toBe(2 + UN[0].w.length);
+    // The unit's words, and its video's sentences beside them (2026-09-29). A
+    // deck card that is also a unit word is one card (rule 20.4): «привет» is
+    // both since the 2026-09-30 review put it in the first unit.
+    const distinct = new Set(deck.cards.map((c) => c.ru).concat(UN[0].w.map((i) => L[i].b)));
+    expect(both.filter((c) => !c.sentence).length).toBe(distinct.size);
   });
 
   it("shows a deck card, grades it into the schedule, and lists the deck in the picker", async () => {

@@ -25,6 +25,14 @@
     {
      "ru": "мама",
      "en": "mom"
+    },
+    {
+     "ru": "брюки",
+     "en": "trousers"
+    },
+    {
+     "ru": "отвечать",
+     "en": "answer"
     }
    ],
    "lines": [
@@ -35,28 +43,28 @@
     },
     {
      "s": "a",
-     "ru": "Мама, я уже одет. Вот мои красные брюки!",
-     "en": "Mom, I am dressed. Here are my red trousers!"
+     "ru": "Мама, я уже одет! Мои красные брюки очень удобные.",
+     "en": "Mom, I am dressed! My red trousers are very comfortable."
     },
     {
      "s": "b",
-     "ru": "Красные брюки на праздник? Откуда у тебя такой вкус?",
-     "en": "Red trousers to a party? Where did you get such taste?"
+     "ru": "Красные брюки на праздник? Где ты видел такой стиль?",
+     "en": "Red trousers to a party? Where did you ever see that style?"
     },
     {
      "s": "a",
-     "ru": "От тебя, мама. Ты же всегда следишь за модой.",
-     "en": "From you, Mom. You always follow fashion."
+     "ru": "У тебя, мама. Ты всегда следишь за модой.",
+     "en": "On you, Mom. You always follow fashion."
     },
     {
      "s": "b",
-     "ru": "Слежу. Поэтому и говорю: они слишком яркие.",
-     "en": "I do. That's exactly why I'm saying they're too bright."
+     "ru": "Слежу. Они слишком яркие. Надевай чёрные.",
+     "en": "I do. They're too bright. Put on the black ones."
     },
     {
      "s": "c",
-     "ru": "Нежа! Я сейчас была у Миши. Там все в спортивных брюках!",
-     "en": "Nezha! I was just at Misha's. Everyone there is in tracksuit trousers!"
+     "ru": "Нежа! Я вчера была у Миши. Все будут в спортивных брюках!",
+     "en": "Nezha! I was at Misha's yesterday. Everyone will be in tracksuit trousers!"
     },
     {
      "s": "b",
@@ -65,13 +73,13 @@
     },
     {
      "s": "c",
-     "ru": "Праздник будет в лесу! Грибы, вода и камни.",
-     "en": "The party is in the woods! Mushrooms, water and rocks."
+     "ru": "Праздник будет в лесу! Грибы и картошка.",
+     "en": "The party is in the woods! Mushrooms and potatoes."
     },
     {
      "s": "a",
-     "ru": "Вот! В лесу красный — это хорошо, мама. Меня там все видят.",
-     "en": "See! In the woods red is good, Mom. Everyone can see me there."
+     "ru": "Вот! В лесу красный — это хорошо. Меня все видят.",
+     "en": "See! In the woods red is good. Everyone can see me."
     },
     {
      "s": "b",
@@ -85,8 +93,8 @@
     },
     {
      "s": "b",
-     "ru": "Ладно. Красные брюки. Но старые, не праздничные!",
-     "en": "Fine. The red trousers. But the old ones, not the party ones!"
+     "ru": "Ладно, красные. Но старые, не праздничные!",
+     "en": "Fine, the red ones. But the old ones, not the party ones!"
     },
     {
      "s": "a",
@@ -172,12 +180,16 @@
      "en": "game"
     },
     {
-     "ru": "папа",
-     "en": "dad"
-    },
-    {
      "ru": "лужа",
      "en": "puddle"
+    },
+    {
+     "ru": "грязный",
+     "en": "dirty"
+    },
+    {
+     "ru": "брюки",
+     "en": "trousers"
     }
    ],
    "lines": [
@@ -233,8 +245,8 @@
     },
     {
      "s": "a",
-     "ru": "Монька, спасибо! Но откуда ты знал, что формы нет?",
-     "en": "Thanks, Monka! But how did you know the kit was missing?"
+     "ru": "Монька, спасибо! Но почему она была у тебя в мешке?",
+     "en": "Thanks, Monka! But why was it in your sack?"
     },
     {
      "s": "c",

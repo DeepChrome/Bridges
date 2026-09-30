@@ -15,7 +15,7 @@ import Study from "../src/screens/Study";
 import { Speaker } from "../src/ui";
 import { RuInput, RuKeyboard, ROWS, KEY_H } from "../src/keyboard";
 import { space } from "../src/theme";
-import { configureAudio, audioPrefs, cue, say, CUE_NAMES, SPEEDS } from "../src/audio";
+import { configureAudio, audioPrefs, cue, say, CUE_NAMES, WRONG_NAMES, SPEEDS } from "../src/audio";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const base = {
@@ -33,20 +33,23 @@ async function saved() { await flushState(); return (await global.__db.saved("p1
 beforeEach(async () => {
   await flushState(); await AsyncStorage.clear(); jest.clearAllMocks();
   global.__played = []; global.__spoke = []; global.__spokeOpts = [];
-  configureAudio({ speed: "normal", cue: "bell" });
+  configureAudio({ speed: "normal" });
 });
 afterEach(async () => { await flushState(); });
 
 describe("audio preferences", () => {
-  it("has ten right-answer cues and plays the chosen one", () => {
-    expect(CUE_NAMES).toHaveLength(10);
-    expect(new Set(CUE_NAMES.map((c) => c.id)).size).toBe(10);
-    configureAudio({ cue: "harp" });
-    expect(audioPrefs().cue).toBe("harp");
+  it("plays the chosen right and wrong cues, and falls back from an old one", () => {
+    expect(new Set(CUE_NAMES.map((c) => c.id)).size).toBe(CUE_NAMES.length);
+    expect(new Set(WRONG_NAMES.map((c) => c.id)).size).toBe(WRONG_NAMES.length);
+    configureAudio({ cue: "rise2", wrongCue: "wrong3" });
+    expect(audioPrefs()).toMatchObject({ cue: "rise2", wrongCue: "wrong3" });
     expect(cue("right")).toBe(true);
-    configureAudio({ cue: "not-a-cue" });
-    expect(audioPrefs().cue).toBe("harp");            // an unknown choice changes nothing
     expect(cue("wrong")).toBe(true);
+    // A profile still holding a cue from the synthesised set gets the default,
+    // never a silent answer.
+    configureAudio({ cue: "bell" });
+    expect(audioPrefs()).toMatchObject({ cue: CUE_NAMES[0].id, wrongCue: WRONG_NAMES[0].id });
+    expect(cue("right")).toBe(true);
   });
 
   it("reads at the chosen speed, and a second press in a row plays slower", async () => {
@@ -71,10 +74,12 @@ describe("audio preferences", () => {
     await withProfile(<You navigation={nav} />);
     await act(async () => { fireEvent.press(await screen.findByText("Settings")); });
     await act(async () => { fireEvent.press(screen.getByText("Slowest")); });
-    await act(async () => { fireEvent.press(screen.getByText("Kalimba")); });
+    await act(async () => { fireEvent.press(screen.getByText("Rise 1")); });
+    await act(async () => { fireEvent.press(screen.getByText("Low 2")); });
     const st = await saved();
     expect(st.speed).toBe("slowest");
-    expect(st.cue).toBe("kalimba");
+    expect(st.cue).toBe("rise1");
+    expect(st.wrongCue).toBe("wrong2");
   });
 });
 

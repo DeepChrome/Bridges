@@ -452,7 +452,6 @@ bridges/                          (directory is still named russian-blocks on di
     build_transcripts.py <- captions -> data/transcripts.json, lemma resolved (§30g)
     build_videos.py    <- catalogue + index -> data/videos.json (§30g)
     make_app_icon.py   <- the bridge mark, every size both apps need (zlib PNGs, no image library)
-    make_sounds.py     <- the answer cues, ten right and one wrong
     panel.py           <- form -> lemma + paradigm tables + examples (shared logic)
     lookup.py          <- CLI word panel, for checking data without a browser
     smoke.js           <- headless checks against the built page
@@ -1463,10 +1462,12 @@ several channels carry the channel's initials where a unit has its icon.
 
 ## 30h. Settings, keyboard, quizzes and decks (the owner's batch, 2026-09-07)
 
-- **Right-answer cue** — ten in `make_sounds.py` (`CORRECT`), named in
-  `audio.js CUE_NAMES`, chosen in Settings with a preview; `st.cue`. The first
-  bell was "programmed"; the fix is a choice, since one ear's bell is another's
-  beep.
+- **Answer cues** — Kenney's *Interface Sounds* (CC0) since 2026-09-30: six
+  right (`CUE_NAMES`, `st.cue`) and four wrong (`WRONG_NAMES`, `st.wrongCue`),
+  each chosen in Settings with a preview. The ten synthesised by the old
+  `make_sounds.py` still sounded programmed; the owner chose Kenney's free
+  pack over buying one. An id the tables do not hold (an old profile's
+  "bell") falls back to the default, never to silence.
 - **Reading speed** — `SPEEDS` in `audio.js` (normal 1.0, slower 0.8, slowest
   0.65), `st.speed`; a recording slows with pitch correction, the device voice by
   its rate. **A second press within six seconds plays at three quarters of

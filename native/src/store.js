@@ -76,7 +76,8 @@ export const DEFAULTS = {
   mined: {},            // word -> {v, t, s}: taken from a video, and where from
   decks: [],            // imported Anki decks: {id, name, cards:[{ru, en}]}
   speed: "normal",      // how fast Russian is read: normal, slower, slowest
-  cue: "bell",          // the sound a right answer makes (audio.js CUE_NAMES)
+  cue: "confirm1",      // the sound a right answer makes (audio.js CUE_NAMES)
+  wrongCue: "wrong1",   // …and a wrong one (audio.js WRONG_NAMES)
   osk: false,           // an on-screen Russian keyboard for typed answers
   /* Drill answers written rather than chosen. On by default: four options is
      the easier question, and §30j found production is what keeps a word. Some

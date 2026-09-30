@@ -11,7 +11,7 @@ import { CharacterPicker } from "./Gate";
 import { plan as askPlan } from "../lib/feedback";
 import { PLANS, PLAN_NAMES, PREMIUM_PRICE, ALLOWANCE_LINES, planOf } from "@core/plans";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone, dueCount } from "../data";
-import { CUE_NAMES, SPEEDS, previewCue } from "../audio";
+import { CUE_NAMES, WRONG_NAMES, SPEEDS, previewCue, rightCueOf, wrongCueOf } from "../audio";
 import { backupProfile, restoreProfile, shareCrashes } from "../backup";
 import { readCrashes, clearCrashes } from "../crash";
 import { importDeck } from "../anki";
@@ -366,8 +366,15 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               <Row>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Right-answer sound</Text>
-                  <Choice testID="cue-choice" options={CUE_NAMES} value={st.cue || "bell"} style={{ marginTop: 8 }}
+                  <Choice testID="cue-choice" options={CUE_NAMES} value={rightCueOf(st.cue)} style={{ marginTop: 8 }}
                           onPick={(id) => { previewCue(id); update((p) => ({ ...p, cue: id })); }} />
+                </View>
+              </Row>
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Wrong-answer sound</Text>
+                  <Choice testID="wrong-cue-choice" options={WRONG_NAMES} value={wrongCueOf(st.wrongCue)} style={{ marginTop: 8 }}
+                          onPick={(id) => { previewCue(id); update((p) => ({ ...p, wrongCue: id })); }} />
                 </View>
               </Row>
               {/* An obligation, not a feature (rule 20.10): OpenRussian,

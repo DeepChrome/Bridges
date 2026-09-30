@@ -431,7 +431,8 @@ function Shell() {
   const [placement, setPlacement] = useState(null);
 
   /* Playback reads its two settings from here rather than from state. */
-  useEffect(() => { configureAudio({ speed: st.speed, cue: st.cue }); }, [st.speed, st.cue]);
+  useEffect(() => { configureAudio({ speed: st.speed, cue: st.cue, wrongCue: st.wrongCue }); },
+            [st.speed, st.cue, st.wrongCue]);
   /* …and so does the vibration motor, for the same reason: a call site that
      had to read state to decide whether to buzz would be a call site that
      could get it wrong. */

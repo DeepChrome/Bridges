@@ -1,300 +1,305 @@
 {
  "chapter": 8,
- "name": "Things & Happenings",
+ "name": "Cooking & Celebrating",
  "lessons": {
   "core8:2": {
-   "title": "While you were out",
+   "title": "Borscht before Mum arrives",
    "cast": [
     {
      "id": "a",
-     "ru": "Борис",
-     "en": "Boris"
+     "ru": "Аня",
+     "en": "Anya"
     },
     {
      "id": "b",
-     "ru": "Лена",
-     "en": "Lena"
+     "ru": "Миша",
+     "en": "Misha"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "мама",
+     "en": "mum"
+    },
+    {
+     "ru": "час",
+     "en": "hour"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Лена, пока тебя не было, произошло одно дело.",
-     "en": "Lena, while you were out, something happened."
+     "ru": "Миша, мама будет здесь через час. Где борщ?",
+     "en": "Misha, Mum will be here in an hour. Where is the borscht?"
     },
     {
      "s": "b",
-     "ru": "Что? Говори быстро.",
-     "en": "What? Tell me quickly."
+     "ru": "Вот он. Я его ещё делаю, Аня.",
+     "en": "Here it is. I am still making it, Anya."
     },
     {
      "s": "a",
-     "ru": "Твоя программа. Она не работает.",
-     "en": "Your program. It is not working."
+     "ru": "Ты его делаешь уже слишком долго.",
+     "en": "You have been making it for far too long."
     },
     {
      "s": "b",
-     "ru": "Как не работает? Я её вчера видела.",
-     "en": "What do you mean? I saw it yesterday."
+     "ru": "Быстро борщ не получается. Это же не пицца.",
+     "en": "Borscht does not come out fast. It is not pizza."
     },
     {
      "s": "a",
-     "ru": "Вчера работала. Сейчас нет.",
-     "en": "Yesterday it worked. Not now."
+     "ru": "А почему он ещё не красный?",
+     "en": "And why is it not red yet?"
     },
     {
      "s": "b",
-     "ru": "Кто может дать помощь?",
-     "en": "Who can give us help?"
+     "ru": "Он становится красным. Уже практически красный.",
+     "en": "It is turning red. It is almost red already."
     },
     {
      "s": "a",
-     "ru": "Я уже писал учёному.",
-     "en": "I have already written to the scientist."
+     "ru": "Хорошо. А соль ты положил?",
+     "en": "All right. And did you put the salt in?"
     },
     {
      "s": "b",
-     "ru": "И что он сказал?",
-     "en": "And what did he say?"
+     "ru": "Нет. Соль я всегда кладу потом.",
+     "en": "No. I always put the salt in later."
     },
     {
      "s": "a",
-     "ru": "Что он вернётся в час.",
-     "en": "That he will be back at one."
+     "ru": "Можно, я положу туда немножко колбасы?",
+     "en": "Can I put a little sausage in?"
     },
     {
      "s": "b",
-     "ru": "В час! Это не быстро.",
-     "en": "At one! That is not quick."
+     "ru": "Колбасы? В борщ? Аня, так никто не делает.",
+     "en": "Sausage? In borscht? Anya, nobody does that."
     },
     {
      "s": "a",
-     "ru": "Пока мы можем читать.",
-     "en": "Meanwhile we can read."
+     "ru": "Моя мама так делала. И никто не говорил, что это плохо.",
+     "en": "My mum did it that way. And nobody said it was bad."
     },
     {
      "s": "b",
-     "ru": "Читать? У нас весь мир ждёт!",
-     "en": "Read? The whole world is waiting on us!"
+     "ru": "Между нами, Аня, твоя мама делала борщ не очень хорошо.",
+     "en": "Between us, Anya, your mum did not make borscht very well."
     },
     {
      "s": "a",
-     "ru": "Весь мир? Это одна программа.",
-     "en": "The whole world? It is one program."
+     "ru": "Миша! Она будет здесь через час!",
+     "en": "Misha! She will be here in an hour!"
     },
     {
      "s": "b",
-     "ru": "Для меня — мир.",
-     "en": "For me it is the world."
+     "ru": "Ладно. Немножко колбасы можно. Но тогда это твой борщ.",
+     "en": "Fine. A little sausage is allowed. But then it is your borscht."
     },
     {
      "s": "a",
-     "ru": "Хорошо. Я вернусь быстро.",
-     "en": "All right. I will be back quickly."
-    },
-    {
-     "s": "b",
-     "ru": "Иди, Борис. И быстро.",
-     "en": "Go, Boris. And be quick."
+     "ru": "Хорошо. Но если мама скажет «очень хорошо», борщ наш.",
+     "en": "All right. But if Mum says \"very good\", the borscht is ours."
     }
    ],
    "questions": [
     {
-     "ask": "What has gone wrong?",
+     "ask": "Who is coming to visit?",
      "options": [
-      "Lena's program has stopped",
-      "Lena's computer is stolen",
-      "Boris has lost the file",
-      "The office has flooded"
+      "Anya's mother",
+      "Misha's father",
+      "Their neighbour",
+      "Anya's teacher"
      ],
      "answer": 0
     },
     {
-     "ask": "When did it last work?",
+     "ask": "Why is Anya worried?",
      "options": [
-      "Yesterday",
-      "This morning",
-      "An hour ago",
-      "Last week"
+      "The borscht is not ready",
+      "The oven is not working",
+      "They have run out of salt",
+      "The table is not set yet"
      ],
      "answer": 0
     },
     {
-     "ask": "Who has Boris contacted?",
+     "ask": "What does Misha say about the salt?",
      "options": [
-      "A scientist",
-      "The police",
-      "Their manager",
-      "Nobody yet"
+      "He adds it later",
+      "He has none left",
+      "He added too much",
+      "He never uses it"
      ],
      "answer": 0
     },
     {
-     "ask": "When will that person be back?",
+     "ask": "What does Anya want to add?",
      "options": [
-      "In an hour",
-      "In a day",
-      "Straight away",
-      "He does not know"
+      "Some sausage",
+      "Some cheese",
+      "More garlic",
+      "Sour cream"
      ],
      "answer": 0
     },
     {
-     "ask": "How does Lena react to the wait?",
+     "ask": "What do they agree in the end?",
      "options": [
-      "She thinks it is too slow",
-      "She thinks it is fast enough",
-      "She offers to help him out",
-      "She decides to go home"
+      "She may add a little",
+      "She may add nothing",
+      "Misha will make pizza",
+      "They will buy borscht"
      ],
      "answer": 0
     }
    ]
   },
   "core8:4": {
-   "title": "A good one too",
+   "title": "The secret of the meat",
    "cast": [
     {
      "id": "a",
-     "ru": "Катя",
-     "en": "Katya"
+     "ru": "Виктор",
+     "en": "Viktor"
     },
     {
      "id": "b",
-     "ru": "Ваня",
-     "en": "Vanya"
+     "ru": "Нина",
+     "en": "Nina"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "мёд",
+     "en": "honey"
+    },
+    {
+     "ru": "час",
+     "en": "hour"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Ваня, этот фильм хороший.",
-     "en": "Vanya, this film is good."
+     "ru": "Нина, у нас сегодня праздник, а я не знаю, что делать.",
+     "en": "Nina, we are having a celebration today, and I do not know what to do."
     },
     {
      "s": "b",
-     "ru": "Хороший? Я его не видел.",
-     "en": "Good? I have not seen it."
+     "ru": "А какой повод?",
+     "en": "And what is the occasion?"
     },
     {
      "s": "a",
-     "ru": "А тот, первый, тоже хороший.",
-     "en": "And that first one is good too."
+     "ru": "Брат окончил университет. Все будут у нас дома.",
+     "en": "My brother has finished university. Everyone will be at our place."
     },
     {
      "s": "b",
-     "ru": "Два хороших фильма?",
-     "en": "Two good films?"
+     "ru": "Это повод! Тогда нужно мясо и картошка.",
+     "en": "That is an occasion! Then you need meat and potatoes."
     },
     {
      "s": "a",
-     "ru": "Да. Но этот я люблю.",
-     "en": "Yes. But this one I love."
+     "ru": "Мясо с картошкой — это твоё блюдо. Какой у него секрет?",
+     "en": "Meat with potatoes is your dish. What is its secret?"
     },
     {
      "s": "b",
-     "ru": "Почему этот?",
-     "en": "Why this one?"
+     "ru": "Секрет, Виктор? Если я его скажу, это уже не секрет.",
+     "en": "The secret, Viktor? If I tell it, it is no longer a secret."
     },
     {
      "s": "a",
-     "ru": "Тут хорошая история.",
-     "en": "There is a good story in it."
+     "ru": "Нина, пожалуйста. Только между нами.",
+     "en": "Nina, please. Just between us."
     },
     {
      "s": "b",
-     "ru": "История? О чём?",
-     "en": "A story? About what?"
+     "ru": "Ладно. Мясо я сначала оставляю в воде с солью.",
+     "en": "All right. First I leave the meat in salted water."
     },
     {
      "s": "a",
-     "ru": "О семье. И о собаке.",
-     "en": "About a family. And about a dog."
+     "ru": "В воде? И долго?",
+     "en": "In water? For long?"
     },
     {
      "s": "b",
-     "ru": "О собаке! Я тоже хочу.",
-     "en": "About a dog! I want to see it too."
+     "ru": "Час, не больше. Потом добавляю картошку и немножко мёда.",
+     "en": "An hour, no more. Then I add the potatoes and a little honey."
     },
     {
      "s": "a",
-     "ru": "Тогда смотри. У меня есть время.",
-     "en": "Then watch it. I have time."
+     "ru": "Мёда? В мясо? Это интересно.",
+     "en": "Honey? In meat? That is interesting."
     },
     {
      "s": "b",
-     "ru": "И у меня тоже.",
-     "en": "So do I."
+     "ru": "Так делал мой дед. Зимой, на каждый праздник.",
+     "en": "That is how my grandfather did it. In winter, for every holiday."
     },
     {
      "s": "a",
-     "ru": "Вот. Тут хороший стол.",
-     "en": "Here. This is a good table."
+     "ru": "Понятно. Спасибо, Нина! А ты у нас будешь?",
+     "en": "Got it. Thanks, Nina! And will you come to us?"
     },
     {
      "s": "b",
-     "ru": "А вода? Или вино?",
-     "en": "And water? Or wine?"
-    },
-    {
-     "s": "a",
-     "ru": "Вода. Вино не хочу.",
-     "en": "Water. I do not want wine."
-    },
-    {
-     "s": "b",
-     "ru": "Хорошо, Катя. Смотрим.",
-     "en": "All right, Katya. Let us watch."
+     "ru": "Буду. Хочу видеть, что у тебя получается.",
+     "en": "I will. I want to see how yours turns out."
     }
    ],
    "questions": [
     {
-     "ask": "What are they choosing?",
+     "ask": "Why is Viktor having a party?",
      "options": [
-      "A film to watch",
-      "A book to read",
-      "A place to eat",
-      "A song to play"
+      "His brother graduated",
+      "His sister got married",
+      "His father turned 60",
+      "His mother came back"
      ],
      "answer": 0
     },
     {
-     "ask": "How many does Katya call good?",
+     "ask": "What does Nina tell him to cook?",
      "options": [
-      "Two",
-      "One",
-      "Three",
-      "None"
+      "Meat with potatoes",
+      "Chicken with rice",
+      "Fish with carrots",
+      "Borscht with bread"
      ],
      "answer": 0
     },
     {
-     "ask": "What is the one she loves about?",
+     "ask": "What does Nina do first with the meat?",
      "options": [
-      "A family, and a dog",
-      "A family, and a war",
-      "A town, and a school",
-      "She will not say"
+      "Leaves it in salt water",
+      "Fries it in hot butter",
+      "Cuts it into small cubes",
+      "Rubs it with red pepper"
      ],
      "answer": 0
     },
     {
-     "ask": "What makes Vanya keen?",
+     "ask": "What is her secret ingredient?",
      "options": [
-      "The dog",
-      "The family",
-      "The town",
-      "The music"
+      "A little honey",
+      "A little milk",
+      "A bit of wine",
+      "A little sugar"
      ],
      "answer": 0
     },
     {
-     "ask": "What do they drink?",
+     "ask": "Who did the recipe come from?",
      "options": [
-      "Water",
-      "Wine",
-      "Tea",
-      "Nothing"
+      "Nina's grandfather",
+      "Nina's grandmother",
+      "Her first teacher",
+      "Her old neighbour"
      ],
      "answer": 0
     }

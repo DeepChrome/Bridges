@@ -14,6 +14,7 @@ Output: data/topics.db
 """
 
 import argparse
+import json
 import re
 import sqlite3
 import sys
@@ -22,18 +23,34 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from panel import fold, Resolver, STUB_GLOSS  # noqa: E402  (fold: the fr lookup)
+from build_skeleton import spoken_ranks  # noqa: E402
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 
-SPINE_UNIT = 30      # words per core unit
+SPINE_UNIT = 30      # words per core unit in the first chapters…
+SPINE_UNIT_LATER = 40  # …and after, when the goal videos say more (Phase 14: 30 left them 70-80 % followable)
+EARLY_SPINE = 2
 SPINE_UNITS = 10     # core units: ten chapters (eight left chapter 8 a 44-lesson dump)
 SPINE_VERBS = 5      # verbs a spine unit carries at least — chapter 1 had one (быть)
 SPINE_FR = 200       # this common in the Core-5000 ranking: spine, whatever the decks say
 CLOSED_TOP = 500     # closed-class words this common are spine: no branch can take them
 CLOSED = {"other", "pronoun", "possessive", "numeral"}
-BRANCH_MAX = 40      # cap on a topic unit…
-BRANCH_MAX_EARLY = 20  # …and in the first chapters, where forty nouns is a word bank
+BRANCH_SIZE = 30     # words a side quest teaches…
+BRANCH_SIZE_EARLY = 20  # …and in the first chapters, where forty nouns is a word bank
+BRANCH_POS = {"noun", "verb", "adjective", "adverb"}   # a side quest's words; the closed classes are the spine's
+COVER = 0.9          # a unit teaches off its video until this share of the speech is followable
+SPINE_RESERVE = 0.25   # …in at most this much less than the whole unit: the rest is the commonest words
+BRANCH_RESERVE = 0.3   # …and for a side quest, its topic's core words
+SKELETON = ROOT / "data" / "curated" / "skeleton.json"
+# Words a video says that are not Russian to learn from it: the channel's own
+# boilerplate (subscribe, like, the link below) and the grammar metalanguage a
+# lesson-video talks in. They are real words, and the second kind is taught by
+# the grammar reference; neither belongs in a unit because a video said it.
+VIDEO_NOISE = set("""канал подписываться подписаться подписка лайк комментарий ролик выпуск
+ссылка описание субтитры патреон падёж глагол предлог окончание союз спряжение
+существительное прилагательное местоимение наречие""".split())
+TRANSCRIPTS = ROOT / "data" / "transcripts.json"
 EARLY_CHAPTERS = 3
 BRANCH_MIN = 10      # below this a topic isn't worth a unit
 PRIMARY_SENSES = 2   # how many of a gloss's senses may claim a topic
@@ -57,6 +74,7 @@ BRANCH_VERBS = {
     "sport":    "играть бегать плавать выиграть".split(),
     "emotion":  "нравиться бояться радоваться".split(),
     "speech":   "говорить сказать спросить ответить рассказывать объяснять".split(),
+    "religion": "верить молиться".split(),
 }
 
 # Ordered by priority: the first rule that matches claims the word. Specific topics
@@ -422,27 +440,49 @@ OVERRIDES = {
     "номер": "time", "волнение": "emotion", "обсуждаться": "speech", "указывать": "speech",
 }
 
-# A chapter is one spine unit plus the branches that follow it — the shape a language
-# textbook already has: a core of words you cannot speak without, then the themed
-# vocabulary that builds on them. Aligned index-for-index with STAGE_PLAN below.
+# A chapter is one spine unit plus the side quests that follow it, each unit
+# built towards its own video (data/curated/skeleton.json, Phase 14).
 #
-# The chapter title names what the chapter collectively covers, taken from its
-# branches. The spine name *describes* what is actually in that frequency band — it
-# does not define it. The spine is ordered by how often a word occurs in the decks,
-# so these names were written by reading the word lists, not by deciding in advance
-# what each unit ought to contain. Re-read them if --pool changes: the bands shift.
+# The chapter title names what its side quests cover; the spine name describes
+# what the spine unit actually teaches, read off the word lists after a build
+# (`python tools/build_topics.py` prints them) — its goal video decides most
+# of it now, so a changed skeleton means re-reading these. Index-aligned with
+# the skeleton's chapters.
 CHAPTERS = [
-    ("Pronouns & Being",       "People and Time"),
-    ("Time, Life & People",    "Food and School"),
-    ("Wanting & Knowing",      "Home and Clothes"),
-    ("Everyday Things",        "Town and Travel"),
-    ("Family & Home Life",     "Health and Nature"),
-    ("Health & Getting Around", "Work and Animals"),
-    ("Days, Talk & the World", "Mind and Language"),
-    ("Things & Happenings",    "Conflict, Tech and Sport"),
-    ("Where, When & How",      "Culture and Society"),
-    ("Thought & Society",      "Law and Faith"),
+    ("First Words",            "Family and Food"),
+    ("People & Places",        "Phones and Home"),
+    ("The Little Words",       "Town and Time"),
+    ("Winter & Gifts",         "Travel, Talk and Clothes"),
+    ("Spending & Saving",      "Work, Business and Feelings"),
+    ("Before & After",         "Body, Animals and Science"),
+    ("Feelings & Fears",       "School, Art and Nature"),
+    ("Cooking & Celebrating",  "Sport and Society"),
+    ("Style & Fashion",        "Faith and Health"),
+    ("Forests & Seasons",      "Law and Conflict"),
 ]
+
+# --- which quests are genuinely optional -------------------------------
+# Until 2026-09-22 *every* branch was optional and the next chapter needed
+# only the spine (§30e). The owner changed that: *"all parallel nodes must
+# be completed before moving down a node unless there are specifically
+# optional lessons. Optional lessons should be about niche subjects. Like
+# imagine the core lesson path is sports, well maybe there's an optional
+# lesson for soccer or basketball."*
+#
+# So the default is now required, and this is the exception list: the
+# subjects a learner can speak Russian without. The cut is "would someone
+# living in the language need this to get through a week?" — a doctor, a
+# kitchen, clothes and a bus, yes; a courtroom, a liturgy, a balance sheet
+# and a battalion, no. They are also the four §30h added late as niche
+# quests in the first place, plus the three hobbies.
+#
+# It is a judgement, and it is here rather than in the app because the
+# path and the gate must read one source (§22). Changing it changes when
+# chapters unlock: re-run `tools/audit_branches.py` and look at what a
+# learner is now required to finish.
+OPTIONAL = {"military", "sport", "art", "politics", "science", "law",
+            "religion", "business"}
+
 
 PARENS = re.compile(r"\([^)]*\)")
 
@@ -564,79 +604,55 @@ def main():
         deduped.append(lid)
     dropped = len([1 for lid, _ in pool if lid in meta]) - len(deduped)
 
-    # The spine is decided first, and its words are then off-limits to the branches:
-    # a core word is taught once, on the spine, not again inside a topic.
-    #
-    # What the spine holds (the pedagogy review, 2026-09-08): the commonest words
-    # by the decks' own count, plus three kinds of word the count alone put in
-    # the wrong place or nowhere — closed-class words in the top CLOSED_TOP (да,
-    # если, или, два: no topic rule can take them, so 210 of the 463 commonest
-    # were taught nowhere), words the Core-5000 ranking puts in the top SPINE_FR
-    # (понимать is #85 there and was a side-quest word), and enough verbs per
-    # unit to make a sentence with (SPINE_VERBS; chapter 1 taught one verb).
+    # --- the units are built towards their videos (ROADMAP Phase 14, V3) -----
+    # The owner, 2026-09-29: the video skeleton is "the framework as well as
+    # the goal of everything". data/curated/skeleton.json names each chapter's
+    # goal video and its side quests' videos, in the order a learner meets
+    # them (tools/build_skeleton.py). Walking that route, each unit teaches
+    # first the words its video says most that nothing earlier has taught,
+    # until the video is COVER followable by the unit's end; only then does it
+    # top up — a spine unit with the commonest spoken Russian not yet taught
+    # (the forced words first: the closed classes and the Core-5000 top, as
+    # before), a side quest with its own topic's words. The frequency spine of
+    # old is therefore still here, as the top-up rather than the whole.
     fr = {}
     for rk, f in src.execute("select ru_key, freq_rank from c.items"
                              " where kind='vocab' and freq_rank is not null"):
         fr.setdefault(rk, f)
-    total = SPINE_UNIT * SPINE_UNITS
-    forced = set()
-    for k, lid in enumerate(deduped):
-        m = meta[lid]
-        if (m["pos"] in CLOSED and k < CLOSED_TOP) or fr.get(fold(m["bare"]), 10 ** 9) <= SPINE_FR:
-            forced.add(lid)
-    rest = [lid for lid in deduped if lid not in forced]
-    spine_pool = sorted(list(forced) + rest[:max(0, total - len(forced))], key=deduped.index)
-    # Cut into units by frequency, each with its quota of verbs: a unit short of
-    # verbs pulls the next ones forward and gives up its least common other words
-    # to the unit after.
-    spine_chunks, used = [], set()
-    for n in range(SPINE_UNITS):
-        free = [lid for lid in spine_pool if lid not in used]
-        chunk = free[:SPINE_UNIT]
-        verbs_in = [lid for lid in chunk if meta[lid]["pos"] == "verb"]
-        if len(verbs_in) < SPINE_VERBS:
-            extra = [lid for lid in free[SPINE_UNIT:] if meta[lid]["pos"] == "verb"][:SPINE_VERBS - len(verbs_in)]
-            drop = [lid for lid in chunk if meta[lid]["pos"] != "verb"][::-1][:len(extra)]
-            chunk = [lid for lid in chunk if lid not in drop] + extra
-            chunk.sort(key=spine_pool.index)
-        used.update(chunk)
-        spine_chunks.append(chunk)
-    spine_set = set(used)
+    forced = [lid for k, lid in enumerate(deduped)
+              if (meta[lid]["pos"] in CLOSED and k < CLOSED_TOP)
+              or fr.get(fold(meta[lid]["bare"]), 10 ** 9) <= SPINE_FR]
     dedup_set = set(deduped)
-
-    rules = compile_rules()
-    assigned, by_topic = {}, {t: [] for t, _, _ in rules}
     by_bare = {}
     for lid in deduped:
         by_bare.setdefault(meta[lid]["bare"], []).append(lid)
 
-    # A topic's own verbs first (BRANCH_VERBS), unless the spine has them.
+    # What each topic rule would claim, before any unit is built: the pool a
+    # side quest tops up from. The spine no longer takes its words first, so
+    # nothing is excluded here; a word is taught by whichever unit reaches it.
+    rules = compile_rules()
+    topic_of = {}
+    by_topic = {t: [] for t, _, _ in rules}
     for tid, verbs in BRANCH_VERBS.items():
-        if tid not in by_topic:
-            continue
         for bare in verbs:
             for lid in by_bare.get(bare, []):
-                if meta[lid]["pos"] == "verb" and lid not in spine_set and lid not in assigned:
-                    assigned[lid] = tid
+                if meta[lid]["pos"] == "verb" and lid not in topic_of:
+                    topic_of[lid] = tid
                     by_topic[tid].append((lid, meta[lid]["n"], "verb"))
                     break
-
     for lid, m in meta.items():
-        if lid in spine_set or lid not in dedup_set or m["pos"] not in BRANCHABLE or lid in assigned:
+        if lid not in dedup_set or m["pos"] not in BRANCHABLE or lid in topic_of:
             continue
         if m["bare"] in OVERRIDES:
             tid = OVERRIDES[m["bare"]]
             if tid:
-                assigned[lid] = tid
+                topic_of[lid] = tid
                 by_topic[tid].append((lid, m["n"], "manual"))
             continue
         # Parentheticals are disambiguators, not meanings: "on (date)" must not
         # make на a word about time. Only the PRIMARY senses count — the first
         # two, and each at most three words — because a word is what it mostly
-        # means: стекло is "glass" the material before it is a drinking glass,
-        # зеркало is a mirror, таблица is a chart. Matching any sense anywhere
-        # put all three in Food, глухой ("deaf"; also "blind wall") in Home, and
-        # a fifth of every branch was that kind of accident.
+        # means: стекло is "glass" the material before it is a drinking glass.
         senses = [(PARENS.sub(" ", s).strip(), "(" in s)
                   for s in re.split(r"[,;]", m["en"].lower())]
         primary = [(k, s, qualified)
@@ -655,126 +671,161 @@ def main():
                 hit = sense
                 break
             if hit:
-                assigned[lid] = tid
+                topic_of[lid] = tid
                 by_topic[tid].append((lid, m["n"], hit))
                 break
+    for tid in by_topic:
+        by_topic[tid].sort(key=lambda w: (w[2] != "verb", -w[1]))
+
+    skeleton = json.loads(SKELETON.read_text(encoding="utf-8"))
+    index = json.loads(TRANSCRIPTS.read_text(encoding="utf-8"))["index"]
+    spoken = spoken_ranks(index)
+    counts = {vid: {b: len(m) for b, m in words.items()} for vid, words in index.items()}
+    rule_ids = [t for t, _, _ in rules]
+    in_skeleton = {t for c in skeleton["chapters"] for t in c["quests"]}
+    # A topic the skeleton found no video for keeps its place, in the last
+    # chapter, built from its rule as before (Law and Military, 2026-09-29).
+    orphans = [t for t in rule_ids if t not in in_skeleton]
+
+    def followable(vid, known):
+        c = counts.get(vid) or {}
+        total = sum(c.values())
+        return sum(n for b, n in c.items() if b in known) / total if total else 0
+
+    route = []   # (unit id, kind, chapter index, video id or None)
+    for k, ch in enumerate(skeleton["chapters"]):
+        route.append((f"core{k + 1}", "spine", k, ch["spine"]))
+        for t, vid in ch["quests"].items():
+            route.append((t, "branch", k, vid))
+    last = len(skeleton["chapters"]) - 1
+    route += [(t, "branch", last, None) for t in orphans]
+
+    # The same videos measured against the curriculum this build replaces, so
+    # the change is a number (before → after) rather than a claim.
+    before = {}
+    if args.out.exists():
+        old = sqlite3.connect(f"file:{args.out}?mode=ro", uri=True)
+        old.execute("attach database ? as lex", (str(args.lexicon),))
+        old_words = {}
+        for tid, bare in old.execute("select u.topic_id, l.bare from unit_words u"
+                                     " join lex.lemmas l on l.id = u.lemma_id order by u.topic_id, u.ord"):
+            old_words.setdefault(tid, []).append(bare)
+        old_order = [t for _r, _c, t in old.execute("select row, col, topic_id from path order by row, col")]
+        old.close()
+        vid_of = {u: v for u, _, _, v in route if v}
+        known = set()
+        for t in old_order:
+            known |= set(old_words.get(t, []))
+            if t in vid_of:
+                before[t] = followable(vid_of[t], known)
+
+    taught, units = set(), []
+    for tid, kind, k, vid in route:
+        size = ((SPINE_UNIT if k < EARLY_SPINE else SPINE_UNIT_LATER) if kind == "spine"
+                else (BRANCH_SIZE_EARLY if k < EARLY_CHAPTERS else BRANCH_SIZE))
+        chosen, why = [], {}
+
+        def take(lid, reason):
+            if lid in taught or lid in why or lid not in dedup_set:
+                return False
+            if reason == "video" and meta[lid]["bare"] in VIDEO_NOISE:
+                return False
+            if kind == "branch" and meta[lid]["pos"] not in BRANCH_POS:
+                return False     # the closed classes are the spine's to teach
+            chosen.append(lid)
+            why[lid] = reason
+            return True
+
+        # Not every slot goes to the video. A side quest keeps a share for its
+        # topic's core words and the spine for the commonest words there are:
+        # built from the video alone, Sport taught no «футбол», Family no «брат»
+        # and Medicine no «больница», because those particular episodes happen
+        # not to say them — and a unit on a subject without its first word is
+        # not a unit on that subject.
+        video_room = size - round(size * (SPINE_RESERVE if kind == "spine" else BRANCH_RESERVE))
+        if vid:
+            c = counts.get(vid) or {}
+            total = sum(c.values()) or 1
+            got = sum(n for b, n in c.items() if any(l in taught for l in by_bare.get(b, [])))
+            for b, n in sorted(c.items(), key=lambda x: (-x[1], spoken.get(x[0], 10 ** 6))):
+                if got >= COVER * total or len(chosen) >= video_room:
+                    break
+                for lid in by_bare.get(b, [])[:1]:
+                    if take(lid, "video"):
+                        got += n
+        if kind == "spine":
+            for lid in sorted(forced, key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6)):
+                if len(chosen) >= size:
+                    break
+                take(lid, "common")
+            for lid in sorted(deduped, key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6)):
+                if len(chosen) >= size:
+                    break
+                take(lid, "common")
+            # Enough verbs to make a sentence with (SPINE_VERBS): swap the last
+            # top-ups for the video's most-said verbs, then the commonest.
+            verbs = [l for l in chosen if meta[l]["pos"] == "verb"]
+            if len(verbs) < SPINE_VERBS:
+                pool_v = [by_bare[b][0] for b, _ in sorted((counts.get(vid) or {}).items(), key=lambda x: -x[1])
+                          if b in by_bare] + sorted(deduped, key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6))
+                for lid in pool_v:
+                    if len(verbs) >= SPINE_VERBS:
+                        break
+                    if meta[lid]["pos"] != "verb" or lid in taught or lid in why or lid not in dedup_set:
+                        continue
+                    drop = next((l for l in reversed(chosen) if meta[l]["pos"] != "verb" and why[l] != "video"), None)
+                    if drop is None:
+                        break
+                    chosen.remove(drop)
+                    del why[drop]
+                    chosen.append(lid)
+                    why[lid] = "verb"
+                    verbs.append(lid)
+        else:
+            for lid, _n, _hit in by_topic.get(tid, []):
+                if len(chosen) >= size:
+                    break
+                take(lid, "topic")
+        # Lessons are cut from this order, so the commonest words come first:
+        # «я» and «быть» belong in chapter 1's first lesson whatever the video
+        # happens to repeat most.
+        chosen.sort(key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6))
+        taught |= set(chosen)
+        after = followable(vid, {meta[l]["bare"] for l in taught}) if vid else None
+        units.append({"id": tid, "kind": kind, "chapter": k, "video": vid, "words": chosen,
+                      "why": why, "after": after, "before": before.get(tid)})
 
     if args.out.exists():
         args.out.unlink()
     db = sqlite3.connect(args.out)
     db.executescript(SCHEMA)
 
-    ordv = 0
-    spine_ids = []
-
-    # --- spine: the commonest words, whatever they are about --------------
-    for i, chunk in enumerate(spine_chunks):
-        if len(chunk) < SPINE_UNIT // 2:
-            break
-        n = i + 1
-        tid = f"core{n}"
-        # Past the curated list the bands are unnamed rather than numbered — a wrong
-        # name is worse than none, and this only happens if --pool grows.
-        spine_name, chapter_title = (CHAPTERS[n - 1] if n <= len(CHAPTERS)
-                                     else (f"More Words {n}", f"Chapter {n}"))
-        db.execute("insert into topics (id, name, kind, ord, n) values (?,?,?,?,?)",
-                   (tid, spine_name, "spine", ordv, len(chunk)))
-        db.execute("insert into chapters (n, title, spine_id) values (?,?,?)",
-                   (n, chapter_title, tid))
-        db.executemany(
-            "insert into unit_words (topic_id, lemma_id, ord, reason) values (?,?,?,?)",
-            [(tid, lid, j, "frequency") for j, lid in enumerate(chunk)])
-        spine_ids.append(tid)
-        ordv += 1
-
-    # --- lay out the tree --------------------------------------------------
-    # Concrete, immediately useful topics come early; abstract and specialist
-    # ones come late. Anything not named here lands in the final stage.
-    #
-    # The order is also the grammar order (docs/grammar-sequence.md): each
-    # chapter's spine note introduces one point, and a branch's note may only use
-    # what has been introduced by then. Chapter 2 teaches the present tense, so it
-    # gets the two branches whose notes are about verbs (food: есть/пить, school:
-    # учить/учиться); chapter 3 teaches gender, so home and clothes (agreement);
-    # chapter 6 teaches the accusative, so work (having/not having: the first
-    # genitive) then animals (animate accusative copies the genitive); chapter 8
-    # opens on military, which introduces the instrumental that tech then uses.
-    # Side quests sit with the chapter whose grammar they can use: business with
-    # work (the genitive of having), science and law with the instrumental
-    # chapter, faith with art and society. Ten chapters since 2026-09-08: the
-    # eighth used to carry eight quests and 44 lessons.
-    STAGE_PLAN = [
-        ["family", "time"],
-        ["food", "school"],
-        ["home", "clothes"],
-        ["city", "travel"],
-        ["body", "nature", "medicine"],
-        ["work", "animals"],
-        ["emotion", "speech", "business"],
-        ["military", "tech", "sport"],
-        ["art", "politics", "science"],
-        ["law", "religion"],
-    ]
-    chapter_of = {b: k for k, stage in enumerate(STAGE_PLAN) for b in stage}
-
-    # --- which quests are genuinely optional -------------------------------
-    # Until 2026-09-22 *every* branch was optional and the next chapter needed
-    # only the spine (§30e). The owner changed that: *"all parallel nodes must
-    # be completed before moving down a node unless there are specifically
-    # optional lessons. Optional lessons should be about niche subjects. Like
-    # imagine the core lesson path is sports, well maybe there's an optional
-    # lesson for soccer or basketball."*
-    #
-    # So the default is now required, and this is the exception list: the
-    # subjects a learner can speak Russian without. The cut is "would someone
-    # living in the language need this to get through a week?" — a doctor, a
-    # kitchen, clothes and a bus, yes; a courtroom, a liturgy, a balance sheet
-    # and a battalion, no. They are also the four §30h added late as niche
-    # quests in the first place, plus the three hobbies.
-    #
-    # It is a judgement, and it is here rather than in the app because the
-    # path and the gate must read one source (§22). Changing it changes when
-    # chapters unlock: re-run `tools/audit_branches.py` and look at what a
-    # learner is now required to finish.
-    OPTIONAL = {"military", "sport", "art", "politics", "science", "law",
-                "religion", "business"}
-
-    # --- branches: topic units --------------------------------------------
-    # Capped, and capped harder in the first chapters: forty nouns of family
-    # eight lessons deep is a word bank, not a lesson. A topic's own verbs
-    # (BRANCH_VERBS) are kept ahead of the cap.
-    branch_ids = []
-    for tid, name, _ in rules:
-        cap = BRANCH_MAX_EARLY if chapter_of.get(tid, 99) < EARLY_CHAPTERS else BRANCH_MAX
-        verbs = [w for w in by_topic[tid] if w[2] == "verb"]
-        others = sorted([w for w in by_topic[tid] if w[2] != "verb"], key=lambda x: -x[1])
-        words = verbs + others[:max(0, cap - len(verbs))]
-        if len(words) < BRANCH_MIN:
-            continue
-        db.execute("insert into topics (id, name, kind, ord, n, opt) values (?,?,?,?,?,?)",
-                   (tid, name, "branch", ordv, len(words), 1 if tid in OPTIONAL else 0))
-        db.executemany(
-            "insert into unit_words (topic_id, lemma_id, ord, reason) values (?,?,?,?)",
-            [(tid, lid, j, why) for j, (lid, _, why) in enumerate(words)])
-        branch_ids.append(tid)
-        ordv += 1
-
-    have = set(branch_ids)
-    planned = [b for stage in STAGE_PLAN for b in stage if b in have]
-    leftover = [b for b in branch_ids if b not in planned]
-
-    row = 0
-    for si, sid in enumerate(spine_ids):
-        db.execute("insert into path (row, col, topic_id, requires) values (?,?,?,?)",
-                   (row, 0, sid, spine_ids[si - 1] if si else None))
-        row += 1
-        stage = [b for b in (STAGE_PLAN[si] if si < len(STAGE_PLAN) else []) if b in have]
-        if si == len(spine_ids) - 1:
-            stage = stage + leftover
-        for k, bid in enumerate(stage):
+    ordv, row = 0, 0
+    name_of = {t: n for t, n, _ in rules}
+    for u in units:
+        k = u["chapter"]
+        if u["kind"] == "spine":
+            spine_name, chapter_title = CHAPTERS[k] if k < len(CHAPTERS) else (f"More Words {k + 1}", f"Chapter {k + 1}")
+            db.execute("insert into topics (id, name, kind, ord, n) values (?,?,?,?,?)",
+                       (u["id"], spine_name, "spine", ordv, len(u["words"])))
+            db.execute("insert into chapters (n, title, spine_id) values (?,?,?)", (k + 1, chapter_title, u["id"]))
             db.execute("insert into path (row, col, topic_id, requires) values (?,?,?,?)",
-                       (row, -1 if k % 2 == 0 else 1, bid, sid))
-            row += 1
+                       (row, 0, u["id"], f"core{k}" if k else None))
+            quest_k = 0
+        else:
+            if len(u["words"]) < BRANCH_MIN:
+                print(f"  !! {u['id']}: {len(u['words'])} words, below {BRANCH_MIN}; left out")
+                continue
+            db.execute("insert into topics (id, name, kind, ord, n, opt) values (?,?,?,?,?,?)",
+                       (u["id"], name_of[u["id"]], "branch", ordv, len(u["words"]),
+                        1 if u["id"] in OPTIONAL else 0))
+            db.execute("insert into path (row, col, topic_id, requires) values (?,?,?,?)",
+                       (row, -1 if quest_k % 2 == 0 else 1, u["id"], f"core{k + 1}"))
+            quest_k += 1
+        db.executemany("insert into unit_words (topic_id, lemma_id, ord, reason) values (?,?,?,?)",
+                       [(u["id"], lid, j, u["why"][lid]) for j, lid in enumerate(u["words"])])
+        ordv += 1
+        row += 1
 
     db.commit()
 
@@ -782,18 +833,21 @@ def main():
     print(f"  pool considered   : {len(meta):,} lemmas with glosses "
           f"({unsettled:,} tokens of forms the resolver could not settle counted for nobody)")
     print(f"  duplicate forms   : {dropped:,} rows dropped (one row per bare form; names out)")
-    print(f"  placed in a topic : {len(assigned):,} ({len(assigned)/max(1,len(meta)):.0%})")
-    print(f"  spine units       : {len(spine_ids)}")
-    opt_n = sum(1 for b in branch_ids if b in OPTIONAL)
-    print(f"  branch units      : {len(branch_ids)} "
-          f"({len(branch_ids) - opt_n} the chapter requires, {opt_n} optional)")
-    stale = sorted(OPTIONAL - set(branch_ids))
+    print(f"  words taught      : {len(taught):,} "
+          f"({sum(1 for u in units for l in u['words'] if u['why'][l] == 'video'):,} chosen off a video)")
+    opt_n = sum(1 for u in units if u["kind"] == "branch" and u["id"] in OPTIONAL)
+    print(f"  units             : {sum(1 for u in units if u['kind'] == 'spine')} spine, "
+          f"{sum(1 for u in units if u['kind'] == 'branch')} branch ({opt_n} optional)")
+    stale = sorted(OPTIONAL - {u["id"] for u in units})
     if stale:
         print(f"    !! OPTIONAL names {len(stale)} unit(s) that do not exist: " + ", ".join(stale))
     print()
-    for tid, name, kind, n, opt in db.execute(
-            "select id, name, kind, n, opt from topics order by kind, ord"):
-        print(f"    {kind:<7} {name:<22} {n:>3}{'  optional' if opt else ''}")
+    print("  how much of its video a learner follows by the unit's end (was → now):")
+    for u in units:
+        was = f"{u['before']:.0%}" if u["before"] is not None else "  —"
+        now = f"{u['after']:.0%}" if u["after"] is not None else "no video"
+        vids = sum(1 for l in u["words"] if u["why"][l] == "video")
+        print(f"    ch{u['chapter'] + 1:>2} {u['id']:<9} {len(u['words']):>3} words ({vids:>2} off the video)  {was:>4} → {now}")
     db.close()
 
 

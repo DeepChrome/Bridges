@@ -53,14 +53,10 @@ UNIT_MAX_SEC = 1200
 # A video is a unit's episode only if it says this many of the unit's words.
 MIN_HIT = 5
 
-# Keyword matching gets these wrong: "city" pulled a video about a Latvian city
-# rather than town vocabulary, and "photos" pulled a family album into Technology.
-# Same convention as OVERRIDES in build_topics.py — curate the misses, don't bend
-# the rules around them.
-OVERRIDES = {
-    "city": "TBI1dEe_X5E",   # Learn to Talk About Your Neighbourhood in Russian
-    "tech": "p9XNf1EFz98",   # Laptop, App and Other Words Russians Call Differently
-}
+# The course's goal videos, chosen from the videos first (tools/build_skeleton.py,
+# ROADMAP Phase 14). A unit the skeleton names takes its video from there; the
+# matching below is only for a unit it has no video for (Law, Military).
+SKELETON = ROOT / "data" / "curated" / "skeleton.json"
 
 STOP = set("""the a an and or of in on at to for with about from is are was were be
 been being this that these those it its as by how why what when where who russian
@@ -286,6 +282,14 @@ def main():
 
     by_id = {v["id"]: v for v in rows}
     taken, assigned, known = set(), {}, set()
+    skeleton = json.loads(SKELETON.read_text(encoding="utf-8")) if SKELETON.exists() else {"chapters": []}
+    goal, lesson = {}, {}
+    for k, ch in enumerate(skeleton["chapters"]):
+        goal[f"core{k + 1}"] = ch["spine"]
+        if ch.get("lesson"):
+            lesson[f"core{k + 1}"] = ch["lesson"]
+        goal.update(ch["quests"])
+    taken |= set(goal.values()) | set(lesson.values())
 
     def pick(tid, words, min_hit):
         best = None
@@ -316,10 +320,13 @@ def main():
     for tid in order:
         words = unit_words.get(tid) or set()
         known |= words
-        if tid in OVERRIDES and by_id.get(OVERRIDES[tid]):
-            v = by_id[OVERRIDES[tid]]
+        if tid in goal and by_id.get(goal[tid]):
+            v = by_id[goal[tid]]
             assigned[tid] = dict(v, score=99, comp=round(comprehension(v["id"], known), 3))
-            taken.add(v["id"])
+            # The chapter's grammar episode, played from the grammar step.
+            if tid in lesson and by_id.get(lesson[tid]):
+                g = by_id[lesson[tid]]
+                assigned[tid]["lesson"] = {"id": g["id"], "title": g["title"], "dur": g.get("dur")}
             continue
         # A narrow side quest (Medicine, Law) is said by fewer videos; three of
         # its words is still a video about it, and no video is worse.
@@ -329,7 +336,7 @@ def main():
             assigned[tid] = dict(v, score=round(score, 3), hit=hit, coverage=cov, comp=round(comp, 3))
             taken.add(v["id"])
 
-    keep = ("id", "title", "dur", "channel", "score", "hit", "coverage", "comp")
+    keep = ("id", "title", "dur", "channel", "score", "hit", "coverage", "comp", "lesson")
     out = {
         "channels": catalogue["channels"],
         "units": {tid: {k: v[k] for k in keep if k in v} for tid, v in assigned.items()},
@@ -351,7 +358,9 @@ def main():
     for tid, name, _kind, _ in units:
         v = assigned.get(tid)
         mark = "  " if v else "!!"
-        if v and "comp" in v and "hit" in v:
+        if v and v.get("score") == 99:
+            how = f"skeleton, knows {v['comp']:.0%}"
+        elif v and "comp" in v and "hit" in v:
             how = f"knows {v['comp']:.0%}, {v['hit']:>2} unit words"
         elif v and "coverage" in v:
             how = f"{v['hit']:>3} words, {v['coverage']:.0%} of the unit"

@@ -1,9 +1,9 @@
 {
  "chapter": 4,
- "name": "Everyday Things",
+ "name": "Winter & Gifts",
  "lessons": {
   "core4:2": {
-   "title": "The child needs a doctor",
+   "title": "Who will be Ded Moroz?",
    "cast": [
     {
      "id": "a",
@@ -16,285 +16,313 @@
      "en": "Pyotr"
     }
    ],
+   "intro": [
+    {
+     "ru": "папа",
+     "en": "dad"
+    },
+    {
+     "ru": "борода",
+     "en": "beard"
+    },
+    {
+     "ru": "пальто",
+     "en": "coat"
+    },
+    {
+     "ru": "голос",
+     "en": "voice"
+    }
+   ],
    "lines": [
     {
      "s": "a",
-     "ru": "Пётр, у нас проблема.",
-     "en": "Pyotr, we have a problem."
+     "ru": "Пётр, наш дед сейчас в другой стране.",
+     "en": "Pyotr, our grandad is in another country right now."
     },
     {
      "s": "b",
-     "ru": "Какая? Говори.",
-     "en": "What is it? Tell me."
+     "ru": "Я знаю. Он там до января, не дома.",
+     "en": "I know. He is there until January, not at home."
     },
     {
      "s": "a",
-     "ru": "Ребёнок. Мы должны идти к врачу.",
-     "en": "The child. We have to go to the doctor."
+     "ru": "А кто будет Дедом Морозом? Обычно это он.",
+     "en": "Then who will be Ded Moroz? It is usually him."
     },
     {
      "s": "b",
-     "ru": "Когда? Сейчас?",
-     "en": "When? Now?"
+     "ru": "Может, дети уже знают, кто Дед Мороз?",
+     "en": "Maybe the children already know who Ded Moroz is?"
     },
     {
      "s": "a",
-     "ru": "Сейчас. В школе так сказали.",
-     "en": "Now. That is what they said at school."
+     "ru": "Нет, они говорят только о нём. И о подарках.",
+     "en": "No, they talk only about him. And about the presents."
     },
     {
      "s": "b",
-     "ru": "А место есть?",
-     "en": "Is there an appointment?"
+     "ru": "Хорошо. Подарки у нас есть. Мешок тоже.",
+     "en": "Fine. We have the presents. The sack too."
     },
     {
      "s": "a",
-     "ru": "Есть. Но это деньги.",
-     "en": "There is. But it costs money."
+     "ru": "Ну, Пётр, Дедом Морозом будешь ты сам.",
+     "en": "Well, Pyotr, you will be Ded Moroz yourself."
     },
     {
      "s": "b",
-     "ru": "Много денег?",
-     "en": "A lot of money?"
+     "ru": "Я сам? Но дети скажут: это же наш папа!",
+     "en": "Me myself? But the children will say: that's our dad!"
     },
     {
      "s": "a",
-     "ru": "Хорошо, что не много.",
-     "en": "Luckily, not a lot."
+     "ru": "Не скажут. У Деда Мороза борода и красное пальто.",
+     "en": "They won't. Ded Moroz has a beard and a red coat."
     },
     {
      "s": "b",
-     "ru": "Я могу прийти в час.",
-     "en": "I can come at one."
+     "ru": "А голос? Мой голос они тоже знают.",
+     "en": "And my voice? They know my voice too."
     },
     {
      "s": "a",
-     "ru": "Хорошо. Я буду там.",
-     "en": "Good. I will be there."
+     "ru": "Говори как старый дед: а где тут мои дети?",
+     "en": "Talk like an old grandad: \"Now where are my children?\""
     },
     {
      "s": "b",
-     "ru": "Он хочет смотреть фильм.",
-     "en": "He wants to watch a film."
+     "ru": "Так? Ну, дети, где вы?",
+     "en": "Like this? \"Well, children, where are you?\""
     },
     {
      "s": "a",
-     "ru": "Я знаю. Он каждый раз так.",
-     "en": "I know. He is like that every time."
+     "ru": "Да! Теперь я сама тебя не знаю.",
+     "en": "Ha! Now even I don't know you."
     },
     {
      "s": "b",
-     "ru": "Скажи, что фильм будет.",
-     "en": "Tell him there will be a film."
+     "ru": "Хорошо, Лена. Но подарки даёшь ты.",
+     "en": "All right, Lena. But you hand out the presents."
     },
     {
      "s": "a",
-     "ru": "Хорошо. Это не проблема.",
-     "en": "Fine. That is not a problem."
+     "ru": "Нет, подарки даёт Дед Мороз. Обычно из мешка.",
+     "en": "No, Ded Moroz hands out the presents. Usually from the sack."
     },
     {
      "s": "b",
-     "ru": "Всё. Я иду, Лена.",
-     "en": "Right. I am on my way, Lena."
+     "ru": "Ну хорошо, хорошо. Дед Мороз всё может.",
+     "en": "Oh, all right, all right. Ded Moroz can do anything."
     }
    ],
    "questions": [
     {
-     "ask": "What is the problem?",
+     "ask": "Where is the children's grandad?",
      "options": [
-      "The child needs a doctor",
-      "The child is in trouble",
-      "The school has rung twice",
-      "They have lost the car"
+      "In another country",
+      "In the town hospital",
+      "At work until late",
+      "On a train back home"
      ],
      "answer": 0
     },
     {
-     "ask": "Who told them?",
+     "ask": "What does grandad usually do at New Year?",
      "options": [
-      "The school",
-      "The doctor",
-      "A neighbour",
-      "The child"
+      "Plays Ded Moroz",
+      "Buys the gifts",
+      "Cooks the meal",
+      "Brings the tree"
      ],
      "answer": 0
     },
     {
-     "ask": "What else worries Lena besides the time?",
+     "ask": "What is Pyotr worried about?",
      "options": [
-      "The cost",
-      "The journey",
-      "The waiting",
-      "The doctor"
+      "The children will know him",
+      "The children will be scared",
+      "The costume will not fit",
+      "The presents are not ready"
      ],
      "answer": 0
     },
     {
-     "ask": "When will Pyotr get there?",
+     "ask": "How does Lena answer his worry?",
      "options": [
-      "At one o'clock",
-      "At three o'clock",
-      "Straight away",
-      "Not until later"
+      "A beard and coat will hide him",
+      "The kids will be at grandma's",
+      "The lights will be turned off",
+      "Grandad will come back early"
      ],
      "answer": 0
     },
     {
-     "ask": "What would the child rather do?",
+     "ask": "What do they argue about at the end?",
      "options": [
-      "Watch a film",
-      "Stay at school",
-      "Go to the park",
-      "Stay in bed"
+      "Who hands out the presents",
+      "Who wraps up the presents",
+      "Where to hide the presents",
+      "When to open the presents"
      ],
      "answer": 0
     }
    ]
   },
   "core4:4": {
-   "title": "You have never been",
+   "title": "Borscht for Ded Moroz",
    "cast": [
     {
      "id": "a",
-     "ru": "Аня",
-     "en": "Anya"
+     "ru": "Петя",
+     "en": "Petya"
     },
     {
      "id": "b",
-     "ru": "Ваня",
-     "en": "Vanya"
+     "ru": "Маша",
+     "en": "Masha"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "ёлка",
+     "en": "New Year tree"
+    },
+    {
+     "ru": "папа",
+     "en": "dad"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Ваня, ты никогда не был у меня дома.",
-     "en": "Vanya, you have never been to my house."
+     "ru": "Маша, там такой мороз! Дед Мороз летает, когда мороз?",
+     "en": "Masha, it's so frosty out there! Does Ded Moroz fly when it's frosty?"
     },
     {
      "s": "b",
-     "ru": "Никогда? Это не так.",
-     "en": "Never? That is not right."
+     "ru": "Конечно, Петя. Для него мороз — как дом.",
+     "en": "Of course, Petya. For him the frost is like home."
     },
     {
      "s": "a",
-     "ru": "Один раз. И всё.",
-     "en": "Once. That is all."
+     "ru": "А как он носит подарки? Их же очень много.",
+     "en": "And how does he carry the presents? There are so many."
     },
     {
      "s": "b",
-     "ru": "Который год ты там живёшь?",
-     "en": "How long have you lived there?"
+     "ru": "У него есть мешок. Красный, как он сам.",
+     "en": "He has a big sack. Red, like him."
     },
     {
      "s": "a",
-     "ru": "Много лет. Дом большой.",
-     "en": "Many years. The house is big."
+     "ru": "А подарки он оставляет перед ёлкой?",
+     "en": "And does he leave the presents in front of the tree?"
     },
     {
      "s": "b",
-     "ru": "Он много стоит?",
-     "en": "Does it cost a lot?"
+     "ru": "Да. Каждый ребёнок получает свой подарок перед ёлкой.",
+     "en": "Yes. Every child gets their own present in front of the tree."
     },
     {
      "s": "a",
-     "ru": "Стоил. Сейчас — нет.",
-     "en": "It did. Not now."
+     "ru": "А сам Дед Мороз подарки получает?",
+     "en": "And does Ded Moroz himself get presents?"
     },
     {
      "s": "b",
-     "ru": "Хорошо. Я хочу видеть.",
-     "en": "Good. I want to see it."
+     "ru": "Не знаю. Кажется, нет.",
+     "en": "I don't know. I don't think so."
     },
     {
      "s": "a",
-     "ru": "Пойдём сейчас?",
-     "en": "Shall we go now?"
+     "ru": "Я хочу, чтобы Дед Мороз тоже получал подарки.",
+     "en": "I want Ded Moroz to get presents too."
     },
     {
      "s": "b",
-     "ru": "Сейчас? У меня отец.",
-     "en": "Now? My father is here."
+     "ru": "Какой подарок? У него всё есть.",
+     "en": "What present? He has everything."
     },
     {
      "s": "a",
-     "ru": "Отец? Он у тебя?",
-     "en": "Your father? He is with you?"
+     "ru": "Борщ! В такой мороз он хочет борщ.",
+     "en": "Borscht! In frost like this he wants borscht."
     },
     {
      "s": "b",
-     "ru": "Да. Он с детьми играет.",
-     "en": "Yes. He is playing with the children."
+     "ru": "Борщ перед ёлкой? Петя, это же не кафе!",
+     "en": "Borscht in front of the tree? Petya, this isn't a café!"
     },
     {
      "s": "a",
-     "ru": "Так пойдём все!",
-     "en": "Then let us all go!"
+     "ru": "А что? Он летает весь декабрь, до января!",
+     "en": "So what? He flies all December, right up to January!"
     },
     {
      "s": "b",
-     "ru": "Все? В твой дом?",
-     "en": "All of us? To your house?"
+     "ru": "Ну хорошо. Борщ и колбаса. Для деда.",
+     "en": "Oh, all right. Borscht and sausage. For the old man."
     },
     {
      "s": "a",
-     "ru": "Да. Дети могут играть там.",
-     "en": "Yes. The children can play there."
+     "ru": "Спасибо, Маша! Ты молодец!",
+     "en": "Thanks, Masha! You're the best!"
     },
     {
      "s": "b",
-     "ru": "Хорошо, Аня. Пойдём.",
-     "en": "All right, Anya. Let us go."
+     "ru": "Только не говори папе, что это его борщ!",
+     "en": "Just don't tell Dad that it's his borscht!"
     }
    ],
    "questions": [
     {
-     "ask": "What does Anya point out?",
+     "ask": "Why is Petya worried at first?",
      "options": [
-      "Vanya never visits her",
-      "Vanya never rings her",
-      "Vanya is always late",
-      "Vanya has moved away"
+      "It is very frosty outside",
+      "Their tree has fallen over",
+      "Masha has hidden his gift",
+      "They have no presents left"
      ],
      "answer": 0
     },
     {
-     "ask": "How long has she lived there?",
+     "ask": "How does Ded Moroz carry the presents?",
      "options": [
-      "Many years",
-      "A few months",
-      "Since last year",
-      "She does not say"
+      "In a big red sack",
+      "On a wooden sledge",
+      "In a heavy basket",
+      "In a blue suitcase"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Vanya ask about the house?",
+     "ask": "Where do the children find their presents?",
      "options": [
-      "What it cost",
-      "Who built it",
-      "How big it is",
-      "Where it is"
+      "In front of the tree",
+      "Behind the front door",
+      "On the kitchen table",
+      "In a box on the bed"
      ],
      "answer": 0
     },
     {
-     "ask": "Why can he not come at once?",
+     "ask": "What does Petya want to leave for Ded Moroz?",
      "options": [
-      "His father is there",
-      "He is still at work",
-      "He has no car",
-      "It is too late"
+      "A bowl of borscht",
+      "A slice of pizza",
+      "A glass of milk",
+      "A cup of hot tea"
      ],
      "answer": 0
     },
     {
-     "ask": "How do they settle it?",
+     "ask": "What does Masha ask Petya not to do?",
      "options": [
-      "Everyone goes together",
-      "They go another day instead",
-      "Vanya goes on his own",
-      "They call the whole thing off"
+      "Tell Dad about the borscht",
+      "Open his presents too early",
+      "Eat the pizza before night",
+      "Look into Ded Moroz's sack"
      ],
      "answer": 0
     }

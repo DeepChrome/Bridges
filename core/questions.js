@@ -1292,8 +1292,14 @@ export function makeQuestions(env) {
     const review = shuffle((prefer || []).filter((i) => L[i] && !words.includes(i)));
     const earlier = shuffle(unit.w.slice(0, index * lessonWords(unit, 0).length)
       .filter((i) => !words.includes(i) && !review.includes(i)));
-    while (bag.length < QUIZ_N && (review.length || earlier.length)) {
-      const pick = review.length ? review.pop() : earlier.pop();
+    /* …and past the unit, the route before it. A unit's first lesson has no
+       earlier lessons, so a side quest opening right after its chapter's spine
+       asked seven questions where it should ask eight; the words the learner
+       has just finished are the natural top-up (Phase 14 put Food in chapter 1). */
+    const route = shuffle(unitsUpTo(unit).filter((u) => u.id !== unit.id).flatMap((u) => u.w)
+      .filter((i) => !words.includes(i) && !review.includes(i) && !earlier.includes(i)));
+    while (bag.length < QUIZ_N && (review.length || earlier.length || route.length)) {
+      const pick = review.length ? review.pop() : earlier.length ? earlier.pop() : route.pop();
       const e = draw(pick);
       if (e) bag.push(e);
     }

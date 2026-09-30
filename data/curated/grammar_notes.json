@@ -66,7 +66,7 @@
       "form": { "pos": "verb", "table": "Present / Future", "aspect": "perfective" },
       "title": "Talking about the future",
       "body": "A perfective verb in its present-tense forms already means the future: я сде́лаю is “I will do”. For a process use бу́ду plus the imperfective: я бу́ду рабо́тать.",
-      "examples": [["За́втра я сде́лаю э́то.", "Tomorrow I will do it."], ["Я бу́ду рабо́тать до́ма.", "I will be working at home."]]
+      "examples": [["Пото́м я сде́лаю э́то.", "I will do it later."], ["Я бу́ду рабо́тать до́ма.", "I will be working at home."]]
     },
     "core10": {
       "form": { "pos": "verb", "table": "Imperative" },
@@ -78,7 +78,7 @@
     "family": {
       "title": "“My” agrees with what is owned",
       "body": "мой, твой, наш, ваш and свой take the gender of the thing possessed, not of the owner. (его, её and их never change.)",
-      "examples": [["мой брат, моя́ дочь", "my brother, my daughter"], ["мои́ роди́тели", "my parents"]]
+      "examples": [["мой па́па, моя́ ма́ма", "my dad, my mum"], ["моя́ семья́", "my family"]]
     },
     "time": {
       "title": "Numbers change the noun after them",
@@ -88,7 +88,7 @@
     "food": {
       "title": "Saying what you want",
       "body": "хоте́ть is irregular — я хочу́, ты хо́чешь, он хо́чет, мы хоти́м — and the thing you want follows it directly.",
-      "examples": [["Я хочу́ чай.", "I want tea."], ["Ты хо́чешь ко́фе?", "Do you want coffee?"]]
+      "examples": [["Я хочу́ чай.", "I want tea."], ["Ты хо́чешь пи́ццу?", "Do you want pizza?"]]
     },
     "school": {
       "title": "Three ways to “study”",
@@ -108,13 +108,13 @@
     "city": {
       "title": "Places in the plural",
       "body": "Most take -ы/-и, but some common masculine nouns take a stressed -а́: дом → дома́, го́род → города́.",
-      "examples": [["у́лицы и площа́ди", "streets and squares"], ["больши́е города́", "big cities"]]
+      "examples": [["у́лицы и магази́ны", "streets and shops"], ["больши́е города́", "big cities"]]
     },
     "travel": {
       "form": { "pos": "verb", "table": "Present / Future" },
       "title": "Two verbs for “go”",
       "body": "идти́ is one trip in one direction happening now; ходи́ть is going regularly or there and back.",
-      "examples": [["Я иду́ в парк.", "I am going to the park."], ["Я хожу́ в парк ка́ждый день.", "I go to the park every day."]]
+      "examples": [["Я иду́ в магази́н.", "I am going to the shop."], ["Я хожу́ в магази́н ка́ждый день.", "I go to the shop every day."]]
     },
     "body": {
       "title": "What hurts is the subject",
@@ -141,7 +141,7 @@
       "form": { "pos": "noun", "table": "Declension", "rows": ["Dative"], "cols": ["Singular"] },
       "title": "Liking is done “to” you",
       "body": "нра́виться puts the person in the dative and the thing liked in the nominative — literally “to me is pleasing”.",
-      "examples": [["Мне нра́вится му́зыка.", "I like music."], ["Ей нра́вятся ко́шки.", "She likes cats."]]
+      "examples": [["Мне нра́вится му́зыка.", "I like music."], ["Ему́ нра́вится ко́фе.", "He likes coffee."]]
     },
     "speech": {
       "form": { "pos": "verb", "table": "Present / Future" },
@@ -153,13 +153,12 @@
       "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
       "title": "“With” takes the instrumental",
       "body": "с plus the instrumental means together with — including who you are fighting or negotiating with.",
-      "examples": [["война́ с враго́м", "war with the enemy"], ["Он говори́т с генера́лом.", "He is speaking with the general."]]
+      "examples": [["Он говори́т с дру́гом.", "He is speaking with a friend."], ["война́ с враго́м", "war with the enemy"]]
     },
     "tech": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Dative"], "cols": ["Singular"] },
-      "title": "Communicating “by” something",
-      "body": "по plus the dative case gives the medium something travels through.",
-      "examples": [["по телефо́ну", "by phone"], ["по интерне́ту", "over the internet"]]
+      "title": "Can and want, plus a verb",
+      "body": "мочь and хоте́ть take a verb in its dictionary form after them: я могу́ сде́лать, ты хо́чешь посмотре́ть.",
+      "examples": [["Я могу́ сде́лать ви́део.", "I can make a video."], ["Хо́чешь посмотре́ть?", "Do you want to watch?"]]
     },
     "sport": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative", "Prepositional"], "cols": ["Singular"] },
@@ -188,7 +187,7 @@
       "form": { "pos": "noun", "table": "Declension", "rows": ["Genitive"], "cols": ["Singular"] },
       "title": "How much does it cost?",
       "body": "ско́лько сто́ит plus the thing; the answer counts in roubles the way hours are counted — оди́н рубль, два рубля́, пять рубле́й.",
-      "examples": [["Ско́лько э́то сто́ит?", "How much does this cost?"], ["Э́то сто́ит два рубля́.", "It costs two roubles."]]
+      "examples": [["Э́то сто́ит два рубля́.", "It costs two roubles."], ["Чай сто́ит два рубля́.", "The tea costs two roubles."]]
     },
     "law": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
@@ -206,7 +205,7 @@
       "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative", "Dative"], "cols": ["Singular"] },
       "title": "Believing in",
       "body": "ве́рить в plus the accusative is to believe in something; ве́рить plus the dative is to believe someone.",
-      "examples": [["Я ве́рю в Бо́га.", "I believe in God."], ["Я тебе́ ве́рю.", "I believe you."]]
+      "examples": [["Я ве́рю в тебя́.", "I believe in you."], ["Я тебе́ ве́рю.", "I believe you."]]
     }
   }
 }

@@ -25,9 +25,9 @@
  */
 
 import React from "react";
-import { Animated, View, Image } from "react-native";
+import { Animated, View, Image, Pressable } from "react-native";
 import { useTheme, radius, type as T } from "./theme";
-import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses, Text } from "./ui";
+import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses, Text, Btn } from "./ui";
 import { RuleCard } from "./rules";
 import { Linked } from "./words";
 import { Guide } from "./guide";
@@ -150,7 +150,7 @@ function WordRow({ i, unit, last, delay }) {
 /* The rule the chapter turns on. It gets the brand colour and a left edge, so a
    rule does not look like a vocabulary card with different words in it, and Yuri
    points at it rather than saying anything about it. */
-export function GrammarNote({ unit, note, at, total }) {
+export function GrammarNote({ unit, note, at, total, onEpisode }) {
   const t = useTheme();
   const anim = useEnter([note.title, at]);
   return (
@@ -168,6 +168,12 @@ export function GrammarNote({ unit, note, at, total }) {
           </View>
         </View>
         <RuleCard note={note} tone="brand" testID="grammar-note" />
+        {/* The chapter's grammar episode, where the library has one (Phase 14):
+            the same rule, taught by a person, in slow Russian. */}
+        {onEpisode && unit.v && unit.v.lesson ? (
+          <Btn testID="grammar-episode" label="Watch the grammar episode" style={{ marginTop: 12 }}
+               onPress={() => onEpisode(unit.v.lesson.id)} />
+        ) : null}
       </Animated.View>
     </>
   );
@@ -187,7 +193,7 @@ export function GrammarNote({ unit, note, at, total }) {
  * worse it looked; now the word is optically centred and the button sits under
  * it where the thumb reaches.
  */
-export function WordCard({ i, at, total }) {
+export function WordCard({ i, at, total, unit, onMoment }) {
   const t = useTheme();
   const w = L[i];
   const anim = useEnter([i]);
@@ -196,6 +202,9 @@ export function WordCard({ i, at, total }) {
   const photo = IMAGES[w.b];
   const credit = CREDITS[w.b];
   const tags = [w.p, w.g, w.a].filter(Boolean).filter((x) => x !== "other");
+  // Where the unit's video says this word (Phase 14): the lesson is preparing
+  // for that video, so the card shows the word in it and plays the moment.
+  const moment = unit && unit.v && unit.v.heard && (unit.v.heard[w.b] || [])[0];
 
   return (
     <>
@@ -287,6 +296,25 @@ export function WordCard({ i, at, total }) {
               <Muted>{ex.en}</Muted>
             </View>
           ))}
+
+          {moment && onMoment ? (
+            <Pressable testID="word-moment" accessibilityRole="button"
+                       accessibilityLabel="Play it in the video"
+                       onPress={() => onMoment(unit.v.id, w.b, moment.t)}
+                       style={({ pressed }) => ({ marginTop: 14, paddingTop: 12, borderTopWidth: 1,
+                                                  borderTopColor: t.lineSoft, alignSelf: "stretch",
+                                                  flexDirection: "row", alignItems: "center", gap: 10,
+                                                  opacity: pressed ? 0.6 : 1 })}>
+              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: t.brandBg,
+                             alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ color: t.brandInk, fontSize: 14 }}>▶</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Muted size={T.small}>In the video</Muted>
+                <Text style={{ color: t.ink2, fontSize: T.body }} numberOfLines={2}>{moment.s}</Text>
+              </View>
+            </Pressable>
+          ) : null}
         </Card>
       </Animated.View>
     </>

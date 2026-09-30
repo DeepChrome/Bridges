@@ -1,300 +1,297 @@
 {
  "chapter": 5,
- "name": "Family & Home Life",
+ "name": "Spending & Saving",
  "lessons": {
   "core5:2": {
-   "title": "Nobody is home",
+   "title": "The first salary",
    "cast": [
     {
      "id": "a",
-     "ru": "Пётр",
-     "en": "Pyotr"
+     "ru": "Катя",
+     "en": "Katya"
     },
     {
      "id": "b",
-     "ru": "Нина",
-     "en": "Nina"
+     "ru": "Олег",
+     "en": "Oleg"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "зарплата",
+     "en": "salary"
+    },
+    {
+     "ru": "квартира",
+     "en": "flat"
+    },
+    {
+     "ru": "карточка",
+     "en": "bank card"
+    },
+    {
+     "ru": "карман",
+     "en": "pocket"
+    },
+    {
+     "ru": "банкомат",
+     "en": "cash machine"
     }
    ],
    "lines": [
     {
-     "s": "a",
-     "ru": "Нина, ты дома?",
-     "en": "Nina, are you at home?"
-    },
-    {
      "s": "b",
-     "ru": "Дома. А что?",
-     "en": "At home. Why?"
+     "ru": "Катя, я получил зарплату! Теперь можно снимать квартиру.",
+     "en": "Katya, I got my salary! Now I can rent a flat."
     },
     {
      "s": "a",
-     "ru": "Я у твоей двери.",
-     "en": "I am at your door."
+     "ru": "Молодец, Олег! А денег достаточно для квартиры?",
+     "en": "Well done, Oleg! But is it enough money for a flat?"
     },
     {
      "s": "b",
-     "ru": "Я вышла. Я не дома.",
-     "en": "I went out. I am not at home."
+     "ru": "Думаю, да. Все деньги сейчас на карточке.",
+     "en": "I think so. All the money is on my card now."
     },
     {
      "s": "a",
-     "ru": "Ты же сказала, что дома!",
-     "en": "But you said you were at home!"
+     "ru": "А карточка где? Ты часто оставляешь её в кафе.",
+     "en": "And where is the card? You often leave it in cafés."
     },
     {
      "s": "b",
-     "ru": "Была. Вся семья вышла, Пётр.",
-     "en": "I was. The whole family went out, Pyotr."
+     "ru": "Она в кармане, конечно. Так... В кармане её нет.",
+     "en": "It's in my pocket, of course. Hmm... It's not in my pocket."
     },
     {
      "s": "a",
-     "ru": "А где они сейчас?",
-     "en": "And where are they now?"
+     "ru": "Олег! Где ты сегодня был?",
+     "en": "Oleg! Where have you been today?"
     },
     {
      "s": "b",
-     "ru": "Не знаю, тут ли они.",
-     "en": "I do not know whether they are here."
+     "ru": "На работе, потом в банке, потом в кафе.",
+     "en": "At work, then at the bank, then at the café."
     },
     {
      "s": "a",
-     "ru": "Я стою у двери с водой.",
-     "en": "I am standing at the door with the water."
+     "ru": "А в банке? Ты что-то там делал с карточкой?",
+     "en": "And at the bank? Did you do something there with the card?"
     },
     {
      "s": "b",
-     "ru": "С водой? Ты купил?",
-     "en": "With the water? You bought it?"
+     "ru": "Да, я снимал там деньги. Карточка в банкомате!",
+     "en": "Yes, I took money out there. The card is in the cash machine!"
     },
     {
      "s": "a",
-     "ru": "Да. Ты хотела воду.",
-     "en": "Yes. You wanted water."
+     "ru": "Тогда надо идти в банк. Он сегодня ещё работает?",
+     "en": "Then you have to go to the bank. Is it still open today?"
     },
     {
      "s": "b",
-     "ru": "Там девушка стоит?",
-     "en": "Is there a girl standing there?"
+     "ru": "Да, работает. Катя, ты идёшь со мной?",
+     "en": "Yes, it's open. Katya, are you coming with me?"
     },
     {
      "s": "a",
-     "ru": "Девушка? Да, одна.",
-     "en": "A girl? Yes, one."
+     "ru": "Иду. Но квартиру смотрим потом, хорошо?",
+     "en": "I'm coming. But we look at the flat later, all right?"
     },
     {
      "s": "b",
-     "ru": "Это наша. Дай ей воду.",
-     "en": "That is ours. Give her the water."
-    },
-    {
-     "s": "a",
-     "ru": "Хорошо. А ты когда?",
-     "en": "All right. And when will you be back?"
-    },
-    {
-     "s": "b",
-     "ru": "Я буду дома. Один час.",
-     "en": "I will be home. One hour."
+     "ru": "Хорошо. Карточка, а потом квартира.",
+     "en": "All right. The card, and then the flat."
     }
    ],
    "questions": [
     {
-     "ask": "Where is Pyotr?",
+     "ask": "What has Oleg just got?",
      "options": [
-      "At Nina's door",
-      "At his own door",
-      "At the shop",
-      "On the bus"
+      "His salary",
+      "A new flat",
+      "A new job",
+      "A bank loan"
      ],
      "answer": 0
     },
     {
-     "ask": "What did Nina say that turned out to be wrong?",
+     "ask": "What does Oleg want to do with the money?",
      "options": [
-      "That she was at home",
-      "That she would be late",
-      "That she had the water",
-      "That nobody was in"
+      "Rent a flat",
+      "Buy a car",
+      "Open a café",
+      "Pay a debt"
      ],
      "answer": 0
     },
     {
-     "ask": "Who else has gone out?",
+     "ask": "What is Oleg's problem?",
      "options": [
-      "Her whole family",
-      "Only her husband",
-      "Just the children",
-      "Nobody else"
+      "He has lost his card",
+      "He has lost his keys",
+      "He has no money left",
+      "He forgot the address"
      ],
      "answer": 0
     },
     {
-     "ask": "What is Pyotr carrying?",
+     "ask": "Where did Oleg go today?",
      "options": [
-      "Water",
-      "Bread",
-      "A parcel",
-      "Nothing"
+      "Work, the bank, a café",
+      "Work, a shop, the bar",
+      "Home, the bank, a bar",
+      "School, a café, a bar"
      ],
      "answer": 0
     },
     {
-     "ask": "Who is standing at the door?",
+     "ask": "Where is the card in the end?",
      "options": [
-      "A girl of theirs",
-      "A neighbour of hers",
-      "Nobody at all",
-      "Her mother"
+      "In the cash machine",
+      "In his jacket pocket",
+      "At the café counter",
+      "In the car at home"
      ],
      "answer": 0
     }
    ]
   },
   "core5:4": {
-   "title": "The book in her hand",
+   "title": "Money for her studies",
    "cast": [
     {
      "id": "a",
-     "ru": "Аня",
-     "en": "Anya"
+     "ru": "Лена",
+     "en": "Lena"
     },
     {
      "id": "b",
-     "ru": "Ваня",
-     "en": "Vanya"
+     "ru": "Иван",
+     "en": "Ivan"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "телефон",
+     "en": "phone"
+    },
+    {
+     "ru": "доллар",
+     "en": "dollar"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Ваня, я не могу найти книгу.",
-     "en": "Vanya, I cannot find the book."
+     "ru": "Иван, ты можешь перевести мне деньги? Это очень нужно.",
+     "en": "Ivan, can you transfer me some money? I really need it."
     },
     {
      "s": "b",
-     "ru": "Какую книгу?",
-     "en": "Which book?"
+     "ru": "Лена, ты же работаешь в кафе и зарабатываешь.",
+     "en": "Lena, you work at a café, you earn money."
     },
     {
      "s": "a",
-     "ru": "Русскую. Мою первую.",
-     "en": "The Russian one. My first one."
+     "ru": "Да, но сегодня надо заплатить за учёбу, а денег нет.",
+     "en": "Yes, but today I have to pay for my studies, and I have no money."
     },
     {
      "s": "b",
-     "ru": "Минуту. Где ты её видела?",
-     "en": "One moment. Where did you see it?"
+     "ru": "Как нет? А где деньги из кафе?",
+     "en": "What do you mean, none? Where's the money from the café?"
     },
     {
      "s": "a",
-     "ru": "Дома. У двери.",
-     "en": "At home. By the door."
+     "ru": "Были покупки. Телефон и разные мелкие подарки.",
+     "en": "I did some shopping. A phone and various little presents."
     },
     {
      "s": "b",
-     "ru": "Я смотрел. Её там нет.",
-     "en": "I looked. It is not there."
+     "ru": "Подарки, Лена! Хорошо, но у меня на счёте только доллары.",
+     "en": "Presents, Lena! All right, but I only have dollars in my account."
     },
     {
      "s": "a",
-     "ru": "Это книга моей мамы.",
-     "en": "It is my mother's book."
+     "ru": "Доллары? Тогда их надо поменять в банке.",
+     "en": "Dollars? Then they have to be changed at the bank."
     },
     {
      "s": "b",
-     "ru": "Мамы? Это проблема.",
-     "en": "Your mother's? That is a problem."
+     "ru": "Банк сегодня не работает. Дома у меня только мелкие деньги.",
+     "en": "The bank isn't open today. At home I only have small change."
     },
     {
      "s": "a",
-     "ru": "Я должна её найти.",
-     "en": "I have to find it."
+     "ru": "Сколько там мелких денег, Иван?",
+     "en": "How much small change is there, Ivan?"
     },
     {
      "s": "b",
-     "ru": "Дай мне минуту.",
-     "en": "Give me a minute."
+     "ru": "Много. Дед часто даёт мне рубли. Там их мешок.",
+     "en": "A lot. Grandad often gives me roubles. There's a bag of them."
     },
     {
      "s": "a",
-     "ru": "Ты её видишь?",
-     "en": "Can you see it?"
+     "ru": "Мешок? В университете такие деньги не хотят.",
+     "en": "A bag? The university doesn't want money like that."
     },
     {
      "s": "b",
-     "ru": "Вот! Я нашёл.",
-     "en": "There! I have found it."
-    },
-    {
-     "s": "a",
-     "ru": "Где она была?",
-     "en": "Where was it?"
-    },
-    {
-     "s": "b",
-     "ru": "У тебя в руке.",
-     "en": "In your hand."
-    },
-    {
-     "s": "a",
-     "ru": "В руке! Я не видела.",
-     "en": "In my hand! I did not see it."
-    },
-    {
-     "s": "b",
-     "ru": "Аня, книга была с тобой.",
-     "en": "Anya, the book was with you all along."
+     "ru": "Тогда так. Когда банк работает, я могу всё перевести.",
+     "en": "Then here's the plan. When the bank is open, I can transfer it all."
     }
    ],
    "questions": [
     {
-     "ask": "What is Anya looking for?",
+     "ask": "What does Lena ask Ivan to do?",
      "options": [
-      "A Russian book",
-      "A Russian film",
-      "Her phone",
-      "Her keys"
+      "Transfer her money",
+      "Lend her his car",
+      "Pay for her phone",
+      "Buy her a present"
      ],
      "answer": 0
     },
     {
-     "ask": "Whose is it?",
+     "ask": "What does Lena need the money for?",
      "options": [
-      "Her mother's",
-      "Vanya's",
-      "Her own",
-      "The school's"
+      "Her studies",
+      "Her new phone",
+      "Her flat rent",
+      "A café bill"
      ],
      "answer": 0
     },
     {
-     "ask": "Where had she last seen it?",
+     "ask": "Why has Lena no money left?",
      "options": [
-      "At home by the door",
-      "At work on her desk",
-      "In the car outside",
-      "She cannot remember"
+      "She spent it on shopping",
+      "She lost her bank card",
+      "Her café pays in January",
+      "She gave it to her grandad"
      ],
      "answer": 0
     },
     {
-     "ask": "Who finds it?",
+     "ask": "What is the problem with Ivan's money?",
      "options": [
-      "Vanya",
-      "Anya",
-      "Her mother",
-      "Nobody"
+      "It is all in dollars",
+      "It is all in his car",
+      "It is on a lost card",
+      "It belongs to grandad"
      ],
      "answer": 0
     },
     {
-     "ask": "Where was it?",
+     "ask": "What does Ivan have at home?",
      "options": [
-      "In her own hand",
-      "Behind the door",
-      "Under the bed",
-      "In her bag"
+      "A bag of small coins",
+      "A bag of US dollars",
+      "A new phone for her",
+      "Grandad's bank card"
      ],
      "answer": 0
     }

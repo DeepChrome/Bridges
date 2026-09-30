@@ -1,300 +1,289 @@
 {
  "chapter": 9,
- "name": "Where, When & How",
+ "name": "Style & Fashion",
  "lessons": {
   "core9:2": {
-   "title": "I do not understand it",
+   "title": "What to wear to the bank",
    "cast": [
     {
      "id": "a",
-     "ru": "Олег",
-     "en": "Oleg"
+     "ru": "Маша",
+     "en": "Masha"
     },
     {
      "id": "b",
-     "ru": "Нина",
-     "en": "Nina"
+     "ru": "Петя",
+     "en": "Petya"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "костюм",
+     "en": "suit"
+    },
+    {
+     "ru": "рубашка",
+     "en": "shirt"
+    },
+    {
+     "ru": "галстук",
+     "en": "tie"
     }
    ],
    "lines": [
     {
-     "s": "a",
-     "ru": "Нина, откуда у тебя этот результат?",
-     "en": "Nina, where did you get this result?"
-    },
-    {
      "s": "b",
-     "ru": "От врача. Вчера пришёл.",
-     "en": "From the doctor. It came yesterday."
+     "ru": "Маша, сегодня я иду в банк говорить о работе. В чём мне идти?",
+     "en": "Masha, today I'm going to the bank to talk about a job. What should I wear?"
     },
     {
      "s": "a",
-     "ru": "И ты его понимаешь?",
-     "en": "And do you understand it?"
+     "ru": "А что у тебя есть? Ты же знаешь, я слежу за модой.",
+     "en": "What have you got? You know I follow fashion."
     },
     {
      "s": "b",
-     "ru": "Ну, не всё.",
-     "en": "Well, not all of it."
+     "ru": "Вот брюки и рубашка. Мне кажется, это мой стиль.",
+     "en": "Here, trousers and a shirt. I think this is my style."
     },
     {
      "s": "a",
-     "ru": "Тут три слова, которых я не знаю.",
-     "en": "There are three words here I do not know."
+     "ru": "Петя, это спортивные брюки! Откуда они у тебя?",
+     "en": "Petya, those are tracksuit trousers! Where did you get them?"
     },
     {
      "s": "b",
-     "ru": "Три? Я не понимаю их.",
-     "en": "Three? I do not understand them."
+     "ru": "От брата. В них хорошо двигаться.",
+     "en": "From my brother. They're easy to move in."
     },
     {
      "s": "a",
-     "ru": "Потом пойдём к врачу.",
-     "en": "We will go to the doctor later."
+     "ru": "В банке не нужно двигаться.",
+     "en": "You don't need to move at a bank."
     },
     {
      "s": "b",
-     "ru": "Потом? Я хочу знать сейчас.",
-     "en": "Later? I want to know now."
+     "ru": "Ну, а какой стиль там предпочитают?",
+     "en": "Well, what style do they prefer there?"
     },
     {
      "s": "a",
-     "ru": "Ну, тогда читай мне.",
-     "en": "Well, read it to me then."
+     "ru": "Классический. Костюм, светлая рубашка и галстук.",
+     "en": "Classic. A suit, a light shirt and a tie."
     },
     {
      "s": "b",
-     "ru": "Читаю: всё хорошо.",
-     "en": "I am reading: all is well."
+     "ru": "Костюм у меня есть, старый, от деда. Но галстук я носить не буду.",
+     "en": "I have a suit, an old one, from my grandfather. But I won't wear a tie."
     },
     {
      "s": "a",
-     "ru": "Всё хорошо! Это же результат.",
-     "en": "All is well! That is the result."
+     "ru": "Почему? Он тебе не идёт?",
+     "en": "Why? Does it not suit you?"
     },
     {
      "s": "b",
-     "ru": "Но других слов я не понимаю.",
-     "en": "But I do not understand the other words."
+     "ru": "Я в нём как профессор. Все будут на меня смотреть.",
+     "en": "I look like a professor in it. Everyone will stare at me."
     },
     {
      "s": "a",
-     "ru": "Они для врача, не для нас.",
-     "en": "They are for the doctor, not for us."
+     "ru": "Вот и хорошо. Профессору в банке всегда отвечают «да».",
+     "en": "All the better. At a bank they always say yes to a professor."
     },
     {
      "s": "b",
-     "ru": "Ну хорошо. Потом он скажет.",
-     "en": "All right then. He will tell us later."
-    },
-    {
-     "s": "a",
-     "ru": "Скажет. А сейчас — вода и вино.",
-     "en": "He will. And now, water and wine."
-    },
-    {
-     "s": "b",
-     "ru": "Вино? Ну, Олег!",
-     "en": "Wine? Really, Oleg!"
+     "ru": "Ладно, Маша. Тогда костюм, рубашка и галстук.",
+     "en": "All right, Masha. Suit, shirt and tie, then."
     }
    ],
    "questions": [
     {
-     "ask": "Where did the result come from?",
+     "ask": "Why does Petya need Masha's advice?",
      "options": [
-      "The doctor",
-      "The school",
-      "Her work",
-      "A friend"
+      "He has a job talk at a bank",
+      "He has a date at a concert",
+      "He is visiting his grandfather",
+      "He is starting university soon"
      ],
      "answer": 0
     },
     {
-     "ask": "What is the trouble with it?",
+     "ask": "What does Masha say about his trousers?",
      "options": [
-      "She cannot read the words",
-      "She has lost part of it",
-      "It arrived far too late",
-      "It is not hers at all"
+      "They are tracksuit trousers",
+      "They are much too short now",
+      "They are dirty at the back",
+      "They are far too bright red"
      ],
      "answer": 0
     },
     {
-     "ask": "What does it actually say?",
+     "ask": "What style does Masha say the bank prefers?",
      "options": [
-      "That all is well",
-      "That all is not well",
-      "That she must go back",
-      "Nothing either way"
+      "Classic",
+      "Sporty",
+      "Bright",
+      "Casual"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Oleg say about the rest of it?",
+     "ask": "Where is Petya's suit from?",
      "options": [
-      "It is meant for the doctor",
-      "It is meant for her boss",
-      "It is not important now",
-      "He will read it later"
+      "His grandfather",
+      "His older brother",
+      "A shop in town",
+      "His best friend"
      ],
      "answer": 0
     },
     {
-     "ask": "What does he suggest afterwards?",
+     "ask": "Why does Petya not want to wear the tie?",
      "options": [
-      "Wine",
-      "A walk",
-      "A rest",
-      "Bed"
+      "He looks like a professor in it",
+      "It is far too bright for a bank",
+      "It belonged to his grandfather",
+      "He does not know how to tie it"
      ],
      "answer": 0
     }
    ]
   },
   "core9:4": {
-   "title": "He is taking it badly",
+   "title": "Nothing to wear to grandpa's",
    "cast": [
     {
      "id": "a",
-     "ru": "Таня",
-     "en": "Tanya"
+     "ru": "Катя",
+     "en": "Katya"
     },
     {
      "id": "b",
-     "ru": "Саша",
-     "en": "Sasha"
+     "ru": "Олег",
+     "en": "Oleg"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "свитер",
+     "en": "sweater"
+    },
+    {
+     "ru": "рад",
+     "en": "glad"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Саша, он принимает это плохо.",
-     "en": "Sasha, he is taking it badly."
+     "ru": "Олег, сегодня праздник у деда, а ты ещё не одет!",
+     "en": "Oleg, grandpa's party is today, and you're still not dressed!"
     },
     {
      "s": "b",
-     "ru": "Плохо? Что ты сказала ему?",
-     "en": "Badly? What did you tell him?"
+     "ru": "Катя, мои светлые брюки грязные. Это всё кот!",
+     "en": "Katya, my light trousers are dirty. It's all the cat's doing!"
     },
     {
      "s": "a",
-     "ru": "Правду. Всю правду.",
-     "en": "The truth. The whole truth."
+     "ru": "Ну, а другие брюки у тебя есть?",
+     "en": "Well, do you have any other trousers?"
     },
     {
      "s": "b",
-     "ru": "И он не понимает?",
-     "en": "And he does not understand?"
+     "ru": "Только спортивные. Широкие и старые.",
+     "en": "Only tracksuit ones. Wide and old."
     },
     {
      "s": "a",
-     "ru": "Понимает. Но плохо принимает.",
-     "en": "He understands. But he is taking it badly."
+     "ru": "В спортивных брюках к деду на праздник? Нет, Олег.",
+     "en": "Tracksuit trousers to grandpa's party? No, Oleg."
     },
     {
      "s": "b",
-     "ru": "Ну, это его дело.",
-     "en": "Well, that is his business."
+     "ru": "Тогда я буду дома. Скажешь деду, что я работаю.",
+     "en": "Then I'll stay home. You'll tell grandpa I'm working."
     },
     {
      "s": "a",
-     "ru": "Он мой друг, Саша.",
-     "en": "He is my friend, Sasha."
+     "ru": "Нет. А подарок деда? Красный свитер, который ты никогда не носишь.",
+     "en": "No. What about grandpa's present? The red sweater you never wear."
     },
     {
      "s": "b",
-     "ru": "Знаю. Но правда — это правда.",
-     "en": "I know. But the truth is the truth."
+     "ru": "Он слишком яркий. Я в нём как звезда на концерте.",
+     "en": "It's too bright. I look like a star at a concert in it."
     },
     {
      "s": "a",
-     "ru": "Я думала, он понимает быстро.",
-     "en": "I thought he understood quickly."
+     "ru": "Ну и что? Сегодня праздник. И дед будет очень рад.",
+     "en": "So what? It's a holiday today. And grandpa will be very glad."
     },
     {
      "s": "b",
-     "ru": "Три дня, Таня. Три дня.",
-     "en": "Three days, Tanya. Three days."
+     "ru": "А брюки? Красный свитер и спортивные брюки?",
+     "en": "And the trousers? A red sweater and tracksuit trousers?"
     },
     {
      "s": "a",
-     "ru": "Три дня? Я не могу ждать.",
-     "en": "Three days? I cannot wait."
+     "ru": "У брата есть подобные брюки, классические. Я их сейчас возьму.",
+     "en": "My brother has similar trousers, classic ones. I'll go and get them now."
     },
     {
      "s": "b",
-     "ru": "Тогда иди к нему сейчас.",
-     "en": "Then go to him now."
-    },
-    {
-     "s": "a",
-     "ru": "А если он не принимает?",
-     "en": "And if he does not take it?"
-    },
-    {
-     "s": "b",
-     "ru": "Тогда это не твоя задача.",
-     "en": "Then it is not your task."
-    },
-    {
-     "s": "a",
-     "ru": "Моя. Он мой друг.",
-     "en": "It is mine. He is my friend."
-    },
-    {
-     "s": "b",
-     "ru": "Ну, иди, Таня.",
-     "en": "Well, go on, Tanya."
+     "ru": "Ладно. Но свитер я надеваю только для деда!",
+     "en": "All right. But I'm putting the sweater on only for grandpa!"
     }
    ],
    "questions": [
     {
-     "ask": "What did Tanya do?",
+     "ask": "Where are Katya and Oleg going?",
      "options": [
-      "She told him the truth",
-      "She told him a lie",
-      "She kept it from him",
-      "She wrote him a note"
+      "To grandpa's holiday party",
+      "To a concert with friends",
+      "To a restaurant for lunch",
+      "To his brother's new flat"
      ],
      "answer": 0
     },
     {
-     "ask": "How is he taking it?",
+     "ask": "What is wrong with Oleg's light trousers?",
      "options": [
-      "Badly",
-      "Well",
-      "Calmly",
-      "He has not replied"
+      "The cat got them dirty",
+      "They are far too wide",
+      "His brother took them",
+      "They no longer fit him"
      ],
      "answer": 0
     },
     {
-     "ask": "Did he understand her?",
+     "ask": "What does Oleg offer to do at first?",
      "options": [
-      "Yes, but he took it badly",
-      "No, he misheard her",
-      "No, he would not listen",
-      "She does not know"
+      "Stay at home instead",
+      "Wear his tracksuit ones",
+      "Buy some new trousers",
+      "Go a little bit later"
      ],
      "answer": 0
     },
     {
-     "ask": "How long does Sasha think it will take?",
+     "ask": "What is the red sweater?",
      "options": [
-      "Three days",
-      "Three weeks",
-      "An hour",
-      "He does not say"
+      "A present from grandpa",
+      "A present from Katya",
+      "His brother's old one",
+      "Something he just bought"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Tanya do?",
+     "ask": "Where will the other trousers come from?",
      "options": [
-      "Goes to see him",
-      "Waits it out",
-      "Writes to him",
-      "Lets it go"
+      "From Katya's brother",
+      "From grandpa's house",
+      "From a shop in town",
+      "From Oleg's old flat"
      ],
      "answer": 0
     }

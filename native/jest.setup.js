@@ -1,4 +1,4 @@
-﻿/* Stubs for the native modules a test environment has no business running.
+/* Stubs for the native modules a test environment has no business running.
  *
  * Each one is replaced by the smallest thing that keeps the screen honest: storage
  * that really stores, audio that records what it was asked to play, a WebView that
@@ -225,6 +225,12 @@ jest.mock("expo-notifications", () => ({
    timeout. Nothing here has a form clip unless a test says so (form.test.js
    mocks its own); formaudio.test.js checks the real generated table. */
 jest.mock("./src/formaudio", () => ({ FORM_CLIPS: {}, formClip: () => null }));
+
+/* The suites seed profiles on the *current* curriculum without its stamp, so
+   the once-per-curriculum reconcile (data.js, Phase 14 V7) would re-derive
+   their lesson progress from their cards and undo what each test set up. It
+   is off here; recut.test.js drives the real one through jest.requireActual. */
+jest.mock("./src/data", () => ({ ...jest.requireActual("./src/data"), reconcileCurriculum: (st) => st }));
 
 /* The Anki import/export modules: files, the picker, SQLite and the share sheet
    are all injected by anki.js, so the packages only need to load. */

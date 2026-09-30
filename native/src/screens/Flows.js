@@ -96,8 +96,10 @@ export function VocabFlow({ route, navigation }) {
     return (
       <Screen fill>
         {step.t === "grammar"
-          ? <GrammarNote unit={unit} note={step.note} at={at} total={steps.length} />
-          : <WordCard i={step.i} at={at} total={steps.length} />}
+          ? <GrammarNote unit={unit} note={step.note} at={at} total={steps.length}
+                         onEpisode={(videoId) => navigation.navigate("Video", { videoId })} />
+          : <WordCard i={step.i} at={at} total={steps.length} unit={unit}
+                      onMoment={(videoId, word, at) => navigation.navigate("Video", { videoId, word, at })} />}
         {/* marginTop:"auto" against Screen's flexGrow: the action holds one position
             whatever the card's height, instead of moving down the screen each step.
             The gap lives on the wrapper — putting it on the button would change the
@@ -816,11 +818,6 @@ const bestOf = (prev, key, score) => {
    repeated until it read as a drill. */
 export const LISTENING_N = 1;
 
-/* Which conversations a chapter puts forward before the rest of them: the two
-   from its spine, the unit the chapter is named for. The side quests are
-   optional detours (§30e), so their scenarios are the extras. */
-const SCENES_SHOWN = 2;
-
 /* The conversations on offer, by chapter (the owner, 2026-09-11: *"one or two
    scenarios per chapter and then maybe some extras. Each should have a scenario
    title"*). Before this the activity drew one and dealt it out, so 168 written
@@ -829,8 +826,6 @@ export function ScenesList({ navigation }) {
   const { st } = useSession();
   const t = useTheme();
   const lib = useMemo(() => scenarioLibrary(st), [st.unit, st.dev]);
-  const [open, setOpen] = useState({});
-
   if (!lib.length) {
     return <Done title="Nothing to listen to yet" detail="Finish a lesson first."
                  onBack={() => navigation.goBack()} />;
@@ -838,13 +833,13 @@ export function ScenesList({ navigation }) {
   return (
     <Screen>
       {lib.map(({ stage, rows }) => {
-        const extras = rows.length - SCENES_SHOWN;
-        const showing = open[stage.n] ? rows : rows.slice(0, SCENES_SHOWN);
+        // Two a chapter since Phase 14 (the twelve extras chapter 1 carried were
+        // retired), so every one is listed: the "N more" row had nothing to hide.
         return (
           <View key={stage.n}>
             <SectionLabel>{stage.title || `Chapter ${stage.n}`}</SectionLabel>
             <List>
-              {showing.map((s) => {
+              {rows.map((s) => {
                 const best = ((st.drills || {})[`scene:${s.key}`] || {}).best;
                 return (
                   <Row key={s.key} testID={`scene-row-${s.key}`}
@@ -860,14 +855,6 @@ export function ScenesList({ navigation }) {
                   </Row>
                 );
               })}
-              {extras > 0 && !open[stage.n] ? (
-                <Row testID={`scene-more-${stage.n}`}
-                     onPress={() => setOpen({ ...open, [stage.n]: true })}>
-                  <View style={{ flex: 1 }}>
-                    <Muted>{`${extras} more`}</Muted>
-                  </View>
-                </Row>
-              ) : null}
             </List>
           </View>
         );

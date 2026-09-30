@@ -861,6 +861,10 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             v = videos[tid]
             u["v"] = {"id": v["id"], "title": v["title"], "dur": v.get("dur"),
                       "ch": v.get("channel")}
+            # The chapter's grammar episode, where the library has one
+            # (build_skeleton.py): played from the grammar card, not a goal.
+            if v.get("lesson"):
+                u["v"]["lesson"] = v["lesson"]
             spoken = heard.get(v["id"], {})
             if spoken:
                 # Only this unit's own words, and at most a handful of moments each —
@@ -910,11 +914,12 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             # is something to listen for, «и» is not, though both are taught.
             own = sorted((i for i in u["w"] if lemmas[i]["b"] in spoken),
                          key=lambda i: (lemmas[i]["p"] not in PREP_POS, -count[lemmas[i]["b"]]))
+            own_all = set(own)       # the unit's own words beyond the first few are not "new"
             own = own[:PREP_OWN]
             new, review = [], []
             for b, _n in sorted(count.items(), key=lambda x: (-x[1], x[0])):
                 i = idx_of_bare.get(b)
-                if i is None or i < VIDEO_SKIP_TOP or i in own:
+                if i is None or i < VIDEO_SKIP_TOP or i in own_all:
                     continue
                 if lemmas[i]["p"] not in PREP_POS:
                     continue
@@ -925,6 +930,12 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             prep_of_video[v["id"]] = [lemmas[i]["b"] for i in prep]
         taught_before |= set(u["w"])
     stats["prep_words"] = [len((units[ui].get("v") or {}).get("heard") or {}) for ui in route]
+    # A fingerprint of which words each unit teaches, in order. Lesson progress
+    # is stored by lesson index, so when this changes the app re-derives it
+    # from what the learner has studied (native data.js reconcileCurriculum).
+    stats["curriculum"] = hashlib.sha1(json.dumps(
+        [[u["id"], [lemmas[i]["b"] for i in u["w"]]] for u in units],
+        ensure_ascii=False).encode("utf-8")).hexdigest()[:12]
     for v in library:
         spoken = heard.get(v["id"])
         if not spoken:

@@ -96,8 +96,17 @@ describe("every drill is open from the first screen", () => {
     const st = { ...base, unit: through(8) };
     const floor = drillPool(st, DRILL_POOL_MIN);
     expect(floor.length).toBeGreaterThanOrEqual(DRILL_POOL_MIN);
-    const thin = Q.drillQuestions("aspect", DRILL_N, floor, undefined, true);
-    expect(thin.length).toBeLessThan(DRILL_N);          // the defect, still there
+    /* The route itself no longer shows the defect: since the units were built
+       from their videos (Phase 14) the first chapters carry enough verbs with
+       a partner to fill a run at the floor. The defect is a property of a pool
+       with few such verbs, so the test builds one — the floor's own words,
+       all but two of its verbs removed — rather than hoping the route stays
+       thin. */
+    const { L } = require("../src/data");
+    const verbs = floor.filter((i) => L[i].p === "verb");
+    const thinPool = floor.filter((i) => L[i].p !== "verb").concat(verbs.slice(0, 2));
+    const thin = Q.drillQuestions("aspect", DRILL_N, thinPool, undefined, true);
+    expect(thin.length).toBeLessThan(DRILL_N);          // the defect, in a thin pool
 
     // What DrillFlow does with it.
     let filled = [];

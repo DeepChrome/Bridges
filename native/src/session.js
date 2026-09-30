@@ -17,6 +17,7 @@ import {
   DEFAULTS, loadAccounts, saveAccounts, loadState, saveState, flushState, setAside,
   onWriteError, newId, touchStreak,
 } from "./store";
+import { reconcileCurriculum } from "./data";
 
 const Ctx = createContext(null);
 
@@ -49,8 +50,10 @@ export function SessionProvider({ children }) {
       return state;                                  // shown, not saved
     }
     if (recovered) setError({ kind: "recovered", text: ERRORS.recovered });
-    const touched = touchStreak(state);
-    // The streak advanced: that is a change worth writing.
+    // A rebuilt curriculum re-derives lesson progress once (data.js).
+    const carried = reconcileCurriculum(state);
+    const touched = touchStreak(carried);
+    // The streak advanced, or the progress was carried across: worth writing.
     if (touched !== state) { dirty.current = true; }
     return touched;
   };

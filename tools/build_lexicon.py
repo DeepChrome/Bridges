@@ -164,6 +164,12 @@ def as_int(v):
         return None
 
 
+# Nouns with no singular that OpenRussian's row does not flag: «джинсы» comes
+# with no forms and no pl_only, so it read as a noun missing its gender (the
+# every-noun-has-a-gender check) when it has none to give, like «деньги».
+PLURAL_ONLY = {"джинсы"}
+
+
 class Builder:
     def __init__(self, db):
         self.db = db
@@ -258,7 +264,7 @@ class Builder:
                      gender, as_int(row.get("animate")),
                      row.get("aspect") or None, clean_partner(row.get("partner")),
                      as_int(row.get("indeclinable")), as_int(row.get("sg_only")),
-                     as_int(row.get("pl_only")),
+                     1 if pos == "noun" and bare in PLURAL_ONLY else as_int(row.get("pl_only")),
                      gloss_for(bare, pos, (row.get("translations_en") or "").strip() or None),
                      (row.get("translations_de") or "").strip() or None))
                 n_lemmas += 1

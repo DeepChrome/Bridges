@@ -51,34 +51,23 @@ beforeEach(async () => {
 afterEach(async () => { await flushState(); });
 
 describe("the conversations on offer", () => {
-  it("groups them by chapter, a couple at a time", async () => {
+  it("groups them by chapter, two to each", async () => {
     await withProfile(dev);
     // The chapter's own name, never "Core 3" (§30b).
     expect(await screen.findByText(STAGES[0].title)).toBeTruthy();
     expect(screen.getByText(STAGES[1].title)).toBeTruthy();
-    // Two forward, the rest of the chapter behind one row.
+    // Two a chapter since Phase 14, all of them listed: nothing behind a row.
     expect(screen.getAllByTestId(/^scene-row-core1:/).length).toBe(2);
-    expect(screen.getByTestId("scene-more-1")).toBeTruthy();
-  });
-
-  it("opens the rest of a chapter on request", async () => {
-    await withProfile(dev);
-    const more = await screen.findByTestId("scene-more-1");
-    const before = screen.getAllByTestId(/^scene-row-/).length;
-    fireEvent.press(more);
-    // The state update lands a tick after the press, not inside it.
-    await waitFor(() => expect(screen.queryByTestId("scene-more-1")).toBeNull());
-    expect(screen.getAllByTestId(/^scene-row-/).length).toBeGreaterThan(before);
+    expect(screen.queryByTestId(/^scene-more-/)).toBeNull();
   });
 
   it("offers a conversation by its title, and opens that one", async () => {
     await withProfile(dev);
-    const row = await screen.findByTestId("scene-row-core1:0");
-    expect(within(row).getByText(SCRIPTS["core1:0"].title)).toBeTruthy();
+    const row = await screen.findByTestId("scene-row-core1:2");
+    expect(within(row).getByText(SCRIPTS["core1:2"].title)).toBeTruthy();
     fireEvent.press(row);
-    expect(nav.navigate).toHaveBeenCalledWith("Scenes", { key: "core1:0" });
+    expect(nav.navigate).toHaveBeenCalledWith("Scenes", { key: "core1:2" });
   });
-
   /* Developer mode aside (rule 20.9), the library may never be a way round the
      path: a learner who has finished nothing is offered nothing. */
   it("offers nothing to a learner who has not finished a lesson", async () => {

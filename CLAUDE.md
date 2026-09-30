@@ -5379,6 +5379,37 @@ unrankable. The order is built as a learner walks it — each goal the one
 costing the fewest new words after everything before it — and a grammar
 episode is attached beside a chapter, never made its goal.
 
+**The units are built from their videos** (V3, `build_topics.py`; the old
+frequency spine and `STAGE_PLAN` are gone). Walking the skeleton's route,
+each unit first takes the words its video says most that nothing earlier
+taught, until the video is `COVER` (90 %) followable — but only into a share
+of its slots: `SPINE_RESERVE` (25 %) of a spine unit goes to the commonest
+spoken words not yet taught, `BRANCH_RESERVE` (30 %) of a side quest to its
+topic's own words. **The reserve is not optional**: built from the video
+alone, Sport taught no «футбол», Family no «брат», Medicine no «больница»,
+because those episodes happen not to say them. Words are then ordered
+commonest-first, since lessons are cut from that order (without it «я» and
+«быть» landed in chapter 1's last lesson). `VIDEO_NOISE` keeps channel
+boilerplate and grammar metalanguage («падёж», «глагол») out. The build
+prints each video's followability before → after: 26–80 % became 52–93 %.
+Chapter and spine names (`CHAPTERS`) are read off the word lists and must be
+re-read when the skeleton changes.
+
+**Progress across a re-cut** (V7, `reconcileCurriculum` in data.js): the
+build stamps `stats.curriculum`, and on the first load of a new one lesson
+flags are re-derived — a finished unit stays finished (video step included,
+or an unwatched new video locks every chapter after it), otherwise a lesson
+is done when every word in it has a reviewed card; the old record is kept as
+`unitBefore`. The test suites seed progress without the stamp, so
+`jest.setup.js` turns the reconcile off and `recut.test.js` drives the real
+one.
+
+**The summary** (V2, `Summary.js`) is an optional lesson step and a unit
+button; optional steps are never where Continue goes (`nextStep`) and never
+counted in "N/M steps done". The grammar step and the summary offer the
+chapter's grammar episode; a word card shows the line of its unit's video
+where the word is said, playable at that moment.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

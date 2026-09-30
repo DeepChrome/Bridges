@@ -16,7 +16,7 @@ import React, { useEffect } from "react";
 import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Screen, Muted, SectionLabel, Speaker, Pill, Familiarity, Text } from "../ui";
+import { Screen, Muted, SectionLabel, Speaker, Pill, Familiarity, Text, Btn } from "../ui";
 import { Linked } from "../words";
 import { RuleCard } from "../rules";
 import { clusterWords, prepSentences } from "../prep";
@@ -51,7 +51,7 @@ function WordLine({ word, seen, first }) {
   );
 }
 
-export default function Summary({ route }) {
+export default function Summary({ route, navigation }) {
   const { st, update, ready } = useSession();
   const t = useTheme();
   const { unitId, index } = route.params || {};
@@ -109,6 +109,10 @@ export default function Summary({ route }) {
         <View testID="summary-grammar" style={{ marginTop: 16 }}>
           <SectionLabel>Grammar</SectionLabel>
           <RuleCard note={note} />
+          {unit.v && unit.v.lesson && navigation ? (
+            <Btn testID="summary-episode" label="Watch the grammar episode" style={{ marginTop: 12 }}
+                 onPress={() => navigation.navigate("Video", { videoId: unit.v.lesson.id })} />
+          ) : null}
         </View>
       ) : null}
     </Screen>

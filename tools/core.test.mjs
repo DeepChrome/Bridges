@@ -1326,9 +1326,14 @@ group("form questions");
   ok(Q.formsIntroduced(reached(3)).length === 0, "after three chapters no case has been introduced");
   const c4 = Q.formsIntroduced(reached(4));
   ok(c4.length === 1 && c4[0].row === "Nominative" && c4[0].col === "Plural", "chapter 4 introduces the nominative plural", JSON.stringify(c4));
+  // Since the units were built from their videos (Phase 14), chapter 5's side
+  // quests (Work, Business) bring the genitive and chapter 6's (Science) the
+  // instrumental; each case waits for the chapter whose card teaches it.
+  const c5 = Q.formsIntroduced(reached(5));
+  ok(c5.some((c) => c.row === "Genitive") && !c5.some((c) => c.row === "Instrumental"),
+     "chapter 5's quests add the genitive; the instrumental waits", JSON.stringify(c5));
   const c6 = Q.formsIntroduced(reached(6));
-  ok(c6.some((c) => c.row === "Genitive") && !c6.some((c) => c.row === "Instrumental"),
-     "chapter 6's branch adds the genitive; the instrumental waits", JSON.stringify(c6));
+  ok(c6.some((c) => c.row === "Instrumental"), "and chapter 6 brings the instrumental", JSON.stringify(c6));
   ok(Q.drillQuestions("cases", 6, null, []).length === 0, "with nothing introduced the cases drill has no question");
   const gated = Q.drillQuestions("cases", 8, null, [{ row: "Prepositional", col: "Singular" }]);
   ok(gated.length === 8 && gated.every((q) => q.ask === "Choose prepositional singular"),
@@ -1714,11 +1719,13 @@ group("written listening scenarios");
   // Practice's Listening draws on the lessons actually finished, and never on
   // one that has not been reached.
   const units = Q.unitsUpTo(STAGES[2].core);
-  const p = Q.writtenPassage(units, () => 2);
+  // The conversations sit on each spine's third and fifth lessons (index 2, 4).
+  const p = Q.writtenPassage(units, () => 3);
   ok(p && p.written && p.lines.length >= 4, "Practice draws a written scenario too");
-  const first = Q.writtenPassage([STAGES[0].core], (u) => 1);
+  const first = Q.writtenPassage([STAGES[0].core], (u) => 3);
   ok(first && first.unit === STAGES[0].core.id && first.lines.length >= 4,
-     "one lesson in, the first lesson's scenario is available");
+     "three lessons in, the first chapter's conversation is available");
+  ok(!Q.writtenPassage([STAGES[0].core], (u) => 2), "…and not before its lesson is reached");
   ok(Q.writtenPassage(units, () => 0) === null, "no lessons finished, no passage");
 }
 

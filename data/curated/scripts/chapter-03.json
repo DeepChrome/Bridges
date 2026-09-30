@@ -1,158 +1,158 @@
 {
  "chapter": 3,
- "name": "Wanting & Knowing",
+ "name": "The Little Words",
  "lessons": {
   "core3:2": {
-   "title": "My friend moved away",
+   "title": "Looking for the professor",
    "cast": [
     {
      "id": "a",
-     "ru": "Катя",
-     "en": "Katya"
+     "ru": "Олег",
+     "en": "Oleg"
     },
     {
      "id": "b",
-     "ru": "Олег",
-     "en": "Oleg"
+     "ru": "Катя",
+     "en": "Katya"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Олег, смотри. Это мой друг.",
-     "en": "Oleg, look. This is my friend."
+     "ru": "Катя, где офис профессора? Я хочу на его курс.",
+     "en": "Katya, where is the professor's office? I want to get onto his course."
     },
     {
      "s": "b",
-     "ru": "Кто он? Я его не знаю.",
-     "en": "Who is he? I do not know him."
+     "ru": "Какого профессора, Олег? Он русский или американец?",
+     "en": "Which professor, Oleg? Is he Russian or American?"
     },
     {
      "s": "a",
-     "ru": "Он сейчас живёт в большой стране.",
-     "en": "He lives in a big country now."
+     "ru": "Русский. Говорят, у него в офисе кот.",
+     "en": "Russian. They say he keeps a cat in his office."
     },
     {
      "s": "b",
-     "ru": "В какой стране?",
-     "en": "Which country?"
+     "ru": "А, этот! Ну, его офис там, в том доме.",
+     "en": "Oh, that one! Well, his office is over there, in the other building."
     },
     {
      "s": "a",
-     "ru": "Он не сказал.",
-     "en": "He did not say."
+     "ru": "Я там уже был. Офис есть, а профессора нет.",
+     "en": "I have already been there. The office is there, but the professor is not."
     },
     {
      "s": "b",
-     "ru": "Что ты думаешь?",
-     "en": "What do you think?"
+     "ru": "А когда ты там был, Олег?",
+     "en": "And when were you there, Oleg?"
     },
     {
      "s": "a",
-     "ru": "Думаю, он там стал новый человек.",
-     "en": "I think he has become a new person there."
+     "ru": "Сейчас был. Там только его кот, и всё.",
+     "en": "Just now. There is only his cat, and that's it."
     },
     {
      "s": "b",
-     "ru": "Новый? Как это?",
-     "en": "New? How so?"
+     "ru": "Ну, когда он не работает, он в кафе.",
+     "en": "Well, when he is not working, he is in the café."
     },
     {
      "s": "a",
-     "ru": "Он говорит, там большая работа.",
-     "en": "He says there is big work there."
+     "ru": "В каком кафе? В том, где пицца?",
+     "en": "Which café? The one with the pizza?"
     },
     {
      "s": "b",
-     "ru": "А ты, Катя? Ты хочешь так?",
-     "en": "And you, Katya? Do you want that?"
+     "ru": "Нет, в том, где борщ. Он же русский.",
+     "en": "No, the other one, with the borscht. He is Russian, after all."
     },
     {
      "s": "a",
-     "ru": "Не знаю. Тут все мои.",
-     "en": "I do not know. Everyone of mine is here."
+     "ru": "Катя, идём со мной? Я его ещё не видел.",
+     "en": "Katya, will you come with me? I have never seen him yet."
     },
     {
      "s": "b",
-     "ru": "При мне он был не такой.",
-     "en": "When I knew him he was not like that."
+     "ru": "Ну, можно. Я тоже хочу борщ, как профессор.",
+     "en": "Well, all right. I want borscht too, like the professor."
     },
     {
      "s": "a",
-     "ru": "Такой какой?",
-     "en": "Not like what?"
+     "ru": "Вот это кафе. Ты его там видишь?",
+     "en": "Here is the café. Can you see him in there?"
     },
     {
      "s": "b",
-     "ru": "Он всё время думал.",
-     "en": "He was always thinking."
+     "ru": "Вижу. Вот он, и кот тоже с ним!",
+     "en": "I see him. There he is, and the cat is with him too!"
     },
     {
      "s": "a",
-     "ru": "Да. Он и сейчас такой.",
-     "en": "Yes. He is still like that."
+     "ru": "Кот в кафе? Что мне ему сказать?",
+     "en": "A cat in a café? What do I say to him?"
     },
     {
      "s": "b",
-     "ru": "Он твой друг. Я знаю.",
-     "en": "He is your friend. I know that."
+     "ru": "Просто скажи, что ты хочешь быть на его курсе.",
+     "en": "Just say that you want to be on his course."
     }
    ],
    "questions": [
     {
-     "ask": "What are they looking at?",
+     "ask": "What is Oleg trying to do?",
      "options": [
-      "A picture of her friend",
-      "A letter from her friend",
-      "A map of that country",
-      "A book about the town"
+      "Join a professor's course",
+      "Return a professor's book",
+      "Meet his brother at a bar",
+      "Rent an office near there"
      ],
      "answer": 0
     },
     {
-     "ask": "Where is the friend now?",
+     "ask": "What does the professor keep in his office?",
      "options": [
-      "In a big country abroad",
-      "In the same town as them",
-      "Back where he grew up",
-      "Nobody knows at all"
+      "His cat",
+      "His dog",
+      "His son",
+      "His car"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Katya think has happened to him?",
+     "ask": "Where does the professor go when he is not working?",
      "options": [
-      "He has become someone else",
-      "He has fallen out with her",
-      "He has forgotten all of it",
-      "He has changed his mind"
+      "A café with borscht",
+      "A café with pizza",
+      "A bar by the bank",
+      "The other building"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Oleg remember about him?",
+     "ask": "Why does Oleg want Katya to come along?",
      "options": [
-      "He was always thinking",
-      "He was always late",
-      "He never said much",
-      "He talked of leaving"
+      "He has never seen the man",
+      "He does not know the way",
+      "He wants to buy her lunch",
+      "He is afraid of the cat"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Oleg conclude?",
+     "ask": "What surprises Oleg at the café?",
      "options": [
-      "The man is still her friend",
-      "The man was never her friend",
-      "She should go out there",
-      "She should forget him"
+      "The cat is in the café",
+      "The café is shut today",
+      "The professor has left",
+      "Katya has met him before"
      ],
      "answer": 0
     }
    ]
   },
   "core3:4": {
-   "title": "The first years here",
+   "title": "A brother in the bar",
    "cast": [
     {
      "id": "a",
@@ -165,136 +165,146 @@
      "en": "Boris"
     }
    ],
+   "intro": [
+    {
+     "ru": "поднос",
+     "en": "tray"
+    },
+    {
+     "ru": "официант",
+     "en": "waiter"
+    }
+   ],
    "lines": [
     {
-     "s": "a",
-     "ru": "Борис, когда ты первый раз тут был?",
-     "en": "Boris, when were you first here?"
-    },
-    {
      "s": "b",
-     "ru": "Много лет. Я был один.",
-     "en": "Many years ago. I was on my own."
+     "ru": "Нина, смотри! Это не твой брат там, в баре?",
+     "en": "Nina, look! Isn't that your brother there, in the bar?"
     },
     {
      "s": "a",
-     "ru": "И что ты видел?",
-     "en": "And what did you see?"
+     "ru": "Мой брат? Не может быть. Он сейчас работает.",
+     "en": "My brother? It can't be. He is at work now."
     },
     {
      "s": "b",
-     "ru": "Большой город. Много работы.",
-     "en": "A big town. Plenty of work."
+     "ru": "Мне кажется, что это он. Смотри, вот там.",
+     "en": "I think it is him. Look, right there."
     },
     {
      "s": "a",
-     "ru": "А ты что думал?",
-     "en": "And what did you think?"
+     "ru": "Да, это он! Но он же работает в банке.",
+     "en": "Yes, it is him! But he works at the bank."
     },
     {
      "s": "b",
-     "ru": "Что тут я стану новый.",
-     "en": "That here I would become someone new."
+     "ru": "А ты знаешь, где он работает сейчас?",
+     "en": "And do you know where he works now?"
     },
     {
      "s": "a",
-     "ru": "И стал?",
-     "en": "And did you?"
+     "ru": "Конечно, знаю. В банке, у него там офис.",
+     "en": "Of course I do. At the bank, in a big office."
     },
     {
      "s": "b",
-     "ru": "Не знаю. Это моя жизнь.",
-     "en": "I do not know. This is my life."
+     "ru": "А что он делает в баре? Он с подносом.",
+     "en": "Then what is he doing in the bar? He has a tray."
     },
     {
      "s": "a",
-     "ru": "Ты тут живёшь много лет.",
-     "en": "You have lived here many years."
+     "ru": "С подносом? Да, кажется, он там работает.",
+     "en": "A tray? Yes, it looks like he works there."
     },
     {
      "s": "b",
-     "ru": "Да. Весь день работа.",
-     "en": "Yes. Work all day."
+     "ru": "Официант? Твой брат? Он же был в банке.",
+     "en": "A waiter? Your brother? He was at the bank."
     },
     {
      "s": "a",
-     "ru": "А когда ты не работаешь?",
-     "en": "And when are you not working?"
+     "ru": "Нет, Борис. Он мне этого не сказал.",
+     "en": "No, Boris. He did not tell me that."
     },
     {
      "s": "b",
-     "ru": "Час, Нина. Один час.",
-     "en": "An hour, Nina. One hour."
+     "ru": "Идём в бар, Нина? Я хочу пиццу.",
+     "en": "Shall we go into the bar, Nina? I want pizza."
     },
     {
      "s": "a",
-     "ru": "Один час! Это не жизнь.",
-     "en": "One hour! That is not a life."
+     "ru": "Ты только о пицце думаешь!",
+     "en": "All you think about is pizza!"
     },
     {
      "s": "b",
-     "ru": "Я думаю об этом много.",
-     "en": "I think about it a lot."
+     "ru": "Не только. Я думаю, он там хорошо работает.",
+     "en": "Not only that. I think he works well there."
     },
     {
      "s": "a",
-     "ru": "Скажи одно слово. Что ты хочешь?",
-     "en": "Say one word. What do you want?"
+     "ru": "Хорошо, идём. Я хочу видеть, как он работает.",
+     "en": "All right, let's go. I want to see how he works."
     },
     {
      "s": "b",
-     "ru": "Время. Я хочу время.",
-     "en": "Time. I want time."
+     "ru": "Смотри, Нина, он нас уже видит!",
+     "en": "Look, Nina, he has already seen us!"
+    },
+    {
+     "s": "a",
+     "ru": "Ну вот. Он идёт к нам с подносом.",
+     "en": "Well, there you go. He is coming over to us with a tray."
     }
    ],
    "questions": [
     {
-     "ask": "What are they talking about?",
+     "ask": "Where does Boris spot Nina's brother?",
      "options": [
-      "Boris's first years here",
-      "Nina's first years here",
-      "A trip they took once",
-      "A job he turned down"
+      "In a bar",
+      "In a bank",
+      "In a café",
+      "In a car"
      ],
      "answer": 0
     },
     {
-     "ask": "What did he find when he arrived?",
+     "ask": "Where does Nina believe her brother works?",
      "options": [
-      "A big town, and lots of work",
-      "A small town, and no work at all",
-      "A place he already knew well",
-      "Nothing that he liked at all"
+      "At a bank",
+      "At a bar",
+      "At a café",
+      "At a shop"
      ],
      "answer": 0
     },
     {
-     "ask": "What did he expect to happen?",
+     "ask": "What makes Nina think he works in the bar?",
      "options": [
-      "That he would be someone new",
-      "That he would go home again",
-      "That he would make money fast",
-      "That he would not stay long"
+      "He is carrying a tray",
+      "He is wearing an apron",
+      "He is behind the till",
+      "He is serving a table"
      ],
      "answer": 0
     },
     {
-     "ask": "How much time to himself does he have?",
+     "ask": "Why does Boris want to go in?",
      "options": [
-      "An hour a day",
-      "A day a week",
-      "None at all",
-      "He does not say"
+      "He wants to eat pizza",
+      "He wants some borscht",
+      "He is meeting a friend",
+      "He left his bag there"
      ],
      "answer": 0
     },
     {
-     "ask": "What does he say he wants?",
+     "ask": "What happens at the end?",
      "options": [
-      "Time",
-      "Money",
-      "Company",
-      "A new job"
+      "The brother sees them",
+      "The brother runs away",
+      "Nina goes home alone",
+      "Boris orders a pizza"
      ],
      "answer": 0
     }

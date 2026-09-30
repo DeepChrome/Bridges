@@ -23,7 +23,7 @@ import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize } from "@core/questions";
 import { quizPassed } from "@core/state";
-import { dueCards, wanted } from "@core/scheduler";
+import { dueCards, wanted, cardFor } from "@core/scheduler";
 import { cardKind, kindsOf } from "@core/queue";
 import { isIrregular } from "@core/facts";
 
@@ -332,6 +332,54 @@ export function markComponent(st, u, i, id, extra) {
   s.done = Array.from({ length: lessonCount(u) }, (_, k) => k)
     .every((k) => lessonDone(next, u, k));
   return next;
+}
+
+/* The curriculum this build teaches, as a fingerprint of every unit's words
+   (build_site.py `stats.curriculum`). */
+export const CURRICULUM = (DATA.stats && DATA.stats.curriculum) || null;
+
+/* Lesson progress carried across a re-cut curriculum (Phase 14, V7).
+ *
+ * Progress is stored by lesson index, and a rebuilt curriculum puts different
+ * words in each lesson, so the old flags would claim lessons done that the
+ * learner never saw and hide ones they had. Cards are untouched — they key on
+ * the word (rule 20.4) — and what the learner has actually studied is
+ * therefore known exactly. So, once per new curriculum:
+ *
+ *   - a unit finished before stays finished: it was learned, or tested out of,
+ *     and a re-cut must not take a completed chapter away;
+ *   - otherwise a lesson is done when every word in it has been studied — met
+ *     and reviewed at least once — carrying the unit's best quiz score;
+ *   - the watched flag follows the unit's *current* video, which may be a new
+ *     one — except in a finished unit, whose video step stays done, or the
+ *     unwatched new video would lock every chapter after it;
+ *   - the old record is kept whole beside the new (`unitBefore`), never
+ *     deleted.
+ *
+ * A profile with no progress simply takes the stamp. */
+export function reconcileCurriculum(st) {
+  if (!CURRICULUM || !st || st.curriculum === CURRICULUM) return st;
+  const old = st.unit || {};
+  if (!Object.keys(old).length) return { ...st, curriculum: CURRICULUM };
+  const seen = st.seen || {};
+  const studied = (w) => !!seen[w] && (cardFor(seen[w]).reps || 0) > 0;
+  const unit = {};
+  for (const u of UN) {
+    const was = old[u.id] || {};
+    const n = lessonCount(u);
+    const lessons = {};
+    for (let i = 0; i < n; i++) {
+      const words = lessonWords(u, i).map((k) => L[k].b);
+      if (was.done || (words.length && words.every(studied))) {
+        lessons[i] = { v: true, q: Math.max(80, was.best || 0), tries: 1, carried: true };
+      }
+    }
+    const watched = !!(u.v && (st.watched || {})[u.v.id]);
+    if (!Object.keys(lessons).length && !watched && !was.best) continue;
+    unit[u.id] = { best: was.best || 0, lessons, video: watched || !!was.done,
+                   done: Object.keys(lessons).length === n };
+  }
+  return { ...st, unit, unitBefore: old, curriculum: CURRICULUM };
 }
 
 export function unitProgress(st, u) {

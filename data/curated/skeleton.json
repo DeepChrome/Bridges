@@ -1,7 +1,8 @@
 {
  "_comment": [
   "The course's goal videos, chapter by chapter (ROADMAP Phase 14).",
-  "Proposed by tools/build_skeleton.py, then edited by hand: this file is the decision."
+  "Proposed by tools/build_skeleton.py, then edited by hand: this file is the decision.",
+  "2026-09-29: speech is the conversation-phrases episode; the grocery one had been matched on the word phrases and taught bread and eggs."
  ],
  "chapters": [
   {
@@ -41,7 +42,7 @@
    "lesson": null,
    "quests": {
     "travel": "-qbTumiWw98",
-    "speech": "ok09KmmxVWQ",
+    "speech": "vJZs4TZLCwc",
     "clothes": "256FyJD5i9A"
    }
   },

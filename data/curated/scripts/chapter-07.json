@@ -1,300 +1,327 @@
 {
  "chapter": 7,
- "name": "Days, Talk & the World",
+ "name": "Feelings & Fears",
  "lessons": {
   "core7:2": {
-   "title": "Viewing the flat",
+   "title": "Someone outside at night",
    "cast": [
     {
      "id": "a",
-     "ru": "Мария",
-     "en": "Maria"
+     "ru": "Маша",
+     "en": "Masha"
     },
     {
      "id": "b",
-     "ru": "Саша",
-     "en": "Sasha"
+     "ru": "Олег",
+     "en": "Oleg"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "окно",
+     "en": "window"
+    },
+    {
+     "ru": "ночь",
+     "en": "night"
+    },
+    {
+     "ru": "бояться",
+     "en": "to be afraid"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Саша, пройдите. Это квартира.",
-     "en": "Sasha, come through. This is the flat."
+     "ru": "Олег, ты видел? За окном кто-то есть!",
+     "en": "Oleg, did you see? There is someone outside the window!"
     },
     {
      "s": "b",
-     "ru": "Небольшая.",
-     "en": "Small."
+     "ru": "Где? Сейчас ночь, Маша. Там никто не бывает.",
+     "en": "Where? It is night, Masha. Nobody is ever out there."
     },
     {
      "s": "a",
-     "ru": "Небольшая, но окно огромное.",
-     "en": "Small, but the window is enormous."
+     "ru": "Есть. Я видела. Кто-то был с той стороны, у воды.",
+     "en": "There is. I saw. Someone was on that side, by the water."
     },
     {
      "s": "b",
-     "ru": "Да, окно большое. Она много стоит?",
-     "en": "Yes, the window is big. Does it cost a lot?"
+     "ru": "У воды? Наверное, это кот.",
+     "en": "By the water? It is probably the cat."
     },
     {
      "s": "a",
-     "ru": "Я скажу завтра. Она не готова.",
-     "en": "I will tell you tomorrow. It is not ready."
+     "ru": "Это был не кот. Он был с мешком. Я боюсь, Олег.",
+     "en": "It was not the cat. He had a bag. I am scared, Oleg."
     },
     {
      "s": "b",
-     "ru": "Не готова? А когда?",
-     "en": "Not ready? When, then?"
+     "ru": "С мешком? А, тогда я знаю, кто это.",
+     "en": "With a bag? Oh, then I know who it is."
     },
     {
      "s": "a",
-     "ru": "Тогда, когда выйдет семья.",
-     "en": "When the family moves out."
+     "ru": "Ты знаешь? Почему ты мне ничего не сказал?",
+     "en": "You know? Why did you not tell me anything?"
     },
     {
      "s": "b",
-     "ru": "Там живёт семья?",
-     "en": "A family lives there?"
+     "ru": "Это мой брат. У него для тебя подарок.",
+     "en": "It is my brother. He has a present for you."
     },
     {
      "s": "a",
-     "ru": "Да. С детьми и собакой.",
-     "en": "Yes. With children and a dog."
+     "ru": "Подарок? Сейчас? И почему он у воды?",
+     "en": "A present? Now? And why is he by the water?"
     },
     {
      "s": "b",
-     "ru": "Собака? У меня есть собака.",
-     "en": "A dog? I have a dog."
+     "ru": "Он думал, что ты уже легла.",
+     "en": "He thought you had already gone to bed."
     },
     {
      "s": "a",
-     "ru": "Тогда всё хорошо.",
-     "en": "Then all is well."
+     "ru": "Я почти легла. Но я видела его в окно.",
+     "en": "I almost had. But I saw him through the window."
     },
     {
      "s": "b",
-     "ru": "А улица? Тут огромный город.",
-     "en": "And the street? This is an enormous city."
+     "ru": "Маша, нельзя, чтобы он знал. Ты ничего не видела, хорошо?",
+     "en": "Masha, he must not know. You saw nothing, all right?"
     },
     {
      "s": "a",
-     "ru": "Улица небольшая. Смотрите в окно.",
-     "en": "The street is small. Look out of the window."
+     "ru": "Хорошо. А где он сейчас?",
+     "en": "All right. And where is he now?"
     },
     {
      "s": "b",
-     "ru": "Вижу. Тут хорошо.",
-     "en": "I see. It is good here."
+     "ru": "Ещё там. Он думает, что его никто не видел.",
+     "en": "Still there. He thinks nobody saw him."
     },
     {
      "s": "a",
-     "ru": "Тогда завтра, Саша?",
-     "en": "Tomorrow, then, Sasha?"
+     "ru": "Ну, никто и не видел. Только я.",
+     "en": "Well, nobody did. Only me."
     },
     {
      "s": "b",
-     "ru": "Завтра, Мария. Я готов.",
-     "en": "Tomorrow, Maria. I am ready."
+     "ru": "Вот и хорошо. А подарок будет потом.",
+     "en": "That is fine, then. And the present comes later."
     }
    ],
    "questions": [
     {
-     "ask": "What is Sasha being shown?",
+     "ask": "Where did Masha see someone?",
      "options": [
-      "A flat",
-      "A house",
-      "An office",
-      "A shop"
+      "By the water",
+      "By the door",
+      "In the garden",
+      "On the road"
      ],
      "answer": 0
     },
     {
-     "ask": "What does he notice first?",
+     "ask": "Why is Masha frightened?",
      "options": [
-      "How small it is",
-      "How big it is",
-      "How dark it is",
-      "How cold it is"
+      "She saw someone outside",
+      "She heard a loud crash",
+      "She lost her house key",
+      "The cat did not return"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Maria point out about it?",
+     "ask": "Who was outside?",
      "options": [
-      "The huge window",
-      "The quiet street",
-      "The new door",
-      "The low price"
+      "Oleg's brother",
+      "Masha's father",
+      "Their neighbour",
+      "A lost tourist"
      ],
      "answer": 0
     },
     {
-     "ask": "Why is it not available yet?",
+     "ask": "Why had he come?",
      "options": [
-      "A family still lives there",
-      "It is being painted still",
-      "The owner is abroad",
-      "The papers are not ready"
+      "A present for Masha",
+      "A letter for Oleg",
+      "Money for the flat",
+      "Water for the house"
      ],
      "answer": 0
     },
     {
-     "ask": "What do they agree?",
+     "ask": "What does Oleg ask Masha to do?",
      "options": [
-      "To speak again tomorrow",
-      "To speak again next week",
-      "To meet at the office",
-      "To leave it for now"
+      "Pretend she saw nothing",
+      "Call the neighbours now",
+      "Lock the door tonight",
+      "Go outside to meet him"
      ],
      "answer": 0
     }
    ]
   },
   "core7:4": {
-   "title": "You were not listening",
+   "title": "Lost in the forest",
    "cast": [
     {
      "id": "a",
-     "ru": "Нина",
-     "en": "Nina"
+     "ru": "Лена",
+     "en": "Lena"
     },
     {
      "id": "b",
-     "ru": "Пётр",
-     "en": "Pyotr"
+     "ru": "Юра",
+     "en": "Yura"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "день",
+     "en": "day"
+    },
+    {
+     "ru": "комар",
+     "en": "mosquito"
+    },
+    {
+     "ru": "насекомое",
+     "en": "insect"
+    },
+    {
+     "ru": "бояться",
+     "en": "to be afraid"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Пётр, ты меня слушаешь?",
-     "en": "Pyotr, are you listening to me?"
+     "ru": "Юра, мы весь день провели в лесу. Где машина?",
+     "en": "Yura, we have spent the whole day in the forest. Where is the car?"
     },
     {
      "s": "b",
-     "ru": "Слушаю. Говори.",
-     "en": "I am listening. Go on."
+     "ru": "Где-то там, за тем камнем. Или с другой стороны.",
+     "en": "Somewhere over there, behind that rock. Or on the other side."
     },
     {
      "s": "a",
-     "ru": "Я сказала цену. Ты не слушал.",
-     "en": "I told you the price. You were not listening."
+     "ru": "Ты сказал, что знаешь этот лес!",
+     "en": "You said you knew this forest!"
     },
     {
      "s": "b",
-     "ru": "Какая цена?",
-     "en": "What price?"
+     "ru": "Я знаю. Просто тогда здесь всё было совсем другое.",
+     "en": "I do. It is just that everything here was quite different then."
     },
     {
      "s": "a",
-     "ru": "Вот. Смотри сам.",
-     "en": "Here. See for yourself."
+     "ru": "И комары! Я никогда не видела так много комаров.",
+     "en": "And the mosquitoes! I have never seen so many mosquitoes."
     },
     {
      "s": "b",
-     "ru": "Это много рублей.",
-     "en": "That is a lot of roubles."
+     "ru": "Сколько эмоций, Лена! Это просто комары.",
+     "en": "So much emotion, Lena! They are just mosquitoes."
     },
     {
      "s": "a",
-     "ru": "Я знаю. Но случай другой.",
-     "en": "I know. But this case is different."
+     "ru": "А огромное насекомое? Оно было прямо на мне!",
+     "en": "And that enormous insect? It was right on me!"
     },
     {
      "s": "b",
-     "ru": "Другой? Как это?",
-     "en": "Different? How so?"
+     "ru": "Оно тебя боялось больше, чем ты его.",
+     "en": "It was more afraid of you than you were of it."
     },
     {
      "s": "a",
-     "ru": "Эта машина — последняя.",
-     "en": "This car is the last one."
+     "ru": "Не думаю. Ладно, куда теперь?",
+     "en": "I doubt it. Fine, where now?"
     },
     {
      "s": "b",
-     "ru": "Последняя? Кто сказал?",
-     "en": "The last one? Who said so?"
+     "ru": "Вот камень. Мы его уже проходили?",
+     "en": "Here is a rock. Have we passed it already?"
     },
     {
      "s": "a",
-     "ru": "Человек в компании. Он учёный.",
-     "en": "A man at the firm. He is a scientist."
+     "ru": "Проходили. Вот моя вода. Я её тут оставила.",
+     "en": "We have. Here is my water. I left it here."
     },
     {
      "s": "b",
-     "ru": "Учёный и машины?",
-     "en": "A scientist, and cars?"
+     "ru": "Тогда я знаю, где мы. Машина дальше, прямо туда.",
+     "en": "Then I know where we are. The car is further on, straight that way."
     },
     {
      "s": "a",
-     "ru": "Он знает цены. Я его слушала.",
-     "en": "He knows prices. I listened to him."
+     "ru": "Ты это уже говорил, Юра.",
+     "en": "You have said that before, Yura."
     },
     {
      "s": "b",
-     "ru": "Хорошо. Тогда я слушаю.",
-     "en": "All right. Then I am listening."
+     "ru": "Теперь я это знаю, а тогда только думал.",
+     "en": "Now I know it; back then I only thought so."
     },
     {
      "s": "a",
-     "ru": "Тогда смотри мне в глаза.",
-     "en": "Then look me in the eye."
-    },
-    {
-     "s": "b",
-     "ru": "Смотрю, Нина. Говори цену.",
-     "en": "I am looking, Nina. Tell me the price."
+     "ru": "Хорошо. Но в лес я с тобой больше никогда не иду.",
+     "en": "All right. But I am never going to the forest with you again."
     }
    ],
    "questions": [
     {
-     "ask": "What is Nina annoyed about?",
+     "ask": "Where are Lena and Yura?",
      "options": [
-      "He was not listening",
-      "He was not answering",
-      "He arrived too late",
-      "He spent the money"
+      "Lost in a forest",
+      "Lost in a city",
+      "On a lake shore",
+      "In a small park"
      ],
      "answer": 0
     },
     {
-     "ask": "What had she told him?",
+     "ask": "What are they trying to find?",
      "options": [
-      "A price",
-      "A name",
-      "An address",
-      "A time"
+      "Their car",
+      "Their dog",
+      "The river",
+      "A village"
      ],
      "answer": 0
     },
     {
-     "ask": "What is she trying to buy?",
+     "ask": "What frightened Lena?",
      "options": [
-      "A car",
-      "A flat",
-      "A book",
-      "A phone"
+      "A big insect on her",
+      "A snake on the path",
+      "A dog in the bushes",
+      "A bird in her hair"
      ],
      "answer": 0
     },
     {
-     "ask": "Who told her about it?",
+     "ask": "How do they know they have gone in a circle?",
      "options": [
-      "A scientist at a firm",
-      "A friend of her father",
-      "A man at the garage",
-      "Nobody in particular"
+      "Her water is by the rock",
+      "They see their footprints",
+      "The sun is behind them now",
+      "A road sign points back"
      ],
      "answer": 0
     },
     {
-     "ask": "How does it end?",
+     "ask": "What does Lena decide?",
      "options": [
-      "He agrees to listen",
-      "He walks out on her",
-      "He buys it anyway",
-      "He says nothing more"
+      "No more forest walks with Yura",
+      "To come back here next summer",
+      "To walk home alone in the dark",
+      "To wait by the rock for help"
      ],
      "answer": 0
     }

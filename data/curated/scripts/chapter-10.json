@@ -1,300 +1,288 @@
 {
  "chapter": 10,
- "name": "Thought & Society",
+ "name": "Forests & Seasons",
  "lessons": {
   "core10:2": {
-   "title": "The system is down",
+   "title": "Which mushroom is safe",
    "cast": [
     {
      "id": "a",
-     "ru": "Мария",
-     "en": "Maria"
+     "ru": "Аня",
+     "en": "Anya"
     },
     {
      "id": "b",
-     "ru": "Борис",
-     "en": "Boris"
+     "ru": "Миша",
+     "en": "Misha"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "опасный",
+     "en": "dangerous"
+    },
+    {
+     "ru": "корзина",
+     "en": "basket"
+    },
+    {
+     "ru": "белый",
+     "en": "white; a porcini mushroom"
     }
    ],
    "lines": [
     {
-     "s": "a",
-     "ru": "Борис, система не работает.",
-     "en": "Boris, the system is not working."
-    },
-    {
      "s": "b",
-     "ru": "Именно сейчас?",
-     "en": "Right now, of all times?"
+     "ru": "Аня, смотри, какой огромный гриб! Он был около камня.",
+     "en": "Anya, look what a huge mushroom! It was by the stone."
     },
     {
      "s": "a",
-     "ru": "Именно. Поэтому я тут.",
-     "en": "Exactly. That is why I am here."
+     "ru": "Миша, а ты точно знаешь, какой это гриб?",
+     "en": "Misha, are you sure you know what mushroom this is?"
     },
     {
      "s": "b",
-     "ru": "И что нам приходится делать?",
-     "en": "And what do we have to do?"
+     "ru": "Конечно. Его можно попробовать даже сырым.",
+     "en": "Of course. You can even try it raw."
     },
     {
      "s": "a",
-     "ru": "Ждать. Также говорить с компанией.",
-     "en": "Wait. And also talk to the firm."
+     "ru": "Сырым? Нет, спасибо. А чем он отличается вот от этого?",
+     "en": "Raw? No, thanks. And how is it different from this one?"
     },
     {
      "s": "b",
-     "ru": "Я им уже писал.",
-     "en": "I have already written to them."
+     "ru": "Почти не отличается. Только мой чуть-чуть красный.",
+     "en": "It hardly differs. Only mine is a little bit red."
     },
     {
      "s": "a",
-     "ru": "И что?",
-     "en": "And?"
+     "ru": "Вот именно. Твой опасный, Миша. Оставь его.",
+     "en": "Exactly. Yours is dangerous, Misha. Leave it."
     },
     {
      "s": "b",
-     "ru": "Ничего. Никто не выходит.",
-     "en": "Nothing. Nobody is coming back to us."
+     "ru": "Откуда ты знаешь?",
+     "en": "How do you know?"
     },
     {
      "s": "a",
-     "ru": "Никто? Это плохо.",
-     "en": "Nobody? That is bad."
+     "ru": "Каждый октябрь я была в лесу с дедом. Он много говорил о грибах.",
+     "en": "Every October I was in the forest with grandpa. He talked a lot about mushrooms."
     },
     {
      "s": "b",
-     "ru": "Поэтому мы должны думать сами.",
-     "en": "So we have to think for ourselves."
+     "ru": "Ну хорошо, великий профессор грибов. Решай сама, что класть в корзину.",
+     "en": "All right, great professor of mushrooms. You decide what goes in the basket."
     },
     {
      "s": "a",
-     "ru": "Каким образом?",
-     "en": "In what way?"
+     "ru": "Ну, Миша! А вот этот возьми. Это белый, лучше гриба нет.",
+     "en": "Oh, Misha! But take this one. It's a porcini, there's no better mushroom."
     },
     {
      "s": "b",
-     "ru": "Есть три программы. Одна работает.",
-     "en": "There are three programs. One works."
+     "ru": "Аня, а сколько грибов нам надо собрать?",
+     "en": "Anya, how many mushrooms do we need to gather?"
     },
     {
      "s": "a",
-     "ru": "Одна? Именно эта?",
-     "en": "One? This one exactly?"
-    },
-    {
-     "s": "b",
-     "ru": "Да. И система вернётся.",
-     "en": "Yes. And the system will come back."
-    },
-    {
-     "s": "a",
-     "ru": "Когда именно?",
-     "en": "When exactly?"
-    },
-    {
-     "s": "b",
-     "ru": "Завтра, Мария. Поэтому — домой.",
-     "en": "Tomorrow, Maria. So: home."
+     "ru": "Всю корзину. Только медленно и спокойно, Миша.",
+     "en": "A whole basket. Just slowly and calmly, Misha."
     }
    ],
    "questions": [
     {
-     "ask": "What is the problem?",
+     "ask": "What are Anya and Misha doing?",
      "options": [
-      "The system has stopped",
-      "The office has closed",
-      "The staff have left",
-      "The power is off"
+      "Picking mushrooms in the forest",
+      "Buying mushrooms at the market",
+      "Cooking mushrooms at grandpa's",
+      "Picking berries by the river"
      ],
      "answer": 0
     },
     {
-     "ask": "What has Boris already done?",
+     "ask": "What is wrong with Misha's first mushroom?",
      "options": [
-      "Written to the firm",
-      "Rung the engineer",
-      "Gone home for the day",
-      "Nothing whatsoever"
+      "It is dangerous to eat",
+      "It is far too old now",
+      "It is much too small",
+      "It belongs to someone"
      ],
      "answer": 0
     },
     {
-     "ask": "What answer did he get?",
+     "ask": "How does Anya know about mushrooms?",
      "options": [
-      "None at all",
-      "A short one",
-      "A useful one",
-      "A rude one"
+      "From her grandfather",
+      "From a book at school",
+      "From a video online",
+      "From a friend in town"
      ],
      "answer": 0
     },
     {
-     "ask": "What are they left with?",
+     "ask": "What do they agree on?",
      "options": [
-      "One program that works",
-      "Two programs that work",
-      "No programs at all",
-      "An old backup file"
+      "Anya decides what goes in the basket",
+      "Misha decides what goes in the basket",
+      "They put everything in the basket",
+      "They each fill their own basket"
      ],
      "answer": 0
     },
     {
-     "ask": "What do they do in the end?",
+     "ask": "What does Misha jokingly call Anya?",
      "options": [
-      "Go home until tomorrow",
-      "Stay and keep trying",
-      "Call in more people",
-      "Start the work by hand"
+      "A great professor of mushrooms",
+      "A great doctor of the forest",
+      "The queen of the whole forest",
+      "A young student of mushrooms"
      ],
      "answer": 0
     }
    ]
   },
   "core10:4": {
-   "title": "Deciding",
+   "title": "Berries at the swamp",
    "cast": [
     {
      "id": "a",
-     "ru": "Пётр",
-     "en": "Pyotr"
+     "ru": "Соня",
+     "en": "Sonya"
     },
     {
      "id": "b",
-     "ru": "Аня",
-     "en": "Anya"
+     "ru": "Юра",
+     "en": "Yura"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "ягода",
+     "en": "berry"
+    },
+    {
+     "ru": "сапог",
+     "en": "boot"
+    },
+    {
+     "ru": "телефон",
+     "en": "telephone"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Аня, ты решаешь?",
-     "en": "Anya, are you deciding?"
+     "ru": "Юра, смотри, сколько ягод! Весь край болота в ягодах.",
+     "en": "Yura, look how many berries! The whole edge of the swamp is covered in them."
     },
     {
      "s": "b",
-     "ru": "Ещё нет. Я думаю.",
-     "en": "Not yet. I am thinking."
+     "ru": "В июле их тут множество, а в болоте ещё больше. Я иду туда.",
+     "en": "In July there are loads of them here, and even more in the swamp. I'm going in."
     },
     {
      "s": "a",
-     "ru": "Думаешь три дня.",
-     "en": "You have been thinking for three days."
+     "ru": "Юра, не надо! Там вода, а здесь, на краю, сухо.",
+     "en": "Yura, don't! There's water there, and here at the edge it's dry."
     },
     {
      "s": "b",
-     "ru": "Всё становится плохо.",
-     "en": "Everything is getting worse."
+     "ru": "Ой! Соня, я в воде, не могу выйти!",
+     "en": "Oh! Sonya, I'm in the water, I can't get out!"
     },
     {
      "s": "a",
-     "ru": "Почему плохо?",
-     "en": "Why worse?"
+     "ru": "Я же говорила! Иди ко мне, медленно.",
+     "en": "I told you! Come to me, slowly."
     },
     {
      "s": "b",
-     "ru": "Время идёт, а я тут.",
-     "en": "Time is going, and I am still here."
+     "ru": "Все брюки грязные, и один сапог я оставил в болоте.",
+     "en": "My trousers are all dirty, and I left a boot in the swamp."
     },
     {
      "s": "a",
-     "ru": "Ну, решай сейчас.",
-     "en": "Well, decide now."
+     "ru": "Сапог жалко. Но ягод мы набрали много.",
+     "en": "Shame about the boot. But we've picked lots of berries."
     },
     {
      "s": "b",
-     "ru": "Сейчас? Я не могу.",
-     "en": "Now? I cannot."
+     "ru": "Мне необходимо домой, Соня. Как я буду идти в одном сапоге?",
+     "en": "I need to get home, Sonya. How will I walk in one boot?"
     },
     {
      "s": "a",
-     "ru": "Ты становишься другой, Аня.",
-     "en": "You are becoming someone else, Anya."
+     "ru": "Набери брата. Скажи ему, что мы у болота, около старого камня.",
+     "en": "Call your brother. Tell him we're at the swamp, by the old stone."
     },
     {
      "s": "b",
-     "ru": "Другой? Не понимаю.",
-     "en": "Someone else? I do not understand."
+     "ru": "Не могу, мой телефон был в воде. Он не работает.",
+     "en": "I can't, my phone was in the water. It doesn't work."
     },
     {
      "s": "a",
-     "ru": "Первый раз ты решала быстро.",
-     "en": "The first time you decided quickly."
+     "ru": "Ну, Юра! Тогда я наберу. А ты пока считай ягоды.",
+     "en": "Oh, Yura! Then I'll call. And you count the berries meanwhile."
     },
     {
      "s": "b",
-     "ru": "Первый раз я не думала.",
-     "en": "The first time I did not think."
-    },
-    {
-     "s": "a",
-     "ru": "Именно. Поэтому и решала.",
-     "en": "Exactly. That is why you decided."
-    },
-    {
-     "s": "b",
-     "ru": "Ну хорошо. Я решаю.",
-     "en": "All right then. I am deciding."
-    },
-    {
-     "s": "a",
-     "ru": "И что?",
-     "en": "And?"
-    },
-    {
-     "s": "b",
-     "ru": "Я остаюсь тут, Пётр.",
-     "en": "I am staying here, Pyotr."
+     "ru": "Считать? Их тут множество!",
+     "en": "Count them? There are loads of them here!"
     }
    ],
    "questions": [
     {
-     "ask": "What is Anya trying to do?",
+     "ask": "Where are Sonya and Yura?",
      "options": [
-      "Make a decision",
-      "Finish a report",
-      "Find a new job",
-      "Pack her things"
+      "At the edge of a swamp",
+      "At the edge of a river",
+      "In a field near home",
+      "On a road in the town"
      ],
      "answer": 0
     },
     {
-     "ask": "How long has she been at it?",
+     "ask": "What month is it?",
      "options": [
-      "Three days",
-      "Three weeks",
-      "All morning",
-      "She does not say"
+      "July",
+      "June",
+      "May",
+      "August"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Pyotr say has changed about her?",
+     "ask": "What happens when Yura goes into the swamp?",
      "options": [
-      "She used to decide quickly",
-      "She used to ask for advice",
-      "She used to be happier",
-      "She never used to care"
+      "He falls into the water",
+      "He finds more berries",
+      "He loses the berry bag",
+      "He meets an old friend"
      ],
      "answer": 0
     },
     {
-     "ask": "Why was it easier the first time?",
+     "ask": "Why can't Yura call his brother?",
      "options": [
-      "She did not think about it",
-      "She had a lot more time then",
-      "Somebody else chose it",
-      "There was less at stake"
+      "His phone got wet in the swamp",
+      "He does not know the number",
+      "There is no signal in the forest",
+      "His brother is busy at work"
      ],
      "answer": 0
     },
     {
-     "ask": "What does she decide?",
+     "ask": "What does Sonya give Yura to do while she calls?",
      "options": [
-      "To stay",
-      "To go",
-      "To wait",
-      "To ask again"
+      "Count the berries",
+      "Find his lost boot",
+      "Wash his trousers",
+      "Pick more berries"
      ],
      "answer": 0
     }

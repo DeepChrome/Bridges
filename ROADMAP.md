@@ -1281,6 +1281,40 @@ lesson**, and lesson completion is stored by lesson index, so progress has to be
 re-derived (V7) rather than carried by position — the learner's cards are safe
 regardless, since they key on the word.
 
+### Executed, 2026-09-29 (the owner: *"I like that skeleton. Gun it and run it"*)
+
+- **V1** — approved; one correction after: Speech had been given the grocery
+  episode (matched on "phrases") and now has the conversation-phrases one.
+- **V2** — `Summary.js`: an optional step before each quiz, and "Unit
+  summary" before a unit's test. Continue never routes through an optional
+  step, and "N/M steps done" counts required ones only.
+- **V3** — units built from their videos, with 25 % (spine) / 30 % (side
+  quest) of each reserved for the commonest and the topic's own words. **1,040
+  words taught** (1,045 before), 670 of them straight off a video. Followable
+  share of each unit's video by the unit's end, before → after: chapter 1's
+  goal **41 % → 87 %**; every unit 52–93 % (26–80 % before). Tech alone reads
+  lower (74 → 65 %) because it moved from chapter 8 to chapter 2, where less is
+  known. Chapters renamed for what they now teach.
+- **V4** — ten grammar-card examples rewritten to use taught words; Tech's
+  card (the dative, now three chapters early) replaced by "can and want, plus a
+  verb", chapter-2 grammar its video uses. Six other side-quest cards now sit
+  one chapter before their spine teaches the point formally; judged fine as a
+  first taste and left. Six chapters carry a grammar episode, offered from the
+  grammar step and the summary.
+- **V5** — each word card shows where its unit's video says it and plays that
+  moment. **Not done: a gap-fill drawn from the captions** — they are YouTube's
+  automatic ones, unpunctuated, cut mid-sentence and without English; a gap on
+  them would be ragged, which is worse than none.
+- **V6** — the twenty featured conversations rewritten against the new lessons
+  (two per chapter, each set near its chapter's video), 0 errors; audio bought
+  ($0.38), 20 tracks. Chapter 1's twelve extra conversations retired, as the
+  2026-09-19 brief had planned; git keeps them.
+- **V7** — `reconcileCurriculum`, once per curriculum fingerprint.
+- **V8** — words, sentences and inflected forms voiced for the new words
+  (~$1.10); 110 new photographs read by eye, 50 blanked, 195 ship. Suites and
+  the simulator re-run (40 lessons: every profile passes, 0 structural
+  problems).
+
 ## Phase 12 — What is actually left (2026-09-10)
 
 **Superseded by Phase 13 above; kept because the reasoning still reads.**

@@ -1,4 +1,4 @@
-﻿/* Headless smoke test — drives site/index.html in jsdom the way a person would.
+/* Headless smoke test — drives site/index.html in jsdom the way a person would.
  * Catches render-path crashes a syntax check cannot. Layout is visual.js's job.
  *
  *   node tools/smoke.js
@@ -239,7 +239,10 @@ setTimeout(async () => {
 
   group("video component");
   await nav("#/lesson/food/0/video");
-  ok(/Easy Russian/.test($("#s-lesson").textContent), "video screen names the source");
+  // The unit's own video's channel, read off the data: which channel Food's
+  // video comes from is the skeleton's choice (Phase 14), not a fixed fact.
+  const foodCh = (JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", "videos.json"), "utf8")).units.food || {}).channel;
+  ok(!!foodCh && $("#s-lesson").textContent.includes(foodCh), "video screen names the source", foodCh);
   ok(!!byText("#s-lesson .btn", /Play here/), "play control present");
   const watched = byText("#s-lesson .btn", /Mark as watched/);
   ok(!!watched, "watched control present");

@@ -1,823 +1,158 @@
 {
  "chapter": 1,
- "name": "People and Time",
+ "name": "First Words",
  "lessons": {
-  "core1:0": {
-   "title": "Locked out",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Лена",
-     "en": "Lena"
-    },
-    {
-     "id": "b",
-     "ru": "Виктор",
-     "en": "Viktor"
-    },
-    {
-     "id": "c",
-     "ru": "Аня",
-     "en": "Anya"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "дом",
-     "en": "house"
-    },
-    {
-     "ru": "ключ",
-     "en": "key"
-    },
-    {
-     "ru": "дверь",
-     "en": "door"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Вот дом, Виктор.",
-     "en": "There is the house, Viktor."
-    },
-    {
-     "s": "b",
-     "ru": "Это он, Лена?",
-     "en": "Is that it, Lena?"
-    },
-    {
-     "s": "a",
-     "ru": "Да, он. Вот дверь.",
-     "en": "Yes, that is it. There is the door."
-    },
-    {
-     "s": "b",
-     "ru": "А ключ? Он у тебя?",
-     "en": "And the key? Do you have it?"
-    },
-    {
-     "s": "a",
-     "ru": "Нет, не у меня.",
-     "en": "No, I do not have it."
-    },
-    {
-     "s": "b",
-     "ru": "Почему? Он же твой.",
-     "en": "Why not? It is yours."
-    },
-    {
-     "s": "a",
-     "ru": "Мой ключ не тут.",
-     "en": "My key is not here."
-    },
-    {
-     "s": "b",
-     "ru": "А у кого он?",
-     "en": "So who has it?"
-    },
-    {
-     "s": "a",
-     "ru": "У Ани. Она уже тут?",
-     "en": "Anya does. Is she here yet?"
-    },
-    {
-     "s": "b",
-     "ru": "Нет, ещё нет.",
-     "en": "No, not yet."
-    },
-    {
-     "s": "a",
-     "ru": "Аня! Ты где?",
-     "en": "Anya! Where are you?"
-    },
-    {
-     "s": "c",
-     "ru": "Я тут. Ключ у меня.",
-     "en": "I am here. I have the key."
-    },
-    {
-     "s": "b",
-     "ru": "Аня, ты и ключ!",
-     "en": "Anya, you and the key!"
-    },
-    {
-     "s": "a",
-     "ru": "Вот и всё. Так.",
-     "en": "There we are. Good."
-    }
-   ],
-   "questions": [
-    {
-     "ask": "Where are they standing?",
-     "options": [
-      "Outside the house",
-      "Outside the school",
-      "Outside the shop",
-      "Outside the office"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What is the problem?",
-     "options": [
-      "Lena does not have the key",
-      "Viktor does not have the key",
-      "Anya does not have the key",
-      "Nobody can find the door"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Whose key is it?",
-     "options": [
-      "It is Lena's own key",
-      "It is Viktor's own key",
-      "It is Anya's own key",
-      "It is nobody's key"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Who is holding it?",
-     "options": [
-      "Anya is holding it",
-      "Lena is holding it",
-      "Viktor is holding it",
-      "Nobody is holding it"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How does it end?",
-     "options": [
-      "Anya turns up with it",
-      "Anya leaves without it",
-      "Viktor goes to fetch it",
-      "Lena finds hers after all"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "core1:1": {
-   "title": "Not our bus",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Таня",
-     "en": "Tanya"
-    },
-    {
-     "id": "b",
-     "ru": "Олег",
-     "en": "Oleg"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "автобус",
-     "en": "bus"
-    },
-    {
-     "ru": "сумка",
-     "en": "bag"
-    },
-    {
-     "ru": "холодно",
-     "en": "cold"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Олег, тут холодно.",
-     "en": "Oleg, it is cold here."
-    },
-    {
-     "s": "b",
-     "ru": "Да, Таня. А автобус?",
-     "en": "Yes, Tanya. And the bus?"
-    },
-    {
-     "s": "a",
-     "ru": "Он не тут.",
-     "en": "It is not here."
-    },
-    {
-     "s": "b",
-     "ru": "Вот этот, с сумками!",
-     "en": "That one there, with the bags!"
-    },
-    {
-     "s": "a",
-     "ru": "Нет, это не он.",
-     "en": "No, that is not it."
-    },
-    {
-     "s": "b",
-     "ru": "А эта сумка?",
-     "en": "And this bag?"
-    },
-    {
-     "s": "a",
-     "ru": "Сумка моя.",
-     "en": "The bag is mine."
-    },
-    {
-     "s": "b",
-     "ru": "Сумка была тут?",
-     "en": "Was the bag here?"
-    },
-    {
-     "s": "a",
-     "ru": "Да, была. Со мной.",
-     "en": "Yes, it was. With me."
-    },
-    {
-     "s": "b",
-     "ru": "Вот он, этот автобус!",
-     "en": "There it is, that bus!"
-    },
-    {
-     "s": "a",
-     "ru": "Это он?",
-     "en": "Is that the one?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, Таня, он.",
-     "en": "Yes, Tanya, it is."
-    },
-    {
-     "s": "a",
-     "ru": "Я и сумка — тут!",
-     "en": "Me and the bag — here!"
-    },
-    {
-     "s": "b",
-     "ru": "И уже не холодно.",
-     "en": "And it is not cold any more."
-    }
-   ],
-   "questions": [
-    {
-     "ask": "Where are these two people?",
-     "options": [
-      "Waiting for a bus",
-      "Waiting for a train",
-      "Waiting in a shop",
-      "Waiting at home"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What is Tanya complaining about?",
-     "options": [
-      "The cold",
-      "The rain",
-      "The noise",
-      "The dark"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What happens with the first bus that comes?",
-     "options": [
-      "It is not the one they want",
-      "It goes straight past them",
-      "It is too full to board",
-      "It breaks down at the stop"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Whose bag is it?",
-     "options": [
-      "Tanya's",
-      "Oleg's",
-      "The driver's",
-      "Nobody's"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How does the scene end?",
-     "options": [
-      "Their bus arrives at last",
-      "Their bus never turns up",
-      "They decide to walk home",
-      "They go back indoors"
-     ],
-     "answer": 0
-    }
-   ]
-  },
   "core1:2": {
-   "title": "Meeting Katya's family",
+   "title": "A borscht with no salt",
    "cast": [
     {
      "id": "a",
-     "ru": "Катя",
-     "en": "Katya"
+     "ru": "Маша",
+     "en": "Masha"
     },
     {
      "id": "b",
-     "ru": "Олег",
-     "en": "Oleg"
+     "ru": "Петя",
+     "en": "Petya"
     },
     {
      "id": "c",
-     "ru": "Миша",
-     "en": "Misha"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "семья",
-     "en": "family"
-    },
-    {
-     "ru": "папа",
-     "en": "dad"
-    },
-    {
-     "ru": "брат",
-     "en": "brother"
-    },
-    {
-     "ru": "друг",
-     "en": "friend"
-    },
-    {
-     "ru": "пять",
-     "en": "five"
-    },
-    {
-     "ru": "тридцать",
-     "en": "thirty"
+     "ru": "Иван",
+     "en": "Ivan"
     }
    ],
    "lines": [
     {
      "s": "b",
-     "ru": "Катя, а кто они все? Я же их не знаю.",
-     "en": "Katya, who are they all? I do not know any of them."
+     "ru": "Маша, это не борщ. Тут нет соли!",
+     "en": "Masha, this isn't borscht. There's no salt in it!"
     },
     {
      "s": "a",
-     "ru": "Это моя семья, Олег. Они все очень хотят с тобой говорить.",
-     "en": "This is my family, Oleg. They all really want to talk to you."
+     "ru": "Нет соли? Иван, где соль?",
+     "en": "No salt? Ivan, where's the salt?"
+    },
+    {
+     "s": "c",
+     "ru": "Соль? Я не знаю, Маша.",
+     "en": "Salt? I don't know, Masha."
     },
     {
      "s": "b",
-     "ru": "А вот это кто, Катя? Твой папа, да?",
-     "en": "And who is that, Katya? Your dad, right?"
-    },
-    {
-     "s": "a",
-     "ru": "Папа?! Нет, Олег, это же мой брат!",
-     "en": "Dad?! No, Oleg, that is my brother!"
+     "ru": "Как не знаете? Это же ресторан!",
+     "en": "What do you mean, you don't know? This is a restaurant!"
     },
     {
      "s": "c",
-     "ru": "А ты кто такой? Ты её друг, да?",
-     "en": "And who are you? You are her friend, right?"
+     "ru": "Нет, это не ресторан. Это кафе.",
+     "en": "No, this isn't a restaurant. It's a café."
     },
     {
      "s": "b",
-     "ru": "Да, я Олег, я друг Кати. А ты кто?",
-     "en": "Yes, I am Oleg, I am Katya's friend. And who are you?"
+     "ru": "И в кафе все хотят соль!",
+     "en": "People in a café want salt too!"
     },
     {
      "s": "c",
-     "ru": "Я Миша, я тоже её брат. Мне пять лет, а тебе?",
-     "en": "I am Misha, I am her brother too. I am five, and you?"
+     "ru": "Да, все хотят. А соли нет.",
+     "en": "Yes, everyone does. But there's no salt."
+    },
+    {
+     "s": "a",
+     "ru": "Иван, а что вы можете? Пиццу?",
+     "en": "Ivan, so what can you do? A pizza?"
+    },
+    {
+     "s": "c",
+     "ru": "Могу пиццу. С колбасой, да?",
+     "en": "I can do a pizza. With sausage, yes?"
     },
     {
      "s": "b",
-     "ru": "Мне? А вот это я не говорю, Миша!",
-     "en": "Me? That I am not telling, Misha!"
-    },
-    {
-     "s": "c",
-     "ru": "Почему не говоришь? Ты что, не знаешь?",
-     "en": "Why will you not say? What, do you not know?"
+     "ru": "Нет, я не хочу пиццу. Я хочу борщ!",
+     "en": "No, I don't want pizza. I want borscht!"
     },
     {
      "s": "a",
-     "ru": "Миша, так не говорят! Он у нас такой, Олег.",
-     "en": "Misha, you do not ask that! He is like that, Oleg."
+     "ru": "Петя, я знаю, где соль. Вот она.",
+     "en": "Petya, I know where the salt is. Here it is."
     },
     {
      "s": "b",
-     "ru": "Нет, Катя, он может. Мне уже тридцать лет, Миша.",
-     "en": "No, Katya, he can ask. I am thirty already, Misha."
-    },
-    {
-     "s": "c",
-     "ru": "Тридцать лет?! Это же как наш папа!",
-     "en": "Thirty?! That is the same as our dad!"
+     "ru": "Это твоя соль, Маша?",
+     "en": "Is that your salt, Masha?"
     },
     {
      "s": "a",
-     "ru": "Миша, он не папа. Он Олег, и он мой друг.",
-     "en": "Misha, he is not Dad. He is Oleg, and he is my friend."
+     "ru": "Моя. Я знаю это кафе, Петя.",
+     "en": "Mine. I know this café, Petya."
     },
     {
      "s": "c",
-     "ru": "Я знаю, знаю! Олег, ты тоже мой друг.",
-     "en": "I know, I know! Oleg, you are my friend too."
+     "ru": "Молодец, Маша! А борщ с солью как?",
+     "en": "Well done, Masha! So how's the borscht with salt?"
     },
     {
-     "s": "a",
-     "ru": "Вот так, Олег. Ты у нас уже свой.",
-     "en": "There you go, Oleg. You are one of us now."
+     "s": "b",
+     "ru": "С солью? Очень хорошо, Иван!",
+     "en": "With salt? Very good, Ivan!"
     }
    ],
    "questions": [
     {
-     "ask": "What is Oleg doing?",
+     "ask": "What is wrong with Petya's borscht?",
      "options": [
-      "Meeting Katya's family",
-      "Meeting Katya's teacher",
-      "Meeting Misha's friends",
-      "Leaving Katya's family"
+      "It has no salt",
+      "It is too cold",
+      "It has no meat",
+      "It is too thin"
      ],
      "answer": 0
     },
     {
-     "ask": "Who does Oleg take for Katya's father?",
-     "options": [
-      "Her brother",
-      "Her uncle",
-      "Her friend",
-      "Her neighbour"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Misha want to know?",
-     "options": [
-      "How old Oleg is",
-      "Where Oleg lives",
-      "What Oleg does",
-      "Why Oleg came"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Why does Katya tell Misha off?",
-     "options": [
-      "For asking Oleg his age",
-      "For calling Oleg his dad",
-      "For hiding from the guest",
-      "For not saying his name"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How does it end?",
-     "options": [
-      "Misha calls Oleg his friend",
-      "Misha goes to look for Dad",
-      "Oleg decides to leave early",
-      "Katya sends Misha off to bed"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "core1:3": {
-   "title": "Left on the table",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Катя",
-     "en": "Katya"
-    },
-    {
-     "id": "b",
-     "ru": "Миша",
-     "en": "Misha"
-    },
-    {
-     "id": "c",
-     "ru": "Юра",
-     "en": "Yura"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "кафе",
-     "en": "café"
-    },
-    {
-     "ru": "стол",
-     "en": "table"
-    },
-    {
-     "ru": "сумка",
-     "en": "bag"
-    },
-    {
-     "ru": "забыть",
-     "en": "to forget"
-    },
-    {
-     "ru": "спасибо",
-     "en": "thank you"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Миша, сумка. Тут, в кафе.",
-     "en": "Misha, a bag. Here, in the café."
-    },
-    {
-     "s": "b",
-     "ru": "Она не моя, Катя.",
-     "en": "It is not mine, Katya."
-    },
-    {
-     "s": "a",
-     "ru": "А у тебя?",
-     "en": "And what about you?"
-    },
-    {
-     "s": "b",
-     "ru": "У меня нет.",
-     "en": "I have not got one."
-    },
-    {
-     "s": "a",
-     "ru": "А тот стол?",
-     "en": "What about that table?"
-    },
-    {
-     "s": "b",
-     "ru": "Они были тут, да.",
-     "en": "They were here, yes."
-    },
-    {
-     "s": "a",
-     "ru": "Они забыли сумку!",
-     "en": "They have forgotten the bag!"
-    },
-    {
-     "s": "b",
-     "ru": "Юра! Это ты?",
-     "en": "Yura! Is that you?"
-    },
-    {
-     "s": "c",
-     "ru": "Я тут. Что?",
-     "en": "I am here. What is it?"
-    },
-    {
-     "s": "a",
-     "ru": "Юра, эта сумка твоя?",
-     "en": "Yura, is this bag yours?"
-    },
-    {
-     "s": "c",
-     "ru": "Да, моя. Я забыл.",
-     "en": "Yes, mine. I forgot it."
-    },
-    {
-     "s": "b",
-     "ru": "Тот стол, вот он.",
-     "en": "That table, there it is."
-    },
-    {
-     "s": "c",
-     "ru": "Спасибо, Катя и Миша.",
-     "en": "Thank you, Katya and Misha."
-    },
-    {
-     "s": "a",
-     "ru": "Не забудь её, Юра.",
-     "en": "Do not forget it, Yura."
-    }
-   ],
-   "questions": [
-    {
-     "ask": "Where does this happen?",
+     "ask": "Where are they?",
      "options": [
       "In a café",
-      "In a shop",
-      "At a station",
-      "At home"
+      "At a hotel",
+      "On a train",
+      "At a market"
      ],
      "answer": 0
     },
     {
-     "ask": "What has been left behind?",
+     "ask": "What does Ivan offer instead?",
      "options": [
-      "A bag",
-      "A coat",
-      "A phone",
-      "A key"
+      "Pizza with sausage",
+      "Bread with butter",
+      "Fish with potatoes",
+      "Chicken with rice"
      ],
      "answer": 0
     },
     {
-     "ask": "Who does it belong to?",
+     "ask": "Whose salt do they end up using?",
      "options": [
-      "Yura",
-      "Katya",
-      "Misha",
-      "The café"
+      "Masha's own",
+      "The waiter's",
+      "The cook's",
+      "A neighbor's"
      ],
      "answer": 0
     },
     {
-     "ask": "How do they find the owner?",
+     "ask": "What does Petya think of the borscht in the end?",
      "options": [
-      "They call out to him",
-      "They look inside the bag",
-      "They ask the waiter",
-      "They leave it on the table"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Katya say at the end?",
-     "options": [
-      "Do not forget it again",
-      "Do not come back here",
-      "Do not sit at that table",
-      "Do not thank me for it"
+      "Very good",
+      "Too salty",
+      "Still cold",
+      "Too spicy"
      ],
      "answer": 0
     }
    ]
   },
   "core1:4": {
-   "title": "One seat short",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Саша",
-     "en": "Sasha"
-    },
-    {
-     "id": "b",
-     "ru": "Лена",
-     "en": "Lena"
-    },
-    {
-     "id": "c",
-     "ru": "Пётр",
-     "en": "Pyotr"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "машина",
-     "en": "car"
-    },
-    {
-     "ru": "место",
-     "en": "seat"
-    },
-    {
-     "ru": "ехать",
-     "en": "to go by car"
-    },
-    {
-     "ru": "спасибо",
-     "en": "thank you"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Лена, это наша машина.",
-     "en": "Lena, this is our car."
-    },
-    {
-     "s": "b",
-     "ru": "Все мы тут?",
-     "en": "Are we all here?"
-    },
-    {
-     "s": "a",
-     "ru": "Я, ты и Пётр.",
-     "en": "Me, you and Pyotr."
-    },
-    {
-     "s": "c",
-     "ru": "А место? Оно моё?",
-     "en": "And a seat? Is one mine?"
-    },
-    {
-     "s": "a",
-     "ru": "Места нет, Пётр.",
-     "en": "There is no seat, Pyotr."
-    },
-    {
-     "s": "c",
-     "ru": "Я не могу ехать?",
-     "en": "So I cannot come?"
-    },
-    {
-     "s": "b",
-     "ru": "Ты можешь, Пётр.",
-     "en": "You can, Pyotr."
-    },
-    {
-     "s": "a",
-     "ru": "Все не могут ехать.",
-     "en": "We cannot all go."
-    },
-    {
-     "s": "b",
-     "ru": "Наша машина не та.",
-     "en": "Our car is the wrong one."
-    },
-    {
-     "s": "c",
-     "ru": "А что мы можем?",
-     "en": "So what can we do?"
-    },
-    {
-     "s": "a",
-     "ru": "Вы едете, я за вами.",
-     "en": "You go, I will follow you."
-    },
-    {
-     "s": "b",
-     "ru": "Ты можешь?",
-     "en": "Can you?"
-    },
-    {
-     "s": "a",
-     "ru": "Могу. Всё, все едут.",
-     "en": "I can. Right, everyone is going."
-    },
-    {
-     "s": "c",
-     "ru": "Спасибо, Саша!",
-     "en": "Thank you, Sasha!"
-    }
-   ],
-   "questions": [
-    {
-     "ask": "What is the problem?",
-     "options": [
-      "There is not enough room",
-      "The car will not start",
-      "Nobody knows the way",
-      "They are running late"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How many people want to go?",
-     "options": [
-      "Three",
-      "Two",
-      "Four",
-      "Five"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Sasha suggest?",
-     "options": [
-      "He will follow them",
-      "He will stay at home",
-      "He will drive them all",
-      "He will take the bus"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Who was worried about a seat?",
-     "options": [
-      "Pyotr",
-      "Lena",
-      "Sasha",
-      "The driver"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How does it end?",
-     "options": [
-      "Everyone gets to go",
-      "Only two of them go",
-      "They put it off",
-      "Nobody goes at all"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "core1:5": {
-   "title": "I want to speak Russian",
+   "title": "Asking the way to borscht",
    "cast": [
     {
      "id": "a",
@@ -826,1391 +161,150 @@
     },
     {
      "id": "b",
-     "ru": "Иван",
-     "en": "Ivan"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "язык",
-     "en": "language"
-    },
-    {
-     "ru": "русский",
-     "en": "Russian"
-    },
-    {
-     "ru": "слово",
-     "en": "word"
-    },
-    {
-     "ru": "урок",
-     "en": "lesson"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Иван, я хочу говорить.",
-     "en": "Ivan, I want to speak."
-    },
-    {
-     "s": "b",
-     "ru": "Говорить? Что?",
-     "en": "Speak? What?"
-    },
-    {
-     "s": "a",
-     "ru": "Я хочу знать русский.",
-     "en": "I want to know Russian."
-    },
-    {
-     "s": "b",
-     "ru": "Ты знаешь слова?",
-     "en": "Do you know any words?"
-    },
-    {
-     "s": "a",
-     "ru": "Я знаю не все.",
-     "en": "I do not know them all."
-    },
-    {
-     "s": "b",
-     "ru": "Это наш язык, Аня.",
-     "en": "It is our language, Anya."
-    },
-    {
-     "s": "a",
-     "ru": "Мы можем? Урок?",
-     "en": "Can we? A lesson?"
-    },
-    {
-     "s": "b",
-     "ru": "Можем. Говори своё слово.",
-     "en": "We can. Say your word."
-    },
-    {
-     "s": "a",
-     "ru": "Этот... этот язык мой.",
-     "en": "This... this language is mine."
-    },
-    {
-     "s": "b",
-     "ru": "Да! Ты знаешь.",
-     "en": "Yes! You do know."
-    },
-    {
-     "s": "a",
-     "ru": "Я хочу знать все слова.",
-     "en": "I want to know all the words."
-    },
-    {
-     "s": "b",
-     "ru": "Все? Это год, Аня.",
-     "en": "All of them? That is a year, Anya."
-    },
-    {
-     "s": "a",
-     "ru": "Год? Я могу.",
-     "en": "A year? I can do that."
-    },
-    {
-     "s": "b",
-     "ru": "Я знаю, Аня. Можешь.",
-     "en": "I know, Anya. You can."
-    }
-   ],
-   "questions": [
-    {
-     "ask": "What does Anya want?",
-     "options": [
-      "To speak Russian",
-      "To read Russian",
-      "To live in Russia",
-      "To teach Russian"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Ivan ask her first?",
-     "options": [
-      "Whether she knows any words",
-      "Whether she has been before",
-      "Whether she has a teacher",
-      "Whether she reads well"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Anya admit?",
-     "options": [
-      "She does not know them all",
-      "She knows nothing at all",
-      "She has forgotten them",
-      "She learnt them last year"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How long does Ivan say it takes?",
-     "options": [
-      "About a year",
-      "About a month",
-      "About a week",
-      "Only a day"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What is Ivan's attitude?",
-     "options": [
-      "He encourages her",
-      "He discourages her",
-      "He ignores her",
-      "He corrects her constantly"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "family:0": {
-   "title": "The neighbour at the door",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Виктор",
-     "en": "Viktor"
-    },
-    {
-     "id": "b",
-     "ru": "Маша",
-     "en": "Masha"
-    },
-    {
-     "id": "c",
-     "ru": "Пётр",
-     "en": "Pyotr"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "сосед",
-     "en": "neighbour"
-    },
-    {
-     "ru": "город",
-     "en": "town"
-    },
-    {
-     "ru": "привет",
-     "en": "hello"
-    },
-    {
-     "ru": "спасибо",
-     "en": "thank you"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Привет! Я ваш сосед.",
-     "en": "Hello! I am your neighbour."
-    },
-    {
-     "s": "b",
-     "ru": "Я Маша. Это мой муж.",
-     "en": "I am Masha. This is my husband."
-    },
-    {
-     "s": "c",
-     "ru": "Меня зовут Пётр.",
-     "en": "My name is Pyotr."
-    },
-    {
-     "s": "a",
-     "ru": "Виктор. Вы тут родились?",
-     "en": "Viktor. Were you born here?"
-    },
-    {
-     "s": "c",
-     "ru": "Нет. Я рос в городе.",
-     "en": "No. I grew up in the city."
-    },
-    {
-     "s": "b",
-     "ru": "Я тут родилась, Виктор.",
-     "en": "I was born here, Viktor."
-    },
-    {
-     "s": "a",
-     "ru": "И я тут рос.",
-     "en": "I grew up here too."
-    },
-    {
-     "s": "c",
-     "ru": "Этот мужчина — наш сосед?",
-     "en": "This man is our neighbour?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, Пётр. Наш.",
-     "en": "Yes, Pyotr. Ours."
-    },
-    {
-     "s": "a",
-     "ru": "Вы тут уже год?",
-     "en": "Have you been here a year?"
-    },
-    {
-     "s": "b",
-     "ru": "Нет, ещё не год.",
-     "en": "No, not a year yet."
-    },
-    {
-     "s": "c",
-     "ru": "Мы тут не год.",
-     "en": "We have not been here a year."
-    },
-    {
-     "s": "a",
-     "ru": "Я знаю этот город.",
-     "en": "I know this town."
-    },
-    {
-     "s": "b",
-     "ru": "Спасибо, Виктор.",
-     "en": "Thank you, Viktor."
-    },
-    {
-     "s": "c",
-     "ru": "Вот и наш сосед.",
-     "en": "So there is our neighbour."
-    }
-   ],
-   "questions": [
-    {
-     "ask": "Who has come to the door?",
-     "options": [
-      "A neighbour",
-      "A postman",
-      "A relative",
-      "A stranger"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Masha tell him?",
-     "options": [
-      "That Pyotr is her husband",
-      "That Pyotr is her brother",
-      "That Pyotr is her son",
-      "That she lives there alone"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Who grew up in this town?",
-     "options": [
-      "Masha and Viktor",
-      "Only Pyotr",
-      "Only Masha",
-      "All three of them"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How long have Masha and Pyotr been there?",
-     "options": [
-      "Less than a year",
-      "More than a year",
-      "Exactly one year",
-      "Since childhood"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How does the meeting go?",
-     "options": [
-      "Warmly on both sides",
-      "Coldly on both sides",
-      "Viktor stays for tea",
-      "They cut it short"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "family:1": {
-   "title": "Who is in the photo?",
-   "cast": [
-    {
-     "id": "a",
      "ru": "Катя",
      "en": "Katya"
     },
     {
-     "id": "b",
-     "ru": "Олег",
-     "en": "Oleg"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "фото",
-     "en": "photo"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Олег, это твоё фото?",
-     "en": "Oleg, is this your photo?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, Катя, это мы.",
-     "en": "Yes, Katya, that is us."
-    },
-    {
-     "s": "a",
-     "ru": "А эта девочка?",
-     "en": "And this girl?"
-    },
-    {
-     "s": "b",
-     "ru": "Это моя дочь.",
-     "en": "That is my daughter."
-    },
-    {
-     "s": "a",
-     "ru": "Она уже растёт!",
-     "en": "She is growing already!"
-    },
-    {
-     "s": "b",
-     "ru": "Ей уже год.",
-     "en": "She is a year old."
-    },
-    {
-     "s": "a",
-     "ru": "А этот мужчина?",
-     "en": "And this man?"
-    },
-    {
-     "s": "b",
-     "ru": "Мой брат. Он тут рос.",
-     "en": "My brother. He grew up here."
-    },
-    {
-     "s": "a",
-     "ru": "А эта? Твоя подруга?",
-     "en": "And her? Your friend?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, она моя подруга.",
-     "en": "Yes, she is my friend."
-    },
-    {
-     "s": "a",
-     "ru": "А сын? Он тут?",
-     "en": "And your son? Is he here?"
-    },
-    {
-     "s": "b",
-     "ru": "Он не на фото.",
-     "en": "He is not in the photo."
-    },
-    {
-     "s": "a",
-     "ru": "Почему, Олег?",
-     "en": "Why not, Oleg?"
-    },
-    {
-     "s": "b",
-     "ru": "Он был не с нами.",
-     "en": "He was not with us."
-    }
-   ],
-   "questions": [
-    {
-     "ask": "What are they looking at?",
-     "options": [
-      "A photograph",
-      "A painting",
-      "A letter",
-      "A passport"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Who is the little girl?",
-     "options": [
-      "Oleg's daughter",
-      "Oleg's niece",
-      "Katya's daughter",
-      "Oleg's sister"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How old is she?",
-     "options": [
-      "A year old",
-      "Two years old",
-      "Five years old",
-      "Nobody says"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Who else is in the picture?",
-     "options": [
-      "His brother and a friend",
-      "His parents and a friend",
-      "His brother and his son",
-      "Only his daughter"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Why is his son missing from it?",
-     "options": [
-      "He was not with them",
-      "He was away that day",
-      "He was too young then",
-      "He took the photograph"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "family:2": {
-   "title": "Tea at grandmother's",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Соня",
-     "en": "Sonya"
-    },
-    {
-     "id": "b",
-     "ru": "Ваня",
-     "en": "Vanya"
-    },
-    {
      "id": "c",
-     "ru": "Борис",
-     "en": "Boris"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "чай",
-     "en": "tea"
-    },
-    {
-     "ru": "торт",
-     "en": "cake"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Ваня, бабушка тут?",
-     "en": "Vanya, is grandmother here?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, она с гостями.",
-     "en": "Yes, she is with the guests."
-    },
-    {
-     "s": "a",
-     "ru": "А кто эти гости?",
-     "en": "And who are these guests?"
-    },
-    {
-     "s": "b",
-     "ru": "Борис и его родители.",
-     "en": "Boris and his parents."
-    },
-    {
-     "s": "c",
-     "ru": "Соня! Тут чай и торт.",
-     "en": "Sonya! There is tea and cake."
-    },
-    {
-     "s": "a",
-     "ru": "Бабушка, это твой торт?",
-     "en": "Grandmother, is this your cake?"
-    },
-    {
-     "s": "b",
-     "ru": "Её. Она может всё.",
-     "en": "Hers. She can do anything."
-    },
-    {
-     "s": "c",
-     "ru": "А тот старик? Кто он?",
-     "en": "And that old man? Who is he?"
-    },
-    {
-     "s": "b",
-     "ru": "Это её муж.",
-     "en": "That is her husband."
-    },
-    {
-     "s": "a",
-     "ru": "А этот мальчик?",
-     "en": "And this boy?"
-    },
-    {
-     "s": "b",
-     "ru": "Это мой сын.",
-     "en": "That is my son."
-    },
-    {
-     "s": "c",
-     "ru": "Он растёт!",
-     "en": "He is growing!"
-    },
-    {
-     "s": "a",
-     "ru": "Бабушка, чай уже?",
-     "en": "Grandmother, is the tea ready?"
-    },
-    {
-     "s": "b",
-     "ru": "Гости хотят торт.",
-     "en": "The guests want cake."
-    },
-    {
-     "s": "c",
-     "ru": "И чай, и торт!",
-     "en": "Tea and cake both!"
-    }
-   ],
-   "questions": [
-    {
-     "ask": "Whose house are they in?",
-     "options": [
-      "The grandmother's",
-      "The old man's",
-      "Sonya's parents'",
-      "Boris's parents'"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Who are the visitors?",
-     "options": [
-      "Boris and his parents",
-      "Boris and his brother",
-      "Sonya and her parents",
-      "The old man only"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What is on the table?",
-     "options": [
-      "Tea and cake",
-      "Tea and bread",
-      "Cake only",
-      "Nothing yet"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Who is the old man?",
-     "options": [
-      "The grandmother's husband",
-      "The grandmother's brother",
-      "A neighbour who called in",
-      "Boris's own father"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Who is the little boy?",
-     "options": [
-      "Vanya's son",
-      "Sonya's son",
-      "Boris's son",
-      "The old man's son"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "family:3": {
-   "title": "Not on the list",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Мария",
-     "en": "Maria"
-    },
-    {
-     "id": "b",
      "ru": "Юра",
      "en": "Yura"
     }
    ],
    "intro": [
     {
-     "ru": "имя",
-     "en": "first name"
+     "ru": "вечер",
+     "en": "evening"
     },
     {
-     "ru": "список",
-     "en": "list"
+     "ru": "повар",
+     "en": "cook"
     }
    ],
    "lines": [
     {
+     "s": "b",
+     "ru": "Аня, я хочу борщ. Где тут ресторан?",
+     "en": "Anya, I want borscht. Where's a restaurant around here?"
+    },
+    {
      "s": "a",
-     "ru": "Имя и фамилия?",
-     "en": "First name and surname?"
+     "ru": "Не знаю, Катя. А он может знать.",
+     "en": "I don't know, Katya. But he might know."
     },
     {
      "s": "b",
-     "ru": "Я Юра. Вот фамилия.",
-     "en": "I am Yura. Here is the surname."
-    },
-    {
-     "s": "a",
-     "ru": "Вас нет в списке.",
-     "en": "You are not on the list."
-    },
-    {
-     "s": "b",
-     "ru": "Как нет? Я тут.",
-     "en": "How not? I am here."
-    },
-    {
-     "s": "a",
-     "ru": "Этот список семейный.",
-     "en": "This list is for families."
-    },
-    {
-     "s": "b",
-     "ru": "У меня сын и дочь.",
-     "en": "I have a son and a daughter."
-    },
-    {
-     "s": "a",
-     "ru": "А где они?",
-     "en": "And where are they?"
-    },
-    {
-     "s": "b",
-     "ru": "Малыш с бабушкой.",
-     "en": "The little one is with his grandmother."
-    },
-    {
-     "s": "a",
-     "ru": "А тот парень?",
-     "en": "And that young man?"
-    },
-    {
-     "s": "b",
-     "ru": "Тот парень — мой сын.",
-     "en": "That young man is my son."
-    },
-    {
-     "s": "a",
-     "ru": "Этот мальчишка?",
-     "en": "That lad?"
-    },
-    {
-     "s": "b",
-     "ru": "Он уже не малыш.",
-     "en": "He is not a little one any more."
-    },
-    {
-     "s": "a",
-     "ru": "Имя? Фамилия?",
-     "en": "First name? Surname?"
-    },
-    {
-     "s": "b",
-     "ru": "Фамилия наша, Мария.",
-     "en": "The surname is ours, Maria."
-    },
-    {
-     "s": "a",
-     "ru": "Вот, вы в списке.",
-     "en": "There, you are on the list."
-    }
-   ],
-   "questions": [
-    {
-     "ask": "What is Yura doing?",
-     "options": [
-      "Signing in at a desk",
-      "Buying a ticket",
-      "Looking for a room",
-      "Asking for directions"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What is the problem?",
-     "options": [
-      "His name is not listed",
-      "He has lost his papers",
-      "He has come too late",
-      "He has the wrong desk"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What kind of list is it?",
-     "options": [
-      "A family one",
-      "A private one",
-      "A very old one",
-      "A very long one"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Where is the youngest child?",
-     "options": [
-      "With the grandmother",
-      "With the other parent",
-      "Here beside Yura",
-      "Nobody says where"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Maria say about the older boy?",
-     "options": [
-      "She calls him a lad",
-      "She says he is a baby",
-      "She does not see him",
-      "She asks for his age"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "time:0": {
-   "title": "Finding an evening",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Таня",
-     "en": "Tanya"
-    },
-    {
-     "id": "b",
-     "ru": "Миша",
-     "en": "Misha"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "работа",
-     "en": "work"
-    },
-    {
-     "ru": "спасибо",
-     "en": "thank you"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Миша, ты можешь вечером?",
-     "en": "Misha, can you this evening?"
-    },
-    {
-     "s": "b",
-     "ru": "Вечером? Не могу.",
-     "en": "This evening? I cannot."
-    },
-    {
-     "s": "a",
-     "ru": "А утром?",
-     "en": "In the morning?"
-    },
-    {
-     "s": "b",
-     "ru": "Утром я на работе.",
-     "en": "In the morning I am at work."
-    },
-    {
-     "s": "a",
-     "ru": "Эта неделя вся?",
-     "en": "The whole week?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, вся неделя.",
-     "en": "Yes, the whole week."
-    },
-    {
-     "s": "a",
-     "ru": "А та неделя?",
-     "en": "And the week after?"
-    },
-    {
-     "s": "b",
-     "ru": "Та неделя — да.",
-     "en": "That week, yes."
-    },
-    {
-     "s": "a",
-     "ru": "Твой номер тот же?",
-     "en": "Is your number still the same?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, он мой.",
-     "en": "Yes, it is mine."
-    },
-    {
-     "s": "a",
-     "ru": "Вечером или утром?",
-     "en": "Evening or morning?"
-    },
-    {
-     "s": "b",
-     "ru": "Вечером. Утром не могу.",
-     "en": "Evening. I cannot in the morning."
-    },
-    {
-     "s": "a",
-     "ru": "Пора! Всё, вечером.",
-     "en": "About time! Right, evening it is."
-    },
-    {
-     "s": "b",
-     "ru": "Спасибо, Таня.",
-     "en": "Thank you, Tanya."
-    }
-   ],
-   "questions": [
-    {
-     "ask": "What are they trying to do?",
-     "options": [
-      "Agree on a time to meet",
-      "Agree on a place to meet",
-      "Change a booking",
-      "Call off their plans"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Why is this week no good?",
-     "options": [
-      "He is busy all week",
-      "He is away all week",
-      "He is ill all week",
-      "He does not say"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "When do they settle on?",
-     "options": [
-      "An evening next week",
-      "A morning next week",
-      "An evening this week",
-      "A morning this week"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Tanya check about him?",
-     "options": [
-      "That his number is the same",
-      "That he knows the address",
-      "That he will not forget",
-      "That he can get there"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How does Misha end the call?",
-     "options": [
-      "By thanking her",
-      "By apologising",
-      "By asking again",
-      "By saying nothing"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "time:1": {
-   "title": "A ticket for September",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Саша",
-     "en": "Sasha"
-    },
-    {
-     "id": "b",
-     "ru": "Анна",
-     "en": "Anna"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "билет",
-     "en": "ticket"
-    },
-    {
-     "ru": "рубль",
-     "en": "rouble"
-    },
-    {
-     "ru": "поезд",
-     "en": "train"
-    },
-    {
-     "ru": "спасибо",
-     "en": "thank you"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Мне билет на сентябрь.",
-     "en": "A ticket for September, please."
-    },
-    {
-     "s": "b",
-     "ru": "Сентябрь. А число?",
-     "en": "September. And the date?"
-    },
-    {
-     "s": "a",
-     "ru": "Число я не знаю.",
-     "en": "I do not know the date."
-    },
-    {
-     "s": "b",
-     "ru": "Секунду. Поезд утром.",
-     "en": "One second. A train in the morning."
-    },
-    {
-     "s": "a",
-     "ru": "А вечером?",
-     "en": "And in the evening?"
-    },
-    {
-     "s": "b",
-     "ru": "Вечером нет. Этот месяц...",
-     "en": "Not in the evening. This month..."
-    },
-    {
-     "s": "a",
-     "ru": "Весь месяц нет?",
-     "en": "None all month?"
-    },
-    {
-     "s": "b",
-     "ru": "Утром — тысяча рублей.",
-     "en": "The morning one is a thousand roubles."
-    },
-    {
-     "s": "a",
-     "ru": "Тысяча?",
-     "en": "A thousand?"
-    },
-    {
-     "s": "b",
-     "ru": "Да. Билет на сентябрь.",
-     "en": "Yes. A ticket for September."
-    },
-    {
-     "s": "a",
-     "ru": "Анна, а номер?",
-     "en": "Anna, and the seat number?"
-    },
-    {
-     "s": "b",
-     "ru": "Номер — в билете.",
-     "en": "The number is on the ticket."
-    },
-    {
-     "s": "a",
-     "ru": "Спасибо, Анна.",
-     "en": "Thank you, Anna."
-    },
-    {
-     "s": "b",
-     "ru": "Саша, вот ваш билет.",
-     "en": "Sasha, here is your ticket."
-    }
-   ],
-   "questions": [
-    {
-     "ask": "What is Sasha buying?",
-     "options": [
-      "A train ticket",
-      "A bus ticket",
-      "A month pass",
-      "A seat number"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "For when?",
-     "options": [
-      "September",
-      "December",
-      "This month",
-      "Next week"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does he not know?",
-     "options": [
-      "The date",
-      "The price",
-      "The time",
-      "The platform"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What is there in the morning?",
-     "options": [
-      "A train at a thousand roubles",
-      "A train at two thousand roubles",
-      "An evening train instead",
-      "Nothing until October"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Sasha ask about at the end?",
-     "options": [
-      "The seat number",
-      "The platform",
-      "The return trip",
-      "The price again"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "time:2": {
-   "title": "The Monday train",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Нина",
-     "en": "Nina"
-    },
-    {
-     "id": "b",
-     "ru": "Пётр",
-     "en": "Pyotr"
-    },
-    {
-     "id": "c",
-     "ru": "Ваня",
-     "en": "Vanya"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "поезд",
-     "en": "train"
-    },
-    {
-     "ru": "вокзал",
-     "en": "railway station"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Пётр, мы не успеем!",
-     "en": "Pyotr, we are not going to make it!"
-    },
-    {
-     "s": "b",
-     "ru": "Поезд утром, Нина.",
-     "en": "The train is in the morning, Nina."
-    },
-    {
-     "s": "a",
-     "ru": "Вокзал не тут.",
-     "en": "The station is not here."
+     "ru": "Добрый вечер! У меня вопрос.",
+     "en": "Good evening! I have a question."
     },
     {
      "s": "c",
-     "ru": "Я могу. Я успею.",
-     "en": "I can. I will make it."
-    },
-    {
-     "s": "a",
-     "ru": "Ваня, а ты где?",
-     "en": "Vanya, where are you?"
-    },
-    {
-     "s": "c",
-     "ru": "Я уже на вокзале.",
-     "en": "I am at the station already."
+     "ru": "Добрый вечер. Да, какой вопрос?",
+     "en": "Good evening. Yes, what's the question?"
     },
     {
      "s": "b",
-     "ru": "В марте мы успели.",
-     "en": "In March we made it."
-    },
-    {
-     "s": "a",
-     "ru": "Это был апрель!",
-     "en": "That was April!"
-    },
-    {
-     "s": "b",
-     "ru": "Март, апрель... миллион лет!",
-     "en": "March, April... a million years ago!"
-    },
-    {
-     "s": "a",
-     "ru": "Понедельник — тот же поезд.",
-     "en": "Monday, the same train."
+     "ru": "Где тут ресторан? Мы хотим борщ.",
+     "en": "Where's a restaurant here? We want borscht."
     },
     {
      "s": "c",
-     "ru": "Поезд уже тут!",
-     "en": "The train is here already!"
+     "ru": "Ресторан? Ресторана тут нет. Только кафе.",
+     "en": "A restaurant? There's no restaurant here. Only a café."
     },
     {
      "s": "a",
-     "ru": "Пётр, мы можем?",
-     "en": "Pyotr, can we do it?"
+     "ru": "Кафе? Катя, кафе — это хорошо!",
+     "en": "A café? Katya, a café is fine!"
     },
     {
      "s": "b",
-     "ru": "Мы успеем, Нина.",
-     "en": "We will make it, Nina."
+     "ru": "А вы знаете, какой там борщ?",
+     "en": "And do you know what the borscht is like there?"
     },
     {
      "s": "c",
-     "ru": "Вы успели!",
-     "en": "You made it!"
+     "ru": "Знаю. Это мой борщ. Я там повар.",
+     "en": "I do. It's my borscht. I'm the cook there."
+    },
+    {
+     "s": "a",
+     "ru": "Ваш борщ? Вы повар?",
+     "en": "Your borscht? You're a cook?"
+    },
+    {
+     "s": "c",
+     "ru": "Да, я Юра, я повар. Кафе вот там.",
+     "en": "Yes, I'm Yura, I'm the cook. The café is over there."
+    },
+    {
+     "s": "b",
+     "ru": "А пицца тоже ваша, Юра?",
+     "en": "And is the pizza yours too, Yura?"
+    },
+    {
+     "s": "c",
+     "ru": "Нет, пицца не моя. Только борщ.",
+     "en": "No, the pizza isn't mine. Just the borscht."
+    },
+    {
+     "s": "a",
+     "ru": "Вот и хорошо, Катя! Борщ у Юры.",
+     "en": "That settles it, Katya! Borscht at Yura's."
+    },
+    {
+     "s": "b",
+     "ru": "Спасибо, Юра! Мы в кафе.",
+     "en": "Thank you, Yura! We're off to the café."
     }
    ],
    "questions": [
     {
-     "ask": "What is the rush?",
+     "ask": "What does Katya want to eat?",
      "options": [
-      "They may miss a train",
-      "They may miss a bus",
-      "They are late for work",
-      "They have lost a ticket"
+      "Borscht",
+      "Pancakes",
+      "Dumplings",
+      "Salmon"
      ],
      "answer": 0
     },
     {
-     "ask": "Where is Vanya?",
+     "ask": "What is the problem with Katya's plan?",
      "options": [
-      "Already at the station",
-      "Still on his way there",
-      "Waiting at the wrong stop",
-      "Back at the house"
+      "There is no restaurant nearby",
+      "The restaurant is closed now",
+      "The restaurant is too pricey",
+      "The restaurant has no tables"
      ],
      "answer": 0
     },
     {
-     "ask": "What do the other two argue about?",
+     "ask": "What does the man they ask turn out to be?",
      "options": [
-      "Whether it was March or April",
-      "Whether it is a million miles",
-      "Who is holding the tickets",
-      "Which platform they want"
+      "The cook",
+      "A waiter",
+      "A driver",
+      "The owner"
      ],
      "answer": 0
     },
     {
-     "ask": "When is the same train next?",
+     "ask": "What does Yura make at the café?",
      "options": [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Friday"
+      "Only the borscht",
+      "Only the pizza",
+      "The tea and cakes",
+      "Every dish there"
      ],
      "answer": 0
     },
     {
-     "ask": "How does it end?",
+     "ask": "Where do the women go in the end?",
      "options": [
-      "They make it",
-      "They miss it",
-      "They give up",
-      "They wait for Vanya"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "time:3": {
-   "title": "Nights in December",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Лена",
-     "en": "Lena"
-    },
-    {
-     "id": "b",
-     "ru": "Борис",
-     "en": "Boris"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "работа",
-     "en": "work"
-    },
-    {
-     "ru": "смена",
-     "en": "shift"
-    },
-    {
-     "ru": "больница",
-     "en": "hospital"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Борис, у тебя смена?",
-     "en": "Boris, have you got a shift?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, ночная. В декабре.",
-     "en": "Yes, a night one. In December."
-    },
-    {
-     "s": "a",
-     "ru": "Весь декабрь?",
-     "en": "All of December?"
-    },
-    {
-     "s": "b",
-     "ru": "Среда, и ещё третья.",
-     "en": "Wednesday, and the third one too."
-    },
-    {
-     "s": "a",
-     "ru": "Третья неделя?",
-     "en": "The third week?"
-    },
-    {
-     "s": "b",
-     "ru": "Да. В больнице.",
-     "en": "Yes. At the hospital."
-    },
-    {
-     "s": "a",
-     "ru": "А в июне?",
-     "en": "And in June?"
-    },
-    {
-     "s": "b",
-     "ru": "В июне я не могу.",
-     "en": "In June I cannot."
-    },
-    {
-     "s": "a",
-     "ru": "Почему, Борис?",
-     "en": "Why not, Boris?"
-    },
-    {
-     "s": "b",
-     "ru": "Ночная работа — это год.",
-     "en": "Night work — that is a whole year."
-    },
-    {
-     "s": "a",
-     "ru": "Год? Ты успеешь?",
-     "en": "A year? Will you manage?"
-    },
-    {
-     "s": "b",
-     "ru": "Успею. Я уже знаю.",
-     "en": "I will. I know that already."
-    },
-    {
-     "s": "a",
-     "ru": "Среда — моя смена.",
-     "en": "Wednesday is my shift."
-    },
-    {
-     "s": "b",
-     "ru": "Лена, и моя.",
-     "en": "Lena, mine too."
-    },
-    {
-     "s": "a",
-     "ru": "Третья среда — наша.",
-     "en": "The third Wednesday is ours."
-    }
-   ],
-   "questions": [
-    {
-     "ask": "What has Boris got coming up?",
-     "options": [
-      "Night shifts",
-      "A long holiday",
-      "A week of exams",
-      "A new job"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Where does he work?",
-     "options": [
-      "In a hospital",
-      "In a shop",
-      "At a station",
-      "He does not say"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Which day of the week?",
-     "options": [
-      "Wednesday",
-      "Monday",
-      "Saturday",
-      "Every day"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Which month does he say he cannot?",
-     "options": [
-      "June",
-      "July",
-      "March",
-      "April"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Lena find out at the end?",
-     "options": [
-      "They share a shift",
-      "They will not meet",
-      "He is leaving soon",
-      "She must swap hers"
+      "To the café",
+      "To the hotel",
+      "To a market",
+      "Home to bed"
      ],
      "answer": 0
     }

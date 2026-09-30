@@ -323,7 +323,7 @@ describe("the disc you are on", () => {
     expect(shown.map((u) => u.id)).toEqual(UN.map((u) => u.id));
     const filled = shown.filter((u) => painted(screen.getByTestId(`node-${u.id}`), light.brand) > 0);
     expect(filled.map((u) => u.id)).toEqual(["core1"]);
-    expect(screen.getByText(/^Start \(Pronouns & Being\)$/)).toBeTruthy();
+    expect(screen.getByText(`Start (${STAGES[0].core.name})`)).toBeTruthy();
   });
 
   test("a locked unit is not filled", async () => {

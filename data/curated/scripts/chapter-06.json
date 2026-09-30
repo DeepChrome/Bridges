@@ -1,311 +1,296 @@
 {
  "chapter": 6,
- "name": "Health & Getting Around",
+ "name": "Before & After",
  "lessons": {
   "core6:2": {
-   "title": "The dog is out",
+   "title": "Four tickets, one principle",
    "cast": [
     {
      "id": "a",
-     "ru": "Лена",
-     "en": "Lena"
+     "ru": "Маша",
+     "en": "Masha"
     },
     {
      "id": "b",
      "ru": "Борис",
      "en": "Boris"
-    },
+    }
+   ],
+   "intro": [
     {
-     "id": "c",
-     "ru": "Миша",
-     "en": "Misha"
+     "ru": "билет",
+     "en": "ticket"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Борис, ты не видел собаку?",
-     "en": "Boris, have you seen the dog?"
+     "ru": "Борис, концерт сегодня. Сколько билетов нам взять?",
+     "en": "Boris, the concert is today. How many tickets should we get?"
     },
     {
      "s": "b",
-     "ru": "Вчера видел. А что?",
-     "en": "I saw it yesterday. Why?"
+     "ru": "Несколько. Петя и Соня тоже хотят, но после работы.",
+     "en": "A few. Petya and Sonya want to come too, but after work."
     },
     {
      "s": "a",
-     "ru": "Её нет в квартире.",
-     "en": "It is not in the flat."
+     "ru": "Значит, надо взять билеты и для них?",
+     "en": "So we have to get tickets for them too?"
     },
     {
      "s": "b",
-     "ru": "Она вышла без тебя?",
-     "en": "It got out without you?"
+     "ru": "Да, но сначала надо считать деньги.",
+     "en": "Yes, but first we need to count the money."
     },
     {
      "s": "a",
-     "ru": "Без меня. Я работала.",
-     "en": "Without me. I was working."
-    },
-    {
-     "s": "c",
-     "ru": "Я видел собаку на улице.",
-     "en": "I saw the dog on the street."
-    },
-    {
-     "s": "a",
-     "ru": "Миша! Где?",
-     "en": "Misha! Where?"
-    },
-    {
-     "s": "c",
-     "ru": "Под машиной, у дома.",
-     "en": "Under a car, by the house."
-    },
-    {
-     "s": "a",
-     "ru": "Под машиной! Она там?",
-     "en": "Under a car! Is it there now?"
-    },
-    {
-     "s": "c",
-     "ru": "Была. Два часа.",
-     "en": "It was. Two hours ago."
+     "ru": "Я уже считала. У меня деньги на три билета.",
+     "en": "I've already counted. I have money for three tickets."
     },
     {
      "s": "b",
-     "ru": "Или она уже дома?",
-     "en": "Or is it home already?"
+     "ru": "А у меня на один. Значит, денег для всех достаточно.",
+     "en": "And I have enough for one. So there's enough money for everyone."
     },
     {
      "s": "a",
-     "ru": "Дома ничего нет.",
-     "en": "There is nothing at home."
+     "ru": "Нет, Борис, я хочу взять и твой билет. Это подарок.",
+     "en": "No, Boris, I want to get your ticket too. It's a present."
     },
     {
      "s": "b",
-     "ru": "Идём на улицу.",
-     "en": "Let us go out to the street."
-    },
-    {
-     "s": "c",
-     "ru": "Я иду с вами.",
-     "en": "I am coming with you."
+     "ru": "Спасибо, Маша, но нет. У меня принцип.",
+     "en": "Thanks, Masha, but no. I have a principle."
     },
     {
      "s": "a",
-     "ru": "Два человека — это хорошо.",
-     "en": "Two people is good."
+     "ru": "Принцип? Что ты имеешь в виду?",
+     "en": "A principle? What do you mean?"
     },
     {
      "s": "b",
-     "ru": "Мы её найдём, Лена.",
-     "en": "We will find it, Lena."
+     "ru": "Каждый сам оплачивает свой билет. Всегда.",
+     "en": "Everyone pays for their own ticket. Always."
+    },
+    {
+     "s": "a",
+     "ru": "Понятно. А у Пети и Сони деньги есть?",
+     "en": "I see. And do Petya and Sonya have the money?"
+    },
+    {
+     "s": "b",
+     "ru": "Есть. Соня может перевести их тебе после работы.",
+     "en": "They do. Sonya can transfer it to you after work."
+    },
+    {
+     "s": "a",
+     "ru": "После работы? Тогда билетов уже нет, Борис.",
+     "en": "After work? By then there won't be any tickets left, Boris."
+    },
+    {
+     "s": "b",
+     "ru": "Хорошо. Тогда можно взять все билеты сейчас.",
+     "en": "All right. Then we can get all the tickets now."
+    },
+    {
+     "s": "a",
+     "ru": "И Соня потом даёт деньги мне, так?",
+     "en": "And Sonya gives me the money afterwards, right?"
+    },
+    {
+     "s": "b",
+     "ru": "Так. Это тоже принцип.",
+     "en": "Right. That's a principle too."
     }
    ],
    "questions": [
     {
-     "ask": "What has happened?",
+     "ask": "Where are Masha and Boris going?",
      "options": [
-      "The dog has got out",
-      "The dog is unwell",
-      "The dog has been found",
-      "The dog bit someone"
+      "To a concert",
+      "To a lecture",
+      "To the cinema",
+      "To a museum"
      ],
      "answer": 0
     },
     {
-     "ask": "When did Boris last see it?",
+     "ask": "Who else wants to come?",
      "options": [
-      "Yesterday",
-      "This morning",
-      "An hour ago",
-      "He cannot say"
+      "Petya and Sonya",
+      "Petya and Lena",
+      "Sonya and Oleg",
+      "Only their boss"
      ],
      "answer": 0
     },
     {
-     "ask": "Where did Misha see it?",
+     "ask": "Why does Boris turn down Masha's offer?",
      "options": [
-      "Under a car",
-      "On the main road",
-      "By the school",
-      "In the garden"
+      "He pays for himself on principle",
+      "He does not like concerts at all",
+      "He already has a ticket at home",
+      "He has to work late this evening"
      ],
      "answer": 0
     },
     {
-     "ask": "How long ago was that?",
+     "ask": "When could Sonya send her money?",
      "options": [
-      "Two hours",
-      "Two days",
-      "Ten minutes",
-      "He does not say"
+      "After work",
+      "Before lunch",
+      "At the concert",
+      "In the morning"
      ],
      "answer": 0
     },
     {
-     "ask": "What do they decide?",
+     "ask": "What do they decide to do?",
      "options": [
-      "To go out and look",
-      "To wait at home",
-      "To ring the police",
-      "To leave it till later"
+      "Take all the tickets now",
+      "Wait for Petya and Sonya",
+      "Skip the concert tonight",
+      "Buy only two tickets now"
      ],
      "answer": 0
     }
    ]
   },
   "core6:4": {
-   "title": "Her favourite",
+   "title": "Breakfast before the lesson",
    "cast": [
     {
      "id": "a",
-     "ru": "Катя",
-     "en": "Katya"
+     "ru": "Нина",
+     "en": "Nina"
     },
     {
      "id": "b",
-     "ru": "Олег",
-     "en": "Oleg"
-    }
-   ],
-   "intro": [
+     "ru": "Виктор",
+     "en": "Viktor"
+    },
     {
-     "ru": "спасибо",
-     "en": "thank you"
+     "id": "c",
+     "ru": "Соня",
+     "en": "Sonya"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Олег, это моя любимая музыка.",
-     "en": "Oleg, this is my favourite music."
+     "ru": "Виктор, урок уже идёт! Где вы были?",
+     "en": "Viktor, the lesson has already started! Where were you?"
     },
     {
      "s": "b",
-     "ru": "Эта? Я её не знаю.",
-     "en": "This? I do not know it."
+     "ru": "Нина, я был в кафе. Сначала завтрак, потом урок.",
+     "en": "Nina, I was at the café. First breakfast, then the lesson."
+    },
+    {
+     "s": "c",
+     "ru": "Нина, он же иностранец. За границей сначала завтрак.",
+     "en": "Nina, he's a foreigner. Abroad, breakfast comes first."
+    },
+    {
+     "s": "b",
+     "ru": "Спасибо, Соня. А что мы сегодня делаем?",
+     "en": "Thank you, Sonya. So what are we doing today?"
     },
     {
      "s": "a",
-     "ru": "Не знаешь? Это же история!",
-     "en": "You do not know it? It is a piece of history!"
+     "ru": "Сегодня у нас «после». Кто может сказать предложение?",
+     "en": "Today it's the word \"after\". Who can make a sentence?"
     },
     {
      "s": "b",
-     "ru": "Какая история?",
-     "en": "What history?"
+     "ru": "Я могу. После завтрак я иду на урок.",
+     "en": "I can. After breakfast (in the wrong form) I go to the lesson."
     },
     {
      "s": "a",
-     "ru": "Моего отца. Он её любил.",
-     "en": "My father's. He loved it."
+     "ru": "Хорошо, но есть ошибка. После «после» другая форма.",
+     "en": "Good, but there's a mistake. After \"after\" comes a different form."
     },
     {
-     "s": "b",
-     "ru": "А, вот как.",
-     "en": "Ah, I see."
-    },
-    {
-     "s": "a",
-     "ru": "Вот стол. Вот вино.",
-     "en": "Here is the table. Here is the wine."
-    },
-    {
-     "s": "b",
-     "ru": "Я не пью вино.",
-     "en": "I do not drink wine."
+     "s": "c",
+     "ru": "«После завтрака»! Правильно, Нина?",
+     "en": "\"After breakfast\", in the right form! Is that right, Nina?"
     },
     {
      "s": "a",
-     "ru": "Не пьёшь? Вот вода.",
-     "en": "You do not? Here is water."
+     "ru": "Правильно, Соня. Виктор, теперь ещё одно предложение.",
+     "en": "Right, Sonya. Viktor, now one more sentence."
     },
     {
      "s": "b",
-     "ru": "Спасибо. А что за задача?",
-     "en": "Thank you. And what is the task?"
+     "ru": "После урока я иду в банк, а потом на работу.",
+     "en": "After the lesson I go to the bank, and then to work."
     },
     {
      "s": "a",
-     "ru": "Задача одна — ты её любишь.",
-     "en": "The task is one thing: you love it."
+     "ru": "Молодец, Виктор! Здесь ошибок нет.",
+     "en": "Well done, Viktor! No mistakes here."
     },
     {
      "s": "b",
-     "ru": "Я не умею любить музыку.",
-     "en": "I do not know how to love music."
+     "ru": "Спасибо, Нина. А завтрак после обеда можно?",
+     "en": "Thank you, Nina. And can I have breakfast after lunch?"
     },
     {
      "s": "a",
-     "ru": "Умеешь. Все умеют.",
-     "en": "You do. Everyone does."
-    },
-    {
-     "s": "b",
-     "ru": "Хорошо, Катя. Вот я.",
-     "en": "All right, Katya. Here I am."
-    },
-    {
-     "s": "a",
-     "ru": "Это моя любимая история.",
-     "en": "This is my favourite story."
-    },
-    {
-     "s": "b",
-     "ru": "И моя, может быть.",
-     "en": "And mine, perhaps."
+     "ru": "Виктор, это уже другая ошибка.",
+     "en": "Viktor, that's a different mistake altogether."
     }
    ],
    "questions": [
     {
-     "ask": "What are they disagreeing about?",
+     "ask": "Why is Viktor late for the lesson?",
      "options": [
-      "Music",
-      "Wine",
-      "Money",
-      "Work"
+      "He was having breakfast",
+      "He was changing his money",
+      "He had missed the bus",
+      "He was asleep at home"
      ],
      "answer": 0
     },
     {
-     "ask": "Why does it matter to Katya?",
+     "ask": "What is today's lesson about?",
      "options": [
-      "It was her father's",
-      "It was her first ever",
-      "She wrote it herself",
-      "She heard it at work"
+      "Using the word 'after'",
+      "Using the word 'before'",
+      "Filling in a visa form",
+      "Ordering food in Russian"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Oleg turn down?",
+     "ask": "What was wrong with Viktor's first sentence?",
      "options": [
-      "The wine",
-      "The food",
-      "The music",
-      "The chair"
+      "A noun had the wrong ending",
+      "The verb had the wrong ending",
+      "It was missing a verb at all",
+      "The word order was backwards"
      ],
      "answer": 0
     },
     {
-     "ask": "How many tasks does Katya set him?",
+     "ask": "Who gives the correct form?",
      "options": [
-      "One task",
-      "Two tasks",
-      "No task",
-      "Three tasks"
+      "Sonya, a classmate",
+      "Nina, the teacher",
+      "Viktor, on his own",
+      "No one in the class"
      ],
      "answer": 0
     },
     {
-     "ask": "How does Oleg end up?",
+     "ask": "What does Viktor ask at the end?",
      "options": [
-      "Coming round to it",
-      "Walking out on her",
-      "Still refusing it",
-      "Changing the subject"
+      "If breakfast can come after lunch",
+      "If the lesson can end early now",
+      "If lunch can come before the lesson",
+      "If he can leave for the bank now"
      ],
      "answer": 0
     }

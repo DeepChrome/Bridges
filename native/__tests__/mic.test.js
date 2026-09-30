@@ -27,6 +27,7 @@ async function withProfile(ui) {
 const pause = () => act(() => new Promise((r) => setTimeout(r, SILENCE_MS + 150)));
 
 beforeEach(async () => { await flushState(); await AsyncStorage.clear(); global.__stt.reset(); });
+const saved = async () => { await flushState(); return global.__db.saved("p1"); };
 afterEach(async () => { await flushState(); });
 
 function Answer() {
@@ -35,17 +36,28 @@ function Answer() {
 }
 
 describe("speaking into a field", () => {
-  it("fills the dictionary's search with what was said, hearing Russian or English", async () => {
+  /* One language at a time, chosen by the RU/EN switch beside the microphone
+     and remembered (2026-09-29): Android's own switching between the two
+     leaned to English. */
+  it("fills the dictionary's search with what was said, in the language chosen", async () => {
     await withProfile(<Search navigation={nav} />);
-    await act(async () => { fireEvent.press(await screen.findByTestId("word-search-mic")); });
+    expect((await screen.findByTestId("word-search-lang")).props.accessibilityLabel).toBe("Listen in Russian");
+    await act(async () => { fireEvent.press(screen.getByTestId("word-search-mic")); });
     const opts = global.__stt.calls[0];
     expect(opts.continuous).toBe(true);                       // it ends itself, on a pause
-    expect(opts.androidIntentOptions.EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES).toEqual(["ru-RU", "en-US"]);
+    expect(opts.lang).toBe("ru-RU");
+    expect(opts.androidIntentOptions.EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES).toBeUndefined();
     await act(async () => {
       global.__stt.emit("result", { isFinal: true, results: [{ transcript: "собака" }] });
     });
     await pause();
     expect(screen.getByTestId("word-search").props.value).toBe("собака");
+
+    // Switched to English, the next press listens in English, and it is kept.
+    await act(async () => { fireEvent.press(screen.getByTestId("word-search-lang")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("word-search-mic")); });
+    expect(global.__stt.calls[global.__stt.calls.length - 1].lang).toBe("en-US");
+    expect((await saved()).searchLang).toBe("en-US");
   });
 
   it("puts a spoken answer where the typing goes, in Russian only, without the full stop", async () => {
@@ -70,5 +82,44 @@ describe("speaking into a field", () => {
     await pause();
     expect(screen.getByTestId("answer").props.value).toBe("");
     expect(screen.getByTestId("answer-mic").props.accessibilityState).toMatchObject({ selected: false });
+  });
+});
+
+/* The microphone is drawn as open when the engine can hear, not when it was
+   asked to start (the owner, 2026-09-29: *"if you start talking too soon, it
+   won't detect. There seems to be a solid one second delay"*). Android takes a
+   moment to open the audio; speaking into that moment was speaking to nobody. */
+describe("when the microphone is ready", () => {
+  function Probe() {
+    const { useRecognizer } = require("../src/speech");
+    const rec = useRecognizer({ onFinal: () => {} });
+    return (
+      <>
+        <Text testID="phase">{rec.phase}</Text>
+        <Text testID="go" onPress={() => rec.hold()}>go</Text>
+      </>
+    );
+  }
+  const { Text } = require("react-native");
+
+  it("reads as listening only once the engine reports audio", async () => {
+    global.__stt.slowStart = true;
+    await render(<Probe />);
+    await act(async () => { fireEvent.press(screen.getByTestId("go")); });
+    expect(global.__stt.calls).toHaveLength(1);                // the engine was started…
+    expect(screen.getByTestId("phase").props.children).toBe("asking");   // …but cannot hear yet
+    await act(async () => { global.__stt.emit("audiostart", {}); });
+    expect(screen.getByTestId("phase").props.children).toBe("listening");
+  });
+
+  it("asks for the microphone once, not on every press", async () => {
+    const { ExpoSpeechRecognitionModule: M } = require("expo-speech-recognition");
+    M.requestPermissionsAsync.mockClear();
+    await render(<Probe />);
+    await act(async () => { fireEvent.press(screen.getByTestId("go")); });
+    await act(async () => { global.__stt.emit("result", { isFinal: true, results: [{ transcript: "да" }] }); });
+    await act(async () => { fireEvent.press(screen.getByTestId("go")); });
+    expect(global.__stt.calls).toHaveLength(2);
+    expect(M.requestPermissionsAsync).toHaveBeenCalledTimes(1);
   });
 });

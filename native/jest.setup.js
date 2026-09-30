@@ -157,12 +157,17 @@ jest.mock("expo-speech-recognition", () => {
   const stt = {
     calls: [],
     emit: (name, payload) => (listeners[name] || []).forEach((h) => h(payload)),
-    reset: () => { stt.calls.length = 0; for (const k in listeners) delete listeners[k]; },
+    reset: () => { stt.calls.length = 0; stt.slowStart = false; for (const k in listeners) delete listeners[k]; },
   };
   global.__stt = stt;
   return {
     ExpoSpeechRecognitionModule: {
-      start: (opts) => { stt.calls.push(opts); stt.emit("start", {}); },
+      // The device reports "start" and then "audiostart" once it can hear; the
+      // microphone is drawn as open only on the second (speech.js `ready`).
+      start: (opts) => {
+        stt.calls.push(opts); stt.emit("start", {});
+        if (!stt.slowStart) stt.emit("audiostart", {});   // a test may hold it back
+      },
       // stop() does not emit "end" here: on the device the final result arrives
       // first and "end" after it, so a test emits them in that order itself.
       stop: jest.fn(),
@@ -306,3 +311,7 @@ jest.mock("expo-file-system", () => {
   Animated.spring = settle;
   Animated.decay = settle;
 }
+
+/* The microphone grant is cached for the life of the process (speech.js); each
+   test starts as a fresh install would, asked again. */
+beforeEach(() => { require("./src/speech").forgetMicPermission(); });

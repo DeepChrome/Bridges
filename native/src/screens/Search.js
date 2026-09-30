@@ -109,7 +109,9 @@ export default function Search({ navigation }) {
   return (
     <Screen>
       <SearchField value={text} onChangeText={setText} placeholder="Russian or English"
-                   label="Search the dictionary" testID="word-search" voice={[LANG, LANG_EN]} />
+                   label="Search the dictionary" testID="word-search" voice={[LANG, LANG_EN]}
+                   voiceLang={st.searchLang}
+                   onVoiceLang={(l) => update((p) => ({ ...p, searchLang: l }))} />
 
       {!q && recent.length ? (
         <>

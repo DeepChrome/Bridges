@@ -157,6 +157,21 @@ export const TRANSIENT = {
    it is listening for; the owner's complaint (2026-09-19) that Say "almost
    always marks me wrong" was mostly the engine hearing a plausible other
    sentence. Read at hold time, so a changing question changes the hint. */
+/* The microphone permission, once granted, for the life of the process.
+   Asking the platform on every press was a native round trip between the
+   finger and the engine starting — part of the second the owner had to wait
+   (2026-09-29: *"if you start talking too soon, it won't detect"*). */
+let micGranted = false;
+/* Forgotten when the engine reports it refused (the permission can be taken
+   back in the system settings while the app is open), and between tests. */
+export function forgetMicPermission() { micGranted = false; }
+
+/* How long to wait for the engine to say audio has started before drawing
+   the microphone as open anyway. Android reports it within a few hundred
+   milliseconds; an engine that never reports must not leave the button
+   looking busy for good. */
+export const READY_FALLBACK_MS = 1500;
+
 export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias } = {}) {
   const [phase, setPhase] = useState("idle");
   const phaseRef = useRef("idle");
@@ -171,6 +186,13 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
   const watchdog = useRef(null);
   const stopTimer = useRef(null);
   const releasedEarly = useRef(false);
+  /* Whether the engine is running — from the moment it was started, which is
+     before it can hear anything. The *phase* the screen reads only becomes
+     "listening" when the engine reports audio (`audiostart`), so the button
+     turns on when speaking will be heard rather than when the start was
+     asked for; everything that ends or times an attempt reads this instead. */
+  const engine = useRef(false);
+  const readyTimer = useRef(null);
   /* Whether the attempt in flight ends by itself (`listen`) rather than on a
      release (`hold`). It decides what "the engine stopped with nothing" means:
      a finger let go too early, or a turn where nobody spoke. */
@@ -201,10 +223,17 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     if (stopTimer.current) { clearTimeout(stopTimer.current); stopTimer.current = null; }
     if (silence.current) { clearTimeout(silence.current); silence.current = null; }
     if (cap.current) { clearTimeout(cap.current); cap.current = null; }
+    if (readyTimer.current) { clearTimeout(readyTimer.current); readyTimer.current = null; }
+  };
+  // The engine is up and hearing: now the button may say so.
+  const ready = () => {
+    if (readyTimer.current) { clearTimeout(readyTimer.current); readyTimer.current = null; }
+    if (engine.current && phaseRef.current === "asking") go("listening");
   };
 
   const finish = (text, alternatives) => {
     clearTimers();
+    engine.current = false;
     selfEnding.current = false;
     heard.current = [];
     partial.current = "";
@@ -219,6 +248,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
      able to tell silence from an answer. */
   const quiet = () => {
     clearTimers();
+    engine.current = false;
     selfEnding.current = false;
     heard.current = [];
     partial.current = "";
@@ -234,7 +264,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     if (silence.current) clearTimeout(silence.current);
     silence.current = setTimeout(() => {
       silence.current = null;
-      if (phaseRef.current !== "listening" || !selfEnding.current) return;
+      if (!engine.current || !selfEnding.current) return;
       const whole = spoken();
       if (!whole) { quiet(); try { M.abort(); } catch (e) { /* nothing to abort */ } return; }
       finish(whole, [whole]);
@@ -242,8 +272,11 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     }, SILENCE_MS);
   };
 
+  useSpeechRecognitionEvent("audiostart", ready);
+  useSpeechRecognitionEvent("speechstart", ready);
   useSpeechRecognitionEvent("result", (ev) => {
-    if (phaseRef.current !== "listening") return;
+    if (!engine.current) return;
+    ready();
     const all = (ev.results || []).map((r) => r && r.transcript).filter((t) => typeof t === "string");
     const text = all[0] || "";
     /* Held speech: the release decides, so a final result is the answer. */
@@ -265,8 +298,9 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     }
   });
   useSpeechRecognitionEvent("error", (ev) => {
-    if (phaseRef.current !== "listening") return;
+    if (!engine.current) return;
     clearTimers();
+    engine.current = false;
     const wasSelf = selfEnding.current;
     selfEnding.current = false;
     go("idle");
@@ -275,6 +309,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
       setBlock({ why: "model", name: NAME[lang.current] || lang.current,
                  text: `${NAME[lang.current] || lang.current} is not installed for offline recognition.` });
     } else if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
+      micGranted = false;
       setBlock({ why: "mic", text: "The microphone is off for Bridges." });
     } else if (TRANSIENT[ev.error]) {
       setNote(TRANSIENT[ev.error]);
@@ -295,7 +330,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     }
   });
   useSpeechRecognitionEvent("end", () => {
-    if (phaseRef.current !== "listening") return;
+    if (!engine.current) return;
     /* Conversation mode holds the engine open, so an ending here is the
        platform closing the session under us. Whatever was heard is the turn. */
     if (selfEnding.current) {
@@ -306,7 +341,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     // Held speech ended without a final result. The last partial is what the
     // recogniser had, so use that rather than throw the attempt away.
     if (liveRef.current) finish(liveRef.current);
-    else go("idle");
+    else { engine.current = false; go("idle"); }
   });
 
   /* One way in for both: permission, then the engine. `self` says whether the
@@ -322,8 +357,11 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     heard.current = [];
     partial.current = "";
     go("asking");
-    let perm;
-    try { perm = await M.requestPermissionsAsync(); } catch (e) { perm = { granted: false }; }
+    let perm = { granted: micGranted };
+    if (!micGranted) {
+      try { perm = await M.requestPermissionsAsync(); } catch (e) { perm = { granted: false }; }
+      micGranted = !!perm.granted;
+    }
     if (!perm.granted) {
       go("idle");
       selfEnding.current = false;
@@ -331,8 +369,9 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
       return;
     }
     if (releasedEarly.current) { go("idle"); selfEnding.current = false; return; }
-    go("listening");
+    engine.current = true;
     startedAt.current = Date.now();
+    readyTimer.current = setTimeout(() => { readyTimer.current = null; ready(); }, READY_FALLBACK_MS);
     /* Nothing releases a hands-free attempt, so the latency `onFinal` reports
        is measured from the moment it started listening. */
     if (self) releasedAt.current = Date.now();
@@ -353,7 +392,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
         /* Nobody is there. Cleared the moment any word arrives. */
         watchdog.current = setTimeout(() => {
           watchdog.current = null;
-          if (phaseRef.current !== "listening" || !selfEnding.current) return;
+          if (!engine.current || !selfEnding.current) return;
           quiet();
           try { M.abort(); } catch (e) { /* nothing to abort */ }
         }, NOTHING_MS);
@@ -361,13 +400,15 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
            open for the rest of the session by an engine that never closes. */
         cap.current = setTimeout(() => {
           cap.current = null;
-          if (phaseRef.current !== "listening" || !selfEnding.current) return;
+          if (!engine.current || !selfEnding.current) return;
           const whole = spoken();
           if (whole) finish(whole, [whole]); else quiet();
           try { M.abort(); } catch (e) { /* nothing to abort */ }
         }, LISTEN_MAX_MS);
       }
     } catch (e) {
+      clearTimers();
+      engine.current = false;
       go("idle");
       selfEnding.current = false;
       setBlock({ why: "engine", text: `Recognition failed: ${e.message || e}` });
@@ -390,10 +431,11 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     selfEnding.current = false;
     heard.current = [];
     partial.current = "";
-    const was = phaseRef.current;
+    const was = engine.current || phaseRef.current !== "idle";
+    engine.current = false;
     go("idle");
     setLive("");
-    if (was !== "idle") { try { M.abort(); } catch (e) { /* nothing to abort */ } }
+    if (was) { try { M.abort(); } catch (e) { /* nothing to abort */ } }
   };
 
   /* A recogniser that never reports "end" after stop() would leave the button
@@ -402,10 +444,10 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
      attempt is abandoned and said so. */
   const release = () => {
     releasedAt.current = Date.now();
-    if (phaseRef.current === "listening") {
+    if (engine.current) {
       const stop = () => {
         stopTimer.current = null;
-        if (phaseRef.current !== "listening") return;
+        if (!engine.current) return;
         try { M.stop(); } catch (e) { /* the end event still arrives */ }
       };
       const heldFor = Date.now() - startedAt.current;
@@ -414,10 +456,10 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
       if (watchdog.current) clearTimeout(watchdog.current);
       watchdog.current = setTimeout(() => {
         watchdog.current = null;
-        if (phaseRef.current !== "listening") return;
+        if (!engine.current) return;
         // The last partial is what the recogniser had; with nothing, say so.
         if (liveRef.current) finish(liveRef.current);
-        else { go("idle"); setNote("Nothing heard"); }
+        else { engine.current = false; go("idle"); setNote("Nothing heard"); }
         try { M.abort(); } catch (e) { /* nothing to abort */ }
       }, WATCHDOG_MS);
     } else {

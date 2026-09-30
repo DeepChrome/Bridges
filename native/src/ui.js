@@ -1,4 +1,4 @@
-﻿/* Shared UI primitives, matching the web app's visual language.
+/* Shared UI primitives, matching the web app's visual language.
  *
  * The web app leans on CSS classes; here the same shapes are components so the
  * spacing, radii and colours stay in one place instead of being retyped per screen.
@@ -747,10 +747,24 @@ export function Choice({ options, value, onPick, testID, style }) {
 /* `voice` puts a small grey microphone in the bar (the owner, 2026-09-29):
    one press listens, and what is said becomes the query as it is said. Its
    value is the languages to hear — the dictionary takes Russian or English. */
-export function SearchField({ value, onChangeText, placeholder, label, testID, style, autoFocus, voice }) {
+export function SearchField({ value, onChangeText, placeholder, label, testID, style, autoFocus, voice,
+                             voiceLang, onVoiceLang }) {
   const t = useTheme();
   const [note, setNote] = useState(null);
-  const right = (voice ? 44 : 0) + (value ? 40 : 0);
+  /* Which language the microphone listens in, when it could hear either.
+     Android's own switching between the two was tried first and leaned to
+     English (the owner, 2026-09-29: *"the voice button for the search module
+     seems to prioritize English"*), so the learner says which, once, and it is
+     remembered (`onVoiceLang`). */
+  const choose = Array.isArray(voice) && voice.length > 1;
+  const [lang, setLang] = useState(voiceLang || (voice && voice[0]));
+  useEffect(() => { if (voiceLang) setLang(voiceLang); }, [voiceLang]);
+  const flip = () => {
+    const next = voice[(voice.indexOf(lang) + 1) % voice.length];
+    setLang(next);
+    if (onVoiceLang) onVoiceLang(next);
+  };
+  const right = (voice ? 44 : 0) + (choose ? 40 : 0) + (value ? 40 : 0);
   return (
     <View style={style}>
     <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -772,14 +786,24 @@ export function SearchField({ value, onChangeText, placeholder, label, testID, s
       {value ? (
         <Pressable onPress={() => onChangeText("")} hitSlop={10} accessibilityRole="button"
                    accessibilityLabel="Clear" testID={testID ? testID + "-clear" : undefined}
-                   style={{ position: "absolute", right: voice ? 46 : 6, width: 36, height: 36, borderRadius: 18,
+                   style={{ position: "absolute", right: (voice ? 46 : 6) + (choose ? 40 : 0), width: 36, height: 36, borderRadius: 18,
                             alignItems: "center", justifyContent: "center" }}>
           <Text style={{ color: t.ink3, fontSize: 16 }}>✕</Text>
         </Pressable>
       ) : null}
+      {choose ? (
+        <Pressable testID={testID ? testID + "-lang" : "search-lang"} onPress={flip} hitSlop={6}
+                   accessibilityRole="button" accessibilityLabel={`Listen in ${lang === voice[0] ? "Russian" : "English"}`}
+                   style={{ position: "absolute", right: 46, width: 36, height: 36, borderRadius: 18,
+                            alignItems: "center", justifyContent: "center" }}>
+          <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "700" }}>
+            {lang === voice[0] ? "RU" : "EN"}
+          </Text>
+        </Pressable>
+      ) : null}
       {voice ? (
         <View style={{ position: "absolute", right: 4 }}>
-          <MicButton testID={testID ? testID + "-mic" : "search-mic"} langs={voice}
+          <MicButton testID={testID ? testID + "-mic" : "search-mic"} langs={choose ? [lang] : voice}
                      onLive={(s) => { if (s) onChangeText(s); }} onText={onChangeText} onNote={setNote} />
         </View>
       ) : null}

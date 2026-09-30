@@ -147,6 +147,11 @@ async function edit(prompt, refs, file, { size = "1024x1024", transparent = true
   const j = await res.json();
   /* The account's rate limit counts reference images a minute (five), and it
      says how long to wait; waiting is cheaper than losing a batch to it. */
+  // …but a 429 that says the credit is spent will not clear by waiting.
+  if (res.status === 429 && /quota|billing/i.test(JSON.stringify(j))) {
+    console.error("OpenAI credit is used up — stopping; what was drawn is kept");
+    process.exit(3);
+  }
   if (res.status === 429 && waited < 10) {
     const s = +((JSON.stringify(j).match(/try again in ([\d.]+)s/) || [])[1] || 15);
     await new Promise((r) => setTimeout(r, (s + 2) * 1000));

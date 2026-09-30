@@ -78,7 +78,7 @@
     "family": {
       "title": "“My” agrees with what is owned",
       "body": "мой, твой, наш, ваш and свой take the gender of the thing possessed, not of the owner. (его, её and их never change.)",
-      "examples": [["мой па́па, моя́ ма́ма", "my dad, my mum"], ["моя́ семья́", "my family"]]
+      "examples": [["мой муж, моя́ жена́", "my husband, my wife"], ["моя́ семья́", "my family"]]
     },
     "time": {
       "title": "Numbers change the noun after them",
@@ -158,7 +158,7 @@
     "tech": {
       "title": "Can and want, plus a verb",
       "body": "мочь and хоте́ть take a verb in its dictionary form after them: я могу́ сде́лать, ты хо́чешь посмотре́ть.",
-      "examples": [["Я могу́ сде́лать ви́део.", "I can make a video."], ["Хо́чешь посмотре́ть?", "Do you want to watch?"]]
+      "examples": [["Я могу́ сде́лать фо́то.", "I can take a photo."], ["Хо́чешь посмотре́ть?", "Do you want to watch?"]]
     },
     "sport": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative", "Prepositional"], "cols": ["Singular"] },

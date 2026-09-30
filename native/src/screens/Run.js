@@ -693,7 +693,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
             {q.hint}
           </Muted>
         ) : (
-          <Btn kind="ghost" label="Hint · counts" style={{ marginBottom: 12 }}
+          <Btn kind="ghost" label="Hint" style={{ marginBottom: 12 }}
                onPress={() => setUsedHint(true)} />
         )
       ) : null}

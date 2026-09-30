@@ -195,7 +195,11 @@ export function sentencesToBuy(payload, audio, replace = SENTENCE_REPLACE) {
   const files = (audio && audio.files) || {};
   const src = (audio && audio.src) || {};
   const out = [], seen = new Set();
-  for (const row of (payload.speech && payload.speech.rows) || []) {
+  /* …and the examples on each unit's grammar card (2026-09-30): the card is
+     read at the start of every unit and under wrong answers, and it was the
+     last place a lesson reached for the phone's voice. */
+  const cards = (payload.units || []).flatMap((u) => ((u.g && u.g.examples) || []).map((e) => [e[0]]));
+  for (const row of ((payload.speech && payload.speech.rows) || []).concat(cards)) {
     const key = fold(row[0]);
     if (seen.has(key)) continue;
     seen.add(key);

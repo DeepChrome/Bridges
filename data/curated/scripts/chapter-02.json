@@ -193,13 +193,17 @@
     {
      "ru": "учитель",
      "en": "teacher"
+    },
+    {
+     "ru": "английский",
+     "en": "English"
     }
    ],
    "lines": [
     {
      "s": "b",
-     "ru": "Тедди, в университете курс русского. Ты хочешь?",
-     "en": "Teddy, there's a Russian course at the university. Do you want to go?"
+     "ru": "Тедди, в университете курс английского. Ты хочешь?",
+     "en": "Teddy, there's an English course at the university. Do you want to go?"
     },
     {
      "s": "a",
@@ -243,18 +247,18 @@
     },
     {
      "s": "b",
-     "ru": "Тедди, ты ещё не знаешь русский.",
-     "en": "Teddy, you don't even know Russian yet."
+     "ru": "Тедди, ты ещё не знаешь английский.",
+     "en": "Teddy, you don't even know English yet."
     },
     {
      "s": "a",
-     "ru": "Знаю, мама! Я говорю, как все.",
-     "en": "I do, Mom! I talk like everybody else."
+     "ru": "Мама, а китайский я тоже не знаю!",
+     "en": "Mom, but I don't know Chinese either!"
     },
     {
      "s": "c",
-     "ru": "Нежа, курс русского и курс китайского — там же!",
-     "en": "Nezha, the Russian course and the Chinese course are in the same place!"
+     "ru": "Нежа, курс английского и курс китайского — там же!",
+     "en": "Nezha, the English course and the Chinese course are in the same place!"
     },
     {
      "s": "b",
@@ -268,8 +272,8 @@
     },
     {
      "s": "b",
-     "ru": "Ты на курсе русского, а я — на китайском!",
-     "en": "You go on the Russian course, and I'll take Chinese!"
+     "ru": "Ты на курсе английского, а я — на китайском!",
+     "en": "You go on the English course, and I'll take Chinese!"
     },
     {
      "s": "c",
@@ -281,9 +285,9 @@
     {
      "ask": "Which course does Nezha suggest for Teddy?",
      "options": [
-      "A Russian course",
-      "A Chinese course",
       "An English course",
+      "A Chinese course",
+      "A French course",
       "A cooking course"
      ],
      "answer": 0

@@ -56,14 +56,13 @@
   "чем": "что",
   "чего": "что",
   "чему": "что",
-
   "_p11.3": "Measured over the shipped payload, 2026-09-10. gradeAlignment writes FSRS history through index[key][0], so a form credited to the wrong lemma schedules the wrong word. Counted by reading the English side of every corpus sentence containing the form.",
   "стоит": "стоить|verb",
   "начал": "начать|verb",
   "начала": "начать|verb",
   "дорога": "дорога|noun",
-
   "_p11.5": "Two rows where the closed-class reading is the word and the content row is a rarity or an inflection: «перед» the preposition against a paradigm-less noun glossed 'before', and «зовут» — a form of «звать» that others.csv carries as a headword of its own.",
   "перед": "перед|other",
-  "зовут": "звать|verb"
+  "зовут": "звать|verb",
+  "уж": "уж|other"
 }

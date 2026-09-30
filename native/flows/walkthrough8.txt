@@ -1,0 +1,16 @@
+# What changed 2026-09-29 → 30, walked on a clean install: the cast (Teddy as
+# guide, the family's faces), the video-first units, the lesson summary and
+# video sentences, the transcript, Study's end of day, the answer sounds, Talk
+# played by a character.
+#
+#   adb shell pm clear app.bridges.russian; launch; then
+#   .\native\tools\walk.ps1 -Flow native\flows\walkthrough8.txt -Device emulator-5554
+#
+# Screenshots land in native/screenshots/walk/. Read them — that is the audit.
+# The emulator needs a universal APK (§31).
+
+# The way in: Teddy waves and introduces himself; the family's faces lead the
+# picker.
+wait:3
+shot:90-gate-new
+texts

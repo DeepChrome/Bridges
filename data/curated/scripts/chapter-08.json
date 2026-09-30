@@ -41,6 +41,10 @@
     {
      "ru": "первый",
      "en": "first"
+    },
+    {
+     "ru": "папа",
+     "en": "dad"
     }
    ],
    "lines": [
@@ -81,8 +85,8 @@
     },
     {
      "s": "a",
-     "ru": "Что теперь делать, Ярик?",
-     "en": "What do we do now, Yarik?"
+     "ru": "Папа, что теперь делать?",
+     "en": "Dad, what do we do now?"
     },
     {
      "s": "c",
@@ -205,8 +209,8 @@
      "en": "to peel, to clean"
     },
     {
-     "ru": "год",
-     "en": "year"
+     "ru": "мама",
+     "en": "mum"
     }
    ],
    "lines": [
@@ -257,8 +261,8 @@
     },
     {
      "s": "c",
-     "ru": "Сегодня год, как ты наш друг. Это блюдо для тебя!",
-     "en": "It's a year today since you became our friend. This dish is for you!"
+     "ru": "Мама говорит, ты всегда один на праздник. Это блюдо для тебя!",
+     "en": "Mum says you're always alone on holidays. This dish is for you!"
     },
     {
      "s": "b",

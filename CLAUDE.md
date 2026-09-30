@@ -42,8 +42,11 @@ Built and working today:
 - a 58,844-lemma lexicon resolving ~97.7% of the Russian text in the collection
 - any recognised token can expose lemma, meaning, grammar, full paradigm, and every
   other sentence in the corpus containing that word
-- a learning path of ten chapters: ten spine units of thirty words and 24 topic
-  branches as side quests, 168 lessons, 1,045 words taught (§30i)
+- a learning path of ten chapters, every unit built towards a real video
+  (§30bf): ten spine units (30 words in the first two chapters, 40 after) and
+  24 side quests, 168 lessons, 1,040 words taught
+- a cast the whole app is told through: Teddy the Yorkie, his family, and
+  Monka the monkey whose schemes always backfire (§30bg, docs/cast.md)
 - lessons built from six activity types, plus Hear, Say and listening scenes on
   native (§30c), a conversation mode, Talk (§30f), quizzes of the learner's own
   making and Anki decks in and out (§30h)

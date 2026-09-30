@@ -118,7 +118,7 @@ describe("a lesson's flashcards", () => {
 });
 
 describe("the profile and its settings", () => {
-  it("counts cards to review, explains its settings and shows the plan", async () => {
+  it("counts cards to review, keeps one scheduler setting and shows the plan", async () => {
     await withProfile(<You navigation={nav} />);
     // "cards to review" is the Study badge's number, and a tap goes there.
     await act(async () => { fireEvent.press(await screen.findByTestId("stat-due")); });
@@ -134,9 +134,10 @@ describe("the profile and its settings", () => {
 
     fireEvent.press(await screen.findByText("Settings"));
     // A scheduler setting says what it does, on a tap, and not before.
-    expect(screen.queryByText(/most review cards/i)).toBeNull();
-    await act(async () => { fireEvent.press(await screen.findByTestId("info-reviews")); });
-    expect(screen.getByText(/most review cards/i)).toBeTruthy();
+    // One scheduler setting left, new words a day (2026-09-29); reviews a day,
+    // retention and learn-ahead are gone from the sheet.
+    expect(await screen.findByTestId("settings-new-per-day")).toBeTruthy();
+    for (const id of ["reviews-per-day", "retention", "learn-ahead"]) expect(screen.queryByTestId(id)).toBeNull();
     expect(screen.getByTestId("change-picture")).toBeTruthy();
   });
 });

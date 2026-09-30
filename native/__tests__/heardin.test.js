@@ -21,7 +21,7 @@ jest.mock("../src/youtube", () => {
   const React = require("react");
   const { View } = require("react-native");
   return { YouTube: React.forwardRef((props, ref) => {
-    React.useImperativeHandle(ref, () => ({ seek: jest.fn(), pause: jest.fn() }));
+    React.useImperativeHandle(ref, () => ({ seek: jest.fn(), pause: jest.fn(), watch: jest.fn() }));
     return React.createElement(View, { testID: "yt-player" });
   }) };
 });

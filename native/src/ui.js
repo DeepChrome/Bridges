@@ -835,34 +835,6 @@ export function Fold({ title, open: start = false, testID, children, style }) {
   );
 }
 
-/* A setting's name with a small circled "i" beside it; a tap shows one line
-   under it saying what the setting does (the owner, 2026-09-29: "it's not
-   clear what 'reviews a day' and 'retention' and 'learn ahead' are"). On
-   demand, not always drawn — rule 20.7's tooltip, which is where explanation
-   of a control is allowed to live. */
-export function InfoLabel({ label, info, testID }) {
-  const t = useTheme();
-  const [open, setOpen] = useState(false);
-  return (
-    <View>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-        <Text style={{ color: t.ink, fontSize: 15 }}>{label}</Text>
-        <Pressable testID={testID} onPress={() => setOpen(!open)} hitSlop={12}
-                   accessibilityRole="button" accessibilityLabel={`About ${label}`}
-                   accessibilityState={{ expanded: open }}
-                   style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 1.5,
-                            borderColor: open ? t.brandInk : t.ink3,
-                            alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: open ? t.brandInk : t.ink3, fontSize: 12, fontWeight: "700",
-                         lineHeight: 14 }}>i</Text>
-        </Pressable>
-      </View>
-      {open ? <Muted size={13} style={{ marginTop: 4 }}>{info}</Muted> : null}
-    </View>
-  );
-}
-
-/* Done, drawn one way: a green disc with a tick. */
 export function Tick({ on, size = 26 }) {
   const t = useTheme();
   return (

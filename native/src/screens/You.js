@@ -6,7 +6,7 @@ import { useSession } from "../session";
 import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb, InfoLabel } from "../ui";
+import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb, Stepper } from "../ui";
 import { CharacterPicker } from "./Gate";
 import { plan as askPlan } from "../lib/feedback";
 import { PLANS, PLAN_NAMES, PREMIUM_PRICE, ALLOWANCE_LINES, planOf } from "@core/plans";
@@ -24,7 +24,8 @@ import Constants from "expo-constants";
    something the binary is not. */
 const VERSION = (Constants.expoConfig && Constants.expoConfig.version) || "";
 import { tagInfo } from "@core/errortags";
-import { cardsOf, maxLapses, RETENTION_MIN, RETENTION_MAX } from "@core/scheduler";
+import { cardsOf, maxLapses } from "@core/scheduler";
+import { QUEUE_DEFAULTS } from "@core/queue";
 import { askPermission } from "../notify";
 
 /* When the reminder may land, as minutes past midnight. Four, not twenty-four:
@@ -259,40 +260,17 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
             <PictureSection />
             <View style={{ height: 16 }} />
             <List>
-              {/* The flashcards' three directions and the new-card ration are
-                  on the Study picker now, not here (§30ai): a learner sets them
-                  at the moment of starting a session, and named as "Cards:
-                  recognise" in a settings sheet they were never found. What
-                  stays are the scheduler's other rations and its target
-                  (docs/PLAYBOOK.md 2.3). Retention is what the scheduler aims
-                  for: higher means more reviews for fewer lapses. */}
+              {/* How many new words the flashcards bring in a day — the same
+                  setting as the Study picker's, so the two cannot disagree
+                  (the owner, 2026-09-29: "maybe a global setting for new words
+                  per day?"). Reviews a day, retention and learn-ahead were
+                  here and are gone (same day: "those are absurdly long… for
+                  now, disable those"); the scheduler keeps its defaults. */}
               <Row>
-                <View style={{ flex: 1 }}>
-                  <InfoLabel testID="info-reviews" label="Reviews a day"
-                             info="The most review cards dealt in a day." />
-                  <Choice testID="reviews-per-day" value={st.reviewsPerDay || 200} style={{ marginTop: 8 }}
-                          options={[50, 100, 200, 500].map((n) => ({ id: n, name: String(n) }))}
-                          onPick={(id) => update((p) => ({ ...p, reviewsPerDay: id }))} />
-                </View>
-              </Row>
-              <Row>
-                <View style={{ flex: 1 }}>
-                  <InfoLabel testID="info-retention" label="Retention"
-                             info="How much you aim to remember. Higher means more reviews." />
-                  <Choice testID="retention" value={st.retention || 0.9} style={{ marginTop: 8 }}
-                          options={[0.8, 0.85, 0.9, 0.95].filter((r) => r >= RETENTION_MIN && r <= RETENTION_MAX)
-                            .map((r) => ({ id: r, name: `${Math.round(r * 100)} %` }))}
-                          onPick={(id) => update((p) => ({ ...p, retention: id }))} />
-                </View>
-              </Row>
-              <Row>
-                <View style={{ flex: 1 }}>
-                  <InfoLabel testID="info-ahead" label="Learn ahead"
-                             info="How early a card you just missed can come back." />
-                  <Choice testID="learn-ahead" value={st.learnAhead === undefined ? 20 : st.learnAhead} style={{ marginTop: 8 }}
-                          options={[0, 10, 20, 60].map((n) => ({ id: n, name: n ? `${n} min` : "Off" }))}
-                          onPick={(id) => update((p) => ({ ...p, learnAhead: id }))} />
-                </View>
+                <Text style={{ flex: 1, color: t.ink, fontSize: 15 }}>New words a day</Text>
+                <Stepper testID="settings-new-per-day" label="New words a day" min={0} max={99}
+                         value={st.newPerDay === undefined ? QUEUE_DEFAULTS.newPerDay : st.newPerDay}
+                         onChange={(n) => update((p) => ({ ...p, newPerDay: n }))} />
               </Row>
               {/* "Write drill answers" sat here until 2026-09-26 and is on the
                   drill's own cog now (Flows.js DrillOptions), where a learner

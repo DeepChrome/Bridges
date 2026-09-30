@@ -70,11 +70,11 @@ function FinalCard({ best, onOpen }) {
         alignSelf: "stretch", marginTop: 26, padding: 16, borderRadius: 20,
         backgroundColor: best ? t.goodBg : t.brandBg,
         borderColor: best ? t.goodDim : t.brandDim, borderWidth: 1,
-        flexDirection: "row", alignItems: "center", gap: 12,
+        flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12,
         opacity: pressed ? 0.7 : 1,
       })}
     >
-      <Text style={{ flex: 1, color: t.ink, fontSize: 17, fontWeight: "700" }}>Final Test</Text>
+      <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700", textAlign: "center" }}>Final Test</Text>
       {best ? <Pill tone="good">{`${best}%`}</Pill> : null}
     </Pressable>
   );

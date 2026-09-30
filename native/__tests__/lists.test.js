@@ -92,9 +92,9 @@ describe("a list's hairlines", () => {
     await withProfile(<You navigation={nav} />, { dev: true });
     await act(async () => { fireEvent.press(await screen.findByText("Settings")); });
     /* "Cards: recognise" led this list until the flashcards' directions moved
-       to the Study picker (§30ai); the group now opens on the scheduler's
-       rations. */
-    const group = ["Reviews a day", "On-screen Russian keyboard", "Reading speed",
+       to the Study picker (§30ai); "Reviews a day" after that, until the
+       scheduler's settings came down to new words a day (2026-09-29). */
+    const group = ["New words a day", "On-screen Russian keyboard", "Reading speed",
                    "Right-answer sound", "Show the tour", "Developer mode", "STT Lab"];
     for (const label of group.slice(0, -1)) expect(rowAround(label)).toBe(1);
     expect(rowAround("STT Lab")).toBe(0);

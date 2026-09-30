@@ -19,7 +19,7 @@ jest.mock("../src/youtube", () => {
   const React = require("react");
   const { View } = require("react-native");
   return { YouTube: React.forwardRef((props, ref) => {
-    React.useImperativeHandle(ref, () => ({ seek: jest.fn(), pause: jest.fn() }));
+    React.useImperativeHandle(ref, () => ({ seek: jest.fn(), pause: jest.fn(), watch: jest.fn() }));
     return React.createElement(View, { testID: "yt-player" });
   }) };
 });
@@ -375,5 +375,16 @@ describe("Video", () => {
     st = await saved();
     expect(st.unit[unitVideo.unit].video).toBe(true);
     expect(typeof st.watched[unitVideo.id]).toBe("number");
+  });
+});
+
+describe("the transcript button", () => {
+  it("opens the video's transcript under the player, and closes it", async () => {
+    await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={nav} />);
+    await act(async () => { fireEvent.press(await screen.findByTestId("transcript-toggle")); });
+    expect(screen.getByTestId("transcript")).toBeTruthy();
+    expect(screen.getByTestId("transcript-line-0")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByTestId("transcript-toggle")); });
+    expect(screen.queryByTestId("transcript")).toBeNull();
   });
 });

@@ -458,6 +458,39 @@ SRC_CODE = {"tatoeba": "t", "lof": "l", "yandex": "y", "core5000": "c",
             "googletts": "g", "other": "o", "video": "v"}
 
 
+# The transcript panel's lines (2026-09-29, the owner: *"a transcript button
+# below the videos that will display an autoscrolling transcript that
+# highlights the word being said"*). A line ends at a pause long enough to be
+# one, or once it is long enough to read at a glance.
+LINE_PAUSE_MS = 700
+LINE_WORDS = 10
+
+
+def video_transcripts(ids):
+    """{video: [[start ms, "words", [each word's offset from the start, in
+    centiseconds]], …]} from the auto-captions (build_transcripts
+    words_with_times, which already collapses a rolling caption's repeats).
+    Offsets rather than times, and centiseconds rather than milliseconds,
+    because the file is mostly numbers and these are the short ones."""
+    from build_transcripts import words_with_times, SUBS
+    out = {}
+    for vid in ids:
+        stream = words_with_times(SUBS / f"{vid}.ru-orig.json3")
+        if not stream:
+            continue
+        lines, cur = [], []
+        for w, at in stream:
+            if cur and (at - cur[-1][1] >= LINE_PAUSE_MS or len(cur) >= LINE_WORDS):
+                lines.append(cur)
+                cur = []
+            cur.append((w, at))
+        if cur:
+            lines.append(cur)
+        out[vid] = [[ln[0][1], " ".join(w for w, _ in ln), [(at - ln[0][1]) // 10 for _, at in ln]]
+                    for ln in lines]
+    return out
+
+
 def add_video_lines(speech, units, measure, stats):
     """Sentences from each unit's goal video (tools/build_video_lines.py) into
     the pools, and onto the unit as `v.lines` — [row, ms] — so a lesson can
@@ -1574,6 +1607,20 @@ def main():
             (native_assets / f"{name}.json").write_text(text, encoding="utf-8")
             sizes.append(f"{name}.json {len(text.encode('utf-8'))/1_048_576:.2f} MB")
         print(f"  native data  : {', '.join(sizes)}")
+        # The videos' transcripts, for the player's transcript panel — native
+        # only (the web app is on hold) and never in a public build, which ships
+        # no caption text (P8.8). Loaded when a transcript is first opened.
+        tpath = native_assets / "transcripts.json"
+        if args.public:
+            # Empty rather than absent: the app requires the file, and Metro
+            # resolves a require at bundle time, not at run time.
+            tpath.write_text("{}", encoding="utf-8")
+        else:
+            tr = video_transcripts([v["id"] for v in payload["videos"]])
+            text = json.dumps(tr, ensure_ascii=False, separators=(",", ":"))
+            tpath.write_text(text, encoding="utf-8")
+            print(f"  transcripts  : {len(tr)} videos, {sum(len(v) for v in tr.values()):,} lines, "
+                  f"{len(text.encode('utf-8'))/1_048_576:.2f} MB")
         print(f"  records      : {payload['stats'].get('lemmas_with_record', 0):,} of "
               f"{len(payload['lemmas']):,} studied rows carry their own paradigm record, "
               f"{payload['stats'].get('lemmas_twinned', 0)} a twin's; none needs the dictionary at boot")

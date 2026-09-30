@@ -15,6 +15,13 @@ import { fold, today } from "@core/util";
 const deepBlob = () => require("../assets/deep.json");
 const sentPool = () => require("../assets/sent.json");
 export const videos = () => require("../assets/videos.json");
+/* A video's transcript for the player's panel: [[start ms, text, word
+   offsets in cs]] (build_site.py `video_transcripts`). Required on first open;
+   a public build ships none, and the panel then has nothing to offer. */
+export function transcriptOf(id) {
+  const all = require("../assets/transcripts.json");
+  return (all && all[id]) || null;
+}
 /* Numbered senses for the studied words (tools/ingest_wiktionary.py, §30q).
    Required when a word is opened, which is never the first screen. */
 const sensesBlob = () => require("../assets/senses.json");

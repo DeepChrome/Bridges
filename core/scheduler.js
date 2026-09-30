@@ -79,7 +79,6 @@ export const NEW = State.New, LEARNING = State.Learning, REVIEW = State.Review, 
 /* The playbook's defaults (2.1): retention 0.9, a year at most, fuzz on,
    short-term steps on. `w` is null until an optimiser has fitted one. */
 export const SCHEDULER_DEFAULTS = { retention: 0.9, maxInterval: 365, fuzz: true, w: null, learnAhead: 20 };
-export const RETENTION_MIN = 0.8, RETENTION_MAX = 0.95;
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const gradeOf = (g) => clamp(g | 0, 1, 4);

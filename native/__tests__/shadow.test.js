@@ -15,7 +15,7 @@ import { flushState } from "../src/store";
 import { Runner, VIEWS } from "../src/screens/Run";
 import { Q } from "../src/questions";
 import { STAGES, AUDIO } from "../src/data";
-import { probeVoices } from "../src/audio";
+import { probeVoices, hasRealAudio } from "../src/audio";
 import { fold } from "@core/util";
 import { SPEECH_SKIP_TOP } from "@core/speech";
 
@@ -78,7 +78,9 @@ describe("the shadowing drill", () => {
     drill.forEach((s) => {
       expect(s.kind).toBe("shadow");
       expect(typeof VIEWS[s.kind]).toBe("function");
-      expect(AUDIO[fold(s.target)]).toBeTruthy();
+      // A recording from the collection, or one bought for the video's own
+      // sentences (2026-09-29): either is a real recording, never the device.
+      expect(hasRealAudio(s.target)).toBe(true);
     });
   });
 

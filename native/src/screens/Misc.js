@@ -10,8 +10,9 @@ import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, S
          Dropdown, Text } from "../ui";
 import {
   UN, STATS, unitState, markComponent, videos, videoById, videoWatched, unitById,
-  CHANNELS, videoLines,
+  CHANNELS, videoLines, transcriptOf,
 } from "../data";
+import { Transcript } from "../transcript";
 import { releaseAudio } from "../audio";
 import { PrepList } from "../prep";
 import { fold, today } from "@core/util";
@@ -354,7 +355,22 @@ export function Video({ route, navigation }) {
      Done here rather than only on the way out of a lesson because the order of
      unmount and mount is not ours to rely on. */
   useEffect(() => { releaseAudio(); }, []);
+  /* The transcript panel (transcript.js): loaded on first open, and the
+     player reports its position only while the panel is showing. */
+  const [showScript, setShowScript] = useState(false);
+  const [pos, setPos] = useState(0);
+  useEffect(() => {
+    if (player.current) player.current.watch(showScript && playing);
+    return () => { if (player.current) player.current.watch(false); };
+  }, [showScript, playing]);
   if (!v) return null;
+  const script = showScript ? transcriptOf(v.id) : null;
+  const seekTo = (ms) => {
+    setPlaying(true);
+    setPos(ms);
+    if (player.current) player.current.seek(ms, 0);
+    else pending.current = [ms, 0];
+  };
 
   const unit = v.unit ? unitById(v.unit) : null;
   const words = Object.keys(v.words || {});
@@ -434,17 +450,26 @@ export function Video({ route, navigation }) {
           <YouTube
             ref={player}
             videoId={v.id}
+            onTime={setPos}
             onReady={() => {
               if (pending.current != null) {
                 player.current && player.current.seek(pending.current[0], pending.current[1]);
                 pending.current = null;
               }
+              if (showScript && player.current) player.current.watch(true);
             }}
           />
         </View>
       ) : (
         <Btn kind="pri" label="Play here" onPress={() => setPlaying(true)} />
       )}
+      <Btn testID="transcript-toggle" style={{ marginTop: 10 }}
+           label={showScript ? "Hide transcript" : "Transcript"} onPress={() => setShowScript(!showScript)} />
+      {showScript ? (
+        script && script.length
+          ? <Transcript lines={script} position={pos} onSeek={seekTo} />
+          : <Muted style={{ marginTop: 8 }}>No transcript for this one.</Muted>
+      ) : null}
 
       {/* The tapped word sits under the player, not under the list.
           The list runs to VIDEO_WORDS (20) rows of 56 px, so about eleven

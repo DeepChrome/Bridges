@@ -102,45 +102,17 @@ export const SCENES = {
 };
 
 /* Pictures for single words, drawn with the cast (the owner, 2026-09-30:
-   "make him interact with the material"). Two kinds, both from
-   docs/reviews/2026-09-30-content.md: where a word *is* a character, the
-   character (мама → Nezha); and where a photograph cannot show a word — a
-   verb, a feeling, a food a beginner meets first — a character doing it.
-   `who` are the sheets handed in as references. A drawn picture wins over a
-   photograph on the word's card (native/src/pictures.js). */
-export const WORDS = {
-  // the family as the vocabulary
-  "мама": { who: ["nezha"], what: "Nezha smiling warmly, a loving mother, waving hello" },
-  "папа": { who: ["yarik"], what: "Yarik smiling proudly, a kind father, arms folded" },
-  "сын": { who: ["teddy", "yarik"], what: "Yarik proudly hugging his little son Teddy" },
-  "семья": { who: ["teddy", "nezha", "yarik"], what: "the whole family together, Nezha and Yarik with Teddy between them, a happy family portrait" },
-  "подруга": { who: ["nezha", "belka"], what: "Nezha and Belka arm in arm, best friends laughing" },
-  "обезьяна": { who: ["monka"], what: "Monka the monkey grinning" },
-  "собака": { who: ["teddy"], what: "Teddy the dog sitting and wagging his tail" },
-  "волк": { who: ["yarik"], what: "Yarik the wolf howling happily at the moon" },
-  // chapter 1: what a photograph cannot show
-  "хотеть": { who: ["teddy"], what: "Teddy staring longingly at a pizza in a café window, clearly wanting it" },
-  "знать": { who: ["teddy"], what: "Teddy raising a paw confidently, he knows the answer" },
-  "говорить": { who: ["teddy", "belka"], what: "Teddy and Belka talking to each other, speech bubbles with no letters" },
-  "любить": { who: ["teddy", "nezha"], what: "Nezha hugging Teddy, little hearts around them" },
-  "жить": { who: ["teddy", "nezha", "yarik"], what: "the family in front of their cosy little house where they live" },
-  "звать": { who: ["teddy"], what: "Teddy introducing himself with a paw on his chest, a name tag with no letters" },
-  "родиться": { who: ["nezha", "yarik"], what: "Nezha and Yarik looking tenderly at a newborn puppy Teddy in a basket" },
-  "расти": { who: ["teddy", "yarik"], what: "Yarik marking Teddy's height on a door frame, Teddy standing proudly tall" },
-  "пить": { who: ["teddy"], what: "Teddy drinking from a glass of water" },
-  "готовить": { who: ["nezha"], what: "Nezha cooking at a stove, stirring a pot" },
-  "пробовать": { who: ["teddy"], what: "Teddy tasting a spoonful of soup carefully" },
-  "заказать": { who: ["teddy"], what: "Teddy pointing at a menu, ordering at a café counter" },
-  "обедать": { who: ["teddy", "nezha", "yarik"], what: "the family eating lunch at a table in the middle of the day" },
-  "ужинать": { who: ["teddy", "nezha", "yarik"], what: "the family eating dinner in the evening, a window showing the night sky" },
-  "вкусный": { who: ["teddy"], what: "Teddy licking his lips over a delicious cake" },
-  "горячий": { who: ["teddy"], what: "Teddy blowing on a very hot cup of tea, steam rising" },
-  "хлеб": { who: ["teddy"], what: "Teddy holding a fresh round loaf of bread" },
-  "молоко": { who: ["teddy"], what: "Teddy with a glass of milk and a milk moustache" },
-  "рыба": { who: ["yarik"], what: "Yarik proudly holding up a big fish" },
-  "вода": { who: ["teddy"], what: "a glass of clear water on a table, Teddy reaching for it" },
-  "еда": { who: ["teddy"], what: "Teddy at a table full of food, delighted" },
-};
+   "make him interact with the material"): where a word *is* a character, the
+   character (мама → Nezha); where a photograph cannot show a word — a verb, a
+   feeling, a food a beginner meets first — a character doing it. The briefs
+   live in data/curated/word_art.json ({ who, what } or { skip: true } where no
+   picture can show the word), drafted by a model and read by a person; `who`
+   are the sheets handed in as references. A drawing wins over a photograph on
+   the word's card (native/src/pictures.js). */
+const WORD_ART_FILE = path.join(ROOT, "data", "curated", "word_art.json");
+export const WORDS = Object.fromEntries(Object.entries(
+  fs.existsSync(WORD_ART_FILE) ? JSON.parse(fs.readFileSync(WORD_ART_FILE, "utf8")) : {})
+  .filter(([, v]) => !v.skip));
 
 function key() {
   const k = process.env.OPENAI_API_KEY;
@@ -148,7 +120,7 @@ function key() {
   return k;
 }
 
-async function edit(prompt, refs, file, { size = "1024x1024", transparent = true, quality = "high" } = {}) {
+async function edit(prompt, refs, file, { size = "1024x1024", transparent = true, quality = "high", waited = 0 } = {}) {
   const form = new FormData();
   form.append("model", MODEL);
   form.append("prompt", prompt);
@@ -173,6 +145,13 @@ async function edit(prompt, refs, file, { size = "1024x1024", transparent = true
     }
   }
   const j = await res.json();
+  /* The account's rate limit counts reference images a minute (five), and it
+     says how long to wait; waiting is cheaper than losing a batch to it. */
+  if (res.status === 429 && waited < 10) {
+    const s = +((JSON.stringify(j).match(/try again in ([\d.]+)s/) || [])[1] || 15);
+    await new Promise((r) => setTimeout(r, (s + 2) * 1000));
+    return edit(prompt, refs, file, { size, transparent, quality, waited: waited + 1 });
+  }
   if (!res.ok) throw new Error(`${res.status} ${JSON.stringify(j.error || j).slice(0, 300)}`);
   fs.writeFileSync(file, Buffer.from(j.data[0].b64_json, "base64"));
   const u = j.usage || {};
@@ -241,8 +220,12 @@ async function words() {
   const dir = path.join(ART, "words");
   fs.mkdirSync(dir, { recursive: true });
   const only = arg("--only");
-  for (const [word, { who, what }] of Object.entries(WORDS)) {
+  // `--part 2/4`: every fourth word from the second — parallel runs without
+  // handing Cyrillic through a shell (§23).
+  const [pk, pn] = (arg("--part") || "0/1").split("/").map(Number);
+  for (const [k, [word, { who, what }]] of Object.entries(WORDS).entries()) {
     if (only && !only.split(",").includes(word)) continue;
+    if (k % pn !== pk) continue;
     const file = path.join(dir, `${word}.png`);
     if (fs.existsSync(file) && !has("--again")) { console.log(`kept ${rel(file)}`); continue; }
     const refs = who.length ? who.map((id) => need(sheet(id))) : [STYLE_REF];
@@ -300,7 +283,8 @@ function ship() {
     execFileSync("ffmpeg", ["-v", "error", "-y", "-i", src, "-vf", `scale=${SCENE_W}:-2:flags=lanczos`, "-q:v", "4", dst]);
     shipped.push(unit);
   }
-  // Word pictures: 400 px cut-outs,
+  // Word pictures: 400 px cut-outs as WebP with alpha (a PNG of each was
+  // 230 KB, 45 MB for 197 — too much to carry in the app),
   // named by a short hash so the file name is ASCII (Android resources want it).
   const wdir = path.join(ROOT, "native", "assets", "wordart");
   fs.mkdirSync(wdir, { recursive: true });
@@ -313,8 +297,8 @@ function ship() {
       // The model will not paint transparency, so the words are drawn on a
       // green screen and keyed out here.
       `chromakey=0x00FF00:0.13:0.06,despill=type=green,format=rgba,scale=400:400:flags=lanczos`,
-      "-pix_fmt", "rgba", path.join(wdir, `${name}.png`)]);
-    wlines.push(`  ${JSON.stringify(word)}: require("../assets/wordart/${name}.png"),`);
+      "-c:v", "libwebp", "-quality", "82", path.join(wdir, `${name}.webp`)]);
+    wlines.push(`  ${JSON.stringify(word)}: require("../assets/wordart/${name}.webp"),`);
   }
   fs.writeFileSync(path.join(ROOT, "native", "src", "wordart.js"),
     "/* Generated by tools/build_cast_art.mjs --ship. Do not edit. Words drawn\n" +

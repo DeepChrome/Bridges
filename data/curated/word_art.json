@@ -1,0 +1,1248 @@
+{
+ "мама": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha smiling warmly, a loving mother, waving hello"
+ },
+ "папа": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik smiling proudly, a kind father, arms folded"
+ },
+ "сын": {
+  "who": [
+   "teddy",
+   "yarik"
+  ],
+  "what": "Yarik proudly hugging his little son Teddy"
+ },
+ "семья": {
+  "who": [
+   "teddy",
+   "nezha",
+   "yarik"
+  ],
+  "what": "the whole family together, Nezha and Yarik with Teddy between them, a happy family portrait"
+ },
+ "подруга": {
+  "who": [
+   "nezha",
+   "belka"
+  ],
+  "what": "Nezha and Belka arm in arm, best friends laughing"
+ },
+ "обезьяна": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka the monkey grinning"
+ },
+ "собака": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy the dog sitting and wagging his tail"
+ },
+ "волк": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik the wolf howling happily at the moon"
+ },
+ "хотеть": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy staring longingly at a pizza in a café window, clearly wanting it"
+ },
+ "знать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy raising a paw confidently, he knows the answer"
+ },
+ "говорить": {
+  "who": [
+   "teddy",
+   "belka"
+  ],
+  "what": "Teddy and Belka talking to each other, speech bubbles with no letters"
+ },
+ "любить": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Nezha hugging Teddy, little hearts around them"
+ },
+ "жить": {
+  "who": [
+   "teddy",
+   "nezha",
+   "yarik"
+  ],
+  "what": "the family in front of their cosy little house where they live"
+ },
+ "звать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy introducing himself with a paw on his chest, a name tag with no letters"
+ },
+ "родиться": {
+  "who": [
+   "nezha",
+   "yarik"
+  ],
+  "what": "Nezha and Yarik looking tenderly at a newborn puppy Teddy in a basket"
+ },
+ "расти": {
+  "who": [
+   "teddy",
+   "yarik"
+  ],
+  "what": "Yarik marking Teddy's height on a door frame, Teddy standing proudly tall"
+ },
+ "пить": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy drinking from a glass of water"
+ },
+ "готовить": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha cooking at a stove, stirring a pot"
+ },
+ "пробовать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy tasting a spoonful of soup carefully"
+ },
+ "заказать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy pointing at a menu, ordering at a café counter"
+ },
+ "обедать": {
+  "who": [
+   "teddy",
+   "nezha",
+   "yarik"
+  ],
+  "what": "the family eating lunch at a table in the middle of the day"
+ },
+ "ужинать": {
+  "who": [
+   "teddy",
+   "nezha",
+   "yarik"
+  ],
+  "what": "the family eating dinner in the evening, a window showing the night sky"
+ },
+ "вкусный": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy licking his lips over a delicious cake"
+ },
+ "горячий": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy blowing on a very hot cup of tea, steam rising"
+ },
+ "хлеб": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy holding a fresh round loaf of bread"
+ },
+ "молоко": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy with a glass of milk and a milk moustache"
+ },
+ "рыба": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik proudly holding up a big fish"
+ },
+ "вода": {
+  "who": [
+   "teddy"
+  ],
+  "what": "a glass of clear water on a table, Teddy reaching for it"
+ },
+ "еда": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy at a table full of food, delighted"
+ },
+ "быть": {
+  "skip": true
+ },
+ "мочь": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik easily lifts a huge heavy barbell over his head with a proud grin, showing he is able to do it."
+ },
+ "привет": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy the puppy waves one paw high with a big happy smile, greeting the viewer."
+ },
+ "мой": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy hugs a red ball tightly to his chest, clearly claiming it as his own."
+ },
+ "твой": {
+  "who": [
+   "teddy",
+   "monka"
+  ],
+  "what": "Teddy points a paw at a banana and hands it to Monka, as if saying it belongs to him."
+ },
+ "человек": {
+  "skip": true
+ },
+ "дочь": {
+  "who": [],
+  "what": "a mother rabbit lovingly hugging her little daughter, a small bunny with a pink bow"
+ },
+ "ребёнок": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy the small puppy plays happily with a wooden toy block on the floor, looking like a little kid."
+ },
+ "бабушка": {
+  "who": [],
+  "what": "an elderly grandmother rabbit, like an older Nezha, with round glasses and a knitted shawl, knitting in a rocking chair"
+ },
+ "дедушка": {
+  "who": [],
+  "what": "an elderly grandfather grey wolf with white whiskers and a walking cane, smiling kindly in an armchair"
+ },
+ "муж": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik in a neat suit and bow tie stands proudly as a groom, holding a small bouquet."
+ },
+ "жена": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha in a white wedding veil holds a bouquet and smiles lovingly as a bride."
+ },
+ "цвет": {
+  "who": [],
+  "what": "A painter's palette with splashes of red, yellow, blue and green paint and a brush."
+ },
+ "этот": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy points a paw directly at one apple right next to him, while other apples sit far away in the background."
+ },
+ "такой": {
+  "skip": true
+ },
+ "весь": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy happily hugs a whole round cake, the entire cake with nothing missing."
+ },
+ "добрый": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik gently gives a warm smile and shares a loaf of bread with a little bird, looking kind."
+ },
+ "русский": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka in a traditional embroidered headscarf holds a matryoshka nesting doll and smiles."
+ },
+ "сказать": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka chats with her mouth open and a big speech bubble with a simple smiley face above her head."
+ },
+ "делать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy busily builds a little wooden birdhouse with a hammer, making something with his paws."
+ },
+ "вопрос": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka raises one hand with a puzzled face and a big question mark floating above his head."
+ },
+ "курс": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy sits at a small school desk with an open notebook and a pointer board, attending a lesson."
+ },
+ "раз": {
+  "skip": true
+ },
+ "видеть": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy's eyes are wide open in surprise as he notices a bright butterfly landing right in front of his nose."
+ },
+ "посмотреть": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Teddy and Nezha sit on a sofa watching a television together, eyes fixed on the screen."
+ },
+ "думать": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka rests his chin on his hand with eyes looking up, a thought bubble with a lightbulb above his head."
+ },
+ "машина": {
+  "who": [],
+  "what": "A friendly small red cartoon car seen from the side on a road."
+ },
+ "бар": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik stands behind a bar counter, sliding a glass of juice to a customer, with bottles on shelves behind."
+ },
+ "американец": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka wears a cowboy hat and holds a hamburger, in a cheerful all-American style."
+ },
+ "молодец": {
+  "who": [
+   "nezha",
+   "teddy"
+  ],
+  "what": "Nezha beams proudly and gives Teddy a big thumbs up as he holds a shiny gold medal."
+ },
+ "новый": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy proudly holds up a shiny brand-new red toy car still tied with a ribbon, sparkles around it, while an old battered toy car lies dusty in the background."
+ },
+ "сделать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy has just finished building a small wooden birdhouse, holding a hammer and smiling proudly beside it."
+ },
+ "получиться": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka happily looks at a wobbly cake that has turned out perfectly, with a cherry on top and a big surprised grin."
+ },
+ "нравиться": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy hugs an ice cream cone with heart-shaped eyes and a huge smile, little hearts floating above his head."
+ },
+ "камера": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka holds up a big old-fashioned camera with a large lens, pointing it forward and ready to snap."
+ },
+ "радио": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik sits next to a retro radio with an antenna and dial, music notes flowing out as he listens happily."
+ },
+ "интернет": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka sits with a laptop while a glowing globe with wi-fi waves floats above it, connecting to little devices around."
+ },
+ "сайт": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha looks at a big computer monitor showing a simple web page with a picture and colorful blocks, a cursor arrow pointing at it."
+ },
+ "программа": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka sits at a laptop typing, with a screen full of colorful code blocks and a little robot on the screen waving."
+ },
+ "экран": {
+  "who": [],
+  "what": "A large flat TV screen glowing brightly with a simple cheerful landscape picture on it."
+ },
+ "кнопка": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka is about to push a huge round red button on a box with one finger, looking curious and mischievous."
+ },
+ "статья": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik reads a large open newspaper with a big picture and columns of squiggly lines standing for text, looking interested."
+ },
+ "фото": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Teddy and Nezha cuddle together and smile, and a framed photograph of the same pose hangs beside them."
+ },
+ "сообщение": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka looks at a smartphone with a speech bubble popping out of the screen, a little envelope flying up, and she looks delighted."
+ },
+ "который": {
+  "skip": true
+ },
+ "большой": {
+  "who": [
+   "yarik",
+   "teddy"
+  ],
+  "what": "Big grey Yarik stands next to tiny Teddy, towering over him, both smiling, to show the size difference."
+ },
+ "давать": {
+  "who": [
+   "nezha",
+   "teddy"
+  ],
+  "what": "Nezha hands a shiny red apple to Teddy, who reaches out happily with both paws."
+ },
+ "выглядеть": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha stands in front of a mirror in a fancy hat and sunglasses, looking at her glamorous reflection."
+ },
+ "вещь": {
+  "who": [],
+  "what": "A pile of assorted everyday objects: a lamp, a teapot, a teddy bear and a shoe, stacked together."
+ },
+ "сидеть": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik sits calmly on a chair with his back straight and paws on his knees."
+ },
+ "лежать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy lies stretched out flat on the floor on his tummy, eyes open, relaxed and smiling."
+ },
+ "спать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy sleeps curled up in a little bed with closed eyes, a blanket, and floating Z shapes as bubbles of snoring."
+ },
+ "стул": {
+  "who": [],
+  "what": "A single simple wooden chair standing alone."
+ },
+ "кровать": {
+  "who": [],
+  "what": "A cozy bed with a pillow and a striped blanket, shown alone."
+ },
+ "диван": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik relaxes on a big comfy sofa with cushions, his arms stretched along the back."
+ },
+ "шкаф": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka peeks out from inside a tall open wardrobe full of hanging clothes, with a sock on his head."
+ },
+ "этаж": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka waves from a window on the top of a cutaway apartment building with several stacked floors, each floor visible as a level."
+ },
+ "какой": {
+  "skip": true
+ },
+ "тот": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy points with his paw at a far-away red kite in the sky, while a near kite is ignored beside him."
+ },
+ "другой": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka holds a blue hat in one hand and looks at a red different hat in the other, choosing the other one."
+ },
+ "свой": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy proudly hugs his own red bone to his chest while Monka reaches for it and Teddy holds it tight, clearly 'mine'.",
+  "skip": false
+ },
+ "идти": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy walks happily along a path on his four little legs, one paw mid-step."
+ },
+ "смотреть": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik sits on a sofa with wide eyes watching a TV screen showing a colorful cartoon picture, popcorn in his paw."
+ },
+ "найти": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy joyfully pulls a shiny golden key out of a pile of leaves, with a bright 'found it' sparkle above him."
+ },
+ "работать": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik in a hard hat hammers busily at a wooden workbench, sweating a little, clearly at work."
+ },
+ "казаться": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka stands in a bedsheet with two eye holes, looking like a ghost, while Teddy tilts his head and thinks it seems scary."
+ },
+ "студент": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik the wolf wearing a graduation cap and carrying a backpack and a stack of books, looking studious."
+ },
+ "студентка": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha the glamorous rabbit wearing a graduation cap and carrying a backpack and books, smiling elegantly."
+ },
+ "доктор": {
+  "who": [],
+  "what": "a big friendly brown bear doctor in a white coat with a stethoscope, holding a clipboard"
+ },
+ "центр": {
+  "who": [],
+  "what": "A bird's-eye view of a small cartoon town with streets all leading to a big round square in the middle, marked by a glowing dot."
+ },
+ "квартал": {
+  "who": [],
+  "what": "A single city block seen from above: four streets forming a square around a group of little colorful houses."
+ },
+ "ходить": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Teddy and Nezha stroll side by side along a town sidewalk, walking casually with paws swinging."
+ },
+ "поехать": {
+  "who": [
+   "teddy",
+   "yarik"
+  ],
+  "what": "Teddy and Yarik set off in a little red car, waving out of the windows with a puff of exhaust behind them."
+ },
+ "пройти": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy walks through a big stone archway, passing under it and emerging on the other side."
+ },
+ "искать": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka peers through a giant magnifying glass, hunting around the ground with a puzzled look, searching for something."
+ },
+ "находиться": {
+  "skip": true
+ },
+ "магазин": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka stands at the open door of a cute little shop with a striped awning, with fruit and goods displayed in the window."
+ },
+ "станция": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy waits on a small metro station platform beside a rounded train pulling in, with a tunnel arch behind him."
+ },
+ "вокзал": {
+  "who": [
+   "yarik",
+   "teddy"
+  ],
+  "what": "Yarik and Teddy stand with a suitcase in front of a big railway station building with a clock tower and a steam train beside it."
+ },
+ "номер": {
+  "skip": true
+ },
+ "время": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy looks up at a big round wall clock with hands, an hourglass sitting beside him."
+ },
+ "пора": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha taps her wrist watch with an urgent smile, ready to leave with her handbag, as if saying 'it's time to go'."
+ },
+ "секунда": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka watches a large stopwatch with a single tick mark highlighted, holding his breath in a quick instant."
+ },
+ "час": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka sits beside a big clock whose hour hand points at one, with a small sand timer, patiently waiting for an hour."
+ },
+ "неделя": {
+  "who": [],
+  "what": "A calendar page with seven squares in a row, each with a different little colored picture, one row highlighted."
+ },
+ "месяц": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy sits on a hill at night looking up at a big bright crescent moon in a starry sky."
+ },
+ "год": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy stands in the middle of four small scenes around him: spring flowers, summer sun, autumn leaves and winter snow."
+ },
+ "утро": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy stretches and yawns beside his bed as the sun rises over the hills outside the window."
+ },
+ "день": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha relaxes with sunglasses under a bright sun high in a blue sky at noon, on a sunny lawn."
+ },
+ "первый": {
+  "who": [
+   "teddy",
+   "monka",
+   "belka"
+  ],
+  "what": "Teddy runs at the front of a line of racers, reaching the finish ribbon first, with Belka and Monka puffing behind him."
+ },
+ "второй": {
+  "who": [
+   "teddy",
+   "monka",
+   "belka"
+  ],
+  "what": "Three animals cross a finish line in a row, and Teddy in the middle is clearly second, holding a silver medal, with a gold-medal winner ahead of him and a third-place animal behind."
+ },
+ "третий": {
+  "who": [
+   "teddy",
+   "yarik",
+   "nezha"
+  ],
+  "what": "Three animals stand on a winners' podium, and the one on the lowest right step, Teddy, proudly holds a bronze medal while the other two stand higher."
+ },
+ "стоить": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha holds up a shiny handbag with a big price tag on it while a cashier's coins pile on the counter, and she looks surprised at how much it costs."
+ },
+ "пять": {
+  "who": [],
+  "what": "Five bright red apples lined up in a neat row."
+ },
+ "число": {
+  "skip": true
+ },
+ "половина": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy holds a round pizza cut cleanly in two, with exactly one half on his plate and the other half missing."
+ },
+ "тысяча": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka stands astonished in front of a huge mountain of gold coins that towers over him."
+ },
+ "разный": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka proudly shows a row of hats, each a totally different color and shape."
+ },
+ "каждый": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik hands out one ice cream cone to each of several animals in a line, and every animal holds exactly one."
+ },
+ "некоторый": {
+  "skip": true
+ },
+ "сам": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy proudly puts on his own little boots all by himself, nobody else in the picture, a satisfied smile"
+ },
+ "страна": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy stands on a hill looking out at a wide green landscape with fields, a river and mountains, like a whole land."
+ },
+ "Россия": {
+  "who": [
+   "yarik",
+   "teddy"
+  ],
+  "what": "Yarik and Teddy stand in front of colorful onion-domed cathedral towers in a snowy square, with a matryoshka doll beside them."
+ },
+ "мир": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy hugs a big globe of the Earth that is as tall as he is."
+ },
+ "история": {
+  "who": [
+   "belka",
+   "teddy"
+  ],
+  "what": "Belka sits in an armchair reading a big storybook aloud to Teddy, who listens with wide eyes while little dreamy pictures float above the book."
+ },
+ "хороший": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy sits happily with a big smile and a golden star, giving a thumbs-up with his paw."
+ },
+ "старый": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik is drawn as a very old wolf with white whiskers and a wooden cane, sitting in a rocking chair next to a worn-out old armchair."
+ },
+ "красный": {
+  "who": [],
+  "what": "A single big bright red ball on a plain background."
+ },
+ "приходить": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Teddy walks through an open front door on his paws and Nezha greets him with open arms."
+ },
+ "ездить": {
+  "who": [
+   "yarik",
+   "teddy"
+  ],
+  "what": "Yarik drives a little car along a road with Teddy sitting beside him, both smiling and looking ahead."
+ },
+ "летать": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka in a cosmonaut suit flies in the sky with flapping arms, trailing little clouds, happy and weightless."
+ },
+ "носить": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik walks along carrying a big stack of boxes in his arms."
+ },
+ "получать": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Teddy happily receives a wrapped gift box that Nezha is handing him, his paws reaching out to take it"
+ },
+ "оставлять": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy puts his little red hat on a bench and walks away, leaving the hat behind on the bench."
+ },
+ "январь": {
+  "who": [
+   "teddy",
+   "belka"
+  ],
+  "what": "Teddy and Belka stand in a snowy yard next to a snowman, with a big January snowfall and a decorated fir tree in the background."
+ },
+ "мороз": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy shivers in a scarf with frost on his whiskers and icicles hanging nearby, a thermometer showing freezing cold."
+ },
+ "помощь": {
+  "who": [
+   "yarik",
+   "teddy"
+  ],
+  "what": "Yarik lifts up Teddy, who is stuck in a snowdrift, pulling him out with a big helpful paw."
+ },
+ "видео": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka points a small video camera at the viewer, with a red recording light glowing on it."
+ },
+ "самый": {
+  "who": [
+   "yarik",
+   "teddy",
+   "monka"
+  ],
+  "what": "Three animals stand side by side, and Yarik is the tallest, towering above the others with a crown-like star above his head."
+ },
+ "прийти": {
+  "who": [
+   "belka",
+   "nezha"
+  ],
+  "what": "Belka arrives at Nezha's doorstep, just stepping up to the door with a happy wave, as Nezha opens it."
+ },
+ "приехать": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik the wolf steps off a bus at a stop with a suitcase, while Teddy waits and waves happily at his arrival."
+ },
+ "уйти": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka the monkey walks away on foot through a doorway, seen from behind, waving goodbye over his shoulder."
+ },
+ "отправляться": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Teddy and Nezha sit in a little train whose wheels are just starting to move, with a packed suitcase, both waving as it departs the station."
+ },
+ "ехать": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik the wolf drives a small red car along a road, hands on the steering wheel, smiling."
+ },
+ "плыть": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy the puppy swims in a blue lake, paddling with his paws, head above the water."
+ },
+ "нужный": {
+  "skip": true
+ },
+ "полезный": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka the squirrel happily holds a basket of fresh vegetables and fruit, looking healthy and strong."
+ },
+ "свободный": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy points proudly at an empty bus seat, the only vacant seat among crowded ones."
+ },
+ "купить": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha hands a coin to a shopkeeper and takes a new hat, which she is happily buying."
+ },
+ "платить": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik the wolf puts coins into the paw of a cashier at a counter, paying for a bag of goods."
+ },
+ "карта": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy the puppy holds a large unfolded paper map with a winding path and a red X mark, studying it."
+ },
+ "поездка": {
+  "who": [
+   "teddy",
+   "yarik"
+  ],
+  "what": "Teddy and Yarik ride together in a car with a picnic basket on a sunny day, on a short outing."
+ },
+ "путешествие": {
+  "who": [
+   "teddy",
+   "monka"
+  ],
+  "what": "Teddy and Monka stand on a ship deck with backpacks, looking at a far horizon and distant mountains on a long adventure."
+ },
+ "дело": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik the wolf in a tie sits at an office desk with a briefcase and a pile of papers, busy with his work."
+ },
+ "слово": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy says one single word, shown as a big speech bubble with a single picture of a bone inside."
+ },
+ "фраза": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha speaks, and a long speech bubble comes out containing a row of several small pictures: sun, heart, flower."
+ },
+ "буква": {
+  "who": [],
+  "what": "A single big decorative alphabet block with a simple shape on it, sitting alone on a table."
+ },
+ "письмо": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka the squirrel happily holds a sealed mail envelope with a heart stamp, delivered in her paws."
+ },
+ "следующий": {
+  "who": [
+   "teddy",
+   "monka"
+  ],
+  "what": "A queue of animals: Teddy is next in line, pointing at himself, while Monka steps away from the counter in front."
+ },
+ "согласный": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Teddy and Nezha both nod yes with big smiles and thumbs up, agreeing together."
+ },
+ "рассказывать": {
+  "who": [
+   "belka"
+  ],
+  "what": "Belka chatters away energetically to a listening audience, waving her paws as she tells a long story with a thought bubble of a adventure."
+ },
+ "рассказать": {
+  "who": [
+   "yarik",
+   "teddy"
+  ],
+  "what": "Yarik sits and tells Teddy a story, a thought bubble over him showing a dragon and a castle, Teddy listening wide-eyed."
+ },
+ "объяснять": {
+  "who": [
+   "nezha",
+   "teddy"
+  ],
+  "what": "Nezha points at a simple drawing on a board with a pointer, explaining it patiently to Teddy, who is learning."
+ },
+ "показать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy proudly holds out a shiny toy ball toward the viewer, showing it."
+ },
+ "повторить": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Nezha says something and Teddy repeats it, both with identical speech bubbles containing the same star picture."
+ },
+ "понимать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy has a bright lightbulb above his head and a happy smile, having just understood."
+ },
+ "слушать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy the puppy leans toward a radio with big perked ears, listening carefully to the music."
+ },
+ "слышать": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik the wolf has his ear up as music notes drift in from far away, hearing them."
+ },
+ "услышать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy suddenly perks up his ears in surprise as a bell rings nearby, he has just caught the sound."
+ },
+ "разговаривать": {
+  "who": [
+   "nezha",
+   "belka"
+  ],
+  "what": "Nezha and Belka sit on a bench chatting with each other, with speech bubbles going back and forth."
+ },
+ "поговорить": {
+  "who": [
+   "nezha",
+   "belka"
+  ],
+  "what": "Nezha and Belka sit side by side on a bench and chat happily, with little speech bubbles holding hearts and flowers."
+ },
+ "договариваться": {
+  "who": [
+   "teddy",
+   "monka"
+  ],
+  "what": "Teddy and Monka sit at a small table and talk it over, each holding a cookie and pointing at the single toy between them, trying to agree how to share."
+ },
+ "договориться": {
+  "who": [
+   "teddy",
+   "monka"
+  ],
+  "what": "Teddy and Monka shake paw and hand over a small table, both smiling, with one toy split neatly in two equal piles between them: a deal is made."
+ },
+ "спросить": {
+  "who": [
+   "teddy",
+   "yarik"
+  ],
+  "what": "Teddy looks up at big Yarik with a raised paw and a large question mark over his head, asking a question."
+ },
+ "ответить": {
+  "who": [
+   "yarik",
+   "teddy"
+  ],
+  "what": "Yarik bends down and answers Teddy with a kind smile, a speech bubble with a big check mark coming from his mouth."
+ },
+ "просить": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Teddy sits politely with both front paws held out and puppy eyes, asking Nezha, who holds a plate of cookies."
+ },
+ "попросить": {
+  "who": [
+   "monka",
+   "belka"
+  ],
+  "what": "Monka holds out both hands and points toward a jar of nuts in Belka's paws, asking for it with a pleading face."
+ },
+ "группа": {
+  "who": [
+   "teddy",
+   "nezha",
+   "yarik"
+  ],
+  "what": "Teddy, Nezha and Yarik stand close together in a tight cluster, like a group photo."
+ },
+ "разговор": {
+  "who": [
+   "nezha",
+   "yarik"
+  ],
+  "what": "Nezha and Yarik face each other, talking, with speech bubbles going back and forth between them."
+ },
+ "звонить": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik holds an old phone to his ear and dials with one paw, with little ringing lines around the phone."
+ },
+ "позвонить": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka in his cosmonaut suit holds a phone to his ear and speaks into it with a wide grin, ringing lines around the phone."
+ },
+ "правда": {
+  "skip": true
+ },
+ "детство": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Big Yarik daydreams, with a thought bubble showing him as a tiny wolf cub playing with a toy ball and a wooden horse."
+ },
+ "красивый": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Glamorous Nezha poses with sparkles around her, a flower behind her ear, and a glowing smile."
+ },
+ "высокий": {
+  "who": [
+   "yarik",
+   "teddy"
+  ],
+  "what": "Tall Yarik stands next to tiny Teddy, who looks up at him, showing a big height difference."
+ },
+ "короткий": {
+  "who": [],
+  "what": "A very short pencil next to a much longer pencil, the short one clearly highlighted."
+ },
+ "любимый": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy hugs a worn teddy-bear toy tightly with hearts floating around him, while other toys lie unnoticed on the floor."
+ },
+ "тёплый": {
+  "who": [
+   "teddy",
+   "nezha"
+  ],
+  "what": "Nezha wraps Teddy in a cozy blanket and hugs him, with a warm glow and little hearts around them."
+ },
+ "обычный": {
+  "skip": true
+ },
+ "чувствовать": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy closes his eyes with a happy smile and holds a paw out to feel a gentle breeze, with small wind swirls and a heart on his chest."
+ },
+ "выходить": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy walks out through an open front door into the sunny yard, one paw still on the doorframe."
+ },
+ "одежда": {
+  "who": [],
+  "what": "A clothesline with a colorful dress, a T-shirt, trousers and a jacket hanging on it."
+ },
+ "майка": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka proudly wears a bright sleeveless tank top and points at it."
+ },
+ "платье": {
+  "who": [
+   "nezha"
+  ],
+  "what": "Nezha twirls in a pretty flowing dress, holding its skirt out."
+ },
+ "брюки": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik stands proudly in a pair of trousers and a bare top, pointing at the trousers."
+ },
+ "джинсы": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy stands on his hind legs wearing little blue denim jeans and a simple top, pointing at them."
+ },
+ "костюм": {
+  "who": [
+   "yarik"
+  ],
+  "what": "Yarik stands tall in a full matching suit with a tie, looking smart and proud."
+ },
+ "пиджак": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka wears a suit jacket that is far too big for him, with sleeves hanging past his hands, and proudly tugs on the lapel."
+ },
+ "одеваться": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy stands by a chair with clothes on it, pulling a little sweater over himself, halfway dressed."
+ },
+ "надеть": {
+  "who": [
+   "monka"
+  ],
+  "what": "Monka puts a big hat on his head with both hands, the hat halfway down over his eyes."
+ },
+ "снять": {
+  "who": [
+   "teddy"
+  ],
+  "what": "Teddy the puppy stands happily pulling a red knitted hat off his head, holding it in his paw, with the bare fluffy ears showing clearly."
+ }
+}

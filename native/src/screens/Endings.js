@@ -26,25 +26,34 @@ import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Title, Text, Muted, Note, Loading, useRussianVoice } from "../ui";
 import { FormSpeaker } from "../rules";
-import { say } from "../audio";
+import { say, playTrack } from "../audio";
+import { ENDING_CLIPS } from "../endingaudio";
 import { endingsByFrequency } from "../data";
 
 /* The ending's button: what it sounds like, respelled, and a speaker. A pill
    rather than a round speaker, because what it says is the lesson — "sounds
    like -ово" is the thing to read before pressing. */
+/* The sound is cut from a recording of a word that ends that way
+   (tools/build_ending_clips.mjs) — the phone's voice reading a respelled
+   fragment was the inaccurate one (the owner, 2026-09-29). Only where no
+   recording could be had does the device voice read it, and says so. */
 function EndingSound({ e }) {
   const t = useTheme();
   const voice = useRussianVoice();
+  const clip = ENDING_CLIPS[e.id];
+  const live = !!clip || voice;
   return (
     <Pressable testID={`ending-say-${e.id}`}
-               onPress={voice ? () => say(e.say, { device: true, stress: true }) : undefined}
+               onPress={clip ? () => playTrack(clip.src)
+                        : voice ? () => say(e.say, { device: true, stress: true }) : undefined}
                accessibilityRole="button"
-               accessibilityLabel={voice ? `Hear the ending, ${e.sounds} (device voice)` : undefined}
+               accessibilityLabel={clip ? `Hear the ending, ${e.sounds}`
+                                   : voice ? `Hear the ending, ${e.sounds} (device voice)` : undefined}
                hitSlop={6}
                style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 6,
                  minHeight: 36, paddingHorizontal: 12, borderRadius: radius.lg,
                  borderWidth: 1, borderColor: t.line, backgroundColor: t.surface,
-                 opacity: !voice ? 0.4 : pressed ? 0.6 : 1 })}>
+                 opacity: !live ? 0.4 : pressed ? 0.6 : 1 })}>
       <Text style={{ color: t.ink2, fontSize: T.small }}>sounds</Text>
       <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "700" }}>{e.sounds}</Text>
       <Svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={t.ink3}

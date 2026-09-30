@@ -334,6 +334,27 @@ export function markComponent(st, u, i, id, extra) {
   return next;
 }
 
+/* A unit's goal-video sentences (tools/build_video_lines.py, carried on the
+   unit as `v.lines`: [row in SPEECH.rows, ms into the video]). The speaker's
+   own words, punctuated, with an English translation; the recording is a
+   bought one in the lessons' voice, and `t` is where the video says it. */
+export function videoLines(u) {
+  const out = [];
+  for (const [r, t] of (u && u.v && u.v.lines) || []) {
+    const row = SPEECH.rows[r];
+    if (row) out.push({ ru: row[0], en: row[1], t, vid: u.v.id });
+  }
+  return out;
+}
+
+const LINE_WORD = /[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*/g;
+/* The lines of a unit's video that say any of these words (lemma indices),
+   through the lookup index as every word link does. */
+export function linesWith(u, idxs) {
+  const want = new Set(idxs);
+  return videoLines(u).filter((l) =>
+    (l.ru.match(LINE_WORD) || []).some((tok) => (IX[fold(tok)] || []).some((i) => want.has(i))));
+}
 /* The curriculum this build teaches, as a fingerprint of every unit's words
    (build_site.py `stats.curriculum`). */
 export const CURRICULUM = (DATA.stats && DATA.stats.curriculum) || null;

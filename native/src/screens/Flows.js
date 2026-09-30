@@ -8,19 +8,23 @@ import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text,
          Sheet, Choice, CogButton } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
-import { WordList, GrammarNote, WordCard } from "../lesson";
+import { WordList, GrammarNote, WordCard, StepBar } from "../lesson";
+import { VideoLines } from "../prep";
 import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
   DRILL_POOL_STEPS, chapterWords, irregularWords,
   reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
-  scenarioLibrary, required,
+  scenarioLibrary, required, linesWith,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { pairDrill } from "@core/alphabet";
 import { buildupDrill } from "@core/buildup";
 import { firstSense } from "@core/util";
 import { touchStreak } from "../store";
+
+/* The video's sentences a lesson ends on (`VocabFlow`): a few, not a wall. */
+const LESSON_LINES = 4;
 
 /* The mark for a run: partial credit summed over first attempts, as a percentage. */
 const scoreOf = (r) => (r.total ? Math.round(r.credit / r.total * 100) : 0);
@@ -49,7 +53,13 @@ export function VocabFlow({ route, navigation }) {
   const t = useTheme();
   const unit = UN.find((u) => u.id === route.params.unitId);
   const index = route.params.index;
-  const steps = useMemo(() => Q.vocabSteps(unit, index), [unit.id, index]);
+  /* After the words, the video's own sentences that use them (Phase 14, the
+     owner, 2026-09-29: *"more video centric. More sentences/phrases"*) — the
+     lesson ends on what it is preparing for. */
+  const steps = useMemo(() => {
+    const lines = linesWith(unit, lessonWords(unit, index)).slice(0, LESSON_LINES);
+    return Q.vocabSteps(unit, index).concat(lines.length ? [{ t: "lines", lines }] : []);
+  }, [unit.id, index]);
   const [at, setAt] = useState(0);
   const [done, setDone] = useState(false);
   useAudioStopOnLeave();
@@ -87,6 +97,20 @@ export function VocabFlow({ route, navigation }) {
         <WordList unit={unit} words={step.words} at={at} total={steps.length} />
         <View style={{ marginTop: "auto", paddingTop: 16 }}>
           <Btn kind="pri" label="Start learning" onPress={advance} />
+        </View>
+      </Screen>
+    );
+  }
+
+  if (step.t === "lines") {
+    return (
+      <Screen>
+        <StepBar at={at} total={steps.length} />
+        <SectionLabel>From the video</SectionLabel>
+        <VideoLines lines={step.lines} testID="lesson-lines"
+                    onMoment={(l) => navigation.navigate("Video", { videoId: l.vid, at: l.t })} />
+        <View style={{ marginTop: "auto", paddingTop: 16 }}>
+          <Btn kind="pri" label="Finish" onPress={advance} />
         </View>
       </Screen>
     );

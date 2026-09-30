@@ -309,7 +309,12 @@ describe("Video", () => {
     expect(screen.getByTestId("prep-met").props.children).toBe(`1 of ${heard.length} met`);
     // The whole list goes to the flashcards as one round.
     await act(async () => { fireEvent.press(screen.getByTestId("prep-cards")); });
-    expect(nav.navigate).toHaveBeenCalledWith("ListCards", { round: "list", words: heard, title: "Before the video" });
+    // …with the video's own sentences after the words (2026-09-29).
+    const { videoLines } = require("../src/data");
+    const lines = videoLines(unit).map((l) => l.ru);
+    expect(lines.length).toBeGreaterThan(0);
+    expect(nav.navigate).toHaveBeenCalledWith("ListCards", { round: "list", words: heard.concat(lines), title: "Before the video" });
+    expect(screen.getByTestId("prep-lines")).toBeTruthy();
   });
 
   /* From a dictionary entry (the owner, 2026-09-08): the entry lists the videos

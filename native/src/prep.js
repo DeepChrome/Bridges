@@ -19,6 +19,7 @@ import { RuleCard } from "./rules";
 import { familiarity, cardFor } from "@core/scheduler";
 import { firstSense } from "@core/util";
 import { L, idxOfWord, rankOf } from "./data";
+import { hasRealAudio } from "./audio";
 
 export const CLUSTERS = [
   { id: "verb", name: "Verbs", pos: ["verb"] },
@@ -50,8 +51,11 @@ export function prepSentences(words, n = PREP_SENTENCES) {
   for (const word of words) {
     if (out.length >= n) break;
     const e = L[idxOfWord(word)];
+    // Only sentences with a recording: the phone's voice reading a sentence
+    // is the grey speaker the owner asked not to be offered here (2026-09-29).
     const ex = ((e && e.x) || [])
-      .filter((x) => x.en && !have.has(x.ru) && x.ru.split(/\s+/).length <= SENTENCE_MAX_WORDS)
+      .filter((x) => x.en && !have.has(x.ru) && x.ru.split(/\s+/).length <= SENTENCE_MAX_WORDS
+              && hasRealAudio(x.ru))
       .sort((a, b) => a.ru.length - b.ru.length)[0];
     if (ex) { have.add(ex.ru); out.push(ex); }
   }
@@ -59,6 +63,39 @@ export function prepSentences(words, n = PREP_SENTENCES) {
 }
 
 const ARROW = "M8 5l11 7-11 7z";
+
+/* Sentences from the video itself (data.js `videoLines`): the Russian, every
+   word a link; the English under it; a speaker for the lessons' recording of
+   it; and ▶ to hear the speaker say it in the video. One component wherever a
+   lesson shows the video's sentences — the word card, the summary, the list
+   before watching, the lesson's own "from the video" step. */
+export function VideoLines({ lines, onMoment, testID = "video-lines" }) {
+  const t = useTheme();
+  return (
+    <View testID={testID}>
+      {lines.map((l, k) => (
+        <View key={l.ru + l.t} testID={`${testID}-${k}`}
+              style={{ flexDirection: "row", alignItems: "flex-start", gap: 8, paddingVertical: 8,
+                       borderTopWidth: k ? 1 : 0, borderTopColor: t.lineSoft }}>
+          <View style={{ flex: 1 }}>
+            <Linked text={l.ru} size={16} />
+            <Muted>{l.en}</Muted>
+          </View>
+          <Speaker text={l.ru} size={36} />
+          {onMoment ? (
+            <Pressable testID={`${testID}-${k}-moment`} onPress={() => onMoment(l)} hitSlop={4}
+                       accessibilityRole="button" accessibilityLabel="Hear it in the video"
+                       style={({ pressed }) => ({ width: 36, height: 36, borderRadius: 18, alignItems: "center",
+                                                  justifyContent: "center", backgroundColor: t.brandBg,
+                                                  opacity: pressed ? 0.6 : 1 })}>
+              <Svg width={14} height={14} viewBox="0 0 24 24"><Path d={ARROW} fill={t.brandInk} /></Svg>
+            </Pressable>
+          ) : null}
+        </View>
+      ))}
+    </View>
+  );
+}
 
 function Jump({ word, active, onPress }) {
   const t = useTheme();
@@ -97,12 +134,15 @@ function WordRow({ word, seen, active, onJump, first }) {
   );
 }
 
-export function PrepList({ words, seen, unit, focusWord, onJump, onCards }) {
+export function PrepList({ words, seen, unit, focusWord, onJump, onCards, lines, onMoment }) {
   const t = useTheme();
   if (!words.length) return <Muted>No study words are spoken in this one.</Muted>;
   const met = words.filter((w) => seen[w]).length;
   const clusters = clusterWords(words);
-  const sentences = prepSentences(words);
+  // The video's own sentences where it has them; otherwise the collection's
+  // recorded ones.
+  const own = lines && lines.length ? lines : null;
+  const sentences = own ? [] : prepSentences(words);
   const note = unit && unit.g;
   return (
     <View testID="prep">
@@ -120,7 +160,12 @@ export function PrepList({ words, seen, unit, focusWord, onJump, onCards }) {
           ))}
         </View>
       ))}
-      {sentences.length ? (
+      {own ? (
+        <View testID="prep-sentences" style={{ marginTop: 16 }}>
+          <Text style={{ color: t.ink3, fontSize: 13, fontWeight: "700" }}>Sentences</Text>
+          <VideoLines lines={own} onMoment={onMoment} testID="prep-lines" />
+        </View>
+      ) : sentences.length ? (
         <View testID="prep-sentences" style={{ marginTop: 16 }}>
           <Text style={{ color: t.ink3, fontSize: 13, fontWeight: "700" }}>Sentences</Text>
           {sentences.map((s, k) => (

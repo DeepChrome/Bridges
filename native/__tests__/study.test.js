@@ -148,7 +148,11 @@ describe("which cards a set holds", () => {
     const far = { ...base, sets: ["__path__"], unit: Object.fromEntries(STAGES.slice(0, 3).flatMap((s) =>
       [s.core, ...s.branches].map((u) => [u.id, { lessons: { 0: { v: true, q: 100 } } }]))) };
     expect(cardsIn(far, ["__sentences__"]).every((c) => c.sentence)).toBe(true);
-    expect(cardsIn(far, [UNIT_WITH_WORDS]).some((c) => c.sentence)).toBe(false);
+    // A unit's set carries its video's sentences too (2026-09-29); the chosen
+    // kinds are what keep them out of a words-only pile, below.
+    const unitSet = cardsIn(far, [UNIT_WITH_WORDS]);
+    expect(unitSet.filter((c) => !c.sentence).length).toBe(require("../src/data").UN.find((u) => u.id === UNIT_WITH_WORDS).w.length);
+    expect(unitSet.filter((c) => c.sentence).every((c) => c.e && hasRealAudio(c.b))).toBe(true);
     expect(studyCards({ ...far, cardKinds: ["words"] }).some((c) => c.sentence)).toBe(false);
     expect(studyCards({ ...far, cardKinds: ["words", "sentences"] }).some((c) => c.sentence)).toBe(true);
   });

@@ -5404,6 +5404,35 @@ is done when every word in it has a reviewed card; the old record is kept as
 `jest.setup.js` turns the reconcile off and `recut.test.js` drives the real
 one.
 
+**The video's own sentences** (`tools/build_video_lines.py` →
+`data/video_lines.json`, committed because the model's answers cost money).
+Auto-captions carry no sentence boundaries; cutting at pauses kept half as
+many usable lines, so a model reads each goal video's transcript in
+overlapping chunks and returns complete sentences, punctuated and translated —
+and **each is kept only if it is an exact, contiguous run of the words said**,
+compared after folding (548 of 2,547 were refused for changing a word). They
+join the speech pools where their words are taught (`add_video_lines` in
+build_site.py, source letter `v`), are voiced like every pool sentence, and
+ride on the unit as `v.lines` ([row, ms]). Lessons show them before any
+dictionary example: the word card, a closing "From the video" step, the
+summary, the list before watching, and list and chapter flashcards. Where the
+video has none, only **recorded** examples are shown — a grey (device-voice)
+speaker on a lesson sentence is what the owner asked to be rid of.
+
+**The endings' own sound is cut from a recorded word**
+(`tools/build_ending_clips.mjs`): syllable peaks from a 10 ms loudness
+envelope, the cut in the dip before the respelling's syllables, kept only
+when the peaks found equal the word's vowel count; otherwise the whole
+example word plays. The device voice reading a lone fragment was inaccurate.
+Not verified by ear.
+
+**The microphone reads "listening" only on the engine's `audiostart`**, not
+when start was asked for (speech.js `ready`, `READY_FALLBACK_MS`); an
+`engine` ref, not the phase, is what every end and timer checks. Speaking
+into Android's start-up gap was speaking to nobody. The permission is asked
+once per run. Search listens in one language chosen by a RU/EN switch
+(`st.searchLang`): Android's own switching leaned to English.
+
 **The summary** (V2, `Summary.js`) is an optional lesson step and a unit
 button; optional steps are never where Continue goes (`nextStep`) and never
 counted in "N/M steps done". The grammar step and the summary offer the

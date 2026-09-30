@@ -10,7 +10,7 @@ import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, S
          Dropdown, Text } from "../ui";
 import {
   UN, STATS, unitState, markComponent, videos, videoById, videoWatched, unitById,
-  CHANNELS,
+  CHANNELS, videoLines,
 } from "../data";
 import { releaseAudio } from "../audio";
 import { PrepList } from "../prep";
@@ -303,6 +303,8 @@ export const clock = (ms) => {
    the word rather than landing on top of it. */
 const LEAD_MS = 5000;
 const HOLD_MS = 10000;
+// A sentence is played from just before it, and not stopped: it is heard in its place.
+const LINE_LEAD_MS = 800;
 
 /* Opened from a dictionary entry at a moment (`word`, `at`): the word is the
    focus from the start, at that occurrence. */
@@ -338,10 +340,14 @@ export function Video({ route, navigation }) {
   const params = route.params || {};
   const v = videoFor(params);
   const [focus, setFocus] = useState(() => (v ? focusAt(v, params) : null));
-  const [playing, setPlaying] = useState(!!focus);
+  /* Opened at a moment with no word to focus — a sentence from the video
+     (prep.js VideoLines): the player starts a breath before it and plays on. */
+  const at = !focus && typeof params.at === "number" ? params.at : null;
+  const [playing, setPlaying] = useState(!!focus || at !== null);
   const player = useRef(null);
   // A moment asked for before the player exists is held for onReady.
-  const pending = useRef(focus ? [Math.max(0, focus.t - LEAD_MS), HOLD_MS] : null);
+  const pending = useRef(focus ? [Math.max(0, focus.t - LEAD_MS), HOLD_MS]
+                         : at !== null ? [Math.max(0, at - LINE_LEAD_MS), 0] : null);
   /* The audio on this screen belongs to the video, not to us. Whatever a lesson
      left holding the session is handed back before the player loads, or the
      WebView plays silently and has no way to say why (the owner, 2026-09-10).
@@ -353,6 +359,8 @@ export function Video({ route, navigation }) {
   const unit = v.unit ? unitById(v.unit) : null;
   const words = Object.keys(v.words || {});
   const watched = videoWatched(st, v);
+  // The video's own sentences, when it is a unit's goal (build_video_lines.py).
+  const lines = unit && unit.v && unit.v.id === v.id ? videoLines(unit) : [];
   const mined = st.mined || {};
 
   /* Mining a word: into the review set, with the video and the second it was
@@ -478,8 +486,10 @@ export function Video({ route, navigation }) {
           moment it is said, and the whole list as flashcards. */}
       <PrepList words={words} seen={st.seen || {}} unit={unit}
                 focusWord={focus ? focus.word : null} onJump={openWord}
+                lines={lines}
+                onMoment={(l) => { setFocus(null); setPlaying(true); jump(Math.max(0, l.t - LINE_LEAD_MS), 0); }}
                 onCards={(list) => navigation.navigate("ListCards",
-                  { round: "list", words: list, title: "Before the video" })} />
+                  { round: "list", words: list.concat(lines.map((l) => l.ru)), title: "Before the video" })} />
 
       {v.chapters && v.chapters.length ? (
         <>

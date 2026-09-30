@@ -131,7 +131,8 @@ describe("flashcards from a deck", () => {
     expect(q.map((c) => c.word).sort()).toEqual(["пока", "привет"]);
     expect(q.every((c) => c.kind === "new" && c.direction === "recognise")).toBe(true);
     const both = cardsIn({ ...st, sets: ["deck:k1", UN[0].id] }, ["deck:k1", UN[0].id]);
-    expect(both.length).toBe(2 + UN[0].w.length);
+    // The unit's words, and its video's sentences beside them (2026-09-29).
+    expect(both.filter((c) => !c.sentence).length).toBe(2 + UN[0].w.length);
   });
 
   it("shows a deck card, grades it into the schedule, and lists the deck in the picker", async () => {

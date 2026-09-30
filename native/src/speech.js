@@ -309,7 +309,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
       setBlock({ why: "model", name: NAME[lang.current] || lang.current,
                  text: `${NAME[lang.current] || lang.current} is not installed for offline recognition.` });
     } else if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
-      micGranted = false;
+      forgetMicPermission();
       setBlock({ why: "mic", text: "The microphone is off for Bridges." });
     } else if (TRANSIENT[ev.error]) {
       setNote(TRANSIENT[ev.error]);

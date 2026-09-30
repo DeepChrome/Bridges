@@ -32,11 +32,13 @@ import { RuleCard } from "./rules";
 import { Linked } from "./words";
 import { Guide } from "./guide";
 import { useEnter } from "./motion";
-import { L } from "./data";
+import { L, linesWith } from "./data";
 import { IMAGES, CREDITS } from "./images";
 import { firstSense } from "@core/util";
 import { soundTip } from "@core/alphabet";
 import { isIrregular } from "@core/facts";
+import { hasRealAudio } from "./audio";
+import { VideoLines } from "./prep";
 
 /* How big a word can be drawn in the head band, by how long it is. */
 const bandSize = (word) => {
@@ -205,6 +207,12 @@ export function WordCard({ i, at, total, unit, onMoment }) {
   // Where the unit's video says this word (Phase 14): the lesson is preparing
   // for that video, so the card shows the word in it and plays the moment.
   const moment = unit && unit.v && unit.v.heard && (unit.v.heard[w.b] || [])[0];
+  // The video's own sentences with this word, which are what the lesson is
+  // preparing for (2026-09-29: *"for those sentences, we should only use the
+  // ones in the video"*); without one, only the collection's recorded
+  // examples — never a sentence the phone would have to read.
+  const lines = unit ? linesWith(unit, [i]).slice(0, 2) : [];
+  const examples = lines.length ? [] : (w.x || []).filter((ex) => hasRealAudio(ex.ru)).slice(0, 2);
 
   return (
     <>
@@ -285,7 +293,16 @@ export function WordCard({ i, at, total, unit, onMoment }) {
             </View>
           ) : null}
 
-          {(w.x || []).slice(0, 2).map((ex, k) => (
+          {lines.length ? (
+            <View style={{ marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.lineSoft,
+                           alignSelf: "stretch" }}>
+              <Muted size={T.small}>In the video</Muted>
+              <VideoLines lines={lines} testID="word-lines"
+                          onMoment={onMoment ? (l) => onMoment(l.vid, null, l.t) : undefined} />
+            </View>
+          ) : null}
+
+          {examples.map((ex, k) => (
             <View key={k} style={{ marginTop: k ? 10 : 14, paddingTop: k ? 10 : 12,
                                    borderTopWidth: 1, borderTopColor: t.lineSoft,
                                    alignSelf: "stretch" }}>
@@ -297,7 +314,7 @@ export function WordCard({ i, at, total, unit, onMoment }) {
             </View>
           ))}
 
-          {moment && onMoment ? (
+          {!lines.length && moment && onMoment ? (
             <Pressable testID="word-moment" accessibilityRole="button"
                        accessibilityLabel="Play it in the video"
                        onPress={() => onMoment(unit.v.id, w.b, moment.t)}

@@ -88,13 +88,20 @@ describe("Word endings", () => {
     expect(ranked[0].id).toBe("a");
   });
 
-  /* The ending's own button says the respelling, not the letters: reading
-     «ого» as written is the mistake the entry exists to correct. */
-  it("says the ending as it sounds, not as it is spelled", async () => {
+  /* The ending's own button plays the ending cut from a word said well
+     (tools/build_ending_clips.mjs), never the phone reading the letters:
+     reading «ого» as written is the mistake the entry exists to correct, and
+     the phone reading a respelled fragment was inaccurate too (2026-09-29). */
+  it("plays the ending cut from a recorded word, not the device voice", async () => {
+    const { ENDING_CLIPS } = require("../src/endingaudio");
+    expect(Object.keys(ENDING_CLIPS)).toHaveLength(ENDINGS.length);
     await render(<Endings />);
+    const before = (global.__players || []).length;
     await act(async () => { fireEvent.press(await screen.findByTestId("ending-say-ogo")); });
-    expect(global.__spoke).toContain("ово");
+    expect((global.__players || []).length).toBeGreaterThan(before);
     expect(global.__spoke).not.toContain("ого");
+    expect(global.__spoke).not.toContain("ово");
+    expect(screen.getByTestId("ending-say-ogo").props.accessibilityLabel).not.toMatch(/device voice/);
   });
 
   it("plays each example", async () => {

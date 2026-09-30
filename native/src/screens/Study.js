@@ -18,7 +18,7 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton,
          Familiarity, familiarityColor } from "../ui";
-import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf, rankOf } from "../data";
+import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, sensesOf, rankOf, videoLines } from "../data";
 import { Linked } from "../words";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
@@ -182,7 +182,13 @@ export function cardsIn(st, sets, words = []) {
       return;
     }
     const u = UN.find((x) => x.id === id);
-    if (u) u.w.forEach((i) => add(cardOf(i)));
+    if (u) {
+      u.w.forEach((i) => add(cardOf(i)));
+      // …and its video's own sentences, which the sentence kind lets through
+      // (2026-09-29: *"for video specific flash cards or chapter specific, the
+      // sentences should be tied to the videos"*).
+      videoLines(u).forEach((l) => { const row = sentenceRow(l.ru); if (row) add(sentenceCard(row)); });
+    }
   });
   words.forEach(byWord);   // a list handed in by word, such as a video's
   return pool;

@@ -6,7 +6,7 @@ import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick, Text } from "../ui";
 import {
-  UN, lessonCount, lessonWords, lessonDone, components, unitFineProgress, L,
+  UN, lessonCount, lessonWords, lessonDone, components, unitFineProgress, L, linesWith,
 } from "../data";
 
 export function UnitScreen({ route, navigation }) {
@@ -155,7 +155,10 @@ export function LessonScreen({ route, navigation }) {
           lesson to the video it prepares for (§30bf). */}
       <Btn testID="lesson-cards" style={{ marginTop: 10 }} label="Flashcards for this lesson"
            onPress={() => navigation.navigate("ListCards", {
-             round: "list", words: lessonWords(unit, i).map((x) => L[x].b), title: unit.name })} />
+             round: "list", title: unit.name,
+             // The lesson's words, and the video's sentences that use them.
+             words: lessonWords(unit, i).map((x) => L[x].b)
+               .concat(linesWith(unit, lessonWords(unit, i)).map((l) => l.ru)) })} />
     </Screen>
   );
 }

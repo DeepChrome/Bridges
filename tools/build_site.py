@@ -455,7 +455,56 @@ def measure_sentences(sentences, sent_tokens, index, key_units, lemmas, unit_pos
 # One letter per source in the shipped rows, so an activity can tell a human
 # recording from a synthetic one without a lookup. Matches build_audio.py's names.
 SRC_CODE = {"tatoeba": "t", "lof": "l", "yandex": "y", "core5000": "c",
-            "googletts": "g", "other": "o"}
+            "googletts": "g", "other": "o", "video": "v"}
+
+
+def add_video_lines(speech, units, measure, stats):
+    """Sentences from each unit's goal video (tools/build_video_lines.py) into
+    the pools, and onto the unit as `v.lines` — [row, ms] — so a lesson can
+    show the video's own sentences and play the moment each is said (the
+    owner, 2026-09-29: *"for those sentences, we should only use the ones in
+    the video"*).
+
+    A line joins the speaking and listening pools at the unit where every word
+    in it has been taught, like any corpus sentence (measure_sentences); it is
+    on its own unit's `v.lines` regardless, since there it is shown, not asked.
+    It has no recording from the collection: tools/build_word_audio.mjs buys
+    one for every pool row that lacks it, in the voice the lessons use."""
+    path = ROOT / "data" / "video_lines.json"
+    if not path.exists():
+        return
+    lines = json.loads(path.read_text(encoding="utf-8")).get("lines", {})
+    rows = speech["rows"]
+    at = {fold(r[0]): k for k, r in enumerate(rows)}
+    sents, toks, meta = {}, {}, {}
+    for u in units:
+        v = u.get("v")
+        for n, ln in enumerate(lines.get(v["id"], []) if v else []):
+            sid = f"v:{v['id']}:{n}"
+            sents[sid] = (ln["ru"], ln["en"], None, None)
+            toks[sid] = [fold(w) for w in re.findall(r"[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*", ln["ru"])]
+            meta[sid] = (u, ln["t"])
+    measured = {rec_id: rec for rec_id, rec in zip(sents, measure(sents, toks))}
+    shown = pooled = 0
+    for sid, (u, t) in meta.items():
+        ru, en, n, diff, unit, _fname, _src = measured[sid]
+        k = fold(ru)
+        if k not in at:
+            at[k] = len(rows)
+            rows.append([ru, en, n, round(diff, 2), SRC_CODE["video"]])
+        u["v"].setdefault("lines", []).append([at[k], t])
+        shown += 1
+        if unit is None:
+            continue
+        uid = units[unit]["id"]
+        for pool, (lo, hi) in (("speak", SPEAK_TOKENS), ("listen", LISTEN_TOKENS)):
+            if lo <= n <= hi:
+                got = speech[pool].setdefault(uid, [])
+                if at[k] not in got:
+                    got.append(at[k])
+                    pooled += 1
+    stats["video_lines"] = shown
+    stats["video_lines_pooled"] = pooled
 
 # The video library (build_videos.py): how many curriculum words a video lists to
 # listen for, how many moments each, and the frequency rank below which a word is
@@ -1123,6 +1172,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     measured = measure_sentences(sentences, sent_tokens, index, key_units, lemmas,
                                  unit_pos, audio, src_of, stats)
     speech = build_pools(measured, units, stats)
+    add_video_lines(speech, units, lambda s, t: measure_sentences(
+        s, t, index, key_units, lemmas, unit_pos, {}, {}, {}), stats)
 
     # Listening passages: spans of real video, 45 s each, with the curriculum
     # words they say (tools/build_listening.py). Shipped whole — which passage

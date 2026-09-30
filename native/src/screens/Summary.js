@@ -19,8 +19,8 @@ import { useTheme } from "../theme";
 import { Screen, Muted, SectionLabel, Speaker, Pill, Familiarity, Text, Btn } from "../ui";
 import { Linked } from "../words";
 import { RuleCard } from "../rules";
-import { clusterWords, prepSentences } from "../prep";
-import { UN, L, idxOfWord, rankOf, lessonWords, lessonCount, markComponent } from "../data";
+import { clusterWords, prepSentences, VideoLines } from "../prep";
+import { UN, L, idxOfWord, rankOf, lessonWords, lessonCount, markComponent, linesWith } from "../data";
 import { familiarity, cardFor } from "@core/scheduler";
 import { firstSense } from "@core/util";
 import { isIrregular } from "@core/facts";
@@ -72,7 +72,10 @@ export default function Summary({ route, navigation }) {
     : lessonWords(unit, index);
   const words = idxs.map((i) => L[i].b);
   const seen = st.seen || {};
-  const sentences = prepSentences(words, whole ? UNIT_SENTENCES : LESSON_SENTENCES);
+  // The video's own sentences with these words first; the collection's
+  // recorded ones only where the video has none.
+  const lines = linesWith(unit, idxs).slice(0, whole ? UNIT_SENTENCES : LESSON_SENTENCES);
+  const sentences = lines.length ? [] : prepSentences(words, whole ? UNIT_SENTENCES : LESSON_SENTENCES);
   const note = unit.g || null;       // the unit's rule applies to every lesson in it
 
   return (
@@ -89,7 +92,13 @@ export default function Summary({ route, navigation }) {
         </View>
       ))}
 
-      {sentences.length ? (
+      {lines.length ? (
+        <View testID="summary-sentences" style={{ marginTop: 16 }}>
+          <SectionLabel>From the video</SectionLabel>
+          <VideoLines lines={lines} testID="summary-lines"
+                      onMoment={navigation ? (l) => navigation.navigate("Video", { videoId: l.vid, at: l.t }) : undefined} />
+        </View>
+      ) : sentences.length ? (
         <View testID="summary-sentences" style={{ marginTop: 16 }}>
           <SectionLabel>Sentences</SectionLabel>
           {sentences.map((s, k) => (

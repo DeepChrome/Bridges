@@ -478,11 +478,32 @@ def video_transcripts(ids):
         stream = words_with_times(SUBS / f"{vid}.ru-orig.json3")
         if not stream:
             continue
+        # A pause is long *for this video*. A slow beginner episode leaves
+        # most of a second between every word, so a fixed 0.7 s cut every
+        # word onto its own line ("Добро / пожаловать / в / ресторан", seen
+        # on the emulator 2026-09-30). The cut is a few times this video's
+        # own typical gap, never less than LINE_PAUSE_MS.
+        gaps = sorted(b[1] - a[1] for a, b in zip(stream, stream[1:]))
+        typical = gaps[len(gaps) // 2] if gaps else 0
+        pause = max(LINE_PAUSE_MS, int(typical * 2.5))
+        # Where the captions capitalise a sentence's first word, that is the
+        # best cut there is; a proper noun mid-sentence costs one early break.
+        # Only trusted when capitals are common, i.e. the captions do mark
+        # sentences rather than just names.
+        caps = sum(1 for w, _ in stream if w[:1].isupper()) / len(stream)
+        by_capital = caps >= 0.08
         lines, cur = [], []
         for w, at in stream:
-            if cur and (at - cur[-1][1] >= LINE_PAUSE_MS or len(cur) >= LINE_WORDS):
+            if cur and (at - cur[-1][1] >= pause or (by_capital and w[:1].isupper() and len(cur) >= 2)):
                 lines.append(cur)
                 cur = []
+            elif len(cur) >= LINE_WORDS:
+                # Full: cut where the speaker paused longest (never before the
+                # third word), not at exactly LINE_WORDS — captions carry no
+                # punctuation, and a hard cut split «такос и / начос».
+                k = max(range(3, len(cur)), key=lambda i: cur[i][1] - cur[i - 1][1])
+                lines.append(cur[:k])
+                cur = cur[k:]
             cur.append((w, at))
         if cur:
             lines.append(cur)

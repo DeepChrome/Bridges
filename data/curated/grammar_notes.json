@@ -18,7 +18,7 @@
     "core1": {
       "title": "No “a”, no “the”, no “is”",
       "body": "Russian has no articles, and it leaves out the present tense of “to be”.",
-      "examples": [["Я — Джа́ред.", "I am Jared."], ["Э́то он.", "That is him."]]
+      "examples": [["Я — Те́дди.", "I am Teddy."], ["Э́то он.", "That is him."]]
     },
     "core2": {
       "form": { "pos": "verb", "table": "Present / Future" },

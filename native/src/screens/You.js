@@ -277,7 +277,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   decides it at the moment of starting. What stays here is the
                   one thing that touches every runner: a line from the Worker
                   under a wrong answer saying why. */}
-              <Row>
+              <Row onPress={() => update((p) => ({ ...p, explain: !(p.explain !== false) }))}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Explain wrong answers</Text>
                 </View>
@@ -292,7 +292,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   Tutor (the owner, 2026-09-26: "if the user wants, they can
                   disable the English in settings"). One key, `talkEn`; Talk's
                   toolbar EN button writes the same one. */}
-              <Row>
+              <Row onPress={() => update((p) => ({ ...p, talkEn: !(p.talkEn !== false) }))}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>English under the tutor</Text>
                 </View>
@@ -303,7 +303,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>
-              <Row>
+              <Row onPress={() => update((p) => ({ ...p, osk: !p.osk }))}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>On-screen Russian keyboard</Text>
                 </View>
@@ -314,7 +314,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>
-              <Row>
+              <Row onPress={() => update((p) => ({ ...p, haptics: !(p.haptics !== false) }))}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Vibration</Text>
                 </View>
@@ -397,7 +397,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   top) and lives here so the owner can still unlock the course
                   on his own phone; the comment used to say "ships on" and had
                   been wrong for four days. */}
-              <Row>
+              <Row onPress={() => update((p) => ({ ...p, dev: !p.dev }))}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Developer mode</Text>
                   <Muted>All lessons unlocked</Muted>

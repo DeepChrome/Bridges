@@ -799,7 +799,10 @@ export default function Study({ navigation, route }) {
           <Text testID="study-heading" style={{ color: t.ink, fontSize: 15 }}>{heading}</Text>
           <Muted testID="pile">
             {session && session.practice ? `${items.length} cards`
-              : session && (session.due || session.newLeft)
+              /* The counts are the deal's, taken when it was dealt; once it is
+                 played through with nothing more to deal they are history,
+                 and "5 new" over "Daily goal met" read as work still owed. */
+              : session && !(finished && !more) && (session.due || session.newLeft)
                 ? [session.due ? `${session.due} due` : "", session.newLeft ? `${Math.min(session.newLeft, unmet)} new` : ""]
                     .filter(Boolean).join(" · ")
                 : "Nothing due"}

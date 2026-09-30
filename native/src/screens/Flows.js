@@ -860,7 +860,9 @@ export function ScenesList({ navigation }) {
         // Two a chapter since Phase 14 (the twelve extras chapter 1 carried were
         // retired), so every one is listed: the "N more" row had nothing to hide.
         return (
-          <View key={stage.n}>
+          // The same 18 of air between chapters that Practice leaves between
+          // its sections; without it each heading sat on the card above.
+          <View key={stage.n} style={{ marginBottom: 18 }}>
             <SectionLabel>{stage.title || `Chapter ${stage.n}`}</SectionLabel>
             <List>
               {rows.map((s) => {

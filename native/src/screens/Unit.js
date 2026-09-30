@@ -24,10 +24,16 @@ export function UnitScreen({ route, navigation }) {
       {/* The unit's episode (docs/cast.md): the family doing what this unit
           teaches, and Monka's plan going wrong somewhere in it. No caption —
           the picture is the unit's subject, and the title is in the header. */}
+      {/* The frame sets the size and the picture fills it. An Image given
+          width "100%" and an aspectRatio of its own laid out at the file's
+          size instead, on the emulator, and ran off the screen's edge. */}
       {art ? (
-        <Image testID="unit-art" source={art} accessibilityIgnoresInvertColors
-               accessible={false}
-               style={{ width: "100%", aspectRatio: 1.5, borderRadius: radius.xl, marginBottom: 16 }} />
+        <View style={{ width: "100%", aspectRatio: 1.5, borderRadius: radius.xl,
+                       overflow: "hidden", marginBottom: 16 }}>
+          <Image testID="unit-art" source={art} accessible={false} resizeMode="cover"
+                 style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+                          width: "100%", height: "100%" }} />
+        </View>
       ) : null}
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
         <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>

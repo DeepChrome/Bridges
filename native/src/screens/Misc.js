@@ -183,16 +183,22 @@ export function CreatorsNote({ onClose }) {
       <Muted style={{ marginTop: 6, marginBottom: 14 }}>Made by these channels. Support them.</Muted>
       <List>
         {CHANNELS.map((c) => (
+          /* The name on its own line and the links under it. Side by side,
+             three buttons took the width and the name was squeezed until it
+             broke mid-word ("Compreh / ensible") or, for the longest row,
+             vanished into a tall empty box (the 2026-09-30 walkthrough). */
           <Row key={c.name} testID={`creator-${c.name}`}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>{c.name}</Text>
+            <View style={{ flex: 1, gap: 8 }}>
+              <Text style={{ color: t.ink, fontSize: 16, fontWeight: "600" }}>{c.name}</Text>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                {c.patreon ? <Btn kind="plain" label="Patreon"
+                                  onPress={() => Linking.openURL(c.patreon)} /> : null}
+                {c.site ? <Btn kind="ghost" label="Site"
+                               onPress={() => Linking.openURL(c.site)} /> : null}
+                {c.url ? <Btn kind="ghost" label="YouTube"
+                              onPress={() => Linking.openURL(c.url)} /> : null}
+              </View>
             </View>
-            {c.patreon ? <Btn kind="plain" label="Patreon" style={{ paddingHorizontal: 12 }}
-                              onPress={() => Linking.openURL(c.patreon)} /> : null}
-            {c.site ? <Btn kind="ghost" label="Site" style={{ paddingHorizontal: 10 }}
-                           onPress={() => Linking.openURL(c.site)} /> : null}
-            {c.url ? <Btn kind="ghost" label="YouTube" style={{ paddingHorizontal: 10 }}
-                          onPress={() => Linking.openURL(c.url)} /> : null}
           </Row>
         ))}
       </List>

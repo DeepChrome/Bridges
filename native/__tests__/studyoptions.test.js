@@ -312,6 +312,8 @@ describe("after the day's pile", () => {
     expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     expect(screen.getByTestId("study-today").props.children).toBe("1 card today");
     expect(screen.queryByText(/to go/)).toBeNull();
+    // The header does not go on counting the deal that was just finished.
+    expect(screen.getByTestId("pile").props.children).toBe("Nothing due");
     // New words, ahead of the day's ration.
     await act(async () => { fireEvent.press(screen.getByTestId("study-ahead")); });
     expect(await screen.findByTestId("flag-new")).toBeTruthy();

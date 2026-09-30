@@ -70,6 +70,16 @@ describe("audio preferences", () => {
     expect(global.__spokeOpts[4].rate).toBeCloseTo(0.9 * 0.65);
   });
 
+  /* A row whose only control is a switch toggles from anywhere on it: on the
+     emulator (2026-09-30) a tap on "Developer mode" did nothing, since only
+     the switch itself listened. */
+  it("toggles a switch from a tap on its row", async () => {
+    await withProfile(<You navigation={nav} />);
+    await act(async () => { fireEvent.press(await screen.findByText("Settings")); });
+    await act(async () => { fireEvent.press(screen.getByText("Vibration")); });
+    expect((await saved()).haptics).toBe(false);
+  });
+
   it("offers the speed and the sound in settings, and remembers the choice", async () => {
     await withProfile(<You navigation={nav} />);
     await act(async () => { fireEvent.press(await screen.findByText("Settings")); });

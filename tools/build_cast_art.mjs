@@ -237,7 +237,7 @@ async function words() {
     const names = who.map((id, k) => `image ${k + 1} is ${castById[id].en} (${castById[id].species})`).join("; ");
     const prompt = `A picture for a language-learning vocabulary card: ${what}.` +
       (names ? ` The characters are exactly as in the reference images (${names}) — same design, colours and style.` : "") +
-      ` The subject large and centred with only the props it needs, on a perfectly flat solid pure green (#00FF00) chroma-key background filling the whole frame: no ground, no shadow, no scenery, and nothing else bright green. Friendly and funny. ${STYLE.replace("exactly the style of the cartoon monkey in the style reference image", "exactly the style of the reference images")}`;
+      ` The subject large and centred with only the props it needs, on a perfectly flat solid pure green (#00FF00) chroma-key background filling the whole frame: no ground, no shadow, no scenery, and nothing else bright green. Everyone in the picture is a cartoon animal: no humans and no human hands, since the story's world has none. Friendly and funny. ${STYLE.replace("exactly the style of the cartoon monkey in the style reference image", "exactly the style of the reference images")}`;
     await edit(prompt, refs, file, { transparent: false, quality: arg("--quality") || "medium" });
   }
 }

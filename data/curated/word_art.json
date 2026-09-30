@@ -1363,13 +1363,13 @@
   "who": [
    "nezha"
   ],
-  "what": "Nezha the rabbit hands a coin to a shopkeeper across a counter and receives an ice cream, paying with elegance."
+  "what": "Nezha hands a coin across a counter to a friendly bear shopkeeper and receives an ice cream"
  },
  "оплачивать": {
   "who": [
    "yarik"
   ],
-  "what": "Yarik the wolf gives a coin to a cashier at a till, the paid bill stamped and cashier smiling."
+  "what": "Yarik gives coins to a smiling squirrel cashier at a till, paying for a bag of shopping"
  },
  "экономить": {
   "who": [
@@ -1520,9 +1520,10 @@
  },
  "зарплата": {
   "who": [
-   "teddy"
+   "teddy",
+   "yarik"
   ],
-  "what": "Teddy happily receives a fat envelope stuffed with banknotes and coins from a hand, smiling with joy."
+  "what": "Yarik hands Teddy a fat envelope of coins and banknotes, his pay, and Teddy beams"
  },
  "доллар": {
   "who": [],
@@ -1577,7 +1578,7 @@
   "who": [
    "nezha"
   ],
-  "what": "Nezha hands coins to a shopkeeper at a market stall and takes a bag of apples in return."
+  "what": "Nezha hands coins to Gena, a grumpy green crocodile shopkeeper at a market stall, and takes a bag of apples"
  },
  "продавать": {
   "who": [
@@ -1670,7 +1671,7 @@
  },
  "экономика": {
   "who": [],
-  "what": "A small town with a market stall, a factory and a bank, with coins flowing in a circle among them."
+  "what": "a small animal town with a market stall run by a fox, a factory and a bank, with coins flowing in a circle between them"
  },
  "бюджет": {
   "who": [

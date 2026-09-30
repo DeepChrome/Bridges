@@ -3,308 +3,321 @@
  "name": "First Words",
  "lessons": {
   "core1:2": {
-   "title": "A borscht with no salt",
+   "title": "Monka swaps the salt",
    "cast": [
     {
      "id": "a",
-     "ru": "Маша",
-     "en": "Masha"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "b",
-     "ru": "Петя",
-     "en": "Petya"
+     "ru": "Нежа",
+     "en": "Nezha"
     },
     {
      "id": "c",
-     "ru": "Иван",
-     "en": "Ivan"
+     "ru": "Монька",
+     "en": "Monka"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "мама",
+     "en": "mom"
+    },
+    {
+     "ru": "вечер",
+     "en": "evening"
+    },
+    {
+     "ru": "сахар",
+     "en": "sugar"
+    },
+    {
+     "ru": "сладкий",
+     "en": "sweet"
     }
    ],
    "lines": [
     {
+     "s": "a",
+     "ru": "Мама, я хочу борщ. Очень хочу!",
+     "en": "Mom, I want borscht. I really want it!"
+    },
+    {
      "s": "b",
-     "ru": "Маша, это не борщ. Тут нет соли!",
-     "en": "Masha, this isn't borscht. There's no salt in it!"
+     "ru": "Хорошо, Тедди. Тебе борщ, а мне пиццу.",
+     "en": "All right, Teddy. Borscht for you, and pizza for me."
+    },
+    {
+     "s": "c",
+     "ru": "Они хотят борщ? Их соль… Нет, тут уже сахар!",
+     "en": "They want borscht? Their salt… No, it's sugar in there now!"
     },
     {
      "s": "a",
-     "ru": "Нет соли? Иван, где соль?",
-     "en": "No salt? Ivan, where's the salt?"
+     "ru": "Монька? Добрый вечер, Монька! Ты тоже тут?",
+     "en": "Monka? Good evening, Monka! You're here too?"
     },
     {
      "s": "c",
-     "ru": "Соль? Я не знаю, Маша.",
-     "en": "Salt? I don't know, Masha."
+     "ru": "Я? Да… Я тоже хочу борщ. Все хотят!",
+     "en": "Me? Yes… I want borscht too. Everybody does!"
     },
     {
      "s": "b",
-     "ru": "Как не знаете? Это же ресторан!",
-     "en": "What do you mean, you don't know? This is a restaurant!"
-    },
-    {
-     "s": "c",
-     "ru": "Нет, это не ресторан. Это кафе.",
-     "en": "No, this isn't a restaurant. It's a café."
-    },
-    {
-     "s": "b",
-     "ru": "И в кафе все хотят соль!",
-     "en": "People in a café want salt too!"
-    },
-    {
-     "s": "c",
-     "ru": "Да, все хотят. А соли нет.",
-     "en": "Yes, everyone does. But there's no salt."
+     "ru": "Вот и борщ! Монька, это твой борщ.",
+     "en": "Here's the borscht! Monka, this one is yours."
     },
     {
      "s": "a",
-     "ru": "Иван, а что вы можете? Пиццу?",
-     "en": "Ivan, so what can you do? A pizza?"
+     "ru": "Монька, ты хочешь соль? Вот наша соль.",
+     "en": "Monka, do you want salt? Here's our salt."
     },
     {
      "s": "c",
-     "ru": "Могу пиццу. С колбасой, да?",
-     "en": "I can do a pizza. With sausage, yes?"
-    },
-    {
-     "s": "b",
-     "ru": "Нет, я не хочу пиццу. Я хочу борщ!",
-     "en": "No, I don't want pizza. I want borscht!"
+     "ru": "Ваша соль? Нет, нет, я не хочу!",
+     "en": "Your salt? No, no, I don't want it!"
     },
     {
      "s": "a",
-     "ru": "Петя, я знаю, где соль. Вот она.",
-     "en": "Petya, I know where the salt is. Here it is."
-    },
-    {
-     "s": "b",
-     "ru": "Это твоя соль, Маша?",
-     "en": "Is that your salt, Masha?"
-    },
-    {
-     "s": "a",
-     "ru": "Моя. Я знаю это кафе, Петя.",
-     "en": "Mine. I know this café, Petya."
+     "ru": "Как не хочешь? Борщ с солью — это борщ!",
+     "en": "What do you mean? Borscht with salt is real borscht!"
     },
     {
      "s": "c",
-     "ru": "Молодец, Маша! А борщ с солью как?",
-     "en": "Well done, Masha! So how's the borscht with salt?"
+     "ru": "Тедди… Это не соль. Это сахар!",
+     "en": "Teddy… That's not salt. That's sugar!"
     },
     {
      "s": "b",
-     "ru": "С солью? Очень хорошо, Иван!",
-     "en": "With salt? Very good, Ivan!"
+     "ru": "Сахар? Тедди, а где наша соль?",
+     "en": "Sugar? Teddy, so where is our salt?"
+    },
+    {
+     "s": "a",
+     "ru": "Вот она, мама! Я знаю, где соль.",
+     "en": "Here it is, Mom! I know where the salt is."
+    },
+    {
+     "s": "b",
+     "ru": "Вот так кафе! Монька, ты хочешь пиццу?",
+     "en": "Some café! Monka, would you like some pizza?"
+    },
+    {
+     "s": "c",
+     "ru": "Пиццу? Да, спасибо, Нежа. Сладкий борщ я не могу.",
+     "en": "Pizza? Yes, thank you, Nezha. I can't eat sweet borscht."
     }
    ],
    "questions": [
     {
-     "ask": "What is wrong with Petya's borscht?",
-     "options": [
-      "It has no salt",
-      "It is too cold",
-      "It has no meat",
-      "It is too thin"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Where are they?",
+     "ask": "Where is the family eating?",
      "options": [
       "In a café",
-      "At a hotel",
-      "On a train",
-      "At a market"
+      "At a park",
+      "On a boat",
+      "At school"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Ivan offer instead?",
+     "ask": "What does Monka do to the family's salt?",
      "options": [
-      "Pizza with sausage",
-      "Bread with butter",
-      "Fish with potatoes",
-      "Chicken with rice"
+      "Swaps it for sugar",
+      "Hides it in his bag",
+      "Pours it on the floor",
+      "Takes it for himself"
      ],
      "answer": 0
     },
     {
-     "ask": "Whose salt do they end up using?",
+     "ask": "What does Teddy kindly offer Monka?",
      "options": [
-      "Masha's own",
-      "The waiter's",
-      "The cook's",
-      "A neighbor's"
+      "Their salt pot",
+      "Half his pizza",
+      "A cup of tea",
+      "His own spoon"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Petya think of the borscht in the end?",
+     "ask": "What goes wrong for Monka?",
      "options": [
-      "Very good",
-      "Too salty",
-      "Still cold",
-      "Too spicy"
+      "His borscht turns sweet",
+      "His pizza arrives cold",
+      "His chair is too small",
+      "His tea has gone cold"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Nezha offer Monka at the end?",
+     "options": [
+      "Pizza",
+      "Salad",
+      "Cake",
+      "Soup"
      ],
      "answer": 0
     }
    ]
   },
   "core1:4": {
-   "title": "Asking the way to borscht",
+   "title": "Waiting at the wrong place",
    "cast": [
     {
      "id": "a",
-     "ru": "Аня",
-     "en": "Anya"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "b",
-     "ru": "Катя",
-     "en": "Katya"
+     "ru": "Ярик",
+     "en": "Yarik"
     },
     {
      "id": "c",
-     "ru": "Юра",
-     "en": "Yura"
+     "ru": "Белка",
+     "en": "Belka"
     }
    ],
    "intro": [
     {
-     "ru": "вечер",
-     "en": "evening"
+     "ru": "мама",
+     "en": "mom"
     },
     {
-     "ru": "повар",
-     "en": "cook"
+     "ru": "папа",
+     "en": "dad"
     }
    ],
    "lines": [
     {
+     "s": "a",
+     "ru": "Папа, где мама? Я хочу пиццу!",
+     "en": "Dad, where's Mom? I want pizza!"
+    },
+    {
      "s": "b",
-     "ru": "Аня, я хочу борщ. Где тут ресторан?",
-     "en": "Anya, I want borscht. Where's a restaurant around here?"
+     "ru": "Не знаю, Тедди. Мама говорит, мы тут, в ресторане.",
+     "en": "I don't know, Teddy. Mom says we meet here, at the restaurant."
     },
     {
      "s": "a",
-     "ru": "Не знаю, Катя. А он может знать.",
-     "en": "I don't know, Katya. But he might know."
-    },
-    {
-     "s": "b",
-     "ru": "Добрый вечер! У меня вопрос.",
-     "en": "Good evening! I have a question."
+     "ru": "А её тут нет, папа!",
+     "en": "But she isn't here, Dad!"
     },
     {
      "s": "c",
-     "ru": "Добрый вечер. Да, какой вопрос?",
-     "en": "Good evening. Yes, what's the question?"
+     "ru": "Ярик! Тедди! Вот вы где!",
+     "en": "Yarik! Teddy! So that's where you are!"
     },
     {
      "s": "b",
-     "ru": "Где тут ресторан? Мы хотим борщ.",
-     "en": "Where's a restaurant here? We want borscht."
+     "ru": "Белка? Ты знаешь, где Нежа?",
+     "en": "Belka? Do you know where Nezha is?"
     },
     {
      "s": "c",
-     "ru": "Ресторан? Ресторана тут нет. Только кафе.",
-     "en": "A restaurant? There's no restaurant here. Only a café."
+     "ru": "Знаю! Нежа в кафе, не в ресторане.",
+     "en": "I do! Nezha is at the café, not the restaurant."
+    },
+    {
+     "s": "b",
+     "ru": "В кафе? Нет, она говорит «ресторан».",
+     "en": "At the café? No, she says \"restaurant\"."
+    },
+    {
+     "s": "c",
+     "ru": "Нет, Ярик. Она говорит «кафе». Я знаю!",
+     "en": "No, Yarik. She says \"café\". I know!"
     },
     {
      "s": "a",
-     "ru": "Кафе? Катя, кафе — это хорошо!",
-     "en": "A café? Katya, a café is fine!"
-    },
-    {
-     "s": "b",
-     "ru": "А вы знаете, какой там борщ?",
-     "en": "And do you know what the borscht is like there?"
+     "ru": "А пицца там? С колбасой?",
+     "en": "And is there pizza there? With sausage?"
     },
     {
      "s": "c",
-     "ru": "Знаю. Это мой борщ. Я там повар.",
-     "en": "I do. It's my borscht. I'm the cook there."
+     "ru": "Там пицца с колбасой, Тедди. И борщ.",
+     "en": "There's pizza with sausage there, Teddy. And borscht."
+    },
+    {
+     "s": "b",
+     "ru": "Мы тут, а Нежа там. Молодец, Ярик.",
+     "en": "We're here, and Nezha's there. Well done, Yarik."
+    },
+    {
+     "s": "c",
+     "ru": "А я знаю, где это кафе. Вот там!",
+     "en": "And I know where that café is. Right over there!"
     },
     {
      "s": "a",
-     "ru": "Ваш борщ? Вы повар?",
-     "en": "Your borscht? You're a cook?"
-    },
-    {
-     "s": "c",
-     "ru": "Да, я Юра, я повар. Кафе вот там.",
-     "en": "Yes, I'm Yura, I'm the cook. The café is over there."
+     "ru": "Спасибо, Белка! Папа, я очень хочу пиццу.",
+     "en": "Thank you, Belka! Dad, I really want pizza."
     },
     {
      "s": "b",
-     "ru": "А пицца тоже ваша, Юра?",
-     "en": "And is the pizza yours too, Yura?"
+     "ru": "Хорошо, Тедди. Белка, ты с нами?",
+     "en": "All right, Teddy. Belka, are you coming with us?"
     },
     {
      "s": "c",
-     "ru": "Нет, пицца не моя. Только борщ.",
-     "en": "No, the pizza isn't mine. Just the borscht."
-    },
-    {
-     "s": "a",
-     "ru": "Вот и хорошо, Катя! Борщ у Юры.",
-     "en": "That settles it, Katya! Borscht at Yura's."
-    },
-    {
-     "s": "b",
-     "ru": "Спасибо, Юра! Мы в кафе.",
-     "en": "Thank you, Yura! We're off to the café."
+     "ru": "С вами? Да! Я тоже хочу борщ.",
+     "en": "With you? Yes! I want borscht too."
     }
    ],
    "questions": [
     {
-     "ask": "What does Katya want to eat?",
+     "ask": "Who are Teddy and his dad waiting for?",
      "options": [
-      "Borscht",
-      "Pancakes",
-      "Dumplings",
-      "Salmon"
+      "Teddy's mom",
+      "Teddy's aunt",
+      "Teddy's uncle",
+      "Teddy's nanny"
      ],
      "answer": 0
     },
     {
-     "ask": "What is the problem with Katya's plan?",
+     "ask": "What mix-up has happened?",
      "options": [
-      "There is no restaurant nearby",
-      "The restaurant is closed now",
-      "The restaurant is too pricey",
-      "The restaurant has no tables"
+      "They went to the wrong place",
+      "They came on the wrong day",
+      "They forgot to book a table",
+      "They lost the restaurant key"
      ],
      "answer": 0
     },
     {
-     "ask": "What does the man they ask turn out to be?",
+     "ask": "What news does Belka bring?",
      "options": [
-      "The cook",
-      "A waiter",
-      "A driver",
-      "The owner"
+      "Nezha is at the café",
+      "Nezha is running late",
+      "Nezha is stuck at work",
+      "Nezha forgot about it"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Yura make at the café?",
+     "ask": "What does Teddy want to eat?",
      "options": [
-      "Only the borscht",
-      "Only the pizza",
-      "The tea and cakes",
-      "Every dish there"
+      "Pizza with sausage",
+      "Borscht with bread",
+      "Fish with potatoes",
+      "Cake with cherries"
      ],
      "answer": 0
     },
     {
-     "ask": "Where do the women go in the end?",
+     "ask": "Who goes to the café in the end?",
      "options": [
-      "To the café",
-      "To the hotel",
-      "To a market",
-      "Home to bed"
+      "All three of them",
+      "Just Yarik alone",
+      "Just Belka alone",
+      "Nobody, they stay"
      ],
      "answer": 0
     }

@@ -6,7 +6,7 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  View, Pressable, ScrollView, ActivityIndicator, StyleSheet, Modal, Animated,
+  View, Pressable, ScrollView, ActivityIndicator, StyleSheet, Modal, Animated, Image,
 } from "react-native";
 /* Renamed on the way in: the app's own `Text` and `TextInput` are defined below
    and are what everything else imports (font.test.js). */
@@ -14,7 +14,8 @@ import { Text as RNText, TextInput as RNTextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml, Circle } from "react-native-svg";
 import { iconFor } from "@core/icons";
-import { AV, AV_IDS, avatarOf } from "@core/avatars";
+import { AV, AV_IDS, AV_LEGACY, avatarOf } from "@core/avatars";
+import { CAST_FACES } from "./castfaces";
 import { useTheme, radius, space, type, faceFor, useShadow } from "./theme";
 import { useFill, usePress, useEnter } from "./motion";
 import { say, warm, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
@@ -961,14 +962,21 @@ export function Thumb({ id, done, locked, n, tone }) {
    `avatarOf` resolves an id from before the DiceBear faces to a face of its own. */
 export function Avatar({ id, size = 44 }) {
   const a = avatarOf(id);
+  /* The story's characters (docs/cast.md) are drawn from the cast art, so the
+     Teddy in the picker is the Teddy in the lessons. The SVG stays for every
+     other face, and for the frozen web app. */
+  const rid = AV[id] ? id : AV[AV_LEGACY[id]] ? AV_LEGACY[id] : AV_IDS[0];
+  const face = CAST_FACES[rid];
   return (
     <View style={{ width: size, height: size, borderRadius: size / 2,
                    backgroundColor: a.bg, overflow: "hidden" }}>
-      <SvgXml
+      {face ? (
+        <Image testID={`face-${rid}`} source={face} style={{ width: size, height: size }} />
+      ) : <SvgXml
         width={size}
         height={size}
         xml={`<svg viewBox="${a.vb}" xmlns="http://www.w3.org/2000/svg">${a.svg}</svg>`}
-      />
+      />}
     </View>
   );
 }

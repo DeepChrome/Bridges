@@ -421,7 +421,8 @@ bridges/                          (directory is still named russian-blocks on di
     entry.js paradigm.js forms.js   <- entry hydration, paradigm rebuild, form names
     compare.js         <- transcript vs target, word-aligned through fold()
     errortags.js       <- the closed list of learner-error tags
-    scenarios.js       <- the Talk situations (§30f)
+    scenarios.js       <- the Talk situations (§30f), each played by a character
+    cast.js            <- the cast: Teddy, Nezha, Yarik, Belka, Monka (§30bg; docs/cast.md)
     grammar.js         <- the grammar reference: topics, rules, endings tables (§30ay)
     facts.js           <- what one word's own paradigm says about it (§30az)
     endings.js         <- how word endings are said, and how often they occur (§30ba)
@@ -451,6 +452,7 @@ bridges/                          (directory is still named russian-blocks on di
     harvest_videos.py  <- YouTube listings, metadata, captions -> data/raw (§30g)
     build_transcripts.py <- captions -> data/transcripts.json, lemma resolved (§30g)
     build_videos.py    <- catalogue + index -> data/videos.json (§30g)
+    build_cast_art.mjs <- the cast drawn by an image model: sheets, poses, unit scenes (§30bg)
     make_app_icon.py   <- the bridge mark, every size both apps need (zlib PNGs, no image library)
     panel.py           <- form -> lemma + paradigm tables + examples (shared logic)
     lookup.py          <- CLI word panel, for checking data without a browser
@@ -5444,6 +5446,71 @@ button; optional steps are never where Continue goes (`nextStep`) and never
 counted in "N/M steps done". The grammar step and the summary offer the
 chapter's grammar episode; a word card shows the line of its unit's video
 where the word is said, playable at that moment.
+
+## 30bg. The cast — one story under the whole app (2026-09-30)
+
+The owner: *"Teddy is the main character. He's a Yorkie. His family is the
+rabbit who is beautiful and loving… her partner (husband) is a wolf… Then
+there is the monkey that is always trying to foil their plans but getting it
+turned around on him… like the roadrunner and the coyote… he's just insecure
+and has a heart but is just misunderstood… Codify this theme into our project
+so it's understood and consistent in future development."*
+
+**`core/cast.js` is the one table** and **`docs/cast.md` the story bible**;
+read the bible before writing any scene, line, prompt or picture.
+
+- **Тедди Teddy** (Yorkie, he) — the hero and the guide on every screen
+  (`GUIDE_ID`; the guide was the monkey Yuri until this change). Drawn from
+  the owner's own dog (photos cropped to the dog alone in
+  `data/cast_art/ref/`).
+- **Нежа Nezha** (rabbit, she) — his glamorous, loving mother; the name is
+  short for Нежана, "tender", and echoes the owner's "Coneja".
+- **Ярик Yarik** (wolf, he) — his father; short for Ярослав (the owner's
+  "Lobo or Jared, Russianified").
+- **Белка Belka** (squirrel, she) — Nezha's best friend.
+- **Монька Monka** (cosmonaut monkey, he) — the rival. Every scheme
+  backfires on him; **unlucky, never humiliated, never cruel**, and now and
+  then kind where nobody sees. His avatar keeps the id `yuri`, because
+  profiles store it.
+- Neighbours for other roles: Тортила, Гена, Лиса, Миша.
+
+What holds it together, and each is enforced rather than hoped for:
+
+- **The scenarios' names *are* the cast.** `core/names.js` is built from
+  `core/cast.js`, so `check_scripts.mjs` refuses any other name — the human
+  cast (Маша, Олег…) was removed, and the 20 conversations rewritten as
+  episodes (`docs/scenario-brief.md` carries the cast rules for writers).
+  `core.test.mjs` "the cast" checks every conversation and every Talk
+  situation is played by a character.
+- **A character has one voice everywhere.** `voice` in the cast is their
+  Chirp3-HD voice in every conversation (`castVoices` in
+  `build_scenario_audio.mjs` takes it before the pool); `tone` shifts it at
+  stitch time (`build_scene_tracks.mjs`, `asetrate` for pitch and formants,
+  `atempo` for pace) — the owner asked for Teddy "a cute little voice", the
+  wolf "a strong masculine voice", Monka "a little goofy weakling voice…
+  slow and derpy". Measured medians before/after: Teddy 157 → ~190 Hz, Yarik
+  132 → ~123, Monka +9 % and 14 % slower. The bought clips are untouched
+  (rule 20.3). On the device, `voiceFor(id)` in `audio.js` gives the phone
+  voice the same sex and tone: the personal tutor speaks as Teddy
+  (`backend/src/tutor.js` says so to the model), and each Talk situation
+  names who plays it (`who` in `core/scenarios.js`).
+  **A tempo below 1 lengthens a conversation**: Monka's slowdown pushed three
+  past the 70 s gate and they were trimmed; `check_scripts`'s estimate does
+  not know about tone, `audio_qa.mjs` measuring the real tracks does.
+- **The art is made from references, never prompts alone**
+  (`tools/build_cast_art.mjs`, gpt-image-2 via `OPENAI_API_KEY` from the
+  environment, about $0.21 an image at high quality): the first monkey the
+  owner approved is the style reference for every character sheet, the
+  chosen sheets (`data/cast_art/<id>.png`, picked by eye) are the references
+  for every pose and scene, and Teddy's sheet also takes the photos. Every
+  bought image is committed. `--ship` writes the guide's five poses, the
+  cast's avatar faces (`native/src/castfaces.js`, cut by `FACE_BOX`) and one
+  episode picture per unit (`native/src/sceneart.js`, drawn at the top of
+  the Unit screen). The model's faint alpha halo is cut on the way out
+  (`HALO`) — invisible on white, an orange glow on the dark theme.
+- **The safety filter refuses "sexy".** The owner's brief for Nezha said
+  "kind of sexy"; the prompt that leaned on it was refused, and "glamorous…
+  a classic cartoon leading lady" drew what he meant.
 
 ## 31. Verification
 

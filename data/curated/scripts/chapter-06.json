@@ -3,155 +3,145 @@
  "name": "Before & After",
  "lessons": {
   "core6:2": {
-   "title": "Four tickets, one principle",
+   "title": "Snacks for the concert",
    "cast": [
     {
      "id": "a",
-     "ru": "Маша",
-     "en": "Masha"
+     "ru": "Нежа",
+     "en": "Nezha"
     },
     {
      "id": "b",
-     "ru": "Борис",
-     "en": "Boris"
+     "ru": "Белка",
+     "en": "Belka"
+    },
+    {
+     "id": "c",
+     "ru": "Тедди",
+     "en": "Teddy"
     }
    ],
    "intro": [
     {
-     "ru": "билет",
-     "en": "ticket"
+     "ru": "орех",
+     "en": "nut"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Борис, концерт сегодня. Сколько билетов нам взять?",
-     "en": "Boris, the concert is today. How many tickets should we get?"
+     "ru": "Белка, концерт сегодня после обеда. А что это у тебя?",
+     "en": "Belka, the concert is today after lunch. And what's that you've got?"
     },
     {
      "s": "b",
-     "ru": "Несколько. Петя и Соня тоже хотят, но после работы.",
-     "en": "A few. Petya and Sonya want to come too, but after work."
+     "ru": "Мешки, Нежа. На концерте Тедди всегда что-то хочет.",
+     "en": "Bags, Nezha. At a concert Teddy always wants something."
     },
     {
      "s": "a",
-     "ru": "Значит, надо взять билеты и для них?",
-     "en": "So we have to get tickets for them too?"
+     "ru": "Белка, на концерт мы не можем взять обед. Такой у меня принцип.",
+     "en": "Belka, we can't take lunch to a concert. That's my principle."
     },
     {
      "s": "b",
-     "ru": "Да, но сначала надо считать деньги.",
-     "en": "Yes, but first we need to count the money."
+     "ru": "Но это не обед. Это орехи, всего несколько.",
+     "en": "But it isn't lunch. It's nuts, only a few."
+    },
+    {
+     "s": "c",
+     "ru": "Орехи — это не обед. Это просто орехи!",
+     "en": "Nuts aren't lunch. They're just nuts!"
     },
     {
      "s": "a",
-     "ru": "Я уже считала. У меня деньги на три билета.",
-     "en": "I've already counted. I have money for three tickets."
+     "ru": "Тедди, я знаю эти орехи. После них все смотрят на нас.",
+     "en": "Teddy, I know those nuts. After them, everybody looks at us."
     },
     {
      "s": "b",
-     "ru": "А у меня на один. Значит, денег для всех достаточно.",
-     "en": "And I have enough for one. So there's enough money for everyone."
+     "ru": "Нежа, ты имеешь в виду тот концерт в декабре?",
+     "en": "Nezha, do you mean that concert in December?"
     },
     {
      "s": "a",
-     "ru": "Нет, Борис, я хочу взять и твой билет. Это подарок.",
-     "en": "No, Boris, I want to get your ticket too. It's a present."
+     "ru": "Именно тот. Там все смотрели на нас, не на концерт.",
+     "en": "That very one. Everybody there was looking at us, not at the concert."
+    },
+    {
+     "s": "c",
+     "ru": "Тогда давайте так: сначала обед, потом концерт!",
+     "en": "Then let's do this: lunch first, then the concert!"
     },
     {
      "s": "b",
-     "ru": "Спасибо, Маша, но нет. У меня принцип.",
-     "en": "Thanks, Masha, but no. I have a principle."
+     "ru": "Молодец, Тедди! Значит, обед сейчас, а мешки дома.",
+     "en": "Well done, Teddy! So lunch now, and the bags stay at home."
     },
     {
      "s": "a",
-     "ru": "Принцип? Что ты имеешь в виду?",
-     "en": "A principle? What do you mean?"
+     "ru": "Хорошо. Только все мешки, Белка. Я считаю.",
+     "en": "All right. But all the bags, Belka. I'm counting."
     },
     {
      "s": "b",
-     "ru": "Каждый сам оплачивает свой билет. Всегда.",
-     "en": "Everyone pays for their own ticket. Always."
+     "ru": "Все, Нежа. Ну... один орех можно?",
+     "en": "All of them, Nezha. Well... may I have one nut?"
     },
     {
      "s": "a",
-     "ru": "Понятно. А у Пети и Сони деньги есть?",
-     "en": "I see. And do Petya and Sonya have the money?"
-    },
-    {
-     "s": "b",
-     "ru": "Есть. Соня может перевести их тебе после работы.",
-     "en": "They do. Sonya can transfer it to you after work."
-    },
-    {
-     "s": "a",
-     "ru": "После работы? Тогда билетов уже нет, Борис.",
-     "en": "After work? By then there won't be any tickets left, Boris."
-    },
-    {
-     "s": "b",
-     "ru": "Хорошо. Тогда можно взять все билеты сейчас.",
-     "en": "All right. Then we can get all the tickets now."
-    },
-    {
-     "s": "a",
-     "ru": "И Соня потом даёт деньги мне, так?",
-     "en": "And Sonya gives me the money afterwards, right?"
-    },
-    {
-     "s": "b",
-     "ru": "Так. Это тоже принцип.",
-     "en": "Right. That's a principle too."
+     "ru": "Один. Только один, Белка.",
+     "en": "One. Only one, Belka."
     }
    ],
    "questions": [
     {
-     "ask": "Where are Masha and Boris going?",
+     "ask": "Where are they going today?",
      "options": [
       "To a concert",
+      "To a cinema",
       "To a lecture",
-      "To the cinema",
       "To a museum"
      ],
      "answer": 0
     },
     {
-     "ask": "Who else wants to come?",
+     "ask": "What has Belka brought?",
      "options": [
-      "Petya and Sonya",
-      "Petya and Lena",
-      "Sonya and Oleg",
-      "Only their boss"
+      "Several bags of nuts",
+      "Tickets for everybody",
+      "A cake for the family",
+      "Flowers for the singer"
      ],
      "answer": 0
     },
     {
-     "ask": "Why does Boris turn down Masha's offer?",
+     "ask": "What is Nezha's rule?",
      "options": [
-      "He pays for himself on principle",
-      "He does not like concerts at all",
-      "He already has a ticket at home",
-      "He has to work late this evening"
+      "No food at concerts",
+      "No bags on the bus",
+      "Always arrive early",
+      "Pay for your own seat"
      ],
      "answer": 0
     },
     {
-     "ask": "When could Sonya send her money?",
+     "ask": "What went wrong at the December concert?",
      "options": [
-      "After work",
-      "Before lunch",
-      "At the concert",
-      "In the morning"
+      "Everyone stared at them",
+      "They lost their tickets",
+      "Teddy fell fast asleep",
+      "The singer never came"
      ],
      "answer": 0
     },
     {
-     "ask": "What do they decide to do?",
+     "ask": "What do they decide in the end?",
      "options": [
-      "Take all the tickets now",
-      "Wait for Petya and Sonya",
-      "Skip the concert tonight",
-      "Buy only two tickets now"
+      "Eat lunch before they go",
+      "Skip the concert entirely",
+      "Take just one bag along",
+      "Eat the nuts during it"
      ],
      "answer": 0
     }
@@ -162,135 +152,154 @@
    "cast": [
     {
      "id": "a",
-     "ru": "Нина",
-     "en": "Nina"
+     "ru": "Белка",
+     "en": "Belka"
     },
     {
      "id": "b",
-     "ru": "Виктор",
-     "en": "Viktor"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "c",
-     "ru": "Соня",
-     "en": "Sonya"
+     "ru": "Монька",
+     "en": "Monka"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "каша",
+     "en": "porridge"
+    },
+    {
+     "ru": "сахар",
+     "en": "sugar"
+    },
+    {
+     "ru": "чай",
+     "en": "tea"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Виктор, урок уже идёт! Где вы были?",
-     "en": "Viktor, the lesson has already started! Where were you?"
+     "ru": "Тедди, сначала завтрак, а потом урок. Сегодня каша!",
+     "en": "Teddy, breakfast first, and then your lesson. Today it's porridge!"
     },
     {
      "s": "b",
-     "ru": "Нина, я был в кафе. Сначала завтрак, потом урок.",
-     "en": "Nina, I was at the café. First breakfast, then the lesson."
+     "ru": "Каша! А сахар в ней есть?",
+     "en": "Porridge! And is there sugar in it?"
+    },
+    {
+     "s": "a",
+     "ru": "Конечно. Сахар в красном мешке, а соль в другом.",
+     "en": "Of course. The sugar's in the red bag, and the salt's in the other one."
     },
     {
      "s": "c",
-     "ru": "Нина, он же иностранец. За границей сначала завтрак.",
-     "en": "Nina, he's a foreigner. Abroad, breakfast comes first."
-    },
-    {
-     "s": "b",
-     "ru": "Спасибо, Соня. А что мы сегодня делаем?",
-     "en": "Thank you, Sonya. So what are we doing today?"
+     "ru": "Белка! Тедди! А что это у вас, завтрак?",
+     "en": "Belka! Teddy! And what's this you've got, breakfast?"
     },
     {
      "s": "a",
-     "ru": "Сегодня у нас «после». Кто может сказать предложение?",
-     "en": "Today it's the word \"after\". Who can make a sentence?"
+     "ru": "Завтрак, Монька. Тедди сейчас идёт на урок.",
+     "en": "Breakfast, Monka. Teddy's off to his lesson now."
     },
     {
      "s": "b",
-     "ru": "Я могу. После завтрак я иду на урок.",
-     "en": "I can. After breakfast (in the wrong form) I go to the lesson."
+     "ru": "На уроке мне нужно сказать три предложения.",
+     "en": "At the lesson I have to say three sentences."
     },
     {
      "s": "a",
-     "ru": "Хорошо, но есть ошибка. После «после» другая форма.",
-     "en": "Good, but there's a mistake. After \"after\" comes a different form."
+     "ru": "Монька, смотри за кашей. Я иду за книгой Тедди.",
+     "en": "Monka, keep an eye on the porridge. I'm going to get Teddy's book."
     },
     {
      "s": "c",
-     "ru": "«После завтрака»! Правильно, Нина?",
-     "en": "\"After breakfast\", in the right form! Is that right, Nina?"
+     "ru": "Хорошо... Так. Сахар в этот мешок, а соль в красный.",
+     "en": "All right... Now then. The sugar into this bag, and the salt into the red one."
     },
     {
      "s": "a",
-     "ru": "Правильно, Соня. Виктор, теперь ещё одно предложение.",
-     "en": "Right, Sonya. Viktor, now one more sentence."
+     "ru": "Вот книга. Монька, ты с нами? Эта каша — тебе.",
+     "en": "Here's the book. Monka, are you joining us? This porridge is for you."
+    },
+    {
+     "s": "c",
+     "ru": "Мне? Белка, в этой каше соль! Очень много соли!",
+     "en": "For me? Belka, there's salt in this porridge! A lot of salt!"
+    },
+    {
+     "s": "a",
+     "ru": "Как соль? Сахар всегда в красном мешке.",
+     "en": "What do you mean, salt? The sugar's always in the red bag."
     },
     {
      "s": "b",
-     "ru": "После урока я иду в банк, а потом на работу.",
-     "en": "After the lesson I go to the bank, and then to work."
+     "ru": "Монька, ты же смотрел за кашей. Что ты видел?",
+     "en": "Monka, you were watching the porridge. What did you see?"
     },
     {
-     "s": "a",
-     "ru": "Молодец, Виктор! Здесь ошибок нет.",
-     "en": "Well done, Viktor! No mistakes here."
+     "s": "c",
+     "ru": "Я? Ничего не видел. Можно мне просто чай?",
+     "en": "Me? I didn't see anything. Could I just have some tea?"
     },
     {
      "s": "b",
-     "ru": "Спасибо, Нина. А завтрак после обеда можно?",
-     "en": "Thank you, Nina. And can I have breakfast after lunch?"
-    },
-    {
-     "s": "a",
-     "ru": "Виктор, это уже другая ошибка.",
-     "en": "Viktor, that's a different mistake altogether."
+     "ru": "Монька, давай мою кашу вместе. Она без соли.",
+     "en": "Monka, let's share my porridge. It has no salt in it."
     }
    ],
    "questions": [
     {
-     "ask": "Why is Viktor late for the lesson?",
+     "ask": "What is Belka making?",
      "options": [
-      "He was having breakfast",
-      "He was changing his money",
-      "He had missed the bus",
-      "He was asleep at home"
+      "Breakfast before a lesson",
+      "Lunch after the concert",
+      "Dinner for the whole family",
+      "A cake for Nezha's party"
      ],
      "answer": 0
     },
     {
-     "ask": "What is today's lesson about?",
+     "ask": "What must Teddy do at his lesson?",
      "options": [
-      "Using the word 'after'",
-      "Using the word 'before'",
-      "Filling in a visa form",
-      "Ordering food in Russian"
+      "Say three sentences",
+      "Read a whole book",
+      "Sing a short song",
+      "Write his own name"
      ],
      "answer": 0
     },
     {
-     "ask": "What was wrong with Viktor's first sentence?",
+     "ask": "What does Monka do while Belka is away?",
      "options": [
-      "A noun had the wrong ending",
-      "The verb had the wrong ending",
-      "It was missing a verb at all",
-      "The word order was backwards"
+      "Swaps the sugar and salt",
+      "Eats Teddy's breakfast",
+      "Hides Teddy's school book",
+      "Burns the porridge pot"
      ],
      "answer": 0
     },
     {
-     "ask": "Who gives the correct form?",
+     "ask": "Who gets the salty porridge?",
      "options": [
-      "Sonya, a classmate",
-      "Nina, the teacher",
-      "Viktor, on his own",
-      "No one in the class"
+      "Monka himself",
+      "Teddy's mum",
+      "Belka herself",
+      "The teacher"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Viktor ask at the end?",
+     "ask": "What does Teddy offer Monka at the end?",
      "options": [
-      "If breakfast can come after lunch",
-      "If the lesson can end early now",
-      "If lunch can come before the lesson",
-      "If he can leave for the bank now"
+      "To share his porridge",
+      "A glass of cold water",
+      "A seat at his lesson",
+      "Some sugar to take home"
      ],
      "answer": 0
     }

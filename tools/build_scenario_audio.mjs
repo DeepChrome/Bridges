@@ -43,6 +43,7 @@ import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync, statSy
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { sexOf } from "../core/names.js";
+import { castByName } from "../core/cast.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SCRIPTS = join(ROOT, "data", "curated", "scripts");
@@ -156,7 +157,16 @@ export function castVoices(lesson, pools) {
   const turn = hash32(lesson.key);
   const taken = new Set();
   const out = {};
+  /* A character of the cast speaks in their own voice in every conversation
+     (core/cast.js, 2026-09-30) — Teddy is the same dog in chapter 1 and 10.
+     Two supporting characters may share a voice; within one scene the second
+     falls back to the pool, which keeps the two speakers apart. */
+  lesson.cast.forEach((c) => {
+    const own = castByName[c.ru] && castByName[c.ru].voice;
+    if (own && !taken.has(own)) { taken.add(own); out[c.id] = own; }
+  });
   lesson.cast.forEach((c, k) => {
+    if (out[c.id]) return;
     const sex = sexOf(c.ru) || (k % 2 ? "m" : "f");
     const pool = pools[sex].length ? pools[sex] : pools[sex === "f" ? "m" : "f"];
     for (let i = 0; i < pool.length; i++) {

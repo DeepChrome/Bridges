@@ -3,327 +3,328 @@
  "name": "People & Places",
  "lessons": {
   "core2:2": {
-   "title": "Someone at our car",
+   "title": "Monka's pizza trick",
    "cast": [
     {
      "id": "a",
-     "ru": "Нина",
-     "en": "Nina"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "b",
-     "ru": "Олег",
-     "en": "Oleg"
+     "ru": "Ярик",
+     "en": "Yarik"
     },
     {
      "id": "c",
-     "ru": "Борис",
-     "en": "Boris"
+     "ru": "Монька",
+     "en": "Monka"
     }
    ],
    "intro": [
     {
-     "ru": "вечер",
-     "en": "evening"
-    },
-    {
-     "ru": "сосед",
-     "en": "neighbor"
+     "ru": "папа",
+     "en": "dad"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Олег, ты видишь? Кто это у машины?",
-     "en": "Oleg, do you see? Who's that by the car?"
+     "ru": "Папа, в университете дают пиццу. Всем!",
+     "en": "Dad, they're giving out pizza at the university. To everyone!"
     },
     {
      "s": "b",
-     "ru": "Вижу. Что он там делает, Нина?",
-     "en": "I see him. What's he doing there, Nina?"
+     "ru": "Пиццу? Кто говорит? Я тоже хочу, Тедди.",
+     "en": "Pizza? Who says so? I want some too, Teddy."
+    },
+    {
+     "s": "c",
+     "ru": "Ярик, Тедди! Пиццу дают не тут. В офисе!",
+     "en": "Yarik, Teddy! The pizza isn't here. It's at the office!"
     },
     {
      "s": "a",
-     "ru": "Не знаю. Я думаю, он хочет нашу машину.",
-     "en": "I don't know. I think he wants our car."
-    },
-    {
-     "s": "b",
-     "ru": "Нашу машину? Добрый вечер! Вы кто?",
-     "en": "Our car? Good evening! Who are you?"
+     "ru": "В офисе? В каком, Монька?",
+     "en": "At the office? Which office, Monka?"
     },
     {
      "s": "c",
-     "ru": "Добрый вечер. Я Борис. А это моя машина.",
-     "en": "Good evening. I'm Boris. And this is my car."
+     "ru": "Офис в банке, у бара. Вот там.",
+     "en": "The office is in the bank, by the bar. Over there."
     },
     {
      "s": "b",
-     "ru": "Ваша? Нет, Борис, это наша машина!",
-     "en": "Yours? No, Boris, this is our car!"
+     "ru": "Монька, ты думаешь, в банке дают пиццу?",
+     "en": "Monka, you really think a bank gives out pizza?"
     },
     {
      "s": "c",
-     "ru": "Как ваша? Я же вижу, она моя.",
-     "en": "What do you mean, yours? I can see it's mine."
+     "ru": "Да, да! Я знаю. Все говорят!",
+     "en": "Yes, yes! I know. Everybody says so!"
     },
     {
      "s": "a",
-     "ru": "Олег, вот там такая же машина!",
-     "en": "Oleg, there's the same car over there!"
-    },
-    {
-     "s": "c",
-     "ru": "Такая же? Да… Вот моя машина, там.",
-     "en": "The same? Yes… That's my car, over there."
+     "ru": "Папа, Монька знает. Мы в банк?",
+     "en": "Dad, Monka knows. Shall we go to the bank?"
     },
     {
      "s": "b",
-     "ru": "Вот так! А вы кто, Борис? Вы наш сосед?",
-     "en": "Well, there you go! So who are you, Boris? Our neighbor?"
+     "ru": "Хорошо, Тедди. Спасибо, Монька!",
+     "en": "All right, Teddy. Thanks, Monka!"
     },
     {
      "s": "c",
-     "ru": "Да, сосед. Вот мой дом, там.",
-     "en": "Yes, your neighbor. That's my house, over there."
+     "ru": "Вот так! А вся пицца — моя!",
+     "en": "There! Now all the pizza is mine!"
     },
     {
      "s": "a",
-     "ru": "Вы говорите не как русский. Вы американец?",
-     "en": "You don't speak like a Russian. Are you American?"
-    },
-    {
-     "s": "c",
-     "ru": "Да, американец. Но я очень хочу говорить, как русский.",
-     "en": "Yes, American. But I really want to speak like a Russian."
+     "ru": "Папа, это банк. Ты видишь пиццу?",
+     "en": "Dad, this is the bank. Can you see any pizza?"
     },
     {
      "s": "b",
-     "ru": "Вы уже говорите хорошо, Борис. Молодец!",
-     "en": "You already speak well, Boris. Well done!"
+     "ru": "Вижу, Тедди! Тут пицца с колбасой.",
+     "en": "I can, Teddy! There's pizza with sausage here."
+    },
+    {
+     "s": "c",
+     "ru": "Ярик? Тедди? А в университете пиццы нет…",
+     "en": "Yarik? Teddy? There's no pizza left at the university…"
     },
     {
      "s": "a",
-     "ru": "Всё хорошо, Олег. Наша машина тут.",
-     "en": "It's all fine, Oleg. Our car is right here."
+     "ru": "Монька, что ты делаешь? Пицца тут, как ты говоришь!",
+     "en": "Monka, what are you doing? The pizza is here, just like you said!"
+    },
+    {
+     "s": "b",
+     "ru": "Вот, Монька, это тебе. Пицца от нас.",
+     "en": "Here, Monka, this is for you. Pizza from us."
+    },
+    {
+     "s": "c",
+     "ru": "Мне? Спасибо, Ярик…",
+     "en": "For me? Thank you, Yarik…"
     }
    ],
    "questions": [
     {
-     "ask": "What worries Nina at the start?",
+     "ask": "What is happening at the university?",
      "options": [
-      "A man is near their car",
-      "A man is near their door",
-      "Their cat has run away",
-      "A man is at their window"
+      "Pizza for everyone",
+      "A Russian lesson",
+      "A party for dads",
+      "A football match"
      ],
      "answer": 0
     },
     {
-     "ask": "Why does Boris think the car is his?",
+     "ask": "Where does Monka send Teddy and Yarik?",
      "options": [
-      "His car looks just the same",
-      "He parked it there earlier",
-      "Oleg sold it to him last week",
-      "He always parks in that spot"
+      "To an office at the bank",
+      "To a café near the park",
+      "To a shop by the bus stop",
+      "To a bar near the school"
      ],
      "answer": 0
     },
     {
-     "ask": "Who is Boris?",
+     "ask": "Why does Monka send them away?",
      "options": [
-      "Their neighbor",
-      "A police officer",
-      "A car mechanic",
-      "Nina's cousin"
+      "He wants all the pizza",
+      "He wants their car keys",
+      "He wants to be alone",
+      "He wants to find a cat"
      ],
      "answer": 0
     },
     {
-     "ask": "Where is Boris from?",
+     "ask": "What do Teddy and Yarik find at the bank?",
      "options": [
-      "America",
-      "Canada",
-      "England",
-      "Ireland"
+      "Pizza with sausage",
+      "A room full of cats",
+      "A queue out the door",
+      "Only coffee and tea"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Oleg say about Boris's Russian?",
+     "ask": "How does it end for Monka?",
      "options": [
-      "It is already good",
-      "It needs more work",
-      "It is too formal",
-      "It is hard to hear"
+      "They give him some pizza",
+      "He finds pizza on his own",
+      "He goes home with nothing",
+      "He buys a pizza at the bar"
      ],
      "answer": 0
     }
    ]
   },
   "core2:4": {
-   "title": "The wrong man at the bar",
+   "title": "Which course for Teddy?",
    "cast": [
     {
      "id": "a",
-     "ru": "Аня",
-     "en": "Anya"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "b",
-     "ru": "Виктор",
-     "en": "Viktor"
+     "ru": "Нежа",
+     "en": "Nezha"
     },
     {
      "id": "c",
-     "ru": "Юра",
-     "en": "Yura"
+     "ru": "Белка",
+     "en": "Belka"
     }
    ],
    "intro": [
     {
-     "ru": "вечер",
-     "en": "evening"
+     "ru": "мама",
+     "en": "mom"
     },
     {
-     "ru": "сестра",
-     "en": "sister"
+     "ru": "китайский",
+     "en": "Chinese"
     },
     {
-     "ru": "английский",
-     "en": "English (language)"
+     "ru": "учитель",
+     "en": "teacher"
     }
    ],
    "lines": [
     {
-     "s": "a",
-     "ru": "Добрый вечер! Вы американец? Вы из банка?",
-     "en": "Good evening! Are you the American? From the bank?"
-    },
-    {
      "s": "b",
-     "ru": "Из банка, да. Но я не американец.",
-     "en": "From the bank, yes. But I'm not American."
+     "ru": "Тедди, в университете курс русского. Ты хочешь?",
+     "en": "Teddy, there's a Russian course at the university. Do you want to go?"
     },
     {
      "s": "a",
-     "ru": "Как не американец? Юра говорит, американец в баре.",
-     "en": "What do you mean? Yura says the American is at the bar."
+     "ru": "Не хочу, мама. Я хочу китайский!",
+     "en": "I don't, Mom. I want Chinese!"
     },
     {
      "s": "b",
-     "ru": "Юра? Вы знаете Юру? Он же в моём офисе.",
-     "en": "Yura? You know Yura? He's in my office."
-    },
-    {
-     "s": "a",
-     "ru": "Я Аня, его сестра. У меня курс английского.",
-     "en": "I'm Anya, his sister. I'm taking an English course."
-    },
-    {
-     "s": "b",
-     "ru": "Аня, но американец сейчас в Китае.",
-     "en": "Anya, but the American is in China right now."
-    },
-    {
-     "s": "a",
-     "ru": "В Китае? А Юра что, не знает?",
-     "en": "In China? What, doesn't Yura know?"
-    },
-    {
-     "s": "b",
-     "ru": "Знает. А вот и он. Юра!",
-     "en": "He knows. And here he is. Yura!"
+     "ru": "Китайский? Белка, что ты думаешь?",
+     "en": "Chinese? Belka, what do you think?"
     },
     {
      "s": "c",
-     "ru": "Аня! Виктор! Вы уже тут?",
-     "en": "Anya! Viktor! You're here already?"
+     "ru": "Я думаю, Тедди молодец! Мой брат на курсе китайского.",
+     "en": "I think Teddy's got it right! My brother is on a Chinese course."
     },
     {
      "s": "a",
-     "ru": "Юра, где твой американец? Виктор говорит, он в Китае.",
-     "en": "Yura, where's your American? Viktor says he's in China."
+     "ru": "Твой брат, Белка? И как там?",
+     "en": "Your brother, Belka? And what's it like?"
     },
     {
      "s": "c",
-     "ru": "Да, в Китае. Я думаю, ты знаешь.",
-     "en": "Yes, in China. I figured you know."
-    },
-    {
-     "s": "a",
-     "ru": "Я не знаю! А мой курс? А английский?",
-     "en": "I don't know! What about my course? My English?"
+     "ru": "Брат говорит, там только китайский. Весь курс!",
+     "en": "My brother says it's only Chinese there. The whole course!"
     },
     {
      "s": "b",
-     "ru": "Аня, а я? Я тоже знаю английский.",
-     "en": "Anya, what about me? I know English too."
-    },
-    {
-     "s": "a",
-     "ru": "Вы знаете английский, Виктор?",
-     "en": "You know English, Viktor?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, знаю. В нашем банке его все знают.",
-     "en": "Yes, I do. Everyone at our bank knows it."
+     "ru": "Только китайский? А кто там учитель?",
+     "en": "Only Chinese? And who's the teacher?"
     },
     {
      "s": "c",
-     "ru": "Вот видишь, Аня? Всё хорошо!",
-     "en": "See, Anya? It all works out!"
+     "ru": "Учитель — американец, но он из Китая.",
+     "en": "The teacher is an American, but he's from China."
+    },
+    {
+     "s": "a",
+     "ru": "Американец? Мама, я хочу, как он!",
+     "en": "An American? Mom, I want to be like him!"
+    },
+    {
+     "s": "b",
+     "ru": "Тедди, ты ещё не знаешь русский.",
+     "en": "Teddy, you don't even know Russian yet."
+    },
+    {
+     "s": "a",
+     "ru": "Знаю, мама! Я говорю, как все.",
+     "en": "I do, Mom! I talk like everybody else."
+    },
+    {
+     "s": "c",
+     "ru": "Нежа, курс русского и курс китайского — там же!",
+     "en": "Nezha, the Russian course and the Chinese course are in the same place!"
+    },
+    {
+     "s": "b",
+     "ru": "Там же? Вот так! Тедди, вот что мы делаем.",
+     "en": "The same place? Well then! Teddy, here's what we'll do."
+    },
+    {
+     "s": "a",
+     "ru": "Что, мама?",
+     "en": "What, Mom?"
+    },
+    {
+     "s": "b",
+     "ru": "Ты на курсе русского, а я — на китайском!",
+     "en": "You go on the Russian course, and I'll take Chinese!"
+    },
+    {
+     "s": "c",
+     "ru": "Нежа, ты? Китайский? Вот это да!",
+     "en": "Nezha, you? Chinese? Well, how about that!"
     }
    ],
    "questions": [
     {
-     "ask": "Why has Anya come to the bar?",
+     "ask": "Which course does Nezha suggest for Teddy?",
      "options": [
-      "To practice her English",
-      "To find a job at a bank",
-      "To celebrate her birthday",
-      "To pay back some money"
+      "A Russian course",
+      "A Chinese course",
+      "An English course",
+      "A cooking course"
      ],
      "answer": 0
     },
     {
-     "ask": "Who does Anya take Viktor for?",
+     "ask": "How does Belka know about the Chinese course?",
      "options": [
-      "The American",
-      "Her teacher",
-      "The barman",
-      "Yura's boss"
+      "Her brother takes it",
+      "She takes it herself",
+      "Her mother teaches it",
+      "Her aunt runs it there"
      ],
      "answer": 0
     },
     {
-     "ask": "How does Viktor know Yura?",
+     "ask": "Who teaches the Chinese course?",
      "options": [
-      "They share an office",
-      "They live in one house",
-      "They play in one team",
-      "They met at the bar"
+      "An American",
+      "A Chinese man",
+      "Belka's aunt",
+      "An old turtle"
      ],
      "answer": 0
     },
     {
-     "ask": "Where is the American now?",
+     "ask": "What does Belka point out that helps?",
      "options": [
-      "In China",
-      "In Japan",
-      "In Moscow",
-      "At home"
+      "Both courses are in one place",
+      "Both courses start next week",
+      "Both courses have one teacher",
+      "Both courses are for children"
      ],
      "answer": 0
     },
     {
-     "ask": "How is Anya's problem solved?",
+     "ask": "What does Nezha decide in the end?",
      "options": [
-      "Viktor knows English too",
-      "Yura calls the American",
-      "She finds a new course",
-      "The American comes back"
+      "She will take Chinese herself",
+      "Teddy will take both courses",
+      "Teddy will stay home with her",
+      "Belka will take Teddy's place"
      ],
      "answer": 0
     }

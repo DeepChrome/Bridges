@@ -1,7 +1,8 @@
 /* A unit's lessons, and inside a lesson its three components. */
 
 import React from "react";
-import { View, Pressable } from "react-native";
+import { View, Pressable, Image } from "react-native";
+import { SCENE_ART } from "../sceneart";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick, Text } from "../ui";
@@ -17,8 +18,17 @@ export function UnitScreen({ route, navigation }) {
   const pr = unitFineProgress(st, unit);
   const n = lessonCount(unit);
 
+  const art = SCENE_ART[unit.id];
   return (
     <Screen>
+      {/* The unit's episode (docs/cast.md): the family doing what this unit
+          teaches, and Monka's plan going wrong somewhere in it. No caption —
+          the picture is the unit's subject, and the title is in the header. */}
+      {art ? (
+        <Image testID="unit-art" source={art} accessibilityIgnoresInvertColors
+               accessible={false}
+               style={{ width: "100%", aspectRatio: 1.5, borderRadius: radius.xl, marginBottom: 16 }} />
+      ) : null}
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
         <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
           {Math.round(pr * 100)}%

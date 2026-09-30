@@ -46,7 +46,7 @@ import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ICONS, ACTIVITY_ICONS, iconFor } from "../core/icons.js";
 import { AV, AV_IDS, avatarOf, AV_CREDIT } from "../core/avatars.js";
-import { POSES, LINES, MAX_WORDS, guideLine, poseFor } from "../core/guide.js";
+import { POSES, LINES, MAX_WORDS, guideLine, poseFor, GUIDE } from "../core/guide.js";
 
 import { loadPayload, PARTS } from "./payload.mjs";
 
@@ -1618,8 +1618,31 @@ group("minimal pairs");
   ok(!folded.length, "and no pair collapses under fold()", folded.join(", "));
 }
 
-/* Yuri (§30m). The art is judged by eye; what a suite can hold is that every
-   pose ships a picture, and that his one line of copy stays one line. */
+/* The cast (core/cast.js, docs/cast.md, 2026-09-30): one story under the
+   whole app, so the places that name a character must agree on who exists. */
+group("the cast");
+{
+  const { CAST: CAST_, EVERYONE, castById: byId, castByName: byName, GUIDE_ID } = await import("../core/cast.js");
+  const { PEOPLE } = await import("../core/names.js");
+  const { SCENARIOS } = await import("../core/scenarios.js");
+  ok(byId[GUIDE_ID] && GUIDE.name === byId[GUIDE_ID].en, "the guide is the main character", GUIDE.name);
+  ok(EVERYONE.every((c) => PEOPLE[c.ru] && PEOPLE[c.ru].sex === c.sex), "every character is a scenario name with their sex");
+  const mainVoices = CAST_.map((c) => c.voice);
+  ok(new Set(mainVoices).size === mainVoices.length, "each main character has a voice of their own", mainVoices.join(", "));
+  const strangers = [];
+  for (const f of readdirSync(join(ROOT, "data", "curated", "scripts")).filter((x) => x.endsWith(".json"))) {
+    const o = JSON.parse(readFileSync(join(ROOT, "data", "curated", "scripts", f), "utf8"));
+    for (const [key, e] of Object.entries(o.lessons)) for (const c of e.cast) if (!byName[c.ru]) strangers.push(`${key} ${c.ru}`);
+  }
+  ok(!strangers.length, "every conversation is spoken by the cast", strangers.join(", "));
+  const unknown = SCENARIOS.filter((s) => !byId[s.who] || !s.prompt.includes(byId[s.who].en));
+  ok(!unknown.length, "every Talk situation is played by a character", unknown.map((s) => s.id).join(", "));
+  ok(CAST_.every((c) => !c.tone || (c.tone.pitch > 0.8 && c.tone.pitch < 1.4 && c.tone.tempo >= 0.8 && c.tone.tempo <= 1.2)),
+     "a character's tone stays a shade, not a cartoon effect");
+}
+
+/* The guide (§30m). The art is judged by eye; what a suite can hold is that
+   every pose ships a picture, and that his one line of copy stays one line. */
 group("the guide");
 {
   ok(POSES.length === 5 && new Set(POSES).size === 5, "five distinct poses", POSES.join(", "));

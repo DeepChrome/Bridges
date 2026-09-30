@@ -11,6 +11,7 @@ import { audioUrl } from "./data";
 import { bare, fold } from "@core/util";
 import { wordClip } from "./wordaudio";
 import { sexOf } from "@core/names";
+import { castById } from "@core/cast";
 import { knownVoiceSex, rankVoice } from "@core/voices";
 
 /* When nothing could play — the stream failed and there is no Russian voice —
@@ -334,6 +335,24 @@ export function castVoices(cast, seed = "") {
 }
 
 probeVoices();
+
+/* A character of the cast (core/cast.js) read by the device: a voice of their
+   sex, seeded by their id so it is the same phone voice every time, then their
+   `tone` on top — Teddy small and bright, Monka slow and goofy — the same
+   shift the bought conversations carry (build_scene_tracks.mjs). The tutor is
+   Teddy; a Talk scenario is whoever it names. Spread into speakLine's opts. */
+export function voiceFor(id) {
+  const c = castById[id];
+  if (!c) return {};
+  const v = castVoices([{ ru: c.ru, sex: c.sex }], c.id)[0] || {};
+  const tone = c.tone || { pitch: 1, tempo: 1 };
+  return {
+    voice: v.voice || undefined, language: v.language,
+    pitch: (v.pitch || 1) * tone.pitch,
+    rate: prefs.rate * tone.tempo,
+    tempo: tone.tempo,
+  };
+}
 
 /* What is playing right now, as a promise that settles when it ends — by
    finishing, by being replaced, by being stopped, or (a stalled stream) by the

@@ -3,308 +3,343 @@
  "name": "The Little Words",
  "lessons": {
   "core3:2": {
-   "title": "Looking for the professor",
+   "title": "The hat on the roof",
    "cast": [
     {
      "id": "a",
-     "ru": "Олег",
-     "en": "Oleg"
+     "ru": "Нежа",
+     "en": "Nezha"
     },
     {
      "id": "b",
-     "ru": "Катя",
-     "en": "Katya"
+     "ru": "Тедди",
+     "en": "Teddy"
+    },
+    {
+     "id": "c",
+     "ru": "Монька",
+     "en": "Monka"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "шапка",
+     "en": "hat"
+    },
+    {
+     "ru": "крыша",
+     "en": "roof"
+    },
+    {
+     "ru": "лестница",
+     "en": "ladder"
+    },
+    {
+     "ru": "мама",
+     "en": "mom"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Катя, где офис профессора? Я хочу на его курс.",
-     "en": "Katya, where is the professor's office? I want to get onto his course."
+     "ru": "Тедди, мы идём в ресторан. Где твоя шапка?",
+     "en": "Teddy, we're going to the restaurant. Where is your hat?"
     },
     {
      "s": "b",
-     "ru": "Какого профессора, Олег? Он русский или американец?",
-     "en": "Which professor, Oleg? Is he Russian or American?"
+     "ru": "Не знаю, мама. Её здесь нет, я смотрел.",
+     "en": "I don't know, Mom. It isn't here, I looked."
     },
     {
      "s": "a",
-     "ru": "Русский. Говорят, у него в офисе кот.",
-     "en": "Russian. They say he keeps a cat in his office."
+     "ru": "А в машине? Ты там был с котом.",
+     "en": "And in the car? You were in there with the cat."
     },
     {
      "s": "b",
-     "ru": "А, этот! Ну, его офис там, в том доме.",
-     "en": "Oh, that one! Well, his office is over there, in the other building."
+     "ru": "Смотрел. В машине только наш кот, и всё.",
+     "en": "I looked. There's only our cat in the car, that's all."
     },
     {
      "s": "a",
-     "ru": "Я там уже был. Офис есть, а профессора нет.",
-     "en": "I have already been there. The office is there, but the professor is not."
+     "ru": "Тедди, так ты в ресторан не идёшь.",
+     "en": "Teddy, you're not going to the restaurant like that."
     },
     {
-     "s": "b",
-     "ru": "А когда ты там был, Олег?",
-     "en": "And when were you there, Oleg?"
-    },
-    {
-     "s": "a",
-     "ru": "Сейчас был. Там только его кот, и всё.",
-     "en": "Just now. There is only his cat, and that's it."
-    },
-    {
-     "s": "b",
-     "ru": "Ну, когда он не работает, он в кафе.",
-     "en": "Well, when he is not working, he is in the café."
+     "s": "c",
+     "ru": "Нежа! Я здесь, на крыше!",
+     "en": "Nezha! I'm here, on the roof!"
     },
     {
      "s": "a",
-     "ru": "В каком кафе? В том, где пицца?",
-     "en": "Which café? The one with the pizza?"
+     "ru": "Монька? Что ты делаешь на крыше?",
+     "en": "Monka? What are you doing on the roof?"
+    },
+    {
+     "s": "c",
+     "ru": "Я нашёл шапку Тедди!",
+     "en": "I found Teddy's hat!"
     },
     {
      "s": "b",
-     "ru": "Нет, в том, где борщ. Он же русский.",
-     "en": "No, the other one, with the borscht. He is Russian, after all."
+     "ru": "Моя шапка! Монька, а что она делает на крыше?",
+     "en": "My hat! Monka, what is it doing on the roof?"
+    },
+    {
+     "s": "c",
+     "ru": "Не знаю. Мне кажется, это ваш кот.",
+     "en": "I don't know. I think it was your cat."
     },
     {
      "s": "a",
-     "ru": "Катя, идём со мной? Я его ещё не видел.",
-     "en": "Katya, will you come with me? I have never seen him yet."
+     "ru": "Наш кот? Ну, может быть. Монька, а где лестница?",
+     "en": "Our cat? Well, maybe. Monka, where's the ladder?"
+    },
+    {
+     "s": "c",
+     "ru": "Лестница там, у машины.",
+     "en": "The ladder is over there, by the car."
     },
     {
      "s": "b",
-     "ru": "Ну, можно. Я тоже хочу борщ, как профессор.",
-     "en": "Well, all right. I want borscht too, like the professor."
+     "ru": "Мама, Монька нашёл мою шапку! Он молодец!",
+     "en": "Mom, Monka found my hat! Good for him!"
     },
     {
      "s": "a",
-     "ru": "Вот это кафе. Ты его там видишь?",
-     "en": "Here is the café. Can you see him in there?"
+     "ru": "Молодец, Монька. Тедди, найди ему лестницу.",
+     "en": "Well done, Monka. Teddy, find him the ladder."
     },
     {
-     "s": "b",
-     "ru": "Вижу. Вот он, и кот тоже с ним!",
-     "en": "I see him. There he is, and the cat is with him too!"
+     "s": "c",
+     "ru": "А можно мне с вами в ресторан?",
+     "en": "Nezha, can I come to the restaurant with you?"
     },
     {
      "s": "a",
-     "ru": "Кот в кафе? Что мне ему сказать?",
-     "en": "A cat in a café? What do I say to him?"
-    },
-    {
-     "s": "b",
-     "ru": "Просто скажи, что ты хочешь быть на его курсе.",
-     "en": "Just say that you want to be on his course."
+     "ru": "Можно, Монька. Только шапку — Тедди!",
+     "en": "You can, Monka. Just give the hat to Teddy!"
     }
    ],
    "questions": [
     {
-     "ask": "What is Oleg trying to do?",
+     "ask": "Where is the family going?",
      "options": [
-      "Join a professor's course",
-      "Return a professor's book",
-      "Meet his brother at a bar",
-      "Rent an office near there"
+      "To a restaurant",
+      "To the doctor's",
+      "To see a friend",
+      "To a university"
      ],
      "answer": 0
     },
     {
-     "ask": "What does the professor keep in his office?",
+     "ask": "What has gone missing?",
      "options": [
-      "His cat",
-      "His dog",
-      "His son",
-      "His car"
+      "Teddy's hat",
+      "Teddy's bag",
+      "Nezha's key",
+      "Yarik's tie"
      ],
      "answer": 0
     },
     {
-     "ask": "Where does the professor go when he is not working?",
+     "ask": "Where is Monka when he calls out?",
      "options": [
-      "A café with borscht",
-      "A café with pizza",
-      "A bar by the bank",
-      "The other building"
+      "On the roof",
+      "In the car",
+      "At the bar",
+      "In the café"
      ],
      "answer": 0
     },
     {
-     "ask": "Why does Oleg want Katya to come along?",
+     "ask": "Who does Monka say put the hat there?",
      "options": [
-      "He has never seen the man",
-      "He does not know the way",
-      "He wants to buy her lunch",
-      "He is afraid of the cat"
+      "The family cat",
+      "Teddy's father",
+      "A café waiter",
+      "The professor"
      ],
      "answer": 0
     },
     {
-     "ask": "What surprises Oleg at the café?",
+     "ask": "What does Monka ask at the end?",
      "options": [
-      "The cat is in the café",
-      "The café is shut today",
-      "The professor has left",
-      "Katya has met him before"
+      "To go with them",
+      "To keep the hat",
+      "To borrow a car",
+      "To have some tea"
      ],
      "answer": 0
     }
    ]
   },
   "core3:4": {
-   "title": "A brother in the bar",
+   "title": "Dad's missing tie",
    "cast": [
     {
      "id": "a",
-     "ru": "Нина",
-     "en": "Nina"
+     "ru": "Ярик",
+     "en": "Yarik"
     },
     {
      "id": "b",
-     "ru": "Борис",
-     "en": "Boris"
+     "ru": "Тедди",
+     "en": "Teddy"
     }
    ],
    "intro": [
     {
-     "ru": "поднос",
-     "en": "tray"
+     "ru": "галстук",
+     "en": "tie"
     },
     {
-     "ru": "официант",
-     "en": "waiter"
+     "ru": "шкаф",
+     "en": "wardrobe"
+    },
+    {
+     "ru": "волосы",
+     "en": "hair"
+    },
+    {
+     "ru": "мама",
+     "en": "mom"
+    },
+    {
+     "ru": "папа",
+     "en": "dad"
     }
    ],
    "lines": [
     {
-     "s": "b",
-     "ru": "Нина, смотри! Это не твой брат там, в баре?",
-     "en": "Nina, look! Isn't that your brother there, in the bar?"
-    },
-    {
      "s": "a",
-     "ru": "Мой брат? Не может быть. Он сейчас работает.",
-     "en": "My brother? It can't be. He is at work now."
+     "ru": "Тедди, мы идём к маме в банк. Где мой галстук?",
+     "en": "Teddy, we're going to Mom's bank. Where's my tie?"
     },
     {
      "s": "b",
-     "ru": "Мне кажется, что это он. Смотри, вот там.",
-     "en": "I think it is him. Look, right there."
+     "ru": "Не знаю, папа. Ты смотрел в шкафу?",
+     "en": "I don't know, Dad. Did you look in the wardrobe?"
     },
     {
      "s": "a",
-     "ru": "Да, это он! Но он же работает в банке.",
-     "en": "Yes, it is him! But he works at the bank."
+     "ru": "Смотрел. В шкафу его нет, и в машине нет.",
+     "en": "I looked. It isn't in the wardrobe, and it isn't in the car."
     },
     {
      "s": "b",
-     "ru": "А ты знаешь, где он работает сейчас?",
-     "en": "And do you know where he works now?"
+     "ru": "А какой он? Может, я его видел.",
+     "en": "What does it look like? Maybe I've seen it."
     },
     {
      "s": "a",
-     "ru": "Конечно, знаю. В банке, у него там офис.",
-     "en": "Of course I do. At the bank, in a big office."
+     "ru": "Тот, из Китая. От брата.",
+     "en": "The one from China. From my brother."
     },
     {
      "s": "b",
-     "ru": "А что он делает в баре? Он с подносом.",
-     "en": "Then what is he doing in the bar? He has a tray."
+     "ru": "А, этот... Папа, ты только не смотри на меня.",
+     "en": "Oh, that one... Dad, just don't look at me."
     },
     {
      "s": "a",
-     "ru": "С подносом? Да, кажется, он там работает.",
-     "en": "A tray? Yes, it looks like he works there."
+     "ru": "Тедди! Мой галстук — в твоих волосах?",
+     "en": "Teddy! My tie is in your hair?"
     },
     {
      "s": "b",
-     "ru": "Официант? Твой брат? Он же был в банке.",
-     "en": "A waiter? Your brother? He was at the bank."
+     "ru": "Да! Смотри, я в нём как профессор.",
+     "en": "Yes! Look, I'm like a professor in it."
     },
     {
      "s": "a",
-     "ru": "Нет, Борис. Он мне этого не сказал.",
-     "en": "No, Boris. He did not tell me that."
+     "ru": "А я в чём иду в банк? Там все в галстуках.",
+     "en": "And what do I wear to the bank? Everyone there wears a tie."
     },
     {
      "s": "b",
-     "ru": "Идём в бар, Нина? Я хочу пиццу.",
-     "en": "Shall we go into the bar, Nina? I want pizza."
+     "ru": "Папа, а у тебя есть другой?",
+     "en": "Dad, don't you have another one?"
     },
     {
      "s": "a",
-     "ru": "Ты только о пицце думаешь!",
-     "en": "All you think about is pizza!"
+     "ru": "Другой — у брата. А брат — в Китае.",
+     "en": "The other one is at my brother's. And my brother is in China."
     },
     {
      "s": "b",
-     "ru": "Не только. Я думаю, он там хорошо работает.",
-     "en": "Not only that. I think he works well there."
+     "ru": "Ну, вот он, папа. Он твой.",
+     "en": "Well, here it is, Dad. It's yours."
     },
     {
      "s": "a",
-     "ru": "Хорошо, идём. Я хочу видеть, как он работает.",
-     "en": "All right, let's go. I want to see how he works."
+     "ru": "Нет, Тедди. Ты в нём такой молодец!",
+     "en": "No, Teddy. You look so great in it!"
     },
     {
      "s": "b",
-     "ru": "Смотри, Нина, он нас уже видит!",
-     "en": "Look, Nina, he has already seen us!"
+     "ru": "А что ты скажешь маме, папа?",
+     "en": "So what will you tell Mom, Dad?"
     },
     {
      "s": "a",
-     "ru": "Ну вот. Он идёт к нам с подносом.",
-     "en": "Well, there you go. He is coming over to us with a tray."
+     "ru": "Скажу: галстук у нас один, и он на Тедди.",
+     "en": "I'll say: we have one tie, and Teddy is wearing it."
+    },
+    {
+     "s": "b",
+     "ru": "А мама скажет: Ярик, ты молодец!",
+     "en": "And Mom will say: Yarik, you're a star!"
     }
    ],
    "questions": [
     {
-     "ask": "Where does Boris spot Nina's brother?",
+     "ask": "Where are Yarik and Teddy going?",
      "options": [
-      "In a bar",
-      "In a bank",
-      "In a café",
-      "In a car"
+      "To Mom's bank",
+      "To Dad's work",
+      "To Grandma's",
+      "To the doctor"
      ],
      "answer": 0
     },
     {
-     "ask": "Where does Nina believe her brother works?",
+     "ask": "What can Yarik not find?",
      "options": [
-      "At a bank",
-      "At a bar",
-      "At a café",
-      "At a shop"
+      "His tie",
+      "His hat",
+      "His car",
+      "His key"
      ],
      "answer": 0
     },
     {
-     "ask": "What makes Nina think he works in the bar?",
+     "ask": "Where is the missing thing?",
      "options": [
-      "He is carrying a tray",
-      "He is wearing an apron",
-      "He is behind the till",
-      "He is serving a table"
+      "In Teddy's hair",
+      "In the wardrobe",
+      "In the car boot",
+      "At Mom's bank"
      ],
      "answer": 0
     },
     {
-     "ask": "Why does Boris want to go in?",
+     "ask": "Where is Yarik's other one?",
      "options": [
-      "He wants to eat pizza",
-      "He wants some borscht",
-      "He is meeting a friend",
-      "He left his bag there"
+      "With his brother",
+      "Under the table",
+      "At the cleaner's",
+      "In Teddy's room"
      ],
      "answer": 0
     },
     {
-     "ask": "What happens at the end?",
+     "ask": "What does Yarik decide?",
      "options": [
-      "The brother sees them",
-      "The brother runs away",
-      "Nina goes home alone",
-      "Boris orders a pizza"
+      "Teddy keeps the tie",
+      "Yarik buys a new tie",
+      "They stay home today",
+      "Mom brings another"
      ],
      "answer": 0
     }

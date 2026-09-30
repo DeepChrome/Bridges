@@ -59,11 +59,26 @@ LENGTH AND LEVEL
   concrete nouns that make the situation real (a passport, a bus, a key).
 - Spell ё as ё, never е. Put no stress marks in.
 
-CAST
-- Two or three speakers, only from the names given. Each speaker is addressed
-  by name at least once in the dialogue (spoken aloud), each says at least
-  two lines, and nobody says nearly all of them.
-- Decline names correctly (Катя → Кати, Кате, Катю; Олег → Олега, Олегу).
+CAST — the conversations are episodes of one story (docs/cast.md)
+- The speakers are the app's characters and nobody else: Тедди (Teddy, a
+  small Yorkshire terrier, the hero), his mother Нежа (Nezha, a glamorous,
+  loving rabbit), his father Ярик (Yarik, a big soft-hearted wolf), Нежа's
+  best friend Белка (Belka, a chatty squirrel), and Монька (Monka, a small goofy
+  cosmonaut monkey who schemes to spoil the family's plans out of jealousy —
+  and every scheme backfires on him, like the coyote's; unlucky, never
+  humiliated, secretly kind). Neighbours for other roles: Тортила (Tortila,
+  wise old turtle), Гена (Gena, grumpy crocodile shopkeeper), Лиса (Lisa, sly
+  fox), Миша (Misha, warm bear).
+- Teddy is in most conversations. Monka appears in about half; when he does,
+  his scheme is the complication and it turns round on him by the end.
+- Two or three speakers. Each speaker is addressed by name at least once in
+  the dialogue (spoken aloud), each says at least two lines, and nobody says
+  nearly all of them.
+- Decline names correctly: Нежа → Нежи, Неже, Нежу, Нежей; Ярик → Ярика,
+  Ярику, Яриком; Монька → Моньки, Моньке, Моньку, Монькой; Белка → Белки, Белке, Белку.
+  Тедди never changes.
+- The characters are animals living ordinary lives: shops, buses, doctors,
+  school. Nobody remarks on it.
 
 RULES THE CHECKER ENFORCES
 - No line of three or more words appears twice anywhere in the two
@@ -82,7 +97,12 @@ RULES THE CHECKER ENFORCES
 
 ## Names allowed
 
-Анна (Anna, woman), Аня (Anya, woman), Мария (Maria, woman), Маша (Masha, woman), Лена (Lena, woman), Нина (Nina, woman), Катя (Katya, woman), Соня (Sonya, woman), Таня (Tanya, woman), Иван (Ivan, man), Ваня (Vanya, man), Саша (Sasha, man), Олег (Oleg, man), Борис (Boris, man), Виктор (Viktor, man), Миша (Misha, man), Пётр (Pyotr, man), Петя (Petya, man), Юра (Yura, man)
+The cast only (`core/cast.js`; the checker refuses any other name). In
+"cast", use exactly these `ru`/`en` pairs:
+
+Тедди (Teddy, he), Нежа (Nezha, she), Ярик (Yarik, he), Белка (Belka, she),
+Монька (Monka, he), Тортила (Tortila, she), Гена (Gena, he), Лиса (Lisa, she),
+Миша (Misha, he)
 
 ## Free in every chapter (never counted against the list)
 

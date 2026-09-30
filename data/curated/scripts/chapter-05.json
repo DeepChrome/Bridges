@@ -3,295 +3,320 @@
  "name": "Spending & Saving",
  "lessons": {
   "core5:2": {
-   "title": "The first salary",
+   "title": "A headache and a red hat",
    "cast": [
     {
      "id": "a",
-     "ru": "Катя",
-     "en": "Katya"
+     "ru": "Нежа",
+     "en": "Nezha"
     },
     {
      "id": "b",
-     "ru": "Олег",
-     "en": "Oleg"
+     "ru": "Миша",
+     "en": "Misha"
+    },
+    {
+     "id": "c",
+     "ru": "Тедди",
+     "en": "Teddy"
     }
    ],
    "intro": [
     {
-     "ru": "зарплата",
-     "en": "salary"
+     "ru": "голова",
+     "en": "head"
     },
     {
-     "ru": "квартира",
-     "en": "flat"
+     "ru": "болеть",
+     "en": "to hurt"
     },
     {
-     "ru": "карточка",
-     "en": "bank card"
+     "ru": "шапка",
+     "en": "hat"
     },
     {
-     "ru": "карман",
-     "en": "pocket"
+     "ru": "причёска",
+     "en": "hairstyle"
     },
     {
-     "ru": "банкомат",
-     "en": "cash machine"
+     "ru": "чай",
+     "en": "tea"
     }
    ],
    "lines": [
     {
+     "s": "a",
+     "ru": "Миша, это Тедди. У него часто болит голова.",
+     "en": "Misha, this is Teddy. His head often hurts."
+    },
+    {
      "s": "b",
-     "ru": "Катя, я получил зарплату! Теперь можно снимать квартиру.",
-     "en": "Katya, I got my salary! Now I can rent a flat."
+     "ru": "Тедди, когда она болит? Всегда?",
+     "en": "Teddy, when does it hurt? All the time?"
+    },
+    {
+     "s": "c",
+     "ru": "Не всегда. Иногда, когда я на морозе. Сегодня очень болит.",
+     "en": "Not all the time. Sometimes, when I'm out in the frost. Today it hurts a lot."
+    },
+    {
+     "s": "b",
+     "ru": "На морозе? А шапку ты носишь?",
+     "en": "In the frost? And do you wear a hat?"
+    },
+    {
+     "s": "c",
+     "ru": "Нет, доктор. Шапка и моя причёска — не друзья.",
+     "en": "No, doctor. Hats and my hairstyle are not friends."
     },
     {
      "s": "a",
-     "ru": "Молодец, Олег! А денег достаточно для квартиры?",
-     "en": "Well done, Oleg! But is it enough money for a flat?"
+     "ru": "Тедди, в декабре ты получил от деда красную шапку. Где она?",
+     "en": "Teddy, in December you got a red hat from Grandad. Where is it?"
+    },
+    {
+     "s": "c",
+     "ru": "Она дома. Но она такая красная!",
+     "en": "It's at home. But it's so red!"
     },
     {
      "s": "b",
-     "ru": "Думаю, да. Все деньги сейчас на карточке.",
-     "en": "I think so. All the money is on my card now."
+     "ru": "Тедди, смотри на меня. Я всегда ношу шапку.",
+     "en": "Teddy, look at me. I always wear a hat."
+    },
+    {
+     "s": "c",
+     "ru": "Вы тоже? А ваша причёска?",
+     "en": "You too? And your hairstyle?"
+    },
+    {
+     "s": "b",
+     "ru": "С причёской у меня всё хорошо. И голова не болит.",
+     "en": "My hairstyle is fine. And my head doesn't hurt."
     },
     {
      "s": "a",
-     "ru": "А карточка где? Ты часто оставляешь её в кафе.",
-     "en": "And where is the card? You often leave it in cafés."
+     "ru": "Миша, ему нужно что-то ещё? Может, чай?",
+     "en": "Misha, does he need anything else? Tea, maybe?"
     },
     {
      "s": "b",
-     "ru": "Она в кармане, конечно. Так... В кармане её нет.",
-     "en": "It's in my pocket, of course. Hmm... It's not in my pocket."
+     "ru": "Нежа, чай дома — это хорошо. Но шапки достаточно. Носи её всегда, Тедди!",
+     "en": "Nezha, tea at home is good. But the hat is enough. Wear it all the time, Teddy!"
+    },
+    {
+     "s": "c",
+     "ru": "Хорошо, доктор. Красная шапка — теперь моя причёска.",
+     "en": "All right, doctor. The red hat is my hairstyle now."
     },
     {
      "s": "a",
-     "ru": "Олег! Где ты сегодня был?",
-     "en": "Oleg! Where have you been today?"
-    },
-    {
-     "s": "b",
-     "ru": "На работе, потом в банке, потом в кафе.",
-     "en": "At work, then at the bank, then at the café."
-    },
-    {
-     "s": "a",
-     "ru": "А в банке? Ты что-то там делал с карточкой?",
-     "en": "And at the bank? Did you do something there with the card?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, я снимал там деньги. Карточка в банкомате!",
-     "en": "Yes, I took money out there. The card is in the cash machine!"
-    },
-    {
-     "s": "a",
-     "ru": "Тогда надо идти в банк. Он сегодня ещё работает?",
-     "en": "Then you have to go to the bank. Is it still open today?"
-    },
-    {
-     "s": "b",
-     "ru": "Да, работает. Катя, ты идёшь со мной?",
-     "en": "Yes, it's open. Katya, are you coming with me?"
-    },
-    {
-     "s": "a",
-     "ru": "Иду. Но квартиру смотрим потом, хорошо?",
-     "en": "I'm coming. But we look at the flat later, all right?"
-    },
-    {
-     "s": "b",
-     "ru": "Хорошо. Карточка, а потом квартира.",
-     "en": "All right. The card, and then the flat."
+     "ru": "Спасибо, Миша! Тедди, идём за шапкой.",
+     "en": "Thank you, Misha! Teddy, let's go and get the hat."
     }
    ],
    "questions": [
     {
-     "ask": "What has Oleg just got?",
+     "ask": "Why have they come to see Misha?",
      "options": [
-      "His salary",
-      "A new flat",
-      "A new job",
-      "A bank loan"
+      "Teddy's head often hurts",
+      "Teddy's paw often hurts",
+      "Teddy cannot sleep well",
+      "Teddy has lost his hat"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Oleg want to do with the money?",
+     "ask": "When does Teddy's head hurt?",
      "options": [
-      "Rent a flat",
-      "Buy a car",
-      "Open a café",
-      "Pay a debt"
+      "After time out in the frost",
+      "After eating too much cake",
+      "After a long day at school",
+      "After too much loud music"
      ],
      "answer": 0
     },
     {
-     "ask": "What is Oleg's problem?",
+     "ask": "Why does Teddy not wear a hat?",
      "options": [
-      "He has lost his card",
-      "He has lost his keys",
-      "He has no money left",
-      "He forgot the address"
+      "It spoils his hair",
+      "He lost it at school",
+      "It is really itchy",
+      "His dad took it away"
      ],
      "answer": 0
     },
     {
-     "ask": "Where did Oleg go today?",
+     "ask": "Who gave Teddy the red hat?",
      "options": [
-      "Work, the bank, a café",
-      "Work, a shop, the bar",
-      "Home, the bank, a bar",
-      "School, a café, a bar"
+      "His grandad",
+      "His mother",
+      "His father",
+      "Doctor Misha"
      ],
      "answer": 0
     },
     {
-     "ask": "Where is the card in the end?",
+     "ask": "What does the doctor tell Teddy?",
      "options": [
-      "In the cash machine",
-      "In his jacket pocket",
-      "At the café counter",
-      "In the car at home"
+      "Always wear the hat",
+      "Stay at home a week",
+      "Take a pill hourly",
+      "Never go out again"
      ],
      "answer": 0
     }
    ]
   },
   "core5:4": {
-   "title": "Money for her studies",
+   "title": "Changing a bag of coins",
    "cast": [
     {
      "id": "a",
-     "ru": "Лена",
-     "en": "Lena"
+     "ru": "Ярик",
+     "en": "Yarik"
     },
     {
      "id": "b",
-     "ru": "Иван",
-     "en": "Ivan"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "телефон",
-     "en": "phone"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
-     "ru": "доллар",
-     "en": "dollar"
+     "id": "c",
+     "ru": "Монька",
+     "en": "Monka"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Иван, ты можешь перевести мне деньги? Это очень нужно.",
-     "en": "Ivan, can you transfer me some money? I really need it."
+     "ru": "Тедди, что у тебя в этом мешке?",
+     "en": "Teddy, what have you got in that bag?"
     },
     {
      "s": "b",
-     "ru": "Лена, ты же работаешь в кафе и зарабатываешь.",
-     "en": "Lena, you work at a café, you earn money."
+     "ru": "Мелкие деньги. Я их зарабатывал весь декабрь.",
+     "en": "Small change. I was earning it all December."
     },
     {
      "s": "a",
-     "ru": "Да, но сегодня надо заплатить за учёбу, а денег нет.",
-     "en": "Yes, but today I have to pay for my studies, and I have no money."
+     "ru": "Молодец. Их надо поменять в банке.",
+     "en": "Well done. It has to be changed at the bank."
     },
     {
-     "s": "b",
-     "ru": "Как нет? А где деньги из кафе?",
-     "en": "What do you mean, none? Where's the money from the café?"
-    },
-    {
-     "s": "a",
-     "ru": "Были покупки. Телефон и разные мелкие подарки.",
-     "en": "I did some shopping. A phone and various little presents."
-    },
-    {
-     "s": "b",
-     "ru": "Подарки, Лена! Хорошо, но у меня на счёте только доллары.",
-     "en": "Presents, Lena! All right, but I only have dollars in my account."
+     "s": "c",
+     "ru": "Ярик! В банк идёте? Он сегодня не работает.",
+     "en": "Yarik! Going to the bank? It's closed today."
     },
     {
      "s": "a",
-     "ru": "Доллары? Тогда их надо поменять в банке.",
-     "en": "Dollars? Then they have to be changed at the bank."
+     "ru": "Он всегда работает, Монька.",
+     "en": "It's always open, Monka."
+    },
+    {
+     "s": "c",
+     "ru": "Мешок мне, а тебе рубль.",
+     "en": "The bag for me, and a rouble for you."
     },
     {
      "s": "b",
-     "ru": "Банк сегодня не работает. Дома у меня только мелкие деньги.",
-     "en": "The bank isn't open today. At home I only have small change."
+     "ru": "Один рубль за весь мешок?",
+     "en": "One rouble for the whole bag?"
+    },
+    {
+     "s": "c",
+     "ru": "Это очень старый рубль, Тедди.",
+     "en": "It's a very old rouble, Teddy."
+    },
+    {
+     "s": "b",
+     "ru": "Старый? Хорошо, Монька. Вот мешок.",
+     "en": "Old? All right, Monka. Here's the bag."
     },
     {
      "s": "a",
-     "ru": "Сколько там мелких денег, Иван?",
-     "en": "How much small change is there, Ivan?"
+     "ru": "Тедди, рубль пока у меня. Я иду в банк.",
+     "en": "Teddy, I'll hold the rouble for now. I'm going to the bank."
     },
     {
-     "s": "b",
-     "ru": "Много. Дед часто даёт мне рубли. Там их мешок.",
-     "en": "A lot. Grandad often gives me roubles. There's a bag of them."
+     "s": "c",
+     "ru": "Вот это деньги!",
+     "en": "Now that's money!"
     },
     {
      "s": "a",
-     "ru": "Мешок? В университете такие деньги не хотят.",
-     "en": "A bag? The university doesn't want money like that."
+     "ru": "Монька, банк работает. И за этот рубль дают много денег.",
+     "en": "Monka, the bank is open. And they give a lot of money for this rouble."
+    },
+    {
+     "s": "c",
+     "ru": "Но это был рубль моего деда!",
+     "en": "But that was my grandad's rouble!"
     },
     {
      "s": "b",
-     "ru": "Тогда так. Когда банк работает, я могу всё перевести.",
-     "en": "Then here's the plan. When the bank is open, I can transfer it all."
+     "ru": "Монька, тогда это твой рубль. А мешок теперь мой.",
+     "en": "Monka, then it's your rouble. And the bag is mine again."
+    },
+    {
+     "s": "c",
+     "ru": "Спасибо, Тедди. Банк, значит, работает?",
+     "en": "Thank you, Teddy. So the bank is open, then?"
+    },
+    {
+     "s": "a",
+     "ru": "Работает. Идём, Тедди, поменяем деньги.",
+     "en": "It's open. Come on, Teddy, let's change the money."
     }
    ],
    "questions": [
     {
-     "ask": "What does Lena ask Ivan to do?",
+     "ask": "Where are Teddy and Yarik going?",
      "options": [
-      "Transfer her money",
-      "Lend her his car",
-      "Pay for her phone",
-      "Buy her a present"
+      "To the bank",
+      "To the café",
+      "To the shop",
+      "To the office"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Lena need the money for?",
+     "ask": "What is in Teddy's bag?",
      "options": [
-      "Her studies",
-      "Her new phone",
-      "Her flat rent",
-      "A café bill"
+      "Small change he earned",
+      "Presents for his mum",
+      "Old books from school",
+      "Sausage and some pizza"
      ],
      "answer": 0
     },
     {
-     "ask": "Why has Lena no money left?",
+     "ask": "What does Monka say about the bank?",
      "options": [
-      "She spent it on shopping",
-      "She lost her bank card",
-      "Her café pays in January",
-      "She gave it to her grandad"
+      "It is closed today",
+      "It is too crowded",
+      "It moved elsewhere",
+      "It lost its money"
      ],
      "answer": 0
     },
     {
-     "ask": "What is the problem with Ivan's money?",
+     "ask": "What does Monka offer for the whole bag?",
      "options": [
-      "It is all in dollars",
-      "It is all in his car",
-      "It is on a lost card",
-      "It belongs to grandad"
+      "One old rouble coin",
+      "Two new banknotes",
+      "A ride in his rocket",
+      "A slice of his pizza"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Ivan have at home?",
+     "ask": "How does it end?",
      "options": [
-      "A bag of small coins",
-      "A bag of US dollars",
-      "A new phone for her",
-      "Grandad's bank card"
+      "Teddy gives the rouble back",
+      "Monka keeps the bag of coins",
+      "Yarik sells the old rouble",
+      "Teddy loses all his money"
      ],
      "answer": 0
     }

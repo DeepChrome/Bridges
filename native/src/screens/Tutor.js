@@ -39,7 +39,9 @@ import { Screen, Btn, Muted, Text, TextInput, Marked, Note, CogButton, BulbButto
 import { Linked } from "../words";
 import { L, STAGES, drillPool, routePosition, rankOf } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
-import { speakLine, stop } from "../audio";
+import { speakLine, stop, voiceFor } from "../audio";
+// The tutor is Teddy (backend/src/tutor.js), and sounds like him.
+import { GUIDE_ID } from "@core/cast";
 import { useRecognizer, LANG, LANG_EN } from "../speech";
 import { HoldButton, Blocked } from "../activities/Say";
 import { failureText, talkLevelFor, TALK_LEVELS } from "./Talk";
@@ -187,7 +189,7 @@ function Replay({ text }) {
   const t = useTheme();
   return (
     <Pressable testID="tutor-replay" accessibilityRole="button" accessibilityLabel="Hear the Russian"
-               onPress={() => speakLine(text)} hitSlop={8}
+               onPress={() => speakLine(text, voiceFor(GUIDE_ID))} hitSlop={8}
                style={({ pressed }) => ({ width: 34, height: 34, borderRadius: 17, borderWidth: 1,
                  borderColor: t.line, alignItems: "center", justifyContent: "center", opacity: pressed ? 0.6 : 1 })}>
       <Svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
@@ -372,7 +374,7 @@ export default function Tutor({ navigation }) {
        contend for one audio session, and a microphone open under a speaker
        hears the speaker (§30h′). `speakLine` resolves when it has finished,
        which is the handshake the loop turns on. */
-    if (turn.ru) { speakingRef.current = true; await speakLine(turn.ru); speakingRef.current = false; }
+    if (turn.ru) { speakingRef.current = true; await speakLine(turn.ru, voiceFor(GUIDE_ID)); speakingRef.current = false; }
     if (!alive.current || askSeq.current !== mine) return;
     /* `ask` reaches the recogniser through a ref because a conversation is a
        cycle — the reply starts the listening that produces the next reply —

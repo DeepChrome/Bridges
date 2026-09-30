@@ -18,27 +18,13 @@
  * Every name here is unambiguous in Russian, which is why these are the names.
  */
 
-export const PEOPLE = {
-  "Анна": { en: "Anna", sex: "f" },
-  "Аня": { en: "Anya", sex: "f" },
-  "Мария": { en: "Maria", sex: "f" },
-  "Маша": { en: "Masha", sex: "f" },
-  "Лена": { en: "Lena", sex: "f" },
-  "Нина": { en: "Nina", sex: "f" },
-  "Катя": { en: "Katya", sex: "f" },
-  "Соня": { en: "Sonya", sex: "f" },
-  "Таня": { en: "Tanya", sex: "f" },
-  "Иван": { en: "Ivan", sex: "m" },
-  "Ваня": { en: "Vanya", sex: "m" },
-  "Саша": { en: "Sasha", sex: "m" },
-  "Олег": { en: "Oleg", sex: "m" },
-  "Борис": { en: "Boris", sex: "m" },
-  "Виктор": { en: "Viktor", sex: "m" },
-  "Миша": { en: "Misha", sex: "m" },
-  "Пётр": { en: "Pyotr", sex: "m" },
-  "Петя": { en: "Petya", sex: "m" },
-  "Юра": { en: "Yura", sex: "m" },
-};
+import { EVERYONE } from "./cast.js";
+
+/* Since 2026-09-30 the people in the scenarios are the cast (core/cast.js):
+   Teddy, his family, Yuri, and the neighbourhood. The table is built from the
+   cast, so a name a writer reaches for that is not a character fails the
+   checker instead of quietly putting a stranger in the story. */
+export const PEOPLE = Object.fromEntries(EVERYONE.map((c) => [c.ru, { en: c.en, sex: c.sex }]));
 
 /* The sex of a named character, or null for a name the table does not carry —
    a corpus scene has no cast at all, and an unknown name must fall back rather

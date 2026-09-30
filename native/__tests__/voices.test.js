@@ -39,9 +39,11 @@ async function phoneHas(voices) {
   await refreshVoices();
 }
 
-const MASHA = { id: "a", ru: "Маша", en: "Masha" };
-const OLEG = { id: "b", ru: "Олег", en: "Oleg" };
-const ANYA = { id: "c", ru: "Аня", en: "Anya" };
+/* The scenarios' people are the cast since 2026-09-30 (core/cast.js); the
+   names are theirs, the roles in these tests unchanged: two women, a man. */
+const MASHA = { id: "a", ru: "Нежа", en: "Nezha" };
+const OLEG = { id: "b", ru: "Ярик", en: "Yarik" };
+const ANYA = { id: "c", ru: "Белка", en: "Belka" };
 
 afterEach(() => { global.__voices = undefined; });
 

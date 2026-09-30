@@ -93,7 +93,8 @@ describe("talk", () => {
     expect(await screen.findByText(/Здравствуйте! Что вы хотите\?/)).toBeTruthy();
     expect(talk).toHaveBeenCalledTimes(1);
     expect(talk.mock.calls[0][0]).toMatchObject({ transcript: "", history: [] });
-    expect(talk.mock.calls[0][0].scenario).toMatch(/waiter/);
+    // The café is Gena's (the cast, core/cast.js), and the tutor plays him.
+    expect(talk.mock.calls[0][0].scenario).toMatch(/Gena.*café/);
     expect(talk.mock.calls[0][0].studied.length).toBeGreaterThan(20);
     // Chapters 1–5 are done, so the tutor pitches its Russian at the advanced
     // level unless a level was chosen; and it reads its turn out as it arrives.

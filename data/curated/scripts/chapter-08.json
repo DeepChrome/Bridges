@@ -3,17 +3,22 @@
  "name": "Cooking & Celebrating",
  "lessons": {
   "core8:2": {
-   "title": "Borscht before Mum arrives",
+   "title": "Teddy cooks the chicken",
    "cast": [
     {
      "id": "a",
-     "ru": "Аня",
-     "en": "Anya"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "b",
-     "ru": "Миша",
-     "en": "Misha"
+     "ru": "Нежа",
+     "en": "Nezha"
+    },
+    {
+     "id": "c",
+     "ru": "Ярик",
+     "en": "Yarik"
     }
    ],
    "intro": [
@@ -22,152 +27,164 @@
      "en": "mum"
     },
     {
-     "ru": "час",
-     "en": "hour"
+     "ru": "огонь",
+     "en": "fire, heat"
+    },
+    {
+     "ru": "чёрный",
+     "en": "black"
+    },
+    {
+     "ru": "запах",
+     "en": "smell"
+    },
+    {
+     "ru": "первый",
+     "en": "first"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Миша, мама будет здесь через час. Где борщ?",
-     "en": "Misha, Mum will be here in an hour. Where is the borscht?"
+     "ru": "Мама, сегодня я хочу сам делать курицу на обед.",
+     "en": "Mum, today I want to make the chicken for lunch myself."
     },
     {
      "s": "b",
-     "ru": "Вот он. Я его ещё делаю, Аня.",
-     "en": "Here it is. I am still making it, Anya."
+     "ru": "Сам? Тедди, ты ещё никогда не делал курицу.",
+     "en": "Yourself? Teddy, you've never made chicken before."
     },
     {
      "s": "a",
-     "ru": "Ты его делаешь уже слишком долго.",
-     "en": "You have been making it for far too long."
+     "ru": "Я нашёл рецепт. Там всё очень просто.",
+     "en": "I found a recipe. It's all very simple."
     },
     {
      "s": "b",
-     "ru": "Быстро борщ не получается. Это же не пицца.",
-     "en": "Borscht does not come out fast. It is not pizza."
+     "ru": "Хорошо. Но Тортила сегодня приходит к нам на обед.",
+     "en": "All right. But Tortila is coming to us for lunch today."
     },
     {
      "s": "a",
-     "ru": "А почему он ещё не красный?",
-     "en": "And why is it not red yet?"
+     "ru": "Поэтому я делаю всё быстро. Огонь у меня огромный.",
+     "en": "That's why I'm doing it all fast. My heat is enormous."
     },
     {
      "s": "b",
-     "ru": "Он становится красным. Уже практически красный.",
-     "en": "It is turning red. It is almost red already."
+     "ru": "Огромный огонь — это слишком, Тедди.",
+     "en": "Enormous heat is too much, Teddy."
+    },
+    {
+     "s": "c",
+     "ru": "Нежа, что это за запах? Курица становится чёрной!",
+     "en": "Nezha, what's that smell? The chicken is turning black!"
     },
     {
      "s": "a",
-     "ru": "Хорошо. А соль ты положил?",
-     "en": "All right. And did you put the salt in?"
+     "ru": "Что теперь делать, Ярик?",
+     "en": "What do we do now, Yarik?"
+    },
+    {
+     "s": "c",
+     "ru": "Её можно снимать. Может быть, она ещё ничего.",
+     "en": "We can take it off. Maybe it's still all right."
+    },
+    {
+     "s": "a",
+     "ru": "А Тортила? Что она будет говорить про чёрную курицу?",
+     "en": "And Tortila? What is she going to say about a black chicken?"
+    },
+    {
+     "s": "c",
+     "ru": "Между нами, Тедди, мама свою первую курицу тоже делала чёрной.",
+     "en": "Between us, Teddy, Mum made her first chicken black too."
     },
     {
      "s": "b",
-     "ru": "Нет. Соль я всегда кладу потом.",
-     "en": "No. I always put the salt in later."
+     "ru": "Ярик! Это был секрет.",
+     "en": "Yarik! That was a secret."
     },
     {
      "s": "a",
-     "ru": "Можно, я положу туда немножко колбасы?",
-     "en": "Can I put a little sausage in?"
+     "ru": "Мама тоже? Тогда это не ошибка, а возможность!",
+     "en": "Mum too? Then it's not a mistake, it's an opportunity!"
     },
     {
      "s": "b",
-     "ru": "Колбасы? В борщ? Аня, так никто не делает.",
-     "en": "Sausage? In borscht? Anya, nobody does that."
-    },
-    {
-     "s": "a",
-     "ru": "Моя мама так делала. И никто не говорил, что это плохо.",
-     "en": "My mum did it that way. And nobody said it was bad."
-    },
-    {
-     "s": "b",
-     "ru": "Между нами, Аня, твоя мама делала борщ не очень хорошо.",
-     "en": "Between us, Anya, your mum did not make borscht very well."
-    },
-    {
-     "s": "a",
-     "ru": "Миша! Она будет здесь через час!",
-     "en": "Misha! She will be here in an hour!"
-    },
-    {
-     "s": "b",
-     "ru": "Ладно. Немножко колбасы можно. Но тогда это твой борщ.",
-     "en": "Fine. A little sausage is allowed. But then it is your borscht."
-    },
-    {
-     "s": "a",
-     "ru": "Хорошо. Но если мама скажет «очень хорошо», борщ наш.",
-     "en": "All right. But if Mum says \"very good\", the borscht is ours."
+     "ru": "У нас есть ещё одна курица. Но теперь огонь не такой огромный.",
+     "en": "We have one more chicken. But this time the heat isn't so enormous."
     }
    ],
    "questions": [
     {
-     "ask": "Who is coming to visit?",
+     "ask": "Who is coming to lunch?",
      "options": [
-      "Anya's mother",
-      "Misha's father",
-      "Their neighbour",
-      "Anya's teacher"
+      "Tortila, a neighbour",
+      "Belka, Mum's friend",
+      "Misha from next door",
+      "Gena from the shop"
      ],
      "answer": 0
     },
     {
-     "ask": "Why is Anya worried?",
+     "ask": "What is Teddy cooking?",
      "options": [
-      "The borscht is not ready",
-      "The oven is not working",
-      "They have run out of salt",
-      "The table is not set yet"
+      "Chicken",
+      "Borscht",
+      "Pizzas",
+      "Potatoes"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Misha say about the salt?",
+     "ask": "What goes wrong?",
      "options": [
-      "He adds it later",
-      "He has none left",
-      "He added too much",
-      "He never uses it"
+      "The heat is too high",
+      "The oven will not open",
+      "The recipe is missing",
+      "They have no salt left"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Anya want to add?",
+     "ask": "What secret does Yarik give away?",
      "options": [
-      "Some sausage",
-      "Some cheese",
-      "More garlic",
-      "Sour cream"
+      "Nezha burned her first one too",
+      "Tortila hates chicken with skin",
+      "He already had lunch at work",
+      "Teddy's recipe came from Gena"
      ],
      "answer": 0
     },
     {
-     "ask": "What do they agree in the end?",
+     "ask": "How does Teddy take the mistake?",
      "options": [
-      "She may add a little",
-      "She may add nothing",
-      "Misha will make pizza",
-      "They will buy borscht"
+      "As a chance to try again",
+      "He blames the recipe book",
+      "He gives up on cooking",
+      "He wants to order pizza"
      ],
      "answer": 0
     }
    ]
   },
   "core8:4": {
-   "title": "The secret of the meat",
+   "title": "Salt in the holiday dish",
    "cast": [
     {
      "id": "a",
-     "ru": "Виктор",
-     "en": "Viktor"
+     "ru": "Монька",
+     "en": "Monka"
     },
     {
      "id": "b",
-     "ru": "Нина",
-     "en": "Nina"
+     "ru": "Белка",
+     "en": "Belka"
+    },
+    {
+     "id": "c",
+     "ru": "Тедди",
+     "en": "Teddy"
     }
    ],
    "intro": [
@@ -176,130 +193,137 @@
      "en": "honey"
     },
     {
-     "ru": "час",
-     "en": "hour"
+     "ru": "дверь",
+     "en": "door"
+    },
+    {
+     "ru": "рука",
+     "en": "hand"
+    },
+    {
+     "ru": "чистить",
+     "en": "to peel, to clean"
+    },
+    {
+     "ru": "год",
+     "en": "year"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Нина, у нас сегодня праздник, а я не знаю, что делать.",
-     "en": "Nina, we are having a celebration today, and I do not know what to do."
+     "ru": "Белка! А что это у вас за блюдо?",
+     "en": "Belka! And what's this dish you've got?"
     },
     {
      "s": "b",
-     "ru": "А какой повод?",
-     "en": "And what is the occasion?"
+     "ru": "Мясо с картошкой. Нежа его делает только на праздник.",
+     "en": "Meat with potatoes. Nezha only makes it for a celebration."
     },
     {
      "s": "a",
-     "ru": "Брат окончил университет. Все будут у нас дома.",
-     "en": "My brother has finished university. Everyone will be at our place."
+     "ru": "А что она туда добавляет? Это секрет?",
+     "en": "And what does she add to it? Is it a secret?"
     },
     {
      "s": "b",
-     "ru": "Это повод! Тогда нужно мясо и картошка.",
-     "en": "That is an occasion! Then you need meat and potatoes."
+     "ru": "Мёд. Так её дед делал зимой.",
+     "en": "Honey. Her grandad made it that way in winter."
     },
     {
      "s": "a",
-     "ru": "Мясо с картошкой — это твоё блюдо. Какой у него секрет?",
-     "en": "Meat with potatoes is your dish. What is its secret?"
+     "ru": "Мёд… А соль? Без соли мясо не мясо.",
+     "en": "Honey... And salt? Meat without salt isn't meat."
     },
     {
      "s": "b",
-     "ru": "Секрет, Виктор? Если я его скажу, это уже не секрет.",
-     "en": "The secret, Viktor? If I tell it, it is no longer a secret."
+     "ru": "Соль там уже есть. Кто-то у двери!",
+     "en": "There's salt in it already. Someone's at the door!"
     },
     {
      "s": "a",
-     "ru": "Нина, пожалуйста. Только между нами.",
-     "en": "Nina, please. Just between us."
+     "ru": "Вот моя возможность. Много соли — и праздника нет!",
+     "en": "Here's my chance. Lots of salt, and no celebration!"
     },
     {
-     "s": "b",
-     "ru": "Ладно. Мясо я сначала оставляю в воде с солью.",
-     "en": "All right. First I leave the meat in salted water."
-    },
-    {
-     "s": "a",
-     "ru": "В воде? И долго?",
-     "en": "In water? For long?"
-    },
-    {
-     "s": "b",
-     "ru": "Час, не больше. Потом добавляю картошку и немножко мёда.",
-     "en": "An hour, no more. Then I add the potatoes and a little honey."
+     "s": "c",
+     "ru": "Монька! А мы хотели видеть тебя у нас на обеде.",
+     "en": "Monka! We wanted to have you over for lunch."
     },
     {
      "s": "a",
-     "ru": "Мёда? В мясо? Это интересно.",
-     "en": "Honey? In meat? That is interesting."
+     "ru": "Меня? На обед? А какой повод, Тедди?",
+     "en": "Me? To lunch? And what's the occasion, Teddy?"
+    },
+    {
+     "s": "c",
+     "ru": "Сегодня год, как ты наш друг. Это блюдо для тебя!",
+     "en": "It's a year today since you became our friend. This dish is for you!"
     },
     {
      "s": "b",
-     "ru": "Так делал мой дед. Зимой, на каждый праздник.",
-     "en": "That is how my grandfather did it. In winter, for every holiday."
+     "ru": "У двери никто не был… Монька, почему у тебя в руке соль?",
+     "en": "There was nobody there... Monka, why do you have salt in your hand?"
     },
     {
      "s": "a",
-     "ru": "Понятно. Спасибо, Нина! А ты у нас будешь?",
-     "en": "Got it. Thanks, Nina! And will you come to us?"
+     "ru": "Я… ничего. Белка, а если добавлять больше картошки?",
+     "en": "I... nothing. Belka, what if we add more potatoes?"
     },
     {
      "s": "b",
-     "ru": "Буду. Хочу видеть, что у тебя получается.",
-     "en": "I will. I want to see how yours turns out."
+     "ru": "Можно. Картошки у нас много. Но чистить её будешь ты, Монька.",
+     "en": "We can. We have plenty of potatoes. But you'll be the one peeling them, Monka."
     }
    ],
    "questions": [
     {
-     "ask": "Why is Viktor having a party?",
+     "ask": "What is Belka looking after?",
      "options": [
-      "His brother graduated",
-      "His sister got married",
-      "His father turned 60",
-      "His mother came back"
+      "Nezha's holiday meat dish",
+      "Nezha's garden flowers",
+      "Yarik's broken red car",
+      "Teddy's big birthday cake"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Nina tell him to cook?",
-     "options": [
-      "Meat with potatoes",
-      "Chicken with rice",
-      "Fish with carrots",
-      "Borscht with bread"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Nina do first with the meat?",
-     "options": [
-      "Leaves it in salt water",
-      "Fries it in hot butter",
-      "Cuts it into small cubes",
-      "Rubs it with red pepper"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What is her secret ingredient?",
+     "ask": "What is Nezha's secret ingredient?",
      "options": [
       "A little honey",
-      "A little milk",
-      "A bit of wine",
-      "A little sugar"
+      "A little sugar",
+      "A pinch of salt",
+      "A little wine"
      ],
      "answer": 0
     },
     {
-     "ask": "Who did the recipe come from?",
+     "ask": "What is Monka's plan?",
      "options": [
-      "Nina's grandfather",
-      "Nina's grandmother",
-      "Her first teacher",
-      "Her old neighbour"
+      "Ruin the dish with salt",
+      "Eat all the meat alone",
+      "Hide all the potatoes",
+      "Steal the secret recipe"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Who was the dish really for?",
+     "options": [
+      "Monka himself",
+      "Old Tortila",
+      "Belka's aunt",
+      "Yarik's boss"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How does Monka try to fix the dish?",
+     "options": [
+      "More potatoes in it",
+      "More honey on top",
+      "A new piece of meat",
+      "Throwing it away"
      ],
      "answer": 0
     }

@@ -2,7 +2,7 @@
  *
  * The bought Chirp3-HD clips, bundled: the curriculum words (ROADMAP 13.32,
  * then every Core 5000 one) and the speaking and listening pools' sentences
- * (2026-09-19). 3237 clips, keyed by the **folded** utterance, which
+ * (2026-09-19). 3248 clips, keyed by the **folded** utterance, which
  * is the key `say()` already derives (rule 20.2 — the manifest folds ё to е
  * and a lemma's bare form does not, which is how the first count of these
  * came out at 75 instead of 61).
@@ -129,6 +129,7 @@ export const WORD_CLIPS = {
   "в диалоге, когда кто-то рассказывает, а вы просто слушаете, конечно же, хочется как-то реагировать.": require("../assets/words/s-b5ff78d7174e.mp3"),
   "в других странах есть свои версии санта клауса.": require("../assets/words/s-af8c990fa869.mp3"),
   "в жизни его не забуду.": require("../assets/words/s-a914c885473d.mp3"),
+  "в июле уже можно есть свежие огурцы.": require("../assets/words/s-652044b24db2.mp3"),
   "в каком доме они живут?": require("../assets/words/s-3c098f3dde17.mp3"),
   "в каком из домов ты живешь?": require("../assets/words/s-51944cf72382.mp3"),
   "в каком часу ты начинаешь работу?": require("../assets/words/s-0a8f9c8fa2e8.mp3"),
@@ -493,6 +494,7 @@ export const WORD_CLIPS = {
   "для": require("../assets/words/dlya.mp3"),
   "для вас поступило важное сообщение.": require("../assets/words/s-7a3da9ab31d6.mp3"),
   "для меня это не проблема.": require("../assets/words/s-2d4139662506.mp3"),
+  "для многих людей дача это место, где лето чувствуется особенно сильно.": require("../assets/words/s-3b2ef45309ad.mp3"),
   "для чего тебе нужны деньги?": require("../assets/words/s-907656e1fdd9.mp3"),
   "для чего тебе эти деньги?": require("../assets/words/s-9d7ad2ee95fc.mp3"),
   "для чего ты это делаешь?": require("../assets/words/s-0fadc05b3a4c.mp3"),
@@ -638,6 +640,7 @@ export const WORD_CLIPS = {
   "и": require("../assets/words/i.mp3"),
   "и в чайнике есть чай.": require("../assets/words/s-abf90e13a47f.mp3"),
   "и в этом чайнике чай.": require("../assets/words/s-ec16d7161c7d.mp3"),
+  "и кружка зеленая.": require("../assets/words/s-2177afde5131.mp3"),
   "и моя кружка зеленая.": require("../assets/words/s-72199d999ec0.mp3"),
   "и мы здесь очень маленькие.": require("../assets/words/s-18186da1b0db.mp3"),
   "и оставляют детям небольшие подарки в обуви на подоконнике.": require("../assets/words/s-ada60668e5bf.mp3"),
@@ -668,6 +671,8 @@ export const WORD_CLIPS = {
   "иногда": require("../assets/words/inogda.mp3"),
   "иногда все идет не так.": require("../assets/words/s-5dcc0088b7d7.mp3"),
   "иногда кажется что дача это не отдых а вторая работа.": require("../assets/words/s-b239e495a10f.mp3"),
+  "иногда кажется, что дача это не отдых, а вторая работа.": require("../assets/words/s-40fd4696093c.mp3"),
+  "иногда кажется, что дача это не отдых.": require("../assets/words/s-46fbcb4206c9.mp3"),
   "иногда мы смотрели вместе видео или читали.": require("../assets/words/s-52bc0ed49257.mp3"),
   "иногда они это делают.": require("../assets/words/s-fea0cba0a433.mp3"),
   "иностранец": require("../assets/words/inostranec.mp3"),
@@ -1714,6 +1719,7 @@ export const WORD_CLIPS = {
   "после предлога должно быть имя существительное или местоимение в нужном падеже.": require("../assets/words/s-88891255714a.mp3"),
   "после того как мы вышли с концерта мы пошли в ресторан.": require("../assets/words/s-bcfba98ba105.mp3"),
   "после того как он окончил университет он переехал в другой город.": require("../assets/words/s-c2120d71f7e0.mp3"),
+  "после того как он позавтракал, он пошел на работу.": require("../assets/words/s-a7db0015229e.mp3"),
   "после того как я дочитала книгу я легла спать.": require("../assets/words/s-e6f6cbd4563f.mp3"),
   "после школы я часто играю в теннис.": require("../assets/words/s-1c07a4f434d6.mp3"),
   "после этого мы решили отправиться в ботанический сад.": require("../assets/words/s-c1093a5d9dfa.mp3"),
@@ -1820,6 +1826,7 @@ export const WORD_CLIPS = {
   "пробовать": require("../assets/words/probovat.mp3"),
   "провести": require("../assets/words/provesti.mp3"),
   "проводить": require("../assets/words/provodit.mp3"),
+  "проводят время на свежем воздухе.": require("../assets/words/s-f9a3f15b162b.mp3"),
   "программа": require("../assets/words/programma.mp3"),
   "прогресс": require("../assets/words/progress.mp3"),
   "продолжай идти, том.": require("../assets/words/s-0e98eb0272a4.mp3"),
@@ -1980,6 +1987,7 @@ export const WORD_CLIPS = {
   "секунда": require("../assets/words/sekunda.mp3"),
   "семья": require("../assets/words/semya.mp3"),
   "сентябрь": require("../assets/words/sentyabr.mp3"),
+  "сентябрь это начало нового учебного года в россии.": require("../assets/words/s-4ad26f15a57a.mp3"),
   "сердце": require("../assets/words/serdce.mp3"),
   "сестра": require("../assets/words/sestra.mp3"),
   "сидеть": require("../assets/words/sidet.mp3"),
@@ -2738,6 +2746,7 @@ export const WORD_CLIPS = {
   "это дорого стоило.": require("../assets/words/s-ac86e1e0aae2.mp3"),
   "это ее брат жираф евгений.": require("../assets/words/s-d9cac0739ef1.mp3"),
   "это ее брат жираф.": require("../assets/words/s-7d3fba381170.mp3"),
+  "это ее брат.": require("../assets/words/s-08bff6fa854c.mp3"),
   "это ее мама.": require("../assets/words/s-e8651f9384b3.mp3"),
   "это ее папа.": require("../assets/words/s-2759f0bf048c.mp3"),
   "это ее сестра.": require("../assets/words/s-a993418a0890.mp3"),
@@ -2763,8 +2772,10 @@ export const WORD_CLIPS = {
   "это моя мама.": require("../assets/words/s-49ae3ff29b33.mp3"),
   "это моя семья.": require("../assets/words/s-1b27823cb379.mp3"),
   "это моя сестра.": require("../assets/words/s-7485667f1a51.mp3"),
+  "это называется тарелка.": require("../assets/words/s-426bdd78f65e.mp3"),
   "это наш дом.": require("../assets/words/s-a68161e311ea.mp3"),
   "это не было ошибкой.": require("../assets/words/s-4eb08e060665.mp3"),
+  "это не вилка это ложка.": require("../assets/words/s-cd72f5655452.mp3"),
   "это не ложка.": require("../assets/words/s-d1ef09fc77f8.mp3"),
   "это не мы сделали.": require("../assets/words/s-f0ca131b3f3f.mp3"),
   "это не пришло мне в голову.": require("../assets/words/s-d5fd17c6f7c4.mp3"),

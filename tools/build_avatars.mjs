@@ -104,7 +104,7 @@ const GATOR = `
    tsarevna of the folk tale). `role` is the persona, shown when one is picked. */
 const CAST = [
   {
-    id: "yuri", name: "Yuri", role: "Cosmonaut, obviously", bg: "#1D2B53",
+    id: "yuri", name: "Monka", role: "Schemes backfire, heart of gold", bg: "#1D2B53",
     base: "monkey_face", t: [0.72, 4.5, 3.2],
     over: `<circle cx="16" cy="17.3" r="15.4" fill="#BFE3FF" fill-opacity=".2" stroke="#E6EEF7" stroke-width="1.5"/>
       <path d="M5.8 12.2a12 12 0 0 1 6.4-6.6" stroke="#fff" stroke-opacity=".9" stroke-width="1.5" stroke-linecap="round" fill="none"/>
@@ -114,7 +114,7 @@ const CAST = [
       <circle cx="23.5" cy="33.6" r="1.2" fill="#E6394A"/><rect x="6.5" y="32.9" width="4" height="1.3" rx=".6" fill="#3D6FD9"/>`,
   },
   {
-    id: "belka", name: "Belka", role: "Saves the day, hides the nuts", bg: "#FFD166",
+    id: "belka", name: "Belka", role: "Nezha's best friend, hides the nuts", bg: "#FFD166",
     head: SQUIRREL, t: [0.86, 2.4, 3.2],
     over: `<path d="M3.5 33c.5-4 3-6.6 6.5-7.6h12c3.5 1 6 3.6 6.5 7.6z" fill="#E53935"/>
       <path d="M10 25.4h12l-1.4 2.2H11.4z" fill="#B71C1C"/>
@@ -126,7 +126,7 @@ const CAST = [
       <rect x="15.1" y="20.8" width="1.8" height="1.6" rx=".3" fill="#fff"/>`,
   },
   {
-    id: "zaya", name: "Zaya", role: "Too cool for carrots", bg: "#FF8FAB",
+    id: "nezha", name: "Nezha", role: "Teddy's glamorous mum", bg: "#FF8FAB",
     base: "rabbit_face", t: [0.8, 3.2, 4.4],
     over: `<ellipse cx="9" cy="22" rx="2" ry="1.2" fill="#FF8FAB" fill-opacity=".7"/><ellipse cx="23" cy="22" rx="2" ry="1.2" fill="#FF8FAB" fill-opacity=".7"/>
       <path d="${heart(12, 18.4, 2.6)}" fill="#E91E63"/><path d="${heart(20, 18.4, 2.6)}" fill="#E91E63"/>
@@ -166,7 +166,7 @@ const CAST = [
       <path d="M26.6 15.4l4.6-3.4.4 2.2zM26.6 15.6l4 2.8-1.6 1.2z" fill="#C62828"/><circle cx="26.8" cy="15.6" r="1" fill="#B71C1C"/>`,
   },
   {
-    id: "serafim", name: "Serafim", role: "Small dog, big halo", bg: "#A0C4FF",
+    id: "teddy", name: "Teddy", role: "Small dog, big heart", bg: "#A0C4FF",
     under: `<path d="M9 22.6C4.8 22.9 1.2 20.4.6 15.8c1.5.6 2.8.7 3.8.3-1.2-1-1.8-2.3-1.8-3.9 1.8 1.2 3.4 1.7 4.8 1.5-.6-.9-.8-1.9-.6-3 1.8 1.4 3.3 3.6 3.9 6.2z" fill="#fff"/>
       <path d="M23 22.6c4.2.3 7.8-2.2 8.4-6.8-1.5.6-2.8.7-3.8.3 1.2-1 1.8-2.3 1.8-3.9-1.8 1.2-3.4 1.7-4.8 1.5.6-.9.8-1.9.6-3-1.8 1.4-3.3 3.6-3.9 6.2z" fill="#fff"/>
       <path d="M1.7 16.4q2.4 1.4 5.2 1.2M3.5 13.2q2.2 1.6 4.6 1.4M30.3 16.4q-2.4 1.4-5.2 1.2M28.5 13.2q-2.2 1.6-4.6 1.4" stroke="#D5DEEA" stroke-width=".6" fill="none"/>`,
@@ -193,6 +193,13 @@ const CAST = [
       <path d="M2.2 13c3.8-2 8.8-3 14.3-3s10.5 1 14.3 3l-.3 2.6c-3.9-1.8-8.6-2.7-14-2.7s-10.1.9-14 2.7z" fill="#A1887F"/>
       <path d="M2.2 13.4c-.8 2.6-.6 5.3.4 7.3l2.4-.6c-.5-2-.4-4.2.2-6.4zM30.8 13.4c.8 2.6.6 5.3-.4 7.3l-2.4-.6c.5-2 .4-4.2-.2-6.4z" fill="#A1887F"/>
       <path d="M9 5.5q3-1.8 7.5-2" stroke="#8D6E63" stroke-width=".8" fill="none" stroke-linecap="round"/>`,
+  },
+  /* Yarik the wolf has no flat drawing of his own: the native app draws his
+     face from the cast art (native/src/castfaces.js) and only the frozen web
+     app falls back to this bear, tinted grey. */
+  {
+    id: "yarik", name: "Yarik", role: "Big grey wolf, soft heart", bg: "#9AA5B1",
+    base: "bear", t: [0.8, 3.2, 5],
   },
   {
     id: "barsik", name: "Barsik", role: "Sails for fish, not gold", bg: "#90DBF4",
@@ -231,12 +238,14 @@ const CAST = [
 
 /* Profiles from before the animals keep a character of their own rather than
    all falling to the first (rule 20.4's spirit: a profile's choices are its
-   data). The monkeynaut was the owner's own picture and is Yuri. */
+   data). The monkeynaut was the owner's own picture and is the cosmonaut
+   monkey (Monka since 2026-09-30, id still "yuri"); the Yorkie and the rabbit
+   became Teddy and Nezha of the cast (core/cast.js). */
 const LEGACY = {
-  monkeynaut: "yuri", gymbun: "zaya", shadesduck: "senya", djcat: "filin", scarfbear: "misha",
+  serafim: "teddy", zaya: "nezha", monkeynaut: "yuri", gymbun: "nezha", shadesduck: "senya", djcat: "filin", scarfbear: "misha",
   profowl: "tortila", kingfrog: "tsarevna", bowtiepen: "pirozhok", sneakfox: "lisa", spikelib: "belka",
-  curls: "yuri", mint: "belka", blossom: "zaya", fern: "lisa", ginger: "tortila", frost: "borsuk",
-  ace: "serafim", shades: "gena", bun: "filin", teal: "misha", bubblegum: "tsarevna", sunny: "barsik",
+  curls: "yuri", mint: "belka", blossom: "nezha", fern: "lisa", ginger: "tortila", frost: "borsuk",
+  ace: "teddy", shades: "gena", bun: "filin", teal: "misha", bubblegum: "tsarevna", sunny: "barsik",
 };
 
 function markup(c) {
@@ -245,6 +254,9 @@ function markup(c) {
   return `<g transform="translate(${dx} ${dy}) scale(${s})">${inner.replace(/\n\s*/g, "")}</g>`;
 }
 
+/* The cast first, in story order: the picker opens on the family. */
+const FIRST = ["teddy", "nezha", "yarik", "yuri", "belka"];
+CAST.sort((a, b) => ((FIRST.indexOf(a.id) + 1) || 99) - ((FIRST.indexOf(b.id) + 1) || 99));
 const out = {};
 for (const c of CAST) out[c.id] = { name: c.name, role: c.role, bg: c.bg, vb: "0 0 32 32", svg: markup(c) };
 for (const [old, now] of Object.entries(LEGACY)) {

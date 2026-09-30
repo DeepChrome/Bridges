@@ -3,190 +3,197 @@
  "name": "Winter & Gifts",
  "lessons": {
   "core4:2": {
-   "title": "Who will be Ded Moroz?",
+   "title": "The bus to Grandad's",
    "cast": [
     {
      "id": "a",
-     "ru": "Лена",
-     "en": "Lena"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "b",
-     "ru": "Пётр",
-     "en": "Pyotr"
+     "ru": "Белка",
+     "en": "Belka"
     }
    ],
    "intro": [
     {
-     "ru": "папа",
-     "en": "dad"
+     "ru": "автобус",
+     "en": "bus"
     },
     {
-     "ru": "борода",
-     "en": "beard"
+     "ru": "билет",
+     "en": "ticket"
     },
     {
-     "ru": "пальто",
-     "en": "coat"
-    },
-    {
-     "ru": "голос",
-     "en": "voice"
+     "ru": "орех",
+     "en": "nut"
     }
    ],
    "lines": [
     {
-     "s": "a",
-     "ru": "Пётр, наш дед сейчас в другой стране.",
-     "en": "Pyotr, our grandad is in another country right now."
-    },
-    {
      "s": "b",
-     "ru": "Я знаю. Он там до января, не дома.",
-     "en": "I know. He is there until January, not at home."
+     "ru": "Тедди, вот наш автобус! Билеты у тебя?",
+     "en": "Teddy, here's our bus! Have you got the tickets?"
     },
     {
      "s": "a",
-     "ru": "А кто будет Дедом Морозом? Обычно это он.",
-     "en": "Then who will be Ded Moroz? It is usually him."
+     "ru": "У меня, Белка. Два билета, к деду.",
+     "en": "I have, Belka. Two tickets, to Grandad's."
     },
     {
      "s": "b",
-     "ru": "Может, дети уже знают, кто Дед Мороз?",
-     "en": "Maybe the children already know who Ded Moroz is?"
+     "ru": "Хорошо. А дед знает, что мы приходим?",
+     "en": "Good. And does Grandad know we're coming?"
     },
     {
      "s": "a",
-     "ru": "Нет, они говорят только о нём. И о подарках.",
-     "en": "No, they talk only about him. And about the presents."
+     "ru": "Знает. Он говорит, что у них там мороз.",
+     "en": "He knows. He says it's freezing where they are."
     },
     {
      "s": "b",
-     "ru": "Хорошо. Подарки у нас есть. Мешок тоже.",
-     "en": "Fine. We have the presents. The sack too."
+     "ru": "Конечно, декабрь! А где мешок с подарками?",
+     "en": "Of course, it's December! And where's the bag of presents?"
     },
     {
      "s": "a",
-     "ru": "Ну, Пётр, Дедом Морозом будешь ты сам.",
-     "en": "Well, Pyotr, you will be Ded Moroz yourself."
+     "ru": "Мешок... он дома! Белка, что теперь делать?",
+     "en": "The bag... it's at home! Belka, what do we do now?"
     },
     {
      "s": "b",
-     "ru": "Я сам? Но дети скажут: это же наш папа!",
-     "en": "Me myself? But the children will say: that's our dad!"
+     "ru": "Тедди, смотри на меня. Что я ношу?",
+     "en": "Teddy, look at me. What am I carrying?"
     },
     {
      "s": "a",
-     "ru": "Не скажут. У Деда Мороза борода и красное пальто.",
-     "en": "They won't. Ded Moroz has a beard and a red coat."
+     "ru": "Красный мешок... Белка, это наш?",
+     "en": "A red bag... Belka, is that ours?"
     },
     {
      "s": "b",
-     "ru": "А голос? Мой голос они тоже знают.",
-     "en": "And my voice? They know my voice too."
+     "ru": "Наш. Он был дома, а теперь у меня.",
+     "en": "It's ours. It was at home, and now I have it."
     },
     {
      "s": "a",
-     "ru": "Говори как старый дед: а где тут мои дети?",
-     "en": "Talk like an old grandad: \"Now where are my children?\""
+     "ru": "Белка, ты молодец! А что это тут, в мешке? Орехи?",
+     "en": "Belka, you're a star! But what's this in the bag? Nuts?"
     },
     {
      "s": "b",
-     "ru": "Так? Ну, дети, где вы?",
-     "en": "Like this? \"Well, children, where are you?\""
+     "ru": "Это для меня. У меня в каждом мешке орехи.",
+     "en": "Those are for me. I keep nuts in every bag."
     },
     {
      "s": "a",
-     "ru": "Да! Теперь я сама тебя не знаю.",
-     "en": "Ha! Now even I don't know you."
+     "ru": "Ну, и дед получает подарок от Белки!",
+     "en": "Well, then Grandad gets a present from Belka too!"
     },
     {
      "s": "b",
-     "ru": "Хорошо, Лена. Но подарки даёшь ты.",
-     "en": "All right, Lena. But you hand out the presents."
+     "ru": "Вот! Каждый получает подарок. А теперь — в автобус!",
+     "en": "Exactly! Everyone gets a present. And now, onto the bus!"
     },
     {
      "s": "a",
-     "ru": "Нет, подарки даёт Дед Мороз. Обычно из мешка.",
-     "en": "No, Ded Moroz hands out the presents. Usually from the sack."
-    },
-    {
-     "s": "b",
-     "ru": "Ну хорошо, хорошо. Дед Мороз всё может.",
-     "en": "Oh, all right, all right. Ded Moroz can do anything."
+     "ru": "Два билета, мешок, орехи... Всё, идём!",
+     "en": "Two tickets, the bag, the nuts... That's everything, let's go!"
     }
    ],
    "questions": [
     {
-     "ask": "Where is the children's grandad?",
+     "ask": "Where are Teddy and Belka going?",
      "options": [
-      "In another country",
-      "In the town hospital",
-      "At work until late",
-      "On a train back home"
+      "To Grandad's",
+      "To the market",
+      "To the doctor",
+      "To see Misha"
      ],
      "answer": 0
     },
     {
-     "ask": "What does grandad usually do at New Year?",
+     "ask": "How are they travelling?",
      "options": [
-      "Plays Ded Moroz",
-      "Buys the gifts",
-      "Cooks the meal",
-      "Brings the tree"
+      "By bus",
+      "By car",
+      "By train",
+      "On foot"
      ],
      "answer": 0
     },
     {
-     "ask": "What is Pyotr worried about?",
+     "ask": "What does Teddy think he has forgotten?",
      "options": [
-      "The children will know him",
-      "The children will be scared",
-      "The costume will not fit",
-      "The presents are not ready"
+      "The bag of presents",
+      "The two bus tickets",
+      "His warm red scarf",
+      "Grandad's address"
      ],
      "answer": 0
     },
     {
-     "ask": "How does Lena answer his worry?",
+     "ask": "Who has brought it along?",
      "options": [
-      "A beard and coat will hide him",
-      "The kids will be at grandma's",
-      "The lights will be turned off",
-      "Grandad will come back early"
+      "Belka",
+      "Gena",
+      "Misha",
+      "Monka"
      ],
      "answer": 0
     },
     {
-     "ask": "What do they argue about at the end?",
+     "ask": "What else is in the bag?",
      "options": [
-      "Who hands out the presents",
-      "Who wraps up the presents",
-      "Where to hide the presents",
-      "When to open the presents"
+      "Belka's nuts",
+      "Some sausage",
+      "Two tickets",
+      "A warm hat"
      ],
      "answer": 0
     }
    ]
   },
   "core4:4": {
-   "title": "Borscht for Ded Moroz",
+   "title": "Ice at the bus stop",
    "cast": [
     {
      "id": "a",
-     "ru": "Петя",
-     "en": "Petya"
+     "ru": "Ярик",
+     "en": "Yarik"
     },
     {
      "id": "b",
-     "ru": "Маша",
-     "en": "Masha"
+     "ru": "Тедди",
+     "en": "Teddy"
+    },
+    {
+     "id": "c",
+     "ru": "Монька",
+     "en": "Monka"
     }
    ],
    "intro": [
     {
+     "ru": "автобус",
+     "en": "bus"
+    },
+    {
+     "ru": "город",
+     "en": "town"
+    },
+    {
      "ru": "ёлка",
      "en": "New Year tree"
+    },
+    {
+     "ru": "лёд",
+     "en": "ice"
+    },
+    {
+     "ru": "упасть",
+     "en": "to fall"
     },
     {
      "ru": "папа",
@@ -196,133 +203,123 @@
    "lines": [
     {
      "s": "a",
-     "ru": "Маша, там такой мороз! Дед Мороз летает, когда мороз?",
-     "en": "Masha, it's so frosty out there! Does Ded Moroz fly when it's frosty?"
+     "ru": "Тедди, вот наш автобус. Идём в город, на ёлку!",
+     "en": "Teddy, here's our bus. We're off to town, to see the tree!"
     },
     {
      "s": "b",
-     "ru": "Конечно, Петя. Для него мороз — как дом.",
-     "en": "Of course, Petya. For him the frost is like home."
+     "ru": "Папа, а какая там ёлка? Как дом?",
+     "en": "Dad, what's the tree like? As big as a house?"
     },
     {
      "s": "a",
-     "ru": "А как он носит подарки? Их же очень много.",
-     "en": "And how does he carry the presents? There are so many."
+     "ru": "Как два дома! И там дед Мороз.",
+     "en": "As big as two houses! And Ded Moroz is there."
     },
     {
-     "s": "b",
-     "ru": "У него есть мешок. Красный, как он сам.",
-     "en": "He has a big sack. Red, like him."
-    },
-    {
-     "s": "a",
-     "ru": "А подарки он оставляет перед ёлкой?",
-     "en": "And does he leave the presents in front of the tree?"
-    },
-    {
-     "s": "b",
-     "ru": "Да. Каждый ребёнок получает свой подарок перед ёлкой.",
-     "en": "Yes. Every child gets their own present in front of the tree."
+     "s": "c",
+     "ru": "Ярик! Тедди! Вы тоже в город?",
+     "en": "Yarik! Teddy! Are you going to town too?"
     },
     {
      "s": "a",
-     "ru": "А сам Дед Мороз подарки получает?",
-     "en": "And does Ded Moroz himself get presents?"
+     "ru": "В город, Монька. А ты? Ты с нами?",
+     "en": "To town, Monka. What about you? Are you coming with us?"
+    },
+    {
+     "s": "c",
+     "ru": "Нет, у меня тут дело. Идите, идите!",
+     "en": "No, I've got something to do here. Go on, go on!"
     },
     {
      "s": "b",
-     "ru": "Не знаю. Кажется, нет.",
-     "en": "I don't know. I don't think so."
+     "ru": "Папа, смотри! Что это перед автобусом? Лёд?",
+     "en": "Dad, look! What's that in front of the bus? Ice?"
     },
     {
      "s": "a",
-     "ru": "Я хочу, чтобы Дед Мороз тоже получал подарки.",
-     "en": "I want Ded Moroz to get presents too."
+     "ru": "Лёд. Хорошо, что ты его видишь.",
+     "en": "Ice. Good thing you spotted it."
+    },
+    {
+     "s": "c",
+     "ru": "Какой лёд? Мой? Ну... а где он?",
+     "en": "What ice? Mine? Well... where is it, then?"
     },
     {
      "s": "b",
-     "ru": "Какой подарок? У него всё есть.",
-     "en": "What present? He has everything."
+     "ru": "Монька упал! Монька, ты можешь идти?",
+     "en": "Monka fell! Monka, can you walk?"
+    },
+    {
+     "s": "c",
+     "ru": "Могу, могу. Это мороз, Тедди. Всё мороз.",
+     "en": "I can, I can. It's the frost, Teddy. It's all the frost."
+    },
+    {
+     "s": "b",
+     "ru": "Монька, я скажу деду Морозу, что ты тут!",
+     "en": "Monka, I'll tell Ded Moroz that you're here!"
+    },
+    {
+     "s": "c",
+     "ru": "Скажи ему, что Монька очень добрый.",
+     "en": "Tell him that Monka is very kind."
     },
     {
      "s": "a",
-     "ru": "Борщ! В такой мороз он хочет борщ.",
-     "en": "Borscht! In frost like this he wants borscht."
-    },
-    {
-     "s": "b",
-     "ru": "Борщ перед ёлкой? Петя, это же не кафе!",
-     "en": "Borscht in front of the tree? Petya, this isn't a café!"
-    },
-    {
-     "s": "a",
-     "ru": "А что? Он летает весь декабрь, до января!",
-     "en": "So what? He flies all December, right up to January!"
-    },
-    {
-     "s": "b",
-     "ru": "Ну хорошо. Борщ и колбаса. Для деда.",
-     "en": "Oh, all right. Borscht and sausage. For the old man."
-    },
-    {
-     "s": "a",
-     "ru": "Спасибо, Маша! Ты молодец!",
-     "en": "Thanks, Masha! You're the best!"
-    },
-    {
-     "s": "b",
-     "ru": "Только не говори папе, что это его борщ!",
-     "en": "Just don't tell Dad that it's his borscht!"
+     "ru": "Скажем, Монька. Тедди, идём!",
+     "en": "We will, Monka. Teddy, let's go!"
     }
    ],
    "questions": [
     {
-     "ask": "Why is Petya worried at first?",
+     "ask": "Where are Yarik and Teddy going?",
      "options": [
-      "It is very frosty outside",
-      "Their tree has fallen over",
-      "Masha has hidden his gift",
-      "They have no presents left"
+      "To see the big tree",
+      "To meet Mom at work",
+      "To a football match",
+      "To visit Belka's shop"
      ],
      "answer": 0
     },
     {
-     "ask": "How does Ded Moroz carry the presents?",
+     "ask": "How big does Yarik say the tree is?",
      "options": [
-      "In a big red sack",
-      "On a wooden sledge",
-      "In a heavy basket",
-      "In a blue suitcase"
+      "Like two houses",
+      "Like a big bus",
+      "Like three cars",
+      "Like the bank"
      ],
      "answer": 0
     },
     {
-     "ask": "Where do the children find their presents?",
+     "ask": "What does Teddy notice at the stop?",
      "options": [
-      "In front of the tree",
-      "Behind the front door",
-      "On the kitchen table",
-      "In a box on the bed"
+      "Some ice",
+      "A red sack",
+      "A lost hat",
+      "A lost key"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Petya want to leave for Ded Moroz?",
+     "ask": "What happens to Monka?",
      "options": [
-      "A bowl of borscht",
-      "A slice of pizza",
-      "A glass of milk",
-      "A cup of hot tea"
+      "He slips on the ice",
+      "He drops his helmet",
+      "He gets on the bus",
+      "He sees Ded Moroz"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Masha ask Petya not to do?",
+     "ask": "What does Monka want Ded Moroz to hear?",
      "options": [
-      "Tell Dad about the borscht",
-      "Open his presents too early",
-      "Eat the pizza before night",
-      "Look into Ded Moroz's sack"
+      "That he is very kind",
+      "That he wants a tree",
+      "That he is very cold",
+      "That he has a ticket"
      ],
      "answer": 0
     }

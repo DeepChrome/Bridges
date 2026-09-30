@@ -27,7 +27,15 @@ import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLab
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, drillPool, nextLesson } from "../data";
 import { talk as askTutor, review as askReview, hint as askHint, config } from "../lib/feedback";
-import { say, SPEEDS } from "../audio";
+import { say, SPEEDS, speakLine, voiceFor } from "../audio";
+
+/* A tutor turn read in its character's device voice, at the pace picked for
+   the tutor (`st.talkSpeed`) times the character's own tempo. */
+function speakAs(who, text, speed) {
+  const v = voiceFor(who);
+  const s = SPEEDS.find((x) => x.id === speed);
+  return speakLine(text, { ...v, rate: (s ? s.rate : 1) * (v.tempo || 1) });
+}
 import { tagInfo } from "@core/errortags";
 import { useRecognizer } from "../speech";
 import { HoldButton, Feedback, Blocked } from "../activities/Say";
@@ -440,7 +448,8 @@ export default function Talk({ navigation, route }) {
                                       tokens: reply.reply_tokens }]));
     // The tutor speaks its turn as it arrives (the owner, 2026-09-07), at the
     // pace chosen on the picker; the speaker on the bubble is for hearing it again.
-    say(reply.reply_ru, { repeat: false, speed });
+    // …in the voice of whoever the scenario says is talking (core/cast.js).
+    speakAs(scenario.who, reply.reply_ru, speed);
     if (reply.newWords && reply.newWords.length) {
       setNewWords((prev) => {
         const have = new Set(prev.map((w) => w.lemma));

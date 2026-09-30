@@ -3,325 +3,327 @@
  "name": "Feelings & Fears",
  "lessons": {
   "core7:2": {
-   "title": "Someone outside at night",
+   "title": "A present on three hundred roubles",
    "cast": [
     {
      "id": "a",
-     "ru": "Маша",
-     "en": "Masha"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "b",
-     "ru": "Олег",
-     "en": "Oleg"
+     "ru": "Белка",
+     "en": "Belka"
     }
    ],
    "intro": [
     {
-     "ru": "окно",
-     "en": "window"
+     "ru": "купить",
+     "en": "to buy"
     },
     {
-     "ru": "ночь",
-     "en": "night"
+     "ru": "мама",
+     "en": "mum"
     },
     {
-     "ru": "бояться",
-     "en": "to be afraid"
+     "ru": "цветок",
+     "en": "flower"
+    },
+    {
+     "ru": "стоить",
+     "en": "to cost"
+    },
+    {
+     "ru": "триста",
+     "en": "three hundred"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Олег, ты видел? За окном кто-то есть!",
-     "en": "Oleg, did you see? There is someone outside the window!"
+     "ru": "Белка, я хочу купить маме подарок, а денег почти нет.",
+     "en": "Belka, I want to buy Mum a present, but I have almost no money."
     },
     {
      "s": "b",
-     "ru": "Где? Сейчас ночь, Маша. Там никто не бывает.",
-     "en": "Where? It is night, Masha. Nobody is ever out there."
+     "ru": "А сколько у тебя есть, Тедди?",
+     "en": "And how much do you have, Teddy?"
     },
     {
      "s": "a",
-     "ru": "Есть. Я видела. Кто-то был с той стороны, у воды.",
-     "en": "There is. I saw. Someone was on that side, by the water."
+     "ru": "Триста рублей. Я много тратил на пиццу.",
+     "en": "Three hundred roubles. I've been spending a lot on pizza."
     },
     {
      "s": "b",
-     "ru": "У воды? Наверное, это кот.",
-     "en": "By the water? It is probably the cat."
+     "ru": "На пиццу! Ну, а какой подарок ты хочешь?",
+     "en": "On pizza! Well, and what present do you want?"
     },
     {
      "s": "a",
-     "ru": "Это был не кот. Он был с мешком. Я боюсь, Олег.",
-     "en": "It was not the cat. He had a bag. I am scared, Oleg."
+     "ru": "Красные цветы. Но здесь они стоят очень много.",
+     "en": "Red flowers. But here they cost a lot."
     },
     {
      "s": "b",
-     "ru": "С мешком? А, тогда я знаю, кто это.",
-     "en": "With a bag? Oh, then I know who it is."
+     "ru": "Я могу заплатить за тебя, если хочешь.",
+     "en": "I can pay for you, if you want."
     },
     {
      "s": "a",
-     "ru": "Ты знаешь? Почему ты мне ничего не сказал?",
-     "en": "You know? Why did you not tell me anything?"
+     "ru": "Нет, спасибо, так нельзя. Подарок от меня, и деньги тоже мои.",
+     "en": "No, thanks, that won't do. The present is from me, so the money is mine too."
     },
     {
      "s": "b",
-     "ru": "Это мой брат. У него для тебя подарок.",
-     "en": "It is my brother. He has a present for you."
+     "ru": "Тогда я знаю, где такие цветы есть. У воды, на той стороне.",
+     "en": "Then I know where there are flowers like that. By the water, on the other side."
     },
     {
      "s": "a",
-     "ru": "Подарок? Сейчас? И почему он у воды?",
-     "en": "A present? Now? And why is he by the water?"
+     "ru": "У воды? И их можно просто взять?",
+     "en": "By the water? And you can just take them?"
     },
     {
      "s": "b",
-     "ru": "Он думал, что ты уже легла.",
-     "en": "He thought you had already gone to bed."
+     "ru": "Можно. Там они ничего не стоят, и никто не говорит «нельзя».",
+     "en": "You can. There they cost nothing, and nobody says \"you can't\"."
     },
     {
      "s": "a",
-     "ru": "Я почти легла. Но я видела его в окно.",
-     "en": "I almost had. But I saw him through the window."
+     "ru": "А мои триста рублей? Что с ними делать?",
+     "en": "And my three hundred roubles? What do I do with them?"
     },
     {
      "s": "b",
-     "ru": "Маша, нельзя, чтобы он знал. Ты ничего не видела, хорошо?",
-     "en": "Masha, he must not know. You saw nothing, all right?"
+     "ru": "Их можно хранить. Или положить в банк.",
+     "en": "You can keep them. Or put them in the bank."
     },
     {
      "s": "a",
-     "ru": "Хорошо. А где он сейчас?",
-     "en": "All right. And where is he now?"
+     "ru": "В банк? Белка, это же только триста рублей!",
+     "en": "In the bank? Belka, it's only three hundred roubles!"
     },
     {
      "s": "b",
-     "ru": "Ещё там. Он думает, что его никто не видел.",
-     "en": "Still there. He thinks nobody saw him."
+     "ru": "Вот так и начинают, Тедди. Мой дед тоже так начинал.",
+     "en": "That's how it starts, Teddy. My grandad started that way too."
     },
     {
      "s": "a",
-     "ru": "Ну, никто и не видел. Только я.",
-     "en": "Well, nobody did. Only me."
-    },
-    {
-     "s": "b",
-     "ru": "Вот и хорошо. А подарок будет потом.",
-     "en": "That is fine, then. And the present comes later."
+     "ru": "Хорошо. Цветы с той стороны, а деньги в банк. Идём!",
+     "en": "All right. Flowers from the other side, and the money in the bank. Let's go!"
     }
    ],
    "questions": [
     {
-     "ask": "Where did Masha see someone?",
+     "ask": "Who is the present for?",
      "options": [
-      "By the water",
-      "By the door",
-      "In the garden",
-      "On the road"
+      "Teddy's mother",
+      "Teddy's father",
+      "Belka's friend",
+      "Belka's grandad"
      ],
      "answer": 0
     },
     {
-     "ask": "Why is Masha frightened?",
+     "ask": "Why can't Teddy buy the red flowers?",
      "options": [
-      "She saw someone outside",
-      "She heard a loud crash",
-      "She lost her house key",
-      "The cat did not return"
+      "He has too little money",
+      "The shop is closed now",
+      "The flowers are all sold",
+      "He left his bag at home"
      ],
      "answer": 0
     },
     {
-     "ask": "Who was outside?",
+     "ask": "Why does Teddy say no to Belka's offer?",
      "options": [
-      "Oleg's brother",
-      "Masha's father",
-      "Their neighbour",
-      "A lost tourist"
+      "The gift must be from him",
+      "He does not trust Belka",
+      "She has no money either",
+      "He wants to save his cash"
      ],
      "answer": 0
     },
     {
-     "ask": "Why had he come?",
+     "ask": "Where will Teddy get the flowers?",
      "options": [
-      "A present for Masha",
-      "A letter for Oleg",
-      "Money for the flat",
-      "Water for the house"
+      "On the far side, by water",
+      "In the shop near the bank",
+      "From Belka's own garden",
+      "At a market in the town"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Oleg ask Masha to do?",
+     "ask": "What does Belka suggest doing with the money?",
      "options": [
-      "Pretend she saw nothing",
-      "Call the neighbours now",
-      "Lock the door tonight",
-      "Go outside to meet him"
+      "Putting it in the bank",
+      "Buying a pizza with it",
+      "Giving it to her grandad",
+      "Spending it on a book"
      ],
      "answer": 0
     }
    ]
   },
   "core7:4": {
-   "title": "Lost in the forest",
+   "title": "The stones in the forest",
    "cast": [
     {
      "id": "a",
-     "ru": "Лена",
-     "en": "Lena"
+     "ru": "Монька",
+     "en": "Monka"
     },
     {
      "id": "b",
-     "ru": "Юра",
-     "en": "Yura"
+     "ru": "Ярик",
+     "en": "Yarik"
+    },
+    {
+     "id": "c",
+     "ru": "Тедди",
+     "en": "Teddy"
     }
    ],
    "intro": [
+    {
+     "ru": "утром",
+     "en": "in the morning"
+    },
+    {
+     "ru": "домой",
+     "en": "home"
+    },
+    {
+     "ru": "дорога",
+     "en": "road, way"
+    },
     {
      "ru": "день",
      "en": "day"
     },
     {
-     "ru": "комар",
-     "en": "mosquito"
-    },
-    {
-     "ru": "насекомое",
-     "en": "insect"
-    },
-    {
-     "ru": "бояться",
-     "en": "to be afraid"
+     "ru": "искать",
+     "en": "to look for"
     }
    ],
    "lines": [
     {
-     "s": "a",
-     "ru": "Юра, мы весь день провели в лесу. Где машина?",
-     "en": "Yura, we have spent the whole day in the forest. Where is the car?"
+     "s": "b",
+     "ru": "Тедди, мы провели в лесу весь день. Где наши камни?",
+     "en": "Teddy, we've spent the whole day in the forest. Where are our stones?"
+    },
+    {
+     "s": "c",
+     "ru": "Утром я их оставил здесь, у дороги. А теперь их нет!",
+     "en": "This morning I left them here, by the path. And now they're gone!"
     },
     {
      "s": "b",
-     "ru": "Где-то там, за тем камнем. Или с другой стороны.",
-     "en": "Somewhere over there, behind that rock. Or on the other side."
+     "ru": "Камни не летают, Тедди. Кто-то их взял.",
+     "en": "Stones don't fly, Teddy. Someone took them."
     },
     {
      "s": "a",
-     "ru": "Ты сказал, что знаешь этот лес!",
-     "en": "You said you knew this forest!"
+     "ru": "Ярик? Тедди? Вы тоже здесь?",
+     "en": "Yarik? Teddy? You're here too?"
+    },
+    {
+     "s": "c",
+     "ru": "Монька! А что ты делаешь в лесу?",
+     "en": "Monka! And what are you doing in the forest?"
+    },
+    {
+     "s": "a",
+     "ru": "Я искал грибы. А теперь не знаю, где мой дом.",
+     "en": "I was looking for mushrooms. And now I don't know where my house is."
     },
     {
      "s": "b",
-     "ru": "Я знаю. Просто тогда здесь всё было совсем другое.",
-     "en": "I do. It is just that everything here was quite different then."
+     "ru": "Монька, ты не видел наши камни? Мы их оставили утром.",
+     "en": "Monka, have you seen our stones? We left them this morning."
     },
     {
      "s": "a",
-     "ru": "И комары! Я никогда не видела так много комаров.",
-     "en": "And the mosquitoes! I have never seen so many mosquitoes."
+     "ru": "Камни? Какие камни? Я их… не видел.",
+     "en": "Stones? What stones? I haven't... seen them."
+    },
+    {
+     "s": "c",
+     "ru": "Без них мы не знаем, где дорога домой!",
+     "en": "Without them we don't know the way home!"
+    },
+    {
+     "s": "a",
+     "ru": "Кто-то положил их на другой стороне. Я сам шёл по ним весь день.",
+     "en": "Someone put them on the other side. I followed them myself all day."
     },
     {
      "s": "b",
-     "ru": "Сколько эмоций, Лена! Это просто комары.",
-     "en": "So much emotion, Lena! They are just mosquitoes."
+     "ru": "Я и без камней знаю этот лес. Идём, дом с той стороны.",
+     "en": "I know this forest even without stones. Come on, home is that way."
+    },
+    {
+     "s": "c",
+     "ru": "Монька, ты идёшь с нами? У нас много грибов на обед.",
+     "en": "Monka, are you coming with us? We have lots of mushrooms for lunch."
     },
     {
      "s": "a",
-     "ru": "А огромное насекомое? Оно было прямо на мне!",
-     "en": "And that enormous insect? It was right on me!"
-    },
-    {
-     "s": "b",
-     "ru": "Оно тебя боялось больше, чем ты его.",
-     "en": "It was more afraid of you than you were of it."
-    },
-    {
-     "s": "a",
-     "ru": "Не думаю. Ладно, куда теперь?",
-     "en": "I doubt it. Fine, where now?"
-    },
-    {
-     "s": "b",
-     "ru": "Вот камень. Мы его уже проходили?",
-     "en": "Here is a rock. Have we passed it already?"
-    },
-    {
-     "s": "a",
-     "ru": "Проходили. Вот моя вода. Я её тут оставила.",
-     "en": "We have. Here is my water. I left it here."
-    },
-    {
-     "s": "b",
-     "ru": "Тогда я знаю, где мы. Машина дальше, прямо туда.",
-     "en": "Then I know where we are. The car is further on, straight that way."
-    },
-    {
-     "s": "a",
-     "ru": "Ты это уже говорил, Юра.",
-     "en": "You have said that before, Yura."
-    },
-    {
-     "s": "b",
-     "ru": "Теперь я это знаю, а тогда только думал.",
-     "en": "Now I know it; back then I only thought so."
-    },
-    {
-     "s": "a",
-     "ru": "Хорошо. Но в лес я с тобой больше никогда не иду.",
-     "en": "All right. But I am never going to the forest with you again."
+     "ru": "С вами? Хорошо… Спасибо, Тедди. А камни — больше не моё дело.",
+     "en": "With you? All right... Thank you, Teddy. And stones are no longer my business."
     }
    ],
    "questions": [
     {
-     "ask": "Where are Lena and Yura?",
+     "ask": "Why can't Yarik and Teddy find the way back?",
      "options": [
-      "Lost in a forest",
-      "Lost in a city",
-      "On a lake shore",
-      "In a small park"
+      "Someone moved their stones",
+      "It grew dark in the woods",
+      "Teddy lost the paper map",
+      "Their car would not start"
      ],
      "answer": 0
     },
     {
-     "ask": "What are they trying to find?",
+     "ask": "What does Monka say he was doing in the forest?",
      "options": [
-      "Their car",
-      "Their dog",
-      "The river",
-      "A village"
+      "Picking mushrooms",
+      "Collecting wood",
+      "Walking his dog",
+      "Fishing by a lake"
      ],
      "answer": 0
     },
     {
-     "ask": "What frightened Lena?",
+     "ask": "Why is Monka lost himself?",
      "options": [
-      "A big insect on her",
-      "A snake on the path",
-      "A dog in the bushes",
-      "A bird in her hair"
+      "He followed the moved stones",
+      "He fell asleep under a tree",
+      "He was chasing a large bird",
+      "His torch batteries ran out"
      ],
      "answer": 0
     },
     {
-     "ask": "How do they know they have gone in a circle?",
+     "ask": "How will Yarik find the way home?",
      "options": [
-      "Her water is by the rock",
-      "They see their footprints",
-      "The sun is behind them now",
-      "A road sign points back"
+      "He knows the forest well",
+      "He will phone Teddy's mum",
+      "He follows Monka's stones",
+      "He climbs up a tall tree"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Lena decide?",
+     "ask": "How does it end for Monka?",
      "options": [
-      "No more forest walks with Yura",
-      "To come back here next summer",
-      "To walk home alone in the dark",
-      "To wait by the rock for help"
+      "He goes home with them",
+      "He stays in the forest",
+      "He hides from the family",
+      "He runs home by himself"
      ],
      "answer": 0
     }

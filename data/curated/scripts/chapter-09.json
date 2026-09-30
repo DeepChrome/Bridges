@@ -3,287 +3,298 @@
  "name": "Style & Fashion",
  "lessons": {
   "core9:2": {
-   "title": "What to wear to the bank",
+   "title": "Red trousers for Misha's party",
    "cast": [
     {
      "id": "a",
-     "ru": "Маша",
-     "en": "Masha"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "b",
-     "ru": "Петя",
-     "en": "Petya"
+     "ru": "Нежа",
+     "en": "Nezha"
+    },
+    {
+     "id": "c",
+     "ru": "Белка",
+     "en": "Belka"
     }
    ],
    "intro": [
     {
-     "ru": "костюм",
-     "en": "suit"
-    },
-    {
-     "ru": "рубашка",
-     "en": "shirt"
-    },
-    {
-     "ru": "галстук",
-     "en": "tie"
+     "ru": "мама",
+     "en": "mom"
     }
    ],
    "lines": [
     {
      "s": "b",
-     "ru": "Маша, сегодня я иду в банк говорить о работе. В чём мне идти?",
-     "en": "Masha, today I'm going to the bank to talk about a job. What should I wear?"
+     "ru": "Тедди, сегодня праздник у Миши, а ты ещё не одет!",
+     "en": "Teddy, Misha's party is today, and you're still not dressed!"
     },
     {
      "s": "a",
-     "ru": "А что у тебя есть? Ты же знаешь, я слежу за модой.",
-     "en": "What have you got? You know I follow fashion."
+     "ru": "Мама, я уже одет. Вот мои красные брюки!",
+     "en": "Mom, I am dressed. Here are my red trousers!"
     },
     {
      "s": "b",
-     "ru": "Вот брюки и рубашка. Мне кажется, это мой стиль.",
-     "en": "Here, trousers and a shirt. I think this is my style."
+     "ru": "Красные брюки на праздник? Откуда у тебя такой вкус?",
+     "en": "Red trousers to a party? Where did you get such taste?"
     },
     {
      "s": "a",
-     "ru": "Петя, это спортивные брюки! Откуда они у тебя?",
-     "en": "Petya, those are tracksuit trousers! Where did you get them?"
+     "ru": "От тебя, мама. Ты же всегда следишь за модой.",
+     "en": "From you, Mom. You always follow fashion."
     },
     {
      "s": "b",
-     "ru": "От брата. В них хорошо двигаться.",
-     "en": "From my brother. They're easy to move in."
+     "ru": "Слежу. Поэтому и говорю: они слишком яркие.",
+     "en": "I do. That's exactly why I'm saying they're too bright."
+    },
+    {
+     "s": "c",
+     "ru": "Нежа! Я сейчас была у Миши. Там все в спортивных брюках!",
+     "en": "Nezha! I was just at Misha's. Everyone there is in tracksuit trousers!"
+    },
+    {
+     "s": "b",
+     "ru": "В спортивных? Белка, это же праздник, а не урок.",
+     "en": "Tracksuit trousers? Belka, it's a party, not a lesson."
+    },
+    {
+     "s": "c",
+     "ru": "Праздник будет в лесу! Грибы, вода и камни.",
+     "en": "The party is in the woods! Mushrooms, water and rocks."
     },
     {
      "s": "a",
-     "ru": "В банке не нужно двигаться.",
-     "en": "You don't need to move at a bank."
+     "ru": "Вот! В лесу красный — это хорошо, мама. Меня там все видят.",
+     "en": "See! In the woods red is good, Mom. Everyone can see me there."
     },
     {
      "s": "b",
-     "ru": "Ну, а какой стиль там предпочитают?",
-     "en": "Well, what style do they prefer there?"
+     "ru": "Может быть. Но почему Миша мне не отвечает?",
+     "en": "Maybe. But why isn't Misha answering me?"
+    },
+    {
+     "s": "c",
+     "ru": "Он уже в лесу, Нежа. Там никто не отвечает.",
+     "en": "He's already in the woods, Nezha. Nobody answers out there."
+    },
+    {
+     "s": "b",
+     "ru": "Ладно. Красные брюки. Но старые, не праздничные!",
+     "en": "Fine. The red trousers. But the old ones, not the party ones!"
     },
     {
      "s": "a",
-     "ru": "Классический. Костюм, светлая рубашка и галстук.",
-     "en": "Classic. A suit, a light shirt and a tie."
-    },
-    {
-     "s": "b",
-     "ru": "Костюм у меня есть, старый, от деда. Но галстук я носить не буду.",
-     "en": "I have a suit, an old one, from my grandfather. But I won't wear a tie."
-    },
-    {
-     "s": "a",
-     "ru": "Почему? Он тебе не идёт?",
-     "en": "Why? Does it not suit you?"
-    },
-    {
-     "s": "b",
-     "ru": "Я в нём как профессор. Все будут на меня смотреть.",
-     "en": "I look like a professor in it. Everyone will stare at me."
-    },
-    {
-     "s": "a",
-     "ru": "Вот и хорошо. Профессору в банке всегда отвечают «да».",
-     "en": "All the better. At a bank they always say yes to a professor."
-    },
-    {
-     "s": "b",
-     "ru": "Ладно, Маша. Тогда костюм, рубашка и галстук.",
-     "en": "All right, Masha. Suit, shirt and tie, then."
+     "ru": "Мама, ты молодец. Вот это вкус!",
+     "en": "Mom, you're the best. Now that's taste!"
     }
    ],
    "questions": [
     {
-     "ask": "Why does Petya need Masha's advice?",
+     "ask": "Where is Teddy going?",
      "options": [
-      "He has a job talk at a bank",
-      "He has a date at a concert",
-      "He is visiting his grandfather",
-      "He is starting university soon"
+      "To a party at Misha's",
+      "To a concert at school",
+      "To a lesson at the bank",
+      "To lunch at grandpa's"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Masha say about his trousers?",
+     "ask": "What does Nezha think of the red trousers?",
      "options": [
-      "They are tracksuit trousers",
-      "They are much too short now",
-      "They are dirty at the back",
-      "They are far too bright red"
+      "They are far too bright",
+      "They are much too wide",
+      "They are old and dirty",
+      "They are far too small"
      ],
      "answer": 0
     },
     {
-     "ask": "What style does Masha say the bank prefers?",
+     "ask": "What news does Belka bring?",
      "options": [
-      "Classic",
-      "Sporty",
-      "Bright",
-      "Casual"
+      "The party is in the woods",
+      "The party is at the bank",
+      "The party is at a school",
+      "The party is on the river"
      ],
      "answer": 0
     },
     {
-     "ask": "Where is Petya's suit from?",
+     "ask": "Why does Misha not answer Nezha?",
      "options": [
-      "His grandfather",
-      "His older brother",
-      "A shop in town",
-      "His best friend"
+      "He is in the forest",
+      "He is still asleep",
+      "He is at the bank",
+      "He is at the shop"
      ],
      "answer": 0
     },
     {
-     "ask": "Why does Petya not want to wear the tie?",
+     "ask": "What do they decide Teddy will wear?",
      "options": [
-      "He looks like a professor in it",
-      "It is far too bright for a bank",
-      "It belonged to his grandfather",
-      "He does not know how to tie it"
+      "His old red trousers",
+      "His new red trousers",
+      "Classic dark trousers",
+      "Sporty white trousers"
      ],
      "answer": 0
     }
    ]
   },
   "core9:4": {
-   "title": "Nothing to wear to grandpa's",
+   "title": "A clean kit for the game",
    "cast": [
     {
      "id": "a",
-     "ru": "Катя",
-     "en": "Katya"
+     "ru": "Ярик",
+     "en": "Yarik"
     },
     {
      "id": "b",
-     "ru": "Олег",
-     "en": "Oleg"
+     "ru": "Тедди",
+     "en": "Teddy"
+    },
+    {
+     "id": "c",
+     "ru": "Монька",
+     "en": "Monka"
     }
    ],
    "intro": [
     {
-     "ru": "свитер",
-     "en": "sweater"
+     "ru": "игра",
+     "en": "game"
     },
     {
-     "ru": "рад",
-     "en": "glad"
+     "ru": "папа",
+     "en": "dad"
+    },
+    {
+     "ru": "лужа",
+     "en": "puddle"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Олег, сегодня праздник у деда, а ты ещё не одет!",
-     "en": "Oleg, grandpa's party is today, and you're still not dressed!"
+     "ru": "Тедди, сегодня игра! Надевай свою светлую спортивную форму.",
+     "en": "Teddy, the game is today! Put on your light sports kit."
     },
     {
      "s": "b",
-     "ru": "Катя, мои светлые брюки грязные. Это всё кот!",
-     "en": "Katya, my light trousers are dirty. It's all the cat's doing!"
+     "ru": "Папа, я не могу её найти. Есть только старая, и она грязная.",
+     "en": "Dad, I can't find it. There's only the old one, and it's dirty."
     },
     {
      "s": "a",
-     "ru": "Ну, а другие брюки у тебя есть?",
-     "en": "Well, do you have any other trousers?"
+     "ru": "Грязная? Где ты её оставил?",
+     "en": "Dirty? Where did you leave it?"
     },
     {
      "s": "b",
-     "ru": "Только спортивные. Широкие и старые.",
-     "en": "Only tracksuit ones. Wide and old."
+     "ru": "Вчера она была здесь. А сегодня её нет.",
+     "en": "Yesterday it was here. And today it's gone."
+    },
+    {
+     "s": "c",
+     "ru": "Ярик! Формы нет? Тедди может взять мои брюки.",
+     "en": "Yarik! No kit? Teddy can take my trousers."
+    },
+    {
+     "s": "b",
+     "ru": "Монька, твои брюки очень широкие. Я в них как в мешке.",
+     "en": "Monka, your trousers are really wide. I'd look like I'm in a sack."
     },
     {
      "s": "a",
-     "ru": "В спортивных брюках к деду на праздник? Нет, Олег.",
-     "en": "Tracksuit trousers to grandpa's party? No, Oleg."
+     "ru": "Спасибо, Монька, не надо. А что у тебя в мешке?",
+     "en": "Thanks, Monka, no need. And what's in your sack?"
+    },
+    {
+     "s": "c",
+     "ru": "В мешке? Ничего! Совсем ничего. Ой!",
+     "en": "In my sack? Nothing! Nothing at all. Oops!"
     },
     {
      "s": "b",
-     "ru": "Тогда я буду дома. Скажешь деду, что я работаю.",
-     "en": "Then I'll stay home. You'll tell grandpa I'm working."
+     "ru": "Монька, ты весь в луже! А в мешке моя форма!",
+     "en": "Monka, you're sitting right in a puddle! And my kit is in the sack!"
+    },
+    {
+     "s": "c",
+     "ru": "Да... Я её нашёл. Для тебя, Тедди.",
+     "en": "Yes... I found it. For you, Teddy."
     },
     {
      "s": "a",
-     "ru": "Нет. А подарок деда? Красный свитер, который ты никогда не носишь.",
-     "en": "No. What about grandpa's present? The red sweater you never wear."
+     "ru": "Монька, спасибо! Но откуда ты знал, что формы нет?",
+     "en": "Thanks, Monka! But how did you know the kit was missing?"
+    },
+    {
+     "s": "c",
+     "ru": "Это другая история, Ярик. Тедди, можно мне твою старую форму?",
+     "en": "That's another story, Yarik. Teddy, can I have your old kit?"
     },
     {
      "s": "b",
-     "ru": "Он слишком яркий. Я в нём как звезда на концерте.",
-     "en": "It's too bright. I look like a star at a concert in it."
-    },
-    {
-     "s": "a",
-     "ru": "Ну и что? Сегодня праздник. И дед будет очень рад.",
-     "en": "So what? It's a holiday today. And grandpa will be very glad."
-    },
-    {
-     "s": "b",
-     "ru": "А брюки? Красный свитер и спортивные брюки?",
-     "en": "And the trousers? A red sweater and tracksuit trousers?"
-    },
-    {
-     "s": "a",
-     "ru": "У брата есть подобные брюки, классические. Я их сейчас возьму.",
-     "en": "My brother has similar trousers, classic ones. I'll go and get them now."
-    },
-    {
-     "s": "b",
-     "ru": "Ладно. Но свитер я надеваю только для деда!",
-     "en": "All right. But I'm putting the sweater on only for grandpa!"
+     "ru": "Конечно, Монька! Надевай. Она грязная, но ты сейчас тоже.",
+     "en": "Of course, Monka! Put it on. It's dirty, but so are you right now."
     }
    ],
    "questions": [
     {
-     "ask": "Where are Katya and Oleg going?",
+     "ask": "Why is Yarik in a hurry?",
      "options": [
-      "To grandpa's holiday party",
-      "To a concert with friends",
-      "To a restaurant for lunch",
-      "To his brother's new flat"
+      "Teddy has a game soon",
+      "Teddy has a lesson soon",
+      "Teddy has a party soon",
+      "Teddy has a photo soon"
      ],
      "answer": 0
     },
     {
-     "ask": "What is wrong with Oleg's light trousers?",
+     "ask": "What can Teddy not find?",
      "options": [
-      "The cat got them dirty",
-      "They are far too wide",
-      "His brother took them",
-      "They no longer fit him"
+      "His light sports kit",
+      "His old wide trousers",
+      "His father's red bag",
+      "His ticket to the game"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Oleg offer to do at first?",
+     "ask": "What does Monka offer Teddy?",
      "options": [
-      "Stay at home instead",
-      "Wear his tracksuit ones",
-      "Buy some new trousers",
-      "Go a little bit later"
+      "His own wide trousers",
+      "A new light sports kit",
+      "A lift to the big game",
+      "His lucky space helmet"
      ],
      "answer": 0
     },
     {
-     "ask": "What is the red sweater?",
+     "ask": "What happens to Monka?",
      "options": [
-      "A present from grandpa",
-      "A present from Katya",
-      "His brother's old one",
-      "Something he just bought"
+      "He falls into a puddle",
+      "He falls into the river",
+      "He gets lost in the town",
+      "He loses his own helmet"
      ],
      "answer": 0
     },
     {
-     "ask": "Where will the other trousers come from?",
+     "ask": "What does Monka wear at the end?",
      "options": [
-      "From Katya's brother",
-      "From grandpa's house",
-      "From a shop in town",
-      "From Oleg's old flat"
+      "Teddy's old sports kit",
+      "Yarik's big grey coat",
+      "His own wide trousers",
+      "Teddy's new light kit"
      ],
      "answer": 0
     }

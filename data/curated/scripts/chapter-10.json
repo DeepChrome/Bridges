@@ -3,286 +3,324 @@
  "name": "Forests & Seasons",
  "lessons": {
   "core10:2": {
-   "title": "Which mushroom is safe",
+   "title": "Mushroom picking in October",
    "cast": [
     {
      "id": "a",
-     "ru": "Аня",
-     "en": "Anya"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "b",
-     "ru": "Миша",
-     "en": "Misha"
+     "ru": "Ярик",
+     "en": "Yarik"
+    },
+    {
+     "id": "c",
+     "ru": "Белка",
+     "en": "Belka"
     }
    ],
    "intro": [
     {
-     "ru": "опасный",
-     "en": "dangerous"
+     "ru": "папа",
+     "en": "dad"
     },
     {
-     "ru": "корзина",
-     "en": "basket"
+     "ru": "карман",
+     "en": "pocket"
     },
     {
-     "ru": "белый",
-     "en": "white; a porcini mushroom"
+     "ru": "орех",
+     "en": "nut"
     }
    ],
    "lines": [
     {
-     "s": "b",
-     "ru": "Аня, смотри, какой огромный гриб! Он был около камня.",
-     "en": "Anya, look what a huge mushroom! It was by the stone."
-    },
-    {
      "s": "a",
-     "ru": "Миша, а ты точно знаешь, какой это гриб?",
-     "en": "Misha, are you sure you know what mushroom this is?"
+     "ru": "Папа, смотри, какой огромный гриб! Можно его попробовать?",
+     "en": "Dad, look what a huge mushroom! Can I try it?"
     },
     {
      "s": "b",
-     "ru": "Конечно. Его можно попробовать даже сырым.",
-     "en": "Of course. You can even try it raw."
+     "ru": "Сырым? Тедди, нет. Это решает Белка, не мы.",
+     "en": "Raw? Teddy, no. Belka decides that, not us."
+    },
+    {
+     "s": "c",
+     "ru": "Где он? Ой, Тедди, этот гриб лучше оставить.",
+     "en": "Where is it? Oh, Teddy, you'd better leave that one."
     },
     {
      "s": "a",
-     "ru": "Сырым? Нет, спасибо. А чем он отличается вот от этого?",
-     "en": "Raw? No, thanks. And how is it different from this one?"
+     "ru": "Почему? Он почти как тот, который собрал папа.",
+     "en": "Why? It's almost like the one Dad picked."
+    },
+    {
+     "s": "c",
+     "ru": "Почти. Но он красный, а красный гриб не для обеда.",
+     "en": "Almost. But it's red, and a red mushroom is not for lunch."
     },
     {
      "s": "b",
-     "ru": "Почти не отличается. Только мой чуть-чуть красный.",
-     "en": "It hardly differs. Only mine is a little bit red."
+     "ru": "Белка, откуда ты всё знаешь?",
+     "en": "Belka, how do you know everything?"
+    },
+    {
+     "s": "c",
+     "ru": "Ярик, я каждый октябрь в этом лесу. Тут я знаю каждый гриб.",
+     "en": "Yarik, I'm in this forest every October. I know every mushroom here."
     },
     {
      "s": "a",
-     "ru": "Вот именно. Твой опасный, Миша. Оставь его.",
-     "en": "Exactly. Yours is dangerous, Misha. Leave it."
+     "ru": "Хорошо. Но я уже хочу обед. Когда он будет?",
+     "en": "All right. But I want lunch already. When will it be?"
     },
     {
      "s": "b",
-     "ru": "Откуда ты знаешь?",
-     "en": "How do you know?"
+     "ru": "Сначала надо собрать мешок грибов.",
+     "en": "First we have to gather a sack of mushrooms."
+    },
+    {
+     "s": "c",
+     "ru": "Тедди, вот тебе орехи. У меня в кармане они есть всегда.",
+     "en": "Teddy, here are some nuts for you. I always have them in my pocket."
     },
     {
      "s": "a",
-     "ru": "Каждый октябрь я была в лесу с дедом. Он много говорил о грибах.",
-     "en": "Every October I was in the forest with grandpa. He talked a lot about mushrooms."
+     "ru": "Спасибо, Белка! Орехи лучше, чем сырой гриб.",
+     "en": "Thanks, Belka! Nuts are better than a raw mushroom."
     },
     {
      "s": "b",
-     "ru": "Ну хорошо, великий профессор грибов. Решай сама, что класть в корзину.",
-     "en": "All right, great professor of mushrooms. You decide what goes in the basket."
+     "ru": "Так и решаем: орехи тебе, а мы с Белкой соберём грибы.",
+     "en": "That's how we'll do it: the nuts are yours, and Belka and I will gather the mushrooms."
     },
     {
-     "s": "a",
-     "ru": "Ну, Миша! А вот этот возьми. Это белый, лучше гриба нет.",
-     "en": "Oh, Misha! But take this one. It's a porcini, there's no better mushroom."
+     "s": "c",
+     "ru": "А красный гриб, Ярик? Оставим его около камня?",
+     "en": "And the red mushroom, Yarik? Shall we leave it by the stone?"
     },
     {
      "s": "b",
-     "ru": "Аня, а сколько грибов нам надо собрать?",
-     "en": "Anya, how many mushrooms do we need to gather?"
-    },
-    {
-     "s": "a",
-     "ru": "Всю корзину. Только медленно и спокойно, Миша.",
-     "en": "A whole basket. Just slowly and calmly, Misha."
+     "ru": "Конечно. Великий гриб, но не для нас.",
+     "en": "Of course. A great mushroom, but not for us."
     }
    ],
    "questions": [
     {
-     "ask": "What are Anya and Misha doing?",
+     "ask": "What are Teddy, Yarik and Belka doing?",
      "options": [
-      "Picking mushrooms in the forest",
-      "Buying mushrooms at the market",
-      "Cooking mushrooms at grandpa's",
-      "Picking berries by the river"
+      "Picking mushrooms in a forest",
+      "Buying mushrooms at a market",
+      "Cooking mushrooms at home now",
+      "Picking berries by the swamp"
      ],
      "answer": 0
     },
     {
-     "ask": "What is wrong with Misha's first mushroom?",
+     "ask": "What is wrong with Teddy's mushroom?",
      "options": [
-      "It is dangerous to eat",
+      "It is not safe to eat",
       "It is far too old now",
       "It is much too small",
-      "It belongs to someone"
+      "It is someone else's"
      ],
      "answer": 0
     },
     {
-     "ask": "How does Anya know about mushrooms?",
+     "ask": "How does Belka know so much?",
      "options": [
-      "From her grandfather",
-      "From a book at school",
-      "From a video online",
-      "From a friend in town"
+      "She comes here every October",
+      "She studied it at university",
+      "She read it in a thick book",
+      "Her grandfather taught her"
      ],
      "answer": 0
     },
     {
-     "ask": "What do they agree on?",
+     "ask": "What does Belka give Teddy?",
      "options": [
-      "Anya decides what goes in the basket",
-      "Misha decides what goes in the basket",
-      "They put everything in the basket",
-      "They each fill their own basket"
+      "Nuts from her pocket",
+      "A mushroom she found",
+      "Apples from her bag",
+      "A sandwich from home"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Misha jokingly call Anya?",
+     "ask": "What do they do with the red mushroom?",
      "options": [
-      "A great professor of mushrooms",
-      "A great doctor of the forest",
-      "The queen of the whole forest",
-      "A young student of mushrooms"
+      "Leave it by the stone",
+      "Take it home to cook",
+      "Give it to Teddy raw",
+      "Show it to a doctor"
      ],
      "answer": 0
     }
    ]
   },
   "core10:4": {
-   "title": "Berries at the swamp",
+   "title": "A picnic by the swamp",
    "cast": [
     {
      "id": "a",
-     "ru": "Соня",
-     "en": "Sonya"
+     "ru": "Нежа",
+     "en": "Nezha"
     },
     {
      "id": "b",
-     "ru": "Юра",
-     "en": "Yura"
+     "ru": "Тедди",
+     "en": "Teddy"
+    },
+    {
+     "id": "c",
+     "ru": "Монька",
+     "en": "Monka"
     }
    ],
    "intro": [
+    {
+     "ru": "мама",
+     "en": "mom"
+    },
+    {
+     "ru": "папа",
+     "en": "dad"
+    },
     {
      "ru": "ягода",
      "en": "berry"
     },
     {
-     "ru": "сапог",
-     "en": "boot"
+     "ru": "карта",
+     "en": "map"
     },
     {
-     "ru": "телефон",
-     "en": "telephone"
+     "ru": "палка",
+     "en": "stick"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Юра, смотри, сколько ягод! Весь край болота в ягодах.",
-     "en": "Yura, look how many berries! The whole edge of the swamp is covered in them."
+     "ru": "Тедди, мы будем здесь. На краю болота сухо, и ягод много.",
+     "en": "Teddy, we'll stay here. At the edge of the swamp it's dry, and there are lots of berries."
     },
     {
      "s": "b",
-     "ru": "В июле их тут множество, а в болоте ещё больше. Я иду туда.",
-     "en": "In July there are loads of them here, and even more in the swamp. I'm going in."
+     "ru": "А у меня карта от Моньки. Ягоды там, в болоте.",
+     "en": "But I've got a map from Monka. The berries are over there, in the swamp."
+    },
+    {
+     "s": "c",
+     "ru": "Ой! Я не могу выйти!",
+     "en": "Oh! I can't get out!"
+    },
+    {
+     "s": "b",
+     "ru": "Мама, это Монька! Он в болоте!",
+     "en": "Mom, it's Monka! He's in the swamp!"
     },
     {
      "s": "a",
-     "ru": "Юра, не надо! Там вода, а здесь, на краю, сухо.",
-     "en": "Yura, don't! There's water there, and here at the edge it's dry."
+     "ru": "Монька, мы тут! Тедди, возьми палку!",
+     "en": "Monka, we're here! Teddy, grab a stick!"
+    },
+    {
+     "s": "c",
+     "ru": "Я хотел, чтобы в болоте были вы.",
+     "en": "I wanted you to be the ones in the swamp."
     },
     {
      "s": "b",
-     "ru": "Ой! Соня, я в воде, не могу выйти!",
-     "en": "Oh! Sonya, I'm in the water, I can't get out!"
+     "ru": "Монька, но почему? Мы же тебе ничего не делали.",
+     "en": "Monka, but why? We never did anything to you."
+    },
+    {
+     "s": "c",
+     "ru": "У Тедди есть мама и папа. А я один.",
+     "en": "Teddy has a mom and a dad. And I'm alone."
     },
     {
      "s": "a",
-     "ru": "Я же говорила! Иди ко мне, медленно.",
-     "en": "I told you! Come to me, slowly."
+     "ru": "Почему ты нам ничего не сказал?",
+     "en": "Why didn't you tell us anything?"
+    },
+    {
+     "s": "c",
+     "ru": "Думал, вы не хотите меня видеть, Нежа. Вот, это вам.",
+     "en": "I thought you didn't want to see me, Nezha. Here, this is for you."
     },
     {
      "s": "b",
-     "ru": "Все брюки грязные, и один сапог я оставил в болоте.",
-     "en": "My trousers are all dirty, and I left a boot in the swamp."
+     "ru": "Мама, смотри! Он набрал нам ягод!",
+     "en": "Mom, look! He picked berries for us!"
     },
     {
      "s": "a",
-     "ru": "Сапог жалко. Но ягод мы набрали много.",
-     "en": "Shame about the boot. But we've picked lots of berries."
+     "ru": "Иди к нам, здесь сухо. Ты же наш друг, Монька.",
+     "en": "Come over to us, it's dry here. You're our friend, Monka."
     },
     {
      "s": "b",
-     "ru": "Мне необходимо домой, Соня. Как я буду идти в одном сапоге?",
-     "en": "I need to get home, Sonya. How will I walk in one boot?"
+     "ru": "Я наберу папу. Скажу, что Монька с нами!",
+     "en": "I'll call Dad. I'll tell him Monka is with us!"
     },
     {
-     "s": "a",
-     "ru": "Набери брата. Скажи ему, что мы у болота, около старого камня.",
-     "en": "Call your brother. Tell him we're at the swamp, by the old stone."
-    },
-    {
-     "s": "b",
-     "ru": "Не могу, мой телефон был в воде. Он не работает.",
-     "en": "I can't, my phone was in the water. It doesn't work."
-    },
-    {
-     "s": "a",
-     "ru": "Ну, Юра! Тогда я наберу. А ты пока считай ягоды.",
-     "en": "Oh, Yura! Then I'll call. And you count the berries meanwhile."
-    },
-    {
-     "s": "b",
-     "ru": "Считать? Их тут множество!",
-     "en": "Count them? There are loads of them here!"
+     "s": "c",
+     "ru": "С вами? Такого праздника у меня ещё не было.",
+     "en": "With you? I've never had a day like this."
     }
    ],
    "questions": [
     {
-     "ask": "Where are Sonya and Yura?",
+     "ask": "Where does Nezha want to stay?",
      "options": [
-      "At the edge of a swamp",
-      "At the edge of a river",
-      "In a field near home",
-      "On a road in the town"
+      "At the dry edge of the swamp",
+      "In the wet middle of the swamp",
+      "On a dry hill in the forest",
+      "By the river near the house"
      ],
      "answer": 0
     },
     {
-     "ask": "What month is it?",
+     "ask": "Whose map does Teddy have?",
      "options": [
-      "July",
-      "June",
-      "May",
-      "August"
+      "Monka's",
+      "Belka's",
+      "Misha's",
+      "Yarik's"
      ],
      "answer": 0
     },
     {
-     "ask": "What happens when Yura goes into the swamp?",
+     "ask": "What happens to Monka?",
      "options": [
-      "He falls into the water",
-      "He finds more berries",
-      "He loses the berry bag",
-      "He meets an old friend"
+      "He gets stuck in the swamp",
+      "He gets lost in the forest",
+      "He falls asleep on a stone",
+      "He loses his map in water"
      ],
      "answer": 0
     },
     {
-     "ask": "Why can't Yura call his brother?",
+     "ask": "Why did Monka play the trick?",
      "options": [
-      "His phone got wet in the swamp",
-      "He does not know the number",
-      "There is no signal in the forest",
-      "His brother is busy at work"
+      "He has nobody to be with",
+      "He wanted all the berries",
+      "He wanted the dry place",
+      "He was angry with Teddy"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Sonya give Yura to do while she calls?",
+     "ask": "How does the day end?",
      "options": [
-      "Count the berries",
-      "Find his lost boot",
-      "Wash his trousers",
-      "Pick more berries"
+      "Monka joins the family picnic",
+      "Monka goes home in wet boots",
+      "The family goes home early",
+      "Yarik takes Monka to a doctor"
      ],
      "answer": 0
     }

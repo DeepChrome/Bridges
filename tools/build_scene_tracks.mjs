@@ -31,6 +31,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, readdirSync
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { durationMs } from "./mp3.mjs";
+import { castByName } from "../core/cast.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CLIPS = join(ROOT, "data", "scenario_audio");
@@ -117,9 +118,26 @@ function measureLevel(file) {
   } catch (e) { return null; }
 }
 
-function levelled(src, id) {
-  const out = join(LEVELS, `${id}.mp3`);
+/* A character's voice, shifted (core/cast.js `tone`): `asetrate` raises or
+   lowers pitch and formants together — a small creature's voice, not the same
+   voice sung higher — and `atempo` then sets the pace independently. Done to
+   a work copy before levelling, so the level is measured on what is heard. */
+function toned(src, id, tone) {
+  if (!tone || (tone.pitch === 1 && tone.tempo === 1)) return src;
+  const out = join(LEVELS, `${id}.p${tone.pitch}-t${tone.tempo}.wav`);
   if (existsSync(out)) return out;
+  const rate = 24000;
+  ff("ffmpeg", ["-y", "-i", src, "-af",
+    `aresample=${rate},asetrate=${Math.round(rate * tone.pitch)},aresample=${rate},atempo=${(tone.tempo / tone.pitch).toFixed(4)}`,
+    "-ac", "1", out]);
+  return existsSync(out) ? out : src;
+}
+
+function levelled(src, id, tone) {
+  const key = tone && (tone.pitch !== 1 || tone.tempo !== 1) ? `${id}.p${tone.pitch}-t${tone.tempo}` : id;
+  const out = join(LEVELS, `${key}.mp3`);
+  if (existsSync(out)) return out;
+  src = toned(src, id, tone);
   const m = measureLevel(src);
   // Unmeasurable (a clip that is silence, or ffmpeg refusing it): ship what
   // was bought rather than ship nothing, and let the QA tool say so.
@@ -180,7 +198,12 @@ function main() {
     if (!script) { missing++; continue; }
     const bought = entry.lines.map((l) => join(CLIPS, `${l.id}.mp3`));
     if (bought.some((f) => !existsSync(f))) { missing++; continue; }
-    const files = raw ? bought : entry.lines.map((l, i) => levelled(bought[i], l.id));
+    const toneOf = (s) => {
+      const who = (script.cast || []).find((c) => c.id === s);
+      const c = who && castByName[who.ru];
+      return c && c.tone;
+    };
+    const files = raw ? bought : entry.lines.map((l, i) => levelled(bought[i], l.id, toneOf(l.s)));
     done++;
     process.stdout.write(`\r  ${done} of ${Object.keys(manifest.lessons).length} lessons`
                          + (done === Object.keys(manifest.lessons).length ? "\n" : ""));
@@ -219,7 +242,9 @@ function main() {
 
   // A lesson that lost its script, or a renamed key, must not leave a track behind.
   for (const f of readdirSync(TRACKS)) if (!kept.has(f)) rmSync(join(TRACKS, f));
-  rmSync(WORK, { recursive: true, force: true });
+  /* The scratch files only. `levelled/` is the cache the comment above LEVELS
+     promises; deleting all of WORK here threw it away on every run. */
+  for (const f of ["list.txt", "gap.mp3"]) rmSync(join(WORK, f), { force: true });
 
   rows.sort((a, b) => (a.key < b.key ? -1 : 1));
   const body = rows.map((r) =>

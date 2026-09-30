@@ -2,7 +2,7 @@
  "chapter": 3,
  "name": "The Little Words",
  "lessons": {
-  "core3:2": {
+  "core3:0": {
    "title": "The hat on the roof",
    "cast": [
     {
@@ -112,8 +112,8 @@
     },
     {
      "s": "c",
-     "ru": "А можно мне с вами в ресторан?",
-     "en": "Can I come to the restaurant with you?"
+     "ru": "А можно мне тоже с вами в ресторан?",
+     "en": "Can I come to the restaurant with you too?"
     },
     {
      "s": "a",
@@ -174,7 +174,7 @@
     }
    ]
   },
-  "core3:4": {
+  "core3:3": {
    "title": "Dad's missing tie",
    "cast": [
     {

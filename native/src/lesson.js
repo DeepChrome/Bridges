@@ -36,9 +36,8 @@ import { L, linesWith } from "./data";
 import { pictureOf } from "./pictures";
 import { firstSense } from "@core/util";
 import { soundTip } from "@core/alphabet";
-import { isIrregular } from "@core/facts";
 import { hasRealAudio } from "./audio";
-import { VideoLines } from "./prep";
+import { VideoLines, WordSections, WordTags } from "./prep";
 
 /* How big a word can be drawn in the head band, by how long it is. */
 const bandSize = (word) => {
@@ -70,8 +69,8 @@ export function StepBar({ at, total }) {
 export function WordList({ unit, words, at, total }) {
   const t = useTheme();
   const head = useEnter([unit.id, at]);
-  const odd = words.filter((i) => L[i] && isIrregular(L[i]));
-  const regular = words.filter((i) => !odd.includes(i));
+  const byWord = new Map(words.map((i) => [L[i].b, i]));
+  let n = 0;   // the stagger runs down the whole list, across the sections
   return (
     <>
       <StepBar at={at} total={total} />
@@ -85,27 +84,16 @@ export function WordList({ unit, words, at, total }) {
           <Muted numberOfLines={1}>{unit.name}</Muted>
         </View>
       </Animated.View>
-      {/* The words that break the rules, grouped under their own heading
-          (the owner, 2026-09-29: "when necessary, they should be grouped when
-          they are encountered in lesson plans"): met together, and met as
-          the exceptions they are rather than one among five. */}
-      <List>
-        {regular.map((i, k) => (
-          <WordRow key={i} i={i} unit={unit} delay={60 + k * 45} />
-        ))}
-      </List>
-      {odd.length ? (
-        <View testID="vocab-irregular" style={{ marginTop: regular.length ? 18 : 0 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
-            <Pill tone="irregular">Irregular</Pill>
-          </View>
-          <List>
-            {odd.map((i, k) => (
-              <WordRow key={i} i={i} unit={unit} delay={60 + (regular.length + k) * 45} />
-            ))}
-          </List>
-        </View>
-      ) : null}
+      {/* In sections and groups of related words, as every list is
+          (prep.js WordSections). The words that break the rules carry a tag
+          rather than a section of their own (the owner, 2026-09-30). */}
+      <WordSections words={words.map((i) => L[i].b)} testID="vocab-cluster" renderWords={(ws) => (
+        <List>
+          {ws.map((b) => (
+            <WordRow key={b} i={byWord.get(b)} unit={unit} delay={60 + (n++) * 45} />
+          ))}
+        </List>
+      )} />
     </>
   );
 }
@@ -140,7 +128,10 @@ function WordRow({ i, unit, last, delay }) {
           </View>
         )}
         <View style={{ flex: 1 }}>
-          <Text style={{ color: t.ink, fontSize: T.head + 2, fontWeight: "600" }}>{word.w}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <Text style={{ color: t.ink, fontSize: T.head + 2, fontWeight: "600" }}>{word.w}</Text>
+            <WordTags e={word} />
+          </View>
           <Muted numberOfLines={1}>{firstSense(word)}</Muted>
         </View>
         <Speaker text={word.b} size={36} />
@@ -285,6 +276,7 @@ export function WordCard({ i, at, total, unit, onMoment }) {
             <View style={{ flexDirection: "row", gap: 6, marginTop: 12, flexWrap: "wrap",
                            justifyContent: "center" }}>
               {tags.map((x) => <Pill key={x}>{x}</Pill>)}
+              <WordTags e={w} />
             </View>
           ) : null}
 

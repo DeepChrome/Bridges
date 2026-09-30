@@ -2,7 +2,7 @@
  "chapter": 6,
  "name": "Before & After",
  "lessons": {
-  "core6:2": {
+  "core6:1": {
    "title": "Snacks for the concert",
    "cast": [
     {
@@ -45,8 +45,8 @@
     },
     {
      "s": "b",
-     "ru": "Но это не обед. Это орехи, всего несколько.",
-     "en": "But it isn't lunch. It's nuts, only a few."
+     "ru": "Но это не обед. Это маленькие орехи, всего несколько.",
+     "en": "But it isn't lunch. It's little nuts, only a few."
     },
     {
      "s": "c",

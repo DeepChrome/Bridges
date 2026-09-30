@@ -1,0 +1,3111 @@
+{
+ "core1": [
+  {
+   "kind": "verb",
+   "name": "Basic verbs",
+   "words": [
+    "быть",
+    "мочь",
+    "хотеть",
+    "знать",
+    "говорить"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Eating out",
+   "words": [
+    "ресторан",
+    "пицца",
+    "борщ"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Greeting",
+   "words": [
+    "привет"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Pronouns",
+   "words": [
+    "я",
+    "ты",
+    "он",
+    "она",
+    "мы",
+    "вы",
+    "они"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Yes and no",
+   "words": [
+    "да",
+    "нет",
+    "не"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Question words",
+   "words": [
+    "что",
+    "кто",
+    "как"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Prepositions",
+   "words": [
+    "в",
+    "на",
+    "с"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Joining words",
+   "words": [
+    "и",
+    "а"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Pointing",
+   "words": [
+    "это",
+    "тут"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Thanks",
+   "words": [
+    "спасибо"
+   ]
+  }
+ ],
+ "family": [
+  {
+   "kind": "noun",
+   "name": "Parents and grandparents",
+   "words": [
+    "мама",
+    "бабушка",
+    "дедушка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Husband and wife",
+   "words": [
+    "муж",
+    "жена"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Brother and sister",
+   "words": [
+    "брат",
+    "сестра"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Children",
+   "words": [
+    "сын",
+    "дочь",
+    "ребёнок"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "People",
+   "words": [
+    "семья",
+    "человек"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Photos",
+   "words": [
+    "фотография"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Life",
+   "words": [
+    "жить",
+    "любить",
+    "родиться",
+    "расти",
+    "звать"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "My and your",
+   "words": [
+    "мой",
+    "твой"
+   ]
+  }
+ ],
+ "food": [
+  {
+   "kind": "verb",
+   "name": "Eating and drinking",
+   "words": [
+    "пить",
+    "обедать",
+    "ужинать",
+    "пробовать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Cooking and ordering",
+   "words": [
+    "готовить",
+    "заказать"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Drinks",
+   "words": [
+    "вода",
+    "чай",
+    "кофе",
+    "молоко"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Food",
+   "words": [
+    "еда",
+    "хлеб",
+    "мясо",
+    "рыба",
+    "суп"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Tableware",
+   "words": [
+    "тарелка",
+    "ложка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Colour",
+   "words": [
+    "цвет"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Describing food",
+   "words": [
+    "вкусный",
+    "горячий"
+   ]
+  }
+ ],
+ "core2": [
+  {
+   "kind": "noun",
+   "name": "Around town",
+   "words": [
+    "дом",
+    "машина",
+    "университет",
+    "банк",
+    "офис",
+    "бар"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "People and pets",
+   "words": [
+    "папа",
+    "американец",
+    "молодец",
+    "кот"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Study and time",
+   "words": [
+    "вопрос",
+    "курс",
+    "раз"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Seeing and thinking",
+   "words": [
+    "видеть",
+    "посмотреть",
+    "думать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Saying and doing",
+   "words": [
+    "сказать",
+    "делать"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "This and all",
+   "words": [
+    "этот",
+    "такой",
+    "весь"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Character and origin",
+   "words": [
+    "добрый",
+    "русский"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Connecting words",
+   "words": [
+    "но",
+    "у",
+    "есть"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Degree and amount",
+   "words": [
+    "очень",
+    "все"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Time and manner",
+   "words": [
+    "сейчас",
+    "хорошо"
+   ]
+  }
+ ],
+ "tech": [
+  {
+   "kind": "noun",
+   "name": "Devices",
+   "words": [
+    "телефон",
+    "компьютер",
+    "телевизор",
+    "камера",
+    "радио"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Screen and online",
+   "words": [
+    "интернет",
+    "сайт",
+    "программа",
+    "экран",
+    "кнопка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Media",
+   "words": [
+    "газета",
+    "журнал",
+    "статья",
+    "фото",
+    "сообщение"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Light",
+   "words": [
+    "свет"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Doing and liking",
+   "words": [
+    "сделать",
+    "получиться",
+    "нравиться"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Describing",
+   "words": [
+    "новый"
+   ]
+  }
+ ],
+ "home": [
+  {
+   "kind": "noun",
+   "name": "Rooms",
+   "words": [
+    "комната",
+    "кухня",
+    "квартира",
+    "этаж"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Furniture",
+   "words": [
+    "стол",
+    "стул",
+    "кровать",
+    "диван",
+    "шкаф"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Parts of a room",
+   "words": [
+    "окно",
+    "дверь",
+    "стена"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Things",
+   "words": [
+    "вещь"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Body positions",
+   "words": [
+    "сидеть",
+    "лежать",
+    "спать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Giving and seeing",
+   "words": [
+    "давать",
+    "выглядеть"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Size",
+   "words": [
+    "большой"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Relative word",
+   "words": [
+    "который"
+   ]
+  }
+ ],
+ "core3": [
+  {
+   "kind": "verb",
+   "name": "Common verbs",
+   "words": [
+    "идти",
+    "смотреть",
+    "найти",
+    "работать",
+    "казаться"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "University people",
+   "words": [
+    "студент",
+    "студентка",
+    "профессор",
+    "доктор"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Pointing out",
+   "words": [
+    "какой",
+    "тот",
+    "другой",
+    "свой"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Numbers",
+   "words": [
+    "один",
+    "два",
+    "три"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Prepositions",
+   "words": [
+    "к",
+    "из",
+    "для",
+    "о",
+    "по",
+    "за"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Linking words",
+   "words": [
+    "если",
+    "когда",
+    "или",
+    "чтобы",
+    "то"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Time words",
+   "words": [
+    "сегодня",
+    "уже",
+    "ещё"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Here and there",
+   "words": [
+    "вот",
+    "там"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Emphasis",
+   "words": [
+    "ну",
+    "конечно",
+    "просто",
+    "же"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "So and also",
+   "words": [
+    "так",
+    "тоже",
+    "можно"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Possessive",
+   "words": [
+    "наш"
+   ]
+  }
+ ],
+ "city": [
+  {
+   "kind": "verb",
+   "name": "Going places",
+   "words": [
+    "ходить",
+    "поехать",
+    "пройти"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Finding",
+   "words": [
+    "искать",
+    "находиться"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Town places",
+   "words": [
+    "город",
+    "центр",
+    "улица",
+    "квартал"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Shops and services",
+   "words": [
+    "магазин",
+    "аптека",
+    "почта",
+    "школа",
+    "кино"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Transport",
+   "words": [
+    "автобус",
+    "метро",
+    "станция",
+    "вокзал",
+    "дорога"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Number",
+   "words": [
+    "номер"
+   ]
+  }
+ ],
+ "time": [
+  {
+   "kind": "noun",
+   "name": "Units of time",
+   "words": [
+    "секунда",
+    "минута",
+    "час",
+    "неделя",
+    "месяц",
+    "год"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Parts of the day",
+   "words": [
+    "утро",
+    "день",
+    "вечер",
+    "ночь"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Time in general",
+   "words": [
+    "время",
+    "пора"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Numbers and amounts",
+   "words": [
+    "пять",
+    "число",
+    "половина",
+    "тысяча"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Ordinal numbers",
+   "words": [
+    "первый",
+    "второй",
+    "третий"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Cost",
+   "words": [
+    "стоить"
+   ]
+  }
+ ],
+ "core4": [
+  {
+   "kind": "verb",
+   "name": "Going and carrying",
+   "words": [
+    "приходить",
+    "ездить",
+    "летать",
+    "носить"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Getting and leaving",
+   "words": [
+    "получать",
+    "оставлять"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Country and world",
+   "words": [
+    "страна",
+    "Россия",
+    "мир",
+    "история"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "People",
+   "words": [
+    "друг",
+    "дед"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Winter",
+   "words": [
+    "декабрь",
+    "январь",
+    "мороз"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Gifts",
+   "words": [
+    "подарок",
+    "мешок"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Qualities",
+   "words": [
+    "хороший",
+    "старый",
+    "красный"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Which one",
+   "words": [
+    "разный",
+    "каждый",
+    "некоторый",
+    "сам"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Place words",
+   "words": [
+    "где",
+    "здесь",
+    "дома"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Prepositions",
+   "words": [
+    "от",
+    "под",
+    "перед",
+    "до"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Amounts",
+   "words": [
+    "много",
+    "больше",
+    "всего",
+    "только"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Time words",
+   "words": [
+    "теперь",
+    "обычно"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Link words",
+   "words": [
+    "поэтому",
+    "даже",
+    "бы"
+   ]
+  }
+ ],
+ "travel": [
+  {
+   "kind": "verb",
+   "name": "Arriving and leaving",
+   "words": [
+    "прийти",
+    "приехать",
+    "уйти",
+    "отправляться"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Ways of moving",
+   "words": [
+    "ехать",
+    "плыть"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Buying",
+   "words": [
+    "купить",
+    "платить"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Vehicles",
+   "words": [
+    "автомобиль",
+    "такси",
+    "поезд",
+    "самолёт",
+    "корабль",
+    "лодка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Travel documents",
+   "words": [
+    "билет",
+    "паспорт",
+    "карта",
+    "чемодан"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Trips",
+   "words": [
+    "поездка",
+    "путешествие"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "People and places",
+   "words": [
+    "турист",
+    "водитель",
+    "аэропорт",
+    "отель"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Help and media",
+   "words": [
+    "помощь",
+    "видео"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Useful qualities",
+   "words": [
+    "нужный",
+    "полезный",
+    "свободный"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Emphasis",
+   "words": [
+    "самый"
+   ]
+  }
+ ],
+ "speech": [
+  {
+   "kind": "verb",
+   "name": "Talking",
+   "words": [
+    "разговаривать",
+    "поговорить",
+    "договариваться",
+    "договориться"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Asking and answering",
+   "words": [
+    "спросить",
+    "ответить",
+    "просить",
+    "попросить"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Telling and showing",
+   "words": [
+    "рассказывать",
+    "рассказать",
+    "объяснять",
+    "показать",
+    "повторить"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Listening and understanding",
+   "words": [
+    "понимать",
+    "слушать",
+    "слышать",
+    "услышать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Phoning",
+   "words": [
+    "звонить",
+    "позвонить"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Written language",
+   "words": [
+    "слово",
+    "фраза",
+    "буква",
+    "письмо"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Conversation",
+   "words": [
+    "разговор",
+    "дискуссия"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Business",
+   "words": [
+    "дело"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Group",
+   "words": [
+    "группа"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Music",
+   "words": [
+    "музыка"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Adjectives",
+   "words": [
+    "следующий",
+    "согласный"
+   ]
+  }
+ ],
+ "clothes": [
+  {
+   "kind": "noun",
+   "name": "Clothes",
+   "words": [
+    "одежда",
+    "рубашка",
+    "майка",
+    "свитер",
+    "платье",
+    "брюки",
+    "джинсы",
+    "костюм",
+    "пиджак",
+    "куртка",
+    "пальто"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Footwear",
+   "words": [
+    "обувь",
+    "ботинок",
+    "сапог"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Accessories",
+   "words": [
+    "карман",
+    "галстук",
+    "кольцо"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Truth and childhood",
+   "words": [
+    "правда",
+    "детство"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Getting dressed",
+   "words": [
+    "одеваться",
+    "надеть",
+    "снять"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Feeling and going",
+   "words": [
+    "чувствовать",
+    "выходить"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Looks",
+   "words": [
+    "красивый",
+    "высокий",
+    "короткий"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Qualities",
+   "words": [
+    "любимый",
+    "тёплый",
+    "обычный"
+   ]
+  }
+ ],
+ "core5": [
+  {
+   "kind": "verb",
+   "name": "Earning",
+   "words": [
+    "зарабатывать",
+    "получить"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Spending",
+   "words": [
+    "тратить",
+    "заплатить",
+    "оплачивать",
+    "экономить"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Keeping and putting",
+   "words": [
+    "хранить",
+    "держать",
+    "положить",
+    "класть",
+    "снимать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Change and meaning",
+   "words": [
+    "поменять",
+    "перевести",
+    "стать",
+    "значить"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Money",
+   "words": [
+    "деньги",
+    "рубль",
+    "счёт"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Work",
+   "words": [
+    "работа",
+    "фирма",
+    "продукт"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Life and place",
+   "words": [
+    "жизнь",
+    "место"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Size",
+   "words": [
+    "мелкий"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "How often",
+   "words": [
+    "всегда",
+    "часто",
+    "иногда"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Time",
+   "words": [
+    "потом",
+    "пока"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Need",
+   "words": [
+    "нужно",
+    "надо"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Amount",
+   "words": [
+    "достаточно",
+    "более"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Questions",
+   "words": [
+    "почему",
+    "ли"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Pronouns",
+   "words": [
+    "что-то",
+    "себя"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Linking words",
+   "words": [
+    "наверное",
+    "вообще",
+    "также"
+   ]
+  }
+ ],
+ "work": [
+  {
+   "kind": "verb",
+   "name": "Wait and start",
+   "words": [
+    "ждать",
+    "начать"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "People at work",
+   "words": [
+    "работник",
+    "рабочий",
+    "сотрудник",
+    "коллега",
+    "начальник",
+    "директор"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Professions",
+   "words": [
+    "врач",
+    "преподаватель",
+    "медсестра"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Work and tasks",
+   "words": [
+    "задание",
+    "служба",
+    "профессия",
+    "деятельность",
+    "встреча"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Money and goods",
+   "words": [
+    "зарплата",
+    "доллар",
+    "товар"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Buildings",
+   "words": [
+    "завод",
+    "здание",
+    "клуб"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Language",
+   "words": [
+    "язык"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Part",
+   "words": [
+    "часть"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Rich and poor",
+   "words": [
+    "богатый",
+    "бедный",
+    "дорогой"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Describing work",
+   "words": [
+    "интересный",
+    "небольшой",
+    "бухгалтерский"
+   ]
+  }
+ ],
+ "business": [
+  {
+   "kind": "verb",
+   "name": "Buying and selling",
+   "words": [
+    "покупать",
+    "продавать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Deciding and showing",
+   "words": [
+    "решить",
+    "показывать"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Money",
+   "words": [
+    "цена",
+    "стоимость",
+    "евро",
+    "доход",
+    "налог",
+    "долг",
+    "кредит"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Business",
+   "words": [
+    "компания",
+    "бизнес",
+    "рынок",
+    "клиент",
+    "сделка",
+    "реклама",
+    "изделие"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Economy",
+   "words": [
+    "экономика",
+    "бюджет",
+    "акция",
+    "фонд"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Problem",
+   "words": [
+    "проблема"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Business and finance",
+   "words": [
+    "деловой",
+    "финансовый",
+    "экономический"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Describing things",
+   "words": [
+    "лучший",
+    "последний",
+    "целый",
+    "личный"
+   ]
+  }
+ ],
+ "emotion": [
+  {
+   "kind": "verb",
+   "name": "Mind and memory",
+   "words": [
+    "понять",
+    "подумать",
+    "узнать",
+    "помнить",
+    "забыть",
+    "обсуждать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Liking and fearing",
+   "words": [
+    "понравиться",
+    "хотеться",
+    "бояться",
+    "волноваться",
+    "гордиться",
+    "ненавидеть"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Showing feelings",
+   "words": [
+    "смеяться",
+    "плакать",
+    "скучать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Doing things",
+   "words": [
+    "пойти",
+    "проводить"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Feelings",
+   "words": [
+    "радость",
+    "любовь",
+    "страх",
+    "смех",
+    "настроение"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Thoughts",
+   "words": [
+    "идея",
+    "мнение"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Friend",
+   "words": [
+    "подруга"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Film",
+   "words": [
+    "фильм"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Moods",
+   "words": [
+    "счастливый",
+    "весёлый",
+    "грустный",
+    "злой"
+   ]
+  }
+ ],
+ "core6": [
+  {
+   "kind": "verb",
+   "name": "Doing things",
+   "words": [
+    "использовать",
+    "ставить",
+    "смочь"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Ending and leaving",
+   "words": [
+    "окончить",
+    "выйти",
+    "лечь"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Study",
+   "words": [
+    "урок",
+    "книга",
+    "предложение",
+    "пример",
+    "ошибка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Situations",
+   "words": [
+    "случай",
+    "ситуация",
+    "принцип",
+    "вид",
+    "форма"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Meals and outings",
+   "words": [
+    "завтрак",
+    "обед",
+    "концерт",
+    "граница"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Size and amount",
+   "words": [
+    "маленький",
+    "многие"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Kinds",
+   "words": [
+    "любой",
+    "должный"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Time order",
+   "words": [
+    "сначала",
+    "тогда",
+    "после"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Prepositions",
+   "words": [
+    "без",
+    "через",
+    "об"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Nothing and some",
+   "words": [
+    "ничего",
+    "ни",
+    "несколько"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Emphasis",
+   "words": [
+    "вместе",
+    "именно",
+    "обязательно"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Comparing and linking",
+   "words": [
+    "лучше",
+    "тем",
+    "хотя"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Your",
+   "words": [
+    "ваш"
+   ]
+  }
+ ],
+ "body": [
+  {
+   "kind": "noun",
+   "name": "Head and face",
+   "words": [
+    "голова",
+    "лицо",
+    "глаз",
+    "рот",
+    "зуб",
+    "волос",
+    "мозг"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Arms and legs",
+   "words": [
+    "рука",
+    "палец",
+    "плечо",
+    "нога",
+    "колено"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Torso",
+   "words": [
+    "тело",
+    "грудь",
+    "спина",
+    "живот",
+    "сердце"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Skin and blood",
+   "words": [
+    "кожа",
+    "кровь"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Health",
+   "words": [
+    "здоровье",
+    "боль",
+    "сила",
+    "сон"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Illness and care",
+   "words": [
+    "болеть",
+    "лечить",
+    "мёрзнуть"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Writing",
+   "words": [
+    "писать"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Health states",
+   "words": [
+    "здоровый",
+    "больной",
+    "головной"
+   ]
+  }
+ ],
+ "animals": [
+  {
+   "kind": "noun",
+   "name": "Animals",
+   "words": [
+    "животное",
+    "порода"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Pets",
+   "words": [
+    "собака",
+    "кошка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Farm animals",
+   "words": [
+    "корова",
+    "лошадь",
+    "конь",
+    "бык",
+    "коза",
+    "свинья",
+    "курица"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Wild animals",
+   "words": [
+    "волк",
+    "медведь",
+    "слон",
+    "обезьяна",
+    "мышь",
+    "мышка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Birds and insects",
+   "words": [
+    "птица",
+    "бабочка",
+    "насекомое"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Animal parts",
+   "words": [
+    "лапа",
+    "крыло"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Animal homes",
+   "words": [
+    "клетка",
+    "гнездо"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Food",
+   "words": [
+    "блин"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Actions",
+   "words": [
+    "кормить",
+    "съесть",
+    "бегать"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Hungry",
+   "words": [
+    "голодный"
+   ]
+  }
+ ],
+ "science": [
+  {
+   "kind": "verb",
+   "name": "Write and help",
+   "words": [
+    "написать",
+    "помочь"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Measuring",
+   "words": [
+    "измерить",
+    "мерить"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Sciences",
+   "words": [
+    "наука",
+    "математика",
+    "химия",
+    "дисциплина",
+    "теория"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "News and topics",
+   "words": [
+    "новость",
+    "событие",
+    "тема"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Discoveries",
+   "words": [
+    "исследование",
+    "открытие",
+    "изобретение"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Science terms",
+   "words": [
+    "энергия",
+    "температура",
+    "элемент",
+    "лаборатория"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Space",
+   "words": [
+    "планета",
+    "вселенная",
+    "пространство",
+    "космодром"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Places",
+   "words": [
+    "Москва"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Science adjectives",
+   "words": [
+    "учёный",
+    "химический",
+    "космический",
+    "исследовательский"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Important, Russian",
+   "words": [
+    "важный",
+    "российский"
+   ]
+  }
+ ],
+ "core7": [
+  {
+   "kind": "verb",
+   "name": "Feeling and testing",
+   "words": [
+    "надеяться",
+    "испытывать",
+    "вызывать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Starting and taking",
+   "words": [
+    "начинать",
+    "взять",
+    "оставить",
+    "провести"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Having and being",
+   "words": [
+    "иметь",
+    "бывать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Seeing and counting",
+   "words": [
+    "увидеть",
+    "считать"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Emotions",
+   "words": [
+    "эмоция",
+    "удивление",
+    "волнение"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Nature",
+   "words": [
+    "лес",
+    "камень",
+    "гриб"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Community",
+   "words": [
+    "общество",
+    "сообщество"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Ends and sides",
+   "words": [
+    "конец",
+    "сторона"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Size and importance",
+   "words": [
+    "главный",
+    "базовый",
+    "огромный"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Reactions",
+   "words": [
+    "пожалуйста",
+    "ладно",
+    "интересно",
+    "красиво"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Degree",
+   "words": [
+    "совсем",
+    "сильно",
+    "прямо",
+    "немножко",
+    "почти"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Time and order",
+   "words": [
+    "никогда",
+    "как-то",
+    "дальше"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Some and how many",
+   "words": [
+    "кто-то",
+    "сколько"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Prepositions",
+   "words": [
+    "про",
+    "при"
+   ]
+  }
+ ],
+ "school": [
+  {
+   "kind": "verb",
+   "name": "Studying",
+   "words": [
+    "учиться",
+    "изучать",
+    "учить",
+    "выучить",
+    "научиться"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Reading and writing",
+   "words": [
+    "читать",
+    "прочитать",
+    "записать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Choosing",
+   "words": [
+    "брать",
+    "выбирать",
+    "выбрать"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "School people",
+   "words": [
+    "учитель",
+    "учительница",
+    "ребята"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "School supplies",
+   "words": [
+    "учебник",
+    "тетрадь",
+    "ручка",
+    "карандаш",
+    "бумага",
+    "страница"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Lessons",
+   "words": [
+    "класс",
+    "лекция",
+    "английский"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Knowledge",
+   "words": [
+    "знание",
+    "ответ",
+    "смысл"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Of school and home",
+   "words": [
+    "школьный",
+    "домашний"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Qualities",
+   "words": [
+    "настоящий",
+    "тяжёлый"
+   ]
+  }
+ ],
+ "art": [
+  {
+   "kind": "verb",
+   "name": "Performing and creating",
+   "words": [
+    "играть",
+    "петь",
+    "танцевать",
+    "рисовать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Helping",
+   "words": [
+    "помогать"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Arts and culture",
+   "words": [
+    "культура",
+    "театр",
+    "литература",
+    "выставка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Artworks",
+   "words": [
+    "картина",
+    "песня",
+    "роман",
+    "произведение",
+    "творчество"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Artists",
+   "words": [
+    "художник",
+    "музыкант",
+    "певец",
+    "актриса",
+    "писатель",
+    "автор",
+    "поэт"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Music",
+   "words": [
+    "гитара",
+    "голос"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Advice and birth",
+   "words": [
+    "совет",
+    "рождение"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Praise and fame",
+   "words": [
+    "прекрасный",
+    "популярный"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Kinds of things",
+   "words": [
+    "театральный",
+    "иностранный",
+    "прямой"
+   ]
+  }
+ ],
+ "nature": [
+  {
+   "kind": "noun",
+   "name": "Seasons",
+   "words": [
+    "зима",
+    "весна",
+    "лето",
+    "осень"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Weather",
+   "words": [
+    "погода",
+    "снег",
+    "ветер",
+    "градус"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "In the sky",
+   "words": [
+    "солнце",
+    "звезда"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Water",
+   "words": [
+    "река",
+    "море",
+    "озеро",
+    "берег"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Land",
+   "words": [
+    "земля",
+    "гора",
+    "поле"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Plants",
+   "words": [
+    "дерево",
+    "трава",
+    "сад"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Free time",
+   "words": [
+    "гулять",
+    "отдыхать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Giving and going on",
+   "words": [
+    "дать",
+    "продолжать"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Weather descriptions",
+   "words": [
+    "холодный",
+    "солнечный",
+    "сильный"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Qualities",
+   "words": [
+    "приятный",
+    "долгий",
+    "общий"
+   ]
+  }
+ ],
+ "core8": [
+  {
+   "kind": "verb",
+   "name": "Doing things",
+   "words": [
+    "заниматься",
+    "добавлять",
+    "проходить"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Becoming and staying",
+   "words": [
+    "становиться",
+    "получаться",
+    "оставаться"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Communicating",
+   "words": [
+    "общаться",
+    "поддерживать"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Food",
+   "words": [
+    "блюдо",
+    "рецепт",
+    "картошка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Celebrations",
+   "words": [
+    "праздник",
+    "повод"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Ideas",
+   "words": [
+    "упражнение",
+    "секрет",
+    "образ"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Holiday and food",
+   "words": [
+    "праздничный",
+    "сливочный",
+    "московский"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Basic and secret",
+   "words": [
+    "основной",
+    "секретный"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Pronouns",
+   "words": [
+    "оно",
+    "никто",
+    "какой-то"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Place",
+   "words": [
+    "рядом",
+    "между",
+    "туда"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Degree",
+   "words": [
+    "особенно",
+    "особо",
+    "слишком",
+    "скорее",
+    "примерно"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Time",
+   "words": [
+    "постоянно",
+    "долго",
+    "зимой"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Linking words",
+   "words": [
+    "итак",
+    "либо",
+    "во-первых"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Bad and forbidden",
+   "words": [
+    "нельзя",
+    "плохо"
+   ]
+  }
+ ],
+ "sport": [
+  {
+   "kind": "verb",
+   "name": "Winning",
+   "words": [
+    "выиграть",
+    "победить",
+    "завоевать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Ball actions",
+   "words": [
+    "бросать",
+    "ловить",
+    "падать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Swimming",
+   "words": [
+    "плавать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Memory",
+   "words": [
+    "вспоминать",
+    "забывать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Coming and starting",
+   "words": [
+    "начаться",
+    "вернуться"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Sports",
+   "words": [
+    "спорт",
+    "футбол",
+    "баскетбол",
+    "теннис",
+    "плавание",
+    "бег"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "People in sport",
+   "words": [
+    "спортсмен",
+    "игрок",
+    "команда"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Competitions",
+   "words": [
+    "игра",
+    "матч",
+    "чемпионат"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Places and things",
+   "words": [
+    "стадион",
+    "бассейн",
+    "мяч",
+    "игрушка"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Describing",
+   "words": [
+    "особенный",
+    "культурный",
+    "олимпийский"
+   ]
+  }
+ ],
+ "politics": [
+  {
+   "kind": "verb",
+   "name": "Happening",
+   "words": [
+    "происходить",
+    "появиться"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Wish and imagine",
+   "words": [
+    "захотеть",
+    "представить"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Ruling",
+   "words": [
+    "править"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Country",
+   "words": [
+    "государство",
+    "родина",
+    "республика"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "People",
+   "words": [
+    "народ",
+    "гражданин",
+    "девушка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Government",
+   "words": [
+    "правительство",
+    "власть",
+    "парламент",
+    "партия",
+    "конституция"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Officials",
+   "words": [
+    "президент",
+    "министр",
+    "чиновник"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Society",
+   "words": [
+    "система",
+    "свобода",
+    "уровень"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Nation and state",
+   "words": [
+    "государственный",
+    "национальный",
+    "отечественный",
+    "советский"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Public life",
+   "words": [
+    "политический",
+    "общественный",
+    "официальный",
+    "избирательный"
+   ]
+  }
+ ],
+ "core9": [
+  {
+   "kind": "describing",
+   "name": "Colours",
+   "words": [
+    "белый",
+    "чёрный",
+    "зелёный",
+    "яркий",
+    "светлый"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Fashion styles",
+   "words": [
+    "модный",
+    "классический",
+    "спортивный",
+    "удобный",
+    "одетый"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Size and degree",
+   "words": [
+    "широкий",
+    "средний",
+    "частый"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Time and manner",
+   "words": [
+    "быстро",
+    "вчера",
+    "вдруг"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Place and direction",
+   "words": [
+    "над",
+    "около",
+    "домой",
+    "сверху",
+    "откуда"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Opinion and hedging",
+   "words": [
+    "по-моему",
+    "вроде",
+    "всё-таки",
+    "немного"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Exclamations",
+   "words": [
+    "ой"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Fashion",
+   "words": [
+    "мода",
+    "стиль",
+    "вкус"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "People",
+   "words": [
+    "женщина",
+    "мужчина"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Chances and hopes",
+   "words": [
+    "возможность",
+    "надежда",
+    "отношение"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Clothing",
+   "words": [
+    "надевать",
+    "одевать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Effort and choice",
+   "words": [
+    "предпочитать",
+    "стараться",
+    "приходиться",
+    "следить"
+   ]
+  }
+ ],
+ "religion": [
+  {
+   "kind": "noun",
+   "name": "Faith",
+   "words": [
+    "религия",
+    "вера",
+    "бог",
+    "ангел",
+    "библия"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Church",
+   "words": [
+    "церковь",
+    "храм",
+    "икона",
+    "распятие"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Celebrations",
+   "words": [
+    "пасха",
+    "свадьба",
+    "традиция",
+    "пост"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Food",
+   "words": [
+    "яйцо",
+    "салат"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Ideas",
+   "words": [
+    "счастье",
+    "связь",
+    "атмосфера",
+    "искусство"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Queue",
+   "words": [
+    "очередь"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Praying",
+   "words": [
+    "верить",
+    "молиться"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Celebrating",
+   "words": [
+    "праздновать",
+    "поздравлять",
+    "красить"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Starting and taking",
+   "words": [
+    "начинаться",
+    "принимать"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Religious",
+   "words": [
+    "религиозный",
+    "христианский",
+    "божий"
+   ]
+  }
+ ],
+ "medicine": [
+  {
+   "kind": "noun",
+   "name": "Illness",
+   "words": [
+    "болезнь",
+    "заболевание",
+    "симптом",
+    "диагноз",
+    "вирус",
+    "стресс"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Injuries",
+   "words": [
+    "травма",
+    "ранение"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Treatment",
+   "words": [
+    "лечение",
+    "лекарство",
+    "таблетка",
+    "вакцина",
+    "операция"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Places",
+   "words": [
+    "больница",
+    "клиника"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "People",
+   "words": [
+    "пациент",
+    "специалист",
+    "психолог"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Medicine",
+   "words": [
+    "медицина",
+    "состояние",
+    "момент"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Health actions",
+   "words": [
+    "выздоравливать",
+    "рекомендовать",
+    "пользоваться"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "People's age",
+   "words": [
+    "молодой",
+    "взрослый"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Payment",
+   "words": [
+    "платный"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Pointing out",
+   "words": [
+    "сей"
+   ]
+  }
+ ],
+ "core10": [
+  {
+   "kind": "verb",
+   "name": "Gathering",
+   "words": [
+    "собирать",
+    "собрать",
+    "собираться",
+    "набрать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Answering and deciding",
+   "words": [
+    "отвечать",
+    "решать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Being and appearing",
+   "words": [
+    "являться",
+    "появляться",
+    "отличаться"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Months",
+   "words": [
+    "июль",
+    "август",
+    "сентябрь",
+    "октябрь"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "In the forest",
+   "words": [
+    "ягода",
+    "болото",
+    "край"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Name and result",
+   "words": [
+    "название",
+    "результат",
+    "множество"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Size",
+   "words": [
+    "малый",
+    "великий"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Dry and wet",
+   "words": [
+    "сухой",
+    "сырой"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Past",
+   "words": [
+    "прошлый"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Time",
+   "words": [
+    "завтра",
+    "раньше",
+    "однажды",
+    "рано"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Manner",
+   "words": [
+    "медленно",
+    "постепенно",
+    "спокойно",
+    "жалко"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Amount",
+   "words": [
+    "мало",
+    "чуть-чуть",
+    "довольно"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Place",
+   "words": [
+    "где-то"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Prepositions",
+   "words": [
+    "против",
+    "несмотря"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Particles",
+   "words": [
+    "лишь",
+    "уж"
+   ]
+  }
+ ],
+ "law": [
+  {
+   "kind": "noun",
+   "name": "Law and court",
+   "words": [
+    "закон",
+    "суд",
+    "судья",
+    "юрист",
+    "свидетель",
+    "доказательство",
+    "свидетельство"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Crime",
+   "words": [
+    "преступление",
+    "преступник",
+    "вор",
+    "убийство",
+    "взятка"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Police and prison",
+   "words": [
+    "полиция",
+    "детектив",
+    "арест",
+    "тюрьма",
+    "наказание"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Agreements",
+   "words": [
+    "договор",
+    "контракт"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Crime and judging",
+   "words": [
+    "судить",
+    "убить",
+    "воровать"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Legal status",
+   "words": [
+    "незаконный",
+    "виновный"
+   ]
+  }
+ ],
+ "military": [
+  {
+   "kind": "noun",
+   "name": "War and battle",
+   "words": [
+    "война",
+    "битва",
+    "борьба",
+    "фронт",
+    "победа",
+    "поражение"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Attack and defence",
+   "words": [
+    "атака",
+    "наступление",
+    "защита"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Armed forces",
+   "words": [
+    "армия",
+    "полк",
+    "флот"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Soldiers and ranks",
+   "words": [
+    "солдат",
+    "ветеран",
+    "офицер",
+    "капитан",
+    "полковник",
+    "командир"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Weapons",
+   "words": [
+    "оружие",
+    "пистолет",
+    "пуля",
+    "мина",
+    "выстрел"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Enemy",
+   "words": [
+    "враг",
+    "противник"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Order",
+   "words": [
+    "приказ"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Fight and command",
+   "words": [
+    "бороться",
+    "атаковать",
+    "приказать"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Military",
+   "words": [
+    "военный"
+   ]
+  }
+ ]
+}

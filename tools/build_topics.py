@@ -47,6 +47,42 @@ OFFTOPIC_SHARE = 0.25  # …and at most this share of the quest is such words
 SKELETON = ROOT / "data" / "curated" / "skeleton.json"
 # A reader's per-unit keeps and drops from the chapter content reviews.
 UNIT_WORDS = json.loads((ROOT / "data" / "curated" / "unit_words.json").read_text(encoding="utf-8"))
+# Each unit's words in named groups of related words (tools/build_word_groups.mjs
+# proposes them; a person may edit the file). The sections a list is drawn in:
+_GROUPS_FILE = ROOT / "data" / "curated" / "word_groups.json"
+WORD_GROUPS = json.loads(_GROUPS_FILE.read_text(encoding="utf-8")) if _GROUPS_FILE.exists() else {}
+GROUP_KINDS = ["verb", "noun", "describing", "little"]
+UNGROUPED = []   # (unit, bare) the groups file does not place — run build_word_groups.mjs --stale
+
+
+def grouped(tid, chosen, meta, spoken):
+    """The unit's words in teaching order — each group whole, groups by their
+    commonest word — and each word's (group, section, place in the reading
+    order). A word the file does not name keeps its frequency place at the end
+    and is reported, so a curriculum change cannot silently leave words
+    ungrouped."""
+    groups = WORD_GROUPS.get(tid) or []
+    rank = lambda l: spoken.get(meta[l]["bare"], 10 ** 6)
+    by_bare = {meta[l]["bare"]: l for l in chosen}
+    # The reading order: sections in GROUP_KINDS order, groups in the file's
+    # order inside each (most useful first, as the file was asked to put them).
+    reading = sorted(range(len(groups)), key=lambda g: (GROUP_KINDS.index(groups[g]["kind"])
+                                                        if groups[g]["kind"] in GROUP_KINDS else 9, g))
+    gord = {g: n for n, g in enumerate(reading)}
+    blocks, group_of, placed = [], {}, set()
+    for g, grp in enumerate(groups):
+        members = [by_bare[b] for b in grp["words"] if b in by_bare and by_bare[b] not in placed]
+        if not members:
+            continue
+        placed.update(members)
+        for l in members:
+            group_of[l] = (grp["name"], grp["kind"], gord[g])
+        blocks.append((min(rank(l) for l in members), g, members))
+    blocks.sort(key=lambda b: (b[0], b[1]))
+    order = [l for _, _, members in blocks for l in members]
+    rest = [l for l in chosen if l not in placed]
+    UNGROUPED.extend((tid, meta[l]["bare"]) for l in rest)
+    return order + rest, group_of
 # Words a video says that are not Russian to learn from it: the channel's own
 # boilerplate (subscribe, like, the link below) and the grammar metalanguage a
 # lesson-video talks in. They are real words, and the second kind is taught by
@@ -509,7 +545,10 @@ create table unit_words (
   topic_id text not null references topics(id),
   lemma_id integer not null,
   ord      integer not null,
-  reason   text                  -- which rule placed it, for auditing
+  reason   text,                 -- which rule placed it, for auditing
+  grp      text,                 -- its group of related words (word_groups.json)
+  gkind    text,                 -- the section that group sits in: verb, noun, describing, little
+  gord     integer               -- the group's place in the reading order of the unit's list
 );
 
 create table path (
@@ -825,10 +864,17 @@ def main():
         # «я» and «быть» belong in chapter 1's first lesson whatever the video
         # happens to repeat most.
         chosen.sort(key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6))
+        # …and then by group (data/curated/word_groups.json, the owner,
+        # 2026-09-30: "Related words always need to be together throughout
+        # the entire app"). A group is taught whole and in its own order —
+        # the four seasons in one lesson, winter to autumn — and the groups
+        # come in the order of their commonest word, so the first lesson is
+        # still the commonest words there are, just in the company they keep.
+        chosen, group_of = grouped(tid, chosen, meta, spoken)
         taught |= set(chosen)
         after = followable(vid, {meta[l]["bare"] for l in taught}) if vid else None
         units.append({"id": tid, "kind": kind, "chapter": k, "video": vid, "words": chosen,
-                      "why": why, "after": after, "before": before.get(tid)})
+                      "why": why, "group": group_of, "after": after, "before": before.get(tid)})
 
     if args.out.exists():
         args.out.unlink()
@@ -857,8 +903,10 @@ def main():
             db.execute("insert into path (row, col, topic_id, requires) values (?,?,?,?)",
                        (row, -1 if quest_k % 2 == 0 else 1, u["id"], f"core{k + 1}"))
             quest_k += 1
-        db.executemany("insert into unit_words (topic_id, lemma_id, ord, reason) values (?,?,?,?)",
-                       [(u["id"], lid, j, u["why"][lid]) for j, lid in enumerate(u["words"])])
+        db.executemany("insert into unit_words (topic_id, lemma_id, ord, reason, grp, gkind, gord) "
+                       "values (?,?,?,?,?,?,?)",
+                       [(u["id"], lid, j, u["why"][lid]) + u["group"].get(lid, (None, None, None))
+                        for j, lid in enumerate(u["words"])])
         ordv += 1
         row += 1
 
@@ -873,6 +921,9 @@ def main():
     opt_n = sum(1 for u in units if u["kind"] == "branch" and u["id"] in OPTIONAL)
     print(f"  units             : {sum(1 for u in units if u['kind'] == 'spine')} spine, "
           f"{sum(1 for u in units if u['kind'] == 'branch')} branch ({opt_n} optional)")
+    if UNGROUPED:
+        print(f"    !! {len(UNGROUPED)} word(s) in no group — run node tools/build_word_groups.mjs --stale: "
+              + ", ".join(f"{t}:{b}" for t, b in UNGROUPED[:12]) + (" …" if len(UNGROUPED) > 12 else ""))
     stale = sorted(OPTIONAL - {u["id"] for u in units})
     if stale:
         print(f"    !! OPTIONAL names {len(stale)} unit(s) that do not exist: " + ", ".join(stale))

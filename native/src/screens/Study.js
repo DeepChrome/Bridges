@@ -563,8 +563,16 @@ export default function Study({ navigation, route }) {
     [st.seen, st.cardKinds]);
 
   const dealt = useRef(0);   // which deal this is, for "read once per card"
-  const deal = (ahead, round, extra) => {
+  /* Cards already played in earlier chunks of this sitting. The pile is dealt
+     twenty at a time and the next chunk follows by itself, so the counter
+     counts the whole day's pile rather than starting again at 1/20 — the
+     owner, 2026-09-30: *"Still says 157 due but 20 cards… the user should have
+     the option to review all due cards til they are caught up."* They always
+     could; the counter said otherwise. */
+  const [base, setBase] = useState(0);
+  const deal = (ahead, round, extra, carry) => {
     dealt.current += 1;
+    setBase(carry && session ? base + session.items.length : 0);
     setSession(sessionFor(st, { ahead, round, ...extra }));
     setAt(0);
     setShown(false); setRevealed(false);
@@ -731,10 +739,14 @@ export default function Study({ navigation, route }) {
      about. The next chunk is simply dealt; the only stop is the end of the
      day's work. Not after a trouble round, which ends on its own screen. */
   useEffect(() => {
-    if (finished && more > 0 && session && !session.practice) deal(false);
+    if (finished && more > 0 && session && !session.practice) deal(false, undefined, undefined, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished, more]);
   const reviewedToday = dailyFor(st.daily, Date.now()).reviews;
+  // The day's whole pile: what earlier chunks played, this chunk, and what the
+  // scheduler still holds past it. A round (trouble, a list) is its own size.
+  const pileSize = !session ? 0 : session.practice ? items.length
+    : base + items.length + (session.remaining || 0);
 
   /* The controls belong to the screen, not to the card, and they are pinned
      off the scroll (`Screen footer`).
@@ -866,8 +878,8 @@ export default function Study({ navigation, route }) {
       ) : (
         <>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginTop: 16 }}>
-            <View style={{ flex: 1 }}><Bar value={at / items.length} /></View>
-            <Pill testID="progress">{`${at + 1}/${items.length}`}</Pill>
+            <View style={{ flex: 1 }}><Bar value={(base + at) / pileSize} /></View>
+            <Pill testID="progress">{`${base + at + 1}/${pileSize}`}</Pill>
           </View>
 
           {/* Once revealed, a tap on the card turns it — back to the front to

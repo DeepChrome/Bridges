@@ -13,32 +13,113 @@ import React from "react";
 import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "./theme";
-import { Btn, Muted, SectionLabel, Familiarity, Speaker, Text, Fold } from "./ui";
+import { Btn, Muted, SectionLabel, Familiarity, Speaker, Text, Fold, Pill } from "./ui";
 import { Linked } from "./words";
 import { RuleCard } from "./rules";
 import { familiarity, cardFor } from "@core/scheduler";
 import { firstSense } from "@core/util";
-import { L, idxOfWord, rankOf } from "./data";
+import { isIrregular } from "@core/facts";
+import { L, UN, idxOfWord, rankOf } from "./data";
 import { hasRealAudio } from "./audio";
 
+/* The four sections every word list is drawn in, and the parts of speech each
+   takes when a word has no group to say (tools/build_word_groups.mjs holds the
+   same split, so a group's kind is the section it appears in here). */
 export const CLUSTERS = [
   { id: "verb", name: "Verbs", pos: ["verb"] },
   { id: "noun", name: "Nouns", pos: ["noun"] },
-  { id: "desc", name: "Describing words", pos: ["adjective", "adverb"] },
-  { id: "small", name: "Little words", pos: null },   // whatever is left
+  { id: "describing", name: "Describing words", pos: ["adjective", "adverb"] },
+  { id: "little", name: "Little words", pos: null },   // whatever is left
 ];
 
-/* The list in its clusters, each keeping the list's own order (the build puts
-   the unit's words first, most-said first). Empty clusters are left out. */
+/* Every curriculum word's group of related words, read once off the units
+   (`gr`, build_site.py): its name, its section, and where the group and the
+   word sit in the reading order. One table for the whole app, so a word is in
+   the same company in a lesson, a unit's summary and a video's list — the
+   owner, 2026-09-30: "Related words always need to be together throughout the
+   entire app." */
+let GROUP_OF = null;
+function groupOf(word) {
+  if (!GROUP_OF) {
+    GROUP_OF = new Map();
+    UN.forEach((u, ui) => (u.gr || []).forEach(([name, kind, ws], gi) => ws.forEach((i, wi) => {
+      if (L[i] && !GROUP_OF.has(L[i].b)) GROUP_OF.set(L[i].b, { name, kind, order: ui * 1000 + gi, at: wi });
+    })));
+  }
+  return GROUP_OF.get(word) || null;
+}
+
+/* The list in its sections, and inside each its groups of related words in
+   the units' reading order, each group's words in their own order (the
+   seasons winter to autumn). Groups of the same name in the same section are
+   one group wherever they came from — a video's list spans units. A word no
+   group names goes by its part of speech into a group with no heading. Empty
+   sections are left out. */
 export function clusterWords(words) {
-  const out = CLUSTERS.map((c) => ({ ...c, words: [] }));
-  for (const word of words) {
+  const out = CLUSTERS.map((c) => ({ ...c, groups: [], words: [] }));
+  const place = [];
+  words.forEach((word, n) => {
+    const g = groupOf(word);
     const e = L[idxOfWord(word)];
-    const p = e ? e.p : "";
-    const c = out.find((x) => x.pos && x.pos.includes(p)) || out[out.length - 1];
-    c.words.push(word);
+    const kind = g ? g.kind
+      : (CLUSTERS.find((c) => c.pos && e && c.pos.includes(e.p)) || CLUSTERS[CLUSTERS.length - 1]).id;
+    place.push({ word, kind, name: g ? g.name : "", order: g ? g.order : 1e9, at: g ? g.at : n });
+  });
+  for (const c of out) {
+    const mine = place.filter((p) => p.kind === c.id);
+    const byName = new Map();
+    for (const p of mine) {
+      if (!byName.has(p.name)) byName.set(p.name, { name: p.name, order: p.order, words: [] });
+      const grp = byName.get(p.name);
+      grp.order = Math.min(grp.order, p.order);
+      grp.words.push(p);
+    }
+    c.groups = [...byName.values()].sort((a, b) => a.order - b.order)
+      .map((grp) => ({ name: grp.name,
+                       words: grp.words.sort((a, b) => (a.order - b.order) || (a.at - b.at)).map((p) => p.word) }));
+    c.words = c.groups.flatMap((grp) => grp.words);
   }
   return out.filter((c) => c.words.length);
+}
+
+/* The small facts a word carries on any list, as tags beside it rather than
+   as sections of their own (the owner, 2026-09-30: "Irregular verbs don't
+   need their own section, just little tags for irregular and reflexive"). */
+export const isReflexive = (e) => !!e && e.p === "verb" && /(ся|сь)$/.test(e.b || "");
+export function WordTags({ e }) {
+  if (!e) return null;
+  return (
+    <>
+      {isIrregular(e) ? <Pill tone="irregular">Irregular</Pill> : null}
+      {isReflexive(e) ? <Pill>Reflexive</Pill> : null}
+    </>
+  );
+}
+
+/* A section heading and its groups, drawn the same way on every list: the
+   section in the ink colour with its count and a rule under it, each group's
+   name in the brand colour above its words. `renderWords(words, group)` draws
+   the rows, so a lesson keeps its own animated rows and a summary its own. */
+export function WordSections({ words, renderWords, testID = "cluster" }) {
+  const t = useTheme();
+  return clusterWords(words).map((c, k) => (
+    <View key={c.id} testID={`${testID}-${c.id}`} style={{ marginTop: k ? 26 : 12 }}>
+      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8, paddingBottom: 6,
+                     borderBottomWidth: 2, borderBottomColor: t.line }}>
+        <Text style={{ color: t.ink, fontSize: 19, fontWeight: "800" }}>{c.name}</Text>
+        <Muted>{String(c.words.length)}</Muted>
+      </View>
+      {c.groups.map((grp) => (
+        <View key={grp.name || "_"} testID={`group-${grp.name || c.id}`} style={{ marginTop: 12 }}>
+          {grp.name ? (
+            <Text style={{ color: t.brand, fontSize: 13, fontWeight: "700", letterSpacing: 0.6,
+                           textTransform: "uppercase", marginBottom: 2 }}>{grp.name}</Text>
+          ) : null}
+          {renderWords(grp.words, grp)}
+        </View>
+      ))}
+    </View>
+  ));
 }
 
 /* A handful of short sentences from the collection, one per word in list
@@ -122,7 +203,10 @@ function WordRow({ word, seen, active, onJump, first }) {
           style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8,
                    borderTopWidth: first ? 0 : 1, borderTopColor: t.lineSoft }}>
       <View style={{ flex: 1 }}>
-        <Linked text={e ? e.w : word} size={17} style={{ fontWeight: "600" }} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <Linked text={e ? e.w : word} size={17} style={{ fontWeight: "600" }} />
+          <WordTags e={e} />
+        </View>
         {e && firstSense(e) ? <Muted numberOfLines={1}>{firstSense(e)}</Muted> : null}
       </View>
       {/* Where the learner stands: the flashcard's own ring, or "new". */}
@@ -138,7 +222,6 @@ export function PrepList({ words, seen, unit, focusWord, onJump, onCards, lines,
   const t = useTheme();
   if (!words.length) return <Muted>No study words are spoken in this one.</Muted>;
   const met = words.filter((w) => seen[w]).length;
-  const clusters = clusterWords(words);
   // The video's own sentences where it has them; otherwise the collection's
   // recorded ones.
   const own = lines && lines.length ? lines : null;
@@ -151,15 +234,10 @@ export function PrepList({ words, seen, unit, focusWord, onJump, onCards, lines,
         <Muted testID="prep-met" style={{ flex: 1 }}>{`${met} of ${words.length} met`}</Muted>
         <Btn kind="pri" testID="prep-cards" label="Flashcards" onPress={() => onCards(words)} />
       </View>
-      {clusters.map((c) => (
-        <View key={c.id} testID={`cluster-${c.id}`} style={{ marginTop: 12 }}>
-          <Text style={{ color: t.ink3, fontSize: 13, fontWeight: "700" }}>{c.name}</Text>
-          {c.words.map((w, k) => (
-            <WordRow key={w} word={w} seen={seen} first={k === 0}
-                     active={focusWord === w} onJump={onJump} />
-          ))}
-        </View>
-      ))}
+      <WordSections words={words} renderWords={(ws) => ws.map((w, k) => (
+        <WordRow key={w} word={w} seen={seen} first={k === 0}
+                 active={focusWord === w} onJump={onJump} />
+      ))} />
       {own ? (
         <View testID="prep-sentences" style={{ marginTop: 16 }}>
           <Text style={{ color: t.ink3, fontSize: 13, fontWeight: "700" }}>Sentences</Text>

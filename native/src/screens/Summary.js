@@ -16,14 +16,13 @@ import React, { useEffect } from "react";
 import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Screen, Muted, SectionLabel, Speaker, Pill, Familiarity, Text, Btn } from "../ui";
+import { Screen, Muted, SectionLabel, Speaker, Familiarity, Text, Btn } from "../ui";
 import { Linked } from "../words";
 import { RuleCard } from "../rules";
-import { clusterWords, prepSentences, VideoLines } from "../prep";
+import { WordSections, WordTags, prepSentences, VideoLines } from "../prep";
 import { UN, L, idxOfWord, rankOf, lessonWords, lessonCount, markComponent, linesWith } from "../data";
 import { familiarity, cardFor } from "@core/scheduler";
 import { firstSense } from "@core/util";
-import { isIrregular } from "@core/facts";
 
 /* Sentences a summary shows: enough to see the words at work, few enough to
    stay a list. The whole unit gets more because it covers more. */
@@ -41,7 +40,7 @@ function WordLine({ word, seen, first }) {
       <View style={{ flex: 1 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <Linked text={e ? e.w : word} size={17} style={{ fontWeight: "600" }} />
-          {e && isIrregular(e) ? <Pill tone="irregular">Irregular</Pill> : null}
+          <WordTags e={e} />
         </View>
         {e && firstSense(e) ? <Muted numberOfLines={2}>{firstSense(e)}</Muted> : null}
       </View>
@@ -85,12 +84,8 @@ export default function Summary({ route, navigation }) {
       </Text>
       <Muted testID="summary-count">{`${words.length} words`}</Muted>
 
-      {clusterWords(words).map((c) => (
-        <View key={c.id} testID={`summary-cluster-${c.id}`} style={{ marginTop: 16 }}>
-          <SectionLabel>{c.name}</SectionLabel>
-          {c.words.map((w, k) => <WordLine key={w} word={w} seen={seen} first={k === 0} />)}
-        </View>
-      ))}
+      <WordSections words={words} testID="summary-cluster"
+                    renderWords={(ws) => ws.map((w, k) => <WordLine key={w} word={w} seen={seen} first={k === 0} />)} />
 
       {lines.length ? (
         <View testID="summary-sentences" style={{ marginTop: 16 }}>

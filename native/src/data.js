@@ -258,16 +258,13 @@ export function components(st, u, i) {
  * Having a script and featuring it are different questions, and conflating them
  * put a Listening step on all fourteen of chapter 1's lessons — the owner,
  * 2026-09-17: *"You dont have to embed it into every single lesson. just 1 or 2
- * lessons per chapter where it's featured."* The spine's lessons 3 and 5 are
- * the two, which is one or two per chapter everywhere and matches where the
- * conversations for chapters 2-10 were written (§30af).
- *
- * Chapter 1's other twelve are **not deleted** — they are written, bought and
- * good, and they stay in Practice → Listening, which lists every script. This
- * only decides what a lesson puts in front of you. */
-export const FEATURED_LESSONS = [2, 4];
+ * lessons per chapter where it's featured."* There are two a chapter now, on
+ * the spine, and each sits on the lesson whose words it uses: when related
+ * words were grouped (2026-09-30) the lessons were re-cut and nine
+ * conversations moved to the lesson they fit, so the lesson is read off the
+ * script's key rather than fixed at the third and fifth. */
 export const featuresListening = (u, i) =>
-  !!SCRIPTS[`${u.id}:${i}`] && /^core\d+$/.test(u.id) && FEATURED_LESSONS.includes(i);
+  !!SCRIPTS[`${u.id}:${i}`] && /^core\d+$/.test(u.id);
 
 /* Optional steps are listed and counted on the lesson screen, but a lesson is
    finished when its required ones are. */

@@ -455,7 +455,8 @@ bridges/                          (directory is still named russian-blocks on di
     harvest_videos.py  <- YouTube listings, metadata, captions -> data/raw (§30g)
     build_transcripts.py <- captions -> data/transcripts.json, lemma resolved (§30g)
     build_videos.py    <- catalogue + index -> data/videos.json (§30g)
-    build_cast_art.mjs <- the cast drawn by an image model: sheets, poses, unit scenes (§30bg)
+    build_cast_art.mjs <- the cast drawn by an image model: sheets, poses, unit scenes, words (§30bg)
+    build_word_groups.mjs <- each unit's words in named groups of related words (§30bi)
     make_app_icon.py   <- the bridge mark, every size both apps need (zlib PNGs, no image library)
     panel.py           <- form -> lemma + paradigm tables + examples (shared logic)
     lookup.py          <- CLI word panel, for checking data without a browser
@@ -5238,6 +5239,12 @@ narrow away work the badge promises.
   a sentences tick into the kind, and gives a profile left with no source its
   path. `cardKinds` is a setting (repo.js `SETTING_KEYS`).
 
+**The counter counts the day, not the chunk** (2026-09-30). The pile is dealt
+twenty at a time and the next chunk follows by itself, but the counter read
+1/20 under "157 due" and the owner took it that twenty was all he could do.
+`base` in Study.js carries the cards played in earlier chunks, so it reads
+1/157 and runs on; `pile.test.js` grades past the first twenty.
+
 **Found on the way**: with a source in the store's defaults, Study dealt a
 real pile from them *before the profile loaded* and read its first card
 aloud. It deals on `ready` now; the one-voice test caught it by counting a
@@ -5516,9 +5523,14 @@ What holds it together, and each is enforced rather than hoped for:
 - **A scene is handed only the characters it names.** Given every sheet the
   model drew every character: Belka stood in all 34 unit scenes, and 30 were
   redrawn. "The family" names Teddy, Nezha and Yarik.
-- **Words drawn with the cast** (`WORDS`, `--words`, medium quality, about
-  $0.05): the family as its own vocabulary (мама → Nezha, собака → Teddy) and
-  what a photograph cannot show (хотеть, вкусный, обедать). `pictureOf` in
+- **Words drawn with the cast** (`--words`, medium quality, about $0.05):
+  the family as its own vocabulary (мама → Nezha, собака → Teddy) and what a
+  photograph cannot show (хотеть, вкусный, обедать). The briefs are
+  `data/curated/word_art.json` — `{ who, what }`, or `{ skip: true }` where no
+  picture can show the word (такой, который, число) — drafted by a model and
+  read before anything is bought: a draft made Belka a grandmother and gave
+  Teddy a sister the story does not have. `--part k/n` splits a run for
+  parallel jobs without passing Cyrillic through the shell. `pictureOf` in
   `native/src/pictures.js` is the one lookup; a drawing wins over a
   photograph and needs no credit. **gpt-image-2 will not paint
   transparency** (`background: transparent` is refused, `auto` comes back
@@ -5558,6 +5570,45 @@ The notes are `docs/reviews/2026-09-30-content.md`.
   every learner's progress is re-mapped on the next launch (§30bf, V7). Do a
   review's rebuild once, not a unit at a time.
 
+## 30bi. Related words together (2026-09-30)
+
+The owner, with a screenshot of Nature's summary: *"The seasons are split up
+from each other. Related words always need to be together throughout the
+entire app… there needs to be coherent grouping of words throughout the
+entire corpus and clear delineation to make it easily navigable."* A unit's
+words were one list commonest first, so «лето» sat beside «гора» and «осень»
+three screens down.
+
+- **`data/curated/word_groups.json`**: every unit's words in named groups
+  (Seasons, Weather, Water, Land…), each of one **section** — `verb`,
+  `noun`, `describing` (adjectives, adverbs), `little` (the rest) — fixed by
+  part of speech, and listed in natural order (winter to autumn, numbers
+  ascending). Proposed by `tools/build_word_groups.mjs` (Sonnet, ~$0.02 a
+  unit), which refuses an answer that drops or doubles a word, puts a verb
+  under nouns, or names a group "Other"; a person may edit the file.
+  `--stale` regroups units whose words changed; **`--check` belongs in
+  verification**, and `build_topics` names any word left ungrouped.
+- **Lessons teach a group whole** (`grouped` in `build_topics.py`): groups in
+  the order of their commonest word, each in its own order, so the first
+  lesson is still the commonest words, in the company they keep. `unit_words`
+  carries `grp`, `gkind`, `gord`; `build_site` ships them as `u.gr`.
+- **Every list draws them one way** (`WordSections` in `prep.js`): a section
+  heading with its count and a rule, the group names in brand colour, the
+  words under them — a lesson's word list, a summary, a video's list.
+  `clusterWords` merges same-named groups across units, because a video's
+  list spans units. **Irregular and Reflexive are tags on the word**
+  (`WordTags`), not a section: the lesson's separate Irregular list went.
+- **Re-cutting lessons moved nine conversations**: a conversation is checked
+  against its lesson's words, so each moved to the lesson of its unit it
+  fits and `featuresListening` reads the lesson off the script's key rather
+  than fixing it at the third and fifth. The rest took a lesson word each.
+- **Moving a word between units cascades.** Six numbers kept into chapter 3
+  pushed «друг», «дело», «хотя» two chapters later and broke four
+  conversations; the move was cut to «два», «три» beside «один». Sets still
+  split across units are listed by grouping name in the build notes
+  (надеть in Clothes, its partner надевать in chapter 9 — moving it would
+  break that chapter's conversation).
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -5591,6 +5642,7 @@ node tools/design.mjs          # scale, rhythm and depth: the arithmetic of look
 node tools/release_check.mjs   # the built bundle: who signed it, size, permissions (§30ag)
 node tools/eas_upload.mjs      # before any EAS build: archive size, and nothing needed excluded
 node tools/copy.mjs            # labels, not prose (rule 20.7), capped and checked
+node tools/build_word_groups.mjs --check   # every unit's words in a group (§30bi)
 node tools/core.test.mjs       # the shared logic: generators, scheduler, state
 node tools/smoke.js            # must be all-pass
 node tools/visual.js           # must be all-pass; then look at tools/shots/

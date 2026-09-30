@@ -953,6 +953,18 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             if l in pos_of]
         uidx[tid] = len(units)
         u = {"id": tid, "name": name, "kind": kind, "w": words}
+        # The unit's words in their groups of related words, in reading order
+        # (build_topics.py `grouped`): [name, section, [lemma index…]]. Every
+        # word list in the app draws from this, so the four seasons are one
+        # group wherever they are listed (the owner, 2026-09-30).
+        groups = {}
+        for l, grp, gkind, gord in db.execute(
+                "select lemma_id, grp, gkind, gord from t.unit_words where topic_id=? and grp is not null "
+                "order by ord", (tid,)):
+            if l in pos_of:
+                groups.setdefault((gord, grp, gkind), []).append(pos_of[l])
+        if groups:
+            u["gr"] = [[grp, gkind, ws] for (gord, grp, gkind), ws in sorted(groups.items())]
         # A side quest the chapter does not require (build_topics.py OPTIONAL,
         # 2026-09-22). Absent on everything else, so a unit without the key is
         # required — which is what every spine unit is by definition.

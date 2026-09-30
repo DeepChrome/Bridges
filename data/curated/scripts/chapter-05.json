@@ -2,7 +2,7 @@
  "chapter": 5,
  "name": "Spending & Saving",
  "lessons": {
-  "core5:2": {
+  "core5:1": {
    "title": "A headache and a red hat",
    "cast": [
     {
@@ -41,10 +41,6 @@
     {
      "ru": "чай",
      "en": "tea"
-    },
-    {
-     "ru": "часто",
-     "en": "often"
     }
    ],
    "lines": [
@@ -172,7 +168,7 @@
     }
    ]
   },
-  "core5:4": {
+  "core5:3": {
    "title": "Changing a bag of coins",
    "cast": [
     {
@@ -239,8 +235,8 @@
     },
     {
      "s": "a",
-     "ru": "Тедди, рубль пока у меня. Я иду в банк.",
-     "en": "Teddy, I'll hold the rouble for now. I'm going to the bank."
+     "ru": "Тедди, рубль пока храню я. Я иду в банк.",
+     "en": "Teddy, I'll keep the rouble for now. I'm going to the bank."
     },
     {
      "s": "c",
@@ -259,8 +255,8 @@
     },
     {
      "s": "b",
-     "ru": "Монька, тогда это твой рубль. А мешок теперь мой.",
-     "en": "Monka, then it's your rouble. And the bag is mine again."
+     "ru": "Монька, это твой рубль. А мешок теперь мой.",
+     "en": "Monka, it's your rouble. And the sack is mine now."
     },
     {
      "s": "c",

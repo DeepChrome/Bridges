@@ -106,6 +106,7 @@ export const IMAGES = {
   "лето": require("../assets/img/1581.jpg"),
   "литература": require("../assets/img/1586.jpg"),
   "лицо": require("../assets/img/1587.jpg"),
+  "лодка": require("../assets/img/1591.jpg"),
   "ложка": require("../assets/img/1593.jpg"),
   "лошадь": require("../assets/img/1594.jpg"),
   "любовь": require("../assets/img/1600.jpg"),
@@ -205,7 +206,6 @@ export const IMAGES = {
   "университет": require("../assets/img/2374.jpg"),
   "упражнение": require("../assets/img/2377.jpg"),
   "урок": require("../assets/img/2379.jpg"),
-  "учёба": require("../assets/img/2399.jpg"),
   "учёный": require("../assets/img/2400.jpg"),
   "фотография": require("../assets/img/2415.jpg"),
   "химия": require("../assets/img/2421.jpg"),
@@ -321,6 +321,7 @@ export const FILES = {
  "лето": "1581.jpg",
  "литература": "1586.jpg",
  "лицо": "1587.jpg",
+ "лодка": "1591.jpg",
  "ложка": "1593.jpg",
  "лошадь": "1594.jpg",
  "любовь": "1600.jpg",
@@ -420,7 +421,6 @@ export const FILES = {
  "университет": "2374.jpg",
  "упражнение": "2377.jpg",
  "урок": "2379.jpg",
- "учёба": "2399.jpg",
  "учёный": "2400.jpg",
  "фотография": "2415.jpg",
  "химия": "2421.jpg",
@@ -1041,6 +1041,12 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Human_faces.jpg"
  },
+ "лодка": {
+  "t": "Motorboat at Kankaria lake.JPG",
+  "a": "Kondicherry",
+  "l": "CC BY-SA 3.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Motorboat_at_Kankaria_lake.JPG"
+ },
  "ложка": {
   "t": "Esslöffel und Teelöffel.JPG",
   "a": "Lesekreis",
@@ -1634,12 +1640,6 @@ export const CREDITS = {
   "a": "Tsaryov357",
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:%D0%A3%D1%80%D0%BE%D0%BA_%D1%85%D0%B8%D0%BC%D0%B8%D0%B8.jpg"
- },
- "учёба": {
-  "t": "Reading old Norse.jpg",
-  "a": "Pål Berge",
-  "l": "CC BY 2.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Reading_old_Norse.jpg"
  },
  "учёный": {
   "t": "InvestigadoresUR.JPG",

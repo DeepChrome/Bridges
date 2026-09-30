@@ -4,7 +4,7 @@
  * screens.test.js. */
 
 import React from "react";
-import { render, screen, fireEvent, act, waitFor } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, waitFor, within } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
@@ -68,11 +68,26 @@ describe("words that break the rules", () => {
     expect(screen.queryByTestId("word-irregular")).toBeNull();
   });
 
-  it("are grouped apart in a lesson's word list", async () => {
+  /* They were grouped under their own heading; since 2026-09-30 they carry a
+     tag and stay with their group of related words (the owner: "Irregular
+     verbs don't need their own section, just little tags"). */
+  it("carry a tag in a lesson's word list, and keep their group", async () => {
     const unit = UN.find((u) => u.w.some((i) => isIrregular(L[i])) && u.w.some((i) => !isIrregular(L[i])));
+    const odd = unit.w.find((i) => isIrregular(L[i]));
     await withProfile(<WordList unit={unit} words={unit.w.slice(0, 40)} at={0} total={3} />);
-    const group = await screen.findByTestId("vocab-irregular");
-    expect(group).toBeTruthy();
+    expect(screen.queryByTestId("vocab-irregular")).toBeNull();
+    expect(within(await screen.findByTestId(`new-${L[odd].b}`)).getByText("Irregular")).toBeTruthy();
+  });
+
+  it("is a list of related words together, in their own order", async () => {
+    const unit = UN.find((u) => u.id === "nature");
+    await withProfile(<WordList unit={unit} words={unit.w} at={0} total={3} />);
+    const seasons = await screen.findByTestId("group-Seasons");
+    const order = ["зима", "весна", "лето", "осень"].map((b) => within(seasons).getByTestId(`new-${b}`));
+    expect(order.length).toBe(4);
+    const all = within(seasons).getAllByTestId(/^new-/).map((n) => n.props.testID);
+    expect(all).toEqual(["new-зима", "new-весна", "new-лето", "new-осень"]);
+    expect(screen.getByTestId("vocab-cluster-noun")).toBeTruthy();
   });
 
   it("can be drilled on their own", () => {

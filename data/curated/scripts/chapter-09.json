@@ -2,7 +2,7 @@
  "chapter": 9,
  "name": "Style & Fashion",
  "lessons": {
-  "core9:2": {
+  "core9:5": {
    "title": "Red trousers for Misha's party",
    "cast": [
     {
@@ -220,8 +220,8 @@
     },
     {
      "s": "b",
-     "ru": "Монька, твои брюки очень широкие. Я в них как в мешке.",
-     "en": "Monka, your trousers are really wide. I'd look like I'm in a sack."
+     "ru": "Монька, твои брюки модные, но очень широкие. Я в них как в мешке.",
+     "en": "Monka, your trousers are trendy, but really wide. I'd look like I'm in a sack."
     },
     {
      "s": "a",
@@ -230,8 +230,8 @@
     },
     {
      "s": "c",
-     "ru": "В мешке? Ничего! Совсем ничего. Ой!",
-     "en": "In my sack? Nothing! Nothing at all. Oops!"
+     "ru": "В мешке? Ничего! Ой!",
+     "en": "In my sack? Nothing! Oops!"
     },
     {
      "s": "b",
@@ -250,8 +250,8 @@
     },
     {
      "s": "c",
-     "ru": "Это другая история, Ярик. Тедди, можно мне твою старую форму?",
-     "en": "That's another story, Yarik. Teddy, can I have your old kit?"
+     "ru": "Тедди, можно мне твою старую форму? Она удобная.",
+     "en": "Teddy, can I have your old kit? It is comfy."
     },
     {
      "s": "b",

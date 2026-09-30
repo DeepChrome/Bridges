@@ -2,7 +2,7 @@
  *
  * The bought Chirp3-HD clips, bundled: the curriculum words (ROADMAP 13.32,
  * then every Core 5000 one) and the speaking and listening pools' sentences
- * (2026-09-19). 3252 clips, keyed by the **folded** utterance, which
+ * (2026-09-19). 3254 clips, keyed by the **folded** utterance, which
  * is the key `say()` already derives (rule 20.2 — the manifest folds ё to е
  * and a lemma's bare form does not, which is how the first count of these
  * came out at 75 instead of 61).
@@ -895,6 +895,8 @@ export const WORD_CLIPS = {
   "личный": require("../assets/words/lichnyj.mp3"),
   "лишь": require("../assets/words/lish.mp3"),
   "ловить": require("../assets/words/lovit.mp3"),
+  "лодка": require("../assets/words/lodka.mp3"),
+  "лодка плыла по реке.": require("../assets/words/s-e4ec54b3980a.mp3"),
   "ложка": require("../assets/words/lozhka.mp3"),
   "лошадь": require("../assets/words/loshad.mp3"),
   "лучше": require("../assets/words/luchshe.mp3"),
@@ -924,6 +926,7 @@ export const WORD_CLIPS = {
   "машины стоят в пробках длинные пробки.": require("../assets/words/s-ef7cdf6e18e3.mp3"),
   "медведь": require("../assets/words/medved.mp3"),
   "медицина": require("../assets/words/medicina.mp3"),
+  "медленно": require("../assets/words/medlenno.mp3"),
   "медсестра": require("../assets/words/medsestra.mp3"),
   "медсестра измерила температуру больному.": require("../assets/words/s-e359646fa363.mp3"),
   "между": require("../assets/words/mezhdu.mp3"),
@@ -1126,7 +1129,6 @@ export const WORD_CLIPS = {
   "надо": require("../assets/words/nado.mp3"),
   "надо перевести время чтобы точно знать который час.": require("../assets/words/s-dc3861a06513.mp3"),
   "название": require("../assets/words/nazvanie.mp3"),
-  "назвать": require("../assets/words/nazvat.mp3"),
   "найти": require("../assets/words/najti.mp3"),
   "найти его офис было просто.": require("../assets/words/s-087b0d5897a3.mp3"),
   "наказание": require("../assets/words/nakazanie.mp3"),
@@ -1594,7 +1596,6 @@ export const WORD_CLIPS = {
   "отмечаете ли вы пасху?": require("../assets/words/s-1c608097b912.mp3"),
   "отношение": require("../assets/words/otnoshenie.mp3"),
   "отправляться": require("../assets/words/otpravlyatsya.mp3"),
-  "отрасль": require("../assets/words/otrasl.mp3"),
   "офис": require("../assets/words/ofis.mp3"),
   "офицер": require("../assets/words/oficer.mp3"),
   "официальный": require("../assets/words/oficialnyj.mp3"),
@@ -1914,8 +1915,10 @@ export const WORD_CLIPS = {
   "родители знают, что вы здесь?": require("../assets/words/s-6138eff530d1.mp3"),
   "родители знают, что ты здесь?": require("../assets/words/s-fc6ea4426204.mp3"),
   "родиться": require("../assets/words/roditsya.mp3"),
+  "рождение": require("../assets/words/rozhdenie.mp3"),
   "рождественская ведьма которая приходит к детям в италии.": require("../assets/words/s-ded388180d49.mp3"),
   "роман": require("../assets/words/roman.mp3"),
+  "рос я медленно, часто болел.": require("../assets/words/s-0b711afa7406.mp3"),
   "российский": require("../assets/words/rossijskij.mp3"),
   "рот": require("../assets/words/rot.mp3"),
   "рубашка": require("../assets/words/rubashka.mp3"),
@@ -2565,7 +2568,6 @@ export const WORD_CLIPS = {
   "учительница": require("../assets/words/uchitelnica.mp3"),
   "учить": require("../assets/words/uchit.mp3"),
   "учиться": require("../assets/words/uchitsya.mp3"),
-  "учеба": require("../assets/words/ucheba.mp3"),
   "ученый": require("../assets/words/uchenyj.mp3"),
   "фильм": require("../assets/words/film.mp3"),
   "финансовый": require("../assets/words/finansovyj.mp3"),

@@ -2,7 +2,7 @@
  "chapter": 4,
  "name": "Winter & Gifts",
  "lessons": {
-  "core4:2": {
+  "core4:3": {
    "title": "The bus to Grandad's",
    "cast": [
     {
@@ -155,7 +155,7 @@
     }
    ]
   },
-  "core4:4": {
+  "core4:5": {
    "title": "Ice at the bus stop",
    "cast": [
     {
@@ -224,8 +224,8 @@
     },
     {
      "s": "c",
-     "ru": "Нет, у меня тут дело. Идите!",
-     "en": "No, I've got something to do here. Off you go!"
+     "ru": "Нет, у меня тут мешок. Идите!",
+     "en": "No, I've got a sack here. Off you go!"
     },
     {
      "s": "b",

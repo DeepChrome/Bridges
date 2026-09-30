@@ -59,13 +59,13 @@
     },
     {
      "s": "b",
-     "ru": "Белка, откуда ты всё знаешь?",
-     "en": "Belka, how do you know everything?"
+     "ru": "Белка, откуда ты знаешь название каждого гриба?",
+     "en": "Belka, how do you know the name of every mushroom?"
     },
     {
      "s": "c",
-     "ru": "Ярик, я каждый октябрь в этом лесу. Тут я знаю каждый гриб.",
-     "en": "Yarik, I'm in this forest every October. I know every mushroom here."
+     "ru": "Ярик, я каждый октябрь в этом лесу. Тут я знаю множество грибов.",
+     "en": "Yarik, I'm in this forest every October. I know loads of mushrooms here."
     },
     {
      "s": "a",
@@ -74,8 +74,8 @@
     },
     {
      "s": "b",
-     "ru": "Сначала надо собрать мешок грибов.",
-     "en": "First we have to gather a sack of mushrooms."
+     "ru": "Сначала надо набрать мешок грибов.",
+     "en": "First we have to fill a sack with mushrooms."
     },
     {
      "s": "c",
@@ -156,7 +156,7 @@
     }
    ]
   },
-  "core10:4": {
+  "core10:5": {
    "title": "A picnic by the swamp",
    "cast": [
     {

@@ -146,6 +146,12 @@ export const SECTION_N = 30;
 export const TEST_OUT = 0.8;
 
 const VOWELS_RU = "аеёиоуыэюяАЕЁИОУЫЭЮЯ";
+/* A word as written without its stress mark (ё kept: it is spelling), whether
+   a written word shows where its stress falls (a mark, or an ё, which is
+   always stressed), and how many syllables it has. */
+const plainOf = (s) => String(s || "").normalize("NFD").replace(/[̀́]/g, "").normalize("NFC");
+const stressed = (s) => /́/.test(String(s || "").normalize("NFD")) || /[ёЁ]/.test(String(s || ""));
+const syllables = (s) => [...plainOf(s)].filter((c) => VOWELS_RU.includes(c)).length;
 /* A partner worth asking about: present, Cyrillic, and **not the verb itself**.
    Some rows record a biaspectual verb as its own partner, and the drill then
    asked the learner to produce the word printed above the question — caught by
@@ -153,6 +159,14 @@ const VOWELS_RU = "аеёиоуыэюяАЕЁИОУЫЭЮЯ";
    (`w` is optional so the old one-argument calls still read the same). */
 const realPartner = (p, w) => !!p && p.trim() && p.trim() !== "-" && /[а-яё]/i.test(p)
   && (!w || fold(p) !== fold(w));
+/* A verb's partners, one each. The lexicon records some verbs with more than
+   one — «лови́ть» → "поймать,изловить", «съесть» → "есть,съедать" — and the
+   whole string was used as one partner: the typed drill wanted the learner to
+   write "поймать,изловить" and the chosen one offered it, comma and all, as a
+   single option (the review, 2026-10-01). Every listed partner is a right
+   answer; any one of them is the one shown. */
+const partnersOf = (x) => String((x && x.pt) || "").split(",").map((p) => p.trim())
+  .filter((p) => realPartner(p, x.w));
 const tableTitled = (w, re) => (w.t || []).find((t) => re.test(t.title));
 const cellsOf = (row) => row.slice(1);
 
@@ -539,13 +553,38 @@ export function makeQuestions(env) {
          the restored sentence was never shown (the pedagogy review). */
       case "cloze": {
         const token = e.token;
-        const own = unique(paradigmForms(w).filter((f) => fold(f) !== fold(token)));
-        const wrong = shuffle(own).slice(0, 3).map((f) => ({ label: f, right: false, cyr: true }));
+        /* **All four options marked for stress, or none.** The answer was the
+           token as the sentence spelled it — usually unmarked, since his decks
+           mostly are — and the wrong ones came from the paradigm, which marks
+           every form: in 27 % of gap-fills the one option without an accent
+           was the answer (the review, 2026-10-01). The answer takes its stress
+           from the paradigm when the paradigm spells it only one way (it
+           cannot choose between «ру́ки» and «руки́» for a bare «руки»); the
+           other words are offered as the lexicon accents them; a one-syllable
+           word carries no mark anywhere; and if any option of two syllables
+           or more is still unmarked, the marks come off all of them. */
+        const forms = paradigmForms(w);
+        const sameLetters = (f) => plainOf(f).toLowerCase() === plainOf(token).toLowerCase();
+        const marks = unique(forms.filter((f) => sameLetters(f) && stressed(f)));
+        const answer = stressed(token) || marks.length !== 1 ? token : marks[0];
+        const seen = new Set([plainOf(token).toLowerCase()]);
+        const fresh = (f) => {
+          const k = plainOf(f).toLowerCase();
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        };
+        const own = shuffle(unique(forms.filter((f) => fold(f) !== fold(token)))).filter(fresh);
+        const wrong = own.slice(0, 3).map((f) => ({ label: f, right: false, cyr: true }));
         if (wrong.length < 3) {
-          for (const i of distractors(e.i, e.pool, 3 - wrong.length, bySense)) {
-            wrong.push({ label: L[i].b, right: false, cyr: true });
+          for (const i of distractors(e.i, e.pool, 3, bySense)) {
+            if (wrong.length < 3 && fresh(L[i].w)) wrong.push({ label: L[i].w, right: false, cyr: true });
           }
         }
+        const bare = (s) => (syllables(s) < 2 ? plainOf(s) : s);
+        const uniform = [answer].concat(wrong.map((o) => o.label)).map(bare)
+          .every((s) => syllables(s) < 2 || stressed(s));
+        const shown = (s) => (uniform ? bare(s) : plainOf(s));
         const form = describeForm(w, token);
         /* Every option cased the way the gap needs it (ROADMAP 13.15).
            The answer is the form exactly as the sentence spelled it, and the
@@ -555,8 +594,8 @@ export function makeQuestions(env) {
            offered «Госуда́рственная» against three lowercase forms, which is a
            free elimination for somebody who reads no Russian at all. Found
            reading the Phase 0 walkthrough shots, 2026-09-15. */
-        const opts = [{ label: token, right: true, cyr: true }].concat(wrong)
-          .map((o) => ({ ...o, label: casedLike(token, o.label) }));
+        const opts = [{ label: answer, right: true, cyr: true }].concat(wrong)
+          .map((o) => ({ ...o, label: casedLike(token, shown(o.label)) }));
         return {
           kind: e.t, i: e.i, ask: "Fill the gap",
           prompt: gapped(e.ex.ru, token), sub: e.ex.en, cyr: true,
@@ -924,7 +963,9 @@ export function makeQuestions(env) {
     // an option is a free elimination (seen on the emulator — «рука́» stood above
     // its own four choices).
     const own = t.rows.flatMap((row) => cellsOf(row).map((c) => (Array.isArray(c) ? c[0] : c)));
-    const seen = new Set([fold(target), fold(w.w)]);
+    // Nor another form of the asked cell, which is a right answer too («есть»
+    // and «бу́ду» … the review, 2026-10-01).
+    const seen = new Set(forms.concat(w.w).map(fold));
     const wrong = [];
     for (const f of shuffle(own.filter(Boolean)).concat(shuffle(paradigmForms(w)))) {
       if (seen.has(fold(f))) continue;
@@ -951,7 +992,14 @@ export function makeQuestions(env) {
        can show the rule rather than only the answer. */
     const withNote = (q) => (q && !q.note ? { ...q, note: formNote(unit) || undefined } : q);
     if (spec.drill) {
-      return withNote(withPool(unitsUpTo(unit).flatMap((u) => u.w), () => (GEN[spec.drill] ? GEN[spec.drill]() : null)));
+      // Asked only in the cases and tenses the route has introduced: chapter
+      // 3's agreement card is the nominative, not all six (the review,
+      // 2026-10-01).
+      const route = unitsUpTo(unit);
+      const { cells, only } = routeDrill(spec.drill, route);
+      const focus = only ? new Set(only) : null;
+      return withNote(withPool(route.flatMap((u) => u.w),
+        () => (GEN[spec.drill] ? GEN[spec.drill](cells, false, focus) : null)));
     }
     const typed = stageOf(unit) >= FORM_MIX.typedFromStage;
     if (only !== undefined) {
@@ -1037,19 +1085,19 @@ export function makeQuestions(env) {
     const lesson = index !== undefined && index !== null;
     const unitSoFar = lesson
       ? Array.from({ length: index + 1 }, (_, j) => lessonWords(unit, j)).flat() : unit.w;
-    const k = stageOf(unit);
-    const spine = STAGES[k] && STAGES[k].core !== unit ? STAGES[k].core.w : [];
-    const route = unique(STAGES.slice(0, Math.max(0, k))
-      .flatMap((s) => [s.core, ...s.branches]).flatMap((u) => u.w).concat(spine, unitSoFar));
+    const reached = unitsUpTo(unit);
+    const route = unique(reached.filter((u) => u !== unit).flatMap((u) => u.w).concat(unitSoFar));
+    // The cases and tenses the route has introduced, for a drill-shaped point.
+    const { cells, only } = routeDrill(spec.drill, reached);
     const choose = Math.ceil(n * GRAMMAR_CHOOSE);
     if (spec.drill) {
       /* A rule the drills already ask (agreement, aspect): the same draw, on
          these words, chosen then written — and never one question twice in
          its two shapes, which `drillKey` cannot see (it keys on the ask). */
       const same = (q) => `${q.prompt}|${q.typed ? q.target : (q.options || []).filter((o) => o.right).map((o) => o.label).join("/")}`;
-      const first = drillQuestions(spec.drill, choose, route, undefined, false);
+      const first = drillQuestions(spec.drill, choose, route, cells, false, only);
       const keys = new Set(first.map(same));
-      const rest = drillQuestions(spec.drill, n, route, undefined, true)
+      const rest = drillQuestions(spec.drill, n, route, cells, true, only)
         .filter((q) => !keys.has(same(q))).slice(0, n - first.length);
       return first.concat(rest).map(withNote);
     }
@@ -1179,7 +1227,10 @@ export function makeQuestions(env) {
       const kind = sentenceKinds[k % sentenceKinds.length];
       const q = kind === "scene" ? sceneFor(unitIds, null) : sentencePrompt(kind, unitIds);
       if (!q) continue;
-      const key = q.kind + "|" + (q.target || (q.rows ? q.rows[0].ru : ""));
+      /* A scene carries its sentences as `lines`; this read `rows`, which no
+         scene has, so every scene keyed as the same empty string and a quiz
+         asked for twenty scenes held one (the review, 2026-10-01). */
+      const key = q.kind + "|" + (q.target || (q.lines ? q.lines.map((l) => l.ru).join("|") : ""));
       if (seen.has(key)) continue;
       seen.add(key);
       out.push(q);
@@ -1268,17 +1319,29 @@ export function makeQuestions(env) {
     return steps;
   }
 
-  /* Every unit on the route up to and including this one: the spine and branches
-     of earlier chapters, and this chapter's up to the unit itself. What a learner
-     here has been through, in order. */
+  /* The units a learner standing at this one has certainly been through, in
+     route order: the spine of this chapter and every earlier one, the
+     **required** side quests of earlier chapters, and the unit itself.
+   *
+   * Never a sibling side quest of the same chapter, and never an optional
+   * quest other than the unit itself: the learner may have taken neither. It
+   * used to be "earlier chapters whole, and this chapter up to the unit", so a
+   * side quest's quiz asked «автомоби́ль» from a sibling quest and Emotion's
+   * listening played «Он пошёл к врачу́» on the strength of Work (the review,
+   * 2026-10-01), and a spine lesson could ask a word only an optional quest
+   * teaches. This is the one rule for "what has the learner met"; the quiz,
+   * the form question, the speech prompts, the grammar run and the drills
+   * spliced into a lesson all read it. */
   function unitsUpTo(unit) {
     const out = [];
     for (const s of STAGES) {
       const here = [s.core].concat(s.branches || []);
-      const at = here.indexOf(unit);
-      if (at < 0) { out.push(...here); continue; }
-      out.push(...here.slice(0, at + 1));
-      return out;
+      if (here.includes(unit)) {
+        out.push(s.core);
+        if (unit !== s.core) out.push(unit);
+        return out;
+      }
+      out.push(s.core, ...(s.branches || []).filter((b) => !b.opt));
     }
     return out;
   }
@@ -1305,14 +1368,29 @@ export function makeQuestions(env) {
     // Hearing in chapter 1 draws on the speak pool when the listen pool has
     // nothing yet: its short sentences are the right first thing to hear.
     const fallback = kind === "hear" && SPEECH.speak ? SPEECH.speak : null;
-    const own = (pool[unit.id] || []).concat(fallback && !(pool[unit.id] || []).length ? (fallback[unit.id] || []) : []);
-    const all = unitsUpTo(unit).flatMap((u) => pool[u.id] || []);
+    /* A sentence's unit is where the build found its last word taught, along
+       the whole path — so a side quest's pool can hold a sentence whose other
+       word only a sibling quest teaches («Како́й сего́дня курс до́ллара…» in
+       Business, «до́ллар» from Work; the review, 2026-10-01). Only sentences
+       every word of which the learner has met, or meets on every screen —
+       and a common word is not "met on every screen" when a quest beside
+       this route is where it is taught: «врач» is Work's. */
+    const route = unitsUpTo(unit);
+    const met = new Set(route.flatMap((u) => u.w));
+    const k = stageOf(unit);
+    const beside = new Set(STAGES.slice(0, k + 1).flatMap((s) => [s.core].concat(s.branches || []))
+      .filter((u) => !route.includes(u)).flatMap((u) => u.w));
+    const sayable = (i) => sentenceLemmas(SPEECH.rows[i][0], IX)
+      .every((l) => met.has(l) || (l < FREE_RANK && !beside.has(l)));
+    const own = (pool[unit.id] || []).concat(fallback && !(pool[unit.id] || []).length ? (fallback[unit.id] || []) : [])
+      .filter(sayable);
+    const all = route.flatMap((u) => pool[u.id] || []).filter(sayable);
     const want = new Set(lessonWords(unit, index));
     const row = pickPrompt(SPEECH.rows, own, want, IX, null, true)
       || pickPrompt(SPEECH.rows, all, want, IX, null, true)
       || pickPrompt(SPEECH.rows, own, null, IX)
       || pickPrompt(SPEECH.rows, all, null, IX)
-      || (fallback ? pickPrompt(SPEECH.rows, unitsUpTo(unit).flatMap((u) => fallback[u.id] || []), null, IX) : null);
+      || (fallback ? pickPrompt(SPEECH.rows, route.flatMap((u) => fallback[u.id] || []).filter(sayable), null, IX) : null);
     return row ? { t: kind, row, unit: unit.id } : null;
   }
 
@@ -1370,7 +1448,12 @@ export function makeQuestions(env) {
        could never reach its second branch: `candidates` always ends with a
        `type`, so the gap-fill was unreachable here and every guaranteed
        production slot in the app was a typed one. */
-    const production = words
+    /* …and only for a word not already asked by production. A word drawn as
+       `type` above and then again as the guaranteed `type` was the same
+       question twice in one quiz, in 26 % of quizzes (the review,
+       2026-10-01). */
+    const produced = new Set(bag.filter((e) => PRODUCTION.includes(e.t)).map((e) => e.i));
+    const production = words.filter((i) => !produced.has(i))
       .map((i) => drawFrom(candidates(i, pool, card(i), readable).filter((e) => PRODUCTION.includes(e.t)), i))
       .filter(Boolean);
     shuffle(production).slice(0, 2).forEach((e) => bag.push(e));
@@ -1418,10 +1501,14 @@ export function makeQuestions(env) {
     if (types.length) {
       const chapter = reached.filter((u) => stageOf(u) === stage).flatMap((u) => u.w);
       const route = reached.flatMap((u) => u.w);
-      const cells = formsIntroduced(reached);
       for (const type of types) {
-        const q = drillQuestions(type, 1, chapter, cells, false)[0]
-          || drillQuestions(type, 1, route, cells, false)[0];
+        /* Only what the route has introduced. The cases drill always kept to
+           the cases taught (`cells`), but agreement and conjugation ignore
+           `cells`, so a chapter-2 lesson asked the past and the imperative and
+           a chapter-3 lesson the instrumental (the review, 2026-10-01). */
+        const { cells, only } = routeDrill(type, reached);
+        const q = drillQuestions(type, 1, chapter, cells, false, only)[0]
+          || drillQuestions(type, 1, route, cells, false, only)[0];
         if (q) out.splice(slotApart(out, q), 0, { ...q, drill: true });
       }
     }
@@ -1582,6 +1669,34 @@ export function makeQuestions(env) {
     return type === "agreement" ? rows.concat(ADJ_STEMS.map((s) => s.id)) : rows;
   }
 
+  /* What a drill spliced into a lesson — or a chapter's own point asked as a
+     drill — may ask, read off the same cards as `formsIntroduced`: agreement
+     in the nominative (chapter 3's card) and the cases taught since;
+     conjugation in the tables the verb cards have introduced, read either
+     way round. Null where the route sets no bound. A Practice drill keeps the
+     learner's own selection (`drillFocus`, `defaultFocus`); this is only for
+     questions the learner did not choose, which must not run ahead of the
+     path (the review, 2026-10-01). */
+  function routeFocus(type, units) {
+    if (type === "agreement") {
+      const rows = ["Nominative"];
+      for (const c of formsIntroduced(units)) if (!rows.includes(c.row)) rows.push(c.row);
+      return rows;
+    }
+    if (type === "conjugation") {
+      const ids = [];
+      for (const u of units) {
+        const s = u.g && u.g.form;
+        if (!s || s.pos !== "verb") continue;
+        const v = VERB_TABLES.find((x) => x.re.test(s.table));
+        if (v && !ids.includes(v.id)) ids.push(v.id);
+      }
+      return ids.length ? ids.concat("who") : null;
+    }
+    return null;
+  }
+  const routeDrill = (type, units) => ({ cells: formsIntroduced(units), only: routeFocus(type, units) });
+
   /* `cells` ({ row, col } pairs, from formsIntroduced) limits what may be asked
      for to the cases the route has taught; the wrong answers still come from
      the whole table. `only` narrows it further, to the cases the learner ticked. */
@@ -1614,11 +1729,17 @@ export function makeQuestions(env) {
        twice in 18 % of questions (tools/audit_options.mjs). Two identical
        options are one option: the learner is choosing from three, and the
        repeat tells them it is not the answer. */
+    /* …and never the headword, which is the prompt printed above the options:
+       an option the learner can rule out by reading the screen is a free
+       elimination, and it was one of the four in 44 % of these (the review,
+       2026-10-01). `formQuestion` has barred it since the walkthrough of
+       2026-09-09; this drill was left behind. Nor the target cell's other
+       forms, which are right answers too. Compared folded, as there. */
     const wrong = [];
-    const shown = new Set([target.label]);
+    const shown = new Set([target.label, w.w].concat(target.alts).map(fold));
     for (const o of shuffle(opts.slice())) {
-      if (shown.has(o.label)) continue;
-      shown.add(o.label);
+      if (shown.has(fold(o.label))) continue;
+      shown.add(fold(o.label));
       wrong.push(o);
       if (wrong.length === 3) break;
     }
@@ -1689,21 +1810,25 @@ export function makeQuestions(env) {
      have one — seven after the first chapter — so the second shape carries the
      drill early on, where any verb marked for aspect qualifies. */
   function qAspectPartner(_cells, typed) {
-    const w = pickWhere((x) => x.p === "verb" && realPartner(x.pt, x.w) && x.a);
+    const w = pickWhere((x) => x.p === "verb" && partnersOf(x).length && x.a);
     if (!w) return null;
     const want = w.a === "imperfective" ? "perfective" : "imperfective";
+    const partners = partnersOf(w);
     if (typed) {
       return written({ kind: "aspect", i: L.indexOf(w), cyr: true, prompt: w.w,
                        sub: w.e || "", note: (UN.find((u) => u.id === "core8") || {}).g },
-                     `Write the ${want} partner`, w.pt.trim());
+                     `Write the ${want} partner`, partners[0], partners.slice(1));
     }
-    const wrong = partnerWrong(w.w, w.pt.trim());
+    // One of the partners, written as the lexicon accents it where it can: an
+    // unmarked answer among marked distractors is a tell of its own.
+    const right = verbLabel(pickOne(partners));
+    const wrong = partnerWrong(w, right);
     if (!wrong) return null;
     return {
       kind: "aspect", i: L.indexOf(w), cyr: true,
       ask: `Choose the ${want} partner`, prompt: w.w, sub: w.e || "",
       note: (UN.find((u) => u.id === "core8") || {}).g,
-      options: optionsOf(w.pt.trim(), wrong),
+      options: optionsOf(right, wrong),
     };
   }
 
@@ -1774,9 +1899,25 @@ export function makeQuestions(env) {
     if (verbIndex) return verbIndex;
     const have = new Set();
     const cands = [], byGram = new Map(), byLen = new Map();
+    /* The accented spelling of every verb the curriculum carries, and every
+       verb's partners both ways round — what a distractor must not be. A wrong
+       option the lexicon records as a partner of the prompt (or that records
+       the prompt as *its* partner) is a second right answer: «ви́деть» was
+       offered «уви́деть» beside «завидеть» (the review, 2026-10-01). */
+    const accented = new Map(), pairs = new Map();
+    const pair = (a, b) => {
+      if (!pairs.has(a)) pairs.set(a, new Set());
+      pairs.get(a).add(b);
+    };
     for (const x of L) {
       if (x.p !== "verb") continue;
-      for (const cand of [x.w, realPartner(x.pt) ? x.pt.trim() : null]) {
+      if (!accented.has(fold(x.b))) accented.set(fold(x.b), x.w);
+      for (const p of partnersOf(x)) { pair(fold(x.w), fold(p)); pair(fold(p), fold(x.w)); }
+    }
+    for (const x of L) {
+      if (x.p !== "verb") continue;
+      for (const raw of [x.w].concat(partnersOf(x))) {
+        const cand = accented.get(fold(raw)) || raw;
         if (!cand) continue;
         const f = fold(cand);
         if (have.has(f)) continue;
@@ -1790,13 +1931,18 @@ export function makeQuestions(env) {
         byLen.get(f.length).push(i);
       }
     }
-    verbIndex = { cands, byGram, byLen };
+    verbIndex = { cands, byGram, byLen, accented, pairs };
     return verbIndex;
   }
+  const verbLabel = (p) => verbIndexed().accented.get(fold(p)) || p;
 
-  function partnerWrong(promptWord, answer) {
+  function partnerWrong(verb, answer) {
+    const promptWord = verb.w;
     const pf = fold(promptWord), af = fold(answer);
     const ps = verbStem(promptWord), as = verbStem(answer);
+    const { pairs } = verbIndexed();
+    const partnered = pairs.get(pf) || new Set();
+    const isPartner = (f) => partnered.has(f) || (pairs.get(f) || new Set()).has(pf);
     /* Every verb the curriculum knows, not the learner's own handful.
      *
      * Two restrictions were narrowing this to almost nothing, and both were
@@ -1829,7 +1975,7 @@ export function makeQuestions(env) {
       for (const g of grams(stem)) {
         for (const i of byGram.get(g) || []) {
           const f = cands[i].f;
-          if (f !== af && f !== pf) related.add(i);
+          if (f !== af && f !== pf && !isPartner(f)) related.add(i);
         }
       }
     }
@@ -1861,7 +2007,7 @@ export function makeQuestions(env) {
       for (const len of d === 0 ? [af.length] : [af.length - d, af.length + d]) {
         for (const i of byLen.get(len) || []) {
           const f = cands[i].f;
-          if (!related.has(i) && f !== af && f !== pf) ring.push(i);
+          if (!related.has(i) && f !== af && f !== pf && !isPartner(f)) ring.push(i);
         }
       }
       for (const i of shuffle(ring)) if (rest.length < 6) rest.push(i);
@@ -1953,44 +2099,65 @@ export function makeQuestions(env) {
     /* The masculine accusative cell holds two forms — «твой» for a thing,
        «твоего́» for a person or an animal — and the first was always taken, so
        the drill asked «___ отца́» and wanted «тво́й». The noun says which: an
-       animate masculine noun's accusative is its genitive. */
-    let right = row[col][0];
-    let alts = row[col].slice(1);
-    if (row[0] === "Accusative" && noun.g === "m" && row[col].length > 1) {
-      /* Animacy is read off the **plural**: an animate noun's accusative
-         plural is its genitive plural (мужчи́н, отцо́в; but столы́, столо́в).
-         The singular cannot say it for the masculine nouns in -а/-я —
-         «мужчи́ну» is neither nominative nor genitive — and reading it there
-         wanted «жена́тый мужчи́ну» (the review, 2026-09-30). */
-      const pl = nt.columns.indexOf("Plural");
-      const nAcc = nt.rows.find((x) => x[0] === "Accusative");
-      const nGen = nt.rows.find((x) => x[0] === "Genitive");
-      const accPl = pl > 0 && nAcc && nAcc[pl], genPl = pl > 0 && nGen && nGen[pl];
-      const animate = !!(accPl && genPl && accPl.length && accPl.some((f) => genPl.some((g) => fold(g) === fold(f))));
-      const aGen = t.rows.find((x) => x[0] === "Genitive");
-      const aNom = t.rows.find((x) => x[0] === "Nominative");
-      const want = animate ? aGen && aGen[col] : aNom && aNom[col];
-      const hit = want && row[col].find((f) => want.some((g) => fold(g) === fold(f)));
-      if (hit) {
-        right = hit;
-        // …and the written answer accepts only that animacy's form.
-        alts = row[col].filter((f) => f !== hit && want.some((g) => fold(g) === fold(f)));
+       animate noun's accusative is its genitive.
+     *
+     * Animacy is read off the **plural**: an animate noun's accusative plural
+     * is its genitive plural (мужчи́н, отцо́в; but столы́, столо́в). The singular
+     * cannot say it for the masculine nouns in -а/-я — «мужчи́ну» is neither
+     * nominative nor genitive — and reading it there wanted «жена́тый мужчи́ну»
+     * (the review, 2026-09-30). */
+    const pl = nt.columns.indexOf("Plural");
+    const aPl = t.columns.indexOf("Plural");
+    const nAcc = nt.rows.find((x) => x[0] === "Accusative");
+    const nGen = nt.rows.find((x) => x[0] === "Genitive");
+    const accPl = pl > 0 && nAcc && nAcc[pl], genPl = pl > 0 && nGen && nGen[pl];
+    const animate = !!(accPl && genPl && accPl.length && accPl.some((f) => genPl.some((g) => fold(g) === fold(f))));
+    /* The adjective's forms for one case and column — for a two-form
+       accusative cell, the one this noun's animacy takes. */
+    const agreeing = (label, c) => {
+      const r = t.rows.find((x) => x[0] === label);
+      const forms = ((r && r[c]) || []).filter(Boolean);
+      if (label !== "Accusative" || forms.length < 2) return forms;
+      const ref = t.rows.find((x) => x[0] === (animate ? "Genitive" : "Nominative"));
+      const hit = forms.filter((f) => ((ref && ref[c]) || []).some((g) => fold(g) === fold(f)));
+      return hit.length ? hit : forms;
+    };
+    const asked = agreeing(row[0], col);
+    if (!asked.length) return null;
+    const right = asked[0];
+    /* **Every reading of the noun form, not only the one drawn.** A noun form
+       is often two cells at once — «ле́кции» is genitive singular and
+       nominative plural, «мужчи́не» dative and prepositional — and the typed
+       question named neither, so «но́вые ле́кции», which is correct Russian,
+       was marked wrong in 18 % of typed questions (the review, 2026-10-01).
+       The case asked is stated now, as the chosen question always stated it;
+       and an answer that agrees with any reading is still accepted when
+       written, and never offered as a wrong option when chosen. */
+    const readings = new Set(asked.map(fold));
+    const nf = fold(nounForm);
+    for (const nr of nt.rows) {
+      if (!CASE_ROWS.includes(nr[0])) continue;
+      for (const [nc, ac] of [[1, col], [pl, aPl]]) {
+        if (nc < 1 || ac < 1 || !(nr[nc] || []).some((f) => fold(f) === nf)) continue;
+        agreeing(nr[0], ac).forEach((f) => readings.add(fold(f)));
       }
     }
     const at = [t.rows.indexOf(row), col];
+    const sub = `${firstSense(adj)} ${firstSense(noun)} · ${row[0].toLowerCase()}`;
     if (typed) {
       return written({ kind: "agreement", i: L.indexOf(adj), cyr: true,
-                       prompt: `___ ${nounForm}`, sub: `${adj.w} · ${adj.e || ""}`.trim(),
+                       prompt: `___ ${nounForm}`, sub: `${adj.w} · ${sub}`,
                        table: t, at },
-                     "Write the form that agrees", right, alts);
+                     "Write the form that agrees", right,
+                     [...readings].filter((f) => f !== fold(right)));
     }
     const own = t.rows.flatMap((r) => cellsOf(r).map((c) => (Array.isArray(c) ? c[0] : c)));
-    const wrong = threeWrong(right, own.filter(Boolean));
+    const wrong = threeWrong(right, own.filter((f) => f && !readings.has(fold(f))));
     if (!wrong) return null;
     return {
       kind: "agreement", i: L.indexOf(adj), cyr: true,
       ask: "Choose the form that agrees", prompt: `___ ${nounForm}`,
-      sub: `${firstSense(adj)} ${firstSense(noun)} · ${row[0].toLowerCase()}`, table: t, at,
+      sub, table: t, at,
       options: optionsOf(right, wrong),
     };
   }
@@ -2075,7 +2242,10 @@ export function makeQuestions(env) {
      verb's own table: which pattern it follows, read off its они form, whether
      its present is a future, and the whole paradigm as the examples with the
      asked row first. */
+  /* The present table's third-person row is labelled «он / она» in one cell,
+     and its examples came out with no English (the review, 2026-10-01). */
   const PERSON_EN = { "я": "I", "ты": "you", "он": "he", "она": "she", "оно": "it",
+                      "он / она": "he / she", "он / она / оно": "he / she / it",
                       "мы": "we", "вы": "you (plural)", "они": "they" };
   function conjugationNote(w, t, target) {
     const rows = t.rows.filter((r) => r[1] && r[1].length);
@@ -2156,17 +2326,23 @@ export function makeQuestions(env) {
       if (VOWELS_RU.indexOf(plain[k]) >= 0) positions.push(k);
     }
     if (positions.length < 2) return null;
+    /* A wrong stress must be wrong. «пла́тите» (you pay) and «плати́те» (pay!)
+       are both forms of «плати́ть», spelled alike, so offering the second as a
+       wrong answer to the first was a question with two right answers (the
+       review, 2026-10-01). A placement the word's own paradigm uses is never
+       a distractor. */
+    const real = new Set(paradigmForms(w).concat(w.w).map((f) => f.normalize("NFC")));
     const variants = positions
-      .map((k) => plain.slice(0, k + 1) + "́" + plain.slice(k + 1))
-      .filter((v) => fold(v) === fold(accented) && v !== accented);
+      .map((k) => (plain.slice(0, k + 1) + "́" + plain.slice(k + 1)).normalize("NFC"))
+      .filter((v) => fold(v) === fold(accented) && v !== accented.normalize("NFC") && !real.has(v));
     // Two options is a coin flip, not a drill — a word needs enough vowels to
     // place the stress somewhere genuinely wrong at least twice.
     if (variants.length < 2) return null;
     return {
       kind: "stress", i: L.indexOf(w), cyr: true,
       ask: "Choose where the stress falls", prompt: plain, sub: w.e || "", say: plain,
-      options: shuffle([accented].concat(shuffle(variants).slice(0, 3)))
-        .map((s) => ({ label: s, right: s === accented, cyr: true })),
+      options: shuffle([accented.normalize("NFC")].concat(shuffle(variants).slice(0, 3)))
+        .map((s) => ({ label: s, right: s === accented.normalize("NFC"), cyr: true })),
     };
   }
 
@@ -2271,7 +2447,7 @@ export function makeQuestions(env) {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
-    customQuiz, finalExam, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, grammarRun,
+    customQuiz, finalExam, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, routeFocus, grammarRun,
     drillsIntroduced, drillOpensAt,
   };
 }

@@ -134,6 +134,11 @@ export function conjugation(w) {
    takes (core/grammar.js, "So every ending has two shapes"). */
 export function nounStem(bare) {
   const s = fold(bare);
+  /* -е after ц, ж or ш is the spelling rule writing an unstressed -о, not a
+     soft stem: those three consonants are always hard, and «се́рдце»,
+     «со́лнце» decline hard (се́рдца, со́лнцем). They were called soft (the
+     review, 2026-10-01). */
+  if (/[цжш]е$/.test(s)) return "hard";
   if (/[ьйяею]$/.test(s)) return "soft";
   return "hard";
 }

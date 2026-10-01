@@ -41,7 +41,7 @@ import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit
          sayPassed, closestTranscript }
   from "../core/speech.js";
 import { describeForm, summarise } from "../core/forms.js";
-import { parseDeep, makeSearch, MATCH } from "../core/search.js";
+import { parseDeep, makeSearch, makeResolve, MATCH } from "../core/search.js";
 import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ICONS, ACTIVITY_ICONS, iconFor } from "../core/icons.js";
@@ -3103,6 +3103,278 @@ group("paradigms rebuilt from shared ending-shapes");
      "which hydration restores", `${l.t.length} table(s), ${l.x.length} example(s)`);
   ok(describeForm(l, "книгу") !== null,
      "and form description still works off the rebuilt tables");
+}
+
+/* The review of 2026-10-01: thirteen defects in the generators, each found by a
+   script that measured it and each pinned here by a check that failed before
+   its fix. Aimed rather than sampled wherever the defect was rare (§23: a check
+   that fails one run in six gets committed over). */
+group("the review, 2026-10-01");
+{
+  const studiedR = [...new Set(UN.flatMap((u) => u.w))];
+  const plainR = (s) => String(s).normalize("NFD").replace(/[̀́]/g, "").normalize("NFC");
+  const acuteR = (s) => /́/.test(String(s).normalize("NFD"));
+  const sylR = (s) => (plainR(s).match(/[аеёиоуыэюя]/gi) || []).length;
+  const formsR = (w) => (w.t || []).flatMap((t) => t.rows.flatMap((r) => r.slice(1)
+    .flatMap((c) => (Array.isArray(c) ? c : [c])).filter(Boolean)));
+  const GC = { m: "Masculine", f: "Feminine", n: "Neuter" };
+  const declension = (x) => (x.t || []).find((t) => /Declension/.test(t.title));
+  /* The noun of an agreement question, and every adjective form that agrees
+     with some reading of its form (the two-form accusative cells left out:
+     which of those agrees is the noun's animacy, asked separately above). */
+  const readingsOf = (q) => {
+    const nounForm = q.prompt.replace(/^___ /, "");
+    const noun = (DATA.pairs[q.i] || []).map((i) => L[i]).find((x) => x && x.p === "noun"
+      && declension(x) && declension(x).rows.some((r) => (r[1] || []).includes(nounForm)));
+    if (!noun) return null;
+    const out = [];
+    declension(noun).rows.forEach((r) => [[1, GC[noun.g]], [2, "Plural"]].forEach(([ci, name]) => {
+      if (!(r[ci] || []).some((f) => fold(f) === fold(nounForm))) return;
+      const ar = q.table.rows.find((x) => x[0] === r[0]);
+      const col = q.table.columns.indexOf(name);
+      if (!ar || col < 1 || !ar[col] || (r[0] === "Accusative" && ar[col].length > 1)) return;
+      for (const f of ar[col]) out.push({ f, why: `${r[0]} ${ci === 1 ? "sg" : "pl"}` });
+    }));
+    return out;
+  };
+
+  // 1. «___ ле́кции» is genitive singular and nominative plural at once.
+  let typedN = 0, unnamed = 0;
+  const refused = [], offered = [];
+  for (let k = 0; k < 30; k++) {
+    for (const q of Q.drillQuestions("agreement", 10, studiedR, undefined, true)) {
+      typedN++;
+      if (!q.sub.includes(q.table.rows[q.at[0]][0].toLowerCase())) unnamed++;
+      const accepted = new Set([fold(q.target), ...q.alts]);
+      for (const r of readingsOf(q) || []) if (!accepted.has(fold(r.f))) refused.push(`${q.prompt}: ${r.f} (${r.why})`);
+    }
+    for (const q of Q.drillQuestions("agreement", 10, studiedR, undefined, false)) {
+      const good = new Set((readingsOf(q) || []).map((r) => fold(r.f)));
+      for (const o of q.options) if (!o.right && good.has(fold(o.label))) offered.push(`${q.prompt}: ${o.label}`);
+    }
+  }
+  ok(!refused.length, "a written agreement answer agreeing with any reading of the noun form is accepted",
+     `${refused.length}: ${refused.slice(0, 3).join("; ")}`);
+  ok(unnamed === 0, "and the written agreement question names the case it asks", `${unnamed}/${typedN}`);
+  ok(!offered.length, "a chosen agreement question never offers an agreeing form as wrong",
+     offered.slice(0, 3).join("; "));
+
+  // 2. «лови́ть» → "поймать,изловить" is two partners, not one.
+  const listed = (x) => String(x.pt || "").split(",").map((p) => fold(p.trim())).filter(Boolean);
+  const multi = studiedR.filter((i) => L[i].p === "verb" && L[i].a && /,/.test(L[i].pt || ""));
+  let comma = 0;
+  const badTyped = [];
+  for (let k = 0; k < 20; k++) {
+    for (const q of Q.drillQuestions("aspect", 10, multi, undefined, false, ["partner"])) {
+      if ((q.options || []).some((o) => /,/.test(o.label))) comma++;
+    }
+    for (const q of Q.drillQuestions("aspect", 10, multi, undefined, true, ["partner"])) {
+      if (!q.typed) continue;
+      const all = listed(L[q.i]).filter((p) => p !== fold(L[q.i].w));
+      if (/,/.test(q.target) || !all.every((p) => p === fold(q.target) || q.alts.includes(p))) {
+        badTyped.push(`${q.prompt} → ${q.target}`);
+      }
+    }
+  }
+  ok(multi.length && comma === 0, "no aspect option is two partners joined by a comma", `${comma} of ${multi.length} verbs`);
+  ok(!badTyped.length, "a written partner may be any one the lexicon lists", badTyped.slice(0, 3).join("; "));
+
+  // 3. «ви́деть»: «уви́деть» records «ви́деть» as its partner, so it is no wrong answer.
+  const pairsR = new Map();
+  const link = (a, b) => { if (!pairsR.has(a)) pairsR.set(a, new Set()); pairsR.get(a).add(b); };
+  for (const x of L) if (x.p === "verb") for (const p of listed(x)) { link(fold(x.w), p); link(p, fold(x.w)); }
+  // Aimed: verbs some *other* verb lists as its partner, where the trap is.
+  const claimed = studiedR.filter((i) => L[i].p === "verb" && L[i].a && L[i].pt
+    && (pairsR.get(fold(L[i].w)) || new Set()).size > listed(L[i]).length);
+  let partnerOffered = 0, partnerAsked = 0;
+  for (let k = 0; k < 40; k++) {
+    for (const q of Q.drillQuestions("aspect", 10, claimed, undefined, false, ["partner"])) {
+      if (!q.options || !q.prompt) continue;
+      partnerAsked++;
+      const pp = pairsR.get(fold(q.prompt)) || new Set();
+      if (q.options.some((o) => !o.right && pp.has(fold(o.label)))) partnerOffered++;
+    }
+  }
+  ok(partnerAsked > 0 && partnerOffered === 0,
+     "an aspect distractor is never a recorded partner of the prompt, either way round",
+     `${partnerOffered}/${partnerAsked}`);
+
+  // 4. A drill inside a lesson keeps to what the route has introduced.
+  const tablesOn = (units) => units.map((u) => u.g && u.g.form)
+    .filter((s) => s && s.pos === "verb").map((s) => s.table.split(" ")[0]);
+  const ahead = [];
+  STAGES.forEach((s) => {
+    const route = Q.unitsUpTo(s.core);
+    const rows = new Set(["Nominative"].concat(Q.formsIntroduced(route).map((c) => c.row)));
+    const tabs = tablesOn(route);
+    for (let r = 0; r < 25; r++) {
+      for (const q of Q.quizSteps(s.core, 1)) {
+        if (!q.drill) continue;
+        const row = q.table && q.table.rows[q.at[0]][0];
+        if (q.kind === "agreement" && !rows.has(row)) ahead.push(`${s.core.id} agreement ${row}`);
+        if (q.kind === "conjugation" && !tabs.some((t) => q.table.title.startsWith(t))) {
+          ahead.push(`${s.core.id} conjugation ${q.table.title}`);
+        }
+      }
+    }
+  });
+  ok(!ahead.length, "a drill in a lesson asks only the cases and tenses the route has introduced",
+     [...new Set(ahead)].slice(0, 5).join("; "));
+  const agreeStage = STAGES.find((s) => s.core.g && s.core.g.form && s.core.g.form.drill === "agreement");
+  const own = [...Array(20)].map(() => Q.formPrompt(agreeStage.core, 0)).filter(Boolean)
+    .concat(Q.grammarRun(agreeStage.core, 0));
+  ok(own.length && own.every((q) => q.kind !== "agreement" || q.table.rows[q.at[0]][0] === "Nominative"),
+     `${agreeStage.core.id}'s own point, agreement, is asked in the nominative`,
+     [...new Set(own.map((q) => q.table && q.table.rows[q.at[0]][0]))].join(","));
+  const early = Q.unitsUpTo(STAGES[1].core).flatMap((u) => u.w);
+  const chosenPast = Q.drillQuestions("conjugation", 10, early, undefined, false, ["past"]);
+  ok(chosenPast.length && chosenPast.every((q) => /^Past/.test(q.table.title)),
+     "but a Practice drill the learner narrowed to the past still asks the past");
+
+  // 5. A gap-fill's options all show their stress, or none do.
+  let clozeN = 0;
+  const uneven = [];
+  for (const i of studiedR.slice(0, 1500)) {
+    for (let r = 0; r < 2; r++) {
+      const c = Q.clozeFor(i);
+      if (!c) break;
+      const q = Q.present({ t: "cloze", i, ex: c.ex, token: c.token, pool: studiedR });
+      clozeN++;
+      const poly = q.options.filter((o) => sylR(o.label) >= 2);
+      const shows = poly.filter((o) => acuteR(o.label) || /[ёЁ]/.test(o.label)).length;
+      const anyAcute = q.options.some((o) => acuteR(o.label));
+      const monoAcute = q.options.some((o) => sylR(o.label) < 2 && acuteR(o.label));
+      if ((anyAcute && shows !== poly.length) || monoAcute) {
+        uneven.push(q.options.map((o) => (o.right ? "*" : "") + o.label).join(" | "));
+      }
+    }
+  }
+  ok(!uneven.length, "a gap-fill marks stress on all its options or on none",
+     `${uneven.length}/${clozeN}: ${uneven[0] || ""}`);
+
+  // 6. Never the same question twice in one quiz.
+  const twice = [];
+  STAGES.forEach((s) => [s.core].concat(s.branches).forEach((u) => {
+    for (let li = 0; li < lessonCount(u); li++) {
+      for (let r = 0; r < 2; r++) {
+        const keys = Q.quizSteps(u, li).filter((q) => typeof q.i === "number" && !q.drill && q.kind !== "form")
+          .map((q) => `${q.kind}:${L[q.i].b}:${q.prompt || ""}`);
+        const d = keys.filter((x, n) => keys.indexOf(x) !== n);
+        if (d.length) twice.push(`${u.id}:${li} ${d[0]}`);
+      }
+    }
+  }));
+  ok(!twice.length, "no lesson quiz asks the same question twice", `${twice.length}: ${twice.slice(0, 3).join("; ")}`);
+
+  // 7. The cases drill never offers the headword printed above it.
+  let casesN = 0, head = 0;
+  for (let k = 0; k < 30; k++) {
+    for (const q of Q.drillQuestions("cases", 10, studiedR, undefined, false)) {
+      casesN++;
+      if (q.options.some((o) => !o.right && fold(o.label) === fold(L[q.i].w))) head++;
+    }
+  }
+  ok(casesN > 0 && head === 0, "the cases drill never offers the headword as a wrong option", `${head}/${casesN}`);
+
+  // 8. The standard explanation names the answer of a chosen question too.
+  const blank = [];
+  const shapes = [["cases", false], ["conjugation", false, ["who"]], ["conjugation", false, ["present"]],
+                  ["agreement", false], ["aspect", false, ["partner"]]];
+  for (const [type, typed, only] of shapes) {
+    for (const q of Q.drillQuestions(type, 5, studiedR, undefined, typed, only)) {
+      const ex = standardExplanation(q, L[q.i]);
+      if (!ex || !ex.what || /«»/.test(ex.what)) blank.push(`${type}: ${ex && ex.what}`);
+      else if (q.ask === "Whose form is this?" && !ex.what.startsWith(`«${q.prompt}»`)) blank.push(`who: ${ex.what}`);
+    }
+  }
+  ok(!blank.length, "the explanation of a chosen miss says what the answer was", blank.slice(0, 3).join("; "));
+
+  // 9. «есть» "eat" is reachable beside «есть» "there is"; «мой», listed twice
+  // with one gloss, is one hit.
+  const searchR = makeSearch({ L, IX, deep: DEEP });
+  const est = searchR("есть", 12).filter((e) => fold(e.b) === "есть");
+  const moi = searchR("мой", 12).filter((e) => fold(e.b) === "мой");
+  ok(est.some((e) => e.p === "verb") && est.some((e) => e.p !== "verb"),
+     "a search finds both homographs of «есть»", est.map((e) => e.p).join(","));
+  ok(moi.length === 1, "and one word listed twice with one meaning is one hit", String(moi.length));
+
+  // 10. A quiz of scenes is a quiz of different scenes.
+  const scenes = Q.customQuiz({ units: Q.unitsUpTo(STAGES[3].core), kinds: ["scene"], n: 20 });
+  ok(scenes.length >= 10, "a custom quiz of scenes holds more than one scene", String(scenes.length));
+
+  // 11. Where a word spells two forms alike but stresses them apart, neither is a wrong answer.
+  const twins = studiedR.filter((i) => {
+    const by = new Map();
+    for (const f of formsR(L[i]).filter(acuteR)) {
+      const k = plainR(f);
+      if (!by.has(k)) by.set(k, new Set());
+      by.get(k).add(f.normalize("NFC"));
+    }
+    return /́/.test(L[i].w.normalize("NFD")) && L[i].b.length > 3 && [...by.values()].some((s) => s.size > 1);
+  });
+  let stressN = 0, stressTwo = 0;
+  for (let k = 0; k < 40; k++) {
+    for (const q of Q.drillQuestions("stress", 10, twins)) {
+      stressN++;
+      const real = new Set(formsR(L[q.i]).concat(L[q.i].w).map((f) => f.normalize("NFC")));
+      if (q.options.some((o) => !o.right && real.has(o.label.normalize("NFC")))) stressTwo++;
+    }
+  }
+  ok(twins.length && stressN > 0 && stressTwo === 0,
+     "a stress question never offers another real form of the word as wrong", `${stressTwo}/${stressN}`);
+
+  // 12. What a learner may be assumed to have met: this chapter's spine and
+  // every earlier one, earlier chapters' required quests, and the unit itself.
+  // Stated here rather than read off `unitsUpTo`, which is what is under test.
+  const expectRoute = (k, u) => STAGES.slice(0, k)
+    .flatMap((x) => [x.core].concat(x.branches.filter((b) => !b.opt)))
+    .concat(u === STAGES[k].core ? [u] : [STAGES[k].core, u]);
+  const routeBad = [], beside = [];
+  STAGES.forEach((s, k) => [s.core].concat(s.branches).forEach((u) => {
+    const route = expectRoute(k, u);
+    const got = Q.unitsUpTo(u);
+    if (got.map((x) => x.id).join() !== route.map((x) => x.id).join()) {
+      routeBad.push(`${u.id}: ${got.filter((x) => !route.includes(x)).map((x) => x.id).join(",")}`);
+    }
+    const met = new Set(route.flatMap((x) => x.w));
+    const off = new Set(STAGES.slice(0, k + 1).flatMap((x) => [x.core].concat(x.branches))
+      .filter((x) => !route.includes(x)).flatMap((x) => x.w).filter((i) => !met.has(i)));
+    for (let li = 0; li < lessonCount(u); li++) {
+      for (let r = 0; r < 2; r++) {
+        for (const q of Q.quizSteps(u, li)) {
+          const used = (q.kind === "hear" || q.kind === "say") ? q.lemmas || []
+            : typeof q.i === "number" ? [q.i] : [];
+          const hit = used.find((i) => off.has(i));
+          if (hit !== undefined) beside.push(`${u.id}:${li} ${q.kind} ${L[hit].b}`);
+        }
+      }
+    }
+  }));
+  ok(!routeBad.length, "the route to a unit holds no sibling quest and no optional quest but itself",
+     routeBad.slice(0, 3).join("; "));
+  ok(!beside.length, "no lesson quiz uses a word only a sibling or optional quest teaches",
+     `${beside.length}: ${beside.slice(0, 4).join("; ")}`);
+
+  // 13. ц is always hard; the present's «он / она» row has its English.
+  ok(nounStem("се́рдце") === "hard" && nounStem("со́лнце") === "hard" && nounStem("мо́ре") === "soft",
+     "«сердце» and «солнце» are hard stems, «море» soft");
+  const noEnglish = [];
+  for (const q of Q.drillQuestions("conjugation", 10, studiedR, undefined, true, ["present"])) {
+    for (const [ru, en] of (q.note && q.note.examples) || []) if (!en) noEnglish.push(ru);
+  }
+  ok(!noEnglish.length, "every row of a conjugation note carries its English", noEnglish.slice(0, 3).join("; "));
+
+  // 14. A headword resolves to itself, not to the word it is also a form of.
+  const resolveR = makeResolve({ L, IX, deep: DEEP });
+  const astray = [];
+  for (const x of L.concat(DEEP)) {
+    const e = resolveR(x.b);
+    if (!e || fold(e.b) !== fold(x.b)) astray.push(`${x.b} → ${e && e.b}`);
+  }
+  ok(!astray.length, "every studied word and dictionary headword resolves to itself",
+     `${astray.length}: ${astray.slice(0, 5).join("; ")}`);
+  const verb = resolveR("есть", "verb");
+  ok(verb && verb.p === "verb", "and to the part of speech asked for", verb && verb.p);
 }
 
 console.log("\n" + checks + " checks · " +

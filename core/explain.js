@@ -81,13 +81,20 @@ function reasons(w, kind) {
       or null when there is nothing to say beyond the answer itself. */
 export function standardExplanation(q, w) {
   if (!q) return null;
-  const answer = q.answer || "";
+  /* Only a typed question carries `answer`; a chosen one says which option is
+     right. Reading `answer` alone printed «» for every multiple-choice miss
+     (the review, 2026-10-01). */
+  const right = (q.options || []).find((o) => o.right);
+  const answer = q.answer || (right && right.label) || "";
   let what = null, rule = null;
   if (w && q.table && q.at) {
     const [r, c] = q.at;
     const row = cell(q.table.rows[r] && q.table.rows[r][0]);
     const col = q.table.columns[c];
-    what = `«${answer}» is ${formName(q.table, row, col)} of «${w.w || w.b}».`;
+    // "Whose form is this?" asks for the row's label (`at` names column 0):
+    // the form is the prompt, and the label is what the answer was.
+    const form = c === 0 ? q.prompt || cell(q.table.rows[r] && q.table.rows[r][1]) : answer;
+    what = `«${form}» is ${formName(q.table, row, col)} of «${w.w || w.b}».`;
     rule = sectionFor(q.kind, q.table, row, col);
   } else if (w && q.kind === "aspect") {
     what = `«${answer}» is the ${w.a === "perfective" ? "imperfective" : "perfective"} partner of «${w.w || w.b}».`;

@@ -92,6 +92,34 @@ export function makeSearch({ L, IX, deep }) {
     return cache;
   };
 
+  /* What makes two hits one entry. It was the bare headword alone, so the
+     studied «есть» "eat" and «есть» "there is" collapsed into whichever
+     scored first and the verb could not be found at all (the review,
+     2026-10-01). A studied row is its headword and its meaning — two rows
+     with one gloss («мой» the adjective and the possessive) are one word
+     listed twice and stay one hit. A dictionary row whose headword a studied
+     row already has is that row's twin and merges into it (the tiers label
+     some classes differently, «вы» pronoun against "other", and the studied
+     row is the one that carries the curriculum); one with the same class as a
+     particular studied row merges into that one. A dictionary-only word is its
+     headword and its class, so its homographs are reachable too. */
+  let studiedKeys = null;
+  const studiedKey = (l) => fold(l.b) + "|" + String(l.e || "").trim().toLowerCase();
+  const keyOf = (entry) => {
+    if (!entry.deep) return studiedKey(entry);
+    if (studiedKeys === null) {
+      studiedKeys = new Map();
+      for (const l of L) {
+        const k = fold(l.b);
+        if (!studiedKeys.has(k)) studiedKeys.set(k, new Map());
+        if (!studiedKeys.get(k).has(l.p)) studiedKeys.get(k).set(l.p, studiedKey(l));
+      }
+    }
+    const byPos = studiedKeys.get(fold(entry.b));
+    if (!byPos) return fold(entry.b) + "|" + (entry.p || "");
+    return byPos.get(entry.p) || byPos.values().next().value;
+  };
+
   /* The ranked hits with their scores; `search` below is the same list as
      entries alone, which is what every older caller wants. */
   function scored(raw, limit = 12) {
@@ -102,11 +130,17 @@ export function makeSearch({ L, IX, deep }) {
     const esc = qe.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const word = new RegExp("\\b" + esc + "\\b");
 
-    const best = new Map();                   // bare -> {score, rank, entry}
+    const best = new Map();                   // keyOf -> {score, rank, entry}
     const offer = (entry, score, rank) => {
-      const prev = best.get(entry.b);
+      const k = keyOf(entry);
+      const prev = best.get(k);
       if (prev && prev.score >= score) return;
-      best.set(entry.b, { score, rank, entry });
+      // A dictionary twin never replaces the studied row it merges into.
+      if (prev && entry.deep && !prev.entry.deep) {
+        best.set(k, { score, rank: prev.rank, entry: prev.entry });
+        return;
+      }
+      best.set(k, { score, rank, entry });
     };
 
     /* An exact sense scores by *where* in the gloss it sits: a word whose first
@@ -164,18 +198,43 @@ export function makeSearch({ L, IX, deep }) {
 /* Resolve one word to an entry, whichever tier holds it. Keyed on the word rather
    than an index, because lemma indices are assigned by frequency and move on every
    rebuild — the same reason learner state keys on the word. */
+/* **A headword is itself before it is anybody's inflection.** The form index
+   was read first, so a word that is also a form of another lemma opened the
+   other one: «ба́нка» opened «банк», «бело́к» «белка», «го́ре» «гора», «пра́во»
+   «правый», «том» «тот» — 356 dictionary words and 7 studied ones (the
+   review, 2026-10-01). An exact headword wins now — studied, then dictionary,
+   of the part of speech asked for when the caller names one — and the form
+   index answers only for a word that is no headword at all. */
 export function makeResolve({ L, IX, deep }) {
-  let cache = null;
-  return function resolve(wordOrKey) {
+  let heads = null, cache = null;
+  const put = (map, k, v) => { if (!map.has(k)) map.set(k, v); };
+  return function resolve(wordOrKey, pos) {
     const q = fold(wordOrKey || "");
     if (!q) return null;
-    const hits = IX[q];
-    if (hits && hits.length) return L[hits[0]];
+    if (heads === null) {
+      heads = new Map();
+      // Of two studied homographs, the one the form index lists first — the
+      // build's resolver's preference.
+      L.forEach((l) => {
+        if (!l || !l.b) return;
+        const k = fold(l.b);
+        const pref = (IX[k] || []).find((j) => L[j] && fold(L[j].b) === k);
+        put(heads, k, pref !== undefined ? L[pref] : l);
+        put(heads, k + "|" + l.p, l);
+      });
+    }
+    const studied = (pos && heads.get(q + "|" + pos)) || heads.get(q);
+    if (studied && (!pos || studied.p === pos)) return studied;
     if (cache === null) {
       cache = new Map();
       const list = typeof deep === "function" ? deep() : (deep || []);
-      for (const d of list) if (!cache.has(fold(d.b))) cache.set(fold(d.b), d);
+      for (const d of list) { put(cache, fold(d.b), d); put(cache, fold(d.b) + "|" + d.p, d); }
     }
-    return cache.get(q) || null;
+    const fromDeep = (pos && cache.get(q + "|" + pos)) || null;
+    if (fromDeep) return fromDeep;
+    if (studied) return studied;
+    if (cache.has(q)) return cache.get(q);
+    const hits = IX[q];
+    return hits && hits.length ? L[hits[0]] : null;
   };
 }

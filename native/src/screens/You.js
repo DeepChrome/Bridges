@@ -10,7 +10,7 @@ import { setSkin, isNotebook } from "../skin";
 import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb, Stepper } from "../ui";
 import { CharacterPicker } from "./Gate";
 import { plan as askPlan } from "../lib/feedback";
-import { PLANS, PLAN_NAMES, PREMIUM_PRICE, ALLOWANCE_LINES, planOf } from "@core/plans";
+import { PLANS, PLAN_NAMES, ALLOWANCE_LINES, planOf } from "@core/plans";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone, dueCount } from "../data";
 import { CUE_NAMES, WRONG_NAMES, SPEEDS, previewCue, rightCueOf, wrongCueOf } from "../audio";
 import { backupProfile, restoreProfile, shareCrashes } from "../backup";
@@ -109,57 +109,75 @@ function Tile({ icon, tone, count, label, onPress, testID }) {
   );
 }
 
-/* The plan, and today's use of it (core/plans.js, 2026-09-29): what this
-   install may ask the AI for each day, what it has, and what Premium would
-   give. Asked of the Worker when Settings opens — it is the one that counts —
-   and drawn from the plan table alone when it cannot be reached. */
-function PlanSection({ navigation }) {
+/* When the day's allowance renews, in the learner's own clock. The Worker's
+   counters roll at 00:00 UTC (§30d) — the afternoon in Los Angeles — so
+   "midnight" would be false for most of the people reading it. */
+export function renewsAt(now = new Date()) {
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+  return next.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+/* The plan, and today's use of it (core/plans.js). One quiet row on the
+   profile — the plan's name, a tap for the rest — and a small sheet saying
+   what is left of each allowance today (the owner, 2026-09-30: "they just
+   click something like 'premium usage' and they get a little popup"). It
+   used to be a titled section of four rows with Premium's numbers and price
+   beside each, which is a sales page, not a profile. Asked of the Worker —
+   the one that counts — on arrival, on every return to the profile, and when
+   the sheet opens; drawn from the plan table alone when it cannot be
+   reached. Its own component, holding its own open state, so the sheet
+   redraws (§30be). */
+function PlanRow({ navigation }) {
   const t = useTheme();
   const [info, setInfo] = useState(null);
-  /* Asked on arrival and every time the profile comes back into view, since
-     the allowance moves while the learner is elsewhere in the app. */
+  const [open, setOpen] = useState(false);
+  const live = React.useRef(true);
+  const ask = React.useCallback(
+    () => askPlan().then((r) => { if (live.current) setInfo(r && r.ok ? r : null); }).catch(() => {}), []);
   useEffect(() => {
-    let live = true;
-    const ask = () => askPlan().then((r) => { if (live) setInfo(r && r.ok ? r : null); }).catch(() => {});
+    live.current = true;
     ask();
     const off = navigation && navigation.addListener ? navigation.addListener("focus", ask) : null;
-    return () => { live = false; if (typeof off === "function") off(); };
-  }, [navigation]);
+    return () => { live.current = false; if (typeof off === "function") off(); };
+  }, [navigation, ask]);
   const plan = info ? info.plan : "free";
   const unlimited = plan === "owner" || plan === "custom";
   const caps = info && info.caps ? info.caps : PLANS[planOf(plan)];
+  const name = unlimited ? "Unlimited" : PLAN_NAMES[planOf(plan)];
   return (
-    <View testID="plan" style={{ marginBottom: 16 }}>
-      <View style={{ flexDirection: "row", alignItems: "baseline", marginBottom: 8 }}>
-        <SectionLabel style={{ flex: 1, marginBottom: 0 }}>AI left today</SectionLabel>
-        <Text testID="plan-name" style={{ color: t.ink, fontSize: 15, fontWeight: "700" }}>
-          {unlimited ? "Unlimited" : PLAN_NAMES[planOf(plan)]}
-        </Text>
-      </View>
-      {unlimited ? null : (
-        <List>
-          {ALLOWANCE_LINES.map(([counter, label]) => (
-            <Row key={counter} testID={`plan-${counter}`}>
-              <Text style={{ flex: 1, color: t.ink, fontSize: 15 }}>
-                {label.charAt(0).toUpperCase() + label.slice(1)}
-              </Text>
-              <Text style={{ color: t.ink2, fontSize: 15 }}>
-                {info ? `${Math.max(0, caps[counter] - (info.used[counter] || 0))} of ${caps[counter]}`
-                      : `– of ${caps[counter]}`}
-              </Text>
-              {plan !== "premium" ? (
-                <Muted size={13} style={{ width: 70, textAlign: "right" }}>
-                  {`${PLANS.premium[counter]} Premium`}
-                </Muted>
-              ) : null}
-            </Row>
-          ))}
-        </List>
-      )}
-      {plan === "free" ? (
-        <Muted size={13} style={{ marginTop: 6 }}>{`Premium · ${PREMIUM_PRICE}`}</Muted>
+    <>
+      <List>
+        <Row testID="plan" onPress={() => { setOpen(true); ask(); }}>
+          <Thumb id="tutor" tone="brand" />
+          <Text style={{ flex: 1, color: t.ink, fontSize: 15, fontWeight: "600" }}>AI usage</Text>
+          <Text testID="plan-name" style={{ color: t.ink2, fontSize: 15 }}>{name}</Text>
+        </Row>
+      </List>
+      {open ? (
+        <Sheet testID="plan-sheet" title={`${name} · left today`} onClose={() => setOpen(false)}>
+          {unlimited ? <Muted>No daily limit</Muted> : (
+            <List>
+              {ALLOWANCE_LINES.map(([counter, label]) => {
+                const left = info ? Math.max(0, caps[counter] - (info.used[counter] || 0)) : null;
+                return (
+                  <Row key={counter} testID={`plan-${counter}`}>
+                    <Text style={{ flex: 1, color: t.ink, fontSize: 15 }}>
+                      {label.charAt(0).toUpperCase() + label.slice(1)}
+                    </Text>
+                    <Text style={{ color: left === 0 ? t.bad : t.ink, fontSize: 15, fontWeight: "700" }}>
+                      {left === null ? "–" : String(left)}
+                    </Text>
+                  </Row>
+                );
+              })}
+            </List>
+          )}
+          {unlimited ? null : (
+            <Muted size={13} style={{ marginTop: 10 }}>{`Renews at ${renewsAt()}`}</Muted>
+          )}
+        </Sheet>
       ) : null}
-    </View>
+    </>
   );
 }
 
@@ -580,11 +598,11 @@ export default function You({ navigation }) {
               onPress={() => setShowing("notes")} />
       </View>
 
-      {/* What the AI has left for today, on the profile rather than inside
-          Settings (the owner, 2026-09-29: "make sure they can see how much
-          'AI juice' they have available still"). */}
-      <View style={{ marginTop: 24 }}>
-        <PlanSection navigation={navigation} />
+      {/* What the AI has left for today: on the profile (the owner,
+          2026-09-29: "make sure they can see how much 'AI juice' they have
+          available still"), as one row with the detail a tap away. */}
+      <View style={{ marginTop: 16, marginBottom: 16 }}>
+        <PlanRow navigation={navigation} />
       </View>
 
       {showing === "trouble" ? (

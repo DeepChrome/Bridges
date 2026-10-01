@@ -37,7 +37,6 @@ export const PLANS = {
 };
 
 export const PLAN_NAMES = { free: "Free", premium: "Premium" };
-export const PREMIUM_PRICE = "$15 a month";
 
 /* The counter a Worker route spends. A Talk hint is a conversation turn —
    it is the tutor's time — and the tutor's own turn is too. */

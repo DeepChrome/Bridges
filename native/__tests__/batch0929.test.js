@@ -139,13 +139,19 @@ describe("the profile and its settings", () => {
     await act(async () => { fireEvent.press(await screen.findByTestId("stat-due")); });
     expect(nav.navigate).toHaveBeenCalledWith("Study");
 
-    // What the AI has left today is on the profile itself, not inside
-    // Settings: Free by default, with Premium's allowance beside it.
+    // What the AI has left today is one row on the profile — the plan's name —
+    // and the detail opens on a tap (2026-09-30). No Premium sales lines.
     expect((await screen.findByTestId("plan-name")).props.children).toBe("Free");
+    expect(screen.queryByTestId("plan-conversation")).toBeNull();
+    expect(screen.queryByText(new RegExp(`${PLANS.premium.conversation} Premium`))).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("plan")); });
+    expect(await screen.findByTestId("plan-sheet")).toBeTruthy();
     expect(screen.getByTestId("plan-conversation")).toBeTruthy();
     // No Worker in the test build, so today's use is unknown and said as such.
-    expect(screen.getByText(`– of ${PLANS.free.conversation}`)).toBeTruthy();
-    expect(screen.getByText(`${PLANS.premium.conversation} Premium`)).toBeTruthy();
+    expect(screen.getAllByText("–").length).toBe(4);
+    expect(screen.getByText(/^Renews at /)).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByTestId("sheet-backdrop")); });
+    expect(screen.queryByTestId("plan-sheet")).toBeNull();
 
     fireEvent.press(await screen.findByText("Settings"));
     // A scheduler setting says what it does, on a tap, and not before.

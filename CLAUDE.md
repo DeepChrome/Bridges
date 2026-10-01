@@ -794,6 +794,17 @@ Each of these cost real time. Do not relearn them.
   fallback would be the thing overlapping. `track.test.js` fires the presses
   without awaiting between them, which is the only way this shows up: awaited in
   order, it always passes.
+- **An MP3 cannot be cut with `-c copy` without a noise at the cut.** Layer
+  III borrows bits across frames (the bit reservoir), so the first frames
+  after a stream-copied cut point at data that was cut away and decode as a
+  burst of garbage. §30aq trimmed every clip's lead that way, and the owner
+  heard it as "weird noises then long pauses" (2026-10-01). The pause was a
+  second fault: Chirp3-HD leaves isolated clicks inside its pads, and a trim
+  that stops at the first non-silence stops at the click and keeps the pad
+  before it. `tools/audio_trim.mjs` is the one filter now — `silenceremove`
+  skipping bursts under 30 ms, at both ends, decoded and re-encoded — and the
+  words and the scene clips both use it. **Trim by decoding**, always; and
+  measure the shipped files, not the purchase.
 - **An MP3 says how long it meant to be; it holds whole frames.** The scenario
   tracks are stitched with `-c copy`, so what a player hears is the frames, and
   at 24 kHz an MPEG-2 Layer III frame is 24 ms. `ffmpeg -t 0.42` for the silence
@@ -4161,11 +4172,13 @@ counts frames, and 400 ms of silence is 400 ms of frames).
 It lands hardest on shadowing, which plays the model the moment the question
 arrives, so the learner stares at a screen for up to a second before the
 exercise begins. `build_word_assets.mjs` takes it off: `silencedetect` finds
-the lead, `ffmpeg -ss … -c copy` cuts to the nearest frame, `KEEP_MS` (80) of
-it stays so a word is not clipped against its first consonant, and the result
-is cached by the clip's own content id. **Nothing is re-encoded** — the frames
-after the cut are the frames that were bought — and **the purchase is
-untouched**, which is rule 20.3 and the arrangement §30y made for levelling.
+the lead, 80 ms of it stays so a word is not clipped against its first
+consonant, and the result is cached by the clip's own content id. **The
+purchase is untouched**, which is rule 20.3 and the arrangement §30y made
+for levelling. *(It was first cut with `-c copy` to avoid re-encoding, and
+that is what put a noise at the front of every clip — §23's bit-reservoir
+trap. Since 2026-10-01 both ends are trimmed by decoding, through
+`tools/audio_trim.mjs`.)*
 Over all 2,886 clips: **18 minutes of dead air**, 379 ms each, and the bundle
 falls from 22.5 MB to 19.0 MB.
 
@@ -5307,6 +5320,15 @@ granted by `backend/tools/user.mjs plan <id> premium`** until the store sells
 it: purchasing needs a Play Billing library, a subscription product in the
 Play Console and server-side receipt checks, none of which exist yet. The
 owner's own install (`app-y3z9qam1`) is on Premium.
+
+**During the beta an install can choose its own plan** (2026-10-01): with
+`BETA_SELF_PLAN = "true"` in wrangler.toml, `/v1/plan` takes `{ set }` and
+answers `selfServe`, and the AI usage sheet draws a Premium switch only when
+it is offered. **Turn it off before Premium is sold** (docs/BETA.md Phase E).
+A request that fails upstream, fails to parse or meets the global cap gives
+its unit back (`untick`) — a learner is charged for answers, not attempts.
+And `envInt` reads `0` as zero: `parseInt(x) || default` had made a cap of
+0 mean the default, the same bug §30d found in the per-user caps.
 
 **AI only on a miss.** Explanations already were; Say's feedback now asks
 only when the transcript differs from the target (`out.wer > 0`).

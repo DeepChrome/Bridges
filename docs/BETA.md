@@ -129,7 +129,13 @@ Phase A's, and no blocking report open.
 ## Phase E — Premium, only before charging
 
 Premium exists today as daily allowances granted by hand
-(`backend/tools/user.mjs plan <id> premium`). Selling it needs:
+(`backend/tools/user.mjs plan <id> premium`), and — during the beta — by a
+switch in the AI usage sheet that any install can flip
+(`BETA_SELF_PLAN = "true"` in `backend/wrangler.toml`). Selling it needs:
+
+- [ ] **Turn `BETA_SELF_PLAN` off and redeploy** before Premium costs
+      money, or anyone can switch themselves to it for free. The app hides
+      the switch on its own once the Worker stops offering it.
 
 - [ ] Google Play Billing in the app and a subscription product in the Play
       Console.

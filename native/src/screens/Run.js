@@ -140,7 +140,11 @@ function Option({ o, i, answered, picked, onPick, centred }) {
                        alignItems: centred ? "center" : "flex-start" }}>
           {/* Weight 600, not regular: an answer is a label on a control, not
               body copy, and the reference sets its buttons heavy. */}
-          <Text style={{ color: t.ink, fontSize: 16, fontWeight: "600",
+          {/* A short Russian answer is the thing being read, so it takes the
+              title size: «в» and «вы» at body size sat lost in a full-width box
+              under a larger English prompt (the walkthrough, 2026-09-30).
+              English options and sentences stay at body size. */}
+          <Text style={{ color: t.ink, fontSize: o.cyr && centred ? T.title : 16, fontWeight: "600",
                          textAlign: centred ? "center" : "left" }}>{o.label}</Text>
         </View>
       </Lift>

@@ -124,6 +124,22 @@ def pack(blocks, size):
     return out, cut
 
 
+_NOTES = json.loads((ROOT / "data" / "curated" / "grammar_notes.json").read_text(encoding="utf-8")).get("notes", {})
+
+
+def card_words(tid):
+    """The words the unit's own grammar card uses in its examples, folded. The
+    card is the first thing a unit shows (the lesson's rule step), so the
+    groups holding these words are taught first: chapter 1 opened on «Я —
+    Тедди», «Это он» and then taught в, на, с, и, а, with я in lesson 3 and
+    это in lesson 6 (the walkthrough, 2026-09-30)."""
+    note = _NOTES.get(tid) or {}
+    out = set()
+    for ex in note.get("examples") or []:
+        out |= {fold(w) for w in re.findall(r"[А-Яа-яЁё́]+", ex[0])}
+    return out
+
+
 def grouped(tid, chosen, meta, spoken, size):
     """The unit's words in teaching order — each group whole and inside one
     lesson, groups by their typical word — and each word's (group, section,
@@ -133,6 +149,7 @@ def grouped(tid, chosen, meta, spoken, size):
     groups = WORD_GROUPS.get(tid) or []
     rank = lambda l: spoken.get(meta[l]["bare"], 10 ** 6)
     by_bare = {meta[l]["bare"]: l for l in chosen}
+    card = card_words(tid)
     # The reading order: sections in GROUP_KINDS order, groups in the file's
     # order inside each (most useful first, as the file was asked to put them).
     reading = sorted(range(len(groups)), key=lambda g: (GROUP_KINDS.index(groups[g]["kind"])
@@ -151,11 +168,13 @@ def grouped(tid, chosen, meta, spoken, size):
         # By the group's middle word, not its commonest: one very common member
         # («год») would otherwise pull a group of rare ones to the front.
         rs = sorted(rank(l) for l in members)
-        blocks.append((rs[len(rs) // 2], g, members))
+        # A group the unit's grammar card speaks with goes first, then by rank.
+        on_card = any(fold(meta[l]["bare"]) in card for l in members)
+        blocks.append(((0 if on_card else 1, rs[len(rs) // 2]), g, members))
         names[id(members)] = grp["name"]
     rest = [l for l in chosen if l not in placed]
     UNGROUPED.extend((tid, meta[l]["bare"]) for l in rest)
-    blocks += [(rank(l), 10 ** 6, [l]) for l in rest]
+    blocks += [((0 if fold(meta[l]["bare"]) in card else 1, rank(l)), 10 ** 6, [l]) for l in rest]
     blocks.sort(key=lambda b: (b[0], b[1]))
     order, cut = pack([members for _, _, members in blocks], size)
     SPLIT_GROUPS.extend((tid, names[id(b)]) for b in cut if id(b) in names)

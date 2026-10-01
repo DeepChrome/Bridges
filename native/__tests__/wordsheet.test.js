@@ -28,6 +28,22 @@ const open = async (word) => {
   await act(async () => { fireEvent.press(screen.getByText(word)); });
 };
 
+/* The walkthrough, 2026-09-30: the glance was the one surface where a tapped
+   word could not be heard, and its gender pill read a bare "f". */
+describe("the word sheet's head", () => {
+  it("can be heard, and says the gender in words", async () => {
+    const w = L.find((e) => {
+      const hit = IX[fold(e.b || "")];
+      return hit && L[hit[0]] === e && e.p === "noun" && e.g === "f";
+    });
+    expect(w).toBeTruthy();
+    await open(w.b);
+    expect(screen.getByText("feminine")).toBeTruthy();
+    expect(screen.queryByText("f")).toBeNull();
+    expect(screen.getAllByLabelText(/Hear it/).length).toBeGreaterThan(0);
+  });
+});
+
 describe("the word sheet's gloss", () => {
   it("numbers the sense groups rather than showing one run", async () => {
     const w = wordWith(3);

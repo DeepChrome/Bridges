@@ -865,6 +865,24 @@ group("backward build-up");
    are tested rather than trusted (rule 20.3: those files are hand-authored
    and a rebuild must never clobber them). */
 
+group("a unit opens on the words its rule card speaks with");
+{
+  /* The rule card is the first thing a unit shows, so its first lesson teaches
+     the words the card's examples use (build_topics card_words). Chapter 1
+     opened on «Я — Тедди», «Это он» and then taught в, на, с, и, а, with я in
+     lesson 3 (the walkthrough, 2026-09-30). */
+  const words = (s) => (s.match(/[А-Яа-яЁё́]+/g) || []).map(fold);
+  const bad = [];
+  for (const u of DATA.units.filter((x) => /^core\d+$/.test(x.id) && x.g && x.g.examples)) {
+    const own = new Set(u.w.map((i) => fold(DATA.lemmas[i].b)));
+    const card = new Set(u.g.examples.flatMap(([ru]) => words(ru)).filter((k) => own.has(k)));
+    if (!card.size) continue;
+    const first = u.w.slice(0, lessonSize(Number(u.id.slice(4)) - 1)).map((i) => fold(DATA.lemmas[i].b));
+    if (!first.some((k) => card.has(k))) bad.push(`${u.id}: lesson 1 is ${first.join(", ")}; the card uses ${[...card].join(", ")}`);
+  }
+  ok(!bad.length, "every spine unit's first lesson teaches a word its card uses", bad.join("; "));
+}
+
 group("the review round trip");
 {
   const { parseCsv, locate, plan } = await import("./import_review.mjs");

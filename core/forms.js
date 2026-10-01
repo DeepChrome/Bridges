@@ -52,10 +52,15 @@ export function describeForm(lemma, surface) {
   return null;
 }
 
+/* A gender as a reader says it. The glance used to show the lexicon's code — a
+   lone "f" pill beside "noun" (the walkthrough, 2026-09-30) — while the full
+   entry spelled it out from its own copy of this table; one table now. */
+export const GENDER_NAMES = { m: "masculine", f: "feminine", n: "neuter", pl: "plural" };
+
 /* The standing grammatical facts about the lemma itself, as short tags. */
 export function grammarTags(lemma) {
   if (!lemma) return [];
-  return [lemma.p, lemma.g, lemma.a].filter(Boolean);
+  return [lemma.p, lemma.g && (GENDER_NAMES[lemma.g] || lemma.g), lemma.a].filter(Boolean);
 }
 
 /* Everything the first tap should show, and nothing more. The full entry — every

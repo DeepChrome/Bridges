@@ -20,7 +20,7 @@ import React, {
 import { View } from "react-native";
 import { createNavigationContainerRef, StackActions, CommonActions } from "@react-navigation/native";
 import { useTheme } from "./theme";
-import { Sheet, Btn, Senses, Text } from "./ui";
+import { Sheet, Btn, Senses, Text, Speaker } from "./ui";
 import { L, IX } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise } from "@core/forms";
@@ -111,9 +111,15 @@ function WordSheet({ state, onClose, onFull }) {
   return (
     <Sheet onClose={onClose} maxHeight="80%"
                  footer={<Btn kind="pri" label="Full entry" style={{ marginTop: 18 }} onPress={onFull} />}>
-      <Text style={{ color: t.ink, fontSize: 30, fontWeight: "600" }}>
-        {s.word}
-      </Text>
+      {/* A speaker beside the word, as on every other piece of Russian in the
+          app (§30as); the glance was the one place a tapped word could not be
+          heard. */}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <Text style={{ flex: 1, color: t.ink, fontSize: 30, fontWeight: "600" }}>
+          {s.word}
+        </Text>
+        <Speaker text={lemma.b} />
+      </View>
 
       {s.surface ? (
         <Text style={{ color: t.ink3, fontSize: 14, marginTop: 4 }}>

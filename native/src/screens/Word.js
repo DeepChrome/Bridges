@@ -12,6 +12,7 @@ import { useTheme, radius } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Familiarity, Fold } from "../ui";
 import { TableGroup, Facts } from "../rules";
 import { wordFacts, isIrregular } from "@core/facts";
+import { grammarTags } from "@core/forms";
 import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
 import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord, rankOf } from "../data";
@@ -24,7 +25,6 @@ import { clock, short } from "./Misc";
    and «что» in 130, so the count in the heading used to promise a list the
    screen had no way to reach (ROADMAP P11.9). */
 const HEARD_ROWS = 4;
-const GENDER = { m: "masculine", f: "feminine", n: "neuter", pl: "plural" };
 
 export default function Word({ route, navigation }) {
   /* Addressed by the word, not by an index: lemma indices are assigned by frequency
@@ -119,7 +119,7 @@ export function WordEntry({ w, index, navigation }) {
             came to read. The rank itself is not lost: it is the lemma's own
             index, and it is what orders the new flashcards (§30ap). */}
         <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
-          {[w.p, GENDER[w.g] || w.g, w.a].filter(Boolean).map((x) => <Pill key={x}>{x}</Pill>)}
+          {grammarTags(w).map((x) => <Pill key={x}>{x}</Pill>)}
           {w.pt ? <Pill>{`pair: ${[w.pt, w.pt2].filter(Boolean).join(", ")}`}</Pill> : null}
           {/* The first thing said about a word that breaks the rules
               (2026-09-29); what it breaks is the facts below. */}

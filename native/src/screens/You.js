@@ -148,7 +148,9 @@ function PlanRow({ navigation }) {
     <>
       <List>
         <Row testID="plan" onPress={() => { setOpen(true); ask(); }}>
-          <Thumb id="tutor" tone="brand" />
+          {/* The speech bubble, not the tutor's cap: the tile above already
+              wears that, and two marks alike mark nothing (§30s). */}
+          <Thumb id="talk" tone="brand" />
           <Text style={{ flex: 1, color: t.ink, fontSize: 15, fontWeight: "600" }}>AI usage</Text>
           <Text testID="plan-name" style={{ color: t.ink2, fontSize: 15 }}>{name}</Text>
         </Row>

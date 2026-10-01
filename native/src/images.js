@@ -104,6 +104,7 @@ export const IMAGES = {
   "лицо": require("../assets/img/1587.jpg"),
   "лодка": require("../assets/img/1591.jpg"),
   "ложка": require("../assets/img/1593.jpg"),
+  "лыжа": require("../assets/img/1597.jpg"),
   "любовь": require("../assets/img/1600.jpg"),
   "медведь": require("../assets/img/1623.jpg"),
   "медицина": require("../assets/img/1624.jpg"),
@@ -315,6 +316,7 @@ export const FILES = {
  "лицо": "1587.jpg",
  "лодка": "1591.jpg",
  "ложка": "1593.jpg",
+ "лыжа": "1597.jpg",
  "любовь": "1600.jpg",
  "медведь": "1623.jpg",
  "медицина": "1624.jpg",
@@ -1020,6 +1022,12 @@ export const CREDITS = {
   "a": "Lesekreis",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Essl%C3%B6ffel_und_Teel%C3%B6ffel.JPG"
+ },
+ "лыжа": {
+  "t": "Interboot 2023, Friedrichshafen (P1120640).jpg",
+  "a": "MB-one",
+  "l": "CC BY-SA 4.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Interboot_2023,_Friedrichshafen_(P1120640).jpg"
  },
  "любовь": {
   "t": "Sri Lankan woman and child.jpg",

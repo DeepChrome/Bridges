@@ -21,6 +21,14 @@ on the phone.
 - [ ] Re-run the full emulator walkthrough on the current build and read
       every screenshot. It has not been run since the drill settings cog, the
       tutor, the word groups or the UI test skin went in.
+      *(2026-09-30: gate, tour, path, first lesson, Practice and profile
+      walked. Fixed: chapter 1 opening on five prepositions, the quick word
+      sheet with no speaker and a bare "f", a duplicated icon. Still to walk:
+      the quiz, Study, Immerse, Search, Talk, the tutor, Settings, dark.)*
+- [ ] The character picker mixes the cast's painted faces with ten flat
+      emoji-style ones, so it looks like two different apps. Either draw the
+      supporting characters in the cast's style (OpenAI credit), or offer
+      only the drawn ones.
 - [ ] See the dark theme on a real device. It has never been looked at
       outside the contrast audit.
 - [ ] Listen for the things no test can hear:
@@ -41,12 +49,16 @@ Authored Russian has to be read by a person before strangers see it (Gate 3).
 The job is much smaller than when it was first priced: 20 conversations
 instead of 168.
 
-- [ ] Re-export the review sheet (`tools/export_review.mjs`) against today's
-      content: conversations, questions, grammar reference, word endings.
-- [ ] A Claude pre-pass over every row first, for a few dollars, so the
-      paid reader spends their time on what a machine can't judge.
-- [ ] **Owner:** hire one native speaker for the read. Re-scope the old
-      $220–385 estimate (§30x) against the smaller sheet before hiring.
+- [x] Re-export the review sheet (`tools/export_review.mjs`) against today's
+      content, now including the grammar reference. 1,201 rows, **551 of
+      them Russian** (down from 2,353).
+- [x] A Claude pre-pass (`tools/review_prepass.mjs`, about $0.60 a run):
+      suggestions land in `flags` and never in `fix`. The first run found
+      eight real errors in the conversations and a reference example that
+      contradicted its own rule; all fixed.
+- [ ] **Owner:** hire one native speaker for the read. At about 551 rows
+      it is roughly 2–3 hours of work, so likely well under $100 rather than
+      the old $220–385.
 - [ ] Apply their corrections (`tools/import_review.mjs`), rebuy the changed
       lines' audio (cents) and rebuild.
 - [ ] Read the remaining photographs (ROADMAP 13.5) and blank any wrong ones.

@@ -5696,6 +5696,41 @@ standalone video module)."*
   accusative is its genitive, and the adjective follows suit. It also took any
   corpus partner noun for an adjective; it prefers the words being practised.
 
+## 30bl. The beta road, and a model's read before a person's (2026-09-30)
+
+`docs/BETA.md` is the short list to a public beta: five phases, each with a
+check, and the owner's decisions in one table. ROADMAP.md stays the long log.
+
+- **`tools/review_prepass.mjs`** sends every Russian row of the review sheet
+  to Claude (§30x's sheet, `review/content_v1.csv`) and writes suggestions
+  into `flags` as "AI: …" — **never into `fix`**, which is the reviewer's
+  verdict and the only column `import_review` applies. It is told the lines
+  are deliberately simple and to flag errors, not plainness; about $0.60 a
+  run. Its first run found eight real errors («никто не был», «делать
+  курицу», three aspect slips) and a grammar-reference example that
+  contradicted its own rule («Дочь любит мама»: «дочь» shows no case).
+  Model runs differ, so run it again after fixing — the second run found
+  different things.
+- **The export carries the grammar reference** (`ref:` ids). Corrections to
+  rows that live in code (`ref:`, `note:`, `talk:`, `alphabet:`, `name:`)
+  are listed by `import_review` to make by hand rather than refused, and the
+  chapter files are written back with their own one-space indent.
+- **A unit opens on the words its rule card uses** (`card_words` in
+  `build_topics.py`): groups holding a word from the unit's own card
+  examples sort first. Chapter 1 used to read «Я — Тедди» on its rule card
+  and then teach в, на, с, и, а. `core.test.mjs` holds it for every spine
+  unit.
+- **The CLI asks the Resolver** (`Panel.resolver()` in `panel.py`). It
+  ranked a form's candidates by paradigm size while the app's index is
+  ordered by the Resolver and its overrides (§30i), so `lookup.py` could
+  name a different word from the one the phone opens — §22 forbids exactly
+  that. Found on «никого», which needed a paradigm for «никто»
+  (`function_words.json`) as well as the override.
+- **A curated keep that names a form is reported** (`build_topics`): its
+  sentences are credited to another word, or to nobody, so it is taught
+  with none. That found «небо», whose forms it shares with «нёбо»; settled
+  in `lemma_overrides.json`.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -5730,6 +5765,7 @@ node tools/release_check.mjs   # the built bundle: who signed it, size, permissi
 node tools/eas_upload.mjs      # before any EAS build: archive size, and nothing needed excluded
 node tools/copy.mjs            # labels, not prose (rule 20.7), capped and checked
 node tools/build_word_groups.mjs --check   # every unit's words in a group (§30bi)
+node tools/export_review.mjs --speller && node tools/review_prepass.mjs   # after authored Russian changes (§30bl)
 node tools/core.test.mjs       # the shared logic: generators, scheduler, state
 node tools/smoke.js            # must be all-pass
 node tools/visual.js           # must be all-pass; then look at tools/shots/

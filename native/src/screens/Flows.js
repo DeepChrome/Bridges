@@ -15,7 +15,7 @@ import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
   DRILL_POOL_STEPS, chapterWords, irregularWords,
   reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
-  scenarioLibrary, required, linesWith,
+  scenarioLibrary, required, linesWith, grammarKey, currentGrammarUnit, grammarNoteOf,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { pairDrill } from "@core/alphabet";
@@ -458,6 +458,9 @@ const ordinal = (n) => (n === 1 ? "first" : n === 2 ? "second" : n === 3 ? "thir
 export function DrillList({ navigation }) {
   const { st } = useSession();
   const t = useTheme();
+  const grammarUnit = useMemo(() => currentGrammarUnit(st),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [st.unit, st.dev]);
   return (
     <Screen>
       {/* The screen was eleven identical rows under a label reading "Practise"
@@ -588,6 +591,18 @@ export function DrillList({ navigation }) {
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>The rules</Text>
           </View>
         </Row>
+        {/* The grammar point of the chapter the learner is in, with its words
+            (GrammarFlow) — the unit's module, one tap from Practice. */}
+        {grammarUnit ? (
+          <Row testID="chapter-grammar"
+               onPress={() => navigation.navigate("GrammarRun", { unitId: grammarUnit.id })}>
+            <Thumb id="conjugation" tone="good" />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>This chapter's grammar</Text>
+              <Muted numberOfLines={1}>{grammarNoteOf(grammarUnit).title}</Muted>
+            </View>
+          </Row>
+        ) : null}
         {DRILL_TYPES.map((d) => (
           /* Straight in. What a drill asks about is on the drill's own cog now
              (DrillOptions), not a screen in front of it — the owner, 2026-09-26:
@@ -832,6 +847,57 @@ const bestOf = (prev, key, score) => {
   drills[key] = { best: Math.max(cur.best || 0, score), runs: (cur.runs || 0) + 1 };
   return touchStreak({ ...prev, drills });
 };
+
+/* ------------------------------------------------------------- grammar */
+
+/* A run on one chapter's grammar point with that chapter's words
+   (core/questions.js grammarRun; the owner, 2026-09-30: "exercises within the
+   lessons that focus on … one of the grammar points from that chapter… They
+   can be embedded in lessons and also stand alone modules"). With an `index`
+   it is a lesson's optional step, starting on that lesson's words; without,
+   it is the unit's own module, reached from the unit screen and Practice.
+   Graded like any run, so the scheduler hears every word it asks. */
+export function GrammarFlow({ route, navigation }) {
+  const { unitId, index } = route.params || {};
+  const unit = UN.find((u) => u.id === unitId);
+  const lesson = index !== undefined && index !== null;
+  const { update } = useSession();
+  const [result, setResult] = useState(null);
+  const [seed, setSeed] = useState(0);
+  const steps = useMemo(() => (unit ? Q.grammarRun(unit, lesson ? index : null) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [unitId, index, seed]);
+  const title = (steps[0] && steps[0].note && steps[0].note.title) || "Grammar";
+  useAudioStopOnLeave();
+
+  if (!unit || !steps.length) {
+    return <Done title="No grammar practice here yet" onBack={() => navigation.goBack()} />;
+  }
+  if (result) {
+    return (
+      <Done
+        title={title}
+        detail={`${result.right} of ${result.total} right`}
+        score={result.score}
+        passed={result.score >= 80}
+        onAgain={() => { setResult(null); setSeed(seed + 1); }}
+        onBack={() => navigation.goBack()}
+      />
+    );
+  }
+  return (
+    <Runner
+      key={seed}
+      steps={steps}
+      navigation={navigation}
+      onFinish={(r) => {
+        const score = scoreOf(r);
+        update((prev) => bestOf(prev, grammarKey(unit, lesson ? index : null), score));
+        setResult({ ...r, score });
+      }}
+    />
+  );
+}
 
 /* ------------------------------------------------------------- listening */
 

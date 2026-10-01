@@ -5643,6 +5643,32 @@ defaults are `docs/ui-test-notebook.md`.
   skin, `Text` sets `fontWeight: "normal"` and lets the file carry the weight.
 - Fonts are OFL files in `native/assets/fonts/` (credited on Credits).
 
+## 30bk. A chapter's grammar, practised on its own (2026-09-30)
+
+The owner: *"exercises within the lessons that focus on … one of the grammar
+points from that chapter with words from that chapter… imagine conjugations
+present… embedded in lessons and also stand alone modules (sort of like the
+standalone video module)."*
+
+- **`grammarRun(unit, index)`** in `core/questions.js`: ten questions
+  (`GRAMMAR_N`) on the card's own `form` (formSpec, so a side quest inherits
+  its chapter's point), the first 60 % chosen and the rest written
+  (`GRAMMAR_CHOOSE`). Words: a lesson's own first, then the unit's, then
+  earlier chapters and this chapter's spine — **never a sibling side quest**
+  (§30l's rule; the first cut asked «акция» in Emotion). Never the same word
+  and cell twice; a `{drill}` card (agreement, aspect) runs that drill on the
+  same words. Chapter 1 has no point and gets nothing.
+- **Three ways in, one screen** (`GrammarFlow`, route `GrammarRun` in the
+  Learn and Practice stacks): a lesson's **optional** Grammar step (a
+  required one would un-finish done lessons), "Grammar practice" on the unit
+  screen, and "This chapter's grammar" in Practice (`currentGrammarUnit`).
+  Recorded under `grammarKey` in `drills`; graded like any run.
+- `tools/sample_grammar.mjs` prints every unit's run to read.
+- **Found on the way:** the agreement drill took the first form of the
+  masculine accusative cell, so «___ отца́» wanted «тво́й». An animate noun's
+  accusative is its genitive, and the adjective follows suit. It also took any
+  corpus partner noun for an adjective; it prefers the words being practised.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

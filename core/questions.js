@@ -62,6 +62,10 @@ export const speechFrom = (kind, stage, lesson) => {
    its chapter's. Chapter 1's card ("no is") teaches nothing a table can ask, so
    the question starts with chapter 2. */
 export const FORM_MIX = { fromStage: 1, typedFromStage: 5, perQuiz: 1 };
+/* A grammar run (grammarRun): ten questions on the chapter's point, the first
+   60 % chosen and the rest written. */
+export const GRAMMAR_N = 10;
+export const GRAMMAR_CHOOSE = 0.6;
 
 /* Practice's drills inside a lesson quiz: this many, of the drills the route
    has opened, on the chapter's own words (quizSteps). */
@@ -996,6 +1000,62 @@ export function makeQuestions(env) {
     return null;
   }
 
+  /* A run of practice on one chapter's grammar point (the owner, 2026-09-30:
+     "exercises within the lessons that focus on … one of the grammar points
+     from that chapter with words from that chapter… imagine conjugations
+     present"). The point is the card's own `form` (formSpec, inherited by a
+     side quest), so the run cannot teach something the card does not.
+     Words: this lesson's first when there is a lesson, then the unit's, then
+     the route so far — each word in turn, so the run starts on what was just
+     met and widens. Chosen first, written last (`GRAMMAR_CHOOSE` of the run),
+     the build-up a learner wants on a new form. Never the same word and cell
+     twice. Empty when the chapter has no point (chapter 1). */
+  function grammarRun(unit, index, n = GRAMMAR_N) {
+    const spec = formSpec(unit);
+    if (!spec) return [];
+    const note = formNote(unit) || undefined;
+    const withNote = (q) => ({ ...q, note: q.note || note });
+    /* Earlier chapters whole, this chapter's spine, and this unit — never a
+       sibling side quest, which the learner may not have taken (the rule the
+       lesson passages follow, §30l). */
+    const k = stageOf(unit);
+    const route = unique(STAGES.slice(0, Math.max(0, k))
+      .flatMap((s) => [s.core, ...s.branches]).concat([STAGES[k] ? STAGES[k].core : unit, unit])
+      .flatMap((u) => u.w));
+    const choose = Math.ceil(n * GRAMMAR_CHOOSE);
+    if (spec.drill) {
+      // A rule the drills already ask (agreement, aspect): the same draw,
+      // on this chapter's words, chosen then written.
+      const first = drillQuestions(spec.drill, choose, route, undefined, false);
+      const keys = new Set(first.map(drillKey));
+      const rest = drillQuestions(spec.drill, n, route, undefined, true)
+        .filter((q) => !keys.has(drillKey(q))).slice(0, n - first.length);
+      return first.concat(rest).map(withNote);
+    }
+    const able = [], seen = new Set();
+    const tiers = [index === undefined || index === null ? [] : lessonWords(unit, index), unit.w, route];
+    for (const tier of tiers) {
+      for (const i of shuffle(unique(tier).slice())) {
+        if (seen.has(i)) continue;
+        seen.add(i);
+        if (formCells(L[i], spec).length) able.push(i);
+      }
+    }
+    if (!able.length) return [];
+    const out = [], asked = new Set();
+    for (let k = 0; out.length < n && k < n * 20; k++) {
+      const i = able[k % able.length];
+      const cell = pickOne(formCells(L[i], spec));
+      const key = `${i}:${cell.ri}:${cell.ci}`;
+      if (asked.has(key)) continue;
+      const q = formQuestion(i, cell, out.length >= choose);
+      if (!q) continue;
+      asked.add(key);
+      out.push(withNote(q));
+    }
+    return out;
+  }
+
   /* Which practice drills the route so far has taught, read off the same grammar
      cards that drive the form question. A learner three lessons in was being
      offered the Aspect drill, which chapter 8 teaches — and the pool of aspect
@@ -1849,7 +1909,12 @@ export function makeQuestions(env) {
     // …but not a plural-only noun: «часы» is plural, and «но́вый часы» is not
     // agreement.
     const nouns = (PAIRS[L.indexOf(adj)] || []).map((i) => L[i]).filter(nounOk);
-    const noun = nouns.length ? nouns[Math.floor(Math.random() * nouns.length)] : null;
+    /* A noun from the words being practised when the corpus pairs one with this
+       adjective — a chapter's grammar run asked «поэ́том» and «усло́вии» of a
+       chapter that teaches neither — and any attested partner otherwise. */
+    const ours = drillPool ? nouns.filter((x) => drillPool.includes(x)) : [];
+    const from = ours.length ? ours : nouns;
+    const noun = from.length ? from[Math.floor(Math.random() * from.length)] : null;
     if (!adj || !noun) return null;
     const t = tableTitled(adj, /Declension/);
     const nt = tableTitled(noun, /Declension/);
@@ -1863,8 +1928,21 @@ export function makeQuestions(env) {
     }));
     if (!rows.length) return null;
     const row = rows[0];
-    const right = row[col][0];
     const nounForm = nt.rows.find((x) => x[0] === row[0])[1][0];
+    /* The masculine accusative cell holds two forms — «твой» for a thing,
+       «твоего́» for a person or an animal — and the first was always taken, so
+       the drill asked «___ отца́» and wanted «тво́й». The noun says which: an
+       animate masculine noun's accusative is its genitive. */
+    let right = row[col][0];
+    if (row[0] === "Accusative" && noun.g === "m" && row[col].length > 1) {
+      const nGen = nt.rows.find((x) => x[0] === "Genitive");
+      const aGen = t.rows.find((x) => x[0] === "Genitive");
+      const aNom = t.rows.find((x) => x[0] === "Nominative");
+      const animate = nGen && nGen[1] && nGen[1].some((f) => fold(f) === fold(nounForm));
+      const want = animate ? aGen && aGen[col] : aNom && aNom[col];
+      const hit = want && row[col].find((f) => want.some((g) => fold(g) === fold(f)));
+      if (hit) right = hit;
+    }
     const at = [t.rows.indexOf(row), col];
     if (typed) {
       return written({ kind: "agreement", i: L.indexOf(adj), cyr: true,
@@ -2159,7 +2237,7 @@ export function makeQuestions(env) {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
-    customQuiz, finalExam, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus,
+    customQuiz, finalExam, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, grammarRun,
     drillsIntroduced, drillOpensAt,
   };
 }

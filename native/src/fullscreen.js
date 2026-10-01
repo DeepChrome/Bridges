@@ -22,6 +22,7 @@
 export const RUNS = [
   "Vocab",        // the lesson's teaching steps
   "Quiz",         // the lesson quiz
+  "GrammarRun",   // a chapter's grammar point with its words
   "TestOut",      // testing out of a section
   "Placement",    // the placement test
   "CustomQuiz",   // a quiz the learner built

@@ -63,7 +63,7 @@ import { flushState } from "./src/store";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
   QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, SoundDrillFlow,
-  ShadowFlow, BuildDrillFlow, FinalFlow,
+  ShadowFlow, BuildDrillFlow, FinalFlow, GrammarFlow,
 } from "./src/screens/Flows";
 
 /* Where the day starts, from this device's own clock (ROADMAP 13.24).
@@ -212,6 +212,9 @@ function LearnStack() {
                     options={titled((p) => `Lesson ${(p.index || 0) + 1}`)} />
       <Stack.Screen name="Vocab" component={VocabFlow} options={titled("Vocabulary")} />
       <Stack.Screen name="Quiz" component={QuizFlow} options={titled("Quiz")} />
+      {/* A chapter's grammar point with its words: a lesson's optional step
+          and the unit's own module (GrammarFlow). Also on Practice. */}
+      <Stack.Screen name="GrammarRun" component={GrammarFlow} options={titled("Grammar")} />
       <Stack.Screen name="Summary" component={Summary} options={{ title: "Summary" }} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       {/* A lesson's or a video's words as one flashcard round (§30bf). Pushed
@@ -280,6 +283,7 @@ function PracticeStack() {
       <Stack.Screen name="Shadow" component={ShadowFlow} options={{ title: "Shadowing" }} />
       {/* What a drill asks about is on its own cog (Flows.js DrillOptions);
           the setup screen that stood here went on 2026-09-26. */}
+      <Stack.Screen name="GrammarRun" component={GrammarFlow} options={titled("Grammar")} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <HeaderRight navigation={navigation} route={route} />,

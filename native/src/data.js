@@ -250,8 +250,37 @@ export function components(st, u, i) {
     out.push({ id: "listen", label: "Listening", optional: true,
                done: !!((st.drills || {})[`scene:${u.id}:${i}`]) });
   }
+  /* Practice on the chapter's grammar point with this lesson's words
+     (GrammarFlow, 2026-09-30). Optional for the reason the Listening step
+     is: a required step would un-finish lessons already done. Done is the run
+     recorded under its key, as Listening's is. */
+  if (hasGrammar(u)) {
+    out.push({ id: "grammar", label: "Grammar", optional: true,
+               done: !!((st.drills || {})[grammarKey(u, i)]) });
+  }
   return out;
 }
+
+/* Whether a unit has a grammar point to practise: its card's `form`, or its
+   chapter spine's (a side quest inherits it, as core/questions.js formSpec
+   does). Chapter 1 has none. Read here rather than off the questions module,
+   which imports this one. */
+export function grammarNoteOf(u) {
+  if (u.g && u.g.form) return u.g;
+  const s = STAGES.find((x) => x.core.id === u.id || x.branches.some((b) => b.id === u.id));
+  return s && s.core.g && s.core.g.form ? s.core.g : null;
+}
+export const hasGrammar = (u) => !!grammarNoteOf(u);
+/* The unit whose grammar Practice offers: the one Continue is in, or the
+   latest reached that has a point (chapter 1 has none). */
+export function currentGrammarUnit(st) {
+  const next = nextStep(st);
+  if (next && hasGrammar(next.unit)) return next.unit;
+  return reachedUnits(st).slice().reverse().find(hasGrammar) || null;
+}
+/* Where a grammar run is recorded: a lesson's, or the unit's own module. */
+export const grammarKey = (u, i) =>
+  (i === undefined || i === null ? `grammar:${u.id}` : `grammar:${u.id}:${i}`);
 
 /* Which lessons *feature* their conversation as a step on the lesson screen.
  *

@@ -7,7 +7,7 @@ import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick, Text } from "../ui";
 import {
-  UN, lessonCount, lessonWords, lessonDone, components, unitFineProgress, L, linesWith,
+  UN, lessonCount, lessonWords, lessonDone, components, unitFineProgress, L, linesWith, hasGrammar,
 } from "../data";
 
 export function UnitScreen({ route, navigation }) {
@@ -71,6 +71,12 @@ export function UnitScreen({ route, navigation }) {
       {/* Everything the unit teaches on one list, to study before its test. */}
       <Btn testID="unit-summary" label="Unit summary" style={{ marginTop: 16 }}
            onPress={() => navigation.navigate("Summary", { unitId: unit.id })} />
+      {/* The chapter's grammar point on its own, with the unit's words
+          (GrammarFlow) — a module beside the lessons, as the video is. */}
+      {hasGrammar(unit) ? (
+        <Btn testID="unit-grammar" label="Grammar practice" style={{ marginTop: 10 }}
+             onPress={() => navigation.navigate("GrammarRun", { unitId: unit.id })} />
+      ) : null}
       {unit.kind === "spine" && unitFineProgress(st, unit) < 1 ? (
         <Btn label="Test out of this section" style={{ marginTop: 10 }}
              onPress={() => navigation.navigate("TestOut", { unitId: unit.id })} />
@@ -80,7 +86,7 @@ export function UnitScreen({ route, navigation }) {
 }
 
 const STEP_LABEL = { vocab: "Start the vocabulary", summary: "Review the summary", quiz: "Take the quiz", video: "Watch the video",
-                     listen: "Listen to the conversation" };
+                     listen: "Listen to the conversation", grammar: "Practice the grammar" };
 
 export function LessonScreen({ route, navigation }) {
   const { st } = useSession();
@@ -100,6 +106,7 @@ export function LessonScreen({ route, navigation }) {
   const open = (id) => {
     if (id === "listen") return navigation.navigate("Scenes", { key: `${unit.id}:${i}` });
     if (id === "summary") return navigation.navigate("Summary", { unitId: unit.id, index: i });
+    if (id === "grammar") return navigation.navigate("GrammarRun", { unitId: unit.id, index: i });
     return navigation.navigate(
       id === "video" ? "Video" : id === "quiz" ? "Quiz" : "Vocab",
       { unitId: unit.id, index: i });

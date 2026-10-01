@@ -106,14 +106,24 @@ export function translitBack(s) {
 export function firstSense(w) {
   const gloss = (w.e || "");
   let depth = 0;
+  let s = "";
   for (let i = 0; i < gloss.length; i++) {
     const c = gloss[i];
     if (c === "(" || c === "[") depth++;
     else if (c === ")" || c === "]") depth = Math.max(0, depth - 1);
-    else if ((c === "," || c === ";") && depth === 0) {
-      const s = gloss.slice(0, i).trim();
-      return s || w.b;
-    }
+    else if ((c === "," || c === ";") && depth === 0) { s = gloss.slice(0, i).trim(); break; }
   }
-  return gloss.trim() || w.b;
+  if (!s) s = gloss.trim();
+  if (!s) return w.b;
+  return w.p === "verb" ? asInfinitive(s) : s;
+}
+
+/* A verb's sense is written "to …". OpenRussian glosses most verbs bare —
+   163 of the 219 verbs the units teach — so "work" stood for both «работа»
+   and «работать», and "judge" for «судья» and «судить», on a word list and on
+   an English-front card (the content sweep, 2026-09-30). Comparisons strip
+   the "to" again (senseKey in core/questions.js), so this changes what is
+   read and never what counts as the same meaning. */
+export function asInfinitive(s) {
+  return /^(to\b|\()/i.test(s) ? s : `to ${s}`;
 }

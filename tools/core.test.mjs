@@ -1925,7 +1925,18 @@ group("speaking");
   ok(!s.autoplay && !s.say, "nothing is played before the attempt — that would be copying");
   ok(SPEECH.speak[unit.id].some((i) => SPEECH.rows[i][0] === s.target),
      "the sentence comes from the unit's speaking pool");
-  ok(!!DATA.audio.files[fold(s.target)], "and has a recording to hear afterwards");
+  /* A recording is the collection's or a bought one (data/word_audio, §27):
+     the video's own lines join the pools voiced only by the bought clips
+     (§30bf), so a draw that landed on one failed here for a sentence the app
+     plays perfectly. */
+  const bought = JSON.parse(readFileSync(join(ROOT, "data", "word_audio", "manifest.json"), "utf8")).files || {};
+  ok(!!(DATA.audio.files[fold(s.target)] || bought[fold(s.target)]), "and has a recording to hear afterwards",
+     s.target);
+  // …and not by luck of the draw (§23): every sentence any unit can ask.
+  const unvoiced = [...new Set(Object.values(SPEECH.speak).flat())]
+    .map((i) => SPEECH.rows[i][0])
+    .filter((ru) => !DATA.audio.files[fold(ru)] && !bought[fold(ru)]);
+  ok(!unvoiced.length, "every sentence in every speaking pool has a recording", unvoiced.slice(0, 3).join(" | "));
   ok(s.lemmas.length > 0, "and lemmas to grade");
 }
 

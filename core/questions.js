@@ -193,7 +193,10 @@ export function makeQuestions(env) {
      another: `firstSense` gives "on (place)" for «на», which never matches the
      plain "on" sitting in «в»'s list even though a learner offered both would be
      right either way. */
-  const senseKey = (s) => fold(String(s || "").replace(/\s*[([][^)\]]*[)\]]/g, "").trim());
+  /* "to read" and "read" are one sense: firstSense writes verbs as
+     infinitives, the gloss list they are compared against does not. */
+  const senseKey = (s) => fold(String(s || "").replace(/\s*[([][^)\]]*[)\]]/g, "").trim()
+    .replace(/^to\s+/i, ""));
   const mainSense = (w) => senseKey(firstSense(w));
   const glossed = (w) => !!(w && w.e && String(w.e).trim());
   /* Every synonym in a gloss, not only the first group: OpenRussian separates

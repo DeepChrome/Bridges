@@ -574,6 +574,10 @@ OVERRIDES = {
     "головной": "body", "источник": "nature", "плавание": "sport", "статья": "tech",
     "акция": "business", "оценивать": "business", "мина": "military", "автомат": "tech",
     "номер": "time", "волнение": "emotion", "обсуждаться": "speech", "указывать": "speech",
+    # -- sixth pass (2026-09-30), the same again after the same-sense sweep
+    # (gloss_overrides "_5"): «пора» read "season" and went to Animals, and
+    # «солнечный» and «противник» lost the sense that placed them.
+    "пора": "time", "солнечный": "nature", "противник": "military",
 }
 
 # A chapter is one spine unit plus the side quests that follow it, each unit

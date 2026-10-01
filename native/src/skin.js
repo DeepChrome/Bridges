@@ -126,38 +126,16 @@ export const board = {
 export const notebookFont = {
   regular: "PTSerif_400Regular",
   bold: "PTSerif_700Bold",
-  italic: "PTSerif_400Italic",
 };
 
 export const skinFonts = {
   PTSerif_400Regular: require("../assets/fonts/PTSerif-Regular.ttf"),
   PTSerif_700Bold: require("../assets/fonts/PTSerif-Bold.ttf"),
-  PTSerif_400Italic: require("../assets/fonts/PTSerif-Italic.ttf"),
 };
 
 export function notebookFace(weight) {
   const w = String(weight || "400");
   return w === "400" || w === "normal" || w === "300" ? notebookFont.regular : notebookFont.bold;
-}
-
-/* ------------------------------------------------------------ the date */
-
-/* How a Russian pupil heads each day's page: the date in words, ordinal
-   neuter nominative and the month in the genitive — «Тридцатое сентября». */
-const ORD = ["Первое", "Второе", "Третье", "Четвёртое", "Пятое", "Шестое", "Седьмое", "Восьмое",
-  "Девятое", "Десятое", "Одиннадцатое", "Двенадцатое", "Тринадцатое", "Четырнадцатое",
-  "Пятнадцатое", "Шестнадцатое", "Семнадцатое", "Восемнадцатое", "Девятнадцатое", "Двадцатое",
-  "Двадцать первое", "Двадцать второе", "Двадцать третье", "Двадцать четвёртое",
-  "Двадцать пятое", "Двадцать шестое", "Двадцать седьмое", "Двадцать восьмое",
-  "Двадцать девятое", "Тридцатое", "Тридцать первое"];
-const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа",
-  "сентября", "октября", "ноября", "декабря"];
-const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August",
-  "September", "October", "November", "December"];
-
-export function dateInWords(d = new Date()) {
-  return { ru: `${ORD[d.getDate() - 1]} ${MONTHS[d.getMonth()]}`,
-           en: `${d.getDate()} ${MONTHS_EN[d.getMonth()]}` };
 }
 
 /* A Russian teacher's mark out of five. No 2: a demo that marks somebody

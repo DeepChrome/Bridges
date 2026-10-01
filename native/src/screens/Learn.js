@@ -38,8 +38,7 @@ import {
   routePosition,
 } from "../data";
 import { nextOpening, markOpening } from "@core/openings";
-import { isNotebook, notebookFont, dateInWords } from "../skin";
-import { say } from "../audio";
+import { isNotebook } from "../skin";
 import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
 import { useSweep, useDraw, useFill } from "../motion";
@@ -245,9 +244,15 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
           )}
         </View>
       </View>
-      <Text style={{ color: tone.nm, fontSize: 12, fontWeight: "600", lineHeight: 15,
+      {/* A fixed width, not a maximum, and the simple line breaker. A name that
+          only just fits ("Food & Drink" at a larger system font) was measured
+          as one line and drawn as two, and Android cut the second line off
+          (the owner's phone, 2026-10-01) — measure and draw must agree on the
+          width. */}
+      <Text textBreakStrategy="simple"
+            style={{ color: tone.nm, fontSize: 12, fontWeight: "600", lineHeight: 15,
                      textAlign: "center", marginTop: 7,
-                     maxWidth: branch ? 92 : 112 }}>
+                     width: branch ? 92 : 112 }}>
         {unit.name}
       </Text>
       {/* Which of a chapter's quests it does not require. Since 2026-09-22 the
@@ -447,32 +452,6 @@ function Fork({ stage, chapterOpen, onOpen }) {
   );
 }
 
-/* The top of today's page, as a Russian pupil writes it (UI test skin,
-   docs/ui-test-notebook.md): the date in words on the first line, «Классная
-   работа» — class work — under it, both in the teacher's hand. The one loud
-   thing in the skin, and a lesson in itself: a month of it and every month's
-   name and the ordinals to thirty-one are read without trying. A press reads
-   the date aloud; the English is small beneath, in pencil. */
-function PageHead() {
-  const t = useTheme();
-  const d = dateInWords();
-  return (
-    <View testID="page-head" style={{ alignItems: "center", marginTop: 4, marginBottom: 10 }}>
-      <Pressable testID="page-date" onPress={() => say(d.ru)} accessibilityRole="button"
-                 accessibilityLabel={`${d.ru}, ${d.en}. Hear it`} hitSlop={6}>
-        <Text numberOfLines={1} adjustsFontSizeToFit
-              style={{ color: t.ink, fontSize: 28, lineHeight: 34, fontWeight: "700" }}>
-          {d.ru}
-        </Text>
-      </Pressable>
-      <Text style={{ color: t.brand, fontFamily: notebookFont.italic, fontSize: 19, lineHeight: 26 }}>
-        Классная работа
-      </Text>
-      <Muted size={12} style={{ marginTop: 2 }}>{d.en}</Muted>
-    </View>
-  );
-}
-
 export default function Learn({ navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
@@ -506,7 +485,6 @@ export default function Learn({ navigation }) {
        * becomes true. One at a time — someone arriving after an update has a
        * backlog, and five of these stacked on the path is the wall this exists
        * to avoid. A name, one line, and the way in. */}
-      {isNotebook() ? <PageHead /> : null}
       {opening ? (
         <View testID="opening"
               style={{ marginTop: 16, borderWidth: 1, borderColor: t.brandDim,

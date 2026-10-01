@@ -6,7 +6,7 @@
 import React from "react";
 import { render, screen, act } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setSkin, loadSkin, useSkin, isNotebook, dateInWords, markOutOfFive, paper, board } from "../src/skin";
+import { setSkin, loadSkin, useSkin, isNotebook, markOutOfFive, paper, board } from "../src/skin";
 import { radius, faceFor, light, dark } from "../src/theme";
 import { Text } from "../src/ui";
 import { Done } from "../src/screens/Run";
@@ -72,15 +72,6 @@ describe("the page", () => {
     await render(<Text testID="label" style={{ textTransform: "uppercase", letterSpacing: 1 }}>Verbs</Text>);
     const style = [].concat(...[screen.getByTestId("label").props.style].flat(3)).filter(Boolean);
     expect(Object.assign({}, ...style).textTransform).toBe("none");
-  });
-});
-
-describe("the date at the top of the page", () => {
-  it("is the ordinal in the neuter and the month in the genitive", () => {
-    expect(dateInWords(new Date(2026, 8, 30)).ru).toBe("Тридцатое сентября");
-    expect(dateInWords(new Date(2026, 0, 1)).ru).toBe("Первое января");
-    expect(dateInWords(new Date(2026, 2, 23)).ru).toBe("Двадцать третье марта");
-    expect(dateInWords(new Date(2026, 11, 31)).en).toBe("31 December");
   });
 });
 

@@ -95,7 +95,7 @@ describe("a list's hairlines", () => {
        to the Study picker (§30ai); "Reviews a day" after that, until the
        scheduler's settings came down to new words a day (2026-09-29). */
     const group = ["New words a day", "On-screen Russian keyboard", "Reading speed",
-                   "Right-answer sound", "Show the tour", "Developer mode", "STT Lab"];
+                   "Right-answer sound", "Show the tour", "Developer mode", "UI test", "STT Lab"];
     for (const label of group.slice(0, -1)) expect(rowAround(label)).toBe(1);
     expect(rowAround("STT Lab")).toBe(0);
 
@@ -104,6 +104,8 @@ describe("a list's hairlines", () => {
     });
     expect(screen.queryByText("STT Lab")).toBeNull();
     for (const label of group.slice(0, -2)) expect(rowAround(label)).toBe(1);
-    expect(rowAround("Developer mode")).toBe(0);
+    // The UI test switch (skin.js) sits under developer mode.
+    expect(rowAround("Developer mode")).toBe(1);
+    expect(rowAround("UI test")).toBe(0);
   });
 });

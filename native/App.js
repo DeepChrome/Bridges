@@ -21,6 +21,11 @@ import Svg, { Path } from "react-native-svg";
 
 import { SessionProvider, useSession } from "./src/session";
 import { light, dark } from "./src/theme";
+import { isNotebook, paper, board, skinFonts, loadSkin, useSkin } from "./src/skin";
+/* The palette for a scheme, through the UI test skin when it is on
+   (src/skin.js); the tree is keyed on the skin, so this is read afresh. */
+const palette = (scheme) => (isNotebook() ? (scheme === "light" ? paper : board)
+                                          : (scheme === "light" ? light : dark));
 import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { DRILL_TYPES } from "./src/questions";
@@ -109,7 +114,7 @@ const SearchIcon = tabIcon("Search");
    home: back to the path in one press from anywhere (the owner, 2026-09-07). */
 function HomeButton() {
   const scheme = useColorScheme();
-  const p = scheme === "light" ? light : dark;
+  const p = palette(scheme);
   return (
     <Pressable onPress={() => navRef.navigate("Tabs", { screen: "Learn", params: { screen: "Path" } })}
                hitSlop={8} accessibilityRole="button" accessibilityLabel="Home, the path"
@@ -343,7 +348,7 @@ function SearchStack() {
 const SPLASH_MS = 900;
 function Splash({ onDone }) {
   const scheme = useColorScheme();
-  const p = scheme === "light" ? light : dark;
+  const p = palette(scheme);
   const bars = [useRef(new Animated.Value(0)).current,
                 useRef(new Animated.Value(0)).current,
                 useRef(new Animated.Value(0)).current];
@@ -407,7 +412,7 @@ const wordTitled = ({ route }) => {
 function StateBanner() {
   const { error, clearError } = useSession();
   const scheme = useColorScheme();
-  const p = scheme === "light" ? light : dark;
+  const p = palette(scheme);
   if (!error) return null;
   return (
     <View testID="state-banner"
@@ -503,7 +508,7 @@ function Shell() {
  * it already said, alongside it. */
 function TabShell() {
   const scheme = useColorScheme();
-  const p = scheme === "light" ? light : dark;
+  const p = palette(scheme);
   const insets = useSafeAreaInsets();
   // What is waiting, on the tab itself (docs/PLAYBOOK.md 2.2): the count
   // Anki shows beside a deck, so the pile is known before it is opened.
@@ -558,12 +563,20 @@ function TabShell() {
 
 export default function App() {
   const scheme = useColorScheme();
-  const p = scheme === "light" ? light : dark;
+  const p = palette(scheme);
   const base = scheme === "light" ? DefaultTheme : DarkTheme;
   const navTheme = {
     ...base,
     colors: { ...base.colors, background: p.bg, card: p.surface, text: p.ink,
               border: p.line, primary: p.brand },
+    // Headers and tab labels in the skin's serif too (React Navigation 7
+    // reads its fonts from the theme); the default look keeps the platform's.
+    ...(isNotebook() ? { fonts: {
+      regular: { fontFamily: "PTSerif_400Regular", fontWeight: "400" },
+      medium: { fontFamily: "PTSerif_700Bold", fontWeight: "400" },
+      bold: { fontFamily: "PTSerif_700Bold", fontWeight: "400" },
+      heavy: { fontFamily: "PTSerif_700Bold", fontWeight: "400" },
+    } } : null),
   };
 
   /* The typeface, before anything is drawn in it. Text rendered while the font
@@ -574,8 +587,14 @@ export default function App() {
      turns true either way, and Text falls back to the system face. */
   const [loaded, fontError] = useFonts({
     Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold, Nunito_800ExtraBold,
+    ...skinFonts,
   });
-  if (!loaded && !fontError) return null;
+  // The UI test skin is read before the first frame, so a phone that has it
+  // on never draws the default look first and then swaps.
+  const skin = useSkin();
+  const [skinRead, setSkinRead] = useState(false);
+  useEffect(() => { loadSkin().then(() => setSkinRead(true)); }, []);
+  if ((!loaded && !fontError) || !skinRead) return null;
 
   /* The boundary sits **inside** SafeAreaProvider and outside everything else
    * (src/boundary.js).
@@ -601,7 +620,7 @@ export default function App() {
         <SessionProvider>
           {/* Sound belongs to the screen that started it: any navigation to
               another route stops it (audio.js `leftFor`, 2026-09-29). */}
-          <NavigationContainer ref={navRef} theme={navTheme}
+          <NavigationContainer key={skin} ref={navRef} theme={navTheme}
                                onStateChange={() => leftFor(currentRouteKey())}>
             <WordsProvider>
               <Shell />

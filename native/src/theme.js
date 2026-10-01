@@ -5,6 +5,7 @@
  * names — a colour that changes here should change there. */
 
 import { useColorScheme } from "react-native";
+import { onSkin, isNotebook, paper, board, notebookFace } from "./skin";
 
 /* Every neutral sits on one hue — 220° in both themes — because a ramp that wanders
  * between hue families is what makes an interface look accidental. The palette was
@@ -45,6 +46,11 @@ const dark = {
 };
 
 export const radius = { sm: 8, md: 14, lg: 20, xl: 26 };
+/* The UI test skin (skin.js) cuts the corners down, in place and reversibly:
+   a sheet on a page has a small cut corner and a control a little more. */
+const ROUND = { ...radius };
+const CUT = { sm: 4, md: 6, lg: 6, xl: 8 };
+onSkin((s) => { Object.assign(radius, s === "notebook" ? CUT : ROUND); });
 /* On the 4-grid, like every mobile system's spacing (Material 3 included).
    `gap` was 10, which is the sort of value that makes a row look a pixel
    wrong without anyone being able to say why (tools/design.mjs). */
@@ -100,6 +106,7 @@ export const font = {
    for a named family: `fontWeight: "700"` on a regular face is ignored, and the
    text comes out light while the code says bold. So a weight picks its file. */
 export function faceFor(weight) {
+  if (isNotebook()) return notebookFace(weight);
   const w = String(weight || "400");
   if (w === "800" || w === "900") return font.heavy;
   if (w === "700" || w === "bold") return font.bold;
@@ -141,7 +148,10 @@ export const shadow = {
   },
 };
 export function useShadow(level = "raised") {
-  return useColorScheme() === "light" ? shadow[level] : null;
+  const scheme = useColorScheme();
+  // Paper on paper does not float: the notebook skin draws no shadows.
+  if (isNotebook()) return null;
+  return scheme === "light" ? shadow[level] : null;
 }
 
 /* Motion. One place for how long a thing takes, so a card that rises and a bar
@@ -152,7 +162,9 @@ export function useShadow(level = "raised") {
 export const motion = { quick: 130, enter: 240, settle: 380, celebrate: 520 };
 
 export function useTheme() {
-  return useColorScheme() === "light" ? light : dark;
+  const scheme = useColorScheme();
+  if (isNotebook()) return scheme === "light" ? paper : board;
+  return scheme === "light" ? light : dark;
 }
 
 export { light, dark };

@@ -83,6 +83,24 @@ export default function Credits() {
         </List>
       ) : null}
 
+      {/* The UI test skin's typefaces (skin.js), bundled as files rather than
+          packages, so the notices below cannot list them. */}
+      <SectionLabel style={{ marginTop: 22 }}>Typefaces</SectionLabel>
+      <List>
+        <Row onPress={() => Linking.openURL("https://fonts.google.com/specimen/PT+Serif")}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15 }}>PT Serif by ParaType</Text>
+            <Muted>SIL Open Font License 1.1</Muted>
+          </View>
+        </Row>
+        <Row onPress={() => Linking.openURL("https://fonts.google.com/specimen/Caveat")}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15 }}>Caveat by Impallari Type</Text>
+            <Muted>SIL Open Font License 1.1</Muted>
+          </View>
+        </Row>
+      </List>
+
       <SectionLabel style={{ marginTop: 22 }}>Software</SectionLabel>
       <List>
         {NOTICES.map((n) => (

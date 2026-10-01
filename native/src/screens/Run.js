@@ -10,6 +10,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Pressable, ScrollView, Alert, Animated, ActivityIndicator } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
+import Svg, { Path } from "react-native-svg";
+import { isNotebook, notebookFont, markOutOfFive } from "../skin";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
          BulbButton } from "../ui";
 import { RuleCard, Reference, hasReference, StandardWhy } from "../rules";
@@ -883,6 +885,24 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
         {kind ? (
           <GuidePop pose={poseFor(kind)} size={108} style={{ marginBottom: 10 }} />
         ) : null}
+        {isNotebook() && score !== undefined ? (
+          /* The UI test skin (skin.js): the result as a Russian teacher
+             writes it — a mark out of five in red pen, circled by hand, with
+             the percentage small beneath in pencil. */
+          <Animated.View testID="grade" style={[pop, { alignItems: "center", marginBottom: 16 }]}>
+            <View style={{ width: 120, height: 110, alignItems: "center", justifyContent: "center",
+                           transform: [{ rotate: "-7deg" }] }}>
+              <Svg width={120} height={110} style={{ position: "absolute" }}>
+                <Path d="M62 8 C 100 6, 116 34, 110 60 C 104 92, 70 104, 44 98 C 16 92, 4 64, 12 38 C 18 18, 40 6, 70 9"
+                      stroke={t.pen} strokeWidth={3} fill="none" strokeLinecap="round" />
+              </Svg>
+              <Text style={{ color: t.pen, fontFamily: notebookFont.hand, fontSize: 76, lineHeight: 84 }}>
+                {String(markOutOfFive(score / 100))}
+              </Text>
+            </View>
+            <Muted>{`${score}%`}</Muted>
+          </Animated.View>
+        ) : (
         <Animated.View
           style={[pop, { width: 104, height: 104, borderRadius: 52, marginBottom: 20,
                          alignItems: "center", justifyContent: "center",
@@ -892,6 +912,7 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
             {score !== undefined ? `${score}%` : "✓"}
           </Text>
         </Animated.View>
+        )}
         <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700",
                        textAlign: "center", letterSpacing: -0.3 }}>{title}</Text>
         {detail ? <Muted style={{ marginTop: 8, textAlign: "center" }}>{detail}</Muted> : null}

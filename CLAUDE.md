@@ -5609,6 +5609,33 @@ three screens down.
   (надеть in Clothes, its partner надевать in chapter 9 — moving it would
   break that chapter's conversation).
 
+## 30bj. UI test: the exercise-book skin (2026-09-30)
+
+The owner asked for a demo of a distinctive interface behind one switch —
+*"do not force this across the app in any way that we cannot quickly undo."*
+Settings → **UI test** turns on «Тетрадь»: the Russian school exercise book
+(grid paper, red margin rule, violet school ink, the teacher's red pen; in
+dark mode the blackboard). The brief, tokens and the review against generic
+defaults are `docs/ui-test-notebook.md`.
+
+- **One file knows about it**, `native/src/skin.js`, and it works through the
+  places the app already takes its look from: `useTheme` and `useShadow`
+  (theme.js), `faceFor` (PT Serif), `radius` (cut in place by a listener in
+  theme.js, restored exactly), `Screen` (the paper), and `Text` (labels lose
+  their all-caps; an explicit `fontFamily` is honoured). Off, every one of
+  them answers as before; `skin.test.js` asserts the round trip.
+- **The choice is the phone's** (`rb.uitest` in AsyncStorage), never a
+  profile's, and switching remounts the navigator (keyed on the skin in
+  App.js) because radius and typeface are read at render.
+- Two things only the skin draws: the date in words and «Классная работа» at
+  the top of the path (`PageHead` in Learn.js; a press reads it aloud), and a
+  circled mark out of five in red pen at the end of a scored run (`Done`).
+- **Trap: Android drops a custom font asked for a weight it does not have.**
+  PT Serif ships 400 and 700, and `fontWeight: "800"` on it fell back to
+  Roboto on every button and chapter title while 700 looked right. In the
+  skin, `Text` sets `fontWeight: "normal"` and lets the file carry the weight.
+- Fonts are OFL files in `native/assets/fonts/` (credited on Credits).
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

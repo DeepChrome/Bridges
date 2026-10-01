@@ -6,6 +6,7 @@ import { useSession } from "../session";
 import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
 import { useTheme, radius, type as T } from "../theme";
+import { setSkin, isNotebook } from "../skin";
 import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb, Stepper } from "../ui";
 import { CharacterPicker } from "./Gate";
 import { plan as askPlan } from "../lib/feedback";
@@ -406,6 +407,21 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   testID="dev-switch"
                   value={!!st.dev}
                   onValueChange={(v) => update((p) => ({ ...p, dev: v }))}
+                  trackColor={{ true: t.good, false: t.surface3 }}
+                />
+              </Row>
+              {/* The exercise-book look (skin.js, docs/ui-test-notebook.md): a
+                  demo the owner switches on and off, kept on the phone rather
+                  than in the profile. Switching rebuilds the screens, so the
+                  sheet closes first and the path is where it lands. */}
+              <Row onPress={() => { onClose(); setSkin(isNotebook() ? "default" : "notebook"); }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>UI test</Text>
+                </View>
+                <Switch
+                  testID="uitest-switch"
+                  value={isNotebook()}
+                  onValueChange={(v) => { onClose(); setSkin(v ? "notebook" : "default"); }}
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>

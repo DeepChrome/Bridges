@@ -1691,6 +1691,23 @@ OPEN_CLASS_WIKT = ("noun", "verb", "adj")
 MAX_SENSES = 8          # ingest_wiktionary.py's cap, kept after the entries are merged
 
 
+PRE_REFORM = re.compile(r"[ѣіѳѵ]|ъ(?![а-яё])", re.I)
+
+
+def not_a_translation(x):
+    """A Wiktionary example the reader cannot use (the definitions read,
+    2026-10-01). For a literary quotation the extract often keeps the
+    attribution where the translation belongs — «…» = "Boris Akunin",
+    "Zemfira", "Bi-2" — so an English side with no lower-case word in it is a
+    name, not a sentence. Pre-1918 spelling (ѣ, і, a final ъ) and wiki-link
+    debris go too."""
+    en = (x.get("en") or "").strip()
+    if not en or "Wikipedia" in en or PRE_REFORM.search(x.get("ru") or ""):
+        return True
+    words = re.findall(r"[A-Za-z][A-Za-z'’-]*", en)
+    return not any(w[0].islower() for w in words)
+
+
 def sense_examples(examples, own, key_rank):
     """A sense's examples, useful first (the owner, 2026-09-28).
 
@@ -1704,11 +1721,65 @@ def sense_examples(examples, own, key_rank):
         toks = [fold(t) for t in re.findall(r"[а-яёА-ЯЁ́̀]+(?:-[а-яёА-ЯЁ́̀]+)*", x.get("ru") or "")]
         if not toks or len(toks) > LONG_WORDS:
             continue
+        if not_a_translation(x):
+            continue
         rare = sum(1 for k in toks if not k.startswith(own)
                    and key_rank.get(k, COMMON_RANK + 1) > COMMON_RANK)
         out.append(((example_tier(len(toks), rare), rare, len(toks)), x))
     out.sort(key=lambda p: p[0])
     return [x for _, x in out]
+
+
+SENSE_OVERRIDES_PATH = ROOT / "data" / "curated" / "sense_overrides.json"
+
+
+def apply_sense_override(senses, rule, key):
+    """A reader's correction to one word's Wiktionary senses (the definitions
+    read, 2026-10-01): `drop` removes a sense whose gloss contains any of the
+    given strings (a sense from another word — «небо»'s "palate" is «нёбо» —
+    slang no beginner's card should carry, a proper name); `rename` rewrites
+    a sense's gloss; `examples` removes an example whose Russian or English
+    contains one; `first` moves the sense containing that string to the top;
+    `lead` puts a sense of the given text above everything. Every string must match something,
+    or the build stops: a correction that no longer applies is a correction
+    nobody can see has gone stale."""
+    low = lambda s: (s or "").lower()
+    # "=front" matches a sense that is exactly "front", where "front" alone
+    # would also take "in front of".
+    has = lambda d, g: low(d[1:]) == low(g).strip() if d.startswith("=") else low(d) in low(g)
+    for d in rule.get("drop", ()):
+        hit = [s for s in senses if has(d, s.get("g"))]
+        if not hit:
+            raise SystemExit(f"sense_overrides.json {key}: no sense contains {d!r}")
+        senses = [s for s in senses if s not in hit]
+    for old, new in (rule.get("rename") or {}).items():
+        hit = [s for s in senses if has(old, s.get("g"))]
+        if not hit:
+            raise SystemExit(f"sense_overrides.json {key}: no sense contains {old!r}")
+        for s in hit:
+            s["g"] = new
+    for d in rule.get("examples", ()):
+        found = False
+        for s in senses:
+            keep = [x for x in s.get("x") or () if low(d) not in low(x.get("ru")) + "\n" + low(x.get("en"))]
+            if len(keep) != len(s.get("x") or ()):
+                found = True
+                s["x"] = keep
+                if not keep:
+                    s.pop("x", None)
+        if not found:
+            raise SystemExit(f"sense_overrides.json {key}: no example contains {d!r}")
+    f = rule.get("first")
+    if f:
+        hit = [s for s in senses if low(f) in low(s.get("g"))]
+        if not hit:
+            raise SystemExit(f"sense_overrides.json {key}: no sense contains {f!r}")
+        senses = [hit[0]] + [s for s in senses if s is not hit[0]]
+    # `lead` puts the meaning the lesson teaches on top where Wiktionary has
+    # no sense that says it («больше» "more", «пасха» "Easter").
+    if rule.get("lead"):
+        senses = [{"g": rule["lead"]}] + senses
+    return senses
 
 
 def load_senses(lemmas, stats, key_rank=None):
@@ -1735,12 +1806,19 @@ def load_senses(lemmas, stats, key_rank=None):
     credit = dict(db.execute("SELECT k, v FROM meta").fetchall())
     db.close()
 
+    overrides = {k: v for k, v in json.loads(SENSE_OVERRIDES_PATH.read_text(encoding="utf-8")).items()
+                 if not k.startswith("_")} if SENSE_OVERRIDES_PATH.exists() else {}
+    used = set()
     out, found, multi, fronted, dropped = {}, 0, 0, [], 0
     for i, l in enumerate(lemmas):
         by_pos = rows.get(fold(l.get("b") or ""))
         if not by_pos:
             continue
         senses, front = pick_senses(l.get("e") or "", l.get("p"), by_pos)
+        key = f"{l.get('b')}|{l.get('p')}"
+        if key in overrides and senses:
+            used.add(key)
+            senses = apply_sense_override([dict(s) for s in senses], overrides[key], key)
         if not senses:
             continue
         # The word's own forms never count against a sentence: a stem match is
@@ -1760,6 +1838,9 @@ def load_senses(lemmas, stats, key_rank=None):
             multi += 1
         if front:
             fronted.append(l.get("b"))
+    stale = sorted(set(overrides) - used)
+    if stale:
+        raise SystemExit(f"sense_overrides.json names words with no senses shipped: {', '.join(stale)}")
     stats["senses"] = found
     stats["senses_multi"] = multi
     stats["senses_fronted"] = len(fronted)

@@ -5676,9 +5676,10 @@ defaults are `docs/ui-test-notebook.md`.
 - **The choice is the phone's** (`rb.uitest` in AsyncStorage), never a
   profile's, and switching remounts the navigator (keyed on the skin in
   App.js) because radius and typeface are read at render.
-- Two things only the skin draws: the date in words and «Классная работа» at
-  the top of the path (`PageHead` in Learn.js; a press reads it aloud), and a
-  circled mark out of five in red pen at the end of a scored run (`Done`).
+- One thing only the skin draws: a circled mark out of five in red pen at the
+  end of a scored run (`Done`). The date in words and «Классная работа» at the
+  top of the path went on 2026-10-01 (the owner: "you can delete that whole
+  header"; the italic т, written like an m, read to him as «раbома»).
 - **Round two, same day**, on his phone: the grid squares and the margin rule
   went ("the background is ugly with the squares"), the handwriting face went
   (hard to read), and the green blackboard became an ink-dark blue with a
@@ -5795,6 +5796,52 @@ against its lesson), the curriculum stamp changes (progress is re-mapped,
 §30bf V7), and new words want audio: `build_word_audio`, `build_form_audio`,
 `build_scenario_audio` (which now prunes keys whose script moved), then
 `build_scene_tracks` and `build_word_assets`.
+
+## 30bn. Every definition read, and photographs cropped round their subject (2026-10-01)
+
+The owner: *"go line by line and compare every single word and ensure the
+definitions are matches"*, and *"if it's Cat… the cat shouldn't be cropped
+from the head up"*.
+
+- **All 1,205 taught words were read** against their senses, in five parts
+  (`scratchpad` dumps; 276 flags). About 150 were "a verb's first meaning
+  lacks 'to'", which is cosmetic: `firstSense` adds it wherever a verb's
+  meaning is shown (`asInfinitive`). The 158 real gloss fixes are
+  `gloss_overrides.json` `_7`, keyed `bare|pos`: wrong first meanings
+  («граница» was "abroad", «зритель» "audience", «точно» "exact», «куда»
+  "wherever", «хотеться» "like"), meanings of another word, garbles, padding.
+  **Russian inside an English gloss is not allowed** — it is shown as an
+  option in "choose the meaning" and names the answer.
+- **`data/curated/sense_overrides.json`** is the reader's lever on the
+  Wiktionary senses, which had none: `drop` (`=x` for an exact sense),
+  `rename`, `examples`, `first`, `lead`. Senses of another word («небо»'s
+  "palate" is «нёбо», «есть» "to eat", «все»'s are «всё»'s), vulgar and
+  criminal slang, ICAO code words, lotto calls, an offensive proverb. Every
+  string must match or the build stops.
+- **An example whose English has no lower-case word is a name, not a
+  translation** (`not_a_translation`): Wiktionary's quotations kept the
+  attribution where the translation belongs — "= Boris Akunin", "= Zemfira",
+  "= Bi-2". Pre-1918 spelling and wiki-link debris go too.
+- **A gloss pass re-cuts the curriculum**, and pinning every moved word back
+  does not converge: each keep pushes another word out of a full unit, and
+  six rounds of pins went from 17 moves to 47. The twenty moves were read and
+  accepted instead («граница» to Travel, «перевод» to Speech, «плакать» to
+  Feelings), and the conversations they broke rehomed by trying every free
+  lesson (two needed one line each).
+- **Search**: a bracketed note no longer stops a sense being the term —
+  "cat" found «кот» ("cat (tom cat)") under "Also", below «кат».
+- **Photographs** (`Photo` and `cropFor` in `native/src/pictures.js`). A card
+  showed every photo in a fixed 190 px band, about 1.9:1, so the median photo
+  lost 29 % of its height and 36 lost more than half. The band now takes the
+  photo's own shape up to 300 px — a 4:3 photo shows whole — and a square or
+  portrait one is cropped around its subject, read by eye into
+  `data/curated/image_focus.json` (`build_images.py` ships `SHAPES`:
+  width, height, focus; a focus for a word with no photo fails the build).
+  `crop.test.js` holds the arithmetic over every photo.
+- **A path label measured as one line and drawn as two was cut off** on his
+  phone ("Food &"): a name that only just fits at a larger system font.
+  `PathNode`'s label has a fixed width and the simple line breaker, so
+  measuring and drawing agree.
 
 ## 31. Verification
 

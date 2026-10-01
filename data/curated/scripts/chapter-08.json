@@ -2,7 +2,7 @@
  "chapter": 8,
  "name": "Cooking & Celebrating",
  "lessons": {
-  "core8:2": {
+  "core8:1": {
    "title": "Teddy cooks the chicken",
    "cast": [
     {
@@ -172,7 +172,7 @@
     }
    ]
   },
-  "core8:7": {
+  "core8:6": {
    "title": "Salt in the holiday dish",
    "cast": [
     {
@@ -230,8 +230,8 @@
     },
     {
      "s": "a",
-     "ru": "А что она туда добавляет? Это секрет?",
-     "en": "And what does she add to it? Is it a secret?"
+     "ru": "А какой у неё рецепт? Что она туда добавляет?",
+     "en": "And what's her recipe? What does she add to it?"
     },
     {
      "s": "b",

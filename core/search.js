@@ -153,7 +153,13 @@ export function makeSearch({ L, IX, deep }) {
     const glossScore = (gloss) => {
       if (!gloss) return 0;
       const g = gloss.toLowerCase();
-      const at = g.split(/[,;]\s*/).findIndex((s) => s.trim() === qe);
+      /* A bracketed note qualifies a sense and does not change what it is:
+         «кот» "cat (tom cat)" and «кошка» "cat (female or in general)" are
+         "cat", and they sat under "Also" below «кошачий» and «кат» until the
+         note was set aside (2026-10-01). A verb's "to" likewise. The note goes
+         before the split, or "you (singular, informal)" splits inside it. */
+      const at = g.replace(/\s*\([^)]*\)/g, "").split(/[,;]\s*/)
+        .findIndex((s) => s.trim().replace(/^to\s+/, "") === qe.replace(/^to\s+/, ""));
       if (at >= 0) return SENSE - Math.min(at, 8) * 0.5;
       if (word.test(g)) return WORD;
       if (g.includes(qe)) return SUBSTR;

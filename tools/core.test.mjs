@@ -2041,6 +2041,13 @@ group("search ranks by sense position");
   ok(white[0].entry.b === "белый" && white[0].entry.p === "adjective",
      "\"white\" opens on the adjective белый, not the White Guard noun", white.map((x) => `${x.entry.b}/${x.entry.p}`).join(" "));
   ok(L.filter((x) => x.b === "белый").length === 1, "the studied list carries белый once");
+  // A bracketed note does not stop a sense being the term: «кот» is "cat
+  // (tom cat)" and sat under "Also", below «кат» (2026-10-01).
+  const cat = search.scored("cat", 6);
+  const kot = cat.find((x) => x.entry.b === "кот");
+  ok(kot && kot.score >= MATCH, "\"cat\" finds кот as a match, its note aside", cat.map((x) => `${x.entry.b}:${x.score}`).join(" "));
+  ok(cat.findIndex((x) => x.entry.b === "кот") < cat.findIndex((x) => x.entry.b === "кат"),
+     "…and above кат", cat.map((x) => x.entry.b).join(" "));
 }
 
 /* The agreement drill pairs an adjective with a noun the corpus actually puts

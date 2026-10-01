@@ -195,6 +195,7 @@ export function makeQuestions(env) {
      right either way. */
   const senseKey = (s) => fold(String(s || "").replace(/\s*[([][^)\]]*[)\]]/g, "").trim());
   const mainSense = (w) => senseKey(firstSense(w));
+  const glossed = (w) => !!(w && w.e && String(w.e).trim());
   /* Every synonym in a gloss, not only the first group: OpenRussian separates
      senses with semicolons and synonyms within a sense with commas, and both
      matter here because either can be the meaning a learner reads. */
@@ -212,6 +213,13 @@ export function makeQuestions(env) {
   function safeDistractor(correctIdx, i) {
     const a = L[correctIdx], b = L[i];
     if (!a || !b) return false;
+    /* A wrong option is a word with a meaning. A glossless row — «м», an
+       abbreviation in his decks — compared as "a different meaning" and so
+       passed, and stood beside «в» as one letter away (the walkthrough,
+       2026-09-30). Nothing a learner could ever choose is an option. */
+    // The gloss itself, not mainSense: firstSense falls back to the word when
+    // there is no gloss, so «м»'s "meaning" was «м».
+    if (!glossed(b)) return false;
     return !allSenses(a).has(mainSense(b)) && !allSenses(b).has(mainSense(a));
   }
 
@@ -327,7 +335,7 @@ export function makeQuestions(env) {
     }
     take(pool, (i) => L[i].p === pos && safeDistractor(correctIdx, i), lenOff);
     take(pool, (i) => safeDistractor(correctIdx, i), lenOff);
-    take(pool, () => true, lenOff);
+    take(pool, (i) => glossed(L[i]), lenOff);
     return out;
   }
 

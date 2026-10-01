@@ -1573,6 +1573,23 @@ group("question quality");
   }
   ok(dupes === 0, "no heard or chosen option set shows the same word twice", String(dupes));
 
+  /* **An option is a word with a meaning.** «м» — a glossless abbreviation row
+     — stood beside «в» as its look-alike in chapter 1's first quiz (the
+     walkthrough, 2026-09-30). Swept over every curriculum word. */
+  const glossOf = new Map(L.map((w) => [w.w, w.e]));
+  const meaningless = [];
+  for (const u of UN) {
+    for (const i of u.w) {
+      for (const kind of ["listen", "choose-ru"]) {
+        const q = Q.present({ t: kind, i, pool: u.w.length >= 8 ? u.w : UN.flatMap((x) => x.w).slice(0, 400) });
+        for (const o of (q && q.options) || []) {
+          if (glossOf.has(o.label) && !glossOf.get(o.label)) meaningless.push(`${L[i].b}: ${o.label}`);
+        }
+      }
+    }
+  }
+  ok(!meaningless.length, "no option is a word with no meaning", meaningless.slice(0, 5).join(", "));
+
   const eto = L.findIndex((w) => w.b === "это");
   if (eto >= 0) {
     const q = Q.present({ t: "listen", i: eto, pool: UN[0].w });

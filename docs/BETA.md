@@ -56,9 +56,10 @@ instead of 168.
       suggestions land in `flags` and never in `fix`. The first run found
       eight real errors in the conversations and a reference example that
       contradicted its own rule; all fixed.
-- [ ] **Owner:** hire one native speaker for the read. At about 551 rows
-      it is roughly 2–3 hours of work, so likely well under $100 rather than
-      the old $220–385.
+- [ ] ~~**Owner:** hire one native speaker for the read.~~ **Deferred**
+      (the owner, 2026-09-30: refine first, then testers). Until then, run
+      the pre-pass after any change to authored Russian and fix what it
+      finds. When it does happen: about 551 rows, 2–3 hours of work.
 - [ ] Apply their corrections (`tools/import_review.mjs`), rebuy the changed
       lines' audio (cents) and rebuild.
 - [ ] Read the remaining photographs (ROADMAP 13.5) and blank any wrong ones.
@@ -140,7 +141,7 @@ install into Premium within a minute, and a cancelled one turns it back.
 | # | Decision | Phase |
 |---|---|---|
 | 1 | The 18 words cut from their units | A |
-| 2 | Hiring the native-speaker reader | B |
+| 2 | Hiring the native-speaker reader — deferred until after testers | B |
 | 3 | Topping up OpenAI for five redraws | B |
 | 4 | Crash reporting (Sentry or not) | C |
 | 5 | Play verification, app record, 12 testers | D |

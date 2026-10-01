@@ -28,6 +28,7 @@ import { fileURLToPath } from "node:url";
 
 import { fold } from "../core/util.js";
 import { durationMs } from "./mp3.mjs";
+import { TRIM_FILTER } from "./audio_trim.mjs";
 import { MIN_WORD_MS } from "./build_word_audio.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -43,7 +44,7 @@ const FORM_MODULE = join(ROOT, "native", "src", "formaudio.js");
 /* Trimmed copies, cached by the clip's own content id — the same arrangement
    the scenario levelling uses, and for the same reason: `data/word_audio` is
    what the money bought and rule 20.3 keeps it exactly as it arrived. */
-const TRIMMED = join(ROOT, "data", "_work", "words", "trim1");
+const TRIMMED = join(ROOT, "data", "_work", "words", "trim2");
 
 /* **Chirp3-HD pads the front of every clip, and it is not a small pad.**
  *
@@ -52,41 +53,37 @@ const TRIMMED = join(ROOT, "data", "_work", "words", "trim1");
  * it where it hurts most — shadowing, which plays the model the moment the
  * question arrives: *"there's a HUGE pause before the guy starts speaking."*
  *
- * `KEEP_MS` is what stays. Not zero: a word cut flush against its first
- * consonant sounds clipped, and the frame copy below lands on a boundary
- * anyway, so the real lead-in is this plus up to one 24 ms frame.
+ * What is trimmed and kept, and why a click in the pad no longer stops the
+ * trim, is `TRIM_FILTER` in tools/audio_trim.mjs, shared with the
+ * conversations.
  *
- * **Trimmed with `-c copy`, so nothing is re-encoded** — the frames after the
- * cut are the frames that were bought. A re-encode would cost a generation of
- * quality on 2,886 clips to remove silence, which is a poor trade. */
-const KEEP_MS = 80;
-const SILENCE_DB = -45;          // well under a 32 kbps encode's own floor
+ * **Decoded, trimmed and re-encoded — never cut with `-c copy`.** The first
+ * version copied frames from the cut on, to spare a generation of quality, and
+ * that is what put a burst of noise before the pause the owner heard
+ * (2026-10-01: *"weird noises then long pauses before starting"*). An MP3
+ * frame borrows bits from the frames before it (the bit reservoir: up to 511
+ * bytes back, five or six frames at 32 kbps), so after a frame-copy cut the
+ * first frames decode from data that is no longer there. ffmpeg mutes such
+ * frames and reports nothing, which is why no check caught it; Android's
+ * decoder plays them. A 10 ms fade-in also means the first sample cannot
+ * click. One generation of re-encode at the purchase's own rate is the
+ * price, and on speech at 32 kbps it is not one an ear finds. */
+/* A shipped word shorter than this is a blip (§30ao). The purchase's own
+   floor, MIN_WORD_MS, was measured with both pads on; a cleaned clip is the
+   speech plus the 80 + 150 ms the trim keeps, so a real one-syllable word
+   ships at 450 ms or more and a nine-frame blip at well under this. */
+const BLIP_MS = 300;
 
 const ff = (args) => spawnSync("ffmpeg", args, { encoding: "utf8", timeout: 60000 });
 
-/* How long a clip waits before anybody speaks, in milliseconds. */
-function leadMs(file) {
-  const s = String(ff(["-hide_banner", "-nostats", "-i", file,
-    "-af", `silencedetect=noise=${SILENCE_DB}dB:d=0.05`, "-f", "null", "-"]).stderr || "");
-  const start = s.match(/silence_start:\s*(-?[\d.]+)/);
-  const end = s.match(/silence_end:\s*([\d.]+)/);
-  // Silence that does not begin at the top of the file is a pause inside it.
-  if (!start || Number(start[1]) > 0.02) return 0;
-  return end ? Math.round(Number(end[1]) * 1000) : 0;
-}
-
-/* The clip with its leading silence taken off, cached. Returns the path to
-   ship, which is the original when there was nothing to take. */
+/* The clip cleaned (TRIM_FILTER), cached by its content id. Returns the path
+   to ship; the purchase itself when ffmpeg refused, rather than nothing. */
 function trimmedClip(src, id) {
   const out = join(TRIMMED, id + ".mp3");
   if (existsSync(out)) return out;
-  const lead = leadMs(src);
-  if (lead <= KEEP_MS) { copyFileSync(src, out); return out; }
-  ff(["-y", "-hide_banner", "-loglevel", "error", "-ss", String((lead - KEEP_MS) / 1000),
-      "-i", src, "-c", "copy", out]);
-  // An ffmpeg that refused the cut ships what was bought rather than nothing.
-  if (!existsSync(out)) return src;
-  return out;
+  ff(["-y", "-hide_banner", "-loglevel", "error", "-i", src, "-af", TRIM_FILTER,
+      "-ar", "24000", "-ac", "1", "-c:a", "libmp3lame", "-b:a", "32k", out]);
+  return existsSync(out) ? out : src;
 }
 
 if (!existsSync(MANIFEST)) {
@@ -140,7 +137,7 @@ function ship(id, label, sentence) {
      purchase and arrive as a blip anyway (§30ao). */
   const shipped = durationMs(from);
   if (from !== bought) { cut++; cutMs += durationMs(bought) - shipped; }
-  if (!sentence && shipped < MIN_WORD_MS - KEEP_MS) blips.push(`${label} ${shipped}ms`);
+  if (!sentence && shipped < BLIP_MS) blips.push(`${label} ${shipped}ms`);
   return name;
 }
 
@@ -202,8 +199,8 @@ export const formClip = (accented) => FORM_CLIPS[String(accented || "").normaliz
 const bytes = readdirSync(OUT).reduce((n, f) => n + readFileSync(join(OUT, f)).length, 0);
 console.log(`${rows.length} word clips and ${formRows.length} forms → native/assets/words/`
             + ` (${nameOf.size} files, ${(bytes / 1024 / 1024).toFixed(1)} MB)`);
-console.log(`  leading silence trimmed off ${cut}, ${(cutMs / 1000).toFixed(1)} s in all`
-            + ` (${cut ? Math.round(cutMs / cut) : 0} ms each, ${KEEP_MS} ms kept)`);
+console.log(`  pads and their clicks trimmed off ${cut}, ${(cutMs / 1000).toFixed(1)} s in all`
+            + ` (${cut ? Math.round(cutMs / cut) : 0} ms each)`);
 if (missing) console.log(`  !! ${missing} named in the manifest but not on disk`);
 if (blips.length) {
   console.log(`  !! ${blips.length} shipped word clip(s) too short to be the word: `

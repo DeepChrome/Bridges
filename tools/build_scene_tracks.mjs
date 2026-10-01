@@ -30,6 +30,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { createHash } from "node:crypto";
+import { TRIM_FILTER } from "./audio_trim.mjs";
 import { fileURLToPath } from "node:url";
 import { durationMs } from "./mp3.mjs";
 import { castByName } from "../core/cast.js";
@@ -106,7 +107,7 @@ const LEVEL = { i: -19, tp: -1.5, lra: 11 };
 
 function measureLevel(file) {
   const s = ffBoth("ffmpeg", ["-hide_banner", "-nostats", "-i", file,
-    "-af", `loudnorm=I=${LEVEL.i}:TP=${LEVEL.tp}:LRA=${LEVEL.lra}:print_format=json`,
+    "-af", `${LEAD_TRIM},loudnorm=I=${LEVEL.i}:TP=${LEVEL.tp}:LRA=${LEVEL.lra}:print_format=json`,
     "-f", "null", "-"]);
   const open = s.lastIndexOf("{"), close = s.lastIndexOf("}");
   if (open < 0 || close < open) return null;
@@ -137,7 +138,15 @@ function toned(src, id, tone) {
 /* What a levelled copy was made with. It is part of the cache key, so moving
    the target or changing the filter re-levels every clip rather than leaving
    the old copies to be stitched as though they were current. */
-const LEVEL_TAG = createHash("sha1").update(JSON.stringify({ LEVEL, v: "loudnorm-linear-32k" })).digest("hex").slice(0, 6);
+/* Each line is cleaned before it is levelled (TRIM_FILTER, tools/
+   audio_trim.mjs, shared with the words): its pads and the clicks Chirp3
+   leaves in them come off. The tracks kept the pads whole — the first line
+   started a third of a second to most of a second after Play (median 310 ms,
+   worst 821), and every turn waited the pads *plus* GAP_MS (the owner,
+   2026-10-01: "weird noises then long pauses before starting"). Measured on
+   the cleaned audio, so the level is the level of what is heard. */
+const LEAD_TRIM = TRIM_FILTER;
+const LEVEL_TAG = createHash("sha1").update(JSON.stringify({ LEVEL, LEAD_TRIM, v: "loudnorm-linear-32k" })).digest("hex").slice(0, 6);
 
 function levelled(bought, id, tone) {
   const key = tone && (tone.pitch !== 1 || tone.tempo !== 1) ? `${id}.p${tone.pitch}-t${tone.tempo}` : id;
@@ -151,7 +160,7 @@ function levelled(bought, id, tone) {
   // stitched by copying MP3 frames.
   if (!m) return bought;
   ff("ffmpeg", ["-y", "-i", src, "-af",
-    `loudnorm=I=${LEVEL.i}:TP=${LEVEL.tp}:LRA=${LEVEL.lra}`
+    `${LEAD_TRIM},loudnorm=I=${LEVEL.i}:TP=${LEVEL.tp}:LRA=${LEVEL.lra}`
     + `:measured_I=${m.i}:measured_TP=${m.tp}:measured_LRA=${m.lra}`
     + `:measured_thresh=${m.thresh}:offset=${m.offset}:linear=true`,
     "-ar", "24000", "-ac", "1", "-b:a", "32k", out]);

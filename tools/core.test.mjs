@@ -1634,9 +1634,21 @@ group("a chapter's grammar run");
     u.w.forEach((i) => out.add(i));
     return out;
   };
-  const bad = [], short = [], order = [], strangers = [];
+  const bad = [], short = [], order = [], strangers = [], ahead = [], twice = [];
+  // A lesson's run asks nothing from a later lesson of the unit (the run
+  // grades what it asks, so that would start a card before it is taught).
+  for (const u of UN) {
+    for (let i = 0; i < lessonCount(u); i++) {
+      const taught = new Set(Array.from({ length: i + 1 }, (_, j) => lessonWords(u, j)).flat());
+      const later = new Set(u.w.filter((x) => !taught.has(x)));
+      for (const q of Q.grammarRun(u, i)) if (later.has(q.i)) ahead.push(`${u.id}:${i}:${L[q.i].b}`);
+    }
+  }
+  ok(!ahead.length, "a lesson's run never asks a word from a later lesson", ahead.slice(0, 6).join(", "));
   for (const u of UN) {
     const run = Q.grammarRun(u, null);
+    const same = run.map((q) => `${q.prompt}|${q.typed ? q.target : (q.options || []).filter((o) => o.right).map((o) => o.label).join("/")}`);
+    if (new Set(same).size !== same.length) twice.push(u.id);
     const k = stageIndexOf(u);
     if (k === 0) { if (run.length) bad.push(`${u.id}: chapter 1 has no grammar point and asked ${run.length}`); continue; }
     if (run.length < GRAMMAR_N) short.push(`${u.id} ${run.length}`);
@@ -1650,6 +1662,7 @@ group("a chapter's grammar run");
   }
   ok(!bad.length, "every chapter from 2 on asks its point, never the same word and cell twice", bad.slice(0, 4).join("; "));
   ok(!short.length, `every run fills its ${GRAMMAR_N}`, short.join(", "));
+  ok(!twice.length, "no run asks one question twice, chosen and then written", twice.join(", "));
   ok(!order.length, "the first questions are chosen and the written ones come last", order.join(", "));
   ok(!strangers.length, "a form question only asks about a word the route has taught", strangers.slice(0, 6).join(", "));
   // A lesson with a verb to conjugate starts its run on it (a lesson of nouns
@@ -1669,26 +1682,46 @@ group("a chapter's grammar run");
    so «___ отца́» wanted «тво́й». An animate noun takes the genitive-like form. */
 group("agreement in the accusative");
 {
+  /* Aimed, not sampled (§23): the adjectives the corpus pairs with an animate
+     masculine noun in -а («мужчи́на», «мальчи́шка» — the case the first fix got
+     wrong, since «мужчи́ну» is neither nominative nor genitive) and with an
+     inanimate one, each asked in the accusative, chosen and written. Animacy
+     is the plural rule, stated independently of the generator. */
+  const declOf = (w) => (w.t || []).find((tt) => /Declension/.test(tt.title));
+  const cellOf = (t, row, col) => (t.rows.find((r) => r[0] === row) || [])[t.columns.indexOf(col)] || [];
+  const animate = (w) => {
+    const t = declOf(w);
+    const acc = cellOf(t, "Accusative", "Plural"), gen = cellOf(t, "Genitive", "Plural");
+    return acc.some((f) => gen.some((g) => fold(g) === fold(f)));
+  };
+  const aims = ["мужчина", "мальчишка", "стол", "дом"].map((b) => L.findIndex((x) => x.b === b && x.p === "noun"))
+    .filter((i) => i >= 0);
+  const adjs = Object.keys(DATA.pairs || {}).map(Number)
+    .filter((a) => (DATA.pairs[a] || []).some((n) => aims.includes(n)) && declOf(L[a]));
   const wrong = [];
-  for (let n = 0; n < 400; n++) {
-    const q = Q.drillQuestions("agreement", 1, null, undefined, true, ["Accusative"])[0];
-    if (!q) continue;
-    const noun = q.prompt.replace(/^___ /, "");
-    const t = q.table;
-    // A masculine row whose two forms differ: the answer must be the genitive
-    // one exactly when the noun's accusative is its genitive.
-    const col = q.at[1], row = t.rows[q.at[0]];
-    if (row[0] !== "Accusative" || !Array.isArray(row[col]) || row[col].length < 2) continue;
-    const gen = t.rows.find((r) => r[0] === "Genitive")[col];
-    const nounLemma = L.find((x) => x.p === "noun" && x.g === "m" && (x.t || []).some((tt) => /Declension/.test(tt.title)
-      && tt.rows.some((r) => r[0] === "Accusative" && (r[1] || []).some((f) => fold(f) === fold(noun)))));
-    if (!nounLemma) continue;
-    const nt = nounLemma.t.find((tt) => /Declension/.test(tt.title));
-    const animate = nt.rows.find((r) => r[0] === "Genitive")[1].some((f) => fold(f) === fold(noun));
-    const saysGen = gen.some((f) => fold(f) === fold(q.target));
-    if (animate !== saysGen) wrong.push(`${q.target} ${noun}`);
+  let asked = 0;
+  for (const a of adjs) {
+    for (let n = 0; n < 30; n++) {
+      for (const typed of [false, true]) {
+        const q = Q.drillQuestions("agreement", 1, [a], undefined, typed, ["Accusative"])[0];
+        if (!q) continue;
+        const nounForm = q.prompt.replace(/^___ /, "");
+        const noun = L.find((x) => aims.includes(L.indexOf(x))
+          && cellOf(declOf(x), "Accusative", "Singular").some((f) => fold(f) === fold(nounForm)));
+        if (!noun) continue;
+        asked++;
+        const answer = q.typed ? q.target : q.options.find((o) => o.right).label;
+        const gen = cellOf(declOf(L[a]), "Genitive", "Masculine");
+        const saysGen = gen.some((f) => fold(f) === fold(answer));
+        if (animate(noun) !== saysGen) wrong.push(`${answer} ${nounForm}`);
+        if (q.typed && (q.alts || []).some((f) => gen.some((g) => fold(g) === f) !== animate(noun)))
+          wrong.push(`accepts the other animacy for ${nounForm}`);
+      }
+    }
   }
-  ok(!wrong.length, "an animate masculine noun takes «твоего́», a thing «тво́й»", wrong.slice(0, 5).join(", "));
+  ok(asked > 20, "the aimed nouns are actually asked", `${asked} questions`);
+  ok(!wrong.length, "«жена́того мужчи́ну», «твоего́ отца́»; «тво́й стол» — animacy by the plural",
+     [...new Set(wrong)].slice(0, 5).join(", "));
 }
 
 /* The cast (core/cast.js, docs/cast.md, 2026-09-30): one story under the

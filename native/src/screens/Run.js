@@ -885,7 +885,8 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
         {kind ? (
           <GuidePop pose={poseFor(kind)} size={108} style={{ marginBottom: 10 }} />
         ) : null}
-        {isNotebook() && score !== undefined ? (
+        {/* Not on a failed run: a 3 is a pass mark in a Russian school. */}
+        {isNotebook() && score !== undefined && passed !== false ? (
           /* The UI test skin (skin.js): the result as a Russian teacher
              writes it — a mark out of five in red pen, circled by hand, with
              the percentage small beneath in pencil. */

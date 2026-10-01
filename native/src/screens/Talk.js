@@ -27,7 +27,7 @@ import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLab
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, drillPool, nextLesson } from "../data";
 import { talk as askTutor, review as askReview, hint as askHint, config } from "../lib/feedback";
-import { say, SPEEDS, speakLine, voiceFor } from "../audio";
+import { SPEEDS, speakLine, voiceFor } from "../audio";
 
 /* A tutor turn read in its character's device voice, at the pace picked for
    the tutor (`st.talkSpeed`) times the character's own tempo. */
@@ -122,7 +122,7 @@ function gradeTurn(words) {
 
 /* The tutor's turn: the Russian, every word a link, and the English under it
    when translations are on (the toolbar's EN switch, on by default). */
-function TutorBubble({ turn, en }) {
+function TutorBubble({ turn, en, speak }) {
   const t = useTheme();
   return (
     <View testID="tutor-bubble" style={{ alignSelf: "flex-start", maxWidth: "88%", marginBottom: 10 }}>
@@ -131,7 +131,7 @@ function TutorBubble({ turn, en }) {
         <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
           <View style={{ flex: 1 }}><Linked text={turn.ru} size={17} /></View>
           {/* Hear it again — it was read out when it arrived. */}
-          <Speaker text={turn.ru} size={32} />
+          <Speaker text={turn.ru} size={32} speak={speak ? () => speak(turn.ru) : undefined} />
         </View>
         {en ? <Muted testID="tutor-en" style={{ marginTop: 6 }}>{turn.en}</Muted> : null}
       </View>
@@ -600,7 +600,7 @@ export default function Talk({ navigation, route }) {
         </Tool>
       </View>
       <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}>
-        {turns.map((x, k) => (x.who === "tutor" ? <TutorBubble key={k} turn={x} en={en} /> : <LearnerBubble key={k} turn={x} />))}
+        {turns.map((x, k) => (x.who === "tutor" ? <TutorBubble key={k} turn={x} en={en} speak={(text) => speakAs(scenario.who, text, speed)} /> : <LearnerBubble key={k} turn={x} />))}
         {turns.length === 0 && !failure ? <ActivityIndicator testID="turn-pending" color={t.ink3} style={{ marginTop: 20 }} /> : null}
         {hint ? <HintCard hint={hint} en={en} onClose={() => setHint(null)} /> : null}
         {failure ? (

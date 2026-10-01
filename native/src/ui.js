@@ -1016,12 +1016,16 @@ export function useRussianVoice() {
   return voice;
 }
 
-export function Speaker({ text, size = 40, device = false }) {
+/* `speak` replaces the playing with a voice the caller owns — a Talk turn
+   replayed in the character's voice it first spoke in (the review,
+   2026-09-30: replayed through `say`, Gena changed voice on a second press).
+   It is always the device voice, so the button says so. */
+export function Speaker({ text, size = 40, device = false, speak }) {
   const t = useTheme();
   /* With `device` the recording is deliberately not used, so the button must
      not claim one: `real` decides the label and the testID, and "Hear it"
      over a device voice would be §27's lie in the other direction. */
-  const real = hasRealAudio(text) && !device;
+  const real = hasRealAudio(text) && !device && !speak;
   const voice = useRussianVoice();
   // A stream that failed with no voice to fall back on: the button says so
   // for a few seconds instead of doing nothing (audio.js onAudioFailure).
@@ -1056,7 +1060,7 @@ export function Speaker({ text, size = 40, device = false }) {
       accessibilityLabel={real ? "Hear it"
         : live ? "Hear it (device voice)"
         : "No recording, and this device has no Russian voice"}
-      onPress={live ? () => say(text, { device }) : undefined}
+      onPress={live ? () => (speak ? speak() : say(text, { device })) : undefined}
       hitSlop={8}
       style={({ pressed }) => ({
         width: size, height: size, borderRadius: size / 2, borderWidth: 1,

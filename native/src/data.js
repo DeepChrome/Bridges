@@ -448,7 +448,10 @@ export function unitFineProgress(st, u) {
   const n = lessonCount(u);
   let total = 0, done = 0;
   for (let i = 0; i < n; i++) {
-    const cs = components(st, u, i);
+    /* Required steps only. The optional ones (summary, listening, grammar)
+       are offered, not owed: counted, a finished unit read under 100 % and
+       kept offering "Test out" (the review, 2026-09-30). */
+    const cs = components(st, u, i).filter((c) => !c.optional);
     total += cs.length;
     done += cs.filter((c) => c.done).length;
   }

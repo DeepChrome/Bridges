@@ -746,7 +746,7 @@ export default function Study({ navigation, route }) {
   // The day's whole pile: what earlier chunks played, this chunk, and what the
   // scheduler still holds past it. A round (trouble, a list) is its own size.
   const pileSize = !session ? 0 : session.practice ? items.length
-    : base + items.length + (session.remaining || 0);
+    : base + items.length + (session.remaining || 0) + (session.newRemaining || 0);
 
   /* The controls belong to the screen, not to the card, and they are pinned
      off the scroll (`Screen footer`).

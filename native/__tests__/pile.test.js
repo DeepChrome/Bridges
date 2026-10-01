@@ -34,5 +34,5 @@ it("counts every card due today, and runs on past the first twenty", async () =>
     await act(async () => { fireEvent.press(screen.getByTestId("grade-3")); });
   }
   // The second chunk follows by itself and the count goes on from 21.
-  expect(await screen.findByTestId("progress")).toHaveTextContent(/^21\/2\d$/);
+  expect(await screen.findByTestId("progress")).toHaveTextContent("21/25");
 });

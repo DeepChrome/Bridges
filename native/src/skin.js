@@ -6,7 +6,7 @@
  *
  * So this is the only file that knows about it, and it works through the
  * places the app already takes its look from: `useTheme` (colours), `faceFor`
- * (the typeface), `radius`, `useShadow`, and `Screen` (the paper). Off, every
+ * (the typeface), `radius`, `useShadow` and `Text` (no all-caps). Off, every
  * one of them answers exactly as before. The choice is the phone's, kept in
  * AsyncStorage beside the Worker token, never in a profile: it is a display
  * experiment, not something a learner's history should carry.
@@ -17,9 +17,10 @@
 
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Font from "expo-font";
 
-export const SKIN_KEY = "rb.uitest";
-export const SKINS = ["default", "notebook"];
+const SKIN_KEY = "rb.uitest";
+const SKINS = ["default", "notebook"];
 
 let current = "default";
 const listeners = new Set();
@@ -31,18 +32,46 @@ export const isNotebook = () => current === "notebook";
 const onChange = new Set();
 export const onSkin = (f) => { onChange.add(f); f(current); };
 
-export function setSkin(name) {
-  current = SKINS.includes(name) ? name : "default";
+/* Everything that follows the skin hears of a change the same way, whether
+   it came from the switch or from the saved choice at startup. The startup
+   path once told only the radius: App kept "default" as its own state, so
+   after a restart with the skin on, switching it off changed nothing App
+   could see and the app stayed half-skinned (the review, 2026-09-30). */
+function announce() {
   onChange.forEach((f) => f(current));
   listeners.forEach((f) => f(current));
+}
+
+/* The skin's typeface is loaded only when the skin is used: on every start it
+   was a megabyte on the path of a look that is off, and a file failing to
+   load set off the font flash in the default look. A face that will not load
+   leaves the system font, as Text already falls back to. */
+async function fontsFor(name) {
+  if (name !== "notebook") return;
+  try { await Font.loadAsync(skinFonts); } catch { /* the system serif then */ }
+}
+
+export async function setSkin(name) {
+  const next = SKINS.includes(name) ? name : "default";
+  await fontsFor(next);
+  current = next;
+  announce();
   AsyncStorage.setItem(SKIN_KEY, current).catch(() => {});
 }
 
+/* Read before the first frame. A read that never settles must not leave the
+   app on a blank screen, so it gives up after a second on the default. */
 export async function loadSkin() {
+  let v = null;
   try {
-    const v = await AsyncStorage.getItem(SKIN_KEY);
-    if (v && SKINS.includes(v)) { current = v; onChange.forEach((f) => f(current)); }
+    v = await Promise.race([AsyncStorage.getItem(SKIN_KEY),
+                            new Promise((r) => setTimeout(() => r(null), 1000))]);
   } catch { /* a skin that cannot be read is the default one */ }
+  if (v && SKINS.includes(v) && v !== current) {
+    await fontsFor(v);
+    current = v;
+    announce();
+  }
   return current;
 }
 

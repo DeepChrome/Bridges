@@ -1013,27 +1013,37 @@ export function makeQuestions(env) {
   function grammarRun(unit, index, n = GRAMMAR_N) {
     const spec = formSpec(unit);
     if (!spec) return [];
+    /* The chapter's own card names the run, whatever card a drill attaches
+       to its questions — or the Done title and the Practice row disagree. */
     const note = formNote(unit) || undefined;
-    const withNote = (q) => ({ ...q, note: q.note || note });
-    /* Earlier chapters whole, this chapter's spine, and this unit — never a
-       sibling side quest, which the learner may not have taken (the rule the
-       lesson passages follow, §30l). */
+    const withNote = (q) => ({ ...q, note: note || q.note });
+    /* What the learner has been taught by the end of this step: earlier
+       chapters whole, this chapter's spine, and this unit — up to and
+       including the lesson when it is a lesson's step. Never a sibling side
+       quest, which the learner may not have taken (§30l), and never a later
+       lesson of this unit: the run grades every word it asks, and a word
+       graded before it is taught starts its card early (the review). */
+    const lesson = index !== undefined && index !== null;
+    const unitSoFar = lesson
+      ? Array.from({ length: index + 1 }, (_, j) => lessonWords(unit, j)).flat() : unit.w;
     const k = stageOf(unit);
+    const spine = STAGES[k] && STAGES[k].core !== unit ? STAGES[k].core.w : [];
     const route = unique(STAGES.slice(0, Math.max(0, k))
-      .flatMap((s) => [s.core, ...s.branches]).concat([STAGES[k] ? STAGES[k].core : unit, unit])
-      .flatMap((u) => u.w));
+      .flatMap((s) => [s.core, ...s.branches]).flatMap((u) => u.w).concat(spine, unitSoFar));
     const choose = Math.ceil(n * GRAMMAR_CHOOSE);
     if (spec.drill) {
-      // A rule the drills already ask (agreement, aspect): the same draw,
-      // on this chapter's words, chosen then written.
+      /* A rule the drills already ask (agreement, aspect): the same draw, on
+         these words, chosen then written — and never one question twice in
+         its two shapes, which `drillKey` cannot see (it keys on the ask). */
+      const same = (q) => `${q.prompt}|${q.typed ? q.target : (q.options || []).filter((o) => o.right).map((o) => o.label).join("/")}`;
       const first = drillQuestions(spec.drill, choose, route, undefined, false);
-      const keys = new Set(first.map(drillKey));
+      const keys = new Set(first.map(same));
       const rest = drillQuestions(spec.drill, n, route, undefined, true)
-        .filter((q) => !keys.has(drillKey(q))).slice(0, n - first.length);
+        .filter((q) => !keys.has(same(q))).slice(0, n - first.length);
       return first.concat(rest).map(withNote);
     }
     const able = [], seen = new Set();
-    const tiers = [index === undefined || index === null ? [] : lessonWords(unit, index), unit.w, route];
+    const tiers = [lesson ? lessonWords(unit, index) : [], unitSoFar, route];
     for (const tier of tiers) {
       for (const i of shuffle(unique(tier).slice())) {
         if (seen.has(i)) continue;
@@ -1934,21 +1944,34 @@ export function makeQuestions(env) {
        the drill asked «___ отца́» and wanted «тво́й». The noun says which: an
        animate masculine noun's accusative is its genitive. */
     let right = row[col][0];
+    let alts = row[col].slice(1);
     if (row[0] === "Accusative" && noun.g === "m" && row[col].length > 1) {
+      /* Animacy is read off the **plural**: an animate noun's accusative
+         plural is its genitive plural (мужчи́н, отцо́в; but столы́, столо́в).
+         The singular cannot say it for the masculine nouns in -а/-я —
+         «мужчи́ну» is neither nominative nor genitive — and reading it there
+         wanted «жена́тый мужчи́ну» (the review, 2026-09-30). */
+      const pl = nt.columns.indexOf("Plural");
+      const nAcc = nt.rows.find((x) => x[0] === "Accusative");
       const nGen = nt.rows.find((x) => x[0] === "Genitive");
+      const accPl = pl > 0 && nAcc && nAcc[pl], genPl = pl > 0 && nGen && nGen[pl];
+      const animate = !!(accPl && genPl && accPl.length && accPl.some((f) => genPl.some((g) => fold(g) === fold(f))));
       const aGen = t.rows.find((x) => x[0] === "Genitive");
       const aNom = t.rows.find((x) => x[0] === "Nominative");
-      const animate = nGen && nGen[1] && nGen[1].some((f) => fold(f) === fold(nounForm));
       const want = animate ? aGen && aGen[col] : aNom && aNom[col];
       const hit = want && row[col].find((f) => want.some((g) => fold(g) === fold(f)));
-      if (hit) right = hit;
+      if (hit) {
+        right = hit;
+        // …and the written answer accepts only that animacy's form.
+        alts = row[col].filter((f) => f !== hit && want.some((g) => fold(g) === fold(f)));
+      }
     }
     const at = [t.rows.indexOf(row), col];
     if (typed) {
       return written({ kind: "agreement", i: L.indexOf(adj), cyr: true,
                        prompt: `___ ${nounForm}`, sub: `${adj.w} · ${adj.e || ""}`.trim(),
                        table: t, at },
-                     "Write the form that agrees", right, row[col].slice(1));
+                     "Write the form that agrees", right, alts);
     }
     const own = t.rows.flatMap((r) => cellsOf(r).map((c) => (Array.isArray(c) ? c[0] : c)));
     const wrong = threeWrong(right, own.filter(Boolean));

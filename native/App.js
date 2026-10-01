@@ -21,7 +21,7 @@ import Svg, { Path } from "react-native-svg";
 
 import { SessionProvider, useSession } from "./src/session";
 import { light, dark } from "./src/theme";
-import { isNotebook, paper, board, skinFonts, loadSkin, useSkin } from "./src/skin";
+import { isNotebook, paper, board, loadSkin, useSkin } from "./src/skin";
 /* The palette for a scheme, through the UI test skin when it is on
    (src/skin.js); the tree is keyed on the skin, so this is read afresh. */
 const palette = (scheme) => (isNotebook() ? (scheme === "light" ? paper : board)
@@ -547,7 +547,9 @@ function TabShell() {
             elevation: 0, shadowOpacity: 0,
           },
         tabBarItemStyle: { gap: 2 },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "600", margin: 0 },
+        // No weight in the skin: PT Serif has no 600, and Android drops a
+        // custom family asked for a weight it lacks (§30bj).
+        tabBarLabelStyle: { fontSize: 11, fontWeight: isNotebook() ? undefined : "600", margin: 0 },
       })}
     >
       <Tabs.Screen name="Learn" component={LearnStack}
@@ -591,7 +593,6 @@ export default function App() {
      turns true either way, and Text falls back to the system face. */
   const [loaded, fontError] = useFonts({
     Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold, Nunito_800ExtraBold,
-    ...skinFonts,
   });
   // The UI test skin is read before the first frame, so a phone that has it
   // on never draws the default look first and then swaps.

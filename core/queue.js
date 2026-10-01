@@ -196,7 +196,10 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }
   const pickedNew = ordered.slice(0, newInSession);
   const items = interleave(pickedLearning, pickedReviews, pickedNew).slice(0, o.sessionSize);
 
+  // `newRemaining`: today's new cards past this chunk, so a counter over the
+  // whole day can count them before the chunk that deals them (Study.js).
   return { items: items, due: due, remaining: todayReviews - reviewsInSession,
+           newRemaining: Math.max(0, todayNew - pickedNew.length),
            newLeft: newLeft === Infinity ? fresh.length : newLeft, reviewsLeft: reviewsLeft, done: done };
 }
 

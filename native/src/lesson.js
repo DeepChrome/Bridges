@@ -69,7 +69,8 @@ export function StepBar({ at, total }) {
 export function WordList({ unit, words, at, total }) {
   const t = useTheme();
   const head = useEnter([unit.id, at]);
-  const byWord = new Map(words.map((i) => [L[i].b, i]));
+  const known = words.filter((i) => L[i]);   // a stale index draws nothing rather than throwing
+  const byWord = new Map(known.map((i) => [L[i].b, i]));
   let n = 0;   // the stagger runs down the whole list, across the sections
   return (
     <>
@@ -87,7 +88,7 @@ export function WordList({ unit, words, at, total }) {
       {/* In sections and groups of related words, as every list is
           (prep.js WordSections). The words that break the rules carry a tag
           rather than a section of their own (the owner, 2026-09-30). */}
-      <WordSections words={words.map((i) => L[i].b)} testID="vocab-cluster" renderWords={(ws) => (
+      <WordSections words={known.map((i) => L[i].b)} testID="vocab-cluster" renderWords={(ws) => (
         <List>
           {ws.map((b) => (
             <WordRow key={b} i={byWord.get(b)} unit={unit} delay={60 + (n++) * 45} />

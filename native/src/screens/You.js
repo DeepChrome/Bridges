@@ -488,6 +488,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                  onPress={() => { onClose(); signOut(); }} />
             <Btn
               label="Reset progress"
+              kind="danger"
               style={{ marginTop: 8 }}
               onPress={() => Alert.alert(
                 "Reset progress",
@@ -514,7 +515,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                 what was actually shipped. */}
             {VERSION ? (
               <Muted testID="app-version" size={12} style={{ textAlign: "center", marginTop: 20 }}>
-                {`Bridges ${VERSION}${/beta/.test(VERSION) ? " · beta" : ""}`}
+                {`Bridges ${VERSION}`}
               </Muted>
             ) : null}
             <View style={{ marginTop: 20 }}>

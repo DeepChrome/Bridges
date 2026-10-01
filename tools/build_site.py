@@ -86,6 +86,9 @@ def example_tier(words, rare):
     return 3
 
 
+ARCHAIC_EN = re.compile(r"\b(abide|abideth|thee|thou|thy|thine|hath|hast|shalt|doth|dost|unto|ye|wherefore|whither|whence|thence|o'er|'tis)\b", re.I)
+
+
 def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tally=None,
                   key_rank=None):
     """The sentences worth showing first, and one of each — and different from
@@ -132,6 +135,12 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tall
         # read as a mistranslation (the owner, 2026-09-24). A sentence whose
         # English is a single word is an idiom or a fragment either way.
         if len(re.findall(r"[A-Za-z']+", en or "")) < 2:
+            continue
+        # Nor a translation in an older English than anyone speaks: «Останься
+        # со мной» — "Abide with me", a hymn title, was the second example on
+        # the second card of the course (the walkthrough, 2026-09-30). The
+        # learner reads the English to learn what the Russian means today.
+        if ARCHAIC_EN.search(en or ""):
             continue
         k = fold(ru)
         score = (sum(ru.count(c) for c in ACC_MARKS) > 0, has_audio, -iid)
@@ -821,6 +830,10 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     if ext_path.exists():
         ex = sqlite3.connect(f"file:{ext_path}?mode=ro", uri=True)
         for xid, ru, en_s, src in ex.execute("select id, ru, en, source from items"):
+            # Tatoeba carries Bible verses in the King James register ("hath
+            # eaten me up"); the rule rank_examples applies to his own decks.
+            if ARCHAIC_EN.search(en_s or ""):
+                continue
             ext_sentences[xid] = (ru, en_s, src)
         for k, xid in ex.execute("select key, item_id from item_tokens"):
             ext_items_of_key.setdefault(k, []).append(xid)

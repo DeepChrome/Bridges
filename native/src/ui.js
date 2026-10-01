@@ -309,6 +309,11 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
     pri: { bg: t.brand, border: t.brandDim, fg: t.brandOn },
     good: { bg: t.good, border: t.goodDim, fg: t.goodOn },
     bad: { bg: t.bad, border: t.badDim, fg: t.badOn },
+    /* An action that destroys something — Reset progress — looked like every
+       button beside it (the walkthrough, 2026-09-30). Tinted, not filled: it
+       must look dangerous, not urgent. `bad` on `badBg` is an audited text pair
+       (tools/contrast.js), so nothing here is picked by eye. */
+    danger: { bg: t.badBg, border: t.badBg, fg: t.bad },
     ghost: { bg: "transparent", border: "transparent", fg: t.ink2 },
     /* A ghost that has nothing around it to say it is a control.
      *

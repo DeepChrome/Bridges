@@ -11,7 +11,7 @@ import { View, Pressable, ScrollView, Alert, Animated, ActivityIndicator } from 
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import Svg, { Path } from "react-native-svg";
-import { isNotebook, notebookFont, markOutOfFive } from "../skin";
+import { isNotebook, markOutOfFive } from "../skin";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
          BulbButton } from "../ui";
 import { RuleCard, Reference, hasReference, StandardWhy } from "../rules";
@@ -896,7 +896,7 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
                 <Path d="M62 8 C 100 6, 116 34, 110 60 C 104 92, 70 104, 44 98 C 16 92, 4 64, 12 38 C 18 18, 40 6, 70 9"
                       stroke={t.pen} strokeWidth={3} fill="none" strokeLinecap="round" />
               </Svg>
-              <Text style={{ color: t.pen, fontFamily: notebookFont.hand, fontSize: 76, lineHeight: 84 }}>
+              <Text style={{ color: t.pen, fontSize: 58, lineHeight: 66, fontWeight: "700" }}>
                 {String(markOutOfFive(score / 100))}
               </Text>
             </View>

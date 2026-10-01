@@ -93,12 +93,6 @@ export default function Credits() {
             <Muted>SIL Open Font License 1.1</Muted>
           </View>
         </Row>
-        <Row onPress={() => Linking.openURL("https://fonts.google.com/specimen/Caveat")}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15 }}>Caveat by Impallari Type</Text>
-            <Muted>SIL Open Font License 1.1</Muted>
-          </View>
-        </Row>
       </List>
 
       <SectionLabel style={{ marginTop: 22 }}>Software</SectionLabel>

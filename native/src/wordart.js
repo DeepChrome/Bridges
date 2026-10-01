@@ -26,7 +26,6 @@ export const WORD_ART = {
   "вкусный": require("../assets/wordart/w9ca0da4d1b.webp"),
   "горячий": require("../assets/wordart/w6600fbf91f.webp"),
   "хлеб": require("../assets/wordart/wadc547a41b.webp"),
-  "молоко": require("../assets/wordart/wc2d396c759.webp"),
   "рыба": require("../assets/wordart/wa01c2e254d.webp"),
   "вода": require("../assets/wordart/w5f376105a4.webp"),
   "еда": require("../assets/wordart/w1696ea33ca.webp"),

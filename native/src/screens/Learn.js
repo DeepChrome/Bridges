@@ -93,6 +93,9 @@ const LANE_H = 64;          // height of the fork drawing
 const MERGE_H = 44;         // and of the lanes coming back to the road
 const ROW_GAP = 40;         // between ranks of side quests, when there is more than one
 const ROW_H = 112;          // a rank of quest discs with their names
+/* …in the UI test skin's serif, which is wider: "Food & Drink" wrapped to two
+   lines on the owner's phone and the second ran under the lanes below. */
+const ROW_H_SERIF = 132;
 const QUEST_COLS = 3;       // quests to a rank: a fourth overlaps its neighbours' names
 const TRUNK_W = 4;          // a track wide enough to read as empty, not as a hairline
 
@@ -410,7 +413,7 @@ function Fork({ stage, chapterOpen, onOpen }) {
       {ranks.map((rank, r) => (
         <React.Fragment key={r}>
           <FanOut rank={rank} xs={xs[r]} W={W} height={r ? ROW_GAP : LANE_H} laneOn={laneOn} />
-          <View testID={`rank-${stage.core.id}-${r}`} style={{ width: W, height: ROW_H }}>
+          <View testID={`rank-${stage.core.id}-${r}`} style={{ width: W, height: isNotebook() ? ROW_H_SERIF : ROW_H }}>
             {rank.map((u, k) => (
               <View key={u.id} style={{ position: "absolute", left: xs[r][k] - 48, top: 0 }}>
                 <PathNode unit={u} open={unitUnlocked(st, u)} branch onOpen={onOpen} />
@@ -446,11 +449,11 @@ function PageHead() {
       <Pressable testID="page-date" onPress={() => say(d.ru)} accessibilityRole="button"
                  accessibilityLabel={`${d.ru}, ${d.en}. Hear it`} hitSlop={6}>
         <Text numberOfLines={1} adjustsFontSizeToFit
-              style={{ color: t.hand, fontFamily: notebookFont.hand, fontSize: 38, lineHeight: 44 }}>
+              style={{ color: t.ink, fontSize: 28, lineHeight: 34, fontWeight: "700" }}>
           {d.ru}
         </Text>
       </Pressable>
-      <Text style={{ color: t.hand, fontFamily: notebookFont.hand, fontSize: 30, lineHeight: 36 }}>
+      <Text style={{ color: t.brand, fontFamily: notebookFont.italic, fontSize: 19, lineHeight: 26 }}>
         Классная работа
       </Text>
       <Muted size={12} style={{ marginTop: 2 }}>{d.en}</Muted>

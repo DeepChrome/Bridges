@@ -30,12 +30,12 @@ describe("the switch", () => {
 });
 
 describe("the page", () => {
-  it("draws the grid and margin only in the skin", async () => {
+  /* Round two (the owner, 2026-09-30): the grid and the margin rule went —
+     "the background is ugly with the squares" — so the page is plain. */
+  it("draws no grid or margin rule on the page", async () => {
+    setSkin("notebook");
     await render(<Screen><Text>page</Text></Screen>);
     expect(screen.queryByTestId("paper")).toBeNull();
-    setSkin("notebook");
-    await render(<Screen><Text>page two</Text></Screen>);
-    expect(screen.getByTestId("paper")).toBeTruthy();
   });
 
   it("writes labels in words, not capitals", async () => {

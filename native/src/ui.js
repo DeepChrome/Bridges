@@ -12,7 +12,7 @@ import {
    and are what everything else imports (font.test.js). */
 import { Text as RNText, TextInput as RNTextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Path, SvgXml, Circle, Defs, Pattern, Rect } from "react-native-svg";
+import Svg, { Path, SvgXml, Circle } from "react-native-svg";
 import { isNotebook } from "./skin";
 import { iconFor } from "@core/icons";
 import { AV, AV_IDS, AV_LEGACY, avatarOf } from "@core/avatars";
@@ -157,7 +157,6 @@ export function Screen({ children, scroll = true, fill = false, safeTop = false,
   return (
     <SafeAreaView testID="screen-root" edges={safeTop ? ["top"] : []}
                   style={{ flex: 1, backgroundColor: t.bg }}>
-      {isNotebook() ? <Paper /> : null}
       <Animated.View style={[{ flex: 1 }, enter]}>
       <Body
         testID="screen-body"
@@ -165,8 +164,6 @@ export function Screen({ children, scroll = true, fill = false, safeTop = false,
         contentContainerStyle={scroll
           // Clear of the footer, so the last row is not sitting under it.
           ? { padding: space.pad, paddingBottom: footer ? 24 : 40,
-              // Writing starts right of the red margin rule (the Paper below).
-              ...(isNotebook() ? { paddingLeft: MARGIN_AT + 12 } : null),
               ...(fill ? { flexGrow: 1 } : null) }
           : null}
         // With the keyboard up, a ScrollView's default is to spend the first touch
@@ -187,29 +184,6 @@ export function Screen({ children, scroll = true, fill = false, safeTop = false,
       ) : null}
       </Animated.View>
     </SafeAreaView>
-  );
-}
-
-/* The UI test skin's page (skin.js): the 5 mm grid of a Russian exercise
-   book and its red margin rule, behind every screen. Drawn once as a pattern,
-   faint enough to read as paper rather than as decoration; it does not
-   scroll, as a page under a moving hand does not. */
-export const MARGIN_AT = 22;
-const CELL = 18;
-function Paper() {
-  const t = useTheme();
-  return (
-    <View pointerEvents="none" testID="paper" style={StyleSheet.absoluteFill}>
-      <Svg width="100%" height="100%">
-        <Defs>
-          <Pattern id="cell" width={CELL} height={CELL} patternUnits="userSpaceOnUse">
-            <Path d={`M ${CELL} 0 L 0 0 0 ${CELL}`} stroke={t.grid} strokeWidth={1} fill="none" />
-          </Pattern>
-        </Defs>
-        <Rect width="100%" height="100%" fill="url(#cell)" />
-        <Rect x={MARGIN_AT} width={1.5} height="100%" fill={t.margin} />
-      </Svg>
-    </View>
   );
 }
 

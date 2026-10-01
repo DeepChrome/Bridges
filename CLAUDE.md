@@ -5630,6 +5630,13 @@ defaults are `docs/ui-test-notebook.md`.
 - Two things only the skin draws: the date in words and «Классная работа» at
   the top of the path (`PageHead` in Learn.js; a press reads it aloud), and a
   circled mark out of five in red pen at the end of a scored run (`Done`).
+- **Round two, same day**, on his phone: the grid squares and the margin rule
+  went ("the background is ugly with the squares"), the handwriting face went
+  (hard to read), and the green blackboard became an ink-dark blue with a
+  lamp-gold accent ("too vomity"). The serif and the contrast stayed — the
+  two things he liked. The serif is wider than Nunito, so the path's quest
+  ranks are taller in the skin (`ROW_H_SERIF`): "Food & Drink" wrapped and
+  its second line ran under the lanes.
 - **Trap: Android drops a custom font asked for a weight it does not have.**
   PT Serif ships 400 and 700, and `fontWeight: "800"` on it fell back to
   Roboto on every button and chapter title while 700 looked right. In the

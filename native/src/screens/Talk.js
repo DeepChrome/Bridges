@@ -31,10 +31,10 @@ import { SPEEDS, speakLine, voiceFor } from "../audio";
 
 /* A tutor turn read in its character's device voice, at the pace picked for
    the tutor (`st.talkSpeed`) times the character's own tempo. */
-function speakAs(who, text, speed) {
+function speakAs(who, text, speed, asked) {
   const v = voiceFor(who);
   const s = SPEEDS.find((x) => x.id === speed);
-  return speakLine(text, { ...v, rate: (s ? s.rate : 1) * (v.tempo || 1) });
+  return speakLine(text, { ...v, rate: (s ? s.rate : 1) * (v.tempo || 1), asked });
 }
 import { tagInfo } from "@core/errortags";
 import { useRecognizer } from "../speech";
@@ -382,6 +382,14 @@ export default function Talk({ navigation, route }) {
   const learnerTurns = turns.filter((x) => x.who === "learner" && !x.pending).length;
   const scrollRef = useRef(null);
   const alive = useRef(true);
+  /* Which conversation a reply belongs to: Restart, End and a new scenario
+     each begin another. A reply still in flight from the old one used to be
+     appended to the new transcript, spoken over its opening, and its marking
+     applied to the new run's waiting turn (the review, 2026-10-01). */
+  const convo = useRef(0);
+  /* The marking already asked for a line, kept until it lands: "Try again"
+     after a failed reply reuses it instead of paying for a second one. */
+  const marked = useRef(null);
   useEffect(() => () => { alive.current = false; }, []);
 
   const unit = scenario ? UN.find((u) => u.id === scenario.unit) : null;
@@ -436,22 +444,31 @@ export default function Talk({ navigation, route }) {
    * the reply is a fifth of that and lands first, and the marking appears under
    * their own bubble a moment later — which is what Say has always done with its
    * feedback. The wait goes from the sum of the two to the longer of them. */
+  /* `history` is the exchange *before* the learner's new line, which goes as
+     `transcript`. It used to include the line too, so the model read it twice,
+     and the review prompt — whose last history turn is the tutor's — was
+     handed something else (the review, 2026-10-01). */
   const ask = async (history, transcript) => {
+    const mine = convo.current;
     setFailure(null);
     const asHistory = history.map((x) => ({ who: x.who, ru: x.ru }));
     const replying = askTutor({
       scenario: scenario.prompt, topic: unit && unit.g ? unit.g.title : null,
       studied: studiedFor(st), history: asHistory, transcript, level,
     });
-    const marking = transcript
-      ? askReview({ scenario: scenario.prompt, history: asHistory, transcript, level })
-      : null;
-    // Neither request is left unhandled: an unawaited rejection here would be
-    // reported by the platform as an app error over a conversation that is fine.
-    if (marking) marking.catch(() => null);
+    const reuse = marked.current && marked.current.convo === mine && marked.current.transcript === transcript;
+    const marking = !transcript ? null : reuse ? marked.current.promise
+      : askReview({ scenario: scenario.prompt, history: asHistory, transcript, level });
+    if (marking) {
+      // Neither request is left unhandled: an unawaited rejection here would be
+      // reported by the platform as an app error over a conversation that is fine.
+      marking.catch(() => null);
+      marked.current = { convo: mine, transcript, promise: marking };
+    }
+    const stale = () => !alive.current || convo.current !== mine;
 
     let reply = await replying;
-    if (!alive.current) return;
+    if (stale()) return;
     /* A malformed answer is asked for again once, silently, before the
        learner is told (the owner, 2026-09-24: "need to have some error
        handling there"). The Worker has already retried inside its own
@@ -463,7 +480,7 @@ export default function Talk({ navigation, route }) {
         scenario: scenario.prompt, topic: unit && unit.g ? unit.g.title : null,
         studied: studiedFor(st), history: asHistory, transcript, level,
       });
-      if (!alive.current) return;
+      if (stale()) return;
     }
     if (!reply || reply.ok !== true) {
       setTurns((prev) => prev.map((x) => (x.pending ? { ...x, pending: false } : x)));
@@ -475,7 +492,7 @@ export default function Talk({ navigation, route }) {
     // The tutor speaks its turn as it arrives (the owner, 2026-09-07), at the
     // pace chosen on the picker; the speaker on the bubble is for hearing it again.
     // …in the voice of whoever the scenario says is talking (core/cast.js).
-    speakAs(scenario.who, reply.reply_ru, speed);
+    speakAs(scenario.who, reply.reply_ru, speed, route && route.key);
     if (reply.newWords && reply.newWords.length) {
       setNewWords((prev) => {
         const have = new Set(prev.map((w) => w.lemma));
@@ -485,7 +502,8 @@ export default function Talk({ navigation, route }) {
 
     if (!transcript) return;
     const review = marking ? await Promise.resolve(marking).catch(() => null) : null;
-    if (!alive.current) return;
+    if (stale()) return;
+    marked.current = null;
     /* Marking that fails, or never comes, is not a failed turn: the tutor has
        answered and the conversation is fine. The bubble stops waiting either
        way — a turn left spinning for ever is the worse failure. */
@@ -503,6 +521,8 @@ export default function Talk({ navigation, route }) {
   const start = (s) => {
     if (!canStart(s)) return;
     update((prev) => ({ ...prev, speech: startTalkSession(prev.speech, day) }));
+    convo.current += 1;
+    marked.current = null;
     setScenario(s);
     setTurns([]); setNewWords([]); setEnded(false); setHint(null); setFailure(null);
     setRun((n) => n + 1);
@@ -517,9 +537,8 @@ export default function Talk({ navigation, route }) {
     onFinal: (transcript) => {
       if (!transcript.trim()) return;
       setHint(null);
-      const history = turns.concat([{ who: "learner", ru: transcript }]);
       setTurns((prev) => prev.concat([{ who: "learner", ru: transcript, pending: true }]));
-      ask(history, transcript);
+      ask(turns, transcript);
     },
   });
 
@@ -612,7 +631,7 @@ export default function Talk({ navigation, route }) {
                 : start(scenario))}>
           <Icon d={RESTART} color={t.ink2} />
         </Tool>
-        <Tool label="End the conversation" testID="talk-end" onPress={() => setEnded(true)}>
+        <Tool label="End the conversation" testID="talk-end" onPress={() => { convo.current += 1; setEnded(true); }}>
           <Icon d={END} color={t.ink2} />
         </Tool>
         <Tool label="Hint: something you could say" testID="talk-hint" onPress={getHint}
@@ -645,7 +664,7 @@ export default function Talk({ navigation, route }) {
                 if (turns.length === 0) ask([], "");
                 else if (lastLearner && turns[turns.length - 1] === lastLearner) {
                   setTurns((prev) => prev.map((x) => (x === lastLearner ? { ...x, pending: true } : x)));
-                  ask(turns, lastLearner.ru);
+                  ask(turns.slice(0, -1), lastLearner.ru);
                 }
               }} />
             ) : null}

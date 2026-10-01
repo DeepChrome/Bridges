@@ -396,7 +396,8 @@ export function Reference({ title, sub, tables, mark, facts, note, topic, onTopi
           <RuleCard note={note} testID="ref-rule" />
         </View>
       ) : null}
-      {topic ? (
+      {/* Only with somewhere to go: a link that cannot navigate is not drawn. */}
+      {topic && onTopic ? (
         <Btn kind="ghost" testID="ref-topic" label={`More on ${topic.title.toLowerCase()}`}
              style={{ marginTop: 16, alignSelf: "flex-start" }}
              onPress={() => { onClose(); onTopic(topic.id); }} />

@@ -103,8 +103,11 @@ export default function Search({ navigation }) {
       recent: [entry.b, ...(prev.recent || []).filter((w) => w !== entry.b)]
         .slice(0, RECENT_MAX),
     }));
-    navigation.navigate("Word", { word: entry.b });
+    // The part of speech too: two hits can share a headword (core/search.js).
+    navigation.navigate("Word", { word: entry.b, pos: entry.p });
   };
+  // Headword, class and meaning: what core/search.js keeps apart, it keys apart.
+  const keyOf = (h) => `${h.b}|${h.p || ""}|${h.e || ""}`;
 
   return (
     <Screen>
@@ -134,7 +137,7 @@ export default function Search({ navigation }) {
       {matches.length ? (
         <View style={{ marginTop: 16 }}>
           <List>
-            {matches.map((h) => <Hit key={h.b} h={h} onOpen={open} />)}
+            {matches.map((h) => <Hit key={keyOf(h)} h={h} onOpen={open} />)}
           </List>
         </View>
       ) : null}
@@ -144,7 +147,7 @@ export default function Search({ navigation }) {
             {matches.length ? "Also" : "Mentions"}
           </SectionLabel>
           <List>
-            {mentions.map((h) => <Hit key={h.b} h={h} onOpen={open} />)}
+            {mentions.map((h) => <Hit key={keyOf(h)} h={h} onOpen={open} />)}
           </List>
         </>
       ) : null}

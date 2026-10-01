@@ -31,7 +31,7 @@ export default function Word({ route, navigation }) {
      at build time and move on every rebuild, which is the same reason learner state
      keys on the word. The index form is still accepted for older call sites. */
   const p = route.params || {};
-  const w = p.word !== undefined ? resolveWord(p.word) : L[p.i];
+  const w = p.word !== undefined ? resolveWord(p.word, p.pos) : L[p.i];
   if (!w) {
     return (
       <Screen>

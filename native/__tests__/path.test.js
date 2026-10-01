@@ -219,6 +219,23 @@ describe("path node states", () => {
     expect(screen.queryByTestId(`lane-${STAGES[1].branches[0].id}`)).toBeNull();
   });
 
+  /* A chapter whose quests are all optional has no lane coming back, so the
+     road on started from nothing — a stub under the quests (the review,
+     2026-10-01). The road runs straight down through them instead, lit with
+     the spine. */
+  it("runs the road through a chapter whose quests are all optional", async () => {
+    const { required } = require("../src/data");
+    const k = STAGES.findIndex((s) => s.branches.length && !required(s).length);
+    expect(k).toBeGreaterThan(-1);
+    const id = STAGES[k].core.id;
+    await withState({ unit: {} });
+    await screen.findByTestId("node-core1");
+    expect(screen.getByTestId(`road-through-${id}`)).toBeTruthy();
+    expect(screen.queryByTestId(`road-through-${id}-lit`)).toBeNull();
+    // Chapters with a required quest keep their lanes as the road.
+    expect(screen.queryByTestId("road-through-core1")).toBeNull();
+  });
+
   /* Eight quests in one row overlapped their names (the owner, 2026-09-08):
      they sit in ranks of three now, each disc a full disc's width from the next. */
   it("lays a chapter's side quests out in ranks of three, none overlapping", async () => {

@@ -162,6 +162,9 @@ function Typed({ q, answered, onAnswer }) {
        alphabet is not the word, and the on-screen keyboard is there for a phone
        without a Russian layout. */
     const typed = fold(text);
+    /* An empty box is a stray tap on Check or the keyboard's Enter, not an
+       answer: marking it wrong would cost the word a lapse for nothing. */
+    if (!typed) return;
     const want = fold(q.target);
     // Another word of the pool with the same meaning is right too: "jacket"
     // is «пиджак» and «куртка», and the prompt did not say which.
@@ -401,7 +404,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     return navigation.addListener("beforeRemove", (e) => {
       if (!guard.current) return;
       e.preventDefault();
-      Alert.alert("Leave the quiz?", "The mark is lost; what you have answered is kept.",
+      /* Every run comes through here — drills and the mouth drills carry no
+         mark — so it names neither a quiz nor a mark. */
+      Alert.alert("Leave now?", "What you have answered is kept.",
                   [{ text: "Stay", style: "cancel" },
                    { text: "Leave", style: "destructive",
                      onPress: () => navigation.dispatch(e.data.action) }]);
@@ -843,7 +848,10 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           sub={ref.word ? firstSense(ref.word) : null}
           tables={ref.tables} mark={ref.mark} facts={ref.facts}
           note={ref.note} topic={ref.topic}
-          onTopic={(id) => navigation.navigate("Grammar", { topic: id })}
+          /* Guarded as onRule is: a Runner mounted without a navigation (the
+             vocabulary step's was, until 2026-10-01) crashed the app on this
+             press — thrown from a handler, past the error boundary. */
+          onTopic={navigation ? (id) => navigation.navigate("Grammar", { topic: id }) : null}
           onClose={() => setHintOpen(false)} />
       ) : null}
     </Screen>

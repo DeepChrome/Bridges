@@ -9,7 +9,7 @@ import { useTheme, radius, type as T } from "../theme";
 import { setSkin, isNotebook } from "../skin";
 import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb, Stepper } from "../ui";
 import { CharacterPicker } from "./Gate";
-import { plan as askPlan } from "../lib/feedback";
+import { plan as askPlan, setPlan } from "../lib/feedback";
 import { PLANS, PLAN_NAMES, ALLOWANCE_LINES, planOf } from "@core/plans";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone, dueCount } from "../data";
 import { CUE_NAMES, WRONG_NAMES, SPEEDS, previewCue, rightCueOf, wrongCueOf } from "../audio";
@@ -144,6 +144,18 @@ function PlanRow({ navigation }) {
   const unlimited = plan === "owner" || plan === "custom";
   const caps = info && info.caps ? info.caps : PLANS[planOf(plan)];
   const name = unlimited ? "Unlimited" : PLAN_NAMES[planOf(plan)];
+  /* The beta's own Premium switch (2026-10-01). Drawn only when the Worker
+     says this install may choose (`selfServe`), so it is never a control that
+     does nothing. What comes back is the Worker's answer, not the wish. */
+  const [switching, setSwitching] = useState(false);
+  const choose = async (premium) => {
+    setSwitching(true);
+    const r = await setPlan(premium ? "premium" : "free").catch(() => null);
+    if (live.current) {
+      if (r && r.ok) setInfo(r);
+      setSwitching(false);
+    }
+  };
   return (
     <>
       <List>
@@ -157,6 +169,16 @@ function PlanRow({ navigation }) {
       </List>
       {open ? (
         <Sheet testID="plan-sheet" title={`${name} · left today`} onClose={() => setOpen(false)}>
+          {info && info.selfServe ? (
+            <List>
+              <Row testID="plan-premium-row">
+                <Text style={{ flex: 1, color: t.ink, fontSize: 15, fontWeight: "600" }}>Premium</Text>
+                <Switch testID="plan-premium" value={plan === "premium"} disabled={switching}
+                        onValueChange={choose} />
+              </Row>
+            </List>
+          ) : null}
+          {info && info.selfServe ? <View style={{ height: 12 }} /> : null}
           {unlimited ? <Muted>No daily limit</Muted> : (
             <List>
               {ALLOWANCE_LINES.map(([counter, label]) => {
@@ -553,6 +575,16 @@ export default function You({ navigation }) {
   const grammar = grammarTrouble(st);
   const openUnit = (unitId) =>
     navigation.navigate("Learn", { screen: "Unit", params: { unitId } });
+  /* The flashcards. Reached from the Study tab's own You, `navigate("Study")`
+     names the tab the learner is already on and does nothing, and a nested
+     navigate would push a second Cards on top of this screen; popping back to
+     the one underneath is what the tap means. From any other tab it is a
+     jump to Study. */
+  const toCards = (params) => {
+    const here = typeof navigation.getState === "function" ? navigation.getState() : null;
+    if (here && here.routeNames && here.routeNames.includes("Cards")) navigation.popTo("Cards", params);
+    else navigation.navigate("Study", { screen: "Cards", params });
+  };
 
   return (
     <Screen>
@@ -582,7 +614,7 @@ export default function You({ navigation }) {
             It is the flashcards waiting today — the Study badge's number — and
             a tap goes there. */}
         <Stat testID="stat-due" value={due.toLocaleString("en-US")} label="cards to review"
-              onPress={() => navigation.navigate("Study")} />
+              onPress={() => toCards(undefined)} />
       </View>
       {/* What the app has learned about this learner, as four tiles: the
           number on each, the detail a tap away (2026-09-28). Statistics was a
@@ -617,7 +649,7 @@ export default function You({ navigation }) {
                         setShowing(null);
                         // One round, asked for by name — not a tick left on
                         // in the picker to narrow every session after it.
-                        navigation.navigate("Study", { screen: "Cards", params: { round: "trouble" } });
+                        toCards({ round: "trouble" });
                       }} />
                ) : null}>
           {!trouble.length ? <Muted>Nothing yet</Muted> : (

@@ -294,7 +294,7 @@ function TutorOptions({ onClose, onRestart }) {
   );
 }
 
-export default function Tutor({ navigation }) {
+export default function Tutor({ navigation, route }) {
   const { st, update, ready } = useSession();
   const t = useTheme();
   // learner: { who, text }; tutor: { who, ru, en, note }
@@ -329,7 +329,28 @@ export default function Tutor({ navigation }) {
   const inputRef = useRef(null);
   const alive = useRef(true);
   const configured = !!config("/v1/tutor");
-  useEffect(() => () => { alive.current = false; goingRef.current = false; stop(); }, []);
+  /* Leaving puts the microphone down, and so does another screen opening on
+     top (the bulb pushes Grammar). Only stop() was called on the way out, so
+     the held-open recogniser went on listening for up to 45 s — and anything
+     it heard was sent as a turn, charged, and answered aloud over whatever
+     screen was showing (the review, 2026-10-01). */
+  useEffect(() => {
+    const off = navigation && navigation.addListener
+      ? navigation.addListener("blur", () => { setLoop(false); if (recRef.current) recRef.current.cancel(); })
+      : null;
+    return () => {
+      alive.current = false; goingRef.current = false;
+      if (recRef.current) recRef.current.cancel();
+      stop();
+      if (typeof off === "function") off();
+    };
+  }, []);   // eslint-disable-line react-hooks/exhaustive-deps
+  /* Which conversation a reply belongs to. Restart begins a new one; a reply
+     to the old one still in flight is dropped rather than appended to the new
+     transcript, spoken over its opening, and left to clear its spinner. */
+  const runRef = useRef(0);
+  // Set synchronously, so a second tap before the re-render sees it.
+  const inFlight = useRef(false);
 
   /* One turn: the profile, the studied words, the exchange so far and what
      was just said. The tutor's note, if any, goes into the profile as it
@@ -346,17 +367,24 @@ export default function Tutor({ navigation }) {
        learn it was superseded. */
     const mine = askSeq.current + 1;
     askSeq.current = mine;
+    const run = runRef.current;
     setFailure(null);
     setPending(true);
+    inFlight.current = true;
     const reply = await askTutor({
       profile: tutorProfile(st), studied: studiedFor(st),
       // A tutor turn goes back as the words it said, Russian then note, so the
       // model reads its own past turns the way the learner did.
       history: history.map((x) => ({ who: x.who, text: turnText(x) })), text,
     });
-    if (!alive.current) return;
+    if (askSeq.current === mine) inFlight.current = false;
+    if (!alive.current || run !== runRef.current) return;
     setPending(false);
-    if (!reply || reply.ok !== true) { setFailure(failureText(reply)); return; }
+    /* A failed turn ends conversation mode. Left running, the loop waited for
+       a reply that had already failed and the status line said "Speaking…"
+       over silence. */
+    const fail = (why) => { setFailure(failureText(why)); if (goingRef.current) setLoop(false); };
+    if (!reply || reply.ok !== true) { fail(reply); return; }
     /* Sending choices is the tutor saying it does not know what is wanted.
        The run of those is counted here and the list is only carried onto the
        turn once it has happened CHOICES_AFTER times in a row. */
@@ -365,7 +393,7 @@ export default function Tutor({ navigation }) {
     const turn = { who: "tutor", ru: reply.ru || "", en: reply.en || "", note: reply.note || "",
                    choices: unsure.current >= CHOICES_AFTER ? suggested : [] };
     // The Worker refuses a turn with nothing in it; this is the app refusing too.
-    if (!turn.ru && !turn.note) { setFailure(failureText({ ok: false, reason: "parse", errors: ["empty turn"] })); return; }
+    if (!turn.ru && !turn.note) { fail({ ok: false, reason: "parse", errors: ["empty turn"] }); return; }
     setTurns((prev) => prev.concat([turn]));
     if (reply.remember) {
       update((prev) => ({ ...prev, tutorNotes: remember(prev.tutorNotes, reply.remember) }));
@@ -374,8 +402,12 @@ export default function Tutor({ navigation }) {
        contend for one audio session, and a microphone open under a speaker
        hears the speaker (§30h′). `speakLine` resolves when it has finished,
        which is the handshake the loop turns on. */
-    if (turn.ru) { speakingRef.current = true; await speakLine(turn.ru, voiceFor(GUIDE_ID)); speakingRef.current = false; }
-    if (!alive.current || askSeq.current !== mine) return;
+    if (turn.ru) {
+      speakingRef.current = true;
+      await speakLine(turn.ru, { ...voiceFor(GUIDE_ID), asked: route && route.key });
+      speakingRef.current = false;
+    }
+    if (!alive.current || askSeq.current !== mine || run !== runRef.current) return;
     /* `ask` reaches the recogniser through a ref because a conversation is a
        cycle — the reply starts the listening that produces the next reply —
        and the hook is created below. */
@@ -402,7 +434,7 @@ export default function Tutor({ navigation }) {
 
   const send = (text) => {
     const s = String(text || "").trim();
-    if (!s || pending) return;
+    if (!alive.current || !s || pending) return;
     setDraft("");
     const history = turns.concat([{ who: "learner", text: s }]);
     setTurns(history);
@@ -456,6 +488,7 @@ export default function Tutor({ navigation }) {
   const restart = () => {
     const go = () => {
       setCog(false); setLoop(false); rec.cancel();
+      runRef.current += 1;
       unsure.current = 0;
       setTurns([]); setFailure(null); ask([], "");
     };
@@ -507,6 +540,8 @@ export default function Tutor({ navigation }) {
               ) : null}
               {failure.retry ? (
                 <Btn label="Try again" onPress={() => {
+                  // A second tap before the re-render would send the turn twice.
+                  if (inFlight.current) return;
                   if (!turns.length || !last || turns[turns.length - 1] !== last) ask([], "");
                   else ask(turns.slice(0, -1), last.text);
                 }} />

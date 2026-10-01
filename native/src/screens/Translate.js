@@ -90,7 +90,7 @@ function Replay({ text, lang }) {
   );
 }
 
-export default function Translate({ navigation }) {
+export default function Translate({ navigation, route }) {
   const t = useTheme();
   const [rows, setRows] = useState([]);       // newest first: { id, from, src, out, note, state }
   const [side, setSide] = useState("ru");     // which microphone is held
@@ -120,18 +120,21 @@ export default function Translate({ navigation }) {
         /* Read aloud on arrival, in the other language: this is the half of
            the exchange the other person gets, and they are not looking at
            the screen. */
-        if (out) speakLine(out, { lang: to });
+        if (out) speakLine(out, { lang: to, asked: route && route.key });
       } else {
         put({ state: "failed" });
       }
     },
   });
 
+  /* A block belongs to the microphone that hit it: no English model installed
+     is no reason to lose the Russian one. It used to replace the whole screen
+     with "Go back" (the review, 2026-10-01); now it can be put aside. */
   if (rec.block) {
     return (
       <Screen title="Translate">
         <Blocked block={rec.block} onGetModel={rec.getModel}
-                 onSkip={() => navigation.goBack()} skipLabel="Go back" />
+                 onSkip={rec.clearBlock} skipLabel="Back" />
       </Screen>
     );
   }

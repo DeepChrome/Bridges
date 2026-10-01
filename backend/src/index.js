@@ -30,7 +30,11 @@ import { capsFor, planOf, COUNTER_OF, PLANS, PLAN_NAMES } from "../../core/plans
 
 const API = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
-const UPSTREAM_TIMEOUT_MS = 15000;
+/* Per attempt, and there are up to three: 30 s at worst, which the app's own
+   timeout (native/src/lib/feedback.js) must outlast, or an answer the learner
+   paid for arrives after the app has given up on it. Haiku answers in 1–3 s;
+   ten is a stall. */
+const UPSTREAM_TIMEOUT_MS = 10000;
 const DEFAULT_CAP = 300;
 const DEFAULT_TALK_CAP = 240;         // a runaway backstop, not a budget (was 3 sessions of 12)
 const DAY_TTL = 60 * 60 * 48;
@@ -75,7 +79,11 @@ function legacyCaps(caps) {
   return { conversation: talk, review: talk, explain: short, feedback: short, translate: short };
 }
 
-const envInt = (v, dflt) => parseInt(v, 10) || dflt;
+/* A number is a number, including zero. `parseInt(v) || dflt` read a ceiling
+   of "0" — the way to stop all spending — as unset and applied the default:
+   the same bug §30d fixed for per-user caps, still alive here (found
+   2026-10-01 by the test for the global refusal). */
+const envInt = (v, dflt) => { const n = parseInt(v, 10); return Number.isFinite(n) ? n : dflt; };
 
 const json = (status, body) => new Response(JSON.stringify(body), {
   status, headers: { "content-type": "application/json; charset=utf-8" },
@@ -113,7 +121,7 @@ async function identify(given, env) {
      those were chosen for that person. */
   if (rec.plan || rec.via === "register") {
     const plan = planOf(rec.plan);
-    return { id: String(rec.id), caps: capsFor(plan), plan };
+    return { id: String(rec.id), caps: capsFor(plan), plan, token: given, rec };
   }
   return { id: String(rec.id), caps: legacyCaps(rec.caps || null), plan: "custom" };
 }
@@ -127,6 +135,17 @@ async function tick(env, key, cap) {
   if (count >= cap) return false;
   await env.USAGE.put(key, String(count + 1), { expirationTtl: DAY_TTL });
   return true;
+}
+
+/* A unit handed back. The counters are ticked *before* the model is called —
+   checking after would let concurrent requests run past the cap — so a request
+   that gave the learner nothing returns its unit: an upstream error, a reply
+   that never parsed, or a refusal by the global ceiling after the user's own
+   counter had already moved. On Free one glitch was a third of the day's
+   explanations (the review, 2026-10-01). */
+async function untick(env, key) {
+  const count = parseInt(await env.USAGE.get(key), 10) || 0;
+  if (count > 0) await env.USAGE.put(key, String(count - 1), { expirationTtl: DAY_TTL });
 }
 
 /* Web Crypto's randomness, base64url so the token is one bearer word. 24
@@ -290,12 +309,30 @@ export async function handle(request, env, deps = {}) {
      today's counters, read and never ticked, and no model call. The app
      shows it in Settings (2026-09-29). */
   if (url.pathname === "/v1/plan") {
+    /* **Choosing a plan yourself, during the beta only** (the owner,
+       2026-10-01: "a toggle for premium/non premium so I can get the AI
+       unlocked"). `{ set }` rewrites this install's own record, and only while
+       BETA_SELF_PLAN is "true" — a switch to turn off before Premium is sold
+       (docs/BETA.md, Phase E). The owner's secret and hand-made tokens are
+       outside it: their plan was set for them. GLOBAL_DAILY_CAP still bounds
+       what every install together can spend, whatever each one chose. */
+    const selfServe = env.BETA_SELF_PLAN === "true" && !!user.rec;
+    let body = null;
+    try { body = await request.json(); } catch (e) { body = null; }
+    let current = user;
+    if (body && body.set !== undefined) {
+      if (!selfServe) return json(403, { ok: false, reason: "plan is not self-service" });
+      if (!PLANS[body.set]) return json(400, { ok: false, reason: "no such plan" });
+      const rec = { ...user.rec, plan: body.set };
+      await env.USAGE.put(`user:${user.token}`, JSON.stringify(rec));
+      current = { ...user, plan: body.set, caps: capsFor(body.set), rec };
+    }
     const day = dayKey(now);
     const used = {};
     for (const counter of Object.keys(PLANS.free)) {
       used[counter] = parseInt(await env.USAGE.get(`${counter}:${day}:${user.id}`), 10) || 0;
     }
-    return json(200, { ok: true, plan: user.plan, caps: user.caps, used });
+    return json(200, { ok: true, plan: current.plan, caps: current.caps, used, selfServe });
   }
   if (!env.ANTHROPIC_API_KEY) return json(503, { ok: false, reason: "no upstream key" });
 
@@ -319,7 +356,8 @@ export async function handle(request, env, deps = {}) {
   const own = user.caps ? user.caps[counter] : undefined;
   const cap = Number.isFinite(own) ? own : route.cap(env);
   const day = dayKey(now);
-  if (!(await tick(env, `${counter}:${day}:${user.id}`, cap))) {
+  const userKey = `${counter}:${day}:${user.id}`;
+  if (!(await tick(env, userKey, cap))) {
     /* On a plan, the refusal says which plan and how much it allows, so the
        app can say it plainly and offer what comes next. */
     const onPlan = user.plan === "free" || user.plan === "premium";
@@ -328,7 +366,10 @@ export async function handle(request, env, deps = {}) {
                          ? `${PLAN_NAMES[user.plan]} plan: ${cap} a day. Resets at 00:00 UTC.`
                          : route.capMessage(cap) });
   }
-  if (user.id !== "owner" && !(await tick(env, `all:${day}`, envInt(env.GLOBAL_DAILY_CAP, DEFAULT_GLOBAL_CAP)))) {
+  const allKey = `all:${day}`;
+  const counted = user.id !== "owner";
+  if (counted && !(await tick(env, allKey, envInt(env.GLOBAL_DAILY_CAP, DEFAULT_GLOBAL_CAP)))) {
+    await untick(env, userKey);
     return json(429, { ok: false, reason: "cap", message: "The tutor has had a busy day; resets at 00:00 UTC." });
   }
 
@@ -342,6 +383,10 @@ export async function handle(request, env, deps = {}) {
     const reply = await askModel(fetchFn, env, route.system, messages, route.maxTokens);
     if (reply.error) {
       await logUsage(env, day, now, { kind: route.kind, user: user.id, error: reply.error, attempt });
+      // Nothing reached the learner. The global unit comes back too when no
+      // attempt was billed; after a billed attempt it stays, since it bounds spend.
+      await untick(env, userKey);
+      if (counted && attempt === 0) await untick(env, allKey);
       return json(502, { ok: false, reason: "upstream", detail: reply.error });
     }
     tokensIn += reply.usage.input_tokens || 0;
@@ -362,7 +407,8 @@ export async function handle(request, env, deps = {}) {
 
   await logUsage(env, day, now, { kind: route.kind, user: user.id, in: tokensIn, out: tokensOut,
                                   model: env.MODEL, parsed: !!result });
-  if (!result) return json(200, { ok: false, reason: "parse", errors: lastErrors });
+  // The model was billed for this, so the global unit stays; the learner's comes back.
+  if (!result) { await untick(env, userKey); return json(200, { ok: false, reason: "parse", errors: lastErrors }); }
   return json(200, { ok: true, ...result });
 }
 

@@ -294,9 +294,7 @@ function Placement({ avatar, onChoose }) {
                        letterSpacing: -0.5, textAlign: "center" }}>
           Where should we start?
         </Text>
-        <Muted style={{ textAlign: "center", marginTop: 4, marginBottom: 22 }}>
-          A short test can skip what you already know.
-        </Muted>
+        <View style={{ height: 22 }} />
       </Rise>
       <Option n={2} testID="placement-take" title="Take the placement test"
               sub="50 questions · about 10 minutes" onPress={() => onChoose(true)} />

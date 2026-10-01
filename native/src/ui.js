@@ -735,7 +735,15 @@ export function Stepper({ value, onChange, min = 0, max = 999, step = 1, testID,
       <TextInput
         testID={testID ? `${testID}-value` : undefined}
         value={text === null ? String(value) : text}
-        onChangeText={setText}
+        onChangeText={(s) => {
+          /* A whole number commits as it is typed: pressing the sheet's Done
+             with the keyboard still up unmounts this before any blur arrives,
+             and the typed value was lost (the review, 2026-10-01). An empty
+             box commits nothing — that is the half-typed case above. */
+          setText(s);
+          const n = parseInt(String(s).replace(/[^0-9]/g, ""), 10);
+          if (Number.isFinite(n) && n >= min && n <= max) onChange(n);
+        }}
         onBlur={commit}
         onSubmitEditing={commit}
         keyboardType="number-pad"

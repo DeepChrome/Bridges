@@ -48,8 +48,6 @@ export const ALLOW = new Map([
    "failure with a cause the learner can act on"],
   ["Your saved progress could not be read. It has been kept aside;",
    "P9: the state banner, and it has to be plain about what happened"],
-  ["The mark is lost; what you have answered is kept.",
-   "the consequence of leaving a quiz, in the confirm dialog"],
   ["No connection. Try again when you are online.", "failure with a cause"],
   ["This file is not a deck Bridges can read.", "failure with a cause"],
   ["No cards with Russian on them in this deck.", "failure with a cause"],

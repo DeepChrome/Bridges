@@ -149,6 +149,7 @@ export function VocabFlow({ route, navigation }) {
       progress={{ at, total: steps.length }}
       recycle={false}
       onFinish={advance}
+      navigation={navigation}
     />
   );
 }
@@ -275,9 +276,6 @@ export function BuildDrillFlow({ navigation }) {
           <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
             Should the phone listen?
           </Text>
-          <Muted style={{ textAlign: "center", marginTop: 8 }}>
-            It says what it heard, and never marks you wrong
-          </Muted>
         </View>
         <Btn kind="pri" testID="build-listen-yes" label="Listen" onPress={() => setListen(true)} />
         <Btn kind="ghost" testID="build-listen-no" label="Just play it" style={{ marginTop: 8 }}
@@ -392,13 +390,14 @@ export function QuizFlow({ route, navigation }) {
     // What the lesson list will show, not the raw mark: the relief rule
     // (core/state.js quizPassed) accepts a lower score from the third try,
     // and this screen used to say "Not quite" over a quiz the list ticked.
-    const { passed, relief } = result;
+    const { passed, relief, thisRun } = result;
     const last = index + 1 >= lessonCount(unit);
     const missed = missedWords(result.results, lessonWords(unit, index));
     return (
       <Done
         title={relief ? `Passed on the ${ordinal(result.tries)} try`
-             : passed ? "Quiz passed" : `Not quite. ${PASS_MARK}% to pass`}
+             : thisRun ? "Quiz passed"
+             : passed ? "Lesson already passed" : `Not quite. ${PASS_MARK}% to pass`}
         /* Which words, not just how many: a score says a learner failed, the
            words say what to do about it. Language material, so it is not the
            explanatory copy rule 20.7 bans. */
@@ -437,8 +436,13 @@ export function QuizFlow({ route, navigation }) {
         const before = ((st.unit[unit.id] || {}).lessons || {})[index] || {};
         const slot = { q: Math.max(before.q || 0, score), tries: (before.tries || 0) + 1 };
         const passed = quizPassed(slot);
+        /* What *this* run did, beside what the lesson now is. `passed` reads the
+           best mark, so a 90 % pass retaken at 30 % said "Passed on the second
+           try" over a 30 (the review, 2026-10-01). Relief is a fact about the
+           run that earned the pass. */
+        const thisRun = quizPassed({ q: score, tries: slot.tries });
         update((prev) => touchStreak(markComponent(prev, unit, index, "quiz", score)));
-        setResult({ ...r, score, passed, relief: passed && score < PASS_MARK, tries: slot.tries });
+        setResult({ ...r, score, passed, thisRun, relief: thisRun && score < PASS_MARK, tries: slot.tries });
       }}
     />
   );
@@ -1171,7 +1175,7 @@ export function PlacementFlow({ navigation }) {
         title="Placement complete"
         detail={result.detail}
         score={result.score}
-        onBack={() => navigation.navigate("Path")}
+        onBack={() => navigation.popTo("Path") /* back down, not a second path on top */}
       />
     );
   }
@@ -1254,6 +1258,10 @@ export function SectionFlow({ route, navigation }) {
               cleared += 1;
             }
           }
+          /* Every lesson tested out: the unit is done, video step and all, as
+             placement marks it — or an unwatched video would leave a unit the
+             learner just tested out of standing in the way of the next. */
+          if (cleared === lessonCount(unit) && unit.v) next = markComponent(next, unit, 0, "video");
           return next;
         });
         setResult({

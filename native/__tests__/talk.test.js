@@ -106,7 +106,9 @@ describe("talk", () => {
     await act(async () => { fireEvent(hold, "pressOut"); });
     await act(async () => { global.__stt.emit("result", { isFinal: true, results: [{ transcript: "я хочу вода" }] }); });
     expect(await screen.findByText(/Вы хотите чай\?/)).toBeTruthy();
-    expect(talk.mock.calls[1][0].history).toHaveLength(2);
+    // The exchange before the line; the line itself goes once, as `transcript`
+    // (backend/src/talk.js: the last history turn is what is being answered).
+    expect(talk.mock.calls[1][0].history).toHaveLength(1);
     expect(talk.mock.calls[1][0].transcript).toBe("я хочу вода");
     /* Both halves of the turn went at once, and the marking carries only what
        marking needs: no studied list, no grammar topic. */

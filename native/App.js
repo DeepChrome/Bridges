@@ -112,11 +112,28 @@ const SearchIcon = tabIcon("Search");
 /* The profile avatar sits in the header, as it does on the web, rather than
    spending a tab on it. Beside it, on every screen but the path itself, a way
    home: back to the path in one press from anywhere (the owner, 2026-09-07). */
+/* Home unwinds; it does not push. `navigate("Path")` in React Navigation 7
+   pushes a new Path unless Path is the screen showing, so Home from a quiz
+   left [Path, Unit, Lesson, Quiz, Path] — the quiz still mounted underneath,
+   a back arrow into it, and the stack one deeper every press (the review,
+   2026-10-01). So: off any Root-stack screen above the tabs, the Learn stack
+   popped to its first screen (the path), then the Learn tab. */
+export function goHome() {
+  const root = navRef.getRootState ? navRef.getRootState() : null;
+  if (root && root.index > 0) navRef.dispatch({ ...StackActions.popToTop(), target: root.key });
+  const tabs = root && root.routes.find((r) => r.name === "Tabs");
+  const learn = tabs && tabs.state && tabs.state.routes.find((r) => r.name === "Learn");
+  if (learn && learn.state && learn.state.routes.length > 1) {
+    navRef.dispatch({ ...StackActions.popToTop(), target: learn.state.key });
+  }
+  navRef.navigate("Tabs", { screen: "Learn" });
+}
+
 function HomeButton() {
   const scheme = useColorScheme();
   const p = palette(scheme);
   return (
-    <Pressable onPress={() => navRef.navigate("Tabs", { screen: "Learn", params: { screen: "Path" } })}
+    <Pressable onPress={goHome}
                hitSlop={8} accessibilityRole="button" accessibilityLabel="Home, the path"
                testID="home-button"
                style={{ marginRight: 12, width: 30, height: 30, alignItems: "center",
@@ -133,7 +150,15 @@ function MeButton({ navigation }) {
   const { account } = useSession();
   if (!account) return null;
   return (
-    <Pressable onPress={() => navigation.navigate("You")} hitSlop={8}
+    /* The profile is on every tab's stack but not on the Root stack, where a
+       video opened from a dictionary entry lives — and React Navigation drops
+       a navigate to a route it does not have, so the avatar there did nothing
+       (§23; the review, 2026-10-01). From there it is the Learn tab's. */
+    <Pressable onPress={() => {
+                 const names = navigation.getState ? (navigation.getState() || {}).routeNames || [] : [];
+                 if (names.includes("You")) navigation.navigate("You");
+                 else navRef.navigate("Tabs", { screen: "Learn", params: { screen: "You" } });
+               }} hitSlop={8}
                accessibilityRole="button" accessibilityLabel={`${account.name}, your profile`}
                style={{ marginRight: 4 }}>
       <Avatar id={account.avatar} size={30} />

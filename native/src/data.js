@@ -187,8 +187,10 @@ const rawResolve = makeResolve({ L, IX, deep: deepList });
 export const searchWords = (q, limit) => rawSearch(q, limit).map(hydrate);
 export const searchWordsScored = (q, limit) =>
   rawSearch.scored(q, limit).map((x) => ({ entry: hydrate(x.entry), score: x.score }));
-export const resolveWord = (w) => {
-  const hit = rawResolve(w);
+/* `pos` picks between homographs — «есть» the verb and «есть» "there is" —
+   where the caller knows which it meant (a search hit does). */
+export const resolveWord = (w, pos) => {
+  const hit = rawResolve(w, pos);
   return hit ? hydrate(hit) : null;
 };
 

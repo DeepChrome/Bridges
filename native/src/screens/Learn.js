@@ -405,11 +405,24 @@ function Fork({ stage, chapterOpen, onOpen }) {
      leaves from there. A rank of optional quests below it hangs off the
      same point with nothing after it. */
   const lastRequired = ranks.reduce((a, rank, r) => (rank.some((u) => !optional(u)) ? r : a), -1);
+  /* A chapter whose quests are all optional — chapters 8 and 10 are — has no
+     lane coming back, so the road on to the next chapter started from nothing:
+     a stub under the quests leading nowhere, the thing §30av ruled out. The
+     road runs straight down past them instead, and they hang off it. */
+  const allOptional = lastRequired < 0;
+  const rowH = isNotebook() ? ROW_H_SERIF : ROW_H;
+  const through = ranks.reduce((n, _, r) => n + (r ? ROW_GAP : LANE_H) + rowH, 0);
 
   return (
     <View testID={`fork-${stage.core.id}`} accessibilityLabel="Side quests"
           style={{ alignItems: "center", alignSelf: "stretch" }}>
       <Trunk height={10} on={open} testID={`stem-${stage.core.id}`} />
+      {allOptional ? (
+        <View pointerEvents="none"
+              style={{ position: "absolute", top: 10, left: "50%", marginLeft: -TRUNK_W / 2 }}>
+          <Trunk height={through} on={done} testID={`road-through-${stage.core.id}`} />
+        </View>
+      ) : null}
       {ranks.map((rank, r) => (
         <React.Fragment key={r}>
           <FanOut rank={rank} xs={xs[r]} W={W} height={r ? ROW_GAP : LANE_H} laneOn={laneOn} />
@@ -427,9 +440,8 @@ function Fork({ stage, chapterOpen, onOpen }) {
           ) : null}
         </React.Fragment>
       ))}
-      {/* On to the next chapter. A chapter whose quests are all optional (none
-          is) would carry the road straight from the stem, so it is drawn
-          either way. */}
+      {/* On to the next chapter: from the lanes coming back, or, when every
+          quest is optional, from the road running through (above). */}
       <Trunk height={10} on={done} testID={`road-on-${stage.core.id}`} />
     </View>
   );

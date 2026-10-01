@@ -370,8 +370,26 @@ function begin() {
   let done;
   current = new Promise((res) => { done = res; });
   const timer = setTimeout(() => done(), STALL_MS);
-  settle = () => { clearTimeout(timer); done(); settle = null; };
-  return settle;
+  /* Clears the shared slot only while it is still the one in it. An
+     interrupted utterance's onStopped arrives on a device *after* the next
+     begin() has installed its own settle, and the old closure used to null the
+     new one — so whatever played next could not settle early and whenIdle()
+     waited out the full STALL_MS: the runner's autoplay fifteen seconds late,
+     or arriving out of nowhere while the learner typed (the review,
+     2026-10-01). The jest mock fires callbacks synchronously, which is why no
+     suite saw it. */
+  const mine = () => { clearTimeout(timer); done(); if (settle === mine) settle = null; };
+  settle = mine;
+  return mine;
+}
+
+/* The phone's voice is about to speak: a recording still playing, or still
+   opening, goes first. Without this they overlapped — a recording from say()
+   or playTrack() went on under the device voice, and a say() still awaiting
+   prepare() started after it (the review, 2026-10-01). */
+function silenceRecording() {
+  trackSeq++;
+  if (player) { release(player); player = null; }
 }
 
 export const whenIdle = () => current;
@@ -423,6 +441,7 @@ function rateFor(text, opts) {
 export function speakTTS(text, opts = {}) {
   if (!ruVoice) return false;
   try {
+    silenceRecording();
     Speech.stop();
     claim();
     const end = begin();
@@ -461,9 +480,15 @@ export function speakLine(text, opts = {}) {
      so the tag alone is enough where enumeration named nothing. */
   const en = opts.lang === "en";
   if (!en && !ruVoice) return Promise.resolve(false);
+  /* `asked` is the route that wanted this said. A tutor's reply arrives
+     seconds after it was asked for, and by then the learner may be on another
+     screen: spoken there, it also belonged there, so leaving did not stop it
+     (the review, 2026-10-01). Not this screen's any more, it is not said. */
+  if (opts.asked && here() !== opts.asked) return Promise.resolve(false);
   return new Promise((resolve) => {
     let done = false;
-    claim();
+    silenceRecording();
+    claim(opts.asked);
     const end = begin();
     const finish = (ok) => {
       if (done) return;

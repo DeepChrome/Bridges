@@ -25,6 +25,7 @@ import { Btn, Muted, Pill, Speaker, Text, Marked } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN } from "../data";
 import { getFeedback, config } from "../lib/feedback";
+import { stop as stopAudio } from "../audio";
 import { useRecognizer } from "../speech";
 import { Alignment } from "./Alignment";
 import { compare, words } from "@core/compare";
@@ -50,7 +51,12 @@ export function HoldButton({ phase, onIn, onOut, size = 84, testID = "say-hold",
         accessibilityRole="button"
         accessibilityLabel={label ? `Hold to speak ${label}` : "Hold to speak"}
         accessibilityState={{ busy }}
-        onPressIn={onIn}
+        /* The app's own sound stops before the microphone opens. Held while
+           the model recording or the tutor's voice was still playing, the
+           microphone recorded the phone — Shadow and Build could be passed by
+           their own recording (the review, 2026-10-01). One place, because
+           every microphone in the app is this button. */
+        onPressIn={(e) => { stopAudio(); if (onIn) onIn(e); }}
         onPressOut={onOut}
         hitSlop={8}
         style={{

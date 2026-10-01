@@ -68,6 +68,7 @@ export function Hear({ q, r }) {
 
   const check = () => {
     if (r.answered) return;
+    if (!fold(text)) return;   // an empty box is a stray tap, not an answer (Run.js Typed)
     // Russian letters or nothing — Latin typing is not transliterated (Run.js
     // Typed says why). `compare` folds both sides and counts only Russian words.
     const out = compare(text, q.target);

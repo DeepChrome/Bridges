@@ -109,7 +109,8 @@ describe("dictionary screen", () => {
     const top = searchWords("книгу")[0];
     fireEvent.press(await screen.findByText(top.w));
     // Addressed by the word, never by a lemma index — those move on every rebuild.
-    expect(nav.navigate).toHaveBeenCalledWith("Word", { word: top.b });
+    // The part of speech rides along, so a homograph opens the hit tapped.
+    expect(nav.navigate).toHaveBeenCalledWith("Word", { word: top.b, pos: top.p });
   });
 
   it("shows no recent shelf for a profile that has never looked anything up", async () => {

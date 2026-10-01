@@ -23,8 +23,13 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const TIMEOUT_MS = 8000;
-export const TALK_TIMEOUT_MS = 20000;   // a conversational turn is longer
+/* Longer than the Worker's own worst case — three attempts of up to 10 s
+   (UPSTREAM_TIMEOUT_MS in backend/src/index.js). At 8 s the app gave up while
+   the Worker was still retrying, and the unit was spent on an answer nobody
+   saw (the review, 2026-10-01). Nothing waits on these with the screen held:
+   the verdict, the transcript and the input stay usable underneath. */
+export const TIMEOUT_MS = 35000;
+export const TALK_TIMEOUT_MS = 35000;
 
 const TOKEN_KEY = "rb.worker.token";
 let installToken = null;      // this install's, once read or minted
@@ -147,6 +152,12 @@ export async function tutor({ profile, studied, history, text }, deps = {}) {
    used }. No model call; Settings asks when it opens. */
 export async function plan(deps = {}) {
   return post({}, deps, "/v1/plan", 8000);
+}
+
+/* Switch this install's plan, during the beta only — the Worker refuses
+   unless its BETA_SELF_PLAN is on, and says in `selfServe` whether it is. */
+export async function setPlan(set, deps = {}) {
+  return post({ set }, deps, "/v1/plan", 8000);
 }
 
 async function post(body, deps, route, timeoutMs, retried = false) {

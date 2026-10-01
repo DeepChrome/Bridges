@@ -137,7 +137,9 @@ describe("the profile and its settings", () => {
     await withProfile(<You navigation={nav} />);
     // "cards to review" is the Study badge's number, and a tap goes there.
     await act(async () => { fireEvent.press(await screen.findByTestId("stat-due")); });
-    expect(nav.navigate).toHaveBeenCalledWith("Study");
+    // From another tab's You it is a jump to the flashcards, not to the Study
+    // tab's top: inside the Study stack that name went nowhere.
+    expect(nav.navigate).toHaveBeenCalledWith("Study", { screen: "Cards", params: undefined });
 
     // What the AI has left today is one row on the profile — the plan's name —
     // and the detail opens on a tap (2026-09-30). No Premium sales lines.

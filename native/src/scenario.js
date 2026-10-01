@@ -155,7 +155,20 @@ export function useScenario(lines, cast, seed = "") {
     const id = setInterval(() => {
       const h = handle.current;
       if (!h) return setPos(mark.current.base + (Date.now() - mark.current.at));
-      const ms = h.pos();
+      /* Something else took the session — a transcript word's speaker, or
+         leaving for a pushed screen — and released this track's player. It
+         used to stay "playing" over a dead player: the bar froze, Pause then
+         stopped the other sound, and reading a removed player could throw
+         inside this interval (the review, 2026-10-01). It is paused instead,
+         where it was. */
+      if (!h.live()) {
+        handle.current = null;
+        setPlaying(false);
+        setAt(-1);
+        return undefined;
+      }
+      let ms;
+      try { ms = h.pos(); } catch (e) { handle.current = null; setPlaying(false); setAt(-1); return undefined; }
       setPos(ms);
       setAt(lineAt(track.spans, ms));
       if (h.ended()) {
@@ -187,7 +200,9 @@ export function useScenario(lines, cast, seed = "") {
   const spans = () => (track ? { spans: track.spans, total: track.total }
                              : timeline(lines, measured.current));
 
-  const play = async (fromMs = 0) => {
+  /* `r` is the rate to play at — passed, not read from the closure, because
+     toggleSlow calls this before React has re-rendered with the new rate. */
+  const play = async (fromMs = 0, r = rate) => {
     const id = ++run.current;
     if (handle.current) { handle.current.stop(); handle.current = null; }
     stop();
@@ -195,7 +210,7 @@ export function useScenario(lines, cast, seed = "") {
     setPlays((n) => n + 1);
 
     if (track) {
-      const h = await playTrack(track.src, fromMs, rate);
+      const h = await playTrack(track.src, fromMs, r);
       if (!alive.current || run.current !== id) { if (h) h.stop(); return; }
       if (h) {
         handle.current = h;
@@ -217,7 +232,7 @@ export function useScenario(lines, cast, seed = "") {
       mark.current = { base, at: Date.now() };
       setPos(base);
       const t0 = Date.now();
-      await speakLine(lines[k].ru, { ...voiceFor(lines[k]), rate });
+      await speakLine(lines[k].ru, { ...voiceFor(lines[k]), rate: r });
       if (!alive.current || run.current !== id) return;
       const took = Date.now() - t0;
       /* A line that came back at once was not spoken — no voice, or stopped
@@ -306,9 +321,10 @@ export function useScenario(lines, cast, seed = "") {
     if (!playing) return;
     const tl = spans();
     const from = at >= 0 && tl.spans[at] ? tl.spans[at].start : pos;
-    // `play` reads `rate` through the closure, so it has to run after the
-    // state has actually changed.
-    setTimeout(() => play(from), 0);
+    /* The new rate is handed over. It used to be read through the closure
+       from a setTimeout, which still held the render with the old rate, so the
+       label flipped and the audio did not (the review, 2026-10-01). */
+    play(from, next ? SLOW_RATE : 1);
   };
 
   return { playing, at, pos, plays, slow, total: spans().total,

@@ -45,6 +45,18 @@ SPINE_RESERVE = 0.25   # …in at most this much less than the whole unit: the r
 BRANCH_RESERVE = 0.3   # …and for a side quest, its topic's core words
 OFFTOPIC_RANK = 1000   # an off-topic video word joins a side quest only if this common (by how many videos say it)
 OFFTOPIC_SHARE = 0.25  # …and at most this share of the quest is such words
+# An OPTIONAL quest may not teach a word everyone needs: one among the
+# EVERYDAY_RANK commonest the videos say, or one SPINE_FR already reserves for
+# the spine. Optional means skippable, so a word only an optional quest teaches
+# is a word a learner who skips it never meets — and the required material
+# kept using them: «помочь», «проблема», «Москва», «важный» were taught only in
+# Science and Business (the data review, 2026-10-01). Measured off
+# transcripts.json: the top 800 are 80 % of everything the 321 videos say, and
+# the 800th is said in 29 of them (9 %), across every channel and subject — a
+# word that turns up in one episode in eleven is not a niche subject's. At 600
+# the cut leaves «девушка» (613), «компания» (644), «забывать» (680) to the
+# quests; past 1,000 it starts taking a subject's own words («традиция», «цена»).
+EVERYDAY_RANK = 800
 SKELETON = ROOT / "data" / "curated" / "skeleton.json"
 # A reader's per-unit keeps and drops from the chapter content reviews.
 UNIT_WORDS = json.loads((ROOT / "data" / "curated" / "unit_words.json").read_text(encoding="utf-8"))
@@ -69,6 +81,26 @@ LESSON_RAMP, LESSON_SIZE = [5, 6], 7
 
 def lesson_size(chapter):
     return LESSON_RAMP[chapter] if 0 <= chapter < len(LESSON_RAMP) else LESSON_SIZE
+
+
+# A unit's last lesson is what is left after the full ones, and a thirty-word
+# side quest cut into lessons of seven ended on a lesson of two words — nineteen
+# lessons of one or two words across the course (the data review, 2026-10-01),
+# a lesson screen, a quiz and a summary for a pair of words. No unit may end on
+# a lesson shorter than this. A unit's size is rounded up to fill the lesson
+# (the same number of lessons, the last one full); a spine that grew past its
+# size takes the next commonest words until its last lesson is longer; and a
+# quest whose subject runs out short of its size gives up its rarest off-subject
+# words instead. Trimming every quest to 28 was measured first and lost 36
+# words — «звонить», «радио», «дверь» — through the cascade into the spine.
+SHORT_LESSON = 2
+
+
+def short_tail(n, size):
+    """How many words a unit of `n` has in its last lesson, when that is a
+    lesson too short to keep (1..SHORT_LESSON); 0 otherwise."""
+    r = n % size
+    return r if 0 < r <= SHORT_LESSON else 0
 
 
 def pack(blocks, size):
@@ -185,7 +217,11 @@ def grouped(tid, chosen, meta, spoken, size):
 # the grammar reference; neither belongs in a unit because a video said it.
 VIDEO_NOISE = set("""канал подписываться подписаться подписка лайк комментарий ролик выпуск
 ссылка описание субтитры патреон падёж глагол предлог окончание союз спряжение
-существительное прилагательное местоимение наречие""".split())
+существительное прилагательное местоимение наречие
+сей""".split())
+# «сей» is archaic "this", heard in set phrases («до сих пор») and nowhere a
+# learner would say it. Reviewers dropped it from core8 and art and it walked
+# into the next unit each time (2026-10-01); it belongs here, not unit by unit.
 TRANSCRIPTS = ROOT / "data" / "transcripts.json"
 EARLY_CHAPTERS = 3
 BRANCH_MIN = 10      # below this a topic isn't worth a unit
@@ -890,122 +926,194 @@ def main():
             if t in vid_of:
                 before[t] = followable(vid_of[t], known)
 
-    taught, units = set(), []
-    for tid, kind, k, vid in route:
-        size = ((SPINE_UNIT if k < EARLY_SPINE else SPINE_UNIT_LATER) if kind == "spine"
-                else (BRANCH_SIZE_EARLY if k < EARLY_CHAPTERS else BRANCH_SIZE))
-        chosen, why = [], {}
-        curated_keep = set((UNIT_WORDS.get(tid) or {}).get("keep", []))
-        curated_drop = set((UNIT_WORDS.get(tid) or {}).get("drop", []))
+    forced_set = set(forced)
 
-        def take(lid, reason):
-            if lid in taught or lid in why or lid not in dedup_set:
-                return False
-            if reserved.get(lid, tid) != tid:
-                return False
-            if reason == "video" and meta[lid]["bare"] in VIDEO_NOISE:
-                return False
-            # A side quest takes a video word that is off its topic only when
-            # the word is common. The owner, 2026-09-30: "When in doubt, stick
-            # to the most useful/common words. Build towards the videos… They
-            # don't need to know every single word." Built from the video
-            # alone, Sport taught «автомат» and «трагический», Animals
-            # «банкомат», Faith «скидка» — words an episode happened to say,
-            # rare and off the subject. A common one («кофе», «война») still
-            # earns its place: it helps with the video and with everything else.
-            bare = meta[lid]["bare"]
-            if bare in curated_drop:
-                return False
-            offtopic = (reason == "video" and kind == "branch" and topic_of.get(lid) != tid
-                        and bare not in curated_keep)
-            if offtopic and spoken.get(bare, 10 ** 6) > OFFTOPIC_RANK:
-                return False
-            # …and only a share of the quest. Uncapped, a quest filled its video
-            # room with whatever common words its episode said, and each word a
-            # review dropped only drifted to the next quest («блин» from
-            # Emotion to Body, «салат» to Faith). The common words fall to the
-            # spine, which takes the commonest words anyway.
-            if offtopic and sum(1 for l in chosen if why.get(l) == "video" and topic_of.get(l) != tid
-                                and meta[l]["bare"] not in curated_keep) >= round(size * OFFTOPIC_SHARE):
-                return False
-            if kind == "branch" and meta[lid]["pos"] not in BRANCH_POS:
-                return False     # the closed classes are the spine's to teach
-            chosen.append(lid)
-            why[lid] = reason
-            return True
+    def everyday(lid):
+        return lid in forced_set or spoken.get(meta[lid]["bare"], 10 ** 6) < EVERYDAY_RANK
 
-        # Not every slot goes to the video. A side quest keeps a share for its
-        # topic's core words and the spine for the commonest words there are:
-        # built from the video alone, Sport taught no «футбол», Family no «брат»
-        # and Medicine no «больница», because those particular episodes happen
-        # not to say them — and a unit on a subject without its first word is
-        # not a unit on that subject.
-        video_room = size - round(size * (SPINE_RESERVE if kind == "spine" else BRANCH_RESERVE))
-        # A reader's keeps first (data/curated/unit_words.json): the frequency
-        # rule cannot tell «праздновать» in an Easter episode from «скидка» in
-        # the same one, and the chapter reviews can.
-        for bare in (UNIT_WORDS.get(tid) or {}).get("keep", []):
-            for lid in by_bare.get(bare, [])[:1]:
-                take(lid, "curated")
-        if vid:
-            c = counts.get(vid) or {}
-            total = sum(c.values()) or 1
-            got = sum(n for b, n in c.items() if any(l in taught for l in by_bare.get(b, [])))
-            for b, n in sorted(c.items(), key=lambda x: (-x[1], spoken.get(x[0], 10 ** 6))):
-                if got >= COVER * total or len(chosen) >= video_room:
-                    break
-                for lid in by_bare.get(b, [])[:1]:
-                    if take(lid, "video"):
-                        got += n
-        if kind == "spine":
-            for lid in sorted(forced, key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6)):
-                if len(chosen) >= size:
-                    break
-                take(lid, "common")
-            for lid in sorted(deduped, key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6)):
-                if len(chosen) >= size:
-                    break
-                take(lid, "common")
-            # Enough verbs to make a sentence with (SPINE_VERBS): swap the last
-            # top-ups for the video's most-said verbs, then the commonest.
-            verbs = [l for l in chosen if meta[l]["pos"] == "verb"]
-            if len(verbs) < SPINE_VERBS:
-                pool_v = [by_bare[b][0] for b, _ in sorted((counts.get(vid) or {}).items(), key=lambda x: -x[1])
-                          if b in by_bare] + sorted(deduped, key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6))
-                for lid in pool_v:
-                    if len(verbs) >= SPINE_VERBS:
+    # Words an optional quest wanted and EVERYDAY_RANK refused it. They fall to
+    # the spine of the quest's own chapter — the required unit a learner has
+    # just finished when the quest opens — which takes them on top of its own
+    # words, so the rule moves a word onto the required route rather than out
+    # of the course. Which words a quest refuses is only known once the route
+    # has been walked, so the route is walked twice (below).
+    def walk(spine_extra):
+        del UNGROUPED[:], MISKINDED[:], SPLIT_GROUPS[:]
+        reserved_now = dict(reserved)
+        refused, refused_keeps = {}, []
+        taught, units = set(), []
+        for tid, kind, k, vid in route:
+            size = ((SPINE_UNIT if k < EARLY_SPINE else SPINE_UNIT_LATER) if kind == "spine"
+                    else (BRANCH_SIZE_EARLY if k < EARLY_CHAPTERS else BRANCH_SIZE))
+            # SHORT_LESSON: a size that would end on a lesson of one or two
+            # words is the same number of lessons with the last one filled —
+            # thirty words in lessons of seven is thirty-five.
+            if short_tail(size, lesson_size(k)):
+                size += lesson_size(k) - short_tail(size, lesson_size(k))
+            chosen, why, held = [], {}, [0]
+            curated_keep = set((UNIT_WORDS.get(tid) or {}).get("keep", []))
+            curated_drop = set((UNIT_WORDS.get(tid) or {}).get("drop", []))
+
+            def take(lid, reason):
+                if lid in taught or lid in why or lid not in dedup_set:
+                    return False
+                if reserved_now.get(lid, tid) != tid:
+                    return False
+                if reason == "video" and meta[lid]["bare"] in VIDEO_NOISE:
+                    return False
+                # A side quest takes a video word that is off its topic only when
+                # the word is common. The owner, 2026-09-30: "When in doubt, stick
+                # to the most useful/common words. Build towards the videos… They
+                # don't need to know every single word." Built from the video
+                # alone, Sport taught «автомат» and «трагический», Animals
+                # «банкомат», Faith «скидка» — words an episode happened to say,
+                # rare and off the subject. A common one («кофе», «война») still
+                # earns its place: it helps with the video and with everything else.
+                bare = meta[lid]["bare"]
+                if bare in curated_drop:
+                    return False
+                offtopic = (reason == "video" and kind == "branch" and topic_of.get(lid) != tid
+                            and bare not in curated_keep)
+                if offtopic and spoken.get(bare, 10 ** 6) > OFFTOPIC_RANK:
+                    return False
+                # …and only a share of the quest. Uncapped, a quest filled its video
+                # room with whatever common words its episode said, and each word a
+                # review dropped only drifted to the next quest («блин» from
+                # Emotion to Body, «салат» to Faith). The common words fall to the
+                # spine, which takes the commonest words anyway.
+                if offtopic and sum(1 for l in chosen if why.get(l) == "video" and topic_of.get(l) != tid
+                                    and meta[l]["bare"] not in curated_keep) >= round(size * OFFTOPIC_SHARE):
+                    return False
+                if kind == "branch" and meta[lid]["pos"] not in BRANCH_POS:
+                    return False     # the closed classes are the spine's to teach
+                if tid in OPTIONAL and everyday(lid):
+                    # Only what the quest would have taught moves: a refused
+                    # word leaves its slot to the next candidate, so a quest
+                    # whose video is all everyday words would otherwise refuse
+                    # dozens it never had room for, and the spine would grow
+                    # by all of them.
+                    # The quest's own subject words («война», «спорт», «народ»)
+                    # always move: they are few, and what the quest is about.
+                    if lid not in refused and (reason != "video" or len(chosen) + held[0] < video_room):
+                        refused[lid] = k
+                        held[0] += 1
+                        if reason == "curated":
+                            refused_keeps.append(f"{tid}:{bare}")
+                    return False
+                chosen.append(lid)
+                why[lid] = reason
+                return True
+
+            # Not every slot goes to the video. A side quest keeps a share for its
+            # topic's core words and the spine for the commonest words there are:
+            # built from the video alone, Sport taught no «футбол», Family no «брат»
+            # and Medicine no «больница», because those particular episodes happen
+            # not to say them — and a unit on a subject without its first word is
+            # not a unit on that subject.
+            video_room = size - round(size * (SPINE_RESERVE if kind == "spine" else BRANCH_RESERVE))
+            # A reader's keeps first (data/curated/unit_words.json): the frequency
+            # rule cannot tell «праздновать» in an Easter episode from «скидка» in
+            # the same one, and the chapter reviews can.
+            for bare in (UNIT_WORDS.get(tid) or {}).get("keep", []):
+                for lid in by_bare.get(bare, [])[:1]:
+                    take(lid, "curated")
+            if vid:
+                c = counts.get(vid) or {}
+                total = sum(c.values()) or 1
+                got = sum(n for b, n in c.items() if any(l in taught for l in by_bare.get(b, [])))
+                for b, n in sorted(c.items(), key=lambda x: (-x[1], spoken.get(x[0], 10 ** 6))):
+                    if got >= COVER * total or len(chosen) >= video_room:
                         break
-                    if meta[lid]["pos"] != "verb" or lid in taught or lid in why or lid not in dedup_set:
-                        continue
-                    drop = next((l for l in reversed(chosen) if meta[l]["pos"] != "verb"
-                                 and why[l] not in ("video", "curated")), None)
-                    if drop is None:
+                    for lid in by_bare.get(b, [])[:1]:
+                        if take(lid, "video"):
+                            got += n
+            if kind == "spine":
+                for lid in sorted(forced, key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6)):
+                    if len(chosen) >= size:
                         break
-                    chosen.remove(drop)
-                    del why[drop]
-                    chosen.append(lid)
-                    why[lid] = "verb"
-                    verbs.append(lid)
-        else:
-            for lid, _n, _hit in by_topic.get(tid, []):
-                if len(chosen) >= size:
-                    break
-                take(lid, "topic")
-        # Lessons are cut from this order, so the commonest words come first:
-        # «я» and «быть» belong in chapter 1's first lesson whatever the video
-        # happens to repeat most.
-        chosen.sort(key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6))
-        # …and then by group (data/curated/word_groups.json, the owner,
-        # 2026-09-30: "Related words always need to be together throughout
-        # the entire app"). A group is taught whole and in its own order —
-        # the four seasons in one lesson, winter to autumn — and the groups
-        # come in the order of their commonest word, so the first lesson is
-        # still the commonest words there are, just in the company they keep.
-        chosen, group_of = grouped(tid, chosen, meta, spoken, lesson_size(k))
-        taught |= set(chosen)
-        after = followable(vid, {meta[l]["bare"] for l in taught}) if vid else None
-        units.append({"id": tid, "kind": kind, "chapter": k, "video": vid, "words": chosen,
-                      "why": why, "group": group_of, "after": after, "before": before.get(tid)})
+                    take(lid, "common")
+                for lid in sorted(deduped, key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6)):
+                    if len(chosen) >= size:
+                        break
+                    take(lid, "common")
+                # Enough verbs to make a sentence with (SPINE_VERBS): swap the last
+                # top-ups for the video's most-said verbs, then the commonest.
+                verbs = [l for l in chosen if meta[l]["pos"] == "verb"]
+                if len(verbs) < SPINE_VERBS:
+                    pool_v = [by_bare[b][0] for b, _ in sorted((counts.get(vid) or {}).items(), key=lambda x: -x[1])
+                              if b in by_bare] + sorted(deduped, key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6))
+                    for lid in pool_v:
+                        if len(verbs) >= SPINE_VERBS:
+                            break
+                        if meta[lid]["pos"] != "verb" or lid in taught or lid in why or lid not in dedup_set:
+                            continue
+                        drop = next((l for l in reversed(chosen) if meta[l]["pos"] != "verb"
+                                     and why[l] not in ("video", "curated", "everyday")), None)
+                        if drop is None:
+                            break
+                        chosen.remove(drop)
+                        del why[drop]
+                        chosen.append(lid)
+                        why[lid] = "verb"
+                        verbs.append(lid)
+                # This chapter's everyday words its optional quests may not
+                # teach, on top of the unit's own: taken in place of its
+                # top-ups they pushed those words down the spine and the last
+                # spine dropped «завтра», «вчера», «домой» off the end. A refused
+                # keep is no longer its quest's reservation.
+                for lid in spine_extra.get(k, ()):
+                    reserved_now.pop(lid, None)
+                    take(lid, "everyday")
+            else:
+                for lid, _n, _hit in by_topic.get(tid, []):
+                    if len(chosen) >= size:
+                        break
+                    take(lid, "topic")
+            # SHORT_LESSON: no unit ends on a lesson of one or two words.
+            ls = lesson_size(k)
+            if short_tail(len(chosen), ls):
+                if kind == "spine":
+                    for lid in sorted(deduped, key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6)):
+                        if not short_tail(len(chosen), ls):
+                            break
+                        take(lid, "common")
+                else:
+                    # Off the quest's subject before on it, then the rarest:
+                    # «дверь» is Home's whatever the videos make of it.
+                    rarest = sorted((l for l in chosen if why[l] != "curated"),
+                                    key=lambda l: (topic_of.get(l) == tid,
+                                                   -spoken.get(meta[l]["bare"], 10 ** 6)))
+                    for lid in rarest[:short_tail(len(chosen), ls)]:
+                        chosen.remove(lid)
+                        del why[lid]
+            # Lessons are cut from this order, so the commonest words come first:
+            # «я» and «быть» belong in chapter 1's first lesson whatever the video
+            # happens to repeat most.
+            chosen.sort(key=lambda l: spoken.get(meta[l]["bare"], 10 ** 6))
+            # …and then by group (data/curated/word_groups.json, the owner,
+            # 2026-09-30: "Related words always need to be together throughout
+            # the entire app"). A group is taught whole and in its own order —
+            # the four seasons in one lesson, winter to autumn — and the groups
+            # come in the order of their commonest word, so the first lesson is
+            # still the commonest words there are, just in the company they keep.
+            chosen, group_of = grouped(tid, chosen, meta, spoken, lesson_size(k))
+            taught |= set(chosen)
+            after = followable(vid, {meta[l]["bare"] for l in taught}) if vid else None
+            units.append({"id": tid, "kind": kind, "chapter": k, "video": vid, "words": chosen,
+                          "why": why, "group": group_of, "after": after, "before": before.get(tid)})
+        return units, taught, refused, refused_keeps
+
+    # Two walks, not a loop to a fixed point: the first finds what the optional
+    # quests would teach of the everyday words, the second gives those to the
+    # spine. In the second a quest reaches past them for its next candidates
+    # and may refuse more, but those it never taught before — forwarding them
+    # too, pass after pass, grew chapter 5's spine to 75 words.
+    _units, _taught, first, keeps_refused = walk({})
+    spine_extra = {}
+    for lid, k in first.items():
+        spine_extra.setdefault(k, []).append(lid)
+    units, taught, _again, _keeps = walk(spine_extra)
+    refused = list(first)
 
     if args.out.exists():
         args.out.unlink()
@@ -1103,6 +1211,19 @@ def main():
         print(f"    !! {len(missed)} curated keep/drop(s) did not take: " + ", ".join(missed))
     if earlier:
         print(f"    {len(earlier)} curated keep(s) already taught on the way: " + ", ".join(earlier))
+    # EVERYDAY_RANK: what the optional quests were refused, where it went, and
+    # anything refused that no required unit then took — a word moved out of
+    # the course rather than onto its required route.
+    moved = [l for l in refused if l in taught]
+    lost = [meta[l]["bare"] for l in refused if l not in taught]
+    print(f"  everyday words    : {len(refused)} refused by an optional quest (top {EVERYDAY_RANK} said, "
+          f"or Core-5000 top {SPINE_FR}); {len(moved)} taught on the required route instead: "
+          + ", ".join(f"{meta[l]['bare']}→{unit_of[meta[l]['bare']]}" for l in moved))
+    if lost:
+        print(f"    !! {len(lost)} everyday word(s) refused by an optional quest and taught nowhere: " + ", ".join(lost))
+    if keeps_refused:
+        print(f"    !! {len(keeps_refused)} curated keep(s) in an optional quest name an everyday word "
+              "(unit_words.json; the spine teaches it): " + ", ".join(keeps_refused))
     stale = sorted(OPTIONAL - {u["id"] for u in units})
     if stale:
         print(f"    !! OPTIONAL names {len(stale)} unit(s) that do not exist: " + ", ".join(stale))

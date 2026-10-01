@@ -97,7 +97,7 @@
     },
     "home": {
       "title": "The ending tells you the gender",
-      "body": "ко́мната, ку́хня, спа́льня end in -а/-я and are feminine; стол, стул, пол end in a consonant and are masculine; окно́ is neuter.",
+      "body": "ко́мната, ку́хня, спа́льня end in -а/-я and are feminine; стол, стул, шкаф end in a consonant and are masculine; окно́ is neuter.",
       "examples": [["больша́я ко́мната", "a big room"], ["большо́й стол", "a big table"]]
     },
     "clothes": {
@@ -186,7 +186,7 @@
     "business": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Genitive"], "cols": ["Singular"] },
       "title": "How much does it cost?",
-      "body": "ско́лько сто́ит plus the thing; the answer counts in roubles the way hours are counted — оди́н рубль, два рубля́, пять рубле́й.",
+      "body": "сто́ит plus the price; the price counts in roubles the way hours are counted — оди́н рубль, два рубля́, пять рубле́й.",
       "examples": [["Э́то сто́ит два рубля́.", "It costs two roubles."], ["Чай сто́ит два рубля́.", "The tea costs two roubles."]]
     },
     "law": {

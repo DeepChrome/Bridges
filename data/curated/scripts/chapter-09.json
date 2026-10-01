@@ -2,7 +2,7 @@
  "chapter": 9,
  "name": "Style & Fashion",
  "lessons": {
-  "core9:5": {
+  "core9:4": {
    "title": "Red trousers for Misha's party",
    "cast": [
     {
@@ -29,10 +29,6 @@
     {
      "ru": "брюки",
      "en": "trousers"
-    },
-    {
-     "ru": "отвечать",
-     "en": "answer"
     }
    ],
    "lines": [
@@ -155,7 +151,7 @@
     }
    ]
   },
-  "core9:4": {
+  "core9:5": {
    "title": "A clean kit for the game",
    "cast": [
     {
@@ -176,16 +172,8 @@
    ],
    "intro": [
     {
-     "ru": "игра",
-     "en": "game"
-    },
-    {
      "ru": "лужа",
      "en": "puddle"
-    },
-    {
-     "ru": "грязный",
-     "en": "dirty"
     },
     {
      "ru": "брюки",

@@ -76,16 +76,111 @@ def clean_partner(p):
     return "; ".join(parts) or None
 
 
+STRAY = {"before": 0, "dropped": 0}   # apostrophes not after a vowel, by how they were read
+
+
 def deapostrophe(s: str) -> str:
     """OpenRussian marks stress with an apostrophe after the stressed vowel
-    (челове'к). Convert to a real combining acute so it renders as челове́к."""
+    (челове'к). Convert to a real combining acute so it renders as челове́к.
+
+    A few rows put it *before* the vowel instead — «такс'ист», «мут'ант»,
+    «мастер'ок», «абстр'актны» — and the apostrophe used to survive into the
+    paradigm, the headword and the lookup key, so «таксиста» matched nothing
+    and the entry printed a quote mark. An apostrophe after a consonant and
+    before a vowel marks that vowel; one with no vowel after it («лоскутах'»)
+    says nothing certain and is dropped (the data review, 2026-10-01)."""
     out = []
-    for ch in s:
+    for n, ch in enumerate(s):
         if ch == "'" and out and out[-1] in VOWELS:
             out.append(ACUTE)
+        elif ch == "'":
+            nxt = s[n + 1] if n + 1 < len(s) else ""
+            if nxt in VOWELS:
+                STRAY["before"] += 1
+                out.append("\0")          # the acute goes after the vowel that follows
+            else:
+                STRAY["dropped"] += 1
         else:
             out.append(ch)
+            if len(out) > 1 and out[-2] == "\0":
+                out[-2:] = [ch, ACUTE]
+    return unicodedata.normalize("NFC", "".join(c for c in out if c != "\0"))
+
+
+MULTI = {"forms": 0, "kept": 0, "lemmas": set()}   # forms with two stresses in one word, and how settled
+
+
+def _stressed_vowels(s):
+    """Indices (counted in vowels from the start) of the vowels carrying an acute."""
+    # NFC, not NFD: NFD splits й into и + a breve and ё into е + a diaeresis,
+    # and й would count as a vowel. A Cyrillic vowel has no precomposed acute
+    # form, so in NFC the acute is always its own character after the vowel.
+    out, v = [], -1
+    for ch in unicodedata.normalize("NFC", s):
+        if ch in VOWELS:
+            v += 1
+        elif ch == ACUTE:
+            out.append(v)
+    return out
+
+
+def _keep_stress(s, keep):
+    """`s` with only the acute on vowel `keep` (None: no acute at all)."""
+    d, out, v = unicodedata.normalize("NFC", s), [], -1
+    for ch in d:
+        if ch == ACUTE:
+            if v == keep:
+                out.append(ch)
+            continue
+        if ch in VOWELS:
+            v += 1
+        out.append(ch)
     return unicodedata.normalize("NFC", "".join(out))
+
+
+def settle_stress(forms, headword=None):
+    """Forms that carry two stress marks in one word, settled.
+
+    OpenRussian marks a few dozen words twice — «фро́нта́», «мо́дны́», «су́кку́ба»
+    — sometimes for two accepted stresses, more often by mistake, and nothing
+    downstream can tell which: the entry showed both, and a bought recording
+    was keyed by the double-marked spelling. Where the word's own other forms
+    all put the stress on one vowel and that vowel is one of the two marked,
+    that one is kept (фронт: every singly-marked form is stressed on the first
+    vowel). Otherwise both go: a form with no mark says "stress unknown",
+    which is true, where a guess would teach a wrong stress. A hyphenated
+    compound has a stress in each part and is judged part by part.
+
+    `forms` is a list of accented strings; returns the list settled. A cell
+    can hold several words («са́мый гла́вный», «бо́льше;бо́льший»), each with
+    its own stress, so the rule is applied word by word."""
+    single = set()
+    for f in list(forms) + ([headword] if headword else []):
+        words = WORD_SPLIT.split(f)
+        if len(words) != 1:
+            continue
+        sv = _stressed_vowels(f)
+        if len(sv) == 1:
+            single.add(sv[0])
+    out = []
+    for f in forms:
+        parts = WORD_SPLIT.split(f)
+        lone = len(parts) == 1
+        fixed = []
+        for n, p in enumerate(parts):
+            sv = _stressed_vowels(p) if n % 2 == 0 else []
+            if len(sv) > 1:
+                MULTI["forms"] += 1
+                keep = next(iter(single)) if lone and len(single) == 1 and next(iter(single)) in sv else None
+                MULTI["kept"] += keep is not None
+                p = _keep_stress(p, keep)
+            fixed.append(p)
+        out.append("".join(fixed))
+    return out
+
+
+# Between words in one cell: a space, a hyphen, or the source's ";" and ",".
+WORD_SPLIT = re.compile(r"([\s;,/\-]+)")
 
 
 def fold(s: str) -> str:
@@ -251,6 +346,11 @@ class Builder:
                 # data/curated/stress.json fills the ones the curriculum teaches.
                 if ACUTE not in unicodedata.normalize("NFD", accented) and "ё" not in accented:
                     accented = STRESS.get(fold(bare), accented)
+                cells = [(col, deapostrophe(v)) for col, cell in row.items()
+                         if not (col in meta_cols or col is None or not keep_paradigm)
+                         for v in variants(cell)]
+                cols = [col for col, _ in cells]
+                accented, *settled = settle_stress([accented] + [acc for _, acc in cells])
                 # Gender from the source, or from the ending where Russian
                 # makes it unambiguous (ROADMAP 13.28).
                 gender = self.gender_of(bare, row) if pos == "noun" else (row.get("gender") or None)
@@ -276,20 +376,20 @@ class Builder:
                     rows_f.append((key_, lid, slot))
                     seen.add((key_, slot))
 
-                for col, cell in row.items():
-                    if col in meta_cols or col is None or not keep_paradigm:
+                cells = [(col, deapostrophe(v)) for col, cell in row.items()
+                     if not (col in meta_cols or col is None or not keep_paradigm)
+                     for v in variants(cell)]
+                settled = settle_stress([acc for _, acc in cells], accented)
+                for (col, _raw), acc in zip(cells, settled):
+                    bare_v = unicodedata.normalize(
+                        "NFC", unicodedata.normalize("NFD", acc).replace(ACUTE, ""))
+                    k = fold(acc)   # fold the de-apostrophised form, not the raw cell
+                    if not k:
                         continue
-                    for v in variants(cell):
-                        acc = deapostrophe(v)
-                        bare_v = unicodedata.normalize(
-                            "NFC", unicodedata.normalize("NFD", acc).replace(ACUTE, ""))
-                        k = fold(acc)   # fold the de-apostrophised form, not the raw cell
-                        if not k:
-                            continue
-                        rows_p.append((lid, col, acc, bare_v, k))
-                        if (k, col) not in seen:
-                            rows_f.append((k, lid, col))
-                            seen.add((k, col))
+                    rows_p.append((lid, col, acc, bare_v, k))
+                    if (k, col) not in seen:
+                        rows_f.append((k, lid, col))
+                        seen.add((k, col))
                 if rows_p:
                     self.db.executemany(
                         "insert into paradigm (lemma_id, slot, accented, bare, key)"
@@ -383,6 +483,21 @@ def main():
     b.load("adjectives.csv", "adjective", ADJ_META)
     b.load("others.csv", "other", ADJ_META)
     b.load_curated(ROOT / "data" / "curated" / "function_words.json")
+    print(f"  stress      {STRAY['before']:>7,} apostrophes before their vowel read as its stress, "
+          f"{STRAY['dropped']:,} with no vowel after them dropped")
+    print(f"  stress      {MULTI['forms']:>7,} words marked twice: {MULTI['kept']:,} settled by the "
+          f"word's other forms, {MULTI['forms'] - MULTI['kept']:,} left unmarked (stress unknown)")
+    # Nothing may leave here with a quote mark in it or two stresses in a word:
+    # the lookup key is built from these, and a stray mark is a key nothing matches.
+    bad = db.execute("select count(*) from paradigm where accented like '%''%' or key like '%''%'").fetchone()[0]
+    bad += db.execute("select count(*) from lemmas where accented like '%''%' or bare like '%''%'").fetchone()[0]
+    twice = sum(1 for (a,) in db.execute("select accented from paradigm union all select accented from lemmas")
+                if a and any(len(_stressed_vowels(p)) > 1 for p in WORD_SPLIT.split(a)))
+    if bad or twice:
+        db.close()
+        args.out.unlink(missing_ok=True)
+        print(f"\n  !! {bad} form(s) still carry an apostrophe and {twice} two stresses in one word")
+        return 1
 
     # A curated decision that no longer matches anything is not harmless: it reads
     # as a fix that is still in force while the word has quietly gone back to its

@@ -14,6 +14,7 @@ import re
 import shutil
 import sqlite3
 import sys
+import unicodedata
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
@@ -54,6 +55,100 @@ def _stress_index(s):
             return i
         i += 1
     return -1
+
+
+VOWELS = set("аеёиоуыэюяАЕЁИОУЫЭЮЯ")
+WORD_RE = re.compile(r"[а-яёА-ЯЁ́̀]+")
+
+
+def _stressed(word):
+    """Vowel indices (from the start) carrying an acute, read in NFC — a
+    Cyrillic vowel has no precomposed acute, so the mark is its own character
+    after it, and NFC keeps й and ё whole where NFD would split them."""
+    out, v = [], -1
+    for ch in word:
+        if ch in VOWELS:
+            v += 1
+            if ch in "ёЁ":
+                out.append(v)
+        elif ch == "́":
+            out.append(v)
+    return out
+
+
+def stress_table(db):
+    """fold(form) -> every vowel index the lexicon stresses in that spelling,
+    from each paradigm form and headword that carries exactly one stress."""
+    table = {}
+    for (acc,) in db.execute("select accented from paradigm union select accented from lemmas"):
+        for w in WORD_RE.findall(unicodedata.normalize("NFC", acc or "")):
+            sv = sorted(set(_stressed(w)))
+            if len(sv) == 1:
+                table.setdefault(fold(w), set()).add(sv[0])
+    return table
+
+
+def tidy_quotes(ru):
+    """No space just inside a pair of straight quotes: «Давай на "ты ".» in
+    the Languages on Fire deck. Quotes are paired left to right."""
+    if ru.count('"') < 2 or ru.count('"') % 2:
+        return ru
+    parts = ru.split('"')
+    for n in range(1, len(parts), 2):          # the quoted spans
+        parts[n] = parts[n].strip()
+    return '"'.join(parts)
+
+
+def fix_stress(ru, table, tally):
+    """A shown sentence's stress marks, kept only where they can be right.
+
+    (a) An acute on a consonant is a typing slip in the source — and NFC
+    composes г + ◌́ into one letter, «ѓ», which no token pattern matches, so
+    the word fell out of its sentence's tokens altogether. It is removed.
+    (b) A mark on a vowel the lexicon never stresses in that spelling —
+    «со́товой», «две́рей», «контро́ля» — teaches a wrong stress to the one
+    person who cannot tell. The word's marks are removed rather than moved:
+    where the right stress is a guess, no mark says "unknown", which is true
+    (§26). A spelling the lexicon does not know, or knows with no stress,
+    keeps its mark — and so does a spelling it stresses two ways: «мо́ю» is
+    "I wash" and «мою́» "my", and only the sentence can say which was meant.
+    (c) A mark typed twice on one vowel («него́́») is one mark.
+    Returns the sentence; counts what it did in `tally`."""
+    if "́" not in ru and "ѓ" not in ru and "ќ" not in ru:
+        return ru
+    d = unicodedata.normalize("NFD", ru)
+    out = []
+    for ch in d:
+        if ch == "́":
+            if out and out[-1] == "́":
+                tally["doubled"] += 1           # «него́́»: one mark typed twice
+                continue
+            base = next((c for c in reversed(out) if not unicodedata.combining(c)), "")
+            if not base or base.lower() not in "аеиоуыэюяё":
+                tally["consonant"] += 1
+                continue
+        out.append(ch)
+    s = unicodedata.normalize("NFC", "".join(out))
+
+    def word(m):
+        w = m.group(0)
+        if "́" not in w:
+            return w
+        fixed = []
+        for p in w.split("-"):
+            # Only the acutes: an ё in the word is the source's spelling, not a mark.
+            acute = set(_stressed(p.replace("ё", "е").replace("Ё", "Е")))
+            known = table.get(fold(p))
+            if acute and known and not (acute & known):
+                tally["contradicted"] += 1
+                p = p.replace("́", "")
+            fixed.append(p)
+        return "-".join(fixed)
+
+    s = re.sub(r"[а-яёА-ЯЁ́̀]+(?:-[а-яёА-ЯЁ́̀]+)*", word, s)
+    if s != ru:
+        tally["sentences"] += 1
+    return s
 
 
 # Examples shown per word, on the entry and the cards.
@@ -401,8 +496,35 @@ COVERAGE_FREE_RANK = 500
 NATIVE_PARTS = ["deep", "sent", "videos", "senses"]
 
 
+def unit_info_of(units, path):
+    """{unit index: (chapter, spine?, optional?)} read off the path, where a
+    spine row opens each chapter."""
+    info, chapter = {}, -1
+    for row in path:
+        u = units[row["u"]]
+        if u["kind"] == "spine":
+            chapter += 1
+        info[row["u"]] = (max(chapter, 0), u["kind"] == "spine", bool(u.get("opt")))
+    return info
+
+
+def guaranteed_matrix(info, order):
+    """g[t][u]: a learner standing at unit u has certainly been taught unit t.
+    The spine of this chapter and every earlier one, the required side quests
+    of earlier chapters, and u itself — never an optional quest but u, and
+    never a sibling quest, which may be done in any order (§30e, §30ap)."""
+    g = {}
+    for t in order:
+        ct, st, ot = info.get(t, (0, True, False))
+        g[t] = {}
+        for u in order:
+            cu = info.get(u, (0, True, False))[0]
+            g[t][u] = (t == u or (st and ct <= cu) or (not st and not ot and ct < cu))
+    return g
+
+
 def measure_sentences(sentences, sent_tokens, index, key_units, lemmas, unit_pos,
-                      audio, src_of, stats):
+                      audio, src_of, stats, unit_info=None):
     """How hard each corpus sentence is, and where in the curriculum it belongs.
 
     difficulty = 1 - studied/tokens, where a token is studied if its folded form
@@ -419,7 +541,16 @@ def measure_sentences(sentences, sent_tokens, index, key_units, lemmas, unit_pos
     Returns one record per English-paired sentence with tokens:
       (ru, en, n_tokens, difficulty, unit_index_or_None, audio_file_or_None, src)
     The pools the speaking and listening activities draw from are cut from this.
+
+    "Latest unit teaching one of its words" was not enough once side quests
+    became a mix of required and optional (§30ap): a sentence whose latest
+    word came from an optional quest, or from a sibling quest the learner may
+    not have done yet, landed in a pool asked of learners who were never
+    taught it. So a sentence's unit is the earliest unit on the route at which
+    every one of its words is *guaranteed* (`guaranteed`, from `unit_info`).
     """
+    order = sorted(unit_pos, key=unit_pos.get)
+    guaranteed = guaranteed_matrix(unit_info or {}, order)
     out = []
     for iid, (ru, en, _deck, _has) in sentences.items():
         toks = sent_tokens.get(iid)
@@ -427,19 +558,21 @@ def measure_sentences(sentences, sent_tokens, index, key_units, lemmas, unit_pos
             continue
         n = len(toks)
         studied = sum(1 for k in toks if k in index)
-        unit, covered = None, True
+        unit, covered, need = None, True, []
         for k in toks:
             taught = key_units.get(k)
             if taught:
-                latest = max(taught, key=lambda u: unit_pos.get(u, -1))
-                if unit is None or unit_pos.get(latest, -1) > unit_pos.get(unit, -1):
-                    unit = latest
+                need.append(taught)
                 continue
             hit = index.get(k)
             fr = lemmas[hit[0]].get("fr") if hit else None
             if not (fr and fr <= COVERAGE_FREE_RANK):
                 covered = False
                 break
+        if covered and need:
+            unit = next((u for u in order
+                         if all(any(guaranteed[t][u] for t in ts) for ts in need)), None)
+            covered = unit is not None
         fname = audio.get(fold(ru))
         out.append((ru, en, n, 1 - studied / n, unit if covered else None,
                     fname, src_of.get(fname, "") if fname else ""))
@@ -634,32 +767,71 @@ def check_closed_class(units, lemmas, with_paradigm):
     return bad
 
 
-def check_grammar_cards(units, path, lemmas, index, keys_of, pos_of):
-    """Every token in a unit's grammar card examples resolves to a word taught
-    by that unit or one earlier on the route, or is within COVERAGE_FREE_RANK.
-    Prints what is not; returns the count."""
+def check_grammar_cards(units, path, lemmas, index, unit_info):
+    """Every Russian word in a unit's grammar card — the examples *and* the
+    body, which is read first — is a word a learner at that unit was certainly
+    taught (guaranteed_matrix: never an optional or sibling quest), or is
+    within COVERAGE_FREE_RANK. A word the curriculum never teaches at all
+    counts too: «пол» in Home's body and «по-русски» in Speech's were never
+    taught anywhere, and only the examples were read. Prints what is not;
+    returns the count."""
     order = [row["u"] for row in path]
-    taught = set()
+    g = guaranteed_matrix(unit_info, order)
+    owner = {}
+    for n, u in enumerate(units):
+        for i in u["w"]:
+            owner.setdefault(i, set()).add(n)
     bad = 0
     for ui in order:
         u = units[ui]
-        taught.update(u["w"])
         card = u.get("g")
         if not card:
             continue
-        for ru, _en in card.get("examples", []):
-            for m in re.finditer(r"[а-яёА-ЯЁ́]+", ru):
-                key = fold(m.group(0))
+        texts = [card.get("body") or ""] + [ru for ru, _en in card.get("examples", [])]
+        for ru in texts:
+            # A -ending or a lone letter in the body names a spelling, not a word.
+            for m in re.finditer(r"(?<![-а-яёА-ЯЁ́])[а-яёА-ЯЁ́]+(?:-[а-яёА-ЯЁ́]+)*", ru):
+                word = m.group(0)
+                key = fold(word)
                 hit = index.get(key)
-                if not hit:
-                    continue                      # not a curriculum word at all
-                if any(i in taught for i in hit):
+                if not hit and word[:1].isupper():
+                    continue                      # a name («Те́дди»), not a word to teach
+                if hit and any(g[t][ui] for i in hit for t in owner.get(i, ())):
                     continue
-                fr = lemmas[hit[0]].get("fr")
+                fr = lemmas[hit[0]].get("fr") if hit else None
                 if fr and fr <= COVERAGE_FREE_RANK:
                     continue
-                print(f"  !! card {u['id']}: «{m.group(0)}» ({lemmas[hit[0]]['b']}) is taught later or never")
+                where = "/".join(sorted({units[t]["id"] for i in (hit or ()) for t in owner.get(i, ())}))
+                print(f"  !! card {u['id']}: «{word}» is " + (f"taught only in {where}" if where else "never taught"))
                 bad += 1
+    return bad
+
+
+def check_pools_guaranteed(speech, units, key_units, unit_info, unit_pos):
+    """The shipped pools read back: every word of a sentence in a unit's pool is
+    one a learner at that unit was certainly taught (guaranteed_matrix), or is
+    within COVERAGE_FREE_RANK. Prints each breach; returns the count. Re-derived
+    from the rows rather than trusted from measure_sentences, so a second path
+    into the pools (add_video_lines) is held to the same rule."""
+    g = guaranteed_matrix(unit_info, sorted(unit_pos, key=unit_pos.get))
+    uidx = {u["id"]: n for n, u in enumerate(units)}
+    bad, shown = 0, 0
+    for pool in ("speak", "listen"):
+        for uid, rows in speech[pool].items():
+            u = uidx[uid]
+            for r in rows:
+                ru = speech["rows"][r][0]
+                for k in re.findall(r"[а-яё]+(?:-[а-яё]+)*", fold(ru)):
+                    ts = key_units.get(k)
+                    if ts is None:
+                        continue
+                    if not any(g[t][u] for t in ts):
+                        bad += 1
+                        if shown < 8:
+                            shown += 1
+                            print(f"  !! {pool} {uid}: «{ru}» uses «{k}», taught only in "
+                                  + "/".join(units[t]["id"] for t in ts))
+                        break
     return bad
 
 
@@ -809,12 +981,20 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         if lid in keep:
             keys_of.setdefault(lid, set()).add(k)
 
-    sentences = {}
+    # Every sentence a learner is shown passes fix_stress on the way in: the
+    # pools, the dictionary's examples (his decks and Tatoeba alike).
+    # A recording is found by fold(text), so a sentence whose text is tidied
+    # keeps its recording under the new key too (`retexted`, applied below).
+    stresses, stress_tally = stress_table(db), Counter()
+    sentences, retexted = {}, {}
     for iid, ru, en_s, deck, audio in db.execute(
             "select i.id, i.ru, i.en, d.name, i.audio from c.items i"
             " left join c.decks d on d.id=i.deck_id"
             " where i.kind='sentence' and i.en is not null"):
-        sentences[iid] = (ru, en_s, (deck or "?").split("::")[0], audio is not None)
+        shown = fix_stress(tidy_quotes(ru), stresses, stress_tally)
+        if fold(shown) != fold(ru):
+            retexted[fold(shown)] = fold(ru)
+        sentences[iid] = (shown, en_s, (deck or "?").split("::")[0], audio is not None)
 
     items_of_key = {}
     for k, iid in db.execute("select key, item_id from c.item_tokens"):
@@ -834,7 +1014,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             # eaten me up"); the rule rank_examples applies to his own decks.
             if ARCHAIC_EN.search(en_s or ""):
                 continue
-            ext_sentences[xid] = (ru, en_s, src)
+            ext_sentences[xid] = (fix_stress(ru, stresses, stress_tally), en_s, src)
         for k, xid in ex.execute("select key, item_id from item_tokens"):
             ext_items_of_key.setdefault(k, []).append(xid)
         row = ex.execute("select v from meta where k='licence'").fetchone()
@@ -843,6 +1023,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             "select v from meta where k='source'").fetchone() or [""])[0]
         ex.close()
     stats["ext_sentences"] = len(ext_sentences)
+    stats["stress_fixed"] = dict(stress_tally)
 
     # Attribution is a licence condition on both corpora, not decoration. It is built
     # from what the databases themselves record, so a source cannot be credited by a
@@ -922,17 +1103,35 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     # A shared key lists the lemma the form belongs to first: every consumer
     # takes index[key][0] — word links, grading, cloze labels, search — and by
     # frequency alone «нет» opened «житься» and «лет» credited «лёт».
-    reordered = 0
+    #
+    # …but the resolver reads frequency in the decks, with no context, and a
+    # learner meets a shared form inside the course: «семью» in a lesson that
+    # teaches «семья» opened "seven times", «устал» opened the adjective
+    # «усталый» while the course teaches «устать», «черепах» the skull. So where
+    # the course teaches one of a form's candidates and the resolver's pick is
+    # not taught, the taught one goes first — the word the learner was given is
+    # the word the tap opens, with the form named (the data review,
+    # 2026-10-01). A key a person settled in lemma_overrides.json is left as
+    # they settled it: that is where «бегу» stays «бежать» against the taught
+    # noun «бег».
+    taught_idx = {pos_of[l] for l in unit_of if l in pos_of}
+    reordered = taught_first = 0
     for k, ids in index.items():
         if len(ids) < 2:
             continue
         lid = resolver.owner_id(k)
         i = pos_of.get(lid)
+        if (i is None or i not in taught_idx) and k not in resolver.overrides:
+            t = next((j for j in ids if j in taught_idx), None)
+            if t is not None:
+                i = t
+                taught_first += ids[0] != t
         if i is not None and ids[0] != i:
             ids.remove(i)
             ids.insert(0, i)
             reordered += 1
     stats["index_reordered"] = reordered
+    stats["index_taught_first"] = taught_first
 
     # --- units and path ----------------------------------------------------
     grammar = {}
@@ -956,6 +1155,53 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     tpath = ROOT / "data" / "transcripts.json"
     if tpath.exists():
         heard = json.loads(tpath.read_text(encoding="utf-8")).get("index", {})
+
+    # Which of a video's moments are a studied row's word. The transcript index
+    # (build_transcripts.py) is keyed by the resolved lemma's bare form only,
+    # and joining it to the studied rows by that string listed «голубое» under
+    # «голубой» "gay", «пеки» under «печь» "oven" and «английские» under the
+    # noun "English language" — the curriculum carries the noun row, the video
+    # said the adjective or the verb. A moment belongs to a row when its form
+    # is one of the row's own forms and the resolver gives the form to that
+    # row, or to a twin of it (the same headword with the same forms: OpenRussian
+    # lists «мой» as possessive and again as adjective).
+    lid_at = {i: lid for lid, i in pos_of.items()}
+    twins_memo = {}
+
+    def twins(lid, bare):
+        if lid not in twins_memo:
+            mine = keys_of.get(lid, set())
+            # A twin that is itself a studied row is a word of its own to the
+            # app («есть» "there is" and «есть» "to eat" share every form).
+            twins_memo[lid] = {o for (o,) in db.execute("select id from lemmas where bare=?", (bare,))
+                               if o == lid or (o not in pos_of and keys_of.get(o, set()) == mine)}
+        return twins_memo[lid]
+
+    def said_as(i, occ):
+        # The lists are keyed by the bare string and the app opens the first
+        # studied row of that spelling, so only that row can be listed: a
+        # moment of «есть» "to eat" would open «есть» "there is".
+        if rows_of_bare[lemmas[i]["b"]][0] != i:
+            return []
+        lid = lid_at[i]
+        mine, own = keys_of.get(lid, set()), twins(lid, lemmas[i]["b"])
+        out = []
+        for o in occ or ():
+            k = fold(o.get("w") or "")
+            if k in mine and resolver.owner_id(k) in own:
+                out.append(o)
+        return out
+
+    rows_of_bare = {}
+    for i, e in enumerate(lemmas):
+        rows_of_bare.setdefault(e["b"], []).append(i)
+
+    def row_said(bare, occ):
+        """(row, its moments) for a spoken bare form, or None when no studied
+        row is the word the video said."""
+        rows = rows_of_bare.get(bare)
+        m = said_as(rows[0], occ) if rows else []
+        return (rows[0], m) if m else None
 
     units = []
     uidx = {}
@@ -999,10 +1245,12 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
                 # the learner replays one occurrence, not every one. A unit word
                 # the video never says is not listed: what is under a video must
                 # be in the video (the owner's rule, 2026-09-07).
-                u["v"]["heard"] = {
-                    lemmas[i]["b"]: spoken[lemmas[i]["b"]][:4]
-                    for i in words if lemmas[i]["b"] in spoken
-                }
+                heard_here = {}
+                for i in words:
+                    m = said_as(i, spoken.get(lemmas[i]["b"]))
+                    if m:
+                        heard_here[lemmas[i]["b"]] = m[:4]
+                u["v"]["heard"] = heard_here
         units.append(u)
 
     # --- the video library ---------------------------------------------------
@@ -1014,9 +1262,15 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     video_list = []
     unit_words_of = {u["id"]: u["w"] for u in units}
     unit_of_video = {v["id"]: tid for tid, v in videos.items()}
-    idx_of_bare = {}
-    for i, e in enumerate(lemmas):
-        idx_of_bare.setdefault(e["b"], i)
+
+    def rows_in(spoken):
+        """{row: its moments} for every studied row a video says (row_said)."""
+        out = {}
+        for b, occ in spoken.items():
+            hit = row_said(b, occ)
+            if hit:
+                out[hit[0]] = hit[1]
+        return out
 
     # --- before the video (2026-09-29) --------------------------------------
     # Each unit works towards its video (build_videos.py, the skeleton), and
@@ -1037,25 +1291,28 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         v = u.get("v")
         spoken = heard.get(v["id"], {}) if v else {}
         if spoken:
-            count = {b: len(o) for b, o in spoken.items()}
+            said = rows_in(spoken)
+            for i in u["w"]:          # the unit's own row, where it shares a headword
+                m = said_as(i, spoken.get(lemmas[i]["b"]))
+                if m:
+                    said[i] = m
             # Content words before function words, then most-said: «хотеть»
             # is something to listen for, «и» is not, though both are taught.
-            own = sorted((i for i in u["w"] if lemmas[i]["b"] in spoken),
-                         key=lambda i: (lemmas[i]["p"] not in PREP_POS, -count[lemmas[i]["b"]]))
+            own = sorted((i for i in u["w"] if i in said),
+                         key=lambda i: (lemmas[i]["p"] not in PREP_POS, -len(said[i])))
             own_all = set(own)       # the unit's own words beyond the first few are not "new"
             own = own[:PREP_OWN]
             new, review = [], []
-            for b, _n in sorted(count.items(), key=lambda x: (-x[1], x[0])):
-                i = idx_of_bare.get(b)
-                if i is None or i < VIDEO_SKIP_TOP or i in own_all:
+            for i in sorted(said, key=lambda i: (-len(said[i]), lemmas[i]["b"])):
+                if i < VIDEO_SKIP_TOP or i in own_all:
                     continue
                 if lemmas[i]["p"] not in PREP_POS:
                     continue
                 (review if i in taught_before else new).append(i)
             prep = (own + new[:PREP_NEW] + review)[:PREP_WORDS]
             # `heard` is the list, in order: the words and where each is said.
-            v["heard"] = {lemmas[i]["b"]: spoken[lemmas[i]["b"]][:4] for i in prep}
-            prep_of_video[v["id"]] = [lemmas[i]["b"] for i in prep]
+            v["heard"] = {lemmas[i]["b"]: said[i][:4] for i in prep}
+            prep_of_video[v["id"]] = (prep, said)
         taught_before |= set(u["w"])
     stats["prep_words"] = [len((units[ui].get("v") or {}).get("heard") or {}) for ui in route]
     # A fingerprint of which words each unit teaches, in order. Lesson progress
@@ -1068,26 +1325,35 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         spoken = heard.get(v["id"])
         if not spoken:
             continue
-        chosen = []
         tid = unit_of_video.get(v["id"])
-        if tid:
+        prepped = tid and prep_of_video.get(v["id"], ([], {}))[0]
+        if prepped:
             # A unit's goal video lists exactly its prep list, as the lesson does.
-            chosen = list(prep_of_video.get(v["id"]) or
-                          [lemmas[i]["b"] for i in unit_words_of.get(tid, []) if lemmas[i]["b"] in spoken])
+            chosen, said = prep_of_video[v["id"]]
+        else:
+            said = rows_in(spoken)
+            chosen = []
+            if tid:
+                for i in unit_words_of.get(tid, []):
+                    m = said_as(i, spoken.get(lemmas[i]["b"]))
+                    if m:
+                        said[i] = m
+                chosen = [i for i in unit_words_of.get(tid, []) if i in said]
+        moments = {lemmas[i]["b"]: said[i] for i in chosen}
         pool = []
-        for bare, occ in spoken.items():
-            i = idx_of_bare.get(bare)
-            if i is None or i < VIDEO_SKIP_TOP or bare in chosen:
+        for i, occ in said.items():
+            if i < VIDEO_SKIP_TOP or lemmas[i]["b"] in moments:
                 continue
             if lemmas[i]["p"] not in ("noun", "verb", "adjective"):
                 continue
-            pool.append((-len(occ), i, bare))
+            pool.append((-len(occ), i))
         pool.sort()
-        if not tid or not prep_of_video.get(v["id"]):
-            chosen += [bare for _, _, bare in pool[:max(0, VIDEO_WORDS - len(chosen))]]
+        if not prepped:
+            for _, i in pool[:max(0, VIDEO_WORDS - len(moments))]:
+                moments[lemmas[i]["b"]] = said[i]
         entry = {"id": v["id"], "title": v["title"], "ch": v.get("ch"), "dur": v.get("dur"),
                  "kw": v.get("kw", ""), "topics": v.get("topics", []),
-                 "words": {b: spoken[b][:VIDEO_MOMENTS] for b in chosen}}
+                 "words": {b: occ[:VIDEO_MOMENTS] for b, occ in moments.items()}}
         if tid:
             entry["unit"] = tid
         if v.get("level"):
@@ -1102,6 +1368,14 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             entry["chapters"] = v["chapters"]
         video_list.append(entry)
     stats["videos"] = len(video_list)
+    # Read back: every moment listed under a word is a form of the row the app
+    # opens for that word (the first studied row of the spelling).
+    bad_moments = 0
+    for words in [e["words"] for e in video_list] + [(u.get("v") or {}).get("heard") or {} for u in units]:
+        for b, occ in words.items():
+            mine = keys_of.get(lid_at[rows_of_bare[b][0]], set()) if b in rows_of_bare else set()
+            bad_moments += sum(1 for o in occ if fold(o.get("w") or "") not in mine)
+    stats["video_moments_off"] = bad_moments
 
     # The creators behind the library, with where to support them (the owner,
     # 2026-09-23). The harvest's own channel rows carry the YouTube url; the
@@ -1142,7 +1416,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     # A grammar card may only use words taught by then (or the commonest few
     # hundred): chapter 2's card conjugated «читать», a chapter-8 word. Reported,
     # not fatal — the cards are hand-written and the fix is a word in the card.
-    stats["card_words_untaught"] = check_grammar_cards(units, path, lemmas, index, keys_of, pos_of)
+    unit_info = unit_info_of(units, path)
+    stats["card_words_untaught"] = check_grammar_cards(units, path, lemmas, index, unit_info)
     with_paradigm = {pos_of[l] for (l,) in db.execute(
         "select distinct lemma_id from paradigm") if l in pos_of}
     stats["closed_class_taught"] = check_closed_class(units, lemmas, with_paradigm)
@@ -1241,6 +1516,9 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         if adir.exists():
             present = {p.name for p in adir.iterdir() if p.is_file()}
             audio = {k: v for k, v in raw.items() if v in present}
+        for new, old in retexted.items():
+            if old in audio:
+                audio.setdefault(new, audio[old])
         stats["audio_files"] = len(set(audio.values()))
         stats["audio_utterances"] = len(audio)
 
@@ -1249,10 +1527,11 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     if apath.exists():
         src_of = json.loads(apath.read_text(encoding="utf-8")).get("src", {})
     measured = measure_sentences(sentences, sent_tokens, index, key_units, lemmas,
-                                 unit_pos, audio, src_of, stats)
+                                 unit_pos, audio, src_of, stats, unit_info)
     speech = build_pools(measured, units, stats)
     add_video_lines(speech, units, lambda s, t: measure_sentences(
-        s, t, index, key_units, lemmas, unit_pos, {}, {}, {}), stats)
+        s, t, index, key_units, lemmas, unit_pos, {}, {}, {}, unit_info), stats)
+    stats["pool_unguaranteed"] = check_pools_guaranteed(speech, units, key_units, unit_info, unit_pos)
 
     # The written conversations (data/curated/scripts/, §30l), keyed by lesson.
     scripts = load_scripts(stats)
@@ -1296,6 +1575,35 @@ def gloss_words(s):
     front of Wiktionary's "onto, on"."""
     words = set(re.findall(r"[a-z']+", (s or "").lower()))
     return (words - GLOSS_STOP) or words
+
+
+# A sense that is only a label («[with prepositional]») or only an editor's
+# note in brackets («(With prepositions and pronouns не actually is a prefix…)»).
+LABEL_ONLY = re.compile(r"^\s*(\[[^\]]*\]|\([^)]*\))\s*\.?\s*$")
+
+
+def tidy_senses(senses):
+    """Wiktionary's senses as a reader should see them: a line that is only a
+    grammatical label or an editor's bracketed note is not a meaning — «в»
+    listed "[with prepositional]" and "[with nominative]" as senses 2 and 8,
+    «не» a sentence about spelling as sense 5 — and a meaning listed twice
+    («где» "where", sense 1 and 3, one per construction) is one sense with
+    both sets of examples (the data review, 2026-10-01)."""
+    out, at = [], {}
+    for s in senses:
+        g = (s.get("g") or "").strip()
+        if not g or LABEL_ONLY.match(g):
+            continue
+        k = re.sub(r"\W+", " ", g.lower()).strip()
+        if k in at:
+            first = out[at[k]]
+            extra = [x for x in s.get("x") or () if x not in (first.get("x") or [])]
+            if extra:
+                first = out[at[k]] = dict(first, x=(first.get("x") or []) + extra)
+            continue
+        at[k] = len(out)
+        out.append(s)
+    return out
 
 
 def pick_senses(gloss, pos, by_pos):
@@ -1355,6 +1663,7 @@ def pick_senses(gloss, pos, by_pos):
             chosen.extend(senses)
         chosen = chosen[:MAX_SENSES]
 
+    chosen = tidy_senses(chosen)
     late = [s for s in chosen if LATE_TAGS & set(s.get("t") or ())]
     chosen = [s for s in chosen if s not in late] + late
     # **Sense 1 must be the meaning the lesson teaches** — the owner,
@@ -1698,6 +2007,11 @@ def main():
         print(f"  {st['ext_source'].lower():13.13}: {st['ext_sentences']:,} sentences, "
               f"the only example for {st['deep_ext_only']:,} words "
               f"({st['ext_licence']})")
+    sf = st.get("stress_fixed") or {}
+    print(f"  stress marks : {sf.get('sentences', 0):,} shown sentences corrected — "
+          f"{sf.get('consonant', 0):,} marks on a consonant removed, {sf.get('doubled', 0):,} doubled, "
+          f"{sf.get('contradicted', 0):,} words "
+          "whose mark the lexicon never gives that spelling left unmarked")
     v = st.get("examples_variety") or {}
     if v.get("plain_words"):
         n = v["plain_words"]
@@ -1727,6 +2041,10 @@ def main():
         if st["speak_short"]:
             print(f"    under {POOL_MIN_PER_UNIT}: " + ", ".join(
                 f"{u} ({sp.get(u, 0)})" for u in st["speak_short"]))
+    print(f"  video words  : {st.get('video_moments_off', 0)} moment(s) listed under a word whose "
+          "forms do not include what was said (must be 0)")
+    print(f"  pool words   : {st.get('pool_unguaranteed', 0)} pool sentence(s) using a word "
+          "the learner at that unit may not have been taught (optional or sibling quest; must be 0)")
     if st.get("listen_pool") is not None:
         lp = st["listen_pool"]
         print(f"  listen pool  : {sum(lp.values()):,} sentences over {len(lp)} units; "
@@ -1758,7 +2076,12 @@ def main():
     # noun must not reach a build anyone deploys.
     for line in st.get("closed_class_taught") or ():
         print(f"  !! {line}")
-    return 1 if st.get("closed_class_taught") else 0
+    # …and so must a pool that asks a learner for a word they were never
+    # guaranteed, or a video list that opens a different word from the one said.
+    if st.get("pool_unguaranteed") or st.get("video_moments_off"):
+        print("  !! pool sentences or video moments break their rule (above)")
+    return 1 if (st.get("closed_class_taught") or st.get("pool_unguaranteed")
+                 or st.get("video_moments_off")) else 0
 
 
 if __name__ == "__main__":

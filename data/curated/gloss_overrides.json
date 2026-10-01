@@ -335,5 +335,11 @@
   "лекарство": "medication, medicine (a drug)",
   "противник": "opponent, adversary, enemy",
   "выучить": "to learn (by heart), to memorize; to teach",
-  "научиться": "to learn (how to)"
+  "научиться": "to learn (how to)",
+  "_6": "2026-10-01, the data review: OpenRussian glosses with a stray comma, a garbled word or a sense listed twice — завязать 'tie, quit,', раздаваться 'come from, emmentate  from', удар 'blow /kick  stroke', место 'site' twice, совет 'advice' twice.",
+  "завязать|verb": "to tie, to tie up; to strike up (a conversation); to quit (colloquial)",
+  "раздаваться": "to be heard, to ring out, to resound",
+  "удар": "blow, stroke, impact; kick, punch",
+  "место": "place, spot; site, scene; room, space; seat; job, position; piece of luggage",
+  "совет": "advice, counsel; council; soviet"
 }

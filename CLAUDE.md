@@ -43,8 +43,8 @@ Built and working today:
 - any recognised token can expose lemma, meaning, grammar, full paradigm, and every
   other sentence in the corpus containing that word
 - a learning path of ten chapters, every unit built towards a real video
-  (§30bf): ten spine units (30 words in the first two chapters, 40 after) and
-  24 side quests, 168 lessons, 1,040 words taught
+  (§30bf): ten spine units and 24 side quests, about 1,200 words taught
+  (§30bm)
 - a cast the whole app is told through: Teddy the Yorkie, his family, and
   Monka the monkey whose schemes always backfire (§30bg, docs/cast.md)
 - lessons built from six activity types, plus Hear, Say and listening scenes on
@@ -5752,6 +5752,49 @@ check, and the owner's decisions in one table. ROADMAP.md stays the long log.
   sentences are credited to another word, or to nobody, so it is taught
   with none. That found «небо», whose forms it shares with «нёбо»; settled
   in `lemma_overrides.json`.
+
+## 30bm. What a learner is guaranteed (2026-10-01)
+
+The code review's data half. Each rule is a build check that fails, not a
+habit.
+
+- **An optional quest may not take an everyday word** (`EVERYDAY_RANK` 800 in
+  `build_topics.py`: the top 800 the videos say, 80 % of all video speech, or
+  anything forced to the spine). `walk()` runs twice: the first pass records
+  what an optional quest would have taken, the second adds those words to the
+  same chapter's spine. 87 words moved («Москва», «проблема», «помочь»), so
+  spines past chapter 4 now run 41–63 words. A word an optional quest takes is
+  one a learner who skips it never meets, and the everyday ones were the
+  expensive ones to miss.
+- **A pool sentence belongs where every word in it is guaranteed**: this and
+  earlier spines, earlier chapters' required quests, the unit itself — never
+  an optional or sibling quest (`guaranteed_matrix`, `check_pools_guaranteed`
+  in `build_site.py`, fatal). §30b's coverage rule counted any unit that
+  taught a word, which put a Work word in a spine quiz.
+- **The index opens the taught lemma** where a shared form has one taught
+  and one not, unless `lemma_overrides.json` settled the key; and
+  `core/search.js makeResolve` prefers the exact headword. «семью», «устал»,
+  «вечером» opened words the learner had never been taught.
+- **Stress marks are checked on the way in.** `fix_stress` drops a mark on a
+  consonant, a doubled mark, and a mark the lexicon never gives that
+  spelling; `settle_stress`/`deapostrophe` in `build_lexicon.py` do the same
+  for paradigms (fatal if any survives). Where the lexicon carries both
+  stresses («мо́ю»/«мою́») only the sentence knows, and it is left alone.
+- **A lesson is never one or two words** (`SHORT_LESSON`, `short_tail`): a
+  unit that would end that way is rounded up to fill it, so quests of 30 in
+  lessons of 7 became 35.
+- **Video moments join through the resolved lemma** (`said_as`, fatal at
+  `video_moments_off`): «есть» "to eat" moments are no longer listed under
+  «есть» "there is".
+- **A word nobody should be taught goes in `VIDEO_NOISE`, not in one unit's
+  drop list.** A drop moves the word to the next unit that wants it: «сей»
+  was dropped from core8, then art, and turned up in Medicine.
+
+After a re-cut like this one the conversations move (a script is checked
+against its lesson), the curriculum stamp changes (progress is re-mapped,
+§30bf V7), and new words want audio: `build_word_audio`, `build_form_audio`,
+`build_scenario_audio` (which now prunes keys whose script moved), then
+`build_scene_tracks` and `build_word_assets`.
 
 ## 31. Verification
 

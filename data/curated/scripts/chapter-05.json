@@ -168,7 +168,7 @@
     }
    ]
   },
-  "core5:3": {
+  "core5:7": {
    "title": "Changing a bag of coins",
    "cast": [
     {
@@ -230,8 +230,8 @@
     },
     {
      "s": "b",
-     "ru": "Старый? Хорошо, Монька. Вот мешок.",
-     "en": "Old? All right, Monka. Here's the bag."
+     "ru": "Старый? Хорошо, Монька. Держи мешок.",
+     "en": "Old? All right, Monka. Here, take the bag."
     },
     {
      "s": "a",

@@ -151,7 +151,7 @@
     }
    ]
   },
-  "core6:4": {
+  "core6:7": {
    "title": "Breakfast before the lesson",
    "cast": [
     {
@@ -246,8 +246,8 @@
     },
     {
      "s": "b",
-     "ru": "Монька, ты же смотрел за кашей. Что ты видел?",
-     "en": "Monka, you were watching the porridge. What did you see?"
+     "ru": "Монька, ты же смотрел за кашей. Что ты заметил?",
+     "en": "Monka, you were watching the porridge. What did you notice?"
     },
     {
      "s": "c",

@@ -71,5 +71,10 @@
   "_p11.5": "Two rows where the closed-class reading is the word and the content row is a rarity or an inflection: «перед» the preposition against a paradigm-less noun glossed 'before', and «зовут» — a form of «звать» that others.csv carries as a headword of its own.",
   "перед": "перед|other",
   "зовут": "звать|verb",
-  "уж": "уж|other"
+  "уж": "уж|other",
+  "_taught_first": "2026-10-01: build_site now puts a taught candidate first in the lookup index when the rule's pick is not taught (семью opens семья, not 'seven times'). These keys keep the rule's pick against a taught rival, because in running speech the pick is the word: «бегу» is 'I run' far more than the dative of the taught noun «бег», «лечу» 'I fly' more than 'I treat', «давай» is 'let's' rather than an imperative of «давать», and «согласно» 'according to' rather than the short form of «согласный».",
+  "бегу": "бежать|verb",
+  "лечу": "лететь|verb",
+  "давай": "давай",
+  "согласно": "согласно"
 }

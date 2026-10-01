@@ -55,8 +55,8 @@
     },
     {
      "s": "b",
-     "ru": "Сам? Тедди, ты ещё никогда не готовил курицу.",
-     "en": "Yourself? Teddy, you've never made chicken before."
+     "ru": "Сам? Тедди, ты ещё не умеешь готовить курицу.",
+     "en": "Yourself? Teddy, you don't know how to cook chicken yet."
     },
     {
      "s": "a",
@@ -172,7 +172,7 @@
     }
    ]
   },
-  "core8:4": {
+  "core8:7": {
    "title": "Salt in the holiday dish",
    "cast": [
     {

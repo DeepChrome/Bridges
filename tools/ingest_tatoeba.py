@@ -34,7 +34,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from ingest_anki import fold, tokenize  # noqa: E402
+from ingest_anki import fold, tokenize as _tokenize, strip_accents  # noqa: E402
+
+
+def tokenize(text):
+    """ingest_anki's tokens, over the text with its stress marks taken off first.
+
+    Some Tatoeba sentences are written with stress marks, and TOKEN_RE stops at
+    the combining acute: «по́лон» became «по» and «лон», «за́мок» «за» and «мок»,
+    «ту́пик» «ту» and «пик», and the sentence was filed as an example of «лоно»,
+    «мокнуть» and «пик» (the data review, 2026-10-01). ingest_anki tokenizes the
+    accent-free text for the same reason (rule 20.2)."""
+    return _tokenize(strip_accents(text))
 
 RAW = ROOT / "data" / "raw" / "tatoeba"
 BASE = "https://downloads.tatoeba.org/exports/per_language"

@@ -11,10 +11,14 @@ export const IMAGES = {
   "актриса": require("../assets/img/1028.jpg"),
   "аптека": require("../assets/img/1034.jpg"),
   "армия": require("../assets/img/1038.jpg"),
+  "аудитория": require("../assets/img/1043.jpg"),
   "аэропорт": require("../assets/img/1044.jpg"),
+  "балет": require("../assets/img/1052.jpg"),
   "банк": require("../assets/img/1054.jpg"),
   "баскетбол": require("../assets/img/1057.jpg"),
   "белка": require("../assets/img/1064.jpg"),
+  "берег": require("../assets/img/1066.jpg"),
+  "беседа": require("../assets/img/1067.jpg"),
   "библия": require("../assets/img/1072.jpg"),
   "билет": require("../assets/img/1074.jpg"),
   "блин": require("../assets/img/1078.jpg"),
@@ -23,12 +27,14 @@ export const IMAGES = {
   "болото": require("../assets/img/1089.jpg"),
   "больница": require("../assets/img/1091.jpg"),
   "больной": require("../assets/img/1092.jpg"),
+  "борода": require("../assets/img/1096.jpg"),
   "борщ": require("../assets/img/1098.jpg"),
   "борьба": require("../assets/img/1099.jpg"),
   "ботинок": require("../assets/img/1100.jpg"),
   "брат": require("../assets/img/1102.jpg"),
   "бумага": require("../assets/img/1111.jpg"),
   "бык": require("../assets/img/1117.jpg"),
+  "вагон": require("../assets/img/1122.jpg"),
   "весна": require("../assets/img/1134.jpg"),
   "ветер": require("../assets/img/1136.jpg"),
   "ветеран": require("../assets/img/1137.jpg"),
@@ -36,6 +42,7 @@ export const IMAGES = {
   "вирус": require("../assets/img/1152.jpg"),
   "водитель": require("../assets/img/1165.jpg"),
   "военный": require("../assets/img/1167.jpg"),
+  "волейбол": require("../assets/img/1176.jpg"),
   "волк": require("../assets/img/1177.jpg"),
   "волос": require("../assets/img/1180.jpg"),
   "встреча": require("../assets/img/1196.jpg"),
@@ -43,8 +50,10 @@ export const IMAGES = {
   "газета": require("../assets/img/1225.jpg"),
   "галстук": require("../assets/img/1227.jpg"),
   "гитара": require("../assets/img/1231.jpg"),
+  "гнездо": require("../assets/img/1234.jpg"),
   "гора": require("../assets/img/1241.jpg"),
   "город": require("../assets/img/1246.jpg"),
+  "госдума": require("../assets/img/1250.jpg"),
   "гражданин": require("../assets/img/1260.jpg"),
   "гриб": require("../assets/img/1263.jpg"),
   "дверь": require("../assets/img/1280.jpg"),
@@ -53,7 +62,6 @@ export const IMAGES = {
   "дерево": require("../assets/img/1302.jpg"),
   "деятельность": require("../assets/img/1309.jpg"),
   "директор": require("../assets/img/1315.jpg"),
-  "дискуссия": require("../assets/img/1316.jpg"),
   "дом": require("../assets/img/1332.jpg"),
   "дорога": require("../assets/img/1335.jpg"),
   "друг": require("../assets/img/1344.jpg"),
@@ -81,6 +89,7 @@ export const IMAGES = {
   "клуб": require("../assets/img/1499.jpg"),
   "кожа": require("../assets/img/1505.jpg"),
   "коза": require("../assets/img/1506.jpg"),
+  "кольцо": require("../assets/img/1512.jpg"),
   "команда": require("../assets/img/1513.jpg"),
   "комната": require("../assets/img/1519.jpg"),
   "компьютер": require("../assets/img/1522.jpg"),
@@ -96,14 +105,17 @@ export const IMAGES = {
   "куртка": require("../assets/img/1567.jpg"),
   "кухня": require("../assets/img/1568.jpg"),
   "лаборатория": require("../assets/img/1569.jpg"),
+  "лапа": require("../assets/img/1571.jpg"),
   "лекарство": require("../assets/img/1574.jpg"),
   "лекция": require("../assets/img/1575.jpg"),
   "лес": require("../assets/img/1576.jpg"),
   "лето": require("../assets/img/1581.jpg"),
+  "лист": require("../assets/img/1585.jpg"),
   "литература": require("../assets/img/1586.jpg"),
   "лицо": require("../assets/img/1587.jpg"),
   "лодка": require("../assets/img/1591.jpg"),
   "ложка": require("../assets/img/1593.jpg"),
+  "лошадь": require("../assets/img/1594.jpg"),
   "лыжа": require("../assets/img/1597.jpg"),
   "любовь": require("../assets/img/1600.jpg"),
   "медведь": require("../assets/img/1623.jpg"),
@@ -116,6 +128,7 @@ export const IMAGES = {
   "мужчина": require("../assets/img/1670.jpg"),
   "музыка": require("../assets/img/1672.jpg"),
   "музыкант": require("../assets/img/1673.jpg"),
+  "мышка": require("../assets/img/1676.jpg"),
   "мышь": require("../assets/img/1678.jpg"),
   "мясо": require("../assets/img/1680.jpg"),
   "мяч": require("../assets/img/1681.jpg"),
@@ -138,6 +151,7 @@ export const IMAGES = {
   "папа": require("../assets/img/1836.jpg"),
   "паспорт": require("../assets/img/1840.jpg"),
   "пасха": require("../assets/img/1842.jpg"),
+  "певица": require("../assets/img/1844.jpg"),
   "пистолет": require("../assets/img/1865.jpg"),
   "пицца": require("../assets/img/1868.jpg"),
   "плавание": require("../assets/img/1869.jpg"),
@@ -145,6 +159,7 @@ export const IMAGES = {
   "погода": require("../assets/img/1893.jpg"),
   "подарок": require("../assets/img/1894.jpg"),
   "поезд": require("../assets/img/1906.jpg"),
+  "поле": require("../assets/img/1921.jpg"),
   "полиция": require("../assets/img/1927.jpg"),
   "полковник": require("../assets/img/1930.jpg"),
   "почта": require("../assets/img/1969.jpg"),
@@ -155,6 +170,7 @@ export const IMAGES = {
   "река": require("../assets/img/2084.jpg"),
   "реклама": require("../assets/img/2085.jpg"),
   "ресторан": require("../assets/img/2091.jpg"),
+  "родитель": require("../assets/img/2101.jpg"),
   "рождество": require("../assets/img/2105.jpg"),
   "рот": require("../assets/img/2108.jpg"),
   "рубашка": require("../assets/img/2109.jpg"),
@@ -172,6 +188,8 @@ export const IMAGES = {
   "свитер": require("../assets/img/2137.jpg"),
   "сентябрь": require("../assets/img/2156.jpg"),
   "сестра": require("../assets/img/2159.jpg"),
+  "сеть": require("../assets/img/2161.jpg"),
+  "словарь": require("../assets/img/2175.jpg"),
   "слон": require("../assets/img/2177.jpg"),
   "смех": require("../assets/img/2184.jpg"),
   "снег": require("../assets/img/2188.jpg"),
@@ -180,6 +198,7 @@ export const IMAGES = {
   "солнце": require("../assets/img/2205.jpg"),
   "сон": require("../assets/img/2208.jpg"),
   "спорт": require("../assets/img/2227.jpg"),
+  "спортзал": require("../assets/img/2228.jpg"),
   "спортсмен": require("../assets/img/2230.jpg"),
   "стадион": require("../assets/img/2240.jpg"),
   "стена": require("../assets/img/2253.jpg"),
@@ -196,6 +215,7 @@ export const IMAGES = {
   "тетрадь": require("../assets/img/2317.jpg"),
   "товар": require("../assets/img/2321.jpg"),
   "трава": require("../assets/img/2327.jpg"),
+  "тренер": require("../assets/img/2334.jpg"),
   "турист": require("../assets/img/2340.jpg"),
   "тюрьма": require("../assets/img/2345.jpg"),
   "уж": require("../assets/img/2365.jpg"),
@@ -211,6 +231,7 @@ export const IMAGES = {
   "чай": require("../assets/img/2441.jpg"),
   "чемодан": require("../assets/img/2449.jpg"),
   "чёрный": require("../assets/img/2460.jpg"),
+  "шахматы": require("../assets/img/2462.jpg"),
   "школа": require("../assets/img/2467.jpg"),
   "ягода": require("../assets/img/2496.jpg"),
   "яйцо": require("../assets/img/2499.jpg"),
@@ -223,10 +244,14 @@ export const FILES = {
  "актриса": "1028.jpg",
  "аптека": "1034.jpg",
  "армия": "1038.jpg",
+ "аудитория": "1043.jpg",
  "аэропорт": "1044.jpg",
+ "балет": "1052.jpg",
  "банк": "1054.jpg",
  "баскетбол": "1057.jpg",
  "белка": "1064.jpg",
+ "берег": "1066.jpg",
+ "беседа": "1067.jpg",
  "библия": "1072.jpg",
  "билет": "1074.jpg",
  "блин": "1078.jpg",
@@ -235,12 +260,14 @@ export const FILES = {
  "болото": "1089.jpg",
  "больница": "1091.jpg",
  "больной": "1092.jpg",
+ "борода": "1096.jpg",
  "борщ": "1098.jpg",
  "борьба": "1099.jpg",
  "ботинок": "1100.jpg",
  "брат": "1102.jpg",
  "бумага": "1111.jpg",
  "бык": "1117.jpg",
+ "вагон": "1122.jpg",
  "весна": "1134.jpg",
  "ветер": "1136.jpg",
  "ветеран": "1137.jpg",
@@ -248,6 +275,7 @@ export const FILES = {
  "вирус": "1152.jpg",
  "водитель": "1165.jpg",
  "военный": "1167.jpg",
+ "волейбол": "1176.jpg",
  "волк": "1177.jpg",
  "волос": "1180.jpg",
  "встреча": "1196.jpg",
@@ -255,8 +283,10 @@ export const FILES = {
  "газета": "1225.jpg",
  "галстук": "1227.jpg",
  "гитара": "1231.jpg",
+ "гнездо": "1234.jpg",
  "гора": "1241.jpg",
  "город": "1246.jpg",
+ "госдума": "1250.jpg",
  "гражданин": "1260.jpg",
  "гриб": "1263.jpg",
  "дверь": "1280.jpg",
@@ -265,7 +295,6 @@ export const FILES = {
  "дерево": "1302.jpg",
  "деятельность": "1309.jpg",
  "директор": "1315.jpg",
- "дискуссия": "1316.jpg",
  "дом": "1332.jpg",
  "дорога": "1335.jpg",
  "друг": "1344.jpg",
@@ -293,6 +322,7 @@ export const FILES = {
  "клуб": "1499.jpg",
  "кожа": "1505.jpg",
  "коза": "1506.jpg",
+ "кольцо": "1512.jpg",
  "команда": "1513.jpg",
  "комната": "1519.jpg",
  "компьютер": "1522.jpg",
@@ -308,14 +338,17 @@ export const FILES = {
  "куртка": "1567.jpg",
  "кухня": "1568.jpg",
  "лаборатория": "1569.jpg",
+ "лапа": "1571.jpg",
  "лекарство": "1574.jpg",
  "лекция": "1575.jpg",
  "лес": "1576.jpg",
  "лето": "1581.jpg",
+ "лист": "1585.jpg",
  "литература": "1586.jpg",
  "лицо": "1587.jpg",
  "лодка": "1591.jpg",
  "ложка": "1593.jpg",
+ "лошадь": "1594.jpg",
  "лыжа": "1597.jpg",
  "любовь": "1600.jpg",
  "медведь": "1623.jpg",
@@ -328,6 +361,7 @@ export const FILES = {
  "мужчина": "1670.jpg",
  "музыка": "1672.jpg",
  "музыкант": "1673.jpg",
+ "мышка": "1676.jpg",
  "мышь": "1678.jpg",
  "мясо": "1680.jpg",
  "мяч": "1681.jpg",
@@ -350,6 +384,7 @@ export const FILES = {
  "папа": "1836.jpg",
  "паспорт": "1840.jpg",
  "пасха": "1842.jpg",
+ "певица": "1844.jpg",
  "пистолет": "1865.jpg",
  "пицца": "1868.jpg",
  "плавание": "1869.jpg",
@@ -357,6 +392,7 @@ export const FILES = {
  "погода": "1893.jpg",
  "подарок": "1894.jpg",
  "поезд": "1906.jpg",
+ "поле": "1921.jpg",
  "полиция": "1927.jpg",
  "полковник": "1930.jpg",
  "почта": "1969.jpg",
@@ -367,6 +403,7 @@ export const FILES = {
  "река": "2084.jpg",
  "реклама": "2085.jpg",
  "ресторан": "2091.jpg",
+ "родитель": "2101.jpg",
  "рождество": "2105.jpg",
  "рот": "2108.jpg",
  "рубашка": "2109.jpg",
@@ -384,6 +421,8 @@ export const FILES = {
  "свитер": "2137.jpg",
  "сентябрь": "2156.jpg",
  "сестра": "2159.jpg",
+ "сеть": "2161.jpg",
+ "словарь": "2175.jpg",
  "слон": "2177.jpg",
  "смех": "2184.jpg",
  "снег": "2188.jpg",
@@ -392,6 +431,7 @@ export const FILES = {
  "солнце": "2205.jpg",
  "сон": "2208.jpg",
  "спорт": "2227.jpg",
+ "спортзал": "2228.jpg",
  "спортсмен": "2230.jpg",
  "стадион": "2240.jpg",
  "стена": "2253.jpg",
@@ -408,6 +448,7 @@ export const FILES = {
  "тетрадь": "2317.jpg",
  "товар": "2321.jpg",
  "трава": "2327.jpg",
+ "тренер": "2334.jpg",
  "турист": "2340.jpg",
  "тюрьма": "2345.jpg",
  "уж": "2365.jpg",
@@ -423,6 +464,7 @@ export const FILES = {
  "чай": "2441.jpg",
  "чемодан": "2449.jpg",
  "чёрный": "2460.jpg",
+ "шахматы": "2462.jpg",
  "школа": "2467.jpg",
  "ягода": "2496.jpg",
  "яйцо": "2499.jpg"
@@ -465,11 +507,23 @@ export const CREDITS = {
   "l": "CC BY 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:Combined_Arms_Training.jpg"
  },
+ "аудитория": {
+  "t": "Hanover Institute Inorganic Chemisty Lecture Hall.jpg",
+  "a": "ChristianSchd",
+  "l": "CC BY-SA 3.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Hanover_Institute_Inorganic_Chemisty_Lecture_Hall.jpg"
+ },
  "аэропорт": {
   "t": "Labuan Malaysia Airport-07.jpg",
   "a": "CEphoto, Uwe Aranas",
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Labuan_Malaysia_Airport-07.jpg"
+ },
+ "балет": {
+  "t": "Grace in winter, contemporary ballet.jpg",
+  "a": "jeff from denver, US",
+  "l": "CC BY-SA 2.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Grace_in_winter,_contemporary_ballet.jpg"
  },
  "банк": {
   "t": "Barclays Bank, West Kirby.jpg",
@@ -488,6 +542,18 @@ export const CREDITS = {
   "a": "26D",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:%D0%91%D0%B5%D0%BB%D0%BA%D0%B0_%D0%B2_%D0%B1%D0%BE%D1%82%D0%B0%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%BC_%D1%81%D0%B0%D0%B4%D1%83_%D0%A2%D0%B0%D1%88%D0%BA%D0%B5%D0%BD%D1%82%D0%B0,_%D0%BC%D0%B0%D1%80%D1%82_2026.jpg"
+ },
+ "берег": {
+  "t": "Spring Lake, New Jersey Beach at Sunrise.jpg",
+  "a": "Nick Harris",
+  "l": "CC BY 2.5",
+  "u": "https://commons.wikimedia.org/wiki/File:Spring_Lake,_New_Jersey_Beach_at_Sunrise.jpg"
+ },
+ "беседа": {
+  "t": "वार्तालाप.jpg",
+  "a": "Surenders25",
+  "l": "CC BY-SA 4.0",
+  "u": "https://commons.wikimedia.org/wiki/File:%E0%A4%B5%E0%A4%BE%E0%A4%B0%E0%A5%8D%E0%A4%A4%E0%A4%BE%E0%A4%B2%E0%A4%BE%E0%A4%AA.jpg"
  },
  "библия": {
   "t": "Gutenberg Bible, Lenox Copy, New York Public Library, 2009. Pic 01.jpg",
@@ -537,6 +603,12 @@ export const CREDITS = {
   "l": "CC BY 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:Hallways_filled_with_patients.jpg"
  },
+ "борода": {
+  "t": "Photography-wallpaper-facial-hair-man-beard-chin-moustache-human-elder-portrait-1453095.jpg",
+  "a": "@nazanin",
+  "l": "CC0",
+  "u": "https://commons.wikimedia.org/wiki/File:Photography-wallpaper-facial-hair-man-beard-chin-moustache-human-elder-portrait-1453095.jpg"
+ },
  "борщ": {
   "t": "Borscht with bread.jpg",
   "a": "Juerg Vollmer from Zürich, Schweiz",
@@ -572,6 +644,12 @@ export const CREDITS = {
   "a": "Philip Halling",
   "l": "CC BY-SA 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:A_Friesian_Bull,_Llandeilo_Graban_-_geograph.org.uk_-_579885.jpg"
+ },
+ "вагон": {
+  "t": "D-DB 50 80 36-75 071-1 DABpza 758.5 Doerverden 01.07.2013.jpg",
+  "a": "Christian Dittmer",
+  "l": "CC BY-SA 3.0",
+  "u": "https://commons.wikimedia.org/wiki/File:D-DB_50_80_36-75_071-1_DABpza_758.5_Doerverden_01.07.2013.jpg"
  },
  "весна": {
   "t": "Arboretum Robert Lenoir - Jardin des méllifères.jpg",
@@ -615,6 +693,12 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:4thTankDivisionOpenDay17p2-06.jpg"
  },
+ "волейбол": {
+  "t": "Volleyball game.jpg",
+  "a": "U.S Navy photo by Photographer's Mate 2nd Class Terry Spain",
+  "l": "Public domain",
+  "u": "https://commons.wikimedia.org/wiki/File:Volleyball_game.jpg"
+ },
  "волк": {
   "t": "Eurasian wolf 2.jpg",
   "a": "User:Mas3cf",
@@ -657,6 +741,12 @@ export const CREDITS = {
   "l": "CC BY 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:My_Mates_3_(2082240480).jpg"
  },
+ "гнездо": {
+  "t": "Yelagiri bird's nest.jpg",
+  "a": "https://www.flickr.com/photos/mckaysavage/ mckaysavage",
+  "l": "CC BY 2.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Yelagiri_bird%27s_nest.jpg"
+ },
  "гора": {
   "t": "Khor Virap.jpg",
   "a": "Maks Karochkin",
@@ -668,6 +758,12 @@ export const CREDITS = {
   "a": "OscarKosy",
   "l": "CC BY 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Turkish.town.cesme.jpg"
+ },
+ "госдума": {
+  "t": "Рассмотрение проекта бюджета на 2023-2025 годы в Государственной думе.jpg",
+  "a": "ЛДПР — Liberal Democratic Party of Russia (photo by Alexander Sivov)",
+  "l": "CC BY 3.0",
+  "u": "https://commons.wikimedia.org/wiki/File:%D0%A0%D0%B0%D1%81%D1%81%D0%BC%D0%BE%D1%82%D1%80%D0%B5%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0_%D0%B1%D1%8E%D0%B4%D0%B6%D0%B5%D1%82%D0%B0_%D0%BD%D0%B0_2023-2025_%D0%B3%D0%BE%D0%B4%D1%8B_%D0%B2_%D0%93%D0%BE%D1%81%D1%83%D0%B4%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B9_%D0%B4%D1%83%D0%BC%D0%B5.jpg"
  },
  "гражданин": {
   "t": "Peter Dutton at Australian Citizenship Ceremony, 2017.jpg",
@@ -716,12 +812,6 @@ export const CREDITS = {
   "a": "Intel Free Press",
   "l": "CC BY-SA 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:Intel_Board_of_Directors.jpg"
- },
- "дискуссия": {
-  "t": "वार्तालाप.jpg",
-  "a": "Surenders25",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:%E0%A4%B5%E0%A4%BE%E0%A4%B0%E0%A5%8D%E0%A4%A4%E0%A4%BE%E0%A4%B2%E0%A4%BE%E0%A4%AA.jpg"
  },
  "дом": {
   "t": "Katsura Imperial Villa in Spring.jpg",
@@ -885,6 +975,12 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Hausziege_04.jpg"
  },
+ "кольцо": {
+  "t": "Ring Ruby.jpg",
+  "a": "ネックレス (A necklace)",
+  "l": "CC BY-SA 4.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Ring_Ruby.jpg"
+ },
  "команда": {
   "t": "Rugby union scrummage.jpg",
   "a": "",
@@ -975,6 +1071,12 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:At_Manchester_2023_2023_006.jpg"
  },
+ "лапа": {
+  "t": "DogDewClawTika1 wb.jpg",
+  "a": "en:User:Elf",
+  "l": "CC BY-SA 3.0",
+  "u": "https://commons.wikimedia.org/wiki/File:DogDewClawTika1_wb.jpg"
+ },
  "лекарство": {
   "t": "Medikamente.jpg",
   "a": "Würfel",
@@ -999,6 +1101,12 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Field_Hamois_Belgium_Luc_Viatour.jpg"
  },
+ "лист": {
+  "t": "Leaf 1 web.jpg",
+  "a": "Jon Sullivan",
+  "l": "Public domain",
+  "u": "https://commons.wikimedia.org/wiki/File:Leaf_1_web.jpg"
+ },
  "литература": {
   "t": "Bibliothèque de l'Assemblée Nationale (Lunon).jpg",
   "a": "Baptiste ROUSSEL",
@@ -1022,6 +1130,12 @@ export const CREDITS = {
   "a": "Lesekreis",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Essl%C3%B6ffel_und_Teel%C3%B6ffel.JPG"
+ },
+ "лошадь": {
+  "t": "Pernod Al Ariba 0046b.jpg",
+  "a": "Thomas Reich",
+  "l": "CC BY-SA 2.5",
+  "u": "https://commons.wikimedia.org/wiki/File:Pernod_Al_Ariba_0046b.jpg"
  },
  "лыжа": {
   "t": "Interboot 2023, Friedrichshafen (P1120640).jpg",
@@ -1094,6 +1208,12 @@ export const CREDITS = {
   "a": "Harshil Mehta",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Musician_Playing_Ravanhatta_at_Mehrangarh,_Rajasthan,_India.jpg"
+ },
+ "мышка": {
+  "t": "Fancy mice.jpg",
+  "a": "User Polarqueen on en.wikipedia",
+  "l": "CC BY-SA 3.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Fancy_mice.jpg"
  },
  "мышь": {
   "t": "Apodemus sylvaticus bosmuis.jpg",
@@ -1227,6 +1347,12 @@ export const CREDITS = {
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Paskha2.jpg"
  },
+ "певица": {
+  "t": "2018-11-02 Konzert -The Hellfreaks- in -Ilvers Musikbar- in Erfurt IMG 3414 LR10 by Stepro.jpg",
+  "a": "Steffen Prößdorf",
+  "l": "CC BY-SA 4.0",
+  "u": "https://commons.wikimedia.org/wiki/File:2018-11-02_Konzert_-The_Hellfreaks-_in_-Ilvers_Musikbar-_in_Erfurt_IMG_3414_LR10_by_Stepro.jpg"
+ },
  "пистолет": {
   "t": "Pistolet makarova pm travmatik com by-sa.jpg",
   "a": "Stanislav S. Yanchenko",
@@ -1268,6 +1394,12 @@ export const CREDITS = {
   "a": "Niagara",
   "l": "CC BY 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:PRR_33164.jpg"
+ },
+ "поле": {
+  "t": "Iglesia de Nuestra Señora de La Blanca, Cardejón, España, 2012-09-01, DD 02.JPG",
+  "a": "Diego Delso",
+  "l": "CC BY-SA 3.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Iglesia_de_Nuestra_Se%C3%B1ora_de_La_Blanca,_Cardej%C3%B3n,_Espa%C3%B1a,_2012-09-01,_DD_02.JPG"
  },
  "полиция": {
   "t": "HH Polizeihauptmeister MZ.jpg",
@@ -1328,6 +1460,12 @@ export const CREDITS = {
   "a": "Infrogmation of New Orleans",
   "l": "CC BY 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:AntoinesDiningRoom8Oct07A.jpg"
+ },
+ "родитель": {
+  "t": "Parents and their baby.jpg",
+  "a": "sheldonl",
+  "l": "CC0",
+  "u": "https://commons.wikimedia.org/wiki/File:Parents_and_their_baby.jpg"
  },
  "рождество": {
   "t": "NativityChristmasLights2.jpg",
@@ -1431,6 +1569,18 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Two_sisters_in_Bihar,_India.jpg"
  },
+ "сеть": {
+  "t": "A fishing net in Brandon Creek - geograph.org.uk - 921094.jpg",
+  "a": "Peter Church",
+  "l": "CC BY-SA 2.0",
+  "u": "https://commons.wikimedia.org/wiki/File:A_fishing_net_in_Brandon_Creek_-_geograph.org.uk_-_921094.jpg"
+ },
+ "словарь": {
+  "t": "Woerterbuchstapel Langenscheidt.jpg",
+  "a": "Langenscheidt",
+  "l": "CC BY-SA 4.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Woerterbuchstapel_Langenscheidt.jpg"
+ },
  "слон": {
   "t": "Elephant Diversity.jpg",
   "a": "Yathin S Krishnappa (File:Elephas maximus (Bandipur).jpg)\nThomas Breuer (File:Lo",
@@ -1478,6 +1628,12 @@ export const CREDITS = {
   "a": "Granada",
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:20180922_UCI_Road_World_Championships_Innsbruck_Team_AG2R_La_Mondiale_850_7022.jpg"
+ },
+ "спортзал": {
+  "t": "Amsterdam - Gymnasium - 0591.jpg",
+  "a": "Jorge Royan",
+  "l": "CC BY-SA 3.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Amsterdam_-_Gymnasium_-_0591.jpg"
  },
  "спортсмен": {
   "t": "Osaka07 D7M Bryan Clay running.jpg",
@@ -1575,6 +1731,12 @@ export const CREDITS = {
   "l": "CC BY 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Steppe_flora,_Wild_flowers,_Rostov-on-Don,_Russia.jpg"
  },
+ "тренер": {
+  "t": "Torre and coaches.jpg",
+  "a": "keithallison",
+  "l": "CC BY-SA 2.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Torre_and_coaches.jpg"
+ },
  "турист": {
   "t": "Au dessus du ciel (Piton de la Fournaise, Ile de la Réunion).jpg",
   "a": "indeepdark",
@@ -1664,6 +1826,12 @@ export const CREDITS = {
   "a": "Chosovi",
   "l": "CC BY-SA 2.5",
   "u": "https://commons.wikimedia.org/wiki/File:Gato_negro.JPG"
+ },
+ "шахматы": {
+  "t": "Бухара, Кукельдаш, шахматы.jpg",
+  "a": "Nikolai Bulykin",
+  "l": "CC BY-SA 4.0",
+  "u": "https://commons.wikimedia.org/wiki/File:%D0%91%D1%83%D1%85%D0%B0%D1%80%D0%B0,_%D0%9A%D1%83%D0%BA%D0%B5%D0%BB%D1%8C%D0%B4%D0%B0%D1%88,_%D1%88%D0%B0%D1%85%D0%BC%D0%B0%D1%82%D1%8B.jpg"
  },
  "школа": {
   "t": "Молодецьке (Маньківський р-н). Школа.jpg",

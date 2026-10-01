@@ -243,6 +243,14 @@ async function main() {
     });
     manifest.lessons[lesson.key] = { voices, lines };
   }
+  /* A conversation moved to another lesson leaves its old key behind, and the
+     stitcher then reports it as "skipped" on every run (2026-10-01: six of
+     them after a re-cut). A whole run knows every key there is; a --chapter
+     run does not, so only a whole run prunes. The clips stay either way. */
+  if (!chapter) {
+    const live = new Set(lessons.map((l) => l.key));
+    for (const k of Object.keys(manifest.lessons)) if (!live.has(k)) delete manifest.lessons[k];
+  }
 
   const todo = wanted.filter((c) => !existsSync(join(OUT, `${c.id}.${EXT}`)));
   const chars = todo.reduce((n, c) => n + c.text.length, 0);

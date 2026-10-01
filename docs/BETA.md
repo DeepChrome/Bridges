@@ -21,16 +21,27 @@ on the phone.
 - [ ] Re-run the full emulator walkthrough on the current build and read
       every screenshot. It has not been run since the drill settings cog, the
       tutor, the word groups or the UI test skin went in.
-      *(2026-09-30: gate, tour, path, first lesson, Practice and profile
-      walked. Fixed: chapter 1 opening on five prepositions, the quick word
-      sheet with no speaker and a bare "f", a duplicated icon. Still to walk:
-      the quiz, Study, Immerse, Search, Talk, the tutor, Settings, dark.)*
+      *(2026-09-30 → 10-01: walked the gate, tour, path, a lesson, the quiz,
+      Study, Immerse, Search, Talk, Settings and Practice, light and dark.
+      Fixed on the way:*
+      - *chapter 1 opening on five prepositions*
+      - *a meaningless option («м»)*
+      - *small Cyrillic answers*
+      - *the quick word sheet: no speaker, and a bare "f"*
+      - *an "Abide with me" example*
+      - *Reset progress styled like any button*
+      - *Talk's narrated options*
+      - *Practice's grab-bag Speaking section*
+      - *33 same-sense word pairs, and 163 verbs without "to"*
+
+      *Still to walk: a full conversation in Talk, the tutor end to end, a
+      lesson's Listening step, the final test.)*
 - [ ] The character picker mixes the cast's painted faces with ten flat
       emoji-style ones, so it looks like two different apps. Either draw the
       supporting characters in the cast's style (OpenAI credit), or offer
       only the drawn ones.
-- [ ] See the dark theme on a real device. It has never been looked at
-      outside the contrast audit.
+- [x] See the dark theme on a device: walked on the emulator
+      (2026-10-01). The path, cards, sheets and brand colour hold up.
 - [ ] Listen for the things no test can hear:
   - the stress on word-building fragments
   - the word-ending clips cut from recordings

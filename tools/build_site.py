@@ -1241,9 +1241,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     add_video_lines(speech, units, lambda s, t: measure_sentences(
         s, t, index, key_units, lemmas, unit_pos, {}, {}, {}), stats)
 
-    # Listening passages: spans of real video, 45 s each, with the curriculum
-    # words they say (tools/build_listening.py). Shipped whole — which passage
-    # suits which learner is decided in the app, against what they have met.
+    # The written conversations (data/curated/scripts/, §30l), keyed by lesson.
     scripts = load_scripts(stats)
 
     senses = load_senses(lemmas, stats, key_rank)

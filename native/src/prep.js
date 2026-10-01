@@ -106,13 +106,13 @@ export function WordSections({ words, renderWords, testID = "cluster" }) {
     <View key={c.id} testID={`${testID}-${c.id}`} style={{ marginTop: k ? 26 : 12 }}>
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8, paddingBottom: 6,
                      borderBottomWidth: 2, borderBottomColor: t.line }}>
-        <Text style={{ color: t.ink, fontSize: 19, fontWeight: "800" }}>{c.name}</Text>
+        <Text accessibilityRole="header" style={{ color: t.ink, fontSize: 19, fontWeight: "800" }}>{c.name}</Text>
         <Muted>{String(c.words.length)}</Muted>
       </View>
       {c.groups.map((grp) => (
         <View key={grp.name || "_"} testID={`group-${grp.name || c.id}`} style={{ marginTop: 12 }}>
           {grp.name ? (
-            <Text style={{ color: t.brand, fontSize: 13, fontWeight: "700", letterSpacing: 0.6,
+            <Text accessibilityRole="header" style={{ color: t.brand, fontSize: 13, fontWeight: "700", letterSpacing: 0.6,
                            textTransform: "uppercase", marginBottom: 2 }}>{grp.name}</Text>
           ) : null}
           {renderWords(grp.words, grp)}

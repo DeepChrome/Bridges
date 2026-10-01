@@ -120,7 +120,6 @@ export const WORD_ART = {
   "разный": require("../assets/wordart/w29cbbabd74.webp"),
   "каждый": require("../assets/wordart/wb3c20263d8.webp"),
   "сам": require("../assets/wordart/w6d02394f98.webp"),
-  "страна": require("../assets/wordart/w132877adc0.webp"),
   "Россия": require("../assets/wordart/w3d9a48af9c.webp"),
   "мир": require("../assets/wordart/w88eed5cb38.webp"),
   "история": require("../assets/wordart/w9d4bd15d6a.webp"),

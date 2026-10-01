@@ -21,7 +21,7 @@
 import { EVERYONE } from "./cast.js";
 
 /* Since 2026-09-30 the people in the scenarios are the cast (core/cast.js):
-   Teddy, his family, Yuri, and the neighbourhood. The table is built from the
+   Teddy, his family, Monka, and the neighbourhood. The table is built from the
    cast, so a name a writer reaches for that is not a character fails the
    checker instead of quietly putting a stranger in the story. */
 export const PEOPLE = Object.fromEntries(EVERYONE.map((c) => [c.ru, { en: c.en, sex: c.sex }]));

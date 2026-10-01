@@ -70,6 +70,10 @@ export const ACTIVITY_ICONS = {
      on a word to come back to. Statistics: three bars on a baseline. */
   trouble: "M5 21V4M5 4h11l-2 4 2 4H5",
   stats: "M4 20h16M7 20v-6M12 20V8M17 20v-9",
+  /* This chapter's grammar: a target — practice aimed at one point. It had
+     borrowed the conjugation table, which then marked two rows in one list,
+     and the chapter's point is as often a case as a verb. */
+  aim: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 7.5a4.5 4.5 0 1 0 0 9a4.5 4.5 0 1 0 0-9zM12 11a1 1 0 1 0 0 2a1 1 0 1 0 0-2z",
 };
 
 export const iconFor = (id) =>

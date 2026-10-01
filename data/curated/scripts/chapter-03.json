@@ -62,8 +62,8 @@
     },
     {
      "s": "a",
-     "ru": "Тедди, так ты в ресторан не идёшь.",
-     "en": "Teddy, you're not going to the restaurant like that."
+     "ru": "Тедди, если шапки нет, ты в ресторан не идёшь.",
+     "en": "Teddy, if there's no hat, you're not going to the restaurant."
     },
     {
      "s": "c",
@@ -97,8 +97,8 @@
     },
     {
      "s": "c",
-     "ru": "Лестница там, у машины.",
-     "en": "The ladder is over there, by the car."
+     "ru": "Вот она, лестница, там, у машины.",
+     "en": "There it is, the ladder, over there by the car."
     },
     {
      "s": "b",
@@ -217,8 +217,8 @@
    "lines": [
     {
      "s": "a",
-     "ru": "Тедди, мы идём к маме в банк. Где мой галстук?",
-     "en": "Teddy, we're going to Mom's bank. Where's my tie?"
+     "ru": "Тедди, сегодня мы идём к маме в банк. Где мой галстук?",
+     "en": "Teddy, today we're going to Mom's bank. Where's my tie?"
     },
     {
      "s": "b",
@@ -227,8 +227,8 @@
     },
     {
      "s": "a",
-     "ru": "Смотрел. В шкафу его нет, и в машине нет.",
-     "en": "I looked. It isn't in the wardrobe, and it isn't in the car."
+     "ru": "Конечно, смотрел. В шкафу его нет, и в машине нет.",
+     "en": "Of course I looked. It isn't in the wardrobe, and it isn't in the car."
     },
     {
      "s": "b",

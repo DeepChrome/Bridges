@@ -36,10 +36,6 @@
     {
      "ru": "триста",
      "en": "three hundred"
-    },
-    {
-     "ru": "вода",
-     "en": "water"
     }
    ],
    "lines": [
@@ -80,18 +76,18 @@
     },
     {
      "s": "b",
-     "ru": "Тогда я знаю, где такие цветы бывают. У воды, на той стороне.",
-     "en": "Then I know where flowers like that grow. By the water, on the other side."
+     "ru": "Тогда я знаю, где такие цветы бывают. В лесу, на той стороне.",
+     "en": "Then I know where flowers like that grow. In the wood, on the other side."
     },
     {
      "s": "a",
-     "ru": "У воды? И их можно просто взять?",
-     "en": "By the water? And you can just take them?"
+     "ru": "В лесу? Интересно. И их можно просто взять?",
+     "en": "In the wood? Interesting. And you can just take them?"
     },
     {
      "s": "b",
-     "ru": "Можно. Там они ничего не стоят — и конец истории.",
-     "en": "You can. There they cost nothing, and that's the end of it."
+     "ru": "Можно. Там очень красиво, и цветы ничего не стоят.",
+     "en": "You can. It's very beautiful there, and the flowers cost nothing."
     },
     {
      "s": "a",
@@ -115,8 +111,8 @@
     },
     {
      "s": "a",
-     "ru": "Хорошо. Цветы с той стороны, а деньги в банк. Идём!",
-     "en": "All right. Flowers from the other side, and the money in the bank. Let's go!"
+     "ru": "Ладно. Цветы с той стороны, а деньги в банк. Идём!",
+     "en": "Okay. Flowers from the other side, and the money in the bank. Let's go!"
     }
    ],
    "questions": [
@@ -153,7 +149,7 @@
     {
      "ask": "Where will Teddy get the flowers?",
      "options": [
-      "On the far side, by water",
+      "In a wood on the far side",
       "In the shop near the bank",
       "From Belka's own garden",
       "At a market in the town"

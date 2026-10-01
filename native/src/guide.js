@@ -1,4 +1,4 @@
-/* Yuri on screen.
+/* Teddy on screen.
  *
  * The rules about when he speaks live in `core/guide.js`; the pictures are
  * bought by tools/build_guide_art.mjs (2026-09-30) and replaced a hand-written
@@ -30,7 +30,7 @@ export function Guide({ pose = "idle", size = 72, style }) {
   );
 }
 
-/* Yuri arriving — used where he is the reward rather than the furniture. */
+/* Teddy arriving — used where he is the reward rather than the furniture. */
 export function GuidePop({ pose = "cheer", size = 72, delay = 0, style }) {
   const anim = usePop([pose], { delay });
   return (

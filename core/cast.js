@@ -78,7 +78,7 @@ export const SUPPORTING = [
     persona: "The old wise turtle next door. Slow, patient, never wrong.",
     voice: "ru-RU-Chirp3-HD-Kore", avatar: "tortila" },
   { id: "gena", ru: "Гена", en: "Gena", sex: "m", species: "crocodile",
-    persona: "The grumpy crocodile who runs the corner shop. Not a morning crocodile.",
+    persona: "The grumpy crocodile who runs the corner shop, with a few café tables at the back. Not a morning crocodile.",
     voice: "ru-RU-Chirp3-HD-Orus", avatar: "gena" },
   { id: "lisa", ru: "Лиса", en: "Lisa", sex: "f", species: "fox",
     persona: "A sly fox, sometimes Monka's partner in a scheme — and quicker than him to switch sides.",

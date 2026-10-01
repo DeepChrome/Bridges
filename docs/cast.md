@@ -54,7 +54,8 @@ the four above are the story.
 - **Белка — Belka**, a red squirrel, Nezha's best friend. Quick, chatty,
   knows everyone's news, hides snacks everywhere. Voice: Zephyr.
 - **Тортила — Tortila**, the old wise turtle. Slow, patient, never wrong.
-- **Гена — Gena**, the grumpy crocodile at the corner shop.
+- **Гена — Gena**, the grumpy crocodile at the corner shop, which has a few
+  café tables at the back — so a scene can buy from him or eat at his place.
 - **Лиса — Lisa**, a sly fox; sometimes Monka's partner in a scheme, and
   quicker than him to switch sides.
 - **Миша — Misha**, a big warm bear in a winter hat.

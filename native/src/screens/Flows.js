@@ -407,7 +407,7 @@ export function QuizFlow({ route, navigation }) {
           : `${result.right} of ${result.total} right`}
         score={result.score}
         passed={passed}
-        /* The end of a lesson quiz is where Yuri belongs and the drills are
+        /* The end of a lesson quiz is where Teddy belongs and the drills are
            where he does not: this is the moment a lesson closes, and he stays
            worth seeing only by not being on every results screen in the app. */
         guide={relief ? "scraped" : passed ? "passed" : "failed"}
@@ -596,7 +596,7 @@ export function DrillList({ navigation }) {
         {grammarUnit ? (
           <Row testID="chapter-grammar"
                onPress={() => navigation.navigate("GrammarRun", { unitId: grammarUnit.id })}>
-            <Thumb id="conjugation" tone="good" />
+            <Thumb id="aim" tone="good" />
             <View style={{ flex: 1 }}>
               <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>This chapter's grammar</Text>
               <Muted numberOfLines={1}>{grammarNoteOf(grammarUnit).title}</Muted>

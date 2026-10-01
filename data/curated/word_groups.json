@@ -382,8 +382,8 @@
    "words": [
     "комната",
     "кухня",
-    "квартира",
-    "этаж"
+    "спальня",
+    "квартира"
    ]
   },
   {
@@ -415,7 +415,7 @@
   },
   {
    "kind": "verb",
-   "name": "Body positions",
+   "name": "Resting",
    "words": [
     "сидеть",
     "лежать",
@@ -424,7 +424,7 @@
   },
   {
    "kind": "verb",
-   "name": "Giving and seeing",
+   "name": "Giving and looking",
    "words": [
     "давать",
     "выглядеть"
@@ -432,15 +432,9 @@
   },
   {
    "kind": "describing",
-   "name": "Size",
+   "name": "Adjectives",
    "words": [
-    "большой"
-   ]
-  },
-  {
-   "kind": "describing",
-   "name": "Which",
-   "words": [
+    "большой",
     "который"
    ]
   }
@@ -981,6 +975,22 @@
  ],
  "clothes": [
   {
+   "kind": "verb",
+   "name": "Getting dressed",
+   "words": [
+    "одеваться",
+    "надеть",
+    "снять"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Sensing",
+   "words": [
+    "чувствовать"
+   ]
+  },
+  {
    "kind": "noun",
    "name": "Clothes",
    "words": [
@@ -994,7 +1004,8 @@
     "костюм",
     "пиджак",
     "куртка",
-    "пальто"
+    "пальто",
+    "галстук"
    ]
   },
   {
@@ -1010,39 +1021,22 @@
    "kind": "noun",
    "name": "Accessories",
    "words": [
-    "карман",
-    "галстук",
-    "кольцо"
+    "шапка",
+    "шарф",
+    "карман"
    ]
   },
   {
    "kind": "noun",
-   "name": "Truth and childhood",
+   "name": "Life and truth",
    "words": [
     "правда",
     "детство"
    ]
   },
   {
-   "kind": "verb",
-   "name": "Getting dressed",
-   "words": [
-    "одеваться",
-    "надеть",
-    "снять"
-   ]
-  },
-  {
-   "kind": "verb",
-   "name": "Feeling and going",
-   "words": [
-    "чувствовать",
-    "выходить"
-   ]
-  },
-  {
    "kind": "describing",
-   "name": "Looks",
+   "name": "Looks and size",
    "words": [
     "красивый",
     "высокий",
@@ -1289,12 +1283,13 @@
    "name": "Buying and selling",
    "words": [
     "покупать",
-    "продавать"
+    "продавать",
+    "продать"
    ]
   },
   {
    "kind": "verb",
-   "name": "Deciding and showing",
+   "name": "Solving and showing",
    "words": [
     "решить",
     "показывать"
@@ -1302,11 +1297,29 @@
   },
   {
    "kind": "noun",
-   "name": "Money",
+   "name": "Companies and trade",
+   "words": [
+    "бизнес",
+    "компания",
+    "рынок",
+    "клиент",
+    "сделка",
+    "реклама"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Prices and costs",
    "words": [
     "цена",
     "стоимость",
-    "евро",
+    "евро"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Money and debt",
+   "words": [
     "доход",
     "налог",
     "долг",
@@ -1315,20 +1328,7 @@
   },
   {
    "kind": "noun",
-   "name": "Business",
-   "words": [
-    "компания",
-    "бизнес",
-    "рынок",
-    "клиент",
-    "сделка",
-    "реклама",
-    "изделие"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "Economy",
+   "name": "Economy and funds",
    "words": [
     "экономика",
     "бюджет",
@@ -1338,14 +1338,14 @@
   },
   {
    "kind": "noun",
-   "name": "Problem",
+   "name": "Problems",
    "words": [
     "проблема"
    ]
   },
   {
    "kind": "describing",
-   "name": "Business and finance",
+   "name": "Business fields",
    "words": [
     "деловой",
     "финансовый",
@@ -1354,7 +1354,7 @@
   },
   {
    "kind": "describing",
-   "name": "Describing things",
+   "name": "Degree and extent",
    "words": [
     "лучший",
     "последний",
@@ -1366,26 +1366,13 @@
  "emotion": [
   {
    "kind": "verb",
-   "name": "Mind and memory",
+   "name": "Thinking",
    "words": [
     "понять",
-    "подумать",
-    "узнать",
     "помнить",
     "забыть",
+    "узнать",
     "обсуждать"
-   ]
-  },
-  {
-   "kind": "verb",
-   "name": "Liking and fearing",
-   "words": [
-    "понравиться",
-    "хотеться",
-    "бояться",
-    "волноваться",
-    "гордиться",
-    "ненавидеть"
    ]
   },
   {
@@ -1394,12 +1381,32 @@
    "words": [
     "смеяться",
     "плакать",
-    "скучать"
+    "скучать",
+    "устать"
    ]
   },
   {
    "kind": "verb",
-   "name": "Doing things",
+   "name": "Fear and worry",
+   "words": [
+    "бояться",
+    "волноваться",
+    "нервничать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Liking and hating",
+   "words": [
+    "понравиться",
+    "хотеться",
+    "гордиться",
+    "ненавидеть"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Going and spending",
    "words": [
     "пойти",
     "проводить"
@@ -1407,18 +1414,17 @@
   },
   {
    "kind": "noun",
-   "name": "Feelings",
+   "name": "Emotions",
    "words": [
     "радость",
     "любовь",
     "страх",
-    "смех",
-    "настроение"
+    "смех"
    ]
   },
   {
    "kind": "noun",
-   "name": "Thoughts",
+   "name": "Ideas and opinions",
    "words": [
     "идея",
     "мнение"
@@ -1426,15 +1432,9 @@
   },
   {
    "kind": "noun",
-   "name": "Friend",
+   "name": "Friends and films",
    "words": [
-    "подруга"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "Film",
-   "words": [
+    "подруга",
     "фильм"
    ]
   },
@@ -1577,10 +1577,11 @@
     "голова",
     "лицо",
     "глаз",
+    "нос",
     "рот",
     "зуб",
-    "волос",
-    "мозг"
+    "ухо",
+    "волос"
    ]
   },
   {
@@ -1596,19 +1597,13 @@
   },
   {
    "kind": "noun",
-   "name": "Torso",
+   "name": "Body and trunk",
    "words": [
     "тело",
     "грудь",
     "спина",
     "живот",
-    "сердце"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "Skin and blood",
-   "words": [
+    "сердце",
     "кожа",
     "кровь"
    ]
@@ -1628,8 +1623,7 @@
    "name": "Illness and care",
    "words": [
     "болеть",
-    "лечить",
-    "мёрзнуть"
+    "лечить"
    ]
   },
   {
@@ -1644,7 +1638,13 @@
    "name": "Health states",
    "words": [
     "здоровый",
-    "больной",
+    "больной"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Of the head",
+   "words": [
     "головной"
    ]
   }
@@ -1652,18 +1652,13 @@
  "animals": [
   {
    "kind": "noun",
-   "name": "Animals",
-   "words": [
-    "животное",
-    "порода"
-   ]
-  },
-  {
-   "kind": "noun",
    "name": "Pets",
    "words": [
     "собака",
-    "кошка"
+    "кошка",
+    "кролик",
+    "мышь",
+    "черепаха"
    ]
   },
   {
@@ -1671,12 +1666,10 @@
    "name": "Farm animals",
    "words": [
     "корова",
-    "лошадь",
-    "конь",
     "бык",
+    "конь",
     "коза",
-    "свинья",
-    "курица"
+    "свинья"
    ]
   },
   {
@@ -1685,10 +1678,12 @@
    "words": [
     "волк",
     "медведь",
+    "лиса",
+    "заяц",
+    "белка",
     "слон",
     "обезьяна",
-    "мышь",
-    "мышка"
+    "крокодил"
    ]
   },
   {
@@ -1696,24 +1691,18 @@
    "name": "Birds and insects",
    "words": [
     "птица",
+    "сова",
     "бабочка",
     "насекомое"
    ]
   },
   {
    "kind": "noun",
-   "name": "Animal parts",
+   "name": "Animal words",
    "words": [
-    "лапа",
-    "крыло"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "Animal homes",
-   "words": [
-    "клетка",
-    "гнездо"
+    "животное",
+    "порода",
+    "клетка"
    ]
   },
   {
@@ -1725,16 +1714,22 @@
   },
   {
    "kind": "verb",
-   "name": "Actions",
+   "name": "Eating",
    "words": [
     "кормить",
-    "съесть",
+    "съесть"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Moving",
+   "words": [
     "бегать"
    ]
   },
   {
    "kind": "describing",
-   "name": "Hungry",
+   "name": "Hunger",
    "words": [
     "голодный"
    ]
@@ -2143,48 +2138,42 @@
   },
   {
    "kind": "noun",
-   "name": "Weather",
+   "name": "Water",
    "words": [
-    "погода",
-    "снег",
-    "ветер",
-    "градус"
+    "река",
+    "озеро",
+    "море"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Land and plants",
+   "words": [
+    "земля",
+    "гора",
+    "дерево",
+    "трава",
+    "цветок",
+    "сад"
    ]
   },
   {
    "kind": "noun",
    "name": "In the sky",
    "words": [
+    "небо",
     "солнце",
     "звезда"
    ]
   },
   {
    "kind": "noun",
-   "name": "Water",
+   "name": "Weather",
    "words": [
-    "река",
-    "море",
-    "озеро",
-    "берег"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "Land",
-   "words": [
-    "земля",
-    "гора",
-    "поле"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "Plants",
-   "words": [
-    "дерево",
-    "трава",
-    "сад"
+    "погода",
+    "снег",
+    "ветер",
+    "градус"
    ]
   },
   {
@@ -2197,7 +2186,7 @@
   },
   {
    "kind": "verb",
-   "name": "Giving and going on",
+   "name": "Giving and continuing",
    "words": [
     "дать",
     "продолжать"
@@ -2205,7 +2194,7 @@
   },
   {
    "kind": "describing",
-   "name": "Weather descriptions",
+   "name": "Weather words",
    "words": [
     "холодный",
     "солнечный",
@@ -2214,7 +2203,7 @@
   },
   {
    "kind": "describing",
-   "name": "Qualities",
+   "name": "Nice, long, general",
    "words": [
     "приятный",
     "долгий",
@@ -2224,29 +2213,12 @@
  ],
  "core8": [
   {
-   "kind": "verb",
-   "name": "Doing things",
+   "kind": "noun",
+   "name": "Celebration",
    "words": [
-    "заниматься",
-    "добавлять",
-    "проходить"
-   ]
-  },
-  {
-   "kind": "verb",
-   "name": "Becoming and staying",
-   "words": [
-    "становиться",
-    "получаться",
-    "оставаться"
-   ]
-  },
-  {
-   "kind": "verb",
-   "name": "Communicating",
-   "words": [
-    "общаться",
-    "поддерживать"
+    "праздник",
+    "повод",
+    "настроение"
    ]
   },
   {
@@ -2255,15 +2227,9 @@
    "words": [
     "блюдо",
     "рецепт",
-    "картошка"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "Celebrations",
-   "words": [
-    "праздник",
-    "повод"
+    "картошка",
+    "курица",
+    "секрет"
    ]
   },
   {
@@ -2271,13 +2237,37 @@
    "name": "Ideas",
    "words": [
     "упражнение",
-    "секрет",
     "образ"
    ]
   },
   {
+   "kind": "verb",
+   "name": "Doing",
+   "words": [
+    "заниматься",
+    "добавлять"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Going",
+   "words": [
+    "выходить",
+    "проходить"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Becoming",
+   "words": [
+    "становиться",
+    "получаться",
+    "оставаться"
+   ]
+  },
+  {
    "kind": "describing",
-   "name": "Holiday and food",
+   "name": "Dish descriptions",
    "words": [
     "праздничный",
     "сливочный",
@@ -2303,11 +2293,11 @@
   },
   {
    "kind": "little",
-   "name": "Place",
+   "name": "Linking words",
    "words": [
-    "рядом",
-    "между",
-    "туда"
+    "итак",
+    "либо",
+    "во-первых"
    ]
   },
   {
@@ -2316,7 +2306,6 @@
    "words": [
     "особенно",
     "особо",
-    "слишком",
     "скорее",
     "примерно"
    ]
@@ -2332,64 +2321,23 @@
   },
   {
    "kind": "little",
-   "name": "Linking words",
+   "name": "Place",
    "words": [
-    "итак",
-    "либо",
-    "во-первых"
+    "рядом",
+    "между",
+    "туда"
    ]
   },
   {
    "kind": "little",
-   "name": "Bad and forbidden",
+   "name": "Not good",
    "words": [
-    "нельзя",
-    "плохо"
+    "плохо",
+    "нельзя"
    ]
   }
  ],
  "sport": [
-  {
-   "kind": "verb",
-   "name": "Winning",
-   "words": [
-    "выиграть",
-    "победить",
-    "завоевать"
-   ]
-  },
-  {
-   "kind": "verb",
-   "name": "Ball actions",
-   "words": [
-    "бросать",
-    "ловить",
-    "падать"
-   ]
-  },
-  {
-   "kind": "verb",
-   "name": "Swimming",
-   "words": [
-    "плавать"
-   ]
-  },
-  {
-   "kind": "verb",
-   "name": "Memory",
-   "words": [
-    "вспоминать",
-    "забывать"
-   ]
-  },
-  {
-   "kind": "verb",
-   "name": "Coming and starting",
-   "words": [
-    "начаться",
-    "вернуться"
-   ]
-  },
   {
    "kind": "noun",
    "name": "Sports",
@@ -2399,7 +2347,17 @@
     "баскетбол",
     "теннис",
     "плавание",
-    "бег"
+    "бег",
+    "лыжа"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Games and contests",
+   "words": [
+    "игра",
+    "матч",
+    "чемпионат"
    ]
   },
   {
@@ -2413,26 +2371,51 @@
   },
   {
    "kind": "noun",
-   "name": "Competitions",
-   "words": [
-    "игра",
-    "матч",
-    "чемпионат"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "Places and things",
+   "name": "Places and gear",
    "words": [
     "стадион",
-    "бассейн",
     "мяч",
     "игрушка"
    ]
   },
   {
+   "kind": "verb",
+   "name": "Winning",
+   "words": [
+    "выиграть",
+    "победить",
+    "завоевать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Sport actions",
+   "words": [
+    "бросать",
+    "ловить",
+    "падать",
+    "плавать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Memory",
+   "words": [
+    "вспоминать",
+    "забывать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Starting and returning",
+   "words": [
+    "начаться",
+    "вернуться"
+   ]
+  },
+  {
    "kind": "describing",
-   "name": "Describing",
+   "name": "Special and cultural",
    "words": [
     "особенный",
     "культурный",
@@ -2534,76 +2517,26 @@
  ],
  "core9": [
   {
-   "kind": "describing",
-   "name": "Colours",
+   "kind": "verb",
+   "name": "Getting dressed",
    "words": [
-    "белый",
-    "чёрный",
-    "зелёный",
-    "яркий",
-    "светлый"
+    "надевать",
+    "одевать"
    ]
   },
   {
-   "kind": "describing",
-   "name": "Fashion styles",
+   "kind": "verb",
+   "name": "Preferences and effort",
    "words": [
-    "модный",
-    "классический",
-    "спортивный",
-    "удобный",
-    "одетый"
-   ]
-  },
-  {
-   "kind": "describing",
-   "name": "Size and degree",
-   "words": [
-    "широкий",
-    "средний",
-    "частый"
-   ]
-  },
-  {
-   "kind": "little",
-   "name": "Time and manner",
-   "words": [
-    "быстро",
-    "вчера",
-    "вдруг"
-   ]
-  },
-  {
-   "kind": "little",
-   "name": "Place and direction",
-   "words": [
-    "над",
-    "около",
-    "домой",
-    "сверху",
-    "откуда"
-   ]
-  },
-  {
-   "kind": "little",
-   "name": "Opinion and hedging",
-   "words": [
-    "по-моему",
-    "вроде",
-    "всё-таки",
-    "немного"
-   ]
-  },
-  {
-   "kind": "little",
-   "name": "Exclamations",
-   "words": [
-    "ой"
+    "предпочитать",
+    "стараться",
+    "приходиться",
+    "следить"
    ]
   },
   {
    "kind": "noun",
-   "name": "Fashion",
+   "name": "Fashion and style",
    "words": [
     "мода",
     "стиль",
@@ -2628,54 +2561,91 @@
    ]
   },
   {
-   "kind": "verb",
-   "name": "Clothing",
+   "kind": "describing",
+   "name": "Style",
    "words": [
-    "надевать",
-    "одевать"
+    "модный",
+    "классический",
+    "спортивный",
+    "удобный",
+    "одетый"
    ]
   },
   {
-   "kind": "verb",
-   "name": "Effort and choice",
+   "kind": "describing",
+   "name": "Colours",
    "words": [
-    "предпочитать",
-    "стараться",
-    "приходиться",
-    "следить"
+    "белый",
+    "чёрный",
+    "зелёный",
+    "светлый",
+    "яркий"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Size and frequency",
+   "words": [
+    "широкий",
+    "средний",
+    "частый"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Opinions",
+   "words": [
+    "по-моему",
+    "вроде",
+    "всё-таки",
+    "ой"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "How much",
+   "words": [
+    "немного",
+    "слишком"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Speed and time",
+   "words": [
+    "быстро",
+    "вчера",
+    "вдруг"
+   ]
+  },
+  {
+   "kind": "little",
+   "name": "Place and direction",
+   "words": [
+    "над",
+    "около",
+    "сверху",
+    "домой"
    ]
   }
  ],
  "religion": [
   {
    "kind": "noun",
-   "name": "Faith",
+   "name": "Holidays",
    "words": [
-    "религия",
-    "вера",
-    "бог",
-    "ангел",
-    "библия"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "Church",
-   "words": [
-    "церковь",
-    "храм",
-    "икона",
-    "распятие"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "Celebrations",
-   "words": [
+    "рождество",
     "пасха",
-    "свадьба",
+    "пост",
+    "свадьба"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Tradition",
+   "words": [
     "традиция",
-    "пост"
+    "искусство"
    ]
   },
   {
@@ -2688,12 +2658,38 @@
   },
   {
    "kind": "noun",
-   "name": "Ideas",
+   "name": "Faith",
+   "words": [
+    "религия",
+    "вера",
+    "бог",
+    "ангел"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Places of worship",
+   "words": [
+    "церковь",
+    "храм"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Religious items",
+   "words": [
+    "икона",
+    "распятие",
+    "библия"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Feelings and ties",
    "words": [
     "счастье",
     "связь",
-    "атмосфера",
-    "искусство"
+    "атмосфера"
    ]
   },
   {
@@ -2705,7 +2701,7 @@
   },
   {
    "kind": "verb",
-   "name": "Praying",
+   "name": "Believing",
    "words": [
     "верить",
     "молиться"
@@ -2722,10 +2718,10 @@
   },
   {
    "kind": "verb",
-   "name": "Starting and taking",
+   "name": "Everyday verbs",
    "words": [
-    "начинаться",
-    "принимать"
+    "принимать",
+    "начинаться"
    ]
   },
   {
@@ -2733,8 +2729,7 @@
    "name": "Religious",
    "words": [
     "религиозный",
-    "христианский",
-    "божий"
+    "христианский"
    ]
   }
  ],
@@ -2747,6 +2742,7 @@
     "заболевание",
     "симптом",
     "диагноз",
+    "кашель",
     "вирус",
     "стресс"
    ]
@@ -2763,24 +2759,16 @@
    "kind": "noun",
    "name": "Treatment",
    "words": [
-    "лечение",
     "лекарство",
     "таблетка",
     "вакцина",
+    "лечение",
     "операция"
    ]
   },
   {
    "kind": "noun",
-   "name": "Places",
-   "words": [
-    "больница",
-    "клиника"
-   ]
-  },
-  {
-   "kind": "noun",
-   "name": "People",
+   "name": "Medical people",
    "words": [
     "пациент",
     "специалист",
@@ -2789,7 +2777,15 @@
   },
   {
    "kind": "noun",
-   "name": "Medicine",
+   "name": "Medical places",
+   "words": [
+    "больница",
+    "клиника"
+   ]
+  },
+  {
+   "kind": "noun",
+   "name": "Medicine and state",
    "words": [
     "медицина",
     "состояние",
@@ -2801,13 +2797,20 @@
    "name": "Health actions",
    "words": [
     "выздоравливать",
-    "рекомендовать",
-    "пользоваться"
+    "рекомендовать"
+   ]
+  },
+  {
+   "kind": "verb",
+   "name": "Using and talking",
+   "words": [
+    "пользоваться",
+    "общаться"
    ]
   },
   {
    "kind": "describing",
-   "name": "People's age",
+   "name": "Age",
    "words": [
     "молодой",
     "взрослый"
@@ -2819,16 +2822,17 @@
    "words": [
     "платный"
    ]
-  },
-  {
-   "kind": "describing",
-   "name": "Pointing out",
-   "words": [
-    "сей"
-   ]
   }
  ],
  "core10": [
+  {
+   "kind": "verb",
+   "name": "Answering and deciding",
+   "words": [
+    "отвечать",
+    "решать"
+   ]
+  },
   {
    "kind": "verb",
    "name": "Gathering",
@@ -2837,14 +2841,6 @@
     "собрать",
     "собираться",
     "набрать"
-   ]
-  },
-  {
-   "kind": "verb",
-   "name": "Answering and deciding",
-   "words": [
-    "отвечать",
-    "решать"
    ]
   },
   {
@@ -2877,7 +2873,7 @@
   },
   {
    "kind": "noun",
-   "name": "Name and result",
+   "name": "Names and results",
    "words": [
     "название",
     "результат",
@@ -2886,18 +2882,18 @@
   },
   {
    "kind": "describing",
-   "name": "Size",
-   "words": [
-    "малый",
-    "великий"
-   ]
-  },
-  {
-   "kind": "describing",
    "name": "Dry and wet",
    "words": [
     "сухой",
     "сырой"
+   ]
+  },
+  {
+   "kind": "describing",
+   "name": "Size",
+   "words": [
+    "малый",
+    "великий"
    ]
   },
   {
@@ -2911,41 +2907,35 @@
    "kind": "little",
    "name": "Time",
    "words": [
-    "завтра",
     "раньше",
+    "завтра",
     "однажды",
-    "рано"
+    "рано",
+    "постепенно"
    ]
   },
   {
    "kind": "little",
-   "name": "Manner",
-   "words": [
-    "медленно",
-    "постепенно",
-    "спокойно",
-    "жалко"
-   ]
-  },
-  {
-   "kind": "little",
-   "name": "Amount",
+   "name": "Degree",
    "words": [
     "мало",
+    "довольно",
     "чуть-чуть",
-    "довольно"
+    "лишь",
+    "уж"
    ]
   },
   {
    "kind": "little",
-   "name": "Place",
+   "name": "Where",
    "words": [
-    "где-то"
+    "где-то",
+    "откуда"
    ]
   },
   {
    "kind": "little",
-   "name": "Prepositions",
+   "name": "Against and despite",
    "words": [
     "против",
     "несмотря"
@@ -2953,10 +2943,10 @@
   },
   {
    "kind": "little",
-   "name": "Particles",
+   "name": "Manner",
    "words": [
-    "лишь",
-    "уж"
+    "спокойно",
+    "жалко"
    ]
   }
  ],

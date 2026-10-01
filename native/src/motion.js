@@ -70,7 +70,7 @@ export function useEnter(deps = [], { delay = 0, distance = 10 } = {}) {
 }
 
 /* A pop: overshoot slightly, then settle. For the one thing on a screen that is
-   the reward — the score disc at the end of a lesson, Yuri on a clean answer. */
+   the reward — the score disc at the end of a lesson, Teddy on a clean answer. */
 export function usePop(deps = [], { delay = 0 } = {}) {
   const v = useRef(new Animated.Value(reduceMotion ? 1 : 0)).current;
   useEffect(() => {

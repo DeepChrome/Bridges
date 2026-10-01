@@ -165,20 +165,31 @@ async function main() {
   const todo = p.units.filter((u) => only ? only.split(",").includes(u.id)
                                           : !file[u.id] || (has("--stale") && !same(u)));
   console.log(`${todo.length} unit(s) to group with ${MODEL}`);
-  let spent = 0;
+  let spent = 0, failed = 0;
   // Four at a time: a unit is one request and the rest wait on the network.
   for (let k = 0; k < todo.length; k += 4) {
     const batch = todo.slice(k, k + 4);
-    const done = await Promise.all(batch.map((u) => groupUnit(u, wordsOf(u), chapterOf.get(u.id))));
+    // Settled, not all: one unit the model cannot group must not throw away
+    // the three beside it that it could.
+    const done = await Promise.allSettled(batch.map((u) => groupUnit(u, wordsOf(u), chapterOf.get(u.id))));
     batch.forEach((u, j) => {
-      file[u.id] = done[j].groups;
-      spent += done[j].tokens;
-      console.log(`  ${u.id}: ${done[j].groups.map((g) => `${g.name} ${g.words.length}`).join(" · ")}`);
+      if (done[j].status === "rejected") { failed++; console.log(`  !! ${done[j].reason.message}`); return; }
+      file[u.id] = done[j].value.groups;
+      spent += done[j].value.tokens;
+      console.log(`  ${u.id}: ${done[j].value.groups.map((g) => `${g.name} ${g.words.length}`).join(" · ")}`);
     });
-    // Written after every batch, so an interrupted run keeps what it bought.
-    const ordered = Object.fromEntries(p.units.filter((u) => file[u.id]).map((u) => [u.id, file[u.id]]));
+    // Written after every batch, so an interrupted run keeps what it bought —
+    // in payload order, with every key it did not touch kept as it was (a
+    // note, a unit the current build happens not to carry): this is a file a
+    // person edits, and a rewrite may not lose what it does not understand.
+    const ids = new Set(p.units.map((u) => u.id));
+    const ordered = Object.fromEntries([
+      ...Object.keys(file).filter((id) => !ids.has(id)).map((id) => [id, file[id]]),
+      ...p.units.filter((u) => file[u.id]).map((u) => [u.id, file[u.id]]),
+    ]);
     fs.writeFileSync(OUT, JSON.stringify(ordered, null, 1) + "\n");
   }
+  if (failed) { console.log(`!! ${failed} unit(s) left as they were`); process.exitCode = 1; }
   // Sonnet at $3 in / $15 out per million; output was weighed ×5 above.
   console.log(`wrote ${path.relative(ROOT, OUT)} · about $${(spent * 3 / 1e6).toFixed(2)}`);
 }

@@ -234,8 +234,8 @@ export function components(st, u, i) {
     { id: "quiz", label: "Quiz", score: l.q, tries: l.tries || 0, done: quizPassed(l) },
   ];
   if (u.v) out.push({ id: "video", label: "Video", done: !!s.video, shared: true });
-  /* The lesson's conversation, where one was written for it — 32 of the 168
-     (§30af). The owner, 2026-09-17: *"you can have them listed along with the
+  /* The lesson's conversation, where one was written for it — a couple a
+     chapter, on the spine (§30af). The owner, 2026-09-17: *"you can have them listed along with the
      lesson content..like where it says vocab lesson quiz video"*. It is listed
      as a step because that is where a learner looks for what a lesson contains;
      it is **optional** because making it required would un-finish lessons he has

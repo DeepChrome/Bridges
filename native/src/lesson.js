@@ -16,7 +16,7 @@
  *
  * So: each step now has its own shape and its own weight, the photograph runs to
  * the card's edges and is the top of it, everything arrives with a short rise
- * (`useEnter`), and Yuri (§30m) is present at the two moments that frame a
+ * (`useEnter`), and Teddy (§30m) is present at the two moments that frame a
  * lesson — meeting the set, and the rule the chapter turns on.
  *
  * §25's line holds: motion reinforces, it never delays. Nothing here waits on an
@@ -62,7 +62,7 @@ export function StepBar({ at, total }) {
 
 /* ------------------------------------------------------------- the word list */
 
-/* The whole set before the cards begin. Yuri opens the lesson here — the one
+/* The whole set before the cards begin. Teddy opens the lesson here — the one
    place a guide belongs, since this is the moment the learner is told what they
    are about to do — and the rows stagger in so the list reads as arriving rather
    than as having always been there. */
@@ -144,7 +144,7 @@ function WordRow({ i, unit, last, delay }) {
 /* ----------------------------------------------------------- the grammar note */
 
 /* The rule the chapter turns on. It gets the brand colour and a left edge, so a
-   rule does not look like a vocabulary card with different words in it, and Yuri
+   rule does not look like a vocabulary card with different words in it, and Teddy
    points at it rather than saying anything about it. */
 export function GrammarNote({ unit, note, at, total, onEpisode }) {
   const t = useTheme();

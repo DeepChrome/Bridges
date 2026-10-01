@@ -29,6 +29,7 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { durationMs } from "./mp3.mjs";
 import { castByName } from "../core/cast.js";
@@ -133,21 +134,28 @@ function toned(src, id, tone) {
   return existsSync(out) ? out : src;
 }
 
-function levelled(src, id, tone) {
+/* What a levelled copy was made with. It is part of the cache key, so moving
+   the target or changing the filter re-levels every clip rather than leaving
+   the old copies to be stitched as though they were current. */
+const LEVEL_TAG = createHash("sha1").update(JSON.stringify({ LEVEL, v: "loudnorm-linear-32k" })).digest("hex").slice(0, 6);
+
+function levelled(bought, id, tone) {
   const key = tone && (tone.pitch !== 1 || tone.tempo !== 1) ? `${id}.p${tone.pitch}-t${tone.tempo}` : id;
-  const out = join(LEVELS, `${key}.mp3`);
+  const out = join(LEVELS, `${key}.${LEVEL_TAG}.mp3`);
   if (existsSync(out)) return out;
-  src = toned(src, id, tone);
+  const src = toned(bought, id, tone);
   const m = measureLevel(src);
   // Unmeasurable (a clip that is silence, or ffmpeg refusing it): ship what
-  // was bought rather than ship nothing, and let the QA tool say so.
-  if (!m) return src;
+  // was bought rather than ship nothing, and let the QA tool say so. The
+  // bought MP3, not the toned work copy — that is a WAV, and the track is
+  // stitched by copying MP3 frames.
+  if (!m) return bought;
   ff("ffmpeg", ["-y", "-i", src, "-af",
     `loudnorm=I=${LEVEL.i}:TP=${LEVEL.tp}:LRA=${LEVEL.lra}`
     + `:measured_I=${m.i}:measured_TP=${m.tp}:measured_LRA=${m.lra}`
     + `:measured_thresh=${m.thresh}:offset=${m.offset}:linear=true`,
     "-ar", "24000", "-ac", "1", "-b:a", "32k", out]);
-  return existsSync(out) ? out : src;
+  return existsSync(out) ? out : bought;
 }
 
 /* Length in milliseconds, counted in frames rather than read from the header

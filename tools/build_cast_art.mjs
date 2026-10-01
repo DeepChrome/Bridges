@@ -42,6 +42,56 @@ const GUIDE_PX = 324;       // three times the largest size the guide is drawn (
 const SCENE_W = 900;        // a phone's width at 2.3x; the scene is a banner, not a poster
 const HALO = 96;            // alpha below this is the model's haze, not the drawing
 const FACE_PX = 192;        // an avatar is drawn at most 64 dp
+const WORD_PX = 400;        // a word picture's shipped size
+
+/* A word picture's green screen, keyed out (the model will not paint
+   transparency, so the words are drawn on #00FF00). ffmpeg's chromakey plus
+   despill did it at first and greyed every green thing in the drawing — the
+   dollar, Belka's scarf, the map — because despill pulls green down across the
+   whole frame. So only the screen goes: what is green *and connected to the
+   border* (a flood fill), plus pure key green anywhere (the gap under an arm),
+   with the spill corrected only on the pixels at the cut. `greenness` is how
+   far green stands above the other two channels. */
+const KEY_FILL = 90, KEY_PURE = 200, KEY_EDGE = 20;
+function keyGreen(px, w, h) {
+  const n = w * h, gone = new Uint8Array(n), g = (i) => px[i * 4 + 1] - Math.max(px[i * 4], px[i * 4 + 2]);
+  const stack = [];
+  for (let x = 0; x < w; x++) stack.push(x, (h - 1) * w + x);
+  for (let y = 0; y < h; y++) stack.push(y * w, y * w + w - 1);
+  while (stack.length) {
+    const i = stack.pop();
+    if (gone[i] || g(i) <= KEY_FILL) continue;
+    gone[i] = 1;
+    const x = i % w, y = (i - x) / w;
+    if (x > 0) stack.push(i - 1);
+    if (x < w - 1) stack.push(i + 1);
+    if (y > 0) stack.push(i - w);
+    if (y < h - 1) stack.push(i + w);
+  }
+  for (let i = 0; i < n; i++) if (g(i) > KEY_PURE) gone[i] = 1;
+  for (let i = 0; i < n; i++) {
+    if (gone[i]) { px[i * 4 + 3] = 0; continue; }
+    const x = i % w, y = (i - x) / w;
+    const edge = (x > 0 && gone[i - 1]) || (x < w - 1 && gone[i + 1]) || (y > 0 && gone[i - w]) || (y < h - 1 && gone[i + w]);
+    if (!edge || g(i) <= KEY_EDGE) continue;
+    // A blended edge pixel: partly the screen, so partly transparent, and its
+    // green brought down to the drawing's own level.
+    const s = Math.min(1, (g(i) - KEY_EDGE) / (KEY_FILL - KEY_EDGE));
+    px[i * 4 + 3] = Math.round(px[i * 4 + 3] * (1 - s));
+    px[i * 4 + 1] = Math.max(px[i * 4], px[i * 4 + 2]);
+  }
+  return px;
+}
+
+function shipWordPicture(src, dst) {
+  const png = fs.readFileSync(src);
+  const w = png.readUInt32BE(16), h = png.readUInt32BE(20);   // the IHDR chunk
+  const raw = execFileSync("ffmpeg", ["-v", "error", "-i", src, "-f", "rawvideo", "-pix_fmt", "rgba", "-"],
+    { maxBuffer: w * h * 4 + 1024 });
+  keyGreen(raw, w, h);
+  execFileSync("ffmpeg", ["-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", `${w}x${h}`, "-i", "-",
+    "-vf", `scale=${WORD_PX}:${WORD_PX}:flags=lanczos`, "-c:v", "libwebp", "-quality", "82", dst], { input: raw });
+}
 const FACE_BOX = {
   teddy: "720:720:100:0", nezha: "330:330:350:120", yarik: "330:330:300:10",
   monka: "440:440:285:30", belka: "480:480:160:40",
@@ -144,11 +194,21 @@ async function edit(prompt, refs, file, { size = "1024x1024", transparent = true
       await new Promise((r) => setTimeout(r, 5000 * tries));
     }
   }
-  const j = await res.json();
+  // A gateway error answers in HTML, not JSON: read the text, then parse it.
+  const body = await res.text();
+  let j;
+  try { j = JSON.parse(body); } catch { j = { error: { message: body.slice(0, 200) } }; }
+  // A server error is theirs and usually passes; three tries, then give up.
+  if (res.status >= 500 && waited < 3) {
+    console.log(`  ${res.status} from the API; retrying`);
+    await new Promise((r) => setTimeout(r, 10000 * (waited + 1)));
+    return edit(prompt, refs, file, { size, transparent, quality, waited: waited + 1 });
+  }
   /* The account's rate limit counts reference images a minute (five), and it
      says how long to wait; waiting is cheaper than losing a batch to it. */
-  // …but a 429 that says the credit is spent will not clear by waiting.
-  if (res.status === 429 && /quota|billing/i.test(JSON.stringify(j))) {
+  // …but a 429 that says the credit is spent will not clear by waiting. Read
+  // the code, not the prose: a rate-limit message mentions "quota" too.
+  if (res.status === 429 && j.error && j.error.code === "insufficient_quota") {
     console.error("OpenAI credit is used up — stopping; what was drawn is kept");
     process.exit(3);
   }
@@ -288,23 +348,25 @@ function ship() {
     execFileSync("ffmpeg", ["-v", "error", "-y", "-i", src, "-vf", `scale=${SCENE_W}:-2:flags=lanczos`, "-q:v", "4", dst]);
     shipped.push(unit);
   }
+  for (const f of fs.readdirSync(out)) if (!shipped.includes(f.replace(/\.jpg$/, ""))) { fs.unlinkSync(path.join(out, f)); console.log(`removed stale ${f}`); }
   // Word pictures: 400 px cut-outs as WebP with alpha (a PNG of each was
   // 230 KB, 45 MB for 197 — too much to carry in the app),
   // named by a short hash so the file name is ASCII (Android resources want it).
   const wdir = path.join(ROOT, "native", "assets", "wordart");
   fs.mkdirSync(wdir, { recursive: true });
-  const wlines = [];
+  const wlines = [], wanted = new Set();
   for (const word of Object.keys(WORDS)) {
     const src = path.join(ART, "words", `${word}.png`);
     if (!fs.existsSync(src)) continue;
     const name = "w" + createHash("sha1").update(word).digest("hex").slice(0, 10);
-    execFileSync("ffmpeg", ["-v", "error", "-y", "-i", src, "-vf",
-      // The model will not paint transparency, so the words are drawn on a
-      // green screen and keyed out here.
-      `chromakey=0x00FF00:0.13:0.06,despill=type=green,format=rgba,scale=400:400:flags=lanczos`,
-      "-c:v", "libwebp", "-quality", "82", path.join(wdir, `${name}.webp`)]);
+    shipWordPicture(src, path.join(wdir, `${name}.webp`));
+    wanted.add(`${name}.webp`);
     wlines.push(`  ${JSON.stringify(word)}: require("../assets/wordart/${name}.webp"),`);
   }
+  // A withdrawn picture (молоко's third paw) must leave the app too: Metro
+  // bundles what is required, but a stale file in the folder is a file the
+  // next reader takes for a shipped one.
+  for (const f of fs.readdirSync(wdir)) if (!wanted.has(f)) { fs.unlinkSync(path.join(wdir, f)); console.log(`removed stale ${f}`); }
   fs.writeFileSync(path.join(ROOT, "native", "src", "wordart.js"),
     "/* Generated by tools/build_cast_art.mjs --ship. Do not edit. Words drawn\n" +
     "   with the cast, preferred over a photograph (native/src/pictures.js). */\n" +

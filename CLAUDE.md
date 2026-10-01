@@ -5535,8 +5535,17 @@ What holds it together, and each is enforced rather than hoped for:
   photograph and needs no credit. **gpt-image-2 will not paint
   transparency** (`background: transparent` is refused, `auto` comes back
   opaque with a painted checkerboard), so a word is drawn on a #00FF00
-  screen and keyed out at ship (`chromakey`, `despill`); nothing bright green
-  may be in the picture. Only taught words, which `cast.test.js` holds.
+  screen and keyed out at ship. **Not with ffmpeg's `chromakey` + `despill`**:
+  despill pulls green down across the whole frame and greyed every green
+  thing in a drawing — the dollar, the paint, Belka's scarf. `keyGreen` in
+  the tool removes what is green *and connected to the border* (a flood fill)
+  plus pure key green anywhere (a gap under an arm), and corrects the spill
+  only on the pixels at the cut. Read a contact sheet on a dark background
+  after any change to it. A brief must not ask for a landscape or anything
+  bright green: the prompt also says "no scenery, nothing else bright green",
+  and страна came back as Teddy from behind with no country at all. `--ship`
+  deletes word and episode files nothing requires any more, so a withdrawn
+  picture leaves the app. Only taught words, which `cast.test.js` holds.
 - **The safety filter refuses "sexy".** The owner's brief for Nezha said
   "kind of sexy"; the prompt that leaned on it was refused, and "glamorous…
   a classic cartoon leading lady" drew what he meant.
@@ -5588,10 +5597,28 @@ three screens down.
   under nouns, or names a group "Other"; a person may edit the file.
   `--stale` regroups units whose words changed; **`--check` belongs in
   verification**, and `build_topics` names any word left ungrouped.
-- **Lessons teach a group whole** (`grouped` in `build_topics.py`): groups in
-  the order of their commonest word, each in its own order, so the first
-  lesson is still the commonest words, in the company they keep. `unit_words`
-  carries `grp`, `gkind`, `gord`; `build_site` ships them as `u.gr`.
+- **Lessons teach a group whole** (`grouped` and `pack` in `build_topics.py`).
+  A lesson is the next 5, 6 or 7 words of the unit (`LESSON_RAMP`, mirrored
+  from core), so keeping a group together is a packing problem, and ordering
+  groups by frequency alone cut **87 of 335** across two lessons. `pack`
+  plans each unit: groups earliest first (by their *median* word — one very
+  common member would drag a group of rare ones to the front), each lesson
+  filled exactly, backtracking when a choice strands the rest, and allowing
+  the fewest cuts a unit's sizes force (5, 5, 5, 3 into lessons of 6 must cut
+  one; a lesson cannot end early). Now **15 cut, each one unavoidable**, and
+  the build lists them. `unit_words` carries `grp`, `gkind`, `gord`;
+  `build_site` ships them as `u.gr`. A word filed under the wrong section for
+  its class is printed with `!!`, by the same rule `build_word_groups.mjs`
+  enforces.
+- **A curated keep outside the pool is brought in, and is its unit's alone**
+  (`build_topics.py`). The pool is the decks' commonest 4,000 lemmas, and
+  23 keeps — «лиса», «сова», «шарф», «нос» — were silently never placed,
+  because nothing outside it can be taken. They are read from the lexicon by
+  class now, and reserved: brought in only because a unit asked, they must
+  not be taken earlier by a spine unit whose video says them (the first cut
+  taught «крокодил» in chapter 2). Every keep or drop that does not take is
+  printed with its reason; a keep already taught earlier on the route is
+  listed separately, since an earlier unit winning is the rule.
 - **Every list draws them one way** (`WordSections` in `prep.js`): a section
   heading with its count and a rule, the group names in brand colour, the
   words under them — a lesson's word list, a summary, a video's list.

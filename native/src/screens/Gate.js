@@ -13,7 +13,7 @@
  *
  *   - **Sign in** — profiles exist. The mark, then the faces, largest thing on
  *     the screen, one tap in. That is the login.
- *   - **New here** — no profile yet. The mark draws itself, Yuri waves and
+ *   - **New here** — no profile yet. The mark draws itself, Teddy waves and
  *     introduces himself (the only screen besides the end of a lesson where he
  *     says anything at all — core/guide.js), then a character and a name.
  *   - **Where to start** — the placement offer, unchanged in substance.

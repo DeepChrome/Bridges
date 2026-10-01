@@ -25,13 +25,17 @@
     {
      "ru": "орех",
      "en": "nut"
+    },
+    {
+     "ru": "час",
+     "en": "hour"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Белка, концерт сегодня после обеда. А что это у тебя?",
-     "en": "Belka, the concert is today after lunch. And what's that you've got?"
+     "ru": "Белка, концерт сегодня, через час. А что это у тебя?",
+     "en": "Belka, the concert is today, in an hour. And what's that you've got?"
     },
     {
      "s": "b",
@@ -55,8 +59,8 @@
     },
     {
      "s": "a",
-     "ru": "Тедди, я знаю эти орехи. После них все смотрят на нас.",
-     "en": "Teddy, I know those nuts. After them, everybody looks at us."
+     "ru": "Тедди, я знаю эти орехи. После них многие смотрят на нас.",
+     "en": "Teddy, I know those nuts. After them, lots of people look at us."
     },
     {
      "s": "b",
@@ -70,8 +74,8 @@
     },
     {
      "s": "c",
-     "ru": "Тогда так: сначала обед, потом концерт!",
-     "en": "Then here's the plan: lunch first, then the concert!"
+     "ru": "Тогда лучше так: сначала обед, потом концерт!",
+     "en": "Then better like this: lunch first, then the concert!"
     },
     {
      "s": "b",
@@ -202,13 +206,13 @@
     },
     {
      "s": "c",
-     "ru": "Белка! Тедди! А что это у вас, завтрак?",
-     "en": "Belka! Teddy! And what's this you've got, breakfast?"
+     "ru": "Белка! Тедди! А что это у вас, обед?",
+     "en": "Belka! Teddy! And what's this you've got, lunch?"
     },
     {
      "s": "a",
-     "ru": "Завтрак, Монька. Тедди сейчас идёт на урок.",
-     "en": "Breakfast, Monka. Teddy's off to his lesson now."
+     "ru": "Завтрак, Монька. Тедди сейчас выйдет, у него урок.",
+     "en": "Breakfast, Monka. Teddy's about to head out, he has a lesson."
     },
     {
      "s": "b",
@@ -232,8 +236,8 @@
     },
     {
      "s": "c",
-     "ru": "Мне? Белка, в этой каше соль! Очень много соли!",
-     "en": "For me? Belka, there's salt in this porridge! A lot of salt!"
+     "ru": "Мне? Белка, в этой каше соль!",
+     "en": "For me? Belka, there's salt in this porridge!"
     },
     {
      "s": "a",

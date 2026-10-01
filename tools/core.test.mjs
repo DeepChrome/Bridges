@@ -1080,6 +1080,12 @@ group("lesson ramp");
   const web = readFileSync(join(ROOT, "tools/app/app.js"), "utf8").match(/const LESSON_RAMP = (\[[^\]]*\])/);
   ok(web && JSON.stringify(JSON.parse(web[1])) === JSON.stringify(LESSON_RAMP),
      "the web app's LESSON_RAMP matches core's", web && web[1]);
+  // …and the build packs word groups into lessons of the same sizes, so a
+  // group it keeps whole stays whole only if the app cuts where it planned.
+  const topics = readFileSync(join(ROOT, "tools/build_topics.py"), "utf8")
+    .match(/^LESSON_RAMP, LESSON_SIZE = (\[[^\]]*\]), (\d+)/m);
+  ok(topics && JSON.stringify(JSON.parse(topics[1])) === JSON.stringify(LESSON_RAMP) && +topics[2] === LESSON_SIZE,
+     "build_topics.py packs groups into core's lesson sizes", topics && topics[0]);
 }
 
 group("lesson generation");

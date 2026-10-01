@@ -205,7 +205,11 @@ export function sentencesToBuy(payload, audio, replace = SENTENCE_REPLACE) {
     seen.add(key);
     const file = files[key];
     if (file && !replace.has(src[file])) continue;
-    out.push({ key, text: bare(row[0]), was: file ? src[file] : null });
+    // A card's pattern example («стол → столы́») is two words, not a sentence:
+    // handed over as written, the engine read the arrow. A comma reads as the
+    // pause between them; the key stays the card's own text, which is what
+    // the app looks the clip up by.
+    out.push({ key, text: bare(row[0]).replace(/\s*→\s*/g, ", "), was: file ? src[file] : null });
   }
   return out;
 }

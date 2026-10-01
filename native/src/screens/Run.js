@@ -729,7 +729,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         // foot and an auto margin would have nothing left to push against.
         <Animated.View testID="verdict" style={[verdictIn, { paddingTop: 18 }]}>
           <Card style={tone ? { backgroundColor: tone.bg, borderColor: tone.line } : undefined}>
-            {/* Yuri turns up for a clean answer and nowhere else in the runner.
+            {/* Teddy turns up for a clean answer and nowhere else in the runner.
                 He is the reward, so he has to stay rare: on every verdict he
                 would be wallpaper within one quiz, and on a wrong answer he
                 would be a cartoon commiserating with someone who is trying to
@@ -848,7 +848,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
 
 /* ------------------------------------------------------------------ done */
 
-/* The kinds Done will let Yuri react to; anything else leaves him off. */
+/* The kinds Done will let Teddy react to; anything else leaves him off. */
 const GUIDE_KINDS = Object.keys(LINES);
 
 /* The end of a run. The primary button points forward: after a pass it is
@@ -863,7 +863,7 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
   const forward = passed !== false;
   /* `guide` is a kind from core/guide.js — "words", "passed", "scraped",
      "failed". It turns the end of a run from a tick over an apology into the one
-     screen where Yuri has something to say, and it is opt-in so the half-dozen
+     screen where Teddy has something to say, and it is opt-in so the half-dozen
      places that reuse Done as an empty-state message box stay plain. */
   const kind = guide && GUIDE_KINDS.includes(guide) ? guide : null;
   const line = kind ? guideLine(kind, (title || "").length) : null;

@@ -14,8 +14,7 @@ export const IMAGES = {
   "аэропорт": require("../assets/img/1044.jpg"),
   "банк": require("../assets/img/1054.jpg"),
   "баскетбол": require("../assets/img/1057.jpg"),
-  "бассейн": require("../assets/img/1058.jpg"),
-  "берег": require("../assets/img/1066.jpg"),
+  "белка": require("../assets/img/1064.jpg"),
   "библия": require("../assets/img/1072.jpg"),
   "билет": require("../assets/img/1074.jpg"),
   "блин": require("../assets/img/1078.jpg"),
@@ -44,7 +43,6 @@ export const IMAGES = {
   "газета": require("../assets/img/1225.jpg"),
   "галстук": require("../assets/img/1227.jpg"),
   "гитара": require("../assets/img/1231.jpg"),
-  "гнездо": require("../assets/img/1234.jpg"),
   "гора": require("../assets/img/1241.jpg"),
   "город": require("../assets/img/1246.jpg"),
   "гражданин": require("../assets/img/1260.jpg"),
@@ -83,7 +81,6 @@ export const IMAGES = {
   "клуб": require("../assets/img/1499.jpg"),
   "кожа": require("../assets/img/1505.jpg"),
   "коза": require("../assets/img/1506.jpg"),
-  "кольцо": require("../assets/img/1512.jpg"),
   "команда": require("../assets/img/1513.jpg"),
   "комната": require("../assets/img/1519.jpg"),
   "компьютер": require("../assets/img/1522.jpg"),
@@ -99,7 +96,6 @@ export const IMAGES = {
   "куртка": require("../assets/img/1567.jpg"),
   "кухня": require("../assets/img/1568.jpg"),
   "лаборатория": require("../assets/img/1569.jpg"),
-  "лапа": require("../assets/img/1571.jpg"),
   "лекарство": require("../assets/img/1574.jpg"),
   "лекция": require("../assets/img/1575.jpg"),
   "лес": require("../assets/img/1576.jpg"),
@@ -108,7 +104,6 @@ export const IMAGES = {
   "лицо": require("../assets/img/1587.jpg"),
   "лодка": require("../assets/img/1591.jpg"),
   "ложка": require("../assets/img/1593.jpg"),
-  "лошадь": require("../assets/img/1594.jpg"),
   "любовь": require("../assets/img/1600.jpg"),
   "медведь": require("../assets/img/1623.jpg"),
   "медицина": require("../assets/img/1624.jpg"),
@@ -120,12 +115,13 @@ export const IMAGES = {
   "мужчина": require("../assets/img/1670.jpg"),
   "музыка": require("../assets/img/1672.jpg"),
   "музыкант": require("../assets/img/1673.jpg"),
-  "мышка": require("../assets/img/1676.jpg"),
   "мышь": require("../assets/img/1678.jpg"),
   "мясо": require("../assets/img/1680.jpg"),
   "мяч": require("../assets/img/1681.jpg"),
   "надежда": require("../assets/img/1686.jpg"),
   "насекомое": require("../assets/img/1708.jpg"),
+  "небо": require("../assets/img/1723.jpg"),
+  "нос": require("../assets/img/1743.jpg"),
   "ночь": require("../assets/img/1748.jpg"),
   "обед": require("../assets/img/1754.jpg"),
   "обувь": require("../assets/img/1768.jpg"),
@@ -148,7 +144,6 @@ export const IMAGES = {
   "погода": require("../assets/img/1893.jpg"),
   "подарок": require("../assets/img/1894.jpg"),
   "поезд": require("../assets/img/1906.jpg"),
-  "поле": require("../assets/img/1921.jpg"),
   "полиция": require("../assets/img/1927.jpg"),
   "полковник": require("../assets/img/1930.jpg"),
   "почта": require("../assets/img/1969.jpg"),
@@ -159,6 +154,7 @@ export const IMAGES = {
   "река": require("../assets/img/2084.jpg"),
   "реклама": require("../assets/img/2085.jpg"),
   "ресторан": require("../assets/img/2091.jpg"),
+  "рождество": require("../assets/img/2105.jpg"),
   "рот": require("../assets/img/2108.jpg"),
   "рубашка": require("../assets/img/2109.jpg"),
   "рука": require("../assets/img/2112.jpg"),
@@ -229,8 +225,7 @@ export const FILES = {
  "аэропорт": "1044.jpg",
  "банк": "1054.jpg",
  "баскетбол": "1057.jpg",
- "бассейн": "1058.jpg",
- "берег": "1066.jpg",
+ "белка": "1064.jpg",
  "библия": "1072.jpg",
  "билет": "1074.jpg",
  "блин": "1078.jpg",
@@ -259,7 +254,6 @@ export const FILES = {
  "газета": "1225.jpg",
  "галстук": "1227.jpg",
  "гитара": "1231.jpg",
- "гнездо": "1234.jpg",
  "гора": "1241.jpg",
  "город": "1246.jpg",
  "гражданин": "1260.jpg",
@@ -298,7 +292,6 @@ export const FILES = {
  "клуб": "1499.jpg",
  "кожа": "1505.jpg",
  "коза": "1506.jpg",
- "кольцо": "1512.jpg",
  "команда": "1513.jpg",
  "комната": "1519.jpg",
  "компьютер": "1522.jpg",
@@ -314,7 +307,6 @@ export const FILES = {
  "куртка": "1567.jpg",
  "кухня": "1568.jpg",
  "лаборатория": "1569.jpg",
- "лапа": "1571.jpg",
  "лекарство": "1574.jpg",
  "лекция": "1575.jpg",
  "лес": "1576.jpg",
@@ -323,7 +315,6 @@ export const FILES = {
  "лицо": "1587.jpg",
  "лодка": "1591.jpg",
  "ложка": "1593.jpg",
- "лошадь": "1594.jpg",
  "любовь": "1600.jpg",
  "медведь": "1623.jpg",
  "медицина": "1624.jpg",
@@ -335,12 +326,13 @@ export const FILES = {
  "мужчина": "1670.jpg",
  "музыка": "1672.jpg",
  "музыкант": "1673.jpg",
- "мышка": "1676.jpg",
  "мышь": "1678.jpg",
  "мясо": "1680.jpg",
  "мяч": "1681.jpg",
  "надежда": "1686.jpg",
  "насекомое": "1708.jpg",
+ "небо": "1723.jpg",
+ "нос": "1743.jpg",
  "ночь": "1748.jpg",
  "обед": "1754.jpg",
  "обувь": "1768.jpg",
@@ -363,7 +355,6 @@ export const FILES = {
  "погода": "1893.jpg",
  "подарок": "1894.jpg",
  "поезд": "1906.jpg",
- "поле": "1921.jpg",
  "полиция": "1927.jpg",
  "полковник": "1930.jpg",
  "почта": "1969.jpg",
@@ -374,6 +365,7 @@ export const FILES = {
  "река": "2084.jpg",
  "реклама": "2085.jpg",
  "ресторан": "2091.jpg",
+ "рождество": "2105.jpg",
  "рот": "2108.jpg",
  "рубашка": "2109.jpg",
  "рука": "2112.jpg",
@@ -489,17 +481,11 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:2023-08-09_Deutschland_gegen_Kanada_(Basketball-L%C3%A4nderspiel)_by_Sandro_Halank%E2%80%93118.jpg"
  },
- "бассейн": {
-  "t": "Lille piscine max dormoy.jpg",
-  "a": "Velvet",
+ "белка": {
+  "t": "Белка в ботаническом саду Ташкента, март 2026.jpg",
+  "a": "26D",
   "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Lille_piscine_max_dormoy.jpg"
- },
- "берег": {
-  "t": "Spring Lake, New Jersey Beach at Sunrise.jpg",
-  "a": "Nick Harris",
-  "l": "CC BY 2.5",
-  "u": "https://commons.wikimedia.org/wiki/File:Spring_Lake,_New_Jersey_Beach_at_Sunrise.jpg"
+  "u": "https://commons.wikimedia.org/wiki/File:%D0%91%D0%B5%D0%BB%D0%BA%D0%B0_%D0%B2_%D0%B1%D0%BE%D1%82%D0%B0%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%BC_%D1%81%D0%B0%D0%B4%D1%83_%D0%A2%D0%B0%D1%88%D0%BA%D0%B5%D0%BD%D1%82%D0%B0,_%D0%BC%D0%B0%D1%80%D1%82_2026.jpg"
  },
  "библия": {
   "t": "Gutenberg Bible, Lenox Copy, New York Public Library, 2009. Pic 01.jpg",
@@ -668,12 +654,6 @@ export const CREDITS = {
   "a": "Steve Garry from Manchester, United Kingdom",
   "l": "CC BY 2.0",
   "u": "https://commons.wikimedia.org/wiki/File:My_Mates_3_(2082240480).jpg"
- },
- "гнездо": {
-  "t": "Yelagiri bird's nest.jpg",
-  "a": "https://www.flickr.com/photos/mckaysavage/ mckaysavage",
-  "l": "CC BY 2.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Yelagiri_bird%27s_nest.jpg"
  },
  "гора": {
   "t": "Khor Virap.jpg",
@@ -903,12 +883,6 @@ export const CREDITS = {
   "l": "CC BY-SA 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:Hausziege_04.jpg"
  },
- "кольцо": {
-  "t": "Ring Ruby.jpg",
-  "a": "ネックレス (A necklace)",
-  "l": "CC BY-SA 4.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Ring_Ruby.jpg"
- },
  "команда": {
   "t": "Rugby union scrummage.jpg",
   "a": "",
@@ -999,12 +973,6 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:At_Manchester_2023_2023_006.jpg"
  },
- "лапа": {
-  "t": "DogDewClawTika1 wb.jpg",
-  "a": "en:User:Elf",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:DogDewClawTika1_wb.jpg"
- },
  "лекарство": {
   "t": "Medikamente.jpg",
   "a": "Würfel",
@@ -1052,12 +1020,6 @@ export const CREDITS = {
   "a": "Lesekreis",
   "l": "CC0",
   "u": "https://commons.wikimedia.org/wiki/File:Essl%C3%B6ffel_und_Teel%C3%B6ffel.JPG"
- },
- "лошадь": {
-  "t": "Pernod Al Ariba 0046b.jpg",
-  "a": "Thomas Reich",
-  "l": "CC BY-SA 2.5",
-  "u": "https://commons.wikimedia.org/wiki/File:Pernod_Al_Ariba_0046b.jpg"
  },
  "любовь": {
   "t": "Sri Lankan woman and child.jpg",
@@ -1125,12 +1087,6 @@ export const CREDITS = {
   "l": "CC BY-SA 4.0",
   "u": "https://commons.wikimedia.org/wiki/File:Musician_Playing_Ravanhatta_at_Mehrangarh,_Rajasthan,_India.jpg"
  },
- "мышка": {
-  "t": "Fancy mice.jpg",
-  "a": "User Polarqueen on en.wikipedia",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Fancy_mice.jpg"
- },
  "мышь": {
   "t": "Apodemus sylvaticus bosmuis.jpg",
   "a": "Rasbak",
@@ -1160,6 +1116,18 @@ export const CREDITS = {
   "a": "See his respective owners",
   "l": "Public domain",
   "u": "https://commons.wikimedia.org/wiki/File:Insecta_Diversity.jpg"
+ },
+ "небо": {
+  "t": "Solar eclipse of 2008 August 1st in Novosibirsk, Russia.jpg",
+  "a": "Michael",
+  "l": "CC BY 3.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Solar_eclipse_of_2008_August_1st_in_Novosibirsk,_Russia.jpg"
+ },
+ "нос": {
+  "t": "Neus1.jpg",
+  "a": "LHOON",
+  "l": "CC BY-SA 2.0",
+  "u": "https://commons.wikimedia.org/wiki/File:Neus1.jpg"
  },
  "ночь": {
   "t": "Парк ночью в Денизли.jpg",
@@ -1293,12 +1261,6 @@ export const CREDITS = {
   "l": "CC BY 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:PRR_33164.jpg"
  },
- "поле": {
-  "t": "Iglesia de Nuestra Señora de La Blanca, Cardejón, España, 2012-09-01, DD 02.JPG",
-  "a": "Diego Delso",
-  "l": "CC BY-SA 3.0",
-  "u": "https://commons.wikimedia.org/wiki/File:Iglesia_de_Nuestra_Se%C3%B1ora_de_La_Blanca,_Cardej%C3%B3n,_Espa%C3%B1a,_2012-09-01,_DD_02.JPG"
- },
  "полиция": {
   "t": "HH Polizeihauptmeister MZ.jpg",
   "a": "Daniel Schwen",
@@ -1358,6 +1320,12 @@ export const CREDITS = {
   "a": "Infrogmation of New Orleans",
   "l": "CC BY 3.0",
   "u": "https://commons.wikimedia.org/wiki/File:AntoinesDiningRoom8Oct07A.jpg"
+ },
+ "рождество": {
+  "t": "NativityChristmasLights2.jpg",
+  "a": "File:NativityChristmasLights.jpg:\nderivative work: Crumpled Fire",
+  "l": "CC BY-SA 2.0",
+  "u": "https://commons.wikimedia.org/wiki/File:NativityChristmasLights2.jpg"
  },
  "рот": {
   "t": "Lion Showing off His Mouth (21454262492).jpg",

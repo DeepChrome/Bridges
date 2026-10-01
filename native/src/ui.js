@@ -660,7 +660,8 @@ export function Dropdown({ testID, sheetTestID, optionPrefix, title, label, valu
 export function SectionLabel({ children, style, testID }) {
   const t = useTheme();
   return (
-    <Text testID={testID} style={[styles.sectionLabel, { color: t.ink3 }, style]}>{children}</Text>
+    <Text testID={testID} accessibilityRole="header"
+          style={[styles.sectionLabel, { color: t.ink3 }, style]}>{children}</Text>
   );
 }
 

@@ -14,6 +14,7 @@ Output: data/topics.db
 """
 
 import argparse
+import functools
 import json
 import re
 import sqlite3
@@ -55,12 +56,80 @@ GROUP_KINDS = ["verb", "noun", "describing", "little"]
 UNGROUPED = []   # (unit, bare) the groups file does not place — run build_word_groups.mjs --stale
 
 
-def grouped(tid, chosen, meta, spoken):
-    """The unit's words in teaching order — each group whole, groups by their
-    commonest word — and each word's (group, section, place in the reading
-    order). A word the file does not name keeps its frequency place at the end
-    and is reported, so a curriculum change cannot silently leave words
-    ungrouped."""
+MISKINDED = []   # (unit, bare, section) a word filed in a section its class does not belong in
+SPLIT_GROUPS = []   # (unit, group) a group a lesson boundary still cuts
+# The section a word's class belongs in, everything else under "little" — the
+# rule build_word_groups.mjs (KINDS) holds the model's answer to.
+KIND_OF_POS = {"verb": "verb", "noun": "noun", "adjective": "describing", "adverb": "describing"}
+# Lesson sizes, as core/questions.js cuts them (LESSON_RAMP, LESSON_SIZE):
+# a lesson is the next N words of the unit, so a group stays whole only if the
+# order puts it inside one N-word window.
+LESSON_RAMP, LESSON_SIZE = [5, 6], 7
+
+
+def lesson_size(chapter):
+    return LESSON_RAMP[chapter] if 0 <= chapter < len(LESSON_RAMP) else LESSON_SIZE
+
+
+def pack(blocks, size):
+    """Blocks (lists of words) in order, each kept inside one `size`-word
+    lesson, and returned with the blocks a lesson boundary still cuts.
+
+    The owner, 2026-09-30: "Related words always need to be together." A
+    lesson is the next `size` words, so that is a packing problem, and greedy
+    filling lost it — a lesson half full with nothing small enough left to
+    finish it cut the next group, 87 of 335 at first. So the whole unit is
+    planned: blocks are placed earliest first and each lesson is filled to
+    exactly `size`, backtracking only when a choice strands the rest — so the
+    order is still commonest first wherever a clean packing allows it.
+    A block larger than a lesson opens one and is cut as few times as it can
+    be; a unit whose groups admit no clean packing cuts as few as it can, and
+    its cuts are reported."""
+    n = len(blocks)
+    lens = [len(b) for b in blocks]
+
+    @functools.lru_cache(maxsize=None)
+    def plan(left, room, cuts):
+        # left: bitmask of blocks still to place; room: what the lesson has
+        # left; cuts: how many more blocks may run over a lesson boundary.
+        if not left:
+            return ()
+        todo = [j for j in range(n) if left >> j & 1]
+        for j in todo:
+            whole = lens[j] <= room or room == size    # a block opening a lesson is never "cut" by choice
+            if not whole and not cuts:
+                continue
+            spill = lens[j] - room if lens[j] > room else 0
+            after = (size - spill % size if spill % size else size) if spill else (room - lens[j] or size)
+            rest = plan(left & ~(1 << j), after, cuts - (0 if whole else 1))
+            if rest is not None:
+                return (j,) + rest
+        # Nothing fits: fine only at the very end, where the last lesson is short.
+        return None
+
+    # The fewest cuts there can be, found by allowing none, then one, then
+    # two: a unit whose groups admit no clean packing (five, five and five into
+    # lessons of six) cuts one group, not every one a greedy fill strands. With
+    # n cuts allowed every order is a plan, so the loop always returns.
+    for cuts in range(n + 1):
+        order = plan((1 << n) - 1, size, cuts)
+        if order is not None:
+            break
+    plan.cache_clear()
+    out, cut = [], []
+    for j in order:
+        if len(blocks[j]) > size - len(out) % size:
+            cut.append(blocks[j])
+        out.extend(blocks[j])
+    return out, cut
+
+
+def grouped(tid, chosen, meta, spoken, size):
+    """The unit's words in teaching order — each group whole and inside one
+    lesson, groups by their typical word — and each word's (group, section,
+    place in the reading order). A word the file does not name is a group of
+    its own in its frequency place and is reported, so a curriculum change
+    cannot silently leave words ungrouped."""
     groups = WORD_GROUPS.get(tid) or []
     rank = lambda l: spoken.get(meta[l]["bare"], 10 ** 6)
     by_bare = {meta[l]["bare"]: l for l in chosen}
@@ -69,7 +138,7 @@ def grouped(tid, chosen, meta, spoken):
     reading = sorted(range(len(groups)), key=lambda g: (GROUP_KINDS.index(groups[g]["kind"])
                                                         if groups[g]["kind"] in GROUP_KINDS else 9, g))
     gord = {g: n for n, g in enumerate(reading)}
-    blocks, group_of, placed = [], {}, set()
+    blocks, group_of, placed, names = [], {}, set(), {}
     for g, grp in enumerate(groups):
         members = [by_bare[b] for b in grp["words"] if b in by_bare and by_bare[b] not in placed]
         if not members:
@@ -77,12 +146,20 @@ def grouped(tid, chosen, meta, spoken):
         placed.update(members)
         for l in members:
             group_of[l] = (grp["name"], grp["kind"], gord[g])
-        blocks.append((min(rank(l) for l in members), g, members))
-    blocks.sort(key=lambda b: (b[0], b[1]))
-    order = [l for _, _, members in blocks for l in members]
+            if KIND_OF_POS.get(meta[l]["pos"], "little") != grp["kind"]:
+                MISKINDED.append((tid, meta[l]["bare"], grp["kind"]))
+        # By the group's middle word, not its commonest: one very common member
+        # («год») would otherwise pull a group of rare ones to the front.
+        rs = sorted(rank(l) for l in members)
+        blocks.append((rs[len(rs) // 2], g, members))
+        names[id(members)] = grp["name"]
     rest = [l for l in chosen if l not in placed]
     UNGROUPED.extend((tid, meta[l]["bare"]) for l in rest)
-    return order + rest, group_of
+    blocks += [(rank(l), 10 ** 6, [l]) for l in rest]
+    blocks.sort(key=lambda b: (b[0], b[1]))
+    order, cut = pack([members for _, _, members in blocks], size)
+    SPLIT_GROUPS.extend((tid, names[id(b)]) for b in cut if id(b) in names)
+    return order, group_of
 # Words a video says that are not Russian to learn from it: the channel's own
 # boilerplate (subscribe, like, the link below) and the grammar metalanguage a
 # lesson-video talks in. They are real words, and the second kind is taught by
@@ -669,6 +746,34 @@ def main():
     by_bare = {}
     for lid in deduped:
         by_bare.setdefault(meta[lid]["bare"], []).append(lid)
+    # A reader's keep is a decision about the curriculum, and the pool (the
+    # decks' commonest --pool lemmas) is only where the rest of it is drawn
+    # from: «лиса», «сова», «шарф» are rare in his decks and are exactly what an
+    # Animals or a Clothes quest is for. So a keep outside the pool is brought
+    # in from the lexicon — the real headword, glossed, by class.
+    # Such a word is the keeping unit's alone: it is in the pool only because
+    # that unit asked for it, so an earlier spine unit must not take it for
+    # being common in its own video (the first cut taught «крокодил» in
+    # chapter 2).
+    KEEP_POS = {"noun": 0, "verb": 1, "adjective": 2, "adverb": 3}
+    reserved = {}
+    keepers = {}
+    for tid, v in UNIT_WORDS.items():
+        for b in (v.get("keep", []) if isinstance(v, dict) else []):
+            keepers.setdefault(b, tid)
+    for bare, keeper in sorted(keepers.items()):
+        if bare in by_bare:
+            continue
+        rows = [r for r in src.execute("select id, bare, accented, pos, en from lemmas where bare=?", (bare,))
+                if r[4] and not STUB_GLOSS.match(r[4])]
+        if not rows:
+            continue
+        lid, b, acc, pos, en = min(rows, key=lambda r: (KEEP_POS.get(r[3], 9), -counts.get(r[0], 0)))
+        meta[lid] = {"bare": b, "acc": acc, "pos": pos, "en": en, "n": counts.get(lid, 0)}
+        deduped.append(lid)
+        dedup_set.add(lid)
+        by_bare[b] = [lid]
+        reserved[lid] = keeper
 
     # What each topic rule would claim, before any unit is built: the pool a
     # side quest tops up from. The spine no longer takes its words first, so
@@ -773,6 +878,8 @@ def main():
         def take(lid, reason):
             if lid in taught or lid in why or lid not in dedup_set:
                 return False
+            if reserved.get(lid, tid) != tid:
+                return False
             if reason == "video" and meta[lid]["bare"] in VIDEO_NOISE:
                 return False
             # A side quest takes a video word that is off its topic only when
@@ -847,7 +954,8 @@ def main():
                         break
                     if meta[lid]["pos"] != "verb" or lid in taught or lid in why or lid not in dedup_set:
                         continue
-                    drop = next((l for l in reversed(chosen) if meta[l]["pos"] != "verb" and why[l] != "video"), None)
+                    drop = next((l for l in reversed(chosen) if meta[l]["pos"] != "verb"
+                                 and why[l] not in ("video", "curated")), None)
                     if drop is None:
                         break
                     chosen.remove(drop)
@@ -870,7 +978,7 @@ def main():
         # the four seasons in one lesson, winter to autumn — and the groups
         # come in the order of their commonest word, so the first lesson is
         # still the commonest words there are, just in the company they keep.
-        chosen, group_of = grouped(tid, chosen, meta, spoken)
+        chosen, group_of = grouped(tid, chosen, meta, spoken, lesson_size(k))
         taught |= set(chosen)
         after = followable(vid, {meta[l]["bare"] for l in taught}) if vid else None
         units.append({"id": tid, "kind": kind, "chapter": k, "video": vid, "words": chosen,
@@ -924,6 +1032,45 @@ def main():
     if UNGROUPED:
         print(f"    !! {len(UNGROUPED)} word(s) in no group — run node tools/build_word_groups.mjs --stale: "
               + ", ".join(f"{t}:{b}" for t, b in UNGROUPED[:12]) + (" …" if len(UNGROUPED) > 12 else ""))
+    if MISKINDED:
+        print(f"    !! {len(MISKINDED)} word(s) in a section their class does not belong in (word_groups.json): "
+              + ", ".join(f"{t}:{b}→{s}" for t, b, s in MISKINDED[:12]) + (" …" if len(MISKINDED) > 12 else ""))
+    if SPLIT_GROUPS:
+        print(f"    {len(SPLIT_GROUPS)} group(s) a lesson boundary cuts (larger than a lesson, or no clean packing): "
+              + ", ".join(f"{t}:{g}" for t, g in SPLIT_GROUPS[:12]) + (" …" if len(SPLIT_GROUPS) > 12 else ""))
+    # A reader's decision that did not take effect is reported, never dropped:
+    # a keep the build could not honour is a keep the reader thinks is there.
+    unit_of = {meta[l]["bare"]: u["id"] for u in units for l in u["words"]}
+    in_unit = {u["id"]: {meta[l]["bare"] for l in u["words"]} for u in units}
+    place = {u["id"]: n for n, u in enumerate(units)}
+    missed, earlier = [], []
+    for tid, v in UNIT_WORDS.items():
+        if not isinstance(v, dict) or tid not in in_unit:
+            continue
+        for b in v.get("keep", []):
+            if b in in_unit[tid]:
+                continue
+            if b not in by_bare:
+                missed.append(f"{tid}:{b} (not in the lexicon)")
+            elif b in unit_of and place[unit_of[b]] < place[tid]:
+                earlier.append(f"{tid}:{b} ({unit_of[b]})")   # the rule: an earlier unit wins
+            elif b in unit_of:
+                missed.append(f"{tid}:{b} (taught later, in {unit_of[b]})")
+            elif meta[by_bare[b][0]]["pos"] not in BRANCH_POS and not tid.startswith("core"):
+                missed.append(f"{tid}:{b} ({meta[by_bare[b][0]]['pos']} — the spine's to teach)")
+            else:
+                missed.append(f"{tid}:{b} (unit full)")
+        missed += [f"{tid}:{b} (dropped, still taught)" for b in v.get("drop", []) if b in in_unit[tid]]
+    # A keep brought in from outside the pool that his decks never say has no
+    # sentence to show: usually the reader named a form, not the headword
+    # («лыжи», whose sentences all belong to «лыжа»).
+    unsaid = sorted(meta[l]["bare"] for l in reserved if meta[l]["n"] == 0 and l in taught)
+    if unsaid:
+        print(f"    !! {len(unsaid)} curated keep(s) the decks never say — name the headword? " + ", ".join(unsaid))
+    if missed:
+        print(f"    !! {len(missed)} curated keep/drop(s) did not take: " + ", ".join(missed))
+    if earlier:
+        print(f"    {len(earlier)} curated keep(s) already taught on the way: " + ", ".join(earlier))
     stale = sorted(OPTIONAL - {u["id"] for u in units})
     if stale:
         print(f"    !! OPTIONAL names {len(stale)} unit(s) that do not exist: " + ", ".join(stale))

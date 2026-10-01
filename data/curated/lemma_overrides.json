@@ -1,6 +1,13 @@
 {
   "_": "tools/panel.py resolve(): which lemma a shared form key belongs to, where the rule cannot settle it. Value is the lemma's bare form, or bare|pos when two rows share the spelling. Read by the pool count (build_topics), the lookup index order and the example join (build_site), and the video index (build_transcripts).",
   "лет": "год",
+  "никого": "никто",
+  "небо": "небо",
+  "неба": "небо",
+  "небе": "небо",
+  "небом": "небо",
+  "небу": "небо",
+  "никому": "никто",
   "лета": "лето",
   "летом": "лето",
   "тут": "тут|other",

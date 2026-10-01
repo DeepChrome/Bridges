@@ -29,6 +29,7 @@ import { loadScripts, NAME_KEYS } from "./check_scripts.mjs";
 import { SCENARIOS } from "../core/scenarios.js";
 import { LETTERS, VOWEL_PAIRS, TRAPS } from "../core/alphabet.js";
 import { PEOPLE } from "../core/names.js";
+import { TOPICS } from "../core/grammar.js";
 import { fold } from "../core/util.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -101,7 +102,7 @@ for (const s of SCENARIOS) {
 /* ------------------------------------------- the alphabet (§30j) */
 
 for (const l of LETTERS) {
-  add({ id: `alphabet:letter:${l.name}`, type: "word", ru: l.l, en: `${l.ipa} · like the ${l.like}`, needs: RU,
+  add({ id: `alphabet:letter:${l.name}`, type: "word", ru: l.l, en: `${l.ipa} · ${l.like}`, needs: RU,
         context: `The letter as the Sounds screen teaches it${l.trap ? " (a Latin look-alike)" : ""}` });
 }
 for (const t of TRAPS) {
@@ -127,6 +128,28 @@ for (const [unit, n] of Object.entries(notes)) {
   (n.examples || []).forEach(([ru, en], k) => {
     add({ id: `note:${unit}:ex:${k}`, type: "sentence", ru, en, needs: RU,
           context: `Example under the grammar note "${n.title}" (${unit})` });
+  });
+}
+
+/* ----------------------------------- the grammar reference (§30ay) */
+
+/* Practice → The rules: hand-authored, so it needs the same read as the
+   scenarios. Each section's rule is English; its examples and the Russian
+   cells of its tables are what a native speaker checks. Corrections here are
+   made by hand — the file is code (import_review lists them). */
+for (const topic of TOPICS) {
+  (topic.sections || []).forEach((s, n) => {
+    const where = `The rules → ${topic.title} → ${s.heading}`;
+    add({ id: `ref:${topic.id}:${n}:rule`, type: "ui_copy", en: s.rule, needs: EN, context: where });
+    (s.examples || []).forEach(([ru, en], k) => {
+      add({ id: `ref:${topic.id}:${n}:ex:${k}`, type: "sentence", ru, en, needs: RU, context: where });
+    });
+    ((s.table && s.table.rows) || []).forEach((cells, k) => {
+      // Every Russian cell, «я» included; an ending («-ов») is not a word to read.
+      const ru = cells.filter((c) => /[а-яё]/i.test(c) && !/^-/.test(String(c).trim())).join(" · ");
+      if (ru) add({ id: `ref:${topic.id}:${n}:row:${k}`, type: "table_row", ru, en: cells.join(" | "),
+                    needs: RU, context: `${where} · table "${s.table.title}"` });
+    });
   });
 }
 

@@ -219,6 +219,11 @@
     { "attach_to": "над", "pos": "other", "forms": { "variant": ["надо"] } },
     { "attach_to": "без", "pos": "other", "forms": { "variant": ["безо"] } },
     { "attach_to": "перед", "pos": "other", "forms": { "variant": ["передо"] } },
-    { "attach_to": "год", "pos": "noun", "forms": { "pl_nom": ["го́ды"], "pl_gen": ["годо́в"] } }
+    { "attach_to": "год", "pos": "noun", "forms": { "pl_nom": ["го́ды"], "pl_gen": ["годо́в"] } },
+    {
+      "attach_to": "никто", "pos": "other",
+      "note": "OpenRussian gives никто no forms, so «никого» resolved to the adjective «никой» and opened it. The prepositional (ни о ком) splits around its preposition and is left out.",
+      "forms": { "nom": ["никто́"], "gen": ["никого́"], "dat": ["никому́"], "acc": ["никого́"], "inst": ["нике́м"] }
+    }
   ]
 }

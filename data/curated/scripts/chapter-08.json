@@ -41,17 +41,21 @@
     {
      "ru": "первый",
      "en": "first"
+    },
+    {
+     "ru": "готовить",
+     "en": "to cook"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Мама, сегодня я хочу сам делать курицу на обед.",
-     "en": "Mum, today I want to make the chicken for lunch myself."
+     "ru": "Мама, сегодня я хочу сам готовить курицу на обед.",
+     "en": "Mum, today I want to cook the chicken for lunch myself."
     },
     {
      "s": "b",
-     "ru": "Сам? Тедди, ты ещё никогда не делал курицу.",
+     "ru": "Сам? Тедди, ты ещё никогда не готовил курицу.",
      "en": "Yourself? Teddy, you've never made chicken before."
     },
     {
@@ -96,8 +100,8 @@
     },
     {
      "s": "c",
-     "ru": "Между нами, Тедди, мама свою первую курицу тоже делала чёрной.",
-     "en": "Between us, Teddy, Mum made her first chicken black too."
+     "ru": "Между нами, Тедди, у мамы первая курица тоже стала чёрной.",
+     "en": "Between us, Teddy, Mum's first chicken turned black too."
     },
     {
      "s": "b",
@@ -266,13 +270,13 @@
     },
     {
      "s": "b",
-     "ru": "У двери никто не был… Монька, почему у тебя в руке соль?",
-     "en": "There was nobody there... Monka, why do you have salt in your hand?"
+     "ru": "Никто к двери не приходил… Монька, почему у тебя в руке соль?",
+     "en": "Nobody came to the door... Monka, why do you have salt in your hand?"
     },
     {
      "s": "a",
-     "ru": "Я… ничего. Белка, а если добавлять больше картошки?",
-     "en": "I... nothing. Belka, what if we add more potatoes?"
+     "ru": "Я… ничего. Белка, а если положить больше картошки?",
+     "en": "I... nothing. Belka, what if we put in more potatoes?"
     },
     {
      "s": "b",

@@ -908,6 +908,15 @@ group("the review round trip");
   ok(!gone.changes.length && gone.refused.length, "and a line that is no longer there");
   const same = plan([row({ id: "script:core1:0:line:0", ru: "Это дом.", fix: "Это дом." })], docs);
   ok(!same.changes.length && !same.refused.length, "a row the reviewer left alone is not a change");
+  // A fix to something that lives in code is listed to make by hand, not
+  // refused: a correct reviewer's sheet must not read as a failed import.
+  const hand = plan([row({ id: "ref:cases:2:ex:0", ru: "Я вижу кота.", fix: "Я вижу кошку." }),
+                     row({ id: "nonsense:1", fix: "x" })], docs);
+  ok(hand.byHand.length === 1 && hand.byHand[0].after === "Я вижу кошку." && hand.refused.length === 1,
+     "a correction to code is listed by hand; only an id nothing exports is refused");
+  const { indentOfText } = await import("./import_review.mjs");
+  ok(indentOfText('{\n "chapter": 3\n}') === 1 && indentOfText('{\n  "a": 1\n}') === 2,
+     "a chapter file is written back with its own indentation");
 
   // The two rules added for PLAYBOOK 3.2, each proved to fire.
   ok(YO_ONLY.get("еще") === "ещё" && YO_ONLY.get("ребенок") === "ребёнок",

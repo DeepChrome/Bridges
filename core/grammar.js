@@ -163,8 +163,12 @@ export const TOPICS = [
         heading: "What a case is",
         rule: "The ending of a noun says what job it does in the sentence. Word order does not.",
         examples: [
-          ["Ма́ма лю́бит дочь.", "Mum loves the daughter."],
-          ["Дочь лю́бит ма́ма.", "Mum loves the daughter — same meaning."],
+          /* «до́чку», not «дочь»: a feminine noun in -ь looks the same in the
+             nominative and accusative, so «Дочь лю́бит ма́ма» reads as the
+             daughter loving Mum and disproves the rule it was here to show
+             (found by the review pre-pass, 2026-09-30). */
+          ["Ма́ма лю́бит до́чку.", "Mum loves her daughter."],
+          ["До́чку лю́бит ма́ма.", "Mum loves her daughter — same meaning."],
         ],
       },
       {

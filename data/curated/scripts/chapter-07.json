@@ -36,6 +36,10 @@
     {
      "ru": "триста",
      "en": "three hundred"
+    },
+    {
+     "ru": "дорого",
+     "en": "expensive, dear"
     }
    ],
    "lines": [
@@ -61,8 +65,8 @@
     },
     {
      "s": "a",
-     "ru": "Красные цветы. Но здесь они стоят очень много.",
-     "en": "Red flowers. But here they cost a lot."
+     "ru": "Красные цветы. Но здесь они стоят очень дорого.",
+     "en": "Red flowers. But here they're very expensive."
     },
     {
      "s": "b",

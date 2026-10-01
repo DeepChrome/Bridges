@@ -1061,12 +1061,21 @@ def main():
             else:
                 missed.append(f"{tid}:{b} (unit full)")
         missed += [f"{tid}:{b} (dropped, still taught)" for b in v.get("drop", []) if b in in_unit[tid]]
-    # A keep brought in from outside the pool that his decks never say has no
-    # sentence to show: usually the reader named a form, not the headword
-    # («лыжи», whose sentences all belong to «лыжа»).
-    unsaid = sorted(meta[l]["bare"] for l in reserved if meta[l]["n"] == 0 and l in taught)
-    if unsaid:
-        print(f"    !! {len(unsaid)} curated keep(s) the decks never say — name the headword? " + ", ".join(unsaid))
+    # A keep that names a form of another word rather than a headword: its
+    # sentences are all credited to that other word, so it is taught with none
+    # («лыжи», a form of «лыжа»). A keep the decks simply never say is fine —
+    # Tatoeba supplies its examples — so that is not what this checks.
+    forms_of = []
+    for l in reserved:
+        owner = resolver.owner_id(fold(meta[l]["bare"]))
+        # An unsettled owner (None) is the same failure: no sentence is credited
+        # to the keep either way — «лыжи» itself resolved to nobody.
+        if l in taught and owner != l:
+            other = src.execute("select bare from lemmas where id=?", (owner,)).fetchone() if owner else None
+            forms_of.append(f"«{meta[l]['bare']}» is a form of «{other[0]}»" if other
+                            else f"«{meta[l]['bare']}» is a form no one word owns")
+    if forms_of:
+        print(f"    !! {len(forms_of)} curated keep(s) name a form, not the headword: " + ", ".join(forms_of))
     if missed:
         print(f"    !! {len(missed)} curated keep/drop(s) did not take: " + ", ".join(missed))
     if earlier:

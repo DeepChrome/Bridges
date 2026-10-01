@@ -261,6 +261,14 @@ class Panel:
     def __init__(self, lexicon_path, corpus_path):
         self.db = sqlite3.connect(f"file:{lexicon_path}?mode=ro", uri=True)
         self.db.execute("attach database ? as c", (str(corpus_path),))
+        self._resolver = None
+
+    def resolver(self):
+        # Built on first use: it reads every form key, which a lookup of one
+        # word should only pay for when it asks.
+        if self._resolver is None:
+            self._resolver = Resolver(self.db)
+        return self._resolver
 
     def resolve(self, word, example_limit=8):
         key = fold(word)
@@ -306,8 +314,14 @@ class Panel:
                 "is_stub": pos == "other" and n_forms == 0 and not en,
             })
 
+        # The owner the Resolver settles on comes first, because that is the
+        # order build_site gives the app's index (§30i) — ranking here by
+        # paradigm size alone let the CLI open «никой» for «никого» while the
+        # app, after an override, opened «никто». The terminal and the phone
+        # must never disagree about what a form is (§22).
+        owner = self.resolver().owner_id(key)
         out["candidates"].sort(
-            key=lambda c: (c["is_stub"], not c["is_headword"], -c["n_forms"]))
+            key=lambda c: (c["lemma_id"] != owner, c["is_stub"], not c["is_headword"], -c["n_forms"]))
 
         # Lemma-aware examples: every sentence using ANY form of the best candidate.
         best = out["candidates"][0]

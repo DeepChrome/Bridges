@@ -103,13 +103,24 @@ function setAt(obj, path, value) {
    it lives in; nothing is written here, so a test hands in objects and reads
    the plan back. */
 export function plan(rows, docs) {
-  const changes = [], refused = [];
+  const changes = [], refused = [], byHand = [];
   for (const r of rows || []) {
     const fix = String(r.fix || "").trim();
     const id = String(r.id || "").trim();
     if (!fix) continue;
     const where = locate(id);
-    if (!where) { refused.push(`${id}: not an id this tool knows how to apply`); continue; }
+    /* A row the export knows and this tool deliberately does not write — the
+       grammar notes and reference, the Talk situations, the alphabet, which
+       live in code — is a correction to make by hand, not a failure. Only an
+       id nothing exports is refused. */
+    if (!where) {
+      if (/^(script|talk|alphabet|note|ref|name):/.test(id)) {
+        byHand.push({ id, before: String(r.ru || r.en || ""), after: fix, note: String(r.note || "").trim() });
+      } else {
+        refused.push(`${id}: not an id this tool knows how to apply`);
+      }
+      continue;
+    }
     const doc = docs[where.unit];
     const entry = doc && (doc.lessons || {})[where.key];
     if (!entry) { refused.push(`${id}: ${where.key} is not in the scripts`); continue; }
@@ -131,7 +142,7 @@ export function plan(rows, docs) {
     changes.push({ id, unit: where.unit, key: where.key, path: where.path,
                    before: String(before), after: fix, note: String(r.note || "").trim() });
   }
-  return { changes, refused };
+  return { changes, refused, byHand };
 }
 
 export function applyPlan(changes, docs) {
@@ -148,15 +159,24 @@ export function applyPlan(changes, docs) {
 /* Which chapter file a unit's lessons live in, read from the files
    themselves because the mapping belongs to the data, not to a convention. */
 export function scriptFiles(dir = SCRIPT_DIR) {
-  const byUnit = {}, byFile = {};
+  const byUnit = {}, byFile = {}, indentOf = {};
   for (const f of readdirSync(dir).filter((x) => x.endsWith(".json")).sort()) {
     const p = join(dir, f);
-    const obj = JSON.parse(readFileSync(p, "utf8"));
+    const text = readFileSync(p, "utf8");
+    const obj = JSON.parse(text);
     byFile[p] = obj;
+    // Written back with the file's own indentation (one space): a two-space
+    // rewrite showed every line of a chapter as changed for one corrected word.
+    indentOf[p] = indentOfText(text);
     for (const k of Object.keys(obj.lessons || {})) byUnit[k.split(":")[0]] = obj;
   }
-  return { byUnit, byFile };
+  return { byUnit, byFile, indentOf };
 }
+
+export const indentOfText = (text) => {
+  const m = String(text).match(/^\{\r?\n( +)"/);
+  return m ? m[1].length : 2;
+};
 
 /* ------------------------------------------------------------------ CLI */
 
@@ -170,14 +190,23 @@ if (process.argv[1] && process.argv[1].endsWith("import_review.mjs")) {
   }
 
   const rows = parseCsv(readFileSync(FILE, "utf8"));
-  const { byUnit, byFile } = scriptFiles();
-  const { changes, refused } = plan(rows, byUnit);
+  const { byUnit, byFile, indentOf } = scriptFiles();
+  const { changes, refused, byHand } = plan(rows, byUnit);
 
-  console.log(`${rows.length} rows read, ${changes.length} corrections, ${refused.length} refused\n`);
+  console.log(`${rows.length} rows read, ${changes.length} corrections, ${byHand.length} to make by hand, `
+              + `${refused.length} refused\n`);
   for (const c of changes) {
     console.log(`  ${c.id}`);
     console.log(`    - ${c.before}`);
     console.log(`    + ${c.after}` + (c.note ? `        (${c.note})` : ""));
+  }
+  if (byHand.length) {
+    console.log("\nto make by hand (these live in code, core/*.js or grammar_notes.json):");
+    for (const c of byHand) {
+      console.log(`  ${c.id}`);
+      console.log(`    - ${c.before}`);
+      console.log(`    + ${c.after}` + (c.note ? `        (${c.note})` : ""));
+    }
   }
   if (refused.length) {
     console.log("\nrefused:");
@@ -193,7 +222,7 @@ if (process.argv[1] && process.argv[1].endsWith("import_review.mjs")) {
   const written = [];
   for (const [p, doc] of Object.entries(byFile)) {
     if (![...touched].some((u) => Object.keys(doc.lessons || {}).some((k) => k.startsWith(u + ":")))) continue;
-    writeFileSync(p, JSON.stringify(doc, null, 2) + "\n", "utf8");
+    writeFileSync(p, JSON.stringify(doc, null, indentOf[p]) + "\n", "utf8");
     written.push(p.replace(ROOT + "\\", "").replace(/\\/g, "/"));
   }
   console.log(`\nwrote ${written.join(", ") || "nothing"}`);

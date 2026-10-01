@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { View, Image, Pressable, Linking } from "react-native";
+import { View, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Familiarity, Fold } from "../ui";
 import { TableGroup, Facts } from "../rules";
@@ -17,7 +17,7 @@ import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
 import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord, rankOf } from "../data";
 import { Linked } from "../words";
-import { pictureOf } from "../pictures";
+import { pictureOf, Photo } from "../pictures";
 import { clock, short } from "./Misc";
 
 /* How many videos an entry lists under "Heard in" before it asks. Four is a
@@ -95,10 +95,9 @@ export function WordEntry({ w, index, navigation }) {
     <>
       <Card>
         {photo ? (
-          <Image testID="word-photo" source={photo} resizeMode={pic.drawn ? "contain" : "cover"}
-                 accessibilityLabel={`Picture: ${(w.e || "").split(/[,;]/)[0]}`}
-                 style={{ width: "100%", height: pic.drawn ? 180 : 160, borderRadius: radius.md, marginBottom: 12,
-                          backgroundColor: pic.drawn ? t.brandBg : undefined }} />
+          <Photo testID="word-photo" pic={pic} minH={160} maxH={pic.drawn ? 180 : 280} bg={t.brandBg}
+                 label={`Picture: ${(w.e || "").split(/[,;]/)[0]}`}
+                 style={{ borderRadius: radius.md, marginBottom: 12 }} />
         ) : null}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           <Text style={{ color: t.ink, fontSize: 32, fontWeight: "600", flex: 1 }}>

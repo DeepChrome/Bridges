@@ -25,7 +25,7 @@
  */
 
 import React from "react";
-import { Animated, View, Image, Pressable } from "react-native";
+import { Animated, View, Pressable } from "react-native";
 import { useTheme, radius, type as T } from "./theme";
 import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses, Text, Btn } from "./ui";
 import { RuleCard } from "./rules";
@@ -33,7 +33,7 @@ import { Linked } from "./words";
 import { Guide } from "./guide";
 import { useEnter } from "./motion";
 import { L, linesWith } from "./data";
-import { pictureOf } from "./pictures";
+import { pictureOf, Photo } from "./pictures";
 import { firstSense } from "@core/util";
 import { soundTip } from "@core/alphabet";
 import { hasRealAudio } from "./audio";
@@ -110,10 +110,8 @@ function WordRow({ i, unit, last, delay }) {
     <Animated.View style={anim}>
       <Row testID={`new-${word.b}`} last={last}>
         {pic ? (
-          <Image source={pic.source} resizeMode={pic.drawn ? "contain" : "cover"}
-                 accessibilityLabel={`Picture: ${firstSense(word)}`}
-                 style={{ width: 46, height: 46, borderRadius: radius.sm,
-                          backgroundColor: pic.drawn ? t.brandBg : undefined }} />
+          <Photo pic={pic} size={46} bg={t.brandBg} label={`Picture: ${firstSense(word)}`}
+                 style={{ borderRadius: radius.sm }} />
         ) : (
           /* The unit's icon used to stand in, which meant a lesson of function
              words was five identical grey tiles down the left of the list — the
@@ -232,10 +230,8 @@ export function WordCard({ i, at, total, unit, onMoment }) {
                            alignSelf: "stretch" }}>
               {/* A drawn picture is a cut-out of the cast (pictures.js): shown
                   whole on the brand band, where a photograph is cropped to fill. */}
-              <Image testID="word-photo" source={photo} resizeMode={pic.drawn ? "contain" : "cover"}
-                     accessibilityLabel={`Picture: ${firstSense(w)}`}
-                     style={{ width: "100%", height: pic.drawn ? 210 : 190,
-                              backgroundColor: pic.drawn ? t.brandBg : undefined }} />
+              <Photo testID="word-photo" pic={pic} minH={190} maxH={pic.drawn ? 210 : 300}
+                     bg={t.brandBg} label={`Picture: ${firstSense(w)}`} />
               {credit ? (
                 <Muted testID="photo-credit" size={T.tiny}
                        style={{ textAlign: "center", paddingTop: 6, paddingHorizontal: pad }}>

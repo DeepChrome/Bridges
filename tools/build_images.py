@@ -33,6 +33,23 @@ RAW = ROOT / "data" / "raw" / "images"
 OUT = ROOT / "native" / "assets" / "img"
 JS = ROOT / "native" / "src" / "images.js"
 VERSION = 2
+FOCUS = ROOT / "data" / "curated" / "image_focus.json"
+
+
+def jpeg_size(path):
+    """(width, height) from a JPEG's frame header — stdlib only, no image library."""
+    b = path.read_bytes()
+    i = 2
+    while i + 9 < len(b):
+        if b[i] != 0xFF:
+            i += 1
+            continue
+        marker = b[i + 1]
+        length = int.from_bytes(b[i + 2:i + 4], "big")
+        if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):
+            return int.from_bytes(b[i + 7:i + 9], "big"), int.from_bytes(b[i + 5:i + 7], "big")
+        i += 2 + length
+    raise SystemExit(f"no frame header in {path}")
 
 
 def main():
@@ -85,7 +102,7 @@ def main():
         name = f"{n:04d}.jpg"
         shutil.copyfile(src, OUT / name)
         total += src.stat().st_size
-        entries.append((bare, name))
+        entries.append((bare, name, jpeg_size(src)))
         by_via[info.get("via")] = by_via.get(info.get("via"), 0) + 1
         # The Russian route stores the title as "File:Файл:…" — Commons' own
         # prefix in front of the ru-wiki one — so stripping "File:" alone left
@@ -103,16 +120,30 @@ def main():
              "   keyed on the bare word. CREDITS carries each file's title, author,",
              "   licence and page, shown on the word's entry. */",
              "", "export const IMAGES = {"]
-    for bare, name in entries:
+    for bare, name, _size in entries:
         lines.append(f'  "{bare}": require("../assets/img/{name}"),')
     lines.append("};")
+    lines.append("")
+    # Each photo's width, height and where its subject sits (0 top, 1 bottom).
+    # A card shows a photo at its own shape up to a height limit, so square and
+    # portrait photos are cropped — and cropped around the subject, read by eye
+    # into image_focus.json, not around the middle: the owner found a cat cut
+    # off at the neck (2026-10-01). A focus for a word that ships no photo is
+    # stale and fails the build, like a stale class override.
+    focus = json.loads(FOCUS.read_text(encoding="utf-8")) if FOCUS.exists() else {}
+    shipped = {bare for bare, _n, _s in entries}
+    stale_focus = sorted(k for k in focus if not k.startswith("_") and k not in shipped)
+    if stale_focus:
+        raise SystemExit(f"image_focus.json names words that ship no photo: {', '.join(stale_focus)}")
+    shapes = {bare: [w, h, focus.get(bare, 0.5)] for bare, _n, (w, h) in entries}
+    lines.append("export const SHAPES = " + json.dumps(shapes, ensure_ascii=False) + ";")
     lines.append("")
     # The file each word ships, by name. A bundler turns every require() into the
     # same opaque handle under test, so "one photograph, one word" cannot be
     # checked through IMAGES — and it is worth checking: nineteen files were
     # shipped for two or three words each.
     lines.append("export const FILES = "
-                 + json.dumps({b: n for b, n in entries}, ensure_ascii=False, indent=1) + ";")
+                 + json.dumps({b: n for b, n, _s in entries}, ensure_ascii=False, indent=1) + ";")
     lines.append("")
     lines.append("export const CREDITS = " + json.dumps(credits, ensure_ascii=False, indent=1) + ";")
     lines.append("")

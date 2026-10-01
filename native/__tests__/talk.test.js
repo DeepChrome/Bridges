@@ -185,8 +185,13 @@ describe("talk", () => {
     talk.mockResolvedValue(OPENING);
     await withTalk({ unit: done() });
     await screen.findByText("В кафе");
+    // Behind the cog, not above the list, and no caption narrating them.
+    expect(screen.queryByText("Beginner")).toBeNull();
+    expect(screen.queryByText(/How fast the tutor/)).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("talk-cog")); });
     await act(async () => { fireEvent.press(screen.getByText("Beginner")); });
     await act(async () => { fireEvent.press(screen.getByText("Slowest")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("sheet-backdrop")); });
     const st = await saved();
     expect(st.talkLevel).toBe("beginner");
     expect(st.talkSpeed).toBe("slowest");

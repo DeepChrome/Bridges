@@ -23,7 +23,7 @@ import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
 import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text,
-         Marked, BULB_PATH } from "../ui";
+         Marked, BULB_PATH, Sheet, CogButton } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, drillPool, nextLesson } from "../data";
 import { talk as askTutor, review as askReview, hint as askHint, config } from "../lib/feedback";
@@ -326,6 +326,32 @@ function LearnerBubble({ turn }) {
   );
 }
 
+/* The cog on the picker, and the sheet it opens: the tutor's level, with what
+   that level means, and how fast it is read. Its own component holding its own
+   open state, so the sheet redraws (§30be). */
+function TalkOptionsButton({ level, speed, update }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <CogButton testID="talk-cog" label="Talk options" onPress={() => setOpen(true)} />
+      {open ? (
+        <Sheet testID="talk-options" onClose={() => setOpen(false)}
+               footer={<Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={() => setOpen(false)} />}>
+          <View style={{ marginBottom: 18 }}>
+            <SectionLabel>Level</SectionLabel>
+            <Choice testID="talk-level" options={TALK_LEVELS} value={level}
+                    onPick={(id) => update((p) => ({ ...p, talkLevel: id }))} />
+            <Muted style={{ marginTop: 6 }}>{TALK_LEVELS.find((l) => l.id === level).blurb}</Muted>
+          </View>
+          <SectionLabel>Reading speed</SectionLabel>
+          <Choice testID="talk-speed" options={SPEEDS} value={speed}
+                  onPick={(id) => update((p) => ({ ...p, talkSpeed: id }))} />
+        </Sheet>
+      ) : null}
+    </>
+  );
+}
+
 /* The tutor's pitch and pace, chosen on the picker and kept. */
 export const TALK_LEVELS = [
   { id: "beginner", name: "Beginner", blurb: "Simple words, present tense" },
@@ -530,15 +556,14 @@ export default function Talk({ navigation, route }) {
             Conversation is not available in this build.
           </Muted>
         ) : null}
-        <SectionLabel>The tutor</SectionLabel>
-        <Choice testID="talk-level" options={TALK_LEVELS} value={level}
-                onPick={(id) => update((p) => ({ ...p, talkLevel: id }))} />
-        <Muted style={{ marginTop: 6, marginBottom: 10 }}>
-          {TALK_LEVELS.find((l) => l.id === level).blurb + (st.talkLevel ? "" : " · set by where you are")}
-        </Muted>
-        <Choice testID="talk-speed" options={SPEEDS} value={speed}
-                onPick={(id) => update((p) => ({ ...p, talkSpeed: id }))} />
-        <Muted style={{ marginTop: 6, marginBottom: 16 }}>How fast the tutor is read out</Muted>
+        {/* The situations are the screen; the tutor's level and pace are
+            options, behind the cog every other run screen has (§30aw). They sat
+            above the list with a caption each — "How fast the tutor is read
+            out" — which is the app narrating itself (rule 20.7; the
+            walkthrough, 2026-09-30). */}
+        <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 10 }}>
+          <TalkOptionsButton level={level} speed={speed} update={update} />
+        </View>
         <List>
           {SCENARIOS.map((s) => {
             const u = UN.find((x) => x.id === s.unit);

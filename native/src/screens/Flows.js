@@ -534,11 +534,17 @@ export function DrillList({ navigation }) {
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Word building</Text>
           </View>
         </Row>
-        {/* Speak Russian, read it back in English (2026-09-22). Under Speaking
-            because holding a microphone is what it asks of you, and because it
-            is where a learner goes when they want to say something and are not
-            sure they said it. Open from the first screen: it teaches nothing
-            and gates nothing, so there is nothing to earn. */}
+      </List>
+
+      {/* Speaking was seven rows of four kinds of thing (the walkthrough,
+          2026-09-30): the mouth drills, three conversations with the model,
+          and two references. Each kind has its own section now. */}
+      <SectionLabel style={{ marginTop: 18 }}>Conversation</SectionLabel>
+      <List>
+        {/* Speak Russian, read it back in English (2026-09-22). With Talk and
+            the tutor because it is the third way of saying something to the
+            model and seeing what came of it. Open from the first screen: it
+            teaches nothing and gates nothing, so there is nothing to earn. */}
         <Row onPress={() => navigation.navigate("Translate")}>
           <Thumb id="translate" tone="brand" />
           <View style={{ flex: 1 }}>
@@ -560,6 +566,10 @@ export function DrillList({ navigation }) {
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Tutor</Text>
           </View>
         </Row>
+      </List>
+
+      <SectionLabel style={{ marginTop: 18 }}>Letters & sounds</SectionLabel>
+      <List>
         {/* The letters and the mouth behind them (ROADMAP P10.2). Open from the
             first screen: nothing else in the app teaches the alphabet. Named
             for the letters rather than for "sounds", which described the vowel

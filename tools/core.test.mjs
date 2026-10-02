@@ -27,7 +27,7 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
   from "../core/state.js";
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
-import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, QUIZ_KINDS, PRODUCE_AT,
+import { makeQuestions, QUIZ_N, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, QUIZ_KINDS, PRODUCE_AT,
          lessonSize, lessonWordsOf, lessonCountOf, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem }
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
@@ -1147,6 +1147,23 @@ group("lesson ramp");
 
 group("lesson generation");
 {
+  /* The core words are drilled every time; a lesson's rarer words only where
+     a slot is free (the owner, 2026-10-02: "just drill the most common one").
+     Swept over every lesson with more words than the quiz has room for. */
+  {
+    const missed = [];
+    for (const u of UN) {
+      for (let k = 0; k < lessonCount(u); k++) {
+        const ws = lessonWords(u, k);
+        if (ws.length <= QUIZ_N - 2) continue;
+        const core = ws.slice().sort((a, b) => a - b).slice(0, QUIZ_N - 2);
+        const asked = new Set(Q.quizSteps(u, k).map((q) => q.i));
+        const gone = core.filter((i) => !asked.has(i));
+        if (gone.length) missed.push(`${u.id}:${k} ${gone.map((i) => L[i].b).join(",")}`);
+      }
+    }
+    ok(!missed.length, "every lesson's core words are asked in its quiz", missed.slice(0, 5).join("; "));
+  }
   const unit = UN.find((u) => u.id === "food");
   const steps = Q.vocabSteps(unit, 0);
   ok(steps[0].t === "grammar", "the first lesson opens on the unit's grammar note");

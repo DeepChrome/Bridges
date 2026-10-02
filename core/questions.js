@@ -1531,7 +1531,17 @@ export function makeQuestions(env) {
     const readable = new Set(unitsUpTo(unit).flatMap((u) => u.w));
     const draw = (i) => drawFrom(candidates(i, pool, card(i), readable), i);
 
-    const bag = words.map(draw).filter(Boolean);
+    /* **Not every word a lesson shows is a word it drills** (the owner,
+       2026-10-02: "you can give multiple greeting options and then just drill
+       the most common one… Focus is always on the core words"). A lesson's
+       block may teach «здравствуйте» beside «привет»; the quiz asks the
+       lesson's commonest words always, the rest only where a slot is free.
+       The lemma index is frequency order (build_site), read here, never keyed
+       on (rule 20.4). */
+    const byUse = words.slice().sort((a, b) => a - b);
+    const core = byUse.slice(0, QUIZ_N - 2);
+    const extra = byUse.slice(QUIZ_N - 2);
+    const bag = core.map(draw).filter(Boolean);
     /* Both production shapes, not just the first. `find(type) || find(cloze)`
        could never reach its second branch: `candidates` always ends with a
        `type`, so the gap-fill was unreachable here and every guaranteed
@@ -1541,10 +1551,16 @@ export function makeQuestions(env) {
        question twice in one quiz, in 26 % of quizzes (the review,
        2026-10-01). */
     const produced = new Set(bag.filter((e) => PRODUCTION.includes(e.t)).map((e) => e.i));
-    const production = words.filter((i) => !produced.has(i))
+    const production = core.filter((i) => !produced.has(i))
       .map((i) => drawFrom(candidates(i, pool, card(i), readable).filter((e) => PRODUCTION.includes(e.t)), i))
       .filter(Boolean);
     shuffle(production).slice(0, 2).forEach((e) => bag.push(e));
+    // The lesson's other words, where there is room before any review.
+    for (const i of shuffle(extra)) {
+      if (bag.length >= QUIZ_N) break;
+      const e = draw(i);
+      if (e) bag.push(e);
+    }
     const review = shuffle((prefer || []).filter((i) => L[i] && !words.includes(i)));
     const earlier = shuffle(Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat()
       .filter((i) => !words.includes(i) && !review.includes(i)));

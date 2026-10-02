@@ -57,12 +57,14 @@ class Ya:
     def __init__(self, size, inset):
         self.s = size
         span = 1 - 2 * inset
-        self.w = span * 0.155                       # stroke weight
+        # Heavy and round, "almost like a bubble" (the owner, 2026-10-02):
+        # chubbier than the board's Unbounded 800, and no flat ends anywhere.
+        self.w = span * 0.19                       # stroke weight
         self.top, self.bot = inset + span * 0.10, inset + span * 0.90
         width = (self.bot - self.top) * 0.80        # a heavy Я is a little narrow
         self.xl = 0.5 - width / 2
         self.xr = 0.5 + width / 2
-        self.mid = self.top + (self.bot - self.top) * 0.56   # where the bowl closes
+        self.mid = self.top + (self.bot - self.top) * 0.64   # where the bowl closes
         h = self.w / 2
         r = (self.mid - self.top - self.w) / 2      # the bowl's round, centre line
         cx, cy = self.xl + h + r, self.top + h + r
@@ -75,24 +77,22 @@ class Ya:
         pts += [(cx, cy + r), (self.xr - h, cy + r)]
         self.bowl = pts
         # The leg leaves the bowl's foot a little left of centre and lands at
-        # the bottom left — carried past the baseline and cut flat there, so its
-        # foot is square like the stem's rather than a rounded cap.
+        # the bottom left, its foot rounded like every other end.
         sx, sy = cx + r * 0.55, cy + r
-        ex, ey = self.xl + h * 1.05, self.bot - h
-        k = (self.bot + self.w - sy) / (ey - sy) if ey != sy else 1   # no span: the plain background
-        self.leg = ((sx, sy), (sx + (ex - sx) * k, sy + (ey - sy) * k))
+        ex, ey = self.xl + h, self.bot - h
+        self.leg = ((sx, sy), (ex, ey))
 
     def coverage(self, px, py):
         """0..1 how much of this pixel the white mark covers."""
         x, y = px / self.s, py / self.s
         aa = 0.9 / self.s
         h = self.w / 2
-        best = self._rect(x, y, self.xr - self.w, self.top, self.xr, self.bot, 0)     # stem
+        best = self._rect(x, y, self.xr - self.w, self.top, self.xr, self.bot, h)     # stem, round ends
         d = min(seg_dist(x, y, ax, ay, bx, by) for (ax, ay), (bx, by) in zip(self.bowl, self.bowl[1:]))
         best = min(best, d - h)
         (ax, ay), (bx, by) = self.leg
         leg = seg_dist(x, y, ax, ay, bx, by) - h
-        best = min(best, max(leg, y - self.bot))      # flat at the baseline, as the stem is
+        best = min(best, leg)
         return max(0.0, min(1.0, 0.5 - best / aa / 2))
 
     @staticmethod

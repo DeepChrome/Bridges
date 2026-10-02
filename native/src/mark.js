@@ -18,13 +18,15 @@ export function Mark({ size = 72, style }) {
     <View testID="mark" accessibilityLabel={APP_NAME} style={style}>
       <Svg width={size} height={size} viewBox="0 0 96 96">
         <Rect x={0} y={0} width={96} height={96} rx={22} fill={LOGO_CORAL} />
-        {/* The stem, full height on the right. */}
-        <Rect x={58.8} y={21.9} width={10.1} height={52.2} fill="#FFFFFF" />
+        {/* Heavy and round, "almost like a bubble" (the owner, 2026-10-02).
+            The stem, full height on the right, its ends rounded. */}
+        <Rect x={56.5} y={21.9} width={12.4} height={52.2} rx={6.2} fill="#FFFFFF" />
         {/* The bowl: along the top, round the left, back along its foot. */}
-        <Path d="M63.8 27 H41.7 A9.6 9.6 0 0 0 41.7 46.1 H63.8"
-              stroke="#FFFFFF" strokeWidth={10.1} fill="none" />
-        {/* The leg, from the bowl's foot to the baseline, cut flat there. */}
-        <Path d="M51.2 48.8 L35.2 74.1 L23.2 74.1 L42.7 43.4 Z" fill="#FFFFFF" />
+        <Path d="M62.7 28.1 H43.8 A10.5 10.5 0 0 0 43.8 49.1 H62.7"
+              stroke="#FFFFFF" strokeWidth={12.4} fill="none" />
+        {/* The leg, from the bowl's foot to the bottom left, its foot rounded. */}
+        <Path d="M49.6 49.1 L33.3 67.9" stroke="#FFFFFF" strokeWidth={12.4}
+              strokeLinecap="round" fill="none" />
       </Svg>
     </View>
   );

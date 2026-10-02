@@ -6,10 +6,14 @@ import { drillPool, DRILL_POOL_MIN, STAGES, L, idxOfWord, lessonWords, lessonCou
 import { Q } from "../src/questions";
 
 describe("lesson ramp", () => {
-  it("chapter 1 teaches five words a lesson, chapter 3 seven", () => {
-    expect(lessonWords(STAGES[0].core, 0)).toHaveLength(5);
-    expect(lessonCount(STAGES[0].core)).toBe(Math.ceil(STAGES[0].core.w.length / 5));
-    expect(lessonWords(STAGES[2].core, 0)).toHaveLength(7);
+  /* The ramp is a target; lessons end where a group of related words ends
+     (build_topics.py cut_lessons), so they run near it rather than at it. */
+  it("lessons run near five words in chapter 1 and near seven in chapter 3, covering every word", () => {
+    for (const [u, n] of [[STAGES[0].core, 5], [STAGES[2].core, 7]]) {
+      const sizes = Array.from({ length: lessonCount(u) }, (_, k) => lessonWords(u, k).length);
+      expect(sizes.reduce((a, b) => a + b, 0)).toBe(u.w.length);
+      for (const m of sizes) { expect(m).toBeGreaterThanOrEqual(3); expect(m).toBeLessThanOrEqual(n + 3); }
+    }
   });
 });
 

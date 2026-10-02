@@ -16,7 +16,7 @@ import { writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadPayload } from "./payload.mjs";
-import { lessonSize } from "../core/questions.js";
+import { lessonSize, lessonWordsOf, lessonCountOf } from "../core/questions.js";
 import { firstSense } from "../core/util.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -65,8 +65,8 @@ export const STAGES = (() => {
 
 const stageIndexOf = (u) => STAGES.findIndex((s) => s.core === u || s.branches.includes(u));
 export const sizeOf = (u) => lessonSize(stageIndexOf(u));
-export const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / sizeOf(u)));
-export const lessonWords = (u, i) => u.w.slice(i * sizeOf(u), (i + 1) * sizeOf(u));
+export const lessonCount = (u) => lessonCountOf(u, sizeOf(u));
+export const lessonWords = (u, i) => lessonWordsOf(u, i, sizeOf(u));
 
 const word = (i) => {
   const w = L[i];
@@ -95,7 +95,7 @@ export function briefs() {
            learner meets within the same chapter is the smallest palette a
            conversation can be written in; a branch still gets only the spine
            it hangs off, since a side quest is optional. */
-        const own = u.kind === "spine" ? u.w : u.w.slice(0, li * sizeOf(u));
+        const own = u.kind === "spine" ? u.w : Array.from({ length: li }, (_, j) => lessonWordsOf(u, j, sizeOf(u))).flat();
         const base = u.kind === "spine" ? earlierSpine : earlierSpine.concat(stage.core.w);
         const palette = Array.from(new Set(base.concat(own, mine)));
         out.push({

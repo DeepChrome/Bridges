@@ -11,7 +11,7 @@
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadPayload } from "./payload.mjs";
-import { makeQuestions, lessonSize, GRAMMAR_N } from "../core/questions.js";
+import { makeQuestions, lessonSize, GRAMMAR_N, lessonWordsOf, lessonCountOf } from "../core/questions.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { parseDeep } from "../core/search.js";
 
@@ -30,8 +30,8 @@ const stageIndex = (u) => Math.max(0, STAGES.findIndex((s) => s.core.id === u.id
 const sizeOf = (u) => lessonSize(stageIndex(u));
 const Q = makeQuestions({
   L, IX: data.index, UN: data.units, STAGES, PAIRS: data.pairs || {}, hasVoice: () => true,
-  lessonWords: (u, i) => u.w.slice(i * sizeOf(u), (i + 1) * sizeOf(u)),
-  lessonCount: (u) => Math.max(1, Math.ceil(u.w.length / sizeOf(u))),
+  lessonWords: (u, i) => lessonWordsOf(u, i, sizeOf(u)),
+  lessonCount: (u) => lessonCountOf(u, sizeOf(u)),
   SPEECH: data.speech, SCRIPTS: data.scripts || {},
 });
 

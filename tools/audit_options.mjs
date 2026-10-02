@@ -29,7 +29,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { loadPayload } from "./payload.mjs";
-import { makeQuestions, DRILL_TYPES, lessonSize } from "../core/questions.js";
+import { makeQuestions, DRILL_TYPES, lessonSize, lessonWordsOf, lessonCountOf } from "../core/questions.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { parseDeep } from "../core/search.js";
 import { fold } from "../core/util.js";
@@ -68,8 +68,8 @@ const STAGES = (() => {
 const stageIndex = (u) => Math.max(0, STAGES.findIndex(
   (s) => s.core.id === u.id || s.branches.some((b) => b.id === u.id)));
 const sizeOf = (u) => lessonSize(stageIndex(u));
-const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / sizeOf(u)));
-const lessonWords = (u, i) => u.w.slice(i * sizeOf(u), (i + 1) * sizeOf(u));
+const lessonCount = (u) => lessonCountOf(u, sizeOf(u));
+const lessonWords = (u, i) => lessonWordsOf(u, i, sizeOf(u));
 
 const Q = makeQuestions({
   L, IX: data.index, UN: data.units, STAGES, lessonWords, lessonCount,

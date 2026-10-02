@@ -1220,11 +1220,21 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     uidx = {}
     for tid, name, kind, n, opt in db.execute(
             "select id, name, kind, n, opt from topics order by ord"):
-        words = [pos_of[l] for (l,) in db.execute(
-            "select lemma_id from t.unit_words where topic_id=? order by ord", (tid,))
+        rows = [(pos_of[l], k) for l, k in db.execute(
+            "select lemma_id, lesson from t.unit_words where topic_id=? order by ord", (tid,))
             if l in pos_of]
+        words = [i for i, _ in rows]
         uidx[tid] = len(units)
         u = {"id": tid, "name": name, "kind": kind, "w": words}
+        # Each lesson's size, in order (build_topics.py cut_lessons): lessons end
+        # where a group of related words ends, so they are not all one length.
+        # core/questions.js lessonWordsOf is the one reader.
+        sizes = []
+        for _, k in rows:
+            if k >= len(sizes):
+                sizes += [0] * (k + 1 - len(sizes))
+            sizes[k] += 1
+        u["ls"] = [m for m in sizes if m]
         # The unit's words in their groups of related words, in reading order
         # (build_topics.py `grouped`): [name, section, [lemma index…]]. Every
         # word list in the app draws from this, so the four seasons are one

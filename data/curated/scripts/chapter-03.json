@@ -2,7 +2,174 @@
  "chapter": 3,
  "name": "The Little Words",
  "lessons": {
-  "core3:5": {
+  "core3:3": {
+   "title": "Dad's missing tie",
+   "cast": [
+    {
+     "id": "a",
+     "ru": "Ярик",
+     "en": "Yarik"
+    },
+    {
+     "id": "b",
+     "ru": "Тедди",
+     "en": "Teddy"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "галстук",
+     "en": "tie"
+    },
+    {
+     "ru": "шкаф",
+     "en": "wardrobe"
+    },
+    {
+     "ru": "волосы",
+     "en": "hair"
+    },
+    {
+     "ru": "конечно",
+     "en": "of course"
+    }
+   ],
+   "lines": [
+    {
+     "s": "a",
+     "ru": "Тедди, сегодня мы идём к маме в банк. Где мой галстук?",
+     "en": "Teddy, today we're going to Mom's bank. Where's my tie?"
+    },
+    {
+     "s": "b",
+     "ru": "Не знаю, папа. Ты смотрел в шкафу?",
+     "en": "I don't know, Dad. Did you look in the wardrobe?"
+    },
+    {
+     "s": "a",
+     "ru": "Конечно, смотрел. В шкафу его нет, и в машине нет.",
+     "en": "Of course I looked. It isn't in the wardrobe, and it isn't in the car."
+    },
+    {
+     "s": "b",
+     "ru": "А какой он? Может, я его видел.",
+     "en": "What does it look like? Maybe I've seen it."
+    },
+    {
+     "s": "a",
+     "ru": "Тот, из Китая. От брата.",
+     "en": "The one from China. From my brother."
+    },
+    {
+     "s": "b",
+     "ru": "А, этот... Папа, ты только не смотри на меня.",
+     "en": "Oh, that one... Dad, just don't look at me."
+    },
+    {
+     "s": "a",
+     "ru": "Тедди! Мой галстук — в твоих волосах?",
+     "en": "Teddy! My tie is in your hair?"
+    },
+    {
+     "s": "b",
+     "ru": "Да! Смотри, я в нём как профессор.",
+     "en": "Yes! Look, I'm like a professor in it."
+    },
+    {
+     "s": "a",
+     "ru": "А я в чём иду в банк? Там все в галстуках.",
+     "en": "And what do I wear to the bank? Everyone there wears a tie."
+    },
+    {
+     "s": "b",
+     "ru": "Папа, а у тебя есть другой?",
+     "en": "Dad, don't you have another one?"
+    },
+    {
+     "s": "a",
+     "ru": "Другой — у брата. А брат — в Китае.",
+     "en": "The other one is at my brother's. And my brother is in China."
+    },
+    {
+     "s": "b",
+     "ru": "Ну, вот он, папа. Он твой.",
+     "en": "Well, here it is, Dad. It's yours."
+    },
+    {
+     "s": "a",
+     "ru": "Нет, Тедди. Ты в нём такой молодец!",
+     "en": "No, Teddy. You look so great in it!"
+    },
+    {
+     "s": "b",
+     "ru": "А что ты скажешь маме, папа?",
+     "en": "So what will you tell Mom, Dad?"
+    },
+    {
+     "s": "a",
+     "ru": "Скажу: галстук у нас один, и он на Тедди.",
+     "en": "I'll say: we have one tie, and Teddy is wearing it."
+    },
+    {
+     "s": "b",
+     "ru": "А мама скажет: Ярик, ты молодец!",
+     "en": "And Mom will say: Yarik, you're a star!"
+    }
+   ],
+   "questions": [
+    {
+     "ask": "Where are Yarik and Teddy going?",
+     "options": [
+      "To Mom's bank",
+      "To Dad's work",
+      "To Grandma's",
+      "To the doctor"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What can Yarik not find?",
+     "options": [
+      "His tie",
+      "His hat",
+      "His car",
+      "His key"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Where is the missing thing?",
+     "options": [
+      "In Teddy's hair",
+      "In the wardrobe",
+      "In the car boot",
+      "At Mom's bank"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Where is Yarik's other one?",
+     "options": [
+      "With his brother",
+      "Under the table",
+      "At the cleaner's",
+      "In Teddy's room"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Yarik decide?",
+     "options": [
+      "Teddy keeps the tie",
+      "Yarik buys a new tie",
+      "They stay home today",
+      "Mom brings another"
+     ],
+     "answer": 0
+    }
+   ]
+  },
+  "core3:4": {
    "title": "The hat on the roof",
    "cast": [
     {
@@ -169,173 +336,6 @@
       "To keep the hat",
       "To borrow a car",
       "To have some tea"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "core3:3": {
-   "title": "Dad's missing tie",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Ярик",
-     "en": "Yarik"
-    },
-    {
-     "id": "b",
-     "ru": "Тедди",
-     "en": "Teddy"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "галстук",
-     "en": "tie"
-    },
-    {
-     "ru": "шкаф",
-     "en": "wardrobe"
-    },
-    {
-     "ru": "волосы",
-     "en": "hair"
-    },
-    {
-     "ru": "конечно",
-     "en": "of course"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Тедди, сегодня мы идём к маме в банк. Где мой галстук?",
-     "en": "Teddy, today we're going to Mom's bank. Where's my tie?"
-    },
-    {
-     "s": "b",
-     "ru": "Не знаю, папа. Ты смотрел в шкафу?",
-     "en": "I don't know, Dad. Did you look in the wardrobe?"
-    },
-    {
-     "s": "a",
-     "ru": "Конечно, смотрел. В шкафу его нет, и в машине нет.",
-     "en": "Of course I looked. It isn't in the wardrobe, and it isn't in the car."
-    },
-    {
-     "s": "b",
-     "ru": "А какой он? Может, я его видел.",
-     "en": "What does it look like? Maybe I've seen it."
-    },
-    {
-     "s": "a",
-     "ru": "Тот, из Китая. От брата.",
-     "en": "The one from China. From my brother."
-    },
-    {
-     "s": "b",
-     "ru": "А, этот... Папа, ты только не смотри на меня.",
-     "en": "Oh, that one... Dad, just don't look at me."
-    },
-    {
-     "s": "a",
-     "ru": "Тедди! Мой галстук — в твоих волосах?",
-     "en": "Teddy! My tie is in your hair?"
-    },
-    {
-     "s": "b",
-     "ru": "Да! Смотри, я в нём как профессор.",
-     "en": "Yes! Look, I'm like a professor in it."
-    },
-    {
-     "s": "a",
-     "ru": "А я в чём иду в банк? Там все в галстуках.",
-     "en": "And what do I wear to the bank? Everyone there wears a tie."
-    },
-    {
-     "s": "b",
-     "ru": "Папа, а у тебя есть другой?",
-     "en": "Dad, don't you have another one?"
-    },
-    {
-     "s": "a",
-     "ru": "Другой — у брата. А брат — в Китае.",
-     "en": "The other one is at my brother's. And my brother is in China."
-    },
-    {
-     "s": "b",
-     "ru": "Ну, вот он, папа. Он твой.",
-     "en": "Well, here it is, Dad. It's yours."
-    },
-    {
-     "s": "a",
-     "ru": "Нет, Тедди. Ты в нём такой молодец!",
-     "en": "No, Teddy. You look so great in it!"
-    },
-    {
-     "s": "b",
-     "ru": "А что ты скажешь маме, папа?",
-     "en": "So what will you tell Mom, Dad?"
-    },
-    {
-     "s": "a",
-     "ru": "Скажу: галстук у нас один, и он на Тедди.",
-     "en": "I'll say: we have one tie, and Teddy is wearing it."
-    },
-    {
-     "s": "b",
-     "ru": "А мама скажет: Ярик, ты молодец!",
-     "en": "And Mom will say: Yarik, you're a star!"
-    }
-   ],
-   "questions": [
-    {
-     "ask": "Where are Yarik and Teddy going?",
-     "options": [
-      "To Mom's bank",
-      "To Dad's work",
-      "To Grandma's",
-      "To the doctor"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What can Yarik not find?",
-     "options": [
-      "His tie",
-      "His hat",
-      "His car",
-      "His key"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Where is the missing thing?",
-     "options": [
-      "In Teddy's hair",
-      "In the wardrobe",
-      "In the car boot",
-      "At Mom's bank"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Where is Yarik's other one?",
-     "options": [
-      "With his brother",
-      "Under the table",
-      "At the cleaner's",
-      "In Teddy's room"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Yarik decide?",
-     "options": [
-      "Teddy keeps the tie",
-      "Yarik buys a new tie",
-      "They stay home today",
-      "Mom brings another"
      ],
      "answer": 0
     }

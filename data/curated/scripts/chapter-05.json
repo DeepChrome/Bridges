@@ -2,7 +2,7 @@
  "chapter": 5,
  "name": "Spending & Saving",
  "lessons": {
-  "core5:2": {
+  "core5:1": {
    "title": "A headache and a red hat",
    "cast": [
     {
@@ -237,8 +237,8 @@
     },
     {
      "s": "c",
-     "ru": "Мешок мне, а тебе рубль.",
-     "en": "The bag for me, and a rouble for you."
+     "ru": "Дай мне мешок, а тебе рубль.",
+     "en": "Give me the bag, and a rouble for you."
     },
     {
      "s": "b",

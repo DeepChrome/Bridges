@@ -14,7 +14,6 @@ Output: data/topics.db
 """
 
 import argparse
-import functools
 import json
 import re
 import sqlite3
@@ -77,9 +76,9 @@ SPLIT_GROUPS = []   # (unit, group) a group a lesson boundary still cuts
 # The section a word's class belongs in, everything else under "little" — the
 # rule build_word_groups.mjs (KINDS) holds the model's answer to.
 KIND_OF_POS = {"verb": "verb", "noun": "noun", "adjective": "describing", "adverb": "describing"}
-# Lesson sizes, as core/questions.js cuts them (LESSON_RAMP, LESSON_SIZE):
-# a lesson is the next N words of the unit, so a group stays whole only if the
-# order puts it inside one N-word window.
+# Each chapter's target lesson size (core/questions.js LESSON_RAMP, LESSON_SIZE).
+# A target, not a cut: cut_lessons ends a lesson where a group ends, and the
+# sizes ride out on the unit as `ls`.
 LESSON_RAMP, LESSON_SIZE = [5, 6], 7
 
 
@@ -107,57 +106,49 @@ def short_tail(n, size):
     return r if 0 < r <= SHORT_LESSON else 0
 
 
-def pack(blocks, size):
-    """Blocks (lists of words) in order, each kept inside one `size`-word
-    lesson, and returned with the blocks a lesson boundary still cuts.
+# A lesson may run this many words over its chapter's size, and this many under,
+# so it can end where a group ends (the owner, 2026-10-02: "I still see тарелка
+# by itself… It's totally okay to make the lessons longer"). Fixed-size lessons
+# could only keep a group whole by packing it into the right window, and a
+# group of seven in lessons of five could never be: Tableware cut «тарелка»
+# off alone at the end of a lesson about drinks.
+LESSON_OVER, LESSON_UNDER = 3, 2
 
-    The owner, 2026-09-30: "Related words always need to be together." A
-    lesson is the next `size` words, so that is a packing problem, and greedy
-    filling lost it — a lesson half full with nothing small enough left to
-    finish it cut the next group, 87 of 335 at first. So the whole unit is
-    planned: blocks are placed earliest first and each lesson is filled to
-    exactly `size`, backtracking only when a choice strands the rest — so the
-    order is still commonest first wherever a clean packing allows it.
-    A block larger than a lesson opens one and is cut as few times as it can
-    be; a unit whose groups admit no clean packing cuts as few as it can, and
-    its cuts are reported."""
-    n = len(blocks)
-    lens = [len(b) for b in blocks]
 
-    @functools.lru_cache(maxsize=None)
-    def plan(left, room, cuts):
-        # left: bitmask of blocks still to place; room: what the lesson has
-        # left; cuts: how many more blocks may run over a lesson boundary.
-        if not left:
-            return ()
-        todo = [j for j in range(n) if left >> j & 1]
-        for j in todo:
-            whole = lens[j] <= room or room == size    # a block opening a lesson is never "cut" by choice
-            if not whole and not cuts:
+def cut_lessons(blocks, size):
+    """Blocks in teaching order, cut into lessons: consecutive blocks, each
+    lesson `size - LESSON_UNDER` to `size + LESSON_OVER` words, as near `size`
+    as the groups allow. A block longer than the longest lesson is split into
+    near-equal parts and reported. Returns (lesson sizes, the blocks cut)."""
+    lo, hi = max(2, size - LESSON_UNDER), size + LESSON_OVER
+    parts, cut = [], []
+    for b in blocks:
+        if len(b) <= hi:
+            parts.append(len(b))
+            continue
+        cut.append(b)
+        k = -(-len(b) // hi)
+        parts += [len(b) // k + (1 if j < len(b) % k else 0) for j in range(k)]
+    # Fewest-cost partition of the parts in order: a lesson's cost is how far it
+    # is from `size`, squared; a lesson outside lo..hi is allowed only at a
+    # steep price, so a unit too small for the bounds is still cut somewhere.
+    def cost(m):
+        c = (m - size) ** 2
+        return c if lo <= m <= hi else c + 100 * (lo - m if m < lo else m - hi) ** 2
+    n = len(parts)
+    best = [(0, [])] + [None] * n
+    for i in range(1, n + 1):
+        m = 0
+        for j in range(i - 1, -1, -1):
+            m += parts[j]
+            if best[j] is None:
                 continue
-            spill = lens[j] - room if lens[j] > room else 0
-            after = (size - spill % size if spill % size else size) if spill else (room - lens[j] or size)
-            rest = plan(left & ~(1 << j), after, cuts - (0 if whole else 1))
-            if rest is not None:
-                return (j,) + rest
-        # Nothing fits: fine only at the very end, where the last lesson is short.
-        return None
-
-    # The fewest cuts there can be, found by allowing none, then one, then
-    # two: a unit whose groups admit no clean packing (five, five and five into
-    # lessons of six) cuts one group, not every one a greedy fill strands. With
-    # n cuts allowed every order is a plan, so the loop always returns.
-    for cuts in range(n + 1):
-        order = plan((1 << n) - 1, size, cuts)
-        if order is not None:
-            break
-    plan.cache_clear()
-    out, cut = [], []
-    for j in order:
-        if len(blocks[j]) > size - len(out) % size:
-            cut.append(blocks[j])
-        out.extend(blocks[j])
-    return out, cut
+            c = best[j][0] + cost(m)
+            if best[i] is None or c < best[i][0]:
+                best[i] = (c, best[j][1] + [m])
+            if m > hi * 2:
+                break
+    return best[n][1], cut
 
 
 _NOTES = json.loads((ROOT / "data" / "curated" / "grammar_notes.json").read_text(encoding="utf-8")).get("notes", {})
@@ -201,7 +192,15 @@ def grouped(tid, chosen, meta, spoken, size):
         # (a numeral) and nine nouns.
         kinds = [KIND_OF_POS.get(meta[by_bare[b]]["pos"], "little") for b in here]
         kind = max(set(kinds), key=kinds.count)
-        groups.insert(at, {"name": name[0].upper() + name[1:], "kind": kind, "words": here, "set": True})
+        # A file group of the set's own name keeps the rest of its words with
+        # the set: "Pets" is собака and кошка (the set) and then кролик and
+        # мышь, not two groups both called Pets that a lesson may cut apart.
+        same = next((g for g in groups if g["name"].lower() == name.lower() and g["kind"] == kind), None)
+        extra = same["words"] if same else []
+        if same:
+            same["words"] = []
+        groups.insert(at, {"name": name[0].upper() + name[1:], "kind": kind,
+                           "words": here + extra, "set": True})
     groups = [g for g in groups if g["words"]]
     card = card_words(tid)
     # The reading order: sections in GROUP_KINDS order, groups in the file's
@@ -233,9 +232,15 @@ def grouped(tid, chosen, meta, spoken, size):
     UNGROUPED.extend((tid, meta[l]["bare"]) for l in rest)
     blocks += [((0 if fold(meta[l]["bare"]) in card else 1, rank(l)), 10 ** 6, [l]) for l in rest]
     blocks.sort(key=lambda b: (b[0], b[1]))
-    order, cut = pack([members for _, _, members in blocks], size)
+    order = [l for _, _, members in blocks for l in members]
+    sizes, cut = cut_lessons([members for _, _, members in blocks], size)
     SPLIT_GROUPS.extend((tid, names[id(b)]) for b in cut if id(b) in names)
-    return order, group_of
+    lesson_of, j = {}, 0
+    for k, m in enumerate(sizes):
+        for l in order[j:j + m]:
+            lesson_of[l] = k
+        j += m
+    return order, group_of, lesson_of
 # Words a video says that are not Russian to learn from it: the channel's own
 # boilerplate (subscribe, like, the link below) and the grammar metalanguage a
 # lesson-video talks in. They are real words, and the second kind is taught by
@@ -709,7 +714,8 @@ create table unit_words (
   reason   text,                 -- which rule placed it, for auditing
   grp      text,                 -- its group of related words (word_groups.json)
   gkind    text,                 -- the section that group sits in: verb, noun, describing, little
-  gord     integer               -- the group's place in the reading order of the unit's list
+  gord     integer,              -- the group's place in the reading order of the unit's list
+  lesson   integer not null      -- which lesson teaches it (cut_lessons: groups whole)
 );
 
 create table path (
@@ -1179,11 +1185,12 @@ def main():
             # the four seasons in one lesson, winter to autumn — and the groups
             # come in the order of their commonest word, so the first lesson is
             # still the commonest words there are, just in the company they keep.
-            chosen, group_of = grouped(tid, chosen, meta, spoken, lesson_size(k))
+            chosen, group_of, lesson_of = grouped(tid, chosen, meta, spoken, lesson_size(k))
             taught |= set(chosen)
             after = followable(vid, {meta[l]["bare"] for l in taught}) if vid else None
             units.append({"id": tid, "kind": kind, "chapter": k, "video": vid, "words": chosen,
-                          "why": why, "group": group_of, "after": after, "before": before.get(tid)})
+                          "why": why, "group": group_of, "lesson": lesson_of,
+                          "after": after, "before": before.get(tid)})
         return units, taught, refused, refused_keeps
 
     # Two walks, not a loop to a fixed point: the first finds what the optional
@@ -1225,9 +1232,10 @@ def main():
             db.execute("insert into path (row, col, topic_id, requires) values (?,?,?,?)",
                        (row, -1 if quest_k % 2 == 0 else 1, u["id"], f"core{k + 1}"))
             quest_k += 1
-        db.executemany("insert into unit_words (topic_id, lemma_id, ord, reason, grp, gkind, gord) "
-                       "values (?,?,?,?,?,?,?)",
+        db.executemany("insert into unit_words (topic_id, lemma_id, ord, reason, grp, gkind, gord, lesson) "
+                       "values (?,?,?,?,?,?,?,?)",
                        [(u["id"], lid, j, u["why"][lid]) + u["group"].get(lid, (None, None, None))
+                        + (u["lesson"][lid],)
                         for j, lid in enumerate(u["words"])])
         ordv += 1
         row += 1
@@ -1250,7 +1258,7 @@ def main():
         print(f"    !! {len(MISKINDED)} word(s) in a section their class does not belong in (word_groups.json): "
               + ", ".join(f"{t}:{b}→{s}" for t, b, s in MISKINDED[:12]) + (" …" if len(MISKINDED) > 12 else ""))
     if SPLIT_GROUPS:
-        print(f"    {len(SPLIT_GROUPS)} group(s) a lesson boundary cuts (larger than a lesson, or no clean packing): "
+        print(f"    {len(SPLIT_GROUPS)} group(s) a lesson boundary cuts (longer than any lesson): "
               + ", ".join(f"{t}:{g}" for t, g in SPLIT_GROUPS[:12]) + (" …" if len(SPLIT_GROUPS) > 12 else ""))
     # A reader's decision that did not take effect is reported, never dropped:
     # a keep the build could not honour is a keep the reader thinks is there.

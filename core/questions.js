@@ -140,6 +140,22 @@ export const LESSON_SIZE = 7;
 export const lessonSize = (stageIndex) =>
   (stageIndex >= 0 && stageIndex < LESSON_RAMP.length ? LESSON_RAMP[stageIndex] : LESSON_SIZE);
 
+/* A unit's lessons as the build cut them. The ramp above is each chapter's
+   *target*; the build ends a lesson where a group of related words ends, so a
+   lesson runs a little under or over it (build_topics.py cut_lessons) and the
+   sizes ride on the unit as `ls`. Every reader — both apps, the simulator, the
+   tools — slices through these two, so the lesson a state key names is the
+   same lesson everywhere. A payload without `ls` cuts fixed `n`-word lessons. */
+export function lessonCountOf(u, n) {
+  return u.ls && u.ls.length ? u.ls.length : Math.max(1, Math.ceil(u.w.length / n));
+}
+export function lessonWordsOf(u, i, n) {
+  if (!(u.ls && u.ls.length)) return u.w.slice(i * n, (i + 1) * n);
+  let at = 0;
+  for (let k = 0; k < i && k < u.ls.length; k++) at += u.ls[k];
+  return i < u.ls.length ? u.w.slice(at, at + u.ls[i]) : [];
+}
+
 export const DRILL_N = 10;
 export const PLACEMENT_N = 50;
 export const SECTION_N = 30;
@@ -1530,7 +1546,7 @@ export function makeQuestions(env) {
       .filter(Boolean);
     shuffle(production).slice(0, 2).forEach((e) => bag.push(e));
     const review = shuffle((prefer || []).filter((i) => L[i] && !words.includes(i)));
-    const earlier = shuffle(unit.w.slice(0, index * lessonWords(unit, 0).length)
+    const earlier = shuffle(Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat()
       .filter((i) => !words.includes(i) && !review.includes(i)));
     /* …and past the unit, the route before it. A unit's first lesson has no
        earlier lessons, so a side quest opening right after its chapter's spine

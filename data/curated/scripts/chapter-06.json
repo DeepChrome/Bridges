@@ -106,8 +106,8 @@
     },
     {
      "s": "a",
-     "ru": "Один. Только один, Белка.",
-     "en": "One. Only one, Belka."
+     "ru": "Один. Только один, Белка. Второй — для Тедди.",
+     "en": "One. Only one, Belka. The second one is for Teddy."
     }
    ],
    "questions": [
@@ -228,8 +228,8 @@
     },
     {
      "s": "b",
-     "ru": "На уроке мне нужно сказать три предложения.",
-     "en": "At the lesson I have to say three sentences."
+     "ru": "На уроке мне нужно сказать три предложения о московском метро.",
+     "en": "At the lesson I have to say three sentences about the Moscow metro."
     },
     {
      "s": "a",
@@ -253,8 +253,8 @@
     },
     {
      "s": "a",
-     "ru": "Как соль? Сахар всегда в красном мешке.",
-     "en": "What do you mean, salt? The sugar's always in the red bag."
+     "ru": "Как соль? Как она появилась? Сахар всегда в красном мешке.",
+     "en": "What do you mean, salt? How did it get there? The sugar's always in the red bag."
     },
     {
      "s": "b",

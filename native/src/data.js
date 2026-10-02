@@ -35,7 +35,7 @@ const sensesBlob = () => require("../assets/senses.json");
 import { rankEndings } from "@core/endings";
 import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
-import { lessonSize } from "@core/questions";
+import { lessonSize, lessonCountOf, lessonWordsOf } from "@core/questions";
 import { quizPassed } from "@core/state";
 import { dueCards, wanted, cardFor, dayOf } from "@core/scheduler";
 import { cardKind, kindsOf } from "@core/queue";
@@ -214,16 +214,13 @@ export const unitById = (id) => UN.find((u) => u.id === id) || null;
 
 export { PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "@core/state";
 
-/* Lessons ramp: five words each in chapter 1, six in chapter 2, seven after
-   (core/questions.js LESSON_RAMP). A unit's chapter decides, spine or branch. */
+/* A unit's lessons as the build cut them, groups whole (core/questions.js
+   lessonWordsOf); the chapter's ramp size only for a payload without the cut. */
 const stageIndexOf = (u) =>
   STAGES.findIndex((s) => s.core === u || s.branches.includes(u));
-export const unitLessonSize = (u) => lessonSize(stageIndexOf(u));
-export const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / unitLessonSize(u)));
-export const lessonWords = (u, i) => {
-  const n = unitLessonSize(u);
-  return u.w.slice(i * n, (i + 1) * n);
-};
+const unitLessonSize = (u) => lessonSize(stageIndexOf(u));
+export const lessonCount = (u) => lessonCountOf(u, unitLessonSize(u));
+export const lessonWords = (u, i) => lessonWordsOf(u, i, unitLessonSize(u));
 
 export const unitState = (st, id) =>
   st.unit[id] || { best: 0, done: false, lessons: {}, video: false };

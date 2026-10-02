@@ -261,8 +261,17 @@ const unitLessonSize = (u) => {
   const k = STAGES.findIndex((s) => s.core === u || s.branches.includes(u));
   return k >= 0 && k < LESSON_RAMP.length ? LESSON_RAMP[k] : LESSON_SIZE;
 };
-const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / unitLessonSize(u)));
-const lessonWords = (u, i) => u.w.slice(i * unitLessonSize(u), (i + 1) * unitLessonSize(u));
+/* …as the target only: the build ends a lesson where a group of related words
+   ends and ships each unit's lesson sizes as `ls` (core/questions.js
+   lessonWordsOf, which this repeats for the same reason). */
+const lessonCount = (u) => (u.ls && u.ls.length ? u.ls.length
+  : Math.max(1, Math.ceil(u.w.length / unitLessonSize(u))));
+const lessonWords = (u, i) => {
+  if (!(u.ls && u.ls.length)) return u.w.slice(i * unitLessonSize(u), (i + 1) * unitLessonSize(u));
+  let at = 0;
+  for (let k = 0; k < i && k < u.ls.length; k++) at += u.ls[k];
+  return i < u.ls.length ? u.w.slice(at, at + u.ls[i]) : [];
+};
 const unitState = (id) => ST.unit[id] || { best: 0, done: false, lessons: {}, video: false };
 
 /* A lesson is three things that can be done in any order. The video belongs to the

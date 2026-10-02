@@ -28,7 +28,7 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, QUIZ_KINDS, PRODUCE_AT,
-         lessonSize, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem }
+         lessonSize, lessonWordsOf, lessonCountOf, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem }
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
@@ -877,7 +877,7 @@ group("a unit opens on the words its rule card speaks with");
     const own = new Set(u.w.map((i) => fold(DATA.lemmas[i].b)));
     const card = new Set(u.g.examples.flatMap(([ru]) => words(ru)).filter((k) => own.has(k)));
     if (!card.size) continue;
-    const first = u.w.slice(0, lessonSize(Number(u.id.slice(4)) - 1)).map((i) => fold(DATA.lemmas[i].b));
+    const first = lessonWordsOf(u, 0, lessonSize(Number(u.id.slice(4)) - 1)).map((i) => fold(DATA.lemmas[i].b));
     if (!first.some((k) => card.has(k))) bad.push(`${u.id}: lesson 1 is ${first.join(", ")}; the card uses ${[...card].join(", ")}`);
   }
   ok(!bad.length, "every spine unit's first lesson teaches a word its card uses", bad.join("; "));
@@ -1076,11 +1076,11 @@ const STAGES = (() => {
   });
   return out;
 })();
-// Mirrors native/src/data.js: lessons ramp by chapter through core's lessonSize.
+// Mirrors native/src/data.js: the build's cut, the chapter's ramp as the fallback.
 const stageIndexOf = (u) => STAGES.findIndex((s) => s.core === u || s.branches.includes(u));
 const sizeOf = (u) => lessonSize(stageIndexOf(u));
-const lessonCount = (u) => Math.max(1, Math.ceil(u.w.length / sizeOf(u)));
-const lessonWords = (u, i) => u.w.slice(i * sizeOf(u), (i + 1) * sizeOf(u));
+const lessonCount = (u) => lessonCountOf(u, sizeOf(u));
+const lessonWords = (u, i) => lessonWordsOf(u, i, sizeOf(u));
 const SPEECH = DATA.speech;
 const SCRIPTS = DATA.scripts || {};
 const Q = makeQuestions({ L, IX, UN, STAGES, lessonWords, lessonCount, SPEECH, SCRIPTS,
@@ -1097,11 +1097,35 @@ group("lesson ramp");
      "five, six, then seven words a lesson, and seven for anything unplaced");
   ok(LESSON_RAMP.every((n, k) => k === 0 || n >= LESSON_RAMP[k - 1]) && LESSON_RAMP[LESSON_RAMP.length - 1] <= LESSON_SIZE,
      "the ramp only ever rises");
-  const c1 = STAGES[0].core, c3 = STAGES[2].core;
-  ok(lessonWords(c1, 0).length === 5 && lessonCount(c1) === Math.ceil(c1.w.length / 5),
-     `chapter 1 lessons carry five words (${lessonCount(c1)} lessons)`);
-  ok(lessonWords(c3, 0).length === 7, "chapter 3 lessons carry seven");
-  ok(lessonWords(STAGES[0].branches[0], 0).length === 5, "a chapter's side quests ramp with it");
+  /* Lessons end where a group ends (the owner, 2026-10-02: "I still see
+     тарелка by itself… It's totally okay to make the lessons longer"): a lesson
+     may run up to three over its chapter's size, and a short one is a whole
+     group of three or more. */
+  const offSize = [], split = [], short = [];
+  for (const u of UN) {
+    const n = sizeOf(u);
+    if (!u.ls || u.ls.reduce((a, b) => a + b, 0) !== u.w.length) { offSize.push(`${u.id}: no cut`); continue; }
+    u.ls.forEach((m, k) => { if (m < 3 || m > n + 3) offSize.push(`${u.id} lesson ${k + 1}: ${m} words (target ${n})`); });
+    const lessonOf = new Map();
+    for (let k = 0; k < lessonCount(u); k++) for (const i of lessonWords(u, k)) lessonOf.set(i, k);
+    for (const [name, , ws] of u.gr || []) {
+      const ks = new Set(ws.map((i) => lessonOf.get(i)));
+      if (ks.size > 1 && ws.length <= n + 3) split.push(`${u.id}: ${name}`);
+    }
+    if (u.ls.some((m) => m <= 2)) short.push(u.id);
+  }
+  ok(!offSize.length, "every lesson is three words or more, and at most three over its chapter's size", offSize.slice(0, 6).join("; "));
+  ok(!split.length, "no group that fits a lesson is cut between two", split.slice(0, 8).join("; "));
+  // A word set took its members out of the file's group of the same name and
+  // left two "Pets" groups in one unit, which a lesson could cut apart.
+  const twice = UN.flatMap((u) => (u.gr || []).map((g) => g[0])
+    .filter((n, k, a) => a.indexOf(n) !== k).map((n) => `${u.id}: ${n}`));
+  ok(!twice.length, "no unit has two groups of one name", twice.join("; "));
+  ok(!short.length, "no lesson of one or two words", short.join(", "));
+  const food = UN.find((u) => u.id === "food");
+  const plates = food && food.w.filter((i) => ["тарелка", "чашка", "ложка"].includes(DATA.lemmas[i].b));
+  ok(!plates || new Set(plates.map((i) => [...Array(lessonCount(food)).keys()].find((k) => lessonWords(food, k).includes(i)))).size === 1,
+     "the plate, the cup and the spoon are taught together");
   // The web bundle repeats the numbers (core/questions.js is not inlined there),
   // and a profile moved between the apps keys on lesson indices: the two must agree.
   const web = readFileSync(join(ROOT, "tools/app/app.js"), "utf8").match(/const LESSON_RAMP = (\[[^\]]*\])/);

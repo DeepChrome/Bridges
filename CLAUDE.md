@@ -5621,16 +5621,23 @@ three screens down.
   `--stale` regroups units whose words changed; **`--check` belongs in
   verification**, and `build_topics` names any word left ungrouped.
 - **Lessons teach a group whole** (`grouped` and `pack` in `build_topics.py`).
-  A lesson is the next 5, 6 or 7 words of the unit (`LESSON_RAMP`, mirrored
-  from core), so keeping a group together is a packing problem, and ordering
-  groups by frequency alone cut **87 of 335** across two lessons. `pack`
-  plans each unit: groups earliest first (by their *median* word — one very
-  common member would drag a group of rare ones to the front), each lesson
-  filled exactly, backtracking when a choice strands the rest, and allowing
-  the fewest cuts a unit's sizes force (5, 5, 5, 3 into lessons of 6 must cut
-  one; a lesson cannot end early). Now **15 cut, each one unavoidable**, and
-  the build lists them. `unit_words` carries `grp`, `gkind`, `gord`;
-  `build_site` ships them as `u.gr`. A word filed under the wrong section for
+  Groups come earliest first (by their *median* word — one very common
+  member would drag a group of rare ones to the front). **Lessons end where
+  a group ends** (2026-10-02, the owner: *"I still see тарелка by itself…
+  It's totally okay to make the lessons longer"*). Fixed lessons of 5, 6 or
+  7 made this a packing problem, and the packer still had to cut 15 groups —
+  Tableware, seven words in lessons of five, left «тарелка» alone at the end
+  of a lesson about drinks. `cut_lessons` partitions the groups in order, a
+  lesson up to `LESSON_OVER` (3) over the chapter's size (`LESSON_RAMP`, now
+  a target) and under it only where a whole group ends; a group longer than
+  any lesson (the twelve months) is split evenly and reported. One cut
+  now. `unit_words` carries `grp`, `gkind`, `gord` and `lesson`;
+  `build_site` ships the groups as `u.gr` and the lesson sizes as `u.ls`,
+  and `lessonWordsOf`/`lessonCountOf` in `core/questions.js` are the one
+  reader — both apps, the simulator and every tool slice through them.
+  **A word set absorbs the file's group of its own name** (`grouped`): the
+  "pets" set took собака and кошка out of the file's Pets group and left a
+  second "Pets" of кролик and мышь that a lesson could cut away. A word filed under the wrong section for
   its class is printed with `!!`, by the same rule `build_word_groups.mjs`
   enforces.
 - **A curated keep outside the pool is brought in, and is its unit's alone**

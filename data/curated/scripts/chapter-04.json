@@ -2,164 +2,7 @@
  "chapter": 4,
  "name": "Winter & Gifts",
  "lessons": {
-  "core4:4": {
-   "title": "The bus to Grandad's",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Тедди",
-     "en": "Teddy"
-    },
-    {
-     "id": "b",
-     "ru": "Белка",
-     "en": "Belka"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "билет",
-     "en": "ticket"
-    },
-    {
-     "ru": "орех",
-     "en": "nut"
-    },
-    {
-     "ru": "ездить",
-     "en": "to go (by transport)"
-    },
-    {
-     "ru": "декабрь",
-     "en": "December"
-    }
-   ],
-   "lines": [
-    {
-     "s": "b",
-     "ru": "Тедди, вот наш автобус! Билеты у тебя?",
-     "en": "Teddy, here's our bus! Have you got the tickets?"
-    },
-    {
-     "s": "a",
-     "ru": "У меня, Белка. Я к деду каждый раз так езжу.",
-     "en": "I have, Belka. I go to Grandad's this way every time."
-    },
-    {
-     "s": "b",
-     "ru": "Хорошо. А дед приходит к автобусу?",
-     "en": "Good. And does Grandad come to meet the bus?"
-    },
-    {
-     "s": "a",
-     "ru": "Приходит. Он говорит, что у них там мороз.",
-     "en": "He does. He says it's freezing where they are."
-    },
-    {
-     "s": "b",
-     "ru": "Конечно, декабрь! А где мешок с подарками?",
-     "en": "Of course, it's December! And where's the bag of presents?"
-    },
-    {
-     "s": "a",
-     "ru": "Мешок... он дома! Белка, что теперь делать?",
-     "en": "The bag... it's at home! Belka, what do we do now?"
-    },
-    {
-     "s": "b",
-     "ru": "Тедди, смотри на меня. Что у меня тут?",
-     "en": "Teddy, look at me. What have I got here?"
-    },
-    {
-     "s": "a",
-     "ru": "Красный мешок... Белка, это наш?",
-     "en": "A red bag... Belka, is that ours?"
-    },
-    {
-     "s": "b",
-     "ru": "Наш. Он был дома, а теперь у меня.",
-     "en": "It's ours. It was at home, and now I have it."
-    },
-    {
-     "s": "a",
-     "ru": "Белка, ты молодец! А что это тут, в мешке? Орехи?",
-     "en": "Belka, you're a star! But what's this in the bag? Nuts?"
-    },
-    {
-     "s": "b",
-     "ru": "Это для меня. Я каждый раз ношу с собой орехи.",
-     "en": "Those are for me. I always carry nuts with me."
-    },
-    {
-     "s": "a",
-     "ru": "Ну, и дед получает подарок от Белки!",
-     "en": "Well, then Grandad gets a present from Belka too!"
-    },
-    {
-     "s": "b",
-     "ru": "Вот! Каждый получает подарок. А теперь — в автобус!",
-     "en": "Exactly! Everyone gets a present. And now, onto the bus!"
-    },
-    {
-     "s": "a",
-     "ru": "Два билета, мешок, орехи... Всё, идём к деду!",
-     "en": "Two tickets, the bag, the nuts... That's everything, off to Grandad's!"
-    }
-   ],
-   "questions": [
-    {
-     "ask": "Where are Teddy and Belka going?",
-     "options": [
-      "To Grandad's",
-      "To the market",
-      "To the doctor",
-      "To see Misha"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "How are they travelling?",
-     "options": [
-      "By bus",
-      "By car",
-      "By train",
-      "On foot"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Teddy think he has forgotten?",
-     "options": [
-      "The bag of presents",
-      "The two bus tickets",
-      "His warm red scarf",
-      "Grandad's address"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Who has brought it along?",
-     "options": [
-      "Belka",
-      "Gena",
-      "Misha",
-      "Monka"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What else is in the bag?",
-     "options": [
-      "Belka's nuts",
-      "Some sausage",
-      "Two tickets",
-      "A warm hat"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "core4:3": {
+  "core4:2": {
    "title": "Ice at the bus stop",
    "cast": [
     {
@@ -322,6 +165,163 @@
       "That he wants a tree",
       "That he is very cold",
       "That he has a ticket"
+     ],
+     "answer": 0
+    }
+   ]
+  },
+  "core4:4": {
+   "title": "The bus to Grandad's",
+   "cast": [
+    {
+     "id": "a",
+     "ru": "Тедди",
+     "en": "Teddy"
+    },
+    {
+     "id": "b",
+     "ru": "Белка",
+     "en": "Belka"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "билет",
+     "en": "ticket"
+    },
+    {
+     "ru": "орех",
+     "en": "nut"
+    },
+    {
+     "ru": "ездить",
+     "en": "to go (by transport)"
+    },
+    {
+     "ru": "декабрь",
+     "en": "December"
+    }
+   ],
+   "lines": [
+    {
+     "s": "b",
+     "ru": "Тедди, вот наш автобус! Билеты у тебя?",
+     "en": "Teddy, here's our bus! Have you got the tickets?"
+    },
+    {
+     "s": "a",
+     "ru": "У меня, Белка. Я к деду каждый раз так езжу.",
+     "en": "I have, Belka. I go to Grandad's this way every time."
+    },
+    {
+     "s": "b",
+     "ru": "Хорошо. А дед приходит к автобусу?",
+     "en": "Good. And does Grandad come to meet the bus?"
+    },
+    {
+     "s": "a",
+     "ru": "Приходит. Он говорит, что у них там мороз.",
+     "en": "He does. He says it's freezing where they are."
+    },
+    {
+     "s": "b",
+     "ru": "Конечно, декабрь! А где мешок с подарками?",
+     "en": "Of course, it's December! And where's the bag of presents?"
+    },
+    {
+     "s": "a",
+     "ru": "Мешок... он дома! Белка, что теперь делать?",
+     "en": "The bag... it's at home! Belka, what do we do now?"
+    },
+    {
+     "s": "b",
+     "ru": "Тедди, смотри на меня. Что у меня тут?",
+     "en": "Teddy, look at me. What have I got here?"
+    },
+    {
+     "s": "a",
+     "ru": "Красный мешок... Белка, это наш?",
+     "en": "A red bag... Belka, is that ours?"
+    },
+    {
+     "s": "b",
+     "ru": "Наш. Он был дома, а теперь у меня.",
+     "en": "It's ours. It was at home, and now I have it."
+    },
+    {
+     "s": "a",
+     "ru": "Белка, ты молодец! А что это тут, в мешке? Орехи?",
+     "en": "Belka, you're a star! But what's this in the bag? Nuts?"
+    },
+    {
+     "s": "b",
+     "ru": "Это для меня. Я каждый раз ношу с собой орехи.",
+     "en": "Those are for me. I always carry nuts with me."
+    },
+    {
+     "s": "a",
+     "ru": "Ну, и дед получает подарок от Белки!",
+     "en": "Well, then Grandad gets a present from Belka too!"
+    },
+    {
+     "s": "b",
+     "ru": "Вот! Каждый получает подарок. А теперь — в автобус!",
+     "en": "Exactly! Everyone gets a present. And now, onto the bus!"
+    },
+    {
+     "s": "a",
+     "ru": "Два билета, мешок, орехи... Всё, идём к деду!",
+     "en": "Two tickets, the bag, the nuts... That's everything, off to Grandad's!"
+    }
+   ],
+   "questions": [
+    {
+     "ask": "Where are Teddy and Belka going?",
+     "options": [
+      "To Grandad's",
+      "To the market",
+      "To the doctor",
+      "To see Misha"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "How are they travelling?",
+     "options": [
+      "By bus",
+      "By car",
+      "By train",
+      "On foot"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Teddy think he has forgotten?",
+     "options": [
+      "The bag of presents",
+      "The two bus tickets",
+      "His warm red scarf",
+      "Grandad's address"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Who has brought it along?",
+     "options": [
+      "Belka",
+      "Gena",
+      "Misha",
+      "Monka"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What else is in the bag?",
+     "options": [
+      "Belka's nuts",
+      "Some sausage",
+      "Two tickets",
+      "A warm hat"
      ],
      "answer": 0
     }

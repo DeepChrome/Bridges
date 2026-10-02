@@ -610,16 +610,22 @@ LINE_WORDS = 10
 
 def video_transcripts(ids):
     """{video: [[start ms, "words", [each word's offset from the start, in
-    centiseconds]], …]} from the auto-captions (build_transcripts
-    words_with_times, which already collapses a rolling caption's repeats).
-    Offsets rather than times, and centiseconds rather than milliseconds,
-    because the file is mostly numbers and these are the short ones."""
+    centiseconds], (the positions in the line of sound tags)], …]} from the
+    auto-captions (build_transcripts words_with_times, which already collapses
+    a rolling caption's repeats). Offsets rather than times, and centiseconds
+    rather than milliseconds, because the file is mostly numbers and these are
+    the short ones. The fourth field is only there when a line has a sound tag
+    — «[музыка]» — and the words stay as they were, so the English keyed on
+    them still matches."""
     from build_transcripts import words_with_times, SUBS
     out = {}
     for vid in ids:
-        stream = words_with_times(SUBS / f"{vid}.ru-orig.json3")
+        tags = []
+        stream = words_with_times(SUBS / f"{vid}.ru-orig.json3", tags)
         if not stream:
             continue
+        tagged = set(tags)
+        stream = [(w, at, k in tagged) for k, (w, at) in enumerate(stream)]
         # A pause is long *for this video*. A slow beginner episode leaves
         # most of a second between every word, so a fixed 0.7 s cut every
         # word onto its own line ("Добро / пожаловать / в / ресторан", seen
@@ -632,10 +638,11 @@ def video_transcripts(ids):
         # best cut there is; a proper noun mid-sentence costs one early break.
         # Only trusted when capitals are common, i.e. the captions do mark
         # sentences rather than just names.
-        caps = sum(1 for w, _ in stream if w[:1].isupper()) / len(stream)
+        caps = sum(1 for w, _, _ in stream if w[:1].isupper()) / len(stream)
         by_capital = caps >= 0.08
         lines, cur = [], []
-        for w, at in stream:
+        for item in stream:
+            w, at, _ = item
             if cur and (at - cur[-1][1] >= pause or (by_capital and w[:1].isupper() and len(cur) >= 2)):
                 lines.append(cur)
                 cur = []
@@ -646,11 +653,17 @@ def video_transcripts(ids):
                 k = max(range(3, len(cur)), key=lambda i: cur[i][1] - cur[i - 1][1])
                 lines.append(cur[:k])
                 cur = cur[k:]
-            cur.append((w, at))
+            cur.append(item)
         if cur:
             lines.append(cur)
-        out[vid] = [[ln[0][1], " ".join(w for w, _ in ln), [(at - ln[0][1]) // 10 for _, at in ln]]
-                    for ln in lines]
+        rows = []
+        for ln in lines:
+            row = [ln[0][1], " ".join(w for w, _, _ in ln), [(at - ln[0][1]) // 10 for _, at, _ in ln]]
+            sounds = [k for k, (_, _, tag) in enumerate(ln) if tag]
+            if sounds:
+                row.append(sounds)
+            rows.append(row)
+        out[vid] = rows
     return out
 
 

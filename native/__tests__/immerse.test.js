@@ -7,12 +7,12 @@
    same file drawing into a dead root (CLAUDE.md §23). */
 
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, waitFor } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider, useSession } from "../src/session";
 import { flushState } from "../src/store";
-import { Immerse, Video, VideoHistory } from "../src/screens/Misc";
+import { Immerse, Video, VideoHistory, VideoControls, VIDEO_SPEEDS } from "../src/screens/Misc";
 import { videos } from "../src/data";
 import { setVideoPosition, openedVideo, watchHistory, videoPosition, libraryState,
          loadImmerse, flushImmerse, resetImmerse } from "../src/immerse";
@@ -21,7 +21,8 @@ jest.mock("../src/youtube", () => {
   const React = require("react");
   const { View } = require("react-native");
   return { YouTube: React.forwardRef((props, ref) => {
-    React.useImperativeHandle(ref, () => ({ seek: global.__seek, pause: jest.fn(), watch: jest.fn() }));
+    React.useImperativeHandle(ref, () => ({ seek: global.__seek, pause: jest.fn(), watch: jest.fn(),
+      toggle: global.__toggle, rate: global.__rate, skip: global.__skip }));
     return React.createElement(View, { testID: "yt-player" });
   }) };
 });
@@ -48,6 +49,9 @@ const b = V.find((v) => v.dur > 300 && v.id !== a.id);
 beforeEach(async () => {
   await flushState(); await AsyncStorage.clear(); jest.clearAllMocks();
   global.__seek = jest.fn();
+  global.__toggle = jest.fn();
+  global.__rate = jest.fn();
+  global.__skip = jest.fn();
 });
 afterEach(async () => { await flushState(); });
 
@@ -156,6 +160,50 @@ describe("the player", () => {
   it("records the video as opened", async () => {
     await withProfile(<Video route={{ params: { videoId: b.id } }} navigation={nav} />);
     expect(watchHistory()[0].id).toBe(b.id);
+  });
+
+  /* Controls under the player, so nobody has to use the video's own (the
+     owner, 2026-10-01): back and forward five seconds, one play/pause, speed
+     down and up through the API's own steps. */
+  it("offers back 5, play/pause, forward 5 and speed under the player", async () => {
+    await withProfile(<Video route={{ params: { videoId: a.id } }} navigation={nav} />);
+    expect(screen.queryByTestId("video-controls")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("video-play")); });
+    // Every press awaited inside act: an un-awaited one overlapping the others
+    // left the renderer a render behind and broke the tests after this one.
+    const press = (id) => act(async () => { fireEvent.press(screen.getByTestId(id)); });
+    await press("video-back5");
+    expect(global.__skip).toHaveBeenCalledWith(-5000, 0, 0);
+    await press("video-fwd5");
+    expect(global.__skip).toHaveBeenCalledWith(5000, 0, 0);
+    await press("video-toggle");
+    expect(global.__toggle).toHaveBeenCalled();
+    expect(screen.getByTestId("video-rate").props.children).toBe("1×");
+    await press("video-faster");
+    expect(screen.getByTestId("video-rate").props.children).toBe("1.25×");
+    await press("video-slower");
+    await press("video-slower");
+    expect(screen.getByTestId("video-rate").props.children).toBe("0.75×");
+    expect(global.__rate).toHaveBeenLastCalledWith(0.75);
+  });
+
+  it("steps the speed down and up through the API's own rates, and stops at the ends", async () => {
+    const rate = jest.fn();
+    function Host() {
+      const [r, setR] = React.useState(1);
+      const player = React.useRef({ rate, skip: jest.fn(), toggle: jest.fn() });
+      return <VideoControls player={player} playing={false} rate={r} onRate={setR} />;
+    }
+    await render(<Host />);
+    const label = () => screen.getByTestId("video-rate").props.children;
+    await act(async () => { fireEvent.press(screen.getByTestId("video-faster")); });
+    expect(label()).toBe("1.25×");
+    await act(async () => { fireEvent.press(screen.getByTestId("video-slower")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("video-slower")); });
+    expect(label()).toBe("0.75×");
+    expect(rate).toHaveBeenLastCalledWith(0.75);
+    for (let k = 0; k < 6; k++) await act(async () => { fireEvent.press(screen.getByTestId("video-slower")); });
+    expect(label()).toBe(`${VIDEO_SPEEDS[0]}×`);            // stops at the slowest
   });
 
   it("starts at the beginning when it was never played", async () => {

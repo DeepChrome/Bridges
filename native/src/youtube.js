@@ -81,7 +81,13 @@ const page = (videoId) => `<!doctype html>
         onReady: function () { post({ type: "ready" }); },
         onStateChange: function (e) {
           if (e.data === YT.PlayerState.ENDED) post({ type: "ended" });
+          // Playing or paused, for the app's own play/pause button.
+          if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.PAUSED
+              || e.data === YT.PlayerState.ENDED) {
+            post({ type: "state", playing: e.data === YT.PlayerState.PLAYING });
+          }
         },
+        onPlaybackRateChange: function (e) { post({ type: "rate", rate: e.data }); },
         onError: function (e) { post({ type: "error", code: e.data }); }
       }
     });
@@ -127,9 +133,22 @@ const page = (videoId) => `<!doctype html>
   window.brSkip = function (deltaSeconds, lo, hi) {
     if (!player || !player.getCurrentTime) return;
     var at = player.getCurrentTime() + deltaSeconds;
+    if (!(hi > 0) && player.getDuration) hi = player.getDuration();   // no span: the whole video
     if (at < lo) at = lo;
-    if (at > hi) at = hi;
+    if (hi > 0 && at > hi) at = hi;
     player.seekTo(at, true);
+  };
+
+  /* The app's own controls under the player (the owner, 2026-10-01: "so the
+     person doesn't have to interact with the video itself"). */
+  window.brToggle = function () {
+    if (!player || !player.getPlayerState) return;
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+    if (player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
+    else player.playVideo();
+  };
+  window.brRate = function (rate) {
+    if (player && player.setPlaybackRate) player.setPlaybackRate(rate);
   };
 
   /* Distinguish the three ways this fails before a player exists, because they
@@ -151,7 +170,7 @@ const page = (videoId) => `<!doctype html>
 </html>`;
 
 export const YouTube = forwardRef(function YouTube(
-  { videoId, onReady, onEnded, onError, onTime, theme }, ref
+  { videoId, onReady, onEnded, onError, onTime, onState, onRate, theme }, ref
 ) {
   const web = useRef(null);
   const isReady = useRef(false);
@@ -190,6 +209,16 @@ export const YouTube = forwardRef(function YouTube(
     watch(on) {
       if (!web.current) return;
       web.current.injectJavaScript(`window.brWatch(${on ? "true" : "false"}); true;`);
+    },
+    /* Play if paused, pause if playing; `onState` reports which it became. */
+    toggle() {
+      if (!web.current || !isReady.current) return;
+      web.current.injectJavaScript("window.brToggle(); true;");
+    },
+    /* A playback rate the IFrame API offers (0.25–2); `onRate` reports it. */
+    rate(r) {
+      if (!web.current || !isReady.current) return;
+      web.current.injectJavaScript(`window.brRate(${Number(r)}); true;`);
     },
   }), []);
 
@@ -236,7 +265,7 @@ export const YouTube = forwardRef(function YouTube(
           // Onto the Metro console: a player that fails on the device cannot be
           // debugged from the machine any other way. Position reports are the one
           // exception — four a second would bury everything else.
-          if (msg.type !== "time") console.log("[youtube]", JSON.stringify(msg));
+          if (msg.type !== "time" && msg.type !== "state") console.log("[youtube]", JSON.stringify(msg));
           if (msg.type === "ready") {
             isReady.current = true;
             setLoading(false);
@@ -247,6 +276,8 @@ export const YouTube = forwardRef(function YouTube(
             onReady && onReady();
           }
           else if (msg.type === "time") { onTime && onTime(msg.at); }
+          else if (msg.type === "state") { onState && onState(msg.playing); }
+          else if (msg.type === "rate") { onRate && onRate(msg.rate); }
           else if (msg.type === "held") { onEnded && onEnded(); }
           else if (msg.type === "ended") { onEnded && onEnded(); }
           else if (msg.type === "error") {

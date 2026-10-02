@@ -44,13 +44,23 @@ TOKEN = re.compile(r"[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*")
 TOP_RANK = 1000
 
 
-def words_with_times(path):
+BRACKETED = re.compile(r"\[[^\]]*\]")
+
+
+def words_with_times(path, tags=None):
     """-> [(token, absolute_ms)] for every Cyrillic word in the transcript.
 
     Auto-captions roll: the same word is re-emitted as the caption scrolls, so a
     word repeated within a second of itself is one utterance, not two. Collapsing
     here rather than later keeps the surrounding context readable — otherwise every
     snippet stutters.
+
+    `tags`, when a list, collects the positions in the result of words that were
+    YouTube's bracketed sound tags — «[музыка]», «[смех]», «[аплодисменты]» —
+    so the transcript can show them as sounds, not speech (the owner,
+    2026-10-02). The result itself is unchanged: the index still reads them as
+    words, which is a known flaw left for the word-groups review, since
+    excluding them changes what units are built from.
     """
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -67,10 +77,13 @@ def words_with_times(path):
             if not text.strip():
                 continue
             at = base + s.get("tOffsetMs", 0)
+            spans = [b.span() for b in BRACKETED.finditer(text)] if tags is not None else ()
             for m in TOKEN.finditer(text):
                 tok = m.group(0)
                 if out and out[-1][0] == tok and at - out[-1][1] <= 1000:
                     continue
+                if any(lo <= m.start() < hi for lo, hi in spans):
+                    tags.append(len(out))
                 out.append((tok, at))
     return out
 

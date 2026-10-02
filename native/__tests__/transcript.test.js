@@ -4,7 +4,7 @@
 
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react-native";
-import { Transcript, lineAt, wordAt } from "../src/transcript";
+import { Transcript, lineAt, wordAt, soundLabel } from "../src/transcript";
 import { transcriptOf, videos } from "../src/data";
 import { font } from "../src/theme";
 
@@ -73,6 +73,19 @@ describe("the transcript", () => {
     const flat = (k) => Object.assign({}, ...[screen.getByTestId(`transcript-en-${k}`).props.style].flat(2).filter(Boolean));
     expect(flat(1).fontFamily).toBe(font.bold);
     expect(flat(0).fontFamily).toBe(font.regular);
+  });
+
+  /* YouTube's sound tags are sounds, not speech (the owner, 2026-10-02). */
+  it("draws a sound tag as a sound, not a word to look up", async () => {
+    const lines = [[0, "Давайте учиться музыка", [0, 40, 90], [2]], [3000, "музыка", [0], [0]]];
+    await render(<Transcript lines={lines} position={0} onSeek={jest.fn()} onWord={jest.fn()}
+                             en={["Let's learn music", ""]} showEn onToggleEn={jest.fn()} />);
+    const sound = screen.getByTestId("transcript-sound-0-2");
+    expect(JSON.stringify(sound.props.children)).toContain("[♪ музыка ♪]");
+    expect(screen.queryByTestId("transcript-link-0-2")).toBeNull();
+    // A line that is only sound reads the same in English.
+    expect(screen.getByTestId("transcript-en-1").props.children).toBe("[♪ music ♪]");
+    expect(soundLabel("смех")).toBe("[смех]");
   });
 
   it("offers no English switch for a video that has none", async () => {

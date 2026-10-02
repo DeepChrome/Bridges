@@ -53,9 +53,31 @@ export function wordAt(line, pos) {
    is the hairline colour rather than the brand's: a transcript is nothing but
    links, and a page of brand underlines is louder than the words. Tapping the
    time, or the line around the words, still plays from there. */
+/* YouTube's sound tags («[музыка]», «[смех]»), drawn as sounds, not speech
+   (the owner, 2026-10-02: "YouTube just translates to music rather than
+   indicating music… brackets and the music symbols"). The build marks which
+   words they were (build_site.py video_transcripts, a line's fourth field). */
+export const soundLabel = (w) => (/^музык/i.test(w) ? `[♪ ${w} ♪]` : `[${w}]`);
+const SOUND_EN = { "музыка": "music", "смех": "laughter", "аплодисменты": "applause" };
+/* A line that is only sound gets its English the same way, not the
+   translator's bare "music". */
+export function soundOnlyEnglish(line) {
+  const words = line[1].split(" ");
+  const tags = new Set(line[3] || []);
+  if (!words.length || words.some((_, n) => !tags.has(n))) return null;
+  return words.map((w) => {
+    const en = SOUND_EN[w.toLowerCase()] || w;
+    return en === "music" ? "[♪ music ♪]" : `[${en}]`;
+  }).join(" ");
+}
+
 const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord, en }) {
   const t = useTheme();
-  const words = useMemo(() => line[1].split(" ").map((w) => ({ w, i: lookup(w) })), [line]);
+  const words = useMemo(() => {
+    const tags = new Set(line[3] || []);
+    return line[1].split(" ").map((w, n) => ({ w, sound: tags.has(n), i: tags.has(n) ? null : lookup(w) }));
+  }, [line]);
+  const english = soundOnlyEnglish(line) || en;
   return (
     <Pressable testID={`transcript-line-${k}`} onPress={() => onSeek(line[0])}
                onLayout={(e) => onPlace(k, e.nativeEvent.layout.y)}
@@ -66,9 +88,16 @@ const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord
       <Muted size={12} style={{ width: 38, marginTop: 3 }}>{clock(line[0])}</Muted>
       <View style={{ flex: 1 }}>
       <Text style={{ fontSize: 16, lineHeight: 23, color: active ? t.ink : t.ink2 }}>
-        {words.map(({ w, i }, n) => {
+        {words.map(({ w, i, sound }, n) => {
           const now = active && n === word;
           const link = i !== null && onWord;
+          if (sound) {
+            return (
+              <Text key={n} testID={`transcript-sound-${k}-${n}`} style={{ color: t.ink3, fontStyle: "italic" }}>
+                {n ? " " : ""}{soundLabel(w)}
+              </Text>
+            );
+          }
           return (
             <Text key={n}>
               {n ? " " : ""}
@@ -87,11 +116,12 @@ const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord
       {/* The line's English under it (the owner, 2026-10-01: "English in
           line with the transcription too, also highlighted as it goes"):
           quiet, and lifted with the Russian on the line being said. */}
-      {en ? (
+      {/* With the English switch on (`en` is null when it is off). */}
+      {english && en != null ? (
         <Text testID={`transcript-en-${k}`}
               style={{ fontSize: 14, lineHeight: 20, marginTop: 2,
                        color: active ? t.ink2 : t.ink3, fontWeight: active ? "600" : "400" }}>
-          {en}
+          {english}
         </Text>
       ) : null}
       </View>

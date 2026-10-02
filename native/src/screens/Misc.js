@@ -209,6 +209,69 @@ export function CreatorsNote({ onClose }) {
   );
 }
 
+/* The player's own controls, under it (the owner, 2026-10-01: "skip back 5
+   seconds, forward 5, play/pause (same button)… simple speed controls so the
+   person doesn't have to interact with the video itself"). The speeds are the
+   IFrame API's own steps; the label is the rate the player reports back. */
+export const VIDEO_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const SKIP_MS = 5000;
+
+function CtlButton({ testID, label, onPress, children, wide }) {
+  const t = useTheme();
+  return (
+    <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={label}
+               onPress={onPress} hitSlop={4}
+               style={({ pressed }) => ({ minWidth: wide ? 52 : 44, height: 44, borderRadius: radius.md,
+                 alignItems: "center", justifyContent: "center", paddingHorizontal: 8,
+                 backgroundColor: wide ? t.brand : t.surface2, opacity: pressed ? 0.6 : 1 })}>
+      {children}
+    </Pressable>
+  );
+}
+
+export function VideoControls({ player, playing, rate, onRate }) {
+  const t = useTheme();
+  const k = Math.max(0, VIDEO_SPEEDS.indexOf(rate));
+  const step = (d) => {
+    const next = VIDEO_SPEEDS[Math.min(VIDEO_SPEEDS.length - 1, Math.max(0, k + d))];
+    if (next === rate) return;
+    onRate(next);
+    if (player.current) player.current.rate(next);
+  };
+  const skip = (ms) => { if (player.current) player.current.skip(ms, 0, 0); };
+  const icon = (d, color = t.ink) => (
+    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2}
+         strokeLinecap="round" strokeLinejoin="round"><Path d={d} /></Svg>
+  );
+  return (
+    <View testID="video-controls" style={{ flexDirection: "row", alignItems: "center", marginTop: 10, gap: 8 }}>
+      <CtlButton testID="video-back5" label="Back 5 seconds" onPress={() => skip(-SKIP_MS)}>
+        <Text style={{ color: t.ink, fontSize: 13, fontWeight: "700" }}>−5s</Text>
+      </CtlButton>
+      <CtlButton testID="video-toggle" label={playing ? "Pause" : "Play"} wide
+                 onPress={() => { if (player.current) player.current.toggle(); }}>
+        {playing
+          ? icon("M9 5v14M15 5v14", t.brandOn)
+          : <Svg width={20} height={20} viewBox="0 0 24 24"><Path d="M7 5l12 7-12 7z" fill={t.brandOn} /></Svg>}
+      </CtlButton>
+      <CtlButton testID="video-fwd5" label="Forward 5 seconds" onPress={() => skip(SKIP_MS)}>
+        <Text style={{ color: t.ink, fontSize: 13, fontWeight: "700" }}>+5s</Text>
+      </CtlButton>
+      <View style={{ flex: 1 }} />
+      <CtlButton testID="video-slower" label="Slower" onPress={() => step(-1)}>
+        {icon("M6 12h12")}
+      </CtlButton>
+      <Text testID="video-rate" accessibilityLabel={`Speed ${rate} times`}
+            style={{ color: t.ink, fontSize: 15, fontWeight: "700", minWidth: 44, textAlign: "center" }}>
+        {`${rate}×`}
+      </Text>
+      <CtlButton testID="video-faster" label="Faster" onPress={() => step(1)}>
+        {icon("M12 6v12M6 12h12")}
+      </CtlButton>
+    </View>
+  );
+}
+
 /* "Today", "Yesterday", or the date: History's day headings, as YouTube's. */
 function dayHeading(ms, now = Date.now()) {
   const day = (x) => { const d = new Date(x); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -462,6 +525,9 @@ export function Video({ route, navigation }) {
      automatic: the button says where, and pressing it plays from there. */
   const resumeAt = useMemo(() => (v && !focus && at === null ? videoPosition(v.id) : 0), [v && v.id]);
   const [playing, setPlaying] = useState(!!focus || at !== null);
+  // Whether the video itself is playing, and how fast, as the player reports.
+  const [running, setRunning] = useState(false);
+  const [rate, setRate] = useState(1);
   const player = useRef(null);
   // A moment asked for before the player exists is held for onReady.
   const pending = useRef(focus ? [Math.max(0, focus.t - LEAD_MS), HOLD_MS]
@@ -576,21 +642,26 @@ export function Video({ route, navigation }) {
                onPress={() => update((p) => toggleFave(p, v.id))} />
       </View>
       {playing ? (
-        <View style={{ aspectRatio: 16 / 9, borderRadius: radius.md,
-                       overflow: "hidden", backgroundColor: "#000" }}>
-          <YouTube
-            ref={player}
-            videoId={v.id}
-            onTime={onTime}
-            onReady={() => {
-              if (pending.current != null) {
-                player.current && player.current.seek(pending.current[0], pending.current[1]);
-                pending.current = null;
-              }
-              if (player.current) player.current.watch(true);
-            }}
-          />
-        </View>
+        <>
+          <View style={{ aspectRatio: 16 / 9, borderRadius: radius.md,
+                         overflow: "hidden", backgroundColor: "#000" }}>
+            <YouTube
+              ref={player}
+              videoId={v.id}
+              onTime={onTime}
+              onState={setRunning}
+              onRate={setRate}
+              onReady={() => {
+                if (pending.current != null) {
+                  player.current && player.current.seek(pending.current[0], pending.current[1]);
+                  pending.current = null;
+                }
+                if (player.current) player.current.watch(true);
+              }}
+            />
+          </View>
+          <VideoControls player={player} playing={running} rate={rate} onRate={setRate} />
+        </>
       ) : (
         <Btn kind="pri" testID="video-play"
              label={resumeAt ? `Resume from ${clock(resumeAt)}` : "Play here"}

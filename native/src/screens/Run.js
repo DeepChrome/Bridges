@@ -20,7 +20,7 @@ import { wordFacts, isIrregular } from "@core/facts";
 import { standardExplanation } from "@core/explain";
 import { GuidePop } from "../guide";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
-import { guideLine, poseFor, LINES } from "@core/guide";
+import { guideLine, poseFor, reactionFor, LINES } from "@core/guide";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
 import { right as buzzRight, wrong as buzzWrong, done as buzzDone } from "../haptics";
 import { RuInput } from "../keyboard";
@@ -884,6 +884,12 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
      places that reuse Done as an empty-state message box stay plain. */
   const kind = guide && GUIDE_KINDS.includes(guide) ? guide : null;
   const line = kind ? guideLine(kind, (title || "").length) : null;
+  /* Every scored run ends with Teddy's face for the score (the owner,
+     2026-10-02: "for scored items, Teddy has… different reactions based on the
+     score"); a run with no pass mark of its own is read against the lesson's. */
+  const pose = score !== undefined
+    ? reactionFor(score, passed === undefined ? score >= PASS_MARK : passed)
+    : kind ? poseFor(kind) : null;
   const pop = usePop([kind, title]);
   /* Only a real pass. Half a dozen screens reuse `Done` as an empty-state
      message box and those pass no `passed` at all — a phone that buzzed to
@@ -899,8 +905,8 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
     <Screen fill>
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center",
                      paddingHorizontal: 16, paddingVertical: 24 }}>
-        {kind ? (
-          <GuidePop pose={poseFor(kind)} size={108} style={{ marginBottom: 10 }} />
+        {pose ? (
+          <GuidePop pose={pose} size={108} style={{ marginBottom: 10 }} />
         ) : null}
         {/* Not on a failed run: a 3 is a pass mark in a Russian school. */}
         {score !== undefined && passed !== false ? (

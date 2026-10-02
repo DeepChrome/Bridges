@@ -24,7 +24,13 @@ import { castById, GUIDE_ID } from "./cast.js";
 
 export const GUIDE = { name: castById[GUIDE_ID].en };
 
-export const POSES = ["idle", "wave", "point", "think", "cheer"];
+export const POSES = ["idle", "wave", "point", "think", "cheer", "smile", "thumbs", "shrug", "wince"];
+
+/* Poses named but not drawn yet: the image account ran dry before they could
+   be bought (2026-10-02). Each shows a stand-in (native/src/guide.js) until
+   `build_cast_art.mjs --poses` draws it; core.test.mjs holds this list to
+   exactly what is missing, so it empties itself out of date. */
+export const UNDRAWN = ["smile", "thumbs", "shrug", "wince"];
 
 /* ----------------------------------------------------------------- his voice */
 
@@ -70,7 +76,18 @@ export function guideLine(kind, seed = 0) {
   return bag[Math.abs(Math.floor(seed)) % bag.length];
 }
 
-/* Which way his face goes, given how a lesson ended. */
+/* His face at the end of a scored run, one of five by how it went (the owner,
+   2026-10-02: "ecstatic cheer, big smile, thumbs up… a shrug… a wincing or
+   oof"). Whether it passed decides the side of the line, so a 72 % that
+   passed on relief gets the thumbs up and a 74 % that did not gets the shrug. */
+export function reactionFor(score, passed) {
+  if (passed && score >= 90) return "cheer";
+  if (passed && score >= 80) return "smile";
+  if (passed) return "thumbs";
+  return score >= 50 ? "shrug" : "wince";
+}
+
+/* Which way his face goes, given how a run ended with no score to read. */
 export function poseFor(kind) {
   if (kind === "failed") return "think";
   if (kind === "scraped") return "point";

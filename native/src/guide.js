@@ -20,12 +20,20 @@ const ART = {
   cheer: require("../assets/guide/cheer.png"),
 };
 
+/* The four score faces (core/guide.js reactionFor) are not drawn yet — the
+   image account ran dry before they could be (2026-10-02). Until
+   `build_cast_art.mjs --poses` draws them and they get a line in ART, each
+   shows the nearest pose there is. The testID still names the reaction, so
+   what the screen means is pinned now and only the picture changes later. */
+const STAND_IN = { smile: "cheer", thumbs: "point", shrug: "think", wince: "think" };
+const artOf = (p) => ART[p] || ART[STAND_IN[p]] || ART.idle;
+
 /* The figure. `pose` is one of core/guide.js POSES; an unknown one is idle. */
 export function Guide({ pose = "idle", size = 72, style }) {
   const p = POSES.includes(pose) ? pose : "idle";
   return (
     <View testID={`guide-${p}`} accessibilityLabel={GUIDE.name} style={style}>
-      <Image source={ART[p]} style={{ width: size, height: size }} resizeMode="contain" />
+      <Image source={artOf(p)}style={{ width: size, height: size }} resizeMode="contain" />
     </View>
   );
 }

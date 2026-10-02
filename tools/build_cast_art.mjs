@@ -37,7 +37,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ART = path.join(ROOT, "data", "cast_art");
 const STYLE_REF = path.join(ART, "yuri_draft", "base-2.png");
 const MODEL = "gpt-image-2";
-const POSES = ["idle", "wave", "point", "think", "cheer"];
+const POSES = ["idle", "wave", "point", "think", "cheer", "smile", "thumbs", "shrug", "wince"];
 const GUIDE_PX = 324;       // three times the largest size the guide is drawn (108 dp)
 const SCENE_W = 900;        // a phone's width at 2.3x; the scene is a banner, not a poster
 const HALO = 96;            // alpha below this is the model's haze, not the drawing
@@ -108,6 +108,11 @@ const POSE_TEXT = {
   point: "Pointing to his side with one paw, as if showing the viewer something, an encouraging look.",
   think: "Thinking: one paw on his chin, eyes looking up, puzzled but cheerful.",
   cheer: "Celebrating: both paws raised in triumph, eyes closed with joy, a big smile.",
+  // The end of a scored run, one face a mark out of five (core/guide.js reactionFor).
+  smile: "Beaming: a big delighted open-mouthed smile, paws together at his chest, tail up.",
+  thumbs: "Giving a thumbs up with one paw held out towards the viewer, a friendly satisfied smile.",
+  shrug: "Shrugging: both paws turned up at his sides, shoulders raised, a lopsided 'oh well' half-smile.",
+  wince: "Wincing, 'oof': eyes squeezed shut, teeth gritted in a sheepish grimace, one paw at the back of his head. Rueful, not sad.",
 };
 
 /* One picture a unit: the family doing the unit's subject, and Monka's scheme

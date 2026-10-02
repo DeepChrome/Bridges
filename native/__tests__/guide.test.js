@@ -17,7 +17,7 @@ import { Runner, Done } from "../src/screens/Run";
 import { VocabFlow } from "../src/screens/Flows";
 import { Q } from "../src/questions";
 import { UN, STAGES, lessonWords } from "../src/data";
-import { POSES, LINES } from "@core/guide";
+import { POSES, LINES, reactionFor } from "@core/guide";
 
 const unit = STAGES[0].core;
 const route = { params: { unitId: unit.id, index: 0 } };
@@ -108,6 +108,25 @@ describe("the guide", () => {
     await withProfile(<Done title="Nothing to listen to yet" onBack={jest.fn()} />);
     expect(screen.queryByTestId("done-line")).toBeNull();
     expect(anyGuide()).toHaveLength(0);
+  });
+});
+
+/* The owner, 2026-10-02: "for scored items, Teddy has… different reactions
+   based on the score". Each Done is its own file-level render, so each gets
+   distinct text rather than an unmount (§23). */
+describe("his face for a score", () => {
+  it("runs cheer, smile, thumbs up, shrug, wince down the marks", () => {
+    expect(reactionFor(100, true)).toBe("cheer");
+    expect(reactionFor(85, true)).toBe("smile");
+    expect(reactionFor(76, true)).toBe("thumbs");
+    expect(reactionFor(72, true)).toBe("thumbs");    // passed on relief
+    expect(reactionFor(72, false)).toBe("shrug");
+    expect(reactionFor(30, false)).toBe("wince");
+  });
+
+  it("shows on a scored run, even one with no line to say", async () => {
+    await withProfile(<Done title="Cases" score={40} passed={false} onBack={jest.fn()} />);
+    expect(await screen.findByTestId("guide-wince")).toBeTruthy();
   });
 });
 

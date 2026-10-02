@@ -208,7 +208,12 @@ async function edit(prompt, refs, file, { size = "1024x1024", transparent = true
      says how long to wait; waiting is cheaper than losing a batch to it. */
   // …but a 429 that says the credit is spent will not clear by waiting. Read
   // the code, not the prose: a rate-limit message mentions "quota" too.
-  if (res.status === 429 && j.error && j.error.code === "insufficient_quota") {
+  /* The code has changed under us: "insufficient_quota" once, now
+     "credit_balance_exhausted" with type "insufficient_quota" (2026-10-02),
+     and a loop that missed it tried every character in turn. */
+  const spent = j.error && (j.error.code === "insufficient_quota" || j.error.type === "insufficient_quota"
+    || j.error.code === "credit_balance_exhausted");
+  if (res.status === 429 && spent) {
     console.error("OpenAI credit is used up — stopping; what was drawn is kept");
     process.exit(3);
   }
@@ -229,8 +234,22 @@ const sheet = (id) => path.join(ART, `${id}.png`);
 const need = (f) => { if (!fs.existsSync(f)) { console.error(`missing ${path.relative(ROOT, f)} — choose a sheet first`); process.exit(1); } return f; };
 const rel = (f) => path.relative(ROOT, f);
 
+/* Avatar characters who are not in the story (core/avatars.js): a face to pick
+   for a profile, drawn in the cast's style so the picker is one set rather
+   than four paintings among flat emoji (the owner, 2026-10-01: "all the other
+   friends and supporting characters have that level of detail too"). Their
+   `look` lives here because core/cast.js is the story's table. */
+const AVATAR_ONLY = {
+  borsuk: { en: "Borsuk", look: "a stocky honey badger with a black-and-white striped head in a white karate gi with a black belt, a fearless confident grin, fists ready in a friendly martial-arts stance" },
+  filin: { en: "Filin", look: "a round purple-grey owl with big round orange eyes, wearing big DJ headphones around his neck, cheerful and wide awake at night" },
+  barsik: { en: "Barsik", look: "a plump ginger tabby cat in a red sailor's hat and a blue-and-white striped sailor shirt, holding a small fishing rod with a fish on the line, a happy grin" },
+  tsarevna: { en: "Tsarevna", look: "a small elegant green frog princess with a little golden crown, big friendly eyes, a playful smile, a tiny arrow held like a sceptre as in the Russian folk tale" },
+  pirozhok: { en: "Pirozhok", look: "a cheerful round panda chef in a tall white chef's hat and apron, holding a plate of steaming dumplings, a proud happy smile" },
+  senya: { en: "Senya", look: "a curious raccoon artist in a blue painter's beret, holding a paintbrush and a small palette with dabs of colour, a dreamy smile" },
+};
+
 async function sheets(id, n) {
-  const c = castById[id];
+  const c = castById[id] || AVATAR_ONLY[id];
   if (!c || !c.look) { console.error(`no character "${id}" with a look in core/cast.js`); process.exit(2); }
   const dir = path.join(ART, "sheets");
   fs.mkdirSync(dir, { recursive: true });

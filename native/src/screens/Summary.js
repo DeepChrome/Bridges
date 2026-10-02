@@ -73,7 +73,7 @@ export default function Summary({ route, navigation }) {
   const seen = st.seen || {};
   // The video's own sentences with these words first; the collection's
   // recorded ones only where the video has none.
-  const lines = linesWith(unit, idxs).slice(0, whole ? UNIT_SENTENCES : LESSON_SENTENCES);
+  const lines = linesWith(unit, idxs, whole ? UNIT_SENTENCES : LESSON_SENTENCES);
   const sentences = lines.length ? [] : prepSentences(words, whole ? UNIT_SENTENCES : LESSON_SENTENCES);
   const note = unit.g || null;       // the unit's rule applies to every lesson in it
 

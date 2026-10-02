@@ -59,7 +59,7 @@ export function VocabFlow({ route, navigation }) {
      owner, 2026-09-29: *"more video centric. More sentences/phrases"*) — the
      lesson ends on what it is preparing for. */
   const fresh = useMemo(() => {
-    const lines = linesWith(unit, lessonWords(unit, index)).slice(0, LESSON_LINES);
+    const lines = linesWith(unit, lessonWords(unit, index), LESSON_LINES);
     return Q.vocabSteps(unit, index).concat(lines.length ? [{ t: "lines", lines }] : []);
   }, [unit.id, index]);
   const save = { key: `vocab:${unit.id}:${index}`, route: "Vocab", params: { unitId: unit.id, index },

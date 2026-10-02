@@ -410,12 +410,65 @@ export function videoLines(u) {
 }
 
 const LINE_WORD = /[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*/g;
+
+/* Where on the route each lemma is first taught (the unit's place in UN). */
+let FIRST_TAUGHT = null;
+const firstTaught = () => {
+  if (!FIRST_TAUGHT) {
+    FIRST_TAUGHT = new Map();
+    UN.forEach((u, k) => u.w.forEach((i) => { if (!FIRST_TAUGHT.has(i)) FIRST_TAUGHT.set(i, k); }));
+  }
+  return FIRST_TAUGHT;
+};
+/* A line's words as lemmas, through the lookup index as every word link does. */
+const lineLemmas = (ru) => (ru.match(LINE_WORD) || []).map((tok) => (IX[fold(tok)] || [])[0]);
+
+/* Over this share of shared words, a line is a near-copy of one already shown. */
+export const LINE_OVERLAP = 0.6;
+
 /* The lines of a unit's video that say any of these words (lemma indices),
-   through the lookup index as every word link does. */
-export function linesWith(u, idxs) {
+   best first (the owner, 2026-10-02: the sentences at the end of a lesson
+   should "use the vocab words and… [be] more digestible", and not be "the tea
+   is tasty", "the hot tea is tasty" — not unique enough to be helpful). Picked
+   one at a time: the most of the lesson's words not yet shown, then fewest
+   words the route has not taught by this unit, then short; a line sharing
+   most of its words with one already chosen is not shown at all. */
+export function linesWith(u, idxs, n = Infinity) {
   const want = new Set(idxs);
-  return videoLines(u).filter((l) =>
-    (l.ru.match(LINE_WORD) || []).some((tok) => (IX[fold(tok)] || []).some((i) => want.has(i))));
+  const at = UN.indexOf(u);
+  const taught = firstTaught();
+  const cands = videoLines(u).map((l) => {
+    const lem = lineLemmas(l.ru);
+    // Compared as written, so a word the lookup cannot name still counts.
+    const set = new Set((l.ru.match(LINE_WORD) || []).map(fold));
+    return {
+      l, set,
+      hits: [...new Set(lem)].filter((i) => want.has(i)),
+      // A word nobody has taught by here, or one the lookup cannot name.
+      unknown: lem.filter((i) => typeof i !== "number" || !(taught.get(i) <= at)).length,
+      words: lem.length,
+    };
+  }).filter((c) => c.hits.length);
+  const out = [], shown = new Set();
+  const overlap = (a) => Math.max(0, ...out.map((b) => {
+    const both = [...a.set].filter((i) => b.set.has(i)).length;
+    return both / Math.max(1, Math.min(a.set.size, b.set.size));
+  }));
+  while (cands.length && out.length < n) {
+    let best = -1, score = -Infinity;
+    cands.forEach((c, k) => {
+      // A near-copy is never shown: fewer lines beats the same line twice.
+      if (overlap(c) >= LINE_OVERLAP) return;
+      const fresh = c.hits.filter((i) => !shown.has(i)).length;
+      const s = 4 * fresh + c.hits.length - 2 * c.unknown - 0.3 * Math.max(0, c.words - 7);
+      if (s > score) { score = s; best = k; }
+    });
+    if (best < 0) break;
+    const [c] = cands.splice(best, 1);
+    c.hits.forEach((i) => shown.add(i));
+    out.push(c);
+  }
+  return out.map((c) => c.l);
 }
 /* The curriculum this build teaches, as a fingerprint of every unit's words
    (build_site.py `stats.curriculum`). */

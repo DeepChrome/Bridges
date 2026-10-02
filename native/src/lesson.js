@@ -204,7 +204,7 @@ export function WordCard({ i, at, total, unit, onMoment }) {
   // preparing for (2026-09-29: *"for those sentences, we should only use the
   // ones in the video"*); without one, only the collection's recorded
   // examples — never a sentence the phone would have to read.
-  const lines = unit ? linesWith(unit, [i]).slice(0, 2) : [];
+  const lines = unit ? linesWith(unit, [i], 2) : [];
   const examples = lines.length ? [] : (w.x || []).filter((ex) => hasRealAudio(ex.ru)).slice(0, 2);
 
   return (

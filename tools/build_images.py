@@ -59,7 +59,13 @@ def main():
 
     manifest = json.loads((RAW / "manifest.json").read_text(encoding="utf-8"))
     payload = json.loads(args.payload.read_text(encoding="utf-8"))
-    taught = {payload["lemmas"][i]["b"] for u in payload["units"] for i in u["w"]}
+    # Where on the route each taught word is first met (the payload lists the
+    # units in route order).
+    met_at = {}
+    for u in payload["units"]:
+        for i in u["w"]:
+            met_at.setdefault(payload["lemmas"][i]["b"], len(met_at))
+    taught = set(met_at)
 
     # A word blanked in the curated terms ships no picture, whether or not the
     # harvester has been re-run since. Only harvest_images.py read this file
@@ -83,22 +89,27 @@ def main():
     # picture IS the meaning, so a shared one teaches that the two words mean
     # the same. The first word to claim a file keeps it; the rest go without,
     # which is the honest outcome (2026-09-10, the content and data reviews).
+    # "First" is the word met first on the route, not the first alphabetically:
+    # «отец» joining the curriculum took «папа»'s photograph from chapter 1
+    # because о sorts before п (2026-10-01).
+    def usable(bare, info):
+        return (info and not bare.startswith("_") and bare in taught and bare not in blanked
+                and (RAW / f"{bare}.jpg").exists())
     claimed = {}
+    for bare in sorted((b for b, info in manifest.items() if usable(b, info) and info.get("v") == VERSION),
+                       key=lambda b: (met_at[b], b)):
+        claimed.setdefault(hashlib.sha1((RAW / f"{bare}.jpg").read_bytes()).hexdigest(), bare)
     shared = 0
     for n, (bare, info) in enumerate(sorted(manifest.items())):
         src = RAW / f"{bare}.jpg"
-        if not info or bare.startswith("_") or not src.exists() or bare not in taught:
-            continue
-        if bare in blanked:
+        if not usable(bare, info):
             continue
         if info.get("v") != VERSION:
             stale += 1
             continue
-        digest = hashlib.sha1(src.read_bytes()).hexdigest()
-        if digest in claimed:
+        if claimed[hashlib.sha1(src.read_bytes()).hexdigest()] != bare:
             shared += 1
             continue
-        claimed[digest] = bare
         name = f"{n:04d}.jpg"
         shutil.copyfile(src, OUT / name)
         total += src.stat().st_size

@@ -36,7 +36,7 @@ import { Build } from "../activities/Build";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts } from "@core/scheduler";
 import { fold, firstSense } from "@core/util";
-import { explain as askWhy, config as workerConfig } from "../lib/feedback";
+import { explain as askWhy, config as workerConfig, isCap, capNotice } from "../lib/feedback";
 
 /* The kinds a wrong answer can be explained for: one right answer, one thing
    the learner put instead. The speaking and listening activities carry their
@@ -395,7 +395,7 @@ export function useAudioStopOnLeave() {
    after every answer, so it can be picked up where it was left; finishing
    clears it. `restore` is such a saved run to start from instead of `steps`. */
 export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true,
-                         allowBack = false, navigation, tools, save, restore }) {
+                         allowBack = false, navigation, tools, save, restore, onAnswered }) {
   const { st, update } = useSession();
   const t = useTheme();
   /* A saved run is only started from while it is still saved: once that run
@@ -491,7 +491,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
      already in the scheduler, and resuming on it would grade it twice. The
      last answer saves nothing new — Continue on it finishes the run. */
   const keep = (deck) => {
-    if (!save || at + 1 >= deck.length) return;
+    if (onAnswered) onAnswered();
+    if (!save) return;
+    /* The last answer: its grade is in, and a run saved pointing at it would
+       ask it again on resume (the review, 2026-10-02). Only the mark is lost. */
+    if (at + 1 >= deck.length) { clearRun(save.key); return; }
     saveRun(save.key, { route: save.route, params: save.params, title: save.title,
                         queue: deck, at: at + 1, total,
                         tally: { ...tally.current }, results: results.current.slice() });
@@ -503,6 +507,16 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
      (0–1, default 1 or 0 from `correct`) is partial credit for the score, with
      `extra.note` saying why ("3 of 4 words"). */
   const record = (correct, words, grade, extra) => {
+    /* A step that teaches the mouth and marks nothing — the word-building
+       step a quiz carries (core/questions.js PRON_MIX): done, and left out of
+       the total like a skipped step, so the mark is for the questions. */
+    if (q.ungraded) {
+      setAnswered(true);
+      setVerdict({ right: true, credit: 1, note: null });
+      if (!q.retry) { tally.current.skipped += 1; results.current.push({ skipped: true, i: q.i }); }
+      keep(queue);
+      return;
+    }
     const credit = extra && typeof extra.credit === "number"
       ? Math.max(0, Math.min(1, extra.credit)) : (correct ? 1 : 0);
     const note = extra && extra.note ? extra.note : null;
@@ -527,7 +541,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                  rule: q.note ? q.note.title : null }).then((reply) => {
           if (!alive.current || atRef.current !== mine) return;
           setWhy(reply && reply.ok === true && reply.why
-            ? { why: reply.why, yours: reply.yours || "", rule: reply.rule || "" } : null);
+            ? { why: reply.why, yours: reply.yours || "", rule: reply.rule || "" }
+            : isCap(reply) ? { cap: capNotice(reply) } : null);
         });
       }
     }
@@ -808,6 +823,17 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
             {right === false && why === "pending" ? (
               <ActivityIndicator testID="why-pending" color={t.ink3}
                                  style={{ alignSelf: "flex-start", marginTop: 12 }} />
+            ) : right === false && why && why.cap ? (
+              <>
+                {/* The day's AI is spent: said once, and the standard
+                    explanation below carries on without it. */}
+                <Muted testID="why-cap" style={{ marginTop: 12 }}>{`${why.cap.text} · ${why.cap.detail}`}</Muted>
+                {standard ? <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.line }}>
+                  <StandardWhy ex={standard}
+                               onRule={navigation ? (r) => navigation.navigate("Grammar", { topic: r.topic, section: r.heading }) : null}
+                               onWord={qWord && words ? () => words.openFull(q.i) : null} />
+                </View> : null}
+              </>
             ) : right === false && why ? (
               <View testID="why" style={{ marginTop: 12, paddingTop: 12,
                                           borderTopWidth: 1, borderTopColor: t.line }}>

@@ -234,9 +234,12 @@ Premium exists today as daily allowances granted by hand
 switch in the AI usage sheet that any install can flip
 (`BETA_SELF_PLAN = "true"` in `backend/wrangler.toml`). Selling it needs:
 
-- [ ] **Turn `BETA_SELF_PLAN` off and redeploy** before Premium costs
-      money, or anyone can switch themselves to it for free. The app hides
-      the switch on its own once the Worker stops offering it.
+- [ ] **Turn `BETA_SELF_PLAN` and `BETA_PREMIUM` off and redeploy** before
+      Premium costs money: the first lets anyone switch themselves to it,
+      the second (since beta.13, 2026-10-02) puts every registered install
+      on Premium's allowance outright. The app hides the switch on its own
+      once the Worker stops offering it. `GLOBAL_DAILY_CAP` bounds the bill
+      meanwhile.
 
 - [ ] Google Play Billing in the app and a subscription product in the Play
       Console.

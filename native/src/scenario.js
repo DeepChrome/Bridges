@@ -346,7 +346,7 @@ export function useScenario(lines, cast, seed = "") {
     /* The new rate is handed over. It used to be read through the closure
        from a setTimeout, which still held the render with the old rate, so the
        label flipped and the audio did not (the review, 2026-10-01). */
-    play(from, next);
+    play(from, next, until.current);
   };
 
   return { playing, at, pos, plays, rate, total: spans().total, recorded: !!track,

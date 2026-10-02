@@ -112,7 +112,7 @@ function rankXs(rank, W) {
   return rank.map((_, k) => W / 2 + (k - (n - 1) / 2) * spacing);
 }
 
-function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
+function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
   const { st } = useSession();
   const t = useTheme();
   const [pressed, setPressed] = React.useState(false);
@@ -138,6 +138,16 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
   const step = nextStep(st);
   const current = open && !complete && !!step && step.unit.id === unit.id;
 
+  /* A colour family a disc, so the path reads as a set of subjects rather
+     than a column of one tint (the owner, 2026-10-02, with HelloChinese's
+     path beside ours: "the icons for the lessons look way way better and
+     refined"). Three of the palette's audited pairs — the spine in the
+     brand, a chapter's quests in green and blue by the side they sit on —
+     never a new colour. The *current* disc is still the one filled disc, in
+     the brand, so the hierarchy §30ah set holds. */
+  const famBg = fam === "brand" ? t.brandBg : fam === "good" ? t.goodBg : t.infoBg;
+  const famInk = fam === "brand" ? t.brandInk : fam === "good" ? t.good : t.info;
+
   /* Five states, and the disc says which without a word. "Underway" keys on fine
      progress rather than completed lessons: a unit with a video needs that video
      watched before any lesson counts as done, so finished lesson bodies would
@@ -151,7 +161,7 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
        brand colour, the same the lit track arrives in, so the road reads as
        running into the node, round it, and on. A tick-green ring was a
        separate mark that the track did not continue into. */
-    ? { arc: t.brand, p: 1, face: t.brandBg, icon: t.brandInk, track: t.surface3,
+    ? { arc: t.brand, p: 1, face: famBg, icon: famInk, track: t.surface3,
         lip: t.brandDim, nm: t.ink }
     : !open
     // Locked: greyed as a whole — face, padlock and name — not just quieter.
@@ -163,12 +173,12 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
     ? { arc: pr > 0 ? t.brand : null, p: pr, face: t.brand, icon: t.brandOn,
         track: "transparent", lip: t.brandDim, nm: t.ink }
     : pr > 0
-    ? { arc: t.brand, p: pr, face: t.surface, icon: t.brandInk, track: t.surface3,
+    ? { arc: t.brand, p: pr, face: famBg, icon: famInk, track: t.surface3,
         lip: t.line, nm: t.ink }
     // Open but not where you are: quiet, and the icon carries the invitation. A
     // full coloured ring has to mean finished, or a fresh unit and a completed
     // one look identical.
-    : { arc: null, p: 0, face: t.surface, icon: t.brand, track: t.surface3,
+    : { arc: null, p: 0, face: famBg, icon: famInk, track: t.surface3,
         lip: t.line, nm: t.ink };
 
   /* The current disc is bigger, because size is the cheapest hierarchy there
@@ -233,7 +243,7 @@ function PathNode({ unit, open, branch, onOpen, dx = 0 }) {
             ) : null}
           </Svg>
           {open ? (
-            <UnitIcon id={unit.id} size={iconSize} color={tone.icon} />
+            <UnitIcon id={unit.id} size={iconSize} color={tone.icon} weight={2.3} />
           ) : (
             <Svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none"
                  stroke={tone.icon} strokeWidth={1.8} strokeLinecap="round"
@@ -433,7 +443,8 @@ function Fork({ stage, chapterOpen, onOpen }) {
           <View testID={`rank-${stage.core.id}-${r}`} style={{ width: W, height: ROW_H }}>
             {rank.map((u, k) => (
               <View key={u.id} style={{ position: "absolute", left: xs[r][k] - 48, top: 0 }}>
-                <PathNode unit={u} open={unitUnlocked(st, u)} branch onOpen={onOpen} />
+                <PathNode unit={u} open={unitUnlocked(st, u)} branch onOpen={onOpen}
+                          fam={["good", "info", "brand"][(r + k) % 3]} />
               </View>
             ))}
           </View>

@@ -76,6 +76,40 @@ export async function shareCrashes(list, deps = {}) {
   return { file, n: (list || []).length };
 }
 
+/* A tester's report (the owner, 2026-10-02: "any sort of statistics gathering
+ * for our records"). There is no telemetry — nothing leaves the phone on its
+ * own (docs/store-listing.md) — so the record is a text the learner sends
+ * through the share sheet, with room for what they wanted to say. What it
+ * carries is what a report needs and no more: the build, where they are on
+ * the route, how much they have done, what the AI was asked, and what broke.
+ * No words, no cards, no name. */
+export function feedbackText(facts, now = Date.now()) {
+  const when = new Date(now).toISOString().replace("T", " ").slice(0, 19);
+  const f = facts || {};
+  const lines = [
+    `${APP_NAME} ${f.version || "?"} · ${when} UTC`,
+    "",
+    "What I wanted to say:",
+    "",
+    "",
+    "---",
+    `chapter ${f.chapter || "?"}, lesson ${f.lesson || "?"} · ${f.lessonsDone || 0} lessons done`,
+    `${f.words || 0} words studied · ${f.mastered || 0} mastered · ${f.reviews || 0} reviews · ${f.days || 0} days`,
+    `AI today: ${f.ai || "none"}`,
+    `problems recorded: ${f.crashes || 0}`,
+    `${f.platform || ""} ${f.device || ""}`.trim(),
+  ];
+  return lines.join("\n");
+}
+
+export async function shareFeedback(facts, deps = {}) {
+  const d = { ...defaultDeps, ...deps };
+  const stamp = new Date().toISOString().slice(0, 10);
+  const file = `ya-feedback-${stamp}.txt`;
+  await d.writeShare(file, feedbackText(facts), "text/plain");
+  return { file };
+}
+
 /* -> { state, log } or { cancelled: true } or { error } */
 export async function restoreProfile(deps = {}) {
   const d = { ...defaultDeps, ...deps };

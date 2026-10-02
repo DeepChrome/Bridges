@@ -16,6 +16,14 @@
  * next, and a run must survive the app being killed between two of them. */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { CURRICULUM } from "./data";
+import { expo as APP } from "../app.json";
+
+/* Which build and curriculum a run was dealt under. A deck carries lemma
+   indices, which shift on every rebuild (rule 20.4): a run saved on one
+   build and resumed on the next would grade other words under the old
+   labels. A mismatch is simply not offered. */
+const STAMP = () => `${APP.version}|${CURRICULUM || ""}`;
 
 const KEY = (id) => `rb.resume.${id}`;
 /* A run older than this is not "where you left off", it is something you
@@ -25,10 +33,12 @@ const MAX_RUNS = 12;
 
 let profile = null;
 let runs = {};
+let offered = false;
 
 export async function loadResume(profileId) {
   if (profileId === profile) return;
   profile = profileId;
+  offered = false;                    // each profile is offered its own run once
   runs = {};
   if (!profileId) return;
   try {
@@ -44,7 +54,7 @@ function write() {
 }
 
 const fresh = (r, now) => !!r && Array.isArray(r.queue) && r.at > 0
-  && r.at < r.queue.length && now - (r.saved || 0) < RESUME_MAX_AGE;
+  && r.at < r.queue.length && now - (r.saved || 0) < RESUME_MAX_AGE && r.stamp === STAMP();
 
 /* The saved run under `key`, or null when there is none worth offering. */
 export function savedRun(key, now = Date.now()) {
@@ -54,7 +64,7 @@ export function savedRun(key, now = Date.now()) {
 
 export function saveRun(key, snap, now = Date.now()) {
   if (!key || !profile) return;
-  const next = { ...runs, [key]: { ...snap, saved: now } };
+  const next = { ...runs, [key]: { ...snap, saved: now, stamp: STAMP() } };
   const keep = Object.keys(next).sort((a, b) => next[b].saved - next[a].saved).slice(0, MAX_RUNS);
   runs = Object.fromEntries(keep.map((k) => [k, next[k]]));
   write();
@@ -80,7 +90,6 @@ export const runLabel = (run) =>
 
 /* The run to offer when the app is opened: once a launch, so leaving the path
    and coming back to it does not ask again. */
-let offered = false;
 export function launchOffer(now = Date.now()) {
   if (offered || !profile) return null;
   offered = true;

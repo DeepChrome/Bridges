@@ -27,3 +27,6 @@ GLOBAL_DAILY_CAP = "1500"
 # (POST /v1/plan { set }). Turn this off before Premium is sold —
 # docs/BETA.md, Phase E. GLOBAL_DAILY_CAP above still bounds the spend.
 BETA_SELF_PLAN = "true"
+# Beta only: every registered install is on Premium's allowance (and the
+# self-serve switch is not offered). Turn off before Premium is sold.
+BETA_PREMIUM = "true"

@@ -398,11 +398,13 @@ const recorded = (ru) => !!DATA.audio.files[fold(ru)] || BOUGHT.has(fold(ru));
       quizLen = quiz.length;
       if (!quiz.length) structural.push({ where: ctx, why: "empty quiz" });
       let right = 0;
-      for (const q of quiz) {
+      // A pronunciation step marks nothing and is left out of the total, as the app does.
+      const marked = quiz.filter((q) => !q.ungraded);
+      for (const q of marked) {
         kinds[q.kind] = (kinds[q.kind] || 0) + 1;
         if (answer(q, { ...ctx, phase: "quiz", try: tries + 1 })) right++;
       }
-      const score = Math.round(right / quiz.length * 100);
+      const score = Math.round(right / Math.max(1, marked.length) * 100);
       best = Math.max(best, score);
       tries++;
       slot = { q: best, tries };

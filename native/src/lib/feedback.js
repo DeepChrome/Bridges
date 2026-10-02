@@ -148,6 +148,23 @@ export async function tutor({ profile, studied, history, text }, deps = {}) {
               deps, "/v1/tutor", TALK_TIMEOUT_MS);
 }
 
+/* Whether a failed reply is the day's allowance being used up. */
+export const isCap = (r) => !!r && (r.reason === "cap" || r.status === 429 || r.detail === "cap");
+
+/* What to say when it is (the owner, 2026-10-02: "make sure the user is
+   prompted that they're out of tokens and when it resets"): the time in the
+   learner's own clock, read off the Worker's `resetsAt`. One line everywhere. */
+export function capNotice(r, now = new Date()) {
+  const at = r && r.resetsAt ? new Date(r.resetsAt) : null;
+  let when = "at 00:00 UTC";
+  if (at && !isNaN(at)) {
+    const sameDay = at.toDateString() === now.toDateString();
+    const time = at.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    when = sameDay ? `at ${time}` : `tomorrow at ${time}`;
+  }
+  return { text: "Today's AI is used up", detail: `More ${when}` };
+}
+
 /* This install's plan and today's use of it (core/plans.js): { plan, caps,
    used }. No model call; Settings asks when it opens. */
 export async function plan(deps = {}) {
@@ -195,7 +212,8 @@ async function send(url, body, token, deps, timeoutMs) {
     if (!r.ok) {
       return { ok: false, reason: "http", status: r.status,
                detail: data && data.reason, message: data && data.message,
-               plan: data && data.plan, counter: data && data.counter, cap: data && data.cap };
+               plan: data && data.plan, counter: data && data.counter, cap: data && data.cap,
+               resetsAt: data && data.resetsAt };
     }
     if (!data || typeof data !== "object") return { ok: false, reason: "parse" };
     if (data.ok !== true) return { ok: false, reason: data.reason || "parse" };

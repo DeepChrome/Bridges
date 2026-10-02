@@ -80,6 +80,7 @@ const PAIRS = [
   ["ink3", "surface2", 4.5, "muted text on the secondary surface"],
   ["brandInk", "brandBg", 4.5, "brand pill text"],
   ["good", "goodBg", 4.5, "correct-answer text"],
+  ["info", "infoBg", 3.0, "a side quest's icon on its blue disc"],
   ["bad", "badBg", 4.5, "wrong-answer text"],
   ["ink", "goodBg", 4.5, "feedback heading, correct"],
   ["ink", "badBg", 4.5, "feedback heading, wrong"],

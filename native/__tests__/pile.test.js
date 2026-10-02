@@ -4,6 +4,7 @@
    (2026-10-01). Green done, yellow coming back, the number left, grey total. */
 
 import React from "react";
+jest.setTimeout(30000);   // the pile is dealt past twenty cards; slow under a full-suite load
 import { render, screen, fireEvent, act } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";

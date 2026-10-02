@@ -14,11 +14,28 @@ import { Intro } from "../src/screens/Intro";
 beforeEach(async () => { await flushState(); await AsyncStorage.clear(); });
 afterEach(async () => { await flushState(); });
 
+/* The tour opens on what the app believes: a lesson is words, a drill, then
+   the video they were for (the owner, 2026-10-02). */
+test("the first card is the lesson's shape, words to drill to video", async () => {
+  await render(
+    <SessionProvider><WordsProvider><Intro onDone={jest.fn()} /></WordsProvider></SessionProvider>
+  );
+  expect(await screen.findByTestId("tour-vision")).toBeTruthy();
+  for (const label of ["Words", "Drill", "Video"]) expect(screen.getByText(label)).toBeTruthy();
+  expect(screen.getByTestId("guide-point")).toBeTruthy();
+});
+
+async function toWords() {
+  await screen.findByTestId("tour-vision");
+  await act(async () => { fireEvent.press(screen.getByText("Next")); });
+  return await screen.findByTestId("tour-sentence");
+}
+
 test("tap a word for its sheet, tap again for the whole entry", async () => {
   await render(
     <SessionProvider><WordsProvider><Intro onDone={jest.fn()} /></WordsProvider></SessionProvider>
   );
-  expect(await screen.findByTestId("tour-sentence")).toBeTruthy();
+  expect(await toWords()).toBeTruthy();
   const word = screen.getByLabelText("читаю, open word");
   await act(async () => { fireEvent.press(word); });
   // The glance: the headword and the way through.
@@ -41,7 +58,7 @@ test("the last card is the five tabs, drawn from the bar's own list", async () =
   await render(
     <SessionProvider><WordsProvider><Intro onDone={jest.fn()} /></WordsProvider></SessionProvider>
   );
-  await screen.findByTestId("tour-sentence");
+  await toWords();
   for (let k = 0; k < 2; k++) await act(async () => { fireEvent.press(screen.getByText("Next")); });
   expect(await screen.findByTestId("tour-tabs")).toBeTruthy();
   for (const name of ["Learn", "Study", "Practice", "Immerse", "Search"]) {
@@ -55,6 +72,6 @@ test("the copy says less than it used to", async () => {
   await render(
     <SessionProvider><WordsProvider><Intro onDone={jest.fn()} /></WordsProvider></SessionProvider>
   );
-  await screen.findByTestId("tour-sentence");
+  await toWords();
   expect(screen.queryByText(/Latin|Cyrillic|recognised/)).toBeNull();
 });

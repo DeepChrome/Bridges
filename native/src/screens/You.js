@@ -13,7 +13,11 @@ import { plan as askPlan, setPlan } from "../lib/feedback";
 import { PLANS, PLAN_NAMES, ALLOWANCE_LINES, planOf } from "@core/plans";
 import { L, UN, STATS, idxOfWord, lessonCount, lessonDone, dueCount } from "../data";
 import { CUE_NAMES, WRONG_NAMES, SPEEDS, previewCue, rightCueOf, wrongCueOf } from "../audio";
-import { backupProfile, restoreProfile, shareCrashes } from "../backup";
+import { backupProfile, restoreProfile, shareCrashes, shareFeedback } from "../backup";
+import { Platform } from "react-native";
+import { routePosition, lessonsDone } from "../data";
+import { masteryOf } from "./Study";
+import { expo as APP } from "../../app.json";
 import { readCrashes, clearCrashes } from "../crash";
 import { importDeck } from "../anki";
 import { today } from "@core/util";
@@ -25,7 +29,7 @@ import Constants from "expo-constants";
    something the binary is not. */
 const VERSION = (Constants.expoConfig && Constants.expoConfig.version) || "";
 import { tagInfo } from "@core/errortags";
-import { cardsOf, maxLapses } from "@core/scheduler";
+import { cardsOf, maxLapses, cardFor } from "@core/scheduler";
 import { QUEUE_DEFAULTS } from "@core/queue";
 import { askPermission } from "../notify";
 import { APP_NAME } from "../brand";
@@ -447,6 +451,30 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               <Row onPress={() => { onClose(); onTour(); }}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Show the tour</Text>
+                </View>
+              </Row>
+              {/* A tester's report, through the share sheet (backup.js
+                  feedbackText): the build, where they are, what they did,
+                  and room for their words. Nothing leaves the phone otherwise. */}
+              <Row testID="send-feedback" onPress={async () => {
+                const ai = await askPlan().catch(() => null);
+                const pos = routePosition(st);
+                const facts = {
+                  version: APP.version, chapter: pos.stage + 1,
+                  lesson: pos.lesson === Infinity ? "done" : pos.lesson + 1,
+                  lessonsDone: UN.reduce((n, u) => n + lessonsDone(st, u), 0),
+                  words: Object.keys(st.seen || {}).length,
+                  mastered: masteryOf(st, Object.keys(st.seen || {}).map((b) => ({ b }))).mastered,
+                  reviews: Object.values(st.seen || {}).reduce((n, e) => n + ((cardFor(e) || {}).reps || 0), 0),
+                  days: st.streak || 0,
+                  ai: ai && ai.ok && ai.used ? Object.entries(ai.used).filter(([, n]) => n).map(([k, n]) => `${k} ${n}`).join(", ") : "",
+                  crashes: crashes.length,
+                  platform: `${Platform.OS} ${Platform.Version}`,
+                };
+                try { await shareFeedback(facts); } catch (e) { Alert.alert("Send feedback", "The report could not be written."); }
+              }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Send feedback</Text>
                 </View>
               </Row>
               {/* Last, not first: a new learner's settings sheet should not

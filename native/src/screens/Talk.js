@@ -26,7 +26,7 @@ import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLab
          Marked, BULB_PATH, Sheet, CogButton } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, drillPool, nextLesson } from "../data";
-import { talk as askTutor, review as askReview, hint as askHint, config } from "../lib/feedback";
+import { talk as askTutor, review as askReview, hint as askHint, config, capNotice } from "../lib/feedback";
 import { SPEEDS, speakLine, voiceFor } from "../audio";
 
 /* A tutor turn read in its character's device voice, at the pace picked for
@@ -62,11 +62,11 @@ export function failureText(reply) {
      the Worker sends says when; this says what. */
   /* On a plan (core/plans.js) the refusal names it, and Free is told what
      Premium would allow — the one fact a learner at the limit can act on. */
-  if (cap && r.plan === "free") {
-    return { text: "Today's free conversation is used.",
-             detail: `Premium allows ${PLANS.premium.conversation} turns a day. More at 00:00 UTC.`, retry: false };
+  if (cap) {
+    const n = capNotice(r);
+    return { text: n.text, retry: false,
+             detail: r.plan === "free" ? `${n.detail} · Premium allows ${PLANS.premium.conversation} turns a day` : n.detail };
   }
-  if (cap) return { text: "Today's conversations are used up.", detail: r.message || null, retry: false };
   if (r.status === 401 || r.status === 403) {
     return { text: "This build's tutor key was refused.", retry: false };
   }

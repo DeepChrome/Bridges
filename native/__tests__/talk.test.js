@@ -18,6 +18,8 @@ import { TALK_SESSIONS_PER_DAY } from "@core/state";
 import { today } from "@core/util";
 
 jest.mock("../src/lib/feedback", () => ({
+  isCap: jest.requireActual("../src/lib/feedback").isCap,
+  capNotice: jest.requireActual("../src/lib/feedback").capNotice,
   talk: jest.fn(), review: jest.fn(), hint: jest.fn(), getFeedback: jest.fn(),
   // A configured build: the picker offers every open scenario.
   config: jest.fn(() => ({ url: "https://worker.test/v1/talk", token: "t" })),

@@ -786,7 +786,10 @@ export default function Study({ navigation, route }) {
       const daily = dailyFor(prev.daily, now);
       return {
         ...prev, seen: r.seen, trouble: r.trouble,
-        daily: { ...daily, reviews: daily.reviews + 1,
+        /* A card, not a press: a re-queued Again and a new card's first grade
+           do not spend the day's reviews (the review, 2026-10-02 — fifteen
+           Agains used to end the day at thirty-five cards). */
+        daily: { ...daily, reviews: daily.reviews + (item.again || item.kind === "new" ? 0 : 1),
                  new: daily.new + (item.kind === "new" && !item.again ? 1 : 0) },
       };
     }, rows);

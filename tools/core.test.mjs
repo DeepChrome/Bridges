@@ -779,6 +779,17 @@ group("the session");
      "and after three other cards in a long one");
   ok(QUEUE_DEFAULTS.sessionSize === 20 && QUEUE_DEFAULTS.newPerDay === 5 && QUEUE_DEFAULTS.reviewsPerDay === 50,
      "the defaults: twenty a session, five new a day, fifty reviews a day");
+  // A card in a learning step is dealt whatever the day's count (the review,
+  // 2026-10-02): the cap bounds reviews, not a card being learnt right now.
+  {
+    const nowMs = Date.now();
+    const learning = { recognise: { state: 1, s: 0.1, d: 5, steps: 1, reps: 1, lapses: 0, dueAt: nowMs - 1000, lastAt: nowMs - 60000 } };
+    const review = { recognise: { state: 2, s: 20, d: 5, steps: 0, reps: 4, lapses: 0, dueAt: nowMs - 86400000, lastAt: nowMs - 10 * 86400000 } };
+    const s = buildSession({ seen: { "да": learning, "нет": review }, words: ["да", "нет"], dirs: ["recognise"], now: nowMs,
+                             daily: { day: S.dayOf(nowMs), new: 0, reviews: 50 }, opts: { reviewsPerDay: 50 } });
+    ok(s.items.length === 1 && s.items[0].word === "да" && !s.done, "past the day's reviews a learning step is still dealt and the day is not done",
+       JSON.stringify({ n: s.items.length, done: s.done }));
+  }
   const unset = buildSession({ seen: {}, words: fresh, dirs: ["recognise"], now: T0, daily: null,
                                opts: { newPerDay: undefined, sessionSize: undefined }, rng });
   // Against the default itself, not a literal: this check is about NaN (§30w's
@@ -1147,6 +1158,21 @@ group("lesson ramp");
 
 group("lesson generation");
 {
+  /* A word built from its end rides in a quiz from chapter 1's second lesson
+     (PRON_MIX), on one of the lesson's own words, marked nothing. */
+  {
+    const c1 = STAGES[0].core;
+    const first = Q.quizSteps(c1, 0), second = Q.quizSteps(c1, 1);
+    ok(!first.some((q) => q.kind === "buildup"), "the first lesson's quiz carries no word building yet");
+    const b = second.find((q) => q.kind === "buildup");
+    ok(b && b.ungraded && typeof b.i === "number" && b.steps.length >= 2,
+       "the second lesson's quiz builds a word, ungraded", b ? JSON.stringify(b.steps) : "none");
+    ok(second[0].kind !== "buildup", "never first");
+    // A lesson with a long word of its own builds one of its own.
+    const food = UN.find((u) => u.id === "food");
+    const own = Q.quizSteps(food, 3).find((q) => q.kind === "buildup");
+    ok(own && lessonWords(food, 3).includes(own.i), "a lesson with a long word builds its own");
+  }
   /* The core words are drilled every time; a lesson's rarer words only where
      a slot is free (the owner, 2026-10-02: "just drill the most common one").
      Swept over every lesson with more words than the quiz has room for. */
@@ -1156,7 +1182,7 @@ group("lesson generation");
       for (let k = 0; k < lessonCount(u); k++) {
         const ws = lessonWords(u, k);
         if (ws.length <= QUIZ_N - 2) continue;
-        const core = ws.slice().sort((a, b) => a - b).slice(0, QUIZ_N - 2);
+        const core = ws.slice().sort((a, b) => a - b).slice(0, QUIZ_N - 3);
         const asked = new Set(Q.quizSteps(u, k).map((q) => q.i));
         const gone = core.filter((i) => !asked.has(i));
         if (gone.length) missed.push(`${u.id}:${k} ${gone.map((i) => L[i].b).join(",")}`);

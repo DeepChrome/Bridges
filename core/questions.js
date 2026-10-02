@@ -13,6 +13,7 @@ import { fold, shuffle, sample, firstSense, TOKEN } from "./util.js";
 import { sentenceLemmas, pickPrompt } from "./speech.js";
 import { charDistance } from "./compare.js";
 import { describeForm, GENERIC_COLUMN } from "./forms.js";
+import { buildupDrill } from "./buildup.js";
 
 export const QUIZ_N = 8;
 
@@ -62,6 +63,11 @@ export const speechFrom = (kind, stage, lesson) => {
    its chapter's. Chapter 1's card ("no is") teaches nothing a table can ask, so
    the question starts with chapter 2. */
 export const FORM_MIX = { fromStage: 1, typedFromStage: 5, perQuiz: 1 };
+/* A word built from its end inside a lesson quiz (core/buildup.js; the owner,
+   2026-10-02: "pronunciation exercises… should be mixed in"): the lesson's
+   longest word, when it has one worth building. Graded nothing and left out
+   of the mark — saying a word is not knowing it. */
+export const PRON_MIX = { fromStage: 0, fromLesson: 1, perQuiz: 1 };
 /* A grammar run (grammarRun): ten questions on the chapter's point, the first
    60 % chosen and the rest written. */
 export const GRAMMAR_N = 10;
@@ -1539,8 +1545,11 @@ export function makeQuestions(env) {
        The lemma index is frequency order (build_site), read here, never keyed
        on (rule 20.4). */
     const byUse = words.slice().sort((a, b) => a - b);
-    const core = byUse.slice(0, QUIZ_N - 2);
-    const extra = byUse.slice(QUIZ_N - 2);
+    // Two slots are production on core words; a lesson with more words than
+    // fit keeps one slot for one of its others, or it would never be asked.
+    const coreN = byUse.length > QUIZ_N - 2 ? QUIZ_N - 3 : QUIZ_N - 2;
+    const core = byUse.slice(0, coreN);
+    const extra = byUse.slice(coreN);
     const bag = core.map(draw).filter(Boolean);
     /* Both production shapes, not just the first. `find(type) || find(cloze)`
        could never reach its second branch: `candidates` always ends with a
@@ -1616,6 +1625,23 @@ export function makeQuestions(env) {
         if (q) out.splice(slotApart(out, q), 0, { ...q, drill: true });
       }
     }
+    if (stage > PRON_MIX.fromStage || (stage === PRON_MIX.fromStage && index >= PRON_MIX.fromLesson)) {
+      /* The lesson's own long words first; a lesson of pronouns and
+         prepositions has none, so then the unit's earlier words, then the
+         route's. One of them at random each time, so a retake builds another. */
+      const tiers = [words, Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat(),
+                     unitsUpTo(unit).flatMap((u) => u.w)];
+      for (const tier of tiers) {
+        const cands = tier.filter((i) => !words.includes(i) || tier === words)
+          .map((i) => ({ i, ru: L[i].w, en: firstSense(L[i]) }));
+        const [step] = buildupDrill(cands, 1, { listen: false });
+        if (!step) continue;
+        const i = cands.find((c) => c.ru === step.ru).i;
+        const q = { ...step, i, ungraded: true };
+        out.splice(slotApart(out, q), 0, q);
+        break;
+      }
+    }
     return out;
   }
 
@@ -1624,7 +1650,7 @@ export function makeQuestions(env) {
      about whether the learner got them right and needs no schema of its own. */
   function stepKeys(steps) {
     return (steps || [])
-      .filter((q) => q && q.kind && typeof q.i === "number")
+      .filter((q) => q && q.kind && typeof q.i === "number" && !q.ungraded)
       .map((q) => `${q.kind}:${q.i}`);
   }
 

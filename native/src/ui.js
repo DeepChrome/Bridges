@@ -950,11 +950,11 @@ export function Bar({ value, animate = false }) {
 }
 
 /* The same icon paths the web app draws, rendered through react-native-svg. */
-export function UnitIcon({ id, size = 22, color }) {
+export function UnitIcon({ id, size = 22, color, weight = 1.6 }) {
   const t = useTheme();
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-         stroke={color || t.ink3} strokeWidth={1.6}
+         stroke={color || t.ink3} strokeWidth={weight}
          strokeLinecap="round" strokeLinejoin="round">
       <Path d={iconFor(id)} />
     </Svg>

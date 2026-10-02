@@ -160,12 +160,14 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead, 
   const sortedLearning = shuffled(learning, random).sort((a, b) => a.card.dueAt - b.card.dueAt);
   const due = sortedReviews.length + sortedLearning.length;
 
-  const done = reviewsLeft === 0 && due > 0;
+  // A learning step (ten minutes on) is never held over to tomorrow: the cap
+  // bounds reviews, and a card mid-step is a card being learnt right now.
+  const done = reviewsLeft === 0 && sortedReviews.length > 0 && !sortedLearning.length;
   /* The day's load is what is due (within the day's cap) plus the new cards
      it may introduce; one session takes its share of each in that ratio, so
      a backlog of 131 still lets a couple of new words in, and an empty pile
      is new words alone. */
-  const todayReviews = Math.min(due, reviewsLeft);
+  const todayReviews = sortedLearning.length + Math.min(sortedReviews.length, reviewsLeft);
   const todayNew = Math.min(fresh.length, newLeft);
   const load = todayReviews + todayNew;
   const size = Math.min(o.sessionSize, load);

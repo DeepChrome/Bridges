@@ -5968,10 +5968,44 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   route. Not saved: placement (onboarding) and the unscored mouth drills.
 - **Teddy's face follows the score** (`reactionFor`): cheer ≥ 90, smile ≥ 80,
   thumbs up for any other pass, shrug from 50, wince under — on every scored
-  run, not only a lesson's quiz. Four of the five poses are briefed in
-  `build_cast_art.mjs` and **not drawn** (the image account is spent); each
-  shows a stand-in, and `UNDRAWN` in core/guide.js is held by core.test to
-  exactly what is missing.
+  run, not only a lesson's quiz. All nine poses are drawn. **gpt-image-2
+  refuses a transparent background**, so poses and character sheets are drawn
+  on a green screen and keyed at ship (`keyedCopy`); Teddy's also lose the
+  green fringe in the fur (`despill`), the avatars never (Gena is green).
+- **Lessons end where a group ends** (§30bi) and **a lesson drills its core
+  words**: the quiz always asks the lesson's commonest `QUIZ_N - 2`, its
+  rarer words only in free slots (the owner: "give multiple greeting options
+  and then just drill the most common one").
+- **Fifty reviews a day** (`DAILY_REVIEWS` in core/queue.js): the badge and
+  the pile count today's capped portion (`dueCount`; `dueAll` is the
+  backlog), "Keep going" lifts it for a sitting, and a stored
+  `reviewsPerDay` from the removed setting is ignored. The Study header
+  shows "· N mastered" (familiarity ≥ `MASTERED_AT`, 80).
+- **The listening transcript plays each line from the scene's own track**
+  (`playLine`, stopping at the line's end) or in its speaker's device voice;
+  the speed button cycles `RATES` 1× → ¾× → ½×. Every listening question's
+  answer is said in the conversation and no question gives another's away
+  (read by hand, 2026-10-02).
+- **The phone's fallback voice is a woman's** (`defaultVoice` in audio.js):
+  every bought clip is one woman, and the first voice Android lists is a man.
+- **A pronunciation step in every quiz** from chapter 1 lesson 2 (`PRON_MIX`):
+  a word built from its end, the lesson's own long word or an earlier one,
+  `ungraded` — answered as a skip, so the mark is for the questions.
+- **"Today's AI is used up · More at 5:00 PM"**: the Worker's 429 carries
+  `resetsAt` and `capNotice` in lib/feedback.js says it in local time, on
+  Talk, the tutor, Translate, Say's feedback and under a verdict. During the
+  beta `BETA_PREMIUM` puts every registered install on Premium's allowance.
+- **A drill opens on its options** (DrillFlow `cog` starts true), ticks
+  prefilled for the route; **a `?` in every header that has help**
+  (`native/src/help.js`, keyed by route name) lists that screen's controls.
+- **Send feedback** (Settings): a text report through the share sheet —
+  build, place on the route, counts, AI use, problems — with room for the
+  tester's words. No telemetry leaves the phone on its own.
+- **The tour opens on the vision** (words → drill → video) on a raised
+  panel, the one shadow the app draws.
+- **Path discs carry a colour family** — spine brand, quests green and blue
+  by rank position — on the tinted face, the glyph heavier; the current disc
+  is still the one filled disc.
 
 ## 31. Verification
 

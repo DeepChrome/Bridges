@@ -37,7 +37,7 @@ import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize, lessonCountOf, lessonWordsOf } from "@core/questions";
 import { quizPassed } from "@core/state";
-import { dueCards, wanted, cardFor, dayOf } from "@core/scheduler";
+import { dueCards, wanted, cardFor, dayOf, kindOf } from "@core/scheduler";
 import { cardKind, kindsOf, dailyFor, QUEUE_DEFAULTS } from "@core/queue";
 import { isIrregular } from "@core/facts";
 
@@ -759,9 +759,14 @@ export const dueAll = (st) => {
 export const dueCount = (st) => {
   /* The constant, not `st.reviewsPerDay`: the setting that wrote that key is
      gone, so a stored value is a leftover from it (200 on older profiles)
-     and must not quietly lift the cap. */
-  const left = Math.max(0, QUEUE_DEFAULTS.reviewsPerDay - dailyFor(st.daily, Date.now()).reviews);
-  return Math.min(dueAll(st), left);
+     and must not quietly lift the cap. A learning step is outside the cap,
+     as core/queue.js deals it. */
+  const kinds = kindsOf(st.cardKinds);
+  const now = Date.now();
+  const cards = dueCards(st.seen, now, st.learnAhead).filter((c) => kinds.includes(cardKind(c.word)));
+  const learning = cards.filter((c) => kindOf(c.card) === "learning").length;
+  const left = Math.max(0, QUEUE_DEFAULTS.reviewsPerDay - dailyFor(st.daily, now).reviews);
+  return learning + Math.min(cards.length - learning, left);
 };
 
 /* What a practice drill may ask about: the words the learner has met, widened

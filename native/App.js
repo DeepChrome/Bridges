@@ -22,6 +22,7 @@ import { palette, fontFiles } from "./src/theme";
 import { loadAppearance, useScheme } from "./src/appearance";
 import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
+import { HelpButton } from "./src/help";
 import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
@@ -170,6 +171,7 @@ function HeaderRight({ navigation, route }) {
   const home = !route || route.name !== "Path";
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <HelpButton route={route && route.name} />
       {home ? <HomeButton /> : null}
       <MeButton navigation={navigation} />
     </View>

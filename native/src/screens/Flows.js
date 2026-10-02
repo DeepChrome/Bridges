@@ -8,7 +8,7 @@ import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text,
          Sheet, Choice, CogButton, Loading } from "../ui";
 import { Runner, Done, useAudioStopOnLeave, useResume } from "./Run";
-import { clearRun, saveRun } from "../resume";
+import { clearRun, saveRun, savedRun } from "../resume";
 import { WordList, GrammarNote, WordCard, StepBar } from "../lesson";
 import { VideoLines } from "../prep";
 import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
@@ -162,6 +162,9 @@ export function VocabFlow({ route, navigation }) {
       progress={{ at, total: steps.length }}
       recycle={false}
       onFinish={advance}
+      /* Saved the moment the answer is in, pointing past it — saving on
+         Continue left a run that re-asked a graded question (the review). */
+      onAnswered={() => saveRun(save.key, { ...save, queue: steps, at: at + 1, total: steps.length })}
       navigation={navigation}
     />
   );
@@ -769,7 +772,11 @@ export function DrillFlow({ route, navigation }) {
   const { st, update } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
-  const [cog, setCog] = useState(false);
+  /* Open on arrival (the owner, 2026-10-02: "when a user selects an exercise
+     or drill, they should be confronted with the settings/config that is pre
+     populated based on where they're at"): the ticks are the route's own, so
+     closing it untouched is the drill as it would have been. */
+  const [cog, setCog] = useState(() => !savedRun(`drill:${type}`));
   const prefs = (st.drillPrefs || {})[type] || {};
   const setPrefs = (next) => update((p) => ({ ...p, drillPrefs: { ...(p.drillPrefs || {}), [type]: next } }));
   // Only the learner's own words (data.js drillPool); the pool is fixed for the
@@ -832,7 +839,7 @@ export function DrillFlow({ route, navigation }) {
 
   /* The cog: open it, change things, Apply deals a fresh run. Closing with
      nothing changed leaves the run where it was. */
-  const before = useRef(null);
+  const before = useRef(JSON.stringify([prefs, typed]));
   const openCog = () => { before.current = JSON.stringify([prefs, typed]); setCog(true); };
   const closeCog = () => {
     setCog(false);

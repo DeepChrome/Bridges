@@ -8,6 +8,7 @@ import { Avatar } from "../src/ui";
 import { SCENE_ART } from "../src/sceneart";
 import { CAST_FACES } from "../src/castfaces";
 import { CAST } from "@core/cast";
+import { AV_IDS } from "@core/avatars";
 
 describe("the cast's faces", () => {
   it("draws every character of the story from the cast art", async () => {
@@ -16,11 +17,14 @@ describe("the cast's faces", () => {
     expect(screen.getByTestId("face-teddy")).toBeTruthy();
   });
 
-  it("gives an old profile's Yorkie Teddy's face, and leaves the neighbours flat", async () => {
+  it("gives an old profile's Yorkie Teddy's face, and every supporting character their own", async () => {
     await render(<Avatar id="serafim" />);
     expect(screen.getByTestId("face-teddy")).toBeTruthy();
+    // Drawn to the main cast's standard on 2026-10-02 (the owner: "all the
+    // avatars to look the same quality of the core characters").
+    for (const id of AV_IDS) expect(CAST_FACES[id]).toBeTruthy();
     await render(<Avatar id="gena" />);
-    expect(screen.queryByTestId("face-gena")).toBeNull();
+    expect(screen.getByTestId("face-gena")).toBeTruthy();
   });
 });
 

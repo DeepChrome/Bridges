@@ -24,7 +24,7 @@ import { useTheme } from "../theme";
 import { Btn, Muted, Pill, Speaker, Text, Marked } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN } from "../data";
-import { getFeedback, config } from "../lib/feedback";
+import { getFeedback, config, isCap, capNotice } from "../lib/feedback";
 import { stop as stopAudio } from "../audio";
 import { useRecognizer } from "../speech";
 import { Alignment } from "./Alignment";
@@ -165,7 +165,8 @@ export function Say({ q, r }) {
       topic: unit && unit.g ? unit.g.title : null,
       lemmas: (q.lemmas || []).map((i) => L[i].b),
     });
-    if (!reply || reply.ok !== true) { if (alive.current) setFb(null); return; }
+    // Used up for the day is the one failure worth a line (the owner, 2026-10-02).
+    if (!reply || reply.ok !== true) { if (alive.current) setFb(isCap(reply) ? { cap: capNotice(reply) } : null); return; }
     const tags = feedbackTags(reply);
     if (tags.length) update((prev) => ({ ...prev, speech: tagAttempt(prev.speech, ts, tags) }));
     if (alive.current) setFb(reply);
@@ -240,6 +241,8 @@ export function Say({ q, r }) {
         {fb === "pending" ? (
           <ActivityIndicator testID="feedback-pending" color={t.ink3}
                              style={{ alignSelf: "flex-start", marginTop: 12 }} />
+        ) : fb && fb.cap ? (
+          <Muted testID="feedback-cap" style={{ marginTop: 12 }}>{`${fb.cap.text} · ${fb.cap.detail}`}</Muted>
         ) : fb ? <Feedback fb={fb} /> : null}
       </View>
     );

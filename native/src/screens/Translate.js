@@ -36,7 +36,7 @@ import { Screen, Card, Muted, Text } from "../ui";
 import { Linked } from "../words";
 import { useRecognizer, LANG, LANG_EN } from "../speech";
 import { HoldButton, Blocked } from "../activities/Say";
-import { translate as askWorker, config } from "../lib/feedback";
+import { translate as askWorker, config, isCap, capNotice } from "../lib/feedback";
 import { speakLine, stop } from "../audio";
 
 /* How many exchanges stay on screen. They are not kept anywhere: leaving the
@@ -122,7 +122,7 @@ export default function Translate({ navigation, route }) {
            the screen. */
         if (out) speakLine(out, { lang: to, asked: route && route.key });
       } else {
-        put({ state: "failed" });
+        put({ state: "failed", cap: isCap(res) ? capNotice(res) : null });
       }
     },
   });
@@ -159,7 +159,9 @@ export default function Translate({ navigation, route }) {
             {r.state === "asking" ? (
               <Muted testID="translate-asking" style={{ marginTop: 6 }}>Translating…</Muted>
             ) : r.state === "failed" ? (
-              <Muted testID="translate-failed" style={{ marginTop: 6 }}>No translation right now.</Muted>
+              <Muted testID="translate-failed" style={{ marginTop: 6 }}>
+                {r.cap ? `${r.cap.text} · ${r.cap.detail}` : "No translation right now."}
+              </Muted>
             ) : r.state === "offline" ? (
               <Muted testID="translate-offline" style={{ marginTop: 6 }}>Tap a word for its meaning.</Muted>
             ) : (

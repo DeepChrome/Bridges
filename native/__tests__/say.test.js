@@ -26,6 +26,8 @@ import { SPEECH_SKIP_TOP } from "@core/speech";
 /* The Worker is out of scope here: the client is stubbed and, unless a test says
    otherwise, answers as an unconfigured build would. */
 jest.mock("../src/lib/feedback", () => ({
+  isCap: jest.requireActual("../src/lib/feedback").isCap,
+  capNotice: jest.requireActual("../src/lib/feedback").capNotice,
   getFeedback: jest.fn(),
   config: jest.fn(() => ({ url: "https://worker.test/v1/feedback", token: "t" })),
 }));

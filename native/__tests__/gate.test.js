@@ -71,6 +71,8 @@ describe("profile gate", () => {
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     // The first profile on a phone sees the tour first: three cards, skippable,
     // the first about the two-press dictionary (ROADMAP P8.6).
+    expect(await screen.findByText("Every lesson leads to a real video")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("Next")); });
     expect(await screen.findByText("Every Russian word is a door")).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByText("Next")); });
     expect(await screen.findByText("Speaking stays on your phone")).toBeTruthy();

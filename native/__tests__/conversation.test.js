@@ -29,6 +29,8 @@ import { tutor } from "../src/lib/feedback";
 import { SILENCE_MS, NOTHING_MS, LISTEN_MAX_MS } from "../src/speech";
 
 jest.mock("../src/lib/feedback", () => ({
+  isCap: jest.requireActual("../src/lib/feedback").isCap,
+  capNotice: jest.requireActual("../src/lib/feedback").capNotice,
   tutor: jest.fn(), talk: jest.fn(), review: jest.fn(), hint: jest.fn(), getFeedback: jest.fn(),
   explain: jest.fn(), translate: jest.fn(),
   config: jest.fn(() => ({ url: "https://worker.test/v1/tutor", token: "t" })),

@@ -90,6 +90,9 @@ const json = (status, body) => new Response(JSON.stringify(body), {
 });
 
 const dayKey = (now) => now.toISOString().slice(0, 10);
+/* When today's counters roll over: the next 00:00 UTC, as an ISO instant, so
+   the app can say it in the learner's own time rather than "00:00 UTC". */
+const resetsAt = (now) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)).toISOString();
 
 /* Constant-time-enough comparison for a bearer token: lengths differ → false
    without comparing; same length → every byte is compared. */
@@ -120,7 +123,11 @@ async function identify(given, env) {
      by hand (backend/tools/user.mjs) keeps the caps it was given, because
      those were chosen for that person. */
   if (rec.plan || rec.via === "register") {
-    const plan = planOf(rec.plan);
+    /* During the beta every registered install gets Premium's allowance
+       (the owner, 2026-10-02: "I'm okay with them going a little crazy with
+       the AI while they're learning"); GLOBAL_DAILY_CAP still bounds the
+       bill. BETA_PREMIUM off, and each install is back on its own plan. */
+    const plan = env.BETA_PREMIUM === "true" && rec.via === "register" ? "premium" : planOf(rec.plan);
     return { id: String(rec.id), caps: capsFor(plan), plan, token: given, rec };
   }
   return { id: String(rec.id), caps: legacyCaps(rec.caps || null), plan: "custom" };
@@ -316,7 +323,7 @@ export async function handle(request, env, deps = {}) {
        (docs/BETA.md, Phase E). The owner's secret and hand-made tokens are
        outside it: their plan was set for them. GLOBAL_DAILY_CAP still bounds
        what every install together can spend, whatever each one chose. */
-    const selfServe = env.BETA_SELF_PLAN === "true" && !!user.rec;
+    const selfServe = env.BETA_SELF_PLAN === "true" && env.BETA_PREMIUM !== "true" && !!user.rec;
     let body = null;
     try { body = await request.json(); } catch (e) { body = null; }
     let current = user;
@@ -361,7 +368,7 @@ export async function handle(request, env, deps = {}) {
     /* On a plan, the refusal says which plan and how much it allows, so the
        app can say it plainly and offer what comes next. */
     const onPlan = user.plan === "free" || user.plan === "premium";
-    return json(429, { ok: false, reason: "cap", plan: user.plan, counter, cap,
+    return json(429, { ok: false, reason: "cap", plan: user.plan, counter, cap, resetsAt: resetsAt(now),
                        message: onPlan
                          ? `${PLAN_NAMES[user.plan]} plan: ${cap} a day. Resets at 00:00 UTC.`
                          : route.capMessage(cap) });
@@ -370,7 +377,8 @@ export async function handle(request, env, deps = {}) {
   const counted = user.id !== "owner";
   if (counted && !(await tick(env, allKey, envInt(env.GLOBAL_DAILY_CAP, DEFAULT_GLOBAL_CAP)))) {
     await untick(env, userKey);
-    return json(429, { ok: false, reason: "cap", message: "The tutor has had a busy day; resets at 00:00 UTC." });
+    return json(429, { ok: false, reason: "cap", resetsAt: resetsAt(now),
+                       message: "The tutor has had a busy day; resets at 00:00 UTC." });
   }
 
   const messages = [{ role: "user", content: route.message(body) }];

@@ -58,6 +58,21 @@ afterEach(async () => {
   delete process.env.EXPO_PUBLIC_APP_TOKEN;
 });
 
+/* The day's AI used up is said, with the hour it comes back in the learner's
+   own clock (the owner, 2026-10-02: "prompted that they're out of tokens and
+   when it resets"). */
+test("the allowance spent says so and when, in local time", async () => {
+  const resetsAt = new Date(Date.now() + 2 * 3600000).toISOString();
+  global.fetch.mockImplementation(async () => ({ ok: false, status: 429,
+    json: async () => ({ ok: false, reason: "cap", plan: "premium", counter: "explain", cap: 60, resetsAt }) }));
+  await withRunner([chosen]);
+  await act(async () => { fireEvent.press(await screen.findByText("table")); });
+  const line = await screen.findByTestId("why-cap");
+  const hour = new Date(resetsAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  expect(line).toHaveTextContent(`Today's AI is used up · More ${new Date(resetsAt).toDateString() === new Date().toDateString() ? "at" : "tomorrow at"} ${hour}`);
+  expect(screen.queryByTestId("why")).toBeNull();
+});
+
 test("a wrong option asks why, shows both lines, and drops the static rule card", async () => {
   answers({ ok: true, why: "«книга» is a book.", yours: "«стол» is a table." });
   await withRunner([chosen]);

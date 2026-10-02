@@ -1,21 +1,35 @@
-/* The first-run tour (ROADMAP P8.6): three things a new learner would not guess.
+/* The first-run tour (ROADMAP P8.6): what the app believes, and three things
+ * a new learner would not guess.
  *
- * Shown once, between naming the profile and choosing where to start; again from
- * Settings ("Show the tour"). Three cards, each one idea, each with the real
- * control drawn rather than described: a word that is a link, a speaker that
- * says which voice it is, and what the microphone is for. Skippable at any point.
+ * Shown once, between naming the profile and choosing where to start; again
+ * from Settings. Four cards, each one idea, each with the real control drawn
+ * rather than described: how a lesson leads to a video (the owner, 2026-10-02:
+ * "the original orientation should mention our vision… where each lesson
+ * prepares them for a video with native speakers"), a word that is a link,
+ * what the microphone is for, and the five tabs. Skippable at any point.
+ *
+ * The demo sits on a raised panel — the one place in the app a shadow is
+ * drawn, because here the picture *is* the page and should sit forward of it
+ * (the owner, same day: "use shadows to draw attention as needed").
  */
 
 import React, { useState } from "react";
 import { View, Animated } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { useTheme, radius } from "../theme";
+import { useTheme, radius, type as T } from "../theme";
 import { Screen, Btn, Muted, Text } from "../ui";
 import { Linked } from "../words";
 import { TABS, TabGlyph } from "../tabicons";
 import { useSwap } from "../motion";
+import { Guide } from "../guide";
 
 const PAGES = [
+  {
+    key: "vision",
+    title: "Every lesson leads to a real video",
+    body: "Learn the words, drill them, then hear them from native speakers.",
+    demo: "vision",
+  },
   {
     key: "words",
     title: "Every Russian word is a door",
@@ -43,26 +57,71 @@ const PAGES = [
   },
 ];
 
-/* The sentence on the first card is the real control, not a picture of one:
+/* The sentence on the word card is the real control, not a picture of one:
    `Linked` opens the same sheet as everywhere else, and a second tap the full
    entry — at first run the entry comes as a sheet too, since there is no
    navigator yet (words.js). The owner, 2026-09-19: "make sure the tutorial
    actually is able to demo what it's showing." */
 export const TOUR_SENTENCE = "Я читаю книгу.";
 
+/* The three steps of a lesson as the app sees them: words, a drill, the
+   video. Drawn with the app's own glyphs, joined by arrows. */
+const STEPS = [
+  { id: "words", label: "Words",
+    d: "M4 6h16M4 12h10M4 18h7" },
+  { id: "drill", label: "Drill",
+    d: "M9 12l2 2 4-4M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4z" },
+  { id: "video", label: "Video",
+    d: "M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM10 9l5 3-5 3z" },
+];
+
+function Step({ step, last }) {
+  const t = useTheme();
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <View style={{ alignItems: "center", width: 64 }}>
+        <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: t.brand,
+                       alignItems: "center", justifyContent: "center" }}>
+          <Svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke={t.brandOn}
+               strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <Path d={step.d} />
+          </Svg>
+        </View>
+        <Muted size={12} style={{ marginTop: 6 }}>{step.label}</Muted>
+      </View>
+      {!last ? (
+        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={t.ink3} strokeWidth={2}
+             strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 20 }}>
+          <Path d="M5 12h14M13 6l6 6-6 6" />
+        </Svg>
+      ) : null}
+    </View>
+  );
+}
+
 function Demo({ kind }) {
   const t = useTheme();
+  if (kind === "vision") {
+    return (
+      <View testID="tour-vision" style={{ alignItems: "center" }}>
+        <Guide pose="point" size={84} />
+        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 14 }}>
+          {STEPS.map((s, k) => <Step key={s.id} step={s} last={k === STEPS.length - 1} />)}
+        </View>
+      </View>
+    );
+  }
   if (kind === "word") {
-    return <Linked testID="tour-sentence" text={TOUR_SENTENCE} size={28} />;
+    return <Linked testID="tour-sentence" text={TOUR_SENTENCE} size={30} />;
   }
   if (kind === "tabs") {
     return (
-      <View testID="tour-tabs" style={{ flexDirection: "row", gap: 18, alignItems: "flex-start" }}>
+      <View testID="tour-tabs" style={{ flexDirection: "row", gap: 14, alignItems: "flex-start" }}>
         {TABS.map((tab) => (
-          <View key={tab.id} style={{ alignItems: "center", gap: 6, width: 56 }}>
-            <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: t.brandBg,
+          <View key={tab.id} style={{ alignItems: "center", gap: 6, width: 52 }}>
+            <View style={{ width: 46, height: 46, borderRadius: 14, backgroundColor: t.brandBg,
                            alignItems: "center", justifyContent: "center" }}>
-              <TabGlyph d={tab.d} color={t.brandInk} size={26} />
+              <TabGlyph d={tab.d} color={t.brandInk} size={24} />
             </View>
             <Muted size={12}>{tab.id}</Muted>
           </View>
@@ -71,9 +130,9 @@ function Demo({ kind }) {
     );
   }
   return (
-    <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: t.brandBg,
-                   borderWidth: 1, borderColor: t.brand, alignItems: "center", justifyContent: "center" }}>
-      <Svg width={30} height={30} viewBox="0 0 24 24" fill="none" stroke={t.brandInk} strokeWidth={2}
+    <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: t.brand,
+                   alignItems: "center", justifyContent: "center" }}>
+      <Svg width={34} height={34} viewBox="0 0 24 24" fill="none" stroke={t.brandOn} strokeWidth={2}
            strokeLinecap="round" strokeLinejoin="round">
         <Path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z" />
         <Path d="M19 11a7 7 0 0 1-14 0M12 18v3" />
@@ -81,6 +140,13 @@ function Demo({ kind }) {
     </View>
   );
 }
+
+/* The demo's panel: raised a little off the page, since on this screen it
+   is the subject. The only shadow the app draws (theme.js useShadow is null). */
+const panelShadow = {
+  shadowColor: "#000", shadowOpacity: 0.12, shadowRadius: 12, shadowOffset: { width: 0, height: 6 },
+  elevation: 4,
+};
 
 export function Intro({ onDone }) {
   const t = useTheme();
@@ -92,22 +158,32 @@ export function Intro({ onDone }) {
   const swap = useSwap(at);
   return (
     <Screen fill>
-      <View style={{ flexDirection: "row", gap: 6, marginBottom: 26 }}>
+      <View style={{ flexDirection: "row", gap: 6, marginBottom: 22 }}>
         {PAGES.map((p, k) => (
           <View key={p.key} style={{ flex: 1, height: 4, borderRadius: 2,
                                      backgroundColor: k <= at ? t.brand : t.surface3 }} />
         ))}
       </View>
       <Animated.View style={swap}>
-        <View testID={`intro-${page.key}`} style={{ alignItems: "center", paddingVertical: 24 }}>
+        <View testID={`intro-${page.key}`}
+              style={[{ alignItems: "center", justifyContent: "center", minHeight: 220,
+                        paddingVertical: 28, paddingHorizontal: 20, borderRadius: radius.xl,
+                        backgroundColor: t.surface, borderWidth: 1, borderColor: t.lineSoft },
+                      panelShadow]}>
           <Demo kind={page.demo} />
         </View>
-        <Text style={{ color: t.ink, fontSize: 22, fontWeight: "700", marginTop: 14 }}>{page.title}</Text>
-        <Text style={{ color: t.ink2, fontSize: 16, lineHeight: 24, marginTop: 10 }}>{page.body}</Text>
+        <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700", marginTop: 26,
+                       textAlign: "center" }}>
+          {page.title}
+        </Text>
+        <Text style={{ color: t.ink2, fontSize: T.body, lineHeight: 24, marginTop: 10,
+                       textAlign: "center", paddingHorizontal: 8 }}>
+          {page.body}
+        </Text>
       </Animated.View>
       <View style={{ marginTop: "auto", paddingTop: 20, gap: 8 }}>
-        <Btn kind="pri" label={last ? "Start" : "Next"} onPress={() => (last ? onDone() : setAt(at + 1))} />
-        {!last ? <Btn kind="ghost" label="Skip" onPress={onDone} /> : null}
+        <Btn block kind="pri" label={last ? "Start" : "Next"} onPress={() => (last ? onDone() : setAt(at + 1))} />
+        {!last ? <Btn block kind="ghost" label="Skip" onPress={onDone} /> : null}
       </View>
     </Screen>
   );

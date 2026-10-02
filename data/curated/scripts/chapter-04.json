@@ -48,8 +48,8 @@
     },
     {
      "s": "a",
-     "ru": "Как два дома! И там дед Мороз.",
-     "en": "As big as two houses! And Ded Moroz is there."
+     "ru": "Как два дома! И теперь там дед Мороз.",
+     "en": "As big as two houses! And now Ded Moroz is there."
     },
     {
      "s": "c",
@@ -113,8 +113,8 @@
     },
     {
      "s": "a",
-     "ru": "Скажем. Тедди, идём!",
-     "en": "We will. Teddy, let's go!"
+     "ru": "Скажем. Тедди, время идти!",
+     "en": "We will. Teddy, time to go!"
     }
    ],
    "questions": [
@@ -192,10 +192,6 @@
     {
      "ru": "орех",
      "en": "nut"
-    },
-    {
-     "ru": "ездить",
-     "en": "to go (by transport)"
     },
     {
      "ru": "декабрь",

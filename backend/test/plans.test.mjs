@@ -47,6 +47,26 @@ test("Free allows its taste of explanations, then refuses and says it is the Fre
   assert.equal(calls, PLANS.free.explain, "the refused request never reached the model");
 });
 
+test("a refusal says when the day rolls over, as an instant", async () => {
+  const e = env();
+  const token = await install(e, "free");
+  for (let i = 0; i < PLANS.free.explain; i++) await handle(post("/v1/explain", token, miss), e, { fetch: upstream, now });
+  const body = await (await handle(post("/v1/explain", token, miss), e, { fetch: upstream, now })).json();
+  assert.equal(body.resetsAt, "2026-09-30T00:00:00.000Z");
+});
+
+test("BETA_PREMIUM puts every registered install on Premium's allowance", async () => {
+  const e = { ...env(), BETA_PREMIUM: "true" };
+  const token = await install(e, "free");
+  for (let i = 0; i < PLANS.free.explain + 5; i++) {
+    assert.equal((await handle(post("/v1/explain", token, miss), e, { fetch: upstream, now })).status, 200);
+  }
+  // A token minted by hand keeps its own plan.
+  await e.USAGE.put("user:hand-minted-abcdefghijklmnop", JSON.stringify({ id: "app-hand", plan: "free" }));
+  for (let i = 0; i < PLANS.free.explain; i++) await handle(post("/v1/explain", "hand-minted-abcdefghijklmnop", miss), e, { fetch: upstream, now });
+  assert.equal((await handle(post("/v1/explain", "hand-minted-abcdefghijklmnop", miss), e, { fetch: upstream, now })).status, 429);
+});
+
 test("Premium allows far more of the same", async () => {
   const e = env();
   const token = await install(e, "premium");

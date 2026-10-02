@@ -97,8 +97,8 @@
     },
     {
      "s": "b",
-     "ru": "Так и решаем: орехи тебе, а мы с Белкой соберём грибы.",
-     "en": "That's how we'll do it: the nuts are yours, and Belka and I will gather the mushrooms."
+     "ru": "Так и решаем: орехи тебе, а мы с Белкой быстро соберём грибы.",
+     "en": "That's settled: the nuts are yours, and Belka and I will quickly gather the mushrooms."
     },
     {
      "s": "c",
@@ -164,7 +164,7 @@
     }
    ]
   },
-  "core10:4": {
+  "core10:5": {
    "title": "A picnic by the swamp",
    "cast": [
     {

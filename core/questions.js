@@ -1634,10 +1634,16 @@ export function makeQuestions(env) {
       for (const tier of tiers) {
         const cands = tier.filter((i) => !words.includes(i) || tier === words)
           .map((i) => ({ i, ru: L[i].w, en: firstSense(L[i]) }));
-        const [step] = buildupDrill(cands, 1, { listen: false });
+        /* Built a syllable at a time, then **said whole and assessed** (the
+           owner, 2026-10-02: "for the test I'd expect them to press the mic
+           button and hold and then the app assesses if they said it well"),
+           with as many tries as they like and a way past for a learner who
+           cannot speak just now. It counts in the mark and never in the
+           scheduler: saying a word is not the claim of knowing it. */
+        const [step] = buildupDrill(cands, 1, { listen: true });
         if (!step) continue;
         const i = cands.find((c) => c.ru === step.ru).i;
-        const q = { ...step, i, ungraded: true };
+        const q = { ...step, i, assess: true };
         out.splice(slotApart(out, q), 0, q);
         break;
       }
@@ -1650,7 +1656,7 @@ export function makeQuestions(env) {
      about whether the learner got them right and needs no schema of its own. */
   function stepKeys(steps) {
     return (steps || [])
-      .filter((q) => q && q.kind && typeof q.i === "number" && !q.ungraded)
+      .filter((q) => q && q.kind && typeof q.i === "number" && !q.assess)
       .map((q) => `${q.kind}:${q.i}`);
   }
 

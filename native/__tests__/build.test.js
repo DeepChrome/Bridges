@@ -259,6 +259,70 @@ describe("building a word", () => {
     expect(await view.findByTestId("build-word")).toBeTruthy();
   });
 
+  /* The step a lesson quiz carries (PRON_MIX): built a syllable at a time,
+     then said whole and assessed — as many tries as wanted, the mark is any
+     try heard right, and a lesson is never held up by a learner who cannot
+     speak just now (the owner, 2026-10-02). */
+  const assessed = () => buildupDrill([WORD], 1, { listen: true }).map((q) => ({ ...q, i: 0, assess: true }));
+  async function toWhole() {
+    await begin();
+    // "Can't speak now" is there from the first syllable, not only at the end.
+    expect(screen.getByTestId("build-skip")).toHaveTextContent("Can't speak now");
+    const want = buildup(WORD.ru);
+    for (let k = 1; k < want.length; k++) {
+      await act(async () => { fireEvent.press(screen.getByTestId("build-next")); });
+    }
+    // The microphone is the only way on; there is no "Next word" to tap past it.
+    expect(screen.queryByTestId("build-next")).toBeNull();
+    return screen.findByTestId("say-hold");
+  }
+  async function sayIt(text) {
+    const hold = await screen.findByTestId("say-hold");
+    await act(async () => { fireEvent(hold, "pressIn"); });
+    await act(async () => { fireEvent(hold, "pressOut"); });
+    await act(async () => {
+      global.__stt.emit("result", { isFinal: true, results: [{ transcript: text, confidence: 0.9 }] });
+    });
+  }
+
+  it("assesses the whole word in a quiz, and a later right try earns the mark", async () => {
+    const onFinish = jest.fn();
+    await withBuild(onFinish, assessed());
+    await toWhole();
+    await sayIt("помню");
+    expect(await screen.findByTestId("build-heard")).toHaveTextContent(/помню/);
+    await act(async () => { fireEvent.press(screen.getByTestId("build-again")); });
+    await sayIt("понимаю");
+    await act(async () => { fireEvent.press(await screen.findByTestId("build-done")); });
+    await act(async () => { fireEvent.press(await screen.findByText("Continue")); });
+    const tally = onFinish.mock.calls[0][0];
+    expect(tally.total).toBe(1);
+    expect(tally.credit).toBe(1);
+    // Still not vocabulary: nothing went into the schedule.
+    await flushState();
+    const saved = await global.__db.saved("p1");
+    expect(Object.keys((saved && saved.seen) || {})).toEqual([]);
+  });
+
+  it("marks a word never heard right as missed", async () => {
+    const onFinish = jest.fn();
+    await withBuild(onFinish, assessed());
+    await toWhole();
+    await sayIt("помню");
+    await act(async () => { fireEvent.press(await screen.findByTestId("build-done")); });
+    await act(async () => { fireEvent.press(await screen.findByText("Continue")); });
+    expect(onFinish.mock.calls[0][0]).toMatchObject({ total: 1, credit: 0 });
+  });
+
+  it("lets a learner who cannot speak leave it out of the total", async () => {
+    const onFinish = jest.fn();
+    await withBuild(onFinish, assessed());
+    await toWhole();
+    await act(async () => { fireEvent.press(screen.getByTestId("build-skip")); });
+    await act(async () => { fireEvent.press(await screen.findByText("Continue")); });
+    expect(onFinish.mock.calls[0][0]).toMatchObject({ total: 0, skipped: 1 });
+  });
+
   /* A mouth drill is not vocabulary. The Pair drill made this rule (§30o) and
      it holds here: nothing the learner says should tell the scheduler they
      know «понимаю». */

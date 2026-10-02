@@ -55,6 +55,13 @@ export function Build({ q, r }) {
   const [at, setAt] = useState(0);
   const [intro, setIntro] = useState(true);      // the word being read out twice
   const [heard, setHeard] = useState(null);      // { ok, transcript } once it has listened
+  /* `q.assess` is the step a lesson quiz carries (core/questions.js PRON_MIX):
+     the whole word said into the microphone is marked, tries are unlimited,
+     and "Can't speak now" leaves it out of the total — a lesson must never be
+     held up because the learner is somewhere they cannot talk. Any try that
+     was heard right is the mark. */
+  const assess = !!q.assess;
+  const [gotIt, setGotIt] = useState(false);
   const last = at >= steps.length - 1;
   const fragment = steps[at] || q.ru;
   const enter = useEnter([at, intro]);
@@ -105,8 +112,13 @@ export function Build({ q, r }) {
       const has = (t) => (t || "").split(/\s+/).map(fold).filter(Boolean).includes(fold(q.ru));
       const hit = (alternatives || [transcript]).find(has);
       setHeard({ ok: !!hit, transcript: hit || transcript || "" });
+      if (hit) setGotIt(true);
     },
   });
+
+  // The mark for an assessed word: right if any try was heard right.
+  const finish = () => r.record(gotIt, [], undefined,
+    { credit: gotIt ? 1 : 0, note: gotIt ? null : "Not heard clearly" });
 
   const advance = () => {
     if (!last) { setAt(at + 1); return; }
@@ -120,7 +132,8 @@ export function Build({ q, r }) {
 
   if (rec.block) {
     return <Blocked block={rec.block} onGetModel={rec.getModel}
-                    onSkip={() => r.record(true, [], undefined, { credit: 1, note: null })}
+                    onSkip={assess ? () => r.skip()
+                                   : () => r.record(true, [], undefined, { credit: 1, note: null })}
                     skipLabel="Carry on without it" />;
   }
 
@@ -227,8 +240,17 @@ export function Build({ q, r }) {
                 {heard.ok ? `Heard «${q.ru}»`
                   : heard.transcript ? `Heard «${heard.transcript}»` : "Did not catch that"}
               </Text>
-              <Btn kind="ghost" label="Try again" testID="build-again"
-                   style={{ marginTop: 8 }} onPress={again} />
+              {assess && r.answered ? null : assess ? (
+                <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+                  <Btn kind={heard.ok ? "ghost" : "pri"} label="Try again" testID="build-again"
+                       onPress={again} />
+                  <Btn kind={heard.ok ? "pri" : "plain"} label="Continue" testID="build-done"
+                       onPress={finish} />
+                </View>
+              ) : (
+                <Btn kind="ghost" label="Try again" testID="build-again"
+                     style={{ marginTop: 8 }} onPress={again} />
+              )}
             </View>
           ) : listening ? (
             <View style={{ alignItems: "center", marginTop: 14 }}>
@@ -241,20 +263,33 @@ export function Build({ q, r }) {
             </View>
           ) : null}
 
-          <Btn kind="pri" testID="build-next" style={{ marginTop: 18 }}
-               label={last ? "Next word" : "Add a syllable"}
-               onPress={advance} />
+          {/* On an assessed word the last step is the microphone: nothing to
+              press past it but the verdict's own Continue. */}
+          {assess && last ? null : (
+            <Btn kind="pri" testID="build-next" style={{ marginTop: 18 }}
+                 label={last ? "Next word" : "Add a syllable"}
+                 onPress={advance} />
+          )}
 
-          {/* The word before and the word after. A mouth drill is the one run
-              where going back is the method rather than a way round the mark,
-              so the runner hands `back` only to this and to Shadowing
-              (`allowBack`). */}
-          <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
-            <Btn kind="ghost" label="◀ Previous" testID="build-prev" style={{ flex: 1 }}
-                 disabled={!r.back} onPress={r.back} />
-            <Btn kind="ghost" label="Skip ▶" testID="build-skip" style={{ flex: 1 }}
-                 onPress={() => r.record(true, [], undefined, { credit: 1, note: null })} />
-          </View>
+          {assess ? (
+            /* In a lesson, always a way past without speaking — left out of
+               the total, like a refused microphone (Say does the same). */
+            r.answered ? null : (
+              <Btn kind="ghost" label="Can't speak now" testID="build-skip"
+                   style={{ marginTop: 10 }} onPress={() => r.skip()} />
+            )
+          ) : (
+            /* The word before and the word after. A mouth drill is the one run
+               where going back is the method rather than a way round the mark,
+               so the runner hands `back` only to this and to Shadowing
+               (`allowBack`). */
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+              <Btn kind="ghost" label="◀ Previous" testID="build-prev" style={{ flex: 1 }}
+                   disabled={!r.back} onPress={r.back} />
+              <Btn kind="ghost" label="Skip ▶" testID="build-skip" style={{ flex: 1 }}
+                   onPress={() => r.record(true, [], undefined, { credit: 1, note: null })} />
+            </View>
+          )}
         </Animated.View>
       )}
     </View>

@@ -5990,7 +5990,11 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   every bought clip is one woman, and the first voice Android lists is a man.
 - **A pronunciation step in every quiz** from chapter 1 lesson 2 (`PRON_MIX`):
   a word built from its end, the lesson's own long word or an earlier one,
-  `ungraded` — answered as a skip, so the mark is for the questions.
+  then **said whole into the microphone and assessed** (`assess`): unlimited
+  tries, right if any try was heard right, counted in the mark and never in
+  the scheduler, never recycled. Every speaking step inside a lesson offers
+  "Can't speak now" (`r.skip()`, left out of the total); an exercise the
+  learner chose to speak in (tutor, Translate, the Practice drills) does not.
 - **"Today's AI is used up · More at 5:00 PM"**: the Worker's 429 carries
   `resetsAt` and `capNotice` in lib/feedback.js says it in local time, on
   Talk, the tutor, Translate, Say's feedback and under a verdict. During the

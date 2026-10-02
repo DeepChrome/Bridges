@@ -507,16 +507,6 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
      (0–1, default 1 or 0 from `correct`) is partial credit for the score, with
      `extra.note` saying why ("3 of 4 words"). */
   const record = (correct, words, grade, extra) => {
-    /* A step that teaches the mouth and marks nothing — the word-building
-       step a quiz carries (core/questions.js PRON_MIX): done, and left out of
-       the total like a skipped step, so the mark is for the questions. */
-    if (q.ungraded) {
-      setAnswered(true);
-      setVerdict({ right: true, credit: 1, note: null });
-      if (!q.retry) { tally.current.skipped += 1; results.current.push({ skipped: true, i: q.i }); }
-      keep(queue);
-      return;
-    }
     const credit = extra && typeof extra.credit === "number"
       ? Math.max(0, Math.min(1, extra.credit)) : (correct ? 1 : 0);
     const note = extra && extra.note ? extra.note : null;
@@ -574,7 +564,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       if (usedHint) tally.current.helped += 1;
       results.current.push({ right: !!correct, credit, stage: q.stage, lesson: q.lesson, i: q.i });
     }
-    const recycled = recycle && credit < 1 && !q.retry;
+    // A word said aloud has had its retries in place (Build.js); sending it
+    // round again would be a second test of the same mouth, not practice.
+    const recycled = recycle && credit < 1 && !q.retry && !q.assess;
     if (recycled) setQueue((prev) => prev.concat([{ ...q, retry: true }]));
     keep(recycled ? queue.concat([{ ...q, retry: true }]) : queue);
     if (gradeWords) {

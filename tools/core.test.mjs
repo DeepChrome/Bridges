@@ -1159,14 +1159,14 @@ group("lesson ramp");
 group("lesson generation");
 {
   /* A word built from its end rides in a quiz from chapter 1's second lesson
-     (PRON_MIX), on one of the lesson's own words, marked nothing. */
+     (PRON_MIX), on one of the lesson's own words, and is said and assessed. */
   {
     const c1 = STAGES[0].core;
     const first = Q.quizSteps(c1, 0), second = Q.quizSteps(c1, 1);
     ok(!first.some((q) => q.kind === "buildup"), "the first lesson's quiz carries no word building yet");
     const b = second.find((q) => q.kind === "buildup");
-    ok(b && b.ungraded && typeof b.i === "number" && b.steps.length >= 2,
-       "the second lesson's quiz builds a word, ungraded", b ? JSON.stringify(b.steps) : "none");
+    ok(b && b.assess && b.listen && typeof b.i === "number" && b.steps.length >= 2,
+       "the second lesson's quiz builds a word and listens for it", b ? JSON.stringify(b.steps) : "none");
     ok(second[0].kind !== "buildup", "never first");
     // A lesson with a long word of its own builds one of its own.
     const food = UN.find((u) => u.id === "food");

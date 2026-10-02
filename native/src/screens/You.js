@@ -442,10 +442,11 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
               {/* An obligation, not a feature (rule 20.10): OpenRussian,
                   Tatoeba and Wiktionary each require the credit to travel with
                   the material, and the native app carried none of it until
-                  2026-09-17. */}
+                  2026-09-17. The same screen opens on a few lines about the
+                  app (2026-10-02). */}
               <Row testID="open-credits" onPress={() => { onClose(); onCredits(); }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Credits</Text>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>About</Text>
                 </View>
               </Row>
               <Row onPress={() => { onClose(); onTour(); }}>

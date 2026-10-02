@@ -26,6 +26,8 @@ import { useTheme } from "../theme";
 import { STATS } from "../data";
 import { NOTICES } from "../notices";
 import { AV_CREDIT } from "@core/avatars";
+import { APP_NAME } from "../brand";
+import { expo as APP } from "../../app.json";
 
 /* The one line that is not generated: the bought scenario audio has no meta
    row to read, because it is a purchase rather than a corpus. */
@@ -39,7 +41,16 @@ export default function Credits() {
   const sources = (STATS && STATS.credits) || [];
   return (
     <Screen>
-      <SectionLabel>Language material</SectionLabel>
+      {/* About, kept light (the owner, 2026-10-02): who made it, for whom. */}
+      <View testID="about" style={{ alignItems: "center", paddingVertical: 18, gap: 4 }}>
+        <Text style={{ color: t.ink, fontSize: 19, fontWeight: "700" }}>{APP_NAME}</Text>
+        <Muted size={12}>{APP.version}</Muted>
+        <Text style={{ color: t.ink2, fontSize: 15, marginTop: 10 }}>App built by Jared F.</Text>
+        <Text style={{ color: t.ink2, fontSize: 15 }}>Dedicated to Teddy and Cone.</Text>
+        <Text style={{ color: t.ink, fontSize: 15, marginTop: 10, fontWeight: "700" }}>Слава Україні!</Text>
+      </View>
+
+      <SectionLabel style={{ marginTop: 8 }}>Language material</SectionLabel>
       <List>
         {sources.map((c) => (
           <Row key={c.n}>

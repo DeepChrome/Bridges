@@ -1239,42 +1239,76 @@ export function makeQuestions(env) {
     return spread(shuffle(out)).slice(0, n);
   }
 
-  /* The day's recap (the owner, 2026-10-01: "a daily recap feature that
-     reviews things you specifically did that day… 10-20 questions… spaced
-     repetition probably helps retention"). Built from the day's own work:
-     `missed` (lemma indices of today's wrong answers) first, each asked once
-     to produce — write it in Russian — because recall is what repairs a miss;
-     then `words` (everything graded today, weakest first), rotating through
-     the kinds so the recap is not one shape twenty times. RECAP_MIN to
-     RECAP_MAX questions; fewer than RECAP_MIN words worked is no recap. */
-  const RECAP_MIN = 10, RECAP_MAX = 20;
-  function recapQuestions({ words, missed = [], n = 15 }) {
-    const all = unique(missed.concat(words)).filter((i) => L[i]);
+  /* The day's recap (the owner, 2026-10-01: "a daily recap… that reviews
+     things you specifically did that day… 10-20 questions"; then: "It should
+     be a review of the biggest things covered that day. You can highlight the
+     biggest areas to focus on… but it shouldn't be the focus. The idea is
+     spaced refresher/exposure").
+     So it is a walk through the day, not a list of mistakes:
+       - `words`, everything graded today in the order it was met, sampled
+         evenly so every part of the day is in it, asked mostly to recognise
+         and hear — refreshing, not testing;
+       - `focus` (today's misses, then the weakest), at most RECAP_FOCUS of the
+         questions, written in Russian, and shuffled in rather than first;
+       - sentences to hear from the units the day touched (RECAP_HEAR), for
+         exposure to the words in use;
+       - the chapter's grammar point once or twice, where a unit touched today
+         teaches one.
+     RECAP_MIN to RECAP_MAX questions; fewer than RECAP_MIN / 2 words worked is
+     no recap. */
+  const RECAP_MIN = 10, RECAP_MAX = 20, RECAP_FOCUS = 0.25, RECAP_HEAR = 0.2, RECAP_GRAMMAR = 2;
+  function recapQuestions({ words, focus = [], n }) {
+    const all = unique(words).filter((i) => L[i]);
     if (all.length < RECAP_MIN / 2) return [];
-    const target = Math.max(RECAP_MIN, Math.min(RECAP_MAX, n, all.length * 2));
-    const home = UN.find((u) => u.w.includes(all[0])) || UN[0];
-    const pool = all.length >= 8 ? all : poolFor(home);
-    const kinds = ["choose-en", "choose-ru", "cloze", "type"].concat(voice() ? ["listen"] : []);
+    const target = Math.max(RECAP_MIN, Math.min(RECAP_MAX, n || Math.round(all.length * 0.8)));
+    const dayWords = new Set(all);
+    const units = UN.filter((u) => u.w.some((i) => dayWords.has(i)));
+    const pool = all.length >= 8 ? all : poolFor(units[0] || UN[0]);
     const out = [];
+    const used = new Set();
     const ask = (i, t) => {
       if (t === "cloze") {
         const c = clozeFor(i);
-        return c ? present({ t: "cloze", i, ex: c.ex, token: c.token, pool }) : present({ t: "choose-ru", i, pool });
+        return c ? present({ t: "cloze", i, ex: c.ex, token: c.token, pool }) : present({ t: "choose-en", i, pool });
       }
       return present({ t, i, pool });
     };
-    const missedSet = new Set(missed);
-    let turn = 0;
-    // Each word once, then round again with a different kind, until the target.
-    for (let round = 0; out.length < target && round < 3; round++) {
-      for (const i of all) {
-        if (out.length >= target) break;
-        const t = round === 0 && missedSet.has(i) ? "type" : kinds[turn++ % kinds.length];
-        const q = ask(i, t);
-        if (q) out.push(q);
-      }
+    // The weak spots: a share, never the whole.
+    const focusN = Math.min(Math.round(target * RECAP_FOCUS), focus.length);
+    for (const i of unique(focus).filter((i) => dayWords.has(i))) {
+      if (out.length >= focusN) break;
+      const q = ask(i, "type");
+      if (q) { out.push(q); used.add(i); }
     }
-    return spread(out).slice(0, target);
+    // The chapter's grammar, where the day touched a unit that teaches one.
+    for (const u of units) {
+      if (out.filter((q) => q.kind === "form").length >= RECAP_GRAMMAR) break;
+      const cand = u.w.find((i) => dayWords.has(i) && !used.has(i));
+      const f = cand === undefined ? null : formPrompt(u, 0, cand);
+      if (f) { const q = present({ t: "form", q: f }); if (q) { out.push(q); used.add(cand); } }
+    }
+    // Sentences to hear, from the day's units.
+    const hearN = voice() ? Math.round(target * RECAP_HEAR) : 0;
+    const unitIds = units.map((u) => u.id);
+    const heard = new Set();
+    for (let k = 0; heard.size < hearN && k < hearN * 5; k++) {
+      const q = sentencePrompt("hear", unitIds);
+      if (!q || heard.has(q.target)) continue;
+      heard.add(q.target);
+      out.push(q);
+    }
+    // The rest: the whole day, evenly, mostly recognised and heard.
+    const rest = all.filter((i) => !used.has(i));
+    const wordN = target - out.length;
+    const kinds = ["choose-en", "cloze", "choose-ru"].concat(voice() ? ["listen"] : []);
+    // Evenly spaced through the day; a short day goes round again in a new shape.
+    const step = rest.length / Math.max(1, wordN);
+    for (let k = 0; k < wordN && rest.length; k++) {
+      const i = rest[Math.min(rest.length - 1, Math.floor(k * step))];
+      const q = ask(i, kinds[k % kinds.length]);
+      if (q) out.push(q);
+    }
+    return spread(shuffle(out)).slice(0, target);
   }
 
   /* The final test: one paper over the whole course rather than a tenth

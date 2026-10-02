@@ -1478,18 +1478,26 @@ group("scenes and custom quizzes");
   ok(Q.customQuiz({ units, kinds: ["scene"], n: 3 }).every((q) => q.kind === "scene"),
      "scenes alone make a listening-only quiz");
 
-  /* The day's recap (2026-10-01): 10 to 20 questions from the day's own
-     work, today's misses first and asked to produce. */
+  /* The day's recap (2026-10-01): 10 to 20 questions over the whole day's
+     work, weak spots a share and never the bulk. */
   {
     const today = units[0].w.slice(0, 12);
-    const missed = [today[3], today[7]];
-    const recap = Q.recapQuestions({ words: today, missed });
+    const focus = [today[3], today[7]];
+    const recap = Q.recapQuestions({ words: today, focus });
     ok(recap.length >= 10 && recap.length <= 20, "a recap is 10 to 20 questions", recap.length);
     ok(recap.every((q) => q.i === undefined || today.includes(q.i)),
        "and asks only about the day's words", recap.map((q) => q.i).join(","));
-    ok(missed.every((i) => recap.some((q) => q.i === i && q.kind === "type")),
-       "a word missed today is asked to be written", recap.filter((q) => missed.includes(q.i)).map((q) => q.kind).join(","));
+    ok(focus.every((i) => recap.some((q) => q.i === i && q.kind === "type")),
+       "a weak word is asked to be written", recap.filter((q) => focus.includes(q.i)).map((q) => q.kind).join(","));
     ok(new Set(recap.map((q) => q.kind)).size >= 3, "in several shapes", [...new Set(recap.map((q) => q.kind))].join(","));
+    // A refresher of the day, not a list of mistakes (the owner, 2026-10-01).
+    const asked = new Set(recap.map((q) => q.i));
+    ok(today.slice(0, 3).some((i) => asked.has(i)) && today.slice(-3).some((i) => asked.has(i)),
+       "it covers the day from its start to its end", recap.map((q) => today.indexOf(q.i)).join(","));
+    const allWeak = Q.recapQuestions({ words: today, focus: today });
+    ok(allWeak.filter((q) => q.kind === "type").length <= Math.round(allWeak.length * 0.25),
+       "however much went wrong, weak spots are at most a quarter of it",
+       `${allWeak.filter((q) => q.kind === "type").length} of ${allWeak.length}`);
     ok(Q.recapQuestions({ words: today.slice(0, 2) }).length === 0, "a day with almost nothing done has no recap");
   }
 

@@ -45,12 +45,16 @@ beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.cl
 afterEach(async () => { await flushState(); });
 
 describe("what counts as today's work", () => {
-  it("is today's graded words, weakest first, and not yesterday's", () => {
+  /* In the order the day met them, so the recap can walk the whole day; the
+     weakest go to `focus`, which the recap leans on and is never made of. */
+  it("is today's graded words in the order they were met, and not yesterday's", () => {
     const t = today();
-    const st = { seen: { ...seenOn(t - 1, 3),
-                         [words[5]]: card(t, 9), [words[6]]: card(t, 1) } };
+    const at = (h, s) => ({ recognise: { lastAt: t * DAY + h * 3600000, dueAt: (t + 3) * DAY,
+                                         s, d: 5, state: REVIEW, steps: 0, reps: 2, lapses: 0 } });
+    const st = { seen: { ...seenOn(t - 1, 3), [words[5]]: at(9, 9), [words[6]]: at(15, 1) } };
     const work = todaysWork(st, t);
-    expect(work.words.map((i) => L[i].b)).toEqual([words[6], words[5]]);
+    expect(work.words.map((i) => L[i].b)).toEqual([words[5], words[6]]);
+    expect(L[work.focus[0]].b).toBe(words[6]);
   });
 
   it("carries today's misses, and leaves a sentence card out", () => {

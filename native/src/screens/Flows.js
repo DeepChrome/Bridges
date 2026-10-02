@@ -1167,10 +1167,10 @@ export function FinalFlow({ navigation }) {
   );
 }
 
-/* The day's recap (core/questions.js `recapQuestions`): today's misses asked
-   again, then today's words, 10 to 20 questions, graded through the scheduler
-   like any quiz — a second retrieval the same day is what consolidates it.
-   Done once a day: kept under `drills["recap:<day>"]`. */
+/* The day's recap (core/questions.js `recapQuestions`): a refresher over the
+   whole day's work, with today's weak spots mixed in, 10 to 20 questions,
+   graded through the scheduler like any quiz — another meeting the same day
+   is what consolidates it. Done once a day: kept under `drills["recap:<day>"]`. */
 export function RecapFlow({ navigation }) {
   const { st, update, ready } = useSession();
   const [result, setResult] = useState(null);
@@ -1181,7 +1181,7 @@ export function RecapFlow({ navigation }) {
   const steps = useMemo(() => {
     if (!ready) return null;
     const work = todaysWork(st);
-    return Q.recapQuestions({ words: work.words, missed: work.missed });
+    return Q.recapQuestions({ words: work.words.concat(work.missed), focus: work.focus });
   }, [seed, ready]);   // eslint-disable-line react-hooks/exhaustive-deps
   useAudioStopOnLeave();
 

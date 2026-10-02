@@ -121,9 +121,9 @@
      "ask": "What can Teddy not find?",
      "options": [
       "His light sports kit",
-      "His old wide trousers",
+      "His old blue scarf",
       "His father's red bag",
-      "His ticket to the game"
+      "His blue school bag"
      ],
      "answer": 0
     },
@@ -131,7 +131,7 @@
      "ask": "What does Monka offer Teddy?",
      "options": [
       "His own wide trousers",
-      "A new light sports kit",
+      "A pair of red shorts",
       "A lift to the big game",
       "His lucky space helmet"
      ],
@@ -152,8 +152,8 @@
      "options": [
       "Teddy's old sports kit",
       "Yarik's big grey coat",
-      "His own wide trousers",
-      "Teddy's new light kit"
+      "Yarik's old tracksuit",
+      "Teddy's red trousers"
      ],
      "answer": 0
     }
@@ -283,20 +283,20 @@
     {
      "ask": "What news does Belka bring?",
      "options": [
-      "The party is in the woods",
-      "The party is at the bank",
-      "The party is at a school",
-      "The party is on the river"
+      "It is in the woods",
+      "It is at the bank",
+      "It is at a school",
+      "It is on the river"
      ],
      "answer": 0
     },
     {
-     "ask": "Why does Misha not answer Nezha?",
+     "ask": "What does Belka say everyone will wear?",
      "options": [
-      "He is in the forest",
-      "He is still asleep",
-      "He is at the bank",
-      "He is at the shop"
+      "Tracksuit trousers",
+      "Dark formal suits",
+      "Bright red hats",
+      "Long evening dresses"
      ],
      "answer": 0
     },

@@ -111,12 +111,12 @@
    ],
    "questions": [
     {
-     "ask": "What is happening at the university?",
+     "ask": "Where is the free pizza at first?",
      "options": [
-      "Pizza for everyone",
-      "A Russian lesson",
-      "A party for dads",
-      "A football match"
+      "At the university",
+      "At the train station",
+      "At the big café",
+      "At the sports club"
      ],
      "answer": 0
     },
@@ -141,7 +141,7 @@
      "answer": 0
     },
     {
-     "ask": "What do Teddy and Yarik find at the bank?",
+     "ask": "What do Teddy and Yarik find there?",
      "options": [
       "Pizza with sausage",
       "A room full of cats",
@@ -289,7 +289,7 @@
      "answer": 0
     },
     {
-     "ask": "How does Belka know about the Chinese course?",
+     "ask": "How does Belka know about the course Teddy wants?",
      "options": [
       "Her brother takes it",
       "She takes it herself",

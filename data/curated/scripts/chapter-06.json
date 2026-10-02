@@ -112,12 +112,12 @@
    ],
    "questions": [
     {
-     "ask": "Where are they going today?",
+     "ask": "When is the event?",
      "options": [
-      "To a concert",
-      "To a cinema",
-      "To a lecture",
-      "To a museum"
+      "Today at six",
+      "Tomorrow at six",
+      "Today at nine",
+      "Sunday morning"
      ],
      "answer": 0
     },
@@ -157,7 +157,7 @@
       "Eat lunch before they go",
       "Skip the concert entirely",
       "Take just one bag along",
-      "Eat the nuts during it"
+      "Eat sweets during it"
      ],
      "answer": 0
     }
@@ -274,12 +274,12 @@
    ],
    "questions": [
     {
-     "ask": "What is Belka making?",
+     "ask": "Where is the sugar kept?",
      "options": [
-      "Breakfast before a lesson",
-      "Lunch after the concert",
-      "Dinner for the whole family",
-      "A cake for Nezha's party"
+      "In the red bag",
+      "In a blue tin",
+      "On the top shelf",
+      "In the fridge"
      ],
      "answer": 0
     },
@@ -304,7 +304,7 @@
      "answer": 0
     },
     {
-     "ask": "Who gets the salty porridge?",
+     "ask": "Who ends up with the spoiled porridge?",
      "options": [
       "Monka himself",
       "Teddy's mum",

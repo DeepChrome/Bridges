@@ -154,7 +154,7 @@
      "ask": "Where will Teddy get the flowers?",
      "options": [
       "In the wood outside town",
-      "In the shop near the bank",
+      "In the shop near the café",
       "From Belka's own garden",
       "At a market in the town"
      ],
@@ -308,7 +308,7 @@
     {
      "ask": "Why is Monka lost himself?",
      "options": [
-      "He followed the moved stones",
+      "He followed the trail himself",
       "He fell asleep under a tree",
       "He was chasing a large bird",
       "His torch batteries ran out"
@@ -320,7 +320,7 @@
      "options": [
       "He knows the forest well",
       "He will phone Teddy's mum",
-      "He follows Monka's stones",
+      "He follows Monka's trail",
       "He climbs up a tall tree"
      ],
      "answer": 0

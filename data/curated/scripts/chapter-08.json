@@ -146,7 +146,7 @@
      "ask": "What secret does Yarik give away?",
      "options": [
       "Nezha burned her first one too",
-      "Tortila hates chicken with skin",
+      "Tortila is not coming now",
       "He already had lunch at work",
       "Teddy's recipe came from Gena"
      ],
@@ -274,12 +274,12 @@
    ],
    "questions": [
     {
-     "ask": "What is Belka looking after?",
+     "ask": "When does Nezha make this dish?",
      "options": [
-      "Nezha's holiday potatoes",
-      "Nezha's garden flowers",
-      "Yarik's broken red car",
-      "Teddy's big birthday cake"
+      "Only for celebrations",
+      "Every single Sunday",
+      "Always for breakfast",
+      "When Grandad visits"
      ],
      "answer": 0
     },
@@ -317,7 +317,7 @@
      "ask": "How does Monka try to fix the dish?",
      "options": [
       "More potatoes in it",
-      "More honey on top",
+      "More butter on top",
       "A new dish from Gena",
       "Throwing it away"
      ],

@@ -143,7 +143,7 @@
       "In Teddy's hair",
       "In the wardrobe",
       "In the car boot",
-      "At Mom's bank"
+      "At Grandad's house"
      ],
      "answer": 0
     },
@@ -160,10 +160,10 @@
     {
      "ask": "What does Yarik decide?",
      "options": [
-      "Teddy keeps the tie",
-      "Yarik buys a new tie",
-      "They stay home today",
-      "Mom brings another"
+      "Teddy keeps it on",
+      "Yarik buys another",
+      "They stay at home",
+      "Mom brings a new one"
      ],
      "answer": 0
     }
@@ -320,7 +320,7 @@
      "answer": 0
     },
     {
-     "ask": "Who does Monka say put the hat there?",
+     "ask": "Who does Monka blame?",
      "options": [
       "The family cat",
       "Teddy's father",
@@ -333,7 +333,7 @@
      "ask": "What does Monka ask at the end?",
      "options": [
       "To go with them",
-      "To keep the hat",
+      "To keep what he found",
       "To borrow a car",
       "To have some tea"
      ],

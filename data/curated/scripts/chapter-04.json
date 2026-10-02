@@ -129,7 +129,7 @@
      "answer": 0
     },
     {
-     "ask": "How big does Yarik say the tree is?",
+     "ask": "How big does Yarik say it is?",
      "options": [
       "Like two houses",
       "Like a big bus",
@@ -151,7 +151,7 @@
     {
      "ask": "What happens to Monka?",
      "options": [
-      "He slips on the ice",
+      "He slips and falls",
       "He drops his helmet",
       "He gets on the bus",
       "He sees Ded Moroz"
@@ -162,7 +162,7 @@
      "ask": "What does Monka want Ded Moroz to hear?",
      "options": [
       "That he is very kind",
-      "That he wants a tree",
+      "That he wants a sled",
       "That he is very cold",
       "That he has a ticket"
      ],
@@ -301,7 +301,7 @@
       "The bag of presents",
       "The two bus tickets",
       "His warm red scarf",
-      "Grandad's address"
+      "The house key"
      ],
      "answer": 0
     },
@@ -316,12 +316,12 @@
      "answer": 0
     },
     {
-     "ask": "What else is in the bag?",
+     "ask": "What does Belka always carry with her?",
      "options": [
-      "Belka's nuts",
-      "Some sausage",
+      "Some nuts",
+      "A sausage",
       "Two tickets",
-      "A warm hat"
+      "A warm scarf"
      ],
      "answer": 0
     }

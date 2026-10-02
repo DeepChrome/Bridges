@@ -123,12 +123,12 @@
    ],
    "questions": [
     {
-     "ask": "Where is the family eating?",
+     "ask": "Who is Teddy eating with?",
      "options": [
-      "In a café",
-      "At a park",
-      "On a boat",
-      "At school"
+      "His mom",
+      "His dad",
+      "Belka",
+      "His grandad"
      ],
      "answer": 0
     },
@@ -146,7 +146,7 @@
      "ask": "What does Teddy kindly offer Monka?",
      "options": [
       "Their salt pot",
-      "Half his pizza",
+      "Half his bread",
       "A cup of tea",
       "His own spoon"
      ],
@@ -156,7 +156,7 @@
      "ask": "What goes wrong for Monka?",
      "options": [
       "His borscht turns sweet",
-      "His pizza arrives cold",
+      "His bread arrives late",
       "His chair is too small",
       "His tea has gone cold"
      ],
@@ -331,7 +331,7 @@
      "answer": 0
     },
     {
-     "ask": "Who goes to the café in the end?",
+     "ask": "Who goes to find Nezha in the end?",
      "options": [
       "All three of them",
       "Just Yarik alone",

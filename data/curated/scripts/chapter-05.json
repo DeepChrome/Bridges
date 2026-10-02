@@ -131,7 +131,7 @@
      "answer": 0
     },
     {
-     "ask": "When does Teddy's head hurt?",
+     "ask": "When does it hurt?",
      "options": [
       "After time out in the frost",
       "After eating too much cake",
@@ -313,7 +313,7 @@
      "answer": 0
     },
     {
-     "ask": "What does Monka say about the bank?",
+     "ask": "What does Monka claim about where they are going?",
      "options": [
       "It is closed today",
       "It is too crowded",
@@ -335,9 +335,9 @@
     {
      "ask": "How does it end?",
      "options": [
-      "Teddy gives the rouble back",
-      "Monka keeps the bag of coins",
-      "Yarik sells the old rouble",
+      "Monka gets back what he gave",
+      "Monka keeps everything",
+      "Yarik spends all the money",
       "Teddy loses all his money"
      ],
      "answer": 0

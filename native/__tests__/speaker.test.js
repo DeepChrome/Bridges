@@ -25,7 +25,11 @@ import { wordClip } from "../src/wordaudio";
 
 // A sentence the collection has a recording for and the app does not bundle
 // (the pools' sentences are bundled since 2026-09-19), and one it does not have.
-const withAudio = Object.keys(AUDIO).find((k) => k.includes(" ") && !wordClip(k));
+const streamed = Object.keys(AUDIO).filter((k) => k.includes(" ") && !wordClip(k));
+const withAudio = streamed[0];
+// Recordings of their own for the offline tests: a copy saved in one test
+// stays saved (the mock file system), and would answer for the stream in another.
+const hangs = streamed[1], offline = streamed[2];
 const noAudio = "этого предложения точно нет в коллекции сегодня";
 
 async function draw(ui) {
@@ -98,6 +102,42 @@ describe("speaker", () => {
     await act(async () => { global.__audioError(); });
     expect(global.__spoke).toHaveLength(1);
     expect(screen.queryByTestId("speaker-down")).toBeNull();
+  });
+
+  /* The owner, 2026-10-01, on a flight: "a lot of delay when I clicked the
+     speaker icon". A stream with no network never starts; the phone's voice
+     takes over after STREAM_START_MS, and for a while after that it answers at
+     once instead of trying the network again. */
+  it("gives up on a stream that never starts, and answers at once after that", async () => {
+    const { STREAM_START_MS } = require("../src/audio");
+    jest.useFakeTimers();
+    try {
+      await withVoices(null);
+      global.__streamNeverStarts = true;
+      await draw(<Speaker text={hangs} />);
+      await act(async () => { fireEvent.press(screen.getByTestId("speaker-real")); });
+      expect(global.__played).toHaveLength(1);
+      expect(global.__spoke).toHaveLength(0);
+      await act(async () => { jest.advanceTimersByTime(STREAM_START_MS + 10); });
+      expect(global.__spoke).toHaveLength(1);
+      // The next press does not wait on the network: a saved copy if there is
+      // one (the mock's download succeeds), otherwise the phone's voice — never
+      // the stream again.
+      await act(async () => { jest.advanceTimersByTime(7000); fireEvent.press(screen.getByTestId("speaker-real")); });
+      expect(global.__played.filter((u) => u.startsWith("http"))).toHaveLength(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("answers at once, in the phone's voice, while the network is known to be down", async () => {
+    const { markOfflineForTest } = require("../src/audio");
+    await withVoices(null);
+    await draw(<Speaker text={offline} />);
+    markOfflineForTest();
+    await act(async () => { fireEvent.press(screen.getByTestId("speaker-real")); });
+    expect(global.__played).toHaveLength(0);
+    expect(global.__spoke).toHaveLength(1);
   });
 
   it("says so when the stream fails and there is no voice to fall back on", async () => {

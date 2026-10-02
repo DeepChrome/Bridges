@@ -379,7 +379,7 @@ export function Reference({ title, sub, tables, mark, facts, note, topic, onTopi
   const t = useTheme();
   return (
     <Sheet onClose={onClose} title="Reference"
-           footer={<Btn kind="pri" label="Got it" style={{ marginTop: 14 }} onPress={onClose} />}>
+           footer={<Btn block kind="pri" label="Got it" style={{ marginTop: 14 }} onPress={onClose} />}>
       {title ? (
         <View style={{ marginBottom: 4 }}>
           <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700" }}>{title}</Text>

@@ -84,6 +84,11 @@ jest.mock("expo-audio", () => ({
       sounding: false,
       play: jest.fn(() => {
         p.sounding = true;
+        /* A stream reports that it is playing, as the platform's status does;
+           audio.js gives up on one that never does (STREAM_START_MS). A test
+           makes a stream hang with global.__streamNeverStarts. */
+        if (!(global.__streamNeverStarts && p.uri)) listeners.forEach((fn) => fn({ playing: true }));
+        else return;
         if (global.__audioHold) global.__audioPending.push(finish);
         else if (!global.__audioNeverFinish) setTimeout(finish, 0);
       }),
@@ -326,3 +331,6 @@ beforeEach(() => { require("./src/speech").forgetMicPermission(); });
 /* Where the learner was in Immerse lives in module memory (immerse.js), so a
    search typed in one test would be waiting in the next. */
 beforeEach(() => { require("./src/immerse").resetImmerse(); });
+// "No network" is remembered for a minute (audio.js); a failed stream in one
+// test must not send the next one straight to the device voice.
+beforeEach(() => { require("./src/audio").forgetOffline(); global.__streamNeverStarts = false; });

@@ -22,6 +22,13 @@ export function transcriptOf(id) {
   const all = require("../assets/transcripts.json");
   return (all && all[id]) || null;
 }
+/* The same lines in English, machine-translated (tools/build_transcript_en.py),
+   one string per line and "" where a line has none; null when the video has
+   none at all. Required only when the English is first shown. */
+export function transcriptEnOf(id) {
+  const all = require("../assets/transcripts_en.json");
+  return (all && all[id]) || null;
+}
 /* Numbered senses for the studied words (tools/ingest_wiktionary.py, §30q).
    Required when a word is opened, which is never the first screen. */
 const sensesBlob = () => require("../assets/senses.json");
@@ -30,7 +37,7 @@ import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize } from "@core/questions";
 import { quizPassed } from "@core/state";
-import { dueCards, wanted, cardFor } from "@core/scheduler";
+import { dueCards, wanted, cardFor, dayOf } from "@core/scheduler";
 import { cardKind, kindsOf } from "@core/queue";
 import { isIrregular } from "@core/facts";
 
@@ -591,6 +598,33 @@ export const exactIdx = (w) => {
   const same = hits.find((i) => L[i] && L[i].b === w);
   return same === undefined ? -1 : same;
 };
+
+/* What the learner did today, for the day's recap (core/questions.js
+   `recapQuestions`): the words whose card was graded today, weakest first, and
+   the words of today's wrong answers, newest first. Words only — a sentence
+   card is a string with a space in it and has no lemma to ask about. */
+export function todaysWork(st, day = dayOf(Date.now())) {
+  const seen = st.seen || {};
+  const graded = [];
+  for (const w in seen) {
+    if (w.includes(" ")) continue;
+    const card = cardFor(seen[w]);
+    if (!card || card.lastAt === undefined || card.lastAt === null || dayOf(card.lastAt) !== day) continue;
+    const i = exactIdx(w);
+    if (i >= 0) graded.push([i, card.s || 0]);
+  }
+  graded.sort((a, b) => a[1] - b[1]);
+  const missed = [];
+  for (const m of st.misses || []) {
+    if (!m || !m.w || !m.at || dayOf(m.at) !== day) continue;
+    const i = exactIdx(m.w);
+    if (i >= 0 && !missed.includes(i)) missed.push(i);
+  }
+  return { words: graded.map(([i]) => i), missed };
+}
+/* Enough done today for a recap to be worth taking. */
+export const RECAP_FROM = 5;
+export const recapKey = (day = dayOf(Date.now())) => `recap:${day}`;
 
 /* A studied word's frequency rank, 1 for the commonest — which is its lemma
  * index plus one, since the build assigns indices by frequency (§30ap reads it

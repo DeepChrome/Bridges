@@ -242,7 +242,7 @@ function NewProfile({ canCancel, onCancel, onDone }) {
         />
       </Rise>
       <Rise n={4} style={{ marginTop: 14 }}>
-        <Btn kind="pri" label="Continue" disabled={!ready} onPress={go} />
+        <Btn block kind="pri" label="Continue" disabled={!ready} onPress={go} />
         {canCancel ? (
           <Btn kind="ghost" style={{ marginTop: 4 }} label="Back" onPress={onCancel} />
         ) : null}

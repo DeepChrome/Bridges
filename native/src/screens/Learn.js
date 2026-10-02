@@ -35,7 +35,7 @@ import { Screen, Btn, Pill, UnitIcon, Muted, styles, Text } from "../ui";
 import {
   STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress, unitState,
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, optional, dueCount,
-  routePosition,
+  routePosition, todaysWork, recapKey, RECAP_FROM,
 } from "../data";
 import { nextOpening, markOpening } from "@core/openings";
 import { isNotebook } from "../skin";
@@ -458,6 +458,10 @@ export default function Learn({ navigation }) {
   const next = nextStep(st);
   const done = dayDone(st, dueCount(st), today());
   const openUnit = (unit) => navigation.navigate("Unit", { unitId: unit.id });
+  const recapDue = useMemo(() => {
+    if ((st.drills || {})[recapKey()]) return false;
+    return todaysWork(st).words.length >= RECAP_FROM;
+  }, [st.seen, st.drills, st.misses]);
 
   const opening = useMemo(
     () => nextOpening({ ...routePosition(st), met: st.met }),
@@ -524,6 +528,13 @@ export default function Learn({ navigation }) {
           onPress={() => navigation.navigate(STEP_ROUTE[next.step] || "Vocab",
                                              { unitId: next.unit.id, index: next.index })}
         />
+      ) : null}
+      {/* The day's recap, once there is a day's work to recap and until it is
+          done (the owner, 2026-10-01: "a daily recap… that reviews things you
+          specifically did that day"). Beside Continue, quieter than it. */}
+      {recapDue ? (
+        <Btn kind="plain" testID="recap-open" label="Today's recap"
+             style={{ marginTop: 10 }} onPress={() => navigation.navigate("Recap")} />
       ) : null}
 
       <View style={{ alignItems: "center" }}>

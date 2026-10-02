@@ -10,7 +10,7 @@ import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, S
          Dropdown, Text } from "../ui";
 import {
   UN, STATS, unitState, markComponent, videos, videoById, videoWatched, unitById,
-  CHANNELS, videoLines, transcriptOf,
+  CHANNELS, videoLines, transcriptOf, transcriptEnOf,
 } from "../data";
 import { Transcript } from "../transcript";
 import { useWords } from "../words";
@@ -179,7 +179,7 @@ export function CreatorsNote({ onClose }) {
   const t = useTheme();
   return (
     <Sheet testID="creators-note" onClose={onClose}
-           footer={<Btn kind="pri" label="Got it" style={{ marginTop: 14 }} onPress={onClose} />}>
+           footer={<Btn block kind="pri" label="Got it" style={{ marginTop: 14 }} onPress={onClose} />}>
       <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
         Every video here is its creator's, not ours.
       </Text>
@@ -432,6 +432,8 @@ export function Video({ route, navigation }) {
   /* The transcript panel (transcript.js): loaded on first open, and the
      player reports its position only while the panel is showing. */
   const [showScript, setShowScript] = useState(false);
+  // English under the transcript: the learner's last choice, kept with the library's.
+  const [showEn, setShowEn] = useState(() => !!libraryState().en);
   const [pos, setPos] = useState(0);
   /* The position is reported whenever the video plays — it is where the
      learner will come back to — but only redraws the screen while the
@@ -554,6 +556,8 @@ export function Video({ route, navigation }) {
       {showScript ? (
         script && script.length
           ? <Transcript lines={script} position={pos} onSeek={seekTo}
+                        en={transcriptEnOf(v.id)} showEn={showEn}
+                        onToggleEn={() => { setShowEn(!showEn); setLibraryState({ en: !showEn }); }}
                         onWord={(w) => { if (player.current) player.current.pause(); if (wordsCtx) wordsCtx.open(w); }} />
           : <Muted style={{ marginTop: 8 }}>No transcript for this one.</Muted>
       ) : null}

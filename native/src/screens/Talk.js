@@ -336,7 +336,7 @@ function TalkOptionsButton({ level, speed, update }) {
       <CogButton testID="talk-cog" label="Talk options" onPress={() => setOpen(true)} />
       {open ? (
         <Sheet testID="talk-options" onClose={() => setOpen(false)}
-               footer={<Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={() => setOpen(false)} />}>
+               footer={<Btn block kind="pri" label="Done" style={{ marginTop: 8 }} onPress={() => setOpen(false)} />}>
           <View style={{ marginBottom: 18 }}>
             <SectionLabel>Level</SectionLabel>
             <Choice testID="talk-level" options={TALK_LEVELS} value={level}

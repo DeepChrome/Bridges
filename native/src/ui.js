@@ -46,11 +46,12 @@ export const LIP = 4;
  * only what it looks like — the same split `Btn` makes, and what keeps a
  * control's own style readable in the render tree (§20a). */
 export function Lift({ children, edge, fill, border, r = radius.md, style, flat,
-                      onPress, disabled, testID, label, hint, role = "button", state }) {
+                      onPress, disabled, testID, label, hint, role = "button", state,
+                      lip = LIP, bw = 2 }) {
   const live = !disabled && !!onPress;
   return (
     <View style={[{ backgroundColor: flat ? "transparent" : edge, borderRadius: r,
-                    paddingBottom: flat ? 0 : LIP }, style]}>
+                    paddingBottom: flat ? 0 : lip }, style]}>
       <Pressable
         testID={testID}
         onPress={live ? onPress : undefined}
@@ -61,9 +62,9 @@ export function Lift({ children, edge, fill, border, r = radius.md, style, flat,
         style={({ pressed }) => ({
           backgroundColor: fill,
           borderColor: border === undefined ? edge : border,
-          borderWidth: flat ? 0 : 2,
+          borderWidth: flat ? 0 : bw,
           borderRadius: r,
-          transform: [{ translateY: pressed && live && !flat ? LIP : 0 }],
+          transform: [{ translateY: pressed && live && !flat ? lip : 0 }],
         })}
       >
         {children}
@@ -315,7 +316,15 @@ export function Row({ children, onPress, disabled, last, testID, at = 0 }) {
   );
 }
 
-export function Btn({ label, onPress, kind = "plain", disabled, style, testID }) {
+/* How big a button is (2026-10-01, the owner: "buttons should be less bulky
+   and AI looking. Make them polished, text centered, only as big as they
+   need to be"). It was every button full width, 48 px tall inside a 2 px
+   border on a 4 px lip — a slab. Now a button is as wide as its label with
+   room either side, 44 px tall, its edge a 3 px lip and no border on a filled
+   one; `block` keeps the full width for the one action a screen or sheet is
+   for (a footer, the quiz's Check). */
+const BTN_LIP = 3;
+export function Btn({ label, onPress, kind = "plain", disabled, style, testID, block }) {
   const t = useTheme();
   const tone = {
     /* Tinted, not white. A plain button used to carry the surface colour, the
@@ -385,7 +394,8 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
     : kind === "bad" ? t.badDim
     : t.line;
   return (
-    <Animated.View style={[style, disabled ? null : press.style,
+    <Animated.View style={[block ? { alignSelf: "stretch" } : { alignSelf: "center", minWidth: 120 },
+                           style, disabled ? null : press.style,
                            kind === "pri" && !disabled ? lift : null]}>
       <Lift
         testID={testID}
@@ -394,6 +404,8 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
         fill={shown.bg}
         border={shown.border}
         r={radius.md}
+        lip={BTN_LIP}
+        bw={kind === "plain" || disabled ? 1 : 0}
         disabled={disabled}
         onPress={onPress}
         /* The label is read off the text inside, so it is deliberately not
@@ -404,12 +416,12 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID })
            cannot use the app at all. */
         state={{ disabled: !!disabled }}
       >
-        <View style={{ paddingVertical: 13, paddingHorizontal: 18,
-                       alignItems: "center", minHeight: 48,
+        <View style={{ paddingVertical: 10, paddingHorizontal: 22,
+                       alignItems: "center", minHeight: 44,
                        justifyContent: "center" }}>
-          {/* 700, not 600. The reference sets button labels heavy and it is the
-              cheapest weight a control can carry to stop reading as a caption. */}
-          <Text style={{ color: shown.fg, fontWeight: "700", fontSize: 15 }}>{label}</Text>
+          {/* Semibold at 16: the label reads as a control without shouting,
+              and centred when a long one wraps. */}
+          <Text style={{ color: shown.fg, fontWeight: "600", fontSize: 16, textAlign: "center" }}>{label}</Text>
         </View>
       </Lift>
     </Animated.View>
@@ -1240,11 +1252,19 @@ export function SenseList({ senses, size = 15, style, max, brief, testID }) {
               {s.g}
             </Text>
             {examplesOf(s).map((x, n) => (
+              /* With a speaker, as every other example in the app has (the
+                 owner, 2026-10-01: "on the detailed cards, we don't have audio
+                 recordings of the answer sentences"); the clips are bought
+                 for every curriculum word's examples (build_word_audio.mjs). */
               <View key={n} testID="sense-example"
                     style={{ marginTop: 5, paddingLeft: 10, borderLeftWidth: 2,
-                             borderLeftColor: t.lineSoft }}>
-                <Text style={{ color: t.ink, fontSize: size - 1 }}>{x.ru}</Text>
-                <Text style={{ color: t.ink3, fontSize: size - 2 }}>{x.en}</Text>
+                             borderLeftColor: t.lineSoft, flexDirection: "row",
+                             alignItems: "center", gap: 8 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: size - 1 }}>{x.ru}</Text>
+                  <Text style={{ color: t.ink3, fontSize: size - 2 }}>{x.en}</Text>
+                </View>
+                <Speaker text={x.ru} size={32} />
               </View>
             ))}
           </View>

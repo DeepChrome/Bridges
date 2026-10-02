@@ -93,6 +93,19 @@ function localCopy(url) {
   try { const f = fileOf(url); return f.exists && f.size > 0 ? f.uri : null; } catch (e) { return null; }
 }
 const fetching = new Map();
+/* No network, remembered (the owner, 2026-10-01, on a flight: "a lot of delay
+   when I clicked the speaker icon"). A streamed recording that would not
+   start, or a copy that would not download, says the network is not there;
+   for a minute after that a recording with no local copy is not tried at all
+   and the phone's voice answers at once. A bundled clip or a saved copy plays
+   regardless, and the first success clears it. */
+export const OFFLINE_HOLD_MS = 60000;
+export const STREAM_START_MS = 2000;
+let offlineUntil = 0;
+const markOffline = () => { offlineUntil = Date.now() + OFFLINE_HOLD_MS; };
+export const seemsOffline = () => Date.now() < offlineUntil;
+export function forgetOffline() { offlineUntil = 0; }
+export const markOfflineForTest = markOffline;
 function fetchCopy(url) {
   if (fetching.has(url) || localCopy(url)) return;
   const part = () => new File(tmpOf(), url.split("/").pop());
@@ -101,7 +114,10 @@ function fetchCopy(url) {
       const done = got && typeof got.move === "function" ? got : part();
       await Promise.resolve(done.move(fileOf(url)));
     })
-    .catch(() => { try { const f = part(); if (f.exists) f.delete(); } catch (e) { /* nothing there */ } })
+    .catch(() => {
+      markOffline();
+      try { const f = part(); if (f.exists) f.delete(); } catch (e) { /* nothing there */ }
+    })
     .finally(() => fetching.delete(url));
   fetching.set(url, job);
 }
@@ -648,6 +664,12 @@ export async function say(text, opts = {}) {
   // The phone's own copy when there is one; otherwise the web, and fetch a
   // copy while it plays so the next press does not wait.
   const local = streamed ? localCopy(streamed) : null;
+  // No network a moment ago: the phone's voice now, not a stream that will fail.
+  if (streamed && !local && seemsOffline()) {
+    const spoke = speakTTS(text, { ...opts, rate });
+    if (!spoke) failed(text);
+    return spoke;
+  }
   if (streamed && !local) fetchCopy(streamed);
   /* A bundled clip is a `require`, which expo-audio takes as it is — the same
      way `playTrack` and the answer cues pass theirs. Only a URL needs the
@@ -676,10 +698,28 @@ export async function say(text, opts = {}) {
     const end = begin();
     const mine = createAudioPlayer(source);
     player = mine;
+    /* A stream that has not started in STREAM_START_MS is not coming: let it
+       go, remember the network is not there, and let the phone say it. Only
+       for a stream — a bundled clip or a saved copy has nothing to wait on. */
+    const remote = !bundled && !local;
+    let started = false;
+    const giveUp = remote ? setTimeout(() => {
+      if (started || player !== mine || seq !== trackSeq) return;
+      markOffline();
+      release(mine);
+      player = null;
+      end();
+      fallback();
+    }, STREAM_START_MS) : null;
     if (mine.addListener) {
       mine.addListener("playbackStatusUpdate", (s) => {
         if (!s) return;
+        if (s.playing || s.didJustFinish || (s.currentTime || 0) > 0) {
+          if (!started && remote) { started = true; clearTimeout(giveUp); forgetOffline(); }
+        }
         if (s.error && player === mine) {
+          clearTimeout(giveUp);
+          if (remote) markOffline();
           // A local copy that will not play is a bad copy: gone, so the next
           // press fetches it again rather than failing the same way.
           if (local) { try { fileOf(streamed).delete(); } catch (e) { /* already gone */ } }

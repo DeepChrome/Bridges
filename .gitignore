@@ -51,6 +51,7 @@ native/assets/sent.json
 native/assets/videos.json
 native/assets/listening.json
 native/assets/senses.json
+native/assets/transcripts_en.json
 .expo-export/
 native/coverage/
 data/raw/subs/

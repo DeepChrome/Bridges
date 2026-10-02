@@ -268,7 +268,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
   };
   return (
     <Sheet visible={visible} onClose={onClose} title="Settings"
-           footer={<Btn kind="pri" label="Done" style={{ marginTop: 14 }} onPress={onClose} />}>
+           footer={<Btn block kind="pri" label="Done" style={{ marginTop: 14 }} onPress={onClose} />}>
             {/* What broke, if anything has (src/crash.js) — at the **top**.
                 It exists only once there is something to report, so a
                 permanent "no problems" line never appears (rule 20.7), and on

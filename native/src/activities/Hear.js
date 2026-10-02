@@ -125,7 +125,7 @@ export function Hear({ q, r }) {
       <View style={{ marginTop: 18 }}>
         <RuInput testID="hear-input" value={text} onChangeText={setText} onSubmit={check} />
       </View>
-      <Btn kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} />
+      <Btn block kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} />
     </View>
   );
 }

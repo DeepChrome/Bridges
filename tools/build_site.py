@@ -2045,16 +2045,35 @@ def main():
         # only (the web app is on hold) and never in a public build, which ships
         # no caption text (P8.8). Loaded when a transcript is first opened.
         tpath = native_assets / "transcripts.json"
+        epath = native_assets / "transcripts_en.json"
         if args.public:
             # Empty rather than absent: the app requires the file, and Metro
             # resolves a require at bundle time, not at run time.
             tpath.write_text("{}", encoding="utf-8")
+            epath.write_text("{}", encoding="utf-8")
         else:
             tr = video_transcripts([v["id"] for v in payload["videos"]])
             text = json.dumps(tr, ensure_ascii=False, separators=(",", ":"))
             tpath.write_text(text, encoding="utf-8")
             print(f"  transcripts  : {len(tr)} videos, {sum(len(v) for v in tr.values()):,} lines, "
                   f"{len(text.encode('utf-8'))/1_048_576:.2f} MB")
+            # Their English, line for line (tools/build_transcript_en.py),
+            # "" where a line has none — a line re-cut since the translation
+            # was bought keeps its Russian and simply shows no English.
+            store = ROOT / "data" / "transcript_en.json"
+            held = json.loads(store.read_text(encoding="utf-8"))["lines"] if store.exists() else {}
+            en, have, total = {}, 0, 0
+            for vid, lines in tr.items():
+                row = [held.get(hashlib.sha1(f"{vid}|{ln[0]}|{ln[1]}".encode("utf-8")).hexdigest()[:16], "")
+                       for ln in lines]
+                have += sum(1 for x in row if x)
+                total += len(row)
+                if any(row):
+                    en[vid] = row
+            etext = json.dumps(en, ensure_ascii=False, separators=(",", ":"))
+            epath.write_text(etext, encoding="utf-8")
+            print(f"  transcript EN: {have:,} of {total:,} lines ({100 * have / max(1, total):.1f}%), "
+                  f"{len(etext.encode('utf-8'))/1_048_576:.2f} MB")
         print(f"  records      : {payload['stats'].get('lemmas_with_record', 0):,} of "
               f"{len(payload['lemmas']):,} studied rows carry their own paradigm record, "
               f"{payload['stats'].get('lemmas_twinned', 0)} a twin's; none needs the dictionary at boot")

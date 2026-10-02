@@ -63,7 +63,7 @@ import { flushState } from "./src/store";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
   QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, SoundDrillFlow,
-  ShadowFlow, BuildDrillFlow, FinalFlow, GrammarFlow,
+  ShadowFlow, BuildDrillFlow, FinalFlow, GrammarFlow, RecapFlow,
 } from "./src/screens/Flows";
 
 /* Where the day starts, from this device's own clock (ROADMAP 13.24).
@@ -240,6 +240,8 @@ function LearnStack() {
       {/* A chapter's grammar point with its words: a lesson's optional step
           and the unit's own module (GrammarFlow). Also on Practice. */}
       <Stack.Screen name="GrammarRun" component={GrammarFlow} options={titled("Grammar")} />
+      {/* The day's recap: from the path once there is a day's work to recap. */}
+      <Stack.Screen name="Recap" component={RecapFlow} options={titled("Today's recap")} />
       <Stack.Screen name="Summary" component={Summary} options={{ title: "Summary" }} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       {/* A lesson's or a video's words as one flashcard round (§30bf). Pushed
@@ -309,6 +311,7 @@ function PracticeStack() {
       {/* What a drill asks about is on its own cog (Flows.js DrillOptions);
           the setup screen that stood here went on 2026-09-26. */}
       <Stack.Screen name="GrammarRun" component={GrammarFlow} options={titled("Grammar")} />
+      <Stack.Screen name="Recap" component={RecapFlow} options={titled("Today's recap")} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <HeaderRight navigation={navigation} route={route} />,

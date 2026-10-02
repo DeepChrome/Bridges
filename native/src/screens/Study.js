@@ -342,7 +342,7 @@ function SetPicker({ visible, onClose }) {
      the app is where the studying happens — a learner who wants their cards
      elsewhere is a learner leaving. Import moved to Settings, beside backup
      and restore, which is the same family of job: bringing something in. */
-  const footer = <Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />;
+  const footer = <Btn block kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />;
 
   /* How the cards are asked — one way, both ways, or audio only (the owner,
      2026-09-23). A word is one card, so a front chooses nothing about *which*

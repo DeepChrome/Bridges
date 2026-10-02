@@ -110,7 +110,7 @@ function WordSheet({ state, onClose, onFull }) {
 
   return (
     <Sheet onClose={onClose} maxHeight="80%"
-                 footer={<Btn kind="pri" label="Full entry" style={{ marginTop: 18 }} onPress={onFull} />}>
+                 footer={<Btn block kind="pri" label="Full entry" style={{ marginTop: 18 }} onPress={onFull} />}>
       {/* A speaker beside the word, as on every other piece of Russian in the
           app (§30as); the glance was the one place a tapped word could not be
           heard. */}

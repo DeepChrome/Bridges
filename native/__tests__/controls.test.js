@@ -17,6 +17,45 @@ import Study from "../src/screens/Study";
 const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : (s || {}));
 const box = (testID) => flat(screen.getByTestId(testID).props.style);
 
+/* "Buttons should be less bulky… only as big as they need to be" (the owner,
+   2026-10-01). A button is as wide as its label unless the screen asks for a
+   full-width one with `block`; the width is decided on the outermost wrapper,
+   so this walks up from the control to the first node that sets alignSelf. */
+describe("how wide a button is", () => {
+  const sizing = (testID) => {
+    for (let n = screen.getByTestId(testID); n; n = n.parent) {
+      const s = flat(n.props && n.props.style);
+      if (s.alignSelf) return s;
+    }
+    return {};
+  };
+
+  it("fits its label and sits centred by default", async () => {
+    await render(<><Btn kind="pri" label="Start" testID="fit" onPress={() => {}} />
+                   <Btn kind="pri" label="Continue" testID="wide" block onPress={() => {}} /></>);
+    expect(sizing("fit").alignSelf).toBe("center");
+    expect(sizing("fit").minWidth).toBeGreaterThanOrEqual(44);
+    expect(sizing("wide").alignSelf).toBe("stretch");
+  });
+
+  it("is still a 44 dp target", async () => {
+    await render(<Btn kind="plain" label="Go" testID="tall" onPress={() => {}} />);
+    let h = 0;
+    for (let n = screen.getByTestId("tall"); n; n = n.parent) {
+      const s = flat(n.props && n.props.style);
+      if (s.minHeight) { h = s.minHeight; break; }
+      let inner = n;
+      while (inner.children && inner.children[0] && typeof inner.children[0] === "object") {
+        inner = inner.children[0];
+        const c = flat(inner.props && inner.props.style);
+        if (c.minHeight) { h = c.minHeight; break; }
+      }
+      if (h) break;
+    }
+    expect(h).toBeGreaterThanOrEqual(44);
+  });
+});
+
 describe("a button that cannot be pressed", () => {
   /* A disabled control takes the neutral tone so it reads as "not yet" rather
      than as a live primary with pale text — but a ghost has no box to keep, and

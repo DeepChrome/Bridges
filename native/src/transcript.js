@@ -53,7 +53,7 @@ export function wordAt(line, pos) {
    is the hairline colour rather than the brand's: a transcript is nothing but
    links, and a page of brand underlines is louder than the words. Tapping the
    time, or the line around the words, still plays from there. */
-const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord }) {
+const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord, en }) {
   const t = useTheme();
   const words = useMemo(() => line[1].split(" ").map((w) => ({ w, i: lookup(w) })), [line]);
   return (
@@ -64,7 +64,8 @@ const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord
                                           borderRadius: radius.md, backgroundColor: active ? t.brandBg : "transparent",
                                           opacity: pressed ? 0.6 : 1 })}>
       <Muted size={12} style={{ width: 38, marginTop: 3 }}>{clock(line[0])}</Muted>
-      <Text style={{ flex: 1, fontSize: 16, lineHeight: 23, color: active ? t.ink : t.ink2 }}>
+      <View style={{ flex: 1 }}>
+      <Text style={{ fontSize: 16, lineHeight: 23, color: active ? t.ink : t.ink2 }}>
         {words.map(({ w, i }, n) => {
           const now = active && n === word;
           const link = i !== null && onWord;
@@ -83,11 +84,22 @@ const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord
           );
         })}
       </Text>
+      {/* The line's English under it (the owner, 2026-10-01: "English in
+          line with the transcription too, also highlighted as it goes"):
+          quiet, and lifted with the Russian on the line being said. */}
+      {en ? (
+        <Text testID={`transcript-en-${k}`}
+              style={{ fontSize: 14, lineHeight: 20, marginTop: 2,
+                       color: active ? t.ink2 : t.ink3, fontWeight: active ? "600" : "400" }}>
+          {en}
+        </Text>
+      ) : null}
+      </View>
     </Pressable>
   );
 });
 
-export function Transcript({ lines, position, onSeek, onWord }) {
+export function Transcript({ lines, position, onSeek, onWord, en, showEn, onToggleEn }) {
   const [follow, setFollow] = useState(true);
   const ys = useRef([]);
   const scroller = useRef(null);
@@ -103,7 +115,12 @@ export function Transcript({ lines, position, onSeek, onWord }) {
 
   return (
     <View testID="transcript" style={{ marginTop: 12 }}>
-      <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 6 }}>
+      <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center",
+                     gap: 8, marginBottom: 6 }}>
+        {/* Says where the English came from (rule 20.7's second allowance):
+            a model translated YouTube's automatic captions. */}
+        {en && showEn ? <Muted size={12} style={{ flex: 1 }}>Machine translation</Muted> : null}
+        {en ? <Chip testID="transcript-en" on={!!showEn} label="English" onPress={onToggleEn} /> : null}
         <Chip testID="transcript-follow" on={follow} label="Follow" onPress={() => setFollow(!follow)} />
       </View>
       {/* flexShrink so it scrolls inside its cap rather than growing to its
@@ -113,7 +130,8 @@ export function Transcript({ lines, position, onSeek, onWord }) {
                   onScrollBeginDrag={() => setFollow(false)}>
         {lines.map((ln, k) => (
           <Line key={k} line={ln} k={k} active={k === at} word={k === at ? word : -1}
-                onSeek={onSeek} onPlace={onPlace} onWord={onWord} />
+                onSeek={onSeek} onPlace={onPlace} onWord={onWord}
+                en={showEn && en ? en[k] : null} />
         ))}
       </ScrollView>
     </View>

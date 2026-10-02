@@ -1239,6 +1239,44 @@ export function makeQuestions(env) {
     return spread(shuffle(out)).slice(0, n);
   }
 
+  /* The day's recap (the owner, 2026-10-01: "a daily recap feature that
+     reviews things you specifically did that day… 10-20 questions… spaced
+     repetition probably helps retention"). Built from the day's own work:
+     `missed` (lemma indices of today's wrong answers) first, each asked once
+     to produce — write it in Russian — because recall is what repairs a miss;
+     then `words` (everything graded today, weakest first), rotating through
+     the kinds so the recap is not one shape twenty times. RECAP_MIN to
+     RECAP_MAX questions; fewer than RECAP_MIN words worked is no recap. */
+  const RECAP_MIN = 10, RECAP_MAX = 20;
+  function recapQuestions({ words, missed = [], n = 15 }) {
+    const all = unique(missed.concat(words)).filter((i) => L[i]);
+    if (all.length < RECAP_MIN / 2) return [];
+    const target = Math.max(RECAP_MIN, Math.min(RECAP_MAX, n, all.length * 2));
+    const home = UN.find((u) => u.w.includes(all[0])) || UN[0];
+    const pool = all.length >= 8 ? all : poolFor(home);
+    const kinds = ["choose-en", "choose-ru", "cloze", "type"].concat(voice() ? ["listen"] : []);
+    const out = [];
+    const ask = (i, t) => {
+      if (t === "cloze") {
+        const c = clozeFor(i);
+        return c ? present({ t: "cloze", i, ex: c.ex, token: c.token, pool }) : present({ t: "choose-ru", i, pool });
+      }
+      return present({ t, i, pool });
+    };
+    const missedSet = new Set(missed);
+    let turn = 0;
+    // Each word once, then round again with a different kind, until the target.
+    for (let round = 0; out.length < target && round < 3; round++) {
+      for (const i of all) {
+        if (out.length >= target) break;
+        const t = round === 0 && missedSet.has(i) ? "type" : kinds[turn++ % kinds.length];
+        const q = ask(i, t);
+        if (q) out.push(q);
+      }
+    }
+    return spread(out).slice(0, target);
+  }
+
   /* The final test: one paper over the whole course rather than a tenth
      chapter's quiz. Cumulative by construction — words are dealt chapter by
      chapter in turn, so every chapter is in it whatever the draw — and
@@ -2447,7 +2485,7 @@ export function makeQuestions(env) {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
-    customQuiz, finalExam, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, routeFocus, grammarRun,
+    customQuiz, finalExam, recapQuestions, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, routeFocus, grammarRun,
     drillsIntroduced, drillOpensAt,
   };
 }

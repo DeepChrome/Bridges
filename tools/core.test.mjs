@@ -1472,6 +1472,21 @@ group("scenes and custom quizzes");
   ok(Q.customQuiz({ units, kinds: ["scene"], n: 3 }).every((q) => q.kind === "scene"),
      "scenes alone make a listening-only quiz");
 
+  /* The day's recap (2026-10-01): 10 to 20 questions from the day's own
+     work, today's misses first and asked to produce. */
+  {
+    const today = units[0].w.slice(0, 12);
+    const missed = [today[3], today[7]];
+    const recap = Q.recapQuestions({ words: today, missed });
+    ok(recap.length >= 10 && recap.length <= 20, "a recap is 10 to 20 questions", recap.length);
+    ok(recap.every((q) => q.i === undefined || today.includes(q.i)),
+       "and asks only about the day's words", recap.map((q) => q.i).join(","));
+    ok(missed.every((i) => recap.some((q) => q.i === i && q.kind === "type")),
+       "a word missed today is asked to be written", recap.filter((q) => missed.includes(q.i)).map((q) => q.kind).join(","));
+    ok(new Set(recap.map((q) => q.kind)).size >= 3, "in several shapes", [...new Set(recap.map((q) => q.kind))].join(","));
+    ok(Q.recapQuestions({ words: today.slice(0, 2) }).length === 0, "a day with almost nothing done has no recap");
+  }
+
   /* The final test (the owner, 2026-09-19): fifty questions, every chapter,
      several shapes. Cumulative and diverse by construction, so the draw
      cannot leave a chapter out or ask fifty of one kind. */

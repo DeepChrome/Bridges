@@ -273,7 +273,7 @@ function TutorOptions({ onClose, onRestart }) {
   const en = st.talkEn !== false;
   return (
     <Sheet onClose={onClose} testID="tutor-options"
-           footer={<Btn kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />}>
+           footer={<Btn block kind="pri" label="Done" style={{ marginTop: 8 }} onPress={onClose} />}>
       <View style={{ marginBottom: 18 }}>
         <SectionLabel>Level</SectionLabel>
         <Choice testID="tutor-level" options={TALK_LEVELS} value={level}

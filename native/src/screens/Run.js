@@ -50,7 +50,10 @@ export const MISSES_KEPT = 30;
 export function missOf(q, said) {
   const opt = q.options ? q.options.find((o) => o.right) : null;
   return { kind: q.kind, prompt: String(q.prompt || ""), answer: opt ? String(opt.label) : String(q.answer || ""),
-           said: said === undefined || said === null ? null : String(said), at: Date.now() };
+           said: said === undefined || said === null ? null : String(said), at: Date.now(),
+           // The word the question was about, as its string (rule 20.4), for
+           // the day's recap to ask again.
+           w: typeof q.i === "number" && L[q.i] ? L[q.i].b : null };
 }
 
 /* One review into state. The grade comes from gradeFor (right or wrong, table used or
@@ -182,7 +185,7 @@ function Typed({ q, answered, onAnswer }) {
       <RuInput value={text} onChangeText={setText} editable={!answered} onSubmit={check}
                testID="type-input" />
       {!answered ? (
-        <Btn kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} />
+        <Btn block kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} />
       ) : null}
     </View>
   );
@@ -836,7 +839,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                 and they will see it; the hint button said it counted before it
                 was pressed. The owner, 2026-09-10: "don't have to explain
                 features that don't have to be explained." */}
-            <Btn kind={tone ? tone.btn : "plain"} label="Continue"
+            <Btn block kind={tone ? tone.btn : "plain"} label="Continue"
                  style={{ marginTop: 12 }} onPress={next} />
           </Card>
         </Animated.View>

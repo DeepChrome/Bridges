@@ -423,7 +423,7 @@ export function Scene({ q, r }) {
           ))}
         </View>
       ) : (
-        <Btn kind="pri" label="Check" style={{ marginTop: 18 }} disabled={!allPicked} onPress={check} />
+        <Btn block kind="pri" label="Check" style={{ marginTop: 18 }} disabled={!allPicked} onPress={check} />
       )}
     </View>
   );

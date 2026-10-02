@@ -43,8 +43,9 @@ Built and working today:
 - any recognised token can expose lemma, meaning, grammar, full paradigm, and every
   other sentence in the corpus containing that word
 - a learning path of ten chapters, every unit built towards a real video
-  (§30bf): ten spine units and 24 side quests, about 1,200 words taught
-  (§30bm)
+  (§30bf): ten spine units and 24 side quests, 189 lessons, 1,244 words
+  taught (§30bm, §30bo), the commonest sets — seasons, days, tableware,
+  family — taught whole
 - a cast the whole app is told through: Teddy the Yorkie, his family, and
   Monka the monkey whose schemes always backfire (§30bg, docs/cast.md)
 - lessons built from six activity types, plus Hear, Say and listening scenes on
@@ -5842,6 +5843,60 @@ from the head up"*.
   phone ("Food &"): a name that only just fits at a larger system font.
   `PathNode`'s label has a fixed width and the simple line breaker, so
   measuring and drawing agree.
+
+## 30bo. Phase T — the owner's list before the testers (2026-10-01)
+
+Twelve items in `docs/BETA.md` Phase T. The rules each one left:
+
+- **Immerse keeps its place** (`native/src/immerse.js`): the library's
+  query, filters, sort and scroll, each video's position and the recent
+  list, per profile in AsyncStorage (`rb.immerse.<id>`) — beside the learner
+  database, not in it, because a scroll offset is not learner state. A
+  position within `EDGE_MS` of either end is not kept: a video opened by
+  accident restarts, and a finished one starts again. `Screen` takes
+  `restoreY`/`onScrollY`. `jest.setup.js` resets the store every test.
+- **The transcript links its words** (two presses, as everywhere) and pauses
+  the video when one is tapped. **Its English** is made at build time,
+  `tools/build_transcript_en.py` → `data/transcript_en.json` (committed: it
+  cost money), forty lines a request with six before for context, keyed by
+  `sha1(video|start|text)`, and refused unless every line comes back once,
+  in English. Labelled "Machine translation". A line with none shows none.
+  **The tool says why a request failed and stops on one no retry fixes** —
+  the first full run swallowed every exception and reported "23,444 left
+  untranslated" with no cause; the cause was a spent API balance, which was
+  also silently failing every AI feature in the app through the Worker.
+- **One voice**: `build_word_audio.mjs` replaces every source for curriculum
+  words and pool sentences (`ALL_SOURCES`), and buys each studied word's
+  dictionary and sense examples (`examplesToBuy`), so «знать» is no longer a
+  deep human recording beside a Chirp3 neighbour.
+- **Word sets are taught whole** (`data/curated/word_sets.json`): the
+  seasons, days, months, meals, tableware, colours, numbers, family… A unit
+  that starts a set (any member not marked `quiet`, or the set's `home` or
+  `unit`) completes it, and `grouped()` keeps it one named group. A word a
+  set forces in is spine-only unless curated, or a side quest takes it from
+  the spine.
+- **Buttons fit their label** (`Btn`): centred, `minWidth` 120, 44 dp tall,
+  a 3 px lip; `block` for a screen's one full-width action.
+  `controls.test.js` pins both.
+- **A stream that cannot start gives up** (`STREAM_START_MS`, 2 s) and the
+  phone's voice takes over; after a failure the app assumes it is offline
+  for `OFFLINE_HOLD_MS` and does not try the network at all.
+- **The day's recap** (`recapQuestions` in core, `todaysWork` in data.js,
+  `RecapFlow`): 10–20 questions on today's misses, then today's words,
+  offered on the path from `RECAP_FROM` (5) words and not again once done
+  (`drills["recap:<day>"]`). It waits for `ready`: computed from the store's
+  defaults it would decide there was nothing to recap and never ask again.
+- **An ending's clip has to be hearable, not merely playable.** The clips
+  played to the end on the emulator and the owner heard nothing: an
+  unstressed final syllable cut from a word is 70–150 ms of quiet sound, and
+  a phone opening its audio route swallows the start of a file.
+  `build_ending_clips.mjs` levels each cut to its word, opens it on 250 ms
+  of silence, and refuses one under 120 ms of speech; `audio_qa.mjs` checks
+  the three on what shipped. **Loudness in LUFS cannot measure this** — EBU
+  R128 gates on 400 ms blocks and reported −70 for clips that were plainly
+  there; `speechLevels` in `tools/mp3.mjs` measures 10 ms frames.
+- **Not built: offline YouTube.** Downloading a video or its audio breaks
+  YouTube's terms and gets an app removed from the store.
 
 ## 31. Verification
 

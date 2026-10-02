@@ -6,7 +6,7 @@ import { View, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text,
-         Sheet, Choice, CogButton } from "../ui";
+         Sheet, Choice, CogButton, Loading } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "./Run";
 import { WordList, GrammarNote, WordCard, StepBar } from "../lesson";
 import { VideoLines } from "../prep";
@@ -16,6 +16,7 @@ import {
   DRILL_POOL_STEPS, chapterWords, irregularWords,
   reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
   scenarioLibrary, required, linesWith, grammarKey, currentGrammarUnit, grammarNoteOf,
+  todaysWork, recapKey,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { pairDrill } from "@core/alphabet";
@@ -110,7 +111,7 @@ export function VocabFlow({ route, navigation }) {
         <VideoLines lines={step.lines} testID="lesson-lines"
                     onMoment={(l) => navigation.navigate("Video", { videoId: l.vid, at: l.t })} />
         <View style={{ marginTop: "auto", paddingTop: 16 }}>
-          <Btn kind="pri" label="Finish" onPress={advance} />
+          <Btn block kind="pri" label="Finish" onPress={advance} />
         </View>
       </Screen>
     );
@@ -687,7 +688,7 @@ export function DrillOptions({ type, prefs, onChange, onClose }) {
 
   return (
     <Sheet onClose={onClose} testID="drill-options" maxHeight="88%"
-           footer={<Btn kind="pri" testID="drill-apply" label="Apply" style={{ marginTop: 8 }} onPress={onClose} />}>
+           footer={<Btn block kind="pri" testID="drill-apply" label="Apply" style={{ marginTop: 8 }} onPress={onClose} />}>
       {groups.map(([label, list]) => (
         <View key={label} style={{ marginBottom: 18 }}>
           <SectionLabel>{label}</SectionLabel>
@@ -1158,6 +1159,46 @@ export function FinalFlow({ navigation }) {
             onFinish={(r) => {
               const score = scoreOf(r);
               update((prev) => bestOf(prev, "final", score));
+              setResult({ ...r, score });
+            }} />
+  );
+}
+
+/* The day's recap (core/questions.js `recapQuestions`): today's misses asked
+   again, then today's words, 10 to 20 questions, graded through the scheduler
+   like any quiz — a second retrieval the same day is what consolidates it.
+   Done once a day: kept under `drills["recap:<day>"]`. */
+export function RecapFlow({ navigation }) {
+  const { st, update, ready } = useSession();
+  const [result, setResult] = useState(null);
+  const [seed, setSeed] = useState(0);
+  /* Drawn once a run, not on every grade — the run's own answers change `st`.
+     Not before the profile has loaded, or the store's empty defaults would
+     decide there was nothing to recap and nothing would ask again. */
+  const steps = useMemo(() => {
+    if (!ready) return null;
+    const work = todaysWork(st);
+    return Q.recapQuestions({ words: work.words, missed: work.missed });
+  }, [seed, ready]);   // eslint-disable-line react-hooks/exhaustive-deps
+  useAudioStopOnLeave();
+
+  if (!steps) return <Screen><Loading /></Screen>;
+  if (!steps.length) {
+    return <Done title="Nothing to recap yet" onBack={() => navigation.goBack()} />;
+  }
+  if (result) {
+    return (
+      <Done title="Today's recap" detail={`${result.right} of ${result.total} right`}
+            score={result.score} passed={result.score >= PASS_MARK}
+            onAgain={() => { setResult(null); setSeed(seed + 1); }}
+            onBack={() => navigation.goBack()} />
+    );
+  }
+  return (
+    <Runner steps={steps} navigation={navigation}
+            onFinish={(r) => {
+              const score = scoreOf(r);
+              update((prev) => bestOf(prev, recapKey(), score));
               setResult({ ...r, score });
             }} />
   );

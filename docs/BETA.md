@@ -20,18 +20,22 @@ work (it moves lessons, conversations and audio, so it goes once, after the
 smaller things settle), the look after the content, the brand at the end.
 Each step ends with the full suite and is committed on its own.
 
-1. [ ] **Immerse keeps its place.** The library's search, filters, sort and
+1. [x] **Immerse keeps its place.** The library's search, filters, sort and
        scroll, and each video's playback position, survive leaving the tab,
        leaving the app and a restart. A video reopens where it stopped.
-2. [ ] **Recently watched.** A short row of the last videos opened, top of
+2. [x] **Recently watched.** A short row of the last videos opened, top of
        the library, each resuming where it stopped.
-3. [ ] **The transcript reads like the rest of the app.** Every word is a
+3. [x] **The transcript reads like the rest of the app.** Every word is a
        two-press link (the sheet, then the full entry), as everywhere else.
 4. [ ] **English under the transcript.** Each caption line with its English
        beneath it, both highlighted as the video plays, behind a switch. The
        captions are YouTube's auto-captions with no punctuation, so the
        translation is made at build time in context (chunks, not single
        lines), stored beside the transcripts, and labelled as machine-made.
+       *Built; 58,652 of 82,096 lines (71 %) translated. The run stopped when
+       the Anthropic balance ran out; `build_transcript_en.py` resumes where
+       it stopped once it is topped up (about $2). A line with no English
+       shows none.*
 5. [ ] **One voice family.** Every curriculum word in the same voice — the
        deep «знать» is a human recording kept on purpose in September, and it
        is exactly the "extremely different" voice he hears. A man and a woman
@@ -47,6 +51,28 @@ Each step ends with the full suite and is committed on its own.
 9. [ ] **Brand.** A name that says "learn Russian" to a store search, and
        five to ten logo directions that read at app-icon size, presented
        side by side for his choice.
+
+10. [ ] **No wait on a speaker, online or off.** On a flight a press waited
+        for a streamed recording to fail before the phone's voice took over.
+        Every curriculum example is now bundled (step 6); what still streams
+        gives up quickly when there is no network, and stops trying for a
+        while once it has failed.
+11. [x] **Daily recap.** A short session at the end of the day built from
+        what was done that day — the words met, the questions missed, the
+        drills and the grammar touched — 10 to 20 questions, mixed kinds,
+        graded through the scheduler like any review, so the day's work is
+        retrieved once more before sleep.
+
+12. [x] **Word endings play.** On the endings screen the example words
+        play and the endings themselves do not (the owner, 2026-10-01). The
+        ending's sound is cut from a recorded word (build_ending_clips.mjs);
+        find why those clips are silent or missing, fix it at the cause, and
+        add a test that every ending's button has a clip that exists.
+        *They played — the emulator ran each to its end — but held 70–150 ms
+        of quiet sound with 20–30 ms before it, which a phone's audio route
+        swallows. Now levelled to their word, 250 ms of lead, under 120 ms of
+        speech refused; `audio_qa.mjs` gates all three (old clips: 29 of 31
+        fail it). Not heard on a phone yet.*
 
 **Not doing: downloading YouTube videos or their audio for offline use.**
 YouTube's terms forbid it outside YouTube's own offline feature, and an app

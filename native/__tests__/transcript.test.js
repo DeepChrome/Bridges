@@ -53,6 +53,31 @@ describe("the transcript", () => {
     expect(screen.queryByTestId("transcript-link-0-3")).toBeNull();
   });
 
+  /* The owner, 2026-10-01: "the option to have English in line with the
+     transcription too (also highlighted as it goes)". */
+  it("puts each line's English under it, behind a switch, said to be a machine's", async () => {
+    const onToggleEn = jest.fn();
+    const en = ["hello everyone", "today we are talking", "about the weather"];
+    const { rerender } = await render(<Transcript lines={LINES} position={2600} onSeek={jest.fn()}
+                                                  en={en} showEn={false} onToggleEn={onToggleEn} />);
+    expect(screen.queryByTestId("transcript-en-1")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("transcript-en")); });
+    expect(onToggleEn).toHaveBeenCalled();
+    await rerender(<Transcript lines={LINES} position={2600} onSeek={jest.fn()}
+                               en={en} showEn onToggleEn={onToggleEn} />);
+    expect(screen.getByTestId("transcript-en-1").props.children).toBe("today we are talking");
+    expect(screen.getByText("Machine translation")).toBeTruthy();
+    // The line being said is lifted in English too.
+    const flat = (k) => Object.assign({}, ...[screen.getByTestId(`transcript-en-${k}`).props.style].flat());
+    expect(flat(1).fontWeight).toBe("600");
+    expect(flat(0).fontWeight).toBe("400");
+  });
+
+  it("offers no English switch for a video that has none", async () => {
+    await render(<Transcript lines={LINES} position={0} onSeek={jest.fn()} en={null} />);
+    expect(screen.queryByTestId("transcript-en")).toBeNull();
+  });
+
   it("ships a transcript for the library's videos, in order", () => {
     const v = videos()[0];
     const lines = transcriptOf(v.id);

@@ -18,6 +18,7 @@ import {
   onWriteError, newId, touchStreak,
 } from "./store";
 import { reconcileCurriculum } from "./data";
+import { loadImmerse, flushImmerse } from "./immerse";
 
 const Ctx = createContext(null);
 
@@ -43,6 +44,8 @@ export function SessionProvider({ children }) {
   const drops = useRef([]);          // log rows to remove: an undone review
 
   const adopt = async (id) => {
+    // Where this profile was in Immerse (immerse.js), ready before any screen reads it.
+    await loadImmerse(id);
     const { state, bad, recovered } = await loadState(id);
     if (bad) {
       await setAside(id, bad);
@@ -81,7 +84,7 @@ export function SessionProvider({ children }) {
     const offWrite = onWriteError(() => { if (live) setError({ kind: "write", text: ERRORS.write }); });
     // Leaving the app is when a pending write is most likely to be lost.
     const sub = AppState.addEventListener("change", (s) => {
-      if (s === "background" || s === "inactive") flushState();
+      if (s === "background" || s === "inactive") { flushState(); flushImmerse(); }
     });
     return () => { live = false; offWrite(); sub.remove(); flushState(); };
   }, []);
@@ -129,6 +132,7 @@ export function SessionProvider({ children }) {
       const acc = { list: accounts.list.concat(a), active: a.id };
       setAccounts(acc);
       await saveAccounts(acc);
+      await loadImmerse(a.id);
       const fresh = touchStreak({ ...DEFAULTS });
       dirty.current = true;
       setSt(fresh);
@@ -161,6 +165,8 @@ export function SessionProvider({ children }) {
       setAccounts(acc);
       await saveAccounts(acc);
       dirty.current = false;
+      flushImmerse();
+      await loadImmerse(null);
       setSt(DEFAULTS);
     },
   }), [ready, error, accounts, st]);

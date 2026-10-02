@@ -4,7 +4,7 @@
  * spacing, radii and colours stay in one place instead of being retyped per screen.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View, Pressable, ScrollView, ActivityIndicator, StyleSheet, Modal, Animated, Image,
 } from "react-native";
@@ -144,9 +144,26 @@ export function TextInput({ style, ...rest }) {
  *   footer   | a bar off the scroll, hairline above, | nothing; scroll padding 40
  *            | scroll padding 24 to clear it         |
  */
-export function Screen({ children, scroll = true, fill = false, safeTop = false, footer }) {
+export function Screen({ children, scroll = true, fill = false, safeTop = false, footer,
+                         restoreY, onScrollY }) {
   const t = useTheme();
   const Body = scroll ? ScrollView : View;
+  /* `restoreY`/`onScrollY`: a screen that keeps its place (Immerse, 2026-10-01:
+     "if you navigate away from the immerse page, it remembers the exact
+     state you were in"). The offset is applied once, when the content is tall
+     enough to hold it — before that a scrollTo lands short. */
+  const body = useRef(null);
+  const restored = useRef(!(restoreY > 0));
+  const remember = scroll && (onScrollY || restoreY > 0) ? {
+    ref: body,
+    scrollEventThrottle: 200,
+    onScroll: onScrollY ? (e) => onScrollY(e.nativeEvent.contentOffset.y) : undefined,
+    onContentSizeChange: (_w, h) => {
+      if (restored.current || !body.current || h < restoreY) return;
+      restored.current = true;
+      body.current.scrollTo({ y: restoreY, animated: false });
+    },
+  } : null;
   /* Every screen's content arrives rather than appearing. The stack already
      slides the screen in (App.js `withMe`); this is the half-step *inside* it
      that makes the arrival read as one movement instead of a slide followed by
@@ -171,6 +188,7 @@ export function Screen({ children, scroll = true, fill = false, safeTop = false,
         // Continue and a tapped search result needed two presses; found on the
         // emulator walkthrough. "handled" lets the button take the press.
         {...(scroll ? { keyboardShouldPersistTaps: "handled" } : null)}
+        {...remember}
       >
         {children}
       </Body>

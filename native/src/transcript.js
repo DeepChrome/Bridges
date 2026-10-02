@@ -15,10 +15,11 @@
  * memoised: a long video is a thousand of them and only two change a tick.
  */
 
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, ScrollView, Pressable } from "react-native";
 import { useTheme, radius } from "./theme";
 import { Text, Muted, Chip } from "./ui";
+import { lookup } from "./words";
 
 export const PANEL_HEIGHT = 340;
 
@@ -45,9 +46,16 @@ export function wordAt(line, pos) {
   return at;
 }
 
-const Line = memo(function Line({ line, k, active, word, onSeek, onPlace }) {
+/* Every word the dictionary knows is a link, as Russian is everywhere else in
+   the app (§30b): one press for the sheet, the same word again for the full
+   entry (words.js). The owner, 2026-10-01: *"allow links to full entries for
+   words found within the transcript… a small pop-up abridged"*. The underline
+   is the hairline colour rather than the brand's: a transcript is nothing but
+   links, and a page of brand underlines is louder than the words. Tapping the
+   time, or the line around the words, still plays from there. */
+const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord }) {
   const t = useTheme();
-  const words = line[1].split(" ");
+  const words = useMemo(() => line[1].split(" ").map((w) => ({ w, i: lookup(w) })), [line]);
   return (
     <Pressable testID={`transcript-line-${k}`} onPress={() => onSeek(line[0])}
                onLayout={(e) => onPlace(k, e.nativeEvent.layout.y)}
@@ -57,18 +65,29 @@ const Line = memo(function Line({ line, k, active, word, onSeek, onPlace }) {
                                           opacity: pressed ? 0.6 : 1 })}>
       <Muted size={12} style={{ width: 38, marginTop: 3 }}>{clock(line[0])}</Muted>
       <Text style={{ flex: 1, fontSize: 16, lineHeight: 23, color: active ? t.ink : t.ink2 }}>
-        {words.map((w, i) => (
-          <Text key={i} testID={active && i === word ? "transcript-word" : undefined}
-                style={active && i === word ? { color: t.brandInk, fontWeight: "700" } : null}>
-            {i ? " " : ""}{w}
-          </Text>
-        ))}
+        {words.map(({ w, i }, n) => {
+          const now = active && n === word;
+          const link = i !== null && onWord;
+          return (
+            <Text key={n}>
+              {n ? " " : ""}
+              <Text testID={now ? "transcript-word" : link ? `transcript-link-${k}-${n}` : undefined}
+                    accessibilityRole={link ? "link" : undefined}
+                    accessibilityLabel={link ? `${w}, open word` : undefined}
+                    onPress={link ? () => onWord(w) : undefined}
+                    style={[link ? { textDecorationLine: "underline", textDecorationColor: t.line } : null,
+                            now ? { color: t.brandInk, fontWeight: "700" } : null]}>
+                {w}
+              </Text>
+            </Text>
+          );
+        })}
       </Text>
     </Pressable>
   );
 });
 
-export function Transcript({ lines, position, onSeek }) {
+export function Transcript({ lines, position, onSeek, onWord }) {
   const [follow, setFollow] = useState(true);
   const ys = useRef([]);
   const scroller = useRef(null);
@@ -94,7 +113,7 @@ export function Transcript({ lines, position, onSeek }) {
                   onScrollBeginDrag={() => setFollow(false)}>
         {lines.map((ln, k) => (
           <Line key={k} line={ln} k={k} active={k === at} word={k === at ? word : -1}
-                onSeek={onSeek} onPlace={onPlace} />
+                onSeek={onSeek} onPlace={onPlace} onWord={onWord} />
         ))}
       </ScrollView>
     </View>

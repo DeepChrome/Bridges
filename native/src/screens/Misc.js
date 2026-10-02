@@ -1,7 +1,7 @@
 /* Immerse (the video library) and the video player. */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Image, Pressable, Linking } from "react-native";
+import { View, Image, Pressable, Linking, ScrollView } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
@@ -13,6 +13,9 @@ import {
   CHANNELS, videoLines, transcriptOf,
 } from "../data";
 import { Transcript } from "../transcript";
+import { useWords } from "../words";
+import { libraryState, setLibraryState, recentVideos, openedVideo, setVideoPosition,
+         videoPosition } from "../immerse";
 import { releaseAudio } from "../audio";
 import { PrepList } from "../prep";
 import { fold, today } from "@core/util";
@@ -206,14 +209,71 @@ export function CreatorsNote({ onClose }) {
   );
 }
 
+/* Recently watched (the owner, 2026-10-01: "an option for recently viewed
+   videos… so people don't have to re-find their video in the list"). One
+   row that scrolls sideways, newest first, each with how far through it the
+   learner got; a tap reopens it there. Nothing when nothing has been opened. */
+function RecentRow({ list, onOpen }) {
+  const t = useTheme();
+  if (!list.length) return null;
+  return (
+    <View testID="recent-videos" style={{ marginBottom: 16 }}>
+      <SectionLabel>Recently watched</SectionLabel>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 10, paddingRight: 4 }}>
+        {list.map(({ v, at }) => {
+          const done = v.dur ? Math.min(1, at / (v.dur * 1000)) : 0;
+          return (
+            <Pressable key={v.id} testID={`recent-${v.id}`} onPress={() => onOpen(v)}
+                       accessibilityRole="button"
+                       accessibilityLabel={`${short(v.title)}${at ? `, from ${clock(at)}` : ""}`}
+                       style={({ pressed }) => ({ width: 144, opacity: pressed ? 0.7 : 1 })}>
+              <View style={{ width: 144, height: 81, borderRadius: 8, overflow: "hidden",
+                             backgroundColor: t.surface2 }}>
+                <Image source={{ uri: thumbUrl(v.id) }} resizeMode="cover"
+                       style={{ width: "100%", height: "100%" }} accessibilityIgnoresInvertColors />
+                {done > 0 ? (
+                  <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 3,
+                                 backgroundColor: "rgba(0,0,0,0.35)" }}>
+                    <View style={{ width: `${Math.round(done * 100)}%`, height: 3, backgroundColor: t.brand }} />
+                  </View>
+                ) : null}
+              </View>
+              <Text numberOfLines={2} style={{ color: t.ink, fontSize: 13, fontWeight: "600",
+                                               lineHeight: 17, marginTop: 6 }}>
+                {short(v.title)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
 export function Immerse({ navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("all");
-  const [sort, setSort] = useState("level");
-  const [channel, setChannel] = useState(ALL_CHANNELS);
+  /* Where the learner was, read once on the way in (immerse.js) and written
+     as it changes, so a trip to another tab, another app or a restart comes
+     back to the same search, the same filters and the same place in the list. */
+  const kept = libraryState();
+  const [query, setQueryRaw] = useState(kept.query || "");
+  const [filter, setFilterRaw] = useState(kept.filter || "all");
+  const [sort, setSortRaw] = useState(kept.sort || "level");
+  const [channel, setChannelRaw] = useState(kept.channel || ALL_CHANNELS);
+  const keep = (set, key) => (value) => { set(value); setLibraryState({ [key]: value }); };
+  const setQuery = keep(setQueryRaw, "query");
+  const setFilter = keep(setFilterRaw, "filter");
+  const setSort = keep(setSortRaw, "sort");
+  const setChannel = keep(setChannelRaw, "channel");
   const [credits, setCredits] = useState(false);
+  /* Recently watched changes on another screen (Video), so it is re-read
+     whenever the library comes back into view. */
+  const [, setTick] = useState(0);
+  useEffect(() => (navigation && navigation.addListener
+    ? navigation.addListener("focus", () => setTick((n) => n + 1)) : undefined), [navigation]);
+  const recent = recentVideos().map((r) => ({ v: videoById(r.id), at: r.at })).filter((r) => r.v);
   const all = videos();
   const channels = useMemo(() => [{ id: ALL_CHANNELS, name: "All channels", note: all.length }]
     .concat(channelsOf(all).map((c) => ({ id: c.name, name: c.name, note: c.count }))), [all.length]);
@@ -235,7 +295,8 @@ export function Immerse({ navigation }) {
      same thing when it is wanted, and a tally at the top of the library read
      as a score for not having watched enough. */
   return (
-    <Screen>
+    <Screen restoreY={kept.y || 0} onScrollY={(y) => setLibraryState({ y: Math.round(y) })}>
+      <RecentRow list={recent} onOpen={(v) => navigation.navigate("Video", { videoId: v.id })} />
       <SearchField testID="video-search" value={query} onChangeText={setQuery}
                    placeholder="Search: travel, grammar, B1, слово…" label="Search videos"
                    style={{ marginBottom: 12 }} />
@@ -344,17 +405,24 @@ export function videoFor(params) {
 export function Video({ route, navigation }) {
   const { st, update } = useSession();
   const t = useTheme();
+  const wordsCtx = useWords();
   const params = route.params || {};
   const v = videoFor(params);
   const [focus, setFocus] = useState(() => (v ? focusAt(v, params) : null));
   /* Opened at a moment with no word to focus — a sentence from the video
      (prep.js VideoLines): the player starts a breath before it and plays on. */
   const at = !focus && typeof params.at === "number" ? params.at : null;
+  /* Otherwise it picks up where it was stopped (immerse.js; the owner,
+     2026-10-01: "continue exactly where you're at"). Asked for, not
+     automatic: the button says where, and pressing it plays from there. */
+  const resumeAt = useMemo(() => (v && !focus && at === null ? videoPosition(v.id) : 0), [v && v.id]);
   const [playing, setPlaying] = useState(!!focus || at !== null);
   const player = useRef(null);
   // A moment asked for before the player exists is held for onReady.
   const pending = useRef(focus ? [Math.max(0, focus.t - LEAD_MS), HOLD_MS]
-                         : at !== null ? [Math.max(0, at - LINE_LEAD_MS), 0] : null);
+                         : at !== null ? [Math.max(0, at - LINE_LEAD_MS), 0]
+                         : resumeAt ? [resumeAt, 0] : null);
+  useEffect(() => { if (v) openedVideo(v.id); }, [v && v.id]);
   /* The audio on this screen belongs to the video, not to us. Whatever a lesson
      left holding the session is handed back before the player loads, or the
      WebView plays silently and has no way to say why (the owner, 2026-09-10).
@@ -365,10 +433,20 @@ export function Video({ route, navigation }) {
      player reports its position only while the panel is showing. */
   const [showScript, setShowScript] = useState(false);
   const [pos, setPos] = useState(0);
+  /* The position is reported whenever the video plays — it is where the
+     learner will come back to — but only redraws the screen while the
+     transcript needs it; four renders a second of everything below the player
+     would buy nothing. */
+  const scriptOn = useRef(false);
+  scriptOn.current = showScript;
+  const onTime = (ms) => {
+    if (v) setVideoPosition(v.id, ms, v.dur ? v.dur * 1000 : 0);
+    if (scriptOn.current) setPos(ms);
+  };
   useEffect(() => {
-    if (player.current) player.current.watch(showScript && playing);
+    if (player.current) player.current.watch(playing);
     return () => { if (player.current) player.current.watch(false); };
-  }, [showScript, playing]);
+  }, [playing]);
   if (!v) return null;
   const script = showScript ? transcriptOf(v.id) : null;
   const seekTo = (ms) => {
@@ -456,24 +534,27 @@ export function Video({ route, navigation }) {
           <YouTube
             ref={player}
             videoId={v.id}
-            onTime={setPos}
+            onTime={onTime}
             onReady={() => {
               if (pending.current != null) {
                 player.current && player.current.seek(pending.current[0], pending.current[1]);
                 pending.current = null;
               }
-              if (showScript && player.current) player.current.watch(true);
+              if (player.current) player.current.watch(true);
             }}
           />
         </View>
       ) : (
-        <Btn kind="pri" label="Play here" onPress={() => setPlaying(true)} />
+        <Btn kind="pri" testID="video-play"
+             label={resumeAt ? `Resume from ${clock(resumeAt)}` : "Play here"}
+             onPress={() => setPlaying(true)} />
       )}
       <Btn testID="transcript-toggle" style={{ marginTop: 10 }}
            label={showScript ? "Hide transcript" : "Transcript"} onPress={() => setShowScript(!showScript)} />
       {showScript ? (
         script && script.length
-          ? <Transcript lines={script} position={pos} onSeek={seekTo} />
+          ? <Transcript lines={script} position={pos} onSeek={seekTo}
+                        onWord={(w) => { if (player.current) player.current.pause(); if (wordsCtx) wordsCtx.open(w); }} />
           : <Muted style={{ marginTop: 8 }}>No transcript for this one.</Muted>
       ) : null}
 

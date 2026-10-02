@@ -12,6 +12,50 @@ checked, what is still open.
 
 ---
 
+## Phase T — Before the testers (2026-10-01, in this order)
+
+The owner's list of 2026-10-01, sequenced so each step lands on a stable base:
+the screens first, the audio next, the curriculum change last of the content
+work (it moves lessons, conversations and audio, so it goes once, after the
+smaller things settle), the look after the content, the brand at the end.
+Each step ends with the full suite and is committed on its own.
+
+1. [ ] **Immerse keeps its place.** The library's search, filters, sort and
+       scroll, and each video's playback position, survive leaving the tab,
+       leaving the app and a restart. A video reopens where it stopped.
+2. [ ] **Recently watched.** A short row of the last videos opened, top of
+       the library, each resuming where it stopped.
+3. [ ] **The transcript reads like the rest of the app.** Every word is a
+       two-press link (the sheet, then the full entry), as everywhere else.
+4. [ ] **English under the transcript.** Each caption line with its English
+       beneath it, both highlighted as the video plays, behind a switch. The
+       captions are YouTube's auto-captions with no punctuation, so the
+       translation is made at build time in context (chunks, not single
+       lines), stored beside the transcripts, and labelled as machine-made.
+5. [ ] **One voice family.** Every curriculum word in the same voice — the
+       deep «знать» is a human recording kept on purpose in September, and it
+       is exactly the "extremely different" voice he hears. A man and a woman
+       are fine; four readers are not.
+6. [ ] **Every example on a card can be heard**, the dictionary's sense
+       examples included.
+7. [ ] **Word sets are taught whole.** Plate with spoon, knife, fork, glass;
+       all four seasons; the days, the months, the colours, the family. A
+       curated list of sets; a unit that teaches one member teaches the core
+       of the set. Moves lessons, so the conversations and audio follow.
+8. [ ] **Buttons that look made, not generated.** Lighter, sized to their
+       label, text centred, full width only where a screen has one action.
+9. [ ] **Brand.** A name that says "learn Russian" to a store search, and
+       five to ten logo directions that read at app-icon size, presented
+       side by side for his choice.
+
+**Not doing: downloading YouTube videos or their audio for offline use.**
+YouTube's terms forbid it outside YouTube's own offline feature, and an app
+that does it is removed from the Play Store. What already works offline is
+everything that is ours: lessons, words, sentences, conversations, the
+dictionary. The video stays a streamed embed.
+
+---
+
 ## Phase A — Smooth what he is testing (now)
 
 The app is feature-complete for a beta. This phase is about it feeling right

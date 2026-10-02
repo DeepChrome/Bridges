@@ -323,3 +323,6 @@ jest.mock("expo-file-system", () => {
 /* The microphone grant is cached for the life of the process (speech.js); each
    test starts as a fresh install would, asked again. */
 beforeEach(() => { require("./src/speech").forgetMicPermission(); });
+/* Where the learner was in Immerse lives in module memory (immerse.js), so a
+   search typed in one test would be waiting in the next. */
+beforeEach(() => { require("./src/immerse").resetImmerse(); });

@@ -26,7 +26,7 @@ describe("the transcript", () => {
   it("marks the line and word, follows until scrolled, and plays from a tapped line", async () => {
     const onSeek = jest.fn();
     const { rerender } = await render(<Transcript lines={LINES} position={2600} onSeek={onSeek} />);
-    expect(screen.getByTestId("transcript-word").props.children).toEqual([" ", "мы"]);
+    expect(screen.getByTestId("transcript-word").props.children).toBe("мы");
     expect(screen.getByTestId("transcript-follow").props.accessibilityState.selected).toBe(true);
     // A finger on the list stops it following; the chip puts it back.
     await act(async () => { fireEvent(screen.getByTestId("transcript-scroll"), "scrollBeginDrag"); });
@@ -37,7 +37,20 @@ describe("the transcript", () => {
     expect(onSeek).toHaveBeenCalledWith(5000);
     // The highlight moves with the position.
     await rerender(<Transcript lines={LINES} position={5100} onSeek={onSeek} />);
-    expect(screen.getByTestId("transcript-word").props.children).toEqual(["", "о"]);
+    expect(screen.getByTestId("transcript-word").props.children).toBe("о");
+  });
+
+  /* The owner, 2026-10-01: "allow links to full entries for words found
+     within the transcript". A word the dictionary knows opens it; the line
+     around it still plays from its time. */
+  it("opens a known word, and leaves an unknown one plain", async () => {
+    const onSeek = jest.fn(), onWord = jest.fn();
+    await render(<Transcript lines={[[0, "сегодня мы говорим ыыкс", [0, 50, 90, 130]]]}
+                             position={-1} onSeek={onSeek} onWord={onWord} />);
+    await act(async () => { fireEvent.press(screen.getByTestId("transcript-link-0-2")); });
+    expect(onWord).toHaveBeenCalledWith("говорим");
+    expect(onSeek).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("transcript-link-0-3")).toBeNull();
   });
 
   it("ships a transcript for the library's videos, in order", () => {

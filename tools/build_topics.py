@@ -659,7 +659,7 @@ CHAPTERS = [
     ("Feelings & Fears",       "School, Art and Nature"),
     ("Cooking & Celebrating",  "Sport and Society"),
     ("Style & Fashion",        "Faith and Health"),
-    ("Forests & Seasons",      "Law and Conflict"),
+    ("Swamps & Berries",       "Law and Conflict"),
 ]
 
 # --- which quests are genuinely optional -------------------------------

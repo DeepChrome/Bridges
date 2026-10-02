@@ -1,10 +1,12 @@
-"""The app icon: a bridge, in the app's own colours.
+"""The app icon: «Я», white on coral.
 
 Hand-rolled with zlib, so the repository can regenerate its artwork without an
-image library. A suspension bridge in white on the brand indigo — two towers,
-the deck, the main cable and its hangers — reads as "bridge" at 48 px on a
-phone. Writes every size Expo needs (native/assets) and the web icons
-(site/icons). It replaced make_icons.py, whose three bars were the old mark.
+image library. The owner chose the "Ya" direction from the brand board
+(2026-10-01): a heavy geometric Я — the letter that is also the word "I", and
+the first one a learner sees that English does not have — white on coral
+#D9502A. Three strokes (stem, bowl, leg) read at a launcher's 48 px where a
+detailed mark would not. It replaced the suspension bridge. Writes every size
+Expo needs (native/assets) and the web icons (site/icons).
 
     python tools/make_app_icon.py
 """
@@ -19,10 +21,8 @@ from pathlib import Path
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = Path(__file__).resolve().parent.parent
 
-INDIGO = (77, 69, 230)          # theme.js light brand #4D45E6
-INDIGO_DEEP = (51, 44, 188)     # brandDim, the lower half of a soft gradient
+CORAL = (217, 80, 42)           # #D9502A, the brand board's "Ya"
 WHITE = (255, 255, 255)
-SPLASH_BG = (247, 248, 249)     # theme.js light bg
 
 
 def png_bytes(w, h, rows):
@@ -47,86 +47,52 @@ def seg_dist(px, py, ax, ay, bx, by):
     return math.hypot(px - ex, py - ey)
 
 
-class Bridge:
-    """The mark in a unit square (0..1), scaled to `size`. Every stroke is a
-    signed distance so edges are anti-aliased rather than stepped."""
+class Ya:
+    """«Я» in a unit square (0..1), scaled to `size`. Every stroke is a signed
+    distance so edges are anti-aliased rather than stepped. The proportions
+    follow a heavy geometric face (the board set it in Unbounded 800): a
+    full-height stem on the right, a bowl over the top half, and a straight
+    leg from the bowl to the bottom left."""
 
     def __init__(self, size, inset):
         self.s = size
-        self.inset = inset                     # fraction of the icon kept clear
         span = 1 - 2 * inset
-        self.x0, self.x1 = inset, 1 - inset
-        self.deck_y = inset + span * 0.62
-        self.tower_x = (inset + span * 0.27, inset + span * 0.73)
-        self.tower_top = inset + span * 0.16
-        self.tower_w = span * 0.045
-        self.deck_h = span * 0.055
-        self.cable_w = span * 0.032
-        self.hanger_w = span * 0.016
-        self.sag = span * 0.30                 # how far the main cable dips
-        self.polyline = self._cable()
-
-    def _cable(self):
-        """The main cable: two towers joined by a parabola, side spans falling
-        to the deck ends. Sampled into segments once."""
-        pts = []
-        lx, rx = self.tower_x
-        # left side span: from deck end up to the left tower top
-        for k in range(0, 21):
-            t = k / 20
-            x = self.x0 + (lx - self.x0) * t
-            y = self.deck_y - (self.deck_y - self.tower_top) * (t ** 1.6)
-            pts.append((x, y))
-        # main span: parabola between the towers
-        for k in range(1, 41):
-            t = k / 40
-            x = lx + (rx - lx) * t
-            y = self.tower_top + self.sag * (4 * t * (1 - t))
-            pts.append((x, y))
-        for k in range(1, 21):
-            t = k / 20
-            x = rx + (self.x1 - rx) * t
-            y = self.tower_top + (self.deck_y - self.tower_top) * ((1 - (1 - t) ** 1.6))
-            pts.append((x, y))
-        return pts
-
-    def cable_y(self, x):
-        pts = self.polyline
-        for (ax, ay), (bx, by) in zip(pts, pts[1:]):
-            if ax <= x <= bx:
-                t = 0 if bx == ax else (x - ax) / (bx - ax)
-                return ay + (by - ay) * t
-        return None
+        self.w = span * 0.155                       # stroke weight
+        self.top, self.bot = inset + span * 0.10, inset + span * 0.90
+        width = (self.bot - self.top) * 0.80        # a heavy Я is a little narrow
+        self.xl = 0.5 - width / 2
+        self.xr = 0.5 + width / 2
+        self.mid = self.top + (self.bot - self.top) * 0.56   # where the bowl closes
+        h = self.w / 2
+        r = (self.mid - self.top - self.w) / 2      # the bowl's round, centre line
+        cx, cy = self.xl + h + r, self.top + h + r
+        # The bowl's centre line: along the top from the stem, round the left,
+        # back along its foot to the stem.
+        pts = [(self.xr - h, self.top + h), (cx, self.top + h)]
+        for k in range(1, 24):
+            a = math.pi / 2 + math.pi * k / 24
+            pts.append((cx + r * math.cos(a), cy - r * math.sin(a)))
+        pts += [(cx, cy + r), (self.xr - h, cy + r)]
+        self.bowl = pts
+        # The leg leaves the bowl's foot a little left of centre and lands at
+        # the bottom left — carried past the baseline and cut flat there, so its
+        # foot is square like the stem's rather than a rounded cap.
+        sx, sy = cx + r * 0.55, cy + r
+        ex, ey = self.xl + h * 1.05, self.bot - h
+        k = (self.bot + self.w - sy) / (ey - sy) if ey != sy else 1   # no span: the plain background
+        self.leg = ((sx, sy), (sx + (ex - sx) * k, sy + (ey - sy) * k))
 
     def coverage(self, px, py):
         """0..1 how much of this pixel the white mark covers."""
         x, y = px / self.s, py / self.s
         aa = 0.9 / self.s
-        best = 10.0
-        # deck
-        best = min(best, self._rect(x, y, self.x0, self.deck_y - self.deck_h / 2,
-                                    self.x1, self.deck_y + self.deck_h / 2, self.deck_h / 2))
-        # towers, a little above the cable top and below the deck
-        for tx in self.tower_x:
-            best = min(best, self._rect(x, y, tx - self.tower_w / 2, self.tower_top - self.tower_w,
-                                        tx + self.tower_w / 2, self.deck_y + self.deck_h * 1.6,
-                                        self.tower_w / 2))
-        # main cable
-        pts = self.polyline
-        d = min(seg_dist(x, y, ax, ay, bx, by) for (ax, ay), (bx, by) in zip(pts, pts[1:]))
-        best = min(best, d - self.cable_w / 2)
-        # hangers between the cable and the deck, on the main span and side spans
-        lx, rx = self.tower_x
-        n = 11
-        for k in range(n):
-            hx = self.x0 + (self.x1 - self.x0) * (k + 0.5) / n
-            if abs(hx - lx) < self.tower_w or abs(hx - rx) < self.tower_w:
-                continue
-            cy = self.cable_y(hx)
-            if cy is None or self.deck_y - cy < self.hanger_w * 2:
-                continue
-            best = min(best, self._rect(x, y, hx - self.hanger_w / 2, cy,
-                                        hx + self.hanger_w / 2, self.deck_y, self.hanger_w / 2))
+        h = self.w / 2
+        best = self._rect(x, y, self.xr - self.w, self.top, self.xr, self.bot, 0)     # stem
+        d = min(seg_dist(x, y, ax, ay, bx, by) for (ax, ay), (bx, by) in zip(self.bowl, self.bowl[1:]))
+        best = min(best, d - h)
+        (ax, ay), (bx, by) = self.leg
+        leg = seg_dist(x, y, ax, ay, bx, by) - h
+        best = min(best, max(leg, y - self.bot))      # flat at the baseline, as the stem is
         return max(0.0, min(1.0, 0.5 - best / aa / 2))
 
     @staticmethod
@@ -144,21 +110,21 @@ def blend(a, b, t):
     return tuple(int(round(a[i] + (b[i] - a[i]) * t)) for i in range(3))
 
 
-def draw(size, inset, corner, background=True, gradient=True, mark_color=WHITE, transparent_bg=False):
-    bridge = Bridge(size, inset)
+def draw(size, inset, corner, background=True, mark_color=WHITE, transparent_bg=False):
+    mark = Ya(size, inset)
     rows = []
     for py in range(size):
         row = []
         for px in range(size):
             if background and not transparent_bg:
-                bg = blend(INDIGO, INDIGO_DEEP, py / size) if gradient else INDIGO
+                bg = CORAL
                 alpha = 255
                 if corner:
                     d = _rounded_dist(px + 0.5, py + 0.5, size, corner)
                     alpha = int(255 * max(0.0, min(1.0, 0.5 - d)))
             else:
                 bg, alpha = (0, 0, 0), 0
-            c = bridge.coverage(px + 0.5, py + 0.5)
+            c = mark.coverage(px + 0.5, py + 0.5)
             if alpha == 0:
                 # transparent ground: the mark alone, with its own alpha
                 row.append((mark_color[0], mark_color[1], mark_color[2], int(255 * c)))
@@ -186,7 +152,7 @@ def main():
         # background is the plain ground; monochrome is the mark alone.
         (args.native / "icon.png", dict(size=1024, inset=0.16, corner=0)),
         (args.native / "android-icon-foreground.png", dict(size=1024, inset=0.30, corner=0, transparent_bg=True)),
-        (args.native / "android-icon-background.png", dict(size=1024, inset=0.5, corner=0, mark_color=INDIGO)),
+        (args.native / "android-icon-background.png", dict(size=1024, inset=0.5, corner=0, mark_color=CORAL)),
         (args.native / "android-icon-monochrome.png", dict(size=1024, inset=0.30, corner=0, transparent_bg=True)),
         (args.native / "splash-icon.png", dict(size=512, inset=0.14, corner=110)),
         (args.native / "favicon.png", dict(size=64, inset=0.12, corner=14)),
@@ -199,7 +165,8 @@ def main():
         path.parent.mkdir(parents=True, exist_ok=True)
         data = draw(**spec)
         path.write_bytes(data)
-        print(f"  {path.relative_to(ROOT)!s:<44} {spec['size']}px  {len(data) / 1024:.1f} KB")
+        shown = path.relative_to(ROOT) if path.is_relative_to(ROOT) else path
+        print(f"  {shown!s:<44} {spec['size']}px  {len(data) / 1024:.1f} KB")
     print(f"wrote {len(jobs)} icons")
 
 

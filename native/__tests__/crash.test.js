@@ -133,7 +133,7 @@ describe("the crash log", () => {
 
   it("goes out as something a person can read", () => {
     const text = crashText([crashEntry(new Error("nope"), { componentStack: "\n  in Run" }, 0)], 0);
-    expect(text).toMatch(/Bridges problem report/);
+    expect(text).toMatch(/Ya problem report/);
     expect(text).toMatch(/nope/);
     expect(text).toMatch(/components:/);
     // No learner state and no profile name: what broke, when, and where.

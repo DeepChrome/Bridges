@@ -19,6 +19,7 @@ import {
 } from "./store";
 import { reconcileCurriculum } from "./data";
 import { loadImmerse, flushImmerse } from "./immerse";
+import { APP_NAME } from "./brand";
 
 const Ctx = createContext(null);
 
@@ -77,7 +78,7 @@ export function SessionProvider({ children }) {
           setSt(loaded);
         }
       } catch (e) {
-        if (live) setError({ kind: "boot", text: `Bridges could not start: ${e && e.message}` });
+        if (live) setError({ kind: "boot", text: `${APP_NAME} could not start: ${e && e.message}` });
       }
       if (live) setReady(true);
     })();

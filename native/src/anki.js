@@ -16,6 +16,7 @@ import * as SQLite from "expo-sqlite";
 import * as Picker from "expo-document-picker";
 import { File } from "expo-file-system";
 import { decksFromNotes, parseTextDeck } from "@core/anki";
+import { APP_NAME } from "./brand";
 
 const defaultDeps = {
   pick: () => Picker.getDocumentAsync({ copyToCacheDirectory: true, multiple: false,
@@ -78,7 +79,7 @@ export async function importDeck(deps = {}) {
     return decks.length ? { decks, source: asset.name }
       : { error: "No lines with Russian in this file." };
   } catch (e) {
-    return { error: "This file is not a deck Bridges can read." };
+    return { error: `This file is not a deck ${APP_NAME} can read.` };
   }
 }
 

@@ -28,12 +28,13 @@ import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { workedOn } from "@core/scheduler";
 import { dayOf } from "@core/util";
+import { APP_NAME } from "./brand";
 
 export const HORIZON = 14;
 const CHANNEL = "daily";
 /* Rule 20.7: a label, not a sentence. A notification is the one place copy is
    read with no screen around it to explain it, so it says the thing and stops. */
-const TITLE = "Bridges";
+const TITLE = APP_NAME;
 const BODY = "Time for Russian";
 
 /* Which instants a reminder should land on, given the learner's state and the

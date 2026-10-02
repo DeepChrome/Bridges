@@ -16,6 +16,7 @@ import * as Sharing from "expo-sharing";
 import { File, Paths } from "expo-file-system";
 import { normalise, readLog } from "./store";
 import { validLog } from "@core/repo";
+import { APP_NAME } from "./brand";
 
 const defaultDeps = {
   pick: () => Picker.getDocumentAsync({ copyToCacheDirectory: true, multiple: false,
@@ -60,7 +61,7 @@ export async function backupProfile(state, account, deps = {}) {
  * in the component tree, which is all a fix needs. */
 export function crashText(list, now = Date.now()) {
   const when = (ms) => new Date(ms).toISOString().replace("T", " ").slice(0, 19);
-  const head = `Bridges problem report, ${when(now)} UTC\n${(list || []).length} recorded\n`;
+  const head = `${APP_NAME} problem report, ${when(now)} UTC\n${(list || []).length} recorded\n`;
   return head + (list || []).map((c, k) =>
     `\n--- ${k + 1} --- ${when(c.at)} UTC${c.fatal ? " (fatal)" : ""}\n${c.what}\n`
     + (c.stack ? `\n${c.stack}\n` : "")
@@ -84,11 +85,11 @@ export async function restoreProfile(deps = {}) {
   let text;
   try { text = await d.readText(res.assets[0].uri); } catch (e) { return { error: "The file could not be read." }; }
   let raw;
-  try { raw = JSON.parse(text); } catch (e) { return { error: "This is not a Bridges backup." }; }
+  try { raw = JSON.parse(text); } catch (e) { return { error: `This is not a ${APP_NAME} backup.` }; }
   // A backup file, or a bare state the web app exported.
   const state = raw && raw.kind === BACKUP_KIND ? raw.state : raw;
   if (!state || typeof state !== "object" || !("seen" in state)) {
-    return { error: "This is not a Bridges backup." };
+    return { error: `This is not a ${APP_NAME} backup.` };
   }
   return { state: normalise(state), log: validLog(raw.log), made: raw.made, name: raw.name };
 }

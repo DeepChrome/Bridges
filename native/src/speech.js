@@ -37,6 +37,9 @@ import { useRef, useState } from "react";
 import {
   ExpoSpeechRecognitionModule as M, useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
+import { APP_NAME } from "./brand";
+
+const MIC_OFF = `The microphone is off for ${APP_NAME}.`;
 
 export const LANG = "ru-RU";
 /* The one other language the recogniser is ever asked for: the English side of
@@ -310,7 +313,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
                  text: `${NAME[lang.current] || lang.current} is not installed for offline recognition.` });
     } else if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
       forgetMicPermission();
-      setBlock({ why: "mic", text: "The microphone is off for Bridges." });
+      setBlock({ why: "mic", text: MIC_OFF});
     } else if (TRANSIENT[ev.error]) {
       setNote(TRANSIENT[ev.error]);
     } else {
@@ -365,7 +368,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     if (!perm.granted) {
       go("idle");
       selfEnding.current = false;
-      setBlock({ why: "mic", text: "The microphone is off for Bridges." });
+      setBlock({ why: "mic", text: MIC_OFF});
       return;
     }
     if (releasedEarly.current) { go("idle"); selfEnding.current = false; return; }

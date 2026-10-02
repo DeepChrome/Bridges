@@ -1,4 +1,4 @@
-/* Bridges — native shell.
+/* Ya (formerly Bridges) — native shell.
  *
  * Five destinations: Learn, Study, Practice, Immerse, Search. The learning data, the
  * scheduler, the question generators, the icons and the avatars all come from core/
@@ -42,6 +42,8 @@ import Credits from "./src/screens/Credits";
 import { UnitScreen, LessonScreen } from "./src/screens/Unit";
 import Summary from "./src/screens/Summary";
 import { Immerse, Video, VideoHistory } from "./src/screens/Misc";
+import { Mark } from "./src/mark";
+import { APP_NAME } from "./src/brand";
 import { Gate } from "./src/screens/Gate";
 import WordScreen from "./src/screens/Word";
 import SttLab from "./src/screens/SttLab";
@@ -373,7 +375,7 @@ function SearchStack() {
   );
 }
 
-/* Three bars settle in, then the wordmark, and it is gone inside a second — it
+/* The Я tile settles in, then the name, and it is gone inside a second — it
    never stands between the learner and studying, and a tap ends it early.
    No tagline: the mark and the name are the whole of it (the owner,
    2026-09-19, on "Russian, from your own words"). */
@@ -381,40 +383,29 @@ const SPLASH_MS = 900;
 function Splash({ onDone }) {
   const scheme = useColorScheme();
   const p = palette(scheme);
-  const bars = [useRef(new Animated.Value(0)).current,
-                useRef(new Animated.Value(0)).current,
-                useRef(new Animated.Value(0)).current];
+  const tile = useRef(new Animated.Value(0)).current;
   const word = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.stagger(60, bars.map((b) =>
-      Animated.timing(b, { toValue: 1, duration: 260, useNativeDriver: true }))).start();
+    Animated.timing(tile, { toValue: 1, duration: 300, useNativeDriver: true }).start();
     Animated.timing(word, { toValue: 1, duration: 300, delay: 180,
                             useNativeDriver: true }).start();
     const timer = setTimeout(onDone, SPLASH_MS);
     return () => clearTimeout(timer);
   }, []);
 
-  const widths = [52, 80, 108];
   return (
     <Pressable onPress={onDone}
                style={{ flex: 1, backgroundColor: p.bg, alignItems: "center",
                         justifyContent: "center" }}>
-      <View style={{ gap: 7, marginBottom: 22, alignItems: "center" }}>
-        {bars.map((b, i) => (
-          <Animated.View
-            key={i}
-            style={{ width: widths[i], height: 13, borderRadius: 7,
-                     backgroundColor: i === 2 ? p.ink : p.brand,
-                     opacity: b,
-                     transform: [{ scaleX: b.interpolate({
-                       inputRange: [0, 1], outputRange: [0.2, 1] }) }] }}
-          />
-        ))}
-      </View>
-      <Animated.Text style={{ color: p.ink, fontSize: 30, fontWeight: "700",
+      <Animated.View style={{ marginBottom: 18, opacity: tile,
+                              transform: [{ scale: tile.interpolate({
+                                inputRange: [0, 1], outputRange: [0.85, 1] }) }] }}>
+        <Mark size={88} />
+      </Animated.View>
+      <Animated.Text style={{ color: p.ink, fontSize: 30, fontWeight: "800",
                               opacity: word }}>
-        Bridges
+        {APP_NAME}
       </Animated.Text>
     </Pressable>
   );

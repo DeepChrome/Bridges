@@ -28,6 +28,7 @@ import { tagInfo } from "@core/errortags";
 import { cardsOf, maxLapses } from "@core/scheduler";
 import { QUEUE_DEFAULTS } from "@core/queue";
 import { askPermission } from "../notify";
+import { APP_NAME } from "../brand";
 
 /* When the reminder may land, as minutes past midnight. Four, not twenty-four:
    the question is which part of the day a learner studies in, and a list long
@@ -378,7 +379,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   ) : null}
                   {/* One of rule 20.7's three reasons: without it the switch
                       springs back to off and nothing says why. */}
-                  {remindDenied ? <Muted>Notifications are off for Bridges in Android settings</Muted> : null}
+                  {remindDenied ? <Muted>{`Notifications are off for ${APP_NAME} in Android settings`}</Muted> : null}
                 </View>
                 <Switch
                   testID="remind-switch"
@@ -537,7 +538,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                 what was actually shipped. */}
             {VERSION ? (
               <Muted testID="app-version" size={12} style={{ textAlign: "center", marginTop: 20 }}>
-                {`Bridges ${VERSION}`}
+                {`${APP_NAME} ${VERSION}`}
               </Muted>
             ) : null}
             <View style={{ marginTop: 20 }}>

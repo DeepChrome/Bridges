@@ -49,7 +49,6 @@ export const ALLOW = new Map([
   ["Your saved progress could not be read. It has been kept aside;",
    "P9: the state banner, and it has to be plain about what happened"],
   ["No connection. Try again when you are online.", "failure with a cause"],
-  ["This file is not a deck Bridges can read.", "failure with a cause"],
   ["No cards with Russian on them in this deck.", "failure with a cause"],
   ["The owner does not allow this video to be embedded.", "failure with a cause"],
 ]);

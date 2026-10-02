@@ -54,7 +54,7 @@ describe("backup and restore", () => {
     expect(j.log.map((x) => x.word)).toEqual(["да"]);
 
     const no = await restoreProfile({ pick: async () => ({ assets: [{ uri: "u" }] }), readText: async () => "{\"hello\":1}" });
-    expect(no.error).toMatch(/not a Bridges backup/);
+    expect(no.error).toMatch(/not a Ya backup/);
     const cancelled = await restoreProfile({ pick: async () => ({ canceled: true }) });
     expect(cancelled.cancelled).toBe(true);
     expect(JSON.parse(backupText(state, null)).name).toBe("");

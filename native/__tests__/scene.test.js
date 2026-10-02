@@ -143,26 +143,29 @@ describe("the listening scenario", () => {
     expect(global.__players[0].play).toHaveBeenCalled();
   });
 
-  /* Three-quarter speed (PLAYBOOK 3.4). The slow button is the one control a
-     listener reaches for that the app did not have; what it has to do is
-     reach the player, not merely change its own label. */
-  it("plays slower when asked, and back at full speed when asked again", async () => {
+  /* The speed button cycles 1× → ¾× → ½× → 1× (the owner, 2026-10-02). What
+     it has to do is reach the player, not merely change its own label. */
+  it("cycles the speed, and the player plays at it", async () => {
     await withScene();
-    const slow = await screen.findByTestId("scene-slow");
-    // It offers the thing it will do, not the state it is in.
-    expect(slow).toHaveTextContent("¾×");
-    await act(async () => { fireEvent.press(slow); });
-    expect(screen.getByTestId("scene-slow")).toHaveTextContent("1×");
+    const speed = await screen.findByTestId("scene-slow");
+    expect(speed).toHaveTextContent("1×");
+    await act(async () => { fireEvent.press(speed); });
+    expect(screen.getByTestId("scene-slow")).toHaveTextContent("¾×");
 
     await act(async () => { fireEvent.press(screen.getByTestId("scene-play")); });
     // `global.__players` accumulates across this file (only `__played` is
     // cleared between tests), so the one that matters is the newest.
     await waitFor(() => expect(global.__played).toHaveLength(1));
-    const player = global.__players[global.__players.length - 1];
-    expect(player.setPlaybackRate).toHaveBeenCalledWith(0.75, "high");
+    expect(global.__players[global.__players.length - 1].setPlaybackRate).toHaveBeenCalledWith(0.75, "high");
+
+    // Pressed while playing, it restarts at the next speed from the same line.
+    await act(async () => { fireEvent.press(screen.getByTestId("scene-slow")); });
+    expect(screen.getByTestId("scene-slow")).toHaveTextContent("½×");
+    await waitFor(() => expect(global.__played).toHaveLength(2));
+    expect(global.__players[global.__players.length - 1].setPlaybackRate).toHaveBeenCalledWith(0.5, "high");
 
     await act(async () => { fireEvent.press(screen.getByTestId("scene-slow")); });
-    expect(screen.getByTestId("scene-slow")).toHaveTextContent("¾×");
+    expect(screen.getByTestId("scene-slow")).toHaveTextContent("1×");
   });
 
   it("reads each speaker in their own voice when it falls back", async () => {
@@ -257,5 +260,52 @@ describe("the listening scenario", () => {
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     await waitFor(() => expect(onFinish).toHaveBeenCalled());
     expect(onFinish.mock.calls[0][0].right).toBe(1);
+  });
+
+  /* The transcript's speakers say each line in the voice that said it in the
+     conversation (the owner, 2026-10-02: "use the same voices for those
+     individual sentence recordings"): the line's slice of the bought track,
+     never a separately bought clip in some other voice. */
+  async function answerAll() {
+    await screen.findByTestId("scene-play");
+    for (let k = 0; k < question.questions.length; k++) {
+      const right = question.questions[k].options.find((o) => o.right);
+      await act(async () => { fireEvent.press(within(screen.getByTestId(`scene-q-${k}`)).getByText(right.label)); });
+    }
+    await act(async () => { fireEvent.press(screen.getByText("Check")); });
+    return within(await screen.findByTestId("scene-transcript"));
+  }
+
+  it("plays a transcript line from the conversation's own track", async () => {
+    await withScene();
+    const t = await answerAll();
+    global.__played = [];
+    const speakers = t.getAllByTestId("speaker-real");
+    expect(speakers).toHaveLength(question.lines.length);
+    await act(async () => { fireEvent.press(speakers[1]); });
+    await waitFor(() => expect(global.__played).toEqual(["asset"]));
+    expect(global.__spoke).toHaveLength(0);
+  });
+
+  it("reads a transcript line in its speaker's voice when there is no track", async () => {
+    await withScene(jest.fn(), spoken);
+    await screen.findByTestId("scene-play");
+    for (let k = 0; k < spoken.questions.length; k++) {
+      const right = spoken.questions[k].options.find((o) => o.right);
+      await act(async () => { fireEvent.press(within(screen.getByTestId(`scene-q-${k}`)).getByText(right.label)); });
+    }
+    await act(async () => { fireEvent.press(screen.getByText("Check")); });
+    const t = within(await screen.findByTestId("scene-transcript"));
+    // Hear the start of it, to learn the second line's voice, then stop.
+    await act(async () => { fireEvent.press(screen.getByTestId("scene-play")); });
+    await waitFor(() => expect(global.__spoke.length).toBeGreaterThan(1));
+    const voiceOf = (o) => `${o.voice}/${o.pitch}`;
+    const inScene = voiceOf(global.__spokeOpts[1]);
+    await act(async () => { fireEvent.press(screen.getByTestId("scene-play")); });
+    global.__spoke = [];
+    global.__spokeOpts = [];
+    await act(async () => { fireEvent.press(t.getAllByTestId("speaker-tts")[1]); });
+    await waitFor(() => expect(global.__spoke).toEqual([spoken.lines[1].ru]));
+    expect(voiceOf(global.__spokeOpts[0])).toBe(inScene);
   });
 });

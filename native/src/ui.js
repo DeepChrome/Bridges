@@ -1064,12 +1064,15 @@ export function useRussianVoice() {
    replayed in the character's voice it first spoke in (the review,
    2026-09-30: replayed through `say`, Gena changed voice on a second press).
    It is always the device voice, so the button says so. */
-export function Speaker({ text, size = 40, device = false, speak }) {
+export function Speaker({ text, size = 40, device = false, speak, recorded = false }) {
   const t = useTheme();
   /* With `device` the recording is deliberately not used, so the button must
      not claim one: `real` decides the label and the testID, and "Hear it"
-     over a device voice would be §27's lie in the other direction. */
-  const real = hasRealAudio(text) && !device && !speak;
+     over a device voice would be §27's lie in the other direction. A `speak`
+     of the caller's own plays whatever the caller plays, so it is a recording
+     only when the caller says so (`recorded`: a conversation line played from
+     its bought track). */
+  const real = recorded || (hasRealAudio(text) && !device && !speak);
   const voice = useRussianVoice();
   // A stream that failed with no voice to fall back on: the button says so
   // for a few seconds instead of doing nothing (audio.js onAudioFailure).

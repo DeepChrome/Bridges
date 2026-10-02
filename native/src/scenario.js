@@ -40,10 +40,11 @@ export const GAP_MS = 420;
 /* How far a press of the back button moves. */
 export const SKIP_MS = 5000;
 
-/* The slow button (PLAYBOOK 3.4). Three quarters is the rate the app already
-   uses for a second press of a speaker (§30h `rateFor`), so a learner who
-   has met "press it twice for slower" meets the same speed here. */
-export const SLOW_RATE = 0.75;
+/* The speed button cycles these, starting at full speed (the owner,
+   2026-10-02: "offer maybe a 1/2 speed… pressing that button… will cycle
+   through all options (starting at 1x)"). Three quarters is the rate a second
+   press of any speaker plays at (§30h `rateFor`). */
+export const RATES = [1, 0.75, 0.5];
 
 /* How long a line will take to say, before it has ever been said.
  *
@@ -117,7 +118,7 @@ export function useScenario(lines, cast, seed = "") {
   const [at, setAt] = useState(-1);          // the line sounding, -1 for none
   const [pos, setPos] = useState(0);         // milliseconds into the scenario
   const [plays, setPlays] = useState(0);     // how many times it was started
-  const [slow, setSlow] = useState(false);   // three-quarter speed
+  const [rate, setRate] = useState(1);       // one of RATES
 
   /* Measured line lengths, **by rate**: the same line takes a third longer at
      three quarters speed, and the rule that a measurement is never overwritten
@@ -125,7 +126,6 @@ export function useScenario(lines, cast, seed = "") {
      learner went back to full speed, and the conversation would appear to
      change length while they were looking at it. */
   const measuredAt = useRef({});
-  const rate = slow ? SLOW_RATE : 1;
   const measured = { get current() {
     const k = String(rate);
     if (!measuredAt.current[k]) measuredAt.current[k] = {};
@@ -138,6 +138,7 @@ export function useScenario(lines, cast, seed = "") {
   // this five times a second.
   const track = useMemo(() => trackWhenCurrent(seed, lines), [seed, lines]);
   const handle = useRef(null);               // the track's player, while one is open
+  const until = useRef(null);                // where a single line's playback stops (playLine)
 
   useEffect(() => () => {
     alive.current = false;
@@ -171,6 +172,14 @@ export function useScenario(lines, cast, seed = "") {
       try { ms = h.pos(); } catch (e) { handle.current = null; setPlaying(false); setAt(-1); return undefined; }
       setPos(ms);
       setAt(lineAt(track.spans, ms));
+      if (until.current !== null && ms >= until.current) {
+        until.current = null;
+        h.stop();
+        handle.current = null;
+        setPlaying(false);
+        setAt(-1);
+        return undefined;
+      }
       if (h.ended()) {
         h.stop();
         handle.current = null;
@@ -202,8 +211,9 @@ export function useScenario(lines, cast, seed = "") {
 
   /* `r` is the rate to play at — passed, not read from the closure, because
      toggleSlow calls this before React has re-rendered with the new rate. */
-  const play = async (fromMs = 0, r = rate) => {
+  const play = async (fromMs = 0, r = rate, end = null) => {
     const id = ++run.current;
+    until.current = end;
     if (handle.current) { handle.current.stop(); handle.current = null; }
     stop();
     setPlaying(true);
@@ -226,7 +236,8 @@ export function useScenario(lines, cast, seed = "") {
     const tl = spans();
     let k = lineAt(tl.spans, fromMs);
     let base = tl.spans.length ? tl.spans[k].start : 0;
-    for (; k < lines.length; k++) {
+    const last = end === null ? lines.length : lineAt(tl.spans, end - 1) + 1;
+    for (; k < last; k++) {
       if (!alive.current || run.current !== id) return;
       setAt(k);
       mark.current = { base, at: Date.now() };
@@ -245,7 +256,7 @@ export function useScenario(lines, cast, seed = "") {
       if (took > 250 && !measured.current[k]) measured.current[k] = took;
       base += (measured.current[k] || estimateMs(lines[k].ru)) + GAP_MS;
       setPos(base);
-      if (k + 1 < lines.length) {
+      if (k + 1 < last) {
         await new Promise((go) => setTimeout(go, GAP_MS));
         if (!alive.current || run.current !== id) return;
       }
@@ -308,25 +319,36 @@ export function useScenario(lines, cast, seed = "") {
     else play(pos >= spans().total ? 0 : pos);
   };
 
-  /* Three-quarter speed, on and off. Changing it while the conversation is
+  /* One line on its own, in the voice that says it in the conversation: the
+     transcript's speakers (the owner, 2026-10-02: "the voices for the original
+     playing of the prompt are different than the ones at the bottom… use the
+     same voices"). A bought track plays that line's slice of itself and stops
+     at its end; the device voices read that one line with its speaker's voice. */
+  const playLine = (k) => {
+    const tl = spans();
+    if (!tl.spans[k]) return;
+    play(tl.spans[k].start, rate, tl.spans[k].start + tl.spans[k].ms);
+  };
+
+  /* The next speed, round the cycle. Changing it while the conversation is
      sounding restarts from the line that is sounding rather than from the
      top: the learner pressed it because they did not catch *that* line, and
      sending them back to the beginning is the opposite of what they asked
      for. `play` rounds to a line boundary for the device voices and lands
      exactly for a bought track, which is the behaviour the back button
      already has. */
-  const toggleSlow = () => {
-    const next = !slow;
-    setSlow(next);
+  const cycleRate = () => {
+    const next = RATES[(RATES.indexOf(rate) + 1) % RATES.length];
+    setRate(next);
     if (!playing) return;
     const tl = spans();
     const from = at >= 0 && tl.spans[at] ? tl.spans[at].start : pos;
     /* The new rate is handed over. It used to be read through the closure
        from a setTimeout, which still held the render with the old rate, so the
        label flipped and the audio did not (the review, 2026-10-01). */
-    play(from, next ? SLOW_RATE : 1);
+    play(from, next);
   };
 
-  return { playing, at, pos, plays, slow, total: spans().total,
-           play, pause, back, toggle, toggleSlow, seek };
+  return { playing, at, pos, plays, rate, total: spans().total, recorded: !!track,
+           play, pause, back, toggle, cycleRate, seek, playLine };
 }

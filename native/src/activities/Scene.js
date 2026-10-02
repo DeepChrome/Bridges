@@ -59,6 +59,8 @@ function Icon({ d, size = 22, color }) {
   );
 }
 
+const RATE_LABEL = { 1: "1×", 0.75: "¾×", 0.5: "½×" };
+
 const PLAY = "M7 4v16l13-8z";
 const PAUSE = "M7 4h4v16H7zM13 4h4v16h-4z";
 // An arrow curling back on itself: five seconds the other way.
@@ -100,25 +102,24 @@ function Transport({ s }) {
         >
           <Icon d={s.playing ? PAUSE : PLAY} size={30} color={t.brandOn} />
         </Pressable>
-        {/* Three-quarter speed (PLAYBOOK 3.4). A toggle rather than a menu of
-            rates: the question a listener has is "say that again, slower",
-            and it wants one press. It shows what it will do, not what is on,
-            in the same way the rest of the transport does. */}
+        {/* The speed, one press round the cycle 1× → ¾× → ½× (the owner,
+            2026-10-02). It shows the speed playing now; any speed but full
+            is lit, so a slowed conversation does not look like the normal one. */}
         <Pressable
           testID="scene-slow"
           accessibilityRole="button"
-          accessibilityState={{ selected: !!s.slow }}
-          accessibilityLabel={s.slow ? "Play at full speed" : "Play slower"}
-          onPress={s.toggleSlow}
+          accessibilityState={{ selected: s.rate !== 1 }}
+          accessibilityLabel={`Speed ${RATE_LABEL[s.rate]}, press to change`}
+          onPress={s.cycleRate}
           style={({ pressed }) => ({
             width: 52, height: 52, borderRadius: 26, alignItems: "center",
             justifyContent: "center", borderWidth: 1,
-            borderColor: s.slow ? t.brand : t.line,
-            backgroundColor: s.slow ? t.brandBg : pressed ? t.surface2 : t.surface,
+            borderColor: s.rate !== 1 ? t.brand : t.line,
+            backgroundColor: s.rate !== 1 ? t.brandBg : pressed ? t.surface2 : t.surface,
           })}
         >
-          <Text style={{ color: s.slow ? t.brandInk : t.ink2, fontSize: 13, fontWeight: "700" }}>
-            {s.slow ? "1×" : "¾×"}
+          <Text style={{ color: s.rate !== 1 ? t.brandInk : t.ink2, fontSize: 13, fontWeight: "700" }}>
+            {RATE_LABEL[s.rate]}
           </Text>
         </Pressable>
         <Pressable
@@ -410,13 +411,14 @@ export function Scene({ q, r }) {
                 </Text>
               ) : null}
               {/* Each line can be heard on its own once the transcript is
-                  open — the recording is one track, and a learner reading
-                  back a line they missed wants that line, not the whole
-                  conversation again (the owner, 2026-09-23: a speaker on
-                  every sentence). The device voice, as `Speaker` says. */}
+                  open, in the voice that said it (the owner, 2026-10-02:
+                  "chop up the prompt and use the same voices"): its slice of
+                  the conversation's own track, or the device reading it with
+                  that speaker's voice where there is no track. */}
               <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
                 <View style={{ flex: 1 }}><Linked text={line.ru} size={18} /></View>
-                <Speaker text={line.ru} size={32} />
+                <Speaker text={line.ru} size={32} speak={() => s.playLine(k)}
+                         recorded={s.recorded} />
               </View>
               <Muted>{line.en}</Muted>
             </View>

@@ -41,7 +41,7 @@ import Stats from "./src/screens/Stats";
 import Credits from "./src/screens/Credits";
 import { UnitScreen, LessonScreen } from "./src/screens/Unit";
 import Summary from "./src/screens/Summary";
-import { Immerse, Video } from "./src/screens/Misc";
+import { Immerse, Video, VideoHistory } from "./src/screens/Misc";
 import { Gate } from "./src/screens/Gate";
 import WordScreen from "./src/screens/Word";
 import SttLab from "./src/screens/SttLab";
@@ -335,7 +335,7 @@ function ImmerseStack() {
   return (
     <Stack.Navigator screenOptions={withMe}>
       <Stack.Screen name="Episodes" component={Immerse} options={{ title: "Immerse" }} />
-      {/* Russian from outside the library (ROADMAP P10.7). */}
+      <Stack.Screen name="VideoHistory" component={VideoHistory} options={titled("History")} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
       <Stack.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />

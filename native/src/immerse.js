@@ -2,7 +2,7 @@
  * "if you navigate away from the immerse page, it remembers the exact state
  * you were in… leave briefly to go do some translation and want to continue
  * exactly where you're at"; and "recently viewed videos… so people don't have
- * to re-find their video").
+ * to re-find their video", which became History, behind a button).
  *
  * Two things, in one AsyncStorage row per profile (`rb.immerse.<id>`):
  *   ui     — the library's search, filter, sort, channel and scroll offset
@@ -22,7 +22,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const KEY = (id) => `rb.immerse.${id}`;
 const SAVE_MS = 1500;
-export const RECENT_MAX = 8;
+/* History holds this many, newest first (the owner, 2026-10-01: "a history
+   similar to YouTube"). The library is 321 videos, so this is most of it. */
+export const HISTORY_MAX = 100;
 /* A position this close to either end is not a place to come back to: the
    first seconds are the intro, the last are the outro. */
 const EDGE_MS = 15000;
@@ -72,7 +74,7 @@ export function setLibraryState(patch) {
   save();
 }
 
-/* Opening a video puts it at the front of Recently watched. */
+/* Opening a video puts it at the top of History. */
 export function openedVideo(id, now = Date.now()) {
   const was = data.videos[id] || {};
   data = { ...data, videos: { ...data.videos, [id]: { ...was, opened: now } } };
@@ -91,8 +93,8 @@ export function setVideoPosition(id, ms, durMs) {
 
 export const videoPosition = (id) => ((data.videos[id] || {}).at || 0);
 
-/* Most recent first, as many as RECENT_MAX. */
-export function recentVideos(max = RECENT_MAX) {
+/* Most recent first, as many as HISTORY_MAX. */
+export function watchHistory(max = HISTORY_MAX) {
   return Object.entries(data.videos)
     .filter(([, v]) => v.opened)
     .sort((a, b) => b[1].opened - a[1].opened)

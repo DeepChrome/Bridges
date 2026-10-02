@@ -1,7 +1,7 @@
 /* Immerse (the video library) and the video player. */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Image, Pressable, Linking, ScrollView } from "react-native";
+import { View, Image, Pressable, Linking } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
@@ -14,7 +14,7 @@ import {
 } from "../data";
 import { Transcript } from "../transcript";
 import { useWords } from "../words";
-import { libraryState, setLibraryState, recentVideos, openedVideo, setVideoPosition,
+import { libraryState, setLibraryState, watchHistory, openedVideo, setVideoPosition,
          videoPosition } from "../immerse";
 import { releaseAudio } from "../audio";
 import { PrepList } from "../prep";
@@ -209,45 +209,80 @@ export function CreatorsNote({ onClose }) {
   );
 }
 
-/* Recently watched (the owner, 2026-10-01: "an option for recently viewed
-   videos… so people don't have to re-find their video in the list"). One
-   row that scrolls sideways, newest first, each with how far through it the
-   learner got; a tap reopens it there. Nothing when nothing has been opened. */
-function RecentRow({ list, onOpen }) {
+/* "Today", "Yesterday", or the date: History's day headings, as YouTube's. */
+function dayHeading(ms, now = Date.now()) {
+  const day = (x) => { const d = new Date(x); d.setHours(0, 0, 0, 0); return d.getTime(); };
+  const gap = Math.round((day(now) - day(ms)) / 86400000);
+  if (gap <= 0) return "Today";
+  if (gap === 1) return "Yesterday";
+  return new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+/* History (the owner, 2026-10-01: "Recently viewed can be more of a button
+   press rather than forced… a history similar to YouTube where the most
+   recently viewed is at the top"). Every video opened, newest first, grouped
+   by day; each shows how far through it the learner got, and a tap reopens
+   it there (Video resumes from immerse.js's position). */
+export function VideoHistory({ navigation }) {
   const t = useTheme();
-  if (!list.length) return null;
+  const { st } = useSession();
+  // Re-read on focus: a video opened from here moves to the top on the way back.
+  const [, setTick] = useState(0);
+  useEffect(() => (navigation && navigation.addListener
+    ? navigation.addListener("focus", () => setTick((n) => n + 1)) : undefined), [navigation]);
+  const rows = watchHistory().map((r) => ({ ...r, v: videoById(r.id) })).filter((r) => r.v);
+  if (!rows.length) {
+    return (
+      <Screen>
+        <Muted testID="history-empty" style={{ textAlign: "center", marginTop: 30 }}>Nothing watched yet</Muted>
+      </Screen>
+    );
+  }
+  const days = [];
+  for (const r of rows) {
+    const h = dayHeading(r.opened);
+    if (!days.length || days[days.length - 1].h !== h) days.push({ h, rows: [] });
+    days[days.length - 1].rows.push(r);
+  }
   return (
-    <View testID="recent-videos" style={{ marginBottom: 16 }}>
-      <SectionLabel>Recently watched</SectionLabel>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: 10, paddingRight: 4 }}>
-        {list.map(({ v, at }) => {
-          const done = v.dur ? Math.min(1, at / (v.dur * 1000)) : 0;
-          return (
-            <Pressable key={v.id} testID={`recent-${v.id}`} onPress={() => onOpen(v)}
-                       accessibilityRole="button"
-                       accessibilityLabel={`${short(v.title)}${at ? `, from ${clock(at)}` : ""}`}
-                       style={({ pressed }) => ({ width: 144, opacity: pressed ? 0.7 : 1 })}>
-              <View style={{ width: 144, height: 81, borderRadius: 8, overflow: "hidden",
-                             backgroundColor: t.surface2 }}>
-                <Image source={{ uri: thumbUrl(v.id) }} resizeMode="cover"
-                       style={{ width: "100%", height: "100%" }} accessibilityIgnoresInvertColors />
-                {done > 0 ? (
-                  <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 3,
-                                 backgroundColor: "rgba(0,0,0,0.35)" }}>
-                    <View style={{ width: `${Math.round(done * 100)}%`, height: 3, backgroundColor: t.brand }} />
+    <Screen>
+      {days.map((d) => (
+        <View key={d.h} style={{ marginBottom: 16 }}>
+          <SectionLabel>{d.h}</SectionLabel>
+          <List>
+            {d.rows.map(({ v, at }) => {
+              const done = v.dur ? Math.min(1, at / (v.dur * 1000)) : 0;
+              const watched = videoWatched(st, v);
+              return (
+                <Row key={v.id} testID={`history-${v.id}`}
+                     onPress={() => navigation.navigate("Video", { videoId: v.id })}>
+                  <View style={{ width: 120, height: 68, borderRadius: 8, overflow: "hidden",
+                                 backgroundColor: t.surface2 }}>
+                    <Image source={{ uri: thumbUrl(v.id) }} resizeMode="cover"
+                           style={{ width: "100%", height: "100%" }} accessibilityIgnoresInvertColors />
+                    {done > 0 ? (
+                      <View style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 3,
+                                     backgroundColor: "rgba(0,0,0,0.35)" }}>
+                        <View style={{ width: `${Math.round(done * 100)}%`, height: 3, backgroundColor: t.brand }} />
+                      </View>
+                    ) : null}
                   </View>
-                ) : null}
-              </View>
-              <Text numberOfLines={2} style={{ color: t.ink, fontSize: 13, fontWeight: "600",
-                                               lineHeight: 17, marginTop: 6 }}>
-                {short(v.title)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-    </View>
+                  <View style={{ flex: 1 }}>
+                    <Text numberOfLines={2} style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+                      {short(v.title)}
+                    </Text>
+                    <Muted>
+                      {[v.ch, watched ? "watched" : at ? `stopped at ${clock(at)}` : minutes(v.dur)]
+                        .filter(Boolean).join(" · ")}
+                    </Muted>
+                  </View>
+                </Row>
+              );
+            })}
+          </List>
+        </View>
+      ))}
+    </Screen>
   );
 }
 
@@ -268,12 +303,6 @@ export function Immerse({ navigation }) {
   const setSort = keep(setSortRaw, "sort");
   const setChannel = keep(setChannelRaw, "channel");
   const [credits, setCredits] = useState(false);
-  /* Recently watched changes on another screen (Video), so it is re-read
-     whenever the library comes back into view. */
-  const [, setTick] = useState(0);
-  useEffect(() => (navigation && navigation.addListener
-    ? navigation.addListener("focus", () => setTick((n) => n + 1)) : undefined), [navigation]);
-  const recent = recentVideos().map((r) => ({ v: videoById(r.id), at: r.at })).filter((r) => r.v);
   const all = videos();
   const channels = useMemo(() => [{ id: ALL_CHANNELS, name: "All channels", note: all.length }]
     .concat(channelsOf(all).map((c) => ({ id: c.name, name: c.name, note: c.count }))), [all.length]);
@@ -296,7 +325,6 @@ export function Immerse({ navigation }) {
      as a score for not having watched enough. */
   return (
     <Screen restoreY={kept.y || 0} onScrollY={(y) => setLibraryState({ y: Math.round(y) })}>
-      <RecentRow list={recent} onOpen={(v) => navigation.navigate("Video", { videoId: v.id })} />
       <SearchField testID="video-search" value={query} onChangeText={setQuery}
                    placeholder="Search: travel, grammar, B1, слово…" label="Search videos"
                    style={{ marginBottom: 12 }} />
@@ -312,6 +340,15 @@ export function Immerse({ navigation }) {
                   onPick={setChannel} style={{ flexShrink: 1 }} />
         <Dropdown testID="video-sort" sheetTestID="sort-sheet" optionPrefix="sort-"
                   title="Sort" label="Sort" value={sort} options={VIDEO_SORTS} onPick={setSort} />
+        {/* History beside the filters, the same shape, opened on a press
+            rather than shown above the library (the owner, 2026-10-01). */}
+        <Pressable testID="video-history" accessibilityRole="button" accessibilityLabel="History"
+                   onPress={() => navigation.navigate("VideoHistory")} hitSlop={6}
+                   style={({ pressed }) => ({ minHeight: 36, paddingHorizontal: 12, justifyContent: "center",
+                     borderRadius: radius.lg, borderWidth: 1, borderColor: t.line,
+                     backgroundColor: t.surface, opacity: pressed ? 0.6 : 1 })}>
+          <Text style={{ color: t.ink2, fontSize: 13, fontWeight: "600" }}>History</Text>
+        </Pressable>
       </View>
       {shown.length ? (
         <List>

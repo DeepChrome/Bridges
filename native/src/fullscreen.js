@@ -71,7 +71,7 @@ export function profileDepth(state) {
 export const TAB_BAR_SCREENS = [
   "Path", "Unit", "Lesson", "Summary",                 // Learn
   "Drills", "QuizSetup", "SceneList", "Sounds", "Grammar", "Endings",  // Practice
-  "Episodes",                                          // Immerse
+  "Episodes", "VideoHistory",                          // Immerse
   "Cards",                                             // Study
   "Words",                                             // Search
   "You", "Stats", "Credits",                           // in every stack

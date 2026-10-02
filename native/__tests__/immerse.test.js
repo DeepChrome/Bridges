@@ -12,9 +12,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider, useSession } from "../src/session";
 import { flushState } from "../src/store";
-import { Immerse, Video } from "../src/screens/Misc";
+import { Immerse, Video, VideoHistory } from "../src/screens/Misc";
 import { videos } from "../src/data";
-import { setVideoPosition, openedVideo, recentVideos, videoPosition, libraryState,
+import { setVideoPosition, openedVideo, watchHistory, videoPosition, libraryState,
          loadImmerse, flushImmerse, resetImmerse } from "../src/immerse";
 
 jest.mock("../src/youtube", () => {
@@ -64,9 +64,9 @@ describe("where the learner was", () => {
   it("lists the videos opened, newest first", () => {
     openedVideo(a.id, 1000);
     openedVideo(b.id, 2000);
-    expect(recentVideos().map((r) => r.id)).toEqual([b.id, a.id]);
+    expect(watchHistory().map((r) => r.id)).toEqual([b.id, a.id]);
     openedVideo(a.id, 3000);
-    expect(recentVideos()[0].id).toBe(a.id);
+    expect(watchHistory()[0].id).toBe(a.id);
   });
 
   it("writes the place to storage and reads it back after a restart", async () => {
@@ -94,18 +94,42 @@ describe("where the learner was", () => {
   });
 });
 
-describe("the library", () => {
-  it("shows Recently watched only once something was opened", async () => {
-    await withProfile(<Immerse navigation={nav} />);
-    expect(screen.queryByTestId("recent-videos")).toBeNull();
-  });
-
-  it("opens a recent video from the row", async () => {
+describe("History", () => {
+  /* A button beside the filters, not a row forced above the library (the
+     owner, 2026-10-01). */
+  it("is a button in the library, not a row in it", async () => {
     await withProfile(<Immerse navigation={nav} />,
       { ui: {}, videos: { [a.id]: { opened: 1000, at: 60000 } } });
-    fireEvent.press(screen.getByTestId(`recent-${a.id}`));
+    expect(screen.queryByTestId(`history-${a.id}`)).toBeNull();
+    fireEvent.press(screen.getByTestId("video-history"));
+    expect(nav.navigate).toHaveBeenCalledWith("VideoHistory");
+  });
+
+  it("lists every video opened, newest first, under its day", async () => {
+    const now = Date.now();
+    await withProfile(<VideoHistory navigation={nav} />,
+      { ui: {}, videos: { [a.id]: { opened: now - 2 * 86400000, at: 60000 }, [b.id]: { opened: now } } });
+    const ids = screen.getAllByTestId(/^history-/).map((n) => n.props.testID);
+    expect(ids).toEqual([`history-${b.id}`, `history-${a.id}`]);
+    expect(screen.getByText("Today")).toBeTruthy();
+    expect(screen.getByText(/stopped at 1:00/)).toBeTruthy();
+    fireEvent.press(screen.getByTestId(`history-${a.id}`));
     expect(nav.navigate).toHaveBeenCalledWith("Video", { videoId: a.id });
   });
+
+  it("says so when nothing was watched", async () => {
+    await withProfile(<VideoHistory navigation={nav} />);
+    expect(screen.getByTestId("history-empty")).toBeTruthy();
+  });
+
+  it("holds far more than the old row's eight", () => {
+    for (let i = 0; i < 30; i++) openedVideo(V[i].id, 1000 + i);
+    expect(watchHistory()).toHaveLength(30);
+    expect(watchHistory()[0].id).toBe(V[29].id);
+  });
+});
+
+describe("the library", () => {
 
   it("comes back to the search and filter it was left on", async () => {
     await withProfile(<Immerse navigation={nav} />,
@@ -131,7 +155,7 @@ describe("the player", () => {
 
   it("records the video as opened", async () => {
     await withProfile(<Video route={{ params: { videoId: b.id } }} navigation={nav} />);
-    expect(recentVideos()[0].id).toBe(b.id);
+    expect(watchHistory()[0].id).toBe(b.id);
   });
 
   it("starts at the beginning when it was never played", async () => {

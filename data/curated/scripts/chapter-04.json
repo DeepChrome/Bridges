@@ -18,16 +18,20 @@
    ],
    "intro": [
     {
-     "ru": "автобус",
-     "en": "bus"
-    },
-    {
      "ru": "билет",
      "en": "ticket"
     },
     {
      "ru": "орех",
      "en": "nut"
+    },
+    {
+     "ru": "ездить",
+     "en": "to go (by transport)"
+    },
+    {
+     "ru": "декабрь",
+     "en": "December"
     }
    ],
    "lines": [
@@ -155,7 +159,7 @@
     }
    ]
   },
-  "core4:5": {
+  "core4:3": {
    "title": "Ice at the bus stop",
    "cast": [
     {
@@ -175,14 +179,6 @@
     }
    ],
    "intro": [
-    {
-     "ru": "автобус",
-     "en": "bus"
-    },
-    {
-     "ru": "город",
-     "en": "town"
-    },
     {
      "ru": "ёлка",
      "en": "New Year tree"

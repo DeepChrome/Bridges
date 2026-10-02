@@ -29,13 +29,25 @@
     {
      "ru": "час",
      "en": "hour"
+    },
+    {
+     "ru": "любой",
+     "en": "any"
+    },
+    {
+     "ru": "маленький",
+     "en": "little"
+    },
+    {
+     "ru": "декабрь",
+     "en": "December"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Белка, концерт сегодня, через час. А что это у тебя?",
-     "en": "Belka, the concert is today, in an hour. And what's that you've got?"
+     "ru": "Белка, концерт сегодня, в шесть часов. А что это у тебя?",
+     "en": "Belka, the concert is today, at six o'clock. And what's that you've got?"
     },
     {
      "s": "b",
@@ -79,8 +91,8 @@
     },
     {
      "s": "b",
-     "ru": "Молодец, Тедди! Значит, обед сейчас, а мешки дома.",
-     "en": "Well done, Teddy! So lunch now, and the bags stay at home."
+     "ru": "Молодец, Тедди! Обед сейчас, а мешки дома.",
+     "en": "Well done, Teddy! Lunch now, and the bags stay at home."
     },
     {
      "s": "a",
@@ -89,8 +101,8 @@
     },
     {
      "s": "b",
-     "ru": "Все, Нежа. Хотя... один орех можно?",
-     "en": "All of them, Nezha. Although... may I keep one nut?"
+     "ru": "Все, Нежа. Но... один орех можно?",
+     "en": "All of them, Nezha. But... may I keep one nut?"
     },
     {
      "s": "a",
@@ -151,7 +163,7 @@
     }
    ]
   },
-  "core6:8": {
+  "core6:7": {
    "title": "Breakfast before the lesson",
    "cast": [
     {

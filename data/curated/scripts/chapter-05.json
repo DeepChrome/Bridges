@@ -2,7 +2,7 @@
  "chapter": 5,
  "name": "Spending & Saving",
  "lessons": {
-  "core5:1": {
+  "core5:2": {
    "title": "A headache and a red hat",
    "cast": [
     {
@@ -41,6 +41,10 @@
     {
      "ru": "чай",
      "en": "tea"
+    },
+    {
+     "ru": "декабрь",
+     "en": "December"
     }
    ],
    "lines": [
@@ -101,7 +105,7 @@
     },
     {
      "s": "b",
-     "ru": "Нежа, чай дома — это хорошо. Но шапку надо носить всегда, Тедди!",
+     "ru": "Нежа, чай дома — это хорошо. Но шапку нужно носить всегда, Тедди!",
      "en": "Nezha, tea at home is good. But the hat has to be worn all the time, Teddy!"
     },
     {
@@ -168,7 +172,7 @@
     }
    ]
   },
-  "core5:7": {
+  "core5:5": {
    "title": "Changing a bag of coins",
    "cast": [
     {
@@ -185,6 +189,24 @@
      "id": "c",
      "ru": "Монька",
      "en": "Monka"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "рубль",
+     "en": "rouble"
+    },
+    {
+     "ru": "декабрь",
+     "en": "December"
+    },
+    {
+     "ru": "надо",
+     "en": "have to"
+    },
+    {
+     "ru": "держать",
+     "en": "to hold"
     }
    ],
    "lines": [
@@ -260,7 +282,7 @@
     },
     {
      "s": "c",
-     "ru": "Спасибо, Тедди. Банк, значит, работает?",
+     "ru": "Спасибо, Тедди. Так банк работает?",
      "en": "Thank you, Teddy. So the bank is open, then?"
     },
     {

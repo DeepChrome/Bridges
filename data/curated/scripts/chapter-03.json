@@ -2,7 +2,7 @@
  "chapter": 3,
  "name": "The Little Words",
  "lessons": {
-  "core3:0": {
+  "core3:5": {
    "title": "The hat on the roof",
    "cast": [
     {
@@ -35,8 +35,8 @@
      "en": "ladder"
     },
     {
-     "ru": "мама",
-     "en": "mom"
+     "ru": "найти",
+     "en": "to find"
     }
    ],
    "lines": [
@@ -202,16 +202,8 @@
      "en": "hair"
     },
     {
-     "ru": "мама",
-     "en": "mom"
-    },
-    {
-     "ru": "брат",
-     "en": "brother"
-    },
-    {
-     "ru": "Китай",
-     "en": "China"
+     "ru": "конечно",
+     "en": "of course"
     }
    ],
    "lines": [

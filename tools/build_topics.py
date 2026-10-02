@@ -60,6 +60,10 @@ EVERYDAY_RANK = 800
 SKELETON = ROOT / "data" / "curated" / "skeleton.json"
 # A reader's per-unit keeps and drops from the chapter content reviews.
 UNIT_WORDS = json.loads((ROOT / "data" / "curated" / "unit_words.json").read_text(encoding="utf-8"))
+# Sets taught together (data/curated/word_sets.json, 2026-10-01): the first unit
+# on the route that teaches a member teaches them all.
+WORD_SETS = {k: v for k, v in json.loads((ROOT / "data" / "curated" / "word_sets.json")
+                                         .read_text(encoding="utf-8")).items() if not k.startswith("_")}
 # Each unit's words in named groups of related words (tools/build_word_groups.mjs
 # proposes them; a person may edit the file). The sections a list is drawn in:
 _GROUPS_FILE = ROOT / "data" / "curated" / "word_groups.json"
@@ -178,9 +182,27 @@ def grouped(tid, chosen, meta, spoken, size):
     place in the reading order). A word the file does not name is a group of
     its own in its frequency place and is reported, so a curriculum change
     cannot silently leave words ungrouped."""
-    groups = WORD_GROUPS.get(tid) or []
     rank = lambda l: spoken.get(meta[l]["bare"], 10 ** 6)
     by_bare = {meta[l]["bare"]: l for l in chosen}
+    # A word set (WORD_SETS) is one group whatever the groups file proposed —
+    # the model split the numbers into "Numbers 1-4", "Number five" and
+    # "Numbers 6-10" (2026-10-01). Its members leave the groups they were in
+    # and become one group, named for the set and in the set's own order
+    # (Monday to Sunday), where the first of them stood.
+    groups = [dict(g, words=list(g["words"])) for g in (WORD_GROUPS.get(tid) or [])]
+    for name, s in WORD_SETS.items():
+        here = [b for b in s["members"] if b in by_bare]
+        if len(here) < 2:
+            continue
+        at = next((k for k, g in enumerate(groups) if set(g["words"]) & set(here)), len(groups))
+        for g in groups:
+            g["words"] = [w for w in g["words"] if w not in here]
+        # The section most of its members belong in: the numbers are «один»
+        # (a numeral) and nine nouns.
+        kinds = [KIND_OF_POS.get(meta[by_bare[b]]["pos"], "little") for b in here]
+        kind = max(set(kinds), key=kinds.count)
+        groups.insert(at, {"name": name[0].upper() + name[1:], "kind": kind, "words": here, "set": True})
+    groups = [g for g in groups if g["words"]]
     card = card_words(tid)
     # The reading order: sections in GROUP_KINDS order, groups in the file's
     # order inside each (most useful first, as the file was asked to put them).
@@ -195,7 +217,10 @@ def grouped(tid, chosen, meta, spoken, size):
         placed.update(members)
         for l in members:
             group_of[l] = (grp["name"], grp["kind"], gord[g])
-            if KIND_OF_POS.get(meta[l]["pos"], "little") != grp["kind"]:
+            # A word set may mix classes by design (the lexicon files «пять» a
+            # noun and «один» a numeral); only the file's own groups are held
+            # to one section.
+            if not grp.get("set") and KIND_OF_POS.get(meta[l]["pos"], "little") != grp["kind"]:
                 MISKINDED.append((tid, meta[l]["bare"], grp["kind"]))
         # By the group's middle word, not its commonest: one very common member
         # («год») would otherwise pull a group of rare ones to the front.
@@ -833,6 +858,30 @@ def main():
         dedup_set.add(lid)
         by_bare[b] = [lid]
         reserved[lid] = keeper
+    # A set's members, the same way — brought in so the set can be taught
+    # whole, but reserved to nobody: whichever unit starts the set takes them.
+    for name, s in sorted(WORD_SETS.items()):
+        want_pos = s.get("pos")
+        for bare in s["members"]:
+            if bare in by_bare and (not want_pos or any(meta[l]["pos"] == want_pos for l in by_bare[bare])):
+                continue
+            rows = [r for r in src.execute("select id, bare, accented, pos, en from lemmas where bare=?", (bare,))
+                    if r[4] and not STUB_GLOSS.match(r[4]) and (not want_pos or r[3] == want_pos)]
+            if not rows:
+                raise SystemExit(f"word_sets.json {name}: «{bare}» is not a glossed headword")
+            lid, b, acc, pos, en = min(rows, key=lambda r: (KEEP_POS.get(r[3], 9), -counts.get(r[0], 0)))
+            meta[lid] = {"bare": b, "acc": acc, "pos": pos, "en": en, "n": counts.get(lid, 0)}
+            deduped.append(lid)
+            dedup_set.add(lid)
+            # The set's class first, so `by_bare[b][0]` is the word the set means.
+            by_bare[b] = [lid] + [l for l in by_bare.get(b, []) if l != lid]
+    # A set pinned to a unit (`unit`) is that unit's alone: reserved like a
+    # reader's keep, so no unit before it takes a member for its own reasons.
+    for name, s in WORD_SETS.items():
+        if s.get("unit"):
+            for bare in s["members"]:
+                for lid in by_bare.get(bare, [])[:1]:
+                    reserved[lid] = s["unit"]
 
     # What each topic rule would claim, before any unit is built: the pool a
     # side quest tops up from. The spine no longer takes its words first, so
@@ -986,6 +1035,14 @@ def main():
                     return False
                 if kind == "branch" and meta[lid]["pos"] not in BRANCH_POS:
                     return False     # the closed classes are the spine's to teach
+                # …and so are the commonest words (forced: the Core-5000 top and
+                # the closed classes), whatever a quest's video says. Only the
+                # optional quests were held to it, and when the parents set
+                # moved chapter 1's spine, Home took «идти» for its episode
+                # (2026-10-01) — out of reach of every conversation, which may
+                # only use the main path's words. A reader's keep still wins.
+                if kind == "branch" and lid in forced_set and reason != "curated":
+                    return False
                 if tid in OPTIONAL and everyday(lid):
                     # Only what the quest would have taught moves: a refused
                     # word leaves its slot to the next candidate, so a quest
@@ -1069,6 +1126,32 @@ def main():
                     if len(chosen) >= size:
                         break
                     take(lid, "topic")
+            # WORD_SETS: a set this unit has started — it teaches a member that
+            # is not `quiet` — is taught here whole, as is a set whose `home` this
+            # is and that nothing has started yet. A member taught earlier stays
+            # where it is; everything else comes here, past the size, the topic
+            # and a reader's drop, because a plate without its spoon and fork is
+            # the thing the owner asked never to see again. Not into an optional
+            # quest a word it would refuse as everyday: that word goes to the
+            # spine, and the set with it on the next walk.
+            for name, s in WORD_SETS.items():
+                lids = [by_bare[b][0] for b in s["members"] if b in by_bare]
+                quiet = set(s.get("quiet", []))
+                if s.get("unit") and s["unit"] != tid:
+                    continue                   # pinned elsewhere
+                started = any(l in why and meta[l]["bare"] not in quiet for l in lids)
+                homed = ((s.get("home") == tid and not any(l in taught for l in lids))
+                         or s.get("unit") == tid)
+                if not (started or homed):
+                    continue
+                for lid in lids:
+                    if lid in taught or lid in why:
+                        continue
+                    if tid in OPTIONAL and everyday(lid):
+                        continue
+                    reserved_now.pop(lid, None)
+                    chosen.append(lid)
+                    why[lid] = "set"
             # SHORT_LESSON: no unit ends on a lesson of one or two words.
             ls = lesson_size(k)
             if short_tail(len(chosen), ls):
@@ -1080,7 +1163,7 @@ def main():
                 else:
                     # Off the quest's subject before on it, then the rarest:
                     # «дверь» is Home's whatever the videos make of it.
-                    rarest = sorted((l for l in chosen if why[l] != "curated"),
+                    rarest = sorted((l for l in chosen if why[l] not in ("curated", "set")),
                                     key=lambda l: (topic_of.get(l) == tid,
                                                    -spoken.get(meta[l]["bare"], 10 ** 6)))
                     for lid in rarest[:short_tail(len(chosen), ls)]:

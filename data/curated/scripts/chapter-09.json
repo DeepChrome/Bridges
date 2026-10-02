@@ -2,7 +2,7 @@
  "chapter": 9,
  "name": "Style & Fashion",
  "lessons": {
-  "core9:3": {
+  "core9:4": {
    "title": "Red trousers for Misha's party",
    "cast": [
     {
@@ -23,12 +23,16 @@
    ],
    "intro": [
     {
-     "ru": "мама",
-     "en": "mom"
-    },
-    {
      "ru": "брюки",
      "en": "trousers"
+    },
+    {
+     "ru": "вчера",
+     "en": "yesterday"
+    },
+    {
+     "ru": "отвечать",
+     "en": "to answer"
     }
    ],
    "lines": [
@@ -178,6 +182,14 @@
     {
      "ru": "брюки",
      "en": "trousers"
+    },
+    {
+     "ru": "найти",
+     "en": "to find"
+    },
+    {
+     "ru": "вчера",
+     "en": "yesterday"
     }
    ],
    "lines": [
@@ -233,8 +245,8 @@
     },
     {
      "s": "a",
-     "ru": "Монька, спасибо! Но почему она была у тебя в мешке?",
-     "en": "Thanks, Monka! But why was it in your sack?"
+     "ru": "Монька, какое счастье! Но почему она была у тебя в мешке?",
+     "en": "Monka, what luck! But why was it in your sack?"
     },
     {
      "s": "c",

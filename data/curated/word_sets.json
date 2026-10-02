@@ -1,0 +1,21 @@
+{
+  "_": "tools/build_topics.py: sets of words that belong together and are taught together (the owner, 2026-10-01: \"I saw tarelka (plate) by itself but not spoon knife fork glass napkin… Same as autumn fall spring summer… the main words of a grouping should always be taught in groups\"). The first unit on the route that teaches any member of a set teaches all of them; a member already taught earlier stays where it is. `members` are bare dictionary forms; `quiet` members belong to the set but do not start it on their own, because they have another common meaning (среда is Wednesday and 'environment'). `pos` names the class meant where a spelling has two («голубой» is the adjective 'light blue', not the noun). `home` is the unit that teaches a set no member of which has started it by then. `unit` pins a set to one unit whatever starts it: «мама» and «папа» are the cast's own words and every conversation uses them, and a conversation may only use the main path's words, so their set is chapter 1's. A member outside the word pool is brought in from the lexicon, as a reader's keep is. Each set is meant to be the core of its group, not everything in it.",
+  "seasons": { "members": ["зима", "весна", "лето", "осень"] },
+  "days of the week": { "members": ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"], "quiet": ["среда"], "home": "time" },
+  "months": { "members": ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"], "quiet": ["март", "май"] },
+  "times of day": { "members": ["утро", "день", "вечер", "ночь"], "quiet": ["день"] },
+  "meals": { "members": ["завтрак", "обед", "ужин"] },
+  "tableware": { "members": ["тарелка", "чашка", "стакан", "ложка", "вилка", "нож", "салфетка"] },
+  "drinks": { "members": ["вода", "чай", "кофе", "сок", "молоко"], "quiet": ["вода"] },
+  "colours": { "members": ["белый", "чёрный", "красный", "синий", "зелёный", "жёлтый", "серый", "коричневый", "голубой"], "pos": "adjective" },
+  "numbers": { "members": ["один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять", "десять"], "quiet": ["один"] },
+  "parents and children": { "members": ["мама", "папа", "брат", "сестра", "сын", "дочь"], "unit": "core1" },
+  "grandparents": { "members": ["бабушка", "дедушка"] },
+  "husband and wife": { "members": ["муж", "жена"] },
+  "the face": { "members": ["глаз", "нос", "рот", "ухо"] },
+  "weather": { "members": ["дождь", "снег", "солнце", "ветер"], "quiet": ["солнце"] },
+  "clothes": { "members": ["рубашка", "брюки", "юбка", "платье", "куртка"] },
+  "transport": { "members": ["автобус", "поезд", "машина", "самолёт", "метро"] },
+  "directions": { "members": ["направо", "налево", "прямо"], "quiet": ["прямо"], "home": "city" },
+  "pets": { "members": ["собака", "кошка"] }
+}

@@ -2,7 +2,7 @@
  "chapter": 10,
  "name": "Forests & Seasons",
  "lessons": {
-  "core10:1": {
+  "core10:4": {
    "title": "Mushroom picking in October",
    "cast": [
     {
@@ -29,6 +29,14 @@
     {
      "ru": "орех",
      "en": "nut"
+    },
+    {
+     "ru": "решать",
+     "en": "to decide"
+    },
+    {
+     "ru": "октябрь",
+     "en": "October"
     }
    ],
    "lines": [
@@ -177,16 +185,16 @@
    ],
    "intro": [
     {
-     "ru": "мама",
-     "en": "mom"
-    },
-    {
      "ru": "карта",
      "en": "map"
     },
     {
      "ru": "палка",
      "en": "stick"
+    },
+    {
+     "ru": "завтра",
+     "en": "tomorrow"
     }
    ],
    "lines": [

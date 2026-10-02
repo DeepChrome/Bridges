@@ -2,7 +2,7 @@
  "chapter": 7,
  "name": "Feelings & Fears",
  "lessons": {
-  "core7:1": {
+  "core7:4": {
    "title": "A present on three hundred roubles",
    "cast": [
     {
@@ -22,10 +22,6 @@
      "en": "to buy"
     },
     {
-     "ru": "мама",
-     "en": "mum"
-    },
-    {
      "ru": "цветок",
      "en": "flower"
     },
@@ -40,13 +36,17 @@
     {
      "ru": "дорого",
      "en": "expensive, dear"
+    },
+    {
+     "ru": "рубль",
+     "en": "rouble"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Белка, я хочу купить маме подарок, а денег почти нет.",
-     "en": "Belka, I want to buy Mum a present, but I have almost no money."
+     "ru": "Белка, я хочу купить маме подарок, а денег только немножко.",
+     "en": "Belka, I want to buy Mum a present, but I only have a little money."
     },
     {
      "s": "b",
@@ -75,13 +75,13 @@
     },
     {
      "s": "a",
-     "ru": "Нет, спасибо. Подарок от меня, значит, и деньги мои.",
+     "ru": "Нет, спасибо. Подарок от меня, поэтому и деньги мои.",
      "en": "No, thanks. The present is from me, so the money has to be mine."
     },
     {
      "s": "b",
-     "ru": "Тогда я знаю, где такие цветы бывают. В лесу, на той стороне.",
-     "en": "Then I know where flowers like that grow. In the wood, on the other side."
+     "ru": "Тогда я знаю, где такие цветы бывают. В лесу, за городом.",
+     "en": "Then I know where flowers like that grow. In the wood, outside town."
     },
     {
      "s": "a",
@@ -110,13 +110,13 @@
     },
     {
      "s": "b",
-     "ru": "Вот так и начинают, Тедди. Мой дед тоже так начинал.",
-     "en": "That's how it starts, Teddy. My grandad started that way too."
+     "ru": "Вот так всё и начинается, Тедди. Мой дед тоже так делал.",
+     "en": "That's how it all starts, Teddy. My grandad did that too."
     },
     {
      "s": "a",
-     "ru": "Ладно. Цветы с той стороны, а деньги в банк. Идём!",
-     "en": "Okay. Flowers from the other side, and the money in the bank. Let's go!"
+     "ru": "Ладно. Цветы из леса, а деньги в банк. Идём!",
+     "en": "Okay. Flowers from the wood, and the money in the bank. Let's go!"
     }
    ],
    "questions": [
@@ -153,7 +153,7 @@
     {
      "ask": "Where will Teddy get the flowers?",
      "options": [
-      "In a wood on the far side",
+      "In the wood outside town",
       "In the shop near the bank",
       "From Belka's own garden",
       "At a market in the town"
@@ -172,7 +172,7 @@
     }
    ]
   },
-  "core7:7": {
+  "core7:6": {
    "title": "The stones in the forest",
    "cast": [
     {
@@ -211,6 +211,10 @@
     {
      "ru": "искать",
      "en": "to look for"
+    },
+    {
+     "ru": "сторона",
+     "en": "side"
     }
    ],
    "lines": [

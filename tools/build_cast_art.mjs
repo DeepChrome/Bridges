@@ -120,6 +120,17 @@ function shipWordPicture(src, dst) {
 const FACE_BOX = {
   teddy: "720:720:100:0", nezha: "330:330:350:120", yarik: "330:330:300:10",
   monka: "440:440:285:30", belka: "480:480:160:40",
+  // The supporting cast (2026-10-02), boxes from each drawing's own bounds.
+  lisa: "396:396:279:41",
+  tortila: "403:403:291:39",
+  borsuk: "383:383:318:45",
+  gena: "408:408:307:32",
+  filin: "337:337:341:120",
+  misha: "380:380:313:57",
+  barsik: "297:297:404:148",
+  tsarevna: "357:357:312:85",
+  pirozhok: "407:407:297:24",
+  senya: "357:357:351:76",
 };
 
 const STYLE =

@@ -341,13 +341,21 @@ export function Immerse({ navigation }) {
         <Dropdown testID="video-sort" sheetTestID="sort-sheet" optionPrefix="sort-"
                   title="Sort" label="Sort" value={sort} options={VIDEO_SORTS} onPick={setSort} />
         {/* History beside the filters, the same shape, opened on a press
-            rather than shown above the library (the owner, 2026-10-01). */}
+            rather than shown above the library (the owner, 2026-10-01). A
+            clock, YouTube's own mark for it: the word squeezed the channel
+            filter to "All cha…" on a phone. */}
         <Pressable testID="video-history" accessibilityRole="button" accessibilityLabel="History"
                    onPress={() => navigation.navigate("VideoHistory")} hitSlop={6}
-                   style={({ pressed }) => ({ minHeight: 36, paddingHorizontal: 12, justifyContent: "center",
+                   style={({ pressed }) => ({ minHeight: 36, minWidth: 40, paddingHorizontal: 9,
+                     alignItems: "center", justifyContent: "center",
                      borderRadius: radius.lg, borderWidth: 1, borderColor: t.line,
                      backgroundColor: t.surface, opacity: pressed ? 0.6 : 1 })}>
-          <Text style={{ color: t.ink2, fontSize: 13, fontWeight: "600" }}>History</Text>
+          <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
+               strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <Path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+            <Path d="M3 3v5h5" />
+            <Path d="M12 7v5l3 2" />
+          </Svg>
         </Pressable>
       </View>
       {shown.length ? (

@@ -36,12 +36,15 @@ import { DIRECTIONS, DEFAULT_FRONTS, cardFor, kindOf, isDue, retrievability, day
    quizzes create most of the cards, not the flashcard ration. What the number
    does control is how many *unfamiliar* faces a flashcard session opens with,
    and five is a pace a learner can feel finishing. */
-/* `reviewsPerDay` is unlimited in the app (2026-09-30). A cap meant the day
-   could be "done" with cards still due, and the Study badge — which counts
-   what is due — went on showing them: the owner met "Daily goal met" beside
-   157 owed. What is due is owed until it is answered. The simulator still
-   passes a cap, to price what a learner with limited time faces (§30aa). */
-export const QUEUE_DEFAULTS = { newPerDay: 5, sessionSize: 20, reviewsPerDay: Infinity, learnAhead: 20,
+/* Reviews a day: fifty (the owner, 2026-10-02: "when it says 213 for example,
+   it's just overwhelming and I don't want to intimidate people… maybe… capped
+   at like 50"). It was unlimited from 2026-09-30, because a cap that the badge
+   ignored met "Daily goal met" beside 157 owed. The badge now counts the same
+   capped portion the pile deals (native data.js dueCount), so the two cannot
+   disagree; what is left waits for tomorrow, as in Anki, and "Keep going"
+   (`beyond`) lifts the cap for a learner who wants more. */
+export const DAILY_REVIEWS = 50;
+export const QUEUE_DEFAULTS = { newPerDay: 5, sessionSize: 20, reviewsPerDay: DAILY_REVIEWS, learnAhead: 20,
                                 minGap: 3 };
 
 /* The front a card is asked through this time: the ticked fronts in turn,
@@ -124,7 +127,7 @@ export function interleave(learning, reviews, fresh) {
  *            one session (the learner chose to study ahead)
  *   rng      random source, Math.random by default
  */
-export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }) {
+export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead, beyond }) {
   // An option left unset is the default — `Object.assign` would let an
   // `undefined` through and turn the ration into NaN, which dealt nothing.
   const o = Object.assign({}, QUEUE_DEFAULTS);
@@ -133,7 +136,8 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }
   const fronts = (dirs && dirs.length ? dirs : DEFAULT_FRONTS).filter((d) => DIRECTIONS.includes(d));
   if (!fronts.length) fronts.push(DEFAULT_FRONTS[0]);
   const today = dailyFor(daily, now);
-  const reviewsLeft = Math.max(0, o.reviewsPerDay - today.reviews);
+  // `beyond`: the learner chose to keep going past the day's reviews.
+  const reviewsLeft = beyond ? Infinity : Math.max(0, o.reviewsPerDay - today.reviews);
   const newLeft = ahead ? Infinity : Math.max(0, o.newPerDay - today.new);
 
   const learning = [], reviews = [], fresh = [];
@@ -198,7 +202,8 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead }
 
   // `newRemaining`: today's new cards past this chunk, so a counter over the
   // whole day can count them before the chunk that deals them (Study.js).
-  return { items: items, due: due, remaining: todayReviews - reviewsInSession,
+  // `today`: what is due *today* — the capped portion the badge counts too.
+  return { items: items, due: due, today: todayReviews, remaining: todayReviews - reviewsInSession,
            newRemaining: Math.max(0, todayNew - pickedNew.length),
            newLeft: newLeft === Infinity ? fresh.length : newLeft, reviewsLeft: reviewsLeft, done: done };
 }

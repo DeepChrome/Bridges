@@ -18,7 +18,7 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton,
          Familiarity, familiarityColor } from "../ui";
-import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines } from "../data";
+import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines, dueAll, dueCount } from "../data";
 import { Linked } from "../words";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
@@ -260,11 +260,12 @@ export function sittingTally(words, marks, beyond = 0) {
 }
 
 /* How much of a set of cards is held (free study: "the user can see how many
-   words they've mastered"). Mastered is familiarity MASTERED_AT and above —
-   the line the tutor's profile already uses for "words held best" — on the
+   words they've mastered"). Mastered is familiarity MASTERED_AT and above
+   (the owner, 2026-10-02: "how many cards they've mastered (say a score of
+   like 80+)"), on the
    word's own frequency scale (core/scheduler.js); learning is anything met
    and below it; new is never met. */
-export const MASTERED_AT = 60;
+export const MASTERED_AT = 80;
 export function masteryOf(st, cards) {
   let mastered = 0, learning = 0, fresh = 0;
   for (const c of cards) {
@@ -326,7 +327,7 @@ function TallySheet({ title, parts, onClose }) {
    `words` handed in by another screen — a video's word list before watching
    it (§30bf) — carrying its own faces, since those words need not be in any
    ticked set. */
-export function sessionFor(st, { ahead, rng, round, words: list, title } = {}) {
+export function sessionFor(st, { ahead, beyond, rng, round, words: list, title } = {}) {
   if (round === "trouble") {
     return practiceSession({ seen: st.seen, words: troubleWords(st), dirs: st.flash || DEFAULT_FRONTS });
   }
@@ -340,7 +341,7 @@ export function sessionFor(st, { ahead, rng, round, words: list, title } = {}) {
   }
   const words = studyCards(st).map((c) => c.b);
   return buildSession({
-    seen: st.seen, words, dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily, rng, ahead,
+    seen: st.seen, words, dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily, rng, ahead, beyond,
     opts: { newPerDay: st.newPerDay, learnAhead: st.learnAhead,
             scheduler: schedulerOpts(st), rank: newCardRank },
   });
@@ -636,6 +637,14 @@ export default function Study({ navigation, route }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [st.sets, st.decks, st.seen, st.cardKinds]);
   const trouble = troubleWords(st);
+  // Cards held, across everything studied (MASTERED_AT), for the header.
+  const masteredAll = useMemo(() => masteryOf(st, Object.keys(st.seen || {}).map((b) => ({ b }))).mastered,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [st.seen]);
+  // Due past today's cap: what "Keep going" deals.
+  const backlog = useMemo(() => Math.max(0, dueAll(st) - dueCount(st)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [st.seen, st.daily, st.cardKinds]);
   const knownCount = useMemo(() => knownWords(st).length,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [st.seen, st.cardKinds]);
@@ -648,11 +657,14 @@ export default function Study({ navigation, route }) {
   const sitting = useRef(new Set());
   const [marks, setMarks] = useState({});
   const [aheadMode, setAheadMode] = useState(false);
+  // Past the day's reviews by choice ("Keep going"); chunks dealt after carry it.
+  const [beyondMode, setBeyondMode] = useState(false);
   const [tallyOpen, setTallyOpen] = useState(false);
   const deal = (ahead, round, extra, carry) => {
     dealt.current += 1;
-    const next = sessionFor(st, { ahead, round, ...extra });
-    if (!carry) { sitting.current = new Set(); setMarks({}); setAheadMode(!!ahead); }
+    const beyond = carry ? beyondMode : !!(extra && extra.beyond);
+    const next = sessionFor(st, { ahead, round, ...extra, beyond });
+    if (!carry) { sitting.current = new Set(); setMarks({}); setAheadMode(!!ahead); setBeyondMode(beyond); }
     for (const it of next.items) sitting.current.add(it.word);
     setSession(next);
     setAt(0);
@@ -811,10 +823,10 @@ export default function Study({ navigation, route }) {
      pile, never the trouble round. */
   const more = useMemo(() => {
     if (!session || (!finished && items.length)) return 0;
-    const s = sessionFor(st);
+    const s = sessionFor(st, { beyond: beyondMode });
     return s.items.length + s.remaining;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finished, items.length, st.seen, st.daily, setsKey]);
+  }, [finished, items.length, st.seen, st.daily, setsKey, beyondMode]);
   /* **The pile goes on until the day is done** (the owner, 2026-09-29: "when
      I finish my review… it randomly says '3 to go'"). A session is dealt
      twenty at a time and the cards just missed come back within minutes, so
@@ -910,16 +922,23 @@ export default function Study({ navigation, route }) {
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <View style={{ flex: 1 }}>
           <Text testID="study-heading" style={{ color: t.ink, fontSize: 15 }}>{heading}</Text>
-          <Muted testID="pile">
-            {session && session.practice ? `${items.length} cards`
-              /* The counts are the deal's, taken when it was dealt; once it is
-                 played through with nothing more to deal they are history,
-                 and "5 new" over "Daily goal met" read as work still owed. */
-              : session && !(finished && !more) && (session.due || session.newLeft)
-                ? [session.due ? `${session.due} due` : "", session.newLeft ? `${Math.min(session.newLeft, unmet)} new` : ""]
-                    .filter(Boolean).join(" · ")
-                : "Nothing due"}
-          </Muted>
+          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+            <Muted testID="pile">
+              {session && session.practice ? `${items.length} cards`
+                /* The counts are the deal's, taken when it was dealt; once it is
+                   played through with nothing more to deal they are history,
+                   and "5 new" over "Daily goal met" read as work still owed. */
+                : session && !(finished && !more) && (session.today || session.newLeft)
+                  ? [session.today ? `${session.today} due` : "", session.newLeft ? `${Math.min(session.newLeft, unmet)} new` : ""]
+                      .filter(Boolean).join(" · ")
+                  : "Nothing due"}
+            </Muted>
+            {/* How many words are held — the number a learner wants to see grow
+                (the owner, 2026-10-02). One quiet figure, not a panel. */}
+            {masteredAll ? (
+              <Muted testID="mastered-count" style={{ color: t.good }}>{` · ${masteredAll} mastered`}</Muted>
+            ) : null}
+          </View>
         </View>
         <CogButton testID="study-cog" label="Study options" onPress={() => setPicker(true)} />
       </View>
@@ -956,6 +975,13 @@ export default function Study({ navigation, route }) {
               Nothing due today.
             </Text>
           )}
+          {/* The day's reviews are done and more are due: tomorrow's, unless
+              the learner wants them now. No number on it — the point of the
+              cap is not to show the wall. */}
+          {!(session && session.practice) && !beyondMode && backlog ? (
+            <Btn kind="pri" testID="keep-going" label="Keep going"
+                 style={{ marginTop: 20, minWidth: 220 }} onPress={() => deal(false, undefined, { beyond: true })} />
+          ) : null}
           {session && session.practice && more ? (
             <Btn kind="pri" testID="continue" label={`Back to today's cards · ${more}`}
                  style={{ marginTop: 20, minWidth: 220 }} onPress={() => deal(false)} />

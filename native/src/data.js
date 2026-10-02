@@ -38,7 +38,7 @@ import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize, lessonCountOf, lessonWordsOf } from "@core/questions";
 import { quizPassed } from "@core/state";
 import { dueCards, wanted, cardFor, dayOf } from "@core/scheduler";
-import { cardKind, kindsOf } from "@core/queue";
+import { cardKind, kindsOf, dailyFor, QUEUE_DEFAULTS } from "@core/queue";
 import { isIrregular } from "@core/facts";
 
 /* The word endings, commonest first across every sentence the app carries
@@ -747,10 +747,21 @@ export const knownWords = (st) => Object.keys((st && st.seen) || {});
    deals exactly these, whatever sets are ticked, so this number and the pile
    are the same number (2026-09-28 — the badge said ~150 while a buried tick
    let the pile hand over twenty). */
-export const dueCount = (st) => {
+/* …and only **today's portion** of it (2026-10-02): what is due, up to the
+   reviews left of the day's cap (core/queue.js DAILY_REVIEWS), which is what
+   the Study pile deals. A badge reading 213 is a wall; 50 is a day. What is
+   past the cap waits for tomorrow (`dueAll` is the whole backlog). */
+export const dueAll = (st) => {
   const kinds = kindsOf(st.cardKinds);
   return dueCards(st.seen, Date.now(), st.learnAhead)
     .filter((c) => kinds.includes(cardKind(c.word))).length;
+};
+export const dueCount = (st) => {
+  /* The constant, not `st.reviewsPerDay`: the setting that wrote that key is
+     gone, so a stored value is a leftover from it (200 on older profiles)
+     and must not quietly lift the cap. */
+  const left = Math.max(0, QUEUE_DEFAULTS.reviewsPerDay - dailyFor(st.daily, Date.now()).reviews);
+  return Math.min(dueAll(st), left);
 };
 
 /* What a practice drill may ask about: the words the learner has met, widened

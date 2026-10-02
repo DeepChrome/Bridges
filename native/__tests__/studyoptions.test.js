@@ -279,14 +279,38 @@ describe("after the day's pile", () => {
      daily review cap, and a due card whose word folds onto another lemma
      («всё» → «все»), which the pile looked up under the other word's schedule
      and never dealt. The badge and the pile are one number. */
-  it("deals every card the badge counts, whatever was answered today", () => {
+  it("deals every card the badge counts", () => {
     const today = require("@core/queue").dailyFor(null, now);
     const st = { ...base, sets: [], cardKinds: ["words"],
                  seen: { "всё": { recognise: due() }, [WORD]: { recognise: due() } },
-                 daily: { ...today, reviews: 500 } };
+                 daily: { ...today, reviews: 10 } };
     const s = sessionFor(st);
     expect(s.items.map((x) => x.word).sort()).toEqual(["всё", WORD].sort());
     expect(s.items.length + s.remaining).toBe(dueCount(st));
+  });
+
+  /* Fifty a day (the owner, 2026-10-02: "when it says 213… it's just
+     overwhelming"). Past the day's reviews the badge and the pile both say
+     nothing is owed today, and "Keep going" deals the rest on request. */
+  it("stops at the day's reviews, and keeps going when asked", () => {
+    const { DAILY_REVIEWS, dailyFor } = require("@core/queue");
+    const { dueAll } = require("../src/data");
+    const today = dailyFor(null, now);
+    const st = { ...base, sets: [], cardKinds: ["words"],
+                 seen: { "всё": { recognise: due() }, [WORD]: { recognise: due() } },
+                 daily: { ...today, reviews: DAILY_REVIEWS } };
+    expect(dueCount(st)).toBe(0);
+    expect(dueAll(st)).toBe(2);
+    expect(sessionFor(st).items).toHaveLength(0);
+    expect(sessionFor(st, { beyond: true }).items.map((x) => x.word).sort()).toEqual(["всё", WORD].sort());
+  });
+
+  it("counts no more than the day's reviews on the badge", () => {
+    const { DAILY_REVIEWS, dailyFor } = require("@core/queue");
+    const seen = {};
+    for (const b of L.slice(0, DAILY_REVIEWS + 30).map((x) => x.b)) seen[b] = { recognise: due() };
+    const st = { ...base, sets: [], cardKinds: ["words"], seen, daily: dailyFor(null, now) };
+    expect(dueCount(st)).toBe(DAILY_REVIEWS);
   });
 
   it("offers a round of known words, least held first", async () => {

@@ -242,6 +242,84 @@ export function knownWords(st, now = Date.now()) {
   return out.sort((a, b) => a[1] - b[1]).map((x) => x[0]);
 }
 
+/* Where a sitting stands (the owner, 2026-10-01: "the total count increases
+   per attempt. That's not helpful"). Counted by card, never by attempt: a
+   card answered Again comes back in the pile but is still one card, so the
+   total holds still. `words` is every card dealt this sitting (all chunks),
+   `marks` what each was last answered — "done" for Hard and better (it is
+   finished for today), "again" for Again (it is coming back) — and `beyond`
+   the cards the scheduler still holds past the dealt chunks. */
+export function sittingTally(words, marks, beyond = 0) {
+  let done = 0, again = 0;
+  for (const w of words) {
+    if (marks[w] === "done") done++;
+    else if (marks[w] === "again") again++;
+  }
+  const total = words.size + beyond;
+  return { done, again, left: total - done, total };
+}
+
+/* How much of a set of cards is held (free study: "the user can see how many
+   words they've mastered"). Mastered is familiarity MASTERED_AT and above —
+   the line the tutor's profile already uses for "words held best" — on the
+   word's own frequency scale (core/scheduler.js); learning is anything met
+   and below it; new is never met. */
+export const MASTERED_AT = 60;
+export function masteryOf(st, cards) {
+  let mastered = 0, learning = 0, fresh = 0;
+  for (const c of cards) {
+    const card = cardFor((st.seen || {})[c.b]);
+    if (!card || kindOf(card) === "new") fresh++;
+    else if (familiarity(card, rankOf(c.b)) >= MASTERED_AT) mastered++;
+    else learning++;
+  }
+  return { mastered, learning, fresh };
+}
+
+/* The counter: a few small figures in a row, each its colour; a tap opens what
+   each one is (`TallySheet`). Small and tight, no words beyond "left" — the
+   colours carry the meaning once seen, and the sheet says it for the first
+   time. */
+function Tally({ parts, onPress }) {
+  const t = useTheme();
+  return (
+    <Pressable testID="tally" accessibilityRole="button" onPress={onPress} hitSlop={8}
+               accessibilityLabel={parts.map((p) => `${p.n} ${p.label}`).join(", ")}
+               style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 10,
+                 minHeight: 32, paddingHorizontal: 10, borderRadius: radius.lg,
+                 backgroundColor: t.surface2, opacity: pressed ? 0.6 : 1 })}>
+      {parts.map((p) => (
+        <View key={p.id} testID={`tally-${p.id}`} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+          {p.dot ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: p.dot }} /> : null}
+          <Text style={{ color: p.muted ? t.ink3 : t.ink, fontSize: 13, fontWeight: "700" }}>
+            {p.short || String(p.n)}
+          </Text>
+        </View>
+      ))}
+    </Pressable>
+  );
+}
+
+function TallySheet({ title, parts, onClose }) {
+  const t = useTheme();
+  return (
+    <Sheet testID="tally-sheet" title={title} onClose={onClose}>
+      <List>
+        {parts.map((p) => (
+          <Row key={p.id}>
+            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: p.dot || t.ink3 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>{p.label}</Text>
+              <Muted>{p.desc}</Muted>
+            </View>
+            <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700" }}>{String(p.n)}</Text>
+          </Row>
+        ))}
+      </List>
+    </Sheet>
+  );
+}
+
 /* The session from the learner's state. Exported so a test can ask for the
    same session the screen deals. `round: "trouble"` is the extra round of
    trouble words offered once the day is done; `round: "list"` is a round on
@@ -563,17 +641,20 @@ export default function Study({ navigation, route }) {
     [st.seen, st.cardKinds]);
 
   const dealt = useRef(0);   // which deal this is, for "read once per card"
-  /* Cards already played in earlier chunks of this sitting. The pile is dealt
-     twenty at a time and the next chunk follows by itself, so the counter
-     counts the whole day's pile rather than starting again at 1/20 — the
-     owner, 2026-09-30: *"Still says 157 due but 20 cards… the user should have
-     the option to review all due cards til they are caught up."* They always
-     could; the counter said otherwise. */
-  const [base, setBase] = useState(0);
+  /* The sitting, by card (`sittingTally`): every card dealt in it, across the
+     chunks — the pile is dealt twenty at a time and the next chunk follows by
+     itself, so the counter has to span them (the owner, 2026-09-30: "Still
+     says 157 due but 20 cards") — and how each was last answered. */
+  const sitting = useRef(new Set());
+  const [marks, setMarks] = useState({});
+  const [aheadMode, setAheadMode] = useState(false);
+  const [tallyOpen, setTallyOpen] = useState(false);
   const deal = (ahead, round, extra, carry) => {
     dealt.current += 1;
-    setBase(carry && session ? base + session.items.length : 0);
-    setSession(sessionFor(st, { ahead, round, ...extra }));
+    const next = sessionFor(st, { ahead, round, ...extra });
+    if (!carry) { sitting.current = new Set(); setMarks({}); setAheadMode(!!ahead); }
+    for (const it of next.items) sitting.current.add(it.word);
+    setSession(next);
     setAt(0);
     setShown(false); setRevealed(false);
     setLast(null);
@@ -686,7 +767,8 @@ export default function Study({ navigation, route }) {
     const word = item.word, direction = item.direction;
     const rows = reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
     const before = { items: items, at, prev: current, trouble: st.trouble, daily: st.daily,
-                     row: rows[0] };
+                     row: rows[0], marks };
+    setMarks({ ...marks, [word]: g === 1 ? "again" : "done" });
     update((prev) => {
       const r = applyGrade(prev.seen, prev.trouble, word, direction, g, now, schedulerOpts(prev));
       const daily = dailyFor(prev.daily, now);
@@ -715,6 +797,7 @@ export default function Study({ navigation, route }) {
       return { ...p, seen, trouble: last.trouble, daily: last.daily };
     }, [], [{ word: row.word, direction: row.direction, at: row.at }]);
     setSession({ ...session, items: last.items });
+    setMarks(last.marks);
     setAt(last.at);
     setShown(true); setRevealed(true);
     setLast(null);
@@ -743,10 +826,28 @@ export default function Study({ navigation, route }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished, more]);
   const reviewedToday = dailyFor(st.daily, Date.now()).reviews;
-  // The day's whole pile: what earlier chunks played, this chunk, and what the
-  // scheduler still holds past it. A round (trouble, a list) is its own size.
-  const pileSize = !session ? 0 : session.practice ? items.length
-    : base + items.length + (session.remaining || 0) + (session.newRemaining || 0);
+  /* Where the sitting stands. A review (the day's pile, a video's list, a
+     chosen round) counts its own cards: done, coming back, left, and the
+     total, which the scheduler's cards past the dealt chunks are part of and
+     an Again never adds to. Learning new words ahead of schedule is free
+     study, and what it shows is the words themselves: how many of the ticked
+     sources are mastered, still learning, and not met yet — no total, since
+     the point there is progress across the set, not a pile to clear. */
+  const tally = !session ? null : sittingTally(sitting.current, marks,
+    session.practice ? 0 : (session.remaining || 0) + (session.newRemaining || 0));
+  const mastery = useMemo(() => (aheadMode ? masteryOf(st, sourceCards(st)) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [aheadMode, st.seen, setsKey]);
+  const tallyParts = mastery ? [
+    { id: "mastered", n: mastery.mastered, dot: t.good, label: "Mastered", desc: "Held well enough to last weeks" },
+    { id: "learning", n: mastery.learning, dot: t.warn, label: "Learning", desc: "Met, not yet held" },
+    { id: "new", n: mastery.fresh, short: `${mastery.fresh} new`, label: "New", desc: "Not met yet" },
+  ] : tally ? [
+    { id: "done", n: tally.done, dot: t.good, label: "Done", desc: "Answered, finished for today" },
+    { id: "again", n: tally.again, dot: t.warn, label: "Coming back", desc: "Missed, asked again soon" },
+    { id: "left", n: tally.left, short: `${tally.left} left`, label: "Left", desc: "Still to answer today" },
+    { id: "total", n: tally.total, muted: true, label: "In this review", desc: "Every card, each counted once" },
+  ] : [];
 
   /* The controls belong to the screen, not to the card, and they are pinned
      off the scroll (`Screen footer`).
@@ -878,9 +979,16 @@ export default function Study({ navigation, route }) {
       ) : (
         <>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginTop: 16 }}>
-            <View style={{ flex: 1 }}><Bar value={(base + at) / pileSize} /></View>
-            <Pill testID="progress">{`${base + at + 1}/${pileSize}`}</Pill>
+            <View style={{ flex: 1 }}>
+              <Bar value={mastery ? mastery.mastered / Math.max(1, mastery.mastered + mastery.learning + mastery.fresh)
+                                  : tally.done / Math.max(1, tally.total)} />
+            </View>
+            <Tally parts={tallyParts} onPress={() => setTallyOpen(true)} />
           </View>
+          {tallyOpen ? (
+            <TallySheet title={mastery ? "Your words" : "This review"} parts={tallyParts}
+                        onClose={() => setTallyOpen(false)} />
+          ) : null}
 
           {/* Once revealed, a tap on the card turns it — back to the front to
               look again, and over once more — while the grade buttons stay. */}

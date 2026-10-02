@@ -36,23 +36,25 @@ Each step ends with the full suite and is committed on its own.
        the Anthropic balance ran out; `build_transcript_en.py` resumes where
        it stopped once it is topped up (about $2). A line with no English
        shows none.*
-5. [ ] **One voice family.** Every curriculum word in the same voice — the
+5. [x] **One voice family.** Every curriculum word in the same voice — the
        deep «знать» is a human recording kept on purpose in September, and it
        is exactly the "extremely different" voice he hears. A man and a woman
        are fine; four readers are not.
-6. [ ] **Every example on a card can be heard**, the dictionary's sense
+6. [x] **Every example on a card can be heard**, the dictionary's sense
        examples included.
-7. [ ] **Word sets are taught whole.** Plate with spoon, knife, fork, glass;
+7. [x] **Word sets are taught whole.** Plate with spoon, knife, fork, glass;
        all four seasons; the days, the months, the colours, the family. A
        curated list of sets; a unit that teaches one member teaches the core
        of the set. Moves lessons, so the conversations and audio follow.
-8. [ ] **Buttons that look made, not generated.** Lighter, sized to their
+8. [x] **Buttons that look made, not generated.** Lighter, sized to their
        label, text centred, full width only where a screen has one action.
 9. [ ] **Brand.** A name that says "learn Russian" to a store search, and
        five to ten logo directions that read at app-icon size, presented
        side by side for his choice.
+       *Seven directions presented (the canvas artifact); waiting on his
+       pick before anything in the app is renamed.*
 
-10. [ ] **No wait on a speaker, online or off.** On a flight a press waited
+10. [x] **No wait on a speaker, online or off.** On a flight a press waited
         for a streamed recording to fail before the phone's voice took over.
         Every curriculum example is now bundled (step 6); what still streams
         gives up quickly when there is no network, and stops trying for a

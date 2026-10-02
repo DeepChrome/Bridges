@@ -5943,6 +5943,36 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
 - **Not built: offline YouTube.** Downloading a video or its audio breaks
   YouTube's terms and gets an app removed from the store.
 
+## 30bp. A lesson's order, a run kept, Teddy's face (2026-10-02)
+
+- **A lesson runs vocabulary → grammar → quiz → listening → summary →
+  video** (the owner: *"the overall flow should be vocab, drill, quiz,
+  summary, video"*). `components` lists the steps in that order and
+  `nextComponent` is what Continue opens: the first step left *after the
+  furthest one done*, optional steps included, so a step skipped past is not
+  pointed at again; a shared step (the unit's video) does not count as
+  "furthest". Completion still counts required steps only, so no finished
+  lesson came undone. `stepRoute` in data.js is the one step → route table:
+  the path's own table knew only vocab, quiz and video, so after the reorder a
+  grammar step would have opened Vocabulary. A passed quiz leads on to the
+  summary and video before the next lesson.
+- **A run is kept as it goes** (`native/src/resume.js`, `rb.resume.<profile>`):
+  after every answer the Runner saves the deck as dealt, the position and the
+  running tally, *pointing at the next question* — the grade just given is
+  already in the scheduler, and resuming on it would grade it twice.
+  Reopening a flow asks Continue or Start again (`useResume`); opening the app
+  offers the newest run once, as a sheet on the path; finishing clears it; a
+  week old is not offered. The screen's memory, not the learner's: losing it
+  costs a restart, never a card (immerse.js's reasoning). Every saving flow
+  names its route and tab, and `routes.test.js` holds each to a registered
+  route. Not saved: placement (onboarding) and the unscored mouth drills.
+- **Teddy's face follows the score** (`reactionFor`): cheer ≥ 90, smile ≥ 80,
+  thumbs up for any other pass, shrug from 50, wince under — on every scored
+  run, not only a lesson's quiz. Four of the five poses are briefed in
+  `build_cast_art.mjs` and **not drawn** (the image account is spent); each
+  shows a stand-in, and `UNDRAWN` in core/guide.js is held by core.test to
+  exactly what is missing.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

@@ -46,7 +46,7 @@ import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ICONS, ACTIVITY_ICONS, iconFor } from "../core/icons.js";
 import { AV, AV_IDS, avatarOf, AV_CREDIT } from "../core/avatars.js";
-import { POSES, UNDRAWN, LINES, MAX_WORDS, guideLine, poseFor, reactionFor, GUIDE } from "../core/guide.js";
+import { POSES, LINES, MAX_WORDS, guideLine, poseFor, reactionFor, GUIDE } from "../core/guide.js";
 
 import { loadPayload, PARTS } from "./payload.mjs";
 
@@ -1880,9 +1880,7 @@ group("the guide");
   ok(new Set(POSES).size === POSES.length, "the poses are distinct", POSES.join(", "));
   const shipped = new Set(readdirSync(join(ROOT, "native", "assets", "guide")));
   const missing = POSES.filter((p) => !shipped.has(`${p}.png`));
-  ok(missing.join() === UNDRAWN.join(),
-     "every pose ships a picture, bar the ones listed as not drawn yet",
-     `missing ${missing.join(", ") || "none"}; listed ${UNDRAWN.join(", ") || "none"}`);
+  ok(!missing.length, "every pose ships a picture", missing.join(", "));
   ok(reactionFor(95, true) === "cheer" && reactionFor(72, true) === "thumbs"
      && reactionFor(72, false) === "shrug" && reactionFor(20, false) === "wince",
      "a score's face follows the mark and the pass");

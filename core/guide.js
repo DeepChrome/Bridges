@@ -26,12 +26,6 @@ export const GUIDE = { name: castById[GUIDE_ID].en };
 
 export const POSES = ["idle", "wave", "point", "think", "cheer", "smile", "thumbs", "shrug", "wince"];
 
-/* Poses named but not drawn yet: the image account ran dry before they could
-   be bought (2026-10-02). Each shows a stand-in (native/src/guide.js) until
-   `build_cast_art.mjs --poses` draws it; core.test.mjs holds this list to
-   exactly what is missing, so it empties itself out of date. */
-export const UNDRAWN = ["smile", "thumbs", "shrug", "wince"];
-
 /* ----------------------------------------------------------------- his voice */
 
 /* The end of a lesson is the one screen where a sentence from Teddy is welcome:

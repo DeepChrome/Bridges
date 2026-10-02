@@ -83,6 +83,31 @@ function keyGreen(px, w, h) {
   return px;
 }
 
+/* A drawing on a green screen keyed to transparency, as a temporary PNG; a
+   drawing that already has transparency (the first sheets and poses) is
+   returned as it is. */
+function keyedCopy(src, { despill = false } = {}) {
+  const png = fs.readFileSync(src);
+  const w = png.readUInt32BE(16), h = png.readUInt32BE(20);
+  const raw = execFileSync("ffmpeg", ["-v", "error", "-i", src, "-f", "rawvideo", "-pix_fmt", "rgba", "-"],
+    { maxBuffer: w * h * 4 + 1024 });
+  if (!(raw[1] > 200 && raw[0] < 90 && raw[2] < 90 && raw[3] > 250)) return src;
+  keyGreen(raw, w, h);
+  /* Fur keeps a green fringe the cut does not reach. For a character with no
+     green in it (Teddy) any green cast is the screen's, and goes; never for
+     the avatars — Gena is a crocodile. */
+  if (despill) {
+    for (let i = 0; i < w * h; i++) {
+      const r = raw[i * 4], g = raw[i * 4 + 1], b = raw[i * 4 + 2];
+      if (g > Math.max(r, b)) raw[i * 4 + 1] = Math.max(r, b);
+    }
+  }
+  const out = path.join(path.dirname(src), `.${path.basename(src, ".png")}.keyed.png`);
+  execFileSync("ffmpeg", ["-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", `${w}x${h}`,
+    "-i", "-", out], { input: raw });
+  return out;
+}
+
 function shipWordPicture(src, dst) {
   const png = fs.readFileSync(src);
   const w = png.readUInt32BE(16), h = png.readUInt32BE(20);   // the IHDR chunk
@@ -269,7 +294,8 @@ async function sheets(id, n) {
   for (let k = 1; k <= n; k++) {
     const file = path.join(dir, `${id}-${k}.png`);
     if (fs.existsSync(file)) { console.log(`kept ${rel(file)}`); continue; }
-    await edit(`A character sheet drawing of ${who} Full body, standing, facing the viewer, centred, with generous empty space around. Plain transparent background, no ground, no shadow. ${STYLE}`, refs, file);
+    // On a green screen, keyed at ship: gpt-image-2 refuses a transparent background.
+    await edit(`A character sheet drawing of ${who} Full body, standing, facing the viewer, centred, with generous empty space around, on a perfectly flat solid pure green (#00FF00) chroma-key background filling the whole frame: no ground, no shadow, nothing else bright green. ${STYLE}`, refs, file, { transparent: false });
   }
 }
 
@@ -280,7 +306,9 @@ async function poses() {
   for (const pose of POSES) {
     const file = path.join(dir, `${pose}.png`);
     if (fs.existsSync(file) && !has("--again")) { console.log(`kept ${rel(file)}`); continue; }
-    await edit(`The same dog character as in the image — identical design, colours, proportions and drawing style. ${POSE_TEXT[pose]} Full body, centred, generous empty space around, plain transparent background, no ground, no shadow. ${STYLE}`, [base], file);
+    /* On a green screen, keyed out at ship (§30bg): gpt-image-2 refuses a
+       transparent background, which is how the first five were asked for. */
+    await edit(`The same dog character as in the image — identical design, colours, proportions and drawing style. ${POSE_TEXT[pose]} Full body, centred, generous empty space around, on a perfectly flat solid pure green (#00FF00) chroma-key background filling the whole frame: no ground, no shadow, nothing else bright green. ${STYLE}`, [base], file, { transparent: false });
   }
 }
 
@@ -330,7 +358,8 @@ function ship() {
   const guide = path.join(ROOT, "native", "assets", "guide");
   fs.mkdirSync(guide, { recursive: true });
   for (const pose of POSES) {
-    const src = need(path.join(ART, "guide", `${pose}.png`));
+    // A pose drawn on a green screen is keyed first, as a word picture is.
+    const src = keyedCopy(need(path.join(ART, "guide", `${pose}.png`)), { despill: true });
     const dst = path.join(guide, `${pose}.png`);
     /* The model paints a wide, faint halo into the alpha channel: invisible on
        white, an orange glow on the dark theme. Alpha under HALO goes to zero
@@ -348,8 +377,8 @@ function ship() {
   fs.mkdirSync(faces, { recursive: true });
   const faceLines = [];
   for (const [id, box] of Object.entries(FACE_BOX)) {
-    const src = path.join(ART, `${id}.png`);
-    if (!fs.existsSync(src)) continue;
+    if (!fs.existsSync(path.join(ART, `${id}.png`))) continue;
+    const src = keyedCopy(path.join(ART, `${id}.png`));
     const av = castById[id] ? castById[id].avatar : id;
     execFileSync("ffmpeg", ["-v", "error", "-y", "-i", src,
       "-vf", `format=rgba,lut=a='if(lt(val,${HALO}),0,min(255,(val-${HALO})*255/(255-${HALO})))',crop=${box},scale=${FACE_PX}:${FACE_PX}:flags=lanczos`,

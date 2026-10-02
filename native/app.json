@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ya",
     "slug": "native",
-    "version": "1.0.0-beta.10",
+    "version": "1.0.0-beta.11",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -15,7 +15,7 @@
     },
     "android": {
       "package": "app.bridges.russian",
-      "versionCode": 10,
+      "versionCode": 11,
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",

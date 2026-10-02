@@ -5849,12 +5849,16 @@ from the head up"*.
 Twelve items in `docs/BETA.md` Phase T. The rules each one left:
 
 - **Immerse keeps its place** (`native/src/immerse.js`): the library's
-  query, filters, sort and scroll, each video's position and the recent
-  list, per profile in AsyncStorage (`rb.immerse.<id>`) — beside the learner
-  database, not in it, because a scroll offset is not learner state. A
-  position within `EDGE_MS` of either end is not kept: a video opened by
+  query, filters, sort and scroll, each video's position and the watch
+  history, per profile in AsyncStorage (`rb.immerse.<id>`) — beside the
+  learner database, not in it, because a scroll offset is not learner state.
+  A position within `EDGE_MS` of either end is not kept: a video opened by
   accident restarts, and a finished one starts again. `Screen` takes
   `restoreY`/`onScrollY`. `jest.setup.js` resets the store every test.
+  Verified on the emulator across tabs, Home, a video and a restart.
+  **History** is a pill beside the filters, not a row forced above the
+  library (the owner: "a button press rather than forced… like YouTube"):
+  `VideoHistory` lists up to `HISTORY_MAX` (100), newest first, by day.
 - **The transcript links its words** (two presses, as everywhere) and pauses
   the video when one is tapped. **Its English** is made at build time,
   `tools/build_transcript_en.py` → `data/transcript_en.json` (committed: it
@@ -5875,17 +5879,34 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   `unit`) completes it, and `grouped()` keeps it one named group. A word a
   set forces in is spine-only unless curated, or a side quest takes it from
   the spine.
-- **Buttons fit their label** (`Btn`): centred, `minWidth` 120, 44 dp tall,
-  a 3 px lip; `block` for a screen's one full-width action.
-  `controls.test.js` pins both.
+- **Buttons fit their label** (`Btn`): centred, `minWidth` 120 for a boxed
+  button only (given to links, the creators' three links stopped fitting a
+  row), 44 dp tall, a 3 px lip; `block` for a screen's one full-width
+  action. `controls.test.js` pins all three.
 - **A stream that cannot start gives up** (`STREAM_START_MS`, 2 s) and the
   phone's voice takes over; after a failure the app assumes it is offline
   for `OFFLINE_HOLD_MS` and does not try the network at all.
 - **The day's recap** (`recapQuestions` in core, `todaysWork` in data.js,
-  `RecapFlow`): 10–20 questions on today's misses, then today's words,
-  offered on the path from `RECAP_FROM` (5) words and not again once done
-  (`drills["recap:<day>"]`). It waits for `ready`: computed from the store's
-  defaults it would decide there was nothing to recap and never ask again.
+  `RecapFlow`): 10–20 questions refreshing the whole day — the owner: *"a
+  review of the biggest things covered that day… highlight the biggest areas
+  to focus on… but it shouldn't be the focus."* Words sampled evenly through
+  the day in the order met; misses and the weakest at most `RECAP_FOCUS` (a
+  quarter), written, shuffled in; a fifth sentences to hear; the chapter's
+  grammar once or twice. Offered on the path from `RECAP_FROM` (5) words and
+  not again once done (`drills["recap:<day>"]`). It waits for `ready`:
+  computed from the store's defaults it would decide there was nothing to
+  recap and never ask again.
+- **The brand is Ya** (the owner's pick from seven): a white Я on coral
+  #D9502A, from `make_app_icon.py` and `mark.js` (one geometry). The shown
+  name is `APP_NAME` in `native/src/brand.js`; the package id, backup kind
+  and database/file names keep "bridges" so installs and backups keep
+  working. The interface stays indigo — coral beside the red of a wrong
+  answer would make main buttons read as errors. **The Android launcher
+  icons in `native/android/…/mipmap-*` are copies** that only an Expo
+  prebuild regenerates, and a prebuild would overwrite the hand-edited build
+  files; regenerate them from `native/assets` with ffmpeg instead.
+- **The final test does not recycle a miss** (`recycle={false}`, like the
+  placement and section tests): 2/50 became 2/51 on the emulator.
 - **An ending's clip has to be hearable, not merely playable.** The clips
   played to the end on the emulator and the owner heard nothing: an
   unstressed final syllable cut from a word is 70–150 ms of quiet sound, and

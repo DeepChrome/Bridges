@@ -25,6 +25,8 @@ Each step ends with the full suite and is committed on its own.
        leaving the app and a restart. A video reopens where it stopped.
 2. [x] **Recently watched.** A short row of the last videos opened, top of
        the library, each resuming where it stopped.
+       *Changed on his word to **History**: a pill beside the filters opening
+       every video opened, newest first, by day, as YouTube's is.*
 3. [x] **The transcript reads like the rest of the app.** Every word is a
        two-press link (the sheet, then the full entry), as everywhere else.
 4. [ ] **English under the transcript.** Each caption line with its English
@@ -32,10 +34,9 @@ Each step ends with the full suite and is committed on its own.
        captions are YouTube's auto-captions with no punctuation, so the
        translation is made at build time in context (chunks, not single
        lines), stored beside the transcripts, and labelled as machine-made.
-       *Built; 58,652 of 82,096 lines (71 %) translated. The run stopped when
-       the Anthropic balance ran out; `build_transcript_en.py` resumes where
-       it stopped once it is topped up (about $2). A line with no English
-       shows none.*
+       *81,816 of 82,096 lines (99.7 %) after the top-up ($3.16 that round).
+       The last 280 fail the every-line-in-English check repeatedly and show
+       no English.*
 5. [x] **One voice family.** Every curriculum word in the same voice — the
        deep «знать» is a human recording kept on purpose in September, and it
        is exactly the "extremely different" voice he hears. A man and a woman
@@ -48,11 +49,13 @@ Each step ends with the full suite and is committed on its own.
        of the set. Moves lessons, so the conversations and audio follow.
 8. [x] **Buttons that look made, not generated.** Lighter, sized to their
        label, text centred, full width only where a screen has one action.
-9. [ ] **Brand.** A name that says "learn Russian" to a store search, and
+9. [x] **Brand.** A name that says "learn Russian" to a store search, and
        five to ten logo directions that read at app-icon size, presented
        side by side for his choice.
-       *Seven directions presented (the canvas artifact); waiting on his
-       pick before anything in the app is renamed.*
+       *He chose "Ya": a white Я on coral, store title "Ya: Learn Russian".
+       Icon, splash, first screen and the name on screen changed; the
+       interface keeps its indigo (coral beside the red of a wrong answer
+       would make every main button look like one).*
 
 10. [x] **No wait on a speaker, online or off.** On a flight a press waited
         for a streamed recording to fail before the phone's voice took over.
@@ -64,6 +67,11 @@ Each step ends with the full suite and is committed on its own.
         drills and the grammar touched — 10 to 20 questions, mixed kinds,
         graded through the scheduler like any review, so the day's work is
         retrieved once more before sleep.
+        *Reworked on his word: a refresher over the whole day, not a misses
+        review — misses and weak words at most a quarter, mixed in.*
+
+**Next, as its own sprint (the owner): related words taught together, with
+a top-to-bottom review.** Not started until the items above are settled.
 
 12. [x] **Word endings play.** On the endings screen the example words
         play and the endings themselves do not (the owner, 2026-10-01). The

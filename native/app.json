@@ -15,7 +15,7 @@
     },
     "android": {
       "package": "app.bridges.russian",
-      "versionCode": 14,
+      "versionCode": 15,
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",

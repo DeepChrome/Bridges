@@ -9,7 +9,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import Summary from "../src/screens/Summary";
-import { UN, L, lessonWords, lessonCount, components, lessonDone, nextStep } from "../src/data";
+import {
+  UN, L, lessonWords, lessonCount, components, lessonDone, nextComponent, hasGrammar, grammarKey,
+} from "../src/data";
 
 const base = {
   v: 10, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {}, watched: {},
@@ -49,11 +51,42 @@ describe("the summary", () => {
     expect((await screen.findByTestId("summary-count")).props.children).toBe(`${all.length} words`);
   });
 
-  it("is an optional step that Continue walks past", () => {
-    const cs = components(base, unit, 0);
-    expect(cs.map((c) => c.id).slice(0, 3)).toEqual(["vocab", "summary", "quiz"]);
-    expect(cs.find((c) => c.id === "summary").optional).toBe(true);
-    const afterVocab = { ...base, unit: { [unit.id]: { lessons: { 0: { v: true } } } } };
-    expect(nextStep(afterVocab)).toMatchObject({ step: "quiz" });
+  it("is an optional step, before the video", () => {
+    const ids = components(base, unit, 0).map((c) => c.id);
+    expect(ids.indexOf("summary")).toBeGreaterThan(ids.indexOf("quiz"));
+    if (unit.v) expect(ids[ids.length - 1]).toBe("video");
+    expect(components(base, unit, 0).find((c) => c.id === "summary").optional).toBe(true);
+  });
+});
+
+/* The owner, 2026-10-02: "the overall flow should be vocab, drill, quiz,
+   summary, video". Continue walks that order, optional steps included, and
+   does not point back at a step the learner chose to skip past. */
+describe("a lesson's flow", () => {
+  const graded = UN.find((u) => u.v && hasGrammar(u));
+  const ids = (u) => components(base, u, 0).map((c) => c.id);
+
+  it("runs words, grammar, quiz, summary, video", () => {
+    const order = ids(graded).filter((x) => x !== "listen");
+    expect(order).toEqual(["vocab", "grammar", "quiz", "summary", "video"]);
+  });
+
+  it("Continue opens the grammar after the words, then the quiz", () => {
+    const s = (l, drills = {}) => ({ ...base, drills,
+      unit: { [graded.id]: { lessons: { 0: l } } } });
+    const cs = (st) => components(st, graded, 0);
+    expect(nextComponent(cs(s({ v: true }))).id).toBe("grammar");
+    expect(nextComponent(cs(s({ v: true }, { [grammarKey(graded, 0)]: { best: 1 } }))).id)
+      .toBe("quiz");
+  });
+
+  it("a step skipped past is not pointed at again", () => {
+    const st = { ...base, unit: { [graded.id]: { lessons: { 0: { v: true, q: 100 } } } } };
+    expect(nextComponent(components(st, graded, 0)).id).not.toBe("grammar");
+  });
+
+  it("a video watched in an earlier lesson does not skip a later lesson's steps", () => {
+    const st = { ...base, unit: { [graded.id]: { video: true, lessons: {} } } };
+    expect(nextComponent(components(st, graded, 1)).id).toBe("vocab");
   });
 });

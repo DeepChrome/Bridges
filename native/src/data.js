@@ -228,21 +228,26 @@ export const lessonWords = (u, i) => {
 export const unitState = (st, id) =>
   st.unit[id] || { best: 0, done: false, lessons: {}, video: false };
 
-/* A lesson is three things doable in any order. The video belongs to the unit — one
-   video covers a unit's worth of vocabulary — so watching it counts for every lesson. */
+/* A lesson's steps, in the order a lesson runs (the owner, 2026-10-02: "the
+   overall flow should be vocab, drill, quiz, summary, video"): the new words,
+   the chapter's grammar on them, the quiz, the conversation where there is
+   one, a summary that preps the video, and the video. Any of them may be
+   opened in any order; the order is what Continue walks (`nextComponent`).
+   The video belongs to the unit — one video covers a unit's worth of
+   vocabulary — so watching it counts for every lesson. */
 export function components(st, u, i) {
   const s = unitState(st, u.id);
   const l = (s.lessons || {})[i] || {};
-  const out = [
-    { id: "vocab", label: "Vocabulary", done: !!l.v },
-    /* What the lesson taught, as a list to study before the quiz (2026-09-29).
-       Optional: listed so it is found, never owed — adding a required step
-       would un-finish every lesson already done (the rule the Listening step
-       set, §30af). */
-    { id: "summary", label: "Summary", optional: true, done: !!l.s },
-    { id: "quiz", label: "Quiz", score: l.q, tries: l.tries || 0, done: quizPassed(l) },
-  ];
-  if (u.v) out.push({ id: "video", label: "Video", done: !!s.video, shared: true });
+  const out = [{ id: "vocab", label: "Vocabulary", done: !!l.v }];
+  /* Practice on the chapter's grammar point with this lesson's words
+     (GrammarFlow, 2026-09-30). Optional: a required step would un-finish
+     lessons already done (the rule the Listening step set, §30af). Done is
+     the run recorded under its key, as Listening's is. */
+  if (hasGrammar(u)) {
+    out.push({ id: "grammar", label: "Grammar", optional: true,
+               done: !!((st.drills || {})[grammarKey(u, i)]) });
+  }
+  out.push({ id: "quiz", label: "Quiz", score: l.q, tries: l.tries || 0, done: quizPassed(l) });
   /* The lesson's conversation, where one was written for it — a couple a
      chapter, on the spine (§30af). The owner, 2026-09-17: *"you can have them listed along with the
      lesson content..like where it says vocab lesson quiz video"*. It is listed
@@ -259,15 +264,23 @@ export function components(st, u, i) {
     out.push({ id: "listen", label: "Listening", optional: true,
                done: !!((st.drills || {})[`scene:${u.id}:${i}`]) });
   }
-  /* Practice on the chapter's grammar point with this lesson's words
-     (GrammarFlow, 2026-09-30). Optional for the reason the Listening step
-     is: a required step would un-finish lessons already done. Done is the run
-     recorded under its key, as Listening's is. */
-  if (hasGrammar(u)) {
-    out.push({ id: "grammar", label: "Grammar", optional: true,
-               done: !!((st.drills || {})[grammarKey(u, i)]) });
-  }
+  /* What the lesson taught, reviewed before the video (2026-09-29). Optional:
+     listed so it is found, never owed. */
+  out.push({ id: "summary", label: "Summary", optional: true, done: !!l.s });
+  if (u.v) out.push({ id: "video", label: "Video", done: !!s.video, shared: true });
   return out;
+}
+
+/* The step Continue opens: the first one left **after the furthest one done**,
+   so the lesson runs in order — optional steps included — and a step the
+   learner chose to skip past is not pointed at again. Failing that, a required
+   step still owed (a quiz not yet passed), and failing that anything left. */
+export function nextComponent(cs) {
+  let last = -1;
+  cs.forEach((c, k) => { if (c.done && !c.shared) last = k; });
+  return cs.find((c, k) => k > last && !c.done)
+    || cs.find((c) => !c.done && !c.optional)
+    || cs.find((c) => !c.done) || null;
 }
 
 /* Whether a unit has a grammar point to practise: its card's `form`, or its
@@ -540,10 +553,7 @@ export function nextLesson(st) {
 export function nextStep(st) {
   const here = nextLesson(st);
   if (!here) return null;
-  // Continue follows the required steps; the optional ones (the summary, a
-  // featured conversation) are there to be chosen, not walked through.
-  const cs = components(st, here.unit, here.index);
-  const c = cs.find((x) => !x.done && !x.optional) || cs.find((x) => !x.done);
+  const c = nextComponent(components(st, here.unit, here.index));
   return { ...here, step: c ? c.id : "vocab" };
 }
 

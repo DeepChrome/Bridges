@@ -7,7 +7,7 @@ import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick, Text } from "../ui";
 import {
-  UN, lessonCount, lessonWords, lessonDone, components, unitFineProgress, L, linesWith, hasGrammar,
+  UN, lessonCount, lessonWords, lessonDone, components, nextComponent, unitFineProgress, L, linesWith, hasGrammar,
 } from "../data";
 
 export function UnitScreen({ route, navigation }) {
@@ -96,11 +96,8 @@ export function LessonScreen({ route, navigation }) {
   if (!unit) return null;
   const cs = components(st, unit, i);
 
-  /* The brand edge goes on the next **required** step while one is left, so a
-     finished lesson does not point at its optional extra as though the lesson
-     were unfinished. Once the required work is done the extra takes it, which
-     is the right nudge and not a demand. */
-  const nextId = (cs.find((c) => !c.done && !c.optional) || cs.find((c) => !c.done) || {}).id;
+  // The brand edge is on the step Continue would open, so the two agree.
+  const nextId = (nextComponent(cs) || {}).id;
   /* One place that knows where a step goes. It was written twice — here and on
      the primary button — which is exactly how the two come to disagree. */
   const open = (id) => {

@@ -33,11 +33,12 @@
  * `speakLine` resolves when it has finished, which is the handshake.
  */
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ExpoSpeechRecognitionModule as M, useSpeechRecognitionEvent,
 } from "expo-speech-recognition";
 import { APP_NAME } from "./brand";
+import { rearmAudio } from "./audio";
 
 const MIC_OFF = `The microphone is off for ${APP_NAME}.`;
 
@@ -275,6 +276,22 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     }, SILENCE_MS);
   };
 
+  /* A screen closed while the microphone was open must not leave it open.
+     There was no cleanup at all: leave Say, Shadow, the tutor or Translate
+     mid-listen and the recogniser ran on — and an open recogniser on Android
+     routes the phone's audio for voice, so every recording and the videos
+     went silent until the app was killed (the owner, 2026-10-02). Aborted,
+     and the audio set up afresh. */
+  useEffect(() => () => {
+    clearTimers();
+    if (engine.current) {
+      engine.current = false;
+      try { M.abort(); } catch (e) { /* nothing to abort */ }
+    }
+    rearmAudio();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useSpeechRecognitionEvent("audiostart", ready);
   useSpeechRecognitionEvent("speechstart", ready);
   useSpeechRecognitionEvent("result", (ev) => {
@@ -333,6 +350,9 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     }
   });
   useSpeechRecognitionEvent("end", () => {
+    // The recogniser has let go of the phone's audio: ours is set up afresh
+    // before the next sound (audio.js rearmAudio).
+    rearmAudio();
     if (!engine.current) return;
     /* Conversation mode holds the engine open, so an ending here is the
        platform closing the session under us. Whatever was heard is the turn. */

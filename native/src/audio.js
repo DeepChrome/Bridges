@@ -777,6 +777,21 @@ export function stop() {
    `ready` is cleared so the next `prepare()` re-arms the session. */
 export function releaseAudio() {
   stop();
+  rearmAudio();
+}
+
+/* The session as the phone left it is not to be trusted (the owner,
+ * 2026-10-02: "sometimes the audio just completely cuts out and I have to
+ * restart the app… for videos but also… when I press the audio button").
+ * The audio mode was applied once per launch and never again, and the
+ * answer-cue players lived for the whole process — so anything that took the
+ * phone's audio in between (the speech recogniser above all, which routes
+ * Android's audio for voice; a call; another app) left ours set the way it
+ * left it, and only a restart applied it afresh. Called when the recogniser
+ * lets go and when the app comes back to the foreground: the mode is applied
+ * again before the next sound, and the cue players are made new. Nothing that
+ * is playing is touched. */
+export function rearmAudio() {
   for (const key of Object.keys(cuePlayers)) {
     release(cuePlayers[key]);
     delete cuePlayers[key];

@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Animated, Pressable } from "react-native";
+import { View, Animated, Pressable, AppState } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -46,7 +46,7 @@ import Sounds from "./src/screens/Sounds";
 import Grammar from "./src/screens/Grammar";
 import Endings from "./src/screens/Endings";
 import { WordsProvider, navRef } from "./src/words";
-import { configureAudio, setRouteSource, leftFor } from "./src/audio";
+import { configureAudio, setRouteSource, leftFor, rearmAudio } from "./src/audio";
 import { setHaptics } from "./src/haptics";
 import { arm as armReminders } from "./src/notify";
 import { workedOn } from "@core/scheduler";
@@ -82,6 +82,10 @@ const currentRouteKey = () => {
   return r ? r.key : null;
 };
 setRouteSource(currentRouteKey);
+/* Back from another app — a call, music, anything that took the phone's
+   audio — the session is set up afresh before the next sound (audio.js
+   rearmAudio). Without it only a restart did that. */
+AppState.addEventListener("change", (s) => { if (s === "active") rearmAudio(); });
 
 /* …and the same for errors that never reach a React boundary: a rejected
    promise, a callback from a native module. At module scope so it is in place

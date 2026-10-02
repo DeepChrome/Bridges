@@ -13,7 +13,6 @@ import {
 import { Text as RNText, TextInput as RNTextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml, Circle } from "react-native-svg";
-import { isNotebook } from "./skin";
 import { iconFor } from "@core/icons";
 import { AV, AV_IDS, AV_LEGACY, avatarOf } from "@core/avatars";
 import { CAST_FACES } from "./castfaces";
@@ -90,16 +89,15 @@ export function Lift({ children, edge, fill, border, r = radius.md, style, flat,
  * its entries. */
 export function Text({ style, children, ...rest }) {
   const flat = StyleSheet.flatten(style) || {};
-  /* The UI test skin writes labels in words, as a school book does: the
-     tracked-out small capitals ("VERBS", "THE RULE") become sentence case
-     there, in the one place every label passes through. */
-  const caps = isNotebook() && flat.textTransform === "uppercase"
-    ? { textTransform: "none", letterSpacing: 0 } : null;
+  /* Labels in words, as a school book writes them: the tracked-out small
+     capitals ("VERBS", "THE RULE") become sentence case, in the one place
+     every label passes through. */
+  const caps = flat.textTransform === "uppercase" ? { textTransform: "none", letterSpacing: 0 } : null;
   /* …and the face carries the weight. PT Serif is one file per weight, and
      Android asked for weight 800 on a family with no 800 falls back to the
      system font — the path's chapter titles and every button came out in
      Roboto while 700 happened to match. */
-  const weight = isNotebook() && !flat.fontFamily ? { fontWeight: "normal" } : null;
+  const weight = !flat.fontFamily ? { fontWeight: "normal" } : null;
   return (
     <RNText {...rest} style={[style, { fontFamily: flat.fontFamily || faceFor(flat.fontWeight) }, caps, weight]}>
       {children}
@@ -107,12 +105,10 @@ export function Text({ style, children, ...rest }) {
   );
 }
 
-/* Typed answers are text too, and a Cyrillic keyboard's output in Roboto beside
-   Nunito everywhere else was the most visible half of the old mix. */
+/* Typed answers are text too, in the same face as everything else. */
 export function TextInput({ style, ...rest }) {
   const flat = StyleSheet.flatten(style) || {};
-  return <RNTextInput {...rest} style={[style, { fontFamily: faceFor(flat.fontWeight) },
-    isNotebook() ? { fontWeight: "normal" } : null]} />;
+  return <RNTextInput {...rest} style={[style, { fontFamily: faceFor(flat.fontWeight) }, { fontWeight: "normal" }]} />;
 }
 
 /* `fill` makes the content container grow to the height of the screen, which is what

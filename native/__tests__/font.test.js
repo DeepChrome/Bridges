@@ -2,7 +2,7 @@
  *
  * React Native has no global font. A `Text` that names a size and not a family
  * falls back to the system one silently, so a single missed import puts Roboto
- * next to Nunito on the same screen — which reads as a bug rather than a choice,
+ * next to the app's face on the same screen — which reads as a bug rather than a choice,
  * and is invisible to every other test in this suite.
  *
  * So the rule is mechanical: nothing imports `Text` or `TextInput` from
@@ -14,7 +14,7 @@
 import { readdirSync, statSync, readFileSync } from "fs";
 import { join } from "path";
 
-import { faceFor, font } from "../src/theme";
+import { faceFor, font, fontFiles } from "../src/theme";
 
 const ROOT = join(__dirname, "..");
 
@@ -47,18 +47,14 @@ describe("the typeface", () => {
 
   it("picks a real face for a weight, because Android will not synthesise one", () => {
     // fontWeight: "700" on the regular file is ignored on Android — the text
-    // comes out light while the code says bold.
+    // comes out light while the code says bold. PT Serif has two files, so the
+    // app's weights fold into two.
     expect(faceFor("400")).toBe(font.regular);
-    expect(faceFor("500")).toBe(font.medium);
-    expect(faceFor("600")).toBe(font.medium);
-    expect(faceFor("700")).toBe(font.bold);
-    expect(faceFor("bold")).toBe(font.bold);
-    expect(faceFor("800")).toBe(font.heavy);
     expect(faceFor(undefined)).toBe(font.regular);
+    for (const w of ["500", "600", "700", "bold", "800"]) expect(faceFor(w)).toBe(font.bold);
   });
 
   it("loads every face it can name", () => {
-    const app = readFileSync(join(ROOT, "App.js"), "utf8");
-    for (const face of Object.values(font)) expect(app).toContain(face);
+    for (const face of Object.values(font)) expect(fontFiles[face]).toBeTruthy();
   });
 });

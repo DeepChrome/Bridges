@@ -65,19 +65,6 @@ const motion = objectNamed("motion");
 const light = objectNamed("light");
 const dark = objectNamed("dark");
 
-/* The two shadow levels, each its own nested object. */
-function shadowLevel(name) {
-  const m = THEME.match(new RegExp(`${name}:\\s*\\{([\\s\\S]*?)\\n  \\},`));
-  if (!m) throw new Error(`theme.js has no shadow.${name}`);
-  const body = m[1];
-  const num = (k) => {
-    const g = body.match(new RegExp(`${k}:\\s*(-?[0-9.]+)`));
-    return g ? Number(g[1]) : null;
-  };
-  return { radius: num("shadowRadius"), height: num("height"), opacity: num("shadowOpacity"),
-           elevation: num("elevation") };
-}
-
 /* ------------------------------------------------------------------ colour */
 
 const rgb = (hex) => {
@@ -150,19 +137,10 @@ group("rhythm — spacing on one grid");
   else fail("a spacing token is off the 4-grid", off.map(([k, v]) => `${k} ${v}`).join(" · "));
 }
 
-group("depth — a shadow is a light source, not a haze");
-{
-  /* Hobday: shadow blur should be about twice the distance. A blur far wider
-     than the offset is the soft grey halo that every generated interface
-     has; it reads as fog rather than as a thing lifted off the page. */
-  for (const name of ["raised", "lift"]) {
-    const s = shadowLevel(name);
-    const ratio = s.radius / s.height;
-    if (ratio >= 1.6 && ratio <= 2.6) pass(`shadow.${name} blur is about twice its distance`, `${s.radius} / ${s.height}`);
-    else fail(`shadow.${name} blur is ${ratio.toFixed(1)}× its distance`,
-              `blur ${s.radius}, distance ${s.height} — want blur ≈ ${s.height * 2}`);
-  }
-}
+/* Depth: the exercise-book look draws no shadows (2026-10-01, theme.js
+   useShadow), so the blur-to-distance rule this group held has nothing to
+   measure. If shadows come back, so does the check: blur about twice the
+   distance, or it reads as the grey haze every generated interface has. */
 
 group("colour — neutrals that read as neutral");
 {

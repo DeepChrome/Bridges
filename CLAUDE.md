@@ -5907,6 +5907,23 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   files; regenerate them from `native/assets` with ffmpeg instead.
 - **The final test does not recycle a miss** (`recycle={false}`, like the
   placement and section tests): 2/50 became 2/51 on the emulator.
+- **The exercise book is the only look** (the owner, 2026-10-01: "I like
+  the new UI… scrap the old UI and just turn that switch into the light dark
+  mode switch"). §30bj's skin is gone as a skin: its paper and night
+  palettes are theme.js's `light` and `dark`, PT Serif is the typeface
+  (`font`, `fontFiles`), corners are cut (4 · 6 · 8 · 10), there are no
+  shadows (`useShadow` answers null; design.mjs dropped its depth check), and
+  labels lose their all-caps in `Text`. `native/src/appearance.js` is light
+  or dark — the phone's setting until **Settings → Dark mode** is flipped,
+  then the choice, kept on the phone (`rb.appearance`). Nunito is
+  uninstalled. The light inks moved onto the paper's hue (§31's one hue
+  family), and tools/app/app.css took the same values so contrast.js's
+  parity holds.
+- **A review counts cards, not attempts** (Study.js `sittingTally`): green
+  done, yellow coming back, the number left, grey total — an Again never
+  grows the total. Learning new words shows mastered / learning / new for
+  the ticked sources instead (`masteryOf`, familiarity ≥ `MASTERED_AT`). A
+  tap on the figures opens what each means.
 - **An ending's clip has to be hearable, not merely playable.** The clips
   played to the end on the emulator and the owner heard nothing: an
   unstressed final syllable cut from a word is 70–150 ms of quiet sound, and

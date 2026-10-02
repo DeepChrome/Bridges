@@ -8,14 +8,14 @@
      picked by eye — see the header comment in native/src/theme.js. Six pairs
      failed WCAG before, muted 13px text worst at 3.01:1. Keep the two files
      identical; they are one design system with two renderers. */
-  --bg:#F7F8F9; --surface:#FFFFFF; --surface-2:#EEF0F4; --surface-3:#DFE3E9;
-  --ink:#14171C; --ink-2:#4B505A; --ink-3:#676D79;
-  --line:#D2D7E1; --line-soft:#ECEFF3;
-  --brand:#4D45E6; --brand-ink:#2D24DB; --brand-bg:#EBEAFD; --brand-dim:#332CBC;
-  --good:#22774D; --good-bg:#E1F3EA; --good-dim:#1F6B45;
-  --bad:#B53E30; --bad-bg:#F9E6E4; --bad-dim:#A5382C;
-  --info:#2967AE; --info-bg:#E2EEFB;
-  --warn:#A8730A;
+  --bg:#F5F5F2; --surface:#FFFFFF; --surface-2:#ECECE8; --surface-3:#DCDCD6;
+  --ink:#1D1D1A; --ink-2:#45453F; --ink-3:#60605A;
+  --line:#CFCFC9; --line-soft:#E6E6E1;
+  --brand:#233A8B; --brand-ink:#1E327B; --brand-bg:#E6EAF5; --brand-dim:#18296A;
+  --good:#2B7A4C; --good-bg:#E2F1E7; --good-dim:#21623C;
+  --bad:#C42B3B; --bad-bg:#FAE5E7; --bad-dim:#A11F2E;
+  --info:#2F5F9A; --info-bg:#E4ECF6;
+  --warn:#986809;
   /* Text sitting *on* a filled button. It flips with the theme — the dark theme's
      accents are light ones — so it cannot be a hardcoded #fff at the call site,
      which is how dark mode ended up with white on light green at 2.25:1. */
@@ -33,28 +33,28 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:#0C0D10; --surface:#16181C; --surface-2:#1F2228; --surface-3:#2C3037;
-    --ink:#EDEEF0; --ink-2:#B9BCC3; --ink-3:#959BA7;
-    --line:#2E323B; --line-soft:#22252B;
-    --brand:#7F79F6; --brand-ink:#8A85F7; --brand-bg:#181636; --brand-dim:#5A54D4;
-    --good:#47C285; --good-bg:#12271D; --good-dim:#3C9F6E;
-    --bad:#E16D60; --bad-bg:#2C1715; --bad-dim:#CA5649;
-    --info:#639FE3; --info-bg:#152230;
-    --warn:#D9A93F;
-    --brand-on:#0C0D10; --good-on:#0C0D10; --bad-on:#0C0D10;
+    --bg:#12151D; --surface:#1A1E28; --surface-2:#232835; --surface-3:#2E3443;
+    --ink:#F0F1F4; --ink-2:#C8CBD4; --ink-3:#A2A7B5;
+    --line:#363C4C; --line-soft:#262B37;
+    --brand:#F2C14E; --brand-ink:#F5CD6B; --brand-bg:#2D291D; --brand-dim:#C89A2E;
+    --good:#7FD3A0; --good-bg:#17302A; --good-dim:#5FB585;
+    --bad:#F28B96; --bad-bg:#3A1F25; --bad-dim:#D46E79;
+    --info:#8DB8EE; --info-bg:#1C2A40;
+    --warn:#E8B44A;
+    --brand-on:#12151D; --good-on:#12151D; --bad-on:#12151D;
     --shadow:rgba(0,0,0,0.45);
   }
 }
 :root[data-theme="dark"] {
-  --bg:#0C0D10; --surface:#16181C; --surface-2:#1F2228; --surface-3:#2C3037;
-  --ink:#EDEEF0; --ink-2:#B9BCC3; --ink-3:#959BA7;
-  --line:#2E323B; --line-soft:#22252B;
-  --brand:#7F79F6; --brand-ink:#8A85F7; --brand-bg:#181636; --brand-dim:#5A54D4;
-  --good:#47C285; --good-bg:#12271D; --good-dim:#3C9F6E;
-  --bad:#E16D60; --bad-bg:#2C1715; --bad-dim:#CA5649;
-  --info:#639FE3; --info-bg:#152230;
-  --warn:#D9A93F;
-  --brand-on:#0C0D10; --good-on:#0C0D10; --bad-on:#0C0D10;
+  --bg:#12151D; --surface:#1A1E28; --surface-2:#232835; --surface-3:#2E3443;
+  --ink:#F0F1F4; --ink-2:#C8CBD4; --ink-3:#A2A7B5;
+  --line:#363C4C; --line-soft:#262B37;
+  --brand:#F2C14E; --brand-ink:#F5CD6B; --brand-bg:#2D291D; --brand-dim:#C89A2E;
+  --good:#7FD3A0; --good-bg:#17302A; --good-dim:#5FB585;
+  --bad:#F28B96; --bad-bg:#3A1F25; --bad-dim:#D46E79;
+  --info:#8DB8EE; --info-bg:#1C2A40;
+  --warn:#E8B44A;
+  --brand-on:#12151D; --good-on:#12151D; --bad-on:#12151D;
   --shadow:rgba(0,0,0,0.45);
 }
 

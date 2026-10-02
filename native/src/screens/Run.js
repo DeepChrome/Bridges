@@ -11,7 +11,7 @@ import { View, Pressable, ScrollView, Alert, Animated, ActivityIndicator } from 
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import Svg, { Path } from "react-native-svg";
-import { isNotebook, markOutOfFive } from "../skin";
+import { markOutOfFive } from "../appearance";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
          BulbButton } from "../ui";
 import { RuleCard, Reference, hasReference, StandardWhy } from "../rules";
@@ -903,10 +903,9 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
           <GuidePop pose={poseFor(kind)} size={108} style={{ marginBottom: 10 }} />
         ) : null}
         {/* Not on a failed run: a 3 is a pass mark in a Russian school. */}
-        {isNotebook() && score !== undefined && passed !== false ? (
-          /* The UI test skin (skin.js): the result as a Russian teacher
-             writes it — a mark out of five in red pen, circled by hand, with
-             the percentage small beneath in pencil. */
+        {score !== undefined && passed !== false ? (
+          /* The result as a Russian teacher writes it — a mark out of five in
+             red pen, circled by hand, with the percentage small beneath. */
           <Animated.View testID="grade" style={[pop, { alignItems: "center", marginBottom: 16 }]}>
             <View style={{ width: 120, height: 110, alignItems: "center", justifyContent: "center",
                            transform: [{ rotate: "-7deg" }] }}>

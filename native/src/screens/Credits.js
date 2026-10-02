@@ -83,8 +83,8 @@ export default function Credits() {
         </List>
       ) : null}
 
-      {/* The UI test skin's typefaces (skin.js), bundled as files rather than
-          packages, so the notices below cannot list them. */}
+      {/* The app's typeface (theme.js), bundled as files rather than a
+          package, so the notices below cannot list it. */}
       <SectionLabel style={{ marginTop: 22 }}>Typefaces</SectionLabel>
       <List>
         <Row onPress={() => Linking.openURL("https://fonts.google.com/specimen/PT+Serif")}>

@@ -7,11 +7,9 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Animated, Pressable, useColorScheme } from "react-native";
+import { View, Animated, Pressable } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
-import { Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold,
-         Nunito_800ExtraBold } from "@expo-google-fonts/nunito";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { NavigationContainer, DefaultTheme, DarkTheme,
          getFocusedRouteNameFromRoute, StackActions } from "@react-navigation/native";
@@ -20,12 +18,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Svg, { Path } from "react-native-svg";
 
 import { SessionProvider, useSession } from "./src/session";
-import { light, dark } from "./src/theme";
-import { isNotebook, paper, board, loadSkin, useSkin } from "./src/skin";
-/* The palette for a scheme, through the UI test skin when it is on
-   (src/skin.js); the tree is keyed on the skin, so this is read afresh. */
-const palette = (scheme) => (isNotebook() ? (scheme === "light" ? paper : board)
-                                          : (scheme === "light" ? light : dark));
+import { palette, fontFiles } from "./src/theme";
+import { loadAppearance, useScheme } from "./src/appearance";
 import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { DRILL_TYPES } from "./src/questions";
@@ -132,7 +126,7 @@ export function goHome() {
 }
 
 function HomeButton() {
-  const scheme = useColorScheme();
+  const scheme = useScheme();
   const p = palette(scheme);
   return (
     <Pressable onPress={goHome}
@@ -381,7 +375,7 @@ function SearchStack() {
    2026-09-19, on "Russian, from your own words"). */
 const SPLASH_MS = 900;
 function Splash({ onDone }) {
-  const scheme = useColorScheme();
+  const scheme = useScheme();
   const p = palette(scheme);
   const tile = useRef(new Animated.Value(0)).current;
   const word = useRef(new Animated.Value(0)).current;
@@ -434,7 +428,7 @@ const wordTitled = ({ route }) => {
    swallowed (session.js). */
 function StateBanner() {
   const { error, clearError } = useSession();
-  const scheme = useColorScheme();
+  const scheme = useScheme();
   const p = palette(scheme);
   if (!error) return null;
   return (
@@ -530,7 +524,7 @@ function Shell() {
  * The icon and label turning brand is what says where you are — which is what
  * it already said, alongside it. */
 function TabShell() {
-  const scheme = useColorScheme();
+  const scheme = useScheme();
   const p = palette(scheme);
   const insets = useSafeAreaInsets();
   // What is waiting, on the tab itself (docs/PLAYBOOK.md 2.2): the count
@@ -566,9 +560,9 @@ function TabShell() {
             elevation: 0, shadowOpacity: 0,
           },
         tabBarItemStyle: { gap: 2 },
-        // No weight in the skin: PT Serif has no 600, and Android drops a
-        // custom family asked for a weight it lacks (§30bj).
-        tabBarLabelStyle: { fontSize: 11, fontWeight: isNotebook() ? undefined : "600", margin: 0 },
+        // No weight: PT Serif has no 600, and Android drops a custom family
+        // asked for a weight it lacks (§30bj).
+        tabBarLabelStyle: { fontSize: 11, margin: 0 },
       })}
     >
       <Tabs.Screen name="Learn" component={LearnStack}
@@ -587,21 +581,22 @@ function TabShell() {
 }
 
 export default function App() {
-  const scheme = useColorScheme();
+  const scheme = useScheme();
   const p = palette(scheme);
   const base = scheme === "light" ? DefaultTheme : DarkTheme;
   const navTheme = {
     ...base,
     colors: { ...base.colors, background: p.bg, card: p.surface, text: p.ink,
               border: p.line, primary: p.brand },
-    // Headers and tab labels in the skin's serif too (React Navigation 7
-    // reads its fonts from the theme); the default look keeps the platform's.
-    ...(isNotebook() ? { fonts: {
+    // Headers and tab labels in the serif too (React Navigation 7 reads its
+    // fonts from the theme). Weight "400" on every one: PT Serif has two files
+    // and Android drops a family asked for a weight it lacks (§30bj).
+    fonts: {
       regular: { fontFamily: "PTSerif_400Regular", fontWeight: "400" },
       medium: { fontFamily: "PTSerif_700Bold", fontWeight: "400" },
       bold: { fontFamily: "PTSerif_700Bold", fontWeight: "400" },
       heavy: { fontFamily: "PTSerif_700Bold", fontWeight: "400" },
-    } } : null),
+    },
   };
 
   /* The typeface, before anything is drawn in it. Text rendered while the font
@@ -610,15 +605,12 @@ export default function App() {
      splash, so this waits there too and nothing is ever drawn twice.
      A font that fails to load is not worth refusing to start over: `loaded`
      turns true either way, and Text falls back to the system face. */
-  const [loaded, fontError] = useFonts({
-    Nunito_400Regular, Nunito_600SemiBold, Nunito_700Bold, Nunito_800ExtraBold,
-  });
-  // The UI test skin is read before the first frame, so a phone that has it
-  // on never draws the default look first and then swaps.
-  const skin = useSkin();
-  const [skinRead, setSkinRead] = useState(false);
-  useEffect(() => { loadSkin().then(() => setSkinRead(true)); }, []);
-  if ((!loaded && !fontError) || !skinRead) return null;
+  const [loaded, fontError] = useFonts(fontFiles);
+  // Light or dark is read before the first frame, so a phone set to dark
+  // never draws a light screen first and then swaps.
+  const [schemeRead, setSchemeRead] = useState(false);
+  useEffect(() => { loadAppearance().then(() => setSchemeRead(true)); }, []);
+  if ((!loaded && !fontError) || !schemeRead) return null;
 
   /* The boundary sits **inside** SafeAreaProvider and outside everything else
    * (src/boundary.js).
@@ -644,7 +636,7 @@ export default function App() {
         <SessionProvider>
           {/* Sound belongs to the screen that started it: any navigation to
               another route stops it (audio.js `leftFor`, 2026-09-29). */}
-          <NavigationContainer key={skin} ref={navRef} theme={navTheme}
+          <NavigationContainer ref={navRef} theme={navTheme}
                                onStateChange={() => leftFor(currentRouteKey())}>
             <WordsProvider>
               <Shell />

@@ -4,53 +4,54 @@
  * object chosen by colour scheme and handed down through context. Same values, same
  * names — a colour that changes here should change there. */
 
-import { useColorScheme } from "react-native";
-import { onSkin, isNotebook, paper, board, notebookFace } from "./skin";
+import { useScheme } from "./appearance";
 
-/* Every neutral sits on one hue — 220° in both themes — because a ramp that wanders
- * between hue families is what makes an interface look accidental. The palette was
- * warm (44°) until 2026-09-04; the sepia cast and a muddy goldenrod brand (#B67D18)
- * were most of why the app read as dated, so both themes moved to a cool neutral
- * with an indigo accent.
+/* The exercise book (2026-10-01). What was the "UI test" skin (§30bj,
+ * docs/ui-test-notebook.md) is the app's only look: the owner, "I like the new
+ * UI… scrap the old UI". Ink on plain paper in the light — a neutral page,
+ * dark blue ink for the brand, the teacher's red pen for a wrong answer and a
+ * mark — and at night an ink-dark blue with chalk-white text and a lamp-gold
+ * accent. The rounded indigo look before it is in git.
  *
- * Foreground values are not hand-picked: each was walked along its own hue until it
- * cleared its contrast minimum against the surface it actually sits on (4.5:1 for
- * text, 3:1 for the brand accent, 1.35:1 for hairlines). Six pairs failed before,
- * worst of them muted 13px text at 3.01:1. If you change one, re-run the audit
+ * Foreground values are not hand-picked: each clears its contrast minimum
+ * against the surface it actually sits on (4.5:1 for text, 3:1 for the brand
+ * accent, 1.35:1 for hairlines). If you change one, re-run tools/contrast.js
  * rather than trusting the swatch. */
 
 const light = {
-  bg: "#F7F8F9", surface: "#FFFFFF", surface2: "#EEF0F4", surface3: "#DFE3E9",
-  ink: "#14171C", ink2: "#4B505A", ink3: "#676D79",
-  line: "#D2D7E1", lineSoft: "#ECEFF3",
-  brand: "#4D45E6", brandInk: "#2D24DB", brandBg: "#EBEAFD", brandDim: "#332CBC",
-  good: "#22774D", goodBg: "#E1F3EA", goodDim: "#1F6B45",
-  bad: "#B53E30", badBg: "#F9E6E4", badDim: "#A5382C",
-  info: "#2967AE", infoBg: "#E2EEFB",
+  bg: "#F5F5F2", surface: "#FFFFFF", surface2: "#ECECE8", surface3: "#DCDCD6",
+  /* On the paper's own hue (60°): the inks the skin had were faintly blue,
+     and a page whose text and ground sit on different undertones looks
+     slightly off without anyone saying why (tools/contrast.js, §31). */
+  ink: "#1D1D1A", ink2: "#45453F", ink3: "#60605A",
+  line: "#CFCFC9", lineSoft: "#E6E6E1",
+  brand: "#233A8B", brandInk: "#1E327B", brandBg: "#E6EAF5", brandDim: "#18296A",
+  good: "#2B7A4C", goodBg: "#E2F1E7", goodDim: "#21623C",
+  bad: "#C42B3B", badBg: "#FAE5E7", badDim: "#A11F2E",
+  info: "#2F5F9A", infoBg: "#E4ECF6",
   /* The middle of the familiarity ring's red → amber → green (2026-09-23).
      A stroke, never text; audited at the accent minimum against the page. */
-  warn: "#A8730A",
+  warn: "#986809",
   brandOn: "#FFFFFF", goodOn: "#FFFFFF", badOn: "#FFFFFF",
+  pen: "#C42B3B",        // the teacher's red pen: the mark out of five
 };
 
 const dark = {
-  bg: "#0C0D10", surface: "#16181C", surface2: "#1F2228", surface3: "#2C3037",
-  ink: "#EDEEF0", ink2: "#B9BCC3", ink3: "#959BA7",
-  line: "#2E323B", lineSoft: "#22252B",
-  brand: "#7F79F6", brandInk: "#8A85F7", brandBg: "#181636", brandDim: "#5A54D4",
-  good: "#47C285", goodBg: "#12271D", goodDim: "#3C9F6E",
-  bad: "#E16D60", badBg: "#2C1715", badDim: "#CA5649",
-  info: "#639FE3", infoBg: "#152230",
-  warn: "#D9A93F",
-  brandOn: "#0C0D10", goodOn: "#0C0D10", badOn: "#0C0D10",
+  bg: "#12151D", surface: "#1A1E28", surface2: "#232835", surface3: "#2E3443",
+  ink: "#F0F1F4", ink2: "#C8CBD4", ink3: "#A2A7B5",
+  line: "#363C4C", lineSoft: "#262B37",
+  brand: "#F2C14E", brandInk: "#F5CD6B", brandBg: "#2D291D", brandDim: "#C89A2E",
+  good: "#7FD3A0", goodBg: "#17302A", goodDim: "#5FB585",
+  bad: "#F28B96", badBg: "#3A1F25", badDim: "#D46E79",
+  info: "#8DB8EE", infoBg: "#1C2A40",
+  warn: "#E8B44A",
+  brandOn: "#12151D", goodOn: "#12151D", badOn: "#12151D",
+  pen: "#F28B96",
 };
 
-export const radius = { sm: 8, md: 14, lg: 20, xl: 26 };
-/* The UI test skin (skin.js) cuts the corners down, in place and reversibly:
-   a sheet on a page has a small cut corner and a control a little more. */
-const ROUND = { ...radius };
-const CUT = { sm: 4, md: 6, lg: 6, xl: 8 };
-onSkin((s) => { Object.assign(radius, s === "notebook" ? CUT : ROUND); });
+/* Small cut corners, as on a sheet of paper: a control a little rounder than
+   the page it sits on. */
+export const radius = { sm: 4, md: 6, lg: 8, xl: 10 };
 /* On the 4-grid, like every mobile system's spacing (Material 3 included).
    `gap` was 10, which is the sort of value that makes a row look a pixel
    wrong without anyone being able to say why (tools/design.mjs). */
@@ -79,16 +80,8 @@ export const type = {
   hero: 40, display: 28, title: 23, head: 19, body: 16, small: 13, tiny: 11,
 };
 
-/* The typeface (2026-09-11).
- *
- * The app was set in whatever the phone's system font happens to be, at fifteen
- * sizes chosen a screen at a time. A system font is the single loudest signal
- * that nobody designed a screen — and on Android it is Roboto, which is what
- * every utility app on the phone is set in.
- *
- * Nunito: rounded, warm, and with a Cyrillic cut that carries stress marks and
- * ё properly, which most display faces do not. Weight is how hierarchy is made
- * here — the scale above is only five steps — so four weights ship.
+/* The typeface: PT Serif, the exercise book's (Paratype, OFL; credited on
+ * Credits). Made for Cyrillic, so stress marks and ё sit properly.
  *
  * `React Native has no global font.` Every `Text` that names a size must also
  * name a family or it silently falls back to the system one, which is worse
@@ -96,62 +89,29 @@ export const type = {
  * The app's own `Text` (ui.js) applies it, and **nothing imports `Text` from
  * react-native any more** — `font.test.js` is what keeps that true. */
 export const font = {
-  regular: "Nunito_400Regular",
-  medium: "Nunito_600SemiBold",
-  bold: "Nunito_700Bold",
-  heavy: "Nunito_800ExtraBold",
+  regular: "PTSerif_400Regular",
+  bold: "PTSerif_700Bold",
+};
+export const fontFiles = {
+  PTSerif_400Regular: require("../assets/fonts/PTSerif-Regular.ttf"),
+  PTSerif_700Bold: require("../assets/fonts/PTSerif-Bold.ttf"),
 };
 
 /* Which file a weight resolves to. RN on Android does not synthesise weights
-   for a named family: `fontWeight: "700"` on a regular face is ignored, and the
-   text comes out light while the code says bold. So a weight picks its file. */
+   for a named family — and asked for a weight a family lacks, it drops the
+   family for Roboto (§30bj) — so a weight picks its file, and the app's four
+   weights fold into PT Serif's two: a semibold that read as emphasis is bold. */
 export function faceFor(weight) {
-  if (isNotebook()) return notebookFace(weight);
   const w = String(weight || "400");
-  if (w === "800" || w === "900") return font.heavy;
-  if (w === "700" || w === "bold") return font.bold;
-  if (w === "500" || w === "600") return font.medium;
-  return font.regular;
+  return w === "400" || w === "normal" || w === "300" ? font.regular : font.bold;
 }
 
-/* Depth (2026-09-11).
- *
- * Everything in the app sat on one plane: a white surface, a one-pixel
- * hairline, on an almost-white ground. That is the whole of "blocky squares" —
- * nothing is *above* anything, so nothing is more important than anything, and
- * a screen reads as a form rather than as a thing you are using.
- *
- * Two levels and no more. `raised` is a grouped surface — a card, a list; `lift`
- * is the one control on a screen that is the point of it. A third level would
- * be a decision to make on every screen, which is how an interface stops being
- * consistent.
- *
- * Shadows are near-black at very low opacity rather than grey, because a grey
- * shadow on a tinted ground goes muddy; and `elevation` is set alongside for
- * Android, which ignores the rest. Kept off the dark theme: a shadow under a
- * dark surface on a dark ground is invisible, and the border is what separates
- * things there.
- *
- * **The blur is twice the distance** (2026-09-26). It was five times, and
- * that is the difference between a thing lifted off the page and a grey haze
- * around it — the soft halo every generated interface has. A shadow is a
- * light source: the further a thing is from the surface, the wider and only
- * then the softer its shadow. `tools/design.mjs` holds the ratio. */
-export const shadow = {
-  raised: {
-    shadowColor: "#0B1020", shadowOpacity: 0.05, shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 }, elevation: 1,
-  },
-  lift: {
-    shadowColor: "#0B1020", shadowOpacity: 0.13, shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 }, elevation: 4,
-  },
-};
-export function useShadow(level = "raised") {
-  const scheme = useColorScheme();
-  // Paper on paper does not float: the notebook skin draws no shadows.
-  if (isNotebook()) return null;
-  return scheme === "light" ? shadow[level] : null;
+/* Depth: none. Paper on paper does not float — the exercise book separates
+   things with hairlines and the press of a control into its edge (`Lift`),
+   not with shadows, and that flatness is part of what the owner liked. The
+   hook stays the one place a screen asks, so depth can come back in one line. */
+export function useShadow() {
+  return null;
 }
 
 /* Motion. One place for how long a thing takes, so a card that rises and a bar
@@ -162,9 +122,9 @@ export function useShadow(level = "raised") {
 export const motion = { quick: 130, enter: 240, settle: 380, celebrate: 520 };
 
 export function useTheme() {
-  const scheme = useColorScheme();
-  if (isNotebook()) return scheme === "light" ? paper : board;
-  return scheme === "light" ? light : dark;
+  return useScheme() === "dark" ? dark : light;
 }
+
+export const palette = (scheme) => (scheme === "dark" ? dark : light);
 
 export { light, dark };

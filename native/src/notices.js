@@ -4,7 +4,7 @@
  * node_modules rather than written down by hand (which is how such a list
  * comes to be wrong with nothing failing). Re-run the tool after npm install.
  *
- * 28 runtime dependencies, 2 distinct licences.
+ * 28 runtime dependencies, 1 distinct licences.
  */
 
 export const NOTICES = [
@@ -23,6 +23,7 @@ export const NOTICES = [
       "expo-file-system",
       "expo-font",
       "expo-haptics",
+      "expo-notifications",
       "expo-sharing",
       "expo-speech",
       "expo-speech-recognition",
@@ -38,12 +39,6 @@ export const NOTICES = [
       "react-native-svg",
       "react-native-webview",
       "ts-fsrs"
-    ]
-  },
-  {
-    "l": "MIT AND OFL-1.1",
-    "packages": [
-      "@expo-google-fonts/nunito"
     ]
   }
 ];

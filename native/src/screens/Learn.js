@@ -38,7 +38,6 @@ import {
   routePosition, todaysWork, recapKey, RECAP_FROM,
 } from "../data";
 import { nextOpening, markOpening } from "@core/openings";
-import { isNotebook } from "../skin";
 import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
 import { useSweep, useDraw, useFill } from "../motion";
@@ -91,10 +90,10 @@ const LIP = 4;
 const LANE_H = 64;          // height of the fork drawing
 const MERGE_H = 44;         // and of the lanes coming back to the road
 const ROW_GAP = 40;         // between ranks of side quests, when there is more than one
-const ROW_H = 112;          // a rank of quest discs with their names
-/* …in the UI test skin's serif, which is wider: "Food & Drink" wrapped to two
-   lines on the owner's phone and the second ran under the lanes below. */
-const ROW_H_SERIF = 132;
+/* A rank of quest discs with their names, tall enough for a name on two lines
+   in the serif, which is wider than the face before it: "Food & Drink" wrapped
+   on the owner's phone and the second line ran under the lanes below. */
+const ROW_H = 132;
 const QUEST_COLS = 3;       // quests to a rank: a fourth overlaps its neighbours' names
 const TRUNK_W = 4;          // a track wide enough to read as empty, not as a hairline
 
@@ -415,7 +414,7 @@ function Fork({ stage, chapterOpen, onOpen }) {
      a stub under the quests leading nowhere, the thing §30av ruled out. The
      road runs straight down past them instead, and they hang off it. */
   const allOptional = lastRequired < 0;
-  const rowH = isNotebook() ? ROW_H_SERIF : ROW_H;
+  const rowH = ROW_H;
   const through = ranks.reduce((n, _, r) => n + (r ? ROW_GAP : LANE_H) + rowH, 0);
 
   return (
@@ -431,7 +430,7 @@ function Fork({ stage, chapterOpen, onOpen }) {
       {ranks.map((rank, r) => (
         <React.Fragment key={r}>
           <FanOut rank={rank} xs={xs[r]} W={W} height={r ? ROW_GAP : LANE_H} laneOn={laneOn} />
-          <View testID={`rank-${stage.core.id}-${r}`} style={{ width: W, height: isNotebook() ? ROW_H_SERIF : ROW_H }}>
+          <View testID={`rank-${stage.core.id}-${r}`} style={{ width: W, height: ROW_H }}>
             {rank.map((u, k) => (
               <View key={u.id} style={{ position: "absolute", left: xs[r][k] - 48, top: 0 }}>
                 <PathNode unit={u} open={unitUnlocked(st, u)} branch onOpen={onOpen} />

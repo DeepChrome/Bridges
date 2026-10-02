@@ -6,6 +6,7 @@ import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react-native";
 import { Transcript, lineAt, wordAt } from "../src/transcript";
 import { transcriptOf, videos } from "../src/data";
+import { font } from "../src/theme";
 
 const LINES = [
   [0, "привет всем", [0, 40]],
@@ -67,10 +68,11 @@ describe("the transcript", () => {
                                en={en} showEn onToggleEn={onToggleEn} />);
     expect(screen.getByTestId("transcript-en-1").props.children).toBe("today we are talking");
     expect(screen.getByText("Machine translation")).toBeTruthy();
-    // The line being said is lifted in English too.
-    const flat = (k) => Object.assign({}, ...[screen.getByTestId(`transcript-en-${k}`).props.style].flat());
-    expect(flat(1).fontWeight).toBe("600");
-    expect(flat(0).fontWeight).toBe("400");
+    // The line being said is lifted in English too — in the bold face, which
+    // is how PT Serif carries weight (theme.js faceFor).
+    const flat = (k) => Object.assign({}, ...[screen.getByTestId(`transcript-en-${k}`).props.style].flat(2).filter(Boolean));
+    expect(flat(1).fontFamily).toBe(font.bold);
+    expect(flat(0).fontFamily).toBe(font.regular);
   });
 
   it("offers no English switch for a video that has none", async () => {

@@ -6,7 +6,7 @@ import { useSession } from "../session";
 import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
 import { useTheme, radius, type as T } from "../theme";
-import { setSkin, isNotebook } from "../skin";
+import { setAppearance, useScheme } from "../appearance";
 import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb, Stepper } from "../ui";
 import { CharacterPicker } from "./Gate";
 import { plan as askPlan, setPlan } from "../lib/feedback";
@@ -236,6 +236,7 @@ export function PictureSection() {
 function Settings({ visible, onClose, onLab, onTour, onCredits }) {
   const { st, update, signOut, account, restore } = useSession();
   const t = useTheme();
+  const scheme = useScheme();
   /* Only ever set by a refusal from the OS, so it belongs to the sheet and not
      to learner state — there is nothing to remember once the sheet closes. */
   const [remindDenied, setRemindDenied] = useState(false);
@@ -358,6 +359,19 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>
+              {/* Light or dark (appearance.js): the phone's setting until this is
+                  flipped, then the choice holds. */}
+              <Row onPress={() => setAppearance(scheme === "dark" ? "light" : "dark")}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Dark mode</Text>
+                </View>
+                <Switch
+                  testID="dark-switch"
+                  value={scheme === "dark"}
+                  onValueChange={(v) => setAppearance(v ? "dark" : "light")}
+                  trackColor={{ true: t.good, false: t.surface3 }}
+                />
+              </Row>
               <Row onPress={() => update((p) => ({ ...p, haptics: !(p.haptics !== false) }))}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Vibration</Text>
@@ -450,21 +464,6 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   testID="dev-switch"
                   value={!!st.dev}
                   onValueChange={(v) => update((p) => ({ ...p, dev: v }))}
-                  trackColor={{ true: t.good, false: t.surface3 }}
-                />
-              </Row>
-              {/* The exercise-book look (skin.js, docs/ui-test-notebook.md): a
-                  demo the owner switches on and off, kept on the phone rather
-                  than in the profile. Switching rebuilds the screens, so the
-                  sheet closes first and the path is where it lands. */}
-              <Row onPress={() => { onClose(); setSkin(isNotebook() ? "default" : "notebook"); }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>UI test</Text>
-                </View>
-                <Switch
-                  testID="uitest-switch"
-                  value={isNotebook()}
-                  onValueChange={(v) => { onClose(); setSkin(v ? "notebook" : "default"); }}
                   trackColor={{ true: t.good, false: t.surface3 }}
                 />
               </Row>

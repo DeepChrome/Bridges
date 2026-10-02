@@ -331,6 +331,7 @@ beforeEach(() => { require("./src/speech").forgetMicPermission(); });
 /* Where the learner was in Immerse lives in module memory (immerse.js), so a
    search typed in one test would be waiting in the next. */
 beforeEach(() => { require("./src/immerse").resetImmerse(); });
+beforeEach(() => { require("./src/resume").resetResume(); });
 // "No network" is remembered for a minute (audio.js); a failed stream in one
 // test must not send the next one straight to the device voice.
 beforeEach(() => { require("./src/audio").forgetOffline(); global.__streamNeverStarts = false; });

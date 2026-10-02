@@ -19,6 +19,7 @@ import {
 } from "./store";
 import { reconcileCurriculum } from "./data";
 import { loadImmerse, flushImmerse } from "./immerse";
+import { loadResume } from "./resume";
 import { APP_NAME } from "./brand";
 
 const Ctx = createContext(null);
@@ -47,6 +48,7 @@ export function SessionProvider({ children }) {
   const adopt = async (id) => {
     // Where this profile was in Immerse (immerse.js), ready before any screen reads it.
     await loadImmerse(id);
+    await loadResume(id);
     const { state, bad, recovered } = await loadState(id);
     if (bad) {
       await setAside(id, bad);
@@ -134,6 +136,7 @@ export function SessionProvider({ children }) {
       setAccounts(acc);
       await saveAccounts(acc);
       await loadImmerse(a.id);
+      await loadResume(a.id);
       const fresh = touchStreak({ ...DEFAULTS });
       dirty.current = true;
       setSt(fresh);
@@ -168,6 +171,7 @@ export function SessionProvider({ children }) {
       dirty.current = false;
       flushImmerse();
       await loadImmerse(null);
+      await loadResume(null);
       setSt(DEFAULTS);
     },
   }), [ready, error, accounts, st]);

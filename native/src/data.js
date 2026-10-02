@@ -275,6 +275,16 @@ export function components(st, u, i) {
    so the lesson runs in order — optional steps included — and a step the
    learner chose to skip past is not pointed at again. Failing that, a required
    step still owed (a quiz not yet passed), and failing that anything left. */
+/* Where a lesson step is: `[route, params]` on the Learn stack. The one table
+   the path's Continue, the lesson screen and the end of a step all read, so
+   none of them can send a step somewhere the others do not. */
+export function stepRoute(id, u, i) {
+  if (id === "listen") return ["Scenes", { key: `${u.id}:${i}` }];
+  const name = { vocab: "Vocab", grammar: "GrammarRun", quiz: "Quiz", summary: "Summary",
+                 video: "Video" }[id] || "Vocab";
+  return [name, { unitId: u.id, index: i }];
+}
+
 export function nextComponent(cs) {
   let last = -1;
   cs.forEach((c, k) => { if (c.done && !c.shared) last = k; });

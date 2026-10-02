@@ -7,7 +7,7 @@ import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick, Text } from "../ui";
 import {
-  UN, lessonCount, lessonWords, lessonDone, components, nextComponent, unitFineProgress, L, linesWith, hasGrammar,
+  UN, lessonCount, lessonWords, lessonDone, components, nextComponent, stepRoute, unitFineProgress, L, linesWith, hasGrammar,
 } from "../data";
 
 export function UnitScreen({ route, navigation }) {
@@ -100,14 +100,7 @@ export function LessonScreen({ route, navigation }) {
   const nextId = (nextComponent(cs) || {}).id;
   /* One place that knows where a step goes. It was written twice — here and on
      the primary button — which is exactly how the two come to disagree. */
-  const open = (id) => {
-    if (id === "listen") return navigation.navigate("Scenes", { key: `${unit.id}:${i}` });
-    if (id === "summary") return navigation.navigate("Summary", { unitId: unit.id, index: i });
-    if (id === "grammar") return navigation.navigate("GrammarRun", { unitId: unit.id, index: i });
-    return navigation.navigate(
-      id === "video" ? "Video" : id === "quiz" ? "Quiz" : "Vocab",
-      { unitId: unit.id, index: i });
-  };
+  const open = (id) => navigation.navigate(...stepRoute(id, unit, i));
 
   return (
     <Screen>

@@ -7,7 +7,8 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text,
          Sheet, Choice, CogButton, Loading } from "../ui";
-import { Runner, Done, useAudioStopOnLeave } from "./Run";
+import { Runner, Done, useAudioStopOnLeave, useResume } from "./Run";
+import { clearRun, saveRun } from "../resume";
 import { WordList, GrammarNote, WordCard, StepBar } from "../lesson";
 import { VideoLines } from "../prep";
 import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
@@ -16,7 +17,7 @@ import {
   DRILL_POOL_STEPS, chapterWords, irregularWords,
   reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
   scenarioLibrary, required, linesWith, grammarKey, currentGrammarUnit, grammarNoteOf,
-  todaysWork, recapKey,
+  todaysWork, recapKey, components, stepRoute,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { pairDrill } from "@core/alphabet";
@@ -57,13 +58,22 @@ export function VocabFlow({ route, navigation }) {
   /* After the words, the video's own sentences that use them (Phase 14, the
      owner, 2026-09-29: *"more video centric. More sentences/phrases"*) — the
      lesson ends on what it is preparing for. */
-  const steps = useMemo(() => {
+  const fresh = useMemo(() => {
     const lines = linesWith(unit, lessonWords(unit, index)).slice(0, LESSON_LINES);
     return Q.vocabSteps(unit, index).concat(lines.length ? [{ t: "lines", lines }] : []);
   }, [unit.id, index]);
-  const [at, setAt] = useState(0);
+  const save = { key: `vocab:${unit.id}:${index}`, route: "Vocab", params: { unitId: unit.id, index },
+                 title: `${unit.name} · Lesson ${index + 1} words` };
+  const resume = useResume(save.key, route.params);
+  // A saved walk keeps the steps it was dealt; its questions were drawn at random.
+  const steps = resume.restore ? resume.restore.queue : fresh;
+  // Null until the learner has moved: where it was left, or the top.
+  const [moved, setAt] = useState(null);
+  const at = moved !== null ? moved : resume.restore ? resume.restore.at : 0;
   const [done, setDone] = useState(false);
   useAudioStopOnLeave();
+
+  if (resume.prompt) return resume.prompt;
 
   if (done) {
     return (
@@ -81,9 +91,11 @@ export function VocabFlow({ route, navigation }) {
   const step = steps[at];
   const advance = () => {
     if (at + 1 >= steps.length) {
+      clearRun(save.key);
       update((prev) => markComponent(prev, unit, index, "vocab"));
       setDone(true);
     } else {
+      saveRun(save.key, { ...save, queue: steps, at: at + 1, total: steps.length });
       setAt(at + 1);
     }
   };
@@ -375,6 +387,10 @@ export function QuizFlow({ route, navigation }) {
     return next;
   }, [unitId, index, seed]);
   useAudioStopOnLeave();
+  const save = { key: `quiz:${unitId}:${index}`, route: "Quiz", params: { unitId, index },
+                 title: `${unit.name} · Lesson ${index + 1} quiz` };
+  const resume = useResume(save.key, route.params);
+  if (resume.prompt) return resume.prompt;
 
   if (reteach !== null) {
     return (
@@ -394,6 +410,9 @@ export function QuizFlow({ route, navigation }) {
     const { passed, relief, thisRun } = result;
     const last = index + 1 >= lessonCount(unit);
     const missed = missedWords(result.results, lessonWords(unit, index));
+    const cs = components(st, unit, index);
+    const quizAt = cs.findIndex((c) => c.id === "quiz");
+    const after = cs.find((c, k) => k > quizAt && !c.done) || null;
     return (
       <Done
         title={relief ? `Passed on the ${ordinal(result.tries)} try`
@@ -419,10 +438,13 @@ export function QuizFlow({ route, navigation }) {
           if (missed.length && !passed) setReteach(0);
           else { setResult(null); setSeed(seed + 1); }
         }}
-        onContinue={passed && !last
-          ? () => navigation.replace("Vocab", { unitId, index: index + 1 })
+        /* On to what follows in this lesson — the summary, then the video
+           (data.js components) — and only then the next lesson. */
+        onContinue={!passed ? undefined
+          : after ? () => navigation.replace(...stepRoute(after.id, unit, index))
+          : !last ? () => navigation.replace("Vocab", { unitId, index: index + 1 })
           : undefined}
-        continueLabel="Next lesson"
+        continueLabel={after ? after.label : "Next lesson"}
         onBack={() => navigation.goBack()}
       />
     );
@@ -432,6 +454,8 @@ export function QuizFlow({ route, navigation }) {
     <Runner
       steps={steps}
       navigation={navigation}
+      save={save}
+      restore={resume.restore}
       onFinish={(r) => {
         const score = scoreOf(r);
         const before = ((st.unit[unit.id] || {}).lessons || {})[index] || {};
@@ -802,6 +826,9 @@ export function DrillFlow({ route, navigation }) {
   }, [type, seed, typed, only, ahead, chapters.join(","), irregularOnly]);
   const spec = DRILL_TYPES.find((d) => d.id === type);
   useAudioStopOnLeave();
+  const save = { key: `drill:${type}`, route: "Drill", tab: "Practice", params: { type },
+                 title: spec ? spec.name : type };
+  const resume = useResume(save.key, route.params);
 
   /* The cog: open it, change things, Apply deals a fresh run. Closing with
      nothing changed leaves the run where it was. */
@@ -809,11 +836,15 @@ export function DrillFlow({ route, navigation }) {
   const openCog = () => { before.current = JSON.stringify([prefs, typed]); setCog(true); };
   const closeCog = () => {
     setCog(false);
-    if (JSON.stringify([prefs, typed]) !== before.current) { setResult(null); setSeed(seed + 1); }
+    if (JSON.stringify([prefs, typed]) !== before.current) {
+      clearRun(save.key);              // a run on the old options is not where you left off
+      setResult(null); setSeed(seed + 1);
+    }
   };
   const tools = <CogButton testID="drill-cog" onPress={openCog} label="Drill options" />;
   const sheet = cog ? <DrillOptions type={type} prefs={prefs} onChange={setPrefs} onClose={closeCog} /> : null;
 
+  if (resume.prompt) return resume.prompt;
   if (!steps.length) {
     return (
       <>
@@ -844,6 +875,8 @@ export function DrillFlow({ route, navigation }) {
         steps={steps}
         navigation={navigation}
         tools={tools}
+        save={save}
+        restore={resume.restore}
         onFinish={(r) => {
           const score = scoreOf(r);
           update((prev) => bestOf(prev, type, score));
@@ -884,6 +917,10 @@ export function GrammarFlow({ route, navigation }) {
     [unitId, index, seed]);
   const title = (steps[0] && steps[0].note && steps[0].note.title) || "Grammar";
   useAudioStopOnLeave();
+  const save = { key: `grammar:${unitId}:${lesson ? index : "unit"}`, route: "GrammarRun",
+                 params: { unitId, index }, title };
+  const resume = useResume(save.key, route.params);
+  if (resume.prompt) return resume.prompt;
 
   if (!unit || !steps.length) {
     return <Done title="No grammar practice here yet" onBack={() => navigation.goBack()} />;
@@ -905,6 +942,8 @@ export function GrammarFlow({ route, navigation }) {
       key={seed}
       steps={steps}
       navigation={navigation}
+      save={save}
+      restore={resume.restore}
       onFinish={(r) => {
         const score = scoreOf(r);
         update((prev) => bestOf(prev, grammarKey(unit, lesson ? index : null), score));
@@ -1111,6 +1150,10 @@ export function CustomQuizFlow({ route, navigation }) {
   const units = useMemo(() => unitIds.map((id) => UN.find((u) => u.id === id)).filter(Boolean), [unitIds]);
   const steps = useMemo(() => Q.customQuiz({ units, kinds, n }), [units, kinds, n, seed]);
   useAudioStopOnLeave();
+  const save = { key: "custom", route: "CustomQuiz", tab: "Practice",
+                 params: { kinds, units: unitIds, n }, title: "Quiz" };
+  const resume = useResume(save.key, route.params);
+  if (resume.prompt) return resume.prompt;
 
   if (!steps.length) {
     return <Done title="No questions for that choice" detail="Try more sections."
@@ -1125,7 +1168,7 @@ export function CustomQuizFlow({ route, navigation }) {
     );
   }
   return (
-    <Runner steps={steps} navigation={navigation}
+    <Runner steps={steps} navigation={navigation} save={save} restore={resume.restore}
             onFinish={(r) => {
               const score = scoreOf(r);
               update((prev) => bestOf(prev, "quiz", score));
@@ -1139,12 +1182,15 @@ export function CustomQuizFlow({ route, navigation }) {
 /* The final test, from the foot of the path (core/questions.js finalExam).
    Scored like a quiz and kept under `drills.final` like a practice run; it
    unlocks nothing, because there is nothing after it. */
-export function FinalFlow({ navigation }) {
+export function FinalFlow({ route, navigation }) {
   const { update } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
   const steps = useMemo(() => Q.finalExam(FINAL_N), [seed]);
   useAudioStopOnLeave();
+  const save = { key: "final", route: "Final", params: {}, title: "Final test" };
+  const resume = useResume(save.key, route && route.params);
+  if (resume.prompt) return resume.prompt;
 
   if (result) {
     return (
@@ -1159,6 +1205,7 @@ export function FinalFlow({ navigation }) {
        fifty would grow with every wrong answer (2/50 became 2/51 on the
        emulator) — the placement and section tests hold the same rule. */
     <Runner steps={steps} recycle={false} navigation={navigation}
+            save={save} restore={resume.restore}
             onFinish={(r) => {
               const score = scoreOf(r);
               update((prev) => bestOf(prev, "final", score));
@@ -1171,7 +1218,7 @@ export function FinalFlow({ navigation }) {
    whole day's work, with today's weak spots mixed in, 10 to 20 questions,
    graded through the scheduler like any quiz — another meeting the same day
    is what consolidates it. Done once a day: kept under `drills["recap:<day>"]`. */
-export function RecapFlow({ navigation }) {
+export function RecapFlow({ route, navigation }) {
   const { st, update, ready } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
@@ -1184,6 +1231,10 @@ export function RecapFlow({ navigation }) {
     return Q.recapQuestions({ words: work.words.concat(work.missed), focus: work.focus });
   }, [seed, ready]);   // eslint-disable-line react-hooks/exhaustive-deps
   useAudioStopOnLeave();
+  // Today's only: yesterday's recap is not where anyone left off.
+  const save = { key: recapKey(), route: "Recap", params: {}, title: "Today's recap" };
+  const resume = useResume(save.key, route && route.params);
+  if (resume.prompt) return resume.prompt;
 
   if (!steps) return <Screen><Loading /></Screen>;
   if (!steps.length) {
@@ -1198,7 +1249,7 @@ export function RecapFlow({ navigation }) {
     );
   }
   return (
-    <Runner steps={steps} navigation={navigation}
+    <Runner steps={steps} navigation={navigation} save={save} restore={resume.restore}
             onFinish={(r) => {
               const score = scoreOf(r);
               update((prev) => bestOf(prev, recapKey(), score));
@@ -1275,6 +1326,10 @@ export function SectionFlow({ route, navigation }) {
   const [result, setResult] = useState(null);
   const steps = useMemo(() => Q.sectionQuestions(unit), [unit.id]);
   useAudioStopOnLeave();
+  const save = { key: `section:${unit.id}`, route: "TestOut", params: { unitId: unit.id },
+                 title: `${unit.name} test` };
+  const resume = useResume(save.key, route.params);
+  if (resume.prompt) return resume.prompt;
 
   if (result) {
     return (
@@ -1288,6 +1343,8 @@ export function SectionFlow({ route, navigation }) {
       steps={steps}
       recycle={false}
       navigation={navigation}
+      save={save}
+      restore={resume.restore}
       onFinish={(r) => {
         let cleared = 0;
         update((prev) => {

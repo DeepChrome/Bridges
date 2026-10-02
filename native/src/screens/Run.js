@@ -19,6 +19,7 @@ import { topicFor } from "@core/grammar";
 import { wordFacts, isIrregular } from "@core/facts";
 import { standardExplanation } from "@core/explain";
 import { GuidePop } from "../guide";
+import { saveRun, clearRun, savedRun, runLabel } from "../resume";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, reactionFor, LINES } from "@core/guide";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
@@ -388,14 +389,24 @@ export function useAudioStopOnLeave() {
    only, so the retake is practice, not a second chance at the mark; the retake
    is still a review for the scheduler. Off for the placement and section tests,
    which measure rather than teach, and for the one-question vocabulary runner. */
-/* `tools`: a control beside the progress — the drill's cog (Flows.js). */
+/* `tools`: a control beside the progress — the drill's cog (Flows.js).
+
+   `save`: `{ key, route, params, title }` keeps the run as it goes (resume.js),
+   after every answer, so it can be picked up where it was left; finishing
+   clears it. `restore` is such a saved run to start from instead of `steps`. */
 export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true,
-                         allowBack = false, navigation, tools }) {
+                         allowBack = false, navigation, tools, save, restore }) {
   const { st, update } = useSession();
   const t = useTheme();
-  const [queue, setQueue] = useState(() => steps.slice());
-  const [at, setAt] = useState(0);
+  /* A saved run is only started from while it is still saved: once that run
+     finishes it is cleared, so a retake mounting with the same prop deals
+     afresh rather than replaying a finished run. */
+  const from = useRef(restore && save && savedRun(save.key) ? restore : null).current;
+  const [queue, setQueue] = useState(() => (from ? from.queue : steps.slice()));
+  const [at, setAt] = useState(() => (from ? from.at : 0));
   const finished = useRef(false);
+  // What the mark is out of: the deck as first dealt, before any recycling.
+  const total = from ? from.total : steps.length;
 
   /* The back arrow sits a thumb's width from Home, and one mis-tap used to throw
      a ten-minute placement away without a word. With `navigation` given, a run
@@ -437,8 +448,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
      the rules to address the thing being drilled"*). Collapsed it costs a
      line; open it teaches the pattern rather than fixing the one word. */
   const [ruleOpen, setRuleOpen] = useState(false);
-  const results = useRef([]);
-  const tally = useRef({ right: 0, wrong: 0, helped: 0, skipped: 0, credit: 0 });
+  const results = useRef(from ? from.results : []);
+  const tally = useRef(from ? { ...from.tally }
+    : { right: 0, wrong: 0, helped: 0, skipped: 0, credit: 0 });
   const sayTimer = useRef(null);
   const atRef = useRef(0);
   const alive = useRef(true);
@@ -473,6 +485,17 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   }, []);
 
   if (!q) return null;
+
+  /* The run as it stands once this answer is in, kept for picking up again.
+     It is saved pointing at the *next* question: the grade for this one is
+     already in the scheduler, and resuming on it would grade it twice. The
+     last answer saves nothing new — Continue on it finishes the run. */
+  const keep = (deck) => {
+    if (!save || at + 1 >= deck.length) return;
+    saveRun(save.key, { route: save.route, params: save.params, title: save.title,
+                        queue: deck, at: at + 1, total,
+                        tally: { ...tally.current }, results: results.current.slice() });
+  };
 
   /* `grade` lets an activity that scores itself hand in 1–4 directly. Without it, the
      answer's right/wrong and whether the table was used decide, as before. An entry
@@ -536,9 +559,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       if (usedHint) tally.current.helped += 1;
       results.current.push({ right: !!correct, credit, stage: q.stage, lesson: q.lesson, i: q.i });
     }
-    if (recycle && credit < 1 && !q.retry) {
-      setQueue((prev) => prev.concat([{ ...q, retry: true }]));
-    }
+    const recycled = recycle && credit < 1 && !q.retry;
+    if (recycled) setQueue((prev) => prev.concat([{ ...q, retry: true }]));
+    keep(recycled ? queue.concat([{ ...q, retry: true }]) : queue);
     if (gradeWords) {
       const entries = words || (typeof q.i === "number" ? [q.i] : []);
       if (entries.length) {
@@ -566,6 +589,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       tally.current.skipped += 1;
       results.current.push({ skipped: true, stage: q.stage, lesson: q.lesson, i: q.i });
     }
+    keep(queue);
   };
 
   const next = () => {
@@ -575,7 +599,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     if (at + 1 >= queue.length) {
       finished.current = true;
       guard.current = false;
-      onFinish({ ...tally.current, total: steps.length - tally.current.skipped,
+      if (save) clearRun(save.key);
+      onFinish({ ...tally.current, total: total - tally.current.skipped,
                  results: results.current });
       return;
     }
@@ -872,6 +897,43 @@ const GUIDE_KINDS = Object.keys(LINES);
    Continue (or Done), and "Try again" drops to a ghost — it used to be the
    blue button whether the quiz was passed or failed, so passing read as an
    invitation to do it over (the interface review, 2026-09-08). */
+/* Whether a flow starts fresh or from where it was left (resume.js). Returns
+   `{ restore, prompt }`: while a saved run waits on the learner's choice,
+   `prompt` is the screen to show instead of the runner. `params.resume`
+   (from the prompt on the way back into the app) means the choice is made. */
+export function useResume(key, params) {
+  const [choice, setChoice] = useState(() => {
+    const run = savedRun(key);
+    if (!run) return { restore: null };
+    return params && params.resume ? { restore: run } : { pending: run };
+  });
+  const prompt = choice.pending ? (
+    <ResumePrompt run={choice.pending}
+                  onContinue={() => setChoice({ restore: choice.pending })}
+                  onRestart={() => { clearRun(key); setChoice({ restore: null }); }} />
+  ) : null;
+  return { restore: choice.restore || null, prompt };
+}
+
+export function ResumePrompt({ run, onContinue, onRestart }) {
+  return (
+    <Screen fill>
+      <View testID="resume-prompt"
+            style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 16 }}>
+        <GuidePop pose="wave" size={96} style={{ marginBottom: 14 }} />
+        <Text style={{ fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
+          Continue where you left off?
+        </Text>
+        <Muted style={{ marginTop: 6, textAlign: "center" }}>{runLabel(run)}</Muted>
+      </View>
+      <View style={{ gap: 10 }}>
+        <Btn block kind="pri" label="Continue" onPress={onContinue} />
+        <Btn block kind="ghost" label="Start again" onPress={onRestart} />
+      </View>
+    </Screen>
+  );
+}
+
 export function Done({ title, detail, score, passed, onAgain, onBack, againLabel, onContinue, continueLabel, guide }) {
   const t = useTheme();
   const tone = passed === false ? { bg: t.badBg, fg: t.bad }

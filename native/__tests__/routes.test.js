@@ -152,3 +152,25 @@ test("the lesson's Listening step can reach the player", () => {
   expect(learn.has("Lesson")).toBe(true);
   expect(learn.has("Scenes")).toBe(true);
 });
+
+/* Lesson steps are routed through data.js stepRoute, which the literal scan
+   above cannot read: the path, the lesson screen and the quiz's end all use
+   it, from the Learn stack. */
+test("every lesson step's route is on the Learn stack", () => {
+  const { stepRoute, UN } = require("../src/data");
+  const learn = STACKS.get("LearnStack");
+  for (const id of ["vocab", "grammar", "quiz", "listen", "summary", "video"]) {
+    expect([id, learn.has(stepRoute(id, UN[0], 0)[0])]).toEqual([id, true]);
+  }
+});
+
+/* The offer to pick a run up again navigates by a saved name, which the scan
+   cannot read either: every flow that saves names a route its tab registers. */
+test("every saved run names a route its stack registers", () => {
+  const flows = require("fs").readFileSync(require("path").join(__dirname, "../src/screens/Flows.js"), "utf8");
+  const saves = [...flows.matchAll(/route: "(\w+)"(, tab: "(\w+)")?/g)].map((m) => [m[1], m[3] || "Learn"]);
+  expect(saves.length).toBeGreaterThanOrEqual(8);
+  for (const [name, tab] of saves) {
+    expect([name, STACKS.get(`${tab}Stack`).has(name)]).toEqual([name, true]);
+  }
+});

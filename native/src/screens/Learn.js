@@ -26,7 +26,7 @@
  * same colours, different renderer — that is the kind of difference rule 20a allows.
  */
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Pressable, Animated, useWindowDimensions } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { useSession } from "../session";
@@ -35,8 +35,10 @@ import { Screen, Btn, Pill, UnitIcon, Muted, styles, Text } from "../ui";
 import {
   STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress, unitState,
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, optional, dueCount,
-  routePosition, todaysWork, recapKey, RECAP_FROM,
+  routePosition, todaysWork, recapKey, RECAP_FROM, stepRoute,
 } from "../data";
+import { launchOffer, clearRun } from "../resume";
+import { ResumeSheet } from "../resumesheet";
 import { nextOpening, markOpening } from "@core/openings";
 import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
@@ -80,8 +82,6 @@ function FinalCard({ best, onOpen }) {
   );
 }
 
-/* A lesson step's screen. */
-export const STEP_ROUTE = { vocab: "Vocab", quiz: "Quiz", video: "Video" };
 
 const STROKE = 5;
 /* The depth of every disc's edge. One number, so a spine node and a side quest
@@ -452,8 +452,18 @@ function Fork({ stage, chapterOpen, onOpen }) {
 }
 
 export default function Learn({ navigation }) {
-  const { st, update } = useSession();
+  const { st, update, ready } = useSession();
   const t = useTheme();
+  /* A run left part-way, offered once each time the app is opened (resume.js;
+     the owner, 2026-10-02: "if the app restarts it can prompt them if they'd
+     like to continue where they left off or start again"). */
+  const [offer, setOffer] = useState(null);
+  useEffect(() => { if (ready) setOffer(launchOffer()); }, [ready]);
+  const goRun = (run, params) => {
+    setOffer(null);
+    if (run.tab) navigation.navigate(run.tab, { screen: run.route, params });
+    else navigation.navigate(run.route, params);
+  };
   const next = nextStep(st);
   const done = dayDone(st, dueCount(st), today());
   const openUnit = (unit) => navigation.navigate("Unit", { unitId: unit.id });
@@ -471,6 +481,12 @@ export default function Learn({ navigation }) {
 
   return (
     <Screen>
+      {offer ? (
+        <ResumeSheet run={offer}
+                     onContinue={() => goRun(offer, { ...offer.params, resume: true })}
+                     onRestart={() => { clearRun(offer.key); goRun(offer, offer.params); }}
+                     onClose={() => setOffer(null)} />
+      ) : null}
       {/* The streak and the "Review · N due" button used to open this screen.
           Both went on 2026-09-29 (the owner: "remove the review from the top
           of the Learn page"; the streak "can just be on the profile page").
@@ -524,8 +540,7 @@ export default function Learn({ navigation }) {
           testID="next-step"
           style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
           label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} (${next.unit.name})`}
-          onPress={() => navigation.navigate(STEP_ROUTE[next.step] || "Vocab",
-                                             { unitId: next.unit.id, index: next.index })}
+          onPress={() => navigation.navigate(...stepRoute(next.step, next.unit, next.index))}
         />
       ) : null}
       {/* The day's recap, once there is a day's work to recap and until it is

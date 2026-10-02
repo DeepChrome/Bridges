@@ -72,6 +72,27 @@ Each step ends with the full suite and is committed on its own.
 
 **Next, as its own sprint (the owner): related words taught together, with
 a top-to-bottom review.** Not started until the items above are settled.
+Notes for it, gathered on the way:
+- «молодец» ("well done") sits under "People and pets" in a video's list.
+- YouTube's sound tags («[музыка]», «[смех]») are counted as words the
+  videos say, so «музыка» may be picked for a unit on the strength of 600
+  bars of music. The transcript now draws them as sounds; the index still
+  counts them, because excluding them re-cuts units.
+
+## Ideas to revisit (raise these when the owner asks what to work on)
+
+- **Dim the rest of the screen behind every pop-up** (the owner,
+  2026-10-01). Every `Sheet` already lays a dark backdrop over the screen,
+  so the tally's sheet, the cog sheets and the word sheet all do it. What
+  does not: the `Dropdown` menus and `Alert`s are the platform's or ours
+  without a backdrop. Worth one pass making every overlay one component, so
+  a pop-up always looks and dims the same. *Recommended, small.*
+- **Supporting characters in the cast's painted style**: ten descriptions
+  are written (core/cast.js, build_cast_art.mjs); the run stopped on a spent
+  OpenAI balance before buying anything. About $4.20 for two candidates
+  each, one command once there is credit.
+- **`video.test.js` fails under the full suite's load** two runs in three on
+  2026-10-02 (57–65 s), never alone. Looks like a timeout; not yet traced.
 
 12. [x] **Word endings play.** On the endings screen the example words
         play and the endings themselves do not (the owner, 2026-10-01). The

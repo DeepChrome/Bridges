@@ -170,7 +170,15 @@ export async function buyOne(text, { word, dir, key, had }) {
    whole word list. What stays: Languages on Fire (a human in a studio, 17
    curriculum words), Yandex and Tatoeba. `say()` prefers a bundled clip, so
    buying is all it takes; nothing in the app changes. */
-export const REPLACE = new Set(["core5000", "googletts"]);
+/* …and then everything (2026-10-01). The owner: *"inconsistencies in the voice
+   that reads the audio out loud. It's okay to vary slightly… but ideally we
+   aren't varying to extremely different sounding voices. I think the audio for
+   znat sounds really deep and odd."* «знать» was Languages on Fire — a human,
+   kept in September for being one — and that is exactly the voice that stood
+   out. A curriculum word is now always this one voice, whoever recorded it
+   first. */
+const ALL_SOURCES = ["core5000", "googletts", "yandex", "lof", "tatoeba", "other"];
+export const REPLACE = new Set(ALL_SOURCES);
 
 /* The words the units teach that `data/audio.json` has no file for, or has
  * only from a source in REPLACE.
@@ -189,7 +197,38 @@ export const REPLACE = new Set(["core5000", "googletts"]);
    people (Tatoeba, Languages on Fire), which stay. The stress marks come off
    before synthesis, as the scenario tool strips them; the punctuation stays,
    since that is what the engine reads intonation from. */
-export const SENTENCE_REPLACE = new Set(["core5000", "googletts", "yandex"]);
+/* All sources here too since 2026-10-01: the Tatoeba recordings are many
+   different amateur readers, which is the variety the owner asked to be rid of. */
+export const SENTENCE_REPLACE = new Set(ALL_SOURCES);
+
+/* The example sentences on a curriculum word's cards (2026-10-01, the owner:
+   "on the detailed cards, we don't have audio recordings of the answer
+   sentences"): the dictionary's examples (the pool rows its `refs` name) and
+   the Wiktionary sense examples (senses.json), which carried no speaker at
+   all. Keyed by the folded sentence, as `say()` looks a clip up. */
+export function examplesToBuy(payload) {
+  const taught = new Set();
+  for (const u of payload.units) for (const i of u.w || []) taught.add(i);
+  const pool = payload.sent || [];
+  const senses = payload.senses || {};
+  const out = [], seen = new Set();
+  const add = (ru) => {
+    if (!ru || !/[а-яё]/i.test(ru)) return;
+    const key = fold(ru);
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ key, text: bare(ru) });
+  };
+  for (const i of taught) {
+    const w = payload.lemmas[i];
+    for (const r of String((w && w.refs) || "").split(",").filter(Boolean)) {
+      const row = pool[Number(r)];
+      if (row) add(row[0]);
+    }
+    for (const s of senses[String(i)] || []) for (const x of s.x || []) add(x.ru);
+  }
+  return out;
+}
 
 export function sentencesToBuy(payload, audio, replace = SENTENCE_REPLACE) {
   const files = (audio && audio.files) || {};
@@ -244,7 +283,9 @@ async function main() {
      strip it for the same reason (`bare()` in native/src/audio.js). */
   /* One list to buy: the words keyed by their bare form, the sentences by
      their folded text; `text` is what the engine is handed. */
-  const sentences = sentencesToBuy(payload, audio);
+  const pooled = sentencesToBuy(payload, audio);
+  const inPool = new Set(pooled.map((s) => s.key));
+  const sentences = pooled.concat(examplesToBuy(payload).filter((s) => !inPool.has(s.key)));
   /* What was bought before, so a word whose good clip was a retry under a
      different text («Ты») keeps that clip rather than being bought again under
      its bare-text id; and the lengths already measured. */

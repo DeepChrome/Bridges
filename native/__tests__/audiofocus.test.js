@@ -33,9 +33,12 @@ const madeFor = (uri) => global.__players.filter((p) => p.uri === uri);
 
 describe("leaving a lesson", () => {
   it("releases the player rather than parking it", async () => {
-    // A sentence the collection has a recording for, so a real player is made.
+    // A sentence with a recording, so a real player is made. It is a bundled
+    // clip since every pool sentence was bought (2026-10-01): a module, not a
+    // stream, so the player is counted from where it starts, not by its uri.
+    const before = global.__players.length;
     await say("Кто это?");
-    const made = global.__players.filter((p) => p.uri);
+    const made = global.__players.slice(before);
     expect(made.length).toBeGreaterThan(0);
 
     stop();
@@ -44,10 +47,14 @@ describe("leaving a lesson", () => {
   });
 
   it("does not leave a player behind for the next screen to fight", async () => {
+    const before = global.__players.length;
     await say("Кто это?");
     stop();
-    // Everything that was ever handed a stream has been given back.
-    global.__players.filter((p) => p.uri).forEach((p) => {
+    // Everything this made has been given back — and it made something, or
+    // the loop below would pass on nothing.
+    const made = global.__players.slice(before);
+    expect(made.length).toBeGreaterThan(0);
+    made.forEach((p) => {
       expect(p.remove).toHaveBeenCalled();
     });
   });

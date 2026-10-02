@@ -38,6 +38,15 @@ describe("how wide a button is", () => {
     expect(sizing("wide").alignSelf).toBe("stretch");
   });
 
+  // A floor on width is for a box. Given to a link, three links stopped
+  // fitting the creators' row and the last wrapped onto a line of its own.
+  it("puts no width floor on a control with no box", async () => {
+    await render(<><Btn kind="link" label="Site" testID="ln" onPress={() => {}} />
+                   <Btn kind="ghost" label="Skip" testID="gh" onPress={() => {}} /></>);
+    expect(sizing("ln").minWidth).toBeUndefined();
+    expect(sizing("gh").minWidth).toBeUndefined();
+  });
+
   it("is still a 44 dp target", async () => {
     await render(<Btn kind="plain" label="Go" testID="tall" onPress={() => {}} />);
     let h = 0;

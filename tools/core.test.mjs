@@ -1244,7 +1244,13 @@ group("hearing");
   const firstPool = (SPEECH.speak[first.id] || []).map((i) => SPEECH.rows[i]);
   ok(firstPool.length > 0 && firstPool.every((r) => r[2] <= 12),
      `${first.id}: has sayable sentences of its own`, String(firstPool.length));
-  ok(!!DATA.audio.files[fold(h.target)], "and has a recording — the pool guarantees one");
+  /* A recording from the collection or a bought clip: since every pool
+     sentence was bought in one voice (2026-10-01), and the video's own lines
+     never had a collection file, the bundle is where most of them are. */
+  const boughtFiles = JSON.parse(readFileSync(join(ROOT, "data", "word_audio", "manifest.json"), "utf8")).files || {};
+  const boughtKeys = new Set(Object.keys(boughtFiles).map(fold));
+  ok(!!DATA.audio.files[fold(h.target)] || boughtKeys.has(fold(h.target)),
+     "and has a recording — the pool guarantees one", h.target);
   ok(h.lemmas.length > 0 && h.lemmas.every((i) => L[i]),
      "the lemmas it grades are real curriculum entries");
 

@@ -394,7 +394,11 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID, b
     : kind === "bad" ? t.badDim
     : t.line;
   return (
-    <Animated.View style={[block ? { alignSelf: "stretch" } : { alignSelf: "center", minWidth: 120 },
+    /* Content-sized unless `block`. The floor on width is for a box — a one-word
+       box looks like a chip — and a ghost or a link has none: given one, the
+       creators' "Patreon · Site · YouTube" stopped fitting a row and wrapped. */
+    <Animated.View style={[block ? { alignSelf: "stretch" }
+                                 : { alignSelf: "center", minWidth: flat ? undefined : 120 },
                            style, disabled ? null : press.style,
                            kind === "pri" && !disabled ? lift : null]}>
       <Lift

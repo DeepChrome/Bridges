@@ -61,24 +61,15 @@ const ASvgPath = Animated.createAnimatedComponent(Path);
    was seen to lead somewhere, and a locked card saying so was one more thing
    on a path that already shows where it goes. It says what it is and nothing
    more — "50 questions · every chapter" went the same day. */
+/* An ordinary button, sized to its label like every other (the owner,
+   2026-10-02: "far too wide and bulky"), with the best score beside it. */
 function FinalCard({ best, onOpen }) {
-  const t = useTheme();
   return (
-    <Pressable
-      testID="final-test"
-      accessibilityRole="button"
-      onPress={onOpen}
-      style={({ pressed }) => ({
-        alignSelf: "stretch", marginTop: 26, padding: 16, borderRadius: 20,
-        backgroundColor: best ? t.goodBg : t.brandBg,
-        borderColor: best ? t.goodDim : t.brandDim, borderWidth: 1,
-        flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12,
-        opacity: pressed ? 0.7 : 1,
-      })}
-    >
-      <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700", textAlign: "center" }}>Final Test</Text>
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10,
+                   marginTop: 26 }}>
+      <Btn kind="pri" testID="final-test" label="Final Test" onPress={onOpen} />
       {best ? <Pill tone="good">{`${best}%`}</Pill> : null}
-    </Pressable>
+    </View>
   );
 }
 

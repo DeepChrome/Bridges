@@ -26,7 +26,7 @@ import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Title, Text, Muted, Note, Loading, useRussianVoice } from "../ui";
 import { FormSpeaker } from "../rules";
-import { say, playTrack } from "../audio";
+import { say } from "../audio";
 import { ENDING_CLIPS } from "../endingaudio";
 import { endingsByFrequency } from "../data";
 
@@ -42,10 +42,14 @@ function EndingSound({ e }) {
   const voice = useRussianVoice();
   const clip = ENDING_CLIPS[e.id];
   const live = !!clip || voice;
+  /* Through `say` like every other speaker, with the clip handed in, and
+     `repeat: false`: a press is the same sound every time. The repeat
+     slow-down and the separate track player made a few quick presses turn
+     robotic and then stop answering (the owner, 2026-10-02). */
   return (
     <Pressable testID={`ending-say-${e.id}`}
-               onPress={clip ? () => playTrack(clip.src)
-                        : voice ? () => say(e.say, { device: true, stress: true }) : undefined}
+               onPress={clip ? () => say(clip.says, { clip: clip.src, repeat: false })
+                        : voice ? () => say(e.say, { device: true, stress: true, repeat: false }) : undefined}
                accessibilityRole="button"
                accessibilityLabel={clip ? `Hear the ending, ${e.sounds}`
                                    : voice ? `Hear the ending, ${e.sounds} (device voice)` : undefined}

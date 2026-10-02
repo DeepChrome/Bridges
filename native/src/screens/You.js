@@ -29,7 +29,7 @@ import Constants from "expo-constants";
    something the binary is not. */
 const VERSION = (Constants.expoConfig && Constants.expoConfig.version) || "";
 import { tagInfo } from "@core/errortags";
-import { cardsOf, maxLapses, cardFor } from "@core/scheduler";
+import { maxLapses, cardFor, REVIEW } from "@core/scheduler";
 import { QUEUE_DEFAULTS } from "@core/queue";
 import { askPermission } from "../notify";
 import { APP_NAME } from "../brand";
@@ -592,7 +592,11 @@ export default function You({ navigation }) {
   const [settings, setSettings] = useState(false);
   const [showing, setShowing] = useState(null);      // which tile's sheet is open
 
-  const learned = Object.values(st.seen).filter((e) => cardsOf(e).some(({ card }) => (card.reps || 0) > 0)).length;
+  /* Words learned, not words seen (the owner, 2026-10-02): a word counts once
+     its card has left the learning steps — remembered across a day at least —
+     not the moment it was first shown. A sentence card is not a word. */
+  const learned = Object.entries(st.seen)
+    .filter(([w, e]) => !/\s/.test(w) && cardFor(e).state === REVIEW).length;
   // Cleared means done — vocabulary met and the quiz passed — not merely attempted.
   const lessons = UN.reduce((a, u) => {
     let n = 0;
@@ -636,8 +640,10 @@ export default function You({ navigation }) {
       </View>
 
       <View style={{ flexDirection: "row", marginTop: 26, paddingVertical: 4 }}>
-        <Stat first value={String(st.streak || 0)} label="day streak" />
-        <Stat value={learned.toLocaleString("en-US")} label="words seen" />
+        {/* The streak opens the statistics, which open on the days studied. */}
+        <Stat first testID="stat-streak" value={String(st.streak || 0)} label="day streak"
+              onPress={() => navigation.navigate("Stats")} />
+        <Stat value={learned.toLocaleString("en-US")} label="words learned" />
         <Stat value={String(lessons)} label="lessons cleared" />
         {/* "due now" said nothing about what was due (the owner, 2026-09-29).
             It is the flashcards waiting today — the Study badge's number — and

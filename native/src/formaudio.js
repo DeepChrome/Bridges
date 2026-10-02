@@ -11227,7 +11227,7 @@ export const FORM_CLIPS = {
   "чита́ет": require("../assets/words/chitaet.mp3"),
   "чита́ете": require("../assets/words/chitaete.mp3"),
   "чита́ешь": require("../assets/words/chitaesh.mp3"),
-  "чита́й": require("../assets/words/chitaj.mp3"),
+  "чита́й": require("../assets/words/chitaj-853fe5.mp3"),
   "чита́йте": require("../assets/words/chitajte.mp3"),
   "чита́л": require("../assets/words/chital.mp3"),
   "чита́ла": require("../assets/words/chitala.mp3"),

@@ -55,4 +55,26 @@ describe("the lesson's word list", () => {
     // itself is what the list leads into.
     expect(screen.getByTestId("word-card")).toBeTruthy();
   });
+
+  /* Back inside a lesson is the card before, not the way out (the owner,
+     2026-10-02). From the first card it leaves; Home always leaves. */
+  it("steps Back to the previous card, and leaves only from the first", async () => {
+    const listeners = {};
+    const navigation = { ...nav, addListener: (name, fn) => { listeners[name] = fn; return () => delete listeners[name]; } };
+    await withProfile(<VocabFlow route={route} navigation={navigation} />);
+    await screen.findByTestId("vocab-list");
+    const back = async (type = "GO_BACK") => {
+      const e = { preventDefault: jest.fn(), data: { action: { type } } };
+      await act(async () => { listeners.beforeRemove(e); });
+      return e;
+    };
+    await act(async () => { fireEvent.press(screen.getByText("Start learning")); });
+    expect(screen.getByTestId("word-card")).toBeTruthy();
+    // Home is not Back: it leaves as it always did.
+    expect((await back("POP_TO_TOP")).preventDefault).not.toHaveBeenCalled();
+    expect((await back()).preventDefault).toHaveBeenCalled();
+    expect(await screen.findByTestId("vocab-list")).toBeTruthy();
+    // From the first card, Back leaves.
+    expect((await back()).preventDefault).not.toHaveBeenCalled();
+  });
 });

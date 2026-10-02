@@ -979,6 +979,9 @@ bundle is now every word and every sentence a lesson can play, which is why
 left for it to download. What still streams from the collection: the
 dictionary's example sentences, and the human recordings.
 
+*(Since 2026-10-02 nothing streams at all — §30bq. The two paragraphs below
+are history.)*
+
 **…and what streams is kept once fetched** (2026-09-29). «Следуйте за мной»
 had "a huge delay" — and none of 200 sampled collection files has more than
 0.13 s of lead silence, so the wait was the download, paid on every press.
@@ -6010,6 +6013,46 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
 - **Path discs carry a colour family** — spine brand, quests green and blue
   by rank position — on the tinted face, the glyph heavier; the current disc
   is still the one filled disc.
+
+## 30bq. One voice, a calendar of days, Back that steps back (2026-10-02)
+
+- **Nothing streams any more.** `say()` plays a bought clip (`wordaudio.js`,
+  `formaudio.js`, or a `clip` handed in) or the phone's voice — a woman's,
+  like the clips (`defaultVoice`). The collection's recordings were four
+  sources and dozens of readers, and the owner heard "a ton of voices
+  swapping". The cache, the offline hold and `warm` went with them;
+  `hasRealAudio` means "a bought clip". The grammar reference's examples
+  were bought too (`sentencesToBuy` reads `core/grammar.js` TOPICS). What
+  is still the phone: the deep dictionary's sentences, the tutor and Talk,
+  and anything a learner types.
+- **An arrow is a pause** (`say`): «стол → столы» with no clip of its own is
+  said a side at a time, `PART_GAP_MS` apart, cancelled by any later `say`
+  or `stop()`. A pair bought whole plays as bought.
+- **Word endings say their respelling** (`build_ending_clips.mjs`): «ово»,
+  «ца», «оф» bought in the one voice, trimmed and padded; nothing is cut
+  from a word any more, which carried the tail of the syllable before. A
+  lone vowel Chirp3 will not say long enough (-а, -о) plays its first
+  example whole. Two endings sharing a respelling share a file.
+- **The 50 a day holds after days away** (`stepToday` in core/queue.js): a
+  learning step taken *today* is outside the cap; one left from an earlier
+  day is a review like any other. Of more than fifty, the most forgotten come
+  first, weighted toward common words (`rank`).
+- **Back steps back inside a lesson.** VocabFlow turns a plain back
+  (`GO_BACK`/`POP`) into the previous card, passing over answered questions;
+  QuizFlow's Runner takes `stepBack` and a question stepped back to is
+  `revisit` — answerable, never tallied or graded again. From the first card
+  Back leaves; Home always leaves.
+- **Statistics opens from the streak** and leads with a month calendar
+  (`dayReport`, `monthGrid` in Stats.js): each day's main topic — the unit
+  of the words answered, or the unit's grammar card for a drill — and an
+  estimated time (`SITTING_GAP`, `ANSWER_CAP`, `SITTING_LEAD`: gaps inside a
+  sitting capped, a minute per sitting for reading). Graded answers only, so
+  videos and listening are not in it. "Words learned" counts cards in
+  review state, not cards ever shown.
+- **Dark is the default** (`DEFAULT_SCHEME`), the phone's setting no longer
+  decides, and `Appearance.setColorScheme` puts Android's own dialogs on the
+  app's side (a light Alert over a dark app was hard to read).
+- **The pronunciation step is assessed** (`assess`, §30bp).
 
 ## 31. Verification
 

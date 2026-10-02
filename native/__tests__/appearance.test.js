@@ -1,11 +1,12 @@
 /* Light or dark (the owner, 2026-10-01: "turn that switch into the light dark
    mode switch"). The exercise-book look is the only one; the switch chooses
-   its paper or its night, the phone deciding until the learner does. */
+   its paper or its night — dark until the learner chooses (2026-10-02:
+   "Ensure dark mode is default"), whatever the phone is set to. */
 
 import React from "react";
 import { render, screen, act } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useColorScheme } from "react-native";
+import { Appearance, useColorScheme } from "react-native";
 
 import { useScheme, setAppearance, loadAppearance, resetAppearance, markOutOfFive } from "../src/appearance";
 import { useTheme, palette } from "../src/theme";
@@ -28,21 +29,33 @@ beforeEach(async () => {
   useColorScheme.mockReturnValue("light");
 });
 
-it("follows the phone until the learner chooses", async () => {
-  useColorScheme.mockReturnValue("dark");
+it("is dark until the learner chooses, even on a phone set to light", async () => {
   await render(<Probe />);
   expect(read()).toBe(`dark ${palette("dark").bg}`);
 });
 
-it("holds the learner's choice over the phone, and keeps it", async () => {
+it("holds the learner's choice, and keeps it", async () => {
   await render(<Probe />);
+  await act(async () => { setAppearance("light"); });
   expect(read()).toBe(`light ${palette("light").bg}`);
-  await act(async () => { setAppearance("dark"); });
-  expect(read()).toBe(`dark ${palette("dark").bg}`);
-  expect(await AsyncStorage.getItem("rb.appearance")).toBe("dark");
+  expect(await AsyncStorage.getItem("rb.appearance")).toBe("light");
   resetAppearance();
   await act(async () => { await loadAppearance(); });
-  expect(read()).toBe(`dark ${palette("dark").bg}`);
+  expect(read()).toBe(`light ${palette("light").bg}`);
+});
+
+/* The platform's own dialogs follow the app, not the phone: a light Alert over
+   the dark app was hard to read (the restore confirmation). */
+it("tells the platform which scheme the app is in", async () => {
+  const spy = jest.spyOn(Appearance, "setColorScheme").mockImplementation(() => {});
+  try {
+    resetAppearance();
+    expect(spy).toHaveBeenLastCalledWith("dark");
+    setAppearance("light");
+    expect(spy).toHaveBeenLastCalledWith("light");
+  } finally {
+    spy.mockRestore();
+  }
 });
 
 it("the two palettes carry every key, so nothing reads undefined", () => {

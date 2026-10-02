@@ -15,11 +15,12 @@ import { Runner } from "../src/screens/Run";
 import { AUDIO } from "../src/data";
 import { wordClip } from "../src/wordaudio";
 
-/* An utterance that streams from the collection. The autoplay-wait tests
-   count streamed plays, and every curriculum word and pool sentence plays
-   from the bundle since 2026-09-19 (wordaudio.js) — so they listen for a
-   dictionary sentence, which does not. */
-const streamed = Object.keys(AUDIO).find((k) => k.includes(" ") && !wordClip(k));
+/* The autoplay-wait tests count the autoplay's own readings. Every clip is a
+   bundled asset now (nothing streams, 2026-10-02) and the mock cannot tell
+   one asset from another, so they spy on say() for this one sentence. */
+const streamed = Object.keys(AUDIO).find((k) => k.includes(" ") && wordClip(k));
+const audio = require("../src/audio");
+const readings = (spy) => spy.mock.calls.filter((c) => c[0] === streamed).length;
 
 /* Every question present() emits carries a kind; the registry draws nothing for one
    that does not, which is what registry.test.js guards. */
@@ -155,10 +156,11 @@ describe("runner verdict", () => {
                     autoplay: streamed, say: streamed, hint: "book",
                     options: [{ label: "книга", right: true, cyr: true }, { label: "стол", cyr: true }] };
     global.__audioHold = true;
+    const spy = jest.spyOn(audio, "say");
     try {
       await withRunner({ steps: [heard, heard], recycle: false });
       await screen.findByText(/^Hint/);
-      expect(global.__played.filter((u) => u && u.includes("/audio/"))).toHaveLength(1);
+      expect(readings(spy)).toBe(1);
       expect(screen.queryByTestId("hint-text")).toBeNull();
       await act(async () => { fireEvent.press(screen.getByText(/^Hint/)); });
       expect(screen.getByTestId("hint-text").props.children).toBe("book");
@@ -167,12 +169,12 @@ describe("runner verdict", () => {
       await act(async () => { fireEvent.press(screen.getByText("Continue")); });
       // The first recording is still "playing": the second question has not autoplayed.
       await act(async () => {});
-      const recordings = () => global.__played.filter((u) => u && u.includes("/audio/"));
-      expect(recordings()).toHaveLength(1);
+      expect(readings(spy)).toBe(1);
       await act(async () => { global.__audioFinish(); });
       await act(async () => {});
-      expect(recordings().length).toBeGreaterThanOrEqual(2);
+      expect(readings(spy)).toBeGreaterThanOrEqual(2);
     } finally {
+      spy.mockRestore();
       global.__audioHold = false;
       global.__audioFinish();
     }
@@ -209,6 +211,33 @@ describe("runner verdict", () => {
     }
   });
 
+  /* In a lesson's quiz Back is the question before (the owner, 2026-10-02),
+     and a question gone back to is practice: answered again, never marked or
+     graded a second time. */
+  it("steps Back to the previous question without marking it twice", async () => {
+    const listeners = {};
+    const navigation = {
+      addListener: (name, fn) => { listeners[name] = fn; return () => delete listeners[name]; },
+      dispatch: jest.fn(),
+    };
+    const second = { ...question, prompt: "стол", options: [{ label: "table", right: true }, { label: "book" }] };
+    const onFinish = jest.fn();
+    await withRunner({ steps: [question, second], navigation, recycle: false, stepBack: true, onFinish });
+    await act(async () => { fireEvent.press(await screen.findByText("table")); });   // wrong
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    expect(await screen.findByText("стол")).toBeTruthy();
+    const e = { preventDefault: jest.fn(), data: { action: { type: "GO_BACK" } } };
+    await act(async () => { listeners.beforeRemove(e); });
+    expect(e.preventDefault).toHaveBeenCalled();
+    expect(await screen.findByText("книга")).toBeTruthy();
+    // Right this time: practice, the mark still holds the first answer.
+    await act(async () => { fireEvent.press(screen.getByText("book")); });
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    await act(async () => { fireEvent.press(await screen.findByText("table")); });
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ right: 1, wrong: 1, total: 2 }));
+  });
+
   /* Leaving stops the audio, and stopping is what released the queued autoplay:
      the next question used to play over the path (the engineering review). */
   it("never autoplays after the runner has gone", async () => {
@@ -216,11 +245,11 @@ describe("runner verdict", () => {
                     autoplay: streamed, say: streamed,
                     options: [{ label: "книга", right: true, cyr: true }, { label: "стол", cyr: true }] };
     global.__audioHold = true;
-    global.__played = [];
+    const spy = jest.spyOn(audio, "say");
     try {
       const r = await withRunner({ steps: [heard, heard], recycle: false });
       await screen.findByText("стол");
-      const played = () => global.__played.filter((u) => u && u.includes("/audio/")).length;
+      const played = () => readings(spy);
       expect(played()).toBe(1);
       // A wrong answer: a right one schedules its own reading, which is not
       // what this test is about.
@@ -234,6 +263,7 @@ describe("runner verdict", () => {
       await act(async () => {});
       expect(played()).toBe(before);
     } finally {
+      spy.mockRestore();
       global.__audioHold = false;
       global.__audioFinish();
     }

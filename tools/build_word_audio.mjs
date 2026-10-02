@@ -39,6 +39,7 @@ import { fileURLToPath } from "node:url";
 import { loadPayload } from "./payload.mjs";
 import { durationMs } from "./mp3.mjs";
 import { fold, bare } from "../core/util.js";
+import { TOPICS } from "../core/grammar.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "data", "word_audio");
@@ -237,7 +238,12 @@ export function sentencesToBuy(payload, audio, replace = SENTENCE_REPLACE) {
   /* …and the examples on each unit's grammar card (2026-09-30): the card is
      read at the start of every unit and under wrong answers, and it was the
      last place a lesson reached for the phone's voice. */
-  const cards = (payload.units || []).flatMap((u) => ((u.g && u.g.examples) || []).map((e) => [e[0]]));
+  const cards = (payload.units || []).flatMap((u) => ((u.g && u.g.examples) || []).map((e) => [e[0]]))
+    /* …and the grammar reference's examples (2026-10-02): Practice → The
+       rules was the one screen still reading its sentences in the phone's
+       voice, beside the bought voice everywhere else (the owner: "a ton of
+       voices swapping"). */
+    .concat(TOPICS.flatMap((t) => t.sections.flatMap((s) => (s.examples || []).map((e) => [e[0]]))));
   for (const row of ((payload.speech && payload.speech.rows) || []).concat(cards)) {
     const key = fold(row[0]);
     if (seen.has(key)) continue;

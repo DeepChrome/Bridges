@@ -7,7 +7,7 @@
  * Own file, per the timeout note in screens.test.js.
  */
 
-import { forecast, retentionOf, perDay, studiedDays, runOf, calendar, CAL_WEEKS, mastery, LEVELS }
+import { forecast, retentionOf, perDay, studiedDays, runOf, dayReport, monthGrid, mastery, LEVELS }
   from "../src/screens/Stats";
 import { DAY, dayOf, NEW, REVIEW } from "@core/scheduler";
 
@@ -82,23 +82,36 @@ describe("the calendar of days worked", () => {
     expect(runOf(studiedDays([]), now)).toBe(0);
   });
 
-  it("marks the rest of this week as unhappened, not as unstudied", () => {
-    const weeks = calendar(studiedDays([at(now), at(now), at(now - 8 * DAY)]), now);
-    expect(weeks).toHaveLength(CAL_WEEKS);
+  /* The month as a calendar of what was studied and roughly how long
+     (the owner, 2026-10-02). */
+  it("names a day by what was studied most, and estimates the time", () => {
+    const d = dayOf(now);
+    const min = 60000;
+    const rows = [
+      { day: d, at: now, word: "a", source: "type" },
+      { day: d, at: now + 1 * min, word: "b", source: "type" },
+      { day: d, at: now + 10 * min, word: "c", source: "cases" },  // a long read: capped at 3
+      // A second sitting, an hour later: its gap is not counted.
+      { day: d, at: now + 70 * min, word: "d", source: "type" },
+    ];
+    const topic = (r) => (r.source === "cases" ? "Dative case" : "Food & Drink");
+    const rep = dayReport(rows, topic).get(d);
+    expect(rep.n).toBe(4);
+    expect(rep.topic).toBe("Food & Drink");
+    expect(rep.topics).toEqual(["Food & Drink", "Dative case"]);
+    // 1 (lead) + 1 + 3 (capped) + 1 (a new sitting's lead) = 6 minutes.
+    expect(rep.minutes).toBe(6);
+    expect(dayReport([], topic).size).toBe(0);
+  });
+
+  it("lays a month out in whole weeks, Sunday first, each date its day", () => {
+    const weeks = monthGrid(2026, 9);              // October 2026 starts on a Thursday
     expect(weeks.every((w) => w.length === 7)).toBe(true);
-
-    const today = dayOf(now);
-    const flat = weeks.flat();
-    /* A zero and a day that has not arrived are not the same thing, and the
-       grid draws them differently — an empty square for the back half of this
-       week reads as "you missed four days" otherwise. */
-    expect(flat.filter((c) => c.future).every((c) => c.day > today)).toBe(true);
-    expect(flat.some((c) => c.future)).toBe(true);
-    expect(flat.find((c) => c.day === today)).toEqual({ day: today, n: 2, future: false });
-    expect(flat.find((c) => c.day === today - 8)).toMatchObject({ n: 1 });
-
-    // Columns are whole Sunday-to-Saturday weeks, in order, ending in this one.
-    for (const w of weeks) expect(new Date(w[0].day * DAY).getUTCDay()).toBe(0);
-    expect(weeks[CAL_WEEKS - 1].some((c) => c.day === today)).toBe(true);
+    expect(weeks[0].slice(0, 4).every((c) => c === null)).toBe(true);
+    expect(weeks[0][4].date).toBe(1);
+    const dates = weeks.flat().filter(Boolean);
+    expect(dates).toHaveLength(31);
+    // Consecutive dates are consecutive scheduler days.
+    dates.forEach((c, k) => { if (k) expect(c.day - dates[k - 1].day).toBe(1); });
   });
 });

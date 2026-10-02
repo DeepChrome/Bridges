@@ -1,13 +1,12 @@
-/* Playback: the collection's own recordings first, the device voice only for gaps.
+/* Playback: the app's bought clips first, the device voice only for gaps.
  *
- * Same rule as the web app. expo-audio replaces the Audio element, expo-speech
- * replaces SpeechSynthesis; the decision of what to play is unchanged.
+ * Since 2026-10-02 nothing streams: every clip a learner can play is in the
+ * app, in one voice (see `say`). The frozen web app still streams the
+ * collection's recordings; the native app does not.
  */
 
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
-import { File, Directory, Paths } from "expo-file-system";
 import * as Speech from "expo-speech";
-import { audioUrl } from "./data";
 import { bare, fold } from "@core/util";
 import { wordClip } from "./wordaudio";
 import { sexOf } from "@core/names";
@@ -47,85 +46,6 @@ const here = () => { try { return routeOf(); } catch (e) { return null; } };
 const claim = (route) => { owner = route === undefined ? here() : route; };
 export function leftFor(key) {
   if (owner !== null && owner !== key) { owner = null; stop(); }
-}
-
-/* **Streamed recordings, kept on the phone once fetched** (2026-09-29).
- *
- * The owner: «Следуйте за мной» *"has a huge delay before it starts"*. It is a
- * dictionary example — one of the collection's recordings that still stream
- * from the web host (§27) — and measured, the file itself begins speaking at
- * once: none of 200 sampled has more than a tenth of a second of lead
- * silence. The wait was the download, paid on every press. So a streamed
- * recording is fetched into the cache the first time it is wanted and played
- * from there after; and a speaker that has sat on screen for a moment fetches
- * its recording before anybody presses it (`warm`, called by `Speaker`), so
- * the first press is usually the local copy too. Bundled clips need none of
- * this. The cache directory is the OS's to purge, which costs a re-fetch and
- * nothing else. */
-let cacheDir = null;
-const dirOf = () => {
-  if (!cacheDir) {
-    cacheDir = new Directory(Paths.cache, "audio");
-    try { if (!cacheDir.exists) cacheDir.create(); } catch (e) { /* played from the web instead */ }
-  }
-  return cacheDir;
-};
-const fileOf = (url) => new File(dirOf(), url.split("/").pop());
-/* **A copy is the phone's only once it is whole** (2026-09-29, the owner:
-   *"it sort of cuts out mid sentence and then sometimes comes back… then the
-   same card had a different voice"*). The download used to write straight into
-   the file the player reads, and a copy counted as there the moment it was
-   non-empty — so a press during the download played half a recording, stalled
-   where the bytes ran out, and sometimes caught up; and a stall that errored
-   fell back to the phone's own voice, which is the other voice he heard. It is
-   fetched into a directory of its own and moved into place when complete,
-   and nothing still being fetched is ever a local copy. */
-let tmpDir = null;
-const tmpOf = () => {
-  if (!tmpDir) {
-    tmpDir = new Directory(Paths.cache, "audio-partial");
-    try { if (!tmpDir.exists) tmpDir.create(); } catch (e) { /* downloads then fail, and the web plays */ }
-  }
-  return tmpDir;
-};
-function localCopy(url) {
-  if (fetching.has(url)) return null;
-  try { const f = fileOf(url); return f.exists && f.size > 0 ? f.uri : null; } catch (e) { return null; }
-}
-const fetching = new Map();
-/* No network, remembered (the owner, 2026-10-01, on a flight: "a lot of delay
-   when I clicked the speaker icon"). A streamed recording that would not
-   start, or a copy that would not download, says the network is not there;
-   for a minute after that a recording with no local copy is not tried at all
-   and the phone's voice answers at once. A bundled clip or a saved copy plays
-   regardless, and the first success clears it. */
-export const OFFLINE_HOLD_MS = 60000;
-export const STREAM_START_MS = 2000;
-let offlineUntil = 0;
-const markOffline = () => { offlineUntil = Date.now() + OFFLINE_HOLD_MS; };
-export const seemsOffline = () => Date.now() < offlineUntil;
-export function forgetOffline() { offlineUntil = 0; }
-export const markOfflineForTest = markOffline;
-function fetchCopy(url) {
-  if (fetching.has(url) || localCopy(url)) return;
-  const part = () => new File(tmpOf(), url.split("/").pop());
-  const job = File.downloadFileAsync(url, tmpOf())
-    .then(async (got) => {
-      const done = got && typeof got.move === "function" ? got : part();
-      await Promise.resolve(done.move(fileOf(url)));
-    })
-    .catch(() => {
-      markOffline();
-      try { const f = part(); if (f.exists) f.delete(); } catch (e) { /* nothing there */ }
-    })
-    .finally(() => fetching.delete(url));
-  fetching.set(url, job);
-}
-/* Fetch ahead the recording `text` would stream, if it has one. */
-export function warm(text) {
-  if (!text || wordClip(fold(text))) return;
-  const url = audioUrl(text);
-  if (url) fetchCopy(url);
 }
 
 /* Giving a player back: **pause first, then remove**, and never one without the
@@ -646,14 +566,40 @@ export async function playTrack(source, from = 0, rateOverride) {
   }
 }
 
-/* Plays the real recording when the collection has one, otherwise the device voice.
-   A failed load falls back rather than leaving the learner in silence: a
-   synchronous failure at once, and a stream that reports an error after it
-   started (a 404, a dropped connection, a cached file cut off mid-download —
-   which is also deleted) through the same fallback. With no device voice either
-   the speaker is told (onAudioFailure). Resolves with true/false for whether
+/* Each top-level `say` takes a ticket, so the second half of «стол → столы»
+   is not said after something else has been asked for. */
+let sayRun = 0;
+const PART_GAP_MS = 500;
+
+/* Plays the bought clip when there is one, otherwise the device voice. A clip
+   that will not play falls back rather than leaving the learner in silence.
+   With no device voice either the speaker is told (onAudioFailure). Resolves with true/false for whether
    anything started; the playback itself is tracked by whenIdle(). */
 export async function say(text, opts = {}) {
+  /* «стол → столы»: a rule's example is two forms with an arrow between, and
+     the phone's voice read the arrow out (the owner, 2026-10-02: "it
+     pronounces the arrow as well… It should say the first part… pause… say
+     the second part"). Each side is said in turn, a beat apart, each through
+     the ordinary path so a form with a recording gets it. Any later `say`
+     (or leaving the screen) cancels the rest. */
+  if (!opts.part) {
+    const mine = ++sayRun;
+    const parts = String(text || "").split(/\s*(?:→|->|⟶)\s*/).filter((s) => s.trim());
+    // A pair bought whole (build_word_audio.mjs reads the arrow as a comma)
+    // plays as bought; only one with no clip is split here.
+    if (parts.length > 1 && !opts.clip && !wordClip(fold(text))) {
+      const asked = here();
+      for (let k = 0; k < parts.length; k++) {
+        if (k) {
+          await whenIdle();
+          await new Promise((r) => setTimeout(r, PART_GAP_MS));
+          if (mine !== sayRun || here() !== asked) return true;
+        }
+        await say(parts[k], { ...opts, part: true, repeat: false });
+      }
+      return true;
+    }
+  }
   const rate = rateFor(text, opts);
   /* `device: true` asks for the phone's voice even where a recording exists.
      The flashcards offer it as "one voice": the collection's recordings come
@@ -667,31 +613,20 @@ export async function say(text, opts = {}) {
     if (!spoke) failed(text);
     return spoke;
   }
-  /* Bundled first (ROADMAP 13.32, then 2026-09-19): every curriculum word and
-     every sentence the speaking and listening pools hold is a bought clip
-     shipped inside the app — no network, no 404, one voice. `wordaudio.js`
-     keys them by the folded utterance, as the collection's manifest is keyed
-     (rule 20.2). What still streams is the rest of the collection: the
-     dictionary's example sentences and the human recordings. */
-  /* `clip` is a recording the caller has already chosen — a table form looks
+  /* **One voice: a bought clip, or the phone's** (2026-10-02). Every
+     curriculum word, every pool and example sentence, every grammar example
+     and every form is a clip bought from one Chirp3-HD voice and shipped in
+     the app (`wordaudio.js`, keyed by the folded utterance — rule 20.2). What
+     has none is read by the phone's voice, a woman's like the clips
+     (`defaultVoice`). The collection's own recordings used to stream for the
+     rest — the deep dictionary's sentences — and they were four sources and
+     dozens of readers, so a learner moving between screens heard a voice
+     change on every few presses (the owner: "still noticing a ton of voices
+     swapping"). They do not play any more.
+     `clip` is a recording the caller has already chosen — a table form looks
      its own up by the *accented* spelling (formaudio.js), because the folded
-     key below cannot tell «руки́» from «ру́ки». */
-  const bundled = opts.clip || wordClip(fold(text));
-  const streamed = bundled ? null : audioUrl(text);
-  // The phone's own copy when there is one; otherwise the web, and fetch a
-  // copy while it plays so the next press does not wait.
-  const local = streamed ? localCopy(streamed) : null;
-  // No network a moment ago: the phone's voice now, not a stream that will fail.
-  if (streamed && !local && seemsOffline()) {
-    const spoke = speakTTS(text, { ...opts, rate });
-    if (!spoke) failed(text);
-    return spoke;
-  }
-  if (streamed && !local) fetchCopy(streamed);
-  /* A bundled clip is a `require`, which expo-audio takes as it is — the same
-     way `playTrack` and the answer cues pass theirs. Only a URL needs the
-     `{ uri }` wrapper, and wrapping a module id in one plays silence. */
-  const source = bundled || (local ? { uri: local } : streamed ? { uri: streamed } : null);
+     key cannot tell «руки́» from «ру́ки». */
+  const source = opts.clip || wordClip(fold(text));
   if (!source) {
     const spoke = speakTTS(text, { ...opts, rate });
     if (!spoke) failed(text);
@@ -713,38 +648,14 @@ export async function say(text, opts = {}) {
     Speech.stop();
     if (player) { release(player); player = null; }
     const end = begin();
+    /* A bundled clip is a `require`, which expo-audio takes as it is. */
     const mine = createAudioPlayer(source);
     player = mine;
-    /* A stream that has not started in STREAM_START_MS is not coming: let it
-       go, remember the network is not there, and let the phone say it. Only
-       for a stream — a bundled clip or a saved copy has nothing to wait on. */
-    const remote = !bundled && !local;
-    let started = false;
-    const giveUp = remote ? setTimeout(() => {
-      if (started || player !== mine || seq !== trackSeq) return;
-      markOffline();
-      release(mine);
-      player = null;
-      end();
-      fallback();
-    }, STREAM_START_MS) : null;
     if (mine.addListener) {
       mine.addListener("playbackStatusUpdate", (s) => {
         if (!s) return;
-        if (s.playing || s.didJustFinish || (s.currentTime || 0) > 0) {
-          if (!started && remote) { started = true; clearTimeout(giveUp); forgetOffline(); }
-        }
-        if (s.error && player === mine) {
-          clearTimeout(giveUp);
-          if (remote) markOffline();
-          // A local copy that will not play is a bad copy: gone, so the next
-          // press fetches it again rather than failing the same way.
-          if (local) { try { fileOf(streamed).delete(); } catch (e) { /* already gone */ } }
-          end();
-          fallback();
-        } else if (s.didJustFinish) {
-          end();
-        }
+        if (s.error && player === mine) { end(); fallback(); }
+        else if (s.didJustFinish) end();
       });
     }
     if (rate !== 1 && typeof mine.setPlaybackRate === "function") {
@@ -781,6 +692,7 @@ export function stop() {
      with nothing holding it — which is how leaving a screen could still be
      followed by a sentence. */
   trackSeq++;
+  sayRun++;
   try { Speech.stop(); } catch (e) {}
   release(player);
   player = null;
@@ -826,7 +738,7 @@ export function rearmAudio() {
  * The 61 bundled clips (ROADMAP 13.32) are prepared recordings of exactly that
  * kind, bought from the same voices as the scenarios, so they count. Nothing
  * anywhere claims a human said them. */
-export const hasRealAudio = (text) => !!wordClip(fold(text)) || !!audioUrl(text);
+export const hasRealAudio = (text) => !!wordClip(fold(text));
 
 /* ------------------------------------------------------------------- cues */
 

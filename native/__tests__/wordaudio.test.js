@@ -56,13 +56,14 @@ describe("the words with no recording", () => {
     expect(global.__spoke).toEqual([]);
   });
 
-  it("still streams the collection's recording for everything not bundled", async () => {
-    // An utterance the collection has and the bundle does not — a sentence,
-    // since every curriculum word from Core 5000 is bundled now.
+  /* One voice (2026-10-02): what the collection recorded and the bundle does
+     not is read by the phone, never streamed in another reader's voice. */
+  it("reads the phone's voice, not the collection's, for anything not bundled", async () => {
     const known = Object.keys(AUDIO).find((k) => !wordClip(k));
     expect(known).toBeTruthy();
     await say(known);
-    expect(global.__played.length).toBe(1);
+    expect(global.__played.length).toBe(0);
+    expect(global.__spoke.length).toBe(1);
   });
 
   it("the bundle wins over the collection's Core 5000 file for a curriculum word", () => {

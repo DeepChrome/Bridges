@@ -83,6 +83,11 @@ export function practiceSession({ seen, words, dirs, size }) {
            practice: true };
 }
 
+/* A card in a learning step it was put in today — the one kind of due card
+   the daily cap does not bound (buildSession; native data.js dueCount). */
+export const stepToday = (card, now) => !!card && kindOf(card) === "learning"
+  && card.lastAt !== undefined && card.lastAt !== null && dayOf(card.lastAt) === dayOf(now);
+
 /* Today's counts, or a fresh slot when the day has moved on. */
 export function dailyFor(daily, now) {
   const day = dayOf(now);
@@ -151,17 +156,28 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead, 
     }
     if (!isDue(card, now, o.learnAhead)) continue;
     const item = { word: w, direction: direction, card: card, kind: kind, r: retrievability(card, now, o.scheduler) };
-    (kind === "learning" ? learning : reviews).push(item);
+    /* A learning step is exempt from the cap only when it is today's — a card
+       answered today and coming back in ten minutes is being learnt right now.
+       One left mid-step on an earlier day is a review like any other: the
+       owner saw "218 due … 223 left" after a few days away (2026-10-02),
+       because every card stuck in a step had walked past the fifty. */
+    (stepToday(card, now) ? learning : reviews).push(item);
   }
-  // Most forgotten first; equal retrievability in a random order — never
-  // the order the words were stored in.
-  const byR = (a, b) => a.r - b.r;
-  const sortedReviews = shuffled(reviews, random).sort(byR);
+  /* **Which fifty, when there are more** (the owner, 2026-10-02: "the app can
+     decide what the best words to show the user are when it gets to 50 or when
+     the user has been stale on reviewing"). Most forgotten first, as before,
+     but a common word forgotten outranks a rare one forgotten a little more:
+     «как» lost is a word lost from every sentence. `rank` is the caller's
+     frequency order (lower is commoner); without it the order is retrievability
+     alone, ties shuffled — never the order the words were stored in. */
+  const weight = o.rank
+    ? (x) => { const k = o.rank(x.word); return Number.isFinite(k) ? 1 + 0.25 * Math.log10(1 + k / 100) : 1.5; }
+    : () => 1;
+  const urgency = (x) => (1 - x.r) / weight(x);
+  const sortedReviews = shuffled(reviews, random).sort((a, b) => urgency(b) - urgency(a));
   const sortedLearning = shuffled(learning, random).sort((a, b) => a.card.dueAt - b.card.dueAt);
   const due = sortedReviews.length + sortedLearning.length;
 
-  // A learning step (ten minutes on) is never held over to tomorrow: the cap
-  // bounds reviews, and a card mid-step is a card being learnt right now.
   const done = reviewsLeft === 0 && sortedReviews.length > 0 && !sortedLearning.length;
   /* The day's load is what is due (within the day's cap) plus the new cards
      it may introduce; one session takes its share of each in that ratio, so

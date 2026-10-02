@@ -18,7 +18,7 @@ import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrad
 import { split, merge, diff, isEmpty, memoryRepo, validLog, cardRow, rowCard, SETTING_KEYS }
   from "../core/repo.js";
 import * as S from "../core/scheduler.js";
-import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor,
+import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor, stepToday,
          cardKind, kindsOf, practiceSession } from "../core/queue.js";
 import { SCENARIOS } from "../core/scenarios.js";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
@@ -724,6 +724,31 @@ group("the session");
   const capped = buildSession({ seen, words: all, dirs: ["recognise"], now: T0, daily: { day: S.dayOf(T0), new: 0, reviews: 200 }, opts, rng });
   ok(capped.done && capped.items.filter((x) => x.kind === "review").length === 0,
      "past the day's review cap the day is done");
+
+  /* After days away (the owner, 2026-10-02: "218 due… 223 left"): a card
+     left mid-step on an earlier day is under the cap like any review; only a
+     step taken today walks past it. And of the many due, the common word
+     forgotten comes before the rare one. */
+  {
+    const stale = {};
+    for (let i = 0; i < 80; i++) {
+      stale["s" + i] = { recognise: { dueAt: T0 - 3 * DAY, lastAt: T0 - 4 * DAY, s: 0.2, d: 5,
+                                      state: S.RELEARNING, steps: 0, reps: 4, lapses: 1, elapsed: 0, scheduled: 0 } };
+    }
+    stale.now = { recognise: { dueAt: T0, lastAt: T0 - 600000, s: 0.2, d: 5, state: S.LEARNING,
+                               steps: 1, reps: 1, lapses: 0, elapsed: 0, scheduled: 0 } };
+    const o2 = { ...opts, reviewsPerDay: 50 };
+    const s = buildSession({ seen: stale, words: Object.keys(stale), dirs: ["recognise"], now: T0, daily: null, opts: o2, rng });
+    ok(s.today === 51 && s.due === 81, "stale learning cards count toward the fifty; today's step does not",
+       `${s.today} of ${s.due}`);
+    ok(stepToday(stale.now.recognise, T0) && !stepToday(stale.s0.recognise, T0), "stepToday tells them apart");
+    const ranked = buildSession({ seen: { rare: { recognise: { ...seen.w000.recognise } },
+                                          common: { recognise: { ...seen.w000.recognise } } },
+                                  words: ["rare", "common"], dirs: ["recognise"], now: T0, daily: null,
+                                  opts: { ...opts, rank: (w) => (w === "common" ? 5 : 4000) }, rng });
+    ok(ranked.items[0].word === "common", "equally forgotten, the commoner word comes first",
+       ranked.items.map((x) => x.word).join(","));
+  }
   ok(dailyFor({ day: S.dayOf(T0) - 1, new: 9, reviews: 50 }, T0).new === 0 && dailyFor({ day: S.dayOf(T0), new: 9 }, T0).new === 9,
      "a new day starts the counts over");
 

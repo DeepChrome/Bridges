@@ -395,7 +395,7 @@ export function useAudioStopOnLeave() {
    after every answer, so it can be picked up where it was left; finishing
    clears it. `restore` is such a saved run to start from instead of `steps`. */
 export function Runner({ title, steps, onFinish, gradeWords = true, progress, recycle = true,
-                         allowBack = false, navigation, tools, save, restore, onAnswered }) {
+                         allowBack = false, stepBack = false, navigation, tools, save, restore, onAnswered }) {
   const { st, update } = useSession();
   const t = useTheme();
   /* A saved run is only started from while it is still saved: once that run
@@ -416,6 +416,14 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   useEffect(() => {
     if (!navigation || typeof navigation.addListener !== "function") return undefined;
     return navigation.addListener("beforeRemove", (e) => {
+      /* In a lesson's quiz, Back is the question before, not the way out (the
+         owner, 2026-10-02). From the first question it leaves as before. */
+      const type = e.data && e.data.action && e.data.action.type;
+      if (stepBack && atRef.current > 0 && !finished.current && (type === "GO_BACK" || type === "POP")) {
+        e.preventDefault();
+        stepBackRef.current();
+        return;
+      }
       if (!guard.current) return;
       e.preventDefault();
       /* Every run comes through here — drills and the mouth drills carry no
@@ -454,6 +462,12 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const sayTimer = useRef(null);
   const atRef = useRef(0);
   const alive = useRef(true);
+  /* How far the run has been: a question before this was answered and marked
+     already, so one stepped back to (`stepBack`) is practice — it can be
+     answered again, and nothing is tallied or graded a second time. */
+  const reached = useRef(from ? from.at : 0);
+  const revisit = at < reached.current;
+  const stepBackRef = useRef(() => {});
 
   const q = queue[at];
   guard.current = at > 0 && !finished.current;
@@ -507,6 +521,15 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
      (0–1, default 1 or 0 from `correct`) is partial credit for the score, with
      `extra.note` saying why ("3 of 4 words"). */
   const record = (correct, words, grade, extra) => {
+    if (revisit) {
+      const c = extra && typeof extra.credit === "number" ? extra.credit : (correct ? 1 : 0);
+      setAnswered(true);
+      setVerdict({ right: !!correct, credit: c, note: extra && extra.note ? extra.note : null,
+                   said: extra && extra.said !== undefined ? extra.said : null });
+      (correct ? buzzRight : buzzWrong)();
+      cue(correct ? "right" : "wrong");
+      return;
+    }
     const credit = extra && typeof extra.credit === "number"
       ? Math.max(0, Math.min(1, extra.credit)) : (correct ? 1 : 0);
     const note = extra && extra.note ? extra.note : null;
@@ -592,6 +615,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const skip = () => {
     setAnswered(true);
     setVerdict({ right: null, credit: 0, note: null });
+    if (revisit) return;
     if (!q.retry) {
       tally.current.skipped += 1;
       results.current.push({ skipped: true, stage: q.stage, lesson: q.lesson, i: q.i });
@@ -603,6 +627,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     // Moving on cancels a reading that has not started yet; one already playing
     // is left to finish — the next question's audio waits for it.
     if (sayTimer.current) { clearTimeout(sayTimer.current); sayTimer.current = null; }
+    reached.current = Math.max(reached.current, at + 1);
     if (at + 1 >= queue.length) {
       finished.current = true;
       guard.current = false;
@@ -627,9 +652,15 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
    * the point. In a pronunciation drill there is no mark — the learner wants
    * the word before because they want to say it again, which is the method.
    * Nothing is un-tallied: a step already answered stays answered in the
-   * record, and revisiting it cannot score twice (`q.retry` guards that). */
-  const back = !allowBack || at === 0 ? undefined : () => {
+   * record, and revisiting it cannot score or grade twice (`revisit`).
+   *
+   * A lesson's quiz reaches the same step through the header's Back
+   * (`stepBack`, 2026-10-02): practice on the question before, never a second
+   * mark. */
+  const goBack = () => {
     if (sayTimer.current) { clearTimeout(sayTimer.current); sayTimer.current = null; }
+    // Leaving an answered question behind: it counts as reached.
+    if (answered) reached.current = Math.max(reached.current, at + 1);
     setAt(at - 1);
     setAnswered(false);
     setVerdict(null);
@@ -638,6 +669,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setWhy(null);
     setRuleOpen(false);
   };
+  stepBackRef.current = goBack;
+  const back = !allowBack || at === 0 ? undefined : goBack;
 
   const answer = q.options ? q.options.find((o) => o.right) : null;
   const right = verdict ? verdict.right : null;

@@ -1,7 +1,7 @@
 /* Everything the runner drives: vocabulary, lesson quiz, drills, and the two
  * placement routes. Each one supplies its steps and decides what the result means. */
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
@@ -71,7 +71,35 @@ export function VocabFlow({ route, navigation }) {
   const [moved, setAt] = useState(null);
   const at = moved !== null ? moved : resume.restore ? resume.restore.at : 0;
   const [done, setDone] = useState(false);
+  /* The furthest step reached: a question before it has been answered and
+     graded, so stepping back and forth passes over it rather than asking it
+     again — which would grade the word twice. */
+  const [furthest, setFurthest] = useState(0);
+  const reach = Math.max(furthest, at);
+  const isQuestion = (s) => !["list", "lines", "grammar", "word"].includes(s.t);
+  const skip = (j) => isQuestion(steps[j]) && j < reach;
   useAudioStopOnLeave();
+
+  /* Back goes to the previous card, not out of the lesson (the owner,
+     2026-10-02: "the back button should take me to the previous page… right
+     now it seems to take me out of the lesson completely"). Only a plain
+     back — the header arrow or the phone's — is turned round; Home and a
+     jump elsewhere leave as they always did. From the first card it leaves. */
+  const atRef = useRef(at);
+  atRef.current = at;
+  useEffect(() => {
+    if (!navigation || typeof navigation.addListener !== "function") return undefined;
+    return navigation.addListener("beforeRemove", (e) => {
+      const type = e.data && e.data.action && e.data.action.type;
+      if (done || (type !== "GO_BACK" && type !== "POP")) return;
+      let j = atRef.current - 1;
+      while (j >= 0 && skip(j)) j--;
+      if (j < 0) return;
+      e.preventDefault();
+      setFurthest((f) => Math.max(f, atRef.current));
+      setAt(j);
+    });
+  }, [navigation, done, steps, reach]);
 
   if (resume.prompt) return resume.prompt;
 
@@ -90,13 +118,16 @@ export function VocabFlow({ route, navigation }) {
   // at a time, so a lesson interleaves rather than front-loading every card.
   const step = steps[at];
   const advance = () => {
-    if (at + 1 >= steps.length) {
+    let next = at + 1;
+    while (next < steps.length && skip(next) && next < reach) next++;
+    if (next >= steps.length) {
       clearRun(save.key);
       update((prev) => markComponent(prev, unit, index, "vocab"));
       setDone(true);
     } else {
-      saveRun(save.key, { ...save, queue: steps, at: at + 1, total: steps.length });
-      setAt(at + 1);
+      saveRun(save.key, { ...save, queue: steps, at: Math.max(next, reach), total: steps.length });
+      setFurthest((f) => Math.max(f, at));
+      setAt(next);
     }
   };
 
@@ -457,6 +488,7 @@ export function QuizFlow({ route, navigation }) {
     <Runner
       steps={steps}
       navigation={navigation}
+      stepBack
       save={save}
       restore={resume.restore}
       onFinish={(r) => {

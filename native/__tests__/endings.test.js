@@ -88,19 +88,22 @@ describe("Word endings", () => {
     expect(ranked[0].id).toBe("a");
   });
 
-  /* The ending's own button plays the ending cut from a word said well
-     (tools/build_ending_clips.mjs), never the phone reading the letters:
-     reading «ого» as written is the mistake the entry exists to correct, and
-     the phone reading a respelled fragment was inaccurate too (2026-09-29). */
-  it("plays the ending cut from a recorded word, not the device voice", async () => {
+  /* The ending's own button plays its phonetic respelling bought in the app's
+     one voice (tools/build_ending_clips.mjs), never the phone reading the
+     letters: reading «ого» as written is the mistake the entry exists to
+     correct, and the phone's voice was a second voice (2026-10-02). */
+  it("plays the bought respelling, not the device voice, the same on every press", async () => {
     const { ENDING_CLIPS } = require("../src/endingaudio");
     expect(Object.keys(ENDING_CLIPS)).toHaveLength(ENDINGS.length);
+    expect(ENDING_CLIPS.ogo.says).toBe("ово");
     await render(<Endings />);
     const before = (global.__players || []).length;
-    await act(async () => { fireEvent.press(await screen.findByTestId("ending-say-ogo")); });
-    expect((global.__players || []).length).toBeGreaterThan(before);
-    expect(global.__spoke).not.toContain("ого");
-    expect(global.__spoke).not.toContain("ово");
+    for (let k = 0; k < 4; k++) {
+      await act(async () => { fireEvent.press(await screen.findByTestId("ending-say-ogo")); });
+    }
+    // A player for every press: four quick presses never go quiet.
+    expect((global.__players || []).length - before).toBe(4);
+    expect(global.__spoke).toEqual([]);
     expect(screen.getByTestId("ending-say-ogo").props.accessibilityLabel).not.toMatch(/device voice/);
   });
 

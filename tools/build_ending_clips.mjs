@@ -15,11 +15,24 @@
  * falls in the quietest point before the ending's syllables (as many as the
  * respelling has vowels). **The check that makes it trustworthy**: the peaks
  * found must equal the word's vowel count. Where they do not, the syllables
- * were not told apart cleanly, nothing is cut, and the button keeps the device
- * voice — said in the report, never guessed.
+ * were not told apart cleanly, nothing is cut, and the whole word plays —
+ * said in the report, never guessed.
  *
  * Nobody here can listen. What this can promise is that a cut lands between
  * syllables; whether it sounds right is a listen on the phone.
+ *
+ * **…and that what it cut can be heard** (2026-10-01). The owner: *"none of
+ * them seem to play… all the words themselves work"*. They played — the
+ * emulator ran each to its end — but an unstressed final syllable is short
+ * and quiet by nature: «-д» was 70 ms of sound, «-а» 110, at 10–14 dB below
+ * the word it came from, with 20–30 ms before it. A phone opening its audio
+ * route (Bluetooth worst of all) swallows the first part of a sound, and a
+ * clip that is mostly that first part is heard as nothing. So every clip now
+ * opens on PAD_MS of silence, the cut is brought up to the speech level of
+ * the word it came from (never past PEAK_DB), and a cut holding under
+ * MIN_SPEECH_MS of speech is refused — the next example is tried, and failing
+ * all of them the whole word plays. `audio_qa.mjs` checks the same numbers on
+ * what shipped.
  *
  *   node tools/build_ending_clips.mjs   # writes native/assets/endings/ and native/src/endingaudio.js
  */
@@ -28,7 +41,9 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from "node
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
 import { ENDINGS } from "../core/endings.js";
+import { speechLevels } from "./mp3.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const NATIVE = join(ROOT, "native");
@@ -39,21 +54,12 @@ const MIN_GAP = 9;             // two syllable peaks are at least 90 ms apart
 const PEAK_SHARE = 0.25;       // a peak is at least this share of the loudest
 const LEAD = 1;                // start the cut 10 ms before the dip
 const VOWELS = /[аеёиоуыэюя]/giu;
+export const PAD_MS = 250;           // silence before the sound, for the audio route to open
+export const MIN_SPEECH_MS = 120;    // less than this is a click, not a syllable
+export const PEAK_DB = -1.5;         // the gain that levels a cut stops here
+export const QUIET_DB = -26;         // speech quieter than this has not been levelled
 
 const vowels = (s) => (s.normalize("NFC").match(VOWELS) || []).length;
-
-// Every recording the app ships for a word or a form, by the text it says.
-const clips = {};
-for (const [file, fold] of [["formaudio.js", false], ["wordaudio.js", true]]) {
-  const src = readFileSync(join(NATIVE, "src", file), "utf8");
-  for (const m of src.matchAll(/"([^"]+)":\s*require\("\.\.\/assets\/words\/([^"]+)"\)/g)) {
-    const key = m[1].normalize("NFC");
-    if (!clips[key]) clips[key] = join(NATIVE, "assets", "words", m[2]);
-    if (fold) continue;
-  }
-}
-const foldKey = (w) => w.normalize("NFD").replace(/[̀́]/g, "").normalize("NFC").toLowerCase().replace(/ё/g, "е");
-const clipOf = (w) => clips[w.normalize("NFC")] || clips[foldKey(w)] || null;
 
 function envelope(file) {
   const r = spawnSync("ffmpeg", ["-v", "error", "-i", file, "-ac", "1", "-ar", String(RATE), "-f", "s16le", "-"],
@@ -88,59 +94,93 @@ function peaks(env) {
   return out;
 }
 
-if (existsSync(OUT_DIR)) rmSync(OUT_DIR, { recursive: true });
-mkdirSync(OUT_DIR, { recursive: true });
-const made = [], skipped = [];
-for (const e of ENDINGS) {
-  const k = vowels(e.say);
-  /* An example whose last k syllables hold the whole pattern — so the cut
-     carries the ending and nothing before it. «чу́вствовать» has -вств- two
-     syllables from its end and would have given «-вать»; «чу́вство» gives
-     «-ство». Longest first among those, for the most room to find a dip. */
-  const plain = (w) => w.normalize("NFD").replace(/[\u0300\u0301]/g, "").normalize("NFC").toLowerCase();   // ё kept: -ё is an ending
-  const tail = (w) => { const m = plain(w).match(e.re); return m ? vowels(m[0]) : 99; };
-  const cands = e.examples.filter((w) => clipOf(w) && vowels(w) > k && tail(w) <= k)
-    .sort((a, b) => vowels(b) - vowels(a));
-  let done = null, why = cands.length ? "" : "no example longer than the ending has a recording";
-  for (const w of cands) {
-    const env = envelope(clipOf(w));
-    if (!env) { why = `${w}: could not decode`; continue; }
-    const p = peaks(env);
-    if (p.length !== vowels(w)) { why = `${w}: ${p.length} peaks for ${vowels(w)} vowels`; continue; }
-    const a = p[p.length - k - 1], b = p[p.length - k];
-    let dip = a;
-    for (let i = a; i <= b; i++) if (env[i] < env[dip]) dip = i;
-    const start = Math.max(0, dip - LEAD) * WIN / RATE;
-    const out = join(OUT_DIR, `${e.id}.mp3`);
-    const r = spawnSync("ffmpeg", ["-v", "error", "-y", "-ss", start.toFixed(3), "-i", clipOf(w),
-                                   "-af", "afade=t=in:d=0.015", "-ac", "1", "-c:a", "libmp3lame", "-q:a", "4", out]);
-    if (r.status !== 0) { why = `${w}: ffmpeg failed`; continue; }
-    done = { id: e.id, from: w, at: Math.round(start * 1000), ms: Math.round((env.length - dip + LEAD) * WIN / RATE * 1000) };
-    break;
-  }
-  /* Nothing could be cut cleanly: the whole example word, said well, still
-     demonstrates the ending — «друг» is how a final г sounds — where the
-     device reading a lone fragment does not. */
-  if (!done) {
-    const w = e.examples.find((x) => clipOf(x));
-    if (w) {
-      const out = join(OUT_DIR, `${e.id}.mp3`);
-      writeFileSync(out, readFileSync(clipOf(w)));
-      done = { id: e.id, from: w, whole: true, ms: 0 };
-      skipped.push(`${e.id} (${e.end}): whole «${w}» (${why})`);
-    }
-  }
-  if (done) made.push(done); else skipped.push(`${e.id} (${e.end}): ${why}; device voice`);
+const ffmpeg = (args) => spawnSync("ffmpeg", ["-v", "error", "-y", ...args]).status === 0;
+
+/* The shipped file: PAD_MS of silence, then `src` from `startSec` at `gainDb`. */
+function write(src, out, startSec, gainDb) {
+  const af = [startSec > 0 ? "afade=t=in:d=0.015" : null, `volume=${gainDb.toFixed(2)}dB`,
+              `adelay=${PAD_MS}:all=1`].filter(Boolean).join(",");
+  return ffmpeg([...(startSec > 0 ? ["-ss", startSec.toFixed(3)] : []), "-i", src,
+                 "-af", af, "-ac", "1", "-c:a", "libmp3lame", "-q:a", "4", out]);
 }
 
-const body = made.map((m) => `  ${JSON.stringify(m.id)}: { src: require("../assets/endings/${m.id}.mp3"), from: ${JSON.stringify(m.from)}${m.whole ? ", whole: true" : ""} },`).join("\n");
-writeFileSync(join(NATIVE, "src", "endingaudio.js"),
-  `/* GENERATED by tools/build_ending_clips.mjs — do not edit. Each ending's sound,\n` +
-  `   cut from a recording of a whole word that has it (\`from\`). */\n\n` +
-  `export const ENDING_CLIPS = {\n${body}\n};\n`);
-console.log(`${made.filter((m) => !m.whole).length} of ${ENDINGS.length} endings cut from a word, ${made.filter((m) => m.whole).length} played as the whole word`);
-for (const m of made.filter((x) => !x.whole)) console.log(`  ${m.id.padEnd(5)} from ${m.from.padEnd(14)} ${String(m.ms).padStart(4)} ms`);
-if (skipped.length) {
-  console.log(`${skipped.length} not cut:`);
-  for (const s of skipped) console.log(`  ${s}`);
+function main() {
+  // Every recording the app ships for a word or a form, by the text it says.
+  const clips = {};
+  for (const file of ["formaudio.js", "wordaudio.js"]) {
+    const src = readFileSync(join(NATIVE, "src", file), "utf8");
+    for (const m of src.matchAll(/"([^"]+)":\s*require\("\.\.\/assets\/words\/([^"]+)"\)/g)) {
+      const key = m[1].normalize("NFC");
+      if (!clips[key]) clips[key] = join(NATIVE, "assets", "words", m[2]);
+    }
+  }
+  const foldKey = (w) => w.normalize("NFD").replace(/[̀́]/g, "").normalize("NFC").toLowerCase().replace(/ё/g, "е");
+  const clipOf = (w) => clips[w.normalize("NFC")] || clips[foldKey(w)] || null;
+
+  if (existsSync(OUT_DIR)) rmSync(OUT_DIR, { recursive: true });
+  mkdirSync(OUT_DIR, { recursive: true });
+  const tmp = join(tmpdir(), `ending-cut-${process.pid}.wav`);
+  const made = [], skipped = [];
+  for (const e of ENDINGS) {
+    const k = vowels(e.say);
+    /* An example whose last k syllables hold the whole pattern — so the cut
+       carries the ending and nothing before it. «чу́вствовать» has -вств- two
+       syllables from its end and would have given «-вать»; «чу́вство» gives
+       «-ство». Longest first among those, for the most room to find a dip. */
+    const plain = (w) => w.normalize("NFD").replace(/[̀́]/g, "").normalize("NFC").toLowerCase();   // ё kept: -ё is an ending
+    const tail = (w) => { const m = plain(w).match(e.re); return m ? vowels(m[0]) : 99; };
+    const cands = e.examples.filter((w) => clipOf(w) && vowels(w) > k && tail(w) <= k)
+      .sort((a, b) => vowels(b) - vowels(a));
+    const out = join(OUT_DIR, `${e.id}.mp3`);
+    let done = null, why = cands.length ? "" : "no example longer than the ending has a recording";
+    for (const w of cands) {
+      const env = envelope(clipOf(w));
+      if (!env) { why = `${w}: could not decode`; continue; }
+      const p = peaks(env);
+      if (p.length !== vowels(w)) { why = `${w}: ${p.length} peaks for ${vowels(w)} vowels`; continue; }
+      const a = p[p.length - k - 1], b = p[p.length - k];
+      let dip = a;
+      for (let i = a; i <= b; i++) if (env[i] < env[dip]) dip = i;
+      const start = Math.max(0, dip - LEAD) * WIN / RATE;
+      // Measure the cut before shipping it: how much speech, how loud.
+      if (!ffmpeg(["-ss", start.toFixed(3), "-i", clipOf(w), "-ac", "1", tmp])) { why = `${w}: ffmpeg failed`; continue; }
+      const cut = speechLevels(tmp), word = speechLevels(clipOf(w));
+      if (!cut || cut.speechMs < MIN_SPEECH_MS) {
+        why = `${w}: ${cut ? cut.speechMs : 0} ms of speech in the cut`;
+        continue;
+      }
+      const gain = Math.min(word.rms - cut.rms, PEAK_DB - cut.peak);
+      if (!write(clipOf(w), out, start, gain)) { why = `${w}: ffmpeg failed`; continue; }
+      done = { id: e.id, from: w, speech: cut.speechMs, gain };
+      break;
+    }
+    /* Nothing could be cut cleanly: the whole example word, said well, still
+       demonstrates the ending — «друг» is how a final г sounds — where the
+       device reading a lone fragment does not. */
+    if (!done) {
+      const w = e.examples.find((x) => clipOf(x));
+      if (w && write(clipOf(w), out, 0, 0)) {
+        done = { id: e.id, from: w, whole: true };
+        skipped.push(`${e.id} (${e.end}): whole «${w}» (${why})`);
+      }
+    }
+    if (done) made.push(done); else skipped.push(`${e.id} (${e.end}): ${why}; device voice`);
+  }
+  rmSync(tmp, { force: true });
+
+  const body = made.map((m) => `  ${JSON.stringify(m.id)}: { src: require("../assets/endings/${m.id}.mp3"), from: ${JSON.stringify(m.from)}${m.whole ? ", whole: true" : ""} },`).join("\n");
+  writeFileSync(join(NATIVE, "src", "endingaudio.js"),
+    `/* GENERATED by tools/build_ending_clips.mjs — do not edit. Each ending's sound,\n` +
+    `   cut from a recording of a whole word that has it (\`from\`). */\n\n` +
+    `export const ENDING_CLIPS = {\n${body}\n};\n`);
+  console.log(`${made.filter((m) => !m.whole).length} of ${ENDINGS.length} endings cut from a word, ${made.filter((m) => m.whole).length} played as the whole word`);
+  for (const m of made.filter((x) => !x.whole)) {
+    console.log(`  ${m.id.padEnd(6)} from ${m.from.padEnd(14)} ${String(m.speech).padStart(4)} ms of speech, ${m.gain >= 0 ? "+" : ""}${m.gain.toFixed(1)} dB`);
+  }
+  if (skipped.length) {
+    console.log(`${skipped.length} not cut:`);
+    for (const s of skipped) console.log(`  ${s}`);
+  }
 }
+
+if (process.argv[1] && process.argv[1].endsWith("build_ending_clips.mjs")) main();

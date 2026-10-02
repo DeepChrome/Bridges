@@ -28,7 +28,8 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadScripts, MIN_SECONDS, MAX_SECONDS } from "./check_scripts.mjs";
 import { loadPayload } from "./payload.mjs";
-import { durationMs as mp3Ms } from "./mp3.mjs";
+import { durationMs as mp3Ms, speechLevels } from "./mp3.mjs";
+import { PAD_MS as ENDING_PAD_MS, MIN_SPEECH_MS, QUIET_DB } from "./build_ending_clips.mjs";
 import { MIN_WORD_MS } from "./build_word_audio.mjs";
 import { ambiguousSpellings } from "./build_form_audio.mjs";
 import { fold } from "../core/util.js";
@@ -227,6 +228,28 @@ if (existsSync(FORMS)) {
                                 + short.slice(0, 6).map(([f]) => f).join(", "));
   notes.push(`table forms with their own recording: ${Object.keys(forms).length}`
              + ` (${(fm.skipped || []).length} the voice would not say)`);
+}
+
+/* The word endings (2026-10-01). Every clip the screen names must exist, open
+   on enough silence for a phone's audio route to wake, hold a real syllable
+   and not be whispered: the clips once played to the end on the emulator and
+   were still heard as nothing on the phone, because «-д» was 70 ms of sound
+   at the start of the file (build_ending_clips.mjs). */
+const ENDING_MODULE = join(ROOT, "native", "src", "endingaudio.js");
+if (existsSync(ENDING_MODULE)) {
+  const src = readFileSync(ENDING_MODULE, "utf8");
+  const ids = [...src.matchAll(/require\("\.\.\/assets\/endings\/([^"]+)"\)/g)].map((m) => m[1]);
+  const bad = [];
+  for (const f of ids) {
+    const file = join(ROOT, "native", "assets", "endings", f);
+    const lv = existsSync(file) ? speechLevels(file) : null;
+    if (!lv) { bad.push(`${f}: missing`); continue; }
+    if (lv.lead === null || lv.lead < ENDING_PAD_MS - 30) bad.push(`${f}: ${lv.lead} ms before the sound`);
+    if (lv.speechMs < MIN_SPEECH_MS) bad.push(`${f}: ${lv.speechMs} ms of speech`);
+    if (lv.rms < QUIET_DB) bad.push(`${f}: speech at ${lv.rms.toFixed(1)} dB`);
+  }
+  if (bad.length) errors.push(`${bad.length} word-ending clip problem(s): ${bad.slice(0, 6).join("; ")}`);
+  notes.push(`word endings with a clip: ${ids.length}`);
 }
 
 /* ------------------------------------------------------------------ out */

@@ -1121,6 +1121,12 @@ group("lesson ramp");
   const twice = UN.flatMap((u) => (u.gr || []).map((g) => g[0])
     .filter((n, k, a) => a.indexOf(n) !== k).map((n) => `${u.id}: ${n}`));
   ok(!twice.length, "no unit has two groups of one name", twice.join("; "));
+  // The owner, 2026-10-02: "I don't want any straggler words that have their
+  // own section… think like how a textbook would do it." A word set pulling
+  // its members out of a file group is the way a straggler could come back.
+  const alone = UN.flatMap((u) => (u.gr || []).filter((g) => g[2].length < 2)
+    .map((g) => `${u.id}: ${g[0]} (${DATA.lemmas[g[2][0]].b})`));
+  ok(!alone.length, "no word stands alone in a group", alone.join("; "));
   ok(!short.length, "no lesson of one or two words", short.join(", "));
   const food = UN.find((u) => u.id === "food");
   const plates = food && food.w.filter((i) => ["тарелка", "чашка", "ложка"].includes(DATA.lemmas[i].b));

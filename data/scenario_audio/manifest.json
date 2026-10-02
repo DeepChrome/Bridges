@@ -219,151 +219,6 @@
     }
    ]
   },
-  "core2:4": {
-   "voices": {
-    "a": "ru-RU-Chirp3-HD-Puck",
-    "b": "ru-RU-Chirp3-HD-Aoede",
-    "c": "ru-RU-Chirp3-HD-Zephyr"
-   },
-   "lines": [
-    {
-     "s": "b",
-     "id": "da033c7ef7a189b2"
-    },
-    {
-     "s": "a",
-     "id": "52f1f2697a796b67"
-    },
-    {
-     "s": "b",
-     "id": "d1b79dfbe9d39e8c"
-    },
-    {
-     "s": "c",
-     "id": "7a08a73f01663245"
-    },
-    {
-     "s": "a",
-     "id": "4edb36c65cf27fe6"
-    },
-    {
-     "s": "c",
-     "id": "b53bcbb569cf8cd6"
-    },
-    {
-     "s": "b",
-     "id": "fad95fed3cb512f6"
-    },
-    {
-     "s": "c",
-     "id": "0d667050fc405e6a"
-    },
-    {
-     "s": "a",
-     "id": "e45aae4e01ef542f"
-    },
-    {
-     "s": "b",
-     "id": "5b741379c8690fd0"
-    },
-    {
-     "s": "a",
-     "id": "e3c525bddf6e70ac"
-    },
-    {
-     "s": "c",
-     "id": "500e66f08b799c7c"
-    },
-    {
-     "s": "b",
-     "id": "74dbae4e02577a08"
-    },
-    {
-     "s": "a",
-     "id": "c83c028295590f6b"
-    },
-    {
-     "s": "b",
-     "id": "44795727ed99818d"
-    },
-    {
-     "s": "c",
-     "id": "b8bf56dc9288691a"
-    }
-   ]
-  },
-  "core3:3": {
-   "voices": {
-    "a": "ru-RU-Chirp3-HD-Charon",
-    "b": "ru-RU-Chirp3-HD-Puck"
-   },
-   "lines": [
-    {
-     "s": "a",
-     "id": "cb04a487e71afbd6"
-    },
-    {
-     "s": "b",
-     "id": "42a7e9cfab9316a2"
-    },
-    {
-     "s": "a",
-     "id": "fee29b23c7bc36d7"
-    },
-    {
-     "s": "b",
-     "id": "ff24b4ee4d284547"
-    },
-    {
-     "s": "a",
-     "id": "fc214fb04da63d78"
-    },
-    {
-     "s": "b",
-     "id": "501bfff978514ec9"
-    },
-    {
-     "s": "a",
-     "id": "f09ad32cc2f668c5"
-    },
-    {
-     "s": "b",
-     "id": "c8e1efce3291c000"
-    },
-    {
-     "s": "a",
-     "id": "eae65804f7de3105"
-    },
-    {
-     "s": "b",
-     "id": "db70d3e42b40e14d"
-    },
-    {
-     "s": "a",
-     "id": "de246c0f3f76eff7"
-    },
-    {
-     "s": "b",
-     "id": "8cc19de7d3756820"
-    },
-    {
-     "s": "a",
-     "id": "923e04c0d24c85c1"
-    },
-    {
-     "s": "b",
-     "id": "359e6f78132d4a4c"
-    },
-    {
-     "s": "a",
-     "id": "5916d4029353677d"
-    },
-    {
-     "s": "b",
-     "id": "26e4128f8397050b"
-    }
-   ]
-  },
   "core4:4": {
    "voices": {
     "a": "ru-RU-Chirp3-HD-Puck",
@@ -425,140 +280,6 @@
     {
      "s": "a",
      "id": "f27469bf44c74f49"
-    }
-   ]
-  },
-  "core5:5": {
-   "voices": {
-    "a": "ru-RU-Chirp3-HD-Charon",
-    "b": "ru-RU-Chirp3-HD-Puck",
-    "c": "ru-RU-Chirp3-HD-Fenrir"
-   },
-   "lines": [
-    {
-     "s": "a",
-     "id": "f54273423545b2dc"
-    },
-    {
-     "s": "b",
-     "id": "79ab8a94503fd992"
-    },
-    {
-     "s": "a",
-     "id": "1f907df0bbb684c4"
-    },
-    {
-     "s": "c",
-     "id": "e43b3a4cfe704cbf"
-    },
-    {
-     "s": "a",
-     "id": "b90e0adf3f5178eb"
-    },
-    {
-     "s": "c",
-     "id": "5be870c9dd2cd79c"
-    },
-    {
-     "s": "b",
-     "id": "e8b63e4f9f8c37fc"
-    },
-    {
-     "s": "c",
-     "id": "af208f9e3c68ee22"
-    },
-    {
-     "s": "b",
-     "id": "b4a7156b0817e76f"
-    },
-    {
-     "s": "a",
-     "id": "ae4b0adf0432d76f"
-    },
-    {
-     "s": "c",
-     "id": "fdfee3150b8f1cae"
-    },
-    {
-     "s": "a",
-     "id": "75fd57d488e731d2"
-    },
-    {
-     "s": "c",
-     "id": "b70833a22df7efab"
-    },
-    {
-     "s": "b",
-     "id": "28ef225f2129847c"
-    },
-    {
-     "s": "c",
-     "id": "e89e94c6850561dd"
-    },
-    {
-     "s": "a",
-     "id": "a5cbceed6f2e7a6d"
-    }
-   ]
-  },
-  "core6:1": {
-   "voices": {
-    "a": "ru-RU-Chirp3-HD-Aoede",
-    "b": "ru-RU-Chirp3-HD-Zephyr",
-    "c": "ru-RU-Chirp3-HD-Puck"
-   },
-   "lines": [
-    {
-     "s": "a",
-     "id": "113075711f0d2a3c"
-    },
-    {
-     "s": "b",
-     "id": "ff4f3d161f9f501e"
-    },
-    {
-     "s": "a",
-     "id": "9ecb6f11d1b0ff70"
-    },
-    {
-     "s": "b",
-     "id": "9ad255ae8ff26222"
-    },
-    {
-     "s": "c",
-     "id": "c9f297ba38fb4351"
-    },
-    {
-     "s": "a",
-     "id": "81d4312729aba434"
-    },
-    {
-     "s": "b",
-     "id": "7063525ea2fbe4a2"
-    },
-    {
-     "s": "a",
-     "id": "c3b437f6ebc9af85"
-    },
-    {
-     "s": "c",
-     "id": "49497ea3c88050aa"
-    },
-    {
-     "s": "b",
-     "id": "ea7544ab850f529f"
-    },
-    {
-     "s": "a",
-     "id": "52ead3e028be53db"
-    },
-    {
-     "s": "b",
-     "id": "7becd5704ee1a69e"
-    },
-    {
-     "s": "a",
-     "id": "7b3ba166e4d47a6c"
     }
    ]
   },
@@ -753,67 +474,6 @@
     }
    ]
   },
-  "core8:7": {
-   "voices": {
-    "a": "ru-RU-Chirp3-HD-Fenrir",
-    "b": "ru-RU-Chirp3-HD-Zephyr",
-    "c": "ru-RU-Chirp3-HD-Puck"
-   },
-   "lines": [
-    {
-     "s": "a",
-     "id": "da034d75f58b6872"
-    },
-    {
-     "s": "b",
-     "id": "9b69dd2da2c6e9ad"
-    },
-    {
-     "s": "a",
-     "id": "93d86620e7ded1e8"
-    },
-    {
-     "s": "b",
-     "id": "b63131c07b275ad6"
-    },
-    {
-     "s": "a",
-     "id": "b84ef560aabeb9fb"
-    },
-    {
-     "s": "b",
-     "id": "e7498c07256d8f8d"
-    },
-    {
-     "s": "a",
-     "id": "4062106e807709b0"
-    },
-    {
-     "s": "c",
-     "id": "38288278f71122eb"
-    },
-    {
-     "s": "a",
-     "id": "fad107fddd3c6683"
-    },
-    {
-     "s": "c",
-     "id": "a5891f2220055a4a"
-    },
-    {
-     "s": "b",
-     "id": "e2a432a69f828d11"
-    },
-    {
-     "s": "a",
-     "id": "763e8b51ec043471"
-    },
-    {
-     "s": "b",
-     "id": "a6ccd41d33fbe072"
-    }
-   ]
-  },
   "core9:4": {
    "voices": {
     "a": "ru-RU-Chirp3-HD-Puck",
@@ -876,71 +536,6 @@
    ]
   },
   "core10:4": {
-   "voices": {
-    "a": "ru-RU-Chirp3-HD-Puck",
-    "b": "ru-RU-Chirp3-HD-Charon",
-    "c": "ru-RU-Chirp3-HD-Zephyr"
-   },
-   "lines": [
-    {
-     "s": "a",
-     "id": "21f2a1c03ab86349"
-    },
-    {
-     "s": "b",
-     "id": "abd3f7fdcef9592f"
-    },
-    {
-     "s": "c",
-     "id": "dfb6179218aa69f6"
-    },
-    {
-     "s": "a",
-     "id": "eb5fb8c920436b20"
-    },
-    {
-     "s": "c",
-     "id": "672fee534de53297"
-    },
-    {
-     "s": "b",
-     "id": "019ff8325c628ca5"
-    },
-    {
-     "s": "c",
-     "id": "63c546360e7af470"
-    },
-    {
-     "s": "a",
-     "id": "5fde2af5d905f56b"
-    },
-    {
-     "s": "b",
-     "id": "d1121b13ae464c39"
-    },
-    {
-     "s": "c",
-     "id": "476dd5f1bcbdb6c2"
-    },
-    {
-     "s": "a",
-     "id": "581572879196ff78"
-    },
-    {
-     "s": "b",
-     "id": "0d39d64db8224fef"
-    },
-    {
-     "s": "c",
-     "id": "a88b2e7c153fbafc"
-    },
-    {
-     "s": "b",
-     "id": "d100b1db6d2a828c"
-    }
-   ]
-  },
-  "core10:5": {
    "voices": {
     "a": "ru-RU-Chirp3-HD-Aoede",
     "b": "ru-RU-Chirp3-HD-Puck",
@@ -1091,7 +686,7 @@
     },
     {
      "s": "b",
-     "id": "c1779ea3c627f27e"
+     "id": "d7595ef407d46400"
     },
     {
      "s": "a",
@@ -1131,7 +726,7 @@
     },
     {
      "s": "a",
-     "id": "90b4fca3e5f14339"
+     "id": "5729fa40430da9b0"
     },
     {
      "s": "c",
@@ -1216,7 +811,347 @@
     }
    ]
   },
-  "core7:3": {
+  "core9:3": {
+   "voices": {
+    "a": "ru-RU-Chirp3-HD-Charon",
+    "b": "ru-RU-Chirp3-HD-Puck",
+    "c": "ru-RU-Chirp3-HD-Fenrir"
+   },
+   "lines": [
+    {
+     "s": "a",
+     "id": "072f399ba5adac30"
+    },
+    {
+     "s": "b",
+     "id": "8e353316f54b02af"
+    },
+    {
+     "s": "a",
+     "id": "aee05a3ec358e8a1"
+    },
+    {
+     "s": "b",
+     "id": "ecf9563300d6667f"
+    },
+    {
+     "s": "c",
+     "id": "28f77b19b6baa8f4"
+    },
+    {
+     "s": "b",
+     "id": "28d838baee2f66af"
+    },
+    {
+     "s": "a",
+     "id": "ba0d97f85becf149"
+    },
+    {
+     "s": "c",
+     "id": "a19a726cf16beea9"
+    },
+    {
+     "s": "b",
+     "id": "310d049fdef2fd6c"
+    },
+    {
+     "s": "c",
+     "id": "4bc828e18a37a317"
+    },
+    {
+     "s": "a",
+     "id": "e20db042a0c895f3"
+    },
+    {
+     "s": "c",
+     "id": "6adbf05234264281"
+    },
+    {
+     "s": "b",
+     "id": "e137f6751457b23f"
+    }
+   ]
+  },
+  "core2:5": {
+   "voices": {
+    "a": "ru-RU-Chirp3-HD-Puck",
+    "b": "ru-RU-Chirp3-HD-Aoede",
+    "c": "ru-RU-Chirp3-HD-Zephyr"
+   },
+   "lines": [
+    {
+     "s": "b",
+     "id": "da033c7ef7a189b2"
+    },
+    {
+     "s": "a",
+     "id": "52f1f2697a796b67"
+    },
+    {
+     "s": "b",
+     "id": "d1b79dfbe9d39e8c"
+    },
+    {
+     "s": "c",
+     "id": "7a08a73f01663245"
+    },
+    {
+     "s": "a",
+     "id": "4edb36c65cf27fe6"
+    },
+    {
+     "s": "c",
+     "id": "b53bcbb569cf8cd6"
+    },
+    {
+     "s": "b",
+     "id": "fad95fed3cb512f6"
+    },
+    {
+     "s": "c",
+     "id": "0d667050fc405e6a"
+    },
+    {
+     "s": "a",
+     "id": "e45aae4e01ef542f"
+    },
+    {
+     "s": "b",
+     "id": "5b741379c8690fd0"
+    },
+    {
+     "s": "a",
+     "id": "e3c525bddf6e70ac"
+    },
+    {
+     "s": "c",
+     "id": "500e66f08b799c7c"
+    },
+    {
+     "s": "b",
+     "id": "74dbae4e02577a08"
+    },
+    {
+     "s": "a",
+     "id": "c83c028295590f6b"
+    },
+    {
+     "s": "b",
+     "id": "44795727ed99818d"
+    },
+    {
+     "s": "c",
+     "id": "b8bf56dc9288691a"
+    }
+   ]
+  },
+  "core3:1": {
+   "voices": {
+    "a": "ru-RU-Chirp3-HD-Charon",
+    "b": "ru-RU-Chirp3-HD-Puck"
+   },
+   "lines": [
+    {
+     "s": "a",
+     "id": "cb04a487e71afbd6"
+    },
+    {
+     "s": "b",
+     "id": "42a7e9cfab9316a2"
+    },
+    {
+     "s": "a",
+     "id": "fee29b23c7bc36d7"
+    },
+    {
+     "s": "b",
+     "id": "ff24b4ee4d284547"
+    },
+    {
+     "s": "a",
+     "id": "fc214fb04da63d78"
+    },
+    {
+     "s": "b",
+     "id": "501bfff978514ec9"
+    },
+    {
+     "s": "a",
+     "id": "f09ad32cc2f668c5"
+    },
+    {
+     "s": "b",
+     "id": "c8e1efce3291c000"
+    },
+    {
+     "s": "a",
+     "id": "eae65804f7de3105"
+    },
+    {
+     "s": "b",
+     "id": "db70d3e42b40e14d"
+    },
+    {
+     "s": "a",
+     "id": "de246c0f3f76eff7"
+    },
+    {
+     "s": "b",
+     "id": "8cc19de7d3756820"
+    },
+    {
+     "s": "a",
+     "id": "923e04c0d24c85c1"
+    },
+    {
+     "s": "b",
+     "id": "359e6f78132d4a4c"
+    },
+    {
+     "s": "a",
+     "id": "5916d4029353677d"
+    },
+    {
+     "s": "b",
+     "id": "26e4128f8397050b"
+    }
+   ]
+  },
+  "core5:6": {
+   "voices": {
+    "a": "ru-RU-Chirp3-HD-Charon",
+    "b": "ru-RU-Chirp3-HD-Puck",
+    "c": "ru-RU-Chirp3-HD-Fenrir"
+   },
+   "lines": [
+    {
+     "s": "a",
+     "id": "f54273423545b2dc"
+    },
+    {
+     "s": "b",
+     "id": "79ab8a94503fd992"
+    },
+    {
+     "s": "a",
+     "id": "1f907df0bbb684c4"
+    },
+    {
+     "s": "c",
+     "id": "e43b3a4cfe704cbf"
+    },
+    {
+     "s": "a",
+     "id": "b90e0adf3f5178eb"
+    },
+    {
+     "s": "c",
+     "id": "5be870c9dd2cd79c"
+    },
+    {
+     "s": "b",
+     "id": "e8b63e4f9f8c37fc"
+    },
+    {
+     "s": "c",
+     "id": "af208f9e3c68ee22"
+    },
+    {
+     "s": "b",
+     "id": "b4a7156b0817e76f"
+    },
+    {
+     "s": "a",
+     "id": "ae4b0adf0432d76f"
+    },
+    {
+     "s": "c",
+     "id": "fdfee3150b8f1cae"
+    },
+    {
+     "s": "a",
+     "id": "75fd57d488e731d2"
+    },
+    {
+     "s": "c",
+     "id": "b70833a22df7efab"
+    },
+    {
+     "s": "b",
+     "id": "28ef225f2129847c"
+    },
+    {
+     "s": "c",
+     "id": "e89e94c6850561dd"
+    },
+    {
+     "s": "a",
+     "id": "a5cbceed6f2e7a6d"
+    }
+   ]
+  },
+  "core6:2": {
+   "voices": {
+    "a": "ru-RU-Chirp3-HD-Aoede",
+    "b": "ru-RU-Chirp3-HD-Zephyr",
+    "c": "ru-RU-Chirp3-HD-Puck"
+   },
+   "lines": [
+    {
+     "s": "a",
+     "id": "113075711f0d2a3c"
+    },
+    {
+     "s": "b",
+     "id": "ff4f3d161f9f501e"
+    },
+    {
+     "s": "a",
+     "id": "9ecb6f11d1b0ff70"
+    },
+    {
+     "s": "b",
+     "id": "9ad255ae8ff26222"
+    },
+    {
+     "s": "c",
+     "id": "c9f297ba38fb4351"
+    },
+    {
+     "s": "a",
+     "id": "81d4312729aba434"
+    },
+    {
+     "s": "b",
+     "id": "7063525ea2fbe4a2"
+    },
+    {
+     "s": "a",
+     "id": "c3b437f6ebc9af85"
+    },
+    {
+     "s": "c",
+     "id": "49497ea3c88050aa"
+    },
+    {
+     "s": "b",
+     "id": "ea7544ab850f529f"
+    },
+    {
+     "s": "a",
+     "id": "52ead3e028be53db"
+    },
+    {
+     "s": "b",
+     "id": "7becd5704ee1a69e"
+    },
+    {
+     "s": "a",
+     "id": "7b3ba166e4d47a6c"
+    }
+   ]
+  },
+  "core7:2": {
    "voices": {
     "a": "ru-RU-Chirp3-HD-Puck",
     "b": "ru-RU-Chirp3-HD-Zephyr"
@@ -1284,64 +1219,129 @@
     }
    ]
   },
-  "core9:3": {
+  "core8:6": {
    "voices": {
-    "a": "ru-RU-Chirp3-HD-Charon",
-    "b": "ru-RU-Chirp3-HD-Puck",
-    "c": "ru-RU-Chirp3-HD-Fenrir"
+    "a": "ru-RU-Chirp3-HD-Fenrir",
+    "b": "ru-RU-Chirp3-HD-Zephyr",
+    "c": "ru-RU-Chirp3-HD-Puck"
    },
    "lines": [
     {
      "s": "a",
-     "id": "072f399ba5adac30"
+     "id": "da034d75f58b6872"
     },
     {
      "s": "b",
-     "id": "8e353316f54b02af"
+     "id": "9b69dd2da2c6e9ad"
     },
     {
      "s": "a",
-     "id": "aee05a3ec358e8a1"
+     "id": "93d86620e7ded1e8"
     },
     {
      "s": "b",
-     "id": "ecf9563300d6667f"
-    },
-    {
-     "s": "c",
-     "id": "28f77b19b6baa8f4"
-    },
-    {
-     "s": "b",
-     "id": "28d838baee2f66af"
+     "id": "b63131c07b275ad6"
     },
     {
      "s": "a",
-     "id": "ba0d97f85becf149"
-    },
-    {
-     "s": "c",
-     "id": "a19a726cf16beea9"
+     "id": "b84ef560aabeb9fb"
     },
     {
      "s": "b",
-     "id": "310d049fdef2fd6c"
-    },
-    {
-     "s": "c",
-     "id": "4bc828e18a37a317"
+     "id": "e7498c07256d8f8d"
     },
     {
      "s": "a",
-     "id": "e20db042a0c895f3"
+     "id": "4062106e807709b0"
     },
     {
      "s": "c",
-     "id": "6adbf05234264281"
+     "id": "38288278f71122eb"
+    },
+    {
+     "s": "a",
+     "id": "fad107fddd3c6683"
+    },
+    {
+     "s": "c",
+     "id": "a5891f2220055a4a"
     },
     {
      "s": "b",
-     "id": "e137f6751457b23f"
+     "id": "e2a432a69f828d11"
+    },
+    {
+     "s": "a",
+     "id": "763e8b51ec043471"
+    },
+    {
+     "s": "b",
+     "id": "a6ccd41d33fbe072"
+    }
+   ]
+  },
+  "core10:1": {
+   "voices": {
+    "a": "ru-RU-Chirp3-HD-Puck",
+    "b": "ru-RU-Chirp3-HD-Charon",
+    "c": "ru-RU-Chirp3-HD-Zephyr"
+   },
+   "lines": [
+    {
+     "s": "a",
+     "id": "21f2a1c03ab86349"
+    },
+    {
+     "s": "b",
+     "id": "abd3f7fdcef9592f"
+    },
+    {
+     "s": "c",
+     "id": "dfb6179218aa69f6"
+    },
+    {
+     "s": "a",
+     "id": "eb5fb8c920436b20"
+    },
+    {
+     "s": "c",
+     "id": "672fee534de53297"
+    },
+    {
+     "s": "b",
+     "id": "019ff8325c628ca5"
+    },
+    {
+     "s": "c",
+     "id": "63c546360e7af470"
+    },
+    {
+     "s": "a",
+     "id": "5fde2af5d905f56b"
+    },
+    {
+     "s": "b",
+     "id": "d1121b13ae464c39"
+    },
+    {
+     "s": "c",
+     "id": "476dd5f1bcbdb6c2"
+    },
+    {
+     "s": "a",
+     "id": "581572879196ff78"
+    },
+    {
+     "s": "b",
+     "id": "0d39d64db8224fef"
+    },
+    {
+     "s": "c",
+     "id": "a88b2e7c153fbafc"
+    },
+    {
+     "s": "b",
+     "id": "d100b1db6d2a828c"
     }
    ]
   }

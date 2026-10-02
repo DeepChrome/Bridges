@@ -71,7 +71,8 @@ GROUP_KINDS = ["verb", "noun", "describing", "little"]
 UNGROUPED = []   # (unit, bare) the groups file does not place — run build_word_groups.mjs --stale
 
 
-MISKINDED = []   # (unit, bare, section) a word filed in a section its class does not belong in
+MISKINDED = []   # (unit, group, section) a group under a section most of its words are not
+LONE = []        # (unit, bare) a word left alone in its group
 SPLIT_GROUPS = []   # (unit, group) a group a lesson boundary still cuts
 # The section a word's class belongs in, everything else under "little" — the
 # rule build_word_groups.mjs (KINDS) holds the model's answer to.
@@ -216,11 +217,16 @@ def grouped(tid, chosen, meta, spoken, size):
         placed.update(members)
         for l in members:
             group_of[l] = (grp["name"], grp["kind"], gord[g])
-            # A word set may mix classes by design (the lexicon files «пять» a
-            # noun and «один» a numeral); only the file's own groups are held
-            # to one section.
-            if not grp.get("set") and KIND_OF_POS.get(meta[l]["pos"], "little") != grp["kind"]:
-                MISKINDED.append((tid, meta[l]["bare"], grp["kind"]))
+        # A group is a textbook block and may mix classes («заказать» with the
+        # café words); it sits under the section most of its words belong to
+        # (build_word_groups.mjs majorityKind). A word set may lean either way
+        # by design (the lexicon files «пять» a noun and «один» a numeral).
+        kinds = [KIND_OF_POS.get(meta[l]["pos"], "little") for l in members]
+        top = max(kinds.count(k) for k in set(kinds))
+        if not grp.get("set") and kinds.count(grp["kind"]) < top:
+            MISKINDED.append((tid, grp["name"], grp["kind"]))
+        if len(members) == 1:
+            LONE.append((tid, meta[members[0]]["bare"]))
         # By the group's middle word, not its commonest: one very common member
         # («год») would otherwise pull a group of rare ones to the front.
         rs = sorted(rank(l) for l in members)
@@ -295,7 +301,7 @@ RULES = [
         spoon knife cup glass bottle wine beer vodka tea coffee juice water flour
         porridge sausage pie cake candy chocolate honey mushroom onion carrot""".split()),
 
-    ("home",       "Home",              """house home apartment flat room kitchen bedroom
+    ("home",       "At Home",           """house home apartment flat room kitchen bedroom
         bathroom door window wall floor ceiling roof stairs furniture table chair
         bed sofa shelf cupboard wardrobe mirror lamp curtain carpet key lock
         garden yard fence balcony garage basement attic clean wash tidy repair
@@ -993,7 +999,7 @@ def main():
     # of the course. Which words a quest refuses is only known once the route
     # has been walked, so the route is walked twice (below).
     def walk(spine_extra):
-        del UNGROUPED[:], MISKINDED[:], SPLIT_GROUPS[:]
+        del UNGROUPED[:], MISKINDED[:], SPLIT_GROUPS[:], LONE[:]
         reserved_now = dict(reserved)
         refused, refused_keeps = {}, []
         taught, units = set(), []
@@ -1255,8 +1261,11 @@ def main():
         print(f"    !! {len(UNGROUPED)} word(s) in no group — run node tools/build_word_groups.mjs --stale: "
               + ", ".join(f"{t}:{b}" for t, b in UNGROUPED[:12]) + (" …" if len(UNGROUPED) > 12 else ""))
     if MISKINDED:
-        print(f"    !! {len(MISKINDED)} word(s) in a section their class does not belong in (word_groups.json): "
+        print(f"    !! {len(MISKINDED)} group(s) under a section most of their words are not (word_groups.json): "
               + ", ".join(f"{t}:{b}→{s}" for t, b, s in MISKINDED[:12]) + (" …" if len(MISKINDED) > 12 else ""))
+    if LONE:
+        print(f"    !! {len(LONE)} word(s) alone in a group (word_groups.json): "
+              + ", ".join(f"{t}:{b}" for t, b in LONE[:12]) + (" …" if len(LONE) > 12 else ""))
     if SPLIT_GROUPS:
         print(f"    {len(SPLIT_GROUPS)} group(s) a lesson boundary cuts (longer than any lesson): "
               + ", ".join(f"{t}:{g}" for t, g in SPLIT_GROUPS[:12]) + (" …" if len(SPLIT_GROUPS) > 12 else ""))

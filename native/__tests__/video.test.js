@@ -292,16 +292,17 @@ describe("Video", () => {
                                       dueAt: 9e12, lastAt: Date.now() - 86400000 } } },
     });
     await screen.findByTestId("prep");
-    // Clusters by part of speech, every word in exactly one.
+    // Clusters by section, every word in exactly one. A group is a textbook
+    // block and may mix parts of speech (заказать with the café words), so a
+    // section is mostly — not only — its own kind of word.
     const clusters = clusterWords(heard);
     expect(clusters.reduce((n, c) => n + c.words.length, 0)).toBe(heard.length);
+    const kindOf = (p) => (p === "verb" ? "verb" : p === "noun" ? "noun"
+      : p === "adjective" || p === "adverb" ? "describing" : "little");
     for (const c of clusters) {
       expect(screen.getByTestId(`cluster-${c.id}`)).toBeTruthy();
-      for (const w of c.words) {
-        const p = L[idxOfWord(w)].p;
-        if (c.id === "verb") expect(p).toBe("verb");
-        if (c.id === "noun") expect(p).toBe("noun");
-      }
+      const own = c.words.filter((w) => kindOf(L[idxOfWord(w)].p) === c.id).length;
+      expect(own * 2).toBeGreaterThanOrEqual(c.words.length);
     }
     // A word studied carries its score; one never met says so.
     expect(screen.getByTestId(`prep-score-${known}`)).toBeTruthy();

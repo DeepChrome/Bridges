@@ -29,7 +29,7 @@ export const CLUSTERS = [
   { id: "verb", name: "Verbs", pos: ["verb"] },
   { id: "noun", name: "Nouns", pos: ["noun"] },
   { id: "describing", name: "Describing words", pos: ["adjective", "adverb"] },
-  { id: "little", name: "Little words", pos: null },   // whatever is left
+  { id: "little", name: "Everyday words", pos: null },   // whatever is left
 ];
 
 /* Every curriculum word's group of related words, read once off the units

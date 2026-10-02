@@ -48,9 +48,23 @@ export const kindOf = (pos) =>
 const arg = (n) => { const i = process.argv.indexOf(n); return i < 0 ? null : process.argv[i + 1]; };
 const has = (n) => process.argv.includes(n);
 
+/* The section a group sits under: the kind most of its words are. A group is
+   a textbook block — "At the café" holds ресторан, борщ, вкусный and
+   заказать — so it may mix parts of speech, and it is drawn under the
+   heading its words mostly belong to. */
+export function majorityKind(ws) {
+  const n = {};
+  for (const w of ws) n[kindOf(w.p)] = (n[kindOf(w.p)] || 0) + 1;
+  const top = Math.max(...Object.values(n));
+  return Object.keys(KINDS).filter((k) => n[k] === top);
+}
+
 /* What a returned grouping must be, or why it is not. Every word exactly
-   once, each group one kind and its words that kind, names short and never a
-   shrug ("Other", "Misc"), no group larger than a screen's worth. */
+   once, no word alone in a group (the owner, 2026-10-02: "I don't want any
+   straggler words that have their own section… think like how a textbook
+   would do it where grouped words are in a block"), each group under the
+   section most of its words belong to, names short and never a shrug
+   ("Other", "Misc"), no group larger than a screen's worth. */
 export function checkGroups(groups, words) {
   const errs = [];
   const want = new Map(words.map((w) => [w.b, w]));
@@ -62,12 +76,18 @@ export function checkGroups(groups, words) {
     if (!KINDS.hasOwnProperty(g.kind)) errs.push(`"${g.name}": kind "${g.kind}" is not one of ${Object.keys(KINDS).join(", ")}`);
     if (!Array.isArray(g.words) || !g.words.length) { errs.push(`"${g.name}": no words`); continue; }
     if (g.words.length > 12) errs.push(`"${g.name}": ${g.words.length} words, split it`);
+    if (g.words.length < 2) errs.push(`"${g.name}": «${g.words[0]}» stands alone; put it in a block with related words`);
+    const mine = [];
     for (const b of g.words) {
       const w = want.get(b);
       if (!w) { errs.push(`"${g.name}": «${b}» is not a word of this unit`); continue; }
       if (seen.has(b)) errs.push(`«${b}» is in two groups`);
       seen.add(b);
-      if (kindOf(w.p) !== g.kind) errs.push(`«${b}» is a ${w.p}, so it belongs under ${kindOf(w.p)}, not ${g.kind}`);
+      mine.push(w);
+    }
+    const top = mine.length ? majorityKind(mine) : [g.kind];
+    if (KINDS.hasOwnProperty(g.kind) && !top.includes(g.kind)) {
+      errs.push(`"${g.name}": most of its words are ${top[0]} words, so its kind is ${top[0]}, not ${g.kind}`);
     }
   }
   const missing = words.filter((w) => !seen.has(w.b)).map((w) => `«${w.b}»`);
@@ -77,17 +97,18 @@ export function checkGroups(groups, words) {
 
 const SYSTEM = `You organise the vocabulary page of a Russian course unit, the way a good printed textbook does, so a learner can scroll it and see at once which words belong together.
 
-Put every word of the unit into a named group of related words, and give each group a kind:
-- "verb": verbs only
-- "noun": nouns only
-- "describing": adjectives and adverbs only
+Put every word of the unit into a named block of related words, as a textbook lesson does: the block is what the lesson teaches together, illustrates grammar with and drills. Give each block the kind most of its words are:
+- "verb": verbs
+- "noun": nouns
+- "describing": adjectives and adverbs
 - "little": everything else (pronouns, prepositions, conjunctions, particles, numbers, question words, interjections)
-The part of speech of every word is given; a word's kind is fixed by it.
+The part of speech of every word is given.
 
-Groups:
-- are named for what is in them, in 1 to 3 plain English words a learner would use: "Seasons", "Weather", "In the sky", "Getting around", "Feelings", "Family", "Numbers". Never "Other", "Misc", "General" or "Words".
-- hold words that genuinely belong together by meaning: all the seasons in one group, the days of the week in one, the family members in one, opposites side by side.
-- are 2 to 8 words where the words allow; a word with nothing related in the unit may stand alone in a group named for it, but look hard for its companions first. At most 12 in one group.
+Blocks:
+- are named for what is in them, in 1 to 3 plain English words a learner would use: "Seasons", "Weather", "At the café", "Getting around", "Feelings", "Family", "Numbers". Never "Other", "Misc", "General" or "Words".
+- hold words that genuinely belong together by meaning or by use: all the seasons in one, the family members in one, opposites side by side, a verb with the nouns it is used with ("заказать" with the café words), an adjective with what it describes ("вкусный" with the food).
+- may mix parts of speech when the words share a topic; never put unrelated words together just to fill a block.
+- are 3 to 8 words where the words allow. Never a word alone in a block: a word with no obvious companion joins the block it is most used with. A block of two only for a true pair (husband and wife, an aspect pair, two opposites). At most 12 in one block.
 - list their words in natural order where one exists (the seasons from winter to autumn, numbers ascending, the family from grandparents down, days in week order, sizes small to large, opposites adjacent); otherwise put the most everyday word first.
 - are listed most useful first within each kind.
 

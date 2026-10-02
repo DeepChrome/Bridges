@@ -1155,7 +1155,10 @@ export function FinalFlow({ navigation }) {
     );
   }
   return (
-    <Runner steps={steps} navigation={navigation}
+    /* A test, not practice: a miss is not asked again at the back, or the
+       fifty would grow with every wrong answer (2/50 became 2/51 on the
+       emulator) — the placement and section tests hold the same rule. */
+    <Runner steps={steps} recycle={false} navigation={navigation}
             onFinish={(r) => {
               const score = scoreOf(r);
               update((prev) => bestOf(prev, "final", score));

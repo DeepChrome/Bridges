@@ -754,6 +754,15 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
               {/* The answer card says when the word breaks the rules
                   (2026-09-29), right or wrong — it is worth knowing either way. */}
               {right !== null && irregular ? <Pill tone="irregular" testID="verdict-irregular">Irregular</Pill> : null}
+              {/* Hear the right form again, whatever the verdict. It was read
+                  out as the verdict landed; this is the button for once more.
+                  At the end of the verdict's own line: on a row of its own it
+                  was a lone circle taking a line for nothing (2026-10-01). */}
+              {right !== null && answerAudioText(q, answer) ? (
+                <View testID="verdict-speaker" style={{ marginLeft: "auto" }}>
+                  <Speaker text={answerAudioText(q, answer)} size={36} />
+                </View>
+              ) : null}
             </View>
             {verdict && verdict.note ? (
               <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>{verdict.note}</Text>
@@ -762,13 +771,6 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
               <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>
                 {`Answer: ${answer ? answer.label : q.answer}`}
               </Text>
-            ) : null}
-            {/* Hear the right form again, whatever the verdict. It was read
-                out as the verdict landed; this is the button for once more. */}
-            {right !== null && answerAudioText(q, answer) ? (
-              <View testID="verdict-speaker" style={{ marginTop: 8, alignSelf: "flex-start" }}>
-                <Speaker text={answerAudioText(q, answer)} size={36} />
-              </View>
             ) : null}
             {/* Why, when the Worker has one: two short lines, the Russian in
                 them set apart (ui.js `Marked`). A spinner while it is on its

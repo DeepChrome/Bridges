@@ -9,7 +9,7 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import Learn from "../src/screens/Learn";
 import { FinalFlow } from "../src/screens/Flows";
-import { FINAL_N } from "../src/questions";
+import { FINAL_N, Q } from "../src/questions";
 import { lessonCount, UN, STAGES } from "../src/data";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
@@ -63,4 +63,22 @@ test("developer mode shows it too (rule 20.9)", async () => {
 test(`the run is ${FINAL_N} questions long`, async () => {
   await withState(<FinalFlow navigation={nav} />, { dev: true });
   expect(await screen.findByText(`1/${FINAL_N}`)).toBeTruthy();
+});
+
+/* A test, not practice: a miss is not asked again at the back. It was, and
+   on the emulator 2/50 became 2/51 after one wrong answer (2026-10-01). */
+test("a wrong answer does not grow the test", async () => {
+  const ask = (prompt, right, wrong) => ({ kind: "choose-en", ask: "Pick the word", prompt,
+    options: [{ label: right, right: true }, { label: wrong }] });
+  const spy = jest.spyOn(Q, "finalExam").mockReturnValue([ask("книга", "book", "table"), ask("стол", "table", "book")]);
+  try {
+    await withState(<FinalFlow navigation={nav} />, { dev: true });
+    expect(await screen.findByText("1/2")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("table")); });   // wrong
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    expect(await screen.findByText("2/2")).toBeTruthy();
+    expect(screen.queryByText("2/3")).toBeNull();
+  } finally {
+    spy.mockRestore();
+  }
 });

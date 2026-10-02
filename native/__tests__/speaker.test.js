@@ -74,8 +74,10 @@ describe("speaker", () => {
     await act(async () => { fireEvent.press(btn); });
     expect(global.__spoke).toHaveLength(1);
     // Pinned to the actual Russian voice, not just the language tag — the tag alone
-    // still lets the platform fall back.
-    expect(global.__spokeOpts[0].voice).toBe("ru-RU-x-ruf-local");
+    // still lets the platform fall back. Not the first listed: «ruf» is a man
+    // and the bought clips are a woman, so the unknown «rum» is preferred
+    // (audio.js defaultVoice).
+    expect(global.__spokeOpts[0].voice).toBe("ru-RU-x-rum-local");
     expect(global.__spokeOpts[0].language).toMatch(/^ru/i);
   });
 

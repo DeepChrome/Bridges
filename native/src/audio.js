@@ -12,7 +12,7 @@ import { bare, fold } from "@core/util";
 import { wordClip } from "./wordaudio";
 import { sexOf } from "@core/names";
 import { castById } from "@core/cast";
-import { knownVoiceSex, rankVoice } from "@core/voices";
+import { knownVoiceSex, rankVoice, isSilentVoice } from "@core/voices";
 
 /* When nothing could play — the stream failed and there is no Russian voice —
    whoever drew the speaker is told, so the learner sees "No audio right now"
@@ -195,7 +195,7 @@ export function probeVoices() {
       try {
         const voices = await Speech.getAvailableVoicesAsync();
         ruVoices = (voices || []).filter((v) => v.language && /^ru/i.test(v.language));
-        ruVoice = ruVoices[0] || null;
+        ruVoice = defaultVoice(ruVoices);
         const ens = (voices || []).filter((v) => v.language && /^en/i.test(v.language));
         enVoice = ens.find((v) => /^en[-_]US/i.test(v.language)) || ens[0] || null;
       } catch (e) {
@@ -208,6 +208,23 @@ export function probeVoices() {
     })();
   }
   return probe;
+}
+
+/* The voice a word or sentence falls back to when it has no recording, or its
+   stream is slow. It was the first the phone listed, which on the owner's
+   Pixel is a man, while every bought clip is one woman (Chirp3 Aoede,
+   build_word_audio.mjs) — so one speaker button could answer in a woman's
+   voice on one press and a man's on the next (the owner, 2026-10-02: "it
+   sometimes changes between a man and a woman"). A woman's voice first, then
+   one whose sex is unknown, never a silent one; local before network
+   (core/voices.js rankVoice). */
+export function defaultVoice(voices) {
+  const order = (v) => {
+    const sex = voiceSex(v);
+    return (isSilentVoice(v.identifier) ? 100 : 0) + (sex === "f" ? 0 : sex ? 20 : 10)
+      + rankVoice(v.identifier);
+  };
+  return (voices || []).slice().sort((a, b) => order(a) - order(b))[0] || null;
 }
 
 /* Re-render a speaker once the probe lands. */

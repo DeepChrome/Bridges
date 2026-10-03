@@ -84,10 +84,6 @@ export function latestRun(now = Date.now()) {
   return list.length ? { key: list[0][0], ...list[0][1] } : null;
 }
 
-/* What a saved run is, in the words both offers use: "Food · Lesson 2 quiz · 5 of 12". */
-export const runLabel = (run) =>
-  `${run.title ? `${run.title} · ` : ""}${run.at + 1} of ${run.queue.length}`;
-
 /* The run to offer when the app is opened: once a launch, so leaving the path
    and coming back to it does not ask again. */
 export function launchOffer(now = Date.now()) {

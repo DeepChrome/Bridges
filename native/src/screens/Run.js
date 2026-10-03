@@ -19,7 +19,8 @@ import { topicFor } from "@core/grammar";
 import { wordFacts, isIrregular } from "@core/facts";
 import { standardExplanation } from "@core/explain";
 import { GuidePop } from "../guide";
-import { saveRun, clearRun, savedRun, runLabel } from "../resume";
+import { saveRun, clearRun, savedRun } from "../resume";
+import { RunCard } from "../resumesheet";
 import { useEnter, usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, reactionFor, LINES } from "@core/guide";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
@@ -972,10 +973,10 @@ export function ResumePrompt({ run, onContinue, onRestart }) {
       <View testID="resume-prompt"
             style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 16 }}>
         <GuidePop pose="wave" size={96} style={{ marginBottom: 14 }} />
-        <Text style={{ fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
-          Continue where you left off?
+        <Text style={{ fontSize: T.title, fontWeight: "700", textAlign: "center", marginBottom: 18 }}>
+          Pick up where you left off
         </Text>
-        <Muted style={{ marginTop: 6, textAlign: "center" }}>{runLabel(run)}</Muted>
+        <View style={{ alignSelf: "stretch" }}><RunCard run={run} /></View>
       </View>
       <View style={{ gap: 10 }}>
         <Btn block kind="pri" label="Continue" onPress={onContinue} />

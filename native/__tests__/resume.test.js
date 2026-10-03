@@ -74,6 +74,11 @@ describe("a run left part-way", () => {
       spy.mockReturnValue(steps().reverse());
       await withProfile(quiz());
       expect(await screen.findByTestId("resume-prompt")).toBeTruthy();
+      // What was left, as a card: the unit large, the step under it, the count
+      // apart — not one grey run-on line (the owner, 2026-10-03).
+      expect(screen.getByTestId("resume-card")).toBeTruthy();
+      expect(screen.getByTestId("resume-step")).toHaveTextContent(/^Lesson \d+ · Quiz$/);
+      expect(screen.getByTestId("resume-what")).toHaveTextContent("1 of 4");
       await act(async () => { fireEvent.press(screen.getByText("Continue")); });
       expect(await screen.findByText("2/4")).toBeTruthy();
       await answer(deck[1]);

@@ -204,6 +204,56 @@ def load_rejected():
 REJECTED = load_rejected()
 
 
+def load_stress_review():
+    """Which stress a two-way spelling takes in a shown sentence
+    (tools/review_stress.py): {fold(sentence): {fold(word): vowel index}}, and
+    for a pick that moves the deck's mark, whether a second reading agreed. The
+    owner found «Прихо́дите в субботу» ("Come on Saturday" — «приходи́те»);
+    Russian Core 5000 had stressed hundreds of sentences that way, «большой» as
+    «бо́льший» throughout."""
+    path = ROOT / "data" / "curated" / "stress_review.json"
+    if not path.exists():
+        return {}, {}
+    s = json.loads(path.read_text(encoding="utf-8"))
+    return s.get("picked", {}), s.get("agreed", {})
+
+
+STRESS_PICKED, STRESS_AGREED = load_stress_review()
+
+
+def apply_stress_review(s, tally):
+    """Move a deck's mark to the reviewed stress; where the two readings
+    disagreed, drop it — no mark says "unknown", which is true (§26)."""
+    picks = STRESS_PICKED.get(fold(s))
+    if not picks:
+        return s
+    agreed = STRESS_AGREED.get(fold(s), {})
+
+    def word(m):
+        w = m.group(0)
+        k = fold(w)
+        if k not in picks or "́" not in unicodedata.normalize("NFD", w):
+            return w
+        v = picks[k]
+        if v in _stressed(w.replace("ё", "е").replace("Ё", "Е")):
+            return w
+        plain = unicodedata.normalize("NFC", unicodedata.normalize("NFD", w).replace("́", ""))
+        if not agreed.get(k):
+            tally["stress_dropped"] += 1
+            return plain
+        tally["stress_moved"] += 1
+        n, out = -1, []
+        for ch in plain:
+            out.append(ch)
+            if ch in VOWELS:
+                n += 1
+                if n == v and ch not in "ёЁ":
+                    out.append("́")
+        return unicodedata.normalize("NFC", "".join(out))
+
+    return WORD_RE.sub(word, unicodedata.normalize("NFC", s))
+
+
 def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tally=None,
                   key_rank=None):
     """The sentences worth showing first, and one of each — and different from
@@ -1077,7 +1127,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             "select i.id, i.ru, i.en, d.name, i.audio from c.items i"
             " left join c.decks d on d.id=i.deck_id"
             " where i.kind='sentence' and i.en is not null"):
-        shown = fix_stress(tidy_quotes(ru), stresses, stress_tally)
+        shown = apply_stress_review(fix_stress(tidy_quotes(ru), stresses, stress_tally), stress_tally)
         if fold(shown) in REJECTED:
             stats["rejected"] = stats.get("rejected", 0) + 1
             continue
@@ -1103,7 +1153,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             # eaten me up"); the rule rank_examples applies to his own decks.
             if ARCHAIC_EN.search(en_s or "") or fold(ru) in REJECTED:
                 continue
-            ext_sentences[xid] = (fix_stress(ru, stresses, stress_tally), en_s, src)
+            ext_sentences[xid] = (apply_stress_review(fix_stress(ru, stresses, stress_tally), stress_tally), en_s, src)
         for k, xid in ex.execute("select key, item_id from item_tokens"):
             ext_items_of_key.setdefault(k, []).append(xid)
         row = ex.execute("select v from meta where k='licence'").fetchone()
@@ -2216,7 +2266,9 @@ def main():
     print(f"  stress marks : {sf.get('sentences', 0):,} shown sentences corrected — "
           f"{sf.get('consonant', 0):,} marks on a consonant removed, {sf.get('doubled', 0):,} doubled, "
           f"{sf.get('contradicted', 0):,} words "
-          "whose mark the lexicon never gives that spelling left unmarked")
+          "whose mark the lexicon never gives that spelling left unmarked; "
+          f"{sf.get('stress_moved', 0):,} two-way marks moved to the reviewed stress, "
+          f"{sf.get('stress_dropped', 0):,} dropped where the readings disagreed (stress_review.json)")
     v = st.get("examples_variety") or {}
     if v.get("plain_words"):
         n = v["plain_words"]

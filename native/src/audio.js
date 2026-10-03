@@ -68,13 +68,35 @@ function release(p) {
   try { p.remove(); } catch (e) {}
 }
 
+/* **Every sound waits on this, so it may never hang** (the owner, 2026-10-03:
+ * "it kills all audio in the app until I restart… I press play, it just won't
+ * move the slider"). The audio mode is re-applied after the recogniser lets go
+ * and whenever the app comes back to the foreground (`rearmAudio`), and
+ * `say` and `playTrack` both await it before making a player. A platform call
+ * that never answered — Android's audio focus is the likeliest holder — left
+ * every later sound waiting on it for the life of the process: the play
+ * button turned to pause, nothing was ever created, and only a restart, which
+ * starts with `ready` false and a fresh call, brought sound back.
+ *
+ * So one call is in flight at a time (two screens asking at once share it),
+ * and it is waited on for at most PREPARE_MS. Past that the sound plays on
+ * the session as it is — routing that may ignore the silent switch, which is
+ * far better than silence — and the next rearm tries the mode again. */
+export const PREPARE_MS = 1500;
+let preparing = null;
 async function prepare() {
   if (ready) return;
-  try {
+  if (!preparing) {
     // Study out loud with the ringer silenced — the usual case on a phone.
-    await setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: false });
-  } catch (e) { /* not fatal; playback still works with default routing */ }
-  ready = true;
+    const applied = Promise.resolve()
+      .then(() => setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: false }))
+      .then(() => { ready = true; }, () => { ready = true; /* not fatal: default routing plays */ });
+    // Timed out or not, the session is taken as ready until the next rearm:
+    // waiting a second and a half before every press would be its own bug.
+    preparing = Promise.race([applied, new Promise((r) => setTimeout(r, PREPARE_MS))])
+      .finally(() => { ready = true; preparing = null; });
+  }
+  await preparing;
 }
 
 /* Whether this device can actually say Russian.

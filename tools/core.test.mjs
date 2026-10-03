@@ -2435,6 +2435,18 @@ group("the grammar reference");
    line is derived from the paradigm, so every line can be wrong about a word
    in a way no screenshot would show. The two that *were* wrong, before this
    group existed, are the first two checks. */
+/* A deck's stress on a two-way spelling is not trusted (2026-10-03): «Прихо́дите
+   в субботу на спектакль» is "Come on Saturday", the imperative «приходи́те».
+   Russian Core 5000 mis-stressed hundreds; tools/review_stress.py reads them. */
+group("stress in shown sentences");
+{
+  const rows = DATA.speech.rows.map((r) => r[0]);
+  const find = (s) => rows.find((r) => r.normalize("NFD").replace(/́/g, "").normalize("NFC") === s);
+  ok((find("Приходите в субботу на спектакль.") || "").startsWith("Приходи́те"),
+     "the invitation takes the imperative's stress", find("Приходите в субботу на спектакль."));
+  ok(!rows.some((r) => /(^|\s)По́ра /.test(r)), "no «По́ра» for «пора́» (time)");
+}
+
 group("the facts about a word");
 {
   const by = (b) => L.find((x) => x.b === b);

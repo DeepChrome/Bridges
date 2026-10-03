@@ -12,7 +12,8 @@ import React, { useState } from "react";
 import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius } from "./theme";
-import { Sheet, Text, Muted } from "./ui";
+import { Sheet, Text, Muted, Btn } from "./ui";
+import { navRef } from "./words";
 
 export const HELP = {
   Path: { title: "The path", lines: [
@@ -99,7 +100,16 @@ export function HelpButton({ route }) {
         </Svg>
       </Pressable>
       {open ? (
-        <Sheet testID="help-sheet" title={help.title} onClose={() => setOpen(false)}>
+        <Sheet testID="help-sheet" title={help.title} onClose={() => setOpen(false)}
+               footer={(
+                 /* The way to tell the owner something is wrong, from the screen
+                    it is wrong on — the screen's name rides along. */
+                 <Btn kind="ghost" testID="help-feedback" label="Send feedback" style={{ marginTop: 10 }}
+                      onPress={() => {
+                        setOpen(false);
+                        if (navRef.isReady()) navRef.navigate("Feedback", { from: route });
+                      }} />
+               )}>
           <View style={{ gap: 12, paddingBottom: 6 }}>
             {help.lines.map(([what, does]) => (
               <View key={what} style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>

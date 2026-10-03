@@ -177,6 +177,12 @@ export async function setPlan(set, deps = {}) {
   return post({ set }, deps, "/v1/plan", 8000);
 }
 
+/* A tester's feedback, to the owner (POST /v1/report): their words and what
+   the app attaches. No model call and no plan counter. */
+export async function report({ text, facts }, deps = {}) {
+  return post({ text, facts }, deps, "/v1/report", 10000);
+}
+
 async function post(body, deps, route, timeoutMs, retried = false) {
   const cfg = deps.config || config(route);
   if (!cfg) return { ok: false, reason: "unconfigured" };

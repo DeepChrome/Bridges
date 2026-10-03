@@ -163,7 +163,7 @@ export default function Translate({ navigation, route }) {
                 {r.cap ? `${r.cap.text} · ${r.cap.detail}` : "No translation right now."}
               </Muted>
             ) : r.state === "offline" ? (
-              <Muted testID="translate-offline" style={{ marginTop: 6 }}>Tap a word for its meaning.</Muted>
+              <Muted testID="translate-offline" style={{ marginTop: 6 }}>Offline. Tap a word for its meaning.</Muted>
             ) : (
               <>
                 <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8, marginTop: 8 }}>

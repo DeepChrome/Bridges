@@ -297,13 +297,16 @@ const ROUTES = {
   },
 };
 
+const REPORT_CHARS = 4000;
+const REPORTS_PER_DAY = 20;
+
 export async function handle(request, env, deps = {}) {
   const fetchFn = deps.fetch || globalThis.fetch;
   const now = deps.now ? deps.now() : new Date();
   const url = new URL(request.url);
 
   let route = ROUTES[url.pathname];
-  const special = url.pathname === "/v1/register" || url.pathname === "/v1/plan";
+  const special = url.pathname === "/v1/register" || url.pathname === "/v1/plan" || url.pathname === "/v1/report";
   if (!route && !special) return json(404, { ok: false, reason: "not found" });
   if (request.method !== "POST") return json(405, { ok: false, reason: "method" });
   if (url.pathname === "/v1/register") return register(request, env, now);
@@ -341,6 +344,28 @@ export async function handle(request, env, deps = {}) {
     }
     return json(200, { ok: true, plan: current.plan, caps: current.caps, used, selfServe });
   }
+  /* A tester's feedback, straight to the owner (2026-10-03: "I just need a way
+     for them to submit feedback"). Stored in KV under `report:<time>:<user>`
+     with what the app attaches (build, place in the course, counts), read
+     with backend/tools/reports.mjs. No model call; `REPORTS_PER_DAY` an
+     install, so a stuck button cannot fill the namespace. */
+  if (url.pathname === "/v1/report") {
+    let body = null;
+    try { body = await request.json(); } catch (e) { body = null; }
+    const text = body && typeof body.text === "string" ? body.text.trim().slice(0, REPORT_CHARS) : "";
+    if (!text) return json(400, { ok: false, reason: "no text" });
+    const day = dayKey(now);
+    const key = `reports:${day}:${user.id}`;
+    const n = parseInt(await env.USAGE.get(key), 10) || 0;
+    if (n >= REPORTS_PER_DAY) return json(429, { ok: false, reason: "too many reports today" });
+    await env.USAGE.put(key, String(n + 1), { expirationTtl: 2 * 86400 });
+    let facts = body.facts && typeof body.facts === "object" ? body.facts : {};
+    if (JSON.stringify(facts).length > REPORT_CHARS) facts = { dropped: "too large" };
+    await env.USAGE.put(`report:${now.toISOString()}:${user.id}`,
+      JSON.stringify({ at: now.toISOString(), user: user.id, text, facts }));
+    return json(200, { ok: true });
+  }
+
   if (!env.ANTHROPIC_API_KEY) return json(503, { ok: false, reason: "no upstream key" });
 
   let body;

@@ -43,6 +43,7 @@ import { Gate } from "./src/screens/Gate";
 import WordScreen from "./src/screens/Word";
 import SttLab from "./src/screens/SttLab";
 import TourScreen from "./src/screens/Intro";
+import Feedback from "./src/screens/Feedback";
 import Sounds from "./src/screens/Sounds";
 import Grammar from "./src/screens/Grammar";
 import Endings from "./src/screens/Endings";
@@ -506,6 +507,8 @@ function Shell() {
       {/* Developer-mode only; the screen itself refuses to render otherwise. */}
       <Root.Screen name="SttLab" component={SttLab} options={{ title: "STT Lab" }} />
       <Root.Screen name="Tour" component={TourScreen} options={{ title: "Tour" }} />
+      {/* Above the tabs, so Settings and every screen's "?" reach it. */}
+      <Root.Screen name="Feedback" component={Feedback} options={{ title: "Send feedback" }} />
     </Root.Navigator>
     </View>
   );

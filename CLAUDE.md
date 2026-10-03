@@ -6094,6 +6094,28 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
 - **The flashcard back shows both languages**, the side it started from on top
   at the front's size.
 
+## 30bs. The public beta (2026-10-03)
+
+- **Feedback goes to the owner, not to a store form.** Settings → Send
+  feedback and the foot of every "?" sheet open `screens/Feedback.js`: one
+  box, one button; the build, the screen it came from, place in the course
+  and counts ride along (`feedbackFacts` — counts, never anything typed
+  elsewhere). `POST /v1/report` stores it in KV (`report:<time>:<user>`, 20 an
+  install a day, no model call); `node backend/tools/reports.mjs` reads them.
+  Offline, it offers the share sheet with the same words. Play's own tester
+  feedback still works, but carries no context.
+- **The AI budget is under $100 a month**: `GLOBAL_DAILY_CAP` 750 model calls
+  a day across every install (the owner's token outside it); at ~$0.004 for
+  the dearest call that is ~$90 a month if all were the dearest. The Anthropic
+  console's own monthly limit is the hard stop behind it.
+- **No sound waits on the audio mode for more than 1.5 s** (`prepare`,
+  `PREPARE_MS`): a call that never answered left every later sound waiting —
+  the "all audio dead until restart" report.
+- **Stress on two-way spellings is reviewed** (`tools/review_stress.py`,
+  `data/curated/stress_review.json`): two model readings, a person's read of
+  every move, the mark dropped where the readings disagree. Russian Core 5000
+  mis-stressed hundreds of sentences (бо́льший for большо́й throughout).
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

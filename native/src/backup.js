@@ -83,13 +83,13 @@ export async function shareCrashes(list, deps = {}) {
  * carries is what a report needs and no more: the build, where they are on
  * the route, how much they have done, what the AI was asked, and what broke.
  * No words, no cards, no name. */
-export function feedbackText(facts, now = Date.now()) {
+export function feedbackText(facts, words = "", now = Date.now()) {
   const when = new Date(now).toISOString().replace("T", " ").slice(0, 19);
   const f = facts || {};
   const lines = [
     `${APP_NAME} ${f.version || "?"} · ${when} UTC`,
     "",
-    "What I wanted to say:",
+    words || "What I wanted to say:",
     "",
     "",
     "---",
@@ -102,11 +102,13 @@ export function feedbackText(facts, now = Date.now()) {
   return lines.join("\n");
 }
 
-export async function shareFeedback(facts, deps = {}) {
+/* The fallback when the report cannot be sent: the same words and facts as a
+   text file through the share sheet. */
+export async function shareFeedback(facts, words = "", deps = {}) {
   const d = { ...defaultDeps, ...deps };
   const stamp = new Date().toISOString().slice(0, 10);
   const file = `ya-feedback-${stamp}.txt`;
-  await d.writeShare(file, feedbackText(facts), "text/plain");
+  await d.writeShare(file, feedbackText(facts, words), "text/plain");
   return { file };
 }
 

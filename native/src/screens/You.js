@@ -13,11 +13,7 @@ import { plan as askPlan, setPlan } from "../lib/feedback";
 import { PLANS, PLAN_NAMES, ALLOWANCE_LINES, planOf } from "@core/plans";
 import { L, UN, STATS, STAGES, idxOfWord, lessonCount, lessonDone, lessonWords, dueCount, chapterOf } from "../data";
 import { CUE_NAMES, WRONG_NAMES, SPEEDS, previewCue, rightCueOf, wrongCueOf } from "../audio";
-import { backupProfile, restoreProfile, shareCrashes, shareFeedback } from "../backup";
-import { Platform } from "react-native";
-import { routePosition, lessonsDone } from "../data";
-import { masteryOf } from "./Study";
-import { expo as APP } from "../../app.json";
+import { backupProfile, restoreProfile, shareCrashes } from "../backup";
 import { readCrashes, clearCrashes } from "../crash";
 import { importDeck } from "../anki";
 import { today } from "@core/util";
@@ -276,7 +272,7 @@ export function PictureSection() {
   );
 }
 
-function Settings({ visible, onClose, onLab, onTour, onCredits }) {
+function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedback }) {
   const { st, update, signOut, account, restore } = useSession();
   const t = useTheme();
   const scheme = useScheme();
@@ -493,26 +489,9 @@ function Settings({ visible, onClose, onLab, onTour, onCredits }) {
                   <Text style={{ color: t.ink, fontSize: 15 }}>Show the tour</Text>
                 </View>
               </Row>
-              {/* A tester's report, through the share sheet (backup.js
-                  feedbackText): the build, where they are, what they did,
-                  and room for their words. Nothing leaves the phone otherwise. */}
-              <Row testID="send-feedback" onPress={async () => {
-                const ai = await askPlan().catch(() => null);
-                const pos = routePosition(st);
-                const facts = {
-                  version: APP.version, chapter: pos.stage + 1,
-                  lesson: pos.lesson === Infinity ? "done" : pos.lesson + 1,
-                  lessonsDone: UN.reduce((n, u) => n + lessonsDone(st, u), 0),
-                  words: Object.keys(st.seen || {}).length,
-                  mastered: masteryOf(st, Object.keys(st.seen || {}).map((b) => ({ b }))).mastered,
-                  reviews: Object.values(st.seen || {}).reduce((n, e) => n + ((cardFor(e) || {}).reps || 0), 0),
-                  days: st.streak || 0,
-                  ai: ai && ai.ok && ai.used ? Object.entries(ai.used).filter(([, n]) => n).map(([k, n]) => `${k} ${n}`).join(", ") : "",
-                  crashes: crashes.length,
-                  platform: `${Platform.OS} ${Platform.Version}`,
-                };
-                try { await shareFeedback(facts); } catch (e) { Alert.alert("Send feedback", "The report could not be written."); }
-              }}>
+              {/* A tester's words, straight to the owner (screens/Feedback.js,
+                  POST /v1/report). */}
+              <Row testID="send-feedback" onPress={() => { onClose(); onFeedback(); }}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.ink, fontSize: 15 }}>Send feedback</Text>
                 </View>
@@ -854,7 +833,8 @@ export default function You({ navigation }) {
       <Settings visible={settings} onClose={() => setSettings(false)}
                 onLab={() => navigation.navigate("SttLab")}
                 onTour={() => navigation.navigate("Tour")}
-                onCredits={() => navigation.navigate("Credits")} />
+                onCredits={() => navigation.navigate("Credits")}
+                onFeedback={() => navigation.navigate("Feedback", { from: "Settings" })} />
     </Screen>
   );
 }

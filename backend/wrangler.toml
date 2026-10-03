@@ -22,7 +22,11 @@ TALK_DAILY_CAP = "240"
 # The owner's own token is outside it. At Haiku's prices this is a few dollars
 # a day at the very worst. Registrations: REGISTER_IP_CAP (5) and
 # REGISTER_DAILY_CAP (100) default in src/index.js and can be set here.
-GLOBAL_DAILY_CAP = "1500"
+# The owner's budget for the public beta (2026-10-03): under $100 a month.
+# The dearest call, a conversation turn, costs about $0.004 at Haiku's prices,
+# so 750 a day is about $3 a day — $90 a month — if every one were the
+# dearest. Most are explanations at a quarter of that.
+GLOBAL_DAILY_CAP = "750"
 # Beta only: an install may switch itself between Free and Premium
 # (POST /v1/plan { set }). Turn this off before Premium is sold —
 # docs/BETA.md, Phase E. GLOBAL_DAILY_CAP above still bounds the spend.

@@ -704,7 +704,7 @@ export function Video({ route, navigation }) {
               What serious learners do by hand across three tools. */}
           {mined[focus.word] ? (
             <Muted testID="mined" style={{ textAlign: "center", marginTop: 10 }}>
-              In your review, from here
+              Added to review
             </Muted>
           ) : (
             <Btn kind="pri" testID="mine" label="Add to review" style={{ marginTop: 8 }}

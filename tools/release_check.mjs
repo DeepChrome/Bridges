@@ -26,9 +26,32 @@ const KEYTOOL = process.env.JAVA_HOME
   ? join(process.env.JAVA_HOME, "bin", "keytool.exe")
   : "keytool";
 
-/* Play's ceiling for the base of an app bundle. An APK is capped far lower
-   (100 MB), which is why the bundle is the format that ships. */
-const AAB_MAX_MB = 150;
+/* Play's ceiling is on what one phone downloads (200 MB since 2022), not on
+   the .aab file: a bundle carries every density and architecture and Play
+   sends each device its slice. The file overstates the download by tens of
+   megabytes — 217 MB of bundle was 167 MB to a phone (2026-10-03) — so the
+   real figure comes from bundletool, the tool Play itself uses. */
+const DOWNLOAD_MAX_MB = 200;
+const BUNDLETOOL = process.env.BUNDLETOOL || "C:/Android/bundletool.jar";
+const JAVA = process.env.JAVA_HOME
+  ? join(process.env.JAVA_HOME, "bin", "java.exe")
+  : "java";
+
+/* The largest download any device configuration gets, in bytes, or an error. */
+function downloadMax(aab) {
+  if (!existsSync(BUNDLETOOL)) return { error: `no bundletool at ${BUNDLETOOL} (set BUNDLETOOL)` };
+  const apks = join(dirname(aab), "size-check.apks");
+  try {
+    execFileSync(JAVA, ["-jar", BUNDLETOOL, "build-apks", `--bundle=${aab}`,
+                        `--output=${apks}`, "--overwrite"], { stdio: "pipe" });
+    const out = execFileSync(JAVA, ["-jar", BUNDLETOOL, "get-size", "total",
+                                    `--apks=${apks}`], { encoding: "utf8" });
+    const max = Number((out.match(/^\s*(\d+),(\d+)/m) || [])[2]);
+    return Number.isFinite(max) ? { max } : { error: `could not read: ${out.trim()}` };
+  } catch (e) {
+    return { error: String(e.message || e).split("\n")[0] };
+  }
+}
 
 let pass = 0, fail = 0, warn = 0;
 const ok = (cond, label, detail) => {
@@ -98,7 +121,12 @@ function check(path, kind) {
   }
   if (s.until) console.log(`  cert  valid until ${s.until}`);
 
-  if (kind === "aab") ok(mb <= AAB_MAX_MB, `under Play's ${AAB_MAX_MB} MB bundle limit`, `${mb.toFixed(1)} MB`);
+  if (kind === "aab") {
+    const d = downloadMax(path);
+    if (d.error) note("could not measure the per-device download", d.error);
+    else ok(d.max / 1e6 <= DOWNLOAD_MAX_MB, `largest device download under Play's ${DOWNLOAD_MAX_MB} MB`,
+            `${(d.max / 1e6).toFixed(1)} MB`);
+  }
 }
 
 /* What the manifest promises, read from app.json rather than the compiled

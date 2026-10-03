@@ -125,7 +125,10 @@ export function Hear({ q, r }) {
       <View style={{ marginTop: 18 }}>
         <RuInput testID="hear-input" value={text} onChangeText={setText} onSubmit={check} />
       </View>
-      <Btn block kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} />
+      {/* Greyed until something is typed: an empty box used to take the press
+          and do nothing, which reads as a frozen screen (the owner,
+          2026-10-03, with the audio gone too). */}
+      <Btn block kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} disabled={!fold(text)} />
     </View>
   );
 }

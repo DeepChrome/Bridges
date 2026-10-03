@@ -67,9 +67,9 @@ export function FormSpeaker({ form, style, testID, children, device = true }) {
      makes it safe to play. Then, with `device={false}`, any recording of the
      spelling at all — right for a word shown on its own (the endings'
      examples), where there is no second stress to confuse it with. Otherwise
-     the phone's voice, with the stress mark. The glyph takes the brand colour
-     for a recording, as `Speaker`'s ring does, so a recording and the phone's
-     voice never look alike (§27). */
+     the phone's voice, with the stress mark. The glyph is the brand colour
+     either way, as `Speaker`'s ring is (the owner, 2026-10-03); the label
+     says when it is the phone's voice. */
   const clip = formClip(form);
   const real = !!clip || (!device && hasRealAudio(form));
   const live = real || voice;
@@ -87,7 +87,7 @@ export function FormSpeaker({ form, style, testID, children, device = true }) {
                                           opacity: pressed ? 0.55 : 1 }, style]}>
       {children}
       {live ? (
-        <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke={real ? t.brandInk : t.ink3}
+        <Svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke={t.brandInk}
              strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
           <Path d="M11 5 6 9H3v6h3l5 4z" />
           <Path d="M15.5 8.5a5 5 0 0 1 0 7" />

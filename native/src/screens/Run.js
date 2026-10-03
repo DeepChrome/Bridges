@@ -187,7 +187,9 @@ function Typed({ q, answered, onAnswer }) {
       <RuInput value={text} onChangeText={setText} editable={!answered} onSubmit={check}
                testID="type-input" />
       {!answered ? (
-        <Btn block kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} />
+        // Greyed until something is typed, as in Hear: a press that does
+        // nothing reads as a frozen screen.
+        <Btn block kind="pri" label="Check" style={{ marginTop: 12 }} onPress={check} disabled={!fold(text)} />
       ) : null}
     </View>
   );

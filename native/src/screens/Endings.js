@@ -60,7 +60,7 @@ function EndingSound({ e }) {
                  opacity: !live ? 0.4 : pressed ? 0.6 : 1 })}>
       <Text style={{ color: t.ink2, fontSize: T.small }}>sounds</Text>
       <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "700" }}>{e.sounds}</Text>
-      <Svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={t.ink3}
+      <Svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke={t.brandInk}
            strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
         <Path d="M11 5 6 9H3v6h3l5 4z" />
         <Path d="M15.5 8.5a5 5 0 0 1 0 7" />

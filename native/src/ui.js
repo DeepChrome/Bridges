@@ -88,7 +88,17 @@ export function Lift({ children, edge, fill, border, r = radius.md, style, flat,
  *
  * `flatten` because a style may be an array, and the weight can be in any of
  * its entries. */
+/* **A text with no colour of its own is the theme's ink, not black** (the
+   owner, 2026-10-03: "the text was black when I thought we already fixed
+   that"). React Native's default is black whatever the theme, so a heading
+   written without a colour vanished on the dark paper — the resume prompt's
+   title, and before it the restore screen. Only the outermost text takes the
+   default: a span inside another text inherits its parent's colour, as a word
+   link inside a brand-coloured sentence must. */
+const InText = React.createContext(false);
 export function Text({ style, children, ...rest }) {
+  const t = useTheme();
+  const nested = React.useContext(InText);
   const flat = StyleSheet.flatten(style) || {};
   /* Labels in words, as a school book writes them: the tracked-out small
      capitals ("VERBS", "THE RULE") become sentence case, in the one place
@@ -99,9 +109,13 @@ export function Text({ style, children, ...rest }) {
      system font — the path's chapter titles and every button came out in
      Roboto while 700 happened to match. */
   const weight = !flat.fontFamily ? { fontWeight: "normal" } : null;
+  const ink = nested || flat.color ? null : { color: t.ink };
   return (
-    <RNText {...rest} style={[style, { fontFamily: flat.fontFamily || faceFor(flat.fontWeight) }, caps, weight]}>
-      {children}
+    <RNText {...rest} style={[ink, style, { fontFamily: flat.fontFamily || faceFor(flat.fontWeight) }, caps, weight]}>
+      {/* Plain strings cannot hold a nested text, so they need no provider
+          (and stay the text's own children, which is what a test reads). */}
+      {nested || typeof children === "string" || typeof children === "number"
+        ? children : <InText.Provider value>{children}</InText.Provider>}
     </RNText>
   );
 }
@@ -1103,13 +1117,15 @@ export function Speaker({ text, size = 40, device = false, speak, recorded = fal
       hitSlop={8}
       style={({ pressed }) => ({
         width: size, height: size, borderRadius: size / 2, borderWidth: 1,
-        borderColor: real ? t.brand : t.line, alignItems: "center",
+        // One look whatever the source (the owner, 2026-10-03: a speaker is a
+        // speaker); the label still says when the phone's voice is reading.
+        borderColor: t.brand, alignItems: "center",
         justifyContent: "center",
         opacity: !live ? 0.35 : pressed ? 0.6 : 1,
       })}
     >
       <Svg width={18} height={18} viewBox="0 0 24 24" fill="none"
-           stroke={real ? t.brandInk : t.ink3} strokeWidth={2}
+           stroke={t.brandInk} strokeWidth={2}
            strokeLinecap="round" strokeLinejoin="round">
         <Path d="M11 5 6 9H3v6h3l5 4z" />
         <Path d="M15.5 8.5a5 5 0 0 1 0 7" />

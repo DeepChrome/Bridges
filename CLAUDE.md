@@ -923,7 +923,10 @@ whole sentences resolve through the same table. `say()` prefers a recording, fal
 back to the device voice, and falls back again if the file fails to play. The rule
 that mattered held: **TTS is never presented as authentic corpus audio** — the button
 is labelled "Hear it (device voice)" and only carries `.real` when a recording backs
-it. Preserve that whenever you touch playback.
+it. Preserve that whenever you touch playback. **On native the distinction lives
+in the label, not the colour** (the owner, 2026-10-03): every speaker wears
+the brand trim whatever the source, and the accessibility label still says
+"(device voice)" when the phone is reading.
 
 Only ship what exists: the build filters the manifest to files actually present, so a
 partial export cannot promise audio the build does not carry. Report real coverage,

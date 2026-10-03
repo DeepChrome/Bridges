@@ -33,7 +33,7 @@ import { makeQuestions, QUIZ_N, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, QU
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
 import { TOPICS, checkGrammar, russianIn, topicFor } from "../core/grammar.js";
-import { wordFacts, conjugation, stemChange, nounStem, genderWhy, stressAt, irregularities } from "../core/facts.js";
+import { wordFacts, conjugation, stemChange, nounStem, genderWhy, stressAt, irregularities, FACT_REFS } from "../core/facts.js";
 import { standardExplanation } from "../core/explain.js";
 import { ENDINGS, checkEndings, rankEndings } from "../core/endings.js";
 import { ambiguousSpellings, spokenKey } from "./build_form_audio.mjs";
@@ -2439,6 +2439,16 @@ group("the facts about a word");
 {
   const by = (b) => L.find((x) => x.b === b);
   const labels = (w) => wordFacts(w).map((f) => f.label);
+
+  /* A fact's pill opens its rule (2026-10-03): every link must land on a
+     section that exists, or the pill is a dead control. */
+  const sectionAt = (topic, heading) => (TOPICS.find((t) => t.id === topic) || { sections: [] })
+    .sections.find((s) => s.heading === heading);
+  const broken = Object.entries(FACT_REFS).filter(([, [topic, heading]]) => !sectionAt(topic, heading));
+  ok(!broken.length, "every fact links to a section of the reference", broken.map(([l]) => l).join(", "));
+  const linked = L.slice(0, 1500).flatMap(wordFacts).filter((f) => f.ref);
+  ok(linked.length > 500 && linked.every((f) => sectionAt(f.ref.topic, f.ref.section)),
+     "and the facts drawn on real words carry those links", String(linked.length));
   const noteFor = (w, label) => (wordFacts(w).find((f) => f.label === label) || {}).note || "";
 
   /* «вре́мя» is neuter and ends in -я. The reason used to be looked up by

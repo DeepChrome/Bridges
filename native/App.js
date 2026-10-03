@@ -499,6 +499,9 @@ function Shell() {
       {/* The player above the tabs too, so an entry's "Heard in" row opens the
           video over the entry and Back returns to the word, not to the library. */}
       <Root.Screen name="Video" component={Video} options={titled("Episode")} />
+      {/* And the grammar reference, so a fact on an entry ("Hard stem",
+          "Masculine") opens its rule over the entry from any tab. */}
+      <Root.Screen name="Grammar" component={Grammar} options={{ title: "Grammar" }} />
       <Root.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
       {/* Developer-mode only; the screen itself refuses to render otherwise. */}
       <Root.Screen name="SttLab" component={SttLab} options={{ title: "STT Lab" }} />

@@ -33,10 +33,6 @@
     {
      "ru": "готовить",
      "en": "to cook"
-    },
-    {
-     "ru": "плохо",
-     "en": "bad, badly"
     }
    ],
    "lines": [
@@ -57,8 +53,8 @@
     },
     {
      "s": "b",
-     "ru": "Хорошо. Но Тортила сегодня приходит к нам на обед.",
-     "en": "All right. But Tortila is coming to us for lunch today."
+     "ru": "Хорошо. Но обед начнётся в час, и Тортила к нам приходит.",
+     "en": "All right. But lunch starts at one, and Tortila is coming to us."
     },
     {
      "s": "a",
@@ -72,8 +68,8 @@
     },
     {
      "s": "c",
-     "ru": "Нежа, что это за запах? Курица почти чёрная!",
-     "en": "Nezha, what's that smell? The chicken is almost black!"
+     "ru": "Нежа, я вернулся, а тут такой запах! Курица почти чёрная!",
+     "en": "Nezha, I'm back, and there's such a smell! The chicken is almost black!"
     },
     {
      "s": "a",
@@ -164,7 +160,7 @@
     }
    ]
   },
-  "core8:6": {
+  "core8:7": {
    "title": "Salt in the holiday dish",
    "cast": [
     {

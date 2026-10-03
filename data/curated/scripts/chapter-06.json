@@ -31,10 +31,6 @@
      "en": "hour"
     },
     {
-     "ru": "любой",
-     "en": "any"
-    },
-    {
      "ru": "маленький",
      "en": "little"
     },
@@ -163,7 +159,7 @@
     }
    ]
   },
-  "core6:7": {
+  "core6:6": {
    "title": "Breakfast before the lesson",
    "cast": [
     {

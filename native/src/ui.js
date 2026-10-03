@@ -20,6 +20,7 @@ import { useTheme, radius, space, type, faceFor, useShadow } from "./theme";
 import { useFill, usePress, useEnter } from "./motion";
 import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
 import { MicButton } from "./mic";
+import { Linked } from "./words";
 
 /* How deep a control's edge is, and how far it travels when pressed. One
    number, so a quiz answer and the primary button are pressed by the same
@@ -1255,7 +1256,11 @@ export function SenseList({ senses, size = 15, style, max, brief, testID }) {
                              borderLeftColor: t.lineSoft, flexDirection: "row",
                              alignItems: "center", gap: 8 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: size - 1 }}>{x.ru}</Text>
+                  {/* Word-linked like every other Russian sentence in the app
+                      (the owner, 2026-10-03: "in example sentences on cards…
+                      the words are not clickable"). Read at render, so the
+                      circular import with words.js resolves. */}
+                  <Linked text={x.ru} size={size - 1} />
                   <Text style={{ color: t.ink3, fontSize: size - 2 }}>{x.en}</Text>
                 </View>
                 <Speaker text={x.ru} size={32} />

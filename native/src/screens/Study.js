@@ -570,18 +570,35 @@ const faceSize = (face) => (face.sentence ? (face.w.length > 46 ? 20 : 24)
 /* The card's front, by direction: the Russian, its meaning, or only the sound.
    A sentence is plain text here and word-linked on the back — tapping a word
    before answering would hand over the answer. */
+/* The meaning, as the English side of a card: the first sense large — it is
+   the side the learner starts from on a produce card, and the starting side
+   is always the large text (the owner, 2026-10-03: "it helps anchor and
+   orient everything") — and any other senses small beneath it, since the
+   question is "which word means all of these?". A sentence's translation is
+   one line. */
+function Meaning({ face }) {
+  const t = useTheme();
+  if (face.sentence) {
+    return <Text testID="card-meaning-front" style={{ color: t.ink, fontSize: 22, fontWeight: "600",
+                                                       textAlign: "center" }}>{face.e || "—"}</Text>;
+  }
+  const groups = String(face.e || "").split(";").map((s) => s.trim()).filter(Boolean);
+  if (!groups.length) return <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600" }}>—</Text>;
+  return (
+    <View style={{ alignItems: "center", gap: 4 }}>
+      <Text testID="card-meaning-front"
+            style={{ color: t.ink, fontWeight: "600", textAlign: "center",
+                     fontSize: groups[0].length > 22 ? 24 : 30 }}>{groups[0]}</Text>
+      {groups.length > 1 ? (
+        <Muted style={{ textAlign: "center" }}>{groups.slice(1, 4).join("; ")}</Muted>
+      ) : null}
+    </View>
+  );
+}
+
 function Front({ face, direction }) {
   const t = useTheme();
-  if (direction === "produce") {
-    // Meaning first: the same numbered senses, since the question is "which
-    // word means all of these?" and one of nine synonyms is a different question.
-    // A sentence has a translation rather than senses, so it reads as one line.
-    if (face.sentence) {
-      return <Text style={{ color: t.ink, fontSize: 20, textAlign: "center" }}>{face.e || "—"}</Text>;
-    }
-    return face.e ? <Senses e={face.e} size={20} style={{ marginTop: 0 }} />
-                  : <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600" }}>—</Text>;
-  }
+  if (direction === "produce") return <Meaning face={face} />;
   if (direction === "listen") {
     return (
       <View style={{ alignItems: "center", paddingVertical: 12 }}>
@@ -1058,53 +1075,46 @@ export default function Study({ navigation, route }) {
               </Muted>
             ) : !flip.face ? <Front face={face} direction={item.direction} /> : (
               <>
-                {item.direction !== "recognise" ? (
+                {/* **Both sides on the back, the starting side on top and
+                    large** (the owner, 2026-10-03: "both english and russian
+                    on the back, and then whatever their starting point is on
+                    the front. The starting point should always be the larger
+                    text"). The front shows only its own side, so the answer is
+                    never on it. The Russian is word-linked here — tapping a
+                    word before answering would have handed over the answer —
+                    and can always be heard (2026-09-24). */}
+                {item.direction === "produce" ? (
                   <>
-                    {/* Word-linked once it has been answered: the sentence is
-                        the reason to study a sentence, and a word inside it
-                        that the learner did not know is one tap from its
-                        entry (§26 — vocabulary lives in context). */}
-                    {face.sentence
-                      ? <Linked text={face.w} size={faceSize(face)} />
-                      : (
-                        <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center", fontSize: faceSize(face) }}>
-                          {face.w}
-                        </Text>
-                      )}
-                    <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
+                    <Meaning face={face} />
+                    <View testID="card-russian" style={{ alignItems: "center", alignSelf: "stretch", marginTop: 14 }}>
+                      {face.sentence
+                        ? <Linked text={face.w} size={18} />
+                        : <Text style={{ color: t.ink2, fontWeight: "600", textAlign: "center", fontSize: 22 }}>{face.w}</Text>}
+                      <View style={{ marginTop: 8 }}><Speaker text={face.b} /></View>
+                    </View>
                   </>
                 ) : (
                   <>
+                    <View testID="card-russian" style={{ alignItems: "center", alignSelf: "stretch" }}>
+                      {face.sentence
+                        ? <Linked text={face.w} size={faceSize(face)} />
+                        : <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center", fontSize: faceSize(face) }}>{face.w}</Text>}
+                      <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
+                    </View>
+                    {/* Every meaning the word has, numbered as a dictionary
+                        lays them (§30q), four at most — the full entry is one
+                        press away below. Where there are no senses (2% of the
+                        curriculum, every deck card) the translation stands on
+                        its own. A sentence's English is its answer, in ink. */}
                     {face.sentence ? (
-                      // Shown on the front already, but as plain text; the linked
-                      // copy is what makes its words reachable.
-                      <View style={{ alignSelf: "stretch", marginTop: 4 }}>
-                        <Linked text={face.w} size={faceSize(face)} />
-                      </View>
-                    ) : null}
-                    {/* The Russian can be heard from the back as well as the
-                        front (the owner, 2026-09-24) — always the Russian,
-                        never the meaning. */}
-                    <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
-                  </>
-                )}
-                {/* Every meaning the word has, numbered and laid out as a
-                    dictionary lays them (§30q) — labels and all. Where there are
-                    no senses for a word (2% of the curriculum, and every deck
-                    card) the translation stands on its own, which is all there
-                    is to show. Four at most here: the card is a card, and the
-                    full entry is one press away below. */}
-                {/* A sentence's English is the answer on its back, so it reads
-                    as one — ink, not a grey footnote under the Russian. */}
-                {face.sentence ? (
-                  item.direction === "produce" ? null
-                    : <Text testID="card-meaning"
+                      <Text testID="card-meaning"
                             style={{ color: t.ink, fontSize: 18, marginTop: 12, textAlign: "center" }}>
                         {face.e || "—"}
                       </Text>
-                ) : item.direction === "produce" && !senses ? null
-                  : senses ? <SenseList senses={senses} size={16} max={4} brief style={{ marginTop: 10 }} />
-                  : <Senses e={face.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
+                    ) : senses ? <SenseList senses={senses} size={16} max={4} brief style={{ marginTop: 10 }} />
+                      : <Senses e={face.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
+                  </>
+                )}
                 {(face.x || []).slice(0, 3).map((ex, k) => (
                   // The word in use, three ways: the entry reads like a dictionary,
                   // not a gloss (the owner, 2026-09-07).

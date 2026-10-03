@@ -50,14 +50,17 @@ export const RUNS = [
  * still where the learner left it. */
 export const PROFILE_SCREENS = ["You", "Stats", "Credits"];
 
-/* How many profile screens sit on top of a stack's state — the number to pop
-   so a tab press lands on the tab's own screen. Never the stack's first
-   screen, which a stack cannot pop. */
+/* How many screens to pop so a tab press lands on the tab's own screen: the
+   first profile screen in the stack and everything above it. Counting only
+   profile screens on top missed a profile with something opened over it — a
+   grammar page from a fact, a word from the trouble list — and the profile
+   came back with the tab (the owner, 2026-10-03: "sometimes when I click a
+   tab, it takes me to the profile instead… Click study or any tab shouldn't
+   take me there"). Never the stack's first screen, which cannot be popped. */
 export function profileDepth(state) {
   if (!state || !Array.isArray(state.routes)) return 0;
-  let n = 0;
-  for (let i = state.routes.length - 1; i > 0 && PROFILE_SCREENS.includes(state.routes[i].name); i--) n++;
-  return n;
+  const first = state.routes.findIndex((r, i) => i > 0 && PROFILE_SCREENS.includes(r.name));
+  return first > 0 ? state.routes.length - first : 0;
 }
 
 /* The screens that keep the bar: the ones you choose from.

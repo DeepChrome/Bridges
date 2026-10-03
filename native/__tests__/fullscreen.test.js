@@ -79,6 +79,10 @@ describe("a tab press past a profile left open", () => {
   it("pops the profile and what opened from it", () => {
     expect(profileDepth(st("Path", "You"))).toBe(1);
     expect(profileDepth(st("Path", "You", "Stats"))).toBe(2);
+    // Something opened over the profile goes with it, or the profile comes
+    // back with the tab (2026-10-03).
+    expect(profileDepth(st("Path", "You", "Grammar"))).toBe(2);
+    expect(profileDepth(st("Path", "You", "Stats", "Unit"))).toBe(3);
   });
   it("leaves a lesson under the profile where the learner left it", () => {
     expect(profileDepth(st("Path", "Unit", "Lesson", "You"))).toBe(1);

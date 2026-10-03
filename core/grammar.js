@@ -31,6 +31,11 @@
  * and the lesson cannot come to disagree (§22).
  */
 
+/* `page: true` on a section gives it a screen of its own: the topic lists it
+   as a row instead of drawing it inline. The six cases are each one (the
+   owner, 2026-10-03: "break the page for cases into sub categories one per
+   case rather than throwing it all on one page"). */
+
 /* The most a `rule` may run to. A rule that needs more than this is two rules,
    or it wants a table. */
 export const RULE_WORDS = 22;
@@ -150,6 +155,15 @@ export const TOPICS = [
           ["хоро́шее ме́сто", "a good place — unstressed, so е"],
         ],
       },
+      {
+        heading: "A vowel that drops out",
+        rule: "In some nouns the last о or е of the stem disappears once any ending is added.",
+        examples: [
+          ["день — дня", "a day — of a day"],
+          ["оте́ц — отца́", "a father — of a father"],
+          ["сон — сна", "a dream — of a dream"],
+        ],
+      },
     ],
   },
 
@@ -172,7 +186,7 @@ export const TOPICS = [
         ],
       },
       {
-        heading: "Nominative",
+        heading: "Nominative", page: true,
         rule: "The subject, and the form a dictionary lists. It is the word before anything happens to it.",
         uses: [
           "Who or what is doing the verb",
@@ -183,7 +197,7 @@ export const TOPICS = [
         cards: ["core1"],
       },
       {
-        heading: "Accusative",
+        heading: "Accusative", page: true,
         rule: "The direct object: the thing the verb is done to.",
         uses: [
           "What the verb acts on",
@@ -205,7 +219,7 @@ export const TOPICS = [
         cards: ["core6", "animals"],
       },
       {
-        heading: "Genitive",
+        heading: "Genitive", page: true,
         rule: "Of, belonging to, and absent. It has more jobs than any other case.",
         uses: [
           "Of, and belonging to",
@@ -231,7 +245,7 @@ export const TOPICS = [
         cards: ["work", "politics", "time", "animals"],
       },
       {
-        heading: "Dative",
+        heading: "Dative", page: true,
         rule: "To whom, and for whom: the person something is given, said or shown to.",
         uses: [
           "The indirect object — to whom",
@@ -253,7 +267,7 @@ export const TOPICS = [
         cards: ["emotion", "tech"],
       },
       {
-        heading: "Instrumental",
+        heading: "Instrumental", page: true,
         rule: "By, with, using — and what someone is or has become.",
         uses: [
           "The tool something is done with",
@@ -276,7 +290,7 @@ export const TOPICS = [
         cards: ["military", "law", "science"],
       },
       {
-        heading: "Prepositional",
+        heading: "Prepositional", page: true,
         rule: "The only case that never appears without a preposition in front of it.",
         uses: [
           "After в and на meaning where",

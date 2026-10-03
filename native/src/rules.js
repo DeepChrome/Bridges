@@ -25,7 +25,7 @@ import { View, ScrollView, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
 import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, useRussianVoice, Marked } from "./ui";
-import { Linked } from "./words";
+import { Linked, navRef } from "./words";
 import { say, hasRealAudio } from "./audio";
 /* The form table is 9,579 asset requires. Loaded on the first table that
    speaks, not at boot: most sessions never open one, and in jest the first
@@ -272,10 +272,13 @@ export function Examples({ examples, line }) {
 export function TopicSection({ section, cards, testID }) {
   const t = useTheme();
   return (
-    <View testID={testID} style={{ marginTop: 22 }}>
-      <Text style={{ color: t.ink, fontSize: T.head, fontWeight: "700" }}>
-        {section.heading}
-      </Text>
+    <View testID={testID} style={{ marginTop: section.heading ? 22 : 6 }}>
+      {/* No heading on a section that is a page of its own: the page title is it. */}
+      {section.heading ? (
+        <Text style={{ color: t.ink, fontSize: T.head, fontWeight: "700" }}>
+          {section.heading}
+        </Text>
+      ) : null}
       <Note text={section.rule} color={t.ink2} style={{ marginTop: 4 }} />
       {section.uses ? (
         <View style={{ marginTop: 10, gap: 6 }}>
@@ -315,6 +318,13 @@ export function TopicSection({ section, cards, testID }) {
    feminine etc."* A table says what the form is; these say why, which is the
    half that transfers to the next word. A pill and one sentence each, never a
    paragraph. */
+/* A fact's pill opens the reference section that explains it (`ref`, from
+   core/facts.js FACT_REFS), over whatever screen it is on: the Grammar route
+   is on the Root stack, so a navigate from any tab finds it. */
+const openRule = (ref) => {
+  if (ref && navRef.isReady()) navRef.navigate("Grammar", { topic: ref.topic, section: ref.section, only: true });
+};
+
 export function Facts({ facts, testID }) {
   const t = useTheme();
   if (!facts || !facts.length) return null;
@@ -326,15 +336,22 @@ export function Facts({ facts, testID }) {
           {/* A rule-breaker is drawn apart (2026-09-29): an amber edge — the
               `warn` token is audited as a stroke, not as text — around ink,
               so what does not follow the pattern is the first thing seen. */}
-          <View style={{ backgroundColor: f.irregular ? t.surface : t.brandBg,
+          <Pressable testID={f.ref ? `fact-${f.label}` : undefined}
+                     onPress={f.ref ? () => openRule(f.ref) : undefined}
+                     accessibilityRole={f.ref ? "link" : undefined}
+                     accessibilityLabel={f.ref ? `${f.label}, read the rule` : undefined}
+                     hitSlop={8}
+                     style={({ pressed }) => ({ backgroundColor: f.irregular ? t.surface : t.brandBg,
                          borderColor: f.irregular ? t.warn : t.brandDim, borderWidth: f.irregular ? 2 : 1,
                          borderRadius: radius.sm, paddingHorizontal: 8, paddingVertical: 3,
-                         minWidth: 92 }}>
+                         minWidth: 92, opacity: pressed && f.ref ? 0.6 : 1,
+                         flexDirection: "row", alignItems: "center", gap: 4 })}>
             <Text style={{ color: f.irregular ? t.ink : t.brandInk, fontSize: T.tiny, fontWeight: "700",
-                           textTransform: "uppercase", letterSpacing: 0.5 }}>
+                           textTransform: "uppercase", letterSpacing: 0.5,
+                           textDecorationLine: f.ref ? "underline" : "none" }}>
               {f.label}
             </Text>
-          </View>
+          </Pressable>
           <Note text={f.note} color={t.ink2} size={T.small + 1} style={{ flex: 1 }} gap={4} />
         </View>
       ))}

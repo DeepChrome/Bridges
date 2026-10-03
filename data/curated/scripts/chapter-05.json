@@ -201,10 +201,6 @@
      "en": "December"
     },
     {
-     "ru": "надо",
-     "en": "have to"
-    },
-    {
      "ru": "держать",
      "en": "to hold"
     }
@@ -242,8 +238,8 @@
     },
     {
      "s": "b",
-     "ru": "Один рубль за весь мешок?",
-     "en": "One rouble for the whole bag?"
+     "ru": "Одного рубля достаточно за весь мешок?",
+     "en": "Is one rouble enough for the whole bag?"
     },
     {
      "s": "c",
@@ -257,8 +253,8 @@
     },
     {
      "s": "a",
-     "ru": "Тедди, рубль пока храню я. Я иду в банк.",
-     "en": "Teddy, I'll keep the rouble for now. I'm going to the bank."
+     "ru": "Тедди, подойди. Рубль пока храню я. Я иду в банк.",
+     "en": "Teddy, come here. I'll keep the rouble for now. I'm going to the bank."
     },
     {
      "s": "c",

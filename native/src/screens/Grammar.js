@@ -86,9 +86,48 @@ export default function Grammar({ route, navigation }) {
 
   /* A link from a wrong answer names the section that states the rule
      (core/explain.js, 2026-09-29). That section comes first, set apart by a
-     brand edge, and the topic follows in its own order without it. */
+     brand edge, and the topic follows in its own order without it. A section
+     that is a page of its own (one per case) opens as that page instead. */
   const want = route && route.params ? route.params.section : null;
   const first = want ? open.sections.findIndex((s) => s.heading === want) : -1;
+  const pages = open.sections.filter((s) => s.page);
+  /* `only`: a fact on an entry opened this section by itself (core/facts.js
+     FACT_REFS) — the rule on its own page, with the rest of its topic a tap
+     away. */
+  const only = !!(route && route.params && route.params.only);
+  const page = first >= 0 && (open.sections[first].page || only) ? open.sections[first] : null;
+  const openPage = (heading) => navigation.push("Grammar", { topic: open.id, section: heading });
+
+  if (page) {
+    const k = pages.indexOf(page);
+    const prev = k >= 0 ? pages[k - 1] : null, next = k >= 0 ? pages[k + 1] : null;
+    return (
+      <Screen>
+        <Muted testID="page-topic">{open.title}</Muted>
+        <Title>{page.heading}</Title>
+        <TopicSection section={{ ...page, heading: "" }} cards={cardsFor(page)} testID="page-section" />
+        {/* The case before and the case after, so the six read as a set. */}
+        <List>
+          {prev ? (
+            <Row testID="page-prev" onPress={() => navigation.replace("Grammar", { topic: open.id, section: prev.heading })}>
+              <Text style={{ flex: 1, color: t.brandInk, fontSize: T.body, fontWeight: "700" }}>{`‹ ${prev.heading}`}</Text>
+            </Row>
+          ) : null}
+          {next ? (
+            <Row testID="page-next" onPress={() => navigation.replace("Grammar", { topic: open.id, section: next.heading })}>
+              <Text style={{ flex: 1, color: t.brandInk, fontSize: T.body, fontWeight: "700", textAlign: "right" }}>{`${next.heading} ›`}</Text>
+            </Row>
+          ) : null}
+          {k < 0 ? (
+            <Row testID="page-topic-all" onPress={() => navigation.push("Grammar", { topic: open.id })}>
+              <Text style={{ flex: 1, color: t.brandInk, fontSize: T.body, fontWeight: "700" }}>{`All of ${open.title}`}</Text>
+            </Row>
+          ) : null}
+        </List>
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
       <Title>{open.title}</Title>
@@ -99,9 +138,27 @@ export default function Grammar({ route, navigation }) {
                         testID={`section-${first}`} />
         </View>
       ) : null}
-      {open.sections.map((s, k) => (k === first ? null : (
-        <TopicSection key={k} section={s} cards={cardsFor(s)} testID={`section-${k}`} />
-      )))}
+      {open.sections.map((s, k) => {
+        if (k === first) return null;
+        /* The pages, as one list where the first of them stands, each with
+           its one-line rule under its name. */
+        if (s.page) {
+          if (s !== pages[0]) return null;
+          return (
+            <List key={k}>
+              {pages.map((p) => (
+                <Row key={p.heading} testID={`page-${p.heading}`} onPress={() => openPage(p.heading)}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "700" }}>{p.heading}</Text>
+                    <Muted numberOfLines={2}>{p.rule}</Muted>
+                  </View>
+                </Row>
+              ))}
+            </List>
+          );
+        }
+        return <TopicSection key={k} section={s} cards={cardsFor(s)} testID={`section-${k}`} />;
+      })}
       {/* Back to the list, in the list's own place rather than as a header
           control: this screen is two screens deep in one route, and the
           navigator's back arrow leaves Grammar altogether. */}

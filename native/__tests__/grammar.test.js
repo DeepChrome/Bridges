@@ -70,14 +70,31 @@ describe("the grammar reference", () => {
     expect(screen.getByTestId("topics-back")).toBeTruthy();
   });
 
-  it("opens straight at the topic the bulb asked for", async () => {
-    await withProfile(<Grammar route={{ params: { topic: "cases" } }} />);
+  /* One page per case (the owner, 2026-10-03: "break the page for cases into
+     sub categories one per case rather than throwing it all on one page"). */
+  it("lists the six cases as pages, each opening on its own", async () => {
+    const push = jest.fn();
+    await withProfile(<Grammar route={{ params: { topic: "cases" } }} navigation={{ ...nav, push }} />);
     expect(await screen.findByText("The six cases")).toBeTruthy();
+    for (const c of ["Nominative", "Accusative", "Genitive", "Dative", "Instrumental", "Prepositional"]) {
+      expect(screen.getByTestId(`page-${c}`)).toBeTruthy();
+    }
+    // The cases' own lists are on their pages, not here.
+    expect(screen.queryByText("After нет — the thing that is missing")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("page-Genitive")); });
+    expect(push).toHaveBeenCalledWith("Grammar", { topic: "cases", section: "Genitive" });
+  });
+
+  it("draws one case as a page, with the case before and after", async () => {
+    const replace = jest.fn();
+    await withProfile(<Grammar route={{ params: { topic: "cases", section: "Genitive" } }}
+                               navigation={{ ...nav, replace }} />);
     /* "When do I use the genitive" is the question this exists to answer, and
-       the answer is a list rather than a paragraph. ("Genitive" itself is on
-       the screen twice — as the section and as a row of the plural table —
-       which is the reference doing its job.) */
-    expect(screen.getByText("After нет — the thing that is missing")).toBeTruthy();
+       the answer is a list rather than a paragraph. */
+    expect(await screen.findByText("After нет — the thing that is missing")).toBeTruthy();
+    expect(screen.getByTestId("page-prev")).toHaveTextContent(/Accusative/);
+    await act(async () => { fireEvent.press(screen.getByTestId("page-next")); });
+    expect(replace).toHaveBeenCalledWith("Grammar", { topic: "cases", section: "Dative" });
   });
 
   it("draws the course's own card rather than restating it", async () => {

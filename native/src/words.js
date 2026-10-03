@@ -21,7 +21,7 @@ import { View } from "react-native";
 import { createNavigationContainerRef, StackActions, CommonActions } from "@react-navigation/native";
 import { useTheme } from "./theme";
 import { Sheet, Btn, Senses, Text, Speaker } from "./ui";
-import { L, IX } from "./data";
+import { L, IX, deepFormOf, resolveWord } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise } from "@core/forms";
 import { WordEntry } from "./screens/Word";
@@ -42,6 +42,20 @@ export function lookup(surface) {
   return hit && hit.length ? hit[0] : null;
 }
 
+/* The entry a surface form opens: a course word by its index, or — every
+   other word the app shows (2026-10-03: "any word used… should be available
+   in the dictionary") — the dictionary's own headword (`deepFormOf`). Null
+   when neither knows it, and then it is not a link. */
+export function entryOf(surface) {
+  const i = lookup(surface);
+  if (i !== null) return { w: L[i], key: L[i].b };
+  const deep = deepFormOf(surface);
+  if (!deep) return null;
+  const w = resolveWord(deep.word, deep.pos);
+  return w ? { w, key: w.b, pos: deep.pos } : null;
+}
+const linkable = (surface) => lookup(surface) !== null || deepFormOf(surface) !== null;
+
 /* Split a sentence into runs, marking the ones the lexicon recognises. A fresh
    regex per call: TOKEN is global, and a shared lastIndex silently drops matches. */
 export function splitTokens(text) {
@@ -51,7 +65,7 @@ export function splitTokens(text) {
   while ((m = re.exec(text || "")) !== null) {
     if (m.index > last) out.push({ text: text.slice(last, m.index) });
     const i = lookup(m[0]);
-    out.push(i === null ? { text: m[0] } : { text: m[0], i });
+    out.push(i !== null ? { text: m[0], i } : linkable(m[0]) ? { text: m[0], i: -1 } : { text: m[0] });
     last = m.index + m[0].length;
   }
   if (last < (text || "").length) out.push({ text: text.slice(last) });
@@ -91,8 +105,8 @@ export function Linked({ text, style, size = 17, color, testID }) {
 function WordSheet({ state, onClose, onFull }) {
   const t = useTheme();
   if (!state) return null;
-  const { index, surface } = state;
-  const lemma = L[index];
+  const { entry, surface } = state;
+  const lemma = entry.w;
   /* The full entry as a sheet: the second tap before there is a navigator to
      push the Word screen onto — the tour runs before the first profile exists
      (Intro.js). The same component the screen draws, so it is one entry, not
@@ -101,7 +115,7 @@ function WordSheet({ state, onClose, onFull }) {
   if (state.full) {
     return (
       <Sheet onClose={onClose} maxHeight="92%" testID="word-full-sheet">
-        <WordEntry w={lemma} index={index} navigation={null} />
+        <WordEntry w={lemma} navigation={null} />
       </Sheet>
     );
   }
@@ -175,37 +189,42 @@ function WordSheet({ state, onClose, onFull }) {
  * route *is* Word, which means the focused navigator is the Root stack that
  * owns it — nothing depends on an action bubbling up through the tabs.
  * Exported for the test. */
-export function wordAction(current, word) {
+export function wordAction(current, word, pos) {
+  const params = pos ? { word, pos } : { word };
   return current && current.name === "Word"
-    ? StackActions.push("Word", { word })
-    : CommonActions.navigate("Word", { word });
+    ? StackActions.push("Word", params)
+    : CommonActions.navigate("Word", params);
 }
 
 export function WordsProvider({ children }) {
   const [state, setState] = useState(null);
   const showing = useRef(null);
 
-  const openFull = useCallback((index) => {
+  /* `target` is a course word's index (the runner's bulb passes one) or an
+     entry from `entryOf`, which also covers the dictionary's other words. */
+  const openFull = useCallback((target) => {
     showing.current = null;
+    const entry = typeof target === "number" ? { w: L[target], key: L[target].b } : target;
+    if (!entry || !entry.w) return;
     /* By word, not by index — see the note in Word.js. `isReady` alone is not
        enough: the container is mounted before any navigator is (the gate, the
        tour), and a navigate then does nothing at all. With no current route
        the entry opens as a sheet instead (WordSheet). */
     if (navRef.isReady() && navRef.getCurrentRoute()) {
       setState(null);
-      navRef.dispatch(wordAction(navRef.getCurrentRoute(), L[index].b));
+      navRef.dispatch(wordAction(navRef.getCurrentRoute(), entry.key, entry.pos));
     } else {
-      setState({ index, surface: null, full: true });
+      setState({ entry, surface: null, full: true });
     }
   }, []);
 
   const open = useCallback((surface) => {
-    const index = lookup(surface);
-    if (index === null) return;
+    const entry = entryOf(surface);
+    if (!entry) return;
     // The second tap on the same word is the way through to the full entry.
-    if (showing.current === index) { openFull(index); return; }
-    showing.current = index;
-    setState({ index, surface });
+    if (showing.current === entry.key) { openFull(entry); return; }
+    showing.current = entry.key;
+    setState({ entry, surface });
   }, [openFull]);
 
   const value = useMemo(() => ({ open, openFull, lookup }), [open, openFull]);
@@ -216,7 +235,7 @@ export function WordsProvider({ children }) {
       <WordSheet
         state={state}
         onClose={() => { setState(null); showing.current = null; }}
-        onFull={() => state && openFull(state.index)}
+        onFull={() => state && openFull(state.entry)}
       />
     </Ctx.Provider>
   );

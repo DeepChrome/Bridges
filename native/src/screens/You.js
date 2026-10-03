@@ -11,7 +11,7 @@ import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Shee
 import { CharacterPicker } from "./Gate";
 import { plan as askPlan, setPlan } from "../lib/feedback";
 import { PLANS, PLAN_NAMES, ALLOWANCE_LINES, planOf } from "@core/plans";
-import { L, UN, STATS, idxOfWord, lessonCount, lessonDone, dueCount } from "../data";
+import { L, UN, STATS, STAGES, idxOfWord, lessonCount, lessonDone, lessonWords, dueCount, chapterOf } from "../data";
 import { CUE_NAMES, WRONG_NAMES, SPEEDS, previewCue, rightCueOf, wrongCueOf } from "../audio";
 import { backupProfile, restoreProfile, shareCrashes, shareFeedback } from "../backup";
 import { Platform } from "react-native";
@@ -54,6 +54,45 @@ export function grammarTrouble(st) {
     .map((id) => ({ id, n: counts[id], info: tagInfo(id) }))
     .filter((x) => x.info && x.n > 0)
     .sort((a, b) => b.n - a.n || a.id.localeCompare(b.id));
+}
+
+/* What the learner has, and what they should have by now (the owner,
+   2026-10-03: "words learned and lessons cleared can also be clickable and
+   show all completed words… at the top, there can be a recommendation for
+   where the holes are (something they should have learned by that point)").
+ *
+ * A word is learned once its card has left the learning steps (the "words
+ * learned" figure). A gap is a word of a lesson the learner has finished that
+ * is not learned yet — never answered, still on its steps, or forgotten — in
+ * route order, so the first gaps are the oldest. Exported for the test. */
+const isLearned = (st, b) => !!(st.seen && st.seen[b]) && cardFor(st.seen[b]).state === REVIEW;
+export function learnedByUnit(st) {
+  const out = [], placed = new Set();
+  for (const u of UN) {
+    const words = (u.w || []).filter((i) => L[i] && isLearned(st, L[i].b));
+    words.forEach((i) => placed.add(L[i].b));
+    if (words.length) out.push({ unit: u, words });
+  }
+  // Learned outside the course: a deck's cards, a word added from a video.
+  const other = Object.keys(st.seen || {}).filter((b) => !/\s/.test(b) && !placed.has(b) && isLearned(st, b));
+  return { units: out, other };
+}
+export function gapsOf(st) {
+  const out = [];
+  for (const u of UN) {
+    for (let k = 0; k < lessonCount(u); k++) {
+      if (!lessonDone(st, u, k)) continue;
+      for (const i of lessonWords(u, k)) if (L[i] && !isLearned(st, L[i].b)) out.push(i);
+    }
+  }
+  return out;
+}
+export function finishedLessons(st) {
+  return UN.map((u) => {
+    const done = [];
+    for (let k = 0; k < lessonCount(u); k++) if (lessonDone(st, u, k)) done.push(k + 1);
+    return { unit: u, done, of: lessonCount(u) };
+  }).filter((x) => x.done.length);
 }
 
 /* One figure in a band of four.
@@ -643,8 +682,10 @@ export default function You({ navigation }) {
         {/* The streak opens the statistics, which open on the days studied. */}
         <Stat first testID="stat-streak" value={String(st.streak || 0)} label="day streak"
               onPress={() => navigation.navigate("Stats")} />
-        <Stat value={learned.toLocaleString("en-US")} label="words learned" />
-        <Stat value={String(lessons)} label="lessons cleared" />
+        <Stat testID="stat-learned" value={learned.toLocaleString("en-US")} label="words learned"
+              onPress={() => setShowing("learned")} />
+        <Stat testID="stat-lessons" value={String(lessons)} label="lessons cleared"
+              onPress={() => setShowing("lessons")} />
         {/* "due now" said nothing about what was due (the owner, 2026-09-29).
             It is the flashcards waiting today — the Study badge's number — and
             a tap goes there. */}
@@ -728,6 +769,71 @@ export default function You({ navigation }) {
           )}
         </Sheet>
       ) : null}
+
+      {showing === "learned" ? (() => {
+        const gaps = gapsOf(st);
+        const { units, other } = learnedByUnit(st);
+        return (
+          <Sheet testID="learned-sheet" title={`${learned} words learned`} onClose={() => setShowing(null)}>
+            {/* The holes first: what a finished lesson taught that has not
+                stuck, with one way to fix it. */}
+            {gaps.length ? (
+              <View testID="gaps" style={{ padding: 12, borderRadius: radius.md, backgroundColor: t.brandBg,
+                                           marginBottom: 16, gap: 8 }}>
+                <Text style={{ color: t.ink, fontWeight: "700" }}>
+                  {`${gaps.length} ${gaps.length === 1 ? "word" : "words"} from finished lessons to firm up`}
+                </Text>
+                <Muted numberOfLines={2}>{gaps.slice(0, 10).map((i) => L[i].b).join(", ")}</Muted>
+                <Btn kind="pri" testID="gaps-study" label="Study them"
+                     onPress={() => {
+                       setShowing(null);
+                       toCards({ round: "list", words: gaps.slice(0, 50).map((i) => L[i].b), title: "Gaps" });
+                     }} />
+              </View>
+            ) : null}
+            {!units.length && !other.length ? <Muted>Nothing learned yet</Muted> : null}
+            {units.map(({ unit, words }) => (
+              <View key={unit.id} style={{ marginBottom: 12 }}>
+                <SectionLabel>{`${unit.name} · ${words.length}`}</SectionLabel>
+                <Text style={{ color: t.ink, lineHeight: 24 }}>
+                  {words.map((i) => L[i].b).join(", ")}
+                </Text>
+              </View>
+            ))}
+            {other.length ? (
+              <View style={{ marginBottom: 12 }}>
+                <SectionLabel>{`Other · ${other.length}`}</SectionLabel>
+                <Text style={{ color: t.ink, lineHeight: 24 }}>{other.join(", ")}</Text>
+              </View>
+            ) : null}
+          </Sheet>
+        );
+      })() : null}
+
+      {showing === "lessons" ? (() => {
+        const done = finishedLessons(st);
+        return (
+          <Sheet testID="lessons-sheet" title={`${lessons} lessons cleared`} onClose={() => setShowing(null)}>
+            {!done.length ? <Muted>No lessons finished yet</Muted> : (
+              <List>
+                {done.map(({ unit, done: ks, of }) => {
+                  const stage = chapterOf(unit.id);
+                  const n = stage ? STAGES.indexOf(stage) + 1 : null;
+                  return (
+                    <Row key={unit.id} onPress={() => { setShowing(null); openUnit(unit.id); }}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: t.ink, fontSize: 15 }}>{unit.name}</Text>
+                        {n ? <Muted>{`Chapter ${n}`}</Muted> : null}
+                      </View>
+                      <Pill tone={ks.length === of ? "good" : undefined}>{`${ks.length}/${of}`}</Pill>
+                    </Row>
+                  );
+                })}
+              </List>
+            )}
+          </Sheet>
+        );
+      })() : null}
 
       {/* What the tutor has kept about this learner (§30aw `remember`) — the
           one piece of personal feedback nothing else in the app showed. */}

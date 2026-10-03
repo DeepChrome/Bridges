@@ -193,6 +193,21 @@ export const resolveWord = (w, pos) => {
   return hit ? hydrate(hit) : null;
 };
 
+/* A form in the app's text that is not a course word, to its dictionary
+   headword and part of speech (build_site.py `build_deep_forms`): what makes
+   «палатку» in a sentence a link to «палатка». Required on the first tap of
+   such a word. Null when the dictionary has nothing for it. */
+let deepForms = null;
+export function deepFormOf(surface) {
+  if (!deepForms) {
+    try { deepForms = require("../assets/deepforms.json") || {}; } catch (e) { deepForms = {}; }
+  }
+  const hit = deepForms[fold(surface || "")];
+  if (!hit) return null;
+  const bar = hit.lastIndexOf("|");
+  return { word: hit.slice(0, bar), pos: hit.slice(bar + 1) };
+}
+
 /* Which chapter a unit belongs to — the spine unit that opens it, or any of its
    themed units. Used by the headers so a screen can say where the learner is. */
 export function chapterOf(unitId) {

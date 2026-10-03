@@ -31,10 +31,6 @@
      "en": "nut"
     },
     {
-     "ru": "решать",
-     "en": "to decide"
-    },
-    {
      "ru": "октябрь",
      "en": "October"
     }
@@ -191,10 +187,6 @@
     {
      "ru": "палка",
      "en": "stick"
-    },
-    {
-     "ru": "завтра",
-     "en": "tomorrow"
     }
    ],
    "lines": [
@@ -240,13 +232,13 @@
     },
     {
      "s": "a",
-     "ru": "Почему ты нам ничего не сказал?",
-     "en": "Why didn't you tell us anything?"
+     "ru": "Почему ты нам ничего не сказал раньше?",
+     "en": "Why didn't you tell us anything before?"
     },
     {
      "s": "c",
-     "ru": "Думал, вы не хотите меня видеть, Нежа. Вот, это вам.",
-     "en": "I thought you didn't want to see me, Nezha. Here, this is for you."
+     "ru": "Думал, вы не хотите меня видеть, Нежа. Вот, это вам. Я собрал их вчера.",
+     "en": "I thought you didn't want to see me, Nezha. Here, this is for you. I picked them yesterday."
     },
     {
      "s": "b",

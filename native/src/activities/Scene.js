@@ -387,7 +387,7 @@ export function Scene({ q, r }) {
           </Muted>
           {(q.intro || []).map((w, k) => (
             <View key={k} style={{ flexDirection: "row", gap: 8, marginTop: k ? 3 : 0 }}>
-              <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "600" }}>{w.ru}</Text>
+              <Linked text={w.ru} size={T.body} />
               <Muted style={{ flex: 1 }}>{w.en}</Muted>
             </View>
           ))}

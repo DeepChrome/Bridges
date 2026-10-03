@@ -6054,6 +6054,46 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   app's side (a light Alert over a dark app was hard to read).
 - **The pronunciation step is assessed** (`assess`, §30bp).
 
+## 30br. Every sentence read, every word a link (2026-10-03)
+
+- **A model reads every sentence a learner can meet** (`tools/review_sentences.mjs`,
+  Sonnet, ~$1.50 for the first full pass) — the pools, the video lines, the
+  dictionary and sense examples — and `data/curated/sentence_review.json`
+  holds the verdicts, keyed by the folded sentence; `build_site.py` drops every
+  one with a reason (`REJECTED`). 302 of 7,162 went: broken spoken speech,
+  garbled captions, wrong translations, crude lines. **The first prompt
+  over-dropped** — 19 %, because it cut dictionary collocations («в январе»,
+  «новый дом») for not being sentences; the rules now keep them and say "when
+  in doubt, keep", and `--recheck` re-reads the dropped ones (it needs a build
+  with `BRIDGES_IGNORE_REVIEW=1`, or the dropped are not in the payload to
+  read). The authored grammar examples are exempt. Run it after anything adds
+  sentences; a sentence already reviewed is not sent again.
+- **Every word the app shows is a link** (`build_deep_forms`): the studied
+  index has every form of the course's words, the deep dictionary only
+  headwords, so a form of an outside word inside a sentence was plain text.
+  `deepforms.json` maps each such form *found in the app's own text* (pools,
+  examples, conversations, cards, transcripts) to its headword through the
+  resolver; `entryOf` in words.js opens either kind. 28,000 forms. What stays
+  unlinked is mostly YouTube caption debris (false starts, words split across
+  caption lines) — listed in `data/_work/unlinked_forms.txt` after each build.
+- **A fact's pill opens its rule** (`FACT_REFS` in core/facts.js →
+  Grammar `{ topic, section, only: true }`, a page of its own). Grammar is on
+  the Root stack so a fact on an entry reaches it from any tab.
+  `core.test.mjs` fails on a link to a section that does not exist.
+- **The cases are a page each** (`page: true` on a section), with the case
+  before and after.
+- **Question words are chapter 1's** (word sets `question words`, `here and
+  there`; `Quantity` in chapter 2). A set named after the file's group absorbs
+  it — name a new set after the group its words sit in, or the group is left
+  holding a stray.
+- **A tab press clears the profile and everything opened over it**
+  (`profileDepth` counts from the first profile screen up).
+- **The profile's band opens lists**: words learned by unit, with the gaps —
+  words of finished lessons not yet learned — on top and one tap to study
+  them; lessons cleared by unit.
+- **The flashcard back shows both languages**, the side it started from on top
+  at the front's size.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

@@ -13,7 +13,7 @@
  * Own file, per the timeout note in screens.test.js.
  */
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react-native";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
@@ -131,6 +131,26 @@ describe("the front never carries the answer", () => {
     expect(screen.queryAllByText(isWord)).toHaveLength(0);
     fireEvent.press(screen.getByText("Show"));
     expect((await screen.findAllByText(isWord)).length).toBeGreaterThan(0);
+  });
+
+  /* Both languages on the back, the starting side on top and the larger
+     (the owner, 2026-10-03). */
+  it("puts both sides on the back, the side it started from first and larger", async () => {
+    const size = (node) => [].concat(node.props.style).filter(Boolean)
+      .reduce((n, s) => (s.fontSize ? s.fontSize : n), 0);
+    await withProfile({ seen: { [WORD]: { recognise: due() } }, flash: ["produce"] });
+    await screen.findByTestId("card-produce");
+    await act(async () => { fireEvent.press(screen.getByText("Show")); });
+    const meaning = await screen.findByTestId("card-meaning-front");
+    const russian = screen.getByTestId("card-russian");
+    const ru = within(russian).getAllByText(isWord)[0];
+    expect(size(meaning)).toBeGreaterThan(size(ru));
+  });
+
+  it("a recognise card's back keeps the Russian on top, with the meaning under it", async () => {
+    await withProfile({ seen: { [WORD]: { recognise: due() } }, flash: ["recognise"] });
+    await act(async () => { fireEvent.press(await screen.findByText("Show")); });
+    expect(within(await screen.findByTestId("card-russian")).getAllByText(isWord).length).toBeGreaterThan(0);
   });
 
   it("a listen card shows no Russian until it is turned", async () => {

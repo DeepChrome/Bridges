@@ -1,5 +1,34 @@
 {
   "_": "tools/build_topics.py: sets of words that belong together and are taught together (the owner, 2026-10-01: \"I saw tarelka (plate) by itself but not spoon knife fork glass napkin… Same as autumn fall spring summer… the main words of a grouping should always be taught in groups\"). The first unit on the route that teaches any member of a set teaches all of them; a member already taught earlier stays where it is. `members` are bare dictionary forms; `quiet` members belong to the set but do not start it on their own, because they have another common meaning (среда is Wednesday and 'environment'). `pos` names the class meant where a spelling has two («голубой» is the adjective 'light blue', not the noun). `home` is the unit that teaches a set no member of which has started it by then. `unit` pins a set to one unit whatever starts it: «мама» and «папа» are the cast's own words and every conversation uses them, and a conversation may only use the main path's words, so their set is chapter 1's. A member outside the word pool is brought in from the lexicon, as a reader's keep is. Each set is meant to be the core of its group, not everything in it.",
+  "question words": {
+    "_": "The owner, 2026-10-03: «где», «здесь», «много» arrived in chapter 4's Winter & Gifts, which no course does. Every question word, in the first chapter.",
+    "members": [
+      "кто",
+      "что",
+      "где",
+      "как",
+      "когда",
+      "почему",
+      "куда",
+      "сколько"
+    ],
+    "unit": "core1"
+  },
+  "here and there": {
+    "members": [
+      "здесь",
+      "тут",
+      "там"
+    ],
+    "unit": "core1"
+  },
+  "Quantity": {
+    "members": [
+      "много",
+      "мало"
+    ],
+    "unit": "core2"
+  },
   "seasons": {
     "members": [
       "зима",

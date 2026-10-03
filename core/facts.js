@@ -269,10 +269,44 @@ export function genderWhy(bare, g) {
   return null;
 }
 
+/* Where each fact's rule is written up in the grammar reference
+   (core/grammar.js): the pill opens it (the owner, 2026-10-03: "hard stem,
+   masculine, spelling rule all are clickable that will load a page with more
+   detail about what the rule is dictating"). A label with no write-up has no
+   entry and is not a link. `core.test.mjs` checks every one names a real
+   section. */
+export const FACT_REFS = {
+  Masculine: ["gender", "The ending tells you"],
+  Feminine: ["gender", "The ending tells you"],
+  Neuter: ["gender", "The ending tells you"],
+  "Plural only": ["cases", "The plural endings"],
+  "Soft stem": ["stems", "A stem is hard or soft"],
+  "Hard stem": ["stems", "A stem is hard or soft"],
+  "Spelling rule": ["stems", "Never ы after these seven"],
+  "Fleeting vowel": ["stems", "A vowel that drops out"],
+  "Stressed ending": ["adjectives", "Which of the three"],
+  Perfective: ["verbs", "Two aspects"],
+  Imperfective: ["verbs", "Two aspects"],
+  "First conjugation": ["verbs", "Two patterns"],
+  "Second conjugation": ["verbs", "Two patterns"],
+  Reflexive: ["verbs", "Verbs ending in -ся"],
+};
+const withRef = (f, pos) => {
+  /* An adjective's stem is the adjectives topic's business, not a noun's. */
+  const ref = pos === "adjective" && /stem$/.test(f.label) ? ["adjectives", "Which of the three"]
+    : FACT_REFS[f.label];
+  return ref ? { ...f, ref: { topic: ref[0], section: ref[1] } } : f;
+};
+
 /* Everything worth saying about one word, as short labelled lines. Shape:
-   { label, note } — the label is a pill, the note one sentence. The caller
-   decides how many to draw. */
+   { label, note, ref? } — the label is a pill, the note one sentence, `ref`
+   the reference section that explains it. The caller decides how many to
+   draw. */
 export function wordFacts(w) {
+  return factsOf(w).map((f) => withRef(f, w && w.p));
+}
+
+function factsOf(w) {
   if (!w) return [];
   const out = [];
   const bare = fold(w.b);

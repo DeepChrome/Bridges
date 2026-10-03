@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import io
 import json
+import os
 import re
 import shutil
 import sqlite3
@@ -182,6 +183,25 @@ def example_tier(words, rare):
 
 
 ARCHAIC_EN = re.compile(r"\b(abide|abideth|thee|thou|thy|thine|hath|hast|shalt|doth|dost|unto|ye|wherefore|whither|whence|thence|o'er|'tis)\b", re.I)
+
+
+def load_rejected():
+    """The sentences a reader judged not worth learning from (the owner,
+    2026-10-03: "he watches television, football… doesnt seem like a normal
+    sentence"): tools/review_sentences.mjs writes the verdicts to
+    data/curated/sentence_review.json, keyed by the folded sentence, and every
+    one with a reason is left out of the pools, the video lines, the
+    dictionary examples and the sense examples."""
+    path = ROOT / "data" / "curated" / "sentence_review.json"
+    # A build with every sentence in, for tools/review_sentences.mjs --recheck
+    # to read the dropped ones again.
+    if not path.exists() or os.environ.get("BRIDGES_IGNORE_REVIEW"):
+        return frozenset()
+    reviewed = json.loads(path.read_text(encoding="utf-8")).get("reviewed", {})
+    return frozenset(k for k, why in reviewed.items() if why)
+
+
+REJECTED = load_rejected()
 
 
 def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tally=None,
@@ -493,7 +513,7 @@ COVERAGE_FREE_RANK = 500
 
 # The parts of the payload the native app loads on first use rather than at boot,
 # each written to its own file beside data.json.
-NATIVE_PARTS = ["deep", "sent", "videos", "senses"]
+NATIVE_PARTS = ["deep", "sent", "videos", "senses", "deepforms"]
 
 
 def unit_info_of(units, path):
@@ -689,6 +709,9 @@ def add_video_lines(speech, units, measure, stats):
     for u in units:
         v = u.get("v")
         for n, ln in enumerate(lines.get(v["id"], []) if v else []):
+            if fold(ln["ru"]) in REJECTED:
+                stats["rejected"] = stats.get("rejected", 0) + 1
+                continue
             sid = f"v:{v['id']}:{n}"
             sents[sid] = (ln["ru"], ln["en"], None, None)
             toks[sid] = [fold(w) for w in re.findall(r"[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*", ln["ru"])]
@@ -778,6 +801,56 @@ def check_closed_class(units, lemmas, with_paradigm):
                 bad.append(f"{u['id']} teaches «{e['b']}» as a {e['p']} with no {e['p']} "
                            "forms in the lexicon, and function_words.json calls it closed-class")
     return bad
+
+
+def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units, video_ids, stats):
+    """Every word form in the app's own Russian that is not a course word, to
+    the dictionary headword it belongs to (the owner, 2026-10-03: "some words
+    dont appear in our dictionary. Any word used in the videos, sentences, or
+    anywhere in the app should be available").
+
+    The studied index (`index`) has every form of the 4,000 course lemmas; the
+    deep dictionary is headwords only (§30), so «палатку» in a sentence was
+    plain text — not a link — though «палатка» has a full entry. Indexing all
+    567,526 lexicon forms would cost megabytes for words nobody meets, so only
+    the forms the app actually shows are indexed: the pools, the dictionary's
+    sentences, the sense examples, the conversations, the grammar cards and the
+    videos' transcripts. A shared form goes to the lemma the resolver names
+    (§23: a form key is not a lemma); one it cannot settle stays unlinked.
+    Value: "bare|pos", which the app resolves as it does a searched word."""
+    texts = [r[0] for r in speech["rows"]]
+    texts += [r[0] for r in sent_pool]
+    for lst in senses.values():
+        for s in lst:
+            texts += [x.get("ru") or "" for x in s.get("x", ())]
+    for entry in scripts.values():
+        texts += [ln.get("ru") or "" for ln in entry.get("lines", ())]
+    for u in units:
+        texts += [e[0] for e in ((u.get("g") or {}).get("examples") or [])]
+    for lines in video_transcripts(video_ids).values():
+        texts += [ln[1] for ln in lines]
+    out, unsettled, seen_n = {}, {}, Counter()
+    for text in texts:
+        for tok in re.findall(r"[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*", text or ""):
+            k = fold(tok)
+            seen_n[k] += 1
+            if k in index or k in out or k in unsettled:
+                continue
+            c, ambiguous = resolver.owner(k)
+            if c and c["glossed"] and not c["stub"]:
+                out[k] = f"{c['bare']}|{c['pos']}"
+            else:
+                unsettled[k] = ("shared" if ambiguous else "not in the lexicon" if not resolver.candidates(k)
+                                else "no gloss")
+    stats["deep_forms"] = len(out)
+    stats["deep_forms_unsettled"] = len(unsettled)
+    # What stays unlinked, commonest first, for a person to read after a build.
+    work = ROOT / "data" / "_work"
+    work.mkdir(parents=True, exist_ok=True)
+    (work / "unlinked_forms.txt").write_text("\n".join(
+        f"{seen_n[k]:6d}  {k}  ({why})" for k, why in sorted(unsettled.items(), key=lambda kv: -seen_n[kv[0]])),
+        encoding="utf-8")
+    return out
 
 
 def check_grammar_cards(units, path, lemmas, index, unit_info):
@@ -1005,6 +1078,9 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             " left join c.decks d on d.id=i.deck_id"
             " where i.kind='sentence' and i.en is not null"):
         shown = fix_stress(tidy_quotes(ru), stresses, stress_tally)
+        if fold(shown) in REJECTED:
+            stats["rejected"] = stats.get("rejected", 0) + 1
+            continue
         if fold(shown) != fold(ru):
             retexted[fold(shown)] = fold(ru)
         sentences[iid] = (shown, en_s, (deck or "?").split("::")[0], audio is not None)
@@ -1025,7 +1101,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
         for xid, ru, en_s, src in ex.execute("select id, ru, en, source from items"):
             # Tatoeba carries Bible verses in the King James register ("hath
             # eaten me up"); the rule rank_examples applies to his own decks.
-            if ARCHAIC_EN.search(en_s or ""):
+            if ARCHAIC_EN.search(en_s or "") or fold(ru) in REJECTED:
                 continue
             ext_sentences[xid] = (fix_stress(ru, stresses, stress_tally), en_s, src)
         for k, xid in ex.execute("select key, item_id from item_tokens"):
@@ -1561,7 +1637,10 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
 
     senses = load_senses(lemmas, stats, key_rank)
 
-    return {"stats": stats, "lemmas": lemmas, "index": index,
+    deep_forms = build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
+                                  [v["id"] for v in video_list], stats)
+
+    return {"stats": stats, "lemmas": lemmas, "index": index, "deepforms": deep_forms,
             "units": units, "path": path, "audio": {"files": audio},
             "deep": deep, "shapes": shapes, "slots": slot_names,
             "sent": sent_pool, "tsample": tsample, "speech": speech,
@@ -1744,7 +1823,7 @@ def sense_examples(examples, own, key_rank):
         toks = [fold(t) for t in re.findall(r"[а-яёА-ЯЁ́̀]+(?:-[а-яёА-ЯЁ́̀]+)*", x.get("ru") or "")]
         if not toks or len(toks) > LONG_WORDS:
             continue
-        if not_a_translation(x):
+        if not_a_translation(x) or fold(x.get("ru") or "") in REJECTED:
             continue
         rare = sum(1 for k in toks if not k.startswith(own)
                    and key_rank.get(k, COMMON_RANK + 1) > COMMON_RANK)
@@ -2018,7 +2097,10 @@ def main():
     if args.public:
         stripped = strip_captions(payload)
         print(f"  public build : {stripped:,} caption snippets stripped from the video moments")
-    blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    # The deep forms are the native app's (the web app is on hold) and would
+    # only weigh down the page.
+    blob = json.dumps({k: v for k, v in payload.items() if k != "deepforms"},
+                      ensure_ascii=False, separators=(",", ":"))
 
     css = (args.src / "app.css").read_text(encoding="utf-8")
     shell = (args.src / "shell.html").read_text(encoding="utf-8")
@@ -2152,6 +2234,12 @@ def main():
               f"{st['sentences_with_unit']:,} placed in a unit, "
               f"{st['sentences_with_audio']:,} with a recording")
         print("  difficulty   : " + "  ".join(f"{lab} {n:,}" for lab, n in st["difficulty_hist"]))
+    if st.get("deep_forms") is not None:
+        print(f"  deep forms   : {st['deep_forms']:,} forms in the app's text linked to a dictionary "
+              f"headword; {st['deep_forms_unsettled']:,} not (no glossed owner, or shared and unsettled)")
+    if REJECTED:
+        print(f"  reviewed     : {len(REJECTED):,} sentences judged not worth learning from, "
+              f"{st.get('rejected', 0):,} of them left out here (data/curated/sentence_review.json)")
     # Pool sizes per unit. A unit below the floor is named: a speaking activity that
     # keeps asking the same five sentences is worse than none.
     if st.get("speech_rows") is not None:

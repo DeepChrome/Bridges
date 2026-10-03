@@ -317,7 +317,7 @@ function LearnerBubble({ turn }) {
         {turn.alignment ? (
           <Alignment alignment={turn.alignment} />
         ) : (
-          <Text style={{ color: t.ink, fontSize: 17 }}>{turn.ru}</Text>
+          <Linked text={turn.ru} size={17} />
         )}
         {turn.pending ? <ActivityIndicator testID="turn-pending" color={t.ink3} style={{ alignSelf: "flex-start", marginTop: 6 }} /> : null}
       </View>

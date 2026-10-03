@@ -9,7 +9,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import You, { grammarTrouble } from "../src/screens/You";
+import You, { grammarTrouble, gapsOf, learnedByUnit, finishedLessons } from "../src/screens/You";
+import { L, lessonDone, lessonWords, components, markComponent } from "../src/data";
+import { REVIEW } from "@core/scheduler";
 import { tagInfo } from "@core/errortags";
 import { UN } from "../src/data";
 
@@ -102,3 +104,39 @@ describe("grammar trouble", () => {
     expect(nav.navigate).toHaveBeenCalledTimes(1);
   });
 });
+
+/* "Words learned and lessons cleared can also be clickable… at the top, a
+   recommendation for where the holes are" (the owner, 2026-10-03). */
+describe("what was learned, and the gaps", () => {
+  const unit = UN[0];
+  const finishLesson = (st, k) => components(st, unit, k).filter((c) => !c.optional)
+    .reduce((acc, c) => markComponent(acc, unit, k, c.id, 100), st);
+  const held = { state: REVIEW, s: 30, d: 5, dueAt: Date.now() + 9 * 864e5, lastAt: Date.now() - 864e5, reps: 4, lapses: 0 };
+
+  it("counts a finished lesson's unlearned words as gaps, and its learned ones as learned", () => {
+    let st = { ...base, unit: {}, drills: {} };
+    st = finishLesson(st, 0);
+    expect(lessonDone(st, unit, 0)).toBe(true);
+    const words = lessonWords(unit, 0);
+    st.seen = { [L[words[0]].b]: { recognise: held } };
+    const gaps = gapsOf(st);
+    expect(gaps).not.toContain(words[0]);
+    expect(gaps).toEqual(expect.arrayContaining(words.slice(1)));
+    expect(learnedByUnit(st).units[0].words).toEqual([words[0]]);
+    expect(finishedLessons(st)[0]).toMatchObject({ unit, done: [1] });
+  });
+
+  it("opens both lists from the band, the gaps first with a way to study them", async () => {
+    let st = { ...base, unit: {}, drills: {} };
+    st = finishLesson(st, 0);
+    await withYou(st);
+    await act(async () => { fireEvent.press(await screen.findByTestId("stat-learned")); });
+    expect(await screen.findByTestId("gaps")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByTestId("gaps-study")); });
+    expect(nav.navigate).toHaveBeenCalledWith("Study", expect.objectContaining({ screen: "Cards" }));
+    await act(async () => { fireEvent.press(await screen.findByTestId("stat-lessons")); });
+    expect(await screen.findByTestId("lessons-sheet")).toBeTruthy();
+    expect(screen.getByText(unit.name)).toBeTruthy();
+  });
+});
+

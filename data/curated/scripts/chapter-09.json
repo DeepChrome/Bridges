@@ -2,7 +2,160 @@
  "chapter": 9,
  "name": "Style & Fashion",
  "lessons": {
-  "core9:3": {
+  "core9:4": {
+   "title": "Red trousers for Misha's party",
+   "cast": [
+    {
+     "id": "a",
+     "ru": "Тедди",
+     "en": "Teddy"
+    },
+    {
+     "id": "b",
+     "ru": "Нежа",
+     "en": "Nezha"
+    },
+    {
+     "id": "c",
+     "ru": "Белка",
+     "en": "Belka"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "брюки",
+     "en": "trousers"
+    },
+    {
+     "ru": "вчера",
+     "en": "yesterday"
+    },
+    {
+     "ru": "отвечать",
+     "en": "to answer"
+    }
+   ],
+   "lines": [
+    {
+     "s": "b",
+     "ru": "Тедди, сегодня праздник у Миши, а ты ещё не одет!",
+     "en": "Teddy, Misha's party is today, and you're still not dressed!"
+    },
+    {
+     "s": "a",
+     "ru": "Мама, я уже одет! Мои красные брюки очень удобные.",
+     "en": "Mom, I am dressed! My red trousers are very comfortable."
+    },
+    {
+     "s": "b",
+     "ru": "Красные брюки на праздник? Где ты видел такой стиль?",
+     "en": "Red trousers to a party? Where did you ever see that style?"
+    },
+    {
+     "s": "a",
+     "ru": "У тебя, мама. Ты всегда следишь за модой.",
+     "en": "On you, Mom. You always follow fashion."
+    },
+    {
+     "s": "b",
+     "ru": "Слежу. Они слишком яркие. Надевай чёрные.",
+     "en": "I do. They're too bright. Put on the black ones."
+    },
+    {
+     "s": "c",
+     "ru": "Нежа! Я вчера была у Миши. Все будут в спортивных брюках!",
+     "en": "Nezha! I was at Misha's yesterday. Everyone will be in tracksuit trousers!"
+    },
+    {
+     "s": "b",
+     "ru": "В спортивных? Белка, это же праздник, а не урок.",
+     "en": "Tracksuit trousers? Belka, it's a party, not a lesson."
+    },
+    {
+     "s": "c",
+     "ru": "Праздник будет в лесу! Грибы и картошка.",
+     "en": "The party is in the woods! Mushrooms and potatoes."
+    },
+    {
+     "s": "a",
+     "ru": "Вот! В лесу красный — это хорошо. Меня все видят.",
+     "en": "See! In the woods red is good. Everyone can see me."
+    },
+    {
+     "s": "b",
+     "ru": "Может быть. Но почему Миша мне не отвечает?",
+     "en": "Maybe. But why isn't Misha answering me?"
+    },
+    {
+     "s": "c",
+     "ru": "Он уже в лесу, Нежа. Там никто не отвечает.",
+     "en": "He's already in the woods, Nezha. Nobody answers out there."
+    },
+    {
+     "s": "b",
+     "ru": "Ладно, красные. Но старые, не праздничные!",
+     "en": "Fine, the red ones. But the old ones, not the party ones!"
+    },
+    {
+     "s": "a",
+     "ru": "Мама, ты молодец. Вот это вкус!",
+     "en": "Mom, you're the best. Now that's taste!"
+    }
+   ],
+   "questions": [
+    {
+     "ask": "Where is Teddy going?",
+     "options": [
+      "To a party at Misha's",
+      "To a concert at school",
+      "To a lesson at the bank",
+      "To lunch at grandpa's"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Nezha think of the red trousers?",
+     "options": [
+      "They are far too bright",
+      "They are much too wide",
+      "They are old and dirty",
+      "They are far too small"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What news does Belka bring?",
+     "options": [
+      "It is in the woods",
+      "It is at the bank",
+      "It is at a school",
+      "It is on the river"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Belka say everyone will wear?",
+     "options": [
+      "Tracksuit trousers",
+      "Dark formal suits",
+      "Bright red hats",
+      "Long evening dresses"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What do they decide Teddy will wear?",
+     "options": [
+      "His old red trousers",
+      "His new red trousers",
+      "Classic dark trousers",
+      "Sporty white trousers"
+     ],
+     "answer": 0
+    }
+   ]
+  },
+  "core9:5": {
    "title": "A clean kit for the game",
    "cast": [
     {
@@ -154,159 +307,6 @@
       "Yarik's big grey coat",
       "Yarik's old tracksuit",
       "Teddy's red trousers"
-     ],
-     "answer": 0
-    }
-   ]
-  },
-  "core9:4": {
-   "title": "Red trousers for Misha's party",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Тедди",
-     "en": "Teddy"
-    },
-    {
-     "id": "b",
-     "ru": "Нежа",
-     "en": "Nezha"
-    },
-    {
-     "id": "c",
-     "ru": "Белка",
-     "en": "Belka"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "брюки",
-     "en": "trousers"
-    },
-    {
-     "ru": "вчера",
-     "en": "yesterday"
-    },
-    {
-     "ru": "отвечать",
-     "en": "to answer"
-    }
-   ],
-   "lines": [
-    {
-     "s": "b",
-     "ru": "Тедди, сегодня праздник у Миши, а ты ещё не одет!",
-     "en": "Teddy, Misha's party is today, and you're still not dressed!"
-    },
-    {
-     "s": "a",
-     "ru": "Мама, я уже одет! Мои красные брюки очень удобные.",
-     "en": "Mom, I am dressed! My red trousers are very comfortable."
-    },
-    {
-     "s": "b",
-     "ru": "Красные брюки на праздник? Где ты видел такой стиль?",
-     "en": "Red trousers to a party? Where did you ever see that style?"
-    },
-    {
-     "s": "a",
-     "ru": "У тебя, мама. Ты всегда следишь за модой.",
-     "en": "On you, Mom. You always follow fashion."
-    },
-    {
-     "s": "b",
-     "ru": "Слежу. Они слишком яркие. Надевай чёрные.",
-     "en": "I do. They're too bright. Put on the black ones."
-    },
-    {
-     "s": "c",
-     "ru": "Нежа! Я вчера была у Миши. Все будут в спортивных брюках!",
-     "en": "Nezha! I was at Misha's yesterday. Everyone will be in tracksuit trousers!"
-    },
-    {
-     "s": "b",
-     "ru": "В спортивных? Белка, это же праздник, а не урок.",
-     "en": "Tracksuit trousers? Belka, it's a party, not a lesson."
-    },
-    {
-     "s": "c",
-     "ru": "Праздник будет в лесу! Грибы и картошка.",
-     "en": "The party is in the woods! Mushrooms and potatoes."
-    },
-    {
-     "s": "a",
-     "ru": "Вот! В лесу красный — это хорошо. Меня все видят.",
-     "en": "See! In the woods red is good. Everyone can see me."
-    },
-    {
-     "s": "b",
-     "ru": "Может быть. Но почему Миша мне не отвечает?",
-     "en": "Maybe. But why isn't Misha answering me?"
-    },
-    {
-     "s": "c",
-     "ru": "Он уже в лесу, Нежа. Там никто не отвечает.",
-     "en": "He's already in the woods, Nezha. Nobody answers out there."
-    },
-    {
-     "s": "b",
-     "ru": "Ладно, красные. Но старые, не праздничные!",
-     "en": "Fine, the red ones. But the old ones, not the party ones!"
-    },
-    {
-     "s": "a",
-     "ru": "Мама, ты молодец. Вот это вкус!",
-     "en": "Mom, you're the best. Now that's taste!"
-    }
-   ],
-   "questions": [
-    {
-     "ask": "Where is Teddy going?",
-     "options": [
-      "To a party at Misha's",
-      "To a concert at school",
-      "To a lesson at the bank",
-      "To lunch at grandpa's"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Nezha think of the red trousers?",
-     "options": [
-      "They are far too bright",
-      "They are much too wide",
-      "They are old and dirty",
-      "They are far too small"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What news does Belka bring?",
-     "options": [
-      "It is in the woods",
-      "It is at the bank",
-      "It is at a school",
-      "It is on the river"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Belka say everyone will wear?",
-     "options": [
-      "Tracksuit trousers",
-      "Dark formal suits",
-      "Bright red hats",
-      "Long evening dresses"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What do they decide Teddy will wear?",
-     "options": [
-      "His old red trousers",
-      "His new red trousers",
-      "Classic dark trousers",
-      "Sporty white trousers"
      ],
      "answer": 0
     }

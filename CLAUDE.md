@@ -5842,6 +5842,16 @@ from the head up"*.
   "palate" is «нёбо», «есть» "to eat", «все»'s are «всё»'s), vulgar and
   criminal slang, ICAO code words, lotto calls, an offensive proverb. Every
   string must match or the build stops.
+- **The senses are read against the sentences** (`tools/review_senses.mjs`,
+  2026-10-04). Wiktionary's «выпуск» had no "edition, episode" while every
+  sentence under it was a news bulletin. A model reads each taught word's
+  senses beside its examples against a dictionary's commonest uses and
+  proposes only what `sense_overrides.json` can do (`lead`, `first`, `drop`,
+  `rename`), checked against the shipped senses, into
+  `data/_work/sense_proposals.json` — never the curated file. A person reads
+  and merges (113 proposed, ~90 taken; a name leading «надежда», a form field
+  leading «поле» were not). Its replies sometimes correct themselves and
+  answer twice: the last JSON is the one read.
 - **An example whose English has no lower-case word is a name, not a
   translation** (`not_a_translation`): Wiktionary's quotations kept the
   attribution where the translation belongs — "= Boris Akunin", "= Zemfira",

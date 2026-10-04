@@ -4,7 +4,7 @@
  * node_modules rather than written down by hand (which is how such a list
  * comes to be wrong with nothing failing). Re-run the tool after npm install.
  *
- * 28 runtime dependencies, 1 distinct licences.
+ * 29 runtime dependencies, 1 distinct licences.
  */
 
 export const NOTICES = [
@@ -24,6 +24,7 @@ export const NOTICES = [
       "expo-font",
       "expo-haptics",
       "expo-notifications",
+      "expo-screen-orientation",
       "expo-sharing",
       "expo-speech",
       "expo-speech-recognition",
@@ -43,4 +44,4 @@ export const NOTICES = [
   }
 ];
 
-export const NOTICE_COUNT = 28;
+export const NOTICE_COUNT = 29;

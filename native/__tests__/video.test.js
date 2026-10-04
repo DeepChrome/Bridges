@@ -381,6 +381,41 @@ describe("Video", () => {
   });
 });
 
+/* Maximised (the owner, 2026-10-04: "small translucent buttons in the corners
+   of a maximized screen"): the same player fills the screen sideways with the
+   transport over it, and Back or the corner button bring it back. */
+describe("full screen", () => {
+  it("keeps the player, turns the screen, puts the controls over the picture, and comes back", async () => {
+    const setOptions = jest.fn();
+    const parentOptions = jest.fn();
+    const n = { ...nav, setOptions, getParent: () => ({ setOptions: parentOptions }) };
+    await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={n} />);
+    await act(async () => { fireEvent.press(await screen.findByTestId("video-play")); });
+    const before = screen.getByTestId("yt-player");
+    expect(screen.getByTestId("video-pinned")).toBeTruthy();
+
+    await act(async () => { fireEvent.press(screen.getByTestId("video-maximise")); });
+    expect(screen.getByTestId("video-full")).toBeTruthy();
+    expect(screen.getByTestId("video-overlay")).toBeTruthy();
+    for (const id of ["overlay-back5", "overlay-toggle", "overlay-fwd5", "overlay-slower", "overlay-faster", "overlay-exit"]) {
+      expect(screen.getByTestId(id)).toBeTruthy();
+    }
+    // The same player, not a second one: a remount would reload the video.
+    expect(screen.getByTestId("yt-player")).toBe(before);
+    expect(global.__orientation).toBe("landscape");
+    expect(setOptions).toHaveBeenCalledWith({ headerShown: false });
+    expect(parentOptions).toHaveBeenCalledWith({ tabBarStyle: { display: "none" } });
+    // The row under the player is gone; its buttons are over the picture.
+    expect(screen.queryByTestId("video-controls")).toBeNull();
+
+    await act(async () => { fireEvent.press(screen.getByTestId("overlay-exit")); });
+    expect(screen.getByTestId("video-pinned")).toBeTruthy();
+    expect(screen.queryByTestId("video-overlay")).toBeNull();
+    expect(global.__orientation).toBe("portrait");
+    expect(setOptions).toHaveBeenLastCalledWith({ headerShown: true });
+  });
+});
+
 describe("the transcript button", () => {
   it("opens the video's transcript under the player, and closes it", async () => {
     await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={nav} />);

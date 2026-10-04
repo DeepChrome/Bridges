@@ -245,6 +245,12 @@ jest.mock("./src/data", () => ({ ...jest.requireActual("./src/data"), reconcileC
 /* The Anki import/export modules: files, the picker, SQLite and the share sheet
    are all injected by anki.js, so the packages only need to load. */
 jest.mock("expo-sqlite", () => ({ deserializeDatabaseAsync: jest.fn(), openDatabaseAsync: jest.fn() }));
+/* A maximised video turns the screen (Misc.js Video). The lock asked for is
+   kept on `global.__orientation` so a test can see the way back was taken. */
+jest.mock("expo-screen-orientation", () => ({
+  OrientationLock: { PORTRAIT_UP: "portrait", LANDSCAPE: "landscape" },
+  lockAsync: jest.fn(async (o) => { global.__orientation = o; }),
+}));
 jest.mock("expo-document-picker", () => ({ getDocumentAsync: jest.fn() }));
 jest.mock("expo-sharing", () => ({ shareAsync: jest.fn(), isAvailableAsync: jest.fn(async () => true) }));
 /* A file system in memory, enough for the audio cache: directories that list,

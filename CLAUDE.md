@@ -781,6 +781,16 @@ Each of these cost real time. Do not relearn them.
   models `sounding`, which only `pause()` clears, and `global.__sounding()` is
   what a test should assert — "was it released" and "is it quiet" are different
   questions, and the first one passed throughout.
+- **…and `remove()` does not free the player at all in expo-audio 57.** It
+  only drops the id from the module's map; the ExoPlayer, its MediaSession and
+  its MP3 decoder live until the JS object is garbage collected, which Hermes
+  may put off for minutes. Every speaker press leaked a decoder, and once the
+  phone ran out, clips errored and `say` fell back to the device voice — the
+  owner, 2026-10-03: *"most don't work… then REALLY low quality robotic
+  woman"*. The emulator showed it in logcat: eleven `ExoPlayerImpl: Init`, no
+  `Release`. `release(p)` now ends with SharedObject's own `release()`, which
+  frees it at once; `audiofocus.test.js` fails against the old code. **Count
+  `Init` against `Release` in logcat** after touching audio.
 - **Two awaits before a sound is two players.** `playTrack` and `say` both wait
   on the audio session and then on a seek before anything is audible, and a
   finger arrives inside that gap: "back five seconds" pressed four times started

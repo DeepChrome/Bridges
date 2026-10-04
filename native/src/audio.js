@@ -66,6 +66,16 @@ function release(p) {
   if (!p) return;
   try { p.pause(); } catch (e) {}
   try { p.remove(); } catch (e) {}
+  /* …and `remove()` does not free the player either (2026-10-03). In
+     expo-audio 57 it only drops the id from the module's map; the ExoPlayer,
+     its MediaSession and its MP3 decoder live until the JS object is garbage
+     collected, which Hermes may not do for minutes. Every speaker press leaked
+     one — the emulator logged eleven "ExoPlayerImpl: Init" and no "Release"
+     — and once the phone's decoders ran out, clips failed and `say` fell back
+     to the device voice: the owner's "most words don't work… then REALLY low
+     quality robotic woman". `release()` is SharedObject's own: it calls
+     sharedObjectDidRelease, which releases the ExoPlayer now. */
+  try { if (typeof p.release === "function") p.release(); } catch (e) {}
 }
 
 /* **Every sound waits on this, so it may never hang** (the owner, 2026-10-03:

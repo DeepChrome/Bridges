@@ -59,6 +59,19 @@ describe("leaving a lesson", () => {
     });
   });
 
+  /* `remove()` alone forgets the player and keeps its decoder: in
+     expo-audio 57 the ExoPlayer is freed only by `release()` or a garbage
+     collection. Twenty presses leaked twenty decoders, and the phone ran out
+     (2026-10-03: "most don't work… then REALLY low quality robotic woman"). */
+  it("frees every player it lets go, not only forgets it", async () => {
+    const before = global.__players.length;
+    for (let k = 0; k < 20; k++) await say("Кто это?");
+    stop();
+    const made = global.__players.slice(before);
+    expect(made.length).toBe(20);
+    made.forEach((p) => expect(p.release).toHaveBeenCalled());
+  });
+
   it("survives being called with nothing playing", () => {
     expect(() => { stop(); stop(); }).not.toThrow();
   });

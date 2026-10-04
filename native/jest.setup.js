@@ -91,6 +91,10 @@ jest.mock("expo-audio", () => ({
       pause: jest.fn(() => { p.sounding = false; }),
       // Deliberately does not clear `sounding` — see above.
       remove: jest.fn(() => { p.removed = true; }),
+      /* `remove()` does not free the native player in expo-audio 57; only
+         SharedObject's `release()` does, and a player never released holds a
+         decoder until the phone runs out of them (audio.js release). */
+      release: jest.fn(() => { p.freed = true; }),
       addListener: (name, fn) => { listeners.push(fn); return { remove: () => {} }; },
     };
     // A finished track is not still sounding.

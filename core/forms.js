@@ -63,6 +63,23 @@ export function grammarTags(lemma) {
   return [lemma.p, lemma.g && (GENDER_NAMES[lemma.g] || lemma.g), lemma.a].filter(Boolean);
 }
 
+/* The grammar line drawn right under a word (the owner, 2026-10-04: "part of
+   speech, form, case, etc right under the word… with the associated root
+   word… Also aspect"): what the word is — its class, gender or aspect, and an
+   aspect partner where the lexicon records one — and, when a form of it was
+   tapped, which form, read out of the word's own table. One function so the
+   glance, the entry and the flashcard say it in the same words. */
+export function grammarLine(lemma, surface) {
+  if (!lemma) return null;
+  const facts = grammarTags(lemma);
+  const partner = lemma.p === "verb" && lemma.pt && lemma.a
+    ? { label: /^imperf/i.test(lemma.a) ? "perfective" : "imperfective", word: String(lemma.pt).split(/,\s*/)[0] }
+    : null;
+  const shown = surface && fold(surface) !== fold(lemma.b) ? surface : null;
+  const form = shown || surface ? describeForm(lemma, surface) : null;
+  return { facts, partner, surface: shown, form };
+}
+
 /* Everything the first tap should show, and nothing more. The full entry — every
    table, every example sentence — is what the second tap is for. */
 export function summarise(lemma, surface) {

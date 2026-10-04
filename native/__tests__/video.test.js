@@ -314,7 +314,9 @@ describe("Video", () => {
     const { videoLines } = require("../src/data");
     const lines = videoLines(unit).map((l) => l.ru);
     expect(lines.length).toBeGreaterThan(0);
-    expect(nav.navigate).toHaveBeenCalledWith("ListCards", { round: "list", words: heard.concat(lines), title: "Before the video" });
+    // …and the round ends on the way back to the video (2026-10-04).
+    expect(nav.navigate).toHaveBeenCalledWith("ListCards", { round: "list", words: heard.concat(lines),
+                                                             title: "Before the video", after: "Continue to video" });
     expect(screen.getByTestId("prep-lines")).toBeTruthy();
   });
 

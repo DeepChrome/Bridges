@@ -126,7 +126,7 @@ describe("a lesson's flashcards", () => {
     await withProfile(<LessonScreen route={{ params: { unitId: UN[0].id, index: 0 } }} navigation={nav} />);
     await act(async () => { fireEvent.press(await screen.findByTestId("lesson-cards")); });
     expect(nav.navigate).toHaveBeenCalledWith("ListCards", {
-      round: "list", title: UN[0].name,
+      round: "list", title: UN[0].name, after: "Back to the lesson",
       // the lesson's words, then the video's sentences that use them
       words: lessonWords(UN[0], 0).map((x) => L[x].b).concat(linesWith(UN[0], lessonWords(UN[0], 0)).map((l) => l.ru)) });
   });

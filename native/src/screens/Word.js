@@ -12,11 +12,10 @@ import { useTheme, radius } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Familiarity, Fold } from "../ui";
 import { TableGroup, Facts } from "../rules";
 import { wordFacts, isIrregular } from "@core/facts";
-import { grammarTags } from "@core/forms";
 import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
 import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord, rankOf } from "../data";
-import { Linked } from "../words";
+import { Linked, GrammarLine } from "../words";
 import { pictureOf, Photo } from "../pictures";
 import { clock, short } from "./Misc";
 
@@ -105,6 +104,9 @@ export function WordEntry({ w, index, navigation }) {
           </Text>
           <Speaker text={w.b} />
         </View>
+        {/* What the word is, right under it, as the glance and the flashcard
+            say it (words.js GrammarLine, the owner 2026-10-04). */}
+        <GrammarLine lemma={w} style={{ marginTop: 2 }} />
         {/* The entry gets every sense there is, with its examples: this is the
             screen a learner opened *to read* (§30q). The card shows four. */}
         {senses
@@ -117,14 +119,18 @@ export function WordEntry({ w, index, navigation }) {
             and it sat in the same row as the grammar, which is the row they
             came to read. The rank itself is not lost: it is the lemma's own
             index, and it is what orders the new flashcards (§30ap). */}
-        <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
-          {grammarTags(w).map((x) => <Pill key={x}>{x}</Pill>)}
-          {w.pt ? <Pill>{`pair: ${[w.pt, w.pt2].filter(Boolean).join(", ")}`}</Pill> : null}
-          {/* The first thing said about a word that breaks the rules
-              (2026-09-29); what it breaks is the facts below. */}
-          {isIrregular(w) ? <Pill tone="irregular" testID="word-irregular">Irregular</Pill> : null}
-          {unit ? <Pill tone="brand">{unit.name}</Pill> : null}
-        </View>
+        {/* The class, gender and aspect pair are the line under the word now;
+            what stays here is what is not grammar. */}
+        {isIrregular(w) || unit || w.pt2 ? (
+          <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
+            {/* Other partners where the lexicon has more than one. */}
+            {w.pt2 ? <Pill>{`also: ${w.pt2}`}</Pill> : null}
+            {/* The first thing said about a word that breaks the rules
+                (2026-09-29); what it breaks is the facts below. */}
+            {isIrregular(w) ? <Pill tone="irregular" testID="word-irregular">Irregular</Pill> : null}
+            {unit ? <Pill tone="brand">{unit.name}</Pill> : null}
+          </View>
+        ) : null}
         {/* What is true about the word, before the tables that follow from
             it: gender and why, hard or soft stem, which conjugation, whether
             the stress moves (core/facts.js, 2026-09-28). The entry is the

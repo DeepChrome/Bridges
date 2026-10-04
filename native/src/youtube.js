@@ -75,6 +75,15 @@ const page = (videoId) => `<!doctype html>
         playsinline: 1,
         rel: 0,
         modestbranding: 1,
+        /* YouTube's own bar, title and buttons popped up over the burned-in
+           subtitles on every skip (the owner, 2026-10-04: "they pop up and
+           distract from the subtitles"). The app's transport under the player
+           does all of it — skip, play, speed — so the player draws none, and
+           no fullscreen, annotations or keyboard shortcuts either. */
+        controls: 0,
+        fs: 0,
+        iv_load_policy: 3,
+        disablekb: 1,
         origin: ${JSON.stringify(ORIGIN)}
       },
       events: {

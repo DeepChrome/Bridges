@@ -23,7 +23,7 @@ import { useTheme } from "./theme";
 import { Sheet, Btn, Senses, Text, Speaker } from "./ui";
 import { L, IX, deepFormOf, resolveWord } from "./data";
 import { fold, TOKEN } from "@core/util";
-import { summarise } from "@core/forms";
+import { summarise, grammarLine } from "@core/forms";
 import { WordEntry } from "./screens/Word";
 
 export const navRef = createNavigationContainerRef();
@@ -100,6 +100,41 @@ export function Linked({ text, style, size = 17, color, testID }) {
   );
 }
 
+/* ---------------------------------------------------------- grammar line */
+
+/* What the word is, right under it — class, gender or aspect, the aspect
+   partner — and, when a form was tapped, which form it is (core/forms.js
+   grammarLine). The glance, the entry and the flashcard's back all draw this,
+   so a word is described in one way wherever it is met. */
+export function GrammarLine({ lemma, surface, style, center }) {
+  const t = useTheme();
+  const align = { textAlign: center ? "center" : "left" };
+  const g = grammarLine(lemma, surface);
+  if (!g || (!g.facts.length && !g.form && !g.surface)) return null;
+  const lower = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+  return (
+    <View testID="grammar-line" style={style}>
+      {g.facts.length ? (
+        <Text testID="grammar-facts" style={[{ color: t.ink2, fontSize: 15 }, align]}>
+          {g.facts.join(" · ")}
+          {g.partner ? (
+            <Text style={{ color: t.ink2 }}>
+              {` · ${g.partner.label} `}
+              <Text style={{ color: t.brandInk, fontWeight: "700" }}>{g.partner.word}</Text>
+            </Text>
+          ) : null}
+        </Text>
+      ) : null}
+      {g.surface || g.form ? (
+        <Text testID="grammar-form" style={[{ color: t.ink2, fontSize: 15, marginTop: 2 }, align]}>
+          <Text style={{ color: t.brandInk, fontWeight: "700" }}>{g.surface || lemma.b}</Text>
+          {g.form ? `  ${lower(g.form.text)}` : "  form not listed"}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 /* ------------------------------------------------------------------ sheet */
 
 function WordSheet({ state, onClose, onFull }) {
@@ -135,17 +170,10 @@ function WordSheet({ state, onClose, onFull }) {
         <Speaker text={lemma.b} />
       </View>
 
-      {s.surface ? (
-        <Text style={{ color: t.ink3, fontSize: 14, marginTop: 4 }}>
-          {s.form
-            ? `${s.surface} · ${s.form.text}`
-            : `${s.surface} · form not listed`}
-        </Text>
-      ) : s.form ? (
-        <Text style={{ color: t.ink3, fontSize: 14, marginTop: 4 }}>
-          {s.form.text}
-        </Text>
-      ) : null}
+      {/* What it is and which form was tapped, right under the word and its
+          dictionary form (the owner, 2026-10-04) — the pills that used to sit
+          below the senses said half of this, last. */}
+      <GrammarLine lemma={lemma} surface={surface} style={{ marginTop: 4 }} />
 
       {/* The senses numbered, as the entry, the flashcard back and the
           vocabulary card all number them — one run of prose was the odd surface
@@ -157,20 +185,6 @@ function WordSheet({ state, onClose, onFull }) {
           than a second number invented here. */}
       <Senses e={lemma.e} size={17} align="left" max={SHEET_SENSES}
               style={{ marginTop: 12 }} />
-
-      {s.tags.length ? (
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6,
-                       marginTop: 12 }}>
-          {s.tags.map((x) => (
-            <View key={x} style={{ backgroundColor: t.surface2, borderRadius: 99,
-                                   paddingHorizontal: 11, paddingVertical: 5 }}>
-              <Text style={{ color: t.ink2, fontSize: 12, fontWeight: "600" }}>
-                {x}
-              </Text>
-            </View>
-          ))}
-        </View>
-      ) : null}
     </Sheet>
   );
 }

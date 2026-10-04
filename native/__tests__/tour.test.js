@@ -47,10 +47,10 @@ test("tap a word for its sheet, tap again for the whole entry", async () => {
   expect(full).toBeTruthy();
   /* Something only the *full* entry draws, to prove this is the entry and not
      the glance sheet again. It used to be the «№ N by frequency» pill, which
-     the owner had removed on 2026-09-22; the grammar row it stood in is still
-     entry-only — the sheet's tags are form names from `summarise()`, never a
-     word class. */
-  expect(screen.getByText("verb")).toBeTruthy();
+     the owner had removed on 2026-09-22, then the word-class pill, which both
+     surfaces draw since the grammar line went under the word (2026-10-04).
+     The tables are the entry's alone. */
+  expect(screen.getByTestId("word-tables")).toBeTruthy();
   expect(screen.queryByText(/Heard in/)).toBeNull();          // no player to open from here
 });
 

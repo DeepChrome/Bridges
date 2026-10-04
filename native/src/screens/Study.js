@@ -19,7 +19,7 @@ import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton,
          Familiarity, familiarityColor } from "../ui";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines, dueAll, dueCount } from "../data";
-import { Linked } from "../words";
+import { Linked, GrammarLine } from "../words";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
@@ -681,7 +681,7 @@ export default function Study({ navigation, route }) {
     dealt.current += 1;
     const beyond = carry ? beyondMode : !!(extra && extra.beyond);
     const next = sessionFor(st, { ahead, round, ...extra, beyond });
-    if (!carry) { sitting.current = new Set(); setMarks({}); setAheadMode(!!ahead); setBeyondMode(beyond); }
+    if (!carry) { sitting.current = new Set(); setMarks({}); setAheadMode(!!ahead); setBeyondMode(beyond); setAfter(null); }
     for (const it of next.items) sitting.current.add(it.word);
     setSession(next);
     setAt(0);
@@ -693,11 +693,17 @@ export default function Study({ navigation, route }) {
      leaves the day's settings as they were. */
   const params = (route && route.params) || {};
   const round = params.round === "trouble" || params.round === "list" ? params.round : null;
+  /* A round handed in from somewhere the learner is going back to — the
+     video's "Before the video" cards, a lesson's — ends on the one way back
+     (`after`: its label), not on the day's options (the owner, 2026-10-04:
+     "the option should be to continue to video, not those other options"). */
+  const [after, setAfter] = useState(null);
   useEffect(() => {
     if (!round || !ready) return;
     dealtKey.current = setsKey;   // the round stands until the settings change
     deal(false, round, { words: params.words, title: params.title });
-    navigation.setParams({ round: undefined, words: undefined, title: undefined });
+    setAfter(params.after || null);
+    navigation.setParams({ round: undefined, words: undefined, title: undefined, after: undefined });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, ready]);
   // The profile arrives after the first render, and a set or a deck can change
@@ -756,6 +762,9 @@ export default function Study({ navigation, route }) {
   const current = item ? cardFor(st.seen[item.word]) : null;
   const iv = item ? preview(current, Date.now(), schedulerOpts(st)) : null;
   const senses = face ? sensesOf(idxOfWord(face.b)) : null;
+  // The word's own record, for the grammar line on the back; a sentence or a
+  // deck card has none.
+  const cardLemma = face && !face.sentence ? L[idxOfWord(face.b)] || null : null;
   const flip = useFlip(shown, at);
 
   /* The Russian side reads itself out: on arrival when it is the front, on
@@ -998,6 +1007,11 @@ export default function Study({ navigation, route }) {
           {/* The day's reviews are done and more are due: tomorrow's, unless
               the learner wants them now. No number on it — the point of the
               cap is not to show the wall. */}
+          {after && session && session.practice && finished ? (
+            <Btn kind="pri" testID="round-after" label={after}
+                 style={{ marginTop: 20, minWidth: 220 }} onPress={() => navigation.goBack()} />
+          ) : null}
+          {after && session && session.practice && finished ? null : (<>
           {!(session && session.practice) && !beyondMode && backlog ? (
             <Btn kind="pri" testID="keep-going" label="Keep going"
                  style={{ marginTop: 20, minWidth: 220 }} onPress={() => deal(false, undefined, { beyond: true })} />
@@ -1020,6 +1034,7 @@ export default function Study({ navigation, route }) {
             <Btn testID="known-round" style={{ marginTop: 12, minWidth: 220 }}
                  label="Review known words" onPress={() => deal(false, "known")} />
           ) : null}
+          </>)}
         </View>
         )
       ) : (
@@ -1090,6 +1105,7 @@ export default function Study({ navigation, route }) {
                       {face.sentence
                         ? <Linked text={face.w} size={18} />
                         : <Text style={{ color: t.ink2, fontWeight: "600", textAlign: "center", fontSize: 22 }}>{face.w}</Text>}
+                      {cardLemma ? <GrammarLine lemma={cardLemma} center style={{ marginTop: 2, alignSelf: "stretch" }} /> : null}
                       <View style={{ marginTop: 8 }}><Speaker text={face.b} /></View>
                     </View>
                   </>
@@ -1099,6 +1115,10 @@ export default function Study({ navigation, route }) {
                       {face.sentence
                         ? <Linked text={face.w} size={faceSize(face)} />
                         : <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center", fontSize: faceSize(face) }}>{face.w}</Text>}
+                      {/* What the word is, under it, as everywhere (words.js
+                          GrammarLine): only on the back, where nothing is left
+                          to give away. */}
+                      {cardLemma ? <GrammarLine lemma={cardLemma} center style={{ marginTop: 2, alignSelf: "stretch" }} /> : null}
                       <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
                     </View>
                     {/* Every meaning the word has, numbered as a dictionary

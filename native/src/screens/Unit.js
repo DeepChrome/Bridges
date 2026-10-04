@@ -168,7 +168,7 @@ export function LessonScreen({ route, navigation }) {
           lesson to the video it prepares for (§30bf). */}
       <Btn testID="lesson-cards" style={{ marginTop: 10 }} label="Flashcards for this lesson"
            onPress={() => navigation.navigate("ListCards", {
-             round: "list", title: unit.name,
+             round: "list", title: unit.name, after: "Back to the lesson",
              // The lesson's words, and the video's sentences that use them.
              words: lessonWords(unit, i).map((x) => L[x].b)
                .concat(linesWith(unit, lessonWords(unit, i)).map((l) => l.ru)) })} />

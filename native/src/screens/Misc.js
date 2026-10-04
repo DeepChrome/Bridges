@@ -721,7 +721,8 @@ export function Video({ route, navigation }) {
                 lines={lines}
                 onMoment={(l) => { setFocus(null); setPlaying(true); jump(Math.max(0, l.t - LINE_LEAD_MS), 0); }}
                 onCards={(list) => navigation.navigate("ListCards",
-                  { round: "list", words: list.concat(lines.map((l) => l.ru)), title: "Before the video" })} />
+                  { round: "list", words: list.concat(lines.map((l) => l.ru)), title: "Before the video",
+                    after: "Continue to video" })} />
 
       {v.chapters && v.chapters.length ? (
         <>

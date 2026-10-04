@@ -38,11 +38,48 @@ describe("the word sheet's head", () => {
     });
     expect(w).toBeTruthy();
     await open(w.b);
-    expect(screen.getByText("feminine")).toBeTruthy();
+    // Right under the word, in words (the owner, 2026-10-04).
+    const facts = screen.getByTestId("grammar-facts");
+    expect(flat(facts)).toMatch(/^noun · feminine/);
     expect(screen.queryByText("f")).toBeNull();
     expect(screen.getAllByLabelText(/Hear it/).length).toBeGreaterThan(0);
   });
+
+  /* «книгу» tapped in a sentence: the dictionary form big, and under it what
+     the tapped form is — the case and number read out of the word's table. */
+  it("names the tapped form under the dictionary form", async () => {
+    const w = L.find((e) => {
+      const hit = IX[fold(e.b || "")];
+      return hit && L[hit[0]] === e && e.p === "noun" && e.g === "f" && /а$/.test(e.b)
+        && IX[fold(e.b.replace(/а$/, "у"))] && L[IX[fold(e.b.replace(/а$/, "у"))][0]] === e;
+    });
+    expect(w).toBeTruthy();
+    const form = w.b.replace(/а$/, "у");
+    await open(form);
+    expect(flat(screen.getByTestId("grammar-form"))).toMatch(new RegExp(`^${form}\\s+accusative singular`, "i"));
+  });
+
+  /* A verb says its aspect, and the partner of the other aspect. */
+  it("gives a verb its aspect and partner", async () => {
+    const w = L.find((e) => {
+      const hit = IX[fold(e.b || "")];
+      return hit && L[hit[0]] === e && e.p === "verb" && e.a === "imperfective" && e.pt;
+    });
+    expect(w).toBeTruthy();
+    await open(w.b);
+    const facts = flat(screen.getByTestId("grammar-facts"));
+    expect(facts).toMatch(/^verb · imperfective · perfective /);
+    expect(facts).toContain(w.pt.split(/,\s*/)[0]);
+  });
 });
+
+/* Every string under a Text, nested spans included. */
+const flat = (node) => {
+  const kids = node.props.children;
+  const walk = (k) => (k == null || k === false ? "" : typeof k === "string" || typeof k === "number" ? String(k)
+    : Array.isArray(k) ? k.map(walk).join("") : k.props ? walk(k.props.children) : "");
+  return walk(kids);
+};
 
 describe("the word sheet's gloss", () => {
   it("numbers the sense groups rather than showing one run", async () => {

@@ -123,9 +123,13 @@
       "жёлтый",
       "серый",
       "коричневый",
-      "голубой"
+      "голубой",
+      "оранжевый",
+      "розовый",
+      "фиолетовый"
     ],
-    "pos": "adjective"
+    "pos": "adjective",
+    "_": "The owner, 2026-10-04: «if you're teaching colors, you should hit all of the basic colors at once» — orange, pink and purple joined the nine."
   },
   "numbers": {
     "members": [
@@ -192,7 +196,12 @@
       "брюки",
       "юбка",
       "платье",
-      "куртка"
+      "куртка",
+      "пальто",
+      "шапка",
+      "шарф",
+      "ботинок",
+      "футболка"
     ]
   },
   "transport": {
@@ -234,5 +243,33 @@
       "русский"
     ],
     "unit": "core2"
+  },
+  "sports": {
+    "_": "The owner, 2026-10-04: «if you hit sports, all common sports at once».",
+    "members": [
+      "футбол",
+      "хоккей",
+      "теннис",
+      "баскетбол",
+      "волейбол",
+      "плавание",
+      "бег"
+    ],
+    "pos": "noun",
+    "home": "sport"
+  },
+  "cinema": {
+    "_": "The owner, 2026-10-04: «if you hit movies, all common movie words at once». They were in five units — фильм in Feelings, кино in Around Town, актёр in Art, зритель in Science.",
+    "members": [
+      "фильм",
+      "кино",
+      "актёр",
+      "актриса",
+      "режиссёр",
+      "зритель",
+      "сериал"
+    ],
+    "pos": "noun",
+    "home": "tech"
   }
 }

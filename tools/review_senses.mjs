@@ -40,20 +40,22 @@ const MODEL = "claude-sonnet-5-5";
 const BATCH = 20;
 const PRICE = { in: 3, out: 15 };
 
-const SYSTEM = `You are a lexicographer checking the definitions in a Russian course for English speakers. For each Russian word you get its part of speech, the numbered senses shown on its dictionary entry (taken from Wiktionary), and the example sentences shown under it.
+const SYSTEM = `You are a lexicographer checking the definitions in a Russian course for English speakers who are building fundamentals. For each Russian word you get its part of speech, its TRANSLATION (the short English shown on flashcards and accepted as the quiz answer), the numbered senses shown on its dictionary entry (from Wiktionary), and the example sentences shown under it.
 
-Judge the senses against what a standard bilingual dictionary (Oxford Russian Dictionary, Multitran, a good learner's dictionary) gives, and against modern everyday usage:
-1. The FIRST sense must be the word's most common modern meaning — the one a learner meets most.
-2. A common meaning must not be missing. If the example sentences use a meaning no sense covers, that meaning is almost certainly common and missing.
-3. A sense that does not belong to this word (another word's meaning, a homograph's), or is wrong, should be dropped. Rare, dated or technical senses are fine where they are — do not drop them for being rare.
+Judge both against what a standard bilingual dictionary (Oxford Russian Dictionary, Multitran, a good learner's dictionary) gives and against modern everyday usage:
+1. The TRANSLATION must open on the plain, everyday English equivalent a learner should learn first — the word an English speaker would use. «синий» is "blue" (the basic colour word), not "dark blue"; «голубой» is "light blue". If the translation's first item is not that, propose a corrected translation.
+2. The FIRST sense must be that same most common modern meaning, said plainly. If it is not there, add it with "lead"; if it is there but not first, use "first".
+3. A common meaning must not be missing. If the example sentences use a meaning no sense covers, it is almost certainly common and missing.
+4. Drop a sense that does not belong to this word (another word's or a homograph's meaning) or is wrong. For an everyday word, also drop slang, criminal-jargon or vulgar senses («синий» "drunk", "dead", "a mafia thief") — a beginner's entry should not carry them. Rare, dated or technical senses are otherwise fine where they are.
 
-Most entries are fine. Propose a change only when a learner would be misled. Use only these operations:
+Propose a change only when a learner would be misled or would learn the wrong first meaning. Use only these operations:
+- "gloss": a corrected TRANSLATION, the whole string: the plain everyday equivalent first, then the next commonest, separated by commas or semicolons ("blue; dark blue, navy"). For a verb begin with "to". Never Russian.
 - "lead": a new sense to put on top, when the commonest meaning is missing. Write it as a dictionary gloss: concise English, two to five comma-separated equivalents, a parenthetical note only if needed ("edition, episode, bulletin (of a publication or programme)"). For a verb begin with "to". Never Russian.
 - "first": an exact substring of an existing sense, to move that sense to the top, when the commonest meaning is present but not first.
 - "drop": exact substrings of senses that do not belong to this word.
 - "rename": {"exact substring of an existing sense": "corrected gloss"}, when a sense is right in idea but garbled.
 
-Answer with JSON only: {"fix":[{"id":3,"lead":"...","why":"at most fifteen words"}]}. Omit words that are fine. An empty list is a fine answer.`;
+Answer with JSON only, once: {"fix":[{"id":3,"lead":"...","why":"at most fifteen words"}]}. Omit words that are fine. An empty list is a fine answer.`;
 
 const has = (n) => process.argv.includes(n);
 
@@ -106,7 +108,7 @@ export function wordsToReview(payload) {
     const examples = refs.map((r) => (payload.sent || [])[r]).filter(Boolean).slice(0, 4)
       .map((r) => ({ ru: bare(r[0]), en: r[1] }));
     for (const s of senses) for (const x of s.x || []) if (examples.length < 6) examples.push({ ru: bare(x.ru), en: x.en });
-    out.push({ i, key: `${l.b}|${l.p}`, b: l.b, p: l.p, senses: senses.map((s) => s.g), examples });
+    out.push({ i, key: `${l.b}|${l.p}`, b: l.b, p: l.p, gloss: l.e || "", senses: senses.map((s) => s.g), examples });
   });
   return out;
 }
@@ -118,12 +120,13 @@ function valid(fix, senses) {
   const found = (d) => senses.some((g) => low(g).includes(low(d)));
   const out = { why: String(fix.why || "").slice(0, 160) };
   if (typeof fix.lead === "string" && fix.lead.trim() && !/[А-Яа-яЁё]/.test(fix.lead)) out.lead = fix.lead.trim();
+  if (typeof fix.gloss === "string" && fix.gloss.trim() && !/[А-Яа-яЁё]/.test(fix.gloss)) out.gloss = fix.gloss.trim();
   if (typeof fix.first === "string" && found(fix.first)) out.first = fix.first;
   const drop = (Array.isArray(fix.drop) ? fix.drop : []).filter((d) => typeof d === "string" && found(d));
   if (drop.length) out.drop = drop;
   const rename = Object.fromEntries(Object.entries(fix.rename || {}).filter(([k, v]) => found(k) && typeof v === "string" && !/[А-Яа-яЁё]/.test(v)));
   if (Object.keys(rename).length) out.rename = rename;
-  return out.lead || out.first || out.drop || out.rename ? out : null;
+  return out.lead || out.gloss || out.first || out.drop || out.rename ? out : null;
 }
 
 async function main() {
@@ -147,6 +150,7 @@ async function main() {
     const batch = todo.slice(k, k + BATCH);
     const content = batch.map((w, id) => [
       `${id}. ${w.b} (${w.p})`,
+      `   translation: ${w.gloss}`,
       ...w.senses.map((g, n) => `   sense ${n + 1}: ${g}`),
       ...w.examples.map((x) => `   example: ${x.ru} = ${x.en}`),
     ].join("\n")).join("\n\n");
@@ -165,7 +169,7 @@ async function main() {
       const w = Number.isInteger(f.id) && batch[f.id];
       if (!w) continue;
       const v = valid(f, w.senses);
-      if (v) proposals[w.key] = { ...v, senses: w.senses };
+      if (v) proposals[w.key] = { ...v, was: w.gloss, senses: w.senses };
     }
     fs.mkdirSync(path.dirname(OUT), { recursive: true });
     fs.writeFileSync(OUT, JSON.stringify(proposals, null, 1) + "\n");

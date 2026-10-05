@@ -13,15 +13,16 @@
  * `tools/build_notices.mjs`, which reads node_modules. Neither list is typed
  * by hand, and that is the point of both.
  *
- * The photographs are the exception and deliberately so: each carries its own
- * author and licence on the word it belongs to (§30h′), because a wall of 259
- * credits here would be read by nobody and the credit belongs beside the
- * picture.
+ * The photographs are listed one by one, folded: since 2026-10-05 the lesson
+ * card carries no credit line (the owner did not want one under every
+ * picture), so this list and the word's own entry are where each author and
+ * licence is shown.
  */
 
 import React from "react";
 import { View, Linking } from "react-native";
-import { Screen, List, Row, Muted, SectionLabel, Text } from "../ui";
+import { Screen, List, Row, Muted, SectionLabel, Text, Fold } from "../ui";
+import { CREDITS as PHOTO_CREDITS } from "../images";
 import { useTheme } from "../theme";
 import { STATS } from "../data";
 import { NOTICES } from "../notices";
@@ -31,6 +32,8 @@ import { expo as APP } from "../../app.json";
 
 /* The one line that is not generated: the bought scenario audio has no meta
    row to read, because it is a purchase rather than a corpus. */
+const PHOTOS = Object.entries(PHOTO_CREDITS || {}).sort((a, b) => a[0].localeCompare(b[0], "ru"));
+
 const VOICES = {
   n: "Google Cloud Text-to-Speech (Chirp3-HD)",
   l: "Licensed for use in this app",
@@ -69,14 +72,22 @@ export default function Credits() {
       </List>
 
       <SectionLabel style={{ marginTop: 22 }}>Photographs</SectionLabel>
-      <List>
-        <Row onPress={() => Linking.openURL("https://commons.wikimedia.org")}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15 }}>Wikimedia Commons</Text>
-            <Muted>Each picture credits its author on the word</Muted>
-          </View>
-        </Row>
-      </List>
+      {/* Every photograph, its author and licence, each opening its Commons
+          page — the credit CC BY and BY-SA ask for, now that the lesson card
+          carries none (2026-10-05). Read off images.js, which build_images.py
+          writes from the harvest's own records. Folded: it is long. */}
+      <Fold testID="photo-credits" title={`Wikimedia Commons · ${PHOTOS.length}`}>
+        <List>
+          {PHOTOS.map(([word, c]) => (
+            <Row key={word} onPress={c.u ? () => Linking.openURL(c.u) : undefined}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: t.ink, fontSize: 15 }}>{word}</Text>
+                <Muted>{[c.t, c.a, c.l].filter(Boolean).join(" · ")}</Muted>
+              </View>
+            </Row>
+          ))}
+        </List>
+      </Fold>
 
       {/* Read off core/avatars.js, which the generator writes from the style's
           own licence metadata, so the credit cannot drift from the faces. */}

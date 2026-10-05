@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { render } from "@testing-library/react-native";
+import { render, fireEvent, act } from "@testing-library/react-native";
 
 import Credits from "../src/screens/Credits";
 import { STATS } from "../src/data";
@@ -51,9 +51,16 @@ describe("what the app says it owes", () => {
     expect(NOTICES.map((n) => n.l).join(" ")).not.toMatch(/unknown|undefined|null/i);
   });
 
-  it("points photograph credits at the picture rather than listing 259 of them", async () => {
+  /* The lesson card carries no credit line since 2026-10-05, so every
+     photograph's author and licence is listed here (CC BY / BY-SA). */
+  it("lists every photograph with its author and licence", async () => {
+    const { CREDITS } = require("../src/images");
+    const n = Object.keys(CREDITS).length;
     const view = await render(<Credits />);
-    expect(view.getByText("Wikimedia Commons")).toBeTruthy();
-    expect(view.getByText(/credits its author on the word/)).toBeTruthy();
+    const fold = view.getByText(`Wikimedia Commons · ${n}`);
+    await act(async () => { fireEvent.press(fold); });
+    const [word, c] = Object.entries(CREDITS)[0];
+    expect(view.getByText(word)).toBeTruthy();
+    expect(view.getByText([c.t, c.a, c.l].filter(Boolean).join(" · "))).toBeTruthy();
   });
 });

@@ -193,7 +193,6 @@ export function WordCard({ i, at, total, unit }) {
   const pad = 16;                                  // Card's own padding, cancelled for the photo
   const pic = pictureOf(w.b);
   const photo = pic && pic.source;
-  const credit = pic && pic.credit;
   // The video's own sentences with this word, which are what the lesson is
   // preparing for (2026-09-29: *"for those sentences, we should only use the
   // ones in the video"*); without one, only the collection's recorded
@@ -226,12 +225,10 @@ export function WordCard({ i, at, total, unit }) {
                   whole on the brand band, where a photograph is cropped to fill. */}
               <Photo testID="word-photo" pic={pic} minH={190} maxH={pic.drawn ? 210 : 300}
                      bg={t.brandBg} label={`Picture: ${firstSense(w)}`} />
-              {credit ? (
-                <Muted testID="photo-credit" size={T.tiny}
-                       style={{ textAlign: "center", paddingTop: 6, paddingHorizontal: pad }}>
-                  {`${credit.a || "Wikimedia Commons"} · ${credit.l}`}
-                </Muted>
-              ) : null}
+              {/* No credit line on the teaching card (the owner, 2026-10-05).
+                  CC BY and BY-SA allow the credit "in any reasonable manner"
+                  for the medium: it is on the word's entry and every photo is
+                  listed on the Credits screen (rule 20.10). */}
             </View>
           ) : (
             <View testID="word-band"

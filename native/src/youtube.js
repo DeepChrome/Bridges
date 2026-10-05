@@ -46,7 +46,7 @@ const REASON = {
   150: "The owner does not allow this video to be embedded.",
 };
 
-const page = (videoId) => `<!doctype html>
+const page = (videoId, captions) => `<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -84,10 +84,18 @@ const page = (videoId) => `<!doctype html>
         fs: 0,
         iv_load_policy: 3,
         disablekb: 1,
+        /* YouTube's own Russian captions, on unless the learner turned them
+           off (the owner, 2026-10-05: "Ensure subtitles are default turned
+           on"). They draw inside the picture with controls off too. */
+        cc_load_policy: ${captions ? 1 : 0},
+        cc_lang_pref: "ru",
+        hl: "ru",
         origin: ${JSON.stringify(ORIGIN)}
       },
       events: {
-        onReady: function () { post({ type: "ready" }); },
+        onReady: function () {
+          post({ type: "ready", len: player.getDuration ? Math.round(player.getDuration() * 1000) : 0 });
+        },
         onStateChange: function (e) {
           if (e.data === YT.PlayerState.ENDED) post({ type: "ended" });
           // Playing or paused, for the app's own play/pause button.
@@ -133,7 +141,8 @@ const page = (videoId) => `<!doctype html>
     if (!on) return;
     ticker = setInterval(function () {
       if (!player || !player.getCurrentTime) return;
-      post({ type: "time", at: Math.round(player.getCurrentTime() * 1000) });
+      post({ type: "time", at: Math.round(player.getCurrentTime() * 1000),
+             len: player.getDuration ? Math.round(player.getDuration() * 1000) : 0 });
     }, 250);
   };
 
@@ -159,6 +168,25 @@ const page = (videoId) => `<!doctype html>
   window.brRate = function (rate) {
     if (player && player.setPlaybackRate) player.setPlaybackRate(rate);
   };
+  /* Captions on or off from the app's settings cog: the captions module,
+     loaded with the Russian track or unloaded. */
+  window.brCaptions = function (on) {
+    if (!player || !player.loadModule) return;
+    try {
+      if (on) {
+        player.loadModule("captions");
+        player.setOption("captions", "track", { languageCode: "ru" });
+      } else {
+        player.unloadModule("captions");
+      }
+    } catch (e) { post({ type: "log", what: "captions: " + e.message }); }
+  };
+  /* A seek from the scrubber: to the moment, keeping whether it was playing. */
+  window.brSeekTo = function (seconds) {
+    if (!player || !player.seekTo) return;
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+    player.seekTo(Math.max(0, seconds), true);
+  };
 
   /* Distinguish the three ways this fails before a player exists, because they
      have different fixes: the script never arrived, the script arrived but the
@@ -179,8 +207,11 @@ const page = (videoId) => `<!doctype html>
 </html>`;
 
 export const YouTube = forwardRef(function YouTube(
-  { videoId, onReady, onEnded, onError, onTime, onState, onRate, theme }, ref
+  { videoId, onReady, onEnded, onError, onTime, onState, onRate, theme, captions = true }, ref
 ) {
+  // The page is built once: captions change later through `captions()`, not a
+  // reload, which would restart the video.
+  const html = useRef(page(videoId, captions)).current;
   const web = useRef(null);
   const isReady = useRef(false);
   const queued = useRef(null);
@@ -229,6 +260,16 @@ export const YouTube = forwardRef(function YouTube(
       if (!web.current || !isReady.current) return;
       web.current.injectJavaScript(`window.brRate(${Number(r)}); true;`);
     },
+    /* YouTube's Russian captions on or off. */
+    captions(on) {
+      if (!web.current || !isReady.current) return;
+      web.current.injectJavaScript(`window.brCaptions(${on ? "true" : "false"}); true;`);
+    },
+    /* To a moment, as the scrubber asks, without changing play or pause. */
+    seekTo(ms) {
+      if (!web.current || !isReady.current) return;
+      web.current.injectJavaScript(`window.brSeekTo(${(ms || 0) / 1000}); true;`);
+    },
   }), []);
 
   if (failed !== null) {
@@ -259,7 +300,7 @@ export const YouTube = forwardRef(function YouTube(
     <View style={{ flex: 1, backgroundColor: "#000" }}>
       <WebView
         ref={web}
-        source={{ html: page(videoId), baseUrl: ORIGIN }}
+        source={{ html, baseUrl: ORIGIN }}
         originWhitelist={["*"]}
         javaScriptEnabled
         domStorageEnabled
@@ -282,9 +323,9 @@ export const YouTube = forwardRef(function YouTube(
               runSeek(queued.current[0], queued.current[1]);
               queued.current = null;
             }
-            onReady && onReady();
+            onReady && onReady(msg.len || 0);
           }
-          else if (msg.type === "time") { onTime && onTime(msg.at); }
+          else if (msg.type === "time") { onTime && onTime(msg.at, msg.len || 0); }
           else if (msg.type === "state") { onState && onState(msg.playing); }
           else if (msg.type === "rate") { onRate && onRate(msg.rate); }
           else if (msg.type === "held") { onEnded && onEnded(); }

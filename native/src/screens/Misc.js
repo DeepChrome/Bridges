@@ -1,7 +1,7 @@
 /* Immerse (the video library) and the video player. */
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Image, Pressable, Linking, BackHandler } from "react-native";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { View, Image, Pressable, Linking, BackHandler, Switch, useWindowDimensions } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { setStatusBarHidden } from "expo-status-bar";
@@ -211,29 +211,15 @@ export function CreatorsNote({ onClose }) {
   );
 }
 
-/* The player's own controls, under it (the owner, 2026-10-01: "skip back 5
-   seconds, forward 5, play/pause (same button)… simple speed controls so the
-   person doesn't have to interact with the video itself"). The speeds are the
-   IFrame API's own steps; the label is the rate the player reports back. */
+/* The player's own controls (the owner, 2026-10-01: "skip back 5 seconds,
+   forward 5, play/pause (same button)… simple speed controls so the person
+   doesn't have to interact with the video itself"). The speeds are the IFrame
+   API's own steps; the label is the rate the player reports back. */
 export const VIDEO_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 const SKIP_MS = 5000;
 
-function CtlButton({ testID, label, onPress, children, wide }) {
-  const t = useTheme();
-  return (
-    <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={label}
-               onPress={onPress} hitSlop={4}
-               style={({ pressed }) => ({ minWidth: wide ? 52 : 44, height: 44, borderRadius: radius.md,
-                 alignItems: "center", justifyContent: "center", paddingHorizontal: 8,
-                 backgroundColor: wide ? t.brand : t.surface2, opacity: pressed ? 0.6 : 1 })}>
-      {children}
-    </Pressable>
-  );
-}
-
-/* What a press on the transport does — one copy for the row under the player
-   and the overlay over it when the video is maximised. */
-function videoActions(player, rate, onRate) {
+/* What a press on the transport does. */
+export function videoActions(player, rate, onRate) {
   const k = Math.max(0, VIDEO_SPEEDS.indexOf(rate));
   return {
     step: (d) => {
@@ -247,124 +233,166 @@ function videoActions(player, rate, onRate) {
   };
 }
 
-/* The maximise glyph, and its way back. */
-const MAXIMISE = "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5";
-const MINIMISE = "M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5";
+/* The transport over the picture, maximised or not (the owner, 2026-10-05:
+   "use the overlay… even if it's not maximized (with the scroller too)"). A
+   row of buttons under the player covered the subtitles and took a band of the
+   screen; this sits in the corners instead.
 
-export function VideoControls({ player, playing, rate, onRate, onMaximise }) {
-  const t = useTheme();
-  const { step, skip } = videoActions(player, rate, onRate);
-  const icon = (d, color = t.ink) => (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2}
-         strokeLinecap="round" strokeLinejoin="round"><Path d={d} /></Svg>
-  );
-  return (
-    <View testID="video-controls" style={{ flexDirection: "row", alignItems: "center", marginTop: 10, gap: 8 }}>
-      <CtlButton testID="video-back5" label="Back 5 seconds" onPress={() => skip(-SKIP_MS)}>
-        <Text style={{ color: t.ink, fontSize: 13, fontWeight: "700" }}>−5s</Text>
-      </CtlButton>
-      <CtlButton testID="video-toggle" label={playing ? "Pause" : "Play"} wide
-                 onPress={() => { if (player.current) player.current.toggle(); }}>
-        {playing
-          ? icon("M9 5v14M15 5v14", t.brandOn)
-          : <Svg width={20} height={20} viewBox="0 0 24 24"><Path d="M7 5l12 7-12 7z" fill={t.brandOn} /></Svg>}
-      </CtlButton>
-      <CtlButton testID="video-fwd5" label="Forward 5 seconds" onPress={() => skip(SKIP_MS)}>
-        <Text style={{ color: t.ink, fontSize: 13, fontWeight: "700" }}>+5s</Text>
-      </CtlButton>
-      <View style={{ flex: 1 }} />
-      <CtlButton testID="video-slower" label="Slower" onPress={() => step(-1)}>
-        {icon("M6 12h12")}
-      </CtlButton>
-      <Text testID="video-rate" accessibilityLabel={`Speed ${rate} times`}
-            style={{ color: t.ink, fontSize: 15, fontWeight: "700", minWidth: 44, textAlign: "center" }}>
-        {`${rate}×`}
-      </Text>
-      <CtlButton testID="video-faster" label="Faster" onPress={() => step(1)}>
-        {icon("M12 6v12M6 12h12")}
-      </CtlButton>
-      {onMaximise ? (
-        <CtlButton testID="video-maximise" label="Full screen" onPress={onMaximise}>
-          {icon(MAXIMISE)}
-        </CtlButton>
-      ) : null}
-    </View>
-  );
-}
+   Two layers, by how often they are wanted:
+   - always there: back and forward five seconds, bottom left, and a thin
+     translucent bar along the foot of the picture — "The 5 second
+     forward/back can always stay visible in the corner".
+   - on a touch, for `OVERLAY_HIDE_MS`: play/pause in the middle, speed bottom
+     right, the cog and maximise top right, and the bar's handle — "I only want
+     the cursor/settings/speed to pop up for a short period of time when the
+     user touches the screen (like one second)". While paused they stay, or
+     there would be no way to see how to start it again.
 
-/* The same transport over a maximised video, small and translucent in the
-   corners (the owner, 2026-10-04: "overlayed on the video… as small
-   translucent buttons in the corners of a maximized screen"). A tap on the
-   picture shows them; they fade three seconds after the last touch while the
-   video plays, and stay while it is paused. White on a dark veil, whatever
-   the theme: they sit on the video, not on the app. */
-const OVERLAY_HIDE_MS = 3000;
-function OverlayButton({ testID, label, onPress, children }) {
+   White on a dark veil, whatever the theme: they sit on the video, not on the
+   app. The position arrives through `onTick` rather than a prop, so four
+   reports a second redraw this and nothing else on the screen. */
+const OVERLAY_HIDE_MS = 1500;
+const SCRUB_PAD = 10;          // the bar's inset from the picture's sides
+function OverlayButton({ testID, label, onPress, children, size = 40 }) {
   return (
     <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={label}
                onPress={onPress} hitSlop={6}
-               style={({ pressed }) => ({ minWidth: 44, height: 44, borderRadius: 22, paddingHorizontal: 10,
+               style={({ pressed }) => ({ minWidth: size, height: size, borderRadius: size / 2, paddingHorizontal: 8,
                  alignItems: "center", justifyContent: "center",
-                 backgroundColor: pressed ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.45)" })}>
+                 backgroundColor: pressed ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.42)" })}>
       {children}
     </Pressable>
   );
 }
 
-export function VideoOverlay({ player, playing, rate, onRate, onExit }) {
+/* The thin bar: where the video is, and a place to drag to somewhere else.
+   The seek happens on release, once — a seek per move would make the player
+   chase the finger and stutter. */
+function Scrubber({ pos, len, active, onSeek, onTouch }) {
+  const [width, setWidth] = useState(0);
+  const [drag, setDrag] = useState(null);
+  const frac = (x) => Math.min(1, Math.max(0, x / Math.max(1, width)));
+  const shown = drag !== null ? drag : (len > 0 ? Math.min(1, pos / len) : 0);
+  const thick = active || drag !== null;
+  return (
+    <View testID="overlay-scrub" accessibilityRole="adjustable" accessibilityLabel="Position in the video"
+          accessibilityValue={{ min: 0, max: Math.round(len / 1000), now: Math.round(pos / 1000) }}
+          onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+          onStartShouldSetResponder={() => len > 0}
+          onResponderTerminationRequest={() => false}
+          onResponderGrant={(e) => { onTouch(); setDrag(frac(e.nativeEvent.locationX)); }}
+          onResponderMove={(e) => { onTouch(); setDrag(frac(e.nativeEvent.locationX)); }}
+          onResponderRelease={(e) => {
+            const f = frac(e.nativeEvent.locationX);
+            setDrag(null);
+            onSeek(Math.round(f * len));
+          }}
+          onResponderTerminate={() => setDrag(null)}
+          style={{ position: "absolute", left: SCRUB_PAD, right: SCRUB_PAD, bottom: 0, height: 22,
+                   justifyContent: "center" }}>
+      <View pointerEvents="none"
+            style={{ height: thick ? 4 : 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.22)" }}>
+        <View style={{ width: `${shown * 100}%`, height: "100%", borderRadius: 2,
+                       backgroundColor: "rgba(255,255,255,0.6)" }} />
+      </View>
+      {thick ? (
+        <View pointerEvents="none"
+              style={{ position: "absolute", left: shown * width - 6, width: 12, height: 12, borderRadius: 6,
+                       backgroundColor: "rgba(255,255,255,0.9)" }} />
+      ) : null}
+    </View>
+  );
+}
+
+/* The maximise glyph, and its way back. */
+const MAXIMISE = "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5";
+const MINIMISE = "M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5";
+const COG = "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z";
+
+export function VideoOverlay({ player, playing, rate, onRate, onTick, length = 0, full, onFull, onCog }) {
   const { step, skip, toggle } = videoActions(player, rate, onRate);
-  const [shown, setShown] = useState(true);
+  const [shown, setShown] = useState(false);
+  const [pos, setPos] = useState(0);
+  const [len, setLen] = useState(length);
   const timer = useRef(null);
+  useEffect(() => onTick && onTick((ms, l) => { setPos(ms); if (l > 0) setLen(l); }), [onTick]);
   const poke = () => {
     setShown(true);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => setShown(false), OVERLAY_HIDE_MS);
   };
-  // Paused, the controls stay; playing, they leave three seconds after a touch.
-  useEffect(() => {
-    if (!playing) { if (timer.current) clearTimeout(timer.current); setShown(true); }
-    else poke();
-    return () => { if (timer.current) clearTimeout(timer.current); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing]);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  // Paused, the controls stay; playing, they leave shortly after a touch.
+  const up = shown || !playing;
   const press = (fn) => () => { fn(); poke(); };
   const white = "#fff";
-  const icon = (d) => (
-    <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={white} strokeWidth={2.2}
+  const icon = (d, size = 20) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={white} strokeWidth={2.2}
          strokeLinecap="round" strokeLinejoin="round"><Path d={d} /></Svg>
   );
   const label = (s) => <Text style={{ color: white, fontSize: 13, fontWeight: "700" }}>{s}</Text>;
-  const corner = { position: "absolute", flexDirection: "row", alignItems: "center", gap: 8 };
+  const corner = { position: "absolute", flexDirection: "row", alignItems: "center", gap: 6 };
+  const edge = full ? 16 : 8;
   return (
     <View testID="video-overlay" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
       {/* The picture: a tap shows the controls, or hides them when they are up. */}
       <Pressable testID="overlay-touch" accessibilityLabel="Show controls"
                  style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
                  onPress={() => (shown && playing ? setShown(false) : poke())} />
-      {shown ? (
+      <View style={[corner, { bottom: 18, left: edge }]}>
+        <OverlayButton testID="overlay-back5" label="Back 5 seconds" onPress={press(() => skip(-SKIP_MS))}>{label("−5s")}</OverlayButton>
+        <OverlayButton testID="overlay-fwd5" label="Forward 5 seconds" onPress={press(() => skip(SKIP_MS))}>{label("+5s")}</OverlayButton>
+      </View>
+      {up ? (
         <>
-          <View style={[corner, { top: 16, right: 16 }]}>
-            <OverlayButton testID="overlay-exit" label="Exit full screen" onPress={onExit}>{icon(MINIMISE)}</OverlayButton>
-          </View>
-          <View style={[corner, { bottom: 16, left: 16 }]}>
-            <OverlayButton testID="overlay-back5" label="Back 5 seconds" onPress={press(() => skip(-SKIP_MS))}>{label("−5s")}</OverlayButton>
-            <OverlayButton testID="overlay-toggle" label={playing ? "Pause" : "Play"} onPress={press(toggle)}>
-              {playing ? icon("M9 5v14M15 5v14")
-                : <Svg width={20} height={20} viewBox="0 0 24 24"><Path d="M7 5l12 7-12 7z" fill={white} /></Svg>}
+          <View pointerEvents="box-none"
+                style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+                         alignItems: "center", justifyContent: "center" }}>
+            <OverlayButton testID="overlay-toggle" label={playing ? "Pause" : "Play"} size={52} onPress={press(toggle)}>
+              {playing ? icon("M9 5v14M15 5v14", 24)
+                : <Svg width={24} height={24} viewBox="0 0 24 24"><Path d="M7 5l12 7-12 7z" fill={white} /></Svg>}
             </OverlayButton>
-            <OverlayButton testID="overlay-fwd5" label="Forward 5 seconds" onPress={press(() => skip(SKIP_MS))}>{label("+5s")}</OverlayButton>
           </View>
-          <View style={[corner, { bottom: 16, right: 16 }]}>
+          <View style={[corner, { top: edge, right: edge }]}>
+            <OverlayButton testID="overlay-cog" label="Video settings" onPress={() => { onCog(); poke(); }}>{icon(COG)}</OverlayButton>
+            <OverlayButton testID={full ? "overlay-exit" : "video-maximise"} label={full ? "Exit full screen" : "Full screen"}
+                           onPress={() => { onFull(!full); poke(); }}>{icon(full ? MINIMISE : MAXIMISE)}</OverlayButton>
+          </View>
+          <View style={[corner, { bottom: 18, right: edge }]}>
             <OverlayButton testID="overlay-slower" label="Slower" onPress={press(() => step(-1))}>{icon("M6 12h12")}</OverlayButton>
-            <View style={{ minWidth: 44, height: 44, borderRadius: 22, paddingHorizontal: 10, alignItems: "center",
-                           justifyContent: "center", backgroundColor: "rgba(0,0,0,0.45)" }}>
-              <Text testID="overlay-rate" style={{ color: white, fontSize: 13, fontWeight: "700" }}>{`${rate}×`}</Text>
-            </View>
+            <Text testID="overlay-rate" accessibilityLabel={`Speed ${rate} times`}
+                  style={{ color: white, fontSize: 13, fontWeight: "700", minWidth: 34, textAlign: "center",
+                           textShadowColor: "rgba(0,0,0,0.8)", textShadowRadius: 3 }}>{`${rate}×`}</Text>
             <OverlayButton testID="overlay-faster" label="Faster" onPress={press(() => step(1))}>{icon("M12 6v12M6 12h12")}</OverlayButton>
           </View>
         </>
       ) : null}
+      <Scrubber pos={pos} len={len} active={up} onTouch={poke}
+                onSeek={(ms) => { setPos(ms); if (player.current) player.current.seekTo(ms); }} />
     </View>
+  );
+}
+
+/* The cog's sheet (the owner, 2026-10-05: "just a little watch on YouTube
+   button there and subtitle controls"). Resolution and audio-only are not
+   here because the embedded player offers neither. */
+export function VideoSettings({ videoId, at, captions, onCaptions, onClose }) {
+  const t = useTheme();
+  return (
+    <Sheet testID="video-settings" onClose={onClose}
+           footer={<Btn block kind="pri" label="Done" style={{ marginTop: 14 }} onPress={onClose} />}>
+      <List>
+        <Row>
+          <Text style={{ flex: 1, color: t.ink, fontSize: 16 }}>Subtitles</Text>
+          <Switch testID="video-captions" value={captions} accessibilityLabel="Subtitles"
+                  onValueChange={onCaptions} trackColor={{ true: t.good, false: t.surface3 }} />
+        </Row>
+        <Row testID="video-youtube"
+             onPress={() => Linking.openURL(`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor((at || 0) / 1000)}s`)}>
+          <Text style={{ flex: 1, color: t.ink, fontSize: 16 }}>Watch on YouTube</Text>
+        </Row>
+      </List>
+    </Sheet>
   );
 }
 
@@ -646,28 +674,49 @@ export function Video({ route, navigation }) {
      learner will come back to — but only redraws the screen while the
      transcript needs it; four renders a second of everything below the player
      would buy nothing. */
+  /* Maximised: the same player — it is never remounted, so it keeps playing
+     where it was. Held upright, the video takes the top half and the
+     transcript the bottom; turned sideways, the video takes the whole screen
+     (the owner, 2026-10-05). The header, tab bar and status bar get out of
+     the way either way, and Back leaves full screen before the video. */
+  const [full, setFull] = useState(false);
+  const { width: winW, height: winH } = useWindowDimensions();
+  const sideways = winW > winH;
+  const halfScript = full && !sideways;
   const scriptOn = useRef(false);
-  scriptOn.current = showScript;
-  const onTime = (ms) => {
-    if (v) setVideoPosition(v.id, ms, v.dur ? v.dur * 1000 : 0);
+  scriptOn.current = showScript || halfScript;
+  // The overlay's position, outside React's tree: four a second would
+  // otherwise redraw the whole page under the player.
+  const ticks = useRef(new Set());
+  const onTick = useCallback((f) => { ticks.current.add(f); return () => ticks.current.delete(f); }, []);
+  const lastAt = useRef(0);
+  const onTime = (ms, len) => {
+    lastAt.current = ms;
+    if (v) setVideoPosition(v.id, ms, len || (v.dur ? v.dur * 1000 : 0));
+    for (const f of ticks.current) f(ms, len);
     if (scriptOn.current) setPos(ms);
+  };
+  /* Subtitles: YouTube's Russian captions, on unless turned off in the cog
+     ("Ensure subtitles are default turned on"); kept with the library's state. */
+  const [captions, setCaptions] = useState(() => libraryState().cc !== false);
+  const [cog, setCog] = useState(false);
+  const setCc = (on) => {
+    setCaptions(on);
+    setLibraryState({ cc: on });
+    if (player.current) player.current.captions(on);
   };
   useEffect(() => {
     if (player.current) player.current.watch(playing);
     return () => { if (player.current) player.current.watch(false); };
   }, [playing]);
-  /* Maximised: the same player — it is never remounted, so it keeps playing
-     where it was — filling the screen sideways, the header, tab bar and
-     status bar out of the way, and the transport over the picture. Back
-     leaves full screen before it leaves the video. */
-  const [full, setFull] = useState(false);
   /* The tab bar is not touched here: Video is a run (fullscreen.js), so the
      tabs are already hidden. Setting `tabBarStyle` on the parent from here
      overrode App.js's computed style for good — a key set to undefined still
      overrides — and left that tab's bar unstyled after one full-screen view. */
   useEffect(() => {
     if (full) {
-      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(() => {});
+      // Free to turn: upright is the half-and-half view, sideways the picture alone.
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.ALL).catch(() => {});
       setStatusBarHidden(true, "fade");
       navigation.setOptions && navigation.setOptions({ headerShown: false });
     }
@@ -684,7 +733,7 @@ export function Video({ route, navigation }) {
   // Full screen belongs to a playing video; if the player goes away, so does it.
   useEffect(() => { if (!playing && full) setFull(false); }, [playing, full]);
   if (!v) return null;
-  const script = showScript ? transcriptOf(v.id) : null;
+  const script = showScript || halfScript ? transcriptOf(v.id) : null;
   const seekTo = (ms) => {
     setPlaying(true);
     setPos(ms);
@@ -765,29 +814,45 @@ export function Video({ route, navigation }) {
                 ? { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 10, elevation: 10,
                     backgroundColor: "#000" }
                 : { paddingHorizontal: space.pad, paddingTop: space.pad, paddingBottom: 4, backgroundColor: t.bg }}>
-          <View style={full ? { flex: 1, backgroundColor: "#000" }
-                            : { aspectRatio: 16 / 9, borderRadius: radius.md, overflow: "hidden", backgroundColor: "#000" }}>
-            <YouTube
-              ref={player}
-              videoId={v.id}
-              onTime={onTime}
-              onState={setRunning}
-              onRate={setRate}
-              onReady={() => {
-                if (pending.current != null) {
-                  player.current && player.current.seek(pending.current[0], pending.current[1]);
-                  pending.current = null;
-                }
-                if (player.current) player.current.watch(true);
-              }}
-            />
-            {full ? <VideoOverlay player={player} playing={running} rate={rate} onRate={setRate}
-                                  onExit={() => setFull(false)} /> : null}
+          <View style={full && sideways ? { flex: 1, backgroundColor: "#000" }
+                       : full ? { backgroundColor: "#000" }
+                       : { aspectRatio: 16 / 9, borderRadius: radius.md, overflow: "hidden", backgroundColor: "#000" }}>
+            <View style={full && !sideways ? { width: "100%", aspectRatio: 16 / 9 } : { flex: 1 }}>
+              <YouTube
+                ref={player}
+                videoId={v.id}
+                captions={captions}
+                onTime={onTime}
+                onState={setRunning}
+                onRate={setRate}
+                onReady={(len) => {
+                  if (len > 0) for (const f of ticks.current) f(lastAt.current, len);
+                  if (pending.current != null) {
+                    player.current && player.current.seek(pending.current[0], pending.current[1]);
+                    pending.current = null;
+                  }
+                  if (player.current) player.current.watch(true);
+                }}
+              />
+              <VideoOverlay player={player} playing={running} rate={rate} onRate={setRate}
+                            onTick={onTick} length={v.dur ? v.dur * 1000 : 0}
+                            full={full} onFull={setFull} onCog={() => setCog(true)} />
+            </View>
           </View>
-          {full ? null : <VideoControls player={player} playing={running} rate={rate} onRate={setRate}
-                                        onMaximise={() => setFull(true)} />}
+          {halfScript ? (
+            <View testID="video-half-script" style={{ flex: 1, backgroundColor: t.bg, paddingHorizontal: space.pad }}>
+              {script && script.length
+                ? <Transcript fill lines={script} position={pos} onSeek={seekTo}
+                              en={transcriptEnOf(v.id)} showEn={showEn}
+                              onToggleEn={() => { setShowEn(!showEn); setLibraryState({ en: !showEn }); }}
+                              onWord={(w) => { if (player.current) player.current.pause(); if (wordsCtx) wordsCtx.open(w); }} />
+                : <Muted style={{ marginTop: 12 }}>No transcript for this one.</Muted>}
+            </View>
+          ) : null}
         </View>
       ) : null}
+      {cog ? <VideoSettings videoId={v.id} at={lastAt.current} captions={captions}
+                            onCaptions={setCc} onClose={() => setCog(false)} /> : null}
     <Screen>
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
         <View style={{ flex: 1 }}>

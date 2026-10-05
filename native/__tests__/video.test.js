@@ -398,6 +398,8 @@ describe("full screen", () => {
     const before = screen.getByTestId("yt-player");
     expect(screen.getByTestId("video-pinned")).toBeTruthy();
 
+    // The overlay is over the picture before maximising too (2026-10-05).
+    expect(screen.getByTestId("video-overlay")).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByTestId("video-maximise")); });
     expect(screen.getByTestId("video-full")).toBeTruthy();
     expect(screen.getByTestId("video-overlay")).toBeTruthy();
@@ -406,7 +408,9 @@ describe("full screen", () => {
     }
     // The same player, not a second one: a remount would reload the video.
     expect(screen.getByTestId("yt-player")).toBe(before);
-    expect(global.__orientation).toBe("landscape");
+    // Free to turn: upright, the transcript fills the lower half.
+    expect(global.__orientation).toBe("any");
+    expect(screen.getByTestId("video-half-script")).toBeTruthy();
     expect(setOptions).toHaveBeenCalledWith({ headerShown: false });
     // The tab bar is the run rule's (fullscreen.js), never set from here: an
     // option set on the parent outlives full screen and unstyles the bar.
@@ -418,7 +422,7 @@ describe("full screen", () => {
 
     await act(async () => { fireEvent.press(screen.getByTestId("overlay-exit")); });
     expect(screen.getByTestId("video-pinned")).toBeTruthy();
-    expect(screen.queryByTestId("video-overlay")).toBeNull();
+    expect(screen.queryByTestId("video-half-script")).toBeNull();
     expect(global.__orientation).toBe("portrait");
     expect(setOptions).toHaveBeenLastCalledWith({ headerShown: true });
     expect(parentOptions).not.toHaveBeenCalled();

@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider, useSession } from "../src/session";
 import { flushState } from "../src/store";
-import { Immerse, Video, VideoHistory, VideoControls, VIDEO_SPEEDS } from "../src/screens/Misc";
+import { Immerse, Video, VideoHistory, VideoOverlay, VIDEO_SPEEDS } from "../src/screens/Misc";
 import { videos } from "../src/data";
 import { setVideoPosition, openedVideo, watchHistory, videoPosition, libraryState,
          loadImmerse, flushImmerse, resetImmerse } from "../src/immerse";
@@ -22,7 +22,8 @@ jest.mock("../src/youtube", () => {
   const { View } = require("react-native");
   return { YouTube: React.forwardRef((props, ref) => {
     React.useImperativeHandle(ref, () => ({ seek: global.__seek, pause: jest.fn(), watch: jest.fn(),
-      toggle: global.__toggle, rate: global.__rate, skip: global.__skip }));
+      toggle: global.__toggle, rate: global.__rate, skip: global.__skip,
+      captions: global.__captions, seekTo: jest.fn() }));
     return React.createElement(View, { testID: "yt-player" });
   }) };
 });
@@ -52,6 +53,7 @@ beforeEach(async () => {
   global.__toggle = jest.fn();
   global.__rate = jest.fn();
   global.__skip = jest.fn();
+  global.__captions = jest.fn();
 });
 afterEach(async () => { await flushState(); });
 
@@ -164,28 +166,30 @@ describe("the player", () => {
     expect(watchHistory()[0].id).toBe(b.id);
   });
 
-  /* Controls under the player, so nobody has to use the video's own (the
-     owner, 2026-10-01): back and forward five seconds, one play/pause, speed
-     down and up through the API's own steps. */
-  it("offers back 5, play/pause, forward 5 and speed under the player", async () => {
+  /* The transport sits over the picture, maximised or not (the owner,
+     2026-10-05): back and forward five seconds always in the corner, the rest
+     on a touch — play/pause, speed, the cog — and no row under the player. */
+  it("puts back 5 and forward 5 over the picture always, the rest on a touch", async () => {
     await withProfile(<Video route={{ params: { videoId: a.id } }} navigation={nav} />);
-    expect(screen.queryByTestId("video-controls")).toBeNull();
     await act(async () => { fireEvent.press(screen.getByTestId("video-play")); });
     // Every press awaited inside act: an un-awaited one overlapping the others
     // left the renderer a render behind and broke the tests after this one.
     const press = (id) => act(async () => { fireEvent.press(screen.getByTestId(id)); });
-    await press("video-back5");
+    expect(screen.getByTestId("video-overlay")).toBeTruthy();
+    await press("overlay-back5");
     expect(global.__skip).toHaveBeenCalledWith(-5000, 0, 0);
-    await press("video-fwd5");
+    await press("overlay-fwd5");
     expect(global.__skip).toHaveBeenCalledWith(5000, 0, 0);
-    await press("video-toggle");
+    expect(screen.getByTestId("overlay-scrub")).toBeTruthy();
+    // Paused (the player has not reported playing), the rest stay up.
+    await press("overlay-toggle");
     expect(global.__toggle).toHaveBeenCalled();
-    expect(screen.getByTestId("video-rate").props.children).toBe("1×");
-    await press("video-faster");
-    expect(screen.getByTestId("video-rate").props.children).toBe("1.25×");
-    await press("video-slower");
-    await press("video-slower");
-    expect(screen.getByTestId("video-rate").props.children).toBe("0.75×");
+    expect(screen.getByTestId("overlay-rate").props.children).toBe("1×");
+    await press("overlay-faster");
+    expect(screen.getByTestId("overlay-rate").props.children).toBe("1.25×");
+    await press("overlay-slower");
+    await press("overlay-slower");
+    expect(screen.getByTestId("overlay-rate").props.children).toBe("0.75×");
     expect(global.__rate).toHaveBeenLastCalledWith(0.75);
   });
 
@@ -194,18 +198,64 @@ describe("the player", () => {
     function Host() {
       const [r, setR] = React.useState(1);
       const player = React.useRef({ rate, skip: jest.fn(), toggle: jest.fn() });
-      return <VideoControls player={player} playing={false} rate={r} onRate={setR} />;
+      return <VideoOverlay player={player} playing={false} rate={r} onRate={setR}
+                           full={false} onFull={() => {}} onCog={() => {}} />;
     }
     await render(<Host />);
-    const label = () => screen.getByTestId("video-rate").props.children;
-    await act(async () => { fireEvent.press(screen.getByTestId("video-faster")); });
+    const label = () => screen.getByTestId("overlay-rate").props.children;
+    await act(async () => { fireEvent.press(screen.getByTestId("overlay-faster")); });
     expect(label()).toBe("1.25×");
-    await act(async () => { fireEvent.press(screen.getByTestId("video-slower")); });
-    await act(async () => { fireEvent.press(screen.getByTestId("video-slower")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("overlay-slower")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("overlay-slower")); });
     expect(label()).toBe("0.75×");
     expect(rate).toHaveBeenLastCalledWith(0.75);
-    for (let k = 0; k < 6; k++) await act(async () => { fireEvent.press(screen.getByTestId("video-slower")); });
+    for (let k = 0; k < 6; k++) await act(async () => { fireEvent.press(screen.getByTestId("overlay-slower")); });
     expect(label()).toBe(`${VIDEO_SPEEDS[0]}×`);            // stops at the slowest
+  });
+
+  /* Playing, everything but the five-second skips leaves after a moment, and
+     a touch on the picture brings it back. */
+  it("hides the rest of the controls shortly after a touch while playing", async () => {
+    jest.useFakeTimers();
+    try {
+      const player = { current: { rate: jest.fn(), skip: jest.fn(), toggle: jest.fn() } };
+      await render(<VideoOverlay player={player} playing rate={1} onRate={() => {}}
+                                 full={false} onFull={() => {}} onCog={() => {}} />);
+      expect(screen.queryByTestId("overlay-toggle")).toBeNull();
+      expect(screen.getByTestId("overlay-back5")).toBeTruthy();
+      await act(async () => { fireEvent.press(screen.getByTestId("overlay-touch")); });
+      expect(screen.getByTestId("overlay-toggle")).toBeTruthy();
+      expect(screen.getByTestId("overlay-cog")).toBeTruthy();
+      await act(async () => { jest.advanceTimersByTime(2000); });
+      expect(screen.queryByTestId("overlay-toggle")).toBeNull();
+      expect(screen.getByTestId("overlay-fwd5")).toBeTruthy();
+    } finally { jest.useRealTimers(); }
+  });
+
+  /* The scrubber seeks once, on release, to where the finger let go. */
+  it("seeks from the scrubber on release", async () => {
+    const seekTo = jest.fn();
+    const player = { current: { rate: jest.fn(), skip: jest.fn(), toggle: jest.fn(), seekTo } };
+    await render(<VideoOverlay player={player} playing={false} rate={1} onRate={() => {}} length={100000}
+                               full={false} onFull={() => {}} onCog={() => {}} />);
+    const bar = screen.getByTestId("overlay-scrub");
+    await act(async () => { fireEvent(bar, "layout", { nativeEvent: { layout: { width: 200 } } }); });
+    await act(async () => { fireEvent(bar, "responderGrant", { nativeEvent: { locationX: 50 } }); });
+    expect(seekTo).not.toHaveBeenCalled();
+    await act(async () => { fireEvent(bar, "responderRelease", { nativeEvent: { locationX: 100 } }); });
+    expect(seekTo).toHaveBeenCalledWith(50000);
+  });
+
+  /* The cog: subtitles (on by default) and a way out to YouTube. */
+  it("turns subtitles off from the cog, and remembers", async () => {
+    await withProfile(<Video route={{ params: { videoId: a.id } }} navigation={nav} />);
+    await act(async () => { fireEvent.press(screen.getByTestId("video-play")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("overlay-cog")); });
+    expect(screen.getByTestId("video-captions").props.value).toBe(true);
+    expect(screen.getByTestId("video-youtube")).toBeTruthy();
+    await act(async () => { fireEvent(screen.getByTestId("video-captions"), "valueChange", false); });
+    expect(global.__captions).toHaveBeenLastCalledWith(false);
+    expect(libraryState().cc).toBe(false);
   });
 
   it("starts at the beginning when it was never played", async () => {

@@ -248,7 +248,7 @@ jest.mock("expo-sqlite", () => ({ deserializeDatabaseAsync: jest.fn(), openDatab
 /* A maximised video turns the screen (Misc.js Video). The lock asked for is
    kept on `global.__orientation` so a test can see the way back was taken. */
 jest.mock("expo-screen-orientation", () => ({
-  OrientationLock: { PORTRAIT_UP: "portrait", LANDSCAPE: "landscape" },
+  OrientationLock: { PORTRAIT_UP: "portrait", LANDSCAPE: "landscape", ALL: "any" },
   lockAsync: jest.fn(async (o) => { global.__orientation = o; }),
 }));
 jest.mock("expo-document-picker", () => ({ getDocumentAsync: jest.fn() }));

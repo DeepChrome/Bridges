@@ -129,7 +129,9 @@ const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord
   );
 });
 
-export function Transcript({ lines, position, onSeek, onWord, en, showEn, onToggleEn }) {
+/* `fill`: the lower half of a maximised video, where it takes the space it is
+   given rather than a capped panel inside a scrolling page. */
+export function Transcript({ lines, position, onSeek, onWord, en, showEn, onToggleEn, fill }) {
   const [follow, setFollow] = useState(true);
   const ys = useRef([]);
   const scroller = useRef(null);
@@ -144,7 +146,7 @@ export function Transcript({ lines, position, onSeek, onWord, en, showEn, onTogg
   }, [at, follow]);
 
   return (
-    <View testID="transcript" style={{ marginTop: 12 }}>
+    <View testID="transcript" style={fill ? { flex: 1, marginTop: 8 } : { marginTop: 12 }}>
       <View style={{ flexDirection: "row", justifyContent: "flex-end", alignItems: "center",
                      gap: 8, marginBottom: 6 }}>
         {/* Says where the English came from (rule 20.7's second allowance):
@@ -156,7 +158,7 @@ export function Transcript({ lines, position, onSeek, onWord, en, showEn, onTogg
       {/* flexShrink so it scrolls inside its cap rather than growing to its
           content (§23); nested, since the screen around it scrolls too. */}
       <ScrollView ref={scroller} nestedScrollEnabled testID="transcript-scroll"
-                  style={{ maxHeight: PANEL_HEIGHT, flexShrink: 1 }}
+                  style={fill ? { flex: 1 } : { maxHeight: PANEL_HEIGHT, flexShrink: 1 }}
                   onScrollBeginDrag={() => setFollow(false)}>
         {lines.map((ln, k) => (
           <Line key={k} line={ln} k={k} active={k === at} word={k === at ? word : -1}

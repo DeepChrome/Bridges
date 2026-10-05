@@ -69,7 +69,15 @@ const RATE_PER_M_CHARS = 30;
    the first that is a word. Sentences never did this; they are measured too,
    because the lengths ride in the manifest for audio_qa to read. */
 export const MIN_WORD_MS = 500;
-const RETRIES = ["", "", "cap", "cap", "stop"];
+/* A word is said as a statement — «Вкусный.» — first (the owner, 2026-10-04:
+   "a really weird inflection at the end (pitch rises for no reason)"). Handed
+   a bare lowercase word with nothing after it, the voice reads it as
+   unfinished and lifts the end; the full stop is what tells it the word is the
+   whole sentence. The blip ladder (§30ao) follows: the same again, then other
+   renderings. */
+const RETRIES = ["stop", "stop", "cap", "", ""];
+export const statedId = (text) => clipId(rendering(text, "stop"));
+const RESTATE = process.argv.includes("--restate");
 
 const flag = (n) => process.argv.includes(n);
 const DRY = flag("--dry-run");
@@ -312,6 +320,14 @@ async function main() {
     measured++;
   }
   const blip = (m) => m.word && have.has(m.id) && ms[m.id] < MIN_WORD_MS;
+  /* `--restate`: every word clip bought before words were said as statements
+     is bought again, as one ("Вкусный."), and the old file goes. */
+  const old = new Map();
+  if (RESTATE) for (const m of want) {
+    if (!m.word || m.id === statedId(m.text)) continue;
+    old.set(m.key, m.id);
+    m.id = statedId(m.text);
+  }
   /* A word the engine would not say last time is not bought again on every
      run; `--retry-skipped` asks once more. */
   const skipped = new Set(flag("--retry-skipped") ? [] : (prior.skipped || []));

@@ -853,6 +853,39 @@ def check_closed_class(units, lemmas, with_paradigm):
     return bad
 
 
+WIKT_RAW = ROOT / "data" / "raw" / "wiktionary" / "russian.jsonl"
+WIKT_FORMS_CACHE = ROOT / "data" / "_work" / "wiktionary_forms.json"
+
+
+def wiktionary_forms(wanted):
+    """Which Wiktionary headword lists each of `wanted` (folded forms) among
+    its forms: {form: headword}. The raw dump is 900 MB, so what has been
+    asked is cached (data/_work, a derived file) and the dump read again only
+    for forms not asked before. A form no entry lists is cached as "" so it is
+    not looked for twice. Without the dump, nothing is found."""
+    cache = {}
+    if WIKT_FORMS_CACHE.exists():
+        cache = json.loads(WIKT_FORMS_CACHE.read_text(encoding="utf-8"))
+    todo = {k for k in wanted if k not in cache}
+    if todo and WIKT_RAW.exists():
+        found = {}
+        with WIKT_RAW.open(encoding="utf-8") as f:
+            for line in f:
+                e = json.loads(line)
+                word = e.get("word") or ""
+                if not word or e.get("lang_code", "ru") != "ru":
+                    continue
+                for fm in e.get("forms") or ():
+                    k = fold(fm.get("form") or "")
+                    if k in todo and k not in found and fold(word) != k:
+                        found[k] = word
+        for k in todo:
+            cache[k] = found.get(k, "")
+        WIKT_FORMS_CACHE.parent.mkdir(parents=True, exist_ok=True)
+        WIKT_FORMS_CACHE.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+    return {k: cache[k] for k in wanted if cache.get(k)}
+
+
 def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units, video_ids, stats):
     """Every word form in the app's own Russian that is not a course word, to
     the dictionary headword it belongs to (the owner, 2026-10-03: "some words
@@ -892,6 +925,30 @@ def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
             else:
                 unsettled[k] = ("shared" if ambiguous else "not in the lexicon" if not resolver.candidates(k)
                                 else "no gloss")
+    # What OpenRussian's tables do not list, Wiktionary's often do (the owner,
+    # 2026-10-04: "Every word should always have a reference throughout our
+    # entire app"): «говоря» is a form of говорить, «какие-то» of какой-то.
+    # Taken only where the headword it names is one the dictionary has.
+    def headword(word):
+        c, _amb = resolver.owner(fold(word))
+        return f"{c['bare']}|{c['pos']}" if c and c["glossed"] and not c["stub"] else None
+    for k, word in wiktionary_forms(set(unsettled)).items():
+        h = headword(word)
+        if h:
+            out[k] = h
+            del unsettled[k]
+    # …and a pronoun or adverb with a particle hyphened on («какая-нибудь»,
+    # «кого-то», «кое-где») is that word: linked to it when nothing names the
+    # compound itself.
+    for k in list(unsettled):
+        m = re.fullmatch(r"(?:кое-)?([а-яё]+?)(?:-(?:то|нибудь|либо|ка|таки))?", k)
+        if not m or m.group(1) == k:
+            continue
+        base = m.group(1)
+        h = headword(base)
+        if h:
+            out[k] = h
+            del unsettled[k]
     stats["deep_forms"] = len(out)
     stats["deep_forms_unsettled"] = len(unsettled)
     # What stays unlinked, commonest first, for a person to read after a build.

@@ -2,7 +2,7 @@
  *
  * The bought Chirp3-HD clips, bundled: the curriculum words (ROADMAP 13.32,
  * then every Core 5000 one) and the speaking and listening pools' sentences
- * (2026-09-19). 8181 clips, keyed by the **folded** utterance, which
+ * (2026-09-19). 8180 clips, keyed by the **folded** utterance, which
  * is the key `say()` already derives (rule 20.2 — the manifest folds ё to е
  * and a lemma's bare form does not, which is how the first count of these
  * came out at 75 instead of 61).
@@ -323,7 +323,7 @@ export const WORD_CLIPS = {
   "бояться за кого-либо": require("../assets/words/s-d1e11657dfc0.mp3"),
   "брандмауэр обеспечит гарантированную безопасность в сети интернет.": require("../assets/words/s-c39a5dc154b5.mp3"),
   "брат": require("../assets/words/brat.mp3"),
-  "брать": require("../assets/words/brat-b1d318.mp3"),
+  "брать": require("../assets/words/brat-07a3ee.mp3"),
   "брать кого-либо за руку": require("../assets/words/s-47130e9625b7.mp3"),
   "бригада маляров красит помещение.": require("../assets/words/s-9b374432a1c8.mp3"),
   "британия снабдила египет своим вариантом независимости.": require("../assets/words/s-46124a1305c8.mp3"),
@@ -3116,7 +3116,6 @@ export const WORD_CLIPS = {
   "мы услышали крики.": require("../assets/words/s-f7ffff2cfa1c.mp3"),
   "мы устали от американского империализма.": require("../assets/words/s-042fab04ea50.mp3"),
   "мы устали от его пространной речи.": require("../assets/words/s-d47d756f8eb3.mp3"),
-  "мы ходили на голубой мюзикл.": require("../assets/words/s-a43bad0fc0fa.mp3"),
   "мы хотели бы купить новую квартиру.": require("../assets/words/s-b021a838cfea.mp3"),
   "мы хотели поговорить о них.": require("../assets/words/s-50ee8e82dae9.mp3"),
   "мы хотим иметь гарантии личной безопасности.": require("../assets/words/s-5b21eaa0904d.mp3"),

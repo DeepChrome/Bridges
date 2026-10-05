@@ -49,7 +49,7 @@ import { fold, bare } from "../core/util.js";
 import { parseDeep } from "../core/search.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ENDINGS } from "../core/endings.js";
-import { buyOne, clipId, apiKey, VOICE, RATE, RATE_PER_M_CHARS } from "./build_word_audio.mjs";
+import { buyOne, statedId, apiKey, VOICE, RATE, RATE_PER_M_CHARS } from "./build_word_audio.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DIR = join(ROOT, "data", "word_audio");
@@ -166,7 +166,10 @@ async function main() {
        the letters otherwise exactly as shown. */
     const text = bare(form).normalize("NFC");
     if (wordSkipped.has(text)) { skipped.add(form); continue; }
-    plan.push({ form, text, id: prior.files[form] || wordFiles[text] || clipId(text) });
+    const id = prior.files[form] || wordFiles[text] || statedId(text);
+    /* `--restate`: a form bought before words were said as statements is
+       bought again as one («Рыбы.»), as the headwords are (build_word_audio). */
+    plan.push({ form, text, id: process.argv.includes("--restate") && id !== statedId(text) ? statedId(text) : id });
   }
 
   const reuse = plan.filter((p) => have.has(p.id));

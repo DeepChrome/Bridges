@@ -61,8 +61,13 @@ export function clusterWords(words) {
   words.forEach((word, n) => {
     const g = groupOf(word);
     const e = L[idxOfWord(word)];
-    const kind = g ? g.kind
-      : (CLUSTERS.find((c) => c.pos && e && c.pos.includes(e.p)) || CLUSTERS[CLUSTERS.length - 1]).id;
+    /* A word sits under the heading of its own part of speech — a group may
+       mix them (the café's words with «заказать»), and «вкусный» and
+       «горячий» in the Food group were listed under "Nouns" (the owner,
+       2026-10-04). It keeps its group's name there; only a word whose class
+       has no section of its own goes by the group's. */
+    const own = CLUSTERS.find((c) => c.pos && e && c.pos.includes(e.p));
+    const kind = own ? own.id : g ? g.kind : CLUSTERS[CLUSTERS.length - 1].id;
     place.push({ word, kind, name: g ? g.name : "", order: g ? g.order : 1e9, at: g ? g.at : n });
   });
   for (const c of out) {

@@ -301,8 +301,12 @@ describe("Video", () => {
       : p === "adjective" || p === "adverb" ? "describing" : "little");
     for (const c of clusters) {
       expect(screen.getByTestId(`cluster-${c.id}`)).toBeTruthy();
-      const own = c.words.filter((w) => kindOf(L[idxOfWord(w)].p) === c.id).length;
-      expect(own * 2).toBeGreaterThanOrEqual(c.words.length);
+      // A verb, noun or describing word is under its own heading, whatever
+      // its group (2026-10-04: adjectives were listed under "Nouns").
+      for (const w of c.words) {
+        const k = kindOf(L[idxOfWord(w)].p);
+        if (k !== "little") expect(k).toBe(c.id);
+      }
     }
     // A word studied carries its score; one never met says so.
     expect(screen.getByTestId(`prep-score-${known}`)).toBeTruthy();

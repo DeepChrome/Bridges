@@ -29,7 +29,7 @@ import { Animated, View, Pressable } from "react-native";
 import { useTheme, radius, type as T } from "./theme";
 import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses, Text, Btn } from "./ui";
 import { RuleCard } from "./rules";
-import { Linked } from "./words";
+import { Linked, GrammarLine } from "./words";
 import { Guide } from "./guide";
 import { useEnter } from "./motion";
 import { L, linesWith } from "./data";
@@ -196,7 +196,6 @@ export function WordCard({ i, at, total, unit, onMoment }) {
   const pic = pictureOf(w.b);
   const photo = pic && pic.source;
   const credit = pic && pic.credit;
-  const tags = [w.p, w.g, w.a].filter(Boolean).filter((x) => x !== "other");
   // Where the unit's video says this word (Phase 14): the lesson is preparing
   // for that video, so the card shows the word in it and plays the moment.
   const moment = unit && unit.v && unit.v.heard && (unit.v.heard[w.b] || [])[0];
@@ -262,6 +261,10 @@ export function WordCard({ i, at, total, unit, onMoment }) {
               {w.w}
             </Text>
           ) : null}
+          {/* What the word is, right under it, as everywhere else (words.js
+              GrammarLine) — the card used to show "noun · f" chips below the
+              meaning, the last place a bare gender code survived. */}
+          <GrammarLine lemma={w} center style={{ marginTop: 2, marginBottom: 6, alignSelf: "stretch" }} />
           <Speaker text={w.b} />
 
           {/* Four is enough on a teaching card; the rest are counted, not hidden. */}
@@ -269,13 +272,10 @@ export function WordCard({ i, at, total, unit, onMoment }) {
 
           {/* "other" is the lexicon's bucket for closed classes, and it told a
               learner nothing except that the app had nothing to say. */}
-          {tags.length ? (
-            <View style={{ flexDirection: "row", gap: 6, marginTop: 12, flexWrap: "wrap",
-                           justifyContent: "center" }}>
-              {tags.map((x) => <Pill key={x}>{x}</Pill>)}
-              <WordTags e={w} />
-            </View>
-          ) : null}
+          <View style={{ flexDirection: "row", gap: 6, marginTop: 12, flexWrap: "wrap",
+                         justifyContent: "center" }}>
+            <WordTags e={w} />
+          </View>
 
           {/* One line about a sound this word carries — a letter that is not what
               it looks like, or one English has not got (ROADMAP P10.2). A tip,

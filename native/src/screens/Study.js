@@ -1171,7 +1171,7 @@ export default function Study({ navigation, route }) {
                     still kept (it is what the familiarity ring and the trouble
                     bank read); it is not something to show the learner. */}
                 {idxOfWord(face.b) >= 0 ? (
-                  <Btn kind="ghost" label="Full entry" testID="full-entry"
+                  <Btn kind="ghost" label="More" testID="full-entry"
                        style={{ marginTop: 12 }}
                        onPress={() => navigation.navigate("Word", { word: face.b })} />
                 ) : null}

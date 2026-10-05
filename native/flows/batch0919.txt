@@ -19,7 +19,7 @@ shot:t1-tour
 tapxy:457:236
 wait:2
 shot:t2-tour-sheet
-tap:^Full entry$
+tap:^More$
 wait:2
 shot:t3-tour-entry
 # Back closes a sheet (Modal onRequestClose); the backdrop's centre is the sheet.

@@ -39,9 +39,9 @@ test("tap a word for its sheet, tap again for the whole entry", async () => {
   const word = screen.getByLabelText("читаю, open word");
   await act(async () => { fireEvent.press(word); });
   // The glance: the headword and the way through.
-  expect(await screen.findByText("Full entry")).toBeTruthy();
+  expect(await screen.findByText("More")).toBeTruthy();
   expect(screen.getByText("чита́ть")).toBeTruthy();
-  await act(async () => { fireEvent.press(screen.getByText("Full entry")); });
+  await act(async () => { fireEvent.press(screen.getByText("More")); });
   // The entry, whole, without a screen to push it onto.
   const full = await screen.findByTestId("word-full-sheet");
   expect(full).toBeTruthy();

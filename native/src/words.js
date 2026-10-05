@@ -20,8 +20,8 @@ import React, {
 import { View, Pressable } from "react-native";
 import { createNavigationContainerRef, StackActions, CommonActions } from "@react-navigation/native";
 import { useTheme, radius } from "./theme";
-import { Sheet, Btn, Senses, Text, Speaker, Flag } from "./ui";
-import { L, IX, deepFormOf, resolveWord } from "./data";
+import { Sheet, Btn, Senses, SenseList, Text, Speaker, Flag } from "./ui";
+import { L, IX, deepFormOf, resolveWord, idxOfWord, sensesOf } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise, grammarLine } from "@core/forms";
 import { wordFacts } from "@core/facts";
@@ -30,9 +30,8 @@ import { FactBubble } from "./rules";
 
 export const navRef = createNavigationContainerRef();
 
-/* How many sense groups the summary sheet lists before it counts the remainder;
-   the same cap the vocabulary card uses (lesson.js). */
-const SHEET_SENSES = 4;
+/* How many meanings the summary sheet lists; the rest are behind More. */
+const SHEET_SENSES = 2;
 
 const Ctx = createContext(null);
 export const useWords = () => useContext(Ctx);
@@ -158,6 +157,18 @@ export function GrammarLine({ lemma, surface, style, center, all }) {
 
 /* ------------------------------------------------------------------ sheet */
 
+/* The top meanings, numbered, one to a line — the dictionary's senses where
+   the word has them, the gloss's groups otherwise (the owner, 2026-10-04:
+   "just grab the top two numbered definitions and leave the more button at
+   the bottom"). A gloss run together on one line was a wall of synonyms. */
+function SheetSenses({ lemma, size, style }) {
+  const i = idxOfWord(lemma.b);
+  const senses = i >= 0 && L[i] === lemma ? sensesOf(i) : null;
+  return senses
+    ? <SenseList senses={senses} size={size} max={SHEET_SENSES} plain style={style} />
+    : <Senses e={lemma.e} size={size} align="left" max={SHEET_SENSES} plain style={style} />;
+}
+
 function WordSheet({ state, onClose, onFull }) {
   const t = useTheme();
   if (!state) return null;
@@ -180,7 +191,7 @@ function WordSheet({ state, onClose, onFull }) {
 
   return (
     <Sheet onClose={onClose} maxHeight="80%"
-                 footer={<Btn block kind="pri" label="Full entry" style={{ marginTop: 18 }} onPress={onFull} />}>
+                 footer={<Btn block kind="pri" label="More" testID="sheet-more" style={{ marginTop: 18 }} onPress={onFull} />}>
       {/* A speaker beside the word, as on every other piece of Russian in the
           app (§30as); the glance was the one place a tapped word could not be
           heard. */}
@@ -206,13 +217,10 @@ function WordSheet({ state, onClose, onFull }) {
                      borderRadius: radius.md, backgroundColor: t.surface2, opacity: pressed ? 0.7 : 1 })}>
           <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "700" }}>Dictionary form</Text>
           <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700", marginTop: 2 }}>{s.word}</Text>
-          <Text style={{ color: t.ink2, fontSize: 15, marginTop: 2 }}>{s.gloss}</Text>
+          <SheetSenses lemma={lemma} size={15} style={{ marginTop: 6 }} />
         </Pressable>
       ) : (
-        /* The senses numbered, as the entry and the cards number them; four,
-           the vocabulary card's cap — `Full entry` is in the footer. */
-        <Senses e={lemma.e} size={17} align="left" max={SHEET_SENSES}
-                style={{ marginTop: 12 }} />
+        <SheetSenses lemma={lemma} size={17} style={{ marginTop: 12 }} />
       )}
     </Sheet>
   );

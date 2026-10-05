@@ -14,7 +14,7 @@ import { render, screen, fireEvent, act } from "@testing-library/react-native";
 
 import { WordsProvider, Linked } from "../src/words";
 import { senseGroups } from "../src/ui";
-import { L, IX } from "../src/data";
+import { L, IX, sensesOf } from "../src/data";
 import { fold } from "@core/util";
 
 /* A word the dictionary reaches by its own headword, with `n` sense groups. */
@@ -114,31 +114,38 @@ const flat = (node) => {
   return walk(kids);
 };
 
-describe("the word sheet's gloss", () => {
-  it("numbers the sense groups rather than showing one run", async () => {
-    const w = wordWith(3);
-    expect(w).toBeTruthy();
-    const groups = senseGroups(w.e);
-    await open(w.b);
-    expect(screen.getByTestId("senses")).toBeTruthy();
-    groups.forEach((g, k) => {
-      expect(screen.getByText(`${k + 1}. ${g}`)).toBeTruthy();
-    });
-    // Nothing is quietly dropped at three, so there is nothing to count.
-    expect(screen.queryByTestId("senses-more")).toBeNull();
+/* The glance shows the top two meanings, numbered, one to a line, and More
+   at the foot for the rest (the owner, 2026-10-04: "just grab the top two
+   numbered definitions and leave the more button at the bottom"). */
+describe("the word sheet's meanings", () => {
+  const headword = (pred) => L.findIndex((e) => {
+    const hit = IX[fold(e.b || "")];
+    return hit && L[hit[0]] === e && pred(e, L.indexOf(e));
   });
 
-  /* The sheet is the glance; "Full entry" is in the footer, one press away, and
-     that is the escape hatch the cap assumes. A long gloss says how many it is
-     holding back rather than running down the sheet. */
-  it("caps a long gloss and counts what it is holding back", async () => {
-    const w = [6, 7, 8, 5].map(wordWith).find(Boolean);
-    expect(w).toBeTruthy();
-    const groups = senseGroups(w.e);
-    await open(w.b);
-    expect(screen.getByText(`4. ${groups[3]}`)).toBeTruthy();
-    expect(screen.queryByText(`5. ${groups[4]}`)).toBeNull();
-    expect(screen.getByTestId("senses-more").props.children).toBe(`+${groups.length - 4} more`);
-    expect(screen.getByText("Full entry")).toBeTruthy();
+  it("shows the dictionary's top two senses and nothing after them", async () => {
+    const i = headword((e, k) => (sensesOf(k) || []).length >= 3);
+    expect(i).toBeGreaterThanOrEqual(0);
+    const senses = sensesOf(i);
+    await open(L[i].b);
+    const lines = screen.getAllByTestId("sense-list")[0];
+    expect(flat(lines)).toContain(senses[0].g);
+    expect(flat(lines)).toContain(senses[1].g);
+    expect(flat(lines)).not.toContain(senses[2].g);
+    expect(screen.queryByTestId("sense-example")).toBeNull();
+    expect(screen.queryByTestId("senses-more")).toBeNull();
+    expect(screen.getByText("More")).toBeTruthy();
+    expect(screen.queryByText("Full entry")).toBeNull();
+  });
+
+  it("numbers a bare gloss the same way when there are no senses", async () => {
+    const i = headword((e, k) => !sensesOf(k) && senseGroups(e.e).length >= 3);
+    if (i < 0) return; // every taught word with a long gloss has senses
+    const groups = senseGroups(L[i].e);
+    await open(L[i].b);
+    expect(screen.getByText(`1. ${groups[0]}`)).toBeTruthy();
+    expect(screen.getByText(`2. ${groups[1]}`)).toBeTruthy();
+    expect(screen.queryByText(`3. ${groups[2]}`)).toBeNull();
+    expect(screen.queryByTestId("senses-more")).toBeNull();
   });
 });

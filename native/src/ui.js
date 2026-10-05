@@ -1286,13 +1286,16 @@ const isBrief = (x) => String((x && x.ru) || "").trim().split(/\s+/).length <= B
 
 /* `brief` is a card rather than an entry: one example per sense at most, and
    only a short one. The entry passes nothing and shows everything. */
-export function SenseList({ senses, size = 15, style, max, brief, testID }) {
+/* `plain` is the glance (the word sheet): meanings only — no examples and no
+   "+N more", because the sheet's More button is where the rest are. */
+export function SenseList({ senses, size = 15, style, max, brief, plain, testID }) {
   const t = useTheme();
   if (!senses || !senses.length) return null;
   const shown = max && senses.length > max ? senses.slice(0, max) : senses;
-  const rest = senses.length - shown.length;
+  const rest = plain ? 0 : senses.length - shown.length;
   const many = senses.length > 1;
   const examplesOf = (s) => {
+    if (plain) return [];
     const xs = s.x || [];
     return brief ? xs.filter(isBrief).slice(0, 1) : xs;
   };
@@ -1360,12 +1363,12 @@ export function SenseList({ senses, size = 15, style, max, brief, testID }) {
   );
 }
 
-export function Senses({ e, size = 15, align = "center", style, max }) {
+export function Senses({ e, size = 15, align = "center", style, max, plain }) {
   const t = useTheme();
   const groups = senseGroups(e);
   if (!groups.length) return null;
   const shown = max && groups.length > max ? groups.slice(0, max) : groups;
-  const rest = groups.length - shown.length;
+  const rest = plain ? 0 : groups.length - shown.length;
   return (
     <View testID="senses" style={[{ marginTop: 10, alignSelf: "stretch", gap: 3 }, style]}>
       {/* The same hierarchy `SenseList` draws, for the 2 % of words with no

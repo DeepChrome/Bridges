@@ -18,7 +18,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Svg, { Path } from "react-native-svg";
 
 import { SessionProvider, useSession } from "./src/session";
-import { palette, fontFiles } from "./src/theme";
+import { palette, fontFiles, faceFor } from "./src/theme";
 import { loadAppearance, useScheme } from "./src/appearance";
 import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
@@ -38,7 +38,7 @@ import { UnitScreen, LessonScreen } from "./src/screens/Unit";
 import Summary from "./src/screens/Summary";
 import { Immerse, Video, VideoHistory } from "./src/screens/Misc";
 import { Mark } from "./src/mark";
-import { APP_NAME } from "./src/brand";
+import { APP_TITLE } from "./src/brand";
 import { Gate } from "./src/screens/Gate";
 import WordScreen from "./src/screens/Word";
 import SttLab from "./src/screens/SttLab";
@@ -404,9 +404,12 @@ function Splash({ onDone }) {
                                 inputRange: [0, 1], outputRange: [0.85, 1] }) }] }}>
         <Mark size={88} />
       </Animated.View>
-      <Animated.Text style={{ color: p.ink, fontSize: 30, fontWeight: "800",
+      {/* PT Serif by name: Android drops a custom font asked for a weight
+          it does not ship (§30bj), and a plain Animated.Text is not ui.js's
+          Text, which picks the face. */}
+      <Animated.Text style={{ color: p.ink, fontSize: 26, fontFamily: faceFor("700"),
                               opacity: word }}>
-        {APP_NAME}
+        {APP_TITLE}
       </Animated.Text>
     </Pressable>
   );

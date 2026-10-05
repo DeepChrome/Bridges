@@ -152,7 +152,9 @@ describe("the player", () => {
   it("offers to resume where the video was stopped, and seeks there", async () => {
     await withProfile(<Video route={{ params: { videoId: a.id } }} navigation={nav} />,
       { ui: {}, videos: { [a.id]: { opened: 1000, at: 192000 } } });
-    expect(screen.getByText("Resume from 3:12")).toBeTruthy();
+    expect(screen.getByText("Resume 3:12")).toBeTruthy();
+    // …beside a way to start from the beginning (the owner, 2026-10-05).
+    expect(screen.getByTestId("video-restart")).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByTestId("video-play")); });
     expect(screen.getByTestId("yt-player")).toBeTruthy();
   });
@@ -208,6 +210,6 @@ describe("the player", () => {
 
   it("starts at the beginning when it was never played", async () => {
     await withProfile(<Video route={{ params: { videoId: a.id } }} navigation={nav} />);
-    expect(screen.getByText("Play here")).toBeTruthy();
+    expect(screen.getByText("Play")).toBeTruthy();
   });
 });

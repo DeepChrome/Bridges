@@ -13,7 +13,6 @@
   "стул|noun": { "drop": ["lotto", "stool, feces"] },
   "а|other": { "drop": ["he, she or it"] },
   "к|other": { "drop": ["kilo-", "against (change of position)"] },
-  "о|other": { "drop": ["=oh"] },
   "ну|other": { "drop": ["=word!"] },
   "найти|verb": { "drop": ["to be located"], "examples": ["unloved home"] },
   "центр|noun": { "drop": ["ICAO"] },

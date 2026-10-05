@@ -54,7 +54,7 @@ describe("mining a word from a video", () => {
 
   it("adds it to review and keeps the video and the second", async () => {
     await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />);
-    await screen.findByText("Play here");
+    await screen.findByText("Play");
     // Tapping the word opens its moment; the moment offers the one tap.
     await act(async () => { fireEvent.press(screen.getByTestId(`heard-${word}`)); });
     await act(async () => { fireEvent.press(await screen.findByTestId("mine")); });
@@ -83,7 +83,7 @@ describe("mining a word from a video", () => {
     const mined = { [word]: { v: unitVideo.id, t: 1234, s: "…" } };
     await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />,
                       { pinned: [word], mined });
-    await screen.findByText("Play here");
+    await screen.findByText("Play");
     await act(async () => { fireEvent.press(screen.getByTestId(`heard-${word}`)); });
     expect(await screen.findByTestId("mined")).toBeTruthy();
   });
@@ -94,7 +94,7 @@ describe("mining a word from a video", () => {
     const card = { s: 12, d: 6, due: today() + 9, last: today() - 3, reps: 5, lapses: 1 };
     await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />,
                       { seen: { [word]: card } });
-    await screen.findByText("Play here");
+    await screen.findByText("Play");
     await act(async () => { fireEvent.press(screen.getByTestId(`heard-${word}`)); });
     await act(async () => { fireEvent.press(await screen.findByTestId("mine")); });
     await flushState();

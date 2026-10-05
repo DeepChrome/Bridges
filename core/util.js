@@ -123,6 +123,24 @@ export function firstSense(w) {
    question with nothing in it (the owner, 2026-10-04: "the question is missing
    completely"), and "to" fits к, в and на alike. So a sense that short brings
    the rest of its group with it: "to, towards", "I, me". */
+/* The examples that use a word in the meaning it is taught in: those whose
+   English carries a word of the first sense («вилка» is taught as "fork", and
+   a sentence about a plug is another word to a learner — the owner,
+   2026-10-05). All of them when none do, since a translation may say it with
+   a synonym and a word should not lose its sentences over that. A prefix
+   match, so "fork" finds "forks". */
+export function onSense(w, examples) {
+  const list = examples || [];
+  const keys = String(firstSense(w) || "").toLowerCase().replace(/^to\s+/, "")
+    .replace(/\([^)]*\)/g, " ").split(/[^a-z]+/).filter((k) => k.length >= 3);
+  if (!keys.length) return list;
+  const fits = list.filter((ex) => {
+    const en = String((ex && ex.en) || "").toLowerCase().split(/[^a-z]+/);
+    return keys.some((k) => en.some((e) => e.startsWith(k)));
+  });
+  return fits.length ? fits : list;
+}
+
 /* The whole prompt is measured, so a verb's "to go" stands as it is — the
    "to" is what says it is a verb (asInfinitive) — and only a bare "to" or "I"
    grows. */

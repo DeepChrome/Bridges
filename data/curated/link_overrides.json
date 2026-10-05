@@ -1,0 +1,19 @@
+{
+  "_": "Where a tapped word opens, for a form that is also the dictionary form of a noun the course does not teach (2026-10-05: «Моя кружка зелёная» opened «кружок», 'circle, ring', because «кружка» is also its genitive). Read only by build_site.py build_deep_forms, so a tap opens the noun while grading, the curriculum's word counts and the video index are untouched (those read lemma_overrides.json). Value: bare|pos. Chosen by reading every such key (data/_work, 135 of them): only where the other noun is clearly the commoner reading — «вод» stays «вода», «лет» stays «год», «смог» stays «смочь».",
+  "кружка": "кружка|noun",
+  "выборы": "выборы|noun",
+  "душа": "душа|noun",
+  "критик": "критик|noun",
+  "лев": "лев|noun",
+  "математик": "математик|noun",
+  "очки": "очки|noun",
+  "полка": "полка|noun",
+  "правило": "правило|noun",
+  "политик": "политик|noun",
+  "спор": "спор|noun",
+  "сыр": "сыр|noun",
+  "тест": "тест|noun",
+  "техник": "техник|noun",
+  "физика": "физика|noun",
+  "часы": "часы|noun"
+}

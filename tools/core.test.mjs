@@ -11,7 +11,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-import { fold, bare, translit, translitBack, firstSense, askSense, shuffle, sample, TOKEN }
+import { fold, bare, translit, translitBack, firstSense, askSense, onSense, shuffle, sample, TOKEN }
   from "../core/util.js";
 import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
   from "../core/fsrs.js";
@@ -105,6 +105,15 @@ ok(askSense({ e: "I, me", b: "я", p: "pronoun" }) === "I, me", "«я» is asked
 ok(askSense({ e: "tea, tea-party", b: "чай" }) === "tea", "a real word stays alone");
 ok(askSense({ e: "to try, to attempt", b: "пробовать", p: "verb" }) === "to try",
    "a verb keeps its first sense");
+{
+  // «вилка» is taught as "fork"; the plug sentence is another word (2026-10-05).
+  const fork = { e: "fork; plug", b: "вилка", p: "noun" };
+  const xs = [{ ru: "Если вилка запачкается…", en: "If the plug gets dirty…" },
+              { ru: "Где вилки?", en: "Where are the forks?" }];
+  ok(onSense(fork, xs).length === 1 && /forks/.test(onSense(fork, xs)[0].en),
+     "examples keep to the meaning the word is taught in");
+  ok(onSense(fork, [xs[0]]).length === 1, "…and keep all when none match");
+}
 ok(askSense({ e: "go, walk", b: "идти", p: "verb" }) === "to go",
    "a short verb keeps its \"to\" and is not widened");
 

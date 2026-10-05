@@ -244,6 +244,20 @@ export const SENTENCE_REPLACE = new Set(ALL_SOURCES);
    sentences"): the dictionary's examples (the pool rows its `refs` name) and
    the Wiktionary sense examples (senses.json), which carried no speaker at
    all. Keyed by the folded sentence, as `say()` looks a clip up. */
+/* What the voice is handed for a sentence. Chirp3's text normaliser reads a
+   sentence-final «пол.» as the abbreviation of «половину»: «Стакан выскользнул
+   и упал на пол.» came back as «…упал наполовину» (the owner heard it,
+   2026-10-05; Whisper confirmed it on the purchase). Measured over every
+   bought sentence ending on a word Russian also abbreviates — «см.», «кг.»,
+   «мин.», «тыс.» and the rest were read as the words they stand for, which is
+   right — and «пол.» was the one misread, so it is the one rule. Without the
+   stop the engine has nothing to expand. `fixed` says the text changed, so a
+   clip bought from the old text is bought again. */
+export function forVoice(text) {
+  const said = String(text).replace(/(^|\s)(пол)\.\s*$/i, "$1$2");
+  return { said, fixed: said !== text };
+}
+
 export function examplesToBuy(payload) {
   const taught = new Set();
   for (const u of payload.units) for (const i of u.w || []) taught.add(i);
@@ -255,7 +269,8 @@ export function examplesToBuy(payload) {
     const key = fold(ru);
     if (seen.has(key)) return;
     seen.add(key);
-    out.push({ key, text: bare(ru) });
+    const { said, fixed } = forVoice(bare(ru));
+    out.push({ key, text: said, fixed });
   };
   for (const i of taught) {
     const w = payload.lemmas[i];
@@ -291,7 +306,8 @@ export function sentencesToBuy(payload, audio, replace = SENTENCE_REPLACE) {
     // handed over as written, the engine read the arrow. A comma reads as the
     // pause between them; the key stays the card's own text, which is what
     // the app looks the clip up by.
-    out.push({ key, text: bare(row[0]).replace(/\s*→\s*/g, ", "), was: file ? src[file] : null });
+    const { said, fixed } = forVoice(bare(row[0]).replace(/\s*→\s*/g, ", "));
+    out.push({ key, text: said, fixed, was: file ? src[file] : null });
   }
   return out;
 }
@@ -335,9 +351,11 @@ async function main() {
   let prior = { files: {}, ms: {} };
   if (existsSync(MANIFEST)) prior = { files: {}, ms: {}, ...JSON.parse(readFileSync(MANIFEST, "utf8")) };
   const want = missing.map((m) => ({ key: m.bare, text: m.bare, gloss: m.gloss, was: m.was, word: true }))
-    .concat(sentences.map((s) => ({ key: s.key, text: s.text, gloss: "", was: s.was, word: false })))
+    .concat(sentences.map((s) => ({ key: s.key, text: s.text, gloss: "", was: s.was, word: false, fixed: s.fixed })))
     .map((m) => {
       const kept = prior.files[m.key];
+      // A sentence whose text forVoice changed is held to the new text's clip.
+      if (m.fixed) return { ...m, id: clipId(m.text) };
       return { ...m, id: kept && have.has(kept) ? kept : clipId(m.text) };
     });
 

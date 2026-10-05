@@ -127,7 +127,7 @@ export function Blocked({ block, onGetModel, onSkip, skipLabel }) {
 }
 
 export function Say({ q, r }) {
-  const { update } = useSession();
+  const { st, update } = useSession();
   const t = useTheme();
   const [res, setRes] = useState(null);
   const [attempt, setAttempt] = useState(0);
@@ -189,7 +189,9 @@ export function Say({ q, r }) {
        only used for incorrect answers to limit token waste"). A sentence said
        word for word has nothing to explain; a near miss still asks, because
        that is where the Worker names a real case error. */
-    if (out.wer > 0) askFeedback(transcript, ts);
+    // …and only while the learner lets it spend: AI usage → "Spoken-answer
+    // checks" (`sayFeedback`, You.js) turns it off to save the day's allowance.
+    if (out.wer > 0 && !(st && st.sayFeedback === false)) askFeedback(transcript, ts);
   };
 
   const last = useRef({ transcript: "", ts: 0 });

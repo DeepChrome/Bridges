@@ -48,9 +48,12 @@ export function lookup(surface) {
    in the dictionary") — the dictionary's own headword (`deepFormOf`). Null
    when neither knows it, and then it is not a link. */
 export function entryOf(surface) {
-  const i = lookup(surface);
-  if (i !== null) return { w: L[i], key: L[i].b };
+  /* The dictionary's map first: it holds a studied key only where the build
+     gave it to a noun whose dictionary form it is («кружка» the mug, not the
+     genitive of «кружок» — build_deep_forms, "claimed"). */
   const deep = deepFormOf(surface);
+  const i = lookup(surface);
+  if (i !== null && !(deep && fold(deep.word) === fold(surface))) return { w: L[i], key: L[i].b };
   if (!deep) return null;
   const w = resolveWord(deep.word, deep.pos);
   return w ? { w, key: w.b, pos: deep.pos } : null;

@@ -249,7 +249,7 @@ describe("Video", () => {
     const heard = Object.keys(unit.v.heard);
     expect(Object.keys(v.words).slice(0, heard.length)).toEqual(heard);
     await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />);
-    await screen.findByText("Play here");
+    await screen.findByText("Play");
     // One row per word, keyed by the bare form: the row itself shows the headword
     // as written, stress mark and all, which no plain text match would find (§23).
     for (const w of heard) expect(screen.getByTestId(`heard-${w}`)).toBeTruthy();
@@ -345,9 +345,9 @@ describe("Video", () => {
 
     await flushState(); await AsyncStorage.clear();
     await withProfile(<Video route={{ params: { videoId: first.id, word, at: first.t } }} navigation={nav} />);
-    // The player is up without "Play here", and the moment's caption is shown.
+    // The player is up without "Play", and the moment's caption is shown.
     expect(await screen.findByTestId("yt-player")).toBeTruthy();
-    expect(screen.queryByText("Play here")).toBeNull();
+    expect(screen.queryByText("Play")).toBeNull();
     const occ = require("../src/data").videoById(first.id).words[word].find((o) => o.t === first.t);
     expect(screen.getByText(occ.s)).toBeTruthy();
   });

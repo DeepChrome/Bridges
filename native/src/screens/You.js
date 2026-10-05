@@ -167,8 +167,16 @@ export function renewsAt(now = new Date()) {
    the sheet opens; drawn from the plan table alone when it cannot be
    reached. Its own component, holding its own open state, so the sheet
    redraws (§30be). */
+/* The allowances spent without the learner asking, each with its own switch
+   in the sheet (the owner, 2026-10-05: "if they want to save all AI credit
+   for conversations, they could disable all other AI usage"). Conversation
+   and translation are spent only by opening those screens, so they need
+   none. The value is the learner-state key that turns the use off. */
+const AUTO_SPEND = { explain: "explain", feedback: "sayFeedback" };
+
 function PlanRow({ navigation }) {
   const t = useTheme();
+  const { st, update } = useSession();
   const [info, setInfo] = useState(null);
   const [open, setOpen] = useState(false);
   const live = React.useRef(true);
@@ -219,18 +227,31 @@ function PlanRow({ navigation }) {
             </List>
           ) : null}
           {info && info.selfServe ? <View style={{ height: 12 }} /> : null}
-          {unlimited ? <Muted>No daily limit</Muted> : (
+          {unlimited ? <Muted style={{ marginBottom: 10 }}>No daily limit</Muted> : null}
+          {/* The list for every plan: the switches matter on an unlimited one
+              too; only the counts are left off. */}
+          {(
             <List>
-              {ALLOWANCE_LINES.map(([counter, label]) => {
-                const left = info ? Math.max(0, caps[counter] - (info.used[counter] || 0)) : null;
+              {ALLOWANCE_LINES.filter(([counter]) => !unlimited || AUTO_SPEND[counter]).map(([counter, label]) => {
+                const left = info && !unlimited ? Math.max(0, caps[counter] - (info.used[counter] || 0)) : null;
+                const key = AUTO_SPEND[counter];
+                const on = key ? st[key] !== false : true;
                 return (
                   <Row key={counter} testID={`plan-${counter}`}>
-                    <Text style={{ flex: 1, color: t.ink, fontSize: 15 }}>
+                    <Text style={{ flex: 1, color: on ? t.ink : t.ink3, fontSize: 15 }}>
                       {label.charAt(0).toUpperCase() + label.slice(1)}
                     </Text>
-                    <Text style={{ color: left === 0 ? t.bad : t.ink, fontSize: 15, fontWeight: "700" }}>
-                      {left === null ? "–" : String(left)}
-                    </Text>
+                    {unlimited ? null : (
+                      <Text style={{ color: left === 0 ? t.bad : on ? t.ink : t.ink3, fontSize: 15, fontWeight: "700" }}>
+                        {left === null ? "–" : String(left)}
+                      </Text>
+                    )}
+                    {key ? (
+                      <Switch testID={`plan-use-${counter}`} value={on}
+                              accessibilityLabel={`Use AI for ${label}`}
+                              onValueChange={(v) => update((p) => ({ ...p, [key]: v }))}
+                              trackColor={{ true: t.good, false: t.surface3 }} />
+                    ) : null}
                   </Row>
                 );
               })}
@@ -356,22 +377,9 @@ function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedback }) {
                          value={st.newPerDay === undefined ? QUEUE_DEFAULTS.newPerDay : st.newPerDay}
                          onChange={(n) => update((p) => ({ ...p, newPerDay: n }))} />
               </Row>
-              {/* "Write drill answers" sat here until 2026-09-26 and is on the
-                  drill's own cog now (Flows.js DrillOptions), where a learner
-                  decides it at the moment of starting. What stays here is the
-                  one thing that touches every runner: a line from the Worker
-                  under a wrong answer saying why. */}
-              <Row onPress={() => update((p) => ({ ...p, explain: !(p.explain !== false) }))}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Explain wrong answers</Text>
-                </View>
-                <Switch
-                  testID="explain-switch"
-                  value={st.explain !== false}
-                  onValueChange={(v) => update((p) => ({ ...p, explain: v }))}
-                  trackColor={{ true: t.good, false: t.surface3 }}
-                />
-              </Row>
+              {/* "Explain wrong answers" sat here until 2026-10-05; it is a
+                  switch in the AI usage sheet now (PlanRow), beside what it
+                  spends, with the spoken-answer checks. */}
               {/* The English under the tutor's Russian, in Talk and in the
                   Tutor (the owner, 2026-09-26: "if the user wants, they can
                   disable the English in settings"). One key, `talkEn`; Talk's

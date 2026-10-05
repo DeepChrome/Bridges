@@ -175,7 +175,11 @@ function Typed({ q, answered, onAnswer }) {
     // is «пиджак» and «куртка», and the prompt did not say which.
     // `said` rides on every verdict: what was put is what an explanation of
     // the miss is about (EXPLAIN_KINDS), and what the profile keeps for the tutor.
-    if (typed === want || (q.alts || []).includes(typed)) return onAnswer(true, undefined, undefined, { said: text });
+    if (typed === want) return onAnswer(true, undefined, undefined, { said: text });
+    /* Another right answer is read back as itself: «где» accepted for "where"
+       and then «куда» spoken was the app correcting a right answer (the
+       owner, 2026-10-05). */
+    if ((q.alts || []).includes(typed)) return onAnswer(true, undefined, undefined, { said: text, as: text.trim() });
     // A letter off on a word of four or more is half credit — the word is known,
     // the spelling is not — and the verdict says which letter.
     const d = charDistance(typed, want);
@@ -537,8 +541,10 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       ? Math.max(0, Math.min(1, extra.credit)) : (correct ? 1 : 0);
     const note = extra && extra.note ? extra.note : null;
     const said = extra && extra.said !== undefined ? extra.said : null;
+    // The right answer the learner gave, when it is not the one asked for.
+    const as = correct && extra && extra.as ? extra.as : null;
     setAnswered(true);
-    setVerdict({ right: !!correct, credit, note, said });
+    setVerdict({ right: !!correct, credit, note, said, as });
 
     /* A miss is explained, and remembered (2026-09-26). The explanation is the
        Worker's and arrives under the verdict when it does — a failure of any
@@ -576,7 +582,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     // the verdict carries a speaker to hear it again.
     {
       const opt = q.options ? q.options.find((o) => o.right) : null;
-      const text = answerAudioText(q, opt);
+      const text = (correct && extra && extra.as) || answerAudioText(q, opt);
       if (text) {
         if (sayTimer.current) clearTimeout(sayTimer.current);
         sayTimer.current = setTimeout(() => say(text, { repeat: false }), 420);
@@ -826,9 +832,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                   out as the verdict landed; this is the button for once more.
                   At the end of the verdict's own line: on a row of its own it
                   was a lone circle taking a line for nothing (2026-10-01). */}
-              {right !== null && answerAudioText(q, answer) ? (
+              {right !== null && ((verdict && verdict.as) || answerAudioText(q, answer)) ? (
                 <View testID="verdict-speaker" style={{ marginLeft: "auto" }}>
-                  <Speaker text={answerAudioText(q, answer)} size={36} />
+                  <Speaker text={(verdict && verdict.as) || answerAudioText(q, answer)} size={36} />
                 </View>
               ) : null}
             </View>

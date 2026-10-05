@@ -798,10 +798,17 @@ export function Video({ route, navigation }) {
         <Heart on={isFave(st, v.id)} testID={`fave-${v.id}`} size={44}
                onPress={() => update((p) => toggleFave(p, v.id))} />
       </View>
-      {playing ? null : (
-        <Btn kind="pri" testID="video-play"
-             label={resumeAt ? `Resume from ${clock(resumeAt)}` : "Play here"}
-             onPress={() => setPlaying(true)} />
+      {/* Resume, or from the beginning, side by side (the owner, 2026-10-05:
+          "Should be the option to start from beginning or to resume"). */}
+      {playing ? null : resumeAt ? (
+        <View style={{ flexDirection: "row", gap: 10, justifyContent: "center" }}>
+          <Btn kind="pri" testID="video-play" label={`Resume ${clock(resumeAt)}`}
+               onPress={() => setPlaying(true)} />
+          <Btn testID="video-restart" label="From the start"
+               onPress={() => { pending.current = [0, 0]; setPlaying(true); }} />
+        </View>
+      ) : (
+        <Btn kind="pri" testID="video-play" label="Play" onPress={() => setPlaying(true)} />
       )}
       <Btn testID="transcript-toggle" style={{ marginTop: 10 }}
            label={showScript ? "Hide transcript" : "Transcript"} onPress={() => setShowScript(!showScript)} />

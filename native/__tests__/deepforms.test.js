@@ -13,9 +13,16 @@ describe("words outside the course", () => {
   const key = Object.keys(forms).find((k) => /^[а-я]{5,}$/.test(k) && lookup(k) === null
     && !forms[k].startsWith(k + "|"));
 
-  it("ships forms for them, and none for course words", () => {
+  /* None for course words — except the forms a person gave to a noun the
+     course does not teach (data/curated/link_overrides.json, 2026-10-05):
+     «кружка» is the mug, not the genitive of «кружок». */
+  it("ships forms for them, and for course words only what link_overrides names", () => {
+    const links = Object.keys(require("../../data/curated/link_overrides.json")).filter((k) => !k.startsWith("_"));
     expect(Object.keys(forms).length).toBeGreaterThan(10000);
-    expect(Object.keys(forms).filter((k) => lookup(k) !== null).length).toBe(0);
+    expect(Object.keys(forms).filter((k) => lookup(k) !== null).sort()).toEqual(links.sort());
+    const mug = entryOf("кружка");
+    expect(mug && mug.key).toBe("кружка");
+    expect(entryOf("кружок").key).toBe("кружок");
   });
 
   it("links an inflected form and opens its headword", () => {

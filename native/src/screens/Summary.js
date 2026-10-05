@@ -20,7 +20,7 @@ import { Screen, Muted, SectionLabel, Speaker, Familiarity, Text, Btn } from "..
 import { Linked } from "../words";
 import { RuleCard } from "../rules";
 import { WordSections, WordTags, prepSentences, VideoLines } from "../prep";
-import { UN, L, idxOfWord, rankOf, lessonWords, lessonCount, markComponent, linesWith } from "../data";
+import { UN, L, idxOfWord, rankOf, lessonWords, lessonCount, markComponent, linesWith, stepRoute } from "../data";
 import { familiarity, cardFor } from "@core/scheduler";
 import { firstSense } from "@core/util";
 
@@ -116,6 +116,23 @@ export default function Summary({ route, navigation }) {
           {unit.v && unit.v.lesson && navigation ? (
             <Btn testID="summary-episode" label="Watch the grammar episode" style={{ marginTop: 12 }}
                  onPress={() => navigation.navigate("Video", { videoId: unit.v.lesson.id })} />
+          ) : null}
+        </View>
+      ) : null}
+
+      {/* Where the summary leads (the owner, 2026-10-05: "two buttons…
+          watching the lesson's video… reviewing the lesson's flash cards…
+          side by side, concise, clean"). The same destinations as the
+          lesson's own steps, so the two screens cannot disagree. */}
+      {navigation ? (
+        <View testID="summary-actions" style={{ flexDirection: "row", gap: 10, marginTop: 22 }}>
+          <Btn testID="summary-cards" label="Flashcards" style={{ flex: 1 }}
+               onPress={() => navigation.navigate("ListCards", {
+                 round: "list", title: unit.name, after: "Back to the summary",
+                 words: words.concat(lines.map((l) => l.ru)) })} />
+          {unit.v ? (
+            <Btn kind="pri" testID="summary-video" label="Watch video" style={{ flex: 1 }}
+                 onPress={() => navigation.navigate(...stepRoute("video", unit, whole ? 0 : index))} />
           ) : null}
         </View>
       ) : null}

@@ -40,6 +40,27 @@ it("is not drawn when the Worker does not offer it", async () => {
   expect(screen.queryByTestId("plan-premium")).toBeNull();
 });
 
+/* The learner decides what the allowance is spent on (the owner, 2026-10-05):
+   the two uses that spend without being asked carry a switch, and turning one
+   off is saved; conversation and translation carry none. */
+it("lets the automatic uses be turned off, and saves the choice", async () => {
+  plan.mockResolvedValue({ ok: true, plan: "free", caps: PLANS.free, used, selfServe: false });
+  await withProfile();
+  await act(async () => { fireEvent.press(await screen.findByTestId("plan")); });
+  const ex = await screen.findByTestId("plan-use-explain");
+  expect(screen.getByTestId("plan-use-feedback").props.value).toBe(true);
+  expect(screen.queryByTestId("plan-use-conversation")).toBeNull();
+  expect(screen.queryByTestId("plan-use-translate")).toBeNull();
+  await act(async () => { fireEvent(ex, "valueChange", false); });
+  await act(async () => { fireEvent(screen.getByTestId("plan-use-feedback"), "valueChange", false); });
+  // Held in the learner's state (repo.js SETTING_KEYS saves both): closed and
+  // opened again, the sheet still says off.
+  await act(async () => { fireEvent.press(screen.getByTestId("sheet-backdrop")); });
+  await act(async () => { fireEvent.press(await screen.findByTestId("plan")); });
+  expect((await screen.findByTestId("plan-use-explain")).props.value).toBe(false);
+  expect(screen.getByTestId("plan-use-feedback").props.value).toBe(false);
+});
+
 it("switches to Premium through the Worker and shows what it answered", async () => {
   plan.mockResolvedValue({ ok: true, plan: "free", caps: PLANS.free, used, selfServe: true });
   setPlan.mockResolvedValue({ ok: true, plan: "premium", caps: PLANS.premium, used, selfServe: true });

@@ -9,7 +9,7 @@
  */
 
 // Explicit extension: Node's ESM resolver requires it, Metro tolerates either.
-import { fold, shuffle, sample, firstSense, askSense, TOKEN } from "./util.js";
+import { fold, shuffle, sample, firstSense, askSense, onSense, TOKEN } from "./util.js";
 import { sentenceLemmas, pickPrompt } from "./speech.js";
 import { charDistance } from "./compare.js";
 import { describeForm, GENERIC_COLUMN } from "./forms.js";
@@ -407,6 +407,12 @@ export function makeQuestions(env) {
       if (!known) return false;
       return !ids.some((i) => i === idx || known.has(i) || i < FREE_RANK);
     };
+    /* In the meaning the word is taught in (onSense): «вилка» is the fork, and
+       a sentence about a plug is another word to a learner (2026-10-05). A
+       rank, not a filter: readability still comes first — an unknown word
+       costs 100 — and among sentences as readable, one in the taught sense
+       beats one outside it (50, more than any length difference). */
+    const inSense = new Set(onSense(w, w.x));
     for (const ex of w.x) {
       const toks = ex.ru.match(TOKEN) || [];
       if (toks.length < 3) continue;
@@ -416,7 +422,7 @@ export function makeQuestions(env) {
       });
       if (!hit) continue;
       const unknown = toks.filter(strange).length;
-      scored.push({ ex, token: hit, score: unknown * 100 + toks.length });
+      scored.push({ ex, token: hit, score: unknown * 100 + (inSense.has(ex) ? 0 : 50) + toks.length });
     }
     if (!scored.length) return null;
     /* Readability is a filter, not a ranking. Returning the single minimum made

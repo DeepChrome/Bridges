@@ -10,8 +10,8 @@
 import React from "react";
 import { Animated, View } from "react-native";
 import Svg, { Path, Rect } from "react-native-svg";
-import { useTheme } from "./theme";
-import { APP_NAME, LOGO_CORAL } from "./brand";
+import { useTheme, faceFor } from "./theme";
+import { APP_NAME, APP_TITLE, LOGO_CORAL } from "./brand";
 
 export function Mark({ size = 72, style }) {
   return (
@@ -40,10 +40,9 @@ export function Wordmark({ size = 72, style }) {
       <Mark size={size} />
       <Animated.Text
         testID="wordmark"
-        style={{ color: t.ink, fontSize: size * 0.38, fontWeight: "800",
-                 letterSpacing: -0.6, marginTop: 8 }}
+        style={{ color: t.ink, fontSize: size * 0.3, fontFamily: faceFor("700"), marginTop: 8 }}
       >
-        {APP_NAME}
+        {APP_TITLE}
       </Animated.Text>
     </View>
   );

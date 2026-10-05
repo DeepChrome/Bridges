@@ -6,6 +6,10 @@
  * app and a backup made last week must both go on working. */
 
 export const APP_NAME = "Ya";
+/* The name with what it is, where the app introduces itself — the opening
+   splash and the sign-in mark (the owner, 2026-10-05: it "should say Ya:
+   Learn Russian"). Elsewhere, in a sentence, the short name reads better. */
+export const APP_TITLE = "Ya: Learn Russian";
 
 /* The logo's own colour, as artwork rather than a theme token: the tile is
    the same coral in both themes, like the launcher icon it matches

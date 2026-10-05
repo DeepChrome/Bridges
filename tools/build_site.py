@@ -204,6 +204,23 @@ def load_rejected():
 REJECTED = load_rejected()
 
 
+def load_off_sense():
+    """Example sentences that use a word in a meaning it is not taught in
+    (the owner, 2026-10-05: «вилка» is taught as "fork", and its gap-fill was
+    a sentence about a plug). tools/review_example_sense.mjs writes the
+    verdicts to data/curated/example_sense.json keyed "fold(word)|fold(
+    sentence)"; one with a reason is left out of that word's examples only —
+    the sentence stays everywhere else, where it is not about this word."""
+    path = ROOT / "data" / "curated" / "example_sense.json"
+    if not path.exists():
+        return frozenset()
+    checked = json.loads(path.read_text(encoding="utf-8")).get("checked", {})
+    return frozenset(k for k, why in checked.items() if why)
+
+
+OFF_SENSE = load_off_sense()
+
+
 def load_stress_review():
     """Which stress a two-way spelling takes in a shown sentence
     (tools/review_stress.py): {fold(sentence): {fold(word): vowel index}}, and
@@ -489,7 +506,10 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
         keys = [k for k in keys_of.get(lid, ())
                 if resolver is None or len(resolver.candidates(k)) < 2
                 or resolver.owner_id(k) == lid]
-        cands = {i for k in keys for i in items_of_key.get(k, ()) if i in sentences}
+        # …and never in a meaning the word is not taught in (OFF_SENSE).
+        off = (lambda ru: f"{fold(bare)}|{fold(ru)}" in OFF_SENSE) if OFF_SENSE else (lambda ru: False)
+        cands = {i for k in keys for i in items_of_key.get(k, ())
+                 if i in sentences and not off(sentences[i][0])}
         ranked = (rank_examples(cands, sentences, sent_tokens or {}, studied_keys, keys, tally,
                                 key_rank)
                   if sent_tokens is not None else sorted(cands))
@@ -497,7 +517,8 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
         own = len(refs)
         if ext_items_of_key and len(refs) < N_EXAMPLES:
             spare = N_EXAMPLES - len(refs)
-            ext = {x for k in keys for x in ext_items_of_key.get(k, ()) if x in ext_sentences}
+            ext = {x for k in keys for x in ext_items_of_key.get(k, ())
+                   if x in ext_sentences and not off(ext_sentences[x][0])}
             for xid in sorted(ext, key=lambda x: (len(ext_sentences[x][0]), x))[:spare]:
                 refs.append(str(ext_ref(xid)))
         if refs and not own:
@@ -886,7 +907,8 @@ def wiktionary_forms(wanted):
     return {k: cache[k] for k in wanted if cache.get(k)}
 
 
-def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units, video_ids, stats):
+def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units, video_ids, stats,
+                     studied_heads=frozenset()):
     """Every word form in the app's own Russian that is not a course word, to
     the dictionary headword it belongs to (the owner, 2026-10-03: "some words
     dont appear in our dictionary. Any word used in the videos, sentences, or
@@ -949,6 +971,35 @@ def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
         if h:
             out[k] = h
             del unsettled[k]
+    # A key in the studied index that is the dictionary form of a noun nobody
+    # studies: «кружка» is the mug before it is the genitive of the course's
+    # «кружок», and the tap on «Моя кружка зелёная» opened "circle, ring"
+    # (the owner, 2026-10-05). The corpus cannot settle it — it says «кружок»
+    # six times and the mug never — and frequency would get «мира» wrong the
+    # other way, so a person reads the candidates (data/_work/
+    # link_candidates.txt) and the decision is data/curated/link_overrides.json.
+    # Mapped here, where the app looks first (words.js entryOf); the studied
+    # index is left alone, so grading and the curriculum do not move.
+    link_path = ROOT / "data" / "curated" / "link_overrides.json"
+    links = ({k: v for k, v in json.loads(link_path.read_text(encoding="utf-8")).items()
+              if not k.startswith("_")} if link_path.exists() else {})
+    claimed, candidates = [], []
+    for k in [k for k in seen_n if k in index and k not in studied_heads]:
+        for c in resolver.candidates(k):
+            if c["head"] and c["pos"] == "noun" and c["glossed"] and not c["stub"]:
+                candidates.append(f"{k}  →  {c['bare']}: {c['en'][:50]}")
+    for k, target in links.items():
+        bare_, _, pos = target.partition("|")
+        hit = next((c for c in resolver.candidates(k)
+                    if c["bare"] == bare_ and (not pos or c["pos"] == pos)), None)
+        if not hit:
+            raise SystemExit(f"link_overrides.json: «{k}» → {target} is not one of its lemmas")
+        out[k] = f"{hit['bare']}|{hit['pos']}"
+        claimed.append(k)
+    stats["deep_forms_claimed"] = len(claimed)
+    (ROOT / "data" / "_work").mkdir(parents=True, exist_ok=True)
+    (ROOT / "data" / "_work" / "link_candidates.txt").write_text(
+        "\n".join(sorted(candidates)) + "\n", encoding="utf-8")
     stats["deep_forms"] = len(out)
     stats["deep_forms_unsettled"] = len(unsettled)
     # What stays unlinked, commonest first, for a person to read after a build.
@@ -1310,6 +1361,9 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     # 2026-10-01). A key a person settled in lemma_overrides.json is left as
     # they settled it: that is where «бегу» stays «бежать» against the taught
     # noun «бег».
+    # (A form that is the dictionary form of a noun the course does not teach
+    # — «кружка» the mug — is sent to that noun by the link map instead:
+    # build_deep_forms and data/curated/link_overrides.json.)
     taught_idx = {pos_of[l] for l in unit_of if l in pos_of}
     reordered = taught_first = 0
     for k, ids in index.items():
@@ -1745,7 +1799,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     senses = load_senses(lemmas, stats, key_rank)
 
     deep_forms = build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
-                                  [v["id"] for v in video_list], stats)
+                                  [v["id"] for v in video_list], stats,
+                                  frozenset(fold(l.get("b") or "") for l in lemmas))
 
     return {"stats": stats, "lemmas": lemmas, "index": index, "deepforms": deep_forms,
             "units": units, "path": path, "audio": {"files": audio},

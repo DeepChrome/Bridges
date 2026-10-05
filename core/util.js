@@ -118,6 +118,18 @@ export function firstSense(w) {
   return w.p === "verb" ? asInfinitive(s) : s;
 }
 
+/* The English a question asks *from* (choose the Russian, type it). A first
+   sense of a letter or two — «к» "to", «я» "I" — read on its own as a
+   question with nothing in it (the owner, 2026-10-04: "the question is missing
+   completely"), and "to" fits к, в and на alike. So a sense that short brings
+   the rest of its group with it: "to, towards", "I, me". */
+export function askSense(w) {
+  const s = firstSense(w);
+  if (s.replace(/^to\s+/i, "").replace(/[^\p{L}]/gu, "").length >= 3) return s;
+  const group = String(w.e || "").split(";")[0].trim();
+  return group && group.length > s.length ? group : s;
+}
+
 /* A verb's sense is written "to …". OpenRussian glosses most verbs bare —
    163 of the 219 verbs the units teach — so "work" stood for both «работа»
    and «работать», and "judge" for «судья» and «судить», on a word list and on

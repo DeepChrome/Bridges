@@ -11,7 +11,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-import { fold, bare, translit, translitBack, firstSense, shuffle, sample, TOKEN }
+import { fold, bare, translit, translitBack, firstSense, askSense, shuffle, sample, TOKEN }
   from "../core/util.js";
 import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
   from "../core/fsrs.js";
@@ -98,6 +98,13 @@ ok(translit("shchi") === "щи", "multi-letter clusters win", translit("shchi"))
 ok(translitBack("щи") === "shchi", "and round-trip back", translitBack("щи"));
 ok(firstSense({ e: "tea, tea-party, methinks", b: "чай" }) === "tea",
    "firstSense takes the first gloss only");
+// «к» asked as "to" read as a question with nothing in it (2026-10-04).
+ok(askSense({ e: "to, towards; by (a time)", b: "к", p: "other" }) === "to, towards",
+   "a one- or two-letter sense brings the rest of its group");
+ok(askSense({ e: "I, me", b: "я", p: "pronoun" }) === "I, me", "«я» is asked as \"I, me\"");
+ok(askSense({ e: "tea, tea-party", b: "чай" }) === "tea", "a real word stays alone");
+ok(askSense({ e: "to try, to attempt", b: "пробовать", p: "verb" }) === "to try",
+   "a verb's \"to\" is not counted as the word");
 
 group("shuffle and sample");
 {

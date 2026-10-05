@@ -9,7 +9,7 @@
  */
 
 // Explicit extension: Node's ESM resolver requires it, Metro tolerates either.
-import { fold, shuffle, sample, firstSense, TOKEN } from "./util.js";
+import { fold, shuffle, sample, firstSense, askSense, TOKEN } from "./util.js";
 import { sentenceLemmas, pickPrompt } from "./speech.js";
 import { charDistance } from "./compare.js";
 import { describeForm, GENERIC_COLUMN } from "./forms.js";
@@ -555,7 +555,7 @@ export function makeQuestions(env) {
         const opts = shuffle([e.i].concat(distractors(e.i, e.pool, 3, bySense, true)));
         return {
           kind: e.t, i: e.i, ask: "Choose the Russian",
-          prompt: firstSense(w), cyr: false,
+          prompt: askSense(w), cyr: false,
           options: opts.map((i) => ({ label: L[i].w, right: i === e.i, cyr: true })),
         };
       }
@@ -628,7 +628,7 @@ export function makeQuestions(env) {
       case "type":
         return {
           kind: e.t, i: e.i, ask: "Write it in Russian",
-          prompt: firstSense(w), cyr: false, typed: true, answer: w.w, target: w.b,
+          prompt: askSense(w), cyr: false, typed: true, answer: w.w, target: w.b,
           alts: sameSense(e, w),
         };
       case "match":

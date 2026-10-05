@@ -140,9 +140,11 @@ describe("flashcards from a deck", () => {
 
   it("shows a deck card, grades it into the schedule, and lists the deck in the picker", async () => {
     await withProfile(<Study />, { decks: [deck], sets: ["deck:k1"], flash: ["recognise"] });
+    await global.__startStudy();
     const first = await screen.findByText(/^(привет|пока)$/);
     const word = first.props.children;
-    expect(screen.getByTestId("pile")).toHaveTextContent("2 new");
+    // The header is the day's goal (2026-10-05); the deck's two new cards are dealt toward it.
+    expect(screen.getByTestId("pile")).toHaveTextContent(/to go today/);
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
     await act(async () => { fireEvent.press(screen.getByText("Good")); });
     const st = await saved();

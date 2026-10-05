@@ -37,8 +37,8 @@ import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize, lessonCountOf, lessonWordsOf } from "@core/questions";
 import { quizPassed } from "@core/state";
-import { dueCards, wanted, cardFor, dayOf } from "@core/scheduler";
-import { cardKind, kindsOf, dailyFor, QUEUE_DEFAULTS, stepToday } from "@core/queue";
+import { wanted, cardFor, dayOf } from "@core/scheduler";
+import { rollGoal, goalBadge } from "@core/queue";
 import { isIrregular } from "@core/facts";
 
 /* The word endings, commonest first across every sentence the app carries
@@ -624,6 +624,22 @@ export function nextStep(st) {
   return { ...here, step: c ? c.id : "vocab" };
 }
 
+/* The personal review's words (the owner, 2026-10-05: *"words from lessons
+   that the user has already completed or will encounter slightly in the
+   future (upcoming lessons)"*): every finished lesson's words, wherever on
+   the route, and the next lesson's — met first on a card is met early, not
+   met out of order. Lemma indices. */
+export function personalWords(st) {
+  const out = [], have = new Set();
+  const add = (i) => { if (!have.has(i)) { have.add(i); out.push(i); } };
+  for (const u of UN) {
+    for (let k = 0; k < lessonCount(u); k++) if (lessonDone(st, u, k)) lessonWords(u, k).forEach(add);
+  }
+  const here = nextLesson(st);
+  if (here) lessonWords(here.unit, here.index).forEach(add);
+  return out;
+}
+
 /* Where the learner is: every unit on the route up to the spine lesson Continue
    would resume, or the whole route once it is done. What a quiz or a listening
    drill draws from by default — cumulative, to here (the owner, 2026-09-07). */
@@ -754,28 +770,16 @@ export const knownWords = (st) => Object.keys((st && st.seen) || {});
    deals exactly these, whatever sets are ticked, so this number and the pile
    are the same number (2026-09-28 — the badge said ~150 while a buried tick
    let the pile hand over twenty). */
-/* …and only **today's portion** of it (2026-10-02): what is due, up to the
-   reviews left of the day's cap (core/queue.js DAILY_REVIEWS), which is what
-   the Study pile deals. A badge reading 213 is a wall; 50 is a day. What is
-   past the cap waits for tomorrow (`dueAll` is the whole backlog). */
-export const dueAll = (st) => {
-  const kinds = kindsOf(st.cardKinds);
-  return dueCards(st.seen, Date.now(), st.learnAhead)
-    .filter((c) => kinds.includes(cardKind(c.word))).length;
-};
-export const dueCount = (st) => {
-  /* The constant, not `st.reviewsPerDay`: the setting that wrote that key is
-     gone, so a stored value is a leftover from it (200 on older profiles)
-     and must not quietly lift the cap. A learning step taken today is outside
-     the cap, as core/queue.js deals it (`stepToday`); one left from an
-     earlier day is not. */
-  const kinds = kindsOf(st.cardKinds);
-  const now = Date.now();
-  const cards = dueCards(st.seen, now, st.learnAhead).filter((c) => kinds.includes(cardKind(c.word)));
-  const learning = cards.filter((c) => stepToday(c.card, now)).length;
-  const left = Math.max(0, QUEUE_DEFAULTS.reviewsPerDay - dailyFor(st.daily, now).reviews);
-  return learning + Math.min(cards.length - learning, left);
-};
+/* …and since 2026-10-05 it is not a due count at all but **the day's goal**
+   (core/queue.js rollGoal): 20 reviews plus the new-word setting each study
+   day, carried when missed, one off for every card answered in Study (the
+   owner: *"the user 'fights' that number… Their goal is to turn that number
+   to 0 every day"*). The due count could not be fought — Agains came back
+   and today's learning steps sat outside its cap, so it read 38 all day. On
+   a day that is not a study day it is 0: nothing is pushed. */
+export const goalOpts = (st) => ({ newPerDay: st.newPerDay, days: st.studyDays });
+export const goalNow = (st, now = Date.now()) => rollGoal(st.goal, now, goalOpts(st));
+export const dueCount = (st) => goalBadge(st.goal, Date.now(), goalOpts(st));
 
 /* What a practice drill may ask about: the words the learner has met, widened
    along the route until there are enough to drill. A fresh learner gets the first

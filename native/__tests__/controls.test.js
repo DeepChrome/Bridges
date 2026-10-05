@@ -126,6 +126,7 @@ describe("a control that must not scroll away", () => {
       flash: ["recognise"], newPerDay: 15, reviewsPerDay: 200, learnAhead: 20,
     }));
     const view = await render(<SessionProvider><Study /></SessionProvider>);
+    await global.__startStudy();
 
     // Turn the card over: the grade buttons only exist once there is an answer.
     fireEvent.press(await view.findByText("Show"));

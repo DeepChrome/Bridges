@@ -11,6 +11,7 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import Study, { sittingTally, masteryOf, MASTERED_AT } from "../src/screens/Study";
 import { L } from "../src/data";
+import { dayOf } from "@core/scheduler";
 
 const DAY = 86400000;
 const due = () => ({ recognise: { state: 2, s: 3, d: 5, steps: 0, reps: 3, lapses: 0,
@@ -26,6 +27,8 @@ const figure = (id) => {
 beforeEach(async () => { await flushState(); await AsyncStorage.clear(); });
 afterEach(async () => { await flushState(); });
 
+/* `n` cards due and a day's goal of the same size (2026-10-05: the pile is the
+   goal, and the counter counts it down). */
 async function withPile(n) {
   const words = L.slice(0, n).map((w) => w.b);
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
@@ -34,8 +37,10 @@ async function withPile(n) {
     v: 10, seen: Object.fromEntries(words.map((w) => [w, due()])), trouble: {}, pinned: [],
     sets: ["__path__"], drills: {}, unit: {}, watched: {}, speech: { attempts: [], tagCounts: {} },
     streak: 0, flash: ["recognise"], newPerDay: 0, cardKinds: ["word"],
+    goal: { day: dayOf(Date.now()), owed: n, done: 0 },
   }));
   await render(<SessionProvider><Study /></SessionProvider>);
+  await global.__startStudy();
   await screen.findByTestId("tally");
 }
 const answer = async (g) => {
@@ -53,6 +58,8 @@ it("counts every card due today, and runs on past the first twenty", async () =>
   expect(figure("done")).toBe("20");
   expect(figure("left")).toBe("5 left");
   expect(figure("total")).toBe("25");
+  // …and the day's goal has come down by the cards answered.
+  expect(screen.getByTestId("pile")).toHaveTextContent("5 to go today");
 });
 
 it("an Again is one card coming back, and the total does not grow", async () => {

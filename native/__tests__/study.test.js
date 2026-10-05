@@ -43,34 +43,36 @@ describe("which cards a set holds", () => {
   /* What is due is dealt whatever is ticked (2026-09-28): the Study badge
      counted ~150 due while a trouble-words tick let the pile hand over twenty
      and then say "Done for today". No tick may narrow the due cards away. */
-  it("deals everything due with nothing ticked, and the badge counts the same", () => {
+  /* …and since 2026-10-05 the pile is the day's goal: what is due and new
+     first, then the learner's own met cards to make the goal up — so «город»,
+     not due, comes after them rather than not at all. */
+  it("deals everything due first with nothing ticked, then the learner's own cards toward the goal", () => {
     expect(cardsIn(st, [])).toEqual([]);
     const s = sessionFor({ ...st, sets: [] });
-    const words = s.items.map((x) => x.word).sort();
-    expect(words).toEqual(["дом", "не", "я"]);
+    const first = s.items.slice(0, 3).map((x) => x.word).sort();
+    expect(first).toEqual(["дом", "не", "я"]);
     expect(s.items.find((x) => x.word === "дом").kind).toBe("new");
-    // Not due, so not asked.
-    expect(words).not.toContain("город");
+    expect(s.items.findIndex((x) => x.word === "город")).toBe(3);
+    expect(s.items.find((x) => x.word === "город").extra).toBe(true);
     expect(s.due).toBe(2);
-    expect(dueCount({ ...st, sets: [] })).toBe(2);
   });
 
   it("deals the due cards even when only the trouble words were ticked", () => {
     const s = sessionFor({ ...st, sets: ["__trouble__"] });
-    expect(s.items.map((x) => x.word).sort()).toEqual(["дом", "не", "я"]);
+    expect(s.items.slice(0, 3).map((x) => x.word).sort()).toEqual(["дом", "не", "я"]);
   });
 
   /* Words, sentences, or both — for the due cards as well as the new ones, and
      the badge follows the same choice so it never promises what is not dealt. */
-  it("studies the kinds of card chosen, and counts only those as due", () => {
+  it("studies the kinds of card chosen", () => {
     const withSentence = { ...st, seen: { ...st.seen, "Где книга?": { recognise: review(-1) } } };
     const wordsOnly = sessionFor({ ...withSentence, cardKinds: ["words"] }).items.map((x) => x.word);
     expect(wordsOnly).not.toContain("Где книга?");
-    expect(dueCount({ ...withSentence, cardKinds: ["words"] })).toBe(2);
     const sentOnly = sessionFor({ ...withSentence, cardKinds: ["sentences"] }).items.map((x) => x.word);
     expect(sentOnly).toContain("Где книга?");
     expect(sentOnly).not.toContain("я");
-    expect(dueCount({ ...withSentence, cardKinds: ["sentences"] })).toBe(1);
+    // The badge is the day's goal whatever the kinds (data.js dueCount).
+    expect(dueCount({ ...withSentence, cardKinds: ["sentences"] })).toBe(dueCount({ ...withSentence, cardKinds: ["words"] }));
   });
 
   /* A due sentence carries its English (2026-09-29): the schedule knows it only

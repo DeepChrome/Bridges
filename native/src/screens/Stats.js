@@ -369,7 +369,7 @@ export default function Stats() {
           : <Familiarity testID="retention" score={pct} size={84} text={`${pct}%`}
                          label={`Retention ${pct} percent`} />}
         <View style={{ flex: 1, gap: 4 }}>
-          <Figure testID="due-today" value={String(due)} label="due today" />
+          <Figure testID="due-today" value={String(due)} label="to go today" />
           <Figure value={String(run)} label={run === 1 ? "day in a row" : "days in a row"} />
           <Figure value={week ? String(week.reduce((a, b) => a + b, 0)) : "–"} label="reviews this week" />
         </View>

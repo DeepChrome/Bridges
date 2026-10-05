@@ -156,6 +156,7 @@ describe("flashcards", () => {
      any other in the options. */
   it("start on the learner's own path, commonest word first, with the options a tap away", async () => {
     await withProfile(<Study />);
+    await global.__startStudy();
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
     expect(screen.getByTestId("flag-new")).toBeTruthy();
     expect(screen.getByTestId("study-cog")).toBeTruthy();

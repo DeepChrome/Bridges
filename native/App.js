@@ -6,7 +6,7 @@
  * two platforms cannot drift apart on content or rules.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Animated, Pressable, AppState, InteractionManager } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -51,8 +51,7 @@ import { WordsProvider, navRef } from "./src/words";
 import { configureAudio, setRouteSource, leftFor, rearmAudio, warmForms } from "./src/audio";
 import { setHaptics } from "./src/haptics";
 import { arm as armReminders } from "./src/notify";
-import { workedOn } from "@core/scheduler";
-import { setDayStart, today } from "@core/util";
+import { setDayStart } from "@core/util";
 import { ErrorBoundary } from "./src/boundary";
 import { installCrashHandler } from "./src/crash";
 import { warmToken } from "./src/lib/feedback";
@@ -482,8 +481,11 @@ function Shell() {
      single grade, which is fourteen native calls for nothing; `workedToday`
      flips once a day, so this runs at most twice. `workedOn` scans the cards in
      under a millisecond (§30u measured it), so it costs nothing to derive. */
-  const workedToday = useMemo(() => workedOn(st, today()), [st.seen]);
-  useEffect(() => { armReminders(st, st.remind); }, [st.remind, workedToday]);
+  /* …and since 2026-10-05 the day is "worked" when its goal is met (notify.js
+     nextTimes), and the study days decide which days are reminded at all. */
+  const goalMet = dueCount(st) === 0;
+  useEffect(() => { armReminders(st, st.remind); },   // eslint-disable-line react-hooks/exhaustive-deps
+            [st.remind, goalMet, (st.studyDays || []).join(",")]);
 
   /* Acting on the gate's answer. The navigator only exists once there is an
      account, so this runs on the render after the profile is created: effects fire

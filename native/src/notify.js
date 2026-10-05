@@ -26,8 +26,8 @@
  */
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
-import { workedOn } from "@core/scheduler";
 import { dayOf } from "@core/util";
+import { rollGoal, isStudyDay } from "@core/queue";
 import { APP_NAME } from "./brand";
 
 export const HORIZON = 14;
@@ -46,15 +46,25 @@ const BODY = "Time for Russian";
    this the first iteration" is what makes it right around the 4 am rollover
    (§30ad): at 01:00 the clock's today and the scheduler's today are different
    days, and a reminder set for the evening belongs to the later one. */
+/* Since 2026-10-05 a reminder is for the day's goal (core/queue.js): it lands
+   only on the learner's study days (`st.studyDays`), and not on a day whose
+   goal is already met — the owner: *"Reminders trigger towards the end of the
+   day (maybe 5pm) if they didn't complete the daily review amount."* Only
+   today's goal can be known; a later day is reminded unless the app is opened
+   and the goal met first, which re-arms the window (App.js). */
 export function nextTimes(st, minutes, now = new Date(), horizon = HORIZON) {
   const out = [];
   if (!Number.isFinite(minutes)) return out;
+  const today = dayOf(now.getTime());
+  const goal = rollGoal(st.goal, now.getTime(), { newPerDay: st.newPerDay, days: st.studyDays });
   for (let i = 0; i <= horizon; i++) {
     const d = new Date(now.getTime());
     d.setDate(d.getDate() + i);
     d.setHours(Math.floor(minutes / 60), minutes % 60, 0, 0);
     if (d.getTime() <= now.getTime()) continue;
-    if (workedOn(st, dayOf(d.getTime()))) continue;
+    const day = dayOf(d.getTime());
+    if (!isStudyDay(day, st.studyDays)) continue;
+    if (day === today && !goal.owed) continue;
     out.push(d);
     if (out.length >= horizon) break;
   }

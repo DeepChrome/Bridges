@@ -26,7 +26,7 @@ import Constants from "expo-constants";
 const VERSION = (Constants.expoConfig && Constants.expoConfig.version) || "";
 import { tagInfo } from "@core/errortags";
 import { maxLapses, cardFor, REVIEW } from "@core/scheduler";
-import { QUEUE_DEFAULTS } from "@core/queue";
+import { QUEUE_DEFAULTS, ALL_DAYS } from "@core/queue";
 import { askPermission } from "../notify";
 import { APP_NAME } from "../brand";
 
@@ -36,10 +36,45 @@ import { APP_NAME } from "../brand";
 export const REMIND_TIMES = [
   { id: 8 * 60, name: "08:00" },
   { id: 13 * 60, name: "13:00" },
-  { id: 18 * 60, name: "18:00" },
+  { id: 17 * 60, name: "17:00" },
   { id: 21 * 60, name: "21:00" },
 ];
-export const REMIND_DEFAULT = 18 * 60;
+/* Toward the end of the day, while there is still time to meet the goal (the
+   owner, 2026-10-05: "maybe 5pm"). */
+export const REMIND_DEFAULT = 17 * 60;
+
+/* The days a learner studies on (core/queue.js isStudyDay): the goal grows
+   and the reminder lands on these only. Sunday is 0, as Date counts. */
+export const WEEK = [["M", 1], ["T", 2], ["W", 3], ["T", 4], ["F", 5], ["S", 6], ["S", 0]];
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function StudyDays({ value, onChange }) {
+  const t = useTheme();
+  const on = Array.isArray(value) && value.length ? value : ALL_DAYS;
+  const flip = (d) => {
+    const next = on.includes(d) ? on.filter((x) => x !== d) : on.concat(d);
+    // At least one: a week with no study days has no goal to meet.
+    if (next.length) onChange(next.length === 7 ? null : next.sort());
+  };
+  return (
+    <View style={{ flexDirection: "row", gap: 6, marginTop: 8 }}>
+      {WEEK.map(([label, d]) => {
+        const sel = on.includes(d);
+        return (
+          <Pressable key={d} testID={`study-day-${d}`} onPress={() => flip(d)} hitSlop={4}
+                     accessibilityRole="checkbox" accessibilityState={{ checked: sel }}
+                     accessibilityLabel={DAY_NAMES[d]}
+                     style={({ pressed }) => ({ width: 38, height: 38, borderRadius: 19, alignItems: "center",
+                       justifyContent: "center", borderWidth: 1,
+                       borderColor: sel ? t.brand : t.line, backgroundColor: sel ? t.brandBg : "transparent",
+                       opacity: pressed ? 0.6 : 1 })}>
+            <Text style={{ color: sel ? t.brandInk : t.ink3, fontSize: 14, fontWeight: "700" }}>{label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 
 /* The grammar the learner keeps getting wrong, from the tags the speech feedback
    attaches to attempts (ROADMAP P5.11). Counted in state by recordAttempt; shown
@@ -376,6 +411,13 @@ function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedback }) {
                 <Stepper testID="settings-new-per-day" label="New words a day" min={0} max={99}
                          value={st.newPerDay === undefined ? QUEUE_DEFAULTS.newPerDay : st.newPerDay}
                          onChange={(n) => update((p) => ({ ...p, newPerDay: n }))} />
+              </Row>
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: 15 }}>Study days</Text>
+                  <StudyDays value={st.studyDays}
+                             onChange={(days) => update((p) => ({ ...p, studyDays: days }))} />
+                </View>
               </Row>
               {/* "Explain wrong answers" sat here until 2026-10-05; it is a
                   switch in the AI usage sheet now (PlanRow), beside what it

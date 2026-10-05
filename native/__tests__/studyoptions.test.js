@@ -47,7 +47,9 @@ async function withProfile(state = {}) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
     list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
   await AsyncStorage.setItem("rb.state.p1", JSON.stringify({ ...base, ...state }));
-  return await render(<SessionProvider><Study navigation={nav} /></SessionProvider>);
+  const view = await render(<SessionProvider><Study navigation={nav} /></SessionProvider>);
+  await global.__startStudy();
+  return view;
 }
 async function saved() { await flushState(); return (await global.__db.saved("p1")); }
 
@@ -210,11 +212,9 @@ describe("the options live where a session starts", () => {
     await screen.findByTestId("card-kind");
     expect(sessionFor({ ...base, seen, sets: ["__due__"], flash: ["recognise", "produce"] })
       .items.map((i) => i.word)).toEqual([WORD]);
-    expect(dueCount({ ...base, seen, flash: ["recognise", "produce"] })).toBe(1);
 
     const one = { ...base, seen, sets: ["__due__"], flash: ["produce"] };
     expect(sessionFor(one).items.map((i) => i.direction)).toEqual(["produce"]);
-    expect(dueCount(one)).toBe(1);
     // The default front is the Russian.
     const { DEFAULTS } = require("../src/store");
     expect(DEFAULTS.flash).toEqual(["recognise"]);
@@ -285,52 +285,47 @@ describe("the card reads itself once", () => {
   });
 });
 
+/* The day's goal (2026-10-05): the number is what the learner fights to 0. */
+const goalOf = (owed, done = 0) => ({ day: require("@core/scheduler").dayOf(now), owed, done });
+
 describe("after the day's pile", () => {
   it("offers a round of trouble words, which deals them though none is due", async () => {
     const bad = due({ dueAt: now + 5 * DAY, lapses: 5, reps: 12, d: 9.5 });
-    await withProfile({ seen: { [WORD]: { recognise: bad } } });
-    expect((await screen.findByTestId("study-state")).props.children).toBe("Nothing due today.");
+    await withProfile({ seen: { [WORD]: { recognise: bad } }, goal: goalOf(0) });
+    expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     await act(async () => { fireEvent.press(screen.getByTestId("trouble-round")); });
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
     expect(screen.getByTestId("study-heading").props.children).toBe("Trouble words");
   });
 
-  /* "Daily goal met" beside 157 owed (the owner, 2026-09-29). Two causes: a
-     daily review cap, and a due card whose word folds onto another lemma
-     («всё» → «все»), which the pile looked up under the other word's schedule
-     and never dealt. The badge and the pile are one number. */
-  it("deals every card the badge counts", () => {
-    const today = require("@core/queue").dailyFor(null, now);
-    const st = { ...base, sets: [], cardKinds: ["words"],
-                 seen: { "всё": { recognise: due() }, [WORD]: { recognise: due() } },
-                 daily: { ...today, reviews: 10 } };
+  /* Everything due is dealt toward the goal — including a card whose word
+     folds onto another lemma («всё» → «все»), which the pile once looked up
+     under the other word's schedule and never dealt (2026-09-29). */
+  it("deals what is due toward the goal", () => {
+    const st = { ...base, sets: [], cardKinds: ["words"], goal: goalOf(2),
+                 seen: { "всё": { recognise: due() }, [WORD]: { recognise: due() } } };
     const s = sessionFor(st);
     expect(s.items.map((x) => x.word).sort()).toEqual(["всё", WORD].sort());
-    expect(s.items.length + s.remaining).toBe(dueCount(st));
   });
 
-  /* Fifty a day (the owner, 2026-10-02: "when it says 213… it's just
-     overwhelming"). Past the day's reviews the badge and the pile both say
-     nothing is owed today, and "Keep going" deals the rest on request. */
-  it("stops at the day's reviews, and keeps going when asked", () => {
-    const { DAILY_REVIEWS, dailyFor } = require("@core/queue");
-    const { dueAll } = require("../src/data");
-    const today = dailyFor(null, now);
-    const st = { ...base, sets: [], cardKinds: ["words"],
-                 seen: { "всё": { recognise: due() }, [WORD]: { recognise: due() } },
-                 daily: { ...today, reviews: DAILY_REVIEWS } };
+  /* The goal is the stop: met, the pile deals nothing more, and "Keep going"
+     deals on past it. */
+  it("stops at the goal, and keeps going when asked", () => {
+    const st = { ...base, sets: [], cardKinds: ["words"], goal: goalOf(0, 20),
+                 seen: { "всё": { recognise: due() }, [WORD]: { recognise: due() } } };
     expect(dueCount(st)).toBe(0);
-    expect(dueAll(st)).toBe(2);
     expect(sessionFor(st).items).toHaveLength(0);
     expect(sessionFor(st, { beyond: true }).items.map((x) => x.word).sort()).toEqual(["всё", WORD].sort());
   });
 
-  it("counts no more than the day's reviews on the badge", () => {
-    const { DAILY_REVIEWS, dailyFor } = require("@core/queue");
+  /* The badge is the goal, never the due count: eighty due is still a day's
+     goal of 20 plus the new-word setting (it read 38 all day, 2026-10-05). */
+  it("badges the day's goal, not everything due", () => {
+    const { goalPerDay } = require("@core/queue");
     const seen = {};
-    for (const b of L.slice(0, DAILY_REVIEWS + 30).map((x) => x.b)) seen[b] = { recognise: due() };
-    const st = { ...base, sets: [], cardKinds: ["words"], seen, daily: dailyFor(null, now) };
-    expect(dueCount(st)).toBe(DAILY_REVIEWS);
+    for (const b of L.slice(0, 80).map((x) => x.b)) seen[b] = { recognise: due() };
+    const st = { ...base, sets: [], cardKinds: ["words"], seen };
+    expect(dueCount(st)).toBe(goalPerDay(base.newPerDay));
   });
 
   it("offers a round of known words, least held first", async () => {
@@ -339,28 +334,44 @@ describe("after the day's pile", () => {
     const st = { seen: { "да": { recognise: later(30) }, "нет": { recognise: later(2) },
                          [WORD]: { recognise: fresh() } }, cardKinds: ["words"], learnAhead: 20 };
     expect(knownWords(st)).toEqual(["нет", "да"]);
-    await withProfile({ seen: { "да": st.seen["да"], "нет": st.seen["нет"] } });
-    expect((await screen.findByTestId("study-state")).props.children).toBe("Nothing due today.");
+    await withProfile({ seen: { "да": st.seen["да"], "нет": st.seen["нет"] }, goal: goalOf(0) });
+    expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     await act(async () => { fireEvent.press(screen.getByTestId("known-round")); });
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
     expect(screen.getByTestId("study-heading").props.children).toBe("Known words");
   });
 
-  /* The end of the day's work is said as a goal met, with the two ways to go
-     on — and never as a count of cards "to go" between chunks (2026-09-29). */
-  it("says the daily goal is met, and offers trouble words or new words", async () => {
-    await withProfile({ seen: { [WORD]: { recognise: due() } }, sets: ["__path__"], newPerDay: 0 });
+  /* The end of the day's work is said as a goal met, with the ways to go on. */
+  it("says the daily goal is met, and offers keep going, trouble words or new words", async () => {
+    await withProfile({ seen: { [WORD]: { recognise: due() } }, sets: ["__path__"], newPerDay: 0, goal: goalOf(1) });
     await screen.findByTestId("card-recognise");
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
     await act(async () => { fireEvent.press(screen.getByTestId("grade-3")); });
     expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     expect(screen.getByTestId("study-today").props.children).toBe("1 card today");
-    expect(screen.queryByText(/to go/)).toBeNull();
-    // The header does not go on counting the deal that was just finished.
-    expect(screen.getByTestId("pile").props.children).toBe("Nothing due");
+    expect(screen.getByTestId("pile").props.children).toBe("Daily goal met");
+    expect(screen.getByTestId("keep-going")).toBeTruthy();
     // New words, ahead of the day's ration.
     await act(async () => { fireEvent.press(screen.getByTestId("study-ahead")); });
     expect(await screen.findByTestId("flag-new")).toBeTruthy();
+  });
+});
+
+/* Each visit opens on the options (the owner, 2026-10-05: "Each time the
+   person clicks study, they'll encounter the options… The default will be
+   their personal review"). */
+describe("the options first", () => {
+  it("shows the day's number and the personal review before any card", async () => {
+    await AsyncStorage.setItem("rb.accounts", JSON.stringify({
+      list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
+    await AsyncStorage.setItem("rb.state.p1", JSON.stringify({ ...base, sets: ["__path__"],
+      seen: { [WORD]: { recognise: due() } }, goal: goalOf(7) }));
+    await render(<SessionProvider><Study navigation={nav} /></SessionProvider>);
+    expect((await screen.findByTestId("study-goal")).props.children).toBe("7");
+    expect(screen.queryByTestId("card-recognise")).toBeNull();
+    expect(screen.getByTestId("study-go")).toHaveTextContent("Personal review");
+    await act(async () => { fireEvent.press(screen.getByTestId("study-go")); });
+    expect(await screen.findByTestId("card-recognise")).toBeTruthy();
   });
 });
 

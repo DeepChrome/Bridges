@@ -19,7 +19,8 @@ import { split, merge, diff, isEmpty, memoryRepo, validLog, cardRow, rowCard, SE
   from "../core/repo.js";
 import * as S from "../core/scheduler.js";
 import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor, stepToday,
-         cardKind, kindsOf, practiceSession } from "../core/queue.js";
+         cardKind, kindsOf, practiceSession, rollGoal, spendGoal, goalBadge, goalSession, goalPerDay,
+         weekdayOf, isStudyDay, GOAL_REVIEWS, GOAL_CAP_DAYS, MASTERED_EVERY } from "../core/queue.js";
 import { SCENARIOS } from "../core/scenarios.js";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP,
@@ -3627,6 +3628,55 @@ group("the review, 2026-10-01");
      `${astray.length}: ${astray.slice(0, 5).join("; ")}`);
   const verb = resolveR("есть", "verb");
   ok(verb && verb.p === "verb", "and to the part of speech asked for", verb && verb.p);
+}
+
+/* ------------------------------------------------ the day's goal (2026-10-05)
+ * The owner: "the user 'fights' that number… Each day the user should review
+ * 20 words plus whatever their setting for new words is. If they skip a day,
+ * this number climbs… they will only get cards pushed on those days." */
+{
+  const DAY = 86400000;
+  const t0 = Date.UTC(2026, 9, 5, 12);              // a Monday
+  const day0 = S.dayOf(t0);
+  ok(weekdayOf(day0) === new Date(t0).getUTCDay(), "the weekday of a study day matches the calendar",
+     `${weekdayOf(day0)} vs ${new Date(t0).getUTCDay()}`);
+  const per = goalPerDay(5);
+  ok(per === GOAL_REVIEWS + 5, "a day's goal is 20 reviews plus the new-word setting", String(per));
+  const g0 = rollGoal(null, t0, { newPerDay: 5 });
+  ok(g0.owed === per && g0.done === 0, "the first day starts at one day's goal");
+  ok(rollGoal(g0, t0 + 1000, { newPerDay: 5 }) === g0, "the same day rolls nothing");
+  const spent = spendGoal(spendGoal(g0));
+  ok(spent.owed === per - 2 && spent.done === 2, "each card answered takes one off");
+  ok(spendGoal({ day: day0, owed: 0, done: 25 }).owed === 0, "and never below zero");
+  const skipped = rollGoal(spent, t0 + 2 * DAY, { newPerDay: 5 });
+  ok(skipped.owed === per - 2 + 2 * per && skipped.done === 0, "a skipped day carries and the number climbs",
+     String(skipped.owed));
+  const away = rollGoal(g0, t0 + 40 * DAY, { newPerDay: 5 });
+  ok(away.owed === per * GOAL_CAP_DAYS, "a long absence stops at a week's goals", String(away.owed));
+  // Weekdays only: Saturday and Sunday add nothing and the badge is quiet.
+  const weekdays = [1, 2, 3, 4, 5];
+  const sat = t0 + 5 * DAY;
+  ok(!isStudyDay(S.dayOf(sat), weekdays) && isStudyDay(day0, weekdays), "study days are the ones chosen");
+  ok(goalBadge(g0, sat, { newPerDay: 5, days: weekdays }) === 0, "nothing is pushed on a day off");
+  ok(rollGoal(g0, sat, { newPerDay: 5, days: weekdays }).owed === per * 5,
+     "a week of weekdays adds five days' goals, not seven");
+
+  /* The session meets the goal from the learner's own cards when little is
+     due — weakest first, a mastered one now and then. */
+  const card = (s, state = 2) => ({ recognise: { s, d: 5, state, dueAt: t0 + 30 * DAY, lastAt: t0 - DAY, reps: 3, lapses: 0 } });
+  const seen = {};
+  const words = [];
+  for (let k = 0; k < 30; k++) { const w = `w${k}`; words.push(w); seen[w] = card(k < 25 ? 1 + k : 400); }
+  const sess = goalSession({ seen, words, now: t0, owed: 16, rng: () => 0.5,
+                             familiar: (w, c) => (c.s >= 400 ? 95 : Math.round(c.s * 2)) });
+  ok(sess.items.length === 16, "a session is the goal's size when nothing is due", String(sess.items.length));
+  const fam = sess.items.filter((x) => seen[x.word].recognise.s < 400).map((x) => seen[x.word].recognise.s);
+  ok(fam.every((s, k) => k === 0 || s >= fam[k - 1]), "the weakest come first");
+  const mastered = sess.items.filter((x) => seen[x.word].recognise.s >= 400).length;
+  ok(mastered === Math.floor(16 / MASTERED_EVERY), "a mastered card is sprinkled in now and then", String(mastered));
+  ok(goalSession({ seen, words, now: t0, owed: 0 }).items.length === 0, "a met goal deals nothing");
+  ok(goalSession({ seen, words, now: t0, owed: 0, beyond: true }).items.length === QUEUE_DEFAULTS.sessionSize,
+     "and Keep going deals a chunk past it");
 }
 
 console.log("\n" + checks + " checks · " +

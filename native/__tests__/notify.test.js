@@ -37,18 +37,35 @@ describe("which days a reminder lands on", () => {
     expect(first.getDate()).toBe(19);
   });
 
-  /* The rule the whole feature exists for. */
-  test("a day already worked is skipped", () => {
+  /* The rule the whole feature exists for — since 2026-10-05 a day is done
+     when its goal is (core/queue.js rollGoal): "Reminders trigger towards the
+     end of the day… if they didn't complete the daily review amount". */
+  const metToday = (now) => ({ ...studiedAt(now.getTime()), goal: { day: dayOf(now.getTime()), owed: 0, done: 25 } });
+  test("a day whose goal is met is skipped", () => {
     const now = at("2026-09-18T09:00:00");
-    const st = studiedAt(now.getTime());
-    const [first] = nextTimes(st, AT, now);
+    const [first] = nextTimes(metToday(now), AT, now);
     expect(first.getDate()).toBe(19);
+  });
+
+  test("a day studied but short of its goal is still reminded", () => {
+    const now = at("2026-09-18T09:00:00");
+    const st = { ...studiedAt(now.getTime()), goal: { day: dayOf(now.getTime()), owed: 6, done: 19 } };
+    expect(nextTimes(st, AT, now)[0].getDate()).toBe(18);
   });
 
   test("and only that day — tomorrow is still reminded", () => {
     const now = at("2026-09-18T09:00:00");
-    const times = nextTimes(studiedAt(now.getTime()), AT, now);
+    const times = nextTimes(metToday(now), AT, now);
     expect(times.some((d) => d.getDate() === 19)).toBe(true);
+  });
+
+  /* Study days (the owner: "they will only get cards pushed on those days"). */
+  test("a day that is not a study day is never reminded", () => {
+    const now = at("2026-09-18T09:00:00");          // a Friday
+    const st = { ...studiedNothing(), studyDays: [1, 2, 3, 4, 5] };
+    const times = nextTimes(st, AT, now);
+    expect(times.every((d) => d.getDay() !== 0 && d.getDay() !== 6)).toBe(true);
+    expect(times.some((d) => d.getDay() === 1)).toBe(true);
   });
 
   test("the window is bounded", () => {

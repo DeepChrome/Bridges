@@ -342,3 +342,12 @@ beforeEach(() => { require("./src/resume").resetResume(); });
    app opens dark (appearance.js DEFAULT_SCHEME), which appearance.test.js
    asserts on its own after resetting this. */
 beforeEach(() => { require("./src/appearance").setAppearance("light"); });
+/* Study opens on its options since 2026-10-05 (the owner: "Each time the
+   person clicks study, they'll encounter the options"); a suite about the
+   cards presses Start, as the learner does. A no-op when the screen is
+   already past it (a round handed in deals itself). */
+global.__startStudy = async () => {
+  const { screen, fireEvent, act } = require("@testing-library/react-native");
+  const go = await screen.findByTestId("study-go").catch(() => null);
+  if (go) await act(async () => { fireEvent.press(go); });
+};

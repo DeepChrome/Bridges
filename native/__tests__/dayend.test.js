@@ -88,7 +88,9 @@ describe("what Learn shows", () => {
     // the first (store.test.js: the database wins over the row), so the
     // platform is cleared between the two, as beforeEach does.
     await AsyncStorage.clear();
-    await withProfile({ seen: { дом: card(today(), 3) } });
+    // Worked today and the day's goal met (2026-10-05: the goal is what is
+    // "waiting" now, not the due count).
+    await withProfile({ seen: { дом: card(today(), 3) }, goal: { day: today(), owed: 0, done: 25 } });
     await screen.findByTestId("next-step");
     expect(screen.queryByTestId("streak")).toBeNull();
     // Advice, not a lock: the lesson is still there, it is simply not the blue

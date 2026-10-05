@@ -18,15 +18,16 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton,
          Familiarity, familiarityColor } from "../ui";
-import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines, dueAll, dueCount } from "../data";
+import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines,
+         personalWords, goalNow, goalOpts } from "../data";
 import { Linked, GrammarLine } from "../words";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
 import { applyGrade, reviewRows, preview, schedulerOpts, wanted, troubleWords as troubleBank, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity, kindOf, retrievability } from "@core/scheduler";
 import { isIrregular } from "@core/facts";
-import { buildSession, practiceSession, requeue, dailyFor, QUEUE_DEFAULTS, cardKind, kindsOf, CARD_KINDS }
-  from "@core/queue";
+import { buildSession, practiceSession, requeue, dailyFor, QUEUE_DEFAULTS, cardKind, kindsOf, CARD_KINDS,
+         goalSession, rollGoal, spendGoal, isStudyDay, MASTERED_AT } from "@core/queue";
 
 /* The three directions as the learner sees them: by what is on the **front**.
  *
@@ -170,8 +171,9 @@ export function cardsIn(st, sets, words = []) {
   sets.forEach((id) => {
     if (id === "__trouble__") { troubleWords(st).forEach(byWord); return; }
     if (id === "__sentences__") { sentencesFor(st).forEach(add); return; }
-    // Where the learner is on the path: every unit reached so far.
-    if (id === "__path__") { reachedUnits(st).forEach((u) => u.w.forEach((i) => add(cardOf(i)))); return; }
+    // The personal review: every finished lesson's words and the next one's
+    // (data.js personalWords; 2026-10-05).
+    if (id === "__path__") { personalWords(st).forEach((i) => add(cardOf(i))); return; }
     // Everything the scheduler wants today, whichever set it came from — what
     // "Review · N due" on the path opens.
     if (id === "__due__") {
@@ -265,7 +267,7 @@ export function sittingTally(words, marks, beyond = 0) {
    like 80+)"), on the
    word's own frequency scale (core/scheduler.js); learning is anything met
    and below it; new is never met. */
-export const MASTERED_AT = 80;
+export { MASTERED_AT };
 export function masteryOf(st, cards) {
   let mastered = 0, learning = 0, fresh = 0;
   for (const c of cards) {
@@ -339,11 +341,31 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
                                   size: round === "known" ? QUEUE_DEFAULTS.sessionSize : cards.length }),
              title: round === "known" ? "Known words" : title, faces };
   }
+  const opts = { newPerDay: st.newPerDay, learnAhead: st.learnAhead,
+                 scheduler: schedulerOpts(st), rank: newCardRank };
   const words = studyCards(st).map((c) => c.b);
-  return buildSession({
-    seen: st.seen, words, dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily, rng, ahead, beyond,
-    opts: { newPerDay: st.newPerDay, learnAhead: st.learnAhead,
-            scheduler: schedulerOpts(st), rank: newCardRank },
+  if (ahead) {
+    return buildSession({ seen: st.seen, words, dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily,
+                          rng, ahead, opts });
+  }
+  /* The day's goal (core/queue.js goalSession): what is due, the new words
+     allowed, then the learner's own weakest met cards — so the number on the
+     tab can always be brought to 0 — and "Keep going" (`beyond`) past it. */
+  /* The personal review draws on everything met of the chosen kinds; a
+     review the learner pointed at chapters or a deck keeps to them (the
+     owner: "they can override and review specific chapters"). */
+  const kinds = kindsOf(st.cardKinds);
+  // Nothing chosen is the personal review too: a review never deals nothing.
+  // (`__due__` and the like are old ids, not sources — core/state.js v10.)
+  const sources = (st.sets || []).filter((id) => !["__due__", "__trouble__", "__sentences__"].includes(id));
+  const personal = !sources.length || sources.includes("__path__");
+  const pool = personal ? words : sourceCards(st).map((c) => c.b);
+  const have = new Set(pool);
+  const met = personal ? Object.keys(st.seen || {}).filter((w) => !have.has(w) && kinds.includes(cardKind(w))) : [];
+  return goalSession({
+    seen: st.seen, words: pool.concat(met), dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily,
+    rng, opts, owed: goalNow(st).owed, beyond,
+    familiar: (w, card) => familiarity(card, rankOf(w)) || 0,
   });
 }
 
@@ -490,12 +512,12 @@ function SetPicker({ visible, onClose }) {
                 is what "Due today" and "Trouble words" as sets did (2026-09-28).
                 Your path is the default: the units reached so far. */}
             <View style={{ marginBottom: 18 }}>
-              <SectionLabel>New cards from</SectionLabel>
+              <SectionLabel>Review</SectionLabel>
               <List>
                 <Row testID="set-path" onPress={() => toggle("__path__")}>
                   <Tick on={st.sets.includes("__path__")} />
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: t.ink, fontSize: 15 }}>Your path</Text>
+                    <Text style={{ color: t.ink, fontSize: 15 }}>Personal review</Text>
                   </View>
                 </Row>
               </List>
@@ -658,10 +680,11 @@ export default function Study({ navigation, route }) {
   const masteredAll = useMemo(() => masteryOf(st, Object.keys(st.seen || {}).map((b) => ({ b }))).mastered,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [st.seen]);
-  // Due past today's cap: what "Keep going" deals.
-  const backlog = useMemo(() => Math.max(0, dueAll(st) - dueCount(st)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [st.seen, st.daily, st.cardKinds]);
+  // The day's goal as it stands, and whether today is a study day.
+  const goal = goalNow(st);
+  const studyDay = isStudyDay(goal.day, st.studyDays);
+  // Anything met to go on with past the goal: what "Keep going" deals.
+  const metAny = Object.keys(st.seen || {}).length > 0;
   const knownCount = useMemo(() => knownWords(st).length,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [st.seen, st.cardKinds]);
@@ -730,11 +753,27 @@ export default function Study({ navigation, route }) {
      The pile is dealt once when the sheet closes, and only if something that
      changes the deal did. */
   const dealtKey = useRef(null);
+  /* **Study opens on its options, each time** (the owner, 2026-10-05: "Each
+     time the person clicks study, they'll encounter the options for which
+     cards they review. The default will be their personal review"). Nothing
+     is dealt until Start — or until a round handed in from another screen,
+     which is its own start. */
+  const [started, setStarted] = useState(false);
   useEffect(() => {
-    if (!ready || picker || round || dealtKey.current === setsKey) return;
+    if (!ready || !started || picker || round || dealtKey.current === setsKey) return;
     dealtKey.current = setsKey;
     deal(false);
-  }, [setsKey, ready, picker]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [setsKey, ready, picker, started]);   // eslint-disable-line react-hooks/exhaustive-deps
+  // Back on the tab after leaving it: the options again, unless a sitting is
+  // under way (a half-played pile is not thrown away by a tab press).
+  useEffect(() => {
+    if (!navigation || typeof navigation.addListener !== "function") return undefined;
+    return navigation.addListener("focus", () => {
+      if (started && !Object.keys(marks).length && !(session && session.practice)) {
+        setStarted(false); dealtKey.current = null; setSession(null);
+      }
+    });
+  }, [navigation, marks, started, session]);
 
   const kinds = kindsOf(st.cardKinds);
   const heading = session && session.practice ? session.title || "Trouble words"
@@ -806,7 +845,7 @@ export default function Study({ navigation, route }) {
     const now = Date.now();
     const word = item.word, direction = item.direction;
     const rows = reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
-    const before = { items: items, at, prev: current, trouble: st.trouble, daily: st.daily,
+    const before = { items: items, at, prev: current, trouble: st.trouble, daily: st.daily, goal: st.goal,
                      row: rows[0], marks };
     setMarks({ ...marks, [word]: g === 1 ? "again" : "done" });
     update((prev) => {
@@ -819,6 +858,11 @@ export default function Study({ navigation, route }) {
            Agains used to end the day at thirty-five cards). */
         daily: { ...daily, reviews: daily.reviews + (item.again || item.kind === "new" ? 0 : 1),
                  new: daily.new + (item.kind === "new" && !item.again ? 1 : 0) },
+        /* One off the day's goal for every card answered, any round — the
+           number on the tab is what the learner is fighting (2026-10-05). An
+           Again coming round is the same card, not another. */
+        goal: item.again ? rollGoal(prev.goal, now, goalOpts(prev))
+          : spendGoal(rollGoal(prev.goal, now, goalOpts(prev)), 1),
       };
     }, rows);
     setLast(before);
@@ -837,7 +881,7 @@ export default function Study({ navigation, route }) {
       // The one card, back as it was — or gone, if the grade was its first.
       const seen = { ...p.seen };
       if (prev) seen[row.word] = { recognise: prev }; else delete seen[row.word];
-      return { ...p, seen, trouble: last.trouble, daily: last.daily };
+      return { ...p, seen, trouble: last.trouble, daily: last.daily, goal: last.goal };
     }, [], [{ word: row.word, direction: row.direction, at: row.at }]);
     setSession({ ...session, items: last.items });
     setMarks(last.marks);
@@ -854,8 +898,11 @@ export default function Study({ navigation, route }) {
      pile, never the trouble round. */
   const more = useMemo(() => {
     if (!session || (!finished && items.length)) return 0;
-    const s = sessionFor(st, { beyond: beyondMode });
-    return s.items.length + s.remaining;
+    // Past the goal, "Keep going" is one chunk at a time and ends on the
+    // options again rather than dealing for ever.
+    if (beyondMode) return 0;
+    const s = sessionFor(st, {});
+    return s.items.length + (s.remaining || 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished, items.length, st.seen, st.daily, setsKey, beyondMode]);
   /* **The pile goes on until the day is done** (the owner, 2026-09-29: "when
@@ -868,7 +915,6 @@ export default function Study({ navigation, route }) {
     if (finished && more > 0 && session && !session.practice) deal(false, undefined, undefined, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished, more]);
-  const reviewedToday = dailyFor(st.daily, Date.now()).reviews;
   /* Where the sitting stands. A review (the day's pile, a video's list, a
      chosen round) counts its own cards: done, coming back, left, and the
      total, which the scheduler's cards past the dealt chunks are part of and
@@ -956,13 +1002,10 @@ export default function Study({ navigation, route }) {
           <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
             <Muted testID="pile">
               {session && session.practice ? `${items.length} cards`
-                /* The counts are the deal's, taken when it was dealt; once it is
-                   played through with nothing more to deal they are history,
-                   and "5 new" over "Daily goal met" read as work still owed. */
-                : session && !(finished && !more) && (session.today || session.newLeft)
-                  ? [session.today ? `${session.today} due` : "", session.newLeft ? `${Math.min(session.newLeft, unmet)} new` : ""]
-                      .filter(Boolean).join(" · ")
-                  : "Nothing due"}
+                /* The day's goal, counting down (2026-10-05): the number the
+                   learner is fighting, the same one the tab badges. */
+                : !studyDay ? "Not a study day"
+                  : goal.owed ? `${goal.owed} to go today` : "Daily goal met"}
             </Muted>
             {/* How many words are held — the number a learner wants to see grow
                 (the owner, 2026-10-02). One quiet figure, not a panel. */}
@@ -974,7 +1017,21 @@ export default function Study({ navigation, route }) {
         <CogButton testID="study-cog" label="Study options" onPress={() => setPicker(true)} />
       </View>
 
-      {!item ? (
+      {!started && !session ? (
+        /* The options, first (2026-10-05): the day's number, the personal
+           review as the one big action, and choosing other cards behind it. */
+        <View testID="study-start" style={{ marginTop: 48, alignItems: "center", paddingHorizontal: 24 }}>
+          <Text testID="study-goal" style={{ color: t.ink, fontSize: 56, fontWeight: "700", lineHeight: 64 }}>
+            {studyDay ? String(goal.owed) : "–"}
+          </Text>
+          <Muted>{!studyDay ? "Not a study day" : goal.owed ? "to go today" : "Daily goal met"}</Muted>
+          <Btn kind="pri" testID="study-go" style={{ marginTop: 24, minWidth: 240 }}
+               label={st.sets.includes("__path__") ? "Personal review" : "Start review"}
+               onPress={() => setStarted(true)} />
+          <Btn kind="link" testID="study-choose" style={{ marginTop: 10 }} label="Choose cards"
+               onPress={() => setPicker(true)} />
+        </View>
+      ) : !item ? (
         /* A sentence and its actions, with air around them — not a panel.
            The day's pile first; once it is empty, the day is done and what
            is left is the learner's choice: another round on the trouble words
@@ -990,7 +1047,7 @@ export default function Study({ navigation, route }) {
             <Text testID="study-state" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
               Round finished.
             </Text>
-          ) : reviewedToday ? (
+          ) : studyDay && !goal.owed ? (
             <>
               <Tick on size={56} />
               <Text testID="study-state"
@@ -998,12 +1055,12 @@ export default function Study({ navigation, route }) {
                 Daily goal met
               </Text>
               <Muted testID="study-today" style={{ marginTop: 4 }}>
-                {`${reviewedToday} ${reviewedToday === 1 ? "card" : "cards"} today`}
+                {`${goal.done} ${goal.done === 1 ? "card" : "cards"} today`}
               </Muted>
             </>
           ) : (
             <Text testID="study-state" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
-              Nothing due today.
+              {studyDay ? "Nothing to review yet" : "Not a study day"}
             </Text>
           )}
           {/* The day's reviews are done and more are due: tomorrow's, unless
@@ -1014,7 +1071,10 @@ export default function Study({ navigation, route }) {
                  style={{ marginTop: 20, minWidth: 220 }} onPress={() => navigation.goBack()} />
           ) : null}
           {after && session && session.practice && finished ? null : (<>
-          {!(session && session.practice) && !beyondMode && backlog ? (
+          {/* Past the goal, as far as the learner wants: more reviews push
+              the familiarity of their words up faster (the owner,
+              2026-10-05). */}
+          {!(session && session.practice) && metAny ? (
             <Btn kind="pri" testID="keep-going" label="Keep going"
                  style={{ marginTop: 20, minWidth: 220 }} onPress={() => deal(false, undefined, { beyond: true })} />
           ) : null}
@@ -1185,7 +1245,9 @@ export default function Study({ navigation, route }) {
         </>
       )}
 
-      <SetPicker visible={picker} onClose={() => setPicker(false)} />
+      {/* Chosen from the options screen, the cards are the start: closing the
+          picker deals them. */}
+      <SetPicker visible={picker} onClose={() => { setPicker(false); if (!started) setStarted(true); }} />
     </Screen>
   );
 }

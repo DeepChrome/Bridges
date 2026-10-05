@@ -408,7 +408,11 @@ describe("full screen", () => {
     expect(screen.getByTestId("yt-player")).toBe(before);
     expect(global.__orientation).toBe("landscape");
     expect(setOptions).toHaveBeenCalledWith({ headerShown: false });
-    expect(parentOptions).toHaveBeenCalledWith({ tabBarStyle: { display: "none" } });
+    // The tab bar is the run rule's (fullscreen.js), never set from here: an
+    // option set on the parent outlives full screen and unstyles the bar.
+    expect(parentOptions).not.toHaveBeenCalled();
+    const { hidesTabBar } = require("../src/fullscreen");
+    expect(hidesTabBar("Video")).toBe(true);
     // The row under the player is gone; its buttons are over the picture.
     expect(screen.queryByTestId("video-controls")).toBeNull();
 
@@ -417,6 +421,7 @@ describe("full screen", () => {
     expect(screen.queryByTestId("video-overlay")).toBeNull();
     expect(global.__orientation).toBe("portrait");
     expect(setOptions).toHaveBeenLastCalledWith({ headerShown: true });
+    expect(parentOptions).not.toHaveBeenCalled();
   });
 });
 

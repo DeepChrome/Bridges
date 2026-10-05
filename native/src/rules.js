@@ -320,21 +320,24 @@ const openRule = (ref) => {
    pills, and a pill opens its note in a Bubble with the rule a tap further.
    A rule-breaker keeps its amber stroke, so what does not follow the pattern
    is still the first thing seen. */
-/* One fact's note, and its rule a tap further, over a dimmed screen. */
-export function FactBubble({ fact, onClose }) {
+/* One fact's note, and its rule a tap further, over a dimmed screen.
+   `onLeave` closes whatever sheet the fact sits in (the word sheet, the
+   bulb's reference): the rule opens as a screen, and a sheet left open stays
+   drawn over it. */
+export function FactBubble({ fact, onClose, onLeave }) {
   const t = useTheme();
   return (
     <Bubble testID="fact-bubble" title={fact.label} onClose={onClose}
             footer={fact.ref ? (
               <Btn kind="link" testID="fact-rule" label="Read the rule" style={{ marginTop: 10 }}
-                   onPress={() => { onClose(); openRule(fact.ref); }} />
+                   onPress={() => { onClose(); if (onLeave) onLeave(); openRule(fact.ref); }} />
             ) : null}>
       <Note text={fact.note} color={t.ink2} size={T.body} gap={4} />
     </Bubble>
   );
 }
 
-export function Facts({ facts, testID }) {
+export function Facts({ facts, testID, onLeave }) {
   const [open, setOpen] = useState(null);
   if (!facts || !facts.length) return null;
   const f = open !== null ? facts[open] : null;
@@ -346,7 +349,7 @@ export function Facts({ facts, testID }) {
           {x.label}
         </Flag>
       ))}
-      {f ? <FactBubble fact={f} onClose={() => setOpen(null)} /> : null}
+      {f ? <FactBubble fact={f} onClose={() => setOpen(null)} onLeave={onLeave} /> : null}
     </View>
   );
 }
@@ -395,7 +398,7 @@ export function Reference({ title, sub, tables, mark, facts, note, topic, onTopi
           {sub ? <Muted>{sub}</Muted> : null}
         </View>
       ) : null}
-      <Facts facts={facts} testID="ref-facts" />
+      <Facts facts={facts} testID="ref-facts" onLeave={onClose} />
       {/* The table the question is about opens; the word's others are a tap
           away rather than stacked under it. */}
       <TableGroup tables={tables} speak mark={mark} testID="ref-table"

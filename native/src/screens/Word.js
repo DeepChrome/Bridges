@@ -15,7 +15,7 @@ import { wordFacts, isIrregular } from "@core/facts";
 import { grammarLine } from "@core/forms";
 import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
-import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord, rankOf } from "../data";
+import { L, UN, resolveWord, heardIn, sensesOf, rankOf } from "../data";
 import { Linked, GrammarLine } from "../words";
 import { pictureOf, Photo } from "../pictures";
 import { clock, short } from "./Misc";
@@ -86,7 +86,10 @@ export function WordEntry({ w, index, navigation }) {
   const heard = navigation ? heardIn(w.b) : [];
   /* Senses are shipped for the studied words by index, so a dictionary-only
      entry (the deep tier) has none and shows its gloss, as it always did. */
-  const senses = sensesOf(index !== undefined ? index : idxOfWord(w.b));
+  /* By the entry's own place in L: `idxOfWord(b)` is the first owner of the
+     form key, which can be another word (§23) — and a deep entry is in L not
+     at all, so it has no senses rather than someone else's. */
+  const senses = sensesOf(index !== undefined ? index : L.indexOf(w));
 
   const lineTags = new Set(((grammarLine(w) || {}).facts || []).map((f) => String(f).toLowerCase()));
   const pic = pictureOf(w.b);

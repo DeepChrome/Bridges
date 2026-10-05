@@ -104,7 +104,9 @@ ok(askSense({ e: "to, towards; by (a time)", b: "к", p: "other" }) === "to, tow
 ok(askSense({ e: "I, me", b: "я", p: "pronoun" }) === "I, me", "«я» is asked as \"I, me\"");
 ok(askSense({ e: "tea, tea-party", b: "чай" }) === "tea", "a real word stays alone");
 ok(askSense({ e: "to try, to attempt", b: "пробовать", p: "verb" }) === "to try",
-   "a verb's \"to\" is not counted as the word");
+   "a verb keeps its first sense");
+ok(askSense({ e: "go, walk", b: "идти", p: "verb" }) === "to go",
+   "a short verb keeps its \"to\" and is not widened");
 
 group("shuffle and sample");
 {

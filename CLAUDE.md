@@ -6169,6 +6169,38 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   commoner-ending guesses («жёлтой» → «желтый»), and the raw clips did no
   better than the trimmed (67 %). A person listening is the measure.
 
+## 30bu. Labels on screen, detail behind a tap; grammar in every lesson (2026-10-04)
+
+- **A label on the screen, its sentence in a `Bubble`** (ui.js; the owner:
+  *"only provide details if clicked in sort of a bubble format that shades out
+  the rest of the screen… use this type of interaction as often as
+  possible"*). Facts are a row of pills (`Facts`, `FactBubble` in rules.js);
+  a grammar-line flag the facts explain opens the same bubble, and the entry
+  does not repeat those facts below. Reach for `Bubble` before adding a
+  sentence to a screen.
+- **The aspect partner is a link in brackets** — «готовить» *imperfective
+  (приготовить)* — opening that word; the entry lists every partner (`all`).
+- **The word sheet is a glance**: the form as met, its flags, the top two
+  meanings (`SHEET_SENSES`), and **More** — the label everywhere the full
+  entry is offered.
+- **No speaker where there is no recording** (`Speaker recordedOnly`,
+  `FormSpeaker`): the dictionary, the entry, the sheet and search hide it
+  rather than let the phone's voice stand in. The tutor, Talk and Translate
+  keep the device voice — they speak generated text.
+- **An English prompt of a letter or two carries its group** (`askSense`):
+  «к» is asked as "to, towards", never a bare "to".
+- **The grammar is in every lesson** (`vocabSteps`): the card opens lesson 1
+  and closes every later one, each followed by `GRAMMAR_IN_LESSON` questions
+  on the rule with the lesson's words; a side quest without a card repeats
+  its chapter's. **Every quiz asks `REVIEW_MIX` words from earlier units**,
+  the due and weakest first, and its second drill draws on earlier chapters.
+- **`metBy(unit, index)` is what a lesson may grade**: the route before the
+  unit and this unit up to the lesson. Form questions, drills and the due
+  top-up used to reach into later lessons of the same unit — 60 such
+  questions in a sweep. `core.test.mjs` checks every lesson on the route for
+  that, for a card in every lesson, and for no tense or case asked before a
+  card has taught it; each check was verified against the old behaviour.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

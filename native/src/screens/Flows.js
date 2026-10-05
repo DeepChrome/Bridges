@@ -176,9 +176,7 @@ export function VocabFlow({ route, navigation }) {
           {/* The word list that follows a grammar card owns "Start learning", so
               the card itself only moves on — the two used to carry the same
               label and the lesson asked to start twice. */}
-          <Btn kind="pri"
-               label={step.t === "grammar" ? "Continue"
-                      : at + 1 >= steps.length ? "Finish" : "Continue"}
+          <Btn kind="pri" label={at + 1 >= steps.length ? "Finish" : "Continue"}
                onPress={advance} />
         </View>
       </Screen>

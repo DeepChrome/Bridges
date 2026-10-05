@@ -661,13 +661,15 @@ export function Video({ route, navigation }) {
      status bar out of the way, and the transport over the picture. Back
      leaves full screen before it leaves the video. */
   const [full, setFull] = useState(false);
+  /* The tab bar is not touched here: Video is a run (fullscreen.js), so the
+     tabs are already hidden. Setting `tabBarStyle` on the parent from here
+     overrode App.js's computed style for good — a key set to undefined still
+     overrides — and left that tab's bar unstyled after one full-screen view. */
   useEffect(() => {
-    const parent = navigation.getParent && navigation.getParent();
     if (full) {
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(() => {});
       setStatusBarHidden(true, "fade");
       navigation.setOptions && navigation.setOptions({ headerShown: false });
-      parent && parent.setOptions && parent.setOptions({ tabBarStyle: { display: "none" } });
     }
     const back = full ? BackHandler.addEventListener("hardwareBackPress", () => { setFull(false); return true; }) : null;
     return () => {
@@ -675,10 +677,12 @@ export function Video({ route, navigation }) {
       if (!full) return;
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
       setStatusBarHidden(false, "fade");
+      // Every stack registers Video with its header shown (titled, App.js).
       navigation.setOptions && navigation.setOptions({ headerShown: true });
-      parent && parent.setOptions && parent.setOptions({ tabBarStyle: undefined });
     };
   }, [full]);
+  // Full screen belongs to a playing video; if the player goes away, so does it.
+  useEffect(() => { if (!playing && full) setFull(false); }, [playing, full]);
   if (!v) return null;
   const script = showScript ? transcriptOf(v.id) : null;
   const seekTo = (ms) => {

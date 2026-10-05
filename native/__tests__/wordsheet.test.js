@@ -92,6 +92,21 @@ describe("the word sheet's head", () => {
     expect(screen.queryByTestId("fact-bubble")).toBeNull();
   });
 
+  /* The rule opens as a screen; the sheet it was read from must not stay drawn
+     over it (the review, 2026-10-04). */
+  it("puts the word sheet away when the rule is opened from a fact", async () => {
+    const w = L.find((e) => {
+      const hit = IX[fold(e.b || "")];
+      return hit && L[hit[0]] === e && e.p === "verb" && e.a === "imperfective" && e.pt;
+    });
+    await open(w.b);
+    const aspect = screen.getAllByTestId("grammar-fact").find((n) => flat(n) === "imperfective");
+    await act(async () => { fireEvent.press(aspect); });
+    await act(async () => { fireEvent.press(screen.getByTestId("fact-rule")); });
+    expect(screen.queryByTestId("fact-bubble")).toBeNull();
+    expect(screen.queryByTestId("sheet-word")).toBeNull();
+  });
+
   /* «после»: OpenRussian's "other" is not a word class, and is not shown. */
   it("never flags a word 'other'", async () => {
     const w = L.find((e) => {

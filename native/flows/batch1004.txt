@@ -1,0 +1,38 @@
+# The owner's 2026-10-04 batch: the word sheet as a glance (flags, two
+# meanings, More), facts as pills that open a bubble, the aspect partner as a
+# link, speakers only on recordings. Run over an existing profile:
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\batch1004.txt -Device emulator-5554
+
+tap:^Search$
+wait:2
+tap:Russian or English
+type:to cook
+wait:3
+shot:s1-search
+tap:to cook
+wait:3
+shot:s2-entry
+scroll
+shot:s3-entry-facts
+tap:conjugation, details
+wait:2
+shot:s4-fact-bubble
+tap:^Read the rule$
+wait:3
+shot:s5-rule-page
+back
+wait:2
+scrolltop
+tap:partner
+wait:2
+shot:s6-partner-sheet
+tap:^More$
+wait:3
+shot:s7-partner-entry
+back
+wait:1
+back
+wait:1
+back
+wait:1

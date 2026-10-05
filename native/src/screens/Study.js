@@ -761,10 +761,12 @@ export default function Study({ navigation, route }) {
   // when the session was dealt.
   const current = item ? cardFor(st.seen[item.word]) : null;
   const iv = item ? preview(current, Date.now(), schedulerOpts(st)) : null;
-  const senses = face ? sensesOf(idxOfWord(face.b)) : null;
-  // The word's own record, for the grammar line on the back; a sentence or a
-  // deck card has none.
-  const cardLemma = face && !face.sentence ? L[idxOfWord(face.b)] || null : null;
+  /* The card's own lemma — the one whose bare form *is* this card's word
+     (`exactIdx`), not the first owner of the folded key, which for «всё» or
+     «его» is another word. A sentence or a deck card has none. */
+  const own = face && !face.sentence ? exactIdx(face.b) : -1;
+  const senses = own >= 0 ? sensesOf(own) : null;
+  const cardLemma = own >= 0 ? L[own] : null;
   const flip = useFlip(shown, at);
 
   /* The Russian side reads itself out: on arrival when it is the front, on

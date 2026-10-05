@@ -22,6 +22,8 @@ import { wordClip } from "./wordaudio";
 let FORMS = null;
 let FORMS_FOLDED = null;
 export function formClip(text) {
+  // A form is one word; a sentence never is, and need not load the table.
+  if (/\s/.test(String(text || "").trim())) return null;
   if (!FORMS) {
     FORMS = require("./formaudio");
     FORMS_FOLDED = new Map();
@@ -32,6 +34,10 @@ export function formClip(text) {
   }
   return FORMS.formClip(text) || FORMS_FOLDED.get(fold(text || "")) || null;
 }
+/* Every speaker asks the form table whether a recording exists, and the
+   first ask loads ~9,600 entries. App.js calls this once the first screen has
+   settled, so that cost is never paid inside a render. */
+export const warmForms = () => { formClip("а"); };
 import { sexOf } from "@core/names";
 import { castById } from "@core/cast";
 import { knownVoiceSex, rankVoice, isSilentVoice } from "@core/voices";

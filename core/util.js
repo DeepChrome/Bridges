@@ -123,11 +123,15 @@ export function firstSense(w) {
    question with nothing in it (the owner, 2026-10-04: "the question is missing
    completely"), and "to" fits к, в and на alike. So a sense that short brings
    the rest of its group with it: "to, towards", "I, me". */
+/* The whole prompt is measured, so a verb's "to go" stands as it is — the
+   "to" is what says it is a verb (asInfinitive) — and only a bare "to" or "I"
+   grows. */
 export function askSense(w) {
   const s = firstSense(w);
-  if (s.replace(/^to\s+/i, "").replace(/[^\p{L}]/gu, "").length >= 3) return s;
+  if (s.replace(/[^\p{L}]/gu, "").length >= 3) return s;
   const group = String(w.e || "").split(";")[0].trim();
-  return group && group.length > s.length ? group : s;
+  if (!group || group.length <= s.length) return s;
+  return w.p === "verb" ? asInfinitive(group) : group;
 }
 
 /* A verb's sense is written "to …". OpenRussian glosses most verbs bare —

@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { View, Animated, Pressable, AppState } from "react-native";
+import { View, Animated, Pressable, AppState, InteractionManager } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -48,7 +48,7 @@ import Sounds from "./src/screens/Sounds";
 import Grammar from "./src/screens/Grammar";
 import Endings from "./src/screens/Endings";
 import { WordsProvider, navRef } from "./src/words";
-import { configureAudio, setRouteSource, leftFor, rearmAudio } from "./src/audio";
+import { configureAudio, setRouteSource, leftFor, rearmAudio, warmForms } from "./src/audio";
 import { setHaptics } from "./src/haptics";
 import { arm as armReminders } from "./src/notify";
 import { workedOn } from "@core/scheduler";
@@ -462,6 +462,12 @@ function Shell() {
   /* Playback reads its two settings from here rather than from state. */
   useEffect(() => { configureAudio({ speed: st.speed, cue: st.cue, wrongCue: st.wrongCue }); },
             [st.speed, st.cue, st.wrongCue]);
+  /* The form-recording table, loaded once the first screen has settled
+     rather than inside whichever render first draws a speaker (audio.js). */
+  useEffect(() => {
+    const h = InteractionManager.runAfterInteractions(warmForms);
+    return () => { if (h && h.cancel) h.cancel(); };
+  }, []);
   /* …and so does the vibration motor, for the same reason: a call site that
      had to read state to decide whether to buzz would be a call site that
      could get it wrong. */

@@ -21,7 +21,7 @@ import { View, Pressable } from "react-native";
 import { createNavigationContainerRef, StackActions, CommonActions } from "@react-navigation/native";
 import { useTheme, radius } from "./theme";
 import { Sheet, Btn, Senses, SenseList, Text, Speaker, Flag } from "./ui";
-import { L, IX, deepFormOf, resolveWord, idxOfWord, sensesOf } from "./data";
+import { L, IX, deepFormOf, resolveWord, sensesOf } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise, grammarLine } from "@core/forms";
 import { wordFacts } from "@core/facts";
@@ -140,17 +140,26 @@ export function GrammarLine({ lemma, surface, style, center, all }) {
         const d = detailOf(f);
         return <Flag key={`w${f}`} testID="grammar-fact" onPress={d ? () => setOpen(d) : undefined}>{f}</Flag>;
       })}
-      {partners.map((p, k) => (
-        <Pressable key={p} testID={k ? `grammar-partner-${k}` : "grammar-partner"} hitSlop={8}
-                   accessibilityRole="link" accessibilityLabel={`${g.partner.label} partner ${p}, open word`}
-                   onPress={() => goTo(p)}>
-          <Text style={{ color: t.brandInk, fontSize: 14, fontWeight: "700",
-                         textDecorationLine: "underline", textDecorationColor: t.brand }}>
-            {`(${p})`}
-          </Text>
-        </Pressable>
-      ))}
-      {open ? <FactBubble fact={open} onClose={() => setOpen(null)} /> : null}
+      {partners.map((p, k) => {
+        const id = k ? `grammar-partner-${k}` : "grammar-partner";
+        // A link only where it leads somewhere: a partner the dictionary does
+        // not carry is plain text, never a dead tap.
+        if (!entryOf(p)) {
+          return <Text key={p} testID={id} style={{ color: t.ink2, fontSize: 14, fontWeight: "700" }}>{`(${p})`}</Text>;
+        }
+        return (
+          <Pressable key={p} testID={id} hitSlop={8}
+                     accessibilityRole="link" accessibilityLabel={`${g.partner.label} partner ${p}, open word`}
+                     onPress={() => goTo(p)}>
+            <Text style={{ color: t.brandInk, fontSize: 14, fontWeight: "700",
+                           textDecorationLine: "underline", textDecorationColor: t.brand }}>
+              {`(${p})`}
+            </Text>
+          </Pressable>
+        );
+      })}
+      {open ? <FactBubble fact={open} onClose={() => setOpen(null)}
+                          onLeave={words ? words.close : undefined} /> : null}
     </View>
   );
 }
@@ -161,9 +170,10 @@ export function GrammarLine({ lemma, surface, style, center, all }) {
    the word has them, the gloss's groups otherwise (the owner, 2026-10-04:
    "just grab the top two numbered definitions and leave the more button at
    the bottom"). A gloss run together on one line was a wall of synonyms. */
+/* By the lemma's own place in L, never `idxOfWord(b)`: that is the first
+   owner of the form key, which for «всё» or «его» is another word (§23). */
 function SheetSenses({ lemma, size, style }) {
-  const i = idxOfWord(lemma.b);
-  const senses = i >= 0 && L[i] === lemma ? sensesOf(i) : null;
+  const senses = sensesOf(L.indexOf(lemma));
   return senses
     ? <SenseList senses={senses} size={size} max={SHEET_SENSES} plain style={style} />
     : <Senses e={lemma.e} size={size} align="left" max={SHEET_SENSES} plain style={style} />;
@@ -278,14 +288,16 @@ export function WordsProvider({ children }) {
     setState({ entry, surface });
   }, [openFull]);
 
-  const value = useMemo(() => ({ open, openFull, lookup }), [open, openFull]);
+  // `close` puts the sheet away, for a control inside it that leaves for a screen.
+  const close = useCallback(() => { setState(null); showing.current = null; }, []);
+  const value = useMemo(() => ({ open, openFull, lookup, close }), [open, openFull, close]);
 
   return (
     <Ctx.Provider value={value}>
       {children}
       <WordSheet
         state={state}
-        onClose={() => { setState(null); showing.current = null; }}
+        onClose={close}
         onFull={() => state && openFull(state.entry)}
       />
     </Ctx.Provider>

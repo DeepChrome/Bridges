@@ -1,0 +1,5 @@
+{
+ "_": "tools/audio_review/pull.mjs: the review site's verdicts by recording key (word:/form:/sentence:/ending:). A verdict names the clip id it was given on. `rebought` lists the clips bought again after a flag (build_word_audio.mjs / build_form_audio.mjs --rebuy-flagged).",
+ "pulled": "2026-10-05T03:56:09.725Z",
+ "items": {}
+}

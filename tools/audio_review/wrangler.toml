@@ -1,0 +1,15 @@
+# The audio review site (tools/audio_review). `node build.mjs` writes ./site;
+# `npx wrangler deploy` from this folder publishes it. REVIEW_CODE is a secret
+# (wrangler secret put REVIEW_CODE), never written here.
+name = "bridges-audio-review"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[assets]
+directory = "./site"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+[[kv_namespaces]]
+binding = "REVIEWS"
+id = "52a41deb7ded4d82b0b017ab339c0c17"

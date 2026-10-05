@@ -6139,6 +6139,36 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   every move, the mark dropped where the readings disagree. Russian Core 5000
   mis-stressed hundreds of sentences (бо́льший for большо́й throughout).
 
+## 30bt. One voice, checked by ear (2026-10-04)
+
+- **Every recording the app plays is listed with its source** on the review
+  site, `https://bridges-audio-review.bridges-feedback.workers.dev`
+  (`tools/audio_review/`): words, table forms, sentences and endings, each
+  with the voice, the text the voice was handed and the clip id. `build.mjs`
+  packs the shipped clips (not the purchase — a trimming fault is a fault a
+  learner hears) into ~1.5 MB binary packs, since ~20,000 files is past what
+  the host takes; `npx wrangler deploy` from that folder publishes it.
+  Anyone may listen; verdicts need the link's code (`REVIEW_CODE`, a Worker
+  secret). One KV record per reviewer, merged by time, sent in batches of
+  ten — the free tier's thousand writes a day.
+- **Flags come home and move the recording on.** `pull.mjs` writes
+  `data/curated/audio_review.json`; `build_word_audio.mjs` and
+  `build_form_audio.mjs --rebuy-flagged` buy a recording flagged *on its
+  current clip* again, the next rendering not yet tried (statement, bare,
+  capitalised, the accented spelling), and record it under `rebought`. The
+  new clip is a new id, so the site shows it as needing a listen.
+- **What is not recorded is the device voice, and it was hiding.** Drills
+  widened to the whole studied list (4,000 lemmas) where only the units'
+  1,268 words and their forms are bought, so «участвовать»'s table was the
+  phone's voice — and since every speaker wears one colour (§27), nothing
+  showed it. Drills now widen only to `curriculumPool()`; `say()` also finds
+  a table form's clip (`formClip`), which a drill's answer «возьмёт» never
+  reached. The dictionary's non-curriculum words are still the device voice.
+- **Whisper is a weak judge of single words**: on 60 headwords and 60 forms it
+  heard 83 % and 72 % right, most misses its own vowel reduction and
+  commoner-ending guesses («жёлтой» → «желтый»), and the raw clips did no
+  better than the trimmed (67 %). A person listening is the measure.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

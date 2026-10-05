@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ya · Audio review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f1e6; --surface: #fffaf0; --surface2: #efe7d6; --line: #d9cdb4; --ink: #22201b; --ink2: #4c463b; --ink3: #6f6757;
+    --brand: #3c46b8; --brandBg: #e4e6f7; --brandOn: #fff; --good: #2d7a4f; --goodBg: #dcefe3; --bad: #b3372b; --badBg: #f5dcd8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12141c; --surface: #1b1e29; --surface2: #262a38; --line: #343a4d; --ink: #eceae4; --ink2: #c3c0b8; --ink3: #9a978f;
+      --brand: #f2c14e; --brandBg: #33301f; --brandOn: #1a1508; --good: #7fd19e; --goodBg: #1d3226; --bad: #ef8a7e; --badBg: #3a2220;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "PT Serif", Georgia, serif; }
+  main { max-width: 560px; margin: 0 auto; padding: 16px 16px calc(24px + env(safe-area-inset-bottom)); }
+  h1 { font-size: 22px; margin: 4px 0 2px; }
+  .sub { color: var(--ink3); font-size: 14px; }
+  .bar { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 10px; }
+  select, input[type=search], input[type=text], textarea {
+    font: inherit; font-size: 15px; color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px 10px; min-height: 40px;
+  }
+  input[type=search] { flex: 1; min-width: 140px; }
+  .progress { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; margin: 6px 0 14px; }
+  .progress > div { height: 100%; background: var(--good); width: 0; transition: width .3s; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+  .kind { font-size: 12px; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: .06em; }
+  .ru { font-size: 34px; font-weight: 700; margin: 6px 0 2px; line-height: 1.2; overflow-wrap: anywhere; }
+  .ru.long { font-size: 22px; }
+  .en { color: var(--ink2); font-size: 16px; }
+  .flags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .flag { background: var(--brandBg); color: var(--brand); border: 1px solid var(--line); border-radius: 4px; padding: 2px 8px; font-size: 13px; font-weight: 700; }
+  .flag.plain { background: var(--surface2); color: var(--ink2); }
+  .src { margin-top: 12px; color: var(--ink3); font-size: 13px; }
+  .play { margin: 16px auto 4px; display: flex; width: 72px; height: 72px; border-radius: 36px; border: 2px solid var(--brand);
+          background: var(--brandBg); align-items: center; justify-content: center; cursor: pointer; }
+  .play svg { stroke: var(--brand); }
+  .row { display: flex; gap: 10px; margin-top: 16px; }
+  button { font: inherit; font-weight: 700; font-size: 16px; border-radius: 8px; border: 1px solid var(--line);
+           padding: 12px 14px; min-height: 48px; cursor: pointer; background: var(--surface2); color: var(--ink); }
+  button.good { background: var(--good); border-color: var(--good); color: var(--bg); flex: 1; }
+  button.bad { background: var(--badBg); border-color: var(--bad); color: var(--bad); flex: 1; }
+  button.ghost { background: transparent; border-color: transparent; color: var(--ink3); font-weight: 400; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 10px; }
+  .chip { padding: 8px 12px; min-height: 40px; font-size: 15px; font-weight: 400; }
+  .chip.on { background: var(--badBg); border-color: var(--bad); color: var(--bad); font-weight: 700; }
+  textarea { width: 100%; min-height: 72px; resize: vertical; }
+  .others { margin-top: 14px; font-size: 14px; color: var(--ink2); }
+  .others div { margin-top: 4px; }
+  .mine { margin-top: 10px; font-size: 14px; font-weight: 700; }
+  .mine.ok { color: var(--good); } .mine.flagged { color: var(--bad); }
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--ink3); font-size: 14px; }
+  .banner { background: var(--surface2); border-radius: 8px; padding: 10px 12px; font-size: 14px; color: var(--ink2); margin-bottom: 10px; }
+  .who { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+  .who input { flex: 1; }
+  .empty { text-align: center; color: var(--ink3); padding: 40px 0; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Audio review</h1>
+  <div class="sub" id="sub">Loading…</div>
+
+  <div id="viewonly" class="banner hidden">View only — ask for a reviewer link to give verdicts.</div>
+  <div id="whoBox" class="banner hidden">
+    Your name, so your notes can be read back
+    <div class="who"><input type="text" id="whoInput" placeholder="Name" autocomplete="name"><button id="whoSave">Save</button></div>
+  </div>
+
+  <div class="bar">
+    <select id="fKind" aria-label="Kind">
+      <option value="">Everything</option><option value="word">Words</option><option value="form">Word forms</option>
+      <option value="sentence">Sentences</option><option value="ending">Endings</option>
+    </select>
+    <select id="fShow" aria-label="Show">
+      <option value="todo">Not reviewed by me</option><option value="flagged">Flagged by anyone</option>
+      <option value="mine">Reviewed by me</option><option value="all">All</option>
+    </select>
+    <select id="fUnit" aria-label="Unit"><option value="">All units</option></select>
+    <input type="search" id="fText" placeholder="Search Russian or English" aria-label="Search">
+  </div>
+  <div class="progress"><div id="prog"></div></div>
+
+  <div id="card" class="card hidden">
+    <div class="kind" id="kind"></div>
+    <div class="ru" id="ru" lang="ru"></div>
+    <div class="en" id="en"></div>
+    <div class="flags" id="flags"></div>
+    <button class="play" id="play" aria-label="Play">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+    </button>
+    <div class="src" id="src"></div>
+    <div class="mine" id="mine"></div>
+
+    <div id="verdicts">
+      <div class="row">
+        <button class="good" id="okBtn">Sounds right</button>
+        <button class="bad" id="flagBtn">Something's off</button>
+      </div>
+      <div id="flagBox" class="hidden">
+        <div class="chips" id="reasons"></div>
+        <textarea id="note" placeholder="What's wrong? e.g. stress should be on the first syllable"></textarea>
+        <div class="row"><button class="bad" id="flagSave">Save flag</button><button class="ghost" id="flagCancel">Cancel</button></div>
+      </div>
+    </div>
+    <div class="others" id="others"></div>
+  </div>
+  <div id="empty" class="empty hidden">Nothing left here. Try another filter.</div>
+
+  <div class="nav"><button class="ghost" id="prev">← Back</button><span id="pos"></span><button class="ghost" id="next">Skip →</button></div>
+</main>
+<script>
+(() => {
+  const REASONS = ["Wrong stress", "Mispronounced sound", "Wrong word", "Robotic or unnatural", "Cut off or noise"];
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  };
+  const url = new URL(location.href);
+  if (url.searchParams.get("code")) { store.set("code", url.searchParams.get("code")); url.searchParams.delete("code"); history.replaceState(null, "", url); }
+  const code = store.get("code", "");
+  let who = store.get("who", "");
+  let cat = null, items = [], view = [], at = 0;
+  let others = {};                         // key -> [{who, verdict, reasons, note, id}]
+  const mine = store.get("mine", {});      // key -> {verdict, reasons, note, id, at}
+  let pending = store.get("pending", []);  // verdicts not yet sent
+  const packs = new Map();
+  let audio = null;
+
+  /* ---- sound */
+  async function pack(n) {
+    if (!packs.has(n)) packs.set(n, fetch(`packs/${n}.bin`).then((r) => r.arrayBuffer()));
+    return packs.get(n);
+  }
+  async function play(it) {
+    if (!it) return;
+    const [n, off, len] = it.p;
+    const buf = await pack(n);
+    if (audio) { audio.pause(); URL.revokeObjectURL(audio.src); }
+    audio = new Audio(URL.createObjectURL(new Blob([buf.slice(off, off + len)], { type: "audio/mpeg" })));
+    audio.play().catch(() => {});
+    if (n + 1 < (cat.packs || 0)) pack(n + 1).catch(() => {});    // the next pack, ahead of need
+  }
+
+  /* ---- verdicts */
+  function record(it, verdict, reasons, note) {
+    const v = { key: it.key, id: it.id, verdict, reasons, note, at: Date.now() };
+    mine[it.key] = v;
+    store.set("mine", mine);
+    pending.push(v); store.set("pending", pending);
+    if (pending.length >= 10) send();
+  }
+  async function send() {
+    if (!code || !who || !pending.length) return;
+    const batch = pending.slice();
+    try {
+      const r = await fetch("api/reviews", { method: "POST", headers: { "content-type": "application/json" },
+                                             body: JSON.stringify({ code, who, verdicts: batch }), keepalive: true });
+      if (r.ok) { pending = pending.slice(batch.length); store.set("pending", pending); }
+    } catch (e) { /* kept, and sent with the next batch */ }
+  }
+  setInterval(send, 20000);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") send(); });
+
+  /* ---- what is shown */
+  const state = (it) => (mine[it.key] && mine[it.key].id === it.id ? mine[it.key].verdict : null);
+  const flaggedByAnyone = (it) => state(it) === "flag" || (others[it.key] || []).some((o) => o.verdict === "flag" && o.id === it.id);
+  function filter() {
+    const kind = $("fKind").value, show = $("fShow").value, unit = $("fUnit").value, q = $("fText").value.trim().toLowerCase();
+    const fold = (s) => (s || "").normalize("NFD").replace(/[̀́]/g, "").normalize("NFC").toLowerCase().replace(/ё/g, "е");
+    const fq = fold(q);
+    view = items.filter((it) => (!kind || it.kind === kind) && (!unit || it.unit === unit)
+      && (show === "all" || (show === "todo" && !state(it)) || (show === "mine" && !!state(it)) || (show === "flagged" && flaggedByAnyone(it)))
+      && (!fq || fold(it.text).includes(fq) || fold(it.en).includes(fq) || fold(it.of).includes(fq)));
+    at = 0;
+    draw(true);
+  }
+  function draw(autoplay) {
+    const it = view[at];
+    const done = items.filter((x) => state(x)).length;
+    $("prog").style.width = `${(100 * done / Math.max(1, items.length)).toFixed(1)}%`;
+    $("sub").textContent = `${done.toLocaleString()} of ${items.length.toLocaleString()} reviewed by you · ${cat.voice}`;
+    $("card").classList.toggle("hidden", !it);
+    $("empty").classList.toggle("hidden", !!it);
+    $("pos").textContent = it ? `${at + 1} of ${view.length.toLocaleString()}` : "";
+    if (!it) return;
+    $("kind").textContent = { word: "Word", form: "Word form", sentence: "Sentence", ending: "Word ending" }[it.kind]
+      + (it.unit && cat.units[it.unit] ? ` · ${cat.units[it.unit]}` : "");
+    $("ru").textContent = it.text;
+    $("ru").classList.toggle("long", it.text.length > 24);
+    $("en").textContent = it.en || "";
+    const fl = $("flags"); fl.innerHTML = "";
+    const tag = (txt, plain) => { const s = document.createElement("span"); s.className = "flag" + (plain ? " plain" : ""); s.textContent = txt; fl.appendChild(s); };
+    if (it.of) tag(`form of ${it.of}`, true);
+    (it.flags || []).forEach((f) => tag(f));
+    if (it.pos && it.pos !== "other") tag(it.pos, true);
+    $("src").textContent = `Recorded by ${cat.voice}, given the text «${it.said}» · clip ${it.id}`;
+    const v = mine[it.key];
+    const current = v && v.id === it.id;
+    $("mine").className = "mine" + (current ? (v.verdict === "ok" ? " ok" : " flagged") : "");
+    $("mine").textContent = current ? (v.verdict === "ok" ? "You said: sounds right"
+      : `You flagged: ${[...(v.reasons || []), v.note].filter(Boolean).join(" — ")}`)
+      : v ? "Re-recorded since your last verdict — listen again" : "";
+    const os = (others[it.key] || []).filter((o) => o.who !== who);
+    $("others").innerHTML = "";
+    for (const o of os) {
+      const d = document.createElement("div");
+      const stale = o.id !== it.id ? " (an earlier recording)" : "";
+      d.textContent = `${o.who}: ${o.verdict === "ok" ? "sounds right" : [...(o.reasons || []), o.note].filter(Boolean).join(" — ") || "flagged"}${stale}`;
+      $("others").appendChild(d);
+    }
+    $("verdicts").classList.toggle("hidden", !code);
+    closeFlag();
+    if (autoplay) play(it);
+  }
+  const advance = () => { if (at < view.length - 1) { at++; draw(true); } else draw(false); };
+
+  /* ---- flag form */
+  let picked = new Set();
+  function openFlag() {
+    picked = new Set();
+    const box = $("reasons"); box.innerHTML = "";
+    for (const r of REASONS) {
+      const b = document.createElement("button"); b.className = "chip"; b.textContent = r;
+      b.onclick = () => { picked.has(r) ? picked.delete(r) : picked.add(r); b.classList.toggle("on", picked.has(r)); };
+      box.appendChild(b);
+    }
+    $("note").value = "";
+    $("flagBox").classList.remove("hidden");
+    $("okBtn").parentElement.classList.add("hidden");
+  }
+  function closeFlag() { $("flagBox").classList.add("hidden"); $("okBtn").parentElement.classList.remove("hidden"); }
+
+  $("play").onclick = () => play(view[at]);
+  $("okBtn").onclick = () => { if (!ensureWho()) return; record(view[at], "ok", [], ""); advance(); };
+  $("flagBtn").onclick = () => { if (!ensureWho()) return; openFlag(); };
+  $("flagCancel").onclick = closeFlag;
+  $("flagSave").onclick = () => {
+    const note = $("note").value.trim();
+    if (!picked.size && !note) { $("note").focus(); return; }
+    record(view[at], "flag", [...picked], note); advance();
+  };
+  $("prev").onclick = () => { if (at > 0) { at--; draw(true); } };
+  $("next").onclick = advance;
+  ["fKind", "fShow", "fUnit"].forEach((id) => $(id).addEventListener("change", () => { store.set("f:" + id, $(id).value); filter(); }));
+  $("fText").addEventListener("input", () => { clearTimeout(window.__t); window.__t = setTimeout(filter, 250); });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+    if (e.key === " ") { e.preventDefault(); play(view[at]); }
+    if (e.key === "ArrowRight") advance();
+    if (e.key === "ArrowLeft" && at > 0) { at--; draw(true); }
+    if (e.key === "y" && code) $("okBtn").click();
+    if (e.key === "n" && code) $("flagBtn").click();
+  });
+
+  function ensureWho() {
+    if (who) return true;
+    $("whoBox").classList.remove("hidden"); $("whoInput").focus();
+    return false;
+  }
+  $("whoSave").onclick = () => {
+    const v = $("whoInput").value.trim().slice(0, 40);
+    if (!v) return;
+    who = v; store.set("who", who); $("whoBox").classList.add("hidden"); send();
+  };
+
+  /* ---- start */
+  (async () => {
+    cat = await (await fetch("catalogue.json")).json();
+    items = cat.items;
+    const sel = $("fUnit");
+    for (const [id, name] of Object.entries(cat.units)) { const o = document.createElement("option"); o.value = id; o.textContent = name; sel.appendChild(o); }
+    ["fKind", "fShow", "fUnit"].forEach((id) => { const v = store.get("f:" + id, null); if (v !== null) $(id).value = v; });
+    if (!code) $("viewonly").classList.remove("hidden");
+    else if (!who) $("whoBox").classList.remove("hidden");
+    try {
+      const r = await fetch("api/reviews");
+      if (r.ok) {
+        const all = await r.json();
+        for (const [name, list] of Object.entries(all.reviewers || {})) {
+          for (const v of Object.values(list)) (others[v.key] = others[v.key] || []).push({ ...v, who: name });
+        }
+      }
+    } catch (e) { /* the page works without the others' verdicts */ }
+    filter();
+    send();
+  })();
+})();
+</script>
+</body>
+</html>

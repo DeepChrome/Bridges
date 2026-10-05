@@ -832,6 +832,22 @@ export function chapterWords(indices) {
    draws on, and what a lesson's word list sets apart. Built once: reading a
    word's tables hydrates it, and 1,045 of those is a few milliseconds. */
 let irregularCache = null;
+/* Every word the units teach — the widest a drill reaches (2026-10-04). It
+   used to widen to the whole studied list, 4,000 lemmas, and every one of the
+   ~2,700 the units do not teach had no recording: «участвовать»'s table read
+   by the phone's voice in the middle of a drill (the owner: "more words that
+   all sound awfully pronounced"). The units' words, and every form in their
+   tables, are bought in one voice. */
+let curriculumCache = null;
+export function curriculumPool() {
+  if (curriculumCache === null) {
+    const out = [], have = new Set();
+    for (const u of UN) for (const i of u.w || []) if (!have.has(i)) { have.add(i); out.push(i); }
+    curriculumCache = out;
+  }
+  return curriculumCache;
+}
+
 export function irregularWords() {
   if (irregularCache === null) {
     const out = [], have = new Set();

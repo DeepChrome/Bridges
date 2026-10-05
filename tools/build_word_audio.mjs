@@ -79,6 +79,35 @@ const RETRIES = ["stop", "stop", "cap", "", ""];
 export const statedId = (text) => clipId(rendering(text, "stop"));
 const RESTATE = process.argv.includes("--restate");
 
+/* The review site's flags (tools/audio_review; pulled into
+   data/curated/audio_review.json by pull.mjs): a recording whose latest
+   verdict is a flag *on the clip it has now* is bought again another way.
+   `rebuyLadder` names the renderings not yet tried for it — the statement,
+   the bare word, capitalised, and, where an accented spelling is known, that
+   spelling with its stress mark (`=` passes text as given) — so each flag
+   moves the recording on rather than buying the same clip back. Every clip
+   bought this way is recorded under the key's `rebought`. */
+const REVIEW = join(ROOT, "data", "curated", "audio_review.json");
+export function flagged(key, currentId) {
+  if (!existsSync(REVIEW)) return null;
+  const it = (JSON.parse(readFileSync(REVIEW, "utf8")).items || {})[key];
+  const last = it && it.verdicts && it.verdicts[it.verdicts.length - 1];
+  return last && last.verdict === "flag" && last.id === currentId ? it : null;
+}
+export function rebuyLadder(text, accented, it, currentId) {
+  const tried = new Set([currentId, ...((it && it.rebought) || [])]);
+  const options = ["stop", "", "cap"].map((h) => [h, clipId(rendering(text, h))]);
+  if (accented && accented !== text) options.push(["=" + accented, clipId(accented)]);
+  return options.filter(([, id]) => !tried.has(id)).map(([h]) => h);
+}
+export function noteRebought(key, id) {
+  const file = existsSync(REVIEW) ? JSON.parse(readFileSync(REVIEW, "utf8")) : { items: {} };
+  const it = file.items[key] || (file.items[key] = { verdicts: [] });
+  it.rebought = [...new Set([...(it.rebought || []), id])];
+  writeFileSync(REVIEW, JSON.stringify(file, null, 1) + "\n");
+}
+const REBUY = process.argv.includes("--rebuy-flagged");
+
 const flag = (n) => process.argv.includes(n);
 const DRY = flag("--dry-run");
 
@@ -132,7 +161,7 @@ const rendering = (text, how) => (how === "cap" ? cap(text) : how === "stop" ? c
  * extra calls it took, and the ids deleted along the way. `id` is null when
  * every attempt was a blip — the file is removed, and the caller decides what
  * reads the word instead. */
-export async function buyOne(text, { word, dir, key, had }) {
+export async function buyOne(text, { word, dir, key, had, ladder }) {
   /* Every file this utterance has on disk by the end, by id: the blip it had,
      and each rendering tried. A plain retry has the *same* id as the blip and
      overwrites it in place, which is why this is a map and not a list — the
@@ -141,8 +170,8 @@ export async function buyOne(text, { word, dir, key, had }) {
   const tried = new Map();
   if (had && had.id) tried.set(had.id, had.ms);
   let retries = 0, first = true;
-  for (const how of (word ? RETRIES : [""])) {
-    const said = rendering(text, how);
+  for (const how of (ladder || (word ? RETRIES : [""]))) {
+    const said = how.startsWith("=") ? how.slice(1) : rendering(text, how);
     const id = clipId(said);
     const file = join(dir, id + ".mp3");
     writeFileSync(file, await synth(said, key));
@@ -328,6 +357,18 @@ async function main() {
     old.set(m.key, m.id);
     m.id = statedId(m.text);
   }
+  /* `--rebuy-flagged`: what a reviewer flagged on its current clip is bought
+     again, the next rendering not yet tried (rebuyLadder). */
+  if (REBUY) for (const m of want) {
+    const rkey = `${m.word ? "word" : "sentence"}:${m.key}`;
+    const it = flagged(rkey, m.id);
+    if (!it) continue;
+    const ladder = rebuyLadder(m.text, null, it, m.id);
+    if (!ladder.length) { console.log(`   !! ${m.text}: every rendering tried — needs a person's fix`); continue; }
+    m.ladder = ladder;
+    m.rebuyKey = rkey;
+    m.id = `rebuy-${m.key}`;                       // not on disk, so it is bought
+  }
   /* A word the engine would not say last time is not bought again on every
      run; `--retry-skipped` asks once more. */
   const skipped = new Set(flag("--retry-skipped") ? [] : (prior.skipped || []));
@@ -354,8 +395,9 @@ async function main() {
   let bought = 0, failed = 0, retried = 0, still = 0;
   for (const m of todo) {
     try {
-      const got = await buyOne(m.text, { word: m.word, dir: OUT, key,
+      const got = await buyOne(m.text, { word: m.word, dir: OUT, key, ladder: m.ladder,
                                           had: have.has(m.id) ? { id: m.id, ms: ms[m.id] } : null });
+      if (m.rebuyKey && got.id) noteRebought(m.rebuyKey, got.id);
       retried += got.retries;
       for (const id of got.dropped) delete ms[id];
       if (got.id) {

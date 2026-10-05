@@ -49,7 +49,7 @@ import { fold, bare } from "../core/util.js";
 import { parseDeep } from "../core/search.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ENDINGS } from "../core/endings.js";
-import { buyOne, statedId, apiKey, VOICE, RATE, RATE_PER_M_CHARS } from "./build_word_audio.mjs";
+import { buyOne, statedId, flagged, rebuyLadder, noteRebought, apiKey, VOICE, RATE, RATE_PER_M_CHARS } from "./build_word_audio.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DIR = join(ROOT, "data", "word_audio");
@@ -169,7 +169,17 @@ async function main() {
     const id = prior.files[form] || wordFiles[text] || statedId(text);
     /* `--restate`: a form bought before words were said as statements is
        bought again as one («Рыбы.»), as the headwords are (build_word_audio). */
-    plan.push({ form, text, id: process.argv.includes("--restate") && id !== statedId(text) ? statedId(text) : id });
+    const p = { form, text, id: process.argv.includes("--restate") && id !== statedId(text) ? statedId(text) : id };
+    /* `--rebuy-flagged`: a form a reviewer flagged on its current clip is
+       bought again the next way not yet tried — including the accented
+       spelling, the stress mark handed to the voice (tools/audio_review). */
+    const it = process.argv.includes("--rebuy-flagged") ? flagged(`form:${form}`, p.id) : null;
+    if (it) {
+      const ladder = rebuyLadder(text, form.normalize("NFC"), it, p.id);
+      if (ladder.length) Object.assign(p, { ladder, rebuyKey: `form:${form}`, id: `rebuy-${text}` });
+      else console.log(`   !! ${form}: every rendering tried — needs a person's fix`);
+    }
+    plan.push(p);
   }
 
   const reuse = plan.filter((p) => have.has(p.id));
@@ -220,7 +230,8 @@ async function main() {
 
   for (const p of texts) {
     try {
-      const got = await buyOne(p.text, { word: true, dir: DIR, key, had: null });
+      const got = await buyOne(p.text, { word: true, dir: DIR, key, had: null, ladder: p.ladder });
+      if (p.rebuyKey && got.id) noteRebought(p.rebuyKey, got.id);
       retries += got.retries;
       for (const id of got.dropped) delete ms[id];
       if (got.id) { byText.set(p.text, got.id); ms[got.id] = got.ms; bought++; }

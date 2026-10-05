@@ -14,7 +14,7 @@ import { VideoLines } from "../prep";
 import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
-  DRILL_POOL_STEPS, chapterWords, irregularWords,
+  DRILL_POOL_STEPS, chapterWords, irregularWords, curriculumPool,
   reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
   scenarioLibrary, required, linesWith, grammarKey, currentGrammarUnit, grammarNoteOf,
   todaysWork, recapKey, components, stepRoute,
@@ -854,10 +854,12 @@ export function DrillFlow({ route, navigation }) {
     const odd = irregularOnly ? new Set(irregularWords()) : null;
     const narrow = (pool) => (odd ? (pool || irregularWords()).filter((i) => odd.has(i)) : pool);
     if (chapters.length) return Q.drillQuestions(type, undefined, narrow(chapterWords(chapters)), undefined, typed, only);
-    if (ahead) return Q.drillQuestions(type, undefined, narrow(null), undefined, typed, only);
+    // The widest is every word the units teach (data.js curriculumPool), not
+    // the whole studied list: those are the words with recordings.
+    if (ahead) return Q.drillQuestions(type, undefined, narrow(curriculumPool()), undefined, typed, only);
     let last = [];
     for (const min of DRILL_POOL_STEPS) {
-      const p = min === Infinity ? null : drillPool(st, min);
+      const p = min === Infinity ? curriculumPool() : drillPool(st, min);
       last = Q.drillQuestions(type, undefined, narrow(p), undefined, typed, only);
       if (last.length >= DRILL_N) return last;
     }

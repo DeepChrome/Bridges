@@ -30,7 +30,7 @@ import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, QUIZ_N, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, REVIEW_MIX, GRAMMAR_IN_LESSON, QUIZ_KINDS, PRODUCE_AT,
          lessonSize, lessonWordsOf, lessonCountOf, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem }
   from "../core/questions.js";
-import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
+import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
 import { TOPICS, checkGrammar, russianIn, topicFor } from "../core/grammar.js";
 import { wordFacts, conjugation, stemChange, nounStem, genderWhy, stressAt, irregularities, FACT_REFS } from "../core/facts.js";
@@ -2449,11 +2449,6 @@ group("the writing system");
      TRAPS.map((x) => x.l[0]).join(""));
   ok(TRAPS.every((x) => x.note && /looks like/i.test(x.note)),
      "each says what it is mistaken for");
-  // The tip a word earns.
-  ok(/\bv\b/.test(soundTip("врач") || ""), "«врач» warns about в", soundTip("врач"));
-  ok(/tongue back/.test(soundTip("ты") || ""), "«ты» explains ы", soundTip("ты"));
-  ok(soundTip("да") === null, "a word with nothing tricky gets no tip", String(soundTip("да")));
-  ok(soundTip("") === null && soundTip(undefined) === null, "and neither does nothing");
 }
 
 /* The grammar reference (core/grammar.js, 2026-09-27). Two things can go wrong

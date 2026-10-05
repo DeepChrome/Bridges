@@ -119,31 +119,11 @@ export const VOWEL_CHART = [
   { v: "а", ipa: "[a]", x: 0.5, y: 0.95, like: "a in father" },
 ];
 
-/* Sounds worth a word of warning the first time a learner meets one, keyed by
-   the letter. Shown on the vocabulary card, one line, never a lecture. */
-const TIP = {};
-for (const row of LETTERS) {
-  const bare = row.l.split(" ")[1];
-  if (row.trap) TIP[bare] = `${bare} is ${row.like.replace(/^the /, "")}, not the letter it looks like`;
-}
-TIP["ы"] = "ы: say ee, then pull the tongue back without rounding your lips";
-TIP["щ"] = "щ is a long soft sh, further forward than ш";
-TIP["ж"] = "ж is the s in measure";
-TIP["ц"] = "ц is one sound, the ts in cats";
-TIP["ё"] = "ё is always the stressed syllable";
-
-/* The first tip a word earns, or null. Order matters: the false friends come
-   first because they are what stops a beginner reading at all. */
-export const TIP_ORDER = ["в", "н", "р", "с", "у", "х", "ы", "щ", "ж", "ц", "ё"];
-
-export function soundTip(word) {
-  const w = (word || "").toLowerCase();
-  for (const letter of TIP_ORDER) {
-    if (w.includes(letter)) return TIP[letter];
-  }
-  return null;
-}
-
+/* There was a one-line sound tip on every vocabulary card here — "р is the
+   rolled r of Spanish perro, not the letter it looks like" — until
+   2026-10-05 (the owner: "that grey note about pronunciation is not
+   needed"). The letters are taught where a learner goes for them: Practice →
+   Alphabet. */
 export const TRAPS = LETTERS.filter((x) => x.trap);
 
 /* ------------------------------------------------- minimal pairs (P10.8) */

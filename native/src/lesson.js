@@ -25,7 +25,7 @@
  */
 
 import React from "react";
-import { Animated, View, Pressable } from "react-native";
+import { Animated, View } from "react-native";
 import { useTheme, radius, type as T } from "./theme";
 import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses, Text, Btn } from "./ui";
 import { RuleCard } from "./rules";
@@ -35,7 +35,6 @@ import { useEnter } from "./motion";
 import { L, linesWith } from "./data";
 import { pictureOf, Photo } from "./pictures";
 import { firstSense } from "@core/util";
-import { soundTip } from "@core/alphabet";
 import { hasRealAudio } from "./audio";
 import { VideoLines, WordSections, WordTags } from "./prep";
 
@@ -187,18 +186,14 @@ export function GrammarNote({ unit, note, at, total, onEpisode }) {
  * worse it looked; now the word is optically centred and the button sits under
  * it where the thumb reaches.
  */
-export function WordCard({ i, at, total, unit, onMoment }) {
+export function WordCard({ i, at, total, unit }) {
   const t = useTheme();
   const w = L[i];
   const anim = useEnter([i]);
   const pad = 16;                                  // Card's own padding, cancelled for the photo
-  const tip = soundTip(w.b);
   const pic = pictureOf(w.b);
   const photo = pic && pic.source;
   const credit = pic && pic.credit;
-  // Where the unit's video says this word (Phase 14): the lesson is preparing
-  // for that video, so the card shows the word in it and plays the moment.
-  const moment = unit && unit.v && unit.v.heard && (unit.v.heard[w.b] || [])[0];
   // The video's own sentences with this word, which are what the lesson is
   // preparing for (2026-09-29: *"for those sentences, we should only use the
   // ones in the video"*); without one, only the collection's recorded
@@ -277,23 +272,16 @@ export function WordCard({ i, at, total, unit, onMoment }) {
             <WordTags e={w} />
           </View>
 
-          {/* One line about a sound this word carries — a letter that is not what
-              it looks like, or one English has not got (ROADMAP P10.2). A tip,
-              not a lesson: the whole system is under Practice → Sounds. */}
-          {tip ? (
-            <View testID="sound-tip"
-                  style={{ marginTop: 14, backgroundColor: t.surface2, borderRadius: radius.md,
-                           paddingHorizontal: 12, paddingVertical: 10, alignSelf: "stretch" }}>
-              <Muted size={T.small} style={{ textAlign: "center" }}>{tip}</Muted>
-            </View>
-          ) : null}
 
           {lines.length ? (
             <View style={{ marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.lineSoft,
                            alignSelf: "stretch" }}>
               <Muted size={T.small}>In the video</Muted>
-              <VideoLines lines={lines} testID="word-lines"
-                          onMoment={onMoment ? (l) => onMoment(l.vid, null, l.t) : undefined} />
+              {/* No play-in-video button on a teaching card (the owner,
+                  2026-10-05: "remove the play buttons from there. Not
+                  needed"): the line is heard with its speaker, and the video
+                  is the lesson's own step. */}
+              <VideoLines lines={lines} testID="word-lines" />
             </View>
           ) : null}
 
@@ -308,25 +296,6 @@ export function WordCard({ i, at, total, unit, onMoment }) {
               <Muted>{ex.en}</Muted>
             </View>
           ))}
-
-          {!lines.length && moment && onMoment ? (
-            <Pressable testID="word-moment" accessibilityRole="button"
-                       accessibilityLabel="Play it in the video"
-                       onPress={() => onMoment(unit.v.id, w.b, moment.t)}
-                       style={({ pressed }) => ({ marginTop: 14, paddingTop: 12, borderTopWidth: 1,
-                                                  borderTopColor: t.lineSoft, alignSelf: "stretch",
-                                                  flexDirection: "row", alignItems: "center", gap: 10,
-                                                  opacity: pressed ? 0.6 : 1 })}>
-              <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: t.brandBg,
-                             alignItems: "center", justifyContent: "center" }}>
-                <Text style={{ color: t.brandInk, fontSize: 14 }}>▶</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Muted size={T.small}>In the video</Muted>
-                <Text style={{ color: t.ink2, fontSize: T.body }} numberOfLines={2}>{moment.s}</Text>
-              </View>
-            </Pressable>
-          ) : null}
         </Card>
       </Animated.View>
     </>

@@ -166,8 +166,7 @@ export function VocabFlow({ route, navigation }) {
         {step.t === "grammar"
           ? <GrammarNote unit={unit} note={step.note} at={at} total={steps.length}
                          onEpisode={(videoId) => navigation.navigate("Video", { videoId })} />
-          : <WordCard i={step.i} at={at} total={steps.length} unit={unit}
-                      onMoment={(videoId, word, at) => navigation.navigate("Video", { videoId, word, at })} />}
+          : <WordCard i={step.i} at={at} total={steps.length} unit={unit} />}
         {/* marginTop:"auto" against Screen's flexGrow: the action holds one position
             whatever the card's height, instead of moving down the screen each step.
             The gap lives on the wrapper — putting it on the button would change the

@@ -113,7 +113,9 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
   let done = 0;
   for (let i = 0; i < lessonCount(unit); i++) if (lessonDone(st, unit, i)) done++;
 
-  /* **One disc is filled, and it is the one Continue would open.**
+  /* **One disc is marked, and it is the one Continue would open** — larger,
+   * with a dim brand ring that fills as its lessons are done. It was a solid
+   * brand fill until 2026-10-05, which read as finished.
    *
    * Every open disc used to be a white circle with a pale ring, so a path of
    * eight units was eight identical empty rings and nothing said where the
@@ -134,8 +136,8 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
      path beside ours: "the icons for the lessons look way way better and
      refined"). Three of the palette's audited pairs — the spine in the
      brand, a chapter's quests in green and blue by the side they sit on —
-     never a new colour. The *current* disc is still the one filled disc, in
-     the brand, so the hierarchy §30ah set holds. */
+     never a new colour. The *current* disc keeps its family's face and is
+     set apart by size and its ring, so the hierarchy §30ah set holds. */
   const famBg = fam === "brand" ? t.brandBg : fam === "good" ? t.goodBg : t.infoBg;
   const famInk = fam === "brand" ? t.brandInk : fam === "good" ? t.good : t.info;
 
@@ -159,10 +161,15 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
     ? { arc: null, p: 0, face: t.surface2, icon: t.ink3, track: t.lineSoft,
         lip: t.lineSoft, nm: t.ink3, dim: true }
     : current
-    // Where you are: filled, in the brand, with the icon reversed out of it.
-    // `brandOn` rather than white because the pair is contrast-audited (§24).
-    ? { arc: pr > 0 ? t.brand : null, p: pr, face: t.brand, icon: t.brandOn,
-        track: "transparent", lip: t.brandDim, nm: t.ink }
+    /* Where you are: the same face as any open disc, larger, with its track
+       in a dim brand so the ring reads as one being filled — the bar goes
+       round as lessons are done, and a full ring is finished. It used to be
+       a solid brand fill, and the owner read that as complete (2026-10-05:
+       "It really seems to indicate that the left lesson is complete. I liked
+       how on the right the bar went around the circle until it was
+       complete"). */
+    ? { arc: pr > 0 ? t.brand : null, p: pr, face: famBg, icon: famInk,
+        track: t.brandDim, lip: t.brandDim, nm: t.ink }
     : pr > 0
     ? { arc: t.brand, p: pr, face: famBg, icon: famInk, track: t.surface3,
         lip: t.line, nm: t.ink }

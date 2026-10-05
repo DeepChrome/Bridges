@@ -333,19 +333,27 @@ describe("the disc you are on", () => {
         && flat.backgroundColor.toUpperCase() === hex.toUpperCase();
     }).length;
 
-  test("exactly one disc on the path is filled, and it is the one Continue opens", async () => {
+  /* The disc you are on is marked by its ring, not by a fill (the owner,
+     2026-10-05: a filled disc "really seems to indicate that the left lesson
+     is complete"): its track is a dim brand, ready to be filled round as its
+     lessons are done; no disc is ever a solid brand face. */
+  const ringed = (node) => walk(node).filter((n) => n.props && n.props.stroke !== undefined
+    && strokeHex(n) === light.brandDim.toUpperCase()).length;
+
+  test("exactly one disc carries the open ring, and it is the one Continue opens; none is filled", async () => {
     await withState({});
     // The whole map is on the screen from the first day (2026-09-23).
     const shown = UN.filter((u) => screen.queryByTestId(`node-${u.id}`));
     expect(shown.map((u) => u.id)).toEqual(UN.map((u) => u.id));
-    const filled = shown.filter((u) => painted(screen.getByTestId(`node-${u.id}`), light.brand) > 0);
-    expect(filled.map((u) => u.id)).toEqual(["core1"]);
+    const here = shown.filter((u) => ringed(screen.getByTestId(`node-${u.id}`)) > 0);
+    expect(here.map((u) => u.id)).toEqual(["core1"]);
+    expect(shown.filter((u) => painted(screen.getByTestId(`node-${u.id}`), light.brand) > 0)).toEqual([]);
     expect(screen.getByText(`Start (${STAGES[0].core.name})`)).toBeTruthy();
   });
 
-  test("a locked unit is not filled", async () => {
+  test("a locked unit carries no ring", async () => {
     await withState({});
-    expect(painted(screen.getByTestId("node-core4"), light.brand)).toBe(0);
+    expect(ringed(screen.getByTestId("node-core4"))).toBe(0);
   });
 
   test("and the fill moves on with the learner", async () => {
@@ -355,9 +363,9 @@ describe("the disc you are on", () => {
     const { required } = require("../src/data");
     const first = required(STAGES[0])[0];
     await withState(done(STAGES[0].core));
-    expect(painted(screen.getByTestId("node-core1"), light.brand)).toBe(0);
-    expect(painted(screen.getByTestId(`node-${first.id}`), light.brand)).toBeGreaterThan(0);
-    expect(painted(screen.getByTestId("node-core2"), light.brand)).toBe(0);
+    expect(ringed(screen.getByTestId("node-core1"))).toBe(0);
+    expect(ringed(screen.getByTestId(`node-${first.id}`))).toBeGreaterThan(0);
+    expect(ringed(screen.getByTestId("node-core2"))).toBe(0);
   });
 
   /* Its own test rather than a second half of the one above: two `render`s in
@@ -369,7 +377,7 @@ describe("the disc you are on", () => {
     const all = Object.assign({}, done(STAGES[0].core).unit,
       ...required(STAGES[0]).map((u) => done(u).unit));
     await withState({ unit: all });
-    expect(painted(screen.getByTestId("node-core2"), light.brand)).toBeGreaterThan(0);
-    expect(painted(screen.getByTestId("node-core1"), light.brand)).toBe(0);
+    expect(ringed(screen.getByTestId("node-core2"))).toBeGreaterThan(0);
+    expect(ringed(screen.getByTestId("node-core1"))).toBe(0);
   });
 });

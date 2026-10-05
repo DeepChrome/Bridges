@@ -62,9 +62,9 @@ describe("a list round with a way back", () => {
     await withProfile(<Study navigation={nav}
       route={{ params: { round: "list", words: ["город"], title: "Gaps" } }} />);
     await screen.findByText("Show");
-    expect(screen.queryByTestId("grammar-facts")).toBeNull();
+    expect(screen.queryByTestId("grammar-line")).toBeNull();
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
-    expect(await screen.findByTestId("grammar-facts")).toBeTruthy();
+    expect(await screen.findByTestId("grammar-line")).toBeTruthy();
   });
 
   it("without one, ends on the day's options as before", async () => {

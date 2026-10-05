@@ -38,16 +38,16 @@ describe("the word sheet's head", () => {
     });
     expect(w).toBeTruthy();
     await open(w.b);
-    // Right under the word, in words (the owner, 2026-10-04).
-    const facts = screen.getByTestId("grammar-facts");
-    expect(flat(facts)).toMatch(/^noun · feminine/);
+    // Flags right under the word, in words (the owner, 2026-10-04).
+    expect(flagsOf("grammar-fact")).toEqual(["noun", "feminine"]);
     expect(screen.queryByText("f")).toBeNull();
     expect(screen.getAllByLabelText(/Hear it/).length).toBeGreaterThan(0);
   });
 
-  /* «книгу» tapped in a sentence: the dictionary form big, and under it what
-     the tapped form is — the case and number read out of the word's table. */
-  it("names the tapped form under the dictionary form", async () => {
+  /* «книгу» tapped in a sentence: the form as met, large; flags for its case
+     and number read out of the word's table; then the dictionary form with its
+     top meaning, which opens the full entry. */
+  it("is a snapshot of the tapped form: flags, then the dictionary form", async () => {
     const w = L.find((e) => {
       const hit = IX[fold(e.b || "")];
       return hit && L[hit[0]] === e && e.p === "noun" && e.g === "f" && /а$/.test(e.b)
@@ -56,7 +56,9 @@ describe("the word sheet's head", () => {
     expect(w).toBeTruthy();
     const form = w.b.replace(/а$/, "у");
     await open(form);
-    expect(flat(screen.getByTestId("grammar-form"))).toMatch(new RegExp(`^${form}\\s+accusative singular`, "i"));
+    expect(screen.getByTestId("sheet-word")).toHaveTextContent(form);
+    expect(flagsOf("grammar-flag")).toEqual(["accusative", "singular"]);
+    expect(screen.getByTestId("sheet-root")).toHaveTextContent(/Dictionary form/);
   });
 
   /* A verb says its aspect, and the partner of the other aspect. */
@@ -67,11 +69,23 @@ describe("the word sheet's head", () => {
     });
     expect(w).toBeTruthy();
     await open(w.b);
-    const facts = flat(screen.getByTestId("grammar-facts"));
-    expect(facts).toMatch(/^verb · imperfective · perfective /);
-    expect(facts).toContain(w.pt.split(/,\s*/)[0]);
+    expect(flagsOf("grammar-fact")).toEqual(["verb", "imperfective"]);
+    expect(flat(screen.getByTestId("grammar-partner"))).toBe(`perfective: ${w.pt.split(/,\s*/)[0]}`);
+  });
+
+  /* «после»: OpenRussian's "other" is not a word class, and is not shown. */
+  it("never flags a word 'other'", async () => {
+    const w = L.find((e) => {
+      const hit = IX[fold(e.b || "")];
+      return hit && L[hit[0]] === e && e.p === "other";
+    });
+    expect(w).toBeTruthy();
+    await open(w.b);
+    expect(screen.queryByText("other")).toBeNull();
   });
 });
+
+const flagsOf = (id) => screen.queryAllByTestId(id).map((n) => flat(n));
 
 /* Every string under a Text, nested spans included. */
 const flat = (node) => {

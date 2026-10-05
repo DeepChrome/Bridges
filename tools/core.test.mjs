@@ -40,7 +40,7 @@ import { ambiguousSpellings, spokenKey } from "./build_form_audio.mjs";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP,
          sayPassed, closestTranscript }
   from "../core/speech.js";
-import { describeForm, summarise } from "../core/forms.js";
+import { describeForm, summarise, formFlags, grammarTags } from "../core/forms.js";
 import { parseDeep, makeSearch, makeResolve, MATCH } from "../core/search.js";
 import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
@@ -3169,6 +3169,30 @@ group("naming the form a learner just tapped");
     ok(!!d, "a verb form is found");
     ok(d && !/\bform\b/i.test(d.text), "and is not described as a “form”", d && d.text);
   }
+
+  /* The snapshot's flags (2026-10-04): what the form met is, in words, every
+     cell it fits — an inanimate noun's accusative is its nominative. */
+  if (kniga) {
+    ok(JSON.stringify(formFlags(kniga, "книгу")) === JSON.stringify(["accusative", "singular"]),
+       "flags name a noun form's case and number", formFlags(kniga, "книгу").join(", "));
+  }
+  const vypusk = byBare("выпуск");
+  if (vypusk) {
+    ok(JSON.stringify(formFlags(vypusk, "выпуск")) === JSON.stringify(["nominative / accusative", "singular"]),
+       "a form in two cells is flagged with both", formFlags(vypusk, "выпуск").join(", "));
+  }
+  const vzyat = byBare("взять");
+  if (vzyat) {
+    ok(JSON.stringify(formFlags(vzyat, "возьмёт")) === JSON.stringify(["future", "3rd person", "singular"]),
+       "a perfective's present-tense cell is the future, with person and number", formFlags(vzyat, "возьмёт").join(", "));
+  }
+  const chitat = byBare("читать");
+  if (chitat) {
+    ok(JSON.stringify(formFlags(chitat, "читали")) === JSON.stringify(["past", "plural"]),
+       "a past form says past and its subject", formFlags(chitat, "читали").join(", "));
+  }
+  ok(formFlags(kniga || DATA.lemmas[0], "zzzz").length === 0, "a form not in the tables has no flags");
+  ok(!grammarTags({ p: "other" }).includes("other"), "OpenRussian's 'other' is never a flag");
 
   ok(describeForm(kniga || DATA.lemmas[0], "zzzz") === null,
      "a form that is not in the paradigm returns null rather than guessing");

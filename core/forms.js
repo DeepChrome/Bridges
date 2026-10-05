@@ -60,7 +60,69 @@ export const GENDER_NAMES = { m: "masculine", f: "feminine", n: "neuter", pl: "p
 /* The standing grammatical facts about the lemma itself, as short tags. */
 export function grammarTags(lemma) {
   if (!lemma) return [];
-  return [lemma.p, lemma.g && (GENDER_NAMES[lemma.g] || lemma.g), lemma.a].filter(Boolean);
+  /* "other" is OpenRussian's bin for everything that is not a noun, verb or
+     adjective — prepositions, particles, numerals — and says nothing to a
+     reader («после» flagged "other", the owner, 2026-10-04). Left out. */
+  return [lemma.p !== "other" && lemma.p, lemma.g && (GENDER_NAMES[lemma.g] || lemma.g), lemma.a].filter(Boolean);
+}
+
+/* Every cell of the word's tables that holds this form — an inanimate noun's
+   accusative is its nominative, so «вы́пуск» is honestly both (§26: represent
+   the uncertainty, never invent certainty). */
+function formCells(lemma, surface) {
+  const target = fold(surface || "");
+  const out = [];
+  if (!target || !lemma || !Array.isArray(lemma.t)) return out;
+  for (const table of lemma.t) {
+    for (const row of table.rows || []) {
+      for (let ci = 1; ci < row.length; ci++) {
+        const forms = Array.isArray(row[ci]) ? row[ci] : [row[ci]];
+        if (forms.some((f) => f && fold(f) === target)) {
+          out.push({ table: table.title || "", label: String(row[0] || "").trim(),
+                     column: String((table.columns || [])[ci] || "").trim() });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+const PERSON = {
+  "я": ["1st person", "singular"], "ты": ["2nd person", "singular"], "он / она": ["3rd person", "singular"],
+  "мы": ["1st person", "plural"], "вы": ["2nd person", "plural"], "они": ["3rd person", "plural"],
+};
+const PAST_SUBJECT = { "он": "masculine", "она": "feminine", "оно": "neuter", "они": "plural" };
+const SHORT = { m: "masculine", f: "feminine", n: "neuter", pl: "plural" };
+
+/* What one cell says, in words: case and number for a noun, case and
+   gender for an adjective, tense, person and number for a verb. */
+function cellFlags(lemma, c) {
+  const lower = (s) => s.toLowerCase();
+  if (c.table === "Present / Future") {
+    return [/^perf/i.test(lemma.a || "") ? "future" : "present", ...(PERSON[c.label] || [])];
+  }
+  if (c.table === "Past") return ["past", PAST_SUBJECT[c.label]].filter(Boolean);
+  if (c.table === "Imperative") return ["imperative", c.label === "вы" ? "plural / polite" : "singular"];
+  if (c.table === "Short form") return ["short form", SHORT[c.label]].filter(Boolean);
+  if (c.table === "Comparison") return [lower(c.label)];
+  const col = GENERIC_COLUMN.test(c.column) ? null : lower(c.column);
+  return [lower(c.label), col].filter(Boolean);
+}
+
+/* The flags for the form that was met: each kind of fact once, alternatives
+   joined where the form fits more than one cell ("nominative / accusative").
+   Empty when the form is not in the word's tables. */
+export function formFlags(lemma, surface) {
+  const cells = formCells(lemma, surface);
+  if (!cells.length) return [];
+  const lists = cells.map((c) => cellFlags(lemma, c));
+  const width = Math.max(...lists.map((l) => l.length));
+  const out = [];
+  for (let k = 0; k < width; k++) {
+    const seen = [...new Set(lists.map((l) => l[k]).filter(Boolean))];
+    if (seen.length) out.push(seen.join(" / "));
+  }
+  return out;
 }
 
 /* The grammar line drawn right under a word (the owner, 2026-10-04: "part of
@@ -77,7 +139,7 @@ export function grammarLine(lemma, surface) {
     : null;
   const shown = surface && fold(surface) !== fold(lemma.b) ? surface : null;
   const form = shown || surface ? describeForm(lemma, surface) : null;
-  return { facts, partner, surface: shown, form };
+  return { facts, partner, surface: shown, form, flags: surface ? formFlags(lemma, surface) : [] };
 }
 
 /* Everything the first tap should show, and nothing more. The full entry — every

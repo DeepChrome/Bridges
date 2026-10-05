@@ -945,6 +945,24 @@ export function Pill({ children, tone, testID }) {
   );
 }
 
+/* A small shaded box naming one grammatical fact (the owner, 2026-10-04:
+   "a small colored/shaded box sort of like how you have for the rules…
+   like a little flag. That will distinguish it from the definition").
+   `form` tone is about the form met — its case, number, person, tense — and
+   takes the brand tint; plain is about the word itself — its class, gender,
+   aspect — so the two read apart at a glance. */
+export function Flag({ children, tone, testID }) {
+  const t = useTheme();
+  const form = tone === "form";
+  return (
+    <View testID={testID} style={{ backgroundColor: form ? t.brandBg : t.surface2, borderRadius: radius.sm,
+                                   borderWidth: 1, borderColor: form ? t.brandDim : t.line,
+                                   paddingHorizontal: 8, paddingVertical: 3 }}>
+      <Text style={{ color: form ? t.brandInk : t.ink2, fontSize: 12, fontWeight: "700" }}>{children}</Text>
+    </View>
+  );
+}
+
 /* `animate` fills to the new value rather than jumping to it — pass it wherever
    the bar tracks discrete steps, which is the only place the movement means
    anything. It is opt-in because the video passage drives its bar from a

@@ -17,10 +17,10 @@
 import React, {
   createContext, useCallback, useContext, useMemo, useRef, useState,
 } from "react";
-import { View } from "react-native";
+import { View, Pressable } from "react-native";
 import { createNavigationContainerRef, StackActions, CommonActions } from "@react-navigation/native";
-import { useTheme } from "./theme";
-import { Sheet, Btn, Senses, Text, Speaker } from "./ui";
+import { useTheme, radius } from "./theme";
+import { Sheet, Btn, Senses, Text, Speaker, Flag } from "./ui";
 import { L, IX, deepFormOf, resolveWord } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise, grammarLine } from "@core/forms";
@@ -106,31 +106,18 @@ export function Linked({ text, style, size = 17, color, testID }) {
    partner — and, when a form was tapped, which form it is (core/forms.js
    grammarLine). The glance, the entry and the flashcard's back all draw this,
    so a word is described in one way wherever it is met. */
+/* As flags (the owner, 2026-10-04: "the case, the plurality, the first second
+   or third person, the aspect all with little flags"): first what the form met
+   is, brand-tinted, then what the word is, plain. */
 export function GrammarLine({ lemma, surface, style, center }) {
-  const t = useTheme();
-  const align = { textAlign: center ? "center" : "left" };
   const g = grammarLine(lemma, surface);
-  if (!g || (!g.facts.length && !g.form && !g.surface)) return null;
-  const lower = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+  if (!g || (!g.flags.length && !g.facts.length && !g.partner)) return null;
   return (
-    <View testID="grammar-line" style={style}>
-      {g.facts.length ? (
-        <Text testID="grammar-facts" style={[{ color: t.ink2, fontSize: 15 }, align]}>
-          {g.facts.join(" · ")}
-          {g.partner ? (
-            <Text style={{ color: t.ink2 }}>
-              {` · ${g.partner.label} `}
-              <Text style={{ color: t.brandInk, fontWeight: "700" }}>{g.partner.word}</Text>
-            </Text>
-          ) : null}
-        </Text>
-      ) : null}
-      {g.surface || g.form ? (
-        <Text testID="grammar-form" style={[{ color: t.ink2, fontSize: 15, marginTop: 2 }, align]}>
-          <Text style={{ color: t.brandInk, fontWeight: "700" }}>{g.surface || lemma.b}</Text>
-          {g.form ? `  ${lower(g.form.text)}` : "  form not listed"}
-        </Text>
-      ) : null}
+    <View testID="grammar-line"
+          style={[{ flexDirection: "row", flexWrap: "wrap", gap: 6, justifyContent: center ? "center" : "flex-start" }, style]}>
+      {g.flags.map((f) => <Flag key={`f${f}`} tone="form" testID="grammar-flag">{f}</Flag>)}
+      {g.facts.map((f) => <Flag key={`w${f}`} testID="grammar-fact">{f}</Flag>)}
+      {g.partner ? <Flag testID="grammar-partner">{`${g.partner.label}: ${g.partner.word}`}</Flag> : null}
     </View>
   );
 }
@@ -163,28 +150,36 @@ function WordSheet({ state, onClose, onFull }) {
       {/* A speaker beside the word, as on every other piece of Russian in the
           app (§30as); the glance was the one place a tapped word could not be
           heard. */}
+      {/* A snapshot (the owner, 2026-10-04: "a quick organized snapshot to
+          understand the word with the option to look up more"): the word as
+          it was met, large, with its sound; under it, flags for what that form
+          is and what the word is; then, for a form, the root word with its top
+          meaning — itself a way into the entry — and for the headword its
+          meanings. */}
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <Text style={{ flex: 1, color: t.ink, fontSize: 30, fontWeight: "600" }}>
-          {s.word}
+        <Text testID="sheet-word" style={{ flex: 1, color: t.ink, fontSize: 30, fontWeight: "600" }}>
+          {s.surface || s.word}
         </Text>
-        <Speaker text={lemma.b} />
+        <Speaker text={s.surface || lemma.b} />
       </View>
 
-      {/* What it is and which form was tapped, right under the word and its
-          dictionary form (the owner, 2026-10-04) — the pills that used to sit
-          below the senses said half of this, last. */}
-      <GrammarLine lemma={lemma} surface={surface} style={{ marginTop: 4 }} />
+      <GrammarLine lemma={lemma} surface={surface} style={{ marginTop: 8 }} />
 
-      {/* The senses numbered, as the entry, the flashcard back and the
-          vocabulary card all number them — one run of prose was the odd surface
-          out, and it showed `firstSense` alone, so «стол» read "table" with
-          nothing to say that "diet" and "department" were also in there.
-          Capped, because this is the glance: `Full entry` is in the footer, one
-          press away, and that is the escape hatch `max` assumes. Four is the
-          vocabulary card's cap — the app's other glance-sized surface — rather
-          than a second number invented here. */}
-      <Senses e={lemma.e} size={17} align="left" max={SHEET_SENSES}
-              style={{ marginTop: 12 }} />
+      {s.surface ? (
+        <Pressable testID="sheet-root" accessibilityRole="button" accessibilityLabel={`${lemma.b}, full entry`}
+                   onPress={onFull}
+                   style={({ pressed }) => ({ marginTop: 14, paddingVertical: 10, paddingHorizontal: 12,
+                     borderRadius: radius.md, backgroundColor: t.surface2, opacity: pressed ? 0.7 : 1 })}>
+          <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "700" }}>Dictionary form</Text>
+          <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700", marginTop: 2 }}>{s.word}</Text>
+          <Text style={{ color: t.ink2, fontSize: 15, marginTop: 2 }}>{s.gloss}</Text>
+        </Pressable>
+      ) : (
+        /* The senses numbered, as the entry and the cards number them; four,
+           the vocabulary card's cap — `Full entry` is in the footer. */
+        <Senses e={lemma.e} size={17} align="left" max={SHEET_SENSES}
+                style={{ marginTop: 12 }} />
+      )}
     </Sheet>
   );
 }

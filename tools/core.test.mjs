@@ -27,7 +27,7 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
   from "../core/state.js";
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
-import { makeQuestions, QUIZ_N, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, QUIZ_KINDS, PRODUCE_AT,
+import { makeQuestions, QUIZ_N, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, REVIEW_MIX, GRAMMAR_IN_LESSON, QUIZ_KINDS, PRODUCE_AT,
          lessonSize, lessonWordsOf, lessonCountOf, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem }
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, soundTip, TRAPS,
@@ -1240,6 +1240,50 @@ group("lesson generation");
     }
   }
   ok(true, "every lesson on the route opens on its word list");
+
+  /* The grammar is in every lesson (the owner, 2026-10-04: "This grammar tip is
+     randomly in the summary but not anywhere else… Grammar should be embedded in
+     the lesson"): the first lesson opens on the card, every later one closes on
+     it, and where the card has a form the learner tries it straight after. And,
+     over the whole route, nothing a lesson or its quiz grades is a word taught
+     later, and no question asks a tense or a case before a card has taught it
+     ("you wouldn't ask them to conjugate a past form without having taught them
+     the past"). */
+  {
+    let noCard = 0, noTry = 0, early = 0, untaughtForm = 0, untaughtCase = 0, lessons = 0;
+    const tableId = (title) => (/^Present/.test(title) ? "present" : /^Past/.test(title) ? "past"
+      : /^Imperative/.test(title) ? "imperative" : null);
+    for (const u of UN) {
+      const reached = Q.unitsUpTo(u);
+      const tenses = Q.routeFocus("conjugation", reached) || [];
+      const cases = new Set(Q.formsIntroduced(reached).map((c) => c.row).concat("Nominative"));
+      const card = Q.formSpec(u) ? u.g || true : u.g;
+      for (let li = 0; li < lessonCount(u); li++) {
+        lessons++;
+        const before = new Set(Q.unitsUpTo(u).filter((x) => x !== u).flatMap((x) => x.w)
+          .concat(Array.from({ length: li + 1 }, (_, j) => lessonWords(u, j)).flat()));
+        const vs = Q.vocabSteps(u, li);
+        if (card && !vs.some((s) => s.t === "grammar")) noCard++;
+        if (Q.formSpec(u) && li > 0) {
+          const g = vs.findIndex((s) => s.t === "grammar");
+          if (!vs.slice(g + 1).some((s) => s.drill)) noTry++;
+        }
+        for (let r = 0; r < 3; r++) {
+          for (const q of vs.concat(Q.quizSteps(u, li))) {
+            if (typeof q.i === "number" && q.kind && !before.has(q.i) && !q.assess) early++;
+            if (q.kind === "conjugation" && q.table && !tenses.includes(tableId(q.table.title))) untaughtForm++;
+            if ((q.kind === "cases" || q.kind === "agreement") && q.table && Array.isArray(q.at)
+                && q.table.rows[q.at[0]] && !cases.has(q.table.rows[q.at[0]][0])) untaughtCase++;
+          }
+        }
+      }
+    }
+    ok(noCard === 0, `every lesson with a grammar card shows it (${lessons} lessons)`, String(noCard));
+    ok(noTry === 0, "…and a later lesson tries the rule right after it", String(noTry));
+    ok(early === 0, "nothing in a lesson grades a word taught later", String(early));
+    ok(untaughtForm === 0, "no conjugation question asks a tense no card has taught", String(untaughtForm));
+    ok(untaughtCase === 0, "no case question asks a case no card has taught", String(untaughtCase));
+  }
   ok(steps.filter((s) => s.t === "word").length === lessonWords(unit, 0).length,
      "every new word is presented");
   ok(steps.some((s) => s.options), "questions are interleaved between the words");
@@ -1251,8 +1295,20 @@ group("lesson generation");
   const speechN = quiz.filter((q) => SPEECH_KINDS.includes(q.kind)).length;
   const formN = quiz.filter((q) => q.kind === "form" && !q.drill).length;
   const drillN = quiz.filter((q) => q.drill).length;
-  ok(quiz.length === 8 + speechN + formN + drillN, "a lesson quiz is 8 questions plus its speech, form and drill steps",
-     String(quiz.length));
+  const reviewN = quiz.filter((q) => q.review).length;
+  ok(quiz.length === 8 + speechN + formN + drillN + reviewN,
+     "a lesson quiz is 8 questions plus its speech, form, drill and review steps", String(quiz.length));
+  /* Spaced review inside the lesson (2026-10-04): words from the route before
+     this unit, never this lesson's, on every quiz that has a route behind it. */
+  {
+    const prior = new Set(Q.unitsUpTo(unit).filter((u) => u !== unit).flatMap((u) => u.w));
+    ok(reviewN === REVIEW_MIX.perQuiz, "a quiz asks words from earlier units again", String(reviewN));
+    ok(quiz.filter((q) => q.review).every((q) => prior.has(q.i)), "…and only words from before this unit");
+    const due = [...prior].slice(0, 3);
+    const withDue = Q.quizSteps(unit, 0, due);
+    ok(due.filter((i) => withDue.some((q) => q.i === i)).length >= REVIEW_MIX.perQuiz,
+       "what is due is what comes back first");
+  }
   /* Practice's drills ride in every quiz, on the chapter's own words where
      they can (2026-09-29): as many as DRILL_MIX says, of drills the route has
      opened, and never two of the same drill. */

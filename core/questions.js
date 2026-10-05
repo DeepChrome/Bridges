@@ -72,6 +72,13 @@ export const PRON_MIX = { fromStage: 0, fromLesson: 1, perQuiz: 1 };
    60 % chosen and the rest written. */
 export const GRAMMAR_N = 10;
 export const GRAMMAR_CHOOSE = 0.6;
+/* The rule tried right after its card in every lesson's vocabulary. */
+export const GRAMMAR_IN_LESSON = 2;
+/* Words from earlier in the route asked in every lesson quiz, on top of
+   QUIZ_N — the due and the weakest first (the owner, 2026-10-04: "embedding
+   some questions using words from previous chapters… to create spaced
+   repetition"). */
+export const REVIEW_MIX = { perQuiz: 2 };
 
 /* Practice's drills inside a lesson quiz: this many, of the drills the route
    has opened, on the chapter's own words (quizSteps). */
@@ -670,7 +677,7 @@ export function makeQuestions(env) {
 
   /* ---------------------------------------------------------------- scenes */
 
-  const unique = (a) => a.filter((x, k) => a.indexOf(x) === k);
+  const unique = (a) => [...new Set(a)];
   const pickOne = (a) => a[Math.floor(Math.random() * a.length)];
 
   /* A listening scene from the listening pool of these units (ids): SCENE_ROWS
@@ -1020,7 +1027,7 @@ export function makeQuestions(env) {
       const route = unitsUpTo(unit);
       const { cells, only } = routeDrill(spec.drill, route);
       const focus = only ? new Set(only) : null;
-      return withNote(withPool(route.flatMap((u) => u.w),
+      return withNote(withPool(metBy(unit, index),
         () => (GEN[spec.drill] ? GEN[spec.drill](cells, false, focus) : null)));
     }
     const typed = stageOf(unit) >= FORM_MIX.typedFromStage;
@@ -1055,10 +1062,13 @@ export function makeQuestions(env) {
       }
       return out;
     };
+    /* Never a word from a later lesson of this unit: the question grades the
+       word it asks, and a card started before the word is taught is a card
+       started early. */
     const pools = [
       { words: ableOf(lessonWords(unit, index)), share: 0.55 },
-      { words: ableOf(unit.w), share: 0.25 },
-      { words: ableOf(unitsUpTo(unit).flatMap((u) => u.w)), share: 0.20 },
+      { words: ableOf(unitSoFar(unit, index)), share: 0.25 },
+      { words: ableOf(metBy(unit, index)), share: 0.20 },
     ].filter((p) => p.words.length);
     if (!pools.length) return null;
 
@@ -1105,10 +1115,9 @@ export function makeQuestions(env) {
        lesson of this unit: the run grades every word it asks, and a word
        graded before it is taught starts its card early (the review). */
     const lesson = index !== undefined && index !== null;
-    const unitSoFar = lesson
-      ? Array.from({ length: index + 1 }, (_, j) => lessonWords(unit, j)).flat() : unit.w;
+    const soFar = unitSoFar(unit, index);
     const reached = unitsUpTo(unit);
-    const route = unique(reached.filter((u) => u !== unit).flatMap((u) => u.w).concat(unitSoFar));
+    const route = metBy(unit, index);
     // The cases and tenses the route has introduced, for a drill-shaped point.
     const { cells, only } = routeDrill(spec.drill, reached);
     const choose = Math.ceil(n * GRAMMAR_CHOOSE);
@@ -1124,7 +1133,7 @@ export function makeQuestions(env) {
       return first.concat(rest).map(withNote);
     }
     const able = [], seen = new Set();
-    const tiers = [lesson ? lessonWords(unit, index) : [], unitSoFar, route];
+    const tiers = [lesson ? lessonWords(unit, index) : [], soFar, route];
     for (const tier of tiers) {
       for (const i of shuffle(unique(tier).slice())) {
         if (seen.has(i)) continue;
@@ -1390,11 +1399,20 @@ export function makeQuestions(env) {
      card one of seven with no sense of what was coming, which is a worse way to
      meet a set of words than reading them together. `t: "list"` carries the
      lesson's words for the screen to lay out; the cards follow unchanged. */
+  /* The grammar is in every lesson, not only the first (the owner, 2026-10-04:
+     "This grammar tip is randomly in the summary but not anywhere else in the
+     chapter. Grammar should be embedded in the lesson"). The first lesson
+     opens on the unit's card; every later one closes on it, so the rule comes
+     round again where the words are, and each is followed by a short try of
+     it on the lesson's own words (`GRAMMAR_IN_LESSON`) — the tip, then the
+     drill. A side quest without a card of its own repeats its chapter's. */
   function vocabSteps(unit, index) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
     const steps = [];
-    if (index === 0 && unit.g) steps.push({ t: "grammar", note: unit.g });
+    const note = unit.g || formNote(unit);
+    const practice = note ? grammarRun(unit, index, GRAMMAR_IN_LESSON) : [];
+    if (index === 0 && note) steps.push({ t: "grammar", note });
     if (words.length) steps.push({ t: "list", words });
     words.forEach((w, n) => {
       steps.push({ t: "word", i: w });
@@ -1410,6 +1428,8 @@ export function makeQuestions(env) {
         });
       }
     });
+    if (index > 0 && note) steps.push({ t: "grammar", note });
+    practice.forEach((q) => steps.push({ ...q, drill: true }));
     return steps;
   }
 
@@ -1438,6 +1458,22 @@ export function makeQuestions(env) {
       out.push(s.core, ...(s.branches || []).filter((b) => !b.opt));
     }
     return out;
+  }
+
+  /* This unit's words up to and including lesson `index` — the whole unit when
+     there is no lesson (a unit-level run). */
+  function unitSoFar(unit, index) {
+    if (index === undefined || index === null) return unit.w;
+    return Array.from({ length: index + 1 }, (_, j) => lessonWords(unit, j)).flat();
+  }
+
+  /* Every word a learner at this lesson has been taught: the route before the
+     unit (unitsUpTo) and this unit up to the lesson. What anything that grades
+     a word inside a lesson may draw from — a word from a later lesson of the
+     same unit would start its card before it is taught. */
+  function metBy(unit, index) {
+    return unique(unitsUpTo(unit).filter((u) => u !== unit).flatMap((u) => u.w)
+      .concat(unitSoFar(unit, index)));
   }
 
   /* One speech prompt for a lesson, or null when this platform carries no pools or
@@ -1533,8 +1569,8 @@ export function makeQuestions(env) {
       const from = fresh.length ? fresh : list;
       return from.length ? from[Math.floor(Math.random() * from.length)] : null;
     };
-    // What this learner can read: the route up to this unit (clozeFor).
-    const readable = new Set(unitsUpTo(unit).flatMap((u) => u.w));
+    // What this learner can read: everything taught by this lesson (clozeFor).
+    const readable = new Set(metBy(unit, index));
     const draw = (i) => drawFrom(candidates(i, pool, card(i), readable), i);
 
     /* **Not every word a lesson shows is a word it drills** (the owner,
@@ -1570,7 +1606,7 @@ export function makeQuestions(env) {
       const e = draw(i);
       if (e) bag.push(e);
     }
-    const review = shuffle((prefer || []).filter((i) => L[i] && !words.includes(i)));
+    const review = shuffle((prefer || []).filter((i) => L[i] && !words.includes(i) && readable.has(i)));
     const earlier = shuffle(Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat()
       .filter((i) => !words.includes(i) && !review.includes(i)));
     /* …and past the unit, the route before it. A unit's first lesson has no
@@ -1610,20 +1646,59 @@ export function makeQuestions(env) {
        time; a drill the chapter's words cannot fill reaches back along the
        route, as Practice does. */
     const reached = unitsUpTo(unit);
+    const met = metBy(unit, index);
     const types = shuffle([...drillsIntroduced(reached)]).slice(0, DRILL_MIX.perQuiz);
     if (types.length) {
-      const chapter = reached.filter((u) => stageOf(u) === stage).flatMap((u) => u.w);
-      const route = reached.flatMap((u) => u.w);
-      for (const type of types) {
+      /* The first drill on this chapter's words, the second on earlier
+         chapters' — a conjugation challenge on a verb from two chapters back
+         is spaced repetition in a different shape (the owner, 2026-10-04).
+         Never a word from a later lesson of this unit (`metBy`). */
+      const metSet = new Set(met);
+      const chapter = reached.filter((u) => stageOf(u) === stage && u !== unit).flatMap((u) => u.w)
+        .concat(unitSoFar(unit, index)).filter((i) => metSet.has(i));
+      const before = reached.filter((u) => stageOf(u) < stage).flatMap((u) => u.w);
+      types.forEach((type, k) => {
         /* Only what the route has introduced. The cases drill always kept to
            the cases taught (`cells`), but agreement and conjugation ignore
            `cells`, so a chapter-2 lesson asked the past and the imperative and
            a chapter-3 lesson the instrumental (the review, 2026-10-01). */
         const { cells, only } = routeDrill(type, reached);
-        const q = drillQuestions(type, 1, chapter, cells, false, only)[0]
-          || drillQuestions(type, 1, route, cells, false, only)[0];
+        const first = k === 1 && before.length ? before : chapter;
+        const q = drillQuestions(type, 1, first, cells, false, only)[0]
+          || drillQuestions(type, 1, met, cells, false, only)[0];
         if (q) out.splice(slotApart(out, q), 0, { ...q, drill: true });
-      }
+      });
+    }
+    /* Spaced review: words from earlier in the route, asked again inside the
+       lesson. What the app says is due or in trouble comes first (`prefer`),
+       then the weakest the learner has a card for, then any — earlier
+       chapters before this chapter's earlier units. */
+    const asked = new Set(out.map((q) => q.i).filter((i) => typeof i === "number"));
+    const prior = reached.filter((u) => u !== unit);
+    const earlierCh = prior.filter((u) => stageOf(u) < stage).flatMap((u) => u.w);
+    const sameCh = prior.filter((u) => stageOf(u) === stage).flatMap((u) => u.w);
+    const strength = (i) => {
+      const c = card(i);
+      if (!c) return Infinity;
+      const s = Object.values(c).map((d) => (d && typeof d.s === "number" ? d.s : Infinity));
+      return Math.min(...s);
+    };
+    const priorSet = new Set(earlierCh.concat(sameCh));
+    const queue = unique([
+      ...shuffle((prefer || []).filter((i) => priorSet.has(i))),
+      ...shuffle(earlierCh.filter((i) => strength(i) < Infinity)).sort((a, b) => strength(a) - strength(b)),
+      ...shuffle(earlierCh.slice()),
+      ...shuffle(sameCh.slice()),
+    ]).filter((i) => !asked.has(i));
+    let added = 0;
+    for (const i of queue) {
+      if (added >= REVIEW_MIX.perQuiz) break;
+      const e = draw(i);
+      const q = e && present(e);
+      if (!q) continue;
+      out.splice(slotApart(out, q), 0, { ...q, review: true });
+      asked.add(i);
+      added++;
     }
     if (stage > PRON_MIX.fromStage || (stage === PRON_MIX.fromStage && index >= PRON_MIX.fromLesson)) {
       /* The lesson's own long words first; a lesson of pronouns and

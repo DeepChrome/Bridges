@@ -6,6 +6,7 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { View } from "react-native";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
@@ -101,6 +102,42 @@ describe("a run left part-way", () => {
       expect(await screen.findByText("1/4")).toBeTruthy();
       expect(savedRun(KEY)).toBeNull();
     } finally { spy.mockRestore(); }
+  });
+
+  /* "If the person says they don't want to continue, I'd expect it to prompt
+     them for the question types prior to going to question 1" (2026-10-04). */
+  it("a drill's Start again opens its options before question 1", async () => {
+    const { DrillFlow } = require("../src/screens/Flows");
+    const { saveRun } = require("../src/resume");
+    await withProfile(<DrillFlow route={{ params: { type: "conjugation" } }} navigation={nav} />);
+    // A first visit opens the options; close them and leave a run part-way.
+    await act(async () => { fireEvent.press(await screen.findByTestId("drill-apply")); });
+    saveRun("drill:conjugation", { route: "Drill", params: { type: "conjugation" }, title: "Conjugation",
+                                    queue: steps(), at: 1, total: 4, tally: { right: 1, total: 1 } });
+    await flushState();
+    const view2 = await withProfile(<DrillFlow route={{ params: { type: "conjugation" } }} navigation={nav} />);
+    expect(await screen.findByTestId("resume-prompt")).toBeTruthy();
+    expect(screen.queryByTestId("drill-options")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByText("Start again")); });
+    expect(await screen.findByTestId("drill-options")).toBeTruthy();
+    view2.unmount();
+  });
+
+  /* A quiz left part-way is offered on the setup screen, and Start again
+     comes back to that screen with the run's own choices ticked. */
+  it("a quiz left part-way is offered on its setup screen, and continues with its own choices", async () => {
+    const { QuizSetup } = require("../src/screens/Flows");
+    const { saveRun } = require("../src/resume");
+    const { QUIZ_KINDS } = require("../src/questions");
+    const kind = QUIZ_KINDS[0].id;
+    await withProfile(<View />);
+    saveRun("custom", { route: "CustomQuiz", params: { kinds: [kind], units: [unit.id], n: 10 }, title: "Quiz",
+                         queue: steps(), at: 1, total: 4, tally: { right: 1, total: 1 } });
+    await withProfile(<QuizSetup navigation={nav} />);
+    expect(await screen.findByTestId("resume-prompt")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+    expect(nav.navigate).toHaveBeenCalledWith("CustomQuiz",
+      { kinds: [kind], units: [unit.id], n: 10, resume: true });
   });
 
   it("opened with resume set, it continues without asking", async () => {

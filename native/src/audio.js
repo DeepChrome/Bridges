@@ -9,6 +9,29 @@ import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Speech from "expo-speech";
 import { bare, fold } from "@core/util";
 import { wordClip } from "./wordaudio";
+
+/* The table forms' recordings, for anything `say` is handed (2026-10-04). A
+   drill's answer «возьмёт» is a form, not a headword, so it had no clip in
+   `wordaudio` and the phone's voice read it, while the same form's button in
+   the table played the bought one — the owner: "when they verbalize these
+   answers, they sound so so so weird". Looked up by the accented spelling
+   first, then folded, where every stressing of the spelling shares one clip
+   (a spelling with two stresses was never bought; build_form_audio.mjs).
+   Loaded on first use: 11,000 asset requires that a session without a form
+   never pays for, and which jest mocks empty (jest.setup.js). */
+let FORMS = null;
+let FORMS_FOLDED = null;
+export function formClip(text) {
+  if (!FORMS) {
+    FORMS = require("./formaudio");
+    FORMS_FOLDED = new Map();
+    for (const [k, v] of Object.entries(FORMS.FORM_CLIPS || {})) {
+      const f = fold(k);
+      FORMS_FOLDED.set(f, FORMS_FOLDED.has(f) && FORMS_FOLDED.get(f) !== v ? null : v);
+    }
+  }
+  return FORMS.formClip(text) || FORMS_FOLDED.get(fold(text || "")) || null;
+}
 import { sexOf } from "@core/names";
 import { castById } from "@core/cast";
 import { knownVoiceSex, rankVoice, isSilentVoice } from "@core/voices";
@@ -658,7 +681,7 @@ export async function say(text, opts = {}) {
      `clip` is a recording the caller has already chosen — a table form looks
      its own up by the *accented* spelling (formaudio.js), because the folded
      key cannot tell «руки́» from «ру́ки». */
-  const source = opts.clip || wordClip(fold(text));
+  const source = opts.clip || wordClip(fold(text)) || formClip(text);
   if (!source) {
     const spoke = speakTTS(text, { ...opts, rate });
     if (!spoke) failed(text);
@@ -770,7 +793,7 @@ export function rearmAudio() {
  * The 61 bundled clips (ROADMAP 13.32) are prepared recordings of exactly that
  * kind, bought from the same voices as the scenarios, so they count. Nothing
  * anywhere claims a human said them. */
-export const hasRealAudio = (text) => !!wordClip(fold(text));
+export const hasRealAudio = (text) => !!(wordClip(fold(text)) || formClip(text));
 
 /* ------------------------------------------------------------------- cues */
 

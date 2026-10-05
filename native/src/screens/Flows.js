@@ -7,7 +7,7 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text,
          Sheet, Choice, CogButton, Loading } from "../ui";
-import { Runner, Done, useAudioStopOnLeave, useResume } from "./Run";
+import { Runner, Done, useAudioStopOnLeave, useResume, ResumePrompt } from "./Run";
 import { clearRun, saveRun, savedRun } from "../resume";
 import { WordList, GrammarNote, WordCard, StepBar } from "../lesson";
 import { VideoLines } from "../prep";
@@ -867,7 +867,8 @@ export function DrillFlow({ route, navigation }) {
   useAudioStopOnLeave();
   const save = { key: `drill:${type}`, route: "Drill", tab: "Practice", params: { type },
                  title: spec ? spec.name : type };
-  const resume = useResume(save.key, route.params);
+  // "Start again" opens the options, as a first visit does.
+  const resume = useResume(save.key, route.params, { onRestart: () => setCog(true) });
 
   /* The cog: open it, change things, Apply deals a fresh run. Closing with
      nothing changed leaves the run where it was. */
@@ -1127,9 +1128,23 @@ export function QuizSetup({ navigation }) {
   const { st } = useSession();
   const t = useTheme();
   const reached = useMemo(() => reachedUnits(st).map((u) => u.id), []);
-  const [kinds, setKinds] = useState(QUIZ_KINDS.map((k) => k.id));
-  const [units, setUnits] = useState(reached);
-  const [n, setN] = useState(QUIZ_LENGTHS[0]);
+  /* A quiz left part-way is offered here, before the choices (the owner,
+     2026-10-04: "the continue where you left off prompt on quizzes doesn't
+     take the person back to the initial settings"): Continue picks the run up,
+     and Start again comes back to this screen with that run's choices ticked
+     rather than the defaults. */
+  const [left, setLeft] = useState(() => savedRun("custom"));
+  const was = (left && left.params) || {};
+  const [kinds, setKinds] = useState(was.kinds || QUIZ_KINDS.map((k) => k.id));
+  const [units, setUnits] = useState(was.units || reached);
+  const [n, setN] = useState(was.n || QUIZ_LENGTHS[0]);
+  if (left) {
+    return (
+      <ResumePrompt run={left}
+                    onContinue={() => { setLeft(null); navigation.navigate("CustomQuiz", { ...was, resume: true }); }}
+                    onRestart={() => { clearRun("custom"); setLeft(null); }} />
+    );
+  }
   const flip = (list, set) => (id) =>
     set(list.includes(id) ? list.filter((x) => x !== id) : list.concat(id));
   const ready = kinds.length > 0 && units.length > 0;

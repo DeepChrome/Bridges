@@ -157,28 +157,39 @@ function Choices({ choices, onPick, onOther }) {
   );
 }
 
+/* A turn in two layers (the owner, 2026-10-04: "it just looks like a wall of
+   text… keep it visually appealing and organized"). The bubble is what Teddy
+   *says*: the Russian, large, with its English quiet under it. The coaching
+   is an aside beneath the bubble — smaller, grey, on a thin brand rule — so
+   the eye reads the sentence first and the note second instead of three
+   same-sized blocks in one box. A turn that is only coaching (an answer in
+   English) has nothing to be an aside to, and is the bubble itself. */
 function TutorBubble({ turn, en }) {
   const t = useTheme();
+  const aside = !!(turn.ru && turn.note);
   return (
-    <View testID="tutor-turn" style={{ alignSelf: "flex-start", maxWidth: "90%", marginBottom: 10 }}>
+    <View testID="tutor-turn" style={{ alignSelf: "flex-start", maxWidth: "90%", marginBottom: 14 }}>
       <View style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
-                     borderRadius: radius.lg, borderBottomLeftRadius: 4, padding: 12 }}>
+                     borderRadius: radius.lg, borderBottomLeftRadius: 4, paddingHorizontal: 14, paddingVertical: 12 }}>
         {turn.ru ? (
-          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-            <View style={{ flex: 1 }}><Linked text={turn.ru} size={17} testID="tutor-ru" /></View>
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+            <View style={{ flex: 1 }}><Linked text={turn.ru} size={18} testID="tutor-ru" /></View>
             <Replay text={turn.ru} />
           </View>
         ) : null}
         {turn.ru && en && turn.en ? (
-          <Muted testID="tutor-en" style={{ marginTop: 6 }}>{turn.en}</Muted>
+          <Text testID="tutor-en" style={{ color: t.ink3, fontSize: 14, lineHeight: 20, marginTop: 4 }}>{turn.en}</Text>
         ) : null}
-        {/* One sentence to a line (ui.js `Note`): two facts run together are
-            the "large block of verbose text" the owner keeps reading. */}
-        {turn.note ? (
-          <Note testID="tutor-note" text={turn.note}
-                style={{ marginTop: turn.ru ? 10 : 0 }} />
+        {!turn.ru && turn.note ? (
+          <Note testID="tutor-note" text={turn.note} size={16} gap={6} />
         ) : null}
       </View>
+      {aside ? (
+        <View testID="tutor-aside" style={{ marginTop: 8, marginLeft: 6, paddingLeft: 10,
+                                            borderLeftWidth: 2, borderLeftColor: t.brand }}>
+          <Note testID="tutor-note" text={turn.note} size={15} color={t.ink2} gap={4} />
+        </View>
+      ) : null}
     </View>
   );
 }

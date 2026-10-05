@@ -955,7 +955,11 @@ const GUIDE_KINDS = Object.keys(LINES);
    `{ restore, prompt }`: while a saved run waits on the learner's choice,
    `prompt` is the screen to show instead of the runner. `params.resume`
    (from the prompt on the way back into the app) means the choice is made. */
-export function useResume(key, params) {
+/* `onRestart` is what "Start again" leads to before question 1 — a drill's
+   options (the owner, 2026-10-04: "If the person says they don't want to
+   continue, I'd expect it to prompt them for the question types prior to
+   going to question 1"). */
+export function useResume(key, params, { onRestart } = {}) {
   const [choice, setChoice] = useState(() => {
     const run = savedRun(key);
     if (!run) return { restore: null };
@@ -964,7 +968,7 @@ export function useResume(key, params) {
   const prompt = choice.pending ? (
     <ResumePrompt run={choice.pending}
                   onContinue={() => setChoice({ restore: choice.pending })}
-                  onRestart={() => { clearRun(key); setChoice({ restore: null }); }} />
+                  onRestart={() => { clearRun(key); setChoice({ restore: null }); if (onRestart) onRestart(); }} />
   ) : null;
   return { restore: choice.restore || null, prompt };
 }

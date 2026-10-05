@@ -26,15 +26,8 @@ import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
 import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, useRussianVoice, Marked } from "./ui";
 import { Linked, navRef } from "./words";
-import { say, hasRealAudio } from "./audio";
-/* The form table is 9,579 asset requires. Loaded on the first table that
-   speaks, not at boot: most sessions never open one, and in jest the first
-   load reads every clip file for its cache key (seconds, not milliseconds). */
-let forms = null;
-const formClip = (form) => {
-  if (!forms) forms = require("./formaudio");
-  return forms.formClip(form);
-};
+// The form recordings are looked up where every sound is (audio.js formClip).
+import { say, hasRealAudio, formClip } from "./audio";
 
 /* A column is wide enough for a long inflected form and no wider: at 110 a
    three-column table fits a 390 px screen without scrolling, which is most of

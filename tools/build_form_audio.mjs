@@ -191,7 +191,6 @@ async function main() {
 
   const key = texts.length ? apiKey() : null;
   const ms = { ...prior.ms };
-  const files = { ...prior.files };
   const byText = new Map();
   let bought = 0, failed = 0, retries = 0, still = 0;
 
@@ -199,7 +198,11 @@ async function main() {
     const onDisk = new Set(readdirSync(DIR).filter((f) => f.endsWith(".mp3")).map((f) => f.slice(0, -4)));
     const out = {}, lengths = {};
     for (const p of plan) {
-      const id = byText.has(p.text) ? byText.get(p.text) : (files[p.form] || p.id);
+      /* `p.id` is the form's clip as planned — its earlier one, or under
+         `--restate` the statement already on disk (a headword's). Preferring
+         the earlier manifest entry here left «ры́ба» on the bare clip after
+         the headword had been restated. */
+      const id = byText.has(p.text) ? byText.get(p.text) : p.id;
       if (!id || !onDisk.has(id)) continue;
       out[p.form] = id;
       if (ms[id] === undefined) ms[id] = durationMs(join(DIR, id + ".mp3"));

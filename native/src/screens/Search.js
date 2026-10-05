@@ -78,7 +78,7 @@ function Hit({ h, onOpen }) {
         <Muted size={14} numberOfLines={2}>{h.e}</Muted>
       </View>
       {h.p ? <Pill>{h.p}</Pill> : null}
-      <Speaker text={h.b} size={38} />
+      <Speaker text={h.b} size={38} recordedOnly />
     </Row>
   );
 }

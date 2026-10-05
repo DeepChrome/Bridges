@@ -12,6 +12,7 @@ import { useTheme, radius } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Familiarity, Fold } from "../ui";
 import { TableGroup, Facts } from "../rules";
 import { wordFacts, isIrregular } from "@core/facts";
+import { grammarLine } from "@core/forms";
 import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
 import { L, UN, resolveWord, heardIn, sensesOf, idxOfWord, rankOf } from "../data";
@@ -87,6 +88,7 @@ export function WordEntry({ w, index, navigation }) {
      entry (the deep tier) has none and shows its gloss, as it always did. */
   const senses = sensesOf(index !== undefined ? index : idxOfWord(w.b));
 
+  const lineTags = new Set(((grammarLine(w) || {}).facts || []).map((f) => String(f).toLowerCase()));
   const pic = pictureOf(w.b);
   const photo = pic && pic.source;
   const credit = pic && pic.credit;
@@ -102,11 +104,11 @@ export function WordEntry({ w, index, navigation }) {
           <Text style={{ color: t.ink, fontSize: 32, fontWeight: "600", flex: 1 }}>
             {w.w}
           </Text>
-          <Speaker text={w.b} />
+          <Speaker text={w.b} recordedOnly />
         </View>
         {/* What the word is, right under it, as the glance and the flashcard
             say it (words.js GrammarLine, the owner 2026-10-04). */}
-        <GrammarLine lemma={w} style={{ marginTop: 2 }} />
+        <GrammarLine lemma={w} all style={{ marginTop: 2 }} />
         {/* The entry gets every sense there is, with its examples: this is the
             screen a learner opened *to read* (§30q). The card shows four. */}
         {senses
@@ -121,10 +123,8 @@ export function WordEntry({ w, index, navigation }) {
             index, and it is what orders the new flashcards (§30ap). */}
         {/* The class, gender and aspect pair are the line under the word now;
             what stays here is what is not grammar. */}
-        {isIrregular(w) || unit || w.pt2 ? (
+        {isIrregular(w) || unit ? (
           <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
-            {/* Other partners where the lexicon has more than one. */}
-            {w.pt2 ? <Pill>{`also: ${w.pt2}`}</Pill> : null}
             {/* The first thing said about a word that breaks the rules
                 (2026-09-29); what it breaks is the facts below. */}
             {isIrregular(w) ? <Pill tone="irregular" testID="word-irregular">Irregular</Pill> : null}
@@ -137,7 +137,9 @@ export function WordEntry({ w, index, navigation }) {
             other place a learner comes to look something up, so it gets the
             same guide the drill's bulb does. */}
         <WordStatus word={w.b} />
-        <Facts facts={wordFacts(w)} testID="word-facts" />
+        {/* What the line under the word already flags (gender, aspect) opens
+            there; the rest are pills here. */}
+        <Facts facts={wordFacts(w).filter((f) => !lineTags.has(f.label.toLowerCase()))} testID="word-facts" />
         {/* One section a table, the first open: a verb is three grids and a
             noun twelve cells, and stacked whole they buried the rest (§30bb). */}
         <TableGroup tables={w.t} speak testID="word-tables" />
@@ -184,7 +186,7 @@ export function WordEntry({ w, index, navigation }) {
                   <View style={{ flex: 1 }}>
                     <Linked text={e.ru} />
                   </View>
-                  <Speaker text={e.ru} size={36} />
+                  <Speaker text={e.ru} size={36} recordedOnly />
                 </View>
                 <Muted style={{ marginTop: 4 }}>{e.en}</Muted>
               </View>

@@ -70,7 +70,26 @@ describe("the word sheet's head", () => {
     expect(w).toBeTruthy();
     await open(w.b);
     expect(flagsOf("grammar-fact")).toEqual(["verb", "imperfective"]);
-    expect(flat(screen.getByTestId("grammar-partner"))).toBe(`perfective: ${w.pt.split(/,\s*/)[0]}`);
+    const partner = w.pt.split(/,\s*/)[0];
+    expect(flat(screen.getByTestId("grammar-partner"))).toBe(`(${partner})`);
+    // The partner is a link: pressing it opens that word's glance.
+    await act(async () => { fireEvent.press(screen.getByTestId("grammar-partner")); });
+    expect(fold(flat(screen.getByTestId("sheet-word")))).toBe(fold(partner));
+  });
+
+  /* The flag's explanation is behind a tap, in a bubble (2026-10-04). */
+  it("opens a fact's detail in a bubble", async () => {
+    const w = L.find((e) => {
+      const hit = IX[fold(e.b || "")];
+      return hit && L[hit[0]] === e && e.p === "verb" && e.a === "imperfective" && e.pt;
+    });
+    await open(w.b);
+    expect(screen.queryByTestId("fact-bubble")).toBeNull();
+    const aspect = screen.getAllByTestId("grammar-fact").find((n) => flat(n) === "imperfective");
+    await act(async () => { fireEvent.press(aspect); });
+    expect(screen.getByTestId("fact-bubble")).toHaveTextContent(/process/);
+    await act(async () => { fireEvent.press(screen.getByTestId("bubble-backdrop")); });
+    expect(screen.queryByTestId("fact-bubble")).toBeNull();
   });
 
   /* «после»: OpenRussian's "other" is not a word class, and is not shown. */

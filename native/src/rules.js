@@ -20,11 +20,11 @@
  * in a table at all, and the whole paradigm is safe to show.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { View, ScrollView, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
-import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, useRussianVoice, Marked } from "./ui";
+import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, Marked, Bubble, Flag } from "./ui";
 import { Linked, navRef } from "./words";
 // The form recordings are looked up where every sound is (audio.js formClip).
 import { say, hasRealAudio, formClip } from "./audio";
@@ -38,41 +38,38 @@ const COL = 110;
  * 2026-09-28: *"an audio button next to every pronunciation of a word so I can
  * hear how the word is said in all forms"*).
  *
- * **A recording of this exact form where one was bought, and the device voice
- * with the stress mark where none safely could be** (ROADMAP 13.42, bought
- * 2026-09-28). The word bundle is keyed by the *folded* spelling and cannot be
- * used here: for a spelling two stresses share («руки́» / «ру́ки») it would
- * play whichever word its clip was bought for, the wrong stress half the time,
- * on the one control whose purpose is hearing where the stress falls. So forms
- * have their own manifest, keyed by the accented form, and the spellings with
- * two stresses were never bought — those, about 3 % of the table, are the
- * phone's voice reading the mark, and the label says so (§27).
+ * **A recording of this exact form, or no speaker** (ROADMAP 13.42, bought
+ * 2026-09-28; the phone's voice taken out 2026-10-04). The word bundle is
+ * keyed by the *folded* spelling and cannot be used here: for a spelling two
+ * stresses share («руки́» / «ру́ки») it would play whichever word its clip was
+ * bought for, the wrong stress half the time, on the one control whose
+ * purpose is hearing where the stress falls. So forms have their own
+ * manifest, keyed by the accented form; the spellings with two stresses were
+ * never bought, and those cells, like every form of a word outside the units,
+ * have no speaker.
  *
  * The whole cell is the target, with a small glyph beside the form: a 40 px
  * round speaker in every cell would push a three-column table past the width
  * of a phone. */
 export function FormSpeaker({ form, style, testID, children, device = true }) {
   const t = useTheme();
-  const voice = useRussianVoice();
   /* First the form's own recording, looked up by its **accented** spelling
-     (formaudio.js, ROADMAP 13.42) — bought for every form whose spelling has
-     one stress, and deliberately absent for the ones with two, which is what
-     makes it safe to play. Then, with `device={false}`, any recording of the
-     spelling at all — right for a word shown on its own (the endings'
-     examples), where there is no second stress to confuse it with. Otherwise
-     the phone's voice, with the stress mark. The glyph is the brand colour
-     either way, as `Speaker`'s ring is (the owner, 2026-10-03); the label
-     says when it is the phone's voice. */
+     (formaudio.js) — bought for every form whose spelling has one stress.
+     Then, with `device={false}`, any recording of the spelling at all — right
+     for a word shown on its own (the endings' examples), where there is no
+     second stress to confuse it with. */
   const clip = formClip(form);
   const real = !!clip || (!device && hasRealAudio(form));
-  const live = real || voice;
-  const play = () => (clip ? say(form, { clip })
-    : real ? say(form) : say(form, { device: true, stress: true }));
+  /* Only a recording plays (the owner, 2026-10-04): a form with none — a
+     word outside the units, or a spelling with two stresses — shows no
+     speaker rather than the phone's voice. */
+  const live = real;
+  const play = () => (clip ? say(form, { clip }) : say(form));
   return (
     <Pressable testID={testID}
                onPress={live ? play : undefined}
-               accessibilityRole="button"
-               accessibilityLabel={real ? `Hear ${form}` : voice ? `Hear ${form} (device voice)` : undefined}
+               accessibilityRole={live ? "button" : undefined}
+               accessibilityLabel={live ? `Hear ${form}` : undefined}
                // 36 tall plus 4 either side: the 44 a finger needs (rule 20.12)
                // without making every row of a twelve-row table that tall.
                hitSlop={4}
@@ -318,36 +315,38 @@ const openRule = (ref) => {
   if (ref && navRef.isReady()) navRef.navigate("Grammar", { topic: ref.topic, section: ref.section, only: true });
 };
 
-export function Facts({ facts, testID }) {
+/* Labels only, the sentence behind a tap (the owner, 2026-10-04: "less
+   verbose and only provide details if clicked in sort of a bubble"): a row of
+   pills, and a pill opens its note in a Bubble with the rule a tap further.
+   A rule-breaker keeps its amber stroke, so what does not follow the pattern
+   is still the first thing seen. */
+/* One fact's note, and its rule a tap further, over a dimmed screen. */
+export function FactBubble({ fact, onClose }) {
   const t = useTheme();
-  if (!facts || !facts.length) return null;
   return (
-    <View testID={testID} style={{ marginTop: 12, gap: 10 }}>
-      {facts.map((f, k) => (
-        <View key={k} testID={f.irregular ? `${testID || "facts"}-irregular` : undefined}
-              style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
-          {/* A rule-breaker is drawn apart (2026-09-29): an amber edge — the
-              `warn` token is audited as a stroke, not as text — around ink,
-              so what does not follow the pattern is the first thing seen. */}
-          <Pressable testID={f.ref ? `fact-${f.label}` : undefined}
-                     onPress={f.ref ? () => openRule(f.ref) : undefined}
-                     accessibilityRole={f.ref ? "link" : undefined}
-                     accessibilityLabel={f.ref ? `${f.label}, read the rule` : undefined}
-                     hitSlop={8}
-                     style={({ pressed }) => ({ backgroundColor: f.irregular ? t.surface : t.brandBg,
-                         borderColor: f.irregular ? t.warn : t.brandDim, borderWidth: f.irregular ? 2 : 1,
-                         borderRadius: radius.sm, paddingHorizontal: 8, paddingVertical: 3,
-                         minWidth: 92, opacity: pressed && f.ref ? 0.6 : 1,
-                         flexDirection: "row", alignItems: "center", gap: 4 })}>
-            <Text style={{ color: f.irregular ? t.ink : t.brandInk, fontSize: T.tiny, fontWeight: "700",
-                           textTransform: "uppercase", letterSpacing: 0.5,
-                           textDecorationLine: f.ref ? "underline" : "none" }}>
-              {f.label}
-            </Text>
-          </Pressable>
-          <Note text={f.note} color={t.ink2} size={T.small + 1} style={{ flex: 1 }} gap={4} />
-        </View>
+    <Bubble testID="fact-bubble" title={fact.label} onClose={onClose}
+            footer={fact.ref ? (
+              <Btn kind="link" testID="fact-rule" label="Read the rule" style={{ marginTop: 10 }}
+                   onPress={() => { onClose(); openRule(fact.ref); }} />
+            ) : null}>
+      <Note text={fact.note} color={t.ink2} size={T.body} gap={4} />
+    </Bubble>
+  );
+}
+
+export function Facts({ facts, testID }) {
+  const [open, setOpen] = useState(null);
+  if (!facts || !facts.length) return null;
+  const f = open !== null ? facts[open] : null;
+  return (
+    <View testID={testID} style={{ marginTop: 12, flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+      {facts.map((x, k) => (
+        <Flag key={k} tone={x.irregular ? "irregular" : "form"} onPress={() => setOpen(k)}
+              testID={x.irregular ? `${testID || "facts"}-irregular` : `fact-${x.label}`}>
+          {x.label}
+        </Flag>
       ))}
+      {f ? <FactBubble fact={f} onClose={() => setOpen(null)} /> : null}
     </View>
   );
 }

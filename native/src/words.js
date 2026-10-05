@@ -24,7 +24,9 @@ import { Sheet, Btn, Senses, Text, Speaker, Flag } from "./ui";
 import { L, IX, deepFormOf, resolveWord } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise, grammarLine } from "@core/forms";
+import { wordFacts } from "@core/facts";
 import { WordEntry } from "./screens/Word";
+import { FactBubble } from "./rules";
 
 export const navRef = createNavigationContainerRef();
 
@@ -109,15 +111,47 @@ export function Linked({ text, style, size = 17, color, testID }) {
 /* As flags (the owner, 2026-10-04: "the case, the plurality, the first second
    or third person, the aspect all with little flags"): first what the form met
    is, brand-tinted, then what the word is, plain. */
-export function GrammarLine({ lemma, surface, style, center }) {
+/* A flag the word's facts explain (core/facts.js: "feminine", "imperfective")
+   opens that explanation in a bubble; the label alone is what sits on the
+   screen (the owner, 2026-10-04: "less verbose… details if clicked").
+   The aspect partner is just the word, in brackets, and a link: beside the
+   aspect flag the brackets already say "the other one". `all` adds the
+   lexicon's further partners, for the entry. */
+export function GrammarLine({ lemma, surface, style, center, all }) {
+  const t = useTheme();
+  const words = useWords();
+  const [open, setOpen] = useState(null);
   const g = grammarLine(lemma, surface);
   if (!g || (!g.flags.length && !g.facts.length && !g.partner)) return null;
+  const details = wordFacts(lemma);
+  const detailOf = (tag) => details.find((d) => d.label.toLowerCase() === String(tag).toLowerCase());
+  const partners = !g.partner ? [] : [...new Set([g.partner.word,
+    ...(all ? [...String(lemma.pt || "").split(/,\s*/), ...String(lemma.pt2 || "").split(/,\s*/)] : [])]
+    .filter((p) => p && p !== "-"))];
+  const goTo = (word) => {
+    if (words) words.open(word);
+    else if (navRef.isReady()) navRef.dispatch(StackActions.push("Word", { word }));
+  };
   return (
     <View testID="grammar-line"
-          style={[{ flexDirection: "row", flexWrap: "wrap", gap: 6, justifyContent: center ? "center" : "flex-start" }, style]}>
+          style={[{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 6,
+                    justifyContent: center ? "center" : "flex-start" }, style]}>
       {g.flags.map((f) => <Flag key={`f${f}`} tone="form" testID="grammar-flag">{f}</Flag>)}
-      {g.facts.map((f) => <Flag key={`w${f}`} testID="grammar-fact">{f}</Flag>)}
-      {g.partner ? <Flag testID="grammar-partner">{`${g.partner.label}: ${g.partner.word}`}</Flag> : null}
+      {g.facts.map((f) => {
+        const d = detailOf(f);
+        return <Flag key={`w${f}`} testID="grammar-fact" onPress={d ? () => setOpen(d) : undefined}>{f}</Flag>;
+      })}
+      {partners.map((p, k) => (
+        <Pressable key={p} testID={k ? `grammar-partner-${k}` : "grammar-partner"} hitSlop={8}
+                   accessibilityRole="link" accessibilityLabel={`${g.partner.label} partner ${p}, open word`}
+                   onPress={() => goTo(p)}>
+          <Text style={{ color: t.brandInk, fontSize: 14, fontWeight: "700",
+                         textDecorationLine: "underline", textDecorationColor: t.brand }}>
+            {`(${p})`}
+          </Text>
+        </Pressable>
+      ))}
+      {open ? <FactBubble fact={open} onClose={() => setOpen(null)} /> : null}
     </View>
   );
 }
@@ -160,7 +194,7 @@ function WordSheet({ state, onClose, onFull }) {
         <Text testID="sheet-word" style={{ flex: 1, color: t.ink, fontSize: 30, fontWeight: "600" }}>
           {s.surface || s.word}
         </Text>
-        <Speaker text={s.surface || lemma.b} />
+        <Speaker text={s.surface || lemma.b} recordedOnly />
       </View>
 
       <GrammarLine lemma={lemma} surface={surface} style={{ marginTop: 8 }} />

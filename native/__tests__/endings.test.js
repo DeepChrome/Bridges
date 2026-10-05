@@ -35,13 +35,15 @@ beforeEach(() => { global.__spoke = []; });
 
 describe("a table's forms", () => {
   /* «руки́» (genitive) has no recording — in the real manifest a spelling
-     with two stresses is never bought — so the device voice reads it, and
-     the acute is the only thing telling it which of the two this is. */
-  it("say an unbought form with the device voice, stress mark kept", async () => {
+     with two stresses is never bought. Since 2026-10-04 a form with no
+     recording gets no speaker at all (the owner: hide it rather than let the
+     phone's voice read it): the cell is plain text, not a control. */
+  it("give an unbought form no speaker", async () => {
     await render(<Table table={PARADIGM} speak />);
-    await act(async () => { fireEvent.press(screen.getByTestId("say-1-1-0")); });
-    expect(global.__spoke).toContain("руки́");
-    expect(screen.getByTestId("say-1-1-0").props.accessibilityLabel).toMatch(/device voice/);
+    const cell = screen.getByTestId("say-1-1-0");
+    expect(cell.props.accessibilityRole).toBeUndefined();
+    await act(async () => { fireEvent.press(cell); });
+    expect(global.__spoke).not.toContain("руки́");
   });
 
   /* «ру́ки» has its own recording, found by the accented spelling. Not the
@@ -57,9 +59,10 @@ describe("a table's forms", () => {
     expect(global.__players.length).toBeGreaterThan(0);
   });
 
-  it("label the phone's voice as the phone's voice (§27)", async () => {
+  it("never offer the phone's voice on a form", async () => {
     await render(<Table table={PARADIGM} speak />);
-    expect(screen.getByTestId("say-0-1-0").props.accessibilityLabel).toMatch(/device voice/);
+    const label = screen.getByTestId("say-0-1-0").props.accessibilityLabel || "";
+    expect(label).not.toMatch(/device voice/);
   });
 
   /* The grammar reference's tables hold endings — «-ов», «-ами» — and a voice

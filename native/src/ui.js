@@ -501,6 +501,35 @@ export function Sheet({ visible = true, onClose, title, header, children, footer
   );
 }
 
+/* The detail behind a short label, in a bubble over a dimmed screen (the
+   owner, 2026-10-04: "only provide details if clicked in sort of a bubble
+   format that shades out the rest of the screen… use this type of
+   interaction as often as possible"). A label on the screen, the sentence
+   behind a tap. Smaller than a Sheet and centred, because it is a glance,
+   not a place. The backdrop is a sibling behind the card, as in Sheet (§23:
+   a Pressable around a ScrollView takes the swipe). */
+export function Bubble({ visible = true, onClose, title, children, footer, testID = "bubble" }) {
+  const t = useTheme();
+  return (
+    <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
+        <Pressable testID="bubble-backdrop" accessibilityRole="button" accessibilityLabel="Close"
+                   onPress={onClose}
+                   style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.55)" }]} />
+        <View testID={testID}
+              style={{ width: "100%", maxWidth: 380, maxHeight: "70%", backgroundColor: t.surface,
+                       borderRadius: radius.lg, borderWidth: 1, borderColor: t.line, padding: 18 }}>
+          {title ? (
+            <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700", marginBottom: 8 }}>{title}</Text>
+          ) : null}
+          <ScrollView style={{ flexGrow: 0, flexShrink: 1 }}>{children}</ScrollView>
+          {footer || null}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 /* The cog that opens a screen's options — what a drill asks about, which cards
    a session deals. One drawing for both (the owner, 2026-09-26: *"let's make
    sure we have a settings cog to customize the exercises"*). It sits beside
@@ -951,15 +980,29 @@ export function Pill({ children, tone, testID }) {
    `form` tone is about the form met — its case, number, person, tense — and
    takes the brand tint; plain is about the word itself — its class, gender,
    aspect — so the two read apart at a glance. */
-export function Flag({ children, tone, testID }) {
+/* `onPress` makes a flag the way into its detail (a Bubble, usually); it
+   then carries a dotted underline, since a control that looks like a label
+   is a control nobody presses. `tone="irregular"` is the amber stroke. */
+export function Flag({ children, tone, testID, onPress, label }) {
   const t = useTheme();
   const form = tone === "form";
+  const odd = tone === "irregular";
+  const box = { backgroundColor: form ? t.brandBg : odd ? t.surface : t.surface2, borderRadius: radius.sm,
+                borderWidth: odd ? 2 : 1, borderColor: form ? t.brandDim : odd ? t.warn : t.line,
+                paddingHorizontal: 8, paddingVertical: 3 };
+  const text = (
+    <Text style={{ color: form ? t.brandInk : odd ? t.ink : t.ink2, fontSize: 12, fontWeight: "700",
+                   textDecorationLine: onPress ? "underline" : "none", textDecorationStyle: "dotted" }}>
+      {children}
+    </Text>
+  );
+  if (!onPress) return <View testID={testID} style={box}>{text}</View>;
   return (
-    <View testID={testID} style={{ backgroundColor: form ? t.brandBg : t.surface2, borderRadius: radius.sm,
-                                   borderWidth: 1, borderColor: form ? t.brandDim : t.line,
-                                   paddingHorizontal: 8, paddingVertical: 3 }}>
-      <Text style={{ color: form ? t.brandInk : t.ink2, fontSize: 12, fontWeight: "700" }}>{children}</Text>
-    </View>
+    <Pressable testID={testID} onPress={onPress} hitSlop={6} accessibilityRole="button"
+               accessibilityLabel={label || (typeof children === "string" ? `${children}, details` : undefined)}
+               style={({ pressed }) => [box, { opacity: pressed ? 0.6 : 1 }]}>
+      {text}
+    </Pressable>
   );
 }
 
@@ -1097,7 +1140,10 @@ export function useRussianVoice() {
    replayed in the character's voice it first spoke in (the review,
    2026-09-30: replayed through `say`, Gena changed voice on a second press).
    It is always the device voice, so the button says so. */
-export function Speaker({ text, size = 40, device = false, speak, recorded = false }) {
+/* `recordedOnly`: draw nothing when there is no recording (the owner,
+   2026-10-04, choosing it for the dictionary: every sound there is a
+   recording, never the phone's voice, which reads a word outside the units). */
+export function Speaker({ text, size = 40, device = false, speak, recorded = false, recordedOnly = false }) {
   const t = useTheme();
   /* With `device` the recording is deliberately not used, so the button must
      not claim one: `real` decides the label and the testID, and "Hear it"
@@ -1122,6 +1168,8 @@ export function Speaker({ text, size = 40, device = false, speak, recorded = fal
     return () => { alive = false; offFail(); if (timer) clearTimeout(timer); };
   }, [text]);
   const live = real || voice;
+  // After every hook, so a speaker whose text gains or loses a recording keeps its hooks.
+  if (recordedOnly && !real) return null;
   return (
     <View style={{ alignItems: "center" }}>
     <Pressable
@@ -1297,7 +1345,7 @@ export function SenseList({ senses, size = 15, style, max, brief, testID }) {
                   <Linked text={x.ru} size={size - 1} />
                   <Text style={{ color: t.ink3, fontSize: size - 2 }}>{x.en}</Text>
                 </View>
-                <Speaker text={x.ru} size={32} />
+                <Speaker text={x.ru} size={32} recordedOnly />
               </View>
             ))}
           </View>

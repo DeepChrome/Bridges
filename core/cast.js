@@ -54,7 +54,7 @@ export const CAST = [
   {
     id: "yarik", ru: "Ярик", en: "Yarik", sex: "m", species: "wolf",
     role: "family",
-    persona: "Nezha's husband and Teddy's father. A big grey wolf who looks fearsome and is a softie: calm, protective, dry humour, terrible at hiding that he is proud of his family. Short for Ярослав.",
+    persona: "Nezha's husband and Teddy's father. A big gray wolf who looks fearsome and is a softie: calm, protective, dry humor, terrible at hiding that he is proud of his family. Short for Ярослав.",
     look: "a big friendly grey wolf, tall and broad, with a thick grey-and-white coat, a gentle lopsided smile, warm amber eyes and a navy knitted jumper",
     voice: "ru-RU-Chirp3-HD-Charon", tone: { pitch: 0.93, tempo: 0.97 }, avatar: "yarik",
   },

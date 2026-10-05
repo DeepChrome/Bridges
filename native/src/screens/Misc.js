@@ -1,7 +1,7 @@
 /* Immerse (the video library) and the video player. */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Image, Pressable, Linking, BackHandler, Switch, useWindowDimensions } from "react-native";
+import { View, Image, Pressable, Linking, BackHandler, Switch, useWindowDimensions, Platform } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { setStatusBarHidden } from "expo-status-bar";
@@ -288,8 +288,11 @@ function Scrubber({ pos, len, active, onSeek, onTouch }) {
             onSeek(Math.round(f * len));
           }}
           onResponderTerminate={() => setDrag(null)}
+          /* The line sits on the picture's very edge: YouTube draws its
+             subtitles just above the bottom, and a line through the middle of
+             this touch strip ran through them (the emulator, 2026-10-05). */
           style={{ position: "absolute", left: SCRUB_PAD, right: SCRUB_PAD, bottom: 0, height: 22,
-                   justifyContent: "center" }}>
+                   justifyContent: "flex-end", paddingBottom: 2 }}>
       <View pointerEvents="none"
             style={{ height: thick ? 4 : 3, borderRadius: 2, backgroundColor: "rgba(255,255,255,0.22)" }}>
         <View style={{ width: `${shown * 100}%`, height: "100%", borderRadius: 2,
@@ -297,7 +300,7 @@ function Scrubber({ pos, len, active, onSeek, onTouch }) {
       </View>
       {thick ? (
         <View pointerEvents="none"
-              style={{ position: "absolute", left: shown * width - 6, width: 12, height: 12, borderRadius: 6,
+              style={{ position: "absolute", bottom: 0, left: shown * width - 5, width: 10, height: 10, borderRadius: 5,
                        backgroundColor: "rgba(255,255,255,0.9)" }} />
       ) : null}
     </View>
@@ -715,8 +718,14 @@ export function Video({ route, navigation }) {
      overrides — and left that tab's bar unstyled after one full-screen view. */
   useEffect(() => {
     if (full) {
-      // Free to turn: upright is the half-and-half view, sideways the picture alone.
-      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.ALL).catch(() => {});
+      /* Free to turn: upright is the half-and-half view, sideways the picture
+         alone. On Android by the sensor (SCREEN_ORIENTATION_SENSOR, 4), which
+         turns whatever the phone's rotation lock says, as a video player
+         should, and not upside down — `ALL` is full-sensor and on the
+         emulator stood the video on its head. */
+      (Platform.OS === "android"
+        ? ScreenOrientation.lockPlatformAsync({ screenOrientationConstantAndroid: 4 })
+        : ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.ALL)).catch(() => {});
       setStatusBarHidden(true, "fade");
       navigation.setOptions && navigation.setOptions({ headerShown: false });
     }

@@ -101,7 +101,7 @@ export const LETTERS = [
 export const VOWEL_PAIRS = [
   { hard: "а", soft: "я", sound: "[a]", example: ["мать", "мять"], gloss: ["mother", "to crumple"] },
   { hard: "о", soft: "ё", sound: "[o]", example: ["нос", "нёс"], gloss: ["nose", "he carried"] },
-  { hard: "э", soft: "е", sound: "[e]", example: ["сэр", "сер"], gloss: ["sir", "grey"] },
+  { hard: "э", soft: "е", sound: "[e]", example: ["сэр", "сер"], gloss: ["sir", "gray"] },
   { hard: "у", soft: "ю", sound: "[u]", example: ["лук", "люк"], gloss: ["onion", "hatch"] },
   { hard: "ы", soft: "и", sound: "[i] / [ɨ]", example: ["мы", "ми"], gloss: ["we", "mi (the note)"] },
 ];

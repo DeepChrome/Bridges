@@ -86,7 +86,8 @@ export function UnitScreen({ route, navigation }) {
 }
 
 const STEP_LABEL = { vocab: "Start the vocabulary", summary: "Review the summary", quiz: "Take the quiz", video: "Watch the video",
-                     listen: "Listen to the conversation", grammar: "Practice the grammar" };
+                     listen: "Listen to the conversation", grammar: "Practice the grammar",
+                     prep: "Study the video's words" };
 
 export function LessonScreen({ route, navigation }) {
   const { st } = useSession();

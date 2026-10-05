@@ -11,6 +11,7 @@ import { flushState } from "../src/store";
 import Summary from "../src/screens/Summary";
 import {
   UN, L, lessonWords, lessonCount, components, lessonDone, nextComponent, hasGrammar, grammarKey,
+  stepRoute, markComponent,
 } from "../src/data";
 
 const base = {
@@ -66,9 +67,25 @@ describe("a lesson's flow", () => {
   const graded = UN.find((u) => u.v && hasGrammar(u));
   const ids = (u) => components(base, u, 0).map((c) => c.id);
 
-  it("runs words, grammar, quiz, summary, video", () => {
+  it("runs words, grammar, quiz, summary, the video's words, video", () => {
     const order = ids(graded).filter((x) => x !== "listen");
-    expect(order).toEqual(["vocab", "grammar", "quiz", "summary", "video"]);
+    expect(order).toEqual(["vocab", "grammar", "quiz", "summary", "prep", "video"]);
+  });
+
+  /* The video's own words as cards, just before it (2026-10-05): optional,
+     opened as a round of the video's list, ticked when played through, and
+     leading on to the video. */
+  it("the video's words are an optional round that leads to the video", () => {
+    const prep = components(base, graded, 0).find((c) => c.id === "prep");
+    expect(prep.optional).toBe(true);
+    const [route, params] = stepRoute("prep", graded, 0);
+    expect(route).toBe("ListCards");
+    expect(params.round).toBe("list");
+    expect(params.words).toEqual(expect.arrayContaining(Object.keys(graded.v.heard)));
+    expect(params.next).toEqual(["Video", { unitId: graded.id, index: 0 }]);
+    const done = markComponent(base, graded, 0, "prep");
+    expect(components(done, graded, 0).find((c) => c.id === "prep").done).toBe(true);
+    expect(lessonDone(done, graded, 0)).toBe(false);
   });
 
   it("Continue opens the grammar after the words, then the quiz", () => {

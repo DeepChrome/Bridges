@@ -271,8 +271,20 @@ export function components(st, u, i) {
   /* What the lesson taught, reviewed before the video (2026-09-29). Optional:
      listed so it is found, never owed. */
   out.push({ id: "summary", label: "Summary", optional: true, done: !!l.s });
+  /* The video's own words as flashcards, just before the video (the owner,
+     2026-10-05: "before the video, the user should be able to read the video
+     specific flash cards to prep for the video… after the summary").
+     Optional, like the summary; done when the round is played through. */
+  if (u.v && prepWords(u).length) out.push({ id: "prep", label: "Video words", optional: true, done: !!l.p });
   if (u.v) out.push({ id: "video", label: "Video", done: !!s.video, shared: true });
   return out;
+}
+
+/* A unit's video words to know before watching (§30bf's list, `v.heard`),
+   and the video's own sentences after them. */
+export function prepWords(u) {
+  if (!u || !u.v) return [];
+  return Object.keys(u.v.heard || {}).concat(videoLines(u).map((l) => l.ru));
 }
 
 /* The step Continue opens: the first one left **after the furthest one done**,
@@ -284,6 +296,11 @@ export function components(st, u, i) {
    none of them can send a step somewhere the others do not. */
 export function stepRoute(id, u, i) {
   if (id === "listen") return ["Scenes", { key: `${u.id}:${i}` }];
+  if (id === "prep") {
+    return ["ListCards", { round: "list", words: prepWords(u), title: "Before the video",
+                           after: "Continue to video", mark: { unitId: u.id, index: i, id: "prep" },
+                           next: ["Video", { unitId: u.id, index: i }] }];
+  }
   const name = { vocab: "Vocab", grammar: "GrammarRun", quiz: "Quiz", summary: "Summary",
                  video: "Video" }[id] || "Vocab";
   return [name, { unitId: u.id, index: i }];
@@ -390,6 +407,7 @@ export function markComponent(st, u, i, id, extra) {
     const l = { ...s.lessons[i] };
     if (id === "vocab") l.v = true;
     if (id === "summary") l.s = true;
+    if (id === "prep") l.p = true;
     if (id === "quiz") {
       l.q = Math.max(l.q || 0, extra || 0);
       l.tries = (l.tries || 0) + 1;            // what the relief rule counts

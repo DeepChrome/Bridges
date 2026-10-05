@@ -298,7 +298,14 @@ const ROUTES = {
 };
 
 const REPORT_CHARS = 4000;
-const REPORTS_PER_DAY = 20;
+// Testers report question by question now (2026-10-05), so a sitting can run
+// to dozens; the cap is there for a stuck button, not for them.
+const REPORTS_PER_DAY = 80;
+// Recordings on a report: a few short clips, base64 AAC from the app.
+const REPORT_CLIPS = 5;
+const REPORT_CLIP_BYTES = 600 * 1024;
+export const SEVERITIES = ["minor", "major", "critical"];
+export const REPORT_KINDS = ["pronunciation", "translation", "grammar", "wording", "broken", "display", "other"];
 
 export async function handle(request, env, deps = {}) {
   const fetchFn = deps.fetch || globalThis.fetch;
@@ -352,8 +359,20 @@ export async function handle(request, env, deps = {}) {
   if (url.pathname === "/v1/report") {
     let body = null;
     try { body = await request.json(); } catch (e) { body = null; }
-    const text = body && typeof body.text === "string" ? body.text.trim().slice(0, REPORT_CHARS) : "";
-    if (!text) return json(400, { ok: false, reason: "no text" });
+    /* Since 2026-10-05 a report may also carry a severity, a kind, what it
+       should be instead, what the tester was looking at, and recordings ("if
+       it's a pronunciation thing, they can record the better pronunciation").
+       Each clip is its own KV value (`report-clip:<report key>:<n>`), so a
+       listing of reports stays small. */
+    const str = (v, n = REPORT_CHARS) => (typeof v === "string" ? v.trim().slice(0, n) : "");
+    const text = body ? str(body.text) : "";
+    const fix = body ? str(body.fix) : "";
+    const clips = body && Array.isArray(body.clips)
+      ? body.clips.filter((c) => typeof c === "string" && c.length && c.length <= REPORT_CLIP_BYTES * 4 / 3 + 4)
+        .slice(0, REPORT_CLIPS) : [];
+    if (!text && !fix && !clips.length) return json(400, { ok: false, reason: "no text" });
+    const severity = body && SEVERITIES.includes(body.severity) ? body.severity : null;
+    const kind = body && REPORT_KINDS.includes(body.kind) ? body.kind : null;
     const day = dayKey(now);
     const key = `reports:${day}:${user.id}`;
     const n = parseInt(await env.USAGE.get(key), 10) || 0;
@@ -361,8 +380,12 @@ export async function handle(request, env, deps = {}) {
     await env.USAGE.put(key, String(n + 1), { expirationTtl: 2 * 86400 });
     let facts = body.facts && typeof body.facts === "object" ? body.facts : {};
     if (JSON.stringify(facts).length > REPORT_CHARS) facts = { dropped: "too large" };
-    await env.USAGE.put(`report:${now.toISOString()}:${user.id}`,
-      JSON.stringify({ at: now.toISOString(), user: user.id, text, facts }));
+    let about = body.about && typeof body.about === "object" ? body.about : null;
+    if (about && JSON.stringify(about).length > REPORT_CHARS) about = { dropped: "too large" };
+    const id = `report:${now.toISOString()}:${user.id}`;
+    for (let k = 0; k < clips.length; k++) await env.USAGE.put(`report-clip:${id}:${k}`, clips[k]);
+    await env.USAGE.put(id, JSON.stringify({
+      at: now.toISOString(), user: user.id, severity, kind, text, fix, about, clips: clips.length, facts }));
     return json(200, { ok: true });
   }
 

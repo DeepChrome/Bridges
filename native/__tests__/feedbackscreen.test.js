@@ -56,6 +56,54 @@ it("offers the share sheet when it cannot be sent", async () => {
   } finally { alert.mockRestore(); }
 });
 
+/* A report on a question (2026-10-05): severity, kind, the fix, two
+   recordings, and what was on screen — all of it reaching the Worker. */
+it("sends severity, kind, the fix, recordings and the question it is about", async () => {
+  const about = { screen: "Quiz", title: "Family & People",
+                  question: { kind: "choose-ru", prompt: "how much", answer: "сколько" } };
+  await AsyncStorage.setItem("rb.accounts", JSON.stringify({
+    list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
+  await AsyncStorage.setItem("rb.state.p1", JSON.stringify({ v: 6, seen: {}, trouble: {}, pinned: [], sets: [],
+    drills: {}, unit: {}, speech: { attempts: [], tagCounts: {} } }));
+  await render(<SessionProvider><Feedback route={{ params: { about, from: "Quiz" } }} navigation={nav} /></SessionProvider>);
+  expect(await screen.findByTestId("feedback-about")).toBeTruthy();
+  expect(screen.getByText("how much → сколько")).toBeTruthy();
+  // Nothing to send yet.
+  await act(async () => { fireEvent.press(screen.getByTestId("feedback-send")); });
+  expect(fb.report).not.toHaveBeenCalled();
+  // The scale is explained behind the (i).
+  await act(async () => { fireEvent.press(screen.getByTestId("feedback-severity-info")); });
+  expect(screen.getByText(/teaches something badly false/)).toBeTruthy();
+  await act(async () => { fireEvent.press(screen.getByTestId("feedback-sev-major")); });
+  await act(async () => { fireEvent.press(screen.getByTestId("feedback-kind-pronunciation")); });
+  for (let k = 0; k < 2; k++) {
+    await act(async () => { fireEvent.press(screen.getByTestId("feedback-record")); });
+    await act(async () => { await new Promise((r) => setTimeout(r, 450)); });
+    await act(async () => { fireEvent.press(screen.getByTestId("feedback-record")); });
+  }
+  expect(screen.getByTestId("feedback-clip-1")).toBeTruthy();
+  const fix = screen.getByTestId("feedback-fix");
+  fireEvent.changeText(fix, "ско́лько");
+  await waitFor(() => expect(fix.props.value).toBe("ско́лько"));
+  await act(async () => { fireEvent.press(screen.getByTestId("feedback-send")); });
+  expect(fb.report).toHaveBeenCalledTimes(1);
+  const sent = fb.report.mock.calls[0][0];
+  expect(sent).toMatchObject({ severity: "major", kind: "pronunciation", fix: "ско́лько", about });
+  expect(sent.clips).toHaveLength(2);
+  expect(await screen.findByTestId("feedback-sent")).toBeTruthy();
+});
+
+/* What the flag attaches is what the screen registered (about.js). */
+it("describes a question by its word, prompt, answer and options", () => {
+  const { describe: about } = require("../src/about");
+  const { L } = require("../src/data");
+  const i = L.findIndex((x) => x.b === "сколько");
+  const d = about({ kind: "choose-ru", i, prompt: "how much",
+                    options: [{ label: "сколько", right: true }, { label: "колено" }] });
+  expect(d).toMatchObject({ kind: "choose-ru", word: "сколько", prompt: "how much", answer: "сколько",
+                            options: ["сколько", "колено"] });
+});
+
 it("attaches counts, not anything typed elsewhere", () => {
   const f = feedbackFacts({ seen: {}, unit: {}, drills: {} }, { crashes: 2, from: "Path" });
   expect(Object.keys(f).sort()).toEqual(["ai", "chapter", "crashes", "days", "from", "lesson", "lessonsDone",

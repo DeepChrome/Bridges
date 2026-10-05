@@ -15,7 +15,9 @@ import { charDistance } from "./compare.js";
 import { describeForm, GENERIC_COLUMN } from "./forms.js";
 import { buildupDrill } from "./buildup.js";
 
-export const QUIZ_N = 8;
+/* Ten since 2026-10-05: a lesson's quiz now reaches back over the chapter so
+   far (quizSteps), and eight left no room for it beside the lesson's own. */
+export const QUIZ_N = 10;
 
 /* The smallest pool a shadowing run will draw its sentences from, widening
    along the route to reach it (`shadowDrill`). The owner's number, 2026-09-23:
@@ -74,6 +76,9 @@ export const GRAMMAR_N = 10;
 export const GRAMMAR_CHOOSE = 0.6;
 /* The rule tried right after its card in every lesson's vocabulary. */
 export const GRAMMAR_IN_LESSON = 2;
+/* The mixed round that closes a lesson's words (vocabSteps): one of the
+   lesson's, the rest from the chapter so far. */
+export const VOCAB_MIXED = 3;
 /* Words from earlier in the route asked in every lesson quiz, on top of
    QUIZ_N — the due and the weakest first (the owner, 2026-10-04: "embedding
    some questions using words from previous chapters… to create spaced
@@ -1420,6 +1425,30 @@ export function makeQuestions(env) {
     const practice = note ? grammarRun(unit, index, GRAMMAR_IN_LESSON) : [];
     if (index === 0 && note) steps.push({ t: "grammar", note });
     if (words.length) steps.push({ t: "list", words });
+    /* **Cumulative, not two at a time** (the owner, 2026-10-05: "right now we
+       introduce two words, we answer a question that has two words as obvious
+       answers. I'm not really sure learning happens there… accumulate words
+       and grammar checks from the entire chapter"). After each pair, one
+       question goes back: a word met earlier in this lesson, or earlier in
+       the chapter once the lesson has none. And the words close on a short
+       mixed round over the lesson and the chapter so far, in any shape — a
+       word met an hour ago can be typed. All of it from `metBy`, so never a
+       word this learner was not taught. */
+    const readable = new Set(metBy(unit, index));
+    const stage = stageOf(unit);
+    const chapterBefore = shuffle(unique(Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat()
+      .concat(unitsUpTo(unit).filter((u) => u !== unit && stageOf(u) === stage).flatMap((u) => u.w)))
+      .filter((i) => readable.has(i) && !words.includes(i)));
+    const back = [];                        // what went back, so nothing goes back twice
+    const goBack = (pairStart) => {
+      const inLesson = shuffle(words.slice(0, pairStart)).find((i) => !back.includes(i));
+      const pick = inLesson !== undefined ? inLesson : chapterBefore.find((i) => !back.includes(i));
+      if (pick === undefined) return;
+      back.push(pick);
+      const c = candidates(pick, pool, null, readable);
+      const q = present(c[Math.floor(Math.random() * c.length)]);
+      if (q) steps.push({ ...q, review: true });
+    };
     words.forEach((w, n) => {
       steps.push({ t: "word", i: w });
       if (n % 2 === 1 || n === words.length - 1) {
@@ -1428,12 +1457,22 @@ export function makeQuestions(env) {
         // whole route was "What does this mean?" — four English options, for
         // every word a learner ever meets. The easiest two shapes still carry
         // it: this is the retrieval right after meeting the word.
-        words.slice(Math.max(0, n - 1), n + 1).forEach((r) => {
+        const start = Math.max(0, n - (n % 2 === 1 ? 1 : 0));
+        words.slice(start, n + 1).forEach((r) => {
           const c = candidates(r, pool).slice(0, 3);
           steps.push(present(c[Math.floor(Math.random() * c.length)]));
         });
+        goBack(start);
       }
     });
+    // The closing round: a lesson word and the chapter's, mixed.
+    const closing = shuffle(words.filter((i) => !back.includes(i))).slice(0, 1)
+      .concat(chapterBefore.filter((i) => !back.includes(i)).slice(0, VOCAB_MIXED - 1));
+    for (const i of shuffle(closing)) {
+      const c = candidates(i, pool, null, readable);
+      const q = present(c[Math.floor(Math.random() * c.length)]);
+      if (q) steps.push(words.includes(i) ? q : { ...q, review: true });
+    }
     if (index > 0 && note) steps.push({ t: "grammar", note });
     practice.forEach((q) => steps.push({ ...q, drill: true }));
     return steps;
@@ -1478,8 +1517,32 @@ export function makeQuestions(env) {
      a word inside a lesson may draw from — a word from a later lesson of the
      same unit would start its card before it is taught. */
   function metBy(unit, index) {
+    const own = index === undefined || index === null ? [] : lessonWords(unit, index);
     return unique(unitsUpTo(unit).filter((u) => u !== unit).flatMap((u) => u.w)
-      .concat(unitSoFar(unit, index)));
+      .concat(unitSoFar(unit, index))).filter((i) => taughtOk(i, own));
+  }
+
+  /* **What this learner was actually taught**, when the app says (the owner,
+     2026-10-05: "any standalone question about a specific word should have
+     been taught previously… you shouldn't target a question to focus on an
+     unlearned word"). The route says what a learner here *should* have met,
+     and that is not the same thing: a curriculum re-cut can add a word to a
+     lesson already finished (§30bf V7 keeps it finished), and «сколько»,
+     moved into chapter 1 after the owner had done it, was asked in a chapter 1
+     quest he had never been shown it in. So a lesson flow passes the
+     learner's own record — a word with a card has been met — and everything
+     that targets a word inside it (`metBy`, the quiz's fill and review, the
+     drills and grammar spliced in) keeps to that, plus the lesson's own words.
+     Unset (the web app, the tools, the tests) it is the route, as before.
+     Synchronous by design: set for one call and cleared, never left behind. */
+  let taught = null;
+  function taughtOk(i, own) {
+    return !taught || taught(i) || (own && own.includes(i));
+  }
+  function withTaught(fn, run) {
+    const before = taught;
+    taught = typeof fn === "function" ? fn : null;
+    try { return run(); } finally { taught = before; }
   }
 
   /* One speech prompt for a lesson, or null when this platform carries no pools or
@@ -1612,18 +1675,39 @@ export function makeQuestions(env) {
       const e = draw(i);
       if (e) bag.push(e);
     }
-    const review = shuffle((prefer || []).filter((i) => L[i] && !words.includes(i) && readable.has(i)));
-    const earlier = shuffle(Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat()
-      .filter((i) => !words.includes(i) && !review.includes(i)));
-    /* …and past the unit, the route before it. A unit's first lesson has no
-       earlier lessons, so a side quest opening right after its chapter's spine
-       asked seven questions where it should ask eight; the words the learner
-       has just finished are the natural top-up (Phase 14 put Food in chapter 1). */
-    const route = shuffle(unitsUpTo(unit).filter((u) => u.id !== unit.id).flatMap((u) => u.w)
-      .filter((i) => !words.includes(i) && !review.includes(i) && !earlier.includes(i)));
-    while (bag.length < QUIZ_N && (review.length || earlier.length || route.length)) {
-      const pick = review.length ? review.pop() : earlier.length ? earlier.pop() : route.pop();
-      const e = draw(pick);
+    /* **The rest is the chapter so far** (the owner, 2026-10-05: "accumulate
+       words and grammar checks from the entire chapter… That's how we build.
+       We integrate. Temporal memory of two words" is not learning). A lesson
+       of two words used to fill its quiz with those two asked again; now the
+       free slots go to the words this chapter has already taught — this
+       unit's earlier lessons and the chapter's other units on the route —
+       what is due among them first, then the weakest, then any. Past the
+       chapter only when it has nothing left (a chapter's first lesson). */
+    const stage0 = stageOf(unit);
+    const ok = (i) => L[i] && !words.includes(i) && readable.has(i);
+    const strengthOf = (i) => {
+      const c = card(i);
+      if (!c) return Infinity;
+      const s = Object.values(c).map((d) => (d && typeof d.s === "number" ? d.s : Infinity));
+      return Math.min(...s);
+    };
+    const dueSet = new Set(prefer || []);
+    const chapterSoFar = unique(Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat()
+      .concat(unitsUpTo(unit).filter((u) => u !== unit && stageOf(u) === stage0).flatMap((u) => u.w)))
+      .filter(ok);
+    const byNeed = (list) => {
+      const due = shuffle(list.filter((i) => dueSet.has(i)));
+      const rest = shuffle(list.filter((i) => !dueSet.has(i)));
+      // Weakest first among the rest, with the order among equals left random.
+      rest.sort((a, b) => strengthOf(a) - strengthOf(b));
+      return due.concat(rest);
+    };
+    const fill = byNeed(chapterSoFar);
+    const outside = byNeed(unitsUpTo(unit).filter((u) => stageOf(u) < stage0).flatMap((u) => u.w)
+      .filter((i) => ok(i) && !chapterSoFar.includes(i)));
+    const queueFill = fill.concat(outside);
+    while (bag.length < QUIZ_N && queueFill.length) {
+      const e = draw(queueFill.shift());
       if (e) bag.push(e);
     }
     const out = spread(shuffle(bag).slice(0, QUIZ_N)).map(present).filter(Boolean);
@@ -1662,7 +1746,7 @@ export function makeQuestions(env) {
       const metSet = new Set(met);
       const chapter = reached.filter((u) => stageOf(u) === stage && u !== unit).flatMap((u) => u.w)
         .concat(unitSoFar(unit, index)).filter((i) => metSet.has(i));
-      const before = reached.filter((u) => stageOf(u) < stage).flatMap((u) => u.w);
+      const before = reached.filter((u) => stageOf(u) < stage).flatMap((u) => u.w).filter((i) => metSet.has(i));
       types.forEach((type, k) => {
         /* Only what the route has introduced. The cases drill always kept to
            the cases taught (`cells`), but agreement and conjugation ignore
@@ -1679,23 +1763,16 @@ export function makeQuestions(env) {
        lesson. What the app says is due or in trouble comes first (`prefer`),
        then the weakest the learner has a card for, then any — earlier
        chapters before this chapter's earlier units. */
+    /* …and now and then a core word from before this chapter, to keep it
+       fresh ("occasionally core learned words from outside the chapter"):
+       the spines of earlier chapters, what is due first, then the weakest. */
     const asked = new Set(out.map((q) => q.i).filter((i) => typeof i === "number"));
     const prior = reached.filter((u) => u !== unit);
-    const earlierCh = prior.filter((u) => stageOf(u) < stage).flatMap((u) => u.w);
-    const sameCh = prior.filter((u) => stageOf(u) === stage).flatMap((u) => u.w);
-    const strength = (i) => {
-      const c = card(i);
-      if (!c) return Infinity;
-      const s = Object.values(c).map((d) => (d && typeof d.s === "number" ? d.s : Infinity));
-      return Math.min(...s);
-    };
-    const priorSet = new Set(earlierCh.concat(sameCh));
-    const queue = unique([
-      ...shuffle((prefer || []).filter((i) => priorSet.has(i))),
-      ...shuffle(earlierCh.filter((i) => strength(i) < Infinity)).sort((a, b) => strength(a) - strength(b)),
-      ...shuffle(earlierCh.slice()),
-      ...shuffle(sameCh.slice()),
-    ]).filter((i) => !asked.has(i));
+    const earlierCore = prior.filter((u) => stageOf(u) < stage && STAGES.some((s) => s.core === u))
+      .flatMap((u) => u.w).filter((i) => readable.has(i));
+    const sameCh = prior.filter((u) => stageOf(u) === stage).flatMap((u) => u.w).filter((i) => readable.has(i));
+    const queue = unique(byNeed(earlierCore).concat(earlierCore.length ? [] : byNeed(sameCh)))
+      .filter((i) => !asked.has(i));
     let added = 0;
     for (const i of queue) {
       if (added >= REVIEW_MIX.perQuiz) break;
@@ -1710,8 +1787,8 @@ export function makeQuestions(env) {
       /* The lesson's own long words first; a lesson of pronouns and
          prepositions has none, so then the unit's earlier words, then the
          route's. One of them at random each time, so a retake builds another. */
-      const tiers = [words, Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat(),
-                     unitsUpTo(unit).flatMap((u) => u.w)];
+      const tiers = [words, Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat().filter((i) => readable.has(i)),
+                     unitsUpTo(unit).flatMap((u) => u.w).filter((i) => readable.has(i))];
       for (const tier of tiers) {
         const cands = tier.filter((i) => !words.includes(i) || tier === words)
           .map((i) => ({ i, ru: L[i].w, en: firstSense(L[i]) }));
@@ -2665,6 +2742,6 @@ export function makeQuestions(env) {
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
     customQuiz, finalExam, recapQuestions, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, routeFocus, grammarRun,
-    drillsIntroduced, drillOpensAt,
+    drillsIntroduced, drillOpensAt, withTaught,
   };
 }

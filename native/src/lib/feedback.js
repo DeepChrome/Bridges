@@ -179,8 +179,12 @@ export async function setPlan(set, deps = {}) {
 
 /* A tester's feedback, to the owner (POST /v1/report): their words and what
    the app attaches. No model call and no plan counter. */
-export async function report({ text, facts }, deps = {}) {
-  return post({ text, facts }, deps, "/v1/report", 10000);
+/* A tester's report: words, and since 2026-10-05 a severity, a kind, what it
+   should be, what was on screen, and recordings — longer to send, so a
+   longer wait. */
+export async function report({ text, facts, severity, kind, fix, about, clips }, deps = {}) {
+  return post({ text, facts, severity, kind, fix, about, clips }, deps, "/v1/report",
+              clips && clips.length ? 30000 : 10000);
 }
 
 async function post(body, deps, route, timeoutMs, retried = false) {

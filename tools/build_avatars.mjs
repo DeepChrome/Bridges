@@ -126,7 +126,7 @@ const CAST = [
       <rect x="15.1" y="20.8" width="1.8" height="1.6" rx=".3" fill="#fff"/>`,
   },
   {
-    id: "nezha", name: "Nezha", role: "Teddy's glamorous mum", bg: "#FF8FAB",
+    id: "nezha", name: "Nezha", role: "Teddy's glamorous mom", bg: "#FF8FAB",
     base: "rabbit_face", t: [0.8, 3.2, 4.4],
     over: `<ellipse cx="9" cy="22" rx="2" ry="1.2" fill="#FF8FAB" fill-opacity=".7"/><ellipse cx="23" cy="22" rx="2" ry="1.2" fill="#FF8FAB" fill-opacity=".7"/>
       <path d="${heart(12, 18.4, 2.6)}" fill="#E91E63"/><path d="${heart(20, 18.4, 2.6)}" fill="#E91E63"/>
@@ -198,7 +198,7 @@ const CAST = [
      face from the cast art (native/src/castfaces.js) and only the frozen web
      app falls back to this bear, tinted grey. */
   {
-    id: "yarik", name: "Yarik", role: "Big grey wolf, soft heart", bg: "#9AA5B1",
+    id: "yarik", name: "Yarik", role: "Big gray wolf, soft heart", bg: "#9AA5B1",
     base: "bear", t: [0.8, 3.2, 5],
   },
   {

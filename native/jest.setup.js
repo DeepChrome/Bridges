@@ -104,6 +104,18 @@ jest.mock("expo-audio", () => ({
     return p;
   },
   setAudioModeAsync: jest.fn(async () => {}),
+  /* The report's recordings (recorder.js): a recorder whose clip is a file
+     name, and a microphone that is allowed unless a test says otherwise. */
+  requestRecordingPermissionsAsync: jest.fn(async () => ({ granted: global.__micGranted !== false })),
+  useAudioRecorder: () => {
+    const r = {
+      isRecording: false, uri: null,
+      prepareToRecordAsync: jest.fn(async () => {}),
+      record: jest.fn(() => { r.isRecording = true; }),
+      stop: jest.fn(async () => { r.isRecording = false; r.uri = `file:///clip-${Date.now()}.m4a`; }),
+    };
+    return require("react").useRef(r).current;
+  },
 }));
 /* What is audible right now: every player that was played and has not been
    paused. The assertion a person would make by listening. */
@@ -250,6 +262,10 @@ jest.mock("expo-sqlite", () => ({ deserializeDatabaseAsync: jest.fn(), openDatab
 jest.mock("expo-screen-orientation", () => ({
   OrientationLock: { PORTRAIT_UP: "portrait", LANDSCAPE: "landscape", ALL: "any" },
   lockAsync: jest.fn(async (o) => { global.__orientation = o; }),
+  // Android's own constant: 4 is SCREEN_ORIENTATION_SENSOR, free to turn.
+  lockPlatformAsync: jest.fn(async (o) => {
+    global.__orientation = o && o.screenOrientationConstantAndroid === 4 ? "any" : o;
+  }),
 }));
 jest.mock("expo-document-picker", () => ({ getDocumentAsync: jest.fn() }));
 jest.mock("expo-sharing", () => ({ shareAsync: jest.fn(), isAvailableAsync: jest.fn(async () => true) }));
@@ -279,6 +295,8 @@ jest.mock("expo-file-system", () => {
     delete() { fs.files.delete(this.uri); }
     write(bytes) { fs.files.set(this.uri, bytes.length || 0); }
     async bytes() { return new Uint8Array(0); }
+    // A recording read for a report: its name stands in for its bytes.
+    async base64() { return Buffer.from(this.name).toString("base64"); }
     move(dest) {
       const to = dest instanceof Directory ? new File(dest, this.name) : dest;
       fs.files.set(to.uri, fs.files.get(this.uri) || 0);

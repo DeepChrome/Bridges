@@ -1208,10 +1208,17 @@ group("lesson generation");
     const c1 = STAGES[0].core;
     const first = Q.quizSteps(c1, 0), second = Q.quizSteps(c1, 1);
     ok(!first.some((q) => q.kind === "buildup"), "the first lesson's quiz carries no word building yet");
-    const b = second.find((q) => q.kind === "buildup");
+    /* …and only a word already taught (2026-10-05): chapter 1's second lesson
+       has none long enough to build, so the first build comes once one is. */
+    const soFar = (u, k) => new Set(Array.from({ length: k + 1 }, (_, j) => lessonWords(u, j)).flat());
+    const builds = Array.from({ length: lessonCount(c1) }, (_, k) => k).slice(1)
+      .map((k) => [k, Q.quizSteps(c1, k).find((q) => q.kind === "buildup")]).filter(([, b]) => b);
+    const [bk, b] = builds[0] || [];
     ok(b && b.assess && b.listen && typeof b.i === "number" && b.steps.length >= 2,
-       "the second lesson's quiz builds a word and listens for it", b ? JSON.stringify(b.steps) : "none");
-    ok(second[0].kind !== "buildup", "never first");
+       "a chapter 1 quiz builds a word and listens for it", b ? JSON.stringify(b.steps) : "none");
+    ok(builds.every(([k, x]) => soFar(c1, k).has(x.i)), "never a word from a later lesson",
+       builds.filter(([k, x]) => !soFar(c1, k).has(x.i)).map(([k, x]) => `${k}:${L[x.i].b}`).join(", "));
+    ok(!second.length || second[0].kind !== "buildup", "never first");
     // A lesson with a long word of its own builds one of its own.
     const food = UN.find((u) => u.id === "food");
     const own = Q.quizSteps(food, 3).find((q) => q.kind === "buildup");
@@ -1308,8 +1315,47 @@ group("lesson generation");
   const formN = quiz.filter((q) => q.kind === "form" && !q.drill).length;
   const drillN = quiz.filter((q) => q.drill).length;
   const reviewN = quiz.filter((q) => q.review).length;
-  ok(quiz.length === 8 + speechN + formN + drillN + reviewN,
-     "a lesson quiz is 8 questions plus its speech, form, drill and review steps", String(quiz.length));
+  /* A word is asked only once it was taught (the owner, 2026-10-05: «сколько»
+     asked in a chapter 1 quest he had never been shown). With the learner's
+     own record passed in, nothing outside it and the lesson is targeted. */
+  {
+    const fam = UN.find((u) => u.id === "family");
+    const c1 = STAGES[0].core;
+    const skip = lessonWords(c1, lessonCount(c1) - 1);     // as if a re-cut added a lesson he never saw
+    const has = new Set(c1.w.filter((i) => !skip.includes(i)).concat(lessonWords(fam, 0)));
+    let leaked = [];
+    for (let n = 0; n < 20; n++) {
+      const steps = Q.withTaught((i) => has.has(i), () =>
+        Q.vocabSteps(fam, 1).concat(Q.quizSteps(fam, 1)));
+      const own = new Set(lessonWords(fam, 1));
+      leaked = leaked.concat(steps.filter((q) => typeof q.i === "number" && !own.has(q.i) && !has.has(q.i))
+        .map((q) => `${q.kind}:${L[q.i].b}`));
+    }
+    ok(!leaked.length, "no question targets a word the learner was not taught", [...new Set(leaked)].slice(0, 6).join(", "));
+    ok(Q.withTaught(() => false, () => 1) === 1 && Q.quizSteps(fam, 1).some((q) => !lessonWords(fam, 1).includes(q.i)),
+       "and the rule is cleared after the call");
+  }
+  /* Cumulative lessons (2026-10-05): every pair of new words is followed by
+     a question going back, and the words close on a mixed round over the
+     chapter so far. */
+  {
+    const fam = UN.find((u) => u.id === "family");
+    const v = Q.vocabSteps(fam, 1);
+    const back = v.filter((q) => q.review);
+    const earlier = new Set(Q.unitsUpTo(fam).filter((u) => u !== fam).flatMap((u) => u.w)
+      .concat(lessonWords(fam, 0)));
+    ok(back.length >= Math.ceil(lessonWords(fam, 1).length / 2), "each pair of new words is followed by one going back",
+       String(back.length));
+    ok(back.every((q) => earlier.has(q.i) || lessonWords(fam, 1).includes(q.i)), "and it goes back to what was taught");
+    const quiz = Q.quizSteps(fam, 1);
+    const fromChapter = quiz.filter((q) => typeof q.i === "number" && !q.review && !q.drill
+      && !lessonWords(fam, 1).includes(q.i)).length;
+    ok(fromChapter > 0, "a lesson quiz reaches back over the chapter so far", String(fromChapter));
+  }
+  const buildN = quiz.filter((q) => q.kind === "buildup").length;
+  ok(quiz.length === QUIZ_N + speechN + formN + drillN + reviewN + buildN,
+     `a lesson quiz is ${QUIZ_N} questions plus its speech, form, drill, review and building steps`,
+     `${quiz.length} = ? ${speechN}+${formN}+${drillN}+${reviewN}+${buildN}`);
   /* Spaced review inside the lesson (2026-10-04): words from the route before
      this unit, never this lesson's, on every quiz that has a route behind it. */
   {

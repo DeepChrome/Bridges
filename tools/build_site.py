@@ -2210,6 +2210,87 @@ def strip_modules(src):
     return src
 
 
+# American English in everything the app shows (the owner, 2026-10-05: "Try
+# and avoid British English… I see mum used from time to time"). The English
+# comes from OpenRussian, Wiktionary, Tatoeba and the decks, much of it
+# British; it is converted on the way out rather than in the sources, so a
+# re-ingest cannot bring it back. Only spellings and words with one American
+# reading are here: "flat", "holiday", "lift", "queue" and "rubbish" each have
+# a second sense that a swap would get wrong, and "mummy" is also «мумия».
+AMERICAN = {
+    "mum": "mom", "mums": "moms",
+    "colour": "color", "colours": "colors", "coloured": "colored", "colourful": "colorful",
+    "colouring": "coloring", "favourite": "favorite", "favourites": "favorites",
+    "neighbour": "neighbor", "neighbours": "neighbors", "neighbourhood": "neighborhood",
+    "neighbourhoods": "neighborhoods", "behaviour": "behavior", "behaviours": "behaviors",
+    "honour": "honor", "honours": "honors", "honoured": "honored", "humour": "humor",
+    "labour": "labor", "flavour": "flavor", "flavours": "flavors", "harbour": "harbor",
+    "harbours": "harbors", "rumour": "rumor", "rumours": "rumors", "odour": "odor",
+    "vapour": "vapor", "armour": "armor", "savour": "savor", "endeavour": "endeavor",
+    "centre": "center", "centres": "centers", "theatre": "theater", "theatres": "theaters",
+    "metre": "meter", "metres": "meters", "kilometre": "kilometer", "kilometres": "kilometers",
+    "centimetre": "centimeter", "centimetres": "centimeters", "millimetre": "millimeter",
+    "litre": "liter", "litres": "liters", "fibre": "fiber", "calibre": "caliber", "sabre": "saber",
+    "organise": "organize", "organised": "organized", "organising": "organizing",
+    "organisation": "organization", "organisations": "organizations",
+    "realise": "realize", "realised": "realized", "realising": "realizing",
+    "recognise": "recognize", "recognised": "recognized", "apologise": "apologize",
+    "apologised": "apologized", "criticise": "criticize", "emphasise": "emphasize",
+    "memorise": "memorize", "summarise": "summarize", "specialise": "specialize",
+    "civilisation": "civilization", "analyse": "analyze", "analysed": "analyzed",
+    "travelled": "traveled", "travelling": "traveling", "traveller": "traveler",
+    "travellers": "travelers", "cancelled": "canceled", "cancelling": "canceling",
+    "programme": "program", "programmes": "programs", "cheque": "check", "grey": "gray",
+    "jewellery": "jewelry", "pyjamas": "pajamas", "tyre": "tire", "tyres": "tires",
+    "aeroplane": "airplane", "aeroplanes": "airplanes", "maths": "math", "learnt": "learned",
+    "whilst": "while", "defence": "defense", "offence": "offense", "licence": "license",
+    "practise": "practice", "practised": "practiced", "catalogue": "catalog",
+    "mould": "mold", "plough": "plow", "cosy": "cozy", "moustache": "mustache",
+    "sceptical": "skeptical", "enrol": "enroll", "fulfil": "fulfill", "storey": "story",
+    "draught": "draft", "kerb": "curb", "lorry": "truck", "lorries": "trucks",
+    "petrol": "gas", "motorway": "highway", "motorways": "highways", "pavement": "sidewalk",
+    "biscuit": "cookie", "biscuits": "cookies", "trousers": "pants",
+    "mobile phone": "cell phone", "mobile phones": "cell phones",
+}
+# Football is soccer, except where it is already the American game.
+AMERICAN_RE = re.compile(
+    r"\b(" + "|".join(sorted(map(re.escape, AMERICAN), key=len, reverse=True)) + r")\b"
+    r"|(?<!American )\b(football|footballer|footballers)\b", re.IGNORECASE)
+SOCCER = {"football": "soccer", "footballer": "soccer player", "footballers": "soccer players"}
+
+
+def americanize_text(s):
+    if not s or "://" in s or not re.search(r"[A-Za-z]", s):
+        return s
+
+    def swap(m):
+        word = m.group(0)
+        out = AMERICAN.get(word.lower()) or SOCCER[word.lower()]
+        if word.isupper() and len(word) > 1:
+            return out.upper()
+        return out[0].upper() + out[1:] if word[0].isupper() else out
+    return AMERICAN_RE.sub(swap, s)
+
+
+def americanize(node, counts):
+    """Every English string in the payload, walked in place. Keys are left
+    alone; a URL is never touched."""
+    if isinstance(node, dict):
+        for k, v in node.items():
+            node[k] = americanize(v, counts)
+        return node
+    if isinstance(node, list):
+        for k, v in enumerate(node):
+            node[k] = americanize(v, counts)
+        return node
+    if isinstance(node, str):
+        out = americanize_text(node)
+        if out != node:
+            counts[0] += 1
+        return out
+    return node
+
+
 def strip_captions(payload):
     """The video moments carry a ten-word window of YouTube's caption text (`s`),
     which is the video's text, not ours. A private build keeps it — it is what the
@@ -2256,6 +2337,9 @@ def main():
     args = ap.parse_args()
 
     payload = gather(args.lexicon, args.corpus, args.topics, args.lemmas, args.examples)
+    changed = [0]
+    americanize(payload, changed)
+    print(f"  American     : {changed[0]:,} strings respelled (AMERICAN)")
     if args.public:
         stripped = strip_captions(payload)
         print(f"  public build : {stripped:,} caption snippets stripped from the video moments")
@@ -2331,7 +2415,7 @@ def main():
             held = json.loads(store.read_text(encoding="utf-8"))["lines"] if store.exists() else {}
             en, have, total = {}, 0, 0
             for vid, lines in tr.items():
-                row = [held.get(hashlib.sha1(f"{vid}|{ln[0]}|{ln[1]}".encode("utf-8")).hexdigest()[:16], "")
+                row = [americanize_text(held.get(hashlib.sha1(f"{vid}|{ln[0]}|{ln[1]}".encode("utf-8")).hexdigest()[:16], ""))
                        for ln in lines]
                 have += sum(1 for x in row if x)
                 total += len(row)

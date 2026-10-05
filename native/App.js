@@ -23,6 +23,7 @@ import { loadAppearance, useScheme } from "./src/appearance";
 import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { HelpButton } from "./src/help";
+import { currentAbout } from "./src/about";
 import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
@@ -167,10 +168,46 @@ function MeButton({ navigation }) {
   );
 }
 
+/* The beta's report flag (the owner, 2026-10-05: "a feedback option for this
+   Beta… on the top bar… feedback on specific questions"). It captures what
+   is on screen at the moment it is pressed — the route, its title, and the
+   question about.js holds — and opens the report with that attached. */
+function ReportButton() {
+  const p = palette(useScheme());
+  const open = () => {
+    const r = navRef.getCurrentRoute ? navRef.getCurrentRoute() : null;
+    const opts = navRef.getCurrentOptions ? navRef.getCurrentOptions() || {} : {};
+    const params = (r && r.params) || {};
+    const keep = {};
+    for (const k of ["unitId", "index", "videoId", "type", "round", "word", "key"]) {
+      if (params[k] !== undefined && typeof params[k] !== "object") keep[k] = params[k];
+    }
+    const about = {
+      screen: r ? r.name : null,
+      title: typeof opts.title === "string" ? opts.title : undefined,
+      unit: params.unitId ? (unitById(params.unitId) || {}).name : undefined,
+      params: keep,
+      question: currentAbout() ? { ...currentAbout(), seq: undefined } : undefined,
+    };
+    navRef.navigate("Feedback", { about, from: about.screen });
+  };
+  return (
+    <Pressable testID="report-button" onPress={open} hitSlop={8}
+               accessibilityRole="button" accessibilityLabel="Report a problem"
+               style={{ marginRight: 12, width: 30, height: 30, alignItems: "center", justifyContent: "center" }}>
+      <Svg width={21} height={21} viewBox="0 0 24 24" fill="none" stroke={p.ink2}
+           strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M5 21V4M5 4h11l-2 4 2 4H5" />
+      </Svg>
+    </Pressable>
+  );
+}
+
 function HeaderRight({ navigation, route }) {
   const home = !route || route.name !== "Path";
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <ReportButton />
       <HelpButton route={route && route.name} />
       {home ? <HomeButton /> : null}
       <MeButton navigation={navigation} />
@@ -425,7 +462,7 @@ const wordTitled = ({ route }) => {
   return {
     headerTitleAlign: "center",
     headerBackButtonDisplayMode: "minimal",
-    headerRight: () => <HomeButton />,
+    headerRight: () => <View style={{ flexDirection: "row", alignItems: "center" }}><ReportButton /><HomeButton /></View>,
     headerTitle: () => (
       <HeaderTitle title={w ? w.w : "Word"} sub={w && w.p ? w.p : "Dictionary"} />
     ),

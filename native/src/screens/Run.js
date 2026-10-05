@@ -28,6 +28,7 @@ import { right as buzzRight, wrong as buzzWrong, done as buzzDone } from "../hap
 import { RuInput } from "../keyboard";
 import { charDistance } from "@core/compare";
 import { Linked, useWords } from "../words";
+import { useAbout, describe } from "../about";
 import { Hear } from "../activities/Hear";
 import { Say } from "../activities/Say";
 import { Scene } from "../activities/Scene";
@@ -483,6 +484,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const ref = q ? referenceFor(q) : { tables: [], facts: [], note: null, topic: null };
   const qWord = ref.word;
   const words = useWords();
+  /* For a tester's report: this question, and what they answered if they
+     have (about.js). */
+  useAbout(q ? { ...describe(q), run: title, step: `${at + 1} of ${queue.length}`,
+                 said: verdict && typeof verdict.said === "string" ? verdict.said : undefined,
+                 right: verdict ? verdict.right : undefined } : null);
   /* The explanation a miss gets when the model gives none (core/explain.js):
      computed once the answer is in and only for a miss. */
   const standard = verdict && verdict.right === false && q ? standardExplanation(q, qWord) : null;

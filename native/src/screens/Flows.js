@@ -24,6 +24,14 @@ import { pairDrill } from "@core/alphabet";
 import { buildupDrill } from "@core/buildup";
 import { firstSense } from "@core/util";
 import { touchStreak } from "../store";
+import { useAbout } from "../about";
+
+/* What this learner has been taught, for the lesson builders (core/questions.js
+   withTaught): a word the scheduler holds a card for has been met. */
+export const taughtBy = (st) => {
+  const seen = (st && st.seen) || {};
+  return (i) => !!(L[i] && seen[L[i].b]);
+};
 
 /* The video's sentences a lesson ends on (`VocabFlow`): a few, not a wall. */
 const LESSON_LINES = 4;
@@ -60,7 +68,8 @@ export function VocabFlow({ route, navigation }) {
      lesson ends on what it is preparing for. */
   const fresh = useMemo(() => {
     const lines = linesWith(unit, lessonWords(unit, index), LESSON_LINES);
-    return Q.vocabSteps(unit, index).concat(lines.length ? [{ t: "lines", lines }] : []);
+    return Q.withTaught(taughtBy(st), () => Q.vocabSteps(unit, index))
+      .concat(lines.length ? [{ t: "lines", lines }] : []);
   }, [unit.id, index]);
   const save = { key: `vocab:${unit.id}:${index}`, route: "Vocab", params: { unitId: unit.id, index },
                  title: `${unit.name} · Lesson ${index + 1} words` };
@@ -100,6 +109,14 @@ export function VocabFlow({ route, navigation }) {
       setAt(j);
     });
   }, [navigation, done, steps, reach]);
+  /* A teaching card, for a tester's report (a question registers itself in
+     the runner). */
+  const shown = steps[at];
+  useAbout(shown && !isQuestion(shown)
+    ? { kind: shown.t, word: typeof shown.i === "number" && L[shown.i] ? L[shown.i].b : undefined,
+        answer: typeof shown.i === "number" && L[shown.i] ? firstSense(L[shown.i]) : undefined,
+        step: `${at + 1} of ${steps.length}` }
+    : null);
 
   if (resume.prompt) return resume.prompt;
 
@@ -413,7 +430,7 @@ export function QuizFlow({ route, navigation }) {
        be passable with what the lessons have taught (the owner, 2026-09-24). */
     const within = new Set(Q.unitsUpTo(unit).flatMap((u) => u.w));
     const review = reviewWords(st).filter((i) => within.has(i));
-    const next = Q.quizSteps(unit, index, review, st.seen, asked.current);
+    const next = Q.withTaught(taughtBy(st), () => Q.quizSteps(unit, index, review, st.seen, asked.current));
     asked.current = Q.stepKeys(next);
     return next;
   }, [unitId, index, seed]);
@@ -472,6 +489,10 @@ export function QuizFlow({ route, navigation }) {
         /* On to what follows in this lesson — the summary, then the video
            (data.js components) — and only then the next lesson. */
         onContinue={!passed ? undefined
+          /* The video's cards live above the tabs (ListCards on the Root
+             stack), where `replace` from here cannot reach — it would do
+             nothing (§23) — so the quiz is closed and the cards opened. */
+          : after && after.id === "prep" ? () => { navigation.goBack(); navigation.navigate(...stepRoute(after.id, unit, index)); }
           : after ? () => navigation.replace(...stepRoute(after.id, unit, index))
           : !last ? () => navigation.replace("Vocab", { unitId, index: index + 1 })
           : undefined}
@@ -948,10 +969,14 @@ export function GrammarFlow({ route, navigation }) {
   const { unitId, index } = route.params || {};
   const unit = UN.find((u) => u.id === unitId);
   const lesson = index !== undefined && index !== null;
-  const { update } = useSession();
+  const { st, update } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
-  const steps = useMemo(() => (unit ? Q.grammarRun(unit, lesson ? index : null) : []),
+  // Inside a lesson, only words this learner was taught; as a module of its
+  // own it reaches over the chapter as Practice does.
+  const steps = useMemo(() => (!unit ? []
+      : lesson ? Q.withTaught(taughtBy(st), () => Q.grammarRun(unit, index))
+      : Q.grammarRun(unit, null)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [unitId, index, seed]);
   const title = (steps[0] && steps[0].note && steps[0].note.title) || "Grammar";

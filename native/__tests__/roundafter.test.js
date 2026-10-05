@@ -56,6 +56,24 @@ describe("a list round with a way back", () => {
     expect(nav.goBack).toHaveBeenCalled();
   });
 
+  /* A lesson's "Video words" step (2026-10-05): played through, the step is
+     ticked, and the way on is the video itself. */
+  it("ticks the lesson step it was opened as, and goes on to the video", async () => {
+    const { UN } = require("../src/data");
+    const u = UN.find((x) => x.v);
+    const words = ["город", "хотеть"];
+    const n = { ...nav, replace: jest.fn() };
+    await withProfile(<Study navigation={n}
+      route={{ params: { round: "list", words, title: "Before the video", after: "Continue to video",
+                         mark: { unitId: u.id, index: 0, id: "prep" }, next: ["Video", { unitId: u.id, index: 0 }] } }} />);
+    await playThrough(words.length);
+    const on = await screen.findByTestId("round-after");
+    await flushState();
+    expect((await global.__db.saved("p1")).unit[u.id].lessons[0].p).toBe(true);
+    await act(async () => { fireEvent.press(on); });
+    expect(n.replace).toHaveBeenCalledWith("Video", { unitId: u.id, index: 0 });
+  });
+
   /* The back of a word card carries the grammar line under the word, and the
      front does not — the class and gender would be a hint before the turn. */
   it("says what the word is on the back, not the front", async () => {

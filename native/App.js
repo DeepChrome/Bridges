@@ -28,7 +28,7 @@ import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
 import Translate from "./src/screens/Translate";
-import { unitById, chapterOf, L, resolveWord, dueCount } from "./src/data";
+import { unitById, chapterOf, L, resolveWord, dueCount, videoById } from "./src/data";
 import Learn from "./src/screens/Learn";
 import Search from "./src/screens/Search";
 import Study from "./src/screens/Study";
@@ -179,13 +179,17 @@ function ReportButton() {
     const opts = navRef.getCurrentOptions ? navRef.getCurrentOptions() || {} : {};
     const params = (r && r.params) || {};
     const keep = {};
-    for (const k of ["unitId", "index", "videoId", "type", "round", "word", "key"]) {
+    for (const k of ["unitId", "index", "videoId", "type", "round", "word", "key", "topic", "section", "title"]) {
       if (params[k] !== undefined && typeof params[k] !== "object") keep[k] = params[k];
     }
+    const unit = params.unitId ? unitById(params.unitId) : null;
+    const vid = params.videoId ? videoById(params.videoId) : r && r.name === "Video" && unit && unit.v ? unit.v : null;
     const about = {
       screen: r ? r.name : null,
       title: typeof opts.title === "string" ? opts.title : undefined,
-      unit: params.unitId ? (unitById(params.unitId) || {}).name : undefined,
+      unit: unit ? unit.name : undefined,
+      lesson: typeof params.index === "number" ? params.index + 1 : undefined,
+      video: vid ? vid.title : undefined,
       params: keep,
       question: currentAbout() ? { ...currentAbout(), seq: undefined } : undefined,
     };

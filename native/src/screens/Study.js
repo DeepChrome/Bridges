@@ -21,6 +21,7 @@ import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseL
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines,
          personalWords, goalNow, goalOpts, markComponent } from "../data";
 import { Linked, GrammarLine } from "../words";
+import { useAbout } from "../about";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
@@ -36,14 +37,13 @@ import { buildSession, practiceSession, requeue, dailyFor, QUEUE_DEFAULTS, cardK
  * days without finding them, reporting the produce card as "sometimes the card
  * starts in English" and the listen card, whose front is a speaker and nothing
  * else, as "blank". Both are the app working as designed with nothing on the
- * card saying so. The names here say what you will see, and `KIND_LABEL` puts
- * the same word on the card. */
+ * card saying so. The names here say what you will see. (A caption naming the
+ * front sat on the card too until 2026-10-05; the owner found it redundant.) */
 export const FRONTS = [
   ["recognise", "Russian", "You give the meaning"],
   ["produce", "English", "You give the Russian"],
   ["listen", "Sound only", "You give what you heard"],
 ];
-export const KIND_LABEL = { recognise: "Russian", produce: "Meaning", listen: "Listen" };
 
 /* What the card says about itself. `New` is the session's own word for it.
    There was a `Trouble` flag too, and it went (the owner, 2026-09-29: "the
@@ -803,6 +803,10 @@ export default function Study({ navigation, route }) {
     : { key: "x" + item.word, w: item.word, b: item.word, e: "",
         sentence: /\s/.test(String(item.word || "")) };
   const blank = !!item && !String(face.w || "").trim();
+  // The card on screen, for a tester's report (about.js).
+  useAbout(item ? { kind: face.sentence ? "sentence card" : "word card", word: face.b || item.word,
+                    answer: face.e || undefined, front: item.front || undefined,
+                    step: `${at + 1} of ${items.length}` } : null);
   // The card as it stands now — a re-queued Again is not the card it was
   // when the session was dealt.
   const current = item ? cardFor(st.seen[item.word]) : null;
@@ -1146,17 +1150,13 @@ export default function Study({ navigation, route }) {
                 empty box — a failure the learner can report is worth more than
                 a silent one (rule 20.7's third exemption). Skip moves past it
                 and grading still works, so the pile is never stuck. */}
-            {/* What kind of card this is, and whether it is new or has been
-                hard. On both faces: the caption is what stops a speaker-only
-                front reading as an empty card, and a flag is about the card's
+            {/* Whether the card is new, and on the back how well it is held.
+                No caption naming the front any more (the owner, 2026-10-05:
+                "Doesn't have to say Russian or English at the top of the
+                card"): the front shows what it is. A flag is about the card's
                 history, never its content, so it gives nothing away. */}
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6,
-                           alignSelf: "stretch", marginBottom: 14 }}>
-              <Text testID="card-kind"
-                    style={{ flex: 1, color: t.ink3, fontSize: 12, fontWeight: "600",
-                             letterSpacing: 1, textTransform: "uppercase" }}>
-                {KIND_LABEL[item.direction] || ""}
-              </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 6,
+                           alignSelf: "stretch", marginBottom: 14, minHeight: 28 }}>
               {flags.isNew ? <Pill testID="flag-new" tone="brand">New</Pill> : null}
               {/* How well this card is held, off its own FSRS stability. On
                   both faces for the same reason as the flags: it is about the

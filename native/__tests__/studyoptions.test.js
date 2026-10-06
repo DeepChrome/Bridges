@@ -62,20 +62,24 @@ afterEach(async () => { await flushState(); });
 describe("the card says what it is", () => {
   /* The front is the learner's choice (`flash`), and the one card is asked
      through it (2026-09-23). */
-  it("captions a listen card, whose front is otherwise only a speaker", async () => {
+  /* No caption naming the front (the owner, 2026-10-05: "Doesn't have to say
+     Russian or English at the top of the card"): the front itself shows it. */
+  it("shows a listen card as its speaker, with no caption", async () => {
     await withProfile({ seen: { [WORD]: { recognise: due() } }, flash: ["listen"] });
-    expect((await screen.findByTestId("card-kind")).props.children).toBe("Listen");
-    expect(screen.getByTestId("card-listen")).toBeTruthy();
+    expect(await screen.findByTestId("card-listen")).toBeTruthy();
+    expect(screen.queryByTestId("card-kind")).toBeNull();
   });
 
-  it("captions a produce card, which opens in English", async () => {
+  it("shows a produce card in English, with no caption", async () => {
     await withProfile({ seen: { [WORD]: { recognise: due() } }, flash: ["produce"] });
-    expect((await screen.findByTestId("card-kind")).props.children).toBe("Meaning");
+    await screen.findByText("Show");
+    expect(screen.queryByTestId("card-kind")).toBeNull();
+    expect(screen.queryByText("Meaning")).toBeNull();
   });
 
   it("flags a new card", async () => {
     await withProfile({ seen: { [WORD]: { recognise: fresh() } }, sets: ["__due__"] });
-    await screen.findByTestId("card-kind");
+    await screen.findByText("Show");
     expect(screen.getByTestId("flag-new")).toBeTruthy();
     expect(screen.queryByTestId("flag-trouble")).toBeNull();
   });
@@ -84,7 +88,7 @@ describe("the card says what it is", () => {
      need to be reminded"); it is in the bank, not on the card. */
   it("does not flag a troubled card", async () => {
     await withProfile({ seen: { [WORD]: { recognise: due({ lapses: 4, reps: 12 }) } } });
-    await screen.findByTestId("card-kind");
+    await screen.findByText("Show");
     expect(screen.queryByTestId("flag-trouble")).toBeNull();
     expect(screen.queryByTestId("flag-new")).toBeNull();
   });
@@ -99,7 +103,7 @@ describe("the card says what it is", () => {
        at three weeks and a rare one at three months (2026-09-28) — so the
        number sits in the middle either way. */
     await withProfile({ seen: { [WORD]: { recognise: due({ s: 5 }) } } });
-    await screen.findByTestId("card-kind");
+    await screen.findByText("Show");
     await act(async () => { fireEvent.press(screen.getByText("Show")); });   // the back carries it
     const score = Number((await screen.findByTestId("familiarity-score")).props.children);
     expect(score).toBeGreaterThan(30);
@@ -209,7 +213,7 @@ describe("the options live where a session starts", () => {
   it("asks the one card through the ticked front, and a second front does not double the pile", async () => {
     const seen = { [WORD]: { recognise: due() } };
     await withProfile({ seen, sets: ["__due__"], flash: ["recognise", "produce"] });
-    await screen.findByTestId("card-kind");
+    await screen.findByText("Show");
     expect(sessionFor({ ...base, seen, sets: ["__due__"], flash: ["recognise", "produce"] })
       .items.map((i) => i.word)).toEqual([WORD]);
 

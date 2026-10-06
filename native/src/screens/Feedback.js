@@ -50,7 +50,7 @@ export function feedbackFacts(st, { crashes = 0, from = null, ai = "" } = {}) {
 export const SEVERITIES = [
   { id: "minor", label: "Minor", says: "Correct, but awkward, unclear or odd-looking." },
   { id: "major", label: "Major", says: "Wrong: a meaning, form, sound or answer that is incorrect." },
-  { id: "critical", label: "Critical", says: "Breaks the app, loses progress, or teaches something badly false." },
+  { id: "critical", label: "Critical", says: "Breaks the app, loses progress, or teaches something seriously wrong." },
 ];
 export const KINDS = [
   { id: "pronunciation", label: "Pronunciation" },
@@ -77,18 +77,39 @@ function InfoDot({ onPress, label }) {
   );
 }
 
-/* The line at the top: what this report is attached to. */
+/* What this report is attached to, at the top (the owner, 2026-10-05: "I'd
+   like to see the specific card, exercise, word, or whatever references
+   directly at the top"): the thing itself, large — the question and its
+   answer, the card, the word, the video — and where it sits, small, above. */
+export function aboutLines(about) {
+  if (!about) return { where: "", what: "" };
+  const q = about.question;
+  const p = about.params || {};
+  const where = [about.title || about.screen, about.unit, about.lesson ? `Lesson ${about.lesson}` : null,
+                 q && q.step ? q.step : null]
+    .filter((x, k, all) => x && all.indexOf(x) === k).join(" · ");
+  let what = "";
+  if (q) {
+    const ask = q.prompt || q.word;
+    what = [ask, q.answer && q.answer !== ask ? q.answer : null].filter(Boolean).join(" → ");
+  } else if (about.video) what = about.video;
+  else if (p.word) what = String(p.word);
+  else if (p.topic) what = [p.topic, p.section].filter(Boolean).join(" · ");
+  return { where, what };
+}
+
 function AboutLine({ about }) {
   const t = useTheme();
   if (!about) return null;
-  const q = about.question;
-  const where = [about.screen, about.title].filter(Boolean).join(" · ");
-  const what = q ? [q.prompt || q.word, q.answer].filter(Boolean).join(" → ") : "";
+  const { where, what } = aboutLines(about);
   return (
     <View testID="feedback-about"
           style={{ backgroundColor: t.surface, borderRadius: radius.md, padding: 12, marginBottom: 6 }}>
       <Muted size={12}>{where || "This screen"}</Muted>
-      {what ? <Text style={{ color: t.ink, fontSize: T.body, marginTop: 2 }} numberOfLines={2}>{what}</Text> : null}
+      {what ? (
+        <Text testID="feedback-about-what" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", marginTop: 4 }}
+              numberOfLines={3}>{what}</Text>
+      ) : null}
     </View>
   );
 }

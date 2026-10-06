@@ -146,7 +146,9 @@ const POSE_TEXT = {
   cheer: "Celebrating: both paws raised in triumph, eyes closed with joy, a big smile.",
   // The end of a scored run, one face a mark out of five (core/guide.js reactionFor).
   smile: "Beaming: a big delighted open-mouthed smile, paws together at his chest, tail up.",
-  thumbs: "Giving a thumbs up with one paw held out towards the viewer, a friendly satisfied smile.",
+  /* The first drawing gave him three front legs — two on the ground and a
+     third doing the thumbs up (the owner, 2026-10-05). Say the count. */
+  thumbs: "Sitting up on his hind legs, giving a thumbs up with his right front paw raised beside his chest, his left front paw resting on his tummy, a friendly satisfied smile. He has exactly four legs: two hind legs he sits on and two front paws — the thumbs up is one of the two front paws, never an extra limb.",
   shrug: "Shrugging: both paws turned up at his sides, shoulders raised, a lopsided 'oh well' half-smile.",
   wince: "Wincing, 'oof': eyes squeezed shut, teeth gritted in a sheepish grimace, one paw at the back of his head. Rueful, not sad.",
 };
@@ -314,7 +316,8 @@ async function poses() {
   const base = need(sheet("teddy"));
   const dir = path.join(ART, "guide");
   fs.mkdirSync(dir, { recursive: true });
-  for (const pose of POSES) {
+  const only = arg("--only");
+  for (const pose of POSES.filter((p) => !only || only.split(",").includes(p))) {
     const file = path.join(dir, `${pose}.png`);
     if (fs.existsSync(file) && !has("--again")) { console.log(`kept ${rel(file)}`); continue; }
     /* On a green screen, keyed out at ship (§30bg): gpt-image-2 refuses a
@@ -450,4 +453,4 @@ else if (has("--poses")) await poses();
 else if (has("--scenes")) await scenes();
 else if (has("--words")) await words();
 else if (has("--ship")) ship();
-else console.log("usage: --sheet <id> [--n 3] | --poses [--again] | --scenes [--only a,b] [--again] | --words [--only a,b] [--quality high] | --ship");
+else console.log("usage: --sheet <id> [--n 3] | --poses [--only a,b] [--again] | --scenes [--only a,b] [--again] | --words [--only a,b] [--quality high] | --ship");

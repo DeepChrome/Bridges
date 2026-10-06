@@ -74,6 +74,15 @@ describe("a list round with a way back", () => {
     expect(n.replace).toHaveBeenCalledWith("Video", { unitId: u.id, index: 0 });
   });
 
+  /* The card on screen is what a tester's report is about (about.js). */
+  it("registers the card on screen for a report", async () => {
+    const { currentAbout } = require("../src/about");
+    await withProfile(<Study navigation={nav}
+      route={{ params: { round: "list", words: ["город"], title: "Gaps" } }} />);
+    await screen.findByText("Show");
+    expect(currentAbout()).toMatchObject({ kind: "word card", word: "город", step: "1 of 1" });
+  });
+
   /* The back of a word card carries the grammar line under the word, and the
      front does not — the class and gender would be a hint before the turn. */
   it("says what the word is on the back, not the front", async () => {

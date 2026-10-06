@@ -73,7 +73,7 @@ it("sends severity, kind, the fix, recordings and the question it is about", asy
   expect(fb.report).not.toHaveBeenCalled();
   // The scale is explained behind the (i).
   await act(async () => { fireEvent.press(screen.getByTestId("feedback-severity-info")); });
-  expect(screen.getByText(/teaches something badly false/)).toBeTruthy();
+  expect(screen.getByText(/teaches something seriously wrong/)).toBeTruthy();
   await act(async () => { fireEvent.press(screen.getByTestId("feedback-sev-major")); });
   await act(async () => { fireEvent.press(screen.getByTestId("feedback-kind-pronunciation")); });
   for (let k = 0; k < 2; k++) {
@@ -91,6 +91,19 @@ it("sends severity, kind, the fix, recordings and the question it is about", asy
   expect(sent).toMatchObject({ severity: "major", kind: "pronunciation", fix: "ско́лько", about });
   expect(sent.clips).toHaveLength(2);
   expect(await screen.findByTestId("feedback-sent")).toBeTruthy();
+});
+
+/* The top of the form names the thing itself, not only the screen (the
+   owner, 2026-10-05: a flashcard's report said only "Cards · Study"). */
+it("names the card, the video or the word at the top", () => {
+  const { aboutLines } = require("../src/screens/Feedback");
+  expect(aboutLines({ screen: "Study", title: "Cards",
+    question: { kind: "word card", word: "книга", answer: "book", step: "3 of 20" } }))
+    .toEqual({ where: "Cards · 3 of 20", what: "книга → book" });
+  expect(aboutLines({ screen: "Video", title: "Episode", unit: "Family & People", lesson: 2,
+    video: "Learn Russian with Family Photos" }))
+    .toEqual({ where: "Episode · Family & People · Lesson 2", what: "Learn Russian with Family Photos" });
+  expect(aboutLines({ screen: "Word", params: { word: "дом" } }).what).toBe("дом");
 });
 
 /* What the flag attaches is what the screen registered (about.js). */

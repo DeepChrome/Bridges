@@ -598,36 +598,40 @@ group("the scheduler");
   ok(S.cardFor(split) === split.produce && S.cardFor({ recognise: conv }) === conv && S.cardFor(undefined) === null,
      "cardFor reads the one card, the strongest of a still-split entry");
 
-  /* The trouble rule (the owner, 2026-09-24): Again is normal early, so a
-     card is judged only after TROUBLE_MIN_REPS answers, and then by lapses.
-     Five Agains in a row on a new card are learning steps, not a leech. */
+  /* The trouble rule (the owner, 2026-09-24, 2026-10-06): Again is normal
+     early, so a card is judged only after TROUBLE_MIN_REPS answers, and then
+     by its score — still under TROUBLE_SCORE. Five Agains in a row on a new
+     card are learning steps, not trouble. */
   let e = {}, tr = {};
   let t = T0;
   for (let i = 0; i < 5; i++) { ({ seen: e, trouble: tr } = S.applyGrade(e, tr, "слово", "produce", 1, t, opts)); t += 2 * DAY; }
   ok(!S.wordTrouble(e["слово"]), "five early Agains do not bank a word as trouble");
   ok(Object.keys(e["слово"]).length === 1 && e["слово"].recognise.reps === 5,
      "a grade asked through the meaning lands on the one card", JSON.stringify(e["слово"]));
-  /* A word that keeps lapsing after it has been seen plenty is. */
-  let f = {}, ft = {};
-  let ft0 = T0;
-  for (let i = 0; i < 12; i++) {
-    const g = i % 4 === 3 ? 1 : 3;                     // Good, Good, Good, Again …
-    ({ seen: f, trouble: ft } = S.applyGrade(f, ft, "слово", "recognise", g, ft0, opts));
-    ft0 = f["слово"].recognise.dueAt + 1;
-  }
-  ok(f["слово"].recognise.reps >= S.TROUBLE_MIN_REPS && f["слово"].recognise.lapses >= S.TROUBLE_LAPSES,
-     "…the fixture is a card seen a dozen times that lapsed three", JSON.stringify(f["слово"].recognise));
-  ok(S.wordTrouble(f["слово"]) && ft["слово"] >= 1, "and that one is trouble");
+  /* A word seen plenty whose score is still low is; the same history with a
+     score that has since recovered is not — lapses alone no longer hold a
+     word in the bank. */
+  const card = (s, reps, lapses = 0) => ({ state: S.REVIEW, s, d: 6, reps, lapses, steps: 0,
+                                           lastAt: T0, dueAt: T0 + DAY });
+  ok(S.familiarity(card(0.4, 12, 4)) < S.TROUBLE_SCORE, "…the fixture scores under the bar",
+     String(S.familiarity(card(0.4, 12, 4))));
+  ok(S.wordTrouble({ recognise: card(0.4, 12, 4) }), "seen a dozen times and still under 20: trouble");
+  ok(!S.wordTrouble({ recognise: card(40, 12, 4) }), "four lapses, but held for forty days now: not trouble");
+  ok(!S.wordTrouble({ recognise: card(0.4, S.TROUBLE_MIN_REPS - 1, 4) }), "too few answers to judge: not trouble");
   ok(!S.wordTrouble({ recognise: good }), "a word answered once is not");
+  /* The score reads against the word's own horizon (familiarity): a common
+     word's day of stability is worth more of its score than a rare one's. */
+  ok(S.isTrouble(card(1, 12)) && !S.isTrouble(card(1, 12), 50),
+     "the same stability is trouble for a rare word and not for a common one");
   /* The bank is capped and ordered by how badly a word is going. */
   const many = {};
-  for (let i = 0; i < 30; i++) {
-    many["t" + i] = { recognise: { ...f["слово"].recognise, lapses: 3 + (i % 5), reps: 12 } };
-  }
+  for (let i = 0; i < 30; i++) many["t" + i] = { recognise: card(0.1 + (i % 6) * 0.08, 12, i % 4) };
   const bank = S.troubleWords(many);
   ok(bank.length === S.TROUBLE_CAP, `the bank holds at most ${S.TROUBLE_CAP}`, String(bank.length));
   ok(S.troubleRank(many[bank[0]].recognise) >= S.troubleRank(many[bank[bank.length - 1]].recognise),
      "worst first");
+  ok(S.familiarity(many[bank[0]].recognise) <= S.familiarity(many[bank[bank.length - 1]].recognise),
+     "…the lowest score at the top");
   ok(S.troubleWords({ дом: { recognise: good } }).length === 0, "and nothing in it before a word has earned it");
   const g2 = S.applyGrade(e, tr, "слово", "recognise", 3, t, opts);
   ok(g2.seen["слово"].recognise.reps === e["слово"].recognise.reps + 1 && g2.prev === e["слово"].recognise,

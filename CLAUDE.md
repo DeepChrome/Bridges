@@ -4456,12 +4456,13 @@ in another. What each was, and the rule it left.
 - **Trouble is judged, not counted** (`core/scheduler.js`). *"It's very
   normal to press Again the first 5–7 times… if you're still pressing Again
   after many many times, especially compared to the other cards."* A card is
-  not trouble before `TROUBLE_MIN_REPS` (8) answers, and then on
-  `TROUBLE_LAPSES` (3) lapses — learning-step Agains are not lapses, which is
-  what makes the early ones free — or a difficulty near the ceiling;
-  `troubleWords` ranks the candidates by lapses per answer and keeps the
-  worst `TROUBLE_CAP` (20). The flag on a card and the "Trouble words" set
-  read one list.
+  not trouble before `TROUBLE_MIN_REPS` (8) answers, and then only while its
+  familiarity is under `TROUBLE_SCORE` (20) — the score on the card, read
+  against the word's own frequency horizon (2026-10-06: *"some minimum
+  number of exposures and still the word is under 20%"*). It was three
+  lapses or a high difficulty, and a lapse count never goes down, so a word
+  learned long since stayed in the bank. `troubleWords(seen, rankOf)` ranks
+  the lowest score first and keeps the worst `TROUBLE_CAP` (20).
 - **The path draws no road through the middle of a fork.** The centre line
   ran behind the ranks with a gap through each, and read as a stub to
   nowhere: *"a line should only be there if it leads to a node."* The road

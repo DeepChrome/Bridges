@@ -92,7 +92,7 @@ export function tutorProfile(st) {
     chapter: Math.min(pos.stage, STAGES.length - 1) + 1,
     lesson: Number.isFinite(pos.lesson) ? pos.lesson + 1 : null,
     level: talkLevelFor(st),
-    trouble: troubleWords(seen).concat(st.pinned || []).filter((w, k, a) => a.indexOf(w) === k).slice(0, LIST_N),
+    trouble: troubleWords(seen, rankOf).concat(st.pinned || []).filter((w, k, a) => a.indexOf(w) === k).slice(0, LIST_N),
     strong,
     misses: (st.misses || []).slice(0, 12).map((m) => ({ kind: m.kind, prompt: m.prompt, answer: m.answer, said: m.said })),
     notes: (st.tutorNotes || []).slice(0, NOTES_KEPT),

@@ -93,7 +93,8 @@ describe("which cards a set holds", () => {
   /* The trouble round: the trouble words whether or not they are due, worst
      first, as their own session. */
   it("deals a round of trouble words on request, due or not", () => {
-    const bad = { dueAt: now + 5 * DAY, lastAt: now - DAY, s: 2, d: 9.5, state: REVIEW, steps: 0, reps: 12, lapses: 5 };
+    // Trouble: answered a dozen times and still scoring under 20 (scheduler.js).
+    const bad = { dueAt: now + 5 * DAY, lastAt: now - DAY, s: 0.3, d: 9.5, state: REVIEW, steps: 0, reps: 12, lapses: 5 };
     const s = sessionFor({ ...st, seen: { ...st.seen, "город": { recognise: bad } } }, { round: "trouble" });
     expect(s.practice).toBe(true);
     expect(s.items.map((x) => x.word)).toContain("город");

@@ -72,7 +72,7 @@ export { familiarityColor, Familiarity };
 /* The scheduler's bank, worst first and capped, then whatever the learner
    pinned by hand. */
 export function troubleWords(st) {
-  const out = troubleBank(st.seen);
+  const out = troubleBank(st.seen, rankOf);
   (st.pinned || []).forEach((w) => { if (!out.includes(w)) out.push(w); });
   return out;
 }

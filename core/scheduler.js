@@ -387,30 +387,36 @@ export const dayDone = (state, due, day) => (due || 0) === 0 && workedOn(state, 
  * 20."*
  *
  * So a card is not trouble until it has been *seen enough to judge* —
- * TROUBLE_MIN_REPS answers — and then only when it keeps failing: TROUBLE_LAPSES
- * lapses (an Again on a card that had graduated; learning-step Agains are not
- * lapses, which is what makes the early ones free), or a difficulty the
- * scheduler has pushed near its ceiling. `troubleRank` orders the candidates by
- * how badly they are going — lapses per answer, then difficulty — and
- * `troubleWords` keeps the worst TROUBLE_CAP of them: the bank is the words
- * that stand out *against the others*, not everything that ever missed. The
- * flag on a card and the "Trouble words" set read the same list. */
+ * TROUBLE_MIN_REPS answers — and then only while its familiarity, the 0–100
+ * score on the card, is still under TROUBLE_SCORE (the owner, 2026-10-06:
+ * "some minimum number of exposures and still the word is under 20%"). The
+ * score is stability against the word's own horizon, so it is what the
+ * learner sees and it recovers: a word that lapsed three times and has since
+ * been held for a month leaves the bank, where the old lapse count kept it
+ * there for good. `troubleRank` puts the lowest score first, then the most
+ * lapses per answer, and `troubleWords` keeps the worst TROUBLE_CAP. The flag
+ * on a card and the "Trouble words" set read the same list. `rank` is the
+ * lemma's frequency rank where the caller knows it (familiarity's horizon);
+ * without it a word is judged on the full horizon, the stricter reading. */
 export const TROUBLE_MIN_REPS = 8;
-export const TROUBLE_LAPSES = 3;
+export const TROUBLE_SCORE = 20;
 export const TROUBLE_CAP = 20;
-export function isTrouble(card) {
+export function isTrouble(card, rank) {
   if (!card || (card.reps || 0) < TROUBLE_MIN_REPS) return false;
-  return (card.lapses || 0) >= TROUBLE_LAPSES || (card.d || 0) >= 9;
+  const score = familiarity(card, rank);
+  return score !== null && score < TROUBLE_SCORE;
 }
-export const troubleRank = (card) =>
-  (card ? ((card.lapses || 0) / Math.max(1, card.reps || 0)) * 10 + (card.d || 0) / 10 : 0);
-export const wordTrouble = (entry) => cardsOf(entry).some(({ card }) => isTrouble(card));
-/* The bank: every word whose card is trouble, worst first, at most TROUBLE_CAP. */
-export function troubleWords(seen) {
+export const troubleRank = (card, rank) =>
+  (card ? (TROUBLE_SCORE - (familiarity(card, rank) || 0)) + ((card.lapses || 0) / Math.max(1, card.reps || 0)) : 0);
+export const wordTrouble = (entry, rank) => cardsOf(entry).some(({ card }) => isTrouble(card, rank));
+/* The bank: every word whose card is trouble, worst first, at most TROUBLE_CAP.
+   `rankOf(word)` gives a word's frequency rank where the caller has one. */
+export function troubleWords(seen, rankOf) {
   const out = [];
   for (const w in seen || {}) {
     const card = cardFor(seen[w]);
-    if (isTrouble(card)) out.push({ w, r: troubleRank(card) });
+    const rank = rankOf ? rankOf(w) : undefined;
+    if (isTrouble(card, rank)) out.push({ w, r: troubleRank(card, rank) });
   }
   return out.sort((a, b) => b.r - a.r).slice(0, TROUBLE_CAP).map((x) => x.w);
 }

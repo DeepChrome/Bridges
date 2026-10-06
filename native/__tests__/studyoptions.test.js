@@ -87,7 +87,7 @@ describe("the card says what it is", () => {
   /* A troubled card does not say so (2026-09-29, the owner: "the user doesn't
      need to be reminded"); it is in the bank, not on the card. */
   it("does not flag a troubled card", async () => {
-    await withProfile({ seen: { [WORD]: { recognise: due({ lapses: 4, reps: 12 }) } } });
+    await withProfile({ seen: { [WORD]: { recognise: due({ lapses: 4, reps: 12, s: 0.3 }) } } });
     await screen.findByText("Show");
     expect(screen.queryByTestId("flag-trouble")).toBeNull();
     expect(screen.queryByTestId("flag-new")).toBeNull();
@@ -294,7 +294,8 @@ const goalOf = (owed, done = 0) => ({ day: require("@core/scheduler").dayOf(now)
 
 describe("after the day's pile", () => {
   it("offers a round of trouble words, which deals them though none is due", async () => {
-    const bad = due({ dueAt: now + 5 * DAY, lapses: 5, reps: 12, d: 9.5 });
+    // Trouble: answered a dozen times and still scoring under 20 (scheduler.js).
+    const bad = due({ dueAt: now + 5 * DAY, lapses: 5, reps: 12, d: 9.5, s: 0.3 });
     await withProfile({ seen: { [WORD]: { recognise: bad } }, goal: goalOf(0) });
     expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     await act(async () => { fireEvent.press(screen.getByTestId("trouble-round")); });

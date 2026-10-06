@@ -334,7 +334,15 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
     return practiceSession({ seen: st.seen, words: troubleWords(st), dirs: st.flash || DEFAULT_FRONTS });
   }
   if (round === "list" || round === "known") {
-    const cards = cardsIn(st, [], round === "known" ? knownWords(st).slice(0, QUEUE_DEFAULTS.sessionSize) : (list || []));
+    /* A list handed in — the video's words, a lesson's — leaves out what is
+       already held (the owner, 2026-10-05: "if the user already has like an
+       80+ on a card, they probably don't need to view it before the video"). */
+    const held = (w) => {
+      const c = cardFor((st.seen || {})[w]);
+      return !!c && (familiarity(c, rankOf(w)) || 0) >= MASTERED_AT;
+    };
+    const cards = cardsIn(st, [], round === "known" ? knownWords(st).slice(0, QUEUE_DEFAULTS.sessionSize)
+      : (list || []).filter((w) => !held(w)));
     const faces = {};
     for (const c of cards) faces[c.b] = c;
     return { ...practiceSession({ seen: st.seen, words: cards.map((c) => c.b), dirs: st.flash || DEFAULT_FRONTS,
@@ -676,10 +684,6 @@ export default function Study({ navigation, route }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [st.sets, st.decks, st.seen, st.cardKinds]);
   const trouble = troubleWords(st);
-  // Cards held, across everything studied (MASTERED_AT), for the header.
-  const masteredAll = useMemo(() => masteryOf(st, Object.keys(st.seen || {}).map((b) => ({ b }))).mastered,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [st.seen]);
   // The day's goal as it stands, and whether today is a study day.
   const goal = goalNow(st);
   const studyDay = isStudyDay(goal.day, st.studyDays);
@@ -1017,22 +1021,13 @@ export default function Study({ navigation, route }) {
           with a "Change" button, which the owner read as a menu; the cog is
           what every other screen means by "options". */}
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        {/* The heading alone (the owner, 2026-10-05: "remove the top left
+            where it says mastered and total cards… I just like the
+            standalone system on the top right"). The tally beside the bar
+            counts the sitting; the start panel and the tab badge carry the
+            day's goal. */}
         <View style={{ flex: 1 }}>
           <Text testID="study-heading" style={{ color: t.ink, fontSize: 15 }}>{heading}</Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-            <Muted testID="pile">
-              {session && session.practice ? `${items.length} cards`
-                /* The day's goal, counting down (2026-10-05): the number the
-                   learner is fighting, the same one the tab badges. */
-                : !studyDay ? "Not a study day"
-                  : goal.owed ? `${goal.owed} to go today` : "Daily goal met"}
-            </Muted>
-            {/* How many words are held — the number a learner wants to see grow
-                (the owner, 2026-10-02). One quiet figure, not a panel. */}
-            {masteredAll ? (
-              <Muted testID="mastered-count" style={{ color: t.good }}>{` · ${masteredAll} mastered`}</Muted>
-            ) : null}
-          </View>
         </View>
         <CogButton testID="study-cog" label="Study options" onPress={() => setPicker(true)} />
       </View>

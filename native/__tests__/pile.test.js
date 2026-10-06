@@ -58,8 +58,9 @@ it("counts every card due today, and runs on past the first twenty", async () =>
   expect(figure("done")).toBe("20");
   expect(figure("left")).toBe("5 left");
   expect(figure("total")).toBe("25");
-  // …and the day's goal has come down by the cards answered.
-  expect(screen.getByTestId("pile")).toHaveTextContent("5 to go today");
+  // The tally is the one count on screen (2026-10-05): no second line of
+  // totals under the heading.
+  expect(screen.queryByTestId("pile")).toBeNull();
 });
 
 it("an Again is one card coming back, and the total does not grow", async () => {

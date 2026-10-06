@@ -353,7 +353,6 @@ describe("after the day's pile", () => {
     await act(async () => { fireEvent.press(screen.getByTestId("grade-3")); });
     expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     expect(screen.getByTestId("study-today").props.children).toBe("1 card today");
-    expect(screen.getByTestId("pile").props.children).toBe("Daily goal met");
     expect(screen.getByTestId("keep-going")).toBeTruthy();
     // New words, ahead of the day's ration.
     await act(async () => { fireEvent.press(screen.getByTestId("study-ahead")); });

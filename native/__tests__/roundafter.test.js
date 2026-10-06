@@ -9,8 +9,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Study from "../src/screens/Study";
+import Study, { sessionFor } from "../src/screens/Study";
 import { SCHEMA_VERSION } from "@core/state";
+import { REVIEW, DAY } from "@core/scheduler";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const base = {
@@ -18,10 +19,10 @@ const base = {
   mined: {}, dev: true, xp: 0, streak: 0,
 };
 
-async function withProfile(ui) {
+async function withProfile(ui, state = {}) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
     list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
-  await AsyncStorage.setItem("rb.state.p1", JSON.stringify(base));
+  await AsyncStorage.setItem("rb.state.p1", JSON.stringify({ ...base, ...state }));
   return await render(<SessionProvider>{ui}</SessionProvider>);
 }
 
@@ -72,6 +73,24 @@ describe("a list round with a way back", () => {
     expect((await global.__db.saved("p1")).unit[u.id].lessons[0].p).toBe(true);
     await act(async () => { fireEvent.press(on); });
     expect(n.replace).toHaveBeenCalledWith("Video", { unitId: u.id, index: 0 });
+  });
+
+  /* A card already held (80+) is left out of a list handed in (the owner,
+     2026-10-05: "they probably don't need to view it before the video"). */
+  const held = () => ({ recognise: { state: REVIEW, s: 400, d: 3, reps: 9, lapses: 0, steps: 0,
+                                     lastAt: Date.now() - DAY, dueAt: Date.now() + 300 * DAY } });
+  it("leaves out the cards already mastered", () => {
+    const st = { ...base, flash: ["recognise"], seen: { "город": held() } };
+    const s = sessionFor(st, { round: "list", words: ["город", "хотеть"], title: "Before the video" });
+    expect(s.items.map((x) => x.word)).toEqual(["хотеть"]);
+  });
+
+  it("goes straight to the way on when every card is mastered", async () => {
+    await withProfile(<Study navigation={nav}
+      route={{ params: { round: "list", words: ["город"], title: "Before the video", after: "Continue to video" } }} />,
+      { seen: { "город": held() } });
+    expect(await screen.findByTestId("round-after")).toBeTruthy();
+    expect(screen.queryByText("Show")).toBeNull();
   });
 
   /* The card on screen is what a tester's report is about (about.js). */

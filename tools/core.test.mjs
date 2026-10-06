@@ -1537,16 +1537,19 @@ group("form questions");
   ok(namesTheForm, "the question names the form and can show the table");
   ok(neverHeadword, "the form asked for is never the headword on screen");
 
-  // …and no option repeats the prompt, which would be a free elimination.
+  // …and no option repeats the prompt, which would be a free elimination. The
+  // quiz's form question is written now; the chosen ones are what opens a
+  // full grammar run.
   let promptAsOption = 0, drawn = 0;
   for (const s of STAGES.slice(1)) {
     const spec = Q.formSpec(s.core);
     if (!spec || spec.drill) continue;
-    for (let k = 0; k < 40; k++) {
-      const q = Q.formPrompt(s.core, 0);
-      if (!q || !q.options) continue;
-      drawn++;
-      if (q.options.some((o) => fold(o.label) === fold(q.prompt))) promptAsOption++;
+    for (let k = 0; k < 15; k++) {
+      for (const q of Q.grammarRun(s.core, null)) {
+        if (!q.options) continue;
+        drawn++;
+        if (q.options.some((o) => fold(o.label) === fold(q.prompt))) promptAsOption++;
+      }
     }
   }
   ok(drawn > 0 && promptAsOption === 0,
@@ -1963,8 +1966,9 @@ group("a chapter's grammar run");
     if (run.length < GRAMMAR_N) short.push(`${u.id} ${run.length}`);
     const keys = run.filter((q) => q.kind === "form").map((q) => `${q.i}:${q.at}`);
     if (new Set(keys).size !== keys.length) bad.push(`${u.id}: the same word and cell twice`);
-    const choose = Math.ceil(GRAMMAR_N * GRAMMAR_CHOOSE);
-    if (run.some((q, n) => n < choose ? q.typed : false)) order.push(u.id);
+    const choose = Math.floor(GRAMMAR_N * GRAMMAR_CHOOSE);
+    // One chosen to open, every other written (the owner, 2026-10-06).
+    if (run.some((q, n) => (n < choose ? q.typed : !q.typed && q.kind !== "stress"))) order.push(u.id);
     if (!run.every((q) => q.note && q.note.title)) bad.push(`${u.id}: a question without the card`);
     const route = routeOf(u);
     for (const q of run) if (q.kind === "form" && !route.has(q.i)) strangers.push(`${u.id}:${L[q.i].b}`);
@@ -1972,7 +1976,19 @@ group("a chapter's grammar run");
   ok(!bad.length, "every chapter from 2 on asks its point, never the same word and cell twice", bad.slice(0, 4).join("; "));
   ok(!short.length, `every run fills its ${GRAMMAR_N}`, short.join(", "));
   ok(!twice.length, "no run asks one question twice, chosen and then written", twice.join(", "));
-  ok(!order.length, "the first questions are chosen and the written ones come last", order.join(", "));
+  ok(!order.length, "a run opens on one chosen question and writes the rest", order.join(", "));
+  // The two after a lesson's card are both written, and so is the quiz's
+  // form question and its drills.
+  {
+    const u = STAGES[2].core;
+    const lesson = Q.grammarRun(u, 0, 2);
+    ok(lesson.length && lesson.every((q) => q.typed), "a lesson's two grammar questions are written",
+       `${u.id} ` + JSON.stringify(lesson.map((q) => [q.kind, q.typed, q.ask])));
+    const quiz = Q.quizSteps(u, 0);
+    const grammar = quiz.filter((q) => q.kind === "form" || (q.drill && q.kind !== "stress"));
+    ok(grammar.length && grammar.every((q) => q.typed), "a quiz's form and drill questions are written",
+       grammar.map((q) => `${q.kind}:${!!q.typed}`).join(","));
+  }
   ok(!strangers.length, "a form question only asks about a word the route has taught", strangers.slice(0, 6).join(", "));
   // A lesson with a verb to conjugate starts its run on it (a lesson of nouns
   // has nothing for a present-tense point and starts on the unit's verbs).

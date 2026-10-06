@@ -840,11 +840,21 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                   out as the verdict landed; this is the button for once more.
                   At the end of the verdict's own line: on a row of its own it
                   was a lone circle taking a line for nothing (2026-10-01). */}
-              {right !== null && ((verdict && verdict.as) || answerAudioText(q, answer)) ? (
-                <View testID="verdict-speaker" style={{ marginLeft: "auto" }}>
-                  <Speaker text={(verdict && verdict.as) || answerAudioText(q, answer)} size={36} />
-                </View>
-              ) : null}
+              {/* …and More beside it: the word's whole entry, every form in
+                  its tables, to look over before going on (the owner,
+                  2026-10-06: "a 'more' button next to the speaker that will
+                  pull up the full detail entry for that word"). */}
+              <View style={{ marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 6 }}>
+                {right !== null && qWord && words ? (
+                  <Btn kind="ghost" testID="verdict-more" label="More"
+                       onPress={() => words.openFull(q.i)} />
+                ) : null}
+                {right !== null && ((verdict && verdict.as) || answerAudioText(q, answer)) ? (
+                  <View testID="verdict-speaker">
+                    <Speaker text={(verdict && verdict.as) || answerAudioText(q, answer)} size={36} />
+                  </View>
+                ) : null}
+              </View>
             </View>
             {verdict && verdict.note ? (
               <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>{verdict.note}</Text>
@@ -1080,15 +1090,19 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
           </Muted>
         ) : null}
       </View>
-      {forward ? (
-        <Btn kind="pri" label={onContinue ? (continueLabel || "Continue") : "Done"}
+      {/* With a way on, it is the one primary button whatever the score and
+          trying again the quieter one beside it — no Back as well (the
+          owner, 2026-10-06). A run that failed with nowhere to go offers the
+          retry first and Back under it. */}
+      {forward || onContinue ? (
+        <Btn kind="pri" block testID="done-continue" label={onContinue ? (continueLabel || "Continue") : "Done"}
              onPress={onContinue || onBack} />
       ) : null}
       {onAgain ? (
-        <Btn kind={forward ? "ghost" : "pri"} label={againLabel || "Again"}
+        <Btn kind={forward || onContinue ? "plain" : "pri"} block testID="done-again" label={againLabel || "Again"}
              style={{ marginTop: 8 }} onPress={onAgain} />
       ) : null}
-      {!forward || onContinue ? (
+      {!forward && !onContinue ? (
         <Btn kind="ghost" label="Back" style={{ marginTop: 8 }} onPress={onBack} />
       ) : null}
     </Screen>

@@ -5727,8 +5727,14 @@ standalone video module)."*
 
 - **`grammarRun(unit, index)`** in `core/questions.js`: ten questions
   (`GRAMMAR_N`) on the card's own `form` (formSpec, so a side quest inherits
-  its chapter's point), the first 60 % chosen and the rest written
-  (`GRAMMAR_CHOOSE`). Words: a lesson's own first, then the unit's, then
+  its chapter's point), written — one chosen to open a full run
+  (`GRAMMAR_CHOOSE`), none in a lesson's two (2026-10-06, the owner: *"It's
+  easy to select a conjugation from a list. It's harder to generate it"*).
+  The quiz's form question and its drills are written too (`FORM_MIX`).
+  The run ends on Continue — the lesson's next step — with Try again the
+  quiet button and no Back; every `Done` with a way on reads that way. Every
+  verdict on a word has **More** beside the speaker: the full entry, all
+  its tables. Words: a lesson's own first, then the unit's, then
   earlier chapters and this chapter's spine — **never a sibling side quest**
   (§30l's rule; the first cut asked «акция» in Emotion). Never the same word
   and cell twice; a `{drill}` card (agreement, aspect) runs that drill on the

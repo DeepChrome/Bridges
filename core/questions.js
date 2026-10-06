@@ -60,20 +60,26 @@ export const speechFrom = (kind, stage, lesson) => {
 /* The form question (P9.20): one per quiz, asking for the form the chapter's
    grammar card teaches — the plural of a chapter-4 noun, the prepositional of a
    chapter-5 noun, the past of a chapter-7 verb — chosen from the word's own
-   paradigm early and typed from `typedFromStage` on. Which form is the card's
+   paradigm. Which form is the card's
    business (`form` in grammar_notes.json); a branch card without one inherits
    its chapter's. Chapter 1's card ("no is") teaches nothing a table can ask, so
-   the question starts with chapter 2. */
-export const FORM_MIX = { fromStage: 1, typedFromStage: 5, perQuiz: 1 };
+   the question starts with chapter 2. Written from the first (the owner,
+   2026-10-06: "It's easy to select a conjugation from a list. It's harder to
+   generate it and that will challenge them"); it was chosen from four until
+   chapter 6. */
+export const FORM_MIX = { fromStage: 1, typedFromStage: 1, perQuiz: 1 };
 /* A word built from its end inside a lesson quiz (core/buildup.js; the owner,
    2026-10-02: "pronunciation exercises… should be mixed in"): the lesson's
    longest word, when it has one worth building. Graded nothing and left out
    of the mark — saying a word is not knowing it. */
 export const PRON_MIX = { fromStage: 0, fromLesson: 1, perQuiz: 1 };
-/* A grammar run (grammarRun): ten questions on the chapter's point, the first
-   60 % chosen and the rest written. */
+/* A grammar run (grammarRun): ten questions on the chapter's point, written —
+   one chosen to open a full run (`GRAMMAR_CHOOSE`, rounded down, so the two
+   questions after a lesson's card are both written). It was 60 % chosen,
+   and choosing a form from a list is recognising it, not producing it (the
+   owner, 2026-10-06). */
 export const GRAMMAR_N = 10;
-export const GRAMMAR_CHOOSE = 0.6;
+export const GRAMMAR_CHOOSE = 0.1;
 /* The rule tried right after its card in every lesson's vocabulary. */
 export const GRAMMAR_IN_LESSON = 2;
 /* The mixed round that closes a lesson's words (vocabSteps): one of the
@@ -1131,13 +1137,14 @@ export function makeQuestions(env) {
     const route = metBy(unit, index);
     // The cases and tenses the route has introduced, for a drill-shaped point.
     const { cells, only } = routeDrill(spec.drill, reached);
-    const choose = Math.ceil(n * GRAMMAR_CHOOSE);
+    const choose = Math.floor(n * GRAMMAR_CHOOSE);
     if (spec.drill) {
       /* A rule the drills already ask (agreement, aspect): the same draw, on
          these words, chosen then written — and never one question twice in
          its two shapes, which `drillKey` cannot see (it keys on the ask). */
       const same = (q) => `${q.prompt}|${q.typed ? q.target : (q.options || []).filter((o) => o.right).map((o) => o.label).join("/")}`;
-      const first = drillQuestions(spec.drill, choose, route, cells, false, only);
+      // `drillQuestions` reads a count of 0 as its default of ten.
+      const first = choose ? drillQuestions(spec.drill, choose, route, cells, false, only) : [];
       const keys = new Set(first.map(same));
       const rest = drillQuestions(spec.drill, n, route, cells, true, only)
         .filter((q) => !keys.has(same(q))).slice(0, n - first.length);
@@ -1754,8 +1761,9 @@ export function makeQuestions(env) {
            a chapter-3 lesson the instrumental (the review, 2026-10-01). */
         const { cells, only } = routeDrill(type, reached);
         const first = k === 1 && before.length ? before : chapter;
-        const q = drillQuestions(type, 1, first, cells, false, only)[0]
-          || drillQuestions(type, 1, met, cells, false, only)[0];
+        // Written, as the form question is: producing the form is the skill.
+        const q = drillQuestions(type, 1, first, cells, true, only)[0]
+          || drillQuestions(type, 1, met, cells, true, only)[0];
         if (q) out.splice(slotApart(out, q), 0, { ...q, drill: true });
       });
     }

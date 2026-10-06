@@ -112,4 +112,20 @@ describe("the result screen", () => {
     await act(async () => { fireEvent.press(screen.getByText("Try again")); });
     expect(onAgain).toHaveBeenCalled();
   });
+
+  /* With a way on, Continue is the primary button even after a low score,
+     Try again the neutral one, and there is no Back (the owner, 2026-10-06,
+     of the grammar drills). */
+  it("offers Continue first and Try again second, with no Back", async () => {
+    const onContinue = jest.fn(), onAgain = jest.fn(), onBack = jest.fn();
+    await render(<Done title="Grammar" score={60} passed={false} onContinue={onContinue}
+                       onAgain={onAgain} againLabel="Try again" onBack={onBack} />);
+    const go = await screen.findByTestId("done-continue");
+    expect(screen.getByText("Continue")).toBeTruthy();
+    expect(screen.getByTestId("done-again")).toBeTruthy();
+    expect(screen.queryByText("Back")).toBeNull();
+    await act(async () => { fireEvent.press(go); });
+    expect(onContinue).toHaveBeenCalled();
+    expect(onBack).not.toHaveBeenCalled();
+  });
 });

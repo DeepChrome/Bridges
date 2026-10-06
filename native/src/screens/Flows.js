@@ -987,6 +987,16 @@ export function GrammarFlow({ route, navigation }) {
     return <Done title="No grammar practice here yet" onBack={() => navigation.goBack()} />;
   }
   if (result) {
+    /* Continue is the way on — the lesson's next step, the next lesson after
+       its last, or back where a unit's own run was opened — and Try again the
+       quieter choice (the owner, 2026-10-06: "Remove back and place
+       continue… try again being the less important more neutral looking
+       option"). Grammar is an optional step, so a low score does not hold
+       the lesson up. */
+    const cs = lesson ? components(st, unit, index) : [];
+    const at = cs.findIndex((c) => c.id === "grammar");
+    const after = lesson ? cs.find((c, k) => k > at && !c.done) || null : null;
+    const nextLesson = lesson && index + 1 < lessonCount(unit);
     return (
       <Done
         title={title}
@@ -994,6 +1004,12 @@ export function GrammarFlow({ route, navigation }) {
         score={result.score}
         passed={result.score >= 80}
         onAgain={() => { setResult(null); setSeed(seed + 1); }}
+        againLabel="Try again"
+        /* A lesson's run is only ever opened on the Learn stack (Practice
+           opens the unit's, with no index), so its steps are there. */
+        onContinue={after ? () => navigation.replace(...stepRoute(after.id, unit, index))
+          : nextLesson ? () => navigation.replace(...stepRoute("vocab", unit, index + 1))
+          : () => navigation.goBack()}
         onBack={() => navigation.goBack()}
       />
     );

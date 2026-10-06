@@ -1,5 +1,6 @@
-/* The form question (P9.20): the chapter's grammar asked in the quiz, chosen
- * early and typed later, and the Cases drill kept to what the route has taught.
+/* The form question (P9.20): the chapter's grammar asked in the quiz, written
+ * from the first (2026-10-06); chosen only to open a full grammar run. And the
+ * Cases drill kept to what the route has taught.
  *
  * Own file, per the timeout note in screens.test.js.
  */
@@ -17,6 +18,8 @@ import { fold } from "@core/util";
 
 const chosenChapter = STAGES[FORM_MIX.fromStage];
 const typedChapter = STAGES[FORM_MIX.typedFromStage];
+/* The one chosen form question left: the first of a full grammar run. */
+const chosenForm = (unit) => Q.grammarRun(unit, null).find((q) => q.kind === "form" && q.options);
 
 async function withRunner(q) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
@@ -38,7 +41,7 @@ afterEach(async () => { await flushState(); });
 
 describe("form question", () => {
   it("has a view for both of its shapes", () => {
-    const chosen = Q.formPrompt(chosenChapter.core, 0);
+    const chosen = chosenForm(chosenChapter.core);
     const typed = Q.formPrompt(typedChapter.core, 0);
     expect(chosen && chosen.options && !chosen.typed).toBeTruthy();
     expect(typed && typed.typed && typed.target).toBeTruthy();
@@ -60,7 +63,7 @@ describe("form question", () => {
   });
 
   it("shows the table as a hint that counts", async () => {
-    const q = Q.formPrompt(chosenChapter.core, 0);
+    const q = chosenForm(chosenChapter.core);
     await withRunner(q);
     await screen.findByText(q.ask);
     fireEvent.press(screen.getByTestId("bulb"));

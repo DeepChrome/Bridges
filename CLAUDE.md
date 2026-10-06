@@ -6201,6 +6201,36 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   that, for a card in every lesson, and for no tense or case asked before a
   card has taught it; each check was verified against the old behaviour.
 
+## 30bv. The video as three screens, and the video closes the unit (2026-10-05)
+
+- **The video page is the player and the transcript** (following, with its
+  English, both on by default) and **Continue** at the foot, which marks the
+  video watched and opens **VideoSummary** (Misc.js): the words it says, in
+  their groups with the learner's score on each, its sentences, the rule,
+  and all of it as flashcards. Its Continue opens **VideoQuiz** (Flows.js);
+  the quiz's end pops back past all three (`depth` 3), or one screen when
+  the lesson's "Video questions" step opened it.
+- **Five questions a video** (`tools/build_video_quiz.mjs` →
+  `data/video_quiz.json`, committed; ~$0.04 a video on Sonnet). Mostly what
+  happens or is said, one or two on a word or grammar point as the video
+  uses it; the right answer written first and shuffled on the way out.
+  Refused and asked again: anything but five questions of four distinct
+  options, a line out of range, a negative or trick question, an answer
+  printed in its question, or a right answer given away by its length.
+  Keyed by a hash of the transcript's first 600 lines; `build_site`'s
+  `attach_video_quiz` ships `quiz` on the library entry only while the hash
+  holds, and flags `u.v.quiz` so the lesson can list the step. Nothing is
+  graded into the scheduler (kind `video`).
+- **The unit's video, its words and its questions are the last lesson's
+  steps only** (`components`, `closes`). A unit's words are cut from its
+  video, so offering it after lesson 1 put the video before most of what
+  prepares for it — the owner watched it and met its words afterwards.
+  Earlier lessons no longer list it, which finishes them sooner and undoes
+  nothing.
+- **A verb's personal-forms table is headed by its aspect** (`tableLabel` in
+  core/forms.js): Present for an imperfective, Future for a perfective, both
+  for a verb of both. The title "Present / Future" stays the lookup key.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

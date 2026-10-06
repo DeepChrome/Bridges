@@ -51,12 +51,13 @@ afterEach(async () => { await flushState(); });
 describe("mining a word from a video", () => {
   const unit = unitById(unitVideo.unit);
   const word = Object.keys(unit.v.heard)[0];
+  /* Since 2026-10-05 the video page is the player and the transcript, and a
+     word's moment is opened from its dictionary entry ("Heard in"): the page
+     then offers the one tap. */
+  const atMoment = () => ({ params: { videoId: unitVideo.id, word, at: unit.v.heard[word][0].t } });
 
   it("adds it to review and keeps the video and the second", async () => {
-    await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />);
-    await screen.findByText("Play");
-    // Tapping the word opens its moment; the moment offers the one tap.
-    await act(async () => { fireEvent.press(screen.getByTestId(`heard-${word}`)); });
+    await withProfile(<Video route={atMoment()} navigation={nav} />);
     await act(async () => { fireEvent.press(await screen.findByTestId("mine")); });
 
     await flushState();
@@ -81,10 +82,7 @@ describe("mining a word from a video", () => {
 
   it("mining the same word twice does not duplicate it", async () => {
     const mined = { [word]: { v: unitVideo.id, t: 1234, s: "…" } };
-    await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />,
-                      { pinned: [word], mined });
-    await screen.findByText("Play");
-    await act(async () => { fireEvent.press(screen.getByTestId(`heard-${word}`)); });
+    await withProfile(<Video route={atMoment()} navigation={nav} />, { pinned: [word], mined });
     expect(await screen.findByTestId("mined")).toBeTruthy();
   });
 
@@ -92,10 +90,7 @@ describe("mining a word from a video", () => {
      mature card back to the scheduler as new. */
   it("leaves an existing card's schedule alone", async () => {
     const card = { s: 12, d: 6, due: today() + 9, last: today() - 3, reps: 5, lapses: 1 };
-    await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />,
-                      { seen: { [word]: card } });
-    await screen.findByText("Play");
-    await act(async () => { fireEvent.press(screen.getByTestId(`heard-${word}`)); });
+    await withProfile(<Video route={atMoment()} navigation={nav} />, { seen: { [word]: card } });
     await act(async () => { fireEvent.press(await screen.findByTestId("mine")); });
     await flushState();
     const saved = (await global.__db.saved("p1"));

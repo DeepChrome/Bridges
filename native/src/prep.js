@@ -218,12 +218,12 @@ function WordRow({ word, seen, active, onJump, first }) {
       {score === null
         ? <Muted size={12} testID={`prep-new-${word}`}>new</Muted>
         : <Familiarity score={score} size={30} testID={`prep-score-${word}`} />}
-      <Jump word={word} active={active} onPress={() => onJump(word)} />
+      {onJump ? <Jump word={word} active={active} onPress={() => onJump(word)} /> : null}
     </View>
   );
 }
 
-export function PrepList({ words, seen, unit, focusWord, onJump, onCards, lines, onMoment }) {
+export function PrepList({ words, seen, unit, focusWord, onJump, onCards, lines, onMoment, label = "Before you watch" }) {
   const t = useTheme();
   if (!words.length) return <Muted>No study words are spoken in this one.</Muted>;
   const met = words.filter((w) => seen[w]).length;
@@ -234,7 +234,7 @@ export function PrepList({ words, seen, unit, focusWord, onJump, onCards, lines,
   const note = unit && unit.g;
   return (
     <View testID="prep">
-      <SectionLabel style={{ marginTop: 18 }}>Before you watch</SectionLabel>
+      <SectionLabel style={{ marginTop: 18 }}>{label}</SectionLabel>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 6 }}>
         <Muted testID="prep-met" style={{ flex: 1 }}>{`${met} of ${words.length} met`}</Muted>
         <Btn kind="pri" testID="prep-cards" label="Flashcards" onPress={() => onCards(words)} />

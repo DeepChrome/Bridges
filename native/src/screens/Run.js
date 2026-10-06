@@ -377,6 +377,8 @@ export const VIEWS = {
   shadow: (q, r) => <Shadow q={q} r={r} />,
   // A long word built from its end, a syllable at a time (core/buildup.js).
   buildup: (q, r) => <Build q={q} r={r} />,
+  // What a video said, in English, four options (VideoQuiz in Misc.js).
+  video: asOptions,
 };
 
 /* ------------------------------------------------------------------ runner */
@@ -943,6 +945,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           title={ref.word ? ref.word.w : null}
           sub={ref.word ? firstSense(ref.word) : null}
           tables={ref.tables} mark={ref.mark} facts={ref.facts}
+          aspect={ref.word ? ref.word.a : null}
           note={ref.note} topic={ref.topic}
           /* Guarded as onRule is: a Runner mounted without a navigation (the
              vocabulary step's was, until 2026-10-01) crashed the app on this

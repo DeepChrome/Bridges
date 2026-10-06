@@ -275,8 +275,26 @@ export function components(st, u, i) {
      2026-10-05: "before the video, the user should be able to read the video
      specific flash cards to prep for the video… after the summary").
      Optional, like the summary; done when the round is played through. */
-  if (u.v && prepWords(u).length) out.push({ id: "prep", label: "Video words", optional: true, done: !!l.p });
-  if (u.v) out.push({ id: "video", label: "Video", done: !!s.video, shared: true });
+  /* **The video closes the unit, not every lesson** (the owner, 2026-10-05:
+     "I watched the lesson 1 family video and then the next lesson after was
+     using a lot of cards and sentences from the previous video… words for the
+     video should be taught prior to the video"). A unit's words are cut from
+     its video (§30bf), so only its last lesson has taught them all; offered
+     after lesson 1, the video came before most of what prepares for it. Its
+     words, the video and its questions are the last lesson's steps. Earlier
+     lessons simply no longer list it, which finishes them sooner rather than
+     undoing anything. */
+  const closes = i === lessonCount(u) - 1;
+  if (u.v && closes && prepWords(u).length) out.push({ id: "prep", label: "Video words", optional: true, done: !!l.p });
+  if (u.v && closes) out.push({ id: "video", label: "Video", done: !!s.video, shared: true });
+  /* The video's five questions, after it (the owner, 2026-10-05: "you can
+     throw video questions on that page after the video"). Optional, like
+     every step added to lessons already finished, and shared with the video:
+     done is the run recorded under its key (Flows.js videoQuizKey). */
+  if (u.v && u.v.quiz && closes) {
+    out.push({ id: "vquiz", label: "Video questions", optional: true, shared: true,
+               done: !!((st.drills || {})[`vquiz:${u.v.id}`]) });
+  }
   return out;
 }
 
@@ -296,6 +314,7 @@ export function prepWords(u) {
    none of them can send a step somewhere the others do not. */
 export function stepRoute(id, u, i) {
   if (id === "listen") return ["Scenes", { key: `${u.id}:${i}` }];
+  if (id === "vquiz") return ["VideoQuiz", { unitId: u.id, index: i, videoId: u.v && u.v.id }];
   if (id === "prep") {
     return ["ListCards", { round: "list", words: prepWords(u), title: "Before the video",
                            after: "Continue to video", mark: { unitId: u.id, index: i, id: "prep" },

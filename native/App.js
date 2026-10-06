@@ -37,7 +37,7 @@ import Stats from "./src/screens/Stats";
 import Credits from "./src/screens/Credits";
 import { UnitScreen, LessonScreen } from "./src/screens/Unit";
 import Summary from "./src/screens/Summary";
-import { Immerse, Video, VideoHistory } from "./src/screens/Misc";
+import { Immerse, Video, VideoHistory, VideoSummary } from "./src/screens/Misc";
 import { Mark } from "./src/mark";
 import { APP_TITLE } from "./src/brand";
 import { Gate } from "./src/screens/Gate";
@@ -61,7 +61,7 @@ import { flushState } from "./src/store";
 import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
   QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, SoundDrillFlow,
-  ShadowFlow, BuildDrillFlow, FinalFlow, GrammarFlow, RecapFlow,
+  ShadowFlow, BuildDrillFlow, FinalFlow, GrammarFlow, RecapFlow, VideoQuizFlow,
 } from "./src/screens/Flows";
 
 /* Where the day starts, from this device's own clock (ROADMAP 13.24).
@@ -287,6 +287,8 @@ function LearnStack() {
       <Stack.Screen name="Recap" component={RecapFlow} options={titled("Today's recap")} />
       <Stack.Screen name="Summary" component={Summary} options={{ title: "Summary" }} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
+      <Stack.Screen name="VideoSummary" component={VideoSummary} options={titled("Video summary")} />
+      <Stack.Screen name="VideoQuiz" component={VideoQuizFlow} options={titled("Video questions")} />
       {/* A lesson's or a video's words as one flashcard round (§30bf). Pushed
           on the stack it was asked from, so Back returns there — sending it to
           the Study tab left Back to land on the path. On every stack Video is. */}
@@ -380,6 +382,8 @@ function ImmerseStack() {
       <Stack.Screen name="Episodes" component={Immerse} options={{ title: "Immerse" }} />
       <Stack.Screen name="VideoHistory" component={VideoHistory} options={titled("History")} />
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
+      <Stack.Screen name="VideoSummary" component={VideoSummary} options={titled("Video summary")} />
+      <Stack.Screen name="VideoQuiz" component={VideoQuizFlow} options={titled("Video questions")} />
       <Stack.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
@@ -397,6 +401,8 @@ function StudyStack() {
           and Immerse but not here. Found by routes.test.js, not by anybody
           pressing it; it had been dead since the mined-word link was added. */}
       <Stack.Screen name="Video" component={Video} options={titled("Episode")} />
+      <Stack.Screen name="VideoSummary" component={VideoSummary} options={titled("Video summary")} />
+      <Stack.Screen name="VideoQuiz" component={VideoQuizFlow} options={titled("Video questions")} />
       <Stack.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
@@ -552,6 +558,8 @@ function Shell() {
       {/* The player above the tabs too, so an entry's "Heard in" row opens the
           video over the entry and Back returns to the word, not to the library. */}
       <Root.Screen name="Video" component={Video} options={titled("Episode")} />
+      <Root.Screen name="VideoSummary" component={VideoSummary} options={titled("Video summary")} />
+      <Root.Screen name="VideoQuiz" component={VideoQuizFlow} options={titled("Video questions")} />
       {/* And the grammar reference, so a fact on an entry ("Hard stem",
           "Masculine") opens its rule over the entry from any tab. */}
       <Root.Screen name="Grammar" component={Grammar} options={{ title: "Grammar" }} />

@@ -492,5 +492,7 @@ export const DIRECTION_OF_KIND = {
   /* A mouth drill that grades no word (core/buildup.js) — it is here because
      every kind must name a direction, not because a card is ever written. */
   buildup: "produce",
+  // A question about what a video said (VideoQuiz): comprehension, no word graded.
+  video: "listen",
 };
 export const directionOfKind = (kind) => DIRECTION_OF_KIND[kind] || "recognise";

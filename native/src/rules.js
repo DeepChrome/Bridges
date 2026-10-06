@@ -26,6 +26,7 @@ import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
 import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, Marked, Bubble, Flag } from "./ui";
 import { Linked, navRef } from "./words";
+import { tableLabel } from "@core/forms";
 // The form recordings are looked up where every sound is (audio.js formClip).
 import { say, hasRealAudio, formClip } from "./audio";
 
@@ -172,7 +173,9 @@ export function Table({ table, mark, speak, testID, bare }) {
  * came after it. Each table is a row now, its name and a chevron, and `open`
  * says which start open: the first on an entry, the one the question is about
  * in the bulb's sheet. The learner opens the rest when they want them. */
-export function TableGroup({ tables, speak, mark, open = [0], testID = "tables" }) {
+/* `aspect` is the verb's, so its personal forms are headed Present or Future
+   rather than both (core/forms.js tableLabel). */
+export function TableGroup({ tables, speak, mark, open = [0], testID = "tables", aspect }) {
   const t = useTheme();
   const [shown, setShown] = React.useState(() => new Set(open));
   if (!tables || !tables.length) return null;
@@ -189,10 +192,10 @@ export function TableGroup({ tables, speak, mark, open = [0], testID = "tables" 
           <View key={k}>
             <Pressable testID={`${testID}-head-${k}`} onPress={() => toggle(k)}
                        accessibilityRole="button" accessibilityState={{ expanded: on }}
-                       accessibilityLabel={tb.title}
+                       accessibilityLabel={tableLabel(tb.title, aspect)}
                        style={({ pressed }) => ({ flexDirection: "row", alignItems: "center",
                          minHeight: 44, opacity: pressed ? 0.6 : 1 })}>
-              <Text style={{ flex: 1, color: t.ink, fontSize: T.body, fontWeight: "700" }}>{tb.title}</Text>
+              <Text style={{ flex: 1, color: t.ink, fontSize: T.body, fontWeight: "700" }}>{tableLabel(tb.title, aspect)}</Text>
               <Text style={{ color: t.ink3, fontSize: T.body }}>{on ? "▾" : "▸"}</Text>
             </Pressable>
             {on ? (
@@ -387,7 +390,7 @@ export function StandardWhy({ ex, onRule, onWord, testID = "standard-why" }) {
  * Nothing is withheld (§30az). Any part may be absent; the sheet is only
  * offered when at least one is there (`hasReference`), because a bulb that
  * opens on nothing is worse than no bulb. */
-export function Reference({ title, sub, tables, mark, facts, note, topic, onTopic, onClose }) {
+export function Reference({ title, sub, tables, mark, facts, note, topic, onTopic, onClose, aspect }) {
   const t = useTheme();
   return (
     <Sheet onClose={onClose} title="Reference"
@@ -401,7 +404,7 @@ export function Reference({ title, sub, tables, mark, facts, note, topic, onTopi
       <Facts facts={facts} testID="ref-facts" onLeave={onClose} />
       {/* The table the question is about opens; the word's others are a tap
           away rather than stacked under it. */}
-      <TableGroup tables={tables} speak mark={mark} testID="ref-table"
+      <TableGroup tables={tables} speak mark={mark} testID="ref-table" aspect={aspect}
                   open={[Math.max(0, (tables || []).indexOf(mark && mark.table))]} />
       {note ? (
         <View style={{ marginTop: tables && tables.length ? 20 : 0 }}>

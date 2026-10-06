@@ -8,6 +8,7 @@ import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick, Text } from "../ui";
 import {
   UN, lessonCount, lessonWords, lessonDone, components, nextComponent, stepRoute, unitFineProgress, L, linesWith, hasGrammar,
+  nextLesson,
 } from "../data";
 
 export function UnitScreen({ route, navigation }) {
@@ -87,7 +88,7 @@ export function UnitScreen({ route, navigation }) {
 
 const STEP_LABEL = { vocab: "Start the vocabulary", summary: "Review the summary", quiz: "Take the quiz", video: "Watch the video",
                      listen: "Listen to the conversation", grammar: "Practice the grammar",
-                     prep: "Study the video's words" };
+                     prep: "Study the video's words", vquiz: "Answer the video questions" };
 
 export function LessonScreen({ route, navigation }) {
   const { st } = useSession();
@@ -96,6 +97,9 @@ export function LessonScreen({ route, navigation }) {
   const i = route.params.index;
   if (!unit) return null;
   const cs = components(st, unit, i);
+  // Where the route goes after this unit's last lesson, when that is another unit.
+  const nl = nextLesson(st);
+  const after = nl && nl.unit.id !== unit.id ? nl : null;
 
   // The brand edge is on the step Continue would open, so the two agree.
   const nextId = (nextComponent(cs) || {}).id;
@@ -162,8 +166,14 @@ export function LessonScreen({ route, navigation }) {
              label={STEP_LABEL[nextId]}
              onPress={() => open(nextId)} />
       ) : i + 1 < lessonCount(unit) ? (
-        <Btn kind="pri" style={{ marginTop: 16 }} label="Next lesson"
+        <Btn kind="pri" testID="lesson-next" style={{ marginTop: 16 }} label="Next lesson"
              onPress={() => navigation.setParams({ index: i + 1 })} />
+      ) : after ? (
+        /* The unit's last lesson: on to the next one on the route (the owner,
+           2026-10-05: "a continue button if they want to move on to the next
+           lesson"). */
+        <Btn kind="pri" testID="lesson-next" style={{ marginTop: 16 }} label="Continue"
+             onPress={() => navigation.replace("Lesson", { unitId: after.unit.id, index: after.index })} />
       ) : null}
       {/* The lesson's words as a round of flashcards, on the way from the
           lesson to the video it prepares for (§30bf). */}

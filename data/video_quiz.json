@@ -1,0 +1,5834 @@
+{
+ "videos": {
+  "oR2hGWoStZo": {
+   "hash": "69f1f9f9a4ff6620",
+   "questions": [
+    {
+     "q": "What color is Elvira's mug?",
+     "options": [
+      "Green",
+      "Blue",
+      "Red",
+      "Yellow"
+     ],
+     "at": 19760
+    },
+    {
+     "q": "What does Elvira pour into the mug first?",
+     "options": [
+      "Tea",
+      "Milk",
+      "Juice",
+      "Coffee"
+     ],
+     "at": 67600
+    },
+    {
+     "q": "What color is the plate?",
+     "options": [
+      "Blue",
+      "White",
+      "Green",
+      "Black"
+     ],
+     "at": 101280
+    },
+    {
+     "q": "What does Elvira say you might eat with the fork?",
+     "options": [
+      "She says maybe with a fork",
+      "She says only with a spoon",
+      "She says only with hands",
+      "She says with a knife"
+     ],
+     "at": 140959
+    },
+    {
+     "q": "When Elvira repeats, what does she say is hot?",
+     "options": [
+      "The kettle",
+      "The plate",
+      "The mug",
+      "The spoon"
+     ],
+     "at": 188680
+    }
+   ]
+  },
+  "MSxKfCnQIAA": {
+   "hash": "9cbe4f676bc66515",
+   "questions": [
+    {
+     "q": "Which two foods are at the first place in the restaurant?",
+     "options": [
+      "Pizza and pasta",
+      "Sushi and sashimi",
+      "Borscht and pelmeni",
+      "Tacos and nachos"
+     ],
+     "at": 5400
+    },
+    {
+     "q": "At the pizza and pasta place, which Italian dish does the speaker suggest next?",
+     "options": [
+      "Lasagna",
+      "Risotto",
+      "Ravioli",
+      "Tiramisu"
+     ],
+     "at": 147760
+    },
+    {
+     "q": "At the sushi place, which meat dish does the speaker suggest?",
+     "options": [
+      "Doner",
+      "Schnitzel",
+      "Meatballs",
+      "Shashlik"
+     ],
+     "at": 179959
+    },
+    {
+     "q": "At the pelmeni place, which fast food does the speaker suggest?",
+     "options": [
+      "A hamburger",
+      "A hot dog",
+      "French fries",
+      "A sandwich"
+     ],
+     "at": 280360
+    },
+    {
+     "q": "At the nachos part, which Spanish dish does the speaker suggest?",
+     "options": [
+      "Paella",
+      "Churros",
+      "Gazpacho",
+      "Tortilla"
+     ],
+     "at": 340680
+    }
+   ]
+  },
+  "XjkGvceXceY": {
+   "hash": "95fc936df74304e6",
+   "questions": [
+    {
+     "q": "What is the speaker going to show in the video?",
+     "options": [
+      "Photos of her family",
+      "Photos of her travels",
+      "Photos of her school friends",
+      "Photos of her pets only"
+     ],
+     "at": 29560
+    },
+    {
+     "q": "In the early photos, what is the speaker's mom doing?",
+     "options": [
+      "Holding her in her arms",
+      "Reading her a book",
+      "Feeding her at a table",
+      "Pushing her on a swing"
+     ],
+     "at": 50039
+    },
+    {
+     "q": "How does the speaker describe her hair in the old photo compared to now?",
+     "options": [
+      "Short then, very long now",
+      "Long then, very short now",
+      "Curly then, straight now",
+      "Dark then, blonde now"
+     ],
+     "at": 95680
+    },
+    {
+     "q": "Who is sitting on the couch with the speaker and her sister?",
+     "options": [
+      "Their cat",
+      "Their dog",
+      "Their grandmother",
+      "Their cousin"
+     ],
+     "at": 138120
+    },
+    {
+     "q": "What is the speaker's dad doing in his photo?",
+     "options": [
+      "Sitting in a boat on water",
+      "Standing on a mountain",
+      "Riding a bicycle",
+      "Cooking by a fire"
+     ],
+     "at": 166159
+    }
+   ]
+  },
+  "3-g5cBfd7pE": {
+   "hash": "76264527f7796b39",
+   "questions": [
+    {
+     "q": "What is the panda's name?",
+     "options": [
+      "Kristina",
+      "Darya",
+      "Victoria",
+      "Anna"
+     ],
+     "at": 7680
+    },
+    {
+     "q": "Which country is the panda's home?",
+     "options": [
+      "China",
+      "Spain",
+      "Ukraine",
+      "Russia"
+     ],
+     "at": 240480
+    },
+    {
+     "q": "Who is the giraffe to the panda?",
+     "options": [
+      "Her brother",
+      "Her father",
+      "Her sister",
+      "Her mother"
+     ],
+     "at": 290639
+    },
+    {
+     "q": "What is the giraffe's name?",
+     "options": [
+      "Evgeny",
+      "Vladimir",
+      "Viktor",
+      "Andrey"
+     ],
+     "at": 17279
+    },
+    {
+     "q": "What place is the home of the panda and the giraffe?",
+     "options": [
+      "The zoo",
+      "A bank",
+      "An office",
+      "A restaurant"
+     ],
+     "at": 21600
+    }
+   ]
+  },
+  "gFpTVhFp6n0": {
+   "hash": "43f35969233651be",
+   "questions": [
+    {
+     "q": "Why does Elvira want to take a new photo?",
+     "options": [
+      "Her old profile photo is old and she dislikes it",
+      "Her friends asked her for a new picture",
+      "She is starting a new job soon",
+      "Her phone screen was broken recently"
+     ],
+     "at": 37680
+    },
+    {
+     "q": "What does Elvira forget how to do before her first photo?",
+     "options": [
+      "Turn on the camera",
+      "Charge the phone",
+      "Open her profile",
+      "Find the light"
+     ],
+     "at": 101079
+    },
+    {
+     "q": "What is wrong with the first photo she takes with the camera?",
+     "options": [
+      "It is too dark",
+      "It is blurry",
+      "It is too bright",
+      "It is cut off"
+     ],
+     "at": 189920
+    },
+    {
+     "q": "What does Elvira use to take the next photo, after the camera photo is too small?",
+     "options": [
+      "Her phone",
+      "Her friend's tablet",
+      "A new lens",
+      "A tripod"
+     ],
+     "at": 250079
+    },
+    {
+     "q": "What does she dislike about the good photo she finally picks?",
+     "options": [
+      "Her clothes",
+      "Her hair",
+      "The background",
+      "Her smile"
+     ],
+     "at": 333000
+    }
+   ]
+  },
+  "soKb7C4g_X8": {
+   "hash": "ef336d282ca106f9",
+   "questions": [
+    {
+     "q": "What important rule about shoes does Nastya explain at the entrance?",
+     "options": [
+      "Take them off before entering the house",
+      "Wash them before going inside",
+      "Leave them only in the closet",
+      "Wear slippers outside the house"
+     ],
+     "at": 75799
+    },
+    {
+     "q": "Why do Russians sit down for a moment before leaving the house?",
+     "options": [
+      "So the journey will be good and lucky",
+      "So they remember what they forgot",
+      "So the house stays safe",
+      "So the family can say goodbye"
+     ],
+     "at": 194760
+    },
+    {
+     "q": "What traditional Russian dish did Nastya's mom make today?",
+     "options": [
+      "Pancakes",
+      "Dumplings",
+      "Meat pies",
+      "Porridge"
+     ],
+     "at": 415400
+    },
+    {
+     "q": "Why does Nastya say gas stoves are common in Russia?",
+     "options": [
+      "Gas is cheaper than electricity",
+      "Gas stoves cook food faster",
+      "Gas stoves are easier to clean",
+      "Gas stoves last longer"
+     ],
+     "at": 514680
+    },
+    {
+     "q": "What does the poster in Nastya's room show?",
+     "options": [
+      "The Kremlin in Moscow",
+      "A mountain in Siberia",
+      "A beach in Sochi",
+      "A church in Saint Petersburg"
+     ],
+     "at": 739760
+    }
+   ]
+  },
+  "_4MNz6X6nzE": {
+   "hash": "cc58bb78f780ebf0",
+   "questions": [
+    {
+     "q": "What question does the speaker ask viewers to answer in the comments?",
+     "options": [
+      "How many time zones Russia has",
+      "How many hours she sleeps",
+      "What time it is in Moscow",
+      "Which clock system is best"
+     ],
+     "at": 217840
+    },
+    {
+     "q": "Why does the woman say she overslept when she wakes up?",
+     "options": [
+      "It is very bright outside",
+      "Her phone did not ring",
+      "Her friend called her late",
+      "It is very quiet outside"
+     ],
+     "at": 237959
+    },
+    {
+     "q": "Which place does the speaker say is at Russia's far eastern point?",
+     "options": [
+      "Kamchatka",
+      "Moscow",
+      "Sakhalin",
+      "Vladivostok"
+     ],
+     "at": 261040
+    },
+    {
+     "q": "What does the woman have planned shortly after midday in the sketch?",
+     "options": [
+      "A meeting with a friend",
+      "A visit to the doctor",
+      "A trip to the airport",
+      "A lesson at school"
+     ],
+     "at": 556720
+    },
+    {
+     "q": "What does the woman find out about her watch at the end?",
+     "options": [
+      "It is running fast",
+      "It is running slow",
+      "It has stopped working",
+      "It shows the wrong date"
+     ],
+     "at": 593920
+    }
+   ]
+  },
+  "htHIPFhV7uc": {
+   "hash": "7db0ff19b6383b78",
+   "questions": [
+    {
+     "q": "Where does Ded Moroz live, according to the video?",
+     "options": [
+      "Veliky Ustyug, a city in northern Russia",
+      "Murmansk, a port city in the far north",
+      "Moscow, near the Kremlin",
+      "Novgorod, an old city in western Russia"
+     ],
+     "at": 84780
+    },
+    {
+     "q": "What does Befana do to children who are naughty?",
+     "options": [
+      "Gives them coal, onion, or garlic",
+      "Takes away their toys for a year",
+      "Leaves them a broom to clean with",
+      "Fills their stockings with snow"
+     ],
+     "at": 131780
+    },
+    {
+     "q": "Why did the old woman refuse to help the wise men?",
+     "options": [
+      "She wanted to finish cleaning her house",
+      "She was too tired after a long trip",
+      "She was afraid of the cold night",
+      "She had to bake bread for guests"
+     ],
+     "at": 153420
+    },
+    {
+     "q": "How many Yule Lads come to children in Iceland?",
+     "options": [
+      "Thirteen",
+      "Seven",
+      "Twelve",
+      "Twenty-four"
+     ],
+     "at": 191840
+    },
+    {
+     "q": "What does the Swiss helper Schmutzli carry in his sack?",
+     "options": [
+      "Coal for naughty children",
+      "Sweets for good children",
+      "Toys for the whole family",
+      "Wood for the fire"
+     ],
+     "at": 247519
+    }
+   ]
+  },
+  "-qbTumiWw98": {
+   "hash": "9cb6add2b045679a",
+   "questions": [
+    {
+     "q": "How does the person say you can get to the city center most easily?",
+     "options": [
+      "By metro",
+      "By bus",
+      "By tram",
+      "By taxi"
+     ],
+     "at": 27080
+    },
+    {
+     "q": "How much does the metro ticket cost?",
+     "options": [
+      "Half a euro",
+      "One euro",
+      "Two euros",
+      "Five euros"
+     ],
+     "at": 54120
+    },
+    {
+     "q": "Where does the woman in the restaurant say she can find the menu?",
+     "options": [
+      "On her phone",
+      "On the wall",
+      "At the counter",
+      "On the table"
+     ],
+     "at": 110479
+    },
+    {
+     "q": "What does the hotel worker say is written over there?",
+     "options": [
+      "The Wi-Fi password",
+      "The room price",
+      "The breakfast time",
+      "The checkout rule"
+     ],
+     "at": 182920
+    },
+    {
+     "q": "What are the main sights of Athens, according to the video?",
+     "options": [
+      "The Parthenon and gyros",
+      "The old port and museums",
+      "The beach and the market",
+      "The castle and the theater"
+     ],
+     "at": 259120
+    }
+   ]
+  },
+  "TgwXHXqdWa0": {
+   "hash": "53d27280c6962b0c",
+   "questions": [
+    {
+     "q": "What is Boris's job?",
+     "options": [
+      "He is a professor",
+      "He is a captain",
+      "He is a soldier",
+      "He is an artist"
+     ],
+     "at": 399
+    },
+    {
+     "q": "What is Natalya's job?",
+     "options": [
+      "She is a doctor",
+      "She is an engineer",
+      "She is a professor",
+      "She is a banker"
+     ],
+     "at": 214640
+    },
+    {
+     "q": "What does Ivan do?",
+     "options": [
+      "He is a student",
+      "He is a cashier",
+      "He is a barista",
+      "He is an astronaut"
+     ],
+     "at": 333319
+    },
+    {
+     "q": "What does Maria do?",
+     "options": [
+      "She is a student",
+      "She is a banker",
+      "She is a doctor",
+      "She is an engineer"
+     ],
+     "at": 439440
+    },
+    {
+     "q": "What kind of animal is Vladimir?",
+     "options": [
+      "He is a cat",
+      "He is a panda",
+      "He is a giraffe",
+      "He is a chameleon"
+     ],
+     "at": 535080
+    }
+   ]
+  },
+  "256FyJD5i9A": {
+   "hash": "758ecee5847cb6db",
+   "questions": [
+    {
+     "q": "What does Marina say about the sweater she shows at the start?",
+     "options": [
+      "It is as soft as a kitty",
+      "It is as warm as a blanket",
+      "It is too big for her",
+      "It is her favorite one"
+     ],
+     "at": 122560
+    },
+    {
+     "q": "Why does Marina tighten her belt?",
+     "options": [
+      "Her jeans might fall off her",
+      "Her pants are too short",
+      "It is cold and windy outside",
+      "She is going out on a date"
+     ],
+     "at": 180680
+    },
+    {
+     "q": "What did Marina think as a child about the word for t-shirt?",
+     "options": [
+      "That it came from Jamaica",
+      "That it came from her grandmother",
+      "That it came from a sports team",
+      "That it came from the word for summer"
+     ],
+     "at": 244560
+    },
+    {
+     "q": "Whom does Marina mostly run after in her sneakers?",
+     "options": [
+      "The bus",
+      "Her friend Nikita",
+      "Her grandmother",
+      "The mail carrier"
+     ],
+     "at": 367720
+    },
+    {
+     "q": "What did Marina make from her old jeans?",
+     "options": [
+      "A vest",
+      "A shopper bag",
+      "A skirt",
+      "A backpack"
+     ],
+     "at": 543760
+    }
+   ]
+  },
+  "7MRugTEqMo4": {
+   "hash": "ad1cc6d1df5d8467",
+   "questions": [
+    {
+     "q": "Where does the first traveler want to go?",
+     "options": [
+      "To the railway station",
+      "To the pharmacy",
+      "To the post office",
+      "To the shopping center"
+     ],
+     "at": 1100
+    },
+    {
+     "q": "Why is the bus a bad choice for getting to the shopping center?",
+     "options": [
+      "It might get stuck in traffic",
+      "It costs too much money",
+      "The stop is too far away",
+      "It is always very crowded"
+     ],
+     "at": 131239
+    },
+    {
+     "q": "The driver wants a U-turn. What must he do before turning around?",
+     "options": [
+      "Drive a bit further, keeping left",
+      "Turn right at the lights",
+      "Drive back to the intersection",
+      "Stop at the next corner"
+     ],
+     "at": 173519
+    },
+    {
+     "q": "How long does the walk to the center take?",
+     "options": [
+      "Half an hour",
+      "Ten minutes",
+      "Twenty minutes",
+      "One hour"
+     ],
+     "at": 198239
+    },
+    {
+     "q": "What is the name of the metro station at the end?",
+     "options": [
+      "Botanical Garden",
+      "Central Park",
+      "Red Square",
+      "University"
+     ],
+     "at": 274280
+    }
+   ]
+  },
+  "P2O8HWoMEX0": {
+   "hash": "785b4e262fb4a2c9",
+   "questions": [
+    {
+     "q": "In which city is Marina renting a workspace now?",
+     "options": [
+      "Lisbon",
+      "Berlin",
+      "Moscow",
+      "Madrid"
+     ],
+     "at": 47640
+    },
+    {
+     "q": "Who does Marina share the studio with?",
+     "options": [
+      "Several Portuguese artists",
+      "Her family members",
+      "Some Russian students",
+      "Other video bloggers"
+     ],
+     "at": 75080
+    },
+    {
+     "q": "What does Marina say is in the fridge?",
+     "options": [
+      "Nothing, better not to look",
+      "Paint and brushes",
+      "Her lunch and drinks",
+      "Old canvases and frames"
+     ],
+     "at": 185000
+    },
+    {
+     "q": "What does Marina want to make with her own hands?",
+     "options": [
+      "A lamp, a mirror and a candle",
+      "A chair and a table",
+      "A painting and a frame",
+      "A shelf and a clock"
+     ],
+     "at": 250360
+    },
+    {
+     "q": "What can Marina see and hear from the window?",
+     "options": [
+      "An opera house",
+      "A busy market",
+      "A street band",
+      "A big church"
+     ],
+     "at": 379280
+    }
+   ]
+  },
+  "1pQvYLggCWw": {
+   "hash": "266ccbf34996156c",
+   "questions": [
+    {
+     "q": "What will the girls do together after meeting a friend for brunch?",
+     "options": [
+      "Throw axes",
+      "Go ice skating",
+      "Visit a museum",
+      "Go shopping for gifts"
+     ],
+     "at": 80640
+    },
+    {
+     "q": "Why is Arina recording voice messages in French?",
+     "options": [
+      "The man speaks neither English nor Russian",
+      "She wants to practice her French",
+      "The man is a French teacher",
+      "She is too shy to call him"
+     ],
+     "at": 181800
+    },
+    {
+     "q": "What does Arina suggest the date could be, since they can't talk much?",
+     "options": [
+      "A movie",
+      "A long walk",
+      "A concert",
+      "A dinner"
+     ],
+     "at": 209959
+    },
+    {
+     "q": "What does the speaker say she usually does in the morning before riding her bike to university?",
+     "options": [
+      "Drinks coffee and reads a book",
+      "Goes running in the park",
+      "Cooks breakfast at home",
+      "Buys fresh bread"
+     ],
+     "at": 344680
+    },
+    {
+     "q": "What did Arina eat at the restaurant on her date?",
+     "options": [
+      "A duck steak",
+      "A fish soup",
+      "A cheese salad",
+      "A beef burger"
+     ],
+     "at": 627440
+    }
+   ]
+  },
+  "MPdYcyTaFfk": {
+   "hash": "51f6266d36948074",
+   "questions": [
+    {
+     "q": "Which city are Max and Yulia walking in at the start?",
+     "options": [
+      "Ourense",
+      "Vigo",
+      "Lugo",
+      "Santiago"
+     ],
+     "at": 73479
+    },
+    {
+     "q": "Why did they dislike the first house they saw with the agent?",
+     "options": [
+      "It stood right in a village",
+      "It was too far from shops",
+      "It was far too small",
+      "It had no roof"
+     ],
+     "at": 191200
+    },
+    {
+     "q": "What did they find inside the second house?",
+     "options": [
+      "Black floors covered in mold",
+      "Walls full of holes",
+      "Broken windows everywhere",
+      "Water on the floor"
+     ],
+     "at": 322960
+    },
+    {
+     "q": "When did they get to the third house?",
+     "options": [
+      "Late in the evening",
+      "Early in the morning",
+      "Around noon",
+      "In the afternoon"
+     ],
+     "at": 454080
+    },
+    {
+     "q": "What did Yulia do for the house a few days ago?",
+     "options": [
+      "Paid a deposit",
+      "Signed the final contract",
+      "Met the house owner",
+      "Took out a bank loan"
+     ],
+     "at": 624600
+    }
+   ]
+  },
+  "-9HtYXYi3AA": {
+   "hash": "bbc9a0acceace649",
+   "questions": [
+    {
+     "q": "Besides working, how can a person get money, according to the video?",
+     "options": [
+      "A person died and left it to him",
+      "He won it in a lottery",
+      "He found it on the street",
+      "A friend gave it as a gift"
+     ],
+     "at": 49800
+    },
+    {
+     "q": "What does the person in the example want to save up for?",
+     "options": [
+      "A car",
+      "A house",
+      "A trip abroad",
+      "A wedding"
+     ],
+     "at": 219840
+    },
+    {
+     "q": "Where does the idiom say people hide their money at home?",
+     "options": [
+      "Under a pillow",
+      "Inside a shoe",
+      "Behind a picture",
+      "In a book"
+     ],
+     "at": 265720
+    },
+    {
+     "q": "Which two currencies are given as an example of exchanging money?",
+     "options": [
+      "Dollars and rubles",
+      "Euros and pounds",
+      "Yuan and euros",
+      "Dollars and euros"
+     ],
+     "at": 355199
+    },
+    {
+     "q": "At the end, which expression does the teacher ask about first?",
+     "options": [
+      "To throw money to the wind",
+      "To count every penny",
+      "To pay with cash",
+      "To borrow from a friend"
+     ],
+     "at": 533200
+    }
+   ]
+  },
+  "vJZs4TZLCwc": {
+   "hash": "838a17954dbfaae1",
+   "questions": [
+    {
+     "q": "What is the first group of phrases in the video about?",
+     "options": [
+      "Greeting someone",
+      "Saying goodbye",
+      "Saying thank you",
+      "Asking for help"
+     ],
+     "at": 23760
+    },
+    {
+     "q": "The video says the online community lets viewers decide what?",
+     "options": [
+      "Topics of future videos",
+      "Names of the hosts",
+      "Music in the videos",
+      "Length of the videos"
+     ],
+     "at": 127840
+    },
+    {
+     "q": "The group with \"wow\" and \"seriously?\" shows which feeling?",
+     "options": [
+      "Strong surprise",
+      "Deep anger",
+      "Plain boredom",
+      "Great hunger"
+     ],
+     "at": 135610
+    },
+    {
+     "q": "When can you say \"it's nothing\" or \"no problem\"?",
+     "options": [
+      "When someone apologizes to you",
+      "When someone thanks you",
+      "When someone greets you",
+      "When someone invites you"
+     ],
+     "at": 278260
+    },
+    {
+     "q": "In the short scene near the end, where is the person going?",
+     "options": [
+      "To have lunch",
+      "To the cinema",
+      "To work",
+      "To the airport"
+     ],
+     "at": 339880
+    }
+   ]
+  },
+  "p9WDjKUZjlI": {
+   "hash": "80a20bebf2c885cd",
+   "questions": [
+    {
+     "q": "What did the man do after he finished university?",
+     "options": [
+      "Moved to another city",
+      "Got a job abroad",
+      "Got married",
+      "Bought a flat"
+     ],
+     "at": 129300
+    },
+    {
+     "q": "What did they buy after earning a lot of money?",
+     "options": [
+      "A house",
+      "A car",
+      "A boat",
+      "A shop"
+     ],
+     "at": 179760
+    },
+    {
+     "q": "What did the speaker do after she finished reading the book?",
+     "options": [
+      "Went to bed",
+      "Had dinner",
+      "Watched a film",
+      "Called a friend"
+     ],
+     "at": 315240
+    },
+    {
+     "q": "What did the speaker find out before buying the ticket?",
+     "options": [
+      "The price",
+      "The date",
+      "The seat number",
+      "The way to the station"
+     ],
+     "at": 328340
+    },
+    {
+     "q": "Where did they go after the concert?",
+     "options": [
+      "To a restaurant",
+      "To a club",
+      "To a hotel",
+      "To a park"
+     ],
+     "at": 405979
+    }
+   ]
+  },
+  "23PEkMd2svg": {
+   "hash": "383defde2c0921fd",
+   "questions": [
+    {
+     "q": "Where is Elena standing while she films the start of the video?",
+     "options": [
+      "Next to the Belgrade zoo",
+      "Next to the Belgrade train station",
+      "Next to the Belgrade city market",
+      "Next to the Belgrade river port"
+     ],
+     "at": 32520
+    },
+    {
+     "q": "What does the friend say they will do if the ticket check catches them?",
+     "options": [
+      "Pay a fine",
+      "Run away quickly",
+      "Show an old ticket",
+      "Call a friend for help"
+     ],
+     "at": 118799
+    },
+    {
+     "q": "What does the speaker say the other person forgot at home?",
+     "options": [
+      "Her wallet",
+      "Her phone",
+      "Her bus card",
+      "Her backpack"
+     ],
+     "at": 213659
+    },
+    {
+     "q": "What does the friend guess is wrong with her?",
+     "options": [
+      "She is just hungry",
+      "She is just very tired",
+      "She is just feeling cold",
+      "She is just quite bored"
+     ],
+     "at": 363740
+    },
+    {
+     "q": "What does the friend offer to do near the end of the story?",
+     "options": [
+      "Carry her backpack",
+      "Buy her some lunch",
+      "Call her a taxi",
+      "Hold her phone"
+     ],
+     "at": 410460
+    }
+   ]
+  },
+  "Lv39BhZJ2mg": {
+   "hash": "88b93096f99d2a00",
+   "questions": [
+    {
+     "q": "Why does the host say she feels joy at the start?",
+     "options": [
+      "Her friend is helping her record the video",
+      "Her friend is visiting her for a holiday",
+      "She just finished a long trip abroad",
+      "She got many new subscribers this week"
+     ],
+     "at": 8360
+    },
+    {
+     "q": "What do the two friends do to let their anger out?",
+     "options": [
+      "They scream in the forest",
+      "They go for a long run",
+      "They write angry letters",
+      "They hit pillows at home"
+     ],
+     "at": 106200
+    },
+    {
+     "q": "What does one friend suggest she might feel about the beetles instead of fear?",
+     "options": [
+      "Disgust",
+      "Sadness",
+      "Surprise",
+      "Boredom"
+     ],
+     "at": 216799
+    },
+    {
+     "q": "What food does one friend hate and the other loves to eat?",
+     "options": [
+      "Olives",
+      "Mushrooms",
+      "Cheese",
+      "Tomatoes"
+     ],
+     "at": 292120
+    },
+    {
+     "q": "Where is Elina going to travel next?",
+     "options": [
+      "Asia",
+      "Africa",
+      "South America",
+      "Northern Europe"
+     ],
+     "at": 403560
+    }
+   ]
+  },
+  "XTMNiYPHgkQ": {
+   "hash": "15b8abcbdf7c709b",
+   "questions": [
+    {
+     "q": "What topic do the two hosts choose for their video?",
+     "options": [
+      "Proverbs with body parts",
+      "Sayings about animals and weather",
+      "Famous Russian poems and writers",
+      "Old folk tales about heroes"
+     ],
+     "at": 14679
+    },
+    {
+     "q": "The proverb about crying over hair has a bloodthirsty origin. What times is it from?",
+     "options": [
+      "Times of executions and battles",
+      "Times of barbers and haircuts",
+      "Times of royal weddings",
+      "Times of long hunting trips"
+     ],
+     "at": 98000
+    },
+    {
+     "q": "How often does the speaking club for Russian learners meet?",
+     "options": [
+      "Every week",
+      "Every day",
+      "Every month",
+      "Every weekend"
+     ],
+     "at": 178159
+    },
+    {
+     "q": "Where was curious Varvara when something was torn off her?",
+     "options": [
+      "At the bazaar",
+      "At the village well",
+      "At the train station",
+      "At the church"
+     ],
+     "at": 202480
+    },
+    {
+     "q": "What does the full karavay proverb say to do instead of gaping at someone else's bread?",
+     "options": [
+      "Get up earlier and make your own",
+      "Go to bed earlier and rest",
+      "Ask the neighbors to share theirs",
+      "Work harder and sell more bread"
+     ],
+     "at": 251879
+    }
+   ]
+  },
+  "EjDIUtUXvtI": {
+   "hash": "28c3f2f1db2afbb0",
+   "questions": [
+    {
+     "q": "Who is the speaker shopping with at the start of the video?",
+     "options": [
+      "His son, Roma",
+      "His younger brother",
+      "His school friend",
+      "His wife, Ani"
+     ],
+     "at": 4799
+    },
+    {
+     "q": "What is a pencil case used for, according to the video?",
+     "options": [
+      "Holding pencils and markers",
+      "Carrying a lunch",
+      "Storing scissors and glue",
+      "Keeping school notebooks flat"
+     ],
+     "at": 28359
+    },
+    {
+     "q": "What design is on the notebook they decide to buy?",
+     "options": [
+      "Minecraft",
+      "Football",
+      "Space",
+      "Flowers"
+     ],
+     "at": 82560
+    },
+    {
+     "q": "What is special about the sharpener they pick?",
+     "options": [
+      "It has an eraser in it",
+      "It is shaped like a car",
+      "It comes with a pencil",
+      "It lights up"
+     ],
+     "at": 110159
+    },
+    {
+     "q": "What extra thing does the backpack do, besides carrying things?",
+     "options": [
+      "It glows",
+      "It plays music",
+      "It keeps food cold",
+      "It is waterproof"
+     ],
+     "at": 176720
+    }
+   ]
+  },
+  "bzILjaOqN4U": {
+   "hash": "46ad67380685596f",
+   "questions": [
+    {
+     "q": "Where do the hosts' colleagues ask people about their cooking?",
+     "options": [
+      "On the streets of Moscow",
+      "In a restaurant kitchen",
+      "At a food market",
+      "In a cooking school"
+     ],
+     "at": 20760
+    },
+    {
+     "q": "What is one signature dish the woman describes with baked meat and potatoes in little pots?",
+     "options": [
+      "Chanakhi",
+      "Pilaf",
+      "Borscht",
+      "Shurpa"
+     ],
+     "at": 78920
+    },
+    {
+     "q": "Which place is the woman making shurpa from?",
+     "options": [
+      "Crimea",
+      "Georgia",
+      "Uzbekistan",
+      "Siberia"
+     ],
+     "at": 184000
+    },
+    {
+     "q": "Which Korean dish does one person say a family member cooks very well?",
+     "options": [
+      "Steamed buns called pigodi",
+      "Spicy cabbage called kimchi",
+      "Rice rolls called gimbap",
+      "Cold noodle soup"
+     ],
+     "at": 266600
+    },
+    {
+     "q": "What does the man say makes his soup broth tasty, needing a lot of it?",
+     "options": [
+      "Butter",
+      "Cream",
+      "Salt",
+      "Garlic"
+     ],
+     "at": 454680
+    }
+   ]
+  },
+  "Xdvn1T5Fe4c": {
+   "hash": "189f525b54f39a43",
+   "questions": [
+    {
+     "q": "Which two professions does she name as examples of professional unions?",
+     "options": [
+      "Doctor and teacher",
+      "Pilot and farmer",
+      "Lawyer and driver",
+      "Cook and builder"
+     ],
+     "at": 154120
+    },
+    {
+     "q": "What does she call early diagnosis of Alzheimer's?",
+     "options": [
+      "A very important step",
+      "A complete cure",
+      "A simple home method",
+      "A new kind of medicine"
+     ],
+     "at": 361479
+    },
+    {
+     "q": "What does she say the word диалог means?",
+     "options": [
+      "A conversation to find a solution",
+      "A written agreement between countries",
+      "A public vote on a topic",
+      "A rule for athletes"
+     ],
+     "at": 443680
+    },
+    {
+     "q": "What rare baby animal was born in the Moscow zoo?",
+     "options": [
+      "A goat",
+      "A snow leopard",
+      "A red panda",
+      "A zebra"
+     ],
+     "at": 525720
+    },
+    {
+     "q": "Where did the week of figure skating open?",
+     "options": [
+      "In Luzhniki",
+      "In Gorky Park",
+      "On Red Square",
+      "In Sokolniki"
+     ],
+     "at": 623959
+    }
+   ]
+  },
+  "6GqonOcxCQQ": {
+   "hash": "c34fd4820d98a1eb",
+   "questions": [
+    {
+     "q": "Who joins the host in this episode?",
+     "options": [
+      "Her friend Natasha",
+      "Her sister Anya",
+      "Her teacher Polina",
+      "Her colleague Dima"
+     ],
+     "at": 39080
+    },
+    {
+     "q": "Whose song does the host say was stuck in her head recently?",
+     "options": [
+      "Dima Bilan",
+      "Monetochka",
+      "Sergei Lazarev",
+      "Shufutinsky"
+     ],
+     "at": 70210
+    },
+    {
+     "q": "What does бесит mean in the words «клип просто бесит»?",
+     "options": [
+      "annoys me",
+      "amazes me",
+      "scares me",
+      "bores me"
+     ],
+     "at": 148660
+    },
+    {
+     "q": "One person gives advice for a stuck song: «слушать до посинения». What is the advice?",
+     "options": [
+      "Listen to it many times",
+      "Sing it very loudly",
+      "Find a similar song",
+      "Jump around the room"
+     ],
+     "at": 400630
+    },
+    {
+     "q": "Which singer do people connect with the third of September?",
+     "options": [
+      "Shufutinsky",
+      "Dima Bilan",
+      "Monetochka",
+      "Lazarev"
+     ],
+     "at": 419220
+    }
+   ]
+  },
+  "W9vm5pzKLRs": {
+   "hash": "8f6de05a923abca2",
+   "questions": [
+    {
+     "q": "What does Nastya say a blizzard (метель) is?",
+     "options": [
+      "Snow falls and a strong wind blows",
+      "Rain falls and the sky is dark",
+      "Very cold air with clear sunny weather",
+      "Thick fog covers the whole city"
+     ],
+     "at": 81960
+    },
+    {
+     "q": "What was the name of the event held near the Victory Museum?",
+     "options": [
+      "Искра надежды",
+      "Свеча памяти",
+      "Огонь победы",
+      "Звёзды блокады"
+     ],
+     "at": 152080
+    },
+    {
+     "q": "What did the people at the event raise up in the dark?",
+     "options": [
+      "Lamps and phones",
+      "Candles and flags",
+      "Flowers and photos",
+      "Paper stars and torches"
+     ],
+     "at": 213920
+    },
+    {
+     "q": "What was Evgeny Lyubimov doing when his life suddenly ended?",
+     "options": [
+      "He was hunting",
+      "He was driving a car",
+      "He was skiing in the mountains",
+      "He was giving a speech"
+     ],
+     "at": 308560
+    },
+    {
+     "q": "Where was the new free water dispenser installed in Moscow?",
+     "options": [
+      "Right behind the turnstiles at Komsomolskaya station",
+      "Next to the ticket office at Red Square station",
+      "On the platform at Park Pobedy station",
+      "Near the escalators at Kurskaya station"
+     ],
+     "at": 481759
+    }
+   ]
+  },
+  "BxUZdClSMnM": {
+   "hash": "4dfe602361264d94",
+   "questions": [
+    {
+     "q": "Who first announced the idea of leaving the Bologna system?",
+     "options": [
+      "Valery Falkov, the minister of higher education",
+      "Vladimir Putin, the president",
+      "Nastya, the video host",
+      "The head of the Bologna University"
+     ],
+     "at": 66479
+    },
+    {
+     "q": "What kind of degree did the Soviet Union have that is purely Russian?",
+     "options": [
+      "Специалитет, with no master's needed afterwards",
+      "Докторантура, with three years of research",
+      "Бакалавриат, with a short two-year course",
+      "Магистратура, with classes and one research year"
+     ],
+     "at": 213760
+    },
+    {
+     "q": "Why was the Unified State Exam (ЕГЭ) created, according to Nastya?",
+     "options": [
+      "So children could apply to universities in other cities easily",
+      "So students could study for free abroad",
+      "So universities could stop giving entrance tests",
+      "So every school would teach the same subjects"
+     ],
+     "at": 300639
+    },
+    {
+     "q": "Why does Russia say the Bologna system is harmful?",
+     "options": [
+      "Valuable workers leave for other countries",
+      "Students stop wanting to study at all",
+      "Universities become too expensive for families",
+      "Foreign teachers take jobs from Russians"
+     ],
+     "at": 450039
+    },
+    {
+     "q": "What does the new diploma show as the qualification of the girl in the example?",
+     "options": [
+      "Software engineer, with an extra teacher qualification",
+      "Economist, with an extra translator qualification",
+      "Clinical psychologist, with a teacher qualification",
+      "Oil engineer, with an extra manager qualification"
+     ],
+     "at": 837560
+    }
+   ]
+  },
+  "hFWGPcA6r6s": {
+   "hash": "a5c92f0f934eda5d",
+   "questions": [
+    {
+     "q": "What does Dasha say the interviews will find out about at the start?",
+     "options": [
+      "Which doctors people visit and what folk remedies they use",
+      "Which hospitals are best and which medicines are cheapest",
+      "Where people buy herbs and how they cook healthy food",
+      "How often people exercise and what sports they play"
+     ],
+     "at": 5879
+    },
+    {
+     "q": "What does the first woman say about when she goes to her district doctor?",
+     "options": [
+      "Only when something starts to hurt",
+      "Every year for a checkup",
+      "Only when her family tells her",
+      "Every time she gets a cold"
+     ],
+     "at": 49079
+    },
+    {
+     "q": "Why do the men in the video say they finally go to the doctor?",
+     "options": [
+      "Their wives tell them it is time",
+      "Their bosses ask for a letter",
+      "Their friends go with them",
+      "Their children become worried"
+     ],
+     "at": 127960
+    },
+    {
+     "q": "What does the woman say makes paid medicine better, as she sees it?",
+     "options": [
+      "It is safer and you can choose the specialist yourself",
+      "It is faster and the doctors are younger",
+      "It is cheaper and clinics are near home",
+      "It is friendlier and the rooms are cleaner"
+     ],
+     "at": 291960
+    },
+    {
+     "q": "What do the people use to make a vacuum in the cups (банки)?",
+     "options": [
+      "Cotton on a stick, dipped in alcohol and lit",
+      "A hot match dropped inside the jar",
+      "Boiling water poured into the glass",
+      "A hot stone placed under the cup"
+     ],
+     "at": 881600
+    }
+   ]
+  },
+  "aO3IsyGkwQk": {
+   "hash": "2a71b237b0079f1c",
+   "questions": [
+    {
+     "q": "Which berry does the speaker say she starts gathering first, beginning in July?",
+     "options": [
+      "Blueberries (черника)",
+      "Lingonberries (брусника)",
+      "Cranberries (клюква)",
+      "Strawberries (земляника)"
+     ],
+     "at": 19199
+    },
+    {
+     "q": "In the speaker's explanation, what is the difference between «набрать» and «собрать»?",
+     "options": [
+      "«Собрать» means gathering all the berries in a place and moving on",
+      "«Собрать» means picking only one berry at a time",
+      "«Набрать» means finding berries and leaving them",
+      "«Набрать» means gathering berries that are not ripe yet"
+     ],
+     "at": 52140
+    },
+    {
+     "q": "What does the speaker say about when lingonberries ripen, compared with blueberries?",
+     "options": [
+      "Later than blueberries",
+      "At the same time as blueberries",
+      "Earlier than blueberries",
+      "Only after the cranberries"
+     ],
+     "at": 65100
+    },
+    {
+     "q": "What does the speaker say is her favorite berry?",
+     "options": [
+      "Cranberry, which is sour and grows in bogs",
+      "Blueberry, which is sweet and grows in forests",
+      "Strawberry, which is red and grows in clearings",
+      "Lingonberry, which is tart and grows under trees"
+     ],
+     "at": 126060
+    },
+    {
+     "q": "What does the speaker say she saw twice this week near the bog?",
+     "options": [
+      "Bear droppings",
+      "Wolf tracks",
+      "A wild elk",
+      "A snake"
+     ],
+     "at": 176280
+    }
+   ]
+  },
+  "_4k0VthuqMA": {
+   "hash": "fa4afdb477d00aaf",
+   "questions": [
+    {
+     "q": "Why could Nastya and her friend travel in February?",
+     "options": [
+      "School was on break",
+      "Her parents were on leave",
+      "Her friend invited her there",
+      "She won a free trip"
+     ],
+     "at": 70720
+    },
+    {
+     "q": "How did the artists draw the tortured people in the Lutheran church?",
+     "options": [
+      "Without faces",
+      "Without hands",
+      "In dark colors",
+      "With closed eyes"
+     ],
+     "at": 386120
+    },
+    {
+     "q": "Which opera did they see at the Mariinsky Theater?",
+     "options": [
+      "Маскарад",
+      "Травиата",
+      "Кармен",
+      "Аида"
+     ],
+     "at": 469919
+    },
+    {
+     "q": "Which Russian word does she use for the person who told them the palace history?",
+     "options": [
+      "экскурсовод",
+      "путеводитель",
+      "проводник",
+      "переводчик"
+     ],
+     "at": 582760
+    },
+    {
+     "q": "How much does one pyshka cost, compared with a euro?",
+     "options": [
+      "A quarter of a euro",
+      "A third of a euro",
+      "Half of a euro",
+      "Two thirds of a euro"
+     ],
+     "at": 884720
+    }
+   ]
+  },
+  "MbvtSNMwshI": {
+   "hash": "16bdfd498e13a139",
+   "questions": [
+    {
+     "q": "Which color does one girl say she adores?",
+     "options": [
+      "Red",
+      "Pink",
+      "Blue",
+      "Yellow"
+     ],
+     "at": 38719
+    },
+    {
+     "q": "Where is one speaker's dress at the moment, she says?",
+     "options": [
+      "In the wash",
+      "At the tailor",
+      "In a suitcase",
+      "At a friend's home"
+     ],
+     "at": 144319
+    },
+    {
+     "q": "When does one woman say she sometimes puts on a black latex suit?",
+     "options": [
+      "At night",
+      "On holidays",
+      "In summer",
+      "At the office"
+     ],
+     "at": 146840
+    },
+    {
+     "q": "What does one speaker say she could go out in?",
+     "options": [
+      "A garbage bag",
+      "A knitted cardigan",
+      "A latex suit",
+      "A long coat"
+     ],
+     "at": 560920
+    },
+    {
+     "q": "Which Russian verb do the speakers choose for putting clothes on yourself?",
+     "options": [
+      "надеть",
+      "одеть",
+      "снять",
+      "носить"
+     ],
+     "at": 927240
+    }
+   ]
+  },
+  "38dpdR7Nq-0": {
+   "hash": "79fdc9c2385c04cf",
+   "questions": [
+    {
+     "q": "What did the man do yesterday evening after his day off began?",
+     "options": [
+      "He went to the theater to see a production",
+      "He went to a rock concert with friends",
+      "He stayed home and watched a series",
+      "He went to a fair and bought books"
+     ],
+     "at": 50160
+    },
+    {
+     "q": "What is the name of the band that the man plays rock in?",
+     "options": [
+      "Бизнес-юнос",
+      "Рок-Урал",
+      "Тёплый рассвет",
+      "Хармс"
+     ],
+     "at": 116680
+    },
+    {
+     "q": "Where did the group spend the whole day walking and eating, visiting museums?",
+     "options": [
+      "Perm",
+      "Chelyabinsk",
+      "Tobolsk",
+      "Yekaterinburg"
+     ],
+     "at": 156000
+    },
+    {
+     "q": "What is the name of the speaker's Russian hunting spaniel?",
+     "options": [
+      "Lika",
+      "Laska",
+      "Mila",
+      "Chizhik"
+     ],
+     "at": 232959
+    },
+    {
+     "q": "Why did the girl's family get a dog this year?",
+     "options": [
+      "Her daughter really wanted one",
+      "Her husband wanted a guard dog",
+      "She wanted to exercise more",
+      "A friend gave them a puppy"
+     ],
+     "at": 282880
+    }
+   ]
+  },
+  "a71I8yNxLOM": {
+   "hash": "84a2e2c185ea42d6",
+   "questions": [
+    {
+     "q": "What does the host say costs three times more than the regular kind?",
+     "options": [
+      "Hipster coffee",
+      "Fresh orange juice",
+      "Bakery bread",
+      "Metro tickets"
+     ],
+     "at": 42039
+    },
+    {
+     "q": "In which city is the coffee shop where she orders?",
+     "options": [
+      "Lisbon",
+      "Madrid",
+      "Prague",
+      "Berlin"
+     ],
+     "at": 76560
+    },
+    {
+     "q": "What kind of milk does the host choose for her drink?",
+     "options": [
+      "Regular milk",
+      "Oat milk",
+      "Almond milk",
+      "Coconut milk"
+     ],
+     "at": 150879
+    },
+    {
+     "q": "The barista says foreigners who learn Russian sometimes come with a partner and try to do what?",
+     "options": [
+      "Order something in Russian",
+      "Pay in rubles",
+      "Read the menu aloud",
+      "Sing a Russian song"
+     ],
+     "at": 222959
+    },
+    {
+     "q": "In line 127, what does the host say people are afraid to do in a Russian-speaking café?",
+     "options": [
+      "Order a coffee",
+      "Ask for the bill",
+      "Ask about the price",
+      "Talk to the owner"
+     ],
+     "at": 376919
+    }
+   ]
+  },
+  "6idM4p8PLqE": {
+   "hash": "f1de31a6892a392f",
+   "questions": [
+    {
+     "q": "What was the topic of the previous episode in this series?",
+     "options": [
+      "Money",
+      "Food",
+      "Travel",
+      "Work"
+     ],
+     "at": 52600
+    },
+    {
+     "q": "In Russian, what does Marina say \"Я одинока\" really means, in line 48?",
+     "options": [
+      "Some kind of lack",
+      "A happy choice",
+      "A new habit",
+      "A kind of freedom"
+     ],
+     "at": 119799
+    },
+    {
+     "q": "In which city did Marina go for an internship soon after she got married?",
+     "options": [
+      "Prague",
+      "Berlin",
+      "Paris",
+      "Warsaw"
+     ],
+     "at": 269280
+    },
+    {
+     "q": "How did Marina's colleagues in Europe react when they heard she was married?",
+     "options": [
+      "They were very surprised",
+      "They were very happy",
+      "They gave her gifts",
+      "They asked about the wedding"
+     ],
+     "at": 281840
+    },
+    {
+     "q": "What does Marina say she loves, besides friends and family, in the part about different kinds of love?",
+     "options": [
+      "Her motorcycle",
+      "Her car",
+      "Her old house",
+      "Her piano"
+     ],
+     "at": 881560
+    }
+   ]
+  },
+  "AyRPqHcRCx8": {
+   "hash": "209d69ac528aa041",
+   "questions": [
+    {
+     "q": "What does Marina say her first reaction would be if she suddenly earned a million dollars?",
+     "options": [
+      "Tell nobody about it",
+      "Buy an apartment at once",
+      "Post about it on her channel",
+      "Quit her job and travel"
+     ],
+     "at": 80079
+    },
+    {
+     "q": "Why did Marina's pay from her first magazine job turn out so small?",
+     "options": [
+      "They fined her for punctuation mistakes",
+      "She was late to work every day",
+      "She worked there only in the summer",
+      "The magazine had no money left"
+     ],
+     "at": 309600
+    },
+    {
+     "q": "What does Marina say the fear of \"умереть под мостом\" means literally?",
+     "options": [
+      "Not having enough money to pay for an apartment",
+      "Losing all your friends in a new country",
+      "Being unable to find any work as a writer",
+      "Having to sell your car to pay debts"
+     ],
+     "at": 520120
+    },
+    {
+     "q": "What does Marina say she buys when she feels stress?",
+     "options": [
+      "Small things like buttons online",
+      "Expensive clothes in big shops",
+      "Books about money and saving",
+      "Gifts for her friends and family"
+     ],
+     "at": 598480
+    },
+    {
+     "q": "Which city does Marina say reminded her of Moscow?",
+     "options": [
+      "New York",
+      "Boston",
+      "Lisbon",
+      "Los Angeles"
+     ],
+     "at": 755920
+    }
+   ]
+  },
+  "YNZ67LZMgx0": {
+   "hash": "7d5276e1363995a3",
+   "questions": [
+    {
+     "q": "Where did the presenter's colleagues go out to ask passersby about work?",
+     "options": [
+      "Yekaterinburg",
+      "Novosibirsk",
+      "Kazan",
+      "Nizhny Novgorod"
+     ],
+     "at": 25720
+    },
+    {
+     "q": "What does the man say a бутафор makes?",
+     "options": [
+      "Sets and puppets for a performance",
+      "Costumes and posters for a concert",
+      "Toys and furniture for a shop",
+      "Films and cartoons for television"
+     ],
+     "at": 137080
+    },
+    {
+     "q": "The analyst at Pyaterochka says he writes code in Russian. What does he really write?",
+     "options": [
+      "Instructions for other workers",
+      "Reports for the store managers",
+      "Advertisements for the customers",
+      "Messages for the delivery drivers"
+     ],
+     "at": 193840
+    },
+    {
+     "q": "A woman says she found her job «случайным образом». What does this phrase mean?",
+     "options": [
+      "By chance, not planned",
+      "On purpose, with a plan",
+      "Through a friend's advice",
+      "After many months of searching"
+     ],
+     "at": 543200
+    },
+    {
+     "q": "Why does one speaker say that even bad job interviews are useful?",
+     "options": [
+      "You understand what they want from you",
+      "You meet your future boss there",
+      "You get paid for each interview",
+      "You learn a new language there"
+     ],
+     "at": 772160
+    }
+   ]
+  },
+  "wGcqFV_alDk": {
+   "hash": "8e9180c6521fea3b",
+   "questions": [
+    {
+     "q": "What does the presenter say about Narva's population in Estonia?",
+     "options": [
+      "It has the biggest Russian-speaking population",
+      "It has the oldest population",
+      "It has the youngest population",
+      "It has the fastest-growing population"
+     ],
+     "at": 6899
+    },
+    {
+     "q": "What does the woman say is much harder for Russian speakers who don't know Estonian well?",
+     "options": [
+      "Finding work",
+      "Finding a flat",
+      "Making friends",
+      "Getting a passport"
+     ],
+     "at": 51180
+    },
+    {
+     "q": "What did the man have to know to get Estonian citizenship?",
+     "options": [
+      "The language and the Constitution",
+      "The anthem and the history",
+      "The laws and the geography",
+      "The language and the flag"
+     ],
+     "at": 285840
+    },
+    {
+     "q": "Which colour word does the man use for his stateless passport?",
+     "options": [
+      "серый",
+      "красный",
+      "синий",
+      "чёрный"
+     ],
+     "at": 313560
+    },
+    {
+     "q": "Why does the Estonian state want to remove the tank monument?",
+     "options": [
+      "It sees the tank as a symbol of occupation",
+      "It sees the tank as a danger to cars",
+      "It sees the tank as too old and broken",
+      "It sees the tank as too costly to keep"
+     ],
+     "at": 528959
+    }
+   ]
+  },
+  "o_tKs9HXtU4": {
+   "hash": "0adcba5d7dfc5283",
+   "questions": [
+    {
+     "q": "What fun fact does Alice give about sharks?",
+     "options": [
+      "They only attack wet people",
+      "They only attack at night",
+      "They only attack tall people",
+      "They only attack lone swimmers"
+     ],
+     "at": 16600
+    },
+    {
+     "q": "Which Russian word does the young man use for himself, saying he wants everything on paper?",
+     "options": [
+      "старовер",
+      "лентяй",
+      "студент",
+      "новичок"
+     ],
+     "at": 48960
+    },
+    {
+     "q": "What was the man's training before he began working on marketplaces?",
+     "options": [
+      "He is a welder",
+      "He is a cook",
+      "He is a driver",
+      "He is a teacher"
+     ],
+     "at": 331600
+    },
+    {
+     "q": "Why would the factory engineer like AI to replace part of her work?",
+     "options": [
+      "She writes endless identical reports",
+      "She travels to many factories",
+      "She works very early mornings",
+      "She trains new workers every year"
+     ],
+     "at": 382160
+    },
+    {
+     "q": "Which Russian word does she use for \"hot\" when she explains потеть?",
+     "options": [
+      "жарко",
+      "больно",
+      "мокрый",
+      "тёплый"
+     ],
+     "at": 668560
+    }
+   ]
+  },
+  "xXGwa1sfTq0": {
+   "hash": "315be349c1e4c158",
+   "questions": [
+    {
+     "q": "In which city does the video take place?",
+     "options": [
+      "Perugia",
+      "Prague",
+      "Milan",
+      "Rome"
+     ],
+     "at": 3639
+    },
+    {
+     "q": "What does Rock say is the hardest thing for him in Russian?",
+     "options": [
+      "Using the cases correctly",
+      "Pronouncing the sounds",
+      "Learning the verbs of motion",
+      "Remembering the word stress"
+     ],
+     "at": 198599
+    },
+    {
+     "q": "What is Rock's tip for learning the cases?",
+     "options": [
+      "He gave each case its own color",
+      "He sang each case in a song",
+      "He wrote each case on a card",
+      "He linked each case to a city"
+     ],
+     "at": 243200
+    },
+    {
+     "q": "Which color did Rock use for the genitive case (родительный)?",
+     "options": [
+      "Blue",
+      "Yellow",
+      "Green",
+      "Purple"
+     ],
+     "at": 268479
+    },
+    {
+     "q": "In the blitz, what does «минус» mean in music, according to the host?",
+     "options": [
+      "Music only, without the words",
+      "A song that is not good",
+      "A very quiet song",
+      "A song with no singer's name"
+     ],
+     "at": 973680
+    }
+   ]
+  },
+  "VJhkIivWfTU": {
+   "hash": "66712883da4ee5ad",
+   "questions": [
+    {
+     "q": "What does the host say you only need to do in Russia to find magic?",
+     "options": [
+      "Turn on the television",
+      "Visit a village",
+      "Open a window",
+      "Read a newspaper"
+     ],
+     "at": 26439
+    },
+    {
+     "q": "Which village is called \"Посёлок Висельников\" by the locals, and in which region?",
+     "options": [
+      "Chelyabinsk region",
+      "Moscow region",
+      "Tula region",
+      "Kazan region"
+     ],
+     "at": 123880
+    },
+    {
+     "q": "According to the video, what is enough to solve most of the guests' problems on the psychic show?",
+     "options": [
+      "Stop drinking alcohol",
+      "Move to another village",
+      "Change their jobs",
+      "Talk to their families"
+     ],
+     "at": 158840
+    },
+    {
+     "q": "What did people put in front of the TV when Chumak and Kashpirovsky were on air?",
+     "options": [
+      "Jars of water",
+      "Bowls of salt",
+      "Candles",
+      "Family photos"
+     ],
+     "at": 87119
+    },
+    {
+     "q": "In line 483–489, what does the word «ванговать» mean?",
+     "options": [
+      "To predict the future",
+      "To read a book",
+      "To cast a curse",
+      "To heal a person"
+     ],
+     "at": 953399
+    }
+   ]
+  },
+  "LLNjftcLlLA": {
+   "hash": "6b303f34bfa9f809",
+   "questions": [
+    {
+     "q": "What does the word выцвела mean in the line about the rainbow?",
+     "options": [
+      "It faded in the sun",
+      "It was painted over",
+      "It was washed away",
+      "It got much brighter"
+     ],
+     "at": 112600
+    },
+    {
+     "q": "In her childhood memory, where does she sleep in her grandmother's house?",
+     "options": [
+      "On top of the stove",
+      "In the hayloft",
+      "On the porch",
+      "In a small tent"
+     ],
+     "at": 185720
+    },
+    {
+     "q": "Where in the body does she say toska pulls?",
+     "options": [
+      "In the chest",
+      "In the stomach",
+      "In the throat",
+      "In the head"
+     ],
+     "at": 334720
+    },
+    {
+     "q": "In which city did she enjoy meeting her subscribers?",
+     "options": [
+      "Vienna",
+      "Prague",
+      "Berlin",
+      "Warsaw"
+     ],
+     "at": 584600
+    },
+    {
+     "q": "Where will the next video be filmed?",
+     "options": [
+      "Yekaterinburg",
+      "Kamchatka",
+      "Lisbon",
+      "Kazan"
+     ],
+     "at": 789160
+    }
+   ]
+  },
+  "-yT45RqTsho": {
+   "hash": "79fbcbc955728754",
+   "questions": [
+    {
+     "q": "Where does Miro work?",
+     "options": [
+      "In a hospital",
+      "In a school",
+      "In a restaurant",
+      "In a bank"
+     ],
+     "at": 204360
+    },
+    {
+     "q": "Which form of ноутбук does Miro use when he says he has none?",
+     "options": [
+      "ноутбука",
+      "ноутбуку",
+      "ноутбуком",
+      "ноутбуки"
+     ],
+     "at": 366599
+    },
+    {
+     "q": "Why does Miro say he has no umbrella?",
+     "options": [
+      "Today it is sunny",
+      "He left it at home",
+      "He lost it on a bus",
+      "It is broken"
+     ],
+     "at": 428759
+    },
+    {
+     "q": "What does Lena say about the word рюкзак?",
+     "options": [
+      "It is a German word",
+      "It is a Swedish word",
+      "It is an English word",
+      "It is a Spanish word"
+     ],
+     "at": 836199
+    },
+    {
+     "q": "In which city did someone steal Lena's wallet?",
+     "options": [
+      "Belgrade",
+      "Lisbon",
+      "Berlin",
+      "Madrid"
+     ],
+     "at": 960199
+    }
+   ]
+  },
+  "sTcIuHutXag": {
+   "hash": "db380444b578ab6a",
+   "questions": [
+    {
+     "q": "Which book does Arturo name as a turning point for him?",
+     "options": [
+      "«Братья Карамазовы»",
+      "«Преступление и наказание»",
+      "«Анна Каренина»",
+      "«Война и мир»"
+     ],
+     "at": 199879
+    },
+    {
+     "q": "Why does Arturo say he is like Alyosha?",
+     "options": [
+      "He is the youngest brother",
+      "He is the kindest brother",
+      "He is the cleverest brother",
+      "He is the tallest brother"
+     ],
+     "at": 238000
+    },
+    {
+     "q": "What stops Arturo from travelling to Russia now?",
+     "options": [
+      "He needs a visa",
+      "He has no money",
+      "He has no free time",
+      "He is afraid of the cold"
+     ],
+     "at": 618160
+    },
+    {
+     "q": "Which word does Marina use for a woman from Moscow?",
+     "options": [
+      "москвичка",
+      "москвичанка",
+      "москвитянка",
+      "московка"
+     ],
+     "at": 654079
+    },
+    {
+     "q": "In student slang, what is a «хвост» at university?",
+     "options": [
+      "An exam you have not passed",
+      "A class you have missed",
+      "A book you have not read",
+      "A teacher who is too strict"
+     ],
+     "at": 902880
+    }
+   ]
+  },
+  "uuFjnKmyckY": {
+   "hash": "0ba9d1b1e56cf066",
+   "questions": [
+    {
+     "q": "What does Marina decide to test Arnold on?",
+     "options": [
+      "His knowledge of Russian phraseologisms and idioms",
+      "His knowledge of Russian history and writers",
+      "His speed at editing long Russian texts",
+      "His skill at reading old Russian newspapers"
+     ],
+     "at": 28920
+    },
+    {
+     "q": "Arnold gives an example of when to say «не первый раз замужем». What is the situation?",
+     "options": [
+      "Friends give advice about a ski slope",
+      "Someone asks for help to cook dinner",
+      "A boss explains a new work task",
+      "A driver gives tips about a road"
+     ],
+     "at": 168239
+    },
+    {
+     "q": "Which language does Marina say she is studying now?",
+     "options": [
+      "Portuguese",
+      "Spanish",
+      "Italian",
+      "Polish"
+     ],
+     "at": 269880
+    },
+    {
+     "q": "Where does Arnold say grandmothers sit and talk about gossip?",
+     "options": [
+      "On a bench in the courtyard",
+      "In the kitchen at home",
+      "At the market near the bus stop",
+      "In a café in the park"
+     ],
+     "at": 395360
+    },
+    {
+     "q": "Arnold says he «съел собаку» on editing texts. What does he mean?",
+     "options": [
+      "He has a lot of experience in it",
+      "He is tired of doing it",
+      "He does it badly but tries",
+      "He learned it a long time ago"
+     ],
+     "at": 487840
+    }
+   ]
+  },
+  "f4zd_M1jUzA": {
+   "hash": "2b8a53171972e4a6",
+   "questions": [
+    {
+     "q": "Which city is Dasha in when she introduces the street interviews?",
+     "options": [
+      "Yekaterinburg",
+      "Chelyabinsk",
+      "Saint Petersburg",
+      "Moscow"
+     ],
+     "at": 72840
+    },
+    {
+     "q": "A man says a real Russian person loves something. What is it?",
+     "options": [
+      "The cold",
+      "Hot coffee",
+      "Fast driving",
+      "Fur hats"
+     ],
+     "at": 158760
+    },
+    {
+     "q": "A girl says Russian people look unfriendly from outside. What does she say about the Russian gaze?",
+     "options": [
+      "It is heavy",
+      "It is sad",
+      "It is angry",
+      "It is tired"
+     ],
+     "at": 258560
+    },
+    {
+     "q": "Which word does the video say you say as the answer when someone thanks you?",
+     "options": [
+      "на здоровье",
+      "за здоровье",
+      "за любовь",
+      "за семью"
+     ],
+     "at": 496800
+    },
+    {
+     "q": "Why did the woman's family drink tea from a saucer long ago?",
+     "options": [
+      "It cooled the hot tea faster",
+      "It tasted sweeter that way",
+      "It was the family tradition",
+      "They had no cups"
+     ],
+     "at": 777240
+    }
+   ]
+  },
+  "IucCETSAaU8": {
+   "hash": "6b3a9880abb21949",
+   "questions": [
+    {
+     "q": "Why did Marina dress more seriously for this video?",
+     "options": [
+      "To slightly confuse the viewers",
+      "To match the serious topic",
+      "Because she was meeting a shop owner",
+      "Because she filmed at a market"
+     ],
+     "at": 40520
+    },
+    {
+     "q": "What does Marina say the word старьё means?",
+     "options": [
+      "Old, worn things no longer used",
+      "Expensive art for showing off knowledge",
+      "Things found on the street for free",
+      "Clothes you wear only at home"
+     ],
+     "at": 139519
+    },
+    {
+     "q": "According to Marina, what is the Russian version of a flea market?",
+     "options": [
+      "An internet website",
+      "A weekly street fair",
+      "A big shop in every city",
+      "A market inside a park"
+     ],
+     "at": 242319
+    },
+    {
+     "q": "Whose jacket was passed down to Marina?",
+     "options": [
+      "Her older sister's",
+      "Her mother's",
+      "Her grandmother's",
+      "Her cousin's"
+     ],
+     "at": 289080
+    },
+    {
+     "q": "What does Marina say about the word столик?",
+     "options": [
+      "It is a cute, smaller form of стол",
+      "It is the plural form of стол",
+      "It is an old-fashioned word for стол",
+      "It is a name for a glass table"
+     ],
+     "at": 484360
+    }
+   ]
+  },
+  "j8QwQBWc8sM": {
+   "hash": "a174920d08c3c482",
+   "questions": [
+    {
+     "q": "Which series did Dasha and her friends gather to watch every week?",
+     "options": [
+      "Game of Thrones",
+      "Sex and the City",
+      "Friends",
+      "Sherlock"
+     ],
+     "at": 52520
+    },
+    {
+     "q": "Why does Dasha say she spends the second movie evening with her sister?",
+     "options": [
+      "To cheer themselves up and spend time together",
+      "To learn English from comedy films",
+      "To celebrate her sister's birthday each year",
+      "To save money on cinema tickets"
+     ],
+     "at": 114200
+    },
+    {
+     "q": "At which film did Dasha meet her husband?",
+     "options": [
+      "A film by Gaspar Noé in the cinema",
+      "A comedy at a friend's home",
+      "A film by Julio Medem on a date",
+      "A Russian classic at a festival"
+     ],
+     "at": 220680
+    },
+    {
+     "q": "Which Russian word does Dasha use for the dessert her mom makes, a cake with cream?",
+     "options": [
+      "торт",
+      "пицца",
+      "салат",
+      "бутерброд"
+     ],
+     "at": 373599
+    },
+    {
+     "q": "What does Dasha like to pour for herself during her evening alone?",
+     "options": [
+      "Hot fragrant tea with mint and lemon",
+      "Cold juice with ice and berries",
+      "Hot chocolate with marshmallows",
+      "Sweet coffee with milk and cinnamon"
+     ],
+     "at": 469720
+    }
+   ]
+  },
+  "1JJ1o-eqTHY": {
+   "hash": "2a09e25d0d6bb5de",
+   "questions": [
+    {
+     "q": "Which tsar's time does the speaker say the word дача first appeared in?",
+     "options": [
+      "Peter's",
+      "Ivan's",
+      "Catherine's",
+      "Nicholas's"
+     ],
+     "at": 24039
+    },
+    {
+     "q": "Why did the ruler give land to his subordinates?",
+     "options": [
+      "As a reward",
+      "As a payment for taxes",
+      "As a wedding gift",
+      "As a place to hide"
+     ],
+     "at": 37480
+    },
+    {
+     "q": "What do small children do at the dacha, according to the video?",
+     "options": [
+      "Eat ripe berries from the bush",
+      "Dig potatoes with relatives",
+      "Plant flowers in greenhouses",
+      "Cook borscht for the family"
+     ],
+     "at": 84240
+    },
+    {
+     "q": "What do teenagers prefer to do at the dacha?",
+     "options": [
+      "Go with friends, not relatives",
+      "Stay home with their parents",
+      "Work in the greenhouse alone",
+      "Sell vegetables to neighbors"
+     ],
+     "at": 146920
+    },
+    {
+     "q": "In the dacha-style joke, what does the speaker call the cameraman's outfit: дачный лук?",
+     "options": [
+      "A classic dacha look",
+      "A winter dacha coat",
+      "A farmer's old hat",
+      "A new city style"
+     ],
+     "at": 299720
+    }
+   ]
+  },
+  "OVfSmehf_NI": {
+   "hash": "ec0c77f1641bf531",
+   "questions": [
+    {
+     "q": "Dasha asks the residents of which city if they celebrate Halloween?",
+     "options": [
+      "Yekaterinburg",
+      "Novosibirsk",
+      "Kazan",
+      "Saint Petersburg"
+     ],
+     "at": 14040
+    },
+    {
+     "q": "Who does one person say is against the Halloween holiday in Russia?",
+     "options": [
+      "The Orthodox Church",
+      "The city government",
+      "Local schools",
+      "Shop owners"
+     ],
+     "at": 203920
+    },
+    {
+     "q": "What costume did the sixth-grade boy make out of toilet paper?",
+     "options": [
+      "A mummy",
+      "A ghost",
+      "A snowman",
+      "A zombie"
+     ],
+     "at": 362039
+    },
+    {
+     "q": "What does the other host say the \"pumpkin\" in Dasha's hands really is?",
+     "options": [
+      "хурма",
+      "дыня",
+      "апельсин",
+      "грейпфрут"
+     ],
+     "at": 672639
+    },
+    {
+     "q": "In the cartoon «Три кота», what is the holiday called?",
+     "options": [
+      "день страшилок",
+      "день привидений",
+      "ночь тыкв",
+      "день осени"
+     ],
+     "at": 765320
+    }
+   ]
+  },
+  "iEyj0jKHQA8": {
+   "hash": "faa1aa117aa6714e",
+   "questions": [
+    {
+     "q": "In which place does Marina say drifters gather and train?",
+     "options": [
+      "Елизово",
+      "Владивосток",
+      "Петропавловск",
+      "Новосибирск"
+     ],
+     "at": 33120
+    },
+    {
+     "q": "How does Ruslan explain what drifting is?",
+     "options": [
+      "A controlled skid",
+      "A fast race on ice",
+      "A style of jumping cars",
+      "A way to fix engines"
+     ],
+     "at": 103479
+    },
+    {
+     "q": "According to Ruslan, where did drifting come to the Far East from?",
+     "options": [
+      "Japan",
+      "Germany",
+      "America",
+      "China"
+     ],
+     "at": 139760
+    },
+    {
+     "q": "In line 94, what does Marina say «жига» is short for?",
+     "options": [
+      "Жигули, a Russian car",
+      "Жигант, a big truck",
+      "Жижа, a car fluid",
+      "Журнал, a car magazine"
+     ],
+     "at": 190840
+    },
+    {
+     "q": "What was Ruslan's profession before he stayed in Kamchatka?",
+     "options": [
+      "Diver",
+      "Pilot",
+      "Mechanic",
+      "Fisherman"
+     ],
+     "at": 536320
+    }
+   ]
+  },
+  "2TVJI1D21bk": {
+   "hash": "f1b6d0e1ad7ead78",
+   "questions": [
+    {
+     "q": "Why did Marina choose to travel to Moscow through Vilnius by bus?",
+     "options": [
+      "To play it safe at the border",
+      "Because the tickets were cheaper",
+      "Because she wanted to see Lithuania",
+      "Because there were no flights to Moscow"
+     ],
+     "at": 63199
+    },
+    {
+     "q": "Who did Marina meet as travel companions on the road?",
+     "options": [
+      "Two long-haul truckers from Belarus",
+      "Two students from Lithuania",
+      "A family going to Minsk",
+      "Two bus drivers from Moscow"
+     ],
+     "at": 92920
+    },
+    {
+     "q": "What did Marina say is a fun fact about Belarus?",
+     "options": [
+      "It has a legally permitted casino",
+      "It has no border controls",
+      "It has free train travel",
+      "It has a famous potato museum"
+     ],
+     "at": 179720
+    },
+    {
+     "q": "In the Belarusian restaurant, Marina says драники are the food of her childhood. Who cooked them for her?",
+     "options": [
+      "Her grandmother",
+      "Her mother",
+      "Her father",
+      "Her aunt"
+     ],
+     "at": 210080
+    },
+    {
+     "q": "Why does Marina say the streets of Moscow looked so unusual?",
+     "options": [
+      "They were very empty",
+      "They were full of snow",
+      "They were very dirty",
+      "They were closed for repairs"
+     ],
+     "at": 289160
+    }
+   ]
+  },
+  "Tc9Kz_LiCoQ": {
+   "hash": "3796ddff4dccd58c",
+   "questions": [
+    {
+     "q": "What does the host say her new perfume smells of?",
+     "options": [
+      "Bergamot",
+      "Vanilla",
+      "Peach",
+      "Mint"
+     ],
+     "at": 55359
+    },
+    {
+     "q": "What kind of shower gel did the first couple buy?",
+     "options": [
+      "One with peach",
+      "One with mint",
+      "One with vanilla",
+      "One with bergamot"
+     ],
+     "at": 95759
+    },
+    {
+     "q": "Why does the man who lives on the fifth floor order groceries?",
+     "options": [
+      "There is no elevator and he avoids carrying heavy water",
+      "His car is broken and the store is too far away",
+      "The stores near his house are always full of people",
+      "He works late and the stores are closed when he leaves"
+     ],
+     "at": 612079
+    },
+    {
+     "q": "What did one woman say she does at an offline store before buying online?",
+     "options": [
+      "Looks at things, then buys online for less",
+      "Tries things on, then asks for a discount",
+      "Takes photos, then shows them to her friends",
+      "Reads reviews, then buys the same thing in the store"
+     ],
+     "at": 494599
+    },
+    {
+     "q": "What did the man say was his most expensive, most memorable purchase?",
+     "options": [
+      "His first iPhone",
+      "His first car",
+      "A new laptop",
+      "A winter coat"
+     ],
+     "at": 732639
+    }
+   ]
+  },
+  "hsfTkMhGClI": {
+   "hash": "ed016ae1e021bca7",
+   "questions": [
+    {
+     "q": "How does Nikita open the office door?",
+     "options": [
+      "With a card",
+      "With a key",
+      "With a code",
+      "With his phone"
+     ],
+     "at": 50960
+    },
+    {
+     "q": "Why does Sveta say the coffee break is a good idea at work?",
+     "options": [
+      "Coffee helps fight sleepiness",
+      "Coffee helps her think of ideas",
+      "Coffee is free for workers",
+      "Coffee makes the long day shorter"
+     ],
+     "at": 128280
+    },
+    {
+     "q": "What does Nikita say when a client calls and can't hear him?",
+     "options": [
+      "He drove into a tunnel",
+      "He is in a lift",
+      "He is outside in the wind",
+      "His phone battery is low"
+     ],
+     "at": 162840
+    },
+    {
+     "q": "What does Nikita take from the office to bring home?",
+     "options": [
+      "Paper",
+      "A chair",
+      "A printer",
+      "Coffee"
+     ],
+     "at": 207040
+    },
+    {
+     "q": "What does Sveta say about \"командировочные\" in the video?",
+     "options": [
+      "Money for transport, food and housing",
+      "Money for a new computer",
+      "Extra pay for working at night",
+      "Money for sick days"
+     ],
+     "at": 451840
+    }
+   ]
+  },
+  "uXL7Pxjvz-E": {
+   "hash": "70a445535d0b34a1",
+   "questions": [
+    {
+     "q": "Which ocean is the city where Marina lives located next to?",
+     "options": [
+      "The Atlantic Ocean",
+      "The Pacific Ocean",
+      "The Indian Ocean",
+      "The Arctic Ocean"
+     ],
+     "at": 19720
+    },
+    {
+     "q": "What does Marina say about the weather, as always, in summer?",
+     "options": [
+      "It is windy",
+      "It is rainy",
+      "It is foggy",
+      "It is cold"
+     ],
+     "at": 31080
+    },
+    {
+     "q": "Why does Marina say she needs a towel at this beach?",
+     "options": [
+      "The beach is sandy",
+      "The grass is wet",
+      "The stones are sharp",
+      "The ground is dirty"
+     ],
+     "at": 114200
+    },
+    {
+     "q": "Why does Marina say she cannot swim in the water?",
+     "options": [
+      "She has no wetsuit and the water is cold",
+      "She forgot her swimsuit at home",
+      "The waves are too big and dangerous",
+      "The beach is closed for swimming"
+     ],
+     "at": 222480
+    },
+    {
+     "q": "How long does Marina say it takes to get to the beach?",
+     "options": [
+      "An hour and a half",
+      "Forty minutes",
+      "Two hours",
+      "Three hours"
+     ],
+     "at": 233439
+    }
+   ]
+  },
+  "ok09KmmxVWQ": {
+   "hash": "b1e40e60728cf943",
+   "questions": [
+    {
+     "q": "What was the previous video on the channel about?",
+     "options": [
+      "Clothing",
+      "Travel",
+      "Cooking",
+      "Music"
+     ],
+     "at": 8200
+    },
+    {
+     "q": "In the short dialogue, why is the speaker going to the store?",
+     "options": [
+      "Their fridge is empty",
+      "They are having guests",
+      "They need a gift",
+      "It is a holiday"
+     ],
+     "at": 55840
+    },
+    {
+     "q": "What does Marina say you can do with chicken?",
+     "options": [
+      "Fry it in a pan",
+      "Bake it in the oven",
+      "Boil it in soup",
+      "Grill it outside"
+     ],
+     "at": 89880
+    },
+    {
+     "q": "Which two European countries does Marina say eat a lot of buckwheat?",
+     "options": [
+      "The Netherlands and Latvia",
+      "Poland and Germany",
+      "Finland and Estonia",
+      "France and Italy"
+     ],
+     "at": 202200
+    },
+    {
+     "q": "In line 33, what does Marina call bread, using the word блюдо?",
+     "options": [
+      "Her favorite dish on the list",
+      "The cheapest item on the list",
+      "The heaviest item on the list",
+      "Her least favorite item on the list"
+     ],
+     "at": 153000
+    }
+   ]
+  },
+  "PMJoQiDgxjQ": {
+   "hash": "32e2bbec3ba92cdf",
+   "questions": [
+    {
+     "q": "At the start, who really scattered the woman's things around the room?",
+     "options": [
+      "She did it herself",
+      "Her little brother",
+      "A neighbor's cat",
+      "Her husband"
+     ],
+     "at": 18320
+    },
+    {
+     "q": "What did people recently find out about the dog Kek?",
+     "options": [
+      "He is part wolf",
+      "He is part fox",
+      "He is part jackal",
+      "He is a pure Spitz"
+     ],
+     "at": 54760
+    },
+    {
+     "q": "Why did the woman name her first cat Cassandra?",
+     "options": [
+      "A book inspired her",
+      "A film heroine inspired her",
+      "It was her grandmother's name",
+      "A singer she liked"
+     ],
+     "at": 163000
+    },
+    {
+     "q": "Which Russian word do they use as a nickname for Nyusha, the cat who hides?",
+     "options": [
+      "загасок",
+      "шкодник",
+      "бандитка",
+      "хрюкальщик"
+     ],
+     "at": 446599
+    },
+    {
+     "q": "What job are they training Kek for at the end?",
+     "options": [
+      "Therapy dog",
+      "Guard dog",
+      "Show dog",
+      "Hunting dog"
+     ],
+     "at": 715680
+    }
+   ]
+  },
+  "6cKTSj4a8bQ": {
+   "hash": "07dfcad4ab949e69",
+   "questions": [
+    {
+     "q": "Which instrument does Marina joke about her own playing of?",
+     "options": [
+      "The flute",
+      "The guitar",
+      "The violin",
+      "The piano"
+     ],
+     "at": 47280
+    },
+    {
+     "q": "Which instruments does the woman musician say she teaches?",
+     "options": [
+      "Guitar and ukulele",
+      "Piano and accordion",
+      "Violin and cello",
+      "Drums and flute"
+     ],
+     "at": 131120
+    },
+    {
+     "q": "Which city is the favorite rap group from, according to the speaker?",
+     "options": [
+      "Chelyabinsk",
+      "Yekaterinburg",
+      "Novosibirsk",
+      "Kazan"
+     ],
+     "at": 192840
+    },
+    {
+     "q": "What kind of phone does the man say he uses?",
+     "options": [
+      "A button phone",
+      "A very old smartphone",
+      "A work phone only",
+      "A phone without a screen"
+     ],
+     "at": 404160
+    },
+    {
+     "q": "In line 198, what does за рубежом mean?",
+     "options": [
+      "In other countries",
+      "In small towns",
+      "In old times",
+      "On the internet"
+     ],
+     "at": 479720
+    }
+   ]
+  },
+  "a5bLHLqaNDg": {
+   "hash": "9f609dd088d00469",
+   "questions": [
+    {
+     "q": "What color does Marina say the person's back is at the start?",
+     "options": [
+      "White",
+      "Black",
+      "Red",
+      "Green"
+     ],
+     "at": 9519
+    },
+    {
+     "q": "What does the word дурак mean in \"День дурака\"?",
+     "options": [
+      "Fool",
+      "King",
+      "Liar",
+      "Child"
+     ],
+     "at": 167440
+    },
+    {
+     "q": "How did one man's parents trick him on April 1?",
+     "options": [
+      "Played sirens while he slept",
+      "Poured cold water over his head",
+      "Hid all his clothes and shoes",
+      "Locked him in his room"
+     ],
+     "at": 215920
+    },
+    {
+     "q": "What does the woman say her office colleagues suddenly start shooting at each other?",
+     "options": [
+      "Nerf guns",
+      "Water pistols",
+      "Paper balls",
+      "Party poppers"
+     ],
+     "at": 596680
+    },
+    {
+     "q": "How did the math teacher react when she saw the prank on her textbook?",
+     "options": [
+      "She calmly asked what it was",
+      "She shouted at the whole class",
+      "She sent them to the principal",
+      "She laughed and left the room"
+     ],
+     "at": 751240
+    }
+   ]
+  },
+  "7kbI0d2_T5s": {
+   "hash": "7a758597abdd2066",
+   "questions": [
+    {
+     "q": "When does Marina say you can use привет, as she explains it?",
+     "options": [
+      "When you call someone by phone",
+      "When you meet a new teacher",
+      "When you write a formal letter",
+      "When you enter a shop"
+     ],
+     "at": 77920
+    },
+    {
+     "q": "How is the first letter «о» in the word здорово pronounced, according to Marina?",
+     "options": [
+      "Like «а»",
+      "Like «у»",
+      "Like «и»",
+      "Like «э»"
+     ],
+     "at": 129720
+    },
+    {
+     "q": "In her bad-weather example, what does the person notice at home?",
+     "options": [
+      "The roof is leaking",
+      "A window is broken",
+      "The door is stuck",
+      "The light is off"
+     ],
+     "at": 247560
+    },
+    {
+     "q": "Marina says здравствуйте comes from which Russian word?",
+     "options": [
+      "здоровье",
+      "радость",
+      "счастье",
+      "добро"
+     ],
+     "at": 301440
+    },
+    {
+     "q": "What kind of TV show from her childhood does Marina remember?",
+     "options": [
+      "A puppet show",
+      "A cartoon series",
+      "A cooking show",
+      "A quiz show"
+     ],
+     "at": 574399
+    }
+   ]
+  },
+  "tkJ5aiWOkXs": {
+   "hash": "48c7ecd8c450a5a8",
+   "questions": [
+    {
+     "q": "What does the host say most Russians give you when you try to start small talk?",
+     "options": [
+      "A stern refusal, or a very long personal answer",
+      "A friendly joke, or a quick change of subject",
+      "A polite smile, or a question about your job",
+      "Silence, or an invitation to have tea together"
+     ],
+     "at": 34760
+    },
+    {
+     "q": "Where does the first woman say she grew up, when talking about the weather?",
+     "options": [
+      "In the far north",
+      "In a village near Moscow",
+      "On the Black Sea coast",
+      "In a big city in Siberia"
+     ],
+     "at": 81280
+    },
+    {
+     "q": "Which New Year activity does one woman say she would like to do with her family?",
+     "options": [
+      "Go to an ice rink",
+      "Travel to England",
+      "Go to a theatre show",
+      "Cook a big dinner for guests"
+     ],
+     "at": 198360
+    },
+    {
+     "q": "Where does the woman who talks about regular customers and compliments on her haircut work?",
+     "options": [
+      "In a bakery",
+      "In a flower shop",
+      "In a hair salon",
+      "In a bookshop"
+     ],
+     "at": 439000
+    },
+    {
+     "q": "A woman says a grandmother spoke to her on public transport. Why did the grandmother start talking?",
+     "options": [
+      "She had given up her seat to her",
+      "She had dropped something on the floor",
+      "She had asked her for directions",
+      "She had helped her carry a bag"
+     ],
+     "at": 760680
+    }
+   ]
+  },
+  "n63PP-9Fj3I": {
+   "hash": "b0e115833b2c59bf",
+   "questions": [
+    {
+     "q": "What does Marina say the video's questions were made by?",
+     "options": [
+      "City residents who were asked to invent them",
+      "Her students in a class",
+      "Famous Russian poets and writers",
+      "Teachers from a language school"
+     ],
+     "at": 22080
+    },
+    {
+     "q": "Which funny counting rhyme helps remember the case names?",
+     "options": [
+      "Иван родил девчонку, велел тащить пелёнку",
+      "Мама мыла раму, папа читал газету",
+      "Раз, два, три, четыре, пять",
+      "Зима пришла, снег идёт"
+     ],
+     "at": 84079
+    },
+    {
+     "q": "What does Marina ask viewers to write in the comments to get a link to a free lesson?",
+     "options": [
+      "The word клуб",
+      "The word урок",
+      "The word падеж",
+      "The word видео"
+     ],
+     "at": 280720
+    },
+    {
+     "q": "In the example about mama, which case is «мамы» in «кого мне не хватает»?",
+     "options": [
+      "Genitive",
+      "Accusative",
+      "Dative",
+      "Instrumental"
+     ],
+     "at": 339039
+    },
+    {
+     "q": "Which question for the instrumental case is used with the word \"to work as\"?",
+     "options": [
+      "Кем",
+      "О ком",
+      "Кому",
+      "Чего"
+     ],
+     "at": 412639
+    }
+   ]
+  },
+  "IU0Zy67ZLpU": {
+   "hash": "889ed8e4d220a439",
+   "questions": [
+    {
+     "q": "How long has Marina been living in Berlin?",
+     "options": [
+      "About one month",
+      "About one year",
+      "About three months",
+      "About six weeks"
+     ],
+     "at": 10880
+    },
+    {
+     "q": "What does Marina say about bike paths in Moscow?",
+     "options": [
+      "They are mostly only in the center",
+      "They go through the whole city",
+      "They are always full of people",
+      "They are free for everyone to use"
+     ],
+     "at": 73920
+    },
+    {
+     "q": "Why does Marina say entering the metro in Moscow is like entering an airport?",
+     "options": [
+      "You pass police, metal detectors and x-rays",
+      "You must show your passport at the gate",
+      "You need to buy a ticket in advance",
+      "You wait in a very long line outside"
+     ],
+     "at": 195319
+    },
+    {
+     "q": "Which word does Marina say is the name for homemade pickled jars, from the verb \"закручивать\"?",
+     "options": [
+      "закрутки",
+      "соленья",
+      "ларёк",
+      "кругляк"
+     ],
+     "at": 475159
+    },
+    {
+     "q": "What word does Marina use for a Russian neighborhood kiosk?",
+     "options": [
+      "ларёк",
+      "вестибюль",
+      "турникет",
+      "мусоропровод"
+     ],
+     "at": 539920
+    }
+   ]
+  },
+  "NduDs59WZqU": {
+   "hash": "f7d24f9fd3805c5e",
+   "questions": [
+    {
+     "q": "What does Marina say she really loves to do?",
+     "options": [
+      "Ask questions",
+      "Learn new songs",
+      "Walk in the city",
+      "Cook breakfast"
+     ],
+     "at": 1640
+    },
+    {
+     "q": "According to Marina, what can change the meaning and feeling of the word что?",
+     "options": [
+      "The intonation",
+      "The speed",
+      "The word order",
+      "The ending"
+     ],
+     "at": 26359
+    },
+    {
+     "q": "In the video, who is asked to say who lives on the roof?",
+     "options": [
+      "Residents of Yekaterinburg",
+      "Marina's team",
+      "Students at a school",
+      "Tourists from Moscow"
+     ],
+     "at": 108640
+    },
+    {
+     "q": "Which question word does she use in «Где находится остановка»?",
+     "options": [
+      "Где",
+      "Куда",
+      "Откуда",
+      "Когда"
+     ],
+     "at": 204159
+    },
+    {
+     "q": "What does Marina call the question about where the wind blows from?",
+     "options": [
+      "A philosophical question",
+      "A traditional question",
+      "A pressing question",
+      "An interesting question"
+     ],
+     "at": 288360
+    }
+   ]
+  },
+  "or8terUVLIw": {
+   "hash": "9533045b30c8f769",
+   "questions": [
+    {
+     "q": "In the example for the \"ability\" function of the verb, what does Marina say she can do?",
+     "options": [
+      "Speak Russian",
+      "Draw a cat",
+      "Read a book",
+      "Sing in Russian"
+     ],
+     "at": 24119
+    },
+    {
+     "q": "Marina says they might be late. What does Maxim answer?",
+     "options": [
+      "They still have a few minutes",
+      "The bus will come soon",
+      "They should take a taxi",
+      "The work can wait"
+     ],
+     "at": 87439
+    },
+    {
+     "q": "According to Maxim, what can people do in a conversation club?",
+     "options": [
+      "Talk for a whole hour on any topic",
+      "Watch Russian films together",
+      "Take a written grammar test",
+      "Learn to write letters by hand"
+     ],
+     "at": 125600
+    },
+    {
+     "q": "What does Marina ask when she sees the sign, and what does Maxim think the sign shows?",
+     "options": [
+      "Smoking is not allowed there",
+      "Parking is not allowed there",
+      "Entry is not allowed there",
+      "Eating is not allowed there"
+     ],
+     "at": 196319
+    },
+    {
+     "q": "Which word does Maxim give as the only opposite of можно?",
+     "options": [
+      "нельзя",
+      "не можно",
+      "не могу",
+      "нет можно"
+     ],
+     "at": 223040
+    }
+   ]
+  },
+  "MWXvj4eDnt4": {
+   "hash": "6824f20948b000f8",
+   "questions": [
+    {
+     "q": "Which kind of tree toys does one woman say she loves?",
+     "options": [
+      "Soviet toys that survived",
+      "Handmade wooden toys",
+      "Glass toys from Europe",
+      "Plain white toys"
+     ],
+     "at": 51840
+    },
+    {
+     "q": "In the line about paper and champagne, what does the word загадывать mean?",
+     "options": [
+      "To make a wish",
+      "To guess a riddle",
+      "To light a candle",
+      "To pour a drink"
+     ],
+     "at": 83320
+    },
+    {
+     "q": "What stands on the table from the first days of December?",
+     "options": [
+      "A bucket of mandarins",
+      "A bowl of nuts",
+      "A tray of cookies",
+      "A jar of pickles"
+     ],
+     "at": 96600
+    },
+    {
+     "q": "Why does one family set a timer on New Year's night?",
+     "options": [
+      "To call exactly when the chimes strike",
+      "To light the fireworks on time",
+      "To take the duck out of the oven",
+      "To throw the wish out the window"
+     ],
+     "at": 219959
+    },
+    {
+     "q": "According to the man, where do people in France put gifts?",
+     "options": [
+      "In special shoes",
+      "Under the tree",
+      "In socks by the fireplace",
+      "In a basket by the door"
+     ],
+     "at": 470800
+    }
+   ]
+  },
+  "bpAFSabRyJ8": {
+   "hash": "1c09290b881f3a13",
+   "questions": [
+    {
+     "q": "Why was the man left alone at the border on his way to the tournament?",
+     "options": [
+      "He forgot to renew his passport",
+      "He lost his bus ticket",
+      "He arrived at the station too late",
+      "He left his money at home"
+     ],
+     "at": 63239
+    },
+    {
+     "q": "What did the girl step into while she was photographing the sunset?",
+     "options": [
+      "A puddle",
+      "A snowdrift",
+      "A fountain",
+      "A muddy hole"
+     ],
+     "at": 144840
+    },
+    {
+     "q": "Ded Moroz tells the children «Потрогай меня за бороду». What does «потрогай» mean?",
+     "options": [
+      "Touch",
+      "Pull",
+      "Smell",
+      "Kiss"
+     ],
+     "at": 281360
+    },
+    {
+     "q": "What did Kristina eat at the restaurant for half a year?",
+     "options": [
+      "Rolls with meat",
+      "Pizza with cheese",
+      "Soup with fish",
+      "Pancakes with eggs"
+     ],
+     "at": 368400
+    },
+    {
+     "q": "In line 243, the girl says «проспала». What does this word mean there?",
+     "options": [
+      "Slept too long",
+      "Came to class late",
+      "Forgot her bag",
+      "Ran out of school"
+     ],
+     "at": 577360
+    }
+   ]
+  },
+  "-XvydxPvcyI": {
+   "hash": "dc68739d0cb4ecac",
+   "questions": [
+    {
+     "q": "What did almost every child in the host's childhood take outside to play?",
+     "options": [
+      "a knife",
+      "a ball",
+      "a rubber band",
+      "a stick"
+     ],
+     "at": 22640
+    },
+    {
+     "q": "In the street interview, why did one woman like hide and seek best?",
+     "options": [
+      "She could not run fast",
+      "She liked hiding in trees",
+      "She had many friends nearby",
+      "She was good at counting"
+     ],
+     "at": 133840
+    },
+    {
+     "q": "In the game \"войнушка\", what did the children pretend the sticks were?",
+     "options": [
+      "weapons",
+      "houses",
+      "dolls",
+      "swords for knights"
+     ],
+     "at": 149040
+    },
+    {
+     "q": "Where did one speaker build little houses in winter, with so much snow?",
+     "options": [
+      "in the trees",
+      "in the garage",
+      "in the forest",
+      "on the roof"
+     ],
+     "at": 296320
+    },
+    {
+     "q": "What does one speaker say about playing games on a computer in the video?",
+     "options": [
+      "It can help to learn English",
+      "It helps you run faster",
+      "It teaches you to cook",
+      "It helps you make friends at school"
+     ],
+     "at": 647200
+    }
+   ]
+  },
+  "sw2V54gc-iQ": {
+   "hash": "ae5a9c0ec37bc7fa",
+   "questions": [
+    {
+     "q": "In the joke sport at the start, what is the host searching for?",
+     "options": [
+      "A coffee shop",
+      "A quiet bookshop",
+      "A cheap lunch spot",
+      "A public toilet"
+     ],
+     "at": 3959
+    },
+    {
+     "q": "What does one speaker say sport is at their dacha?",
+     "options": [
+      "Work in the garden",
+      "Fun with the family",
+      "A summer holiday",
+      "A weekend habit"
+     ],
+     "at": 81079
+    },
+    {
+     "q": "What can the girl do very well, according to her friend?",
+     "options": [
+      "Kick very high",
+      "Swim very fast",
+      "Jump very far",
+      "Run very long"
+     ],
+     "at": 187120
+    },
+    {
+     "q": "She says травмы are the most unpleasant thing about sport. What does травмы mean?",
+     "options": [
+      "Injuries",
+      "Defeats",
+      "Early mornings",
+      "Expensive gear"
+     ],
+     "at": 354160
+    },
+    {
+     "q": "What sport does one speaker always watch in the morning with her grandfather?",
+     "options": [
+      "Biathlon",
+      "Volleyball",
+      "Boxing",
+      "Curling"
+     ],
+     "at": 708639
+    }
+   ]
+  },
+  "fNvsiRrKLj4": {
+   "hash": "08c26758d009aefe",
+   "questions": [
+    {
+     "q": "In the video, who does Rafael pretend to be?",
+     "options": [
+      "The boyfriend of the host",
+      "The father of the host",
+      "The brother of the host",
+      "A friend from work"
+     ],
+     "at": 20000
+    },
+    {
+     "q": "Which kind of car does Rafael say he loves?",
+     "options": [
+      "Ladas (Жигули)",
+      "Fiats",
+      "Mercedes cars",
+      "Old Volkswagens"
+     ],
+     "at": 110479
+    },
+    {
+     "q": "What does the older brother ask to do in the summer during the vacation?",
+     "options": [
+      "Stay at Rafael's house as a family",
+      "Take Rafael on a trip to Greece",
+      "Go boxing with Rafael",
+      "Rent a car from Rafael"
+     ],
+     "at": 141440
+    },
+    {
+     "q": "Why does the older brother say \"Да не бойся, я шучу\"?",
+     "options": [
+      "He wanted to test Rafael",
+      "He wanted Rafael to leave",
+      "He was angry about the cars",
+      "He forgot Rafael's name"
+     ],
+     "at": 153120
+    },
+    {
+     "q": "What does the host say about the word тачки?",
+     "options": [
+      "It is a slang word for cars",
+      "It is a polite word for cars",
+      "It is an old word for trucks",
+      "It is a word for sports"
+     ],
+     "at": 234239
+    }
+   ]
+  },
+  "G3fGvuFg7x4": {
+   "hash": "51fcf3f35387ce86",
+   "questions": [
+    {
+     "q": "What is the job of the man who has been to forty-two countries?",
+     "options": [
+      "He is a sailor",
+      "He is a pilot",
+      "He is a train driver",
+      "He is a tour guide"
+     ],
+     "at": 73840
+    },
+    {
+     "q": "What does the man mean when he calls Russians сумрачные?",
+     "options": [
+      "Gloomy",
+      "Very proud",
+      "Easily angry",
+      "Quite lazy"
+     ],
+     "at": 82119
+    },
+    {
+     "q": "In which country does the woman live who says she can compare Russians with others?",
+     "options": [
+      "China",
+      "Malaysia",
+      "Germany",
+      "Denmark"
+     ],
+     "at": 117399
+    },
+    {
+     "q": "Which team does the man say might be playing when a friend shows up?",
+     "options": [
+      "Dynamo Moscow",
+      "Spartak Moscow",
+      "CSKA Moscow",
+      "Zenit"
+     ],
+     "at": 350080
+    },
+    {
+     "q": "What does the woman say Russian hosts give a guest at the door?",
+     "options": [
+      "Slippers (тапочки)",
+      "A towel",
+      "A warm jacket",
+      "Bread and salt"
+     ],
+     "at": 961160
+    }
+   ]
+  },
+  "M-RZ088Y0v0": {
+   "hash": "09da831945a02184",
+   "questions": [
+    {
+     "q": "At the start, what does the first speaker say happened with her crush yesterday?",
+     "options": [
+      "Something totally cringe happened",
+      "He lost his phone at a party",
+      "He told her a secret about her",
+      "He moved to another city"
+     ],
+     "at": 160
+    },
+    {
+     "q": "Which Russian word does the first speaker say she understood from her friend's long explanation?",
+     "options": [
+      "пока",
+      "чел",
+      "вписка",
+      "чилить"
+     ],
+     "at": 25080
+    },
+    {
+     "q": "Which city were the friends from who asked passersby to explain slang?",
+     "options": [
+      "Yekaterinburg",
+      "Kazan",
+      "Novosibirsk",
+      "Samara"
+     ],
+     "at": 39399
+    },
+    {
+     "q": "In the video, what example does a passerby give of something that is «жесть»?",
+     "options": [
+      "A duck drowned today",
+      "A bus was late again",
+      "A cat climbed a tree",
+      "A friend won a prize"
+     ],
+     "at": 105960
+    },
+    {
+     "q": "How does a passerby explain the word «нормис»?",
+     "options": [
+      "A person who watches TV in the evenings",
+      "A person who always wears expensive clothes",
+      "A person who never leaves their home town",
+      "A person who only listens to old music"
+     ],
+     "at": 142800
+    }
+   ]
+  },
+  "9lhm8fd3yS0": {
+   "hash": "989dbd52bf235079",
+   "questions": [
+    {
+     "q": "How many cups does Marina say they need for the pancakes?",
+     "options": [
+      "Three",
+      "Two",
+      "Four",
+      "Five"
+     ],
+     "at": 24519
+    },
+    {
+     "q": "What does Marina say you can do with the flour so there are no lumps?",
+     "options": [
+      "Sift it with a sieve",
+      "Warm it in the oven",
+      "Keep it in the fridge",
+      "Add it before the eggs"
+     ],
+     "at": 137519
+    },
+    {
+     "q": "Which word does Marina use for the kind of oil she will use?",
+     "options": [
+      "подсолнечное",
+      "сливочное",
+      "оливковое",
+      "кукурузное"
+     ],
+     "at": 192360
+    },
+    {
+     "q": "Which word does Marina use for the tool she fills with batter?",
+     "options": [
+      "поварёшку",
+      "лопаточку",
+      "кастрюлю",
+      "чашку"
+     ],
+     "at": 270880
+    },
+    {
+     "q": "What does Marina say she loves most of all to eat with pancakes?",
+     "options": [
+      "Nutella",
+      "Honey",
+      "Jam",
+      "Sour cream"
+     ],
+     "at": 325600
+    }
+   ]
+  },
+  "phNN7g8tavg": {
+   "hash": "9b5629d32a51ebea",
+   "questions": [
+    {
+     "q": "What does Lena first say tongue twisters help you develop?",
+     "options": [
+      "Your diction",
+      "Your memory",
+      "Your vocabulary",
+      "Your grammar"
+     ],
+     "at": 43920
+    },
+    {
+     "q": "In the Greek tongue twister, what grabs the Greek by the hand?",
+     "options": [
+      "A crab",
+      "A fish",
+      "A frog",
+      "A snake"
+     ],
+     "at": 108360
+    },
+    {
+     "q": "Why does the man know the long tongue twister about cones?",
+     "options": [
+      "He used to work in theater",
+      "He used to teach Russian",
+      "He works at a factory",
+      "He is a speech therapist"
+     ],
+     "at": 222280
+    },
+    {
+     "q": "The speaker says «я ходила к логопеду». Who is a логопед?",
+     "options": [
+      "A speech therapist",
+      "A voice coach",
+      "A school teacher",
+      "A family doctor"
+     ],
+     "at": 357400
+    },
+    {
+     "q": "At the end, what does Lena ask viewers to write in the comments?",
+     "options": [
+      "Which sound they want to practice",
+      "Their favorite tongue twister",
+      "Which city they live in",
+      "Which word they cannot translate"
+     ],
+     "at": 493599
+    }
+   ]
+  },
+  "0Aiyey5H4kA": {
+   "hash": "32d03254e2738d49",
+   "questions": [
+    {
+     "q": "What does the team decide to call February?",
+     "options": [
+      "A month of love for the Russian language",
+      "A month of Russian poetry and music",
+      "A month of travel across Russia",
+      "A month of Russian cooking lessons"
+     ],
+     "at": 6120
+    },
+    {
+     "q": "How long is the marathon that the video invites people to join?",
+     "options": [
+      "Thirty days",
+      "Fourteen days",
+      "Sixty days",
+      "One week"
+     ],
+     "at": 16000
+    },
+    {
+     "q": "Which pet does the speaker give as an example for the first task?",
+     "options": [
+      "A cat",
+      "A dog",
+      "A parrot",
+      "A hamster"
+     ],
+     "at": 36920
+    },
+    {
+     "q": "What word does she use for \"pet\" when she asks how you got it?",
+     "options": [
+      "питомец",
+      "животное",
+      "котёнок",
+      "друг"
+     ],
+     "at": 43120
+    },
+    {
+     "q": "What must you become to join the marathon?",
+     "options": [
+      "A paid subscriber",
+      "A team member",
+      "A free app user",
+      "A Discord moderator"
+     ],
+     "at": 82040
+    }
+   ]
+  },
+  "h6RIj8WvYXM": {
+   "hash": "be7ea9b888d0abb4",
+   "questions": [
+    {
+     "q": "What does the word синенький mean in Central Russia, according to the intro?",
+     "options": [
+      "An eggplant",
+      "A blueberry",
+      "A plum",
+      "A cornflower"
+     ],
+     "at": 18720
+    },
+    {
+     "q": "Which two cities' streets did the video makers visit to ask people questions?",
+     "options": [
+      "Moscow and Yekaterinburg",
+      "Moscow and Kazan",
+      "Yekaterinburg and Tomsk",
+      "Kamchatka and Rostov"
+     ],
+     "at": 54359
+    },
+    {
+     "q": "Why does the Estonian-raised woman say people looked at her strangely when she came?",
+     "options": [
+      "They thought she spoke Moscow-style",
+      "They thought she sounded like a foreigner",
+      "They thought she spoke too quietly",
+      "They thought she spoke too slowly"
+     ],
+     "at": 138760
+    },
+    {
+     "q": "Which Ural word for ice cream does a speaker say her colleague told her about?",
+     "options": [
+      "мороженко",
+      "мороженка",
+      "морожка",
+      "мороженое"
+     ],
+     "at": 419440
+    },
+    {
+     "q": "What does one speaker say Petersburg people call a document file?",
+     "options": [
+      "мультифора",
+      "файл",
+      "папка",
+      "обложка"
+     ],
+     "at": 489720
+    }
+   ]
+  },
+  "rDQ802sFP2Y": {
+   "hash": "773c77dbcc5cea10",
+   "questions": [
+    {
+     "q": "What do people in Turkey call this salad?",
+     "options": [
+      "Russian salad",
+      "Potato salad",
+      "Brine salad",
+      "French salad"
+     ],
+     "at": 25359
+    },
+    {
+     "q": "Which meat did Lena buy this time because the shop had no sausage?",
+     "options": [
+      "Ham",
+      "Chicken",
+      "Beef",
+      "Pork"
+     ],
+     "at": 106200
+    },
+    {
+     "q": "Why does Lena say canned green peas are better than fresh frozen ones?",
+     "options": [
+      "They are a little salty",
+      "They are cheaper to buy",
+      "They stay softer in the salad",
+      "They have a sweeter taste"
+     ],
+     "at": 181319
+    },
+    {
+     "q": "In line 110, what is boiled unpeeled potato called?",
+     "options": [
+      "картофель в мундире",
+      "картофель по-русски",
+      "картошка в рассоле",
+      "молодая картошка"
+     ],
+     "at": 365280
+    },
+    {
+     "q": "What do the two women say some people drink brine for?",
+     "options": [
+      "To cure a hangover",
+      "To help them sleep",
+      "To warm up in winter",
+      "To cure a cold"
+     ],
+     "at": 670880
+    }
+   ]
+  },
+  "t9YstQvhEso": {
+   "hash": "d88d19a8c69c26cc",
+   "questions": [
+    {
+     "q": "Why does Marina say it was a funny coincidence that the topic is family photos?",
+     "options": [
+      "She had just come from a photo shoot of non-family photos",
+      "She had just printed some old family photos",
+      "She had just found a box of old albums",
+      "She had just bought a new camera"
+     ],
+     "at": 71040
+    },
+    {
+     "q": "In the famous war photo of Nikita's grandmother, how does she look compared with the men?",
+     "options": [
+      "She smiles radiantly while the men look tired and sad",
+      "She looks very serious while the men smile",
+      "She looks tired while the men look proud",
+      "She is laughing while the men look angry"
+     ],
+     "at": 155480
+    },
+    {
+     "q": "What was Nikita's grandfather's nickname, as Nikita says in the video?",
+     "options": [
+      "Батяня",
+      "Гусар",
+      "Дедуля",
+      "Папаша"
+     ],
+     "at": 435479
+    },
+    {
+     "q": "What did Nikita's grandfather write on the back of the photo found in the safe?",
+     "options": [
+      "Still the same, lonely, only now fat too",
+      "Happy and young, summer in Sochi",
+      "Never again will I visit the sea",
+      "Still the same, always cheerful and strong"
+     ],
+     "at": 562519
+    },
+    {
+     "q": "What did Marina find out about her mother from the photos in her grandmother's albums?",
+     "options": [
+      "She played bass guitar in a rock band",
+      "She was a champion swimmer",
+      "She worked as a newspaper journalist",
+      "She sang in a local choir"
+     ],
+     "at": 827000
+    }
+   ]
+  },
+  "z4-Ra9EDmzo": {
+   "hash": "d09b3445a261c84b",
+   "questions": [
+    {
+     "q": "In the first woman's photo, what runs along one cousin's hands?",
+     "options": [
+      "A hamster",
+      "A kitten",
+      "A parrot",
+      "A lizard"
+     ],
+     "at": 60600
+    },
+    {
+     "q": "Who brought the very small cat to the girl's family?",
+     "options": [
+      "A neighbor",
+      "Her grandmother",
+      "Her uncle",
+      "A school friend"
+     ],
+     "at": 110040
+    },
+    {
+     "q": "The grandfather's family made a human pyramid. What story did he compare it to?",
+     "options": [
+      "The Bremen Town Musicians",
+      "The Three Little Pigs",
+      "The Snow Queen",
+      "The Gingerbread Man"
+     ],
+     "at": 156239
+    },
+    {
+     "q": "In line 127, what does the word мило mean?",
+     "options": [
+      "Sweet, cute",
+      "Silly, foolish",
+      "Rare, unusual",
+      "Old-fashioned"
+     ],
+     "at": 328479
+    },
+    {
+     "q": "For which occasion does the woman always make a separate photo album for each person?",
+     "options": [
+      "A birthday",
+      "A wedding",
+      "A graduation",
+      "Every New Year"
+     ],
+     "at": 542480
+    }
+   ]
+  },
+  "HzxZ2ovb3aM": {
+   "hash": "5bcdb009e5ca0d20",
+   "questions": [
+    {
+     "q": "What does the host say is happening to the clocks in European countries this weekend?",
+     "options": [
+      "They are turned back one hour",
+      "They are turned forward one hour",
+      "They are turned back two hours",
+      "They are not changed at all"
+     ],
+     "at": 8679
+    },
+    {
+     "q": "What did one person do for the first time on a trip to Petersburg?",
+     "options": [
+      "Fed raccoons at a petting zoo",
+      "Rode a bicycle in Anapa",
+      "Played a cello concert",
+      "Visited a big circus"
+     ],
+     "at": 102920
+    },
+    {
+     "q": "How does the video say the Russian past tense is formed from the infinitive?",
+     "options": [
+      "Remove the suffix ть and add л",
+      "Remove the suffix ть and add ся",
+      "Keep ть and add the ending ла",
+      "Remove the first letter and add в"
+     ],
+     "at": 264000
+    },
+    {
+     "q": "Which past form of идти does the video give for masculine \"he\"?",
+     "options": [
+      "шёл",
+      "идел",
+      "ишёл",
+      "шел"
+     ],
+     "at": 544880
+    },
+    {
+     "q": "What did Lena and Pasha say they baked together yesterday?",
+     "options": [
+      "A pizza",
+      "A pumpkin pie",
+      "Some pancakes",
+      "A big cake"
+     ],
+     "at": 605640
+    }
+   ]
+  },
+  "ACn7xTNNRcc": {
+   "hash": "cbbd8fa5b8ce4892",
+   "questions": [
+    {
+     "q": "One woman says she loves winter only for one reason. What is it?",
+     "options": [
+      "Her birthday is in December",
+      "Her family goes skiing then",
+      "She likes the snowy forests",
+      "Her school has long holidays"
+     ],
+     "at": 102640
+    },
+    {
+     "q": "One person likes winter because something is missing in the cold season. What is it?",
+     "options": [
+      "Insects",
+      "Crowds",
+      "Traffic",
+      "Noise"
+     ],
+     "at": 154879
+    },
+    {
+     "q": "One man dislikes the snow. What reason does he give?",
+     "options": [
+      "It is dirty and cannot be eaten",
+      "It is too deep to walk in",
+      "It is too heavy to shovel",
+      "It melts too quickly"
+     ],
+     "at": 280919
+    },
+    {
+     "q": "A speaker says it is very slippery outside. Which word does she use for ice on the road?",
+     "options": [
+      "гололёд",
+      "оттепель",
+      "вьюга",
+      "сугроб"
+     ],
+     "at": 431800
+    },
+    {
+     "q": "Where did one woman go sledding as a child?",
+     "options": [
+      "An abandoned bomb shelter",
+      "A frozen river bank",
+      "An old factory roof",
+      "A hill by a castle"
+     ],
+     "at": 551079
+    }
+   ]
+  },
+  "ghBGLrwBTk4": {
+   "hash": "51c764f2e9b165cd",
+   "questions": [
+    {
+     "q": "What kind of place does Marina think the old meme interview was recorded in?",
+     "options": [
+      "A clothing store",
+      "A car dealership",
+      "A furniture shop",
+      "A hair salon"
+     ],
+     "at": 48920
+    },
+    {
+     "q": "Who came to visit Marina and asked what вайб means?",
+     "options": [
+      "Her mother",
+      "Her sister",
+      "Her boss",
+      "Her neighbor"
+     ],
+     "at": 251680
+    },
+    {
+     "q": "Which phrase does Marina say is closest to describing кринж?",
+     "options": [
+      "испанский стыд",
+      "французский шарм",
+      "английский юмор",
+      "немецкая точность"
+     ],
+     "at": 307039
+    },
+    {
+     "q": "Which borrowed word do people at foreign companies say instead of встреча?",
+     "options": [
+      "митинг",
+      "брифинг",
+      "дедлайн",
+      "семинар"
+     ],
+     "at": 955399
+    },
+    {
+     "q": "Who did Marina ask for a list of borrowed Russian words?",
+     "options": [
+      "The chat",
+      "A teacher",
+      "A dictionary",
+      "A friend"
+     ],
+     "at": 1125240
+    }
+   ]
+  },
+  "i7SOvgZIhIM": {
+   "hash": "3e9d7b8c77ff9e79",
+   "questions": [
+    {
+     "q": "What is the name of the man who presents the video with Elena?",
+     "options": [
+      "Pasha",
+      "Misha",
+      "Sasha",
+      "Dima"
+     ],
+     "at": 4980
+    },
+    {
+     "q": "A friend asks «Что делаешь». What does the other person say they have?",
+     "options": [
+      "A break",
+      "A meeting",
+      "A headache",
+      "A deadline"
+     ],
+     "at": 62000
+    },
+    {
+     "q": "In line 36, what does каждую минуту mean?",
+     "options": [
+      "Every minute",
+      "Every morning",
+      "Every week",
+      "Every hour"
+     ],
+     "at": 167879
+    },
+    {
+     "q": "Which thing does the speaker say he has already taken?",
+     "options": [
+      "An umbrella",
+      "A phone",
+      "A ticket",
+      "A coat"
+     ],
+     "at": 190680
+    },
+    {
+     "q": "In the joke, what is sitting on the rails?",
+     "options": [
+      "Tomatoes",
+      "Cucumbers",
+      "Birds",
+      "Cats"
+     ],
+     "at": 497039
+    }
+   ]
+  },
+  "RYvSIVoFOQA": {
+   "hash": "846b184a6fadf1de",
+   "questions": [
+    {
+     "q": "What does the host say was the main entertainment of her childhood?",
+     "options": [
+      "Visiting people or having guests over",
+      "Playing games in the courtyard",
+      "Going to the cinema with family",
+      "Spending summers at a country house"
+     ],
+     "at": 7560
+    },
+    {
+     "q": "Why does one man say he only goes to other people's homes?",
+     "options": [
+      "He has no place of his own in Moscow",
+      "His apartment is too far from the center",
+      "His family lives in another city",
+      "His roommates do not like visitors"
+     ],
+     "at": 74040
+    },
+    {
+     "q": "What did parents always tell the speaker about going to visit someone?",
+     "options": [
+      "Do not go with empty hands",
+      "Do not stay longer than an hour",
+      "Do not arrive before the invited time",
+      "Do not talk about politics at the table"
+     ],
+     "at": 163319
+    },
+    {
+     "q": "According to one woman, how do you know it is time to leave?",
+     "options": [
+      "Guests suggest looking at the family album",
+      "The hosts start washing the dishes",
+      "Someone turns off the music",
+      "The hosts bring out the tea"
+     ],
+     "at": 358740
+    },
+    {
+     "q": "What do some people say can be said with compote instead of alcohol?",
+     "options": [
+      "Toasts",
+      "Songs",
+      "Jokes",
+      "Wishes"
+     ],
+     "at": 470160
+    }
+   ]
+  },
+  "nunVkD5wd1c": {
+   "hash": "b7342a7b8069e49f",
+   "questions": [
+    {
+     "q": "Why can't the hosts play any of the music in this video?",
+     "options": [
+      "The channel's rules do not allow audio or video clips",
+      "The singers refused to give permission",
+      "The songs are too old to find",
+      "The videos would be too long for the channel"
+     ],
+     "at": 23039
+    },
+    {
+     "q": "In the song \"Million Roses\", what does the artist do to impress the actress?",
+     "options": [
+      "He sells his house and paintings to buy flowers",
+      "He writes her a song and sings it outside",
+      "He follows her on tour across the country",
+      "He paints her portrait and sends it to her hotel"
+     ],
+     "at": 93000
+    },
+    {
+     "q": "Why was Pugacheva in horror at a festival in Poland?",
+     "options": [
+      "She had a bad chemical perm before going on stage",
+      "She lost her dress just before the concert",
+      "She forgot the words to her song",
+      "Her seamstress did not arrive on time"
+     ],
+     "at": 152640
+    },
+    {
+     "q": "What does Svetlana say she realized when trying to find her favorite Meladze song?",
+     "options": [
+      "She has a different favorite song for every mood",
+      "She does not really have any favorite song",
+      "Her favorite song is the one from her school days",
+      "She likes only his sad songs"
+     ],
+     "at": 242640
+    },
+    {
+     "q": "What does the host say Russian chanson is about?",
+     "options": [
+      "Harsh prison themes",
+      "Village life and nature",
+      "Love and French romance",
+      "War and soldiers"
+     ],
+     "at": 396300
+    }
+   ]
+  },
+  "ZQ6CEQn9SmQ": {
+   "hash": "8b6416cf035f194e",
+   "questions": [
+    {
+     "q": "Where are the presenter's friends and colleagues from, who asked people on the street?",
+     "options": [
+      "Yekaterinburg",
+      "Moscow",
+      "Kazan",
+      "Novosibirsk"
+     ],
+     "at": 11280
+    },
+    {
+     "q": "Which two Slavic languages does she say also have the sound Ы?",
+     "options": [
+      "Belarusian and Ukrainian",
+      "Polish and Czech",
+      "Serbian and Bulgarian",
+      "Polish and Slovak"
+     ],
+     "at": 117240
+    },
+    {
+     "q": "She says Ы often forms the plural. Which word does she give as a plural example?",
+     "options": [
+      "штаны",
+      "рыба",
+      "выбор",
+      "шишка"
+     ],
+     "at": 193800
+    },
+    {
+     "q": "What does she say is the rule for the letters жи and ши?",
+     "options": [
+      "Write them with the letter и",
+      "Write them with the letter ы",
+      "Always stress them",
+      "Read them like soft sounds"
+     ],
+     "at": 282900
+    },
+    {
+     "q": "What should the tongue do when you say Ы with a pencil in your mouth?",
+     "options": [
+      "Not touch the pencil and stay back",
+      "Press hard against the pencil",
+      "Touch the top of your teeth",
+      "Roll up toward the palate"
+     ],
+     "at": 437340
+    }
+   ]
+  },
+  "kYg1fKIzohQ": {
+   "hash": "a086182af56e06f1",
+   "questions": [
+    {
+     "q": "In which city did Elena's friends and colleagues ask passersby about school?",
+     "options": [
+      "Yekaterinburg",
+      "Novosibirsk",
+      "Kazan",
+      "Saint Petersburg"
+     ],
+     "at": 26279
+    },
+    {
+     "q": "What does the speaker say people search for in the evenings before September 1st?",
+     "options": [
+      "Gladioluses",
+      "School uniforms",
+      "New backpacks",
+      "Colored ribbons"
+     ],
+     "at": 104520
+    },
+    {
+     "q": "Which cartoon characters visited the child's class after the assembly?",
+     "options": [
+      "Kuzya and Shapoklyak",
+      "Cheburashka and Gena",
+      "Masha and the Bear",
+      "The Wolf and the Hare"
+     ],
+     "at": 244980
+    },
+    {
+     "q": "Which word did the math teacher use to call her students?",
+     "options": [
+      "касатики",
+      "зайчики",
+      "котики",
+      "солнышки"
+     ],
+     "at": 436440
+    },
+    {
+     "q": "Why did one student miss school in the summer?",
+     "options": [
+      "There is always something to do there",
+      "Her friends live near the school",
+      "She likes the school lunches",
+      "Her teacher gives her extra tasks"
+     ],
+     "at": 730500
+    }
+   ]
+  },
+  "pp_FbwCzPZM": {
+   "hash": "15d9007fa52737c2",
+   "questions": [
+    {
+     "q": "What was Nikita doing when he made his famous stress mistake in a word?",
+     "options": [
+      "Courting a girl, near a possible kiss",
+      "Reading aloud in front of his class",
+      "Talking on the phone with his mother",
+      "Answering a question from a teacher"
+     ],
+     "at": 60420
+    },
+    {
+     "q": "Why does Marina say she now makes more grammar mistakes than before?",
+     "options": [
+      "Autocorrect is turned on everywhere she writes",
+      "She types too fast on her phone",
+      "She stopped reading Russian books",
+      "She lives abroad and speaks less Russian"
+     ],
+     "at": 132300
+    },
+    {
+     "q": "In which country is Nikita living right now?",
+     "options": [
+      "Latvia",
+      "Belarus",
+      "Czechia",
+      "Ukraine"
+     ],
+     "at": 300660
+    },
+    {
+     "q": "In Prague, what did Marina's friend from Minsk say she had missed?",
+     "options": [
+      "Marina's Moscow accent",
+      "Marina's Russian cooking",
+      "Her old school in Minsk",
+      "Singing Belarusian songs together"
+     ],
+     "at": 693540
+    },
+    {
+     "q": "Which verb do they say is right for putting socks on yourself?",
+     "options": [
+      "надевать",
+      "одевать",
+      "одеваться",
+      "наряжать"
+     ],
+     "at": 1171919
+    }
+   ]
+  },
+  "8-5-WaiMOJY": {
+   "hash": "167180da5a854459",
+   "questions": [
+    {
+     "q": "Why did the host build a home studio in an echoing room?",
+     "options": [
+      "One studio was being renovated and the other was busy",
+      "Their usual studio was too far from home",
+      "The sound engineer broke the studio equipment",
+      "Their office studio was closed for the holidays"
+     ],
+     "at": 58020
+    },
+    {
+     "q": "What is the host's plan for the podcast starting with this episode?",
+     "options": [
+      "It will come out every Wednesday in video format too",
+      "It will come out every day as audio only",
+      "It will come out every two weeks with a live audience",
+      "It will come out every Friday with guest speakers"
+     ],
+     "at": 115140
+    },
+    {
+     "q": "What does Marina have to do next week that scares her?",
+     "options": [
+      "Lead a discussion with three people before an audience",
+      "Give a speech alone at a big conference",
+      "Host a radio show live in the morning",
+      "Interview a famous person on a stage"
+     ],
+     "at": 213659
+    },
+    {
+     "q": "What did Nikita find hardest when he hosted a morning radio show?",
+     "options": [
+      "Thinking about his next step while the guest was answering",
+      "Waking up early enough to get to the studio",
+      "Finding good questions to ask each guest",
+      "Speaking clearly while the microphone was on"
+     ],
+     "at": 283800
+    },
+    {
+     "q": "What did Nikita once want to write on his wrist as a tattoo?",
+     "options": [
+      "Не бойся",
+      "Не спи",
+      "Зачем",
+      "Живи"
+     ],
+     "at": 531839
+    }
+   ]
+  },
+  "PCElEOJ8UDw": {
+   "hash": "64704f056be57627",
+   "questions": [
+    {
+     "q": "What does Elena have in her hands at the start of the video?",
+     "options": [
+      "A bouquet of different flowers",
+      "A basket of colorful fruit",
+      "A box of colored pencils",
+      "A book about colors"
+     ],
+     "at": 2700
+    },
+    {
+     "q": "In the counting rhyme, which bird does every hunter want to find?",
+     "options": [
+      "A pheasant",
+      "A duck",
+      "A pigeon",
+      "A partridge"
+     ],
+     "at": 41480
+    },
+    {
+     "q": "In «у этих цветов очень маленькие цветки», what does цветки mean?",
+     "options": [
+      "Parts of the flower itself",
+      "Little plants in pots",
+      "Shades of color",
+      "Bunches of flowers"
+     ],
+     "at": 390680
+    },
+    {
+     "q": "When is the word карий used, according to Elena?",
+     "options": [
+      "Only for the color of eyes",
+      "Only for the color of hair",
+      "Only for the color of clothes",
+      "Only for the color of animals"
+     ],
+     "at": 535920
+    },
+    {
+     "q": "Besides their favorite color, what does Elena ask viewers to write in the comments?",
+     "options": [
+      "Three objects of that color they own",
+      "Three words they learned today",
+      "The name of a flower they like",
+      "Three places they want to visit"
+     ],
+     "at": 555600
+    }
+   ]
+  },
+  "3_fiyh0fXyM": {
+   "hash": "e9ba83c021fef14d",
+   "questions": [
+    {
+     "q": "Why is the presenter's list of books called \"subjective\"?",
+     "options": [
+      "She and her colleagues could not agree after long discussions",
+      "Her colleagues refused to help her choose any books",
+      "She only picked books that she had written about before",
+      "The channel's viewers voted for the books on the list"
+     ],
+     "at": 21720
+    },
+    {
+     "q": "What does the presenter say about the weapon in Lukyanenko's science fiction books?",
+     "options": [
+      "It fires seconds before the trigger is pulled",
+      "It can only be used once in each book",
+      "It is hidden inside a futuristic subway train",
+      "It turns people into cyborgs when they touch it"
+     ],
+     "at": 78299
+    },
+    {
+     "q": "In which period of history do the Fandorin detective stories take place?",
+     "options": [
+      "Pre-revolutionary tsarist Russia",
+      "The years of the Second World War",
+      "The Soviet period of the 1970s",
+      "A post-apocalyptic future in Moscow"
+     ],
+     "at": 201180
+    },
+    {
+     "q": "Where does Brandon say he is from?",
+     "options": [
+      "Indiana, in America",
+      "Riga, in Latvia",
+      "Ukraine, near Kyiv",
+      "Saratov, in Russia"
+     ],
+     "at": 272240
+    },
+    {
+     "q": "Which hero ability does the presenter say she envies in the Max Fray books?",
+     "options": [
+      "Pulling drinks and food out of emptiness",
+      "Flying over the streets of the city",
+      "Reading the thoughts of other people",
+      "Walking through walls into dreams"
+     ],
+     "at": 392880
+    }
+   ]
+  },
+  "y6SVjctaXJ4": {
+   "hash": "3c59ed414790b15a",
+   "questions": [
+    {
+     "q": "What did the speaker and his friend have as a snack in the park at night?",
+     "options": [
+      "One banana for the two of them",
+      "A bag of chips to share",
+      "Two sandwiches, one for each",
+      "A small cake they shared"
+     ],
+     "at": 146580
+    },
+    {
+     "q": "Where did the young man take the girl on her unusual date?",
+     "options": [
+      "To a shawarma stall",
+      "To a history museum",
+      "To a Burger King",
+      "To a Ferris wheel"
+     ],
+     "at": 178519
+    },
+    {
+     "q": "What happened when the couple came out of the restaurant?",
+     "options": [
+      "Their car had been towed away",
+      "Their car had been stolen",
+      "Their car would not start",
+      "Their car had a flat tyre"
+     ],
+     "at": 283860
+    },
+    {
+     "q": "What does the phrase «на халяву» mean in the line about the bouquet?",
+     "options": [
+      "for free",
+      "by chance",
+      "in secret",
+      "at once"
+     ],
+     "at": 304680
+    },
+    {
+     "q": "Why did the man arrive at his date covered in blood?",
+     "options": [
+      "He crashed his bike on the way",
+      "He got into a fight in a bar",
+      "A stranger hit him with a car",
+      "He cut himself on broken glass"
+     ],
+     "at": 482099
+    }
+   ]
+  },
+  "ADTwFvHACE4": {
+   "hash": "d1f4c06cc0b2cd02",
+   "questions": [
+    {
+     "q": "Where is the host at the start of the video, and what problem does she have?",
+     "options": [
+      "In Riga, with a cold",
+      "In Moscow, with a sore leg",
+      "In Riga, with no voice",
+      "In Yekaterinburg, with a headache"
+     ],
+     "at": 13740
+    },
+    {
+     "q": "Which poet's farewell poem does the host think of before the street interviews?",
+     "options": [
+      "Sergey Yesenin",
+      "Alexander Pushkin",
+      "Marina Tsvetaeva",
+      "Joseph Brodsky"
+     ],
+     "at": 55920
+    },
+    {
+     "q": "Which poem does the first speaker say he can recite, starting at 1:55?",
+     "options": [
+      "Letter to a Woman",
+      "Song of the Prophetic Oleg",
+      "Mtsyri",
+      "The Fish"
+     ],
+     "at": 115880
+    },
+    {
+     "q": "A passerby says Mayakovsky's lines are about a man who agreed to advertise what before his execution?",
+     "options": [
+      "Cocoa",
+      "Tea",
+      "Vodka",
+      "Soap"
+     ],
+     "at": 514880
+    },
+    {
+     "q": "Why does one young woman say she learned a Yesenin poem so well?",
+     "options": [
+      "She heard it as a song",
+      "She had to recite it at school",
+      "She was in love",
+      "She learned it for a concert"
+     ],
+     "at": 545220
+    }
+   ]
+  },
+  "qnfIZKnh7to": {
+   "hash": "d97bab04cfb69dfc",
+   "questions": [
+    {
+     "q": "How many horoscope websites did Nikita study for this video?",
+     "options": [
+      "Five",
+      "Three",
+      "Seven",
+      "Ten"
+     ],
+     "at": 18420
+    },
+    {
+     "q": "Which advice from the websites does Nikita say he will use himself?",
+     "options": [
+      "Plan a romantic evening for his partner",
+      "Show his ambition and start a project",
+      "Keep a low profile at work",
+      "Spend more time with old friends"
+     ],
+     "at": 56100
+    },
+    {
+     "q": "Why does one man say horoscopes are ridiculous?",
+     "options": [
+      "People with one sign would have one fate",
+      "The stars are too far from Earth",
+      "Horoscopes are written by random people",
+      "Every website says something different"
+     ],
+     "at": 165680
+    },
+    {
+     "q": "What does Nikita mean by «лить воду» in his sign's trait?",
+     "options": [
+      "Talking a lot about many topics",
+      "Swimming very often",
+      "Cooking for many people",
+      "Staying calm in hard moments"
+     ],
+     "at": 275639
+    },
+    {
+     "q": "With which sign does one woman say it is hardest to get along?",
+     "options": [
+      "Pisces",
+      "Scorpio",
+      "Gemini",
+      "Leo"
+     ],
+     "at": 427440
+    }
+   ]
+  },
+  "WwtlgKatBPg": {
+   "hash": "a63ed2939b7b1ba8",
+   "questions": [
+    {
+     "q": "What does the host ask viewers to look at on the people in the video?",
+     "options": [
+      "Their eyelashes",
+      "Their warm hats",
+      "Their red cheeks",
+      "Their big gloves"
+     ],
+     "at": 28500
+    },
+    {
+     "q": "What city does the team in the video come from?",
+     "options": [
+      "Yakutsk",
+      "Murmansk",
+      "Novosibirsk",
+      "Yekaterinburg"
+     ],
+     "at": 40860
+    },
+    {
+     "q": "What does the woman say she feeds with seeds, berries and pancakes in the park?",
+     "options": [
+      "Birds and squirrels",
+      "Ducks and swans",
+      "Dogs and cats",
+      "Pigeons and crows"
+     ],
+     "at": 267440
+    },
+    {
+     "q": "What does the man say is a good way to start winter swimming?",
+     "options": [
+      "Start in summer and swim every day",
+      "Begin with cold showers at home",
+      "Start with a short swim in January",
+      "Swim only with a group of friends"
+     ],
+     "at": 598459
+    },
+    {
+     "q": "Where do people in Yakutsk traditionally store meat and fish in winter instead of a refrigerator?",
+     "options": [
+      "On the balcony",
+      "In the cellar",
+      "In the garage",
+      "In the snow yard"
+     ],
+     "at": 858139
+    }
+   ]
+  },
+  "aMVWmYYjt3o": {
+   "hash": "cd532136ea8eddef",
+   "questions": [
+    {
+     "q": "What does the host say he has in his bag, as an example?",
+     "options": [
+      "A razor",
+      "A pocket mirror",
+      "A pair of scissors",
+      "A folding umbrella"
+     ],
+     "at": 16920
+    },
+    {
+     "q": "Why does the woman carry a thermos with tea?",
+     "options": [
+      "To drink on her way",
+      "To share with her friend",
+      "To keep her hands warm",
+      "To bring to the office"
+     ],
+     "at": 62699
+    },
+    {
+     "q": "Why does the woman have flowers in her bag?",
+     "options": [
+      "A friend dances at the opera",
+      "She is going to a wedding",
+      "It is her mother's birthday",
+      "She visits a friend in hospital"
+     ],
+     "at": 127020
+    },
+    {
+     "q": "What does the word ключница mean in this video?",
+     "options": [
+      "A holder for keys",
+      "A box for cards",
+      "A case for glasses",
+      "A bag for coins"
+     ],
+     "at": 281040
+    },
+    {
+     "q": "Which game did the two people bring to play today?",
+     "options": [
+      "Карточные войны",
+      "Морской бой",
+      "Шахматы",
+      "Монополия"
+     ],
+     "at": 335520
+    }
+   ]
+  },
+  "xGCuF-h-XVc": {
+   "hash": "e47a687dfd902927",
+   "questions": [
+    {
+     "q": "What kind of camera does the host wish he were holding?",
+     "options": [
+      "An old mechanical one with a crank",
+      "A tiny pocket camera for travel",
+      "A big camera with a long lens",
+      "A camera fixed to a small drone"
+     ],
+     "at": 12480
+    },
+    {
+     "q": "What does крылатые mean in крылатые фразы?",
+     "options": [
+      "Well known and often quoted",
+      "Long and hard to remember",
+      "Rude and not for children",
+      "Taken from very old books"
+     ],
+     "at": 32940
+    },
+    {
+     "q": "Whom does the hero compare himself to when he gets upset about his age?",
+     "options": [
+      "Napoleon and Alexander the Great",
+      "Peter the Great and Lenin",
+      "Pushkin and Tolstoy",
+      "Stalin and Julius Caesar"
+     ],
+     "at": 271740
+    },
+    {
+     "q": "Why does the girl say watching horror films in the dorm is fun?",
+     "options": [
+      "It is scary to go to the toilet afterwards",
+      "Everyone screams together and then laughs",
+      "The lights go out and the room is dark",
+      "Friends hide and jump out at you"
+     ],
+     "at": 542279
+    },
+    {
+     "q": "Why does the man often say не кризис in everyday life?",
+     "options": [
+      "It replaces a swear word he avoids",
+      "It calms him down when he is nervous",
+      "It always makes his friends laugh",
+      "It is a habit from his old job"
+     ],
+     "at": 757680
+    }
+   ]
+  },
+  "64C3HxLr0cg": {
+   "hash": "7177155315140e7e",
+   "questions": [
+    {
+     "q": "What does the host say numbers decline according to, in the first part of the video?",
+     "options": [
+      "The gender of the word they refer to",
+      "The size of the object being counted",
+      "The case of the previous sentence",
+      "The number of syllables in the word"
+     ],
+     "at": 43379
+    },
+    {
+     "q": "What does the host say is the reason the next examples will be simpler?",
+     "options": [
+      "He is very cold",
+      "He ran out of time",
+      "He lost his notes",
+      "The camera battery is low"
+     ],
+     "at": 200159
+    },
+    {
+     "q": "Which thing does the host say will help him in the warm room?",
+     "options": [
+      "Marshmallows",
+      "Flashcards",
+      "A tripod",
+      "A telephone"
+     ],
+     "at": 207540
+    },
+    {
+     "q": "To form numbers 11–19, what does the host say you add to the digits of the first ten?",
+     "options": [
+      "надцать",
+      "дцать",
+      "десят",
+      "тысяча"
+     ],
+     "at": 253080
+    },
+    {
+     "q": "What does the host say about the ordinal number первый?",
+     "options": [
+      "It does not look like один",
+      "It is the same as один",
+      "It never changes its ending",
+      "It has no feminine form"
+     ],
+     "at": 421259
+    }
+   ]
+  },
+  "pNogULi28gs": {
+   "hash": "97d009753121fd46",
+   "questions": [
+    {
+     "q": "What is the weather like outside at the start of the video?",
+     "options": [
+      "A blizzard is raging",
+      "Heavy rain is falling",
+      "It is very hot",
+      "Thick fog covers the city"
+     ],
+     "at": 5160
+    },
+    {
+     "q": "Which city are the host's new colleagues from?",
+     "options": [
+      "Yekaterinburg",
+      "Novosibirsk",
+      "Kazan",
+      "Saint Petersburg"
+     ],
+     "at": 15299
+    },
+    {
+     "q": "One woman says she wants to travel to see her aunt. In which country does the aunt live?",
+     "options": [
+      "Spain",
+      "Italy",
+      "Germany",
+      "France"
+     ],
+     "at": 228299
+    },
+    {
+     "q": "Why does one man say he likes Italian? What does he mention about it?",
+     "options": [
+      "He likes how opera singers sing",
+      "He wants to move there for work",
+      "His family comes from Italy",
+      "He likes Italian food"
+     ],
+     "at": 434460
+    },
+    {
+     "q": "In line 202, what does the speaker say he will \"take up\" (возьмусь) sometime?",
+     "options": [
+      "Turkish",
+      "Arabic",
+      "Kazakh",
+      "Farsi"
+     ],
+     "at": 754440
+    }
+   ]
+  },
+  "0-BD5WJ_hBk": {
+   "hash": "7c9e87498ec27de5",
+   "questions": [
+    {
+     "q": "What is the first reason the host gives for the similar, predictable answers?",
+     "options": [
+      "Most Russians have never been abroad",
+      "Most Russians do not like travelling",
+      "Interviewers asked only a few people",
+      "Interviewers chose only older people"
+     ],
+     "at": 31679
+    },
+    {
+     "q": "What does the host say can happen to a person who says something different from official views?",
+     "options": [
+      "A big fine or even prison",
+      "Losing their job at once",
+      "Being sent out of Moscow",
+      "Being banned from using the internet"
+     ],
+     "at": 76200
+    },
+    {
+     "q": "What does the man say about his acquaintance who studied in England?",
+     "options": [
+      "Russian way of seeing life does not suit him",
+      "He misses English food and weather",
+      "He wants to move back to England",
+      "He thinks Russians work too little"
+     ],
+     "at": 309120
+    },
+    {
+     "q": "The man says Russia is like a planet. What reason does he give?",
+     "options": [
+      "It has many time zones and different climates",
+      "It has the largest cities in the world",
+      "It has the oldest forests in Europe",
+      "It has people from every country"
+     ],
+     "at": 331740
+    },
+    {
+     "q": "The woman wanting to visit Norway says what attracts her to it?",
+     "options": [
+      "Beautiful nature",
+      "Cheap food and housing",
+      "Friendly people there",
+      "Famous old castles"
+     ],
+     "at": 698220
+    }
+   ]
+  },
+  "ahRV-a30jhE": {
+   "hash": "2dceba339891a375",
+   "questions": [
+    {
+     "q": "Which language does Nikita say he can speak a little of?",
+     "options": [
+      "Latvian",
+      "Polish",
+      "German",
+      "Ukrainian"
+     ],
+     "at": 51379
+    },
+    {
+     "q": "Why does Nikita say he is hurrying home?",
+     "options": [
+      "It is still very cold",
+      "He is late for work",
+      "He wants to watch a video",
+      "He is waiting for pizza"
+     ],
+     "at": 108600
+    },
+    {
+     "q": "What does Nikita say he is watching on his screen?",
+     "options": [
+      "Their last episode",
+      "The news on his phone",
+      "A favorite series",
+      "A video from Katya"
+     ],
+     "at": 168000
+    },
+    {
+     "q": "Why does Marina call the courier?",
+     "options": [
+      "He is late",
+      "He took the wrong address",
+      "He forgot the pizza",
+      "He cannot find the door"
+     ],
+     "at": 268199
+    },
+    {
+     "q": "On which days does the podcast come out, according to the hosts?",
+     "options": [
+      "Wednesdays",
+      "Fridays",
+      "Mondays",
+      "Saturdays"
+     ],
+     "at": 356280
+    }
+   ]
+  },
+  "DZPR3UVoHCU": {
+   "hash": "8fc96b278a813cb4",
+   "questions": [
+    {
+     "q": "What does the host's mother always tell him to eat more of?",
+     "options": [
+      "Carrots",
+      "Apples",
+      "Fish",
+      "Cheese"
+     ],
+     "at": 21119
+    },
+    {
+     "q": "Which beer did the first shopper say she bought?",
+     "options": [
+      "White Bear",
+      "Black Wolf",
+      "Golden Eagle",
+      "Brown Fox"
+     ],
+     "at": 56780
+    },
+    {
+     "q": "Which shorter Russian word does the host give for жевательная резинка?",
+     "options": [
+      "жвачка",
+      "конфетка",
+      "пастилка",
+      "леденец"
+     ],
+     "at": 142700
+    },
+    {
+     "q": "What does the man plan to store in his new containers?",
+     "options": [
+      "Leftover paint",
+      "Spare screws",
+      "Garden seeds",
+      "Dry pasta"
+     ],
+     "at": 194599
+    },
+    {
+     "q": "In the last answer, what did the man say he bought for his country?",
+     "options": [
+      "The sun",
+      "A new park",
+      "Fresh snow",
+      "A good road"
+     ],
+     "at": 536220
+    }
+   ]
+  },
+  "n-AfbcYQYeI": {
+   "hash": "a7ecc9ebae1dc85e",
+   "questions": [
+    {
+     "q": "Why does the first man choose Pushkin as his favorite writer?",
+     "options": [
+      "He read and studied him at school",
+      "A teacher told him to read him",
+      "He saw Pushkin's plays in a theater",
+      "His parents read him Pushkin as a child"
+     ],
+     "at": 94380
+    },
+    {
+     "q": "How many books per week does the speaker say he reads on average?",
+     "options": [
+      "One and a half to two",
+      "About five or six",
+      "Only one every month",
+      "Around ten"
+     ],
+     "at": 229680
+    },
+    {
+     "q": "What did her mother tell her to do before reading Anna Karenina again?",
+     "options": [
+      "Wait until she is married with children",
+      "Wait until she finishes university",
+      "Wait until she moves to Moscow",
+      "Wait until she learns more history"
+     ],
+     "at": 543180
+    },
+    {
+     "q": "What quality of Scarlett does the speaker remember from reading as a child?",
+     "options": [
+      "Her strength to never give up",
+      "Her beauty and charm",
+      "Her love of travel",
+      "Her kindness to everyone"
+     ],
+     "at": 660480
+    },
+    {
+     "q": "Which Russian word does the man use for a tiny person inside the state machine?",
+     "options": [
+      "песчинка",
+      "винтик",
+      "капля",
+      "пылинка"
+     ],
+     "at": 704760
+    }
+   ]
+  },
+  "GgCnpDg0jwc": {
+   "hash": "af37cd343d09d287",
+   "questions": [
+    {
+     "q": "What question did the team ask Moscow passersby?",
+     "options": [
+      "What are your plans for the coming year?",
+      "Where did you spend last winter?",
+      "What is your favorite winter holiday?",
+      "How did you celebrate last New Year?"
+     ],
+     "at": 35100
+    },
+    {
+     "q": "The host says she will study more foreign languages. Which language is named?",
+     "options": [
+      "Latvian",
+      "French",
+      "Chinese",
+      "Italian"
+     ],
+     "at": 184980
+    },
+    {
+     "q": "What can you do with Lingopay's interactive subtitles, according to the host?",
+     "options": [
+      "Hover over a word to see its translation",
+      "Record your own voice over the video",
+      "Chat with native speakers in real time",
+      "Print the subtitles as a book"
+     ],
+     "at": 195239
+    },
+    {
+     "q": "One passerby says she will learn a manicure skill. What does she say she will be doing?",
+     "options": [
+      "Making nails (ноготочки) better",
+      "Painting pictures for her family",
+      "Studying to be a doctor",
+      "Opening a small shop"
+     ],
+     "at": 306419
+    },
+    {
+     "q": "Where does one man say he will fly on the fifth to ski?",
+     "options": [
+      "Sochi",
+      "Dubai",
+      "Kazan",
+      "Murmansk"
+     ],
+     "at": 436500
+    }
+   ]
+  },
+  "8zuYw-DPTsM": {
+   "hash": "79d82a0136a3bc97",
+   "questions": [
+    {
+     "q": "What was the building behind the host before it became a refugee center?",
+     "options": [
+      "A railway station",
+      "A school building",
+      "A town hospital",
+      "A hotel near the port"
+     ],
+     "at": 4200
+    },
+    {
+     "q": "Who organized this refugee center, according to the host?",
+     "options": [
+      "Art historians who ran an art biennial",
+      "Local church priests",
+      "Latvian city officials",
+      "University teachers from Riga"
+     ],
+     "at": 37500
+    },
+    {
+     "q": "Who bought, packed and delivered the New Year gifts to the center?",
+     "options": [
+      "A Latvian businessman",
+      "A group of volunteers",
+      "The Ukrainian embassy",
+      "A big toy company"
+     ],
+     "at": 135060
+    },
+    {
+     "q": "Why does the host say he moved to a warm place?",
+     "options": [
+      "His camera cannot work long in the frost",
+      "He had a bad cold",
+      "The interview was finished",
+      "The center was too noisy outdoors"
+     ],
+     "at": 84720
+    },
+    {
+     "q": "Anna says the center has a \"бесплатный магазин\". What can people get there?",
+     "options": [
+      "Clothes and shoes",
+      "Fresh food",
+      "Books and toys only",
+      "Computers and phones"
+     ],
+     "at": 554640
+    }
+   ]
+  },
+  "lNqRiL_kF20": {
+   "hash": "7f79f09815779d2d",
+   "questions": [
+    {
+     "q": "Where does Tim say he is recording this video?",
+     "options": [
+      "In Egypt",
+      "In Estonia",
+      "In Holland",
+      "In Russia"
+     ],
+     "at": 10559
+    },
+    {
+     "q": "What nationality does Nikita say Tim is?",
+     "options": [
+      "Dutch",
+      "Latvian",
+      "Estonian",
+      "Lithuanian"
+     ],
+     "at": 52200
+    },
+    {
+     "q": "Why does Tim say he likes wearing a suit?",
+     "options": [
+      "He likes how it looks",
+      "His television school required it",
+      "It is comfortable when travelling",
+      "His boss asked him to"
+     ],
+     "at": 301919
+    },
+    {
+     "q": "Why does Tim think the power station video got fewer views?",
+     "options": [
+      "Its title confused possible viewers",
+      "It was much shorter than the others",
+      "It was posted at a bad time",
+      "It had no interviews with people"
+     ],
+     "at": 604380
+    },
+    {
+     "q": "Which Russian word does Nikita use to explain the striped shirt?",
+     "options": [
+      "тельняшка",
+      "футболка",
+      "рубашка",
+      "костюм"
+     ],
+     "at": 777120
+    }
+   ]
+  },
+  "zMKiZDU00jo": {
+   "hash": "f58d57f130ea50f7",
+   "questions": [
+    {
+     "q": "In which Russian city do the passersby in this video live?",
+     "options": [
+      "Yekaterinburg",
+      "Chelyabinsk",
+      "Novosibirsk",
+      "Kazan"
+     ],
+     "at": 6319
+    },
+    {
+     "q": "What famous event does one person link with the month of April?",
+     "options": [
+      "The first human flight into space",
+      "The first Russian Olympic gold medal",
+      "The end of a big war",
+      "The opening of the first metro"
+     ],
+     "at": 110340
+    },
+    {
+     "q": "One person says February brings слякоть and snow. What does слякоть mean?",
+     "options": [
+      "Wet, muddy snow",
+      "Dry, cold wind",
+      "Thick morning fog",
+      "Heavy summer rain"
+     ],
+     "at": 152940
+    },
+    {
+     "q": "Which holiday does one person connect with June?",
+     "options": [
+      "Children's Day",
+      "Victory Day",
+      "Teachers' Day",
+      "Day of Lovers"
+     ],
+     "at": 229440
+    },
+    {
+     "q": "How does a speaker say \"in June\" when talking about her birthday?",
+     "options": [
+      "в июне",
+      "в июн",
+      "в июню",
+      "в июнь"
+     ],
+     "at": 438180
+    }
+   ]
+  }
+ }
+}

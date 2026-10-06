@@ -2291,6 +2291,41 @@ def americanize(node, counts):
     return node
 
 
+VIDEO_QUIZ_LINES = 600   # tools/build_video_quiz.mjs MAX_LINES: what the questions were written from
+
+
+def attach_video_quiz(videos, transcripts, units=()):
+    """Five questions about a video (data/video_quiz.json, from
+    tools/build_video_quiz.mjs) ride on its library entry as `quiz` —
+    [question, [right, wrong, wrong, wrong], ms] — only while the transcript
+    still hashes as it did when they were written: questions about lines a
+    re-harvest has changed would ask about something the video may not say."""
+    store = ROOT / "data" / "video_quiz.json"
+    held = json.loads(store.read_text(encoding="utf-8"))["videos"] if store.exists() else {}
+    shipped = stale = 0
+    for v in videos:
+        q = held.get(v["id"])
+        lines = transcripts.get(v["id"])
+        if not q or not lines:
+            continue
+        h = hashlib.sha1("\n".join(f"{l[0]}|{l[1]}" for l in lines[:VIDEO_QUIZ_LINES])
+                         .encode("utf-8")).hexdigest()[:16]
+        if h != q["hash"]:
+            stale += 1
+            continue
+        v["quiz"] = [[americanize_text(x["q"]), [americanize_text(o) for o in x["options"]], x["at"]]
+                     for x in q["questions"]]
+        shipped += 1
+    # A unit whose video has questions says so on its own row (`v.quiz`), so
+    # the lesson can list the step without opening the video library.
+    asked = {v["id"] for v in videos if v.get("quiz")}
+    for u in units:
+        if u.get("v") and u["v"].get("id") in asked:
+            u["v"]["quiz"] = True
+    print(f"  video quiz   : {shipped} of {len(videos)} videos carry five questions"
+          + (f"; {stale} stale (transcript changed), rerun build_video_quiz" if stale else ""))
+
+
 def strip_captions(payload):
     """The video moments carry a ten-word window of YouTube's caption text (`s`),
     which is the video's text, not ours. A private build keeps it — it is what the
@@ -2383,7 +2418,9 @@ def main():
     # the first screen, so the app requires each on first use (P9.24). The
     # tools read them back together (tools/payload.mjs).
     native_assets = ROOT / "native" / "assets"
+    tr = video_transcripts([v["id"] for v in payload["videos"]]) if native_assets.exists() else {}
     if native_assets.exists():
+        attach_video_quiz(payload["videos"], tr, payload["units"])
         parts = {k: payload[k] for k in NATIVE_PARTS}
         parts["data"] = {k: v for k, v in payload.items() if k not in NATIVE_PARTS}
         sizes = []
@@ -2403,7 +2440,6 @@ def main():
             tpath.write_text("{}", encoding="utf-8")
             epath.write_text("{}", encoding="utf-8")
         else:
-            tr = video_transcripts([v["id"] for v in payload["videos"]])
             text = json.dumps(tr, ensure_ascii=False, separators=(",", ":"))
             tpath.write_text(text, encoding="utf-8")
             print(f"  transcripts  : {len(tr)} videos, {sum(len(v) for v in tr.values()):,} lines, "

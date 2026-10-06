@@ -64,7 +64,10 @@ describe("form question", () => {
     await withRunner(q);
     await screen.findByText(q.ask);
     fireEvent.press(screen.getByTestId("bulb"));
-    expect(await screen.findByText(q.table.title)).toBeTruthy();
+    // Headed as this verb reads it: Present or Future, not both (core/forms.js tableLabel).
+    const { tableLabel } = require("@core/forms");
+    const { L } = require("../src/data");
+    expect(await screen.findByText(tableLabel(q.table.title, L[q.i] && L[q.i].a))).toBeTruthy();
     /* The reference shows the asked cell and marks it (the owner,
        2026-09-28: *"everything should be referenceable… they should be
        allowed to reference the correct answer"*). That `at` really points at

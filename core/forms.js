@@ -94,6 +94,20 @@ const PERSON = {
 const PAST_SUBJECT = { "он": "masculine", "она": "feminine", "оно": "neuter", "они": "plural" };
 const SHORT = { m: "masculine", f: "feminine", n: "neuter", pl: "plural" };
 
+/* A table's name as a learner reads it. The lexicon calls a verb's personal
+   forms "Present / Future", because which one they are depends on the verb:
+   an imperfective's are its present («держу́», I hold), a perfective's its
+   future («скажу́», I will say) — a perfective has no present. So the heading
+   names the one this verb has (the owner, 2026-10-05: "It would just say
+   future for perfective and present for imperfective"); a verb that is both
+   keeps both. The title itself stays the key every table lookup uses. */
+export function tableLabel(title, aspect) {
+  if (title !== "Present / Future") return title;
+  if (aspect === "perfective") return "Future";
+  if (aspect === "imperfective") return "Present";
+  return title;
+}
+
 /* What one cell says, in words: case and number for a noun, case and
    gender for an adjective, tense, person and number for a verb. */
 function cellFlags(lemma, c) {

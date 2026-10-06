@@ -41,7 +41,7 @@ import { ambiguousSpellings, spokenKey } from "./build_form_audio.mjs";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP,
          sayPassed, closestTranscript }
   from "../core/speech.js";
-import { describeForm, summarise, formFlags, grammarTags } from "../core/forms.js";
+import { describeForm, summarise, formFlags, grammarTags, tableLabel } from "../core/forms.js";
 import { parseDeep, makeSearch, makeResolve, MATCH } from "../core/search.js";
 import { decodeShapes, slotsOf, buildTables } from "../core/paradigm.js";
 import { makeHydrator, makeDeepIndex } from "../core/entry.js";
@@ -117,6 +117,13 @@ ok(askSense({ e: "to try, to attempt", b: "пробовать", p: "verb" }) ===
 }
 ok(askSense({ e: "go, walk", b: "идти", p: "verb" }) === "to go",
    "a short verb keeps its \"to\" and is not widened");
+
+group("table names");
+// A verb's personal forms are its present or its future, by aspect (2026-10-05).
+ok(tableLabel("Present / Future", "imperfective") === "Present", "an imperfective's personal forms are its present");
+ok(tableLabel("Present / Future", "perfective") === "Future", "a perfective's are its future");
+ok(tableLabel("Present / Future", "both") === "Present / Future", "a verb of both aspects keeps both");
+ok(tableLabel("Past", "perfective") === "Past" && tableLabel("Declension") === "Declension", "other tables keep their names");
 
 group("shuffle and sample");
 {

@@ -399,6 +399,35 @@ export function VideoSettings({ videoId, at, captions, onCaptions, onClose }) {
   );
 }
 
+/* What a video held, after it (the owner, 2026-10-05: "The summary will just
+   be all the contents of the video… the verbs, their mastery score of the
+   verbs, etc."): the words it says, in their groups with the learner's score
+   on each, its own sentences, the unit's rule, and all of it as flashcards.
+   Continue goes on to the video's questions where it has them, and back to
+   wherever the video was opened from where it has none. */
+export function VideoSummary({ route, navigation }) {
+  const { st } = useSession();
+  const params = route.params || {};
+  const v = videoFor(params);
+  if (!v) return null;
+  const unit = v.unit ? unitById(v.unit) : null;
+  const words = Object.keys(v.words || {});
+  const lines = unit && unit.v && unit.v.id === v.id ? videoLines(unit) : [];
+  const leave = (n) => (navigation.pop ? navigation.pop(n) : navigation.goBack());
+  const go = () => (v.quiz && v.quiz.length
+    ? navigation.navigate("VideoQuiz", { videoId: v.id, unitId: params.unitId, index: params.index, depth: 3 })
+    : leave(2));
+  return (
+    <Screen footer={<Btn block kind="pri" testID="summary-continue" label="Continue" onPress={go} />}>
+      <Title sub={[v.ch, unit ? unit.name : null].filter(Boolean).join(" · ")}>{short(v.title)}</Title>
+      <PrepList words={words} seen={st.seen || {}} unit={unit} lines={lines} label="In the video"
+                onCards={(list) => navigation.navigate("ListCards",
+                  { round: "list", words: list.concat(lines.map((l) => l.ru)), title: short(v.title),
+                    after: "Back to the summary" })} />
+    </Screen>
+  );
+}
+
 /* "Today", "Yesterday", or the date: History's day headings, as YouTube's. */
 function dayHeading(ms, now = Date.now()) {
   const day = (x) => { const d = new Date(x); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -667,16 +696,11 @@ export function Video({ route, navigation }) {
      Done here rather than only on the way out of a lesson because the order of
      unmount and mount is not ours to rely on. */
   useEffect(() => { releaseAudio(); }, []);
-  /* The transcript panel (transcript.js): loaded on first open, and the
-     player reports its position only while the panel is showing. */
-  const [showScript, setShowScript] = useState(false);
-  // English under the transcript: the learner's last choice, kept with the library's.
-  const [showEn, setShowEn] = useState(() => !!libraryState().en);
+  /* English under the transcript: on unless the learner turned it off (the
+     owner, 2026-10-05: "by default it will track and show the English"),
+     the choice kept with the library's. */
+  const [showEn, setShowEn] = useState(() => libraryState().en !== false);
   const [pos, setPos] = useState(0);
-  /* The position is reported whenever the video plays — it is where the
-     learner will come back to — but only redraws the screen while the
-     transcript needs it; four renders a second of everything below the player
-     would buy nothing. */
   /* Maximised: the same player — it is never remounted, so it keeps playing
      where it was. Held upright, the video takes the top half and the
      transcript the bottom; turned sideways, the video takes the whole screen
@@ -686,8 +710,9 @@ export function Video({ route, navigation }) {
   const { width: winW, height: winH } = useWindowDimensions();
   const sideways = winW > winH;
   const halfScript = full && !sideways;
+  // The transcript follows the position except while the picture fills the screen.
   const scriptOn = useRef(false);
-  scriptOn.current = showScript || halfScript;
+  scriptOn.current = !(full && sideways);
   // The overlay's position, outside React's tree: four a second would
   // otherwise redraw the whole page under the player.
   const ticks = useRef(new Set());
@@ -742,7 +767,7 @@ export function Video({ route, navigation }) {
   // Full screen belongs to a playing video; if the player goes away, so does it.
   useEffect(() => { if (!playing && full) setFull(false); }, [playing, full]);
   if (!v) return null;
-  const script = showScript || halfScript ? transcriptOf(v.id) : null;
+  const script = transcriptOf(v.id);
   const seekTo = (ms) => {
     setPlaying(true);
     setPos(ms);
@@ -751,10 +776,7 @@ export function Video({ route, navigation }) {
   };
 
   const unit = v.unit ? unitById(v.unit) : null;
-  const words = Object.keys(v.words || {});
   const watched = videoWatched(st, v);
-  // The video's own sentences, when it is a unit's goal (build_video_lines.py).
-  const lines = unit && unit.v && unit.v.id === v.id ? videoLines(unit) : [];
   const mined = st.mined || {};
 
   /* Mining a word: into the review set, with the video and the second it was
@@ -788,27 +810,19 @@ export function Video({ route, navigation }) {
     else pending.current = [at, hold];      // the player is still mounting; run it on ready
   };
 
-  /* Tapping the same word again walks to its next occurrence, so a word said five
-     times is five listening chances rather than the same one replayed. */
-  const openWord = (word) => {
-    const occ = v.words[word];
-    if (!occ || !occ.length) return;
-    const k = focus && focus.word === word ? (focus.k + 1) % occ.length : 0;
-    setFocus({ word, k, n: occ.length, ...occ[k] });
-    setPlaying(true);
-    jump(occ[k].t);
-  };
-
-  const markWatched = () => {
+  /* Continue marks the video watched and opens what it held (the owner,
+     2026-10-05: "That continue button will mark the video watched and
+     display the summary"). A unit's episode also counts for its lessons. */
+  const finish = () => {
     update((prev) => {
       let next = { ...prev, watched: { ...(prev.watched || {}), [v.id]: today() } };
-      // A unit's episode also counts for the unit's lessons, as before.
       if (unit && unit.v && unit.v.id === v.id) {
-        next = markComponent(next, unit, route.params.index || 0, "video");
+        next = markComponent(next, unit, params.index || 0, "video");
       }
       return next;
     });
-    navigation.goBack();
+    if (player.current) player.current.pause();
+    navigation.navigate("VideoSummary", { videoId: v.id, unitId: params.unitId, index: params.index });
   };
 
   return (
@@ -862,7 +876,14 @@ export function Video({ route, navigation }) {
       ) : null}
       {cog ? <VideoSettings videoId={v.id} at={lastAt.current} captions={captions}
                             onCaptions={setCc} onClose={() => setCog(false)} /> : null}
-    <Screen>
+    {/* The page is the player and the transcript rolling under it, and one
+        way on (the owner, 2026-10-05: "video page just have the video player
+        and the transcript rolling… at the bottom of the page, there will be a
+        continue button"). What the video holds — its words, their scores,
+        its sentences — is the next screen, VideoSummary; its questions the
+        one after. */}
+    <Screen scroll={false} fill footer={
+      <Btn block kind="pri" testID="video-continue" label="Continue" onPress={finish} />}>
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
         <View style={{ flex: 1 }}>
           <Title sub={[v.ch, minutes(v.dur), unit ? unit.name : null, watched ? "watched" : null].filter(Boolean).join(" · ")}>
@@ -884,88 +905,30 @@ export function Video({ route, navigation }) {
       ) : (
         <Btn kind="pri" testID="video-play" label="Play" onPress={() => setPlaying(true)} />
       )}
-      <Btn testID="transcript-toggle" style={{ marginTop: 10 }}
-           label={showScript ? "Hide transcript" : "Transcript"} onPress={() => setShowScript(!showScript)} />
-      {showScript ? (
+      {/* A word opened from the dictionary's "Heard in" (`word`, `at`): the
+          moment, once more, and the word into review (ROADMAP P10.4). */}
+      {focus ? (
+        <View testID="video-focus" style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 8 }}>
+          <Pill tone="brand">{clock(focus.t)}</Pill>
+          <Btn kind="ghost" label="Play it again" onPress={() => { setPlaying(true); jump(focus.t); }} />
+          <View style={{ flex: 1 }} />
+          {mined[focus.word]
+            ? <Muted testID="mined">Added to review</Muted>
+            : <Btn testID="mine" label="Add to review" onPress={() => mine(focus)} />}
+        </View>
+      ) : null}
+
+      {/* The transcript, always (the owner: "the transcript automatically
+          shows below"), following the video and with its English unless the
+          learner has turned either off. */}
+      {!halfScript ? (
         script && script.length
-          ? <Transcript lines={script} position={pos} onSeek={seekTo}
+          ? <Transcript fill lines={script} position={pos} onSeek={seekTo}
                         en={transcriptEnOf(v.id)} showEn={showEn}
                         onToggleEn={() => { setShowEn(!showEn); setLibraryState({ en: !showEn }); }}
                         onWord={(w) => { if (player.current) player.current.pause(); if (wordsCtx) wordsCtx.open(w); }} />
           : <Muted style={{ marginTop: 8 }}>No transcript for this one.</Muted>
       ) : null}
-
-      {/* The tapped word sits under the player, not under the list.
-          The list runs to VIDEO_WORDS (20) rows of 56 px, so about eleven
-          hundred pixels stood between the player and this card: tapping a word
-          set the focus and seeked the video, both off screen, and read as the
-          tap having done nothing at all (the interface review, P11.9).
-
-          Moved rather than scrolled to. The card is *about* the player's
-          position and its two actions belong beside the thing playing; a
-          scroll-to would also slide the word list out from under the finger,
-          which fights the repeat gesture — tapping the same word again walks to
-          its next occurrence. */}
-      {focus ? (
-        <Card testID="video-focus" style={{ marginTop: 14 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-            <Pill tone="brand">{clock(focus.t)}</Pill>
-            <View style={{ flex: 1 }} />
-            <Muted>{focus.n > 1 ? `${focus.k + 1} of ${focus.n}` : "once"}</Muted>
-          </View>
-          <Text style={{ color: t.ink2, fontSize: 15, lineHeight: 22 }}>{focus.s}</Text>
-          <Btn label="Play it again" style={{ marginTop: 12 }}
-               onPress={() => { setPlaying(true); jump(focus.t); }} />
-          {/* One tap takes the word into review and keeps where it was heard, so
-              the flashcard can send you back to this second (ROADMAP P10.4).
-              What serious learners do by hand across three tools. */}
-          {mined[focus.word] ? (
-            <Muted testID="mined" style={{ textAlign: "center", marginTop: 10 }}>
-              Added to review
-            </Muted>
-          ) : (
-            <Btn kind="pri" testID="mine" label="Add to review" style={{ marginTop: 8 }}
-                 onPress={() => mine(focus)} />
-          )}
-        </Card>
-      ) : null}
-
-      {/* The words to have in hand before pressing play (§30bf): underlined
-          for the dictionary, the learner's score beside each, an arrow to the
-          moment it is said, and the whole list as flashcards. */}
-      <PrepList words={words} seen={st.seen || {}} unit={unit}
-                focusWord={focus ? focus.word : null} onJump={openWord}
-                lines={lines}
-                onMoment={(l) => { setFocus(null); setPlaying(true); jump(Math.max(0, l.t - LINE_LEAD_MS), 0); }}
-                onCards={(list) => navigation.navigate("ListCards",
-                  { round: "list", words: list.concat(lines.map((l) => l.ru)), title: "Before the video",
-                    after: "Continue to video" })} />
-
-      {v.chapters && v.chapters.length ? (
-        <>
-          <SectionLabel style={{ marginTop: 18 }}>Chapters</SectionLabel>
-          <List>
-            {v.chapters.map((c, k) => (
-              <Row key={k}
-                   onPress={() => { setPlaying(true); jump(c.t * 1000, 0); }}>
-                <Pill>{clock(c.t * 1000)}</Pill>
-                <Text style={{ flex: 1, color: t.ink, fontSize: 15 }} numberOfLines={2}>
-                  {c.title}
-                </Text>
-              </Row>
-            ))}
-          </List>
-        </>
-      ) : null}
-
-      {/* Once watched, the fact sits by the title (the thumbnail in the library
-          shows it too); a primary button reading "Watched" that went back was a
-          third way of saying the same thing. */}
-      {watched ? (
-        <Btn kind="ghost" style={{ marginTop: 20 }} label="Back" onPress={() => navigation.goBack()} />
-      ) : (
-        <Btn kind="pri" style={{ marginTop: 20 }} label="Mark as watched" onPress={markWatched} />
-      )}
     </Screen>
     </View>
   );

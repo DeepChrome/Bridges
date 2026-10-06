@@ -37,6 +37,8 @@ export const RUNS = [
   "Tutor",        // the free conversation with the tutor
   "Translate",    // speaking Russian to be read back in English
   "Video",        // an episode, which wants the whole screen
+  "VideoSummary", // what the episode held, on the way to its questions
+  "VideoQuiz",    // the episode's five questions
   "ListCards",    // a lesson's or a video's words as one flashcard round
 ];
 

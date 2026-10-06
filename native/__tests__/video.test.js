@@ -8,12 +8,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { Immerse, Video, searchVideos, libraryOrder, videoFor, channelsOf, VIDEO_SORTS }
+import { Immerse, Video, VideoSummary, searchVideos, libraryOrder, videoFor, channelsOf, VIDEO_SORTS }
   from "../src/screens/Misc";
 import { UN, videos, unitById } from "../src/data";
 import { fold, firstSense } from "@core/util";
 
 const VIDEOS = videos();
+/* The video page draws its whole transcript from the start (2026-10-05), a
+   few hundred lines; under a full parallel run that outlasts jest's 5 s. */
+jest.setTimeout(30000);
 
 jest.mock("../src/youtube", () => {
   const React = require("react");
@@ -243,50 +246,44 @@ describe("Immerse", () => {
 });
 
 describe("Video", () => {
-  it("shows only spoken words for a unit's episode, and seeks on a tap", async () => {
+  /* The video page is the player and the transcript (the owner, 2026-10-05);
+     what the video held is its summary, after it. */
+  it("lists only spoken words for a unit's episode, on its summary", async () => {
     const unit = unitById(unitVideo.unit);
     const v = videoFor({ unitId: unit.id, index: 0 });
     const heard = Object.keys(unit.v.heard);
     expect(Object.keys(v.words).slice(0, heard.length)).toEqual(heard);
     await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />);
     await screen.findByText("Play");
+    // The video page itself holds no word list.
+    expect(screen.queryByTestId("prep")).toBeNull();
+    await flushState(); await AsyncStorage.clear();
+    await withProfile(<VideoSummary route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />);
+    await screen.findByTestId("prep");
     // One row per word, keyed by the bare form: the row itself shows the headword
     // as written, stress mark and all, which no plain text match would find (§23).
-    for (const w of heard) expect(screen.getByTestId(`heard-${w}`)).toBeTruthy();
+    for (const w of heard) expect(screen.getByTestId(`prep-${w}`)).toBeTruthy();
     // Each word carries its meaning beside it (the owner, 2026-09-10).
     const { L, idxOfWord } = require("../src/data");
     const meaning = firstSense(L[idxOfWord(heard[0])]);
     expect(meaning && screen.getAllByText(meaning).length).toBeTruthy();
     // No unit word the episode does not say is on the screen.
     const silent = unit.w.map((i) => L[i].b).filter((b) => !unit.v.heard[b]);
-    for (const b of silent.slice(0, 5)) expect(screen.queryByTestId(`heard-${b}`)).toBeNull();
-    expect(screen.queryByText(/not spoken/)).toBeNull();
-    await act(async () => { fireEvent.press(screen.getByTestId(`heard-${heard[0]}`)); });
-    expect(screen.getByTestId("yt-player")).toBeTruthy();
-    expect(screen.getByText(unit.v.heard[heard[0]][0].s)).toBeTruthy();
-
-    /* And the card is above the word list, not below twenty rows of it.
-       It used to sit under the whole list — about eleven hundred pixels down —
-       so a tap set the focus and seeked the video with both off screen, and
-       read as having done nothing (P11.9). Position is the fix, so position is
-       what is asserted: native has no visual suite, so a visual contract is
-       held in the render tree (§20a). */
-    const order = JSON.stringify(screen.toJSON());
-    expect(order.indexOf("video-focus")).toBeGreaterThan(-1);
-    expect(order.indexOf("video-focus")).toBeLessThan(order.indexOf("Before you watch"));
-    expect(order.indexOf("video-focus")).toBeLessThan(order.indexOf(`heard-${heard[0]}`));
+    for (const b of silent.slice(0, 5)) expect(screen.queryByTestId(`prep-${b}`)).toBeNull();
+    // No player here, so no arrow to a moment.
+    expect(screen.queryByTestId(`heard-${heard[0]}`)).toBeNull();
   });
 
-  /* Before you watch (the owner, 2026-09-29): the list grouped (verbs, nouns…),
-     each word underlined for the dictionary, the learner's score beside it,
-     an arrow to its moment, and the whole list as a round of flashcards. */
+  /* The list grouped (verbs, nouns…), each word underlined for the
+     dictionary, the learner's score beside it, and the whole list as a round
+     of flashcards. */
   it("groups the list, scores each word, and hands it to the flashcards", async () => {
     const { L, idxOfWord } = require("../src/data");
     const { clusterWords } = require("../src/prep");
     const unit = unitById(unitVideo.unit);
     const heard = Object.keys(unit.v.heard);
     const known = heard[0];
-    await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />, {
+    await withProfile(<VideoSummary route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />, {
       v: 10,
       seen: { [known]: { recognise: { state: 2, s: 20, d: 5, steps: 0, reps: 4, lapses: 0,
                                       dueAt: 9e12, lastAt: Date.now() - 86400000 } } },
@@ -318,9 +315,10 @@ describe("Video", () => {
     const { videoLines } = require("../src/data");
     const lines = videoLines(unit).map((l) => l.ru);
     expect(lines.length).toBeGreaterThan(0);
-    // …and the round ends on the way back to the video (2026-10-04).
+    // …and the round ends on the way back to the summary.
+    const { short } = require("../src/screens/Misc");
     expect(nav.navigate).toHaveBeenCalledWith("ListCards", { round: "list", words: heard.concat(lines),
-                                                             title: "Before the video", after: "Continue to video" });
+                                                             title: short(unitVideo.title), after: "Back to the summary" });
     expect(screen.getByTestId("prep-lines")).toBeTruthy();
   });
 
@@ -345,11 +343,11 @@ describe("Video", () => {
 
     await flushState(); await AsyncStorage.clear();
     await withProfile(<Video route={{ params: { videoId: first.id, word, at: first.t } }} navigation={nav} />);
-    // The player is up without "Play", and the moment's caption is shown.
+    // The player is up without "Play", with the moment and "Add to review".
     expect(await screen.findByTestId("yt-player")).toBeTruthy();
     expect(screen.queryByText("Play")).toBeNull();
-    const occ = require("../src/data").videoById(first.id).words[word].find((o) => o.t === first.t);
-    expect(screen.getByText(occ.s)).toBeTruthy();
+    expect(screen.getByTestId("video-focus")).toBeTruthy();
+    expect(screen.getByTestId("mine")).toBeTruthy();
   });
 
   /* Watched shows on the row and the library filters by it (the owner,
@@ -369,19 +367,68 @@ describe("Video", () => {
     expect(screen.queryByTestId(`video-${libraryVideo.id}`)).toBeNull();
   });
 
-  it("records a library video as watched, and a unit episode for its unit too", async () => {
+  /* Continue marks the video watched and opens its summary (the owner,
+     2026-10-05); a unit's episode counts for its unit too. */
+  it("Continue records the video as watched and opens its summary", async () => {
     await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={nav} />);
-    await act(async () => { fireEvent.press(await screen.findByText("Mark as watched")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("video-continue")); });
     let st = await saved();
     expect(typeof st.watched[libraryVideo.id]).toBe("number");
-    expect(nav.goBack).toHaveBeenCalled();
+    expect(nav.navigate).toHaveBeenCalledWith("VideoSummary", expect.objectContaining({ videoId: libraryVideo.id }));
 
     await flushState(); await AsyncStorage.clear();
     await withProfile(<Video route={{ params: { unitId: unitVideo.unit, index: 0 } }} navigation={nav} />);
-    await act(async () => { fireEvent.press(await screen.findByText("Mark as watched")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("video-continue")); });
     st = await saved();
     expect(st.unit[unitVideo.unit].video).toBe(true);
     expect(typeof st.watched[unitVideo.id]).toBe("number");
+  });
+
+  /* The summary's Continue goes to the questions where the video has them,
+     and back past itself and the video where it has none. */
+  it("the summary goes on to the questions, or back where there are none", async () => {
+    const withQuiz = VIDEOS.find((v) => v.quiz && v.quiz.length);
+    const without = VIDEOS.find((v) => !v.quiz);
+    const n = { ...nav, pop: jest.fn() };
+    if (withQuiz) {
+      await withProfile(<VideoSummary route={{ params: { videoId: withQuiz.id } }} navigation={n} />);
+      await act(async () => { fireEvent.press(await screen.findByTestId("summary-continue")); });
+      expect(n.navigate).toHaveBeenCalledWith("VideoQuiz", expect.objectContaining({ videoId: withQuiz.id, depth: 3 }));
+      await flushState(); await AsyncStorage.clear();
+    }
+    if (without) {
+      await withProfile(<VideoSummary route={{ params: { videoId: without.id } }} navigation={n} />);
+      await act(async () => { fireEvent.press(await screen.findByTestId("summary-continue")); });
+      expect(n.pop).toHaveBeenCalledWith(2);
+    }
+  });
+});
+
+/* The video's questions (tools/build_video_quiz.mjs): the right answer was
+   written first and is shuffled; a run keeps its best and goes back. */
+describe("the video's questions", () => {
+  const quiz = [["Who joins the host?", ["Her friend", "Her sister", "Her teacher", "Her cat"], 5000]];
+  it("shuffles each question's options and keeps one right answer", () => {
+    const { videoQuizSteps } = require("../src/screens/Flows");
+    const seen = new Set();
+    for (let k = 0; k < 40; k++) {
+      const [q] = videoQuizSteps({ quiz });
+      expect(q.kind).toBe("video");
+      expect(q.options.filter((o) => o.right).map((o) => o.label)).toEqual(["Her friend"]);
+      seen.add(q.options.findIndex((o) => o.right));
+    }
+    expect(seen.size).toBeGreaterThan(1);
+  });
+});
+
+describe("the transcript", () => {
+  it("is on the video page from the start, with its English", async () => {
+    await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={nav} />);
+    expect(await screen.findByTestId("transcript")).toBeTruthy();
+    expect(screen.getByTestId("transcript-line-0")).toBeTruthy();
+    expect(screen.queryByTestId("transcript-toggle")).toBeNull();
+    const en = require("../src/data").transcriptEnOf(libraryVideo.id);
+    if (en && en[0]) expect(screen.getByTestId("transcript-en-0")).toBeTruthy();
   });
 });
 
@@ -429,13 +476,3 @@ describe("full screen", () => {
   });
 });
 
-describe("the transcript button", () => {
-  it("opens the video's transcript under the player, and closes it", async () => {
-    await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={nav} />);
-    await act(async () => { fireEvent.press(await screen.findByTestId("transcript-toggle")); });
-    expect(screen.getByTestId("transcript")).toBeTruthy();
-    expect(screen.getByTestId("transcript-line-0")).toBeTruthy();
-    await act(async () => { fireEvent.press(screen.getByTestId("transcript-toggle")); });
-    expect(screen.queryByTestId("transcript")).toBeNull();
-  });
-});

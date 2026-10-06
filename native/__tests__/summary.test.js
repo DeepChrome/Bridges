@@ -53,10 +53,37 @@ describe("the summary", () => {
   });
 
   it("is an optional step, before the video", () => {
-    const ids = components(base, unit, 0).map((c) => c.id);
+    const last = lessonCount(unit) - 1;
+    const ids = components(base, unit, last).map((c) => c.id);
     expect(ids.indexOf("summary")).toBeGreaterThan(ids.indexOf("quiz"));
-    if (unit.v) expect(ids[ids.length - 1]).toBe("video");
+    // The video, then its questions where it has them (2026-10-05).
+    if (unit.v) expect(ids.filter((x) => x !== "vquiz").pop()).toBe("video");
     expect(components(base, unit, 0).find((c) => c.id === "summary").optional).toBe(true);
+  });
+});
+
+/* The video closes the unit (the owner, 2026-10-05: "words for the video
+   should be taught prior to the video"): only the last lesson lists it, its
+   words and its questions, so it never comes before the words it says. */
+describe("the unit's video", () => {
+  it("is a step of the unit's last lesson only", () => {
+    for (const u of UN.filter((x) => x.v && lessonCount(x) > 1)) {
+      const last = lessonCount(u) - 1;
+      for (let k = 0; k < last; k++) {
+        const ids = components(base, u, k).map((c) => c.id);
+        expect({ unit: u.id, lesson: k, video: ids.includes("video") || ids.includes("prep") || ids.includes("vquiz") })
+          .toEqual({ unit: u.id, lesson: k, video: false });
+      }
+      expect(components(base, u, last).map((c) => c.id)).toContain("video");
+    }
+  });
+
+  it("an earlier lesson is finished without the video", () => {
+    const u = UN.find((x) => x.v && lessonCount(x) > 1);
+    let st = base;
+    for (const c of components(base, u, 0).filter((c) => !c.optional)) st = markComponent(st, u, 0, c.id, 100);
+    expect(lessonDone(st, u, 0)).toBe(true);
+    expect(lessonDone(st, u, lessonCount(u) - 1)).toBe(false);
   });
 });
 
@@ -65,27 +92,42 @@ describe("the summary", () => {
    does not point back at a step the learner chose to skip past. */
 describe("a lesson's flow", () => {
   const graded = UN.find((u) => u.v && hasGrammar(u));
-  const ids = (u) => components(base, u, 0).map((c) => c.id);
+  const lastOf = (u) => lessonCount(u) - 1;
+  const ids = (u) => components(base, u, lastOf(u)).map((c) => c.id);
 
-  it("runs words, grammar, quiz, summary, the video's words, video", () => {
+  it("runs words, grammar, quiz, summary, the video's words, video, its questions", () => {
     const order = ids(graded).filter((x) => x !== "listen");
-    expect(order).toEqual(["vocab", "grammar", "quiz", "summary", "prep", "video"]);
+    expect(order).toEqual(["vocab", "grammar", "quiz", "summary", "prep", "video"]
+      .concat(graded.v.quiz ? ["vquiz"] : []));
+  });
+
+  /* The video's questions are an optional step after the video, opened on
+     their own (depth 1: back to the lesson), and done once a run is kept. */
+  it("lists the video's questions after the video, done once answered", () => {
+    const u = UN.find((x) => x.v && x.v.quiz);
+    const k = lastOf(u);
+    const step = components(base, u, k).find((c) => c.id === "vquiz");
+    expect(step.optional).toBe(true);
+    expect(stepRoute("vquiz", u, k)).toEqual(["VideoQuiz", { unitId: u.id, index: k, videoId: u.v.id }]);
+    const done = { ...base, drills: { [`vquiz:${u.v.id}`]: { best: 80 } } };
+    expect(components(done, u, k).find((c) => c.id === "vquiz").done).toBe(true);
   });
 
   /* The video's own words as cards, just before it (2026-10-05): optional,
      opened as a round of the video's list, ticked when played through, and
      leading on to the video. */
   it("the video's words are an optional round that leads to the video", () => {
-    const prep = components(base, graded, 0).find((c) => c.id === "prep");
+    const k = lastOf(graded);
+    const prep = components(base, graded, k).find((c) => c.id === "prep");
     expect(prep.optional).toBe(true);
-    const [route, params] = stepRoute("prep", graded, 0);
+    const [route, params] = stepRoute("prep", graded, k);
     expect(route).toBe("ListCards");
     expect(params.round).toBe("list");
     expect(params.words).toEqual(expect.arrayContaining(Object.keys(graded.v.heard)));
-    expect(params.next).toEqual(["Video", { unitId: graded.id, index: 0 }]);
-    const done = markComponent(base, graded, 0, "prep");
-    expect(components(done, graded, 0).find((c) => c.id === "prep").done).toBe(true);
-    expect(lessonDone(done, graded, 0)).toBe(false);
+    expect(params.next).toEqual(["Video", { unitId: graded.id, index: k }]);
+    const done = markComponent(base, graded, k, "prep");
+    expect(components(done, graded, k).find((c) => c.id === "prep").done).toBe(true);
+    expect(lessonDone(done, graded, k)).toBe(false);
   });
 
   it("Continue opens the grammar after the words, then the quiz", () => {

@@ -130,7 +130,9 @@ export default function Summary({ route, navigation }) {
                onPress={() => navigation.navigate("ListCards", {
                  round: "list", title: unit.name, after: "Back to the summary",
                  words: words.concat(lines.map((l) => l.ru)) })} />
-          {unit.v ? (
+          {/* The video closes the unit (data.js components): offered from the
+              last lesson's summary and the unit's, not before its words are taught. */}
+          {unit.v && (whole || index === lessonCount(unit) - 1) ? (
             <Btn kind="pri" testID="summary-video" label="Watch video" style={{ flex: 1 }}
                  onPress={() => navigation.navigate(...stepRoute("video", unit, whole ? 0 : index))} />
           ) : null}

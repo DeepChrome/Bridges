@@ -97,31 +97,40 @@ describe("unit and lesson", () => {
     expect(screen.getByText(new RegExp(`Lesson ${lessonCount(unit)}`))).toBeTruthy();
   });
 
-  it("shows three components, none done", async () => {
+  /* The video closes the unit (2026-10-05): the first lesson is words and a
+     quiz, the last adds the video. */
+  const last = () => lessonCount(UN.find((u) => u.id === "food")) - 1;
+  const lastRoute = () => ({ params: { unitId: "food", index: last() } });
+
+  it("shows the lesson's steps, none done, with the video only in the last", async () => {
     await withProfile(<LessonScreen route={route} navigation={nav} />);
     expect(await screen.findByText("Vocabulary")).toBeTruthy();
     expect(screen.getByText("Quiz")).toBeTruthy();
-    expect(screen.getByText("Video")).toBeTruthy();
+    expect(screen.queryByText("Video")).toBeNull();
+    expect(screen.getByText(/0\/2/)).toBeTruthy();
+    await flushState(); await AsyncStorage.clear();
+    await withProfile(<LessonScreen route={lastRoute()} navigation={nav} />);
+    expect(await screen.findByText("Video")).toBeTruthy();
     expect(screen.getByText(/0\/3/)).toBeTruthy();
   });
 
   it("reflects completion from stored state", async () => {
-    await withProfile(<LessonScreen route={route} navigation={nav} />, {
+    await withProfile(<LessonScreen route={lastRoute()} navigation={nav} />, {
       state: {
         v: 8, seen: {}, trouble: {}, pinned: [], sets: [], drills: {},
-        unit: { food: { lessons: { 0: { v: true, q: 100 } }, video: true } },
+        unit: { food: { lessons: { [last()]: { v: true, q: 100 } }, video: true } },
       },
     });
     expect(await screen.findByText(/3\/3/)).toBeTruthy();
   });
 
   it("routes each component to its own flow", async () => {
-    await withProfile(<LessonScreen route={route} navigation={nav} />);
+    await withProfile(<LessonScreen route={lastRoute()} navigation={nav} />);
     fireEvent.press(await screen.findByText("Vocabulary"));
-    expect(nav.navigate).toHaveBeenCalledWith("Vocab", { unitId: "food", index: 0 });
+    expect(nav.navigate).toHaveBeenCalledWith("Vocab", { unitId: "food", index: last() });
     fireEvent.press(screen.getByText("Quiz"));
-    expect(nav.navigate).toHaveBeenCalledWith("Quiz", { unitId: "food", index: 0 });
+    expect(nav.navigate).toHaveBeenCalledWith("Quiz", { unitId: "food", index: last() });
     fireEvent.press(screen.getByText("Video"));
-    expect(nav.navigate).toHaveBeenCalledWith("Video", { unitId: "food", index: 0 });
+    expect(nav.navigate).toHaveBeenCalledWith("Video", { unitId: "food", index: last() });
   });
 });

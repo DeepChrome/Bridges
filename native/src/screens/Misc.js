@@ -399,12 +399,11 @@ export function VideoSettings({ videoId, at, captions, onCaptions, onClose }) {
   );
 }
 
-/* What a video held, after it (the owner, 2026-10-05: "The summary will just
-   be all the contents of the video… the verbs, their mastery score of the
-   verbs, etc."): the words it says, in their groups with the learner's score
-   on each, its own sentences, the unit's rule, and all of it as flashcards.
-   Continue goes on to the video's questions where it has them, and back to
-   wherever the video was opened from where it has none. */
+/* What a video holds, before it (the owner, 2026-10-06: "video browser ->
+   summary (flashcard option and overview of the relevant vocab/sentences) ->
+   video -> questions"): the words it says, in their groups with the
+   learner's score on each, its own sentences, the unit's rule, and all of it
+   as flashcards. Watch video opens the player, which starts on arrival. */
 export function VideoSummary({ route, navigation }) {
   const { st } = useSession();
   const params = route.params || {};
@@ -413,12 +412,10 @@ export function VideoSummary({ route, navigation }) {
   const unit = v.unit ? unitById(v.unit) : null;
   const words = Object.keys(v.words || {});
   const lines = unit && unit.v && unit.v.id === v.id ? videoLines(unit) : [];
-  const leave = (n) => (navigation.pop ? navigation.pop(n) : navigation.goBack());
-  const go = () => (v.quiz && v.quiz.length
-    ? navigation.navigate("VideoQuiz", { videoId: v.id, unitId: params.unitId, index: params.index, depth: 3 })
-    : leave(2));
+  const go = () => navigation.navigate("Video",
+    { videoId: v.id, unitId: params.unitId, index: params.index, viaSummary: true });
   return (
-    <Screen footer={<Btn block kind="pri" testID="summary-continue" label="Continue" onPress={go} />}>
+    <Screen footer={<Btn block kind="pri" testID="summary-continue" label="Watch video" onPress={go} />}>
       <Title sub={[v.ch, unit ? unit.name : null].filter(Boolean).join(" · ")}>{short(v.title)}</Title>
       <PrepList words={words} seen={st.seen || {}} unit={unit} lines={lines} label="In the video"
                 onCards={(list) => navigation.navigate("ListCards",
@@ -584,7 +581,7 @@ export function Immerse({ navigation }) {
             const unit = v.unit ? unitById(v.unit) : null;
             return (
               <Row key={v.id} testID={`video-${v.id}`}
-                   onPress={() => navigation.navigate("Video", { videoId: v.id })}>
+                   onPress={() => navigation.navigate("VideoSummary", { videoId: v.id })}>
                 <VideoThumb id={v.id} done={watched} />
                 <View style={{ flex: 1 }}>
                   <Text numberOfLines={2}
@@ -677,10 +674,11 @@ export function Video({ route, navigation }) {
      (prep.js VideoLines): the player starts a breath before it and plays on. */
   const at = !focus && typeof params.at === "number" ? params.at : null;
   /* Otherwise it picks up where it was stopped (immerse.js; the owner,
-     2026-10-01: "continue exactly where you're at"). Asked for, not
-     automatic: the button says where, and pressing it plays from there. */
+     2026-10-01: "continue exactly where you're at"). The video plays on
+     arrival (the owner, 2026-10-06: "start automatically playing the video
+     (no play video button)"); the summary before it is where one decides. */
   const resumeAt = useMemo(() => (v && !focus && at === null ? videoPosition(v.id) : 0), [v && v.id]);
-  const [playing, setPlaying] = useState(!!focus || at !== null);
+  const [playing, setPlaying] = useState(true);
   // Whether the video itself is playing, and how fast, as the player reports.
   const [running, setRunning] = useState(false);
   const [rate, setRate] = useState(1);
@@ -810,9 +808,10 @@ export function Video({ route, navigation }) {
     else pending.current = [at, hold];      // the player is still mounting; run it on ready
   };
 
-  /* Continue marks the video watched and opens what it held (the owner,
-     2026-10-05: "That continue button will mark the video watched and
-     display the summary"). A unit's episode also counts for its lessons. */
+  /* Continue marks the video watched and goes on to its questions; with none,
+     back to wherever the summary was opened from. A unit's episode also
+     counts for its lessons. Opened through the summary, the questions' end
+     pops past it too. */
   const finish = () => {
     update((prev) => {
       let next = { ...prev, watched: { ...(prev.watched || {}), [v.id]: today() } };
@@ -822,7 +821,12 @@ export function Video({ route, navigation }) {
       return next;
     });
     if (player.current) player.current.pause();
-    navigation.navigate("VideoSummary", { videoId: v.id, unitId: params.unitId, index: params.index });
+    const behind = params.viaSummary ? 2 : 1;
+    if (v.quiz && v.quiz.length) {
+      navigation.navigate("VideoQuiz",
+        { videoId: v.id, unitId: params.unitId, index: params.index, depth: behind + 1 });
+    } else if (navigation.pop) navigation.pop(behind);
+    else navigation.goBack();
   };
 
   return (
@@ -893,18 +897,13 @@ export function Video({ route, navigation }) {
         <Heart on={isFave(st, v.id)} testID={`fave-${v.id}`} size={44}
                onPress={() => update((p) => toggleFave(p, v.id))} />
       </View>
-      {/* Resume, or from the beginning, side by side (the owner, 2026-10-05:
-          "Should be the option to start from beginning or to resume"). */}
-      {playing ? null : resumeAt ? (
-        <View style={{ flexDirection: "row", gap: 10, justifyContent: "center" }}>
-          <Btn kind="pri" testID="video-play" label={`Resume ${clock(resumeAt)}`}
-               onPress={() => setPlaying(true)} />
-          <Btn testID="video-restart" label="From the start"
-               onPress={() => { pending.current = [0, 0]; setPlaying(true); }} />
-        </View>
-      ) : (
-        <Btn kind="pri" testID="video-play" label="Play" onPress={() => setPlaying(true)} />
-      )}
+      {/* Picked up where it was stopped, with the way back to the beginning
+          (the owner, 2026-10-05: "the option to start from beginning or to
+          resume"). */}
+      {resumeAt ? (
+        <Btn kind="ghost" testID="video-restart" label="From the start" style={{ alignSelf: "flex-start" }}
+             onPress={() => { if (player.current) player.current.seek(0, 0); else pending.current = [0, 0]; }} />
+      ) : null}
       {/* A word opened from the dictionary's "Heard in" (`word`, `at`): the
           moment, once more, and the word into review (ROADMAP P10.4). */}
       {focus ? (

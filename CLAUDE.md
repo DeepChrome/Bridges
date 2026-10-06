@@ -6203,13 +6203,16 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
 
 ## 30bv. The video as three screens, and the video closes the unit (2026-10-05)
 
-- **The video page is the player and the transcript** (following, with its
-  English, both on by default) and **Continue** at the foot, which marks the
-  video watched and opens **VideoSummary** (Misc.js): the words it says, in
-  their groups with the learner's score on each, its sentences, the rule,
-  and all of it as flashcards. Its Continue opens **VideoQuiz** (Flows.js);
-  the quiz's end pops back past all three (`depth` 3), or one screen when
-  the lesson's "Video questions" step opened it.
+- **Summary, then video, then questions** (the owner, 2026-10-06). A library
+  row and a lesson's Video step open **VideoSummary** (Misc.js): the words
+  the video says, in their groups with the learner's score on each, its
+  sentences, the rule, and all of it as flashcards. **Watch video** opens the
+  player, which **plays on arrival** (no Play button; resumed, a "From the
+  start" link), with the transcript under it. **Continue** marks the video
+  watched and opens **VideoQuiz** (Flows.js), whose end pops back past all
+  three (`depth` 3); a video opened straight from a word's moment or from
+  History skips the summary. The lesson's separate "Video words" cards step
+  went: the summary's flashcards are the same cards, before the video.
 - **Five questions a video** (`tools/build_video_quiz.mjs` →
   `data/video_quiz.json`, committed; ~$0.04 a video on Sonnet). Mostly what
   happens or is said, one or two on a word or grammar point as the video

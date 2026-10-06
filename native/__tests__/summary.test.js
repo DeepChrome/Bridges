@@ -95,9 +95,9 @@ describe("a lesson's flow", () => {
   const lastOf = (u) => lessonCount(u) - 1;
   const ids = (u) => components(base, u, lastOf(u)).map((c) => c.id);
 
-  it("runs words, grammar, quiz, summary, the video's words, video, its questions", () => {
+  it("runs words, grammar, quiz, summary, video, its questions", () => {
     const order = ids(graded).filter((x) => x !== "listen");
-    expect(order).toEqual(["vocab", "grammar", "quiz", "summary", "prep", "video"]
+    expect(order).toEqual(["vocab", "grammar", "quiz", "summary", "video"]
       .concat(graded.v.quiz ? ["vquiz"] : []));
   });
 
@@ -113,21 +113,11 @@ describe("a lesson's flow", () => {
     expect(components(done, u, k).find((c) => c.id === "vquiz").done).toBe(true);
   });
 
-  /* The video's own words as cards, just before it (2026-10-05): optional,
-     opened as a round of the video's list, ticked when played through, and
-     leading on to the video. */
-  it("the video's words are an optional round that leads to the video", () => {
+  /* The video step opens the video's summary — its words, sentences and
+     flashcards — and the video from there (the owner, 2026-10-06). */
+  it("the video step opens the video's summary first", () => {
     const k = lastOf(graded);
-    const prep = components(base, graded, k).find((c) => c.id === "prep");
-    expect(prep.optional).toBe(true);
-    const [route, params] = stepRoute("prep", graded, k);
-    expect(route).toBe("ListCards");
-    expect(params.round).toBe("list");
-    expect(params.words).toEqual(expect.arrayContaining(Object.keys(graded.v.heard)));
-    expect(params.next).toEqual(["Video", { unitId: graded.id, index: k }]);
-    const done = markComponent(base, graded, k, "prep");
-    expect(components(done, graded, k).find((c) => c.id === "prep").done).toBe(true);
-    expect(lessonDone(done, graded, k)).toBe(false);
+    expect(stepRoute("video", graded, k)).toEqual(["VideoSummary", { unitId: graded.id, index: k }]);
   });
 
   it("Continue opens the grammar after the words, then the quiz", () => {

@@ -19,7 +19,7 @@ import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton,
          Familiarity, familiarityColor } from "../ui";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines,
-         personalWords, goalNow, goalOpts, markComponent } from "../data";
+         personalWords, goalNow, goalOpts } from "../data";
 import { Linked, GrammarLine } from "../words";
 import { useAbout } from "../about";
 import { IrregularTag } from "../rules";
@@ -726,19 +726,12 @@ export default function Study({ navigation, route }) {
      (`after`: its label), not on the day's options (the owner, 2026-10-04:
      "the option should be to continue to video, not those other options"). */
   const [after, setAfter] = useState(null);
-  /* A lesson's video cards (2026-10-05) also say which lesson step they are,
-     so finishing them ticks it (`mark`: { unitId, index, id }), and where the
-     way on leads (`next`: [route, params]) — straight to the video rather
-     than back to the list it came from. */
-  const roundExtra = useRef({ mark: null, next: null });
   useEffect(() => {
     if (!round || !ready) return;
     dealtKey.current = setsKey;   // the round stands until the settings change
     deal(false, round, { words: params.words, title: params.title });
     setAfter(params.after || null);
-    roundExtra.current = { mark: params.mark || null, next: params.next || null };
-    navigation.setParams({ round: undefined, words: undefined, title: undefined, after: undefined,
-                           mark: undefined, next: undefined });
+    navigation.setParams({ round: undefined, words: undefined, title: undefined, after: undefined });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, ready]);
   // The profile arrives after the first render, and a set or a deck can change
@@ -944,15 +937,6 @@ export default function Study({ navigation, route }) {
     if (finished && more > 0 && session && !session.practice) deal(false, undefined, undefined, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished, more]);
-  // A lesson step's cards, played through: the step is done.
-  useEffect(() => {
-    const m = roundExtra.current.mark;
-    if (!finished || !m || !session || !session.practice) return;
-    const u = UN.find((x) => x.id === m.unitId);
-    if (u) update((prev) => markComponent(prev, u, m.index, m.id));
-    roundExtra.current = { ...roundExtra.current, mark: null };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finished]);
   /* Where the sitting stands. A review (the day's pile, a video's list, a
      chosen round) counts its own cards: done, coming back, left, and the
      total, which the scheduler's cards past the dealt chunks are part of and
@@ -1098,11 +1082,7 @@ export default function Study({ navigation, route }) {
           {after && session && session.practice && finished ? (
             <Btn kind="pri" testID="round-after" label={after}
                  style={{ marginTop: 20, minWidth: 220 }}
-                 onPress={() => {
-                   const next = roundExtra.current.next;
-                   if (next && navigation.replace) navigation.replace(next[0], next[1]);
-                   else navigation.goBack();
-                 }} />
+                 onPress={() => navigation.goBack()} />
           ) : null}
           {after && session && session.practice && finished ? null : (<>
           {/* Past the goal, as far as the learner wants: more reviews push

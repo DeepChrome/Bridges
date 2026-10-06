@@ -131,6 +131,7 @@ describe("unit and lesson", () => {
     fireEvent.press(screen.getByText("Quiz"));
     expect(nav.navigate).toHaveBeenCalledWith("Quiz", { unitId: "food", index: last() });
     fireEvent.press(screen.getByText("Video"));
-    expect(nav.navigate).toHaveBeenCalledWith("Video", { unitId: "food", index: last() });
+    // The video step opens its summary, and the video from there.
+    expect(nav.navigate).toHaveBeenCalledWith("VideoSummary", { unitId: "food", index: last() });
   });
 });

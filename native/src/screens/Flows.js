@@ -490,10 +490,6 @@ export function QuizFlow({ route, navigation }) {
         /* On to what follows in this lesson — the summary, then the video
            (data.js components) — and only then the next lesson. */
         onContinue={!passed ? undefined
-          /* The video's cards live above the tabs (ListCards on the Root
-             stack), where `replace` from here cannot reach — it would do
-             nothing (§23) — so the quiz is closed and the cards opened. */
-          : after && after.id === "prep" ? () => { navigation.goBack(); navigation.navigate(...stepRoute(after.id, unit, index)); }
           : after ? () => navigation.replace(...stepRoute(after.id, unit, index))
           : !last ? () => navigation.replace("Vocab", { unitId, index: index + 1 })
           : undefined}

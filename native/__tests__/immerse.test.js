@@ -151,14 +151,15 @@ describe("the library", () => {
 });
 
 describe("the player", () => {
-  it("offers to resume where the video was stopped, and seeks there", async () => {
+  /* The player starts on arrival (the owner, 2026-10-06: "no play video
+     button"), from where it was stopped, with a way back to the beginning. */
+  it("plays on arrival, and offers the beginning when it resumed", async () => {
     await withProfile(<Video route={{ params: { videoId: a.id } }} navigation={nav} />,
       { ui: {}, videos: { [a.id]: { opened: 1000, at: 192000 } } });
-    expect(screen.getByText("Resume 3:12")).toBeTruthy();
-    // …beside a way to start from the beginning (the owner, 2026-10-05).
-    expect(screen.getByTestId("video-restart")).toBeTruthy();
-    await act(async () => { fireEvent.press(screen.getByTestId("video-play")); });
     expect(screen.getByTestId("yt-player")).toBeTruthy();
+    expect(screen.queryByTestId("video-play")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("video-restart")); });
+    expect(global.__seek).toHaveBeenCalledWith(0, 0);
   });
 
   it("records the video as opened", async () => {
@@ -171,7 +172,6 @@ describe("the player", () => {
      on a touch — play/pause, speed, the cog — and no row under the player. */
   it("puts back 5 and forward 5 over the picture always, the rest on a touch", async () => {
     await withProfile(<Video route={{ params: { videoId: a.id } }} navigation={nav} />);
-    await act(async () => { fireEvent.press(screen.getByTestId("video-play")); });
     // Every press awaited inside act: an un-awaited one overlapping the others
     // left the renderer a render behind and broke the tests after this one.
     const press = (id) => act(async () => { fireEvent.press(screen.getByTestId(id)); });
@@ -249,7 +249,6 @@ describe("the player", () => {
   /* The cog: subtitles (on by default) and a way out to YouTube. */
   it("turns subtitles off from the cog, and remembers", async () => {
     await withProfile(<Video route={{ params: { videoId: a.id } }} navigation={nav} />);
-    await act(async () => { fireEvent.press(screen.getByTestId("video-play")); });
     await act(async () => { fireEvent.press(screen.getByTestId("overlay-cog")); });
     expect(screen.getByTestId("video-captions").props.value).toBe(true);
     expect(screen.getByTestId("video-youtube")).toBeTruthy();
@@ -260,6 +259,7 @@ describe("the player", () => {
 
   it("starts at the beginning when it was never played", async () => {
     await withProfile(<Video route={{ params: { videoId: a.id } }} navigation={nav} />);
-    expect(screen.getByText("Play")).toBeTruthy();
+    expect(screen.getByTestId("yt-player")).toBeTruthy();
+    expect(screen.queryByTestId("video-restart")).toBeNull();
   });
 });

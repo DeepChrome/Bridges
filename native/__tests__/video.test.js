@@ -241,20 +241,21 @@ describe("Immerse", () => {
     expect(screen.getByText(/Nothing matches/)).toBeTruthy();
     await act(async () => { fireEvent.changeText(input, ""); });
     await act(async () => { fireEvent.press(screen.getAllByText(first.title.split(" | ")[0].trim())[0]); });
-    expect(nav.navigate).toHaveBeenCalledWith("Video", { videoId: first.id });
+    // A row opens the video's summary first (the owner, 2026-10-06).
+    expect(nav.navigate).toHaveBeenCalledWith("VideoSummary", { videoId: first.id });
   });
 });
 
 describe("Video", () => {
   /* The video page is the player and the transcript (the owner, 2026-10-05);
-     what the video held is its summary, after it. */
+     what the video holds is its summary, before it. */
   it("lists only spoken words for a unit's episode, on its summary", async () => {
     const unit = unitById(unitVideo.unit);
     const v = videoFor({ unitId: unit.id, index: 0 });
     const heard = Object.keys(unit.v.heard);
     expect(Object.keys(v.words).slice(0, heard.length)).toEqual(heard);
     await withProfile(<Video route={{ params: { unitId: unit.id, index: 0 } }} navigation={nav} />);
-    await screen.findByText("Play");
+    await screen.findByTestId("yt-player");
     // The video page itself holds no word list.
     expect(screen.queryByTestId("prep")).toBeNull();
     await flushState(); await AsyncStorage.clear();
@@ -367,40 +368,47 @@ describe("Video", () => {
     expect(screen.queryByTestId(`video-${libraryVideo.id}`)).toBeNull();
   });
 
-  /* Continue marks the video watched and opens its summary (the owner,
-     2026-10-05); a unit's episode counts for its unit too. */
-  it("Continue records the video as watched and opens its summary", async () => {
-    await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={nav} />);
-    await act(async () => { fireEvent.press(await screen.findByTestId("video-continue")); });
-    let st = await saved();
-    expect(typeof st.watched[libraryVideo.id]).toBe("number");
-    expect(nav.navigate).toHaveBeenCalledWith("VideoSummary", expect.objectContaining({ videoId: libraryVideo.id }));
-
-    await flushState(); await AsyncStorage.clear();
-    await withProfile(<Video route={{ params: { unitId: unitVideo.unit, index: 0 } }} navigation={nav} />);
-    await act(async () => { fireEvent.press(await screen.findByTestId("video-continue")); });
-    st = await saved();
-    expect(st.unit[unitVideo.unit].video).toBe(true);
-    expect(typeof st.watched[unitVideo.id]).toBe("number");
+  /* The summary comes first and its button opens the video (the owner,
+     2026-10-06: "summary -> video -> questions… update the text from
+     continue to watch video"). */
+  it("the summary's Watch video opens the player", async () => {
+    await withProfile(<VideoSummary route={{ params: { videoId: libraryVideo.id } }} navigation={nav} />);
+    const watch = await screen.findByTestId("summary-continue");
+    expect(screen.getByText("Watch video")).toBeTruthy();
+    await act(async () => { fireEvent.press(watch); });
+    expect(nav.navigate).toHaveBeenCalledWith("Video", expect.objectContaining({ videoId: libraryVideo.id, viaSummary: true }));
   });
 
-  /* The summary's Continue goes to the questions where the video has them,
-     and back past itself and the video where it has none. */
-  it("the summary goes on to the questions, or back where there are none", async () => {
+  /* Continue marks the video watched; a unit's episode counts for its unit
+     too. It goes on to the questions where the video has them, and back past
+     the video (and the summary it came through) where it has none. */
+  it("Continue records the video as watched and goes on to its questions", async () => {
     const withQuiz = VIDEOS.find((v) => v.quiz && v.quiz.length);
     const without = VIDEOS.find((v) => !v.quiz);
     const n = { ...nav, pop: jest.fn() };
     if (withQuiz) {
-      await withProfile(<VideoSummary route={{ params: { videoId: withQuiz.id } }} navigation={n} />);
-      await act(async () => { fireEvent.press(await screen.findByTestId("summary-continue")); });
+      await withProfile(<Video route={{ params: { videoId: withQuiz.id, viaSummary: true } }} navigation={n} />);
+      await act(async () => { fireEvent.press(await screen.findByTestId("video-continue")); });
+      expect(typeof (await saved()).watched[withQuiz.id]).toBe("number");
       expect(n.navigate).toHaveBeenCalledWith("VideoQuiz", expect.objectContaining({ videoId: withQuiz.id, depth: 3 }));
       await flushState(); await AsyncStorage.clear();
     }
     if (without) {
-      await withProfile(<VideoSummary route={{ params: { videoId: without.id } }} navigation={n} />);
-      await act(async () => { fireEvent.press(await screen.findByTestId("summary-continue")); });
+      await withProfile(<Video route={{ params: { videoId: without.id, viaSummary: true } }} navigation={n} />);
+      await act(async () => { fireEvent.press(await screen.findByTestId("video-continue")); });
       expect(n.pop).toHaveBeenCalledWith(2);
+      await flushState(); await AsyncStorage.clear();
+      // Opened straight from a word's moment, only the video is behind.
+      await withProfile(<Video route={{ params: { videoId: without.id } }} navigation={n} />);
+      await act(async () => { fireEvent.press(await screen.findByTestId("video-continue")); });
+      expect(n.pop).toHaveBeenLastCalledWith(1);
+      await flushState(); await AsyncStorage.clear();
     }
+    await withProfile(<Video route={{ params: { unitId: unitVideo.unit, index: 0 } }} navigation={n} />);
+    await act(async () => { fireEvent.press(await screen.findByTestId("video-continue")); });
+    const st = await saved();
+    expect(st.unit[unitVideo.unit].video).toBe(true);
+    expect(typeof st.watched[unitVideo.id]).toBe("number");
   });
 });
 
@@ -441,8 +449,7 @@ describe("full screen", () => {
     const parentOptions = jest.fn();
     const n = { ...nav, setOptions, getParent: () => ({ setOptions: parentOptions }) };
     await withProfile(<Video route={{ params: { videoId: libraryVideo.id } }} navigation={n} />);
-    await act(async () => { fireEvent.press(await screen.findByTestId("video-play")); });
-    const before = screen.getByTestId("yt-player");
+    const before = await screen.findByTestId("yt-player");
     expect(screen.getByTestId("video-pinned")).toBeTruthy();
 
     // The overlay is over the picture before maximising too (2026-10-05).

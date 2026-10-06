@@ -271,10 +271,6 @@ export function components(st, u, i) {
   /* What the lesson taught, reviewed before the video (2026-09-29). Optional:
      listed so it is found, never owed. */
   out.push({ id: "summary", label: "Summary", optional: true, done: !!l.s });
-  /* The video's own words as flashcards, just before the video (the owner,
-     2026-10-05: "before the video, the user should be able to read the video
-     specific flash cards to prep for the video… after the summary").
-     Optional, like the summary; done when the round is played through. */
   /* **The video closes the unit, not every lesson** (the owner, 2026-10-05:
      "I watched the lesson 1 family video and then the next lesson after was
      using a lot of cards and sentences from the previous video… words for the
@@ -285,7 +281,10 @@ export function components(st, u, i) {
      lessons simply no longer list it, which finishes them sooner rather than
      undoing anything. */
   const closes = i === lessonCount(u) - 1;
-  if (u.v && closes && prepWords(u).length) out.push({ id: "prep", label: "Video words", optional: true, done: !!l.p });
+  /* The video step opens its summary first — the words it says, with their
+     flashcards — and the video from there (the owner, 2026-10-06: "summary
+     (flashcard option…) -> video -> questions"); the separate "Video words"
+     step that did the same cards went with it. */
   if (u.v && closes) out.push({ id: "video", label: "Video", done: !!s.video, shared: true });
   /* The video's five questions, after it (the owner, 2026-10-05: "you can
      throw video questions on that page after the video"). Optional, like
@@ -298,13 +297,6 @@ export function components(st, u, i) {
   return out;
 }
 
-/* A unit's video words to know before watching (§30bf's list, `v.heard`),
-   and the video's own sentences after them. */
-export function prepWords(u) {
-  if (!u || !u.v) return [];
-  return Object.keys(u.v.heard || {}).concat(videoLines(u).map((l) => l.ru));
-}
-
 /* The step Continue opens: the first one left **after the furthest one done**,
    so the lesson runs in order — optional steps included — and a step the
    learner chose to skip past is not pointed at again. Failing that, a required
@@ -315,13 +307,8 @@ export function prepWords(u) {
 export function stepRoute(id, u, i) {
   if (id === "listen") return ["Scenes", { key: `${u.id}:${i}` }];
   if (id === "vquiz") return ["VideoQuiz", { unitId: u.id, index: i, videoId: u.v && u.v.id }];
-  if (id === "prep") {
-    return ["ListCards", { round: "list", words: prepWords(u), title: "Before the video",
-                           after: "Continue to video", mark: { unitId: u.id, index: i, id: "prep" },
-                           next: ["Video", { unitId: u.id, index: i }] }];
-  }
   const name = { vocab: "Vocab", grammar: "GrammarRun", quiz: "Quiz", summary: "Summary",
-                 video: "Video" }[id] || "Vocab";
+                 video: "VideoSummary" }[id] || "Vocab";
   return [name, { unitId: u.id, index: i }];
 }
 
@@ -426,7 +413,6 @@ export function markComponent(st, u, i, id, extra) {
     const l = { ...s.lessons[i] };
     if (id === "vocab") l.v = true;
     if (id === "summary") l.s = true;
-    if (id === "prep") l.p = true;
     if (id === "quiz") {
       l.q = Math.max(l.q || 0, extra || 0);
       l.tries = (l.tries || 0) + 1;            // what the relief rule counts

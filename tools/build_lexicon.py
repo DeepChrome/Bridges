@@ -446,6 +446,12 @@ class Builder:
                 n_new += 1
 
             for slot, vals in e["forms"].items():
+                # `replace`: these slots as given, not added to OpenRussian's.
+                # «год» came with the archaic «лета́» in every plural slot, so
+                # the table taught it as the plural (2026-10-05).
+                if e.get("replace"):
+                    self.db.execute("delete from paradigm where lemma_id=? and slot=?", (lid, slot))
+                    self.db.execute("delete from forms where lemma_id=? and slot=?", (lid, slot))
                 for acc in vals:
                     bare_v = unicodedata.normalize(
                         "NFC", unicodedata.normalize("NFD", acc).replace(ACUTE, ""))

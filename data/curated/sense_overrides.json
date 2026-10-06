@@ -2,6 +2,7 @@
   "_": "tools/build_site.py (apply_sense_override): a reader's corrections to a word's Wiktionary senses, keyed bare|pos. drop: senses containing these strings ('=x' for a sense that is exactly x). rename: a sense's gloss rewritten. examples: examples containing these strings. first: the sense containing this string goes on top. lead: a sense with this text goes above everything, where Wiktionary has none that says what the lesson teaches. Every string must match, or the build stops. Read 2026-10-01, every taught word line by line: senses from another word (небо's 'palate' is нёбо, есть 'to eat', все's senses are всё's), vulgar and criminal slang, spelling-alphabet code words, proper names, lotto calls, and an offensive proverb.",
   "жена|noun": { "examples": ["Orel girls"], "drop": ["woman"] },
   "бабушка|noun": { "drop": ["lotto"] },
+  "кружок|noun": { "drop": ["=kroužek"] },
   "дедушка|noun": { "drop": ["lotto"] },
   "ужинать|verb": { "drop": ["scythe", "harvest"], "examples": ["Tchubikov"] },
   "но|other": { "drop": ["=Noh", "same as"] },

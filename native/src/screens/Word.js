@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { View, Pressable, Linking } from "react-native";
 import { useTheme, radius } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Familiarity, Fold } from "../ui";
-import { TableGroup, Facts } from "../rules";
+import { TableGroup, Facts, IrregularTag } from "../rules";
 import { wordFacts, isIrregular } from "@core/facts";
 import { grammarLine } from "@core/forms";
 import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
@@ -130,7 +130,7 @@ export function WordEntry({ w, index, navigation }) {
           <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
             {/* The first thing said about a word that breaks the rules
                 (2026-09-29); what it breaks is the facts below. */}
-            {isIrregular(w) ? <Pill tone="irregular" testID="word-irregular">Irregular</Pill> : null}
+            <IrregularTag word={w} testID="word-irregular" />
             {unit ? <Pill tone="brand">{unit.name}</Pill> : null}
           </View>
         ) : null}

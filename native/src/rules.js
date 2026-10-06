@@ -27,6 +27,7 @@ import { useTheme, radius, type as T } from "./theme";
 import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, Marked, Bubble, Flag } from "./ui";
 import { Linked, navRef } from "./words";
 import { tableLabel } from "@core/forms";
+import { irregularities } from "@core/facts";
 // The form recordings are looked up where every sound is (audio.js formClip).
 import { say, hasRealAudio, formClip } from "./audio";
 
@@ -337,6 +338,67 @@ export function FactBubble({ fact, onClose, onLeave }) {
             ) : null}>
       <Note text={fact.note} color={t.ink2} size={T.body} gap={4} />
     </Bubble>
+  );
+}
+
+/* What breaks the rules about a word, each with its one line (core/facts.js
+   `irregularities`): «ребёнок» → «дети», «хотеть»'s mixed endings. The
+   owner, 2026-10-05: "the first time an irregular is introduced… point out
+   what makes it irregular… in the full entries where it's flagged
+   irregular, you can click that and it will say what's irregular". */
+export function IrregularNotes({ word, testID = "irregular-notes", style }) {
+  const t = useTheme();
+  const ir = word ? irregularities(word) : [];
+  if (!ir.length) return null;
+  return (
+    <View testID={testID} style={[{ gap: 6 }, style]}>
+      {ir.map((x) => (
+        <View key={x.kind + x.label} style={{ flexDirection: "row", gap: 8, alignItems: "flex-start" }}>
+          <Warn />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: T.small, fontWeight: "700" }}>{x.label}</Text>
+            <Marked text={x.note} size={T.small} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/* The warning mark: a red circle with "!" — "something here breaks the
+   pattern" (the owner: "a red exclamation point in a circle is a warning for
+   anything that deviates from the norm"). */
+function Warn({ size = 18 }) {
+  const t = useTheme();
+  return (
+    <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: t.bad,
+                   alignItems: "center", justifyContent: "center", marginTop: 1 }}>
+      <Text style={{ color: t.badOn, fontSize: size * 0.7, fontWeight: "800", lineHeight: size }}>!</Text>
+    </View>
+  );
+}
+
+/* The "Irregular" tag, wherever a word is shown: the mark and the word, and a
+   tap opens what is irregular about it. Draws nothing for a regular word. */
+export function IrregularTag({ word, testID = "irregular" }) {
+  const t = useTheme();
+  const [open, setOpen] = useState(false);
+  if (!word || !irregularities(word).length) return null;
+  return (
+    <>
+      <Pressable testID={testID} onPress={() => setOpen(true)} hitSlop={6}
+                 accessibilityRole="button" accessibilityLabel="Irregular, what is irregular"
+                 style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 5,
+                   borderWidth: 1.5, borderColor: t.warn, borderRadius: 99, backgroundColor: t.surface,
+                   paddingLeft: 3, paddingRight: 9, paddingVertical: 2, opacity: pressed ? 0.6 : 1 })}>
+        <Warn size={16} />
+        <Text style={{ color: t.ink, fontSize: 12, fontWeight: "700",
+                       textDecorationLine: "underline", textDecorationStyle: "dotted" }}>Irregular</Text>
+      </Pressable>
+      <Bubble visible={open} onClose={() => setOpen(false)} title={word.w} testID={`${testID}-bubble`}>
+        <IrregularNotes word={word} />
+      </Bubble>
+    </>
   );
 }
 

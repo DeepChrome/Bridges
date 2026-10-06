@@ -110,6 +110,23 @@ describe("path node states", () => {
     expect(Number(arc.props.strokeDashoffset)).toBeGreaterThan(0);
   });
 
+  /* One yellow line and nothing else yellow (the owner, 2026-10-05: "it
+     looks like there are two… a single clockwise yellow line… when the lesson
+     is complete… the stroke becomes a bit thicker"). The edge under a disc
+     was a dim brand on finished and current discs and read as a second ring. */
+  it("draws one ring: heavier when finished, and never a brand-coloured edge", async () => {
+    await withState({ unit: { core1: finished("core1"), family: { lessons: { 0: { v: true } } } } });
+    const done = await screen.findByTestId("arc-core1");
+    const going = screen.getByTestId("arc-family");
+    expect(Number(done.props.strokeWidth)).toBeGreaterThan(Number(going.props.strokeWidth));
+    const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : s);
+    const yellow = new Set([light.brand, light.brandDim].map((c) => c.toUpperCase()));
+    for (const lip of screen.getAllByTestId(/^lip-/)) {
+      const bg = String(flat(lip.props.style).backgroundColor || "").toUpperCase();
+      expect(yellow.has(bg)).toBe(false);
+    }
+  });
+
   it("locks a later chapter, greys it, and offers it no ring", async () => {
     await withState({});
     const later = await screen.findByTestId("node-core4");
@@ -333,12 +350,11 @@ describe("the disc you are on", () => {
         && flat.backgroundColor.toUpperCase() === hex.toUpperCase();
     }).length;
 
-  /* The disc you are on is marked by its ring, not by a fill (the owner,
+  /* The disc you are on is marked by its size, not by a fill (the owner,
      2026-10-05: a filled disc "really seems to indicate that the left lesson
-     is complete"): its track is a dim brand, ready to be filled round as its
-     lessons are done; no disc is ever a solid brand face. */
-  const ringed = (node) => walk(node).filter((n) => n.props && n.props.stroke !== undefined
-    && strokeHex(n) === light.brandDim.toUpperCase()).length;
+     is complete") nor by a yellow track (later that day: it read as a second
+     ring). No disc is ever a solid brand face. */
+  const ringed = (node) => walk(node).filter((n) => n.props && /^here-/.test(n.props.testID || "")).length;
 
   test("exactly one disc carries the open ring, and it is the one Continue opens; none is filled", async () => {
     await withState({});

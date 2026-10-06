@@ -15,10 +15,9 @@ import Svg, { Path } from "react-native-svg";
 import { useTheme } from "./theme";
 import { Btn, Muted, SectionLabel, Familiarity, Speaker, Text, Fold, Pill } from "./ui";
 import { Linked } from "./words";
-import { RuleCard } from "./rules";
+import { RuleCard, IrregularTag } from "./rules";
 import { familiarity, cardFor } from "@core/scheduler";
 import { firstSense } from "@core/util";
-import { isIrregular } from "@core/facts";
 import { L, UN, idxOfWord, rankOf } from "./data";
 import { hasRealAudio } from "./audio";
 
@@ -95,7 +94,7 @@ export function WordTags({ e }) {
   if (!e) return null;
   return (
     <>
-      {isIrregular(e) ? <Pill tone="irregular">Irregular</Pill> : null}
+      <IrregularTag word={e} testID={`irregular-${e.b}`} />
       {isReflexive(e) ? <Pill>Reflexive</Pill> : null}
     </>
   );

@@ -9,6 +9,8 @@
  *   node tools/build_video_quiz.mjs --units         only the units' goal videos
  *   node tools/build_video_quiz.mjs --limit 20      at most this many
  *   node tools/build_video_quiz.mjs --again ID,ID   ask for these again
+ *   node tools/build_video_quiz.mjs --refix         ask again for stored sets the wording rules refuse
+ *   node tools/audit_video_quiz.mjs --sample 8      read them (do, after every run)
  *   node tools/build_video_quiz.mjs --dry-run       say what would be asked and what it costs
  *
  * Reads the shipped transcripts (native/assets/transcripts.json and its
@@ -56,6 +58,8 @@ Rules:
 - A learner who did not watch must not be able to guess the answer from common sense or general knowledge.
 - The question must never contain the answer or its key word.
 - Keep each question simple and direct: one thing asked, no negatives ("NOT"), no "wrongly", no tricks about what was misnamed.
+- Never mention line numbers or timestamps: the learner watched a video, they did not read numbered lines. Point to a moment by what was happening ("when she shows the photo of her dad…").
+- Vary how the questions are asked: not "What does she say…" five times. Ask about reasons, people, places, what happened next, feelings.
 - Questions at most 18 words, options at most 10 words. No "all of the above", no "none of the above".
 
 Answer with JSON only: {"questions":[{"q":"...","options":["right","wrong","wrong","wrong"],"line":12}, ...]}`;
@@ -79,9 +83,25 @@ const clock = (ms) => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) 
 const words = (s) => String(s).trim().split(/\s+/).filter(Boolean).length;
 const STOP = new Set(["they", "their", "that", "this", "with", "from", "what", "about", "there", "have", "were", "will", "into", "when", "where"]);
 
-/* What is wrong with a reply, or null. Exported for core.test. */
+/* What is wrong with the wording of a set, or null — the rules that can be
+   checked on a stored set as well as on a fresh reply (`--refix`). */
+const opener = (q) => q.toLowerCase().replace(/[^a-z\s']/g, "").split(/\s+/).slice(0, 3).join(" ");
+export function wording(qs) {
+  for (const [k, x] of qs.entries()) {
+    // The learner watched a video; numbered lines and clock times are ours.
+    if (/\blines? \d+|\b\d{1,2}:\d\d\b/i.test(x.q)) return `${k}: points at a line number or a time`;
+  }
+  const ops = {};
+  for (const x of qs) ops[opener(x.q)] = (ops[opener(x.q)] || 0) + 1;
+  if (Math.max(...Object.values(ops)) >= 3) return "three questions open the same way";
+  return null;
+}
+
+/* What is wrong with a reply, or null. */
 export function problem(qs, nLines) {
   if (!Array.isArray(qs) || qs.length !== N) return `wanted ${N} questions`;
+  const w = qs.every((x) => x && typeof x.q === "string") ? wording(qs) : null;
+  if (w) return w;
   for (const [k, x] of qs.entries()) {
     if (!x || typeof x.q !== "string" || !x.q.trim()) return `${k}: no question`;
     if (words(x.q) > 22) return `${k}: question too long`;
@@ -136,6 +156,12 @@ async function ask(id, lines, en) {
 
 const unitVideos = data.units.filter((u) => u.v && u.v.id).map((u) => u.v.id);
 const again = new Set((arg("--again") || "").split(",").filter(Boolean));
+/* --refix: ask again for every stored set the wording rules now refuse —
+   the rules grew after the first sets were written. */
+if (has("--refix")) {
+  for (const [id, v] of Object.entries(store.videos)) if (wording(v.questions)) again.add(id);
+  console.log(`${again.size} stored sets break the wording rules and will be asked again`);
+}
 const order = [...new Set(unitVideos.concat(has("--units") ? [] : videos.map((v) => v.id)))]
   .filter((id) => transcripts[id] && transcripts[id].length >= 20);
 const todo = order.filter((id) => {

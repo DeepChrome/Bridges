@@ -28,7 +28,7 @@ import React from "react";
 import { Animated, View } from "react-native";
 import { useTheme, radius, type as T } from "./theme";
 import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses, Text, Btn } from "./ui";
-import { RuleCard } from "./rules";
+import { RuleCard, IrregularNotes } from "./rules";
 import { Linked, GrammarLine } from "./words";
 import { Guide } from "./guide";
 import { useEnter } from "./motion";
@@ -261,6 +261,13 @@ export function WordCard({ i, at, total, unit }) {
 
           {/* Four is enough on a teaching card; the rest are counted, not hidden. */}
           <Senses e={w.e} size={T.body + 1} max={4} style={{ marginTop: 10 }} />
+
+          {/* Where a word breaks the pattern, it is said here, where the word
+              is first taught (the owner, 2026-10-05: «ребёнок» on the card and
+              «дети» in every sentence under it, with nothing to say they are
+              one word). Elsewhere it is the Irregular tag, and a tap. */}
+          <IrregularNotes word={w} testID="card-irregular"
+                          style={{ marginTop: 12, alignSelf: "stretch" }} />
 
           {/* "other" is the lexicon's bucket for closed classes, and it told a
               learner nothing except that the app had nothing to say. */}

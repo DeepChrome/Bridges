@@ -758,6 +758,88 @@ def video_transcripts(ids):
     return out
 
 
+# Words that open a spoken line without changing what it says.
+NEAR_DUP_FILLER = {"а", "и", "но", "ну", "вот", "да", "так", "вон"}
+
+
+def merge_near_duplicates(speech, units, stats):
+    """One sentence where the pools held two a word apart (the owner,
+    2026-10-05: "I shouldn't see sentences that are like... a single word off.
+    Like this is my sister... and then the next sentence is 'and this is my
+    sister'"). A video says the same line several times with a word changed,
+    and the decks repeat themselves too, so the flashcards dealt both.
+
+    Two rows are one when, with an opening filler word (а, и, ну, вот…) set
+    aside, their words are the same, or — at three words or more — one word
+    apart. Rows are never renumbered; only the listings that point at them
+    thin out."""
+    rows = speech["rows"]
+
+    def words(ru):
+        w = [fold(x) for x in re.findall(r"[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*", ru)]
+        return w[1:] if len(w) > 1 and w[0] in NEAR_DUP_FILLER else w
+
+    # Lookups by signature rather than a comparison of every pair: the same
+    # words, the words with one swapped for a wildcard, the words with one
+    # left out. Two sentences one word apart share one of them.
+    canon, full, subs, dels = {}, {}, {}, {}
+    for k, r in enumerate(rows):
+        w = tuple(words(r[0]))
+        same = full.get(w)
+        if same is None and len(w) >= 3:
+            for i in range(len(w)):
+                same = subs.get(w[:i] + ("*",) + w[i + 1:])
+                if same is not None:
+                    break
+        if same is None and len(w) - 1 >= 3:
+            for i in range(len(w)):
+                same = full.get(w[:i] + w[i + 1:])
+                if same is not None:
+                    break
+        if same is None and len(w) >= 3:
+            same = dels.get(w)
+        canon[k] = k if same is None else same
+        if same is None:
+            full.setdefault(w, k)
+            for i in range(len(w)):
+                subs.setdefault(w[:i] + ("*",) + w[i + 1:], k)
+                dels.setdefault(w[:i] + w[i + 1:], k)
+    # Each sentence stays itself — a twin may use a word its unit has not
+    # taught (check_pools_guaranteed caught «Ты как Том» standing in for a
+    # chapter-1 line) — and a later one is dropped when its twin is already
+    # listed in this unit or one before it on the route.
+    dropped = 0
+    for pool in ("speak", "listen"):
+        groups = set()
+        for u in units:
+            lst = speech[pool].get(u["id"])
+            if not lst:
+                continue
+            out = []
+            for k in lst:
+                g = canon.get(k, k)
+                if g in groups:
+                    dropped += 1
+                    continue
+                groups.add(g)
+                out.append(k)
+            speech[pool][u["id"]] = out
+    for u in units:
+        v = u.get("v")
+        if v and v.get("lines"):
+            groups, out = set(), []
+            for row, t in v["lines"]:
+                g = canon.get(row, row)
+                if g in groups:
+                    dropped += 1
+                    continue
+                groups.add(g)
+                out.append([row, t])
+            v["lines"] = out
+    stats["near_duplicates"] = dropped
+    print(f"  near-dupes   : {dropped:,} listings dropped, each a word apart from one already listed")
+
+
 def add_video_lines(speech, units, measure, stats):
     """Sentences from each unit's goal video (tools/build_video_lines.py) into
     the pools, and onto the unit as `v.lines` — [row, ms] — so a lesson can
@@ -1791,6 +1873,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     speech = build_pools(measured, units, stats)
     add_video_lines(speech, units, lambda s, t: measure_sentences(
         s, t, index, key_units, lemmas, unit_pos, {}, {}, {}, unit_info), stats)
+    merge_near_duplicates(speech, units, stats)
     stats["pool_unguaranteed"] = check_pools_guaranteed(speech, units, key_units, unit_info, unit_pos)
 
     # The written conversations (data/curated/scripts/, §30l), keyed by lesson.

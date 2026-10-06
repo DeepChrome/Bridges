@@ -6227,6 +6227,11 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   prepares for it — the owner watched it and met its words afterwards.
   Earlier lessons no longer list it, which finishes them sooner and undoes
   nothing.
+- **A sentence a word apart from one already listed is not listed again**
+  (`merge_near_duplicates` in build_site.py: «Это моя сестра» and «А это моя
+  сестра»). Listings thin out per unit along the route; rows are never
+  remapped, because a twin may hold a word that unit has not taught — the
+  first cut remapped and `check_pools_guaranteed` failed on it.
 - **A verb's personal-forms table is headed by its aspect** (`tableLabel` in
   core/forms.js): Present for an imperfective, Future for a perfective, both
   for a verb of both. The title "Present / Future" stays the lookup key.

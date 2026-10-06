@@ -183,8 +183,12 @@ export function irregularities(w) {
       out.push({ kind: "conjugation", label: "Mixed conjugation",
                  note: "It takes first-conjugation endings in some persons and second in others." });
     } else if (t && c === null && fold(formOf(t, /ты/))) {
+      // «быть»: one present form for every person, and its own future.
+      const one = fold(formOf(t, /ты/)) === fold(formOf(t, /они/));
       out.push({ kind: "conjugation", label: "Irregular endings",
-                 note: `Its endings follow neither pattern: «${formOf(t, /ты/)}», «${formOf(t, /они/)}». Learn the table whole.` });
+                 note: one
+                   ? `Its present is one form for every person, «${formOf(t, /ты/)}», usually left out; the future has its own stem.`
+                   : `Its endings follow neither pattern: «${formOf(t, /ты/)}», «${formOf(t, /они/)}». Learn the table whole.` });
     }
     const sc = stemChange(w);
     if (sc && sc.kind === "other") {
@@ -222,10 +226,14 @@ export function irregularities(w) {
         out.push({ kind: "plural", label: "Plural in -ья", note: `The plural is «${cell(nomRow[2])}», not the ordinary -ы/-и.` });
       } else if (w.g === "m" && /[ая]́$/.test(plRaw)) {
         out.push({ kind: "plural", label: "Plural in -а", note: `A stressed -а/-я plural: «${cell(nomRow[2])}», not -ы/-и.` });
-      } else if (!fleeting(w) && sgStem.length > 2 && !plStem.startsWith(sgStem.slice(0, 2))
-                 && !(genStem && plStem === genStem)) {
+      } else if (sgStem.length > 2 && !plStem.startsWith(sgStem.slice(0, 2))
+                 && !(genStem && plStem.startsWith(genStem.slice(0, 2)))) {
         // A plural on the genitive's stem is a vowel that dropped out («лёд»
-        // → «льда», «льды»), not a different word.
+        // → «льда», «льды»), not a different word. Checked against the
+        // genitive's stem rather than skipped for every noun with a fleeting
+        // vowel: «ребёнок» drops its о («ребёнка») *and* has a different
+        // plural («дети»), and the second hid behind the first (the owner,
+        // 2026-10-05).
         out.push({ kind: "plural", label: "Different plural", note: `The plural is a different word: «${cell(nomRow[2])}».` });
       }
       if (gen && sgStem && gen.startsWith(sgStem) && gen.length - sgStem.length >= 3 && /ер/.test(gen.slice(sgStem.length))) {

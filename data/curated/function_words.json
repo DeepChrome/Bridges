@@ -210,6 +210,15 @@
       }
     },
 
+    {
+      "attach_to": "год", "pos": "noun", "replace": true,
+      "note": "OpenRussian fills every plural slot with the archaic «лета́», so the table taught it as the plural. The plural is «го́ды» (also «года́»); after a number the genitive plural is «лет» (пять лет), otherwise «годо́в».",
+      "forms": {
+        "pl_nom": ["го́ды", "года́"], "pl_gen": ["ле́т", "годо́в"], "pl_dat": ["года́м"],
+        "pl_acc": ["го́ды", "года́"], "pl_inst": ["года́ми"], "pl_prep": ["года́х"]
+      }
+    },
+
     { "attach_to": "с",   "pos": "other", "forms": { "variant": ["со"] } },
     { "attach_to": "в",   "pos": "other", "forms": { "variant": ["во"] } },
     { "attach_to": "к",   "pos": "other", "forms": { "variant": ["ко"] } },

@@ -22,10 +22,11 @@ import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx,
          personalWords, goalNow, goalOpts, markComponent } from "../data";
 import { Linked, GrammarLine } from "../words";
 import { useAbout } from "../about";
+import { IrregularTag } from "../rules";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
-import { applyGrade, reviewRows, preview, schedulerOpts, wanted, troubleWords as troubleBank, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity, kindOf, retrievability } from "@core/scheduler";
+import { applyGrade, reviewRows, preview, schedulerOpts, wanted, troubleWords as troubleBank, DIRECTIONS, DEFAULT_FRONTS, cardFor, familiarity, kindOf, retrievability, NEW, dayOf } from "@core/scheduler";
 import { isIrregular } from "@core/facts";
 import { buildSession, practiceSession, requeue, dailyFor, QUEUE_DEFAULTS, cardKind, kindsOf, CARD_KINDS,
          goalSession, rollGoal, spendGoal, isStudyDay, MASTERED_AT } from "@core/queue";
@@ -859,12 +860,24 @@ export default function Study({ navigation, route }) {
     buzzTap();
     const now = Date.now();
     const word = item.word, direction = item.direction;
-    const rows = reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
+    /* **A second look the same day is practice, not new evidence** (the
+       owner, 2026-10-05: «ребёнок» at 98 "I don't think I've reviewed it more
+       than once"). A lesson's flashcards, a video's words and the day's pile
+       could each meet the same new word within minutes, and FSRS reads every
+       Easy as more memory: one Easy is about 8 days, three in a sitting the
+       high nineties. In a practice round a card already answered today keeps
+       its schedule on a right answer; an Again still counts, since forgetting
+       within the day is a real signal. */
+    const practiceAgain = !!(session && session.practice && g > 1 && current && current.state !== NEW
+                             && current.lastAt && dayOf(current.lastAt) === dayOf(now));
+    const rows = practiceAgain ? []
+      : reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
     const before = { items: items, at, prev: current, trouble: st.trouble, daily: st.daily, goal: st.goal,
                      row: rows[0], marks };
     setMarks({ ...marks, [word]: g === 1 ? "again" : "done" });
     update((prev) => {
-      const r = applyGrade(prev.seen, prev.trouble, word, direction, g, now, schedulerOpts(prev));
+      const r = practiceAgain ? { seen: prev.seen, trouble: prev.trouble }
+        : applyGrade(prev.seen, prev.trouble, word, direction, g, now, schedulerOpts(prev));
       const daily = dailyFor(prev.daily, now);
       return {
         ...prev, seen: r.seen, trouble: r.trouble,
@@ -894,10 +907,11 @@ export default function Study({ navigation, route }) {
     const { row, prev } = last;
     update((p) => {
       // The one card, back as it was — or gone, if the grade was its first.
+      // A same-day practice answer wrote no row and changed no card.
       const seen = { ...p.seen };
-      if (prev) seen[row.word] = { recognise: prev }; else delete seen[row.word];
+      if (row) { if (prev) seen[row.word] = { recognise: prev }; else delete seen[row.word]; }
       return { ...p, seen, trouble: last.trouble, daily: last.daily, goal: last.goal };
-    }, [], [{ word: row.word, direction: row.direction, at: row.at }]);
+    }, [], row ? [{ word: row.word, direction: row.direction, at: row.at }] : []);
     setSession({ ...session, items: last.items });
     setMarks(last.marks);
     setAt(last.at);
@@ -1159,7 +1173,7 @@ export default function Study({ navigation, route }) {
               {/* On the back only (the owner, 2026-09-29): the front is the
                   question, and a score beside it is something else to look
                   at before answering. */}
-              {flip.face && flags.irregular ? <Pill tone="irregular" testID="flag-irregular">Irregular</Pill> : null}
+              {flip.face && flags.irregular ? <IrregularTag word={L[idxOfWord(item.word)]} testID="flag-irregular" /> : null}
               {flip.face ? <Familiarity score={flags.score} /> : null}
             </View>
             {blank ? (

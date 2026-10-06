@@ -75,6 +75,8 @@ function FinalCard({ best, onOpen }) {
 
 
 const STROKE = 5;
+// A finished disc's ring, closed and heavier, so done reads at a glance.
+const STROKE_DONE = 7;
 /* The depth of every disc's edge. One number, so a spine node and a side quest
    are pressed by the same amount. */
 const LIP = 4;
@@ -155,7 +157,7 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
        running into the node, round it, and on. A tick-green ring was a
        separate mark that the track did not continue into. */
     ? { arc: t.brand, p: 1, face: famBg, icon: famInk, track: t.surface3,
-        lip: t.brandDim, nm: t.ink }
+        lip: t.line, nm: t.ink, width: STROKE_DONE }
     : !open
     // Locked: greyed as a whole — face, padlock and name — not just quieter.
     ? { arc: null, p: 0, face: t.surface2, icon: t.ink3, track: t.lineSoft,
@@ -168,8 +170,12 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
        "It really seems to indicate that the left lesson is complete. I liked
        how on the right the bar went around the circle until it was
        complete"). */
+    /* One yellow line and nothing else yellow (the owner, 2026-10-05: "it
+       looks like there are two… it should make a single clockwise yellow
+       line around the circle"): the track and the edge under the disc were
+       a dim yellow here and on finished discs, and read as a second ring. */
     ? { arc: pr > 0 ? t.brand : null, p: pr, face: famBg, icon: famInk,
-        track: t.brandDim, lip: t.brandDim, nm: t.ink }
+        track: t.surface3, lip: t.line, nm: t.ink }
     : pr > 0
     ? { arc: t.brand, p: pr, face: famBg, icon: famInk, track: t.surface3,
         lip: t.line, nm: t.ink }
@@ -183,7 +189,8 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
      is and a path is read at arm's length. */
   const size = branch ? (current ? 62 : 56) : (current ? 80 : 68);
   const iconSize = branch ? (current ? 25 : 22) : (current ? 31 : 26);
-  const r = (size - STROKE) / 2;
+  const sw = tone.width || STROKE;
+  const r = (size - sw) / 2;
   const c = 2 * Math.PI * r;
   /* The lip, and how far the disc travels into it when pressed. Four, not
      three: the physical press only reads if the travel is visible at arm's
@@ -216,15 +223,17 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
             RN's shadows are blurred, so this is a plain circle rather than a shadow —
             which is also the right model: the depth here is physical, a darker
             tint of the disc's own colour, never an atmospheric blur. */}
-        <View style={{ position: "absolute", left: 0, top: LIP, width: size, height: size,
+        <View testID={`lip-${unit.id}`}
+              style={{ position: "absolute", left: 0, top: LIP, width: size, height: size,
                        borderRadius: size / 2, backgroundColor: tone.lip }} />
-        <View style={{ position: "absolute", left: 0, top: drop, width: size,
+        <View testID={current ? `here-${unit.id}` : undefined}
+              style={{ position: "absolute", left: 0, top: drop, width: size,
                        height: size, borderRadius: size / 2,
                        backgroundColor: tone.face, alignItems: "center",
                        justifyContent: "center" }}>
           <Svg width={size} height={size} style={{ position: "absolute" }}>
             <Circle cx={size / 2} cy={size / 2} r={r} stroke={tone.track}
-                    strokeWidth={STROKE} fill="none" />
+                    strokeWidth={sw} fill="none" />
             {/* The ring sweeps to its new value instead of being redrawn at it.
                 Coming back to the path after a lesson, this is the only thing
                 on the screen that says the lesson counted, and it used to
@@ -234,7 +243,7 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
             {tone.arc && tone.p > 0 ? (
               <ASvgCircle testID={`arc-${unit.id}`}
                       cx={size / 2} cy={size / 2} r={r} stroke={tone.arc}
-                      strokeWidth={STROKE} fill="none" strokeLinecap="round"
+                      strokeWidth={sw} fill="none" strokeLinecap="round"
                       strokeDasharray={`${c} ${c}`}
                       strokeDashoffset={sweep}
                       rotation={-90} originX={size / 2} originY={size / 2} />

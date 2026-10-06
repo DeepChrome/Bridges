@@ -93,6 +93,30 @@ describe("a list round with a way back", () => {
     expect(screen.queryByText("Show")).toBeNull();
   });
 
+  /* A second look the same day is practice (2026-10-05: «ребёнок» at 98
+     after a few Easy presses in one sitting). */
+  it("keeps the schedule of a card already answered today when the round's answer is right", async () => {
+    const today = { recognise: { state: REVIEW, s: 2.3, d: 5, reps: 3, lapses: 0, steps: 0,
+                                 lastAt: Date.now() - 30 * 60000, dueAt: Date.now() + 2 * DAY } };
+    await withProfile(<Study navigation={nav}
+      route={{ params: { round: "list", words: ["город"], title: "Gaps" } }} />, { seen: { "город": today } });
+    await act(async () => { fireEvent.press(await screen.findByText("Show")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("grade-4")); });
+    await flushState();
+    expect((await global.__db.saved("p1")).seen["город"].recognise.s).toBe(2.3);
+  });
+
+  it("…but an Again still counts", async () => {
+    const today = { recognise: { state: REVIEW, s: 2.3, d: 5, reps: 3, lapses: 0, steps: 0,
+                                 lastAt: Date.now() - 30 * 60000, dueAt: Date.now() + 2 * DAY } };
+    await withProfile(<Study navigation={nav}
+      route={{ params: { round: "list", words: ["город"], title: "Gaps" } }} />, { seen: { "город": today } });
+    await act(async () => { fireEvent.press(await screen.findByText("Show")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("grade-1")); });
+    await flushState();
+    expect((await global.__db.saved("p1")).seen["город"].recognise.s).not.toBe(2.3);
+  });
+
   /* The card on screen is what a tester's report is about (about.js). */
   it("registers the card on screen for a report", async () => {
     const { currentAbout } = require("../src/about");

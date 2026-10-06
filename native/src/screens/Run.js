@@ -14,7 +14,7 @@ import Svg, { Path } from "react-native-svg";
 import { markOutOfFive } from "../appearance";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
          BulbButton } from "../ui";
-import { RuleCard, Reference, hasReference, StandardWhy } from "../rules";
+import { RuleCard, Reference, hasReference, StandardWhy, IrregularTag } from "../rules";
 import { topicFor } from "@core/grammar";
 import { wordFacts, isIrregular } from "@core/facts";
 import { standardExplanation } from "@core/explain";
@@ -835,7 +835,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
               </Text>
               {/* The answer card says when the word breaks the rules
                   (2026-09-29), right or wrong — it is worth knowing either way. */}
-              {right !== null && irregular ? <Pill tone="irregular" testID="verdict-irregular">Irregular</Pill> : null}
+              {right !== null && irregular ? <IrregularTag word={qWord} testID="verdict-irregular" /> : null}
               {/* Hear the right form again, whatever the verdict. It was read
                   out as the verdict landed; this is the button for once more.
                   At the end of the verdict's own line: on a row of its own it

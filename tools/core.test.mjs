@@ -1307,11 +1307,11 @@ group("lesson generation");
         const before = new Set(Q.unitsUpTo(u).filter((x) => x !== u).flatMap((x) => x.w)
           .concat(Array.from({ length: li + 1 }, (_, j) => lessonWords(u, j)).flat()));
         const vs = Q.vocabSteps(u, li);
-        if (card && !vs.some((s) => s.t === "grammar")) noCard++;
-        if (Q.formSpec(u) && li > 0) {
-          const g = vs.findIndex((s) => s.t === "grammar");
-          if (!vs.slice(g + 1).some((s) => s.drill)) noTry++;
-        }
+        // The card is taught once — the unit's own, in its first lesson — and
+        // the rule is practised in every lesson (the owner, 2026-10-07).
+        const cards = vs.filter((s) => s.t === "grammar").length;
+        if (cards !== (li === 0 && u.g ? 1 : 0)) noCard++;
+        if (Q.formSpec(u) && !vs.some((s) => s.drill)) noTry++;
         for (let r = 0; r < 3; r++) {
           for (const q of vs.concat(Q.quizSteps(u, li))) {
             if (typeof q.i === "number" && q.kind && !before.has(q.i) && !q.assess) early++;
@@ -1322,8 +1322,8 @@ group("lesson generation");
         }
       }
     }
-    ok(noCard === 0, `every lesson with a grammar card shows it (${lessons} lessons)`, String(noCard));
-    ok(noTry === 0, "…and a later lesson tries the rule right after it", String(noTry));
+    ok(noCard === 0, `a unit's card is shown once, in its first lesson (${lessons} lessons)`, String(noCard));
+    ok(noTry === 0, "…and every lesson with a rule practises it", String(noTry));
     ok(early === 0, "nothing in a lesson grades a word taught later", String(early));
     ok(untaughtForm === 0, "no conjugation question asks a tense no card has taught", String(untaughtForm));
     ok(untaughtCase === 0, "no case question asks a case no card has taught", String(untaughtCase));

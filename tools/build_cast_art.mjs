@@ -153,7 +153,9 @@ const POSE_TEXT = {
      front legs now come plainly from the shoulders, one up and one down. */
   thumbs: "Sitting up on his hind legs, facing the viewer, giving a thumbs up: his right front leg comes straight out from his right shoulder and is raised in front of him with the paw making a thumbs up, and his left front leg hangs straight down from his left shoulder at his side. A friendly satisfied smile. He has exactly four legs and both front legs are clearly joined at the shoulders: two hind legs he sits on, one front leg raised, one front leg down. Nothing on his tummy.",
   shrug: "Shrugging: both paws turned up at his sides, shoulders raised, a lopsided 'oh well' half-smile.",
-  wince: "Wincing, 'oof': eyes squeezed shut, teeth gritted in a sheepish grimace, one paw at the back of his head. Rueful, not sad.",
+  /* Redrawn 2026-10-07: he stood on all four legs with a fifth at his head.
+     Sitting up frees a front leg to be the one at his head; say the count. */
+  wince: "Wincing, 'oof': eyes squeezed shut, teeth gritted in a sheepish grimace. Sitting up on his two hind legs; his right front leg comes from his right shoulder and its paw rubs the back of his head, his left front leg hangs down at his side. He has exactly four legs: two hind legs he sits on, one front leg at his head, one front leg down. Rueful, not sad.",
 };
 
 /* One picture a unit: the family doing the unit's subject, and Monka's scheme

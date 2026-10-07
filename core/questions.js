@@ -1417,20 +1417,21 @@ export function makeQuestions(env) {
      card one of seven with no sense of what was coming, which is a worse way to
      meet a set of words than reading them together. `t: "list"` carries the
      lesson's words for the screen to lay out; the cards follow unchanged. */
-  /* The grammar is in every lesson, not only the first (the owner, 2026-10-04:
-     "This grammar tip is randomly in the summary but not anywhere else in the
-     chapter. Grammar should be embedded in the lesson"). The first lesson
-     opens on the unit's card; every later one closes on it, so the rule comes
-     round again where the words are, and each is followed by a short try of
-     it on the lesson's own words (`GRAMMAR_IN_LESSON`) — the tip, then the
-     drill. A side quest without a card of its own repeats its chapter's. */
+  /* The grammar is in every lesson as **practice**, and taught once (the
+     owner, 2026-10-07: "The grammar rules don't need to be repeated. The
+     enforcement or the drills are what need to be repeated"). The unit's own
+     card opens its first lesson; every lesson then closes on a short try of
+     the rule on its own words (`GRAMMAR_IN_LESSON`). A side quest with no card
+     of its own shows none — its chapter's card was met on the spine — and
+     drills its chapter's rule. The card stays a tap away under a wrong answer
+     and in the reference. It used to close every later lesson too. */
   function vocabSteps(unit, index) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
     const steps = [];
     const note = unit.g || formNote(unit);
     const practice = note ? grammarRun(unit, index, GRAMMAR_IN_LESSON) : [];
-    if (index === 0 && note) steps.push({ t: "grammar", note });
+    if (index === 0 && unit.g) steps.push({ t: "grammar", note: unit.g });
     if (words.length) steps.push({ t: "list", words });
     /* **Cumulative, not two at a time** (the owner, 2026-10-05: "right now we
        introduce two words, we answer a question that has two words as obvious
@@ -1480,7 +1481,6 @@ export function makeQuestions(env) {
       const q = present(c[Math.floor(Math.random() * c.length)]);
       if (q) steps.push(words.includes(i) ? q : { ...q, review: true });
     }
-    if (index > 0 && note) steps.push({ t: "grammar", note });
     practice.forEach((q) => steps.push({ ...q, drill: true }));
     return steps;
   }

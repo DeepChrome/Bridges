@@ -148,7 +148,10 @@ const POSE_TEXT = {
   smile: "Beaming: a big delighted open-mouthed smile, paws together at his chest, tail up.",
   /* The first drawing gave him three front legs — two on the ground and a
      third doing the thumbs up (the owner, 2026-10-05). Say the count. */
-  thumbs: "Sitting up on his hind legs, giving a thumbs up with his right front paw raised beside his chest, his left front paw resting on his tummy, a friendly satisfied smile. He has exactly four legs: two hind legs he sits on and two front paws — the thumbs up is one of the two front paws, never an extra limb.",
+  /* Second redraw (2026-10-07): the raised paw grew out of his side behind the
+     chest fur, with the other paw on his tummy, and read as a third arm. Both
+     front legs now come plainly from the shoulders, one up and one down. */
+  thumbs: "Sitting up on his hind legs, facing the viewer, giving a thumbs up: his right front leg comes straight out from his right shoulder and is raised in front of him with the paw making a thumbs up, and his left front leg hangs straight down from his left shoulder at his side. A friendly satisfied smile. He has exactly four legs and both front legs are clearly joined at the shoulders: two hind legs he sits on, one front leg raised, one front leg down. Nothing on his tummy.",
   shrug: "Shrugging: both paws turned up at his sides, shoulders raised, a lopsided 'oh well' half-smile.",
   wince: "Wincing, 'oof': eyes squeezed shut, teeth gritted in a sheepish grimace, one paw at the back of his head. Rueful, not sad.",
 };

@@ -10,10 +10,54 @@
      "at": "2026-10-05",
      "who": "owner",
      "note": "жч clunky, hesitates"
+    },
+    {
+     "verdict": "flag",
+     "id": "6ac7bfb29913e9fd",
+     "at": "2026-10-07",
+     "who": "owner",
+     "note": "still awful after the first rebuy (beta.6 report)"
+    },
+    {
+     "verdict": "flag",
+     "id": "f6946d01bfa99438",
+     "at": "2026-10-07",
+     "who": "owner",
+     "note": "the first clip, bought back by the ladder bug"
     }
    ],
    "rebought": [
-    "6ac7bfb29913e9fd"
+    "6ac7bfb29913e9fd",
+    "f6946d01bfa99438",
+    "e7e2c7d4fb3a009a"
+   ]
+  },
+  "word:салфетка": {
+   "verdicts": [
+    {
+     "verdict": "flag",
+     "id": "f0b5b7b7630747e6",
+     "at": "2026-10-07",
+     "who": "owner",
+     "note": "heard as 'salferwka' (beta.5 report)"
+    }
+   ],
+   "rebought": [
+    "8494db14cc65f02d"
+   ]
+  },
+  "sentence:а это их дети.": {
+   "verdicts": [
+    {
+     "verdict": "flag",
+     "id": "0485b4b09b716cc0",
+     "at": "2026-10-07",
+     "who": "owner",
+     "note": "их sounds like и (beta.5 report)"
+    }
+   ],
+   "rebought": [
+    "ffe3e35cb87a6365"
    ]
   }
  }

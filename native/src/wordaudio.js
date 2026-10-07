@@ -97,7 +97,7 @@ export const WORD_CLIPS = {
   "а ты?": require("../assets/words/s-efc7652ca76a.mp3"),
   "а что мне потом делать?": require("../assets/words/s-b49ea29d246c.mp3"),
   "а это ее родители.": require("../assets/words/s-1433f5ec6a9a.mp3"),
-  "а это их дети.": require("../assets/words/s-0485b4b09b71.mp3"),
+  "а это их дети.": require("../assets/words/s-ffe3e35cb87a.mp3"),
   "а это мой телефон.": require("../assets/words/s-428f93bd0fc1.mp3"),
   "а это моя мама.": require("../assets/words/s-cfca4aba8156.mp3"),
   "а это тоже чайник.": require("../assets/words/s-bb364552ed34.mp3"),

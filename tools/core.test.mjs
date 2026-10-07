@@ -84,6 +84,20 @@ ok(fold("  СЕБЕ ") === "себе", "trims");
 ok(fold("во́ду") === fold("воду"), "stressed and plain forms fold together");
 ok(bare("кни́га") === "книга", "bare keeps case, drops the accent");
 
+group("re-buying a flagged recording");
+{
+  /* A flag moves a recording on to a rendering not yet tried — never back to
+     one a reviewer already flagged (the second flag on «мужчина» bought back
+     the first clip it had replaced, 2026-10-07). */
+  const { rebuyLadder, clipId } = await import("../tools/build_word_audio.mjs");
+  const it = { verdicts: [{ verdict: "flag", id: "first" }, { verdict: "flag", id: "second" }], rebought: ["second"] };
+  const ids = rebuyLadder("мужчина", null, it, "second").map((h) => (h ? h : "bare"));
+  ok(ids.length > 0, "something is left to try", ids.join(","));
+  const firstAgain = rebuyLadder("мужчина", null,
+    { verdicts: [{ verdict: "flag", id: clipId("мужчина") }], rebought: [] }, "other");
+  ok(!firstAgain.includes(""), "a rendering flagged before is not offered again", firstAgain.join(","));
+}
+
 group("tokenising");
 {
   // The accent must stay inside the token, or a stressed word splits in two.

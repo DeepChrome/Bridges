@@ -95,7 +95,10 @@ export function flagged(key, currentId) {
   return last && last.verdict === "flag" && last.id === currentId ? it : null;
 }
 export function rebuyLadder(text, accented, it, currentId) {
-  const tried = new Set([currentId, ...((it && it.rebought) || [])]);
+  /* Every clip ever flagged counts as tried, not only the current one: the
+     second flag on «мужчина» bought back the first clip it had replaced. */
+  const tried = new Set([currentId, ...((it && it.rebought) || []),
+                         ...((it && it.verdicts) || []).filter((v) => v.verdict === "flag").map((v) => v.id)]);
   const options = ["stop", "", "cap"].map((h) => [h, clipId(rendering(text, h))]);
   if (accented && accented !== text) options.push(["=" + accented, clipId(accented)]);
   return options.filter(([, id]) => !tried.has(id)).map(([h]) => h);

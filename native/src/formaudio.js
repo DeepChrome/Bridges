@@ -8800,7 +8800,7 @@ export const FORM_CLIPS = {
   "сала́том": require("../assets/words/salatom.mp3"),
   "сала́ту": require("../assets/words/salatu.mp3"),
   "сала́ты": require("../assets/words/salaty.mp3"),
-  "салфе́тка": require("../assets/words/salfetka.mp3"),
+  "салфе́тка": require("../assets/words/salfetka-f0b5b7.mp3"),
   "салфе́ткам": require("../assets/words/salfetkam.mp3"),
   "салфе́тками": require("../assets/words/salfetkami.mp3"),
   "салфе́тках": require("../assets/words/salfetkah.mp3"),

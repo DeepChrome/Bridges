@@ -227,6 +227,35 @@ the emulator, and a week passes with no Worker surprises.
 **Check:** 14 days of closed testing, testers' notes worked through like
 Phase A's, and no blocking report open.
 
+## Feedback, fixed and approved before it ships (the owner, 2026-10-07)
+
+*"You can automatically review and address feedback… but also make sure
+there's a method in place for someone to approve the change you made before
+we roll out to production."* Claude may harvest and fix feedback on its own;
+nothing it changes reaches testers or the store until the owner approves it.
+
+1. **Harvest.** `node backend/tools/reports.mjs --clips <dir>` lists every
+   report with the screen, the card and the tester's recordings. Reports from
+   the owner's install (`app-pMoedBXi`) are his own testing; every other
+   install is a tester.
+2. **Fix on a branch, never on `master`.** `feedback/<yyyy-mm-dd>`, one
+   commit per report or per cause, each naming the report it answers. Paid
+   data (a re-bought recording, a redrawn picture) is fine under a dollar a
+   batch; it is committed on the branch like any other change.
+3. **The approval list.** A short message to the owner: for each report,
+   what it said, what was found, what changed, and anything not done and
+   why. Nothing in it is "done" until he has seen it.
+4. **His phone first.** The branch is built and installed on the owner's
+   phone only (USB, or the private download link). No tester build, no Play
+   upload, no Worker deploy from a branch.
+5. **Approve, then merge.** On his OK — whole list or item by item — the
+   branch merges into `master` and the version is bumped there. Only
+   `master` builds go to testers or to Play. An item he rejects is reverted
+   on the branch before the merge.
+6. **The Worker is production the moment it deploys.** A backend change waits
+   for the same OK; the one exception is undoing a deploy that broke
+   something, which is reported straight after.
+
 ## Phase E — Premium, only before charging
 
 Premium exists today as daily allowances granted by hand

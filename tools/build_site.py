@@ -1119,6 +1119,8 @@ def check_grammar_cards(units, path, lemmas, index, unit_info):
             for m in re.finditer(r"(?<![-а-яёА-ЯЁ́])[а-яёА-ЯЁ́]+(?:-[а-яёА-ЯЁ́]+)*", ru):
                 word = m.group(0)
                 key = fold(word)
+                if len(key) == 1:
+                    continue                      # к, г, х: a letter the rule names
                 hit = index.get(key)
                 if not hit and word[:1].isupper():
                     continue                      # a name («Те́дди»), not a word to teach
@@ -1880,6 +1882,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     scripts = load_scripts(stats)
 
     senses = load_senses(lemmas, stats, key_rank)
+    distinct_examples(lemmas, senses, sent_pool, stats)
 
     deep_forms = build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
                                   [v["id"] for v in video_list], stats,
@@ -2127,6 +2130,69 @@ def apply_sense_override(senses, rule, key):
     if rule.get("lead"):
         senses = [{"g": rule["lead"]}] + senses
     return senses
+
+
+def _example_words(ru):
+    return frozenset(fold(t) for t in re.findall(r"[а-яёА-ЯЁ́̀]+(?:-[а-яёА-ЯЁ́̀]+)*", ru or ""))
+
+
+def same_use(a, b):
+    """Two example sentences that show the word the same way: the same sentence,
+    or one that is nearly all the other («Я говорю по-русски» beside «Я не
+    говорю по-русски», «Я горжусь тобой» beside «Я тобой горжусь»)."""
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    small = min(len(a), len(b))
+    return small >= 2 and len(a & b) / small >= 0.75
+
+
+def distinct_examples(lemmas, senses, sent_pool, stats):
+    """One use, one sentence, across everything a card and an entry show.
+
+    The card's back lists a sentence under each meaning (Wiktionary's) and then
+    the dictionary's examples, and each list was de-duplicated only against
+    itself: «Которы́й час?» stood under two senses, and a dictionary example
+    could repeat a sense's word for word (the owner, 2026-10-07: "the same
+    sentence used twice… we're supposed to have distinct uses when possible").
+    So, per word: the dictionary's examples are kept first — they are the
+    recorded sentences, and a word must keep at least one — less any that
+    repeat one already kept; then a sense's example goes when it repeats or
+    nearly copies anything kept so far. A sense left with no example keeps
+    its gloss."""
+    dropped_sense = dropped_refs = 0
+    for k, ss in senses.items():
+        shown = []
+        lemma = lemmas[int(k)]
+        if lemma.get("refs"):
+            kept = []
+            for r in lemma["refs"].split(","):
+                row = sent_pool[int(r)] if r.isdigit() and int(r) < len(sent_pool) else None
+                w = _example_words(row[0]) if row else None
+                if w is not None and kept and any(same_use(w, o) for o in shown):
+                    dropped_refs += 1
+                    continue
+                kept.append(r)
+                if w is not None:
+                    shown.append(w)
+            lemma["refs"] = ",".join(kept)
+        for s in ss:
+            keep = []
+            for x in s.get("x") or ():
+                w = _example_words(x.get("ru"))
+                if any(same_use(w, o) for o in shown):
+                    dropped_sense += 1
+                    continue
+                keep.append(x)
+                shown.append(w)
+            if keep:
+                s["x"] = keep
+            else:
+                s.pop("x", None)
+    stats["examples_same_use_dropped"] = dropped_sense + dropped_refs
+    print(f"  same use     : {dropped_sense} sense examples and {dropped_refs} dictionary examples "
+          f"dropped, each repeating or nearly copying one shown above it")
 
 
 def load_senses(lemmas, stats, key_rank=None):

@@ -23,19 +23,19 @@
     "core2": {
       "form": { "pos": "verb", "table": "Present / Future" },
       "title": "Two verb patterns",
-      "body": "Most verbs follow either the -е- pattern (чита́ю, чита́ешь) or the -и- pattern (говорю́, говори́шь).",
+      "body": "A verb's ending changes with who does it, in one of two sets: -ю, -ешь, -ет, -ем, -ете, -ют (чита́ть) or -ю, -ишь, -ит, -им, -ите, -ят (говори́ть).",
       "examples": [["я чита́ю, ты чита́ешь", "I read, you read"], ["я говорю́, ты говори́шь", "I speak, you speak"]]
     },
     "core3": {
       "form": { "drill": "agreement" },
       "title": "Every noun has a gender",
-      "body": "A noun ending in a consonant is masculine, in -а/-я feminine, in -о/-е neuter. Everything that describes it must agree.",
+      "body": "A noun ending in a consonant is masculine, in -а/-я feminine, in -о/-е neuter; one in -ь can be either and is learned with the word. Words that describe a noun take its gender.",
       "examples": [["но́вый дом", "a new house (m)"], ["но́вая кни́га", "a new book (f)"]]
     },
     "core4": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Nominative"], "cols": ["Plural"] },
       "title": "Making things plural",
-      "body": "Masculine and feminine nouns usually take -ы or -и. Neuter nouns take -а or -я.",
+      "body": "Masculine and feminine nouns take -ы — or -и after к, г, х, ж, ш, щ, ч and in place of -я or -ь. Neuter -о becomes -а, and -е becomes -я.",
       "examples": [["стол → столы́", "table → tables"], ["кни́га → кни́ги", "book → books"]]
     },
     "core5": {
@@ -47,7 +47,7 @@
     "core6": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative"], "cols": ["Singular"] },
       "title": "The accusative marks the object",
-      "body": "The thing an action is done to changes form. Feminine -а becomes -у; inanimate masculine looks unchanged.",
+      "body": "The thing an action is done to goes into the accusative: feminine -а becomes -у and -я becomes -ю; masculine and neuter things stay as they are.",
       "examples": [["Я чита́ю кни́гу.", "I am reading a book."], ["Я ви́жу дом.", "I see a house."]]
     },
     "core7": {
@@ -71,7 +71,7 @@
     "core10": {
       "form": { "pos": "verb", "table": "Imperative" },
       "title": "Asking someone to do something",
-      "body": "The imperative is the ты form with -й, -и or -ь: чита́й, скажи́, забу́дь. Add -те for вы.",
+      "body": "Take the они form and drop its ending: after a vowel add -й (чита́ют → чита́й), after a consonant add -и (ска́жут → скажи́), or -ь when the stress stays on the stem (забу́дут → забу́дь). Add -те for вы.",
       "examples": [["Скажи́, где ты живёшь.", "Tell me where you live."], ["Прочита́йте э́то, пожа́луйста.", "Read this, please."]]
     },
 
@@ -82,12 +82,12 @@
     },
     "time": {
       "title": "Numbers change the noun after them",
-      "body": "1 takes the plain form, 2–4 take a second form, and 5 and above take a third — оди́н час, два часа́, пять часо́в.",
+      "body": "After 1 the noun stays as it is, after 2, 3 and 4 it takes the genitive singular, and from 5 to 20 the genitive plural. Past 20, the last digit decides.",
       "examples": [["оди́н час, два часа́", "one hour, two hours"], ["пять часо́в", "five hours"]]
     },
     "food": {
       "title": "Saying what you want",
-      "body": "хоте́ть is irregular — я хочу́, ты хо́чешь, он хо́чет, мы хоти́м — and the thing you want follows it directly.",
+      "body": "хоте́ть mixes the two verb patterns: я хочу́, ты хо́чешь, он хо́чет, but мы хоти́м, вы хоти́те, они́ хотя́т. What you want comes straight after it.",
       "examples": [["Я хочу́ чай.", "I want tea."], ["Ты хо́чешь пи́ццу?", "Do you want pizza?"]]
     },
     "school": {
@@ -96,19 +96,19 @@
       "examples": [["Я учу́ слова́.", "I am learning words."], ["Я учу́сь в университе́те.", "I study at university."]]
     },
     "home": {
-      "title": "The ending tells you the gender",
-      "body": "ко́мната, ку́хня, спа́льня end in -а/-я and are feminine; стол, стул, шкаф end in a consonant and are masculine; окно́ is neuter.",
-      "examples": [["больша́я ко́мната", "a big room"], ["большо́й стол", "a big table"]]
+      "title": "Asking yes or no",
+      "body": "A yes-or-no question uses the same words in the same order as the statement; only the voice rises, on the word being asked about.",
+      "examples": [["Э́то ку́хня.", "This is the kitchen."], ["Э́то стол?", "Is this a table?"]]
     },
     "clothes": {
-      "title": "Adjectives take the noun’s gender",
-      "body": "-ый/-ий with a masculine noun, -ая with a feminine one, -ое with a neuter one.",
-      "examples": [["кра́сная руба́шка", "a red shirt"], ["но́вое пальто́", "a new coat"]]
+      "title": "Adjectives in the plural",
+      "body": "In the plural an adjective has one ending whatever the gender: -ые, or -ие after к, г, х, ж, ш, щ, ч and on a soft stem.",
+      "examples": [["но́вая руба́шка → но́вые руба́шки", "a new shirt → new shirts"], ["большо́й шарф → больши́е шарфы́", "a big scarf → big scarves"]]
     },
     "city": {
-      "title": "Places in the plural",
-      "body": "Most take -ы/-и, but some common masculine nouns take a stressed -а́: дом → дома́, го́род → города́.",
-      "examples": [["у́лицы и магази́ны", "streets and shops"], ["больши́е города́", "big cities"]]
+      "title": "“This shop” and “This is a shop”",
+      "body": "э́тот, э́та, э́то agree with the noun: э́тот магази́н, э́та у́лица. On its own, э́то means “this is”, whatever the gender.",
+      "examples": [["э́тот го́род", "this city"], ["Э́то го́род.", "This is a city."]]
     },
     "travel": {
       "form": { "pos": "verb", "table": "Present / Future" },
@@ -123,7 +123,7 @@
     },
     "nature": {
       "title": "Where in nature",
-      "body": "A few short nouns take a stressed -у́ instead of -е: в лесу́, в снегу́. Open places take на, not в.",
+      "body": "A few short masculine nouns take a stressed -у́ instead of -е after в and на: в лесу́, в снегу́, на берегу́. Open spaces take на rather than в: на мо́ре, на у́лице.",
       "examples": [["в лесу́", "in the forest"], ["на мо́ре", "at the sea"]]
     },
     "work": {
@@ -146,8 +146,8 @@
     "speech": {
       "form": { "pos": "verb", "table": "Present / Future" },
       "title": "Speaking a language",
-      "body": "говори́ть по-ру́сски uses an adverb with no case at all; the noun form needs на + prepositional.",
-      "examples": [["Я говорю́ по-ру́сски.", "I speak Russian."], ["Он говори́т на ру́сском языке́.", "He speaks in Russian."]]
+      "body": "по- with a language's -ски form says which language you speak, read or understand in, and it never changes: по-ру́сски.",
+      "examples": [["Я говорю́ по-ру́сски.", "I speak Russian."], ["Ты говори́шь по-ру́сски?", "Do you speak Russian?"]]
     },
     "military": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
@@ -186,8 +186,8 @@
     "business": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Genitive"], "cols": ["Singular"] },
       "title": "How much does it cost?",
-      "body": "сто́ит plus the price; the price counts in roubles the way hours are counted — оди́н рубль, два рубля́, пять рубле́й.",
-      "examples": [["Э́то сто́ит два рубля́.", "It costs two roubles."], ["Чай сто́ит два рубля́.", "The tea costs two roubles."]]
+      "body": "сто́ит for one thing, сто́ят for several, then the price: оди́н рубль, два рубля́, пять рубле́й.",
+      "examples": [["Э́то сто́ит два рубля́.", "It costs two roubles."], ["Э́ти ве́щи сто́ят пять рубле́й.", "These things cost five roubles."]]
     },
     "law": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
@@ -197,9 +197,9 @@
     },
     "science": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
-      "title": "Doing something with something",
-      "body": "The instrumental, with no preposition, is the field or the tool: занима́ться матема́тикой; and what someone became: стать учёным.",
-      "examples": [["Он занима́ется матема́тикой.", "He does mathematics."], ["Она́ ста́ла учёным.", "She became a scientist."]]
+      "title": "Studying a subject",
+      "body": "занима́ться takes the subject or activity in the instrumental, with no preposition: занима́ться матема́тикой, нау́кой.",
+      "examples": [["Он занима́ется матема́тикой.", "He does mathematics."], ["Мы занима́емся нау́кой.", "We do science."]]
     },
     "religion": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative", "Dative"], "cols": ["Singular"] },

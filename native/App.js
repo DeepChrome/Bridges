@@ -62,6 +62,7 @@ import {
   VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
   QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, SoundDrillFlow,
   ShadowFlow, BuildDrillFlow, FinalFlow, GrammarFlow, RecapFlow, VideoQuizFlow,
+  CaseHub, CaseModule, CaseFlow,
 } from "./src/screens/Flows";
 
 /* Where the day starts, from this device's own clock (ROADMAP 13.24).
@@ -283,6 +284,8 @@ function LearnStack() {
       {/* A chapter's grammar point with its words: a lesson's optional step
           and the unit's own module (GrammarFlow). Also on Practice. */}
       <Stack.Screen name="GrammarRun" component={GrammarFlow} options={titled("Grammar")} />
+      {/* A chapter's case, as a lesson step (data.js caseOfLesson). */}
+      <Stack.Screen name="CaseRun" component={CaseFlow} options={titled("Cases")} />
       {/* The day's recap: from the path once there is a day's work to recap. */}
       <Stack.Screen name="Recap" component={RecapFlow} options={titled("Today's recap")} />
       <Stack.Screen name="Summary" component={Summary} options={{ title: "Summary" }} />
@@ -357,6 +360,10 @@ function PracticeStack() {
           the setup screen that stood here went on 2026-09-26. */}
       <Stack.Screen name="GrammarRun" component={GrammarFlow} options={titled("Grammar")} />
       <Stack.Screen name="Recap" component={RecapFlow} options={titled("Today's recap")} />
+      {/* The cases one at a time (core/cases.js, 2026-10-08). */}
+      <Stack.Screen name="CaseHub" component={CaseHub} options={titled("Cases")} />
+      <Stack.Screen name="CaseModule" component={CaseModule} options={titled("Cases")} />
+      <Stack.Screen name="CaseRun" component={CaseFlow} options={titled("Cases")} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <HeaderRight navigation={navigation} route={route} />,

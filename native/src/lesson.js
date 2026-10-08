@@ -143,7 +143,9 @@ function WordRow({ i, unit, last, delay }) {
 /* The rule the chapter turns on. It gets the brand colour and a left edge, so a
    rule does not look like a vocabulary card with different words in it, and Teddy
    points at it rather than saying anything about it. */
-export function GrammarNote({ unit, note, at, total, onEpisode }) {
+/* `label` stands in for the unit's name where the card belongs to no unit —
+   a case module's cards (Flows.js CaseFlow). */
+export function GrammarNote({ unit, note, at, total, onEpisode, label }) {
   const t = useTheme();
   const anim = useEnter([note.title, at]);
   return (
@@ -153,7 +155,7 @@ export function GrammarNote({ unit, note, at, total, onEpisode }) {
         <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 10, marginBottom: 12 }}>
           <Guide pose="point" size={58} />
           <View style={{ flex: 1, paddingBottom: 6 }}>
-            <Muted numberOfLines={1}>{unit.name}</Muted>
+            <Muted numberOfLines={1}>{unit ? unit.name : label}</Muted>
             <Text style={{ color: t.brand, fontSize: T.tiny, fontWeight: "700",
                            letterSpacing: 0.8, marginTop: 2 }}>
               THE RULE
@@ -163,7 +165,7 @@ export function GrammarNote({ unit, note, at, total, onEpisode }) {
         <RuleCard note={note} tone="brand" testID="grammar-note" />
         {/* The chapter's grammar episode, where the library has one (Phase 14):
             the same rule, taught by a person, in slow Russian. */}
-        {onEpisode && unit.v && unit.v.lesson ? (
+        {onEpisode && unit && unit.v && unit.v.lesson ? (
           <Btn testID="grammar-episode" label="Watch the grammar episode" style={{ marginTop: 12 }}
                onPress={() => onEpisode(unit.v.lesson.id)} />
         ) : null}

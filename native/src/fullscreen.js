@@ -23,6 +23,7 @@ export const RUNS = [
   "Vocab",        // the lesson's teaching steps
   "Quiz",         // the lesson quiz
   "GrammarRun",   // a chapter's grammar point with its words
+  "CaseRun",      // a case's lesson or drill (core/cases.js)
   "Recap",        // the day's recap
   "TestOut",      // testing out of a section
   "Placement",    // the placement test
@@ -76,6 +77,7 @@ export function profileDepth(state) {
 export const TAB_BAR_SCREENS = [
   "Path", "Unit", "Lesson", "Summary",                 // Learn
   "Drills", "QuizSetup", "SceneList", "Sounds", "Grammar", "Endings",  // Practice
+  "CaseHub", "CaseModule",
   "Episodes", "VideoHistory",                          // Immerse
   "Cards",                                             // Study
   "Words",                                             // Search

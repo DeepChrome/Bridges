@@ -14,6 +14,8 @@ import { sentenceLemmas, pickPrompt } from "./speech.js";
 import { charDistance } from "./compare.js";
 import { describeForm, GENERIC_COLUMN } from "./forms.js";
 import { buildupDrill } from "./buildup.js";
+import { CASES, caseById, AS_VERBS, PREPOSITIONS, SET_PHRASES, TIME_NOUNS } from "./cases.js";
+import { irregularities } from "./facts.js";
 
 /* Ten since 2026-10-05: a lesson's quiz now reaches back over the chapter so
    far (quizSteps), and eight left no room for it beside the lesson's own. */
@@ -89,11 +91,19 @@ export const VOCAB_MIXED = 3;
    QUIZ_N — the due and the weakest first (the owner, 2026-10-04: "embedding
    some questions using words from previous chapters… to create spaced
    repetition"). */
-export const REVIEW_MIX = { perQuiz: 2 };
+/* One each, since 2026-10-08: the learner agents counted 13–18 questions in
+   a quiz for five to eight words, half of them on other words (two review
+   words, two drills, listening and speaking and a build-up all at once). A
+   quiz is now its lesson's words — `QUIZ_WORDS` per word taught, between
+   `QUIZ_MIN` and `QUIZ_N - 2` — and one each of the chapter's form, a drill,
+   an earlier word and a spoken step (`spokenStep`), about twelve at most. */
+export const REVIEW_MIX = { perQuiz: 1 };
+export const QUIZ_WORDS = 2;
+export const QUIZ_MIN = 6;
 
 /* Practice's drills inside a lesson quiz: this many, of the drills the route
    has opened, on the chapter's own words (quizSteps). */
-export const DRILL_MIX = { perQuiz: 2 };
+export const DRILL_MIX = { perQuiz: 1 };
 /* The columns of a noun's declension table, for a spec that names rows only. */
 const NOUN_COLUMNS = ["Singular", "Plural"];
 /* The six cases as panel.py titles a declension's rows — what the cases and
@@ -130,6 +140,10 @@ export const PRODUCE_AT = 4;
    never counts as a word the learner cannot read (build_site.py
    COVERAGE_FREE_RANK draws the same line for the speech pools). */
 export const FREE_RANK = 500;
+/* …but inside a lesson the line is the commonest hundred: «статья́» and
+   «у́тро» are in the top five hundred and a chapter-1 gap read «Статья́
+   появи́лась в "Правде" на сле́дующее у́тро» (the learner agents, 2026-10-08). */
+export const LESSON_FREE_RANK = 100;
 
 export const SCENE_ROWS = [2, 3];
 /* Sentences in a lesson-level listening passage. Five of the corpus's short
@@ -240,6 +254,59 @@ export function makeQuestions(env) {
   const voice = () => (typeof hasVoice === "function" ? hasVoice() : !!hasVoice);
   const stageOf = (u) =>
     STAGES.findIndex((s) => s.core === u || (s.branches || []).includes(u));
+
+  /* ------------------------------------------------------- what is taught */
+
+  /* While a lesson's material is being built, the grammar the route has
+     taught by then (the learner agents, 2026-10-08: gaps asking «тобо́й» on
+     day two, "write the future" in chapter 3, a plural drill made of
+     «друзья́» and «времена́»). `route` is set by `inRoute` for the lesson
+     builders and is null everywhere else — Practice is the learner's own
+     choice and asks what they ask for.
+       stage   0-based chapter: the present from 1, the past from 6 (core7),
+               a perfective's future from 8 (core9), the imperative from 9
+       cases   the case rows a card on the route has named, and the nominative */
+  const PRESENT_FROM = 1, PAST_FROM = 6, FUTURE_FROM = 8, IMPERATIVE_FROM = 9;
+  let curriculumCache = null;
+  const curriculumWords = () => curriculumCache || (curriculumCache = unique(UN.flatMap((u) => u.w)));
+  const PRONOMINAL = new Set(["сам", "тот", "весь", "самый", "который", "какой", "такой", "один", "каждый",
+                              "любой", "иной", "другой", "этот", "чей"]);
+  let route = null;
+  function inRoute(unit, fn) {
+    const before = route;
+    route = { stage: stageOf(unit),
+              cases: new Set(["Nominative"].concat(formsIntroduced(unitsUpTo(unit)).map((c) => c.row))) };
+    try { return fn(); } finally { route = before; }
+  }
+  /* A table the route has taught a verb's forms in. */
+  const verbTableTaught = (w, title) => !route
+    || (/^Present/.test(title) ? route.stage >= (w.a === "perfective" ? FUTURE_FROM : PRESENT_FROM)
+      : /^Past/.test(title) ? route.stage >= PAST_FROM
+      : /^Imperative/.test(title) ? route.stage >= IMPERATIVE_FROM : true);
+  /* Whether a form of word `i` is one the route has taught: its dictionary
+     form always; a verb's form in a tense taught; a declined word's form in a
+     case taught. A word with no table (an adverb, a preposition) is itself. */
+  function formTaught(i, tok) {
+    if (!route) return true;
+    const w = L[i];
+    if (!w) return true;
+    const f = fold(tok);
+    if (f === fold(w.b)) return true;
+    const has = (t) => t.rows.find((r) => cellsOf(r).some((c) => (c || []).some((x) => fold(x) === f)));
+    const tables = w.t || [];
+    if (!tables.length) return true;
+    let found = false;
+    for (const t of tables) {
+      const r = has(t);
+      if (!r) continue;
+      found = true;
+      if (/Declension/.test(t.title) ? route.cases.has(r[0]) : verbTableTaught(w, t.title)) return true;
+    }
+    return !found;
+  }
+  /* A word that keeps its rule: what the questions after a card ask, so the
+     first plural a learner meets is «столы́» and not «друзья́». */
+  const regular = (w) => !route || !irregularities(w).length;
 
   /* ------------------------------------------------------------ helpers */
 
@@ -392,7 +459,15 @@ export function makeQuestions(env) {
     }
     take(pool, (i) => L[i].p === pos && safeDistractor(correctIdx, i), lenOff);
     take(pool, (i) => safeDistractor(correctIdx, i), lenOff);
-    take(pool, (i) => glossed(L[i]), lenOff);
+    /* A thin pool reaches across the curriculum before it gives up on the
+       safety check: the last tier used to take any glossed word, and chapter
+       1's small pool put «где» beside «куда» for "where" — a second right
+       answer marked wrong (the learner agents, 2026-10-08). */
+    if (out.length < n) {
+      const all = curriculumWords();
+      take(all, (i) => L[i].p === pos && safeDistractor(correctIdx, i), lenOff);
+      take(all, (i) => safeDistractor(correctIdx, i), lenOff);
+    }
     return out;
   }
 
@@ -416,7 +491,8 @@ export function makeQuestions(env) {
       const ids = IX[fold(t)];
       if (!ids) return true;
       if (!known) return false;
-      return !ids.some((i) => i === idx || known.has(i) || i < FREE_RANK);
+      const free = route ? LESSON_FREE_RANK : FREE_RANK;
+      return !ids.some((i) => i === idx || known.has(i) || i < free);
     };
     /* In the meaning the word is taught in (onSense): «вилка» is the fork, and
        a sentence about a plug is another word to a learner (2026-10-05). A
@@ -427,12 +503,18 @@ export function makeQuestions(env) {
     for (const ex of w.x) {
       const toks = ex.ru.match(TOKEN) || [];
       if (toks.length < 3) continue;
+      // The gap's answer is a form the route has taught (formTaught): no
+      // «тобо́й» before the cases.
       const hit = toks.find((t) => {
         const ids = IX[fold(t)];
-        return ids && ids.includes(idx);
+        return ids && ids.includes(idx) && formTaught(idx, t);
       });
       if (!hit) continue;
       const unknown = toks.filter(strange).length;
+      // Inside a lesson, a sentence the learner can read: one unknown word at
+      // most, and short (a day-one gap was «У нас в гру́ппе мно́го но́вых
+      // студе́нтов»).
+      if (route && known && (unknown > 1 || toks.length > 10)) continue;
       scored.push({ ex, token: hit, score: unknown * 100 + (inSense.has(ex) ? 0 : 50) + toks.length });
     }
     if (!scored.length) return null;
@@ -961,6 +1043,8 @@ export function makeQuestions(env) {
   function formCells(w, spec) {
     if (!w || w.p !== spec.pos || (spec.aspect && w.a !== spec.aspect)) return [];
     if (w.p === "noun" && w.pl) return [];
+    // In a lesson: a tense the route has taught, and a word that keeps the rule.
+    if (!verbTableTaught(w, spec.table) || !regular(w)) return [];
     const t = (w.t || []).find((x) => x.title === spec.table);
     if (!t) return [];
     const out = [];
@@ -1034,6 +1118,9 @@ export function makeQuestions(env) {
   function formPrompt(unit, index, only) {
     const spec = formSpec(unit);
     if (!spec) return null;
+    // Inside a lesson, not the chapter's rule in a quest whose own card says
+    // something else (drillsOwnRule).
+    if (route && !drillsOwnRule(unit)) return null;
     /* Every form question carries the card it was built on, so a wrong answer
        can show the rule rather than only the answer. */
     const withNote = (q) => (q && !q.note ? { ...q, note: formNote(unit) || undefined } : q);
@@ -1041,11 +1128,19 @@ export function makeQuestions(env) {
       // Asked only in the cases and tenses the route has introduced: chapter
       // 3's agreement card is the nominative, not all six (the review,
       // 2026-10-01).
-      const route = unitsUpTo(unit);
-      const { cells, only } = routeDrill(spec.drill, route);
+      const reached = unitsUpTo(unit);
+      const { cells, only } = routeDrill(spec.drill, reached);
       const focus = only ? new Set(only) : null;
-      return withNote(withPool(metBy(unit, index),
-        () => (GEN[spec.drill] ? GEN[spec.drill](cells, false, focus) : null)));
+      const typedDrill = stageOf(unit) >= FORM_MIX.typedFromStage;
+      /* A generator may decline a draw (an agreement whose answer would be
+         the adjective on screen), so it is asked a few times. */
+      return withNote(withPool(metBy(unit, index), () => {
+        for (let k = 0; k < 20 && GEN[spec.drill]; k++) {
+          const q = GEN[spec.drill](cells, typedDrill, focus);
+          if (q) return q;
+        }
+        return null;
+      }));
     }
     const typed = stageOf(unit) >= FORM_MIX.typedFromStage;
     if (only !== undefined) {
@@ -1108,6 +1203,223 @@ export function makeQuestions(env) {
     return null;
   }
 
+  /* ------------------------------------------------------------ case modules */
+
+  /* Real sentences sorted into the uses of each case (core/cases.js; the
+     owner, 2026-10-08: "a wide array of words and sentences… a lot of examples
+     of how the cases can be used"). Every curriculum word's example sentences
+     are read once; a noun counts when its form belongs to **one** case in its
+     own table — «кни́гу» is accusative and nothing else, «кни́ге» could be dative
+     or prepositional and is left out, so a question never asks for a form the
+     sentence does not settle — and when the words before it say which use it
+     is (`useOf`). Adjectives and possessives between the trigger and the noun
+     are passed over: «в большо́м го́роде» is «в» meaning where. Built on first
+     use and kept. */
+  const SKIP_BEFORE = new Set(["adjective", "pronoun", "numeral"]);
+  const PREP_SET = new Set(PREPOSITIONS);
+  const AS_SET = new Set(AS_VERBS);
+  const TIME_SET = new Set(TIME_NOUNS);
+  /* A word the learner is unlikely to know: past the commonest CASE_COMMON
+     lemmas (the index is assigned by frequency), or not in the dictionary. */
+  const CASE_COMMON = 2500;
+  let caseIndex = null;
+  function useOf(c, tokens, k) {
+    const found = useAt(c, tokens, k);
+    if (!found) return null;
+    // A set phrase is not the preposition's ordinary meaning (cases.js).
+    const around = " " + tokens.slice(Math.max(0, found.j), k + 2).map(fold).join(" ") + " ";
+    if (SET_PHRASES.some((p) => around.includes(" " + p + " "))) return null;
+    return found.u;
+  }
+  function useAt(c, tokens, k) {
+    let j = k - 1;
+    while (j >= 0 && j >= k - 3) {
+      const ids = IX[fold(tokens[j])];
+      const p = ids && L[ids[0]] ? L[ids[0]].p : null;
+      // A preposition or a counting word is a trigger even when the lexicon files
+      // it as a pronoun or numeral («у», «два»); anything else describing the
+      // noun is passed over.
+      const f = fold(tokens[j]);
+      if (PREP_SET.has(f) || c.uses.some((u) => u.triggers.includes(f))) break;
+      if (!p || !SKIP_BEFORE.has(p)) break;
+      j--;
+    }
+    // Returns the use and where its trigger stands, for the set-phrase check.
+    const at = (u) => (u ? { u, j: Math.max(0, j) } : null);
+    if (j < 0) return at(c.uses.find((u) => u.after === "none"));
+    const f = fold(tokens[j]);
+    const ids = IX[f];
+    const w = ids && L[ids[0]];
+    for (const u of c.uses) if (u.triggers.includes(f)) return at(u);
+    // «не́ было», «не бу́дет»: a use whose trigger is нет also takes these.
+    if ((f === "было" || f === "будет") && j > 0 && fold(tokens[j - 1]) === "не") {
+      const absent = c.uses.find((u) => u.triggers.includes("нет"));
+      if (absent) return at(absent);
+    }
+    if (PREP_SET.has(f)) return null;                    // a preposition no use names
+    for (const u of c.uses) {
+      if (u.after === "verb" && w && w.p === "verb") return at(u);
+      if (u.after === "as" && w && AS_SET.has(fold(w.b))) return at(u);
+      if (u.after === "noun" && w && w.p === "noun") return at(u);
+      if (u.after === "none") return at(u);
+    }
+    return null;
+  }
+  function caseSightings() {
+    if (caseIndex) return caseIndex;
+    caseIndex = {};
+    for (const c of CASES) caseIndex[c.id] = [];
+    // Every curriculum word's examples, and the speaking and listening pools —
+    // the sentences with recordings, which a lesson already plays.
+    const sentences = new Map();
+    for (const i of unique(UN.flatMap((u) => u.w))) {
+      for (const ex of (L[i] && L[i].x) || []) if (ex && ex.ru && !sentences.has(ex.ru)) sentences.set(ex.ru, ex);
+    }
+    for (const row of (SPEECH && SPEECH.rows) || []) {
+      if (row && row[0] && row[1] && !sentences.has(row[0])) sentences.set(row[0], { ru: row[0], en: row[1] });
+    }
+    const byRow = new Map(CASES.map((c) => [c.row, c]));
+    for (const ex of sentences.values()) {
+      const tokens = ex.ru.match(TOKEN) || [];
+      if (tokens.length < 3 || tokens.length > 12) continue;
+      tokens.forEach((tok, k) => {
+        // A capital mid-sentence is a name («с То́мом» is Tom, not «том», a
+        // volume — the learner agents, 2026-10-08).
+        if (k > 0 && tok[0] !== tok[0].toLowerCase()) return;
+        const ids = IX[fold(tok)];
+        const i = ids && ids[0];
+        const w = i !== undefined ? L[i] : null;
+        if (!w || w.p !== "noun") return;
+        // «Сериа́л сериа́лу рознь»: the same noun twice is an idiom, not a use.
+        if (k > 0 && (IX[fold(tokens[k - 1])] || [])[0] === i) return;
+        const t = tableTitled(w, /Declension/);
+        if (!t) return;
+        const rows = new Set(), at = [];
+        t.rows.forEach((r, ri) => cellsOf(r).forEach((cell, ci) => {
+          if ((cell || []).some((f) => fold(f) === fold(tok))) { rows.add(r[0]); at.push([ri, ci + 1]); }
+        }));
+        if (rows.size !== 1) return;
+        const c = byRow.get([...rows][0]);
+        if (!c) return;
+        const u = useOf(c, tokens, k);
+        if (!u) return;
+        // «в феврале́» is when, not where.
+        if ((u.id === "where" || u.id === "to") && TIME_SET.has(fold(w.b))) return;
+        const [ri, ci] = at[0];
+        // Easiest first: a word outside the commonest costs three plain ones.
+        const rare = tokens.filter((x) => { const h = IX[fold(x)]; return !h || h[0] >= CASE_COMMON; }).length;
+        caseIndex[c.id].push({ ru: ex.ru, en: ex.en, token: tok, i, use: u.id, table: t, at: [ri, ci],
+                               form: cellsOf(t.rows[ri])[ci - 1], plural: /plural/i.test(t.columns[ci] || ""),
+                               ease: tokens.length + 3 * rare });
+      });
+    }
+    return caseIndex;
+  }
+
+  /* The easier part of a use's sentences, shuffled: the easiest `share`, but
+     never fewer than `min`, so a drill still ranges widely and a lesson opens
+     on sentences a learner can read. */
+  const easiest = (list, share, min) => {
+    const sorted = list.slice().sort((a, b) => a.ease - b.ease);
+    return shuffle(sorted.slice(0, Math.max(min, Math.ceil(sorted.length * share))));
+  };
+
+  /* A sentence with the noun taken out and its dictionary form given: write
+     (or choose) the form the sentence needs. */
+  function caseGap(s, typed) {
+    const w = L[s.i];
+    const gap = s.ru.replace(s.token, "___");
+    if (gap === s.ru) return null;
+    const base = { kind: "cases", i: s.i, cyr: true, prompt: gap,
+                   sub: `${w.w}${s.plural ? " (plural)" : ""} · ${s.en}`, table: s.table, at: s.at, caseUse: s.use };
+    const right = s.form[0];
+    if (typed) return written(base, "Fill the gap", right, s.form.slice(1).concat(s.token));
+    const others = s.table.rows.flatMap((r) => cellsOf(r).flat()).filter(Boolean);
+    const wrong = threeWrong(right, others.filter((f) => !s.form.some((x) => fold(x) === fold(f))
+      && fold(f) !== fold(s.token)));
+    return wrong ? { ...base, ask: "Fill the gap", options: optionsOf(right, wrong) } : null;
+  }
+
+  /* The sentence whole, and the question is the situation: what calls for this
+     case here? The options are the uses of this case and of the cases taught
+     before it (`upTo`), so the learner tells «в» meaning where from «в»
+     meaning where to — the distinction the module is for. No word is graded:
+     this is about the sentence, not the noun. */
+  function caseWhy(s, c, upTo) {
+    const pool = CASES.slice(0, CASES.indexOf(c) + 1).filter((x) => !upTo || upTo.includes(x.id))
+      .flatMap((x) => x.uses.map((u) => ({ x, u })));
+    const right = pool.find((p) => p.x === c && p.u.id === s.use);
+    if (!right) return null;
+    const label = (p) => (p.x === c ? p.u.label : `${p.u.label} (${p.x.name.toLowerCase()})`);
+    const wrong = shuffle(pool.filter((p) => p !== right)).slice(0, 3);
+    if (wrong.length < 2) return null;
+    return { kind: "cases", cyr: true, prompt: s.ru, sub: s.en, caseUse: s.use,
+             ask: `Why «${s.token}»?`,
+             note: { title: right.u.label, body: right.u.body, examples: right.u.examples },
+             options: shuffle([right].concat(wrong)).map((p) => ({ label: label(p), right: p === right })) };
+  }
+
+  /* The case's own cell of a noun's table, for the forms themselves. */
+  const caseForm = (c, typed, pool) =>
+    drillQuestions("cases", 1, pool || curriculumNouns(), null, typed, [c.row])[0] || null;
+  const curriculumNouns = () => unique(UN.flatMap((u) => u.w)).filter((i) => L[i] && L[i].p === "noun");
+
+  /* The lesson of one case: what it is for, then each use in turn — its card
+     and two questions on sentences of exactly that use, the first chosen and
+     the second written — then two of the case's forms to write. The cards
+     are `{ t: "grammar" }` steps, the shape a lesson's rule card already is. */
+  function caseLesson(caseId) {
+    const c = caseById(caseId);
+    if (!c) return [];
+    const seen = caseSightings()[c.id];
+    const steps = [{ t: "grammar", note: { title: `The ${c.name.toLowerCase()} case`, body: c.intro,
+                                            examples: c.uses.map((u) => u.examples[0]) } }];
+    const used = new Set();
+    for (const u of c.uses) {
+      steps.push({ t: "grammar", note: { title: u.label, body: u.body, examples: u.examples } });
+      const mine = easiest(seen.filter((s) => s.use === u.id && !used.has(s.ru)), 0, 6);
+      let made = 0;
+      for (const s of mine) {
+        const q = caseGap(s, made === 1);
+        if (!q) continue;
+        used.add(s.ru);
+        steps.push(q);
+        if (++made === 2) break;
+      }
+    }
+    for (let k = 0; k < 2; k++) { const q = caseForm(c, true); if (q) steps.push(q); }
+    return steps;
+  }
+
+  /* The drill of one case: `n` questions over a wide spread of words and
+     sentences, every use in turn so none is drowned by the commonest (most
+     accusatives are objects), mostly gaps to write, some "why", a few forms.
+     `upTo` is the cases the learner has met (their options in "why"). */
+  function caseDrill(caseId, n = 12, upTo) {
+    const c = caseById(caseId);
+    if (!c) return [];
+    const seen = caseSightings()[c.id];
+    const byUse = c.uses.map((u) => easiest(seen.filter((s) => s.use === u.id), 0.5, 15));
+    const out = [], usedRu = new Set(), usedWord = new Map();
+    for (let k = 0; out.length < n && k < n * 6; k++) {
+      const slot = out.length;
+      if (slot % 6 === 5) { const q = caseForm(c, true); if (q) { out.push(q); continue; } }
+      const list = byUse[k % byUse.length];
+      const s = list.find((x) => !usedRu.has(x.ru) && (usedWord.get(x.i) || 0) < 2);
+      if (!s) continue;
+      usedRu.add(s.ru);
+      usedWord.set(s.i, (usedWord.get(s.i) || 0) + 1);
+      // "Why?" needs three uses to choose from; a case with two (the first
+      // module) asks the gap instead.
+      const q = (slot % 4 === 2 && caseWhy(s, c, upTo)) || caseGap(s, true);
+      if (q) out.push(q);
+    }
+    return out;
+  }
+  /* How many sentences each use of a case has, for the tests and the build. */
+  const caseCounts = () => Object.fromEntries(CASES.map((c) => [c.id,
+    Object.fromEntries(c.uses.map((u) => [u.id, caseSightings()[c.id].filter((s) => s.use === u.id).length]))]));
+
   /* A run of practice on one chapter's grammar point (the owner, 2026-09-30:
      "exercises within the lessons that focus on … one of the grammar points
      from that chapter with words from that chapter… imagine conjugations
@@ -1119,6 +1431,9 @@ export function makeQuestions(env) {
      the build-up a learner wants on a new form. Never the same word and cell
      twice. Empty when the chapter has no point (chapter 1). */
   function grammarRun(unit, index, n = GRAMMAR_N) {
+    return inRoute(unit, () => grammarRunIn(unit, index, n));
+  }
+  function grammarRunIn(unit, index, n) {
     const spec = formSpec(unit);
     if (!spec) return [];
     /* The chapter's own card names the run, whatever card a drill attaches
@@ -1426,11 +1741,36 @@ export function makeQuestions(env) {
      drills its chapter's rule. The card stays a tap away under a wrong answer
      and in the reference. It used to close every later lesson too. */
   function vocabSteps(unit, index) {
+    return inRoute(unit, () => vocabStepsIn(unit, index));
+  }
+  /* A side quest whose own card teaches something no table can ask (идти and
+     ходить, the number rule, «у меня боли́т») is not drilled on its chapter's
+     rule instead: the body quest's card says the aching part is nominative and
+     the drill then asked it in the accusative (the learner agents,
+     2026-10-08). Drilled only where the unit's own card has a form, or where
+     the unit has no card and borrows its chapter's. */
+  const drillsOwnRule = (unit) => !unit.g || !!unit.g.form;
+  function vocabStepsIn(unit, index) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
     const steps = [];
     const note = unit.g || formNote(unit);
-    const practice = note ? grammarRun(unit, index, GRAMMAR_IN_LESSON) : [];
+    const practice = note && drillsOwnRule(unit) ? grammarRun(unit, index, GRAMMAR_IN_LESSON) : [];
+    /* Variety: a shape not the same as the question before it, "what did you
+       hear?" at most a third of the walk's questions, and no typing in chapter
+       1 (the walk knows nothing of the learner's cards; the quiz does). */
+    const stageNow = stageOf(unit);
+    let lastKind = null, asked = 0, heard = 0;
+    const pickShape = (list) => {
+      let c = list.filter((e) => e && (stageNow > 0 || e.t !== "type"));
+      const notHeard = c.filter((e) => e.t !== "listen");
+      if (heard * 3 >= asked + 1 && notHeard.length) c = notHeard;
+      const fresh = c.filter((e) => e.t !== lastKind);
+      const from = fresh.length ? fresh : c;
+      const e = from[Math.floor(Math.random() * from.length)];
+      if (e) { lastKind = e.t; asked++; if (e.t === "listen") heard++; }
+      return e;
+    };
     if (index === 0 && unit.g) steps.push({ t: "grammar", note: unit.g });
     if (words.length) steps.push({ t: "list", words });
     /* **Cumulative, not two at a time** (the owner, 2026-10-05: "right now we
@@ -1453,8 +1793,7 @@ export function makeQuestions(env) {
       const pick = inLesson !== undefined ? inLesson : chapterBefore.find((i) => !back.includes(i));
       if (pick === undefined) return;
       back.push(pick);
-      const c = candidates(pick, pool, null, readable);
-      const q = present(c[Math.floor(Math.random() * c.length)]);
+      const q = present(pickShape(candidates(pick, pool, null, readable)));
       if (q) steps.push({ ...q, review: true });
     };
     words.forEach((w, n) => {
@@ -1467,8 +1806,7 @@ export function makeQuestions(env) {
         // it: this is the retrieval right after meeting the word.
         const start = Math.max(0, n - (n % 2 === 1 ? 1 : 0));
         words.slice(start, n + 1).forEach((r) => {
-          const c = candidates(r, pool).slice(0, 3);
-          steps.push(present(c[Math.floor(Math.random() * c.length)]));
+          steps.push(present(pickShape(candidates(r, pool).slice(0, 3))));
         });
         goBack(start);
       }
@@ -1477,8 +1815,7 @@ export function makeQuestions(env) {
     const closing = shuffle(words.filter((i) => !back.includes(i))).slice(0, 1)
       .concat(chapterBefore.filter((i) => !back.includes(i)).slice(0, VOCAB_MIXED - 1));
     for (const i of shuffle(closing)) {
-      const c = candidates(i, pool, null, readable);
-      const q = present(c[Math.floor(Math.random() * c.length)]);
+      const q = present(pickShape(candidates(i, pool, null, readable)));
       if (q) steps.push(words.includes(i) ? q : { ...q, review: true });
     }
     practice.forEach((q) => steps.push({ ...q, drill: true }));
@@ -1627,11 +1964,22 @@ export function makeQuestions(env) {
      app decides) first, then words from the unit's earlier lessons, so a
      three-word lesson is not a five-question quiz. */
   function quizSteps(unit, index, prefer, seen, last) {
+    return inRoute(unit, () => quizStepsIn(unit, index, prefer, seen, last));
+  }
+  /* Typing waits in chapter 1 until a word has been answered twice (the
+     learner agents, 2026-10-08: a beginner with shaky Cyrillic met three typed
+     answers in the first quiz). A card is from the scheduler (`seen`). */
+  const typeReady = (stage, entry) => stage > 0
+    || Object.values(entry || {}).some((c) => c && (c.reps || 0) >= 2);
+  function quizStepsIn(unit, index, prefer, seen, last) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
     // `seen` is the learner's schedule keyed on the Russian string (rule 20.4).
     // A word the scheduler already holds is asked by production (PRODUCE_AT).
     const card = (i) => (seen && L[i] ? seen[L[i].b] : null);
+    // The lesson's words set the length: two questions a word, six to eight.
+    const QN = Math.min(QUIZ_N - 2, Math.max(QUIZ_MIN, QUIZ_WORDS * words.length));
+    const stageHere = stageOf(unit);
 
     /* `last` is what the previous attempt asked (`stepKeys` below). A retake
        repeated 41 % of the quiz and half of that word for word, which is not a
@@ -1647,7 +1995,19 @@ export function makeQuestions(env) {
     };
     // What this learner can read: everything taught by this lesson (clozeFor).
     const readable = new Set(metBy(unit, index));
-    const draw = (i) => drawFrom(candidates(i, pool, card(i), readable), i);
+    // "What did you hear?" at most a third of the words' questions.
+    let heardN = 0;
+    const shapes = (i) => {
+      const list = candidates(i, pool, card(i), readable)
+        .filter((e) => e.t !== "type" || typeReady(stageHere, card(i)));
+      const quiet = list.filter((e) => e.t !== "listen");
+      return heardN * 3 >= QN && quiet.length ? quiet : list;
+    };
+    const draw = (i) => {
+      const e = drawFrom(shapes(i), i);
+      if (e && e.t === "listen") heardN++;
+      return e;
+    };
 
     /* **Not every word a lesson shows is a word it drills** (the owner,
        2026-10-02: "you can give multiple greeting options and then just drill
@@ -1659,7 +2019,7 @@ export function makeQuestions(env) {
     const byUse = words.slice().sort((a, b) => a - b);
     // Two slots are production on core words; a lesson with more words than
     // fit keeps one slot for one of its others, or it would never be asked.
-    const coreN = byUse.length > QUIZ_N - 2 ? QUIZ_N - 3 : QUIZ_N - 2;
+    const coreN = byUse.length > QN - 2 ? QN - 3 : QN - 2;
     const core = byUse.slice(0, coreN);
     const extra = byUse.slice(coreN);
     const bag = core.map(draw).filter(Boolean);
@@ -1672,13 +2032,25 @@ export function makeQuestions(env) {
        question twice in one quiz, in 26 % of quizzes (the review,
        2026-10-01). */
     const produced = new Set(bag.filter((e) => PRODUCTION.includes(e.t)).map((e) => e.i));
+    /* …and only a production shape the last attempt did not ask: in chapter 1
+       the gap-fill is the only one left, and forcing it repeated the retake. */
     const production = core.filter((i) => !produced.has(i))
-      .map((i) => drawFrom(candidates(i, pool, card(i), readable).filter((e) => PRODUCTION.includes(e.t)), i))
+      .map((i) => drawFrom(shapes(i).filter((e) => PRODUCTION.includes(e.t) && !avoid.has(`${e.t}:${i}`)), i))
       .filter(Boolean);
     shuffle(production).slice(0, 2).forEach((e) => bag.push(e));
+    /* One word, one question — and where a word has two, the production one
+       stays: «hello» chosen and then typed was the same word twice in one
+       quiz (the learner agents, 2026-10-08). Done before the fill, so the
+       quiz is topped up to its length rather than left short. */
+    for (const e of bag.filter((x) => PRODUCTION.includes(x.t))) {
+      for (let k = bag.length - 1; k >= 0; k--) {
+        if (bag[k] !== e && bag[k].i === e.i && !PRODUCTION.includes(bag[k].t)) bag.splice(k, 1);
+      }
+    }
+    const inBag = (i) => bag.some((e) => e.i === i);
     // The lesson's other words, where there is room before any review.
     for (const i of shuffle(extra)) {
-      if (bag.length >= QUIZ_N) break;
+      if (bag.length >= QN) break;
       const e = draw(i);
       if (e) bag.push(e);
     }
@@ -1713,22 +2085,14 @@ export function makeQuestions(env) {
     const outside = byNeed(unitsUpTo(unit).filter((u) => stageOf(u) < stage0).flatMap((u) => u.w)
       .filter((i) => ok(i) && !chapterSoFar.includes(i)));
     const queueFill = fill.concat(outside);
-    while (bag.length < QUIZ_N && queueFill.length) {
-      const e = draw(queueFill.shift());
+    while (bag.length < QN && queueFill.length) {
+      const i = queueFill.shift();
+      if (inBag(i)) continue;                    // «мы» twice in one quiz
+      const e = draw(i);
       if (e) bag.push(e);
     }
-    const out = spread(shuffle(bag).slice(0, QUIZ_N)).map(present).filter(Boolean);
-    // Speech steps ride on top of the QUIZ_N vocabulary questions, at a random
-    // position each — never first, so the quiz opens on a word rather than audio.
+    const out = spread(shuffle(bag).slice(0, QN)).map(present).filter(Boolean);
     const stage = stageOf(unit);
-    for (const kind of Object.keys(SPEECH_MIX)) {
-      const mix = SPEECH_MIX[kind];
-      if (!speechFrom(kind, stage, index)) continue;
-      for (let k = 0; k < mix.perQuiz; k++) {
-        const e = speechPrompt(kind, unit, index);
-        if (e) out.splice(1 + Math.floor(Math.random() * out.length), 0, present(e));
-      }
-    }
     // And the chapter's form, the same way: on top, never first — and not
     // beside another question about its word, since it has one.
     if (stage >= FORM_MIX.fromStage) {
@@ -1791,7 +2155,19 @@ export function makeQuestions(env) {
       asked.add(i);
       added++;
     }
-    if (stage > PRON_MIX.fromStage || (stage === PRON_MIX.fromStage && index >= PRON_MIX.fromLesson)) {
+    /* **One spoken step, rotating** (the learner agents, 2026-10-08: every
+       quiz from chapter 2 carried listen-and-type, say-it and a build-up at
+       once). Whichever of them the route has opened, one at random, at a
+       random place after the first question. */
+    const spoken = Object.keys(SPEECH_MIX).filter((kind) => speechFrom(kind, stage, index));
+    const pronOpen = stage > PRON_MIX.fromStage || (stage === PRON_MIX.fromStage && index >= PRON_MIX.fromLesson);
+    if (pronOpen) spoken.push("pron");
+    const pickSpoken = spoken.length ? spoken[Math.floor(Math.random() * spoken.length)] : null;
+    if (pickSpoken && pickSpoken !== "pron") {
+      const e = speechPrompt(pickSpoken, unit, index);
+      if (e) out.splice(1 + Math.floor(Math.random() * out.length), 0, present(e));
+    }
+    if (pickSpoken === "pron") {
       /* The lesson's own long words first; a lesson of pronouns and
          prepositions has none, so then the unit's earlier words, then the
          route's. One of them at random each time, so a retake builds another. */
@@ -2372,7 +2748,11 @@ export function makeQuestions(env) {
        selection naming no table. */
     const stems = ADJ_STEMS.filter((s) => allows(only, s.id)).map((s) => s.id);
     const stemOk = (x) => !stems.length || stems.includes(adjStem(x.b));
+    /* Not the pronoun-like adjectives: the corpus pairs them with anything
+       («тот приве́т», «сам факт», «весь мужчи́на»), and the pair reads as
+       nonsense (the learner agents, 2026-10-08). */
     const adj = pickWhere((x) => x.p === "adjective" && stemOk(x) && tableTitled(x, /Declension/)
+                                 && !PRONOMINAL.has(fold(x.b))
                                  && (PAIRS[L.indexOf(x)] || []).some((i) => nounOk(L[i])));
     if (!adj) return null;
     // …but not a plural-only noun: «часы» is plural, and «но́вый часы» is not
@@ -2427,6 +2807,10 @@ export function makeQuestions(env) {
     const asked = agreeing(row[0], col);
     if (!asked.length) return null;
     const right = asked[0];
+    /* Never a form that is the adjective printed beside the gap: the masculine
+       nominative answered itself («___ ребёнок · ма́ленький → ма́ленький»).
+       The caller draws again. */
+    if (fold(right) === fold(adj.w)) return null;
     /* **Every reading of the noun form, not only the one drawn.** A noun form
        is often two cells at once — «ле́кции» is genitive singular and
        nominative plural, «мужчи́не» dative and prepositional — and the typed
@@ -2479,7 +2863,10 @@ export function makeQuestions(env) {
     const able = VERB_TABLES.filter((x) => allows(only, x.id));
     const from = able.length ? able : VERB_TABLES;
     const re = from[Math.floor(Math.random() * from.length)].re;
-    const w = pickWhere((x) => x.p === "verb" && tableTitled(x, re));
+    // In a lesson, a tense the route has taught and a verb that keeps its
+    // pattern: no "write the future" of «найти́» in chapter 4 (verbTableTaught).
+    const w = pickWhere((x) => x.p === "verb" && tableTitled(x, re)
+      && verbTableTaught(x, tableTitled(x, re).title) && regular(x));
     return w ? { w, t: tableTitled(w, re) } : null;
   }
 
@@ -2651,9 +3038,13 @@ export function makeQuestions(env) {
   function qStress() {
     const w = pickWhere((x) => /́/.test(x.w) && x.b.length > 3);
     if (!w) return null;
-    // The headword about half the time, else one of its inflected forms.
+    // The headword about half the time, else one of its inflected forms — in
+    // a lesson only a form the route has taught, and never the bookish -ою/-ею
+    // instrumental («ма́мою», «страно́ю»), which nobody says.
     if (Math.random() < 0.5) {
-      const forms = shuffle(paradigmForms(w).filter((f) => /́/.test(f)));
+      const bookish = (f) => fold(f).length > 4 && /(ою|ею)$/.test(fold(f));
+      const forms = shuffle(paradigmForms(w).filter((f) => /́/.test(f) && !bookish(f)
+        && formTaught(L.indexOf(w), f)));
       for (const f of forms.slice(0, 6)) {
         const q = stressQuestion(w, f);
         if (q) return q;
@@ -2750,6 +3141,6 @@ export function makeQuestions(env) {
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
     customQuiz, finalExam, recapQuestions, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, routeFocus, grammarRun,
-    drillsIntroduced, drillOpensAt, withTaught,
+    drillsIntroduced, drillOpensAt, withTaught, caseLesson, caseDrill, caseCounts,
   };
 }

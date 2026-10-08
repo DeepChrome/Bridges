@@ -29,7 +29,7 @@
     "core3": {
       "form": { "drill": "agreement" },
       "title": "Every noun has a gender",
-      "body": "A noun ending in a consonant is masculine, in -а/-я feminine, in -о/-е neuter; one in -ь can be either and is learned with the word. Words that describe a noun take its gender.",
+      "body": "A noun ending in a consonant is masculine, in -а/-я feminine, in -о/-е neuter; one in -ь can be either. Words for men in -а (па́па, мужчи́на) are masculine. Words that describe a noun take its gender.",
       "examples": [["но́вый дом", "a new house (m)"], ["но́вая кни́га", "a new book (f)"]]
     },
     "core4": {
@@ -41,19 +41,19 @@
     "core5": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Prepositional"], "cols": ["Singular"] },
       "title": "Saying where something is",
-      "body": "After в or на meaning “in” or “on”, the noun takes the prepositional case, usually ending in -е.",
+      "body": "After в or на meaning “in” or “on”, the noun takes the prepositional case: -е for most nouns, but -и for feminine nouns in -ь and for nouns in -ия or -ие.",
       "examples": [["в до́ме", "in the house"], ["на столе́", "on the table"]]
     },
     "core6": {
       "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative"], "cols": ["Singular"] },
       "title": "The accusative marks the object",
-      "body": "The thing an action is done to goes into the accusative: feminine -а becomes -у and -я becomes -ю; masculine and neuter things stay as they are.",
+      "body": "The thing an action is done to goes into the accusative: feminine -а becomes -у, -я becomes -ю, and -ь stays. Masculine and neuter things stay as they are, but a masculine person or animal takes -а/-я (брат → бра́та).",
       "examples": [["Я чита́ю кни́гу.", "I am reading a book."], ["Я ви́жу дом.", "I see a house."]]
     },
     "core7": {
       "form": { "pos": "verb", "table": "Past" },
       "title": "The past tense agrees with the subject",
-      "body": "Drop -ть and add -л, -ла, -ло or -ли. It matches gender and number, not person — “I read” differs for a man and a woman.",
+      "body": "Drop -ть and add -л, -ла, -ло or -ли; verbs in -ти take their own stem (идти́ → шёл, пришла́). It matches gender and number, not person — “I read” differs for a man and a woman.",
       "examples": [["Он чита́л.", "He read."], ["Она́ чита́ла.", "She read."]]
     },
     "core8": {
@@ -76,23 +76,23 @@
     },
 
     "family": {
-      "title": "“My” agrees with what is owned",
-      "body": "мой, твой, наш, ваш and свой take the gender of the thing possessed, not of the owner. (его, её and их never change.)",
+      "title": "“My” follows the person you mean",
+      "body": "моя́ with мама, сестра́, дочь, жена́; мой with па́па, брат, сын, муж. Learn them as pairs for now: the reason comes with gender in chapter 3.",
       "examples": [["мой муж, моя́ жена́", "my husband, my wife"], ["моя́ семья́", "my family"]]
     },
     "time": {
       "title": "Numbers change the noun after them",
-      "body": "After 1 the noun stays as it is, after 2, 3 and 4 it takes the genitive singular, and from 5 to 20 the genitive plural. Past 20, the last digit decides.",
+      "body": "The noun after a number changes: оди́н час, then два, три, четы́ре часа́, then from пять to twenty часо́в. Learn the three as set phrases; the case behind them comes in chapter 7.",
       "examples": [["оди́н час, два часа́", "one hour, two hours"], ["пять часо́в", "five hours"]]
     },
     "food": {
       "title": "Saying what you want",
-      "body": "хоте́ть mixes the two verb patterns: я хочу́, ты хо́чешь, он хо́чет, but мы хоти́м, вы хоти́те, они́ хотя́т. What you want comes straight after it.",
+      "body": "я хочу́, ты хо́чешь, он хо́чет, мы хоти́м, вы хоти́те, они́ хотя́т — and what you want comes straight after it. Learn these six by heart: хоте́ть follows no single pattern.",
       "examples": [["Я хочу́ чай.", "I want tea."], ["Ты хо́чешь пи́ццу?", "Do you want pizza?"]]
     },
     "school": {
       "title": "Three ways to “study”",
-      "body": "учи́ть is to memorise something, учи́ться is to be a student, изуча́ть is to study a subject in depth.",
+      "body": "учи́ть is to learn something by heart, or to teach someone; учи́ться is to be a student; изуча́ть is to study a subject in depth.",
       "examples": [["Я учу́ слова́.", "I am learning words."], ["Я учу́сь в университе́те.", "I study at university."]]
     },
     "home": {

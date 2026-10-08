@@ -40,6 +40,7 @@ import { loadPayload } from "./payload.mjs";
 import { durationMs } from "./mp3.mjs";
 import { fold, bare } from "../core/util.js";
 import { TOPICS } from "../core/grammar.js";
+import { CASES } from "../core/cases.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "data", "word_audio");
@@ -298,7 +299,9 @@ export function sentencesToBuy(payload, audio, replace = SENTENCE_REPLACE) {
        rules was the one screen still reading its sentences in the phone's
        voice, beside the bought voice everywhere else (the owner: "a ton of
        voices swapping"). */
-    .concat(TOPICS.flatMap((t) => t.sections.flatMap((s) => (s.examples || []).map((e) => [e[0]]))));
+    .concat(TOPICS.flatMap((t) => t.sections.flatMap((s) => (s.examples || []).map((e) => [e[0]]))))
+    // …and the case modules' cards (core/cases.js), the same kind of example.
+    .concat(CASES.flatMap((c) => c.uses.flatMap((u) => u.examples.map((e) => [e[0]]))));
   for (const row of ((payload.speech && payload.speech.rows) || []).concat(cards)) {
     const key = fold(row[0]);
     if (seen.has(key)) continue;

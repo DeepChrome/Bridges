@@ -28,7 +28,7 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
   from "../core/state.js";
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
-import { makeQuestions, QUIZ_N, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, REVIEW_MIX, GRAMMAR_IN_LESSON, QUIZ_KINDS, PRODUCE_AT,
+import { makeQuestions, QUIZ_N, QUIZ_MIN, QUIZ_WORDS, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, REVIEW_MIX, GRAMMAR_IN_LESSON, QUIZ_KINDS, PRODUCE_AT,
          lessonSize, lessonWordsOf, lessonCountOf, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem }
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, TRAPS,
@@ -1236,8 +1236,13 @@ group("lesson generation");
     /* …and only a word already taught (2026-10-05): chapter 1's second lesson
        has none long enough to build, so the first build comes once one is. */
     const soFar = (u, k) => new Set(Array.from({ length: k + 1 }, (_, j) => lessonWords(u, j)).flat());
+    // The spoken step rotates (2026-10-08), so each lesson is drawn a few times.
+    const buildIn = (u, k) => {
+      for (let r = 0; r < 25; r++) { const b = Q.quizSteps(u, k).find((q) => q.kind === "buildup"); if (b) return b; }
+      return null;
+    };
     const builds = Array.from({ length: lessonCount(c1) }, (_, k) => k).slice(1)
-      .map((k) => [k, Q.quizSteps(c1, k).find((q) => q.kind === "buildup")]).filter(([, b]) => b);
+      .map((k) => [k, buildIn(c1, k)]).filter(([, b]) => b);
     const [bk, b] = builds[0] || [];
     ok(b && b.assess && b.listen && typeof b.i === "number" && b.steps.length >= 2,
        "a chapter 1 quiz builds a word and listens for it", b ? JSON.stringify(b.steps) : "none");
@@ -1246,7 +1251,7 @@ group("lesson generation");
     ok(!second.length || second[0].kind !== "buildup", "never first");
     // A lesson with a long word of its own builds one of its own.
     const food = UN.find((u) => u.id === "food");
-    const own = Q.quizSteps(food, 3).find((q) => q.kind === "buildup");
+    const own = buildIn(food, 3);
     ok(own && lessonWords(food, 3).includes(own.i), "a lesson with a long word builds its own");
   }
   /* The core words are drilled every time; a lesson's rarer words only where
@@ -1257,8 +1262,10 @@ group("lesson generation");
     for (const u of UN) {
       for (let k = 0; k < lessonCount(u); k++) {
         const ws = lessonWords(u, k);
-        if (ws.length <= QUIZ_N - 2) continue;
-        const core = ws.slice().sort((a, b) => a - b).slice(0, QUIZ_N - 3);
+        // The quiz's length follows the lesson's words (QUIZ_WORDS a word).
+        const qn = Math.min(QUIZ_N - 2, Math.max(QUIZ_MIN, QUIZ_WORDS * ws.length));
+        if (ws.length <= qn - 2) continue;
+        const core = ws.slice().sort((a, b) => a - b).slice(0, qn - 3);
         const asked = new Set(Q.quizSteps(u, k).map((q) => q.i));
         const gone = core.filter((i) => !asked.has(i));
         if (gone.length) missed.push(`${u.id}:${k} ${gone.map((i) => L[i].b).join(",")}`);
@@ -1294,7 +1301,7 @@ group("lesson generation");
      ("you wouldn't ask them to conjugate a past form without having taught them
      the past"). */
   {
-    let noCard = 0, noTry = 0, early = 0, untaughtForm = 0, untaughtCase = 0, lessons = 0;
+    let noCard = 0, noTry = 0, early = 0, untaughtForm = 0, untaughtCase = 0, lessons = 0, futureEarly = 0;
     const tableId = (title) => (/^Present/.test(title) ? "present" : /^Past/.test(title) ? "past"
       : /^Imperative/.test(title) ? "imperative" : null);
     for (const u of UN) {
@@ -1311,10 +1318,15 @@ group("lesson generation");
         // the rule is practised in every lesson (the owner, 2026-10-07).
         const cards = vs.filter((s) => s.t === "grammar").length;
         if (cards !== (li === 0 && u.g ? 1 : 0)) noCard++;
-        if (Q.formSpec(u) && !vs.some((s) => s.drill)) noTry++;
+        // A quest whose own card has no form drills nothing rather than its
+        // chapter's rule (2026-10-08); everything else practises its rule.
+        if (Q.formSpec(u) && (!u.g || u.g.form) && !vs.some((s) => s.drill)) noTry++;
         for (let r = 0; r < 3; r++) {
           for (const q of vs.concat(Q.quizSteps(u, li))) {
             if (typeof q.i === "number" && q.kind && !before.has(q.i) && !q.assess) early++;
+            // A perfective's present forms are its future, taught in chapter 9.
+            if ((q.kind === "conjugation" || q.kind === "form") && q.table && /^Present/.test(q.table.title)
+                && L[q.i] && L[q.i].a === "perfective" && stageIndexOf(u) < 8) futureEarly++;
             if (q.kind === "conjugation" && q.table && !tenses.includes(tableId(q.table.title))) untaughtForm++;
             if ((q.kind === "cases" || q.kind === "agreement") && q.table && Array.isArray(q.at)
                 && q.table.rows[q.at[0]] && !cases.has(q.table.rows[q.at[0]][0])) untaughtCase++;
@@ -1327,6 +1339,7 @@ group("lesson generation");
     ok(early === 0, "nothing in a lesson grades a word taught later", String(early));
     ok(untaughtForm === 0, "no conjugation question asks a tense no card has taught", String(untaughtForm));
     ok(untaughtCase === 0, "no case question asks a case no card has taught", String(untaughtCase));
+    ok(futureEarly === 0, "no lesson asks a perfective's future before chapter 9", String(futureEarly));
   }
   ok(steps.filter((s) => s.t === "word").length === lessonWords(unit, 0).length,
      "every new word is presented");
@@ -1372,15 +1385,33 @@ group("lesson generation");
     ok(back.length >= Math.ceil(lessonWords(fam, 1).length / 2), "each pair of new words is followed by one going back",
        String(back.length));
     ok(back.every((q) => earlier.has(q.i) || lessonWords(fam, 1).includes(q.i)), "and it goes back to what was taught");
-    const quiz = Q.quizSteps(fam, 1);
-    const fromChapter = quiz.filter((q) => typeof q.i === "number" && !q.review && !q.drill
-      && !lessonWords(fam, 1).includes(q.i)).length;
-    ok(fromChapter > 0, "a lesson quiz reaches back over the chapter so far", String(fromChapter));
+    /* A quiz is its lesson's words first (2026-10-08); a short lesson fills
+       the rest from the chapter so far rather than asking its few words over. */
+    let short = 0, reached = 0;
+    for (const u of UN) {
+      for (let li = 1; li < lessonCount(u); li++) {
+        const ws = lessonWords(u, li);
+        if (ws.length > 3) continue;
+        short++;
+        if (Q.quizSteps(u, li).some((q) => typeof q.i === "number" && !q.review && !q.drill && !ws.includes(q.i))) reached++;
+      }
+    }
+    ok(short > 0 && reached === short, `a short lesson's quiz reaches back over the chapter (${short} lessons)`,
+       `${reached}/${short}`);
   }
   const buildN = quiz.filter((q) => q.kind === "buildup").length;
-  ok(quiz.length === QUIZ_N + speechN + formN + drillN + reviewN + buildN,
-     `a lesson quiz is ${QUIZ_N} questions plus its speech, form, drill, review and building steps`,
-     `${quiz.length} = ? ${speechN}+${formN}+${drillN}+${reviewN}+${buildN}`);
+  /* The lesson's words set the length (2026-10-08): QUIZ_WORDS a word, between
+     QUIZ_MIN and QUIZ_N − 2, then one each of a spoken step, the form, a
+     drill and an earlier word — about twelve at most. */
+  {
+    const qn = Math.min(QUIZ_N - 2, Math.max(QUIZ_MIN, QUIZ_WORDS * lessonWords(unit, 0).length));
+    const words = quiz.length - speechN - formN - drillN - reviewN - buildN;
+    ok(words <= qn && words >= Math.min(qn, QUIZ_MIN), `a lesson quiz asks its words about ${qn} times`, String(words));
+    ok(speechN + buildN <= 1, "one spoken step at most, not three", `${speechN}+${buildN}`);
+    let longest = 0;
+    for (const u of UN) for (let li = 0; li < lessonCount(u); li++) longest = Math.max(longest, Q.quizSteps(u, li).length);
+    ok(longest <= QUIZ_N + 3, `no quiz runs past ${QUIZ_N + 3} questions`, String(longest));
+  }
   /* Spaced review inside the lesson (2026-10-04): words from the route before
      this unit, never this lesson's, on every quiz that has a route behind it. */
   {
@@ -1440,7 +1471,7 @@ group("lesson generation");
      === "Это явление _____ фокусе.", "«в» leaves «явление» whole");
   const small = UN.find((u) => u.w.length % 7 && u.w.length > 7);
   const lastQuiz = Q.quizSteps(small, lessonCount(small) - 1);
-  ok(lastQuiz.filter((q) => q.kind !== "hear" && q.kind !== "say").length >= 8,
+  ok(lastQuiz.filter((q) => q.kind !== "hear" && q.kind !== "say").length >= QUIZ_MIN,
      `${small.id}: a short last lesson still gets a full quiz`, String(lastQuiz.length));
   const own = new Set(lessonWords(small, lessonCount(small) - 1));
   ok(lastQuiz.some((q) => typeof q.i === "number" && !own.has(q.i)),
@@ -1459,10 +1490,13 @@ group("hearing");
      "the first lesson's quiz is reading-only");
   ok(SPEECH_MIX.hear.fromStage === 0 && SPEECH_MIX.hear.fromLesson === 2,
      "listening joins in chapter 1 from the third lesson");
-  const quiz = Q.quizSteps(later, lesson);
-  const hears = quiz.filter((q) => q.kind === "hear");
-  ok(hears.length === SPEECH_MIX.hear.perQuiz, `${later.id}: one hear step per quiz`,
-     String(hears.length));
+  // The spoken step rotates (2026-10-08): drawn until a hearing step comes.
+  let quiz = [], hears = [];
+  for (let k = 0; k < 40 && !hears.length; k++) {
+    quiz = Q.quizSteps(later, lesson);
+    hears = quiz.filter((q) => q.kind === "hear");
+  }
+  ok(hears.length === 1, `${later.id}: a hear step comes round, one at a time`, String(hears.length));
   ok(quiz[0].kind !== "hear", "and never first — the quiz opens on a word");
   const h = hears[0];
   ok(h.autoplay === h.target && h.en && h.unit === later.id,
@@ -1998,10 +2032,62 @@ group("a chapter's grammar run");
     const lesson = Q.grammarRun(u, 0, 2);
     ok(lesson.length && lesson.every((q) => q.typed), "a lesson's two grammar questions are written",
        `${u.id} ` + JSON.stringify(lesson.map((q) => [q.kind, q.typed, q.ask])));
-    const quiz = Q.quizSteps(u, 0);
-    const grammar = quiz.filter((q) => q.kind === "form" || (q.drill && q.kind !== "stress"));
+    // Over a few quizzes: one drill a quiz, and it may be stress, which is chosen.
+    const grammar = Array.from({ length: 8 }, () => Q.quizSteps(u, 0)).flat()
+      .filter((q) => q.kind === "form" || (q.drill && q.kind !== "stress"));
     ok(grammar.length && grammar.every((q) => q.typed), "a quiz's form and drill questions are written",
        grammar.map((q) => `${q.kind}:${!!q.typed}`).join(","));
+  }
+
+  /* The case modules (core/cases.js; the owner, 2026-10-08): one case at a
+     time, taught by the situations that call for it, drilled on real
+     sentences that settle the case. */
+  group("case modules");
+  {
+    const { CASES, checkCases } = await import("../core/cases.js");
+    const shape = checkCases();
+    ok(!shape.length, "every use has a short label, one sentence, two examples, a trigger", shape.join("; "));
+    // Every Russian word an example writes is a real word (§30a).
+    const strange = [];
+    for (const c of CASES) for (const u of c.uses) for (const [ru] of u.examples) {
+      for (const tok of ru.match(/[а-яёА-ЯЁ́]+(?:-[а-яёА-ЯЁ́]+)*/g) || []) {
+        if (!IX[fold(tok)] && !/^[А-ЯЁ]/.test(tok)) strange.push(`${c.id}/${u.id}: ${tok}`);
+      }
+    }
+    ok(!strange.length, "no example uses a word the dictionary does not know", strange.join(", "));
+    const counts = Q.caseCounts();
+    const thin = [];
+    for (const c of CASES) for (const u of c.uses) if (counts[c.id][u.id] < 10) thin.push(`${c.id}/${u.id} ${counts[c.id][u.id]}`);
+    ok(!thin.length, "every use has at least ten real sentences to drill",
+       thin.join(", ") + " | " + JSON.stringify(counts));
+    let lessonBad = [], drillBad = [], wrongCase = 0, gaps = 0;
+    for (const c of CASES) {
+      const steps = Q.caseLesson(c.id);
+      const cards = steps.filter((s) => s.t === "grammar").length;
+      if (cards !== c.uses.length + 1) lessonBad.push(`${c.id}: ${cards} cards`);
+      const qs = steps.filter((s) => s.kind);
+      if (qs.length < c.uses.length) lessonBad.push(`${c.id}: ${qs.length} questions`);
+      for (let r = 0; r < 4; r++) {
+        const run = Q.caseDrill(c.id, 12);
+        if (run.length !== 12) drillBad.push(`${c.id}: ${run.length}`);
+        for (const q of run) {
+          if (!answerable(q)) drillBad.push(`${c.id}: unanswerable ${q.kind}`);
+          // A gap's answer is a form of the noun in exactly this case.
+          if (q.caseUse && q.typed && q.table) {
+            gaps++;
+            const rows = q.table.rows.filter((row) => row.slice(1).some((cell) => (cell || []).some((f) => fold(f) === fold(q.answer))));
+            if (rows.length !== 1 || rows[0][0] !== c.row) wrongCase++;
+            if (!q.prompt.includes("___")) drillBad.push(`${c.id}: a gap with no gap`);
+          }
+          if (q.options && q.options.filter((o) => o.right).length !== 1) drillBad.push(`${c.id}: not one right option`);
+        }
+        const uses = new Set(run.map((q) => q.caseUse).filter(Boolean));
+        if (uses.size < Math.min(c.uses.length, 2)) drillBad.push(`${c.id}: one use only`);
+      }
+    }
+    ok(!lessonBad.length, "a case's lesson is its card, a card per use, and questions on each", lessonBad.join("; "));
+    ok(!drillBad.length, "a case drill fills twelve, spread over the uses, each answerable", drillBad.slice(0, 6).join("; "));
+    ok(gaps > 0 && wrongCase === 0, `every gap's answer is that case and only that case (${gaps} gaps)`, String(wrongCase));
   }
   ok(!strangers.length, "a form question only asks about a word the route has taught", strangers.slice(0, 6).join(", "));
   // A lesson with a verb to conjugate starts its run on it (a lesson of nouns
@@ -2209,9 +2295,17 @@ group("speaking");
      `${early.id}: no speaking step yet`);
   const unit = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.say.fromStage
                                   && (SPEECH.speak[s.core.id] || []).length).core;
-  const says = Q.quizSteps(unit, 0).filter((q) => q.kind === "say");
-  ok(says.length === SPEECH_MIX.say.perQuiz, `${unit.id}: one say step per quiz`,
-     String(says.length));
+  /* One spoken step a quiz, rotating between hearing, saying and building a
+     word (2026-10-08): over a few quizzes a say step comes round, never two. */
+  let says = [], twice = 0;
+  for (let k = 0; k < 40; k++) {
+    const qs = Q.quizSteps(unit, 0);
+    const n = qs.filter((q) => q.kind === "say" || q.kind === "hear" || q.kind === "buildup").length;
+    if (n > 1) twice++;
+    if (!says.length) says = qs.filter((q) => q.kind === "say");
+  }
+  ok(says.length === 1 && twice === 0, `${unit.id}: a say step comes round, one spoken step a quiz`,
+     `${says.length} / ${twice}`);
   const s = says[0];
   ok(s.prompt === s.en && !s.cyr, "the prompt is the English");
   ok(!s.autoplay && !s.say, "nothing is played before the attempt — that would be copying");

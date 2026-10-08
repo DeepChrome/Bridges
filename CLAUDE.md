@@ -6258,6 +6258,84 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   core/forms.js): Present for an imperfective, Future for a perfective, both
   for a verb of both. The title "Present / Future" stays the lookup key.
 
+## 30bw. The case modules (2026-10-08)
+
+The owner: *"case specific drills… start with the lesson that shows examples
+of how each case can be used… then drills that only focus on that specific
+case with a wide array of words and sentences… It's important not to just
+drill them with all of the cases at once. Hit them in a logical sequence.
+Focus on teaching them what situations call for which cases."*
+
+- **`core/cases.js` is the teaching content**: the five cases in teaching
+  order (prepositional, accusative, genitive, dative, instrumental), each a
+  list of **uses** — one situation a learner can recognise, a label short
+  enough to be an option, one sentence, two examples, and `triggers` (the
+  words that call for it) or `after` (the kind of word before it: a verb, a
+  noun, none, or a role verb). `stage` is the chapter that carries it (5–9).
+  `checkCases()` holds the shape; `SET_PHRASES` and `TIME_NOUNS` keep idioms
+  («к сожале́нию», «в тече́ние») and times («в феврале́») out of the uses.
+- **The drill is real sentences, sorted at runtime** (`caseSightings` in
+  core/questions.js): every curriculum word's examples and the speech pools,
+  a noun counted only when its form belongs to **one** case in its own table
+  (so «кни́ге» — dative or prepositional — is never asked), and filed under a
+  use by the words before it, adjectives passed over. Easiest first (`ease`:
+  common words, short). `tools/sample_cases.mjs` prints the counts and a
+  drill per case — **read it after touching a trigger**: a sentence filed
+  under the wrong use teaches the wrong reason, and the first cut filed «к
+  сожалению» as "towards" and «за лека́рством» as a position.
+- **Three question shapes**, all the existing `cases` kind: the gap (the
+  noun's dictionary form and the English given, write the form — chosen in
+  the lesson's first try), "why «X»?" (the options are the uses of this case
+  and the cases learned before it, so «в» meaning where is told from «в»
+  meaning where to; grades no word), and the case's own table cell.
+- **Where it lives**: Practice → Grammar → Cases (`CaseHub`) lists the five
+  in order, nothing locked, the next to learn in brand colour; a case's page
+  (`CaseModule`) leads with Learn until its lesson has been run, then with
+  Drill. Every case mixed is the old forms drill. Each case is also an
+  optional step on the spine's first lesson of its chapter (`caseOfLesson`
+  in data.js). Runs are kept under `case:<id>` and `casedrill:<id>`.
+
+## 30bx. What three simulated learners found (2026-10-08)
+
+The owner asked for agents playing different learners to judge the lesson
+sequence. `tools/walk_lessons.mjs` prints the course as a learner meets it —
+each lesson's steps, the vocabulary walk, one draw of the quiz with answers —
+and three agents (an absolute beginner, a returning A2 learner, a 10-minutes-a-
+day learner) read chapters 1–10 of it. Their shared finding, and the rules it
+left:
+
+- **A lesson asks only what the route has taught** (`inRoute`, `formTaught`,
+  `verbTableTaught` in core/questions.js). While a lesson's words, quiz or
+  grammar run are built, `route` holds the chapter and the cases the cards
+  have named: a gap's answer is the dictionary form or a form in a taught
+  case or tense (no «тобо́й» on day two), a gap sentence has at most one
+  unknown word and ten words, a perfective's present (its future) waits for
+  chapter 9, the past for 7, the imperative for 10, and the questions after a
+  card skip words that break its rule (`regular`: «друзья́», «времена́»,
+  «хоте́ть»). Practice is outside `route` and asks what the learner chose.
+  `core.test.mjs` sweeps every lesson for a future asked early.
+- **A side quest drills its own card or nothing** (`drillsOwnRule`): a quest
+  whose card has no `form` used to drill its chapter's rule, and Body's drill
+  asked the aching part in the accusative straight after a card saying it is
+  the nominative. Writing drills for those cards' own rules (numbers, идти
+  and ходить, «у меня боли́т», «в лесу́») is open.
+- **A quiz is its lesson's words**: `QUIZ_WORDS` (2) a word, between
+  `QUIZ_MIN` (6) and 8, then one each of the chapter's form, a drill, an
+  earlier word and a spoken step that rotates between listening, saying and
+  building a word — about twelve at most, where it had reached eighteen.
+  One question a word (the production one kept), "What did you hear?" at
+  most a third, no shape twice running in the walk, no typing in chapter 1
+  until a word has been answered twice.
+- **No second right answer**: a thin option pool reaches across the
+  curriculum for a *safe* wrong answer rather than taking any glossed word
+  (that is how «где» stood beside «куда» for "where").
+- **The lesson's Grammar step is gone**; the walk ends on the rule's
+  questions and the ten-question run lives on the unit screen and Practice.
+
+Not done, and the owner's to decide: greetings and «меня зовут» in chapter
+1, the basic adjectives (хороший, новый, большой) earlier, and the genitive
+module earlier than chapter 7 — each a re-cut of the curriculum.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

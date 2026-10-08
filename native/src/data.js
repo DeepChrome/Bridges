@@ -40,6 +40,7 @@ import { quizPassed } from "@core/state";
 import { wanted, cardFor, dayOf } from "@core/scheduler";
 import { rollGoal, goalBadge } from "@core/queue";
 import { isIrregular } from "@core/facts";
+import { CASES } from "@core/cases";
 
 /* The word endings, commonest first across every sentence the app carries
    (core/endings.js). Counted once and kept: about a tenth of a second over
@@ -243,13 +244,20 @@ export function components(st, u, i) {
   const s = unitState(st, u.id);
   const l = (s.lessons || {})[i] || {};
   const out = [{ id: "vocab", label: "Vocabulary", done: !!l.v }];
-  /* Practice on the chapter's grammar point with this lesson's words
-     (GrammarFlow, 2026-09-30). Optional: a required step would un-finish
-     lessons already done (the rule the Listening step set, §30af). Done is
-     the run recorded under its key, as Listening's is. */
-  if (hasGrammar(u)) {
-    out.push({ id: "grammar", label: "Grammar", optional: true,
-               done: !!((st.drills || {})[grammarKey(u, i)]) });
+  /* The chapter's grammar point is practised inside the vocabulary walk,
+     which ends on questions on the rule; the ten-question run of it
+     (GrammarFlow) is the unit screen's and Practice's, not a lesson step. It
+     was one until 2026-10-08, when the learner agents found it duplicated the
+     walk on every lesson's step list. */
+  /* The case this chapter brings in, taught on its own (core/cases.js; the
+     owner, 2026-10-08: "embed these specific modules into chapters where they
+     make sense"): the spine's first lesson of chapters 5–9, after the rule.
+     Optional, like every step added to lessons already finished; done once
+     its lesson has been run. */
+  const caseHere = caseOfLesson(u, i);
+  if (caseHere) {
+    out.push({ id: "case", label: `${caseHere.name} case`, optional: true, caseId: caseHere.id,
+               done: !!((st.drills || {})[caseLearnKey(caseHere.id)]) });
   }
   out.push({ id: "quiz", label: "Quiz", score: l.q, tries: l.tries || 0, done: quizPassed(l) });
   /* The lesson's conversation, where one was written for it — a couple a
@@ -307,7 +315,11 @@ export function components(st, u, i) {
 export function stepRoute(id, u, i) {
   if (id === "listen") return ["Scenes", { key: `${u.id}:${i}` }];
   if (id === "vquiz") return ["VideoQuiz", { unitId: u.id, index: i, videoId: u.v && u.v.id }];
-  const name = { vocab: "Vocab", grammar: "GrammarRun", quiz: "Quiz", summary: "Summary",
+  if (id === "case") {
+    const c = caseOfLesson(u, i);
+    return ["CaseRun", { caseId: c && c.id, mode: "learn", unitId: u.id, index: i }];
+  }
+  const name = { vocab: "Vocab", quiz: "Quiz", summary: "Summary",
                  video: "VideoSummary" }[id] || "Vocab";
   return [name, { unitId: u.id, index: i }];
 }
@@ -338,8 +350,17 @@ export function currentGrammarUnit(st) {
   return reachedUnits(st).slice().reverse().find(hasGrammar) || null;
 }
 /* Where a grammar run is recorded: a lesson's, or the unit's own module. */
-export const grammarKey = (u, i) =>
-  (i === undefined || i === null ? `grammar:${u.id}` : `grammar:${u.id}:${i}`);
+/* The case modules' run keys in `drills`: the lesson, and the drill. */
+export const caseLearnKey = (id) => `case:${id}`;
+export const caseDrillKey = (id) => `casedrill:${id}`;
+/* The case a lesson carries: its chapter's, on the spine's first lesson. */
+export function caseOfLesson(u, i) {
+  if (i !== 0) return null;
+  const k = STAGES.findIndex((s) => s.core === u);
+  return k < 0 ? null : CASES.find((c) => c.stage === k) || null;
+}
+
+export const grammarKey = (u) => `grammar:${u.id}`;
 
 /* Which lessons *feature* their conversation as a step on the lesson screen.
  *

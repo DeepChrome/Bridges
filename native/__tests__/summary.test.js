@@ -95,9 +95,11 @@ describe("a lesson's flow", () => {
   const lastOf = (u) => lessonCount(u) - 1;
   const ids = (u) => components(base, u, lastOf(u)).map((c) => c.id);
 
-  it("runs words, grammar, quiz, summary, video, its questions", () => {
-    const order = ids(graded).filter((x) => x !== "listen");
-    expect(order).toEqual(["vocab", "grammar", "quiz", "summary", "video"]
+  /* The grammar is inside the words' walk now, not a step of its own (the
+     learner agents, 2026-10-08: it duplicated the walk on every lesson). */
+  it("runs words, quiz, summary, video, its questions", () => {
+    const order = ids(graded).filter((x) => x !== "listen" && x !== "case");
+    expect(order).toEqual(["vocab", "quiz", "summary", "video"]
       .concat(graded.v.quiz ? ["vquiz"] : []));
   });
 
@@ -120,18 +122,16 @@ describe("a lesson's flow", () => {
     expect(stepRoute("video", graded, k)).toEqual(["VideoSummary", { unitId: graded.id, index: k }]);
   });
 
-  it("Continue opens the grammar after the words, then the quiz", () => {
-    const s = (l, drills = {}) => ({ ...base, drills,
-      unit: { [graded.id]: { lessons: { 0: l } } } });
-    const cs = (st) => components(st, graded, 0);
-    expect(nextComponent(cs(s({ v: true }))).id).toBe("grammar");
-    expect(nextComponent(cs(s({ v: true }, { [grammarKey(graded, 0)]: { best: 1 } }))).id)
-      .toBe("quiz");
+  it("Continue opens the quiz after the words, and a lesson lists no Grammar step", () => {
+    const later = 1;   // a lesson that carries no case module
+    const st = { ...base, unit: { [graded.id]: { lessons: { [later]: { v: true } } } } };
+    expect(nextComponent(components(st, graded, later)).id).toBe("quiz");
+    expect(components(base, graded, later).some((c) => c.id === "grammar")).toBe(false);
   });
 
   it("a step skipped past is not pointed at again", () => {
-    const st = { ...base, unit: { [graded.id]: { lessons: { 0: { v: true, q: 100 } } } } };
-    expect(nextComponent(components(st, graded, 0)).id).not.toBe("grammar");
+    const st = { ...base, unit: { [graded.id]: { lessons: { 1: { v: true, q: 100 } } } } };
+    expect(nextComponent(components(st, graded, 1)).id).not.toBe("vocab");
   });
 
   it("a video watched in an earlier lesson does not skip a later lesson's steps", () => {

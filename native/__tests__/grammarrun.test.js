@@ -1,16 +1,17 @@
 /* A chapter's grammar run (GrammarFlow, 2026-09-30): the grammar point of a
-   chapter with that chapter's words, as a lesson's optional step and as the
-   unit's own module, on the unit screen and in Practice. */
+   chapter with that chapter's words, as the unit's own module, on the unit
+   screen and in Practice. Inside a lesson the rule is practised at the end of
+   the vocabulary walk; the run is not a lesson step (2026-10-08). */
 
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react-native";
+import { render, screen, fireEvent } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { UnitScreen, LessonScreen } from "../src/screens/Unit";
+import { UnitScreen } from "../src/screens/Unit";
 import { GrammarFlow } from "../src/screens/Flows";
-import { UN, components, nextStep, lessonDone, hasGrammar, grammarKey } from "../src/data";
+import { UN, components, hasGrammar } from "../src/data";
 
 const base = {
   v: 10, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {}, watched: {},
@@ -30,23 +31,8 @@ const core2 = UN.find((u) => u.id === "core2");
 const nav = () => ({ navigate: jest.fn(), goBack: jest.fn(), replace: jest.fn(), setOptions: jest.fn() });
 
 describe("in a lesson", () => {
-  it("is an optional step, from chapter 2 on, that finishes nothing owed", () => {
-    expect(components(base, core1, 0).some((c) => c.id === "grammar")).toBe(false);
-    const step = components(base, core2, 0).find((c) => c.id === "grammar");
-    expect(step).toMatchObject({ optional: true, done: false });
-    const done = { ...base, drills: { [grammarKey(core2, 0)]: { best: 90, runs: 1 } } };
-    expect(components(done, core2, 0).find((c) => c.id === "grammar").done).toBe(true);
-    expect(lessonDone(done, core2, 0)).toBe(false);
-    // Continue never lands on it: it is offered, not owed.
-    const afterVocab = { ...base, unit: { [core2.id]: { lessons: { 0: { v: true } } } } };
-    expect(nextStep(afterVocab).step).not.toBe("grammar");
-  });
-
-  it("opens the run on the lesson's words", async () => {
-    const n = nav();
-    await withProfile(<LessonScreen route={{ params: { unitId: core2.id, index: 0 } }} navigation={n} />);
-    fireEvent.press(await screen.findByText("Grammar"));
-    expect(n.navigate).toHaveBeenCalledWith("GrammarRun", { unitId: core2.id, index: 0 });
+  it("is not a step: the words' walk practises the rule", () => {
+    for (let i = 0; i < 3; i++) expect(components(base, core2, i).some((c) => c.id === "grammar")).toBe(false);
   });
 });
 
@@ -69,6 +55,6 @@ describe("on the unit screen", () => {
 describe("the run", () => {
   it("asks the chapter's point straight away", async () => {
     await withProfile(<GrammarFlow route={{ params: { unitId: core2.id } }} navigation={nav()} />);
-    expect(await screen.findByText(/^Choose the (present|future) for/)).toBeTruthy();
+    expect(await screen.findByText(/^(Choose|Write) the present for/)).toBeTruthy();
   });
 });

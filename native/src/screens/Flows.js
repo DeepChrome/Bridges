@@ -17,8 +17,9 @@ import {
   DRILL_POOL_STEPS, chapterWords, irregularWords, curriculumPool,
   reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
   scenarioLibrary, required, linesWith, grammarKey, currentGrammarUnit, grammarNoteOf,
-  todaysWork, recapKey, components, stepRoute,
+  todaysWork, recapKey, components, stepRoute, caseLearnKey, caseDrillKey,
 } from "../data";
+import { CASES, caseById } from "@core/cases";
 import { quizPassed } from "@core/state";
 import { pairDrill } from "@core/alphabet";
 import { buildupDrill } from "@core/buildup";
@@ -692,7 +693,16 @@ export function DrillList({ navigation }) {
             </View>
           </Row>
         ) : null}
-        {DRILL_TYPES.map((d) => (
+        {/* The cases, one at a time in the order they are taught, each with its
+            lesson and its drill (CaseHub; 2026-10-08). The forms drill that
+            was this row is inside it, as every case mixed. */}
+        <Row testID="drill-cases" onPress={() => navigation.navigate("CaseHub")}>
+          <Thumb id="cases" tone="good" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Cases</Text>
+          </View>
+        </Row>
+        {DRILL_TYPES.filter((d) => d.id !== "cases").map((d) => (
           /* Straight in. What a drill asks about is on the drill's own cog now
              (DrillOptions), not a screen in front of it — the owner, 2026-09-26:
              *"instead of a settings cog, we have this sort of ugly ass top
@@ -958,28 +968,23 @@ const bestOf = (prev, key, score) => {
 /* A run on one chapter's grammar point with that chapter's words
    (core/questions.js grammarRun; the owner, 2026-09-30: "exercises within the
    lessons that focus on … one of the grammar points from that chapter… They
-   can be embedded in lessons and also stand alone modules"). With an `index`
-   it is a lesson's optional step, starting on that lesson's words; without,
-   it is the unit's own module, reached from the unit screen and Practice.
-   Graded like any run, so the scheduler hears every word it asks. */
+   can be embedded in lessons and also stand alone modules"). Inside a lesson
+   it is the questions that close the vocabulary walk; this is the unit's own
+   module, reached from the unit screen and Practice. It was also a lesson
+   step until 2026-10-08 (data.js components). Graded like any run, so the
+   scheduler hears every word it asks. */
 export function GrammarFlow({ route, navigation }) {
-  const { unitId, index } = route.params || {};
+  const { unitId } = route.params || {};
   const unit = UN.find((u) => u.id === unitId);
-  const lesson = index !== undefined && index !== null;
-  const { st, update } = useSession();
+  const { update } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
-  // Inside a lesson, only words this learner was taught; as a module of its
-  // own it reaches over the chapter as Practice does.
-  const steps = useMemo(() => (!unit ? []
-      : lesson ? Q.withTaught(taughtBy(st), () => Q.grammarRun(unit, index))
-      : Q.grammarRun(unit, null)),
+  const steps = useMemo(() => (unit ? Q.grammarRun(unit, null) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [unitId, index, seed]);
+    [unitId, seed]);
   const title = (steps[0] && steps[0].note && steps[0].note.title) || "Grammar";
   useAudioStopOnLeave();
-  const save = { key: `grammar:${unitId}:${lesson ? index : "unit"}`, route: "GrammarRun",
-                 params: { unitId, index }, title };
+  const save = { key: `grammar:${unitId}:unit`, route: "GrammarRun", params: { unitId }, title };
   const resume = useResume(save.key, route.params);
   if (resume.prompt) return resume.prompt;
 
@@ -987,16 +992,9 @@ export function GrammarFlow({ route, navigation }) {
     return <Done title="No grammar practice here yet" onBack={() => navigation.goBack()} />;
   }
   if (result) {
-    /* Continue is the way on — the lesson's next step, the next lesson after
-       its last, or back where a unit's own run was opened — and Try again the
-       quieter choice (the owner, 2026-10-06: "Remove back and place
-       continue… try again being the less important more neutral looking
-       option"). Grammar is an optional step, so a low score does not hold
-       the lesson up. */
-    const cs = lesson ? components(st, unit, index) : [];
-    const at = cs.findIndex((c) => c.id === "grammar");
-    const after = lesson ? cs.find((c, k) => k > at && !c.done) || null : null;
-    const nextLesson = lesson && index + 1 < lessonCount(unit);
+    /* Continue back to where it was opened, Try again the quieter choice (the
+       owner, 2026-10-06: "Remove back and place continue… try again being the
+       less important more neutral looking option"). */
     return (
       <Done
         title={title}
@@ -1005,11 +1003,7 @@ export function GrammarFlow({ route, navigation }) {
         passed={result.score >= 80}
         onAgain={() => { setResult(null); setSeed(seed + 1); }}
         againLabel="Try again"
-        /* A lesson's run is only ever opened on the Learn stack (Practice
-           opens the unit's, with no index), so its steps are there. */
-        onContinue={after ? () => navigation.replace(...stepRoute(after.id, unit, index))
-          : nextLesson ? () => navigation.replace(...stepRoute("vocab", unit, index + 1))
-          : () => navigation.goBack()}
+        onContinue={() => navigation.goBack()}
         onBack={() => navigation.goBack()}
       />
     );
@@ -1023,10 +1017,175 @@ export function GrammarFlow({ route, navigation }) {
       restore={resume.restore}
       onFinish={(r) => {
         const score = scoreOf(r);
-        update((prev) => bestOf(prev, grammarKey(unit, lesson ? index : null), score));
+        update((prev) => bestOf(prev, grammarKey(unit), score));
         setResult({ ...r, score });
       }}
     />
+  );
+}
+
+/* ------------------------------------------------------------- the cases */
+
+/* Questions in one case drill. */
+export const CASE_DRILL_N = 12;
+
+/* The case modules (core/cases.js; the owner, 2026-10-08): the five cases in
+   the order they are taught, each a lesson on the situations that call for it
+   and a drill on real sentences. Nothing is locked (§30au); the next one to
+   learn carries the brand colour, a learned one its tick. Below them, every
+   case mixed — the forms drill that was the only cases drill before. */
+export function CaseHub({ navigation }) {
+  const { st } = useSession();
+  const t = useTheme();
+  const drills = st.drills || {};
+  const next = CASES.find((c) => !drills[caseLearnKey(c.id)]);
+  return (
+    <Screen>
+      <List>
+        {CASES.map((c, k) => {
+          const learned = !!drills[caseLearnKey(c.id)];
+          return (
+            <Row key={c.id} testID={`case-${c.id}`}
+                 onPress={() => navigation.navigate("CaseModule", { caseId: c.id })}>
+              <Thumb n={k + 1} done={learned} tone={c === next ? "brand" : undefined} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>{c.name}</Text>
+                <Muted>{`Chapter ${c.stage + 1}`}</Muted>
+              </View>
+            </Row>
+          );
+        })}
+      </List>
+      <SectionLabel style={{ marginTop: 18 }}>Every case</SectionLabel>
+      <List>
+        <Row testID="case-mixed" onPress={() => navigation.navigate("Drill", { type: "cases" })}>
+          <Thumb id="cases" tone="good" />
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>All the forms</Text>
+          </View>
+        </Row>
+      </List>
+    </Screen>
+  );
+}
+
+/* One case: what it is for, the situations that call for it, and the two
+   ways in. Learn is the main button until the lesson has been run; then
+   Drill is, with the lesson still there to go through again. */
+export function CaseModule({ route, navigation }) {
+  const { st } = useSession();
+  const t = useTheme();
+  const c = caseById((route.params || {}).caseId);
+  if (!c) return null;
+  const learned = !!(st.drills || {})[caseLearnKey(c.id)];
+  const go = (mode) => navigation.navigate("CaseRun", { caseId: c.id, mode });
+  return (
+    <Screen footer={
+      <View style={{ gap: 8 }}>
+        <Btn block kind="pri" testID={learned ? "case-drill" : "case-learn"}
+             label={learned ? "Drill" : "Learn"} onPress={() => go(learned ? "drill" : "learn")} />
+        <Btn block kind="plain" testID={learned ? "case-learn" : "case-drill"}
+             label={learned ? "Learn again" : "Drill"} onPress={() => go(learned ? "learn" : "drill")} />
+      </View>}>
+      <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700" }}>{`The ${c.name.toLowerCase()} case`}</Text>
+      <Muted style={{ marginTop: 6 }}>{c.intro}</Muted>
+      <SectionLabel style={{ marginTop: 18 }}>When it's used</SectionLabel>
+      <List>
+        {c.uses.map((u) => (
+          <Row key={u.id} testID={`case-use-${u.id}`}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>{u.label}</Text>
+              <Muted>{u.examples[0][0]}</Muted>
+            </View>
+          </Row>
+        ))}
+      </List>
+    </Screen>
+  );
+}
+
+/* A case's lesson (`mode: "learn"`) or its drill (`"drill"`). The lesson is
+   VocabFlow's shape — a card, then questions one at a time through the
+   runner — and the drill is a run like any other. Both keep their best under
+   the case's key; from a lesson step (`unitId`) Continue goes on to the
+   lesson's next step, from the hub the lesson leads into the drill. */
+export function CaseFlow({ route, navigation }) {
+  const { caseId, mode, unitId, index } = route.params || {};
+  const c = caseById(caseId);
+  const { st, update } = useSession();
+  const [seed, setSeed] = useState(0);
+  const [at, setAt] = useState(0);
+  const [tally, setTally] = useState({ credit: 0, total: 0, right: 0 });
+  const [result, setResult] = useState(null);
+  useAudioStopOnLeave();
+  const learned = CASES.filter((x) => (st.drills || {})[caseLearnKey(x.id)]).map((x) => x.id);
+  const steps = useMemo(() => (!c ? []
+    : mode === "drill" ? Q.caseDrill(c.id, CASE_DRILL_N, learned.concat(c.id))
+    : Q.caseLesson(c.id)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [caseId, mode, seed]);
+  if (!c || !steps.length) return <Done title="Nothing to practice here yet" onBack={() => navigation.goBack()} />;
+
+  const key = mode === "drill" ? caseDrillKey(c.id) : caseLearnKey(c.id);
+  const finish = (sum) => {
+    const score = sum.total ? Math.round(sum.credit / sum.total * 100) : 100;
+    update((prev) => bestOf(prev, key, score));
+    setResult({ ...sum, score });
+  };
+  const again = () => { setResult(null); setAt(0); setTally({ credit: 0, total: 0, right: 0 }); setSeed(seed + 1); };
+
+  if (result) {
+    /* From a lesson step, on through the lesson; from the hub, a lesson goes
+       on to its drill and a drill back to the case. */
+    const unit = unitId ? UN.find((u) => u.id === unitId) : null;
+    const cs = unit ? components(st, unit, index) : [];
+    const here = cs.findIndex((x) => x.id === "case");
+    const after = unit ? cs.find((x, k) => k > here && !x.done) || null : null;
+    return (
+      <Done
+        title={mode === "drill" ? `${c.name} drill` : `The ${c.name.toLowerCase()} case`}
+        detail={result.total ? `${result.right} of ${result.total} right` : undefined}
+        score={result.total ? result.score : undefined}
+        onAgain={again}
+        againLabel="Try again"
+        onContinue={unit ? (after ? () => navigation.replace(...stepRoute(after.id, unit, index)) : () => navigation.goBack())
+          : mode === "learn" ? () => navigation.replace("CaseRun", { caseId: c.id, mode: "drill" })
+          : () => navigation.goBack()}
+        continueLabel={!unit && mode === "learn" ? "Drill" : "Continue"}
+        onBack={() => navigation.goBack()}
+      />
+    );
+  }
+
+  if (mode === "drill") {
+    return (
+      <Runner key={seed} steps={steps} navigation={navigation} recycle={false}
+              onFinish={(r) => finish({ credit: r.credit, total: r.total, right: r.right })} />
+    );
+  }
+
+  // The lesson: cards shown here, each question handed to the runner alone.
+  const step = steps[at];
+  const advance = (r) => {
+    const sum = r ? { credit: tally.credit + (r.credit || 0), total: tally.total + (r.total || 0),
+                      right: tally.right + (r.right || 0) } : tally;
+    setTally(sum);
+    if (at + 1 >= steps.length) finish(sum);
+    else setAt(at + 1);
+  };
+  if (step.t === "grammar") {
+    return (
+      <Screen fill>
+        <GrammarNote note={step.note} at={at} total={steps.length} label={`${c.name} case`} />
+        <View style={{ marginTop: "auto", paddingTop: 16 }}>
+          <Btn kind="pri" testID="case-card-next" label="Continue" onPress={() => advance(null)} />
+        </View>
+      </Screen>
+    );
+  }
+  return (
+    <Runner key={`${seed}:${at}`} steps={[step]} progress={{ at, total: steps.length }}
+            recycle={false} navigation={navigation} onFinish={advance} />
   );
 }
 

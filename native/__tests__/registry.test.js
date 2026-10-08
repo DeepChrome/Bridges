@@ -59,12 +59,17 @@ describe("activity registry", () => {
     const later = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.hear.fromStage
                                      && (SPEECH.listen[s.core.id] || []).length).core;
     const lesson = Q.stageOf(later) === SPEECH_MIX.hear.fromStage ? (SPEECH_MIX.hear.fromLesson || 0) : 0;
-    const quiz = Q.quizSteps(later, lesson);
+    // One spoken step a quiz, rotating (2026-10-08): draw until each comes round.
+    const until = (u, k, kind) => {
+      for (let r = 0; r < 40; r++) { const q = Q.quizSteps(u, k); if (q.some((x) => x.kind === kind)) return q; }
+      return [];
+    };
+    const quiz = until(later, lesson, "hear");
     expect(quiz.some((q) => q.kind === "hear")).toBe(true);
     qs.push(...quiz);
     const speaking = STAGES.find((s) => Q.stageOf(s.core) >= SPEECH_MIX.say.fromStage
                                         && (SPEECH.speak[s.core.id] || []).length).core;
-    const quiz2 = Q.quizSteps(speaking, 0);
+    const quiz2 = until(speaking, 0, "say");
     expect(quiz2.some((q) => q.kind === "say")).toBe(true);
     qs.push(...quiz2);
     // The chapter's form, chosen and typed (form.test.js exercises the views).

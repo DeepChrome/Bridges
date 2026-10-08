@@ -6196,10 +6196,22 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   keep the device voice — they speak generated text.
 - **An English prompt of a letter or two carries its group** (`askSense`):
   «к» is asked as "to, towards", never a bare "to".
-- **The grammar is in every lesson** (`vocabSteps`): the card opens lesson 1
-  and closes every later one, each followed by `GRAMMAR_IN_LESSON` questions
-  on the rule with the lesson's words; a side quest without a card repeats
-  its chapter's. **Every quiz asks `REVIEW_MIX` words from earlier units**,
+- **The grammar is practised in every lesson and taught once** (`vocabSteps`;
+  2026-10-07, the owner: *"The grammar rules don't need to be repeated. The
+  enforcement or the drills are what need to be repeated"*): the unit's own
+  card opens its first lesson, and every lesson closes on `GRAMMAR_IN_LESSON`
+  questions on the rule with its words. A side quest without a card of its
+  own shows none and drills its chapter's rule.
+- **A card's examples decide lesson order** (`card_words` in build_topics:
+  a group holding one of their words *in its dictionary form* is taught
+  first), so rewriting a card's examples can re-cut a unit and re-map every
+  learner's progress. Rewrite a card, rebuild, and diff the units; keep the
+  promoted dictionary forms the same unless the re-cut is wanted.
+- **One use, one sentence** (`distinct_examples` in build_site): a card or
+  entry never shows the same sentence twice, or a near copy («Я говорю
+  по-русски» beside «Я не говорю по-русски»), across the senses' examples and
+  the dictionary's. Showing a word's *range* in proportion to how it is used
+  is not done yet — it needs each sentence classified by sense. **Every quiz asks `REVIEW_MIX` words from earlier units**,
   the due and weakest first, and its second drill draws on earlier chapters.
 - **`metBy(unit, index)` is what a lesson may grade**: the route before the
   unit and this unit up to the lesson. Form questions, drills and the due

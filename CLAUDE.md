@@ -6294,6 +6294,13 @@ Focus on teaching them what situations call for which cases."*
   Drill. Every case mixed is the old forms drill. Each case is also an
   optional step on the spine's first lesson of its chapter (`caseOfLesson`
   in data.js). Runs are kept under `case:<id>` and `casedrill:<id>`.
+- **Ten a run from a pool of a hundred** (the owner, 2026-10-08): `casePool`
+  takes the easier half of each use but never fewer than `CASE_POOL` (100)
+  across the case; the drill record keeps the last `CASE_RECENT` (90)
+  sentences asked, a run draws the unasked first, and each use is drawn in
+  proportion to what it has left — strict turns used a small use up first
+  and repeated after 62. Prepositional before accusative is deliberate: one
+  ending (-е) answering "where", against a rule that changes only some nouns.
 
 ## 30bx. What three simulated learners found (2026-10-08)
 

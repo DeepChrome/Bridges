@@ -1222,6 +1222,8 @@ export function makeQuestions(env) {
   /* A word the learner is unlikely to know: past the commonest CASE_COMMON
      lemmas (the index is assigned by frequency), or not in the dictionary. */
   const CASE_COMMON = 2500;
+  // The fewest sentences a case drill draws from.
+  const CASE_POOL = 100;
   let caseIndex = null;
   function useOf(c, tokens, k) {
     const found = useAt(c, tokens, k);
@@ -1330,7 +1332,7 @@ export function makeQuestions(env) {
     const w = L[s.i];
     const gap = s.ru.replace(s.token, "___");
     if (gap === s.ru) return null;
-    const base = { kind: "cases", i: s.i, cyr: true, prompt: gap,
+    const base = { kind: "cases", i: s.i, cyr: true, prompt: gap, caseRu: s.ru,
                    sub: `${w.w}${s.plural ? " (plural)" : ""} · ${s.en}`, table: s.table, at: s.at, caseUse: s.use };
     const right = s.form[0];
     if (typed) return written(base, "Fill the gap", right, s.form.slice(1).concat(s.token));
@@ -1353,7 +1355,7 @@ export function makeQuestions(env) {
     const label = (p) => (p.x === c ? p.u.label : `${p.u.label} (${p.x.name.toLowerCase()})`);
     const wrong = shuffle(pool.filter((p) => p !== right)).slice(0, 3);
     if (wrong.length < 2) return null;
-    return { kind: "cases", cyr: true, prompt: s.ru, sub: s.en, caseUse: s.use,
+    return { kind: "cases", cyr: true, prompt: s.ru, sub: s.en, caseUse: s.use, caseRu: s.ru,
              ask: `Why «${s.token}»?`,
              note: { title: right.u.label, body: right.u.body, examples: right.u.examples },
              options: shuffle([right].concat(wrong)).map((p) => ({ label: label(p), right: p === right })) };
@@ -1395,16 +1397,40 @@ export function makeQuestions(env) {
      sentences, every use in turn so none is drowned by the commonest (most
      accusatives are objects), mostly gaps to write, some "why", a few forms.
      `upTo` is the cases the learner has met (their options in "why"). */
-  function caseDrill(caseId, n = 12, upTo) {
+  /* A case's pool: the easier half of each use's sentences, but never fewer
+     than CASE_POOL across the case (the owner, 2026-10-08: "10 questions at a
+     time but a pool of like 100 per case"), each use given its share. */
+  function casePool(c) {
+    const seen = caseSightings()[c.id];
+    const per = Math.ceil(CASE_POOL / c.uses.length);
+    return c.uses.map((u) => easiest(seen.filter((s) => s.use === u.id), 0.5, per));
+  }
+  /* `recent` is what this case's last runs asked (the sentences, kept with
+     the drill's best): a run draws what it has not asked first, so a learner
+     works through the pool before a sentence comes round again. */
+  function caseDrill(caseId, n = 10, upTo, recent) {
     const c = caseById(caseId);
     if (!c) return [];
-    const seen = caseSightings()[c.id];
-    const byUse = c.uses.map((u) => easiest(seen.filter((s) => s.use === u.id), 0.5, 15));
+    const asked = new Set(recent || []);
+    // Unasked first, the rest after, each list still shuffled within.
+    const byUse = casePool(c).map((list) => list.filter((s) => !asked.has(s.ru)).concat(list.filter((s) => asked.has(s.ru))));
     const out = [], usedRu = new Set(), usedWord = new Map();
+    /* Which use a slot draws on: each in proportion to what it has not yet
+       asked, so a small use («о» meaning about, 29 sentences) is not used up
+       in strict turns while a large one still has seventy left. The first
+       slots still go round every use, so a run is never one use only. */
+    const unasked = (u) => byUse[u].filter((x) => !asked.has(x.ru) && !usedRu.has(x.ru)).length;
+    const pickUse = (k) => {
+      if (k < byUse.length) return k;
+      const weights = byUse.map((_, u) => unasked(u) || 0.01);
+      let roll = Math.random() * weights.reduce((a, b) => a + b, 0);
+      for (let u = 0; u < weights.length; u++) { roll -= weights[u]; if (roll <= 0) return u; }
+      return weights.length - 1;
+    };
     for (let k = 0; out.length < n && k < n * 6; k++) {
       const slot = out.length;
       if (slot % 6 === 5) { const q = caseForm(c, true); if (q) { out.push(q); continue; } }
-      const list = byUse[k % byUse.length];
+      const list = byUse[pickUse(k)];
       const s = list.find((x) => !usedRu.has(x.ru) && (usedWord.get(x.i) || 0) < 2);
       if (!s) continue;
       usedRu.add(s.ru);
@@ -1416,6 +1442,8 @@ export function makeQuestions(env) {
     }
     return out;
   }
+  /* The size of a case's drill pool, for the tests. */
+  const casePoolSize = (caseId) => { const c = caseById(caseId); return c ? casePool(c).flat().length : 0; };
   /* How many sentences each use of a case has, for the tests and the build. */
   const caseCounts = () => Object.fromEntries(CASES.map((c) => [c.id,
     Object.fromEntries(c.uses.map((u) => [u.id, caseSightings()[c.id].filter((s) => s.use === u.id).length]))]));
@@ -3141,6 +3169,6 @@ export function makeQuestions(env) {
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
     customQuiz, finalExam, recapQuestions, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, routeFocus, grammarRun,
-    drillsIntroduced, drillOpensAt, withTaught, caseLesson, caseDrill, caseCounts,
+    drillsIntroduced, drillOpensAt, withTaught, caseLesson, caseDrill, caseCounts, casePoolSize,
   };
 }

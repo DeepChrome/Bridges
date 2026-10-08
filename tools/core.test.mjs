@@ -2068,8 +2068,8 @@ group("a chapter's grammar run");
       const qs = steps.filter((s) => s.kind);
       if (qs.length < c.uses.length) lessonBad.push(`${c.id}: ${qs.length} questions`);
       for (let r = 0; r < 4; r++) {
-        const run = Q.caseDrill(c.id, 12);
-        if (run.length !== 12) drillBad.push(`${c.id}: ${run.length}`);
+        const run = Q.caseDrill(c.id, 10);
+        if (run.length !== 10) drillBad.push(`${c.id}: ${run.length}`);
         for (const q of run) {
           if (!answerable(q)) drillBad.push(`${c.id}: unanswerable ${q.kind}`);
           // A gap's answer is a form of the noun in exactly this case.
@@ -2086,7 +2086,24 @@ group("a chapter's grammar run");
       }
     }
     ok(!lessonBad.length, "a case's lesson is its card, a card per use, and questions on each", lessonBad.join("; "));
-    ok(!drillBad.length, "a case drill fills twelve, spread over the uses, each answerable", drillBad.slice(0, 6).join("; "));
+    ok(!drillBad.length, "a case drill fills ten, spread over the uses, each answerable", drillBad.slice(0, 6).join("; "));
+    /* A pool of a hundred a case, worked through before a sentence comes back
+       (the owner, 2026-10-08): runs that pass on what they asked repeat
+       nothing until the pool is used. */
+    const small = [], repeats = [];
+    for (const c of CASES) {
+      const size = Q.casePoolSize(c.id);
+      if (size < 100) small.push(`${c.id} ${size}`);
+      let recent = [], seenRu = new Set(), first = 0;
+      for (let r = 0; r < 12; r++) {
+        const asked = Q.caseDrill(c.id, 10, null, recent).map((q) => q.caseRu).filter(Boolean);
+        for (const ru of asked) { if (seenRu.has(ru) && !first) first = seenRu.size; seenRu.add(ru); }
+        recent = recent.concat(asked).slice(-90);
+      }
+      if (first && first < 80) repeats.push(`${c.id} after ${first}`);
+    }
+    ok(!small.length, "every case drills from a pool of at least a hundred sentences", small.join(", "));
+    ok(!repeats.length, "no sentence comes back before eighty others have", repeats.join(", "));
     ok(gaps > 0 && wrongCase === 0, `every gap's answer is that case and only that case (${gaps} gaps)`, String(wrongCase));
   }
   ok(!strangers.length, "a form question only asks about a word the route has taught", strangers.slice(0, 6).join(", "));

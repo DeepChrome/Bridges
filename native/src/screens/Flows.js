@@ -1026,8 +1026,12 @@ export function GrammarFlow({ route, navigation }) {
 
 /* ------------------------------------------------------------- the cases */
 
-/* Questions in one case drill. */
-export const CASE_DRILL_N = 12;
+/* Questions in one case drill, and how many of a case's sentences are
+   remembered as asked, so the next runs draw the rest of its pool of a
+   hundred first (the owner, 2026-10-08: "10 questions at a time but a pool of
+   like 100 per case"). */
+export const CASE_DRILL_N = 10;
+export const CASE_RECENT = 90;
 
 /* The case modules (core/cases.js; the owner, 2026-10-08): the five cases in
    the order they are taught, each a lesson on the situations that call for it
@@ -1119,8 +1123,9 @@ export function CaseFlow({ route, navigation }) {
   const [result, setResult] = useState(null);
   useAudioStopOnLeave();
   const learned = CASES.filter((x) => (st.drills || {})[caseLearnKey(x.id)]).map((x) => x.id);
+  const recent = ((st.drills || {})[caseDrillKey(caseId)] || {}).recent || [];
   const steps = useMemo(() => (!c ? []
-    : mode === "drill" ? Q.caseDrill(c.id, CASE_DRILL_N, learned.concat(c.id))
+    : mode === "drill" ? Q.caseDrill(c.id, CASE_DRILL_N, learned.concat(c.id), recent)
     : Q.caseLesson(c.id)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [caseId, mode, seed]);
@@ -1129,7 +1134,15 @@ export function CaseFlow({ route, navigation }) {
   const key = mode === "drill" ? caseDrillKey(c.id) : caseLearnKey(c.id);
   const finish = (sum) => {
     const score = sum.total ? Math.round(sum.credit / sum.total * 100) : 100;
-    update((prev) => bestOf(prev, key, score));
+    // A drill remembers its sentences, newest last, so the next run draws others.
+    const asked = steps.map((q) => q.caseRu).filter(Boolean);
+    update((prev) => {
+      const next = bestOf(prev, key, score);
+      if (mode !== "drill") return next;
+      const was = ((prev.drills || {})[key] || {}).recent || [];
+      const recentNow = was.filter((r) => !asked.includes(r)).concat(asked).slice(-CASE_RECENT);
+      return { ...next, drills: { ...next.drills, [key]: { ...next.drills[key], recent: recentNow } } };
+    });
     setResult({ ...sum, score });
   };
   const again = () => { setResult(null); setAt(0); setTally({ credit: 0, total: 0, right: 0 }); setSeed(seed + 1); };

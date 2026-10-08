@@ -25,6 +25,7 @@ import { SYSTEM_TALK, talkMessage, validateTalk, SYSTEM_HINT, hintMessage, valid
          SYSTEM_REVIEW, reviewMessage, validateReview } from "./talk.js";
 import { SYSTEM_TRANSLATE, SYSTEM_TRANSLATE_EN, translateMessage, validateTranslate, direction } from "./translate.js";
 import { SYSTEM_EXPLAIN, explainMessage, validateExplain } from "./explain.js";
+import { SYSTEM_ASK, SYSTEM_APP, askMessage, checkAsk, validateAsk } from "./ask.js";
 import { SYSTEM_TUTOR, tutorMessage, validateTutor } from "./tutor.js";
 import { capsFor, planOf, COUNTER_OF, PLANS, PLAN_NAMES } from "../../core/plans.js";
 
@@ -283,6 +284,20 @@ const ROUTES = {
     message: (b) => explainMessage(b),
     validate: (parsed) => validateExplain(parsed),
     capMessage: (cap) => `Daily limit of ${cap} reached; resets at 00:00 UTC.`,
+  },
+  /* A question asked from any screen, about what is on it (2026-10-08,
+     ask.js). An explanation the learner asked for, so the explanation's
+     counter (core/plans.js COUNTER_OF). */
+  "/v1/ask": {
+    kind: "ask", counter: "count", cap: (env) => parseInt(env.DAILY_CAP, 10) || DEFAULT_CAP,
+    maxTokens: 400, system: SYSTEM_ASK,
+    check: (b) => checkAsk(b),
+    message: (b) => askMessage(b),
+    validate: (parsed) => validateAsk(parsed),
+    capMessage: (cap) => `Daily limit of ${cap} reached; resets at 00:00 UTC.`,
+    /* `mode: "app"` — the "?" asking how to use the app, answered from the
+       guide the app sends. Same counter. */
+    variant: (b) => (b.mode === "app" ? { system: SYSTEM_APP } : null),
   },
   /* The free conversation with a tutor who is handed the learner's standing
      (tutor.js). It counts as talk: a turn of it is a turn of the tutor's time,

@@ -43,6 +43,8 @@ export const PLAN_NAMES = { free: "Free", premium: "Premium" };
 export const COUNTER_OF = {
   talk: "conversation", hint: "conversation", tutor: "conversation",
   review: "review", explain: "explain", feedback: "feedback", translate: "translate",
+  // A question asked of the AI from any screen (ask.js) is an explanation too.
+  ask: "explain",
 };
 
 export const planOf = (id) => (PLANS[id] ? id : "free");

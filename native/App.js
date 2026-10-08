@@ -23,7 +23,8 @@ import { loadAppearance, useScheme } from "./src/appearance";
 import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { HelpButton } from "./src/help";
-import { currentAbout } from "./src/about";
+import { screenAbout } from "./src/about";
+import { AskButton } from "./src/askai";
 import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
@@ -176,24 +177,7 @@ function MeButton({ navigation }) {
 function ReportButton() {
   const p = palette(useScheme());
   const open = () => {
-    const r = navRef.getCurrentRoute ? navRef.getCurrentRoute() : null;
-    const opts = navRef.getCurrentOptions ? navRef.getCurrentOptions() || {} : {};
-    const params = (r && r.params) || {};
-    const keep = {};
-    for (const k of ["unitId", "index", "videoId", "type", "round", "word", "key", "topic", "section", "title"]) {
-      if (params[k] !== undefined && typeof params[k] !== "object") keep[k] = params[k];
-    }
-    const unit = params.unitId ? unitById(params.unitId) : null;
-    const vid = params.videoId ? videoById(params.videoId) : r && r.name === "Video" && unit && unit.v ? unit.v : null;
-    const about = {
-      screen: r ? r.name : null,
-      title: typeof opts.title === "string" ? opts.title : undefined,
-      unit: unit ? unit.name : undefined,
-      lesson: typeof params.index === "number" ? params.index + 1 : undefined,
-      video: vid ? vid.title : undefined,
-      params: keep,
-      question: currentAbout() ? { ...currentAbout(), seq: undefined } : undefined,
-    };
+    const about = screenAbout();
     navRef.navigate("Feedback", { about, from: about.screen });
   };
   return (
@@ -213,6 +197,10 @@ function HeaderRight({ navigation, route }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <ReportButton />
+      {/* Ask the AI about what is on this screen (askai.js), beside the "?"
+          that says how the screen works (help.js) — two buttons for two
+          questions (the owner, 2026-10-08). */}
+      <AskButton />
       <HelpButton route={route && route.name} />
       {home ? <HomeButton /> : null}
       <MeButton navigation={navigation} />

@@ -6343,6 +6343,30 @@ Not done, and the owner's to decide: greetings and «меня зовут» in ch
 1, the basic adjectives (хороший, новый, большой) earlier, and the genitive
 module earlier than chapter 7 — each a re-cut of the curriculum.
 
+## 30by. Two AI buttons in every header, and rings that sit on their disc (2026-10-08)
+
+- **The sparkle asks about the Russian on screen; the "?" asks how to use
+  the app** (the owner: *"one is for getting feedback on the specific
+  question and the other needs to be for how to use and interact with the
+  interface"*). Both post `/v1/ask` (backend/src/ask.js, the explanation's
+  counter). The sparkle sends about.js's `screenAbout()` — the question card
+  as drawn and what the learner put — which the report flag also reads, so
+  the two cannot describe a screen differently. The "?" sends `mode: "app"`
+  and `native/src/appguide.js`, a map of the app plus the screen's `HELP`
+  lines, and the Worker answers **from that alone**: a control that moves or
+  is renamed has to move in appguide.js too, or the help sends learners to a
+  button that is gone. With a Worker the "?" is on every screen. One thread
+  component (`useAskThread`, `AskTurns`, `AskInput` in askai.js); a thread
+  belongs to the screen and question it was opened on.
+- **A path disc has no lip.** The face is a circle inside the ring
+  (`face = size − 2·stroke`), concentric with it; the grey edge offset under
+  the disc showed as a crescent below the ring and made it look off-centre
+  (the owner asked twice). `path.test.js` checks the centres agree.
+- **Test trap:** a Sheet left open at the end of one test leaves the next
+  test's sheets undrawn in the same file; close it (`closeSheets` in
+  askai.test.js). Reopening a sheet within one test hits §30be's Modal trap;
+  test the state through `renderHook` (awaited, in RNTL 14) instead.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

@@ -59,6 +59,7 @@ const strokeHex = (node) => {
 };
 
 /* Every lesson of a unit finished, video included. */
+const flatStyle = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : s);
 const finished = (id) => {
   const unit = UN.find((u) => u.id === id);
   const lessons = {};
@@ -121,10 +122,25 @@ describe("path node states", () => {
     expect(Number(done.props.strokeWidth)).toBeGreaterThan(Number(going.props.strokeWidth));
     const flat = (s) => (Array.isArray(s) ? Object.assign({}, ...s.filter(Boolean)) : s);
     const yellow = new Set([light.brand, light.brandDim].map((c) => c.toUpperCase()));
-    for (const lip of screen.getAllByTestId(/^lip-/)) {
-      const bg = String(flat(lip.props.style).backgroundColor || "").toUpperCase();
+    for (const face of screen.getAllByTestId(/^face-/)) {
+      const bg = String(flat(face.props.style).backgroundColor || "").toUpperCase();
       expect(yellow.has(bg)).toBe(false);
     }
+  });
+
+  /* The ring is a stroke round the outside of the face, centred on it (the
+     owner, 2026-10-08: "not aligned to the tile… perfectly even centering").
+     The face's circle and the ring's circle share a centre, and the ring's
+     inner edge is the face's edge: nothing of the tile shows outside it. */
+  it("centres every ring on its face, with nothing of the tile outside it", async () => {
+    await withState({ unit: { core1: finished("core1") } });
+    const arc = await screen.findByTestId("arc-core1");
+    const face = flatStyle(screen.getByTestId("face-core1").props.style);
+    const sw = Number(arc.props.strokeWidth), r = Number(arc.props.r);
+    expect(face.left + face.width / 2).toBeCloseTo(Number(arc.props.cx));
+    expect(face.top + face.height / 2).toBeCloseTo(Number(arc.props.cy));
+    expect(face.width / 2).toBeCloseTo(r - sw / 2);
+    expect(screen.queryByTestId(/^lip-/)).toBeNull();
   });
 
   it("locks a later chapter, greys it, and offers it no ring", async () => {

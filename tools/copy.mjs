@@ -31,7 +31,9 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "native", "src");
 
 export const MAX_WORDS = 10;
-const SKIP_FILES = [/screens[\\/]Intro\.js$/, /screens[\\/]SttLab\.js$/, /[\\/]images\.js$/];
+/* appguide.js is the map of the app the "?" sends the model (2026-10-08):
+   a prompt, never drawn on screen. */
+const SKIP_FILES = [/screens[\\/]Intro\.js$/, /screens[\\/]SttLab\.js$/, /[\\/]images\.js$/, /[\\/]appguide\.js$/];
 
 /* Longer strings that earn it. Each is here for one of three reasons: it teaches
    something about Russian, it says where something came from (a licence

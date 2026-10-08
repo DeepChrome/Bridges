@@ -77,9 +77,9 @@ function FinalCard({ best, onOpen }) {
 const STROKE = 5;
 // A finished disc's ring, closed and heavier, so done reads at a glance.
 const STROKE_DONE = 7;
-/* The depth of every disc's edge. One number, so a spine node and a side quest
-   are pressed by the same amount. */
-const LIP = 4;
+/* How far a disc sinks under a finger. One number, so a spine node and a side
+   quest are pressed by the same amount. */
+const PRESS_DROP = 2;
 const LANE_H = 64;          // height of the fork drawing
 const MERGE_H = 44;         // and of the lanes coming back to the road
 const ROW_GAP = 40;         // between ranks of side quests, when there is more than one
@@ -156,12 +156,10 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
        brand colour, the same the lit track arrives in, so the road reads as
        running into the node, round it, and on. A tick-green ring was a
        separate mark that the track did not continue into. */
-    ? { arc: t.brand, p: 1, face: famBg, icon: famInk, track: t.surface3,
-        lip: t.line, nm: t.ink, width: STROKE_DONE }
+    ? { arc: t.brand, p: 1, face: famBg, icon: famInk, track: t.surface3, nm: t.ink, width: STROKE_DONE }
     : !open
     // Locked: greyed as a whole — face, padlock and name — not just quieter.
-    ? { arc: null, p: 0, face: t.surface2, icon: t.ink3, track: t.lineSoft,
-        lip: t.lineSoft, nm: t.ink3, dim: true }
+    ? { arc: null, p: 0, face: t.surface2, icon: t.ink3, track: t.lineSoftSoft, nm: t.ink3, dim: true }
     : current
     /* Where you are: the same face as any open disc, larger, with its track
        in a dim brand so the ring reads as one being filled — the bar goes
@@ -175,15 +173,13 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
        line around the circle"): the track and the edge under the disc were
        a dim yellow here and on finished discs, and read as a second ring. */
     ? { arc: pr > 0 ? t.brand : null, p: pr, face: famBg, icon: famInk,
-        track: t.surface3, lip: t.line, nm: t.ink }
+        track: t.surface3, nm: t.ink }
     : pr > 0
-    ? { arc: t.brand, p: pr, face: famBg, icon: famInk, track: t.surface3,
-        lip: t.line, nm: t.ink }
+    ? { arc: t.brand, p: pr, face: famBg, icon: famInk, track: t.surface3, nm: t.ink }
     // Open but not where you are: quiet, and the icon carries the invitation. A
     // full coloured ring has to mean finished, or a fresh unit and a completed
     // one look identical.
-    : { arc: null, p: 0, face: famBg, icon: famInk, track: t.surface3,
-        lip: t.line, nm: t.ink };
+    : { arc: null, p: 0, face: famBg, icon: famInk, track: t.surface3, nm: t.ink };
 
   /* The current disc is bigger, because size is the cheapest hierarchy there
      is and a path is read at arm's length. */
@@ -192,11 +188,15 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
   const sw = tone.width || STROKE;
   const r = (size - sw) / 2;
   const c = 2 * Math.PI * r;
-  /* The lip, and how far the disc travels into it when pressed. Four, not
-     three: the physical press only reads if the travel is visible at arm's
-     length, and the disc must land flush on its own edge rather than hovering
-     a pixel above it. */
-  const drop = pressed && open ? LIP : 0;
+  /* The face sits wholly inside the ring, one concentric circle inside
+     another (the owner, 2026-10-08, the second time: "the yellow stroke
+     around the circle is not aligned to the tile… make it a stroke around the
+     outside with perfectly even centering"). There used to be a lip — the
+     same circle offset LIP below — and it showed as a grey crescent under the
+     ring, so the ring looked off-centre against the tile. No lip now; a
+     press sinks the whole disc a little instead. */
+  const face = size - 2 * sw;
+  const drop = pressed && open ? PRESS_DROP : 0;
   const sweep = useSweep(c * (1 - Math.min(1, tone.p)));
 
   return (
@@ -218,20 +218,14 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
         opacity: tone.dim ? 0.55 : 1,
       }}
     >
-      <View style={{ width: size, height: size + LIP }}>
-        {/* The lip: a solid edge under the disc, so pressing it has somewhere to go.
-            RN's shadows are blurred, so this is a plain circle rather than a shadow —
-            which is also the right model: the depth here is physical, a darker
-            tint of the disc's own colour, never an atmospheric blur. */}
-        <View testID={`lip-${unit.id}`}
-              style={{ position: "absolute", left: 0, top: LIP, width: size, height: size,
-                       borderRadius: size / 2, backgroundColor: tone.lip }} />
+      <View style={{ width: size, height: size + PRESS_DROP }}>
         <View testID={current ? `here-${unit.id}` : undefined}
               style={{ position: "absolute", left: 0, top: drop, width: size,
-                       height: size, borderRadius: size / 2,
-                       backgroundColor: tone.face, alignItems: "center",
-                       justifyContent: "center" }}>
-          <Svg width={size} height={size} style={{ position: "absolute" }}>
+                       height: size, alignItems: "center", justifyContent: "center" }}>
+          <View testID={`face-${unit.id}`}
+                style={{ position: "absolute", left: sw, top: sw, width: face, height: face,
+                         borderRadius: face / 2, backgroundColor: tone.face }} />
+          <Svg width={size} height={size} style={{ position: "absolute", left: 0, top: 0 }}>
             <Circle cx={size / 2} cy={size / 2} r={r} stroke={tone.track}
                     strokeWidth={sw} fill="none" />
             {/* The ring sweeps to its new value instead of being redrawn at it.

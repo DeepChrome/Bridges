@@ -140,6 +140,22 @@ export async function explain({ kind, ask, prompt, sub, answer, said, rule }, de
               deps, "/v1/explain", TIMEOUT_MS);
 }
 
+/* A question asked from any screen about what is on it (2026-10-08,
+   backend/src/ask.js): the question, the screen, what the screen is showing
+   (about.js), the learner's level and chapter, and the sheet's earlier turns.
+   With `mode: "app"` it is the "?" asking how to use the app, and `guide` is
+   the map it answers from (help.js). The reply is { answer }. */
+export async function ask({ question, screen, about, level, chapter, history, mode, guide }, deps = {}) {
+  if (mode === "app") {
+    return post({ mode, question: question || "", screen: screen || null, guide: guide || "",
+                  history: history || [] }, deps, "/v1/ask", TIMEOUT_MS);
+  }
+  return post({ question: question || "", screen: screen || null, about: about || {},
+                level: level || null, chapter: typeof chapter === "number" ? chapter : null,
+                history: history || [] },
+              deps, "/v1/ask", TIMEOUT_MS);
+}
+
 /* The free conversation with a tutor who is handed the learner's standing
    (2026-09-26, screens/Tutor.js). The profile rides in every turn and the
    Worker keeps none of it; the reply is { text, ru, remember }. */

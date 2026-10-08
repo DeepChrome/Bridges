@@ -10,7 +10,8 @@
  * nothing leaves the phone except inside a report the tester sends. */
 
 import { useEffect } from "react";
-import { L } from "./data";
+import { L, unitById, videoById } from "./data";
+import { navRef } from "./words";
 
 let current = null;
 let seq = 0;
@@ -33,6 +34,32 @@ export function useAbout(about) {
 const short = (s) => (typeof s === "string" ? s.slice(0, 300) : undefined);
 const label = (o) => (o && typeof o === "object" ? o.label || o.ru || o.en || o.text : o);
 
+/* The screen the learner is on at this moment, read off the navigator: its
+   route, title, unit, lesson, the video open, the plain params that say what
+   it shows, and the question or card it has registered. What the report flag
+   attaches to a report and the AI button sends with a question — one reading,
+   so the two cannot describe the screen differently. */
+export function screenAbout() {
+  const r = navRef.isReady && navRef.isReady() && navRef.getCurrentRoute ? navRef.getCurrentRoute() : null;
+  const opts = navRef.getCurrentOptions ? navRef.getCurrentOptions() || {} : {};
+  const params = (r && r.params) || {};
+  const keep = {};
+  for (const k of ["unitId", "index", "videoId", "type", "round", "word", "key", "topic", "section", "title", "caseId", "mode"]) {
+    if (params[k] !== undefined && typeof params[k] !== "object") keep[k] = params[k];
+  }
+  const unit = params.unitId ? unitById(params.unitId) : null;
+  const vid = params.videoId ? videoById(params.videoId) : r && r.name === "Video" && unit && unit.v ? unit.v : null;
+  return {
+    screen: r ? r.name : null,
+    title: typeof opts.title === "string" ? opts.title : undefined,
+    unit: unit ? unit.name : undefined,
+    lesson: typeof params.index === "number" ? params.index + 1 : undefined,
+    video: vid ? vid.title : undefined,
+    params: keep,
+    question: current ? { ...current, seq: undefined } : undefined,
+  };
+}
+
 /* One question or card, as a reviewer needs it: its kind, what it asked, the
    right answer, the options offered, and the word behind it by its Russian
    (rule 20.4: never an index, which a rebuild moves). */
@@ -44,6 +71,7 @@ export function describe(q) {
     kind: q.kind || q.t || undefined,
     word,
     prompt: short(q.prompt) || short(q.ru) || undefined,
+    sub: short(q.sub) || undefined,
     ask: short(q.ask) || short(q.hint) || undefined,
     answer: short(q.answer) || short(q.target) || (right.length ? right.join(" / ") : undefined) || short(q.en) || undefined,
     options: Array.isArray(q.options) ? q.options.map(label).map(short).slice(0, 6) : undefined,

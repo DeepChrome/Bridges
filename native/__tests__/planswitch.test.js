@@ -41,24 +41,23 @@ it("is not drawn when the Worker does not offer it", async () => {
 });
 
 /* The learner decides what the allowance is spent on (the owner, 2026-10-05):
-   the two uses that spend without being asked carry a switch, and turning one
-   off is saved; conversation and translation carry none. */
-it("lets the automatic uses be turned off, and saves the choice", async () => {
+   the one use that spends without being asked — the spoken-answer check —
+   carries a switch, and turning it off is saved. Conversation, translation
+   and questions to Teddy are asked for and carry none (2026-10-08: a wrong
+   answer is no longer explained unasked). */
+it("lets the automatic use be turned off, and saves the choice", async () => {
   plan.mockResolvedValue({ ok: true, plan: "free", caps: PLANS.free, used, selfServe: false });
   await withProfile();
   await act(async () => { fireEvent.press(await screen.findByTestId("plan")); });
-  const ex = await screen.findByTestId("plan-use-explain");
-  expect(screen.getByTestId("plan-use-feedback").props.value).toBe(true);
-  expect(screen.queryByTestId("plan-use-conversation")).toBeNull();
-  expect(screen.queryByTestId("plan-use-translate")).toBeNull();
-  await act(async () => { fireEvent(ex, "valueChange", false); });
-  await act(async () => { fireEvent(screen.getByTestId("plan-use-feedback"), "valueChange", false); });
-  // Held in the learner's state (repo.js SETTING_KEYS saves both): closed and
-  // opened again, the sheet still says off.
+  const fb = await screen.findByTestId("plan-use-feedback");
+  expect(fb.props.value).toBe(true);
+  for (const c of ["explain", "conversation", "translate"]) expect(screen.queryByTestId(`plan-use-${c}`)).toBeNull();
+  await act(async () => { fireEvent(fb, "valueChange", false); });
+  // Held in the learner's state (repo.js SETTING_KEYS): closed and opened
+  // again, the sheet still says off.
   await act(async () => { fireEvent.press(screen.getByTestId("sheet-backdrop")); });
   await act(async () => { fireEvent.press(await screen.findByTestId("plan")); });
-  expect((await screen.findByTestId("plan-use-explain")).props.value).toBe(false);
-  expect(screen.getByTestId("plan-use-feedback").props.value).toBe(false);
+  expect((await screen.findByTestId("plan-use-feedback")).props.value).toBe(false);
 });
 
 it("switches to Premium through the Worker and shows what it answered", async () => {

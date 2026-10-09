@@ -84,8 +84,8 @@ export default function Grammar({ route, navigation }) {
     );
   }
 
-  /* A link from a wrong answer names the section that states the rule
-     (core/explain.js, 2026-09-29). That section comes first, set apart by a
+  /* A link from a fact's pill names the section that states the rule
+     (FACT_REFS in core/facts.js). That section comes first, set apart by a
      brand edge, and the topic follows in its own order without it. A section
      that is a page of its own (one per case) opens as that page instead. */
   const want = route && route.params ? route.params.section : null;

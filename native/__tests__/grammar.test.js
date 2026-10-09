@@ -152,23 +152,15 @@ describe("the bulb", () => {
     expect(hasReference(referenceFor({ kind: "hear", prompt: "x" }))).toBe(false);
   });
 
-  it("carries the guide to the word, not only its table", async () => {
+  /* The chart and nothing else (the owner, 2026-10-08: "Remove random grammar
+     tips from the hint area… The rest is too busy"). */
+  it("shows the word's tables and no facts, rule card or topic link", async () => {
     const q = drill("conjugation");
     await withProfile(<Runner steps={[q]} onFinish={jest.fn()} gradeWords={false} navigation={nav} />);
     await screen.findByText(q.ask);
     await act(async () => { fireEvent.press(screen.getByTestId("bulb")); });
-    expect(screen.getByTestId("ref-facts")).toBeTruthy();
-    // A verb always has at least its aspect and its conjugation to say.
-    expect(referenceFor(q).facts.length).toBeGreaterThan(1);
-  });
-
-  it("leads to the topic behind the question", async () => {
-    const q = drill("conjugation");
-    await withProfile(<Runner steps={[q]} onFinish={jest.fn()} gradeWords={false} navigation={nav} />);
-    await screen.findByText(q.ask);
-    await act(async () => { fireEvent.press(screen.getByTestId("bulb")); });
-    await act(async () => { fireEvent.press(screen.getByTestId("ref-topic")); });
-    expect(nav.navigate).toHaveBeenCalledWith("Grammar", { topic: "verbs" });
+    expect(screen.getByTestId("table-asked")).toBeTruthy();
+    for (const id of ["ref-facts", "ref-rule", "ref-topic"]) expect(screen.queryByTestId(id)).toBeNull();
   });
 });
 

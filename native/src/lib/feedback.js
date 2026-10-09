@@ -131,15 +131,6 @@ export async function translate({ ru, en }, deps = {}) {
   return post(ru ? { ru } : { en }, deps, "/v1/translate", TIMEOUT_MS);
 }
 
-/* Why a wrong answer was wrong (2026-09-26): the question as the runner drew
-   it and what the learner put, one short paragraph back as { why }. Same
-   counter as feedback; the ordinary timeout, since it is one sentence out. */
-export async function explain({ kind, ask, prompt, sub, answer, said, rule }, deps = {}) {
-  return post({ kind: kind || "", ask: ask || "", prompt: prompt || "", sub: sub || null,
-                answer, said: said === undefined ? null : said, rule: rule || null },
-              deps, "/v1/explain", TIMEOUT_MS);
-}
-
 /* A question asked from any screen about what is on it (2026-10-08,
    backend/src/ask.js): the question, the screen, what the screen is showing
    (about.js), the learner's level and chapter, and the sheet's earlier turns.

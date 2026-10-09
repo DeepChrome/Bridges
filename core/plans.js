@@ -53,7 +53,8 @@ export const capsFor = (id) => ({ ...PLANS[planOf(id)] });
 /* What the app shows for a plan, in the order a learner thinks of it. */
 export const ALLOWANCE_LINES = [
   ["conversation", "tutor turns"],
-  ["explain", "explanations of a wrong answer"],
+  // Spent by asking Teddy (/v1/ask) since 2026-10-08; nothing explains a miss unasked.
+  ["explain", "questions to Teddy"],
   ["feedback", "spoken-answer checks"],
   ["translate", "translations"],
 ];

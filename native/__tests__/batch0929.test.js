@@ -35,27 +35,6 @@ const byBare = (b) => L.find((w) => fold(w.b) === b);
 beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.clearAllMocks(); });
 afterEach(async () => { await flushState(); });
 
-describe("a miss without the model", () => {
-  /* No Worker in this build: the miss still gets the answer's form, what
-     decides it, and a link to the section that states the rule. */
-  it("names the form, says why, and links the rule and the entry", async () => {
-    let q = null;
-    for (let k = 0; k < 40 && !q; k++) q = Q.drillQuestions("cases", 1, null, null, true)[0] || null;
-    expect(q && q.table && q.at).toBeTruthy();
-    await withProfile(<Runner steps={[q]} onFinish={jest.fn()} gradeWords={false} navigation={nav} />,
-                      { explain: false });
-    const input = await screen.findByTestId("type-input");
-    fireEvent.changeText(input, "ааа");
-    await waitFor(() => expect(input.props.value).toBe("ааа"));
-    await act(async () => { fireEvent.press(screen.getByText("Check")); });
-    expect(await screen.findByTestId("standard-why")).toBeTruthy();
-    expect(screen.getByTestId("standard-why-what")).toBeTruthy();
-    await act(async () => { fireEvent.press(screen.getByTestId("standard-why-rule")); });
-    expect(nav.navigate).toHaveBeenCalledWith("Grammar", expect.objectContaining({ topic: expect.any(String),
-                                                                                  section: expect.any(String) }));
-  });
-});
-
 describe("words that break the rules", () => {
   it("are flagged on the entry", async () => {
     await withProfile(<WordScreen route={{ params: { word: "хотеть" } }} navigation={nav} />);

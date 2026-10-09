@@ -15,10 +15,8 @@ import { markOutOfFive } from "../appearance";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
          BulbButton } from "../ui";
 import { RunTools } from "../askai";
-import { RuleCard, Reference, hasReference, StandardWhy, IrregularTag } from "../rules";
-import { topicFor } from "@core/grammar";
-import { wordFacts, isIrregular } from "@core/facts";
-import { standardExplanation } from "@core/explain";
+import { Reference, hasReference, IrregularTag } from "../rules";
+import { isIrregular } from "@core/facts";
 import { GuidePop } from "../guide";
 import { saveRun, clearRun, savedRun } from "../resume";
 import { RunCard } from "../resumesheet";
@@ -39,10 +37,9 @@ import { Build } from "../activities/Build";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts } from "@core/scheduler";
 import { fold, firstSense } from "@core/util";
-import { explain as askWhy, config as workerConfig, isCap, capNotice } from "../lib/feedback";
 
-/* The kinds a wrong answer can be explained for: one right answer, one thing
-   the learner put instead. The speaking and listening activities carry their
+/* The kinds whose miss the profile keeps for the tutor: one right answer, one
+   thing the learner put instead. The speaking and listening activities carry their
    own feedback and are not on the list; a match has no single answer. */
 export const EXPLAIN_KINDS = ["cases", "aspect", "agreement", "conjugation", "stress",
                               "cloze", "type", "choose-en", "choose-ru", "listen", "form"];
@@ -287,20 +284,20 @@ function Match({ q, onDone }) {
  * bulb, not the four whose answer happened to be safe to show.
  *
  * **Opening it still grades the answer Hard**, and that is not a punishment:
- * it is the only way the scheduler hears that the word was not recalled. The
- * cost is uniform across kinds now, because the facts can give the answer
- * away as readily as the table can — the aspect drill asks for a partner and
- * the facts name it.
+ * it is the only way the scheduler hears that the word was not recalled.
+ *
+ * **It is the word's tables and nothing else** (the owner, 2026-10-08:
+ * *"Remove random grammar tips from the hint area. Just show the reference
+ * conjugation chart. The rest is too busy"*). The facts, the chapter's card
+ * and the link to the topic went; a word with no table gets no bulb. The rule
+ * still comes under a wrong answer, and the facts on the word's entry.
  */
 export function referenceFor(q) {
   const w = q.i !== undefined && q.i !== null ? L[q.i] : null;
   return {
     word: w,
     tables: (w && w.t) || [],
-    facts: w ? wordFacts(w) : [],
     mark: q.table && q.at ? { table: q.table, at: q.at } : null,
-    note: q.note || null,
-    topic: topicFor(q.kind) || (w ? topicFor(w.p) : null),
   };
 }
 
@@ -311,15 +308,6 @@ export function promptSpeech(q) {
   if (q.say) return q.say;
   if (q.cyr && q.prompt && CYR.test(q.prompt) && !/_/.test(q.prompt)) return q.prompt;
   return null;
-}
-
-/* A chapter's grammar card under a verdict (§30al — the owner: *"the grammar
-   tips can be feedback after an incorrect answer on a question featuring the
-   grammar tip"*). `RuleCard` in rules.js is the one renderer; this name is
-   kept because the verdict, the reference sheet and the lesson's teaching step
-   all reach for it and the tests name it. */
-export function RuleNote({ note, testID }) {
-  return <RuleCard note={note} testID={testID} />;
 }
 
 /* ---------------------------------------------------------------- registry */
@@ -459,14 +447,6 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     if (!navigation || typeof navigation.addListener !== "function") return undefined;
     return navigation.addListener("blur", () => setHintOpen(false));
   }, [navigation]);
-  // Why the answer was wrong, from the Worker: null (not asked), "pending",
-  // or the text. Anything but the text draws nothing — the verdict stands alone.
-  const [why, setWhy] = useState(null);
-  /* The reference behind the two lines, open only if it is asked for (the
-     owner, 2026-09-26: *"the user can click a box and get a little hint on
-     the rules to address the thing being drilled"*). Collapsed it costs a
-     line; open it teaches the pattern rather than fixing the one word. */
-  const [ruleOpen, setRuleOpen] = useState(false);
   const results = useRef(from ? from.results : []);
   const tally = useRef(from ? { ...from.tally }
     : { right: 0, wrong: 0, helped: 0, skipped: 0, credit: 0 });
@@ -484,7 +464,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   guard.current = at > 0 && !finished.current;
   /* What the bulb has behind it for this question. Reading it always counts
      as a hint — see referenceFor. */
-  const ref = q ? referenceFor(q) : { tables: [], facts: [], note: null, topic: null };
+  const ref = q ? referenceFor(q) : { tables: [] };
   const qWord = ref.word;
   const words = useWords();
   /* For a tester's report: this question, and what they answered if they
@@ -492,9 +472,6 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   useAbout(q ? { ...describe(q), run: title, step: `${at + 1} of ${queue.length}`,
                  said: verdict && typeof verdict.said === "string" ? verdict.said : undefined,
                  right: verdict ? verdict.right : undefined } : null);
-  /* The explanation a miss gets when the model gives none (core/explain.js):
-     computed once the answer is in and only for a miss. */
-  const standard = verdict && verdict.right === false && q ? standardExplanation(q, qWord) : null;
   const irregular = !!(qWord && isIrregular(qWord));
 
   // Autoplay waits for whatever is still playing — the previous answer's reading,
@@ -555,27 +532,12 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setAnswered(true);
     setVerdict({ right: !!correct, credit, note, said, as });
 
-    /* A miss is explained, and remembered (2026-09-26). The explanation is the
-       Worker's and arrives under the verdict when it does — a failure of any
-       kind leaves the verdict exactly as drawn, the rule Say follows for its
-       online feedback. The miss itself goes to the profile whatever happens,
-       for the tutor to draw on; a recycled question is not recorded twice. */
-    if (!correct && EXPLAIN_KINDS.includes(q.kind)) {
+    /* A miss is remembered for the tutor to draw on (2026-09-26); a recycled
+       question is not recorded twice. It is no longer explained unasked
+       (2026-10-08) — the sparkle beside the question is where to ask. */
+    if (!correct && EXPLAIN_KINDS.includes(q.kind) && !q.retry) {
       const miss = missOf(q, said);
-      if (!q.retry) {
-        update((prev) => ({ ...prev, misses: [miss].concat(prev.misses || []).slice(0, MISSES_KEPT) }));
-      }
-      if (st.explain !== false && workerConfig("/v1/explain")) {
-        setWhy("pending");
-        const mine = at;
-        askWhy({ kind: q.kind, ask: q.ask, prompt: q.prompt, sub: q.sub, answer: miss.answer, said,
-                 rule: q.note ? q.note.title : null }).then((reply) => {
-          if (!alive.current || atRef.current !== mine) return;
-          setWhy(reply && reply.ok === true && reply.why
-            ? { why: reply.why, yours: reply.yours || "", rule: reply.rule || "" }
-            : isCap(reply) ? { cap: capNotice(reply) } : null);
-        });
-      }
+      update((prev) => ({ ...prev, misses: [miss].concat(prev.misses || []).slice(0, MISSES_KEPT) }));
     }
 
     /* The verdict reaches three senses at once, and the buzz is the one that
@@ -659,8 +621,6 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setVerdict(null);
     setPicked(null);
     setUsedHint(false);
-    setWhy(null);
-    setRuleOpen(false);
   };
 
   /* A step backwards, for a run where that is a sensible thing to want.
@@ -684,8 +644,6 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setVerdict(null);
     setPicked(null);
     setUsedHint(false);
-    setWhy(null);
-    setRuleOpen(false);
   };
   stepBackRef.current = goBack;
   const back = !allowBack || at === 0 ? undefined : goBack;
@@ -868,69 +826,13 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                 {`Answer: ${answer ? answer.label : q.answer}`}
               </Text>
             ) : null}
-            {/* Why, when the Worker has one: two short lines, the Russian in
-                them set apart (ui.js `Marked`). A spinner while it is on its
-                way, and the chapter's rule card below **only if it does not
-                come** — the two together were the "large ugly verbose block"
-                the owner read on his phone (2026-09-26). The explanation is
-                about the word just missed and the card is the rule in
-                general, so where there is an explanation the card is the
-                thing to cut. */}
-            {right === false && why === "pending" ? (
-              <ActivityIndicator testID="why-pending" color={t.ink3}
-                                 style={{ alignSelf: "flex-start", marginTop: 12 }} />
-            ) : right === false && why && why.cap ? (
-              <>
-                {/* The day's AI is spent: said once, and the standard
-                    explanation below carries on without it. */}
-                <Muted testID="why-cap" style={{ marginTop: 12 }}>{`${why.cap.text} · ${why.cap.detail}`}</Muted>
-                {standard ? <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.line }}>
-                  <StandardWhy ex={standard}
-                               onRule={navigation ? (r) => navigation.navigate("Grammar", { topic: r.topic, section: r.heading }) : null}
-                               onWord={qWord && words ? () => words.openFull(q.i) : null} />
-                </View> : null}
-              </>
-            ) : right === false && why ? (
-              <View testID="why" style={{ marginTop: 12, paddingTop: 12,
-                                          borderTopWidth: 1, borderTopColor: t.line }}>
-                <Note testID="why-line" text={why.why} />
-                {why.yours ? (
-                  <Marked testID="why-yours" text={why.yours} size={T.small} color={t.ink3}
-                          italic style={{ marginTop: 6 }} />
-                ) : null}
-                {/* The reference, behind a tap. Two short lines stay two
-                    short lines for whoever does not want it. */}
-                {why.rule ? (
-                  ruleOpen ? (
-                    <View testID="why-rule" style={{ marginTop: 10, padding: 12, borderRadius: radius.md,
-                                                     backgroundColor: t.surface2 }}>
-                      <Note text={why.rule} size={T.small + 1} color={t.ink2} />
-                    </View>
-                  ) : (
-                    <Btn kind="link" testID="why-rule-open" label="The rule"
-                         style={{ marginTop: 6, alignSelf: "flex-start" }}
-                         onPress={() => setRuleOpen(true)} />
-                  )
-                ) : null}
-              </View>
-            ) : right === false && standard ? (
-              /* Without the model — no Worker in this build, the setting off,
-                 the day's allowance spent, no connection — a miss still gets
-                 the whole answer: which form it is, what decides it, and the
-                 rule and the entry to read it in (core/explain.js). */
-              <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.line }}>
-                <StandardWhy ex={standard}
-                             onRule={navigation ? (r) => navigation.navigate("Grammar", { topic: r.topic, section: r.heading }) : null}
-                             onWord={qWord && words ? () => words.openFull(q.i) : null} />
-              </View>
-            ) : right === false && q.note ? (
-              /* A kind with nothing to derive from (no word behind it): the
-                 chapter's rule card, as before. A rule read at the moment it
-                 was broken is a rule that sticks (§30al). */
-              <View style={{ marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: t.line }}>
-                <RuleNote note={q.note} testID="rule-note" />
-              </View>
-            ) : null}
+            {/* The answer, its audio and More — nothing else (the owner,
+                2026-10-08: "Remove the bloat in the pop-up. Don't need forced
+                AI responses. Instead, just leave the answer, the audio, and
+                the full entry"). The model's explanation, the derived one, the
+                fact pills and the rule card all used to come under a miss;
+                the sparkle beside the question asks Teddy when a learner
+                wants the why. */}
             {/* A gap-fill gives the sentence back whole, every word a link, and
                 names the form that filled it. */}
             {right !== null && q.reveal ? (
@@ -958,13 +860,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         <Reference
           title={ref.word ? ref.word.w : null}
           sub={ref.word ? firstSense(ref.word) : null}
-          tables={ref.tables} mark={ref.mark} facts={ref.facts}
+          tables={ref.tables} mark={ref.mark}
           aspect={ref.word ? ref.word.a : null}
-          note={ref.note} topic={ref.topic}
-          /* Guarded as onRule is: a Runner mounted without a navigation (the
-             vocabulary step's was, until 2026-10-01) crashed the app on this
-             press — thrown from a handler, past the error boundary. */
-          onTopic={navigation ? (id) => navigation.navigate("Grammar", { topic: id }) : null}
           onClose={() => setHintOpen(false)} />
       ) : null}
     </Screen>

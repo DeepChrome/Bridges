@@ -206,8 +206,10 @@ export function renewsAt(now = new Date()) {
    in the sheet (the owner, 2026-10-05: "if they want to save all AI credit
    for conversations, they could disable all other AI usage"). Conversation
    and translation are spent only by opening those screens, so they need
-   none. The value is the learner-state key that turns the use off. */
-const AUTO_SPEND = { explain: "explain", feedback: "sayFeedback" };
+   none, and nor do questions to Teddy, which are asked (2026-10-08: wrong
+   answers are no longer explained unasked). The value is the learner-state
+   key that turns the use off. */
+const AUTO_SPEND = { feedback: "sayFeedback" };
 
 function PlanRow({ navigation }) {
   const t = useTheme();

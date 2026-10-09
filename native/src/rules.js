@@ -419,40 +419,11 @@ export function Facts({ facts, testID, onLeave }) {
   );
 }
 
-/* The explanation a wrong answer gets without the model (core/explain.js):
- * which form the answer is, the facts that decide it — what breaks the rules
- * first — and the two references it leans on: the grammar section that states
- * the rule, and the word's own entry. Organised as those parts and nothing
- * more (the owner, 2026-09-29: "keep it organized… rely on references"). */
-export function StandardWhy({ ex, onRule, onWord, testID = "standard-why" }) {
-  const t = useTheme();
-  if (!ex) return null;
-  return (
-    <View testID={testID}>
-      {ex.what ? <Marked testID={`${testID}-what`} text={ex.what} size={T.body - 1} color={t.ink} /> : null}
-      <Facts facts={ex.why} testID={`${testID}-facts`} />
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 14, marginTop: 10 }}>
-        {ex.rule && onRule ? (
-          <Btn kind="link" testID={`${testID}-rule`} label={`Rule: ${ex.rule.heading}`}
-               onPress={() => onRule(ex.rule)} />
-        ) : null}
-        {onWord ? (
-          <Btn kind="link" testID={`${testID}-word`} label="The full entry" onPress={onWord} />
-        ) : null}
-      </View>
-    </View>
-  );
-}
-
-/* The bulb's sheet — the word, what is true about it, its paradigms whole,
- * the rule behind the question, and the way into the reference for the whole
- * topic. In that order, because "feminine, hard stem" is what makes the table
- * underneath it readable rather than a grid to memorise.
- *
- * Nothing is withheld (§30az). Any part may be absent; the sheet is only
- * offered when at least one is there (`hasReference`), because a bulb that
- * opens on nothing is worse than no bulb. */
-export function Reference({ title, sub, tables, mark, facts, note, topic, onTopic, onClose, aspect }) {
+/* The bulb's sheet — the word and its tables, the asked one open and its cell
+ * marked. Nothing is withheld (§30az), and nothing else is added (the owner,
+ * 2026-10-08: *"Just show the reference conjugation chart. The rest is too
+ * busy"*): the facts, the rule card and the topic link it used to carry went. */
+export function Reference({ title, sub, tables, mark, onClose, aspect }) {
   const t = useTheme();
   return (
     <Sheet onClose={onClose} title="Reference"
@@ -463,29 +434,17 @@ export function Reference({ title, sub, tables, mark, facts, note, topic, onTopi
           {sub ? <Muted>{sub}</Muted> : null}
         </View>
       ) : null}
-      <Facts facts={facts} testID="ref-facts" onLeave={onClose} />
       {/* The table the question is about opens; the word's others are a tap
           away rather than stacked under it. */}
       <TableGroup tables={tables} speak mark={mark} testID="ref-table" aspect={aspect}
                   open={[Math.max(0, (tables || []).indexOf(mark && mark.table))]} />
-      {note ? (
-        <View style={{ marginTop: tables && tables.length ? 20 : 0 }}>
-          <RuleCard note={note} testID="ref-rule" />
-        </View>
-      ) : null}
-      {/* Only with somewhere to go: a link that cannot navigate is not drawn. */}
-      {topic && onTopic ? (
-        <Btn kind="ghost" testID="ref-topic" label={`More on ${topic.title.toLowerCase()}`}
-             style={{ marginTop: 16, alignSelf: "flex-start" }}
-             onPress={() => { onClose(); onTopic(topic.id); }} />
-      ) : null}
     </Sheet>
   );
 }
 
-/* Is there anything behind the bulb for this question? Exported so the runner
+/* Is there a chart behind the bulb for this question? Exported so the runner
    draws the control only where it leads somewhere, and so a test can ask the
    question without mounting a sheet. */
-export function hasReference({ tables, facts, note, topic }) {
-  return !!((tables && tables.length) || (facts && facts.length) || note || topic);
+export function hasReference({ tables }) {
+  return !!(tables && tables.length);
 }

@@ -35,7 +35,6 @@ import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
 import { TOPICS, checkGrammar, russianIn, topicFor } from "../core/grammar.js";
 import { wordFacts, conjugation, stemChange, nounStem, genderWhy, stressAt, irregularities, FACT_REFS } from "../core/facts.js";
-import { standardExplanation } from "../core/explain.js";
 import { ENDINGS, checkEndings, rankEndings } from "../core/endings.js";
 import { ambiguousSpellings, spokenKey } from "./build_form_audio.mjs";
 import { sentenceLemmas, gradeAlignment, feedbackTags, nearMiss, alignmentCredit, SPEECH_SKIP_TOP,
@@ -2801,27 +2800,6 @@ group("the facts about a word");
     if (got) ok(got.length === 0, `«${b}» follows the rules`, got.join(", "));
   }
 
-  /* The explanation a miss gets without the model (core/explain.js): the
-     answer's form, the facts that decide it, and a grammar section that
-     exists. */
-  const kn = by("книга");
-  if (kn) {
-    const t = kn.t.find((x) => /Declension/.test(x.title));
-    const r = t.rows.findIndex((row) => /Accusative/.test(row[0]));
-    const ex = standardExplanation({ kind: "cases", answer: [].concat(t.rows[r][1])[0], table: t, at: [r, 1] }, kn);
-    ok(ex && /accusative singular/.test(ex.what) && ex.rule && ex.rule.heading === "Accusative",
-       "a missed case names the form and links the section that states it", JSON.stringify(ex && [ex.what, ex.rule]));
-    ok(ex.why.some((f) => /Feminine/.test(f.label)), "and says what decides it", ex.why.map((f) => f.label).join(", "));
-  }
-  const hot = by("хотеть");
-  if (hot) {
-    const t = hot.t.find((x) => /Present/.test(x.title));
-    const ex = standardExplanation({ kind: "conjugation", answer: [].concat(t.rows[1][1])[0], table: t, at: [1, 1] }, hot);
-    ok(ex.why[0] && ex.why[0].irregular, "an irregular verb's miss leads with what breaks the rules",
-       ex.why.map((f) => f.label).join(", "));
-    ok(ex.rule && ex.rule.topic === "verbs", "and links the verbs topic", JSON.stringify(ex.rule));
-  }
-
   /* Nothing may claim a fact it cannot support, and nothing may throw on a
      word with no paradigm at all — the closed-class rows have none. */
   let threw = 0, empty = 0;
@@ -3726,19 +3704,6 @@ group("the review, 2026-10-01");
     }
   }
   ok(casesN > 0 && head === 0, "the cases drill never offers the headword as a wrong option", `${head}/${casesN}`);
-
-  // 8. The standard explanation names the answer of a chosen question too.
-  const blank = [];
-  const shapes = [["cases", false], ["conjugation", false, ["who"]], ["conjugation", false, ["present"]],
-                  ["agreement", false], ["aspect", false, ["partner"]]];
-  for (const [type, typed, only] of shapes) {
-    for (const q of Q.drillQuestions(type, 5, studiedR, undefined, typed, only)) {
-      const ex = standardExplanation(q, L[q.i]);
-      if (!ex || !ex.what || /«»/.test(ex.what)) blank.push(`${type}: ${ex && ex.what}`);
-      else if (q.ask === "Whose form is this?" && !ex.what.startsWith(`«${q.prompt}»`)) blank.push(`who: ${ex.what}`);
-    }
-  }
-  ok(!blank.length, "the explanation of a chosen miss says what the answer was", blank.slice(0, 3).join("; "));
 
   // 9. «есть» "eat" is reachable beside «есть» "there is"; «мой», listed twice
   // with one gloss, is one hit.

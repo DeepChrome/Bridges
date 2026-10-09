@@ -87,9 +87,6 @@ export const DEFAULTS = {
      cog on the drill (Flows.js DrillOptions): drill id -> { only, chapters }.
      Absent, a drill runs as it always did. */
   drillPrefs: {},
-  /* One short paragraph from the Worker under a wrong answer, saying why
-     (2026-09-26). On unless turned off; nothing is asked without a Worker. */
-  explain: true,
   /* The last wrong answers, newest first, as { kind, prompt, answer, said, at }
      (Run.js): what the tutor is handed so "drill me on what I get wrong" has
      something to go on. Capped at MISSES_KEPT. */

@@ -668,6 +668,16 @@ export function nextStep(st) {
   return { ...here, step: c ? c.id : "vocab" };
 }
 
+/* Where Continue goes once a unit's video and its questions are done: the
+   next thing on the path, kept linear (the owner, 2026-10-09: "After I
+   answer the video questions, continue should take me to the next chapter.
+   It's important to keep things pretty linear other than optional
+   lessons"). Null at the end of the course. */
+export function nextRoute(st) {
+  const n = nextStep(st);
+  return n ? stepRoute(n.step, n.unit, n.index) : null;
+}
+
 /* The personal review's words (the owner, 2026-10-05: *"words from lessons
    that the user has already completed or will encounter slightly in the
    future (upcoming lessons)"*): every finished lesson's words, wherever on

@@ -12,8 +12,9 @@ import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, S
          Dropdown, Text } from "../ui";
 import {
   UN, STATS, unitState, markComponent, videos, videoById, videoWatched, unitById,
-  CHANNELS, videoLines, transcriptOf, transcriptEnOf,
+  CHANNELS, videoLines, transcriptOf, transcriptEnOf, nextRoute,
 } from "../data";
+import { StackActions } from "@react-navigation/native";
 import { Transcript } from "../transcript";
 import { useWords } from "../words";
 import { libraryState, setLibraryState, watchHistory, openedVideo, setVideoPosition,
@@ -414,8 +415,19 @@ export function VideoSummary({ route, navigation }) {
   const lines = unit && unit.v && unit.v.id === v.id ? videoLines(unit) : [];
   const go = () => navigation.navigate("Video",
     { videoId: v.id, unitId: params.unitId, index: params.index, viaSummary: true });
+  /* Opened again from the end of the video's questions (`onward`), its
+     Continue goes on to the next lesson, not back into the video (the owner,
+     2026-10-09: "the continue at the bottom of that page should move them to
+     the next lesson rather than back to the video"). */
+  const next = params.onward ? nextRoute(st) : null;
+  const goOn = () => {
+    navigation.dispatch(StackActions.popToTop());
+    navigation.dispatch(StackActions.push(...next));
+  };
   return (
-    <Screen footer={<Btn block kind="pri" testID="summary-continue" label="Watch video" onPress={go} />}>
+    <Screen footer={next
+      ? <Btn block kind="pri" testID="summary-continue" label="Continue" onPress={goOn} />
+      : <Btn block kind="pri" testID="summary-continue" label="Watch video" onPress={go} />}>
       <Title sub={[v.ch, unit ? unit.name : null].filter(Boolean).join(" · ")}>{short(v.title)}</Title>
       <PrepList words={words} seen={st.seen || {}} unit={unit} lines={lines} label="In the video"
                 onCards={(list) => navigation.navigate("ListCards",
@@ -822,9 +834,18 @@ export function Video({ route, navigation }) {
     });
     if (player.current) player.current.pause();
     const behind = params.viaSummary ? 2 : 1;
+    /* A unit's video with no questions goes on along the path, as its
+       questions' Continue does (2026-10-09). Read off the state as it will be
+       once this video is marked, since the update has not landed yet. */
+    const onward = unit && unit.v && unit.v.id === v.id
+      ? nextRoute(markComponent({ ...st, watched: { ...(st.watched || {}), [v.id]: today() } }, unit, params.index || 0, "video"))
+      : null;
     if (v.quiz && v.quiz.length) {
       navigation.navigate("VideoQuiz",
         { videoId: v.id, unitId: params.unitId, index: params.index, depth: behind + 1 });
+    } else if (onward && navigation.pop) {
+      navigation.pop(behind);
+      navigation.dispatch(StackActions.push(...onward));
     } else if (navigation.pop) navigation.pop(behind);
     else navigation.goBack();
   };

@@ -17,8 +17,9 @@ import {
   chapterWords, irregularWords, knownPool,
   reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
   scenarioLibrary, required, linesWith, grammarKey, currentGrammarUnit, grammarNoteOf,
-  todaysWork, recapKey, components, stepRoute, caseLearnKey, caseDrillKey,
+  todaysWork, recapKey, components, stepRoute, caseLearnKey, caseDrillKey, nextRoute,
 } from "../data";
+import { StackActions } from "@react-navigation/native";
 import { CASES, caseById } from "@core/cases";
 import { quizPassed } from "@core/state";
 import { pairDrill } from "@core/alphabet";
@@ -1213,7 +1214,7 @@ export function videoQuizSteps(v) {
 }
 
 export function VideoQuizFlow({ route, navigation }) {
-  const { update } = useSession();
+  const { st, update } = useSession();
   const params = route.params || {};
   const v = videoFor(params);
   const [result, setResult] = useState(null);
@@ -1224,6 +1225,14 @@ export function VideoQuizFlow({ route, navigation }) {
      it came from them (`depth` 3), or just off this screen when the lesson's
      own "Video questions" step opened it. */
   const leave = () => (navigation.pop ? navigation.pop(params.depth || 1) : navigation.goBack());
+  /* A unit's video: Continue goes on to the next thing on the path, not back
+     to the video's pages (the owner, 2026-10-09). The screens it came through
+     are popped first, so Back from the next lesson is the path, not the video. */
+  const onward = params.unitId ? nextRoute(st) : null;
+  const goOn = () => {
+    if (navigation.pop) navigation.pop(params.depth || 1);
+    navigation.dispatch(StackActions.push(...onward));
+  };
   if (!v || !steps.length) return <Done title="No questions for this video yet" onBack={leave} />;
   if (result) {
     return (
@@ -1232,10 +1241,13 @@ export function VideoQuizFlow({ route, navigation }) {
         detail={`${result.right} of ${result.total} right`}
         score={result.score}
         passed={result.score >= PASS_MARK}
-        againLabel="Try again"
-        onAgain={() => { setResult(null); setSeed(seed + 1); }}
-        onContinue={leave}
-        continueLabel="Continue"
+        /* The quiet way off the line: the video's summary again, whose own
+           Continue then goes on, as this one does. */
+        againLabel={onward ? "Summary" : "Try again"}
+        onAgain={onward
+          ? () => navigation.navigate("VideoSummary", { unitId: params.unitId, index: params.index, onward: true })
+          : () => { setResult(null); setSeed(seed + 1); }}
+        onContinue={onward ? goOn : leave}
         onBack={leave}
       />
     );

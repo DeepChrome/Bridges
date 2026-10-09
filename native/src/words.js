@@ -224,7 +224,7 @@ function WordSheet({ state, onClose, onFull }) {
       <GrammarLine lemma={lemma} surface={surface} style={{ marginTop: 8 }} />
 
       {s.surface ? (
-        <Pressable testID="sheet-root" accessibilityRole="button" accessibilityLabel={`${lemma.b}, full entry`}
+        <Pressable testID="sheet-root" accessibilityRole="button" accessibilityLabel={`${lemma.b}, more`}
                    onPress={onFull}
                    style={({ pressed }) => ({ marginTop: 14, paddingVertical: 10, paddingHorizontal: 12,
                      borderRadius: radius.md, backgroundColor: t.surface2, opacity: pressed ? 0.7 : 1 })}>

@@ -61,7 +61,7 @@ test("a miss shows the answer, its audio and More, asks the Worker nothing, and 
   await withRunner([chosen]);
   await act(async () => { fireEvent.press(await screen.findByText("table")); });
   await screen.findByTestId("verdict");
-  expect(screen.getByText("Answer: book")).toBeTruthy();
+  expect(screen.getByTestId("verdict-answer")).toHaveTextContent(/book/);
   expect(screen.getByTestId("verdict-speaker")).toBeTruthy();
   // More needs the word provider, which this harness does not mount; its own
   // test covers it.

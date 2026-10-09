@@ -26,7 +26,7 @@ import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio
 import { right as buzzRight, wrong as buzzWrong, done as buzzDone } from "../haptics";
 import { RuInput } from "../keyboard";
 import { charDistance } from "@core/compare";
-import { Linked, useWords } from "../words";
+import { Linked } from "../words";
 import { useAbout, describe } from "../about";
 import { Hear } from "../activities/Hear";
 import { Say } from "../activities/Say";
@@ -37,6 +37,12 @@ import { Build } from "../activities/Build";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
 import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts, gradesCard } from "@core/scheduler";
 import { fold, firstSense } from "@core/util";
+
+/* The row of round tools under a question — speaker, bulb, Teddy, flag. */
+export const TOOL_SIZE = 48;
+const TOOL_GAP = 20;
+/* The right answer under a verdict: the largest thing on the card. */
+const ANSWER_SIZE = 26;
 
 /* The kinds whose miss the profile keeps for the tutor: one right answer, one
    thing the learner put instead. The speaking and listening activities carry their
@@ -466,7 +472,6 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
      as a hint — see referenceFor. */
   const ref = q ? referenceFor(q) : { tables: [] };
   const qWord = ref.word;
-  const words = useWords();
   /* For a tester's report: this question, and what they answered if they
      have (about.js). */
   useAbout(q ? { ...describe(q), run: title, step: `${at + 1} of ${queue.length}`,
@@ -652,6 +657,10 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const answer = q.options ? q.options.find((o) => o.right) : null;
   const right = verdict ? verdict.right : null;
   const partial = verdict && verdict.right === false && verdict.credit > 0;
+  /* The right answer as the verdict shows it: the right answer the learner
+     gave when it was another accepted one, else the one asked for. */
+  const answerText = (verdict && verdict.as) || (answer ? answer.label : q.answer) || null;
+  const answerSpeech = (verdict && verdict.as) || answerAudioText(q, answer);
   const tone = !verdict || verdict.right === null ? null
     : verdict.right ? { bg: t.goodBg, line: t.good, btn: "good" }
     : partial ? { bg: t.brandBg, line: t.brand, btn: "pri" }
@@ -709,9 +718,13 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           nobody read a quiz shot (2026-09-17). A question and its answers are
           one thing and belong together; the breathing room belongs under the
           progress bar, where it reads as air rather than as a rift. */}
+      {/* …and then too low (the owner, 2026-10-09: "Lot of empty space up
+          top… move the question up a little"): flush with the answers it left
+          the top half of the screen empty. Centred in the room above them now,
+          the slack split between above and below. */}
       <Animated.View testID="question-block"
                      style={[questionIn, { flexGrow: hasInput(q) || !q.prompt ? 0 : 1,
-                                           justifyContent: "flex-end",
+                                           justifyContent: "center",
                                            alignItems: "center", marginBottom: 20 }]}>
         <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "600", letterSpacing: 1,
                        textTransform: "uppercase", marginBottom: 12,
@@ -736,13 +749,15 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
             asking about the question is part of the question, so it sits
             here rather than in the header (the owner, 2026-10-08). They stay
             after the answer, which is when "why?" is most often asked. */}
-        <View style={{ marginTop: 12, flexDirection: "row", gap: 10, justifyContent: "center" }}>
-          {promptSpeech(q) ? <Speaker text={promptSpeech(q)} /> : null}
+        {/* 48 dp and spaced wide (the owner, 2026-10-09: "too small. Make
+            them larger and space them out a little bit more horizontally"). */}
+        <View style={{ marginTop: 14, flexDirection: "row", gap: TOOL_GAP, justifyContent: "center" }}>
+          {promptSpeech(q) ? <Speaker text={promptSpeech(q)} size={TOOL_SIZE} /> : null}
           {!answered && hasReference(ref) ? (
-            <BulbButton testID="bulb" on={hintOpen} label="Reference"
+            <BulbButton testID="bulb" on={hintOpen} label="Reference" size={TOOL_SIZE}
                         onPress={() => { setUsedHint(true); setHintOpen(true); }} />
           ) : null}
-          <RunTools />
+          <RunTools size={TOOL_SIZE} />
         </View>
       </Animated.View>
 
@@ -791,41 +806,51 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                 would be wallpaper within one quiz, and on a wrong answer he
                 would be a cartoon commiserating with someone who is trying to
                 concentrate. */}
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              {right === true && !usedHint ? <GuidePop pose="cheer" size={40} /> : null}
-              <Text style={{ color: t.ink, fontWeight: "700", fontSize: 16 }}>
-                {right === null ? "Skipped" : right ? "Correct" : partial ? "Almost" : "Not quite"}
-              </Text>
-              {/* The answer card says when the word breaks the rules
-                  (2026-09-29), right or wrong — it is worth knowing either way. */}
-              {right !== null && irregular ? <IrregularTag word={qWord} testID="verdict-irregular" /> : null}
-              {/* Hear the right form again, whatever the verdict. It was read
-                  out as the verdict landed; this is the button for once more.
-                  At the end of the verdict's own line: on a row of its own it
-                  was a lone circle taking a line for nothing (2026-10-01). */}
-              {/* …and More beside it: the word's whole entry, every form in
-                  its tables, to look over before going on (the owner,
-                  2026-10-06: "a 'more' button next to the speaker that will
-                  pull up the full detail entry for that word"). */}
-              <View style={{ marginLeft: "auto", flexDirection: "row", alignItems: "center", gap: 6 }}>
-                {right !== null && qWord && words ? (
-                  <Btn kind="ghost" testID="verdict-more" label="More"
-                       onPress={() => words.openFull(q.i)} />
-                ) : null}
-                {right !== null && ((verdict && verdict.as) || answerAudioText(q, answer)) ? (
-                  <View testID="verdict-speaker">
-                    <Speaker text={(verdict && verdict.as) || answerAudioText(q, answer)} size={36} />
-                  </View>
-                ) : null}
+            {/* A heading for a right, partial or skipped answer. A wrong one
+                has none: the colour says it, and the answer below is what
+                matters (the owner, 2026-10-09: "Remove 'not quite' and make the
+                correct answer larger"). */}
+            {right !== false || partial ? (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                {right === true && !usedHint ? <GuidePop pose="cheer" size={40} /> : null}
+                <Text style={{ color: t.ink, fontWeight: "700", fontSize: 16 }}>
+                  {right === null ? "Skipped" : right ? "Correct" : "Almost"}
+                </Text>
               </View>
-            </View>
+            ) : null}
+            {/* The right answer, large, with its speaker right beside it — not
+                at the far end of a heading (the owner, 2026-10-09: "make sure
+                the speaker button is aligned more with what is actually
+                said"). Russian is a word link like everywhere else: one tap
+                for the quick look, its More for the whole entry. That
+                replaced a separate More button here (same day: "put its
+                functionality into clicking the answer itself"). */}
+            {right !== null && answerText ? (
+              <View testID="verdict-answer" style={{ flexDirection: "row", alignItems: "center",
+                                                     flexWrap: "wrap", gap: 10 }}>
+                {/* An English answer ("book") cannot be tapped into a Russian
+                    word, so the word it means comes first, linked: «книга — book». */}
+                {CYR.test(answerText) ? (
+                  <Linked text={answerText} size={ANSWER_SIZE} />
+                ) : (
+                  <>
+                    {qWord ? <Linked text={qWord.w} size={ANSWER_SIZE} /> : null}
+                    <Text style={{ color: qWord ? t.ink2 : t.ink, fontSize: qWord ? ANSWER_SIZE - 6 : ANSWER_SIZE,
+                                   fontWeight: "700" }}>
+                      {qWord ? `— ${answerText}` : answerText}
+                    </Text>
+                  </>
+                )}
+                {answerSpeech ? (
+                  <View testID="verdict-speaker"><Speaker text={answerSpeech} size={40} /></View>
+                ) : null}
+                {/* The answer card says when the word breaks the rules
+                    (2026-09-29), right or wrong. */}
+                {irregular ? <IrregularTag word={qWord} testID="verdict-irregular" /> : null}
+              </View>
+            ) : null}
             {verdict && verdict.note ? (
               <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>{verdict.note}</Text>
-            ) : null}
-            {right === false && (answer || q.answer) ? (
-              <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>
-                {`Answer: ${answer ? answer.label : q.answer}`}
-              </Text>
             ) : null}
             {/* The answer, its audio and More — nothing else (the owner,
                 2026-10-08: "Remove the bloat in the pop-up. Don't need forced

@@ -494,7 +494,8 @@ export function QuizFlow({ route, navigation }) {
           : after ? () => navigation.replace(...stepRoute(after.id, unit, index))
           : !last ? () => navigation.replace("Vocab", { unitId, index: index + 1 })
           : undefined}
-        continueLabel={after ? after.label : "Next lesson"}
+        /* Done's own "Continue", not the step's name (the owner,
+           2026-10-09: "Replace summary with Continue"). */
         onBack={() => navigation.goBack()}
       />
     );

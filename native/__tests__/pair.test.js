@@ -106,7 +106,8 @@ describe("hearing a contrast", () => {
     await withStep(step);
     const wrong = step.options.findIndex((o) => !o.right);
     await act(async () => { fireEvent.press(screen.getByTestId(`pair-option-${wrong}`)); });
-    expect(await screen.findByText("Not quite")).toBeTruthy();
+    expect(await screen.findByTestId("verdict")).toBeTruthy();
+    expect(screen.queryByText("Correct")).toBeNull();
   });
 });
 
@@ -127,10 +128,11 @@ describe("saying a contrast", () => {
     await speak(step.other);
     const heard = await screen.findByTestId("pair-heard");
     expect(heard).toHaveTextContent(new RegExp(step.other));
-    expect(screen.queryByText("Not quite")).toBeNull();          // the learner decides
+    expect(screen.queryByTestId("verdict")).toBeNull();          // the learner decides
     expect(screen.getByText("Try again")).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
-    expect(await screen.findByText("Not quite")).toBeTruthy();
+    expect(await screen.findByTestId("verdict")).toBeTruthy();
+    expect(screen.queryByText("Correct")).toBeNull();
   });
 
   it("skips rather than fails when it caught neither, after as many tries as wanted", async () => {

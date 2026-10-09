@@ -141,10 +141,13 @@ export const INLINE_TOOLS = new Set(["Vocab", "Quiz", "GrammarRun", "CaseRun", "
   "Scenes", "TestOut", "Final", "Placement", "CustomQuiz", "SoundDrill", "BuildDrill", "Shadow", "Drill",
   "Cards", "ListCards"]);
 
-/* Header size, or the 40 px disc the bulb and the cog are (`disc`). */
+/* Header size, or a disc like the bulb's: `disc` true for 40 px, or the
+   size itself (an exercise's row is larger — Run.js TOOL_SIZE). */
+const discSize = (disc) => (disc === true ? 40 : typeof disc === "number" ? disc : 0);
 function iconBox(t, disc) {
-  return disc
-    ? ({ pressed }) => ({ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center",
+  const d = discSize(disc);
+  return d
+    ? ({ pressed }) => ({ width: d, height: d, borderRadius: d / 2, alignItems: "center", justifyContent: "center",
         borderWidth: 1, borderColor: t.line, backgroundColor: t.surface, opacity: pressed ? 0.6 : 1 })
     : { marginRight: 6, width: 30, height: 30, alignItems: "center", justifyContent: "center" };
 }
@@ -154,7 +157,7 @@ export function AskButton({ disc }) {
   const th = useAskThread();
   const [open, setOpen] = useState(false);
   if (!aiOffered()) return null;
-  const size = disc ? 20 : 22;
+  const size = disc ? Math.round(discSize(disc) / 2) : 22;
   return (
     <>
       <Pressable onPress={() => { th.open(); setOpen(true); }} hitSlop={disc ? 6 : 8} testID="ask-button"
@@ -197,7 +200,7 @@ export function ReportButton({ disc }) {
     const about = screenAbout();
     if (navRef.isReady && navRef.isReady()) navRef.navigate("Feedback", { about, from: about.screen });
   };
-  const size = disc ? 19 : 21;
+  const size = disc ? Math.round(discSize(disc) * 0.48) : 21;
   return (
     <Pressable testID="report-button" onPress={open} hitSlop={disc ? 6 : 8}
                accessibilityRole="button" accessibilityLabel="Report a problem"
@@ -211,12 +214,12 @@ export function ReportButton({ disc }) {
   );
 }
 
-/* The two in an exercise's own row. */
-export function RunTools() {
+/* The two in an exercise's own row, at that row's size. */
+export function RunTools({ size = 40 }) {
   return (
     <>
-      <AskButton disc />
-      <ReportButton disc />
+      <AskButton disc={size} />
+      <ReportButton disc={size} />
     </>
   );
 }

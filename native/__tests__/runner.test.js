@@ -100,7 +100,7 @@ describe("runner verdict", () => {
     fireEvent.changeText(input, "chto");
     await waitFor(() => expect(screen.getByTestId("type-input").props.value).toBe("chto"));
     await act(async () => { fireEvent.press(screen.getByText("Check")); });
-    expect(await screen.findByText("Not quite")).toBeTruthy();
+    expect(await screen.findByTestId("verdict-answer")).toHaveTextContent(/что/);
     expect(screen.queryByText(/Latin/)).toBeNull();
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     // Question 8 on the emulator opened with question 7's answer still in it.
@@ -118,7 +118,7 @@ describe("runner verdict", () => {
     await withRunner({ steps: [question, second], onFinish });
     expect(await screen.findByText("1/2")).toBeTruthy();
     await act(async () => { fireEvent.press(screen.getByText("table")); });   // wrong for книга
-    expect(await screen.findByText("Not quite")).toBeTruthy();
+    expect(await screen.findByTestId("verdict-answer")).toHaveTextContent(/book/);
     /* The deck growing from 2 to 3 below is what recycling *is*; the line
        reading "Comes round again" that used to be asserted here was the app
        narrating it, and the owner had it cut (2026-09-10). */
@@ -145,7 +145,7 @@ describe("runner verdict", () => {
     await act(async () => { fireEvent.press(screen.getByText("Check")); });
     expect(await screen.findByText("Almost")).toBeTruthy();
     expect(screen.getByText("One letter off")).toBeTruthy();
-    expect(screen.getByText("Answer: книга")).toBeTruthy();
+    expect(screen.getByTestId("verdict-answer")).toHaveTextContent(/книга/);
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     // Not recycled: the deck never grew, which the finish tally shows.
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ credit: 0.5, total: 1 }));

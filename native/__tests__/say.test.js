@@ -215,7 +215,7 @@ describe("say", () => {
     const dropped = IX[words[k]][0];
     await final(words.filter((_, j) => j !== k).join(" "));
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
-    expect(await screen.findByText(/^(Almost|Not quite)$/)).toBeTruthy();
+    expect(await screen.findByTestId("verdict")).toBeTruthy();
     const st = await saved();
     // The dropped word is Again (due again today); the rest are due later. A
     // first Again on a new card is a learning step, not a lapse.
@@ -262,7 +262,7 @@ describe("say", () => {
     await final(heard.split(/\s+/).slice(1).join(" "));
     expect(getFeedback).not.toHaveBeenCalled();                 // not before the verdict
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
-    expect(await screen.findByText(/^(Almost|Not quite)$/)).toBeTruthy();
+    expect(await screen.findByTestId("verdict")).toBeTruthy();
     expect(screen.getByTestId("feedback-pending")).toBeTruthy(); // below it, not blocking it
     expect(getFeedback).toHaveBeenCalledTimes(1);
     expect(getFeedback.mock.calls[0][0]).toMatchObject({ target: question.target, unitId: later.id });

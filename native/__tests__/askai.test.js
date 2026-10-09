@@ -161,7 +161,7 @@ it("puts the sparkle and the flag in the exercise, and out of its header", () =>
   for (const r of ["Quiz", "Drill", "CaseRun", "GrammarRun", "Vocab", "Cards"]) expect(INLINE_TOOLS.has(r)).toBe(true);
   for (const r of ["Path", "Words", "Episodes", "Word"]) expect(INLINE_TOOLS.has(r)).toBe(false);
   const runSrc = require("fs").readFileSync(require("path").join(__dirname, "../src/screens/Run.js"), "utf8");
-  expect(runSrc).toMatch(/<RunTools \/>/);
+  expect(runSrc).toMatch(/<RunTools\b/);
 });
 
 it("keeps the map honest: every Practice row and tab it names exists", () => {

@@ -563,16 +563,17 @@ export function CogButton({ onPress, testID = "cog", label = "Options" }) {
    a drill are visibly the same offer. */
 export const BULB_PATH = "M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.4 1 2.5h6c0-1.1.3-1.9 1-2.5A6 6 0 0 0 12 3z";
 
-export function BulbButton({ onPress, testID = "bulb", label = "Reference", on }) {
+export function BulbButton({ onPress, testID = "bulb", label = "Reference", on, size = 40 }) {
   const t = useTheme();
+  const glyph = Math.round(size / 2);
   return (
     <Pressable onPress={onPress} testID={testID} hitSlop={6}
                accessibilityRole="button" accessibilityLabel={label}
-               style={({ pressed }) => ({ width: 40, height: 40, borderRadius: 20,
+               style={({ pressed }) => ({ width: size, height: size, borderRadius: size / 2,
                  alignItems: "center", justifyContent: "center", borderWidth: 1,
                  borderColor: on ? t.brand : t.line,
                  backgroundColor: on ? t.brandBg : t.surface, opacity: pressed ? 0.6 : 1 })}>
-      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none"
+      <Svg width={glyph} height={glyph} viewBox="0 0 24 24" fill="none"
            stroke={on ? t.brandInk : t.ink2}
            strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
         <Path d={BULB_PATH} />

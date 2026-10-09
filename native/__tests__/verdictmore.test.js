@@ -1,31 +1,27 @@
-/* More on the verdict (the owner, 2026-10-06: "it should give the option for
- * the user to review the word… a 'more' button next to the speaker that will
- * pull up the full detail entry for that word so the learner can see all
- * conjugations"). Own file: it mocks the words context.
+/* The answer under a verdict is the way into the word (the owner, 2026-10-09:
+ * "Remove the more button and instead put its functionality into clicking
+ * the answer itself… clicking the word gives the abridged context… but it
+ * also has the full entry option"). The answer is a word link like any
+ * other: a tap opens the quick look, whose More opens the whole entry. "Not
+ * quite" is gone, and the speaker sits beside the answer it reads.
  */
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react-native";
+import { render, screen, fireEvent, within, act } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-jest.mock("../src/words", () => {
-  const actual = jest.requireActual("../src/words");
-  const ctx = { open: jest.fn(), openFull: jest.fn(), lookup: jest.fn(), close: jest.fn() };
-  global.__wordsCtx = ctx;
-  return { ...actual, useWords: () => ctx };
-});
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
+import { WordsProvider } from "../src/words";
 import { Runner } from "../src/screens/Run";
-import { idxOfWord } from "../src/data";
+import { idxOfWord, L } from "../src/data";
 
 async function withRunner(steps) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
     list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
   return await render(
-    <SessionProvider>
+    <SessionProvider><WordsProvider>
       <Runner steps={steps} onFinish={jest.fn()} gradeWords={false} />
-    </SessionProvider>
+    </WordsProvider></SessionProvider>
   );
 }
 
@@ -33,23 +29,39 @@ beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.cl
 afterEach(async () => { await flushState(); });
 
 const i = idxOfWord("книга");
-const step = {
-  kind: "choose-en", ask: "Pick the word", prompt: "книга", cyr: true, i,
+const chooseRu = {
+  kind: "choose-ru", ask: "Pick the word", prompt: "book", i,
+  options: [{ label: "книга", right: true, cyr: true }, { label: "стол", cyr: true },
+            { label: "стул", cyr: true }, { label: "лампа", cyr: true }],
+};
+const chooseEn = {
+  kind: "choose-en", ask: "Pick the meaning", prompt: "книга", cyr: true, i,
   options: [{ label: "book", right: true }, { label: "table" }, { label: "chair" }, { label: "lamp" }],
 };
 
-test("the verdict opens the word's whole entry, right or wrong", async () => {
-  expect(i).toBeGreaterThanOrEqual(0);
-  await withRunner([step]);
-  expect(screen.queryByTestId("verdict-more")).toBeNull();   // not before an answer
-  fireEvent.press(await screen.findByText("table"));
-  fireEvent.press(await screen.findByTestId("verdict-more"));
-  expect(global.__wordsCtx.openFull).toHaveBeenCalledWith(i);
+test("a wrong answer shows the right one as a link, with its speaker, and no 'Not quite' or More button", async () => {
+  await withRunner([chooseRu]);
+  fireEvent.press(await screen.findByText("стол"));
+  const row = await screen.findByTestId("verdict-answer");
+  expect(within(row).getByTestId("verdict-speaker")).toBeTruthy();
+  expect(screen.queryByText("Not quite")).toBeNull();
+  expect(screen.queryByTestId("verdict-more")).toBeNull();
+  // The tap is the word link's: the quick look, which carries More.
+  await act(async () => { fireEvent.press(within(row).getAllByRole("link")[0]); });
+  expect(await screen.findByTestId("sheet-more")).toBeTruthy();
 });
 
-test("a question with no word behind it offers none", async () => {
-  await withRunner([{ ...step, i: undefined }]);
-  fireEvent.press(await screen.findByText("book"));
-  await screen.findByTestId("verdict");
-  expect(screen.queryByTestId("verdict-more")).toBeNull();
+test("an English answer leads with the Russian word it means, linked", async () => {
+  await withRunner([chooseEn]);
+  fireEvent.press(await screen.findByText("table"));
+  const row = await screen.findByTestId("verdict-answer");
+  expect(row).toHaveTextContent(/— book/);
+  await act(async () => { fireEvent.press(within(row).getAllByRole("link")[0]); });
+  expect(await screen.findByTestId("sheet-more")).toBeTruthy();
+});
+
+test("a right answer keeps its heading", async () => {
+  await withRunner([chooseRu]);
+  fireEvent.press(await screen.findByText("книга"));
+  expect(await screen.findByText("Correct")).toBeTruthy();
 });

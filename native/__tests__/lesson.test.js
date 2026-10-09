@@ -88,8 +88,10 @@ describe("a quiz, end to end", () => {
       // The words were reviewed: each has a schedule now.
       for (const i of words.slice(0, 4)) expect(saved.seen[L[i].b]).toBeTruthy();
 
-      // On to the rest of this lesson first: the summary, which preps the video.
-      await act(async () => { fireEvent.press(screen.getByText("Summary")); });
+      // On to the rest of this lesson first: the summary, which preps the
+      // video. The button says Continue, not the step (2026-10-09).
+      await act(async () => { fireEvent.press(screen.getByTestId("done-continue")); });
+      expect(screen.queryByText("Summary")).toBeNull();
       expect(nav.replace).toHaveBeenCalledWith("Summary", { unitId: unit.id, index: 0 });
     } finally {
       spy.mockRestore();

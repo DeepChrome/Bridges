@@ -37,7 +37,7 @@ import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize, lessonCountOf, lessonWordsOf } from "@core/questions";
 import { quizPassed } from "@core/state";
-import { wanted, cardFor, dayOf } from "@core/scheduler";
+import { wanted, cardFor, dayOf, familiarity } from "@core/scheduler";
 import { rollGoal, goalBadge } from "@core/queue";
 import { isIrregular } from "@core/facts";
 import { CASES } from "@core/cases";
@@ -880,20 +880,36 @@ export function chapterWords(indices) {
    draws on, and what a lesson's word list sets apart. Built once: reading a
    word's tables hydrates it, and 1,045 of those is a few milliseconds. */
 let irregularCache = null;
-/* Every word the units teach — the widest a drill reaches (2026-10-04). It
-   used to widen to the whole studied list, 4,000 lemmas, and every one of the
-   ~2,700 the units do not teach had no recording: «участвовать»'s table read
-   by the phone's voice in the middle of a drill (the owner: "more words that
-   all sound awfully pronounced"). The units' words, and every form in their
-   tables, are bought in one voice. */
-let curriculumCache = null;
-export function curriculumPool() {
-  if (curriculumCache === null) {
-    const out = [], have = new Set();
-    for (const u of UN) for (const i of u.w || []) if (!have.has(i)) { have.add(i); out.push(i); }
-    curriculumCache = out;
+/* Every word the units teach. A drill draws only on these (2026-10-04): the
+   ~2,700 studied words the units do not teach have no recording, and
+   «участвовать»'s table was read by the phone's voice mid-drill (the owner:
+   "more words that all sound awfully pronounced"). */
+let unitWordSet = null;
+const unitWords = () => {
+  if (unitWordSet === null) {
+    unitWordSet = new Set();
+    for (const u of UN) for (const i of u.w || []) unitWordSet.add(i);
   }
-  return curriculumCache;
+  return unitWordSet;
+};
+/* The words a learner knows well enough to drill their forms: a card at
+   familiarity `KNOWN_AT` or above (the owner, 2026-10-08: *"the 'your words'
+   setting still brings up random new words. Realistically, that should only
+   show words with a mastery score of 40 or higher"*). A drill asks for an
+   ending; asking it of a word whose meaning is not yet held is two things to
+   recall at once. Nothing widens this — a learner with few such words gets a
+   short run, and the cog's chapters are the way to drill anything else. */
+export const KNOWN_AT = 40;
+export function knownPool(st) {
+  const out = [], have = new Set();
+  for (const w of Object.keys(st.seen || {})) {
+    const score = familiarity(cardFor(st.seen[w]), rankOf(w));
+    if (score === null || score < KNOWN_AT) continue;
+    const e = exactIdx(w);
+    const i = e >= 0 ? e : idxOfWord(w);
+    if (i >= 0 && unitWords().has(i) && !have.has(i)) { have.add(i); out.push(i); }
+  }
+  return out;
 }
 
 export function irregularWords() {
@@ -906,10 +922,3 @@ export function irregularWords() {
   }
   return irregularCache;
 }
-
-/* The floors DrillFlow walks up when a run will not fill. Each step reaches
-   further along the route; the last is the whole curriculum, which is where a
-   drill the learner's own words genuinely cannot supply has to end up — asking
-   the same seven questions every sitting is worse than asking about a word
-   they will meet next week. */
-export const DRILL_POOL_STEPS = [DRILL_POOL_MIN, 150, 400, Infinity];

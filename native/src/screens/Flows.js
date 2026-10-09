@@ -11,10 +11,10 @@ import { Runner, Done, useAudioStopOnLeave, useResume, ResumePrompt } from "./Ru
 import { clearRun, saveRun, savedRun } from "../resume";
 import { WordList, GrammarNote, WordCard, StepBar } from "../lesson";
 import { VideoLines } from "../prep";
-import { Q, DRILL_TYPES, DRILL_N, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
+import { Q, DRILL_TYPES, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
 import {
   L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
-  DRILL_POOL_STEPS, chapterWords, irregularWords, curriculumPool,
+  chapterWords, irregularWords, knownPool,
   reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
   scenarioLibrary, required, linesWith, grammarKey, currentGrammarUnit, grammarNoteOf,
   todaysWork, recapKey, components, stepRoute, caseLearnKey, caseDrillKey,
@@ -533,8 +533,7 @@ const ordinal = (n) => (n === 1 ? "first" : n === 2 ? "second" : n === 3 ? "thir
    no percentages anywhere on that page"*). The drills used to open with the
    chapter that taught their rule and Talk after chapter 2, each with an
    "Opens in chapter N" line and a best-score pill; a learner who wants to try
-   the aspect drill in week one may, and the drill widens to the whole
-   curriculum when the route has not yet supplied enough (DrillFlow `ahead`). */
+   the aspect drill in week one may, choosing chapters on its cog. */
 export function DrillList({ navigation }) {
   const { st } = useSession();
   const t = useTheme();
@@ -737,8 +736,8 @@ export function DrillList({ navigation }) {
  *     begin with (`defaultFocus`), so an untouched cog is exactly the drill as
  *     it was. **The last tick cannot be removed** — an empty selection is a
  *     drill with nothing to ask.
- *   - **Words from** — "Your words" (the learner's own, widened along the
- *     route until a run fills) or any set of chapters. A chapter chosen is a
+ *   - **Words from** — "Your words" (the learner's own at familiarity 40 or
+ *     above, never widened — data.js knownPool) or any set of chapters. A chapter chosen is a
  *     chapter drawn on whole, quests included, and nothing widens it: the
  *     learner asked for chapter 3 and a run short of ten is what chapter 3 has.
  *   - **Answers** — written or chosen. One setting for every drill
@@ -826,23 +825,22 @@ export function DrillOptions({ type, prefs, onChange, onClose }) {
 
 export function DrillFlow({ route, navigation }) {
   const { type } = route.params;
-  const { st, update } = useSession();
+  /* `all`: every focus in play and straight in, no options first — what "All
+     the forms" under the cases means (the owner, 2026-10-08: "if they press
+     that, the exercise should just start and assume all cases are in play").
+     It opened the options ticked for the route, which read as the button not
+     doing anything. The cog still changes it from there. */
+  const [all, setAll] = useState(!!route.params.all);
+  const { st, update, ready } = useSession();
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
   /* Open on arrival (the owner, 2026-10-02: "when a user selects an exercise
      or drill, they should be confronted with the settings/config that is pre
      populated based on where they're at"): the ticks are the route's own, so
      closing it untouched is the drill as it would have been. */
-  const [cog, setCog] = useState(() => !savedRun(`drill:${type}`));
+  const [cog, setCog] = useState(() => !all && !savedRun(`drill:${type}`));
   const prefs = (st.drillPrefs || {})[type] || {};
   const setPrefs = (next) => update((p) => ({ ...p, drillPrefs: { ...(p.drillPrefs || {}), [type]: next } }));
-  // Only the learner's own words (data.js drillPool); the pool is fixed for the
-  // run so answering does not reshuffle the questions underneath.
-  //
-  // Unless the drill is open ahead of the route: a learner in chapter 1 who
-  // opens Aspect has met eight verbs, and the drill would ask the same handful
-  // all run. Skipping ahead means the whole curriculum is fair game.
-  const ahead = useMemo(() => !Q.drillsIntroduced(reachedUnits(st)).has(type), [type]);
   /* Written or chosen (the owner, 2026-09-11: *"fill in the blank allows the
      user to generate it completely rather than guess"*). On unless turned off,
      because that is §30j's own finding — recognition meets a word, production
@@ -852,47 +850,34 @@ export function DrillFlow({ route, navigation }) {
      route has taught (which used to be the `cells` gate, §30i), else
      everything. A cases drill before chapter 4 therefore asks all six cases
      rather than saying "not yet" — nothing in Practice is locked (§30au). */
-  const only = useMemo(() => prefs.only || Q.defaultFocus(type, reachedUnits(st)),
-                       [type, prefs.only]);
+  const only = useMemo(() => (all ? null : prefs.only || Q.defaultFocus(type, reachedUnits(st))),
+                       [type, prefs.only, all]);
   const chapters = prefs.chapters || [];
 
-  /* **Widen until the run fills.**
-   *
-   * `drillPool` puts a floor under the number of *words*, which is not a floor
-   * under the number of questions: measured on 2026-09-16 (tools/audit_banks.mjs)
-   * a learner with 40 words met has **seven** distinct aspect questions in
-   * total, because the drill needs verbs carrying a recorded partner. Ten runs
-   * is then the same seven questions, which is exactly what the owner reported.
-   *
-   * So the pool steps further along the route until a full run comes back, and
-   * the last step is the whole curriculum. Reaching past what the learner has
-   * met is the lesser wrong: §30e's rule is that a drill asks about the
-   * learner's own words, and it already bends that way at DRILL_POOL_MIN.
-   *
-   * Chapters chosen on the cog are not widened: that is the learner saying
-   * where the words come from, and a short run is the honest answer. */
-  /* "Rule-breakers only" (2026-09-29) narrows any pool to the words that break
-     the rules (data.js irregularWords); the widening below then ends on every
-     irregular word the course teaches rather than on the whole curriculum. */
+  /* "Rule-breakers only" (2026-09-29) narrows the pool to the words that break
+     the rules (data.js irregularWords). */
   const irregularOnly = !!prefs.irregular && IRREGULAR_DRILLS.includes(type);
+  /* "Your words" are the words held at familiarity 40 or above
+     (data.js knownPool), and nothing widens them (2026-10-08). It used to
+     step along the route to the whole curriculum until a run filled, which
+     is how unmet words kept arriving under "Your words". Chapters chosen on
+     the cog draw on those chapters whole, as before. */
+  /* Dealt once the profile has loaded: dealt from the store's defaults, the
+     known words were none and the run stayed empty (the old widening hid it). */
   const steps = useMemo(() => {
+    if (!ready) return null;
     const odd = irregularOnly ? new Set(irregularWords()) : null;
-    const narrow = (pool) => (odd ? (pool || irregularWords()).filter((i) => odd.has(i)) : pool);
-    if (chapters.length) return Q.drillQuestions(type, undefined, narrow(chapterWords(chapters)), undefined, typed, only);
-    // The widest is every word the units teach (data.js curriculumPool), not
-    // the whole studied list: those are the words with recordings.
-    if (ahead) return Q.drillQuestions(type, undefined, narrow(curriculumPool()), undefined, typed, only);
-    let last = [];
-    for (const min of DRILL_POOL_STEPS) {
-      const p = min === Infinity ? curriculumPool() : drillPool(st, min);
-      last = Q.drillQuestions(type, undefined, narrow(p), undefined, typed, only);
-      if (last.length >= DRILL_N) return last;
-    }
-    return last;
-  }, [type, seed, typed, only, ahead, chapters.join(","), irregularOnly]);
+    const narrow = (pool) => (odd ? pool.filter((i) => odd.has(i)) : pool);
+    const pool = narrow(chapters.length ? chapterWords(chapters) : knownPool(st));
+    // An empty pool means "anything" to the generators (withPool), which is
+    // exactly the random words this must not ask; empty is no questions.
+    if (!pool.length) return [];
+    return Q.drillQuestions(type, undefined, pool, undefined, typed, only);
+  }, [type, seed, typed, only, chapters.join(","), irregularOnly, ready]);
+  const mine = !chapters.length;
   const spec = DRILL_TYPES.find((d) => d.id === type);
   useAudioStopOnLeave();
-  const save = { key: `drill:${type}`, route: "Drill", tab: "Practice", params: { type },
+  const save = { key: `drill:${type}`, route: "Drill", tab: "Practice", params: all ? { type, all } : { type },
                  title: spec ? spec.name : type };
   // "Start again" opens the options, as a first visit does.
   const resume = useResume(save.key, route.params, { onRestart: () => setCog(true) });
@@ -905,6 +890,7 @@ export function DrillFlow({ route, navigation }) {
     setCog(false);
     if (JSON.stringify([prefs, typed]) !== before.current) {
       clearRun(save.key);              // a run on the old options is not where you left off
+      setAll(false);                   // the ticks chosen now are what it asks
       setResult(null); setSeed(seed + 1);
     }
   };
@@ -912,10 +898,15 @@ export function DrillFlow({ route, navigation }) {
   const sheet = cog ? <DrillOptions type={type} prefs={prefs} onChange={setPrefs} onClose={closeCog} /> : null;
 
   if (resume.prompt) return resume.prompt;
+  if (!steps) return <Screen><Loading /></Screen>;
   if (!steps.length) {
     return (
       <>
-        <Done title="No questions available" onBack={() => navigation.goBack()}
+        {/* Under "Your words", say why: no word is at 40 yet, and the cog's
+            chapters are the way in until one is. */}
+        <Done title={mine ? "No words at 40 yet" : "No questions available"}
+              detail={mine ? "Pick chapters in Options" : undefined}
+              onBack={() => navigation.goBack()}
               onAgain={openCog} againLabel="Options" />
         {sheet}
       </>
@@ -1062,7 +1053,7 @@ export function CaseHub({ navigation }) {
       </List>
       <SectionLabel style={{ marginTop: 18 }}>Every case</SectionLabel>
       <List>
-        <Row testID="case-mixed" onPress={() => navigation.navigate("Drill", { type: "cases" })}>
+        <Row testID="case-mixed" onPress={() => navigation.navigate("Drill", { type: "cases", all: true })}>
           <Thumb id="cases" tone="good" />
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>All the forms</Text>

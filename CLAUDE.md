@@ -6362,6 +6362,27 @@ module earlier than chapter 7 — each a re-cut of the curriculum.
   (`face = size − 2·stroke`), concentric with it; the grey edge offset under
   the disc showed as a crescent below the ring and made it look off-centre
   (the owner asked twice). `path.test.js` checks the centres agree.
+- **On an exercise the two buttons sit in the exercise** (`INLINE_TOOLS`,
+  `RunTools` in askai.js): under the question beside the speaker and bulb,
+  beside a lesson card's progress, beside Study's cog. Other screens keep
+  them in the header. The sparkle's sheet is Teddy waving, "How can I help?".
+- **A wrong answer shows the answer, its audio and More — nothing else**
+  (the owner: *"Don't need forced AI responses"*). The unasked `/v1/explain`
+  call, the derived explanation (`core/explain.js`, `StandardWhy`), the fact
+  pills and the rule card under a miss are gone; the Worker route stays for
+  old builds. **The bulb's sheet is the word's tables only** — no facts, rule
+  card or topic link — and a word with no table has no bulb.
+- **Familiarity grows from meaning, never from a form drill**
+  (`gradesCard`, `FORM_KINDS` in core/scheduler.js): cases, agreement,
+  conjugation, aspect, stress and the form question grade no card. Lessons'
+  meaning questions and Study review do.
+- **"Your words" on a drill are the words held at familiarity 40 or above**
+  (`knownPool`, `KNOWN_AT` in data.js), the units' words only, never widened;
+  none is "No words at 40 yet". **An empty pool means "anything" to the
+  generators** (`withPool`), so the flow returns no questions rather than
+  passing one in. The drill deals only once `ready`: dealt from the store's
+  defaults it had no known words and stayed empty. "All the forms" opens the
+  cases drill with `all` — straight in, every case.
 - **Test trap:** a Sheet left open at the end of one test leaves the next
   test's sheets undrawn in the same file; close it (`closeSheets` in
   askai.test.js). Reopening a sheet within one test hits §30be's Modal trap;

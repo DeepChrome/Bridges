@@ -34,9 +34,10 @@ describe("the case hub", () => {
     expect(CASES.map((c) => c.id)).toEqual(["prepositional", "accusative", "genitive", "dative", "instrumental"]);
     await act(async () => { fireEvent.press(screen.getByTestId("case-genitive")); });
     expect(nav.navigate).toHaveBeenCalledWith("CaseModule", { caseId: "genitive" });
-    // Every case mixed is the forms drill.
+    // Every case mixed is the forms drill, all six in play and straight in
+    // (the owner, 2026-10-08: "the exercise should just start").
     await act(async () => { fireEvent.press(screen.getByTestId("case-mixed")); });
-    expect(nav.navigate).toHaveBeenCalledWith("Drill", { type: "cases" });
+    expect(nav.navigate).toHaveBeenCalledWith("Drill", { type: "cases", all: true });
   });
 });
 

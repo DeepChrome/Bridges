@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { DrillFlow } from "../src/screens/Flows";
-import { STAGES, chapterWords, lessonCount } from "../src/data";
+import { STAGES, chapterWords, lessonCount, L } from "../src/data";
 import { Q } from "../src/questions";
 import { CASE_ROWS, ADJ_STEMS, adjStem } from "@core/questions";
 
@@ -36,12 +36,27 @@ const through = (n) => {
   return unit;
 };
 
-async function open(type, state = {}) {
+/* "Your words" are the words held at familiarity 40 or above (data.js
+   knownPool), so a run needs some: every word of the first `n` chapters,
+   held for a year. */
+const known = (n) => {
+  const seen = {};
+  const now = Date.now();
+  for (const s of STAGES.slice(0, n)) for (const u of [s.core].concat(s.branches)) {
+    for (const i of u.w) seen[L[i].b] = { recognise: { state: 2, s: 400, d: 5, reps: 8, lapses: 0,
+                                                       dueAt: now + 86400000 * 300, lastAt: now } };
+  }
+  return seen;
+};
+
+async function open(type, state = {}, params = {}) {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
     list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
-  await AsyncStorage.setItem("rb.state.p1", JSON.stringify({ ...base, ...state }));
+  const n = state.unit ? Object.keys(state.unit).length && STAGES.findIndex((s) => !state.unit[s.core.id]) : 0;
+  const seen = state.seen || known(n < 0 ? STAGES.length : n);
+  await AsyncStorage.setItem("rb.state.p1", JSON.stringify({ ...base, ...state, seen }));
   return await render(
-    <SessionProvider><DrillFlow navigation={nav} route={{ params: { type } }} /></SessionProvider>,
+    <SessionProvider><DrillFlow navigation={nav} route={{ params: { type, ...params } }} /></SessionProvider>,
   );
 }
 async function saved() { await flushState(); return (await global.__db.saved("p1")); }

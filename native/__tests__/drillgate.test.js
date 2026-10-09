@@ -8,8 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { DrillList } from "../src/screens/Flows";
-import { STAGES, lessonCount, drillPool, DRILL_POOL_MIN, DRILL_POOL_STEPS } from "../src/data";
-import { Q, DRILL_N } from "../src/questions";
+import { STAGES, lessonCount, knownPool, KNOWN_AT } from "../src/data";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const base = {
@@ -67,54 +66,25 @@ describe("every drill is open from the first screen", () => {
     expect(nav.navigate).not.toHaveBeenCalledWith("DrillSetup", expect.anything());
   });
 
-  /* Opening a drill ahead of the route widens its words to the whole curriculum:
-     a chapter-1 learner in developer mode has met eight verbs, and Aspect drawn
-     from those asks the same handful every run. */
-  it("a drill opened ahead of the route draws on every word", () => {
-    const key = (q) => Q.drillKey(q);
-    const early = [...new Set(STAGES.slice(0, 1).flatMap((s) => [s.core].concat(s.branches))
-      .flatMap((u) => u.w))];
-    const narrow = new Set();
-    const wide = new Set();
-    for (let k = 0; k < 12; k++) {
-      Q.drillQuestions("aspect", 20, early).forEach((q) => narrow.add(key(q)));
-      Q.drillQuestions("aspect", 20, null).forEach((q) => wide.add(key(q)));
-    }
-    expect(wide.size).toBeGreaterThan(narrow.size * 3);
-  });
+});
 
-  /* …and a drill the route *has* opened still has to fill a run.
-   *
-   * `drillPool` puts a floor under the number of words, which is not a floor
-   * under the number of questions: measured with tools/audit_banks.mjs on
-   * 2026-09-16, a 40-word pool yields **seven** distinct aspect questions in
-   * total, because the drill needs verbs carrying a recorded partner. Ten
-   * sittings is then the same seven questions — the owner's "not just the same
-   * 10 questions every time". DrillFlow steps the pool further along the route
-   * until a full run comes back. */
-  it("fills a run even where the learner's own words cannot", async () => {
-    const st = { ...base, unit: through(8) };
-    const floor = drillPool(st, DRILL_POOL_MIN);
-    expect(floor.length).toBeGreaterThanOrEqual(DRILL_POOL_MIN);
-    /* The route itself no longer shows the defect: since the units were built
-       from their videos (Phase 14) the first chapters carry enough verbs with
-       a partner to fill a run at the floor. The defect is a property of a pool
-       with few such verbs, so the test builds one — the floor's own words,
-       all but two of its verbs removed — rather than hoping the route stays
-       thin. */
-    const { L } = require("../src/data");
-    const verbs = floor.filter((i) => L[i].p === "verb");
-    const thinPool = floor.filter((i) => L[i].p !== "verb").concat(verbs.slice(0, 2));
-    const thin = Q.drillQuestions("aspect", DRILL_N, thinPool, undefined, true);
-    expect(thin.length).toBeLessThan(DRILL_N);          // the defect, in a thin pool
-
-    // What DrillFlow does with it.
-    let filled = [];
-    for (const min of DRILL_POOL_STEPS) {
-      const p = min === Infinity ? null : drillPool(st, min);
-      filled = Q.drillQuestions("aspect", DRILL_N, p, undefined, true);
-      if (filled.length >= DRILL_N) break;
-    }
-    expect(filled.length).toBe(DRILL_N);
+/* "Your words" are the words held at familiarity 40 or above, and nothing
+   widens them (the owner, 2026-10-08: "the 'your words' setting still brings
+   up random new words… should only show words with a mastery score of 40 or
+   higher"). The drill used to step along the route to the whole curriculum
+   until a run filled. */
+describe("Your words", () => {
+  const DAY = 86400000;
+  const { L } = require("../src/data");
+  const units = STAGES.flatMap((s) => [s.core].concat(s.branches)).flatMap((u) => u.w);
+  const card = (stability) => ({ recognise: { state: 2, s: stability, d: 5, reps: 6, lapses: 0,
+                                              dueAt: Date.now() + DAY, lastAt: Date.now() - DAY } });
+  it("holds only words at 40 or above, and only the units' words", () => {
+    const [held, shaky] = units.filter((i) => L[i].p === "noun").slice(0, 2).map((i) => L[i].b);
+    const st = { seen: { [held]: card(400), [shaky]: card(0.5) } };
+    const pool = knownPool(st).map((i) => L[i].b);
+    expect(pool).toEqual([held]);
+    expect(knownPool({ seen: {} })).toEqual([]);
+    expect(KNOWN_AT).toBe(40);
   });
 });

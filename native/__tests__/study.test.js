@@ -48,7 +48,8 @@ describe("which cards a set holds", () => {
      not due, comes after them rather than not at all. */
   it("deals everything due first with nothing ticked, then the learner's own cards toward the goal", () => {
     expect(cardsIn(st, [])).toEqual([]);
-    const s = sessionFor({ ...st, sets: [] });
+    // Words only, so the order under test is not shared with new sentences.
+    const s = sessionFor({ ...st, sets: [], cardKinds: ["words"] });
     const first = s.items.slice(0, 3).map((x) => x.word).sort();
     expect(first).toEqual(["дом", "не", "я"]);
     expect(s.items.find((x) => x.word === "дом").kind).toBe("new");
@@ -58,7 +59,7 @@ describe("which cards a set holds", () => {
   });
 
   it("deals the due cards even when only the trouble words were ticked", () => {
-    const s = sessionFor({ ...st, sets: ["__trouble__"] });
+    const s = sessionFor({ ...st, sets: ["__trouble__"], cardKinds: ["words"] });
     expect(s.items.slice(0, 3).map((x) => x.word).sort()).toEqual(["дом", "не", "я"]);
   });
 
@@ -115,12 +116,23 @@ describe("which cards a set holds", () => {
   /* New cards from the path come commonest first, and a sentence is ranked by
      its rarest word (the owner, 2026-09-28: "prioritize more common and useful
      words… same with simpler sentences"). */
-  it("introduces the commonest new cards first, simple sentences among them", () => {
-    const fresh = { ...base, sets: ["__path__"], newPerDay: 5 };
-    const ranks = sessionFor(fresh).items.map((x) => newCardRank(x.word));
-    expect(ranks.length).toBeGreaterThan(0);
-    const all = studyCards(fresh).filter((c) => !fresh.seen[c.b]).map((c) => newCardRank(c.b)).sort((a, b) => a - b);
-    expect(Math.max(...ranks)).toBeLessThanOrEqual(all[ranks.length - 1]);
+  /* The commonest first within each kind, and a third of the new cards are
+     sentences (the owner, 2026-10-09: "Make sure we also include sentences in
+     the studies and daily reviews… it seems very vocab centric"). Ranked on
+     one scale, sentences came behind every word and five a day never
+     reached them. */
+  it("introduces the commonest new cards first, a third of them sentences", () => {
+    const fresh = { ...base, sets: ["__path__"], newPerDay: 6 };
+    const items = sessionFor(fresh).items;
+    const kind = (w) => (/\s/.test(w) ? "sentences" : "words");
+    const sents = items.filter((x) => kind(x.word) === "sentences");
+    expect(sents.length).toBe(2);
+    for (const k of ["words", "sentences"]) {
+      const ranks = items.filter((x) => kind(x.word) === k).map((x) => newCardRank(x.word));
+      const all = studyCards(fresh).filter((c) => !fresh.seen[c.b] && kind(c.b) === k)
+        .map((c) => newCardRank(c.b)).sort((a, b) => a - b);
+      expect(Math.max(...ranks)).toBeLessThanOrEqual(all[ranks.length - 1]);
+    }
     expect(newCardRank("Где книга?")).toBeLessThan(newCardRank("Нам нужно установить наблюдение за домом этого человека."));
   });
 
@@ -145,6 +157,22 @@ describe("which cards a set holds", () => {
     // No duplicates: the listen and speak pools share rows by design.
     const keys = sentences.map((c) => c.b);
     expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  /* Sentences made of words from finished lessons come first (the owner,
+     2026-10-09: "Especially sentences from their lessons already
+     completed"): once one with an untaught word appears, every one after it
+     has one too. */
+  it("leads with sentences built from finished lessons' words", () => {
+    const { personalWords, idxOfWord } = require("../src/data");
+    const far = { ...base, unit: Object.fromEntries(STAGES.slice(0, 3).flatMap((s) =>
+      [s.core, ...s.branches].map((u) => [u.id, { lessons: { 0: { v: true, q: 100 } } }]))) };
+    const known = new Set(personalWords(far));
+    const yours = (c) => (c.b.match(/[А-Яа-яЁё́-]+/g) || [])
+      .every((t) => { const i = idxOfWord(t); return i >= 0 && (i < 100 || known.has(i)); });
+    const flags = sentencesFor(far).map(yours);
+    expect(flags[0]).toBe(true);
+    expect(flags.indexOf(false) === -1 || !flags.slice(flags.indexOf(false)).includes(true)).toBe(true);
   });
 
   it("puts new sentences in the pile only when sentences are chosen", () => {

@@ -60,7 +60,27 @@ export const frontFor = (card, fronts) => fronts[((card && card.reps) || 0) % fr
    space in it, a word is not — so a deck card or a pooled sentence needs no tag
    and the badge and the session cannot classify one card two ways. */
 export const CARD_KINDS = ["words", "sentences"];
-export const DEFAULT_KINDS = ["words"];
+/* Both, since 2026-10-09 (the owner: "Make sure we also include sentences in
+   the studies and daily reviews. Right now it seems very vocab centric"). */
+export const DEFAULT_KINDS = ["words", "sentences"];
+/* The share of a session's new cards kept for sentences when both kinds are
+   studied. Ranked on one scale with the words, a sentence is as common as its
+   rarest word, so with five new cards a day they came behind every word and
+   were almost never dealt. A third, interleaved. */
+export const SENTENCE_SHARE = 1 / 3;
+export function mixNew(ordered, share = SENTENCE_SHARE) {
+  const words = ordered.filter((x) => cardKind(x.word) === "words");
+  const sents = ordered.filter((x) => cardKind(x.word) === "sentences");
+  if (!words.length || !sents.length || !share) return ordered;
+  const out = [];
+  let s = 0, w = 0;
+  while (w < words.length || s < sents.length) {
+    const wantS = Math.floor((out.length + 1) * share) > s;
+    if ((wantS && s < sents.length) || w >= words.length) out.push(sents[s++]);
+    else out.push(words[w++]);
+  }
+  return out;
+}
 export const cardKind = (word) => (/\s/.test(String(word || "").trim()) ? "sentences" : "words");
 export const kindsOf = (chosen) => {
   const k = (chosen || []).filter((x) => CARD_KINDS.includes(x));
@@ -212,10 +232,10 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead, 
    * It is a sort, not a filter: nothing is withheld, and a rare word is dealt
    * the moment the commoner ones above it are done. */
   const byRank = o.rank;
-  const ordered = byRank
+  const ordered = mixNew(byRank
     ? fresh.map((x, i) => ({ x, i, k: byRank(x.word) }))
         .sort((a, b) => (a.k - b.k) || (a.i - b.i)).map((e) => e.x)
-    : shuffled(fresh, random);
+    : shuffled(fresh, random));
   const pickedNew = ordered.slice(0, newInSession);
   const items = interleave(pickedLearning, pickedReviews, pickedNew).slice(0, o.sessionSize);
 

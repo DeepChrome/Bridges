@@ -13,7 +13,7 @@
  * single classic script, and the rest of core/ keeps to that style.
  */
 
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
 
 /* A lesson quiz passes at PASS_MARK. After RELIEF_AFTER attempts it passes at
    RELIEF_MARK instead: the simulated struggling learner failed 15 of 40 lessons
@@ -143,6 +143,15 @@ export const MIGRATIONS = {
     const sets = old.filter((id) => !["__due__", "__trouble__", "__sentences__"].includes(id));
     const cardKinds = old.includes("__sentences__") ? ["words", "sentences"] : ["words"];
     return Object.assign({}, s, { sets: sets.length ? sets : ["__path__"], cardKinds, v: 10 });
+  },
+  // v11: sentences are studied beside words by default (the owner,
+  // 2026-10-09: "include sentences in the studies and daily reviews"). Words
+  // alone was the default, so nobody can be told from a profile that chose it;
+  // a profile on words alone gets both, as v8 and v9 did for their defaults.
+  10: (s) => {
+    const k = s.cardKinds || [];
+    const wordsOnly = k.length === 1 && k[0] === "words";
+    return Object.assign({}, s, { cardKinds: wordsOnly || !k.length ? ["words", "sentences"] : k, v: 11 });
   },
 };
 

@@ -98,6 +98,8 @@ export const VOCAB_MIXED = 3;
    `QUIZ_MIN` and `QUIZ_N - 2` — and one each of the chapter's form, a drill,
    an earlier word and a spoken step (`spokenStep`), about twelve at most. */
 export const REVIEW_MIX = { perQuiz: 1 };
+/* At most this share of a lesson quiz is on earlier chapters (quizStepsIn). */
+export const OLD_SHARE = 0.2;
 export const QUIZ_WORDS = 2;
 export const QUIZ_MIN = 6;
 
@@ -2112,12 +2114,27 @@ export function makeQuestions(env) {
     const fill = byNeed(chapterSoFar);
     const outside = byNeed(unitsUpTo(unit).filter((u) => stageOf(u) < stage0).flatMap((u) => u.w)
       .filter((i) => ok(i) && !chapterSoFar.includes(i)));
-    const queueFill = fill.concat(outside);
+    /* **Older material is the minority** (the owner, 2026-10-09: "if 10
+       questions, 8 of them should focus on current chapter and maybe 1 or 2
+       on older concepts"). A quiz's budget for earlier chapters is
+       OLD_SHARE of its length; the review word and the second drill (on
+       earlier chapters' words) spend theirs first, and the fill from before
+       this chapter gets what is left. A chapter's first lesson of five words
+       had filled three slots that way and reached 7 older of 12; it asks a
+       shorter quiz now instead of padding it with old words. */
+    const reachedHere = unitsUpTo(unit);
+    const drillsHere = Math.min(DRILL_MIX.perQuiz, drillsIntroduced(reachedHere).size);
+    const oldMax = Math.max(1, Math.floor(OLD_SHARE * (QN + FORM_MIX.perQuiz + drillsHere + REVIEW_MIX.perQuiz + 1)));
+    const reviewOld = stageHere > 0 ? REVIEW_MIX.perQuiz : 0;
+    const drillOld = drillsHere > 1 && stageHere > 0 && oldMax - reviewOld > 0 ? 1 : 0;
+    let outsideLeft = Math.max(0, oldMax - reviewOld - drillOld);
+    const queueFill = fill.map((i) => ({ i, old: false })).concat(outside.map((i) => ({ i, old: true })));
     while (bag.length < QN && queueFill.length) {
-      const i = queueFill.shift();
+      const { i, old } = queueFill.shift();
       if (inBag(i)) continue;                    // «мы» twice in one quiz
+      if (old && outsideLeft <= 0) break;
       const e = draw(i);
-      if (e) bag.push(e);
+      if (e) { bag.push(e); if (old) outsideLeft--; }
     }
     const out = spread(shuffle(bag).slice(0, QN)).map(present).filter(Boolean);
     const stage = stageOf(unit);
@@ -2126,7 +2143,8 @@ export function makeQuestions(env) {
     if (stage >= FORM_MIX.fromStage) {
       for (let k = 0; k < FORM_MIX.perQuiz; k++) {
         const q = formPrompt(unit, index);
-        if (q) out.splice(slotApart(out, q), 0, q);
+        // `chapter`: the chapter's own point, whatever its word (tools/quiz_mix.mjs).
+        if (q) out.splice(slotApart(out, q), 0, { ...q, chapter: true });
       }
     }
     /* And Practice's drills, the ones the route has opened, on this chapter's
@@ -2152,11 +2170,12 @@ export function makeQuestions(env) {
            `cells`, so a chapter-2 lesson asked the past and the imperative and
            a chapter-3 lesson the instrumental (the review, 2026-10-01). */
         const { cells, only } = routeDrill(type, reached);
-        const first = k === 1 && before.length ? before : chapter;
+        // Earlier chapters' words only while the older budget allows (above).
+        const first = k === 1 && drillOld && before.length ? before : chapter;
         // Written, as the form question is: producing the form is the skill.
         const q = drillQuestions(type, 1, first, cells, true, only)[0]
           || drillQuestions(type, 1, met, cells, true, only)[0];
-        if (q) out.splice(slotApart(out, q), 0, { ...q, drill: true });
+        if (q) out.splice(slotApart(out, q), 0, { ...q, drill: true, older: first === before });
       });
     }
     /* Spaced review: words from earlier in the route, asked again inside the
@@ -2199,8 +2218,12 @@ export function makeQuestions(env) {
       /* The lesson's own long words first; a lesson of pronouns and
          prepositions has none, so then the unit's earlier words, then the
          route's. One of them at random each time, so a retake builds another. */
+      /* The route's words only while the older-material budget has room
+         (OLD_SHARE): a chapter's first lesson with no long word of its own
+         was building one from two chapters back on top of its review word. */
       const tiers = [words, Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat().filter((i) => readable.has(i)),
-                     unitsUpTo(unit).flatMap((u) => u.w).filter((i) => readable.has(i))];
+                     unitsUpTo(unit).filter((u) => outsideLeft > 0 || stageOf(u) === stageHere)
+                       .flatMap((u) => u.w).filter((i) => readable.has(i))];
       for (const tier of tiers) {
         const cands = tier.filter((i) => !words.includes(i) || tier === words)
           .map((i) => ({ i, ru: L[i].w, en: firstSense(L[i]) }));

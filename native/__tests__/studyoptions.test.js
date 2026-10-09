@@ -214,10 +214,11 @@ describe("the options live where a session starts", () => {
     const seen = { [WORD]: { recognise: due() } };
     await withProfile({ seen, sets: ["__due__"], flash: ["recognise", "produce"] });
     await screen.findByText("Show");
-    expect(sessionFor({ ...base, seen, sets: ["__due__"], flash: ["recognise", "produce"] })
+    // Words only: the fronts are under test, not the sentence pool.
+    expect(sessionFor({ ...base, seen, sets: ["__due__"], flash: ["recognise", "produce"], cardKinds: ["words"] })
       .items.map((i) => i.word)).toEqual([WORD]);
 
-    const one = { ...base, seen, sets: ["__due__"], flash: ["produce"] };
+    const one = { ...base, seen, sets: ["__due__"], flash: ["produce"], cardKinds: ["words"] };
     expect(sessionFor(one).items.map((i) => i.direction)).toEqual(["produce"]);
     // The default front is the Russian.
     const { DEFAULTS } = require("../src/store");

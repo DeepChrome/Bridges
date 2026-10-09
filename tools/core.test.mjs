@@ -19,7 +19,7 @@ import { split, merge, diff, isEmpty, memoryRepo, validLog, cardRow, rowCard, SE
   from "../core/repo.js";
 import * as S from "../core/scheduler.js";
 import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor, stepToday,
-         cardKind, kindsOf, practiceSession, rollGoal, spendGoal, goalBadge, goalSession, goalPerDay,
+         cardKind, kindsOf, mixNew, practiceSession, rollGoal, spendGoal, goalBadge, goalSession, goalPerDay,
          weekdayOf, isStudyDay, GOAL_REVIEWS, GOAL_CAP_DAYS, MASTERED_EVERY } from "../core/queue.js";
 import { SCENARIOS } from "../core/scenarios.js";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
@@ -250,7 +250,13 @@ group("grading");
 
 group("state schema");
 {
-  ok(SCHEMA_VERSION === 10, "schema is at 10", String(SCHEMA_VERSION));
+  ok(SCHEMA_VERSION === 11, "schema is at 11", String(SCHEMA_VERSION));
+  // v11: sentences studied beside words by default (2026-10-09); a profile
+  // that chose sentences alone keeps its choice.
+  const v11 = MIGRATIONS[10]({ v: 10, cardKinds: ["words"] });
+  ok(v11.v === 11 && v11.cardKinds.join() === "words,sentences", "v10 → v11 adds sentences to words-only study");
+  ok(MIGRATIONS[10]({ v: 10, cardKinds: ["sentences"] }).cardKinds.join() === "sentences",
+     "and leaves a sentences-only choice alone");
   /* v8 turns developer mode off for everyone (2026-09-23): it had shipped on
      and no profile can say whether it chose that, so nobody keeps it. */
   const v8 = MIGRATIONS[7]({ v: 7, dev: true, watched: {} });
@@ -831,8 +837,16 @@ group("the session");
   /* Words or sentences, read off the key (2026-09-28), and the trouble round. */
   ok(cardKind("книга") === "words" && cardKind("Где книга?") === "sentences" && cardKind(" дом ") === "words",
      "a sentence is a card with a space in it");
-  ok(kindsOf([]).join() === "words" && kindsOf(["sentences", "x"]).join() === "sentences",
-     "no kind chosen is words; an unknown kind is dropped");
+  ok(kindsOf([]).join() === "words,sentences" && kindsOf(["sentences", "x"]).join() === "sentences",
+     "no kind chosen is both; an unknown kind is dropped");
+  // A third of a session's new cards are sentences when both are studied,
+  // interleaved, and a session of one kind is as it was (2026-10-09).
+  const mix = mixNew(["a", "b", "c", "d", "e", "f"].map((w) => ({ word: w }))
+    .concat(["x y", "z w", "p q"].map((w) => ({ word: w }))));
+  ok(mix.slice(0, 6).filter((x) => cardKind(x.word) === "sentences").length === 2
+     && cardKind(mix[0].word) === "words",
+     "new cards are a third sentences, interleaved", mix.map((x) => x.word).join("|"));
+  ok(mixNew([{ word: "a" }, { word: "b" }]).length === 2, "and one kind alone is left as it was");
   const later = { dueAt: Date.now() + 9 * S.DAY, lastAt: Date.now() - S.DAY, s: 3, d: 9, state: S.REVIEW,
                   steps: 0, reps: 12, lapses: 5 };
   const round = practiceSession({ seen: { дом: { recognise: later } }, words: ["дом", "стол"], dirs: ["recognise"] });

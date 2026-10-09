@@ -106,6 +106,9 @@ const sentenceCard = (row) => ({ key: "s" + row[0], w: row[0], b: row[0], e: row
    is worth saying, and the two overlap by design (§30b stores a shared row
    list). */
 export const SENTENCE_POOL_MIN = 400;
+/* Below this frequency rank a word is met everywhere from the first screen
+   («и», «не», «в») and does not count against a sentence being "yours". */
+const SENTENCE_FREE_RANK = 100;
 export function sentencesFor(st) {
   const out = [], have = new Set();
   const units = reachedUnits(st);
@@ -125,7 +128,19 @@ export function sentencesFor(st) {
     if (out.length >= SENTENCE_POOL_MIN) break;
     if (!reached.has(u.id)) take(u);
   }
-  return out;
+  /* Sentences made only of words from lessons already finished come first
+     (the owner, 2026-10-09: "expose the learner to sentences. Especially
+     sentences from their lessons already completed"); the rest keep their
+     order behind them. A stable partition, so the newest units still lead
+     inside each half. */
+  const known = new Set(personalWords(st));
+  const yours = (c) => (String(c.b).match(/[А-Яа-яЁё́-]+/g) || []).every((tok) => {
+    const i = idxOfWord(tok);
+    return i >= 0 && (i < SENTENCE_FREE_RANK || known.has(i));
+  });
+  const mine = [], rest = [];
+  for (const c of out) (yours(c) ? mine : rest).push(c);
+  return mine.concat(rest);
 }
 
 /* A pooled sentence by its own text, built once on first use. */
@@ -206,7 +221,10 @@ export function cardsIn(st, sets, words = []) {
 export function sourceCards(st) {
   const kinds = kindsOf(st.cardKinds);
   const ids = (st.sets || []).filter((id) => id !== "__due__" && id !== "__trouble__" && id !== "__sentences__");
-  if (kinds.includes("sentences")) ids.push("__sentences__");
+  /* The sentence pool rides with the path, not with a deck or a chapter the
+     learner picked: those carry their own sentences (a unit's video lines),
+     and an imported deck is its cards and nothing else. */
+  if (kinds.includes("sentences") && (!ids.length || ids.includes("__path__"))) ids.push("__sentences__");
   return cardsIn(st, ids).filter((c) => kinds.includes(cardKind(c.b)));
 }
 

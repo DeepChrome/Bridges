@@ -51,7 +51,7 @@ export const DEFAULTS = {
      learner has reached), chapters, decks. What is due is always dealt,
      whatever is ticked (core/queue.js, 2026-09-28). */
   sets: ["__path__"],
-  cardKinds: ["words"],   // words, sentences, or both (core/queue.js cardKind)
+  cardKinds: ["words", "sentences"],   // words, sentences, or both (core/queue.js cardKind)
   seen: {},             // word -> { recognise, produce, listen }: a card each (core/scheduler.js)
   trouble: {},
   daily: { day: null, new: 0, reviews: 0 },   // today's counts (core/queue.js dailyFor)

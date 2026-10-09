@@ -62,6 +62,41 @@ describe("the summary", () => {
   });
 });
 
+/* One way on (the owner, 2026-10-09: "force it to go to flashcards after the
+   summary and then after flashcards they can do the video… Include sentences
+   for the upcoming exercise"). The grammar episode's button is gone. */
+describe("the summary's Continue", () => {
+  const nav = { replace: jest.fn(), navigate: jest.fn(), goBack: jest.fn() };
+  beforeEach(() => jest.clearAllMocks());
+
+  it("deals the words with sentences as cards, then the video, on the last lesson", async () => {
+    const u = UN.find((x) => x.v && lessonCount(x) > 1);
+    const k = lessonCount(u) - 1;
+    await withProfile(<Summary route={{ params: { unitId: u.id, index: k } }} navigation={nav} />);
+    expect(screen.queryByTestId("summary-episode")).toBeNull();
+    expect(screen.queryByTestId("summary-cards")).toBeNull();
+    const { fireEvent, act } = require("@testing-library/react-native");
+    await act(async () => { fireEvent.press(await screen.findByTestId("summary-continue")); });
+    const [route, params] = nav.replace.mock.calls[0];
+    expect(route).toBe("ListCards");
+    expect(params.next).toEqual(["Video", { videoId: u.v.id, unitId: u.id, index: k }]);
+    const words = lessonWords(u, k).map((i) => L[i].b);
+    for (const w of words) expect(params.words).toContain(w);
+    // Sentences ride with the words (a card key with a space is a sentence).
+    expect(params.words.some((w) => / /.test(w))).toBe(true);
+  });
+
+  it("goes on to the next lesson from an earlier one", async () => {
+    const u = UN.find((x) => lessonCount(x) > 2);
+    await withProfile(<Summary route={{ params: { unitId: u.id, index: 0 } }} navigation={nav} />);
+    const { fireEvent, act } = require("@testing-library/react-native");
+    await act(async () => { fireEvent.press(await screen.findByTestId("summary-continue")); });
+    const next = nav.replace.mock.calls[0][1].next;
+    expect(next[0]).not.toBe("Summary");
+    expect(next).toBeTruthy();
+  });
+});
+
 /* The video closes the unit (the owner, 2026-10-05: "words for the video
    should be taught prior to the video"): only the last lesson lists it, its
    words and its questions, so it never comes before the words it says. */

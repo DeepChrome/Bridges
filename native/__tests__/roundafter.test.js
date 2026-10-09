@@ -57,6 +57,20 @@ describe("a list round with a way back", () => {
     expect(nav.goBack).toHaveBeenCalled();
   });
 
+  /* A round with somewhere to go on to (the summary's, 2026-10-09) ends on
+     Continue, which goes there rather than back. */
+  it("goes on to `next` with a Continue, not back", async () => {
+    nav.replace = jest.fn();
+    const words = ["город", "хотеть"];
+    await withProfile(<Study navigation={nav}
+      route={{ params: { round: "list", words, title: "Lesson", next: ["Video", { videoId: "x" }] } }} />);
+    await playThrough(words.length);
+    const on = await screen.findByTestId("round-after");
+    expect(screen.getByText("Continue")).toBeTruthy();
+    await act(async () => { fireEvent.press(on); });
+    expect(nav.replace).toHaveBeenCalledWith("Video", { videoId: "x" });
+  });
+
   /* A card already held (80+) is left out of a list handed in (the owner,
      2026-10-05: "they probably don't need to view it before the video"). */
   const held = () => ({ recognise: { state: REVIEW, s: 400, d: 3, reps: 9, lapses: 0, steps: 0,

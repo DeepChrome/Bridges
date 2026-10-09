@@ -726,13 +726,20 @@ export default function Study({ navigation, route }) {
      video's "Before the video" cards, a lesson's — ends on the one way back
      (`after`: its label), not on the day's options (the owner, 2026-10-04:
      "the option should be to continue to video, not those other options"). */
+  /* …and since 2026-10-09 the round goes *on* rather than back: `next` is
+     the route the lesson continues to (the video, the next lesson's words),
+     and the one button says Continue (the owner: "After the flashcards, it
+     should not go back to summary. Continue to the video or whatever the
+     exercise is. The button should just say continue"). */
   const [after, setAfter] = useState(null);
+  const [onward, setOnward] = useState(null);
   useEffect(() => {
     if (!round || !ready) return;
     dealtKey.current = setsKey;   // the round stands until the settings change
     deal(false, round, { words: params.words, title: params.title });
-    setAfter(params.after || null);
-    navigation.setParams({ round: undefined, words: undefined, title: undefined, after: undefined });
+    setAfter(params.after || (params.next ? "Continue" : null));
+    setOnward(params.next || null);
+    navigation.setParams({ round: undefined, words: undefined, title: undefined, after: undefined, next: undefined });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round, ready]);
   // The profile arrives after the first render, and a set or a deck can change
@@ -1084,7 +1091,7 @@ export default function Study({ navigation, route }) {
           {after && session && session.practice && finished ? (
             <Btn kind="pri" testID="round-after" label={after}
                  style={{ marginTop: 20, minWidth: 220 }}
-                 onPress={() => navigation.goBack()} />
+                 onPress={() => (onward ? navigation.replace(...onward) : navigation.goBack())} />
           ) : null}
           {after && session && session.practice && finished ? null : (<>
           {/* Past the goal, as far as the learner wants: more reviews push

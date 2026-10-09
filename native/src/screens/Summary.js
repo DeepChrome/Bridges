@@ -20,7 +20,10 @@ import { Screen, Muted, SectionLabel, Speaker, Familiarity, Text, Btn } from "..
 import { Linked } from "../words";
 import { RuleCard } from "../rules";
 import { WordSections, WordTags, prepSentences, VideoLines } from "../prep";
-import { UN, L, idxOfWord, rankOf, lessonWords, lessonCount, markComponent, linesWith, stepRoute } from "../data";
+import { UN, L, idxOfWord, rankOf, lessonWords, lessonCount, markComponent, linesWith, stepRoute,
+         components } from "../data";
+
+const unitWordIdxs = (unit) => Array.from({ length: lessonCount(unit) }, (_, k) => lessonWords(unit, k)).flat();
 import { familiarity, cardFor } from "@core/scheduler";
 import { firstSense } from "@core/util";
 
@@ -66,9 +69,7 @@ export default function Summary({ route, navigation }) {
   }, [ready]);
 
   if (!unit) return null;
-  const idxs = whole
-    ? Array.from({ length: lessonCount(unit) }, (_, k) => lessonWords(unit, k)).flat()
-    : lessonWords(unit, index);
+  const idxs = whole ? unitWordIdxs(unit) : lessonWords(unit, index);
   const words = idxs.map((i) => L[i].b);
   const seen = st.seen || {};
   // The video's own sentences with these words first; the collection's
@@ -76,9 +77,22 @@ export default function Summary({ route, navigation }) {
   const lines = linesWith(unit, idxs, whole ? UNIT_SENTENCES : LESSON_SENTENCES);
   const sentences = lines.length ? [] : prepSentences(words, whole ? UNIT_SENTENCES : LESSON_SENTENCES);
   const note = unit.g || null;       // the unit's rule applies to every lesson in it
+  const onward = onwardOf(st, unit, index, whole);
+  /* The cards: the words, and sentences for what comes next (the owner,
+     2026-10-09: "this block just had 5 verbs and it wasn't particularly
+     helpful. Include sentences for the upcoming exercise") — the video's own
+     lines when the video is next, else the sentences shown here. */
+  const toVideo = onward && onward[0] === "Video";
+  const cardSentences = (toVideo ? linesWith(unit, unitWordIdxs(unit), UNIT_SENTENCES).map((l) => l.ru) : [])
+    .concat(lines.map((l) => l.ru), sentences.map((s) => s.ru));
+  const cards = words.concat([...new Set(cardSentences)]);
+  const go = () => navigation.replace("ListCards", { round: "list", title: unit.name, words: cards,
+                                                      next: onward || undefined });
 
   return (
-    <Screen>
+    <Screen footer={navigation ? (
+      <Btn block kind="pri" testID="summary-continue" label="Continue" onPress={go} />
+    ) : null}>
       <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
         {whole ? unit.name : `${unit.name} · Lesson ${index + 1}`}
       </Text>
@@ -113,31 +127,27 @@ export default function Summary({ route, navigation }) {
         <View testID="summary-grammar" style={{ marginTop: 16 }}>
           <SectionLabel>Grammar</SectionLabel>
           <RuleCard note={note} />
-          {unit.v && unit.v.lesson && navigation ? (
-            <Btn testID="summary-episode" label="Watch the grammar episode" style={{ marginTop: 12 }}
-                 onPress={() => navigation.navigate("Video", { videoId: unit.v.lesson.id })} />
-          ) : null}
-        </View>
-      ) : null}
-
-      {/* Where the summary leads (the owner, 2026-10-05: "two buttons…
-          watching the lesson's video… reviewing the lesson's flash cards…
-          side by side, concise, clean"). The same destinations as the
-          lesson's own steps, so the two screens cannot disagree. */}
-      {navigation ? (
-        <View testID="summary-actions" style={{ flexDirection: "row", gap: 10, marginTop: 22 }}>
-          <Btn testID="summary-cards" label="Flashcards" style={{ flex: 1 }}
-               onPress={() => navigation.navigate("ListCards", {
-                 round: "list", title: unit.name, after: "Back to the summary",
-                 words: words.concat(lines.map((l) => l.ru)) })} />
-          {/* The video closes the unit (data.js components): offered from the
-              last lesson's summary and the unit's, not before its words are taught. */}
-          {unit.v && (whole || index === lessonCount(unit) - 1) ? (
-            <Btn kind="pri" testID="summary-video" label="Watch video" style={{ flex: 1 }}
-                 onPress={() => navigation.navigate(...stepRoute("video", unit, whole ? 0 : index))} />
-          ) : null}
         </View>
       ) : null}
     </Screen>
   );
+}
+
+/* Where a summary leads, one way only (the owner, 2026-10-09: "instead of
+   having two options, force it to go to flashcards after the summary and
+   then after flashcards they can do the video"): the lesson's words as
+   cards, with sentences, and then the lesson's next step. The video goes
+   straight to the player — its own summary would deal these cards again.
+   The grammar episode's button went with the choice ("replace watch grammar
+   episode with continue"). */
+function onwardOf(st, unit, index, whole) {
+  if (whole || index === lessonCount(unit) - 1) {
+    if (unit.v) return ["Video", { videoId: unit.v.id, unitId: unit.id, index: whole ? 0 : index }];
+  }
+  if (whole) return null;
+  const cs = components(st, unit, index);
+  const at = cs.findIndex((c) => c.id === "summary");
+  const after = cs.find((c, k) => k > at && !c.done && c.id !== "video" && c.id !== "vwords");
+  if (after) return stepRoute(after.id, unit, index);
+  return index + 1 < lessonCount(unit) ? ["Vocab", { unitId: unit.id, index: index + 1 }] : null;
 }

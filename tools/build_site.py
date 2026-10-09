@@ -89,6 +89,56 @@ def stress_table(db):
     return table
 
 
+def yo_table(db):
+    """fold(form) -> the one spelling with ё, for every form the lexicon only
+    ever writes with ё. «Сколько молока дает эта корова?» showed «дает» beside
+    options «даёшь», «даём» read off the tables, and the voice — reading the
+    word right — sounded wrong against the text (the owner, 2026-10-09). The
+    collection often drops the dots. **Only where there is no choice**: «все»
+    and «всё» are two words, and a key the lexicon also spells with е, or with
+    ё in two places, is left as written (check_scripts.mjs YO_ONLY, the same
+    rule for the authored scripts)."""
+    yo, ambiguous = {}, set()
+    for (acc,) in db.execute("select accented from paradigm union select accented from lemmas"):
+        for w in WORD_RE.findall(unicodedata.normalize("NFC", acc or "")):
+            plain = unicodedata.normalize("NFC", unicodedata.normalize("NFD", w).replace("́", "").replace("̀", "")).lower()
+            k = fold(plain)
+            if "ё" in plain:
+                if yo.get(k, plain) != plain:
+                    ambiguous.add(k)
+                yo.setdefault(k, plain)
+            elif "е" in plain:
+                ambiguous.add(k)
+    for k in ambiguous:
+        yo.pop(k, None)
+    return yo
+
+
+def restore_yo(ru, table, tally):
+    """The sentence with ё put back where `yo_table` leaves no choice. Letter
+    for letter: the stress marks and the capitals stay as they were."""
+    def word(m):
+        w = m.group(0)
+        if "ё" in w.lower():
+            return w
+        target = table.get(fold(w))
+        if not target:
+            return w
+        out, letters = [], iter(target)
+        for ch in unicodedata.normalize("NFD", w):
+            if unicodedata.combining(ch):
+                out.append(ch)
+                continue
+            t = next(letters, None)
+            if t == "ё" and ch in "еЕ":
+                out.append("Ё" if ch == "Е" else "ё")
+            else:
+                out.append(ch)
+        tally["yo"] += 1
+        return unicodedata.normalize("NFC", "".join(out))
+    return re.sub(r"[а-яёА-ЯЁ́̀]+", word, ru)
+
+
 def tidy_quotes(ru):
     """No space just inside a pair of straight quotes: «Давай на "ты ".» in
     the Languages on Fire deck. Quotes are paired left to right."""
@@ -1314,12 +1364,14 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     # A recording is found by fold(text), so a sentence whose text is tidied
     # keeps its recording under the new key too (`retexted`, applied below).
     stresses, stress_tally = stress_table(db), Counter()
+    yos = yo_table(db)
     sentences, retexted = {}, {}
     for iid, ru, en_s, deck, audio in db.execute(
             "select i.id, i.ru, i.en, d.name, i.audio from c.items i"
             " left join c.decks d on d.id=i.deck_id"
             " where i.kind='sentence' and i.en is not null"):
-        shown = apply_stress_review(fix_stress(tidy_quotes(ru), stresses, stress_tally), stress_tally)
+        shown = restore_yo(apply_stress_review(fix_stress(tidy_quotes(ru), stresses, stress_tally), stress_tally),
+                           yos, stress_tally)
         if fold(shown) in REJECTED:
             stats["rejected"] = stats.get("rejected", 0) + 1
             continue
@@ -1345,7 +1397,8 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
             # eaten me up"); the rule rank_examples applies to his own decks.
             if ARCHAIC_EN.search(en_s or "") or fold(ru) in REJECTED:
                 continue
-            ext_sentences[xid] = (apply_stress_review(fix_stress(ru, stresses, stress_tally), stress_tally), en_s, src)
+            ext_sentences[xid] = (restore_yo(apply_stress_review(fix_stress(ru, stresses, stress_tally), stress_tally),
+                                             yos, stress_tally), en_s, src)
         for k, xid in ex.execute("select key, item_id from item_tokens"):
             ext_items_of_key.setdefault(k, []).append(xid)
         row = ex.execute("select v from meta where k='licence'").fetchone()

@@ -70,6 +70,9 @@ it("sends the question with the card on screen, and a follow-up with the turn be
   await askIt("And the plural?");
   expect(fb.ask.mock.calls[1][0].history).toEqual([{ q: "Why книгу?", a: "«читать» takes the accusative." }]);
   expect(await screen.findByTestId("ask-answer-1")).toBeTruthy();
+  // Teddy asks, not a label (the owner, 2026-10-08).
+  expect(screen.getByTestId("ask-hello").props.children).toBe("How can I help?");
+  expect(screen.getByTestId("guide-wave")).toBeTruthy();
   await closeSheets();
 });
 
@@ -151,6 +154,14 @@ it("and not on such a screen without it", async () => {
   mockConfigured = false;
   await openHelp("Settings");
   await waitFor(() => expect(screen.queryByTestId("help-button")).toBeNull());
+});
+
+it("puts the sparkle and the flag in the exercise, and out of its header", () => {
+  const { INLINE_TOOLS } = require("../src/askai");
+  for (const r of ["Quiz", "Drill", "CaseRun", "GrammarRun", "Vocab", "Cards"]) expect(INLINE_TOOLS.has(r)).toBe(true);
+  for (const r of ["Path", "Words", "Episodes", "Word"]) expect(INLINE_TOOLS.has(r)).toBe(false);
+  const runSrc = require("fs").readFileSync(require("path").join(__dirname, "../src/screens/Run.js"), "utf8");
+  expect(runSrc).toMatch(/<RunTools \/>/);
 });
 
 it("keeps the map honest: every Practice row and tab it names exists", () => {

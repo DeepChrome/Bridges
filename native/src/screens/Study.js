@@ -18,6 +18,7 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton,
          Familiarity, familiarityColor } from "../ui";
+import { RunTools } from "../askai";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines,
          personalWords, goalNow, goalOpts } from "../data";
 import { Linked, GrammarLine } from "../words";
@@ -1027,6 +1028,7 @@ export default function Study({ navigation, route }) {
         <View style={{ flex: 1 }}>
           <Text testID="study-heading" style={{ color: t.ink, fontSize: 15 }}>{heading}</Text>
         </View>
+        {started || session ? <RunTools /> : null}
         <CogButton testID="study-cog" label="Study options" onPress={() => setPicker(true)} />
       </View>
 

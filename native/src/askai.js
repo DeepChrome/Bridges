@@ -29,6 +29,8 @@ import { routePosition } from "./data";
 import { ask, config, isCap, capNotice } from "./lib/feedback";
 import { talkLevelFor } from "./screens/Talk";
 import { screenAbout } from "./about";
+import { navRef } from "./words";
+import { GuidePop } from "./guide";
 
 export const aiOffered = () => !!config("/v1/ask");
 
@@ -130,28 +132,91 @@ export function AskInput({ th, placeholder, prefix = "ask", autoFocus }) {
   );
 }
 
-export function AskButton() {
+/* Exercise screens carry the sparkle and the flag in the exercise, beside the
+   speaker and the bulb (the owner, 2026-10-08: "the AI button should be lower
+   so it looks like it's referenceable in the exercise… throw the flag down
+   there for reporting too"), so the header leaves them out there. Every other
+   screen keeps them in the header. `RunTools` is the pair. */
+export const INLINE_TOOLS = new Set(["Vocab", "Quiz", "GrammarRun", "CaseRun", "Recap", "VideoQuiz",
+  "Scenes", "TestOut", "Final", "Placement", "CustomQuiz", "SoundDrill", "BuildDrill", "Shadow", "Drill",
+  "Cards", "ListCards"]);
+
+/* Header size, or the 40 px disc the bulb and the cog are (`disc`). */
+function iconBox(t, disc) {
+  return disc
+    ? ({ pressed }) => ({ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center",
+        borderWidth: 1, borderColor: t.line, backgroundColor: t.surface, opacity: pressed ? 0.6 : 1 })
+    : { marginRight: 6, width: 30, height: 30, alignItems: "center", justifyContent: "center" };
+}
+
+export function AskButton({ disc }) {
   const t = useTheme();
   const th = useAskThread();
   const [open, setOpen] = useState(false);
   if (!aiOffered()) return null;
+  const size = disc ? 20 : 22;
   return (
     <>
-      <Pressable onPress={() => { th.open(); setOpen(true); }} hitSlop={8} testID="ask-button"
+      <Pressable onPress={() => { th.open(); setOpen(true); }} hitSlop={disc ? 6 : 8} testID="ask-button"
                  accessibilityRole="button" accessibilityLabel="Ask the AI about the Russian here"
-                 style={{ marginRight: 6, width: 30, height: 30, alignItems: "center", justifyContent: "center" }}>
-        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={t.brand}
+                 style={iconBox(t, disc)}>
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={t.brand}
              strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
           <Path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z" />
           <Path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" />
         </Svg>
       </Pressable>
       {open ? (
-        <Sheet testID="ask-sheet" title="Ask about the Russian" onClose={() => setOpen(false)}
+        /* Teddy asks (the owner, 2026-10-08: "an avatar of teddy asking 'how
+           can I help' and looking cute") — he is the voice of the app's help,
+           and the tutor already speaks as him (§30bg). */
+        <Sheet testID="ask-sheet" onClose={() => setOpen(false)}
+               header={(
+                 <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                   <GuidePop pose="wave" size={64} />
+                   <Text testID="ask-hello" style={{ color: t.ink, fontSize: T.head, fontWeight: "700" }}>
+                     How can I help?
+                   </Text>
+                 </View>
+               )}
                footer={<AskInput th={th} placeholder="Why is it «книгу» here?" autoFocus />}>
           <AskTurns thread={th.thread} busy={th.busy} />
         </Sheet>
       ) : null}
+    </>
+  );
+}
+
+/* The beta's report flag (the owner, 2026-10-05: "a feedback option for this
+   Beta… feedback on specific questions"). It captures what is on screen at
+   the moment it is pressed — the route, its title, and the question about.js
+   holds — and opens the report with that attached. */
+export function ReportButton({ disc }) {
+  const t = useTheme();
+  const open = () => {
+    const about = screenAbout();
+    if (navRef.isReady && navRef.isReady()) navRef.navigate("Feedback", { about, from: about.screen });
+  };
+  const size = disc ? 19 : 21;
+  return (
+    <Pressable testID="report-button" onPress={open} hitSlop={disc ? 6 : 8}
+               accessibilityRole="button" accessibilityLabel="Report a problem"
+               style={disc ? iconBox(t, true) : { marginRight: 12, width: 30, height: 30,
+                                                  alignItems: "center", justifyContent: "center" }}>
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
+           strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M5 21V4M5 4h11l-2 4 2 4H5" />
+      </Svg>
+    </Pressable>
+  );
+}
+
+/* The two in an exercise's own row. */
+export function RunTools() {
+  return (
+    <>
+      <AskButton disc />
+      <ReportButton disc />
     </>
   );
 }

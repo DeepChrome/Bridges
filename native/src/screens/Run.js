@@ -14,6 +14,7 @@ import Svg, { Path } from "react-native-svg";
 import { markOutOfFive } from "../appearance";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
          BulbButton } from "../ui";
+import { RunTools } from "../askai";
 import { RuleCard, Reference, hasReference, StandardWhy, IrregularTag } from "../rules";
 import { topicFor } from "@core/grammar";
 import { wordFacts, isIrregular } from "@core/facts";
@@ -772,15 +773,18 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
         {/* The two things to do with the word on screen — hear it, look it up
             — in one row under it, rather than a speaker here and a text link
             adrift in the middle of the screen. */}
-        {promptSpeech(q) || (!answered && hasReference(ref)) ? (
-          <View style={{ marginTop: 12, flexDirection: "row", gap: 10, justifyContent: "center" }}>
-            {promptSpeech(q) ? <Speaker text={promptSpeech(q)} /> : null}
-            {!answered && hasReference(ref) ? (
-              <BulbButton testID="bulb" on={hintOpen} label="Reference"
-                          onPress={() => { setUsedHint(true); setHintOpen(true); }} />
-            ) : null}
-          </View>
-        ) : null}
+        {/* …and, beside them, Teddy's help and the report flag (askai.js):
+            asking about the question is part of the question, so it sits
+            here rather than in the header (the owner, 2026-10-08). They stay
+            after the answer, which is when "why?" is most often asked. */}
+        <View style={{ marginTop: 12, flexDirection: "row", gap: 10, justifyContent: "center" }}>
+          {promptSpeech(q) ? <Speaker text={promptSpeech(q)} /> : null}
+          {!answered && hasReference(ref) ? (
+            <BulbButton testID="bulb" on={hintOpen} label="Reference"
+                        onPress={() => { setUsedHint(true); setHintOpen(true); }} />
+          ) : null}
+          <RunTools />
+        </View>
       </Animated.View>
 
       {q.hint && !answered ? (

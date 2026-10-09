@@ -23,8 +23,7 @@ import { loadAppearance, useScheme } from "./src/appearance";
 import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { HelpButton } from "./src/help";
-import { screenAbout } from "./src/about";
-import { AskButton } from "./src/askai";
+import { AskButton, ReportButton, INLINE_TOOLS } from "./src/askai";
 import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
@@ -170,37 +169,15 @@ function MeButton({ navigation }) {
   );
 }
 
-/* The beta's report flag (the owner, 2026-10-05: "a feedback option for this
-   Beta… on the top bar… feedback on specific questions"). It captures what
-   is on screen at the moment it is pressed — the route, its title, and the
-   question about.js holds — and opens the report with that attached. */
-function ReportButton() {
-  const p = palette(useScheme());
-  const open = () => {
-    const about = screenAbout();
-    navRef.navigate("Feedback", { about, from: about.screen });
-  };
-  return (
-    <Pressable testID="report-button" onPress={open} hitSlop={8}
-               accessibilityRole="button" accessibilityLabel="Report a problem"
-               style={{ marginRight: 12, width: 30, height: 30, alignItems: "center", justifyContent: "center" }}>
-      <Svg width={21} height={21} viewBox="0 0 24 24" fill="none" stroke={p.ink2}
-           strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
-        <Path d="M5 21V4M5 4h11l-2 4 2 4H5" />
-      </Svg>
-    </Pressable>
-  );
-}
-
 function HeaderRight({ navigation, route }) {
   const home = !route || route.name !== "Path";
+  /* The report flag and the AI sparkle (askai.js); on an exercise they sit in
+     the exercise beside the speaker and the bulb instead (`INLINE_TOOLS`). */
+  const inline = !!route && INLINE_TOOLS.has(route.name);
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
-      <ReportButton />
-      {/* Ask the AI about what is on this screen (askai.js), beside the "?"
-          that says how the screen works (help.js) — two buttons for two
-          questions (the owner, 2026-10-08). */}
-      <AskButton />
+      {inline ? null : <ReportButton />}
+      {inline ? null : <AskButton />}
       <HelpButton route={route && route.name} />
       {home ? <HomeButton /> : null}
       <MeButton navigation={navigation} />

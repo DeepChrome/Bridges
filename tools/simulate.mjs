@@ -25,7 +25,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fold, TOKEN } from "../core/util.js";
 import { makeQuestions, QUIZ_N, SPEECH_MIX, lessonSize, lessonWordsOf, lessonCountOf } from "../core/questions.js";
-import { gradeFor, applyGrade, directionOfKind, dueCards, wordTrouble, DAY, DEFAULT_FRONTS }
+import { gradeFor, applyGrade, directionOfKind, dueCards, wordTrouble, DAY, DEFAULT_FRONTS, gradesCard }
   from "../core/scheduler.js";
 import { buildSession, dailyFor, QUEUE_DEFAULTS } from "../core/queue.js";
 import { RELIEF_AFTER, RELIEF_MARK, PASS_MARK, reviewFirst, REVIEW_FIRST }
@@ -192,6 +192,8 @@ function simulate(profileName, seed) {
      the runner's does (DIRECTION_OF_KIND). */
   const grade = (idx, correct, kind) => {
     if (typeof idx !== "number" || !L[idx]) return;
+    // A form drill grades no card, as in the runner (gradesCard).
+    if (!gradesCard(kind)) return;
     const r = applyGrade(st.seen, st.trouble, L[idx].b, directionOfKind(kind), gradeFor(correct, false), nowMs());
     st = { ...st, seen: r.seen, trouble: r.trouble };
   };

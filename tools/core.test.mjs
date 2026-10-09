@@ -674,6 +674,10 @@ group("the scheduler");
      && S.directionOfKind("type") === "produce" && S.directionOfKind("hear") === "listen"
      && S.directionOfKind("nothing") === "recognise",
      "every question kind names a direction");
+  // A form drill grades no card; a meaning question and a review do (2026-10-08).
+  ok(["cases", "agreement", "conjugation", "aspect", "stress", "form"].every((k) => !S.gradesCard(k))
+     && ["choose-en", "choose-ru", "type", "cloze", "listen", "hear", "say", "match", "study"].every(S.gradesCard),
+     "familiarity grows from meaning, never from a form drill");
 }
 
 /* ------------------------------------------------------------ session */

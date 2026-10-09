@@ -35,7 +35,7 @@ import { PairHear, PairSay } from "../activities/Pair";
 import { Shadow } from "../activities/Shadow";
 import { Build } from "../activities/Build";
 import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
-import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts } from "@core/scheduler";
+import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts, gradesCard } from "@core/scheduler";
 import { fold, firstSense } from "@core/util";
 
 /* The kinds whose miss the profile keeps for the tutor: one right answer, one
@@ -572,7 +572,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     const recycled = recycle && credit < 1 && !q.retry && !q.assess;
     if (recycled) setQueue((prev) => prev.concat([{ ...q, retry: true }]));
     keep(recycled ? queue.concat([{ ...q, retry: true }]) : queue);
-    if (gradeWords) {
+    // A form drill grades no card: the card is the word's meaning (gradesCard).
+    if (gradeWords && gradesCard(q.kind)) {
       const entries = words || (typeof q.i === "number" ? [q.i] : []);
       if (entries.length) {
         const g = grade || gradeFor(correct, usedHint);

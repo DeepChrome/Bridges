@@ -502,3 +502,16 @@ export const DIRECTION_OF_KIND = {
   video: "listen",
 };
 export const directionOfKind = (kind) => DIRECTION_OF_KIND[kind] || "recognise";
+
+/* The kinds that drill a form rather than a meaning: a case ending, a
+   conjugation, an agreement, an aspect partner, where the stress falls, the
+   chapter's form question. They grade no word's card (the owner, 2026-10-08:
+   *"Familiarity score calculation should largely be based off of performance
+   of that card during study card review… it can also stem from exposure and
+   success in lessons… it shouldn't grow at all from drills because they're
+   not focused on meaning"*). The card is the word's meaning; knowing
+   «книгу» is the accusative of «книга» says nothing about remembering what
+   «книга» means, and a run of right endings was lifting the familiarity of
+   words the learner could not translate. The runners still score them. */
+export const FORM_KINDS = new Set(["cases", "agreement", "conjugation", "aspect", "stress", "form"]);
+export const gradesCard = (kind) => !FORM_KINDS.has(kind);

@@ -95,6 +95,30 @@ test("a right answer records nothing", async () => {
   expect(((await saved()).misses || [])).toEqual([]);
 });
 
+/* Familiarity is the card's, and a form drill does not touch it (the owner,
+   2026-10-08: "it shouldn't grow at all from drills"). Graded runner, same
+   word: the meaning question writes a card, the drill writes none. */
+test("a meaning question grades the word's card and a form drill does not", async () => {
+  const cardOf = (st) => (st.seen || {})[L[wi].b];
+  const drill = { kind: "cases", ask: "Pick the form", prompt: L[wi].w, cyr: true, i: wi,
+                  options: [{ label: "x1", right: true }, { label: "x2" }, { label: "x3" }, { label: "x4" }] };
+  await AsyncStorage.setItem("rb.accounts", JSON.stringify({
+    list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
+  await render(<SessionProvider><Runner steps={[drill]} onFinish={jest.fn()} /></SessionProvider>);
+  await act(async () => { fireEvent.press(await screen.findByText("x1")); });
+  await screen.findByTestId("verdict");
+  expect(cardOf(await saved())).toBeUndefined();
+});
+
+test("…while the same word's meaning question does", async () => {
+  await AsyncStorage.setItem("rb.accounts", JSON.stringify({
+    list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
+  await render(<SessionProvider><Runner steps={[chosen]} onFinish={jest.fn()} /></SessionProvider>);
+  await act(async () => { fireEvent.press(await screen.findByText("book")); });
+  await screen.findByTestId("verdict");
+  expect(((await saved()).seen || {})[L[wi].b]).toBeTruthy();
+});
+
 test("misses are shaped for the tutor and capped", () => {
   const m = missOf(chosen, "table");
   expect(m).toMatchObject({ kind: "choose-en", answer: "book", said: "table" });

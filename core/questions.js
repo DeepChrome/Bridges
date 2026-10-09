@@ -284,7 +284,11 @@ export function makeQuestions(env) {
   const verbTableTaught = (w, title) => !route
     || (/^Present/.test(title) ? route.stage >= (w.a === "perfective" ? FUTURE_FROM : PRESENT_FROM)
       : /^Past/.test(title) ? route.stage >= PAST_FROM
-      : /^Imperative/.test(title) ? route.stage >= IMPERATIVE_FROM : true);
+      : /^Imperative/.test(title) ? route.stage >= IMPERATIVE_FROM
+      /* No lesson card teaches an adjective's short form or its comparison
+         (the owner, 2026-10-09: "I'm not sure short form has been explained
+         to us"); the grammar reference does, outside the route. */
+      : /^(Short form|Comparison)/.test(title) ? false : true);
   /* Whether a form of word `i` is one the route has taught: its dictionary
      form always; a verb's form in a tense taught; a declined word's form in a
      case taught. A word with no table (an adverb, a preposition) is itself. */
@@ -507,9 +511,15 @@ export function makeQuestions(env) {
       if (toks.length < 3) continue;
       // The gap's answer is a form the route has taught (formTaught): no
       // «тобо́й» before the cases.
+      /* …and a form no word of another kind shares: «добра́» in «сде́лал
+         мно́го добра́» is the noun «добро́», but it is also «до́брый»'s short
+         feminine, and the gap was built as the adjective's — wrong options from
+         the wrong word and a "short form" note (the owner, 2026-10-09). Which
+         one a sentence means is not something the index can say. */
       const hit = toks.find((t) => {
         const ids = IX[fold(t)];
-        return ids && ids.includes(idx) && formTaught(idx, t);
+        return ids && ids.includes(idx) && formTaught(idx, t)
+          && ids.every((j) => j === idx || !L[j] || L[j].p === w.p);
       });
       if (!hit) continue;
       const unknown = toks.filter(strange).length;
@@ -704,7 +714,9 @@ export function makeQuestions(env) {
           seen.add(k);
           return true;
         };
-        const own = shuffle(unique(forms.filter((f) => fold(f) !== fold(token)))).filter(fresh);
+        // Wrong options are forms the route has taught too: «добре́йший» was
+        // offered beside a gap no lesson had prepared (formTaught).
+        const own = shuffle(unique(forms.filter((f) => fold(f) !== fold(token) && formTaught(e.i, f)))).filter(fresh);
         const wrong = own.slice(0, 3).map((f) => ({ label: f, right: false, cyr: true }));
         if (wrong.length < 3) {
           for (const i of distractors(e.i, e.pool, 3, bySense)) {

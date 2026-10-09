@@ -1318,7 +1318,9 @@ group("lesson generation");
      ("you wouldn't ask them to conjugate a past form without having taught them
      the past"). */
   {
-    let noCard = 0, noTry = 0, early = 0, untaughtForm = 0, untaughtCase = 0, lessons = 0, futureEarly = 0;
+    let noCard = 0, noTry = 0, early = 0, untaughtForm = 0, untaughtCase = 0, lessons = 0, futureEarly = 0,
+        untaughtShort = 0;
+    const shortSeen = [];
     const tableId = (title) => (/^Present/.test(title) ? "present" : /^Past/.test(title) ? "past"
       : /^Imperative/.test(title) ? "imperative" : null);
     for (const u of UN) {
@@ -1347,6 +1349,22 @@ group("lesson generation");
             if (q.kind === "conjugation" && q.table && !tenses.includes(tableId(q.table.title))) untaughtForm++;
             if ((q.kind === "cases" || q.kind === "agreement") && q.table && Array.isArray(q.at)
                 && q.table.rows[q.at[0]] && !cases.has(q.table.rows[q.at[0]][0])) untaughtCase++;
+            // No lesson card teaches a short form or a comparison (2026-10-09:
+            // "I'm not sure short form has been explained to us").
+            if (q.kind === "cloze" && L[q.i] && Array.isArray(q.options)) {
+              const shortOrComp = new Set((L[q.i].t || []).filter((t) => /^(Short form|Comparison)/.test(t.title))
+                .flatMap((t) => t.rows.flatMap((r) => r.slice(1).flat())).map((f) => fold(f || "")));
+              shortOrComp.delete(fold(L[q.i].b));
+              // «си́нее» is the neuter as well as the comparative: a form a
+              // taught table also holds is taught.
+              for (const t of (L[q.i].t || []).filter((t) => /Declension/.test(t.title))) {
+                for (const f of t.rows.flatMap((r) => r.slice(1).flat())) shortOrComp.delete(fold(f || ""));
+              }
+              if (q.options.some((o) => shortOrComp.has(fold(o.label)))) {
+                untaughtShort++;
+                shortSeen.push(`${L[q.i].b}: ${q.options.map((o) => o.label).join("/")}`);
+              }
+            }
           }
         }
       }
@@ -1357,6 +1375,7 @@ group("lesson generation");
     ok(untaughtForm === 0, "no conjugation question asks a tense no card has taught", String(untaughtForm));
     ok(untaughtCase === 0, "no case question asks a case no card has taught", String(untaughtCase));
     ok(futureEarly === 0, "no lesson asks a perfective's future before chapter 9", String(futureEarly));
+    ok(untaughtShort === 0, "no lesson gap-fill asks or offers a short form or a comparison", shortSeen.slice(0, 3).join("; "));
   }
   ok(steps.filter((s) => s.t === "word").length === lessonWords(unit, 0).length,
      "every new word is presented");

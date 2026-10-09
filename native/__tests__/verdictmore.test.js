@@ -60,6 +60,23 @@ test("an English answer leads with the Russian word it means, linked", async () 
   expect(await screen.findByTestId("sheet-more")).toBeTruthy();
 });
 
+/* The answer's form as little flags (the owner, 2026-10-09: "the case, the
+   tense, the plurality, the gender… Just little flags"). */
+test("flags the answer's case, number and gender", async () => {
+  const typed = { kind: "cases", ask: "Write the accusative singular", prompt: "кни́га", cyr: true, i,
+                  typed: true, answer: "кни́гу", target: "кни́гу", alts: [] };
+  await withRunner([typed]);
+  const input = await screen.findByTestId("type-input");
+  fireEvent.changeText(input, "книга");
+  const { waitFor } = require("@testing-library/react-native");
+  await waitFor(() => expect(input.props.value).toBe("книга"));
+  await act(async () => { fireEvent.press(screen.getByText("Check")); });
+  const flags = await screen.findByTestId("verdict-flags");
+  expect(flags).toHaveTextContent(/accusative/);
+  expect(flags).toHaveTextContent(/singular/);
+  expect(flags).toHaveTextContent(/feminine/);
+});
+
 test("a right answer keeps its heading", async () => {
   await withRunner([chooseRu]);
   fireEvent.press(await screen.findByText("книга"));

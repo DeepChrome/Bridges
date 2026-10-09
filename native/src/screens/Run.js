@@ -17,6 +17,7 @@ import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked
 import { RunTools } from "../askai";
 import { Reference, hasReference, IrregularTag } from "../rules";
 import { isIrregular } from "@core/facts";
+import { formFlags, GENDER_NAMES } from "@core/forms";
 import { GuidePop } from "../guide";
 import { saveRun, clearRun, savedRun } from "../resume";
 import { RunCard } from "../resumesheet";
@@ -661,6 +662,16 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
      gave when it was another accepted one, else the one asked for. */
   const answerText = (verdict && verdict.as) || (answer ? answer.label : q.answer) || null;
   const answerSpeech = (verdict && verdict.as) || answerAudioText(q, answer);
+  /* The answer's form as flags — case and number, tense and person, gender —
+     only when the answer is a form of the question's word. A noun's gender
+     rides along, since its table does not carry it. */
+  const answerFlags = (() => {
+    if (!qWord || !answerText || !CYR.test(answerText)) return [];
+    const flags = formFlags(qWord, answerText);
+    if (!flags.length) return [];
+    const g = qWord.p === "noun" && qWord.g && GENDER_NAMES[qWord.g];
+    return g && !flags.includes(g) ? flags.concat([g]) : flags;
+  })();
   const tone = !verdict || verdict.right === null ? null
     : verdict.right ? { bg: t.goodBg, line: t.good, btn: "good" }
     : partial ? { bg: t.brandBg, line: t.brand, btn: "pri" }
@@ -849,6 +860,15 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                 {irregular ? <IrregularTag word={qWord} testID="verdict-irregular" /> : null}
               </View>
             ) : null}
+            {/* What form the answer is, as little flags (the owner, 2026-10-09:
+                "the case, the tense, the plurality, the gender… don't make it
+                too verbose. Just little flags"): read off the word's own table,
+                the same flags the quick look shows. */}
+            {right !== null && answerFlags.length ? (
+              <View testID="verdict-flags" style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                {answerFlags.map((f) => <Pill key={f}>{f}</Pill>)}
+              </View>
+            ) : null}
             {verdict && verdict.note ? (
               <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>{verdict.note}</Text>
             ) : null}
@@ -867,7 +887,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                   <View style={{ flex: 1 }}><Linked text={q.reveal} size={17} /></View>
                   <Speaker text={q.reveal} size={32} />
                 </View>
-                {q.formNote ? <Muted style={{ marginTop: 3 }}>{q.formNote}</Muted> : null}
+                {/* The form is named by the flags above now, not a sentence
+                    («добра́» is short form · f) — except where there are none. */}
+                {q.formNote && !answerFlags.length ? <Muted style={{ marginTop: 3 }}>{q.formNote}</Muted> : null}
               </View>
             ) : null}
             {/* "Comes round again" and "Right, with a hint" used to sit here.

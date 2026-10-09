@@ -16,7 +16,7 @@ import React, { useEffect } from "react";
 import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Screen, Muted, SectionLabel, Speaker, Familiarity, Text, Btn } from "../ui";
+import { Screen, Muted, Heading, Subheading, Speaker, Familiarity, Btn } from "../ui";
 import { Linked } from "../words";
 import { RuleCard } from "../rules";
 import { WordSections, WordTags, prepSentences, VideoLines } from "../prep";
@@ -93,23 +93,22 @@ export default function Summary({ route, navigation }) {
     <Screen footer={navigation ? (
       <Btn block kind="pri" testID="summary-continue" label="Continue" onPress={go} />
     ) : null}>
-      <Text style={{ color: t.ink, fontSize: 20, fontWeight: "700" }}>
-        {whole ? unit.name : `${unit.name} · Lesson ${index + 1}`}
-      </Text>
-      <Muted testID="summary-count">{`${words.length} words`}</Muted>
+      {/* Which lesson, in the small heading style: the header bar already
+          says Summary, and each section carries its own count. */}
+      <Subheading testID="summary-title">{whole ? unit.name : `${unit.name} · Lesson ${index + 1}`}</Subheading>
 
       <WordSections words={words} testID="summary-cluster"
                     renderWords={(ws) => ws.map((w, k) => <WordLine key={w} word={w} seen={seen} first={k === 0} />)} />
 
       {lines.length ? (
-        <View testID="summary-sentences" style={{ marginTop: 16 }}>
-          <SectionLabel>From the video</SectionLabel>
+        <View testID="summary-sentences" style={{ marginTop: 26 }}>
+          <Heading>From the video</Heading>
           <VideoLines lines={lines} testID="summary-lines"
                       onMoment={navigation ? (l) => navigation.navigate("Video", { videoId: l.vid, at: l.t }) : undefined} />
         </View>
       ) : sentences.length ? (
-        <View testID="summary-sentences" style={{ marginTop: 16 }}>
-          <SectionLabel>Sentences</SectionLabel>
+        <View testID="summary-sentences" style={{ marginTop: 26 }}>
+          <Heading>Sentences</Heading>
           {sentences.map((s, k) => (
             <View key={s.ru} style={{ flexDirection: "row", alignItems: "flex-start", gap: 8, paddingVertical: 8,
                                       borderTopWidth: k ? 1 : 0, borderTopColor: t.lineSoft }}>
@@ -124,8 +123,8 @@ export default function Summary({ route, navigation }) {
       ) : null}
 
       {note ? (
-        <View testID="summary-grammar" style={{ marginTop: 16 }}>
-          <SectionLabel>Grammar</SectionLabel>
+        <View testID="summary-grammar" style={{ marginTop: 26 }}>
+          <Heading style={{ marginBottom: 10 }}>Grammar</Heading>
           <RuleCard note={note} />
         </View>
       ) : null}

@@ -24,7 +24,7 @@ import React, { useState } from "react";
 import { View, ScrollView, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
-import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, Marked, Bubble, Flag } from "./ui";
+import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, Marked, Bubble, Flag, Subheading } from "./ui";
 import { Linked, navRef } from "./words";
 import { tableLabel } from "@core/forms";
 import { irregularities } from "@core/facts";
@@ -102,7 +102,7 @@ const CYRILLIC = /[Ѐ-ӿ]/;
  * grammar reference's tables hold *endings* — «-ов», «-ами» — and a speaker
  * reading a lone ending aloud says something no Russian would. The entry and
  * the drill's reference turn it on, because their tables hold real words. */
-export function Table({ table, mark, speak, testID, bare }) {
+export function Table({ table, mark, speak, testID, bare, labelHead }) {
   const t = useTheme();
   const [br, bc] = mark || [];
   /* Laid out for a person reading it rather than for a parser (the owner,
@@ -122,7 +122,7 @@ export function Table({ table, mark, speak, testID, bare }) {
               <Text key={c + ci}
                     style={{ width: COL, color: t.ink2, fontSize: T.small, fontWeight: "700",
                              paddingVertical: 7 }}>
-                {ci === 0 ? "" : c}
+                {ci === 0 && !labelHead ? "" : c}
               </Text>
             ))}
           </View>
@@ -221,10 +221,19 @@ export function RuleCard({ note, tone, testID, style }) {
   const brand = tone === "brand";
   const body = (
     <>
-      <Text style={{ color: t.ink, fontSize: brand ? T.title : T.head, fontWeight: "700" }}>
-        {note.title}
-      </Text>
+      {/* On its own teaching step the rule's name is the screen's title;
+          anywhere else it sits under a section's Heading and is the
+          Subheading, so a page carries two heading styles, not three. */}
+      {brand ? (
+        <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700" }}>{note.title}</Text>
+      ) : (
+        <Subheading>{note.title}</Subheading>
+      )}
       <Note text={note.body} color={t.ink2} style={{ marginTop: 6 }} />
+      {/* A set of endings, pairs or choices is a table, not a sentence (the
+          owner, 2026-10-09: "side by side tables when that would help
+          organization… not just a wall of text"). Forms in it say themselves. */}
+      {note.table ? <Table table={note.table} speak labelHead testID={testID ? `${testID}-table` : "rule-table"} /> : null}
       <Examples examples={note.examples} line={brand ? t.brandDim : t.lineSoft} />
     </>
   );

@@ -34,9 +34,8 @@ describe("the summary", () => {
   it("lists a lesson's words by kind, with sentences and the rule, and marks its step", async () => {
     const words = lessonWords(unit, 0).map((i) => L[i].b);
     await withProfile(<Summary route={{ params: { unitId: unit.id, index: 0 } }} />);
-    expect(await screen.findByTestId("summary-count")).toBeTruthy();
+    expect(await screen.findByTestId("summary-title")).toBeTruthy();
     for (const w of words) expect(screen.getByTestId(`summary-${w}`)).toBeTruthy();
-    expect(screen.getByTestId("summary-count").props.children).toBe(`${words.length} words`);
     if (unit.g) expect(screen.getByTestId("summary-grammar")).toBeTruthy();
 
     await flushState();
@@ -46,10 +45,20 @@ describe("the summary", () => {
     expect(lessonDone(saved, unit, 0)).toBe(false);
   });
 
+  /* A set of endings is a table, not a sentence (the owner, 2026-10-09). */
+  it("draws a grammar card's table", async () => {
+    const u = UN.find((x) => x.g && x.g.table);
+    expect(u).toBeTruthy();
+    await withProfile(<Summary route={{ params: { unitId: u.id, index: 0 } }} />);
+    expect(await screen.findByTestId("rule-table")).toBeTruthy();
+    for (const c of u.g.table.columns.filter(Boolean)) expect(screen.getAllByText(c).length).toBeGreaterThan(0);
+  });
+
   it("lists the whole unit when no lesson is named", async () => {
     const all = Array.from({ length: lessonCount(unit) }, (_, k) => lessonWords(unit, k)).flat();
     await withProfile(<Summary route={{ params: { unitId: unit.id } }} />);
-    expect((await screen.findByTestId("summary-count")).props.children).toBe(`${all.length} words`);
+    await screen.findByTestId("summary-title");
+    for (const i of all) expect(screen.getByTestId(`summary-${L[i].b}`)).toBeTruthy();
   });
 
   it("is an optional step, before the video", () => {

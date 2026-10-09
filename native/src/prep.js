@@ -13,7 +13,7 @@ import React from "react";
 import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "./theme";
-import { Btn, Muted, SectionLabel, Familiarity, Speaker, Text, Fold, Pill } from "./ui";
+import { Btn, Muted, SectionLabel, Familiarity, Speaker, Text, Fold, Pill, Heading, Subheading } from "./ui";
 import { Linked } from "./words";
 import { RuleCard, IrregularTag } from "./rules";
 import { familiarity, cardFor } from "@core/scheduler";
@@ -105,20 +105,12 @@ export function WordTags({ e }) {
    name in the brand colour above its words. `renderWords(words, group)` draws
    the rows, so a lesson keeps its own animated rows and a summary its own. */
 export function WordSections({ words, renderWords, testID = "cluster" }) {
-  const t = useTheme();
   return clusterWords(words).map((c, k) => (
     <View key={c.id} testID={`${testID}-${c.id}`} style={{ marginTop: k ? 26 : 12 }}>
-      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8, paddingBottom: 6,
-                     borderBottomWidth: 2, borderBottomColor: t.line }}>
-        <Text accessibilityRole="header" style={{ color: t.ink, fontSize: 19, fontWeight: "800" }}>{c.name}</Text>
-        <Muted>{String(c.words.length)}</Muted>
-      </View>
+      <Heading count={c.words.length}>{c.name}</Heading>
       {c.groups.map((grp) => (
         <View key={grp.name || "_"} testID={`group-${grp.name || c.id}`} style={{ marginTop: 12 }}>
-          {grp.name ? (
-            <Text accessibilityRole="header" style={{ color: t.brand, fontSize: 13, fontWeight: "700", letterSpacing: 0.6,
-                           textTransform: "uppercase", marginBottom: 2 }}>{grp.name}</Text>
-          ) : null}
+          {grp.name ? <Subheading>{grp.name}</Subheading> : null}
           {renderWords(grp.words, grp)}
         </View>
       ))}

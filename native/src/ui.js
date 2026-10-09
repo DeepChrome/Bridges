@@ -745,6 +745,31 @@ export function SectionLabel({ children, style, testID }) {
   );
 }
 
+/* The two heading levels a reference page uses, and only these two (the
+   owner, 2026-10-09: "make the demarcation of the sections more clear…
+   inconsistency in font size, color, etc. stick with maybe two header
+   fonts/formats"). A section — Verbs, Sentences, Grammar — is `Heading`:
+   ink, bold, a rule under it, an optional count. What sits inside one — a
+   group of words, a rule's name — is `Subheading`: brand, small capitals. */
+export function Heading({ children, count, testID, style }) {
+  const t = useTheme();
+  return (
+    <View testID={testID} style={[{ flexDirection: "row", alignItems: "baseline", gap: 8, paddingBottom: 6,
+                                    borderBottomWidth: 2, borderBottomColor: t.line }, style]}>
+      <Text accessibilityRole="header" style={{ color: t.ink, fontSize: 19, fontWeight: "800" }}>{children}</Text>
+      {count === undefined || count === null ? null : <Muted>{String(count)}</Muted>}
+    </View>
+  );
+}
+export function Subheading({ children, testID, style }) {
+  const t = useTheme();
+  return (
+    <Text testID={testID} accessibilityRole="header"
+          style={[{ color: t.brand, fontSize: 13, fontWeight: "700", letterSpacing: 0.6,
+                    textTransform: "uppercase", marginBottom: 2 }, style]}>{children}</Text>
+  );
+}
+
 /* A chip in a row of choices, lit when chosen. One size for every screen, and
    that size is a thumb's: three screens had their own at 34, 36 and 40 px. */
 export function Chip({ on, label, onPress, testID }) {

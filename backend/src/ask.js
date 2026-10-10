@@ -15,9 +15,12 @@
  *
  * **Short, and Russian set apart.** One field, at most ANSWER_WORDS, plain
  * English with every Russian form in «guillemets» (the app's `Marked` draws
- * those loud). A learner mid-exercise wants the reason, not a lecture. It may
- * give the right answer — the app's references never hide it (§30az) — and it
- * keeps to Russian: anything else is declined in a sentence.
+ * those loud). A learner mid-exercise wants the reason, not a lecture.
+ * **The why, not the answer** (the owner, 2026-10-09: "The right answer
+ * should be provided. The AI is an option for the user to ask WHY...like what
+ * dictates the case"): the screen already shows the answer, so the reply
+ * names what in the sentence decides it and the rule it follows. It keeps to
+ * Russian: anything else is declined in a sentence.
  */
 
 import { plain } from "./schema.js";
@@ -41,9 +44,12 @@ Reply with JSON only, no prose around it:
 {"answer":"<at most ${ANSWER_WORDS} words>"}
 
 Rules:
-- Answer the question about what is on the screen. If they ask "why", give the rule that decides it here: the case and what governs it, the person and tense, the gender, the aspect, the stress, or the meaning in this sentence. Then one short example if it helps.
-- You may state the right answer; the learner is allowed to know it.
+- The right answer is already on the learner's screen. Your job is the WHY: what in this sentence decides it — the word or preposition that governs the case and why it does, the subject that sets the person, gender or number, what makes the aspect or tense the one used. Name the trigger in the sentence, then the rule it follows, then one short example of the same rule if it helps.
+- Never answer by only restating the right answer or saying it is correct. If the learner gave a wrong answer, say in a few words why it does not fit here.
+- Never say a rule has no exceptions ("always"). Where a preposition or verb takes more than one case, say which meaning takes this one: «в» with the prepositional is location («в Москве́»), with the accusative direction («в Москву́»).
 - Write every Russian word or form inside «guillemets», like «книгу». Never write Russian without them.
+- Never use straight double quotes inside the answer (they break the JSON); write English meanings plainly or in single quotes.
+- Copy stress marks only from words on the screen; never add a stress mark to a word you bring in yourself.
 - Pitch it to the learner's level: plain words for a beginner, grammar terms only when you also say what they mean.
 - At most ${ANSWER_WORDS} words. Short sentences. No lists of more than three items, no headings, no markdown.
 - If the question is not about Russian or this app's exercise, say in one sentence that you can only help with Russian.

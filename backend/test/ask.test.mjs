@@ -54,7 +54,10 @@ test("an answer is capped, keeps its guillemets, and loses its dashes", () => {
   assert.match(validateAsk({ answer: new Array(ANSWER_WORDS + 1).fill("w").join(" ") }).errors.join(" "), /over/);
   assert.equal(validateAsk({}).ok, false);
   assert.match(SYSTEM_ASK, /Never write Russian without them/);
-  assert.match(SYSTEM_ASK, /You may state the right answer/);
+  // The answer is on screen; Teddy explains what decides it (the owner,
+  // 2026-10-09: "The AI is an option for the user to ask WHY").
+  assert.match(SYSTEM_ASK, /Your job is the WHY/);
+  assert.match(SYSTEM_ASK, /Never answer by only restating the right answer/);
   assert.match(SYSTEM_ASK, /only help with Russian/);
 });
 

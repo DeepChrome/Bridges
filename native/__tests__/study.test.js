@@ -91,6 +91,21 @@ describe("which cards a set holds", () => {
     expect(cards.find((c) => c.b === "Как дела у тебя?").e).toBe("How are you doing?");
   });
 
+  /* A summary's sentences are dictionary examples, not pooled ones, and they
+     turned over to no English (the owner, 2026-10-09). Every sentence a
+     summary deals carries its English, new or coming back due. */
+  it("gives a summary's example sentences their English", () => {
+    const { prepSentences } = require("../src/prep");
+    const { lessonWords, L } = require("../src/data");
+    const words = lessonWords(STAGES[1].core, 0).concat(lessonWords(STAGES[2].core, 0)).map((i) => L[i].b);
+    const sents = prepSentences(words, 8).map((x) => x.ru);
+    expect(sents.length).toBeGreaterThan(0);
+    const fresh = cardsIn(st, [], sents);
+    expect(fresh.every((c) => c.e)).toBe(true);
+    const due = cardsIn({ ...st, seen: Object.fromEntries(sents.map((s) => [s, { recognise: review(-1) }])) }, ["__due__"]);
+    expect(due.filter((c) => c.sentence).every((c) => c.e)).toBe(true);
+  });
+
   /* The trouble round: the trouble words whether or not they are due, worst
      first, as their own session. */
   it("deals a round of trouble words on request, due or not", () => {

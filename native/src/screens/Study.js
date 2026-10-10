@@ -20,7 +20,7 @@ import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseL
          Familiarity, familiarityColor } from "../ui";
 import { RunTools } from "../askai";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines,
-         personalWords, goalNow, goalOpts } from "../data";
+         personalWords, goalNow, goalOpts, englishOfSentence } from "../data";
 import { Linked, GrammarLine } from "../words";
 import { useAbout } from "../about";
 import { IrregularTag } from "../rules";
@@ -183,7 +183,9 @@ export function cardsIn(st, sets, words = []) {
     const row = sentenceRow(w);
     if (row) { add(sentenceCard(row)); return; }
     const dc = deckCardOf(st, w);
-    add(dc || { key: "d" + w, w, b: w, e: "", sentence: /\s/.test(w) });
+    if (dc) { add(dc); return; }
+    // A dictionary example (a summary's sentence) keeps its English too.
+    add({ key: "d" + w, w, b: w, e: englishOfSentence(w), sentence: /\s/.test(w) });
   };
   sets.forEach((id) => {
     if (id === "__trouble__") { troubleWords(st).forEach(byWord); return; }

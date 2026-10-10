@@ -46,6 +46,19 @@ import { CASES } from "@core/cases";
    (core/endings.js). Counted once and kept: about a tenth of a second over
    20,425 sentences in Node, and the pool has to be parsed on the way, so it
    happens on the first visit to the screen and never on boot. */
+/* A dictionary sentence's English by its Russian, built on first use: a
+   flashcard made from a lesson summary's example sentences is one of these,
+   not a pooled sentence, and it came up with no English when turned (the
+   owner, 2026-10-09). */
+let sentenceEnglish = null;
+export function englishOfSentence(ru) {
+  if (sentenceEnglish === null) {
+    sentenceEnglish = new Map();
+    for (const r of sentPool()) if (r[1] && !sentenceEnglish.has(r[0])) sentenceEnglish.set(r[0], r[1]);
+  }
+  return sentenceEnglish.get(ru) || "";
+}
+
 let endingsRanked = null;
 export function endingsByFrequency() {
   if (endingsRanked === null) endingsRanked = rankEndings(sentPool().map((r) => r[0]));

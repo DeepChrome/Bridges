@@ -742,11 +742,22 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                        textAlign: "center" }}>
           {q.ask}
         </Text>
+        {/* The question's Russian is word-linked like Russian everywhere else
+            (the owner, 2026-10-11: "Why did you remove all the
+            underlines/references?"). A sentence with a gap gives nothing
+            away — the missing word is not in it. A word being asked about
+            («what does книга mean?») links only once answered, since its
+            quick look would show the answer. */}
         {q.prompt ? (
-          <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center",
-                         fontSize: promptSize(q), lineHeight: promptSize(q) + 8 }}>
-            {q.prompt}
-          </Text>
+          CYR.test(q.prompt) && (/_/.test(q.prompt) || answered) ? (
+            <Linked testID="prompt-linked" text={q.prompt} size={promptSize(q)}
+                    style={{ fontWeight: "600", textAlign: "center", lineHeight: promptSize(q) + 8 }} />
+          ) : (
+            <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center",
+                           fontSize: promptSize(q), lineHeight: promptSize(q) + 8 }}>
+              {q.prompt}
+            </Text>
+          )
         ) : null}
         {q.sub ? <Muted style={{ marginTop: 6, textAlign: "center" }}>{q.sub}</Muted> : null}
         {/* Whatever Russian the question shows can be heard (the owner,

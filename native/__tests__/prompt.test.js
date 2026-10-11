@@ -13,6 +13,7 @@
 
 import React from "react";
 import { render, screen } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
@@ -120,8 +121,10 @@ describe("how big the prompt is", () => {
                     options: [{ label: "новый", right: true }, { label: "новая" },
                               { label: "новое" }, { label: "новые" }] };
     await withRunner([cloze]);
-    const prompt = await screen.findByText(LONGEST);
-    const s = flat(prompt.props.style);
+    // A gap sentence is word-linked (2026-10-11); its size is on the line.
+    await screen.findByText(LONGEST);
+    const prompt = screen.getByTestId("prompt-linked");
+    const s = StyleSheet.flatten(prompt.props.style);
     expect(s.fontSize).toBe(22);
     expect(s.lineHeight).toBe(30);
     // And the options are still there beneath it.

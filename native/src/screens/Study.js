@@ -379,8 +379,9 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
                           rng, ahead, opts });
   }
   /* The day's goal (core/queue.js goalSession): what is due, the new words
-     allowed, then the learner's own weakest met cards — so the number on the
-     tab can always be brought to 0 — and "Keep going" (`beyond`) past it. */
+     allowed, then the learner's own met cards most faded since they were last
+     seen — so the number on the tab can always be brought to 0 — and "Keep
+     going" (`beyond`) past it. */
   /* The personal review draws on everything met of the chosen kinds; a
      review the learner pointed at chapters or a deck keeps to them (the
      owner: "they can override and review specific chapters"). */

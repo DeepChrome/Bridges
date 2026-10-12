@@ -315,9 +315,31 @@ export const goalBadge = (goal, now, opts) => {
  *      forgotten first (buildSession's order, common words weighted up);
  *   2. new cards from the learner's own pool, up to the day's allowance;
  *   3. and to make up the rest, the learner's met cards that are not due,
- *      **weakest first** — familiarity ascending, so a word met yesterday
- *      comes round far more than one held for a month — with one mastered
- *      card sprinkled in every `MASTERED_EVERY`.
+ *      **most faded first** — retrievability ascending, so a word met
+ *      yesterday comes round far more than one held for a month — with one
+ *      mastered card sprinkled in every `MASTERED_EVERY`.
+ *
+ * **Faded, not weak** (the owner, 2026-10-12: *"the study cards repeating
+ * themselves for the past week. It's not rotating through all my cards"*).
+ * The fill was sorted by familiarity, which is stability alone and knows
+ * nothing of when the card was last seen. An early Good on a card already
+ * held three weeks moves its stability a day or two — FSRS, correctly,
+ * learns little from recalling what was 99 % recallable — so the card that
+ * was the weakest this morning is the weakest again this evening, in the
+ * next chunk of the same sitting, and tomorrow, and the hundreds held a
+ * little better are never dealt at all. Measured over ten simulated days with
+ * nothing due: one card dealt seventeen times, two a day on seven of them,
+ * while 250 of 400 were not dealt once. Retrievability is what has faded
+ * *since the last review*: a card answered today sits at 1.0 and goes to the
+ * back, every other card has decayed a little, and the fill walks the whole
+ * pool — fastest through the recently learned, whose memory fades fastest,
+ * which is still the owner's "recently learned cards most often".
+ *
+ * And a card answered today is not dealt again today while anything else is
+ * left: a second look the same day is practice, not evidence (Study.js
+ * `practiceAgain`). Only a learner with fewer met cards than the goal sees
+ * one twice, least recently answered first, so the number on the tab can
+ * still be brought to 0 on day one.
  *
  * `words` is the pool (the personal review: every card met of the chosen
  * kinds, and the unmet words of finished lessons and the next one). `owed`
@@ -336,20 +358,28 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
     if (!fronts.length) fronts.push(DEFAULT_FRONTS[0]);
     const have = new Set(items.map((x) => x.word));
     const score = familiar || (() => 0);
-    const weak = [], held = [];
+    const today = dayOf(now);
+    const weak = [], held = [], answered = [];
     for (const w of words || []) {
       if (have.has(w)) continue;
       const card = cardFor((seen && seen[w]) || {});
       if (!card || kindOf(card) === "new") continue;
-      const f = score(w, card);
-      (f >= MASTERED_AT ? held : weak).push({ w, card, f });
+      const x = { w, card, f: score(w, card), r: retrievability(card, now, o.scheduler) };
+      if (card.lastAt !== undefined && card.lastAt !== null && dayOf(card.lastAt) === today) answered.push(x);
+      else (x.f >= MASTERED_AT ? held : weak).push(x);
     }
-    const weakest = shuffled(weak, random).sort((a, b) => a.f - b.f);
-    const sprinkle = shuffled(held, random);
+    // Shuffled first so equal retrievabilities are not dealt in storage order.
+    // The mastered cards walk in the same order: a random draw from a few
+    // hundred lands on the same card twice in a week, a walk cannot.
+    const byFade = (a, b) => a.r - b.r;
+    const faded = shuffled(weak, random).sort(byFade);
+    const sprinkle = shuffled(held, random).sort(byFade);
+    const todays = shuffled(answered, random).sort((a, b) => a.card.lastAt - b.card.lastAt);
     const extra = [];
-    while (items.length + extra.length < want && (weakest.length || sprinkle.length)) {
+    while (items.length + extra.length < want && (faded.length || sprinkle.length || todays.length)) {
       const n = items.length + extra.length + 1;
-      const from = (n % MASTERED_EVERY === 0 && sprinkle.length) || !weakest.length ? sprinkle : weakest;
+      const from = !faded.length && !sprinkle.length ? todays
+        : (n % MASTERED_EVERY === 0 && sprinkle.length) || !faded.length ? sprinkle : faded;
       const x = from.shift();
       extra.push({ word: x.w, direction: frontFor(x.card, fronts), card: x.card, kind: kindOf(x.card), extra: true });
     }

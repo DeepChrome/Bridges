@@ -108,6 +108,20 @@ it("interprets the English speaker into Russian and says it aloud", async () => 
   expect(global.__spoke).toEqual(["Где вокзал?", "Где вокзал?"]);
 });
 
+/* The answer is often for somewhere else — a message, a form — so it can be
+   copied with one press, and the lines can be held and selected (the owner,
+   2026-10-13). */
+it("copies the translation to the clipboard", async () => {
+  answers({ ok: true, en: "I want tea.", note: "" });
+  await open();
+  await say("я хочу чай");
+  await screen.findByTestId("translate-en");
+  expect(screen.getByTestId("translate-en").props.selectable).toBe(true);
+  await act(async () => { fireEvent.press(screen.getByTestId("translate-copy-en")); });
+  expect(global.__clipboard).toBe("I want tea.");
+  expect(screen.getByTestId("translate-copy-en").props.accessibilityState.checked).toBe(true);
+});
+
 it("says when the Russian was odd, without correcting it", async () => {
   answers({ ok: true, en: "I wants tea.", note: "verb does not agree" });
   await open();

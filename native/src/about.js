@@ -60,6 +60,23 @@ export function screenAbout() {
   };
 }
 
+/* What a flashcard's back or a dictionary entry lays out, in the order it lays
+   it out: the meanings (each with the example drawn under it) and the example
+   sentences. `max` is how many senses the screen numbers (a card shows four,
+   an entry all of them), so "the second meaning" means the same to the model
+   as to the eye. A sentence card is its sentence and its meaning. */
+export function cardAbout(face, senses, { maxSenses = 4, maxExamples = 3 } = {}) {
+  if (!face) return undefined;
+  if (face.sentence) return { word: face.b, sentence: face.w, meaning: face.e || undefined };
+  const list = (senses || []).slice(0, maxSenses).map((s) => {
+    const ex = (s.x || [])[0];
+    return { g: s.g, ru: ex ? ex.ru : undefined, en: ex ? ex.en : undefined };
+  });
+  const examples = (face.x || []).slice(0, maxExamples).map((x) => ({ ru: x.ru, en: x.en }));
+  if (!list.length && !examples.length) return undefined;
+  return { word: face.b, senses: list, examples };
+}
+
 /* One question or card, as a reviewer needs it: its kind, what it asked, the
    right answer, the options offered, and the word behind it by its Russian
    (rule 20.4: never an index, which a rebuild moves). */

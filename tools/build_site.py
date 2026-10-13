@@ -418,7 +418,14 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tall
             # example be the near-copy when nothing crossed it; a graded overlap
             # prefers the sentence that shares least.
             overlap = max((len(rest & info[c][3]) for c in chosen), default=0)
-            near = overlap >= NEAR_DUPLICATE
+            # …and a short sentence that is one already chosen with a word
+            # swapped («Мы — люди» / «Они — люди»): counting only the words
+            # outside the headword, two two-word sentences never overlapped.
+            swapped = any(
+                min(words, info[c][1]) <= 4
+                and len((rest | forms) & (info[c][3] | info[c][2])) >= min(words, info[c][1]) - 1
+                for c in chosen)
+            near = overlap >= NEAR_DUPLICATE or swapped
             # The nearest tier to the target, a too-long sentence last of all;
             # within it a new form, then no near copy, then common and short.
             return (tier == 3, abs(tier - target), near, repeat, overlap, rare, words, iid)
@@ -2198,7 +2205,14 @@ def same_use(a, b):
     if a == b:
         return True
     small = min(len(a), len(b))
-    return small >= 2 and len(a & b) / small >= 0.75
+    if small >= 2 and len(a & b) / small >= 0.75:
+        return True
+    # Two short sentences a word apart are one use: «Мы — люди» beside «Они —
+    # люди» showed the same form twice on «человек»'s card (the owner,
+    # 2026-10-13: "ensure all words have a variety of example sentences").
+    # At four words or fewer, all but one shared is the same sentence with a
+    # pronoun swapped.
+    return small <= 4 and len(a & b) >= small - 1
 
 
 def distinct_examples(lemmas, senses, sent_pool, stats):

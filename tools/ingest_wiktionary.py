@@ -75,12 +75,19 @@ MAX_TAGS = 3
 
 # Labels worth showing. Wiktionary's tag vocabulary is large and much of it is
 # grammatical bookkeeping the app states elsewhere (gender, aspect, animacy) or
-# noise; these are the ones that change what a sense *means* to a reader.
+# noise; these are the ones that *warn* a reader — a sense they should not use
+# in a shop, or not today, or not of a person.
+#
+# Dropped 2026-10-13 (the owner, of «человек» reading "poetic person, human
+# being"): "poetic", "literary" and "rare" are style notes, not warnings, and
+# wiktextract hangs "poetic" on every sense of a word whose *plural* has a
+# poetic variant («челове́ки») — 239 uses, most of them on ordinary words.
+# "transitive", "intransitive", "reflexive" and "impersonal" are the
+# paradigm's business and the app shows that elsewhere.
 USEFUL_TAGS = {
     "figurative", "colloquial", "informal", "formal", "slang", "vulgar",
-    "dated", "archaic", "obsolete", "poetic", "literary", "humorous",
-    "derogatory", "euphemistic", "rare", "regional", "dialectal",
-    "transitive", "intransitive", "reflexive", "impersonal",
+    "dated", "archaic", "obsolete", "humorous",
+    "derogatory", "euphemistic", "regional", "dialectal",
 }
 
 

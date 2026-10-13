@@ -542,31 +542,25 @@ export function DrillList({ navigation }) {
   const grammarUnit = useMemo(() => currentGrammarUnit(st),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [st.unit, st.dev]);
+  /* One shape for every row (the owner, 2026-10-13: "This menu is pretty damn
+     ugly. Why is the top row a different color?"). The quiz used to lead as a
+     brand-tinted card above the lists, which read as the one row that had
+     been styled; it is a section like the others now. The tiles carry three
+     hues by what the activity asks of you — taking Russian in (`info`), putting
+     it out (`brand`), and the rules (`good`) — the families §30ah gave the
+     screen, so the sections read as kinds rather than as a stripe. */
+  const title = { color: t.ink, fontSize: T.body, fontWeight: "600" };
   return (
     <Screen>
-      {/* The screen was eleven identical rows under a label reading "Practise"
-          beneath a header reading "Practice" — the same word twice, and no
-          hierarchy at all, so nothing on it looked more worth doing than
-          anything else (the interface review, P11.9).
-
-          A quiz of the learner's own making is the thing most often wanted, so
-          it leads and looks like it. The rest group by what they ask of you. */}
-      <Pressable
-        testID="practice-quiz"
-        accessibilityRole="button"
-        onPress={() => navigation.navigate("QuizSetup")}
-        style={({ pressed }) => ({
-          flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 20,
-          backgroundColor: t.brandBg, borderColor: t.brandDim, borderWidth: 1,
-          borderRadius: radius.lg, padding: 14, minHeight: 64,
-          opacity: pressed ? 0.7 : 1,
-        })}
-      >
-        <Thumb id="quiz" />
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700" }}>Build a quiz</Text>
-        </View>
-      </Pressable>
+      <SectionLabel>Quiz</SectionLabel>
+      <List>
+        <Row testID="practice-quiz" onPress={() => navigation.navigate("QuizSetup")}>
+          <Thumb id="quiz" tone="good" />
+          <View style={{ flex: 1 }}>
+            <Text style={title}>Build a quiz</Text>
+          </View>
+        </Row>
+      </List>
 
       {/* Listening and speaking used to be one section of five rows, and the
           owner could not find the mouth drills in it (2026-09-16): taking
@@ -574,7 +568,7 @@ export function DrillList({ navigation }) {
           and a learner deciding "I want to practise speaking" was reading past
           two listening rows to get there. Split, with speaking second because
           that is the order the skills arrive in. */}
-      <SectionLabel>Listening</SectionLabel>
+      <SectionLabel style={{ marginTop: 18 }}>Listening</SectionLabel>
       <List>
         {/* Listening at the learner's level comes first, and the native-speed
             one says plainly that it is harder. The owner found the video
@@ -587,7 +581,7 @@ export function DrillList({ navigation }) {
                 the row "Listening" too read as "LISTENING / Listening", and the
                 walkthrough's tap matched the header instead of the row, which
                 is how it was found. */}
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>At your level</Text>
+            <Text style={title}>At your level</Text>
           </View>
         </Row>
         {/* "Native speed" — 45 s of real video and "which word did you hear?"
@@ -604,7 +598,7 @@ export function DrillList({ navigation }) {
         <Row onPress={() => navigation.navigate("Shadow")}>
           <Thumb id="shadow" tone="brand" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Repeat a sentence</Text>
+            <Text style={title}>Repeat a sentence</Text>
           </View>
         </Row>
         {/* A row of its own, rather than a button inside Alphabet. It was
@@ -612,7 +606,7 @@ export function DrillList({ navigation }) {
         <Row onPress={() => navigation.navigate("BuildDrill")}>
           <Thumb id="buildup" tone="brand" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Word building</Text>
+            <Text style={title}>Word building</Text>
           </View>
         </Row>
       </List>
@@ -629,13 +623,13 @@ export function DrillList({ navigation }) {
         <Row onPress={() => navigation.navigate("Translate")}>
           <Thumb id="translate" tone="brand" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Translate</Text>
+            <Text style={title}>Translate</Text>
           </View>
         </Row>
         <Row onPress={() => navigation.navigate("Talk")}>
           <Thumb id="talk" tone="brand" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Talk</Text>
+            <Text style={title}>Talk</Text>
           </View>
         </Row>
         {/* The free conversation with a tutor who knows where you are
@@ -644,7 +638,7 @@ export function DrillList({ navigation }) {
         <Row testID="practice-tutor" onPress={() => navigation.navigate("Tutor")}>
           <Thumb id="tutor" tone="brand" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Tutor</Text>
+            <Text style={title}>Tutor</Text>
           </View>
         </Row>
       </List>
@@ -656,18 +650,18 @@ export function DrillList({ navigation }) {
             for the letters rather than for "sounds", which described the vowel
             chart and hid the thirty-three characters underneath it. */}
         <Row onPress={() => navigation.navigate("Sounds")}>
-          <Thumb id="letters" tone="brand" />
+          <Thumb id="letters" tone="info" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Alphabet</Text>
+            <Text style={title}>Alphabet</Text>
           </View>
         </Row>
         {/* Its own row beside Alphabet, not a section inside it: things put
             inside another screen are the things that do not get found (§30ab,
             Word building). */}
         <Row testID="open-endings" onPress={() => navigation.navigate("Endings")}>
-          <Thumb id="endings" tone="brand" />
+          <Thumb id="endings" tone="info" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Word endings</Text>
+            <Text style={title}>Word endings</Text>
           </View>
         </Row>
       </List>
@@ -679,7 +673,7 @@ export function DrillList({ navigation }) {
         <Row testID="open-grammar" onPress={() => navigation.navigate("Grammar")}>
           <Thumb id="rules" tone="good" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>The rules</Text>
+            <Text style={title}>The rules</Text>
           </View>
         </Row>
         {/* The grammar point of the chapter the learner is in, with its words
@@ -689,7 +683,7 @@ export function DrillList({ navigation }) {
                onPress={() => navigation.navigate("GrammarRun", { unitId: grammarUnit.id })}>
             <Thumb id="aim" tone="good" />
             <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>This chapter's grammar</Text>
+              <Text style={title}>This chapter's grammar</Text>
               <Muted numberOfLines={1}>{grammarNoteOf(grammarUnit).title}</Muted>
             </View>
           </Row>
@@ -700,7 +694,7 @@ export function DrillList({ navigation }) {
         <Row testID="drill-cases" onPress={() => navigation.navigate("CaseHub")}>
           <Thumb id="cases" tone="good" />
           <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>Cases</Text>
+            <Text style={title}>Cases</Text>
           </View>
         </Row>
         {DRILL_TYPES.filter((d) => d.id !== "cases").map((d) => (
@@ -712,7 +706,7 @@ export function DrillList({ navigation }) {
                onPress={() => navigation.navigate("Drill", { type: d.id })}>
             <Thumb id={d.icon} tone="good" />
             <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+              <Text style={title}>
                 {d.name}
               </Text>
             </View>

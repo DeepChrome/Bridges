@@ -17,6 +17,7 @@ import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
 import { L, UN, resolveWord, heardIn, sensesOf, rankOf } from "../data";
 import { Linked, GrammarLine } from "../words";
+import { useAbout, cardAbout } from "../about";
 import { pictureOf, Photo } from "../pictures";
 import { clock, short } from "./Misc";
 
@@ -90,6 +91,9 @@ export function WordEntry({ w, index, navigation }) {
      form key, which can be another word (§23) — and a deep entry is in L not
      at all, so it has no senses rather than someone else's. */
   const senses = sensesOf(index !== undefined ? index : L.indexOf(w));
+  // The entry, as the AI and a report see it: every meaning and example shown.
+  useAbout({ kind: "entry", word: w.b, answer: w.e || undefined,
+             card: cardAbout({ b: w.b, w: w.w, e: w.e, x: examples }, senses, { maxSenses: 8, maxExamples: 6 }) });
 
   const lineTags = new Set(((grammarLine(w) || {}).facts || []).map((f) => String(f).toLowerCase()));
   const pic = pictureOf(w.b);

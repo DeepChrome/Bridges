@@ -20,7 +20,7 @@ import React, {
 import { View, Pressable } from "react-native";
 import { createNavigationContainerRef, StackActions, CommonActions } from "@react-navigation/native";
 import { useTheme, radius } from "./theme";
-import { Sheet, Btn, Senses, SenseList, Text, Speaker, Flag } from "./ui";
+import { Sheet, Btn, Senses, SenseList, Text, Speaker, Flag, useSelectable } from "./ui";
 import { L, IX, deepFormOf, resolveWord, sensesOf } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise, grammarLine } from "@core/forms";
@@ -78,13 +78,17 @@ export function splitTokens(text) {
 
 /* Russian text whose recognised words are links. Underlined, because a link that
    only looks like a link once you press it is not discoverable. */
-export function Linked({ text, style, size = 17, color, testID }) {
+export function Linked({ text, style, size = 17, color, testID, selectable }) {
   const words = useWords();
   const t = useTheme();
   const parts = useMemo(() => splitTokens(text), [text]);
+  // A sentence can be held and copied (ui.js NoSelect); a tap on a word
+  // still opens it, since the spans keep their own onPress.
+  const canSelect = useSelectable();
 
   return (
-    <Text testID={testID} style={[{ color: color || t.ink, fontSize: size }, style]}>
+    <Text testID={testID} style={[{ color: color || t.ink, fontSize: size }, style]}
+          selectable={selectable === undefined ? canSelect : selectable}>
       {parts.map((p, k) => (
         p.i === undefined ? (
           <Text key={k}>{p.text}</Text>

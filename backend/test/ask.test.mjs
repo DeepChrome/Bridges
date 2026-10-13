@@ -46,6 +46,26 @@ test("the screen's question card and the earlier turns go to the model", () => {
   assert.equal(JSON.parse(askMessage({ question: "hi" })).about.prompt, null);
 });
 
+test("a flashcard's meanings and examples ride along, numbered as shown, and cut to the cap", () => {
+  const card = { word: "челове́к",
+    senses: [{ g: "person, human being", ru: "Э́тот челове́к твой друг.", en: "This man is your friend." },
+             { g: "mankind" }],
+    examples: [{ ru: "Мы — лю́ди.", en: "We are human." }, { ru: "Кто тот челове́к?", en: "Who is that man?" }] };
+  const m = JSON.parse(askMessage({ question: "Is the second example accusative?", about: { word: "челове́к", card } }));
+  assert.equal(m.card.senses[0].n, 1);
+  assert.equal(m.card.senses[0].example.en, "This man is your friend.");
+  assert.equal(m.card.senses[1].example, undefined);
+  assert.equal(m.card.examples[1].n, 2);
+  assert.equal(m.card.examples[1].ru, "Кто тот челове́к?");
+  assert.match(SYSTEM_ASK, /"card"/);
+  // No card, no field; a card too long loses examples from the end, never the word.
+  assert.equal(JSON.parse(askMessage({ question: "hi", about: {} })).card, null);
+  const long = { word: "x", senses: [], examples: new Array(6).fill({ ru: "а".repeat(200), en: "b".repeat(200) }) };
+  const cut = JSON.parse(askMessage({ question: "hi", about: { card: long } })).card;
+  assert.ok(cut.examples.length < 6 && cut.examples.length > 0);
+  assert.equal(cut.word, "x");
+});
+
 test("an answer is capped, keeps its guillemets, and loses its dashes", () => {
   const r = validateAsk({ answer: "«книгу» is the accusative — «читать» takes a direct object." });
   assert.equal(r.ok, true);

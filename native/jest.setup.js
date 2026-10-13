@@ -269,6 +269,12 @@ jest.mock("expo-screen-orientation", () => ({
 }));
 jest.mock("expo-document-picker", () => ({ getDocumentAsync: jest.fn() }));
 jest.mock("expo-sharing", () => ({ shareAsync: jest.fn(), isAvailableAsync: jest.fn(async () => true) }));
+/* The clipboard: what was last copied, for a test to read back. */
+global.__clipboard = null;
+jest.mock("expo-clipboard", () => ({
+  setStringAsync: jest.fn(async (s) => { global.__clipboard = s; return true; }),
+  getStringAsync: jest.fn(async () => global.__clipboard || ""),
+}));
 /* A file system in memory, enough for the audio cache: directories that list,
    files that exist, download and delete. global.__fs is the store; a test seeds
    it or reads it back. File.downloadFileAsync records the URL on __downloads. */

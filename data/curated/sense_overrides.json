@@ -217,5 +217,7 @@
   "потрясающий|adjective": { "first": "awesome, stunning" },
   "кролик|noun": { "drop": ["father of many children"] },
   "крокодил|noun": { "drop": ["desomorphine", "ugly person"] },
+  "_10": "2026-10-13: a Wiktionary usage note shipped as a third sense (the owner, of «человек»: a line reading 'also plural when used with cardinal words').",
+  "человек|noun": { "drop": ["=also plural when used with cardinal words"] },
   "_9": "2026-10-04, second pass: tools/review_senses.mjs now sees the translation (firstSense, the quiz answer) and asks for the plain everyday word first and no slang on everyday words (the owner on «синий»: 'deep blue, indigo, dead, drunken… how would blue not enter the #1 definition'). 174 proposals, each read; about 140 taken."
 }

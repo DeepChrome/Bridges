@@ -32,7 +32,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, ScrollView, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Muted, Text } from "../ui";
+import { Screen, Card, Muted, Text, CopyButton } from "../ui";
 import { Linked } from "../words";
 import { useRecognizer, LANG, LANG_EN } from "../speech";
 import { HoldButton, Blocked } from "../activities/Say";
@@ -61,7 +61,7 @@ function Line({ text, lang, size, testID }) {
       </View>
     );
   }
-  return <Text testID={testID} style={{ color: t.ink, fontSize: size }}>{text}</Text>;
+  return <Text testID={testID} selectable style={{ color: t.ink, fontSize: size }}>{text}</Text>;
 }
 
 /* Hear the answer again, in whichever language it is in. Not `Speaker`: that
@@ -172,7 +172,10 @@ export default function Translate({ navigation, route }) {
                       <Line text={r.out} lang={r.to} size={20} testID={`translate-${r.to}`} />
                     ) : null}
                   </View>
+                  {/* Hear it, and take it with you: the answer is often for
+                      a message, a form, a search box (the owner, 2026-10-13). */}
                   {r.out ? <Replay text={r.out} lang={r.to} /> : null}
+                  {r.out ? <CopyButton text={r.out} testID={`translate-copy-${r.to}`} /> : null}
                 </View>
                 {r.note ? (
                   <Muted testID="translate-note" style={{ marginTop: 4, fontStyle: "italic" }}>

@@ -22,7 +22,7 @@ import { RunTools } from "../askai";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines,
          personalWords, goalNow, goalOpts, englishOfSentence } from "../data";
 import { Linked, GrammarLine } from "../words";
-import { useAbout } from "../about";
+import { useAbout, cardAbout } from "../about";
 import { IrregularTag } from "../rules";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
@@ -823,10 +823,6 @@ export default function Study({ navigation, route }) {
     : { key: "x" + item.word, w: item.word, b: item.word, e: "",
         sentence: /\s/.test(String(item.word || "")) };
   const blank = !!item && !String(face.w || "").trim();
-  // The card on screen, for a tester's report (about.js).
-  useAbout(item ? { kind: face.sentence ? "sentence card" : "word card", word: face.b || item.word,
-                    answer: face.e || undefined, front: item.front || undefined,
-                    step: `${at + 1} of ${items.length}` } : null);
   // The card as it stands now — a re-queued Again is not the card it was
   // when the session was dealt.
   const current = item ? cardFor(st.seen[item.word]) : null;
@@ -837,6 +833,14 @@ export default function Study({ navigation, route }) {
   const own = face && !face.sentence ? exactIdx(face.b) : -1;
   const senses = own >= 0 ? sensesOf(own) : null;
   const cardLemma = own >= 0 ? L[own] : null;
+  /* The card on screen, for a tester's report and for the AI (about.js): what
+     the back shows — the meanings as numbered there and the example sentences
+     in their order — so "is the third example accusative?" is about the one
+     in front of the learner (the owner, 2026-10-13). */
+  useAbout(item ? { kind: face.sentence ? "sentence card" : "word card", word: face.b || item.word,
+                    answer: face.e || undefined, front: item.front || undefined,
+                    step: `${at + 1} of ${items.length}`,
+                    card: cardAbout(face, senses) } : null);
   const flip = useFlip(shown, at);
 
   /* The Russian side reads itself out: on arrival when it is the front, on
@@ -1222,7 +1226,7 @@ export default function Study({ navigation, route }) {
                         curriculum, every deck card) the translation stands on
                         its own. A sentence's English is its answer, in ink. */}
                     {face.sentence ? (
-                      <Text testID="card-meaning"
+                      <Text testID="card-meaning" selectable
                             style={{ color: t.ink, fontSize: 18, marginTop: 12, textAlign: "center" }}>
                         {face.e || "—"}
                       </Text>
@@ -1242,7 +1246,7 @@ export default function Study({ navigation, route }) {
                       <View style={{ flex: 1 }}><Linked text={ex.ru} size={16} /></View>
                       <Speaker text={ex.ru} size={32} />
                     </View>
-                    <Muted>{ex.en}</Muted>
+                    <Muted selectable>{ex.en}</Muted>
                   </View>
                 ))}
                 {/* A word taken from a video keeps its source, and the card sends

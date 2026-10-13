@@ -6453,6 +6453,49 @@ any content work.
   ≈ $0.34, 725 forms ≈ $0.18, 33 scenario clips ≈ $0.05; until then
   `wordaudio.test.js` and `scenario.test.js` fail on exactly those.
 
+## 30ca. Seven from one evening on the re-cut build (2026-10-13)
+
+- **Prose selects; controls do not** (`NoSelect` in ui.js). The owner wanted
+  "standard long pressability to highlight and copy/paste throughout the
+  app". On Android a selectable `Text` takes the touch for itself, so one
+  inside a `Row`, `Lift` or `Chip` would stop the press: those three put
+  their children under `NoSelect`, and `Linked`, `Marked`/`Note` and the
+  sense list ask `useSelectable()` before turning it on; a caller may still
+  pass `selectable={false}`. `select.test.js` holds the structure. Translate
+  carries a `CopyButton` (expo-clipboard, the SDK's module — RN core has
+  none; mocked in jest.setup as `global.__clipboard`) beside Replay.
+  **Not verified on a device yet**: that a tap on a word inside a selectable
+  `Linked` still opens it is the one thing a render tree cannot say.
+- **The AI reads the card** (`cardAbout` in about.js → `card` on the ask).
+  Study and the entry register the meanings as the screen numbers them and
+  the example sentences in order, and ask.js's prompt says "the second
+  meaning" counts in that order. Cost: `CARD_CHARS` (1,600) of JSON at most,
+  about 400 tokens, well under a cent on Haiku; nothing else changes.
+- **The sparkle's sheet is tall** (`Sheet tall`: 88 % of the screen, body
+  grows) — a conversation, not a glance.
+- **Sense labels are warnings only.** `USEFUL_TAGS` in ingest_wiktionary.py
+  lost poetic, literary, rare and the four grammar tags: wiktextract hangs
+  "poetic" on every sense of a word whose *plural* has a poetic variant
+  («человек» read "poetic person, human being"). What is left (colloquial,
+  slang, vulgar, dated, archaic…) is what a learner must not use in a shop.
+  Re-ingest after changing it (`ingest_wiktionary.py`, ~3 min).
+- **Two short sentences a word apart are one use** (`same_use`,
+  `rank_examples` in build_site.py): «Мы — люди» beside «Они — люди» counted
+  as sharing nothing, because only the words outside the headword were
+  compared. At four words or fewer, all but one shared is the same sentence.
+- **Every grammar section explains itself** (`why` in core/grammar.js:
+  `WHY_MIN`–`WHY_MAX` sentences of `WHY_WORDS`, Russian in guillemets, no
+  dashes, each a line on screen through `Marked`). The owner: "'it's this and
+  this but never this and this' and in isolation that means literally
+  nothing." The rule line names the point; `why` says what it is, how to
+  recognise it, how to form it, the trap. `checkGrammar` refuses a section
+  without one, and `russianIn` checks its words against the lexicon. The 47
+  were drafted by four agents from one brief and read line by line.
+- **Practice is one shape** (`DrillList`): the quiz used to lead as a
+  brand-tinted card above the lists — "why is the top row a different
+  color?" — and is a section like the others; tiles carry three hues by what
+  the activity asks (in: `info`, out: `brand`, rules: `good`).
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

@@ -45,6 +45,9 @@ function aboutForAsk(a) {
     kind: q.kind, ask: q.ask, prompt: q.prompt, sub: q.sub, answer: q.answer, said: q.said,
     options: q.options, word: q.word || a.params.word,
     title: a.video || a.title || a.unit, topic: a.params.topic || a.params.caseId,
+    // The rest of a card or an entry — meanings and example sentences — so a
+    // question about "the third example" is about the one on screen.
+    card: q.card,
   };
 }
 
@@ -173,7 +176,10 @@ export function AskButton({ disc }) {
         /* Teddy asks (the owner, 2026-10-08: "an avatar of teddy asking 'how
            can I help' and looking cute") — he is the voice of the app's help,
            and the tutor already speaks as him (§30bg). */
-        <Sheet testID="ask-sheet" onClose={() => setOpen(false)}
+        /* Tall: a conversation, not a glance. It opened at the height of its
+           first line and the owner read it as "subtle on the bottom fifth of
+           the screen" (2026-10-13). */
+        <Sheet testID="ask-sheet" onClose={() => setOpen(false)} tall
                header={(
                  <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12 }}>
                    <GuidePop pose="wave" size={64} />

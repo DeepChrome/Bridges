@@ -280,6 +280,13 @@ export function TopicSection({ section, cards, testID }) {
         </Text>
       ) : null}
       <Note text={section.rule} color={t.ink2} style={{ marginTop: 4 }} />
+      {/* What the rule means and how to use it, a sentence to a line
+          (core/grammar.js `why`): the rule names the point, this explains it. */}
+      {section.why && section.why.length ? (
+        <View testID="section-why" style={{ marginTop: 10, gap: 8 }}>
+          {section.why.map((w, k) => <Marked key={k} text={w} size={T.body} color={t.ink} />)}
+        </View>
+      ) : null}
       {section.uses ? (
         <View style={{ marginTop: 10, gap: 6 }}>
           {section.uses.map((u, k) => (

@@ -73,6 +73,9 @@ it("sends the question with the card on screen, and a follow-up with the turn be
   // Teddy asks, not a label (the owner, 2026-10-08).
   expect(screen.getByTestId("ask-hello").props.children).toBe("How can I help?");
   expect(screen.getByTestId("guide-wave")).toBeTruthy();
+  // A conversation, not a glance: the sheet opens tall whatever it holds
+  // (the owner, 2026-10-13: "subtle on the bottom fifth of the screen").
+  expect(screen.getByTestId("ask-sheet").props.style.height).toBe("88%");
   await closeSheets();
 });
 

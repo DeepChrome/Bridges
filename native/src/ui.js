@@ -12,6 +12,7 @@ import {
 /* Renamed on the way in: the app's own `Text` and `TextInput` are defined below
    and are what everything else imports (font.test.js). */
 import { Text as RNText, TextInput as RNTextInput } from "react-native";
+import * as Clipboard from "expo-clipboard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path, SvgXml, Circle } from "react-native-svg";
 import { iconFor } from "@core/icons";
@@ -46,6 +47,18 @@ export const LIP = 4;
  * The caller owns layout, so `style` goes on the container and the face keeps
  * only what it looks like — the same split `Btn` makes, and what keeps a
  * control's own style readable in the render tree (§20a). */
+/* Prose can be selected and copied — a long press on a sentence, a word's
+   meaning, the AI's answer (the owner, 2026-10-13: "standard long
+   pressability to highlight and copy/paste things throughout the app").
+   Not inside a control: on Android a selectable text takes the touch for
+   itself, and a row or button holding one stops pressing. So `Lift`, `Row`
+   and `Chip` put their children under `NoSelect`, and the prose components
+   (`Linked`, `Marked`, `Note`) ask `useSelectable()` before turning it on.
+   A caller may still say `selectable={false}` on one piece. */
+const NoSelect = React.createContext(false);
+export const useSelectable = () => !React.useContext(NoSelect);
+export const Unselectable = ({ children }) => <NoSelect.Provider value>{children}</NoSelect.Provider>;
+
 export function Lift({ children, edge, fill, border, r = radius.md, style, flat,
                       onPress, disabled, testID, label, hint, role = "button", state,
                       lip = LIP, bw = 2 }) {
@@ -68,7 +81,7 @@ export function Lift({ children, edge, fill, border, r = radius.md, style, flat,
           transform: [{ translateY: pressed && live && !flat ? lip : 0 }],
         })}
       >
-        {children}
+        <NoSelect.Provider value>{children}</NoSelect.Provider>
       </Pressable>
     </View>
   );
@@ -322,7 +335,7 @@ export function Row({ children, onPress, disabled, last, testID, at = 0 }) {
           minHeight: 56,
         })}
       >
-        {children}
+        {onPress ? <NoSelect.Provider value>{children}</NoSelect.Provider> : children}
       </Pressable>
     </Animated.View>
   );
@@ -466,8 +479,12 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID, b
    0, so inside a sheet capped at `maxHeight` a long body grew to its content's
    height instead of scrolling within the cap, and pushed the footer down with
    it. */
+/* `tall` opens the sheet at TALL_HEIGHT of the screen whatever it holds, for a
+   sheet that is a place to stay — the AI conversation — rather than a glance;
+   its body grows to fill, so the input sits at the foot. */
+const TALL_HEIGHT = "88%";
 export function Sheet({ visible = true, onClose, title, header, children, footer,
-                        maxHeight = "85%", testID }) {
+                        maxHeight = "85%", tall, testID }) {
   const t = useTheme();
   return (
     <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
@@ -482,7 +499,8 @@ export function Sheet({ visible = true, onClose, title, header, children, footer
         <View
           testID={testID}
           style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.lg,
-                   borderTopRightRadius: radius.lg, padding: 16, paddingBottom: 22, maxHeight }}
+                   borderTopRightRadius: radius.lg, padding: 16, paddingBottom: 22,
+                   ...(tall ? { height: TALL_HEIGHT } : { maxHeight }) }}
         >
           <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: t.line,
                          alignSelf: "center", marginBottom: 14 }} />
@@ -491,7 +509,7 @@ export function Sheet({ visible = true, onClose, title, header, children, footer
               {title}
             </Text>
           ) : null}
-          <ScrollView testID="sheet-body" style={{ flexGrow: 0, flexShrink: 1 }}
+          <ScrollView testID="sheet-body" style={{ flexGrow: tall ? 1 : 0, flexShrink: 1 }}
                       keyboardShouldPersistTaps="handled">
             {children}
           </ScrollView>
@@ -626,13 +644,15 @@ export function splitMarked(text) {
 }
 
 export function Marked({ text, size = 15, color, italic, style, testID, numberOfLines,
-                         accessibilityLabel }) {
+                         accessibilityLabel, selectable }) {
   const t = useTheme();
   const parts = splitMarked(text);
+  const canSelect = useSelectable();
   /* One label for the whole line when a caller gives one: a reader announcing
      each marked span separately would read the sentence in pieces. */
   return (
     <Text testID={testID} numberOfLines={numberOfLines} accessibilityLabel={accessibilityLabel}
+          selectable={selectable === undefined ? canSelect : selectable}
           style={[{ color: color || t.ink, fontSize: size, lineHeight: Math.round(size * 1.4),
                     fontStyle: italic ? "italic" : "normal" }, style]}>
       {parts.map((p, k) => (p.mark ? (
@@ -782,7 +802,40 @@ export function Chip({ on, label, onPress, testID }) {
                         backgroundColor: on ? t.brandBg : t.surface, borderRadius: 99,
                         paddingHorizontal: 14, paddingVertical: 10, minHeight: 44,
                         justifyContent: "center" }}>
-      <Text style={{ color: on ? t.brandInk : t.ink2, fontSize: 14 }}>{label}</Text>
+      <Text selectable={false} style={{ color: on ? t.brandInk : t.ink2, fontSize: 14 }}>{label}</Text>
+    </Pressable>
+  );
+}
+
+/* Copy a piece of text to the clipboard, with the usual two-sheets mark. A
+   press turns the mark into a tick for a moment, which is the only feedback a
+   copy needs (the owner, 2026-10-13: Translate wants "a standalone button for
+   it as well, using the typical symbol"). */
+const COPIED_MS = 1500;
+export function CopyButton({ text, size = 36, label = "Copy", testID = "copy-button" }) {
+  const t = useTheme();
+  const [done, setDone] = useState(false);
+  const timer = useRef(null);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  const copy = async () => {
+    if (!text) return;
+    try { await Clipboard.setStringAsync(String(text)); } catch { return; }
+    setDone(true);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setDone(false), COPIED_MS);
+  };
+  const glyph = Math.round(size / 2);
+  return (
+    <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={label}
+               accessibilityState={{ checked: done }} onPress={copy} hitSlop={8}
+               style={({ pressed }) => ({ width: size, height: size, borderRadius: size / 2, borderWidth: 1,
+                 borderColor: done ? t.good : t.line, alignItems: "center", justifyContent: "center",
+                 opacity: pressed ? 0.6 : 1 })}>
+      <Svg width={glyph} height={glyph} viewBox="0 0 24 24" fill="none" stroke={done ? t.good : t.ink2}
+           strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        {done ? <Path d="M5 12.5l4.5 4.5L19 7.5" />
+          : <><Path d="M9 9h10v11H9z" /><Path d="M5 15V4h10" /></>}
+      </Svg>
     </Pressable>
   );
 }
@@ -1317,6 +1370,7 @@ const isBrief = (x) => String((x && x.ru) || "").trim().split(/\s+/).length <= B
    "+N more", because the sheet's More button is where the rest are. */
 export function SenseList({ senses, size = 15, style, max, brief, plain, testID }) {
   const t = useTheme();
+  const canSelect = useSelectable();
   if (!senses || !senses.length) return null;
   const shown = max && senses.length > max ? senses.slice(0, max) : senses;
   const rest = plain ? 0 : senses.length - shown.length;
@@ -1347,7 +1401,7 @@ export function SenseList({ senses, size = 15, style, max, brief, plain, testID 
             </Text>
           ) : null}
           <View style={{ flex: 1 }}>
-            <Text testID={k === 0 ? "sense-primary" : undefined}
+            <Text testID={k === 0 ? "sense-primary" : undefined} selectable={canSelect}
                   style={{ color: k === 0 ? t.ink : t.ink2, fontSize: size,
                            fontWeight: k === 0 ? "600" : "400", lineHeight: size + 6 }}>
               {/* The labels read as part of the sentence, in italics, the way a
@@ -1421,10 +1475,10 @@ export function Senses({ e, size = 15, align = "center", style, max, plain }) {
 /* `numberOfLines` is passed through deliberately: seven call sites hand it over
    to clamp a long caption or title, and dropping it (as this did) let a mined
    caption run to five lines on a flashcard. Same class as the testID drops. */
-export function Muted({ children, size = 13, style, testID, numberOfLines }) {
+export function Muted({ children, size = 13, style, testID, numberOfLines, selectable }) {
   const t = useTheme();
   return (
-    <Text testID={testID} numberOfLines={numberOfLines}
+    <Text testID={testID} numberOfLines={numberOfLines} selectable={selectable}
           style={[{ color: t.ink3, fontSize: size }, style]}>
       {children}
     </Text>

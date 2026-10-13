@@ -25,7 +25,7 @@ import { useTheme, radius, space } from "../theme";
 import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text,
          Marked, BULB_PATH, Sheet, CogButton } from "../ui";
 import { Linked } from "../words";
-import { L, IX, UN, STAGES, drillPool, nextLesson } from "../data";
+import { L, IX, UN, STAGES, studiedFor, nextLesson } from "../data";
 import { talk as askTutor, review as askReview, hint as askHint, config, capNotice } from "../lib/feedback";
 import { SPEEDS, speakLine, voiceFor } from "../audio";
 
@@ -43,7 +43,7 @@ import { Alignment } from "../activities/Alignment";
 import { SCENARIOS } from "@core/scenarios";
 import { feedbackTags } from "@core/speech";
 import { recordAttempt, talkAllowance, startTalkSession, TALK_TURNS } from "@core/state";
-import { applyGrade, reviewRows, strength, schedulerOpts } from "@core/scheduler";
+import { applyGrade, reviewRows, schedulerOpts } from "@core/scheduler";
 import { fold, today, firstSense } from "@core/util";
 import { PLANS } from "@core/plans";
 
@@ -98,14 +98,6 @@ export function failureText(reply) {
    itself to the learner's level either way (talkLevelFor: chapters 1–4
    beginner, 5–7 intermediate, 8–10 advanced). */
 
-/* Which words to tell the tutor the learner knows: the words met, strongest
-   first — by the scheduler's stability, not the order they were met in —
-   topped up along the route (the same pool the drills use). */
-const studiedFor = (st) => {
-  const s = (i) => strength((st.seen || {})[L[i].b]);
-  return drillPool(st).slice().sort((a, b) => s(b) - s(a)).map((i) => L[i].b).slice(0, 300);
-};
-
 /* Per-lemma grades from the tutor's word-by-word correction, the Say rule: right
    is Good, wrong or missing is Again, an extra word grades nothing. */
 function gradeTurn(words) {
@@ -146,7 +138,7 @@ function HintCard({ hint, en, onClose }) {
     <View testID="hint-card" style={{ alignSelf: "stretch", marginTop: 4, marginBottom: 10, padding: 12,
                    borderRadius: radius.md, borderWidth: 1, borderColor: t.brand, backgroundColor: t.brandBg }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        <Muted size={11} style={{ flex: 1, fontWeight: "700", letterSpacing: 0.8, textTransform: "uppercase" }}>
+        <Muted size={11} style={{ flex: 1, fontWeight: "700" }}>
           You could say
         </Muted>
         <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close the hint">

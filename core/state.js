@@ -42,6 +42,12 @@ export const SCHEMA_VERSION = 11;
 export const PASS_MARK = 75;
 export const RELIEF_MARK = 70;
 export const RELIEF_AFTER = 3;
+/* A drill, a grammar run or a listening passes at DRILL_PASS: no relief, since
+   a run is retaken at will. Shadowing passes lower (SHADOW_PASS): the
+   recogniser's hearing of an ending is not the learner's saying of it (§30c),
+   and a mark that punishes the engine is a mark nobody trusts. */
+export const DRILL_PASS = 80;
+export const SHADOW_PASS = 70;
 export const quizPassed = (l) => {
   if (!l || typeof l.q !== "number") return false;
   return l.q >= PASS_MARK || ((l.tries || 0) >= RELIEF_AFTER && l.q >= RELIEF_MARK);

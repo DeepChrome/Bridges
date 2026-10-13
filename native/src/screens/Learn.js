@@ -31,7 +31,7 @@ import { View, Pressable, Animated, useWindowDimensions } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, space, radius } from "../theme";
-import { Screen, Btn, Pill, UnitIcon, Muted, styles, Text } from "../ui";
+import { Screen, Btn, Pill, UnitIcon, Muted, SectionLabel, Text } from "../ui";
 import {
   STAGES, lessonCount, lessonDone, unitFineProgress, unitProgress, unitState,
   stageDone, stageUnlocked, unitUnlocked, nextStep, forkOpen, optional, dueCount,
@@ -63,7 +63,7 @@ const ASvgPath = Animated.createAnimatedComponent(Path);
    more — "50 questions · every chapter" went the same day. */
 /* An ordinary button, sized to its label like every other (the owner,
    2026-10-02: "far too wide and bulky"), with the best score beside it. */
-function FinalCard({ best, onOpen }) {
+function FinalRow({ best, onOpen }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10,
                    marginTop: 26 }}>
@@ -159,7 +159,7 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
     ? { arc: t.brand, p: 1, face: famBg, icon: famInk, track: t.surface3, nm: t.ink, width: STROKE_DONE }
     : !open
     // Locked: greyed as a whole — face, padlock and name — not just quieter.
-    ? { arc: null, p: 0, face: t.surface2, icon: t.ink3, track: t.lineSoftSoft, nm: t.ink3, dim: true }
+    ? { arc: null, p: 0, face: t.surface2, icon: t.ink3, track: t.lineSoft, nm: t.ink3, dim: true }
     : current
     /* Where you are: the same face as any open disc, larger, with its track
        in a dim brand so the ring reads as one being filled — the bar goes
@@ -272,8 +272,7 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
           to tell which discs they must finish and which are theirs to take. */}
       {optional(unit) ? (
         <Text testID={`optional-${unit.id}`}
-              style={{ color: t.ink3, fontSize: 10, fontWeight: "600", marginTop: 2,
-                       letterSpacing: 0.5, textTransform: "uppercase" }}>
+              style={{ color: t.ink3, fontSize: 10, fontWeight: "600", marginTop: 2 }}>
           Optional
         </Text>
       ) : null}
@@ -520,8 +519,8 @@ export default function Learn({ navigation }) {
         <View testID="opening"
               style={{ marginTop: 16, borderWidth: 1, borderColor: t.brandDim,
                        backgroundColor: t.brandBg, borderRadius: radius.lg, padding: 14 }}>
-          <Muted size={11} style={{ color: t.brandInk, fontWeight: "700", letterSpacing: 1 }}>
-            NOW OPEN
+          <Muted size={11} style={{ color: t.brandInk, fontWeight: "700" }}>
+            Now open
           </Muted>
           <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700", marginTop: 4 }}>
             {opening.name}
@@ -571,9 +570,7 @@ export default function Learn({ navigation }) {
               <View style={{ alignItems: "center", marginTop: 22, marginBottom: 12 }}>
                 {/* One string, not two children: a screen reader should hear
                     "Chapter 1", not "Chapter" then "1". */}
-                <Text style={[styles.sectionLabel, { color: t.ink3, marginBottom: 0 }]}>
-                  {`Chapter ${stage.n || i + 1}`}
-                </Text>
+                <SectionLabel style={{ marginBottom: 0 }}>{`Chapter ${stage.n || i + 1}`}</SectionLabel>
                 {stage.title ? (
                   <Text style={{ color: t.ink, fontSize: 18, fontWeight: "700",
                                  letterSpacing: -0.2, marginTop: 1, textAlign: "center" }}>
@@ -595,7 +592,7 @@ export default function Learn({ navigation }) {
           );
         })}
         {st.dev || STAGES.every((s) => !!unitState(st, s.core.id).done) ? (
-          <FinalCard best={((st.drills || {}).final || {}).best}
+          <FinalRow best={((st.drills || {}).final || {}).best}
                      onOpen={() => navigation.navigate("Final")} />
         ) : null}
       </View>

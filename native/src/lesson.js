@@ -160,9 +160,8 @@ export function GrammarNote({ unit, note, at, total, onEpisode, label }) {
           <Guide pose="point" size={58} />
           <View style={{ flex: 1, paddingBottom: 6 }}>
             <Muted numberOfLines={1}>{unit ? unit.name : label}</Muted>
-            <Text style={{ color: t.brand, fontSize: T.tiny, fontWeight: "700",
-                           letterSpacing: 0.8, marginTop: 2 }}>
-              THE RULE
+            <Text style={{ color: t.brand, fontSize: T.tiny, fontWeight: "700", marginTop: 2 }}>
+              The rule
             </Text>
           </View>
         </View>

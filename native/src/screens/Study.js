@@ -1,10 +1,10 @@
 /* Study — flashcards with the four Anki buttons, scheduled by FSRS.
  *
- * A card is a curriculum word or, since 2026-09-07, a card from an imported Anki
- * deck (You → decks). Both key their schedule on the Russian string (rule 20.4),
- * so a deck card that is also a curriculum word shares one memory — three
- * memories since Phase 2, one a direction (core/scheduler.js): the word
- * shown, the meaning shown, the word heard.
+ * A card is a curriculum word, a pool sentence, or a card from an imported Anki
+ * deck. All key their schedule on the Russian string (rule 20.4), so a deck
+ * card that is also a curriculum word shares one memory — one card a word
+ * since §30at, asked from whichever front the learner chose (Russian, English,
+ * sound).
  *
  * The session is built by core/queue.js, which is where the owner's "131
  * cards, sequential" went: most forgotten first, learning steps when due, new
@@ -461,13 +461,6 @@ function SetPicker({ visible, onClose }) {
        onPress: () => update((p) => ({ ...p, decks: (p.decks || []).filter((x) => x.id !== d.id),
                                        sets: p.sets.filter((x) => x !== "deck:" + d.id) })) }]);
 
-  const header = (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
-      <Text style={{ flex: 1, color: t.ink, fontSize: 17, fontWeight: "600" }}>
-        Study options
-      </Text>
-    </View>
-  );
   /* Just the way out. "Export selected as an Anki deck" stood here and is gone
      (the owner, 2026-09-22: *"remove the anki deck export"*). It answered a
      question nobody was asking in the middle of choosing what to study, and
@@ -493,7 +486,7 @@ function SetPicker({ visible, onClose }) {
   });
 
   return (
-    <Sheet visible={visible} onClose={onClose} header={header} footer={footer} maxHeight="88%">
+    <Sheet visible={visible} onClose={onClose} title="Study options" footer={footer} maxHeight="88%">
             {/* Words, sentences or both (the owner, 2026-09-28). Decides the
                 due cards dealt as well as the new ones, and the badge counts
                 the same kinds. Sentences are how his own decks are built and

@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Pill, Speaker, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text,
+import { Screen, Btn, Pill, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text,
          Sheet, Choice, CogButton, Loading } from "../ui";
 import { Runner, Done, useAudioStopOnLeave, useResume, ResumePrompt } from "./Run";
 import { clearRun, saveRun, savedRun } from "../resume";
@@ -13,9 +13,9 @@ import { WordList, GrammarNote, WordCard, StepBar } from "../lesson";
 import { VideoLines } from "../prep";
 import { Q, DRILL_TYPES, TEST_OUT, QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N } from "../questions";
 import {
-  L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, drillPool,
+  L, UN, STAGES, lessonWords, lessonCount, markComponent, PASS_MARK, DRILL_PASS, SHADOW_PASS, drillPool,
   chapterWords, irregularWords, knownPool,
-  reachedUnits, unitUnlocked, reviewWords, knownWords, lessonsDone, nextLesson,
+  reachedUnits, unitUnlocked, reviewWords, lessonsDone, nextLesson,
   scenarioLibrary, required, linesWith, grammarKey, currentGrammarUnit, grammarNoteOf,
   todaysWork, recapKey, components, stepRoute, caseLearnKey, caseDrillKey, nextRoute,
 } from "../data";
@@ -243,7 +243,7 @@ export function ShadowFlow({ navigation }) {
     return (
       <Done title="Shadowing"
             detail={`${result.right} of ${result.total} clean`}
-            score={scoreOf(result)} passed={scoreOf(result) >= 70}
+            score={scoreOf(result)} passed={scoreOf(result) >= SHADOW_PASS}
             onAgain={() => { setResult(null); setSeed(seed + 1); }}
             onBack={() => navigation.goBack()} />
     );
@@ -921,7 +921,7 @@ export function DrillFlow({ route, navigation }) {
         detail={`${result.right} of ${result.total} right` +
                 (result.helped ? ` · ${result.helped} with the table` : "")}
         score={result.score}
-        passed={result.score >= 80}
+        passed={result.score >= DRILL_PASS}
         onAgain={() => { setResult(null); setSeed(seed + 1); }}
         onBack={() => navigation.goBack()}
       />
@@ -993,7 +993,7 @@ export function GrammarFlow({ route, navigation }) {
         title={title}
         detail={`${result.right} of ${result.total} right`}
         score={result.score}
-        passed={result.score >= 80}
+        passed={result.score >= DRILL_PASS}
         onAgain={() => { setResult(null); setSeed(seed + 1); }}
         againLabel="Try again"
         onContinue={() => navigation.goBack()}
@@ -1126,7 +1126,7 @@ export function CaseFlow({ route, navigation }) {
 
   const key = mode === "drill" ? caseDrillKey(c.id) : caseLearnKey(c.id);
   const finish = (sum) => {
-    const score = sum.total ? Math.round(sum.credit / sum.total * 100) : 100;
+    const score = scoreOf(sum);
     // A drill remembers its sentences, newest last, so the next run draws others.
     const asked = steps.map((q) => q.caseRu).filter(Boolean);
     update((prev) => {
@@ -1265,12 +1265,6 @@ export function VideoQuizFlow({ route, navigation }) {
 
 /* ------------------------------------------------------------- listening */
 
-/* One scenario, not five. The owner, 2026-09-10: "just one audio is sufficient
-   per lesson. It doesn't need to be a series of 5 sets of 5 questions." A
-   scenario is half a minute of conversation and five questions about it, which
-   is a session of its own — five of them was the old four-sentence scene
-   repeated until it read as a drill. */
-export const LISTENING_N = 1;
 
 /* The conversations on offer, by chapter (the owner, 2026-09-11: *"one or two
    scenarios per chapter and then maybe some extras. Each should have a scenario
@@ -1350,15 +1344,11 @@ export function ListeningFlow({ route, navigation }) {
     const here = nextLesson(st);
     const done = (u) =>
       here && here.unit.id === u.id ? here.index + 1 : lessonsDone(st, u);
-    const out = [];
-    const seen = new Set();
-    for (let k = 0; k < LISTENING_N * 6 && out.length < LISTENING_N; k++) {
-      const p = Q.writtenPassage(units, done) || Q.lessonPassage(units, want);
-      if (!p || !p.lines.length || seen.has(p.lines[0].ru)) continue;
-      seen.add(p.lines[0].ru);
-      out.push(p);
-    }
-    return out;
+    /* One scenario, not five (the owner, 2026-09-10: "just one audio is
+       sufficient per lesson") — half a minute of conversation and five
+       questions is a session of its own. */
+    const p = Q.writtenPassage(units, done) || Q.lessonPassage(units, want);
+    return p && p.lines.length ? [p] : [];
   }, [units, seed]);
   useAudioStopOnLeave();
 
@@ -1370,7 +1360,7 @@ export function ListeningFlow({ route, navigation }) {
   if (result) {
     return (
       <Done title="Listening" detail={steps[0] ? steps[0].topic : null}
-            score={result.score} passed={result.score >= 80}
+            score={result.score} passed={result.score >= DRILL_PASS}
             onAgain={() => { setResult(null); setSeed(seed + 1); }}
             onBack={() => navigation.goBack()} />
     );
@@ -1419,7 +1409,6 @@ export function QuizSetup({ navigation }) {
     set(list.includes(id) ? list.filter((x) => x !== id) : list.concat(id));
   const ready = kinds.length > 0 && units.length > 0;
 
-  const Section = ({ label }) => <SectionLabel style={{ marginTop: 18 }}>{label}</SectionLabel>;
 
   return (
     /* Start is pinned: it used to sit under every chapter's unit chips, so on a
@@ -1432,14 +1421,14 @@ export function QuizSetup({ navigation }) {
              onPress={() => navigation.navigate("CustomQuiz", { kinds, units, n })} />
       }
     >
-      <Section label="Questions" />
+      <SectionLabel style={{ marginTop: 18 }}>Questions</SectionLabel>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
         {QUIZ_KINDS.map((k) => (
           <Chip key={k.id} on={kinds.includes(k.id)} label={k.name}
                 onPress={() => flip(kinds, setKinds)(k.id)} testID={`kind-${k.id}`} />
         ))}
       </View>
-      <Section label="Sections" />
+      <SectionLabel style={{ marginTop: 18 }}>Sections</SectionLabel>
       {STAGES.map((s, si) => {
         const here = [s.core].concat(s.branches).filter((u) => unitUnlocked(st, u));
         if (!here.length) return null;
@@ -1455,7 +1444,7 @@ export function QuizSetup({ navigation }) {
           </View>
         );
       })}
-      <Section label="Length" />
+      <SectionLabel style={{ marginTop: 18 }}>Length</SectionLabel>
       <View style={{ flexDirection: "row", gap: 6 }}>
         {QUIZ_LENGTHS.map((len) => (
           <Chip key={len} on={n === len} label={String(len)} onPress={() => setN(len)}

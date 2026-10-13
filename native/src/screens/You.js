@@ -19,16 +19,16 @@ import { importDeck } from "../anki";
 import { today } from "@core/util";
 import { troubleWords, newDeckId } from "./Study";
 import Constants from "expo-constants";
-
-/* What build this is, at the foot of Settings. The version is app.json's
-   (1.0.0-beta.N while it is a beta), read off the build so it cannot say
-   something the binary is not. */
-const VERSION = (Constants.expoConfig && Constants.expoConfig.version) || "";
 import { tagInfo } from "@core/errortags";
 import { maxLapses, cardFor, REVIEW } from "@core/scheduler";
 import { QUEUE_DEFAULTS, ALL_DAYS } from "@core/queue";
 import { askPermission } from "../notify";
 import { APP_NAME } from "../brand";
+
+/* What build this is, at the foot of Settings. The version is app.json's
+   (1.0.0-beta.N while it is a beta), read off the build so it cannot say
+   something the binary is not. */
+const VERSION = (Constants.expoConfig && Constants.expoConfig.version) || "";
 
 /* When the reminder may land, as minutes past midnight. Four, not twenty-four:
    the question is which part of the day a learner studies in, and a list long
@@ -142,7 +142,7 @@ function Stat({ value, label, first, onPress, testID }) {
                accessibilityRole={onPress ? "button" : undefined}
                style={{ flex: 1, alignItems: "center", paddingHorizontal: 4,
                         borderLeftWidth: first ? 0 : 1, borderLeftColor: t.lineSoft }}>
-      <Text style={{ color: onPress ? t.brandInk : t.ink, fontSize: 26, fontWeight: "800",
+      <Text style={{ color: onPress ? t.brandInk : t.ink, fontSize: 26, fontWeight: "700",
                      letterSpacing: -0.5 }}>{value}</Text>
       <Muted size={12} style={{ textAlign: "center", marginTop: 2 }}>{label}</Muted>
     </Pressable>
@@ -174,7 +174,7 @@ function Tile({ icon, tone, count, label, onPress, testID }) {
         <Text style={{ color: t.ink, fontSize: T.head, fontWeight: "700" }}>{label}</Text>
       ) : (
         <View>
-          <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "800", letterSpacing: -0.4 }}>
+          <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700", letterSpacing: -0.4 }}>
             {count}
           </Text>
           <Muted>{label}</Muted>

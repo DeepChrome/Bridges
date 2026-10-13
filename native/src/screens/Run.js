@@ -48,8 +48,8 @@ const ANSWER_SIZE = 26;
 /* The kinds whose miss the profile keeps for the tutor: one right answer, one
    thing the learner put instead. The speaking and listening activities carry their
    own feedback and are not on the list; a match has no single answer. */
-export const EXPLAIN_KINDS = ["cases", "aspect", "agreement", "conjugation", "stress",
-                              "cloze", "type", "choose-en", "choose-ru", "listen", "form"];
+const MISS_KINDS = ["cases", "aspect", "agreement", "conjugation", "stress",
+                    "cloze", "type", "choose-en", "choose-ru", "listen", "form"];
 /* How many wrong answers the profile keeps for the tutor (store.js `misses`). */
 export const MISSES_KEPT = 30;
 
@@ -180,7 +180,7 @@ function Typed({ q, answered, onAnswer }) {
     // Another word of the pool with the same meaning is right too: "jacket"
     // is «пиджак» and «куртка», and the prompt did not say which.
     // `said` rides on every verdict: what was put is what an explanation of
-    // the miss is about (EXPLAIN_KINDS), and what the profile keeps for the tutor.
+    // the miss is about (MISS_KINDS), and what the profile keeps for the tutor.
     if (typed === want) return onAnswer(true, undefined, undefined, { said: text });
     /* Another right answer is read back as itself: «где» accepted for "where"
        and then «куда» spoken was the app correcting a right answer (the
@@ -241,18 +241,18 @@ function Match({ q, onDone }) {
     const done = cleared.includes(item.i);
     const sel = picked && picked.side === side && picked.item.i === item.i;
     const bad = wrong === item.i;
+    // The same pressed box as every quiz option (Lift): a matched pair is done
+    // and no longer presses; a wrong pick shows red until the next tap.
     return (
-      <Pressable
-        key={side + item.i}
-        disabled={done}
-        onPress={() => tap(side, item)}
-        style={{ backgroundColor: done ? t.goodBg : bad ? t.badBg : t.surface,
-                 borderColor: done ? t.good : bad ? t.bad : sel ? t.info : t.line,
-                 borderWidth: 1, borderBottomWidth: 3, borderRadius: radius.md,
-                 padding: 13, minHeight: 54, justifyContent: "center", flex: 1 }}
-      >
-        <Text style={{ color: t.ink, fontSize: 15 }}>{label}</Text>
-      </Pressable>
+      <Lift key={side + item.i} r={radius.md} disabled={done} onPress={() => tap(side, item)}
+            edge={done ? t.goodDim : bad ? t.badDim : t.surface3}
+            fill={done ? t.goodBg : bad ? t.badBg : t.surface}
+            border={done ? t.good : bad ? t.bad : sel ? t.info : t.line}
+            state={{ selected: sel, disabled: done }}>
+        <View style={{ padding: 13, minHeight: 54, justifyContent: "center" }}>
+          <Text style={{ color: t.ink, fontSize: 16 }}>{label}</Text>
+        </View>
+      </Lift>
     );
   };
 
@@ -264,19 +264,6 @@ function Match({ q, onDone }) {
   );
 }
 
-/* What the bulb has to show for this question.
- *
- * The tables are the word's own — every one of them, so a verb's present, past
- * and imperative all arrive together, which is the "answer key for that verb"
- * the owner asked for. The one cell the question is asking for is blanked
- * (`q.at`, set by the generator), so the sheet is a reference rather than the
- * answer with extra steps.
- *
- * A word is only safe to show at all when it is already on screen. Where the
- * Russian word *is* what the learner has to produce — a typed vocabulary
- * answer, a stress question, anything heard and written back — there is no
- * bulb, because the reference would be the answer. `q.cyr` marks a question
- * whose prompt is the Russian word itself. */
 /* What the bulb shows: everything the app knows about the word in the
  * question, with nothing held back.
  *
@@ -541,7 +528,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     /* A miss is remembered for the tutor to draw on (2026-09-26); a recycled
        question is not recorded twice. It is no longer explained unasked
        (2026-10-08) — the sparkle beside the question is where to ask. */
-    if (!correct && EXPLAIN_KINDS.includes(q.kind) && !q.retry) {
+    if (!correct && MISS_KINDS.includes(q.kind) && !q.retry) {
       const miss = missOf(q, said);
       update((prev) => ({ ...prev, misses: [miss].concat(prev.misses || []).slice(0, MISSES_KEPT) }));
     }
@@ -737,8 +724,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
                      style={[questionIn, { flexGrow: hasInput(q) || !q.prompt ? 0 : 1,
                                            justifyContent: "center",
                                            alignItems: "center", marginBottom: 20 }]}>
-        <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "600", letterSpacing: 1,
-                       textTransform: "uppercase", marginBottom: 12,
+        <Text style={{ color: t.ink3, fontSize: 12, fontWeight: "600", marginBottom: 12,
                        textAlign: "center" }}>
           {q.ask}
         </Text>
@@ -1035,7 +1021,7 @@ export function Done({ title, detail, score, passed, onAgain, onBack, againLabel
           style={[pop, { width: 104, height: 104, borderRadius: 52, marginBottom: 20,
                          alignItems: "center", justifyContent: "center",
                          backgroundColor: tone.bg }]}>
-          <Text style={{ color: tone.fg, fontSize: 30, fontWeight: "800",
+          <Text style={{ color: tone.fg, fontSize: 30, fontWeight: "700",
                          letterSpacing: -0.5 }}>
             {score !== undefined ? `${score}%` : "✓"}
           </Text>

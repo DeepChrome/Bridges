@@ -1,7 +1,8 @@
-/* Shared UI primitives, matching the web app's visual language.
- *
- * The web app leans on CSS classes; here the same shapes are components so the
- * spacing, radii and colours stay in one place instead of being retyped per screen.
+/* Shared UI primitives — the exercise-book look (§30bo): PT Serif, cut corners,
+ * no shadows, labels in sentence case. The shapes are components so spacing,
+ * radii and colours stay in one place instead of being retyped per screen; a
+ * screen that draws its own button, row or heading is the defect, not the
+ * exception (§30s).
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -96,22 +97,22 @@ export function Lift({ children, edge, fill, border, r = radius.md, style, flat,
    default: a span inside another text inherits its parent's colour, as a word
    link inside a brand-coloured sentence must. */
 const InText = React.createContext(false);
+/* What dims the screen behind a Sheet or a Bubble — one value, so the two
+   cannot drift apart (they were 0.45 and 0.55). Not a theme token: it sits
+   over both palettes and is black in both. */
+const SCRIM = "rgba(0,0,0,0.5)";
 export function Text({ style, children, ...rest }) {
   const t = useTheme();
   const nested = React.useContext(InText);
   const flat = StyleSheet.flatten(style) || {};
-  /* Labels in words, as a school book writes them: the tracked-out small
-     capitals ("VERBS", "THE RULE") become sentence case, in the one place
-     every label passes through. */
-  const caps = flat.textTransform === "uppercase" ? { textTransform: "none", letterSpacing: 0 } : null;
-  /* …and the face carries the weight. PT Serif is one file per weight, and
+  /* The face carries the weight. PT Serif is one file per weight, and
      Android asked for weight 800 on a family with no 800 falls back to the
      system font — the path's chapter titles and every button came out in
      Roboto while 700 happened to match. */
   const weight = !flat.fontFamily ? { fontWeight: "normal" } : null;
   const ink = nested || flat.color ? null : { color: t.ink };
   return (
-    <RNText {...rest} style={[ink, style, { fontFamily: flat.fontFamily || faceFor(flat.fontWeight) }, caps, weight]}>
+    <RNText {...rest} style={[ink, style, { fontFamily: flat.fontFamily || faceFor(flat.fontWeight) }, weight]}>
       {/* Plain strings cannot hold a nested text, so they need no provider
           (and stay the text's own children, which is what a test reads). */}
       {nested || typeof children === "string" || typeof children === "number"
@@ -476,7 +477,7 @@ export function Sheet({ visible = true, onClose, title, header, children, footer
           accessibilityRole="button"
           accessibilityLabel="Close"
           onPress={onClose}
-          style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.45)" }]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: SCRIM }]}
         />
         <View
           testID={testID}
@@ -515,7 +516,7 @@ export function Bubble({ visible = true, onClose, title, children, footer, testI
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
         <Pressable testID="bubble-backdrop" accessibilityRole="button" accessibilityLabel="Close"
                    onPress={onClose}
-                   style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.55)" }]} />
+                   style={[StyleSheet.absoluteFill, { backgroundColor: SCRIM }]} />
         <View testID={testID}
               style={{ width: "100%", maxWidth: 380, maxHeight: "70%", backgroundColor: t.surface,
                        borderRadius: radius.lg, borderWidth: 1, borderColor: t.line, padding: 18 }}>
@@ -545,12 +546,13 @@ export function CogButton({ onPress, testID = "cog", label = "Options" }) {
                  borderColor: t.line, backgroundColor: t.surface, opacity: pressed ? 0.6 : 1 })}>
       <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
            strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
-        <Path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-        <Path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+        <Path d={COG_PATH} />
       </Svg>
     </Pressable>
   );
 }
+/* The cog, drawn once: here and on the video overlay (screens/Misc.js). */
+export const COG_PATH = "M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z";
 
 /* The reference a learner can always reach for (the owner, 2026-09-27: *"when
    you're asking them to perform a specific skill, make sure there's a
@@ -756,7 +758,7 @@ export function Heading({ children, count, testID, style }) {
   return (
     <View testID={testID} style={[{ flexDirection: "row", alignItems: "baseline", gap: 8, paddingBottom: 6,
                                     borderBottomWidth: 2, borderBottomColor: t.line }, style]}>
-      <Text accessibilityRole="header" style={{ color: t.ink, fontSize: 19, fontWeight: "800" }}>{children}</Text>
+      <Text accessibilityRole="header" style={{ color: t.ink, fontSize: 19, fontWeight: "700" }}>{children}</Text>
       {count === undefined || count === null ? null : <Muted>{String(count)}</Muted>}
     </View>
   );
@@ -765,8 +767,7 @@ export function Subheading({ children, testID, style }) {
   const t = useTheme();
   return (
     <Text testID={testID} accessibilityRole="header"
-          style={[{ color: t.brand, fontSize: 13, fontWeight: "700", letterSpacing: 0.6,
-                    textTransform: "uppercase", marginBottom: 2 }, style]}>{children}</Text>
+          style={[{ color: t.brand, fontSize: 13, fontWeight: "700", marginBottom: 2 }, style]}>{children}</Text>
   );
 }
 
@@ -1095,7 +1096,7 @@ export function Thumb({ id, done, locked, n, tone }) {
   const hue = done ? t.good : key ? t[key] : t.ink3;
   const face = done ? t.goodBg : key && !locked ? t[`${key}Bg`] : t.surface2;
   return (
-    <View style={{ width: 44, height: 44, borderRadius: 12, alignItems: "center",
+    <View style={{ width: 44, height: 44, borderRadius: radius.xl, alignItems: "center",
                    justifyContent: "center",
                    backgroundColor: face,
                    borderWidth: done ? 2 : 0, borderColor: t.good }}>
@@ -1444,8 +1445,7 @@ export function HeaderTitle({ title, sub }) {
       </Text>
       {sub ? (
         <Text numberOfLines={1}
-              style={{ color: t.ink3, fontSize: 10, fontWeight: "700",
-                       letterSpacing: 0.9, textTransform: "uppercase", marginTop: 1 }}>
+              style={{ color: t.ink3, fontSize: 10, fontWeight: "700", marginTop: 1 }}>
           {sub}
         </Text>
       ) : null}
@@ -1463,7 +1463,6 @@ export function Loading() {
   );
 }
 
-export const styles = StyleSheet.create({
-  sectionLabel: { fontSize: 11, fontWeight: "600", letterSpacing: 1,
-                  textTransform: "uppercase", marginBottom: 9, marginLeft: 2 },
+const styles = StyleSheet.create({
+  sectionLabel: { fontSize: 11, fontWeight: "600", marginBottom: 9, marginLeft: 2 },
 });

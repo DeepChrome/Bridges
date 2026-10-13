@@ -9,7 +9,7 @@ import { YouTube } from "../youtube";
 import { useSession } from "../session";
 import { useTheme, radius, space } from "../theme";
 import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel, Sheet,
-         Dropdown, Text } from "../ui";
+         Dropdown, Text, COG_PATH } from "../ui";
 import {
   UN, STATS, unitState, markComponent, videos, videoById, videoWatched, unitById,
   CHANNELS, videoLines, transcriptOf, transcriptEnOf, nextRoute,
@@ -43,7 +43,7 @@ function VideoThumb({ id, done }) {
       {done ? (
         <View style={{ position: "absolute", right: 3, bottom: 3, width: 16, height: 16,
                        borderRadius: 8, backgroundColor: t.good, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ color: t.goodOn, fontSize: 10, fontWeight: "800" }}>✓</Text>
+          <Text style={{ color: t.goodOn, fontSize: 10, fontWeight: "700" }}>✓</Text>
         </View>
       ) : null}
     </View>
@@ -311,7 +311,6 @@ function Scrubber({ pos, len, active, onSeek, onTouch }) {
 /* The maximise glyph, and its way back. */
 const MAXIMISE = "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5";
 const MINIMISE = "M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5";
-const COG = "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z";
 
 export function VideoOverlay({ player, playing, rate, onRate, onTick, length = 0, full, onFull, onCog }) {
   const { step, skip, toggle } = videoActions(player, rate, onRate);
@@ -358,7 +357,7 @@ export function VideoOverlay({ player, playing, rate, onRate, onTick, length = 0
             </OverlayButton>
           </View>
           <View style={[corner, { top: edge, right: edge }]}>
-            <OverlayButton testID="overlay-cog" label="Video settings" onPress={() => { onCog(); poke(); }}>{icon(COG)}</OverlayButton>
+            <OverlayButton testID="overlay-cog" label="Video settings" onPress={() => { onCog(); poke(); }}>{icon(COG_PATH)}</OverlayButton>
             <OverlayButton testID={full ? "overlay-exit" : "video-maximise"} label={full ? "Exit full screen" : "Full screen"}
                            onPress={() => { onFull(!full); poke(); }}>{icon(full ? MINIMISE : MAXIMISE)}</OverlayButton>
           </View>
@@ -825,21 +824,20 @@ export function Video({ route, navigation }) {
      counts for its lessons. Opened through the summary, the questions' end
      pops past it too. */
   const finish = () => {
-    update((prev) => {
-      let next = { ...prev, watched: { ...(prev.watched || {}), [v.id]: today() } };
-      if (unit && unit.v && unit.v.id === v.id) {
-        next = markComponent(next, unit, params.index || 0, "video");
-      }
-      return next;
-    });
+    /* The state as it will be once this video is marked — computed once, from
+       `st`, and handed to the store; the update has not landed when `onward`
+       is read, so it is read off the same value. */
+    const own = unit && unit.v && unit.v.id === v.id;
+    const marked = (s) => {
+      const next = { ...s, watched: { ...(s.watched || {}), [v.id]: today() } };
+      return own ? markComponent(next, unit, params.index || 0, "video") : next;
+    };
+    update(marked);
     if (player.current) player.current.pause();
     const behind = params.viaSummary ? 2 : 1;
     /* A unit's video with no questions goes on along the path, as its
-       questions' Continue does (2026-10-09). Read off the state as it will be
-       once this video is marked, since the update has not landed yet. */
-    const onward = unit && unit.v && unit.v.id === v.id
-      ? nextRoute(markComponent({ ...st, watched: { ...(st.watched || {}), [v.id]: today() } }, unit, params.index || 0, "video"))
-      : null;
+       questions' Continue does (2026-10-09). */
+    const onward = own ? nextRoute(marked(st)) : null;
     if (v.quiz && v.quiz.length) {
       navigation.navigate("VideoQuiz",
         { videoId: v.id, unitId: params.unitId, index: params.index, depth: behind + 1 });

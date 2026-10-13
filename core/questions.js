@@ -652,9 +652,9 @@ export function makeQuestions(env) {
      times, and from then on the word is asked by typing or by a gap to fill.
      Stability rather than a count of reviews, because that is what the scheduler
      actually believes about the memory. */
-  /* `known` is the word's entry — up to three cards, one a direction
-     (core/scheduler.js) — and the strongest of them is what the scheduler
-     believes about the memory. */
+  /* `known` is the word's entry — one card since §30at, in the `recognise`
+     slot; the strongest slot an older profile still carries is what the
+     scheduler believes about the memory. */
   const mature = (entry) => !!entry && Object.keys(entry).some((d) =>
     entry[d] && typeof entry[d].s === "number" && entry[d].s >= PRODUCE_AT);
   const PRODUCTION = ["type", "cloze"];
@@ -1153,10 +1153,9 @@ export function makeQuestions(env) {
     const target = forms[0];
     const what = formName(t, ri, ci, w);
     /* `at` is the cell the answer is in. The app's reference sheet (the bulb)
-       draws the whole paradigm with that one cell left blank, which is what
-       lets a learner look the *pattern* up without reading the answer off it
-       (the owner, 2026-09-27: "It doesn't reveal the answer, but it reveals
-       the reference for the different verb forms for that word"). */
+       draws the whole paradigm with that cell marked, so a learner looking the
+       pattern up sees which row the question is about (§30az: nothing is
+       hidden — "everything should be referenceable"). */
     const base = { kind: "form", i, cyr: true, prompt: w.w, sub: firstSense(w), table: t, at: [ri, ci] };
     if (typed) {
       return { ...base, ask: `Write ${what}`, typed: true, answer: target, target,
@@ -1564,8 +1563,7 @@ export function makeQuestions(env) {
          these words, chosen then written — and never one question twice in
          its two shapes, which `drillKey` cannot see (it keys on the ask). */
       const same = (q) => `${q.prompt}|${q.typed ? q.target : (q.options || []).filter((o) => o.right).map((o) => o.label).join("/")}`;
-      // `drillQuestions` reads a count of 0 as its default of ten.
-      const first = choose ? drillQuestions(spec.drill, choose, route, cells, false, only) : [];
+      const first = drillQuestions(spec.drill, choose, route, cells, false, only);
       const keys = new Set(first.map(same));
       const rest = drillQuestions(spec.drill, n, route, cells, true, only)
         .filter((q) => !keys.has(same(q))).slice(0, n - first.length);
@@ -1619,17 +1617,6 @@ export function makeQuestions(env) {
       else if (spec.pos === "verb") out.add("conjugation");
     }
     return out;
-  }
-
-  /* The first chapter (0-based) that opens a drill, for "Opens in chapter N";
-     -1 when it is open from the start or never. */
-  function drillOpensAt(drill) {
-    if (drill === "stress") return -1;
-    for (let s = 0; s < STAGES.length; s++) {
-      const units = [STAGES[s].core].concat(STAGES[s].branches || []);
-      if (drillsIntroduced(units).has(drill)) return s;
-    }
-    return -1;
   }
 
   /* The cells of a noun's declension the route so far has introduced, as
@@ -2554,14 +2541,14 @@ export function makeQuestions(env) {
      which means everything (the owner, 2026-09-16: *"imagine I want to focus on
      imperative only, then I can just ensure that's checked"*). An empty set is
      read as "everything" too: a screen where the learner has unticked the last
-     box must still be able to ask a question, and the setup screen keeps at
-     least one ticked anyway. */
+     box must still be able to ask a question, and the drill's cog keeps at
+     least one ticked anyway (§30aw). */
   const allows = (only, id) => !only || !only.size || only.has(id);
 
   /* The question shapes a drill can be narrowed to. Dynamic where the route
      decides it — the cases a chapter-3 learner may be asked are the cases the
      route has introduced (`formsIntroduced`), not all six. Empty means the
-     drill has nothing to narrow and the setup screen is skipped for it. */
+     drill has nothing to narrow and its cog offers no "Ask about" row. */
   function drillFocus(type) {
     if (type === "conjugation") {
       return [{ id: "present", name: "Present / future" },
@@ -3237,8 +3224,7 @@ export function makeQuestions(env) {
     return {
       kind: "conjugation", i: L.indexOf(w), cyr: true,
       // Here the answer is the row's *label*, not a form, so that is the cell
-      // the reference blanks — the paradigm is still readable, and the row the
-      // question is about is the unlabelled one.
+      // the reference marks.
       ask: "Whose form is this?", prompt: target[1][0], sub: firstSense(w), table: t,
       at: [t.rows.indexOf(target), 0],
       options: shuffle([target[0]].concat(wrong))
@@ -3375,7 +3361,9 @@ export function makeQuestions(env) {
   function drillQuestions(type, n, pool, cells, typed, only) {
     const out = [];
     const seen = new Set();
-    const want = n || DRILL_N;
+    // A count of 0 is zero questions; only an unset count means the default.
+    const want = n === undefined || n === null ? DRILL_N : n;
+    if (!want) return [];
     const set = only && only.length ? new Set(only) : null;
     // The chapter card that teaches this drill rides on every question, for the
     // runner to show under a wrong answer. Aspect's generator sets its own.
@@ -3398,6 +3386,6 @@ export function makeQuestions(env) {
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
     customQuiz, finalExam, recapQuestions, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, routeFocus, grammarRun,
-    drillsIntroduced, drillOpensAt, withTaught, caseLesson, caseDrill, caseCounts, casePoolSize, metBy,
+    drillsIntroduced, withTaught, caseLesson, caseDrill, caseCounts, casePoolSize, metBy,
   };
 }

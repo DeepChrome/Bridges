@@ -382,8 +382,8 @@ export function Scene({ q, r }) {
         <View testID="scene-intro"
               style={{ marginTop: 14, backgroundColor: t.surface2, borderRadius: radius.md,
                        paddingHorizontal: 12, paddingVertical: 10 }}>
-          <Muted size={T.tiny} style={{ fontWeight: "700", letterSpacing: 0.6, marginBottom: 6 }}>
-            NEW IN THIS ONE
+          <Muted size={T.tiny} style={{ fontWeight: "700", marginBottom: 6 }}>
+            New in this one
           </Muted>
           {(q.intro || []).map((w, k) => (
             <View key={k} style={{ flexDirection: "row", gap: 8, marginTop: k ? 3 : 0 }}>
@@ -405,9 +405,8 @@ export function Scene({ q, r }) {
           {lines.map((line, k) => (
             <View key={k} style={{ marginBottom: 12 }}>
               {speaker(line.s) ? (
-                <Text style={{ color: t.ink3, fontSize: T.tiny, fontWeight: "700",
-                               letterSpacing: 0.4, marginBottom: 2 }}>
-                  {speaker(line.s).toUpperCase()}
+                <Text style={{ color: t.ink3, fontSize: T.tiny, fontWeight: "700", marginBottom: 2 }}>
+                  {speaker(line.s)}
                 </Text>
               ) : null}
               {/* Each line can be heard on its own once the transcript is

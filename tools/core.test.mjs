@@ -3083,9 +3083,13 @@ group("drill variety");
     return seen.size;
   };
   // Each drill, from the chapter that opens it, must beat a run several times over.
+  // A drill opens in the first chapter whose cards introduce its rule; stress is
+  // open from the start (-1).
+  const drillOpensAt = (d) => (d === "stress" ? -1
+    : STAGES.findIndex((s) => Q.drillsIntroduced([s.core].concat(s.branches || [])).has(d)));
   const FLOOR = 100;
   for (const d of DRILL_TYPES) {
-    const at = Q.drillOpensAt(d.id);
+    const at = drillOpensAt(d.id);
     const units = route.slice(0, Math.max(3, (at + 1) * 3));
     const n = distinct(d.id, units);
     ok(n >= FLOOR, `${d.id}: ${n} distinct questions where it opens (floor ${FLOOR})`, String(n));
@@ -3100,11 +3104,10 @@ group("drill variety");
 
   /* A drill opens when the route has taught its rule, so nobody drills aspect in
      chapter 1 — where their words could fill fifteen questions. */
-  ok(Q.drillOpensAt("aspect") === 7 && Q.drillOpensAt("cases") === 3
-     && Q.drillOpensAt("conjugation") === 1 && Q.drillOpensAt("agreement") === 2,
+  ok(drillOpensAt("aspect") === 7 && drillOpensAt("cases") === 3
+     && drillOpensAt("conjugation") === 1 && drillOpensAt("agreement") === 2,
      "each drill opens at the chapter that teaches it",
-     DRILL_TYPES.map((d) => `${d.id}:${Q.drillOpensAt(d.id) + 1}`).join(" "));
-  ok(Q.drillOpensAt("stress") === -1, "stress is open from the start");
+     DRILL_TYPES.map((d) => `${d.id}:${drillOpensAt(d.id) + 1}`).join(" "));
   const first = Q.drillsIntroduced(route.slice(0, 3));
   ok(first.has("stress") && !first.has("aspect") && !first.has("cases"),
      "chapter 1 opens one of the five", [...first].join(","));
@@ -3262,8 +3265,7 @@ group("what has just opened");
 {
   const { OPENINGS, isOpen, newlyOpen, nextOpening, markOpening }
     = await import("../core/openings.js");
-  const drillOpensAt = (d) => Q.drillOpensAt(d);
-  const at = (stage, lesson = 0, met = []) => ({ stage, lesson, met, drillOpensAt });
+  const at = (stage, lesson = 0, met = []) => ({ stage, lesson, met });
 
   ok(new Set(OPENINGS.map((o) => o.id)).size === OPENINGS.length, "every opening has its own id");
   ok(OPENINGS.every((o) => o.name && o.blurb), "…and a name and a line");

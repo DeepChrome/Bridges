@@ -37,7 +37,7 @@ import { useTheme, radius, space } from "../theme";
 import { Screen, Btn, Muted, Text, TextInput, Marked, Note, CogButton, BulbButton, Sheet,
          List, Row, SectionLabel, Choice, Tick } from "../ui";
 import { Linked } from "../words";
-import { L, STAGES, drillPool, routePosition, rankOf } from "../data";
+import { L, STAGES, studiedFor, routePosition, rankOf } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
 import { speakLine, stop, voiceFor } from "../audio";
 // The tutor is Teddy (backend/src/tutor.js), and sounds like him.
@@ -45,7 +45,7 @@ import { GUIDE_ID } from "@core/cast";
 import { useRecognizer, LANG, LANG_EN } from "../speech";
 import { HoldButton, Blocked } from "../activities/Say";
 import { failureText, talkLevelFor, TALK_LEVELS } from "./Talk";
-import { troubleWords, strength, familiarity, cardFor } from "@core/scheduler";
+import { troubleWords, familiarity, cardFor } from "@core/scheduler";
 
 /* How many notes the tutor may leave in the profile; the oldest goes when a
    new one arrives. Twenty short lines is a person's worth of context. */
@@ -98,13 +98,6 @@ export function tutorProfile(st) {
     notes: (st.tutorNotes || []).slice(0, NOTES_KEPT),
   };
 }
-
-/* The words the learner has met, strongest first, for the tutor to prefer —
-   the same list Talk sends. */
-const studiedFor = (st) => {
-  const s = (i) => strength((st.seen || {})[L[i].b]);
-  return drillPool(st).slice().sort((a, b) => s(b) - s(a)).map((i) => L[i].b).slice(0, 300);
-};
 
 /* One note into the profile: newest first, no repeats, capped. */
 export const remember = (notes, line) => {

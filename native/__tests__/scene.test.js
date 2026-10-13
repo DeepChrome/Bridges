@@ -256,7 +256,8 @@ describe("the listening scenario", () => {
     await waitFor(() => expect(screen.getByTestId("scene-transcript")).toBeTruthy());
     expect(screen.getAllByText(question.lines[0].en).length).toBeGreaterThan(0);
     const who = question.cast.find((c) => c.id === question.lines[0].s);
-    expect(screen.getAllByText(who.ru.toUpperCase()).length).toBeGreaterThan(0);
+    // The speaker's name as written, not tracked-out capitals (§30bo).
+    expect(screen.getAllByText(who.ru).length).toBeGreaterThan(0);
     await act(async () => { fireEvent.press(screen.getByText("Continue")); });
     await waitFor(() => expect(onFinish).toHaveBeenCalled());
     expect(onFinish.mock.calls[0][0].right).toBe(1);

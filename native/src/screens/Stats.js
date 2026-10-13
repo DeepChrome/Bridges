@@ -267,7 +267,7 @@ function Figure({ value, label, testID }) {
   const t = useTheme();
   return (
     <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8 }}>
-      <Text testID={testID} style={{ color: t.ink, fontSize: 24, fontWeight: "800", letterSpacing: -0.5,
+      <Text testID={testID} style={{ color: t.ink, fontSize: 24, fontWeight: "700", letterSpacing: -0.5,
                                      minWidth: 44 }}>{value}</Text>
       <Muted size={14}>{label}</Muted>
     </View>

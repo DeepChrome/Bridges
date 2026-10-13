@@ -8,16 +8,13 @@
  * here and the four call sites import them.
  *
  * The bulb (the owner, 2026-09-27: *"when you're asking them to perform a
- * specific skill, make sure there's a lightbulb available… it doesn't reveal
- * the answer, but it reveals the reference for the different verb forms for
- * that word"*). `Reference` is that sheet: every table the word has, with the
- * one cell the question is asking for left blank, then the rule behind the
- * question, then a way into the grammar reference for the whole topic.
- *
- * Blanking is what makes it a reference rather than an answer key, and it is
- * the generator that says which cell to blank (`at` on the question), because
- * only the generator knows. A question with no `at` is one whose answer is not
- * in a table at all, and the whole paradigm is safe to show.
+ * specific skill, make sure there's a lightbulb available"*). `Reference` is
+ * that sheet: every table the word has, nothing held back (§30az — a
+ * reference you have to outwit is not a reference), with the cell the
+ * question asks for marked in the brand colour (`at` on the question, set by
+ * the generator, because only the generator knows which cell). Since
+ * 2026-10-08 it is the tables alone: no facts, no rule card, no topic link
+ * (§30by). A word with no table has no bulb.
  */
 
 import React, { useState } from "react";
@@ -287,7 +284,7 @@ export function TopicSection({ section, cards, testID }) {
         <View style={{ marginTop: 10, gap: 6 }}>
           {section.uses.map((u, k) => (
             <View key={k} style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
-              <Text style={{ color: t.brand, fontSize: T.body, fontWeight: "800",
+              <Text style={{ color: t.brand, fontSize: T.body, fontWeight: "700",
                              lineHeight: T.body + 5 }}>·</Text>
               <Text style={{ flex: 1, color: t.ink, fontSize: T.body, lineHeight: T.body + 5 }}>
                 {u}
@@ -305,9 +302,7 @@ export function TopicSection({ section, cards, testID }) {
         <Card key={unit.id} testID={`card-${unit.id}`}
               style={{ marginTop: 14, borderLeftWidth: 4, borderLeftColor: t.brand,
                        backgroundColor: t.brandBg, borderColor: t.brandDim }}>
-          <Muted size={T.tiny} style={{ textTransform: "uppercase", letterSpacing: 0.8 }}>
-            {unit.name}
-          </Muted>
+          <Muted size={T.tiny}>{unit.name}</Muted>
           <RuleCard note={note} style={{ marginTop: 6 }} />
         </Card>
       ))}
@@ -382,7 +377,7 @@ function Warn({ size = 18 }) {
   return (
     <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: t.bad,
                    alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-      <Text style={{ color: t.badOn, fontSize: size * 0.7, fontWeight: "800", lineHeight: size }}>!</Text>
+      <Text style={{ color: t.badOn, fontSize: size * 0.7, fontWeight: "700", lineHeight: size }}>!</Text>
     </View>
   );
 }

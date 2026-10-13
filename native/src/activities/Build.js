@@ -174,8 +174,7 @@ export function Build({ q, r }) {
           it has been — which is also the only thing on screen that says the
           two readings have finished, since the controls are not there yet. */}
       <Muted testID="build-cue" size={12}
-             style={{ textAlign: "center", marginBottom: 10, letterSpacing: 0.6,
-                      textTransform: "uppercase" }}>
+             style={{ textAlign: "center", marginBottom: 10 }}>
         {intro ? "Listen" : "Repeat"}
       </Muted>
 

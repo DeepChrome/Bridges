@@ -22,10 +22,10 @@ import { RuleCard } from "../rules";
 import { WordSections, WordTags, prepSentences, VideoLines } from "../prep";
 import { UN, L, idxOfWord, rankOf, lessonWords, lessonCount, markComponent, linesWith, stepRoute,
          components } from "../data";
-
-const unitWordIdxs = (unit) => Array.from({ length: lessonCount(unit) }, (_, k) => lessonWords(unit, k)).flat();
 import { familiarity, cardFor } from "@core/scheduler";
 import { firstSense } from "@core/util";
+
+const unitWordIdxs = (unit) => Array.from({ length: lessonCount(unit) }, (_, k) => lessonWords(unit, k)).flat();
 
 /* Sentences a summary shows: enough to see the words at work, few enough to
    stay a list. The whole unit gets more because it covers more. */

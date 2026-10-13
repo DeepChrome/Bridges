@@ -5,7 +5,7 @@ import { View, Pressable, Image } from "react-native";
 import { SCENE_ART } from "../sceneart";
 import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Tick, Text } from "../ui";
+import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Text } from "../ui";
 import {
   UN, lessonCount, lessonWords, lessonDone, components, nextComponent, stepRoute, unitFineProgress, L, linesWith, hasGrammar,
   nextLesson,

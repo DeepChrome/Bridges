@@ -62,7 +62,7 @@ describe("saying what has just opened", () => {
     const view = await withState({ unit: through(4) });
     const card = await view.findByTestId("opening");
     expect(card).toBeTruthy();
-    expect(view.getByText("NOW OPEN")).toBeTruthy();
+    expect(view.getByText("Now open")).toBeTruthy();
   });
 
   /* Acknowledged once, gone for good — and it is the *next* one that appears,

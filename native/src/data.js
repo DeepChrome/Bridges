@@ -37,7 +37,7 @@ import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize, lessonCountOf, lessonWordsOf } from "@core/questions";
 import { quizPassed } from "@core/state";
-import { wanted, cardFor, dayOf, familiarity } from "@core/scheduler";
+import { wanted, cardFor, dayOf, familiarity, strength } from "@core/scheduler";
 import { rollGoal, goalBadge } from "@core/queue";
 import { isIrregular } from "@core/facts";
 import { CASES } from "@core/cases";
@@ -233,7 +233,7 @@ export function chapterOf(unitId) {
 
 export const unitById = (id) => UN.find((u) => u.id === id) || null;
 
-export { PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "@core/state";
+export { PASS_MARK, RELIEF_MARK, RELIEF_AFTER, DRILL_PASS, SHADOW_PASS } from "@core/state";
 
 /* A unit's lessons as the build cut them, groups whole (core/questions.js
    lessonWordsOf); the chapter's ramp size only for a payload without the cut. */
@@ -859,6 +859,14 @@ export const dueCount = (st) => goalBadge(st.goal, Date.now(), goalOpts(st));
    caller raises the floor until the run actually fills (DrillFlow), rather than
    this guessing a number that happens to work for one drill. */
 export const DRILL_POOL_MIN = 40;
+/* The words to tell a tutor the learner knows: the words met, strongest first
+   (the scheduler's stability, not the order met), topped up along the route —
+   the drills' pool. Talk and the personal tutor send the same list. */
+export const studiedFor = (st) => {
+  const s = (i) => strength((st.seen || {})[L[i].b]);
+  return drillPool(st).slice().sort((a, b) => s(b) - s(a)).map((i) => L[i].b).slice(0, 300);
+};
+
 export function drillPool(st, min = DRILL_POOL_MIN) {
   const out = [];
   const have = new Set();

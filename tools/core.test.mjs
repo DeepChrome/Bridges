@@ -29,7 +29,8 @@ import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechD
 import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, QUIZ_N, QUIZ_MIN, QUIZ_WORDS, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, REVIEW_MIX, GRAMMAR_IN_LESSON, QUIZ_KINDS, PRODUCE_AT,
-         lessonSize, lessonWordsOf, lessonCountOf, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem }
+         lessonSize, lessonWordsOf, lessonCountOf, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem,
+         LESSON_FREE_RANK }
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
@@ -1988,6 +1989,89 @@ group("question quality");
    this group is that neither word of a pair can be invented: they were written
    by an author who is not a native speaker, and a pair whose second member is
    not a real word teaches a wrong word beside a right one. */
+group("a lesson does not ask the same thing twice");
+{
+  /* The owner, 2026-10-12: "a lot of repetition in an unhelpful way". Read off
+     the real generators over every lesson on the route, as tools/audit_repeats.mjs
+     does with more draws. The zeroes are zero by construction (the walk's
+     per-word shape memory, the seeded gap draw the quiz avoids, the fixed grammar
+     order the quiz knows, the closed-class rule on the review slot); the two
+     bounds are on draws with randomness left in them. */
+  const WORD_KINDS = new Set(["choose-en", "choose-ru", "listen", "cloze", "type"]);
+  const MEANING = new Set(["choose-ru", "type"]);
+  let lessons = 0, walkShape = 0, sameSentence = 0, grammarTwice = 0, reviewAgain = 0,
+      freeReview = 0, speechAhead = 0, sameSense = 0, adjacent = 0;
+  for (const u of UN) {
+    let prevReview = new Set();
+    for (let li = 0; li < lessonCount(u); li++) {
+      lessons++;
+      const words = new Set(lessonWords(u, li));
+      const walk = Q.vocabSteps(u, li).filter((q) => q && q.kind);
+      const quiz = Q.quizSteps(u, li);
+      // A word sharing its first meaning with a commoner lesson word is never
+      // asked by that meaning, and may repeat another shape instead. The key
+      // is the generator's own (mainSense): parentheticals and "to" stripped.
+      const senseOf = (i) => fold(String(firstSense(L[i]) || "").replace(/\s*[([][^)\]]*[)\]]/g, "").trim().replace(/^to\s+/i, ""));
+      const firstOf = new Map();
+      for (const i of [...words].sort((a, b) => a - b)) {
+        const k = senseOf(i);
+        if (k && !firstOf.has(k)) firstOf.set(k, i);
+      }
+      const barred = new Set([...words].filter((i) => firstOf.get(senseOf(i)) !== i));
+      const seen = new Set();
+      for (const q of walk) {
+        if (!WORD_KINDS.has(q.kind) || typeof q.i !== "number" || barred.has(q.i)) continue;
+        const k = `${q.kind}:${q.i}`;
+        if (seen.has(k)) walkShape++;
+        seen.add(k);
+      }
+      const sent = new Set();
+      for (const q of walk.concat(quiz)) {
+        if (q.kind !== "cloze" || !q.reveal) continue;
+        const k = fold(q.reveal);
+        if (sent.has(k)) sameSentence++;
+        sent.add(k);
+      }
+      for (let k = 1; k < quiz.length; k++) {
+        if (WORD_KINDS.has(quiz[k].kind) && quiz[k].kind === quiz[k - 1].kind) adjacent++;
+      }
+      const practised = new Set(walk.filter((q) => q.drill && typeof q.i === "number").map((q) => q.i));
+      for (const q of quiz) if (q.kind === "form" && practised.has(q.i)) grammarTwice++;
+      const reviewed = new Set(walk.filter((q) => q.review && typeof q.i === "number" && !words.has(q.i)).map((q) => q.i));
+      for (const i of reviewed) if (prevReview.has(i)) reviewAgain++;
+      prevReview = reviewed;
+      for (const q of quiz) {
+        if (q.review && typeof q.i === "number" && q.i < LESSON_FREE_RANK
+            && !["noun", "verb", "adjective", "adverb"].includes(L[q.i].p)) freeReview++;
+      }
+      const met = new Set(Q.metBy(u, li));
+      for (const q of quiz) {
+        if ((q.kind === "say" || q.kind === "hear") && Array.isArray(q.lemmas)
+            && q.lemmas.some((l) => !met.has(l) && u.w.includes(l))) speechAhead++;
+      }
+      const byMeaning = new Map();
+      for (const q of walk.concat(quiz)) {
+        if (!MEANING.has(q.kind) || typeof q.i !== "number" || !words.has(q.i)) continue;
+        const k = senseOf(q.i);
+        if (!k) continue;
+        if (!byMeaning.has(k)) byMeaning.set(k, new Set());
+        byMeaning.get(k).add(q.i);
+      }
+      for (const set of byMeaning.values()) if (set.size > 1) sameSense++;
+    }
+  }
+  ok(lessons > 150, `${lessons} lessons swept`);
+  ok(walkShape === 0, "a walk never asks a word in the same shape twice", String(walkShape));
+  ok(sameSentence === 0, "a gap sentence is never shown twice in a lesson", String(sameSentence));
+  ok(grammarTwice === 0, "the quiz's form question is not the walk's grammar word", String(grammarTwice));
+  ok(freeReview === 0, "a review slot is never spent on a top-100 closed-class word", String(freeReview));
+  ok(speechAhead === 0, "a spoken step uses no word the lesson has not reached", String(speechAhead));
+  ok(sameSense === 0, "two words of one meaning are not both asked by that meaning", String(sameSense));
+  ok(reviewAgain <= lessons * 0.03, "a chapter word reviewed in one walk is rarely reviewed in the next",
+     `${reviewAgain} of ${lessons}`);
+  ok(adjacent <= lessons, "quiz questions of one shape rarely follow each other", `${adjacent} in ${lessons} quizzes`);
+}
+
 group("minimal pairs");
 {
   const pairs = soundPairs();

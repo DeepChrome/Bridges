@@ -6388,6 +6388,71 @@ module earlier than chapter 7 — each a re-cut of the curriculum.
   askai.test.js). Reopening a sheet within one test hits §30be's Modal trap;
   test the state through `renderHook` (awaited, in RNTL 14) instead.
 
+## 30bz. The course re-cut, and a lesson that asks nothing twice (2026-10-12 → 13)
+
+The owner: *"a lot of repetition in an unhelpful way… incomplete groupings
+of words. Words shouldn't arrive to the learner individually… the study
+cards repeating themselves for the past week."* Three agents read the course
+chapter by chapter; `docs/COURSE-ROADMAP.md` is the write-up and the plan
+(work packages WP1–WP9, exact edits, owner decisions in §13) and is written
+for a less capable model to execute to the same standard — read it before
+any content work.
+
+- **Study repeated because the make-up fill sorted by stability alone**
+  (`goalSession` in core/queue.js): the same card won every day. It sorts by
+  retrievability now, a card answered today is not dealt again today, and
+  the mastered sprinkle walks least-recently-seen first. `goalfill.test.js`
+  fails against the old code.
+- **Repetition is measured, not felt**: `tools/audit_repeats.mjs` draws
+  every lesson and counts nine tells (a word asked in a shape the walk used,
+  a sentence twice, the grammar run and the quiz asking the same cell, a
+  top-100 closed-class word as a "review", a spoken step on a word not yet
+  met…). Before → after over 555 draws: 1366 · 100 · 80 · 208 · 37 · 47
+  → **0** each; review-again 215 → ~4; adjacent same shape 797 → ~200.
+  `core.test.mjs` "a lesson does not ask the same thing twice" pins it.
+  The rules live in core/questions.js: per-word shape memory in the walk,
+  `chapterReview` (lesson-fixed order, last lesson's picks demoted),
+  `clozePlan` (gap sentences planned once a lesson and shared with the
+  quiz), `meaningClash` (two lesson words with one first meaning are not
+  both asked by it), `lessonFreeRank` 0/50/100 by chapter, `formTaught`
+  (plural only from the plural card), `NO_IMPERATIVE`, `metBy` for spoken
+  steps. **Run the audit after touching a generator.**
+- **The re-cut is curated data and one rebuild** (WP1–WP4, commit "The
+  course re-cut"): chapter 1 opens on greetings, pronouns, linking words
+  and family; 26 sets added or completed and taught whole (`word_sets.json`
+  — tableware, basic adjectives, units of time, places in town, money,
+  professions, feelings, rooms, ingredients…). 169 words moved units, 52
+  left, 96 joined; 1,312 taught. Chapter 1's spine followability fell
+  81 % → 55 % because greetings are not video words — accepted: a day-one
+  lesson comes before the video. **Progress is re-mapped on the next
+  launch** (§30bf V7) — say so whenever a build carries a re-cut.
+- **The groups file must agree with the sets.** A set forms its own group
+  at build time whatever `word_groups.json` says, but `--check` reads the
+  file, and a file group **named exactly as its set** (same kind) is what
+  `grouped()` merges the set into — any other name leaves a second block.
+  A set's name is capped at four words like a group's («verbs of motion»,
+  not «going on foot and by transport»). `build_word_groups.mjs --stale`
+  needs the model key in `backend/.dev.vars`, which was stale; the file
+  was regrouped by hand.
+- **Three joins the re-cut exposed**, each the §23 form trap: «сыр» and
+  «сыра» are short forms of «сырой», so the cheese was taught with no
+  sentence; «ванной» is the room except in one case of the tub; «кот»
+  shares its only photograph with «кошка», which is met first, so it ships
+  none (`image_focus.json` must not name it). `lemma_overrides.json` holds
+  the first two.
+- **A re-cut moves the conversations**: `tools/rehome_scripts.mjs` moves
+  each failing script to the lesson of its unit it fits (tracking lessons
+  already taken — two once landed on one lesson and the second overwrote
+  the first) and fixes the intro list; what is left is a writer's job.
+- **`build_cast_art.mjs --ship` ships only taught words**; a drawing of a
+  word that left stays in `data/cast_art` for the day it returns.
+- **A small case use must not be forced into the opening round**
+  (`caseDrill`): «нет» has thirteen sentences, and forcing one every run
+  repeated it after 73 while the pool held 218.
+- **Audio owed, not bought** (the owner approves purchases): 406 words
+  ≈ $0.34, 725 forms ≈ $0.18, 33 scenario clips ≈ $0.05; until then
+  `wordaudio.test.js` and `scenario.test.js` fail on exactly those.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

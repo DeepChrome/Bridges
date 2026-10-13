@@ -142,6 +142,26 @@ same-meaning pair 47→0, review repeating 215→6, adjacent shape 797→~280.
 
 ## 3. WP1 — Chapter 1: day one (data; one rebuild with WP2–WP4)
 
+> **Done 2026-10-13** (commit "The course re-cut"), WP1–WP4 together in one
+> rebuild. What differs from the plan below, and why: «до свидания» is not a
+> lexicon entry, so the greetings set is приве́т здра́вствуйте спаси́бо
+> пожа́луйста извини́те пока́ (пока́ glossed as the goodbye first); `family`
+> stayed `parents and children` (renaming the set would re-cut core1 for
+> nothing); `possessives` was not made a set (мой/твой sit on the family card
+> and наш/ваш where they are); the adjective set stopped at eight (дорого́й
+> дешёвый интере́сный stay with money and work, where their sentences are);
+> places in town has no банк/рестора́н/университе́т (рестора́н is food's);
+> `holidays` is пра́здник рождество́ па́сха (the lexicon has no «Новый год»
+> entry); sports stayed on the optional quest — an owner decision (§13).
+> `build_word_groups.mjs --stale` could not run (no model key on disk), so
+> the groups file was regrouped by hand and brought into step with the sets
+> — a file group **named as its set** is what the build merges the set into.
+> Result: 169 words moved units, 52 left, 96 joined, 1,312 taught; core1
+> opens Greetings · Pronouns · Linking words · Family; chapter 1 spine
+> followability fell 81 % → 55 % because greetings are not video words
+> (accepted — a day-one lesson comes first). Still owed: the audio for the
+> new words (quoted below in §9), and WP5.
+
 **Goal.** A learner's first lesson is greetings and people, not seven
 prepositions. Family and food taught whole.
 
@@ -435,6 +455,21 @@ node tools/walk_lessons.mjs 1 2          # read chapter 1 as a learner
 Then build, install, and walk the first two lessons on the emulator before
 anything goes to the owner's phone. Progress is re-mapped on first launch
 (§30bf V7): say so in the report.
+
+Two more steps the 2026-10-13 rebuild needed, now part of the procedure:
+`node tools/rehome_scripts.mjs` (dry run, then `--apply`) moves each failing
+conversation to the lesson of its unit it fits and fixes its intro list —
+what is left is a writer's job; and `python tools/build_images.py` plus
+`node tools/build_cast_art.mjs --ship` prune the photographs and drawings
+of words that left (`image_focus.json` must not name a word that ships no
+photo). A new word with no example sentence (entry.test.js) is usually a
+shared form the resolver gave to another lemma — «сыр» was «сырой»'s short
+form — and belongs in `lemma_overrides.json`, not in a wider set.
+
+**Audio owed after the 2026-10-13 re-cut, not yet bought** (the owner
+approves purchases): 406 words ≈ $0.34, 725 table forms ≈ $0.18, 33
+scenario clips ≈ $0.05. Until bought, the new words play in the device
+voice and `wordaudio.test.js` / `scenario.test.js` fail on exactly them.
 
 ---
 

@@ -1427,7 +1427,7 @@ export function SenseList({ senses, size = 15, style, max, brief, plain, testID 
                       the words are not clickable"). Read at render, so the
                       circular import with words.js resolves. */}
                   <Linked text={x.ru} size={size - 1} />
-                  <Text style={{ color: t.ink3, fontSize: size - 2 }}>{x.en}</Text>
+                  <Text selectable={canSelect} style={{ color: t.ink3, fontSize: size - 2 }}>{x.en}</Text>
                 </View>
                 <Speaker text={x.ru} size={32} recordedOnly />
               </View>
@@ -1446,6 +1446,7 @@ export function SenseList({ senses, size = 15, style, max, brief, plain, testID 
 
 export function Senses({ e, size = 15, align = "center", style, max, plain }) {
   const t = useTheme();
+  const canSelect = useSelectable();
   const groups = senseGroups(e);
   if (!groups.length) return null;
   const shown = max && groups.length > max ? groups.slice(0, max) : groups;
@@ -1456,7 +1457,7 @@ export function Senses({ e, size = 15, align = "center", style, max, plain }) {
           Wiktionary entry and for a deck card, where a translation is all
           there is. One rule, both renderers. */}
       {shown.map((g, k) => (
-        <Text key={k} testID={k === 0 ? "sense-primary" : undefined}
+        <Text key={k} testID={k === 0 ? "sense-primary" : undefined} selectable={canSelect}
               style={{ color: k === 0 ? t.ink : t.ink2, fontSize: size, textAlign: align,
                        fontWeight: k === 0 ? "600" : "400", lineHeight: size + 6 }}>
           {groups.length > 1 ? `${k + 1}. ${g}` : g}

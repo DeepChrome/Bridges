@@ -23,12 +23,14 @@ describe("selecting text", () => {
         <Linked text="Я чита́ю кни́гу." testID="sentence" />
         <Marked text="«книгу» is the accusative." testID="marked" />
         <Note text="One. Two." testID="note" />
-        <SenseList senses={[{ g: "person" }, { g: "mankind" }]} testID="senses" />
+        <SenseList senses={[{ g: "person", x: [{ ru: "Он в теа́тре", en: "He is at the theater." }] }, { g: "mankind" }]} testID="senses" />
       </View>,
     );
     expect(screen.getByTestId("sentence").props.selectable).toBe(true);
     expect(screen.getByTestId("marked").props.selectable).toBe(true);
     expect(screen.getByTestId("sense-primary").props.selectable).toBe(true);
+    // …and a sense example's English, which the emulator found left out (2026-10-13).
+    expect(screen.getByText("He is at the theater.").props.selectable).toBe(true);
     // A word inside the sentence is still a link.
     expect(screen.getByLabelText("кни́гу, open word")).toBeTruthy();
   });

@@ -2,7 +2,7 @@
  "chapter": 7,
  "name": "Feelings & Fears",
  "lessons": {
-  "core7:3": {
+  "core7:5": {
    "title": "A present on three hundred roubles",
    "cast": [
     {
@@ -26,10 +26,6 @@
      "en": "flower"
     },
     {
-     "ru": "стоить",
-     "en": "to cost"
-    },
-    {
      "ru": "триста",
      "en": "three hundred"
     },
@@ -38,8 +34,12 @@
      "en": "expensive, dear"
     },
     {
-     "ru": "рубль",
-     "en": "rouble"
+     "ru": "пицца",
+     "en": "Pizza"
+    },
+    {
+     "ru": "лес",
+     "en": "wood"
     }
    ],
    "lines": [
@@ -173,165 +173,158 @@
    ]
   },
   "core7:7": {
-   "title": "The stones in the forest",
+   "title": "The most beautiful song",
    "cast": [
     {
      "id": "a",
-     "ru": "Монька",
-     "en": "Monka"
+     "ru": "Тедди",
+     "en": "Teddy"
     },
     {
      "id": "b",
-     "ru": "Ярик",
-     "en": "Yarik"
+     "ru": "Нежа",
+     "en": "Nezha"
     },
     {
      "id": "c",
-     "ru": "Тедди",
-     "en": "Teddy"
+     "ru": "Монька",
+     "en": "Monka"
     }
    ],
    "intro": [
     {
-     "ru": "утром",
-     "en": "in the morning"
+     "ru": "петь",
+     "en": "to sing"
     },
     {
-     "ru": "домой",
-     "en": "home"
+     "ru": "обезьяна",
+     "en": "monkey"
     },
     {
-     "ru": "дорога",
-     "en": "road, way"
-    },
-    {
-     "ru": "день",
-     "en": "day"
-    },
-    {
-     "ru": "искать",
-     "en": "to look for"
-    },
-    {
-     "ru": "сторона",
-     "en": "side"
+     "ru": "слушать",
+     "en": "to listen"
     }
    ],
    "lines": [
     {
      "s": "b",
-     "ru": "Тедди, мы провели в лесу весь день. Где наши камни?",
-     "en": "Teddy, we've spent the whole day in the forest. Where are our stones?"
+     "ru": "Тедди, праздник уже начинается. Ты поёшь свою песню?",
+     "en": "Teddy, the party is starting. Are you singing your song?"
+    },
+    {
+     "s": "a",
+     "ru": "Да, мама! Но где слова? Они были здесь…",
+     "en": "Yes, Mum! But where are the words? They were right here…"
     },
     {
      "s": "c",
-     "ru": "Утром я их оставил здесь, у дороги. А теперь их нет!",
-     "en": "This morning I left them here, by the path. And now they're gone!"
+     "ru": "Тедди, вот твои слова. Я их видел там.",
+     "en": "Teddy, here are your words. I saw them over there."
     },
     {
      "s": "b",
-     "ru": "Камни не летают, Тедди. Кто-то их взял.",
-     "en": "Stones don't fly, Teddy. Someone took them."
+     "ru": "Монька? Спасибо. Иди, Тедди, все тебя слушают.",
+     "en": "Monka? Thank you. Go on, Teddy, everyone is listening to you."
     },
     {
      "s": "a",
-     "ru": "Ярик? Тедди? Вы тоже здесь?",
-     "en": "Yarik? Teddy? You're here too?"
+     "ru": "Мама, это не моя песня! Это песня про самую красивую обезьяну в мире!",
+     "en": "Mum, this isn't my song! It's a song about the most beautiful monkey in the world!"
     },
     {
      "s": "c",
-     "ru": "Монька! А что ты делаешь в лесу?",
-     "en": "Monka! And what are you doing in the forest?"
-    },
-    {
-     "s": "a",
-     "ru": "Я искал грибы. А теперь не знаю, где мой дом.",
-     "en": "I was looking for mushrooms. And now I don't know where my house is."
+     "ru": "Да? Какое удивление! Но все уже слушают, Тедди. Пой!",
+     "en": "Really? What a surprise! But everyone's already listening, Teddy. Sing!"
     },
     {
      "s": "b",
-     "ru": "Монька, ты не видел наши камни? Мы их оставили утром.",
-     "en": "Monka, have you seen our stones? We left them this morning."
+     "ru": "Пой, Тедди. Главное — петь красиво.",
+     "en": "Sing, Teddy. The main thing is to sing beautifully."
     },
     {
      "s": "a",
-     "ru": "Камни? Какие камни? Я их… не видел.",
-     "en": "Stones? What stones? I haven't... seen them."
-    },
-    {
-     "s": "c",
-     "ru": "Без них мы не знаем, где дорога домой!",
-     "en": "Without them we don't know the way home!"
-    },
-    {
-     "s": "a",
-     "ru": "Кто-то положил их на другой стороне. Я сам шёл по ним весь день.",
-     "en": "Someone put them on the other side. I followed them myself all day."
+     "ru": "Мама, ты видела? Все слушали, а в конце хотели ещё!",
+     "en": "Mum, did you see? Everyone listened, and at the end they wanted more!"
     },
     {
      "s": "b",
-     "ru": "Я и без камней знаю этот лес. Идём, дом с той стороны.",
-     "en": "I know this forest even without stones. Come on, home is that way."
-    },
-    {
-     "s": "c",
-     "ru": "Монька, ты идёшь с нами? У нас много грибов на обед.",
-     "en": "Monka, are you coming with us? We have lots of mushrooms for lunch."
+     "ru": "Какая красота! И как интересно! Тедди, чьи это слова?",
+     "en": "How beautiful! And how interesting! Teddy, whose words are these?"
     },
     {
      "s": "a",
-     "ru": "С вами? Хорошо… Спасибо, Тедди. А камни — больше не для меня.",
-     "en": "With you? All right… Thanks, Teddy. And stones — never again for me."
+     "ru": "Это слова Моньки, мама. Не мои.",
+     "en": "They're Monka's words, Mum. Not mine."
+    },
+    {
+     "s": "b",
+     "ru": "Монька! У тебя хороший вкус. Иди к нам, пой свою песню сам!",
+     "en": "Monka! You have good taste. Come up here, sing your song yourself!"
+    },
+    {
+     "s": "c",
+     "ru": "Я? Петь? Нежа, от волнения я уже забываю слова!",
+     "en": "Me? Sing? Nezha, I'm already forgetting the words from nerves!"
+    },
+    {
+     "s": "b",
+     "ru": "Тедди тебе поможет. Вместе петь не так сложно.",
+     "en": "Teddy will help you. Singing together isn't so hard."
+    },
+    {
+     "s": "c",
+     "ru": "Хорошо… Но в другой раз я свои слова оставляю себе!",
+     "en": "All right… But next time I'm keeping my words to myself!"
     }
    ],
    "questions": [
     {
-     "ask": "Why can't Yarik and Teddy find the way back?",
+     "ask": "What is Teddy about to do at the party?",
      "options": [
-      "Someone moved their stones",
-      "It grew dark in the woods",
-      "Teddy lost the paper map",
-      "Their car would not start"
+      "Sing a song for his mother",
+      "Play a tune on the piano",
+      "Read a poem he has written",
+      "Dance with Belka and Monka"
      ],
      "answer": 0
     },
     {
-     "ask": "What does Monka say he was doing in the forest?",
+     "ask": "What did Monka do to the song?",
      "options": [
-      "Picking mushrooms",
-      "Collecting wood",
-      "Walking his dog",
-      "Fishing by a lake"
+      "He swapped in his own words",
+      "He hid the sheet of music",
+      "He sang it first, too loud",
+      "He turned the lights down"
      ],
      "answer": 0
     },
     {
-     "ask": "Why is Monka lost himself?",
+     "ask": "What is the new song about?",
      "options": [
-      "He followed the trail himself",
-      "He fell asleep under a tree",
-      "He was chasing a large bird",
-      "His torch batteries ran out"
+      "The most beautiful monkey in the world",
+      "The bravest little dog in all the world",
+      "The kindest grandmother in the world",
+      "The fastest train in the whole country"
      ],
      "answer": 0
     },
     {
-     "ask": "How will Yarik find the way home?",
+     "ask": "Why does Monka not want to sing?",
      "options": [
-      "He knows the forest well",
-      "He will phone Teddy's mum",
-      "He follows Monka's trail",
-      "He climbs up a tall tree"
+      "Nerves make him forget the words",
+      "He thinks his voice is too quiet",
+      "He has never heard the song before",
+      "He wants to go home for supper"
      ],
      "answer": 0
     },
     {
      "ask": "How does it end for Monka?",
      "options": [
-      "He goes home with them",
-      "He stays in the forest",
-      "He hides from the family",
-      "He runs home by himself"
+      "He has to sing the song himself",
+      "He runs off before the song ends",
+      "He eats the whole holiday cake",
+      "He is sent home without supper"
      ],
      "answer": 0
     }

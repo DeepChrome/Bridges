@@ -2,7 +2,7 @@
  "chapter": 5,
  "name": "Spending & Saving",
  "lessons": {
-  "core5:1": {
+  "core5:0": {
    "title": "A headache and a red hat",
    "cast": [
     {
@@ -65,8 +65,8 @@
     },
     {
      "s": "b",
-     "ru": "На морозе? А носишь ли ты шапку?",
-     "en": "In the frost? And do you wear a hat?"
+     "ru": "На морозе? А шапка у тебя есть?",
+     "en": "In the frost? And do you have a hat?"
     },
     {
      "s": "c",
@@ -85,8 +85,8 @@
     },
     {
      "s": "b",
-     "ru": "Тедди, смотри на меня. Я всегда ношу шапку.",
-     "en": "Teddy, look at me. I always wear a hat."
+     "ru": "Тедди, смотри на меня. Я всегда в шапке.",
+     "en": "Teddy, look at me. I am always in a hat."
     },
     {
      "s": "c",
@@ -105,8 +105,8 @@
     },
     {
      "s": "b",
-     "ru": "Нежа, чай дома — это хорошо. Но шапку нужно носить всегда, Тедди!",
-     "en": "Nezha, tea at home is good. But the hat has to be worn all the time, Teddy!"
+     "ru": "Нежа, чай дома — это хорошо. Но на мороз без шапки нельзя, Тедди!",
+     "en": "Nezha, tea at home is good. But no going out in the frost without a hat, Teddy!"
     },
     {
      "s": "c",
@@ -172,7 +172,7 @@
     }
    ]
   },
-  "core5:4": {
+  "core5:6": {
    "title": "Changing a bag of coins",
    "cast": [
     {
@@ -193,16 +193,8 @@
    ],
    "intro": [
     {
-     "ru": "рубль",
-     "en": "rouble"
-    },
-    {
      "ru": "декабрь",
      "en": "December"
-    },
-    {
-     "ru": "держать",
-     "en": "to hold"
     }
    ],
    "lines": [

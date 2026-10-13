@@ -33,6 +33,18 @@
     {
      "ru": "октябрь",
      "en": "October"
+    },
+    {
+     "ru": "гриб",
+     "en": "mushroom"
+    },
+    {
+     "ru": "обед",
+     "en": "lunch"
+    },
+    {
+     "ru": "лес",
+     "en": "wood"
     }
    ],
    "lines": [
@@ -98,8 +110,8 @@
     },
     {
      "s": "c",
-     "ru": "А красный гриб, Ярик? Оставим его около камня?",
-     "en": "And the red mushroom, Yarik? Shall we leave it by the stone?"
+     "ru": "А красный гриб, Ярик? Оставим его здесь?",
+     "en": "And the red mushroom, Yarik? Shall we leave it here?"
     },
     {
      "s": "b",

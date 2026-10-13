@@ -1,268 +1,566 @@
 {
-  "_comment": [
-    "One grammar point per unit, shown before the first lesson of that unit.",
-    "Hand-authored and deliberately narrow: a single rule the learner can hold in",
-    "mind while meeting the unit's vocabulary. Stress marks are combining acutes.",
-    "Keep each body to one or two sentences — this is a teaching card, not a chapter.",
-    "Where the rule is a set of endings, pairs or choices, put them in `table`",
-    "({ columns, rows }, each row's first cell its label) and keep the body to the",
-    "one line the table does not say (the owner, 2026-10-09: no 'wall of text').",
-    "The ORDER is the point: spine notes run simple to complex in the sequence the",
-    "external courses agree on (docs/grammar-sequence.md), and a branch note never",
-    "uses a case or tense its chapter's spine has not yet introduced.",
-    "`form` says what the card teaches in terms the paradigm tables can ask",
-    "(core/questions.js formPrompt): a table title with the row and column labels",
-    "panel.py writes, or a drill the practice screen already has. A branch card",
-    "without one inherits its chapter's; the Cases drill asks only for the cells",
-    "the route so far has named."
-  ],
-
+  "_comment": ["One grammar point per unit,  shown before the first lesson of that unit.", "Hand-authored and deliberately narrow: a single rule the learner can hold in", "mind while meeting the unit's vocabulary. Stress marks are combining acutes.", "Keep each body to one or two sentences — this is a teaching card,  not a chapter.", "Where the rule is a set of endings,  pairs or choices,  put them in `table`", "({ columns,  rows },  each row's first cell its label) and keep the body to the", "one line the table does not say (the owner,  2026-10-09: no 'wall of text').", "The ORDER is the point: spine notes run simple to complex in the sequence the", "external courses agree on (docs/grammar-sequence.md),  and a branch note never", "uses a case or tense its chapter's spine has not yet introduced.", "`form` says what the card teaches in terms the paradigm tables can ask", "(core/questions.js formPrompt): a table title with the row and column labels", "panel.py writes,  or a drill the practice screen already has. A branch card", "without one inherits its chapter's; the Cases drill asks only for the cells", "the route so far has named."],
   "notes": {
     "core1": {
       "title": "No “a”, no “the”, no “is”",
       "body": "Russian has no articles, and it leaves out the present tense of “to be”.",
-      "examples": [["Я — Те́дди.", "I am Teddy."], ["Э́то он.", "That is him."]]
+      "examples": [
+        ["Приве́т! Я — Те́дди.", "Hi! I am Teddy."],
+        ["Э́то ма́ма.", "This is Mom."]
+      ]
     },
     "core2": {
-      "form": { "pos": "verb", "table": "Present / Future" },
+      "form": {
+        "pos": "verb",
+        "table": "Present / Future"
+      },
       "title": "Two verb patterns",
       "body": "A verb's ending changes with who does it, in one of two sets.",
-      "table": { "columns": ["", "чита́ть", "говори́ть"],
-                 "rows": [["я", "-ю", "-ю"], ["ты", "-ешь", "-ишь"], ["он, она́", "-ет", "-ит"],
-                          ["мы", "-ем", "-им"], ["вы", "-ете", "-ите"], ["они́", "-ют", "-ят"]] },
-      "examples": [["я чита́ю, ты чита́ешь", "I read, you read"], ["я говорю́, ты говори́шь", "I speak, you speak"]]
+      "table": {
+        "columns": ["", "знать", "говори́ть"],
+        "rows": [
+          ["я", "-ю", "-ю"],
+          ["ты", "-ешь", "-ишь"],
+          ["он,  она́", "-ет", "-ит"],
+          ["мы", "-ем", "-им"],
+          ["вы", "-ете", "-ите"],
+          ["они́", "-ют", "-ят"]
+        ]
+      },
+      "examples": [
+        ["я зна́ю,  ты зна́ешь", "I know,  you know"],
+        ["я говорю́,  ты говори́шь", "I speak,  you speak"]
+      ]
     },
     "core3": {
-      "form": { "drill": "agreement" },
+      "form": {
+        "drill": "agreement"
+      },
       "title": "Every noun has a gender",
       "body": "The ending tells the gender, and words that describe a noun take it. Words for men in -а (па́па) are masculine.",
-      "table": { "columns": ["Ends in", "Gender", "Example"],
-                 "rows": [["consonant", "masculine", "дом"], ["-а, -я", "feminine", "кни́га"],
-                          ["-о, -е", "neuter", "окно́"], ["-ь", "either", "день, ночь"]] },
-      "examples": [["но́вый дом", "a new house (m)"], ["но́вая кни́га", "a new book (f)"]]
+      "table": {
+        "columns": ["Ends in", "Gender", "Example"],
+        "rows": [
+          ["consonant", "masculine", "дом"],
+          ["-а,  -я", "feminine", "маши́на"],
+          ["-о,  -е", "neuter", "окно́"],
+          ["-ь", "either", "день,  ночь"]
+        ]
+      },
+      "examples": [
+        ["но́вый дом", "a new house (m)"],
+        ["но́вая маши́на", "a new car (f)"]
+      ]
     },
     "core4": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Nominative"], "cols": ["Plural"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Nominative"],
+        "cols": ["Plural"]
+      },
       "title": "Making things plural",
       "body": "The plural ending follows the noun's own ending. After к, г, х, ж, ш, щ, ч it is -и, never -ы.",
-      "table": { "columns": ["Singular", "Plural", "Example"],
-                 "rows": [["consonant, -а", "-ы", "стол → столы́"], ["-я, -ь", "-и", "ночь → но́чи"],
-                          ["к г х ж ш щ ч", "-и", "кни́га → кни́ги"], ["-о", "-а", "окно́ → о́кна"],
-                          ["-е", "-я", "мо́ре → моря́"]] },
-      "examples": [["стол → столы́", "table → tables"], ["кни́га → кни́ги", "book → books"]]
+      "table": {
+        "columns": ["Singular", "Plural", "Example"],
+        "rows": [
+          ["consonant,  -а", "-ы", "стол → столы́"],
+          ["-я,  -ь", "-и", "ночь → но́чи"],
+          ["к г х ж ш щ ч", "-и", "кни́га → кни́ги"],
+          ["-о", "-а", "окно́ → о́кна"],
+          ["-е", "-я", "мо́ре → моря́"]
+        ]
+      },
+      "examples": [
+        ["пода́рок → пода́рки", "present → presents"],
+        ["страна́ → стра́ны", "country → countries"]
+      ]
     },
     "core5": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Prepositional"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Prepositional"],
+        "cols": ["Singular"]
+      },
       "title": "Saying where something is",
       "body": "After в or на meaning “in” or “on”, the noun takes the prepositional case.",
-      "table": { "columns": ["Noun", "Ending", "Example"],
-                 "rows": [["most nouns", "-е", "в до́ме"], ["feminine in -ь", "-и", "в ночи́"],
-                          ["in -ия, -ие", "-и", "в Росси́и"]] },
-      "examples": [["в до́ме", "in the house"], ["на столе́", "on the table"]]
+      "table": {
+        "columns": ["Noun", "Ending", "Example"],
+        "rows": [
+          ["most nouns", "-е", "в до́ме"],
+          ["feminine in -ь", "-и", "в ночи́"],
+          ["in -ия,  -ие", "-и", "в Росси́и"]
+        ]
+      },
+      "examples": [
+        ["на рабо́те", "at work"],
+        ["в фи́рме", "in the firm"]
+      ]
     },
     "core6": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Accusative"],
+        "cols": ["Singular"]
+      },
       "title": "The accusative marks the object",
       "body": "The thing an action is done to goes into the accusative.",
-      "table": { "columns": ["Noun", "Becomes", "Example"],
-                 "rows": [["feminine -а", "-у", "кни́га → кни́гу"], ["feminine -я", "-ю", "ня́ня → ня́ню"],
-                          ["feminine -ь", "stays", "ночь"], ["masc., neuter thing", "stays", "дом, окно́"],
-                          ["masc. person, animal", "-а, -я", "брат → бра́та"]] },
-      "examples": [["Я чита́ю кни́гу.", "I am reading a book."], ["Я ви́жу дом.", "I see a house."]]
+      "table": {
+        "columns": ["Noun", "Becomes", "Example"],
+        "rows": [
+          ["feminine -а", "-у", "кни́га → кни́гу"],
+          ["feminine -я", "-ю", "ня́ня → ня́ню"],
+          ["feminine -ь", "stays", "ночь"],
+          ["masc.,  neuter thing", "stays", "дом,  окно́"],
+          ["masc. person,  animal", "-а,  -я", "брат → бра́та"]
+        ]
+      },
+      "examples": [
+        ["Я чита́ю кни́гу.", "I am reading a book."],
+        ["Я ви́жу дом.", "I see a house."]
+      ]
     },
     "core7": {
-      "form": { "pos": "verb", "table": "Past" },
+      "form": {
+        "pos": "verb",
+        "table": "Past"
+      },
       "title": "The past tense agrees with the subject",
       "body": "Drop -ть and add an ending for the subject's gender and number, not its person. Verbs in -ти have their own stem (идти́ → шёл).",
-      "table": { "columns": ["Subject", "Ending", "чита́ть"],
-                 "rows": [["он, я (man)", "-л", "чита́л"], ["она́, я (woman)", "-ла", "чита́ла"],
-                          ["оно́", "-ло", "чита́ло"], ["мы, вы, они́", "-ли", "чита́ли"]] },
-      "examples": [["Он чита́л.", "He read."], ["Она́ чита́ла.", "She read."]]
+      "table": {
+        "columns": ["Subject", "Ending", "игра́ть"],
+        "rows": [
+          ["он,  я (man)", "-л", "игра́л"],
+          ["она́,  я (woman)", "-ла", "игра́ла"],
+          ["оно́", "-ло", "игра́ло"],
+          ["мы,  вы,  они́", "-ли", "игра́ли"]
+        ]
+      },
+      "examples": [
+        ["Он игра́л.", "He played."],
+        ["Она́ игра́ла.", "She played."]
+      ]
     },
     "core8": {
-      "form": { "drill": "aspect" },
+      "form": {
+        "drill": "aspect"
+      },
       "title": "Two aspects of every verb",
       "body": "Imperfective verbs describe the process or a repeated action; perfective verbs describe one completed act.",
-      "examples": [["Я чита́л кни́гу.", "I was reading the book."], ["Я прочита́л кни́гу.", "I finished the book."]]
+      "examples": [
+        ["Я чита́л кни́гу.", "I was reading the book."],
+        ["Я прочита́л кни́гу.", "I finished the book."]
+      ]
     },
     "core9": {
-      "form": { "pos": "verb", "table": "Present / Future", "aspect": "perfective" },
+      "form": {
+        "pos": "verb",
+        "table": "Present / Future",
+        "aspect": "perfective"
+      },
       "title": "Talking about the future",
       "body": "Two ways, by aspect.",
-      "table": { "columns": ["Aspect", "Future is", "Example"],
-                 "rows": [["perfective", "its present forms", "я сде́лаю"],
-                          ["imperfective", "бу́ду + the verb", "я бу́ду рабо́тать"]] },
-      "examples": [["Пото́м я сде́лаю э́то.", "I will do it later."], ["Я бу́ду рабо́тать до́ма.", "I will be working at home."]]
+      "table": {
+        "columns": ["Aspect", "Future is", "Example"],
+        "rows": [
+          ["perfective", "its present forms", "я сде́лаю"],
+          ["imperfective", "бу́ду + the verb", "я бу́ду рабо́тать"]
+        ]
+      },
+      "examples": [
+        ["Пото́м я сде́лаю э́то.", "I will do it later."],
+        ["Я бу́ду рабо́тать до́ма.", "I will be working at home."]
+      ]
     },
     "core10": {
-      "form": { "pos": "verb", "table": "Imperative" },
+      "form": {
+        "pos": "verb",
+        "table": "Imperative"
+      },
       "title": "Asking someone to do something",
       "body": "Take the они́ form, drop its ending, and add one by what is left. Add -те for вы.",
-      "table": { "columns": ["Left with", "Add", "Example"],
-                 "rows": [["a vowel", "-й", "чита́ют → чита́й"], ["a consonant", "-и", "ска́жут → скажи́"],
-                          ["stem stress", "-ь", "забу́дут → забу́дь"]] },
-      "examples": [["Скажи́, где ты живёшь.", "Tell me where you live."], ["Прочита́йте э́то, пожа́луйста.", "Read this, please."]]
+      "table": {
+        "columns": ["Left with", "Add", "Example"],
+        "rows": [
+          ["a vowel", "-й", "чита́ют → чита́й"],
+          ["a consonant", "-и", "ска́жут → скажи́"],
+          ["stem stress", "-ь", "забу́дут → забу́дь"]
+        ]
+      },
+      "examples": [
+        ["Скажи́,  где ты живёшь.", "Tell me where you live."],
+        ["Прочита́йте э́то,  пожа́луйста.", "Read this,  please."]
+      ]
     },
-
     "family": {
       "title": "“My” follows the person you mean",
       "body": "Learn them as pairs for now; the reason comes with gender in chapter 3.",
-      "table": { "columns": ["", "моя́", "мой"],
-                 "rows": [["parent", "ма́ма", "па́па"], ["sibling", "сестра́", "брат"],
-                          ["child", "дочь", "сын"], ["spouse", "жена́", "муж"]] },
-      "examples": [["мой муж, моя́ жена́", "my husband, my wife"], ["моя́ семья́", "my family"]]
+      "table": {
+        "columns": ["", "моя́", "мой"],
+        "rows": [
+          ["parent", "ма́ма", "па́па"],
+          ["sibling", "сестра́", "брат"],
+          ["child", "дочь", "сын"],
+          ["spouse", "жена́", "муж"]
+        ]
+      },
+      "examples": [
+        ["мой муж,  моя́ жена́", "my husband,  my wife"],
+        ["моя́ семья́", "my family"]
+      ]
     },
     "time": {
       "title": "Numbers change the noun after them",
       "body": "The noun after a number changes. Learn the three as set phrases; the case behind them comes in chapter 7.",
-      "table": { "columns": ["Number", "час", "Example"],
-                 "rows": [["1", "час", "оди́н час"], ["2, 3, 4", "часа́", "два часа́"], ["5–20", "часо́в", "пять часо́в"]] },
-      "examples": [["оди́н час, два часа́", "one hour, two hours"], ["пять часо́в", "five hours"]]
+      "table": {
+        "columns": ["Number", "час", "Example"],
+        "rows": [
+          ["1", "час", "оди́н час"],
+          ["2,  3,  4", "часа́", "два часа́"],
+          ["5–20", "часо́в", "пять часо́в"]
+        ]
+      },
+      "examples": [
+        ["оди́н час,  два часа́", "one hour,  two hours"],
+        ["пять часо́в", "five hours"]
+      ]
     },
     "food": {
       "title": "Saying what you want",
       "body": "What you want comes straight after it. Learn the six by heart: хоте́ть follows no single pattern.",
-      "table": { "columns": ["", "хоте́ть"],
-                 "rows": [["я", "хочу́"], ["ты", "хо́чешь"], ["он, она́", "хо́чет"],
-                          ["мы", "хоти́м"], ["вы", "хоти́те"], ["они́", "хотя́т"]] },
-      "examples": [["Я хочу́ чай.", "I want tea."], ["Ты хо́чешь пи́ццу?", "Do you want pizza?"]]
+      "table": {
+        "columns": ["", "хоте́ть"],
+        "rows": [
+          ["я", "хочу́"],
+          ["ты", "хо́чешь"],
+          ["он,  она́", "хо́чет"],
+          ["мы", "хоти́м"],
+          ["вы", "хоти́те"],
+          ["они́", "хотя́т"]
+        ]
+      },
+      "examples": [
+        ["Я хочу́ чай.", "I want tea."],
+        ["Ты хо́чешь пи́ццу?", "Do you want pizza?"]
+      ]
     },
     "school": {
       "title": "Three ways to “study”",
       "body": "Russian has three verbs where English has one.",
-      "table": { "columns": ["Verb", "Means", "Example"],
-                 "rows": [["учи́ть", "learn by heart; teach", "учу́ слова́"], ["учи́ться", "be a student", "учу́сь в шко́ле"],
-                          ["изуча́ть", "study in depth", "изуча́ю исто́рию"]] },
-      "examples": [["Я учу́ слова́.", "I am learning words."], ["Я учу́сь в университе́те.", "I study at university."]]
+      "table": {
+        "columns": ["Verb", "Means", "Example"],
+        "rows": [
+          ["учи́ть", "learn by heart; teach", "учу́ слова́"],
+          ["учи́ться", "be a student", "учу́сь в шко́ле"],
+          ["изуча́ть", "study in depth", "изуча́ю исто́рию"]
+        ]
+      },
+      "examples": [
+        ["Я учу́ слова́.", "I am learning words."],
+        ["Я учу́сь в университе́те.", "I study at university."]
+      ]
     },
     "home": {
       "title": "Asking yes or no",
       "body": "A yes-or-no question uses the same words in the same order as the statement; only the voice rises, on the word being asked about.",
-      "examples": [["Э́то ку́хня.", "This is the kitchen."], ["Э́то стол?", "Is this a table?"]]
+      "examples": [
+        ["Э́то ку́хня.", "This is the kitchen."],
+        ["Э́то стол?", "Is this a table?"]
+      ]
     },
     "clothes": {
       "title": "Adjectives in the plural",
       "body": "In the plural an adjective has one ending whatever the gender.",
-      "table": { "columns": ["Stem", "Plural", "Example"],
-                 "rows": [["most", "-ые", "но́вые"], ["к г х ж ш щ ч", "-ие", "больши́е"], ["soft", "-ие", "си́ние"]] },
-      "examples": [["но́вая руба́шка → но́вые руба́шки", "a new shirt → new shirts"], ["большо́й шарф → больши́е шарфы́", "a big scarf → big scarves"]]
+      "table": {
+        "columns": ["Stem", "Plural", "Example"],
+        "rows": [
+          ["most", "-ые", "но́вые"],
+          ["к г х ж ш щ ч", "-ие", "больши́е"],
+          ["soft", "-ие", "си́ние"]
+        ]
+      },
+      "examples": [
+        ["но́вая руба́шка → но́вые руба́шки", "a new shirt → new shirts"],
+        ["большо́й шарф → больши́е шарфы́", "a big scarf → big scarves"]
+      ]
     },
     "city": {
       "title": "“This shop” and “This is a shop”",
       "body": "Before a noun, “this” agrees with it. On its own, э́то means “this is”, whatever the gender.",
-      "table": { "columns": ["Gender", "“this”", "Example"],
-                 "rows": [["masculine", "э́тот", "э́тот магази́н"], ["feminine", "э́та", "э́та у́лица"],
-                          ["neuter", "э́то", "э́то окно́"], ["plural", "э́ти", "э́ти дома́"]] },
-      "examples": [["э́тот го́род", "this city"], ["Э́то го́род.", "This is a city."]]
+      "table": {
+        "columns": ["Gender", "“this”", "Example"],
+        "rows": [
+          ["masculine", "э́тот", "э́тот магази́н"],
+          ["feminine", "э́та", "э́та у́лица"],
+          ["neuter", "э́то", "э́то окно́"],
+          ["plural", "э́ти", "э́ти дома́"]
+        ]
+      },
+      "examples": [
+        ["э́тот магази́н", "this shop"],
+        ["Э́то магази́н.", "This is a shop."]
+      ]
     },
     "travel": {
-      "form": { "pos": "verb", "table": "Present / Future" },
+      "form": {
+        "pos": "verb",
+        "table": "Present / Future"
+      },
       "title": "Two verbs for “go”",
       "body": "Two verbs for going on foot, by the kind of trip.",
-      "table": { "columns": ["Verb", "Trip", "Example"],
-                 "rows": [["идти́", "one way, now", "Я иду́ домо́й."], ["ходи́ть", "regular, or there and back", "Я хожу́ в шко́лу."]] },
-      "examples": [["Я иду́ в магази́н.", "I am going to the shop."], ["Я хожу́ в магази́н ка́ждый день.", "I go to the shop every day."]]
+      "table": {
+        "columns": ["Verb", "Trip", "Example"],
+        "rows": [
+          ["идти́", "one way,  now", "Я иду́ домо́й."],
+          ["ходи́ть", "regular,  or there and back", "Я хожу́ в шко́лу."]
+        ]
+      },
+      "examples": [
+        ["Я иду́ в магази́н.", "I am going to the shop."],
+        ["Я хожу́ в магази́н ка́ждый день.", "I go to the shop every day."]
+      ]
     },
     "body": {
       "title": "What hurts is the subject",
       "body": "Russian says “by me hurts the head” — the aching part is the subject, and the person comes after у: у меня́, у неё.",
-      "examples": [["У меня́ боли́т голова́.", "I have a headache."], ["У неё боля́т но́ги.", "Her legs hurt."]]
+      "examples": [
+        ["У меня́ боли́т голова́.", "I have a headache."],
+        ["У неё боля́т но́ги.", "Her legs hurt."]
+      ],
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Nominative"],
+        "cols": ["Plural"]
+      }
     },
     "nature": {
       "title": "Where in nature",
       "body": "A few short masculine nouns take a stressed -у́ instead of -е after в and на: в лесу́, в снегу́, на берегу́. Open spaces take на rather than в: на мо́ре, на у́лице.",
-      "examples": [["в лесу́", "in the forest"], ["на мо́ре", "at the sea"]]
+      "examples": [
+        ["в лесу́", "in the forest"],
+        ["на мо́ре", "at the sea"]
+      ]
     },
     "work": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Genitive"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Genitive"],
+        "cols": ["Singular"]
+      },
       "title": "Having and not having",
       "body": "Not having is the genitive's first job.",
-      "table": { "columns": ["", "Say", "Noun"],
-                 "rows": [["have", "у меня́ есть", "as it is"], ["have not", "у меня́ нет", "genitive"]] },
-      "examples": [["У меня́ есть рабо́та.", "I have a job."], ["У меня́ нет де́нег.", "I have no money."]]
+      "table": {
+        "columns": ["", "Say", "Noun"],
+        "rows": [
+          ["have", "у меня́ есть", "as it is"],
+          ["have not", "у меня́ нет", "genitive"]
+        ]
+      },
+      "examples": [
+        ["У меня́ есть рабо́та.", "I have a job."],
+        ["У меня́ нет де́нег.", "I have no money."]
+      ]
     },
     "animals": {
       "title": "Living things take the genitive as object",
       "body": "For masculine animate nouns — and all animate plurals — the accusative copies the genitive.",
-      "examples": [["Я ви́жу кота́.", "I see the cat."], ["Я ви́жу дом.", "I see the house (inanimate, unchanged)."]]
+      "examples": [
+        ["Я ви́жу кота́.", "I see the cat."],
+        ["Я ви́жу дом.", "I see the house (inanimate,  unchanged)."]
+      ],
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Accusative"],
+        "cols": ["Singular"]
+      }
     },
     "emotion": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Dative"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Dative"],
+        "cols": ["Singular"]
+      },
       "title": "Liking is done “to” you",
       "body": "нра́виться puts the person in the dative and the thing liked in the nominative — literally “to me is pleasing”.",
-      "examples": [["Мне нра́вится му́зыка.", "I like music."], ["Ему́ нра́вится ко́фе.", "He likes coffee."]]
+      "examples": [
+        ["Мне нра́вится му́зыка.", "I like music."],
+        ["Ему́ нра́вится ко́фе.", "He likes coffee."]
+      ]
     },
     "speech": {
-      "form": { "pos": "verb", "table": "Present / Future" },
+      "form": {
+        "pos": "verb",
+        "table": "Present / Future"
+      },
       "title": "Speaking a language",
       "body": "по- with a language's -ски form says which language you speak, read or understand in, and it never changes: по-ру́сски.",
-      "examples": [["Я говорю́ по-ру́сски.", "I speak Russian."], ["Ты говори́шь по-ру́сски?", "Do you speak Russian?"]]
+      "examples": [
+        ["Я говорю́ по-ру́сски.", "I speak Russian."],
+        ["Ты говори́шь по-ру́сски?", "Do you speak Russian?"]
+      ]
     },
     "military": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Instrumental"],
+        "cols": ["Singular"]
+      },
       "title": "“With” takes the instrumental",
       "body": "с plus the instrumental means together with — including who you are fighting or negotiating with.",
-      "examples": [["Он говори́т с дру́гом.", "He is speaking with a friend."], ["война́ с враго́м", "war with the enemy"]]
+      "examples": [
+        ["Он говори́т с дру́гом.", "He is speaking with a friend."],
+        ["война́ с враго́м", "war with the enemy"]
+      ]
     },
     "tech": {
       "title": "Can and want, plus a verb",
-      "body": "мочь and хоте́ть take a verb in its dictionary form after them: я могу́ сде́лать, ты хо́чешь посмотре́ть.",
-      "examples": [["Я могу́ сде́лать фо́то.", "I can take a photo."], ["Хо́чешь посмотре́ть?", "Do you want to watch?"]]
+      "body": "мочь and хоте́ть take a verb in its dictionary form after them: я могу́ де́лать, ты хо́чешь посмотре́ть.",
+      "examples": [
+        ["Я могу́ де́лать фо́то.", "I can take photos."],
+        ["Хо́чешь посмотре́ть ви́део?", "Do you want to watch the video?"]
+      ]
     },
     "sport": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative", "Prepositional"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Accusative", "Prepositional"],
+        "cols": ["Singular"]
+      },
       "title": "Playing games vs playing instruments",
       "body": "The preposition, and the case after it, say what kind of playing.",
-      "table": { "columns": ["Playing", "Say", "Case"],
-                 "rows": [["a sport, a game", "игра́ть в", "accusative"], ["an instrument", "игра́ть на", "prepositional"]] },
-      "examples": [["игра́ть в футбо́л", "to play football"], ["игра́ть на компью́тере", "to play on the computer"]]
+      "table": {
+        "columns": ["Playing", "Say", "Case"],
+        "rows": [
+          ["a sport,  a game", "игра́ть в", "accusative"],
+          ["an instrument", "игра́ть на", "prepositional"]
+        ]
+      },
+      "examples": [
+        ["игра́ть в футбо́л", "to play football"],
+        ["игра́ть на компью́тере", "to play on the computer"]
+      ]
     },
     "art": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Prepositional"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Prepositional"],
+        "cols": ["Singular"]
+      },
       "title": "Talking about a work",
       "body": "о (об before a vowel) plus the prepositional case means “about”.",
-      "examples": [["фильм о войне́", "a film about the war"], ["кни́га о Москве́", "a book about Moscow"]]
+      "examples": [
+        ["фильм о Москве́", "a film about Moscow"],
+        ["пе́сня о любви́", "a song about love"]
+      ]
     },
     "politics": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Genitive"], "cols": ["Plural"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Genitive"],
+        "cols": ["Plural"]
+      },
       "title": "Quantity words take the genitive",
       "body": "After мно́го, ма́ло, ско́лько and similar words the noun goes into the genitive: plural for things you count, singular for things you measure.",
-      "examples": [["мно́го люде́й", "many people"], ["ма́ло вре́мени", "little time"]]
+      "examples": [
+        ["мно́го люде́й", "many people"],
+        ["ма́ло вре́мени", "little time"]
+      ]
     },
     "medicine": {
       "title": "At the doctor's",
       "body": "“At” a person and “at” a place are said differently.",
-      "table": { "columns": ["At", "Say", "Example"],
-                 "rows": [["a person", "у + genitive", "у врача́"], ["a building", "в + prepositional", "в больни́це"]] },
-      "examples": [["Я у врача́.", "I am at the doctor's."], ["Она́ в больни́це.", "She is in hospital."]]
+      "table": {
+        "columns": ["At", "Say", "Example"],
+        "rows": [
+          ["a person", "у + genitive", "у врача́"],
+          ["a building", "в + prepositional", "в больни́це"]
+        ]
+      },
+      "examples": [
+        ["Я у врача́.", "I am at the doctor's."],
+        ["Она́ в больни́це.", "She is in hospital."]
+      ]
     },
     "business": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Genitive"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Genitive"],
+        "cols": ["Singular"]
+      },
       "title": "How much does it cost?",
       "body": "сто́ит for one thing, сто́ят for several, then the price.",
-      "table": { "columns": ["Number", "рубль", "Example"],
-                 "rows": [["1", "рубль", "оди́н рубль"], ["2, 3, 4", "рубля́", "два рубля́"], ["5–20", "рубле́й", "пять рубле́й"]] },
-      "examples": [["Э́то сто́ит два рубля́.", "It costs two roubles."], ["Э́ти ве́щи сто́ят пять рубле́й.", "These things cost five roubles."]]
+      "table": {
+        "columns": ["Number", "рубль", "Example"],
+        "rows": [
+          ["1", "рубль", "оди́н рубль"],
+          ["2,  3,  4", "рубля́", "два рубля́"],
+          ["5–20", "рубле́й", "пять рубле́й"]
+        ]
+      },
+      "examples": [
+        ["Э́то сто́ит два рубля́.", "It costs two roubles."],
+        ["Э́ти ве́щи сто́ят пять рубле́й.", "These things cost five roubles."]
+      ]
     },
     "law": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Instrumental"],
+        "cols": ["Singular"]
+      },
       "title": "What someone is, was, or became",
       "body": "After рабо́тать, стать and the past of быть, the role goes into the instrumental: юри́ст → юри́стом, судья́ → судьёй.",
-      "examples": [["Он рабо́тает юри́стом.", "He works as a lawyer."], ["Она́ ста́ла судьёй.", "She became a judge."]]
+      "examples": [
+        ["Он рабо́тает юри́стом.", "He works as a lawyer."],
+        ["Она́ ста́ла судьёй.", "She became a judge."]
+      ]
     },
     "science": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Instrumental"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Instrumental"],
+        "cols": ["Singular"]
+      },
       "title": "Studying a subject",
       "body": "занима́ться takes the subject or activity in the instrumental, with no preposition: занима́ться матема́тикой, нау́кой.",
-      "examples": [["Он занима́ется матема́тикой.", "He does mathematics."], ["Мы занима́емся нау́кой.", "We do science."]]
+      "examples": [
+        ["Он занима́ется матема́тикой.", "He does mathematics."],
+        ["Мы занима́емся нау́кой.", "We do science."]
+      ]
     },
     "religion": {
-      "form": { "pos": "noun", "table": "Declension", "rows": ["Accusative", "Dative"], "cols": ["Singular"] },
+      "form": {
+        "pos": "noun",
+        "table": "Declension",
+        "rows": ["Accusative", "Dative"],
+        "cols": ["Singular"]
+      },
       "title": "Believing in",
       "body": "With в or without it, a different meaning and case.",
-      "table": { "columns": ["Means", "Say", "Example"],
-                 "rows": [["believe in", "ве́рить в + accusative", "ве́рю в тебя́"], ["believe someone", "ве́рить + dative", "ве́рю тебе́"]] },
-      "examples": [["Я ве́рю в тебя́.", "I believe in you."], ["Я тебе́ ве́рю.", "I believe you."]]
+      "table": {
+        "columns": ["Means", "Say", "Example"],
+        "rows": [
+          ["believe in", "ве́рить в + accusative", "ве́рю в тебя́"],
+          ["believe someone", "ве́рить + dative", "ве́рю тебе́"]
+        ]
+      },
+      "examples": [
+        ["Я ве́рю в тебя́.", "I believe in you."],
+        ["Я тебе́ ве́рю.", "I believe you."]
+      ]
     }
   }
 }

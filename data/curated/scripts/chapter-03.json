@@ -200,13 +200,21 @@
     {
      "ru": "найти",
      "en": "to find"
+    },
+    {
+     "ru": "ресторан",
+     "en": "restaurant"
+    },
+    {
+     "ru": "кот",
+     "en": "cat (tom cat)"
     }
    ],
    "lines": [
     {
      "s": "a",
-     "ru": "Тедди, мы идём в ресторан. Где твоя шапка?",
-     "en": "Teddy, we're going to the restaurant. Where is your hat?"
+     "ru": "Тедди, мы идём в ресторан, уже время. Где твоя шапка?",
+     "en": "Teddy, we are going to the restaurant, it is time already. Where is your hat?"
     },
     {
      "s": "b",
@@ -250,7 +258,7 @@
     },
     {
      "s": "c",
-     "ru": "Не знаю. Мне кажется, это ваш кот.",
+     "ru": "Не знаю. Я думаю, это ваш кот.",
      "en": "I don't know. I think it was your cat."
     },
     {

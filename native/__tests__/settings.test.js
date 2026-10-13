@@ -160,8 +160,12 @@ describe("flashcards", () => {
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
     expect(screen.getByTestId("flag-new")).toBeTruthy();
     expect(screen.getByTestId("study-cog")).toBeTruthy();
-    const { L } = require("../src/data");
-    expect(screen.getAllByText(L[0].w).length).toBeGreaterThan(0);
+    // New cards come from the lessons reached — a fresh profile's is the first
+    // lesson of the first unit — commonest first, and the lemma index is the
+    // frequency order (rank is read, never keyed on: rule 20.4).
+    const { L, UN, lessonWords } = require("../src/data");
+    const first = Math.min(...lessonWords(UN[0], 0));
+    expect(screen.getAllByText(L[first].w).length).toBeGreaterThan(0);
   });
 });
 

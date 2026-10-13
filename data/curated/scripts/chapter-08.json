@@ -33,6 +33,18 @@
     {
      "ru": "готовить",
      "en": "to cook"
+    },
+    {
+     "ru": "обед",
+     "en": "lunch"
+    },
+    {
+     "ru": "час",
+     "en": "hour"
+    },
+    {
+     "ru": "вернуться",
+     "en": "to return"
     }
    ],
    "lines": [
@@ -48,8 +60,8 @@
     },
     {
      "s": "a",
-     "ru": "Во-первых, у меня есть рецепт. Там всё очень просто.",
-     "en": "First of all, I've got a recipe. It's all very simple."
+     "ru": "Во-первых, у меня есть рецепт. Там всё совершенно просто.",
+     "en": "First of all, I've got a recipe. It's all completely simple."
     },
     {
      "s": "b",
@@ -58,18 +70,18 @@
     },
     {
      "s": "a",
-     "ru": "Долго — это не для меня. Огонь у меня огромный.",
-     "en": "Slow is not for me. My heat is enormous."
+     "ru": "Час? Это долго. Огонь у меня будет особенно большой.",
+     "en": "An hour? That's ages. My heat is going to be especially high."
     },
     {
      "s": "b",
-     "ru": "Огромный огонь — это плохо, Тедди.",
-     "en": "Enormous heat is bad, Teddy."
+     "ru": "Тедди, большой огонь — это скорее плохо, чем хорошо.",
+     "en": "Teddy, high heat is more bad than good."
     },
     {
      "s": "c",
-     "ru": "Нежа, я вернулся, а тут такой запах! Курица почти чёрная!",
-     "en": "Nezha, I'm back, and there's such a smell! The chicken is almost black!"
+     "ru": "Нежа, я вернулся, а тут такой запах! Курица практически чёрная!",
+     "en": "Nezha, I'm back, and there's such a smell! The chicken is practically black!"
     },
     {
      "s": "a",
@@ -78,18 +90,18 @@
     },
     {
      "s": "c",
-     "ru": "Её можно снимать. Тедди, такое у нас дома часто происходит.",
-     "en": "We can take it off. Teddy, that happens in our house a lot."
+     "ru": "Снимай её с огня, Тедди. Такое у нас дома бывает.",
+     "en": "Take it off the heat, Teddy. That happens in our house."
     },
     {
      "s": "a",
-     "ru": "А Тортила? Что она будет говорить про чёрную курицу?",
-     "en": "And Tortila? What is she going to say about a black chicken?"
+     "ru": "А Тортила? Что она скажет про совершенно чёрную курицу?",
+     "en": "And Tortila? What will she say about a completely black chicken?"
     },
     {
      "s": "c",
-     "ru": "А знаешь, Тедди, у мамы первая курица тоже стала чёрной.",
-     "en": "And you know what, Teddy? Mum's first chicken turned black too."
+     "ru": "А знаешь, Тедди, один раз у мамы курица тоже стала чёрной. Примерно такой же.",
+     "en": "You know what, Teddy? Mum's chicken turned black once too. Just about like this one."
     },
     {
      "s": "b",
@@ -98,13 +110,13 @@
     },
     {
      "s": "a",
-     "ru": "Мама тоже? Тогда это не ошибка, а урок! Ещё раз!",
-     "en": "Mum too? Then it's not a mistake, it's a lesson! Once more!"
+     "ru": "Мама тоже? Тогда это не проблема, а опыт! Ещё раз!",
+     "en": "Mum too? Then it's not a problem, it's experience! Once more!"
     },
     {
      "s": "b",
-     "ru": "У нас есть ещё одна курица. Но теперь огонь не такой огромный.",
-     "en": "We have one more chicken. But this time the heat isn't so enormous."
+     "ru": "У нас есть ещё одна курица. Но теперь огонь маленький, и соли — чуть.",
+     "en": "We have one more chicken. But this time the heat is low, and the salt — just a touch."
     }
    ],
    "questions": [
@@ -141,10 +153,10 @@
     {
      "ask": "What secret does Yarik give away?",
      "options": [
-      "Nezha burned her first one too",
-      "Tortila is not coming now",
-      "He already had lunch at work",
-      "Teddy's recipe came from Gena"
+      "Nezha once burned a chicken too",
+      "Tortila is not coming after all",
+      "He already had lunch at his work",
+      "The recipe was Gena's, not Teddy's"
      ],
      "answer": 0
     },
@@ -197,8 +209,12 @@
      "en": "to peel, to clean"
     },
     {
-     "ru": "соль",
-     "en": "salt"
+     "ru": "зима",
+     "en": "winter"
+    },
+    {
+     "ru": "обед",
+     "en": "lunch"
     }
    ],
    "lines": [

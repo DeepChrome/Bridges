@@ -25,6 +25,18 @@
     {
      "ru": "колбаса",
      "en": "sausage"
+    },
+    {
+     "ru": "давать",
+     "en": "to give"
+    },
+    {
+     "ru": "пицца",
+     "en": "Pizza"
+    },
+    {
+     "ru": "добрый",
+     "en": "kind"
     }
    ],
    "lines": [
@@ -162,7 +174,7 @@
     }
    ]
   },
-  "core2:4": {
+  "core2:3": {
    "title": "Which course for Teddy?",
    "cast": [
     {

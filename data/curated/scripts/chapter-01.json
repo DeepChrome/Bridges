@@ -2,174 +2,6 @@
  "chapter": 1,
  "name": "First Words",
  "lessons": {
-  "core1:3": {
-   "title": "Waiting at the wrong place",
-   "cast": [
-    {
-     "id": "a",
-     "ru": "Тедди",
-     "en": "Teddy"
-    },
-    {
-     "id": "b",
-     "ru": "Ярик",
-     "en": "Yarik"
-    },
-    {
-     "id": "c",
-     "ru": "Белка",
-     "en": "Belka"
-    }
-   ],
-   "intro": [
-    {
-     "ru": "кафе",
-     "en": "café"
-    },
-    {
-     "ru": "колбаса",
-     "en": "sausage"
-    },
-    {
-     "ru": "молодец",
-     "en": "well done"
-    }
-   ],
-   "lines": [
-    {
-     "s": "a",
-     "ru": "Папа, где мама? Я хочу пиццу!",
-     "en": "Dad, where's Mom? I want pizza!"
-    },
-    {
-     "s": "b",
-     "ru": "Не знаю, Тедди. Мама говорит, мы тут, в ресторане.",
-     "en": "I don't know, Teddy. Mom says we meet here, at the restaurant."
-    },
-    {
-     "s": "a",
-     "ru": "А её тут нет, папа! Мама не в ресторане?",
-     "en": "But she isn't here, Dad! Isn't Mom at the restaurant?"
-    },
-    {
-     "s": "c",
-     "ru": "Ярик! Тедди! Вот вы где!",
-     "en": "Yarik! Teddy! So that's where you are!"
-    },
-    {
-     "s": "b",
-     "ru": "Белка, привет! Ты знаешь, где Нежа?",
-     "en": "Belka, hi! Do you know where Nezha is?"
-    },
-    {
-     "s": "c",
-     "ru": "Знаю! Нежа в кафе, не в ресторане.",
-     "en": "I do! Nezha is at the café, not the restaurant."
-    },
-    {
-     "s": "b",
-     "ru": "В кафе? Нет, она говорит «ресторан».",
-     "en": "At the café? No, she says \"restaurant\"."
-    },
-    {
-     "s": "c",
-     "ru": "Нет, Ярик. Она говорит «кафе». Я знаю!",
-     "en": "No, Yarik. She says \"café\". I know!"
-    },
-    {
-     "s": "a",
-     "ru": "А пицца там? С колбасой?",
-     "en": "And is there pizza there? With sausage?"
-    },
-    {
-     "s": "c",
-     "ru": "Там пицца с колбасой, Тедди. И борщ тоже.",
-     "en": "There's pizza with sausage there, Teddy. And borscht too."
-    },
-    {
-     "s": "b",
-     "ru": "Мы тут, а Нежа там. Молодец, Ярик.",
-     "en": "We're here, and Nezha's there. Well done, Yarik."
-    },
-    {
-     "s": "c",
-     "ru": "А я знаю, где это кафе. Вот там!",
-     "en": "And I know where that café is. Right over there!"
-    },
-    {
-     "s": "a",
-     "ru": "Спасибо, Белка! Папа, я очень хочу пиццу.",
-     "en": "Thank you, Belka! Dad, I really want pizza."
-    },
-    {
-     "s": "b",
-     "ru": "Да, Тедди, да! Белка, ты с нами?",
-     "en": "Yes, Teddy, yes! Belka, are you coming with us?"
-    },
-    {
-     "s": "c",
-     "ru": "С вами? Да! Я тоже хочу борщ.",
-     "en": "With you? Yes! I want borscht too."
-    },
-    {
-     "s": "a",
-     "ru": "Папа, и борщ, и пиццу! Я всё могу!",
-     "en": "Dad, borscht and pizza! I can manage it all!"
-    }
-   ],
-   "questions": [
-    {
-     "ask": "Who are Teddy and his dad waiting for?",
-     "options": [
-      "Teddy's mom",
-      "Teddy's aunt",
-      "Teddy's uncle",
-      "Teddy's nanny"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What mix-up has happened?",
-     "options": [
-      "They went to the wrong place",
-      "They came on the wrong day",
-      "They forgot to book a table",
-      "They lost the restaurant key"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What news does Belka bring?",
-     "options": [
-      "Nezha is at the café",
-      "Nezha is running late",
-      "Nezha is stuck at work",
-      "Nezha forgot about it"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "What does Teddy want to eat?",
-     "options": [
-      "Pizza with sausage",
-      "Borscht with bread",
-      "Fish with potatoes",
-      "Cake with cherries"
-     ],
-     "answer": 0
-    },
-    {
-     "ask": "Who goes to find Nezha in the end?",
-     "options": [
-      "All three of them",
-      "Just Yarik alone",
-      "Just Belka alone",
-      "Nobody, they stay"
-     ],
-     "answer": 0
-    }
-   ]
-  },
   "core1:2": {
    "title": "Monka swaps the salt",
    "cast": [
@@ -205,6 +37,14 @@
     {
      "ru": "кафе",
      "en": "café"
+    },
+    {
+     "ru": "борщ",
+     "en": "borscht"
+    },
+    {
+     "ru": "пицца",
+     "en": "Pizza"
     }
    ],
    "lines": [
@@ -337,6 +177,182 @@
       "Salad",
       "Cake",
       "Soup"
+     ],
+     "answer": 0
+    }
+   ]
+  },
+  "core1:3": {
+   "title": "Waiting at the wrong place",
+   "cast": [
+    {
+     "id": "a",
+     "ru": "Тедди",
+     "en": "Teddy"
+    },
+    {
+     "id": "b",
+     "ru": "Ярик",
+     "en": "Yarik"
+    },
+    {
+     "id": "c",
+     "ru": "Белка",
+     "en": "Belka"
+    }
+   ],
+   "intro": [
+    {
+     "ru": "кафе",
+     "en": "café"
+    },
+    {
+     "ru": "колбаса",
+     "en": "sausage"
+    },
+    {
+     "ru": "пицца",
+     "en": "Pizza"
+    },
+    {
+     "ru": "ресторан",
+     "en": "restaurant"
+    },
+    {
+     "ru": "борщ",
+     "en": "borscht"
+    }
+   ],
+   "lines": [
+    {
+     "s": "a",
+     "ru": "Папа, где мама? Я хочу пиццу!",
+     "en": "Dad, where's Mom? I want pizza!"
+    },
+    {
+     "s": "b",
+     "ru": "Не знаю, Тедди. Мама говорит, мы тут, в ресторане.",
+     "en": "I don't know, Teddy. Mom says we meet here, at the restaurant."
+    },
+    {
+     "s": "a",
+     "ru": "А её тут нет, папа! Мама не в ресторане?",
+     "en": "But she isn't here, Dad! Isn't Mom at the restaurant?"
+    },
+    {
+     "s": "c",
+     "ru": "Ярик! Тедди! Вот вы где!",
+     "en": "Yarik! Teddy! So that's where you are!"
+    },
+    {
+     "s": "b",
+     "ru": "Белка, привет! Ты знаешь, где Нежа?",
+     "en": "Belka, hi! Do you know where Nezha is?"
+    },
+    {
+     "s": "c",
+     "ru": "Знаю! Нежа в кафе, не в ресторане.",
+     "en": "I do! Nezha is at the café, not the restaurant."
+    },
+    {
+     "s": "b",
+     "ru": "В кафе? Нет, она говорит «ресторан».",
+     "en": "At the café? No, she says \"restaurant\"."
+    },
+    {
+     "s": "c",
+     "ru": "Нет, Ярик. Она говорит «кафе». Я знаю!",
+     "en": "No, Yarik. She says \"café\". I know!"
+    },
+    {
+     "s": "a",
+     "ru": "А пицца там? С колбасой?",
+     "en": "And is there pizza there? With sausage?"
+    },
+    {
+     "s": "c",
+     "ru": "Там пицца с колбасой, Тедди. И борщ тоже.",
+     "en": "There's pizza with sausage there, Teddy. And borscht too."
+    },
+    {
+     "s": "b",
+     "ru": "Мы тут, а Нежа там. Молодец, Ярик.",
+     "en": "We're here, and Nezha's there. Well done, Yarik."
+    },
+    {
+     "s": "c",
+     "ru": "А я знаю, где это кафе. Вот там!",
+     "en": "And I know where that café is. Right over there!"
+    },
+    {
+     "s": "a",
+     "ru": "Спасибо, Белка! Папа, я очень хочу пиццу.",
+     "en": "Thank you, Belka! Dad, I really want pizza."
+    },
+    {
+     "s": "b",
+     "ru": "Да, Тедди, да! Белка, ты с нами?",
+     "en": "Yes, Teddy, yes! Belka, are you coming with us?"
+    },
+    {
+     "s": "c",
+     "ru": "С вами? Да! Я тоже хочу борщ.",
+     "en": "With you? Yes! I want borscht too."
+    },
+    {
+     "s": "a",
+     "ru": "Папа, и борщ, и пиццу! Я всё могу!",
+     "en": "Dad, borscht and pizza! I can manage it all!"
+    }
+   ],
+   "questions": [
+    {
+     "ask": "Who are Teddy and his dad waiting for?",
+     "options": [
+      "Teddy's mom",
+      "Teddy's aunt",
+      "Teddy's uncle",
+      "Teddy's nanny"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What mix-up has happened?",
+     "options": [
+      "They went to the wrong place",
+      "They came on the wrong day",
+      "They forgot to book a table",
+      "They lost the restaurant key"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What news does Belka bring?",
+     "options": [
+      "Nezha is at the café",
+      "Nezha is running late",
+      "Nezha is stuck at work",
+      "Nezha forgot about it"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "What does Teddy want to eat?",
+     "options": [
+      "Pizza with sausage",
+      "Borscht with bread",
+      "Fish with potatoes",
+      "Cake with cherries"
+     ],
+     "answer": 0
+    },
+    {
+     "ask": "Who goes to find Nezha in the end?",
+     "options": [
+      "All three of them",
+      "Just Yarik alone",
+      "Just Belka alone",
+      "Nobody, they stay"
      ],
      "answer": 0
     }

@@ -162,9 +162,11 @@ def card_words(tid):
     Тедди», «Это он» and then taught в, на, с, и, а, with я in lesson 3 and
     это in lesson 6 (the walkthrough, 2026-09-30)."""
     note = _NOTES.get(tid) or {}
-    out = set()
+    out = []
     for ex in note.get("examples") or []:
-        out |= {fold(w) for w in re.findall(r"[А-Яа-яЁё́]+", ex[0])}
+        for w in re.findall(r"[А-Яа-яЁё́]+", ex[0]):
+            if fold(w) not in out:
+                out.append(fold(w))
     return out
 
 
@@ -230,13 +232,17 @@ def grouped(tid, chosen, meta, spoken, size):
         # By the group's middle word, not its commonest: one very common member
         # («год») would otherwise pull a group of rare ones to the front.
         rs = sorted(rank(l) for l in members)
-        # A group the unit's grammar card speaks with goes first, then by rank.
-        on_card = any(fold(meta[l]["bare"]) in card for l in members)
-        blocks.append(((0 if on_card else 1, rs[len(rs) // 2]), g, members))
+        # A group the unit's grammar card speaks with goes first — in the order
+        # the card's examples say its words, so «Приве́т! Я — Те́дди. Э́то ма́ма.»
+        # opens on the greetings, then the pronouns (2026-10-12; by rank the
+        # commonest group, «и а не», always won) — then by rank.
+        at_card = [card.index(fold(meta[l]["bare"])) for l in members if fold(meta[l]["bare"]) in card]
+        blocks.append(((0, min(at_card)) if at_card else (1, rs[len(rs) // 2]), g, members))
         names[id(members)] = grp["name"]
     rest = [l for l in chosen if l not in placed]
     UNGROUPED.extend((tid, meta[l]["bare"]) for l in rest)
-    blocks += [((0 if fold(meta[l]["bare"]) in card else 1, rank(l)), 10 ** 6, [l]) for l in rest]
+    blocks += [((0, card.index(fold(meta[l]["bare"]))) if fold(meta[l]["bare"]) in card else (1, rank(l)), 10 ** 6, [l])
+               for l in rest]
     blocks.sort(key=lambda b: (b[0], b[1]))
     order = [l for _, _, members in blocks for l in members]
     sizes, cut = cut_lessons([members for _, _, members in blocks], size)
@@ -254,10 +260,15 @@ def grouped(tid, chosen, meta, spoken, size):
 VIDEO_NOISE = set("""канал подписываться подписаться подписка лайк комментарий ролик выпуск
 ссылка описание субтитры патреон падёж глагол предлог окончание союз спряжение
 существительное прилагательное местоимение наречие
-сей""".split())
+сей пост принцип доступ марина здравоохранение ножка ничто малый""".split())
 # «сей» is archaic "this", heard in set phrases («до сих пор») and nowhere a
 # learner would say it. Reviewers dropped it from core8 and art and it walked
 # into the next unit each time (2026-10-01); it belongs here, not unit by unit.
+# The last row (2026-10-12) is the same lesson again: «пост» taught as "guard
+# post" under an Easter heading, «марина» a mis-lemmatised name, «малый» a fourth
+# "small", B1 strays («здравоохранение», «принцип», «доступ») — each dropped
+# from one unit walked into the next. A word here is refused by every way into
+# a unit except a reader's keep, not only by a video pick.
 TRANSCRIPTS = ROOT / "data" / "transcripts.json"
 EARLY_CHAPTERS = 3
 BRANCH_MIN = 10      # below this a topic isn't worth a unit
@@ -1020,7 +1031,7 @@ def main():
                     return False
                 if reserved_now.get(lid, tid) != tid:
                     return False
-                if reason == "video" and meta[lid]["bare"] in VIDEO_NOISE:
+                if reason != "curated" and meta[lid]["bare"] in VIDEO_NOISE:
                     return False
                 # A side quest takes a video word that is off its topic only when
                 # the word is common. The owner, 2026-09-30: "When in doubt, stick

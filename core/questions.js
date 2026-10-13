@@ -1498,7 +1498,10 @@ export function makeQuestions(env) {
        slots still go round every use, so a run is never one use only. */
     const unasked = (u) => byUse[u].filter((x) => !asked.has(x.ru) && !usedRu.has(x.ru)).length;
     const pickUse = (k) => {
-      if (k < byUse.length) return k;
+      // The opening round skips a use already worked through («нет» has
+      // thirteen sentences): forcing it every run repeated one before the
+      // other uses were half asked.
+      if (k < byUse.length && unasked(k)) return k;
       const weights = byUse.map((_, u) => unasked(u) || 0.01);
       let roll = Math.random() * weights.reduce((a, b) => a + b, 0);
       for (let u = 0; u < weights.length; u++) { roll -= weights[u]; if (roll <= 0) return u; }
@@ -1577,19 +1580,23 @@ export function makeQuestions(env) {
        «начина́ть» and «переста́ть» three lessons running) — and the quiz can
        recompute what the walk asked. A standalone run is shuffled: variety is
        what a retake wants. */
-    for (const tier of tiers) {
+    let own = 0;
+    tiers.forEach((tier, t) => {
       const order = lesson ? orderBy(unique(tier), unit.id) : shuffle(unique(tier).slice());
       for (const i of order) {
         if (seen.has(i)) continue;
         seen.add(i);
-        if (formCells(L[i], spec).length) able.push(i);
+        if (formCells(L[i], spec).length) { able.push(i); if (t === 0) own++; }
       }
-    }
+    });
     if (!able.length) return [];
-    const offset = lesson ? (index * n) % able.length : 0;
+    // The lesson's own words always lead; the rotation walks the borrowed rest.
+    const rest = able.slice(own);
+    const offset = lesson && rest.length ? (index * n) % rest.length : 0;
+    const walk = able.slice(0, own).concat(rest.slice(offset), rest.slice(0, offset));
     const out = [], asked = new Set();
     for (let k = 0; out.length < n && k < n * 20; k++) {
-      const i = able[(offset + k) % able.length];
+      const i = walk[k % walk.length];
       const cell = pickOne(formCells(L[i], spec));
       const key = `${i}:${cell.ri}:${cell.ci}`;
       if (asked.has(key)) continue;

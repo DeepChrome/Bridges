@@ -2,7 +2,7 @@
  "chapter": 6,
  "name": "Before & After",
  "lessons": {
-  "core6:2": {
+  "core6:1": {
    "title": "Snacks for the concert",
    "cast": [
     {
@@ -31,12 +31,20 @@
      "en": "hour"
     },
     {
-     "ru": "маленький",
-     "en": "little"
-    },
-    {
      "ru": "декабрь",
      "en": "December"
+    },
+    {
+     "ru": "обед",
+     "en": "lunch"
+    },
+    {
+     "ru": "носить",
+     "en": "to carry (habitually)"
+    },
+    {
+     "ru": "принцип",
+     "en": "principle"
     }
    ],
    "lines": [
@@ -102,8 +110,8 @@
     },
     {
      "s": "a",
-     "ru": "Один. Только один, Белка. Второй — для Тедди.",
-     "en": "One. Only one, Belka. The second one is for Teddy."
+     "ru": "Один. Только один, Белка. А этот — для Тедди.",
+     "en": "One. Only one, Belka. And this one is for Teddy."
     }
    ],
    "questions": [
@@ -159,7 +167,7 @@
     }
    ]
   },
-  "core6:6": {
+  "core6:5": {
    "title": "Breakfast before the lesson",
    "cast": [
     {
@@ -194,6 +202,14 @@
     {
      "ru": "соль",
      "en": "salt"
+    },
+    {
+     "ru": "завтрак",
+     "en": "breakfast"
+    },
+    {
+     "ru": "урок",
+     "en": "lesson"
     }
    ],
    "lines": [
@@ -214,8 +230,8 @@
     },
     {
      "s": "c",
-     "ru": "Белка! Тедди! А что это у вас, обед?",
-     "en": "Belka! Teddy! And what's this you've got, lunch?"
+     "ru": "Белка! Тедди! А что это у вас? Каша?",
+     "en": "Belka! Teddy! What is that you have got? Porridge?"
     },
     {
      "s": "a",

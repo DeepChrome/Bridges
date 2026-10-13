@@ -98,6 +98,12 @@ export function Linked({ text, style, size = 17, color, testID, selectable }) {
             accessibilityRole="link"
             accessibilityLabel={`${p.text}, open word`}
             onPress={words ? () => words.open(p.text) : undefined}
+            /* A long press is the selection starting (the sentence is
+               selectable); without this the release still counted as the tap
+               and opened the word's sheet over the selection (emulator,
+               2026-10-13). With a long-press handler of its own, the span's
+               onPress fires only on a tap. */
+            onLongPress={words ? () => {} : undefined}
             style={{ textDecorationLine: "underline", textDecorationColor: t.brand }}
           >
             {p.text}

@@ -16,7 +16,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Pressable, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton,
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton, Unselectable,
          Familiarity, familiarityColor } from "../ui";
 import { RunTools } from "../askai";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines,
@@ -1154,13 +1154,19 @@ export default function Study({ navigation, route }) {
                         onClose={() => setTallyOpen(false)} />
           ) : null}
 
-          {/* Once revealed, a tap on the card turns it — back to the front to
-              look again, and over once more — while the grade buttons stay. */}
-          <Pressable testID="card-turn" accessibilityRole={revealed ? "button" : undefined}
-                     accessibilityLabel={revealed ? "Turn the card" : undefined}
-                     onPress={revealed ? () => setShown(!shown) : undefined}>
           <Animated.View style={flip.style}>
           <Card testID={`card-${item.direction}`} style={{ marginTop: 12, alignItems: "center", paddingVertical: 28 }}>
+          {/* Once revealed, a tap on the card's head — the word, its meaning,
+              the speaker — turns it: back to the front to look again, and over
+              once more, while the grade buttons stay. The head only: the
+              meanings and examples under it are text to hold and copy (ui.js
+              NoSelect), and a Pressable round the whole card took that touch
+              first and turned the card instead (emulator, 2026-10-13). */}
+          <Pressable testID="card-turn" accessibilityRole={revealed ? "button" : undefined}
+                     accessibilityLabel={revealed ? "Turn the card" : undefined}
+                     onPress={revealed ? () => setShown(!shown) : undefined}
+                     style={{ alignSelf: "stretch", alignItems: "center" }}>
+          <Unselectable>
             {/* A card with no Russian on it at all. It should not be possible
                 and it happened, so it says what it is instead of showing an
                 empty box — a failure the learner can report is worth more than
@@ -1209,31 +1215,36 @@ export default function Study({ navigation, route }) {
                     </View>
                   </>
                 ) : (
-                  <>
-                    <View testID="card-russian" style={{ alignItems: "center", alignSelf: "stretch" }}>
-                      {face.sentence
-                        ? <Linked text={face.w} size={faceSize(face)} />
-                        : <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center", fontSize: faceSize(face) }}>{face.w}</Text>}
-                      {/* What the word is, under it, as everywhere (words.js
-                          GrammarLine): only on the back, where nothing is left
-                          to give away. */}
-                      {cardLemma ? <GrammarLine lemma={cardLemma} center style={{ marginTop: 2, alignSelf: "stretch" }} /> : null}
-                      <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
-                    </View>
-                    {/* Every meaning the word has, numbered as a dictionary
-                        lays them (§30q), four at most — the full entry is one
-                        press away below. Where there are no senses (2% of the
-                        curriculum, every deck card) the translation stands on
-                        its own. A sentence's English is its answer, in ink. */}
-                    {face.sentence ? (
-                      <Text testID="card-meaning" selectable
-                            style={{ color: t.ink, fontSize: 18, marginTop: 12, textAlign: "center" }}>
-                        {face.e || "—"}
-                      </Text>
-                    ) : senses ? <SenseList senses={senses} size={16} max={4} brief style={{ marginTop: 10 }} />
-                      : <Senses e={face.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
-                  </>
+                  <View testID="card-russian" style={{ alignItems: "center", alignSelf: "stretch" }}>
+                    {face.sentence
+                      ? <Linked text={face.w} size={faceSize(face)} />
+                      : <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center", fontSize: faceSize(face) }}>{face.w}</Text>}
+                    {/* What the word is, under it, as everywhere (words.js
+                        GrammarLine): only on the back, where nothing is left
+                        to give away. */}
+                    {cardLemma ? <GrammarLine lemma={cardLemma} center style={{ marginTop: 2, alignSelf: "stretch" }} /> : null}
+                    <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
+                  </View>
                 )}
+              </>
+            )}
+          </Unselectable>
+          </Pressable>
+          {flip.face && !blank ? (
+              <>
+                {/* Every meaning the word has, numbered as a dictionary
+                    lays them (§30q), four at most — the full entry is one
+                    press away below. Where there are no senses (2% of the
+                    curriculum, every deck card) the translation stands on
+                    its own. A sentence's English is its answer, in ink. The
+                    produce card already showed the meaning as its front. */}
+                {item.direction === "produce" ? null : face.sentence ? (
+                  <Text testID="card-meaning" selectable
+                        style={{ color: t.ink, fontSize: 18, marginTop: 12, textAlign: "center" }}>
+                    {face.e || "—"}
+                  </Text>
+                ) : senses ? <SenseList senses={senses} size={16} max={4} brief style={{ marginTop: 10 }} />
+                  : <Senses e={face.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
                 {(face.x || []).slice(0, 3).map((ex, k) => (
                   // The word in use, three ways: the entry reads like a dictionary,
                   // not a gloss (the owner, 2026-09-07).
@@ -1275,10 +1286,9 @@ export default function Study({ navigation, route }) {
                        onPress={() => navigation.navigate("Word", { word: face.b })} />
                 ) : null}
               </>
-            )}
+          ) : null}
           </Card>
           </Animated.View>
-          </Pressable>
         </>
       )}
 

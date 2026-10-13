@@ -143,15 +143,18 @@ export const TOPICS = [
           "This matters for endings because one and the same ending is spelled with the left letter on one word and the right letter on another, as the next sections show.",
           "At the start of a word or after another vowel the soft letters gain a y sound in front, so «я» on its own sounds like ya.",
         ],
+        /* The first column of a table is its row label (rules.js Table), so a
+           two-column table lost its "Hard" heading on screen; the sound is the
+           label. */
         table: {
           title: "Vowel pairs",
-          columns: ["Hard", "Soft"],
+          columns: ["Sound", "Hard", "Soft"],
           rows: [
-            ["а", "я"],
-            ["о", "ё"],
-            ["у", "ю"],
-            ["ы", "и"],
-            ["э", "е"],
+            ["a", "а", "я"],
+            ["o", "о", "ё"],
+            ["u", "у", "ю"],
+            ["i", "ы", "и"],
+            ["e", "э", "е"],
           ],
         },
       },

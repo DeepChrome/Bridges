@@ -1,0 +1,51 @@
+# The owner's 2026-10-13 batch, on an installed build with a profile: the
+# Practice menu in one shape, a grammar page that explains itself, the tall
+# AI sheet over a flashcard, Translate's copy button, and a tap on a word
+# inside a selectable sentence (the one thing the render tree cannot say).
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\batch1013.txt -Device emulator-5554
+
+tap:^Practice$
+wait:2
+shot:u1-practice
+scroll
+shot:u2-practice-more
+tap:^The rules$
+wait:2
+shot:u3-grammar
+tap:^Hard and soft$
+wait:2
+shot:u4-stems
+scroll
+shot:u5-stems-more
+back
+wait:1
+back
+wait:1
+scrolltop
+tap:^Translate$
+wait:2
+shot:u6-translate
+back
+wait:1
+tap:^Study$
+wait:3
+tap:^Personal review$
+wait:3
+shot:u7-study-front
+tap:^Show$
+wait:2
+shot:u8-study-back
+# A word inside a selectable sentence still opens on a tap (the first link
+# on the back is an example sentence's word).
+tap:open word
+wait:2
+shot:u9-word-sheet
+back
+wait:1
+tap:Ask the AI
+wait:2
+shot:u10-ask-sheet
+back
+wait:1
+texts

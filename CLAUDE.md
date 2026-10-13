@@ -6464,8 +6464,15 @@ any content work.
   pass `selectable={false}`. `select.test.js` holds the structure. Translate
   carries a `CopyButton` (expo-clipboard, the SDK's module — RN core has
   none; mocked in jest.setup as `global.__clipboard`) beside Replay.
-  **Not verified on a device yet**: that a tap on a word inside a selectable
-  `Linked` still opens it is the one thing a render tree cannot say.
+  **Verified on the emulator**, which found two things no render tree
+  shows: a long press on a sentence selected it *and* opened the word's
+  sheet on release, so the spans carry an `onLongPress` of their own (a
+  long press then fires that, never `onPress`); and the flashcard's
+  tap-to-turn Pressable wrapped the whole card, so a long press on an
+  example's English turned the card instead of selecting — it wraps the
+  head only now (word, meaning, speaker; `Unselectable`), and the meanings
+  and examples beneath are plain text. **A Pressable around prose is the
+  thing to look for** when a long press does nothing.
 - **The AI reads the card** (`cardAbout` in about.js → `card` on the ask).
   Study and the entry register the meanings as the screen numbers them and
   the example sentences in order, and ask.js's prompt says "the second

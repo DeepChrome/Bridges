@@ -190,12 +190,17 @@ function Jump({ word, active, onPress }) {
   );
 }
 
-function WordRow({ word, seen, active, onJump, first }) {
+/* One row for a word in any list with scores — the list before a video, a
+   lesson's or unit's summary (COURSE-ROADMAP WP6: the two had a row each).
+   The word, its tags, its first meaning, where the learner stands (the
+   flashcard's own ring, or "new"), and then either a jump to the moment it is
+   said (`onJump`) or a speaker (`speaker`). */
+export function WordRow({ word, seen, active, onJump, first, speaker, testID = "prep" }) {
   const t = useTheme();
   const e = L[idxOfWord(word)];
   const score = familiarity(cardFor(seen[word] || null), rankOf(word));
   return (
-    <View testID={`prep-${word}`}
+    <View testID={`${testID}-${word}`}
           style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8,
                    borderTopWidth: first ? 0 : 1, borderTopColor: t.lineSoft }}>
       <View style={{ flex: 1 }}>
@@ -203,13 +208,13 @@ function WordRow({ word, seen, active, onJump, first }) {
           <Linked text={e ? e.w : word} size={17} style={{ fontWeight: "600" }} />
           <WordTags e={e} />
         </View>
-        {e && firstSense(e) ? <Muted numberOfLines={1}>{firstSense(e)}</Muted> : null}
+        {e && firstSense(e) ? <Muted numberOfLines={2}>{firstSense(e)}</Muted> : null}
       </View>
-      {/* Where the learner stands: the flashcard's own ring, or "new". */}
       {score === null
-        ? <Muted size={12} testID={`prep-new-${word}`}>new</Muted>
-        : <Familiarity score={score} size={30} testID={`prep-score-${word}`} />}
+        ? <Muted size={12} testID={`${testID}-new-${word}`}>new</Muted>
+        : <Familiarity score={score} size={30} testID={`${testID}-score-${word}`} />}
       {onJump ? <Jump word={word} active={active} onPress={() => onJump(word)} /> : null}
+      {speaker ? <Speaker text={word} size={36} /> : null}
     </View>
   );
 }

@@ -63,15 +63,18 @@ for (let s = from - 1; s < to && s < STAGES.length; s++) {
     if (u.g) console.log(`  RULE CARD: ${u.g.title} — ${u.g.body}\n    e.g. ${(u.g.examples || []).map((e) => e.join(" = ")).join("; ")}`);
     const n = lessonCount(u);
     for (let i = 0; i < n; i++) {
+      // The rule is practised inside the walk; the ten-question run is the
+      // unit screen's, not a lesson step (data.js components, 2026-10-08).
       const steps = ["Vocabulary"];
-      if (Q.formSpec(u)) steps.push("Grammar (optional)");
       const c = i === 0 && u.id === stage.core.id ? CASES.find((x) => x.stage === s) : null;
       if (c) steps.push(`${c.name} case (optional)`);
       steps.push("Quiz");
       if ((data.scripts || {})[`${u.id}:${i}`]) steps.push("Listening (optional)");
       steps.push("Summary (optional)");
       if (u.v && i === n - 1) steps.push("Video", ...(u.v.quiz ? ["Video questions (optional)"] : []));
-      console.log(`\n  --- Lesson ${i + 1}/${n}: ${lessonWords(u, i).map(word).join(", ")}`);
+      const lw = new Set(lessonWords(u, i));
+      const groups = (u.gr || []).filter(([, , ws]) => ws.some((w) => lw.has(w))).map(([name]) => name);
+      console.log(`\n  --- Lesson ${i + 1}/${n} (${groups.join(" · ") || "no groups"}): ${lessonWords(u, i).map(word).join(", ")}`);
       console.log(`  steps: ${steps.join(" → ")}`);
       console.log("  vocabulary walk:");
       for (const st of Q.vocabSteps(u, i)) {

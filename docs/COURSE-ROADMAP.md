@@ -413,6 +413,27 @@ word list); `check_scripts --strict` 0; `units.txt` diff read end to end.
 
 ## 8. WP6 — The lesson shape (code)
 
+> **2026-10-13, read against the code before doing it:** three of the six
+> were already true and one is done now; two are design calls for the owner.
+> - Lesson titles are the group names — **done** (`lessonGroups` in data.js;
+>   Unit.js rows read "Greetings", "Parents and children · This and that";
+>   `lessongroups.test.js`; `walk_lessons.mjs` prints them).
+> - One row for a word with a score — **done** (prep.js `WordRow`, used by the
+>   list before a video and by Summary; Summary's own copy deleted).
+> - The rule questions closing a walk are **already required**: they are
+>   inside the Vocabulary step, which is required; the separate "Grammar
+>   (optional)" step had already gone (2026-10-08) and only `walk_lessons.mjs`
+>   still printed it — fixed.
+> - A small lesson's quiz **already fills from the chapter so far**
+>   (`quizStepsIn`: core words, two production slots, then `chapterSoFar`),
+>   two questions a word at most.
+> - "Listen first" (3–4 video lines *before* the cards) and a lesson-final
+>   Say on the model sentence: **owner decisions** — the first inverts the
+>   owner's own rule that the video's sentences close the walk ("the lesson
+>   ends on what it is preparing for", 2026-09-29), the second adds a
+>   microphone step to every lesson from chapter 2. Both are a few lines in
+>   Flows.js `VocabFlow` once decided.
+
 - Lesson titles are the group names, not word lists («э́то, в, на…»);
   the card's example is the model sentence (Unit.js / Flows.js VocabFlow).
 - A "Listen first" step: 3–4 of the unit's video lines (`u.v.lines`) before

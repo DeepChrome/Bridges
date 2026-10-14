@@ -16,14 +16,12 @@ import React, { useEffect } from "react";
 import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
-import { Screen, Muted, Heading, Subheading, Speaker, Familiarity, Btn } from "../ui";
+import { Screen, Muted, Heading, Subheading, Speaker, Btn } from "../ui";
 import { Linked } from "../words";
 import { RuleCard } from "../rules";
-import { WordSections, WordTags, prepSentences, VideoLines } from "../prep";
-import { UN, L, idxOfWord, rankOf, lessonWords, lessonCount, markComponent, linesWith, stepRoute,
+import { WordSections, WordRow, prepSentences, VideoLines } from "../prep";
+import { UN, L, lessonWords, lessonCount, markComponent, linesWith, stepRoute,
          components } from "../data";
-import { familiarity, cardFor } from "@core/scheduler";
-import { firstSense } from "@core/util";
 
 const unitWordIdxs = (unit) => Array.from({ length: lessonCount(unit) }, (_, k) => lessonWords(unit, k)).flat();
 
@@ -31,27 +29,6 @@ const unitWordIdxs = (unit) => Array.from({ length: lessonCount(unit) }, (_, k) 
    stay a list. The whole unit gets more because it covers more. */
 const LESSON_SENTENCES = 4;
 const UNIT_SENTENCES = 8;
-
-function WordLine({ word, seen, first }) {
-  const t = useTheme();
-  const e = L[idxOfWord(word)];
-  const score = familiarity(cardFor(seen[word] || null), rankOf(word));
-  return (
-    <View testID={`summary-${word}`}
-          style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8,
-                   borderTopWidth: first ? 0 : 1, borderTopColor: t.lineSoft }}>
-      <View style={{ flex: 1 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-          <Linked text={e ? e.w : word} size={17} style={{ fontWeight: "600" }} />
-          <WordTags e={e} />
-        </View>
-        {e && firstSense(e) ? <Muted numberOfLines={2}>{firstSense(e)}</Muted> : null}
-      </View>
-      {score === null ? null : <Familiarity score={score} size={28} />}
-      <Speaker text={word} size={36} />
-    </View>
-  );
-}
 
 export default function Summary({ route, navigation }) {
   const { st, update, ready } = useSession();
@@ -97,8 +74,11 @@ export default function Summary({ route, navigation }) {
           says Summary, and each section carries its own count. */}
       <Subheading testID="summary-title">{whole ? unit.name : `${unit.name} · Lesson ${index + 1}`}</Subheading>
 
+      {/* The same row as the list before a video (prep.js WordRow), with a
+          speaker where that list has a jump to the moment. */}
       <WordSections words={words} testID="summary-cluster"
-                    renderWords={(ws) => ws.map((w, k) => <WordLine key={w} word={w} seen={seen} first={k === 0} />)} />
+                    renderWords={(ws) => ws.map((w, k) => (
+                      <WordRow key={w} word={w} seen={seen} first={k === 0} speaker testID="summary" />))} />
 
       {lines.length ? (
         <View testID="summary-sentences" style={{ marginTop: 26 }}>

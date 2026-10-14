@@ -7,7 +7,7 @@ import { useSession } from "../session";
 import { useTheme, radius } from "../theme";
 import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Text } from "../ui";
 import {
-  UN, lessonCount, lessonWords, lessonDone, components, nextComponent, stepRoute, unitFineProgress, L, linesWith, hasGrammar,
+  UN, lessonCount, lessonWords, lessonGroups, lessonDone, components, nextComponent, stepRoute, unitFineProgress, L, linesWith, hasGrammar,
   nextLesson,
 } from "../data";
 
@@ -47,7 +47,12 @@ export function UnitScreen({ route, navigation }) {
       <List>
         {Array.from({ length: n }, (_, i) => {
           const cs = components(st, unit, i);
+          /* Named by its groups of related words ("Greetings · Pronouns"),
+             the words themselves only where the build shipped no groups. */
+          const groups = lessonGroups(unit, i);
           const words = lessonWords(unit, i).map((x) => L[x].b);
+          const about = groups.length ? groups.join(" · ")
+            : words.slice(0, 3).join(", ") + (words.length > 3 ? "…" : "");
           return (
             <Row key={i}
                  onPress={() => navigation.navigate("Lesson",
@@ -57,7 +62,7 @@ export function UnitScreen({ route, navigation }) {
                 <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
                   {"Lesson " + (i + 1)}
                 </Text>
-                <Muted>{words.slice(0, 3).join(", ") + (words.length > 3 ? "…" : "")}</Muted>
+                <Muted testID={`lesson-about-${i}`} numberOfLines={2}>{about}</Muted>
               </View>
               <View style={{ flexDirection: "row", gap: 5 }}>
                 {cs.filter((c) => !c.optional).map((c) => (

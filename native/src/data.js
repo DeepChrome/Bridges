@@ -242,6 +242,16 @@ const stageIndexOf = (u) =>
 const unitLessonSize = (u) => lessonSize(stageIndexOf(u));
 export const lessonCount = (u) => lessonCountOf(u, unitLessonSize(u));
 export const lessonWords = (u, i) => lessonWordsOf(u, i, unitLessonSize(u));
+/* What a lesson is about, by name: the groups of related words it teaches
+   (`gr`, build_site.py — "Greetings", "Pronouns"), in the unit's reading
+   order. A lesson is cut from whole groups (§30bi), so its groups are its
+   title; a word list («э́то, в, на…») was a list, not a name (COURSE-ROADMAP
+   WP6). A unit shipped without groups names nothing, and the caller falls
+   back to the words. */
+export function lessonGroups(u, i) {
+  const words = new Set(lessonWords(u, i));
+  return (u.gr || []).filter(([, , ws]) => ws.some((w) => words.has(w))).map(([name]) => name);
+}
 
 export const unitState = (st, id) =>
   st.unit[id] || { best: 0, done: false, lessons: {}, video: false };

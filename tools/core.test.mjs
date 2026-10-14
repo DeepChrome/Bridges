@@ -1787,16 +1787,19 @@ group("scenes and custom quizzes");
      "a custom quiz asks only the chosen kinds", own.map((q) => q.kind).join(","));
   const wordSet = new Set(units.flatMap((u) => u.w));
   ok(own.every((q) => wordSet.has(q.i)), "and only about the chosen sections' words");
-  const mixed = Q.customQuiz({ units, kinds: ["choose-ru", "hear", "scene"], n: 12 });
-  ok(mixed.some((q) => q.kind === "hear") && mixed.some((q) => q.kind === "scene"),
+  const mixed = Q.customQuiz({ units, kinds: ["choose-ru", "hear", "say"], n: 12 });
+  ok(mixed.some((q) => q.kind === "hear"),
      "sentence kinds join when chosen", mixed.map((q) => q.kind).join(","));
-  ok(mixed.filter((q) => q.kind === "hear" || q.kind === "scene").length <= 5,
+  ok(mixed.filter((q) => q.kind === "hear" || q.kind === "say").length <= 5,
      "and take about a third of the quiz");
   ok(Q.customQuiz({ units, kinds: [], n: 10 }).length === 0
      && Q.customQuiz({ units: [], kinds: ["type"], n: 10 }).length === 0,
      "nothing chosen, nothing asked");
-  ok(Q.customQuiz({ units, kinds: ["scene"], n: 3 }).every((q) => q.kind === "scene"),
-     "scenes alone make a listening-only quiz");
+  /* The per-sentence listening scene left Build-a-quiz on 2026-10-13 (the
+     shape the owner rejected, §30af): not offered, and not made when asked. */
+  ok(!QUIZ_KINDS.some((k) => k.id === "scene")
+     && Q.customQuiz({ units, kinds: ["scene"], n: 3 }).length === 0,
+     "the corpus scene is not a quiz kind");
 
   /* The day's recap (2026-10-01): 10 to 20 questions over the whole day's
      work, weak spots a share and never the bulk. */
@@ -3842,9 +3845,7 @@ group("the review, 2026-10-01");
      "a search finds both homographs of «есть»", est.map((e) => e.p).join(","));
   ok(moi.length === 1, "and one word listed twice with one meaning is one hit", String(moi.length));
 
-  // 10. A quiz of scenes is a quiz of different scenes.
-  const scenes = Q.customQuiz({ units: Q.unitsUpTo(STAGES[3].core), kinds: ["scene"], n: 20 });
-  ok(scenes.length >= 10, "a custom quiz of scenes holds more than one scene", String(scenes.length));
+  // 10. (A quiz of scenes used to be checked here; the kind left Build-a-quiz on 2026-10-13.)
 
   // 11. Where a word spells two forms alike but stresses them apart, neither is a wrong answer.
   const twins = studiedR.filter((i) => {

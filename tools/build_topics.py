@@ -671,17 +671,20 @@ OVERRIDES = {
 # (`python tools/build_topics.py` prints them) — its goal video decides most
 # of it now, so a changed skeleton means re-reading these. Index-aligned with
 # the skeleton's chapters.
+# The spine names were re-read against the word lists on 2026-10-13
+# (COURSE-ROADMAP §13.3): each names the unit's two largest groups, not its
+# goal video — "Swamps & Berries" was five words of forty-one.
 CHAPTERS = [
     ("First Words",            "Family and Food"),
-    ("People & Places",        "Phones and Home"),
-    ("The Little Words",       "Town and Time"),
-    ("Winter & Gifts",         "Travel, Talk and Clothes"),
+    ("Places & Transport",     "Phones and Home"),
+    ("Adjectives & Numbers",   "Town and Time"),
+    ("Colours & Holidays",     "Travel, Talk and Clothes"),
     ("Spending & Saving",      "Work, Business and Feelings"),
-    ("Before & After",         "Body, Animals and Science"),
-    ("Feelings & Fears",       "School, Art and Nature"),
-    ("Cooking & Celebrating",  "Sport and Society"),
-    ("Style & Fashion",        "Faith and Health"),
-    ("Swamps & Berries",       "Law and Conflict"),
+    ("Events & Ideas",         "Body, Animals and Science"),
+    ("Actions & Society",      "School, Art and Nature"),
+    ("In the Kitchen",         "Sport and Society"),
+    ("Style & Opinion",        "Faith and Health"),
+    ("Time & Society",         "Law and Conflict"),
 ]
 
 # --- which quests are genuinely optional -------------------------------
@@ -703,7 +706,9 @@ CHAPTERS = [
 # path and the gate must read one source (§22). Changing it changes when
 # chapters unlock: re-run `tools/audit_branches.py` and look at what a
 # learner is now required to finish.
-OPTIONAL = {"military", "sport", "art", "politics", "science", "law",
+# Sport left the list on 2026-10-13 (COURSE-ROADMAP §13.2): every A1/A2
+# syllabus has it, and chapter 8 had no required quest at all.
+OPTIONAL = {"military", "art", "politics", "science", "law",
             "religion", "business"}
 
 
@@ -1009,7 +1014,8 @@ def main():
     # words, so the rule moves a word onto the required route rather than out
     # of the course. Which words a quest refuses is only known once the route
     # has been walked, so the route is walked twice (below).
-    def walk(spine_extra):
+    def walk(spine_extra, quest_extra=None):
+        quest_extra = quest_extra or {}
         del UNGROUPED[:], MISKINDED[:], SPLIT_GROUPS[:], LONE[:]
         reserved_now = dict(reserved)
         refused, refused_keeps = {}, []
@@ -1145,6 +1151,15 @@ def main():
                     reserved_now.pop(lid, None)
                     take(lid, "everyday")
             else:
+                # An everyday word an optional quest may not teach goes to the
+                # chapter's *required* quest on its subject before it goes to
+                # the spine (COURSE-ROADMAP §13.4, 2026-10-13): «футбол» belongs
+                # with Sport, not on a spine that reached 63 words carrying
+                # every quest's leftovers. On top of the quest's own size, as
+                # the spine took them.
+                for lid in quest_extra.get(tid, ()):
+                    reserved_now.pop(lid, None)
+                    take(lid, "everyday")
                 for lid, _n, _hit in by_topic.get(tid, []):
                     if len(chosen) >= size:
                         break
@@ -1216,11 +1231,24 @@ def main():
     # and may refuse more, but those it never taught before — forwarding them
     # too, pass after pass, grew chapter 5's spine to 75 words.
     _units, _taught, first, keeps_refused = walk({})
-    spine_extra = {}
+    # A refused word with a subject goes to the required quest of its chapter
+    # on that subject; the closed classes and the Core-5000 top (`forced`) stay
+    # the spine's, since a conversation may only use the main path's words.
+    required_in = {}
+    for tid, kind, k, _v in route:
+        if kind == "branch" and tid not in OPTIONAL:
+            required_in.setdefault(k, set()).add(tid)
+    spine_extra, quest_extra = {}, {}
     for lid, k in first.items():
-        spine_extra.setdefault(k, []).append(lid)
-    units, taught, _again, _keeps = walk(spine_extra)
+        home = topic_of.get(lid)
+        if (lid not in forced_set and meta[lid]["pos"] in BRANCH_POS
+                and home in required_in.get(k, ())):
+            quest_extra.setdefault(home, []).append(lid)
+        else:
+            spine_extra.setdefault(k, []).append(lid)
+    units, taught, _again, _keeps = walk(spine_extra, quest_extra)
     refused = list(first)
+    to_quests = sum(len(v) for v in quest_extra.values())
 
     if args.out.exists():
         args.out.unlink()
@@ -1327,6 +1355,7 @@ def main():
     # the course rather than onto its required route.
     moved = [l for l in refused if l in taught]
     lost = [meta[l]["bare"] for l in refused if l not in taught]
+    print(f"  everyday words    : {to_quests} refused by an optional quest went to a required quest on their subject")
     print(f"  everyday words    : {len(refused)} refused by an optional quest (top {EVERYDAY_RANK} said, "
           f"or Core-5000 top {SPINE_FR}); {len(moved)} taught on the required route instead: "
           + ", ".join(f"{meta[l]['bare']}→{unit_of[meta[l]['bare']]}" for l in moved))

@@ -615,6 +615,39 @@ owner's phone build read screen by screen.
 
 ## 13. Owner decisions, in one place
 
+> **Decided 2026-10-13** — the owner: "for anything that is a decision just
+> deploy your best idea." What was done, and why:
+>
+> 1. **No full arc re-cut.** WP1–WP4 landed the day before and already
+>    re-mapped his progress; new spine videos for six chapters would re-home
+>    most conversations and re-map again for a course nobody has read in its
+>    new shape. The hump and the "course ends at chapter 7" are addressed by
+>    2 and 4 below; the arc stays on the table for a later, deliberate pass.
+> 2. **Sport is required** (chapter 8 had no required quest). Holidays are
+>    on the spine as a set; Faith & Tradition stays optional. Chapter 10
+>    keeps no required quest — Law and Military are not A1/A2.
+> 3. **Two names kept, spine names re-read**: "Swamps & Berries" was five
+>    words of forty-one. Each spine now names its two largest groups
+>    (Places & Transport, Adjectives & Numbers, Colours & Holidays, Events &
+>    Ideas, Actions & Society, In the Kitchen, Style & Opinion, Time &
+>    Society). The chapter heading above the disc already carries the theme.
+> 4. **Everyday words a quest refuses go to the chapter's required quest on
+>    their subject before the spine** (`quest_extra` in build_topics.py).
+>    Measured: it moves **two** words — nearly every refused word («решить»,
+>    «лучший», «главный») has no subject and belongs on the spine. The
+>    spines stay 41–60 words; a hard cap would push common words out of the
+>    course, so there is none.
+> 5. **`scene` removed** from Build-a-quiz (the shape rejected in §30af).
+> 6. **Bulb keeps the Hard grade** — §30az's reasoning stands (FSRS must hear
+>    the word was not recalled).
+> 7. **Palette left**: he likes the look; changing every neutral blind is
+>    not a judgement to make for him.
+> 8. **Audio bought** as it comes (he approved).
+>
+> WP6's two open items: no "Listen first" (it inverts his own rule that
+> the video's lines close the walk) and no lesson-final Say (every quiz
+> already rotates a spoken step, §30bx).
+
 | # | decision | default if unanswered |
 |---|---|---|
 | 1 | Adopt the WP5 arc (new spine videos for ch4/5/6/8/9/10; quests moved) | do WP1–WP4 only |

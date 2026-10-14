@@ -6456,6 +6456,37 @@ any content work.
   so `audiofocus.test.js` read its fixture («Кто это?») off the pool
   instead of a literal after the sentence went silent.
 
+## 30bz′. The roadmap's decisions, taken (2026-10-13)
+
+The owner: *"for anything that is a decision just deploy your best idea."*
+`docs/COURSE-ROADMAP.md` §13 records each call and its reason; the ones
+that changed the code or the course:
+
+- **Sport is a required quest** (`OPTIONAL` in build_topics.py is seven
+  now, not eight): chapter 8 had no required quest. Five words left the
+  course with the re-cut (шахматы, чемпион, падать, бросаться,
+  замечательный), seven moved; two conversations each lost a word to Sport
+  and took one line each.
+- **An everyday word an optional quest refuses goes to the chapter's
+  required quest on its subject before the spine** (`quest_extra`). It
+  moves two words. Nearly every refused word has no subject and belongs on
+  the spine, so the spines stay 41–60 and there is no hard cap: one would
+  push common words out of the course.
+- **Spine names re-read** against the word lists (`CHAPTERS`): each names
+  its two largest groups. "Swamps & Berries" was five words of forty-one.
+- **No full arc re-cut (WP5)**, no "Listen first" step, no lesson-final
+  Say, bulb grade and palette left — the reasons are in §13.
+- **`scene` left Build-a-quiz** (`QUIZ_KINDS`, `customQuiz`): the
+  per-sentence shape §30af rejected. `sceneFor` stays for `lessonPassage`.
+- **WP6** was mostly already true in the code; what was real is done:
+  `lessonGroups` names a lesson by its groups, `WordRow` is the one row for
+  a word with a score. `walk_lessons.mjs` had been printing a "Grammar
+  (optional)" step that no longer existed — a mirror, not an import.
+- **A bought sentence that no entry shows any more still ships**: the word
+  manifest is pruned for pool sentences but not for dictionary examples, so
+  `copy.mjs` skips the generated audio tables (their keys are sentences,
+  not copy). Pruning the examples is open.
+
 ## 30ca. Seven from one evening on the re-cut build (2026-10-13)
 
 - **Prose selects; controls do not** (`NoSelect` in ui.js). The owner wanted

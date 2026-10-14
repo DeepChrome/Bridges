@@ -191,7 +191,9 @@ export const QUIZ_KINDS = [
   { id: "form", name: "Forms", blurb: "A word in the form its chapter teaches" },
   { id: "hear", name: "Hear a sentence", blurb: "Type what is said" },
   { id: "say", name: "Say it", blurb: "Read a sentence aloud" },
-  { id: "scene", name: "Listening scene", blurb: "A few sentences, then questions" },
+  /* "Listening scene" — pooled sentences with a meaning question each — was
+     offered here until 2026-10-13; it is the shape the owner rejected for
+     lessons (§30af), and Practice → Listening has the written conversations. */
 ];
 export const QUIZ_LENGTHS = [10, 20, 30];
 /* The final test at the end of the path (the owner, 2026-09-19): fifty
@@ -1662,7 +1664,7 @@ export function makeQuestions(env) {
      sentence kinds take about a third of the quiz between them when chosen. */
   function customQuiz({ units, kinds, n }) {
     const wordKinds = kinds.filter((k) => ["choose-en", "choose-ru", "listen", "cloze", "type", "form"].includes(k));
-    const sentenceKinds = kinds.filter((k) => ["hear", "say", "scene"].includes(k));
+    const sentenceKinds = kinds.filter((k) => ["hear", "say"].includes(k));
     if (!units.length || (!wordKinds.length && !sentenceKinds.length)) return [];
     const words = unique(units.flatMap((u) => u.w));
     const pool = words.length >= 8 ? words : poolFor(units[0]);
@@ -1697,12 +1699,9 @@ export function makeQuestions(env) {
     const seen = new Set();
     for (let k = 0, made = 0; made < sentenceShare && k < sentenceShare * 5; k++) {
       const kind = sentenceKinds[k % sentenceKinds.length];
-      const q = kind === "scene" ? sceneFor(unitIds, null) : sentencePrompt(kind, unitIds);
+      const q = sentencePrompt(kind, unitIds);
       if (!q) continue;
-      /* A scene carries its sentences as `lines`; this read `rows`, which no
-         scene has, so every scene keyed as the same empty string and a quiz
-         asked for twenty scenes held one (the review, 2026-10-01). */
-      const key = q.kind + "|" + (q.target || (q.lines ? q.lines.map((l) => l.ru).join("|") : ""));
+      const key = q.kind + "|" + (q.target || "");
       if (seen.has(key)) continue;
       seen.add(key);
       out.push(q);

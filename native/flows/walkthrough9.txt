@@ -1,0 +1,62 @@
+# The look pass (COURSE-ROADMAP WP8, 2026-10-14), on an installed build with
+# a profile: every screen that got a primitive — row text, icon buttons,
+# toggle rows, lesson steps through Lift, section gaps, the sheet titles.
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\walkthrough9.txt -Device emulator-5554
+#
+# Read the shots in native/screenshots/walk/ — that is the audit (§31).
+
+wait:2
+shot:v1-learn
+tap:^Start \(
+wait:3
+shot:v2-lesson-steps
+back
+wait:1
+tap:^First Words$
+wait:2
+shot:v3-unit-lessons
+back
+wait:1
+tap:^Practice$
+wait:2
+shot:v4-practice
+tap:^Translate$
+wait:2
+shot:v5-translate
+back
+wait:1
+tap:^Tutor$
+wait:4
+shot:v6-tutor
+back
+wait:1
+tap:^Study$
+wait:3
+shot:v7-study
+tap:Options
+wait:2
+shot:v8-study-options
+back
+wait:1
+tap:^Immerse$
+wait:3
+shot:v9-immerse
+tap:^Search$
+wait:2
+tap:Russian or English
+type:dog
+wait:2
+shot:v10-search
+back
+wait:1
+tap:Your profile
+wait:2
+shot:v11-you
+tap:^Settings$
+wait:2
+shot:v12-settings
+scroll
+shot:v13-settings-more
+back
+wait:1

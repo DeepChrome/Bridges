@@ -6537,6 +6537,31 @@ that changed the code or the course:
   color?" — and is a section like the others; tiles carry three hues by what
   the activity asks (in: `info`, out: `brand`, rules: `good`).
 
+## 30cb. The look pass (COURSE-ROADMAP WP8, 2026-10-14)
+
+Four primitives in ui.js, each replacing a dozen hand-rolled copies; fix at
+the primitive, never per screen (§30s):
+
+- **`RowText`** — a row's title and second line at `type.body`. Thirty-four
+  bodies were «<View flex:1><Text fontSize 15…>», a point under the scale;
+  the other 15s moved to `type.body` (design.mjs: 143 → 66 off-scale).
+- **`IconButton`** — the one round glyph control (cog, bulb, replay, jump,
+  the ask and report discs, Translate's copy). Drawn at `size`; the touch
+  target is `ICON_TARGET` (44) whatever is drawn, the difference in
+  `hitSlop`. `on` lights it brand; `fill` makes a filled disc.
+- **`ToggleRow`** — a switch row; the whole row toggles. It forwards `last`
+  and `at` to its `Row`, because `List` hands those to its *direct*
+  children and a wrapper that dropped them broke Settings' last hairline
+  (`lists.test.js` caught it).
+- **`toneOf(t, kind)`** — Btn's tone table, read by Study's grade buttons
+  instead of a copy.
+
+Also: `Title` is `type.title`, Sheet and Bubble titles `type.head`;
+`SectionLabel gap` is the one space above a following section (20, on the
+grid); the lesson's steps press through `Lift` like everything else.
+`primitives.test.js` pins the four. Reading the app's own `Text` in a test:
+a weight becomes a *face* (§30bj), so assert `fontFamily`, not `fontWeight`.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

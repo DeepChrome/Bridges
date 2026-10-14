@@ -547,6 +547,19 @@ worse; a grep for `lineSoftSoft`, `textTransform`, `"800"` finds none.
 
 ## 11. WP8 — The look (code; read screenshots, not code, to judge)
 
+> **2026-10-14, items 1–8 done; 9 (the file splits) left for its own
+> pass.** `RowText` (34 hand-written row bodies replaced; the rest of the
+> 15s moved to `type.body` — off-scale sizes 143 → 66), `IconButton` (cog,
+> bulb, Talk's tools, the tutor's replay/language/conversation buttons,
+> Translate's replay, prep's jump and moment, the ask and report discs,
+> CopyButton; target ≥ 44 by `hitSlop` whatever is drawn), `ToggleRow`
+> (Settings' five switches, the video's subtitles), `toneOf` (Study's grade
+> buttons read Btn's table), `Title` at `type.title`, Sheet and Bubble
+> titles at `type.head`, `SectionLabel gap` (16 `marginTop: 18` wrappers
+> gone), the lesson's steps through `Lift`, `ink3`/`ink2` on `brandBg`
+> audited. `primitives.test.js` pins the four primitives. Walked on the
+> emulator (`walkthrough9.txt`) and read.
+
 How to judge: run the emulator (`native/tools/emulator.ps1 -Apk <universal
 apk>`; a universal build is needed — `assembleRelease` without
 `-PreactNativeArchitectures`), run `native/tools/walk.ps1 -Flow

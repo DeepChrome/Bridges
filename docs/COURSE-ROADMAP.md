@@ -487,10 +487,10 @@ photo). A new word with no example sentence (entry.test.js) is usually a
 shared form the resolver gave to another lemma — «сыр» was «сырой»'s short
 form — and belongs in `lemma_overrides.json`, not in a wider set.
 
-**Audio owed after the 2026-10-13 re-cut, not yet bought** (the owner
-approves purchases): 406 words ≈ $0.34, 725 table forms ≈ $0.18, 33
-scenario clips ≈ $0.05. Until bought, the new words play in the device
-voice and `wordaudio.test.js` / `scenario.test.js` fail on exactly them.
+**The re-cut's audio was bought 2026-10-13** (375 words, 672 forms, 33
+scenario clips, ≈ $0.57) and `audio_qa` is clean. A sentence that leaves
+the pool leaves the bundle: a test that names a sentence literally goes
+silent when the course moves on (audiofocus.test.js now reads the pool).
 
 ---
 

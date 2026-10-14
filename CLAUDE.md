@@ -6449,9 +6449,12 @@ any content work.
 - **A small case use must not be forced into the opening round**
   (`caseDrill`): «нет» has thirteen sentences, and forcing one every run
   repeated it after 73 while the pool held 218.
-- **Audio owed, not bought** (the owner approves purchases): 406 words
-  ≈ $0.34, 725 forms ≈ $0.18, 33 scenario clips ≈ $0.05; until then
-  `wordaudio.test.js` and `scenario.test.js` fail on exactly those.
+- **The re-cut's audio was bought the next day** (2026-10-13, on the
+  owner's word): 375 words, 672 table forms, 33 scenario clips, about
+  $0.57; `audio_qa` clean. **A sentence that leaves the pool leaves the
+  bundle** — `build_word_audio` prunes the manifest to what the app plays,
+  so `audiofocus.test.js` read its fixture («Кто это?») off the pool
+  instead of a literal after the sentence went silent.
 
 ## 30ca. Seven from one evening on the re-cut build (2026-10-13)
 

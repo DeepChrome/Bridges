@@ -12,8 +12,8 @@
 import React from "react";
 import { View, Pressable } from "react-native";
 import Svg, { Line, Circle, Text as SvgText, Polygon } from "react-native-svg";
-import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Card, Muted, SectionLabel, Speaker, Chip, Btn, Text } from "../ui";
+import { useTheme, radius, type as T } from "../theme";
+import { Screen, List, Row, Card, Muted, SectionLabel, Speaker, Chip, Btn, Text, RowText } from "../ui";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, TRAPS } from "@core/alphabet";
 
 /* The vowel trapezoid: across is where the tongue sits, down is how far the jaw
@@ -78,10 +78,7 @@ export default function Sounds({ navigation }) {
         {VOWEL_CHART.map((v) => (
           <Row key={v.v}>
             <Text style={{ color: t.ink, fontSize: 22, fontWeight: "700", width: 34 }}>{v.v}</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>{v.like}</Text>
-              <Muted>{v.ipa}</Muted>
-            </View>
+            <RowText title={v.like} sub={v.ipa} bold={false} />
             <Speaker text={v.v} size={36} />
           </Row>
         ))}
@@ -105,7 +102,7 @@ export default function Sounds({ navigation }) {
               <Muted size={12}>soft</Muted>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>
+              <Text style={{ color: t.ink, fontSize: T.body }}>
                 {`${p.example[0]} · ${p.example[1]}`}
               </Text>
               <Muted numberOfLines={1}>{`${p.gloss[0]} · ${p.gloss[1]}`}</Muted>
@@ -123,7 +120,7 @@ export default function Sounds({ navigation }) {
               {row.l.split(" ")[0]}
             </Text>
             <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>{row.like}</Text>
+              <Text style={{ color: t.ink, fontSize: T.body }}>{row.like}</Text>
               <Muted numberOfLines={2}>{row.note}</Muted>
             </View>
           </Row>
@@ -139,7 +136,7 @@ export default function Sounds({ navigation }) {
               {row.l}
             </Text>
             <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>{row.like}</Text>
+              <Text style={{ color: t.ink, fontSize: T.body }}>{row.like}</Text>
               {row.note ? <Muted numberOfLines={2}>{row.note}</Muted> : null}
             </View>
             <Muted size={12}>{row.ipa}</Muted>

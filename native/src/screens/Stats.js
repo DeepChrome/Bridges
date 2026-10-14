@@ -10,7 +10,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Pressable } from "react-native";
 import { useSession } from "../session";
-import { useTheme } from "../theme";
+import { useTheme, type as T } from "../theme";
 import { Screen, Muted, SectionLabel, Text, Familiarity, familiarityColor, Sheet } from "../ui";
 import { readLog } from "../store";
 import { rankOf, dueCount, UN, exactIdx, grammarNoteOf } from "../data";
@@ -294,8 +294,8 @@ function Levels({ counts }) {
         {LEVELS.map(([name, score]) => (
           <View key={name} style={{ width: "50%", flexDirection: "row", alignItems: "center", gap: 8 }}>
             <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colour(score) }} />
-            <Text style={{ color: t.ink, fontSize: 15, flex: 1 }}>{name}</Text>
-            <Text style={{ color: t.ink2, fontSize: 15, fontWeight: "700", marginRight: 16 }}>
+            <Text style={{ color: t.ink, fontSize: T.body, flex: 1 }}>{name}</Text>
+            <Text style={{ color: t.ink2, fontSize: T.body, fontWeight: "700", marginRight: 16 }}>
               {counts[name].toLocaleString("en-US")}
             </Text>
           </View>
@@ -390,7 +390,7 @@ export default function Stats() {
           {open.d.topics.length ? (
             <View style={{ marginTop: 12, gap: 6 }}>
               {open.d.topics.slice(0, 6).map((name) => (
-                <Text key={name} style={{ color: t.ink, fontSize: 15 }}>{name}</Text>
+                <Text key={name} style={{ color: t.ink, fontSize: T.body }}>{name}</Text>
               ))}
             </View>
           ) : null}

@@ -16,8 +16,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Pressable, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton, Unselectable,
-         Familiarity, familiarityColor } from "../ui";
+import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, SectionLabel, Sheet, Stepper, Lift, Text, CogButton, Unselectable, toneOf,
+         Familiarity, familiarityColor, RowText } from "../ui";
 import { RunTools } from "../askai";
 import { L, UN, STAGES, SPEECH, unitUnlocked, reachedUnits, idxOfWord, exactIdx, sensesOf, rankOf, videoLines,
          personalWords, goalNow, goalOpts, englishOfSentence } from "../data";
@@ -333,10 +333,7 @@ function TallySheet({ title, parts, onClose }) {
         {parts.map((p) => (
           <Row key={p.id}>
             <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: p.dot || t.ink3 }} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>{p.label}</Text>
-              <Muted>{p.desc}</Muted>
-            </View>
+            <RowText title={p.label} sub={p.desc} />
             <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700" }}>{String(p.n)}</Text>
           </Row>
         ))}
@@ -497,9 +494,7 @@ function SetPicker({ visible, onClose }) {
                 {[["words", "Words"], ["sentences", "Sentences"]].map(([id, name]) => (
                   <Row key={id} testID={`kind-${id}`} onPress={() => toggleKind(id)}>
                     <Tick on={kinds.includes(id)} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.ink, fontSize: 15 }}>{name}</Text>
-                    </View>
+                    <RowText title={name} bold={false} />
                   </Row>
                 ))}
               </List>
@@ -510,10 +505,7 @@ function SetPicker({ visible, onClose }) {
                 {FRONTS.map(([id, name, sub]) => (
                   <Row key={id} testID={`flash-${id}`} onPress={() => toggleFront(id)}>
                     <Tick on={fronts.includes(id)} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.ink, fontSize: 15 }}>{name}</Text>
-                      <Muted>{sub}</Muted>
-                    </View>
+                    <RowText title={name} sub={sub} bold={false} />
                   </Row>
                 ))}
               </List>
@@ -540,9 +532,7 @@ function SetPicker({ visible, onClose }) {
               <List>
                 <Row testID="set-path" onPress={() => toggle("__path__")}>
                   <Tick on={st.sets.includes("__path__")} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ color: t.ink, fontSize: 15 }}>Personal review</Text>
-                  </View>
+                  <RowText title="Personal review" bold={false} />
                 </Row>
               </List>
             </View>
@@ -559,10 +549,7 @@ function SetPicker({ visible, onClose }) {
                     <Row key={d.id}
                          onPress={() => toggle("deck:" + d.id)}>
                       <Tick on={st.sets.includes("deck:" + d.id)} />
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ color: t.ink, fontSize: 15 }}>{d.name}</Text>
-                        <Muted>{d.cards.length + " cards"}</Muted>
-                      </View>
+                      <RowText title={d.name} sub={d.cards.length + " cards"} bold={false} />
                       <Btn kind="ghost" label="Remove" onPress={() => removeDeck(d)}
                            style={{ paddingHorizontal: 8 }} />
                     </Row>
@@ -593,10 +580,7 @@ function SetPicker({ visible, onClose }) {
                       <Row key={u.id}
                            onPress={() => toggle(u.id)}>
                         <Tick on={st.sets.includes(u.id)} />
-                        <View style={{ flex: 1 }}>
-                          <Text style={{ color: t.ink, fontSize: 15 }}>{u.name}</Text>
-                          <Muted>{u.w.length + " words"}</Muted>
-                        </View>
+                        <RowText title={u.name} sub={u.w.length + " words"} bold={false} />
                       </Row>
                     ))}
                   </List>
@@ -1008,9 +992,12 @@ export default function Study({ navigation, route }) {
               colour, not a border that thins. */}
           {[[1, "Again", "bad"], [2, "Hard", "plain"],
             [3, "Good", "good"], [4, "Easy", "pri"]].map(([g, label, kind]) => {
-            const fill = kind === "bad" ? t.bad : kind === "good" ? t.good : kind === "pri" ? t.brand : t.surface;
-            const edge = kind === "bad" ? t.badDim : kind === "good" ? t.goodDim : kind === "pri" ? t.brandDim : t.surface3;
-            const fg = kind === "plain" ? t.ink : kind === "pri" ? t.brandOn : kind === "good" ? t.goodOn : t.badOn;
+            // Btn's own tone table (ui.js toneOf), so a grade button and a
+            // button of the same kind cannot drift apart.
+            const tone = toneOf(t, kind);
+            const fill = kind === "plain" ? t.surface : tone.bg;
+            const edge = kind === "plain" ? t.surface3 : tone.edge;
+            const fg = tone.fg;
             return (
               <Lift key={g} testID={`grade-${g}`} fill={fill} edge={edge}
                     border={kind === "plain" ? t.line : edge} r={radius.md}
@@ -1050,9 +1037,7 @@ export default function Study({ navigation, route }) {
             standalone system on the top right"). The tally beside the bar
             counts the sitting; the start panel and the tab badge carry the
             day's goal. */}
-        <View style={{ flex: 1 }}>
-          <Text testID="study-heading" style={{ color: t.ink, fontSize: 15 }}>{heading}</Text>
-        </View>
+        <RowText testID="study-heading" title={heading} bold={false} />
         {started || session ? <RunTools /> : null}
         <CogButton testID="study-cog" label="Study options" onPress={() => setPicker(true)} />
       </View>

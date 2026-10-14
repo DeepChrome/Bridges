@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import {
-  View, Pressable, ScrollView, ActivityIndicator, StyleSheet, Modal, Animated, Image,
+  View, Pressable, ScrollView, ActivityIndicator, StyleSheet, Modal, Animated, Image, Switch,
 } from "react-native";
 /* Renamed on the way in: the app's own `Text` and `TextInput` are defined below
    and are what everything else imports (font.test.js). */
@@ -231,14 +231,71 @@ export function Screen({ children, scroll = true, fill = false, safeTop = false,
   );
 }
 
+/* A page's title, at the scale's `title` (COURSE-ROADMAP WP8: two heading
+   sizes for the app — a page is `type.title`, a section is `Heading`). */
 export function Title({ children, sub }) {
   const t = useTheme();
   return (
     <View style={{ marginBottom: 14 }}>
-      <Text style={{ color: t.ink, fontSize: 26, fontWeight: "700",
-                     letterSpacing: -0.4 }}>{children}</Text>
-      {sub ? <Text style={{ color: t.ink3, fontSize: 14, marginTop: 2 }}>{sub}</Text> : null}
+      <Text style={{ color: t.ink, fontSize: type.title, fontWeight: "700" }}>{children}</Text>
+      {sub ? <Text style={{ color: t.ink3, fontSize: type.small, marginTop: 2 }}>{sub}</Text> : null}
     </View>
+  );
+}
+
+/* The text of a row — a title, an optional second line — at the body size.
+   It was written by hand in a hundred rows («<View style={{ flex: 1 }}><Text
+   fontSize 15…>»), most of them a point under the type scale; one component
+   is what keeps a list reading as one list (COURSE-ROADMAP WP8). */
+export function RowText({ title, sub, bold = true, numberOfLines, testID, children }) {
+  const t = useTheme();
+  return (
+    <View style={{ flex: 1 }}>
+      <Text testID={testID} numberOfLines={numberOfLines}
+            style={{ color: t.ink, fontSize: type.body, fontWeight: bold ? "600" : "400" }}>{title}</Text>
+      {sub ? <Muted numberOfLines={numberOfLines}>{sub}</Muted> : null}
+      {children || null}
+    </View>
+  );
+}
+
+/* A row with a switch on the right: the whole row toggles it. The nine
+   settings rows each wrote the Switch by hand; one component means one track
+   colour and one way to say disabled. */
+export function ToggleRow({ title, sub, value, onValueChange, testID, disabled, children, last, at }) {
+  const t = useTheme();
+  return (
+    // `last` and `at` are what `List` hands its rows (the hairline, the
+    // stagger); a wrapper that dropped them broke the group's last hairline.
+    <Row onPress={disabled ? undefined : () => onValueChange(!value)} last={last} at={at}>
+      <RowText title={title} sub={sub} bold={false}>{children}</RowText>
+      <Switch testID={testID} value={!!value} disabled={disabled} onValueChange={onValueChange}
+              accessibilityLabel={typeof title === "string" ? title : undefined}
+              trackColor={{ true: t.good, false: t.surface3 }} />
+    </Row>
+  );
+}
+
+/* A round control holding one glyph — the cog, the bulb, a replay, a jump
+   to a moment. Eleven screens drew their own at 34, 36, 40 and 44 px; this is
+   the one (COURSE-ROADMAP WP8). `size` is what is drawn; the touch target is
+   always at least 44 (rule 20.12), the rest made up in `hitSlop`. `on` lights
+   it in the brand tint; `fill` replaces the surface (a filled disc). */
+export const ICON_TARGET = 44;
+export function IconButton({ onPress, label, testID, size = 40, on, fill, border = true, children,
+                             selected, state, style }) {
+  const t = useTheme();
+  const slop = Math.max(4, Math.ceil((ICON_TARGET - size) / 2));
+  return (
+    <Pressable onPress={onPress} testID={testID} hitSlop={slop}
+               accessibilityRole="button" accessibilityLabel={label}
+               accessibilityState={state || (selected === undefined ? undefined : { selected: !!selected })}
+               style={({ pressed }) => [{ width: size, height: size, borderRadius: size / 2,
+                 alignItems: "center", justifyContent: "center",
+                 borderWidth: border ? 1 : 0, borderColor: on ? t.brand : t.line,
+                 backgroundColor: fill || (on ? t.brandBg : t.surface), opacity: pressed ? 0.6 : 1 }, style]}>
+      {children}
+    </Pressable>
   );
 }
 
@@ -349,6 +406,19 @@ export function Row({ children, onPress, disabled, last, testID, at = 0 }) {
    one; `block` keeps the full width for the one action a screen or sheet is
    for (a footer, the quiz's Check). */
 const BTN_LIP = 3;
+/* The fill, edge and label colour of each kind of button — read by `Btn` and
+   by Study's grade buttons, which used to keep a copy (COURSE-ROADMAP WP8). */
+export function toneOf(t, kind) {
+  return {
+    plain: { bg: t.surface2, border: t.line, fg: t.ink, edge: t.line },
+    pri: { bg: t.brand, border: t.brandDim, fg: t.brandOn, edge: t.brandDim },
+    good: { bg: t.good, border: t.goodDim, fg: t.goodOn, edge: t.goodDim },
+    bad: { bg: t.bad, border: t.badDim, fg: t.badOn, edge: t.badDim },
+    danger: { bg: t.badBg, border: t.badBg, fg: t.bad, edge: t.line },
+    ghost: { bg: "transparent", border: "transparent", fg: t.ink2, edge: t.line },
+    link: { bg: "transparent", border: "transparent", fg: t.brandInk, edge: t.line },
+  }[kind];
+}
 export function Btn({ label, onPress, kind = "plain", disabled, style, testID, block }) {
   const t = useTheme();
   const tone = {
@@ -505,7 +575,7 @@ export function Sheet({ visible = true, onClose, title, header, children, footer
           <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: t.line,
                          alignSelf: "center", marginBottom: 14 }} />
           {header ? header : title ? (
-            <Text style={{ color: t.ink, fontSize: 17, fontWeight: "600", marginBottom: 14 }}>
+            <Text style={{ color: t.ink, fontSize: type.head, fontWeight: "700", marginBottom: 14 }}>
               {title}
             </Text>
           ) : null}
@@ -539,7 +609,7 @@ export function Bubble({ visible = true, onClose, title, children, footer, testI
               style={{ width: "100%", maxWidth: 380, maxHeight: "70%", backgroundColor: t.surface,
                        borderRadius: radius.lg, borderWidth: 1, borderColor: t.line, padding: 18 }}>
           {title ? (
-            <Text style={{ color: t.ink, fontSize: 17, fontWeight: "700", marginBottom: 8 }}>{title}</Text>
+            <Text style={{ color: t.ink, fontSize: type.head, fontWeight: "700", marginBottom: 8 }}>{title}</Text>
           ) : null}
           <ScrollView style={{ flexGrow: 0, flexShrink: 1 }}>{children}</ScrollView>
           {footer || null}
@@ -557,16 +627,12 @@ export function Bubble({ visible = true, onClose, title, children, footer, testI
 export function CogButton({ onPress, testID = "cog", label = "Options" }) {
   const t = useTheme();
   return (
-    <Pressable onPress={onPress} testID={testID} hitSlop={6}
-               accessibilityRole="button" accessibilityLabel={label}
-               style={({ pressed }) => ({ width: 40, height: 40, borderRadius: 20,
-                 alignItems: "center", justifyContent: "center", borderWidth: 1,
-                 borderColor: t.line, backgroundColor: t.surface, opacity: pressed ? 0.6 : 1 })}>
+    <IconButton onPress={onPress} testID={testID} label={label}>
       <Svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
            strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
         <Path d={COG_PATH} />
       </Svg>
-    </Pressable>
+    </IconButton>
   );
 }
 /* The cog, drawn once: here and on the video overlay (screens/Misc.js). */
@@ -587,18 +653,13 @@ export function BulbButton({ onPress, testID = "bulb", label = "Reference", on, 
   const t = useTheme();
   const glyph = Math.round(size / 2);
   return (
-    <Pressable onPress={onPress} testID={testID} hitSlop={6}
-               accessibilityRole="button" accessibilityLabel={label}
-               style={({ pressed }) => ({ width: size, height: size, borderRadius: size / 2,
-                 alignItems: "center", justifyContent: "center", borderWidth: 1,
-                 borderColor: on ? t.brand : t.line,
-                 backgroundColor: on ? t.brandBg : t.surface, opacity: pressed ? 0.6 : 1 })}>
+    <IconButton onPress={onPress} testID={testID} label={label} on={on} size={size}>
       <Svg width={glyph} height={glyph} viewBox="0 0 24 24" fill="none"
            stroke={on ? t.brandInk : t.ink2}
            strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
         <Path d={BULB_PATH} />
       </Svg>
-    </Pressable>
+    </IconButton>
   );
 }
 
@@ -743,9 +804,7 @@ export function Dropdown({ testID, sheetTestID, optionPrefix, title, label, valu
             {options.map((o) => (
               <Row key={o.id} testID={`${prefix}${o.id}`}
                    onPress={() => { onPick(o.id); setOpen(false); }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>{o.name}</Text>
-                </View>
+                <RowText title={o.name} bold={false} />
                 {o.note !== undefined ? <Muted>{String(o.note)}</Muted> : null}
                 <Tick on={o.id === (current && current.id)} />
               </Row>
@@ -759,11 +818,14 @@ export function Dropdown({ testID, sheetTestID, optionPrefix, title, label, valu
 
 /* A section's heading: one style, used everywhere a screen groups things
    under a label (it was retyped inline two dozen times). */
-export function SectionLabel({ children, style, testID }) {
+/* `gap` opens the space above a section that follows another — one value,
+   on the grid, where sixteen call sites wrote `marginTop: 18`. */
+export const SECTION_GAP = 20;
+export function SectionLabel({ children, style, testID, gap }) {
   const t = useTheme();
   return (
     <Text testID={testID} accessibilityRole="header"
-          style={[styles.sectionLabel, { color: t.ink3 }, style]}>{children}</Text>
+          style={[styles.sectionLabel, { color: t.ink3 }, gap ? { marginTop: SECTION_GAP } : null, style]}>{children}</Text>
   );
 }
 
@@ -826,17 +888,14 @@ export function CopyButton({ text, size = 36, label = "Copy", testID = "copy-but
   };
   const glyph = Math.round(size / 2);
   return (
-    <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={label}
-               accessibilityState={{ checked: done }} onPress={copy} hitSlop={8}
-               style={({ pressed }) => ({ width: size, height: size, borderRadius: size / 2, borderWidth: 1,
-                 borderColor: done ? t.good : t.line, alignItems: "center", justifyContent: "center",
-                 opacity: pressed ? 0.6 : 1 })}>
+    <IconButton testID={testID} label={label} state={{ checked: done }} onPress={copy} size={size}
+                style={done ? { borderColor: t.good } : null}>
       <Svg width={glyph} height={glyph} viewBox="0 0 24 24" fill="none" stroke={done ? t.good : t.ink2}
            strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         {done ? <Path d="M5 12.5l4.5 4.5L19 7.5" />
           : <><Path d="M9 9h10v11H9z" /><Path d="M5 15V4h10" /></>}
       </Svg>
-    </Pressable>
+    </IconButton>
   );
 }
 

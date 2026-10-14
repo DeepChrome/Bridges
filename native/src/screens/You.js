@@ -7,7 +7,7 @@ import { DEFAULTS, SETTING_KEYS } from "../store";
 import { speechDefault } from "@core/state";
 import { useTheme, radius, type as T } from "../theme";
 import { setAppearance, useScheme } from "../appearance";
-import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb, Stepper } from "../ui";
+import { Screen, List, Row, Btn, Pill, Muted, Avatar, Choice, SectionLabel, Sheet, Text, Thumb, Stepper, RowText, ToggleRow } from "../ui";
 import { CharacterPicker } from "./Gate";
 import { plan as askPlan, setPlan } from "../lib/feedback";
 import { PLANS, PLAN_NAMES, ALLOWANCE_LINES, planOf } from "@core/plans";
@@ -248,8 +248,8 @@ function PlanRow({ navigation }) {
           {/* The speech bubble, not the tutor's cap: the tile above already
               wears that, and two marks alike mark nothing (§30s). */}
           <Thumb id="talk" tone="brand" />
-          <Text style={{ flex: 1, color: t.ink, fontSize: 15, fontWeight: "600" }}>AI usage</Text>
-          <Text testID="plan-name" style={{ color: t.ink2, fontSize: 15 }}>{name}</Text>
+          <RowText title="AI usage" />
+          <Text testID="plan-name" style={{ color: t.ink2, fontSize: T.body }}>{name}</Text>
         </Row>
       </List>
       {open ? (
@@ -257,7 +257,7 @@ function PlanRow({ navigation }) {
           {info && info.selfServe ? (
             <List>
               <Row testID="plan-premium-row">
-                <Text style={{ flex: 1, color: t.ink, fontSize: 15, fontWeight: "600" }}>Premium</Text>
+                <RowText title="Premium" />
                 <Switch testID="plan-premium" value={plan === "premium"} disabled={switching}
                         onValueChange={choose} />
               </Row>
@@ -275,11 +275,11 @@ function PlanRow({ navigation }) {
                 const on = key ? st[key] !== false : true;
                 return (
                   <Row key={counter} testID={`plan-${counter}`}>
-                    <Text style={{ flex: 1, color: on ? t.ink : t.ink3, fontSize: 15 }}>
+                    <Text style={{ flex: 1, color: on ? t.ink : t.ink3, fontSize: T.body }}>
                       {label.charAt(0).toUpperCase() + label.slice(1)}
                     </Text>
                     {unlimited ? null : (
-                      <Text style={{ color: left === 0 ? t.bad : on ? t.ink : t.ink3, fontSize: 15, fontWeight: "700" }}>
+                      <Text style={{ color: left === 0 ? t.bad : on ? t.ink : t.ink3, fontSize: T.body, fontWeight: "700" }}>
                         {left === null ? "–" : String(left)}
                       </Text>
                     )}
@@ -316,7 +316,7 @@ export function PictureSection() {
       <List>
         <Row testID="change-picture" onPress={() => setPicking(!picking)}>
           <Avatar id={account ? account.avatar : null} size={36} />
-          <Text style={{ flex: 1, color: t.ink, fontSize: 15 }}>Picture</Text>
+          <RowText title="Picture" bold={false} />
           <Muted>{picking ? "Done" : "Change"}</Muted>
         </Row>
       </List>
@@ -380,7 +380,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedback }) {
                 <List>
                   <Row testID="crash-row">
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.bad, fontSize: 15, fontWeight: "600" }}>
+                      <Text style={{ color: t.bad, fontSize: T.body, fontWeight: "600" }}>
                         {crashes.length === 1 ? "1 problem recorded" : `${crashes.length} problems recorded`}
                       </Text>
                       <Muted numberOfLines={2}>{crashes[0].what}</Muted>
@@ -409,14 +409,14 @@ function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedback }) {
                   here and are gone (same day: "those are absurdly long… for
                   now, disable those"); the scheduler keeps its defaults. */}
               <Row>
-                <Text style={{ flex: 1, color: t.ink, fontSize: 15 }}>New words a day</Text>
+                <RowText title="New words a day" bold={false} />
                 <Stepper testID="settings-new-per-day" label="New words a day" min={0} max={99}
                          value={st.newPerDay === undefined ? QUEUE_DEFAULTS.newPerDay : st.newPerDay}
                          onChange={(n) => update((p) => ({ ...p, newPerDay: n }))} />
               </Row>
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Study days</Text>
+                  <Text style={{ color: t.ink, fontSize: T.body }}>Study days</Text>
                   <StudyDays value={st.studyDays}
                              onChange={(days) => update((p) => ({ ...p, studyDays: days }))} />
                 </View>
@@ -428,55 +428,23 @@ function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedback }) {
                   Tutor (the owner, 2026-09-26: "if the user wants, they can
                   disable the English in settings"). One key, `talkEn`; Talk's
                   toolbar EN button writes the same one. */}
-              <Row onPress={() => update((p) => ({ ...p, talkEn: !(p.talkEn !== false) }))}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>English under the tutor</Text>
-                </View>
-                <Switch
-                  testID="tutor-en-switch"
-                  value={st.talkEn !== false}
-                  onValueChange={(v) => update((p) => ({ ...p, talkEn: v }))}
-                  trackColor={{ true: t.good, false: t.surface3 }}
-                />
-              </Row>
-              <Row onPress={() => update((p) => ({ ...p, osk: !p.osk }))}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>On-screen Russian keyboard</Text>
-                </View>
-                <Switch
-                  testID="osk-switch"
-                  value={!!st.osk}
-                  onValueChange={(v) => update((p) => ({ ...p, osk: v }))}
-                  trackColor={{ true: t.good, false: t.surface3 }}
-                />
-              </Row>
+              <ToggleRow title="English under the tutor" testID="tutor-en-switch"
+                         value={st.talkEn !== false}
+                         onValueChange={(v) => update((p) => ({ ...p, talkEn: v }))} />
+              <ToggleRow title="On-screen Russian keyboard" testID="osk-switch"
+                         value={!!st.osk}
+                         onValueChange={(v) => update((p) => ({ ...p, osk: v }))} />
               {/* Light or dark (appearance.js): the phone's setting until this is
                   flipped, then the choice holds. */}
-              <Row onPress={() => setAppearance(scheme === "dark" ? "light" : "dark")}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Dark mode</Text>
-                </View>
-                <Switch
-                  testID="dark-switch"
-                  value={scheme === "dark"}
-                  onValueChange={(v) => setAppearance(v ? "dark" : "light")}
-                  trackColor={{ true: t.good, false: t.surface3 }}
-                />
-              </Row>
-              <Row onPress={() => update((p) => ({ ...p, haptics: !(p.haptics !== false) }))}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Vibration</Text>
-                </View>
-                <Switch
-                  testID="haptics-switch"
-                  value={st.haptics !== false}
-                  onValueChange={(v) => update((p) => ({ ...p, haptics: v }))}
-                  trackColor={{ true: t.good, false: t.surface3 }}
-                />
-              </Row>
+              <ToggleRow title="Dark mode" testID="dark-switch"
+                         value={scheme === "dark"}
+                         onValueChange={(v) => setAppearance(v ? "dark" : "light")} />
+              <ToggleRow title="Vibration" testID="haptics-switch"
+                         value={st.haptics !== false}
+                         onValueChange={(v) => update((p) => ({ ...p, haptics: v }))} />
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Daily reminder</Text>
+                  <Text style={{ color: t.ink, fontSize: T.body }}>Daily reminder</Text>
                   {Number.isFinite(st.remind) ? (
                     <Choice testID="remind-at" value={st.remind} style={{ marginTop: 8 }}
                             options={REMIND_TIMES}
@@ -506,7 +474,7 @@ function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedback }) {
                   was nothing left for it to download. */}
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Reading speed</Text>
+                  <Text style={{ color: t.ink, fontSize: T.body }}>Reading speed</Text>
                   <Muted>Press a speaker twice for slower</Muted>
                   <Choice testID="speed-choice" options={SPEEDS} value={st.speed || "normal"} style={{ marginTop: 8 }}
                           onPick={(id) => update((p) => ({ ...p, speed: id }))} />
@@ -514,14 +482,14 @@ function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedback }) {
               </Row>
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Right-answer sound</Text>
+                  <Text style={{ color: t.ink, fontSize: T.body }}>Right-answer sound</Text>
                   <Choice testID="cue-choice" options={CUE_NAMES} value={rightCueOf(st.cue)} style={{ marginTop: 8 }}
                           onPick={(id) => { previewCue(id); update((p) => ({ ...p, cue: id })); }} />
                 </View>
               </Row>
               <Row>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Wrong-answer sound</Text>
+                  <Text style={{ color: t.ink, fontSize: T.body }}>Wrong-answer sound</Text>
                   <Choice testID="wrong-cue-choice" options={WRONG_NAMES} value={wrongCueOf(st.wrongCue)} style={{ marginTop: 8 }}
                           onPick={(id) => { previewCue(id); update((p) => ({ ...p, wrongCue: id })); }} />
                 </View>
@@ -532,21 +500,15 @@ function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedback }) {
                   2026-09-17. The same screen opens on a few lines about the
                   app (2026-10-02). */}
               <Row testID="open-credits" onPress={() => { onClose(); onCredits(); }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>About</Text>
-                </View>
+                <RowText title="About" bold={false} />
               </Row>
               <Row onPress={() => { onClose(); onTour(); }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Show the tour</Text>
-                </View>
+                <RowText title="Show the tour" bold={false} />
               </Row>
               {/* A tester's words, straight to the owner (screens/Feedback.js,
                   POST /v1/report). */}
               <Row testID="send-feedback" onPress={() => { onClose(); onFeedback(); }}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Send feedback</Text>
-                </View>
+                <RowText title="Send feedback" bold={false} />
               </Row>
               {/* Last, not first: a new learner's settings sheet should not
                   open on a switch they cannot place. It ships **off** since
@@ -554,24 +516,13 @@ function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedback }) {
                   top) and lives here so the owner can still unlock the course
                   on his own phone; the comment used to say "ships on" and had
                   been wrong for four days. */}
-              <Row onPress={() => update((p) => ({ ...p, dev: !p.dev }))}>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>Developer mode</Text>
-                  <Muted>All lessons unlocked</Muted>
-                </View>
-                <Switch
-                  testID="dev-switch"
-                  value={!!st.dev}
-                  onValueChange={(v) => update((p) => ({ ...p, dev: v }))}
-                  trackColor={{ true: t.good, false: t.surface3 }}
-                />
-              </Row>
+              <ToggleRow title="Developer mode" sub="All lessons unlocked" testID="dev-switch"
+                         value={!!st.dev}
+                         onValueChange={(v) => update((p) => ({ ...p, dev: v }))} />
               {st.dev ? (
                 // A measuring tool, not a feature: only with developer mode on.
                 <Row onPress={() => { onClose(); onLab(); }}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ color: t.ink, fontSize: 15 }}>STT Lab</Text>
-                  </View>
+                  <RowText title="STT Lab" bold={false} />
                 </Row>
               ) : null}
             </List>
@@ -789,7 +740,7 @@ export default function You({ navigation }) {
                        onPress={unit ? () => { setShowing(null); openUnit(unit.id); } : undefined}
                        disabled={!unit}>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.ink, fontSize: 15 }}>{g.info.en}</Text>
+                      <Text style={{ color: t.ink, fontSize: T.body }}>{g.info.en}</Text>
                       {unit ? <Muted>{unit.name}</Muted> : null}
                     </View>
                     <Pill>{`${g.n}×`}</Pill>
@@ -853,7 +804,7 @@ export default function You({ navigation }) {
                   return (
                     <Row key={unit.id} onPress={() => { setShowing(null); openUnit(unit.id); }}>
                       <View style={{ flex: 1 }}>
-                        <Text style={{ color: t.ink, fontSize: 15 }}>{unit.name}</Text>
+                        <Text style={{ color: t.ink, fontSize: T.body }}>{unit.name}</Text>
                         {n ? <Muted>{`Chapter ${n}`}</Muted> : null}
                       </View>
                       <Pill tone={ks.length === of ? "good" : undefined}>{`${ks.length}/${of}`}</Pill>
@@ -874,7 +825,7 @@ export default function You({ navigation }) {
             <List>
               {(st.tutorNotes || []).map((n, k) => (
                 <Row key={k}>
-                  <Text style={{ flex: 1, color: t.ink, fontSize: 15 }}>{n}</Text>
+                  <RowText title={n} bold={false} />
                 </Row>
               ))}
             </List>

@@ -7,7 +7,7 @@
 import React from "react";
 import { View } from "react-native";
 import { Text } from "../ui";
-import { useTheme, radius } from "../theme";
+import { useTheme, radius, type as T } from "../theme";
 
 function Word({ a }) {
   const t = useTheme();
@@ -32,7 +32,7 @@ function Word({ a }) {
     <Text
       testID={`align-${a.status}`}
       accessibilityLabel={spoken}
-      style={[{ fontSize: 15, paddingVertical: 3, paddingHorizontal: 7,
+      style={[{ fontSize: T.body, paddingVertical: 3, paddingHorizontal: 7,
                 borderRadius: radius.sm, overflow: "hidden", marginRight: 6,
                 marginBottom: 6 }, styles[a.status]]}
     >

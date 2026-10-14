@@ -771,7 +771,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
 
       {q.hint && !answered ? (
         usedHint ? (
-          <Muted testID="hint-text" style={{ marginBottom: 12, textAlign: "center", fontSize: 15 }}>
+          <Muted testID="hint-text" style={{ marginBottom: 12, textAlign: "center", fontSize: T.body }}>
             {q.hint}
           </Muted>
         ) : (
@@ -867,7 +867,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
               </View>
             ) : null}
             {verdict && verdict.note ? (
-              <Text style={{ color: t.ink2, marginTop: 4, fontSize: 15 }}>{verdict.note}</Text>
+              <Text style={{ color: t.ink2, marginTop: 4, fontSize: T.body }}>{verdict.note}</Text>
             ) : null}
             {/* The answer, its audio and More — nothing else (the owner,
                 2026-10-08: "Remove the bloat in the pop-up. Don't need forced

@@ -8,7 +8,7 @@
 
 import React, { useState } from "react";
 import { View, Pressable, Linking } from "react-native";
-import { useTheme, radius } from "../theme";
+import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Familiarity, Fold } from "../ui";
 import { TableGroup, Facts, IrregularTag } from "../rules";
 import { wordFacts, isIrregular } from "@core/facts";
@@ -218,7 +218,7 @@ export function WordEntry({ w, index, navigation }) {
                    onPress={() => navigation.navigate("Video", { videoId: h.id, word: w.b, at: h.t })}>
                 <Pill tone="brand">{clock(h.t)}</Pill>
                 <View style={{ flex: 1 }}>
-                  <Text numberOfLines={1} style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+                  <Text numberOfLines={1} style={{ color: t.ink, fontSize: T.body, fontWeight: "600" }}>
                     {short(h.title)}
                   </Text>
                   <Muted>{[h.ch, `«${h.w}»`, h.n > 1 ? `×${h.n}` : null].filter(Boolean).join(" · ")}</Muted>
@@ -229,7 +229,7 @@ export function WordEntry({ w, index, navigation }) {
                 control off to the side — the list expands where it stopped. */}
             {heard.length > HEARD_ROWS ? (
               <Row testID="heard-more" onPress={() => setAllHeard(!allHeard)}>
-                <Text style={{ flex: 1, color: t.brandInk, fontSize: 15, fontWeight: "600" }}>
+                <Text style={{ flex: 1, color: t.brandInk, fontSize: T.body, fontWeight: "600" }}>
                   {allHeard ? "Show fewer" : `Show all ${heard.length}`}
                 </Text>
               </Row>

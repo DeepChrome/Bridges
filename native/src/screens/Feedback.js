@@ -188,7 +188,7 @@ export default function Feedback({ route, navigation }) {
         ))}
       </View>
 
-      <SectionLabel style={{ marginTop: 18 }}>What kind</SectionLabel>
+      <SectionLabel gap>What kind</SectionLabel>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
         {KINDS.map((k) => (
           <Chip key={k.id} testID={`feedback-kind-${k.id}`} on={kind === k.id} label={k.label}
@@ -196,17 +196,17 @@ export default function Feedback({ route, navigation }) {
         ))}
       </View>
 
-      <SectionLabel style={{ marginTop: 18 }}>What's wrong</SectionLabel>
+      <SectionLabel gap>What's wrong</SectionLabel>
       <TextInput testID="feedback-text" value={text} onChangeText={setText} multiline
                  placeholder="What you saw or heard" placeholderTextColor={t.ink3}
                  textAlignVertical="top" style={[field(t, 96), { marginTop: 6 }]} />
 
-      <SectionLabel style={{ marginTop: 18 }}>What it should be</SectionLabel>
+      <SectionLabel gap>What it should be</SectionLabel>
       <TextInput testID="feedback-fix" value={fix} onChangeText={setFix} multiline
                  placeholder="Optional" placeholderTextColor={t.ink3}
                  textAlignVertical="top" style={[field(t, 56), { marginTop: 6 }]} />
 
-      <SectionLabel style={{ marginTop: 18 }}>Recordings</SectionLabel>
+      <SectionLabel gap>Recordings</SectionLabel>
       <View style={{ gap: 8, marginTop: 6 }}>
         {rec.clips.map((c, k) => (
           <View key={c.uri} testID={`feedback-clip-${k}`}

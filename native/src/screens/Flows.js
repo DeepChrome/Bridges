@@ -6,7 +6,7 @@ import { View, Pressable } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Btn, Pill, Muted, List, Row, Thumb, SectionLabel, Chip, Tick, Text,
-         Sheet, Choice, CogButton, Loading } from "../ui";
+         Sheet, Choice, CogButton, Loading, RowText } from "../ui";
 import { Runner, Done, useAudioStopOnLeave, useResume, ResumePrompt } from "./Run";
 import { clearRun, saveRun, savedRun } from "../resume";
 import { WordList, GrammarNote, WordCard, StepBar } from "../lesson";
@@ -568,7 +568,7 @@ export function DrillList({ navigation }) {
           and a learner deciding "I want to practise speaking" was reading past
           two listening rows to get there. Split, with speaking second because
           that is the order the skills arrive in. */}
-      <SectionLabel style={{ marginTop: 18 }}>Listening</SectionLabel>
+      <SectionLabel gap>Listening</SectionLabel>
       <List>
         {/* Listening at the learner's level comes first, and the native-speed
             one says plainly that it is harder. The owner found the video
@@ -591,7 +591,7 @@ export function DrillList({ navigation }) {
             whole with the words they say and the moment each is said. */}
       </List>
 
-      <SectionLabel style={{ marginTop: 18 }}>Speaking</SectionLabel>
+      <SectionLabel gap>Speaking</SectionLabel>
       <List>
         {/* Hear it, say it back (P10.6) — the step from taking Russian in to
             putting it out, with the model still in your ear. */}
@@ -614,7 +614,7 @@ export function DrillList({ navigation }) {
       {/* Speaking was seven rows of four kinds of thing (the walkthrough,
           2026-09-30): the mouth drills, three conversations with the model,
           and two references. Each kind has its own section now. */}
-      <SectionLabel style={{ marginTop: 18 }}>Conversation</SectionLabel>
+      <SectionLabel gap>Conversation</SectionLabel>
       <List>
         {/* Speak Russian, read it back in English (2026-09-22). With Talk and
             the tutor because it is the third way of saying something to the
@@ -643,7 +643,7 @@ export function DrillList({ navigation }) {
         </Row>
       </List>
 
-      <SectionLabel style={{ marginTop: 18 }}>Letters & sounds</SectionLabel>
+      <SectionLabel gap>Letters & sounds</SectionLabel>
       <List>
         {/* The letters and the mouth behind them (ROADMAP P10.2). Open from the
             first screen: nothing else in the app teaches the alphabet. Named
@@ -665,7 +665,7 @@ export function DrillList({ navigation }) {
           </View>
         </Row>
       </List>
-      <SectionLabel style={{ marginTop: 18 }}>Grammar</SectionLabel>
+      <SectionLabel gap>Grammar</SectionLabel>
       <List>
         {/* The reference, first in the section it explains: the rules the
             drills below are drilling. Open from the first screen, like the
@@ -775,9 +775,7 @@ export function DrillOptions({ type, prefs, onChange, onClose }) {
             {list.map((o) => (
               <Row key={o.id} testID={`focus-${o.id}`} onPress={() => toggle(o.id)}>
                 <Tick on={on.includes(o.id)} />
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15 }}>{o.name}</Text>
-                </View>
+                <RowText title={o.name} bold={false} />
               </Row>
             ))}
           </List>
@@ -791,9 +789,7 @@ export function DrillOptions({ type, prefs, onChange, onClose }) {
           <List>
             <Row testID="irregular-only" onPress={() => onChange({ ...prefs, irregular: !prefs.irregular })}>
               <Tick on={!!prefs.irregular} />
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 15 }}>Irregular words only</Text>
-              </View>
+              <RowText title="Irregular words only" bold={false} />
             </Row>
           </List>
         </View>
@@ -1039,21 +1035,16 @@ export function CaseHub({ navigation }) {
             <Row key={c.id} testID={`case-${c.id}`}
                  onPress={() => navigation.navigate("CaseModule", { caseId: c.id })}>
               <Thumb n={k + 1} done={learned} tone={c === next ? "brand" : undefined} />
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>{c.name}</Text>
-                <Muted>{`Chapter ${c.stage + 1}`}</Muted>
-              </View>
+              <RowText title={c.name} sub={`Chapter ${c.stage + 1}`} />
             </Row>
           );
         })}
       </List>
-      <SectionLabel style={{ marginTop: 18 }}>Every case</SectionLabel>
+      <SectionLabel gap>Every case</SectionLabel>
       <List>
         <Row testID="case-mixed" onPress={() => navigation.navigate("Drill", { type: "cases", all: true })}>
           <Thumb id="cases" tone="good" />
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>All the forms</Text>
-          </View>
+          <RowText title="All the forms" />
         </Row>
       </List>
     </Screen>
@@ -1080,14 +1071,11 @@ export function CaseModule({ route, navigation }) {
       </View>}>
       <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700" }}>{`The ${c.name.toLowerCase()} case`}</Text>
       <Muted style={{ marginTop: 6 }}>{c.intro}</Muted>
-      <SectionLabel style={{ marginTop: 18 }}>When it's used</SectionLabel>
+      <SectionLabel gap>When it's used</SectionLabel>
       <List>
         {c.uses.map((u) => (
           <Row key={u.id} testID={`case-use-${u.id}`}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>{u.label}</Text>
-              <Muted>{u.examples[0][0]}</Muted>
-            </View>
+            <RowText title={u.label} sub={u.examples[0][0]} />
           </Row>
         ))}
       </List>
@@ -1289,7 +1277,7 @@ export function ScenesList({ navigation }) {
                   <Row key={s.key} testID={`scene-row-${s.key}`}
                        onPress={() => navigation.navigate("Scenes", { key: s.key })}>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}
+                      <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "600" }}
                             numberOfLines={2}>
                         {s.title}
                       </Text>
@@ -1415,14 +1403,14 @@ export function QuizSetup({ navigation }) {
              onPress={() => navigation.navigate("CustomQuiz", { kinds, units, n })} />
       }
     >
-      <SectionLabel style={{ marginTop: 18 }}>Questions</SectionLabel>
+      <SectionLabel gap>Questions</SectionLabel>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
         {QUIZ_KINDS.map((k) => (
           <Chip key={k.id} on={kinds.includes(k.id)} label={k.name}
                 onPress={() => flip(kinds, setKinds)(k.id)} testID={`kind-${k.id}`} />
         ))}
       </View>
-      <SectionLabel style={{ marginTop: 18 }}>Sections</SectionLabel>
+      <SectionLabel gap>Sections</SectionLabel>
       {STAGES.map((s, si) => {
         const here = [s.core].concat(s.branches).filter((u) => unitUnlocked(st, u));
         if (!here.length) return null;
@@ -1438,7 +1426,7 @@ export function QuizSetup({ navigation }) {
           </View>
         );
       })}
-      <SectionLabel style={{ marginTop: 18 }}>Length</SectionLabel>
+      <SectionLabel gap>Length</SectionLabel>
       <View style={{ flexDirection: "row", gap: 6 }}>
         {QUIZ_LENGTHS.map((len) => (
           <Chip key={len} on={n === len} label={String(len)} onPress={() => setN(len)}

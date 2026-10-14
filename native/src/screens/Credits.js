@@ -21,9 +21,9 @@
 
 import React from "react";
 import { View, Linking } from "react-native";
-import { Screen, List, Row, Muted, SectionLabel, Text, Fold } from "../ui";
+import { Screen, List, Row, Muted, SectionLabel, Text, Fold, RowText } from "../ui";
 import { CREDITS as PHOTO_CREDITS } from "../images";
-import { useTheme } from "../theme";
+import { useTheme, type as T } from "../theme";
 import { STATS } from "../data";
 import { NOTICES } from "../notices";
 import { AV_CREDIT } from "@core/avatars";
@@ -48,26 +48,20 @@ export default function Credits() {
       <View testID="about" style={{ alignItems: "center", paddingVertical: 18, gap: 4 }}>
         <Text style={{ color: t.ink, fontSize: 19, fontWeight: "700" }}>{APP_NAME}</Text>
         <Muted size={12}>{APP.version}</Muted>
-        <Text style={{ color: t.ink2, fontSize: 15, marginTop: 10 }}>App built by Jared F.</Text>
-        <Text style={{ color: t.ink2, fontSize: 15 }}>Dedicated to Teddy and Cone.</Text>
-        <Text style={{ color: t.ink, fontSize: 15, marginTop: 10, fontWeight: "700" }}>Слава Україні!</Text>
+        <Text style={{ color: t.ink2, fontSize: T.body, marginTop: 10 }}>App built by Jared F.</Text>
+        <Text style={{ color: t.ink2, fontSize: T.body }}>Dedicated to Teddy and Cone.</Text>
+        <Text style={{ color: t.ink, fontSize: T.body, marginTop: 10, fontWeight: "700" }}>Слава Україні!</Text>
       </View>
 
       <SectionLabel style={{ marginTop: 8 }}>Language material</SectionLabel>
       <List>
         {sources.map((c) => (
           <Row key={c.n}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>{c.n}</Text>
-              <Muted>{c.l}</Muted>
-            </View>
+            <RowText title={c.n} sub={c.l} bold={false} />
           </Row>
         ))}
         <Row>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15 }}>{VOICES.n}</Text>
-            <Muted>{VOICES.l}</Muted>
-          </View>
+          <RowText title={VOICES.n} sub={VOICES.l} bold={false} />
         </Row>
       </List>
 
@@ -80,10 +74,7 @@ export default function Credits() {
         <List>
           {PHOTOS.map(([word, c]) => (
             <Row key={word} onPress={c.u ? () => Linking.openURL(c.u) : undefined}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 15 }}>{word}</Text>
-                <Muted>{[c.t, c.a, c.l].filter(Boolean).join(" · ")}</Muted>
-              </View>
+              <RowText title={word} sub={[c.t, c.a, c.l].filter(Boolean).join(" · ")} bold={false} />
             </Row>
           ))}
         </List>
@@ -96,7 +87,7 @@ export default function Credits() {
         <List>
           <Row onPress={AV_CREDIT.url ? () => Linking.openURL(AV_CREDIT.url) : undefined}>
             <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>
+              <Text style={{ color: t.ink, fontSize: T.body }}>
                 {`${AV_CREDIT.title} by ${AV_CREDIT.creator}`}
               </Text>
               <Muted>{`${AV_CREDIT.license} · ${AV_CREDIT.via}`}</Muted>
@@ -110,10 +101,7 @@ export default function Credits() {
       <SectionLabel style={{ marginTop: 22 }}>Typefaces</SectionLabel>
       <List>
         <Row onPress={() => Linking.openURL("https://fonts.google.com/specimen/PT+Serif")}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: t.ink, fontSize: 15 }}>PT Serif by ParaType</Text>
-            <Muted>SIL Open Font License 1.1</Muted>
-          </View>
+          <RowText title="PT Serif by ParaType" sub="SIL Open Font License 1.1" bold={false} />
         </Row>
       </List>
 
@@ -121,10 +109,7 @@ export default function Credits() {
       <List>
         {NOTICES.map((n) => (
           <Row key={n.l}>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>{n.l}</Text>
-              <Muted>{n.packages.join(", ")}</Muted>
-            </View>
+            <RowText title={n.l} sub={n.packages.join(", ")} bold={false} />
           </Row>
         ))}
       </List>

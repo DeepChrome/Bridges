@@ -13,7 +13,7 @@ import React from "react";
 import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "./theme";
-import { Btn, Muted, SectionLabel, Familiarity, Speaker, Text, Fold, Pill, Heading, Subheading } from "./ui";
+import { Btn, Muted, SectionLabel, Familiarity, Speaker, Text, Fold, Pill, Heading, Subheading, IconButton } from "./ui";
 import { Linked } from "./words";
 import { RuleCard, IrregularTag } from "./rules";
 import { familiarity, cardFor } from "@core/scheduler";
@@ -160,13 +160,10 @@ export function VideoLines({ lines, onMoment, testID = "video-lines" }) {
           </View>
           <Speaker text={l.ru} size={36} />
           {onMoment ? (
-            <Pressable testID={`${testID}-${k}-moment`} onPress={() => onMoment(l)} hitSlop={4}
-                       accessibilityRole="button" accessibilityLabel="Hear it in the video"
-                       style={({ pressed }) => ({ width: 36, height: 36, borderRadius: 18, alignItems: "center",
-                                                  justifyContent: "center", backgroundColor: t.brandBg,
-                                                  opacity: pressed ? 0.6 : 1 })}>
+            <IconButton testID={`${testID}-${k}-moment`} onPress={() => onMoment(l)} size={36}
+                        label="Hear it in the video" border={false} fill={t.brandBg}>
               <Svg width={14} height={14} viewBox="0 0 24 24"><Path d={ARROW} fill={t.brandInk} /></Svg>
-            </Pressable>
+            </IconButton>
           ) : null}
         </View>
       ))}
@@ -177,16 +174,12 @@ export function VideoLines({ lines, onMoment, testID = "video-lines" }) {
 function Jump({ word, active, onPress }) {
   const t = useTheme();
   return (
-    <Pressable testID={`heard-${word}`} onPress={onPress} hitSlop={4}
-               accessibilityRole="button" accessibilityLabel={`Play where «${word}» is said`}
-               style={({ pressed }) => ({ width: 40, height: 40, borderRadius: 20,
-                                          alignItems: "center", justifyContent: "center",
-                                          backgroundColor: active ? t.brand : t.surface2,
-                                          opacity: pressed ? 0.6 : 1 })}>
+    <IconButton testID={`heard-${word}`} onPress={onPress} label={`Play where «${word}» is said`}
+                border={false} fill={active ? t.brand : t.surface2}>
       <Svg width={16} height={16} viewBox="0 0 24 24">
         <Path d={ARROW} fill={active ? t.brandOn : t.ink2} />
       </Svg>
-    </Pressable>
+    </IconButton>
   );
 }
 
@@ -230,7 +223,7 @@ export function PrepList({ words, seen, unit, focusWord, onJump, onCards, lines,
   const note = unit && unit.g;
   return (
     <View testID="prep">
-      <SectionLabel style={{ marginTop: 18 }}>{label}</SectionLabel>
+      <SectionLabel gap>{label}</SectionLabel>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 6 }}>
         <Muted testID="prep-met" style={{ flex: 1 }}>{`${met} of ${words.length} met`}</Muted>
         <Btn kind="pri" testID="prep-cards" label="Flashcards" onPress={() => onCards(words)} />

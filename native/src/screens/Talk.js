@@ -21,9 +21,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
-import { useTheme, radius, space } from "../theme";
+import { useTheme, radius, space, type as T } from "../theme";
 import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text,
-         Marked, BULB_PATH, Sheet, CogButton } from "../ui";
+         Marked, BULB_PATH, Sheet, CogButton, RowText, IconButton } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, studiedFor, nextLesson } from "../data";
 import { talk as askTutor, review as askReview, hint as askHint, config, capNotice } from "../lib/feedback";
@@ -162,16 +162,10 @@ function HintCard({ hint, en, onClose }) {
 
 /* A toolbar button: an icon, a label for the screen reader, nothing else. */
 function Tool({ label, on, onPress, testID, children }) {
-  const t = useTheme();
   return (
-    <Pressable onPress={onPress} hitSlop={6} accessibilityRole="button" accessibilityLabel={label}
-               accessibilityState={on !== undefined ? { selected: !!on } : undefined} testID={testID}
-               style={({ pressed }) => ({ width: 40, height: 40, borderRadius: 20, alignItems: "center",
-                 justifyContent: "center", borderWidth: 1,
-                 borderColor: on ? t.brand : t.line, backgroundColor: on ? t.brandBg : t.surface,
-                 opacity: pressed ? 0.6 : 1 })}>
+    <IconButton onPress={onPress} label={label} testID={testID} on={on} selected={on}>
       {children}
-    </Pressable>
+    </IconButton>
   );
 }
 
@@ -220,15 +214,15 @@ function Summary({ scenario, turns, newWords, st, onPin, onPinAll, onAgain, onBa
       </Text>
 
       <SectionLabel>Went well</SectionLabel>
-      {good.map((g, k) => <Text key={k} style={{ color: t.ink2, fontSize: 15, marginBottom: 4 }}>{g}</Text>)}
+      {good.map((g, k) => <Text key={k} style={{ color: t.ink2, fontSize: T.body, marginBottom: 4 }}>{g}</Text>)}
 
-      <SectionLabel style={{ marginTop: 18 }}>To work on</SectionLabel>
+      <SectionLabel gap>To work on</SectionLabel>
       {!Object.keys(points).length && !better.length ? (
         <Muted>Nothing the tutor corrected.</Muted>
       ) : null}
       {Object.values(points).sort((a, b) => b.n - a.n).map((p) => (
         <View key={p.tag} style={{ marginBottom: 8 }}>
-          <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+          <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "600" }}>
             {(tagInfo(p.tag) || {}).en || p.tag.toLowerCase().replace(/_/g, " ")}{p.n > 1 ? ` ×${p.n}` : ""}
           </Text>
           {/* The Russian in a correction is set apart, as it is in the
@@ -238,7 +232,7 @@ function Summary({ scenario, turns, newWords, st, onPin, onPinAll, onAgain, onBa
           ))}
         </View>
       ))}
-      {better.map((b, k) => <Text key={k} style={{ color: t.ink2, fontSize: 15, marginBottom: 4 }}>{b}</Text>)}
+      {better.map((b, k) => <Text key={k} style={{ color: t.ink2, fontSize: T.body, marginBottom: 4 }}>{b}</Text>)}
 
       {words.length ? (
         <>
@@ -583,10 +577,7 @@ export default function Talk({ navigation, route }) {
               <Row key={s.id} disabled={!enabled}
                    onPress={() => start(s)}>
                 <Thumb id={s.icon} locked={!enabled} />
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>{s.title}</Text>
-                  <Muted>{`${s.en} · ${u ? u.name : ""}`}</Muted>
-                </View>
+                <RowText title={s.title} sub={`${s.en} · ${u ? u.name : ""}`} />
               </Row>
             );
           })}

@@ -33,9 +33,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
-import { useTheme, radius, space } from "../theme";
+import { useTheme, radius, space, type as T } from "../theme";
 import { Screen, Btn, Muted, Text, TextInput, Marked, Note, CogButton, BulbButton, Sheet,
-         List, Row, SectionLabel, Choice, Tick } from "../ui";
+         List, Row, SectionLabel, Choice, Tick, RowText, IconButton } from "../ui";
 import { Linked } from "../words";
 import { L, STAGES, studiedFor, routePosition, rankOf } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
@@ -136,7 +136,7 @@ function Choices({ choices, onPick, onOther }) {
                      backgroundColor: t.brandBg, borderRadius: radius.md,
                      paddingVertical: 10, paddingHorizontal: 14, minHeight: 44,
                      justifyContent: "center", opacity: pressed ? 0.7 : 1 })}>
-          <Text style={{ color: t.brandInk, fontSize: 15, fontWeight: "600" }}>{c}</Text>
+          <Text style={{ color: t.brandInk, fontSize: T.body, fontWeight: "600" }}>{c}</Text>
         </Pressable>
       ))}
       <Pressable testID="tutor-choice-other" accessibilityRole="button" onPress={onOther}
@@ -144,7 +144,7 @@ function Choices({ choices, onPick, onOther }) {
                    backgroundColor: t.surface, borderRadius: radius.md,
                    paddingVertical: 10, paddingHorizontal: 14, minHeight: 44,
                    justifyContent: "center", opacity: pressed ? 0.7 : 1 })}>
-        <Text style={{ color: t.ink2, fontSize: 15 }}>Something else</Text>
+        <Text style={{ color: t.ink2, fontSize: T.body }}>Something else</Text>
       </Pressable>
     </View>
   );
@@ -192,16 +192,14 @@ function TutorBubble({ turn, en }) {
 function Replay({ text }) {
   const t = useTheme();
   return (
-    <Pressable testID="tutor-replay" accessibilityRole="button" accessibilityLabel="Hear the Russian"
-               onPress={() => speakLine(text, voiceFor(GUIDE_ID))} hitSlop={8}
-               style={({ pressed }) => ({ width: 34, height: 34, borderRadius: 17, borderWidth: 1,
-                 borderColor: t.line, alignItems: "center", justifyContent: "center", opacity: pressed ? 0.6 : 1 })}>
-      <Svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
+    <IconButton testID="tutor-replay" label="Hear the Russian" size={36}
+                onPress={() => speakLine(text, voiceFor(GUIDE_ID))}>
+      <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
            strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         <Path d="M11 5L6 9H2v6h4l5 4V5z" />
         <Path d="M15.5 8.5a5 5 0 0 1 0 7" />
       </Svg>
-    </Pressable>
+    </IconButton>
   );
 }
 
@@ -224,14 +222,10 @@ function LangToggle({ lang, onPress }) {
   const t = useTheme();
   const en = lang === LANG_EN;
   return (
-    <Pressable testID="tutor-lang" accessibilityRole="button"
-               accessibilityLabel={en ? "Microphone hears English" : "Microphone hears Russian"}
-               onPress={onPress} hitSlop={8}
-               style={({ pressed }) => ({ width: 44, height: 44, borderRadius: 22, borderWidth: 1,
-                 borderColor: t.line, backgroundColor: t.surface, alignItems: "center",
-                 justifyContent: "center", opacity: pressed ? 0.6 : 1 })}>
+    <IconButton testID="tutor-lang" size={44} onPress={onPress}
+                label={en ? "Microphone hears English" : "Microphone hears Russian"}>
       <Text style={{ color: t.ink2, fontSize: 12, fontWeight: "700" }}>{en ? "EN" : "RU"}</Text>
-    </Pressable>
+    </IconButton>
   );
 }
 
@@ -245,20 +239,13 @@ const SEND = "M4 12h14M12 5l7 7-7 7";
 function ConverseToggle({ on, onPress }) {
   const t = useTheme();
   return (
-    <Pressable testID="tutor-converse" accessibilityRole="button"
-               accessibilityState={{ selected: !!on }}
-               accessibilityLabel={on ? "Leave conversation mode" : "Conversation mode"}
-               onPress={onPress} hitSlop={8}
-               style={({ pressed }) => ({ width: 44, height: 44, borderRadius: 22,
-                 alignItems: "center", justifyContent: "center", borderWidth: 1,
-                 borderColor: on ? t.brand : t.line,
-                 backgroundColor: on ? t.brandBg : t.surface,
-                 opacity: pressed ? 0.6 : 1 })}>
+    <IconButton testID="tutor-converse" size={44} on={on} selected={on} onPress={onPress}
+                label={on ? "Leave conversation mode" : "Conversation mode"}>
       <Svg width={22} height={22} viewBox="0 0 24 24" fill="none"
            stroke={on ? t.brandInk : t.ink2} strokeWidth={2} strokeLinecap="round">
         <Path d="M4 10v4M8.5 6v12M15.5 6v12M20 10v4" />
       </Svg>
-    </Pressable>
+    </IconButton>
   );
 }
 
@@ -287,9 +274,7 @@ function TutorOptions({ onClose, onRestart }) {
         <List>
           <Row testID="tutor-en-row" onPress={() => update((p) => ({ ...p, talkEn: !en }))}>
             <Tick on={en} />
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: t.ink, fontSize: 15 }}>English under the Russian</Text>
-            </View>
+            <RowText title="English under the Russian" bold={false} />
           </Row>
         </List>
       </View>
@@ -616,7 +601,7 @@ export default function Tutor({ navigation, route }) {
                 : <LangToggle lang={lang} onPress={() => setLang(lang === LANG ? LANG_EN : LANG)} />}
             </View>
             <Text testID="tutor-live"
-                  style={{ color: t.ink, fontSize: 15, minHeight: 20, textAlign: "center", marginTop: 4 }}>
+                  style={{ color: t.ink, fontSize: T.body, minHeight: 20, textAlign: "center", marginTop: 4 }}>
               {rec.phase === "listening" ? (rec.live || "Listening…")
                 : going && pending ? "Thinking…"
                 : going ? "Speaking…"

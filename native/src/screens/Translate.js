@@ -32,7 +32,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, ScrollView, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius } from "../theme";
-import { Screen, Card, Muted, Text, CopyButton } from "../ui";
+import { Screen, Card, Muted, Text, CopyButton, IconButton } from "../ui";
 import { Linked } from "../words";
 import { useRecognizer, LANG, LANG_EN } from "../speech";
 import { HoldButton, Blocked } from "../activities/Say";
@@ -70,23 +70,14 @@ function Line({ text, lang, size, testID }) {
 function Replay({ text, lang }) {
   const t = useTheme();
   return (
-    <Pressable
-      testID={`translate-replay-${lang}`}
-      accessibilityRole="button"
-      accessibilityLabel="Hear it again"
-      onPress={() => speakLine(text, { lang })}
-      hitSlop={8}
-      style={({ pressed }) => ({
-        width: 36, height: 36, borderRadius: 18, borderWidth: 1, borderColor: t.line,
-        alignItems: "center", justifyContent: "center", opacity: pressed ? 0.6 : 1,
-      })}
-    >
+    <IconButton testID={`translate-replay-${lang}`} label="Hear it again" size={36}
+                onPress={() => speakLine(text, { lang })}>
       <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
            strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         <Path d="M11 5L6 9H2v6h4l5 4V5z" />
         <Path d="M15.5 8.5a5 5 0 0 1 0 7" />
       </Svg>
-    </Pressable>
+    </IconButton>
   );
 }
 

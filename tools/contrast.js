@@ -79,6 +79,10 @@ const PAIRS = [
   ["ink3", "surface", 4.5, "muted text on a card"],
   ["ink3", "surface2", 4.5, "muted text on the secondary surface"],
   ["brandInk", "brandBg", 4.5, "brand pill text"],
+  // A quiet line on a brand-tinted box: the path's opening notice, Talk's hint
+  // card, the profile's gaps box (COURSE-ROADMAP WP8.8).
+  ["ink3", "brandBg", 4.5, "muted text on the brand tint"],
+  ["ink2", "brandBg", 4.5, "secondary text on the brand tint"],
   ["good", "goodBg", 4.5, "correct-answer text"],
   ["info", "infoBg", 3.0, "a side quest's icon on its blue disc"],
   ["bad", "badBg", 4.5, "wrong-answer text"],

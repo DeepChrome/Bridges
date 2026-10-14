@@ -16,7 +16,7 @@ import { View, Pressable } from "react-native";
 import { Text, TextInput } from "./ui";
 import Svg, { Path, Rect } from "react-native-svg";
 import { useSession } from "./session";
-import { useTheme, radius } from "./theme";
+import { useTheme, radius, type as T } from "./theme";
 import { MicButton } from "./mic";
 
 /* The standard ЙЦУКЕН layout, as on every Russian phone. */
@@ -77,7 +77,7 @@ export function RuKeyboard({ onKey, onBackspace, onSubmit }) {
         </Key>
         {onSubmit ? (
           <Key label="Check" wide={2} tone="brand" onPress={onSubmit} testID="key-submit">
-            <Text style={{ color: t.brandInk, fontSize: 15, fontWeight: "600" }}>✓</Text>
+            <Text style={{ color: t.brandInk, fontSize: T.body, fontWeight: "600" }}>✓</Text>
           </Key>
         ) : null}
       </View>

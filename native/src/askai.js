@@ -23,7 +23,7 @@ import React, { useRef, useState } from "react";
 import { View, Pressable, ActivityIndicator } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
-import { Sheet, Text, TextInput, Muted, Btn, Note } from "./ui";
+import { Sheet, Text, TextInput, Muted, Btn, Note, IconButton } from "./ui";
 import { useSession } from "./session";
 import { routePosition } from "./data";
 import { ask, config, isCap, capNotice } from "./lib/feedback";
@@ -147,12 +147,23 @@ export const INLINE_TOOLS = new Set(["Vocab", "Quiz", "GrammarRun", "CaseRun", "
 /* Header size, or a disc like the bulb's: `disc` true for 40 px, or the
    size itself (an exercise's row is larger — Run.js TOOL_SIZE). */
 const discSize = (disc) => (disc === true ? 40 : typeof disc === "number" ? disc : 0);
-function iconBox(t, disc) {
-  const d = discSize(disc);
-  return d
-    ? ({ pressed }) => ({ width: d, height: d, borderRadius: d / 2, alignItems: "center", justifyContent: "center",
-        borderWidth: 1, borderColor: t.line, backgroundColor: t.surface, opacity: pressed ? 0.6 : 1 })
-    : { marginRight: 6, width: 30, height: 30, alignItems: "center", justifyContent: "center" };
+// The disc is ui.js's IconButton; a header glyph has no box.
+const iconBox = () => ({ marginRight: 6, width: 30, height: 30, alignItems: "center", justifyContent: "center" });
+
+/* The glyph in a disc (an exercise's row) or bare (a header). */
+function Disc({ disc, onPress, testID, label, children }) {
+  const t = useTheme();
+  if (disc) {
+    return (
+      <IconButton onPress={onPress} testID={testID} label={label} size={discSize(disc)}>{children}</IconButton>
+    );
+  }
+  return (
+    <Pressable onPress={onPress} hitSlop={8} testID={testID} accessibilityRole="button" accessibilityLabel={label}
+               style={iconBox(t, false)}>
+      {children}
+    </Pressable>
+  );
 }
 
 export function AskButton({ disc }) {
@@ -163,15 +174,14 @@ export function AskButton({ disc }) {
   const size = disc ? Math.round(discSize(disc) / 2) : 22;
   return (
     <>
-      <Pressable onPress={() => { th.open(); setOpen(true); }} hitSlop={disc ? 6 : 8} testID="ask-button"
-                 accessibilityRole="button" accessibilityLabel="Ask the AI about the Russian here"
-                 style={iconBox(t, disc)}>
+      <Disc disc={disc} onPress={() => { th.open(); setOpen(true); }} testID="ask-button"
+            label="Ask the AI about the Russian here">
         <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={t.brand}
              strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
           <Path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z" />
           <Path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" />
         </Svg>
-      </Pressable>
+      </Disc>
       {open ? (
         /* Teddy asks (the owner, 2026-10-08: "an avatar of teddy asking 'how
            can I help' and looking cute") — he is the voice of the app's help,
@@ -207,15 +217,20 @@ export function ReportButton({ disc }) {
     if (navRef.isReady && navRef.isReady()) navRef.navigate("Feedback", { about, from: about.screen });
   };
   const size = disc ? Math.round(discSize(disc) * 0.48) : 21;
+  const glyph = (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
+         strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
+      <Path d="M5 21V4M5 4h11l-2 4 2 4H5" />
+    </Svg>
+  );
+  if (disc) {
+    return <IconButton testID="report-button" onPress={open} label="Report a problem" size={discSize(disc)}>{glyph}</IconButton>;
+  }
   return (
-    <Pressable testID="report-button" onPress={open} hitSlop={disc ? 6 : 8}
+    <Pressable testID="report-button" onPress={open} hitSlop={8}
                accessibilityRole="button" accessibilityLabel="Report a problem"
-               style={disc ? iconBox(t, true) : { marginRight: 12, width: 30, height: 30,
-                                                  alignItems: "center", justifyContent: "center" }}>
-      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
-           strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round">
-        <Path d="M5 21V4M5 4h11l-2 4 2 4H5" />
-      </Svg>
+               style={{ marginRight: 12, width: 30, height: 30, alignItems: "center", justifyContent: "center" }}>
+      {glyph}
     </Pressable>
   );
 }

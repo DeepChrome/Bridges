@@ -20,7 +20,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Pressable, ActivityIndicator } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
-import { useTheme } from "../theme";
+import { useTheme, type as T } from "../theme";
 import { Btn, Muted, Pill, Speaker, Text, Marked } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN } from "../data";
@@ -116,7 +116,7 @@ export function Blocked({ block, onGetModel, onSkip, skipLabel }) {
   const t = useTheme();
   return (
     <View style={{ alignItems: "center", gap: 12 }}>
-      <Text style={{ color: t.ink2, fontSize: 15, textAlign: "center" }}>{block.text}</Text>
+      <Text style={{ color: t.ink2, fontSize: T.body, textAlign: "center" }}>{block.text}</Text>
       {block.why === "model" ? <Btn label={`Get ${block.name || "Russian"}`} onPress={onGetModel} /> : null}
       {onSkip ? (
         <Btn kind="ghost" label={skipLabel || (block.why === "mic" ? "Skip (mic off)" : "Skip")}

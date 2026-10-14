@@ -4,8 +4,8 @@ import React from "react";
 import { View, Pressable, Image } from "react-native";
 import { SCENE_ART } from "../sceneart";
 import { useSession } from "../session";
-import { useTheme, radius } from "../theme";
-import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Text } from "../ui";
+import { useTheme, radius, type as T } from "../theme";
+import { Screen, List, Row, Bar, Thumb, Pill, Muted, Btn, Text, Lift, RowText } from "../ui";
 import {
   UN, lessonCount, lessonWords, lessonGroups, lessonDone, components, nextComponent, stepRoute, unitFineProgress, L, linesWith, hasGrammar,
   nextLesson,
@@ -59,7 +59,7 @@ export function UnitScreen({ route, navigation }) {
                    { unitId: unit.id, index: i })}>
               <Thumb id={unit.id} done={lessonDone(st, unit, i)} n={i + 1} />
               <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+                <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "600" }}>
                   {"Lesson " + (i + 1)}
                 </Text>
                 <Muted testID={`lesson-about-${i}`} numberOfLines={2}>{about}</Muted>
@@ -129,39 +129,27 @@ export function LessonScreen({ route, navigation }) {
         {cs.map((c, k) => {
           const isNext = c.id === nextId;
           return (
-            <Pressable
-              key={c.id}
-              testID={`step-${c.id}`}
-              onPress={() => open(c.id)}
-              style={({ pressed }) => ({
-                backgroundColor: c.done ? t.surface2 : t.surface,
-                borderColor: isNext ? t.brand : t.line,
-                borderWidth: 1,
-                borderBottomWidth: pressed ? 1 : isNext ? 3 : 1,
-                marginBottom: pressed ? 2 : 0,
-                borderRadius: radius.lg,
-                padding: 15,
-                flexDirection: "row", alignItems: "center", gap: 14,
-                opacity: c.done ? 0.85 : 1,
-              })}
-            >
-              <View style={{ width: 38, height: 38, borderRadius: 19,
-                             alignItems: "center", justifyContent: "center",
-                             backgroundColor: c.done ? t.good : isNext ? t.brand : t.surface2,
-                             borderWidth: c.done || isNext ? 0 : 1, borderColor: t.line }}>
-                <Text style={{ fontSize: c.done ? 17 : 15, fontWeight: "700",
-                               color: c.done ? t.goodOn : isNext ? t.brandOn : t.ink3 }}>
-                  {c.done ? "✓" : String(k + 1)}
-                </Text>
+            /* The one press model (§30ah): pressed into an edge, the next step's
+               edge in the brand colour — not a border that thins. */
+            <Lift key={c.id} testID={`step-${c.id}`} onPress={() => open(c.id)}
+                  fill={c.done ? t.surface2 : t.surface} border={isNext ? t.brand : t.line}
+                  edge={isNext ? t.brandDim : t.surface3} r={radius.lg} bw={1}
+                  style={{ opacity: c.done ? 0.85 : 1 }}>
+              <View style={{ padding: 16, flexDirection: "row", alignItems: "center", gap: 14 }}>
+                <View style={{ width: 38, height: 38, borderRadius: 19,
+                               alignItems: "center", justifyContent: "center",
+                               backgroundColor: c.done ? t.good : isNext ? t.brand : t.surface2,
+                               borderWidth: c.done || isNext ? 0 : 1, borderColor: t.line }}>
+                  <Text style={{ fontSize: c.done ? 17 : T.body, fontWeight: "700",
+                                 color: c.done ? t.goodOn : isNext ? t.brandOn : t.ink3 }}>
+                    {c.done ? "✓" : String(k + 1)}
+                  </Text>
+                </View>
+                <RowText title={c.label} />
+                {c.id === "quiz" && typeof c.score === "number"
+                  ? <Pill tone={c.done ? "good" : undefined}>{c.score + "%"}</Pill> : null}
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: 16, fontWeight: "600" }}>
-                  {c.label}
-                </Text>
-              </View>
-              {c.id === "quiz" && typeof c.score === "number"
-                ? <Pill tone={c.done ? "good" : undefined}>{c.score + "%"}</Pill> : null}
-            </Pressable>
+            </Lift>
           );
         })}
       </View>

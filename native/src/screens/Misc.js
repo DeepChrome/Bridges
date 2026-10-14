@@ -7,9 +7,9 @@ import * as ScreenOrientation from "expo-screen-orientation";
 import { setStatusBarHidden } from "expo-status-bar";
 import { YouTube } from "../youtube";
 import { useSession } from "../session";
-import { useTheme, radius, space } from "../theme";
+import { useTheme, radius, space, type as T } from "../theme";
 import { Screen, List, Row, Card, Btn, Pill, Thumb, Muted, Title, SearchField, SectionLabel, Sheet,
-         Dropdown, Text, COG_PATH } from "../ui";
+         Dropdown, Text, COG_PATH, RowText, ToggleRow } from "../ui";
 import {
   UN, STATS, unitState, markComponent, videos, videoById, videoWatched, unitById,
   CHANNELS, videoLines, transcriptOf, transcriptEnOf, nextRoute,
@@ -385,14 +385,10 @@ export function VideoSettings({ videoId, at, captions, onCaptions, onClose }) {
     <Sheet testID="video-settings" onClose={onClose}
            footer={<Btn block kind="pri" label="Done" style={{ marginTop: 14 }} onPress={onClose} />}>
       <List>
-        <Row>
-          <Text style={{ flex: 1, color: t.ink, fontSize: 16 }}>Subtitles</Text>
-          <Switch testID="video-captions" value={captions} accessibilityLabel="Subtitles"
-                  onValueChange={onCaptions} trackColor={{ true: t.good, false: t.surface3 }} />
-        </Row>
+        <ToggleRow title="Subtitles" testID="video-captions" value={captions} onValueChange={onCaptions} />
         <Row testID="video-youtube"
              onPress={() => Linking.openURL(`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor((at || 0) / 1000)}s`)}>
-          <Text style={{ flex: 1, color: t.ink, fontSize: 16 }}>Watch on YouTube</Text>
+          <RowText title="Watch on YouTube" bold={false} />
         </Row>
       </List>
     </Sheet>
@@ -495,7 +491,7 @@ export function VideoHistory({ navigation }) {
                     ) : null}
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text numberOfLines={2} style={{ color: t.ink, fontSize: 15, fontWeight: "600" }}>
+                    <Text numberOfLines={2} style={{ color: t.ink, fontSize: T.body, fontWeight: "600" }}>
                       {short(v.title)}
                     </Text>
                     <Muted>
@@ -596,7 +592,7 @@ export function Immerse({ navigation }) {
                 <VideoThumb id={v.id} done={watched} />
                 <View style={{ flex: 1 }}>
                   <Text numberOfLines={2}
-                        style={{ color: watched ? t.ink2 : t.ink, fontSize: 15, fontWeight: "600" }}>
+                        style={{ color: watched ? t.ink2 : t.ink, fontSize: T.body, fontWeight: "600" }}>
                     {short(v.title)}
                   </Text>
                   <Muted>

@@ -1,0 +1,12 @@
+# The lesson's step cards (Unit.js LessonScreen), through Lift since WP8.
+#   .\native\tools\walk.ps1 -Flow native\flows\lessonsteps.txt -Device emulator-5554
+tap:^Learn$
+wait:2
+tap:^First Words$
+wait:2
+tap:^Lesson 1$
+wait:2
+shot:v14-lesson-steps
+back
+wait:1
+back

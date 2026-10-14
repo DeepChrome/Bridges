@@ -20,6 +20,12 @@
  */
 
 import { say, stop, releaseAudio, cue, probeVoices } from "../src/audio";
+import { SPEECH } from "../src/data";
+
+/* A pool sentence, read off the payload: every one has a bought clip, and a
+   literal («Кто это?») left the pool in the 2026-10-13 re-cut and went
+   silent. */
+const SENTENCE = SPEECH.rows[0][0];
 
 beforeEach(async () => {
   jest.clearAllMocks();
@@ -37,7 +43,7 @@ describe("leaving a lesson", () => {
     // clip since every pool sentence was bought (2026-10-01): a module, not a
     // stream, so the player is counted from where it starts, not by its uri.
     const before = global.__players.length;
-    await say("Кто это?");
+    await say(SENTENCE);
     const made = global.__players.slice(before);
     expect(made.length).toBeGreaterThan(0);
 
@@ -48,7 +54,7 @@ describe("leaving a lesson", () => {
 
   it("does not leave a player behind for the next screen to fight", async () => {
     const before = global.__players.length;
-    await say("Кто это?");
+    await say(SENTENCE);
     stop();
     // Everything this made has been given back — and it made something, or
     // the loop below would pass on nothing.
@@ -65,7 +71,7 @@ describe("leaving a lesson", () => {
      (2026-10-03: "most don't work… then REALLY low quality robotic woman"). */
   it("frees every player it lets go, not only forgets it", async () => {
     const before = global.__players.length;
-    for (let k = 0; k < 20; k++) await say("Кто это?");
+    for (let k = 0; k < 20; k++) await say(SENTENCE);
     stop();
     const made = global.__players.slice(before);
     expect(made.length).toBe(20);
@@ -99,7 +105,7 @@ describe("a screen whose audio is not ours", () => {
   });
 
   it("lets audio work again afterwards", async () => {
-    await say("Кто это?");
+    await say(SENTENCE);
     releaseAudio();
     // The session re-arms on the next use rather than staying dead.
     await say("Это я.");

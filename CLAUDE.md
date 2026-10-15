@@ -6618,6 +6618,37 @@ the ask sheet's box and button sat behind the keys), so `Sheet` pads by the
 the keyboard's top when it opens, which is zero on a window that already
 moved. A fixed pad would shrink a resized sheet twice.
 
+## 30ce. Drive mode (2026-10-15)
+
+The owner: *"a drive mode feature where it plays audio russian lessons… Perhaps
+learn russian podcast or something?"* Practice → Listening → **Drive mode**: a
+hands-free lesson built the way Pimsleur builds one, because that is the method
+made for a listener who cannot look at a screen.
+
+- **`core/drive.js` is the method, pure**: `driveScript(items)` turns items
+  into segments — the English, a pause to say the Russian aloud
+  (`DRIVE_GAP`: 2.6 s a word, 4.2 s a sentence), the Russian twice when new,
+  and every item asked again `DRIVE_RECALL` (2 and 5) items later with nothing
+  given first. `core.test.mjs` holds the order (never the answer before the
+  pause) and the counts.
+- **What it plays** (`driveFrom` in Drive.js): the newest fourteen words of
+  `personalWords` with a bought clip, and short pool sentences from the units
+  reached, newest first — one voice (§30bq). The English is the phone's
+  English voice. **Nothing is graded** (§30z: a word said in a car is not a
+  claim).
+- **It plays on with the phone locked.** Android stops a backgrounded app's
+  sound after a few minutes unless a media session shows on the lock screen,
+  and every clip here is its own short player, so `startCarrier` in audio.js
+  loops `assets/silence.mp3` underneath as the session's owner and sets it
+  active for the lock screen; `shouldPlayInBackground` is on only while it
+  runs. Focus is expo-audio's module-wide, so the clips do not take it from
+  the carrier. The lock screen's pause and play reach the drive through the
+  carrier's status (`__asked` marks the app's own presses). `stopCarrier` on
+  leaving the screen gives everything back.
+- `jest.setup.js`'s player never finishes when `loop` is set, as a looping
+  player does not. `drive.test.js` pins English-first, the carrier held and
+  freed, pause silencing everything, and nothing graded.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

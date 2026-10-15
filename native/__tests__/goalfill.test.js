@@ -15,7 +15,7 @@
  */
 import { goalSession, GOAL_REVIEWS, MASTERED_EVERY } from "@core/queue";
 import { applyGrade, familiarity, REVIEW, DAY, dayOf } from "@core/scheduler";
-import { sessionFor } from "../src/screens/Study";
+import { sessionFor } from "../src/studycards";
 import { L } from "../src/data";
 
 const sched = { fuzz: false };

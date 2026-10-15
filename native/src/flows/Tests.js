@@ -2,7 +2,8 @@
 
 import React, { useMemo, useState } from "react";
 import { useSession } from "../session";
-import { Runner, Done, useAudioStopOnLeave, useResume } from "../screens/Run";
+import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
+import { useResume } from "../resume";
 import { Q, TEST_OUT, FINAL_N } from "../questions";
 import { UN, STAGES, lessonCount, markComponent, PASS_MARK, required } from "../data";
 import { scoreOf, bestOf } from "./shared";

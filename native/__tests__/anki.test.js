@@ -11,7 +11,8 @@ import { unzipSync, zipSync, strToU8, strFromU8 } from "fflate";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Study, { sessionFor, cardsIn } from "../src/screens/Study";
+import Study from "../src/screens/Study";
+import { sessionFor, cardsIn } from "../src/studycards";
 import { importDeck, readCollection } from "../src/anki";
 import { cardFromFields, decksFromNotes, parseTextDeck } from "@core/anki";
 import { UN, L } from "../src/data";

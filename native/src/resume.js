@@ -15,7 +15,13 @@
  * card. Writes go straight to storage — an answer is seconds apart from the
  * next, and a run must survive the app being killed between two of them. */
 
+import React, { useState } from "react";
+import { View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Screen, Btn, Text } from "./ui";
+import { type as T } from "./theme";
+import { GuidePop } from "./guide";
+import { RunCard } from "./resumesheet";
 import { CURRICULUM } from "./data";
 import { expo as APP } from "../app.json";
 
@@ -97,4 +103,45 @@ export function resetResume() {
   profile = null;
   runs = {};
   offered = false;
+}
+
+/* Whether a flow starts fresh or from where it was left (resume.js). Returns
+   `{ restore, prompt }`: while a saved run waits on the learner's choice,
+   `prompt` is the screen to show instead of the runner. `params.resume`
+   (from the prompt on the way back into the app) means the choice is made. */
+/* `onRestart` is what "Start again" leads to before question 1 — a drill's
+   options (the owner, 2026-10-04: "If the person says they don't want to
+   continue, I'd expect it to prompt them for the question types prior to
+   going to question 1"). */
+export function useResume(key, params, { onRestart } = {}) {
+  const [choice, setChoice] = useState(() => {
+    const run = savedRun(key);
+    if (!run) return { restore: null };
+    return params && params.resume ? { restore: run } : { pending: run };
+  });
+  const prompt = choice.pending ? (
+    <ResumePrompt run={choice.pending}
+                  onContinue={() => setChoice({ restore: choice.pending })}
+                  onRestart={() => { clearRun(key); setChoice({ restore: null }); if (onRestart) onRestart(); }} />
+  ) : null;
+  return { restore: choice.restore || null, prompt };
+}
+
+export function ResumePrompt({ run, onContinue, onRestart }) {
+  return (
+    <Screen fill>
+      <View testID="resume-prompt"
+            style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 16 }}>
+        <GuidePop pose="wave" size={96} style={{ marginBottom: 14 }} />
+        <Text style={{ fontSize: T.title, fontWeight: "700", textAlign: "center", marginBottom: 18 }}>
+          Pick up where you left off
+        </Text>
+        <View style={{ alignSelf: "stretch" }}><RunCard run={run} /></View>
+      </View>
+      <View style={{ gap: 10 }}>
+        <Btn block kind="pri" label="Continue" onPress={onContinue} />
+        <Btn block kind="ghost" label="Start again" onPress={onRestart} />
+      </View>
+    </Screen>
+  );
 }

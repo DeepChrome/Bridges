@@ -24,7 +24,7 @@ import { shareFeedback } from "../backup";
 import { readCrashes } from "../crash";
 import { GuidePop } from "../guide";
 import { UN, routePosition, lessonsDone } from "../data";
-import { masteryOf } from "./Study";
+import { masteryOf } from "../studycards";
 import { cardFor } from "@core/scheduler";
 import { useClips, clipData, CLIPS_MAX } from "../recorder";
 import { playTrack, stop as stopAudio } from "../audio";

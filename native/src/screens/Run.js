@@ -12,16 +12,15 @@ import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import Svg, { Path } from "react-native-svg";
 import { markOutOfFive } from "../appearance";
-import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
+import { Screen, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
          BulbButton } from "../ui";
 import { RunTools } from "../askai";
-import { Reference, hasReference, IrregularTag } from "../rules";
+import { Reference, hasReference } from "../rules";
 import { isIrregular } from "@core/facts";
-import { formFlags, GENDER_NAMES } from "@core/forms";
 import { GuidePop } from "../guide";
 import { saveRun, clearRun, savedRun } from "../resume";
-import { RunCard } from "../resumesheet";
-import { useEnter, usePop, useSwap, usePress } from "../motion";
+import { Verdict, CYR } from "../verdict";
+import { usePop, useSwap, usePress } from "../motion";
 import { guideLine, poseFor, reactionFor, LINES } from "@core/guide";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
 import { right as buzzRight, wrong as buzzWrong, done as buzzDone } from "../haptics";
@@ -42,8 +41,6 @@ import { fold, firstSense } from "@core/util";
 /* The row of round tools under a question — speaker, bulb, Teddy, flag. */
 export const TOOL_SIZE = 48;
 const TOOL_GAP = 20;
-/* The right answer under a verdict: the largest thing on the card. */
-const ANSWER_SIZE = 26;
 
 /* The kinds whose miss the profile keeps for the tutor: one right answer, one
    thing the learner put instead. The speaking and listening activities carry their
@@ -297,7 +294,6 @@ export function referenceFor(q) {
 
 /* What the prompt can be read aloud as: the generator's own `say`, else a
    Russian prompt with no gap in it. Exported for the test. */
-const CYR = /[Ѐ-ӿ]/;
 export function promptSpeech(q) {
   if (q.say) return q.say;
   if (q.cyr && q.prompt && CYR.test(q.prompt) && !/_/.test(q.prompt)) return q.prompt;
@@ -642,32 +638,6 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   stepBackRef.current = goBack;
   const back = !allowBack || at === 0 ? undefined : goBack;
 
-  const answer = q.options ? q.options.find((o) => o.right) : null;
-  const right = verdict ? verdict.right : null;
-  const partial = verdict && verdict.right === false && verdict.credit > 0;
-  /* The right answer as the verdict shows it: the right answer the learner
-     gave when it was another accepted one, else the one asked for. */
-  const answerText = (verdict && verdict.as) || (answer ? answer.label : q.answer) || null;
-  const answerSpeech = (verdict && verdict.as) || answerAudioText(q, answer);
-  /* The answer's form as flags — case and number, tense and person, gender —
-     only when the answer is a form of the question's word. A noun's gender
-     rides along, since its table does not carry it. */
-  const answerFlags = (() => {
-    if (!qWord || !answerText || !CYR.test(answerText)) return [];
-    const flags = formFlags(qWord, answerText);
-    if (!flags.length) return [];
-    const g = qWord.p === "noun" && qWord.g && GENDER_NAMES[qWord.g];
-    return g && !flags.includes(g) ? flags.concat([g]) : flags;
-  })();
-  const tone = !verdict || verdict.right === null ? null
-    : verdict.right ? { bg: t.goodBg, line: t.good, btn: "good" }
-    : partial ? { bg: t.brandBg, line: t.brand, btn: "pri" }
-    : { bg: t.badBg, line: t.bad, btn: "bad" };
-  /* The verdict rises into place instead of appearing whole. It is the one
-     moment in a quiz where something happens *to* the learner rather than
-     because of them, and it used to be indistinguishable from a re-render.
-     Keyed on the step as well as `answered` so it plays once per question. */
-  const verdictIn = useEnter([answered, at], { distance: 14 });
   /* Keyed on the question rather than on the index: a recycled question comes
      back at a different position, and a learner who has just been handed the
      same word again should see it arrive rather than find it already there. */
@@ -799,106 +769,8 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       </Animated.View>
 
       {answered ? (
-        // At the foot of the screen, so Continue sits in the same place on every
-        // question instead of wherever the options happened to end — the same
-        // rule Flows.js and the web runner already follow. The gap lives on the
-        // wrapper, not the card.
-        //
-        // `paddingTop`, not `marginTop: "auto"`: the question block above now
-        // carries flexGrow and takes the slack, so the verdict is already at the
-        // foot and an auto margin would have nothing left to push against.
-        <Animated.View testID="verdict" style={[verdictIn, { paddingTop: 18 }]}>
-          <Card style={tone ? { backgroundColor: tone.bg, borderColor: tone.line } : undefined}>
-            {/* Teddy turns up for a clean answer and nowhere else in the runner.
-                He is the reward, so he has to stay rare: on every verdict he
-                would be wallpaper within one quiz, and on a wrong answer he
-                would be a cartoon commiserating with someone who is trying to
-                concentrate. */}
-            {/* A heading for a right, partial or skipped answer. A wrong one
-                has none: the colour says it, and the answer below is what
-                matters (the owner, 2026-10-09: "Remove 'not quite' and make the
-                correct answer larger"). */}
-            {right !== false || partial ? (
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                {right === true && !usedHint ? <GuidePop pose="cheer" size={40} /> : null}
-                <Text style={{ color: t.ink, fontWeight: "700", fontSize: 16 }}>
-                  {right === null ? "Skipped" : right ? "Correct" : "Almost"}
-                </Text>
-              </View>
-            ) : null}
-            {/* The right answer, large, with its speaker right beside it — not
-                at the far end of a heading (the owner, 2026-10-09: "make sure
-                the speaker button is aligned more with what is actually
-                said"). Russian is a word link like everywhere else: one tap
-                for the quick look, its More for the whole entry. That
-                replaced a separate More button here (same day: "put its
-                functionality into clicking the answer itself"). */}
-            {right !== null && answerText ? (
-              <View testID="verdict-answer" style={{ flexDirection: "row", alignItems: "center",
-                                                     flexWrap: "wrap", gap: 10 }}>
-                {/* An English answer ("book") cannot be tapped into a Russian
-                    word, so the word it means comes first, linked: «книга — book». */}
-                {CYR.test(answerText) ? (
-                  <Linked text={answerText} size={ANSWER_SIZE} />
-                ) : (
-                  <>
-                    {qWord ? <Linked text={qWord.w} size={ANSWER_SIZE} /> : null}
-                    <Text style={{ color: qWord ? t.ink2 : t.ink, fontSize: qWord ? ANSWER_SIZE - 6 : ANSWER_SIZE,
-                                   fontWeight: "700" }}>
-                      {qWord ? `— ${answerText}` : answerText}
-                    </Text>
-                  </>
-                )}
-                {answerSpeech ? (
-                  <View testID="verdict-speaker"><Speaker text={answerSpeech} size={40} /></View>
-                ) : null}
-                {/* The answer card says when the word breaks the rules
-                    (2026-09-29), right or wrong. */}
-                {irregular ? <IrregularTag word={qWord} testID="verdict-irregular" /> : null}
-              </View>
-            ) : null}
-            {/* What form the answer is, as little flags (the owner, 2026-10-09:
-                "the case, the tense, the plurality, the gender… don't make it
-                too verbose. Just little flags"): read off the word's own table,
-                the same flags the quick look shows. */}
-            {right !== null && answerFlags.length ? (
-              <View testID="verdict-flags" style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
-                {answerFlags.map((f) => <Pill key={f}>{f}</Pill>)}
-              </View>
-            ) : null}
-            {verdict && verdict.note ? (
-              <Text style={{ color: t.ink2, marginTop: 4, fontSize: T.body }}>{verdict.note}</Text>
-            ) : null}
-            {/* The answer, its audio and More — nothing else (the owner,
-                2026-10-08: "Remove the bloat in the pop-up. Don't need forced
-                AI responses. Instead, just leave the answer, the audio, and
-                the full entry"). The model's explanation, the derived one, the
-                fact pills and the rule card all used to come under a miss;
-                the sparkle beside the question asks Teddy when a learner
-                wants the why. */}
-            {/* A gap-fill gives the sentence back whole, every word a link, and
-                names the form that filled it. */}
-            {right !== null && q.reveal ? (
-              <View style={{ marginTop: 8 }}>
-                <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-                  <View style={{ flex: 1 }}><Linked text={q.reveal} size={17} /></View>
-                  <Speaker text={q.reveal} size={32} />
-                </View>
-                {/* The form is named by the flags above now, not a sentence
-                    («добра́» is short form · f) — except where there are none. */}
-                {q.formNote && !answerFlags.length ? <Muted style={{ marginTop: 3 }}>{q.formNote}</Muted> : null}
-              </View>
-            ) : null}
-            {/* "Comes round again" and "Right, with a hint" used to sit here.
-                Both explained a mechanism rather than telling the learner
-                anything they could act on — the question does come round again,
-                and they will see it; the hint button said it counted before it
-                was pressed. The owner, 2026-09-10: "don't have to explain
-                features that don't have to be explained." */}
-            <Btn block kind={tone ? tone.btn : "plain"} label="Continue"
-                 style={{ marginTop: 12 }} onPress={next} />
-          </Card>
-        </Animated.View>
+        <Verdict q={q} qWord={qWord} verdict={verdict} at={at} usedHint={usedHint}
+                 irregular={irregular} onNext={next} />
       ) : null}
 
       {hintOpen ? (
@@ -922,47 +794,6 @@ const GUIDE_KINDS = Object.keys(LINES);
    Continue (or Done), and "Try again" drops to a ghost — it used to be the
    blue button whether the quiz was passed or failed, so passing read as an
    invitation to do it over (the interface review, 2026-09-08). */
-/* Whether a flow starts fresh or from where it was left (resume.js). Returns
-   `{ restore, prompt }`: while a saved run waits on the learner's choice,
-   `prompt` is the screen to show instead of the runner. `params.resume`
-   (from the prompt on the way back into the app) means the choice is made. */
-/* `onRestart` is what "Start again" leads to before question 1 — a drill's
-   options (the owner, 2026-10-04: "If the person says they don't want to
-   continue, I'd expect it to prompt them for the question types prior to
-   going to question 1"). */
-export function useResume(key, params, { onRestart } = {}) {
-  const [choice, setChoice] = useState(() => {
-    const run = savedRun(key);
-    if (!run) return { restore: null };
-    return params && params.resume ? { restore: run } : { pending: run };
-  });
-  const prompt = choice.pending ? (
-    <ResumePrompt run={choice.pending}
-                  onContinue={() => setChoice({ restore: choice.pending })}
-                  onRestart={() => { clearRun(key); setChoice({ restore: null }); if (onRestart) onRestart(); }} />
-  ) : null;
-  return { restore: choice.restore || null, prompt };
-}
-
-export function ResumePrompt({ run, onContinue, onRestart }) {
-  return (
-    <Screen fill>
-      <View testID="resume-prompt"
-            style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 16 }}>
-        <GuidePop pose="wave" size={96} style={{ marginBottom: 14 }} />
-        <Text style={{ fontSize: T.title, fontWeight: "700", textAlign: "center", marginBottom: 18 }}>
-          Pick up where you left off
-        </Text>
-        <View style={{ alignSelf: "stretch" }}><RunCard run={run} /></View>
-      </View>
-      <View style={{ gap: 10 }}>
-        <Btn block kind="pri" label="Continue" onPress={onContinue} />
-        <Btn block kind="ghost" label="Start again" onPress={onRestart} />
-      </View>
-    </Screen>
-  );
-}
-
 export function Done({ title, detail, score, passed, onAgain, onBack, againLabel, onContinue, continueLabel, guide }) {
   const t = useTheme();
   const tone = passed === false ? { bg: t.badBg, fg: t.bad }

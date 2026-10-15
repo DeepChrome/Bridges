@@ -9,7 +9,8 @@ import { render, screen, fireEvent, act } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Study, { sittingTally, masteryOf, MASTERED_AT } from "../src/screens/Study";
+import Study from "../src/screens/Study";
+import { sittingTally, masteryOf, MASTERED_AT } from "../src/studycards";
 import { L } from "../src/data";
 import { dayOf } from "@core/scheduler";
 

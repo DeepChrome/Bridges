@@ -10,7 +10,7 @@
  * Own file, per the timeout note in screens.test.js.
  */
 
-import { cardsIn, sessionFor, sentencesFor, studyCards, newCardRank } from "../src/screens/Study";
+import { cardsIn, sessionFor, sentencesFor, studyCards, newCardRank } from "../src/studycards";
 import { DAY, REVIEW, NEW } from "@core/scheduler";
 import { SPEECH, STAGES, dueCount } from "../src/data";
 import { hasRealAudio } from "../src/audio";

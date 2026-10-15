@@ -18,7 +18,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Study, { flagsFor, FRONTS, sessionFor, newCardRank } from "../src/screens/Study";
+import Study from "../src/screens/Study";
+import { flagsFor, sessionFor, newCardRank } from "../src/studycards";
+import { FRONTS } from "../src/studypicker";
 import { L, dueCount } from "../src/data";
 import { hasRealAudio, refreshVoices } from "../src/audio";
 import { act } from "@testing-library/react-native";
@@ -123,7 +125,7 @@ describe("the card says what it is", () => {
 
   it("counts a pinned word as trouble", () => {
     const st = { ...base, seen: { [WORD]: { recognise: due() } }, pinned: [WORD] };
-    const { troubleWords } = require("../src/screens/Study");
+    const { troubleWords } = require("../src/studycards");
     expect(troubleWords(st)).toContain(WORD);
     expect(troubleWords({ ...st, pinned: [] })).not.toContain(WORD);
   });
@@ -335,7 +337,7 @@ describe("after the day's pile", () => {
   });
 
   it("offers a round of known words, least held first", async () => {
-    const { knownWords } = require("../src/screens/Study");
+    const { knownWords } = require("../src/studycards");
     const later = (s) => due({ dueAt: now + 5 * DAY, s });
     const st = { seen: { "да": { recognise: later(30) }, "нет": { recognise: later(2) },
                          [WORD]: { recognise: fresh() } }, cardKinds: ["words"], learnAhead: 20 };

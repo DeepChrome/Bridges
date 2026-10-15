@@ -6,8 +6,8 @@ import { View } from "react-native";
 import { useSession } from "../session";
 import { useTheme } from "../theme";
 import { Screen, Btn, Muted, SectionLabel, Chip, Loading } from "../ui";
-import { Runner, Done, useAudioStopOnLeave, useResume, ResumePrompt } from "../screens/Run";
-import { clearRun, savedRun } from "../resume";
+import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
+import { clearRun, savedRun, useResume, ResumePrompt } from "../resume";
 import { Q, QUIZ_KINDS, QUIZ_LENGTHS } from "../questions";
 import {
   UN, STAGES, PASS_MARK, unitUnlocked, reachedUnits, todaysWork, recapKey,

@@ -7,8 +7,8 @@ import { useSession } from "../session";
 import { useTheme, type as T } from "../theme";
 import { Screen, Btn, List, Row, SectionLabel, Chip, Tick, Text,
          Sheet, Choice, CogButton, Loading, RowText } from "../ui";
-import { Runner, Done, useAudioStopOnLeave, useResume } from "../screens/Run";
-import { clearRun, savedRun } from "../resume";
+import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
+import { clearRun, savedRun, useResume } from "../resume";
 import { Q, DRILL_TYPES } from "../questions";
 import {
   L, UN, STAGES, DRILL_PASS, SHADOW_PASS, drillPool,

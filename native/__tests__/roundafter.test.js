@@ -9,7 +9,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Study, { sessionFor } from "../src/screens/Study";
+import Study from "../src/screens/Study";
+import { sessionFor } from "../src/studycards";
 import { SCHEMA_VERSION } from "@core/state";
 import { REVIEW, DAY } from "@core/scheduler";
 

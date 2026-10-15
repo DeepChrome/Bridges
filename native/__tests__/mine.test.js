@@ -7,7 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState, normalise } from "../src/store";
-import { Video } from "../src/screens/Misc";
+import { Video } from "../src/screens/Video";
 import Study from "../src/screens/Study";
 import { videos, unitById, L, idxOfWord } from "../src/data";
 import { migrate, SCHEMA_VERSION } from "@core/state";
@@ -72,7 +72,7 @@ describe("mining a word from a video", () => {
     expect(saved.seen[word].recognise).toMatchObject({ s: 0, reps: 0, lapses: 0, state: 0 });
     expect(saved.seen[word].recognise.dueAt).toBeLessThanOrEqual(Date.now());
     const { reviewWords } = require("../src/data");
-    const { cardsIn } = require("../src/screens/Study");
+    const { cardsIn } = require("../src/studycards");
     expect(reviewWords(saved)).toContain(idxOfWord(word));
     expect(cardsIn(saved, ["__due__"]).map((c) => c.b)).toContain(word);
     // Said once, and it says so rather than offering to add it again.

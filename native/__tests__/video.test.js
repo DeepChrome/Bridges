@@ -8,8 +8,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { Immerse, Video, VideoSummary, searchVideos, libraryOrder, videoFor, channelsOf, VIDEO_SORTS }
-  from "../src/screens/Misc";
+import { Immerse } from "../src/screens/Immerse";
+import { Video, videoFor } from "../src/screens/Video";
+import { VideoSummary } from "../src/screens/VideoSummary";
+import { searchVideos, libraryOrder, channelsOf, VIDEO_SORTS } from "../src/video";
 import { UN, videos, unitById } from "../src/data";
 import { fold, firstSense } from "@core/util";
 
@@ -317,7 +319,7 @@ describe("Video", () => {
     const lines = videoLines(unit).map((l) => l.ru);
     expect(lines.length).toBeGreaterThan(0);
     // …and the round ends on the way back to the summary.
-    const { short } = require("../src/screens/Misc");
+    const { short } = require("../src/video");
     expect(nav.navigate).toHaveBeenCalledWith("ListCards", { round: "list", words: heard.concat(lines),
                                                              title: short(unitVideo.title), after: "Back to the summary" });
     expect(screen.getByTestId("prep-lines")).toBeTruthy();

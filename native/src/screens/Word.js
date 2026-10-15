@@ -19,7 +19,7 @@ import { L, UN, resolveWord, heardIn, sensesOf, rankOf } from "../data";
 import { Linked, GrammarLine } from "../words";
 import { useAbout, cardAbout } from "../about";
 import { pictureOf, Photo } from "../pictures";
-import { clock, short } from "./Misc";
+import { clock, short } from "../video";
 
 /* How many videos an entry lists under "Heard in" before it asks. Four is a
    glance; 22 % of the words the library says are said in more than four videos

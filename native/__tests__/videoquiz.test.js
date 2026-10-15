@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { VideoSummary } from "../src/screens/Misc";
+import { VideoSummary } from "../src/screens/VideoSummary";
 import { UN, lessonCount, nextRoute, markComponent, components } from "../src/data";
 
 const unit = UN.find((u) => u.v && u.v.quiz);

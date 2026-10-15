@@ -6,7 +6,7 @@ import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
 import { PASS_MARK, nextRoute } from "../data";
 import { StackActions } from "@react-navigation/native";
 import { shuffle } from "@core/util";
-import { videoFor } from "../screens/Misc";
+import { videoFor } from "../screens/Video";
 import { scoreOf, bestOf } from "./shared";
 
 /* ------------------------------------------------------------- the video's questions */

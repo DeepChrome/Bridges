@@ -12,7 +12,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider, useSession } from "../src/session";
 import { flushState } from "../src/store";
-import { Immerse, Video, VideoHistory, VideoOverlay, VIDEO_SPEEDS } from "../src/screens/Misc";
+import { Immerse, VideoHistory } from "../src/screens/Immerse";
+import { Video, VideoOverlay, VIDEO_SPEEDS } from "../src/screens/Video";
 import { videos } from "../src/data";
 import { setVideoPosition, openedVideo, watchHistory, videoPosition, libraryState,
          loadImmerse, flushImmerse, resetImmerse } from "../src/immerse";

@@ -135,9 +135,14 @@ export function Text({ style, children, ...rest }) {
 }
 
 /* Typed answers are text too, in the same face as everything else. */
-export function TextInput({ style, ...rest }) {
+export function TextInput({ style, placeholderTextColor, ...rest }) {
+  const t = useTheme();
   const flat = StyleSheet.flatten(style) || {};
-  return <RNTextInput {...rest} style={[style, { fontFamily: faceFor(flat.fontWeight) }, { fontWeight: "normal" }]} />;
+  /* The ink is the theme's unless the caller says otherwise: a bare input
+     took Android's default black, which on the dark theme put the tutor's
+     typed question in black on near-black (the emulator, 2026-10-15). */
+  return <RNTextInput {...rest} placeholderTextColor={placeholderTextColor || t.ink3}
+                      style={[{ color: t.ink }, style, { fontFamily: faceFor(flat.fontWeight) }, { fontWeight: "normal" }]} />;
 }
 
 /* `fill` makes the content container grow to the height of the screen, which is what

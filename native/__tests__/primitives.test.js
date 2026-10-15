@@ -7,8 +7,20 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react-native";
 import { View, StyleSheet } from "react-native";
 
-import { RowText, IconButton, ToggleRow, List, toneOf, ICON_TARGET } from "../src/ui";
-import { type, light, faceFor } from "../src/theme";
+import { RowText, IconButton, ToggleRow, List, toneOf, ICON_TARGET, TextInput } from "../src/ui";
+import { type, light, dark, faceFor } from "../src/theme";
+
+describe("TextInput", () => {
+  /* A bare input took Android's default black, which on the dark theme put
+     the tutor's typed question in black on near-black (2026-10-15). */
+  it("writes in the theme's ink unless told otherwise, and its placeholder in the muted ink", async () => {
+    await render(<View><TextInput testID="ti" placeholder="Ask" /><TextInput testID="own" style={{ color: "#123456" }} /></View>);
+    const ti = screen.getByTestId("ti");
+    expect([light.ink, dark.ink]).toContain(StyleSheet.flatten(ti.props.style).color);
+    expect([light.ink3, dark.ink3]).toContain(ti.props.placeholderTextColor);
+    expect(StyleSheet.flatten(screen.getByTestId("own").props.style).color).toBe("#123456");
+  });
+});
 
 describe("RowText", () => {
   it("is the body size, bold by default, with its second line muted", async () => {

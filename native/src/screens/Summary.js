@@ -21,7 +21,7 @@ import { Linked } from "../words";
 import { RuleCard } from "../rules";
 import { WordSections, WordRow, prepSentences, VideoLines } from "../prep";
 import { UN, L, lessonWords, lessonCount, markComponent, linesWith, stepRoute,
-         components } from "../data";
+         afterStep } from "../data";
 
 const unitWordIdxs = (unit) => Array.from({ length: lessonCount(unit) }, (_, k) => lessonWords(unit, k)).flat();
 
@@ -124,9 +124,7 @@ function onwardOf(st, unit, index, whole) {
     if (unit.v) return ["Video", { videoId: unit.v.id, unitId: unit.id, index: whole ? 0 : index }];
   }
   if (whole) return null;
-  const cs = components(st, unit, index);
-  const at = cs.findIndex((c) => c.id === "summary");
-  const after = cs.find((c, k) => k > at && !c.done && c.id !== "video" && c.id !== "vwords");
+  const after = afterStep(st, unit, index, "summary", ["video", "vwords"]);
   if (after) return stepRoute(after.id, unit, index);
   return index + 1 < lessonCount(unit) ? ["Vocab", { unitId: unit.id, index: index + 1 }] : null;
 }

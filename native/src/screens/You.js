@@ -8,7 +8,7 @@ import { Screen, List, Row, Btn, Pill, Muted, Avatar, SectionLabel, Sheet, Text,
 import { plan as askPlan, setPlan } from "../lib/feedback";
 import { PLANS, PLAN_NAMES, ALLOWANCE_LINES, planOf } from "@core/plans";
 import { L, UN, STAGES, idxOfWord, lessonCount, lessonDone, lessonWords, dueCount, chapterOf } from "../data";
-import { troubleWords } from "./Study";
+import { troubleWords } from "../studycards";
 import { tagInfo } from "@core/errortags";
 import { maxLapses, cardFor, REVIEW } from "@core/scheduler";
 import { Settings } from "./Settings";

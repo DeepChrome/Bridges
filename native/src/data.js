@@ -355,6 +355,16 @@ export function nextComponent(cs) {
     || cs.find((c) => !c.done) || null;
 }
 
+/* What a finished step leads on to: the first step of the lesson after the
+   named one that is not done yet (`skip` names steps a caller sends elsewhere),
+   or null at the end. One reader for the quiz, the case module and the summary,
+   which each used to scan the components by hand (WP8.9). */
+export function afterStep(st, u, i, id, skip = []) {
+  const cs = components(st, u, i);
+  const at = cs.findIndex((c) => c.id === id);
+  return cs.find((c, k) => k > at && !c.done && !skip.includes(c.id)) || null;
+}
+
 /* Whether a unit has a grammar point to practise: its card's `form`, or its
    chapter spine's (a side quest inherits it, as core/questions.js formSpec
    does). Chapter 1 has none. Read here rather than off the questions module,

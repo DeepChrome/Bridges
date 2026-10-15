@@ -8,7 +8,7 @@ import { Screen, Btn, Muted, List, Row, Thumb, SectionLabel, Text, RowText } fro
 import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
 import { GrammarNote } from "../lesson";
 import { Q } from "../questions";
-import { UN, components, stepRoute, caseLearnKey, caseDrillKey } from "../data";
+import { UN, afterStep, stepRoute, caseLearnKey, caseDrillKey } from "../data";
 import { CASES, caseById } from "@core/cases";
 import { scoreOf, bestOf } from "./shared";
 
@@ -131,9 +131,7 @@ export function CaseFlow({ route, navigation }) {
     /* From a lesson step, on through the lesson; from the hub, a lesson goes
        on to its drill and a drill back to the case. */
     const unit = unitId ? UN.find((u) => u.id === unitId) : null;
-    const cs = unit ? components(st, unit, index) : [];
-    const here = cs.findIndex((x) => x.id === "case");
-    const after = unit ? cs.find((x, k) => k > here && !x.done) || null : null;
+    const after = unit ? afterStep(st, unit, index, "case") : null;
     return (
       <Done
         title={mode === "drill" ? `${c.name} drill` : `The ${c.name.toLowerCase()} case`}

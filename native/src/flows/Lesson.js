@@ -13,7 +13,7 @@ import { VideoLines } from "../prep";
 import { Q } from "../questions";
 import {
   L, UN, lessonWords, lessonCount, markComponent, PASS_MARK,
-  reviewWords, linesWith, components, stepRoute,
+  reviewWords, linesWith, afterStep, stepRoute,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { firstSense } from "@core/util";
@@ -298,9 +298,7 @@ export function QuizFlow({ route, navigation }) {
     const { passed, relief, thisRun } = result;
     const last = index + 1 >= lessonCount(unit);
     const missed = missedWords(result.results, lessonWords(unit, index));
-    const cs = components(st, unit, index);
-    const quizAt = cs.findIndex((c) => c.id === "quiz");
-    const after = cs.find((c, k) => k > quizAt && !c.done) || null;
+    const after = afterStep(st, unit, index, "quiz");
     return (
       <Done
         title={relief ? `Passed on the ${ordinal(result.tries)} try`
@@ -327,7 +325,7 @@ export function QuizFlow({ route, navigation }) {
           else { setResult(null); setSeed(seed + 1); }
         }}
         /* On to what follows in this lesson — the summary, then the video
-           (data.js components) — and only then the next lesson. */
+           (data.js afterStep) — and only then the next lesson. */
         onContinue={!passed ? undefined
           : after ? () => navigation.replace(...stepRoute(after.id, unit, index))
           : !last ? () => navigation.replace("Vocab", { unitId, index: index + 1 })

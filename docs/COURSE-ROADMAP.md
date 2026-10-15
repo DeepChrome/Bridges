@@ -547,6 +547,19 @@ worse; a grep for `lineSoftSoft`, `textTransform`, `"800"` finds none.
 
 ## 11. WP8 — The look (code; read screenshots, not code, to judge)
 
+> **2026-10-15, item 9 done** (three agents, pure moves, 777 tests green
+> after each): `Flows.js` → `screens/Practice.js` + `flows/{Lesson, Drills,
+> Cases, Listening, Quiz, Tests, VideoQuiz, shared}.js`; `Run.js` → the
+> verdict in `verdict.js`, `useResume`/`ResumePrompt` in `resume.js`;
+> `Study.js` → `studycards.js` (the card and session helpers) and
+> `studypicker.js`; `Misc.js` → `screens/{Immerse, Video, VideoSummary}.js`
+> + `video.js`; `Settings` out of `You.js` into `screens/Settings.js`;
+> `afterStep()` in data.js replaces the quiz's, the case module's and the
+> summary's own scans. Largest screen files now 836 (Run) and 750 (Study)
+> lines, from 1,582 and 1,286. Not a pure move: the verdict was inline JSX
+> in `Runner` and is a component now (`Verdict`), with its enter animation
+> on mount rather than on the answered flag.
+>
 > **2026-10-14, items 1–8 done; 9 (the file splits) left for its own
 > pass.** `RowText` (34 hand-written row bodies replaced; the rest of the
 > 15s moved to `type.body` — off-scale sizes 143 → 66), `IconButton` (cog,

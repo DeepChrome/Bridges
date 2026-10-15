@@ -15,7 +15,7 @@ import { backupProfile, restoreProfile, shareCrashes } from "../backup";
 import { readCrashes, clearCrashes } from "../crash";
 import { importDeck } from "../anki";
 import { today } from "@core/util";
-import { newDeckId } from "./Study";
+import { newDeckId } from "../studycards";
 import Constants from "expo-constants";
 import { QUEUE_DEFAULTS, ALL_DAYS } from "@core/queue";
 import { askPermission } from "../notify";

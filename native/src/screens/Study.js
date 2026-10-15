@@ -32,10 +32,6 @@ import { flagsFor, troubleWords, cardsIn, sourceCards, studyCards, knownWords, s
          sessionFor } from "../studycards";
 import { SetPicker } from "../studypicker";
 
-/* The card and session helpers live in studycards.js (2026-10-14); re-exported
-   for You.js, which still imports them from here. */
-export { troubleWords, newDeckId } from "../studycards";
-
 /* The familiarity ring and its colour live in ui.js now (2026-09-28): the
    dictionary entry draws the same ring for the same number, and a second copy
    here is how the two would come to disagree. Re-exported for the tests that

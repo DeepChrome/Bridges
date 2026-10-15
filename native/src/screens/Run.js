@@ -7,20 +7,19 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Pressable, ScrollView, Alert, Animated, ActivityIndicator } from "react-native";
+import { View, Alert, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import Svg, { Path } from "react-native-svg";
 import { markOutOfFive } from "../appearance";
-import { Screen, Btn, Bar, Pill, Speaker, Muted, Sheet, Lift, Text, Marked, Note,
-         BulbButton } from "../ui";
+import { Screen, Btn, Bar, Pill, Speaker, Muted, Lift, Text, BulbButton } from "../ui";
 import { RunTools } from "../askai";
 import { Reference, hasReference } from "../rules";
 import { isIrregular } from "@core/facts";
 import { GuidePop } from "../guide";
 import { saveRun, clearRun, savedRun } from "../resume";
 import { Verdict, CYR } from "../verdict";
-import { usePop, useSwap, usePress } from "../motion";
+import { usePop, useSwap } from "../motion";
 import { guideLine, poseFor, reactionFor, LINES } from "@core/guide";
 import { say, cue, answerAudioText, stop as stopAudio, whenIdle } from "../audio";
 import { right as buzzRight, wrong as buzzWrong, done as buzzDone } from "../haptics";
@@ -34,7 +33,7 @@ import { Scene } from "../activities/Scene";
 import { PairHear, PairSay } from "../activities/Pair";
 import { Shadow } from "../activities/Shadow";
 import { Build } from "../activities/Build";
-import { L, UN, lessonWords, markComponent, PASS_MARK } from "../data";
+import { L, PASS_MARK } from "../data";
 import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts, gradesCard } from "@core/scheduler";
 import { fold, firstSense } from "@core/util";
 

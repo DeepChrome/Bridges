@@ -1,0 +1,15 @@
+# Drive mode (core/drive.js, 2026-10-15), on an installed build with a profile:
+# open it, play, and read the screen mid-lesson. The lock-screen half is
+# checked by hand: power key, wait, logcat for ExoPlayer and TTS.
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\drive.txt -Device emulator-5554
+
+wait:2
+tap:^Practice$
+wait:2
+tap:^Drive mode$
+wait:2
+shot:d1-drive-ready
+tap:^Play$
+wait:9
+shot:d2-drive-playing

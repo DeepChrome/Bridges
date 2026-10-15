@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import Learn from "../src/screens/Learn";
-import { FinalFlow } from "../src/screens/Flows";
+import { FinalFlow } from "../src/flows/Tests";
 import { FINAL_N, Q } from "../src/questions";
 import { lessonCount, UN, STAGES } from "../src/data";
 

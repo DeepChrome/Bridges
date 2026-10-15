@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { LessonScreen } from "../src/screens/Unit";
-import { QuizFlow } from "../src/screens/Flows";
+import { QuizFlow } from "../src/flows/Lesson";
 import { Done } from "../src/screens/Run";
 import { Q } from "../src/questions";
 import { nextStep, lessonDone, STAGES, L, lessonWords } from "../src/data";

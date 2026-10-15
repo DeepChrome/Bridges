@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { Reteach, missedWords, RETEACH_MAX } from "../src/screens/Flows";
+import { Reteach, missedWords, RETEACH_MAX } from "../src/flows/Lesson";
 import { UN, L, lessonWords } from "../src/data";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), replace: jest.fn(), setParams: jest.fn(),

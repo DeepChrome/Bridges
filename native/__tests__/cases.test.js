@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { CaseHub, CaseModule, CaseFlow, CASE_DRILL_N } from "../src/screens/Flows";
+import { CaseHub, CaseModule, CaseFlow, CASE_DRILL_N } from "../src/flows/Cases";
 import { STAGES, components, stepRoute, caseLearnKey } from "../src/data";
 import { CASES } from "@core/cases";
 import { SCHEMA_VERSION } from "@core/state";

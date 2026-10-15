@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { Runner, Done } from "../src/screens/Run";
-import { VocabFlow } from "../src/screens/Flows";
+import { VocabFlow } from "../src/flows/Lesson";
 import { Q } from "../src/questions";
 import { UN, STAGES, lessonWords } from "../src/data";
 import { POSES, LINES, reactionFor } from "@core/guide";

@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { VocabFlow } from "../src/screens/Flows";
+import { VocabFlow } from "../src/flows/Lesson";
 import { L, UN, lessonWords } from "../src/data";
 import { firstSense } from "@core/util";
 

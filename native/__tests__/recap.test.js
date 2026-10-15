@@ -17,7 +17,7 @@ import { UN, L, todaysWork, recapKey, RECAP_FROM } from "../src/data";
 import { DAY, REVIEW } from "@core/scheduler";
 import { today } from "@core/util";
 import Learn from "../src/screens/Learn";
-import { RecapFlow } from "../src/screens/Flows";
+import { RecapFlow } from "../src/flows/Quiz";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), addListener: jest.fn(() => jest.fn()),
               setOptions: jest.fn() };

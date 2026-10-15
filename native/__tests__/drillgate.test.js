@@ -7,7 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { DrillList } from "../src/screens/Flows";
+import { DrillList } from "../src/screens/Practice";
 import { STAGES, lessonCount, knownPool, KNOWN_AT } from "../src/data";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };

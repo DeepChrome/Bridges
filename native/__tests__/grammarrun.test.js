@@ -10,7 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { UnitScreen } from "../src/screens/Unit";
-import { GrammarFlow } from "../src/screens/Flows";
+import { GrammarFlow } from "../src/flows/Drills";
 import { UN, components, hasGrammar } from "../src/data";
 
 const base = {

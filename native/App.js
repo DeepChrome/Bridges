@@ -58,12 +58,14 @@ import { installCrashHandler } from "./src/crash";
 import { warmToken } from "./src/lib/feedback";
 import { tabIcon } from "./src/tabicons";
 import { flushState } from "./src/store";
-import {
-  VocabFlow, QuizFlow, DrillList, DrillFlow, PlacementFlow, SectionFlow,
-  QuizSetup, CustomQuizFlow, ListeningFlow, ScenesList, SoundDrillFlow,
-  ShadowFlow, BuildDrillFlow, FinalFlow, GrammarFlow, RecapFlow, VideoQuizFlow,
-  CaseHub, CaseModule, CaseFlow,
-} from "./src/screens/Flows";
+import { DrillList } from "./src/screens/Practice";
+import { VocabFlow, QuizFlow } from "./src/flows/Lesson";
+import { DrillFlow, SoundDrillFlow, ShadowFlow, BuildDrillFlow, GrammarFlow } from "./src/flows/Drills";
+import { CaseHub, CaseModule, CaseFlow } from "./src/flows/Cases";
+import { ListeningFlow, ScenesList } from "./src/flows/Listening";
+import { QuizSetup, CustomQuizFlow, RecapFlow } from "./src/flows/Quiz";
+import { PlacementFlow, SectionFlow, FinalFlow } from "./src/flows/Tests";
+import { VideoQuizFlow } from "./src/flows/VideoQuiz";
 
 /* Where the day starts, from this device's own clock (ROADMAP 13.24).
  *

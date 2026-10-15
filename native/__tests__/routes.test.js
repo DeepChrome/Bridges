@@ -66,7 +66,7 @@ const STACKS = stacks(APP);
 const ALL_ROUTES = new Set([...STACKS.values()].flatMap((r) => [...r.keys()]));
 
 /* A module split into its top-level exported functions, so a file holding many
-   screens (Flows.js holds a dozen) attributes each navigate to the right one. */
+   screens (flows/Drills.js holds six) attributes each navigate to the right one. */
 function blocks(path) {
   let src;
   try {
@@ -167,7 +167,10 @@ test("every lesson step's route is on the Learn stack", () => {
 /* The offer to pick a run up again navigates by a saved name, which the scan
    cannot read either: every flow that saves names a route its tab registers. */
 test("every saved run names a route its stack registers", () => {
-  const flows = require("fs").readFileSync(require("path").join(__dirname, "../src/screens/Flows.js"), "utf8");
+  const { readdirSync } = require("fs");
+  const dir = join(ROOT, "src/flows");
+  const flows = readdirSync(dir).filter((f) => f.endsWith(".js"))
+    .map((f) => readFileSync(join(dir, f), "utf8")).join("\n");
   const saves = [...flows.matchAll(/route: "(\w+)"(, tab: "(\w+)")?/g)].map((m) => [m[1], m[3] || "Learn"]);
   expect(saves.length).toBeGreaterThanOrEqual(8);
   for (const [name, tab] of saves) {

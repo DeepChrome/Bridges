@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { Runner } from "../src/screens/Run";
-import { BuildDrillFlow } from "../src/screens/Flows";
+import { BuildDrillFlow } from "../src/flows/Drills";
 import { probeVoices } from "../src/audio";
 import { buildupDrill, buildup } from "@core/buildup";
 import { INTRO_GAP_MS, INTRO_SETTLE_MS } from "../src/activities/Build";

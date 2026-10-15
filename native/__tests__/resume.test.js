@@ -10,7 +10,7 @@ import { View } from "react-native";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { QuizFlow } from "../src/screens/Flows";
+import { QuizFlow } from "../src/flows/Lesson";
 import Learn from "../src/screens/Learn";
 import { Q } from "../src/questions";
 import { STAGES, lessonWords } from "../src/data";
@@ -107,7 +107,7 @@ describe("a run left part-way", () => {
   /* "If the person says they don't want to continue, I'd expect it to prompt
      them for the question types prior to going to question 1" (2026-10-04). */
   it("a drill's Start again opens its options before question 1", async () => {
-    const { DrillFlow } = require("../src/screens/Flows");
+    const { DrillFlow } = require("../src/flows/Drills");
     const { saveRun } = require("../src/resume");
     await withProfile(<DrillFlow route={{ params: { type: "conjugation" } }} navigation={nav} />);
     // A first visit opens the options; close them and leave a run part-way.
@@ -126,7 +126,7 @@ describe("a run left part-way", () => {
   /* A quiz left part-way is offered on the setup screen, and Start again
      comes back to that screen with the run's own choices ticked. */
   it("a quiz left part-way is offered on its setup screen, and continues with its own choices", async () => {
-    const { QuizSetup } = require("../src/screens/Flows");
+    const { QuizSetup } = require("../src/flows/Quiz");
     const { saveRun } = require("../src/resume");
     const { QUIZ_KINDS } = require("../src/questions");
     const kind = QUIZ_KINDS[0].id;

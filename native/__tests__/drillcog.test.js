@@ -13,7 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import { DrillFlow } from "../src/screens/Flows";
+import { DrillFlow } from "../src/flows/Drills";
 import { STAGES, chapterWords, lessonCount, L } from "../src/data";
 import { Q } from "../src/questions";
 import { CASE_ROWS, ADJ_STEMS, adjStem } from "@core/questions";

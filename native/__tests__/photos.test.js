@@ -11,7 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import WordScreen from "../src/screens/Word";
-import { VocabFlow } from "../src/screens/Flows";
+import { VocabFlow } from "../src/flows/Lesson";
 import { IMAGES, CREDITS } from "../src/images";
 import { UN, L, lessonWords, lessonCount } from "../src/data";
 

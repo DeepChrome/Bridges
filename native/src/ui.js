@@ -1254,6 +1254,37 @@ export function Avatar({ id, size = 44 }) {
 
 export { AV, AV_IDS };
 
+/* One turn of a conversation drawn as a message (the owner, 2026-10-14: *"like
+   a text conversation with the user's avatar and Teddy's avatar with little
+   chat bubbles (like SMS)"*). The speaker's face sits at the foot of the bubble
+   and the bubble's near corner is cut to a tail; the learner is on the right
+   in the brand tint, the character on the left on the surface. `below` is what
+   belongs to the turn but is not what was said — the tutor's aside, the
+   feedback on a learner's turn — and hangs under the bubble, in line with it
+   and not with the face. Both conversation screens draw their turns through
+   this, so a tutor's bubble and a scene's cannot drift apart. */
+export const CHAT_FACE = 32;
+export function ChatTurn({ side = "left", avatar, children, below, testID, width = "84%" }) {
+  const t = useTheme();
+  const right = side === "right";
+  const bubble = right
+    ? { backgroundColor: t.brandBg, borderColor: t.brand, borderBottomRightRadius: 4 }
+    : { backgroundColor: t.surface, borderColor: t.line, borderBottomLeftRadius: 4 };
+  const indent = right ? { marginRight: CHAT_FACE + 8 } : { marginLeft: CHAT_FACE + 8 };
+  return (
+    <View testID={testID} style={{ alignItems: right ? "flex-end" : "flex-start", marginBottom: 12 }}>
+      <View style={{ flexDirection: right ? "row-reverse" : "row", alignItems: "flex-end", gap: 8, maxWidth: width }}>
+        <View testID={testID ? `${testID}-face` : undefined}><Avatar id={avatar} size={CHAT_FACE} /></View>
+        <View style={[{ flexShrink: 1, borderWidth: 1, borderRadius: radius.lg,
+                        paddingHorizontal: 14, paddingVertical: 10 }, bubble]}>
+          {children}
+        </View>
+      </View>
+      {below ? <View style={[{ maxWidth: width }, indent]}>{below}</View> : null}
+    </View>
+  );
+}
+
 /* A speaker that stays live when the collection has a real recording, whether or not
    the device has a Russian voice. */
 /* A recording plays whatever the device can do. Without one, the button is live only

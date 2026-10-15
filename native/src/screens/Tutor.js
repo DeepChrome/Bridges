@@ -35,13 +35,13 @@ import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space, type as T } from "../theme";
 import { Screen, Btn, Muted, Text, TextInput, Marked, Note, CogButton, BulbButton, Sheet,
-         List, Row, SectionLabel, Choice, Tick, RowText, IconButton } from "../ui";
+         List, Row, SectionLabel, Choice, Tick, RowText, IconButton, ChatTurn } from "../ui";
 import { Linked } from "../words";
 import { L, STAGES, studiedFor, routePosition, rankOf } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
 import { speakLine, stop, voiceFor } from "../audio";
 // The tutor is Teddy (backend/src/tutor.js), and sounds like him.
-import { GUIDE_ID } from "@core/cast";
+import { GUIDE_ID, castById } from "@core/cast";
 import { useRecognizer, LANG, LANG_EN } from "../speech";
 import { HoldButton, Blocked } from "../activities/Say";
 import { failureText, talkLevelFor, TALK_LEVELS } from "./Talk";
@@ -161,29 +161,26 @@ function TutorBubble({ turn, en }) {
   const t = useTheme();
   const aside = !!(turn.ru && turn.note);
   return (
-    <View testID="tutor-turn" style={{ alignSelf: "flex-start", maxWidth: "90%", marginBottom: 14 }}>
-      <View style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
-                     borderRadius: radius.lg, borderBottomLeftRadius: 4, paddingHorizontal: 14, paddingVertical: 12 }}>
-        {turn.ru ? (
-          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-            <View style={{ flex: 1 }}><Linked text={turn.ru} size={18} testID="tutor-ru" /></View>
-            <Replay text={turn.ru} />
-          </View>
-        ) : null}
-        {turn.ru && en && turn.en ? (
-          <Text testID="tutor-en" style={{ color: t.ink3, fontSize: 14, lineHeight: 20, marginTop: 4 }}>{turn.en}</Text>
-        ) : null}
-        {!turn.ru && turn.note ? (
-          <Note testID="tutor-note" text={turn.note} size={16} gap={6} />
-        ) : null}
-      </View>
-      {aside ? (
-        <View testID="tutor-aside" style={{ marginTop: 8, marginLeft: 6, paddingLeft: 10,
-                                            borderLeftWidth: 2, borderLeftColor: t.brand }}>
-          <Note testID="tutor-note" text={turn.note} size={15} color={t.ink2} gap={4} />
+    <ChatTurn testID="tutor-turn" side="left" avatar={castById[GUIDE_ID].avatar}
+              below={aside ? (
+                <View testID="tutor-aside" style={{ marginTop: 6, marginLeft: 6, paddingLeft: 10,
+                                                    borderLeftWidth: 2, borderLeftColor: t.brand }}>
+                  <Note testID="tutor-note" text={turn.note} size={15} color={t.ink2} gap={4} />
+                </View>
+              ) : null}>
+      {turn.ru ? (
+        <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+          <View style={{ flexShrink: 1 }}><Linked text={turn.ru} size={18} testID="tutor-ru" /></View>
+          <Replay text={turn.ru} />
         </View>
       ) : null}
-    </View>
+      {turn.ru && en && turn.en ? (
+        <Text testID="tutor-en" style={{ color: t.ink3, fontSize: 14, lineHeight: 20, marginTop: 4 }}>{turn.en}</Text>
+      ) : null}
+      {!turn.ru && turn.note ? (
+        <Note testID="tutor-note" text={turn.note} size={16} gap={6} />
+      ) : null}
+    </ChatTurn>
   );
 }
 
@@ -203,16 +200,13 @@ function Replay({ text }) {
   );
 }
 
-function LearnerBubble({ turn }) {
+function LearnerBubble({ turn, avatar }) {
   const t = useTheme();
   return (
-    <View testID="learner-turn" style={{ alignSelf: "flex-end", maxWidth: "90%", marginBottom: 10 }}>
-      <View style={{ backgroundColor: t.brandBg, borderColor: t.brand, borderWidth: 1,
-                     borderRadius: radius.lg, borderBottomRightRadius: 4, padding: 12 }}>
-        {CYR.test(turn.text) ? <Linked text={turn.text} size={16} />
-          : <Text style={{ color: t.ink, fontSize: 16, lineHeight: 22 }}>{turn.text}</Text>}
-      </View>
-    </View>
+    <ChatTurn testID="learner-turn" side="right" avatar={avatar}>
+      {CYR.test(turn.text) ? <Linked text={turn.text} size={16} />
+        : <Text style={{ color: t.ink, fontSize: 16, lineHeight: 22 }}>{turn.text}</Text>}
+    </ChatTurn>
   );
 }
 
@@ -284,7 +278,7 @@ function TutorOptions({ onClose, onRestart }) {
 }
 
 export default function Tutor({ navigation, route }) {
-  const { st, update, ready } = useSession();
+  const { st, update, ready, account } = useSession();
   const t = useTheme();
   // learner: { who, text }; tutor: { who, ru, en, note }
   const [turns, setTurns] = useState([]);
@@ -514,7 +508,8 @@ export default function Tutor({ navigation, route }) {
         </View>
         <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}
                     keyboardShouldPersistTaps="handled">
-          {turns.map((x, k) => (x.who === "tutor" ? <TutorBubble key={k} turn={x} en={en} /> : <LearnerBubble key={k} turn={x} />))}
+          {turns.map((x, k) => (x.who === "tutor" ? <TutorBubble key={k} turn={x} en={en} />
+            : <LearnerBubble key={k} turn={x} avatar={account ? account.avatar : null} />))}
           {/* Only on the turn that offered them: a list from three exchanges
               ago is not a thing to still be tappable. */}
           {!pending && offered.length ? (

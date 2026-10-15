@@ -5,7 +5,7 @@
 
 import React from "react";
 import { Alert } from "react-native";
-import { render, screen, fireEvent, act } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, within } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
@@ -119,6 +119,13 @@ describe("talk", () => {
     expect(review.mock.calls[0][0].studied).toBeUndefined();
     // The learner's bubble carries the alignment; the grammar note sits under it.
     expect(screen.getAllByTestId("align-sub")).toHaveLength(1);
+    /* Drawn as messages (2026-10-14): the character playing the scene on his
+       own turns — Gena at his café, not Teddy — and the learner's own face on
+       theirs (the profile's "monkeynaut" is Monka, id "yuri"). */
+    const tutorFaces = screen.getAllByTestId("tutor-bubble-face");
+    expect(tutorFaces.length).toBe(2);
+    for (const f of tutorFaces) expect(within(f).getByTestId("face-gena")).toBeTruthy();
+    expect(within(screen.getByTestId("learner-bubble-face")).getByTestId("face-yuri")).toBeTruthy();
     /* The Russian in a note is its own span now (ui.js `Marked`, 2026-09-26),
        so the English clause is what a whole-string query can match. */
     expect(screen.getByText(/the accusative after/)).toBeTruthy();

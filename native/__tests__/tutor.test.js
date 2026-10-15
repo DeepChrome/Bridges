@@ -9,7 +9,7 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, act, waitFor } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, waitFor, within } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
@@ -106,6 +106,10 @@ describe("tutor", () => {
     expect(sent.history).toEqual([{ who: "tutor", text: `${GREET.ru} ${GREET.note}` }]);
     // …and what the learner typed is on screen: the transcript is the point.
     expect(screen.getByTestId("learner-turn")).toHaveTextContent("drill me on cases");
+    /* Drawn as a text conversation (2026-10-14): Teddy's face on every tutor
+       turn, the learner's own on theirs ("monkeynaut" is Monka, id "yuri"). */
+    for (const f of screen.getAllByTestId("tutor-turn-face")) expect(within(f).getByTestId("face-teddy")).toBeTruthy();
+    expect(within(screen.getByTestId("learner-turn-face")).getByTestId("face-yuri")).toBeTruthy();
     // Every Russian word in the reply is a dictionary link.
     expect(screen.getByLabelText("чай, open word")).toBeTruthy();
     // The note is in the profile now, and the schedule is untouched.

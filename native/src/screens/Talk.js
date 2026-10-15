@@ -23,7 +23,7 @@ import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space, type as T } from "../theme";
 import { Screen, Btn, Pill, Muted, Speaker, List, Row, Thumb, Choice, SectionLabel, Text,
-         Marked, BULB_PATH, Sheet, CogButton, RowText, IconButton } from "../ui";
+         Marked, BULB_PATH, Sheet, CogButton, RowText, IconButton, ChatTurn } from "../ui";
 import { Linked } from "../words";
 import { L, IX, UN, STAGES, studiedFor, nextLesson } from "../data";
 import { talk as askTutor, review as askReview, hint as askHint, config, capNotice } from "../lib/feedback";
@@ -41,6 +41,7 @@ import { useRecognizer } from "../speech";
 import { HoldButton, Feedback, Blocked } from "../activities/Say";
 import { Alignment } from "../activities/Alignment";
 import { SCENARIOS } from "@core/scenarios";
+import { castById, GUIDE_ID } from "@core/cast";
 import { feedbackTags } from "@core/speech";
 import { recordAttempt, talkAllowance, startTalkSession, TALK_TURNS } from "@core/state";
 import { applyGrade, reviewRows, schedulerOpts } from "@core/scheduler";
@@ -114,20 +115,16 @@ function gradeTurn(words) {
 
 /* The tutor's turn: the Russian, every word a link, and the English under it
    when translations are on (the toolbar's EN switch, on by default). */
-function TutorBubble({ turn, en, speak }) {
-  const t = useTheme();
+function TutorBubble({ turn, en, speak, avatar }) {
   return (
-    <View testID="tutor-bubble" style={{ alignSelf: "flex-start", maxWidth: "88%", marginBottom: 10 }}>
-      <View style={{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
-                     borderRadius: radius.lg, borderBottomLeftRadius: 4, padding: 12 }}>
-        <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-          <View style={{ flex: 1 }}><Linked text={turn.ru} size={17} /></View>
-          {/* Hear it again — it was read out when it arrived. */}
-          <Speaker text={turn.ru} size={32} speak={speak ? () => speak(turn.ru) : undefined} />
-        </View>
-        {en ? <Muted testID="tutor-en" style={{ marginTop: 6 }}>{turn.en}</Muted> : null}
+    <ChatTurn testID="tutor-bubble" side="left" avatar={avatar}>
+      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+        <View style={{ flexShrink: 1 }}><Linked text={turn.ru} size={17} /></View>
+        {/* Hear it again — it was read out when it arrived. */}
+        <Speaker text={turn.ru} size={32} speak={speak ? () => speak(turn.ru) : undefined} />
       </View>
-    </View>
+      {en ? <Muted testID="tutor-en" style={{ marginTop: 6 }}>{turn.en}</Muted> : null}
+    </ChatTurn>
   );
 }
 
@@ -294,21 +291,18 @@ export function conversationWords(turns, newWords, st) {
 
 /* The learner's words in a bubble; the tutor's notes on them under it, outside
    the bubble, in a quieter face — there to read, not part of what was said. */
-function LearnerBubble({ turn }) {
+function LearnerBubble({ turn, avatar }) {
   const t = useTheme();
   return (
-    <View testID="learner-bubble" style={{ alignSelf: "flex-end", maxWidth: "88%", marginBottom: 10, alignItems: "flex-end" }}>
-      <View style={{ backgroundColor: t.brandBg, borderColor: t.brand, borderWidth: 1,
-                     borderRadius: radius.lg, borderBottomRightRadius: 4, padding: 12 }}>
-        {turn.alignment ? (
-          <Alignment alignment={turn.alignment} />
-        ) : (
-          <Linked text={turn.ru} size={17} />
-        )}
-        {turn.pending ? <ActivityIndicator testID="turn-pending" color={t.ink3} style={{ alignSelf: "flex-start", marginTop: 6 }} /> : null}
-      </View>
-      {turn.feedback ? <Feedback fb={turn.feedback} quiet style={{ marginTop: 6, paddingHorizontal: 4 }} /> : null}
-    </View>
+    <ChatTurn testID="learner-bubble" side="right" avatar={avatar}
+              below={turn.feedback ? <Feedback fb={turn.feedback} quiet style={{ marginTop: 6, paddingHorizontal: 4 }} /> : null}>
+      {turn.alignment ? (
+        <Alignment alignment={turn.alignment} />
+      ) : (
+        <Linked text={turn.ru} size={17} />
+      )}
+      {turn.pending ? <ActivityIndicator testID="turn-pending" color={t.ink3} style={{ alignSelf: "flex-start", marginTop: 6 }} /> : null}
+    </ChatTurn>
   );
 }
 
@@ -354,7 +348,7 @@ export function talkLevelFor(st) {
 }
 
 export default function Talk({ navigation, route }) {
-  const { st, update } = useSession();
+  const { st, update, account } = useSession();
   const t = useTheme();
   const day = today();
   const allowance = talkAllowance(st.speech, day);
@@ -627,7 +621,12 @@ export default function Talk({ navigation, route }) {
         </Tool>
       </View>
       <ScrollView ref={scrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 12 }}>
-        {turns.map((x, k) => (x.who === "tutor" ? <TutorBubble key={k} turn={x} en={en} speak={(text) => speakAs(scenario.who, text, speed)} /> : <LearnerBubble key={k} turn={x} />))}
+        {/* The scene is played by a character (`who`, §30f), and it is their
+            face on the bubble — Gena at his café, not Teddy. */}
+        {turns.map((x, k) => (x.who === "tutor"
+          ? <TutorBubble key={k} turn={x} en={en} speak={(text) => speakAs(scenario.who, text, speed)}
+                         avatar={castById[scenario.who] ? castById[scenario.who].avatar : GUIDE_ID} />
+          : <LearnerBubble key={k} turn={x} avatar={account ? account.avatar : null} />))}
         {turns.length === 0 && !failure ? <ActivityIndicator testID="turn-pending" color={t.ink3} style={{ marginTop: 20 }} /> : null}
         {hint ? <HintCard hint={hint} en={en} onClose={() => setHint(null)} /> : null}
         {failure ? (

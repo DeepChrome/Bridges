@@ -6597,6 +6597,9 @@ face is the character's **avatar id** (`castById[who].avatar`, since Monka's is
 his café, not Teddy. The learner's is `account.avatar`. What belongs to a turn
 but was not said — the tutor's aside, the feedback on a learner's line — goes
 in `below`, under the bubble and in line with it, never with the face.
+The sparkle's ask sheet and the "?" help thread (`AskTurns` in askai.js)
+draw the same way — the owner, the next morning: *"It should be for all the
+AI interactions."* Translate is a tool, not a conversation, and stays as it is.
 
 **And the tutor's input row was behind the keyboard.** Reading the shots
 for this found it: the app draws edge to edge, so `adjustResize` does

@@ -23,7 +23,8 @@ import React, { useRef, useState } from "react";
 import { View, Pressable, ActivityIndicator } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
-import { Sheet, Text, TextInput, Muted, Btn, Note, IconButton } from "./ui";
+import { Sheet, Text, TextInput, Muted, Btn, Note, IconButton, ChatTurn, CHAT_FACE } from "./ui";
+import { GUIDE_ID, castById } from "@core/cast";
 import { useSession } from "./session";
 import { routePosition } from "./data";
 import { ask, config, isCap, capNotice } from "./lib/feedback";
@@ -97,19 +98,27 @@ export function useAskThread({ mode = "russian", guide } = {}) {
   return { thread, text, setText, busy, failed, open, send };
 }
 
-/* The turns, newest last. */
+/* The turns, newest last, drawn as a text conversation like the tutor's
+   (§30cd; the owner, 2026-10-15: "It should be for all the AI
+   interactions"): the learner's question on the right with their own face,
+   Teddy's answer on the left with his. */
 export function AskTurns({ thread, busy, prefix = "ask" }) {
   const t = useTheme();
+  const { account } = useSession();
   if (!thread.length && !busy) return null;
   return (
-    <View style={{ gap: 16, paddingBottom: 4 }}>
+    <View style={{ paddingBottom: 4 }}>
       {thread.map((h, k) => (
-        <View key={k} testID={`${prefix}-turn-${k}`} style={{ gap: 6 }}>
-          <Text style={{ color: t.ink2, fontWeight: "700" }}>{h.q}</Text>
-          <Note text={h.a} size={T.body} testID={`${prefix}-answer-${k}`} />
+        <View key={k} testID={`${prefix}-turn-${k}`}>
+          <ChatTurn testID={`${prefix}-question-${k}`} side="right" avatar={account ? account.avatar : null}>
+            <Text style={{ color: t.ink, fontSize: T.body, lineHeight: 22 }}>{h.q}</Text>
+          </ChatTurn>
+          <ChatTurn testID={`${prefix}-reply-${k}`} side="left" avatar={castById[GUIDE_ID].avatar}>
+            <Note text={h.a} size={T.body} testID={`${prefix}-answer-${k}`} />
+          </ChatTurn>
         </View>
       ))}
-      {busy ? <ActivityIndicator testID={`${prefix}-busy`} color={t.brand} /> : null}
+      {busy ? <ActivityIndicator testID={`${prefix}-busy`} color={t.brand} style={{ alignSelf: "flex-start", marginLeft: CHAT_FACE + 8 }} /> : null}
     </View>
   );
 }

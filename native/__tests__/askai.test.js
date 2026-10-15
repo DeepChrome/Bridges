@@ -4,7 +4,7 @@
    with no Worker draws no button. The "?" (help.js) is a separate button. */
 
 import React from "react";
-import { render, renderHook, screen, fireEvent, act, waitFor } from "@testing-library/react-native";
+import { render, renderHook, screen, fireEvent, act, waitFor, within } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
@@ -70,6 +70,11 @@ it("sends the question with the card on screen, and a follow-up with the turn be
   await askIt("And the plural?");
   expect(fb.ask.mock.calls[1][0].history).toEqual([{ q: "Why книгу?", a: "«читать» takes the accusative." }]);
   expect(await screen.findByTestId("ask-answer-1")).toBeTruthy();
+  /* A text conversation (2026-10-15, "all the AI interactions"): the
+     learner's question with their face on the right, Teddy's answer with
+     his on the left. The profile's "yuri" is Monka. */
+  expect(within(screen.getByTestId("ask-question-0-face")).getByTestId("face-yuri")).toBeTruthy();
+  expect(within(screen.getByTestId("ask-reply-0-face")).getByTestId("face-teddy")).toBeTruthy();
   // Teddy asks, not a label (the owner, 2026-10-08).
   expect(screen.getByTestId("ask-hello").props.children).toBe("How can I help?");
   expect(screen.getByTestId("guide-wave")).toBeTruthy();

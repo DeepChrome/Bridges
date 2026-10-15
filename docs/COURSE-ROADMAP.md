@@ -674,6 +674,16 @@ owner's phone build read screen by screen.
 > WP6's two open items: no "Listen first" (it inverts his own rule that
 > the video's lines close the walk) and no lesson-final Say (every quiz
 > already rotates a spoken step, §30bx).
+>
+> **2026-10-15, WP9's two content calls.** Chapter 10's Law and Military
+> keep no goal video: the 321-episode library has nothing on either — the
+> only candidate is an intermediate listening piece on a draft notice
+> («Повестка», ayXACcXNhMo), which is one subject, not a quest's worth —
+> so attaching one would mean a new harvest, and both quests are optional.
+> The corpus-scene fallback (`lessonPassage` under `writtenPassage` in the
+> Listening flow) fires only before any lesson is finished; it stays for
+> that one case rather than leaving a brand-new learner's Listening row
+> empty.
 
 | # | decision | default if unanswered |
 |---|---|---|

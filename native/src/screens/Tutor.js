@@ -487,7 +487,7 @@ export default function Tutor({ navigation, route }) {
   const offered = tail && tail.who === "tutor" && Array.isArray(tail.choices) ? tail.choices : [];
 
   return (
-    <Screen scroll={false}>
+    <Screen scroll={false} keyboard>
       <View style={{ flex: 1, padding: space.pad }}>
         {!configured ? (
           <Muted testID="tutor-unconfigured" style={{ marginBottom: 12 }}>

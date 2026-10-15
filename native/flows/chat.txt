@@ -1,0 +1,31 @@
+# The two conversation screens drawn as messages (CLAUDE.md 30cd, 2026-10-14),
+# on an installed build with a profile and a network: the tutor's opening
+# turn with Teddy's face, a typed learner turn with the profile's face, and a
+# Talk scene played by its own character.
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\chat.txt -Device emulator-5554
+#
+# Read the shots in native/screenshots/walk/ — that is the audit (§31).
+
+wait:2
+tap:^Practice$
+wait:2
+tap:^Tutor$
+wait:6
+shot:c1-tutor-opening
+tap:Ask the tutor
+wait:1
+type:drill me on cases
+wait:1
+tap:Send
+wait:6
+shot:c2-tutor-exchange
+back
+wait:1
+tap:^Talk$
+wait:2
+tap:^В кафе$
+wait:6
+shot:c3-talk-cafe
+back
+wait:1

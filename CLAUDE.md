@@ -6583,6 +6583,31 @@ a weight becomes a *face* (§30bj), so assert `fontFamily`, not `fontWeight`.
   the impersonal ones among them. A personal verb with only third-person
   examples loses a question shape and nothing else.
 
+## 30cd. A conversation looks like one (2026-10-14)
+
+The owner: *"when the user is having a conversation with the AI, I'd like it
+to appear almost like a text conversation with the user's avatar and Teddy's
+avatar with little chat bubbles (like SMS)."* `ChatTurn` in ui.js is the one
+message shape — the speaker's face (`CHAT_FACE` 32) at the foot of the bubble,
+the near corner cut to a tail, the learner on the right in the brand tint, the
+character on the left on the surface — and both conversation screens draw
+through it, so the tutor's turn and a Talk scene's cannot drift apart. The
+face is the character's **avatar id** (`castById[who].avatar`, since Monka's is
+`yuri`), and in Talk it is whoever plays the scene (`scenario.who`): Gena at
+his café, not Teddy. The learner's is `account.avatar`. What belongs to a turn
+but was not said — the tutor's aside, the feedback on a learner's line — goes
+in `below`, under the bubble and in line with it, never with the face.
+
+**And the tutor's input row was behind the keyboard.** Reading the shots
+for this found it: the app draws edge to edge, so `adjustResize` does
+nothing and the window never shrinks (Gate.js had found this and padded
+itself). Typing into the tutor landed in a field under the keys, and Send
+could not be reached. `useKeyboardPad()` in ui.js is the one listener and
+`Screen keyboard` pads the foot by it — the tutor, the feedback form and the
+gate use it; Run.js stacks its typed questions from the top and needs none.
+`keyboard.test.js` catches the listeners, since the jest Keyboard has no
+emitter.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

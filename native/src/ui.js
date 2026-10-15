@@ -7,7 +7,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import {
-  View, Pressable, ScrollView, ActivityIndicator, StyleSheet, Modal, Animated, Image, Switch,
+  View, Pressable, ScrollView, ActivityIndicator, StyleSheet, Modal, Animated, Image, Switch, Keyboard,
 } from "react-native";
 /* Renamed on the way in: the app's own `Text` and `TextInput` are defined below
    and are what everything else imports (font.test.js). */
@@ -170,10 +170,29 @@ export function TextInput({ style, ...rest }) {
  *   footer   | a bar off the scroll, hairline above, | nothing; scroll padding 40
  *            | scroll padding 24 to clear it         |
  */
+/* How much of the screen the keyboard covers, while it is up. The app draws
+   edge to edge, so `adjustResize` does nothing and the window is never what
+   resizes (Gate.js found this first): a text field at the foot of a screen
+   sits behind the keys, and a scroll view's last rows cannot be reached. A
+   screen that holds one pads its foot by this. */
+export function useKeyboardPad() {
+  const [pad, setPad] = useState(0);
+  useEffect(() => {
+    const show = Keyboard.addListener("keyboardDidShow",
+      (e) => setPad((e && e.endCoordinates && e.endCoordinates.height) || 0));
+    const hide = Keyboard.addListener("keyboardDidHide", () => setPad(0));
+    return () => { show.remove(); hide.remove(); };
+  }, []);
+  return pad;
+}
+
 export function Screen({ children, scroll = true, fill = false, safeTop = false, footer,
-                         restoreY, onScrollY }) {
+                         restoreY, onScrollY, keyboard = false }) {
   const t = useTheme();
   const Body = scroll ? ScrollView : View;
+  // `keyboard`: the screen has a text field, and makes room for the keys.
+  const pad = useKeyboardPad();
+  const keyboardPad = keyboard ? pad : 0;
   /* `restoreY`/`onScrollY`: a screen that keeps its place (Immerse, 2026-10-01:
      "if you navigate away from the immerse page, it remembers the exact
      state you were in"). The offset is applied once, when the content is tall
@@ -200,7 +219,7 @@ export function Screen({ children, scroll = true, fill = false, safeTop = false,
   return (
     <SafeAreaView testID="screen-root" edges={safeTop ? ["top"] : []}
                   style={{ flex: 1, backgroundColor: t.bg }}>
-      <Animated.View style={[{ flex: 1 }, enter]}>
+      <Animated.View testID="screen-pane" style={[{ flex: 1, paddingBottom: keyboardPad }, enter]}>
       <Body
         testID="screen-body"
         style={{ flex: 1 }}

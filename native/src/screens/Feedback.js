@@ -172,7 +172,7 @@ export default function Feedback({ route, navigation }) {
 
   const recording = rec.state === "recording";
   return (
-    <Screen footer={
+    <Screen keyboard footer={
       <Btn block kind="pri" testID="feedback-send" disabled={!ready || state === "sending"}
            label={state === "sending" ? "Sending…" : "Send"} onPress={send} />}>
       <AboutLine about={about} />

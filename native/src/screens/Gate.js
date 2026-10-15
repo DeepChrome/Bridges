@@ -29,7 +29,7 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Pressable, Animated, Keyboard } from "react-native";
+import { View, Pressable, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Btn, Muted, Avatar, AV, AV_IDS, Text, TextInput } from "../ui";
@@ -57,26 +57,19 @@ function Rise({ n = 0, style, children, testID }) {
    rather than stacked under the status bar with half a screen of nothing
    below it — which is what it looked like on the emulator.
  *
- * The padding is the keyboard. `android:windowSoftInputMode="adjustResize"` is
- * set and does nothing here, because the app draws edge to edge and the window
- * is never the thing that resizes; centred content therefore stayed centred in
- * the *whole* screen and the name field was behind the keys you were typing on.
- * Padding the foot by the keyboard's height moves the centre to the middle of
- * what can actually be seen, which is what the learner means by "the middle".
- * Ten lines and no new dependency (rule 20.5). */
+ * The padding is the keyboard (`Screen keyboard`, ui.js `useKeyboardPad`):
+ * `android:windowSoftInputMode="adjustResize"` is set and does nothing here,
+ * because the app draws edge to edge and the window is never the thing that
+ * resizes; centred content therefore stayed centred in the *whole* screen and
+ * the name field was behind the keys you were typing on. Padding the foot by
+ * the keyboard's height moves the centre to the middle of what can actually
+ * be seen, which is what the learner means by "the middle". */
 function Middle({ children }) {
-  const [pad, setPad] = useState(0);
-  useEffect(() => {
-    const show = Keyboard.addListener("keyboardDidShow",
-      (e) => setPad((e.endCoordinates && e.endCoordinates.height) || 0));
-    const hide = Keyboard.addListener("keyboardDidHide", () => setPad(0));
-    return () => { show.remove(); hide.remove(); };
-  }, []);
   // `safeTop`: the one screen with no navigation header above it, so the one
   // that has to take the status-bar inset itself.
   return (
-    <Screen fill safeTop>
-      <View style={{ flex: 1, justifyContent: "center", paddingBottom: pad }}>
+    <Screen fill safeTop keyboard>
+      <View style={{ flex: 1, justifyContent: "center" }}>
         {children}
       </View>
     </Screen>

@@ -3194,6 +3194,43 @@ group("drill focus");
      "and everything ticked still mixes the tables");
 }
 
+/* The 2026-10-14 generator items (COURSE-ROADMAP WP9): a partner the course
+   teaches, a drill's second line as one meaning, and no «я» for a verb nobody
+   says of themselves. */
+group("the drills ask what a learner can answer");
+{
+  const idx = (b) => L.findIndex((l) => l && l.b === b && l.p === "verb");
+  const taughtSet = new Set(UN.flatMap((u) => u.w));
+  // «видеть» lists two perfectives; the one shown is the taught one.
+  const videt = idx("видеть");
+  if (videt >= 0 && String(L[videt].pt || "").includes(",")) {
+    const typed = Q.drillQuestions("aspect", 6, [videt], undefined, true, ["partner"]);
+    const chosen = Q.drillQuestions("aspect", 6, [videt], undefined, false, ["partner"]);
+    const shown = typed.map((q) => q.target).concat(chosen.flatMap((q) => (q.options || []).filter((o) => o.right).map((o) => o.label)));
+    const isTaught = (s) => taughtSet.has(L.findIndex((l) => l && fold(l.b) === fold(s)));
+    ok(shown.length > 0 && shown.every(isTaught),
+       "the aspect drill shows the partner the course teaches", [...new Set(shown)].join(","));
+  }
+  // The second line under a drill prompt is one meaning, not the gloss.
+  const subs = ["cases", "aspect", "conjugation", "agreement"].flatMap((d) => Q.drillQuestions(d, 6, undefined, undefined, true))
+    .map((q) => q.sub).filter((s) => typeof s === "string");
+  ok(subs.length > 0 && subs.every((s) => !s.includes(";")),
+     "a drill's second line is the first meaning, not the whole gloss", subs.find((s) => s.includes(";")) || "");
+  // A verb with no first- or second-person use in its examples is asked only
+  // in the third person.
+  const nach = idx("начинаться");
+  if (nach >= 0) {
+    const qs = Q.drillQuestions("conjugation", 20, [nach], undefined, true, ["present", "past", "imperative", "who"]);
+    const persons = qs.map((q) => (q.ask || "").match(/“([^”]+)”/)).filter(Boolean).map((m) => m[1]);
+    ok(qs.length > 0 && persons.every((p) => !/^(я|ты|мы|вы)$/.test(p)),
+       "«начинаться» is never asked for я, ты, мы or вы", [...new Set(persons)].join(","));
+  }
+  // …while a verb said of oneself still is.
+  const hotet = idx("хотеть");
+  const hq = Q.drillQuestions("conjugation", 30, [hotet], undefined, true, ["present"]);
+  ok(hq.some((q) => /“(я|ты|мы|вы)”/.test(q.ask || "")), "«хотеть» is still asked for я or ты");
+}
+
 /* Gender is what the agreement drill and the chapter's form question read, so
    a noun the curriculum teaches without one cannot be asked about properly
    (ROADMAP 13.28). OpenRussian left 18 of them blank; `build_lexicon.py`

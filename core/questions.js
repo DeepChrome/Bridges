@@ -102,6 +102,9 @@ export const REVIEW_MIX = { perQuiz: 1 };
 export const OLD_SHARE = 0.2;
 export const QUIZ_WORDS = 2;
 export const QUIZ_MIN = 6;
+/* The distinct questions a quiz's drill slot wants in its pool before it
+   draws from the chapter alone; fewer, and it draws from everything met. */
+export const DRILL_VARIETY = 4;
 
 /* Practice's drills inside a lesson quiz: this many, of the drills the route
    has opened, on the chapter's own words (quizSteps). */
@@ -2355,8 +2358,13 @@ export function makeQuestions(env) {
         const { cells, only } = routeDrill(type, reached);
         // Earlier chapters' words only while the older budget allows (above).
         const first = k === 1 && drillOld && before.length ? before : chapter;
-        // Written, as the form question is: producing the form is the skill.
-        const q = drillQuestions(type, 1, first, cells, true, only)[0]
+        /* Written, as the form question is: producing the form is the skill.
+           A pool that cannot fill DRILL_VARIETY distinct questions is too thin
+           to draw one from — the aspect drill asked «отвеча́ть → отве́тить»
+           three lessons running from a chapter with two verb pairs
+           (COURSE-ROADMAP WP9) — so the draw widens to everything met. */
+        const narrow = drillQuestions(type, DRILL_VARIETY, first, cells, true, only);
+        const q = (narrow.length >= DRILL_VARIETY ? pickOne(narrow) : null)
           || drillQuestions(type, 1, met, cells, true, only)[0];
         if (q) out.splice(slotApart(out, q), 0, { ...q, drill: true, older: first === before });
       });
@@ -2642,7 +2650,7 @@ export function makeQuestions(env) {
     const target = askable[Math.floor(Math.random() * askable.length)];
     const what = `${t.rows[target.ri][0].toLowerCase()} ${t.columns[target.ci + 1].toLowerCase()}`;
     const base = { kind: "cases", i: L.indexOf(w), cyr: true,
-                   prompt: w.w, sub: w.e || "", table: t, at: [target.ri, target.ci + 1] };
+                   prompt: w.w, sub: firstSense(w) || "", table: t, at: [target.ri, target.ci + 1] };
     if (typed) return written(base, `Write ${what}`, target.label, target.alts);
     /* One option per *form*, not per cell. A paradigm repeats itself — an
        inanimate noun's accusative is its nominative, an animate one's is its
@@ -2730,24 +2738,33 @@ export function makeQuestions(env) {
      out of four. The partner question is limited by how many verbs in the pool
      have one — seven after the first chapter — so the second shape carries the
      drill early on, where any verb marked for aspect qualifies. */
+  /* The partner shown is a taught one where the lexicon lists several: «видеть»
+     carries "увидеть,завидеть" and the drill offered «завидеть», which no
+     lesson teaches (COURSE-ROADMAP WP9). Every listed partner still counts as
+     right when typed. */
+  let taughtKeys = null;
+  const taughtFirst = (ps) => {
+    if (!taughtKeys) taughtKeys = new Set(UN.flatMap((u) => u.w).map((i) => L[i] && fold(L[i].b)));
+    return ps.slice().sort((a, b) => (taughtKeys.has(fold(a)) ? 0 : 1) - (taughtKeys.has(fold(b)) ? 0 : 1));
+  };
   function qAspectPartner(_cells, typed) {
     const w = pickWhere((x) => x.p === "verb" && partnersOf(x).length && x.a);
     if (!w) return null;
     const want = w.a === "imperfective" ? "perfective" : "imperfective";
-    const partners = partnersOf(w);
+    const partners = taughtFirst(partnersOf(w));
     if (typed) {
       return written({ kind: "aspect", i: L.indexOf(w), cyr: true, prompt: w.w,
-                       sub: w.e || "", note: (UN.find((u) => u.id === "core8") || {}).g },
+                       sub: firstSense(w) || "", note: (UN.find((u) => u.id === "core8") || {}).g },
                      `Write the ${want} partner`, partners[0], partners.slice(1));
     }
-    // One of the partners, written as the lexicon accents it where it can: an
+    // The taught partner, written as the lexicon accents it where it can: an
     // unmarked answer among marked distractors is a tell of its own.
-    const right = verbLabel(pickOne(partners));
+    const right = verbLabel(partners[0]);
     const wrong = partnerWrong(w, right);
     if (!wrong) return null;
     return {
       kind: "aspect", i: L.indexOf(w), cyr: true,
-      ask: `Choose the ${want} partner`, prompt: w.w, sub: w.e || "",
+      ask: `Choose the ${want} partner`, prompt: w.w, sub: firstSense(w) || "",
       note: (UN.find((u) => u.id === "core8") || {}).g,
       options: optionsOf(right, wrong),
     };
@@ -3137,7 +3154,8 @@ export function makeQuestions(env) {
      * Filtering the rows covers both shapes at once: the typed answer, and the
      * right option in the chosen one. A verb with nothing left to ask returns
      * null and the caller draws another. */
-    const rows = t.rows.filter((r) => r[1] && r[1].length && fold(r[1][0]) !== fold(w.w));
+    const rows = t.rows.filter((r) => r[1] && r[1].length && fold(r[1][0]) !== fold(w.w)
+      && personRow(w, r));
     if (!rows.length) return null;
     const target = rows[Math.floor(Math.random() * rows.length)];
     const right = target[1][0];
@@ -3147,7 +3165,7 @@ export function makeQuestions(env) {
       const label = t.title === "Imperative" ? "imperative"
         : t.title === "Past" ? "past" : (w.a === "perfective" ? "future" : "present");
       return written({ kind: "conjugation", i: L.indexOf(w), cyr: true,
-                       prompt: w.w, sub: w.e || "", table: t, note, at },
+                       prompt: w.w, sub: firstSense(w) || "", table: t, note, at },
                      `Write the ${label} for “${target[0]}”`, right, target[1].slice(1));
     }
     // The verb's own other persons first — the imperative has only two rows, so
@@ -3168,7 +3186,7 @@ export function makeQuestions(env) {
       : t.title === "Past" ? "past" : (w.a === "perfective" ? "future" : "present");
     return {
       kind: "conjugation", i: L.indexOf(w), cyr: true,
-      ask: `Choose the ${what} for “${target[0]}”`, prompt: w.w, sub: w.e || "", table: t, note, at,
+      ask: `Choose the ${what} for “${target[0]}”`, prompt: w.w, sub: firstSense(w) || "", table: t, note, at,
       options: optionsOf(right, wrong),
     };
   }
@@ -3215,11 +3233,42 @@ export function makeQuestions(env) {
   /* The other direction: here is a form, whose is it? Reading a conjugated verb
      is what the learner does when a sentence arrives, and it is not the same
      skill as producing one. */
+  /* A verb nobody says of themselves is not asked for «я» or «мы»: «начинаться»
+     gave "write the present for мы → начинаемся", which is a form and not a
+     sentence anyone would say (COURSE-ROADMAP WP9). The signal is the verb's
+     own examples: none with a first- or second-person subject, and the drill
+     keeps to the third person — always a fair question. */
+  const PERSONAL = new Set(["я", "ты", "мы", "вы"]);
+  const personLabel = (r) => fold(String(r[0]).split(/\s*\/\s*/)[0]);
+  const personal = new Map();
+  /* Said of oneself when one of the verb's *own* first- or second-person
+     forms occurs in its examples. A pronoun anywhere in the sentence is not
+     enough: «Я расскажу, как начинался день» has «я», and the verb that is
+     said of oneself there is «рассказать». */
+  const saidOfOneself = (w) => {
+    if (!personal.has(w)) {
+      const rows = (w.t || []).flatMap((t) => t.rows);
+      const first = new Set(rows.filter((r) => PERSONAL.has(personLabel(r))).flatMap((r) => (r[1] || []).map(fold)));
+      const any = new Set(rows.flatMap((r) => (r[1] || []).map(fold)).concat([fold(w.b)]));
+      /* …or a first- or second-person pronoun within two words of one of its
+         forms («Я вчера купил…»): four examples a word is too few for the
+         verb's own first-person form to turn up every time it could. */
+      const said = (w.x || []).some((x) => {
+        const toks = String(x.ru || "").split(/[^А-Яа-яЁё́]+/).map(fold).filter(Boolean);
+        return toks.some((tok, k) => first.has(tok)
+          || (any.has(tok) && toks.slice(Math.max(0, k - 2), k + 3).some((n) => PERSONAL.has(n))));
+      });
+      personal.set(w, said);
+    }
+    return personal.get(w);
+  };
+  const personRow = (w, r) => saidOfOneself(w) || !PERSONAL.has(personLabel(r));
+
   function qConjugationWho(_cells, _typed, only) {
     const pick = verbTable(only);
     if (!pick) return null;
     const { w, t } = pick;
-    const rows = t.rows.filter((r) => r[1] && r[1].length);
+    const rows = t.rows.filter((r) => r[1] && r[1].length && personRow(w, r));
     if (rows.length < 4) return null;
     const target = rows[Math.floor(Math.random() * rows.length)];
     // Only rows whose form differs: «он» and «оно» share a past in some verbs,
@@ -3278,7 +3327,7 @@ export function makeQuestions(env) {
     if (variants.length < 2) return null;
     return {
       kind: "stress", i: L.indexOf(w), cyr: true,
-      ask: "Choose where the stress falls", prompt: plain, sub: w.e || "", say: plain,
+      ask: "Choose where the stress falls", prompt: plain, sub: firstSense(w) || "", say: plain,
       options: shuffle([accented.normalize("NFC")].concat(shuffle(variants).slice(0, 3)))
         .map((s) => ({ label: s, right: s === accented.normalize("NFC"), cyr: true })),
     };

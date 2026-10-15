@@ -6562,6 +6562,27 @@ grid); the lesson's steps press through `Lift` like everything else.
 `primitives.test.js` pins the four. Reading the app's own `Text` in a test:
 a weight becomes a *face* (§30bj), so assert `fontFamily`, not `fontWeight`.
 
+## 30cc. The drills ask what a learner can answer (WP9, 2026-10-14)
+
+- **A listed partner is not a taught partner.** The lexicon gives «видеть»
+  "увидеть,завидеть" and the drill offered «завидеть»; `taughtFirst` puts a
+  curriculum word first and the drill shows that one (every listed partner
+  still counts when typed).
+- **A drill's second line is `firstSense`**, not the gloss (`sub` on cases,
+  aspect, conjugation, agreement, stress).
+- **A thin pool repeats.** The quiz's drill slot drew from the chapter's
+  words and asked the same aspect pair three lessons running; it draws from
+  the whole route when the chapter cannot fill `DRILL_VARIETY` (4) distinct
+  questions.
+- **No «я» for a verb nobody says of themselves** (`saidOfOneself`): one of
+  the verb's own first/second-person forms in an example, or such a pronoun
+  within two words of one of its forms. Three rules were measured before
+  one was kept — any pronoun anywhere caught 45 verbs but missed
+  «начинаться» («Я расскажу, как начинался день»); the verb's own form
+  alone caught 119, starving on four examples a word; the pair catches 71,
+  the impersonal ones among them. A personal verb with only third-person
+  examples loses a question shape and nothing else.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

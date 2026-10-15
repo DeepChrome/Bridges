@@ -608,6 +608,20 @@ owner's phone build read screen by screen.
 
 ## 12. WP9 — Generator and content items still open
 
+> **2026-10-14, done:** the aspect drill shows a *taught* partner where the
+> lexicon lists several («видеть» → «увидеть», not «завидеть»; `taughtFirst`);
+> every drill's second line is `firstSense`, not the whole gloss; a quiz's
+> drill slot draws from the whole route when the chapter's pool cannot fill
+> `DRILL_VARIETY` (4) distinct questions; a verb nobody says of themselves is
+> asked only in the third person (`saidOfOneself`: one of the verb's own
+> first/second-person forms in an example, or a first/second-person pronoun
+> within two words of one of its forms — 71 of 258 taught verbs keep to the
+> third person, «начинаться», «стоить», «происходить» among them; some
+> personal verbs with only third-person examples are caught too, which costs
+> a question shape and nothing else). Not done: «разговаривать» keeps its
+> partner (the pair is a textbook one); the corpus-scene fallback and chapter
+> 10's quest videos are content decisions still open.
+
 - `realPartner`: prefer a partner that is itself a taught word (платить →
   заплатить, not выплатить); exclude разгова́ривать (no perfective).
 - Cases drill prompt prints the whole gloss (`вы́пуск | issue, output,

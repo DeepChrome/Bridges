@@ -6611,7 +6611,12 @@ could not be reached. `useKeyboardPad()` in ui.js is the one listener and
 `Screen keyboard` pads the foot by it — the tutor, the feedback form and the
 gate use it; Run.js stacks its typed questions from the top and needs none.
 `keyboard.test.js` catches the listeners, since the jest Keyboard has no
-emitter.
+emitter. **A sheet is different**: a Modal is its own window, and whether
+Android resizes it for the keyboard differs by device (the emulator did not;
+the ask sheet's box and button sat behind the keys), so `Sheet` pads by the
+*measured* overlap — `useKeyboardOverlap` measures the panel's bottom against
+the keyboard's top when it opens, which is zero on a window that already
+moved. A fixed pad would shrink a resized sheet twice.
 
 ## 31. Verification
 

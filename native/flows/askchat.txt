@@ -1,0 +1,20 @@
+# The sparkle's ask sheet drawn as a conversation (CLAUDE.md 30cd, 2026-10-15),
+# on an installed build with a profile and a network: a question typed, the
+# learner's face on it, Teddy's on the answer.
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\askchat.txt -Device emulator-5554
+
+wait:2
+tap:^Practice$
+wait:2
+tap:Ask the AI about the Russian here
+wait:2
+tap:Why is it
+wait:1
+type:what does Practice mean here
+wait:1
+tap:^Ask$
+wait:12
+shot:a1-ask-chat
+back
+wait:1

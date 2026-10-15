@@ -182,13 +182,41 @@ export function TextInput({ style, placeholderTextColor, ...rest }) {
    screen that holds one pads its foot by this. */
 export function useKeyboardPad() {
   const [pad, setPad] = useState(0);
+  useKeyboardEvents((e) => setPad(e.height), () => setPad(0));
+  return pad;
+}
+
+function useKeyboardEvents(onShow, onHide) {
+  const latest = useRef({ onShow, onHide });
+  latest.current = { onShow, onHide };
   useEffect(() => {
-    const show = Keyboard.addListener("keyboardDidShow",
-      (e) => setPad((e && e.endCoordinates && e.endCoordinates.height) || 0));
-    const hide = Keyboard.addListener("keyboardDidHide", () => setPad(0));
+    const show = Keyboard.addListener("keyboardDidShow", (e) => {
+      const c = (e && e.endCoordinates) || {};
+      latest.current.onShow({ height: c.height || 0, top: c.screenY });
+    });
+    const hide = Keyboard.addListener("keyboardDidHide", () => latest.current.onHide());
     return () => { show.remove(); hide.remove(); };
   }, []);
-  return pad;
+}
+
+/* How far the keyboard overlaps a view anchored at the foot of the screen —
+   a sheet. Measured, not assumed: a Modal is its own window, and whether
+   Android resizes it for the keyboard differs by device, so a fixed pad
+   would shrink a resized sheet twice. The view's bottom is measured when the
+   keyboard opens; only the part under the keys is padded. `measure` is
+   injectable for the tests, which have no layout. */
+export function useKeyboardOverlap(measure = measureBottom) {
+  const ref = useRef(null);
+  const [pad, setPad] = useState(0);
+  useKeyboardEvents((k) => {
+    if (!Number.isFinite(k.top)) { setPad(k.height); return; }
+    measure(ref.current, (bottom) => setPad(bottom == null ? k.height : Math.max(0, Math.round(bottom - k.top))));
+  }, () => setPad(0));
+  return [ref, pad];
+}
+function measureBottom(node, cb) {
+  if (!node || typeof node.measureInWindow !== "function") { cb(null); return; }
+  node.measureInWindow((x, y, w, h) => cb(y + h));
 }
 
 export function Screen({ children, scroll = true, fill = false, safeTop = false, footer,
@@ -580,6 +608,9 @@ const TALL_HEIGHT = "88%";
 export function Sheet({ visible = true, onClose, title, header, children, footer,
                         maxHeight = "85%", tall, testID }) {
   const t = useTheme();
+  // A sheet with a text field (the ask sheet, the feedback form) makes room
+  // for the keys; see useKeyboardOverlap.
+  const [panel, keyboardPad] = useKeyboardOverlap();
   return (
     <Modal transparent animationType="slide" visible={visible} onRequestClose={onClose}>
       <View style={{ flex: 1, justifyContent: "flex-end" }}>
@@ -591,9 +622,10 @@ export function Sheet({ visible = true, onClose, title, header, children, footer
           style={[StyleSheet.absoluteFill, { backgroundColor: SCRIM }]}
         />
         <View
+          ref={panel}
           testID={testID}
           style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.lg,
-                   borderTopRightRadius: radius.lg, padding: 16, paddingBottom: 22,
+                   borderTopRightRadius: radius.lg, padding: 16, paddingBottom: 22 + keyboardPad,
                    ...(tall ? { height: TALL_HEIGHT } : { maxHeight }) }}
         >
           <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: t.line,

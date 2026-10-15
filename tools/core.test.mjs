@@ -4008,6 +4008,30 @@ group("the review, 2026-10-01");
      "and Keep going deals a chunk past it");
 }
 
+group("drive mode: a Pimsleur lesson, played");
+{
+  const { driveScript, driveItems, driveLength, DRIVE_RECALL } = await import("../core/drive.js");
+  const items = ["один", "два", "три", "четыре", "пять", "шесть"].map((ru, k) =>
+    ({ ru, en: "n" + k, kind: "word" }));
+  const sc = driveScript(items);
+  const marks = sc.filter((s) => s.t === "mark");
+  ok(marks.filter((m) => m.first).length === items.length, "every item is met once as new");
+  ok(marks.filter((m) => !m.first).length === items.length * DRIVE_RECALL.length,
+     "and recalled once for each spacing, the tail included");
+  // A prompt is English, then a pause, then the Russian: never the answer first.
+  let fine = true;
+  sc.forEach((s, k) => { if (s.t === "mark") fine = fine && sc[k + 1].t === "en" && sc[k + 2].t === "gap" && sc[k + 3].t === "ru"; });
+  ok(fine, "the English, a pause to say it, then the Russian");
+  const firstOf2 = sc.findIndex((s) => s.t === "mark" && s.item === 2 && s.first);
+  const recall0 = sc.findIndex((s) => s.t === "mark" && s.item === 0 && !s.first);
+  ok(recall0 > 0 && recall0 < firstOf2, "an item comes back before the one two places on is new");
+  const ru = sc.filter((s) => s.t === "ru");
+  ok(ru.length === items.length * 2 + items.length * DRIVE_RECALL.length, "twice when new, once when recalled");
+  ok(driveLength(sc) > 60000, "a dozen prompts run past a minute", String(driveLength(sc)));
+  const mixed = driveItems(items, [{ ru: "Я дома.", en: "I'm home.", kind: "sentence" }]);
+  ok(mixed[3].kind === "sentence", "a sentence follows every few words");
+}
+
 console.log("\n" + checks + " checks · " +
             (failures ? failures + " FAILED" : "all passed"));
 process.exit(failures ? 1 : 0);

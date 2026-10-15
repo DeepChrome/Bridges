@@ -63,6 +63,12 @@ export function DrillList({ navigation }) {
             <Text style={title}>At your level</Text>
           </View>
         </Row>
+        <Row testID="practice-drive" onPress={() => navigation.navigate("Drive")}>
+          <Thumb id="drive" tone="info" />
+          <View style={{ flex: 1 }}>
+            <Text style={title}>Drive mode</Text>
+          </View>
+        </Row>
         {/* "Native speed" — 45 s of real video and "which word did you hear?"
             — sat here until 2026-09-23. The owner: *"'what word did you hear'
             is pretty horrible and doesn't actually teach the language."* The

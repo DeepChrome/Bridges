@@ -25,6 +25,7 @@ export const RUNS = [
   "GrammarRun",   // a chapter's grammar point with its words
   "CaseRun",      // a case's lesson or drill (core/cases.js)
   "Recap",        // the day's recap
+  "Drive",        // drive mode: a player, its controls are the screen
   "TestOut",      // testing out of a section
   "Placement",    // the placement test
   "CustomQuiz",   // a quiz the learner built

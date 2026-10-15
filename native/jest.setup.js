@@ -85,6 +85,8 @@ jest.mock("expo-audio", () => ({
       play: jest.fn(() => {
         p.sounding = true;
         listeners.forEach((fn) => fn({ playing: true }));
+        // A looping player (drive mode's carrier) never finishes.
+        if (p.loop) return;
         if (global.__audioHold) global.__audioPending.push(finish);
         else if (!global.__audioNeverFinish) setTimeout(finish, 0);
       }),

@@ -123,12 +123,15 @@ function release(p) {
  * far better than silence — and the next rearm tries the mode again. */
 export const PREPARE_MS = 1500;
 let preparing = null;
+/* Drive mode plays on with the screen locked (core/drive.js); everything else
+   stops when the app leaves the foreground, as it always has. */
+let background = false;
 async function prepare() {
   if (ready) return;
   if (!preparing) {
     // Study out loud with the ringer silenced — the usual case on a phone.
     const applied = Promise.resolve()
-      .then(() => setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: false }))
+      .then(() => setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: background }))
       .then(() => { ready = true; }, () => { ready = true; /* not fatal: default routing plays */ });
     // Timed out or not, the session is taken as ready until the next rearm:
     // waiting a second and a half before every press would be its own bug.
@@ -758,6 +761,67 @@ export function stop() {
   release(player);
   player = null;
   if (settle) settle();
+}
+
+/* Drive mode's hold on the phone (core/drive.js). Android stops a backgrounded
+ * app's sound after a few minutes unless a media session is showing on the lock
+ * screen, and every clip here is its own short player — so a silent track loops
+ * underneath as the session's owner, carrying the lock-screen card ("Drive ·
+ * Ya") and its play/pause. Audio focus is the module's, not a player's
+ * (expo-audio AudioModule.kt), so the clips play over it without taking focus
+ * from it. `onLockScreen(playing)` hears the lock screen's buttons: the carrier
+ * stopping or starting when the app did not ask is the learner pressing them.
+ */
+let carrier = null;
+export async function startCarrier(source, title, onLockScreen) {
+  stopCarrier();
+  background = true;
+  ready = false;
+  await prepare();
+  try {
+    const c = createAudioPlayer(source);
+    carrier = c;
+    c.loop = true;
+    let was = null;
+    if (c.addListener && onLockScreen) {
+      c.addListener("playbackStatusUpdate", (s) => {
+        // A loop wrapping round is not a press.
+        if (!s || s.didJustFinish || carrier !== c || typeof s.playing !== "boolean" || s.playing === was) return;
+        const asked = c.__asked;
+        was = s.playing;
+        // The app's own pause or play is announced in __asked; anything else
+        // came from outside.
+        if (asked === s.playing) return;
+        onLockScreen(s.playing);
+      });
+    }
+    c.__asked = true;
+    c.play();
+    if (typeof c.setActiveForLockScreen === "function") {
+      c.setActiveForLockScreen(true, { title, artist: "Ya" }, { showSeekForward: false, showSeekBackward: false });
+    }
+    return true;
+  } catch (e) {
+    carrier = null;
+    return false;
+  }
+}
+/* The carrier playing again after a pause from the app's own button. */
+export function resumeCarrier() {
+  if (carrier) { try { carrier.__asked = true; carrier.play(); } catch (e) {} }
+}
+export function pauseCarrier() {
+  if (carrier) { try { carrier.__asked = false; carrier.pause(); } catch (e) {} }
+}
+export function stopCarrier() {
+  const c = carrier;
+  carrier = null;
+  if (c) {
+    c.__asked = false;
+    try { if (typeof c.setActiveForLockScreen === "function") c.setActiveForLockScreen(false); } catch (e) {}
+    release(c);
+  }
+  if (background) { background = false; ready = false; }
 }
 
 /* Everything the app holds, handed back — the cue players too, which are cached

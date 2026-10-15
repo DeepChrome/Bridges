@@ -39,6 +39,8 @@ export const ACTIVITY_ICONS = {
   quiz: "M4 6h8M4 12h8M4 18h8M16 6l1.5 1.5L21 4M16 12l1.5 1.5L21 10M16 18l1.5 1.5L21 16",
   listen: "M4 14v-2a8 8 0 0 1 16 0v2M6 12h1v6H6a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2zM18 12h-1v6h1a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2z",
   native: "M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2",
+  /* Drive mode: a steering wheel. */
+  drive: "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4zM3.5 11h6.5M14 11h6.5M12 14v7",
   shadow: "M12 4a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3zM6 11a6 6 0 0 0 12 0M12 17v3M9 20h6",
   talk: "M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1zM8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01",
   letters: "M5 19l6-14h2l6 14M8.5 14h7",

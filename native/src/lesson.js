@@ -148,7 +148,7 @@ function WordRow({ i, unit, last, delay }) {
    rule does not look like a vocabulary card with different words in it, and Teddy
    points at it rather than saying anything about it. */
 /* `label` stands in for the unit's name where the card belongs to no unit —
-   a case module's cards (Flows.js CaseFlow). */
+   a case module's cards (flows/Cases.js CaseFlow). */
 export function GrammarNote({ unit, note, at, total, onEpisode, label }) {
   const t = useTheme();
   const anim = useEnter([note.title, at]);

@@ -433,7 +433,8 @@ bridges/                          (directory is still named russian-blocks on di
     anki.js            <- Anki decks: field parsing, legacy collection rows (§30h)
     icons.js avatars.js
   native/              <- THE PRODUCT (Expo / React Native); see native/README.md
-    src/screens/       <- Learn, Unit, Flows, Run (the runner + VIEWS registry), You…
+    src/screens/       <- Learn, Unit, Practice, Run (the runner + VIEWS registry), You…
+    src/flows/         <- the runs: Lesson, Drills, Cases, Listening, Quiz, Tests, VideoQuiz (WP8.9, 2026-10-15)
     src/activities/    <- Hear, Say, Scene, Alignment (§30c)
     src/rules.js       <- the one table, rule card and reference sheet (§30ay)
     src/lib/feedback.js<- client for the Worker (§30d)

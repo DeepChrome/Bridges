@@ -115,7 +115,7 @@ const NOUN_COLUMNS = ["Singular", "Plural"];
    agreement drills can be narrowed to, all six, since the drill is open from
    the first screen (§30au) and the learner may choose any of them (the owner,
    2026-09-26: *"For cases, you should be able to select each case or all
-   cases"*). The route's own cases are only the default ticks (Flows.js). */
+   cases"*). The route's own cases are only the default ticks (flows/Drills.js). */
 export const CASE_ROWS = ["Nominative", "Genitive", "Dative", "Accusative", "Instrumental", "Prepositional"];
 /* An adjective's stem class, off its dictionary ending: the three shapes a
    learner has to keep apart, and what the agreement drill narrows to ("maybe

@@ -84,7 +84,7 @@ export const DEFAULTS = {
      drill shapes have nothing to produce and ignore it (core/questions.js). */
   typedDrills: true,
   /* What each drill asks about and where its words come from, chosen from the
-     cog on the drill (Flows.js DrillOptions): drill id -> { only, chapters }.
+     cog on the drill (flows/Drills.js DrillOptions): drill id -> { only, chapters }.
      Absent, a drill runs as it always did. */
   drillPrefs: {},
   /* The last wrong answers, newest first, as { kind, prompt, answer, said, at }

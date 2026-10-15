@@ -320,7 +320,7 @@ export function components(st, u, i) {
   /* The video's five questions, after it (the owner, 2026-10-05: "you can
      throw video questions on that page after the video"). Optional, like
      every step added to lessons already finished, and shared with the video:
-     done is the run recorded under its key (Flows.js videoQuizKey). */
+     done is the run recorded under its key (flows/VideoQuiz.js videoQuizKey). */
   if (u.v && u.v.quiz && closes) {
     out.push({ id: "vquiz", label: "Video questions", optional: true, shared: true,
                done: !!((st.drills || {})[`vquiz:${u.v.id}`]) });

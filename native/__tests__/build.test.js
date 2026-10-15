@@ -76,7 +76,7 @@ describe("building a word", () => {
     // it is the whole reason the technique works (core/buildup.js).
     expect(f.every((x, i) => i === 0 || x.endsWith(f[i - 1]))).toBe(true);
     expect(steps[0].steps).toEqual(f);
-    // Off unless the learner asked for it on the way in (Flows.js).
+    // Off unless the learner asked for it on the way in (flows/Drills.js).
     expect(steps[0].listen).toBe(false);
   });
 

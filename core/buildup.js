@@ -136,7 +136,7 @@ export function buildupDrill(words, n = 6, opts = {}) {
     steps: buildup(w.ru),
     cyr: true,
     /* Whether the learner asked to be listened to. Decided once, on the way in
-       (Flows.js), because a question per word would be the drill. */
+       (flows/Drills.js), because a question per word would be the drill. */
     listen: !!opts.listen,
     ask: opts.listen ? "Listen, then say it back" : "Listen, then say it out loud",
     prompt: "",

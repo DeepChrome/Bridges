@@ -15,7 +15,7 @@ import { useTheme, radius, type as T } from "./theme";
 import { UN } from "./data";
 
 /* «Food · Lesson 2 quiz» -> { name: "Food", step: "Lesson 2 · Quiz" }. The
-   titles are written by the flows (Flows.js `save`); a title with no unit in
+   titles are written by the flows (flows/*.js `save`); a title with no unit in
    it ("Today's recap") is the name alone. */
 export function runParts(run) {
   const [name, ...rest] = String(run.title || "").split(" · ");

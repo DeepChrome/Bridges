@@ -787,11 +787,16 @@ export async function startCarrier(source, title, onLockScreen) {
       c.addListener("playbackStatusUpdate", (s) => {
         // A loop wrapping round is not a press.
         if (!s || s.didJustFinish || carrier !== c || typeof s.playing !== "boolean" || s.playing === was) return;
+        /* Nothing counts until it has played once: the first statuses arrive
+           while it is still loading, not playing, and read as a lock-screen
+           pause (the emulator, 2026-10-15: the drive stopped on its first item). */
+        if ((was === null && !s.playing) || s.isLoaded === false) return;
         const asked = c.__asked;
         was = s.playing;
         // The app's own pause or play is announced in __asked; anything else
         // came from outside.
         if (asked === s.playing) return;
+        c.__asked = s.playing;             // what the carrier is doing now
         onLockScreen(s.playing);
       });
     }

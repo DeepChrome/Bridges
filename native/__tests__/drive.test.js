@@ -44,6 +44,14 @@ it("plays the English first, holds the lock screen, pauses everything, and lets 
   const carrier = global.__players[0];
   expect(carrier.loop).toBe(true);
   expect(carrier.sounding).toBe(true);
+  // A loading status before it has played is not a lock-screen pause.
+  await act(async () => { carrier.__emit({ playing: false, isLoaded: false }); });
+  expect(screen.getByTestId("drive-play").props.accessibilityLabel).toBe("Pause");
+  // The lock screen's pause, once it has played, is one.
+  await act(async () => { carrier.__emit({ playing: false }); });
+  expect(screen.getByTestId("drive-play").props.accessibilityLabel).toBe("Play");
+  await act(async () => { carrier.__emit({ playing: true }); });
+  expect(screen.getByTestId("drive-play").props.accessibilityLabel).toBe("Pause");
 
   await act(async () => { fireEvent.press(screen.getByTestId("drive-play")); });   // pause
   expect(global.__sounding()).toEqual([]);

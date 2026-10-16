@@ -98,6 +98,8 @@ jest.mock("expo-audio", () => ({
          decoder until the phone runs out of them (audio.js release). */
       release: jest.fn(() => { p.freed = true; }),
       addListener: (name, fn) => { listeners.push(fn); return { remove: () => {} }; },
+      // A status from the platform, as the lock screen's buttons send one.
+      __emit: (s) => listeners.forEach((fn) => fn(s)),
     };
     // A finished track is not still sounding.
     listeners.push((s) => { if (s && s.didJustFinish) p.sounding = false; });

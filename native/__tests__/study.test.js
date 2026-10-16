@@ -128,6 +128,18 @@ describe("which cards a set holds", () => {
     for (const w of words) expect(s.faces[w].e).toBeTruthy();
   });
 
+  /* A tester, 2026-10-10: a summary's round turned «Авто́бусы во́зят
+     пассажи́ров.» over to no English. A dictionary example finds its English
+     (cardsIn); a sentence the payload has none for is not dealt at all. */
+  it("deals every sentence of a list round with its English, and none without", () => {
+    const known = "Авто́бусы во́зят пассажи́ров.";
+    const nobody = "Этого предложения нет нигде.";
+    const s = sessionFor({ ...st, sets: [] }, { round: "list", words: ["город", known, nobody], title: "Lesson" });
+    expect(s.items.map((x) => x.word)).toEqual(["город", known]);
+    expect(s.faces[known].e).toBe("Buses carry passengers.");
+    expect(s.faces[known].sentence).toBe(true);
+  });
+
   /* New cards from the path come commonest first, and a sentence is ranked by
      its rarest word (the owner, 2026-09-28: "prioritize more common and useful
      words… same with simpler sentences"). */

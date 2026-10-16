@@ -31,7 +31,7 @@ import { loadPayload } from "./payload.mjs";
 import { durationMs as mp3Ms, speechLevels } from "./mp3.mjs";
 import { PAD_MS as ENDING_PAD_MS, MIN_SPEECH_MS, QUIET_DB } from "./build_ending_clips.mjs";
 import { MIN_WORD_MS } from "./build_word_audio.mjs";
-import { ambiguousSpellings } from "./build_form_audio.mjs";
+import { ambiguousSpellings, lexiconSpellings, spokenKey } from "./build_form_audio.mjs";
 import { fold } from "../core/util.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -180,6 +180,18 @@ if (blips.length) errors.push(`${blips.length} bought word clip(s) under ${MIN_W
                               + blips.slice(0, 12).join(", ") + (blips.length > 12 ? ", …" : ""));
 if (unmeasured.length) errors.push(`${unmeasured.length} bought word clip(s) never measured — run build_word_audio.mjs`);
 
+/* Every clip the generated modules require is a file on disk (2026-10-15).
+   «нуль» was shipped as nul.mp3, which Windows sends to the null device: the
+   copy "succeeded", the manifest was whole, and Metro would have failed the
+   bundle on a require of a file that was never there. */
+for (const mod of ["wordaudio.js", "formaudio.js", "endingaudio.js"]) {
+  const file = join(ROOT, "native", "src", mod);
+  if (!existsSync(file)) continue;
+  const gone = [...readFileSync(file, "utf8").matchAll(/require\("\.\.\/assets\/([^"]+)"\)/g)]
+    .map((m) => m[1]).filter((p) => !existsSync(join(ROOT, "native", "assets", p)));
+  if (gone.length) errors.push(`${gone.length} clip(s) ${mod} requires are not on disk: ${gone.slice(0, 6).join(", ")}`);
+}
+
 /* A bundled clip wins over the collection's file (`say()` checks the bundle
    first), so a word in both plays the bought one: since 2026-09-19 that is
    every Core 5000 word, not only the 61 the collection never had. */
@@ -218,7 +230,10 @@ if (existsSync(FORMS)) {
   const forms = fm.files || {}, fms = fm.ms || {};
   /* The same definition the purchase used (build_form_audio.mjs), so the gate
      and the tool cannot come to disagree about what "two stresses" means. */
-  const twoStress = [...ambiguousSpellings(Object.keys(forms))];
+  /* Against the whole lexicon, dictionary tables included: «полку́» passed
+     this gate while «по́лку» (shelf) sat in a table it never read. */
+  const clash = ambiguousSpellings(lexiconSpellings(DATA).concat(Object.keys(forms)));
+  const twoStress = Object.keys(forms).filter((f) => clash.has(spokenKey(f)));
   if (twoStress.length) errors.push(`${twoStress.length} form spelling(s) bought with two stresses: `
                                     + twoStress.slice(0, 6).join(", "));
   const gone = Object.values(forms).filter((id) => !existsSync(join(ROOT, "data", "word_audio", id + ".mp3")));

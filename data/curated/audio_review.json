@@ -46,6 +46,43 @@
     "8494db14cc65f02d"
    ]
   },
+  "word:по": {
+   "verdicts": [
+    {
+     "verdict": "flag",
+     "id": "b3c42e1df18b4862",
+     "at": "2026-10-15",
+     "who": "tester",
+     "note": "high pitched for no reason (beta.10 report): opens at 400 Hz and never falls"
+    },
+    {
+     "verdict": "flag",
+     "id": "c9892f09a15e8122",
+     "at": "2026-10-15",
+     "who": "measured",
+     "note": "the bare rebuy rises at the end like a question (Whisper: 'По?'; pitch 211 -> 254 Hz)"
+    }
+   ],
+   "rebought": [
+    "c9892f09a15e8122",
+    "7c02121ee6e663a0",
+    "8f42b4fe838402ac"
+   ]
+  },
+  "sentence:я знаю, ты знаешь": {
+   "verdicts": [
+    {
+     "verdict": "flag",
+     "id": "7c40134f574291b1",
+     "at": "2026-10-15",
+     "who": "tester",
+     "note": "huge pause between 'you' and 'know' (beta.10 report): 1.36 s of silence after «ты», with or without the double space"
+    }
+   ],
+   "rebought": [
+    "cbd927770779b0a8"
+   ]
+  },
   "sentence:а это их дети.": {
    "verdicts": [
     {

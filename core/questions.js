@@ -2251,7 +2251,18 @@ export function makeQuestions(env) {
       .map((i) => drawFrom(shapes(i).filter((e) => PRODUCTION.includes(e.t) && !avoid.has(`${e.t}:${i}`)
                                                    && !(barred.has(i) && MEANING.includes(e.t))), i))
       .filter(Boolean);
-    shuffle(production).slice(0, 2).forEach((e) => { bag.push(e); if (e.t === "cloze") usedEx.add(fold(e.ex.ru)); });
+    /* The draws above were made side by side, so two words sharing a sentence
+       («чай» and «кофе» in «Вы будете чай или кофе?») could each have drawn it
+       as their gap; the second is passed over here, or one quiz gaps it twice
+       (core.test.mjs caught it about one sweep in five). */
+    let kept = 0;
+    for (const e of shuffle(production)) {
+      if (kept >= 2) break;
+      if (e.t === "cloze" && usedEx.has(fold(e.ex.ru))) continue;
+      bag.push(e);
+      kept++;
+      if (e.t === "cloze") usedEx.add(fold(e.ex.ru));
+    }
     /* One word, one question — and where a word has two, the production one
        stays: «hello» chosen and then typed was the same word twice in one
        quiz (the learner agents, 2026-10-08). Done before the fill, so the

@@ -119,7 +119,7 @@ export function WordEntry({ w, index, navigation }) {
         {/* The entry gets every sense there is, with its examples: this is the
             screen a learner opened *to read* (§30q). The card shows four. */}
         {senses
-          ? <SenseList senses={senses} size={16} style={{ marginTop: 10 }} />
+          ? <SenseList senses={senses} size={16} mark={w} style={{ marginTop: 10 }} />
           : <Senses e={w.e} size={16} align="left" style={{ marginTop: 8 }} />}
         {/* Words a learner reads, not codes: "feminine", not "f".
             The frequency rank went on 2026-09-22 (the owner: "remove the 'X by
@@ -191,7 +191,7 @@ export function WordEntry({ w, index, navigation }) {
               >
                 <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
                   <View style={{ flex: 1 }}>
-                    <Linked text={e.ru} />
+                    <Linked text={e.ru} mark={w} />
                   </View>
                   <Speaker text={e.ru} size={36} recordedOnly />
                 </View>

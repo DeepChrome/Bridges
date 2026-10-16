@@ -1,5 +1,5 @@
 {
-  "_comment": ["One grammar point per unit,  shown before the first lesson of that unit.", "Hand-authored and deliberately narrow: a single rule the learner can hold in", "mind while meeting the unit's vocabulary. Stress marks are combining acutes.", "Keep each body to one or two sentences — this is a teaching card,  not a chapter.", "Where the rule is a set of endings,  pairs or choices,  put them in `table`", "({ columns,  rows },  each row's first cell its label) and keep the body to the", "one line the table does not say (the owner,  2026-10-09: no 'wall of text').", "The ORDER is the point: spine notes run simple to complex in the sequence the", "external courses agree on (docs/grammar-sequence.md),  and a branch note never", "uses a case or tense its chapter's spine has not yet introduced.", "`form` says what the card teaches in terms the paradigm tables can ask", "(core/questions.js formPrompt): a table title with the row and column labels", "panel.py writes,  or a drill the practice screen already has. A branch card", "without one inherits its chapter's; the Cases drill asks only for the cells", "the route so far has named."],
+  "_comment": ["One grammar point per unit, shown before the first lesson of that unit.", "Hand-authored and deliberately narrow: a single rule the learner can hold in", "mind while meeting the unit's vocabulary. Stress marks are combining acutes.", "Keep each body to one or two sentences — this is a teaching card, not a chapter.", "Where the rule is a set of endings, pairs or choices, put them in `table`", "({ columns, rows }, each row's first cell its label) and keep the body to the", "one line the table does not say (the owner, 2026-10-09: no 'wall of text').", "The ORDER is the point: spine notes run simple to complex in the sequence the", "external courses agree on (docs/grammar-sequence.md), and a branch note never", "uses a case or tense its chapter's spine has not yet introduced.", "`form` says what the card teaches in terms the paradigm tables can ask", "(core/questions.js formPrompt): a table title with the row and column labels", "panel.py writes, or a drill the practice screen already has. A branch card", "without one inherits its chapter's; the Cases drill asks only for the cells", "the route so far has named."],
   "notes": {
     "core1": {
       "title": "No “a”, no “the”, no “is”",
@@ -21,15 +21,15 @@
         "rows": [
           ["я", "-ю", "-ю"],
           ["ты", "-ешь", "-ишь"],
-          ["он,  она́", "-ет", "-ит"],
+          ["он, она́", "-ет", "-ит"],
           ["мы", "-ем", "-им"],
           ["вы", "-ете", "-ите"],
           ["они́", "-ют", "-ят"]
         ]
       },
       "examples": [
-        ["я зна́ю,  ты зна́ешь", "I know,  you know"],
-        ["я говорю́,  ты говори́шь", "I speak,  you speak"]
+        ["я зна́ю, ты зна́ешь", "I know, you know"],
+        ["я говорю́, ты говори́шь", "I speak, you speak"]
       ]
     },
     "core3": {
@@ -42,9 +42,9 @@
         "columns": ["Ends in", "Gender", "Example"],
         "rows": [
           ["consonant", "masculine", "дом"],
-          ["-а,  -я", "feminine", "маши́на"],
-          ["-о,  -е", "neuter", "окно́"],
-          ["-ь", "either", "день,  ночь"]
+          ["-а, -я", "feminine", "маши́на"],
+          ["-о, -е", "neuter", "окно́"],
+          ["-ь", "either", "день, ночь"]
         ]
       },
       "examples": [
@@ -64,8 +64,8 @@
       "table": {
         "columns": ["Singular", "Plural", "Example"],
         "rows": [
-          ["consonant,  -а", "-ы", "стол → столы́"],
-          ["-я,  -ь", "-и", "ночь → но́чи"],
+          ["consonant, -а", "-ы", "стол → столы́"],
+          ["-я, -ь", "-и", "ночь → но́чи"],
           ["к г х ж ш щ ч", "-и", "кни́га → кни́ги"],
           ["-о", "-а", "окно́ → о́кна"],
           ["-е", "-я", "мо́ре → моря́"]
@@ -90,7 +90,7 @@
         "rows": [
           ["most nouns", "-е", "в до́ме"],
           ["feminine in -ь", "-и", "в ночи́"],
-          ["in -ия,  -ие", "-и", "в Росси́и"]
+          ["in -ия, -ие", "-и", "в Росси́и"]
         ]
       },
       "examples": [
@@ -113,8 +113,8 @@
           ["feminine -а", "-у", "кни́га → кни́гу"],
           ["feminine -я", "-ю", "ня́ня → ня́ню"],
           ["feminine -ь", "stays", "ночь"],
-          ["masc.,  neuter thing", "stays", "дом,  окно́"],
-          ["masc. person,  animal", "-а,  -я", "брат → бра́та"]
+          ["masc., neuter thing", "stays", "дом, окно́"],
+          ["masc. person, animal", "-а, -я", "брат → бра́та"]
         ]
       },
       "examples": [
@@ -132,10 +132,10 @@
       "table": {
         "columns": ["Subject", "Ending", "игра́ть"],
         "rows": [
-          ["он,  я (man)", "-л", "игра́л"],
-          ["она́,  я (woman)", "-ла", "игра́ла"],
+          ["он, я (man)", "-л", "игра́л"],
+          ["она́, я (woman)", "-ла", "игра́ла"],
           ["оно́", "-ло", "игра́ло"],
-          ["мы,  вы,  они́", "-ли", "игра́ли"]
+          ["мы, вы, они́", "-ли", "игра́ли"]
         ]
       },
       "examples": [
@@ -190,8 +190,8 @@
         ]
       },
       "examples": [
-        ["Скажи́,  где ты живёшь.", "Tell me where you live."],
-        ["Прочита́йте э́то,  пожа́луйста.", "Read this,  please."]
+        ["Скажи́, где ты живёшь.", "Tell me where you live."],
+        ["Прочита́йте э́то, пожа́луйста.", "Read this, please."]
       ]
     },
     "family": {
@@ -207,7 +207,7 @@
         ]
       },
       "examples": [
-        ["мой муж,  моя́ жена́", "my husband,  my wife"],
+        ["мой муж, моя́ жена́", "my husband, my wife"],
         ["моя́ семья́", "my family"]
       ]
     },
@@ -218,12 +218,12 @@
         "columns": ["Number", "час", "Example"],
         "rows": [
           ["1", "час", "оди́н час"],
-          ["2,  3,  4", "часа́", "два часа́"],
+          ["2, 3, 4", "часа́", "два часа́"],
           ["5–20", "часо́в", "пять часо́в"]
         ]
       },
       "examples": [
-        ["оди́н час,  два часа́", "one hour,  two hours"],
+        ["оди́н час, два часа́", "one hour, two hours"],
         ["пять часо́в", "five hours"]
       ]
     },
@@ -235,7 +235,7 @@
         "rows": [
           ["я", "хочу́"],
           ["ты", "хо́чешь"],
-          ["он,  она́", "хо́чет"],
+          ["он, она́", "хо́чет"],
           ["мы", "хоти́м"],
           ["вы", "хоти́те"],
           ["они́", "хотя́т"]
@@ -313,8 +313,8 @@
       "table": {
         "columns": ["Verb", "Trip", "Example"],
         "rows": [
-          ["идти́", "one way,  now", "Я иду́ домо́й."],
-          ["ходи́ть", "regular,  or there and back", "Я хожу́ в шко́лу."]
+          ["идти́", "one way, now", "Я иду́ домо́й."],
+          ["ходи́ть", "regular, or there and back", "Я хожу́ в шко́лу."]
         ]
       },
       "examples": [
@@ -370,7 +370,7 @@
       "body": "For masculine animate nouns — and all animate plurals — the accusative copies the genitive.",
       "examples": [
         ["Я ви́жу кота́.", "I see the cat."],
-        ["Я ви́жу дом.", "I see the house (inanimate,  unchanged)."]
+        ["Я ви́жу дом.", "I see the house (inanimate, unchanged)."]
       ],
       "form": {
         "pos": "noun",
@@ -439,7 +439,7 @@
       "table": {
         "columns": ["Playing", "Say", "Case"],
         "rows": [
-          ["a sport,  a game", "игра́ть в", "accusative"],
+          ["a sport, a game", "игра́ть в", "accusative"],
           ["an instrument", "игра́ть на", "prepositional"]
         ]
       },
@@ -504,7 +504,7 @@
         "columns": ["Number", "рубль", "Example"],
         "rows": [
           ["1", "рубль", "оди́н рубль"],
-          ["2,  3,  4", "рубля́", "два рубля́"],
+          ["2, 3, 4", "рубля́", "два рубля́"],
           ["5–20", "рубле́й", "пять рубле́й"]
         ]
       },

@@ -76,12 +76,40 @@ export function splitTokens(text) {
   return out;
 }
 
+/* Every spelling one word takes — its headword and each form its tables show
+   — folded, so «Всему́», «всех» and «все» all answer to «весь». Built once a
+   word, on first use. */
+const formSets = new WeakMap();
+export function formsOf(lemma) {
+  if (!lemma) return null;
+  if (formSets.has(lemma)) return formSets.get(lemma);
+  const out = new Set([fold(lemma.b || ""), fold(lemma.w || "")]);
+  for (const tb of lemma.t || []) {
+    for (const r of tb.rows || []) {
+      for (let c = 1; c < r.length; c++) {
+        for (const f of (Array.isArray(r[c]) ? r[c] : [r[c]])) if (f) out.add(fold(f));
+      }
+    }
+  }
+  out.delete("");
+  formSets.set(lemma, out);
+  return out;
+}
+
 /* Russian text whose recognised words are links. Underlined, because a link that
    only looks like a link once you press it is not discoverable. */
-export function Linked({ text, style, size = 17, color, testID, selectable }) {
+/* `mark` is the word a card or an entry is about: each of its forms in the
+   sentence is drawn as `Marked` draws Russian, brand colour and bold — a
+   tester, 2026-10-15, on the back of «весь»: *"Why is it spelled in different
+   ways in the example sentences"* («Всему своё время», «Прошу всех встать»).
+   They are one word inflected, and now they look like one word. */
+export function Linked({ text, style, size = 17, color, testID, selectable, mark }) {
   const words = useWords();
   const t = useTheme();
   const parts = useMemo(() => splitTokens(text), [text]);
+  const own = useMemo(() => formsOf(mark), [mark]);
+  const isOwn = (p) => !!own && own.has(fold(p.text));
+  const ownStyle = { color: t.brandInk, fontWeight: "700" };
   // A sentence can be held and copied (ui.js NoSelect); a tap on a word
   // still opens it, since the spans keep their own onPress.
   const canSelect = useSelectable();
@@ -91,10 +119,11 @@ export function Linked({ text, style, size = 17, color, testID, selectable }) {
           selectable={selectable === undefined ? canSelect : selectable}>
       {parts.map((p, k) => (
         p.i === undefined ? (
-          <Text key={k}>{p.text}</Text>
+          <Text key={k} testID={isOwn(p) ? "linked-own" : undefined} style={isOwn(p) ? ownStyle : undefined}>{p.text}</Text>
         ) : (
           <Text
             key={k}
+            testID={isOwn(p) ? "linked-own" : undefined}
             accessibilityRole="link"
             accessibilityLabel={`${p.text}, open word`}
             onPress={words ? () => words.open(p.text) : undefined}
@@ -104,7 +133,7 @@ export function Linked({ text, style, size = 17, color, testID, selectable }) {
                2026-10-13). With a long-press handler of its own, the span's
                onPress fires only on a tap. */
             onLongPress={words ? () => {} : undefined}
-            style={{ textDecorationLine: "underline", textDecorationColor: t.brand }}
+            style={[{ textDecorationLine: "underline", textDecorationColor: t.brand }, isOwn(p) ? ownStyle : null]}
           >
             {p.text}
           </Text>

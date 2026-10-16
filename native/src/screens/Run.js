@@ -292,9 +292,11 @@ export function referenceFor(q) {
 }
 
 /* What the prompt can be read aloud as: the generator's own `say`, else a
-   Russian prompt with no gap in it. Exported for the test. */
+   Russian prompt with no gap in it. Exported for the test. Russian only: an
+   English prompt ("to think") has no speaker, since the voice is a Russian
+   one (audio.js say). */
 export function promptSpeech(q) {
-  if (q.say) return q.say;
+  if (q.say) return CYR.test(q.say) ? q.say : null;
   if (q.cyr && q.prompt && CYR.test(q.prompt) && !/_/.test(q.prompt)) return q.prompt;
   return null;
 }

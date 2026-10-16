@@ -151,7 +151,10 @@ async function synth(text, key) {
 
 const pause = () => new Promise((r) => setTimeout(r, 120));   // somebody else's service
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-const rendering = (text, how) => (how === "cap" ? cap(text) : how === "stop" ? cap(text) + "." : text);
+// A sentence that already ends on its stop is not given a second one: a
+// flagged sentence was being bought again as «…знаешь..».
+const stopped = (s) => (/[.!?…]$/.test(s.trim()) ? s : s + ".");
+const rendering = (text, how) => (how === "cap" ? cap(text) : how === "stop" ? stopped(cap(text)) : text);
 
 /* Buy one utterance, and for a word keep buying until what came back is a word.
  *
@@ -172,14 +175,24 @@ export async function buyOne(text, { word, dir, key, had, ladder }) {
      first cut deleted "the previous best" and took the file it had just
      written with it. The longest stays; the rest go. */
   const tried = new Map();
+  const kept = new Set();
   if (had && had.id) tried.set(had.id, had.ms);
   let retries = 0, first = true;
   for (const how of (ladder || (word ? RETRIES : [""]))) {
     const said = how.startsWith("=") ? how.slice(1) : rendering(text, how);
     const id = clipId(said);
     const file = join(dir, id + ".mp3");
-    writeFileSync(file, await synth(said, key));
-    await pause();
+    /* A rendering already on disk under another name's purchase — «Слово.»
+       bought as a table form — is that clip, not one to pay for again: 41
+       words were re-synthesised over their own form clips on 2026-10-15. The
+       blip being replaced is the exception; replacing it is the point. */
+    const owned = existsSync(file) && !(had && had.id === id) && !tried.has(id);
+    if (owned) kept.add(id);
+    else {
+      kept.delete(id);
+      writeFileSync(file, await synth(said, key));
+      await pause();
+    }
     tried.set(id, durationMs(file));
     if (!first) retries++;
     first = false;
@@ -188,14 +201,16 @@ export async function buyOne(text, { word, dir, key, had, ladder }) {
   let best = null;
   for (const [id, got] of tried) if (!best || got > best.ms) best = { id, ms: got };
   const dropped = [];
+  // A clip that was already on disk belongs to whatever bought it; it is
+  // never deleted here, only not chosen.
   for (const id of tried.keys()) {
-    if (id === best.id) continue;
+    if (id === best.id || kept.has(id)) continue;
     const file = join(dir, id + ".mp3");
     if (existsSync(file)) rmSync(file);
     dropped.push(id);
   }
   if (word && best.ms < MIN_WORD_MS) {
-    rmSync(join(dir, best.id + ".mp3"));
+    if (!kept.has(best.id)) rmSync(join(dir, best.id + ".mp3"));
     dropped.push(best.id);
     return { id: null, ms: best.ms, retries, dropped };
   }
@@ -257,8 +272,20 @@ export const SENTENCE_REPLACE = new Set(ALL_SOURCES);
    right — and «пол.» was the one misread, so it is the one rule. Without the
    stop the engine has nothing to expand. `fixed` says the text changed, so a
    clip bought from the old text is bought again. */
+/* …and it was not the one rule (2026-10-15). A tester heard «Мы решили пойти
+   в бар.» as «…в барона», and Whisper, run over one bought sentence for each
+   of the 413 distinct words a sentence ends on before its stop, found four
+   more of the same kind: «бар.» → «барона», «слов.» → «словарей», «долг.» →
+   «долгота», «гор.» → «городских». The units after a number («4 кал.», «$400
+   тыс.») came back as the words they stand for, which is right, so the list
+   stays a list of what was measured misread.
+   And **one space between words, never two**: «я знаю,  ты знаешь» — a double
+   space left in the grammar cards by a reformat — came back with 1.3 s of
+   silence after «ты», and the single-spaced clip bought a month earlier has
+   none. */
+const MISREAD_STOP = /(^|\s)(пол|бар|слов|долг|гор)\.\s*$/i;
 export function forVoice(text) {
-  const said = String(text).replace(/(^|\s)(пол)\.\s*$/i, "$1$2");
+  const said = String(text).replace(/\s{2,}/g, " ").replace(MISREAD_STOP, "$1$2");
   return { said, fixed: said !== text };
 }
 
@@ -321,12 +348,22 @@ export function sentencesToBuy(payload, audio, replace = SENTENCE_REPLACE) {
 export function wordsToBuy(payload, audio, replace = REPLACE) {
   const files = (audio && audio.files) || {};
   const src = (audio && audio.src) || {};
+  /* The units' words, and then **every studied word** (2026-10-15). A tester
+     heard «знаменитый» and «воспользоваться» on Study cards and called them
+     robotic: neither is a unit word any more, neither had ever been bought,
+     so `say()` had nothing but the phone's voice. They were in his schedule
+     from drills that drew on the whole studied list before §30bt, and from
+     earlier cuts of the curriculum — a card outlives the cut that taught it.
+     Any studied word can therefore be on somebody's card, so each has a
+     recording; about 2,700 words, under a dollar. */
   const taught = new Set();
   for (const u of payload.units) for (const i of u.w || []) taught.add(i);
-  const out = [];
+  payload.lemmas.forEach((_, i) => taught.add(i));
+  const out = [], seen = new Set();
   for (const i of taught) {
     const w = payload.lemmas[i];
-    if (!w || !w.b) continue;
+    if (!w || !w.b || seen.has(w.b)) continue;
+    seen.add(w.b);
     const file = files[fold(w.b)];
     if (file && !replace.has(src[file])) continue;
     out.push({ i, bare: w.b, accented: w.w || w.b, gloss: (w.e || "").split(/[;,]/)[0].trim(),

@@ -564,7 +564,28 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
                 if resolver is None or len(resolver.candidates(k)) < 2
                 or resolver.owner_id(k) == lid]
         # …and never in a meaning the word is not taught in (OFF_SENSE).
-        off = (lambda ru: f"{fold(bare)}|{fold(ru)}" in OFF_SENSE) if OFF_SENSE else (lambda ru: False)
+        off_sense = (lambda ru: f"{fold(bare)}|{fold(ru)}" in OFF_SENSE) if OFF_SENSE else (lambda ru: False)
+        # …and never through a «ё» the word does not have. fold() makes «всё»
+        # and «все» one key, so «Всё хорошо.» was the one example of «все»
+        # "everybody" (a tester asked on 2026-10-15 whether the two are one
+        # word). A sentence that spells the key only with ё is evidence it is
+        # not this word, unless one of the word's own forms carries the ё; one
+        # written without it says nothing, since most text drops the dots.
+        yo_keys = {fold(f) for f in [m["w"], bare] + [v for vs in slots.values() for v in vs]
+                   if f and "ё" in unicodedata.normalize("NFC", f).lower()}
+        def off(ru):
+            if off_sense(ru):
+                return True
+            text = unicodedata.normalize("NFC", ru)
+            if "ё" not in text.lower():
+                return False
+            for k in keys:
+                if k in yo_keys:
+                    continue
+                said = [w for w in WORD_RE.findall(text) if fold(w) == k]
+                if said and all("ё" in w.lower() for w in said):
+                    return True
+            return False
         cands = {i for k in keys for i in items_of_key.get(k, ())
                  if i in sentences and not off(sentences[i][0])}
         ranked = (rank_examples(cands, sentences, sent_tokens or {}, studied_keys, keys, tally,

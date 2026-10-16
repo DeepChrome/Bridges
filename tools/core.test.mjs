@@ -4058,6 +4058,49 @@ group("drive mode: a Pimsleur lesson, played");
   ok(eps.every((e) => e.title && e.title.length < 60), "each has a name from its groups", eps[0].title);
 }
 
+group("tester reports, 2026-10-15");
+{
+  const { forVoice, rebuyLadder, clipId } = await import("../tools/build_word_audio.mjs");
+  const { lexiconSpellings } = await import("../tools/build_form_audio.mjs");
+  // «бар.» was read as «барона»; units after a number are read as words, rightly.
+  ok(forVoice("Мы решили пойти в бар.").said === "Мы решили пойти в бар", "«бар.» loses the stop it was misread through");
+  ok(!forVoice("Это 5 кг.").fixed, "a unit after a number keeps its stop");
+  // A double space bought a 1.3 s pause after «ты».
+  ok(forVoice("я знаю,  ты знаешь").said === "я знаю, ты знаешь", "one space between words, never two");
+  ok(DATA.units.every((u) => !u.g || (u.g.examples || []).every(([ru]) => !/\s{2}/.test(ru))),
+     "no grammar card example carries a double space");
+  // A flagged sentence that already ends on its stop is not bought as «…..».
+  ok(rebuyLadder("Я знаю.", null, { verdicts: [] }, clipId("Я знаю.")).length === 0,
+     "a sentence's stop is not doubled to make a new rendering");
+  // «Всё хорошо.» was the one example of «все» "everybody".
+  const yoOff = [];
+  for (const w of DATA.lemmas) {
+    const forms = new Set([w.b, w.w].concat((w.t || []).flatMap((t) => t.rows.flatMap((r) => r.slice(1).flat()))).filter(Boolean));
+    if ([...forms].some((f) => /ё/i.test(f))) continue;
+    const keys = new Set([...forms].map(fold));
+    for (const ex of w.x || []) {
+      const toks = (ex.ru.match(/[А-Яа-яЁё́]+/g) || []).filter((t) => keys.has(fold(t)));
+      if (toks.length && toks.every((t) => /ё/i.test(t))) yoOff.push(`${w.b}: ${ex.ru}`);
+    }
+  }
+  ok(yoOff.length === 0, "no example shows a word through a ё the word does not have", yoOff.slice(0, 3).join(" · "));
+  // «полку́» (regiment) was bought from «полку», which the voice read as «по́лку» (shelf).
+  ok(ambiguousSpellings(lexiconSpellings(DATA)).has("полку"),
+     "a spelling two dictionary words stress differently is caught", "полку");
+  /* Aimed, not sampled (§23): Military's first lesson teaches «а́рмия» and
+     «фронт», which share «Красная А́рмия наступа́ла на все́х фро́нта́х.», and the
+     quiz's production slots were drawn side by side — 13 quizzes in 2,000
+     gapped it twice before the fix, which the lesson sweep above met about
+     one run in five. */
+  const mil = UN.find((u) => u.id === "military");
+  let twice = 0;
+  for (let k = 0; mil && k < 1500; k++) {
+    const gaps = Q.quizSteps(mil, 0).filter((q) => q.kind === "cloze" && q.reveal).map((q) => fold(q.reveal));
+    if (new Set(gaps).size < gaps.length) twice++;
+  }
+  ok(mil && twice === 0, "two words sharing a sentence never both gap it in one quiz", String(twice));
+}
+
 console.log("\n" + checks + " checks · " +
             (failures ? failures + " FAILED" : "all passed"));
 process.exit(failures ? 1 : 0);

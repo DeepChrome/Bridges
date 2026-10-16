@@ -276,8 +276,13 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
       const c = cardFor((st.seen || {})[w]);
       return !!c && (familiarity(c, rankOf(w)) || 0) >= MASTERED_AT;
     };
+    /* A sentence turns over to its English or it is not dealt (a tester,
+       2026-10-10: «Авто́бусы во́зят пассажи́ров.» with nothing on the back).
+       Every source a list draws on carries one now (cardsIn); a sentence the
+       payload has no English for is a card with nothing to learn from. */
     const cards = cardsIn(st, [], round === "known" ? knownWords(st).slice(0, QUEUE_DEFAULTS.sessionSize)
-      : (list || []).filter((w) => !held(w)));
+      : (list || []).filter((w) => !held(w)))
+      .filter((c) => !c.sentence || String(c.e || "").trim());
     const faces = {};
     for (const c of cards) faces[c.b] = c;
     return { ...practiceSession({ seen: st.seen, words: cards.map((c) => c.b), dirs: st.flash || DEFAULT_FRONTS,

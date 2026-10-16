@@ -290,7 +290,7 @@ export function WordCard({ i, at, total, unit }) {
                   2026-10-05: "remove the play buttons from there. Not
                   needed"): the line is heard with its speaker, and the video
                   is the lesson's own step. */}
-              <VideoLines lines={lines} testID="word-lines" />
+              <VideoLines lines={lines} testID="word-lines" mark={w} />
             </View>
           ) : null}
 
@@ -299,7 +299,7 @@ export function WordCard({ i, at, total, unit }) {
                                    borderTopWidth: 1, borderTopColor: t.lineSoft,
                                    alignSelf: "stretch" }}>
               <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-                <View style={{ flex: 1 }}><Linked text={ex.ru} size={T.head + 1} /></View>
+                <View style={{ flex: 1 }}><Linked text={ex.ru} size={T.head + 1} mark={w} /></View>
                 <Speaker text={ex.ru} size={36} />
               </View>
               <Muted>{ex.en}</Muted>

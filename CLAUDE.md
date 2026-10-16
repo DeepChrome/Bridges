@@ -6666,6 +6666,72 @@ made for a listener who cannot look at a screen.
   player does not. `drive.test.js` pins English-first, the carrier held and
   freed, pause silencing everything, and nothing graded.
 
+## 30cf. Tester reports, 2026-10-15
+
+Nine reports from the beta, each traced before it was fixed. The causes
+worth keeping:
+
+- **Chirp3 reads some sentence-final words as abbreviations.** «Мы решили
+  пойти в бар.» came back «…в барона». Whisper over one bought sentence per
+  distinct final word (413 of them) found «бар.», «слов.», «долг.», «гор.»
+  beside the «пол.» already known; units after a number («4 кал.», «$400
+  тыс.») are read as words, rightly. `forVoice` drops the stop after those
+  five. **Run the same sweep after buying sentences that end on new words.**
+- **A double space is a pause, and so, sometimes, is nothing.** The re-cut's
+  reformat left `,  ` in 44 places in grammar_notes.json, and «я зна́ю,  ты
+  зна́ешь» came back with 1.3 s of silence after «ты». Single-spaced, it
+  still did — Whisper heard «ты?» — and «Я знаю, ты знаешь.» (capital and
+  stop, the rebuy ladder's first rung) did not. `forVoice` collapses runs of
+  space; the ladder no longer doubles a sentence's stop («…знаешь..»). A scan
+  of every bought clip for silences inside the speech is how to look for
+  more (20 ms frames, 25 dB under the peak).
+- **A card outlives the cut that taught it.** «знаменитый» and
+  «воспользоваться» were "robotic" because they were the phone's voice:
+  neither is a unit word, neither was ever bought, and both were in the
+  tester's schedule from drills that drew on the whole studied list before
+  §30bt. Every studied word's headword is bought now (`wordsToBuy`: 2,705
+  clips, about $0.64; native/assets/words went from 18,494 files and
+  108 MB to 21,013 and 118 MB). 41 of them were already on disk as form
+  clips («Слово.») and were synthesised again over them; `buyOne` now takes
+  a rendering already on disk as that clip and never deletes one it did not
+  write, and the 41 originals were restored from git. And «нуль» was
+  shipped as `nul.mp3`, a Windows device name: the copy "succeeded" into the
+  null device and git could not add the file. Device names get the hash
+  suffix now, and `audio_qa.mjs` checks every `require` in the generated
+  audio modules against the disk.
+- **«по» had no good rendering on the ladder.** «По.» opened at 400 Hz,
+  «по» rose like a question, «По» came back «По!». «по...» falls like «на»
+  does (225 → 138 Hz) and Whisper hears «По»; it was put in by hand and
+  recorded under `rebought`. Other one-syllable prepositions were not
+  measured.
+- **The two-stress check must read the dictionary's tables.** «полку́»
+  (regiment) was bought from «полку», which the voice said as «по́лку»
+  (shelf) — a word only in the deep tier. `lexiconSpellings` hydrates the
+  deep paradigms too, skipping a dictionary entry that *is* a studied word
+  listed again with a variant stress (same letters and class: «ужи́н»).
+  123 form clips left the bundle with it, «вода́» and «кому́» among them:
+  the voice reads the commoner word, and nothing here knows which reading
+  that is. `audio_qa.mjs` checks against the same set.
+- **fold() lets «ё» attach a sentence to the wrong word.** «Всё хорошо.» was
+  the one example of «все» "everybody". `build_dictionary` refuses a
+  sentence that spells the key only with ё when none of the word's own forms
+  has one; a sentence without the dots says nothing, since most text drops
+  them.
+- **One bar for "is this a form of the card's word".** `Linked` takes
+  `mark` (the card's lemma) and draws each of its forms brand and bold —
+  «Всему», «всех», «все» under «весь» read as one word (`formsOf`, folded,
+  headword and every table cell).
+- **`say` refuses text with no Cyrillic.** It is the Russian voice; English
+  goes through `speakLine(…, { lang: "en" })`. Nothing handed it English
+  when "to think" was reported as «то» — that report's cause was not found —
+  so the rule is held at both ends rather than fixed in one.
+- **A quiz's production draws were made side by side**, so two words sharing
+  a sentence («а́рмия», «фронт») could both gap it: 13 quizzes in 2,000 for
+  Military's first lesson, and "a gap sentence is never shown twice" failed
+  about one core run in five. Kept ones now skip a sentence already used.
+- **A list round never deals a sentence without its English** (fixed at the
+  source on 2026-10-09; `sessionFor` now also refuses one).
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

@@ -125,11 +125,37 @@ export function ambiguousSpellings(spellings) {
   return new Set([...by].filter(([, v]) => v.size > 1).map(([k]) => k));
 }
 
-async function main() {
-  const D = loadPayload(ROOT);
+/* Every spelling the learner can meet anywhere in the lexicon: the studied
+ * words' tables and headwords, and the dictionary's headwords **and tables**.
+ *
+ * The dictionary's tables were left out until a tester heard «полку́» (the
+ * dative of «полк», regiment) "say a different word" (2026-10-08). The voice
+ * was handed «полку» and read it as «по́лку», the accusative of «по́лка»
+ * (shelf) — a word only in the dictionary tier, whose paradigm the check
+ * never looked at. Hydrates the payload's lemmas as a side effect. */
+export function lexiconSpellings(D) {
   const deep = parseDeep(D.deep || "");
   const BY = makeDeepIndex(deep);
-  D.lemmas.forEach(makeHydrator({ deepIndex: () => BY, shapes: D.shapes, slots: D.slots, sent: D.sent }));
+  const hydrate = makeHydrator({ deepIndex: () => BY, shapes: D.shapes, slots: D.slots, sent: D.sent });
+  D.lemmas.forEach(hydrate);
+  deep.forEach(hydrate);
+  /* A dictionary entry that *is* a studied word — same headword letters, same
+     class — is that word listed again, often with a variant stress («ужи́н»
+     beside «у́жин», «ле́карство» beside «лека́рство»). The studied table is the
+     one the app teaches, so the variant is no second word for the voice to
+     confuse it with. A different word with the same letters is: «по́лка». */
+  const studied = new Set(D.lemmas.map((w) => fold(w.b) + "|" + (w.p || "")));
+  const other = deep.map((_, i) => i).filter((i) => !studied.has(fold(deep[i].b) + "|" + (deep[i].p || "")));
+  const out = [...tableForms(D.lemmas, D.lemmas.map((_, i) => i)),
+               ...tableForms(deep, other)];
+  for (const w of D.lemmas) if (w.w) out.push(w.w);
+  for (const d of deep) if (d.w) out.push(d.w);
+  return out;
+}
+
+async function main() {
+  const D = loadPayload(ROOT);
+  const everywhere = lexiconSpellings(D);
 
   const units = new Set();
   for (const u of D.units) for (const i of u.w || []) units.add(i);
@@ -138,10 +164,6 @@ async function main() {
   // same voice should read them (core/endings.js).
   for (const e of ENDINGS) for (const x of e.examples) wanted.add(formKey(x));
 
-  /* The whole studied lexicon's tables and every headword, for the check. */
-  const everywhere = [...tableForms(D.lemmas, D.lemmas.map((_, i) => i))];
-  for (const w of D.lemmas) if (w.w) everywhere.push(w.w);
-  for (const d of deep) if (d.w) everywhere.push(d.w);
   const clash = ambiguousSpellings(everywhere.concat([...wanted]));
 
   mkdirSync(DIR, { recursive: true });

@@ -640,6 +640,11 @@ const PART_GAP_MS = 500;
    With no device voice either the speaker is told (onAudioFailure). Resolves with true/false for whether
    anything started; the playback itself is tracked by whenIdle(). */
 export async function say(text, opts = {}) {
+  /* `say` is the Russian voice, and English is never handed to it: read by
+     a Russian voice, "to think" comes out as «то» (a tester, 2026-10-09:
+     *"Just says to rather than to think or the Russian word"*). English that
+     should be heard goes through `speakLine(text, { lang: "en" })`. */
+  if (!CYRILLIC.test(String(text || ""))) return false;
   /* «стол → столы»: a rule's example is two forms with an arrow between, and
      the phone's voice read the arrow out (the owner, 2026-10-02: "it
      pronounces the arrow as well… It should say the first part… pause… say

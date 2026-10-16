@@ -1514,7 +1514,8 @@ const isBrief = (x) => String((x && x.ru) || "").trim().split(/\s+/).length <= B
    only a short one. The entry passes nothing and shows everything. */
 /* `plain` is the glance (the word sheet): meanings only — no examples and no
    "+N more", because the sheet's More button is where the rest are. */
-export function SenseList({ senses, size = 15, style, max, brief, plain, testID }) {
+/* `mark` is the word itself, whose forms the examples draw out (words.js). */
+export function SenseList({ senses, size = 15, style, max, brief, plain, testID, mark }) {
   const t = useTheme();
   const canSelect = useSelectable();
   if (!senses || !senses.length) return null;
@@ -1572,7 +1573,7 @@ export function SenseList({ senses, size = 15, style, max, brief, plain, testID 
                       (the owner, 2026-10-03: "in example sentences on cards…
                       the words are not clickable"). Read at render, so the
                       circular import with words.js resolves. */}
-                  <Linked text={x.ru} size={size - 1} />
+                  <Linked text={x.ru} size={size - 1} mark={mark} />
                   <Text selectable={canSelect} style={{ color: t.ink3, fontSize: size - 2 }}>{x.en}</Text>
                 </View>
                 <Speaker text={x.ru} size={32} recordedOnly />

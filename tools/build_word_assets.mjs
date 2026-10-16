@@ -104,6 +104,7 @@ const TRANSLIT = {
 };
 const slug = (w) => [...fold(w)].map((c) => (TRANSLIT[c] !== undefined ? TRANSLIT[c] : "")).join("")
   || "w";
+const WINDOWS_DEVICE = /^(con|prn|aux|nul|com\d|lpt\d)$/i;
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
@@ -126,7 +127,10 @@ function ship(id, label, sentence) {
   let name = sentence ? `s-${id.slice(0, 12)}` : slug(label);
   // A transliteration can collide («есть»/«естъ» kinds of thing); the hash is
   // what makes it unique, so it breaks the tie rather than the word being lost.
-  if (used.has(name)) name = `${name}-${id.slice(0, 6)}`;
+  // …and Windows will not hold a file named after a device, whatever its
+  // extension: «нуль» → nul.mp3 went to the null device and was never written
+  // (2026-10-15, when every studied word was bought).
+  if (used.has(name) || WINDOWS_DEVICE.test(name)) name = `${name}-${id.slice(0, 6)}`;
   used.add(name);
   copyFileSync(from, join(OUT, name + ".mp3"));
   nameOf.set(id, name);

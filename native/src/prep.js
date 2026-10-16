@@ -146,7 +146,7 @@ const ARROW = "M8 5l11 7-11 7z";
    it; and ▶ to hear the speaker say it in the video. One component wherever a
    lesson shows the video's sentences — the word card, the summary, the list
    before watching, the lesson's own "from the video" step. */
-export function VideoLines({ lines, onMoment, testID = "video-lines" }) {
+export function VideoLines({ lines, onMoment, testID = "video-lines", mark }) {
   const t = useTheme();
   return (
     <View testID={testID}>
@@ -155,7 +155,7 @@ export function VideoLines({ lines, onMoment, testID = "video-lines" }) {
               style={{ flexDirection: "row", alignItems: "flex-start", gap: 8, paddingVertical: 8,
                        borderTopWidth: k ? 1 : 0, borderTopColor: t.lineSoft }}>
           <View style={{ flex: 1 }}>
-            <Linked text={l.ru} size={16} />
+            <Linked text={l.ru} size={16} mark={mark} />
             <Muted>{l.en}</Muted>
           </View>
           <Speaker text={l.ru} size={36} />

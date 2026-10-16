@@ -716,7 +716,7 @@ export default function Study({ navigation, route }) {
                         style={{ color: t.ink, fontSize: 18, marginTop: 12, textAlign: "center" }}>
                     {face.e || "—"}
                   </Text>
-                ) : senses ? <SenseList senses={senses} size={16} max={4} brief style={{ marginTop: 10 }} />
+                ) : senses ? <SenseList senses={senses} size={16} max={4} brief mark={cardLemma} style={{ marginTop: 10 }} />
                   : <Senses e={face.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
                 {(face.x || []).slice(0, 3).map((ex, k) => (
                   // The word in use, three ways: the entry reads like a dictionary,
@@ -727,7 +727,7 @@ export default function Study({ navigation, route }) {
                         owner, 2026-09-23: "everything in the app… a speaker
                         button… the user is always hearing the words"). */}
                     <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
-                      <View style={{ flex: 1 }}><Linked text={ex.ru} size={16} /></View>
+                      <View style={{ flex: 1 }}><Linked text={ex.ru} size={16} mark={cardLemma} /></View>
                       <Speaker text={ex.ru} size={32} />
                     </View>
                     <Muted selectable>{ex.en}</Muted>

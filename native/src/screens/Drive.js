@@ -120,7 +120,9 @@ export default function Drive() {
         </Muted>
 
         <View style={{ alignItems: "center", gap: 14 }}>
-          {now ? (
+          {state === "done" ? (
+            <Text testID="drive-done" style={{ color: t.ink, fontSize: T.title, fontWeight: "700" }}>Done</Text>
+          ) : now ? (
             <>
               <Text testID="drive-en" style={{ color: t.ink2, fontSize: T.title, textAlign: "center" }}>
                 {now.item.en}
@@ -129,8 +131,6 @@ export default function Drive() {
                 {now.item.ru}
               </Text>
             </>
-          ) : state === "done" ? (
-            <Text testID="drive-done" style={{ color: t.ink, fontSize: T.title, fontWeight: "700" }}>Done</Text>
           ) : null}
         </View>
 

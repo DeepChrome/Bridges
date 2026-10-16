@@ -6631,11 +6631,22 @@ made for a listener who cannot look at a screen.
   and every item asked again `DRIVE_RECALL` (2 and 5) items later with nothing
   given first. `core.test.mjs` holds the order (never the answer before the
   pause) and the counts.
-- **What it plays** (`driveFrom` in Drive.js): the newest fourteen words of
-  `personalWords` with a bought clip, and short pool sentences from the units
-  reached, newest first — one voice (§30bq). The English is the phone's
-  English voice. **Nothing is graded** (§30z: a word said in a car is not a
-  claim).
+- **In clusters, never a pile** (the owner, the same evening: *"different
+  clusters of words that are similar so it's not just a bunch of random ass
+  words"*). A drive is a run of the course's own named groups (`u.gr`,
+  §30bi): the group's name said, its words taught in their order, each
+  recalled two words on, the whole group once more, up to two pool sentences
+  that use it, and the next group opens by recalling `DRIVE_CARRY` of the
+  last one's words. `driveGroups` in Drive.js builds them per source:
+  **Where I am** (groups holding `personalWords`, newest last), **Review**
+  (studied words, weakest group first by mean familiarity), **A chapter**
+  (any chapter, whole). Only words with a bought clip — one voice (§30bq).
+- **The cog** (`DriveOptions`, kept in `st.drivePrefs`, a setting key):
+  source, prompt (Say it / Understand it / Both — the Russian first, the
+  English after the pause), pause (`PAUSE_SCALE`), length (`LENGTH_GROUPS`:
+  3, 5, 8 groups), Russian speed, and three switches (Russian twice, sentences,
+  group names). A changed option is a new drive from the top.
+  **Nothing is graded** (§30z: a word said in a car is not a claim).
 - **It plays on with the phone locked.** Android stops a backgrounded app's
   sound after a few minutes unless a media session shows on the lock screen,
   and every clip here is its own short player, so `startCarrier` in audio.js

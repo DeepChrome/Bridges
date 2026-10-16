@@ -4,12 +4,12 @@
    screen is left; pause silences everything; nothing is graded. */
 
 import React from "react";
-import { render, screen, fireEvent, act, waitFor } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, waitFor, within } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
-import Drive, { driveFrom } from "../src/screens/Drive";
+import Drive, { driveGroups } from "../src/screens/Drive";
 import { STAGES, L } from "../src/data";
 
 const base = { v: 9, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
@@ -52,19 +52,39 @@ it("ends a pause on the carrier's native ticks, with no timer firing (the screen
   }
 });
 
-it("draws from the next lesson on a new profile, words with a recording and their meaning", () => {
-  const items = driveFrom(base);
-  expect(items.length).toBeGreaterThan(0);
+it("plays the course's own groups, from the next lesson on a new profile", () => {
+  const groups = driveGroups(base, {});
+  expect(groups.length).toBeGreaterThan(0);
   const first = STAGES[0].core.w.map((i) => L[i].w || L[i].b);
-  expect(items.filter((x) => x.kind === "word").every((x) => first.includes(x.ru) && x.en)).toBe(true);
+  const names = (STAGES[0].core.gr || []).map(([name]) => name);
+  for (const g of groups) {
+    expect(names).toContain(g.name);                                // a named group, not a pile
+    expect(g.items.every((x) => first.includes(x.ru) && x.en)).toBe(true);
+  }
+  // A chapter can be chosen ahead of the route, and Review needs studied words.
+  expect(driveGroups(base, { source: "chapter", chapter: 3 }).length).toBeGreaterThan(0);
+  expect(driveGroups(base, { source: "review" })).toEqual([]);
+});
+
+it("keeps its options, and a new option is a new drive", async () => {
+  await open();
+  await act(async () => { fireEvent.press(await screen.findByTestId("drive-cog")); });
+  await act(async () => { fireEvent.press(within(screen.getByTestId("drive-opt-length")).getByText("Long")); });
+  await act(async () => { fireEvent.press(within(screen.getByTestId("drive-opt-direction")).getByText("Understand it")); });
+  await flushState();
+  const saved = await global.__db.saved("p1");
+  expect(saved.drivePrefs).toMatchObject({ length: "long", direction: "hear" });
+  await act(async () => { fireEvent.press(screen.getByTestId("drive-apply")); });
 });
 
 it("plays the English first, holds the lock screen, pauses everything, and lets go on leaving", async () => {
   const view = await open();
   await act(async () => { fireEvent.press(await screen.findByTestId("drive-play")); });
   const en = await screen.findByTestId("drive-en");
-  await waitFor(() => expect(global.__spoke.length).toBeGreaterThan(0));
-  expect(global.__spoke[0]).toBe(en.props.children);       // the prompt is the English
+  await waitFor(() => expect(global.__spoke.length).toBeGreaterThan(1));
+  // The group's name, then the prompt in English.
+  expect(global.__spoke[0]).toBe(screen.getByTestId("drive-group").props.children);
+  expect(global.__spoke[1]).toBe(en.props.children);
   const carrier = global.__players[0];
   expect(carrier.loop).toBe(true);
   expect(carrier.sounding).toBe(true);

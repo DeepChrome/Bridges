@@ -4010,26 +4010,39 @@ group("the review, 2026-10-01");
 
 group("drive mode: a Pimsleur lesson, played");
 {
-  const { driveScript, driveItems, driveLength, DRIVE_RECALL } = await import("../core/drive.js");
-  const items = ["один", "два", "три", "четыре", "пять", "шесть"].map((ru, k) =>
-    ({ ru, en: "n" + k, kind: "word" }));
-  const sc = driveScript(items);
+  const { driveScript, driveLength, pickGroups, DRIVE_CARRY } = await import("../core/drive.js");
+  const w = (ru, en) => ({ ru, en, kind: "word" });
+  const numbers = { name: "Numbers", items: [w("один", "one"), w("два", "two"), w("три", "three"), w("четыре", "four")],
+                    sentences: [{ ru: "Два кота.", en: "Two cats.", kind: "sentence" }] };
+  const family = { name: "Family", items: [w("мама", "mom"), w("папа", "dad"), w("брат", "brother")], sentences: [] };
+  const sc = driveScript([numbers, family]);
   const marks = sc.filter((s) => s.t === "mark");
-  ok(marks.filter((m) => m.first).length === items.length, "every item is met once as new");
-  ok(marks.filter((m) => !m.first).length === items.length * DRIVE_RECALL.length,
-     "and recalled once for each spacing, the tail included");
-  // A prompt is English, then a pause, then the Russian: never the answer first.
+  // Clusters, not a pile: every prompt of a group comes before the next group's name,
+  // except the few carried over to open it.
+  const famAt = sc.findIndex((s) => s.t === "group" && s.name === "Family");
+  const numAt = sc.findIndex((s) => s.t === "group" && s.name === "Numbers");
+  ok(numAt === 0 && famAt > 0, "each group is announced before its words");
+  const famWords = new Set(family.items.map((x) => x.ru));
+  ok(sc.slice(0, famAt).filter((s) => s.t === "mark").every((m) => !famWords.has(m.item.ru)),
+     "no word of the next group before its name");
+  const carried = sc.slice(famAt - 20, famAt).filter((s) => s.t === "mark");
+  ok(carried.slice(-DRIVE_CARRY).every((m) => !m.first && numbers.items.some((x) => x.ru === m.item.ru)),
+     "the next group opens by recalling the last one's words");
+  ok(marks.filter((m) => m.first && m.item.kind === "word").length === 7, "every word is met once as new");
   let fine = true;
-  sc.forEach((s, k) => { if (s.t === "mark") fine = fine && sc[k + 1].t === "en" && sc[k + 2].t === "gap" && sc[k + 3].t === "ru"; });
+  sc.forEach((s, k) => { if (s.t === "mark" && !s.hear) fine = fine && sc[k + 1].t === "en" && sc[k + 2].t === "gap" && sc[k + 3].t === "ru"; });
   ok(fine, "the English, a pause to say it, then the Russian");
-  const firstOf2 = sc.findIndex((s) => s.t === "mark" && s.item === 2 && s.first);
-  const recall0 = sc.findIndex((s) => s.t === "mark" && s.item === 0 && !s.first);
-  ok(recall0 > 0 && recall0 < firstOf2, "an item comes back before the one two places on is new");
-  const ru = sc.filter((s) => s.t === "ru");
-  ok(ru.length === items.length * 2 + items.length * DRIVE_RECALL.length, "twice when new, once when recalled");
-  ok(driveLength(sc) > 60000, "a dozen prompts run past a minute", String(driveLength(sc)));
-  const mixed = driveItems(items, [{ ru: "Я дома.", en: "I'm home.", kind: "sentence" }]);
-  ok(mixed[3].kind === "sentence", "a sentence follows every few words");
+  ok(marks.some((m) => m.item.kind === "sentence"), "a group closes on a sentence that uses it");
+  const hear = driveScript([numbers], { direction: "hear" });
+  const hm = hear.findIndex((s) => s.t === "mark");
+  ok(hear[hm + 1].t === "ru" && hear[hm + 3].t === "en", "Understand it: the Russian first, the English after the pause");
+  ok(driveScript([numbers], { twice: false, names: false, sentences: false }).filter((s) => s.t === "ru").length
+     < sc.filter((s) => s.t === "ru").length, "the options take things out");
+  ok(driveLength(driveScript([numbers], { pause: "long" })) > driveLength(driveScript([numbers], { pause: "short" })),
+     "a longer pause is a longer drive");
+  const cands = [1, 2, 3, 4, 5, 6, 7].map((k) => ({ name: "g" + k, items: [w("а", "a"), w("б", "b")], score: 10 - k }));
+  ok(pickGroups(cands, { length: "short" }).map((g) => g.name).join() === "g5,g6,g7", "where I am: the newest groups");
+  ok(pickGroups(cands, { source: "review", length: "short" })[0].name === "g7", "review: the weakest first");
 }
 
 console.log("\n" + checks + " checks · " +

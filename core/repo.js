@@ -38,7 +38,7 @@
 export const SETTING_KEYS = ["dev", "theme", "name", "speed", "cue", "wrongCue", "osk",
                              "typedDrills", "talkLevel", "talkSpeed", "talkEn",
                              "flash", "newPerDay", "reviewsPerDay", "retention", "learnAhead",
-                             "haptics", "remind", "drillPrefs", "explain", "sayFeedback", "studyDays",
+                             "haptics", "remind", "drillPrefs", "drivePrefs", "explain", "sayFeedback", "studyDays",
                              "cardKinds", "searchLang"];
 
 /* A card row's columns, and the card field each holds. `due` and `last` are

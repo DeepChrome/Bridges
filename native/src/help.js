@@ -86,6 +86,7 @@ export const HELP = {
     ["The pause", "Say the Russian aloud before you hear it"],
     ["Lock the phone", "It keeps playing; pause from the lock screen"],
     ["Arrows", "The item before or after"],
+    ["Cog", "What to play, prompt, pause, length, speed"],
   ] },
   Tutor: { title: "The tutor", lines: [
     ["Microphone", "Hold to speak, in either language"],

@@ -87,6 +87,8 @@ export const DEFAULTS = {
      cog on the drill (flows/Drills.js DrillOptions): drill id -> { only, chapters }.
      Absent, a drill runs as it always did. */
   drillPrefs: {},
+  // Drive mode's options (core/drive.js DRIVE_DEFAULTS fill what is unset).
+  drivePrefs: {},
   /* The last wrong answers, newest first, as { kind, prompt, answer, said, at }
      (Run.js): what the tutor is handed so "drill me on what I get wrong" has
      something to go on. Capped at MISSES_KEPT. */

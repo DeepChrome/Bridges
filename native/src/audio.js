@@ -773,16 +773,42 @@ export function stop() {
  * stopping or starting when the app did not ask is the learner pressing them.
  */
 let carrier = null;
+const ticks = new Set();
+const CARRIER_TICK_MS = 250;
+
+/* A pause of `ms` that still ends with the screen locked. React Native's
+   timers are driven by screen frames and stop firing in the background, so
+   the first gap of a locked drive never ended (the emulator, 2026-10-15: four
+   minutes on one item). The carrier's status updates are native and keep
+   arriving, so while it runs they are the clock; the timer covers the
+   foreground and a phone with no carrier. Resolves early when `cancelled()`. */
+export function waitMs(ms, cancelled = () => false) {
+  const end = Date.now() + ms;
+  return new Promise((resolve) => {
+    let done = false;
+    const check = () => {
+      if (done) return;
+      if (cancelled() || Date.now() >= end) {
+        done = true; ticks.delete(check); clearInterval(timer); resolve();
+      }
+    };
+    const timer = setInterval(check, 100);
+    ticks.add(check);
+  });
+}
+
 export async function startCarrier(source, title, onLockScreen) {
   stopCarrier();
   background = true;
   ready = false;
   await prepare();
   try {
-    const c = createAudioPlayer(source);
+    // Its status ticks are drive mode's clock (waitMs), so they come often.
+    const c = createAudioPlayer(source, { updateInterval: CARRIER_TICK_MS });
     carrier = c;
     c.loop = true;
     let was = null;
+    if (c.addListener) c.addListener("playbackStatusUpdate", () => { for (const fn of ticks) fn(); });
     if (c.addListener && onLockScreen) {
       c.addListener("playbackStatusUpdate", (s) => {
         // A loop wrapping round is not a press.

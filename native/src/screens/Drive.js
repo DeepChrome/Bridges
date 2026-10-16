@@ -19,7 +19,7 @@ import { useTheme, type as T } from "../theme";
 import { Screen, Text, Muted, IconButton, Btn } from "../ui";
 import { L, SPEECH, personalWords, reachedUnits } from "../data";
 import { say, speakLine, stop, whenIdle, hasRealAudio, startCarrier, pauseCarrier,
-         resumeCarrier, stopCarrier } from "../audio";
+         resumeCarrier, stopCarrier, waitMs } from "../audio";
 import { driveScript, driveItems, driveLength } from "@core/drive";
 import { firstSense } from "@core/util";
 
@@ -44,17 +44,6 @@ export function driveFrom(st) {
   }
   return driveItems(recent, sentences);
 }
-
-const wait = (ms, cancelled) => new Promise((resolve) => {
-  const step = 100;
-  let left = ms;
-  const tick = () => {
-    if (cancelled() || left <= 0) return resolve();
-    left -= step;
-    setTimeout(tick, Math.min(step, Math.max(0, left)) || step);
-  };
-  tick();
-});
 
 export default function Drive() {
   const t = useTheme();
@@ -83,7 +72,7 @@ export default function Drive() {
         markAt.current = k;
         setNow({ item: items[s.item], first: s.first, at: marks.indexOf(k) });
       } else if (s.t === "gap") {
-        await wait(s.ms, gone);
+        await waitMs(s.ms, gone);
       } else if (s.t === "en") {
         await speakLine(s.text, { lang: "en" });
       } else {

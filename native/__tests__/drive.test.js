@@ -28,6 +28,30 @@ beforeEach(async () => {
 });
 afterEach(async () => { await flushState(); });
 
+it("ends a pause on the carrier's native ticks, with no timer firing (the screen locked)", async () => {
+  const audio = require("../src/audio");
+  await audio.startCarrier("asset", "Drive", () => {});
+  const carrier = global.__players[global.__players.length - 1];
+  let now = 1_000_000;
+  const realNow = Date.now;
+  Date.now = () => now;
+  const realSetInterval = global.setInterval;
+  global.setInterval = () => 0;               // background: JS timers do not fire
+  try {
+    let over = false;
+    audio.waitMs(2600).then(() => { over = true; });
+    now += 1000; carrier.__emit({ playing: true, currentTime: 1 });
+    await Promise.resolve();
+    expect(over).toBe(false);
+    now += 2000; carrier.__emit({ playing: true, currentTime: 3 });
+    await Promise.resolve(); await Promise.resolve();
+    expect(over).toBe(true);
+  } finally {
+    Date.now = realNow; global.setInterval = realSetInterval;
+    audio.stopCarrier();
+  }
+});
+
 it("draws from the next lesson on a new profile, words with a recording and their meaning", () => {
   const items = driveFrom(base);
   expect(items.length).toBeGreaterThan(0);

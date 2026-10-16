@@ -28,7 +28,7 @@ import { DRILL_TYPES } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
 import Translate from "./src/screens/Translate";
-import Drive from "./src/screens/Drive";
+import { DriveList, DriveEpisode } from "./src/screens/Drive";
 import { unitById, chapterOf, L, resolveWord, dueCount, videoById } from "./src/data";
 import Learn from "./src/screens/Learn";
 import Search from "./src/screens/Search";
@@ -311,7 +311,8 @@ function PracticeStack() {
           conversation. This one should just be called listening."* */}
       <Stack.Screen name="SceneList" component={ScenesList} options={{ title: "Listening" }} />
       {/* A hands-free audio lesson for the car (core/drive.js, 2026-10-15). */}
-      <Stack.Screen name="Drive" component={Drive} options={{ title: "Drive mode" }} />
+      <Stack.Screen name="Drive" component={DriveList} options={{ title: "Drive mode" }} />
+      <Stack.Screen name="DriveEpisode" component={DriveEpisode} options={{ title: "Drive mode" }} />
       <Stack.Screen name="Scenes" component={ListeningFlow} options={{ title: "Listening" }} />
       <Stack.Screen name="Sounds" component={Sounds} options={{ title: "Alphabet" }} />
       {/* Beside Alphabet, and the same kind of thing: a reference that is open

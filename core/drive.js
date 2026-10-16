@@ -29,16 +29,20 @@ export const DRIVE_RECALL_AT = 2;                           // a word comes back
 export const DRIVE_CARRY = 2;                               // words of the last group recalled at the next
 
 export const DRIVE_OPTIONS = {
-  source: [{ id: "next", name: "Where I am" }, { id: "review", name: "Review" }, { id: "chapter", name: "A chapter" }],
   direction: [{ id: "say", name: "Say it" }, { id: "hear", name: "Understand it" }, { id: "mix", name: "Both" }],
   pause: [{ id: "short", name: "Short" }, { id: "normal", name: "Normal" }, { id: "long", name: "Long" }],
-  length: [{ id: "short", name: "Short" }, { id: "normal", name: "Normal" }, { id: "long", name: "Long" }],
   speed: [{ id: "normal", name: "Normal" }, { id: "slower", name: "Slower" }],
 };
-export const DRIVE_DEFAULTS = { source: "next", direction: "say", pause: "normal", length: "normal",
-                                speed: "normal", twice: true, sentences: true, names: true, chapter: 0 };
+export const DRIVE_DEFAULTS = { direction: "say", pause: "normal", speed: "normal",
+                                twice: true, sentences: true, names: true, next: true };
 export const PAUSE_SCALE = { short: 0.7, normal: 1, long: 1.5 };
-export const LENGTH_GROUPS = { short: 3, normal: 5, long: 8 };
+
+/* **The playlist** (the owner, 2026-10-15: *"like 25 different 'episodes'
+   which are blocks of associated words, the earlier blocks simpler and later
+   blocks more complex… select it like a podcast or playlist… largely
+   coincide with vocab and sentences learned in the chapters"*). */
+export const DRIVE_EPISODES = 25;
+export const REVIEW_GROUPS = 5;
 
 export const drivePrefs = (p) => ({ ...DRIVE_DEFAULTS, ...(p || {}) });
 
@@ -103,17 +107,50 @@ export function driveLength(script) {
   return ms;
 }
 
-/* Which groups a drive takes, as many as the length asks for. `candidates` is
-   every usable group in course order, each carrying `score` (lower = weaker,
-   for review). */
-export function pickGroups(candidates, prefs = {}) {
-  const o = drivePrefs(prefs);
-  const n = LENGTH_GROUPS[o.length] || LENGTH_GROUPS.normal;
-  const usable = candidates.filter((g) => g.items.length >= 2);
-  if (o.source === "review") return usable.slice().sort((a, b) => a.score - b.score).slice(0, n);
-  if (o.source === "chapter") return usable.slice(0, n);
-  // Where I am: the newest of the learner's own groups, and when they are too
-  // few, the groups just ahead (`ahead`) after them, in order.
-  const own = usable.filter((g) => !g.ahead).slice(-n);
-  return own.concat(usable.filter((g) => g.ahead).slice(0, n - own.length));
+/* The course cut into episodes. `groups` is every usable group in course
+   order ({ name, chapter, items, … }); each episode is a run of whole groups
+   holding about an equal share of the words, so the first is the first
+   chapter's greetings and the last is chapter ten's — simpler to harder by
+   construction, because the course is. A group is never split, and a group
+   of one word joins its neighbour rather than making a cluster of one. */
+export function buildEpisodes(groups, n = DRIVE_EPISODES) {
+  const usable = [];
+  for (const g of groups) {
+    if (!g.items.length) continue;
+    const prev = usable[usable.length - 1];
+    if (g.items.length < 2 && prev && prev.chapter === g.chapter) {
+      usable[usable.length - 1] = { ...prev, items: prev.items.concat(g.items),
+                                    idxs: (prev.idxs || []).concat(g.idxs || []) };
+    } else usable.push(g);
+  }
+  const total = usable.reduce((s, g) => s + g.items.length, 0);
+  if (!total) return [];
+  const per = total / Math.min(n, usable.length);
+  const out = [];
+  const episodes = Math.min(n, usable.length);
+  let cur = [], done = 0;
+  usable.forEach((g, k) => {
+    cur.push(g); done += g.items.length;
+    const left = usable.length - k - 1;              // groups not yet placed
+    const slotsLeft = episodes - out.length - 1;     // episodes still to open after this one
+    if (slotsLeft <= 0) return;                      // the last takes everything left
+    // Close at this episode's share of the words — or now, if waiting would
+    // leave fewer groups than the episodes still to fill.
+    const share = done >= per * (out.length + 1);
+    if ((share && left >= slotsLeft) || left === slotsLeft) { out.push(cur); cur = []; }
+  });
+  if (cur.length) out.push(cur);
+  return out.map((gs, k) => ({
+    id: k + 1,
+    title: episodeTitle(gs),
+    chapter: gs[0].chapter,
+    groups: gs,
+    words: gs.reduce((s, g) => s + g.items.length, 0),
+  }));
+}
+
+/* An episode's name: its two largest groups, as a chapter heading reads. */
+export function episodeTitle(groups) {
+  const names = [...new Set(groups.slice().sort((a, b) => b.items.length - a.items.length).map((g) => g.name))];
+  return names.slice(0, 2).join(" & ");
 }

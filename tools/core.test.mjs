@@ -4010,7 +4010,7 @@ group("the review, 2026-10-01");
 
 group("drive mode: a Pimsleur lesson, played");
 {
-  const { driveScript, driveLength, pickGroups, DRIVE_CARRY } = await import("../core/drive.js");
+  const { driveScript, driveLength, buildEpisodes, DRIVE_CARRY, DRIVE_EPISODES } = await import("../core/drive.js");
   const w = (ru, en) => ({ ru, en, kind: "word" });
   const numbers = { name: "Numbers", items: [w("один", "one"), w("два", "two"), w("три", "three"), w("четыре", "four")],
                     sentences: [{ ru: "Два кота.", en: "Two cats.", kind: "sentence" }] };
@@ -4040,13 +4040,22 @@ group("drive mode: a Pimsleur lesson, played");
      < sc.filter((s) => s.t === "ru").length, "the options take things out");
   ok(driveLength(driveScript([numbers], { pause: "long" })) > driveLength(driveScript([numbers], { pause: "short" })),
      "a longer pause is a longer drive");
-  const cands = [1, 2, 3, 4, 5, 6, 7].map((k) => ({ name: "g" + k, items: [w("а", "a"), w("б", "b")], score: 10 - k }));
-  ok(pickGroups(cands, { length: "short" }).map((g) => g.name).join() === "g5,g6,g7", "where I am: the newest groups");
-  ok(pickGroups(cands, { source: "review", length: "short" })[0].name === "g7", "review: the weakest first");
-  const fresh = [{ name: "own", items: [w("а", "a"), w("б", "b")] },
-                 ...[1, 2, 3, 4].map((k) => ({ name: "next" + k, ahead: true, items: [w("а", "a"), w("б", "b")] }))];
-  ok(pickGroups(fresh, { length: "short" }).map((g) => g.name).join() === "own,next1,next2",
-     "a new learner's drive goes on into the groups just ahead");
+
+  // The playlist: the real course's groups, cut into episodes.
+  const course = [];
+  STAGES.forEach((s, k) => [s.core].concat(s.branches).forEach((u) => (u.gr || []).forEach(([name, , ws]) =>
+    course.push({ name, chapter: k + 1, idxs: ws, items: ws.map((i) => w(L[i].b, "x")) }))));
+  const eps = buildEpisodes(course);
+  ok(eps.length === DRIVE_EPISODES, "the course is cut into 25 episodes", String(eps.length));
+  ok(eps.every((e, k) => k === 0 || e.chapter >= eps[k - 1].chapter), "they follow the chapters, simplest first");
+  ok(eps[0].chapter === 1 && eps[eps.length - 1].chapter === STAGES.length, "from chapter 1 to the last");
+  const placed = eps.flatMap((e) => e.groups.flatMap((g) => g.items)).length;
+  ok(placed === course.reduce((s, g) => s + g.items.length, 0), "every word of the course is in one episode");
+  ok(eps.every((e) => e.groups.every((g) => g.items.length >= 2 || e.groups.length === 1)),
+     "no group of one word stands alone");
+  const sizes = eps.map((e) => e.words);
+  ok(Math.max(...sizes) <= 3 * Math.min(...sizes), "episodes are of a size", sizes.join(","));
+  ok(eps.every((e) => e.title && e.title.length < 60), "each has a name from its groups", eps[0].title);
 }
 
 console.log("\n" + checks + " checks · " +

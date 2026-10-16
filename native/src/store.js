@@ -89,6 +89,8 @@ export const DEFAULTS = {
   drillPrefs: {},
   // Drive mode's options (core/drive.js DRIVE_DEFAULTS fill what is unset).
   drivePrefs: {},
+  // Drive episodes heard to the end: episode number -> day.
+  driveDone: {},
   /* The last wrong answers, newest first, as { kind, prompt, answer, said, at }
      (Run.js): what the tutor is handed so "drill me on what I get wrong" has
      something to go on. Capped at MISSES_KEPT. */

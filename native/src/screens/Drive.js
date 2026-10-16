@@ -1,13 +1,22 @@
-/* Drive mode (core/drive.js): a hands-free audio lesson in clusters of related
- * words. Press play, lock the phone, and it runs: a group announced, its words
- * prompted in English with a pause to say the Russian, the Russian twice, each
- * word asked again a little later, the group once more, a sentence that uses it.
+/* Drive mode (core/drive.js): hands-free audio lessons, chosen like podcast
+ * episodes (the owner, 2026-10-15: *"like 25 different 'episodes' which are
+ * blocks of associated words… earlier blocks simpler and later blocks more
+ * complex… select it like a podcast or playlist"*).
  *
- * What it plays is what has a bought clip (§30bq: one voice). The English is
- * the phone's English voice. The cog holds the options (§30aw's place for
- * them): what to play, which way round, how long a pause, how long a drive.
+ *   - **The episodes** are the course itself cut into 25 runs of its named
+ *     word groups (`buildEpisodes`), so episode 1 is chapter 1's greetings
+ *     and episode 25 is chapter 10's — they follow the chapters because they
+ *     are the chapters. Each group: its name, its words prompted with a pause
+ *     to say the Russian, recalled, the group once more, a sentence that uses
+ *     it. Nothing is locked: a podcast can be played in any order.
+ *   - **Two playlists of your own** stay above them (the owner: *"you can
+ *     still maintain those options though like studied words and troubled
+ *     words"*): the groups you have studied, weakest first, and your trouble
+ *     words in their groups.
+ *   - Press play, lock the phone; the next episode follows if the option is on.
  *
- * Nothing is graded. A word said in a car is practice, not a claim (§30z).
+ * What it plays is what has a bought clip (§30bq: one voice); the English is
+ * the phone's English voice. Nothing is graded (§30z).
  */
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -16,19 +25,22 @@ import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, type as T } from "../theme";
 import { Screen, Text, Muted, IconButton, Btn, CogButton, Sheet, Choice, SectionLabel, List,
-         ToggleRow } from "../ui";
-import { L, IX, UN, SPEECH, STAGES, personalWords, reachedUnits, rankOf } from "../data";
+         ToggleRow, Row, RowText, Thumb } from "../ui";
+import { L, IX, SPEECH, STAGES, rankOf } from "../data";
+import { troubleWords } from "../studycards";
 import { say, speakLine, stop, whenIdle, hasRealAudio, startCarrier, pauseCarrier,
          resumeCarrier, stopCarrier, waitMs } from "../audio";
-import { driveScript, driveLength, pickGroups, drivePrefs, DRIVE_OPTIONS, LENGTH_GROUPS } from "@core/drive";
+import { driveScript, driveLength, drivePrefs, buildEpisodes, DRIVE_OPTIONS,
+         REVIEW_GROUPS } from "@core/drive";
 import { cardFor, familiarity } from "@core/scheduler";
-import { firstSense, fold } from "@core/util";
+import { firstSense, fold, today } from "@core/util";
 
 const SILENCE = require("../../assets/silence.mp3");
 const SENTENCES_PER_GROUP = 2;
 const CYRILLIC = /[А-Яа-яЁё́-]+/g;
 
 const wordOf = (i) => (L[i] ? L[i].w || L[i].b : "");
+const itemOf = (i) => ({ ru: wordOf(i), en: firstSense(L[i]), kind: "word", b: L[i].b });
 
 /* The sentences of a unit's pool that use one of these words, shortest first,
    each with a recording. */
@@ -45,67 +57,61 @@ function sentencesFor(unit, idxs) {
   return out.sort((a, b) => a.ru.length - b.ru.length).slice(0, SENTENCES_PER_GROUP);
 }
 
-/* Every usable group for the chosen source, in course order. */
-export function driveGroups(st, prefs) {
-  const o = drivePrefs(prefs);
+/* Every group of the course with a recording for its words, in course order.
+   The same for every learner, so built once. */
+let COURSE = null;
+export function courseGroups() {
+  if (COURSE) return COURSE;
+  COURSE = [];
+  STAGES.forEach((s, k) => {
+    for (const u of [s.core].concat(s.branches)) {
+      for (const [name, , ws] of (u.gr || [])) {
+        const idxs = ws.filter((i) => L[i] && hasRealAudio(wordOf(i)) && firstSense(L[i]));
+        if (idxs.length) COURSE.push({ name, chapter: k + 1, unit: u, idxs, items: idxs.map(itemOf) });
+      }
+    }
+  });
+  return COURSE;
+}
+let EPISODES = null;
+export const episodes = () => (EPISODES = EPISODES || buildEpisodes(courseGroups()));
+
+const scoreOf = (st, b) => (st.seen && st.seen[b] ? familiarity(cardFor(st.seen[b]), rankOf(b)) || 0 : 0);
+
+/* Your own playlists: the course's groups narrowed to your words. */
+export function ownPlaylist(st, which) {
   const seen = st.seen || {};
-  let units, keep;
-  if (o.source === "chapter") {
-    const s = STAGES[Math.max(0, Math.min(STAGES.length - 1, o.chapter || 0))];
-    units = [s.core].concat(s.branches);
-    keep = () => true;
-  } else if (o.source === "review") {
-    units = UN;
-    keep = (i) => !!seen[L[i].b];
-  } else {
-    units = reachedUnits(st);
-    const met = new Set(personalWords(st));
-    keep = (i) => met.has(i);
-  }
-  const out = [];
-  /* Where I am, and too little of it to fill the drive (a new learner has one
-     group): the drive goes on into the groups just ahead, whole, in course
-     order — a drive with new words in it is a lesson, as Pimsleur's are. */
-  const want = LENGTH_GROUPS[o.length] || LENGTH_GROUPS.normal;
-  const course = STAGES.flatMap((s) => [s.core].concat(s.branches));
-  const ahead = o.source === "next" ? course.filter((u) => !units.includes(u)) : [];
-  const route = units.concat(ahead);
-  for (const u of route) {
-    if (ahead.includes(u)) {
-      if (out.filter((g) => g.items.length >= 2).length >= want) break;
-      keep = () => true;
-    }
-    for (const [name, , ws] of (u.gr || [])) {
-      const idxs = ws.filter((i) => L[i] && keep(i) && hasRealAudio(wordOf(i)) && firstSense(L[i]));
-      if (!idxs.length) continue;
-      const scores = idxs.map((i) => (seen[L[i].b] ? familiarity(cardFor(seen[L[i].b]), rankOf(L[i].b)) || 0 : 0));
-      out.push({
-        name,
-        ahead: ahead.includes(u),
-        items: idxs.map((i) => ({ ru: wordOf(i), en: firstSense(L[i]), kind: "word" })),
-        // Sentences are found for the groups a drive picks (withSentences), not
-        // for every group on the route: scanning the pools for all of them was
-        // the slow part of opening the screen.
-        unit: u, idxs,
-        score: scores.reduce((a, b) => a + b, 0) / scores.length,
-      });
-    }
-  }
-  return out;
+  const trouble = which === "trouble" ? new Set(troubleWords(st)) : null;
+  const keep = (it) => (trouble ? trouble.has(it.b) : !!seen[it.b]);
+  const groups = courseGroups()
+    .map((g) => {
+      const items = g.items.filter(keep);
+      return { ...g, items, idxs: g.idxs.filter((i) => keep({ b: L[i].b })),
+               score: items.reduce((s, it) => s + scoreOf(st, it.b), 0) / Math.max(1, items.length) };
+    })
+    .filter((g) => g.items.length);
+  if (trouble) return groups;                     // every trouble word, in its group
+  return groups.filter((g) => g.items.length >= 2).sort((a, b) => a.score - b.score).slice(0, REVIEW_GROUPS);
 }
 
-export const withSentences = (groups) =>
+/* What a playlist id plays: an episode number, "studied" or "trouble". */
+export function playlistOf(st, id) {
+  if (id === "studied" || id === "trouble") {
+    const groups = ownPlaylist(st, id);
+    return { id, title: id === "trouble" ? "Trouble words" : "Your words", groups };
+  }
+  return episodes().find((e) => e.id === id) || null;
+}
+
+const withSentences = (groups) =>
   groups.map((g) => ({ ...g, sentences: g.sentences || sentencesFor(g.unit, g.idxs) }));
 
 function DriveOptions({ prefs, onChange, onClose }) {
   const o = drivePrefs(prefs);
   const set = (k) => (v) => onChange({ ...o, [k]: v });
-  const chapters = STAGES.map((s, k) => ({ id: k, name: String(k + 1) }));
   const rows = [
-    ["What to play", "source", DRIVE_OPTIONS.source],
     ["Prompt", "direction", DRIVE_OPTIONS.direction],
     ["Pause to answer", "pause", DRIVE_OPTIONS.pause],
-    ["Length", "length", DRIVE_OPTIONS.length],
     ["Russian speed", "speed", DRIVE_OPTIONS.speed],
   ];
   return (
@@ -115,14 +121,11 @@ function DriveOptions({ prefs, onChange, onClose }) {
         <View key={key}>
           <SectionLabel gap={k > 0}>{label}</SectionLabel>
           <Choice testID={`drive-opt-${key}`} options={options} value={o[key]} onPick={set(key)} />
-          {key === "source" && o.source === "chapter" ? (
-            <Choice testID="drive-opt-chapter" options={chapters} value={o.chapter} onPick={set("chapter")}
-                    style={{ marginTop: 8 }} />
-          ) : null}
         </View>
       ))}
       <SectionLabel gap>Also</SectionLabel>
       <List>
+        <ToggleRow title="Play the next episode" value={o.next} onValueChange={set("next")} testID="drive-opt-next" />
         <ToggleRow title="Russian twice when new" value={o.twice} onValueChange={set("twice")} testID="drive-opt-twice" />
         <ToggleRow title="Sentences" value={o.sentences} onValueChange={set("sentences")} testID="drive-opt-sentences" />
         <ToggleRow title="Say each group's name" value={o.names} onValueChange={set("names")} testID="drive-opt-names" />
@@ -131,49 +134,141 @@ function DriveOptions({ prefs, onChange, onClose }) {
   );
 }
 
-export default function Drive() {
+/* About how long: the script without its sentences (finding those scans the
+   pools, which is not worth doing for 25 rows) plus a sentence's worth a group. */
+const SENTENCE_MS = 9000;
+const minutesOf = (groups, prefs) => {
+  const ms = driveLength(driveScript(groups, { ...prefs, sentences: false }))
+    + (prefs.sentences ? groups.length * SENTENCES_PER_GROUP * SENTENCE_MS : 0);
+  return Math.max(1, Math.round(ms / 60000));
+};
+
+/* The playlist. */
+export function DriveList({ navigation }) {
   const t = useTheme();
   const { st, ready, update } = useSession();
   const prefs = drivePrefs(st.drivePrefs);
-  const prefsKey = JSON.stringify(prefs);
-  const groups = useMemo(() => (ready ? withSentences(pickGroups(driveGroups(st, prefs), prefs)) : []),
-    // Built once a sitting and when the options change: the words met do not
-    // change while driving.
+  const [cog, setCog] = useState(false);
+  const eps = useMemo(() => episodes(), []);
+  const own = useMemo(() => (ready ? {
+    studied: ownPlaylist(st, "studied"), trouble: ownPlaylist(st, "trouble"),
+  } : { studied: [], trouble: [] }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [ready, prefsKey]);
+    [ready]);
+  const done = st.driveDone || {};
+  // Up next: the first episode holding a word you have not studied yet.
+  const upNext = useMemo(() => (eps.find((e) => e.groups.some((g) => g.items.some((it) => !(st.seen || {})[it.b]))) || {}).id,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ready]);
+  const open = (id) => navigation.navigate("DriveEpisode", { id });
+  const prefsKey = JSON.stringify(prefs);
+  const lengths = useMemo(() => eps.map((e) => minutesOf(e.groups, prefs)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [eps, prefsKey]);
+
+  return (
+    <Screen>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <SectionLabel>Your playlists</SectionLabel>
+        <CogButton testID="drive-cog" label="Drive options" onPress={() => setCog(true)} />
+      </View>
+      <List>
+        <Row testID="drive-own-studied" onPress={own.studied.length ? () => open("studied") : undefined}
+             disabled={!own.studied.length}>
+          <Thumb id="drive" tone="info" />
+          <RowText title="Your words"
+                   sub={own.studied.length ? own.studied.map((g) => g.name).join(" · ") : "Study some words first"} />
+        </Row>
+        <Row testID="drive-own-trouble" onPress={own.trouble.length ? () => open("trouble") : undefined}
+             disabled={!own.trouble.length}>
+          <Thumb id="drive" tone="info" />
+          <RowText title="Trouble words"
+                   sub={own.trouble.length ? `${own.trouble.reduce((s, g) => s + g.items.length, 0)} words` : "None right now"} />
+        </Row>
+      </List>
+
+      <SectionLabel gap>Episodes</SectionLabel>
+      <List>
+        {eps.map((e) => (
+          <Row key={e.id} testID={`drive-episode-${e.id}`} onPress={() => open(e.id)}>
+            <Thumb n={e.id} done={!!done[e.id]} tone={e.id === upNext ? "brand" : undefined} />
+            <RowText title={e.title}
+                     sub={`Chapter ${e.chapter} · ${e.groups.length} groups · ${lengths[e.id - 1]} min`} />
+          </Row>
+        ))}
+      </List>
+      {cog ? <DriveOptions prefs={prefs} onChange={(next) => update((p) => ({ ...p, drivePrefs: next }))}
+                           onClose={() => setCog(false)} /> : null}
+    </Screen>
+  );
+}
+
+/* One episode, played. Chains into the next without letting the lock screen
+   go, so a locked phone carries on from episode to episode. */
+export function DriveEpisode({ route }) {
+  const t = useTheme();
+  const { st, ready, update } = useSession();
+  const prefs = drivePrefs(st.drivePrefs);
+  const [id, setId] = useState(route && route.params ? route.params.id : 1);
+  const list = useMemo(() => (ready ? playlistOf(st, id) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ready, id]);
+  const groups = useMemo(() => (list ? withSentences(list.groups) : []), [list]);
   const script = useMemo(() => driveScript(groups, prefs),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [groups, prefsKey]);
+    [groups, JSON.stringify(prefs)]);
   const marks = useMemo(() => script.map((s, k) => (s.t === "mark" ? k : -1)).filter((k) => k >= 0), [script]);
   const [state, setState] = useState("idle");          // idle | playing | paused | done
   const [now, setNow] = useState(null);                // { item, group, at }
-  const [cog, setCog] = useState(false);
   const run = useRef(0);
   const markAt = useRef(0);
+  const chain = useRef(false);                         // the next episode should start on its own
+  const live = useRef({});
+  live.current = { script, marks, groups };
 
   useEffect(() => () => { run.current++; stop(); stopCarrier(); }, []);
 
   const show = (k) => {
-    const s = script[k];
-    setNow({ item: s.item, group: groups[s.group] ? groups[s.group].name : "", at: marks.indexOf(k) });
+    const { script: sc, marks: ms, groups: gs } = live.current;
+    const s = sc[k];
+    setNow({ item: s.item, group: gs[s.group] ? gs[s.group].name : "", at: ms.indexOf(k) });
+  };
+
+  const finish = () => {
+    if (typeof id === "number") update((p) => ({ ...p, driveDone: { ...(p.driveDone || {}), [id]: today() } }));
+    const next = typeof id === "number" && prefs.next ? id + 1 : null;
+    if (next && episodes().some((e) => e.id === next)) {
+      chain.current = true;
+      markAt.current = 0;
+      setNow(null);
+      setId(next);                                     // the effect below plays it
+      return;
+    }
+    setState("done");
+    stopCarrier();
   };
 
   const play = async (from) => {
     const mine = ++run.current;
     const gone = () => run.current !== mine;
     setState("playing");
-    for (let k = from; k < script.length; k++) {
+    const sc = live.current.script;
+    for (let k = from; k < sc.length; k++) {
       if (gone()) return;
-      const s = script[k];
+      const s = sc[k];
       if (s.t === "mark") { markAt.current = k; show(k); }
       else if (s.t === "gap") await waitMs(s.ms, gone);
       else if (s.t === "en") await speakLine(s.text, { lang: "en" });
       else if (s.t === "ru") { await say(s.text, { repeat: false, speed: prefs.speed }); await whenIdle(); }
     }
-    if (gone()) return;
-    setState("done");
-    stopCarrier();
+    if (!gone()) finish();
   };
+
+  // The next episode, once its script is built.
+  useEffect(() => {
+    if (chain.current && script.length) { chain.current = false; play(0); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [script]);
 
   const pause = (fromLock) => { run.current++; stop(); if (!fromLock) pauseCarrier(); setState("paused"); };
   const start = async () => {
@@ -195,25 +290,20 @@ export default function Drive() {
     else show(to);
   };
   const again = () => { markAt.current = 0; setNow(null); start(); };
-  // A new set of options is a new drive: stop, and start from the top.
-  const setPrefs = (next) => {
-    run.current++; stop(); stopCarrier();
-    markAt.current = 0; setNow(null); setState("idle");
-    update((p) => ({ ...p, drivePrefs: next }));
-  };
 
+  if (!list) return <Screen><Muted testID="drive-empty">Nothing to play here yet.</Muted></Screen>;
   const minutes = Math.max(1, Math.round(driveLength(script) / 60000));
   const playing = state === "playing";
+  const heading = typeof id === "number" ? `Episode ${id} · ${list.title}` : list.title;
 
   return (
     <Screen scroll={false}>
       <View style={{ flex: 1, padding: 24, justifyContent: "space-between" }}>
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <Muted testID="drive-length" style={{ flex: 1 }}>
-            {!groups.length ? "" : now ? `${now.at + 1} of ${marks.length}`
-              : `${groups.length} ${groups.length === 1 ? "group" : "groups"} · about ${minutes} min`}
+        <View style={{ gap: 4 }}>
+          <Text testID="drive-title" style={{ color: t.ink, fontSize: T.head, fontWeight: "700" }}>{heading}</Text>
+          <Muted testID="drive-length">
+            {now ? `${now.at + 1} of ${marks.length}` : `${groups.length} ${groups.length === 1 ? "group" : "groups"} · about ${minutes} min`}
           </Muted>
-          <CogButton testID="drive-cog" label="Drive options" onPress={() => setCog(true)} />
         </View>
 
         <View style={{ alignItems: "center", gap: 14 }}>
@@ -265,7 +355,6 @@ export default function Drive() {
           )}
         </View>
       </View>
-      {cog ? <DriveOptions prefs={prefs} onChange={setPrefs} onClose={() => setCog(false)} /> : null}
     </Screen>
   );
 }

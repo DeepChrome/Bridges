@@ -25,7 +25,7 @@ export const RUNS = [
   "GrammarRun",   // a chapter's grammar point with its words
   "CaseRun",      // a case's lesson or drill (core/cases.js)
   "Recap",        // the day's recap
-  "Drive",        // drive mode: a player, its controls are the screen
+  "DriveEpisode", // drive mode's player: its controls are the screen
   "TestOut",      // testing out of a section
   "Placement",    // the placement test
   "CustomQuiz",   // a quiz the learner built
@@ -77,7 +77,7 @@ export function profileDepth(state) {
  * Phase 0.3: completeness, not existence). */
 export const TAB_BAR_SCREENS = [
   "Path", "Unit", "Lesson", "Summary",                 // Learn
-  "Drills", "QuizSetup", "SceneList", "Sounds", "Grammar", "Endings",  // Practice
+  "Drills", "QuizSetup", "SceneList", "Drive", "Sounds", "Grammar", "Endings",  // Practice
   "CaseHub", "CaseModule",
   "Episodes", "VideoHistory",                          // Immerse
   "Cards",                                             // Study

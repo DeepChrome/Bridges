@@ -1,6 +1,6 @@
 # Drive mode (core/drive.js, 2026-10-15), on an installed build with a profile:
-# the groups it will play, the options sheet, and the screen mid-lesson. The
-# lock-screen half is checked by hand: power key, wait, logcat for ExoPlayer.
+# the playlist, the options sheet, an episode mid-play. The lock-screen half is
+# checked by hand: power key, wait, logcat for ExoPlayer.
 #
 #   .\native\tools\walk.ps1 -Flow native\flows\drive.txt -Device emulator-5554
 
@@ -8,13 +8,21 @@ wait:2
 tap:^Practice$
 wait:2
 tap:^Drive mode$
-wait:2
-shot:d1-drive-ready
+wait:3
+shot:d0-drive-playlist
+scroll
+wait:1
+shot:d0b-drive-playlist-more
+scrolltop
+wait:1
 tap:Drive options
 wait:2
 shot:d1b-drive-options
 tap:^Done$
 wait:1
+tap:Pronouns
+wait:3
+shot:d1-drive-episode
 tap:^Play$
 wait:9
 shot:d2-drive-playing

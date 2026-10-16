@@ -27,6 +27,8 @@ import { tableLabel } from "@core/forms";
 import { irregularities } from "@core/facts";
 // The form recordings are looked up where every sound is (audio.js formClip).
 import { say, hasRealAudio, formClip } from "./audio";
+import { wordClip } from "./wordaudio";
+import { fold } from "@core/util";
 
 /* A column is wide enough for a long inflected form and no wider: at 110 a
    three-column table fits a 390 px screen without scrolling, which is most of
@@ -50,14 +52,20 @@ const COL = 110;
  * The whole cell is the target, with a small glyph beside the form: a 40 px
  * round speaker in every cell would push a three-column table past the width
  * of a phone. */
-export function FormSpeaker({ form, style, testID, children, device = true }) {
+export function FormSpeaker({ form, style, testID, children, device = true, headword }) {
   const t = useTheme();
   /* First the form's own recording, looked up by its **accented** spelling
      (formaudio.js) — bought for every form whose spelling has one stress.
      Then, with `device={false}`, any recording of the spelling at all — right
      for a word shown on its own (the endings' examples), where there is no
-     second stress to confuse it with. */
-  const clip = formClip(form);
+     second stress to confuse it with.
+     And the cell that *is* the headword («вода́» in вода's own table) plays
+     the headword's clip — the one the card already plays for the word. A
+     rare homograph elsewhere in the dictionary («во́да», a genitive of
+     "waters") takes the form recording away (§30cf), and a table with no
+     speaker on its own dictionary form, under a card that plays it, read as
+     broken. */
+  const clip = formClip(form) || (headword && form === headword ? wordClip(fold(form)) : null);
   const real = !!clip || (!device && hasRealAudio(form));
   /* Only a recording plays (the owner, 2026-10-04): a form with none — a
      word outside the units, or a spelling with two stresses — shows no
@@ -99,7 +107,7 @@ const CYRILLIC = /[Ѐ-ӿ]/;
  * grammar reference's tables hold *endings* — «-ов», «-ами» — and a speaker
  * reading a lone ending aloud says something no Russian would. The entry and
  * the drill's reference turn it on, because their tables hold real words. */
-export function Table({ table, mark, speak, testID, bare, labelHead }) {
+export function Table({ table, mark, speak, testID, bare, labelHead, headword }) {
   const t = useTheme();
   const [br, bc] = mark || [];
   /* Laid out for a person reading it rather than for a parser (the owner,
@@ -148,7 +156,7 @@ export function Table({ table, mark, speak, testID, bare, labelHead }) {
                   <View key={ci} testID={asked && ci === bc ? "table-asked" : undefined}
                         style={{ width: COL, paddingVertical: 4, gap: 2 }}>
                     {forms.map((f, fi) => (
-                      <FormSpeaker key={fi} form={f} testID={`say-${ri}-${ci}-${fi}`}
+                      <FormSpeaker key={fi} form={f} testID={`say-${ri}-${ci}-${fi}`} headword={headword}
                                    style={{ minHeight: 36 }}>
                         <Text style={style}>{f}</Text>
                       </FormSpeaker>
@@ -173,7 +181,7 @@ export function Table({ table, mark, speak, testID, bare, labelHead }) {
  * in the bulb's sheet. The learner opens the rest when they want them. */
 /* `aspect` is the verb's, so its personal forms are headed Present or Future
    rather than both (core/forms.js tableLabel). */
-export function TableGroup({ tables, speak, mark, open = [0], testID = "tables", aspect }) {
+export function TableGroup({ tables, speak, mark, open = [0], testID = "tables", aspect, headword }) {
   const t = useTheme();
   const [shown, setShown] = React.useState(() => new Set(open));
   if (!tables || !tables.length) return null;
@@ -197,7 +205,7 @@ export function TableGroup({ tables, speak, mark, open = [0], testID = "tables",
               <Text style={{ color: t.ink3, fontSize: T.body }}>{on ? "▾" : "▸"}</Text>
             </Pressable>
             {on ? (
-              <Table table={tb} speak={speak} bare testID={`${testID}-${k}`}
+              <Table table={tb} speak={speak} bare testID={`${testID}-${k}`} headword={headword}
                      mark={mark && mark.table === tb ? mark.at : null} />
             ) : null}
           </View>
@@ -447,7 +455,7 @@ export function Reference({ title, sub, tables, mark, onClose, aspect }) {
       ) : null}
       {/* The table the question is about opens; the word's others are a tap
           away rather than stacked under it. */}
-      <TableGroup tables={tables} speak mark={mark} testID="ref-table" aspect={aspect}
+      <TableGroup tables={tables} speak mark={mark} testID="ref-table" aspect={aspect} headword={title}
                   open={[Math.max(0, (tables || []).indexOf(mark && mark.table))]} />
     </Sheet>
   );

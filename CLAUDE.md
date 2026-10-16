@@ -6637,15 +6637,28 @@ made for a listener who cannot look at a screen.
   §30bi): the group's name said, its words taught in their order, each
   recalled two words on, the whole group once more, up to two pool sentences
   that use it, and the next group opens by recalling `DRIVE_CARRY` of the
-  last one's words. `driveGroups` in Drive.js builds them per source:
-  **Where I am** (groups holding `personalWords`, newest last), **Review**
-  (studied words, weakest group first by mean familiarity), **A chapter**
-  (any chapter, whole). Only words with a bought clip — one voice (§30bq).
+  last one's words. Only words with a bought clip — one voice (§30bq).
+- **A playlist of 25 episodes** (the owner, the next morning: *"like 25
+  different 'episodes' which are blocks of associated words… earlier blocks
+  simpler and later blocks more complex… select it like a podcast or
+  playlist"*). `buildEpisodes` in core/drive.js cuts the course's groups, in
+  course order, into `DRIVE_EPISODES` runs of about equal word count (about
+  50 words, 10–12 groups, 15–20 minutes), never splitting a group and
+  folding a one-word group into its neighbour — so they follow the chapters
+  because they are the chapters. Named from their two largest groups.
+  Nothing is locked; "up next" is the first episode holding a word not yet
+  studied; one heard to the end is ticked (`st.driveDone`). **Your words**
+  (studied groups, weakest first, `REVIEW_GROUPS` of them) and **Trouble
+  words** stay above the episodes (the owner: *"you can still maintain those
+  options"*). Two routes: `Drive` (the list, keeps the tab bar) and
+  `DriveEpisode` (the player). An episode **chains into the next inside the
+  player** rather than by navigating, so the carrier never lets go and a
+  locked phone carries on — starting a media service from the background is
+  what Android refuses.
 - **The cog** (`DriveOptions`, kept in `st.drivePrefs`, a setting key):
-  source, prompt (Say it / Understand it / Both — the Russian first, the
-  English after the pause), pause (`PAUSE_SCALE`), length (`LENGTH_GROUPS`:
-  3, 5, 8 groups), Russian speed, and three switches (Russian twice, sentences,
-  group names). A changed option is a new drive from the top.
+  prompt (Say it / Understand it / Both — the Russian first, the English
+  after the pause), pause (`PAUSE_SCALE`), Russian speed, and switches for
+  the next episode, Russian twice, sentences and group names.
   **Nothing is graded** (§30z: a word said in a car is not a claim).
 - **It plays on with the phone locked.** Android stops a backgrounded app's
   sound after a few minutes unless a media session shows on the lock screen,
@@ -6711,7 +6724,11 @@ worth keeping:
   listed again with a variant stress (same letters and class: «ужи́н»).
   123 form clips left the bundle with it, «вода́» and «кому́» among them:
   the voice reads the commoner word, and nothing here knows which reading
-  that is. `audio_qa.mjs` checks against the same set.
+  that is. `audio_qa.mjs` checks against the same set. **The cell that is the
+  headword keeps a speaker**: `FormSpeaker` takes `headword` and, for the
+  table cell spelled exactly as it, plays the headword's own clip — the one
+  the card above already plays — rather than show «вода́» speechless in
+  water's own table (`headwordcell.test.js`).
 - **fold() lets «ё» attach a sentence to the wrong word.** «Всё хорошо.» was
   the one example of «все» "everybody". `build_dictionary` refuses a
   sentence that spells the key only with ё when none of the word's own forms

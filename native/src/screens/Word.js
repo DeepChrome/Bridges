@@ -149,7 +149,7 @@ export function WordEntry({ w, index, navigation }) {
         <Facts facts={wordFacts(w).filter((f) => !lineTags.has(f.label.toLowerCase()))} testID="word-facts" />
         {/* One section a table, the first open: a verb is three grids and a
             noun twelve cells, and stacked whole they buried the rest (§30bb). */}
-        <TableGroup tables={w.t} speak testID="word-tables" aspect={w.a} />
+        <TableGroup tables={w.t} speak testID="word-tables" aspect={w.a} headword={w.w} />
         {credit ? (
           // The photo's record: title, author where one is named, licence — and
           // the page it came from, which is what a CC BY credit asks for.

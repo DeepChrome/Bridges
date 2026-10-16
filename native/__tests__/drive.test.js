@@ -11,6 +11,7 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import Drive, { driveGroups } from "../src/screens/Drive";
 import { STAGES, L } from "../src/data";
+import { pickGroups } from "@core/drive";
 
 const base = { v: 9, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, streak: 0, dev: false, flash: ["recognise"] };
@@ -57,30 +58,23 @@ it("plays the course's own groups, from the next lesson on a new profile", () =>
   expect(groups.length).toBeGreaterThan(0);
   const first = STAGES[0].core.w.map((i) => L[i].w || L[i].b);
   const names = (STAGES[0].core.gr || []).map(([name]) => name);
-  for (const g of groups) {
+  for (const g of groups.filter((x) => !x.ahead)) {
     expect(names).toContain(g.name);                                // a named group, not a pile
     expect(g.items.every((x) => first.includes(x.ru) && x.en)).toBe(true);
   }
+  // Too few of their own to fill a drive: it goes on into the groups ahead.
+  expect(pickGroups(groups, {}).length).toBe(5);
   // A chapter can be chosen ahead of the route, and Review needs studied words.
   expect(driveGroups(base, { source: "chapter", chapter: 3 }).length).toBeGreaterThan(0);
   expect(driveGroups(base, { source: "review" })).toEqual([]);
 });
 
-it("keeps its options, and a new option is a new drive", async () => {
-  await open();
-  await act(async () => { fireEvent.press(await screen.findByTestId("drive-cog")); });
-  await act(async () => { fireEvent.press(within(screen.getByTestId("drive-opt-length")).getByText("Long")); });
-  await act(async () => { fireEvent.press(within(screen.getByTestId("drive-opt-direction")).getByText("Understand it")); });
-  await flushState();
-  const saved = await global.__db.saved("p1");
-  expect(saved.drivePrefs).toMatchObject({ length: "long", direction: "hear" });
-  await act(async () => { fireEvent.press(screen.getByTestId("drive-apply")); });
-});
 
 it("plays the English first, holds the lock screen, pauses everything, and lets go on leaving", async () => {
   const view = await open();
   await act(async () => { fireEvent.press(await screen.findByTestId("drive-play")); });
-  const en = await screen.findByTestId("drive-en");
+  // The first item shows after the carrier opens and the group's name is said.
+  const en = await screen.findByTestId("drive-en", {}, { timeout: 5000 });
   await waitFor(() => expect(global.__spoke.length).toBeGreaterThan(1));
   // The group's name, then the prompt in English.
   expect(global.__spoke[0]).toBe(screen.getByTestId("drive-group").props.children);
@@ -106,4 +100,17 @@ it("plays the English first, holds the lock screen, pauses everything, and lets 
   // Practice, not a claim: nothing was graded.
   const saved = await global.__db.saved("p1");
   expect(Object.keys((saved && saved.seen) || {})).toEqual([]);
+});
+
+/* Last in the file: a sheet opened in a test leaves the next test's tree
+   undrawn (§30by's trap), so nothing renders after this one. */
+it("keeps its options, and a new option is a new drive", async () => {
+  await open();
+  await act(async () => { fireEvent.press(await screen.findByTestId("drive-cog")); });
+  await act(async () => { fireEvent.press(within(screen.getByTestId("drive-opt-length")).getByText("Long")); });
+  await act(async () => { fireEvent.press(within(screen.getByTestId("drive-opt-direction")).getByText("Understand it")); });
+  await flushState();
+  const saved = await global.__db.saved("p1");
+  expect(saved.drivePrefs).toMatchObject({ length: "long", direction: "hear" });
+  await act(async () => { fireEvent.press(screen.getByTestId("drive-apply")); });
 });

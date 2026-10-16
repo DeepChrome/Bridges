@@ -4043,6 +4043,10 @@ group("drive mode: a Pimsleur lesson, played");
   const cands = [1, 2, 3, 4, 5, 6, 7].map((k) => ({ name: "g" + k, items: [w("а", "a"), w("б", "b")], score: 10 - k }));
   ok(pickGroups(cands, { length: "short" }).map((g) => g.name).join() === "g5,g6,g7", "where I am: the newest groups");
   ok(pickGroups(cands, { source: "review", length: "short" })[0].name === "g7", "review: the weakest first");
+  const fresh = [{ name: "own", items: [w("а", "a"), w("б", "b")] },
+                 ...[1, 2, 3, 4].map((k) => ({ name: "next" + k, ahead: true, items: [w("а", "a"), w("б", "b")] }))];
+  ok(pickGroups(fresh, { length: "short" }).map((g) => g.name).join() === "own,next1,next2",
+     "a new learner's drive goes on into the groups just ahead");
 }
 
 console.log("\n" + checks + " checks · " +

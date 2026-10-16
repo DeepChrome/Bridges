@@ -112,5 +112,8 @@ export function pickGroups(candidates, prefs = {}) {
   const usable = candidates.filter((g) => g.items.length >= 2);
   if (o.source === "review") return usable.slice().sort((a, b) => a.score - b.score).slice(0, n);
   if (o.source === "chapter") return usable.slice(0, n);
-  return usable.slice(-n);                        // where I am: the newest groups, in order
+  // Where I am: the newest of the learner's own groups, and when they are too
+  // few, the groups just ahead (`ahead`) after them, in order.
+  const own = usable.filter((g) => !g.ahead).slice(-n);
+  return own.concat(usable.filter((g) => g.ahead).slice(0, n - own.length));
 }

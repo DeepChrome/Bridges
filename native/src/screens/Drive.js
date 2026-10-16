@@ -20,7 +20,7 @@ import { Screen, Text, Muted, IconButton, Btn, CogButton, Sheet, Choice, Section
 import { L, IX, UN, SPEECH, STAGES, personalWords, reachedUnits, rankOf } from "../data";
 import { say, speakLine, stop, whenIdle, hasRealAudio, startCarrier, pauseCarrier,
          resumeCarrier, stopCarrier, waitMs } from "../audio";
-import { driveScript, driveLength, pickGroups, drivePrefs, DRIVE_OPTIONS } from "@core/drive";
+import { driveScript, driveLength, pickGroups, drivePrefs, DRIVE_OPTIONS, LENGTH_GROUPS } from "@core/drive";
 import { cardFor, familiarity } from "@core/scheduler";
 import { firstSense, fold } from "@core/util";
 
@@ -63,21 +63,39 @@ export function driveGroups(st, prefs) {
     keep = (i) => met.has(i);
   }
   const out = [];
-  for (const u of units) {
+  /* Where I am, and too little of it to fill the drive (a new learner has one
+     group): the drive goes on into the groups just ahead, whole, in course
+     order — a drive with new words in it is a lesson, as Pimsleur's are. */
+  const want = LENGTH_GROUPS[o.length] || LENGTH_GROUPS.normal;
+  const course = STAGES.flatMap((s) => [s.core].concat(s.branches));
+  const ahead = o.source === "next" ? course.filter((u) => !units.includes(u)) : [];
+  const route = units.concat(ahead);
+  for (const u of route) {
+    if (ahead.includes(u)) {
+      if (out.filter((g) => g.items.length >= 2).length >= want) break;
+      keep = () => true;
+    }
     for (const [name, , ws] of (u.gr || [])) {
       const idxs = ws.filter((i) => L[i] && keep(i) && hasRealAudio(wordOf(i)) && firstSense(L[i]));
       if (!idxs.length) continue;
       const scores = idxs.map((i) => (seen[L[i].b] ? familiarity(cardFor(seen[L[i].b]), rankOf(L[i].b)) || 0 : 0));
       out.push({
         name,
+        ahead: ahead.includes(u),
         items: idxs.map((i) => ({ ru: wordOf(i), en: firstSense(L[i]), kind: "word" })),
-        sentences: sentencesFor(u, idxs),
+        // Sentences are found for the groups a drive picks (withSentences), not
+        // for every group on the route: scanning the pools for all of them was
+        // the slow part of opening the screen.
+        unit: u, idxs,
         score: scores.reduce((a, b) => a + b, 0) / scores.length,
       });
     }
   }
   return out;
 }
+
+export const withSentences = (groups) =>
+  groups.map((g) => ({ ...g, sentences: g.sentences || sentencesFor(g.unit, g.idxs) }));
 
 function DriveOptions({ prefs, onChange, onClose }) {
   const o = drivePrefs(prefs);
@@ -118,7 +136,7 @@ export default function Drive() {
   const { st, ready, update } = useSession();
   const prefs = drivePrefs(st.drivePrefs);
   const prefsKey = JSON.stringify(prefs);
-  const groups = useMemo(() => (ready ? pickGroups(driveGroups(st, prefs), prefs) : []),
+  const groups = useMemo(() => (ready ? withSentences(pickGroups(driveGroups(st, prefs), prefs)) : []),
     // Built once a sitting and when the options change: the words met do not
     // change while driving.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -193,7 +211,7 @@ export default function Drive() {
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <Muted testID="drive-length" style={{ flex: 1 }}>
             {!groups.length ? "" : now ? `${now.at + 1} of ${marks.length}`
-              : `${groups.length} groups · about ${minutes} min`}
+              : `${groups.length} ${groups.length === 1 ? "group" : "groups"} · about ${minutes} min`}
           </Muted>
           <CogButton testID="drive-cog" label="Drive options" onPress={() => setCog(true)} />
         </View>

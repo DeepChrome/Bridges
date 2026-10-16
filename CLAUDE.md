@@ -6645,6 +6645,12 @@ made for a listener who cannot look at a screen.
   the carrier. The lock screen's pause and play reach the drive through the
   carrier's status (`__asked` marks the app's own presses). `stopCarrier` on
   leaving the screen gives everything back.
+- **React Native's timers stop with the screen locked** — they are driven by
+  frames — so a locked drive sat on its first pause for four minutes. Pauses
+  are `waitMs` in audio.js, clocked off the carrier's native status updates
+  (`CARRIER_TICK_MS`, 250) with a timer for the foreground. Verified on the
+  emulator: 46 clips played in 4.5 minutes locked, to the end. Its first
+  statuses (loading, not playing) are not a lock-screen pause either.
 - `jest.setup.js`'s player never finishes when `loop` is set, as a looping
   player does not. `drive.test.js` pins English-first, the carrier held and
   freed, pause silencing everything, and nothing graded.

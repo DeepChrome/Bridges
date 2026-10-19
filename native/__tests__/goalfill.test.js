@@ -15,6 +15,13 @@
  */
 import { goalSession, GOAL_REVIEWS, MASTERED_EVERY } from "@core/queue";
 import { applyGrade, familiarity, REVIEW, DAY, dayOf } from "@core/scheduler";
+import React from "react";
+import { render, screen, fireEvent, act } from "@testing-library/react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SessionProvider } from "../src/session";
+import { flushState } from "../src/store";
+import Study from "../src/screens/Study";
+import { SCHEMA_VERSION } from "@core/state";
 import { sessionFor } from "../src/studycards";
 import { L } from "../src/data";
 
@@ -73,19 +80,67 @@ describe("the goal's fill, within a sitting", () => {
     expect(second.items.filter((x) => dealtBefore.has(x.word))).toEqual([]);
   });
 
-  it("deals a card twice only when the learner has fewer cards than the goal asks for", () => {
+  /* A learner with fewer cards than the goal asks for is never dealt one
+     twice (the owner, 2026-10-19: "the same exact word even when I'm pressing
+     easy"). The session says it is exhausted and the screen counts the rest
+     of the goal as met. It used to deal the answered cards again, least
+     recently answered first. */
+  it("never deals a card answered today, even when the goal asks for more than the learner has", () => {
     const now = Date.now();
     const pool = words(6);
     const seen = learner(pool, now);
     const first = goalSession({ seen, words: pool, now, owed: 10, rng: seeded(), opts, familiar });
-    // Six distinct, and no more: the rest of the goal waits for the next chunk.
     expect(first.items.map((x) => x.word).sort()).toEqual(pool.slice().sort());
+    expect(first.exhausted).toBe(true);
+    expect(first.remaining).toBe(0);
     const { seen: after, at } = goodAll(seen, first.items, now);
     const second = goalSession({ seen: after, words: pool, now: at + 60000, owed: 4, rng: seeded(), opts, familiar });
-    expect(second.items).toHaveLength(4);
-    // The ones answered longest ago come round first.
-    const order = first.items.map((x) => x.word);
-    expect(second.items.map((x) => x.word)).toEqual(order.slice(0, 4));
+    expect(second.items).toEqual([]);
+    expect(second.exhausted).toBe(true);
+    // Nor past the goal: "Keep going" has nothing to deal either.
+    expect(goalSession({ seen: after, words: pool, now: at + 60000, owed: 0, beyond: true, rng: seeded(), opts, familiar }).items)
+      .toEqual([]);
+  });
+
+  it("…and a pool that can fill the goal is not exhausted", () => {
+    const now = Date.now();
+    const pool = words(30);
+    const sess = goalSession({ seen: learner(pool, now), words: pool, now, owed: 10, rng: seeded(), opts, familiar });
+    expect(sess.exhausted).toBe(false);
+  });
+});
+
+/* The screen, when the pool runs out before the goal does: the day ends on
+   "Daily goal met", the number on the tab is 0, and Keep going is not offered
+   — there is nothing it could deal but the cards just answered. */
+describe("the goal, met by running out of cards", () => {
+  const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn(), addListener: () => () => {} };
+
+  beforeEach(async () => { await flushState(); await AsyncStorage.clear(); });
+  afterEach(async () => { await flushState(); });
+
+  it("ends on the goal met, with nothing more to keep going on", async () => {
+    const now = Date.now();
+    const pool = L.slice(0, 4).map((w) => w.b);
+    await AsyncStorage.setItem("rb.accounts", JSON.stringify({
+      list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
+    await AsyncStorage.setItem("rb.state.p1", JSON.stringify({
+      v: SCHEMA_VERSION, seen: learner(pool, now), trouble: {}, pinned: [], sets: ["__path__"], decks: [], drills: {},
+      unit: {}, mined: {}, flash: ["recognise"], newPerDay: 0, learnAhead: 20, cardKinds: ["words"],
+      goal: { day: dayOf(now), owed: 10, done: 0 },
+    }));
+    await render(<SessionProvider><Study navigation={nav} route={{ params: {} }} /></SessionProvider>);
+    expect((await screen.findByTestId("study-goal")).props.children).toBe("10");
+    await act(async () => { fireEvent.press(screen.getByTestId("study-go")); });
+    for (let k = 0; k < pool.length; k++) {
+      await act(async () => { fireEvent.press(await screen.findByText("Show")); });
+      await act(async () => { fireEvent.press(screen.getByTestId("grade-4")); });
+    }
+    expect(await screen.findByText("Daily goal met")).toBeTruthy();
+    expect(screen.queryByTestId("keep-going")).toBeNull();
+    expect(screen.queryByText("Show")).toBeNull();
+    await flushState();
+    expect((await global.__db.saved("p1")).goal.owed).toBe(0);
   });
 });
 

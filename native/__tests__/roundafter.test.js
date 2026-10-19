@@ -90,28 +90,31 @@ describe("a list round with a way back", () => {
     expect(screen.queryByText("Show")).toBeNull();
   });
 
-  /* A second look the same day is practice (2026-10-05: «ребёнок» at 98
-     after a few Easy presses in one sitting). */
-  it("keeps the schedule of a card already answered today when the round's answer is right", async () => {
-    const today = { recognise: { state: REVIEW, s: 2.3, d: 5, reps: 3, lapses: 0, steps: 0,
-                                 lastAt: Date.now() - 30 * 60000, dueAt: Date.now() + 2 * DAY } };
+  /* A card answered today and scheduled out is not dealt again today (the
+     owner, 2026-10-19: "I keep getting drilled with the same exact word even
+     when I'm pressing easy"). Until then it was dealt and its grade thrown
+     away as "practice" — which is what hid the repeat and froze the score. */
+  const answeredToday = () => ({ recognise: { state: REVIEW, s: 2.3, d: 5, reps: 3, lapses: 0, steps: 0,
+                                              lastAt: Date.now() - 30 * 60000, dueAt: Date.now() + 2 * DAY } });
+  it("leaves out a card answered today that is scheduled out", () => {
+    const st = { ...base, flash: ["recognise"], seen: { "город": answeredToday() } };
+    const s = sessionFor(st, { round: "list", words: ["город", "хотеть"], title: "Gaps" });
+    expect(s.items.map((x) => x.word)).toEqual(["хотеть"]);
+  });
+
+  /* …while one answered Again today is in a learning step, due within
+     minutes, and is dealt — and every grade it gets counts. */
+  it("deals a card answered Again today, and grades it", async () => {
+    const relearning = { recognise: { state: 3, s: 2.3, d: 5, reps: 3, lapses: 1, steps: 1,
+                                      lastAt: Date.now() - 60000, dueAt: Date.now() + 5 * 60000 } };
     await withProfile(<Study navigation={nav}
-      route={{ params: { round: "list", words: ["город"], title: "Gaps" } }} />, { seen: { "город": today } });
+      route={{ params: { round: "list", words: ["город"], title: "Gaps" } }} />, { seen: { "город": relearning } });
     await act(async () => { fireEvent.press(await screen.findByText("Show")); });
     await act(async () => { fireEvent.press(screen.getByTestId("grade-4")); });
     await flushState();
-    expect((await global.__db.saved("p1")).seen["город"].recognise.s).toBe(2.3);
-  });
-
-  it("…but an Again still counts", async () => {
-    const today = { recognise: { state: REVIEW, s: 2.3, d: 5, reps: 3, lapses: 0, steps: 0,
-                                 lastAt: Date.now() - 30 * 60000, dueAt: Date.now() + 2 * DAY } };
-    await withProfile(<Study navigation={nav}
-      route={{ params: { round: "list", words: ["город"], title: "Gaps" } }} />, { seen: { "город": today } });
-    await act(async () => { fireEvent.press(await screen.findByText("Show")); });
-    await act(async () => { fireEvent.press(screen.getByTestId("grade-1")); });
-    await flushState();
-    expect((await global.__db.saved("p1")).seen["город"].recognise.s).not.toBe(2.3);
+    const card = (await global.__db.saved("p1")).seen["город"].recognise;
+    expect(card.s).not.toBe(2.3);
+    expect(card.dueAt).toBeGreaterThan(Date.now() + DAY);   // Easy took it out of the step
   });
 
   /* The card on screen is what a tester's report is about (about.js). */

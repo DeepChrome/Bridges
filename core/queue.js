@@ -335,11 +335,16 @@ export const goalBadge = (goal, now, opts) => {
  * pool — fastest through the recently learned, whose memory fades fastest,
  * which is still the owner's "recently learned cards most often".
  *
- * And a card answered today is not dealt again today while anything else is
- * left: a second look the same day is practice, not evidence (Study.js
- * `practiceAgain`). Only a learner with fewer met cards than the goal sees
- * one twice, least recently answered first, so the number on the tab can
- * still be brought to 0 on day one.
+ * **And a card answered today is never dealt again today** (the owner,
+ * 2026-10-19: *"I keep getting drilled with the same exact word even when I'm
+ * pressing easy. An easy should push it pretty far back"*). It used to come
+ * round once the pool was exhausted, least recently answered first, so that
+ * a learner with fewer met cards than the goal could still bring the number
+ * on the tab to 0 — and a learner a few days away, owing more than they had
+ * met, was handed the cards they had just pressed Easy on. The session is
+ * `exhausted` instead when the pool cannot fill it, and the screen counts
+ * the rest of the goal as met: there was nothing left to do, which is what
+ * a goal met means.
  *
  * `words` is the pool (the personal review: every card met of the chosen
  * kinds, and the unmet words of finished lessons and the next one). `owed`
@@ -359,14 +364,15 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
     const have = new Set(items.map((x) => x.word));
     const score = familiar || (() => 0);
     const today = dayOf(now);
-    const weak = [], held = [], answered = [];
+    const weak = [], held = [];
     for (const w of words || []) {
       if (have.has(w)) continue;
       const card = cardFor((seen && seen[w]) || {});
       if (!card || kindOf(card) === "new") continue;
+      // Answered today: scheduled out, and not dealt again today.
+      if (card.lastAt !== undefined && card.lastAt !== null && dayOf(card.lastAt) === today) continue;
       const x = { w, card, f: score(w, card), r: retrievability(card, now, o.scheduler) };
-      if (card.lastAt !== undefined && card.lastAt !== null && dayOf(card.lastAt) === today) answered.push(x);
-      else (x.f >= MASTERED_AT ? held : weak).push(x);
+      (x.f >= MASTERED_AT ? held : weak).push(x);
     }
     // Shuffled first so equal retrievabilities are not dealt in storage order.
     // The mastered cards walk in the same order: a random draw from a few
@@ -374,21 +380,23 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
     const byFade = (a, b) => a.r - b.r;
     const faded = shuffled(weak, random).sort(byFade);
     const sprinkle = shuffled(held, random).sort(byFade);
-    const todays = shuffled(answered, random).sort((a, b) => a.card.lastAt - b.card.lastAt);
     const extra = [];
-    while (items.length + extra.length < want && (faded.length || sprinkle.length || todays.length)) {
+    while (items.length + extra.length < want && (faded.length || sprinkle.length)) {
       const n = items.length + extra.length + 1;
-      const from = !faded.length && !sprinkle.length ? todays
-        : (n % MASTERED_EVERY === 0 && sprinkle.length) || !faded.length ? sprinkle : faded;
+      const from = (n % MASTERED_EVERY === 0 && sprinkle.length) || !faded.length ? sprinkle : faded;
       const x = from.shift();
       extra.push({ word: x.w, direction: frontFor(x.card, fronts), card: x.card, kind: kindOf(x.card), extra: true });
     }
     items.push(...extra);
   }
+  /* The pool could not fill the session: everything met has been answered
+     today. Nothing is "remaining" then — a remainder the next chunk cannot
+     deal would have the screen dealing empty chunks for ever. */
+  const exhausted = items.length < want;
   // `remaining`: the goal past this chunk, so the sitting's counter spans the
   // day and not only the twenty dealt (Study.js sittingTally).
-  return { items, owed: owed || 0, due: base.due, newLeft: base.newLeft, goal: true,
-           remaining: beyond ? 0 : Math.max(0, (owed || 0) - items.length), newRemaining: 0 };
+  return { items, owed: owed || 0, due: base.due, newLeft: base.newLeft, goal: true, exhausted,
+           remaining: beyond || exhausted ? 0 : Math.max(0, (owed || 0) - items.length), newRemaining: 0 };
 }
 /* Familiarity at which a card counts as mastered — the Study header's count
    and the reinforcement above read the same line. */

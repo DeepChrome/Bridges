@@ -350,8 +350,14 @@ describe("after the day's pile", () => {
   });
 
   /* The end of the day's work is said as a goal met, with the ways to go on. */
+  /* Keep going is offered while a met card is left that was not answered
+     today: here «хотеть», held and not due. A card answered today is never
+     dealt again today (2026-10-19), so with only that one card met there
+     would be nothing to keep going on, and the button says so by its absence. */
   it("says the daily goal is met, and offers keep going, trouble words or new words", async () => {
-    await withProfile({ seen: { [WORD]: { recognise: due() } }, sets: ["__path__"], newPerDay: 0, goal: goalOf(1) });
+    const held = { dueAt: now + 20 * DAY, lastAt: now - 3 * DAY, s: 20, d: 5, state: REVIEW, steps: 0, reps: 4, lapses: 0 };
+    await withProfile({ seen: { [WORD]: { recognise: due() }, "хотеть": { recognise: held } },
+                        sets: ["__path__"], newPerDay: 0, goal: goalOf(1) });
     await screen.findByTestId("card-recognise");
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
     await act(async () => { fireEvent.press(screen.getByTestId("grade-3")); });
@@ -361,6 +367,15 @@ describe("after the day's pile", () => {
     // New words, ahead of the day's ration.
     await act(async () => { fireEvent.press(screen.getByTestId("study-ahead")); });
     expect(await screen.findByTestId("flag-new")).toBeTruthy();
+  });
+
+  it("…and not keep going when every met card was answered today", async () => {
+    await withProfile({ seen: { [WORD]: { recognise: due() } }, sets: ["__path__"], newPerDay: 0, goal: goalOf(1) });
+    await screen.findByTestId("card-recognise");
+    await act(async () => { fireEvent.press(screen.getByText("Show")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("grade-4")); });
+    expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
+    expect(screen.queryByTestId("keep-going")).toBeNull();
   });
 });
 

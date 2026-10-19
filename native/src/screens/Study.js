@@ -26,7 +26,7 @@ import { IrregularTag } from "../rules";
 import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
-import { applyGrade, reviewRows, preview, schedulerOpts, cardFor, NEW, dayOf } from "@core/scheduler";
+import { applyGrade, reviewRows, preview, schedulerOpts, cardFor } from "@core/scheduler";
 import { requeue, dailyFor, kindsOf, rollGoal, spendGoal, isStudyDay } from "@core/queue";
 import { flagsFor, troubleWords, cardsIn, sourceCards, studyCards, knownWords, sittingTally, masteryOf,
          sessionFor } from "../studycards";
@@ -351,24 +351,23 @@ export default function Study({ navigation, route }) {
     buzzTap();
     const now = Date.now();
     const word = item.word, direction = item.direction;
-    /* **A second look the same day is practice, not new evidence** (the
-       owner, 2026-10-05: «ребёнок» at 98 "I don't think I've reviewed it more
-       than once"). A lesson's flashcards, a video's words and the day's pile
-       could each meet the same new word within minutes, and FSRS reads every
-       Easy as more memory: one Easy is about 8 days, three in a sitting the
-       high nineties. In a practice round a card already answered today keeps
-       its schedule on a right answer; an Again still counts, since forgetting
-       within the day is a real signal. */
-    const practiceAgain = !!(session && session.practice && g > 1 && current && current.state !== NEW
-                             && current.lastAt && dayOf(current.lastAt) === dayOf(now));
-    const rows = practiceAgain ? []
-      : reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
+    /* **Every grade counts, a second look the same day included.** From
+       2026-10-05 a right answer on a card already answered today changed
+       nothing in a practice round («ребёнок» at 98 after a lesson's cards, the
+       video's and the day's pile each met it within the hour). That hid the
+       repeat instead of stopping it, and the owner met the other side of it
+       on 2026-10-19: *"multiple easy presses is not putting a dent in the
+       familiarity score"*. The rounds no longer deal a card answered today
+       (studycards.js sessionFor, core/queue.js goalSession); a card that is
+       dealt is graded, and FSRS-6's same-day formula is what keeps three
+       Easys in a sitting from reading as three weeks (one Easy is 8 days,
+       the next 13, the next 20). */
+    const rows = reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
     const before = { items: items, at, prev: current, trouble: st.trouble, daily: st.daily, goal: st.goal,
                      row: rows[0], marks };
     setMarks({ ...marks, [word]: g === 1 ? "again" : "done" });
     update((prev) => {
-      const r = practiceAgain ? { seen: prev.seen, trouble: prev.trouble }
-        : applyGrade(prev.seen, prev.trouble, word, direction, g, now, schedulerOpts(prev));
+      const r = applyGrade(prev.seen, prev.trouble, word, direction, g, now, schedulerOpts(prev));
       const daily = dailyFor(prev.daily, now);
       return {
         ...prev, seen: r.seen, trouble: r.trouble,
@@ -398,7 +397,6 @@ export default function Study({ navigation, route }) {
     const { row, prev } = last;
     update((p) => {
       // The one card, back as it was — or gone, if the grade was its first.
-      // A same-day practice answer wrote no row and changed no card.
       const seen = { ...p.seen };
       if (row) { if (prev) seen[row.word] = { recognise: prev }; else delete seen[row.word]; }
       return { ...p, seen, trouble: last.trouble, daily: last.daily, goal: last.goal };
@@ -433,8 +431,30 @@ export default function Study({ navigation, route }) {
      day's work. Not after a trouble round, which ends on its own screen. */
   useEffect(() => {
     if (finished && more > 0 && session && !session.practice) deal(false, undefined, undefined, true);
+    /* The pool is exhausted — every met card answered today, nothing due,
+       no new card allowed — and the goal still says some are owed. There is
+       nothing left to deal that would not be a card already answered today
+       (core/queue.js goalSession), so the rest of the goal is met: the
+       number on the tab goes to 0 because the work is done, not because the
+       same cards were shown twice. Only after a pile that dealt something,
+       so a learner with nothing met at all is told "Nothing to review yet"
+       rather than congratulated. */
+    if (finished && more === 0 && session && session.goal && !beyondMode && items.length
+        && goal.owed > 0) {
+      update((prev) => {
+        const g = rollGoal(prev.goal, Date.now(), goalOpts(prev));
+        return g.owed > 0 ? { ...prev, goal: { ...g, owed: 0 } } : prev;
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished, more]);
+  /* "Keep going" only while something met is left to deal: past the goal
+     the fill never repeats a card answered today, so a learner who has been
+     through everything is not offered an empty chunk. */
+  const moreToGo = useMemo(() => !!session && !session.practice && finished && metAny
+    && sessionFor(st, { beyond: true }).items.length > 0,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [finished, st.seen, setsKey, session && session.practice]);
   /* Where the sitting stands. A review (the day's pile, a video's list, a
      chosen round) counts its own cards: done, coming back, left, and the
      total, which the scheduler's cards past the dealt chunks are part of and
@@ -588,7 +608,7 @@ export default function Study({ navigation, route }) {
           {/* Past the goal, as far as the learner wants: more reviews push
               the familiarity of their words up faster (the owner,
               2026-10-05). */}
-          {!(session && session.practice) && metAny ? (
+          {moreToGo ? (
             <Btn kind="pri" testID="keep-going" label="Keep going"
                  style={{ marginTop: 20, minWidth: 220 }} onPress={() => deal(false, undefined, { beyond: true })} />
           ) : null}

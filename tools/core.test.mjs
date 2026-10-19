@@ -4006,6 +4006,17 @@ group("the review, 2026-10-01");
   ok(goalSession({ seen, words, now: t0, owed: 0 }).items.length === 0, "a met goal deals nothing");
   ok(goalSession({ seen, words, now: t0, owed: 0, beyond: true }).items.length === QUEUE_DEFAULTS.sessionSize,
      "and Keep going deals a chunk past it");
+  /* A card answered today is never dealt again today (2026-10-19). With every
+     card answered this minute and the goal still owed, the session is
+     exhausted and nothing remains for a next chunk — not the same cards. */
+  const answered = {};
+  for (const w of words) answered[w] = { recognise: { ...seen[w].recognise, lastAt: t0 - 1000, dueAt: t0 + 8 * DAY } };
+  const drained = goalSession({ seen: answered, words, now: t0, owed: 16, rng: () => 0.5 });
+  ok(drained.items.length === 0 && drained.exhausted === true && drained.remaining === 0,
+     "a pool answered today deals nothing and says it is exhausted", JSON.stringify([drained.items.length, drained.exhausted, drained.remaining]));
+  ok(goalSession({ seen: answered, words, now: t0, owed: 0, beyond: true, rng: () => 0.5 }).items.length === 0,
+     "and Keep going has nothing to deal from it either");
+  ok(sess.exhausted === false, "a pool that fills the goal is not exhausted");
 }
 
 group("drive mode: a Pimsleur lesson, played");

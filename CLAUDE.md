@@ -6749,6 +6749,37 @@ worth keeping:
 - **A list round never deals a sentence without its English** (fixed at the
   source on 2026-10-09; `sessionFor` now also refuses one).
 
+## 30cg. A card answered today is never dealt again today (2026-10-19)
+
+The owner: *"on my daily words I keep getting drilled with the same exact
+word even when I'm pressing easy… multiple easy presses is not putting a
+dent in the familiarity score."* The scheduler was right — one Easy is eight
+days and a jump to 72 on a common word, measured through `review()` — and
+two rules the app had made for itself threw the grade away:
+
+- **A second look the same day was "practice" and not graded** (Study.js
+  `practiceAgain`, 2026-10-05, after «ребёнок» reached 98 from a lesson's
+  cards, the video's cards and the day's pile each meeting it within the
+  hour). It hid the repeat instead of stopping it: the lesson's and the
+  video's list rounds dealt the word again and discarded every Easy after the
+  first. Gone. **Every grade counts**; FSRS-6's same-day formula is the
+  dampener (8 → 13 → 20 days for three Easys in a sitting, not three weeks).
+- **The day's pile recycled cards once the pool ran out** (`goalSession`'s
+  `todays` fallback, least recently answered first) so the tab's number
+  could reach 0 on day one. A learner back after days away, owing more than
+  they had met, was handed the cards they had just pressed Easy on. Gone:
+  the session is `exhausted` and `remaining` is 0, and Study spends the rest
+  of the goal when a pile that dealt something is followed by an empty one —
+  the number reaches 0 because the work is done. "Keep going" is offered only
+  while `sessionFor(st, { beyond: true })` has something to deal.
+- **A list round leaves out a card answered today and scheduled out**
+  (`held` in studycards.js `sessionFor`), beside the 80+ rule it already had.
+  A card answered Again today is in a learning step, due within minutes, and
+  stays.
+
+`goalfill.test.js`, `roundafter.test.js` and `studyoptions.test.js` pin all
+three; `core.test.mjs` the exhausted session.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

@@ -5,7 +5,8 @@
 
 import { L, UN, SPEECH, reachedUnits, idxOfWord, exactIdx, rankOf, videoLines,
          personalWords, goalNow, englishOfSentence } from "./data";
-import { schedulerOpts, wanted, troubleWords as troubleBank, DEFAULT_FRONTS, cardFor, familiarity, kindOf, retrievability } from "@core/scheduler";
+import { schedulerOpts, wanted, troubleWords as troubleBank, DEFAULT_FRONTS, cardFor, familiarity, kindOf, retrievability,
+         isDue, dayOf } from "@core/scheduler";
 import { isIrregular } from "@core/facts";
 import { buildSession, practiceSession, QUEUE_DEFAULTS, cardKind, kindsOf,
          goalSession, MASTERED_AT } from "@core/queue";
@@ -272,9 +273,18 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
     /* A list handed in — the video's words, a lesson's — leaves out what is
        already held (the owner, 2026-10-05: "if the user already has like an
        80+ on a card, they probably don't need to view it before the video"). */
+    /* …and what was answered today and is scheduled out (the owner,
+       2026-10-19: the lesson's cards, the video's and the day's pile each dealt
+       the same word within the hour, "even when I'm pressing easy"). A card
+       answered Again today is in a learning step and due within minutes, so
+       it stays. */
+    const now = Date.now();
     const held = (w) => {
       const c = cardFor((st.seen || {})[w]);
-      return !!c && (familiarity(c, rankOf(w)) || 0) >= MASTERED_AT;
+      if (!c) return false;
+      if ((familiarity(c, rankOf(w)) || 0) >= MASTERED_AT) return true;
+      return c.lastAt !== undefined && c.lastAt !== null && dayOf(c.lastAt) === dayOf(now)
+        && !isDue(c, now, st.learnAhead);
     };
     /* A sentence turns over to its English or it is not dealt (a tester,
        2026-10-10: «Авто́бусы во́зят пассажи́ров.» with nothing on the back).

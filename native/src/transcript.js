@@ -19,7 +19,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "
 import { View, ScrollView, Pressable } from "react-native";
 import { useTheme, radius } from "./theme";
 import { Text, Muted, Chip } from "./ui";
-import { lookup } from "./words";
+import { linkable } from "./words";
 
 export const PANEL_HEIGHT = 340;
 
@@ -75,7 +75,11 @@ const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord
   const t = useTheme();
   const words = useMemo(() => {
     const tags = new Set(line[3] || []);
-    return line[1].split(" ").map((w, n) => ({ w, sound: tags.has(n), i: tags.has(n) ? null : lookup(w) }));
+    /* `linkable`, not the course index alone: a caption word outside the
+       course («пообщаемся», «научить») has a dictionary entry through the
+       build's form map, and was plain text here while the same word in a
+       sentence was a link (2026-10-20, 37,000 caption words). */
+    return line[1].split(" ").map((w, n) => ({ w, sound: tags.has(n), link: !tags.has(n) && linkable(w) }));
   }, [line]);
   const english = soundOnlyEnglish(line) || en;
   return (
@@ -88,9 +92,9 @@ const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord
       <Muted size={12} style={{ width: 38, marginTop: 3 }}>{clock(line[0])}</Muted>
       <View style={{ flex: 1 }}>
       <Text style={{ fontSize: 16, lineHeight: 23, color: active ? t.ink : t.ink2 }}>
-        {words.map(({ w, i, sound }, n) => {
+        {words.map(({ w, link: known, sound }, n) => {
           const now = active && n === word;
-          const link = i !== null && onWord;
+          const link = known && onWord;
           if (sound) {
             return (
               <Text key={n} testID={`transcript-sound-${k}-${n}`} style={{ color: t.ink3, fontStyle: "italic" }}>

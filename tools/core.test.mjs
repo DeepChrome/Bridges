@@ -4115,3 +4115,38 @@ group("tester reports, 2026-10-15");
 console.log("\n" + checks + " checks · " +
             (failures ? failures + " FAILED" : "all passed"));
 process.exit(failures ? 1 : 0);
+group("one word does not take over the course, 2026-10-20");
+{
+  // "this" asked «этот» and marked «эта», «это», «эти» wrong.
+  const eto = L.findIndex((w) => w.b === "этот");
+  const big = L.findIndex((w) => w.b === "большой");
+  const typed = (i) => Q.present({ t: "type", i, pool: [i] });
+  ok(["эта", "это", "эти"].every((f) => typed(eto).alts.includes(f)), "«этот» typed for \"this\" accepts its other forms",
+     JSON.stringify(typed(eto).alts));
+  ok(["большая", "большое", "большие"].every((f) => typed(big).alts.includes(f)), "an adjective accepts every gender");
+  const kniga = L.findIndex((w) => w.b === "книга");
+  ok(!typed(kniga).alts.includes("книги"), "a noun's plural is not \"book\"");
+  // Nor «это» offered as a wrong answer to "this".
+  let bad = 0;
+  for (let k = 0; k < 300; k++) {
+    const c = Q.present({ t: "choose-ru", i: eto, pool: UN.flatMap((u) => u.w) });
+    if (c.options.some((o) => !o.right && ["это", "эта", "эти"].includes(fold(o.label)))) bad++;
+  }
+  ok(bad === 0, "no wrong option is one of the answer's own forms", String(bad));
+  /* A word due and weak, answered wrong in one lesson, does not lead the next
+     lesson that day: it led every lesson, 183 of a learner's (tools/
+     audit_targets.mjs). Aimed: chapter 3's lessons, where «этот» is a review. */
+  const now = Date.now();
+  const card = (lastAt) => ({ [L[eto].b]: { recognise: { state: 2, s: 0.5, d: 9, reps: 12, lapses: 6, lastAt, dueAt: now + 60000 } } });
+  let today = 0, yesterday = 0, lessons = 0;
+  for (const u of [STAGES[2].core].concat(STAGES[2].branches)) {
+    for (let i = 0; i < lessonCount(u); i++) {
+      lessons++;
+      if (Q.quizSteps(u, i, [eto], card(now - 1000)).some((q) => q.i === eto)) today++;
+      if (Q.quizSteps(u, i, [eto], card(now - 2 * 86400000)).some((q) => q.i === eto)) yesterday++;
+    }
+  }
+  ok(yesterday > lessons / 2, "a due word not yet seen today is reviewed", `${yesterday} of ${lessons}`);
+  ok(today === 0, "a word answered today is not the review again", `${today} of ${lessons}`);
+}
+

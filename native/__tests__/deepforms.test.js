@@ -38,4 +38,43 @@ describe("words outside the course", () => {
   it("leaves a run nothing knows unlinked", () => {
     expect(splitTokens("ывфывфыв").every((p) => p.i === undefined)).toBe(true);
   });
+
+  /* The owner, 2026-10-20, of «ва́нная»'s example: every word underlined but
+     «накра́шенная». The build cut words at the stress mark the app keeps, so
+     a stress-marked word outside the course was never looked up; and
+     OpenRussian has no participles, which Wiktionary lists under the verb. */
+  it("links every word of a stress-marked sentence, a participle to its verb", () => {
+    const parts = splitTokens("Она́ вы́шла из ва́нной уже́ накра́шенная и оде́тая.");
+    const words = parts.filter((p) => /[а-я]/i.test(p.text));
+    expect(words.filter((p) => p.i === undefined).map((p) => p.text)).toEqual([]);
+    expect(entryOf("накра́шенная").key).toBe("накрасить");
+  });
+
+  /* A sweep rather than one sentence: the dictionary's examples are what most
+     of the app's Russian is. 3.8 % of their words were plain text before the
+     fix (2,536 of them stress-marked) and 0.65 % after, nearly all names
+     (tools/audit_links.mjs prints the rest by reason). */
+  it("leaves under one word in a hundred of the dictionary's examples unlinked", () => {
+    const { TOKEN } = require("@core/util");
+    const sent = require("../assets/sent.json");
+    let n = 0, plain = 0;
+    for (const [ru] of sent) {
+      for (const w of ru.match(new RegExp(TOKEN.source, "g")) || []) {
+        n++;
+        if (entryOf(w) === null) plain++;
+      }
+    }
+    expect(n).toBeGreaterThan(50000);
+    expect(plain / n).toBeLessThan(0.01);
+  });
+
+  /* A word OpenRussian lacks, or lists with no meaning, is given Wiktionary's
+     — an entry with no table, since nothing is invented (§30). */
+  it("opens a word only Wiktionary has, with its meaning and no table", () => {
+    const e = entryOf("подкаста");
+    expect(e && e.key).toBe("подкаст");
+    expect(e.w.e).toMatch(/podcast/);
+    expect(e.w.t || []).toEqual([]);
+    expect(entryOf("Сочи").w.e).toMatch(/Sochi/);
+  });
 });

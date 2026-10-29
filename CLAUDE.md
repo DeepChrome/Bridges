@@ -6780,6 +6780,69 @@ two rules the app had made for itself threw the grade away:
 `goalfill.test.js`, `roundafter.test.js` and `studyoptions.test.js` pin all
 three; `core.test.mjs` the exhausted session.
 
+## 30ch. Every word a link, cut the way the app cuts it (2026-10-20)
+
+The owner: *"Any words throughout the curriculum should have clickable links
+for full definitions. I've seen a bunch that don't"* — «накра́шенная» plain
+in a sentence where every other word was underlined.
+`tools/audit_links.mjs` decides link-or-not exactly as `words.js` does, over
+every source `Linked` draws, and files each miss under the build's own reason
+(`data/_work/unlinked_forms.txt`) or "build never saw it". Run it after
+anything touches the lexicon, the dictionary or the text. Measured: 4,501 of
+125,851 curriculum words not a working link → 876, nearly all names (the
+cast's among them) and loanwords no dictionary has; the captions 52,487 →
+6,998, mostly YouTube's own debris.
+
+- **The build cut words at the stress mark the app keeps.** Its pattern had
+  no U+0301, so «накра́шенная» was looked up as «накра» and «шенная» and the
+  word itself never: 2,536 words of the dictionary's and senses' examples.
+  `words_of` in build_site.py is the app's TOKEN; use it for any split of
+  Russian text. **Three counts there still use the old pattern** (the one-word
+  check and the length in `rank_examples`, the pool's near-duplicate test):
+  correcting them re-chooses the examples of 1,621 words, which wants the
+  owner's read, a sentence review and audio, so it is left for that.
+- **OpenRussian has no participles.** Wiktionary keeps one as an entry of its
+  own, declined in full, and lists it under its verb, so `build_deep_forms`
+  follows Wiktionary's form lists two steps («накра́шенная» → «накра́шенный» →
+  «накрасить»). Those lists also carry *other words* — the adverb, the
+  abstract noun, the diminutive, a verb's aspect partner — which used to link
+  «маркетинговый» to «маркетинг» and «удовлетвориться» to its partner:
+  `WIKT_NOT_A_FORM` keeps them out (cache versioned, `WIKT_FORMS_VERSION`), and
+  a comparative's «(по)сложне́е» stands for both spellings.
+- **A word OpenRussian lists without a meaning, or not at all, takes
+  Wiktionary's** (`wiktionary_glosses`): 4,669 lexicon lemmas keep their
+  tables and gain a gloss where the part of speech agrees, and 1,152 words
+  the app's text uses («подка́ст», «Ива́н», «Со́чи») get a paradigm-less entry.
+  The dictionary is 51,808 entries now. Neither kind carries example
+  sentences: the dictionary's are reviewed before they ship (§30br). A form
+  that is itself a Wiktionary headword is that word before it is a form of
+  another («Сочи» the city, not «сочить»'s imperative); a form the resolver
+  calls shared stays unlinked (§23).
+- **The transcript asked the course index only** (`lookup`), so 37,000
+  caption words with an entry were plain text; it asks `linkable` now, the
+  one test every piece of Russian uses.
+- Admitting those entries made six table forms two-stress spellings
+  (`audio_qa.mjs`), and `build_form_audio.mjs` took their clips out, as §30cf
+  says it must.
+
+**And from the same day's reports:**
+
+- **"Write it in Russian: this" took one answer.** «эта», «это», «эти» are
+  "this" too; 175 unit words (13 % of typed questions) marked a gender or
+  number form wrong. `genderForms` (core/questions.js) reads the Nominative
+  row of a gender-declined table into the type question's `alts`, and keeps a
+  wrong option off the answer's own forms («это» beside «этот»). Accepted,
+  not labelled "(m.)": each is correct Russian for the cue and the verdict
+  still shows the form taught. `tools/audit_answers.mjs` counts both, now 0.
+- **A word marked wrong led every lesson.** Due and weakest first put a
+  lapsing word in the fill and the review slot of every quiz; a seeded
+  learner met «этот» in 183 lessons against a median of one
+  (`tools/audit_targets.mjs`). A review word answered today goes to the back
+  (`answeredToday` in `quizStepsIn`), as Study does (§30cg): 63, once a day.
+- **A table column fits its longest form** (`columnWidths` in rules.js): a
+  fixed 110 ran «предста́вленного» two lines and over the next column's
+  speaker.
+
 ## 30ci. Two offline Russians, and the one the app uses (2026-10-29)
 
 The owner, from the cases drill: *"I keep getting the warning that Russian
@@ -6893,6 +6956,8 @@ it, run the audit, and if it fails, solve for the value rather than nudging it.*
 **Deploys cost credits.** The Netlify free plan grants 300 credits a month and they run
 down fast; the pool refreshes on the 7th. Iterate against `tools/serve.py` and deploy
 deliberately, not after every change. `.\tools\deploy.ps1` when it is genuinely worth it.
+node tools/audit_links.mjs     # every word the app shows a working link, misses by reason (§30ch)
+node tools/audit_answers.mjs   # no typed cue that marks a right answer wrong (§30ch)
 The 205 MB of audio is one large first upload — Netlify diffs files, so later deploys
 stay cheap.
 

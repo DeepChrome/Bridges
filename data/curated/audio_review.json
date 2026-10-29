@@ -2,6 +2,39 @@
  "_": "tools/audio_review/pull.mjs: the review site's verdicts by recording key (word:/form:/sentence:/ending:). A verdict names the clip id it was given on. `rebought` lists the clips bought again after a flag (build_word_audio.mjs / build_form_audio.mjs --rebuy-flagged).",
  "pulled": "2026-10-05T03:56:09.725Z",
  "items": {
+  "word:повторить": {
+   "verdicts": [
+    {
+     "verdict": "flag",
+     "id": "9d1fc1262af8f9c3",
+     "at": "2026-10-20",
+     "who": "tester",
+     "note": "the ending inflected up for no reason (beta.7 report): measured 229 Hz at the start, 320 at the end"
+    }
+   ]
+  },
+  "word:русский": {
+   "verdicts": [
+    {
+     "verdict": "flag",
+     "id": "590e4e1943897357",
+     "at": "2026-10-20",
+     "who": "tester",
+     "note": "weird upward intonation (beta.10 report): measured 195 Hz at the start, 337 at the end; bought 2026-09-19, before words were said as statements"
+    }
+   ]
+  },
+  "word:что": {
+   "verdicts": [
+    {
+     "verdict": "flag",
+     "id": "26e426c4759d0b23",
+     "at": "2026-10-20",
+     "who": "tester",
+     "note": "really weird intonation (beta.7 report); the contour measures as falling (246 -> 229 Hz), so this wants an ear before a rebuy is trusted"
+    }
+   ]
+  },
   "word:мужчина": {
    "verdicts": [
     {

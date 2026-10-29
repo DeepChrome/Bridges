@@ -9,7 +9,7 @@
  */
 
 // Explicit extension: Node's ESM resolver requires it, Metro tolerates either.
-import { fold, shuffle, sample, firstSense, askSense, onSense, TOKEN } from "./util.js";
+import { fold, shuffle, sample, firstSense, askSense, onSense, TOKEN, dayOf } from "./util.js";
 import { sentenceLemmas, pickPrompt } from "./speech.js";
 import { charDistance } from "./compare.js";
 import { describeForm, GENERIC_COLUMN } from "./forms.js";
@@ -383,6 +383,27 @@ export function makeQuestions(env) {
     new Set(String(w.e || "").split(/[;,]/).map(senseKey).filter(Boolean));
 
   /* Whether `i` can be a wrong answer against `correctIdx`.
+  /* The nominative of a word declined for gender and number, folded: what an
+     English cue that carries neither — "this", "big", "my" — can be in
+     Russian. «этот» asked as "this" marked «эта», «это» and «эти» wrong, and a
+     word answered "wrong" every time is a word the review keeps bringing back
+     (2026-10-20: 175 of the unit words, 13 % of typed questions). Read off
+     the word's own table, so it is exactly the forms the lexicon gives. */
+  const genderCache = new Map();
+  function genderForms(i) {
+    if (genderCache.has(i)) return genderCache.get(i);
+    const out = new Set();
+    for (const t of (L[i] && L[i].t) || []) {
+      if (!(t.columns || []).includes("Feminine")) continue;
+      const row = (t.rows || []).find((r) => r[0] === "Nominative");
+      for (const c of row ? row.slice(1) : []) {
+        for (const f of (Array.isArray(c) ? c : [c])) if (f) out.add(fold(f));
+      }
+    }
+    genderCache.set(i, out);
+    return out;
+  }
+
      A distractor is unsafe when the option a learner sees is *also* a right
      answer. It was checked one way only — first sense against first sense —
      which let «у» stand as a wrong answer to "at" beside «на», and 1.1 % of all
@@ -401,6 +422,9 @@ export function makeQuestions(env) {
     // there is no gloss, so «м»'s "meaning" was «м».
     if (!glossed(b)) return false;
     return !allSenses(a).has(mainSense(b)) && !allSenses(b).has(mainSense(a));
+    /* Nor a word spelt as one of the answer's own gender forms: «это» stood
+       as a wrong answer to "this" beside «этот», and it is «этот»'s neuter. */
+    if (genderForms(correctIdx).has(fold(b.b)) || genderForms(i).has(fold(a.b))) return false;
   }
 
   /* Wrong answers, preferring words of the same class as the right one.
@@ -812,7 +836,13 @@ export function makeQuestions(env) {
         return {
           kind: e.t, i: e.i, ask: "Write it in Russian",
           prompt: askSense(w), cyr: false, typed: true, answer: w.w, target: w.b,
-          alts: sameSense(e, w),
+          /* Every right answer, not the one written on the card: another word
+             with this meaning (sameSense, and an aspect partner glossed the
+             same is one), and the word's other gender and number forms
+             (genderForms). Accepted rather than labelled "(m.)": each is
+             correct Russian for the cue, and the verdict still shows the
+             form taught. */
+          alts: unique(sameSense(e, w).concat([...genderForms(e.i)].filter((f) => f !== fold(w.b)))),
         };
       case "match":
         return {
@@ -2300,11 +2330,12 @@ export function makeQuestions(env) {
       .concat(unitsUpTo(unit).filter((u) => u !== unit && stageOf(u) === stage0).flatMap((u) => u.w)))
       .filter(ok);
     const byNeed = (list) => {
-      const due = shuffle(list.filter((i) => dueSet.has(i)));
-      const rest = shuffle(list.filter((i) => !dueSet.has(i)));
+      const fresh = list.filter((i) => !answeredToday(i));
+      const due = shuffle(fresh.filter((i) => dueSet.has(i)));
+      const rest = shuffle(fresh.filter((i) => !dueSet.has(i)));
       // Weakest first among the rest, with the order among equals left random.
       rest.sort((a, b) => strengthOf(a) - strengthOf(b));
-      return due.concat(rest);
+      return due.concat(rest, shuffle(list.filter(answeredToday)));
     };
     const fill = byNeed(chapterSoFar);
     const outside = byNeed(unitsUpTo(unit).filter((u) => stageOf(u) < stage0).flatMap((u) => u.w)
@@ -2319,6 +2350,18 @@ export function makeQuestions(env) {
        shorter quiz now instead of padding it with old words. */
     const reachedHere = unitsUpTo(unit);
     const drillsHere = Math.min(DRILL_MIX.perQuiz, drillsIntroduced(reachedHere).size);
+    /* **A word already answered today goes to the back** (2026-10-20: "this"
+       in every quiz). Due and weakest first is right once; but a word answered
+       wrong stays due and weakest, so it led the fill and the review slot of
+       every lesson that day and the next — «этот», marked wrong for «эта»,
+       was asked in 183 of a seeded learner's lessons against a median of one.
+       Study already keeps a card answered today out of the day's pile
+       (§30cg); the quiz now does the same for its review words. */
+    const todayN = dayOf(Date.now());
+    const answeredToday = (i) => {
+      const c = card(i);
+      return !!c && Object.values(c).some((d) => d && d.lastAt && dayOf(d.lastAt) === todayN);
+    };
     const oldMax = Math.max(1, Math.floor(OLD_SHARE * (QN + FORM_MIX.perQuiz + drillsHere + REVIEW_MIX.perQuiz + 1)));
     const reviewOld = stageHere > 0 ? REVIEW_MIX.perQuiz : 0;
     const drillOld = drillsHere > 1 && stageHere > 0 && oldMax - reviewOld > 0 ? 1 : 0;

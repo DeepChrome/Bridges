@@ -54,6 +54,20 @@ describe("the transcript", () => {
     expect(screen.queryByTestId("transcript-link-0-3")).toBeNull();
   });
 
+  /* A word outside the course is a link here as it is in a sentence: the
+     transcript read the course index alone, so 37,000 caption words with a
+     dictionary entry were plain text (2026-10-20). */
+  it("links a word outside the course, as Linked does", async () => {
+    const forms = require("../assets/deepforms.json");
+    const { lookup } = require("../src/words");
+    const outside = Object.keys(forms).find((k) => /^[а-я]{6,}$/.test(k) && lookup(k) === null);
+    const onWord = jest.fn();
+    await render(<Transcript lines={[[0, `мы ${outside}`, [0, 40]]]} position={-1}
+                             onSeek={jest.fn()} onWord={onWord} />);
+    await act(async () => { fireEvent.press(screen.getByTestId("transcript-link-0-1")); });
+    expect(onWord).toHaveBeenCalledWith(outside);
+  });
+
   /* The owner, 2026-10-01: "the option to have English in line with the
      transcription too (also highlighted as it goes)". */
   it("puts each line's English under it, behind a switch, said to be a machine's", async () => {

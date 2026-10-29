@@ -60,6 +60,22 @@ def _stress_index(s):
 
 VOWELS = set("аеёиоуыэюяАЕЁИОУЫЭЮЯ")
 WORD_RE = re.compile(r"[а-яёА-ЯЁ́̀]+")
+# The app's words (core/util.js TOKEN): Cyrillic runs, the stress marks inside
+# them, hyphened compounds whole. The marks belong to the word: a pattern
+# without them cut «накра́шенная» into «накра» and «шенная», so the build
+# never looked the word up and the app showed it as plain text (2026-10-20,
+# 2,536 such words in the dictionary's and the senses' examples). The same
+# cut once filed Tatoeba sentences under the wrong words (ingest_tatoeba.py).
+# Three counts still use the old pattern — the one-word check and the length
+# in rank_examples, and the pool's near-duplicate test — because correcting
+# them re-chooses the examples of 1,621 words and the pools, which wants the
+# owner's read, a sentence review and audio before it ships (2026-10-20).
+TOKEN_RE = re.compile(r"[а-яёА-ЯЁ̀́]+(?:-[а-яёА-ЯЁ̀́]+)*")
+
+
+def words_of(text):
+    """The words of a piece of Russian, as the app cuts them."""
+    return TOKEN_RE.findall(text or "")
 
 
 def _stressed(word):
@@ -452,8 +468,15 @@ def rank_examples(cands, sentences, sent_tokens, studied_keys, own_keys=(), tall
 def build_dictionary(db, sentences, items_of_key, keys_of, stats,
                      ext_sentences=None, ext_items_of_key=None,
                      resolver=None, sent_tokens=None, studied_keys=frozenset(),
-                     key_rank=None):
+                     key_rank=None, wikt=None):
     """Every glossed lemma, with its paradigm and its sentences.
+
+    Glossed by OpenRussian, or — for a lemma OpenRussian lists with no English
+    — by Wiktionary (`wikt`, wiktionary_glosses), where the part of speech
+    agrees: «Сочи», «табличка», «классно» were in the lexicon with full tables
+    and nothing to say what they mean, so no sentence could link them
+    (2026-10-20). Those carry no example sentences: the dictionary's
+    sentences are read before they ship (§30br), and these were not.
 
     The curriculum ships ~4,000 lemmas in full. The lexicon holds 58,844, and an
     entry that says "no paradigm for this one" is not a dictionary entry — so every
@@ -467,12 +490,27 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
     Every count here is printed by the build, so a stale number in this docstring is
     a discrepancy you can see rather than one you have to measure.
     """
-    meta = {}
+    meta, from_wikt = {}, set()
     for lid, bare, acc, pos, gender, animate, aspect, partner, en in db.execute(
-            "select id, bare, accented, pos, gender, animate, aspect, partner, en"
-            " from lemmas where en is not null and en <> ''"):
+            "select id, bare, accented, pos, gender, animate, aspect, partner, en from lemmas"):
+        if not (en and en.strip()):
+            en = wiktionary_gloss_for(wikt or {}, bare, pos)
+            if not en:
+                continue
+            from_wikt.add(lid)
         meta[lid] = {"b": bare, "w": acc or bare, "p": pos, "g": gender,
                      "an": animate, "a": aspect, "pt": partner, "e": en}
+    # OpenRussian lists some words twice, once glossed and once bare; the bare
+    # twin is that word, not a second entry for Wiktionary to fill.
+    have = {(fold(m["b"]), m["p"]) for lid, m in meta.items() if lid not in from_wikt}
+    for lid in sorted(from_wikt):
+        k = (fold(meta[lid]["b"]), meta[lid]["p"])
+        if k in have:
+            del meta[lid]
+            from_wikt.discard(lid)
+        else:
+            have.add(k)
+    stats["deep_wikt_glossed"] = len(from_wikt)
 
     par = {}
     for lid, slot, acc in db.execute(
@@ -560,9 +598,10 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
         # Only through forms the lemma owns: a key shared with another lemma
         # attaches a sentence only when the resolver gives it to this one, or
         # «мочь» is illustrated by «недержание мочи» and «лук» by Великие Луки.
-        keys = [k for k in keys_of.get(lid, ())
-                if resolver is None or len(resolver.candidates(k)) < 2
-                or resolver.owner_id(k) == lid]
+        keys = [] if lid in from_wikt else [
+            k for k in keys_of.get(lid, ())
+            if resolver is None or len(resolver.candidates(k)) < 2
+            or resolver.owner_id(k) == lid]
         # …and never in a meaning the word is not taught in (OFF_SENSE).
         off_sense = (lambda ru: f"{fold(bare)}|{fold(ru)}" in OFF_SENSE) if OFF_SENSE else (lambda ru: False)
         # …and never through a «ё» the word does not have. fold() makes «всё»
@@ -603,12 +642,15 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
             ext_only += 1
 
         rec = (stem_len, shape_id, stress, ",".join(refs), ";".join(overrides))
-        rec_of[lid] = rec
-        # By folded headword and part of speech, first wins — the app's twinOf()
-        # rule (core/entry.js), applied here so a studied row without a line of
-        # its own still ships a record.
-        for key in (fold(bare) + "|" + (m["p"] or ""), fold(bare)):
-            rec_of.setdefault(key, rec)
+        # A studied row keeps the record it had: never one of these, which
+        # carry no sentences.
+        if lid not in from_wikt:
+            rec_of[lid] = rec
+            # By folded headword and part of speech, first wins — the app's twinOf()
+            # rule (core/entry.js), applied here so a studied row without a line of
+            # its own still ships a record.
+            for key in (fold(bare) + "|" + (m["p"] or ""), fold(bare)):
+                rec_of.setdefault(key, rec)
         lines.append("\t".join([
             bare,
             "" if m["w"] == bare else m["w"],
@@ -650,7 +692,10 @@ def build_dictionary(db, sentences, items_of_key, keys_of, stats,
     stats["deep_sentences"] = len(pool)
     stats["examples_variety"] = dict(tally)
     stats["shapes"] = len(shapes)
-    return "\n".join(lines), shape_blob, slot_names, pool, sample, rec_of
+    # Which (folded headword, part of speech) the dictionary has an entry for:
+    # what build_deep_forms may link a form to.
+    entries = {(fold(m["b"]), m["p"] or "") for m in meta.values()}
+    return "\n".join(lines), shape_blob, slot_names, pool, sample, rec_of, entries
 
 
 # A word the units never teach may still appear in a pool sentence if it is this
@@ -945,7 +990,7 @@ def add_video_lines(speech, units, measure, stats):
                 continue
             sid = f"v:{v['id']}:{n}"
             sents[sid] = (ln["ru"], ln["en"], None, None)
-            toks[sid] = [fold(w) for w in re.findall(r"[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*", ln["ru"])]
+            toks[sid] = [fold(w) for w in words_of(ln["ru"])]
             meta[sid] = (u, ln["t"])
     measured = {rec_id: rec for rec_id, rec in zip(sents, measure(sents, toks))}
     shown = pooled = 0
@@ -1036,6 +1081,43 @@ def check_closed_class(units, lemmas, with_paradigm):
 
 WIKT_RAW = ROOT / "data" / "raw" / "wiktionary" / "russian.jsonl"
 WIKT_FORMS_CACHE = ROOT / "data" / "_work" / "wiktionary_forms.json"
+WIKT_HEADS_CACHE = ROOT / "data" / "_work" / "wiktionary_heads.json"
+# Bumped when what counts as "a form of" changes, so the cache is read again.
+WIKT_FORMS_VERSION = 3
+# A Wiktionary entry's `forms` lists more than inflections: the words made from
+# it («сло́жно», «сло́жность», «сло́жненький» under «сло́жный») and a verb's
+# aspect partner («произвести́сь» under «производи́ться», tagged perfective
+# and nothing else). Those are other words, not forms of this one.
+WIKT_NOT_A_FORM = {"romanization", "table-tags", "inflection-template", "class", "adverb",
+                   "abstract-noun", "diminutive", "augmentative", "adjective", "relational",
+                   "noun-from-verb", "pejorative", "endearing"}
+WIKT_ASPECT_ONLY = {"perfective", "imperfective"}
+
+
+def _wikt_form_keys(form):
+    """The folded keys one listed form stands for. A comparative is listed with
+    its optional prefix in brackets, «(по)сложне́е», which folds to nothing
+    anybody writes: it stands for «сложнее» and «посложнее»."""
+    m = re.fullmatch(r"\((\w+)\)(.+)", form)
+    return {fold(m.group(2)), fold(m.group(1) + m.group(2))} if m else {fold(form)}
+
+
+def _wikt_cache(path):
+    """A Wiktionary cache, emptied when written under an older WIKT_FORMS_VERSION
+    — unless the dump is not here to answer again, when the old answers are
+    better than none."""
+    if not path.exists():
+        return {}
+    cache = json.loads(path.read_text(encoding="utf-8"))
+    if cache.pop("_v", None) != WIKT_FORMS_VERSION and WIKT_RAW.exists():
+        return {}
+    return cache
+
+
+def _wikt_save(path, cache):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"_v": WIKT_FORMS_VERSION, **cache}, ensure_ascii=False),
+                    encoding="utf-8")
 
 
 def wiktionary_forms(wanted):
@@ -1044,9 +1126,7 @@ def wiktionary_forms(wanted):
     asked is cached (data/_work, a derived file) and the dump read again only
     for forms not asked before. A form no entry lists is cached as "" so it is
     not looked for twice. Without the dump, nothing is found."""
-    cache = {}
-    if WIKT_FORMS_CACHE.exists():
-        cache = json.loads(WIKT_FORMS_CACHE.read_text(encoding="utf-8"))
+    cache = _wikt_cache(WIKT_FORMS_CACHE)
     todo = {k for k in wanted if k not in cache}
     if todo and WIKT_RAW.exists():
         found = {}
@@ -1057,18 +1137,93 @@ def wiktionary_forms(wanted):
                 if not word or e.get("lang_code", "ru") != "ru":
                     continue
                 for fm in e.get("forms") or ():
-                    k = fold(fm.get("form") or "")
-                    if k in todo and k not in found and fold(word) != k:
-                        found[k] = word
+                    tags = set(fm.get("tags") or ())
+                    if tags & WIKT_NOT_A_FORM or (tags and tags <= WIKT_ASPECT_ONLY):
+                        continue
+                    for k in _wikt_form_keys(fm.get("form") or ""):
+                        if k in todo and k not in found and fold(word) != k:
+                            found[k] = word
         for k in todo:
             cache[k] = found.get(k, "")
-        WIKT_FORMS_CACHE.parent.mkdir(parents=True, exist_ok=True)
-        WIKT_FORMS_CACHE.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+        _wikt_save(WIKT_FORMS_CACHE, cache)
     return {k: cache[k] for k in wanted if cache.get(k)}
 
 
+def wiktionary_heads(wanted):
+    """How Wiktionary spells each of `wanted` (folded headwords) as a headword,
+    with its stress: {key: [bare, accented]}. senses.db keys entries by the
+    folded spelling, which has lost «Ива́н»'s capital and «ё». Cached like
+    wiktionary_forms."""
+    cache = _wikt_cache(WIKT_HEADS_CACHE)
+    todo = {k for k in wanted if k not in cache}
+    if todo and WIKT_RAW.exists():
+        found = {}
+        with WIKT_RAW.open(encoding="utf-8") as f:
+            for line in f:
+                e = json.loads(line)
+                word = e.get("word") or ""
+                k = fold(word)
+                if k not in todo or k in found or e.get("lang_code", "ru") != "ru":
+                    continue
+                acc = next((fm.get("form") for fm in e.get("forms") or ()
+                            if "canonical" in (fm.get("tags") or ()) and fold(fm.get("form") or "") == k), "")
+                found[k] = [word, acc if acc and acc != word else ""]
+        for k in todo:
+            cache[k] = found.get(k, "")
+        _wikt_save(WIKT_HEADS_CACHE, cache)
+    return {k: cache[k] for k in wanted if cache.get(k)}
+
+
+# Wiktionary's parts of speech, as the app names them (core/search.js POS_CODE).
+# A proper name is a noun; phrases, affixes and proverbs are not words a token
+# can be.
+WIKT_POS = {"noun": "noun", "name": "noun", "verb": "verb", "adj": "adjective", "adv": "adverb",
+            "intj": "interjection", "pron": "pronoun", "det": "pronoun", "prep": "preposition",
+            "conj": "conjunction", "particle": "particle", "num": "numeral"}
+WIKT_GLOSS_SENSES = 3
+# Senses that are about the spelling, not the word: «э» is first "the name of
+# the Cyrillic letter Э", «Иван» "India" in the spelling alphabet.
+WIKT_NOT_A_SENSE = re.compile(r"letter\b.*\b(cyrillic|alphabet)|cyrillic (script )?letter|spelling alphabet", re.I)
+
+
+def wiktionary_glosses():
+    """{folded headword: {app part of speech: gloss}} from senses.db (§30q):
+    the first WIKT_GLOSS_SENSES of Wiktionary's senses, joined with "; " so
+    the app numbers them (Senses). The gloss for a word OpenRussian lists
+    without one, or does not list at all — never a definition written here."""
+    path = ROOT / "data" / "senses.db"
+    out = {}
+    if not path.exists():
+        return out
+    db = sqlite3.connect(path)
+    for key, pos, js in db.execute("select key, pos, json from senses order by n desc"):
+        app = WIKT_POS.get(pos)
+        if not app:
+            continue
+        glosses = []
+        for s in json.loads(js):
+            g = re.sub(r"\s+", " ", s.get("g") or "").strip().replace("\t", " ")
+            if g and not WIKT_NOT_A_SENSE.search(g) and g not in glosses:
+                glosses.append(g)
+        if glosses:
+            out.setdefault(key, {}).setdefault(app, "; ".join(glosses[:WIKT_GLOSS_SENSES]))
+    db.close()
+    return out
+
+
+def wiktionary_gloss_for(wg, bare, pos):
+    """Wiktionary's gloss for one OpenRussian lemma, only where the part of
+    speech agrees: OpenRussian files «лежа» as a noun and Wiktionary as an
+    adverb, and an adverb's meaning under a noun's table is a wrong entry.
+    OpenRussian's "other" is any class but the three open ones."""
+    by = wg.get(fold(bare)) or {}
+    if pos == "other":
+        return next((g for p, g in by.items() if p not in ("noun", "verb", "adjective")), None)
+    return by.get(pos)
+
+
 def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units, video_ids, stats,
-                     studied_heads=frozenset()):
+                     studied_heads=frozenset(), deep_entries=frozenset(), wikt=None):
     """Every word form in the app's own Russian that is not a course word, to
     the dictionary headword it belongs to (the owner, 2026-10-03: "some words
     dont appear in our dictionary. Any word used in the videos, sentences, or
@@ -1082,7 +1237,21 @@ def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
     sentences, the sense examples, the conversations, the grammar cards and the
     videos' transcripts. A shared form goes to the lemma the resolver names
     (§23: a form key is not a lemma); one it cannot settle stays unlinked.
-    Value: "bare|pos", which the app resolves as it does a searched word."""
+    Value: "bare|pos", which the app resolves as it does a searched word.
+
+    Returns the map and the dictionary lines this adds: a word OpenRussian
+    does not have at all («подкаст», «Сочи» as a city, «угу») is given a
+    paradigm-less entry from Wiktionary (wiktionary_glosses), only for the
+    words the app's text actually uses."""
+    def opens(c):
+        """The lemma a resolver candidate opens, if the dictionary has it:
+        glossed by OpenRussian, or by Wiktionary (build_dictionary)."""
+        if not c or c["stub"]:
+            return None
+        if c["glossed"] or (fold(c["bare"]), c["pos"]) in deep_entries:
+            return f"{c['bare']}|{c['pos']}"
+        return None
+
     texts = [r[0] for r in speech["rows"]]
     texts += [r[0] for r in sent_pool]
     for lst in senses.values():
@@ -1096,14 +1265,21 @@ def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
         texts += [ln[1] for ln in lines]
     out, unsettled, seen_n = {}, {}, Counter()
     for text in texts:
-        for tok in re.findall(r"[а-яёА-ЯЁ]+(?:-[а-яёА-ЯЁ]+)*", text or ""):
+        for tok in words_of(text):
             k = fold(tok)
             seen_n[k] += 1
             if k in index or k in out or k in unsettled:
                 continue
             c, ambiguous = resolver.owner(k)
-            if c and c["glossed"] and not c["stub"]:
-                out[k] = f"{c['bare']}|{c['pos']}"
+            h = opens(c)
+            # A form only Wiktionary's gloss makes readable, that Wiktionary
+            # also has as a headword of its own, waits for the headword step
+            # below: «сочи» is in the lexicon only as the imperative of
+            # «сочить» ("ooze"), and in the app's text it is the city.
+            if h and not c["glossed"] and not c["head"] and k in (wikt or {}):
+                h = None
+            if h:
+                out[k] = h
             else:
                 unsettled[k] = ("shared" if ambiguous else "not in the lexicon" if not resolver.candidates(k)
                                 else "no gloss")
@@ -1113,9 +1289,58 @@ def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
     # Taken only where the headword it names is one the dictionary has.
     def headword(word):
         c, _amb = resolver.owner(fold(word))
-        return f"{c['bare']}|{c['pos']}" if c and c["glossed"] and not c["stub"] else None
-    for k, word in wiktionary_forms(set(unsettled)).items():
-        h = headword(word)
+        return opens(c)
+    # A participle is its own Wiktionary entry, declined in full («накра́шенная»
+    # is listed under «накра́шенный»), and OpenRussian has neither: the entry
+    # named is then followed one step further, to the verb whose participle
+    # Wiktionary lists it as («накрасить»). Both steps are Wiktionary's own
+    # form lists; nothing is guessed from an ending.
+    found = wiktionary_forms(set(unsettled))
+    via = wiktionary_forms({fold(w) for w in found.values() if not headword(w)})
+    # A word OpenRussian does not have, or has with no meaning, that Wiktionary
+    # has as a headword is given an entry from Wiktionary's senses, with no
+    # table: OpenRussian has none to give and none is invented (§30). Spelled
+    # as Wiktionary spells the headword («Ива́н», not the folded «иван»).
+    wikt = wikt or {}
+    wanted = {k for k, why in unsettled.items() if why != "shared"}
+    heads = wiktionary_heads({t for t in (wanted | {fold(w) for w in found.values()}
+                                          | {fold(w) for w in via.values()}) if t in wikt})
+    added = {}
+
+    def wikt_entry(t, like=()):
+        """Wiktionary's entry for the folded headword `t`, adding its line.
+        `like`: where the lexicon has the spelling as a headword itself, the
+        entry must be that word — the same class — or it is another word
+        («чи́стенький» the adjective is not Wiktionary's noun "a clean
+        person")."""
+        if t not in wikt or t not in heads:
+            return None
+        heads_here = [c["pos"] for c in like if c["head"]]
+        ok = [(p, g) for p, g in wikt[t].items()
+              if not heads_here or any(wiktionary_gloss_for({t: {p: g}}, t, hp) for hp in heads_here)]
+        if not ok:
+            return None
+        pos, gloss = ok[0]
+        bare_, acc = heads[t]
+        if (t, pos) not in deep_entries and (t, pos) not in added:
+            added[(t, pos)] = "\t".join([bare_, acc, POS_LETTER.get(pos, pos), "", "", "", gloss,
+                                         "", "", "", "", ""])
+        return f"{bare_}|{pos}"
+    # A spelling the lexicon has, with no meaning from either source, that
+    # Wiktionary has as a headword is that headword before it is a form of
+    # another word: «Сочи» is the city, not the imperative of «сочить» that
+    # Wiktionary also lists it as — the rule link_overrides.json applies to
+    # «кружка». Not for a form the resolver found shared: what it cannot
+    # settle stays unlinked (§23).
+    for k in sorted(k for k, why in unsettled.items() if why == "no gloss"):
+        h = wikt_entry(k, resolver.candidates(k))
+        if h:
+            out[k] = h
+            del unsettled[k]
+    for k, word in found.items():
+        if k not in unsettled:
+            continue
+        h = headword(word) or (headword(via[fold(word)]) if fold(word) in via else None)
         if h:
             out[k] = h
             del unsettled[k]
@@ -1131,6 +1356,20 @@ def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
         if h:
             out[k] = h
             del unsettled[k]
+    # What OpenRussian does not have at all: a headword only Wiktionary has
+    # («подка́ст», «Ива́н», «угу́») — after the steps above, so a participle
+    # Wiktionary also keeps an entry for still opens its verb («говори́вший»,
+    # «говорить») — and then a form of one («подка́ста»), one or two steps
+    # along its form lists.
+    for k in [k for k in unsettled if unsettled[k] != "shared"]:
+        h = wikt_entry(k, resolver.candidates(k))
+        if not h and k in found:
+            t = fold(found[k])
+            h = wikt_entry(t) or (wikt_entry(fold(via[t])) if t in via else None)
+        if h:
+            out[k] = h
+            del unsettled[k]
+    stats["deep_wikt_only"] = len(added)
     # A key in the studied index that is the dictionary form of a noun nobody
     # studies: «кружка» is the mug before it is the genitive of the course's
     # «кружок», and the tap on «Моя кружка зелёная» opened "circle, ring"
@@ -1168,7 +1407,7 @@ def build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
     (work / "unlinked_forms.txt").write_text("\n".join(
         f"{seen_n[k]:6d}  {k}  ({why})" for k, why in sorted(unsettled.items(), key=lambda kv: -seen_n[kv[0]])),
         encoding="utf-8")
-    return out
+    return out, sorted(added.values())
 
 
 def check_grammar_cards(units, path, lemmas, index, unit_info):
@@ -1886,10 +2125,11 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     stats["adjective_noun_pairs"] = sum(len(v) for v in pairs.values())
     stats["adjectives_with_pairs"] = len(pairs)
 
-    deep, shapes, slot_names, sent_pool, tsample, rec_of = build_dictionary(
+    wikt = wiktionary_glosses()
+    deep, shapes, slot_names, sent_pool, tsample, rec_of, deep_entries = build_dictionary(
         db, sentences, items_of_key, keys_of, stats, ext_sentences, ext_items_of_key,
         resolver=resolver, sent_tokens=sent_tokens, studied_keys=studied_keys,
-        key_rank=key_rank)
+        key_rank=key_rank, wikt=wikt)
 
     # Every studied row carries a compressed record — the same five fields its
     # dictionary line has, or its twin's (a glossless row, the same word under
@@ -1965,9 +2205,13 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     senses = load_senses(lemmas, stats, key_rank)
     distinct_examples(lemmas, senses, sent_pool, stats)
 
-    deep_forms = build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
-                                  [v["id"] for v in video_list], stats,
-                                  frozenset(fold(l.get("b") or "") for l in lemmas))
+    deep_forms, wikt_lines = build_deep_forms(resolver, index, speech, sent_pool, senses, scripts, units,
+                                              [v["id"] for v in video_list], stats,
+                                              frozenset(fold(l.get("b") or "") for l in lemmas),
+                                              deep_entries, wikt)
+    if wikt_lines:
+        deep = deep + "\n" + "\n".join(wikt_lines)
+        stats["deep"] += len(wikt_lines)
 
     return {"stats": stats, "lemmas": lemmas, "index": index, "deepforms": deep_forms,
             "units": units, "path": path, "audio": {"files": audio},
@@ -2149,7 +2393,7 @@ def sense_examples(examples, own, key_rank):
     and the rest go easiest first, by tier, uncommon words, then length."""
     out = []
     for x in examples or ():
-        toks = [fold(t) for t in re.findall(r"[а-яёА-ЯЁ́̀]+(?:-[а-яёА-ЯЁ́̀]+)*", x.get("ru") or "")]
+        toks = [fold(t) for t in words_of(x.get("ru"))]
         if not toks or len(toks) > LONG_WORDS:
             continue
         if not_a_translation(x) or fold(x.get("ru") or "") in REJECTED:
@@ -2214,7 +2458,7 @@ def apply_sense_override(senses, rule, key):
 
 
 def _example_words(ru):
-    return frozenset(fold(t) for t in re.findall(r"[а-яёА-ЯЁ́̀]+(?:-[а-яёА-ЯЁ́̀]+)*", ru or ""))
+    return frozenset(fold(t) for t in words_of(ru))
 
 
 def same_use(a, b):
@@ -2758,6 +3002,8 @@ def main():
     if st.get("deep_forms") is not None:
         print(f"  deep forms   : {st['deep_forms']:,} forms in the app's text linked to a dictionary "
               f"headword; {st['deep_forms_unsettled']:,} not (no glossed owner, or shared and unsettled)")
+        print(f"  wiktionary   : {st.get('deep_wikt_glossed', 0):,} lexicon words OpenRussian leaves unglossed and "
+              f"{st.get('deep_wikt_only', 0):,} it does not have, given Wiktionary's senses as their gloss")
     if REJECTED:
         print(f"  reviewed     : {len(REJECTED):,} sentences judged not worth learning from, "
               f"{st.get('rejected', 0):,} of them left out here (data/curated/sentence_review.json)")

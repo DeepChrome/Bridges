@@ -267,6 +267,7 @@
       "body": "A yes-or-no question uses the same words in the same order as the statement; only the voice rises, on the word being asked about.",
       "examples": [
         ["Э́то ку́хня.", "This is the kitchen."],
+        ["Э́то стол.", "This is a table."],
         ["Э́то стол?", "Is this a table?"]
       ]
     },

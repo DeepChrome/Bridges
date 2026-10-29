@@ -30,10 +30,28 @@ import { say, hasRealAudio, formClip } from "./audio";
 import { wordClip } from "./wordaudio";
 import { fold } from "@core/util";
 
-/* A column is wide enough for a long inflected form and no wider: at 110 a
-   three-column table fits a 390 px screen without scrolling, which is most of
-   them, and the rest scroll sideways rather than wrapping. */
+/* A column is 110 wide — a three-column table fits a 390 px screen without
+   scrolling, which is most of them — and wider where a form needs it, so a
+   long one scrolls sideways rather than wrapping. A fixed 110 for every column
+   let «предста́вленного» and «потряса́ющими» run two lines and over the next
+   column, onto its speaker, which then took no press (a tester, 2026-10-20).
+   The width is estimated from the longest form, since React Native cannot
+   measure text before drawing it: a Cyrillic letter of this face is about
+   0.6 of its size, the stress mark nothing, a speaker glyph 17. */
 const COL = 110;
+const GLYPH_W = 17;
+const charsOf = (s) => String(s || "").normalize("NFD").replace(/[̀́]/g, "").length;
+export function columnWidths(table, speak) {
+  return table.columns.map((c, ci) => {
+    let need = charsOf(c) * T.small * 0.62;
+    for (const r of table.rows) {
+      const forms = (Array.isArray(r[ci]) ? r[ci] : [r[ci]]).filter(Boolean);
+      const size = ci === 0 ? T.small : T.body;
+      for (const f of forms) need = Math.max(need, charsOf(f) * size * 0.6 + (speak && ci ? GLYPH_W : 0));
+    }
+    return Math.max(COL, Math.ceil(need) + 10);
+  });
+}
 
 /* One form in a table, which says itself when pressed (the owner,
  * 2026-09-28: *"an audio button next to every pronunciation of a word so I can
@@ -110,6 +128,7 @@ const CYRILLIC = /[Ѐ-ӿ]/;
 export function Table({ table, mark, speak, testID, bare, labelHead, headword }) {
   const t = useTheme();
   const [br, bc] = mark || [];
+  const widths = React.useMemo(() => columnWidths(table, speak), [table, speak]);
   /* Laid out for a person reading it rather than for a parser (the owner,
      2026-09-28: *"it seems like it's optimized for computers to look at but not
      humans"*): every other row shaded so the eye can follow one across, the
@@ -125,7 +144,7 @@ export function Table({ table, mark, speak, testID, bare, labelHead, headword })
           <View style={{ flexDirection: "row", backgroundColor: t.surface3, paddingHorizontal: 10 }}>
             {table.columns.map((c, ci) => (
               <Text key={c + ci}
-                    style={{ width: COL, color: t.ink2, fontSize: T.small, fontWeight: "700",
+                    style={{ width: widths[ci], color: t.ink2, fontSize: T.small, fontWeight: "700",
                              paddingVertical: 7 }}>
                 {ci === 0 && !labelHead ? "" : c}
               </Text>
@@ -146,7 +165,7 @@ export function Table({ table, mark, speak, testID, bare, labelHead, headword })
                 if (!speak || ci === 0 || !forms.some((f) => CYRILLIC.test(f))) {
                   return (
                     <Text key={ci} testID={asked && ci === bc ? "table-asked" : undefined}
-                          style={[{ width: COL, paddingVertical: 6 }, style]}>
+                          style={[{ width: widths[ci], paddingVertical: 6 }, style]}>
                       {forms.join(" / ")}
                     </Text>
                   );
@@ -154,7 +173,7 @@ export function Table({ table, mark, speak, testID, bare, labelHead, headword })
                 /* A cell may hold two forms («ру́кою / руко́й»); each says itself. */
                 return (
                   <View key={ci} testID={asked && ci === bc ? "table-asked" : undefined}
-                        style={{ width: COL, paddingVertical: 4, gap: 2 }}>
+                        style={{ width: widths[ci], paddingVertical: 4, gap: 2 }}>
                     {forms.map((f, fi) => (
                       <FormSpeaker key={fi} form={f} testID={`say-${ri}-${ci}-${fi}`} headword={headword}
                                    style={{ minHeight: 36 }}>

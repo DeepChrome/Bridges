@@ -58,7 +58,9 @@ export function entryOf(surface) {
   const w = resolveWord(deep.word, deep.pos);
   return w ? { w, key: w.b, pos: deep.pos } : null;
 }
-const linkable = (surface) => lookup(surface) !== null || deepFormOf(surface) !== null;
+/* Whether a form is drawn as a link: the one test every piece of Russian
+   uses, `Linked` and the video transcript alike. */
+export const linkable = (surface) => lookup(surface) !== null || deepFormOf(surface) !== null;
 
 /* Split a sentence into runs, marking the ones the lexicon recognises. A fresh
    regex per call: TOKEN is global, and a shared lastIndex silently drops matches. */

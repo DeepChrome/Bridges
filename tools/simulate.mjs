@@ -25,7 +25,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fold, TOKEN } from "../core/util.js";
 import { makeQuestions, QUIZ_N, SPEECH_MIX, lessonSize, lessonWordsOf, lessonCountOf } from "../core/questions.js";
-import { gradeFor, applyGrade, directionOfKind, dueCards, wordTrouble, DAY, DEFAULT_FRONTS, gradesCard }
+import { gradeFor, applyGrade, gradeSkill, skillOfKind, directionOfKind, dueCards, wordTrouble, DAY, DEFAULT_FRONTS, gradesCard }
   from "../core/scheduler.js";
 import { buildSession, dailyFor, QUEUE_DEFAULTS } from "../core/queue.js";
 import { RELIEF_AFTER, RELIEF_MARK, PASS_MARK, reviewFirst, REVIEW_FIRST }
@@ -192,9 +192,15 @@ function simulate(profileName, seed) {
      the runner's does (DIRECTION_OF_KIND). */
   const grade = (idx, correct, kind) => {
     if (typeof idx !== "number" || !L[idx]) return;
-    // A form drill grades no card, as in the runner (gradesCard).
-    if (!gradesCard(kind)) return;
-    const r = applyGrade(st.seen, st.trouble, L[idx].b, directionOfKind(kind), gradeFor(correct, false), nowMs());
+    // A form drill grades no card, as in the runner (gradesCard) — only the
+    // word's "forms" skill (gradeSkill).
+    if (!gradesCard(kind)) {
+      const sk = skillOfKind(kind);
+      if (sk) st = { ...st, seen: gradeSkill(st.seen, L[idx].b, sk, gradeFor(correct, false), nowMs()).seen };
+      return;
+    }
+    const r = applyGrade(st.seen, st.trouble, L[idx].b, directionOfKind(kind), gradeFor(correct, false), nowMs(),
+                         undefined, skillOfKind(kind, directionOfKind(kind)));
     st = { ...st, seen: r.seen, trouble: r.trouble };
   };
 
@@ -258,7 +264,8 @@ const recorded = (ru) => !!DATA.audio.files[fold(ru)] || BOUGHT.has(fold(ru));
       correct = out.wer === 0;
       const grades = gradeAlignment(out.alignment, IX, { perfect: correct, firstTry: true });
       for (const g of grades) {
-        const r = applyGrade(st.seen, st.trouble, L[g.i].b, directionOfKind(q.kind), g.grade, nowMs());
+        const r = applyGrade(st.seen, st.trouble, L[g.i].b, directionOfKind(q.kind), g.grade, nowMs(),
+                             undefined, skillOfKind(q.kind, directionOfKind(q.kind)));
         st = { ...st, seen: r.seen, trouble: r.trouble };
         met.set(g.i, (met.get(g.i) || 0) + 1);
       }

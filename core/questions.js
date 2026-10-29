@@ -16,6 +16,7 @@ import { describeForm, GENERIC_COLUMN } from "./forms.js";
 import { buildupDrill } from "./buildup.js";
 import { CASES, caseById, AS_VERBS, PREPOSITIONS, SET_PHRASES, TIME_NOUNS } from "./cases.js";
 import { irregularities, stemChange, conjugation } from "./facts.js";
+import { cardFor, weakestSkill, skillOfKind } from "./scheduler.js";
 
 /* Ten since 2026-10-05: a lesson's quiz now reaches back over the chapter so
    far (quizSteps), and eight left no room for it beside the lesson's own. */
@@ -382,7 +383,6 @@ export function makeQuestions(env) {
   const allSenses = (w) =>
     new Set(String(w.e || "").split(/[;,]/).map(senseKey).filter(Boolean));
 
-  /* Whether `i` can be a wrong answer against `correctIdx`.
   /* The nominative of a word declined for gender and number, folded: what an
      English cue that carries neither — "this", "big", "my" — can be in
      Russian. «этот» asked as "this" marked «эта», «это» and «эти» wrong, and a
@@ -404,6 +404,7 @@ export function makeQuestions(env) {
     return out;
   }
 
+  /* Whether `i` can be a wrong answer against `correctIdx`.
      A distractor is unsafe when the option a learner sees is *also* a right
      answer. It was checked one way only — first sense against first sense —
      which let «у» stand as a wrong answer to "at" beside «на», and 1.1 % of all
@@ -421,10 +422,10 @@ export function makeQuestions(env) {
     // The gloss itself, not mainSense: firstSense falls back to the word when
     // there is no gloss, so «м»'s "meaning" was «м».
     if (!glossed(b)) return false;
-    return !allSenses(a).has(mainSense(b)) && !allSenses(b).has(mainSense(a));
     /* Nor a word spelt as one of the answer's own gender forms: «это» stood
        as a wrong answer to "this" beside «этот», and it is «этот»'s neuter. */
     if (genderForms(correctIdx).has(fold(b.b)) || genderForms(i).has(fold(a.b))) return false;
+    return !allSenses(a).has(mainSense(b)) && !allSenses(b).has(mainSense(a));
   }
 
   /* Wrong answers, preferring words of the same class as the right one.
@@ -682,10 +683,10 @@ export function makeQuestions(env) {
      Stability rather than a count of reviews, because that is what the scheduler
      actually believes about the memory. */
   /* `known` is the word's entry — one card since §30at, in the `recognise`
-     slot; the strongest slot an older profile still carries is what the
-     scheduler believes about the memory. */
-  const mature = (entry) => !!entry && Object.keys(entry).some((d) =>
-    entry[d] && typeof entry[d].s === "number" && entry[d].s >= PRODUCE_AT);
+     slot (`cardFor`; the strongest slot an older profile still carries). The
+     skill slots beside it (core/skills.js) are scores, not the schedule's
+     belief about the memory, so they are not read here. */
+  const mature = (entry) => { const c = cardFor(entry); return !!c && typeof c.s === "number" && c.s >= PRODUCE_AT; };
   const PRODUCTION = ["type", "cloze"];
   /* Not a reordering — a restriction. The quiz picks at random from what this
      returns, so leaving the recognition kinds in the list would leave them in
@@ -2198,7 +2199,7 @@ export function makeQuestions(env) {
      learner agents, 2026-10-08: a beginner with shaky Cyrillic met three typed
      answers in the first quiz). A card is from the scheduler (`seen`). */
   const typeReady = (stage, entry) => stage > 0
-    || Object.values(entry || {}).some((c) => c && (c.reps || 0) >= 2);
+    || ((cardFor(entry) || {}).reps || 0) >= 2;
   function quizStepsIn(unit, index, prefer, seen, last) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
@@ -2216,9 +2217,29 @@ export function makeQuestions(env) {
        A word that comes back comes back in a different shape when it has one;
        when it has only one, it repeats, because asking nothing would be worse. */
     const avoid = new Set(last || []);
+    /* **The shape the word most needs** (the owner, 2026-10-29: the scores
+       "should feed into different drills… the app should be intelligent when
+       picking"). Each shape exercises one skill (core/skills.js SKILL_OF_KIND)
+       and the word's skill slots say how each stands; for a word the scheduler
+       already trusts (`mature`, PRODUCE_AT — the same bar at which the quiz
+       stops offering recognition) the draw is narrowed to the shapes of its
+       weakest skill — a skill never asked before everything, then the least
+       held. **Not before**: a word met this week is asked recognition-first
+       by design (§30j), and steering it to its weakest skill after one
+       choose-en would type every new word on day one. A word with no score
+       is drawn at random, as it always was. */
+    const preferWeak = (list, i) => {
+      const entry = card(i);
+      if (!entry || list.length < 2 || !mature(entry)) return list;
+      const ids = unique(list.map((e) => skillOfKind(e.t)).filter(Boolean));
+      if (ids.length < 2 || !ids.some((id) => entry[id] && entry[id].s > 0)) return list;
+      const weak = weakestSkill(entry, ids);
+      const sub = list.filter((e) => skillOfKind(e.t) === weak);
+      return sub.length ? sub : list;
+    };
     const drawFrom = (list, i) => {
       const fresh = list.filter((e) => !avoid.has(`${e.t}:${i}`));
-      const from = fresh.length ? fresh : list;
+      const from = preferWeak(fresh.length ? fresh : list, i);
       return from.length ? from[Math.floor(Math.random() * from.length)] : null;
     };
     // What this learner can read: everything taught by this lesson (clozeFor).
@@ -2319,16 +2340,27 @@ export function makeQuestions(env) {
        chapter only when it has nothing left (a chapter's first lesson). */
     const stage0 = stageOf(unit);
     const ok = (i) => L[i] && !words.includes(i) && readable.has(i);
+    // The word's card — never a skill slot, which is a score and not the schedule.
     const strengthOf = (i) => {
-      const c = card(i);
-      if (!c) return Infinity;
-      const s = Object.values(c).map((d) => (d && typeof d.s === "number" ? d.s : Infinity));
-      return Math.min(...s);
+      const c = cardFor(card(i));
+      return c && typeof c.s === "number" ? c.s : Infinity;
     };
     const dueSet = new Set(prefer || []);
     const chapterSoFar = unique(Array.from({ length: index }, (_, j) => lessonWords(unit, j)).flat()
       .concat(unitsUpTo(unit).filter((u) => u !== unit && stageOf(u) === stage0).flatMap((u) => u.w)))
       .filter(ok);
+    /* **A word already answered today goes to the back** (2026-10-20: "this"
+       in every quiz). Due and weakest first is right once; but a word answered
+       wrong stays due and weakest, so it led the fill and the review slot of
+       every lesson that day and the next — «этот», marked wrong for «эта»,
+       was asked in 183 of a seeded learner's lessons against a median of one.
+       Study already keeps a card answered today out of the day's pile
+       (§30cg); the quiz now does the same for its review words. */
+    const todayN = dayOf(Date.now());
+    const answeredToday = (i) => {
+      const c = cardFor(card(i));
+      return !!c && !!c.lastAt && dayOf(c.lastAt) === todayN;
+    };
     const byNeed = (list) => {
       const fresh = list.filter((i) => !answeredToday(i));
       const due = shuffle(fresh.filter((i) => dueSet.has(i)));
@@ -2350,18 +2382,6 @@ export function makeQuestions(env) {
        shorter quiz now instead of padding it with old words. */
     const reachedHere = unitsUpTo(unit);
     const drillsHere = Math.min(DRILL_MIX.perQuiz, drillsIntroduced(reachedHere).size);
-    /* **A word already answered today goes to the back** (2026-10-20: "this"
-       in every quiz). Due and weakest first is right once; but a word answered
-       wrong stays due and weakest, so it led the fill and the review slot of
-       every lesson that day and the next — «этот», marked wrong for «эта»,
-       was asked in 183 of a seeded learner's lessons against a median of one.
-       Study already keeps a card answered today out of the day's pile
-       (§30cg); the quiz now does the same for its review words. */
-    const todayN = dayOf(Date.now());
-    const answeredToday = (i) => {
-      const c = card(i);
-      return !!c && Object.values(c).some((d) => d && d.lastAt && dayOf(d.lastAt) === todayN);
-    };
     const oldMax = Math.max(1, Math.floor(OLD_SHARE * (QN + FORM_MIX.perQuiz + drillsHere + REVIEW_MIX.perQuiz + 1)));
     const reviewOld = stageHere > 0 ? REVIEW_MIX.perQuiz : 0;
     const drillOld = drillsHere > 1 && stageHere > 0 && oldMax - reviewOld > 0 ? 1 : 0;
@@ -2588,21 +2608,48 @@ export function makeQuestions(env) {
      knows six words. Distractors still come from anywhere — a wrong option needs
      no acquaintance. */
   let drillPool = null;
+  /* Cumulative weights over `drillPool`, when the caller handed a `weight`;
+     null is a uniform draw. */
+  let drillCum = null;
 
-  /* Run a generator against a pool (lemma indices) and put the pool back. */
-  function withPool(pool, fn) {
-    const before = drillPool;
-    drillPool = pool && pool.length ? pool.map((i) => L[i]).filter(Boolean) : null;
-    try { return fn(); } finally { drillPool = before; }
+  /* Run a generator against a pool (lemma indices) and put the pool back.
+     `weight(i)` (optional) says how much more one word should be asked than
+     another — Practice weights a word by how weak its skill is (native data.js
+     skillWeight), so a drill leans on what the learner has not held yet
+     without ever leaving the rest out. */
+  function withPool(pool, fn, weight) {
+    const before = drillPool, beforeCum = drillCum;
+    const idx = pool && pool.length ? pool.filter((i) => L[i]) : [];
+    drillPool = idx.length ? idx.map((i) => L[i]) : null;
+    drillCum = null;
+    if (drillPool && typeof weight === "function") {
+      let sum = 0;
+      drillCum = idx.map((i) => { const w = Number(weight(i)); sum += Number.isFinite(w) && w > 0 ? w : 1; return sum; });
+      if (!(sum > 0)) drillCum = null;
+    }
+    try { return fn(); } finally { drillPool = before; drillCum = beforeCum; }
   }
 
   function pickWhere(fn, tries, anywhere) {
-    const from = !anywhere && drillPool && drillPool.length ? drillPool : L;
+    const pooled = !anywhere && drillPool && drillPool.length;
+    const from = pooled ? drillPool : L;
+    const cum = pooled ? drillCum : null;
     for (let n = 0; n < (tries || 300); n++) {
-      const w = from[Math.floor(Math.random() * from.length)];
+      const w = from[cum ? weightedIndex(cum) : Math.floor(Math.random() * from.length)];
       if (w && fn(w)) return w;
     }
     return null;
+  }
+
+  /* An index drawn in proportion to its weight: binary search on the sums. */
+  function weightedIndex(cum) {
+    const r = Math.random() * cum[cum.length - 1];
+    let lo = 0, hi = cum.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (cum[mid] > r) hi = mid; else lo = mid + 1;
+    }
+    return lo;
   }
 
   /* What the learner ticked before starting, as a Set of focus ids — or nothing,
@@ -3467,7 +3514,9 @@ export function makeQuestions(env) {
      so those generators answer with their chosen shape either way, and the
      stress and grammar drills ignore the flag entirely. */
   /* `only`: the focus ids the learner ticked (drillFocus), or nothing for all. */
-  function drillQuestions(type, n, pool, cells, typed, only) {
+  /* `weight(i)`, optional: how much more to ask one word of the pool than
+     another (withPool). */
+  function drillQuestions(type, n, pool, cells, typed, only, weight) {
     const out = [];
     const seen = new Set();
     // A count of 0 is zero questions; only an unset count means the default.
@@ -3486,7 +3535,7 @@ export function makeQuestions(env) {
         seen.add(key);
         out.push(!q.note && note ? { ...q, note } : q);
       }
-    });
+    }, weight);
     return out;
   }
 

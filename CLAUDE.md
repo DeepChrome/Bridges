@@ -6878,6 +6878,55 @@ the phone had, and what it said was true of a different recogniser.
   and send audio to Google, against the tour's and the store listing's
   promise. Left as is.
 
+## 30cj. Four scores behind the one (2026-10-29)
+
+The owner: *"imagine my ability to recall the word in Russian is very strong
+but my ability to recall the English when given the Russian word is weak. A
+score of 90 doesn't indicate that… break up the score into different areas
+and when someone clicks the score, they get a blown up detail… English to
+Russian, Russian to English, cases, and perhaps even usage in a sentence. All
+of these scores should feed into different drills. And the app should be
+intelligent when picking which word to provide."*
+
+- **A word is still one card** (§30at). Beside it, `seen[word]` carries a
+  **skill slot** per skill — `ru2en`, `en2ru`, `forms`, `usage`
+  (`core/skills.js`) — each an FSRS memory of the card's shape, graded only by
+  the questions that exercise it and never due or dealt. Its stability read
+  through `familiarity` is the skill's score. Not a tally: a second count
+  drifts from the schedule the first time an Undo touches one and not the
+  other (§30ar's reasoning, applied four times).
+- **The slots are card rows.** `direction` on a card row is the slot's name,
+  so `split`/`diff`/`nestCards` and the SQLite table carry them with no
+  schema step (what §30v's `direction` column was kept for). A reader that
+  scans *every* slot of an entry now reads skills too — `mature`,
+  `typeReady`, `strengthOf`, `answeredToday` in questions.js read `cardFor`
+  instead, and `mergeEntry`/`normaliseSeen` carry the slots across.
+- **Which question grades which**: `SKILL_OF_KIND` (every runner kind, or
+  `null` for one that grades nothing) and `SKILL_OF_FRONT` (a flashcard's or
+  Talk's). `applyGrade(…, opts, skill)` grades the card and the slot;
+  `gradeSkill` grades a slot alone, which is what the form drills do now —
+  §30by's rule stands (familiarity never grows from a form drill) and "Cases &
+  forms" is what they measure. No log row for those: the log is the schedule's.
+- **The log fills the slots in** (`replayLog`; store.js `seedSkills`, meta
+  `skills`): every row names its kind (`source`) and front, so a profile from
+  before this has months of scores on day one. Once, stamped, written at
+  once. A restored backup from before the slots is replayed in `restore`; one
+  from after is not (`hasSkillSlots`), or every answer counts twice.
+- **Where the scores steer**: `frontFor(card, fronts, entry)` asks a card
+  through the front whose skill is weakest (never asked first), the turn
+  deciding ties; `drawFrom` in the quiz narrows a scored word's shapes to its
+  weakest skill; a Practice drill weights its pool by the skill it measures
+  (`skillWeight`, `WEIGHT_UNASKED` 3× for a word never asked; `withPool`
+  takes a weight), never leaving a word out. Chapter 1, where nothing is
+  scored yet, draws as before.
+- **The breakdown** is a `Bubble` (§30bu) off any ring — the flashcard's
+  back, the entry, a word row (`ScoreRing` in native/src/skills.js): the
+  overall, then a ring and a label per skill, "Not asked yet" where nothing
+  has. The overall stays the card's: it is what the schedule acts on.
+- Run `tools/audit_repeats.mjs` after this: `sameShape` (walk + quiz echo)
+  was never zero and the audit passes no learner, so it cannot move it;
+  `walkShape` is the zero that matters.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -6907,6 +6956,8 @@ node tools/check_scripts.mjs --strict   # the written passages: level, coverage,
 node tools/audio_qa.mjs        # a track per lesson, its hash current, its length sane
 node tools/audit_banks.mjs --pool 150   # how many distinct questions a learner meets (§30ac)
 node tools/audit_dead.mjs      # exports nothing imports, files nothing reaches (§30aj)
+node tools/audit_links.mjs     # every word the app shows a working link, misses by reason (§30ch)
+node tools/audit_answers.mjs   # no typed cue that marks a right answer wrong (§30ch)
 node tools/design.mjs          # scale, rhythm and depth: the arithmetic of looking designed (§30ax)
 node tools/release_check.mjs   # the built bundle: who signed it, size, permissions (§30ag)
 node tools/eas_upload.mjs      # before any EAS build: archive size, and nothing needed excluded
@@ -6956,8 +7007,6 @@ it, run the audit, and if it fails, solve for the value rather than nudging it.*
 **Deploys cost credits.** The Netlify free plan grants 300 credits a month and they run
 down fast; the pool refreshes on the 7th. Iterate against `tools/serve.py` and deploy
 deliberately, not after every change. `.\tools\deploy.ps1` when it is genuinely worth it.
-node tools/audit_links.mjs     # every word the app shows a working link, misses by reason (§30ch)
-node tools/audit_answers.mjs   # no typed cue that marks a right answer wrong (§30ch)
 The 205 MB of audio is one large first upload — Netlify diffs files, so later deploys
 stay cheap.
 

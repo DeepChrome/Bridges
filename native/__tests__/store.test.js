@@ -138,7 +138,8 @@ describe("the save layer", () => {
     expect(log.length).toBe(1);
     expect(log[0]).toMatchObject({ word: "книга", direction: "recognise", grade: 3, reps: 4, lapses: 1, s: 3, source: "probe" });
     expect((await global.__db.saved("p1")).seen["книга"].recognise.reps).toBe(5);
-    expect((await repo().counts()).cards).toBe(1);
+    // The card, and the slot of the skill the front exercised (core/skills.js).
+    expect((await repo().counts()).cards).toBe(2);
   });
 
   it("brings a restored backup's log in with it", async () => {

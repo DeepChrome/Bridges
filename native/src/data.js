@@ -37,7 +37,7 @@ import { makeSearch, makeResolve, parseDeep } from "@core/search";
 import { makeHydrator, makeDeepIndex } from "@core/entry";
 import { lessonSize, lessonCountOf, lessonWordsOf } from "@core/questions";
 import { quizPassed } from "@core/state";
-import { wanted, cardFor, dayOf, familiarity, strength } from "@core/scheduler";
+import { wanted, cardFor, dayOf, familiarity, strength, skillScores } from "@core/scheduler";
 import { rollGoal, goalBadge } from "@core/queue";
 import { isIrregular } from "@core/facts";
 import { CASES } from "@core/cases";
@@ -961,6 +961,22 @@ export function knownPool(st) {
     if (i >= 0 && unitWords().has(i) && !have.has(i)) { have.add(i); out.push(i); }
   }
   return out;
+}
+
+/* How much more a drill should ask one word than another, by how weak the
+   skill it exercises is (the owner, 2026-10-29: the scores "should feed into
+   different drills… the goal is to build these scores up over time"). A word
+   whose "Cases & forms" score is low, or that the forms drills have never
+   asked, is drawn `WEIGHT_UNASKED` times as often as one at 100; nothing is
+   left out, so the bank stays as deep as the pool (core/questions.js
+   withPool). `skill` is a core/skills.js id. */
+export const WEIGHT_UNASKED = 3;
+export function skillWeight(st, skill) {
+  return (i) => {
+    const w = L[i] && L[i].b;
+    const score = w ? skillScores((st.seen || {})[w], rankOf(w))[skill] : null;
+    return score === null || score === undefined ? WEIGHT_UNASKED : 1 + (WEIGHT_UNASKED - 1) * (1 - score / 100);
+  };
 }
 
 export function irregularWords() {

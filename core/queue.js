@@ -28,7 +28,8 @@
  * live in the learner's `daily` slot (core/state.js).
  */
 
-import { DIRECTIONS, DEFAULT_FRONTS, cardFor, kindOf, isDue, retrievability, dayOf } from "./scheduler.js";
+import { DIRECTIONS, DEFAULT_FRONTS, cardFor, kindOf, isDue, retrievability, dayOf, weakestSkill,
+         SKILL_OF_FRONT } from "./scheduler.js";
 /* (The day's goal — rollGoal, goalSession — is at the foot of the file.) */
 
 /* `newPerDay` is 5, down from 15 (the owner, 2026-09-17: "The default is maybe
@@ -48,11 +49,25 @@ export const DAILY_REVIEWS = 50;
 export const QUEUE_DEFAULTS = { newPerDay: 5, sessionSize: 20, reviewsPerDay: DAILY_REVIEWS, learnAhead: 20,
                                 minGap: 3 };
 
-/* The front a card is asked through this time: the ticked fronts in turn,
-   by how many times the card has been answered, so a learner drilling both
-   ways sees the Russian one review and the meaning the next. A new card
-   starts on the first ticked front, which by default is the Russian. */
-export const frontFor = (card, fronts) => fronts[((card && card.reps) || 0) % fronts.length];
+/* The front a card is asked through this time. With one front ticked there is
+   no choice. With several, **the front whose skill is weakest** (the owner,
+   2026-10-29: the app "should be intelligent when picking" — a word recalled
+   into Russian easily and out of it poorly is asked from the English); the
+   skill scores are the word's slots (core/skills.js), and a skill never asked
+   is the weakest of all. Where two fronts tie — Russian shown and Russian heard
+   both exercise one skill, or the word is new to both — the ticked fronts are
+   taken in turn by how many times the card has been answered, which is the
+   whole rule when no `entry` is handed in. A new card starts on the first
+   ticked front, which by default is the Russian. */
+export function frontFor(card, fronts, entry) {
+  const turn = fronts[((card && card.reps) || 0) % fronts.length];
+  if (!entry || fronts.length < 2) return turn;
+  // No front's skill scored yet: nothing to prefer, so the turn decides.
+  if (!fronts.some((f) => { const c = entry[SKILL_OF_FRONT[f]]; return c && c.s > 0; })) return turn;
+  const weak = weakestSkill(entry, fronts.map((f) => SKILL_OF_FRONT[f]));
+  const tied = fronts.filter((f) => SKILL_OF_FRONT[f] === weak);
+  return tied.includes(turn) ? turn : tied[((card && card.reps) || 0) % tied.length];
+}
 
 /* Words or sentences: what a learner chooses to study on cards (the owner,
    2026-09-28: *"it can be sentences or individual words based on what the user
@@ -97,8 +112,9 @@ export function practiceSession({ seen, words, dirs, size }) {
   const fronts = (dirs && dirs.length ? dirs : DEFAULT_FRONTS).filter((d) => DIRECTIONS.includes(d));
   if (!fronts.length) fronts.push(DEFAULT_FRONTS[0]);
   const items = (words || []).slice(0, size || QUEUE_DEFAULTS.sessionSize).map((w) => {
-    const card = cardFor((seen && seen[w]) || {});
-    return { word: w, direction: frontFor(card, fronts), card: card, kind: kindOf(card) };
+    const entry = (seen && seen[w]) || {};
+    const card = cardFor(entry);
+    return { word: w, direction: frontFor(card, fronts, entry), card: card, kind: kindOf(card) };
   });
   return { items: items, due: 0, remaining: 0, newLeft: 0, reviewsLeft: Infinity, done: false,
            practice: true };
@@ -168,9 +184,10 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead, 
 
   const learning = [], reviews = [], fresh = [];
   for (const w of words || []) {
-    const card = cardFor((seen && seen[w]) || {});
+    const entry = (seen && seen[w]) || {};
+    const card = cardFor(entry);
     const kind = kindOf(card);
-    const direction = frontFor(card, fronts);
+    const direction = frontFor(card, fronts, entry);
     if (kind === "new") {
       fresh.push({ word: w, direction: direction, card: card || null, kind: kind });
       continue;
@@ -367,11 +384,12 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
     const weak = [], held = [];
     for (const w of words || []) {
       if (have.has(w)) continue;
-      const card = cardFor((seen && seen[w]) || {});
+      const entry = (seen && seen[w]) || {};
+      const card = cardFor(entry);
       if (!card || kindOf(card) === "new") continue;
       // Answered today: scheduled out, and not dealt again today.
       if (card.lastAt !== undefined && card.lastAt !== null && dayOf(card.lastAt) === today) continue;
-      const x = { w, card, f: score(w, card), r: retrievability(card, now, o.scheduler) };
+      const x = { w, entry, card, f: score(w, card), r: retrievability(card, now, o.scheduler) };
       (x.f >= MASTERED_AT ? held : weak).push(x);
     }
     // Shuffled first so equal retrievabilities are not dealt in storage order.
@@ -385,7 +403,7 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
       const n = items.length + extra.length + 1;
       const from = (n % MASTERED_EVERY === 0 && sprinkle.length) || !faded.length ? sprinkle : faded;
       const x = from.shift();
-      extra.push({ word: x.w, direction: frontFor(x.card, fronts), card: x.card, kind: kindOf(x.card), extra: true });
+      extra.push({ word: x.w, direction: frontFor(x.card, fronts, x.entry), card: x.card, kind: kindOf(x.card), extra: true });
     }
     items.push(...extra);
   }

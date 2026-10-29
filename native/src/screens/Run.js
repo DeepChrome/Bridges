@@ -34,7 +34,7 @@ import { PairHear, PairSay } from "../activities/Pair";
 import { Shadow } from "../activities/Shadow";
 import { Build } from "../activities/Build";
 import { L, PASS_MARK } from "../data";
-import { gradeFor, applyGrade, reviewRows, directionOfKind, schedulerOpts, gradesCard } from "@core/scheduler";
+import { gradeFor, applyGrade, gradeSkill, skillOfKind, reviewRows, directionOfKind, schedulerOpts, gradesCard } from "@core/scheduler";
 import { fold, firstSense } from "@core/util";
 
 /* The row of round tools under a question — speaker, bulb, Teddy, flag. */
@@ -66,10 +66,20 @@ export function missOf(q, said) {
    lives once; the direction is the question's (core/scheduler.js
    DIRECTION_OF_KIND) — a meaning chosen is recognition, a word typed is
    production, a sentence heard is listening. */
-function gradeInto(st, idx, grade, direction, now) {
+function gradeInto(st, idx, grade, direction, now, kind) {
   if (typeof idx !== "number" || !L[idx]) return st;
-  const r = applyGrade(st.seen, st.trouble, L[idx].b, direction, grade, now, schedulerOpts(st));
+  // The grade also counts towards the skill the question kind exercises
+  // (core/skills.js): a gap-fill is "In a sentence", a typed word "English → Russian".
+  const r = applyGrade(st.seen, st.trouble, L[idx].b, direction, grade, now, schedulerOpts(st),
+                       skillOfKind(kind, direction));
   return { ...st, seen: r.seen, trouble: r.trouble };
+}
+
+/* A form drill's grade: the word's card is left alone (gradesCard), and its
+   "Cases & forms" score moves (core/scheduler.js gradeSkill). */
+function gradeSkillInto(st, idx, grade, skill, now) {
+  if (typeof idx !== "number" || !L[idx] || !skill) return st;
+  return { ...st, seen: gradeSkill(st.seen, L[idx].b, skill, grade, now, schedulerOpts(st)).seen };
 }
 
 /* The prompt is the subject of the question, so it should be the largest thing
@@ -563,9 +573,10 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     if (recycled) setQueue((prev) => prev.concat([{ ...q, retry: true }]));
     keep(recycled ? queue.concat([{ ...q, retry: true }]) : queue);
     // A form drill grades no card: the card is the word's meaning (gradesCard).
-    if (gradeWords && gradesCard(q.kind)) {
+    // It grades the word's "Cases & forms" score, which is what it measures.
+    if (gradeWords) {
       const entries = words || (typeof q.i === "number" ? [q.i] : []);
-      if (entries.length) {
+      if (entries.length && gradesCard(q.kind)) {
         const g = grade || gradeFor(correct, usedHint);
         const dir = directionOfKind(q.kind), now = Date.now();
         // The log rows are built here, from the cards as they stand, and
@@ -575,8 +586,14 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           .map((e) => ({ word: L[e.i].b, direction: dir, grade: e.grade }));
         const rows = reviewRows(st.seen, list, now, q.kind, schedulerOpts(st));
         update((prev) => entries.reduce((acc, e) => (
-          typeof e === "number" ? gradeInto(acc, e, g, dir, now) : gradeInto(acc, e.i, e.grade, dir, now)
+          typeof e === "number" ? gradeInto(acc, e, g, dir, now, q.kind) : gradeInto(acc, e.i, e.grade, dir, now, q.kind)
         ), prev), rows);
+      } else if (entries.length && skillOfKind(q.kind)) {
+        const g = grade || gradeFor(correct, usedHint);
+        const sk = skillOfKind(q.kind), now = Date.now();
+        update((prev) => entries.reduce((acc, e) => (
+          typeof e === "number" ? gradeSkillInto(acc, e, g, sk, now) : gradeSkillInto(acc, e.i, e.grade, sk, now)
+        ), prev));
       }
     }
   };

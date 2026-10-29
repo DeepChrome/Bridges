@@ -25,7 +25,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { today } from "@core/util";
 import { SCHEMA_VERSION, migrate, speechDefault } from "@core/state";
 import { SETTING_KEYS, merge, diff, isEmpty } from "@core/repo";
-import { normaliseSeen, DEFAULT_FRONTS } from "@core/scheduler";
+import { normaliseSeen, DEFAULT_FRONTS, replayLog, schedulerOpts } from "@core/scheduler";
 import { openRepo } from "./db";
 
 /* The schema and its migrations live in core/state.js since v5, shared with the web
@@ -243,7 +243,8 @@ export async function loadState(accountId) {
        returns early, and a boot that half-finished a tidy-up is a boot that
        leaves a deck index without its chunks. */
     await retireBlob(accountId, repo);
-    return { state: normalise(cur.saved), bad: null, recovered: cur.recovered };
+    const state = await seedSkills(accountId, repo, normalise(cur.saved));
+    return { state, bad: null, recovered: cur.recovered };
   }
   const legacy = await loadBlob(accountId);
   if (legacy && legacy.bad) return { ...legacy, recovered: null };
@@ -253,6 +254,9 @@ export async function loadState(accountId) {
       const c = await repo.counts();
       const stamp = { at: Date.now(), cards: c.cards, decks: c.decks, deckCards: c.deckCards };
       await repo.setMeta("migrated", JSON.stringify(stamp));
+      // A row carried no log, so there is nothing to seed the scores from;
+      // stamped so the next boot does not replay what this build writes.
+      await repo.setMeta("skills", JSON.stringify({ at: Date.now(), rows: 0 }));
       cur.saved = legacy.state;
       console.log(`[store] ${accountId}: moved into the database — ${c.cards} cards, ${c.decks} decks (${c.deckCards} cards); the row is kept`);
     } catch (e) {
@@ -268,6 +272,36 @@ export async function loadState(accountId) {
     return { state: { ...DEFAULTS }, bad: `(database set aside: ${cur.recovered})`, recovered: null };
   }
   return { state: { ...DEFAULTS }, bad: null, recovered: null };
+}
+
+/* **The four scores, filled in from the review log once** (core/skills.js,
+ * 2026-10-29). A profile graded before the skill slots existed has months of
+ * answers in its log, each row naming the question kind (`source`) and the
+ * front; `replayLog` grades the slots from them, so the breakdown is not
+ * four "Not asked yet" on the day the feature arrives, and the drills have
+ * something to choose on. Done once, stamped in `meta` under `skills`, and
+ * written straight away rather than left for the next save: a boot that
+ * seeded and then crashed before a grade would otherwise replay the whole
+ * log again on top of the slots it had already written. The form drills
+ * never wrote a log row (they graded nothing), so "Cases & forms" starts
+ * empty for everyone. Never fatal — a profile that cannot be seeded is a
+ * profile whose scores start today. */
+async function seedSkills(accountId, repo, state) {
+  try {
+    if (await repo.getMeta("skills")) return state;
+    const rows = await repo.readLog();
+    const seen = replayLog(state.seen, rows, schedulerOpts(state));
+    const seeded = seen === state.seen ? state : { ...state, seen };
+    if (seeded !== state) {
+      await repo.apply(diff(cur.saved, seeded), [], []);
+      cur.saved = seeded;
+    }
+    await repo.setMeta("skills", JSON.stringify({ at: Date.now(), rows: rows.length }));
+    if (rows.length) console.log(`[store] ${accountId}: skill scores seeded from ${rows.length} log rows`);
+    return seeded;
+  } catch (e) {
+    return state;
+  }
 }
 
 /* How long the JSON row is kept after the database takes over (ROADMAP 13.20).

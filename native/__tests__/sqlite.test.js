@@ -157,16 +157,19 @@ describe("a profile in rows", () => {
     const r = applyGrade(prev.seen, prev.trouble, "книга", "recognise", 3, now, { fuzz: false });
     const next = { ...prev, seen: r.seen, trouble: r.trouble, xp: 43 };
     const d = diff(prev, next);
-    expect(d.cards.put.map((x) => x.word + "/" + x.direction)).toEqual(["книга/recognise"]);
+    // The card, and the slot of the skill the front exercises (core/skills.js) — a
+    // skill slot is a row like a card's, keyed by its id in `direction`.
+    expect(d.cards.put.map((x) => x.word + "/" + x.direction).sort()).toEqual(["книга/recognise", "книга/ru2en"]);
     expect(d.decks).toBeNull();
     expect(Object.keys(d.progress.put)).toEqual(["xp"]);
     await repo.apply(d, rows);
 
     const c = await repo.counts();
-    /* Four rows became three: a word is one card (2026-09-23), and the grade
-       that merged «книга» deleted the second row this fixture still carried. */
+    /* Four rows became three cards: a word is one card (2026-09-23), and the
+       grade that merged «книга» deleted the second row this fixture still
+       carried — plus the one skill row the grade wrote. */
     expect(d.cards.del.map((x) => x.word + "/" + x.direction)).toEqual(["книга/produce"]);
-    expect(c.cards).toBe(3);
+    expect(c.cards).toBe(4);
     expect(c.log).toBe(1);
     const [row] = await repo.readLog();
     // The card as it *was*, the grade, and when.

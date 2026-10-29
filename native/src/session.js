@@ -18,6 +18,7 @@ import {
   onWriteError, newId, touchStreak,
 } from "./store";
 import { reconcileCurriculum } from "./data";
+import { hasSkillSlots, replayLog, schedulerOpts } from "@core/scheduler";
 import { loadImmerse, flushImmerse } from "./immerse";
 import { loadResume } from "./resume";
 import { APP_NAME } from "./brand";
@@ -160,7 +161,12 @@ export function SessionProvider({ children }) {
       dirty.current = true;
       if (rows && rows.length) log.current.push(...rows);
       setError(null);
-      setSt(touchStreak(state));
+      /* A backup from before the skill scores (core/skills.js) carries the
+         log the scores are rebuilt from; one made since carries the scores
+         themselves, and replaying its log on top would count every answer
+         twice. */
+      const seen = hasSkillSlots(state.seen) ? state.seen : replayLog(state.seen, rows, schedulerOpts(state));
+      setSt(touchStreak(seen === state.seen ? state : { ...state, seen }));
     },
 
     async signOut() {

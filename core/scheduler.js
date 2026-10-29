@@ -32,6 +32,7 @@
 
 import { fsrs, createEmptyCard, State } from "ts-fsrs";
 import { dayOf as dayOfLocal } from "./util.js";
+import { SKILL_IDS, SKILL_OF_FRONT, isSkill, skillOfKind } from "./skills.js";
 
 export const DAY = 86400000;
 export const MINUTE = 60000;
@@ -63,6 +64,13 @@ export const dayOf = dayOfLocal;
 export const DIRECTIONS = ["recognise", "produce", "listen"];
 export const isDirection = (d) => DIRECTIONS.includes(d);
 export const CARD = "recognise";
+/* **Beside the card, four scores** (the owner, 2026-10-29; core/skills.js).
+ * `seen[word]` also holds a slot per skill — `ru2en`, `en2ru`, `forms`,
+ * `usage` — each a memory of the same shape as the card, graded only by the
+ * questions that exercise that skill (`gradeSkill`), never due, never dealt.
+ * The schedule reads the one card; the scores read the slots. A skill slot
+ * is told from the card by its name: `isSkill(slot)`. */
+export { SKILL_IDS, SKILL_OF_FRONT, isSkill, skillOfKind };
 /* The shipped default front: Russian on the front, the meaning behind. */
 export const DEFAULT_FRONTS = [CARD];
 /* The word's card. An entry a Phase 2 build left as several cards is read as
@@ -120,8 +128,19 @@ export function mergeEntry(entry) {
     const c = entry[d];
     if (!best || (c.s || 0) > (best.s || 0)) best = c;
   }
-  return { [CARD]: best };
+  // The skill slots ride along: they are scores, not cards to merge.
+  const out = {};
+  for (const k in entry) if (isSkill(k) && entry[k]) out[k] = entry[k];
+  out[CARD] = best;
+  return out;
 }
+
+/* The skill slots of an entry, and nothing else. */
+const skillSlots = (entry) => {
+  const out = {};
+  for (const k in entry || {}) if (isSkill(k) && entry[k]) out[k] = entry[k];
+  return out;
+};
 
 /* The scheduler's options as the learner's state holds them: the retention
    they chose, and a fitted `w` once an optimiser has produced one. */
@@ -192,7 +211,8 @@ export function normaliseSeen(seen) {
       fixed = { [CARD]: fromLegacy(x) };
     } else {
       for (const dir in x) {
-        if (x[dir] && isLegacyCard(x[dir])) {
+        // A skill slot was never written in days; only a card can be legacy.
+        if (x[dir] && !isSkill(dir) && isLegacyCard(x[dir])) {
           fixed = fixed || Object.assign({}, x);
           fixed[dir] = fromLegacy(x[dir]);
         }
@@ -427,18 +447,86 @@ export function troubleWords(seen, rankOf) {
    it. `direction` is how the card was asked — it is checked, since the log
    row records it, and it does not choose a card: there is one. `prev` is the
    card as it was, for undo. */
-export function applyGrade(seen, trouble, word, direction, grade, now, opts) {
+/* `skill` is which of the four scores the answer also counts towards
+   (core/skills.js): left out, it is the front's (a flashcard); `null` grades
+   the card alone; a kind's skill where the caller knows the kind. The skill's
+   slot before the grade comes back as `skillPrev`, for undo. */
+export function applyGrade(seen, trouble, word, direction, grade, now, opts, skill) {
   if (!isDirection(direction)) throw new Error("not a direction: " + direction);
   const g = gradeOf(grade);
   const entry = mergeEntry((seen && seen[word]) || {});
   const prev = cardFor(entry) || undefined;
   const card = review(prev, g, now, opts);
-  const nextEntry = { [CARD]: card };
+  const nextEntry = Object.assign(skillSlots(entry), { [CARD]: card });
+  const sk = skill === undefined ? SKILL_OF_FRONT[direction] || null : skill;
+  let skillPrev;
+  if (sk) {
+    if (!isSkill(sk)) throw new Error("not a skill: " + sk);
+    skillPrev = entry[sk] || undefined;
+    nextEntry[sk] = review(skillPrev, g, now, opts);
+  }
   const nextSeen = Object.assign({}, seen, { [word]: nextEntry });
   const nextTrouble = Object.assign({}, trouble);
   if (g === 1 && isTrouble(card)) nextTrouble[word] = (nextTrouble[word] || 0) + 1;
   else if (g > 1 && nextTrouble[word] && !wordTrouble(nextEntry)) delete nextTrouble[word];
-  return { seen: nextSeen, trouble: nextTrouble, card: card, prev: prev };
+  return { seen: nextSeen, trouble: nextTrouble, card: card, prev: prev, skill: sk, skillPrev: skillPrev };
+}
+
+/* A grade that counts towards one skill and leaves the word's card alone —
+   what a form drill does (FORM_KINDS): knowing «книгу» is the accusative says
+   nothing about remembering what «книга» means (2026-10-08), but it is what
+   "Cases & forms" measures. The entry is created if the word has no card yet;
+   `cardFor` still answers null for it, so the word is not in the schedule. */
+export function gradeSkill(seen, word, skill, grade, now, opts) {
+  if (!isSkill(skill)) throw new Error("not a skill: " + skill);
+  const entry = mergeEntry((seen && seen[word]) || {});
+  const prev = entry[skill] || undefined;
+  const card = review(prev, gradeOf(grade), now, opts);
+  const nextEntry = Object.assign({}, entry, { [skill]: card });
+  return { seen: Object.assign({}, seen, { [word]: nextEntry }), card: card, prev: prev };
+}
+
+/* Each skill's score for a word, 0–100 or null where it has never been asked
+   (`familiarity`, against the word's own horizon). */
+export function skillScores(entry, rank) {
+  const out = {};
+  for (const id of SKILL_IDS) out[id] = familiarity(entry ? entry[id] : null, rank);
+  return out;
+}
+
+/* The skill the word most needs, among `among` (every skill by default): the
+   one never asked first, then the lowest stability. Ties keep the table's
+   order, so a caller can rely on the answer being stable. */
+export function weakestSkill(entry, among) {
+  const ids = (among || SKILL_IDS).filter(isSkill);
+  let best = null, bestS = Infinity;
+  for (const id of ids) {
+    const c = entry && entry[id];
+    const s = c && c.s > 0 ? c.s : -1;
+    if (s < bestS) { best = id; bestS = s; }
+  }
+  return best;
+}
+
+/* The skill slots rebuilt from review-log rows (oldest first), for a profile
+   graded before the slots existed: each row's grade goes to the skill its
+   kind (`source`) or front names, at the time it was given. The card itself is
+   not touched — the log already produced it. Rows whose kind grades no skill
+   are passed over. */
+export function hasSkillSlots(seen) {
+  for (const w in seen || {}) for (const k in seen[w] || {}) if (isSkill(k) && seen[w][k]) return true;
+  return false;
+}
+export function replayLog(seen, rows, opts) {
+  let out = seen || {};
+  const sorted = (rows || []).slice().sort((a, b) => a.at - b.at);
+  for (const r of sorted) {
+    if (!r || !r.word) continue;
+    const sk = skillOfKind(r.source, r.direction);
+    if (!sk) continue;
+    out = gradeSkill(out, r.word, sk, r.grade, r.at, opts).seen;
+  }
+  return out;
 }
 
 /* The grade a right-or-wrong answer earns (one rule for every runner): an

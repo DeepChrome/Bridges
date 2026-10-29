@@ -18,6 +18,7 @@ import { Runner, missOf, MISSES_KEPT } from "../src/screens/Run";
 import { splitMarked } from "../src/ui";
 import { forgetToken } from "../src/lib/feedback";
 import { L } from "../src/data";
+import { cardFor } from "@core/scheduler";
 
 const URL_KEY = "EXPO_PUBLIC_FEEDBACK_URL";
 // A word with tables, so More has an entry to open.
@@ -97,9 +98,12 @@ test("a right answer records nothing", async () => {
 
 /* Familiarity is the card's, and a form drill does not touch it (the owner,
    2026-10-08: "it shouldn't grow at all from drills"). Graded runner, same
-   word: the meaning question writes a card, the drill writes none. */
-test("a meaning question grades the word's card and a form drill does not", async () => {
-  const cardOf = (st) => (st.seen || {})[L[wi].b];
+   word: the meaning question writes a card, the drill writes none — it
+   writes the word's "Cases & forms" score instead (core/skills.js,
+   2026-10-29), which is what the drill measures and what the breakdown and
+   the drills' own word choice read. */
+test("a meaning question grades the word's card and a form drill grades only its forms score", async () => {
+  const entryOf = (st) => (st.seen || {})[L[wi].b];
   const drill = { kind: "cases", ask: "Pick the form", prompt: L[wi].w, cyr: true, i: wi,
                   options: [{ label: "x1", right: true }, { label: "x2" }, { label: "x3" }, { label: "x4" }] };
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
@@ -107,16 +111,23 @@ test("a meaning question grades the word's card and a form drill does not", asyn
   await render(<SessionProvider><Runner steps={[drill]} onFinish={jest.fn()} /></SessionProvider>);
   await act(async () => { fireEvent.press(await screen.findByText("x1")); });
   await screen.findByTestId("verdict");
-  expect(cardOf(await saved())).toBeUndefined();
+  const entry = entryOf(await saved());
+  expect(cardFor(entry)).toBeNull();                       // not in the schedule
+  expect(entry.forms).toMatchObject({ reps: 1 });          // the forms score moved
+  expect(entry.ru2en).toBeUndefined();
+  expect(await global.__db.log("p1")).toEqual([]);         // and no review row: the log is the schedule's
 });
 
-test("…while the same word's meaning question does", async () => {
+test("…while the same word's meaning question grades the card and the skill it asked through", async () => {
   await AsyncStorage.setItem("rb.accounts", JSON.stringify({
     list: [{ id: "p1", name: "Jared", avatar: "monkeynaut", placed: null }], active: "p1" }));
   await render(<SessionProvider><Runner steps={[chosen]} onFinish={jest.fn()} /></SessionProvider>);
   await act(async () => { fireEvent.press(await screen.findByText("book")); });
   await screen.findByTestId("verdict");
-  expect(((await saved()).seen || {})[L[wi].b]).toBeTruthy();
+  const entry = ((await saved()).seen || {})[L[wi].b];
+  expect(cardFor(entry)).toMatchObject({ reps: 1 });
+  expect(entry.ru2en).toMatchObject({ reps: 1 });          // choose-en is Russian → English
+  expect(entry.en2ru).toBeUndefined();
 });
 
 test("misses are shaped for the tutor and capped", () => {

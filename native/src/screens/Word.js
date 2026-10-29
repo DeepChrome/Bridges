@@ -9,7 +9,8 @@
 import React, { useState } from "react";
 import { View, Pressable, Linking } from "react-native";
 import { useTheme, radius, type as T } from "../theme";
-import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Familiarity, Fold } from "../ui";
+import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Fold } from "../ui";
+import { ScoreRing } from "../skills";
 import { TableGroup, Facts, IrregularTag } from "../rules";
 import { wordFacts, isIrregular } from "@core/facts";
 import { grammarLine } from "@core/forms";
@@ -69,7 +70,7 @@ function WordStatus({ word }) {
   return (
     <View testID="word-status" style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 12 }}
           accessibilityLabel={score === null ? "Not studied yet" : `${label}, ${score} of 100`}>
-      {score === null ? null : <Familiarity score={score} size={40} />}
+      {score === null ? null : <ScoreRing word={word} score={score} size={40} />}
       {/* The ring carries the colour; the word stays ink, since a mixed
           amber is a text colour nobody audited (§31). */}
       <Text style={{ color: score === null ? t.ink3 : t.ink, fontWeight: "700" }}>

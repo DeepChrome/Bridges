@@ -13,8 +13,9 @@ import React from "react";
 import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "./theme";
-import { Btn, Muted, SectionLabel, Familiarity, Speaker, Text, Fold, Pill, Heading, Subheading, IconButton } from "./ui";
+import { Btn, Muted, SectionLabel, Speaker, Text, Fold, Pill, Heading, Subheading, IconButton } from "./ui";
 import { Linked } from "./words";
+import { ScoreRing } from "./skills";
 import { RuleCard, IrregularTag } from "./rules";
 import { familiarity, cardFor } from "@core/scheduler";
 import { firstSense } from "@core/util";
@@ -205,7 +206,7 @@ export function WordRow({ word, seen, active, onJump, first, speaker, testID = "
       </View>
       {score === null
         ? <Muted size={12} testID={`${testID}-new-${word}`}>new</Muted>
-        : <Familiarity score={score} size={30} testID={`${testID}-score-${word}`} />}
+        : <ScoreRing word={word} score={score} size={30} testID={`${testID}-score-${word}`} />}
       {onJump ? <Jump word={word} active={active} onPress={() => onJump(word)} /> : null}
       {speaker ? <Speaker text={word} size={36} /> : null}
     </View>

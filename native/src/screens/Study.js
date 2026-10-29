@@ -31,6 +31,7 @@ import { requeue, dailyFor, kindsOf, rollGoal, spendGoal, isStudyDay } from "@co
 import { flagsFor, troubleWords, cardsIn, sourceCards, studyCards, knownWords, sittingTally, masteryOf,
          sessionFor } from "../studycards";
 import { SetPicker } from "../studypicker";
+import { ScoreRing } from "../skills";
 
 /* The familiarity ring and its colour live in ui.js now (2026-09-28): the
    dictionary entry draws the same ring for the same number, and a second copy
@@ -363,8 +364,10 @@ export default function Study({ navigation, route }) {
        Easys in a sitting from reading as three weeks (one Easy is 8 days,
        the next 13, the next 20). */
     const rows = reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
-    const before = { items: items, at, prev: current, trouble: st.trouble, daily: st.daily, goal: st.goal,
-                     row: rows[0], marks };
+    // `entry`: the word's whole entry as it was — its card and its skill
+    // slots (core/skills.js) — so Undo puts all of it back.
+    const before = { items: items, at, prev: current, entry: st.seen[word], trouble: st.trouble, daily: st.daily,
+                     goal: st.goal, row: rows[0], marks };
     setMarks({ ...marks, [word]: g === 1 ? "again" : "done" });
     update((prev) => {
       const r = applyGrade(prev.seen, prev.trouble, word, direction, g, now, schedulerOpts(prev));
@@ -394,11 +397,12 @@ export default function Study({ navigation, route }) {
      session as it stood — the card is in front again, face up. */
   const undo = () => {
     if (!last) return;
-    const { row, prev } = last;
+    const { row, entry } = last;
     update((p) => {
-      // The one card, back as it was — or gone, if the grade was its first.
+      // The entry — the card and its skill scores — back as it was, or gone,
+      // if the grade was its first.
       const seen = { ...p.seen };
-      if (row) { if (prev) seen[row.word] = { recognise: prev }; else delete seen[row.word]; }
+      if (row) { if (entry) seen[row.word] = entry; else delete seen[row.word]; }
       return { ...p, seen, trouble: last.trouble, daily: last.daily, goal: last.goal };
     }, [], row ? [{ word: row.word, direction: row.direction, at: row.at }] : []);
     setSession({ ...session, items: last.items });
@@ -680,7 +684,7 @@ export default function Study({ navigation, route }) {
                   question, and a score beside it is something else to look
                   at before answering. */}
               {flip.face && flags.irregular ? <IrregularTag word={L[idxOfWord(item.word)]} testID="flag-irregular" /> : null}
-              {flip.face ? <Familiarity score={flags.score} /> : null}
+              {flip.face ? <ScoreRing word={item.word} score={flags.score} /> : null}
             </View>
             {blank ? (
               <Muted testID="card-blank" style={{ textAlign: "center" }}>

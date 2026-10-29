@@ -12,6 +12,7 @@ import { VIEWS } from "../src/screens/Run";
 import { Q, DRILL_TYPES, SPEECH_MIX, FORM_MIX } from "../src/questions";
 import { STAGES, SPEECH } from "../src/data";
 import { DIRECTION_OF_KIND, isDirection } from "@core/scheduler";
+import { SKILL_OF_KIND, isSkill } from "@core/skills";
 
 const kindsOf = (qs) => new Set(qs.filter(Boolean).map((q) => q.kind));
 const expectViews = (kinds) => {
@@ -37,6 +38,17 @@ describe("activity registry", () => {
       expect({ kind: k, direction: DIRECTION_OF_KIND[k] })
         .toEqual({ kind: k, direction: expect.any(String) });
       expect(isDirection(DIRECTION_OF_KIND[k])).toBe(true);
+    }
+  });
+
+  /* …and the skill it scores (core/skills.js), or null for one that grades
+     nothing. A kind missing from the table would fall to the front's skill
+     silently — a gap-fill counted as English → Russian — so it is checked. */
+  it("every kind names the skill it exercises, or none", () => {
+    for (const k of Object.keys(VIEWS)) {
+      expect({ kind: k, listed: Object.prototype.hasOwnProperty.call(SKILL_OF_KIND, k) })
+        .toEqual({ kind: k, listed: true });
+      expect(SKILL_OF_KIND[k] === null || isSkill(SKILL_OF_KIND[k])).toBe(true);
     }
   });
 

@@ -12,10 +12,11 @@ import { clearRun, savedRun, useResume } from "../resume";
 import { Q, DRILL_TYPES } from "../questions";
 import {
   L, UN, STAGES, DRILL_PASS, SHADOW_PASS, drillPool,
-  chapterWords, irregularWords, knownPool,
+  chapterWords, irregularWords, knownPool, skillWeight,
   reachedUnits, grammarKey,
 } from "../data";
 import { pairDrill } from "@core/alphabet";
+import { skillOfKind } from "@core/skills";
 import { buildupDrill } from "@core/buildup";
 import { firstSense } from "@core/util";
 import { scoreOf, bestOf } from "./shared";
@@ -321,7 +322,10 @@ export function DrillFlow({ route, navigation }) {
     // An empty pool means "anything" to the generators (withPool), which is
     // exactly the random words this must not ask; empty is no questions.
     if (!pool.length) return [];
-    return Q.drillQuestions(type, undefined, pool, undefined, typed, only);
+    // The words whose skill this drill measures is weakest come up most
+    // (data.js skillWeight) — the scores feeding the drills (2026-10-29).
+    const skill = skillOfKind(type);
+    return Q.drillQuestions(type, undefined, pool, undefined, typed, only, skill ? skillWeight(st, skill) : undefined);
   }, [type, seed, typed, only, chapters.join(","), irregularOnly, ready]);
   const mine = !chapters.length;
   const spec = DRILL_TYPES.find((d) => d.id === type);

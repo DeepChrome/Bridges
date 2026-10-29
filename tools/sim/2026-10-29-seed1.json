@@ -1,0 +1,302 @@
+[
+ {
+  "profile": "quick",
+  "seed": 1000,
+  "metrics": {
+   "recurrence": {
+    "quizQuestions": 424,
+    "askedAgain": 177,
+    "backToBack": 0,
+    "within3": 11,
+    "sameQuizTwice": 20,
+    "medianGap": 29,
+    "quizzes": 41
+   },
+   "mix": {
+    "listen": 74,
+    "choose-ru": 95,
+    "stress": 33,
+    "choose-en": 74,
+    "cloze": 18,
+    "hear": 15,
+    "type": 91,
+    "form": 8,
+    "conjugation": 8,
+    "agreement": 6,
+    "say": 2
+   },
+   "chapters": [
+    {
+     "chapter": 1,
+     "title": "Family and Food",
+     "lessons": 17,
+     "newWordsPerLesson": 6.1,
+     "quizAccuracy": 0.99,
+     "passFirstTry": 17,
+     "failedThrice": 0,
+     "speechSteps": 5,
+     "speechTokensMean": 3,
+     "speechTokensMax": 3
+    },
+    {
+     "chapter": 2,
+     "title": "Phones and Home",
+     "lessons": 17,
+     "newWordsPerLesson": 5.9,
+     "quizAccuracy": 0.91,
+     "passFirstTry": 16,
+     "failedThrice": 0,
+     "speechSteps": 8,
+     "speechTokensMean": 4.1,
+     "speechTokensMax": 7
+    },
+    {
+     "chapter": 3,
+     "title": "Town and Time",
+     "lessons": 6,
+     "newWordsPerLesson": 7.3,
+     "quizAccuracy": 0.93,
+     "passFirstTry": 6,
+     "failedThrice": 0,
+     "speechSteps": 4,
+     "speechTokensMean": 3.8,
+     "speechTokensMax": 5
+    }
+   ],
+   "words": {
+    "taught": 248,
+    "everAsked": 248,
+    "taughtButNeverAsked": 0,
+    "inSeen": 248,
+    "cards": 785,
+    "trouble": 0,
+    "leeches": 0
+   },
+   "review": {
+    "simulatedDays": 20,
+    "dueAtEnd": 0,
+    "duePerDay": 0,
+    "sessions": 20,
+    "reviewsPerDay": 13.9,
+    "maxDueInADay": 31,
+    "againRate": 0.01,
+    "backlogDays": 0,
+    "heldDays": 0
+   },
+   "lessons": {
+    "total": 40,
+    "passed": 40,
+    "relieved": 0,
+    "retakes": 1,
+    "shortQuizzes": 2
+   },
+   "structural": 0
+  },
+  "written": {
+   "scenes": 0,
+   "rows": 0,
+   "withAudio": 0
+  },
+  "structural": []
+ },
+ {
+  "profile": "steady",
+  "seed": 1001,
+  "metrics": {
+   "recurrence": {
+    "quizQuestions": 432,
+    "askedAgain": 188,
+    "backToBack": 0,
+    "within3": 11,
+    "sameQuizTwice": 22,
+    "medianGap": 26,
+    "quizzes": 42
+   },
+   "mix": {
+    "choose-en": 106,
+    "choose-ru": 85,
+    "stress": 27,
+    "listen": 73,
+    "cloze": 14,
+    "hear": 10,
+    "type": 87,
+    "conjugation": 14,
+    "form": 7,
+    "say": 2,
+    "agreement": 7
+   },
+   "chapters": [
+    {
+     "chapter": 1,
+     "title": "Family and Food",
+     "lessons": 17,
+     "newWordsPerLesson": 6.1,
+     "quizAccuracy": 0.9,
+     "passFirstTry": 16,
+     "failedThrice": 0,
+     "speechSteps": 3,
+     "speechTokensMean": 3,
+     "speechTokensMax": 3
+    },
+    {
+     "chapter": 2,
+     "title": "Phones and Home",
+     "lessons": 17,
+     "newWordsPerLesson": 5.9,
+     "quizAccuracy": 0.88,
+     "passFirstTry": 16,
+     "failedThrice": 0,
+     "speechSteps": 5,
+     "speechTokensMean": 4.2,
+     "speechTokensMax": 6
+    },
+    {
+     "chapter": 3,
+     "title": "Town and Time",
+     "lessons": 6,
+     "newWordsPerLesson": 7.3,
+     "quizAccuracy": 0.86,
+     "passFirstTry": 6,
+     "failedThrice": 0,
+     "speechSteps": 4,
+     "speechTokensMean": 4,
+     "speechTokensMax": 5
+    }
+   ],
+   "words": {
+    "taught": 248,
+    "everAsked": 248,
+    "taughtButNeverAsked": 0,
+    "inSeen": 248,
+    "cards": 777,
+    "trouble": 0,
+    "leeches": 0
+   },
+   "review": {
+    "simulatedDays": 20,
+    "dueAtEnd": 0,
+    "duePerDay": 0,
+    "sessions": 20,
+    "reviewsPerDay": 18,
+    "maxDueInADay": 32,
+    "againRate": 0.02,
+    "backlogDays": 0,
+    "heldDays": 0
+   },
+   "lessons": {
+    "total": 40,
+    "passed": 40,
+    "relieved": 0,
+    "retakes": 2,
+    "shortQuizzes": 2
+   },
+   "structural": 0
+  },
+  "written": {
+   "scenes": 0,
+   "rows": 0,
+   "withAudio": 0
+  },
+  "structural": []
+ },
+ {
+  "profile": "struggling",
+  "seed": 1002,
+  "metrics": {
+   "recurrence": {
+    "quizQuestions": 721,
+    "askedAgain": 471,
+    "backToBack": 0,
+    "within3": 36,
+    "sameQuizTwice": 32,
+    "medianGap": 14,
+    "quizzes": 70
+   },
+   "mix": {
+    "choose-en": 169,
+    "listen": 116,
+    "stress": 49,
+    "choose-ru": 140,
+    "hear": 27,
+    "cloze": 22,
+    "type": 157,
+    "form": 9,
+    "conjugation": 18,
+    "agreement": 12,
+    "say": 2
+   },
+   "chapters": [
+    {
+     "chapter": 1,
+     "title": "Family and Food",
+     "lessons": 17,
+     "newWordsPerLesson": 6.1,
+     "quizAccuracy": 0.76,
+     "passFirstTry": 7,
+     "failedThrice": 0,
+     "speechSteps": 14,
+     "speechTokensMean": 3.3,
+     "speechTokensMax": 4
+    },
+    {
+     "chapter": 2,
+     "title": "Phones and Home",
+     "lessons": 17,
+     "newWordsPerLesson": 5.9,
+     "quizAccuracy": 0.76,
+     "passFirstTry": 7,
+     "failedThrice": 0,
+     "speechSteps": 12,
+     "speechTokensMean": 4.1,
+     "speechTokensMax": 7
+    },
+    {
+     "chapter": 3,
+     "title": "Town and Time",
+     "lessons": 6,
+     "newWordsPerLesson": 7.3,
+     "quizAccuracy": 0.77,
+     "passFirstTry": 4,
+     "failedThrice": 0,
+     "speechSteps": 3,
+     "speechTokensMean": 3.7,
+     "speechTokensMax": 4
+    }
+   ],
+   "words": {
+    "taught": 248,
+    "everAsked": 248,
+    "taughtButNeverAsked": 0,
+    "inSeen": 248,
+    "cards": 801,
+    "trouble": 0,
+    "leeches": 1
+   },
+   "review": {
+    "simulatedDays": 20,
+    "dueAtEnd": 0,
+    "duePerDay": 0,
+    "sessions": 20,
+    "reviewsPerDay": 29.8,
+    "maxDueInADay": 48,
+    "againRate": 0.05,
+    "backlogDays": 0,
+    "heldDays": 0
+   },
+   "lessons": {
+    "total": 40,
+    "passed": 40,
+    "relieved": 1,
+    "retakes": 30,
+    "shortQuizzes": 2
+   },
+   "structural": 0
+  },
+  "written": {
+   "scenes": 0,
+   "rows": 0,
+   "withAudio": 0
+  },
+  "structural": []
+ }
+]

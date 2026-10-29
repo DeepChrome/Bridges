@@ -184,16 +184,21 @@ export default function Translate({ navigation, route }) {
           them (§30ak: the thing to touch goes low). */}
       <View style={{ paddingTop: 10, borderTopWidth: 1, borderTopColor: t.lineSoft,
                      borderRadius: radius.md }}>
+        {/* What the microphone is hearing, and its notes, *above* the
+            buttons: under them it sat at the very foot of the screen and was
+            off the bottom on the owner's phone (2026-10-29). Quiet — italic,
+            grey — because it is a running transcript, not an answer. */}
+        <Text testID="translate-live"
+              style={{ color: t.ink3, fontSize: 15, fontStyle: "italic", marginBottom: 10, minHeight: 22,
+                       textAlign: "center" }}>
+          {rec.phase === "listening" ? rec.live : rec.live || rec.note || ""}
+        </Text>
         <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
           <HoldButton testID="hold-ru" label={SIDES.ru.label} phase={rec.phase}
                       active={side === "ru"} onIn={hold("ru")} onOut={rec.release} />
           <HoldButton testID="hold-en" label={SIDES.en.label} phase={rec.phase}
                       active={side === "en"} onIn={hold("en")} onOut={rec.release} />
         </View>
-        <Text testID="translate-live"
-              style={{ color: t.ink, fontSize: 17, marginTop: 10, minHeight: 24, textAlign: "center" }}>
-          {rec.phase === "listening" ? rec.live : rec.live || rec.note || ""}
-        </Text>
       </View>
     </Screen>
   );

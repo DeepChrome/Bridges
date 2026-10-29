@@ -18,6 +18,7 @@ import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrad
 import { split, merge, diff, isEmpty, memoryRepo, validLog, cardRow, rowCard, SETTING_KEYS }
   from "../core/repo.js";
 import * as S from "../core/scheduler.js";
+import * as SK from "../core/skills.js";
 import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor, stepToday,
          cardKind, kindsOf, mixNew, practiceSession, rollGoal, spendGoal, goalBadge, goalSession, goalPerDay,
          weekdayOf, isStudyDay, GOAL_REVIEWS, GOAL_CAP_DAYS, MASTERED_EVERY } from "../core/queue.js";
@@ -396,21 +397,23 @@ group("the state as rows");
   const r = S.applyGrade(st.seen, st.trouble, "книга", "recognise", 3, now, { fuzz: false });
   const next = Object.assign({}, st, { seen: r.seen, trouble: r.trouble, xp: 43 });
   const d = diff(st, next);
-  /* One card row put, the xp key — and, since a word is one card (2026-09-23),
-     the second card this fixture still carried for «книга» is deleted by the
-     grade that merged it. */
-  ok(d.cards.put.length === 1 && d.cards.put[0].word === "книга" && d.cards.put[0].direction === "recognise"
+  /* One card row put and one skill row (the front's skill, core/skills.js),
+     the xp key — and, since a word is one card (2026-09-23), the second card
+     this fixture still carried for «книга» is deleted by the grade that
+     merged it. */
+  ok(d.cards.put.length === 2 && d.cards.put.every((c) => c.word === "книга")
+     && d.cards.put.map((c) => c.direction).sort().join() === "recognise,ru2en"
      && d.cards.del.map((k) => k.word + "/" + k.direction).join() === "книга/produce"
      && d.decks === null && Object.keys(d.progress.put).join() === "xp"
      && Object.keys(d.settings.put).length === 0,
-     "one grade: one card row, the stale second card gone, and the xp key, nothing else", JSON.stringify(d));
+     "one grade: one card row and one skill row, the stale second card gone, and the xp key, nothing else", JSON.stringify(d));
   const rebuilt = Object.assign({}, st, { seen: Object.assign({}, st.seen), unit: JSON.parse(JSON.stringify(st.unit)) });
   ok(isEmpty(diff(st, rebuilt)), "new objects with the same content write nothing");
   const fewer = Object.assign({}, next, { seen: { книга: { recognise: next.seen["книга"].recognise } }, decks: [] });
   const d2 = diff(next, fewer);
-  ok(d2.cards.del.map((k) => k.word + "/" + k.direction).sort().join() === "нет/listen"
+  ok(d2.cards.del.map((k) => k.word + "/" + k.direction).sort().join() === "книга/ru2en,нет/listen"
      && d2.decks && d2.decks.del.join() === "k1" && d2.decks.put.length === 0,
-     "what went is deleted: a card, a deck", JSON.stringify(d2.cards.del));
+     "what went is deleted: a card, a skill slot, a deck", JSON.stringify(d2.cards.del));
   const d3 = diff(st, Object.assign({}, st, { decks: st.decks.concat([{ id: "k2", name: "E", cards: [] }]) }));
   ok(d3.decks.put.length === 1 && d3.decks.put[0].id === "k2" && d3.decks.put[0].ord === 1 && d3.decks.del.length === 0,
      "a deck added is the only deck written");
@@ -626,8 +629,11 @@ group("the scheduler");
   let t = T0;
   for (let i = 0; i < 5; i++) { ({ seen: e, trouble: tr } = S.applyGrade(e, tr, "слово", "produce", 1, t, opts)); t += 2 * DAY; }
   ok(!S.wordTrouble(e["слово"]), "five early Agains do not bank a word as trouble");
-  ok(Object.keys(e["слово"]).length === 1 && e["слово"].recognise.reps === 5,
+  ok(S.cardsOf(e["слово"]).length === 1 && e["слово"].recognise.reps === 5,
      "a grade asked through the meaning lands on the one card", JSON.stringify(e["слово"]));
+  ok(Object.keys(e["слово"]).every((k) => k === S.CARD || S.isSkill(k)) && e["слово"].en2ru && e["слово"].en2ru.reps === 5
+     && !e["слово"].ru2en,
+     "…and on the slot of the skill the front exercises — produce is English → Russian — and no other", JSON.stringify(Object.keys(e["слово"])));
   /* A word seen plenty whose score is still low is; the same history with a
      score that has since recovered is not — lapses alone no longer hold a
      word in the bank. */
@@ -657,7 +663,7 @@ group("the scheduler");
   ok(g2.seen["слово"].recognise.reps === e["слово"].recognise.reps + 1 && g2.prev === e["слово"].recognise,
      "a grade through another front continues the same card and reports it as the previous card");
   const g3 = S.applyGrade({ дом: split }, {}, "дом", "listen", 3, T0, opts);
-  ok(Object.keys(g3.seen["дом"]).length === 1 && g3.prev === split.produce,
+  ok(S.cardsOf(g3.seen["дом"]).length === 1 && !g3.seen["дом"].produce && !g3.seen["дом"].listen && g3.prev === split.produce,
      "a grade on a still-split entry merges it first and continues the strongest card");
   let threw = false;
   try { S.applyGrade({}, {}, "x", "sideways", 3, T0); } catch (err) { threw = true; }
@@ -685,6 +691,67 @@ group("the scheduler");
   ok(["cases", "agreement", "conjugation", "aspect", "stress", "form"].every((k) => !S.gradesCard(k))
      && ["choose-en", "choose-ru", "type", "cloze", "listen", "hear", "say", "match", "study"].every(S.gradesCard),
      "familiarity grows from meaning, never from a form drill");
+
+  /* **Four scores beside the card** (the owner, 2026-10-29; core/skills.js). */
+  ok(Object.keys(S.DIRECTION_OF_KIND).every((k) => Object.prototype.hasOwnProperty.call(SK.SKILL_OF_KIND, k))
+     && Object.keys(SK.SKILL_OF_KIND).every((k) => k in S.DIRECTION_OF_KIND),
+     "every question kind names the skill it exercises, or null, and no skill names a kind that is not one");
+  ok(Object.values(SK.SKILL_OF_KIND).every((v) => v === null || SK.isSkill(v))
+     && Object.values(SK.SKILL_OF_FRONT).every(SK.isSkill) && SK.SKILL_IDS.length === 4,
+     "the tables name only the four skills");
+  ok(SK.skillOfKind("cloze") === "usage" && SK.skillOfKind("cases") === "forms" && SK.skillOfKind("type") === "en2ru"
+     && SK.skillOfKind("listen") === "ru2en" && SK.skillOfKind("buildup") === null
+     && SK.skillOfKind("study", "produce") === "en2ru" && SK.skillOfKind("talk", "produce") === "en2ru"
+     && SK.skillOfKind(undefined, "listen") === "ru2en" && SK.skillOfKind("video", "listen") === null,
+     "a kind's skill where the kind is known; a flashcard's or a Talk turn's is the front's; a kind that grades nothing is null");
+  // A grade names its skill: the card and that slot move, no other slot does.
+  const k1 = S.applyGrade({}, {}, "кни́га", "produce", 3, T0, opts, "usage");
+  ok(S.cardFor(k1.seen["кни́га"]).reps === 1 && k1.seen["кни́га"].usage && k1.seen["кни́га"].usage.reps === 1
+     && !k1.seen["кни́га"].en2ru && k1.skill === "usage" && k1.skillPrev === undefined,
+     "a gap-fill grades the card and In a sentence, not English → Russian");
+  const k2 = S.applyGrade(k1.seen, {}, "кни́га", "produce", 4, T0 + DAY, opts, null);
+  ok(S.cardFor(k2.seen["кни́га"]).reps === 2 && k2.seen["кни́га"].usage === k1.seen["кни́га"].usage && k2.skill === null,
+     "a null skill grades the card alone and keeps the slots");
+  threw = false;
+  try { S.applyGrade({}, {}, "x", "produce", 3, T0, opts, "spelling"); } catch (err) { threw = true; }
+  ok(threw, "a skill the table does not know is refused");
+  // A form drill: the slot moves, the card does not exist.
+  const f1 = S.gradeSkill(k2.seen, "сло́во", "forms", 1, T0, opts);
+  ok(S.cardFor(f1.seen["сло́во"]) === null && f1.seen["сло́во"].forms.reps === 1 && f1.prev === undefined
+     && f1.seen["кни́га"] === k2.seen["кни́га"],
+     "gradeSkill writes the skill slot and no card, and touches no other word");
+  ok(S.dueCards(f1.seen, T0 + 365 * DAY).length === 1 && !S.wanted(f1.seen["сло́во"], T0 + 365 * DAY),
+     "a word with only a skill slot is not in the schedule");
+  ok(S.normaliseSeen(f1.seen) === f1.seen, "normaliseSeen leaves an entry with skill slots as it is");
+  const f2 = S.gradeSkill(f1.seen, "сло́во", "forms", 4, T0 + DAY, opts);
+  ok(f2.prev === f1.seen["сло́во"].forms && f2.seen["сло́во"].forms.s > f1.seen["сло́во"].forms.s,
+     "and the next grade continues the slot and reports the previous one");
+  // The scores read each slot through familiarity; the weakest is the one never asked, then the least held.
+  const sc = S.skillScores(f2.seen["кни́га"], 5);
+  ok(sc.usage > 0 && sc.ru2en === null && sc.en2ru === null && sc.forms === null && Object.keys(sc).length === 4,
+     "skillScores: a score per skill, null where never asked", JSON.stringify(sc));
+  ok(S.weakestSkill(f2.seen["кни́га"]) === "ru2en" && S.weakestSkill(f2.seen["кни́га"], ["usage", "en2ru"]) === "en2ru"
+     && S.weakestSkill(f2.seen["кни́га"], ["usage"]) === "usage" && S.weakestSkill(null) === "ru2en",
+     "weakestSkill: never asked before least held, in table order on a tie");
+  const strongUsage = S.gradeSkill(S.gradeSkill({ w: { ru2en: good, usage: good } }, "w", "usage", 4, T0 + 3 * DAY, opts).seen,
+                                   "w", "usage", 4, T0 + 20 * DAY, opts).seen.w;
+  ok(S.weakestSkill(strongUsage, ["ru2en", "usage"]) === "ru2en", "…and the least stability where both are held");
+  // A still-split entry keeps its skill slots through the merge.
+  const splitSk = { ...split, forms: good };
+  ok(S.mergeEntry(splitSk).forms === good && S.cardsOf(splitSk).length === 1 && S.hasSkillSlots({ a: splitSk }) && !S.hasSkillSlots({ a: split }),
+     "mergeEntry carries the skill slots across; hasSkillSlots sees them");
+  // Rebuilt from the log: each row's kind or front names the slot graded, at its time.
+  const rows = [
+    { word: "а", direction: "recognise", grade: 3, at: T0, source: "choose-en" },
+    { word: "а", direction: "produce", grade: 3, at: T0 + DAY, source: "cloze" },
+    { word: "а", direction: "produce", grade: 4, at: T0 + 2 * DAY, source: "study" },
+    { word: "б", direction: "listen", grade: 1, at: T0 + 3 * DAY, source: "video" },
+  ];
+  const rebuilt = S.replayLog({ а: { recognise: good } }, rows.slice().reverse(), opts);
+  ok(rebuilt["а"].recognise === good && rebuilt["а"].ru2en.reps === 1 && rebuilt["а"].usage.reps === 1 && rebuilt["а"].en2ru.reps === 1
+     && !rebuilt["б"] && S.replayLog({}, [], opts) !== null,
+     "replayLog grades the slots from the log, oldest first, and leaves the card and the kinds that grade nothing alone",
+     JSON.stringify(rebuilt));
 }
 
 /* ------------------------------------------------------------ session */
@@ -744,6 +811,17 @@ group("the session");
     const odd = buildSession({ seen: { dom: { recognise: { ...due, reps: 3 } } }, words: ["dom"],
                                dirs: ["recognise", "produce"], now: T0, daily: null, opts, rng });
     ok(odd.items[0].direction === "produce", "…and the other front the next time round");
+    /* With the word's entry handed in, the front whose skill is weakest wins
+       (2026-10-29): a card recalled into Russian easily and out of it poorly
+       is asked from the English. Russian shown and heard share one skill, so
+       the turn decides between them; a word with no scores takes its turn. */
+    const held = (s) => ({ ...due, s });
+    ok(frontFor(due, ["recognise", "produce"], { recognise: due, ru2en: held(30), en2ru: held(2) }) === "produce"
+       && frontFor({ ...due, reps: 3 }, ["recognise", "produce"], { recognise: due, ru2en: held(2), en2ru: held(30) }) === "recognise"
+       && frontFor(due, ["recognise", "produce"], { recognise: due, ru2en: held(30) }) === "produce"
+       && frontFor({ ...due, reps: 1 }, ["recognise", "listen", "produce"], { recognise: due, ru2en: held(2), en2ru: held(30) }) === "listen"
+       && frontFor({ ...due, reps: 1 }, ["recognise", "produce"], { recognise: due }) === "produce",
+       "frontFor asks through the weakest skill's front — a skill never asked first — and takes turns on a tie");
     ok(frontFor({ reps: 0 }, ["recognise"]) === "recognise" && frontFor(null, ["listen"]) === "listen"
        && frontFor({ reps: 5 }, ["recognise", "produce", "listen"]) === "listen",
        "frontFor rotates the ticked fronts by the card's answers; a new card starts on the first");
@@ -3074,6 +3152,52 @@ group("production on a known word");
   // And a platform that passes no schedule behaves exactly as before.
   ok(RECOGNITION.some((k) => kindsFor(undefined).has(k)),
      "with no schedule given, nothing changes");
+
+  /* **The shape the word most needs** (2026-10-29, core/skills.js): among the
+     production shapes a held word is asked in, the one of its weakest skill —
+     a gap-fill is "In a sentence", a typed word "English → Russian". Held in a
+     sentence and never typed: typed, every time. */
+  const slot = (s, reps) => ({ s, d: 5, dueAt: 0, lastAt: 0, state: 2, reps, lapses: 0 });
+  // The kinds each held word of a lesson is asked in, over twenty draws.
+  const byWord = (u, li, seen) => {
+    const ws = lessonWords(u, li), out = new Map();
+    for (let k = 0; k < 20; k++) {
+      for (const q of Q.quizSteps(u, li, [], seen)) {
+        if (q.kind === "form" || !ws.includes(q.i)) continue;
+        if (!out.has(q.i)) out.set(q.i, new Set());
+        out.get(q.i).add(q.kind);
+      }
+    }
+    return out;
+  };
+  const kindsIn = (u, li, seen) => new Set([...byWord(u, li, seen).values()].flatMap((s) => [...s]));
+  const heldAs = (u, li, extra) => {
+    const seen = {};
+    for (const i of lessonWords(u, li)) seen[L[i].b] = { recognise: slot(PRODUCE_AT + 2, 4), ...extra };
+    return seen;
+  };
+  // A lesson whose held words can be gapped at all — the food unit's first cannot.
+  let where = null;
+  for (const u of UN) {
+    for (let li = 0; li < lessonCount(u) && !where; li++) if (kindsIn(u, li, heldAs(u, li, {})).has("cloze")) where = [u, li];
+    if (where) break;
+  }
+  ok(!!where, "some lesson's held words are asked through a gap", where ? `${where[0].id}:${where[1]}` : "none");
+  if (where) {
+    const t1 = kindsIn(where[0], where[1], heldAs(where[0], where[1], { usage: slot(40, 6) }));
+    ok(t1.has("type") && !t1.has("cloze"), "a held word strong in a sentence and never typed is typed, never gapped", [...t1].join(","));
+    // A word with a sentence to gap is gapped and never typed; one without is still typed.
+    const t2 = byWord(where[0], where[1], heldAs(where[0], where[1], { en2ru: slot(40, 6) }));
+    const gapped = [...t2.values()].filter((s) => s.has("cloze"));
+    ok(gapped.length > 0 && gapped.every((s) => !s.has("type")),
+       "…and one strong at typing is asked through a gap wherever it has a sentence, never typed there",
+       [...t2.values()].map((s) => [...s].join("+")).join(" | "));
+  }
+  // Below the bar the preference does not fire: a new word is met by recognition (§30j).
+  const youngSkilled = {};
+  for (const i of words) youngSkilled[L[i].b] = { recognise: slot(1, 1), ru2en: slot(1, 1) };
+  ok(RECOGNITION.some((k) => kindsFor(youngSkilled).has(k)),
+     "a word met this week with one skill scored is still asked by recognition");
 }
 
 /* A drill is a pool of questions, not a handful the learner sees again and again
@@ -4112,9 +4236,6 @@ group("tester reports, 2026-10-15");
   ok(mil && twice === 0, "two words sharing a sentence never both gap it in one quiz", String(twice));
 }
 
-console.log("\n" + checks + " checks · " +
-            (failures ? failures + " FAILED" : "all passed"));
-process.exit(failures ? 1 : 0);
 group("one word does not take over the course, 2026-10-20");
 {
   // "this" asked «этот» and marked «эта», «это», «эти» wrong.
@@ -4150,3 +4271,6 @@ group("one word does not take over the course, 2026-10-20");
   ok(today === 0, "a word answered today is not the review again", `${today} of ${lessons}`);
 }
 
+console.log("\n" + checks + " checks · " +
+            (failures ? failures + " FAILED" : "all passed"));
+process.exit(failures ? 1 : 0);

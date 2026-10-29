@@ -117,7 +117,8 @@ export function Blocked({ block, onGetModel, onSkip, skipLabel }) {
   return (
     <View style={{ alignItems: "center", gap: 12 }}>
       <Text style={{ color: t.ink2, fontSize: T.body, textAlign: "center" }}>{block.text}</Text>
-      {block.why === "model" ? <Btn label={`Get ${block.name || "Russian"}`} onPress={onGetModel} /> : null}
+      {block.why === "model" && block.canGet !== false
+        ? <Btn label={`Get ${block.name || "Russian"}`} onPress={onGetModel} /> : null}
       {onSkip ? (
         <Btn kind="ghost" label={skipLabel || (block.why === "mic" ? "Skip (mic off)" : "Skip")}
              onPress={onSkip} />

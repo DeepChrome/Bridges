@@ -1100,11 +1100,32 @@ export function SearchField({ value, onChangeText, placeholder, label, testID, s
       {voice ? (
         <View style={{ position: "absolute", right: 4 }}>
           <MicButton testID={testID ? testID + "-mic" : "search-mic"} langs={choose ? [lang] : voice}
-                     onLive={(s) => { if (s) onChangeText(s); }} onText={onChangeText} onNote={setNote} />
+                     onLive={(s) => { if (s) onChangeText(s); }} onText={onChangeText}
+                     onNote={(text, action) => setNote(text ? { text, action } : null)} />
         </View>
       ) : null}
     </View>
-    {note ? <Muted testID={testID ? testID + "-note" : undefined} size={13} style={{ marginTop: 6 }}>{note}</Muted> : null}
+    <MicNote note={note} testID={testID ? testID + "-note" : undefined} />
+    </View>
+  );
+}
+
+/* The line under a field that carries a microphone: what the microphone said
+   (`{ text, action }` from MicButton's `onNote`) and, when there is something
+   the learner can do about it — fetch the Russian model — that as a link. */
+export function MicNote({ note, testID, style }) {
+  const t = useTheme();
+  if (!note || !note.text) return null;
+  return (
+    <View testID={testID} style={[{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 6 }, style]}>
+      <Text style={{ color: t.ink3, fontSize: 13, flexShrink: 1 }}>{note.text}</Text>
+      {note.action ? (
+        <Text onPress={note.action.run} accessibilityRole="button" suppressHighlighting
+              testID={testID ? testID + "-action" : undefined}
+              style={{ color: t.brand, fontSize: 13, fontWeight: "700", paddingVertical: 8 }}>
+          {note.action.label}
+        </Text>
+      ) : null}
     </View>
   );
 }

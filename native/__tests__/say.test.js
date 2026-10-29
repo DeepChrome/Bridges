@@ -308,6 +308,7 @@ describe("say", () => {
   });
 
   it("without the offline model it says so and offers the download", async () => {
+    global.__stt.locales = { locales: ["ru-RU"], installedLocales: [] };
     await withSay();
     await screen.findByText(question.en);
     await speak();

@@ -29,6 +29,12 @@ import { useRecognizer, LANG } from "./speech";
 import { stop as stopAudio } from "./audio";
 import { ACTIVITY_ICONS } from "@core/icons";
 
+/* `onNote(text, action)`: what the caller should say under its field, and —
+   when the Russian model is what is missing — the one thing the learner can
+   do about it (`{ label, run }`), which `MicNote` draws as a link. The cases
+   drill's microphone used to report "not installed" with no way to install it
+   (the owner, 2026-10-29); the hold-to-speak activities had `Get Russian`
+   all along (activities/Say.js Blocked). */
 export function MicButton({ onText, onLive, onNote, langs, testID = "mic", size = 40, bias }) {
   const t = useTheme();
   const rec = useRecognizer({
@@ -40,8 +46,14 @@ export function MicButton({ onText, onLive, onNote, langs, testID = "mic", size 
   useEffect(() => { if (onLive && on) onLive(rec.live); }, [rec.live]);   // eslint-disable-line react-hooks/exhaustive-deps
   // A block (microphone off, no Russian model) or a transient note, said once
   // by the caller in its own place — a 40 px button has nowhere to say it.
-  useEffect(() => { if (onNote && rec.block) onNote(rec.block.text); }, [rec.block]);   // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (onNote && rec.note) onNote(rec.note); }, [rec.note]);   // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!onNote || !rec.block) return;
+    const b = rec.block;
+    const action = b.why === "model" && b.canGet !== false
+      ? { label: `Get ${b.name || "Russian"}`, run: rec.getModel } : null;
+    onNote(b.text, action);
+  }, [rec.block]);   // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (onNote && rec.note) onNote(rec.note, null); }, [rec.note]);   // eslint-disable-line react-hooks/exhaustive-deps
   // Leaving the screen puts the microphone down.
   useEffect(() => () => rec.cancel(), []);   // eslint-disable-line react-hooks/exhaustive-deps
 

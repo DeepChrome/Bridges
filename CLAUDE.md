@@ -6780,6 +6780,41 @@ two rules the app had made for itself threw the grade away:
 `goalfill.test.js`, `roundafter.test.js` and `studyoptions.test.js` pin all
 three; `core.test.mjs` the exhausted session.
 
+## 30ci. Two offline Russians, and the one the app uses (2026-10-29)
+
+The owner, from the cases drill: *"I keep getting the warning that Russian
+isn't available in offline recognition… I installed the offline Russian and
+I'm still getting the error."* Nothing in the app had changed since 2026-10-02;
+the phone had, and what it said was true of a different recogniser.
+
+- **Android has two offline speech stores.** The Google app's *Offline speech
+  recognition* list (the legacy Speech Services) is one; the on-device
+  recogniser (`createOnDeviceSpeechRecognizer`, Android 13+) keeps its own
+  models, and **that is the one every microphone in the app uses**
+  (`requiresOnDeviceRecognition: true`, §30c's audio-stays-on-the-phone rule).
+  Installing Russian in the first does nothing for the second. The only
+  things that fill the second are the app's own **Get Russian**
+  (`androidTriggerOfflineModelDownload`) and the phone's on-device speech
+  settings. A model can also leave with a system update, which is how a
+  recogniser that worked for weeks stopped.
+- **One error code, three situations.** `language-not-supported` is
+  `ERROR_LANGUAGE_UNAVAILABLE` and `ERROR_LANGUAGE_NOT_SUPPORTED` alike, and
+  the block said "not installed" for all of them. `modelStatus` in speech.js
+  now asks the same recogniser what it holds (`getSupportedLocales` with no
+  package) and `modelBlock` says which: not installed (Get Russian), installed
+  and still refused (Get Russian, a re-download is harmless), or not offered
+  on this phone at all (no button — it would fail).
+- **A block with no way out is a dead control.** The hold-to-speak activities
+  had `Blocked` with Get Russian from the start; the small `MicButton` on a
+  typed answer and the search bar only passed the text along, so the cases
+  drill reported the model missing and offered nothing. `onNote(text, action)`
+  carries the action and `MicNote` in ui.js draws it as a link. `mic.test.js`
+  holds the three cases; `say.test.js`'s model test sets `__stt.locales`.
+- **Not done, and the owner's call:** falling back to the network recogniser
+  when the on-device one refuses would make the microphone work on any phone
+  and send audio to Google, against the tour's and the store listing's
+  promise. Left as is.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

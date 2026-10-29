@@ -13,7 +13,7 @@
 
 import React, { useEffect, useState } from "react";
 import { View, Pressable } from "react-native";
-import { Text, TextInput } from "./ui";
+import { Text, TextInput, MicNote } from "./ui";
 import Svg, { Path, Rect } from "react-native-svg";
 import { useSession } from "./session";
 import { useTheme, radius, type as T } from "./theme";
@@ -122,6 +122,11 @@ export function RuInput({ value, onChangeText, onSubmit, editable = true, style,
           placeholder={placeholder}
           placeholderTextColor={t.ink3}
           autoCorrect={false}
+          /* …nor suggest or fill in: an answer is what the learner spelt.
+             A tester, 2026-10-20: "Auto correct changes spelling". */
+          autoComplete="off"
+          spellCheck={false}
+          importantForAutofill="no"
           autoCapitalize="none"
           autoFocus={autoFocus}
           showSoftInputOnFocus={!keys}
@@ -137,11 +142,12 @@ export function RuInput({ value, onChangeText, onSubmit, editable = true, style,
         {editable ? (
           <MicButton testID={testID ? testID + "-mic" : "answer-mic"} size={44}
                      onLive={(s) => { if (s) onChangeText(s); }}
-                     onText={(s) => onChangeText(s.replace(/[.!?…]+$/, ""))} onNote={setNote} />
+                     onText={(s) => onChangeText(s.replace(/[.!?…]+$/, ""))}
+                     onNote={(text, action) => setNote(text ? { text, action } : null)} />
         ) : null}
         {editable ? <Toggle on={keys} onPress={() => setShow(!show)} /> : null}
       </View>
-      {note ? <Text style={{ color: t.ink3, fontSize: 13, marginTop: 6 }}>{note}</Text> : null}
+      <MicNote note={note} testID={testID ? testID + "-note" : undefined} />
       {keys ? (
         <RuKeyboard
           onKey={(ch) => onChangeText((value || "") + ch)}

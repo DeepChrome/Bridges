@@ -178,8 +178,15 @@ jest.mock("expo-speech-recognition", () => {
   const stt = {
     calls: [],
     emit: (name, payload) => (listeners[name] || []).forEach((h) => h(payload)),
-    reset: () => { stt.calls.length = 0; stt.slowStart = false; for (const k in listeners) delete listeners[k]; },
+    reset: () => {
+      stt.calls.length = 0; stt.slowStart = false;
+      // What the on-device recogniser holds (speech.js modelStatus); a test
+      // about a missing model sets this before it starts.
+      stt.locales = { locales: ["ru-RU", "en-US"], installedLocales: ["ru-RU", "en-US"] };
+      for (const k in listeners) delete listeners[k];
+    },
   };
+  stt.reset();
   global.__stt = stt;
   return {
     ExpoSpeechRecognitionModule: {
@@ -197,7 +204,7 @@ jest.mock("expo-speech-recognition", () => {
       getPermissionsAsync: jest.fn(async () => ({ granted: true, status: "granted" })),
       isRecognitionAvailable: jest.fn(() => true),
       supportsOnDeviceRecognition: jest.fn(() => true),
-      getSupportedLocales: jest.fn(async () => ({ locales: ["ru-RU"], installedLocales: ["ru-RU"] })),
+      getSupportedLocales: jest.fn(async () => stt.locales),
       androidTriggerOfflineModelDownload: jest.fn(async () => ({ status: "opened_dialog" })),
     },
     useSpeechRecognitionEvent: (name, handler) => {

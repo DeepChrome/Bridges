@@ -49,6 +49,43 @@ export const LANG = "ru-RU";
 export const LANG_EN = "en-US";
 const NAME = { [LANG]: "Russian", [LANG_EN]: "English" };
 export const WATCHDOG_MS = 8000;
+
+/* **Which model is missing, asked of the recogniser that refused it.**
+ *
+ * The engine answers one code for three situations — the language is
+ * supported and not downloaded, downloaded and still refused, or not offered
+ * by this phone's on-device recogniser at all — and for weeks the app said
+ * "not installed" for all three. The owner installed Russian under the Google
+ * app's offline voice list and was told again that it was not installed
+ * (2026-10-29): that list belongs to a *different* recogniser. The app's is
+ * Android's on-device one (`createOnDeviceSpeechRecognizer`), whose models
+ * only `Get Russian` (androidTriggerOfflineModelDownload) fetches.
+ *
+ * So the block asks that same recogniser what it holds, and says which case
+ * this is. `getSupportedLocales` with no package is that recogniser.
+ *   installed  — the model is there and the engine still refused: the phone's
+ *                recogniser is the fault; Get offers a re-download anyway
+ *   supported  — it can be downloaded, and that is what the button does
+ *   missing    — nothing to fetch; the button would fail, so it is not shown
+ *   null       — the platform would not say; the old line stands */
+export async function modelStatus(locale) {
+  const code = String(locale).slice(0, 2).toLowerCase();
+  const has = (xs) => (xs || []).some((l) => String(l).toLowerCase().startsWith(code));
+  try {
+    const loc = await M.getSupportedLocales({});
+    if (has(loc.installedLocales)) return "installed";
+    if (has(loc.locales)) return "supported";
+    return "missing";
+  } catch (e) { return null; }
+}
+
+export function modelBlock(locale, status) {
+  const name = NAME[locale] || locale;
+  const text = status === "installed" ? `${name} is installed, but offline recognition refused it.`
+    : status === "missing" ? `This phone's offline recognition does not offer ${name}.`
+    : `${name} is not installed for offline recognition.`;
+  return { why: "model", name, status: status || null, canGet: status !== "missing", text };
+}
 /* The engine listens for at least this long from the moment it starts, whatever
    the finger does. A one-syllable word in the pronunciation drill is said and
    the button let go inside half a second, and stopping the recogniser that
@@ -326,8 +363,15 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
     go("idle");
     const what = `${ev.error} ${ev.message || ""}`;
     if (/not-supported|not downloaded/i.test(what)) {
-      setBlock({ why: "model", name: NAME[lang.current] || lang.current,
-                 text: `${NAME[lang.current] || lang.current} is not installed for offline recognition.` });
+      const refused = lang.current;
+      setBlock(modelBlock(refused, null));
+      // Refined once the recogniser says what it holds; a block cleared or
+      // replaced in the meantime is left alone.
+      modelStatus(refused).then((status) => {
+        if (!status) return;
+        setBlock((b) => (b && b.why === "model" && b.status === null && b.name === modelBlock(refused).name
+          ? modelBlock(refused, status) : b));
+      });
     } else if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
       forgetMicPermission();
       setBlock({ why: "mic", text: MIC_OFF});

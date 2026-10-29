@@ -85,6 +85,50 @@ describe("speaking into a field", () => {
   });
 });
 
+/* The engine answers one code for three situations and the small microphone
+   used to say "not installed" for all of them with nothing to press (the owner,
+   2026-10-29, on the cases drill: he had installed Russian in the Google app's
+   offline list — a different recogniser's — and was told again it was not
+   installed). The block now asks the app's own recogniser what it holds, and
+   the field offers the download that fills *that* one. */
+describe("when the Russian model is what is missing", () => {
+  const refuse = () => act(async () => {
+    global.__stt.emit("error", { error: "language-not-supported",
+                                 message: "Requested language is supported, but not yet downloaded." });
+  });
+  const { ExpoSpeechRecognitionModule: M } = require("expo-speech-recognition");
+
+  it("offers Get Russian under the answer field, and the press fetches the on-device model", async () => {
+    global.__stt.locales = { locales: ["ru-RU"], installedLocales: [] };
+    M.androidTriggerOfflineModelDownload.mockClear();
+    await withProfile(<Answer />);
+    await act(async () => { fireEvent.press(await screen.findByTestId("answer-mic")); });
+    await refuse();
+    expect(await screen.findByText("Russian is not installed for offline recognition.")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByTestId("answer-note-action")); });
+    expect(M.androidTriggerOfflineModelDownload).toHaveBeenCalledWith({ locale: "ru-RU" });
+    expect(screen.getByTestId("answer-note-action")).toHaveTextContent("Get Russian");
+  });
+
+  it("says when the model is installed and the recogniser still refused it", async () => {
+    global.__stt.locales = { locales: ["ru-RU"], installedLocales: ["ru-RU"] };
+    await withProfile(<Answer />);
+    await act(async () => { fireEvent.press(await screen.findByTestId("answer-mic")); });
+    await refuse();
+    expect(await screen.findByText(/Russian is installed, but offline recognition refused it/)).toBeTruthy();
+    expect(screen.getByTestId("answer-note-action")).toHaveTextContent("Get Russian");   // a re-download is harmless
+  });
+
+  it("offers no download where the phone's recogniser has no Russian at all", async () => {
+    global.__stt.locales = { locales: ["en-US"], installedLocales: ["en-US"] };
+    await withProfile(<Answer />);
+    await act(async () => { fireEvent.press(await screen.findByTestId("answer-mic")); });
+    await refuse();
+    expect(await screen.findByText(/does not offer Russian/)).toBeTruthy();
+    expect(screen.queryByTestId("answer-note-action")).toBeNull();
+  });
+});
+
 /* The microphone is drawn as open when the engine can hear, not when it was
    asked to start (the owner, 2026-09-29: *"if you start talking too soon, it
    won't detect. There seems to be a solid one second delay"*). Android takes a

@@ -5997,7 +5997,12 @@ Twelve items in `docs/BETA.md` Phase T. The rules each one left:
   already in the scheduler, and resuming on it would grade it twice.
   Reopening a flow asks Continue or Start again (`useResume`); opening the app
   offers the newest run once, as a sheet on the path; finishing clears it; a
-  week old is not offered. The screen's memory, not the learner's: losing it
+  week old is not offered. **And a run passed over is not offered at the next
+  launch** (2026-10-29; the owner: *"every time I open the app, I get a
+  continue where you left off prompt"*): closing the sheet only hid it, so one
+  abandoned drill nagged for a week. `launchOffer` stamps every saved run
+  `offered`; one more answer re-saves the run without the stamp. Its own
+  screen still asks. The screen's memory, not the learner's: losing it
   costs a restart, never a card (immerse.js's reasoning). Every saving flow
   names its route and tab, and `routes.test.js` holds each to a registered
   route. Not saved: placement (onboarding) and the unscored mouth drills.

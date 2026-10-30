@@ -91,11 +91,23 @@ export function latestRun(now = Date.now()) {
 }
 
 /* The run to offer when the app is opened: once a launch, so leaving the path
-   and coming back to it does not ask again. */
+   and coming back to it does not ask again — and once a run, so a run that
+   was offered and passed over is not offered on every launch for a week (the
+   owner, 2026-10-29: "every time I open the app, I get a continue where you
+   left off prompt… it should only do that if I was halfway through an
+   exercise and closed the app"). Every run on the row is stamped `offered`
+   when the sheet is shown; `saveRun` rebuilds a run from its snapshot, so one
+   more answer in it makes it offerable again. The run itself is kept: opening
+   its own screen still asks (useResume), which is where leaving it and coming
+   back belongs. */
 export function launchOffer(now = Date.now()) {
   if (offered || !profile) return null;
   offered = true;
-  return latestRun(now);
+  const run = latestRun(now);
+  if (!run || run.offered) return null;
+  runs = Object.fromEntries(Object.entries(runs).map(([k, r]) => [k, { ...r, offered: true }]));
+  write();
+  return run;
 }
 
 /* Tests start each case clean. */

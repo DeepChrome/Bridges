@@ -186,6 +186,46 @@ describe("opening the app", () => {
       expect(screen.queryByTestId("resume-sheet")).toBeNull();   // not again this launch
     } finally { spy.mockRestore(); }
   });
+
+  /* The owner, 2026-10-29: "every time I open the app, I get a continue where
+     you left off prompt… it should only do that if I was halfway through an
+     exercise and closed the app". A run passed over at one launch is not
+     offered at the next; one more answer in it, and it is. */
+  it("a run passed over is not offered at the next launch, until it is worked on again", async () => {
+    const deck = steps();
+    const spy = jest.spyOn(Q, "quizSteps").mockReturnValue(deck);
+    const relaunch = async () => { resetResume(); await flushState(); await loadResume("p1"); };
+    try {
+      const view = await withProfile(quiz());
+      await answer(deck[0]);
+      await act(async () => { view.unmount(); });
+
+      await relaunch();
+      const learn = await withProfile(<Learn navigation={nav} />);
+      expect(await screen.findByTestId("resume-sheet")).toBeTruthy();
+      await act(async () => { fireEvent.press(screen.getByTestId("sheet-backdrop")); });   // passed over
+      await act(async () => { learn.unmount(); });
+
+      await relaunch();
+      const learn2 = await withProfile(<Learn navigation={nav} />);
+      await screen.findByTestId("next-step");
+      expect(screen.queryByTestId("resume-sheet")).toBeNull();     // not again at the next launch
+      expect(savedRun(KEY)).toMatchObject({ at: 1 });               // but the run is kept
+      await act(async () => { learn2.unmount(); });
+
+      // Its own screen still asks: leaving a quiz and coming back to it.
+      const again = await withProfile(quiz());
+      expect(await screen.findByTestId("resume-prompt")).toBeTruthy();
+      await act(async () => { fireEvent.press(screen.getByText("Continue")); });
+      await answer(deck[1]);                                        // worked on again
+      await act(async () => { again.unmount(); });
+
+      await relaunch();
+      await withProfile(<Learn navigation={nav} />);
+      expect(await screen.findByTestId("resume-sheet")).toBeTruthy();
+      expect(screen.getByTestId("resume-what")).toHaveTextContent("2 of 4");
+    } finally { spy.mockRestore(); }
+  });
 });
 
 /* A saved deck goes through JSON, so a question must come back from it whole. */

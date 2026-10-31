@@ -31,6 +31,7 @@ export const RUNS = [
   "CustomQuiz",   // a quiz the learner built
   "Final",        // the final test at the foot of the path
   "Drill",        // any grammar drill
+  "WordDrill",    // one word's drill, from the back of its flashcard
   "SoundDrill",   // the pronunciation pairs
   "BuildDrill",   // a long word built from its end
   "Shadow",       // shadowing

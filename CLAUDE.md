@@ -6932,6 +6932,53 @@ intelligent when picking which word to provide."*
   was never zero and the audit passes no learner, so it cannot move it;
   `walkShape` is the zero that matters.
 
+## 30ck. Drills for one word, from the back of its card (2026-10-31)
+
+The owner: *"the cards are sort of the highlight of the entire app… a little
+drills button on the back of the card… a submenu of drills for that word…
+effectively all drill options for that word… targeted familiarity."*
+
+- **What a word can be asked is read off the word** (`WORD_DRILLS`,
+  `wordDrills(i)`, `wordDrill(i, id)` in core/questions.js): Meaning
+  (chosen, heard, chosen, written — recognition before production), In a
+  sentence (gap-fills over its distinct examples, then pool sentences heard
+  and said, never one sentence twice), then whichever of the five grammar
+  drills the word takes, then Say it (built from its end and assessed,
+  three syllables or more). Each test is the generator's own first test of a
+  word, so a drill listed is one the generator fills — and the count on the
+  row is what one run holds. A noun's **agreement** drill is the adjectives
+  the corpus puts beside it (`adjectivesWith`, PAIRS read backwards), asked
+  to agree with it; it grades the adjective, whose form is written.
+- **The grammar drills run with a pool of one word**: `drillQuestions` draws
+  its word from the pool, so a pool of one is every question about it,
+  deduplicated by `drillKey`. Nothing in the generators changed.
+- **The sheet is `WordDrillsButton` in native/src/worddrills.js**, beside
+  More on the back; a row wears the word's score for the skill the drill
+  feeds (`skills` on each entry, the breakdown's own numbers — Meaning the
+  weaker of its two) and nothing where nothing has asked. `WordDrillFlow` is
+  the run (route `WordDrill`, on every stack that shows a flashcard: Study,
+  Learn, Immerse, Root — routes.test.js found Immerse). Graded as any run:
+  meaning moves the card and its meaning scores, a form drill the forms
+  score alone (§30by), Say it nothing; no best score is kept.
+- **A noun has cases and no conjugation, a verb the reverse, a preposition
+  Meaning and sentences only**: `core.test.mjs` sweeps a third of the course
+  for drills that fill and aim at their word; `worddrills.test.js` and
+  `worddrillflow.test.js` walk the button, the sheet, a Meaning run to Done
+  and a Cases answer into the saved profile.
+- **A test key must see what it compares.** `drillKey` reads a hear's empty
+  prompt and no options, so every heard sentence keyed alike and the first
+  sweep reported duplicates in sound runs. A sentence question is its
+  sentence.
+- **Found on the emulator, not by any suite: Study threw the pile away on
+  the way back from the drill.** Its focus listener reopens the options when
+  nothing has been graded (the owner's "each time the person clicks study")
+  and fired on *any* refocus — a drill, the word entry or a video pushed
+  over the card all blur and refocus it. Drills on the first card, Done, and
+  the start panel. On blur the stack says which it was (`pushedOver` in
+  Study.js: a pushed screen is on top of this one; a tab press leaves it on
+  top of its own stack); `studyfocus.test.js` drives both and fails against
+  the old listener. A screen pushed over another is not a visit to a tab.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

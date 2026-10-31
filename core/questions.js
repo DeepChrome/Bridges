@@ -13,7 +13,7 @@ import { fold, shuffle, sample, firstSense, askSense, onSense, TOKEN, dayOf } fr
 import { sentenceLemmas, pickPrompt } from "./speech.js";
 import { charDistance } from "./compare.js";
 import { describeForm, GENERIC_COLUMN } from "./forms.js";
-import { buildupDrill } from "./buildup.js";
+import { buildupDrill, worthBuilding } from "./buildup.js";
 import { CASES, caseById, AS_VERBS, PREPOSITIONS, SET_PHRASES, TIME_NOUNS } from "./cases.js";
 import { irregularities, stemChange, conjugation } from "./facts.js";
 import { cardFor, weakestSkill, skillOfKind } from "./scheduler.js";
@@ -276,6 +276,31 @@ export const DRILL_TYPES = [
      question built on a chapter's card carries that card as `note`, and the
      runner shows it under a wrong answer (§30al). */
 ];
+
+/* Every way the app can ask about **one** word, for the Drills button on the
+ * back of its flashcard (the owner, 2026-10-31: *"a submenu of drills for that
+ * word… effectively all drill options for that word… targeted familiarity"*).
+ *
+ * Two of its own and the five grammar drills, in the order a learner meets a
+ * word — its meaning, then the word inside a sentence, then its forms, then
+ * the mouth. `skills` names the scores a run feeds (core/skills.js), which is
+ * what makes the menu more than a list: a learner who reads "English → Russian
+ * 40" in the breakdown has a row here that moves exactly that number.
+ * `wordDrills(i)` says which of these a given word can take — a noun has
+ * cases and no conjugation, a word with no aspect partner has no aspect
+ * drill — and `wordDrill(i, id)` builds the run. */
+export const WORD_DRILLS = [
+  { id: "meaning", name: "Meaning", icon: "quiz", skills: ["ru2en", "en2ru"] },
+  { id: "sentence", name: "In a sentence", icon: "listen", skills: ["usage"] },
+  ...DRILL_TYPES.map((d) => ({ id: d.id, name: d.name, icon: d.icon, skills: ["forms"] })),
+  { id: "say", name: "Say it", icon: "buildup", skills: [] },
+];
+/* Questions in one word's drill at most: a noun's declension has eleven cells
+   to ask for, and ten is a sitting. */
+export const WORD_DRILL_N = 10;
+/* Gap-fills, then sentences heard, then said, in one word's sentence drill:
+   six example sentences at most, two of each spoken kind. */
+export const WORD_SENTENCE_MIX = { cloze: 6, hear: 2, say: 2 };
 
 export function makeQuestions(env) {
   const { L, IX, UN, STAGES, lessonWords, lessonCount, hasVoice, SPEECH } = env;
@@ -3539,11 +3564,153 @@ export function makeQuestions(env) {
     return out;
   }
 
+  /* ------------------------------------------------- drills for one word */
+
+  /* The pool sentences that use word `i`, by pool, shortest first, with the
+     unit whose pool holds each (what a hear or say step carries as `unit`).
+     The reverse index is built on the first ask: two thousand sentences
+     tokenised once, not once per card. */
+  let rowIndex = null;
+  function sentenceRowsOf(i) {
+    if (!SPEECH || !SPEECH.rows) return { listen: [], speak: [], unitOf: () => undefined };
+    if (!rowIndex) {
+      const byLemma = new Map();
+      SPEECH.rows.forEach((row, k) => {
+        for (const l of sentenceLemmas(row[0], IX)) {
+          if (!byLemma.has(l)) byLemma.set(l, []);
+          byLemma.get(l).push(k);
+        }
+      });
+      const unitIn = (name) => {
+        const m = new Map();
+        for (const [uid, ks] of Object.entries(SPEECH[name] || {})) {
+          for (const k of ks) if (!m.has(k)) m.set(k, uid);
+        }
+        return m;
+      };
+      rowIndex = { byLemma, listen: unitIn("listen"), speak: unitIn("speak") };
+    }
+    const ks = rowIndex.byLemma.get(i) || [];
+    const byLength = (a, b) => (SPEECH.rows[a][2] || 0) - (SPEECH.rows[b][2] || 0);
+    const pick = (name) => ks.filter((k) => rowIndex[name].has(k)).sort(byLength);
+    return { listen: pick("listen"), speak: pick("speak"), unitOf: (name, k) => rowIndex[name].get(k) };
+  }
+
+  /* The adjectives the corpus puts before noun `i` — PAIRS runs the other way,
+     adjective → nouns, and it is read backwards here so a noun's agreement
+     drill can ask the adjectives that actually stand beside it. */
+  function adjectivesWith(i) {
+    const out = [];
+    for (const [a, nouns] of Object.entries(PAIRS)) if ((nouns || []).includes(i)) out.push(Number(a));
+    return out;
+  }
+
+  /* Which of WORD_DRILLS word `w` can take at all, read off the word before
+     any question is built — the menu must not run five generators against a
+     preposition to learn that it is one. Each rule is the generator's own
+     first test of a word (qCases wants a declined noun, qAspectPartner a verb
+     with a partner, qStress a marked word of four letters or more), so a drill
+     listed is one the generator will fill. */
+  function wordDrillFits(w, i, id) {
+    switch (id) {
+      case "meaning": return glossed(w);
+      case "sentence": return true;
+      case "cases": return w.p === "noun" && !!tableTitled(w, /Declension/);
+      case "conjugation": return w.p === "verb" && VERB_TABLES.some((x) => tableTitled(w, x.re));
+      // An adjective agrees with the nouns the corpus pairs it with; a noun's
+      // drill asks those adjectives to agree with it.
+      case "agreement": return w.p === "adjective" ? !!tableTitled(w, /Declension/) && !PRONOMINAL.has(fold(w.b))
+        : nounOk(w) && adjectivesWith(i).length > 0;
+      case "aspect": return w.p === "verb" && !!w.a && partnersOf(w).length > 0;
+      case "stress": return /́/.test(w.w) && w.b.length > 3;
+      case "say": return worthBuilding(w.w);
+      default: return false;
+    }
+  }
+
+  /* One word's drill, as a run. `opts.typed` is the learner's written-or-chosen
+     setting (default written, like every drill); `opts.n` caps the run. The
+     grammar drills run through `drillQuestions` with a pool of this one word —
+     the generators already draw their word from the pool, so a pool of one is
+     every question about it, deduplicated by `drillKey` as any run is. */
+  function wordDrill(i, id, opts = {}) {
+    const w = L[i];
+    if (!w || !wordDrillFits(w, i, id)) return [];
+    const typed = opts.typed !== false;
+    const n = opts.n || WORD_DRILL_N;
+    const unit = (w.u && UN.find((u) => u.id === w.u)) || null;
+    const pool = poolFor(unit || { w: [] });
+    switch (id) {
+      /* Recognition before production, the order a lesson asks in: the
+         meaning chosen, the word heard, the Russian chosen, the Russian
+         written. Four questions on one word is the point of the drill — the
+         learner asked for this word. */
+      case "meaning":
+        return ["choose-en", "listen", "choose-ru", "type"]
+          .filter((t) => t !== "listen" || voice())
+          .map((t) => present({ t, i, pool })).filter(Boolean);
+      /* The word inside sentences: a gap in each of its example sentences
+         (distinct ones — `avoid` grows as they are taken), then pool
+         sentences that use it heard and typed back, then said. Never the
+         same sentence twice across the three. */
+      case "sentence": {
+        const out = [], taken = new Set();
+        const take = (ru) => { const k = fold(ru); if (taken.has(k)) return false; taken.add(k); return true; };
+        for (let k = 0; k < WORD_SENTENCE_MIX.cloze; k++) {
+          const c = clozeFor(i, null, { avoid: taken });
+          if (!c || !take(c.ex.ru)) break;
+          out.push(present({ t: "cloze", i, ex: c.ex, token: c.token, pool }));
+        }
+        const rows = sentenceRowsOf(i);
+        for (const [t, name] of [["hear", "listen"], ["say", "speak"]]) {
+          // The easier half, at random within it (pickPrompt's own rule), so a
+          // second run of the drill hears a different sentence.
+          const easy = rows[name].slice(0, Math.max(3, Math.ceil(rows[name].length / 2)));
+          let got = 0;
+          for (const k of shuffle(easy)) {
+            if (got >= WORD_SENTENCE_MIX[t]) break;
+            if (!take(SPEECH.rows[k][0])) continue;
+            out.push(present({ t, row: SPEECH.rows[k], unit: rows.unitOf(name, k) }));
+            got++;
+          }
+        }
+        return out.slice(0, n);
+      }
+      case "agreement":
+        return drillQuestions("agreement", n, w.p === "noun" ? adjectivesWith(i).concat([i]) : [i], null, typed, null);
+      case "cases": case "conjugation": case "aspect": case "stress":
+        return drillQuestions(id, n, [i], null, typed, null);
+      /* Built from its end and then said whole into the microphone, as the
+         quiz's pronunciation step is (quizStepsIn): assessed, never graded. */
+      case "say": {
+        const [step] = buildupDrill([{ ru: w.w, en: firstSense(w) }], 1, { listen: true });
+        return step ? [{ ...step, i, assess: true }] : [];
+      }
+      default: return [];
+    }
+  }
+
+  /* The drills word `i` can take, each with how many questions a run holds —
+     the menu on the back of its flashcard. A drill a word fits on paper but
+     cannot fill (a noun no adjective stands beside) is left out. */
+  function wordDrills(i, opts) {
+    const w = L[i];
+    if (!w) return [];
+    const out = [];
+    for (const d of WORD_DRILLS) {
+      if (!wordDrillFits(w, i, d.id)) continue;
+      const n = wordDrill(i, d.id, opts).length;
+      if (n) out.push({ ...d, n });
+    }
+    return out;
+  }
+
   return {
     distractors, clozeFor, candidates, present, poolFor, speechPrompt, stageOf, unitsUpTo,
     vocabSteps, quizSteps, stepKeys, placementQuestions, sectionQuestions, drillQuestions, drillKey,
     sceneFor, lessonPassage, scriptScene, writtenPassage, shadowDrill,
     customQuiz, finalExam, recapQuestions, formPrompt, formSpec, formsIntroduced, drillFocus, defaultFocus, routeFocus, grammarRun,
     drillsIntroduced, withTaught, caseLesson, caseDrill, caseCounts, casePoolSize, metBy,
+    wordDrills, wordDrill,
   };
 }

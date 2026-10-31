@@ -43,6 +43,13 @@ export const HELP = {
     ["Counter", "Done, coming back, left; tap it for more"],
     ["Cog", "Fronts, sources, new words a day"],
     ["Fifty a day", "The rest wait for tomorrow; Keep going lifts it"],
+    ["Drills", "On the back: every drill for that word"],
+  ] },
+  WordDrill: { title: "One word's drill", lines: [
+    ["Bulb", "The word's tables; costs the grade"],
+    ["Speaker", "Hear the word; twice for slower"],
+    ["Missed", "Comes back once at the end"],
+    ["Sparkle", "Ask the AI about this question"],
   ] },
   Drills: { title: "Practice", lines: [
     ["Grammar drills", "Cases, agreement, conjugation, aspect, stress"],

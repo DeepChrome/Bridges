@@ -24,7 +24,7 @@ import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { HelpButton } from "./src/help";
 import { AskButton, ReportButton, INLINE_TOOLS } from "./src/askai";
-import { DRILL_TYPES } from "./src/questions";
+import { DRILL_TYPES, WORD_DRILLS } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
 import Translate from "./src/screens/Translate";
@@ -63,7 +63,7 @@ import { tabIcon } from "./src/tabicons";
 import { flushState } from "./src/store";
 import { DrillList } from "./src/screens/Practice";
 import { VocabFlow, QuizFlow } from "./src/flows/Lesson";
-import { DrillFlow, SoundDrillFlow, ShadowFlow, BuildDrillFlow, GrammarFlow } from "./src/flows/Drills";
+import { DrillFlow, SoundDrillFlow, ShadowFlow, BuildDrillFlow, GrammarFlow, WordDrillFlow } from "./src/flows/Drills";
 import { CaseHub, CaseModule, CaseFlow } from "./src/flows/Cases";
 import { ListeningFlow, ScenesList } from "./src/flows/Listening";
 import { QuizSetup, CustomQuizFlow, RecapFlow } from "./src/flows/Quiz";
@@ -266,6 +266,8 @@ function LearnStack() {
           on the stack it was asked from, so Back returns there — sending it to
           the Study tab left Back to land on the path. On every stack Video is. */}
       <Stack.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
+      {/* A drill on one word, from the back of a flashcard (worddrills.js). */}
+      <Stack.Screen name="WordDrill" component={WordDrillFlow} options={wordDrillTitled} />
       {/* The lesson's own conversation, opened from its Listening step. Here as
           well as on the Practice stack for the reason `Video` is in two stacks:
           **a route is only reachable from the stack it is registered in**, and a
@@ -365,6 +367,7 @@ function ImmerseStack() {
       <Stack.Screen name="VideoSummary" component={VideoSummary} options={titled("Video summary")} />
       <Stack.Screen name="VideoQuiz" component={VideoQuizFlow} options={titled("Video questions")} />
       <Stack.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
+      <Stack.Screen name="WordDrill" component={WordDrillFlow} options={wordDrillTitled} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
       <Stack.Screen name="Credits" component={Credits} options={{ title: "About" }} />
@@ -384,6 +387,8 @@ function StudyStack() {
       <Stack.Screen name="VideoSummary" component={VideoSummary} options={titled("Video summary")} />
       <Stack.Screen name="VideoQuiz" component={VideoQuizFlow} options={titled("Video questions")} />
       <Stack.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
+      {/* A drill on one word, from the back of a flashcard (worddrills.js). */}
+      <Stack.Screen name="WordDrill" component={WordDrillFlow} options={wordDrillTitled} />
       <Stack.Screen name="You" component={You} options={{ title: "You" }} />
       <Stack.Screen name="Stats" component={Stats} options={{ title: "Statistics" }} />
       <Stack.Screen name="Credits" component={Credits} options={{ title: "About" }} />
@@ -445,6 +450,23 @@ function Splash({ onDone }) {
    from every screen — a tapped word in a lesson, a search result, an example
    sentence — and one screen with one back stack beats five copies of it. */
 const Root = createNativeStackNavigator();
+
+/* One word's drill (flows/Drills.js WordDrillFlow): the word as the title, the
+   drill's name under it — the shape the grammar drills' header has. On every
+   stack that shows a flashcard (Study, Learn, Immerse, Root), since that is
+   where the Drills button lives (§23: a route is reachable only from its own
+   stack; routes.test.js is what found Immerse). */
+const wordDrillTitled = ({ navigation, route }) => {
+  const p = route.params || {};
+  const w = p.word !== undefined ? resolveWord(p.word) : null;
+  const spec = WORD_DRILLS.find((d) => d.id === p.drill);
+  return {
+    headerRight: () => <HeaderRight navigation={navigation} route={route} />,
+    headerBackButtonDisplayMode: "minimal",
+    headerTitleAlign: "center",
+    headerTitle: () => <HeaderTitle title={w ? w.w : p.word || "Drill"} sub={spec ? spec.name : "Drill"} />,
+  };
+};
 
 const wordTitled = ({ route }) => {
   const p = route.params || {};
@@ -544,6 +566,7 @@ function Shell() {
           "Masculine") opens its rule over the entry from any tab. */}
       <Root.Screen name="Grammar" component={Grammar} options={{ title: "Grammar" }} />
       <Root.Screen name="ListCards" component={Study} options={{ title: "Flashcards" }} />
+      <Root.Screen name="WordDrill" component={WordDrillFlow} options={wordDrillTitled} />
       {/* Developer-mode only; the screen itself refuses to render otherwise. */}
       <Root.Screen name="SttLab" component={SttLab} options={{ title: "STT Lab" }} />
       <Root.Screen name="Tour" component={TourScreen} options={{ title: "Tour" }} />

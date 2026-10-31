@@ -9,7 +9,8 @@ import { Screen, Btn, List, Row, SectionLabel, Chip, Tick, Text,
          Sheet, Choice, CogButton, Loading, RowText } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
 import { clearRun, savedRun, useResume } from "../resume";
-import { Q, DRILL_TYPES } from "../questions";
+import { Q, DRILL_TYPES, WORD_DRILLS } from "../questions";
+import { wordIndex } from "../worddrills";
 import {
   L, UN, STAGES, DRILL_PASS, SHADOW_PASS, drillPool,
   chapterWords, irregularWords, knownPool, skillWeight,
@@ -396,6 +397,63 @@ export function DrillFlow({ route, navigation }) {
       />
       {sheet}
     </>
+  );
+}
+
+/* ------------------------------------------------------- one word's drill */
+
+/* A drill on one word, chosen from the back of its flashcard (worddrills.js;
+   core/questions.js wordDrill). `word` is the card's Russian string and
+   `drill` one of WORD_DRILLS. Graded as any run is — the meaning questions
+   move the card and its meaning scores, the form drills the "Cases & forms"
+   score alone (Run.js gradesCard), Say it nothing — which is what makes the
+   row in the sheet the way to move the number the breakdown shows. No best
+   score is kept: the skill slots are the record. */
+export function WordDrillFlow({ route, navigation }) {
+  const { word, drill } = route.params || {};
+  const { st } = useSession();
+  const [result, setResult] = useState(null);
+  const [seed, setSeed] = useState(0);
+  const i = wordIndex(word);
+  const spec = WORD_DRILLS.find((d) => d.id === drill);
+  const typed = st.typedDrills !== false;
+  const steps = useMemo(() => (i >= 0 && spec ? Q.wordDrill(i, drill, { typed }) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [i, drill, typed, seed]);
+  useAudioStopOnLeave();
+  const title = spec ? spec.name : "Drill";
+  const save = { key: `word:${word}:${drill}`, route: "WordDrill", tab: "Study", params: { word, drill },
+                 title: i >= 0 ? `${title} · ${L[i].w}` : title };
+  const resume = useResume(save.key, route.params);
+  if (resume.prompt) return resume.prompt;
+
+  if (!steps.length) {
+    return <Done title="Nothing to drill here" onBack={() => navigation.goBack()} />;
+  }
+  if (result) {
+    // A word said is not marked (§30z): the run ends, and nothing is scored.
+    const said = drill === "say";
+    return (
+      <Done
+        title={title}
+        detail={said ? L[i].w : `${result.right} of ${result.total} right`}
+        score={said ? undefined : result.score}
+        passed={said ? undefined : result.score >= DRILL_PASS}
+        onAgain={() => { setResult(null); setSeed(seed + 1); }}
+        againLabel="Again"
+        onBack={() => navigation.goBack()}
+      />
+    );
+  }
+  return (
+    <Runner
+      key={seed}
+      steps={steps}
+      navigation={navigation}
+      save={save}
+      restore={resume.restore}
+      onFinish={(r) => setResult({ ...r, score: scoreOf(r) })}
+    />
   );
 }
 

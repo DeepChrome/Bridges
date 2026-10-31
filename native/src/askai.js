@@ -151,7 +151,7 @@ export function AskInput({ th, placeholder, prefix = "ask", autoFocus }) {
    screen keeps them in the header. `RunTools` is the pair. */
 export const INLINE_TOOLS = new Set(["Vocab", "Quiz", "GrammarRun", "CaseRun", "Recap", "VideoQuiz",
   "Scenes", "TestOut", "Final", "Placement", "CustomQuiz", "SoundDrill", "BuildDrill", "Shadow", "Drill",
-  "Cards", "ListCards"]);
+  "WordDrill", "Cards", "ListCards"]);
 
 /* Header size, or a disc like the bulb's: `disc` true for 40 px, or the
    size itself (an exercise's row is larger — Run.js TOOL_SIZE). */

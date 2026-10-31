@@ -31,7 +31,7 @@ import { compare, words, charDistance } from "../core/compare.js";
 import { ERROR_TAGS, TAG_IDS, isTag, tagInfo } from "../core/errortags.js";
 import { makeQuestions, QUIZ_N, QUIZ_MIN, QUIZ_WORDS, DRILL_TYPES, SPEECH_MIX, FORM_MIX, DRILL_MIX, REVIEW_MIX, GRAMMAR_IN_LESSON, QUIZ_KINDS, PRODUCE_AT,
          lessonSize, lessonWordsOf, lessonCountOf, LESSON_RAMP, LESSON_SIZE, FINAL_N, SHADOW_POOL_MIN, CASE_ROWS, ADJ_STEMS, adjStem,
-         LESSON_FREE_RANK }
+         LESSON_FREE_RANK, WORD_DRILLS, WORD_DRILL_N, WORD_SENTENCE_MIX }
   from "../core/questions.js";
 import { LETTERS, VOWEL_PAIRS, VOWEL_CHART, TRAPS,
          soundPairs, pairDiff, pairLemma } from "../core/alphabet.js";
@@ -4269,6 +4269,100 @@ group("one word does not take over the course, 2026-10-20");
   }
   ok(yesterday > lessons / 2, "a due word not yet seen today is reviewed", `${yesterday} of ${lessons}`);
   ok(today === 0, "a word answered today is not the review again", `${today} of ${lessons}`);
+}
+
+/* The Drills button on the back of a flashcard (2026-10-31): every way the
+   app can ask about one word, read off the word, and every run aimed at it. */
+group("drills for one word, 2026-10-31");
+{
+  const ids = WORD_DRILLS.map((d) => d.id);
+  ok(new Set(ids).size === ids.length, "every word drill has its own id");
+  ok(DRILL_TYPES.every((d) => ids.includes(d.id)), "every grammar drill is a word drill too");
+  ok(WORD_DRILLS.every((d) => d.skills.every((s) => SK.isSkill(s))), "a drill names only real skills");
+  ok(ids[0] === "meaning" && ids[ids.length - 1] === "say", "meaning first, the mouth last");
+
+  const byBare = (b) => L.findIndex((w) => w.b === b);
+  const kniga = byBare("книга"), chitat = byBare("читать"), novy = byBare("новый"), v = byBare("в");
+  const has = (i) => Q.wordDrills(i).map((d) => d.id);
+  ok(has(kniga).includes("cases") && has(kniga).includes("agreement")
+     && !has(kniga).includes("conjugation") && !has(kniga).includes("aspect"),
+     "a noun has cases and agreement, no conjugation or aspect", has(kniga).join(" "));
+  ok(has(chitat).includes("conjugation") && has(chitat).includes("aspect") && !has(chitat).includes("cases"),
+     "a verb has conjugation and its aspect pair, no cases", has(chitat).join(" "));
+  ok(has(novy).includes("agreement") && !has(novy).includes("cases"), "an adjective has agreement", has(novy).join(" "));
+  ok(has(v).join(" ") === "meaning sentence", "a preposition has its meaning and its sentences and nothing else", has(v).join(" "));
+
+  // Meaning: recognition before production, and a preposition's run is still four.
+  const meaning = Q.wordDrill(kniga, "meaning");
+  ok(meaning.map((q) => q.kind).join(" ") === "choose-en listen choose-ru type",
+     "Meaning asks the meaning, the sound, the Russian, then writing it", meaning.map((q) => q.kind).join(" "));
+  ok(meaning.every((q) => q.i === kniga), "…every one about the word");
+
+  // In a sentence: distinct sentences, every one containing the word.
+  const sent = Q.wordDrill(kniga, "sentence");
+  const sentOf = (q) => (q.kind === "cloze" ? q.reveal : q.target);
+  ok(sent.length >= 3 && sent.length <= WORD_DRILL_N, "a common word has sentences to be met in", String(sent.length));
+  ok(new Set(sent.map((q) => fold(sentOf(q)))).size === sent.length, "no sentence twice");
+  ok(sent.every((q) => sentenceLemmas(sentOf(q), IX).includes(kniga)), "every sentence uses the word");
+  ok(sent.filter((q) => q.kind === "cloze").length <= WORD_SENTENCE_MIX.cloze
+     && sent.filter((q) => q.kind === "hear").length <= WORD_SENTENCE_MIX.hear
+     && sent.filter((q) => q.kind === "say").length <= WORD_SENTENCE_MIX.say, "gap-fills, then heard, then said, each capped");
+  const kinds = sent.map((q) => q.kind);
+  ok(kinds.join(" ") === kinds.slice().sort((a, b) => ["cloze", "hear", "say"].indexOf(a) - ["cloze", "hear", "say"].indexOf(b)).join(" "),
+     "read before heard before said");
+
+  // A noun's agreement drill: the adjectives the corpus puts beside it, agreeing with it.
+  const agree = Q.wordDrill(kniga, "agreement");
+  const nounForms = new Set(Q.present({ t: "type", i: kniga, pool: [kniga] }).alts.concat([fold(L[kniga].b)]));
+  const formsOfNoun = new Set();
+  for (const t of L[kniga].t || []) for (const r of t.rows) for (const c of r.slice(1)) for (const f of c || []) formsOfNoun.add(fold(f));
+  ok(agree.length >= 4 && agree.every((q) => q.kind === "agreement" && formsOfNoun.has(fold(q.prompt.replace(/^___\s*/, "")))),
+     "a noun's agreement questions all stand an adjective beside this noun", agree.map((q) => q.prompt).join(" · "));
+  ok(agree.every((q) => L[q.i] && L[q.i].p === "adjective"), "…and grade the adjective whose form is written");
+  void nounForms;
+
+  // The grammar drills with a pool of one are every question about it, none twice.
+  const cases = Q.wordDrill(kniga, "cases");
+  ok(cases.length >= 6 && cases.every((q) => q.i === kniga && q.typed), "a noun's cases drill writes its own forms", String(cases.length));
+  ok(new Set(cases.map(Q.drillKey)).size === cases.length, "…no cell twice");
+  const chosen = Q.wordDrill(kniga, "cases", { typed: false });
+  ok(chosen.length >= 6 && chosen.every((q) => q.options && q.options.length === 4), "…or chooses them, four options each");
+  const aspect = Q.wordDrill(chitat, "aspect");
+  ok(aspect.length >= 1 && aspect.every((q) => q.i === chitat), "a verb's aspect drill asks for its partner");
+  const say = Q.wordDrill(byBare("спасибо"), "say");
+  ok(say.length === 1 && say[0].kind === "buildup" && say[0].assess === true && say[0].i === byBare("спасибо"),
+     "Say it is the word built from its end, then said and assessed");
+  ok(!has(byBare("дом")).includes("say"), "a short word is not built");
+  ok(Q.wordDrill(kniga, "conjugation").length === 0 && Q.wordDrill(-1, "meaning").length === 0,
+     "a drill a word has not got, or a word there is not, is no questions");
+
+  /* Over the course: every word has drills, every drill listed fills, every
+     question has a view and is aimed at the word. Every third word, for time. */
+  const sweep = [...new Set(UN.flatMap((u) => u.w))].filter((_, k) => k % 3 === 0);
+  const faults = [];
+  for (const i of sweep) {
+    const ds = Q.wordDrills(i);
+    if (!ds.some((d) => d.id === "meaning")) faults.push(`${L[i].b}: no Meaning`);
+    for (const d of ds) {
+      const qs = Q.wordDrill(i, d.id);
+      if (!qs.length) { faults.push(`${L[i].b} ${d.id}: listed, empty`); continue; }
+      if (qs.length > WORD_DRILL_N) faults.push(`${L[i].b} ${d.id}: ${qs.length} questions`);
+      // A sentence question is its sentence (drillKey reads a hear's empty
+      // prompt and no options, so every hear would key alike); a grammar
+      // drill's is what it shows, asks and answers.
+      const keyOf = d.id === "sentence" ? (q) => fold(sentOf(q)) : Q.drillKey;
+      if (new Set(qs.map(keyOf)).size !== qs.length) faults.push(`${L[i].b} ${d.id}: a question twice`);
+      for (const q of qs) {
+        if (!(q.kind in SK.SKILL_OF_KIND)) faults.push(`${L[i].b} ${d.id}: kind ${q.kind}`);
+        if (!(answerable(q) || q.kind === "buildup")) faults.push(`${L[i].b} ${d.id}: unanswerable ${q.kind}`);
+        const aimed = d.id === "agreement" ? (L[q.i] && L[q.i].p === "adjective")
+          : d.id === "sentence" ? sentenceLemmas(sentOf(q), IX).includes(i)
+          : q.i === i;
+        if (!aimed) faults.push(`${L[i].b} ${d.id}: ${q.kind} about ${q.i}`);
+      }
+    }
+  }
+  ok(!faults.length, `every word's drills fill and aim at the word (${sweep.length} words)`, faults.slice(0, 6).join("; "));
 }
 
 console.log("\n" + checks + " checks · " +

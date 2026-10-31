@@ -32,6 +32,7 @@ import { flagsFor, troubleWords, cardsIn, sourceCards, studyCards, knownWords, s
          sessionFor } from "../studycards";
 import { SetPicker } from "../studypicker";
 import { ScoreRing } from "../skills";
+import { WordDrillsButton } from "../worddrills";
 
 /* The familiarity ring and its colour live in ui.js now (2026-09-28): the
    dictionary entry draws the same ring for the same number, and a second copy
@@ -266,14 +267,29 @@ export default function Study({ navigation, route }) {
   }, [setsKey, ready, picker, started]);   // eslint-disable-line react-hooks/exhaustive-deps
   // Back on the tab after leaving it: the options again, unless a sitting is
   // under way (a half-played pile is not thrown away by a tab press).
+  /* …and only after leaving the *tab*. A screen pushed over this one — a
+     word's drill or entry from the back of a card, a video from "Where you
+     heard it" — blurs and refocuses it too, and the pile was thrown away on
+     the way back whenever nothing had been graded yet: Drills on the first
+     card, Done, and the options again (the emulator, 2026-10-31). On blur the
+     stack says which it was: a pushed screen is on top of this one; a tab
+     press leaves this screen on top of its own stack. */
+  const pushedOver = useRef(false);
   useEffect(() => {
     if (!navigation || typeof navigation.addListener !== "function") return undefined;
-    return navigation.addListener("focus", () => {
+    const offBlur = navigation.addListener("blur", () => {
+      const s = typeof navigation.getState === "function" ? navigation.getState() : null;
+      const top = s && s.routes ? s.routes[s.index] : null;
+      pushedOver.current = !!(top && route && top.key !== route.key);
+    });
+    const offFocus = navigation.addListener("focus", () => {
+      if (pushedOver.current) { pushedOver.current = false; return; }
       if (started && !Object.keys(marks).length && !(session && session.practice)) {
         setStarted(false); dealtKey.current = null; setSession(null);
       }
     });
-  }, [navigation, marks, started, session]);
+    return () => { offBlur(); offFocus(); };
+  }, [navigation, route, marks, started, session]);
 
   const kinds = kindsOf(st.cardKinds);
   const heading = session && session.practice ? session.title || "Trouble words"
@@ -777,10 +793,18 @@ export default function Study({ navigation, route }) {
                 {/* "3 reviews · 1 lapse" sat here until 2026-09-24. The count is
                     still kept (it is what the familiarity ring and the trouble
                     bank read); it is not something to show the learner. */}
+                {/* The card's two ways on, side by side: every drill this
+                    word can take (worddrills.js — the owner, 2026-10-31:
+                    "a little drills button on the back of the card"), and
+                    the whole entry. A word only: a sentence card has no
+                    paradigm to drill and no entry to open. */}
                 {idxOfWord(face.b) >= 0 ? (
-                  <Btn kind="ghost" label="More" testID="full-entry"
-                       style={{ marginTop: 12 }}
-                       onPress={() => navigation.navigate("Word", { word: face.b })} />
+                  <View style={{ flexDirection: "row", justifyContent: "center", gap: 8, marginTop: 12 }}>
+                    <WordDrillsButton word={face.b}
+                                      onPick={(drill) => navigation.navigate("WordDrill", { word: face.b, drill })} />
+                    <Btn kind="ghost" label="More" testID="full-entry"
+                         onPress={() => navigation.navigate("Word", { word: face.b })} />
+                  </View>
                 ) : null}
               </>
           ) : null}

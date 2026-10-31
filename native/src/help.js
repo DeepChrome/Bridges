@@ -44,6 +44,7 @@ export const HELP = {
     ["Cog", "Fronts, sources, new words a day"],
     ["Fifty a day", "The rest wait for tomorrow; Keep going lifts it"],
     ["Drills", "On the back: every drill for that word"],
+    ["Switch", "Offered when one direction falls far behind"],
   ] },
   WordDrill: { title: "One word's drill", lines: [
     ["Bulb", "The word's tables; costs the grade"],

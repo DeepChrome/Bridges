@@ -19,7 +19,7 @@ import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, Sheet, Lift, Text, CogButton, Unselectable, toneOf,
          Familiarity, familiarityColor, RowText } from "../ui";
 import { RunTools } from "../askai";
-import { L, idxOfWord, exactIdx, sensesOf, goalNow, goalOpts } from "../data";
+import { L, idxOfWord, exactIdx, sensesOf, goalNow, goalOpts, rankOf } from "../data";
 import { Linked, GrammarLine } from "../words";
 import { useAbout, cardAbout } from "../about";
 import { IrregularTag } from "../rules";
@@ -33,6 +33,9 @@ import { flagsFor, troubleWords, cardsIn, sourceCards, studyCards, knownWords, s
 import { SetPicker } from "../studypicker";
 import { ScoreRing } from "../skills";
 import { WordDrillsButton } from "../worddrills";
+import { leanNudge } from "@core/lean";
+import { SKILLS } from "@core/skills";
+import { dayOf } from "@core/scheduler";
 
 /* The familiarity ring and its colour live in ui.js now (2026-09-28): the
    dictionary entry draws the same ring for the same number, and a second copy
@@ -260,10 +263,21 @@ export default function Study({ navigation, route }) {
      is dealt until Start — or until a round handed in from another screen,
      which is its own start. */
   const [started, setStarted] = useState(false);
+  /* The front changed part-way through a sitting: the same cards again from
+     the first, met from the other side (studycards.js `again`; the owner,
+     2026-10-31). A plain re-deal only held what was still due, so the cards
+     just graded from the Russian were gone and the pile "started right where I
+     left off". The fronts are compared on their own: a change of source or
+     ration re-deals the day's pile as before. */
+  const dealtFronts = useRef((st.flash || []).join(","));
   useEffect(() => {
     if (!ready || !started || picker || round || dealtKey.current === setsKey) return;
     dealtKey.current = setsKey;
-    deal(false);
+    const fronts = (st.flash || []).join(",");
+    const switched = fronts !== dealtFronts.current && Object.keys(marks).length > 0;
+    dealtFronts.current = fronts;
+    if (switched) deal(false, "again", { words: [...sitting.current], title: "From the top" });
+    else deal(false);
   }, [setsKey, ready, picker, started]);   // eslint-disable-line react-hooks/exhaustive-deps
   // Back on the tab after leaving it: the options again, unless a sitting is
   // under way (a half-played pile is not thrown away by a tab press).
@@ -290,6 +304,22 @@ export default function Study({ navigation, route }) {
     });
     return () => { offBlur(); offFocus(); };
   }, [navigation, route, marks, started, session]);
+
+  /* The nudge, read off the scores (core/lean.js leanNudge), and stamped the
+     day it is shown so it stays quiet afterwards. Stamped only while the
+     options are showing, which is where it is drawn. */
+  const onOptions = ready && !started && !session;
+  const nudge = useMemo(() => (onOptions
+    ? leanNudge({ seen: st.seen, rankOf, fronts: st.flash, nudged: st.nudged }) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onOptions, st.seen, st.flash, st.nudged]);
+  useEffect(() => {
+    if (!nudge) return;
+    const day = dayOf(Date.now());
+    if (st.nudged && st.nudged.skill === nudge.skill && st.nudged.day === day) return;
+    update((p) => ({ ...p, nudged: { day, skill: nudge.skill } }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nudge && nudge.skill]);
 
   const kinds = kindsOf(st.cardKinds);
   const heading = session && session.practice ? session.title || "Trouble words"
@@ -583,6 +613,17 @@ export default function Study({ navigation, route }) {
                onPress={() => setStarted(true)} />
           <Btn kind="link" testID="study-choose" style={{ marginTop: 10 }} label="Choose cards"
                onPress={() => setPicker(true)} />
+          {/* One direction has run well ahead of the other across the
+              learner's words (core/lean.js): one quiet line naming the skill
+              behind, and the switch. Here only, on the options — never over a
+              card — and after a day it shows, not again for three. */}
+          {nudge ? (
+            <View testID="lean-nudge" style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 28 }}>
+              <Muted>{`${(SKILLS.find((s) => s.id === nudge.skill) || {}).name} is behind`}</Muted>
+              <Btn kind="link" testID="lean-switch" label="Switch"
+                   onPress={() => update((p) => ({ ...p, flash: [nudge.front] }))} />
+            </View>
+          ) : null}
         </View>
       ) : !item ? (
         /* A sentence and its actions, with air around them — not a panel.

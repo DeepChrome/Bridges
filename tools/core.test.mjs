@@ -49,6 +49,7 @@ import { makeHydrator, makeDeepIndex } from "../core/entry.js";
 import { ICONS, ACTIVITY_ICONS, iconFor } from "../core/icons.js";
 import { AV, AV_IDS, avatarOf, AV_CREDIT } from "../core/avatars.js";
 import { POSES, LINES, MAX_WORDS, guideLine, poseFor, reactionFor, GUIDE } from "../core/guide.js";
+import { leanOf, leanNudge, LEAN_MIN_WORDS, LEAN_GAP, LEAN_SHARE, LEAN_EVERY_DAYS } from "../core/lean.js";
 
 import { loadPayload, PARTS } from "./payload.mjs";
 
@@ -4363,6 +4364,57 @@ group("drills for one word, 2026-10-31");
     }
   }
   ok(!faults.length, `every word's drills fill and aim at the word (${sweep.length} words)`, faults.slice(0, 6).join("; "));
+}
+
+/* One direction ahead of the other (core/lean.js, 2026-10-31). */
+group("one direction ahead of the other, 2026-10-31");
+{
+  const now = Date.now(), DAYMS = 86400000;
+  const card = (s, reps) => ({ dueAt: now + 30 * DAYMS, lastAt: now - DAYMS, s, d: 5, state: 2, steps: 0, reps, lapses: 0 });
+  // n words met from the Russian side (ru2en stability s), the other side unasked.
+  const oneSided = (n, s = 20, reps = 6) => {
+    const seen = {};
+    for (let k = 0; k < n; k++) seen["w" + k] = { recognise: card(s, reps), ru2en: card(s, reps) };
+    return seen;
+  };
+  const level = (n) => {
+    const seen = {};
+    for (let k = 0; k < n; k++) seen["w" + k] = { recognise: card(20, 6), ru2en: card(20, 3), en2ru: card(18, 3) };
+    return seen;
+  };
+  const rank = () => 500;
+  ok(leanOf(oneSided(30), rank).behind === "en2ru", "thirty words met from the Russian only: English → Russian is behind",
+     JSON.stringify(leanOf(oneSided(30), rank)));
+  ok(leanOf(oneSided(LEAN_MIN_WORDS - 1), rank).behind === null, "fewer words than the floor say nothing");
+  ok(leanOf(level(40), rank).behind === null, "two sides level: no lean", JSON.stringify(leanOf(level(40), rank)));
+  /* A few words leaning hard do not carry the verdict: 40 level words and 8
+     one-sided ones is a gap on a fifth of the words, under LEAN_SHARE. */
+  const mixed = { ...level(40), ...Object.fromEntries(Object.entries(oneSided(8, 300, 30)).map(([k, v]) => ["x" + k, v])) };
+  ok(leanOf(mixed, rank).behind === null, "a handful of lopsided words is not a habit", JSON.stringify(leanOf(mixed, rank)));
+  // …and the trimming: the most extreme tenth at each end does not move the mean.
+  const seen = leanOf(oneSided(30), rank);
+  ok(seen.gap >= LEAN_GAP && seen.share >= LEAN_SHARE, "the lean reports its gap and its share", JSON.stringify(seen));
+  // The other way round.
+  const eng = {};
+  for (let k = 0; k < 30; k++) eng["e" + k] = { recognise: card(20, 6), en2ru: card(20, 6) };
+  ok(leanOf(eng, rank).behind === "ru2en", "met from the English only: Russian → English is behind");
+
+  // The nudge: quiet unless the behind front is not ticked, and not again for days.
+  const n1 = leanNudge({ seen: oneSided(30), rankOf: rank, fronts: ["recognise"], nudged: null, now });
+  ok(n1 && n1.skill === "en2ru" && n1.front === "produce", "the nudge names the skill behind and the front that practises it");
+  ok(leanNudge({ seen: oneSided(30), rankOf: rank, fronts: ["recognise", "produce"], now }) === null,
+     "both fronts ticked: nothing to say");
+  ok(leanNudge({ seen: oneSided(30), rankOf: rank, fronts: ["produce"], now }) === null,
+     "the behind front alone ticked: nothing to say");
+  const today = S.dayOf(now);
+  ok(leanNudge({ seen: oneSided(30), rankOf: rank, fronts: ["recognise"], nudged: { day: today, skill: "en2ru" }, now }) !== null,
+     "shown through the day it appeared");
+  ok(leanNudge({ seen: oneSided(30), rankOf: rank, fronts: ["recognise"], nudged: { day: today - 1, skill: "en2ru" }, now }) === null,
+     "quiet the day after");
+  ok(leanNudge({ seen: oneSided(30), rankOf: rank, fronts: ["recognise"], nudged: { day: today - LEAN_EVERY_DAYS, skill: "en2ru" }, now }) !== null,
+     `back after ${LEAN_EVERY_DAYS} days`);
+  ok(leanNudge({ seen: oneSided(30), rankOf: rank, fronts: ["recognise"], nudged: { day: today - 1, skill: "ru2en" }, now }) !== null,
+     "a nudge the other way does not silence this one");
 }
 
 console.log("\n" + checks + " checks · " +

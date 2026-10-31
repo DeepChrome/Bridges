@@ -269,7 +269,13 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
   if (round === "trouble") {
     return practiceSession({ seen: st.seen, words: troubleWords(st), dirs: st.flash || DEFAULT_FRONTS });
   }
-  if (round === "list" || round === "known") {
+  /* `again`: the sitting dealt once more from its first card, when the front
+     changed part-way (the owner, 2026-10-31: "if I switch to English to
+     Russian mode after starting with Russian to English, it sort of just
+     starts right where I left off. I think it should start from the
+     beginning"). Nothing is held back — the cards just answered are the
+     point, met now from the other side — and every grade still counts. */
+  if (round === "list" || round === "known" || round === "again") {
     /* A list handed in — the video's words, a lesson's — leaves out what is
        already held (the owner, 2026-10-05: "if the user already has like an
        80+ on a card, they probably don't need to view it before the video"). */
@@ -291,7 +297,7 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
        Every source a list draws on carries one now (cardsIn); a sentence the
        payload has no English for is a card with nothing to learn from. */
     const cards = cardsIn(st, [], round === "known" ? knownWords(st).slice(0, QUEUE_DEFAULTS.sessionSize)
-      : (list || []).filter((w) => !held(w)))
+      : round === "again" ? (list || []) : (list || []).filter((w) => !held(w)))
       .filter((c) => !c.sentence || String(c.e || "").trim());
     const faces = {};
     for (const c of cards) faces[c.b] = c;

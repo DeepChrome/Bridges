@@ -6979,6 +6979,38 @@ effectively all drill options for that word… targeted familiarity."*
   top of its own stack); `studyfocus.test.js` drives both and fails against
   the old listener. A screen pushed over another is not a visit to a tab.
 
+## 30cl. A front switched part-way, and one direction ahead of the other (2026-10-31)
+
+The owner: *"if I switch to English to Russian mode after starting with
+Russian to English, it sort of just starts right where I left off. I think it
+should start from the beginning… When the Russian to English or English to
+Russian gets too far ahead of the other, there should be a gentle nudge to
+switch modes… a sophisticated calculation… don't make the reminders
+obnoxious."*
+
+- **A front changed mid-sitting deals the sitting again from its first
+  card** (`again` in studycards.js `sessionFor`; Study.js `dealtFronts`).
+  The pile did re-deal on a front change, but a plain deal holds only what
+  is still due, and the cards just graded from the Russian were scheduled
+  out — so it looked like carrying on. The `again` round is every word of
+  the sitting in dealt order, nothing held back, titled "From the top"; a
+  front change before anything is graded still deals the day's pile afresh.
+- **The lean is measured per word and summed with care** (`core/lean.js`):
+  per word the Russian → English score minus the English → Russian score,
+  an unasked skill counting as 0 because that is the case the nudge is for;
+  weighted by the log of the answers across both; the extreme tenth at each
+  end trimmed; and two tests, a mean gap of `LEAN_GAP` (25) *and*
+  `LEAN_SHARE` (60 %) of the words leaning that way, so a handful of
+  lopsided words is not a habit. Under `LEAN_MIN_WORDS` (20) nothing is said.
+- **The nudge is one line and a link, on the Study options only** —
+  "English → Russian is behind · Switch" — never over a card, never when the
+  behind front is already ticked (two fronts alternate towards the weaker
+  skill by themselves), shown through the day it appears and then not for
+  `LEAN_EVERY_DAYS` (3). `st.nudged = { day, skill }` records it. Switch
+  sets that front alone; the options still offer both.
+- `core.test.mjs` "one direction ahead of the other" and `lean.test.js`
+  hold the thresholds, the quiet days and the from-the-top re-deal.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

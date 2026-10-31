@@ -38,6 +38,10 @@ export const isSkill = (id) => SKILL_IDS.includes(id);
 /* Which skill a flashcard front exercises (core/scheduler.js DIRECTIONS). The
    Russian heard and the Russian shown both ask for its meaning. */
 export const SKILL_OF_FRONT = { recognise: "ru2en", produce: "en2ru", listen: "ru2en" };
+/* …and the front that practises a meaning skill, for a nudge towards the one
+   that has fallen behind (core/lean.js). Russian shown, not heard: the
+   written card is the plain way to meet a word from its Russian side. */
+export const FRONT_OF_SKILL = { ru2en: "recognise", en2ru: "produce" };
 
 /* Which skill a question kind exercises (core/scheduler.js DIRECTION_OF_KIND
    has the same keys; registry.test.js holds the two complete). `null` is a

@@ -4278,7 +4278,8 @@ group("drills for one word, 2026-10-31");
 {
   const ids = WORD_DRILLS.map((d) => d.id);
   ok(new Set(ids).size === ids.length, "every word drill has its own id");
-  ok(DRILL_TYPES.every((d) => ids.includes(d.id)), "every grammar drill is a word drill too");
+  ok(DRILL_TYPES.every((d) => ids.includes(d.id) || d.id === "stress") && !ids.includes("stress"),
+     "every grammar drill but Stress is a word drill too (the owner, 2026-10-31)");
   ok(WORD_DRILLS.every((d) => d.skills.every((s) => SK.isSkill(s))), "a drill names only real skills");
   ok(ids[0] === "meaning" && ids[ids.length - 1] === "say", "meaning first, the mouth last");
 

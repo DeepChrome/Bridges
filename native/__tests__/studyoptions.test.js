@@ -141,9 +141,10 @@ describe("the front never carries the answer", () => {
     expect((await screen.findAllByText(isWord)).length).toBeGreaterThan(0);
   });
 
-  /* Both languages on the back, the starting side on top and the larger
-     (the owner, 2026-10-03). */
-  it("puts both sides on the back, the side it started from first and larger", async () => {
+  /* Both languages on the back, the starting side on top (the owner,
+     2026-10-03) — and the Russian answer at the size the Russian has on any
+     card (2026-10-31: "the answer is extremely small. It should be bigger"). */
+  it("puts both sides on the back, the meaning on top and the Russian answer full size", async () => {
     const size = (node) => [].concat(node.props.style).filter(Boolean)
       .reduce((n, s) => (s.fontSize ? s.fontSize : n), 0);
     await withProfile({ seen: { [WORD]: { recognise: due() } }, flash: ["produce"] });
@@ -152,7 +153,9 @@ describe("the front never carries the answer", () => {
     const meaning = await screen.findByTestId("card-meaning-front");
     const russian = screen.getByTestId("card-russian");
     const ru = within(russian).getAllByText(isWord)[0];
-    expect(size(meaning)).toBeGreaterThan(size(ru));
+    expect(size(meaning)).toBeGreaterThanOrEqual(24);
+    // «го́род» on a recognise front is 44; the answer is no smaller.
+    expect(size(ru)).toBe(44);
   });
 
   it("a recognise card's back keeps the Russian on top, with the meaning under it", async () => {

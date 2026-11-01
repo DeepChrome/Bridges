@@ -7011,6 +7011,34 @@ obnoxious."*
 - `core.test.mjs` "one direction ahead of the other" and `lean.test.js`
   hold the thresholds, the quiet days and the from-the-top re-deal.
 
+## 30cm. The card after its first turn (2026-10-31, the owner's notes on the build)
+
+- **Both sides are the full card after the first turn.** Until Show, a
+  front is its own side alone (the answer is never on it); after it, the
+  Russian-headed side of every card and the English-headed side of a
+  produce card each carry the meanings, examples and the card's actions
+  (*"flipping back should give the full card on the other side… fully
+  detailed cards after the initial flip"*). `revealed`, not `flip.face`,
+  decides it in Study.js.
+- **The Russian answer is full size** on the English-headed side —
+  `faceSize`, in ink — where it was 22 in the muted ink (*"the answer is
+  extremely small"*). The starting side still sits on top (§30bo's rule);
+  "larger" gave way to this.
+- **Drills and More sit right under the word** (`card-actions`), not under
+  the examples below the fold.
+- **The English front names the entry's first sense**, not the gloss's
+  first group (`Meaning` takes `senses`), so both fronts of one card name
+  the same meaning. The two can still differ where a word has no senses
+  (2 % of the curriculum, deck cards), which show the gloss on both.
+- **Stress is out of the word-drill menu** (`WORD_DRILLS`); the drill itself
+  stays in Practice.
+- **Two ways on sit side by side**: the resume sheet and prompt, Continue and
+  Today's recap on the path (`path-actions`), the end-of-day actions on
+  Study (`study-ways-on`, a wrapping row). *"Always try and focus on being
+  organized, space conscious, no clutter."*
+- `cardfaces.test.js` holds the faces; the owner asked for no rebuild until
+  his notes are in.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

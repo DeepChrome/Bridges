@@ -95,9 +95,9 @@ describe("the Drills button on the back of a card", () => {
     await show();
     await act(async () => { fireEvent.press(screen.getByTestId("word-drills-open")); });
     await screen.findByTestId("word-drills");
-    const ring = screen.getByTestId("word-drill-cases-score");
-    expect(ring).toBeTruthy();
-    expect(screen.getByTestId("word-drill-stress-score")).toBeTruthy();
+    expect(screen.getByTestId("word-drill-cases-score")).toBeTruthy();
+    // Stress is not in this menu (the owner, 2026-10-31).
+    expect(screen.queryByTestId("word-drill-stress")).toBeNull();
     // Meaning's two skills have not been asked: no ring.
     expect(screen.queryByTestId("word-drill-meaning-score")).toBeNull();
   });

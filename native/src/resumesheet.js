@@ -58,9 +58,10 @@ export function ResumeSheet({ run, onContinue, onRestart, onClose }) {
   return (
     <Sheet testID="resume-sheet" title="Pick up where you left off" onClose={onClose}
            footer={(
-             <View style={{ gap: 10 }}>
-               <Btn block kind="pri" testID="resume-continue" label="Continue" onPress={onContinue} />
-               <Btn block kind="ghost" testID="resume-restart" label="Start again" onPress={onRestart} />
+             // Side by side (the owner, 2026-10-31): two ways on in one row.
+             <View style={{ flexDirection: "row", gap: 10 }}>
+               <Btn kind="ghost" testID="resume-restart" label="Start again" style={{ flex: 1 }} onPress={onRestart} />
+               <Btn kind="pri" testID="resume-continue" label="Continue" style={{ flex: 1 }} onPress={onContinue} />
              </View>
            )}>
       <RunCard run={run} />

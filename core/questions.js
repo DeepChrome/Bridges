@@ -281,9 +281,12 @@ export const DRILL_TYPES = [
  * back of its flashcard (the owner, 2026-10-31: *"a submenu of drills for that
  * word… effectively all drill options for that word… targeted familiarity"*).
  *
- * Two of its own and the five grammar drills, in the order a learner meets a
- * word — its meaning, then the word inside a sentence, then its forms, then
- * the mouth. `skills` names the scores a run feeds (core/skills.js), which is
+ * Two of its own and four of the five grammar drills, in the order a learner
+ * meets a word — its meaning, then the word inside a sentence, then its
+ * forms, then the mouth. Not Stress: on one word it is a question or two
+ * about where a mark goes, and the owner left it out of this menu
+ * (2026-10-31: "Stress drill isn't important in that menu"). `skills` names
+ * the scores a run feeds (core/skills.js), which is
  * what makes the menu more than a list: a learner who reads "English → Russian
  * 40" in the breakdown has a row here that moves exactly that number.
  * `wordDrills(i)` says which of these a given word can take — a noun has
@@ -292,7 +295,8 @@ export const DRILL_TYPES = [
 export const WORD_DRILLS = [
   { id: "meaning", name: "Meaning", icon: "quiz", skills: ["ru2en", "en2ru"] },
   { id: "sentence", name: "In a sentence", icon: "listen", skills: ["usage"] },
-  ...DRILL_TYPES.map((d) => ({ id: d.id, name: d.name, icon: d.icon, skills: ["forms"] })),
+  ...DRILL_TYPES.filter((d) => d.id !== "stress")
+    .map((d) => ({ id: d.id, name: d.name, icon: d.icon, skills: ["forms"] })),
   { id: "say", name: "Say it", icon: "buildup", skills: [] },
 ];
 /* Questions in one word's drill at most: a noun's declension has eleven cells

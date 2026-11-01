@@ -540,26 +540,33 @@ export default function Learn({ navigation }) {
         </View>
       ) : null}
 
-      {next ? (
-        // Straight to the next undone step of the next lesson — a question
-        // within seconds, not a unit list and a lesson list first.
-        <Btn
-          // Quiet once the day is done, for the same reason and by the same
-          // means as review-first: the learner may carry on and nothing says
-          // they should not, but the app stops pushing.
-          kind={done ? "plain" : "pri"}
-          testID="next-step"
-          style={{ marginTop: 12, alignSelf: "center", paddingHorizontal: 26 }}
-          label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} (${next.unit.name})`}
-          onPress={() => navigation.navigate(...stepRoute(next.step, next.unit, next.index))}
-        />
-      ) : null}
-      {/* The day's recap, once there is a day's work to recap and until it is
-          done (the owner, 2026-10-01: "a daily recap… that reviews things you
-          specifically did that day"). Beside Continue, quieter than it. */}
-      {recapDue ? (
-        <Btn kind="plain" testID="recap-open" label="Today's recap"
-             style={{ marginTop: 10 }} onPress={() => navigation.navigate("Recap")} />
+      {/* Continue and the day's recap in one row (the owner, 2026-10-31: "put
+          them side by side… organized, space conscious, no clutter"). */}
+      {next || recapDue ? (
+        <View testID="path-actions"
+              style={{ flexDirection: "row", justifyContent: "center", gap: 10, marginTop: 12 }}>
+          {next ? (
+            // Straight to the next undone step of the next lesson — a question
+            // within seconds, not a unit list and a lesson list first.
+            <Btn
+              // Quiet once the day is done, for the same reason and by the same
+              // means as review-first: the learner may carry on and nothing says
+              // they should not, but the app stops pushing.
+              kind={done ? "plain" : "pri"}
+              testID="next-step"
+              style={recapDue ? { flex: 1 } : { paddingHorizontal: 26 }}
+              label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} (${next.unit.name})`}
+              onPress={() => navigation.navigate(...stepRoute(next.step, next.unit, next.index))}
+            />
+          ) : null}
+          {/* The day's recap, once there is a day's work to recap and until it is
+              done (the owner, 2026-10-01: "a daily recap… that reviews things you
+              specifically did that day"). Beside Continue, quieter than it. */}
+          {recapDue ? (
+            <Btn kind="plain" testID="recap-open" label="Today's recap"
+                 style={next ? { flex: 1 } : undefined} onPress={() => navigation.navigate("Recap")} />
+          ) : null}
+        </View>
       ) : null}
 
       <View style={{ alignItems: "center" }}>

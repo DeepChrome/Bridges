@@ -150,9 +150,9 @@ export function ResumePrompt({ run, onContinue, onRestart }) {
         </Text>
         <View style={{ alignSelf: "stretch" }}><RunCard run={run} /></View>
       </View>
-      <View style={{ gap: 10 }}>
-        <Btn block kind="pri" label="Continue" onPress={onContinue} />
-        <Btn block kind="ghost" label="Start again" onPress={onRestart} />
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <Btn kind="ghost" label="Start again" style={{ flex: 1 }} onPress={onRestart} />
+        <Btn kind="pri" label="Continue" style={{ flex: 1 }} onPress={onContinue} />
       </View>
     </Screen>
   );

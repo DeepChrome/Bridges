@@ -99,13 +99,19 @@ const faceSize = (face) => (face.sentence ? (face.w.length > 46 ? 20 : 24)
    orient everything") — and any other senses small beneath it, since the
    question is "which word means all of these?". A sentence's translation is
    one line. */
-function Meaning({ face }) {
+/* …and the meanings are the entry's own senses where it has them, the gloss
+   otherwise — the same first sense the Russian side numbers 1, so the two
+   fronts of one card name the same meaning (the owner, 2026-10-31: "the words
+   and definitions for English to Russian don't always match the key
+   definitions from the Russian to English"). */
+function Meaning({ face, senses }) {
   const t = useTheme();
   if (face.sentence) {
     return <Text testID="card-meaning-front" style={{ color: t.ink, fontSize: 22, fontWeight: "600",
                                                        textAlign: "center" }}>{face.e || "—"}</Text>;
   }
-  const groups = String(face.e || "").split(";").map((s) => s.trim()).filter(Boolean);
+  const groups = senses && senses.length ? senses.map((s) => s.g).filter(Boolean)
+    : String(face.e || "").split(";").map((s) => s.trim()).filter(Boolean);
   if (!groups.length) return <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600" }}>—</Text>;
   return (
     <View style={{ alignItems: "center", gap: 4 }}>
@@ -665,33 +671,35 @@ export default function Study({ navigation, route }) {
                  style={{ marginTop: 20, minWidth: 220 }}
                  onPress={() => (onward ? navigation.replace(...onward) : navigation.goBack())} />
           ) : null}
-          {after && session && session.practice && finished ? null : (<>
+          {after && session && session.practice && finished ? null : (
+          /* The ways on, side by side where they fit rather than a column of
+             wide buttons (the owner, 2026-10-31: "put them side by side…
+             organized, space conscious, no clutter"). */
+          <View testID="study-ways-on"
+                style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 10, marginTop: 20 }}>
           {/* Past the goal, as far as the learner wants: more reviews push
               the familiarity of their words up faster (the owner,
               2026-10-05). */}
           {moreToGo ? (
             <Btn kind="pri" testID="keep-going" label="Keep going"
-                 style={{ marginTop: 20, minWidth: 220 }} onPress={() => deal(false, undefined, { beyond: true })} />
+                 onPress={() => deal(false, undefined, { beyond: true })} />
           ) : null}
           {session && session.practice && more ? (
             <Btn kind="pri" testID="continue" label={`Back to today's cards · ${more}`}
-                 style={{ marginTop: 20, minWidth: 220 }} onPress={() => deal(false)} />
+                 onPress={() => deal(false)} />
           ) : null}
           {trouble.length ? (
             <Btn kind={session && session.practice && more ? "plain" : "pri"} testID="trouble-round"
-                 style={{ marginTop: 20, minWidth: 220 }}
                  label={`Review trouble words · ${trouble.length}`}
                  onPress={() => deal(false, "trouble")} />
           ) : null}
           {unmet ? (
-            <Btn testID="study-ahead" style={{ marginTop: 12, minWidth: 220 }}
-                 label="Learn new words" onPress={() => deal(true)} />
+            <Btn testID="study-ahead" label="Learn new words" onPress={() => deal(true)} />
           ) : null}
           {knownCount ? (
-            <Btn testID="known-round" style={{ marginTop: 12, minWidth: 220 }}
-                 label="Review known words" onPress={() => deal(false, "known")} />
+            <Btn testID="known-round" label="Review known words" onPress={() => deal(false, "known")} />
           ) : null}
-          </>)}
+          </View>)}
         </View>
         )
       ) : (
@@ -747,23 +755,29 @@ export default function Study({ navigation, route }) {
               <Muted testID="card-blank" style={{ textAlign: "center" }}>
                 This card has no word on it
               </Muted>
-            ) : !flip.face ? <Front face={face} direction={item.direction} /> : (
+            ) : !revealed ? <Front face={face} direction={item.direction} /> : (
               <>
-                {/* **Both sides on the back, the starting side on top and
-                    large** (the owner, 2026-10-03: "both english and russian
-                    on the back, and then whatever their starting point is on
-                    the front. The starting point should always be the larger
-                    text"). The front shows only its own side, so the answer is
-                    never on it. The Russian is word-linked here — tapping a
-                    word before answering would have handed over the answer —
-                    and can always be heard (2026-09-24). */}
-                {item.direction === "produce" ? (
+                {/* **Both sides on the back, the starting side on top** (the
+                    owner, 2026-10-03: "both english and russian on the back,
+                    and then whatever their starting point is on the front").
+                    The front shows only its own side until the first turn, so
+                    the answer is never on it. **After that first turn both
+                    sides are the full card** (the owner, 2026-10-31: "flipping
+                    back should give the full card on the other side… fully
+                    detailed cards after the initial flip"): the English-headed
+                    side of a produce card, and the Russian-headed side of
+                    every card, each with the meanings and examples under it.
+                    The Russian is word-linked here and can always be heard. */}
+                {item.direction === "produce" && flip.face ? (
                   <>
-                    <Meaning face={face} />
+                    <Meaning face={face} senses={senses} />
+                    {/* The answer at the size the Russian has on any card
+                        (the owner, 2026-10-31: "the answer is extremely
+                        small. It should be bigger"). */}
                     <View testID="card-russian" style={{ alignItems: "center", alignSelf: "stretch", marginTop: 14 }}>
                       {face.sentence
-                        ? <Linked text={face.w} size={18} />
-                        : <Text style={{ color: t.ink2, fontWeight: "600", textAlign: "center", fontSize: 22 }}>{face.w}</Text>}
+                        ? <Linked text={face.w} size={faceSize(face)} />
+                        : <Text style={{ color: t.ink, fontWeight: "600", textAlign: "center", fontSize: faceSize(face) }}>{face.w}</Text>}
                       {cardLemma ? <GrammarLine lemma={cardLemma} center style={{ marginTop: 2, alignSelf: "stretch" }} /> : null}
                       <View style={{ marginTop: 8 }}><Speaker text={face.b} /></View>
                     </View>
@@ -784,15 +798,30 @@ export default function Study({ navigation, route }) {
             )}
           </Unselectable>
           </Pressable>
-          {flip.face && !blank ? (
+          {revealed && !blank ? (
               <>
+                {/* The card's two ways on, right under the word (the owner,
+                    2026-10-31: "put the drills and the more buttons near the
+                    top of the entry" — they sat under the examples, below the
+                    fold): every drill this word can take (worddrills.js), and
+                    the whole entry. A word only: a sentence card has no
+                    paradigm to drill and no entry to open. */}
+                {idxOfWord(face.b) >= 0 ? (
+                  <View testID="card-actions"
+                        style={{ flexDirection: "row", justifyContent: "center", gap: 8, marginTop: 8 }}>
+                    <WordDrillsButton word={face.b}
+                                      onPick={(drill) => navigation.navigate("WordDrill", { word: face.b, drill })} />
+                    <Btn kind="ghost" label="More" testID="full-entry"
+                         onPress={() => navigation.navigate("Word", { word: face.b })} />
+                  </View>
+                ) : null}
                 {/* Every meaning the word has, numbered as a dictionary
                     lays them (§30q), four at most — the full entry is one
-                    press away below. Where there are no senses (2% of the
+                    press away above. Where there are no senses (2% of the
                     curriculum, every deck card) the translation stands on
                     its own. A sentence's English is its answer, in ink. The
-                    produce card already showed the meaning as its front. */}
-                {item.direction === "produce" ? null : face.sentence ? (
+                    English-headed side already has the meaning as its head. */}
+                {item.direction === "produce" && flip.face ? null : face.sentence ? (
                   <Text testID="card-meaning" selectable
                         style={{ color: t.ink, fontSize: 18, marginTop: 12, textAlign: "center" }}>
                     {face.e || "—"}
@@ -834,19 +863,6 @@ export default function Study({ navigation, route }) {
                 {/* "3 reviews · 1 lapse" sat here until 2026-09-24. The count is
                     still kept (it is what the familiarity ring and the trouble
                     bank read); it is not something to show the learner. */}
-                {/* The card's two ways on, side by side: every drill this
-                    word can take (worddrills.js — the owner, 2026-10-31:
-                    "a little drills button on the back of the card"), and
-                    the whole entry. A word only: a sentence card has no
-                    paradigm to drill and no entry to open. */}
-                {idxOfWord(face.b) >= 0 ? (
-                  <View style={{ flexDirection: "row", justifyContent: "center", gap: 8, marginTop: 12 }}>
-                    <WordDrillsButton word={face.b}
-                                      onPick={(drill) => navigation.navigate("WordDrill", { word: face.b, drill })} />
-                    <Btn kind="ghost" label="More" testID="full-entry"
-                         onPress={() => navigation.navigate("Word", { word: face.b })} />
-                  </View>
-                ) : null}
               </>
           ) : null}
           </Card>

@@ -7039,6 +7039,34 @@ obnoxious."*
 - `cardfaces.test.js` holds the faces; the owner asked for no rebuild until
   his notes are in.
 
+## 30cn. The goal is a moment, and the review can start from the start (2026-11-02)
+
+The owner: *"Remove the 25 study cap. Just have a little temporary pop-up
+when player hits 25 and offer to pivot to something else."* And: *"personal
+review English to Russian gets really hung up on recent words even if
+there's earlier gaps… the option to build up or continue where they were
+struggling."*
+
+- **The goal no longer stops the pile.** Reaching it mid-sitting opens one
+  small `Bubble` (Study.js `goalPop`: "Daily goal met", the day's count,
+  **Something else** / **Keep going**) and the pile deals on past it by
+  itself, a chunk at a time, until the pool has nothing left that was not
+  answered today. Something else ends the sitting on the ways on (`stopped`).
+  A review begun with the goal already met deals past it from its first card.
+  The bubble is for a sitting that *reached* the goal (`sawOwed`), once
+  (`celebrated`), and not when the pool ran out at the same moment — the end
+  screen says it then, and two "Daily goal met" on one screen is what
+  `goalfill.test.js` caught. The badge and the options' number are unchanged.
+- **"From the start"** (`st.reviewOrder`, a setting; the Study options under
+  Personal review): `goalSession` takes `order(word)` and the make-up fill
+  walks the route from its first lesson's words (`pathRank` in data.js)
+  instead of most faded first. The fade is exactly "recently learned most
+  often", which is the hang-up he describes. Due cards are due either way;
+  mastered cards are still the sprinkle, whichever order.
+- `goalpop.test.js`, `revieworder.test.js`; the three Study tests that
+  expected the pile to stop at the goal now drive to the pool's end or
+  through the bubble.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

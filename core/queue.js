@@ -365,9 +365,19 @@ export const goalBadge = (goal, now, opts) => {
  *
  * `words` is the pool (the personal review: every card met of the chosen
  * kinds, and the unmet words of finished lessons and the next one). `owed`
- * sizes the session; `beyond` is "Keep going", past the goal. */
+ * sizes the session; `beyond` is "Keep going", past the goal.
+ *
+ * `order(word)`, optional, replaces the fade with the learner's own order for
+ * the make-up fill — "From the start" on the Study options (the owner,
+ * 2026-11-02: *"personal review English to Russian gets really hung up on
+ * recent words even if there's earlier gaps… the option to build up or
+ * continue where they were struggling"*). Most-faded-first is exactly
+ * "recently learned most often", which is the hang-up he describes; ordered
+ * by the route instead, the fill walks from the first lesson's words forward,
+ * so a gap left early is met before anything recent. Cards due are due either
+ * way; mastered cards are still the sprinkle. */
 export const MASTERED_EVERY = 8;
-export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar }) {
+export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar, order }) {
   const o = Object.assign({}, QUEUE_DEFAULTS);
   for (const k in opts || {}) if (opts[k] !== undefined) o[k] = opts[k];
   const random = rng || Math.random;
@@ -396,8 +406,12 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
     // The mastered cards walk in the same order: a random draw from a few
     // hundred lands on the same card twice in a week, a walk cannot.
     const byFade = (a, b) => a.r - b.r;
-    const faded = shuffled(weak, random).sort(byFade);
-    const sprinkle = shuffled(held, random).sort(byFade);
+    // The learner's order, where given: earliest on the route first, the fade
+    // deciding only between words at the same place.
+    const byOrder = typeof order === "function"
+      ? (a, b) => (order(a.w) - order(b.w)) || byFade(a, b) : byFade;
+    const faded = shuffled(weak, random).sort(byOrder);
+    const sprinkle = shuffled(held, random).sort(byOrder);
     const extra = [];
     while (items.length + extra.length < want && (faded.length || sprinkle.length)) {
       const n = items.length + extra.length + 1;

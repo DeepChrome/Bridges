@@ -143,7 +143,7 @@ it("answers how to use the app from the map and the screen's own lines", async (
   await openHelp("Cards");
   fireEvent.press(await screen.findByTestId("help-button"));
   expect(await screen.findByTestId("help-sheet")).toBeTruthy();
-  expect(screen.getByText("Fifty a day")).toBeTruthy();
+  expect(screen.getByText("Goal reached")).toBeTruthy();
   await askIt("How do I see fewer new words?", "help");
   const sent = fb.ask.mock.calls[0][0];
   expect(sent.mode).toBe("app");

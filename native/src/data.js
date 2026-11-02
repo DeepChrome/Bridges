@@ -727,6 +727,16 @@ export function personalWords(st) {
   return out;
 }
 
+/* A word's place on the route as the learner walked it — its position in
+   `personalWords` — for the review's "From the start" order (core/queue.js
+   goalSession `order`). A card the route does not place (a sentence, a deck
+   card) comes after every word, in no particular order. */
+export function pathRank(st) {
+  const at = new Map();
+  personalWords(st).forEach((i, k) => { if (L[i]) at.set(L[i].b, k); });
+  return (w) => (at.has(w) ? at.get(w) : Infinity);
+}
+
 /* Where the learner is: every unit on the route up to the spine lesson Continue
    would resume, or the whole route once it is done. What a quiz or a listening
    drill draws from by default — cumulative, to here (the owner, 2026-09-07). */

@@ -6,7 +6,7 @@ import React from "react";
 import { View, Alert } from "react-native";
 import { useSession } from "./session";
 import { useTheme } from "./theme";
-import { Btn, List, Row, Tick, SectionLabel, Sheet, Stepper, RowText } from "./ui";
+import { Btn, List, Row, Tick, SectionLabel, Sheet, Stepper, RowText, Choice } from "./ui";
 import { STAGES, unitUnlocked } from "./data";
 import { DIRECTIONS, DEFAULT_FRONTS } from "@core/scheduler";
 import { QUEUE_DEFAULTS, kindsOf, CARD_KINDS } from "@core/queue";
@@ -126,6 +126,16 @@ export function SetPicker({ visible, onClose }) {
                   <RowText title="Personal review" bold={false} />
                 </Row>
               </List>
+              {/* Which met cards make the review up once the due ones are
+                  dealt: the most faded (recent words come round most), or the
+                  route from its first lesson forward — for the learner whose
+                  early words were never met from this side (the owner,
+                  2026-11-02: "the option to build up or continue where they
+                  were struggling"). */}
+              <Choice testID="review-order" style={{ marginTop: 10 }}
+                      value={st.reviewOrder === "path" ? "path" : "weak"}
+                      options={[{ id: "weak", name: "Where you struggle" }, { id: "path", name: "From the start" }]}
+                      onPick={(id) => update((p) => ({ ...p, reviewOrder: id }))} />
             </View>
 
             {/* Only listed when there is one. An empty section headed "Your

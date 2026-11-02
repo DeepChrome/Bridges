@@ -4142,6 +4142,13 @@ group("the review, 2026-10-01");
   ok(goalSession({ seen: answered, words, now: t0, owed: 0, beyond: true, rng: () => 0.5 }).items.length === 0,
      "and Keep going has nothing to deal from it either");
   ok(sess.exhausted === false, "a pool that fills the goal is not exhausted");
+  /* "From the start" (2026-11-02): `order` replaces the fade for the fill.
+     Every word here is met and none due, so the whole session is fill. */
+  const byName = (w) => Number(String(w).replace(/\D/g, "")) || 0;
+  const ordered = goalSession({ seen, words, now: t0, owed: 16, rng: () => 0.5, order: byName });
+  const ranks = ordered.items.map((x) => byName(x.word));
+  ok(ranks.length > 2 && ranks.every((r, k) => !k || r >= ranks[k - 1]),
+     "an order handed in is the order the fill is dealt", ranks.join(" "));
 }
 
 group("drive mode: a Pimsleur lesson, played");

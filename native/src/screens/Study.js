@@ -17,7 +17,7 @@ import { View, Pressable, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, Sheet, Lift, Text, CogButton, Unselectable, toneOf,
-         Familiarity, familiarityColor, RowText } from "../ui";
+         Familiarity, familiarityColor, RowText, Bubble } from "../ui";
 import { RunTools } from "../askai";
 import { L, idxOfWord, exactIdx, sensesOf, goalNow, goalOpts, rankOf } from "../data";
 import { Linked, GrammarLine } from "../words";
@@ -203,11 +203,30 @@ export default function Study({ navigation, route }) {
   // Past the day's reviews by choice ("Keep going"); chunks dealt after carry it.
   const [beyondMode, setBeyondMode] = useState(false);
   const [tallyOpen, setTallyOpen] = useState(false);
+  /* **The goal is a moment, not a wall** (the owner, 2026-11-02: "Remove the
+     25 study cap. Just have a little temporary pop-up when player hits 25 and
+     offer to pivot to something else"). Reaching it opens a small bubble once
+     a sitting — Keep going, or Something else — and the pile runs on past it
+     by itself; `stopped` is the learner choosing something else, which ends
+     the sitting on the ways on. `sawOwed` keeps the bubble for a sitting that
+     actually reached the goal, not one opened after it was met. */
+  const [goalPop, setGoalPop] = useState(false);
+  const [stopped, setStopped] = useState(false);
+  const sawOwed = useRef(false);
+  const celebrated = useRef(false);
   const deal = (ahead, round, extra, carry) => {
     dealt.current += 1;
-    const beyond = carry ? beyondMode : !!(extra && extra.beyond);
+    // A chunk past the goal, asked for or carried on from one: the sitting
+    // stays "beyond" from then on. And a review begun with the goal already
+    // met is past it from its first card — the goal is not a cap.
+    const beyond = !!(extra && extra.beyond) || (!!carry && beyondMode)
+      || (!ahead && !round && goalNow(st).owed === 0 && metAny);
     const next = sessionFor(st, { ahead, round, ...extra, beyond });
-    if (!carry) { sitting.current = new Set(); setMarks({}); setAheadMode(!!ahead); setBeyondMode(beyond); setAfter(null); }
+    if (beyond) setBeyondMode(true);
+    if (!carry) {
+      sitting.current = new Set(); setMarks({}); setAheadMode(!!ahead); setBeyondMode(beyond); setAfter(null);
+      setStopped(false); sawOwed.current = false; celebrated.current = false;
+    }
     for (const it of next.items) sitting.current.add(it.word);
     setSession(next);
     setAt(0);
@@ -486,7 +505,18 @@ export default function Study({ navigation, route }) {
      about. The next chunk is simply dealt; the only stop is the end of the
      day's work. Not after a trouble round, which ends on its own screen. */
   useEffect(() => {
-    if (finished && more > 0 && session && !session.practice) deal(false, undefined, undefined, true);
+    // The learner chose something else at the goal: the sitting ends here.
+    if (stopped) return;
+    if (finished && more > 0 && session && !session.practice) { deal(false, undefined, undefined, true); return; }
+    /* The goal is met and the pile would have stopped: it runs on instead,
+       a chunk at a time past the goal, until the pool has nothing left that
+       was not answered today (the owner, 2026-11-02). The bubble below is
+       where the learner is told, and where they may stop. */
+    if (finished && more === 0 && session && session.goal && items.length && !session.practice
+        && Object.keys(marks).length && sessionFor(st, { beyond: true }).items.length) {
+      deal(false, undefined, { beyond: true }, true);
+      return;
+    }
     /* The pool is exhausted — every met card answered today, nothing due,
        no new card allowed — and the goal still says some are owed. There is
        nothing left to deal that would not be a card already answered today
@@ -503,7 +533,21 @@ export default function Study({ navigation, route }) {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finished, more]);
+  }, [finished, more, stopped]);
+  /* The goal reached inside a sitting: the bubble, once. Only a sitting that
+     had something owed when it began counts; a goal met on another screen is
+     the options' business ("Daily goal met"). */
+  useEffect(() => {
+    if (!started || !session || session.practice) return;
+    if (goal.owed > 0) { sawOwed.current = true; return; }
+    // The pool ran out as the goal was met: the end screen says so itself.
+    if (finished && !sessionFor(st, { beyond: true }).items.length) return;
+    if (sawOwed.current && !celebrated.current && Object.keys(marks).length) {
+      celebrated.current = true;
+      setGoalPop(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [goal.owed, started, session && session.practice]);
   /* "Keep going" only while something met is left to deal: past the goal
      the fill never repeats a card answered today, so a learner who has been
      through everything is not offered an empty chunk. */
@@ -641,7 +685,7 @@ export default function Study({ navigation, route }) {
            and presented with the option of continuing… review trouble words
            or be exposed to new words"). Between chunks nothing is drawn: the
            next one is dealt at once (the effect above). */
-        more && !(session && session.practice) ? null : (
+        more && !stopped && !(session && session.practice) ? null : (
         <View style={{ marginTop: 56, alignItems: "center", paddingHorizontal: 24 }}>
           {session && session.practice && finished ? (
             <Text testID="study-state" style={{ color: t.ink, fontSize: T.title, fontWeight: "700", textAlign: "center" }}>
@@ -873,6 +917,22 @@ export default function Study({ navigation, route }) {
       {/* Chosen from the options screen, the cards are the start: closing the
           picker deals them. */}
       <SetPicker visible={picker} onClose={() => { setPicker(false); if (!started) setStarted(true); }} />
+      {/* The goal, reached mid-sitting: a small bubble, once, with the two
+          ways on. Keep going closes it and the pile runs on; Something else
+          ends the sitting on the ways on (trouble words, new words…). */}
+      {goalPop ? (
+        <Bubble testID="goal-met" title="Daily goal met" onClose={() => setGoalPop(false)}
+                footer={(
+                  <View style={{ flexDirection: "row", gap: 10 }}>
+                    <Btn kind="plain" testID="goal-pivot" label="Something else" style={{ flex: 1 }}
+                         onPress={() => { setGoalPop(false); setStopped(true); setAt(items.length); setShown(false); setRevealed(false); }} />
+                    <Btn kind="pri" testID="goal-keep" label="Keep going" style={{ flex: 1 }}
+                         onPress={() => setGoalPop(false)} />
+                  </View>
+                )}>
+          <Muted testID="goal-met-count">{`${goal.done} ${goal.done === 1 ? "card" : "cards"} today`}</Muted>
+        </Bubble>
+      ) : null}
     </Screen>
   );
 }

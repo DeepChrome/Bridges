@@ -41,8 +41,8 @@ export const HELP = {
   Cards: { title: "Study", lines: [
     ["Show, then grade", "Again, Hard, Good, Easy set the next review"],
     ["Counter", "Done, coming back, left; tap it for more"],
-    ["Cog", "Fronts, sources, new words a day"],
-    ["Fifty a day", "The rest wait for tomorrow; Keep going lifts it"],
+    ["Cog", "Fronts, sources, order, new words a day"],
+    ["Goal reached", "A note; the cards keep coming"],
     ["Drills", "On the back: every drill for that word"],
     ["Switch", "Offered when one direction falls far behind"],
   ] },

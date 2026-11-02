@@ -299,10 +299,19 @@ describe("the card reads itself once", () => {
 const goalOf = (owed, done = 0) => ({ day: require("@core/scheduler").dayOf(now), owed, done });
 
 describe("after the day's pile", () => {
-  it("offers a round of trouble words, which deals them though none is due", async () => {
+  /* The goal is not a cap (the owner, 2026-11-02): a review begun with it met
+     deals the met cards past it; once the pool is through, the ways on
+     include a trouble round, which deals the trouble words though none is
+     due. */
+  it("deals past a met goal, then offers a round of trouble words, which deals them though none is due", async () => {
     // Trouble: answered a dozen times and still scoring under 20 (scheduler.js).
     const bad = due({ dueAt: now + 5 * DAY, lapses: 5, reps: 12, d: 9.5, s: 0.3 });
-    await withProfile({ seen: { [WORD]: { recognise: bad } }, goal: goalOf(0) });
+    // No new words a day, so the one met card is the whole pool.
+    await withProfile({ seen: { [WORD]: { recognise: bad } }, goal: goalOf(0), newPerDay: 0 });
+    expect(await screen.findByTestId("card-recognise")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByText("Show")); });
+    // Hard: a Good would lift the card out of the trouble bank, which is right.
+    await act(async () => { fireEvent.press(screen.getByTestId("grade-2")); });
     expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     await act(async () => { fireEvent.press(screen.getByTestId("trouble-round")); });
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
@@ -345,14 +354,21 @@ describe("after the day's pile", () => {
     const st = { seen: { "да": { recognise: later(30) }, "нет": { recognise: later(2) },
                          [WORD]: { recognise: fresh() } }, cardKinds: ["words"], learnAhead: 20 };
     expect(knownWords(st)).toEqual(["нет", "да"]);
-    await withProfile({ seen: { "да": st.seen["да"], "нет": st.seen["нет"] }, goal: goalOf(0) });
+    // The goal is met and the two met cards are dealt past it (2026-11-02);
+    // through them, the ways on include the known-words round.
+    await withProfile({ seen: { "да": st.seen["да"], "нет": st.seen["нет"] }, goal: goalOf(0), newPerDay: 0 });
+    for (let k = 0; k < 2; k++) {
+      await act(async () => { fireEvent.press(await screen.findByText("Show")); });
+      await act(async () => { fireEvent.press(screen.getByTestId("grade-3")); });
+    }
     expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     await act(async () => { fireEvent.press(screen.getByTestId("known-round")); });
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
     expect(screen.getByTestId("study-heading").props.children).toBe("Known words");
   });
 
-  /* The end of the day's work is said as a goal met, with the ways to go on. */
+  /* The goal met mid-sitting is a bubble (2026-11-02); Something else ends
+     the sitting on the goal met, with the ways to go on. */
   /* Keep going is offered while a met card is left that was not answered
      today: here «хотеть», held and not due. A card answered today is never
      dealt again today (2026-10-19), so with only that one card met there
@@ -364,6 +380,7 @@ describe("after the day's pile", () => {
     await screen.findByTestId("card-recognise");
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
     await act(async () => { fireEvent.press(screen.getByTestId("grade-3")); });
+    await act(async () => { fireEvent.press(await screen.findByTestId("goal-pivot")); });
     expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     expect(screen.getByTestId("study-today").props.children).toBe("1 card today");
     expect(screen.getByTestId("keep-going")).toBeTruthy();

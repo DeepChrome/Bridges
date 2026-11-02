@@ -4,7 +4,7 @@
  * as a pure move; the screen deals what `sessionFor` hands it. */
 
 import { L, UN, SPEECH, reachedUnits, idxOfWord, exactIdx, rankOf, videoLines,
-         personalWords, goalNow, englishOfSentence } from "./data";
+         personalWords, pathRank, goalNow, englishOfSentence } from "./data";
 import { schedulerOpts, wanted, troubleWords as troubleBank, DEFAULT_FRONTS, cardFor, familiarity, kindOf, retrievability,
          isDue, dayOf } from "@core/scheduler";
 import { isIrregular } from "@core/facts";
@@ -331,6 +331,9 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
     seen: st.seen, words: pool.concat(met), dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily,
     rng, opts, owed: goalNow(st).owed, beyond,
     familiar: (w, card) => familiarity(card, rankOf(w)) || 0,
+    // "From the start" walks the route from its first words (the owner,
+    // 2026-11-02); the default is most faded first.
+    order: st.reviewOrder === "path" ? pathRank(st) : undefined,
   });
 }
 

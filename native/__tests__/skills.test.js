@@ -87,11 +87,22 @@ describe("the drills lean on the weakest", () => {
     const weight = skillWeight(st, "forms");
     expect(weight(words[0])).toBeCloseTo(1, 1);
     expect(weight(words[1])).toBe(WEIGHT_UNASKED);
+    /* Weighted down, never left out. Aimed, not sampled (§23): against
+       eleven unasked words the mastered one is drawn in about one question
+       in thirty-four, and twelve runs missed it about one time in thirty.
+       Against one unasked word it is drawn in one question in four, and a
+       hundred and twenty draws cannot miss it. */
+    const pair = new Set();
+    for (let k = 0; k < 12; k++) {
+      for (const q of Q.drillQuestions("cases", 10, words.slice(0, 2), undefined, true, undefined, weight)) pair.add(q.i);
+    }
+    expect(pair.has(words[0])).toBe(true);
+    expect(pair.has(words[1])).toBe(true);
+    // …and over the whole pool the drill still reaches most words.
     const asked = new Set();
     for (let k = 0; k < 12; k++) {
       for (const q of Q.drillQuestions("cases", 10, words, undefined, true, undefined, weight)) asked.add(q.i);
     }
-    expect(asked.has(words[0])).toBe(true);       // weighted down, never left out
     expect(asked.size).toBeGreaterThan(words.length / 2);
   });
 });

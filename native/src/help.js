@@ -43,10 +43,13 @@ export const HELP = {
     ["Counter", "Done, coming back, left; tap it for more"],
     ["Cog", "Fronts, sources, order, new words a day"],
     ["Goal reached", "A note; the cards keep coming"],
+    ["a_", "On the front: the answer a letter at a time"],
     ["Drills", "On the back: every drill for that word"],
+    ["Low priority", "Out of the rotation; the cog lists them"],
     ["Switch", "Offered when one direction falls far behind"],
   ] },
   WordDrill: { title: "One word's drill", lines: [
+    ["a_", "The answer a piece at a time; costs the grade"],
     ["Bulb", "The word's tables; costs the grade"],
     ["Speaker", "Hear the word; twice for slower"],
     ["Missed", "Comes back once at the end"],
@@ -60,12 +63,14 @@ export const HELP = {
   ] },
   Drill: { title: "A drill", lines: [
     ["Cog", "What to ask, which words, written or chosen"],
+    ["a_", "The answer a piece at a time; costs the grade"],
     ["Bulb", "The word's tables and rules; costs the grade"],
     ["Speaker", "Hear the word; twice for slower"],
     ["Wrong answer", "Why, in two lines, and the rule"],
     ["Sparkle", "Ask the AI about this question"],
   ] },
   Quiz: { title: "A quiz", lines: [
+    ["a_", "The answer a piece at a time; costs the grade"],
     ["Bulb", "The word's tables and rules; costs the grade"],
     ["Speaker", "Hear the word; twice for slower"],
     ["Missed", "Comes back once at the end"],

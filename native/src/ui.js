@@ -925,6 +925,28 @@ export function Chip({ on, label, onPress, testID }) {
   );
 }
 
+/* A small boxed action on a card — Drills, More, Low priority (the owner,
+   2026-11-06: "the more and drills button should be more clearly indicated
+   as buttons"). They were ghost buttons: grey words with nothing round them,
+   which on a card full of grey words read as more text. A tinted fill and a
+   hairline make each one a control; 36 drawn, 44 to the finger (rule 20.12).
+   `on` marks a state the action has set. */
+export function ActionChip({ label, onPress, testID, on, accessibilityLabel }) {
+  const t = useTheme();
+  return (
+    <Pressable onPress={onPress} testID={testID} hitSlop={4}
+               accessibilityRole="button" accessibilityLabel={accessibilityLabel}
+               accessibilityState={on === undefined ? undefined : { selected: !!on }}
+               style={({ pressed }) => ({ minHeight: 36, paddingHorizontal: 12, justifyContent: "center",
+                 borderRadius: radius.md, borderWidth: 1, borderColor: on ? t.brand : t.line,
+                 backgroundColor: on ? t.brandBg : t.surface2, opacity: pressed ? 0.6 : 1 })}>
+      <Text selectable={false} style={{ color: on ? t.brandInk : t.ink, fontSize: 14, fontWeight: "600" }}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 /* Copy a piece of text to the clipboard, with the usual two-sheets mark. A
    press turns the mark into a tick for a moment, which is the only feedback a
    copy needs (the owner, 2026-10-13: Translate wants "a standalone button for

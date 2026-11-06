@@ -4,7 +4,7 @@
  * as a pure move; the screen deals what `sessionFor` hands it. */
 
 import { L, UN, SPEECH, reachedUnits, idxOfWord, exactIdx, rankOf, videoLines,
-         personalWords, pathRank, goalNow, englishOfSentence } from "./data";
+         personalWords, pathRank, goalNow, englishOfSentence, isLowPriority } from "./data";
 import { schedulerOpts, wanted, troubleWords as troubleBank, DEFAULT_FRONTS, cardFor, familiarity, kindOf, retrievability,
          isDue, dayOf } from "@core/scheduler";
 import { isIrregular } from "@core/facts";
@@ -33,7 +33,8 @@ export function flagsFor(st, item) {
 export function troubleWords(st) {
   const out = troubleBank(st.seen, rankOf);
   (st.pinned || []).forEach((w) => { if (!out.includes(w)) out.push(w); });
-  return out;
+  // A card set aside is out of every round, this one included (data.js lowPriority).
+  return out.filter((w) => !isLowPriority(st, w));
 }
 
 /* A card as the screen draws it: `b` is the schedule key, `w` the face. */
@@ -185,7 +186,7 @@ export function sourceCards(st) {
      learner picked: those carry their own sentences (a unit's video lines),
      and an imported deck is its cards and nothing else. */
   if (kinds.includes("sentences") && (!ids.length || ids.includes("__path__"))) ids.push("__sentences__");
-  return cardsIn(st, ids).filter((c) => kinds.includes(cardKind(c.b)));
+  return cardsIn(st, ids).filter((c) => kinds.includes(cardKind(c.b)) && !isLowPriority(st, c.b));
 }
 
 /* Every card the session may deal, one of each: everything due of the chosen
@@ -203,7 +204,9 @@ export function studyCards(st) {
   const kinds = kindsOf(st.cardKinds);
   const due = cardsIn(st, ["__due__"]).filter((c) => kinds.includes(cardKind(c.b)));
   const out = [], have = new Set();
-  for (const c of due.concat(sourceCards(st))) if (!have.has(c.b)) { have.add(c.b); out.push(c); }
+  for (const c of due.concat(sourceCards(st))) {
+    if (!have.has(c.b) && !isLowPriority(st, c.b)) { have.add(c.b); out.push(c); }
+  }
   return out;
 }
 
@@ -216,7 +219,7 @@ export function knownWords(st, now = Date.now()) {
   const opts = schedulerOpts(st);
   const out = [];
   for (const w in st.seen || {}) {
-    if (!kinds.includes(cardKind(w))) continue;
+    if (!kinds.includes(cardKind(w)) || isLowPriority(st, w)) continue;
     const card = cardFor(st.seen[w]);
     if (!card || kindOf(card) === "new" || wanted(st.seen[w], now, st.learnAhead)) continue;
     out.push([w, retrievability(card, now, opts)]);
@@ -298,7 +301,7 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
        payload has no English for is a card with nothing to learn from. */
     const cards = cardsIn(st, [], round === "known" ? knownWords(st).slice(0, QUEUE_DEFAULTS.sessionSize)
       : round === "again" ? (list || []) : (list || []).filter((w) => !held(w)))
-      .filter((c) => !c.sentence || String(c.e || "").trim());
+      .filter((c) => (!c.sentence || String(c.e || "").trim()) && !isLowPriority(st, c.b));
     const faces = {};
     for (const c of cards) faces[c.b] = c;
     return { ...practiceSession({ seen: st.seen, words: cards.map((c) => c.b), dirs: st.flash || DEFAULT_FRONTS,
@@ -326,7 +329,8 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
   const personal = !sources.length || sources.includes("__path__");
   const pool = personal ? words : sourceCards(st).map((c) => c.b);
   const have = new Set(pool);
-  const met = personal ? Object.keys(st.seen || {}).filter((w) => !have.has(w) && kinds.includes(cardKind(w))) : [];
+  const met = personal ? Object.keys(st.seen || {})
+    .filter((w) => !have.has(w) && kinds.includes(cardKind(w)) && !isLowPriority(st, w)) : [];
   return goalSession({
     seen: st.seen, words: pool.concat(met), dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily,
     rng, opts, owed: goalNow(st).owed, beyond,

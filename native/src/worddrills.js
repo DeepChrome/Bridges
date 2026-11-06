@@ -15,7 +15,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useSession } from "./session";
-import { Sheet, List, Row, Thumb, RowText, Familiarity, Btn } from "./ui";
+import { Sheet, List, Row, Thumb, RowText, Familiarity, ActionChip } from "./ui";
 import { Q } from "./questions";
 import { L, exactIdx, idxOfWord, rankOf } from "./data";
 import { skillScores } from "@core/scheduler";
@@ -71,12 +71,12 @@ function WordDrillsSheet({ word, onClose, onPick }) {
    state does not redraw in the test renderer (§30be). `onPick(drill)` is the
    caller's — Study navigates, so the route name sits in Study.js where
    routes.test.js can read it. Draws nothing for a card with no word behind it. */
-export function WordDrillsButton({ word, onPick, style, testID = "word-drills-open" }) {
+export function WordDrillsButton({ word, onPick, testID = "word-drills-open" }) {
   const [open, setOpen] = useState(false);
   if (wordIndex(word) < 0) return null;
   return (
     <>
-      <Btn kind="ghost" label="Drills" testID={testID} style={style} onPress={() => setOpen(true)} />
+      <ActionChip label="Drills" testID={testID} onPress={() => setOpen(true)} />
       {open ? (
         <WordDrillsSheet word={word} onClose={() => setOpen(false)}
                          onPick={(drill) => { setOpen(false); onPick(drill); }} />

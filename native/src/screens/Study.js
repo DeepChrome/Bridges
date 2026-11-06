@@ -17,9 +17,11 @@ import { View, Pressable, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, Sheet, Lift, Text, CogButton, Unselectable, toneOf,
-         Familiarity, familiarityColor, RowText, Bubble } from "../ui";
+         Familiarity, familiarityColor, RowText, Bubble, ActionChip } from "../ui";
+import { PartialHintButton, PartialHintLine } from "../hint";
+import { hintSteps, hintMask } from "@core/hint";
 import { RunTools } from "../askai";
-import { L, idxOfWord, exactIdx, sensesOf, goalNow, goalOpts, rankOf } from "../data";
+import { L, idxOfWord, exactIdx, sensesOf, goalNow, goalOpts, rankOf, lowPriority } from "../data";
 import { Linked, GrammarLine } from "../words";
 import { useAbout, cardAbout } from "../about";
 import { IrregularTag } from "../rules";
@@ -125,13 +127,46 @@ function Meaning({ face, senses }) {
   );
 }
 
-function Front({ face, direction }) {
+/* What a card's front hides, for its partial hint: the Russian on an English
+   front; on a Russian or a sound front, the meaning — its first sense, and of
+   that the first word given, since "free, gratuitous, rent-free" a letter at
+   a time is three answers. A sentence's answer is its English. Exported for
+   the test. */
+export function frontAnswer(face, direction, senses) {
+  if (direction === "produce") return String(face.w || "");
+  if (face.sentence) return String(face.e || "");
+  const group = senses && senses.length && senses[0].g ? senses[0].g : String(face.e || "").split(";")[0];
+  return String(group || "").split(",")[0].trim();
+}
+
+/* The front's partial hint (the owner, 2026-11-06: "add this mechanism to the
+   front side of the flash cards… go one letter at a time"): each press shows
+   one more letter of the answer, a sentence one more word (core/hint.js). The
+   card is graded by the learner, so a hint costs nothing here — the four
+   buttons are where they say how it went. */
+function FrontHint({ answer }) {
+  const steps = useMemo(() => hintSteps(answer), [answer]);
+  const [n, setN] = useState(0);
+  if (!steps.length) return null;
+  return (
+    <View style={{ alignItems: "center", gap: 10, marginTop: 14, alignSelf: "stretch" }}>
+      <PartialHintLine mask={n ? hintMask(answer, steps[n - 1]) : null} testID="card-hint-text" size={20} />
+      {n < steps.length ? (
+        <PartialHintButton testID="card-hint" on={n > 0} onPress={() => setN(n + 1)} />
+      ) : null}
+    </View>
+  );
+}
+
+function Front({ face, direction, senses }) {
   const t = useTheme();
-  if (direction === "produce") return <Meaning face={face} />;
+  const hint = <FrontHint answer={frontAnswer(face, direction, senses)} />;
+  if (direction === "produce") return <>{<Meaning face={face} senses={senses} />}{hint}</>;
   if (direction === "listen") {
     return (
-      <View style={{ alignItems: "center", paddingVertical: 12 }}>
+      <View style={{ alignItems: "center", paddingVertical: 12, alignSelf: "stretch" }}>
         <Speaker text={face.b} size={64} />
+        {hint}
       </View>
     );
   }
@@ -141,6 +176,7 @@ function Front({ face, direction }) {
         {face.w}
       </Text>
       <View style={{ marginTop: 10 }}><Speaker text={face.b} /></View>
+      {hint}
     </>
   );
 }
@@ -176,12 +212,13 @@ export default function Study({ navigation, route }) {
     const m = {};
     for (const c of studyCards(st).concat(cardsIn(st, ["__trouble__"]))) if (!m[c.b]) m[c.b] = c;
     return m;
+    // A card restored from low priority needs its face back (studycards.js).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [st.sets, st.decks, st.seen, st.cardKinds]);
+  }, [st.sets, st.decks, st.seen, st.cardKinds, st.lowPriority]);
   // Cards not yet met that the sources could introduce — what "Study ahead" offers.
   const unmet = useMemo(() => sourceCards(st).filter((c) => !st.seen[c.b]).length,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [st.sets, st.decks, st.seen, st.cardKinds]);
+    [st.sets, st.decks, st.seen, st.cardKinds, st.lowPriority]);
   const trouble = troubleWords(st);
   // The day's goal as it stands, and whether today is a study day.
   const goal = goalNow(st);
@@ -464,10 +501,42 @@ export default function Study({ navigation, route }) {
     setShown(false); setRevealed(false);
   };
 
+  /* **Set aside as low priority** (the owner, 2026-11-06: "the option to flag
+     a word low priority and that will remove it from the rotation"). The
+     card leaves the pile now — this time and every time it was due to come
+     round in this sitting — and every pile after (data.js lowPriority). It is
+     not a grade: its schedule is kept as it is, so taking it off the list
+     (Study options) picks it up where it was. Undo puts it straight back. */
+  const setAside = () => {
+    const word = item.word;
+    setLast({ aside: word, items, at, marks, wasLow: lowPriority(st)[word] });
+    update((p) => ({ ...p, lowPriority: { ...(p.lowPriority || {}), [word]: Date.now() } }));
+    sitting.current.delete(word);
+    const { [word]: _gone, ...rest } = marks;
+    setMarks(rest);
+    setSession({ ...session, items: items.filter((it, k) => k < at || (k > at && it.word !== word)) });
+    setShown(false); setRevealed(false);
+  };
+
   /* The last answer taken back: the card as it was, the log row gone, the
      session as it stood — the card is in front again, face up. */
   const undo = () => {
     if (!last) return;
+    if (last.aside) {
+      const word = last.aside;
+      update((p) => {
+        const low = { ...(p.lowPriority || {}) };
+        if (last.wasLow === undefined) delete low[word]; else low[word] = last.wasLow;
+        return { ...p, lowPriority: low };
+      });
+      sitting.current.add(word);
+      setSession({ ...session, items: last.items });
+      setMarks(last.marks);
+      setAt(last.at);
+      setShown(true); setRevealed(true);
+      setLast(null);
+      return;
+    }
     const { row, entry } = last;
     update((p) => {
       // The entry — the card and its skill scores — back as it was, or gone,
@@ -783,8 +852,30 @@ export default function Study({ navigation, route }) {
                 "Doesn't have to say Russian or English at the top of the
                 card"): the front shows what it is. A flag is about the card's
                 history, never its content, so it gives nothing away. */}
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 6,
+            <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 8,
                            alignSelf: "stretch", marginBottom: 14, minHeight: 28 }}>
+              {/* The card's actions, at the top of the card and boxed as the
+                  controls they are (the owner, 2026-11-06: "the more and
+                  drills button should be more clearly indicated as buttons and
+                  they should be at the top of the card"). Once turned only:
+                  every drill this word can take (worddrills.js), the whole
+                  entry — a word only, a sentence card has neither — and
+                  setting the card aside, which any card can be. */}
+              {revealed && !blank ? (
+                <View testID="card-actions" style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, flexShrink: 1 }}>
+                  {idxOfWord(face.b) >= 0 ? (
+                    <>
+                      <WordDrillsButton word={face.b}
+                                        onPick={(drill) => navigation.navigate("WordDrill", { word: face.b, drill })} />
+                      <ActionChip label="More" testID="full-entry"
+                                  onPress={() => navigation.navigate("Word", { word: face.b })} />
+                    </>
+                  ) : null}
+                  <ActionChip label="Low priority" testID="set-aside" onPress={setAside}
+                              accessibilityLabel="Low priority: take out of the rotation" />
+                </View>
+              ) : <View />}
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, minHeight: 28 }}>
               {flags.isNew ? <Pill testID="flag-new" tone="brand">New</Pill> : null}
               {/* How well this card is held, off its own FSRS stability. On
                   both faces for the same reason as the flags: it is about the
@@ -794,12 +885,14 @@ export default function Study({ navigation, route }) {
                   at before answering. */}
               {flip.face && flags.irregular ? <IrregularTag word={L[idxOfWord(item.word)]} testID="flag-irregular" /> : null}
               {flip.face ? <ScoreRing word={item.word} score={flags.score} /> : null}
+              </View>
             </View>
             {blank ? (
               <Muted testID="card-blank" style={{ textAlign: "center" }}>
                 This card has no word on it
               </Muted>
-            ) : !revealed ? <Front face={face} direction={item.direction} /> : (
+            ) : !revealed ? <Front key={`${dealt.current}:${at}:${item.word}`} face={face}
+                                   direction={item.direction} senses={senses} /> : (
               <>
                 {/* **Both sides on the back, the starting side on top** (the
                     owner, 2026-10-03: "both english and russian on the back,
@@ -844,21 +937,6 @@ export default function Study({ navigation, route }) {
           </Pressable>
           {revealed && !blank ? (
               <>
-                {/* The card's two ways on, right under the word (the owner,
-                    2026-10-31: "put the drills and the more buttons near the
-                    top of the entry" — they sat under the examples, below the
-                    fold): every drill this word can take (worddrills.js), and
-                    the whole entry. A word only: a sentence card has no
-                    paradigm to drill and no entry to open. */}
-                {idxOfWord(face.b) >= 0 ? (
-                  <View testID="card-actions"
-                        style={{ flexDirection: "row", justifyContent: "center", gap: 8, marginTop: 8 }}>
-                    <WordDrillsButton word={face.b}
-                                      onPick={(drill) => navigation.navigate("WordDrill", { word: face.b, drill })} />
-                    <Btn kind="ghost" label="More" testID="full-entry"
-                         onPress={() => navigation.navigate("Word", { word: face.b })} />
-                  </View>
-                ) : null}
                 {/* Every meaning the word has, numbered as a dictionary
                     lays them (§30q), four at most — the full entry is one
                     press away above. Where there are no senses (2% of the

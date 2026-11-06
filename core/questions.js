@@ -2221,15 +2221,18 @@ export function makeQuestions(env) {
      up with review: `prefer` (lemma indices — what is due or in trouble, the
      app decides) first, then words from the unit's earlier lessons, so a
      three-word lesson is not a five-question quiz. */
-  function quizSteps(unit, index, prefer, seen, last) {
-    return inRoute(unit, () => quizStepsIn(unit, index, prefer, seen, last));
+  /* `aside`: lemma indices the learner set aside as low priority (native
+     data.js lowPriority) — never the review slot's word. The lesson's own
+     words are asked whatever: the lesson is teaching them. */
+  function quizSteps(unit, index, prefer, seen, last, aside) {
+    return inRoute(unit, () => quizStepsIn(unit, index, prefer, seen, last, aside));
   }
   /* Typing waits in chapter 1 until a word has been answered twice (the
      learner agents, 2026-10-08: a beginner with shaky Cyrillic met three typed
      answers in the first quiz). A card is from the scheduler (`seen`). */
   const typeReady = (stage, entry) => stage > 0
     || ((cardFor(entry) || {}).reps || 0) >= 2;
-  function quizStepsIn(unit, index, prefer, seen, last) {
+  function quizStepsIn(unit, index, prefer, seen, last, aside) {
     const words = lessonWords(unit, index);
     const pool = poolFor(unit);
     // `seen` is the learner's schedule keyed on the Russian string (rule 20.4).
@@ -2488,7 +2491,7 @@ export function makeQuestions(env) {
        «э́то» or «у» — met on every screen — reviews nothing (2026-10-12). */
     const everyday = (i) => i < LESSON_FREE_RANK && !CONTENT.has(L[i].p);
     const all = unique(byNeed(earlierCore).concat(earlierCore.length ? [] : byNeed(sameCh)))
-      .filter((i) => !asked.has(i));
+      .filter((i) => !asked.has(i) && !(aside && aside.has(i)));
     const content = all.filter((i) => !everyday(i));
     const queue = content.length ? content : all;
     let added = 0;

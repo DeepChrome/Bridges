@@ -36,6 +36,8 @@ import { Build } from "../activities/Build";
 import { L, PASS_MARK } from "../data";
 import { gradeFor, applyGrade, gradeSkill, skillOfKind, reviewRows, directionOfKind, schedulerOpts, gradesCard } from "@core/scheduler";
 import { fold, firstSense } from "@core/util";
+import { partialFor, hintSteps, hintMask } from "@core/hint";
+import { PartialHintButton, PartialHintLine } from "../hint";
 
 /* The row of round tools under a question — speaker, bulb, Teddy, flag. */
 export const TOOL_SIZE = 48;
@@ -439,6 +441,9 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   const [picked, setPicked] = useState(null);
   const [hintOpen, setHintOpen] = useState(false);
   const [usedHint, setUsedHint] = useState(false);
+  /* How many presses of the partial hint this question has had (core/hint.js):
+     each gives one more piece of the answer, starting at a form's root. */
+  const [partial, setPartial] = useState(0);
   /* The reference sheet is a native Modal, which is a window of its own: it
      stays on top of whatever the stack shows next. A word link inside it
      opens that word's entry on the Root stack and leaves the drill mounted
@@ -492,6 +497,14 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
   }, []);
 
   if (!q) return null;
+
+  /* The partial hint for this question, and whether any help was taken. A
+     piece of the answer is help like the reference is: the answer is graded
+     Hard at best, since the word was not recalled unaided (§30az). */
+  const part = partialFor(q, L);
+  const partSteps = part ? hintSteps(part.answer, { base: part.base }) : [];
+  const partMask = part && partial ? hintMask(part.answer, partSteps[Math.min(partial, partSteps.length) - 1]) : null;
+  const helped = usedHint || partial > 0;
 
   /* The run as it stands once this answer is in, kept for picking up again.
      It is saved pointing at the *next* question: the grade for this one is
@@ -564,7 +577,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     if (!q.retry) {
       if (correct) tally.current.right += 1; else tally.current.wrong += 1;
       tally.current.credit += credit;
-      if (usedHint) tally.current.helped += 1;
+      if (helped) tally.current.helped += 1;
       results.current.push({ right: !!correct, credit, stage: q.stage, lesson: q.lesson, i: q.i });
     }
     // A word said aloud has had its retries in place (Build.js); sending it
@@ -577,7 +590,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     if (gradeWords) {
       const entries = words || (typeof q.i === "number" ? [q.i] : []);
       if (entries.length && gradesCard(q.kind)) {
-        const g = grade || gradeFor(correct, usedHint);
+        const g = grade || gradeFor(correct, helped);
         const dir = directionOfKind(q.kind), now = Date.now();
         // The log rows are built here, from the cards as they stand, and
         // handed in beside the update — never from inside it (session.js).
@@ -589,7 +602,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
           typeof e === "number" ? gradeInto(acc, e, g, dir, now, q.kind) : gradeInto(acc, e.i, e.grade, dir, now, q.kind)
         ), prev), rows);
       } else if (entries.length && skillOfKind(q.kind)) {
-        const g = grade || gradeFor(correct, usedHint);
+        const g = grade || gradeFor(correct, helped);
         const sk = skillOfKind(q.kind), now = Date.now();
         update((prev) => entries.reduce((acc, e) => (
           typeof e === "number" ? gradeSkillInto(acc, e, g, sk, now) : gradeSkillInto(acc, e.i, e.grade, sk, now)
@@ -629,6 +642,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setVerdict(null);
     setPicked(null);
     setUsedHint(false);
+    setPartial(0);
   };
 
   /* A step backwards, for a run where that is a sensible thing to want.
@@ -652,6 +666,7 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
     setVerdict(null);
     setPicked(null);
     setUsedHint(false);
+    setPartial(0);
   };
   stepBackRef.current = goBack;
   const back = !allowBack || at === 0 ? undefined : goBack;
@@ -749,12 +764,20 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
             them larger and space them out a little bit more horizontally"). */}
         <View style={{ marginTop: 14, flexDirection: "row", gap: TOOL_GAP, justifyContent: "center" }}>
           {promptSpeech(q) ? <Speaker text={promptSpeech(q)} size={TOOL_SIZE} /> : null}
+          {/* The smaller help beside the whole reference: one more piece of
+              the answer each press, a form's root first (the owner,
+              2026-11-06). Gone once the answer has been given away whole. */}
+          {!answered && partSteps.length && partial < partSteps.length ? (
+            <PartialHintButton size={TOOL_SIZE} on={partial > 0}
+                               onPress={() => setPartial(Math.min(partial + 1, partSteps.length))} />
+          ) : null}
           {!answered && hasReference(ref) ? (
             <BulbButton testID="bulb" on={hintOpen} label="Reference" size={TOOL_SIZE}
                         onPress={() => { setUsedHint(true); setHintOpen(true); }} />
           ) : null}
           <RunTools size={TOOL_SIZE} />
         </View>
+        {!answered ? <PartialHintLine mask={partMask} style={{ marginTop: 12 }} /> : null}
       </Animated.View>
 
       {q.hint && !answered ? (
@@ -783,11 +806,11 @@ export function Runner({ title, steps, onFinish, gradeWords = true, progress, re
       <Animated.View key={at} testID="answer-block"
                      style={[answerIn, !q.prompt && !hasInput(q)
                        ? { flexGrow: 1, justifyContent: "flex-end", paddingBottom: 8 } : null]}>
-        {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip, usedHint, back, next }) : null}
+        {VIEWS[q.kind] ? VIEWS[q.kind](q, { answered, picked, setPicked, record, skip, usedHint: helped, back, next }) : null}
       </Animated.View>
 
       {answered ? (
-        <Verdict q={q} qWord={qWord} verdict={verdict} at={at} usedHint={usedHint}
+        <Verdict q={q} qWord={qWord} verdict={verdict} at={at} usedHint={helped}
                  irregular={irregular} onNext={next} />
       ) : null}
 

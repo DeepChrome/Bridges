@@ -13,7 +13,7 @@ import { VideoLines } from "../prep";
 import { Q } from "../questions";
 import {
   L, UN, lessonWords, lessonCount, markComponent, PASS_MARK,
-  reviewWords, linesWith, afterStep, stepRoute,
+  reviewWords, linesWith, afterStep, stepRoute, lowPriorityIdx,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { firstSense } from "@core/util";
@@ -270,7 +270,8 @@ export function QuizFlow({ route, navigation }) {
        be passable with what the lessons have taught (the owner, 2026-09-24). */
     const within = new Set(Q.unitsUpTo(unit).flatMap((u) => u.w));
     const review = reviewWords(st).filter((i) => within.has(i));
-    const next = Q.withTaught(taughtBy(st), () => Q.quizSteps(unit, index, review, st.seen, asked.current));
+    const next = Q.withTaught(taughtBy(st), () => Q.quizSteps(unit, index, review, st.seen, asked.current,
+                                                                lowPriorityIdx(st)));
     asked.current = Q.stepKeys(next);
     return next;
   }, [unitId, index, seed]);

@@ -50,6 +50,7 @@ import { ICONS, ACTIVITY_ICONS, iconFor } from "../core/icons.js";
 import { AV, AV_IDS, avatarOf, AV_CREDIT } from "../core/avatars.js";
 import { POSES, LINES, MAX_WORDS, guideLine, poseFor, reactionFor, GUIDE } from "../core/guide.js";
 import { leanOf, leanNudge, LEAN_MIN_WORDS, LEAN_GAP, LEAN_SHARE, LEAN_EVERY_DAYS } from "../core/lean.js";
+import { hintSteps, hintMask, hintMode, partialFor } from "../core/hint.js";
 
 import { loadPayload, PARTS } from "./payload.mjs";
 
@@ -4423,6 +4424,44 @@ group("one direction ahead of the other, 2026-10-31");
      `back after ${LEAN_EVERY_DAYS} days`);
   ok(leanNudge({ seen: oneSided(30), rankOf: rank, fronts: ["recognise"], nudged: { day: today - 1, skill: "ru2en" }, now }) !== null,
      "a nudge the other way does not silence this one");
+}
+
+group("the partial hint, 2026-11-06");
+{
+  // A form starts at its root, then one letter more a press.
+  const steps = hintSteps("зна́ешь", { base: "знать" });
+  ok(steps[0] === 3 && steps[steps.length - 1] === 6, "a conjugated form opens on its root", JSON.stringify(steps));
+  ok(hintMask("зна́ешь", 3) === "зна́___", "the stress mark rides on its vowel and the rest is blank", hintMask("зна́ешь", 3));
+  ok(hintMask("зна́ешь", 4) === "зна́е__", "each press shows one letter more");
+  // The root never gives away all but the last letter on its own.
+  ok(hintSteps("книга", { base: "книга" })[0] === 3, "a form that is its dictionary form stops two short");
+  // Without a word behind it, one letter at a time.
+  ok(hintSteps("free").join() === "1,2,3,4" && hintMask("free", 1) === "f___", "a meaning goes a letter at a time");
+  ok(hintMask("to read", 2) === "to ____", "spaces keep the shape of the answer");
+  // A sentence a word at a time, punctuation kept.
+  const s = "Я не знаю, где он живёт.";
+  ok(hintMode(s) === "words" && hintSteps(s).length === 6, "a sentence goes a word at a time");
+  ok(hintMask(s, 3) === "Я не знаю, ___ __ _____.", "unrevealed words are blanks of their length", hintMask(s, 3));
+  // Which questions offer one, and what they give away.
+  const typedQ = { kind: "conjugation", typed: true, target: "зна́ешь", i: 0 };
+  const fake = [{ b: "знать" }];
+  ok(partialFor(typedQ, fake).base === "знать", "a written form drill starts from the word's root");
+  ok(partialFor({ kind: "choose-en", options: [{ label: "book", right: true }, { label: "x" }], i: 0 }, fake).answer === "book",
+     "a chosen question gives away its right option");
+  ok(partialFor({ kind: "type", target: "книга", i: 0 }, fake).base === undefined, "a word to produce has no root to start from");
+  ok(partialFor({ kind: "stress", options: [{ label: "ру́ки", right: true }] }, fake) === null, "stress: the letters are the answer's in every option");
+  ok(partialFor({ kind: "match", pairs: [] }, fake) === null, "a match has no single answer");
+
+  // The quiz's review slot never takes a word set aside (native data.js lowPriority).
+  const unitOf = UN.find((u) => STAGES.findIndex((st) => st.core === u || st.branches.includes(u)) >= 2);
+  const reviewed = new Set();
+  for (let r = 0; r < 40; r++) for (const q of Q.quizSteps(unitOf, 0)) if (q.review && typeof q.i === "number") reviewed.add(q.i);
+  ok(reviewed.size > 0, "the quiz has a review slot to test", unitOf && unitOf.id);
+  let leaked = 0;
+  for (let r = 0; r < 40; r++) {
+    for (const q of Q.quizSteps(unitOf, 0, [], undefined, undefined, reviewed)) if (q.review && reviewed.has(q.i)) leaked++;
+  }
+  ok(leaked === 0, "a word set aside is never the review slot's word", `${leaked} leaked`);
 }
 
 console.log("\n" + checks + " checks · " +

@@ -2,12 +2,13 @@
  * day, and where new cards come from. Carved out of screens/Study.js as a
  * pure move. */
 
-import React from "react";
+import React, { useState } from "react";
 import { View, Alert } from "react-native";
 import { useSession } from "./session";
 import { useTheme } from "./theme";
-import { Btn, List, Row, Tick, SectionLabel, Sheet, Stepper, RowText, Choice } from "./ui";
-import { STAGES, unitUnlocked } from "./data";
+import { Btn, List, Row, Tick, SectionLabel, Sheet, Stepper, RowText, Choice, ActionChip, Text } from "./ui";
+import { STAGES, unitUnlocked, L, exactIdx, lowPriority } from "./data";
+import { firstSense } from "@core/util";
 import { DIRECTIONS, DEFAULT_FRONTS } from "@core/scheduler";
 import { QUEUE_DEFAULTS, kindsOf, CARD_KINDS } from "@core/queue";
 
@@ -25,6 +26,46 @@ export const FRONTS = [
   ["produce", "English", "You give the Russian"],
   ["listen", "Sound only", "You give what you heard"],
 ];
+
+/* The cards set aside as low priority (Study's card, data.js lowPriority),
+   newest first, each with the way back into the rotation (the owner,
+   2026-11-06: "The user needs to be able to access this list of low prio
+   words in case they want to remove them from the low priority list later").
+   Folded under one row, since a long list would push the options down. Only
+   drawn while there is something on it. */
+function LowPriorityList() {
+  const { st, update } = useSession();
+  const t = useTheme();
+  const [open, setOpen] = useState(false);
+  const low = lowPriority(st);
+  const words = Object.keys(low).sort((a, b) => low[b] - low[a]);
+  if (!words.length) return null;
+  const restore = (w) => update((p) => {
+    const next = { ...(p.lowPriority || {}) };
+    delete next[w];
+    return { ...p, lowPriority: next };
+  });
+  return (
+    <View style={{ marginBottom: 18 }}>
+      <SectionLabel>Low priority</SectionLabel>
+      <List>
+        <Row testID="low-priority-open" onPress={() => setOpen(!open)}>
+          <RowText title={`${words.length} ${words.length === 1 ? "card" : "cards"} set aside`} bold={false} />
+          <Text style={{ color: t.brandInk, fontSize: 15, fontWeight: "600" }}>{open ? "Hide" : "Show"}</Text>
+        </Row>
+        {open ? words.map((w) => {
+          const i = exactIdx(w);
+          return (
+            <Row key={w} testID={`low-${w}`}>
+              <RowText title={i >= 0 ? L[i].w : w} sub={i >= 0 ? firstSense(L[i]) : undefined} bold={false} />
+              <ActionChip label="Restore" testID={`restore-${w}`} onPress={() => restore(w)} />
+            </Row>
+          );
+        }) : null}
+      </List>
+    </View>
+  );
+}
 
 export function SetPicker({ visible, onClose }) {
   const { st, update } = useSession();
@@ -137,6 +178,7 @@ export function SetPicker({ visible, onClose }) {
                       options={[{ id: "weak", name: "Where you struggle" }, { id: "path", name: "From the start" }]}
                       onPick={(id) => update((p) => ({ ...p, reviewOrder: id }))} />
             </View>
+            <LowPriorityList />
 
             {/* Only listed when there is one. An empty section headed "Your
                 decks" over a line explaining how to get some is the app

@@ -45,6 +45,7 @@ export const DEFAULTS = {
      Settings. The frozen web app still ships it on. */
   dev: false,
   faves: {},            // video id -> day favourited (Immerse)
+  lowPriority: {},      // card's Russian -> when it was set aside (Study; studycards.js)
   notices: {},          // one-time notes seen, by id (Immerse's creators note)
   theme: "auto",
   /* Where the flashcards' *new* cards come from: `__path__` (the units the

@@ -843,10 +843,25 @@ export function rankOf(w) {
 /* What the scheduler wants back today, as lemma indices: the trouble bank
    first, then everything due. What a quiz tops up with and a drill asks for
    before anything else — review on the path, not only in the Study tab. */
+/* Cards the learner set aside as low priority (the owner, 2026-11-06: "flag a
+   word low priority and that will remove it from the rotation"): out of every
+   pile Study deals, the trouble bank, the quiz's review top-up and the drills'
+   "Your words". Keyed on the card's Russian (rule 20.4); the card keeps its
+   schedule, so taking it back off the list picks it up where it was. A
+   lesson still teaches its own words — set aside is about review, not about
+   the course. */
+export const lowPriority = (st) => (st && st.lowPriority) || {};
+export const isLowPriority = (st, w) => Object.prototype.hasOwnProperty.call(lowPriority(st), w);
+// The same, as lemma indices, for the generators that work in indices.
+export const lowPriorityIdx = (st) => new Set(Object.keys(lowPriority(st)).map((w) => exactIdx(w)).filter((i) => i >= 0));
+
 export function reviewWords(st) {
   const now = Date.now();
   const out = [], have = new Set();
-  const add = (w) => { const i = idxOfWord(w); if (i >= 0 && !have.has(i)) { have.add(i); out.push(i); } };
+  const add = (w) => {
+    if (isLowPriority(st, w)) return;
+    const i = idxOfWord(w); if (i >= 0 && !have.has(i)) { have.add(i); out.push(i); }
+  };
   for (const w in (st.trouble || {})) add(w);
   for (const w in (st.seen || {})) if (wanted(st.seen[w], now, st.learnAhead)) add(w);
   return out;
@@ -964,6 +979,7 @@ export const KNOWN_AT = 40;
 export function knownPool(st) {
   const out = [], have = new Set();
   for (const w of Object.keys(st.seen || {})) {
+    if (isLowPriority(st, w)) continue;
     const score = familiarity(cardFor(st.seen[w]), rankOf(w));
     if (score === null || score < KNOWN_AT) continue;
     const e = exactIdx(w);

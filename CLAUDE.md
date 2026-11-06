@@ -7067,6 +7067,42 @@ struggling."*
   expected the pile to stop at the goal now drive to the pool's end or
   through the bubble.
 
+## 30co. Low priority, the card's actions boxed at its top, and the partial hint (2026-11-06)
+
+The owner: *"the option to flag a word low priority and that will remove it
+from the rotation… access this list of low prio words"*; *"the more and drills
+button should be more clearly indicated as buttons and they should be at the
+top of the card"*; *"anywhere where there are hints, there should also be some
+sort of partial hint… another letter or syllable"*, and on the flashcard front
+*"one letter at a time"*.
+
+- **Low priority is a list, not a grade** (`st.lowPriority`, card's Russian →
+  when; `lowPriority`/`isLowPriority`/`lowPriorityIdx` in data.js). A card on
+  it is out of every Study round (the day's pile, its sources, trouble, known,
+  list and "again" rounds — studycards.js), the quiz's review slot
+  (`quizSteps`' sixth argument, `aside`) and its top-up (`reviewWords`), and
+  the drills' "Your words" (`knownPool`). Its schedule is never touched, so
+  Restore picks it up where it was. A lesson still teaches its own words. The
+  card's **Low priority** button takes it out of the sitting at once; Undo puts
+  it back. The list is the Study options' "Low priority" section, folded, each
+  card with Restore, drawn only while it holds something.
+- **The card's actions are `ActionChip`s** (ui.js: a tinted fill and a
+  hairline, 36 drawn, 44 to the finger) in one row at the top of the turned
+  card, flags and ring on the right: Drills and More for a word, Low priority
+  for any card.
+- **The partial hint is core/hint.js**: `hintSteps` (what each press shows),
+  `hintMask` (the answer with the rest blank, spaces and punctuation kept),
+  `partialFor` (a runner question's answer and, for a form drill, the
+  dictionary form its root is read from). A form opens on the letters it
+  shares with its dictionary form, never closer than two short of the whole;
+  anything else a letter at a time; four words or more a word at a time. In a
+  run it is the "a_" button beside the bulb on every kind with one answer
+  (not stress, match or the spoken activities) and **counts as help** — the
+  answer is graded Hard at best, as the bulb is. On a flashcard's front it
+  gives the hidden side (`frontAnswer` in Study.js: the Russian on an English
+  front, else the first word of the first meaning) and costs nothing, since
+  the learner grades the card.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

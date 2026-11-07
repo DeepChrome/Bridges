@@ -12,6 +12,22 @@ compatibility_date = "2026-09-01"
 binding = "USAGE"
 id = "b604658a70984d208e21ea65006f01d0"
 
+# Sync (2026-11-07, src/sync.js): a learner's profile, one Durable Object per
+# account with its own SQLite, and one object for the pairing codes. The
+# classes are exported from src/index.js; `new_sqlite_classes` is what gives
+# them SQL storage (the key-value kind cannot hold rows).
+[[durable_objects.bindings]]
+name = "SYNC"
+class_name = "SyncAccount"
+
+[[durable_objects.bindings]]
+name = "PAIR"
+class_name = "Pairings"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SyncAccount", "Pairings"]
+
 [vars]
 MODEL = "claude-haiku-4-5-20251001"
 DAILY_CAP = "300"

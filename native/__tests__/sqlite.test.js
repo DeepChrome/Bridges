@@ -79,7 +79,7 @@ describe("the schema", () => {
       expect(db.raw.prepare("PRAGMA journal_mode").get().journal_mode).toBe("wal");
       expect(db.raw.prepare("PRAGMA user_version").get().user_version).toBe(SCHEMA);
       const tables = db.raw.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all().map((r) => r.name);
-      expect(tables).toEqual(["cards", "decks", "meta", "progress", "review_log", "settings"]);
+      expect(tables).toEqual(["cards", "decks", "meta", "outbox", "progress", "review_log", "settings", "sync_rows"]);
       // Opening again is harmless: every statement is IF NOT EXISTS.
       await sqliteRepo(db);
       expect(await repo.load()).toBeNull();
@@ -114,7 +114,7 @@ describe("the schema", () => {
       PRAGMA user_version = 1;
     `);
     const repo = await sqliteRepo(db);
-    expect(db.raw.prepare("PRAGMA user_version").get().user_version).toBe(2);
+    expect(db.raw.prepare("PRAGMA user_version").get().user_version).toBe(SCHEMA);
     const cols = db.raw.prepare("PRAGMA table_info(cards)").all().map((c) => c.name);
     expect(cols).toEqual(expect.arrayContaining(["state", "steps", "elapsed", "scheduled"]));
     expect(db.raw.prepare("SELECT direction FROM cards").all().map((r) => r.direction)).toEqual(["recognise", "recognise"]);
@@ -136,8 +136,10 @@ describe("a profile in rows", () => {
     const state = fixture();
     await repo.replace(state, []);
     const c = await repo.counts();
-    expect(c).toEqual({ cards: 4, decks: 2, deckCards: 4006, log: 0,
-                        progress: Object.keys(split(state).progress).length, settings: 3 });
+    const n = Object.keys(split(state).progress).length;
+    // Every row written is also an op waiting to be pushed (core/sync.js).
+    expect(c).toEqual({ cards: 4, decks: 2, deckCards: 4006, log: 0, progress: n, settings: 3,
+                        outbox: 4 + 2 + n + 3 });
     const back = merge(await repo.load());
     expect(back).toEqual(state);
     // A card that never had `lastAt` does not grow one: the scheduler reads an
@@ -237,6 +239,62 @@ describe("a profile in rows", () => {
     await repo.setMeta("migrated", "{\"at\":1}");
     expect(await repo.getMeta("migrated")).toBe("{\"at\":1}");
     expect("migrated" in merge(await repo.load())).toBe(false);
+  });
+});
+
+/* Sync on real SQL (core/sync.js): a save's ops land in the outbox in the
+   same transaction as the rows; a pull is applied where newer and never
+   enters the outbox; `allOps` reads the whole store back stamped. */
+describe("the outbox", () => {
+  it("fills on a save, empties on a push, and a pulled op lands without joining it", async () => {
+    const db = expoLike();
+    const repo = await sqliteRepo(db);
+    const prev = fixture();
+    await repo.replace(prev, [], T0);
+    const n = Object.keys(split(prev).progress).length;
+    expect((await repo.counts()).outbox).toBe(4 + 2 + n + 3);
+    const now = T0 + 12 * DAY;
+    const rows = reviewRows(prev.seen, [{ word: "книга", direction: "recognise", grade: 3 }], now, "study", { fuzz: false });
+    const r = applyGrade(prev.seen, prev.trouble, "книга", "recognise", 3, now, { fuzz: false });
+    const next = { ...prev, seen: r.seen, trouble: r.trouble, xp: 43 };
+    await repo.clearOutbox();
+    await repo.apply(diff(prev, next), rows, [], now + 1);
+    const out = await repo.readOutbox();
+    const ids = out.map((o) => o.k + ":" + o.id.replace(/\u0001/g, "/")).sort();
+    expect(ids).toEqual(["card:книга/produce", "card:книга/recognise", "card:книга/ru2en",
+                         "kv:progress/xp", `log:книга/recognise/${now}`]);
+    expect(out.find((o) => o.id === "книга\u0001produce").v).toBeNull();          // the merged-away card is a deletion
+    expect(out.find((o) => o.k === "log").at).toBe(now);
+    // A push that lands clears exactly what it sent; a row changed since stays.
+    await repo.apply(diff(next, { ...next, xp: 44 }), [], [], now + 2);
+    await repo.clearOutbox(out);
+    const left = await repo.readOutbox();
+    expect(left.map((o) => o.id)).toEqual(["progress\u0001xp"]);
+    expect(left[0].v).toBe("44");
+
+    // Pulled: an older streak loses, a newer one wins, a log row arrives; none joins the outbox.
+    const taken = await repo.applyOps([
+      { k: "kv", id: "progress\u0001xp", v: "1", at: now - 5 },
+      { k: "kv", id: "progress\u0001streak", v: "9", at: now + 10 },
+      { k: "log", id: `да\u0001recognise\u0001${now + 3}`, at: now + 3,
+        v: JSON.stringify({ word: "да", direction: "recognise", grade: 2, day: 1, at: now + 3 }) },
+      { k: "card", id: "стул\u0001recognise", at: now + 4,
+        v: JSON.stringify({ dueAt: now + DAY, s: 1, d: 5, state: REVIEW, steps: 0, reps: 1, lapses: 0, elapsed: 0, scheduled: 1 }) },
+    ]);
+    expect(taken.map((o) => o.id)).toEqual(["progress\u0001streak", `да\u0001recognise\u0001${now + 3}`, "стул\u0001recognise"]);
+    const back = merge(await repo.load());
+    expect(back.xp).toBe(44);
+    expect(back.streak).toBe(9);
+    expect(back.seen["стул"].recognise.s).toBe(1);
+    expect("lastAt" in back.seen["стул"].recognise).toBe(false);
+    expect((await repo.readLog()).map((r) => r.word)).toEqual(["книга", "да"]);
+    expect((await repo.readOutbox()).map((o) => o.id)).toEqual(["progress\u0001xp"]);
+
+    const all = await repo.allOps(0);
+    expect(all.find((o) => o.id === "progress\u0001streak").at).toBe(now + 10);
+    expect(all.find((o) => o.id === "progress\u0001v").at).toBe(T0);
+    expect(all.filter((o) => o.k === "log").length).toBe(2);
+    expect(all.filter((o) => o.k === "card").length).toBe(5);
   });
 });
 

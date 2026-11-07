@@ -14,7 +14,8 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
-const THEME = path.join(ROOT, "native", "src", "theme.js");
+// The palettes moved to core/palette.js on 2026-11-07 (shared with the desktop app).
+const THEME = path.join(ROOT, "core", "palette.js");
 const CSS = path.join(ROOT, "tools", "app", "app.css");
 
 let pass = 0, fail = 0;
@@ -44,7 +45,7 @@ const ratio = (a, b) => {
 function nativePalette(name) {
   const src = fs.readFileSync(THEME, "utf8");
   const m = src.match(new RegExp(`const ${name} = \\{([\\s\\S]*?)\\n\\};`));
-  if (!m) throw new Error(`no ${name} palette in theme.js`);
+  if (!m) throw new Error(`no ${name} palette in core/palette.js`);
   const out = {};
   for (const t of m[1].matchAll(/(\w+):\s*"(#[0-9A-Fa-f]{6})"/g)) out[t[1]] = t[2].toUpperCase();
   return out;

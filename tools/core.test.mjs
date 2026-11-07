@@ -52,6 +52,9 @@ import { AV, AV_IDS, avatarOf, AV_CREDIT } from "../core/avatars.js";
 import { POSES, LINES, MAX_WORDS, guideLine, poseFor, reactionFor, GUIDE } from "../core/guide.js";
 import { leanOf, leanNudge, LEAN_MIN_WORDS, LEAN_GAP, LEAN_SHARE, LEAN_EVERY_DAYS } from "../core/lean.js";
 import { hintSteps, hintMask, hintMode, partialFor } from "../core/hint.js";
+import { opsOf, opsOfState, applyOps, newer, opKv, opCard, opLog, opLogDel, parseId, logOf, validOp,
+         parseToken, makeToken, isPairCode } from "../core/sync.js";
+import { typeRu, hasLatin, LEGEND } from "../core/typing.js";
 
 import { loadPayload, PARTS } from "./payload.mjs";
 
@@ -476,6 +479,116 @@ group("the state as rows");
    owner in Los Angeles is 5 pm: the streak ticked over mid-afternoon, the
    new-card ration reset while he was at work, and an evening session landed on
    the next day's square in the calendar. */
+group("sync: a profile on more than one device");
+{
+  const T = 1762545600000;
+  const card = (over) => Object.assign({ dueAt: T + 86400000, lastAt: T, s: 5, d: 4.2, state: 2, steps: 0,
+                                         reps: 2, lapses: 0, elapsed: 0, scheduled: 1 }, over);
+  const prev = { v: 11, streak: 3, unit: { core1: { done: true } }, flash: ["recognise"],
+                 seen: { книга: { recognise: card() }, да: { recognise: card({ s: 1 }) } },
+                 decks: [{ id: "k1", name: "Mine", cards: [{ ru: "да", en: "yes" }] }] };
+  // One save: a grade, a progress key, a deck removed, a review row.
+  const next = { ...prev, streak: 4, seen: { ...prev.seen, книга: { recognise: card({ s: 9, reps: 3 }), ru2en: card({ s: 2 }) } },
+                 decks: [] };
+  const row = { word: "книга", direction: "recognise", grade: 3, day: 20400, at: T + 500, source: "study" };
+  const ops = opsOf(diff(prev, next), [row], [], T + 1000);
+  const kinds = ops.map((o) => o.k + ":" + o.id.replace(/\u0001/g, "/")).sort();
+  ok(kinds.join(" ") === "card:книга/recognise card:книга/ru2en deck:k1 kv:progress/streak log:книга/recognise/" + (T + 500),
+     "one save becomes one op per row changed", kinds.join(" "));
+  ok(ops.find((o) => o.k === "deck").v === null, "a removed deck is a deletion");
+  ok(ops.find((o) => o.k === "log").at === T + 500, "a review row carries the moment it was reviewed, not the save's");
+  ok(ops.filter((o) => o.k !== "log").every((o) => o.at === T + 1000), "everything else carries the save's clock");
+
+  // Folded into a state, the other device sees the same thing.
+  const theirs = applyOps(prev, ops);
+  ok(theirs.streak === 4 && theirs.decks.length === 0, "kv and decks applied", JSON.stringify([theirs.streak, theirs.decks]));
+  ok(theirs.seen["книга"].recognise.s === 9 && theirs.seen["книга"].ru2en.s === 2, "cards applied into seen");
+  ok(theirs.seen["да"].recognise.s === 1 && prev.streak === 3, "untouched rows stay, and the given state is not mutated");
+  ok(applyOps(prev, []) === prev, "no ops, the same object back");
+  const gone = applyOps(theirs, [opCard("да", "recognise", null, T + 2000)]);
+  ok(!("да" in gone.seen), "a deleted card leaves its word");
+  ok(!("lastAt" in applyOps({}, [opCard("x", "recognise", { dueAt: 1, s: 0, d: 0, state: 0, reps: 0, lapses: 0, steps: 0 }, 1)]).seen.x.recognise),
+     "a card with no last review does not grow one on the way through");
+
+  // The whole state as ops, and back.
+  const all = opsOfState(split(prev), [row], T);
+  ok(all.filter((o) => o.k === "card").length === 2 && all.filter((o) => o.k === "deck").length === 1
+     && all.some((o) => o.k === "log"), "a whole state is every row plus the log", all.length);
+  const rebuilt = applyOps({ seen: {}, decks: [] }, all);
+  // Key order differs (a row's columns against the card as written), so compare sorted.
+  const canon = (o) => JSON.stringify(o, (k, v) => (v && typeof v === "object" && !Array.isArray(v)
+    ? Object.fromEntries(Object.keys(v).sort().map((x) => [x, v[x]])) : v));
+  ok(canon(rebuilt.seen) === canon(prev.seen) && rebuilt.decks[0].id === "k1" && rebuilt.unit.core1.done,
+     "a state rebuilt from its ops is the state", canon(rebuilt.seen));
+  const { rows, drops } = logOf(all.concat([opLogDel({ word: "книга", direction: "recognise", at: T + 500 }, T + 9)]));
+  ok(rows.length === 1 && rows[0].grade === 3 && drops.length === 1 && drops[0].at === T + 500, "log ops split into rows and drops");
+
+  // Last write wins, and two stores given the same ops in any order agree.
+  const a = opKv("progress", "streak", "4", T + 1), b = opKv("progress", "streak", "5", T + 2);
+  ok(newer(b, a) && !newer(a, b), "later wins");
+  ok(newer(a, null), "anything beats nothing");
+  const tie1 = opKv("progress", "x", "1", T), tie2 = opKv("progress", "x", "2", T), del = opKv("progress", "x", undefined, T);
+  ok(newer(tie2, tie1) && !newer(tie1, tie2), "the same moment is settled by the text, one way only");
+  ok(!newer(del, tie1) && newer(tie1, del), "a value beats a deletion at the same instant");
+  ok(!newer(tie1, tie1), "the same op is not newer than itself");
+  const settle = (list) => list.reduce((have, op) => (newer(op, have) ? op : have), null);
+  ok(settle([a, b, del, tie1]).v === "5" && settle([tie1, del, b, a]).v === "5", "order of arrival does not matter");
+
+  // The wire shape is checked on the way in.
+  ok(validOp(a) && validOp(opLog(row)), "a good op passes");
+  ok(!validOp({ k: "card", id: "a\u0001b", v: 5, at: T }), "a non-string value fails");
+  ok(!validOp({ k: "photo", id: "x", v: null, at: T }), "an unknown kind fails");
+  ok(!validOp({ k: "log", id: "x", v: JSON.stringify({ word: "x", grade: 9, day: 1, at: 1 }), at: 1 }), "a log row the store would refuse fails");
+  ok(parseId("kv", "progress\u0001a\u0001b").key === "a\u0001b", "a kv key keeps any separator inside it");
+
+  // Tokens and codes.
+  const tok = makeToken("a-abc123XYZ", "s".repeat(32));
+  ok(parseToken(tok).account === "a-abc123XYZ", "a device token names its account");
+  ok(parseToken("s1.a.short") === null && parseToken("garbage") === null, "a malformed token is nothing");
+  ok(isPairCode("482913") && !isPairCode("48291") && !isPairCode("48291a"), "a pairing code is six digits");
+
+  // The in-memory store: a save fills the outbox, a pull does not, and a
+  // pulled op older than what is held is not taken.
+  const repo = memoryRepo();
+  await repo.replace(prev, [], T);
+  let c = await repo.counts();
+  ok(c.outbox === 2 + 1 + Object.keys(split(prev).progress).length + 1, "a restore puts every row in the outbox", c.outbox);
+  await repo.apply(diff(prev, next), [row], [], T + 1000);
+  const out = await repo.readOutbox();
+  ok(out.some((o) => o.k === "log") && out.find((o) => o.id === "progress\u0001streak").v === "4", "a save's ops join the outbox");
+  await repo.clearOutbox(out);
+  ok((await repo.counts()).outbox === 0, "pushed ops leave the outbox");
+  const taken = await repo.applyOps([opKv("progress", "streak", "2", T + 500), opKv("progress", "streak", "7", T + 5000),
+                                     opLog({ ...row, at: T + 600, grade: 4 })]);
+  ok(taken.length === 2 && taken[0].v === "7", "a pulled op older than what is held is not taken; a newer one is, and a log row too");
+  const back = merge(await repo.load());
+  ok(back.streak === 7 && (await repo.readLog()).length === 2, "pulled ops are in the rows and the log");
+  ok((await repo.counts()).outbox === 0, "pulled ops never enter the outbox");
+  const everything = await repo.allOps(T + 9999);
+  ok(everything.find((o) => o.id === "progress\u0001streak").at === T + 5000, "allOps stamps a row with the clock it was last changed at");
+  ok(everything.find((o) => o.id === "progress\u0001v").at === T, "…and a row from the restore with the restore's");
+}
+
+group("typing Russian on a Latin keyboard");
+{
+  ok(typeRu("privet") === "привет", "privet → привет", typeRu("privet"));
+  ok(typeRu("Zdravstvujte") === "Здравствуйте", "a capital leads to a capital, j is й", typeRu("Zdravstvujte"));
+  ok(typeRu("shchi") === "щи" && typeRu("wi") === "щи", "shch and w are both щ", typeRu("shchi"));
+  ok(typeRu("yolka") === "ёлка" && typeRu("jolka") === "ёлка", "yo and jo are ё");
+  ok(typeRu("mat'") === "мать" && typeRu("ob''ekt") === "объект", "' is ь, '' is ъ", typeRu("ob''ekt"));
+  ok(typeRu("e'to") === "это" && typeRu("eto") === "ето", "e' is э, e alone is е");
+  ok(typeRu("cel'") === "цель" && typeRu("xleb") === "хлеб" && typeRu("hleb") === "хлеб", "c is ц, x and h are х");
+  ok(typeRu("byt'") === "быть", "y is ы");
+  ok(typeRu("книга 5, da!") === "книга 5, да!", "Cyrillic, digits and punctuation pass through");
+  ok(hasLatin("priv") && !hasLatin("привет 5"), "hasLatin says whether the layout has anything to do");
+  // Every letter of the alphabet is reachable.
+  const reach = new Set();
+  for (const [k] of LEGEND) typeRu(k.split(" / ")[0]).split("").forEach((c) => reach.add(c));
+  for (const c of "abvgdezijklmnoprstufhcy") reach.add(typeRu(c));
+  const missing = [..."абвгдеёжзийклмнопрстуфхцчшщъыьэюя"].filter((c) => !reach.has(c));
+  ok(missing.length === 0, "every Russian letter can be typed", missing.join(""));
+}
+
 group("where the day starts");
 {
   const { setDayStart, dayOf: dayOfUtil, today } = await import("../core/util.js");

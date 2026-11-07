@@ -214,7 +214,10 @@ async function post(body, deps, route, timeoutMs, retried = false) {
   return r;
 }
 
-async function send(url, body, token, deps, timeoutMs) {
+/* The one fetch wrapper: every request to the Worker goes through here, the
+   sync client's included (src/sync.js), so a timeout, a cap and an outage
+   read the same on every route. */
+export async function send(url, body, token, deps, timeoutMs) {
   const fetchFn = deps.fetch || globalThis.fetch;
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), timeoutMs);

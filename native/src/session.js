@@ -22,6 +22,7 @@ import { hasSkillSlots, replayLog, schedulerOpts } from "@core/scheduler";
 import { loadImmerse, flushImmerse } from "./immerse";
 import { loadResume } from "./resume";
 import { APP_NAME } from "./brand";
+import { onPulled, applyOps, syncOnOpen, setActiveProfile } from "./sync";
 
 const Ctx = createContext(null);
 
@@ -45,6 +46,12 @@ export function SessionProvider({ children }) {
      row pushed from inside one would be a review logged twice. */
   const log = useRef([]);
   const drops = useRef([]);          // log rows to remove: an undone review
+  /* The active profile, for the sync pull listener below, which outlives
+     renders (src/sync.js is told too, for its own triggers). */
+  const activeRef = useRef(null);
+  useEffect(() => { activeRef.current = accounts.active; setActiveProfile(accounts.active); }, [accounts.active]);
+  /* A linked profile pulls once when it is opened. */
+  useEffect(() => { if (ready && accounts.active) syncOnOpen(accounts.active); }, [ready, accounts.active]);
 
   const adopt = async (id) => {
     // Where this profile was in Immerse (immerse.js), ready before any screen reads it.
@@ -90,7 +97,15 @@ export function SessionProvider({ children }) {
     const sub = AppState.addEventListener("change", (s) => {
       if (s === "background" || s === "inactive") { flushState(); flushImmerse(); }
     });
-    return () => { live = false; offWrite(); sub.remove(); flushState(); };
+    /* What another device changed, pulled by the sync client (src/sync.js):
+       folded into the state on screen. Not a change of the learner's here,
+       so `dirty` is left alone — the rows are already in the database and
+       in the copy a save is diffed against (store.js absorbOps). */
+    const offPulled = onPulled((id, ops) => {
+      if (!live || id !== activeRef.current) return;
+      setSt((prev) => applyOps(prev, ops));
+    });
+    return () => { live = false; offWrite(); offPulled(); sub.remove(); flushState(); };
   }, []);
 
   useEffect(() => {

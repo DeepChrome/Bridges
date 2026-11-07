@@ -32,6 +32,8 @@
  * `seen[word][direction]` in memory (core/scheduler.js).
  */
 
+import { opsOf, opsOfState, newer, parseId, logOf } from "./sync.js";
+
 /* The keys that are settings rather than progress: what "Reset progress"
    keeps and what the settings table holds. Imported decks are kept by a reset
    too, but they are their own table, not a setting. */
@@ -211,6 +213,16 @@ export function memoryRepo() {
   const log = [], logKeys = new Set();
   const cardKey = (w, d) => `${w}${d}`;
   const logKey = (r) => `${r.word}${r.direction}${r.at}`;
+  // Sync (core/sync.js): the ops not yet pushed, and when each row last changed.
+  const outbox = new Map(), syncRows = new Map();
+  const opKey = (op) => op.k + "\u0001" + op.id;
+  const noteOps = (ops, toOutbox = true) => {
+    for (const op of ops) {
+      const o = Object.assign({}, op);
+      if (toOutbox) outbox.set(opKey(op), o);
+      syncRows.set(opKey(op), o);
+    }
+  };
   /* Rows are checked before anything is applied, so a bad one leaves the
      store as it was — the transaction SQLite gives for nothing. */
   const checked = (rows) => (rows || []).map(logRow);
@@ -254,17 +266,20 @@ export function memoryRepo() {
       const ds = [...decks.values()].sort((a, b) => a.ord - b.ord).map((r) => JSON.parse(r.json));
       return { cards: nestCards([...cards.values()]), decks: ds, progress: parsed(progress), settings: parsed(settings) };
     },
-    async replace(state, rows) {
+    async replace(state, rows, at = Date.now()) {
       const ok = checked(rows);
       cards.clear(); decks.clear(); progress.clear(); settings.clear();
-      applyDiff(diff(null, state));
+      const d = diff(null, state);
+      applyDiff(d);
       append(ok);
+      noteOps(opsOf(d, rows, [], at));
     },
-    async apply(d, rows, drops) {
+    async apply(d, rows, drops, at = Date.now()) {
       const ok = checked(rows);
       applyDiff(d);
       append(ok);
       drop(drops);
+      noteOps(opsOf(d, rows, drops, at));
     },
     async readLog(opts) {
       const o = opts || {};
@@ -276,10 +291,67 @@ export function memoryRepo() {
       let deckCards = 0;
       for (const r of decks.values()) deckCards += r.n;
       return { cards: cards.size, decks: decks.size, deckCards: deckCards, log: log.length,
-               progress: progress.size, settings: settings.size };
+               progress: progress.size, settings: settings.size, outbox: outbox.size };
     },
     async getMeta(k) { return meta.has(k) ? meta.get(k) : null; },
     async setMeta(k, v) { meta.set(k, String(v)); },
+    async delMeta(k) { meta.delete(k); },
+
+    /* ---- sync (the same contract core/sqlrepo.js keeps on SQLite) ---- */
+    async readOutbox(limit) {
+      const all = [...outbox.values()].sort((a, b) => a.at - b.at).map((o) => Object.assign({}, o));
+      return limit !== undefined ? all.slice(0, limit) : all;
+    },
+    async queueOutbox(ops) { noteOps(ops || []); },
+    async clearOutbox(ops) {
+      if (!ops) { outbox.clear(); return; }
+      for (const op of ops) {
+        const have = outbox.get(opKey(op));
+        if (have && have.at === op.at) outbox.delete(opKey(op));
+      }
+    },
+    async allOps(at) {
+      const rows = await this.load();
+      if (!rows) return [];
+      const state = merge(rows);
+      const out = opsOfState(split(state), log.map((r) => { const { id, ...row } = r; return row; }), at);
+      return out.map((op) => {
+        const known = syncRows.get(opKey(op));
+        return known ? Object.assign({}, op, { at: known.at }) : op;
+      });
+    },
+    async applyOps(ops) {
+      const taken = (ops || []).filter((op) => newer(op, syncRows.get(opKey(op)) || null));
+      const d = { cards: { put: [], del: [] }, decks: { put: [], del: [] },
+                  progress: { put: {}, del: [] }, settings: { put: {}, del: [] } };
+      for (const op of taken) {
+        if (op.k === "card") {
+          const { word, direction } = parseId("card", op.id);
+          if (op.v === null) d.cards.del.push({ word, direction });
+          else d.cards.put.push(cardRow(word, direction, JSON.parse(op.v)));
+        } else if (op.k === "kv") {
+          const { table, key } = parseId("kv", op.id);
+          if (table !== "progress" && table !== "settings") continue;
+          if (op.v === null) d[table].del.push(key);
+          else d[table].put[key] = op.v;
+        } else if (op.k === "deck") {
+          if (op.v === null) d.decks.del.push(op.id);
+          else {
+            const { ord, json } = JSON.parse(op.v);
+            const deck = JSON.parse(json);
+            d.decks.put.push({ id: op.id, ord, name: deck.name || "", n: (deck.cards || []).length, json });
+          }
+        }
+      }
+      if (!d.decks.put.length && !d.decks.del.length) d.decks = null;
+      const { rows, drops } = logOf(taken);
+      const ok = checked(rows);
+      applyDiff(d);
+      append(ok);
+      drop(drops);
+      noteOps(taken, false);
+      return taken;
+    },
     async close() {},
   };
 }

@@ -61,6 +61,7 @@ import { installCrashHandler } from "./src/crash";
 import { warmToken } from "./src/lib/feedback";
 import { tabIcon } from "./src/tabicons";
 import { flushState } from "./src/store";
+import { startSync } from "./src/sync";
 import { DrillList } from "./src/screens/Practice";
 import { VocabFlow, QuizFlow } from "./src/flows/Lesson";
 import { DrillFlow, SoundDrillFlow, ShadowFlow, BuildDrillFlow, GrammarFlow, WordDrillFlow } from "./src/flows/Drills";
@@ -105,6 +106,12 @@ installCrashHandler();
    happens in a build with no Worker address, and nothing is reported: the first
    request that needs a token tries again. */
 warmToken();
+
+/* …and sync (src/sync.js): a push after every save of a linked profile, a
+   pull when the app comes forward. Nothing runs for a profile that is not
+   linked. The active profile is read off the stored accounts, since this
+   runs outside any component. */
+startSync();
 
 const Tabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();

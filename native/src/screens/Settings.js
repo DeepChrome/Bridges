@@ -20,6 +20,7 @@ import Constants from "expo-constants";
 import { QUEUE_DEFAULTS, ALL_DAYS } from "@core/queue";
 import { askPermission } from "../notify";
 import { APP_NAME } from "../brand";
+import { SyncSection } from "../syncui";
 
 /* What build this is, at the foot of Settings. The version is app.json's
    (1.0.0-beta.N while it is a beta), read off the build so it cannot say
@@ -295,6 +296,9 @@ export function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedbac
                 </Row>
               ) : null}
             </List>
+
+            {/* This profile on another device (src/syncui.js, 2026-11-07). */}
+            <SyncSection />
 
             {/* The schedule off the phone and back: the one thing no rebuild
                 can regenerate (ROADMAP P9.10). */}

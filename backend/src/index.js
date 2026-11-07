@@ -28,6 +28,17 @@ import { SYSTEM_EXPLAIN, explainMessage, validateExplain } from "./explain.js";
 import { SYSTEM_ASK, SYSTEM_APP, askMessage, checkAsk, validateAsk } from "./ask.js";
 import { SYSTEM_TUTOR, tutorMessage, validateTutor } from "./tutor.js";
 import { capsFor, planOf, COUNTER_OF, PLANS, PLAN_NAMES } from "../../core/plans.js";
+import { callDO, SyncAccount, Pairings } from "./sync.js";
+import { parseToken, makeToken, isPairCode } from "../../core/sync.js";
+
+/* The Durable Object classes have to be exported from the Worker's main
+   module for the platform to find them (wrangler.toml names them). */
+export { SyncAccount, Pairings };
+
+/* Sync (2026-11-07, src/sync.js). Accounts an install may open a day — one
+   per profile is the normal case — and pairing codes an address may ask for. */
+const SYNC_ACCOUNTS_CAP = 10;
+const PAIR_IP_CAP = 20;
 
 const API = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
@@ -328,15 +339,24 @@ export async function handle(request, env, deps = {}) {
   const url = new URL(request.url);
 
   let route = ROUTES[url.pathname];
-  const special = url.pathname === "/v1/register" || url.pathname === "/v1/plan" || url.pathname === "/v1/report";
-  if (!route && !special) return json(404, { ok: false, reason: "not found" });
+  const special = url.pathname === "/v1/register" || url.pathname === "/v1/plan" || url.pathname === "/v1/report"
+    || url.pathname === "/v1/sync/account";
+  const synced = url.pathname === "/v1/sync" || url.pathname === "/v1/sync/devices" || url.pathname === "/v1/pair/claim";
+  const paired = url.pathname === "/v1/pair/start" || url.pathname === "/v1/pair/wait";
+  if (!route && !special && !synced && !paired) return json(404, { ok: false, reason: "not found" });
   if (request.method !== "POST") return json(405, { ok: false, reason: "method" });
   if (url.pathname === "/v1/register") return register(request, env, now);
 
   const auth = request.headers.get("authorization") || "";
   const given = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+
+  /* ---- sync: the profile's own store (src/sync.js) ---- */
+  if (paired) return pairing(url.pathname, request, env, now);
+  if (synced) return syncRoute(url.pathname, request, given, env, now);
+
   const user = await identify(given, env);
   if (!user) return json(401, { ok: false, reason: "unauthorised" });
+  if (url.pathname === "/v1/sync/account") return openAccount(request, user, env, now);
   /* What this install may do today and what it has done: the plan's caps and
      today's counters, read and never ticked, and no model call. The app
      shows it in Settings (2026-09-29). */
@@ -481,6 +501,88 @@ export async function handle(request, env, deps = {}) {
   // The model was billed for this, so the global unit stays; the learner's comes back.
   if (!result) { await untick(env, userKey); return json(200, { ok: false, reason: "parse", errors: lastErrors }); }
   return json(200, { ok: true, ...result });
+}
+
+/* ---------------------------------------------------------------- sync */
+
+const readBody = async (request) => { try { return (await request.json()) || {}; } catch (e) { return {}; } };
+
+/* An install opens an account for one profile: a fresh object, a first device
+   (the phone) with its secret, and the token the phone keeps. Counted per
+   install per day, so a looping client cannot mint objects without end. */
+async function openAccount(request, user, env, now) {
+  if (!env.SYNC) return json(503, { ok: false, reason: "sync is not configured" });
+  const day = dayKey(now);
+  if (!(await tick(env, `syncacct:${day}:${user.id}`, envInt(env.SYNC_ACCOUNTS_CAP, SYNC_ACCOUNTS_CAP)))) {
+    return json(429, { ok: false, reason: "cap", message: "No more new sync accounts today." });
+  }
+  const body = await readBody(request);
+  const account = `a-${randomWord(9)}`;
+  const r = await callDO(env.SYNC, account, { op: "create", name: body.name || "Phone", now: now.getTime() });
+  if (!r.data.ok) return json(502, { ok: false, reason: r.data.reason || "create failed" });
+  await logUsage(env, day, now, { kind: "sync-account", user: user.id, account });
+  return json(200, { ok: true, account, device: r.data.device, token: makeToken(account, r.data.secret) });
+}
+
+/* The device routes: a bearer that is a device token, routed to its account's
+   object, which checks the secret. */
+async function syncRoute(path, request, given, env, now) {
+  if (!env.SYNC) return json(503, { ok: false, reason: "sync is not configured" });
+  const tok = parseToken(given);
+  if (!tok) return json(401, { ok: false, reason: "unauthorised" });
+  const body = await readBody(request);
+  const ms = now.getTime();
+  if (path === "/v1/sync") {
+    const r = await callDO(env.SYNC, tok.account, { op: "sync", secret: tok.secret, now: ms,
+      protocol: body.protocol, cursor: body.cursor, ops: body.ops });
+    return json(r.status, r.data);
+  }
+  if (path === "/v1/sync/devices") {
+    if (typeof body.add === "string") {
+      const r = await callDO(env.SYNC, tok.account, { op: "addDevice", secret: tok.secret, now: ms, name: body.add });
+      if (!r.data.ok) return json(r.status, r.data);
+      return json(200, { ok: true, device: r.data.device, token: makeToken(tok.account, r.data.secret) });
+    }
+    if (typeof body.revoke === "string") {
+      const r = await callDO(env.SYNC, tok.account, { op: "revoke", secret: tok.secret, now: ms, device: body.revoke });
+      return json(r.status, r.data);
+    }
+    const r = await callDO(env.SYNC, tok.account, { op: "devices", secret: tok.secret, now: ms });
+    return json(r.status, r.data);
+  }
+  /* /v1/pair/claim: the phone, holding a device token, claims the code the
+     computer is showing — a new device of this account, whose token is left
+     for the computer to collect. */
+  if (!isPairCode(body.code)) return json(400, { ok: false, reason: "code" });
+  const made = await callDO(env.SYNC, tok.account, { op: "addDevice", secret: tok.secret, now: ms,
+    name: body.name || "Computer" });
+  if (!made.data.ok) return json(made.status, made.data);
+  const token = makeToken(tok.account, made.data.secret);
+  const r = await callDO(env.PAIR, "pairings", { op: "claim", code: String(body.code).trim(), token, now: ms });
+  if (!r.data.ok) {
+    // The code was gone: the device just made must not stay admitted.
+    await callDO(env.SYNC, tok.account, { op: "revoke", secret: tok.secret, now: ms, device: made.data.device });
+    return json(r.status, r.data);
+  }
+  return json(200, { ok: true });
+}
+
+/* The computer's half of pairing, with no token to show: ask for a code,
+   then wait on it. Counted per address so a stranger cannot fill the table. */
+async function pairing(path, request, env, now) {
+  if (!env.PAIR) return json(503, { ok: false, reason: "sync is not configured" });
+  const body = await readBody(request);
+  const ms = now.getTime();
+  if (path === "/v1/pair/start") {
+    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    if (!(await tick(env, `pair:${dayKey(now)}:${ip}`, envInt(env.PAIR_IP_CAP, PAIR_IP_CAP)))) {
+      return json(429, { ok: false, reason: "cap", message: "Too many pairing codes from this address today." });
+    }
+    const r = await callDO(env.PAIR, "pairings", { op: "start", now: ms });
+    return json(r.status, r.data);
+  }
+  const r = await callDO(env.PAIR, "pairings", { op: "wait", code: body.code, secret: body.secret, now: ms });
+  return json(r.status, r.data);
 }
 
 /* Per-request line plus a running daily total per route, so cost per request can

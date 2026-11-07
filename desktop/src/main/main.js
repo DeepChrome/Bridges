@@ -82,7 +82,8 @@ function createWindow() {
           type(selector, text) {
             const el = document.querySelector(selector);
             if (!el) throw new Error("no field " + selector);
-            const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
+            const proto = el.tagName === "TEXTAREA" ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+            const set = Object.getOwnPropertyDescriptor(proto, "value").set;
             el.focus(); set.call(el, text); el.dispatchEvent(new Event("input", { bubbles: true })); return true;
           },
           key(key, opts = {}) {

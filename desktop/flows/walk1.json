@@ -14,6 +14,10 @@
   { "js": "__drive.click('Continue')", "wait": 1500, "shot": "09-lesson.png" },
   { "js": "__drive.click('Quiz')", "wait": 1500, "shot": "10-quiz.png" },
   { "js": "__drive.click('Stats')", "wait": 1200, "shot": "11-stats.png" },
+  { "js": "__drive.click('Read')", "wait": 800 },
+  { "js": "__drive.type('textarea', 'Я читаю книгу. Моя сестра любит кофе, а брат пьёт чай. Сегодня мы идём в магазин.')", "wait": 300 },
+  { "js": "__drive.click('Read', 1)", "wait": 1500, "shot": "13-read.png" },
+  { "js": "__drive.click('Cards')", "wait": 1500, "shot": "14-cards.png" },
   { "js": "__drive.click('Jared')", "wait": 1200, "shot": "12-settings.png" },
   { "js": "__drive.text()", "print": "settings text", "wait": 100 }
 ]

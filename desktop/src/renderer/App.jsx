@@ -19,11 +19,13 @@ import { Learn } from "./screens/Learn.jsx";
 import { Practice } from "./screens/Practice.jsx";
 import { Stats } from "./screens/Stats.jsx";
 import { Settings } from "./screens/Settings.jsx";
+import { Read } from "./screens/Read.jsx";
+import { Cards } from "./screens/Cards.jsx";
 import { dueCount } from "../../../native/src/data.js";
 
 const NAV = [
-  ["learn", "Learn", "1"], ["study", "Study", "2"], ["practice", "Practice", "3"],
-  ["dictionary", "Dictionary", "4"], ["stats", "Stats", "5"],
+  ["learn", "Learn", "1"], ["study", "Study", "2"], ["practice", "Practice", "3"], ["read", "Read", "4"],
+  ["dictionary", "Dictionary", "5"], ["cards", "Cards", "6"], ["stats", "Stats", "7"],
 ];
 
 export function App() {
@@ -34,8 +36,8 @@ export function App() {
 
   const go = (s, extra = null) => { setScreen(s); setSub(extra); };
   useKeys({
-    "ctrl+1": () => go("learn"), "ctrl+2": () => go("study"), "ctrl+3": () => go("practice"),
-    "ctrl+4": () => go("dictionary"), "ctrl+5": () => go("stats"), "ctrl+,": () => go("settings"),
+    "ctrl+1": () => go("learn"), "ctrl+2": () => go("study"), "ctrl+3": () => go("practice"), "ctrl+4": () => go("read"),
+    "ctrl+5": () => go("dictionary"), "ctrl+6": () => go("cards"), "ctrl+7": () => go("stats"), "ctrl+,": () => go("settings"),
     "ctrl+k": { fn: () => go("dictionary", { focus: Date.now() }), always: true },
     "Escape": () => { if (current) close(); },
   }, [current]);
@@ -44,7 +46,8 @@ export function App() {
   if (!account) return <Pair />;
 
   const due = dueCount(st);
-  const Screen = { learn: Learn, study: Study, practice: Practice, dictionary: Dictionary, stats: Stats, settings: Settings }[screen] || Learn;
+  const Screen = { learn: Learn, study: Study, practice: Practice, read: Read, dictionary: Dictionary, cards: Cards,
+                   stats: Stats, settings: Settings }[screen] || Learn;
   return (
     <div className={"shell" + (current ? " with-inspector" : "")}>
       <aside className="sidebar">

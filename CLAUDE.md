@@ -7307,11 +7307,19 @@ keeps it one product with the phone:
   pictures (§31). `tools/audit_dead.mjs` reads `desktop/src` and
   `backend/src` now; the three bundle entry points are not orphans.
 
-**Not done**: the video workspace, reading mode and the card browser the
-owner listed; the Worker is **not deployed** (the deploy was blocked by the
-session's permission gate) so pairing has only been exercised end to end in
-the tests; the desktop's Study and runner have no jest suite — the
-walkthrough is their check.
+- **Read** (`Read.jsx`): any pasted Russian, every word a link, the words
+  not yet held marked and listed with one click to add them; the share is
+  of content words beyond the hundred commonest (`READ_FREE`), never the
+  quiz's `FREE_RANK` — on a beginner's first article «читать» is exactly the
+  word to count. **Cards** (`Cards.jsx`): every card as a table, sortable,
+  searchable, with the four skill scores, and low priority in bulk.
+
+**Not done**: the video workspace (an episode beside its live transcript —
+the YouTube player has to be checked against the `ya://` origin first, §23);
+the Worker is **not deployed** (the deploy was blocked by the session's
+permission gate) so pairing has only been exercised end to end in the tests;
+the desktop's Study and runner have no jest suite — the walkthrough is their
+check.
 
 ## 31. Verification
 

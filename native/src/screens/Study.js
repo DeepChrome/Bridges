@@ -17,7 +17,7 @@ import { View, Pressable, Animated } from "react-native";
 import { useSession } from "../session";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseList, Tick, Sheet, Lift, Text, CogButton, Unselectable, toneOf,
-         Familiarity, familiarityColor, RowText, Bubble, ActionChip } from "../ui";
+         Familiarity, familiarityColor, RowText, ActionChip } from "../ui";
 import { PartialHintButton, PartialHintLine } from "../hint";
 import { hintSteps, hintMask } from "@core/hint";
 import { RunTools } from "../askai";
@@ -29,9 +29,11 @@ import { say } from "../audio";
 import { tap as buzzTap } from "../haptics";
 import { useFlip } from "../motion";
 import { applyGrade, reviewRows, preview, schedulerOpts, cardFor } from "@core/scheduler";
-import { requeue, dailyFor, kindsOf, rollGoal, spendGoal, isStudyDay } from "@core/queue";
+import { requeue, dailyFor, kindsOf, rollGoal, spendGoal, isStudyDay, noteAnswer, againGap, frontFor,
+         REST_DAYS } from "@core/queue";
+import { DEFAULT_FRONTS } from "@core/scheduler";
 import { flagsFor, troubleWords, cardsIn, sourceCards, studyCards, knownWords, sittingTally, masteryOf,
-         sessionFor } from "../studycards";
+         sessionFor, replacementFor } from "../studycards";
 import { SetPicker } from "../studypicker";
 import { ScoreRing } from "../skills";
 import { WordDrillsButton } from "../worddrills";
@@ -66,6 +68,36 @@ function Tally({ parts, onPress }) {
         </View>
       ))}
     </Pressable>
+  );
+}
+
+/* A line that comes and goes above the grade buttons, while the cards carry
+   on under it: the goal met, a word put to rest. Not a bubble — nothing waits
+   on it (the owner, 2026-11-06: "Just let it keep going until the user
+   stops"). It goes by itself after `ms`; its one action, if any, is there
+   while it shows. */
+const NOTICE_MS = 4500;
+function Notice({ notice, onDone }) {
+  const t = useTheme();
+  useEffect(() => {
+    const id = setTimeout(onDone, notice.ms || NOTICE_MS);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notice.key]);
+  return (
+    <View testID={notice.testID} accessibilityLiveRegion="polite"
+          style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10,
+                   paddingHorizontal: 14, paddingVertical: 6, minHeight: 44, borderRadius: radius.md,
+                   backgroundColor: t.brandBg, borderWidth: 1, borderColor: t.brandDim }}>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "700" }}>{notice.title}</Text>
+        {notice.detail ? <Muted testID={notice.detailID}>{notice.detail}</Muted> : null}
+      </View>
+      {notice.action ? (
+        <Btn kind="link" testID={notice.action.testID} label={notice.action.label}
+             onPress={() => { onDone(); notice.action.run(); }} />
+      ) : null}
+    </View>
   );
 }
 
@@ -247,10 +279,19 @@ export default function Study({ navigation, route }) {
      by itself; `stopped` is the learner choosing something else, which ends
      the sitting on the ways on. `sawOwed` keeps the bubble for a sitting that
      actually reached the goal, not one opened after it was met. */
-  const [goalPop, setGoalPop] = useState(false);
+  /* …and since 2026-11-06 it is not even a bubble: a line above the buttons
+     that goes by itself, the cards carrying on under it (`Notice`; the owner:
+     "Default to the personal review. Don't have a hard limit. Just let it
+     keep going until the user stops"). Its one action is the way to stop. */
+  const [notice, setNotice] = useState(null);
+  const noticeKey = useRef(0);
+  const announce = (n) => { noticeKey.current += 1; setNotice({ ...n, key: noticeKey.current }); };
   const [stopped, setStopped] = useState(false);
   const sawOwed = useRef(false);
   const celebrated = useRef(false);
+  /* How often each card has been missed in this sitting: an Again comes back
+     after a gap that grows with it (core/queue.js againGap). */
+  const missed = useRef({});
   const deal = (ahead, round, extra, carry) => {
     dealt.current += 1;
     // A chunk past the goal, asked for or carried on from one: the sitting
@@ -263,6 +304,7 @@ export default function Study({ navigation, route }) {
     if (!carry) {
       sitting.current = new Set(); setMarks({}); setAheadMode(!!ahead); setBeyondMode(beyond); setAfter(null);
       setStopped(false); sawOwed.current = false; celebrated.current = false;
+      missed.current = {}; setNotice(null);
     }
     for (const it of next.items) sitting.current.add(it.word);
     setSession(next);
@@ -472,16 +514,23 @@ export default function Study({ navigation, route }) {
        Easys in a sitting from reading as three weeks (one Easy is 8 days,
        the next 13, the next 20). */
     const rows = reviewRows(st.seen, [{ word, direction, grade: g }], now, "study", schedulerOpts(st));
+    /* A run of Agains: at STUCK_AT in a row the word rests (core/queue.js
+       noteAnswer) and a new word takes its place in the pile. */
+    const stuck = noteAnswer(st.rest, word, g, now);
     // `entry`: the word's whole entry as it was — its card and its skill
     // slots (core/skills.js) — so Undo puts all of it back.
     const before = { items: items, at, prev: current, entry: st.seen[word], trouble: st.trouble, daily: st.daily,
-                     goal: st.goal, row: rows[0], marks };
-    setMarks({ ...marks, [word]: g === 1 ? "again" : "done" });
+                     goal: st.goal, row: rows[0], marks, rest: st.rest, missed: missed.current[word],
+                     faces: session.faces, sitting: new Set(sitting.current) };
+    if (stuck.rested) {
+      const { [word]: _gone, ...rest } = marks;
+      setMarks(rest);
+    } else setMarks({ ...marks, [word]: g === 1 ? "again" : "done" });
     update((prev) => {
       const r = applyGrade(prev.seen, prev.trouble, word, direction, g, now, schedulerOpts(prev));
       const daily = dailyFor(prev.daily, now);
       return {
-        ...prev, seen: r.seen, trouble: r.trouble,
+        ...prev, seen: r.seen, trouble: r.trouble, rest: noteAnswer(prev.rest, word, g, now).rest,
         /* A card, not a press: a re-queued Again and a new card's first grade
            do not spend the day's reviews (the review, 2026-10-02 — fifteen
            Agains used to end the day at thirty-five cards). */
@@ -495,8 +544,33 @@ export default function Study({ navigation, route }) {
       };
     }, rows);
     setLast(before);
-    const next = g === 1 ? requeue(items, at, item) : items;
-    setSession({ ...session, items: next });
+    if (stuck.rested) {
+      /* Out of the sitting — every copy still to come — and the next word
+         along the route in its place, with a line saying so and a way to
+         drill it instead, for a word worth fighting for. */
+      let next = items.filter((it, k) => k <= at || it.word !== word);
+      let faces = session.faces;
+      sitting.current.delete(word);
+      const rep = replacementFor(st, new Set(next.map((x) => x.word)));
+      if (rep) {
+        const fronts = st.flash && st.flash.length ? st.flash : DEFAULT_FRONTS;
+        next = next.slice(0, at + 1)
+          .concat([{ word: rep.word, direction: frontFor(null, fronts, null), card: null, kind: "new", extra: true }],
+                  next.slice(at + 1));
+        faces = { ...(faces || {}), [rep.word]: rep.face };
+        sitting.current.add(rep.word);
+      }
+      setSession({ ...session, items: next, faces });
+      const lemma = idxOfWord(word) >= 0;
+      announce({ testID: "word-rested", title: `Resting «${face.w}»`, detail: `Back in ${REST_DAYS} days`,
+                 detailID: "word-rested-days", ms: 6000,
+                 action: lemma ? { label: "Drill it", testID: "rested-drill",
+                                   run: () => navigation.navigate("WordDrill", { word }) } : null });
+    } else if (g === 1) {
+      const n = (missed.current[word] || 0) + 1;
+      missed.current[word] = n;
+      setSession({ ...session, items: requeue(items, at, item, againGap(n)) });
+    } else setSession({ ...session, items });
     setAt(at + 1);
     setShown(false); setRevealed(false);
   };
@@ -543,9 +617,14 @@ export default function Study({ navigation, route }) {
       // if the grade was its first.
       const seen = { ...p.seen };
       if (row) { if (entry) seen[row.word] = entry; else delete seen[row.word]; }
-      return { ...p, seen, trouble: last.trouble, daily: last.daily, goal: last.goal };
+      return { ...p, seen, trouble: last.trouble, daily: last.daily, goal: last.goal, rest: last.rest };
     }, [], row ? [{ word: row.word, direction: row.direction, at: row.at }] : []);
-    setSession({ ...session, items: last.items });
+    if (row) {
+      if (last.missed === undefined) delete missed.current[row.word]; else missed.current[row.word] = last.missed;
+    }
+    if (last.sitting) sitting.current = last.sitting;
+    setNotice(null);
+    setSession({ ...session, items: last.items, faces: last.faces });
     setMarks(last.marks);
     setAt(last.at);
     setShown(true); setRevealed(true);
@@ -579,7 +658,7 @@ export default function Study({ navigation, route }) {
     if (finished && more > 0 && session && !session.practice) { deal(false, undefined, undefined, true); return; }
     /* The goal is met and the pile would have stopped: it runs on instead,
        a chunk at a time past the goal, until the pool has nothing left that
-       was not answered today (the owner, 2026-11-02). The bubble below is
+       was not answered today (the owner, 2026-11-02). The line above the buttons is
        where the learner is told, and where they may stop. */
     if (finished && more === 0 && session && session.goal && items.length && !session.practice
         && Object.keys(marks).length && sessionFor(st, { beyond: true }).items.length) {
@@ -603,7 +682,7 @@ export default function Study({ navigation, route }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [finished, more, stopped]);
-  /* The goal reached inside a sitting: the bubble, once. Only a sitting that
+  /* The goal reached inside a sitting: the line, once. Only a sitting that
      had something owed when it began counts; a goal met on another screen is
      the options' business ("Daily goal met"). */
   useEffect(() => {
@@ -613,7 +692,10 @@ export default function Study({ navigation, route }) {
     if (finished && !sessionFor(st, { beyond: true }).items.length) return;
     if (sawOwed.current && !celebrated.current && Object.keys(marks).length) {
       celebrated.current = true;
-      setGoalPop(true);
+      announce({ testID: "goal-met", title: "Daily goal met", detailID: "goal-met-count",
+                 detail: `${goal.done} ${goal.done === 1 ? "card" : "cards"} today`,
+                 action: { label: "Stop here", testID: "goal-pivot",
+                           run: () => { setStopped(true); setAt(Number.MAX_SAFE_INTEGER); setShown(false); setRevealed(false); } } });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [goal.owed, started, session && session.practice]);
@@ -660,6 +742,7 @@ export default function Study({ navigation, route }) {
      for. Nothing while there is no card: an empty state has nothing to grade. */
   const controls = !item ? null : (
     <>
+      {notice ? <Notice notice={notice} onDone={() => setNotice(null)} /> : null}
       {!revealed ? (
         <Btn kind="pri" label="Show" onPress={() => { setShown(true); setRevealed(true); }} />
       ) : (
@@ -694,6 +777,14 @@ export default function Study({ navigation, route }) {
       <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
         <Btn kind="ghost" label="Undo" testID="undo" style={{ flex: 1 }}
              disabled={!last} onPress={undo} />
+        {/* Past the goal the review has no end of its own (core/queue.js
+            `next`), so it carries its way out: the day's ways on — trouble
+            words, known words, new words — are one press away. */}
+        {beyondMode && !(session && session.practice) ? (
+          <Btn kind="ghost" label="Finish" testID="study-finish" style={{ flex: 1 }}
+               onPress={() => { setNotice(null); setStopped(true); setAt(Number.MAX_SAFE_INTEGER);
+                                setShown(false); setRevealed(false); }} />
+        ) : null}
         <Btn kind="ghost" label="Skip ▶" style={{ flex: 1 }}
              onPress={() => { setAt(at + 1); setShown(false); setRevealed(false); }} />
       </View>
@@ -995,22 +1086,6 @@ export default function Study({ navigation, route }) {
       {/* Chosen from the options screen, the cards are the start: closing the
           picker deals them. */}
       <SetPicker visible={picker} onClose={() => { setPicker(false); if (!started) setStarted(true); }} />
-      {/* The goal, reached mid-sitting: a small bubble, once, with the two
-          ways on. Keep going closes it and the pile runs on; Something else
-          ends the sitting on the ways on (trouble words, new words…). */}
-      {goalPop ? (
-        <Bubble testID="goal-met" title="Daily goal met" onClose={() => setGoalPop(false)}
-                footer={(
-                  <View style={{ flexDirection: "row", gap: 10 }}>
-                    <Btn kind="plain" testID="goal-pivot" label="Something else" style={{ flex: 1 }}
-                         onPress={() => { setGoalPop(false); setStopped(true); setAt(items.length); setShown(false); setRevealed(false); }} />
-                    <Btn kind="pri" testID="goal-keep" label="Keep going" style={{ flex: 1 }}
-                         onPress={() => setGoalPop(false)} />
-                  </View>
-                )}>
-          <Muted testID="goal-met-count">{`${goal.done} ${goal.done === 1 ? "card" : "cards"} today`}</Muted>
-        </Bubble>
-      ) : null}
     </Screen>
   );
 }

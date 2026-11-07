@@ -23,10 +23,30 @@
 import React from "react";
 import { View } from "react-native";
 import { useTheme, type as T } from "../theme";
-import { Screen, Title, List, Row, Muted, Text } from "../ui";
+import { Screen, Title, List, Row, Muted, Text, SectionLabel } from "../ui";
 import { TopicSection } from "../rules";
 import { TOPICS, topicById } from "@core/grammar";
-import { UN } from "../data";
+import { UN, STAGES, chapterOf } from "../data";
+
+/* The chapter that first teaches a topic, off the unit it names. */
+function chapterOfTopic(topic) {
+  const s = topic && topic.from ? chapterOf(topic.from) : null;
+  if (!s) return null;
+  return s.n || STAGES.indexOf(s) + 1;
+}
+/* The topics in their teaching order, grouped by chapter; a topic with no
+   unit of its own (hard and soft stems, which explains the plural beside it)
+   stays with the topic before it. */
+function chapterGroups() {
+  const out = [];
+  for (const topic of TOPICS) {
+    const n = chapterOfTopic(topic);
+    const last = out[out.length - 1];
+    if (last && (n === null || n === last.n)) last.topics.push(topic);
+    else out.push({ n, topics: [topic] });
+  }
+  return out;
+}
 
 /* The course's own card for a unit, or nothing when that unit has none. The
    reference names units; the payload decides what they say. */
@@ -66,20 +86,28 @@ export default function Grammar({ route, navigation }) {
     return (
       <Screen>
         <Title>Grammar</Title>
-        <List>
-          {/* No tile on these rows. Six rows of one repeated glyph marks
-              nothing (§30s); the topic's name is what distinguishes it. */}
-          {TOPICS.map((topic) => (
-            <Row key={topic.id} testID={`topic-${topic.id}`} onPress={() => openTopic(topic.id)}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "700" }}>
-                  {topic.title}
-                </Text>
-                <Muted>{topic.blurb}</Muted>
-              </View>
-            </Row>
-          ))}
-        </List>
+        {/* In the order the course teaches it, under the chapter that does
+            (core/grammar.js `from`, read off the route rather than written
+            down): the reference reads as a curriculum, not an index. */}
+        {chapterGroups().map((g, gi) => (
+          <View key={gi} testID={`grammar-chapter-${g.n || "more"}`} style={{ marginTop: gi ? 16 : 4 }}>
+            {g.n ? <SectionLabel>{`Chapter ${g.n}`}</SectionLabel> : null}
+            <List>
+              {/* No tile on these rows. Six rows of one repeated glyph marks
+                  nothing (§30s); the topic's name is what distinguishes it. */}
+              {g.topics.map((topic) => (
+                <Row key={topic.id} testID={`topic-${topic.id}`} onPress={() => openTopic(topic.id)}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "700" }}>
+                      {topic.title}
+                    </Text>
+                    <Muted>{topic.blurb}</Muted>
+                  </View>
+                </Row>
+              ))}
+            </List>
+          </View>
+        ))}
       </Screen>
     );
   }

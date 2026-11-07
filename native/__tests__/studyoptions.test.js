@@ -312,6 +312,9 @@ describe("after the day's pile", () => {
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
     // Hard: a Good would lift the card out of the trouble bank, which is right.
     await act(async () => { fireEvent.press(screen.getByTestId("grade-2")); });
+    // Past the goal the review goes on with new words (2026-11-06); Finish
+    // is the way out to the day's other rounds.
+    await act(async () => { fireEvent.press(await screen.findByTestId("study-finish")); });
     expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     await act(async () => { fireEvent.press(screen.getByTestId("trouble-round")); });
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
@@ -328,14 +331,18 @@ describe("after the day's pile", () => {
     expect(s.items.map((x) => x.word).sort()).toEqual(["всё", WORD].sort());
   });
 
-  /* The goal is the stop: met, the pile deals nothing more, and "Keep going"
-     deals on past it. */
-  it("stops at the goal, and keeps going when asked", () => {
+  /* Met, the goal deals nothing more of itself; past it ("beyond") the cards
+     due come first and then the route's new words, with no end of its own
+     (2026-11-06: "Don't have a hard limit"). */
+  it("deals nothing at a met goal, and past it the due cards then new words", () => {
     const st = { ...base, sets: [], cardKinds: ["words"], goal: goalOf(0, 20),
                  seen: { "всё": { recognise: due() }, [WORD]: { recognise: due() } } };
     expect(dueCount(st)).toBe(0);
     expect(sessionFor(st).items).toHaveLength(0);
-    expect(sessionFor(st, { beyond: true }).items.map((x) => x.word).sort()).toEqual(["всё", WORD].sort());
+    const past = sessionFor(st, { beyond: true });
+    expect(past.items.slice(0, 2).map((x) => x.word).sort()).toEqual(["всё", WORD].sort());
+    expect(past.items.length).toBeGreaterThan(2);
+    expect(past.items.slice(2).every((x) => x.kind === "new" && past.faces[x.word])).toBe(true);
   });
 
   /* The badge is the goal, never the due count: eighty due is still a day's
@@ -361,6 +368,7 @@ describe("after the day's pile", () => {
       await act(async () => { fireEvent.press(await screen.findByText("Show")); });
       await act(async () => { fireEvent.press(screen.getByTestId("grade-3")); });
     }
+    await act(async () => { fireEvent.press(await screen.findByTestId("study-finish")); });
     expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
     await act(async () => { fireEvent.press(screen.getByTestId("known-round")); });
     expect(await screen.findByTestId("card-recognise")).toBeTruthy();
@@ -389,13 +397,15 @@ describe("after the day's pile", () => {
     expect(await screen.findByTestId("flag-new")).toBeTruthy();
   });
 
-  it("…and not keep going when every met card was answered today", async () => {
+  /* Every met card answered today: the review does not deal one again, and
+     does not stop either — it goes on with the route's new words (2026-11-06). */
+  it("…and goes on with new words when every met card was answered today", async () => {
     await withProfile({ seen: { [WORD]: { recognise: due() } }, sets: ["__path__"], newPerDay: 0, goal: goalOf(1) });
     await screen.findByTestId("card-recognise");
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
     await act(async () => { fireEvent.press(screen.getByTestId("grade-4")); });
-    expect((await screen.findByTestId("study-state")).props.children).toBe("Daily goal met");
-    expect(screen.queryByTestId("keep-going")).toBeNull();
+    expect(await screen.findByTestId("flag-new")).toBeTruthy();
+    expect(screen.queryByTestId("study-state")).toBeNull();
   });
 });
 

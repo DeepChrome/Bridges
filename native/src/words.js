@@ -105,12 +105,14 @@ export function formsOf(lemma) {
    tester, 2026-10-15, on the back of «весь»: *"Why is it spelled in different
    ways in the example sentences"* («Всему своё время», «Прошу всех встать»).
    They are one word inflected, and now they look like one word. */
-export function Linked({ text, style, size = 17, color, testID, selectable, mark }) {
+/* `hl`: a set of folded words drawn the same way as the card's own forms —
+   the words a grammar contrast turns on (rules.js Contrast). */
+export function Linked({ text, style, size = 17, color, testID, selectable, mark, hl }) {
   const words = useWords();
   const t = useTheme();
   const parts = useMemo(() => splitTokens(text), [text]);
   const own = useMemo(() => formsOf(mark), [mark]);
-  const isOwn = (p) => !!own && own.has(fold(p.text));
+  const isOwn = (p) => (!!own && own.has(fold(p.text))) || (!!hl && hl.has(fold(p.text)));
   const ownStyle = { color: t.brandInk, fontWeight: "700" };
   // A sentence can be held and copied (ui.js NoSelect); a tap on a word
   // still opens it, since the spans keep their own onPress.

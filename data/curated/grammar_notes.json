@@ -1,5 +1,5 @@
 {
-  "_comment": ["One grammar point per unit, shown before the first lesson of that unit.", "Hand-authored and deliberately narrow: a single rule the learner can hold in", "mind while meeting the unit's vocabulary. Stress marks are combining acutes.", "Keep each body to one or two sentences — this is a teaching card, not a chapter.", "Where the rule is a set of endings, pairs or choices, put them in `table`", "({ columns, rows }, each row's first cell its label) and keep the body to the", "one line the table does not say (the owner, 2026-10-09: no 'wall of text').", "The ORDER is the point: spine notes run simple to complex in the sequence the", "external courses agree on (docs/grammar-sequence.md), and a branch note never", "uses a case or tense its chapter's spine has not yet introduced.", "`form` says what the card teaches in terms the paradigm tables can ask", "(core/questions.js formPrompt): a table title with the row and column labels", "panel.py writes, or a drill the practice screen already has. A branch card", "without one inherits its chapter's; the Cases drill asks only for the cells", "the route so far has named."],
+  "_comment": ["One grammar point per unit, shown before the first lesson of that unit.", "Hand-authored and deliberately narrow: a single rule the learner can hold in", "mind while meeting the unit's vocabulary. Stress marks are combining acutes.", "Keep each body to one or two sentences — this is a teaching card, not a chapter.", "Where the rule is a set of endings, pairs or choices, put them in `table`", "({ columns, rows }, each row's first cell its label) and keep the body to the", "one line the table does not say (the owner, 2026-10-09: no 'wall of text').", "The ORDER is the point: spine notes run simple to complex in the sequence the", "external courses agree on (docs/grammar-sequence.md). The spine carries ten", "points; the genitive, dative and instrumental arrive on required side quests", "(work and emotion in chapter 5, sport in chapter 8), each as a pattern first,", "and an earlier card that leans on a later case names it as a set phrase.", "`form` says what the card teaches in terms the paradigm tables can ask", "(core/questions.js formPrompt): a table title with the row and column labels", "panel.py writes, or a drill the practice screen already has. A branch card", "without one inherits its chapter's; the Cases drill asks only for the cells", "the route so far has named."],
   "notes": {
     "core1": {
       "title": "No “a”, no “the”, no “is”",
@@ -37,7 +37,7 @@
         "drill": "agreement"
       },
       "title": "Every noun has a gender",
-      "body": "The ending tells the gender, and words that describe a noun take it. Words for men in -а (па́па) are masculine.",
+      "body": "The ending tells the gender, and every word that describes the noun copies it: но́вый дом, но́вая маши́на.",
       "table": {
         "columns": ["Ends in", "Gender", "Example"],
         "rows": [
@@ -195,10 +195,10 @@
       ]
     },
     "family": {
-      "title": "“My” follows the person you mean",
-      "body": "Learn them as pairs for now; the reason comes with gender in chapter 3.",
+      "title": "“My” takes the noun's gender",
+      "body": "моя́ goes with a feminine noun, мой with a masculine one. A word in -а is feminine, except a word for a man: па́па.",
       "table": {
-        "columns": ["", "моя́", "мой"],
+        "columns": ["", "feminine · моя́", "masculine · мой"],
         "rows": [
           ["parent", "ма́ма", "па́па"],
           ["sibling", "сестра́", "брат"],
@@ -213,7 +213,7 @@
     },
     "time": {
       "title": "Numbers change the noun after them",
-      "body": "The noun after a number changes. Learn the three as set phrases; the case behind them comes in chapter 7.",
+      "body": "The noun after a number changes. Learn the three as set phrases; the case behind them, the genitive, comes in chapter 5.",
       "table": {
         "columns": ["Number", "час", "Example"],
         "rows": [
@@ -432,16 +432,17 @@
       "form": {
         "pos": "noun",
         "table": "Declension",
-        "rows": ["Accusative", "Prepositional"],
+        "rows": ["Accusative", "Prepositional", "Instrumental"],
         "cols": ["Singular"]
       },
-      "title": "Playing games vs playing instruments",
-      "body": "The preposition, and the case after it, say what kind of playing.",
+      "title": "Playing, and doing sport",
+      "body": "The verb and the case after it say what kind of playing. занима́ться takes the instrumental, with no preposition.",
       "table": {
         "columns": ["Playing", "Say", "Case"],
         "rows": [
           ["a sport, a game", "игра́ть в", "accusative"],
-          ["an instrument", "игра́ть на", "prepositional"]
+          ["an instrument", "игра́ть на", "prepositional"],
+          ["doing a sport", "занима́ться", "instrumental"]
         ]
       },
       "examples": [

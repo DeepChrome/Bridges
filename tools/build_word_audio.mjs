@@ -327,6 +327,8 @@ export function sentencesToBuy(payload, audio, replace = SENTENCE_REPLACE) {
        voice, beside the bought voice everywhere else (the owner: "a ton of
        voices swapping"). */
     .concat(TOPICS.flatMap((t) => t.sections.flatMap((s) => (s.examples || []).map((e) => [e[0]]))))
+    // …and its contrasts (2026-11-06), the pairs of sentences a rule turns on.
+    .concat(TOPICS.flatMap((t) => t.sections.flatMap((s) => (s.contrast || []).flatMap((c) => c.lines.map((l) => [l[0]])))))
     // …and the case modules' cards (core/cases.js), the same kind of example.
     .concat(CASES.flatMap((c) => c.uses.flatMap((u) => u.examples.map((e) => [e[0]]))));
   for (const row of ((payload.speech && payload.speech.rows) || []).concat(cards)) {

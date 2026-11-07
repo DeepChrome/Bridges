@@ -97,6 +97,35 @@ describe("the grammar reference", () => {
     expect(replace).toHaveBeenCalledWith("Grammar", { topic: "cases", section: "Dative" });
   });
 
+  /* In the order the course teaches it (the owner, 2026-11-06: "in an order
+     that makes sense"), under the chapter that does — read off the route. */
+  it("lists the topics in teaching order, under the chapters that teach them", async () => {
+    await withProfile(<Grammar route={{ params: {} }} navigation={nav} />);
+    const first = await screen.findByTestId("grammar-chapter-1");
+    expect(within(first).getByTestId("topic-first")).toBeTruthy();
+    expect(within(first).getByTestId("topic-gender")).toBeTruthy();
+    // The cases sit with the chapter that opens them, after the present tense.
+    const cases = screen.getByTestId("grammar-chapter-5");
+    expect(within(cases).getByTestId("topic-cases")).toBeTruthy();
+    expect(within(screen.getByTestId("grammar-chapter-2")).getByTestId("topic-verbs")).toBeTruthy();
+  });
+
+  /* "Examples that show the differences": two lines that differ in the one
+     thing, the words that differ drawn apart and each line labelled. */
+  it("draws a contrast with the differing words marked, and a table with its endings set apart", async () => {
+    await withProfile(<Grammar route={{ params: { topic: "cases", section: "Genitive" } }}
+                               navigation={{ ...nav, replace: jest.fn() }} />);
+    const pair = await screen.findByTestId("contrast-0");
+    const marked = within(pair).getAllByTestId("linked-own").map((n) => n.props.children);
+    expect(marked).toEqual(expect.arrayContaining(["есть", "брат", "нет", "бра́та"]));
+    expect(marked).not.toContain("меня́");
+    expect(within(pair).getAllByTestId("contrast-label").map((n) => n.props.children))
+      .toEqual(["have: dictionary form", "have not: genitive"]);
+    // The genitive's own endings, coloured apart from the stem.
+    expect(screen.getAllByTestId("table-ending").map((n) => n.props.children)).toEqual(
+      expect.arrayContaining(["а́", "ы", "и"]));
+  });
+
   it("draws the course's own card rather than restating it", async () => {
     await withProfile(<Grammar route={{ params: { topic: "gender" } }} />);
     const core3 = UN.find((u) => u.id === "core3");

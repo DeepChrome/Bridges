@@ -7103,6 +7103,85 @@ sort of partial hint… another letter or syllable"*, and on the flashcard front
   front, else the first word of the first meaning) and costs nothing, since
   the learner grades the card.
 
+## 30cp. Grammar in the order it is taught; a review with no end (2026-11-06)
+
+The owner: *"Revisit our grammar rules and make sure they are taught extremely
+well and in an order that makes sense. Look up how it's typically taught by
+more established Russian language courses. Have tables where it makes sense…
+examples that show the differences"*; and *"Default to the personal review.
+Don't have a hard limit… if it's not sticking like 10 times in a row maybe
+it's time to just move on to a new word. I've seen it just float in the same
+area for a while."*
+
+**The reference follows the course** (core/grammar.js; docs/grammar-sequence.md
+carries the research). The spine already ran in the courses' order; the
+reference was an index — gender, stems, then the cases nominative → accusative
+→ genitive → … → prepositional, which no course teaches in. Now:
+
+- **Topics in teaching order, grouped by chapter** on Practice → The rules. A
+  topic names the unit that first teaches it (`from`) and the chapter is read
+  off the route (Grammar.js `chapterGroups`), never written down. Thirteen
+  topics: first sentences (no articles, no "is", это/этот, ты/вы, questions),
+  gender, the present tense (id still `verbs`), adjectives, numbers, the
+  plural, hard and soft, going somewhere, the six cases, prepositions,
+  pronouns, past/aspect/future (`tenses`), building sentences.
+- **The cases in teaching order**, prepositional first, each page with a table
+  of the same seven nouns (`caseTable`: hard and soft of each gender and the
+  -ь feminine) from dictionary form to that case, plus "Every case at a
+  glance" (стол, книга, окно through all six, singular and plural).
+- **Endings set apart**: a table cell written «стол|а́» draws the ending in the
+  brand colour (rules.js `Form`); the marker is never shown or spoken. A cell
+  holding two forms stacks them. Reference tables start their columns at 56
+  rather than 110 (`narrow`), so a four-column table fits a phone; the
+  adjective's full declension is two tables (singular, plural) for the same
+  reason.
+- **Contrasts** (`contrast` on a section, rules.js `Contrast`): two or three
+  labelled sentences that differ in the one thing the rule is about — где /
+  куда, есть / нет, вижу маму / звоню маме, чита́л / прочита́л, иду / хожу. The
+  words to colour are read off the lines (any word no other line has, through
+  `Linked hl`), so the data cannot name the wrong one. `checkGrammar` holds
+  their shape; core.test.mjs fails a contrast whose lines differ in no word
+  (a question said with the voice excepted).
+- **Every form in a table was checked against the lexicon's own paradigms,
+  stress included**, before shipping — the only differences were one-syllable
+  words the lexicon marks and the tables leave plain. Do the same after
+  writing a table: `checkGrammar` only proves a word exists.
+- The contrasts' sentences were bought in the one voice with the rest
+  (`sentencesToBuy` reads them), 49 clips, about $0.03.
+
+**Three course cards corrected** (data/curated/grammar_notes.json, body and
+table only, so no lesson moved — `card_words` reads only a card's examples):
+family gave its pairs and said "the reason comes with gender in chapter 3",
+and now gives the reason where мой and моя́ are first met; time said the
+genitive "comes in chapter 7" when work teaches it in chapter 5; and **the
+instrumental was taught only on optional quests** (science, law, military), so
+a learner on the required route never met it on a card — sport (chapter 8,
+required) now carries «занима́ться спо́ртом» and names Instrumental in its
+`form`. The file's comment claimed a branch card never leans on a case its
+spine has not introduced; that was never true (work, emotion, time), and it
+now says what is: those arrive as set phrases first.
+
+**The review has no end of its own** (core/queue.js `goalSession` `next`;
+studycards.js `upcomingWords`). Past the goal, once every met card has been
+answered today, the chunk is made up of new words along the route — the
+personal review's own unmet words, then the required units' lessons beyond,
+optional quests left out — uncapped by the day's ration, carrying their faces
+(a word from further along is in no ticked set). Inside the goal the ration
+holds as before. The goal itself is no longer a bubble: a line above the grade
+buttons for a few seconds (Study.js `Notice`), the cards running on under it,
+with Stop here; past the goal **Finish** sits beside Undo and Skip, because a
+review that does not end needs its way out. The end screen's rounds (trouble,
+known, new) are behind it.
+
+**A word that will not stick rests** (`noteAnswer`, `isResting`, `againGap`).
+`st.rest` counts Agains in a row per card, across sittings, broken by any
+other answer; at `STUCK_AT` (10) the word rests for `REST_DAYS` (3) — out of
+every pile but a round asked for by name, its schedule untouched — leaves the
+sitting, and the next new word takes its place (`replacementFor`), with a line
+offering Drill it. Before that, each further miss in a sitting comes back
+later: 3, 6, 9, 12 cards (`againGap`), so a failing word is no longer a
+quarter of the pile. Undo takes back the rest, the gap and the replacement.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

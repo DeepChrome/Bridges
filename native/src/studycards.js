@@ -4,12 +4,43 @@
  * as a pure move; the screen deals what `sessionFor` hands it. */
 
 import { L, UN, SPEECH, reachedUnits, idxOfWord, exactIdx, rankOf, videoLines,
-         personalWords, pathRank, goalNow, englishOfSentence, isLowPriority } from "./data";
+         personalWords, pathRank, goalNow, englishOfSentence, isLowPriority, lessonCount, lessonWords,
+         lessonDone } from "./data";
 import { schedulerOpts, wanted, troubleWords as troubleBank, DEFAULT_FRONTS, cardFor, familiarity, kindOf, retrievability,
          isDue, dayOf } from "@core/scheduler";
 import { isIrregular } from "@core/facts";
 import { buildSession, practiceSession, QUEUE_DEFAULTS, cardKind, kindsOf,
-         goalSession, MASTERED_AT } from "@core/queue";
+         goalSession, MASTERED_AT, isResting } from "@core/queue";
+
+/* A word resting after a run of misses (core/queue.js noteAnswer) is out of
+   the review until its days are up — and, like a card set aside, out of every
+   pile that is not a round the learner asked for by name. */
+const resting = (st, w) => isResting(st.rest, w, Date.now());
+const outOfRotation = (st, w) => isLowPriority(st, w) || resting(st, w);
+
+/* Words not met yet, in the order the route would bring them: the personal
+   review's own pool first (finished lessons and the next one), then the
+   required units' lessons beyond it, in course order. What the review goes on
+   with past the goal once every met card has been answered today, and the
+   word that takes a rested one's place. Optional side quests are left out:
+   a learner who has not chosen one should not have its words handed over. */
+function upcomingWords(st) {
+  const out = [], have = new Set();
+  const take = (i) => {
+    const w = L[i] && L[i].b;
+    if (!w || have.has(w)) return;
+    have.add(w);
+    if (st.seen && st.seen[w] && kindOf(cardFor(st.seen[w])) !== "new") return;
+    if (outOfRotation(st, w)) return;
+    out.push(w);
+  };
+  personalWords(st).forEach(take);
+  for (const u of UN) {
+    if (u.opt) continue;
+    for (let k = 0; k < lessonCount(u); k++) if (!lessonDone(st, u, k)) lessonWords(u, k).forEach(take);
+  }
+  return out;
+}
 
 /* What the card says about itself. `New` is the session's own word for it.
    There was a `Trouble` flag too, and it went (the owner, 2026-09-29: "the
@@ -186,7 +217,7 @@ export function sourceCards(st) {
      learner picked: those carry their own sentences (a unit's video lines),
      and an imported deck is its cards and nothing else. */
   if (kinds.includes("sentences") && (!ids.length || ids.includes("__path__"))) ids.push("__sentences__");
-  return cardsIn(st, ids).filter((c) => kinds.includes(cardKind(c.b)) && !isLowPriority(st, c.b));
+  return cardsIn(st, ids).filter((c) => kinds.includes(cardKind(c.b)) && !outOfRotation(st, c.b));
 }
 
 /* Every card the session may deal, one of each: everything due of the chosen
@@ -205,7 +236,7 @@ export function studyCards(st) {
   const due = cardsIn(st, ["__due__"]).filter((c) => kinds.includes(cardKind(c.b)));
   const out = [], have = new Set();
   for (const c of due.concat(sourceCards(st))) {
-    if (!have.has(c.b) && !isLowPriority(st, c.b)) { have.add(c.b); out.push(c); }
+    if (!have.has(c.b) && !outOfRotation(st, c.b)) { have.add(c.b); out.push(c); }
   }
   return out;
 }
@@ -330,15 +361,38 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
   const pool = personal ? words : sourceCards(st).map((c) => c.b);
   const have = new Set(pool);
   const met = personal ? Object.keys(st.seen || {})
-    .filter((w) => !have.has(w) && kinds.includes(cardKind(w)) && !isLowPriority(st, w)) : [];
-  return goalSession({
+    .filter((w) => !have.has(w) && kinds.includes(cardKind(w)) && !outOfRotation(st, w)) : [];
+  /* Past the goal, once every met card is answered today, the review goes on
+     with new words (core/queue.js `next`): the route's next words for the
+     personal review, the chosen sources' unmet cards otherwise. */
+  const next = !beyond ? undefined
+    : personal ? (kinds.includes("words") ? upcomingWords(st) : [])
+    : pool.filter((w) => !st.seen[w]);
+  const s = goalSession({
     seen: st.seen, words: pool.concat(met), dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily,
-    rng, opts, owed: goalNow(st).owed, beyond,
+    rng, opts, owed: goalNow(st).owed, beyond, next,
     familiar: (w, card) => familiarity(card, rankOf(w)) || 0,
     // "From the start" walks the route from its first words (the owner,
     // 2026-11-02); the default is most faded first.
     order: st.reviewOrder === "path" ? pathRank(st) : undefined,
   });
+  /* A word from further along the route is in no ticked set, so the screen's
+     face map does not know it: the session carries the faces of what it dealt. */
+  if (next) {
+    const faces = {};
+    for (const c of cardsIn(st, [], s.items.filter((x) => x.kind === "new").map((x) => x.word))) faces[c.b] = c;
+    s.faces = faces;
+  }
+  return s;
+}
+
+/* The new word that takes a rested one's place in the sitting: the first word
+   along the route that is neither met nor already in the pile. */
+export function replacementFor(st, inPile) {
+  const w = upcomingWords(st).find((x) => !inPile.has(x));
+  if (!w) return null;
+  const [face] = cardsIn(st, [], [w]);
+  return face ? { word: w, face } : null;
 }
 
 /* Which new word to deal first: the commoner one. Lemma indices are assigned

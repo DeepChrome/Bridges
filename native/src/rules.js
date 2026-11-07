@@ -25,6 +25,7 @@ import { Text, Card, Muted, Note, Speaker, Sheet, Btn, SectionLabel, Marked, Bub
 import { Linked, navRef } from "./words";
 import { tableLabel } from "@core/forms";
 import { irregularities } from "@core/facts";
+import { tablesOf } from "@core/grammar";
 // The form recordings are looked up where every sound is (audio.js formClip).
 import { say, hasRealAudio, formClip } from "./audio";
 import { wordClip } from "./wordaudio";
@@ -39,9 +40,13 @@ import { fold } from "@core/util";
    measure text before drawing it: a Cyrillic letter of this face is about
    0.6 of its size, the stress mark nothing, a speaker glyph 17. */
 const COL = 110;
+/* The grammar reference's tables hold endings and short forms in four or five
+   columns; at 110 each, the adjective's full declension ran a screen and a half
+   wide. Their columns start narrower and still grow to the longest form. */
+const COL_NARROW = 56;
 const GLYPH_W = 17;
-const charsOf = (s) => String(s || "").normalize("NFD").replace(/[̀́]/g, "").length;
-export function columnWidths(table, speak) {
+const charsOf = (s) => String(s || "").normalize("NFD").replace(/[̀́|]/g, "").length;
+export function columnWidths(table, speak, min = COL) {
   return table.columns.map((c, ci) => {
     let need = charsOf(c) * T.small * 0.62;
     for (const r of table.rows) {
@@ -49,8 +54,24 @@ export function columnWidths(table, speak) {
       const size = ci === 0 ? T.small : T.body;
       for (const f of forms) need = Math.max(need, charsOf(f) * size * 0.6 + (speak && ci ? GLYPH_W : 0));
     }
-    return Math.max(COL, Math.ceil(need) + 10);
+    return Math.max(ci === 0 ? Math.min(min, COL) : min, Math.ceil(need) + 10);
   });
+}
+
+/* A form written «stem|ending» in a reference table: the ending in the brand
+   colour, so the eye goes to the part that changes (the owner, 2026-11-06:
+   "make sure the tables are clear"). The marker is never shown or spoken. */
+const plainForm = (f) => String(f).replace(/\|/g, "");
+function Form({ f, style }) {
+  const t = useTheme();
+  const k = String(f).indexOf("|");
+  if (k < 0) return <Text style={style}>{f}</Text>;
+  return (
+    <Text style={style}>
+      {f.slice(0, k)}
+      <Text testID="table-ending" style={{ color: t.brandInk, fontWeight: "700" }}>{f.slice(k + 1).replace(/\|/g, "")}</Text>
+    </Text>
+  );
 }
 
 /* One form in a table, which says itself when pressed (the owner,
@@ -125,10 +146,10 @@ const CYRILLIC = /[Ѐ-ӿ]/;
  * grammar reference's tables hold *endings* — «-ов», «-ами» — and a speaker
  * reading a lone ending aloud says something no Russian would. The entry and
  * the drill's reference turn it on, because their tables hold real words. */
-export function Table({ table, mark, speak, testID, bare, labelHead, headword }) {
+export function Table({ table, mark, speak, testID, bare, labelHead, headword, narrow }) {
   const t = useTheme();
   const [br, bc] = mark || [];
-  const widths = React.useMemo(() => columnWidths(table, speak), [table, speak]);
+  const widths = React.useMemo(() => columnWidths(table, speak, narrow ? COL_NARROW : COL), [table, speak, narrow]);
   /* Laid out for a person reading it rather than for a parser (the owner,
      2026-09-28: *"it seems like it's optimized for computers to look at but not
      humans"*): every other row shaded so the eye can follow one across, the
@@ -163,6 +184,17 @@ export function Table({ table, mark, speak, testID, bare, labelHead, headword })
                 /* The row label is not a form ("Genitive", "я"), and neither
                    is anything without Cyrillic in it. */
                 if (!speak || ci === 0 || !forms.some((f) => CYRILLIC.test(f))) {
+                  /* Two forms in one cell (an accusative that is the nominative
+                     for a thing and the genitive for a person) stack, one to a
+                     line, as they do when each has a speaker. */
+                  if (forms.length > 1 || forms.some((f) => String(f).includes("|"))) {
+                    return (
+                      <View key={ci} testID={asked && ci === bc ? "table-asked" : undefined}
+                            style={{ width: widths[ci], paddingVertical: 6, gap: 2 }}>
+                        {forms.map((f, fi) => <Form key={fi} f={f} style={style} />)}
+                      </View>
+                    );
+                  }
                   return (
                     <Text key={ci} testID={asked && ci === bc ? "table-asked" : undefined}
                           style={[{ width: widths[ci], paddingVertical: 6 }, style]}>
@@ -175,9 +207,9 @@ export function Table({ table, mark, speak, testID, bare, labelHead, headword })
                   <View key={ci} testID={asked && ci === bc ? "table-asked" : undefined}
                         style={{ width: widths[ci], paddingVertical: 4, gap: 2 }}>
                     {forms.map((f, fi) => (
-                      <FormSpeaker key={fi} form={f} testID={`say-${ri}-${ci}-${fi}`} headword={headword}
+                      <FormSpeaker key={fi} form={plainForm(f)} testID={`say-${ri}-${ci}-${fi}`} headword={headword}
                                    style={{ minHeight: 36 }}>
-                        <Text style={style}>{f}</Text>
+                        <Form f={f} style={style} />
                       </FormSpeaker>
                     ))}
                   </View>
@@ -292,6 +324,50 @@ export function Examples({ examples, line }) {
   );
 }
 
+/* Two or three sentences that differ in the one thing a rule is about, the
+   differing words in the brand colour and each line labelled with what it is
+   (the owner, 2026-11-06: "Make sure there are examples that show the
+   differences"). The words to colour are read off the lines themselves — any
+   word no other line has — so the data cannot name the wrong one. Each line
+   is linked and can be heard, like every example. */
+const WORD = /[\p{L}̀́-]+/gu;
+const wordsOf = (s) => new Set((String(s).match(WORD) || []).map((w) => fold(w)));
+export function Contrast({ contrast, testID = "contrast" }) {
+  const t = useTheme();
+  if (!contrast || !contrast.length) return null;
+  return (
+    <>
+      {contrast.map((c, ci) => {
+        const sets = c.lines.map(([ru]) => wordsOf(ru));
+        return (
+          <View key={ci} testID={`${testID}-${ci}`}
+                style={{ marginTop: 14, borderRadius: radius.md, borderWidth: 1, borderColor: t.line,
+                         overflow: "hidden" }}>
+            {c.lines.map(([ru, en, label], li) => {
+              const others = sets.filter((_, k) => k !== li);
+              const hl = new Set([...sets[li]].filter((w) => others.every((o) => !o.has(w))));
+              return (
+                <View key={li} style={{ paddingHorizontal: 12, paddingVertical: 10,
+                                        backgroundColor: li % 2 ? t.surface2 : t.surface,
+                                        borderTopWidth: li ? 1 : 0, borderTopColor: t.lineSoft }}>
+                  <Text testID="contrast-label" style={{ color: t.brandInk, fontSize: T.tiny, fontWeight: "700" }}>
+                    {label}
+                  </Text>
+                  <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 8, marginTop: 2 }}>
+                    <View style={{ flex: 1 }}><Linked text={ru} size={T.head} hl={hl} /></View>
+                    <Speaker text={ru} size={34} />
+                  </View>
+                  <Muted style={{ marginTop: 2 }}>{en}</Muted>
+                </View>
+              );
+            })}
+          </View>
+        );
+      })}
+    </>
+  );
+}
+
 /* One section of the grammar reference: a heading, one sentence, and then
    structure. `uses` is the list of jobs a case does — the bullets that exist
    so "when do I use the genitive" is answered by a list rather than by a
@@ -327,7 +403,10 @@ export function TopicSection({ section, cards, testID }) {
           ))}
         </View>
       ) : null}
-      {section.table ? <Table table={section.table} /> : null}
+      {/* The paradigm first, then the pair of sentences that turns on it,
+          then any other example. */}
+      {tablesOf(section).map((tb, k) => <Table key={k} table={tb} narrow testID={`topic-table-${k}`} />)}
+      <Contrast contrast={section.contrast} />
       <Examples examples={section.examples} />
       {/* Where the course itself teaches this. Drawn from the payload rather
           than restated in core/grammar.js, so the reference and the lesson

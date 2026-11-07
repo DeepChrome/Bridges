@@ -21,7 +21,8 @@ import * as S from "../core/scheduler.js";
 import * as SK from "../core/skills.js";
 import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor, stepToday,
          cardKind, kindsOf, mixNew, practiceSession, rollGoal, spendGoal, goalBadge, goalSession, goalPerDay,
-         weekdayOf, isStudyDay, GOAL_REVIEWS, GOAL_CAP_DAYS, MASTERED_EVERY } from "../core/queue.js";
+         weekdayOf, isStudyDay, GOAL_REVIEWS, GOAL_CAP_DAYS, MASTERED_EVERY,
+         STUCK_AT, REST_DAYS, noteAnswer, isResting, againGap } from "../core/queue.js";
 import { SCENARIOS } from "../core/scenarios.js";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
 import { SCHEMA_VERSION, MIGRATIONS, migrate, recordAttempt, tagAttempt, speechDefault, ATTEMPT_CAP,
@@ -4462,6 +4463,69 @@ group("the partial hint, 2026-11-06");
     for (const q of Q.quizSteps(unitOf, 0, [], undefined, undefined, reviewed)) if (q.review && reviewed.has(q.i)) leaked++;
   }
   ok(leaked === 0, "a word set aside is never the review slot's word", `${leaked} leaked`);
+}
+
+group("the grammar reference, in teaching order, 2026-11-06");
+{
+  // Each topic names the unit that first teaches it; the list runs in the
+  // order of those units' chapters, as the courses order the grammar.
+  const chapterOf = (id) => STAGES.findIndex((s) => s.core.id === id || s.branches.some((b) => b.id === id)) + 1;
+  const chapters = TOPICS.filter((t) => t.from).map((t) => [t.id, chapterOf(t.from)]);
+  ok(chapters.every(([, n]) => n > 0), "every topic's unit is on the route", JSON.stringify(chapters));
+  ok(chapters.every(([, n], k) => !k || n >= chapters[k - 1][1]), "the topics run in the order they are taught",
+     chapters.map(([id, n]) => `${id}:${n}`).join(" "));
+  // The cases in the order courses teach them, prepositional first.
+  const cases = TOPICS.find((t) => t.id === "cases").sections.filter((s) => s.page).map((s) => s.heading);
+  ok(cases.join() === "Nominative,Prepositional,Accusative,Genitive,Dative,Instrumental", "the cases in teaching order", cases.join());
+  // Every case is shown on real words and with a pair that turns on it.
+  const pages = TOPICS.find((t) => t.id === "cases").sections.filter((s) => s.page && s.heading !== "Nominative");
+  ok(pages.every((s) => (s.table || (s.tables || [])[0]) && (s.table || s.tables[0]).rows.some((r) => /\|/.test(String(r[2])) || /[а-яё]/i.test(String(r[1])))),
+     "every case page has a table of real nouns");
+  ok(pages.every((s) => (s.contrast || []).length), "every case page has a contrast");
+  // A contrast is only worth drawing where its lines differ in some word.
+  let flat = 0;
+  for (const t of TOPICS) for (const s of t.sections) for (const c of s.contrast || []) {
+    const sets = c.lines.map(([ru]) => new Set((ru.match(/[\p{L}̀́-]+/gu) || []).map((w) => fold(w))));
+    const differ = sets.some((a, i) => [...a].some((w) => sets.every((b, j) => j === i || !b.has(w))));
+    if (!differ && !/question/.test(c.lines.map((l) => l[2]).join(" "))) flat++;
+  }
+  ok(flat === 0, "every contrast differs in a word, or is a question said with the voice", `${flat} flat`);
+  // The facts' links still land on sections that exist.
+  ok(Object.values(FACT_REFS).every(([topic, heading]) => {
+    const t = TOPICS.find((x) => x.id === topic);
+    return t && t.sections.some((s) => s.heading === heading);
+  }), "every fact links to a section that exists");
+}
+
+group("a word that will not stick, and a review with no end, 2026-11-06");
+{
+  const now = Date.now(), today = S.dayOf(now);
+  // Nine misses in a row count; the tenth rests the word.
+  let rest = {};
+  for (let k = 1; k < STUCK_AT; k++) rest = noteAnswer(rest, "дом", 1, now).rest;
+  ok(rest["дом"].run === STUCK_AT - 1 && !isResting(rest, "дом", now), "misses are counted, the word still in play");
+  const r = noteAnswer(rest, "дом", 1, now);
+  ok(r.rested && r.rest["дом"].until === today + REST_DAYS && isResting(r.rest, "дом", now),
+     "the tenth Again in a row rests it", JSON.stringify(r.rest));
+  ok(!isResting(r.rest, "дом", now + REST_DAYS * S.DAY), "and it is back when its days are up");
+  // Any other answer breaks the run.
+  ok(noteAnswer({ "дом": { run: 7 } }, "дом", 2, now).rest["дом"] === undefined, "a Hard breaks the run");
+  // A rest that has run its course is dropped, and the count starts again.
+  const old = { "дом": { until: today - 1 }, "кот": { until: today + 2 } };
+  const after = noteAnswer(old, "дом", 1, now).rest;
+  ok(after["дом"].run === 1 && after["кот"].until === today + 2, "a finished rest starts a new count", JSON.stringify(after));
+  // The gap grows, and stops growing.
+  ok([1, 2, 3, 4, 9].map((n) => againGap(n, 3)).join() === "3,6,9,12,12", "an Again comes back later each miss");
+
+  // Past the goal, once the met cards are answered today, new words carry on.
+  const seen = { "дом": { recognise: { state: 2, s: 5, d: 5, reps: 3, lapses: 0, steps: 0, lastAt: now - 60000, dueAt: now + 5 * S.DAY } } };
+  const plain = goalSession({ seen, words: ["дом"], now, owed: 0, beyond: true });
+  ok(plain.items.length === 0, "without new words to hand, a review past the goal has nothing");
+  const more = goalSession({ seen, words: ["дом"], now, owed: 0, beyond: true, next: ["кот", "дом", "сад"] });
+  ok(more.items.map((x) => x.word).join() === "кот,сад" && more.items.every((x) => x.kind === "new"),
+     "…with them, it goes on in their order, never a card answered today", more.items.map((x) => x.word).join());
+  const inside = goalSession({ seen, words: ["дом"], now, owed: 5, next: ["кот"] });
+  ok(!inside.items.some((x) => x.word === "кот"), "inside the goal, new words keep to the day's ration");
 }
 
 console.log("\n" + checks + " checks · " +

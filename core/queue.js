@@ -376,8 +376,16 @@ export const goalBadge = (goal, now, opts) => {
  * by the route instead, the fill walks from the first lesson's words forward,
  * so a gap left early is met before anything recent. Cards due are due either
  * way; mastered cards are still the sprinkle. */
+/* `next`, optional: words not met yet, in the order the learner would meet
+ * them along the route. **Past the goal the review has no end** (the owner,
+ * 2026-11-06: *"Default to the personal review. Don't have a hard limit. Just
+ * let it keep going until the user stops"*): once every met card has been
+ * answered today, the chunk is made up of new words from here, uncapped by the
+ * day's ration — the learner chose to keep going, and a new word is the one
+ * thing left that is not a card already answered today. Only past the goal:
+ * inside it, new words keep to the day's ration as they always have. */
 export const MASTERED_EVERY = 8;
-export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar, order }) {
+export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar, order, next }) {
   const o = Object.assign({}, QUEUE_DEFAULTS);
   for (const k in opts || {}) if (opts[k] !== undefined) o[k] = opts[k];
   const random = rng || Math.random;
@@ -421,6 +429,20 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
     }
     items.push(...extra);
   }
+  if (beyond && items.length < want && Array.isArray(next)) {
+    const fronts = (dirs && dirs.length ? dirs : DEFAULT_FRONTS).filter((d) => DIRECTIONS.includes(d));
+    if (!fronts.length) fronts.push(DEFAULT_FRONTS[0]);
+    const have = new Set(items.map((x) => x.word));
+    for (const w of next) {
+      if (items.length >= want) break;
+      if (have.has(w)) continue;
+      const entry = (seen && seen[w]) || {};
+      const card = cardFor(entry);
+      if (card && kindOf(card) !== "new") continue;
+      have.add(w);
+      items.push({ word: w, direction: frontFor(card, fronts, entry), card: card || null, kind: "new", extra: true });
+    }
+  }
   /* The pool could not fill the session: everything met has been answered
      today. Nothing is "remaining" then — a remainder the next chunk cannot
      deal would have the screen dealing empty chunks for ever. */
@@ -433,6 +455,52 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
 /* Familiarity at which a card counts as mastered — the Study header's count
    and the reinforcement above read the same line. */
 export const MASTERED_AT = 80;
+
+/* ------------------------------------------------------- a word that will not stick
+ *
+ * The owner, 2026-11-06: *"I don't want the user to get caught on the same
+ * word forever so if it's not sticking like 10 times in a row maybe it's time
+ * to just move on to a new word. I've seen it just float in the same area for
+ * a while."*
+ *
+ * Two things kept a failing word in view. Again sent it back after three other
+ * cards however often it had failed, so a word missed five times in a sitting
+ * was a fifth of the sitting; and the review's fill deals the most faded card
+ * first, which a failing card always is, so tomorrow opened on it again.
+ *
+ * So the gap grows with each miss in the sitting (`againGap`), and a run of
+ * `STUCK_AT` Agains in a row — counted across sittings, broken by any other
+ * answer — rests the word for `REST_DAYS`: out of the review, its schedule
+ * untouched, back on its own when the days are up. `rest` is a map in the
+ * learner's state, word → `{ run }` while counting, `{ until }` (a day) while
+ * resting. Pure; the screen saves what it returns. */
+export const STUCK_AT = 10;
+export const REST_DAYS = 3;
+export function noteAnswer(rest, word, grade, now) {
+  const today = dayOf(now);
+  const out = {};
+  // Rests that have run their course are dropped on the way through.
+  for (const w in rest || {}) {
+    const e = rest[w];
+    if (e && (e.until === undefined || e.until > today)) out[w] = e;
+  }
+  const cur = out[word];
+  if (cur && cur.until !== undefined) return { rest: out, rested: false };
+  if (grade !== 1) { delete out[word]; return { rest: out, rested: false }; }
+  const run = (cur ? cur.run || 0 : 0) + 1;
+  if (run >= STUCK_AT) { out[word] = { until: today + REST_DAYS }; return { rest: out, rested: true }; }
+  out[word] = { run };
+  return { rest: out, rested: false };
+}
+export const isResting = (rest, word, now) => {
+  const e = rest && rest[word];
+  return !!(e && e.until !== undefined && e.until > dayOf(now));
+};
+/* The gap an Again comes back after: `minGap` cards the first time, and that
+   much more each time the same card is missed again in the sitting, so a word
+   that is not landing is met less often rather than every fourth card. */
+export const againGap = (misses, minGap = QUEUE_DEFAULTS.minGap) =>
+  minGap * Math.min(4, Math.max(1, misses));
 
 /* Again: the card comes back after at least `minGap` other cards — a
    learning step inside the session, not the end of the pile. `at` is the

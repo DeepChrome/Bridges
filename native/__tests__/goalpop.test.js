@@ -2,9 +2,9 @@
  * 25 study cap. Just have a little temporary pop-up when player hits 25 and
  * offer to pivot to something else").
  *
- * A sitting that reaches the goal gets one small bubble: Keep going, and the
- * pile runs on; Something else, and the sitting ends on the ways on. A
- * sitting opened after the goal was met gets no bubble.
+ * A sitting that reaches the goal gets one line above the buttons, and the
+ * pile runs on under it; Stop here ends the sitting on the ways on. A sitting
+ * opened after the goal was met gets no line.
  *
  * Own file, per the timeout note in screens.test.js.
  */
@@ -53,22 +53,23 @@ describe("reaching the goal", () => {
   // One card owed today: the goal is met on the first grade.
   const oneOwed = { goal: { day: dayOf(now), owed: 1, done: 24 } };
 
-  it("opens a small bubble once, and Keep going lets the pile run on", async () => {
+  /* Since 2026-11-06 the goal is a line above the buttons, not a bubble, and
+     the pile runs on under it without being asked (the owner: "Default to
+     the personal review. Don't have a hard limit. Just let it keep going
+     until the user stops"). */
+  it("says so once, in a line, while the pile runs on unasked", async () => {
     await withProfile(oneOwed);
     await gradeGood();
     expect(await screen.findByTestId("goal-met")).toBeTruthy();
     expect(screen.getByTestId("goal-met-count").props.children).toBe("25 cards today");
-    await press("goal-keep");
-    expect(screen.queryByTestId("goal-met")).toBeNull();
-    // The pile did not stop at the goal: a card from the learner's met words is up.
-    expect(await screen.findByText("Show")).toBeTruthy();
+    // Nothing to dismiss: the next card is already up.
+    expect(screen.getByText("Show")).toBeTruthy();
     expect(screen.queryByTestId("study-state")).toBeNull();
-    // Grading on does not reopen it.
     await gradeGood();
-    expect(screen.queryByTestId("goal-met")).toBeNull();
+    expect(screen.getAllByTestId("goal-met")).toHaveLength(1);
   });
 
-  it("Something else ends the sitting on the ways on", async () => {
+  it("Stop here ends the sitting on the ways on", async () => {
     await withProfile(oneOwed);
     await gradeGood();
     await screen.findByTestId("goal-met");
@@ -79,13 +80,16 @@ describe("reaching the goal", () => {
     expect(screen.queryByText("Show")).toBeNull();
   });
 
-  /* The goal was met before this sitting began: nothing to announce. */
-  it("says nothing in a sitting that began with the goal already met", async () => {
+  /* The goal was met before this sitting began: nothing to announce, and
+     Finish is the way out of a review that has no end of its own. */
+  it("says nothing in a sitting that began with the goal already met, and Finish ends it", async () => {
     await withProfile({ goal: { day: dayOf(now), owed: 0, done: 25 } });
     // Nothing owed: the options say so and Personal review deals past the goal.
     await screen.findByText("Show");
     await act(async () => { fireEvent.press(screen.getByText("Show")); });
     await press("grade-3");
     expect(screen.queryByTestId("goal-met")).toBeNull();
+    await press("study-finish");
+    expect(await screen.findByTestId("study-ways-on")).toBeTruthy();
   });
 });

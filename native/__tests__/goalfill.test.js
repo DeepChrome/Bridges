@@ -16,7 +16,7 @@
 import { goalSession, GOAL_REVIEWS, MASTERED_EVERY } from "@core/queue";
 import { applyGrade, familiarity, REVIEW, DAY, dayOf } from "@core/scheduler";
 import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react-native";
+import { render, screen, fireEvent, act, within } from "@testing-library/react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
@@ -110,16 +110,17 @@ describe("the goal's fill, within a sitting", () => {
   });
 });
 
-/* The screen, when the pool runs out before the goal does: the day ends on
-   "Daily goal met", the number on the tab is 0, and Keep going is not offered
-   — there is nothing it could deal but the cards just answered. */
-describe("the goal, met by running out of cards", () => {
+/* The screen, when the pool runs out before the goal does. Until 2026-11-06
+   the day ended there; now the review goes on with the route's new words
+   (the owner: "Don't have a hard limit. Just let it keep going until the user
+   stops") — and still never deals a card answered today. */
+describe("the goal, when the met cards run out", () => {
   const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn(), addListener: () => () => {} };
 
   beforeEach(async () => { await flushState(); await AsyncStorage.clear(); });
   afterEach(async () => { await flushState(); });
 
-  it("ends on the goal met, with nothing more to keep going on", async () => {
+  it("goes on with new words, never a card answered today", async () => {
     const now = Date.now();
     const pool = L.slice(0, 4).map((w) => w.b);
     await AsyncStorage.setItem("rb.accounts", JSON.stringify({
@@ -136,11 +137,12 @@ describe("the goal, met by running out of cards", () => {
       await act(async () => { fireEvent.press(await screen.findByText("Show")); });
       await act(async () => { fireEvent.press(screen.getByTestId("grade-4")); });
     }
-    expect(await screen.findByText("Daily goal met")).toBeTruthy();
-    expect(screen.queryByTestId("keep-going")).toBeNull();
-    expect(screen.queryByText("Show")).toBeNull();
-    await flushState();
-    expect((await global.__db.saved("p1")).goal.owed).toBe(0);
+    // The met cards are spent; the next card is a new word, not one of them.
+    expect(await screen.findByTestId("flag-new")).toBeTruthy();
+    expect(screen.queryByTestId("study-state")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByText("Show")); });
+    const word = pool.find((w) => within(screen.getByTestId("card-russian")).queryAllByText(new RegExp("^" + [...w].map((c) => c + "[\\u0300\\u0301]?").join("") + "$")).length);
+    expect(word).toBeUndefined();
   });
 });
 

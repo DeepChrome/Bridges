@@ -46,6 +46,7 @@ export const DEFAULTS = {
   dev: false,
   faves: {},            // video id -> day favourited (Immerse)
   lowPriority: {},      // card's Russian -> when it was set aside (Study; studycards.js)
+  rest: {},             // card's Russian -> { run } of Agains, or { until } a day while resting (core/queue.js noteAnswer)
   notices: {},          // one-time notes seen, by id (Immerse's creators note)
   theme: "auto",
   /* Where the flashcards' *new* cards come from: `__path__` (the units the

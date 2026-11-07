@@ -43,6 +43,8 @@ export const HELP = {
     ["Counter", "Done, coming back, left; tap it for more"],
     ["Cog", "Fronts, sources, order, new words a day"],
     ["Goal reached", "A note; the cards keep coming"],
+    ["Finish", "Past the goal: stop, and choose another round"],
+    ["Resting", "Ten misses in a row: a new word instead"],
     ["a_", "On the front: the answer a letter at a time"],
     ["Drills", "On the back: every drill for that word"],
     ["Low priority", "Out of the rotation; the cog lists them"],

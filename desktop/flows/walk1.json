@@ -1,0 +1,19 @@
+[
+  { "js": "__drive.type('input[placeholder=Name]', 'Jared')", "wait": 200 },
+  { "js": "__drive.click('Start here')", "wait": 2500, "shot": "01-learn.png" },
+  { "js": "__drive.click('Study')", "wait": 1500, "shot": "02-study-front.png" },
+  { "js": "__drive.key(' ')", "wait": 800, "shot": "03-study-back.png" },
+  { "js": "__drive.key('3')", "wait": 800, "shot": "04-study-next.png" },
+  { "js": "__drive.click('Dictionary')", "wait": 800 },
+  { "js": "__drive.type('input.field', 'книга')", "wait": 1200, "shot": "05-dictionary.png" },
+  { "js": "__drive.key('Enter')", "wait": 1200, "shot": "06-inspector.png" },
+  { "js": "__drive.click('Practice')", "wait": 800, "shot": "07-practice.png" },
+  { "js": "__drive.click('Cases')", "wait": 1500, "shot": "08-drill.png" },
+  { "js": "__drive.key('Escape')", "wait": 600 },
+  { "js": "__drive.click('Learn')", "wait": 800 },
+  { "js": "__drive.click('Continue')", "wait": 1500, "shot": "09-lesson.png" },
+  { "js": "__drive.click('Quiz')", "wait": 1500, "shot": "10-quiz.png" },
+  { "js": "__drive.click('Stats')", "wait": 1200, "shot": "11-stats.png" },
+  { "js": "__drive.click('Jared')", "wait": 1200, "shot": "12-settings.png" },
+  { "js": "__drive.text()", "print": "settings text", "wait": 100 }
+]

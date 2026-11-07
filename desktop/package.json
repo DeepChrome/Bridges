@@ -1,0 +1,37 @@
+{
+  "name": "ya-desktop",
+  "productName": "Ya",
+  "version": "0.1.0",
+  "description": "Ya for Windows: the Russian course on a desktop, synced with the phone.",
+  "private": true,
+  "main": "build/main.cjs",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "start": "node tools/build.mjs && electron .",
+    "dev": "node tools/build.mjs --watch",
+    "test": "node --test \"test/*.test.mjs\"",
+    "dist": "node tools/build.mjs && electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.deepchrome.ya.desktop",
+    "productName": "Ya",
+    "directories": { "output": "dist" },
+    "files": ["build/**/*", "package.json"],
+    "extraResources": [
+      { "from": "../native/assets", "to": "assets",
+        "filter": ["*.json", "fonts/**", "words/**", "sfx/**", "endings/**", "img/**", "wordart/**", "faces/**", "episodes/**", "!transcripts.json"] }
+    ],
+    "win": { "target": ["nsis"], "icon": "../native/assets/icon.png" },
+    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true }
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "ts-fsrs": "^5.4.2"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0",
+    "esbuild": "0.28.2"
+  }
+}

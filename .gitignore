@@ -77,3 +77,8 @@ native/src/scenetracks.js
 review/*.csv
 !review/*reviewed*.csv
 tools/audio_review/site/
+
+# The desktop app's build output and installer (desktop/tools/build.mjs, electron-builder).
+desktop/node_modules/
+desktop/build/
+desktop/dist/

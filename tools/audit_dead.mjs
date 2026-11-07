@@ -21,13 +21,14 @@ import { join, relative, dirname, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SRC_DIRS = ["core", "native/src", "native/App.js", "native/plugins"];
-const TEST_DIRS = ["native/__tests__", "tools", "backend"];
+// The desktop app (desktop/src) reads core/ and the pure modules of native/src too (2026-11-07).
+const SRC_DIRS = ["core", "native/src", "native/App.js", "native/plugins", "desktop/src", "backend/src"];
+const TEST_DIRS = ["native/__tests__", "tools", "backend/test", "desktop/test"];
 const SHOW_TESTS = process.argv.includes("--tests");
 
 function walk(p, out = []) {
   const s = statSync(p);
-  if (s.isFile()) { if (/\.(m?js)$/.test(p)) out.push(p); return out; }
+  if (s.isFile()) { if (/\.(m?jsx?)$/.test(p)) out.push(p); return out; }
   for (const n of readdirSync(p)) {
     if (n === "node_modules" || n === "build" || n.startsWith(".")) continue;
     walk(join(p, n), out);
@@ -35,8 +36,9 @@ function walk(p, out = []) {
   return out;
 }
 
-const src = SRC_DIRS.flatMap((d) => walk(join(ROOT, d)));
-const tests = TEST_DIRS.flatMap((d) => walk(join(ROOT, d)));
+import { existsSync } from "node:fs";
+const src = SRC_DIRS.filter((d) => existsSync(join(ROOT, d))).flatMap((d) => walk(join(ROOT, d)));
+const tests = TEST_DIRS.filter((d) => existsSync(join(ROOT, d))).flatMap((d) => walk(join(ROOT, d)));
 const text = new Map([...src, ...tests].map((f) => [f, readFileSync(f, "utf8")]));
 
 /* Names a file exports. `export default` is skipped: it is imported under any
@@ -80,11 +82,14 @@ for (const f of src) {
 }
 
 /* A source file nothing imports at all. */
+/* Entry points are reached by the platform, not by an import: the phone's
+   App.js, and the desktop's three bundles (desktop/tools/build.mjs). */
+const ENTRY = /(^|[\\/])(App\.js|desktop[\\/]src[\\/]main[\\/]main\.js|desktop[\\/]src[\\/]preload\.js|desktop[\\/]src[\\/]renderer[\\/]index\.jsx)$/;
 const orphans = [];
 for (const f of src) {
-  if (GENERATED.test(f) || basename(f) === "App.js") continue;
-  const stem = basename(f).replace(/\.m?js$/, "");
-  const re = new RegExp(`["'\`][^"'\`]*\\/${stem}(?:\\.m?js)?["'\`]`);
+  if (GENERATED.test(f) || ENTRY.test(f)) continue;
+  const stem = basename(f).replace(/\.m?jsx?$/, "");
+  const re = new RegExp(`["'\`][^"'\`]*\\/${stem}(?:\\.m?jsx?)?["'\`]`);
   if (![...src, ...tests].some((g) => g !== f && re.test(text.get(g)))) orphans.push(relative(ROOT, f));
 }
 

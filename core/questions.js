@@ -299,6 +299,28 @@ export const WORD_DRILLS = [
     .map((d) => ({ id: d.id, name: d.name, icon: d.icon, skills: ["forms"] })),
   { id: "say", name: "Say it", icon: "buildup", skills: [] },
 ];
+/* The runs the score ring's segments offer (native/src/skills.js; the owner,
+   2026-11-07: "click drill and it will target that specific word's drills for
+   that area to increase that score"). One a skill, and each feeds that score
+   alone: the Meaning drill split by direction, every forms drill the word
+   takes run as one, and In a sentence as it is. `SKILL_DRILL_OF` maps a
+   skill to its run; `wordDrillSpec` names any run, menu or ring. */
+export const SKILL_DRILLS = [
+  { id: "ru2en", name: "Russian → English", icon: "quiz", skills: ["ru2en"] },
+  { id: "en2ru", name: "English → Russian", icon: "quiz", skills: ["en2ru"] },
+  { id: "forms", name: "Cases & forms", icon: "cases", skills: ["forms"] },
+];
+export const SKILL_DRILL_OF = { ru2en: "ru2en", en2ru: "en2ru", forms: "forms", usage: "sentence" };
+export const wordDrillSpec = (id) =>
+  WORD_DRILLS.find((d) => d.id === id) || SKILL_DRILLS.find((d) => d.id === id) || null;
+/* The meaning kinds by the direction they ask in (core/skills.js SKILL_OF_KIND),
+   recognition before production as the Meaning drill orders them. */
+const MEANING_KINDS = { ru2en: ["choose-en", "listen"], en2ru: ["choose-ru", "type"] };
+/* The forms drills a word's own "Cases & forms" score moves. A noun's
+   agreement drill grades the adjectives beside it, not the noun, so it is in
+   only for an adjective. */
+const FORMS_DRILLS = ["cases", "conjugation", "aspect", "agreement"];
+
 /* Questions in one word's drill at most: a noun's declension has eleven cells
    to ask for, and ten is a sitting. */
 export const WORD_DRILL_N = 10;
@@ -3620,8 +3642,9 @@ export function makeQuestions(env) {
      listed is one the generator will fill. */
   function wordDrillFits(w, i, id) {
     switch (id) {
-      case "meaning": return glossed(w);
+      case "meaning": case "ru2en": case "en2ru": return glossed(w);
       case "sentence": return true;
+      case "forms": return FORMS_DRILLS.some((d) => (d !== "agreement" || w.p === "adjective") && wordDrillFits(w, i, d));
       case "cases": return w.p === "noun" && !!tableTitled(w, /Declension/);
       case "conjugation": return w.p === "verb" && VERB_TABLES.some((x) => tableTitled(w, x.re));
       // An adjective agrees with the nouns the corpus pairs it with; a noun's
@@ -3656,6 +3679,22 @@ export function makeQuestions(env) {
         return ["choose-en", "listen", "choose-ru", "type"]
           .filter((t) => t !== "listen" || voice())
           .map((t) => present({ t, i, pool })).filter(Boolean);
+      /* One direction of it, for the ring's segment: only the questions that
+         move that direction's score. */
+      case "ru2en": case "en2ru":
+        return MEANING_KINDS[id].filter((t) => t !== "listen" || voice())
+          .map((t) => present({ t, i, pool })).filter(Boolean);
+      /* Every forms drill the word takes, taken in turn so a verb's run has
+         its conjugation and its aspect pair both. */
+      case "forms": {
+        const runs = FORMS_DRILLS.filter((d) => (d !== "agreement" || w.p === "adjective") && wordDrillFits(w, i, d))
+          .map((d) => drillQuestions(d, n, [i], null, typed, null));
+        const out = [];
+        for (let k = 0; out.length < n && runs.some((r) => k < r.length); k++) {
+          for (const r of runs) if (k < r.length && out.length < n) out.push(r[k]);
+        }
+        return out;
+      }
       /* The word inside sentences: a gap in each of its example sentences
          (distinct ones — `avoid` grows as they are taken), then pool
          sentences that use it heard and typed back, then said. Never the

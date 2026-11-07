@@ -21,16 +21,23 @@
  * The grading lives in core/scheduler.js (`gradeSkill`, `skillScores`).
  */
 
+/* `short` labels a segment of the score ring's legend; `about` is the one
+   line its detail says (native/src/skills.js) — what that score measures,
+   which a learner cannot see from the number. */
 export const SKILLS = [
   /* Russian in front (shown or heard), the meaning asked. */
-  { id: "ru2en", name: "Russian → English" },
+  { id: "ru2en", name: "Russian → English", short: "RU → EN",
+    about: "You see or hear the Russian and give the meaning." },
   /* The meaning in front, the Russian asked for. */
-  { id: "en2ru", name: "English → Russian" },
+  { id: "en2ru", name: "English → Russian", short: "EN → RU",
+    about: "You see the meaning and give the Russian." },
   /* A form of the word: a case ending, a conjugation, agreement, the aspect
      partner, where the stress falls. */
-  { id: "forms", name: "Cases & forms" },
+  { id: "forms", name: "Cases & forms", short: "Forms",
+    about: "Its endings: cases, conjugation, agreement, its aspect partner." },
   /* The word met inside a sentence: a gap to fill, a sentence heard or said. */
-  { id: "usage", name: "In a sentence" },
+  { id: "usage", name: "In a sentence", short: "Sentences",
+    about: "The word inside a sentence: filled in, heard, said." },
 ];
 export const SKILL_IDS = SKILLS.map((s) => s.id);
 export const isSkill = (id) => SKILL_IDS.includes(id);

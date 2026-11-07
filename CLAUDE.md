@@ -7182,6 +7182,35 @@ offering Drill it. Before that, each further miss in a sitting comes back
 later: 3, 6, 9, 12 cards (`againGap`), so a failing word is no longer a
 quarter of the pile. Undo takes back the rest, the gap and the replacement.
 
+## 30cq. The score as a segmented ring (2026-11-07)
+
+The owner: *"a segmented ring where each segment represents one of those
+subscores, and the overall ring gives the overall score. You can click one of
+the segments… glowing fire like border… the others will shadow out… click
+drill and it will target that specific word's drills for that area."*
+
+- **The breakdown bubble is one ring** (`SegmentRing` in native/src/skills.js):
+  a quarter per skill, clockwise from the top in `SKILLS` order, each filled
+  along its quarter by its score in the familiarity colours; a skill never
+  asked is the bare track. The middle is the card's score (what the schedule
+  acts on) or, while a quarter is chosen, that skill's. A 2×2 legend under it
+  sits where the quarters sit, because a quarter is a small target and a
+  colour says nothing a name would.
+- **A chosen quarter burns**: one wide stroke behind it with a radial
+  gradient, `warn` at the ring to `bad` at nothing, flickered by a stepped
+  timer (`useFlicker`; not `Animated.loop`, which restarts itself forever
+  against jest.setup's settled animations; off under reduced motion). The
+  others drop to a quarter's opacity. Butt caps on the flame: round ones
+  spill the amber past the quarter's ends. Pressed again, it goes out.
+- **Each skill has its own run** (`SKILL_DRILLS`, `SKILL_DRILL_OF`,
+  `wordDrillSpec` in core/questions.js): Russian → English and English →
+  Russian are the Meaning drill split by direction; Cases & forms is every
+  forms drill the word takes, interleaved, and never a noun's agreement drill,
+  which grades the adjectives beside it; In a sentence is the sentence drill.
+  The button carries what one run holds, and says so where there is nothing
+  («в» has no forms). It opens through `navRef`, since `WordDrill` is on the
+  root stack as well as Study, Learn and Immerse.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

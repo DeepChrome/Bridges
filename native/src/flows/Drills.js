@@ -9,7 +9,7 @@ import { Screen, Btn, List, Row, SectionLabel, Chip, Tick, Text,
          Sheet, Choice, CogButton, Loading, RowText } from "../ui";
 import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
 import { clearRun, savedRun, useResume } from "../resume";
-import { Q, DRILL_TYPES, WORD_DRILLS } from "../questions";
+import { Q, DRILL_TYPES, wordDrillSpec } from "../questions";
 import { wordIndex } from "../worddrills";
 import {
   L, UN, STAGES, DRILL_PASS, SHADOW_PASS, drillPool,
@@ -404,7 +404,8 @@ export function DrillFlow({ route, navigation }) {
 
 /* A drill on one word, chosen from the back of its flashcard (worddrills.js;
    core/questions.js wordDrill). `word` is the card's Russian string and
-   `drill` one of WORD_DRILLS. Graded as any run is — the meaning questions
+   `drill` one of WORD_DRILLS, or one of SKILL_DRILLS from a segment of the
+   score ring (skills.js). Graded as any run is — the meaning questions
    move the card and its meaning scores, the form drills the "Cases & forms"
    score alone (Run.js gradesCard), Say it nothing — which is what makes the
    row in the sheet the way to move the number the breakdown shows. No best
@@ -415,7 +416,7 @@ export function WordDrillFlow({ route, navigation }) {
   const [result, setResult] = useState(null);
   const [seed, setSeed] = useState(0);
   const i = wordIndex(word);
-  const spec = WORD_DRILLS.find((d) => d.id === drill);
+  const spec = wordDrillSpec(drill);
   const typed = st.typedDrills !== false;
   const steps = useMemo(() => (i >= 0 && spec ? Q.wordDrill(i, drill, { typed }) : []),
     // eslint-disable-next-line react-hooks/exhaustive-deps

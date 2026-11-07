@@ -12,5 +12,5 @@ export const Q = makeQuestions({
 
 export {
   DRILL_TYPES, DRILL_N, PLACEMENT_N, SECTION_N, TEST_OUT, SPEECH_MIX, FORM_MIX,
-  QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N, WORD_DRILLS,
+  QUIZ_KINDS, QUIZ_LENGTHS, FINAL_N, WORD_DRILLS, SKILL_DRILL_OF, wordDrillSpec,
 } from "@core/questions";

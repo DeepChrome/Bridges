@@ -24,7 +24,7 @@ import { hidesTabBar, profileDepth } from "./src/fullscreen";
 import { Loading, Avatar, HeaderTitle, Text } from "./src/ui";
 import { HelpButton } from "./src/help";
 import { AskButton, ReportButton, INLINE_TOOLS } from "./src/askai";
-import { DRILL_TYPES, WORD_DRILLS } from "./src/questions";
+import { DRILL_TYPES, wordDrillSpec } from "./src/questions";
 import Talk from "./src/screens/Talk";
 import Tutor from "./src/screens/Tutor";
 import Translate from "./src/screens/Translate";
@@ -459,7 +459,7 @@ const Root = createNativeStackNavigator();
 const wordDrillTitled = ({ navigation, route }) => {
   const p = route.params || {};
   const w = p.word !== undefined ? resolveWord(p.word) : null;
-  const spec = WORD_DRILLS.find((d) => d.id === p.drill);
+  const spec = wordDrillSpec(p.drill);
   return {
     headerRight: () => <HeaderRight navigation={navigation} route={route} />,
     headerBackButtonDisplayMode: "minimal",

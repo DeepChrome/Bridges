@@ -416,6 +416,8 @@ bridges/                          (directory is still named russian-blocks on di
   core/                <- shared by both apps; ES modules, no DOM, no storage
     util.js            <- fold, translit, tokens — the join key for everything
     scheduler.js       <- ts-fsrs (FSRS-6) behind the app's card; one card a word, three fronts (§30w, §30at)
+    sync.js syncclient.js sqlrepo.js <- a profile on more than one device: ops, the round, the store on SQLite (§30cr)
+    palette.js defaults.js typing.js <- the colours, a fresh profile, the phonetic keyboard — shared with the desktop
     queue.js           <- the study session: order, rations, interleave, Again (§30w)
     fsrs.js            <- FSRS-4.5, the frozen web app's scheduler only
     state.js           <- learner-state schema, migrations, recordAttempt
@@ -444,7 +446,8 @@ bridges/                          (directory is still named russian-blocks on di
     src/store.js sqlite.js db.js <- the profile database, and the JSON row it replaced (§30v)
     __tests__/         <- jest; path.test.js and registry.test.js are the patterns
     eas.json app.json  <- build profiles; Android package and mic permission
-  backend/             <- the feedback Worker (§30d): src/, test/, eval/, wrangler.toml
+  backend/             <- the feedback Worker (§30d): src/, test/, eval/, wrangler.toml; src/sync.js the sync objects (§30cr)
+  desktop/             <- Ya for Windows (§30cr): Electron; src/main (store, sync, ya:// scheme), src/renderer (the screens), tools/build.mjs
   tools/
     ingest_anki.py     <- Anki .anki2 -> data/corpus.db  (per-notetype adapters)
     build_lexicon.py   <- OpenRussian CSVs + curated -> data/lexicon.db
@@ -7210,6 +7213,105 @@ drill and it will target that specific word's drills for that area."*
   The button carries what one run holds, and says so where there is nothing
   («в» has no forms). It opens through `navRef`, since `WordDrill` is on the
   root stack as well as Study, Learn and Immerse.
+
+## 30cr. Ya for Windows, and a profile on more than one device (2026-11-07)
+
+The owner: *"a synchronized version packaged as a computer program that
+brings added functionality and synchronizes with a user's profile… I want it
+to feel like a desktop app and certainly not appear like a phone app widened…
+I want the learning to attach to the profile."* Three things, and the rules
+each one left.
+
+**Sync reverses §30d's "the Worker holds no learner state."** It holds it
+now, per account, in a **Durable Object** (Cloudflare's stateful mini-server
+with its own SQLite; the API token could not create a D1 database, and an
+object per account is the better shape anyway — writes to one account are
+serialised by construction). `backend/src/sync.js`: `SyncAccount` keeps the
+rows and the devices (secrets hashed, never stored), `Pairings` the
+six-digit codes. The Worker routes `/v1/sync/account` (an install opens an
+account for one profile), `/v1/sync` (push and pull), `/v1/sync/devices`,
+`/v1/pair/{start,wait,claim}`. Both classes are plain — `cloudflare:workers`
+cannot be imported in Node — and the tests run them on `node:sqlite` behind
+the two storage calls they use.
+
+- **The unit is an op**: one row of state and when it last changed,
+  `{ k: card|kv|deck|log, id, v, at }` (`core/sync.js`). **Last write wins
+  per row**, the same instant settled by the text, so two stores given the
+  same ops in any order agree. A save is ops (`opsOf` over the diff), kept
+  in an **outbox** written in the same transaction as the rows
+  (`core/sqlrepo.js`, which is `native/src/sqlite.js` moved, with a row
+  clock beside it); a pull is applied where newer and never enters the
+  outbox. A review-log row is an op too, so the optimiser's record travels.
+- **A progress key is one blob** (`unit`, `drills`), so two devices offline
+  on different lessons can lose one device's lesson flag; splitting `unit`
+  by unit id is the fix if it bites, and it is a change to kv keys alone.
+- **The round is `core/syncclient.js`** and both apps run exactly it: push
+  the outbox in chunks of `CHUNK`, pull pages excluding the asking device's
+  own rows, apply, advance the cursor. The link — account, device token
+  `s1.<account>.<secret>`, cursor — is one meta row, `sync`, in the
+  profile's database: it is the *profile* that is synced, and two profiles
+  on one phone are two accounts.
+- **Pulled ops reach memory twice**: the saved copy a diff is made against
+  (`absorbOps` in store.js) and `st` on screen (`onPulled` in session.js),
+  or the next save would read another device's rows as this one's changes
+  and push them straight back. The sync test pins it.
+- **The phone** (`native/src/sync.js`): a round `PUSH_DELAY_MS` after every
+  save of a linked profile, a pull on coming forward and on opening the
+  profile. Settings → Sync: one switch opens the account and pushes
+  everything; Pair a computer takes the code the desktop shows; devices are
+  listed with Remove. A build with no Worker shows nothing.
+- **Pairing**: the computer asks for a code and polls; the phone, holding
+  its device token, claims it, which mints a device of the phone's account
+  whose token the computer collects once. Ten minutes, one use, rate-limited
+  per address.
+
+**The desktop is its own app** (`desktop/`, Electron 45 → Node 24 with
+`node:sqlite`; React 19; esbuild; electron-builder's NSIS installer). What
+keeps it one product with the phone:
+
+- **It bundles the logic, never copies it.** The renderer imports `core/`
+  and the pure modules of `native/src` — `data.js`, `questions.js`,
+  `studycards.js`, none of which touch React Native — so it deals the same
+  session and asks the same questions. `core/palette.js` and
+  `core/defaults.js` were extracted for it (the colours and the fresh
+  profile), and `tools/contrast.js` audits the palette there now.
+- **The payload is not in the bundle.** Inlined, 29 MB of JSON became a
+  50 MB script parsed before the first frame. `tools/build.mjs` turns every
+  `require` of a part into `__yaJson(name)`; the page fetches the parts the
+  first screens need before the app's modules evaluate (`index.jsx`) and a
+  part first wanted later is read on demand with a synchronous request. The
+  21,000 clips become `ya://assets/…` URLs — the app's own privileged scheme,
+  served from `native/assets` in development and from the installer's
+  resources once packaged (`assets.js`); nothing is copied into the bundle.
+- **The look is the exercise book on a wide window**: a sidebar, the work
+  pane, and an **inspector** on the right that opens on any word in one
+  click, so an entry never covers the work. Hotkeys everywhere: Space
+  turns a card, 1–4 grade, Z undoes, L sets aside; in a drill 1–4 choose,
+  Enter checks and continues, H hints, Esc leaves; Ctrl+1–5 the screens,
+  Ctrl+K the dictionary.
+- **Typing Russian**: `core/typing.js` is a phonetic layout (translit.ru's
+  conventions — j й, c ц, w щ, ' ь, '' ъ, e' э), on by default, Ctrl+Shift+R
+  to flip; `RuInput` keeps the Latin buffer and shows the Russian. Settings
+  also adds Windows' own ЙЦУКЕН layout through `Set-WinUserLanguageList`
+  (Win+Space switches). Deliberately not `core/util.js translit`, which is
+  a search convenience with c → к.
+- **A typed answer is judged as the phone judges it** (Practice.jsx
+  `judgeTyped`: folded, any `alts`, one letter off on a long word is half
+  credit) and graded as the phone grades it (`applyGrade` by the kind's
+  direction and skill; a form drill moves the forms score alone). The
+  spoken steps — say, pairs, shadowing, building, the scene — are left out
+  of a desktop quiz (`UNSUPPORTED`); the phone still asks them.
+- **`YA_DRIVE=<steps.json>` is the desktop's walkthrough**: each step runs a
+  line of page JavaScript (`__drive.click/type/key`), waits, screenshots;
+  `YA_USERDATA` keeps its profiles apart from the learner's. Read the
+  pictures (§31). `tools/audit_dead.mjs` reads `desktop/src` and
+  `backend/src` now; the three bundle entry points are not orphans.
+
+**Not done**: the video workspace, reading mode and the card browser the
+owner listed; the Worker is **not deployed** (the deploy was blocked by the
+session's permission gate) so pairing has only been exercised end to end in
+the tests; the desktop's Study and runner have no jest suite — the
+walkthrough is their check.
 
 ## 31. Verification
 

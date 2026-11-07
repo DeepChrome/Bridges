@@ -82,3 +82,5 @@ tools/audio_review/site/
 desktop/node_modules/
 desktop/build/
 desktop/dist/
+# The desktop walkthrough's screenshots (YA_DRIVE in desktop/src/main/main.js).
+desktop/flows/*.png

@@ -39,7 +39,15 @@ function createWindow() {
       nodeIntegration: false,
       sandbox: false,
       spellcheck: false,
+      /* The YouTube player lives in a <webview> (renderer/youtube.jsx): a
+         guest page with a real https base, which the renderer's own ya://
+         origin cannot give an iframe. */
+      webviewTag: true,
     },
+  });
+  // A link clicked inside the player (its title, "watch on YouTube") opens in the browser.
+  win.webContents.on("did-attach-webview", (e, guest) => {
+    guest.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: "deny" }; });
   });
   win.on("close", () => { saveSettings({ bounds: win.getBounds() }); });
   win.on("focus", async () => {

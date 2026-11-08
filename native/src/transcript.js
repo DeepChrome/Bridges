@@ -28,23 +28,10 @@ const clock = (ms) => {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 };
 
-/* The last line that has started by `pos`, by bisection: lines are in order. */
-export function lineAt(lines, pos) {
-  let lo = 0, hi = lines.length - 1, at = -1;
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1;
-    if (lines[mid][0] <= pos) { at = mid; lo = mid + 1; } else hi = mid - 1;
-  }
-  return at;
-}
-
-/* The word of a line being said at `pos`. */
-export function wordAt(line, pos) {
-  const offs = line[2];
-  let at = -1;
-  for (let k = 0; k < offs.length; k++) if (line[0] + offs[k] * 10 <= pos) at = k;
-  return at;
-}
+/* Which line and word is being said, and the sound tags, are captions.js —
+   pure, so the desktop's transcript reads the same line (§30cr). */
+import { lineAt, wordAt, soundLabel, soundOnlyEnglish } from "./captions";
+export { lineAt, wordAt, soundLabel, soundOnlyEnglish };
 
 /* Every word the dictionary knows is a link, as Russian is everywhere else in
    the app (§30b): one press for the sheet, the same word again for the full
@@ -53,23 +40,6 @@ export function wordAt(line, pos) {
    is the hairline colour rather than the brand's: a transcript is nothing but
    links, and a page of brand underlines is louder than the words. Tapping the
    time, or the line around the words, still plays from there. */
-/* YouTube's sound tags («[музыка]», «[смех]»), drawn as sounds, not speech
-   (the owner, 2026-10-02: "YouTube just translates to music rather than
-   indicating music… brackets and the music symbols"). The build marks which
-   words they were (build_site.py video_transcripts, a line's fourth field). */
-export const soundLabel = (w) => (/^музык/i.test(w) ? `[♪ ${w} ♪]` : `[${w}]`);
-const SOUND_EN = { "музыка": "music", "смех": "laughter", "аплодисменты": "applause" };
-/* A line that is only sound gets its English the same way, not the
-   translator's bare "music". */
-export function soundOnlyEnglish(line) {
-  const words = line[1].split(" ");
-  const tags = new Set(line[3] || []);
-  if (!words.length || words.some((_, n) => !tags.has(n))) return null;
-  return words.map((w) => {
-    const en = SOUND_EN[w.toLowerCase()] || w;
-    return en === "music" ? "[♪ music ♪]" : `[${en}]`;
-  }).join(" ");
-}
 
 const Line = memo(function Line({ line, k, active, word, onSeek, onPlace, onWord, en }) {
   const t = useTheme();

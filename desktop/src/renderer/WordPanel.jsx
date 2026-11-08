@@ -85,7 +85,7 @@ function FormsTable({ table, mark, speak }) {
   );
 }
 
-export function WordPanel({ word, pos, surface, onClose }) {
+export function WordPanel({ word, pos, surface, onClose, onVideo }) {
   const { st, update } = useSession();
   const { open } = useInspector();
   const w = useMemo(() => resolveWord(word, pos), [word, pos]);
@@ -173,7 +173,12 @@ export function WordPanel({ word, pos, surface, onClose }) {
         <details className="fold">
           <summary>Heard in</summary>
           <div className="stack">
-            {heard.map((h) => <div key={h.id} className="sub">{h.title} <span className="muted">· «{h.w}»</span></div>)}
+            {heard.map((h) => (
+              <button key={h.id} type="button" className="heard" onClick={() => onVideo && onVideo(h, w.b)}
+                      title={`Play it at ${Math.floor(h.t / 60000)}:${String(Math.floor(h.t / 1000) % 60).padStart(2, "0")}`}>
+                <span className="sub">{h.title}</span> <span className="muted">· «{h.w}»{h.n > 1 ? ` · ${h.n}×` : ""}</span>
+              </button>
+            ))}
           </div>
         </details>
       ) : null}

@@ -1,0 +1,21 @@
+[
+  { "js": "__drive.type('input[placeholder=Name]', 'Jared')", "wait": 200 },
+  { "js": "__drive.click('Start here')", "wait": 2500 },
+  { "js": "__drive.click('Videos')", "wait": 2500, "shot": "20-videos.png" },
+  { "js": "__drive.type('input.field', 'семья')", "wait": 1200, "shot": "21-videos-search.png" },
+  { "js": "__drive.type('input.field', '')", "wait": 300 },
+  { "js": "document.querySelector('.vid-card').click(); true", "wait": 3000, "shot": "22a-video-early.png" },
+  { "js": "(async () => { const w = document.querySelector('webview'); return w.clientWidth + 'x' + w.clientHeight + ' guest ' + (await w.executeJavaScript('innerWidth+\"x\"+innerHeight')); })()", "print": "sizes", "wait": 6000, "shot": "22-video-playing.png" },
+  { "js": "document.querySelectorAll('.tl').length + ' lines, active ' + (document.querySelector('.tl.on') ? document.querySelector('.tl.on').dataset.line : 'none') + ', clock ' + document.querySelector('.video-transport .tabular').textContent", "print": "transcript", "wait": 100 },
+  { "js": "__drive.key(' ')", "wait": 1200, "shot": "23-video-paused.png" },
+  { "js": "document.querySelectorAll('.tl .lk')[3].click(); true", "wait": 1500, "shot": "24-video-word.png" },
+  { "js": "__drive.key('Escape')", "wait": 600, "shot": "24b-inspector-closed.png" },
+  { "js": "__drive.click('Mark watched')", "wait": 800 },
+  { "js": "__drive.key('Escape')", "wait": 1200, "shot": "25-videos-watched.png" },
+  { "js": "__drive.click('Dictionary')", "wait": 800 },
+  { "js": "__drive.type('input.field', 'книга')", "wait": 1000 },
+  { "js": "__drive.key('Enter')", "wait": 1200 },
+  { "js": "__drive.click('Heard in')", "wait": 500 },
+  { "js": "document.querySelector('.heard').click(); true", "wait": 9000, "shot": "26-heard-in.png" },
+  { "js": "document.querySelector('.video-transport .tabular').textContent", "print": "clock after heard-in", "wait": 100 }
+]

@@ -438,6 +438,7 @@ bridges/                          (directory is still named russian-blocks on di
     src/screens/       <- Learn, Unit, Practice, Run (the runner + VIEWS registry), Study, You, Settings, Immerse, Video, VideoSummary…
     src/flows/         <- the runs: Lesson, Drills, Cases, Listening, Quiz, Tests, VideoQuiz (WP8.9, 2026-10-15)
     src/verdict.js studycards.js studypicker.js video.js resume.js  <- carved out of Run, Study, Misc (WP8.9)
+    src/wordgroups.js captions.js <- a word list's groups; which caption line is being said — pure, shared with the desktop (§30cr)
     src/activities/    <- Hear, Say, Scene, Alignment (§30c)
     src/rules.js       <- the one table, rule card and reference sheet (§30ay)
     src/lib/feedback.js<- client for the Worker (§30d)
@@ -7314,12 +7315,35 @@ keeps it one product with the phone:
   word to count. **Cards** (`Cards.jsx`): every card as a table, sortable,
   searchable, with the four skill scores, and low priority in bulk.
 
-**Not done**: the video workspace (an episode beside its live transcript —
-the YouTube player has to be checked against the `ya://` origin first, §23);
-the Worker is **not deployed** (the deploy was blocked by the session's
-permission gate) so pairing has only been exercised end to end in the tests;
-the desktop's Study and runner have no jest suite — the walkthrough is their
-check.
+- **Videos** (`Videos.jsx`, the same evening): the library (search, the
+  watched/favourites filter, channel, order — the phone's own `video.js`
+  rules) and the workspace — the picture and its transport on the left with
+  the words it says in their groups under it, the transcript running down
+  the right and following the sound, a click on a line playing from there,
+  a click on a word pausing the video and opening the inspector; "Heard in"
+  on an entry opens the video at the word's moment with its run-up. Space,
+  ← →, − +, E, F, Esc. **The player is a `<webview>` whose host page is a
+  `data:` URL given the app's https base** (`youtube.jsx`,
+  `baseURLForDataURL`): the renderer's own `ya://` origin carries no
+  referrer and YouTube refuses it, and an iframe from a `ya://` page is
+  that. Measured with a probe before the screen was built, and read off the
+  walkthrough after. **A webview's guest takes the element's size in
+  pixels, not a percentage**: at attach the percentage had not resolved
+  and the player sat at a replaced element's 300×150 until the next
+  relayout; a `ResizeObserver` sets the element's width and height in px.
+  The guest talks to the page through console lines prefixed `__yt ` — a
+  guest has no other channel without a preload of its own. For the rules
+  both apps share, `clusterWords` moved to `native/src/wordgroups.js` and
+  `lineAt`/`wordAt`/the sound tags to `native/src/captions.js`
+  (`prep.js` and `transcript.js` re-export them), because neither may
+  import React Native. `transcripts.json` and `transcripts_en.json` now
+  ship in the installer's resources.
+
+**Not done**: the Worker is **not deployed** (the deploy was blocked by the
+session's permission gate) so pairing has only been exercised end to end in
+the tests; the spoken drills (the microphone) on the desktop; the desktop's
+Study and runner have no jest suite — the walkthroughs (`desktop/flows/`)
+are their check.
 
 ## 31. Verification
 

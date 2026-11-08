@@ -19,7 +19,7 @@
     "files": ["build/**/*", "package.json"],
     "extraResources": [
       { "from": "../native/assets", "to": "assets",
-        "filter": ["*.json", "fonts/**", "words/**", "sfx/**", "endings/**", "img/**", "wordart/**", "faces/**", "episodes/**", "!transcripts.json"] }
+        "filter": ["*.json", "fonts/**", "words/**", "sfx/**", "endings/**", "img/**", "wordart/**", "faces/**", "episodes/**"] }
     ],
     "win": { "target": ["nsis"], "icon": "../native/assets/icon.png" },
     "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true }

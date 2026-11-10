@@ -7345,6 +7345,52 @@ the tests; the spoken drills (the microphone) on the desktop; the desktop's
 Study and runner have no jest suite — the walkthroughs (`desktop/flows/`)
 are their check.
 
+## 30cs. The portal's reports, read as one list (2026-11-10)
+
+`node backend/tools/reports.mjs --all` is the queue; 37 reports since the beta
+opened, all the owner's. Twenty-four were fixed on 2026-10-15 and 10-20 as
+they came in (§30cf). What the rest left:
+
+- **A gloss carries no Russian** (`check_gloss_cyrillic` in build_site.py,
+  fatal). «нравиться» was glossed "to like, to be pleasing (мне нравится — I
+  like)": the gloss is the English front of a flashcard and the cue of "write
+  it in Russian", so a Russian phrase in it is the answer on the front
+  ("Answer is on the card"). Eight glosses carried one as a usage note; the
+  note belongs in the senses, which only the back shows.
+- **A word the course should not teach goes in `VIDEO_NOISE`**, never a
+  unit's `drop` (§30bm said it; here is the measurement). «кот» beside
+  «кошка» in one lesson — "two ways of teaching cat" — dropped from `home`
+  walked into core3, pushed «время» a chapter later, left four words
+  ungrouped and broke three conversations. In `VIDEO_NOISE` the course lost
+  one word and nothing moved: 0 script errors, every unit grouped.
+- **The AI reads the whole screen.** `useAbout` registered a word card's word
+  and first sense and a rule card's *kind*, so "why «кухню» in the second
+  sentence?" had no sentence to read. `aboutStep` in flows/Lesson.js
+  registers the card's meanings and the sentences it draws (`cardAbout`),
+  the rule card whole (`noteText`), the word list and the video lines
+  (`linesText`); a scene its lines; Grammar its topic or page; the video
+  summary its words. `about.text` rides to `/v1/ask` capped at `TEXT_CHARS`.
+- **A word is handled the same wherever it is met**: `CardActions` in
+  lesson.js (Speaker · Drills · More · ring) under the word on a lesson's
+  card, Drills beside the score on the entry, and on the flashcard's back
+  two chips and the ring on one line — "Low priority" sits with Undo and
+  Skip, because it is the sitting's action and a third chip wrapped under
+  the ring ("buttons chaotically strewn about").
+- **An inner pause is capped** (`capInnerGaps` in tools/mp3.mjs, applied by
+  build_word_assets only to the clips `tools/audio_gaps.mjs` measures at
+  `GAP_MS` (600) or more — 104 of 6,189 sentences, «Спасибо, хорошо. А вы?»
+  at 1,030 ms): every silence over 550 ms inside the speech becomes 400 ms,
+  a full stop's own pause, cut in samples. **Not ffmpeg's `silenceremove`**:
+  with a negative `stop_periods` it left a 970 ms silence untouched at every
+  threshold tried, and the build's own re-measurement of what shipped is
+  what said so. Run `audio_gaps.mjs` after buying sentences.
+- **Already fixed, or not a defect**: the overflowing table (§30ch), "to
+  breakfast" (gloss), «кухня»'s cupboards (a drawing since 2026-10-29),
+  «стоить» (the examples all mean *cost*; two confusing Wiktionary senses
+  dropped), the «Это стол?» card (two matched pairs now). The Sync button
+  on the desktop fails because the Worker's sync routes are **not
+  deployed** — the gate refused the deploy twice; it is the owner's command.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

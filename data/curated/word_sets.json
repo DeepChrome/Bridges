@@ -81,7 +81,7 @@
     "home": "city"
   },
   "pets": {
-    "members": ["собака", "кошка", "кот"],
+    "members": ["собака", "кошка"],
     "home": "home"
   },
   "where are you from": {

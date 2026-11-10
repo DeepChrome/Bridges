@@ -1,0 +1,28 @@
+# The tester's 2026-11-10 report, read on the emulator with a profile that has
+# cards: the back of a flashcard (two chips and the ring on one line, Low
+# priority down with Undo and Skip), a lesson's word card (Speaker, Drills,
+# More and the ring under the word), and the entry's Drills beside its score.
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\cards1110.txt -Device emulator-5554
+#
+# Read the shots in native/screenshots/walk/ (§31).
+
+tap:^Study$
+wait:3
+tap:^(Personal review|Start review|Study ahead.*)$
+wait:3
+tap:^Show$
+wait:2
+shot:c1-card-back
+tap:^More$
+wait:3
+shot:c2-entry
+back
+wait:2
+tap:^Learn$
+wait:3
+shot:c3-learn
+tap:^Continue
+wait:3
+shot:c4-lesson
+texts

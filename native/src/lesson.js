@@ -27,13 +27,17 @@
 import React from "react";
 import { Animated, View } from "react-native";
 import { useTheme, radius, type as T } from "./theme";
-import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses, Text, Btn } from "./ui";
+import { Card, Bar, Pill, Speaker, Muted, List, Row, Senses, Text, Btn, ActionChip } from "./ui";
 import { RuleCard, IrregularNotes } from "./rules";
-import { Linked, GrammarLine } from "./words";
+import { Linked, GrammarLine, navRef } from "./words";
+import { WordDrillsButton } from "./worddrills";
+import { ScoreRing } from "./skills";
+import { useSession } from "./session";
+import { familiarity, cardFor } from "@core/scheduler";
 import { Guide } from "./guide";
 import { RunTools } from "./askai";
 import { useEnter } from "./motion";
-import { L, linesWith } from "./data";
+import { L, linesWith, rankOf } from "./data";
 import { pictureOf, Photo } from "./pictures";
 import { firstSense } from "@core/util";
 import { hasRealAudio } from "./audio";
@@ -191,6 +195,32 @@ export function GrammarNote({ unit, note, at, total, onEpisode, label }) {
  * worse it looked; now the word is optically centred and the button sits under
  * it where the thumb reaches.
  */
+/* The one row of things to do with the word, under it: hear it, drill it,
+   open its entry, and its score where it has one — the same row the
+   flashcard's back carries (Study.js card-actions), so a word is handled the
+   same way wherever it is met. The owner, 2026-11-10, on this card: "make
+   sure there's a button for drills on that card's word", and the ring is the
+   same control as everywhere else: a press opens the breakdown by skill
+   (skills.js). `navRef`, because the card has no navigation of its own and
+   both routes sit on every stack a lesson runs in (App.js). */
+export function CardActions({ word, testID = "word-card-actions" }) {
+  const session = useSession();
+  const seen = (session && session.st && session.st.seen) || {};
+  const score = familiarity(cardFor(seen[word] || null), rankOf(word));
+  const go = (route, params) => { if (navRef.isReady()) navRef.navigate(route, params); };
+  return (
+    <View testID={testID}
+          style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+                   flexWrap: "wrap", marginTop: 2 }}>
+      <Speaker text={word} />
+      <WordDrillsButton word={word} testID={`${testID}-drills`}
+                        onPick={(drill) => go("WordDrill", { word, drill })} />
+      <ActionChip label="More" testID={`${testID}-entry`} onPress={() => go("Word", { word })} />
+      <ScoreRing word={word} score={score} size={30} testID={`${testID}-score`} />
+    </View>
+  );
+}
+
 export function WordCard({ i, at, total, unit }) {
   const t = useTheme();
   const w = L[i];
@@ -262,7 +292,7 @@ export function WordCard({ i, at, total, unit }) {
               GrammarLine) — the card used to show "noun · f" chips below the
               meaning, the last place a bare gender code survived. */}
           <GrammarLine lemma={w} center style={{ marginTop: 2, marginBottom: 6, alignSelf: "stretch" }} />
-          <Speaker text={w.b} />
+          <CardActions word={w.b} />
 
           {/* Four is enough on a teaching card; the rest are counted, not hidden. */}
           <Senses e={w.e} size={T.body + 1} max={4} style={{ marginTop: 10 }} />

@@ -11,6 +11,9 @@
      "who": "tester",
      "note": "the ending inflected up for no reason (beta.7 report): measured 229 Hz at the start, 320 at the end"
     }
+   ],
+   "rebought": [
+    "9ef75cadf77545f1"
    ]
   },
   "word:русский": {
@@ -22,6 +25,9 @@
      "who": "tester",
      "note": "weird upward intonation (beta.10 report): measured 195 Hz at the start, 337 at the end; bought 2026-09-19, before words were said as statements"
     }
+   ],
+   "rebought": [
+    "26733db55cb7accd"
    ]
   },
   "word:что": {
@@ -33,6 +39,9 @@
      "who": "tester",
      "note": "really weird intonation (beta.7 report); the contour measures as falling (246 -> 229 Hz), so this wants an ear before a rebuy is trusted"
     }
+   ],
+   "rebought": [
+    "98b05be740ab0116"
    ]
   },
   "word:мужчина": {
@@ -114,6 +123,20 @@
    ],
    "rebought": [
     "cbd927770779b0a8"
+   ]
+  },
+  "sentence:сейчас этот актер снимается сразу в двух сериалах.": {
+   "verdicts": [
+    {
+     "verdict": "flag",
+     "id": "b8ea363e5c44c604",
+     "at": "2026-11-10",
+     "who": "tester",
+     "note": "really weird pronunciation (beta.10 report, 2026-10-20, the first example of «сериал»)"
+    }
+   ],
+   "rebought": [
+    "4472b44fcfaf5094"
    ]
   },
   "sentence:а это их дети.": {

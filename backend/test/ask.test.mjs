@@ -44,6 +44,14 @@ test("the screen's question card and the earlier turns go to the model", () => {
   assert.equal(m.history[0].q, "What case is this?");
   // Nothing on screen is nulls, not the string "undefined".
   assert.equal(JSON.parse(askMessage({ question: "hi" })).about.prompt, null);
+  // A screen's running text — a rule card, a conversation — goes along and is
+  // cut to its cap (a tester, 2026-11-10: the AI "can't always reference the
+  // screen that prompted it").
+  const t = JSON.parse(askMessage({ question: "what did Teddy say?",
+    about: { kind: "scene", text: "Тедди: Привет! — Hi!\nМонька: Где ключ? — Where is the key?" } }));
+  assert.match(t.about.text, /Монька: Где ключ/);
+  assert.equal(JSON.parse(askMessage({ question: "x", about: { text: "а".repeat(5000) } })).about.text.length, 1500);
+  assert.match(SYSTEM_ASK, /"text"/);
 });
 
 test("a flashcard's meanings and examples ride along, numbered as shown, and cut to the cap", () => {

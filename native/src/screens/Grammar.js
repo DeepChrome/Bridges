@@ -27,6 +27,10 @@ import { Screen, Title, List, Row, Muted, Text, SectionLabel } from "../ui";
 import { TopicSection } from "../rules";
 import { TOPICS, topicById } from "@core/grammar";
 import { UN, STAGES, chapterOf } from "../data";
+import { useAbout } from "../about";
+
+/* A section as the AI reads it: its heading, its one-line rule and its why. */
+const sectionText = (s) => [s.heading, s.rule, ...(s.why || [])].filter(Boolean).join("\n");
 
 /* The chapter that first teaches a topic, off the unit it names. */
 function chapterOfTopic(topic) {
@@ -127,9 +131,20 @@ export default function Grammar({ route, navigation }) {
   const openPage = (heading) => navigation.push("Grammar", { topic: open.id, section: heading });
 
   if (page) {
-    const k = pages.indexOf(page);
-    const prev = k >= 0 ? pages[k - 1] : null, next = k >= 0 ? pages[k + 1] : null;
-    return (
+    return <GrammarPage open={open} page={page} pages={pages} navigation={navigation} />;
+  }
+  return <GrammarTopic open={open} first={first} pages={pages} openPage={openPage} toList={toList} />;
+}
+
+/* One case's page, with the case before and after. Registers its text for the
+   AI and a report (about.js) — a hook, so a component of its own rather than
+   a branch below the list's early return. */
+function GrammarPage({ open, page, pages, navigation }) {
+  const t = useTheme();
+  useAbout({ kind: "grammar page", title: `${open.title} · ${page.heading}`, text: sectionText(page) });
+  const k = pages.indexOf(page);
+  const prev = k >= 0 ? pages[k - 1] : null, next = k >= 0 ? pages[k + 1] : null;
+  return (
       <Screen>
         <Muted testID="page-topic">{open.title}</Muted>
         <Title>{page.heading}</Title>
@@ -154,8 +169,13 @@ export default function Grammar({ route, navigation }) {
         </List>
       </Screen>
     );
-  }
+}
 
+/* A topic: its sections in order, the asked one first. */
+function GrammarTopic({ open, first, pages, openPage, toList }) {
+  const t = useTheme();
+  useAbout({ kind: "grammar topic", title: open.title,
+             text: open.sections.map(sectionText).join("\n\n") });
   return (
     <Screen>
       <Title>{open.title}</Title>

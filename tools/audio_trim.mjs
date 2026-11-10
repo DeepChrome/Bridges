@@ -25,3 +25,10 @@ export const TRIM_FILTER = [
   "areverse", lead(0.15), "afade=t=in:d=0.01", "areverse",
   "afade=t=in:d=0.01",
 ].join(",");
+
+/* A pause *inside* the speech is capped too, for the few clips that have one
+   — but in samples, not here: ffmpeg's `silenceremove` with a negative
+   `stop_periods` left a 970 ms inner silence exactly as long at every
+   threshold tried (2026-11-10). `capInnerGaps` in tools/mp3.mjs does it on
+   the decoded clip; build_word_assets.mjs applies it to the clips
+   tools/audio_gaps.mjs measures over GAP_MS. */

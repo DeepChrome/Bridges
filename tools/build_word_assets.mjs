@@ -27,8 +27,9 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { fold } from "../core/util.js";
-import { durationMs } from "./mp3.mjs";
+import { durationMs, innerGap, capInnerGaps, GAP_KEEP_MS } from "./mp3.mjs";
 import { TRIM_FILTER } from "./audio_trim.mjs";
+import { gapsOf, GAP_MS } from "./audio_gaps.mjs";
 import { MIN_WORD_MS } from "./build_word_audio.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -77,13 +78,28 @@ const BLIP_MS = 300;
 const ff = (args) => spawnSync("ffmpeg", args, { encoding: "utf8", timeout: 60000 });
 
 /* The clip cleaned (TRIM_FILTER), cached by its content id. Returns the path
-   to ship; the purchase itself when ffmpeg refused, rather than nothing. */
-function trimmedClip(src, id) {
-  const out = join(TRIMMED, id + ".mp3");
+   to ship; the purchase itself when ffmpeg refused, rather than nothing.
+   `gap`: the inner pauses capped as well (mp3.mjs capInnerGaps) — the clip is
+   decoded through the trim, capped in samples and encoded once, so it is
+   still one generation from the purchase. */
+const RATE = 24000;
+function trimmedClip(src, id, gap = false) {
+  const out = join(TRIMMED, id + (gap ? "-g" : "") + ".mp3");
   if (existsSync(out)) return out;
-  ff(["-y", "-hide_banner", "-loglevel", "error", "-i", src, "-af", TRIM_FILTER,
-      "-ar", "24000", "-ac", "1", "-c:a", "libmp3lame", "-b:a", "32k", out]);
-  return existsSync(out) ? out : src;
+  if (!gap) {
+    ff(["-y", "-hide_banner", "-loglevel", "error", "-i", src, "-af", TRIM_FILTER,
+        "-ar", String(RATE), "-ac", "1", "-c:a", "libmp3lame", "-b:a", "32k", out]);
+    return existsSync(out) ? out : src;
+  }
+  const dec = spawnSync("ffmpeg", ["-v", "error", "-i", src, "-af", TRIM_FILTER, "-ar", String(RATE), "-ac", "1",
+                                   "-f", "s16le", "-"], { maxBuffer: 64 << 20, timeout: 60000 });
+  if (dec.status !== 0) return trimmedClip(src, id, false);
+  const pcm = new Int16Array(dec.stdout.buffer, dec.stdout.byteOffset, dec.stdout.length >> 1);
+  const capped = capInnerGaps(pcm, RATE);
+  const enc = spawnSync("ffmpeg", ["-y", "-v", "error", "-f", "s16le", "-ar", String(RATE), "-ac", "1", "-i", "pipe:0",
+                                   "-c:a", "libmp3lame", "-b:a", "32k", out],
+                        { input: Buffer.from(capped.buffer, capped.byteOffset, capped.byteLength), timeout: 60000 });
+  return enc.status === 0 && existsSync(out) ? out : trimmedClip(src, id, false);
 }
 
 if (!existsSync(MANIFEST)) {
@@ -92,6 +108,14 @@ if (!existsSync(MANIFEST)) {
 }
 const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
 const files = manifest.files || {};
+
+/* Which sentence clips carry a pause inside the speech worth capping
+   (tools/audio_gaps.mjs, cached by clip id — the first measurement of 6,000
+   clips takes minutes, the next none). Words are not measured: a one-word
+   clip has no inner pause to cap, and there are 15,000 of them. */
+const sentenceFiles = Object.fromEntries(Object.entries(files).filter(([k]) => /\s/.test(k)));
+const GAPS = gapsOf(sentenceFiles, { log: (s) => console.log(`  gaps: ${s}`) });
+const wideGap = (label) => !!(GAPS[label] && GAPS[label].gap !== null && GAPS[label].gap >= GAP_MS);
 
 /* A file name a person can read in a diff, from the word itself. Latin-safe
    because Metro and Gradle both handle asset names better that way, and two
@@ -116,12 +140,14 @@ const used = new Set();
    («кни́га» and «книга») is the same clip, and shipping it twice would be
    bytes for nothing in an APK this purchase already grows by half. */
 const nameOf = new Map();
-let missing = 0, cut = 0, cutMs = 0, blips = [];
+let missing = 0, cut = 0, cutMs = 0, blips = [], capped = [];
 function ship(id, label, sentence) {
   if (nameOf.has(id)) return nameOf.get(id);
   const bought = join(SRC, id + ".mp3");
   if (!existsSync(bought)) { missing++; return null; }
-  const from = trimmedClip(bought, id);
+  const gap = sentence && wideGap(label);
+  const from = trimmedClip(bought, id, gap);
+  if (gap) capped.push(from);
   // A sentence is named by its hash: a transliterated sentence is not readable
   // either, and Gradle has a limit on resource names.
   let name = sentence ? `s-${id.slice(0, 12)}` : slug(label);
@@ -205,6 +231,20 @@ console.log(`${rows.length} word clips and ${formRows.length} forms → native/a
             + ` (${nameOf.size} files, ${(bytes / 1024 / 1024).toFixed(1)} MB)`);
 console.log(`  pads and their clicks trimmed off ${cut}, ${(cutMs / 1000).toFixed(1)} s in all`
             + ` (${cut ? Math.round(cutMs / cut) : 0} ms each)`);
+/* The cap, checked on what shipped: a capped clip that still holds a long
+   inner silence means the cap missed the pause, and the learner would hear
+   exactly what it exists to remove. A margin of GAP_SLACK over GAP_MS: the
+   gate decodes the encoded clip at 16 kHz and the cap worked on the 24 kHz
+   decode, and a pause whose tail hovers at the floor reads up to 50 ms apart
+   between the two («у всех насекомых по шесть ножек.», 620 ms both ways,
+   2026-11-10). What is caught is the second-long hole, not a long full stop. */
+const GAP_SLACK = 100;
+const still = capped.filter((f) => { const g = innerGap(f); return g !== null && g >= GAP_MS + GAP_SLACK; });
+console.log(`  inner pauses capped in ${capped.length} sentence clip(s) (over ${GAP_MS} ms → about ${GAP_KEEP_MS} ms)`);
+if (still.length) {
+  console.log(`  !! ${still.length} capped clip(s) still hold a pause of ${GAP_MS + GAP_SLACK} ms or more: ${still.slice(0, 5).join(", ")}`);
+  process.exitCode = 1;
+}
 if (missing) console.log(`  !! ${missing} named in the manifest but not on disk`);
 if (blips.length) {
   console.log(`  !! ${blips.length} shipped word clip(s) too short to be the word: `

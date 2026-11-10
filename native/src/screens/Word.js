@@ -11,13 +11,14 @@ import { View, Pressable, Linking } from "react-native";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Fold } from "../ui";
 import { ScoreRing } from "../skills";
+import { WordDrillsButton } from "../worddrills";
 import { TableGroup, Facts, IrregularTag } from "../rules";
 import { wordFacts, isIrregular } from "@core/facts";
 import { grammarLine } from "@core/forms";
 import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
 import { L, UN, resolveWord, heardIn, sensesOf, rankOf } from "../data";
-import { Linked, GrammarLine } from "../words";
+import { Linked, GrammarLine, navRef } from "../words";
 import { useAbout, cardAbout } from "../about";
 import { pictureOf, Photo } from "../pictures";
 import { clock, short } from "../video";
@@ -60,22 +61,33 @@ export default function Word({ route, navigation }) {
    held three weeks, a rare word only near three months — so the words met every
    day reach 100 when they are genuinely known (core/scheduler.js). A word never
    studied says so and draws no ring; a zero would claim a measurement. */
-function WordStatus({ word }) {
+function WordStatus({ word, navigation }) {
   const t = useTheme();
   const session = useSession();
   if (!session || !session.st) return null;
   const entry = (session.st.seen || {})[word] || null;
   const score = familiarity(cardFor(entry), rankOf(word));
   const label = familiarityLabel(score);
+  /* The entry has every drill the word takes, as the flashcard's back does
+     (the owner, 2026-11-10: "in the full card or main card, make sure there's
+     a button for drills on that card's word"). `WordDrill` is on every stack
+     that shows an entry and on the root one, so the sheet's own navigator or
+     the root reference both reach it. */
+  const drill = (d) => {
+    const params = { word, drill: d };
+    if (navigation) navigation.navigate("WordDrill", params);
+    else if (navRef.isReady()) navRef.navigate("WordDrill", params);
+  };
   return (
     <View testID="word-status" style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 12 }}
           accessibilityLabel={score === null ? "Not studied yet" : `${label}, ${score} of 100`}>
       {score === null ? null : <ScoreRing word={word} score={score} size={40} />}
       {/* The ring carries the colour; the word stays ink, since a mixed
           amber is a text colour nobody audited (§31). */}
-      <Text style={{ color: score === null ? t.ink3 : t.ink, fontWeight: "700" }}>
+      <Text style={{ color: score === null ? t.ink3 : t.ink, fontWeight: "700", flex: 1 }}>
         {score === null ? (entry ? "New" : "Not studied yet") : label}
       </Text>
+      <WordDrillsButton word={word} testID="word-entry-drills" onPick={drill} />
     </View>
   );
 }
@@ -144,7 +156,7 @@ export function WordEntry({ w, index, navigation }) {
             the stress moves (core/facts.js, 2026-09-28). The entry is the
             other place a learner comes to look something up, so it gets the
             same guide the drill's bulb does. */}
-        <WordStatus word={w.b} />
+        <WordStatus word={w.b} navigation={navigation} />
         {/* What the line under the word already flags (gender, aspect) opens
             there; the rest are pills here. */}
         <Facts facts={wordFacts(w).filter((f) => !lineTags.has(f.label.toLowerCase()))} testID="word-facts" />

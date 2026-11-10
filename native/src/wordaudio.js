@@ -7027,7 +7027,7 @@ export const WORD_CLIPS = {
   "сейчас полным ходом идет модернизация производства.": require("../assets/words/s-3ba1f61d669a.mp3"),
   "сейчас половина двенадцатого.": require("../assets/words/s-57f1e76256a4.mp3"),
   "сейчас у меня нет времени.": require("../assets/words/s-8798395b4876.mp3"),
-  "сейчас этот актер снимается сразу в двух сериалах.": require("../assets/words/s-b8ea363e5c44.mp3"),
+  "сейчас этот актер снимается сразу в двух сериалах.": require("../assets/words/s-4472b44fcfaf.mp3"),
   "сейчас я в школе и буду здесь до 8.": require("../assets/words/s-27b7e1e9e8cc.mp3"),
   "сейчас я не так уверена.": require("../assets/words/s-567e65552c69.mp3"),
   "сейчас я пойду готовить ужин.": require("../assets/words/s-5589bdcc038a.mp3"),

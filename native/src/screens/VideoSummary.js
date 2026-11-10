@@ -8,6 +8,9 @@ import { unitById, videoLines, nextRoute } from "../data";
 import { PrepList } from "../prep";
 import { short } from "../video";
 import { videoFor } from "./Video";
+import { useAbout, linesText } from "../about";
+import { L, idxOfWord } from "../data";
+import { firstSense } from "@core/util";
 
 /* What a video holds, before it (the owner, 2026-10-06: "video browser ->
    summary (flashcard option and overview of the relevant vocab/sentences) ->
@@ -18,10 +21,14 @@ export function VideoSummary({ route, navigation }) {
   const { st } = useSession();
   const params = route.params || {};
   const v = videoFor(params);
+  const unit = v && v.unit ? unitById(v.unit) : null;
+  const words = Object.keys((v && v.words) || {});
+  const lines = v && unit && unit.v && unit.v.id === v.id ? videoLines(unit) : [];
+  // The summary as the AI reads it: the video, the words it says, its sentences.
+  useAbout(v ? { kind: "video summary", title: v.title,
+                 text: linesText(words.map((w) => { const i = idxOfWord(w); return i >= 0 ? { ru: L[i].w, en: firstSense(L[i]) } : { ru: w }; })
+                   .concat(lines.map((l) => ({ ru: l.ru, en: l.en })))) } : null);
   if (!v) return null;
-  const unit = v.unit ? unitById(v.unit) : null;
-  const words = Object.keys(v.words || {});
-  const lines = unit && unit.v && unit.v.id === v.id ? videoLines(unit) : [];
   const go = () => navigation.navigate("Video",
     { videoId: v.id, unitId: params.unitId, index: params.index, viaSummary: true });
   /* Opened again from the end of the video's questions (`onward`), its

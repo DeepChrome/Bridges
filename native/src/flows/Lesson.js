@@ -13,12 +13,13 @@ import { VideoLines } from "../prep";
 import { Q } from "../questions";
 import {
   L, UN, lessonWords, lessonCount, markComponent, PASS_MARK,
-  reviewWords, linesWith, afterStep, stepRoute, lowPriorityIdx,
+  reviewWords, linesWith, afterStep, stepRoute, lowPriorityIdx, sensesOf,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { firstSense } from "@core/util";
 import { touchStreak } from "../store";
-import { useAbout } from "../about";
+import { hasRealAudio } from "../audio";
+import { useAbout, cardAbout, noteText, linesText } from "../about";
 import { scoreOf } from "./shared";
 
 /* What this learner has been taught, for the lesson builders (core/questions.js
@@ -32,6 +33,28 @@ export const taughtBy = (st) => {
 const LESSON_LINES = 4;
 
 /* ------------------------------------------------------------- vocabulary */
+
+/* What a teaching step shows, as about.js carries it. The word card's
+   sentences are the ones the card draws (lesson.js WordCard: the video's own
+   lines, else recorded examples), so the AI counts them as the eye does. */
+export function aboutStep(s, at, total, unit, isQuestion) {
+  if (!s || isQuestion(s)) return null;
+  const base = { kind: s.t, step: `${at + 1} of ${total}` };
+  if (s.t === "word" && typeof s.i === "number" && L[s.i]) {
+    const w = L[s.i];
+    const lines = unit ? linesWith(unit, [s.i], 2) : [];
+    const x = lines.length ? lines.map((l) => ({ ru: l.ru, en: l.en }))
+      : (w.x || []).filter((ex) => hasRealAudio(ex.ru)).slice(0, 2);
+    return { ...base, word: w.b, answer: firstSense(w),
+             card: cardAbout({ b: w.b, w: w.w, e: w.e, x }, sensesOf(s.i), { maxSenses: 4, maxExamples: 2 }) };
+  }
+  if (s.t === "grammar") return { ...base, text: noteText(s.note) };
+  if (s.t === "list") {
+    return { ...base, text: linesText((s.words || []).map((i) => (L[i] ? { ru: L[i].w, en: firstSense(L[i]) } : null))) };
+  }
+  if (s.t === "lines") return { ...base, text: linesText(s.lines) };
+  return base;
+}
 
 export function VocabFlow({ route, navigation }) {
   const { st, update } = useSession();
@@ -84,14 +107,14 @@ export function VocabFlow({ route, navigation }) {
       setAt(j);
     });
   }, [navigation, done, steps, reach]);
-  /* A teaching card, for a tester's report (a question registers itself in
-     the runner). */
+  /* A teaching card, for a tester's report and the AI (a question registers
+     itself in the runner). What the card shows rides along — the word's
+     meanings and the sentences under it, the rule card whole, the word list —
+     so "why is it «кухню» in the second sentence?" is about this card (the
+     tester, 2026-11-10: "the AI assist can't always reference the screen that
+     prompted it"; a word card used to register only its word and first sense). */
   const shown = steps[at];
-  useAbout(shown && !isQuestion(shown)
-    ? { kind: shown.t, word: typeof shown.i === "number" && L[shown.i] ? L[shown.i].b : undefined,
-        answer: typeof shown.i === "number" && L[shown.i] ? firstSense(L[shown.i]) : undefined,
-        step: `${at + 1} of ${steps.length}` }
-    : null);
+  useAbout(aboutStep(shown, at, steps.length, unit, isQuestion));
 
   if (resume.prompt) return resume.prompt;
 

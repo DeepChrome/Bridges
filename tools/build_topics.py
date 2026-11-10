@@ -260,7 +260,12 @@ def grouped(tid, chosen, meta, spoken, size):
 VIDEO_NOISE = set("""канал подписываться подписаться подписка лайк комментарий ролик выпуск
 ссылка описание субтитры патреон падёж глагол предлог окончание союз спряжение
 существительное прилагательное местоимение наречие
-сей пост принцип доступ марина здравоохранение ножка ничто малый""".split())
+сей пост принцип доступ марина здравоохранение ножка ничто малый кот""".split())
+# «кот» (2026-11-10): the tester, on the home lesson that taught it beside
+# «кошка»: "Why two ways of teaching cat in one lesson. Seems unnecessary."
+# Dropped from home alone it walked into the next spine unit, pushed «время»
+# a chapter later and broke three conversations; the course teaches «кошка»
+# for cat and «кот» stays in the dictionary, a link away.
 # «сей» is archaic "this", heard in set phrases («до сих пор») and nowhere a
 # learner would say it. Reviewers dropped it from core8 and art and it walked
 # into the next unit each time (2026-10-01); it belongs here, not unit by unit.

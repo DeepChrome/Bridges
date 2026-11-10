@@ -28,6 +28,7 @@
   "что-то|other": { "first": "something (implies" },
   "покупать|verb": { "drop": ["to bathe"] },
   "врач|noun": { "drop": ["therapist, not surgeon"], "rename": { "doc, vet, medic": "doctor, physician" } },
+  "стоить|verb": { "drop": ["it is sufficient", "once (one thing happens"] },
   "дешёвый|adjective": { "first": "inexpensive" },
   "смочь|verb": { "examples": ["Pearlescent"] },
   "лучше|other": { "lead": "better" },

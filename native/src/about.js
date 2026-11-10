@@ -77,9 +77,42 @@ export function cardAbout(face, senses, { maxSenses = 4, maxExamples = 3 } = {})
   return { word: face.b, senses: list, examples };
 }
 
+/* The most a screen's running text sends: a conversation's lines, a rule card,
+   a word list. Enough to answer "what did she say in line three?"; a cap so a
+   question never costs more than its answer. */
+const TEXT_CHARS = 1500;
+const text = (lines) => {
+  const s = (lines || []).filter(Boolean).join("\n");
+  return s ? s.slice(0, TEXT_CHARS) : undefined;
+};
+
+/* A grammar card as the AI reads it: its title, its rule, its table row by
+   row, and its examples with their English (lesson.js GrammarNote draws the
+   same note). The tester, 2026-11-10: "the AI assist can't always reference
+   the screen that prompted it" — a rule card registered only its kind. */
+export function noteText(note) {
+  if (!note) return undefined;
+  const table = note.table
+    ? [(note.table.columns || []).join(" | ")].concat((note.table.rows || []).map((r) => (r || []).join(" | ")))
+    : [];
+  const examples = (note.examples || []).map((ex) => (Array.isArray(ex) ? ex.filter(Boolean).join(" — ") : ex));
+  return text([note.title, note.body, ...table, ...examples]);
+}
+
+/* A conversation or passage: who said what, with the English where there is
+   one. */
+export function linesText(lines) {
+  return text((lines || []).map((l) => {
+    if (!l) return null;
+    const who = l.who || l.speaker;
+    return `${who ? `${who}: ` : ""}${l.ru || ""}${l.en ? ` — ${l.en}` : ""}`;
+  }));
+}
+
 /* One question or card, as a reviewer needs it: its kind, what it asked, the
    right answer, the options offered, and the word behind it by its Russian
-   (rule 20.4: never an index, which a rebuild moves). */
+   (rule 20.4: never an index, which a rebuild moves). A scene carries its
+   lines too, so a question about the conversation is about this one. */
 export function describe(q) {
   if (!q || typeof q !== "object") return null;
   const word = typeof q.i === "number" && L[q.i] ? L[q.i].b : undefined;
@@ -93,5 +126,6 @@ export function describe(q) {
     answer: short(q.answer) || short(q.target) || (right.length ? right.join(" / ") : undefined) || short(q.en) || undefined,
     options: Array.isArray(q.options) ? q.options.map(label).map(short).slice(0, 6) : undefined,
     unit: q.unit || undefined,
+    text: Array.isArray(q.lines) && q.lines.length ? linesText(q.lines) : undefined,
   };
 }

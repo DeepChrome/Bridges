@@ -49,6 +49,9 @@ function aboutForAsk(a) {
     // The rest of a card or an entry — meanings and example sentences — so a
     // question about "the third example" is about the one on screen.
     card: q.card,
+    // The running text a screen shows — a rule card, a conversation's lines, a
+    // word list, a grammar page — where it has one (about.js noteText, linesText).
+    text: q.text,
   };
 }
 

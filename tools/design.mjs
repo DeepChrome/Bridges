@@ -35,6 +35,9 @@ import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const THEME = readFileSync(join(ROOT, "native/src/theme.js"), "utf8");
+/* The two palettes moved to core/palette.js for the desktop (§30cr); the
+   scales stayed in theme.js. contrast.js reads the same file. */
+const PALETTE = readFileSync(join(ROOT, "core/palette.js"), "utf8");
 const STRICT = process.argv.includes("--strict");
 
 let fails = 0, warns = 0, checks = 0;
@@ -47,9 +50,9 @@ const group = (n) => console.log("\n" + n);
 
 /* The token objects are read out of the source rather than imported, because
    theme.js imports react-native. Same approach as contrast.js. */
-function objectNamed(name) {
-  const m = THEME.match(new RegExp(`(?:export )?const ${name}\\s*=\\s*\\{([\\s\\S]*?)\\n?\\};`));
-  if (!m) throw new Error(`theme.js has no ${name}`);
+function objectNamed(name, src = THEME, file = "theme.js") {
+  const m = src.match(new RegExp(`(?:export )?const ${name}\\s*=\\s*\\{([\\s\\S]*?)\\n?\\};`));
+  if (!m) throw new Error(`${file} has no ${name}`);
   const out = {};
   for (const [, k, v] of m[1].matchAll(/([A-Za-z0-9_]+)\s*:\s*("?[#A-Za-z0-9_.-]+"?)/g)) {
     const n = Number(v);
@@ -62,8 +65,8 @@ const radius = objectNamed("radius");
 const space = objectNamed("space");
 const type = objectNamed("type");
 const motion = objectNamed("motion");
-const light = objectNamed("light");
-const dark = objectNamed("dark");
+const light = objectNamed("light", PALETTE, "core/palette.js");
+const dark = objectNamed("dark", PALETTE, "core/palette.js");
 
 /* ------------------------------------------------------------------ colour */
 

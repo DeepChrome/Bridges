@@ -61,17 +61,23 @@ describe("the card after its first turn", () => {
 
   /* At the top of the card, above the word, and boxed (the owner,
      2026-11-06: "the more and drills button should be more clearly indicated
-     as buttons and they should be at the top of the card"). */
-  it("puts Drills, More and Low priority at the top of the card, as boxed buttons", async () => {
+     as buttons and they should be at the top of the card"). Two of them:
+     Low priority is a sitting's action and sits in the footer with Undo and
+     Skip, so the top row is one line beside the ring (the owner, 2026-11-10:
+     "buttons chaotically strewn about"). */
+  it("puts Drills and More at the top of the card as boxed buttons, and Low priority in the footer", async () => {
     const view = await withProfile();
     await show();
     await screen.findByTestId("card-actions");
     expect(order(view, "card-actions")).toBeLessThan(order(view, "card-russian"));
     expect(order(view, "card-actions")).toBeLessThan(order(view, "sense-list"));
     const actions = within(screen.getByTestId("card-actions"));
-    for (const label of ["Drills", "More", "Low priority"]) expect(actions.getByText(label)).toBeTruthy();
+    for (const label of ["Drills", "More"]) expect(actions.getByText(label)).toBeTruthy();
+    expect(actions.queryByText("Low priority")).toBeNull();
+    expect(screen.getByTestId("set-aside")).toBeTruthy();
+    expect(order(view, "set-aside")).toBeGreaterThan(order(view, "undo"));
     // A box: a fill and a hairline, not grey words on the card.
-    for (const id of ["word-drills-open", "full-entry", "set-aside"]) {
+    for (const id of ["word-drills-open", "full-entry"]) {
       const style = [].concat(screen.getByTestId(id).props.style).reduce((a, s) => ({ ...a, ...s }), {});
       expect(style.borderWidth).toBe(1);
       expect(style.backgroundColor).toBeTruthy();

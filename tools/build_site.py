@@ -1079,6 +1079,27 @@ def check_closed_class(units, lemmas, with_paradigm):
     return bad
 
 
+def check_gloss_cyrillic(units, lemmas):
+    """No taught word's gloss carries Russian.
+
+    The gloss is the English front of a flashcard, the cue of "write it in
+    Russian" and an option in "choose the meaning", so Russian inside it names
+    the answer: «нравиться» was glossed "to like, to be pleasing (мне нравится —
+    I like)" and the tester read the answer off the front (2026-11-07, "Answer
+    is on the card"). Eight glosses carried a Russian phrase as a usage note;
+    the note belongs in the senses, which only the back shows. Fatal, like the
+    closed-class check: nothing downstream can tell a note from a leak.
+    """
+    bad = []
+    for u in units:
+        for i in u["w"]:
+            e = lemmas[i]
+            if WORD_RE.search(e.get("e") or ""):
+                bad.append(f"{u['id']} teaches «{e['b']}» glossed “{e['e']}”: Russian inside the "
+                           "English gloss shows the answer on the card's front")
+    return bad
+
+
 WIKT_RAW = ROOT / "data" / "raw" / "wiktionary" / "russian.jsonl"
 WIKT_FORMS_CACHE = ROOT / "data" / "_work" / "wiktionary_forms.json"
 WIKT_HEADS_CACHE = ROOT / "data" / "_work" / "wiktionary_heads.json"
@@ -2085,6 +2106,7 @@ def gather(lex_path, corpus_path, topics_path, n_lemmas, n_examples):
     with_paradigm = {pos_of[l] for (l,) in db.execute(
         "select distinct lemma_id from paradigm") if l in pos_of}
     stats["closed_class_taught"] = check_closed_class(units, lemmas, with_paradigm)
+    stats["gloss_cyrillic"] = check_gloss_cyrillic(units, lemmas)
 
     # Per-sentence tokens and which units each token's lemma belongs to, for the
     # example ranking and the sentence measurements below — taken while the
@@ -3052,13 +3074,13 @@ def main():
     # Reported after the summary so the rest of the numbers are still readable,
     # but the exit code is non-zero: a curriculum that teaches a preposition as a
     # noun must not reach a build anyone deploys.
-    for line in st.get("closed_class_taught") or ():
+    for line in (st.get("closed_class_taught") or ()) + (st.get("gloss_cyrillic") or ()):
         print(f"  !! {line}")
     # …and so must a pool that asks a learner for a word they were never
     # guaranteed, or a video list that opens a different word from the one said.
     if st.get("pool_unguaranteed") or st.get("video_moments_off"):
         print("  !! pool sentences or video moments break their rule (above)")
-    return 1 if (st.get("closed_class_taught") or st.get("pool_unguaranteed")
+    return 1 if (st.get("closed_class_taught") or st.get("gloss_cyrillic") or st.get("pool_unguaranteed")
                  or st.get("video_moments_off")) else 0
 
 

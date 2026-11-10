@@ -777,6 +777,14 @@ export default function Study({ navigation, route }) {
       <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
         <Btn kind="ghost" label="Undo" testID="undo" style={{ flex: 1 }}
              disabled={!last} onPress={undo} />
+        {/* Setting the card aside (§30co), once it is turned: an action on
+            the sitting, like Undo and Skip, not on the word. */}
+        {/* Wider than its neighbours: at three equal columns on a 390 dp
+            phone the label broke into two lines (the emulator, 2026-11-10). */}
+        {revealed && !blank ? (
+          <Btn kind="ghost" label="Low priority" testID="set-aside" style={{ flex: 1.6 }} onPress={setAside}
+               accessibilityLabel="Low priority: take out of the rotation" />
+        ) : null}
         {/* Past the goal the review has no end of its own (core/queue.js
             `next`), so it carries its way out: the day's ways on — trouble
             words, known words, new words — are one press away. */}
@@ -945,25 +953,23 @@ export default function Study({ navigation, route }) {
                 history, never its content, so it gives nothing away. */}
             <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 8,
                            alignSelf: "stretch", marginBottom: 14, minHeight: 28 }}>
-              {/* The card's actions, at the top of the card and boxed as the
+              {/* The word's actions, at the top of the card and boxed as the
                   controls they are (the owner, 2026-11-06: "the more and
                   drills button should be more clearly indicated as buttons and
                   they should be at the top of the card"). Once turned only:
-                  every drill this word can take (worddrills.js), the whole
-                  entry — a word only, a sentence card has neither — and
-                  setting the card aside, which any card can be. */}
-              {revealed && !blank ? (
-                <View testID="card-actions" style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, flexShrink: 1 }}>
-                  {idxOfWord(face.b) >= 0 ? (
-                    <>
-                      <WordDrillsButton word={face.b}
-                                        onPick={(drill) => navigation.navigate("WordDrill", { word: face.b, drill })} />
-                      <ActionChip label="More" testID="full-entry"
-                                  onPress={() => navigation.navigate("Word", { word: face.b })} />
-                    </>
-                  ) : null}
-                  <ActionChip label="Low priority" testID="set-aside" onPress={setAside}
-                              accessibilityLabel="Low priority: take out of the rotation" />
+                  every drill this word can take (worddrills.js) and the whole
+                  entry — a word only, a sentence card has neither. Two chips,
+                  so the row is one line beside the ring: with Low priority
+                  here too it wrapped under the ring and the owner read the
+                  card as "buttons chaotically strewn about" (2026-11-10);
+                  setting a card aside is a sitting's action and sits with
+                  Undo and Skip below. */}
+              {revealed && !blank && idxOfWord(face.b) >= 0 ? (
+                <View testID="card-actions" style={{ flexDirection: "row", gap: 6, flexShrink: 1 }}>
+                  <WordDrillsButton word={face.b}
+                                    onPick={(drill) => navigation.navigate("WordDrill", { word: face.b, drill })} />
+                  <ActionChip label="More" testID="full-entry"
+                              onPress={() => navigation.navigate("Word", { word: face.b })} />
                 </View>
               ) : <View />}
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6, minHeight: 28 }}>

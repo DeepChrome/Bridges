@@ -4268,7 +4268,7 @@ group("the review, 2026-10-01");
 
 group("drive mode: a Pimsleur lesson, played");
 {
-  const { driveScript, driveLength, buildEpisodes, DRIVE_CARRY, EPISODE_WORDS,
+  const { driveScript, driveLength, buildEpisodes, DRIVE_CARRY, EPISODE_WORDS, DRIVE_GAP, DRIVE_BETWEEN,
           parseCommand, focusScript, focusTables, COMMANDS, FOCUS } = await import("../core/drive.js");
   const w = (ru, en) => ({ ru, en, kind: "word" });
   const numbers = { name: "Numbers", items: [w("один", "one"), w("два", "two"), w("три", "three"), w("четыре", "four")],
@@ -4291,6 +4291,13 @@ group("drive mode: a Pimsleur lesson, played");
   let fine = true;
   sc.forEach((s, k) => { if (s.t === "mark" && !s.hear) fine = fine && sc[k + 1].t === "en" && sc[k + 2].t === "gap" && sc[k + 3].t === "ru"; });
   ok(fine, "the English, a pause to say it, then the Russian");
+  // 2026-11-11: the Russian twice on every prompt, a recall as much as a first meeting.
+  let twiceAll = true;
+  sc.forEach((s, k) => { if (s.t === "mark" && !s.hear) twiceAll = twiceAll && sc[k + 4].t === "gap" && sc[k + 5].t === "ru" && sc[k + 5].text === s.item.ru; });
+  ok(twiceAll && marks.some((m) => !m.first && !m.hear), "…and the Russian again, on a recall as on a first meeting");
+  ok(DRIVE_GAP.word === 3380 && DRIVE_GAP.sentence === 5460, "the pause is 30 % over the 2.6 / 4.2 s it started at");
+  ok(sc.find((s) => s.t === "gap").ms === DRIVE_BETWEEN && sc.filter((s) => s.t === "gap").some((s) => s.ms === DRIVE_GAP.word),
+     "and a word's pause is that value");
   ok(marks.some((m) => m.item.kind === "sentence"), "a group closes on a sentence that uses it");
   const hear = driveScript([numbers], { direction: "hear" });
   const hm = hear.findIndex((s) => s.t === "mark");

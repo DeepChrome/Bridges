@@ -22,7 +22,9 @@
  * nothing enters the scheduler (§30z).
  */
 
-export const DRIVE_GAP = { word: 2600, sentence: 4200 };   // time to say it, ms
+// Time to say it, ms. Raised 30 % from 2.6 / 4.2 s on 2026-11-11 (the owner:
+// "increase the pause between words by 30%").
+export const DRIVE_GAP = { word: 3380, sentence: 5460 };
 export const DRIVE_REPEAT_GAP = 1400;                       // between the two readings
 export const DRIVE_BETWEEN = 900;                           // after an item
 export const DRIVE_RECALL_AT = 2;                           // a word comes back this many words on
@@ -57,17 +59,20 @@ export function driveScript(groups, prefs = {}) {
   const prompt = (it, g, first) => {
     const hear = o.direction === "hear" || (o.direction === "mix" && turn++ % 2 === 1);
     out.push({ t: "mark", group: g, item: it, first, hear });
+    // The Russian is given twice on every prompt, not only the first (the
+    // owner, 2026-11-11: "state the word once and then repeat the translation
+    // twice"); `twice` off gives it once.
     if (hear) {
       // Understanding: the Russian, a pause to say what it means, the English.
       out.push({ t: "ru", text: it.ru });
       out.push({ t: "gap", ms: gap(it) });
       out.push({ t: "en", text: it.en });
-      if (first && o.twice) { out.push({ t: "gap", ms: DRIVE_REPEAT_GAP }); out.push({ t: "ru", text: it.ru }); }
+      if (o.twice) { out.push({ t: "gap", ms: DRIVE_REPEAT_GAP }); out.push({ t: "ru", text: it.ru }); }
     } else {
       out.push({ t: "en", text: it.en });
       out.push({ t: "gap", ms: gap(it) });
       out.push({ t: "ru", text: it.ru });
-      if (first && o.twice) { out.push({ t: "gap", ms: DRIVE_REPEAT_GAP }); out.push({ t: "ru", text: it.ru }); }
+      if (o.twice) { out.push({ t: "gap", ms: DRIVE_REPEAT_GAP }); out.push({ t: "ru", text: it.ru }); }
     }
     out.push({ t: "gap", ms: DRIVE_BETWEEN });
   };

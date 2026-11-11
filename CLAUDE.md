@@ -6636,7 +6636,9 @@ made for a listener who cannot look at a screen.
 
 - **`core/drive.js` is the method, pure**: `driveScript(items)` turns items
   into segments — the English, a pause to say the Russian aloud
-  (`DRIVE_GAP`: 2.6 s a word, 4.2 s a sentence), the Russian twice when new,
+  (`DRIVE_GAP`: 3.4 s a word, 5.5 s a sentence since 2026-11-11, 30 % over
+  the 2.6 / 4.2 it started at), the Russian twice on every prompt (2026-11-11;
+  it was twice only when new),
   and every item asked again `DRIVE_RECALL` (2 and 5) items later with nothing
   given first. `core.test.mjs` holds the order (never the answer before the
   pause) and the counts.

@@ -159,7 +159,7 @@ function DriveOptions({ prefs, onChange, onClose }) {
       <List>
         <ToggleRow title="Voice commands" value={o.voice} onValueChange={set("voice")} testID="drive-opt-voice" />
         <ToggleRow title="Play the next episode" value={o.next} onValueChange={set("next")} testID="drive-opt-next" />
-        <ToggleRow title="Russian twice when new" value={o.twice} onValueChange={set("twice")} testID="drive-opt-twice" />
+        <ToggleRow title="Russian twice" value={o.twice} onValueChange={set("twice")} testID="drive-opt-twice" />
         <ToggleRow title="Sentences" value={o.sentences} onValueChange={set("sentences")} testID="drive-opt-sentences" />
         <ToggleRow title="Say each group's name" value={o.names} onValueChange={set("names")} testID="drive-opt-names" />
       </List>

@@ -19,7 +19,7 @@ import { iconFor } from "@core/icons";
 import { AV, AV_IDS, AV_LEGACY, avatarOf } from "@core/avatars";
 import { CAST_FACES } from "./castfaces";
 import { useTheme, radius, space, type, faceFor, useShadow } from "./theme";
-import { useFill, usePress, useEnter } from "./motion";
+import { useFill, usePress, useEnter, motionOff } from "./motion";
 import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
 import { MicButton } from "./mic";
 import { Linked } from "./words";
@@ -1381,6 +1381,32 @@ export function ChatTurn({ side = "left", avatar, children, below, testID, width
       </View>
       {below ? <View style={[{ maxWidth: width }, indent]}>{below}</View> : null}
     </View>
+  );
+}
+
+/* Teddy is typing: a bubble of three dots, one lit at a time, where his reply
+   will land (the owner, 2026-11-10: *"while Teddy is typing, you see the
+   little chat bubble style ellipses"*). A stepped timer rather than an
+   `Animated.loop`, which restarts itself forever against jest.setup's settled
+   animations (§30cq); still under reduced motion. */
+const TYPING_MS = 380;
+export function TypingTurn({ avatar, testID }) {
+  const t = useTheme();
+  const [lit, setLit] = useState(0);
+  useEffect(() => {
+    if (motionOff()) return undefined;
+    const id = setInterval(() => setLit((k) => (k + 1) % 3), TYPING_MS);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <ChatTurn testID={testID} side="left" avatar={avatar}>
+      <View accessibilityLabel="Typing" style={{ flexDirection: "row", gap: 5, paddingVertical: 4, paddingHorizontal: 2 }}>
+        {[0, 1, 2].map((k) => (
+          <View key={k} style={{ width: 8, height: 8, borderRadius: 4,
+                                 backgroundColor: k === lit ? t.ink2 : t.line }} />
+        ))}
+      </View>
+    </ChatTurn>
   );
 }
 

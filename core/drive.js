@@ -34,14 +34,13 @@ export const DRIVE_OPTIONS = {
   speed: [{ id: "normal", name: "Normal" }, { id: "slower", name: "Slower" }],
 };
 export const DRIVE_DEFAULTS = { direction: "say", pause: "normal", speed: "normal",
-                                twice: true, sentences: true, names: true, next: true };
+                                twice: true, sentences: true, names: true, next: true, voice: true };
 export const PAUSE_SCALE = { short: 0.7, normal: 1, long: 1.5 };
 
-/* **The playlist** (the owner, 2026-10-15: *"like 25 different 'episodes'
-   which are blocks of associated words, the earlier blocks simpler and later
-   blocks more complex… select it like a podcast or playlist… largely
-   coincide with vocab and sentences learned in the chapters"*). */
-export const DRIVE_EPISODES = 25;
+/* **The playlist** (the owner, 2026-10-15: *"different 'episodes' which are
+   blocks of associated words, the earlier blocks simpler and later blocks
+   more complex… select it like a podcast or playlist… largely coincide with
+   vocab and sentences learned in the chapters"*): `buildEpisodes` below. */
 export const REVIEW_GROUPS = 5;
 
 export const drivePrefs = (p) => ({ ...DRIVE_DEFAULTS, ...(p || {}) });
@@ -97,6 +96,140 @@ export function driveScript(groups, prefs = {}) {
   return out;
 }
 
+/* **Spoken commands** (the owner, 2026-11-10: *"I'd like drive mode to be able
+ * to take a few commands in English… Repeat… Continue… Back… Pause… Again…
+ * Conjugate… Forms… you can say a case or a tense and it will drill those"*).
+ *
+ * The phone listens during the pauses — the only moments nothing is playing
+ * (§30h′: a microphone open under a speaker hears the speaker) — for English,
+ * and a word on this list is a command. Each has a few ways of being said,
+ * longest matched first; the transcript has to *be* the command or end on it
+ * («мама», heard by the English engine as "mama", matches nothing). */
+export const COMMANDS = [
+  { id: "repeat", say: ["repeat", "keep repeating", "loop"] },
+  { id: "continue", say: ["continue", "carry on", "go on", "keep going", "resume"] },
+  { id: "back", say: ["back", "go back", "previous"] },
+  { id: "next", say: ["next", "skip", "forward"] },
+  { id: "pause", say: ["pause", "stop", "wait", "hold on"] },
+  { id: "play", say: ["play", "start"] },
+  { id: "again", say: ["again", "once more", "one more time", "say it again", "say that again"] },
+  { id: "conjugate", say: ["conjugate", "conjugation", "conjugations", "tenses"] },
+  { id: "forms", say: ["forms", "form", "cases", "declension", "decline"] },
+];
+/* What a focus can be narrowed to: a verb's tables by tense, a declension by
+   case. `table` picks tables by title, `row` picks rows by their label. */
+export const FOCUS = [
+  { id: "present", name: "Present", say: ["present", "present tense"], table: /^Present/, kind: "verb" },
+  { id: "future", name: "Future", say: ["future", "future tense"], table: /^Present/, kind: "verb" },
+  { id: "past", name: "Past", say: ["past", "past tense"], table: /^Past/, kind: "verb" },
+  { id: "imperative", name: "Imperative", say: ["imperative", "command form", "commands"], table: /^Imperative/, kind: "verb" },
+  { id: "nominative", name: "Nominative", say: ["nominative"], row: "Nominative", kind: "noun" },
+  { id: "genitive", name: "Genitive", say: ["genitive"], row: "Genitive", kind: "noun" },
+  { id: "dative", name: "Dative", say: ["dative"], row: "Dative", kind: "noun" },
+  { id: "accusative", name: "Accusative", say: ["accusative"], row: "Accusative", kind: "noun" },
+  { id: "instrumental", name: "Instrumental", say: ["instrumental"], row: "Instrumental", kind: "noun" },
+  { id: "prepositional", name: "Prepositional", say: ["prepositional", "locative"], row: "Prepositional", kind: "noun" },
+];
+/* Every way a command can be said, for the recogniser's hint list. */
+export const COMMAND_WORDS = COMMANDS.concat(FOCUS).flatMap((c) => c.say);
+
+const normalise = (s) => String(s || "").toLowerCase().replace(/[^a-z' ]+/g, " ").replace(/\s+/g, " ").trim();
+
+/* A transcript → { cmd } or { cmd: "focus", id }, or null. `avoid` is the
+   English of the item being answered: with the prompt reversed ("Understand
+   it") the learner says the meaning aloud into the pause, and «повторя́ть»
+   is "to repeat", «наза́д» "back", «опя́ть» "again" — an answer, not an
+   order. A command the item's own English contains is not one. */
+export function parseCommand(text, avoid) {
+  const t = normalise(text);
+  if (!t) return null;
+  const said = avoid ? ` ${normalise(avoid)} ` : "";
+  const hit = (xs) => xs.slice().sort((a, b) => b.length - a.length)
+    .find((w) => (t === w || t.endsWith(" " + w)) && !(said && said.includes(` ${w} `)));
+  for (const f of FOCUS) if (hit(f.say)) return { cmd: "focus", id: f.id };
+  for (const c of COMMANDS) if (hit(c.say)) return { cmd: c.id };
+  return null;
+}
+
+/* **A word's tables, as a drive** — "conjugate" or "forms" on the word being
+ * played. One cell at a time: the English of the cell ("she", "genitive
+ * plural"), the pause, the Russian; each table announced as it opens. The
+ * Russian of a verb's personal form is said with its pronoun («она чита́ла»),
+ * since that is how the form is used; an imperative or a declined form alone.
+ * Nothing is graded; "continue" returns to the lesson where it was.
+ *
+ * `entry` is a hydrated lemma ({ w, p, a, t }); `only` a FOCUS id. For a verb
+ * the tables are its tenses, for anything declined its Declension. A verb
+ * asked for "forms", or a noun for "conjugate", gets the tables it has. */
+const PRONOUN_EN = { "я": "I", "ты": "you", "он / она": "he or she", "он": "he", "она": "she", "оно": "it",
+                     "мы": "we", "вы": "you, plural", "они": "they" };
+const VERB_TABLE = /^(Present|Past|Imperative)/;
+const VERB_TABLE_NAME = { "Past": "Past", "Imperative": "Imperative" };
+
+export function focusTables(entry, only) {
+  const want = only ? FOCUS.find((f) => f.id === only) : null;
+  const verb = entry && entry.p === "verb";
+  let tables = (entry && entry.t || []).filter((t) => (verb ? VERB_TABLE : /^Declension$/).test(t.title || ""));
+  if (want && want.table) tables = tables.filter((t) => want.table.test(t.title || ""));
+  if (want && want.row) tables = tables.map((t) => ({ ...t, rows: (t.rows || []).filter((r) => r[0] === want.row) }))
+    .filter((t) => t.rows.length);
+  return tables;
+}
+
+/* The name a table is announced by. A verb's "Present / Future" is one or the
+   other by its aspect (core/forms.js tableLabel's rule, kept here so core/drive
+   stays free of that import's other baggage). */
+export function focusTableName(title, entry) {
+  if (/^Present/.test(title)) {
+    const a = entry && entry.a;
+    return a === "perfective" ? "Future" : a === "imperfective" ? "Present" : "Present or future";
+  }
+  return VERB_TABLE_NAME[title] || "Forms";
+}
+
+export function focusScript(entry, opts = {}) {
+  const o = drivePrefs(opts.prefs);
+  const scale = PAUSE_SCALE[o.pause] || 1;
+  const gap = Math.round(DRIVE_GAP.word * scale);
+  const out = [];
+  const tables = focusTables(entry, opts.only);
+  for (const t of tables) {
+    const name = focusTableName(t.title, entry);
+    out.push({ t: "group", name });
+    out.push({ t: "en", text: name });
+    out.push({ t: "gap", ms: DRIVE_BETWEEN });
+    const verb = VERB_TABLE.test(t.title || "");
+    const cols = t.columns || [];
+    for (const row of t.rows || []) {
+      const label = String(row[0] || "").trim();
+      for (let ci = 1; ci < row.length; ci++) {
+        const forms = Array.isArray(row[ci]) ? row[ci] : [row[ci]];
+        const form = forms.find(Boolean);
+        if (!form) continue;
+        const col = String(cols[ci] || "").trim();
+        const generic = /^(form|forms)?$/i.test(col);
+        let en, ru, parts;
+        if (verb) {
+          en = PRONOUN_EN[label] || label;
+          const pronoun = /^Imperative/.test(t.title) ? null : label.split(" / ")[0];
+          parts = pronoun ? [pronoun, form] : [form];
+          ru = parts.join(" ");
+        } else {
+          en = generic ? label.toLowerCase() : `${label.toLowerCase()}, ${col.toLowerCase()}`;
+          parts = [form];
+          ru = form;
+        }
+        out.push({ t: "mark", item: { ru, en, kind: "word", b: entry.b }, focus: true, first: false, hear: false });
+        out.push({ t: "en", text: en });
+        out.push({ t: "gap", ms: gap });
+        parts.forEach((p, k) => { if (k) out.push({ t: "gap", ms: 200 }); out.push({ t: "ru", text: p }); });
+        out.push({ t: "gap", ms: DRIVE_BETWEEN });
+      }
+    }
+  }
+  return out;
+}
+
 /* About how long a script runs: the gaps exactly, speech estimated. */
 export function driveLength(script) {
   let ms = 0;
@@ -107,13 +240,19 @@ export function driveLength(script) {
   return ms;
 }
 
-/* The course cut into episodes. `groups` is every usable group in course
-   order ({ name, chapter, items, … }); each episode is a run of whole groups
-   holding about an equal share of the words, so the first is the first
-   chapter's greetings and the last is chapter ten's — simpler to harder by
-   construction, because the course is. A group is never split, and a group
-   of one word joins its neighbour rather than making a cluster of one. */
-export function buildEpisodes(groups, n = DRIVE_EPISODES) {
+/* The course cut into episodes, **chapter by chapter** (the owner, 2026-11-10:
+   *"ensure the categories make sense… synch it with the chapters… organized
+   by words learned in specific chapters"*). `groups` is every usable group in
+   course order ({ name, chapter, items, … }). A chapter's groups are cut into
+   as many episodes as its words fill at about `EPISODE_WORDS` each, each a run
+   of whole groups holding an equal share, so an episode never straddles two
+   chapters and the list reads as the course does. A group is never split, and
+   a group of one word joins its neighbour rather than making a cluster of one.
+   The old cut was 25 equal shares over the whole course, whose titles ("Swamps
+   & Berries") said nothing about where a learner was. */
+export const EPISODE_WORDS = 50;
+
+export function buildEpisodes(groups, perEpisode = EPISODE_WORDS) {
   const usable = [];
   for (const g of groups) {
     if (!g.items.length) continue;
@@ -123,34 +262,45 @@ export function buildEpisodes(groups, n = DRIVE_EPISODES) {
                                     idxs: (prev.idxs || []).concat(g.idxs || []) };
     } else usable.push(g);
   }
-  const total = usable.reduce((s, g) => s + g.items.length, 0);
-  if (!total) return [];
-  const per = total / Math.min(n, usable.length);
   const out = [];
-  const episodes = Math.min(n, usable.length);
-  let cur = [], done = 0;
-  usable.forEach((g, k) => {
-    cur.push(g); done += g.items.length;
-    const left = usable.length - k - 1;              // groups not yet placed
-    const slotsLeft = episodes - out.length - 1;     // episodes still to open after this one
-    if (slotsLeft <= 0) return;                      // the last takes everything left
-    // Close at this episode's share of the words — or now, if waiting would
-    // leave fewer groups than the episodes still to fill.
-    const share = done >= per * (out.length + 1);
-    if ((share && left >= slotsLeft) || left === slotsLeft) { out.push(cur); cur = []; }
-  });
-  if (cur.length) out.push(cur);
-  return out.map((gs, k) => ({
-    id: k + 1,
-    title: episodeTitle(gs),
-    chapter: gs[0].chapter,
-    groups: gs,
-    words: gs.reduce((s, g) => s + g.items.length, 0),
-  }));
+  const chapters = [...new Set(usable.map((g) => g.chapter))];
+  for (const ch of chapters) {
+    const mine = usable.filter((g) => g.chapter === ch);
+    const total = mine.reduce((s, g) => s + g.items.length, 0);
+    const episodes = Math.max(1, Math.min(mine.length, Math.round(total / perEpisode)));
+    const per = total / episodes;
+    const runs = [];
+    let cur = [], done = 0;
+    mine.forEach((g, k) => {
+      cur.push(g); done += g.items.length;
+      const left = mine.length - k - 1;                // groups not yet placed
+      const slotsLeft = episodes - runs.length - 1;    // episodes still to open after this one
+      if (slotsLeft <= 0) return;                      // the last takes everything left
+      // Close at this episode's share of the words — or now, if waiting would
+      // leave fewer groups than the episodes still to fill.
+      const share = done >= per * (runs.length + 1);
+      if ((share && left >= slotsLeft) || left === slotsLeft) { runs.push(cur); cur = []; }
+    });
+    if (cur.length) runs.push(cur);
+    runs.forEach((gs, k) => out.push({
+      id: out.length + 1,
+      title: episodeTitle(gs),
+      chapter: ch,
+      part: k + 1, parts: runs.length,
+      groups: gs,
+      words: gs.reduce((s, g) => s + g.items.length, 0),
+    }));
+  }
+  return out;
 }
 
-/* An episode's name: its two largest groups, as a chapter heading reads. */
+/* An episode's name: its groups, largest first, up to three. */
 export function episodeTitle(groups) {
   const names = [...new Set(groups.slice().sort((a, b) => b.items.length - a.items.length).map((g) => g.name))];
-  return names.slice(0, 2).join(" & ");
+  return names.slice(0, 3).join(" · ") + (names.length > 3 ? " …" : "");
 }
+
+/* The sleep timer's choices, in minutes (the owner, 2026-11-10: *"a little
+   sleep button… set a number of minutes for it to keep playing before the
+   exercise ends"*). */
+export const SLEEP_MINUTES = [10, 20, 30, 45, 60];

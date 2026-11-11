@@ -54,11 +54,14 @@ describe("photographs", () => {
     for (const w of withPhoto) expect(CREDITS[w].t).not.toMatch(/^(File|Файл):/);
   });
 
-  it("appear on the entry with the credit", async () => {
+  /* No credit line on the entry (the owner, 2026-11-10); the attribution the
+     licence asks for is the Credits screen's photograph list. */
+  it("appear on the entry without a credit line", async () => {
     const w = withPhoto[0];
     await withProfile(<WordScreen route={{ params: { word: w } }} />);
     expect(await screen.findByTestId("word-photo")).toBeTruthy();
-    expect(screen.getByText(new RegExp(`Photo: .*${CREDITS[w].l.split(" ")[0]}`))).toBeTruthy();
+    expect(screen.queryByText(/^Photo: /)).toBeNull();
+    expect(CREDITS[w].l).toBeTruthy();
   });
 
   it("appear on the vocabulary card of a lesson that teaches such a word, and not otherwise", async () => {

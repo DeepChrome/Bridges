@@ -4268,7 +4268,8 @@ group("the review, 2026-10-01");
 
 group("drive mode: a Pimsleur lesson, played");
 {
-  const { driveScript, driveLength, buildEpisodes, DRIVE_CARRY, DRIVE_EPISODES } = await import("../core/drive.js");
+  const { driveScript, driveLength, buildEpisodes, DRIVE_CARRY, EPISODE_WORDS,
+          parseCommand, focusScript, focusTables, COMMANDS, FOCUS } = await import("../core/drive.js");
   const w = (ru, en) => ({ ru, en, kind: "word" });
   const numbers = { name: "Numbers", items: [w("один", "one"), w("два", "two"), w("три", "three"), w("четыре", "four")],
                     sentences: [{ ru: "Два кота.", en: "Two cats.", kind: "sentence" }] };
@@ -4304,16 +4305,57 @@ group("drive mode: a Pimsleur lesson, played");
   STAGES.forEach((s, k) => [s.core].concat(s.branches).forEach((u) => (u.gr || []).forEach(([name, , ws]) =>
     course.push({ name, chapter: k + 1, idxs: ws, items: ws.map((i) => w(L[i].b, "x")) }))));
   const eps = buildEpisodes(course);
-  ok(eps.length === DRIVE_EPISODES, "the course is cut into 25 episodes", String(eps.length));
+  // Chapter by chapter (2026-11-10): an episode never straddles two, every
+  // chapter has at least one, and the parts of a chapter are numbered.
+  ok(eps.every((e) => e.groups.every((g) => g.chapter === e.chapter)), "an episode is one chapter's words");
+  ok(new Set(eps.map((e) => e.chapter)).size === STAGES.length, "every chapter has an episode");
   ok(eps.every((e, k) => k === 0 || e.chapter >= eps[k - 1].chapter), "they follow the chapters, simplest first");
   ok(eps[0].chapter === 1 && eps[eps.length - 1].chapter === STAGES.length, "from chapter 1 to the last");
+  ok(eps.every((e) => e.part >= 1 && e.part <= e.parts && e.id === eps.indexOf(e) + 1), "parts are numbered within a chapter");
   const placed = eps.flatMap((e) => e.groups.flatMap((g) => g.items)).length;
   ok(placed === course.reduce((s, g) => s + g.items.length, 0), "every word of the course is in one episode");
   ok(eps.every((e) => e.groups.every((g) => g.items.length >= 2 || e.groups.length === 1)),
      "no group of one word stands alone");
   const sizes = eps.map((e) => e.words);
-  ok(Math.max(...sizes) <= 3 * Math.min(...sizes), "episodes are of a size", sizes.join(","));
-  ok(eps.every((e) => e.title && e.title.length < 60), "each has a name from its groups", eps[0].title);
+  ok(sizes.every((n) => n <= 2 * EPISODE_WORDS), "no episode is twice the size asked for", sizes.join(","));
+  ok(eps.every((e) => e.title && e.title.length < 80), "each has a name from its groups", eps[0].title);
+
+  // Spoken commands (2026-11-10): the word, or a phrase ending on it; never a
+  // Russian answer the English engine has misheard.
+  ok(parseCommand("repeat").cmd === "repeat" && parseCommand("okay repeat").cmd === "repeat", "a command, alone or at the end");
+  ok(parseCommand("Pause.").cmd === "pause" && parseCommand("say it again").cmd === "again", "punctuation and phrases");
+  ok(parseCommand("go back").cmd === "back" && parseCommand("carry on").cmd === "continue", "the longer phrases win");
+  ok(parseCommand("genitive").cmd === "focus" && parseCommand("genitive").id === "genitive", "a case is a focus");
+  ok(parseCommand("past tense").id === "past" && parseCommand("imperative").id === "imperative", "a tense is a focus");
+  ok(parseCommand("mama") === null && parseCommand("") === null && parseCommand("backpack") === null,
+     "a non-command, nothing, or a word that only contains one is nothing");
+  ok(COMMANDS.concat(FOCUS).every((c) => c.say.every((s) => parseCommand(s) !== null)), "every way of saying one parses");
+  ok(parseCommand("to repeat", "to repeat") === null && parseCommand("back", "back, backwards") === null,
+     "the item's own English said into the pause is an answer, not a command");
+  ok(parseCommand("pause", "to repeat").cmd === "pause", "…and any other command still is");
+
+  // A word's tables as a drive: a verb its tenses with their pronouns, a noun
+  // its cases, a cell asked in English then said in Russian.
+  const verb = L.find((x) => x.b === "читать");
+  const vs = focusScript(verb);
+  const vm = vs.filter((s) => s.t === "mark");
+  ok(vs.filter((s) => s.t === "group").map((s) => s.name).join(",") === "Present,Past,Imperative",
+     "a verb's three tables, each announced", vs.filter((s) => s.t === "group").map((s) => s.name).join(","));
+  ok(vm.some((m) => m.item.en === "she" && m.item.ru === "она чита́ла"), "a past form carries its pronoun");
+  ok(vm.some((m) => m.item.en === "you, plural" && m.item.ru === "чита́йте"), "an imperative stands alone");
+  ok(vm.every((m) => m.focus && m.item.b === "читать"), "every item is the word's own");
+  vs.forEach((s, k) => { if (s.t === "mark") ok(vs[k + 1].t === "en" && vs[k + 2].t === "gap" && vs[k + 3].t === "ru", "English, pause, Russian"); });
+  ok(focusScript(verb, { only: "past" }).filter((s) => s.t === "group").length === 1, "narrowed to one tense");
+  ok(focusTables(verb, "genitive").length === 0, "a verb has no genitive");
+  const perf = L.find((x) => x.b === "сказать");
+  ok(focusScript(perf, { only: "future" }).find((s) => s.t === "group").name === "Future", "a perfective's personal forms are its future");
+  const noun = L.find((x) => x.b === "книга");
+  const ns = focusScript(noun);
+  const nm = ns.filter((s) => s.t === "mark");
+  ok(nm.some((m) => m.item.en === "genitive, plural" && m.item.ru === "кни́г"), "a noun's cell is case and number");
+  ok(focusScript(noun, { only: "dative" }).filter((s) => s.t === "mark").length === 2, "one case is its two numbers");
+  ok(focusTables(noun, "past").length === 0, "a noun has no past");
+  ok(focusScript({ b: "вчера", p: "adverb", t: [] }).length === 0, "an indeclinable has nothing to play");
 }
 
 group("tester reports, 2026-10-15");

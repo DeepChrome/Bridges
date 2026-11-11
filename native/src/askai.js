@@ -20,10 +20,10 @@
  * learner's words in the box. */
 
 import React, { useRef, useState } from "react";
-import { View, Pressable, ActivityIndicator } from "react-native";
+import { View, Pressable } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useTheme, radius, type as T } from "./theme";
-import { Sheet, Text, TextInput, Muted, Btn, Note, IconButton, ChatTurn, CHAT_FACE } from "./ui";
+import { Sheet, Text, TextInput, Muted, Btn, Note, IconButton, ChatTurn, TypingTurn } from "./ui";
 import { GUIDE_ID, castById } from "@core/cast";
 import { useSession } from "./session";
 import { routePosition } from "./data";
@@ -80,10 +80,15 @@ export function useAskThread({ mode = "russian", guide } = {}) {
     return a;
   };
 
+  /* The question leaves the box the moment it is sent and sits in the thread
+     with Teddy typing under it; a reply that never comes takes it out of the
+     thread and puts the words back in the box, so they can be sent again
+     (the owner, 2026-11-10: "the text just pauses and stays there"). */
   const send = async () => {
     const question = text.trim();
     if (!question || busy) return;
-    setBusy(true); setFailed(null);
+    setBusy(true); setFailed(null); setText("");
+    setThread((h) => [...h, { q: question, a: null }]);
     const a = about.current || screenAbout();
     const r = await ask(mode === "app"
       ? { mode, question, screen: a.title || a.screen, guide: guide ? guide(a) : "", history: thread }
@@ -91,9 +96,10 @@ export function useAskThread({ mode = "russian", guide } = {}) {
           chapter: routePosition(st).stage + 1, history: thread });
     setBusy(false);
     if (r && r.ok === true && typeof r.answer === "string") {
-      setThread((h) => [...h, { q: question, a: r.answer }]);
-      setText("");
+      setThread((h) => h.map((x) => (x.q === question && x.a === null ? { q: question, a: r.answer } : x)));
     } else {
+      setThread((h) => h.filter((x) => x.a !== null));
+      setText(question);
       setFailed(failureLine(r));
     }
   };
@@ -116,12 +122,15 @@ export function AskTurns({ thread, busy, prefix = "ask" }) {
           <ChatTurn testID={`${prefix}-question-${k}`} side="right" avatar={account ? account.avatar : null}>
             <Text style={{ color: t.ink, fontSize: T.body, lineHeight: 22 }}>{h.q}</Text>
           </ChatTurn>
-          <ChatTurn testID={`${prefix}-reply-${k}`} side="left" avatar={castById[GUIDE_ID].avatar}>
-            <Note text={h.a} size={T.body} testID={`${prefix}-answer-${k}`} />
-          </ChatTurn>
+          {h.a === null ? (
+            <TypingTurn testID={`${prefix}-busy`} avatar={castById[GUIDE_ID].avatar} />
+          ) : (
+            <ChatTurn testID={`${prefix}-reply-${k}`} side="left" avatar={castById[GUIDE_ID].avatar}>
+              <Note text={h.a} size={T.body} testID={`${prefix}-answer-${k}`} />
+            </ChatTurn>
+          )}
         </View>
       ))}
-      {busy ? <ActivityIndicator testID={`${prefix}-busy`} color={t.brand} style={{ alignSelf: "flex-start", marginLeft: CHAT_FACE + 8 }} /> : null}
     </View>
   );
 }
@@ -133,8 +142,12 @@ export function AskInput({ th, placeholder, prefix = "ask", autoFocus }) {
     <View style={{ marginTop: 10, gap: 8 }}>
       {th.failed ? <Muted testID={`${prefix}-failed`} style={{ color: t.bad }}>{th.failed}</Muted> : null}
       <View style={{ flexDirection: "row", gap: 8, alignItems: "flex-end" }}>
+        {/* Enter sends (the owner, 2026-11-10); the box still wraps a long
+            question. `submitBehavior` is what lets a multiline field submit
+            on the return key instead of taking a newline. */}
         <TextInput testID={`${prefix}-input`} value={th.text} onChangeText={th.setText} multiline
-                   autoFocus={autoFocus}
+                   autoFocus={autoFocus} returnKeyType="send" submitBehavior="submit"
+                   onSubmitEditing={th.send}
                    placeholder={th.thread.length ? "Ask more" : placeholder}
                    placeholderTextColor={t.ink3} textAlignVertical="top"
                    style={{ flex: 1, minHeight: 44, maxHeight: 120, color: t.ink, fontSize: T.body,

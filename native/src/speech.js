@@ -213,13 +213,19 @@ export function forgetMicPermission() { micGranted = false; }
    looking busy for good. */
 export const READY_FALLBACK_MS = 1500;
 
-export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias } = {}) {
+/* `onLive(text)` hears every partial as it arrives. Drive mode's commands are
+   one word each and the pause they are said in is short, so it acts on the
+   partial rather than waiting the silence out (core/drive.js parseCommand). */
+export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = true, bias } = {}) {
   const [phase, setPhase] = useState("idle");
   const phaseRef = useRef("idle");
   const go = (p) => { phaseRef.current = p; setPhase(p); };
   const [live, setLiveState] = useState("");
   const liveRef = useRef("");
-  const setLive = (s) => { liveRef.current = s; setLiveState(s); };
+  const setLive = (s) => {
+    liveRef.current = s; setLiveState(s);
+    if (s && cb.current && cb.current.onLive) cb.current.onLive(s);
+  };
   const [note, setNote] = useState(null);
   const [block, setBlock] = useState(null);
   const releasedAt = useRef(0);
@@ -238,8 +244,8 @@ export function useRecognizer({ onFinal, onError, onQuiet, enabled = true, bias 
      release (`hold`). It decides what "the engine stopped with nothing" means:
      a finger let go too early, or a turn where nobody spoke. */
   const selfEnding = useRef(false);
-  const cb = useRef({ onFinal, onError, onQuiet, bias });
-  cb.current = { onFinal, onError, onQuiet, bias };
+  const cb = useRef({ onFinal, onError, onQuiet, onLive, bias });
+  cb.current = { onFinal, onError, onQuiet, onLive, bias };
   /* The language of the hold in progress. Russian unless a hold said otherwise,
      and it rides out on `onFinal` so a screen with two microphones knows which
      one the words came through. */

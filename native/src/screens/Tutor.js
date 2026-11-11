@@ -30,12 +30,12 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Pressable, ScrollView, ActivityIndicator, Alert } from "react-native";
+import { View, Pressable, ScrollView, Alert } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useSession } from "../session";
 import { useTheme, radius, space, type as T } from "../theme";
 import { Screen, Btn, Muted, Text, TextInput, Marked, Note, CogButton, BulbButton, Sheet,
-         List, Row, SectionLabel, Choice, Tick, RowText, IconButton, ChatTurn } from "../ui";
+         List, Row, SectionLabel, Choice, Tick, RowText, IconButton, ChatTurn, TypingTurn } from "../ui";
 import { Linked } from "../words";
 import { L, STAGES, studiedFor, routePosition, rankOf } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
@@ -515,7 +515,7 @@ export default function Tutor({ navigation, route }) {
           {!pending && offered.length ? (
             <Choices choices={offered} onPick={send} onOther={() => inputRef.current && inputRef.current.focus()} />
           ) : null}
-          {pending ? <ActivityIndicator testID="tutor-pending" color={t.ink3} style={{ alignSelf: "flex-start", marginTop: 6 }} /> : null}
+          {pending ? <TypingTurn testID="tutor-pending" avatar={castById[GUIDE_ID].avatar} /> : null}
           {failure ? (
             <View style={{ alignItems: "center", gap: 8, marginTop: 8 }}>
               <Muted testID="tutor-failure">{failure.text}</Muted>

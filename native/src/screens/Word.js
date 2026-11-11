@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from "react";
-import { View, Pressable, Linking } from "react-native";
+import { View } from "react-native";
 import { useTheme, radius, type as T } from "../theme";
 import { Screen, Card, Pill, Speaker, Muted, Senses, SenseList, List, Row, SectionLabel, Text, Fold } from "../ui";
 import { ScoreRing } from "../skills";
@@ -111,7 +111,6 @@ export function WordEntry({ w, index, navigation }) {
   const lineTags = new Set(((grammarLine(w) || {}).facts || []).map((f) => String(f).toLowerCase()));
   const pic = pictureOf(w.b);
   const photo = pic && pic.source;
-  const credit = pic && pic.credit;
   return (
     <>
       <Card>
@@ -162,19 +161,12 @@ export function WordEntry({ w, index, navigation }) {
         <Facts facts={wordFacts(w).filter((f) => !lineTags.has(f.label.toLowerCase()))} testID="word-facts" />
         {/* One section a table, the first open: a verb is three grids and a
             noun twelve cells, and stacked whole they buried the rest (§30bb). */}
+        {/* No credit line under the photograph (the owner, 2026-11-10: "no
+            need to drop in line references for where the pictures came
+            from"). The CC BY attribution every photograph needs is the
+            Credits screen's list — title, author, licence, the Commons page —
+            which is where rule 20.10 is kept. */}
         <TableGroup tables={w.t} speak testID="word-tables" aspect={w.a} headword={w.w} />
-        {credit ? (
-          // The photo's record: title, author where one is named, licence — and
-          // the page it came from, which is what a CC BY credit asks for.
-          <Pressable onPress={credit.u ? () => Linking.openURL(credit.u) : undefined}
-                     accessibilityRole={credit.u ? "link" : undefined}
-                     accessibilityLabel={`Photo credit: ${credit.t}${credit.a ? `, ${credit.a}` : ""}, ${credit.l}`}
-                     hitSlop={8} style={{ marginTop: 12 }}>
-            <Muted size={11} testID="photo-credit">
-              {`Photo: ${credit.t}${credit.a ? `, ${credit.a}` : ""} · ${credit.l}, Wikimedia Commons`}
-            </Muted>
-          </Pressable>
-        ) : null}
       </Card>
 
       {examples.length ? (

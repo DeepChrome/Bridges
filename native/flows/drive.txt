@@ -1,6 +1,8 @@
-# Drive mode (core/drive.js, 2026-10-15), on an installed build with a profile:
-# the playlist, the options sheet, an episode mid-play. The lock-screen half is
-# checked by hand: power key, wait, logcat for ExoPlayer.
+# Drive mode (core/drive.js, 2026-10-15; the keys, commands and sleep timer
+# 2026-11-10), on an installed build with a profile: the playlist by chapter,
+# the options sheet, an episode mid-play, the word's tables on Conjugate, the
+# sleep picker. The lock-screen half and the spoken commands are checked by
+# hand: power key, wait, logcat for ExoPlayer; a word said into the pause.
 #
 #   .\native\tools\walk.ps1 -Flow native\flows\drive.txt -Device emulator-5554
 
@@ -20,9 +22,26 @@ wait:2
 shot:d1b-drive-options
 tap:^Done$
 wait:1
-tap:Pronouns
+tapn:Part 1 of:0
 wait:3
 shot:d1-drive-episode
 tap:^Play$
 wait:9
 shot:d2-drive-playing
+tap:^Repeat$
+wait:1
+shot:d3-drive-repeat
+tap:^Repeat$
+tap:^Conjugate$
+wait:5
+shot:d4-drive-conjugate
+tap:^Continue$
+wait:2
+tap:^Sleep$
+wait:1
+shot:d5-drive-sleep
+tap:^20 min$
+wait:1
+shot:d6-drive-sleep-set
+tap:^Pause$
+wait:1

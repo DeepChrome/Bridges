@@ -6647,14 +6647,14 @@ made for a listener who cannot look at a screen.
   recalled two words on, the whole group once more, up to two pool sentences
   that use it, and the next group opens by recalling `DRIVE_CARRY` of the
   last one's words. Only words with a bought clip — one voice (§30bq).
-- **A playlist of 25 episodes** (the owner, the next morning: *"like 25
+- **A playlist of episodes** (the owner, the next morning: *"like 25
   different 'episodes' which are blocks of associated words… earlier blocks
   simpler and later blocks more complex… select it like a podcast or
   playlist"*). `buildEpisodes` in core/drive.js cuts the course's groups, in
-  course order, into `DRIVE_EPISODES` runs of about equal word count (about
-  50 words, 10–12 groups, 15–20 minutes), never splitting a group and
-  folding a one-word group into its neighbour — so they follow the chapters
-  because they are the chapters. Named from their two largest groups.
+  course order, into runs of about `EPISODE_WORDS` (50) words, never
+  splitting a group and folding a one-word group into its neighbour — so
+  they follow the chapters because they are the chapters. *(Chapter-bounded
+  and listed by chapter since 2026-11-10, §30ct.)* Named from their largest groups.
   Nothing is locked; "up next" is the first episode holding a word not yet
   studied; one heard to the end is ticked (`st.driveDone`). **Your words**
   (studied groups, weakest first, `REVIEW_GROUPS` of them) and **Trouble
@@ -7390,6 +7390,59 @@ they came in (§30cf). What the rest left:
   dropped), the «Это стол?» card (two matched pairs now). The Sync button
   on the desktop fails because the Worker's sync routes are **not
   deployed** — the gate refused the deploy twice; it is the owner's command.
+
+## 30ct. Drive mode takes orders (2026-11-10)
+
+The owner: *"I'd like drive mode to be able to take a few commands in
+English… Repeat… Continue… Back… Pause… Again… Conjugate… Forms… you can say
+a case or a tense… large pressable buttons (car mode style)… a little sleep
+button… ensure the categories make sense… synch it with the chapters."*
+
+- **The ear opens in the pauses and nowhere else.** A microphone under a
+  speaker hears the speaker (§30h′), so `gapWithEar` in Drive.js starts an
+  English, self-ending `listen` as a gap opens and cancels it as the gap
+  ends; a partial that is a command acts at once (`onLive` on
+  `useRecognizer`, new) rather than waiting `SILENCE_MS` out, since a pause
+  is 2.6 s. Paused by a press or by voice, the ear stays open so "continue"
+  can resume. **Not with the screen off**: Android gives no microphone to a
+  backgrounded app, so `AppState` gates every attempt and a locked phone
+  keeps only the lock screen's play/pause. One refusal (no English model, no
+  microphone) ends voice for the sitting and the note offers Get English.
+- **A command is a word or a phrase ending on it** (`parseCommand` in
+  core/drive.js, `COMMANDS` and `FOCUS`), never a word that only contains one
+  ("backpack"). **The item's own English is not an order**: with the prompt
+  reversed the learner says the meaning into the pause, and «повторя́ть» is
+  "to repeat" — `parseCommand(text, avoid)` refuses a command the item's
+  English contains.
+- **Conjugate and Forms are the word's tables as a drive** (`focusScript`):
+  each table announced, each cell asked in English ("she", "genitive,
+  plural"), the pause, the Russian — a personal form with its pronoun («она
+  чита́ла»), an imperative or a declined form alone. A tense or a case
+  narrows it; the keys offer what the word has (`focusChoices`); Continue
+  returns to the lesson at the item it left. "Conjugate" on a noun is told
+  "Not a verb" and the lesson goes on.
+- **Repeat loops the item at its next boundary; Again replays it once.** The
+  engine is one loop over the active script with `at` (the current mark) and
+  `loop`/`onceMore` flags read at every mark; a superseded gap must not
+  cancel the new run's ear (`if (gone()) return` before the cancel).
+- **Episodes are chapter-bounded** (`buildEpisodes(groups, EPISODE_WORDS)`,
+  about 50 words each, never straddling a chapter), listed under their
+  chapter with "Words you've learned" from that chapter beneath them
+  (`ownPlaylist(st, "learned:N")`). `DRIVE_EPISODES` (25 equal shares) is
+  gone.
+- **Sleep** (`SLEEP_MINUTES`): a key, a bubble of minutes, checked between
+  segments so it ends a locked drive too; the screen says "Sleep timer".
+- The AI chats: the question leaves the box as it is sent and sits in the
+  thread with Teddy typing (`TypingTurn` in ui.js, the tutor too); a failed
+  reply puts the words back; Enter sends (`submitBehavior="submit"` on the
+  multiline box). The photograph's credit line left the word entry; the
+  Credits screen's list is the attribution (rule 20.10).
+
+**Not verified on a device**: the ear opening and closing around a bought
+clip every three seconds (the recogniser takes the audio route and
+`rearmAudio` re-applies the mode after each), whether the carrier survives
+it, and the engine's hearing of one-word commands over road noise. The
+emulator has no English model to say them into; it is the owner's phone.
 
 ## 31. Verification
 

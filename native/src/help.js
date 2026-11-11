@@ -98,14 +98,16 @@ export const HELP = {
     ["Afterwards", "Every line, tappable, in its own voice"],
   ] },
   Drive: { title: "Drive mode", lines: [
-    ["Episodes", "The course in 25 parts, easiest first"],
-    ["Your playlists", "Your studied words and your trouble words"],
-    ["Cog", "Prompt, pause, speed, next episode"],
+    ["Episodes", "Each chapter's words, about fifty an episode"],
+    ["Your playlists", "Your studied words, trouble words, a chapter's learned words"],
+    ["Cog", "Prompt, pause, speed, voice, next episode"],
   ] },
   DriveEpisode: { title: "An episode", lines: [
     ["The pause", "Say the Russian aloud before you hear it"],
+    ["Say a command", "Repeat, continue, back, next, pause, play, again"],
+    ["Conjugate, Forms", "The word's tables; say a tense or a case"],
+    ["Sleep", "Stops after the minutes you set"],
     ["Lock the phone", "It keeps playing; pause from the lock screen"],
-    ["Arrows", "The item before or after"],
   ] },
   Tutor: { title: "The tutor", lines: [
     ["Microphone", "Hold to speak, in either language"],

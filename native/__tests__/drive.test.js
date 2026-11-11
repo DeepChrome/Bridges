@@ -1,9 +1,10 @@
 /* Drive mode (core/drive.js, 2026-10-15): hands-free lessons as a playlist.
-   Pinned here: 25 episodes that follow the course, and the learner's own two
-   playlists; an episode plays its groups English first; a silent carrier holds
-   the lock screen and is let go on leaving; pause silences everything; an
-   episode heard to the end is marked, and the next one follows; nothing is
-   graded. */
+   Pinned here: episodes that follow the course chapter by chapter, and the
+   learner's own playlists; an episode plays its groups English first; a
+   silent carrier holds the lock screen and is let go on leaving; pause
+   silences everything; an episode heard to the end is marked, and the next
+   one follows; nothing is graded. The spoken commands and the big keys are
+   drivevoice.test.js. */
 
 import React from "react";
 import { render, screen, fireEvent, act, waitFor, within } from "@testing-library/react-native";
@@ -13,7 +14,7 @@ import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import { DriveList, DriveEpisode, episodes, ownPlaylist } from "../src/screens/Drive";
 import { L, STAGES } from "../src/data";
-import { DRIVE_EPISODES } from "@core/drive";
+import { EPISODE_WORDS } from "@core/drive";
 
 const base = { v: 9, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, streak: 0, dev: false, flash: ["recognise"] };
@@ -59,18 +60,20 @@ it("ends a pause on the carrier's native ticks, with no timer firing (the screen
   }
 });
 
-it("cuts the course into 25 episodes that follow the chapters, of named groups", () => {
+it("cuts the course into episodes chapter by chapter, of named groups", () => {
   const eps = episodes();
-  expect(eps.length).toBe(DRIVE_EPISODES);
   expect(eps[0].chapter).toBe(1);
   expect(eps[eps.length - 1].chapter).toBe(STAGES.length);
-  // Episode 1 opens on chapter 1's first group and holds nothing from later chapters.
+  // Episode 1 opens on chapter 1's first group; no episode straddles two chapters.
   expect(eps[0].groups[0].name).toBe(STAGES[0].core.gr[0][0]);
-  expect(eps[0].groups.every((g) => g.chapter === 1)).toBe(true);
+  expect(eps.every((e) => e.groups.every((g) => g.chapter === e.chapter))).toBe(true);
+  expect(new Set(eps.map((e) => e.chapter)).size).toBe(STAGES.length);
+  expect(eps.every((e) => e.words <= 2 * EPISODE_WORDS)).toBe(true);
 });
 
-it("keeps the learner's own playlists: studied words weakest first, and trouble words", () => {
+it("keeps the learner's own playlists: studied words weakest first, trouble words, a chapter's learned words", () => {
   expect(ownPlaylist(base, "studied")).toEqual([]);
+  expect(ownPlaylist(base, "learned:1")).toEqual([]);
   const words = STAGES[0].core.gr[0][2].map((i) => L[i].b).concat(STAGES[0].core.gr[1][2].map((i) => L[i].b));
   const now = Date.now();
   const card = (s) => ({ recognise: { s, d: 5, state: 2, reps: 9, lapses: 0, dueAt: now + 86400000, lastAt: now } });
@@ -81,18 +84,28 @@ it("keeps the learner's own playlists: studied words weakest first, and trouble 
   expect(studied[0].score).toBeLessThanOrEqual(studied[studied.length - 1].score);
   const trouble = ownPlaylist({ ...base, seen, pinned: [words[0]] }, "trouble");
   expect(trouble.flatMap((g) => g.items.map((it) => it.b))).toContain(words[0]);
+  // What you have learned of chapter 1, in the course's order, every group kept.
+  const learned = ownPlaylist({ ...base, seen }, "learned:1");
+  expect(learned.length).toBe(2);
+  expect(learned.every((g) => g.chapter === 1 && g.items.every((it) => seen[it.b]))).toBe(true);
+  expect(ownPlaylist({ ...base, seen }, "learned:2")).toEqual([]);
 });
 
-it("lists the playlists and opens an episode", async () => {
+it("lists the playlists under their chapters and opens an episode", async () => {
   await seed();
   await render(<SessionProvider><DriveList navigation={nav} /></SessionProvider>);
   await screen.findByTestId("drive-episode-1");
-  expect(screen.getByTestId(`drive-episode-${DRIVE_EPISODES}`)).toBeTruthy();
+  const eps = episodes();
+  expect(screen.getByTestId(`drive-episode-${eps.length}`)).toBeTruthy();
+  expect(within(screen.getByTestId("drive-chapter-1")).getByTestId("drive-episode-1")).toBeTruthy();
+  expect(screen.getByTestId(`drive-chapter-${STAGES.length}`)).toBeTruthy();
   await act(async () => { fireEvent.press(screen.getByTestId("drive-episode-3")); });
   expect(nav.navigate).toHaveBeenCalledWith("DriveEpisode", { id: 3 });
-  // Nothing studied yet: the own playlists are there but have nothing to play.
+  // Nothing studied yet: the own playlists are there but have nothing to play,
+  // and no chapter offers its learned words.
   await act(async () => { fireEvent.press(screen.getByTestId("drive-own-studied")); });
   expect(nav.navigate).toHaveBeenCalledTimes(1);
+  expect(screen.queryByTestId("drive-learned-1")).toBeNull();
 });
 
 it("plays the English first, holds the lock screen, pauses everything, and lets go on leaving", async () => {

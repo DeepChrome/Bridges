@@ -199,6 +199,7 @@ export function DriveList({ navigation }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [eps, prefsKey]);
   const countOf = (groups) => groups.reduce((s, g) => s + g.items.length, 0);
+  const plural = (n, noun) => `${n} ${noun}${n === 1 ? "" : "s"}`;
 
   return (
     <Screen>
@@ -217,7 +218,7 @@ export function DriveList({ navigation }) {
              disabled={!own.trouble.length}>
           <Thumb id="drive" tone="info" />
           <RowText title="Trouble words"
-                   sub={own.trouble.length ? `${countOf(own.trouble)} words` : "None right now"} />
+                   sub={own.trouble.length ? plural(countOf(own.trouble), "word") : "None right now"} />
         </Row>
       </List>
 
@@ -239,7 +240,7 @@ export function DriveList({ navigation }) {
               {learned.length ? (
                 <Row testID={`drive-learned-${k + 1}`} onPress={() => open(`learned:${k + 1}`)}>
                   <Thumb id="drive" tone="info" />
-                  <RowText title="Words you've learned" sub={`${countOf(learned)} words · ${learned.length} groups`} />
+                  <RowText title="Words you've learned" sub={`${plural(countOf(learned), "word")} · ${plural(learned.length, "group")}`} />
                 </Row>
               ) : null}
             </List>

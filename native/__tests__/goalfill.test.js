@@ -13,7 +13,7 @@
  * with fewer cards than it asks for. Every assertion here failed against the
  * familiarity-ordered fill except the last.
  */
-import { goalSession, GOAL_REVIEWS, MASTERED_EVERY } from "@core/queue";
+import { goalSession, GOAL_REVIEWS } from "@core/queue";
 import { applyGrade, familiarity, REVIEW, DAY, dayOf } from "@core/scheduler";
 import React from "react";
 import { render, screen, fireEvent, act, within } from "@testing-library/react-native";
@@ -31,14 +31,16 @@ const familiar = (w, c) => familiarity(c) || 0;
 /* A seeded shuffle, so a run is repeatable. */
 const seeded = (s0 = 7) => { let s = s0; return () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }; };
 
-/* `n` met cards, stability 1..n days, every one answered yesterday and none
-   due for months — the learner who has kept up. Plus `mastered` very strong. */
+/* `n` met cards, stability 1..n days, every one answered the day before
+   yesterday (past the fill's cooldown, core/queue.js FILL_COOLDOWN_DAYS) and
+   none due for months — the learner who has kept up. Plus `mastered` very
+   strong. */
 function learner(words, now, mastered = 0) {
   const seen = {};
   words.forEach((w, k) => {
     const s = k < words.length - mastered ? 1 + k : 400;
     seen[w] = { recognise: { state: REVIEW, s, d: 5, steps: 0, reps: 3, lapses: 0, elapsed: 0, scheduled: s,
-                             lastAt: now - DAY, dueAt: now + 90 * DAY } };
+                             lastAt: now - 2 * DAY, dueAt: now + 90 * DAY } };
   });
   return seen;
 }
@@ -146,12 +148,15 @@ describe("the goal, when the met cards run out", () => {
   });
 });
 
-describe("the goal's fill, over a week", () => {
-  it("walks the whole pool rather than the same weakest cards every day", () => {
+describe("the goal's fill, over two weeks", () => {
+  /* A draw, not a walk (2026-11-12), so the pool is covered over a fortnight
+     rather than a week: a card held well is drawn less often than a young one
+     until it has gone unseen long enough to outrank it (fillPriority `since`). */
+  it("reaches the whole pool rather than the same weakest cards every day", () => {
     const start = Date.now();
     const pool = words(30);
     let seen = learner(pool, start);
-    const days = 7, perDay = 10;
+    const days = 14, perDay = 10;
     const count = new Map(pool.map((w) => [w, 0]));
     const daysDealt = new Map(pool.map((w) => [w, 0]));
     for (let d = 0; d < days; d++) {
@@ -176,22 +181,44 @@ describe("the goal's fill, over a week", () => {
     const never = pool.filter((w) => count.get(w) === 0);
     expect(never).toEqual([]);
     const most = Math.max(...daysDealt.values());
-    // Seventy deals over thirty cards: the most-repeated card is seen on well
-    // under every day. The familiarity-ordered fill dealt its weakest on six.
-    expect(most).toBeLessThanOrEqual(4);
+    // A card dealt by the fill is out of it the next day, so no card is seen
+    // on more than every other day. The familiarity-ordered fill dealt its
+    // weakest on six days of seven.
+    expect(most).toBeLessThanOrEqual(days / 2);
   });
 
-  it("still sprinkles a mastered card in now and then, least recently seen first", () => {
+  /* Never two days running (the owner, 2026-11-12: "I've had almost all of
+     the same words two days in a row. That should never happen"): a card the
+     fill dealt yesterday is not in today's fill, whatever its priority. The
+     retrievability-ordered fill dealt the young cards every day. */
+  it("never deals a card the fill dealt yesterday", () => {
+    const start = Date.now();
+    const pool = words(60);
+    let seen = learner(pool, start);
+    let yesterday = new Set();
+    for (let d = 0; d < 6; d++) {
+      const now = start + d * DAY;
+      const sess = goalSession({ seen, words: pool, now, owed: 20, rng: seeded(d), opts, familiar });
+      expect(sess.items).toHaveLength(20);
+      const today = sess.items.filter((x) => x.kind !== "learning" && x.extra).map((x) => x.word);
+      expect(today.filter((w) => yesterday.has(w))).toEqual([]);
+      yesterday = new Set(sess.items.map((x) => x.word));
+      ({ seen } = goodAll(seen, sess.items, now));
+    }
+  });
+
+  /* A mastered card long unseen outranks the recently seen ones: with the
+     draw made deterministic, the two mastered cards not seen for weeks are
+     dealt and the mastered cards seen the day before yesterday are not. */
+  it("brings back a mastered card long unseen before one seen lately", () => {
     const now = Date.now();
     const pool = words(40);
     const seen = learner(pool, now, 10);
-    // Two of the mastered cards were seen longer ago than the rest.
     seen.w30.recognise.lastAt = now - 20 * DAY;
     seen.w31.recognise.lastAt = now - 10 * DAY;
-    const sess = goalSession({ seen, words: pool, now, owed: 16, rng: seeded(), opts, familiar });
+    const sess = goalSession({ seen, words: pool, now, owed: 16, rng: () => 0.5, opts, familiar });
     const mastered = sess.items.filter((x) => seen[x.word].recognise.s === 400).map((x) => x.word);
     expect(mastered).toEqual(["w30", "w31"]);
-    expect(mastered).toHaveLength(Math.floor(16 / MASTERED_EVERY));
     expect(GOAL_REVIEWS).toBeGreaterThan(0);
   });
 });

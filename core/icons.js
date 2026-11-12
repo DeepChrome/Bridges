@@ -55,6 +55,8 @@ export const ACTIVITY_ICONS = {
   aspect: "M12 21a9 9 0 1 1 0-18M12 3a9 9 0 0 1 8.6 6.5M8 12l3 3 5-6",
   agreement: "M10 12a3 3 0 0 1 3-3h3a3 3 0 0 1 0 6h-1M14 12a3 3 0 0 1-3 3H8a3 3 0 0 1 0-6h1",
   conjugation: "M4 6h16v12H4zM4 12h16M12 6v12",
+  // Two cards, the front one with a word and its form on it: form flashcards.
+  formcards: "M8 4h11a2 2 0 0 1 2 2v9M3 8h13a2 2 0 0 1 2 2v10H3zM7 13h6M7 17h4",
   stress: "M8 8l4-4 4 4M5 14h14M5 14v4M19 14v4",
   rules: "M5 4h10a2 2 0 0 1 2 2v6M5 4a2 2 0 0 0 0 4h10M5 4v14a2 2 0 0 0 2 2h5M15 18l2 2 4-4",
   /* Translate: one script's glyph on the left, the letter A on the right — the

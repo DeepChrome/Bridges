@@ -40,6 +40,7 @@ const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const base = {
   v: 9, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, streak: 0, dev: false, flash: ["recognise"],
+  tutorIntro: { at: Date.now(), skipped: true },   // the first-time questionnaire is tutor.test.js's
 };
 const GREET = { ok: true, ru: "Привет!", en: "Hi!", note: "What shall we do?", remember: "" };
 const REPLY = { ok: true, ru: "Хорошо.", en: "Good.", note: "", remember: "" };

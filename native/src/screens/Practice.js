@@ -182,6 +182,15 @@ export function DrillList({ navigation }) {
             <Text style={title}>Cases</Text>
           </View>
         </Row>
+        {/* Flashcards of forms: the word and the cell asked for, the form on
+            the back, graded by the learner (the owner, 2026-11-12;
+            flows/FormCards.js). */}
+        <Row testID="drill-formcards" onPress={() => navigation.navigate("FormCards")}>
+          <Thumb id="formcards" tone="good" />
+          <View style={{ flex: 1 }}>
+            <Text style={title}>Form cards</Text>
+          </View>
+        </Row>
         {DRILL_TYPES.filter((d) => d.id !== "cases").map((d) => (
           /* Straight in. What a drill asks about is on the drill's own cog now
              (DrillOptions), not a screen in front of it — the owner, 2026-09-26:

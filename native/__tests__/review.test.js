@@ -86,7 +86,7 @@ describe("the top of the path", () => {
 
   it("carries no review button and no streak, and the lesson stays primary", async () => {
     await withState({ seen: due(REVIEW_FIRST + 5), streak: 11 });
-    const lesson = await screen.findByText(/^(Start|Continue) \(/);
+    const lesson = await screen.findByText(/^(Start|Continue) · /);
     expect(fillOf(lesson.parent)).toBe(light.brand.toUpperCase());
     expect(screen.queryByTestId("review-due")).toBeNull();
     expect(screen.queryByText(/in a row/)).toBeNull();

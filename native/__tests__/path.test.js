@@ -316,7 +316,7 @@ describe("path node states", () => {
        It used to follow the spine alone, which was right while every quest was
        optional — and would have left this learner with no Continue at all. */
     const first = require("../src/data").required(STAGES[0])[0];
-    fireEvent.press(screen.getByText(`Start (${first.name})`));
+    fireEvent.press(screen.getByText(`Start · ${first.name}`));
     expect(nav.navigate).toHaveBeenCalledWith("Vocab", { unitId: first.id, index: 0 });
   });
 
@@ -380,7 +380,7 @@ describe("the disc you are on", () => {
     const here = shown.filter((u) => ringed(screen.getByTestId(`node-${u.id}`)) > 0);
     expect(here.map((u) => u.id)).toEqual(["core1"]);
     expect(shown.filter((u) => painted(screen.getByTestId(`node-${u.id}`), light.brand) > 0)).toEqual([]);
-    expect(screen.getByText(`Start (${STAGES[0].core.name})`)).toBeTruthy();
+    expect(screen.getByText(`Start · ${STAGES[0].core.name}`)).toBeTruthy();
   });
 
   test("a locked unit carries no ring", async () => {

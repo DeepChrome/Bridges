@@ -7446,6 +7446,67 @@ clip every three seconds (the recogniser takes the audio route and
 it, and the engine's hearing of one-word commands over road noise. The
 emulator has no English model to say them into; it is the owner's phone.
 
+## 30cu. The review draws, the finger decides, the tutor takes the lead (2026-11-12)
+
+The owner, after a week on the drive-mode build: *"for the card review, it
+really seems to focus heavily on the same words back to back to back. Like
+I've had almost all of the same words two days in a row. That should never
+happen… focus more on how long since a word has been revisited… it's a
+maintenance tool. It's totally okay to bounce around to old material."* Plus
+five more things in the same message and two in the next.
+
+- **The make-up fill is a weighted draw, not a sort** (core/queue.js
+  `fillPriority`, `weightedDraw`). §30bz's "most faded first" was the cause:
+  the least retrievable cards on any day are the *young* ones, and an early
+  Good barely moves them, so the same twenty led every day. The priority is
+  read off the card the scheduler keeps — days since last answered
+  (`since`, the heaviest weight), fade (1 − retrievability), the familiarity
+  score, the gap between the two meaning skills (`meaningHole`), FSRS
+  difficulty — and the draw is Efraimidis–Spirakis sampling with the
+  priority cubed, so two days are never the same list and a mastered word
+  still turns up. **A card answered yesterday is out of the fill**
+  (`FILL_COOLDOWN_DAYS`); due cards are the schedule's and come first as
+  ever. A constant `rng` makes the draw a sort, which is what the tests use.
+  `MASTERED_EVERY` is gone with the sprinkle it governed.
+- **Low priority is rare, not gone**: `rare` on `goalSession` is the
+  set-aside cards, in the draw at `RARE_WEIGHT` (0.05) of their weight, their
+  due dates ignored. Out of the named rounds as before.
+- **A held microphone is never interrupted** (speech.js). A hold ran the
+  engine with `continuous: false`, so Android's endpointing closed it on the
+  first pause and the final was taken as the answer. A hold is continuous now
+  and **accumulates**: a final under the finger is a segment; an `end` or a
+  `no-speech` under the finger reopens the engine with the segments kept
+  (`reopenHeld`, at most `HOLD_RESTARTS`); only the release ends it, and one
+  segment keeps its alternatives for `closestTranscript`. `hold.test.js`
+  drives it; mic.test's "once, not on every press" had to release between
+  presses, which is what the finger does. **Not yet heard on a device.**
+- **The two questions after a pair are not the same two** (questions.js
+  `vocabStepsIn`): either order, the second in any shape the word has (a gap,
+  typing from chapter 2), the look back between them half the time.
+  `audit_repeats`: walkShape and sameSentence still 0; adjacentKind 200 → 300.
+- **Form cards** (flows/FormCards.js, Practice → Grammar): flashcards of the
+  grammar drills' own written questions — the word and the cell asked on the
+  front, the form, its sound and the table on the back, graded by the learner
+  into the word's "Cases & forms" score alone (`gradeSkill`). Kinds and words
+  behind the cog, `st.drillPrefs.formcards`.
+- **The tutor asks first, knows more, takes the lead.** `TutorIntro` once
+  (`st.tutorIntro`, a setting; three choices and a line, or Skip), its answers
+  the first notes (`introNotes`; `NOTES_KEPT` 30). `tutorProfile` carries the
+  chapters worked on with lessons per unit, the four skill averages, the words
+  with a hole between their meaning skills (weak side named), the resting
+  words, days studied of the last seven and the questionnaire; `tutorMessage`
+  whitelists them. The prompt: with an empty, bare or "you decide" turn,
+  choose from holes → trouble → misses → the chapter's grammar, say why in one
+  sentence and ask the first question in the same turn. **The Worker is not
+  redeployed** — the prompt change reaches the phone only when the owner runs
+  `npx wrangler deploy`.
+- **One line per button** (`Btn`: `numberOfLines={1}`, shrinking to 0.8
+  before breaking) and the layouts that wrapped are fixed at the layout: the
+  path's Continue is full width with the recap a link under it; Study's ways
+  on are one primary and short plain buttons ("Trouble words · 12", "New
+  words"). The rule the big apps follow: one primary call to action, the rest
+  text; two equal buttons in a row only with one-word labels.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

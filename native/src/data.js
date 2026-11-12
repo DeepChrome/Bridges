@@ -844,12 +844,15 @@ export function rankOf(w) {
    first, then everything due. What a quiz tops up with and a drill asks for
    before anything else — review on the path, not only in the Study tab. */
 /* Cards the learner set aside as low priority (the owner, 2026-11-06: "flag a
-   word low priority and that will remove it from the rotation"): out of every
-   pile Study deals, the trouble bank, the quiz's review top-up and the drills'
-   "Your words". Keyed on the card's Russian (rule 20.4); the card keeps its
-   schedule, so taking it back off the list picks it up where it was. A
-   lesson still teaches its own words — set aside is about review, not about
-   the course. */
+   word low priority and that will remove it from the rotation"; and
+   2026-11-12: "low prio shouldn't eliminate a card completely but it should
+   be extremely rare relative to others"): out of the trouble bank, the quiz's
+   review top-up, the drills' "Your words" and every named Study round, and in
+   the personal review's make-up draw at a fraction of the weight of any other
+   card (core/queue.js RARE_WEIGHT). Keyed on the card's Russian (rule 20.4);
+   the card keeps its schedule, so taking it back off the list picks it up
+   where it was. A lesson still teaches its own words — set aside is about
+   review, not about the course. */
 export const lowPriority = (st) => (st && st.lowPriority) || {};
 export const isLowPriority = (st, w) => Object.prototype.hasOwnProperty.call(lowPriority(st), w);
 // The same, as lemma indices, for the generators that work in indices.

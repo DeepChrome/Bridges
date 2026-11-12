@@ -33,10 +33,10 @@ function learner() {
   const seen = {};
   words.forEach((i, k) => {
     // Earlier words held a fortnight, recent ones a few days, all answered
-    // yesterday — the recent ones are the most faded. None mastered: a
-    // mastered word is the sprinkle whichever order is chosen.
+    // three days ago (past the fill's cooldown) — the recent ones are the
+    // most faded and the least held, so they lead the draw.
     const early = k < words.length / 2;
-    seen[L[i].b] = { recognise: { dueAt: now + 40 * DAY, lastAt: now - DAY, s: early ? 6 : 1.5, d: 5,
+    seen[L[i].b] = { recognise: { dueAt: now + 40 * DAY, lastAt: now - 3 * DAY, s: early ? 6 : 1.5, d: 5,
                                   state: REVIEW, steps: 0, reps: 5, lapses: 0 } };
   });
   return { ...base, seen, unit: { [UNIT.id]: { lessons, video: true } }, goal: { day: dayOf(now), owed: 10, done: 0 } };
@@ -46,9 +46,10 @@ beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.cl
 afterEach(async () => { await flushState(); });
 
 describe("the review's order", () => {
-  it("most faded first by default, so the recent words lead", () => {
+  it("the weakest first by default, so the recent words lead", () => {
     const st = learner();
-    const s = sessionFor(st, {});
+    // A constant rng makes the draw a sort by priority (core/queue.js).
+    const s = sessionFor(st, { rng: () => 0.5 });
     const rank = pathRank(st);
     const first = s.items.slice(0, 5).map((x) => rank(x.word));
     // The recent half of the route — the later words — comes first.
@@ -57,7 +58,7 @@ describe("the review's order", () => {
 
   it("walks the route from the start when asked", () => {
     const st = { ...learner(), reviewOrder: "path" };
-    const s = sessionFor(st, {});
+    const s = sessionFor(st, { rng: () => 0.5 });
     const rank = pathRank(st);
     const ranks = s.items.map((x) => rank(x.word));
     expect(ranks[0]).toBe(0);

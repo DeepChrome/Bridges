@@ -2014,14 +2014,28 @@ export function makeQuestions(env) {
         // Drawn, not fixed at [0]. `candidates` is ordered easiest first, and
         // taking the head meant every one of the 1,199 retrievals across the
         // whole route was "What does this mean?" — four English options, for
-        // every word a learner ever meets. The easiest two shapes still carry
-        // it: this is the retrieval right after meeting the word.
+        // every word a learner ever meets.
         const start = Math.max(0, n - (n % 2 === 1 ? 1 : 0));
         lastPair = words.slice(start, n + 1);
-        lastPair.forEach((r) => {
-          steps.push(present(pickShape(candidates(r, pool).slice(0, 3))));
-        });
-        goBack(start);
+        /* **Not the same two questions after every pair** (the owner,
+           2026-11-12: *"it always has the same exact structure for the two
+           questions immediately after being exposed to the word. Let's try and
+           mix that up a little so it's not as predictably easy."*). It was: the
+           first word of the pair, then the second, each in one of the three
+           easiest shapes, then the look back. Now the pair is asked in either
+           order; the first retrieval still takes an easy shape — it is the
+           first retrieval — but the second may take any shape the word has, a
+           gap to fill or, from chapter 2, typing; and the look back at an
+           earlier word lands between the two as often as after them, so the
+           word just met is not always the very next question. */
+        const order = shuffle(lastPair.slice());
+        const qs = order.map((r, k) => present(pickShape(
+          k === 0 ? candidates(r, pool).slice(0, 3) : candidates(r, pool, null, readable, cloze))));
+        const between = qs.length > 1 && Math.random() < 0.5;
+        steps.push(qs[0]);
+        if (between) goBack(start);
+        qs.slice(1).forEach((q) => steps.push(q));
+        if (!between) goBack(start);
       }
     });
     /* The closing round: a lesson word and the chapter's, mixed — and not the

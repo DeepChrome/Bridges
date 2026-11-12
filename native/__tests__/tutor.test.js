@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { WordsProvider } from "../src/words";
 import { flushState } from "../src/store";
-import Tutor, { tutorProfile, remember, NOTES_KEPT, CHOICES_AFTER } from "../src/screens/Tutor";
+import Tutor, { tutorProfile, remember, introNotes, NOTES_KEPT, CHOICES_AFTER } from "../src/screens/Tutor";
 import { tutor } from "../src/lib/feedback";
 import { L, STAGES } from "../src/data";
 import { DAY, REVIEW } from "@core/scheduler";
@@ -34,6 +34,8 @@ const WORD = L[STAGES[0].core.w[0]].b;
 const base = {
   v: 9, seen: {}, trouble: {}, pinned: [], sets: [], drills: {}, unit: {},
   speech: { attempts: [], tagCounts: {} }, streak: 0, dev: false, flash: ["recognise"],
+  // The first-time questionnaire has been answered (its own test below).
+  tutorIntro: { at: now, skipped: true },
 };
 const GREET = { ok: true, ru: "Привет, Jared!", en: "Hi, Jared!", note: "Shall we work on the genitive?", remember: "" };
 const REPLY = { ok: true, ru: "Хорошо. Скажи «я хочу чай».", en: "Good. Say «I want tea».", note: "",
@@ -198,13 +200,64 @@ describe("tutor", () => {
     await waitFor(() => expect(screen.queryByTestId("tutor-choices")).toBeNull());
   });
 
+  /* The first time: three choices and a line, kept as the tutor's first notes
+     (the owner, 2026-11-12: "the first time you use it, it just passes you a
+     questionnaire"). Nothing is sent until it is answered or skipped, and it
+     is not asked again. */
+  it("asks a questionnaire the first time, keeps the answers as notes, then opens", async () => {
+    tutor.mockResolvedValueOnce(GREET);
+    await open({ tutorIntro: null });
+    expect(await screen.findByTestId("tutor-intro")).toBeTruthy();
+    expect(tutor).not.toHaveBeenCalled();
+    await act(async () => { fireEvent.press(screen.getByText("Speaking")); });
+    await act(async () => { fireEvent.press(screen.getByText("Drills, one question at a time")); });
+    await act(async () => { fireEvent.press(screen.getByText("15 minutes")); });
+    const box = screen.getByTestId("intro-struggle");
+    fireEvent.changeText(box, "the genitive");
+    await waitFor(() => expect(box.props.value).toBe("the genitive"));   // §23: a press does not flush a changeText
+    await act(async () => { fireEvent.press(screen.getByTestId("intro-start")); });
+    expect(await screen.findByTestId("tutor-turn")).toBeTruthy();
+    const st = await saved();
+    expect(st.tutorIntro.style).toBe("drills");
+    expect(st.tutorNotes).toEqual(["Goal: speaking", "Prefers drills, one question at a time",
+                                   "Sittings of about 15 minutes", "Says they struggle with: the genitive"]);
+    // …and they rode out with the first turn.
+    const sent = tutor.mock.calls[0][0];
+    expect(sent.profile.notes).toEqual(st.tutorNotes);
+    expect(sent.profile.intro).toEqual({ goal: "speaking", style: "drills", time: "15", struggle: "the genitive" });
+    expect(introNotes({})).toEqual([]);
+  });
+
+  it("can be skipped, once", async () => {
+    tutor.mockResolvedValueOnce(GREET);
+    await open({ tutorIntro: null });
+    expect(await screen.findByTestId("tutor-intro")).toBeTruthy();
+    await act(async () => { fireEvent.press(screen.getByTestId("intro-skip")); });
+    expect(await screen.findByTestId("tutor-turn")).toBeTruthy();
+    const st = await saved();
+    expect(st.tutorIntro.skipped).toBe(true);
+    expect(tutor.mock.calls[0][0].profile.intro).toBeNull();
+  });
+
   it("builds the profile from what the app already keeps", () => {
-    const seen = { [WORD]: { recognise: { dueAt: now + 40 * DAY, lastAt: now, s: 200, d: 3, state: REVIEW, reps: 9, lapses: 0 } } };
-    const p = tutorProfile({ ...base, seen, pinned: ["же"], misses: [], tutorNotes: [] });
+    const seen = { [WORD]: { recognise: { dueAt: now + 40 * DAY, lastAt: now, s: 200, d: 3, state: REVIEW, reps: 9, lapses: 0 },
+                             ru2en: { s: 60, d: 5, state: REVIEW, reps: 6, lapses: 0, dueAt: now, lastAt: now } } };
+    const p = tutorProfile({ ...base, seen, pinned: ["же"], misses: [], tutorNotes: [],
+                             unit: { [STAGES[0].core.id]: { lessons: { 0: { v: true, q: 100 } } } } });
     expect(p.chapter).toBe(1);
     expect(p.level).toBe("beginner");
     expect(p.strong).toEqual([WORD]);
     expect(p.trouble).toEqual(["же"]);
+    // The data and the algorithm (2026-11-12): chapters worked on, skills, holes, days.
+    expect(p.chapters[0].chapter).toBe(1);
+    expect(p.chapters[0].units[0]).toMatch(new RegExp(`^${STAGES[0].core.name} 1/\\d+$`));
+    expect(p.skills.ru2en).toBeGreaterThan(0);
+    expect(p.skills.en2ru).toBeNull();
+    expect(p.skills.scored).toBe(1);
+    expect(p.holes).toEqual([{ w: WORD, ru2en: p.skills.ru2en, en2ru: null, forms: null, usage: null }]);
+    expect(p.recentDays).toBe(1);
+    expect(p.resting).toEqual([]);
+    expect(p.intro).toBeNull();
     // Notes: newest first, no repeats, capped.
     let notes = [];
     for (let k = 0; k < NOTES_KEPT + 3; k++) notes = remember(notes, "note " + k);

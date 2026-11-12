@@ -884,34 +884,33 @@ export default function Study({ navigation, route }) {
                  onPress={() => (onward ? navigation.replace(...onward) : navigation.goBack())} />
           ) : null}
           {after && session && session.practice && finished ? null : (
-          /* The ways on, side by side where they fit rather than a column of
-             wide buttons (the owner, 2026-10-31: "put them side by side…
-             organized, space conscious, no clutter"). */
-          <View testID="study-ways-on"
-                style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 10, marginTop: 20 }}>
-          {/* Past the goal, as far as the learner wants: more reviews push
-              the familiarity of their words up faster (the owner,
-              2026-10-05). */}
-          {moreToGo ? (
-            <Btn kind="pri" testID="keep-going" label="Keep going"
-                 onPress={() => deal(false, undefined, { beyond: true })} />
-          ) : null}
-          {session && session.practice && more ? (
-            <Btn kind="pri" testID="continue" label={`Back to today's cards · ${more}`}
-                 onPress={() => deal(false)} />
-          ) : null}
-          {trouble.length ? (
-            <Btn kind={session && session.practice && more ? "plain" : "pri"} testID="trouble-round"
-                 label={`Review trouble words · ${trouble.length}`}
-                 onPress={() => deal(false, "trouble")} />
-          ) : null}
-          {unmet ? (
-            <Btn testID="study-ahead" label="Learn new words" onPress={() => deal(true)} />
-          ) : null}
-          {knownCount ? (
-            <Btn testID="known-round" label="Review known words" onPress={() => deal(false, "known")} />
-          ) : null}
-          </View>)}
+          /* The ways on: one primary, full width, and the rest as short plain
+             buttons in a row beneath it. They were all in one wrapping row
+             with long labels ("Review trouble words · 12") and broke onto two
+             lines (the owner, 2026-11-12). Short labels, one primary. */
+          (() => {
+            const ways = [];
+            /* Past the goal, as far as the learner wants: more reviews push
+               the familiarity of their words up faster (the owner,
+               2026-10-05). */
+            if (moreToGo) ways.push({ id: "keep-going", label: "Keep going", go: () => deal(false, undefined, { beyond: true }) });
+            if (session && session.practice && more) ways.push({ id: "continue", label: `Today's cards · ${more}`, go: () => deal(false) });
+            if (trouble.length) ways.push({ id: "trouble-round", label: `Trouble words · ${trouble.length}`, go: () => deal(false, "trouble") });
+            if (unmet) ways.push({ id: "study-ahead", label: "New words", go: () => deal(true) });
+            if (knownCount) ways.push({ id: "known-round", label: "Known words", go: () => deal(false, "known") });
+            if (!ways.length) return null;
+            const [first, ...rest] = ways;
+            return (
+              <View testID="study-ways-on" style={{ alignSelf: "stretch", alignItems: "center", gap: 10, marginTop: 20 }}>
+                <Btn kind="pri" block testID={first.id} label={first.label} onPress={first.go} />
+                {rest.length ? (
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
+                    {rest.map((w) => <Btn key={w.id} kind="plain" testID={w.id} label={w.label} onPress={w.go} />)}
+                  </View>
+                ) : null}
+              </View>
+            );
+          })())}
         </View>
         )
       ) : (

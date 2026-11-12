@@ -58,10 +58,16 @@ export const HELP = {
     ["Sparkle", "Ask the AI about this question"],
   ] },
   Drills: { title: "Practice", lines: [
-    ["Grammar drills", "Cases, agreement, conjugation, aspect, stress"],
+    ["Grammar drills", "Cases, form cards, agreement, conjugation, aspect, stress"],
     ["Listening", "A conversation and five questions"],
     ["Speaking", "Shadow a sentence; build a word; Talk"],
     ["Tutor", "Ask anything, in Russian or English"],
+  ] },
+  FormCards: { title: "Form cards", lines: [
+    ["Front", "The word and the form it asks for"],
+    ["Show", "The form, its sound and the table"],
+    ["Again · Hard · Good · Easy", "Your own grade; moves Cases & forms only"],
+    ["Cog", "Which drills, which words"],
   ] },
   Drill: { title: "A drill", lines: [
     ["Cog", "What to ask, which words, written or chosen"],
@@ -110,6 +116,8 @@ export const HELP = {
     ["Lock the phone", "It keeps playing; pause from the lock screen"],
   ] },
   Tutor: { title: "The tutor", lines: [
+    ["First time", "A few questions; the tutor remembers them"],
+    ["Say nothing", "It picks what to work on from your data"],
     ["Microphone", "Hold to speak, in either language"],
     ["Loop", "Hands-free: it listens after each answer"],
     ["Bulb", "The grammar reference"],

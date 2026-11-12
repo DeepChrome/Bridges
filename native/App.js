@@ -65,6 +65,7 @@ import { startSync } from "./src/sync";
 import { DrillList } from "./src/screens/Practice";
 import { VocabFlow, QuizFlow } from "./src/flows/Lesson";
 import { DrillFlow, SoundDrillFlow, ShadowFlow, BuildDrillFlow, GrammarFlow, WordDrillFlow } from "./src/flows/Drills";
+import { FormCardsFlow } from "./src/flows/FormCards";
 import { CaseHub, CaseModule, CaseFlow } from "./src/flows/Cases";
 import { ListeningFlow, ScenesList } from "./src/flows/Listening";
 import { QuizSetup, CustomQuizFlow, RecapFlow } from "./src/flows/Quiz";
@@ -346,6 +347,8 @@ function PracticeStack() {
       <Stack.Screen name="CaseHub" component={CaseHub} options={titled("Cases")} />
       <Stack.Screen name="CaseModule" component={CaseModule} options={titled("Cases")} />
       <Stack.Screen name="CaseRun" component={CaseFlow} options={titled("Cases")} />
+      {/* Flashcards of forms and conjugations (flows/FormCards.js, 2026-11-12). */}
+      <Stack.Screen name="FormCards" component={FormCardsFlow} options={titled("Form cards")} />
       <Stack.Screen name="Drill" component={DrillFlow}
                     options={({ navigation, route }) => ({
                       headerRight: () => <HeaderRight navigation={navigation} route={route} />,

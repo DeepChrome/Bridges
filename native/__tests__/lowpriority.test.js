@@ -18,8 +18,8 @@ import { flushState } from "../src/store";
 import Study from "../src/screens/Study";
 import { SetPicker } from "../src/studypicker";
 import { sessionFor, troubleWords, knownWords } from "../src/studycards";
-import { reviewWords, knownPool, lowPriorityIdx, exactIdx } from "../src/data";
-import { DAY, REVIEW } from "@core/scheduler";
+import { reviewWords, knownPool, lowPriorityIdx, exactIdx, L } from "../src/data";
+import { DAY, REVIEW, dayOf } from "@core/scheduler";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn() };
 const now = Date.now();
@@ -69,15 +69,30 @@ it("sets the card aside from its back, takes it out of the sitting, and Undo put
   expect(st.lowPriority).toEqual({});
 });
 
-it("keeps a card set aside out of every round", () => {
+/* Out of every named round; in the personal review's make-up draw at a small
+   fraction of the weight (the owner, 2026-11-12: "low prio shouldn't eliminate
+   a card completely but it should be extremely rare relative to others"). */
+it("keeps a card set aside out of every round, and rare in the personal review", () => {
   const st = {
     ...base, lowPriority: { [A]: now },
     seen: { ...base.seen, "кошка": { recognise: held(400) } },
     trouble: { [A]: 1 }, pinned: [A],
   };
   const words = (s) => s.items.map((it) => it.word);
-  expect(words(sessionFor(st, {}))).not.toContain(A);
-  expect(words(sessionFor(st, {}))).toContain(B);
+  // Due though it is, it is not dealt as due: its schedule is ignored.
+  expect(words(sessionFor(st, { rng: () => 0.5 })).slice(0, 1)).toEqual([B]);
+  // Among twenty ordinary cards past the cooldown, it is drawn rarely, not never.
+  const cooled = { dueAt: now + 30 * DAY, lastAt: now - 3 * DAY, s: 4, d: 5, state: REVIEW, steps: 0, reps: 4, lapses: 0 };
+  const seen = { [A]: { recognise: cooled } };
+  const twenty = L.slice(10, 30).map((x) => x.b);
+  for (const w of twenty) seen[w] = { recognise: cooled };
+  let s0 = 3;
+  const lcg = () => { s0 = (s0 * 1103515245 + 12345) & 0x7fffffff; return s0 / 0x7fffffff; };
+  let dealt = 0;
+  const many = { ...base, seen, lowPriority: { [A]: now }, newPerDay: 0, goal: { day: dayOf(now), owed: 5, done: 0 } };
+  for (let k = 0; k < 120; k++) if (words(sessionFor(many, { rng: lcg })).includes(A)) dealt++;
+  expect(dealt).toBeGreaterThan(0);
+  expect(dealt).toBeLessThan(120 * 5 / 21 * 0.4);
   expect(troubleWords(st)).not.toContain(A);
   expect(knownWords({ ...st, lowPriority: { "кошка": now } })).not.toContain("кошка");
   expect(words(sessionFor(st, { round: "list", words: [A, B] }))).not.toContain(A);

@@ -43,6 +43,7 @@ export const RUNS = [
   "VideoSummary", // what the episode holds, on the way to it
   "VideoQuiz",    // the episode's five questions
   "ListCards",    // a lesson's or a video's words as one flashcard round
+  "FormCards",    // flashcards of forms, graded by the learner (flows/FormCards.js)
 ];
 
 /* The profile and what opens from it. The avatar in every header pushes these

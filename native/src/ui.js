@@ -570,9 +570,14 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID, b
         <View style={{ paddingVertical: 10, paddingHorizontal: 22,
                        alignItems: "center", minHeight: 44,
                        justifyContent: "center" }}>
-          {/* Semibold at 16: the label reads as a control without shouting,
-              and centred when a long one wraps. */}
-          <Text style={{ color: shown.fg, fontWeight: "600", fontSize: 16, textAlign: "center" }}>{label}</Text>
+          {/* Semibold at 16: the label reads as a control without shouting.
+              **One line, always** (the owner, 2026-11-12: "I see buttons that
+              have text on two lines"): a label is a label (rule 20.7), and a
+              button that wraps is a layout putting two long buttons side by
+              side — fix the layout; this is the floor under it, shrinking the
+              type a little rather than breaking the line. */}
+          <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}
+                style={{ color: shown.fg, fontWeight: "600", fontSize: 16, textAlign: "center" }}>{label}</Text>
         </View>
       </Lift>
     </Animated.View>

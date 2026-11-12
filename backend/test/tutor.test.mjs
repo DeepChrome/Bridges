@@ -69,6 +69,33 @@ test("the profile rides in every message, trimmed, and the history is capped", (
   assert.equal(m.text, "drill me");
   // A bare body still makes a message.
   assert.equal(JSON.parse(tutorMessage({})).profile.level, "beginner");
+  assert.deepEqual(JSON.parse(tutorMessage({})).profile.chapters, []);
+  assert.equal(JSON.parse(tutorMessage({})).profile.intro, null);
+});
+
+/* The data and the algorithm ride along (2026-11-12): chapters worked on,
+   the four skill averages, the words with a hole between their two meaning
+   skills, the resting words, the days studied and the questionnaire. */
+test("the learner's standing rides in full, trimmed and typed", () => {
+  const m = JSON.parse(tutorMessage({ profile: {
+    chapters: [{ chapter: 1, title: "Greetings & Family", units: ["Greetings 5/5", "Family 2/4"] }, "junk"],
+    skills: { ru2en: 71.4, en2ru: 40, forms: null, usage: "x", scored: 120 },
+    holes: [{ w: "выглядеть", ru2en: 80, en2ru: 12, forms: null, usage: 30 }, { nope: 1 }],
+    resting: ["же"], recentDays: 5,
+    intro: { goal: "speaking", style: "drills", time: "15", struggle: "cases" },
+  } }));
+  assert.deepEqual(m.profile.chapters, [{ chapter: 1, title: "Greetings & Family", units: ["Greetings 5/5", "Family 2/4"] }]);
+  assert.deepEqual(m.profile.skills, { ru2en: 71, en2ru: 40, forms: null, usage: null, scored: 120 });
+  assert.deepEqual(m.profile.holes, [{ w: "выглядеть", ru2en: 80, en2ru: 12, forms: null, usage: 30 }]);
+  assert.deepEqual(m.profile.resting, ["же"]);
+  assert.equal(m.profile.recentDays, 5);
+  assert.equal(m.profile.intro.style, "drills");
+  // The prompt knows the fields, and takes the lead when the learner does not.
+  assert.match(SYSTEM_TUTOR, /"holes"/);
+  assert.match(SYSTEM_TUTOR, /"chapters"/);
+  assert.match(SYSTEM_TUTOR, /"intro"/);
+  assert.match(SYSTEM_TUTOR, /Take the lead when the learner has not/);
+  assert.match(SYSTEM_TUTOR, /Build your memory of them/);
 });
 
 test("the prompt asks for one question at a time, a first-turn greeting, and no dashes", () => {

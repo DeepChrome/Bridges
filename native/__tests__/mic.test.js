@@ -141,6 +141,7 @@ describe("when the microphone is ready", () => {
       <>
         <Text testID="phase">{rec.phase}</Text>
         <Text testID="go" onPress={() => rec.hold()}>go</Text>
+        <Text testID="stop" onPress={() => rec.release()}>stop</Text>
       </>
     );
   }
@@ -161,7 +162,11 @@ describe("when the microphone is ready", () => {
     M.requestPermissionsAsync.mockClear();
     await render(<Probe />);
     await act(async () => { fireEvent.press(screen.getByTestId("go")); });
+    // A hold ends on the release, never on a result (hold.test.js); the
+    // engine's end after the stop closes the attempt.
+    await act(async () => { fireEvent.press(screen.getByTestId("stop")); });
     await act(async () => { global.__stt.emit("result", { isFinal: true, results: [{ transcript: "да" }] }); });
+    await act(async () => { global.__stt.emit("end", {}); });
     await act(async () => { fireEvent.press(screen.getByTestId("go")); });
     expect(global.__stt.calls).toHaveLength(2);
     expect(M.requestPermissionsAsync).toHaveBeenCalledTimes(1);

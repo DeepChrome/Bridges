@@ -540,11 +540,16 @@ export default function Learn({ navigation }) {
         </View>
       ) : null}
 
-      {/* Continue and the day's recap in one row (the owner, 2026-10-31: "put
-          them side by side… organized, space conscious, no clutter"). */}
+      {/* One primary action, full width, and the day's recap as a quiet link
+          under it. They were side by side (2026-10-31) and "Continue (Pronouns
+          & Being)" beside "Today's recap" broke onto two lines on a phone —
+          the owner, 2026-11-12: "buttons that have text on two lines, the top
+          of the lessons page still has side by side awkward looking buttons".
+          Every established learning app puts one primary call to action on
+          the screen and makes the secondary one a text link; two equal
+          buttons in a row only work with one-word labels. */}
       {next || recapDue ? (
-        <View testID="path-actions"
-              style={{ flexDirection: "row", justifyContent: "center", gap: 10, marginTop: 12 }}>
+        <View testID="path-actions" style={{ alignItems: "center", gap: 6, marginTop: 12 }}>
           {next ? (
             // Straight to the next undone step of the next lesson — a question
             // within seconds, not a unit list and a lesson list first.
@@ -554,17 +559,17 @@ export default function Learn({ navigation }) {
               // they should not, but the app stops pushing.
               kind={done ? "plain" : "pri"}
               testID="next-step"
-              style={recapDue ? { flex: 1 } : { paddingHorizontal: 26 }}
-              label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} (${next.unit.name})`}
+              block
+              label={`${unitFineProgress(st, next.unit) > 0 ? "Continue" : "Start"} · ${next.unit.name}`}
               onPress={() => navigation.navigate(...stepRoute(next.step, next.unit, next.index))}
             />
           ) : null}
           {/* The day's recap, once there is a day's work to recap and until it is
               done (the owner, 2026-10-01: "a daily recap… that reviews things you
-              specifically did that day"). Beside Continue, quieter than it. */}
+              specifically did that day"). Under Continue, quieter than it. */}
           {recapDue ? (
-            <Btn kind="plain" testID="recap-open" label="Today's recap"
-                 style={next ? { flex: 1 } : undefined} onPress={() => navigation.navigate("Recap")} />
+            <Btn kind={next ? "link" : "plain"} testID="recap-open" label="Today's recap"
+                 onPress={() => navigation.navigate("Recap")} />
           ) : null}
         </View>
       ) : null}

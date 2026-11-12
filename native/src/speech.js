@@ -127,6 +127,24 @@ export const SILENCE_MS = 1500;
 export const NOTHING_MS = 9000;
 export const LISTEN_MAX_MS = 45000;
 
+/* **A held button is never interrupted** (the owner, 2026-11-12: *"if I pause
+ * too long, even while holding the mic button, it will continue as if I'm
+ * done. Learners are going to fumble and struggle. They shouldn't be
+ * interrupted as long as they're holding the mic button."*).
+ *
+ * Held speech ran the engine with `continuous: false`, so Android's own
+ * endpointing closed it on the first pause and the final result that followed
+ * was taken as the answer, finger or no finger. Now a hold runs the engine
+ * the way conversation mode does — `continuous: true`, the platform's
+ * silence thresholds pushed out — and **accumulates**: a final result while
+ * the button is still down is one segment of the answer, not the end of it.
+ * When Android closes the session anyway (an `end`, or a `no-speech` after a
+ * long pause), the engine is simply started again with the segments kept,
+ * up to HOLD_RESTARTS times a hold. Only the release stops it; the answer is
+ * then every segment joined, and a single segment keeps its alternatives so
+ * `closestTranscript` still has them. */
+export const HOLD_RESTARTS = 30;
+
 /* Android's own thresholds, pushed out so the platform does not close the
    session before the timer above gets to decide. Ignored on a device that
    does not honour them, which is why the pause is measured here as well. */
@@ -264,6 +282,17 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
   const silence = useRef(null);
   const cap = useRef(null);
   const spoken = () => heard.current.concat(partial.current || []).join(" ").replace(/\s+/g, " ").trim();
+  /* Held speech: whether the finger is still down, how the engine was started
+     (to start it again when the platform closes it under the finger), how
+     many times it has been, and the alternatives of the one final segment
+     heard so far — several segments have none but their join. */
+  const held = useRef(false);
+  const startArgs = useRef(null);
+  const restarts = useRef(0);
+  const segmentAlts = useRef(null);
+  const alternatives = (whole) =>
+    (heard.current.length === 1 && !partial.current && segmentAlts.current && segmentAlts.current.length
+      ? segmentAlts.current : [whole]);
 
   const clearTimers = () => {
     if (watchdog.current) { clearTimeout(watchdog.current); watchdog.current = null; }
@@ -282,12 +311,31 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
     clearTimers();
     engine.current = false;
     selfEnding.current = false;
+    held.current = false;
     heard.current = [];
     partial.current = "";
+    segmentAlts.current = null;
     go("idle");
     if (cb.current.onFinal) {
       cb.current.onFinal(text, Date.now() - releasedAt.current, alternatives || [text], lang.current);
     }
+  };
+
+  /* Start the engine as the attempt in flight asked for it. The extras are
+     Android's, so a device or a library version that does not know them must
+     not take the feature down with it: one retry without them. */
+  const startEngine = () => {
+    const { opts, extras } = startArgs.current;
+    try { M.start(extras ? { ...opts, androidIntentOptions: extras } : opts); }
+    catch (e) { M.start(opts); }
+  };
+  /* The platform closed the session under a held finger: open it again with
+     the segments kept. False when the hold is over or the engine has been
+     restarted too often to be a glitch. */
+  const reopenHeld = () => {
+    if (!held.current || !engine.current || restarts.current >= HOLD_RESTARTS) return false;
+    restarts.current += 1;
+    try { startEngine(); return true; } catch (e) { return false; }
   };
 
   /* A hands-free attempt that heard nothing. Said once, to the screen, so the
@@ -342,10 +390,19 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
     ready();
     const all = (ev.results || []).map((r) => r && r.transcript).filter((t) => typeof t === "string");
     const text = all[0] || "";
-    /* Held speech: the release decides, so a final result is the answer. */
+    /* Held speech: accumulate while the finger is down. A final result with
+       the button still held is one segment of the answer and the engine goes
+       on listening; after the release, the final the stop produces is the
+       end, and the answer is every segment joined. */
     if (!selfEnding.current) {
-      if (ev.isFinal) finish(text, all.length ? all : [text]);
-      else setLive(text);
+      if (ev.isFinal) {
+        if (text.trim()) heard.current.push(text.trim());
+        partial.current = "";
+        segmentAlts.current = heard.current.length === 1 && all.length ? all : null;
+      } else partial.current = text;
+      const whole = spoken();
+      setLive(whole);
+      if (ev.isFinal && !held.current) finish(whole, alternatives(whole));
       return;
     }
     /* Conversation mode: accumulate and keep listening. A final here is one
@@ -362,6 +419,10 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
   });
   useSpeechRecognitionEvent("error", (ev) => {
     if (!engine.current) return;
+    /* A pause under a held finger: Android reports `no-speech` and closes.
+       That is not an answer and not a failure — the engine is opened again
+       and the segments already heard are kept. */
+    if (!selfEnding.current && held.current && TRANSIENT[ev.error] && reopenHeld()) return;
     clearTimers();
     engine.current = false;
     const wasSelf = selfEnding.current;
@@ -411,10 +472,13 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
       if (whole) finish(whole, [whole]); else quiet();
       return;
     }
-    // Held speech ended without a final result. The last partial is what the
-    // recogniser had, so use that rather than throw the attempt away.
-    if (liveRef.current) finish(liveRef.current);
-    else { engine.current = false; go("idle"); }
+    // The session closed under a held finger: open it again, segments kept.
+    if (held.current && reopenHeld()) return;
+    // Held speech ended without a final result. What was heard — the segments
+    // and the last partial — is the answer, rather than throw the attempt away.
+    const whole = spoken() || liveRef.current;
+    if (whole) finish(whole, alternatives(whole));
+    else { engine.current = false; held.current = false; go("idle"); }
   });
 
   /* One way in for both: permission, then the engine. `self` says whether the
@@ -427,8 +491,11 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
     setLive(""); setNote(null);
     releasedEarly.current = false;
     selfEnding.current = !!self;
+    held.current = !self;
+    restarts.current = 0;
     heard.current = [];
     partial.current = "";
+    segmentAlts.current = null;
     go("asking");
     let perm = { granted: micGranted };
     if (!micGranted) {
@@ -438,10 +505,11 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
     if (!perm.granted) {
       go("idle");
       selfEnding.current = false;
+      held.current = false;
       setBlock({ why: "mic", text: MIC_OFF});
       return;
     }
-    if (releasedEarly.current) { go("idle"); selfEnding.current = false; return; }
+    if (releasedEarly.current) { go("idle"); selfEnding.current = false; held.current = false; return; }
     engine.current = true;
     startedAt.current = Date.now();
     readyTimer.current = setTimeout(() => { readyTimer.current = null; ready(); }, READY_FALLBACK_MS);
@@ -450,17 +518,17 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
     if (self) releasedAt.current = Date.now();
     try {
       const hint = (cb.current.bias || []).filter((s) => typeof s === "string" && s.trim());
+      /* Continuous for a hold as for conversation mode: the release ends a
+         hold, never the engine's own idea of a pause (HOLD_RESTARTS above). */
       const opts = { lang: lang.current, requiresOnDeviceRecognition: true, interimResults: true,
-                     maxAlternatives: ALTERNATIVES, continuous: !!self,
+                     maxAlternatives: ALTERNATIVES, continuous: true,
                      ...(hint.length ? { contextualStrings: hint } : {}) };
-      /* Both are Android extras, so a device or a library version that does
-         not know them must not take the feature down with it: one retry
-         without them, and the timer here still endpoints. */
-      const extras = self
-        ? { ...ANDROID_PATIENCE, ...(both.current ? BOTH_LANGUAGES(both.current) : {}) }
-        : null;
-      try { M.start(extras ? { ...opts, androidIntentOptions: extras } : opts); }
-      catch (e) { M.start(opts); }
+      /* Android extras: the platform's patience for both ways in, and the two
+         languages for a conversation that asked for them (startEngine retries
+         without them where a device does not know them). */
+      const extras = { ...ANDROID_PATIENCE, ...(self && both.current ? BOTH_LANGUAGES(both.current) : {}) };
+      startArgs.current = { opts, extras };
+      startEngine();
       if (self) {
         /* Nobody is there. Cleared the moment any word arrives. */
         watchdog.current = setTimeout(() => {
@@ -484,6 +552,7 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
       engine.current = false;
       go("idle");
       selfEnding.current = false;
+      held.current = false;
       setBlock({ why: "engine", text: `Recognition failed: ${e.message || e}` });
     }
   };
@@ -502,8 +571,10 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
   const cancel = () => {
     clearTimers();
     selfEnding.current = false;
+    held.current = false;
     heard.current = [];
     partial.current = "";
+    segmentAlts.current = null;
     const was = engine.current || phaseRef.current !== "idle";
     engine.current = false;
     go("idle");
@@ -517,6 +588,8 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
      attempt is abandoned and said so. */
   const release = () => {
     releasedAt.current = Date.now();
+    // The finger is up: from here the engine's next final or end is the answer.
+    held.current = false;
     if (engine.current) {
       const stop = () => {
         stopTimer.current = null;
@@ -530,8 +603,9 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
       watchdog.current = setTimeout(() => {
         watchdog.current = null;
         if (!engine.current) return;
-        // The last partial is what the recogniser had; with nothing, say so.
-        if (liveRef.current) finish(liveRef.current);
+        // What was heard is what the recogniser had; with nothing, say so.
+        const whole = spoken() || liveRef.current;
+        if (whole) finish(whole, alternatives(whole));
         else { engine.current = false; go("idle"); setNote("Nothing heard"); }
         try { M.abort(); } catch (e) { /* nothing to abort */ }
       }, WATCHDOG_MS);

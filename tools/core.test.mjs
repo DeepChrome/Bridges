@@ -21,7 +21,8 @@ import * as S from "../core/scheduler.js";
 import * as SK from "../core/skills.js";
 import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor, stepToday,
          cardKind, kindsOf, mixNew, practiceSession, rollGoal, spendGoal, goalBadge, goalSession, goalPerDay,
-         weekdayOf, isStudyDay, GOAL_REVIEWS, GOAL_CAP_DAYS, MASTERED_EVERY,
+         weekdayOf, isStudyDay, GOAL_REVIEWS, GOAL_CAP_DAYS, fillPriority, meaningHole, cooledDown,
+         FILL_COOLDOWN_DAYS, RARE_WEIGHT,
          STUCK_AT, REST_DAYS, noteAnswer, isResting, againGap } from "../core/queue.js";
 import { SCENARIOS } from "../core/scenarios.js";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
@@ -4231,18 +4232,68 @@ group("the review, 2026-10-01");
      "a week of weekdays adds five days' goals, not seven");
 
   /* The session meets the goal from the learner's own cards when little is
-     due — weakest first, a mastered one now and then. */
-  const card = (s, state = 2) => ({ recognise: { s, d: 5, state, dueAt: t0 + 30 * DAY, lastAt: t0 - DAY, reps: 3, lapses: 0 } });
+     due — a weighted draw (fillPriority); with a constant rng it is a sort by
+     priority, so the weakest come first. Every card here was last answered
+     three days ago, past the cooldown. */
+  const card = (s, state = 2) => ({ recognise: { s, d: 5, state, dueAt: t0 + 30 * DAY, lastAt: t0 - 3 * DAY, reps: 3, lapses: 0 } });
   const seen = {};
   const words = [];
   for (let k = 0; k < 30; k++) { const w = `w${k}`; words.push(w); seen[w] = card(k < 25 ? 1 + k : 400); }
-  const sess = goalSession({ seen, words, now: t0, owed: 16, rng: () => 0.5,
-                             familiar: (w, c) => (c.s >= 400 ? 95 : Math.round(c.s * 2)) });
+  const familiar = (w, c) => (c.s >= 400 ? 95 : Math.round(c.s * 2));
+  const sess = goalSession({ seen, words, now: t0, owed: 16, rng: () => 0.5, familiar });
   ok(sess.items.length === 16, "a session is the goal's size when nothing is due", String(sess.items.length));
   const fam = sess.items.filter((x) => seen[x.word].recognise.s < 400).map((x) => seen[x.word].recognise.s);
   ok(fam.every((s, k) => k === 0 || s >= fam[k - 1]), "the weakest come first");
-  const mastered = sess.items.filter((x) => seen[x.word].recognise.s >= 400).length;
-  ok(mastered === Math.floor(16 / MASTERED_EVERY), "a mastered card is sprinkled in now and then", String(mastered));
+  /* A real draw bounces around (2026-11-12): a mastered card turns up in some
+     sessions and the weak ones still fill most of the slots. */
+  {
+    let s0 = 11;
+    const lcg = () => { s0 = (s0 * 1103515245 + 12345) & 0x7fffffff; return s0 / 0x7fffffff; };
+    let withMastered = 0, masteredSlots = 0;
+    for (let n = 0; n < 40; n++) {
+      const d = goalSession({ seen, words, now: t0, owed: 16, rng: lcg, familiar });
+      const m = d.items.filter((x) => seen[x.word].recognise.s >= 400).length;
+      if (m) withMastered++;
+      masteredSlots += m;
+    }
+    ok(withMastered > 0 && masteredSlots < 40 * 8, "a mastered card is drawn now and then, never most of the pile",
+       `${withMastered} sessions, ${masteredSlots} slots`);
+  }
+  /* Never two days running: a card answered yesterday is out of the fill. */
+  const yesterday = { ...seen, w3: { recognise: { ...seen.w3.recognise, lastAt: t0 - DAY } } };
+  ok(!goalSession({ seen: yesterday, words, now: t0, owed: 25, rng: () => 0.5, familiar }).items.some((x) => x.word === "w3"),
+     "a card answered yesterday is not dealt again today");
+  ok(FILL_COOLDOWN_DAYS >= 1 && !cooledDown(yesterday.w3.recognise, t0) && cooledDown(seen.w3.recognise, t0),
+     "the cooldown is at least a day");
+  /* What moves the priority, each part alone. */
+  {
+    const base = { card: { s: 10, d: 5, lastAt: t0 - 5 * DAY }, entry: {}, r: 0.9, score: 50, now: t0 };
+    const p = fillPriority(base);
+    ok(fillPriority({ ...base, card: { ...base.card, lastAt: t0 - 40 * DAY } }) > p, "longer unseen: higher");
+    ok(fillPriority({ ...base, r: 0.5 }) > p, "more forgotten: higher");
+    ok(fillPriority({ ...base, score: 10 }) > p && fillPriority({ ...base, score: 100 }) < p, "a lower score: higher");
+    ok(fillPriority({ ...base, card: { ...base.card, d: 9 } }) > p, "harder to acquire: higher");
+    ok(meaningHole({}) === 0.5 && meaningHole({ ru2en: { s: 30 } }) === 1
+       && meaningHole({ ru2en: { s: 30 }, en2ru: { s: 30 } }) === 0
+       && meaningHole({ ru2en: { s: 90 }, en2ru: { s: 1 } }) > 0.5, "a hole between the two meaning skills");
+    ok(fillPriority({ ...base, entry: { ru2en: { s: 30 } } }) > p, "a hole: higher");
+  }
+  /* A low-priority card is in the draw at a fraction of its weight: dealt now
+     and then, far less than its twin. */
+  {
+    let s1 = 5;
+    const lcg = () => { s1 = (s1 * 1103515245 + 12345) & 0x7fffffff; return s1 / 0x7fffffff; };
+    const twins = {};
+    const ws = [];
+    for (let k = 0; k < 10; k++) { const w = `t${k}`; ws.push(w); twins[w] = card(5); }
+    twins.rare = card(5);
+    let dealt = 0;
+    for (let n = 0; n < 400; n++) {
+      if (goalSession({ seen: twins, words: ws, rare: ["rare"], now: t0, owed: 5, rng: lcg, familiar }).items.some((x) => x.word === "rare")) dealt++;
+    }
+    ok(dealt > 0 && dealt < 400 * 5 / 11 * 0.3, "a low-priority card is dealt rarely, not never", String(dealt));
+    ok(RARE_WEIGHT > 0 && RARE_WEIGHT <= 0.1, "rare means a small fraction of the weight");
+  }
   ok(goalSession({ seen, words, now: t0, owed: 0 }).items.length === 0, "a met goal deals nothing");
   ok(goalSession({ seen, words, now: t0, owed: 0, beyond: true }).items.length === QUEUE_DEFAULTS.sessionSize,
      "and Keep going deals a chunk past it");

@@ -71,6 +71,10 @@ export const DEFAULTS = {
      (screens/Tutor.js) — a preference, a recurring confusion. Kept here, not
      on the Worker, like every other piece of learner state. */
   tutorNotes: [],
+  /* The tutor's first-time questionnaire (screens/Tutor.js TutorIntro): the
+     answers as { at, goal, style, time, struggle }, or { at, skipped } — null
+     until it has been asked, which is what shows it. */
+  tutorIntro: null,
   talkLevel: null,      // how the Talk tutor pitches its Russian; null = by chapter reached
   talkSpeed: "normal",  // how fast the tutor is read out (audio.js SPEEDS)
   talkEn: true,         // English under the tutor's turns

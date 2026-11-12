@@ -37,7 +37,7 @@ import { useTheme, radius, space, type as T } from "../theme";
 import { Screen, Btn, Muted, Text, TextInput, Marked, Note, CogButton, BulbButton, Sheet,
          List, Row, SectionLabel, Choice, Tick, RowText, IconButton, ChatTurn, TypingTurn } from "../ui";
 import { Linked } from "../words";
-import { L, STAGES, studiedFor, routePosition, rankOf } from "../data";
+import { L, STAGES, studiedFor, routePosition, rankOf, lessonCount, lessonsDone } from "../data";
 import { tutor as askTutor, config } from "../lib/feedback";
 import { speakLine, stop, voiceFor } from "../audio";
 // The tutor is Teddy (backend/src/tutor.js), and sounds like him.
@@ -45,11 +45,48 @@ import { GUIDE_ID, castById } from "@core/cast";
 import { useRecognizer, LANG, LANG_EN } from "../speech";
 import { HoldButton, Blocked } from "../activities/Say";
 import { failureText, talkLevelFor, TALK_LEVELS } from "./Talk";
-import { troubleWords, familiarity, cardFor } from "@core/scheduler";
+import { troubleWords, familiarity, cardFor, skillScores, workedOn, dayOf } from "@core/scheduler";
+import { isResting } from "@core/queue";
 
 /* How many notes the tutor may leave in the profile; the oldest goes when a
-   new one arrives. Twenty short lines is a person's worth of context. */
-export const NOTES_KEPT = 20;
+   new one arrives. Thirty short lines is a person's worth of context (twenty
+   until 2026-11-12, when the owner asked the tutor to "build its context and
+   maintain its context about the learner" — the questionnaire's answers take
+   four of them). */
+export const NOTES_KEPT = 30;
+/* Words with a hole between the two meaning skills worth telling the tutor
+   about: this far apart, or one side never asked while the other scores. */
+export const HOLE_GAP = 30;
+const HOLES_N = 12;
+/* Days looked back for how often the learner has been studying. */
+const RECENT_DAYS = 7;
+
+/* **The first time, a few questions** (the owner, 2026-11-12: *"Perhaps the
+ * first time you use it, it just passes you a questionnaire… It can learn if I
+ * just like drills"*). Three choices and one free line; the answers become the
+ * first notes in the tutor's memory (`introNotes`), so they ride in every turn
+ * like anything else it knows, and `st.tutorIntro` records that it was asked.
+ * Skipping is allowed and recorded, so it is asked once either way. */
+export const INTRO = [
+  { id: "goal", ask: "What matters most?", options: [
+    { id: "speaking", name: "Speaking" }, { id: "understanding", name: "Understanding speech" },
+    { id: "reading", name: "Reading" }, { id: "grammar", name: "Grammar" }] },
+  { id: "style", ask: "How do you like to work?", options: [
+    { id: "drills", name: "Drills, one question at a time" }, { id: "conversation", name: "Conversation" },
+    { id: "explain", name: "Explain first, then practise" }] },
+  { id: "time", ask: "A sitting is usually", options: [
+    { id: "5", name: "5 minutes" }, { id: "15", name: "15 minutes" }, { id: "30", name: "30 minutes or more" }] },
+];
+const nameOf = (q, id) => { const o = INTRO.find((x) => x.id === q).options.find((x) => x.id === id); return o ? o.name : ""; };
+export function introNotes(a) {
+  const out = [];
+  if (a.goal) out.push(`Goal: ${nameOf("goal", a.goal).toLowerCase()}`);
+  if (a.style) out.push(`Prefers ${nameOf("style", a.style).toLowerCase()}`);
+  if (a.time) out.push(`Sittings of about ${nameOf("time", a.time).toLowerCase()}`);
+  const s = String(a.struggle || "").trim();
+  if (s) out.push(`Says they struggle with: ${s.slice(0, 80)}`);
+  return out;
+}
 /* Silent turns in a row before conversation mode gives up and puts the
    microphone down. Two, because one is a pause for thought and a run of them
    is an empty room. */
@@ -81,13 +118,48 @@ const LIST_N = 30;
 
 /* What the tutor is handed about this learner. Built from the state the app
    already keeps — nothing here is a new record. Exported for the tests. */
-export function tutorProfile(st) {
+export function tutorProfile(st, now = Date.now()) {
   const pos = routePosition(st);
   const seen = st.seen || {};
-  const strong = Object.keys(seen)
+  const words = Object.keys(seen);
+  const strong = words
     .map((w) => ({ w, f: familiarity(cardFor(seen[w]), rankOf(w)) }))
     .filter((x) => x.f !== null && x.f >= STRONG_AT)
     .sort((a, b) => b.f - a.f).slice(0, LIST_N).map((x) => x.w);
+  /* **The data and the algorithm, not only the lists** (the owner,
+     2026-11-12: *"I want it to also have access to the data and algorithm so
+     it knows what chapters I've worked on, what words have tripped me up"*).
+     Each chapter the learner has touched, with lessons done per unit; the
+     four skill scores averaged over the words scored; the words with a hole
+     between their two meaning skills (core/skills.js), weak side named; the
+     words resting after a run of misses; how many of the last seven days had
+     any study; and the questionnaire's answers. All read off state the app
+     already keeps — nothing here is a new record. */
+  const chapters = STAGES.map((s, k) => {
+    const units = [s.core].concat(s.branches || [])
+      .map((u) => ({ name: u.name, done: lessonsDone(st, u), of: lessonCount(u) }))
+      .filter((p) => p.done > 0);
+    return units.length ? { chapter: s.n || k + 1, title: s.title || "", units: units.map((p) => `${p.name} ${p.done}/${p.of}`) } : null;
+  }).filter(Boolean);
+  const sums = { ru2en: [0, 0], en2ru: [0, 0], forms: [0, 0], usage: [0, 0] };
+  const holes = [];
+  for (const w of words) {
+    const sc = skillScores(seen[w], rankOf(w));
+    for (const k in sums) if (sc[k] !== null) { sums[k][0] += sc[k]; sums[k][1] += 1; }
+    const a = sc.ru2en, b = sc.en2ru;
+    if (a === null && b === null) continue;
+    const gap = a === null || b === null ? HOLE_GAP + 20 : Math.abs(a - b);
+    if (gap >= HOLE_GAP) holes.push({ w, ru2en: a, en2ru: b, forms: sc.forms, usage: sc.usage, gap });
+  }
+  const skills = {};
+  for (const k in sums) skills[k] = sums[k][1] ? Math.round(sums[k][0] / sums[k][1]) : null;
+  skills.scored = words.filter((w) => cardFor(seen[w])).length;
+  let recentDays = 0;
+  for (let d = 0; d < RECENT_DAYS; d++) if (workedOn(st, dayOf(now) - d)) recentDays++;
+  const intro = st.tutorIntro && !st.tutorIntro.skipped
+    ? { goal: st.tutorIntro.goal || "", style: st.tutorIntro.style || "", time: st.tutorIntro.time || "",
+        struggle: String(st.tutorIntro.struggle || "").slice(0, 80) }
+    : null;
   return {
     chapter: Math.min(pos.stage, STAGES.length - 1) + 1,
     lesson: Number.isFinite(pos.lesson) ? pos.lesson + 1 : null,
@@ -96,6 +168,12 @@ export function tutorProfile(st) {
     strong,
     misses: (st.misses || []).slice(0, 12).map((m) => ({ kind: m.kind, prompt: m.prompt, answer: m.answer, said: m.said })),
     notes: (st.tutorNotes || []).slice(0, NOTES_KEPT),
+    chapters,
+    skills,
+    holes: holes.sort((x, y) => y.gap - x.gap).slice(0, HOLES_N).map(({ gap, ...x }) => x),
+    resting: words.filter((w) => isResting(st.rest, w, now)).slice(0, LIST_N),
+    recentDays,
+    intro,
   };
 }
 
@@ -277,6 +355,33 @@ function TutorOptions({ onClose, onRestart }) {
   );
 }
 
+/* The questionnaire, once. Three choices and a line, Start, or Skip. */
+function TutorIntro({ onDone, onSkip }) {
+  const t = useTheme();
+  const [a, setA] = useState({});
+  const pick = (q, id) => setA((prev) => ({ ...prev, [q]: id }));
+  return (
+    <Screen keyboard>
+      <View testID="tutor-intro" style={{ gap: 18, paddingTop: 8 }}>
+        <Text style={{ color: t.ink, fontSize: T.title, fontWeight: "700" }}>Before we start</Text>
+        {INTRO.map((q) => (
+          <View key={q.id}>
+            <SectionLabel>{q.ask}</SectionLabel>
+            <Choice testID={`intro-${q.id}`} options={q.options} value={a[q.id] || null} onPick={(id) => pick(q.id, id)} />
+          </View>
+        ))}
+        <View>
+          <SectionLabel>What trips you up?</SectionLabel>
+          <TextInput testID="intro-struggle" value={a.struggle || ""} onChangeText={(s) => pick("struggle", s)}
+                     placeholder="Optional" />
+        </View>
+        <Btn block kind="pri" testID="intro-start" label="Start" onPress={() => onDone(a)} />
+        <Btn kind="link" testID="intro-skip" label="Skip" onPress={onSkip} />
+      </View>
+    </Screen>
+  );
+}
+
 export default function Tutor({ navigation, route }) {
   const { st, update, ready, account } = useSession();
   const t = useTheme();
@@ -409,11 +514,21 @@ export default function Tutor({ navigation, route }) {
      learner with nothing in their profile, and the test that seeds one is
      how that was found. */
   const opened = useRef(false);
+  // …and after the questionnaire, the first time (TutorIntro).
+  const asked = !!st.tutorIntro;
   useEffect(() => {
-    if (!ready || !configured || opened.current) return;
+    if (!ready || !configured || !asked || opened.current) return;
     opened.current = true;
     ask([], "");
-  }, [ready]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ready, asked]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const introDone = (a) => update((prev) => ({
+    ...prev,
+    tutorIntro: { at: Date.now(), goal: a.goal || "", style: a.style || "", time: a.time || "",
+                  struggle: String(a.struggle || "").trim().slice(0, 80) },
+    // Oldest first into `remember`, so the notes read in the order asked.
+    tutorNotes: introNotes(a).reverse().reduce((notes, line) => remember(notes, line), prev.tutorNotes || []),
+  }));
+  const introSkip = () => update((prev) => ({ ...prev, tutorIntro: { at: Date.now(), skipped: true } }));
 
   const send = (text) => {
     const s = String(text || "").trim();
@@ -485,6 +600,8 @@ export default function Tutor({ navigation, route }) {
   /* The choices of the newest turn, and only while it is the newest. */
   const tail = turns[turns.length - 1];
   const offered = tail && tail.who === "tutor" && Array.isArray(tail.choices) ? tail.choices : [];
+
+  if (ready && configured && !asked) return <TutorIntro onDone={introDone} onSkip={introSkip} />;
 
   return (
     <Screen scroll={false} keyboard>

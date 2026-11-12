@@ -362,6 +362,14 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
   const have = new Set(pool);
   const met = personal ? Object.keys(st.seen || {})
     .filter((w) => !have.has(w) && kinds.includes(cardKind(w)) && !outOfRotation(st, w)) : [];
+  /* A card set aside as low priority is not gone from the personal review: it
+     is in the make-up draw at a fraction of its weight (core/queue.js
+     RARE_WEIGHT; the owner, 2026-11-12: *"low prio shouldn't eliminate a card
+     completely but it should be extremely rare relative to others"*). Its due
+     date is ignored — it comes only through the draw. A resting word is out
+     until its days are up, as before. */
+  const rare = personal ? Object.keys(st.seen || {})
+    .filter((w) => isLowPriority(st, w) && !resting(st, w) && kinds.includes(cardKind(w))) : [];
   /* Past the goal, once every met card is answered today, the review goes on
      with new words (core/queue.js `next`): the route's next words for the
      personal review, the chosen sources' unmet cards otherwise. */
@@ -370,17 +378,19 @@ export function sessionFor(st, { ahead, beyond, rng, round, words: list, title }
     : pool.filter((w) => !st.seen[w]);
   const s = goalSession({
     seen: st.seen, words: pool.concat(met), dirs: st.flash || DEFAULT_FRONTS, now: Date.now(), daily: st.daily,
-    rng, opts, owed: goalNow(st).owed, beyond, next,
+    rng, opts, owed: goalNow(st).owed, beyond, next, rare,
     familiar: (w, card) => familiarity(card, rankOf(w)) || 0,
     // "From the start" walks the route from its first words (the owner,
     // 2026-11-02); the default is most faded first.
     order: st.reviewOrder === "path" ? pathRank(st) : undefined,
   });
   /* A word from further along the route is in no ticked set, so the screen's
-     face map does not know it: the session carries the faces of what it dealt. */
-  if (next) {
+     face map does not know it: the session carries the faces of what it dealt.
+     So is a low-priority card the draw let through. */
+  const unknown = s.items.filter((x) => x.kind === "new" || rare.includes(x.word)).map((x) => x.word);
+  if (next || unknown.length) {
     const faces = {};
-    for (const c of cardsIn(st, [], s.items.filter((x) => x.kind === "new").map((x) => x.word))) faces[c.b] = c;
+    for (const c of cardsIn(st, [], unknown)) faces[c.b] = c;
     s.faces = faces;
   }
   return s;

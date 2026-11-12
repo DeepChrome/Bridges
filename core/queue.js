@@ -29,7 +29,7 @@
  */
 
 import { DIRECTIONS, DEFAULT_FRONTS, cardFor, kindOf, isDue, retrievability, dayOf, weakestSkill,
-         SKILL_OF_FRONT } from "./scheduler.js";
+         SKILL_OF_FRONT, familiarity, DAY } from "./scheduler.js";
 /* (The day's goal — rollGoal, goalSession — is at the foot of the file.) */
 
 /* `newPerDay` is 5, down from 15 (the owner, 2026-09-17: "The default is maybe
@@ -331,26 +331,21 @@ export const goalBadge = (goal, now, opts) => {
  *   1. today's learning steps, then everything the scheduler has due, most
  *      forgotten first (buildSession's order, common words weighted up);
  *   2. new cards from the learner's own pool, up to the day's allowance;
- *   3. and to make up the rest, the learner's met cards that are not due,
- *      **most faded first** — retrievability ascending, so a word met
- *      yesterday comes round far more than one held for a month — with one
- *      mastered card sprinkled in every `MASTERED_EVERY`.
+ *   3. and to make up the rest, a **weighted draw** over the learner's met
+ *      cards that are not due (`fillPriority` below, 2026-11-12): how long
+ *      since each was last revisited, how much has faded, how well it is
+ *      held, the gap between its two meaning skills and how hard it was to
+ *      acquire — never a card answered yesterday.
  *
- * **Faded, not weak** (the owner, 2026-10-12: *"the study cards repeating
- * themselves for the past week. It's not rotating through all my cards"*).
- * The fill was sorted by familiarity, which is stability alone and knows
- * nothing of when the card was last seen. An early Good on a card already
- * held three weeks moves its stability a day or two — FSRS, correctly,
- * learns little from recalling what was 99 % recallable — so the card that
- * was the weakest this morning is the weakest again this evening, in the
- * next chunk of the same sitting, and tomorrow, and the hundreds held a
- * little better are never dealt at all. Measured over ten simulated days with
- * nothing due: one card dealt seventeen times, two a day on seven of them,
- * while 250 of 400 were not dealt once. Retrievability is what has faded
- * *since the last review*: a card answered today sits at 1.0 and goes to the
- * back, every other card has decayed a little, and the fill walks the whole
- * pool — fastest through the recently learned, whose memory fades fastest,
- * which is still the owner's "recently learned cards most often".
+ * **Faded, not weak** was the first cut (the owner, 2026-10-12: *"the study
+ * cards repeating themselves for the past week. It's not rotating through all
+ * my cards"*). The fill was sorted by familiarity, which is stability alone
+ * and knows nothing of when the card was last seen, so the weakest card this
+ * morning was the weakest again this evening and tomorrow. Sorting by
+ * retrievability instead walked the pool — and then, a month on, had the same
+ * complaint in a new shape: the least retrievable cards each day are the
+ * *young* ones, so the same twenty led every day and a card held well was
+ * never dealt. Hence the draw.
  *
  * **And a card answered today is never dealt again today** (the owner,
  * 2026-10-19: *"I keep getting drilled with the same exact word even when I'm
@@ -367,15 +362,15 @@ export const goalBadge = (goal, now, opts) => {
  * kinds, and the unmet words of finished lessons and the next one). `owed`
  * sizes the session; `beyond` is "Keep going", past the goal.
  *
- * `order(word)`, optional, replaces the fade with the learner's own order for
+ * `order(word)`, optional, replaces the draw with the learner's own order for
  * the make-up fill — "From the start" on the Study options (the owner,
  * 2026-11-02: *"personal review English to Russian gets really hung up on
  * recent words even if there's earlier gaps… the option to build up or
- * continue where they were struggling"*). Most-faded-first is exactly
- * "recently learned most often", which is the hang-up he describes; ordered
- * by the route instead, the fill walks from the first lesson's words forward,
- * so a gap left early is met before anything recent. Cards due are due either
- * way; mastered cards are still the sprinkle. */
+ * continue where they were struggling"*). Ordered by the route, the fill
+ * walks from the first lesson's words forward, so a gap left early is met
+ * before anything recent; the cooldown still applies, so the walk moves on
+ * day by day. Cards due are due either way. `rare` are the low-priority
+ * cards, in the draw at a fraction of their weight. */
 /* `next`, optional: words not met yet, in the order the learner would meet
  * them along the route. **Past the goal the review has no end** (the owner,
  * 2026-11-06: *"Default to the personal review. Don't have a hard limit. Just
@@ -384,8 +379,94 @@ export const goalBadge = (goal, now, opts) => {
  * day's ration — the learner chose to keep going, and a new word is the one
  * thing left that is not a card already answered today. Only past the goal:
  * inside it, new words keep to the day's ration as they always have. */
-export const MASTERED_EVERY = 8;
-export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar, order, next }) {
+/* ------------------------------------------------- what fills the goal, and how often
+ *
+ * The owner, 2026-11-12: *"it really seems to focus heavily on the same words
+ * back to back to back. Like I've had almost all of the same words two days in
+ * a row. That should never happen… let's make it focus more on how long since
+ * a word has been revisited… a hidden algorithm that factors in a few things… the
+ * idea isn't always to focus in one area… it's a maintenance tool. It's totally
+ * okay to bounce around to old material."*
+ *
+ * He was right about the cause. The fill was a **sort** by retrievability, and
+ * the least retrievable cards on any given day are the young ones — stability
+ * of a day or two, met this week — because a card held a month barely fades
+ * between sittings. An early Good on a young card lifts it a day or two, so it
+ * is the least retrievable again tomorrow, and the same twenty led the fill
+ * every day while the hundreds held a little better were never dealt. A sort
+ * has no memory of yesterday and no room for the rest of the pool.
+ *
+ * So the fill is a **weighted draw** over a priority, not a sort, and a card
+ * answered yesterday is out of it (`FILL_COOLDOWN_DAYS`). The priority, each
+ * part read off the card the scheduler already keeps — nothing here is a new
+ * counter (§30ar's rule, as the familiarity ring keeps it):
+ *
+ *   fade   1 − retrievability: how much has been forgotten since the last look
+ *   since  days since it was last answered, as a share of SINCE_HORIZON_DAYS —
+ *          the lever he named, and the heaviest weight: a word unseen for a
+ *          month outranks a young word seen the day before yesterday however
+ *          well it is held, which is what brings old material back
+ *   score  1 − familiarity/100: the overall score; every Easy, and every long
+ *          gap before one, lifts stability and so pushes the word down here
+ *   hole   the gap between the two meaning skills (core/skills.js): a word
+ *          recalled into English and not out of it, or asked one way only
+ *   hard   FSRS difficulty, 1–10 — the persistent record of how hard this
+ *          word was to acquire; it rises with every Again and eases slowly
+ *
+ * Weighted, not sorted, so that two days are never the same list: the draw is
+ * Efraimidis–Spirakis sampling without replacement (key = u^(1/weight)), with
+ * weight = priority^FILL_SHARPEN so a word long unseen is several times as
+ * likely as a word seen the day before yesterday, and a mastered word still
+ * turns up — bouncing around to old material is the point. A card the learner
+ * set aside as low priority (`rare`) is in the draw at RARE_WEIGHT of its
+ * weight: *"low prio shouldn't eliminate a card completely but it should be
+ * extremely rare relative to others."* Due cards are the schedule's and are
+ * dealt before any of this, as always; low-priority cards' due dates are
+ * ignored — they come only through this draw.
+ *
+ * With the caller's `rng` constant (a test's `() => 0.5`) the draw is a plain
+ * sort by priority, which is what makes it checkable. */
+export const FILL_COOLDOWN_DAYS = 1;
+export const FILL_WEIGHTS = { fade: 0.30, since: 0.35, score: 0.15, hole: 0.10, hard: 0.10 };
+export const SINCE_HORIZON_DAYS = 30;
+export const FILL_SHARPEN = 3;
+export const RARE_WEIGHT = 0.05;
+/* The two meaning skills' scores, 0–100 each or null, read as a gap in 0–1:
+   both scored, their difference over HOLE_SPAN; one scored and one never asked
+   is the widest hole there is; neither scored says nothing (0.5 — a word met
+   only in lessons has both to build). */
+export const HOLE_SPAN = 50;
+export function meaningHole(entry) {
+  const slot = (id) => { const c = entry && entry[id]; return c && c.s > 0 ? familiarity(c) : null; };
+  const a = slot("ru2en"), b = slot("en2ru");
+  if (a === null && b === null) return 0.5;
+  if (a === null || b === null) return 1;
+  return Math.min(1, Math.abs(a - b) / HOLE_SPAN);
+}
+export function fillPriority({ card, entry, r, score, now }) {
+  const W = FILL_WEIGHTS;
+  const days = card && card.lastAt !== undefined && card.lastAt !== null
+    ? Math.max(0, (now - card.lastAt) / DAY) : SINCE_HORIZON_DAYS;
+  const since = Math.min(1, days / SINCE_HORIZON_DAYS);
+  const fam = Number.isFinite(score) ? Math.min(100, Math.max(0, score)) / 100 : 0;
+  const hard = Math.min(1, Math.max(0, (((card && card.d) || 1) - 1) / 9));
+  const fade = Math.min(1, Math.max(0, 1 - (Number.isFinite(r) ? r : 0)));
+  return W.fade * fade + W.since * since + W.score * (1 - fam) + W.hole * meaningHole(entry) + W.hard * hard;
+}
+/* Answered today or within the cooldown: out of the fill. */
+export const cooledDown = (card, now) => {
+  if (!card || card.lastAt === undefined || card.lastAt === null) return true;
+  return dayOf(card.lastAt) < dayOf(now) - FILL_COOLDOWN_DAYS;
+};
+/* The draw: every candidate keyed by u^(1/weight), highest keys first. */
+export function weightedDraw(list, weightOf, random) {
+  return list.map((x) => {
+    const w = Math.max(1e-9, Number(weightOf(x)) || 0);
+    return { x, key: Math.pow(random(), 1 / w) };
+  }).sort((a, b) => b.key - a.key).map((e) => e.x);
+}
+
+export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar, order, next, rare }) {
   const o = Object.assign({}, QUEUE_DEFAULTS);
   for (const k in opts || {}) if (opts[k] !== undefined) o[k] = opts[k];
   const random = rng || Math.random;
@@ -398,36 +479,32 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
     if (!fronts.length) fronts.push(DEFAULT_FRONTS[0]);
     const have = new Set(items.map((x) => x.word));
     const score = familiar || (() => 0);
-    const today = dayOf(now);
-    const weak = [], held = [];
-    for (const w of words || []) {
-      if (have.has(w)) continue;
+    const pool = [];
+    const consider = (w, isRare) => {
+      if (have.has(w)) return;
+      have.add(w);
       const entry = (seen && seen[w]) || {};
       const card = cardFor(entry);
-      if (!card || kindOf(card) === "new") continue;
-      // Answered today: scheduled out, and not dealt again today.
-      if (card.lastAt !== undefined && card.lastAt !== null && dayOf(card.lastAt) === today) continue;
-      const x = { w, entry, card, f: score(w, card), r: retrievability(card, now, o.scheduler) };
-      (x.f >= MASTERED_AT ? held : weak).push(x);
+      if (!card || kindOf(card) === "new") return;
+      // Answered today or yesterday: not dealt again — never two days running.
+      if (!cooledDown(card, now)) return;
+      const r = retrievability(card, now, o.scheduler);
+      pool.push({ w, entry, card, rare: !!isRare,
+                  p: fillPriority({ card, entry, r, score: score(w, card), now }) });
+    };
+    for (const w of words || []) consider(w, false);
+    for (const w of rare || []) consider(w, true);
+    /* The learner's order, where given ("From the start"): earliest on the
+       route first, the priority deciding only between words at the same place.
+       Otherwise the weighted draw, over a shuffle so equal keys never fall in
+       storage order. */
+    const drawn = typeof order === "function"
+      ? pool.slice().sort((a, b) => (order(a.w) - order(b.w)) || (b.p - a.p))
+      : weightedDraw(shuffled(pool, random), (x) => Math.pow(x.p, FILL_SHARPEN) * (x.rare ? RARE_WEIGHT : 1), random);
+    for (const x of drawn) {
+      if (items.length >= want) break;
+      items.push({ word: x.w, direction: frontFor(x.card, fronts, x.entry), card: x.card, kind: kindOf(x.card), extra: true });
     }
-    // Shuffled first so equal retrievabilities are not dealt in storage order.
-    // The mastered cards walk in the same order: a random draw from a few
-    // hundred lands on the same card twice in a week, a walk cannot.
-    const byFade = (a, b) => a.r - b.r;
-    // The learner's order, where given: earliest on the route first, the fade
-    // deciding only between words at the same place.
-    const byOrder = typeof order === "function"
-      ? (a, b) => (order(a.w) - order(b.w)) || byFade(a, b) : byFade;
-    const faded = shuffled(weak, random).sort(byOrder);
-    const sprinkle = shuffled(held, random).sort(byOrder);
-    const extra = [];
-    while (items.length + extra.length < want && (faded.length || sprinkle.length)) {
-      const n = items.length + extra.length + 1;
-      const from = (n % MASTERED_EVERY === 0 && sprinkle.length) || !faded.length ? sprinkle : faded;
-      const x = from.shift();
-      extra.push({ word: x.w, direction: frontFor(x.card, fronts, x.entry), card: x.card, kind: kindOf(x.card), extra: true });
-    }
-    items.push(...extra);
   }
   if (beyond && items.length < want && Array.isArray(next)) {
     const fronts = (dirs && dirs.length ? dirs : DEFAULT_FRONTS).filter((d) => DIRECTIONS.includes(d));

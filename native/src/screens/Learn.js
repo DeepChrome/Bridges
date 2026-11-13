@@ -39,6 +39,7 @@ import {
 } from "../data";
 import { launchOffer, clearRun } from "../resume";
 import { ResumeSheet } from "../resumesheet";
+import { launchUpdate, putBackUpdate, UpdateSheet } from "../update";
 import { nextOpening, markOpening } from "@core/openings";
 import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
@@ -470,6 +471,17 @@ export default function Learn({ navigation }) {
      like to continue where they left off or start again"). */
   const [offer, setOffer] = useState(null);
   useEffect(() => { if (ready) setOffer(launchOffer()); }, [ready]);
+  /* A newer build on the download host, asked for once a launch (update.js;
+     the owner, 2026-11-12: "detects the latest upgrade each time it's
+     launched"). Shown after the resume sheet, if there is one: a learner
+     halfway through a quiz is offered the quiz first. */
+  const [upd, setUpd] = useState(null);
+  useEffect(() => {
+    if (!ready) return undefined;
+    let alive = true;
+    launchUpdate().then((u) => { if (!u) return; if (alive) setUpd(u); else putBackUpdate(); });
+    return () => { alive = false; };
+  }, [ready]);
   const goRun = (run, params) => {
     setOffer(null);
     if (run.tab) navigation.navigate(run.tab, { screen: run.route, params });
@@ -497,6 +509,8 @@ export default function Learn({ navigation }) {
                      onContinue={() => goRun(offer, { ...offer.params, resume: true })}
                      onRestart={() => { clearRun(offer.key); goRun(offer, offer.params); }}
                      onClose={() => setOffer(null)} />
+      ) : upd ? (
+        <UpdateSheet update={upd} onClose={() => setUpd(null)} />
       ) : null}
       {/* The streak and the "Review · N due" button used to open this screen.
           Both went on 2026-09-29 (the owner: "remove the review from the top

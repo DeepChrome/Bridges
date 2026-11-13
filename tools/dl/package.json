@@ -1,0 +1,6 @@
+{
+  "name": "bridges-dl",
+  "private": true,
+  "type": "module",
+  "description": "The download point for side-loaded builds and the record of the latest one (worker.js); upload.mjs publishes a build, test.mjs checks the Worker."
+}

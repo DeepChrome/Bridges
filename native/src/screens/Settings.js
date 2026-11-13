@@ -16,16 +16,17 @@ import { readCrashes, clearCrashes } from "../crash";
 import { importDeck } from "../anki";
 import { today } from "@core/util";
 import { newDeckId } from "../studycards";
-import Constants from "expo-constants";
 import { QUEUE_DEFAULTS, ALL_DAYS } from "@core/queue";
 import { askPermission } from "../notify";
 import { APP_NAME } from "../brand";
 import { SyncSection } from "../syncui";
+import { installedBuild } from "../update";
 
-/* What build this is, at the foot of Settings. The version is app.json's
-   (1.0.0-beta.N while it is a beta), read off the build so it cannot say
-   something the binary is not. */
-const VERSION = (Constants.expoConfig && Constants.expoConfig.version) || "";
+/* What build this is, at the foot of Settings: the installed package's own
+   versionName ("1.0.0-beta.10+8ec6c68", stamped by native/tools/build.ps1),
+   read off the phone so it cannot say something the binary is not. It used
+   to read app.json's version, which every local build shares. */
+const VERSION = installedBuild().name;
 
 /* When the reminder may land, as minutes past midnight. Four, not twenty-four:
    the question is which part of the day a learner studies in, and a list long

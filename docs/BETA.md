@@ -183,8 +183,11 @@ conversation checker and audio QA are clean.
 
 ## Phase C — Release engineering
 
-- [ ] Build an upload-signed app bundle (AAB) and bump `versionCode`. Read
-      what is inside the bundle, not the repo (§23).
+- [ ] Build an upload-signed app bundle (AAB). `versionCode` is stamped per
+      build by `native/tools/build.ps1` since 2026-11-12 (CLAUDE.md §30cv), so
+      there is nothing to bump. Read what is inside the bundle, not the repo
+      (§23). A store build must not offer side-loaded updates: empty
+      `LATEST_URL` in `native/src/update.js` for it.
 - [ ] Size: the phone APK is now 154 MB, mostly bundled audio. Measure what
       Play would actually download against its 200 MB limit for the base
       module. If it is over, move the form recordings into a Play asset pack.

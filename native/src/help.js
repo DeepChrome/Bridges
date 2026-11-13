@@ -31,6 +31,7 @@ export const HELP = {
     ["Side quests", "Open once a chapter's main lessons are done"],
     ["Continue", "Opens the next step for you"],
     ["Recap", "Today's words, once there are enough"],
+    ["Update available", "A newer build; Download fetches it"],
   ] },
   Lesson: { title: "A lesson", lines: [
     ["Vocabulary", "The new words, the rule, and drills on both"],

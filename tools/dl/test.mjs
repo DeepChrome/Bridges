@@ -1,0 +1,58 @@
+// node tools/dl/test.mjs — the Worker on a fake KV: the latest record, the
+// expired file, the download. No network.
+import assert from "node:assert/strict";
+import worker from "./worker.js";
+
+const kv = new Map();
+const env = { FILES: {
+  async get(key, type) {
+    const v = kv.get(key);
+    if (v == null) return null;
+    if (type === "json") return JSON.parse(v);
+    if (type === "arrayBuffer") return v;
+    return v;
+  },
+} };
+const get = (path) => worker.fetch(new Request(`https://dl.test${path}`), env);
+
+let checks = 0;
+const ok = (c, m) => { assert.ok(c, m); checks++; };
+
+// No record yet: 404, and nothing else is served either.
+ok((await get("/latest.json")).status === 404, "no latest record is a 404");
+ok((await get("/short.apk")).status === 404, "a short name is refused");
+ok((await get("/")).status === 404, "the root is nothing");
+
+// A published build.
+const file = "AbcdefghijklmnopQRST.apk";
+kv.set(`dl:${file}:meta`, JSON.stringify({ parts: 2, size: 5 }));
+kv.set(`dl:${file}:0`, new Uint8Array([1, 2, 3]).buffer);
+kv.set(`dl:${file}:1`, new Uint8Array([4, 5]).buffer);
+kv.set("dl:latest", JSON.stringify({ file, code: 29800000, name: "1.0.0-beta.10+abc1234", commit: "abc1234",
+                                     sha256: "ff", at: 1700000000000, notes: "Update check" }));
+const r = await get("/latest.json");
+ok(r.status === 200, "latest answers");
+ok(r.headers.get("cache-control") === "no-store", "never cached");
+const body = await r.json();
+assert.deepEqual(body, { code: 29800000, name: "1.0.0-beta.10+abc1234", url: `https://dl.test/${file}`,
+                         size: 5, at: 1700000000000, notes: "Update check", commit: "abc1234", sha256: "ff" });
+checks++;
+ok((await get("/latest.json?x=1")).status === 200, "a query string does not matter");
+
+// The file itself streams whole.
+const d = await get(`/${file}`);
+ok(d.status === 200, "the file is served");
+ok(d.headers.get("content-length") === "5", "with its length");
+ok(d.headers.get("content-type") === "application/vnd.android.package-archive", "as an APK");
+assert.deepEqual([...new Uint8Array(await d.arrayBuffer())], [1, 2, 3, 4, 5]); checks++;
+
+// The file expired (its TTL ran out) but the record did not: no dead link.
+kv.delete(`dl:${file}:meta`);
+ok((await get("/latest.json")).status === 404, "an expired file is no update");
+ok((await get(`/${file}`)).status === 404, "and the file is gone");
+
+// A record without a file name is not an update either.
+kv.set("dl:latest", JSON.stringify({ code: 1 }));
+ok((await get("/latest.json")).status === 404, "a record naming no file is a 404");
+
+console.log(`dl worker: ${checks} checks, all passed`);

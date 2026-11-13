@@ -26,7 +26,12 @@ async function open() {
   return render(<SessionProvider><Feedback route={{ params: { from: "Cards" } }} navigation={nav} /></SessionProvider>);
 }
 
-beforeEach(async () => { await flushState(); await AsyncStorage.clear(); jest.clearAllMocks(); });
+beforeEach(async () => {
+  await flushState(); await AsyncStorage.clear(); jest.clearAllMocks();
+  // A stamped build (update.js): the report names the build it came from.
+  global.__build = { code: 29800000, name: "1.0.0-beta.10+abc1234" };
+});
+afterEach(() => { global.__build = { code: null, name: null }; });
 
 it("sends the words with the build and the screen attached, and thanks the tester", async () => {
   await open();
@@ -38,7 +43,7 @@ it("sends the words with the build and the screen attached, and thanks the teste
   const { text, facts } = fb.report.mock.calls[0][0];
   expect(text).toBe("The slider froze on Listening.");
   expect(facts).toMatchObject({ from: "Cards", chapter: 1 });
-  expect(facts.version).toMatch(/beta/);
+  expect(facts.version).toBe("1.0.0-beta.10+abc1234 (29800000)");   // the installed package's, not app.json's
   expect(await screen.findByTestId("feedback-sent")).toBeTruthy();
 });
 

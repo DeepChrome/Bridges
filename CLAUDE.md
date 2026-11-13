@@ -446,6 +446,8 @@ bridges/                          (directory is still named russian-blocks on di
     src/keyboard.js    <- the on-screen Russian keyboard (§30h)
     src/store.js sqlite.js db.js <- the profile database, and the JSON row it replaced (§30v)
     __tests__/         <- jest; path.test.js and registry.test.js are the patterns
+    tools/build.ps1    <- the stamped release build: versionCode/versionName per build, APK + sidecar to build-out/ (§30cv)
+    plugins/           <- config plugins: upload signing, the build stamp
     eas.json app.json  <- build profiles; Android package and mic permission
   backend/             <- the feedback Worker (§30d): src/, test/, eval/, wrangler.toml; src/sync.js the sync objects (§30cr)
   desktop/             <- Ya for Windows (§30cr): Electron; src/main (store, sync, ya:// scheme), src/renderer (the screens), tools/build.mjs
@@ -469,6 +471,7 @@ bridges/                          (directory is still named russian-blocks on di
     lookup.py          <- CLI word panel, for checking data without a browser
     smoke.js           <- headless checks against the built page
     deploy.ps1         <- rebuild + Netlify deploy
+    dl/                <- the bridges-dl Worker: side-loaded builds and the latest-build record the app checks (§30cv)
     app/               <- WEB APP SOURCES (edit these, never site/); on hold since 2026-09-05
       shell.html       <- top bar, five <main> screens, bottom tab bar
       app.css          <- design tokens, both themes, layout
@@ -7507,6 +7510,56 @@ five more things in the same message and two in the next.
   words"). The rule the big apps follow: one primary call to action, the rest
   text; two equal buttons in a row only with one-word labels.
 
+## 30cv. The app knows which build it is, and says when a newer one is up (2026-11-12)
+
+The owner: *"a feature that just detects the latest upgrade each time it's
+launched. My other apps do that, dunno why this one doesn't."* It could not
+have: **every local build carried `versionCode 27` and `versionName
+"1.0.0-beta.10"`**, app.json's, so the phone had no way to tell one build from
+the next — Settings said the same thing on every build, every feedback report
+named the same build, and a resume stamp keyed on the version only ever
+noticed a curriculum change.
+
+- **A build is stamped at build time** (`native/tools/build.ps1`): versionCode
+  is the minute the build started (UTC; monotonic, and Android's own rule for
+  "newer" when one APK is installed over another), versionName is app.json's
+  version plus the short commit, `.dirty` when the tree had uncommitted
+  changes. Both reach Gradle as `-PyaBuildCode`/`-PyaBuildName`;
+  `plugins/withBuildStamp.js` is the config plugin that makes build.gradle
+  take them (the same edit is in the current, gitignored `android/` tree, and
+  a plain `gradlew assembleRelease` still builds, at the app.json defaults).
+  **Groovy reads `versionCode (x) as Integer` as `versionCode(x) as
+  Integer`** — the cast on the call's result, the setter handed a String —
+  and AGP fails evaluation with "Value is null" and no useful line; explicit
+  call parentheses, always. The script copies the APK to `native/build-out/`
+  as `Ya-<commit>.apk` with a JSON sidecar (code, name, commit, size,
+  SHA-256). It is the one way to build from now on.
+- **The app reads the installed package** (`installedBuild` in
+  `native/src/update.js`, through `expo-application`): expo-constants' version
+  fields are gone from its Android module in SDK 57, deprecated types or not.
+  Settings' version line, `feedbackFacts` and resume.js's stamp all read it;
+  a development build has code 0 and the update check stays silent.
+- **The download host keeps the record** (`tools/dl/`, the bridges-dl Worker,
+  moved into the repo from a scratchpad — a thing the app asks at every launch
+  is not throwaway). `GET /latest.json` answers `dl:latest` from KV, and 404
+  when the file it names has expired (the pieces carry a seven-day TTL), so
+  the app never offers a dead link. `upload.mjs` publishes a build and, from
+  the sidecar beside it, sets the record (`--notes "one line"`; `--no-latest`
+  to leave it); without a sidecar it uploads and says the record was not set.
+  `node tools/dl/test.mjs` drives the Worker on a fake KV.
+- **At launch, once** (`launchUpdate`): a five-second fetch, compared by code,
+  the update handed out once a launch; a `Sheet` on the path after the resume
+  sheet, if there is one, with the build's name, size and date, the note, and
+  Later / Download — the browser fetches the file and Android installs it, as
+  the testers already install. Nothing remembered, no setting: he asked for
+  every launch, and Later is this launch. Every failure is silence.
+
+**Open**: a Play Store build must not offer side-loaded APKs (a different
+signing key would refuse to install anyway) — point `LATEST_URL` at nothing
+for that build when it exists. And the Worker's `/latest.json` route is in the
+repo and **not deployed** (the gate refused `wrangler deploy`): until the owner
+runs it from `tools/dl`, the route is 404 and the app says nothing.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -7565,6 +7618,12 @@ earns its keep**: reading its shots on 2026-09-09 is what found a form question
 offering «рука́» as one of its own four options, which 307 core checks had not,
 because no test had asked whether a distractor could equal the prompt. Run it
 after any change to a screen, and *look at the pictures*.
+
+**Build with `.\native\tools\build.ps1`**, never a bare `gradlew assembleRelease`:
+the script stamps the build (§30cv), and an unstamped APK carries versionCode
+27, which the update check cannot tell from any other. Then
+`node tools/dl/upload.mjs native\build-out\Ya-<commit>.apk --notes "..."`
+publishes it and makes it the one the app offers.
 
 **A locally built APK cannot update one installed from EAS.** The local build is
 signed with `android/app/debug.keystore`; Android refuses the update with

@@ -280,6 +280,15 @@ jest.mock("expo-screen-orientation", () => ({
 }));
 jest.mock("expo-document-picker", () => ({ getDocumentAsync: jest.fn() }));
 jest.mock("expo-sharing", () => ({ shareAsync: jest.fn(), isAvailableAsync: jest.fn(async () => true) }));
+/* The installed package's version, as expo-application reads it off the
+   phone (src/update.js). Null by default — a development build, which the
+   update check stays silent for — and a test sets global.__build to stand
+   for a stamped one. */
+global.__build = { code: null, name: null };
+jest.mock("expo-application", () => ({
+  get nativeBuildVersion() { return global.__build.code == null ? null : String(global.__build.code); },
+  get nativeApplicationVersion() { return global.__build.name; },
+}));
 /* The clipboard: what was last copied, for a test to read back. */
 global.__clipboard = null;
 jest.mock("expo-clipboard", () => ({

@@ -1,0 +1,9 @@
+name = "bridges-dl"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+# The main Worker's USAGE namespace (backend/wrangler.toml): the builds live
+# under dl:* beside its counters. Clear old builds by key prefix, never whole.
+[[kv_namespaces]]
+binding = "FILES"
+id = "b604658a70984d208e21ea65006f01d0"

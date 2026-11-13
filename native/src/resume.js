@@ -23,13 +23,16 @@ import { type as T } from "./theme";
 import { GuidePop } from "./guide";
 import { RunCard } from "./resumesheet";
 import { CURRICULUM } from "./data";
-import { expo as APP } from "../app.json";
+import { installedBuild } from "./update";
 
 /* Which build and curriculum a run was dealt under. A deck carries lemma
    indices, which shift on every rebuild (rule 20.4): a run saved on one
    build and resumed on the next would grade other words under the old
-   labels. A mismatch is simply not offered. */
-const STAMP = () => `${APP.version}|${CURRICULUM || ""}`;
+   labels. A mismatch is simply not offered. The build is the installed
+   package's versionName (stamped per build since 2026-11-12); before that it
+   was app.json's version, which every local build shared, so only the
+   curriculum stamp ever told two builds apart. */
+const STAMP = () => `${installedBuild().name}|${CURRICULUM || ""}`;
 
 const KEY = (id) => `rb.resume.${id}`;
 /* A run older than this is not "where you left off", it is something you

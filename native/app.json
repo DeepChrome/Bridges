@@ -42,7 +42,8 @@
       "expo-font",
       "expo-asset",
       "expo-notifications",
-      "./plugins/withUploadSigning"
+      "./plugins/withUploadSigning",
+      "./plugins/withBuildStamp"
     ],
     "extra": {
       "eas": {

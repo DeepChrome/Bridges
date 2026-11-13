@@ -28,15 +28,19 @@ import { masteryOf } from "../studycards";
 import { cardFor } from "@core/scheduler";
 import { useClips, clipData, CLIPS_MAX } from "../recorder";
 import { playTrack, stop as stopAudio } from "../audio";
-import { expo as APP } from "../../app.json";
+import { installedBuild } from "../update";
 
 /* What rides along with a report: enough to find the problem, nothing the
    tester typed elsewhere. Exported for the test. */
 export function feedbackFacts(st, { crashes = 0, from = null, ai = "" } = {}) {
   const pos = routePosition(st);
   const seen = st.seen || {};
+  /* The installed package's own name and code (update.js), not app.json's,
+     which every local build shares and so said nothing about which build
+     the report came from. */
+  const build = installedBuild();
   return {
-    version: `${APP.version} (${APP.android ? APP.android.versionCode : "?"})`,
+    version: `${build.name || "?"} (${build.code || "?"})`,
     from, chapter: pos.stage + 1, lesson: pos.lesson === Infinity ? "done" : pos.lesson + 1,
     lessonsDone: UN.reduce((n, u) => n + lessonsDone(st, u), 0),
     words: Object.keys(seen).length,

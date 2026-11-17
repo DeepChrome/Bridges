@@ -7556,9 +7556,30 @@ noticed a curriculum change.
   the testers already install. Nothing remembered, no setting: he asked for
   every launch, and Later is this launch. Every failure is silence.
 
+**The install happens in the app** (2026-11-17; the owner: *"why can't the
+update self take place in the app rather than making it download the link
+externally?"*). Download fetches the APK into the app's own cache through
+`expo-file-system/legacy`'s resumable download (the new `File` API has no
+progress and no content URI), with a bar and the megabytes under the card
+and Cancel beside it, then hands it to Android's package installer
+(`expo-intent-launcher`, `ACTION_VIEW` on a content URI from the module's
+own file provider, `FLAG_GRANT_READ_URI_PERMISSION`). The installer asks its
+one question and, the first time, Android asks to allow this app to install
+unknown apps. It needs `REQUEST_INSTALL_PACKAGES` in the manifest (app.json
+and the hand-edited `android/` tree). A file already whole for the offered
+code is installed without fetching again; files for codes no newer than the
+installed build are deleted at launch (`pruneDownloads`). Where the fetch or
+the installer fails the sheet says so and offers the browser, the old route.
+Leaving the screen cancels a download. `jest.setup.js` mocks the legacy API
+on the same in-memory store as the new one, and records intents on
+`global.__intents`. **Not verified on a device**: the first build carrying
+this is installed by the old route, so the in-app install is first seen on
+the build after it.
+
 **Open**: a Play Store build must not offer side-loaded APKs (a different
 signing key would refuse to install anyway) — point `LATEST_URL` at nothing
-for that build when it exists. The dl Worker's `/latest.json` was deployed
+for that build when it exists, **and drop `REQUEST_INSTALL_PACKAGES`**: Play
+policy reserves it for app stores. The dl Worker's `/latest.json` was deployed
 on the owner's word the same evening, and the first stamped build
 (Ya-2841b66d7, versionCode 29908957) uploaded and set as latest.
 
@@ -7626,7 +7647,13 @@ What each was:
   item with `why` as they deal it (source; for the make-up draw the priority
   and each weighted part, the draw key, the weight, the hold; for a due card
   its urgency), and `drawKeys` is `weightedDraw` keeping the keys. A new
-  pile source needs a `why.source` and a line in `SOURCES`.
+  pile source needs a `why.source` and a line in `SOURCES`. **It shows only
+  with Developer mode on** (Settings, last row; off since v8), which is what
+  the owner asked for — and the first thing he asked on the build was where
+  it was. A dev-only control is invisible by design; say so when shipping one.
+- **No "done" pill under a chapter title** (2026-11-17): a finished chapter
+  is its encircled discs and lit tracks (§30as, §30ar); the word said it
+  again. "locked" stays, once, on a chapter not yet open.
 
 ## 31. Verification
 

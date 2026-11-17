@@ -341,6 +341,54 @@ jest.mock("expo-file-system", () => {
   }
   return { File, Directory, Paths: { cache: new Directory("file:///cache") } };
 });
+/* The legacy file-system API, which src/update.js uses for a download with
+   progress and for the content URI the package installer reads. The same
+   in-memory store as above (global.__fs), so a file one API wrote the other
+   sees. createDownloadResumable records the URL on __downloads, reports one
+   progress step, and honours __downloadFail and __downloadHold like the new
+   API's download does; getContentUriAsync answers content:// for a file that
+   exists. */
+jest.mock("expo-file-system/legacy", () => {
+  jest.requireMock("expo-file-system");                 // whichever is required first, one store
+  const fs = global.__fs;
+  const cacheDirectory = "file:///cache/";
+  return {
+    cacheDirectory,
+    getInfoAsync: async (uri) => (fs.files.has(uri) ? { exists: true, uri, size: fs.files.get(uri) } : { exists: false, uri }),
+    deleteAsync: async (uri) => { fs.files.delete(uri); },
+    readDirectoryAsync: async (dir) => [...fs.files.keys()].filter((u) => u.startsWith(dir)).map((u) => u.slice(dir.length)),
+    getContentUriAsync: async (uri) => {
+      if (!fs.files.has(uri)) throw new Error("no such file");
+      return "content://app.provider/cache/" + uri.split("/").pop();
+    },
+    createDownloadResumable: (url, fileUri, options, callback) => {
+      let cancelled = false;
+      return {
+        cancelAsync: async () => { cancelled = true; },
+        downloadAsync: async () => {
+          global.__downloads.push(url);
+          if (callback) callback({ totalBytesWritten: 50 * 1048576, totalBytesExpectedToWrite: global.__downloadSize || 0 });
+          if (global.__downloadHold) await global.__downloadHold;
+          if (cancelled) return undefined;
+          if (global.__downloadFail && global.__downloadFail(url)) throw new Error("offline");
+          fs.files.set(fileUri, global.__downloadSize || 40000);
+          return { uri: fileUri, status: 200 };
+        },
+      };
+    },
+  };
+});
+/* Android's package installer, asked for through an intent: what it was asked
+   is on __intents; __intentFail makes the phone refuse. */
+global.__intents = [];
+global.__intentFail = false;
+jest.mock("expo-intent-launcher", () => ({
+  startActivityAsync: jest.fn(async (action, params) => {
+    global.__intents.push({ action, ...params });
+    if (global.__intentFail) throw new Error("No Activity found to handle Intent");
+    return { resultCode: -1 };
+  }),
+}));
 
 /* Animations land on their final value at once.
  *

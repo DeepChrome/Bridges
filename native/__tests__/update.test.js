@@ -11,8 +11,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import Learn from "../src/screens/Learn";
-import { installedBuild, newerBuild, checkForUpdate, launchUpdate, resetUpdate,
-         CHECK_TIMEOUT_MS, LATEST_URL } from "../src/update";
+import { installedBuild, newerBuild, checkForUpdate, launchUpdate, resetUpdate, pruneDownloads,
+         downloadedUpdate, apkPath, APK_TYPE, INSTALL_ACTION, CHECK_TIMEOUT_MS, LATEST_URL } from "../src/update";
 import { feedbackFacts } from "../src/screens/Feedback";
 
 const nav = { navigate: jest.fn(), goBack: jest.fn(), setParams: jest.fn(), addListener: () => () => {} };
@@ -35,8 +35,13 @@ beforeEach(async () => {
   resetUpdate();
   global.__build = { code: INSTALLED.code, name: INSTALLED.name };
   global.fetch = jest.fn(okJson(LATEST));
+  global.__fs.files.clear(); global.__downloads = []; global.__intents = [];
+  global.__downloadSize = LATEST.size; global.__downloadFail = null; global.__downloadHold = null; global.__intentFail = false;
 });
-afterEach(async () => { await flushState(); global.__build = { code: null, name: null }; delete global.fetch; });
+afterEach(async () => {
+  await flushState(); global.__build = { code: null, name: null }; delete global.fetch;
+  global.__downloadSize = 0;
+});
 
 describe("which build this is", () => {
   it("is the installed package's own code and name", () => {
@@ -115,17 +120,93 @@ describe("asking the host", () => {
   });
 });
 
-describe("on the path", () => {
-  it("offers the newer build, and Download opens it", async () => {
+/* The install happens in the app (the owner, 2026-11-17: "why can't the update
+   self take place in the app rather than making it download the link
+   externally?"): the file is fetched into the cache and handed to the package
+   installer; the browser is only the fallback. */
+describe("installing in the app", () => {
+  const cached = apkPath(LATEST.code);
+
+  it("offers the newer build; Download fetches the file and opens the installer on it", async () => {
     await path();
     expect(await screen.findByTestId("update-sheet")).toBeTruthy();
     expect(screen.getByTestId("update-name")).toHaveTextContent("1.0.0-beta.10+def5678");
     expect(screen.getByTestId("update-meta")).toHaveTextContent(/288 MB/);
     expect(screen.getByTestId("update-notes")).toHaveTextContent("Form cards and the update check");
     await act(async () => { fireEvent.press(screen.getByTestId("update-download")); });
+    expect(global.__downloads).toEqual([LATEST.url]);
+    expect(global.__fs.files.get(cached)).toBe(LATEST.size);
+    expect(global.__intents).toEqual([{ action: INSTALL_ACTION, data: expect.stringMatching(/^content:\/\/.*update-29800500\.apk$/),
+                                        type: APK_TYPE, flags: 1 }]);
+    expect(Linking.openURL).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("update-sheet")).toBeNull();      // the installer has the screen
+  });
+
+  it("shows the download's progress, and Cancel stops it", async () => {
+    let release;
+    global.__downloadHold = new Promise((res) => { release = res; });
+    await path();
+    await screen.findByTestId("update-sheet");
+    await act(async () => { fireEvent.press(screen.getByTestId("update-download")); });
+    expect(screen.getByTestId("update-progress-text")).toHaveTextContent("50 of 288 MB");
+    expect(screen.queryByTestId("update-download")).toBeNull();
+    await act(async () => { fireEvent.press(screen.getByTestId("update-cancel")); });
+    expect(screen.queryByTestId("update-sheet")).toBeNull();
+    await act(async () => { release(); });
+    expect(global.__intents).toEqual([]);                          // a cancelled fetch installs nothing
+  });
+
+  it("a file already whole in the cache is installed without fetching again", async () => {
+    global.__fs.files.set(cached, LATEST.size);
+    expect(await downloadedUpdate(LATEST)).toBe(cached);
+    await path();
+    await screen.findByTestId("update-sheet");
+    await act(async () => { fireEvent.press(screen.getByTestId("update-download")); });
+    expect(global.__downloads).toEqual([]);
+    expect(global.__intents).toHaveLength(1);
+  });
+
+  it("a part of a file is not whole", async () => {
+    global.__fs.files.set(cached, LATEST.size - 1);
+    expect(await downloadedUpdate(LATEST)).toBeNull();
+    expect(await downloadedUpdate({ ...LATEST, size: 0 })).toBeNull();   // no promised size: nothing to compare
+  });
+
+  it("a fetch that fails, or an installer that will not open, offers the browser", async () => {
+    global.__downloadFail = () => true;
+    await path();
+    await screen.findByTestId("update-sheet");
+    await act(async () => { fireEvent.press(screen.getByTestId("update-download")); });
+    expect(await screen.findByTestId("update-failed")).toBeTruthy();
+    expect(global.__intents).toEqual([]);
+    await act(async () => { fireEvent.press(screen.getByTestId("update-browser")); });
     expect(Linking.openURL).toHaveBeenCalledWith(LATEST.url);
     expect(screen.queryByTestId("update-sheet")).toBeNull();
+
+    resetUpdate(); jest.clearAllMocks();
+    global.__downloadFail = null; global.__intentFail = true;
+    await path();
+    await screen.findByTestId("update-sheet");
+    await act(async () => { fireEvent.press(screen.getByTestId("update-download")); });
+    expect(await screen.findByTestId("update-failed")).toBeTruthy();
+    expect(global.__intents).toHaveLength(1);
+    expect(Linking.openURL).not.toHaveBeenCalled();
   });
+
+  it("at launch, files from builds no newer than this one are deleted; the offered one stays", async () => {
+    const stale = apkPath(INSTALLED.code - 100), own = apkPath(INSTALLED.code);
+    global.__fs.files.set(stale, 5); global.__fs.files.set(own, 5); global.__fs.files.set(cached, LATEST.size);
+    global.__fs.files.set("file:///cache/word.mp3", 7);
+    await pruneDownloads();
+    expect([...global.__fs.files.keys()].sort()).toEqual([cached, "file:///cache/word.mp3"].sort());
+    // launchUpdate runs it: the next launch after installing this build clears its file.
+    global.__fs.files.set(stale, 5);
+    await launchUpdate({ fetch: jest.fn(okJson(LATEST)) });
+    expect(global.__fs.files.has(stale)).toBe(false);
+  });
+});
+
+describe("on the path", () => {
 
   it("Later closes it for this launch, and the next mount does not ask again", async () => {
     const view = await path();

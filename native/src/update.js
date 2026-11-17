@@ -20,12 +20,28 @@
  * Gradle take it.
  *
  * Not a setting and nothing is remembered: the owner asked for the check at
- * every launch, and "Later" is for this launch. */
+ * every launch, and "Later" is for this launch.
+ *
+ * **The install happens in the app** (the owner, 2026-11-17: "why can't the
+ * update self take place in the app rather than making it download the link
+ * externally?"). Download fetches the file into the app's own cache with a
+ * progress bar, and hands it to Android's package installer through a content
+ * URI from expo-file-system's own file provider — the installer then asks the
+ * one question it always asks and replaces the app. The first time, Android
+ * also asks to allow this app to install unknown apps; it remembers the
+ * answer. The browser route stays as the fallback where either step fails. It
+ * needs `REQUEST_INSTALL_PACKAGES` in the manifest (app.json), which **a Play
+ * Store build must drop along with LATEST_URL**: Play's policy reserves that
+ * permission for app stores. A file already downloaded for the offered code is
+ * reused rather than fetched again (an install the learner backed out of), and
+ * what is left in the cache from older codes is deleted at launch. */
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, Linking } from "react-native";
 import * as Application from "expo-application";
-import { Sheet, Btn, Muted, Text } from "./ui";
+import * as FS from "expo-file-system/legacy";
+import * as IntentLauncher from "expo-intent-launcher";
+import { Sheet, Btn, Muted, Text, Bar } from "./ui";
 import { useTheme, radius, type as T } from "./theme";
 
 /* Where the record lives. The host is public and the record carries nothing
@@ -88,7 +104,10 @@ export async function checkForUpdate({ fetch: fetchFn = globalThis.fetch, url = 
 let launched = null;
 let offered = false;
 export async function launchUpdate(deps) {
-  if (!launched) launched = checkForUpdate(deps);
+  if (!launched) {
+    launched = checkForUpdate(deps);
+    pruneDownloads(deps).catch(() => {});
+  }
   const update = await launched;
   if (!update || offered) return null;
   offered = true;
@@ -100,11 +119,70 @@ export function putBackUpdate() { offered = false; }
 /* Tests start each case as a fresh launch. */
 export function resetUpdate() { launched = null; offered = false; }
 
-/* The browser fetches the file and Android offers to install it, as the
-   testers already install. A failure to open is nothing to report: the sheet
-   is closing anyway and the next launch offers it again. */
+/* The fallback: the browser fetches the file and Android offers to install it,
+   as the testers first installed. A failure to open is nothing to report: the
+   sheet is closing anyway and the next launch offers it again. */
 export function openUpdate(update) {
   return Promise.resolve().then(() => Linking.openURL(update.url)).catch(() => {});
+}
+
+/* The package installer's MIME type, and Intent.FLAG_GRANT_READ_URI_PERMISSION:
+   the installer is another app, and the content URI is what lets it read a
+   file in this app's private cache. */
+export const APK_TYPE = "application/vnd.android.package-archive";
+const FLAG_GRANT_READ_URI_PERMISSION = 1;
+export const INSTALL_ACTION = "android.intent.action.VIEW";
+
+const APK_NAME = /^update-(\d+)\.apk$/;
+export const apkPath = (code, fs = FS) => `${fs.cacheDirectory || ""}update-${code}.apk`;
+
+/* Files left from earlier offers — a build since installed, or one that was
+   downloaded and never installed — go at launch; the one for the code still on
+   offer is kept so a second Download costs nothing. 229 MB is not something to
+   leave lying about. */
+export async function pruneDownloads({ fs = FS, installed = installedBuild() } = {}) {
+  if (!fs.cacheDirectory) return;
+  const names = await fs.readDirectoryAsync(fs.cacheDirectory);
+  for (const name of names) {
+    const m = APK_NAME.exec(name);
+    if (m && Number(m[1]) <= installed.code) {
+      await fs.deleteAsync(fs.cacheDirectory + name, { idempotent: true }).catch(() => {});
+    }
+  }
+}
+
+/* The file for this update, already whole in the cache, or null. "Whole" is
+   the size the record promised; a cancelled download leaves a shorter file. */
+export async function downloadedUpdate(update, fs = FS) {
+  try {
+    const info = await fs.getInfoAsync(apkPath(update.code, fs), { size: true });
+    return info && info.exists && update.size > 0 && info.size === update.size ? apkPath(update.code, fs) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/* Fetch the file into the cache. `onProgress(written, total)` as it goes;
+   `cancel()` stops it, after which the promise rejects. The promise resolves
+   to the file's uri. */
+export function downloadUpdate(update, { onProgress, fs = FS } = {}) {
+  const task = fs.createDownloadResumable(update.url, apkPath(update.code, fs), {}, (p) => {
+    if (onProgress) onProgress(p.totalBytesWritten, p.totalBytesExpectedToWrite > 0 ? p.totalBytesExpectedToWrite : update.size);
+  });
+  const promise = task.downloadAsync().then((r) => {
+    if (!r || !r.uri) throw new Error("cancelled");
+    if (r.status && r.status !== 200) throw new Error(`status ${r.status}`);
+    return r.uri;
+  });
+  return { promise, cancel: () => task.cancelAsync().catch(() => {}) };
+}
+
+/* Hand the file to Android's package installer. Rejects when the phone will
+   not — no installer answers, or the permission is missing — so the caller
+   can offer the browser instead. */
+export async function installUpdate(fileUri, { fs = FS, intents = IntentLauncher } = {}) {
+  const data = await fs.getContentUriAsync(fileUri);
+  await intents.startActivityAsync(INSTALL_ACTION, { data, type: APK_TYPE, flags: FLAG_GRANT_READ_URI_PERMISSION });
 }
 
 const mb = (bytes) => (bytes > 0 ? `${Math.max(1, Math.round(bytes / 1048576))} MB` : "");
@@ -137,17 +215,77 @@ export function UpdateCard({ update }) {
   );
 }
 
+/* The sheet runs the whole install: Download fetches the file (a bar and the
+   megabytes under the card, Cancel beside it) and opens the installer the
+   moment it is whole; a file already whole opens the installer at once. The
+   sheet closes behind the installer, which takes the screen. Where the fetch
+   or the installer fails, it says so and offers the browser — the one route
+   that cannot fail for the app's own reasons. Leaving the screen mid-download
+   cancels it; the next launch offers the build again. */
 export function UpdateSheet({ update, onClose }) {
+  const [phase, setPhase] = useState("offer");          // offer · downloading · failed
+  const [progress, setProgress] = useState({ written: 0, total: update.size });
+  const task = useRef(null);
+  const gone = useRef(false);
+  useEffect(() => () => { gone.current = true; if (task.current) task.current.cancel(); }, []);
+
+  const install = async () => {
+    try {
+      let uri = await downloadedUpdate(update);
+      if (!uri) {
+        setPhase("downloading");
+        let shown = -1;
+        task.current = downloadUpdate(update, {
+          /* The native task reports many times a second; the screen redraws
+             once a megabyte. */
+          onProgress: (written, total) => {
+            const mb = Math.floor(written / 1048576);
+            if (gone.current || mb === shown) return;
+            shown = mb;
+            setProgress({ written: mb, total });
+          },
+        });
+        uri = await task.current.promise;
+        task.current = null;
+      }
+      if (gone.current) return;
+      await installUpdate(uri);
+      if (!gone.current) onClose();
+    } catch (e) {
+      task.current = null;
+      if (!gone.current) setPhase("failed");
+    }
+  };
+  const cancel = () => { if (task.current) task.current.cancel(); task.current = null; onClose(); };
+
+  const footer = phase === "downloading" ? (
+    <Btn kind="ghost" testID="update-cancel" label="Cancel" block onPress={cancel} />
+  ) : (
+    <View style={{ flexDirection: "row", gap: 10 }}>
+      <Btn kind="ghost" testID="update-later" label="Later" style={{ flex: 1 }} onPress={onClose} />
+      {phase === "failed"
+        ? <Btn kind="pri" testID="update-browser" label="Open in browser" style={{ flex: 1 }}
+               onPress={() => { openUpdate(update); onClose(); }} />
+        : <Btn kind="pri" testID="update-download" label="Download" style={{ flex: 1 }} onPress={install} />}
+    </View>
+  );
+  const totalMb = Math.round((progress.total || update.size) / 1048576);
   return (
-    <Sheet testID="update-sheet" title="Update available" onClose={onClose}
-           footer={(
-             <View style={{ flexDirection: "row", gap: 10 }}>
-               <Btn kind="ghost" testID="update-later" label="Later" style={{ flex: 1 }} onPress={onClose} />
-               <Btn kind="pri" testID="update-download" label="Download" style={{ flex: 1 }}
-                    onPress={() => { openUpdate(update); onClose(); }} />
-             </View>
-           )}>
+    <Sheet testID="update-sheet" title="Update available" onClose={phase === "downloading" ? cancel : onClose}
+           footer={footer}>
       <UpdateCard update={update} />
+      {phase === "downloading" ? (
+        <View testID="update-progress" style={{ marginTop: 14, gap: 6 }}>
+          <Bar value={totalMb > 0 ? progress.written / totalMb : 0} />
+          <Muted testID="update-progress-text" style={{ textAlign: "center" }}>
+            {totalMb > 0 ? `${progress.written} of ${totalMb} MB` : `${progress.written} MB`}
+          </Muted>
+        </View>
+      ) : phase === "failed" ? (
+        <Muted testID="update-failed" style={{ marginTop: 14, textAlign: "center" }}>
+          The download could not be installed
+        </Muted>
+      ) : null}
     </Sheet>
   );
 }

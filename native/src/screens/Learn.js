@@ -603,10 +603,11 @@ export default function Learn({ navigation }) {
                     {stage.title}
                   </Text>
                 ) : null}
-                <View style={{ marginTop: 6 }}>
-                  {stageDone(st, stage) ? <Pill tone="good">done</Pill>
-                    : !open ? <Pill>locked</Pill> : null}
-                </View>
+                {/* No "done" pill (the owner, 2026-11-17): a finished chapter
+                    is its discs encircled and its tracks lit (§30as, §30ar),
+                    and a word under the title said it again. A locked one is
+                    greyed as a whole, and says so once. */}
+                {!open ? <View style={{ marginTop: 6 }}><Pill>locked</Pill></View> : null}
               </View>
               <PathNode unit={stage.core} open={open} branch={false} onOpen={openUnit} />
               {stage.branches.length ? (

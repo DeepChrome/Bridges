@@ -8,7 +8,7 @@ import { Screen, Btn, Muted, List, Row, Thumb, SectionLabel, Text, RowText } fro
 import { Runner, Done, useAudioStopOnLeave } from "../screens/Run";
 import { GrammarNote } from "../lesson";
 import { Q } from "../questions";
-import { UN, afterStep, stepRoute, caseLearnKey, caseDrillKey } from "../data";
+import { UN, onwardFrom, caseLearnKey, caseDrillKey } from "../data";
 import { CASES, caseById } from "@core/cases";
 import { scoreOf, bestOf } from "./shared";
 
@@ -131,7 +131,7 @@ export function CaseFlow({ route, navigation }) {
     /* From a lesson step, on through the lesson; from the hub, a lesson goes
        on to its drill and a drill back to the case. */
     const unit = unitId ? UN.find((u) => u.id === unitId) : null;
-    const after = unit ? afterStep(st, unit, index, "case") : null;
+    const onward = unit ? onwardFrom(st, unit, index, "case") : null;
     return (
       <Done
         title={mode === "drill" ? `${c.name} drill` : `The ${c.name.toLowerCase()} case`}
@@ -139,7 +139,7 @@ export function CaseFlow({ route, navigation }) {
         score={result.total ? result.score : undefined}
         onAgain={again}
         againLabel="Try again"
-        onContinue={unit ? (after ? () => navigation.replace(...stepRoute(after.id, unit, index)) : () => navigation.goBack())
+        onContinue={unit ? (onward ? () => navigation.replace(...onward) : () => navigation.goBack())
           : mode === "learn" ? () => navigation.replace("CaseRun", { caseId: c.id, mode: "drill" })
           : () => navigation.goBack()}
         continueLabel={!unit && mode === "learn" ? "Drill" : "Continue"}

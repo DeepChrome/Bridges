@@ -5212,7 +5212,9 @@ Twelve items from one message. The ones with a rule behind them:
   second counter (§30ar) — but the stability that counts as 100 now runs
   from `COMMON_AT` (21 days) for the top hundred words to `FAMILIAR_AT` (90)
   from the thousandth, log-interpolated between: a word met in every other
-  sentence gets re-tested by life, so three weeks held is mastered. A card
+  sentence gets re-tested by life, so three weeks held is mastered. *(Since
+  2026-11-17 the curve is an asymptote on the same horizons, the horizon the
+  75 mark and `FAMILIAR_AT` 60 — §30cw.)* A card
   **relearning** is capped at `RELEARNING_CAP` (35) however stable it was,
   because it was just forgotten. `rankOf` in `data.js` is the lemma index,
   which the build orders by frequency (reading it, not keying state on it —
@@ -7556,9 +7558,75 @@ noticed a curriculum change.
 
 **Open**: a Play Store build must not offer side-loaded APKs (a different
 signing key would refuse to install anyway) — point `LATEST_URL` at nothing
-for that build when it exists. And the Worker's `/latest.json` route is in the
-repo and **not deployed** (the gate refused `wrangler deploy`): until the owner
-runs it from `tools/dl`, the route is 404 and the app says nothing.
+for that build when it exists. The dl Worker's `/latest.json` was deployed
+on the owner's word the same evening, and the first stamped build
+(Ya-2841b66d7, versionCode 29908957) uploaded and set as latest.
+
+## 30cw. The first week on a stamped build (2026-11-17)
+
+Five reports from the owner on Ya-2841b66d7, and a sixth request mid-way.
+What each was:
+
+- **"Whenever I go to profile, I get the something broke message"** —
+  `Cannot read property 'state' of null`. A form drill grades a skill slot
+  on a word no meaning question has met (`gradeSkill`, §30cj), so
+  `seen[word]` holds scores and no card, and `cardFor` answers null. Two
+  readers called `.state` and `.reps` on it: the profile's "words learned"
+  count and `reconcileCurriculum`'s `studied`. Both guard now; `you.test.js`
+  seeds such an entry. **An entry may have skill slots and no card** — any
+  reader of `seen` that assumes a card is this crash waiting.
+- **"Pronunciation drills not counting anything as correct… it reads the
+  right word at the bottom but doesn't give me credit."** §30cu made a hold
+  continuous and accumulating: a final under the finger is a segment held
+  until the release. On the release Android often answers the stop with
+  `no-speech` or `client` rather than an `end`, and the error handler threw
+  the segments away and wrote "Try again" — exactly the screenshot: «конечно»
+  in the live line, "Try again" under it, no verdict. A held attempt that
+  heard something now ends on a transient error as it ends on `end`: what
+  was heard is the answer (`hold.test.js`).
+- **"After I complete a lesson, it dumps me off somewhere unexpected."**
+  Three step endings put the learner on the unit screen or the path: the
+  vocabulary step's Done had Back alone, the quiz at a unit's last lesson had
+  no Continue once the summary and video were done, and the case lesson fell
+  back to Back. `onwardFrom(st, u, i, id)` in data.js is the one rule — the
+  rest of this lesson (`afterStep`), the next lesson of the unit, the next
+  thing on the path (`nextRoute`) — read by the vocabulary step, the quiz,
+  the case lesson and the summary; the video quiz no longer pushes a null
+  route at the end of the course. `onward.test.js`.
+- **"Excessive repetition on words that have not been problematic… if I flag
+  it easy, I'd rather not see it for a while."** §30cu's weighted draw
+  weighted a held card down and could not keep it out: with a few hundred
+  met cards and twenty-odd to fill a day, a third of the pool is dealt every
+  day whatever the weights, and the one-day cooldown let Monday's Easy back
+  on Wednesday. **A card rests until half its interval has passed**
+  (`fillHoldDays`, `fillReady` in core/queue.js: `FILL_HOLD_SHARE` 0.5,
+  floored at the cooldown, capped at `FILL_HOLD_MAX_DAYS` 21), so an Easy's
+  longer interval is exactly what buys the longer rest, and a word mastered
+  for months still comes back after three weeks. Due cards are the
+  schedule's and are never held. Every test fixture that modelled "answered
+  the day before yesterday, due in three months" was holding a card that
+  should rest, and each now says what interval it is on.
+- **The score is an asymptote** (*"incrementally harder to get a 100. But
+  it's not a rush… almost like an asymptote"*). `familiarity` was
+  log-stability over the horizon, capped — 100 on the day a common word's
+  stability passed three weeks, in four or five reviews. Now
+  `100 · (1 − 4^(−s/h))`: the horizon is 75, twice it 94, 100 only past
+  about four horizons (80 days of stability for «это», 230 for a rare word,
+  on `FAMILIAR_AT` 60). The bottom is honest: a day held on a rare word is a
+  1, not a 15. Every score the owner sees drops with it, and the thresholds
+  that read the score were re-solved for the stability each meant —
+  `TROUBLE_SCORE` 20 → 8, `KNOWN_AT` 40 → 25; `MASTERED_AT` 80 stays (a
+  memory of about 1.2 horizons). `stabilityFor(score, rank)` reads the curve
+  back. The labels (Just met / Learning / Familiar / Strong / Mastered) keep
+  their numbers and so mean more days held than before.
+- **The wrench** (`native/src/whycard.js`): in developer mode a flashcard's
+  front carries a wrench that opens *why this card came up* — the pile it
+  came from and every number the deal read. **Nothing is computed for the
+  panel**: `buildSession`, `goalSession` and `practiceSession` stamp each
+  item with `why` as they deal it (source; for the make-up draw the priority
+  and each weighted part, the draw key, the weight, the hold; for a due card
+  its urgency), and `drawKeys` is `weightedDraw` keeping the keys. A new
+  pile source needs a `why.source` and a line in `SOURCES`.
 
 ## 31. Verification
 

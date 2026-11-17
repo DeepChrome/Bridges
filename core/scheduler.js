@@ -349,11 +349,35 @@ export const strength = (entry) =>
  *
  * And a card being relearned after a lapse is held at `RELEARNING_CAP`: its old
  * stability says it was known, and the Again that just happened says it is
- * not, and the score should agree with the Again. */
-export const FAMILIAR_AT = 90;
+ * not, and the score should agree with the Again.
+ *
+ * **The curve is an asymptote now** (the owner, 2026-11-17: *"a bit more
+ * precision in calculating the score. It should be incrementally harder to
+ * get a 100. But it's not a rush to get one either… it will come over time.
+ * Like ideally it's almost like an asymptote"*). It was log-stability over
+ * the horizon, capped: a common word hit 100 the day its stability passed
+ * three weeks, in four or five good reviews, and then had nowhere to go. Now
+ *
+ *     score = 100 · (1 − 4^(−s / h))
+ *
+ * with `h` the word's horizon. Every good review closes a share of the gap
+ * left to 100 and never all of it: the horizon is the 75 mark, twice it is
+ * 94, three times 98, and the rounding reaches 100 only once stability is
+ * about 3.8 horizons — 80 days for «это», 230 for a rare word, inside the
+ * scheduler's year but only just. The bottom is honest too: a day's
+ * stability on a common word is 6, on a rare one 1.
+ *
+ *     common (h 21):  1 d → 6   4 d → 23   10 d → 48   21 d → 75   42 d → 94   80 d → 100
+ *     rare   (h 60):  1 d → 1   10 d → 21  30 d → 50   60 d → 75  120 d → 94  230 d → 100
+ *
+ * The thresholds that read the score moved with the curve (TROUBLE_SCORE,
+ * native data.js KNOWN_AT), each re-solved for the stability it meant. */
+export const FAMILIAR_AT = 60;
 export const COMMON_AT = 21;
 export const RELEARNING_CAP = 35;
 const COMMON_RANK = 100, RARE_RANK = 1000;
+/* Where the horizon sits on the curve: 1 − 1/SCORE_BASE of the way to 100. */
+export const SCORE_BASE = 4;
 
 /* Days of stability that count as mastered, for a lemma of this frequency
    rank (1 = commonest; the lemma index is assigned by frequency). No rank — a
@@ -368,9 +392,13 @@ export function masteryHorizon(rank) {
 
 export function familiarity(card, rank) {
   if (!card || card.state === NEW || !(card.s > 0)) return null;
-  const score = Math.round(100 * Math.min(1, Math.log1p(card.s) / Math.log1p(masteryHorizon(rank))));
+  const score = Math.round(100 * (1 - Math.pow(SCORE_BASE, -card.s / masteryHorizon(rank))));
   return card.state === RELEARNING ? Math.min(score, RELEARNING_CAP) : score;
 }
+/* The stability a score stands for, on this horizon — the curve read the
+   other way, for a threshold that is really about days held. */
+export const stabilityFor = (score, rank) =>
+  -masteryHorizon(rank) * Math.log(1 - Math.min(99.5, Math.max(0, score)) / 100) / Math.log(SCORE_BASE);
 
 /* The score in words, for the learner reading their own entry. */
 export function familiarityLabel(score) {
@@ -417,9 +445,14 @@ export const dayDone = (state, due, day) => (due || 0) === 0 && workedOn(state, 
  * lapses per answer, and `troubleWords` keeps the worst TROUBLE_CAP. The flag
  * on a card and the "Trouble words" set read the same list. `rank` is the
  * lemma's frequency rank where the caller knows it (familiarity's horizon);
- * without it a word is judged on the full horizon, the stricter reading. */
+ * without it a word is judged on the full horizon, the stricter reading.
+ *
+ * TROUBLE_SCORE was 20 on the log curve, which meant a day or so of stability
+ * after eight answers; on the asymptote (familiarity, 2026-11-17) a day is a
+ * 6 on a common word and a 1 on a rare one, so the bar is 8 — "eight answers
+ * and it still holds only a day or three". */
 export const TROUBLE_MIN_REPS = 8;
-export const TROUBLE_SCORE = 20;
+export const TROUBLE_SCORE = 8;
 export const TROUBLE_CAP = 20;
 export function isTrouble(card, rank) {
   if (!card || (card.reps || 0) < TROUBLE_MIN_REPS) return false;

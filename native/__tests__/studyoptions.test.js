@@ -101,15 +101,16 @@ describe("the card says what it is", () => {
   it("shows how well a card is held, coloured from red to green", async () => {
     const { familiarityColor } = require("../src/screens/Study");
     const { light } = require("../src/theme");
-    /* Five days held is partway whatever the word — a common word is mastered
-       at three weeks and a rare one at three months (2026-09-28) — so the
-       number sits in the middle either way. */
-    await withProfile({ seen: { [WORD]: { recognise: due({ s: 5 }) } } });
+    /* A fortnight held is partway whatever the word — the horizon is three
+       weeks for a common word and two months for a rare one (2026-09-28;
+       the asymptote of 2026-11-17 puts the horizon at 75) — so the number
+       sits between the ends either way. */
+    await withProfile({ seen: { [WORD]: { recognise: due({ s: 15 }) } } });
     await screen.findByText("Show");
     await act(async () => { fireEvent.press(screen.getByText("Show")); });   // the back carries it
     const score = Number((await screen.findByTestId("familiarity-score")).props.children);
-    expect(score).toBeGreaterThan(30);
-    expect(score).toBeLessThan(70);
+    expect(score).toBeGreaterThan(20);
+    expect(score).toBeLessThan(80);
     // The ends of the scale are the audited tokens; the middle is the amber one.
     expect(familiarityColor(0, light)).toBe(light.bad.toUpperCase());
     expect(familiarityColor(50, light)).toBe(light.warn.toUpperCase());

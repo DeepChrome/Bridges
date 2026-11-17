@@ -365,6 +365,22 @@ export function afterStep(st, u, i, id, skip = []) {
   return cs.find((c, k) => k > at && !c.done && !skip.includes(c.id)) || null;
 }
 
+/* **Where a finished step goes, one rule** (the owner, 2026-11-17: *"if
+   someone is continuing in a track, it should flow properly into the next
+   track component or next track. Sometimes after I complete a lesson, it
+   dumps me off somewhere unexpected"*). The rest of this lesson first
+   (`afterStep`), then the next lesson of the unit, then the next thing on the
+   path (`nextRoute`) — the next unit, or the next chapter. Null only at the
+   end of the course. The vocabulary step used to end on Back alone, the quiz
+   on Back at a unit's last lesson, and the case lesson on Back: each a step
+   that put the learner on the unit screen instead of the next step. */
+export function onwardFrom(st, u, i, id, skip = []) {
+  const after = afterStep(st, u, i, id, skip);
+  if (after) return stepRoute(after.id, u, i);
+  if (i + 1 < lessonCount(u)) return ["Vocab", { unitId: u.id, index: i + 1 }];
+  return nextRoute(st);
+}
+
 /* Whether a unit has a grammar point to practise: its card's `form`, or its
    chapter spine's (a side quest inherits it, as core/questions.js formSpec
    does). Chapter 1 has none. Read here rather than off the questions module,
@@ -582,7 +598,8 @@ export function reconcileCurriculum(st) {
   const old = st.unit || {};
   if (!Object.keys(old).length) return { ...st, curriculum: CURRICULUM };
   const seen = st.seen || {};
-  const studied = (w) => !!seen[w] && (cardFor(seen[w]).reps || 0) > 0;
+  // An entry with skill slots and no card (a form drill's) is not studied.
+  const studied = (w) => { const c = cardFor(seen[w]); return !!c && (c.reps || 0) > 0; };
   const unit = {};
   for (const u of UN) {
     const was = old[u.id] || {};
@@ -977,8 +994,12 @@ const unitWords = () => {
    show words with a mastery score of 40 or higher"*). A drill asks for an
    ending; asking it of a word whose meaning is not yet held is two things to
    recall at once. Nothing widens this — a learner with few such words gets a
-   short run, and the cog's chapters are the way to drill anything else. */
-export const KNOWN_AT = 40;
+   short run, and the cog's chapters are the way to drill anything else.
+   The 40 he named was on the log curve, where it meant three or four days of
+   stability; on the asymptote (core/scheduler.js familiarity, 2026-11-17)
+   40 would mean a fortnight on a common word and a month on a rare one. 25
+   is the bar now: four days held on a common word, twelve on a rare one. */
+export const KNOWN_AT = 25;
 export function knownPool(st) {
   const out = [], have = new Set();
   for (const w of Object.keys(st.seen || {})) {

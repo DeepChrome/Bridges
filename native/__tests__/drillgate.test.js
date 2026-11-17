@@ -68,10 +68,11 @@ describe("every drill is open from the first screen", () => {
 
 });
 
-/* "Your words" are the words held at familiarity 40 or above, and nothing
-   widens them (the owner, 2026-10-08: "the 'your words' setting still brings
-   up random new words… should only show words with a mastery score of 40 or
-   higher"). The drill used to step along the route to the whole curriculum
+/* "Your words" are the words held at familiarity KNOWN_AT or above, and
+   nothing widens them (the owner, 2026-10-08: "the 'your words' setting still
+   brings up random new words… should only show words with a mastery score of
+   40 or higher" — 40 on the log curve; the bar moved with the curve,
+   data.js). The drill used to step along the route to the whole curriculum
    until a run filled. */
 describe("Your words", () => {
   const DAY = 86400000;
@@ -79,12 +80,12 @@ describe("Your words", () => {
   const units = STAGES.flatMap((s) => [s.core].concat(s.branches)).flatMap((u) => u.w);
   const card = (stability) => ({ recognise: { state: 2, s: stability, d: 5, reps: 6, lapses: 0,
                                               dueAt: Date.now() + DAY, lastAt: Date.now() - DAY } });
-  it("holds only words at 40 or above, and only the units' words", () => {
+  it("holds only words at the bar or above, and only the units' words", () => {
     const [held, shaky] = units.filter((i) => L[i].p === "noun").slice(0, 2).map((i) => L[i].b);
     const st = { seen: { [held]: card(400), [shaky]: card(0.5) } };
     const pool = knownPool(st).map((i) => L[i].b);
     expect(pool).toEqual([held]);
     expect(knownPool({ seen: {} })).toEqual([]);
-    expect(KNOWN_AT).toBe(40);
+    expect(KNOWN_AT).toBe(25);
   });
 });

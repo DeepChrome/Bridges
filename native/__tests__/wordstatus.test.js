@@ -52,9 +52,10 @@ describe("the entry", () => {
     expect(screen.queryByTestId("familiarity")).toBeNull();
   });
 
-  /* A month held: mastered for a word as common as this one. */
+  /* Four months held: mastered for a word as common as this one (the score
+     is an asymptote since 2026-11-17; a month is "Strong"). */
   it("shows the score and a word for it once the word is studied", async () => {
-    await open(VERB, { seen: { [VERB]: card(30) } });
+    await open(VERB, { seen: { [VERB]: card(120) } });
     expect(screen.getByTestId("familiarity")).toBeTruthy();
     expect(screen.getByText("Mastered")).toBeTruthy();
   });

@@ -45,7 +45,7 @@ export function VideoQuizFlow({ route, navigation }) {
   const onward = params.unitId ? nextRoute(st) : null;
   const goOn = () => {
     if (navigation.pop) navigation.pop(params.depth || 1);
-    navigation.dispatch(StackActions.push(...onward));
+    if (onward) navigation.dispatch(StackActions.push(...onward));
   };
   if (!v || !steps.length) return <Done title="No questions for this video yet" onBack={leave} />;
   if (result) {

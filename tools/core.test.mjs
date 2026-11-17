@@ -22,7 +22,7 @@ import * as SK from "../core/skills.js";
 import { buildSession, requeue, interleave, dailyFor, QUEUE_DEFAULTS, frontFor, stepToday,
          cardKind, kindsOf, mixNew, practiceSession, rollGoal, spendGoal, goalBadge, goalSession, goalPerDay,
          weekdayOf, isStudyDay, GOAL_REVIEWS, GOAL_CAP_DAYS, fillPriority, meaningHole, cooledDown,
-         FILL_COOLDOWN_DAYS, RARE_WEIGHT,
+         FILL_COOLDOWN_DAYS, RARE_WEIGHT, fillHoldDays, fillReady, FILL_HOLD_MAX_DAYS,
          STUCK_AT, REST_DAYS, noteAnswer, isResting, againGap } from "../core/queue.js";
 import { SCENARIOS } from "../core/scenarios.js";
 import { quizPassed, PASS_MARK, RELIEF_MARK, RELIEF_AFTER } from "../core/state.js";
@@ -657,18 +657,34 @@ group("familiarity");
   ok(S.familiarity(lapsed) < before, "Again lowers it", `${before} -> ${S.familiarity(lapsed)}`);
   ok(S.familiarity({ state: S.RELEARNING, s: 400 }) <= S.RELEARNING_CAP, "relearning is capped",
      String(S.familiarity({ state: S.RELEARNING, s: 400 })));
-  /* Log-scaled, so a day held is a real step and a week is a bigger one. */
+  /* An asymptote (2026-11-17): a day held on a rare word is next to nothing,
+     the horizon is three quarters, and 100 comes only once the memory holds
+     several horizons — incrementally harder, never a wall. */
   const day = S.familiarity({ state: S.REVIEW, s: 1 }), month = S.familiarity({ state: S.REVIEW, s: 30 });
-  ok(day >= 10 && day < 25 && month > 65 && month < 90,
-     "with no rank: a day is a sixth, a month three quarters", `${day} ${month}`);
-  /* How common a word is sets how long it must hold: «это» is mastered at
-     three weeks, a rare word only at the full horizon. */
+  ok(day >= 1 && day < 10 && month >= 40 && month <= 60,
+     "with no rank: a day is a few points, a month about half", `${day} ${month}`);
+  const at = (s, rank) => S.familiarity({ state: S.REVIEW, s }, rank);
+  ok(at(S.FAMILIAR_AT) === 75 && at(2 * S.FAMILIAR_AT) === 94 && at(3 * S.FAMILIAR_AT) === 98,
+     "the horizon is 75, twice it 94, three times 98", `${at(S.FAMILIAR_AT)} ${at(2 * S.FAMILIAR_AT)} ${at(3 * S.FAMILIAR_AT)}`);
+  ok(at(3.5 * S.FAMILIAR_AT) < 100 && at(4 * S.FAMILIAR_AT) === 100 && at(365, 3000) === 100,
+     "100 only past about four horizons, and inside the scheduler's year for a rare word",
+     `${at(3.5 * S.FAMILIAR_AT)} ${at(4 * S.FAMILIAR_AT)} ${at(365, 3000)}`);
+  /* Past the horizon each doubling of stability adds less than the one
+     before — the top of the curve is where it gets incrementally harder. */
+  const steps = [1, 2, 4, 8].map((k) => at(k * S.FAMILIAR_AT));
+  const gains = steps.slice(1).map((v, i) => v - steps[i]);
+  ok(gains.every((g, i) => g > 0 || steps[i] === 100) && gains.every((g, i) => !i || g < gains[i - 1]),
+     "the gains shrink as the score climbs", `${steps.join(" ")} → ${gains.join(" ")}`);
+  ok(Math.abs(S.stabilityFor(75) - S.FAMILIAR_AT) < 0.01 && Math.abs(S.stabilityFor(50, 3) - S.COMMON_AT / 2) < 0.01,
+     "stabilityFor reads the curve back", `${S.stabilityFor(75)} ${S.stabilityFor(50, 3)}`);
+  /* How common a word is sets how long it must hold: «это» is at three
+     quarters after three weeks, a rare word well under half. */
   ok(S.masteryHorizon(5) === S.COMMON_AT && S.masteryHorizon(5000) === S.FAMILIAR_AT
      && S.masteryHorizon(300) > S.COMMON_AT && S.masteryHorizon(300) < S.FAMILIAR_AT,
      "the horizon runs from common to rare", `${S.masteryHorizon(300)}`);
   const common = { state: S.REVIEW, s: S.COMMON_AT };
-  ok(S.familiarity(common, 3) === 100 && S.familiarity(common, 3000) < 80,
-     "three weeks masters a common word and not a rare one",
+  ok(S.familiarity(common, 3) === 75 && S.familiarity(common, 3000) < 50,
+     "three weeks takes a common word to 75 and a rare one under half",
      `${S.familiarity(common, 3)} ${S.familiarity(common, 3000)}`);
   ok(S.familiarityLabel(null) === "New" && S.familiarityLabel(100) === "Mastered"
      && S.familiarityLabel(10) === "Just met", "the words for the score");
@@ -764,8 +780,9 @@ group("the scheduler");
   ok(!S.wordTrouble({ recognise: good }), "a word answered once is not");
   /* The score reads against the word's own horizon (familiarity): a common
      word's day of stability is worth more of its score than a rare one's. */
-  ok(S.isTrouble(card(1, 12)) && !S.isTrouble(card(1, 12), 50),
-     "the same stability is trouble for a rare word and not for a common one");
+  ok(S.isTrouble(card(2, 12)) && !S.isTrouble(card(2, 12), 50),
+     "the same stability is trouble for a rare word and not for a common one",
+     `${S.familiarity(card(2, 12))} ${S.familiarity(card(2, 12), 50)}`);
   /* The bank is capped and ordered by how badly a word is going. */
   const many = {};
   for (let i = 0; i < 30; i++) many["t" + i] = { recognise: card(0.1 + (i % 6) * 0.08, 12, i % 4) };
@@ -4234,8 +4251,9 @@ group("the review, 2026-10-01");
   /* The session meets the goal from the learner's own cards when little is
      due — a weighted draw (fillPriority); with a constant rng it is a sort by
      priority, so the weakest come first. Every card here was last answered
-     three days ago, past the cooldown. */
-  const card = (s, state = 2) => ({ recognise: { s, d: 5, state, dueAt: t0 + 30 * DAY, lastAt: t0 - 3 * DAY, reps: 3, lapses: 0 } });
+     twenty days ago on a thirty-day interval: past the cooldown and past its
+     hold (fillHoldDays), not yet due. */
+  const card = (s, state = 2) => ({ recognise: { s, d: 5, state, dueAt: t0 + 10 * DAY, lastAt: t0 - 20 * DAY, reps: 3, lapses: 0 } });
   const seen = {};
   const words = [];
   for (let k = 0; k < 30; k++) { const w = `w${k}`; words.push(w); seen[w] = card(k < 25 ? 1 + k : 400); }
@@ -4265,6 +4283,28 @@ group("the review, 2026-10-01");
      "a card answered yesterday is not dealt again today");
   ok(FILL_COOLDOWN_DAYS >= 1 && !cooledDown(yesterday.w3.recognise, t0) && cooledDown(seen.w3.recognise, t0),
      "the cooldown is at least a day");
+  /* **A card held well rests** (2026-11-17): out of the fill until half its
+     interval has passed, a day at least, three weeks at most. An Easy gives
+     a longer interval, so an Easy buys the longer rest. */
+  {
+    const held = (interval, ago) => ({ s: interval, d: 5, state: 2, dueAt: t0 - ago * DAY + interval * DAY,
+                                       lastAt: t0 - ago * DAY, reps: 5, lapses: 0 });
+    ok(fillHoldDays(held(10, 0)) === 5 && fillHoldDays(held(1, 0)) === FILL_COOLDOWN_DAYS
+       && fillHoldDays(held(200, 0)) === FILL_HOLD_MAX_DAYS && fillHoldDays({ s: 3 }) === FILL_COOLDOWN_DAYS,
+       "the hold is half the interval, floored at the cooldown and capped at three weeks",
+       `${fillHoldDays(held(10, 0))} ${fillHoldDays(held(1, 0))} ${fillHoldDays(held(200, 0))}`);
+    ok(!fillReady(held(40, 10), t0) && fillReady(held(40, 20), t0) && !fillReady(held(400, 20), t0) && fillReady(held(400, 21), t0),
+       "a card inside its hold is out of the fill, past it in");
+    const resting = { ...seen, w3: { recognise: held(60, 10) }, w4: { recognise: held(60, 30) } };
+    const dealt = goalSession({ seen: resting, words, now: t0, owed: 30, rng: () => 0.5, familiar }).items.map((x) => x.word);
+    ok(!dealt.includes("w3") && dealt.includes("w4"),
+       "a card pressed Easy ten days ago on a sixty-day interval is not dealt; one thirty days ago is", dealt.join(" "));
+    // Every dealt card says why, with the numbers the draw used.
+    const why = goalSession({ seen, words, now: t0, owed: 5, rng: () => 0.5, familiar }).items[0].why;
+    ok(why && why.source === "fill" && Number.isFinite(why.p) && why.parts && Number.isFinite(why.parts.since)
+       && Number.isFinite(why.key) && Number.isFinite(why.weight) && why.hold === fillHoldDays(seen[words[0]].recognise),
+       "a card from the make-up draw carries its priority, parts, key and hold", JSON.stringify(why));
+  }
   /* What moves the priority, each part alone. */
   {
     const base = { card: { s: 10, d: 5, lastAt: t0 - 5 * DAY }, entry: {}, r: 0.9, score: 50, now: t0 };

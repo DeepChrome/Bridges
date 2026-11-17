@@ -82,7 +82,8 @@ it("keeps a card set aside out of every round, and rare in the personal review",
   // Due though it is, it is not dealt as due: its schedule is ignored.
   expect(words(sessionFor(st, { rng: () => 0.5 })).slice(0, 1)).toEqual([B]);
   // Among twenty ordinary cards past the cooldown, it is drawn rarely, not never.
-  const cooled = { dueAt: now + 30 * DAY, lastAt: now - 3 * DAY, s: 4, d: 5, state: REVIEW, steps: 0, reps: 4, lapses: 0 };
+  // Past the cooldown and the hold (three days on a six-day interval), not due.
+  const cooled = { dueAt: now + 3 * DAY, lastAt: now - 3 * DAY, s: 4, d: 5, state: REVIEW, steps: 0, reps: 4, lapses: 0 };
   const seen = { [A]: { recognise: cooled } };
   const twenty = L.slice(10, 30).map((x) => x.b);
   for (const w of twenty) seen[w] = { recognise: cooled };

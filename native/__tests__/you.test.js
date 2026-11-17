@@ -138,5 +138,21 @@ describe("what was learned, and the gaps", () => {
     expect(await screen.findByTestId("lessons-sheet")).toBeTruthy();
     expect(screen.getByText(unit.name)).toBeTruthy();
   });
+
+  /* A form drill grades a skill slot on a word no meaning question has met,
+     so the entry has scores and no card (core/scheduler.js gradeSkill).
+     Reading `.state` off the null card crashed the profile screen on the
+     owner's phone (2026-11-17: "Cannot read property 'state' of null"). */
+  it("stands up to a word with skill scores and no card", async () => {
+    let st = { ...base, unit: {}, drills: {} };
+    st = finishLesson(st, 0);
+    const words = lessonWords(unit, 0);
+    st.seen = { [L[words[0]].b]: { forms: { ...held } }, [L[words[1]].b]: { recognise: held } };
+    expect(learnedByUnit(st).units[0].words).toEqual([words[1]]);
+    expect(gapsOf(st)).toContain(words[0]);
+    await withYou(st);
+    expect(await screen.findByTestId("stat-learned")).toHaveTextContent(/^1/);
+    expect(screen.queryByText("Something broke")).toBeNull();
+  });
 });
 

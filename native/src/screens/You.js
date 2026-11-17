@@ -33,7 +33,12 @@ export function grammarTrouble(st) {
  * learned" figure). A gap is a word of a lesson the learner has finished that
  * is not learned yet — never answered, still on its steps, or forgotten — in
  * route order, so the first gaps are the oldest. Exported for the test. */
-const isLearned = (st, b) => !!(st.seen && st.seen[b]) && cardFor(st.seen[b]).state === REVIEW;
+/* `cardFor` is null for an entry that holds skill slots and no card — a word
+   a form drill graded before any meaning question did (core/scheduler.js
+   gradeSkill). Reading `.state` off it crashed the profile screen on the
+   owner's phone (2026-11-17). */
+const inReview = (entry) => { const c = cardFor(entry); return !!c && c.state === REVIEW; };
+const isLearned = (st, b) => !!(st.seen && st.seen[b]) && inReview(st.seen[b]);
 export function learnedByUnit(st) {
   const out = [], placed = new Set();
   for (const u of UN) {
@@ -250,7 +255,7 @@ export default function You({ navigation }) {
      its card has left the learning steps — remembered across a day at least —
      not the moment it was first shown. A sentence card is not a word. */
   const learned = Object.entries(st.seen)
-    .filter(([w, e]) => !/\s/.test(w) && cardFor(e).state === REVIEW).length;
+    .filter(([w, e]) => !/\s/.test(w) && inReview(e)).length;
   // Cleared means done — vocabulary met and the quiz passed — not merely attempted.
   const lessons = UN.reduce((a, u) => {
     let n = 0;

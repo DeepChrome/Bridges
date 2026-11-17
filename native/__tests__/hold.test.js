@@ -78,6 +78,31 @@ describe("hold to speak", () => {
     expect(onFinal.mock.calls[0][2]).toEqual(["книга", "книги", "книгу"]);
   });
 
+  /* The stop after a release answered with an error, not an end: what was
+     heard under the finger is still the answer. Android reports `no-speech`
+     or `client` when nothing followed the last segment, and the segments were
+     thrown away — the owner's pronunciation step showed «конечно» heard, said
+     "Try again" and gave no credit (2026-11-17). */
+  it("answers with the segments heard when the stop ends in a transient error", async () => {
+    const onFinal = jest.fn();
+    const { result } = await renderHook(() => useRecognizer({ onFinal }));
+    await act(async () => { result.current.hold(); });
+    await final("конечно", ["конечна"]);
+    await act(async () => { result.current.release(); });
+    await act(async () => { global.__stt.emit("error", { error: "client" }); });
+    expect(onFinal).toHaveBeenCalledTimes(1);
+    expect(onFinal.mock.calls[0][0]).toBe("конечно");
+    expect(onFinal.mock.calls[0][2]).toEqual(["конечно", "конечна"]);
+    expect(result.current.note).toBeNull();
+    expect(result.current.phase).toBe("idle");
+    // With nothing heard, the error is still a note and not an answer.
+    await act(async () => { result.current.hold(); });
+    await act(async () => { result.current.release(); });
+    await act(async () => { global.__stt.emit("error", { error: "no-speech" }); });
+    expect(onFinal).toHaveBeenCalledTimes(1);
+    expect(result.current.note).toBe("Nothing heard");
+  });
+
   /* A final that arrives after the release is the end, as it always was. */
   it("takes a final after the release as the answer", async () => {
     const onFinal = jest.fn();

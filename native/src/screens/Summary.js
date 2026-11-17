@@ -20,8 +20,7 @@ import { Screen, Muted, Heading, Subheading, Speaker, Btn } from "../ui";
 import { Linked } from "../words";
 import { RuleCard } from "../rules";
 import { WordSections, WordRow, prepSentences, VideoLines } from "../prep";
-import { UN, L, lessonWords, lessonCount, markComponent, linesWith, stepRoute,
-         afterStep } from "../data";
+import { UN, L, lessonWords, lessonCount, markComponent, linesWith, onwardFrom } from "../data";
 
 const unitWordIdxs = (unit) => Array.from({ length: lessonCount(unit) }, (_, k) => lessonWords(unit, k)).flat();
 
@@ -124,7 +123,6 @@ function onwardOf(st, unit, index, whole) {
     if (unit.v) return ["Video", { videoId: unit.v.id, unitId: unit.id, index: whole ? 0 : index }];
   }
   if (whole) return null;
-  const after = afterStep(st, unit, index, "summary", ["video", "vwords"]);
-  if (after) return stepRoute(after.id, unit, index);
-  return index + 1 < lessonCount(unit) ? ["Vocab", { unitId: unit.id, index: index + 1 }] : null;
+  // The rest of the lesson, the next lesson, or the next unit (data.js).
+  return onwardFrom(st, unit, index, "summary", ["video", "vwords"]);
 }

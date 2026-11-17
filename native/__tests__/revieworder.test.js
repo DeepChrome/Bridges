@@ -33,10 +33,11 @@ function learner() {
   const seen = {};
   words.forEach((i, k) => {
     // Earlier words held a fortnight, recent ones a few days, all answered
-    // three days ago (past the fill's cooldown) — the recent ones are the
-    // most faded and the least held, so they lead the draw.
+    // three days ago on a six-day interval (past the fill's cooldown and its
+    // hold) — the recent ones are the most faded and the least held, so they
+    // lead the draw.
     const early = k < words.length / 2;
-    seen[L[i].b] = { recognise: { dueAt: now + 40 * DAY, lastAt: now - 3 * DAY, s: early ? 6 : 1.5, d: 5,
+    seen[L[i].b] = { recognise: { dueAt: now + 3 * DAY, lastAt: now - 3 * DAY, s: early ? 6 : 1.5, d: 5,
                                   state: REVIEW, steps: 0, reps: 5, lapses: 0 } };
   });
   return { ...base, seen, unit: { [UNIT.id]: { lessons, video: true } }, goal: { day: dayOf(now), owed: 10, done: 0 } };

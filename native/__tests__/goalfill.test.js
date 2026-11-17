@@ -32,15 +32,15 @@ const familiar = (w, c) => familiarity(c) || 0;
 const seeded = (s0 = 7) => { let s = s0; return () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }; };
 
 /* `n` met cards, stability 1..n days, every one answered the day before
-   yesterday (past the fill's cooldown, core/queue.js FILL_COOLDOWN_DAYS) and
-   none due for months — the learner who has kept up. Plus `mastered` very
-   strong. */
+   yesterday on a four-day interval — past the fill's cooldown and past its
+   hold (core/queue.js FILL_COOLDOWN_DAYS, fillHoldDays), not yet due. Plus
+   `mastered` very strong. */
 function learner(words, now, mastered = 0) {
   const seen = {};
   words.forEach((w, k) => {
     const s = k < words.length - mastered ? 1 + k : 400;
     seen[w] = { recognise: { state: REVIEW, s, d: 5, steps: 0, reps: 3, lapses: 0, elapsed: 0, scheduled: s,
-                             lastAt: now - 2 * DAY, dueAt: now + 90 * DAY } };
+                             lastAt: now - 2 * DAY, dueAt: now + 2 * DAY } };
   });
   return seen;
 }
@@ -196,7 +196,9 @@ describe("the goal's fill, over two weeks", () => {
     const pool = words(60);
     let seen = learner(pool, start);
     let yesterday = new Set();
-    for (let d = 0; d < 6; d++) {
+    // Three days: by the fourth every card has been answered and the ones
+    // held longest are resting (fillHoldDays), so a full twenty is not owed.
+    for (let d = 0; d < 3; d++) {
       const now = start + d * DAY;
       const sess = goalSession({ seen, words: pool, now, owed: 20, rng: seeded(d), opts, familiar });
       expect(sess.items).toHaveLength(20);
@@ -215,7 +217,7 @@ describe("the goal's fill, over two weeks", () => {
     const pool = words(40);
     const seen = learner(pool, now, 10);
     seen.w30.recognise.lastAt = now - 20 * DAY;
-    seen.w31.recognise.lastAt = now - 10 * DAY;
+    seen.w31.recognise.lastAt = now - 12 * DAY;
     const sess = goalSession({ seen, words: pool, now, owed: 16, rng: () => 0.5, opts, familiar });
     const mastered = sess.items.filter((x) => seen[x.word].recognise.s === 400).map((x) => x.word);
     expect(mastered).toEqual(["w30", "w31"]);

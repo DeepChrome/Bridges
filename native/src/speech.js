@@ -423,6 +423,17 @@ export function useRecognizer({ onFinal, onError, onQuiet, onLive, enabled = tru
        That is not an answer and not a failure — the engine is opened again
        and the segments already heard are kept. */
     if (!selfEnding.current && held.current && TRANSIENT[ev.error] && reopenHeld()) return;
+    /* A held attempt that already heard something: the error is the end of
+       it, and what was heard is the answer — as the `end` event already
+       treats it. Android answers the stop after a release with `no-speech`
+       or `client` when nothing followed the last segment, and the segments
+       were thrown away: the owner's pronunciation step showed «конечно»
+       heard and "Try again" under it, and never gave credit (2026-11-17). */
+    if (!selfEnding.current && TRANSIENT[ev.error] && spoken()) {
+      const whole = spoken();
+      finish(whole, alternatives(whole));
+      return;
+    }
     clearTimers();
     engine.current = false;
     const wasSelf = selfEnding.current;

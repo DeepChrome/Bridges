@@ -29,7 +29,8 @@ describe("which cards a set holds", () => {
     seen: {
       "я": { recognise: review(-1) },
       "не": { recognise: review(0) },
-      "город": { recognise: review(30, 9) },
+      // Held nine days on a seventeen-day interval: past the fill's hold, not due.
+      "город": { recognise: review(8, 9) },
       // Added by the learner (Read, or a video): new, and wanted.
       "дом": { recognise: { dueAt: now, s: 0, d: 0, state: NEW, steps: 0, reps: 0, lapses: 0 } },
     },

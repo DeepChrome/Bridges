@@ -114,7 +114,8 @@ export function practiceSession({ seen, words, dirs, size }) {
   const items = (words || []).slice(0, size || QUEUE_DEFAULTS.sessionSize).map((w) => {
     const entry = (seen && seen[w]) || {};
     const card = cardFor(entry);
-    return { word: w, direction: frontFor(card, fronts, entry), card: card, kind: kindOf(card) };
+    return { word: w, direction: frontFor(card, fronts, entry), card: card, kind: kindOf(card),
+             why: { source: "round" } };
   });
   return { items: items, due: 0, remaining: 0, newLeft: 0, reviewsLeft: Infinity, done: false,
            practice: true };
@@ -189,11 +190,14 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead, 
     const kind = kindOf(card);
     const direction = frontFor(card, fronts, entry);
     if (kind === "new") {
-      fresh.push({ word: w, direction: direction, card: card || null, kind: kind });
+      fresh.push({ word: w, direction: direction, card: card || null, kind: kind,
+                   why: { source: "new", rank: o.rank ? o.rank(w) : null } });
       continue;
     }
     if (!isDue(card, now, o.learnAhead)) continue;
-    const item = { word: w, direction: direction, card: card, kind: kind, r: retrievability(card, now, o.scheduler) };
+    const r = retrievability(card, now, o.scheduler);
+    const item = { word: w, direction: direction, card: card, kind: kind, r: r,
+                   why: { source: stepToday(card, now) ? "learning" : "due", r: r } };
     /* A learning step is exempt from the cap only when it is today's — a card
        answered today and coming back in ten minutes is being learnt right now.
        One left mid-step on an earlier day is a review like any other: the
@@ -212,6 +216,7 @@ export function buildSession({ seen, words, dirs, now, daily, opts, rng, ahead, 
     ? (x) => { const k = o.rank(x.word); return Number.isFinite(k) ? 1 + 0.25 * Math.log10(1 + k / 100) : 1.5; }
     : () => 1;
   const urgency = (x) => (1 - x.r) / weight(x);
+  for (const x of reviews) Object.assign(x.why, { urgency: urgency(x), rankWeight: weight(x), rank: o.rank ? o.rank(x.word) : null });
   const sortedReviews = shuffled(reviews, random).sort((a, b) => urgency(b) - urgency(a));
   const sortedLearning = shuffled(learning, random).sort((a, b) => a.card.dueAt - b.card.dueAt);
   const due = sortedReviews.length + sortedLearning.length;
@@ -431,6 +436,30 @@ export const FILL_WEIGHTS = { fade: 0.30, since: 0.35, score: 0.15, hole: 0.10, 
 export const SINCE_HORIZON_DAYS = 30;
 export const FILL_SHARPEN = 3;
 export const RARE_WEIGHT = 0.05;
+/* **A card held well is left alone for a while** (the owner, 2026-11-17: *"a
+ * ton of excessive repetition on words that have not been problematic to
+ * me… if a word has easily been mastered, and I flag it easy, I'd rather not
+ * see it for a while"*). The draw weighted such a card down but could not
+ * keep it out: with a pool of a few hundred met cards and twenty or more to
+ * fill a day, a third of the pool is dealt every day whatever the weights,
+ * and the one-day cooldown let a card pressed Easy on Monday back on
+ * Wednesday. So a card is out of the fill until FILL_HOLD_SHARE of the
+ * interval the scheduler gave it has passed — never less than the cooldown,
+ * never more than FILL_HOLD_MAX_DAYS, so a word mastered for months still
+ * comes back after three weeks and bounces around with the rest. An Easy
+ * lengthens the interval, so an Easy is exactly what buys the longer rest.
+ * Due cards are the schedule's and never held. */
+export const FILL_HOLD_SHARE = 0.5;
+export const FILL_HOLD_MAX_DAYS = 21;
+export function fillHoldDays(card) {
+  if (!card || !(card.dueAt > 0) || !(card.lastAt > 0)) return FILL_COOLDOWN_DAYS;
+  const interval = Math.max(0, (card.dueAt - card.lastAt) / DAY);
+  return Math.min(FILL_HOLD_MAX_DAYS, Math.max(FILL_COOLDOWN_DAYS, interval * FILL_HOLD_SHARE));
+}
+/* Past the cooldown and past its hold: in the fill. A card that was never
+   stamped with an answer (an old conversion) has nothing to rest from. */
+export const fillReady = (card, now) =>
+  cooledDown(card, now) && (!(card && card.lastAt > 0) || (now - card.lastAt) / DAY >= fillHoldDays(card));
 /* The two meaning skills' scores, 0–100 each or null, read as a gap in 0–1:
    both scored, their difference over HOLE_SPAN; one scored and one never asked
    is the widest hole there is; neither scored says nothing (0.5 — a word met
@@ -443,7 +472,9 @@ export function meaningHole(entry) {
   if (a === null || b === null) return 1;
   return Math.min(1, Math.abs(a - b) / HOLE_SPAN);
 }
-export function fillPriority({ card, entry, r, score, now }) {
+/* The priority and each part of it in 0–1 (the developer panel on a card
+   reads the parts; the draw reads `p`). */
+export function fillPriorityParts({ card, entry, r, score, now }) {
   const W = FILL_WEIGHTS;
   const days = card && card.lastAt !== undefined && card.lastAt !== null
     ? Math.max(0, (now - card.lastAt) / DAY) : SINCE_HORIZON_DAYS;
@@ -451,20 +482,27 @@ export function fillPriority({ card, entry, r, score, now }) {
   const fam = Number.isFinite(score) ? Math.min(100, Math.max(0, score)) / 100 : 0;
   const hard = Math.min(1, Math.max(0, (((card && card.d) || 1) - 1) / 9));
   const fade = Math.min(1, Math.max(0, 1 - (Number.isFinite(r) ? r : 0)));
-  return W.fade * fade + W.since * since + W.score * (1 - fam) + W.hole * meaningHole(entry) + W.hard * hard;
+  const hole = meaningHole(entry);
+  const parts = { fade, since, score: 1 - fam, hole, hard };
+  const p = W.fade * fade + W.since * since + W.score * (1 - fam) + W.hole * hole + W.hard * hard;
+  return { p, parts, days };
 }
+export const fillPriority = (x) => fillPriorityParts(x).p;
 /* Answered today or within the cooldown: out of the fill. */
 export const cooledDown = (card, now) => {
   if (!card || card.lastAt === undefined || card.lastAt === null) return true;
   return dayOf(card.lastAt) < dayOf(now) - FILL_COOLDOWN_DAYS;
 };
-/* The draw: every candidate keyed by u^(1/weight), highest keys first. */
-export function weightedDraw(list, weightOf, random) {
+/* The draw: every candidate keyed by u^(1/weight), highest keys first.
+   `drawKeys` keeps the key and the weight beside each, for the panel that
+   says why a card came up. */
+export function drawKeys(list, weightOf, random) {
   return list.map((x) => {
     const w = Math.max(1e-9, Number(weightOf(x)) || 0);
-    return { x, key: Math.pow(random(), 1 / w) };
-  }).sort((a, b) => b.key - a.key).map((e) => e.x);
+    return { x, w, key: Math.pow(random(), 1 / w) };
+  }).sort((a, b) => b.key - a.key);
 }
+export const weightedDraw = (list, weightOf, random) => drawKeys(list, weightOf, random).map((e) => e.x);
 
 export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar, order, next, rare }) {
   const o = Object.assign({}, QUEUE_DEFAULTS);
@@ -486,11 +524,15 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
       const entry = (seen && seen[w]) || {};
       const card = cardFor(entry);
       if (!card || kindOf(card) === "new") return;
-      // Answered today or yesterday: not dealt again — never two days running.
-      if (!cooledDown(card, now)) return;
+      // Answered today or yesterday, or still inside its hold (fillHoldDays):
+      // not dealt again — never two days running, and a card held well rests.
+      if (!fillReady(card, now)) return;
       const r = retrievability(card, now, o.scheduler);
-      pool.push({ w, entry, card, rare: !!isRare,
-                  p: fillPriority({ card, entry, r, score: score(w, card), now }) });
+      const fam = score(w, card);
+      const { p, parts, days } = fillPriorityParts({ card, entry, r, score: fam, now });
+      pool.push({ w, entry, card, rare: !!isRare, p,
+                  why: { source: isRare ? "rare" : "fill", p, parts, weights: FILL_WEIGHTS, r, days, score: fam,
+                         hold: fillHoldDays(card) } });
     };
     for (const w of words || []) consider(w, false);
     for (const w of rare || []) consider(w, true);
@@ -500,11 +542,13 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
        storage order. */
     const drawn = typeof order === "function"
       ? pool.slice().sort((a, b) => (order(a.w) - order(b.w)) || (b.p - a.p))
-      : weightedDraw(shuffled(pool, random), (x) => Math.pow(x.p, FILL_SHARPEN) * (x.rare ? RARE_WEIGHT : 1), random);
-    for (const x of drawn) {
-      if (items.length >= want) break;
-      items.push({ word: x.w, direction: frontFor(x.card, fronts, x.entry), card: x.card, kind: kindOf(x.card), extra: true });
-    }
+          .map((x) => ({ x, w: null, key: order(x.w) }))
+      : drawKeys(shuffled(pool, random), (x) => Math.pow(x.p, FILL_SHARPEN) * (x.rare ? RARE_WEIGHT : 1), random);
+    drawn.forEach(({ x, w: weight, key }, place) => {
+      if (items.length >= want) return;
+      items.push({ word: x.w, direction: frontFor(x.card, fronts, x.entry), card: x.card, kind: kindOf(x.card), extra: true,
+                   why: { ...x.why, weight, key, place, of: drawn.length, ordered: typeof order === "function" } });
+    });
   }
   if (beyond && items.length < want && Array.isArray(next)) {
     const fronts = (dirs && dirs.length ? dirs : DEFAULT_FRONTS).filter((d) => DIRECTIONS.includes(d));
@@ -517,7 +561,8 @@ export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, be
       const card = cardFor(entry);
       if (card && kindOf(card) !== "new") continue;
       have.add(w);
-      items.push({ word: w, direction: frontFor(card, fronts, entry), card: card || null, kind: "new", extra: true });
+      items.push({ word: w, direction: frontFor(card, fronts, entry), card: card || null, kind: "new", extra: true,
+                   why: { source: "next" } });
     }
   }
   /* The pool could not fill the session: everything met has been answered

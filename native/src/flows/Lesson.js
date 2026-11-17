@@ -13,7 +13,7 @@ import { VideoLines } from "../prep";
 import { Q } from "../questions";
 import {
   L, UN, lessonWords, lessonCount, markComponent, PASS_MARK,
-  reviewWords, linesWith, afterStep, stepRoute, lowPriorityIdx, sensesOf,
+  reviewWords, linesWith, onwardFrom, lowPriorityIdx, sensesOf,
 } from "../data";
 import { quizPassed } from "@core/state";
 import { firstSense } from "@core/util";
@@ -119,11 +119,16 @@ export function VocabFlow({ route, navigation }) {
   if (resume.prompt) return resume.prompt;
 
   if (done) {
+    /* On to the quiz (or whatever this lesson has next): the step used to end
+       on Back alone, which put the learner on the unit screen or the path
+       (the owner, 2026-11-17). */
+    const onward = onwardFrom(st, unit, index, "vocab");
     return (
       <Done
         title="Vocabulary done"
         detail={`${lessonWords(unit, index).length} words met`}
         guide="words"
+        onContinue={onward ? () => navigation.replace(...onward) : undefined}
         onBack={() => navigation.goBack()}
       />
     );
@@ -320,9 +325,9 @@ export function QuizFlow({ route, navigation }) {
     // (core/state.js quizPassed) accepts a lower score from the third try,
     // and this screen used to say "Not quite" over a quiz the list ticked.
     const { passed, relief, thisRun } = result;
-    const last = index + 1 >= lessonCount(unit);
     const missed = missedWords(result.results, lessonWords(unit, index));
-    const after = afterStep(st, unit, index, "quiz");
+    // The rest of the lesson, the next lesson, or the next unit (data.js).
+    const onward = onwardFrom(st, unit, index, "quiz");
     return (
       <Done
         title={relief ? `Passed on the ${ordinal(result.tries)} try`
@@ -350,10 +355,7 @@ export function QuizFlow({ route, navigation }) {
         }}
         /* On to what follows in this lesson — the summary, then the video
            (data.js afterStep) — and only then the next lesson. */
-        onContinue={!passed ? undefined
-          : after ? () => navigation.replace(...stepRoute(after.id, unit, index))
-          : !last ? () => navigation.replace("Vocab", { unitId, index: index + 1 })
-          : undefined}
+        onContinue={!passed || !onward ? undefined : () => navigation.replace(...onward)}
         /* Done's own "Continue", not the step's name (the owner,
            2026-10-09: "Replace summary with Continue"). */
         onBack={() => navigation.goBack()}

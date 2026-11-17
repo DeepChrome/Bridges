@@ -37,6 +37,7 @@ import { flagsFor, troubleWords, cardsIn, sourceCards, studyCards, knownWords, s
 import { SetPicker } from "../studypicker";
 import { ScoreRing } from "../skills";
 import { WordDrillsButton } from "../worddrills";
+import { WrenchButton, WhyCardSheet } from "../whycard";
 import { leanNudge } from "@core/lean";
 import { SKILLS } from "@core/skills";
 import { dayOf } from "@core/scheduler";
@@ -272,6 +273,8 @@ export default function Study({ navigation, route }) {
   // Past the day's reviews by choice ("Keep going"); chunks dealt after carry it.
   const [beyondMode, setBeyondMode] = useState(false);
   const [tallyOpen, setTallyOpen] = useState(false);
+  // Developer mode: why this card came up (whycard.js), from the wrench on the front.
+  const [whyOpen, setWhyOpen] = useState(false);
   /* **The goal is a moment, not a wall** (the owner, 2026-11-02: "Remove the
      25 study cap. Just have a little temporary pop-up when player hits 25 and
      offer to pivot to something else"). Reaching it opens a small bubble once
@@ -555,7 +558,8 @@ export default function Study({ navigation, route }) {
       if (rep) {
         const fronts = st.flash && st.flash.length ? st.flash : DEFAULT_FRONTS;
         next = next.slice(0, at + 1)
-          .concat([{ word: rep.word, direction: frontFor(null, fronts, null), card: null, kind: "new", extra: true }],
+          .concat([{ word: rep.word, direction: frontFor(null, fronts, null), card: null, kind: "new", extra: true,
+                     why: { source: "replacement" } }],
                   next.slice(at + 1));
         faces = { ...(faces || {}), [rep.word]: rep.face };
         sitting.current.add(rep.word);
@@ -926,6 +930,7 @@ export default function Study({ navigation, route }) {
             <TallySheet title={mastery ? "Your words" : "This review"} parts={tallyParts}
                         onClose={() => setTallyOpen(false)} />
           ) : null}
+          {whyOpen && st.dev ? <WhyCardSheet item={item} st={st} onClose={() => setWhyOpen(false)} /> : null}
 
           <Animated.View style={flip.style}>
           <Card testID={`card-${item.direction}`} style={{ marginTop: 12, alignItems: "center", paddingVertical: 28 }}>
@@ -970,6 +975,10 @@ export default function Study({ navigation, route }) {
                   <ActionChip label="More" testID="full-entry"
                               onPress={() => navigation.navigate("Word", { word: face.b })} />
                 </View>
+              ) : !revealed && st.dev ? (
+                /* Developer mode only, on the front: why the deal chose this
+                   card, with the numbers (whycard.js). */
+                <WrenchButton onPress={() => setWhyOpen(true)} />
               ) : <View />}
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6, minHeight: 28 }}>
               {flags.isNew ? <Pill testID="flag-new" tone="brand">New</Pill> : null}

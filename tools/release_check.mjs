@@ -148,9 +148,15 @@ function manifest() {
     "android.permission.MODIFY_AUDIO_SETTINGS",
     "android.permission.POST_NOTIFICATIONS",
   ]);
-  const extra = perms.filter((p) => !allowed.has(p));
+  /* The fourth is the beta's own: the in-app update installs a side-loaded APK
+     (src/update.js, 2026-11-17). Play policy reserves it for app stores, so
+     a store build drops it along with LATEST_URL — a warning on every run
+     until then, not a pass. */
+  const SIDELOAD = "android.permission.REQUEST_INSTALL_PACKAGES";
+  const extra = perms.filter((p) => !allowed.has(p) && p !== SIDELOAD);
   ok(extra.length === 0, "no permission beyond the three the app can justify",
      extra.length ? extra.join(", ") : "mic, audio, notifications");
+  if (perms.includes(SIDELOAD)) note("carries the side-load install permission; a Play build must drop it", SIDELOAD);
 }
 
 const k = process.argv.indexOf("--file");

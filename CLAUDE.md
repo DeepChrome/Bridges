@@ -7738,6 +7738,19 @@ What was built, and the rule each piece holds:
   pressed mid-clip to the clip's session or the app's, is the phone's to
   show — both pairs land on the same two buttons either way.
 
+**The dictionary entry carries the sparkle too, and registers its tables**
+(2026-11-18; the owner: *"the user should be able to pull up the AI helper
+pretty much constantly… when I'm browsing the detailed word definitions/cards,
+sometimes I have questions about the different conjugations"*). `wordTitled`
+in App.js had a header of its own — the flag and Home, no sparkle — and the
+entry registered its meanings and examples but not its paradigm, so a
+question about a form reached the model without the form. `tablesText` in
+about.js writes the tables a row to a line («они: читают», the ending marker
+out) into `about.text`, the field a rule card and a conversation already use;
+`wordask.test.js` reads it back off the mounted entry and holds the header to
+`HeaderRight`. A screen with its own header is where the next such gap will
+be: `HeaderRight` is the one that carries every tool.
+
 ## 30cz. The aesthetic sweep (2026-11-18)
 
 The owner: *"a full aesthetic sweep in the app… don't get locked into

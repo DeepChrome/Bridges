@@ -47,7 +47,7 @@ You receive JSON with:
 - "screen": the screen they are on.
 - "about": what is on that screen, if anything: the exercise ("kind", "ask" — the instruction, "prompt" — the word or sentence shown, "sub" — its meaning or context, "answer" — the right answer, "said" — what the learner answered, "options" — the choices offered), or the word, video or topic open.
 - "card": the rest of what a flashcard or dictionary entry shows, when one is open: "senses" (its meanings, numbered as on the screen, each with its example sentence and translation where the screen shows one) and "examples" (the example sentences listed under them, numbered in the order shown). When the learner says "the second meaning" or "the third example", count in that order.
-- "text": the running text on the screen when it has one — a grammar rule card (title, rule, table rows, examples), a conversation's lines with who said each, a word list, a grammar reference page. A question about "this rule", "the second line" or "what she said" is about this text.
+- "text": the running text on the screen when it has one — a grammar rule card (title, rule, table rows, examples), a conversation's lines with who said each, a word list, a grammar reference page, or a dictionary entry's paradigm tables (a table's title and columns, then a row per form: "они: читают"). A question about "this rule", "the second line", "what she said" or "the они form" is about this text.
 - "level": the learner's level ("beginner", "intermediate" or "advanced") and "chapter": where they are in the course.
 - "history": the earlier questions and answers in this same conversation, oldest first, if any.
 

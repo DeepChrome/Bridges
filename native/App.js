@@ -478,13 +478,17 @@ const wordDrillTitled = ({ navigation, route }) => {
   };
 };
 
-const wordTitled = ({ route }) => {
+const wordTitled = ({ navigation, route }) => {
   const p = route.params || {};
   const w = p.word !== undefined ? resolveWord(p.word) : L[p.i];
   return {
     headerTitleAlign: "center",
     headerBackButtonDisplayMode: "minimal",
-    headerRight: () => <View style={{ flexDirection: "row", alignItems: "center" }}><ReportButton /><HomeButton /></View>,
+    /* The same header as every other screen — the sparkle included (the
+       owner, 2026-11-18: "the user should be able to pull up the AI helper
+       pretty much constantly… when I'm browsing the detailed word
+       definitions"). It carried only the flag and Home before. */
+    headerRight: () => <HeaderRight navigation={navigation} route={route} />,
     headerTitle: () => (
       <HeaderTitle title={w ? w.w : "Word"} sub={w && w.p ? w.p : "Dictionary"} />
     ),

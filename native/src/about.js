@@ -99,6 +99,31 @@ export function noteText(note) {
   return text([note.title, note.body, ...table, ...examples]);
 }
 
+/* A word's paradigm tables as the AI reads them (the owner, 2026-11-18:
+   "when I'm browsing the detailed word definitions/cards, sometimes I have
+   questions about the different conjugations and I can't get an answer into
+   the AI"). Each table is its title, its column heads, then a row per line —
+   «они: читают» — with the ending marker a table draws in colour («чита|ют»)
+   taken out, and a cell holding two forms joined with a slash. Capped like
+   every other running text, so a verb's three tables fit and a question about
+   the они form has the они form in front of the model. */
+export function tablesText(tables) {
+  if (!Array.isArray(tables) || !tables.length) return undefined;
+  const form = (f) => String(f == null ? "" : f).replace(/\|/g, "");
+  const cell = (c) => (Array.isArray(c) ? c.filter(Boolean).map(form).join(" / ") : form(c));
+  const lines = [];
+  for (const tb of tables) {
+    if (!tb || !Array.isArray(tb.rows)) continue;
+    const cols = (tb.columns || []).slice(1).map(cell).filter(Boolean);
+    lines.push(`${tb.title || "Forms"}${cols.length ? `: ${cols.join(" | ")}` : ""}`);
+    for (const r of tb.rows) {
+      if (!Array.isArray(r) || !r.length) continue;
+      lines.push(`${cell(r[0])}: ${r.slice(1).map(cell).join(" | ")}`);
+    }
+  }
+  return text(lines);
+}
+
 /* A conversation or passage: who said what, with the English where there is
    one. */
 export function linesText(lines) {

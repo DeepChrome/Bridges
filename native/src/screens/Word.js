@@ -19,7 +19,7 @@ import { familiarity, familiarityLabel, cardFor } from "@core/scheduler";
 import { useSession } from "../session";
 import { L, UN, resolveWord, heardIn, sensesOf, rankOf } from "../data";
 import { Linked, GrammarLine, navRef } from "../words";
-import { useAbout, cardAbout } from "../about";
+import { useAbout, cardAbout, tablesText } from "../about";
 import { pictureOf, Photo } from "../pictures";
 import { clock, short } from "../video";
 
@@ -104,9 +104,11 @@ export function WordEntry({ w, index, navigation }) {
      form key, which can be another word (§23) — and a deep entry is in L not
      at all, so it has no senses rather than someone else's. */
   const senses = sensesOf(index !== undefined ? index : L.indexOf(w));
-  // The entry, as the AI and a report see it: every meaning and example shown.
+  // The entry, as the AI and a report see it: every meaning and example shown,
+  // and the tables — a question here is as often about a form as a meaning.
   useAbout({ kind: "entry", word: w.b, answer: w.e || undefined,
-             card: cardAbout({ b: w.b, w: w.w, e: w.e, x: examples }, senses, { maxSenses: 8, maxExamples: 6 }) });
+             card: cardAbout({ b: w.b, w: w.w, e: w.e, x: examples }, senses, { maxSenses: 8, maxExamples: 6 }),
+             text: tablesText(w.t) });
 
   const lineTags = new Set(((grammarLine(w) || {}).facts || []).map((f) => String(f).toLowerCase()));
   const pic = pictureOf(w.b);

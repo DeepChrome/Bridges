@@ -1,0 +1,63 @@
+# The aesthetic sweep, second pass (CLAUDE.md 30cz): the screens a learner
+# spends most time in that sweep.txt did not reach - a quiz question and its
+# verdict, the flashcard front and back, drive mode, the tutor, the grammar
+# reference. On a profile that already exists.
+#
+#   .\native\tools\walk.ps1 -Flow native\flows\sweep2.txt -Device emulator-5554
+
+wait:3
+# The path has no Home, and a newer build on the host opens the update
+# sheet at launch: Later closes it (Back does not reach a sheet's Modal).
+tap:^Later$
+wait:2
+
+# A quiz question: Practice > Build a quiz > Start.
+tap:^Practice$
+wait:2
+tap:^Build a quiz$
+wait:2
+shot:t01-quiz-builder
+tap:^Start$
+wait:3
+shot:t02-quiz-question
+tap:^Home
+wait:2
+
+# The flashcard, front and back.
+tap:^Study$
+wait:2
+tap:^Personal review$
+wait:3
+shot:t04-card-front
+tap:^Show$
+wait:2
+shot:t05-card-back
+tap:^Home
+wait:2
+
+# Drive mode's list and player.
+tap:^Practice$
+wait:2
+tap:^Drive mode$
+wait:3
+shot:t06-drive-list
+tap:^Episode 1
+wait:3
+shot:t07-drive-episode
+back
+wait:1
+back
+wait:1
+
+# The tutor's opening, and the grammar reference.
+tap:^Tutor$
+wait:4
+shot:t08-tutor
+back
+wait:1
+scroll
+tap:^The rules$
+wait:2
+shot:t09-rules
+back
+wait:1

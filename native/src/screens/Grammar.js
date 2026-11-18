@@ -89,7 +89,8 @@ export default function Grammar({ route, navigation }) {
   if (!open) {
     return (
       <Screen>
-        <Title>Grammar</Title>
+        {/* No page title: the header already says Grammar, and the two read
+            as one word printed twice (the emulator, 2026-11-18). */}
         {/* In the order the course teaches it, under the chapter that does
             (core/grammar.js `from`, read off the route rather than written
             down): the reference reads as a curriculum, not an index. */}

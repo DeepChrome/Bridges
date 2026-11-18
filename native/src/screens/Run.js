@@ -139,12 +139,14 @@ function Option({ o, i, answered, picked, onPick, centred }) {
   const t = useTheme();
   const isPicked = picked === i;
   const show = answered && (o.right || isPicked);
-  /* Untouched, the edge is a step darker than the page rather than the hairline
-     the surface already carries — an edge the same weight as a border is not an
-     edge, which is why these read as flat boxes however thick the bottom was. */
+  /* Untouched, an answer is drawn as the plain button is (ui.js Btn, the
+     sweep of 2026-11-18): a solid tone a step up from the page, no hairline,
+     and an edge a step darker again. A hairline box on the surface read as a
+     panel beside buttons that are solid fills. Answered, the border carries
+     the verdict's colour. */
   const edge = !show ? t.surface3 : o.right ? t.goodDim : t.badDim;
-  const border = !show ? t.line : o.right ? t.good : t.bad;
-  const bg = !show ? t.surface : o.right ? t.goodBg : t.badBg;
+  const border = !show ? t.surface2 : o.right ? t.good : t.bad;
+  const bg = !show ? t.surface2 : o.right ? t.goodBg : t.badBg;
   /* The right answer pops when it is revealed — including when the learner
      picked something else, because that is the moment they need their eye taken
      to it. Nothing pops on a wrong pick: the colour says enough, and bouncing
@@ -254,8 +256,8 @@ function Match({ q, onDone }) {
     return (
       <Lift key={side + item.i} r={radius.md} disabled={done} onPress={() => tap(side, item)}
             edge={done ? t.goodDim : bad ? t.badDim : t.surface3}
-            fill={done ? t.goodBg : bad ? t.badBg : t.surface}
-            border={done ? t.good : bad ? t.bad : sel ? t.info : t.line}
+            fill={done ? t.goodBg : bad ? t.badBg : t.surface2}
+            border={done ? t.good : bad ? t.bad : sel ? t.info : t.surface2}
             state={{ selected: sel, disabled: done }}>
         <View style={{ padding: 13, minHeight: 54, justifyContent: "center" }}>
           <Text style={{ color: t.ink, fontSize: 16 }}>{label}</Text>

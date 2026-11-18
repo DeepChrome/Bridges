@@ -218,11 +218,11 @@ function Choices({ choices, onPick, onOther }) {
         </Pressable>
       ))}
       <Pressable testID="tutor-choice-other" accessibilityRole="button" onPress={onOther}
-                 style={({ pressed }) => ({ borderWidth: 1, borderColor: t.line,
-                   backgroundColor: t.surface, borderRadius: radius.md,
+                 style={({ pressed }) => ({
+                   backgroundColor: t.surface2, borderRadius: radius.md,
                    paddingVertical: 10, paddingHorizontal: 14, minHeight: 44,
                    justifyContent: "center", opacity: pressed ? 0.7 : 1 })}>
-        <Text style={{ color: t.ink2, fontSize: T.body }}>Something else</Text>
+        <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "600" }}>Something else</Text>
       </Pressable>
     </View>
   );

@@ -160,7 +160,9 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
     ? { arc: t.brand, p: 1, face: famBg, icon: famInk, track: t.surface3, nm: t.ink, width: STROKE_DONE }
     : !open
     // Locked: greyed as a whole — face, padlock and name — not just quieter.
-    ? { arc: null, p: 0, face: t.surface2, icon: t.ink3, track: t.lineSoft, nm: t.ink3, dim: true }
+    // A solid grey disc, not a ghost: the map is meant to be read ahead
+    // (§30ar), and at 0.55 the locked discs sank into the page (2026-11-18).
+    ? { arc: null, p: 0, face: t.surface3, icon: t.ink3, track: t.lineSoft, nm: t.ink3, dim: true }
     : current
     /* Where you are: the same face as any open disc, larger, with its track
        in a dim brand so the ring reads as one being filled — the bar goes
@@ -216,7 +218,7 @@ function PathNode({ unit, open, branch, onOpen, dx = 0, fam = "brand" }) {
       style={{
         alignItems: "center", width: branch ? 96 : 118, paddingTop: 6,
         paddingBottom: 10, transform: [{ translateX: dx }],
-        opacity: tone.dim ? 0.55 : 1,
+        opacity: tone.dim ? 0.75 : 1,
       }}
     >
       <View style={{ width: size, height: size + PRESS_DROP }}>

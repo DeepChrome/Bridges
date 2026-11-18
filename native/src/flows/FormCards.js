@@ -113,7 +113,7 @@ function FormCard({ q, shown, onShow }) {
   const w = L[q.i];
   const gap = /_{2,}/.test(q.prompt || "");
   return (
-    <View testID="formcard" style={{ borderWidth: 1, borderColor: t.line, borderRadius: radius.xl,
+    <View testID="formcard" style={{ borderWidth: 1, borderColor: t.lineSoft, borderRadius: radius.xl,
                                      backgroundColor: t.surface, padding: 20, marginTop: 16 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <Text testID="formcard-word" style={{ flex: 1, color: t.ink, fontSize: T.display, fontWeight: "700" }}>{q.prompt}</Text>

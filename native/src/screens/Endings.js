@@ -55,8 +55,8 @@ function EndingSound({ e }) {
                                    : voice ? `Hear the ending, ${e.sounds} (device voice)` : undefined}
                hitSlop={6}
                style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 6,
-                 minHeight: 36, paddingHorizontal: 12, borderRadius: radius.lg,
-                 borderWidth: 1, borderColor: t.line, backgroundColor: t.surface,
+                 minHeight: 36, paddingHorizontal: 14, borderRadius: 99,
+                 backgroundColor: t.surface2,
                  opacity: !live ? 0.4 : pressed ? 0.6 : 1 })}>
       <Text style={{ color: t.ink2, fontSize: T.small }}>sounds</Text>
       <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "700" }}>{e.sounds}</Text>

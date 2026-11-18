@@ -645,9 +645,9 @@ function TabShell() {
             elevation: 0, shadowOpacity: 0,
           },
         tabBarItemStyle: { gap: 2 },
-        // No weight: PT Serif has no 600, and Android drops a custom family
-        // asked for a weight it lacks (§30bj).
-        tabBarLabelStyle: { fontSize: 11, margin: 0 },
+        // The face by name and no weight: Android drops a custom family asked
+        // for a weight it lacks (§30bj), and the semibold file is the weight.
+        tabBarLabelStyle: { fontSize: 11, margin: 0, fontFamily: faceFor("600"), fontWeight: "normal" },
       })}
     >
       <Tabs.Screen name="Learn" component={LearnStack}
@@ -673,14 +673,14 @@ export default function App() {
     ...base,
     colors: { ...base.colors, background: p.bg, card: p.surface, text: p.ink,
               border: p.line, primary: p.brand },
-    // Headers and tab labels in the serif too (React Navigation 7 reads its
-    // fonts from the theme). Weight "400" on every one: PT Serif has two files
-    // and Android drops a family asked for a weight it lacks (§30bj).
+    // Headers and tab labels in the app's face too (React Navigation 7 reads
+    // its fonts from the theme). Weight "400" on every one: each face is one
+    // file, and Android drops a family asked for a weight it lacks (§30bj).
     fonts: {
-      regular: { fontFamily: "PTSerif_400Regular", fontWeight: "400" },
-      medium: { fontFamily: "PTSerif_700Bold", fontWeight: "400" },
-      bold: { fontFamily: "PTSerif_700Bold", fontWeight: "400" },
-      heavy: { fontFamily: "PTSerif_700Bold", fontWeight: "400" },
+      regular: { fontFamily: faceFor("400"), fontWeight: "400" },
+      medium: { fontFamily: faceFor("500"), fontWeight: "400" },
+      bold: { fontFamily: faceFor("600"), fontWeight: "400" },
+      heavy: { fontFamily: faceFor("700"), fontWeight: "400" },
     },
   };
 

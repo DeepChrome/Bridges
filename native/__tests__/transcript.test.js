@@ -82,10 +82,10 @@ describe("the transcript", () => {
                                en={en} showEn onToggleEn={onToggleEn} />);
     expect(screen.getByTestId("transcript-en-1").props.children).toBe("today we are talking");
     expect(screen.getByText("Machine translation")).toBeTruthy();
-    // The line being said is lifted in English too — in the bold face, which
-    // is how PT Serif carries weight (theme.js faceFor).
+    // The line being said is lifted in English too — a heavier face, which is
+    // how a weight is carried (theme.js faceFor): weight 600 is its own file.
     const flat = (k) => Object.assign({}, ...[screen.getByTestId(`transcript-en-${k}`).props.style].flat(2).filter(Boolean));
-    expect(flat(1).fontFamily).toBe(font.bold);
+    expect(flat(1).fontFamily).toBe(font.semibold);
     expect(flat(0).fontFamily).toBe(font.regular);
   });
 

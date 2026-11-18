@@ -160,7 +160,7 @@ export function Table({ table, mark, speak, testID, bare, labelHead, headword, n
     <View testID={testID} style={{ marginTop: bare ? 4 : 14 }}>
       {table.title && !bare ? <SectionLabel>{table.title}</SectionLabel> : null}
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={{ borderRadius: radius.md, borderWidth: 1, borderColor: t.line,
+        <View style={{ borderRadius: radius.md, borderWidth: 1, borderColor: t.lineSoft,
                        overflow: "hidden" }}>
           <View style={{ flexDirection: "row", backgroundColor: t.surface3, paddingHorizontal: 10 }}>
             {table.columns.map((c, ci) => (
@@ -341,7 +341,7 @@ export function Contrast({ contrast, testID = "contrast" }) {
         const sets = c.lines.map(([ru]) => wordsOf(ru));
         return (
           <View key={ci} testID={`${testID}-${ci}`}
-                style={{ marginTop: 14, borderRadius: radius.md, borderWidth: 1, borderColor: t.line,
+                style={{ marginTop: 14, borderRadius: radius.md, borderWidth: 1, borderColor: t.lineSoft,
                          overflow: "hidden" }}>
             {c.lines.map(([ru, en, label], li) => {
               const others = sets.filter((_, k) => k !== li);

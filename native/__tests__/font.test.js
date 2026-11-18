@@ -47,11 +47,15 @@ describe("the typeface", () => {
 
   it("picks a real face for a weight, because Android will not synthesise one", () => {
     // fontWeight: "700" on the regular file is ignored on Android — the text
-    // comes out light while the code says bold. PT Serif has two files, so the
-    // app's weights fold into two.
+    // comes out light while the code says bold. Inter ships a file per weight
+    // the app uses, so each weight is its own face and nothing is folded.
     expect(faceFor("400")).toBe(font.regular);
     expect(faceFor(undefined)).toBe(font.regular);
-    for (const w of ["500", "600", "700", "bold", "800"]) expect(faceFor(w)).toBe(font.bold);
+    expect(faceFor("300")).toBe(font.regular);
+    expect(faceFor("500")).toBe(font.medium);
+    expect(faceFor("600")).toBe(font.semibold);
+    for (const w of ["700", "bold", "800", "900"]) expect(faceFor(w)).toBe(font.bold);
+    expect(new Set(Object.values(font)).size).toBe(4);
   });
 
   it("loads every face it can name", () => {

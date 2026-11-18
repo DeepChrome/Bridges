@@ -33,7 +33,7 @@ export function RunCard({ run }) {
     <View testID="resume-card"
           style={{ flexDirection: "row", gap: 14, alignItems: "center", padding: 14,
                    borderRadius: radius.lg, backgroundColor: t.surface,
-                   borderWidth: 1, borderColor: t.line }}>
+                   borderWidth: 1, borderColor: t.lineSoft }}>
       <View style={{ width: 52, height: 52, borderRadius: radius.md, backgroundColor: t.brandBg,
                      alignItems: "center", justifyContent: "center" }}>
         <UnitIcon id={unit ? unit.id : (run.params && run.params.type) || "quiz"}

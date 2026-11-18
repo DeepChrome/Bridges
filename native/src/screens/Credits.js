@@ -100,8 +100,8 @@ export default function Credits() {
           package, so the notices below cannot list it. */}
       <SectionLabel style={{ marginTop: 22 }}>Typefaces</SectionLabel>
       <List>
-        <Row onPress={() => Linking.openURL("https://fonts.google.com/specimen/PT+Serif")}>
-          <RowText title="PT Serif by ParaType" sub="SIL Open Font License 1.1" bold={false} />
+        <Row onPress={() => Linking.openURL("https://rsms.me/inter/")}>
+          <RowText title="Inter by Rasmus Andersson" sub="SIL Open Font License 1.1" bold={false} />
         </Row>
       </List>
 

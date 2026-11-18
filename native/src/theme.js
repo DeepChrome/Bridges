@@ -22,9 +22,13 @@ import { useScheme } from "./appearance";
    desktop app; tools/contrast.js audits them there. */
 import { light, dark } from "@core/palette";
 
-/* Small cut corners, as on a sheet of paper: a control a little rounder than
-   the page it sits on. */
-export const radius = { sm: 4, md: 6, lg: 8, xl: 10 };
+/* The radius scale (2026-11-18, the aesthetic sweep — CLAUDE.md 30cz). The
+   exercise book cut its corners at 4–10, which with a hairline border reads
+   as a form; the modern consumer apps the owner named as the bar round a
+   control at 12 and a card at 16. Four steps on the 4-grid: a chip or a flag
+   (sm), a button or an answer (md), a card, a list or a sheet (lg), the one
+   large panel on a screen (xl). Pills stay 99. */
+export const radius = { sm: 8, md: 12, lg: 16, xl: 20 };
 /* On the 4-grid, like every mobile system's spacing (Material 3 included).
    `gap` was 10, which is the sort of value that makes a row look a pixel
    wrong without anyone being able to say why (tools/design.mjs). */
@@ -53,36 +57,53 @@ export const type = {
   hero: 40, display: 28, title: 23, head: 19, body: 16, small: 13, tiny: 11,
 };
 
-/* The typeface: PT Serif, the exercise book's (Paratype, OFL; credited on
- * Credits). Made for Cyrillic, so stress marks and ё sit properly.
+/* The typeface: Inter (Rasmus Andersson, OFL; credited on Credits), since
+ * 2026-11-18. PT Serif was the exercise book's and read as one — a notebook,
+ * not an app — and the owner asked for the modern, clean feel of the apps
+ * people use every day, which are all set in a sans. Inter is the one most of
+ * them are set in, and it carries Cyrillic with the stress marks and ё in
+ * their places. Four files, one per weight, because Android will not
+ * synthesise a weight for a named family (§30bj): a semibold is a real
+ * semibold now, which is what gives a row's title and a button's label their
+ * step above body copy.
  *
  * `React Native has no global font.` Every `Text` that names a size must also
  * name a family or it silently falls back to the system one, which is worse
  * than not having a typeface at all: two fonts on one screen reads as a bug.
  * The app's own `Text` (ui.js) applies it, and **nothing imports `Text` from
- * react-native any more** — `font.test.js` is what keeps that true. */
+ * react-native any more** — `font.test.js` is what keeps that true. The PT
+ * Serif files stay in assets/fonts for the desktop app, which reads them by
+ * path; the phone no longer bundles them. */
 export const font = {
-  regular: "PTSerif_400Regular",
-  bold: "PTSerif_700Bold",
+  regular: "Inter_400Regular",
+  medium: "Inter_500Medium",
+  semibold: "Inter_600SemiBold",
+  bold: "Inter_700Bold",
 };
 export const fontFiles = {
-  PTSerif_400Regular: require("../assets/fonts/PTSerif-Regular.ttf"),
-  PTSerif_700Bold: require("../assets/fonts/PTSerif-Bold.ttf"),
+  Inter_400Regular: require("../assets/fonts/Inter-Regular.ttf"),
+  Inter_500Medium: require("../assets/fonts/Inter-Medium.ttf"),
+  Inter_600SemiBold: require("../assets/fonts/Inter-SemiBold.ttf"),
+  Inter_700Bold: require("../assets/fonts/Inter-Bold.ttf"),
 };
 
 /* Which file a weight resolves to. RN on Android does not synthesise weights
    for a named family — and asked for a weight a family lacks, it drops the
-   family for Roboto (§30bj) — so a weight picks its file, and the app's four
-   weights fold into PT Serif's two: a semibold that read as emphasis is bold. */
+   family for Roboto (§30bj) — so a weight picks its file: 400 and under the
+   regular, 500 the medium, 600 the semibold, 700 and over the bold. */
 export function faceFor(weight) {
   const w = String(weight || "400");
-  return w === "400" || w === "normal" || w === "300" ? font.regular : font.bold;
+  if (w === "500") return font.medium;
+  if (w === "600") return font.semibold;
+  if (w === "400" || w === "normal" || w === "300" || w === "200" || w === "100") return font.regular;
+  return font.bold;
 }
 
-/* Depth: none. Paper on paper does not float — the exercise book separates
-   things with hairlines and the press of a control into its edge (`Lift`),
-   not with shadows, and that flatness is part of what the owner liked. The
-   hook stays the one place a screen asks, so depth can come back in one line. */
+/* Depth: none. Surfaces are told apart by tone and a soft hairline, and a
+   control by the press of its face into its edge (`Lift`), not by shadows —
+   a dark theme has nothing for a shadow to fall on, and the two themes should
+   not carry two depth models. The hook stays the one place a screen asks, so
+   depth can come back in one line. */
 export function useShadow() {
   return null;
 }

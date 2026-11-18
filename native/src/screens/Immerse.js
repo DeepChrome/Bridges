@@ -246,8 +246,8 @@ export function Immerse({ navigation }) {
                    onPress={() => navigation.navigate("VideoHistory")} hitSlop={6}
                    style={({ pressed }) => ({ minHeight: 36, minWidth: 40, paddingHorizontal: 9,
                      alignItems: "center", justifyContent: "center",
-                     borderRadius: radius.lg, borderWidth: 1, borderColor: t.line,
-                     backgroundColor: t.surface, opacity: pressed ? 0.6 : 1 })}>
+                     borderRadius: 99,
+                     backgroundColor: t.surface2, opacity: pressed ? 0.6 : 1 })}>
           <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={t.ink2}
                strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <Path d="M3 12a9 9 0 1 0 3-6.7L3 8" />

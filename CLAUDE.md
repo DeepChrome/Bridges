@@ -7738,6 +7738,44 @@ What was built, and the rule each piece holds:
   pressed mid-clip to the clip's session or the app's, is the phone's to
   show — both pairs land on the same two buttons either way.
 
+## 30cz. The aesthetic sweep (2026-11-18)
+
+The owner: *"a full aesthetic sweep in the app… don't get locked into
+whatever we have now… I know you have a way better eye for aesthetic appeal
+than I do but make sure you have a firm grasp of popular interfaces. Buttons
+should be clearly buttons. I need a modern clean polished feel."* Read off
+the walkthrough shots (§31) before anything was changed, the exercise book
+(§30bo) had three tells that read as a notebook rather than an app: a serif
+everywhere, corners cut at 4–10 so every container looked like a form field,
+and controls told from containers by a hairline alone — an icon button was a
+ring on the page, a plain button a grey box with a line round it, a card a
+grey box with a line round it. The sweep is at the tokens and the primitives
+(§30s), so one change reaches every screen:
+
+- **Inter, with real weights.** Four files — 400, 500, 600, 700 — and
+  `faceFor` picks one per weight, so a row's title (600) and a button's label
+  (600) are a semibold, not the bold that PT Serif's two files folded them
+  into. The navigator's `fonts` and the tab labels are read through `faceFor`
+  rather than named. The PT Serif files stay in `assets/fonts` for the
+  desktop app, which reads them by path; the phone no longer bundles them.
+  `font.test.js` holds the four faces distinct.
+- **Radius 8 · 12 · 16 · 20** (sm chip, md button and answer, lg card and
+  list, xl sheet and panel); `design.mjs` holds the even steps.
+- **A control is a solid fill with a darker edge, never a hairline.** `plain`
+  buttons are `surface2` on a `surface3` lip with no border; icon buttons
+  (`IconButton`, the speaker, the scene's transport) are filled discs; chips,
+  the drop-downs and the small filter buttons are filled pills. A *container*
+  — card, list, sheet, bubble, table — keeps a hairline, now `lineSoft`,
+  because it is a place and not a thing to press. Inputs keep `line`.
+- **Section labels are small capitals, tracked**, the grouped-list header of
+  every phone system. `HeaderTitle` is 17 semibold.
+- **Locked path discs are solid grey at 0.75**, not ghosts at 0.55: the map is
+  meant to be read ahead (§30ar).
+
+The palette did not move (`contrast.js` 110 checks unchanged); the type
+scale did not move. What the instruments cannot say is whether it *looks*
+right, and that is the walkthrough on the emulator, read by a person (§31).
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

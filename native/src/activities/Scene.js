@@ -80,8 +80,8 @@ function Transport({ s }) {
           onPress={s.back}
           style={({ pressed }) => ({
             width: 52, height: 52, borderRadius: 26, alignItems: "center",
-            justifyContent: "center", borderWidth: 1, borderColor: t.line,
-            backgroundColor: pressed ? t.surface2 : t.surface,
+            justifyContent: "center",
+            backgroundColor: pressed ? t.surface3 : t.surface2,
           })}
         >
           <Icon d={BACK} color={t.ink2} />
@@ -113,9 +113,8 @@ function Transport({ s }) {
           onPress={s.cycleRate}
           style={({ pressed }) => ({
             width: 52, height: 52, borderRadius: 26, alignItems: "center",
-            justifyContent: "center", borderWidth: 1,
-            borderColor: s.rate !== 1 ? t.brand : t.line,
-            backgroundColor: s.rate !== 1 ? t.brandBg : pressed ? t.surface2 : t.surface,
+            justifyContent: "center",
+            backgroundColor: s.rate !== 1 ? t.brandBg : pressed ? t.surface3 : t.surface2,
           })}
         >
           <Text style={{ color: s.rate !== 1 ? t.brandInk : t.ink2, fontSize: 13, fontWeight: "700" }}>
@@ -129,8 +128,8 @@ function Transport({ s }) {
           onPress={() => s.play(0)}
           style={({ pressed }) => ({
             width: 52, height: 52, borderRadius: 26, alignItems: "center",
-            justifyContent: "center", borderWidth: 1, borderColor: t.line,
-            backgroundColor: pressed ? t.surface2 : t.surface,
+            justifyContent: "center",
+            backgroundColor: pressed ? t.surface3 : t.surface2,
           })}
         >
           {/* A bar and a triangle, not a second curling arrow: the back button

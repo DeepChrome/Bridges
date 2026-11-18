@@ -209,7 +209,7 @@ export function Build({ q, r }) {
             onPress={play}
             style={({ pressed }) => ({
               alignItems: "center", paddingVertical: 28, paddingHorizontal: 16,
-              borderRadius: radius.xl, borderWidth: 1, borderColor: t.line,
+              borderRadius: radius.xl, borderWidth: 1, borderColor: t.lineSoft,
               backgroundColor: pressed ? t.surface2 : t.surface,
             })}
           >

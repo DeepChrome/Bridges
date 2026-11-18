@@ -63,10 +63,10 @@ function StudyDays({ value, onChange }) {
                      accessibilityRole="checkbox" accessibilityState={{ checked: sel }}
                      accessibilityLabel={DAY_NAMES[d]}
                      style={({ pressed }) => ({ width: 38, height: 38, borderRadius: 19, alignItems: "center",
-                       justifyContent: "center", borderWidth: 1,
-                       borderColor: sel ? t.brand : t.line, backgroundColor: sel ? t.brandBg : "transparent",
+                       justifyContent: "center",
+                       backgroundColor: sel ? t.brand : t.surface2,
                        opacity: pressed ? 0.6 : 1 })}>
-            <Text style={{ color: sel ? t.brandInk : t.ink3, fontSize: 14, fontWeight: "700" }}>{label}</Text>
+            <Text style={{ color: sel ? t.brandOn : t.ink2, fontSize: 14, fontWeight: "700" }}>{label}</Text>
           </Pressable>
         );
       })}

@@ -263,7 +263,7 @@ function Option({ n, title, sub, onPress, testID }) {
           onPressOut={p.onPressOut}
           style={({ pressed }) => ({
             backgroundColor: pressed ? t.surface2 : t.surface,
-            borderColor: t.line, borderWidth: 1, borderRadius: radius.lg,
+            borderColor: t.lineSoft, borderWidth: 1, borderRadius: radius.lg,
             padding: 18, marginBottom: 10, minHeight: 64, justifyContent: "center",
           })}
         >

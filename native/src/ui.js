@@ -1,8 +1,9 @@
-/* Shared UI primitives — the exercise-book look (§30bo): PT Serif, cut corners,
- * no shadows, labels in sentence case. The shapes are components so spacing,
- * radii and colours stay in one place instead of being retyped per screen; a
- * screen that draws its own button, row or heading is the defect, not the
- * exception (§30s).
+/* Shared UI primitives — the look since 2026-11-18 (CLAUDE.md 30cz): Inter
+ * with real weights, rounded corners, no shadows, a control told from a
+ * container by a solid tonal fill and never by a hairline alone. The shapes
+ * are components so spacing, radii and colours stay in one place instead of
+ * being retyped per screen; a screen that draws its own button, row or
+ * heading is the defect, not the exception (§30s).
  */
 
 import React, { useEffect, useRef, useState } from "react";
@@ -118,10 +119,10 @@ export function Text({ style, children, ...rest }) {
   const t = useTheme();
   const nested = React.useContext(InText);
   const flat = StyleSheet.flatten(style) || {};
-  /* The face carries the weight. PT Serif is one file per weight, and
-     Android asked for weight 800 on a family with no 800 falls back to the
-     system font — the path's chapter titles and every button came out in
-     Roboto while 700 happened to match. */
+  /* The face carries the weight. Each face is one file, and Android asked
+     for a weight a family has no file for falls back to the system font —
+     the path's chapter titles and every button once came out in Roboto
+     while 700 happened to match (§30bj). */
   const weight = !flat.fontFamily ? { fontWeight: "normal" } : null;
   const ink = nested || flat.color ? null : { color: t.ink };
   return (
@@ -334,7 +335,10 @@ export function ToggleRow({ title, sub, value, onValueChange, testID, disabled, 
    always at least 44 (rule 20.12), the rest made up in `hitSlop`. `on` lights
    it in the brand tint; `fill` replaces the surface (a filled disc). */
 export const ICON_TARGET = 44;
-export function IconButton({ onPress, label, testID, size = 40, on, fill, border = true, children,
+/* A filled disc, not a ring: a hairline circle on the page read as an empty
+   circle, and the glyph inside it as decoration (the sweep, 2026-11-18). The
+   tone is a step up from the page, the brand tint when `on`. */
+export function IconButton({ onPress, label, testID, size = 40, on, fill, border = false, children,
                              selected, state, style }) {
   const t = useTheme();
   const slop = Math.max(4, Math.ceil((ICON_TARGET - size) / 2));
@@ -345,7 +349,7 @@ export function IconButton({ onPress, label, testID, size = 40, on, fill, border
                style={({ pressed }) => [{ width: size, height: size, borderRadius: size / 2,
                  alignItems: "center", justifyContent: "center",
                  borderWidth: border ? 1 : 0, borderColor: on ? t.brand : t.line,
-                 backgroundColor: fill || (on ? t.brandBg : t.surface), opacity: pressed ? 0.6 : 1 }, style]}>
+                 backgroundColor: fill || (on ? t.brandBg : t.surface2), opacity: pressed ? 0.6 : 1 }, style]}>
       {children}
     </Pressable>
   );
@@ -359,7 +363,7 @@ export function Card({ children, style, testID }) {
   const raised = useShadow();
   return (
     <View testID={testID}
-          style={[{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
+          style={[{ backgroundColor: t.surface, borderColor: t.lineSoft, borderWidth: 1,
                     borderRadius: radius.lg, padding: 16 }, raised, style]}>
       {children}
     </View>
@@ -385,7 +389,7 @@ export function List({ children }) {
   const raised = useShadow();
   const rows = React.Children.toArray(children);
   return (
-    <View style={[{ backgroundColor: t.surface, borderColor: t.line, borderWidth: 1,
+    <View style={[{ backgroundColor: t.surface, borderColor: t.lineSoft, borderWidth: 1,
                     borderRadius: radius.lg, overflow: "hidden" }, raised]}>
       {rows.map((row, k) => (
         React.isValidElement(row)
@@ -437,7 +441,7 @@ export function Row({ children, onPress, disabled, last, testID, at = 0 }) {
         onPressOut={live ? press.onPressOut : undefined}
         style={({ pressed }) => ({
           flexDirection: "row", alignItems: "center", gap: 12,
-          paddingVertical: 13, paddingHorizontal: 15,
+          paddingVertical: 14, paddingHorizontal: 16,
           borderBottomWidth: last ? 0 : 1, borderBottomColor: t.lineSoft,
           backgroundColor: pressed && !disabled ? t.surface2 : "transparent",
           opacity: disabled ? 0.5 : 1,
@@ -462,7 +466,7 @@ const BTN_LIP = 3;
    by Study's grade buttons, which used to keep a copy (COURSE-ROADMAP WP8). */
 export function toneOf(t, kind) {
   return {
-    plain: { bg: t.surface2, border: t.line, fg: t.ink, edge: t.line },
+    plain: { bg: t.surface2, border: t.surface2, fg: t.ink, edge: t.surface3 },
     pri: { bg: t.brand, border: t.brandDim, fg: t.brandOn, edge: t.brandDim },
     good: { bg: t.good, border: t.goodDim, fg: t.goodOn, edge: t.goodDim },
     bad: { bg: t.bad, border: t.badDim, fg: t.badOn, edge: t.badDim },
@@ -474,12 +478,15 @@ export function toneOf(t, kind) {
 export function Btn({ label, onPress, kind = "plain", disabled, style, testID, block }) {
   const t = useTheme();
   const tone = {
-    /* Tinted, not white. A plain button used to carry the surface colour, the
-       line colour and the card radius — which is a card, and on the unit screen
-       "Test out of this section" read as an empty panel somebody had forgotten
-       to fill in. A control has to differ from a container somewhere, and the
-       cheapest place is its fill. */
-    plain: { bg: t.surface2, border: t.line, fg: t.ink },
+    /* A solid tone, no hairline. A plain button used to carry the surface
+       colour, the line colour and the card radius — which is a card, and on
+       the unit screen "Test out of this section" read as an empty panel
+       somebody had forgotten to fill in. A control has to differ from a
+       container somewhere: a container here is a surface with a soft line
+       round it, so a control is a solid fill with a darker edge under it and
+       no line at all (the owner, 2026-11-18: "buttons should be clearly
+       buttons"). */
+    plain: { bg: t.surface2, border: t.surface2, fg: t.ink },
     pri: { bg: t.brand, border: t.brandDim, fg: t.brandOn },
     good: { bg: t.good, border: t.goodDim, fg: t.goodOn },
     bad: { bg: t.bad, border: t.badDim, fg: t.badOn },
@@ -539,6 +546,7 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID, b
     : kind === "pri" ? t.brandDim
     : kind === "good" ? t.goodDim
     : kind === "bad" ? t.badDim
+    : kind === "plain" ? t.surface3
     : t.line;
   return (
     /* Content-sized unless `block`. The floor on width is for a box — a one-word
@@ -556,7 +564,7 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID, b
         border={shown.border}
         r={radius.md}
         lip={BTN_LIP}
-        bw={kind === "plain" || disabled ? 1 : 0}
+        bw={disabled ? 1 : 0}
         disabled={disabled}
         onPress={onPress}
         /* The label is read off the text inside, so it is deliberately not
@@ -567,8 +575,8 @@ export function Btn({ label, onPress, kind = "plain", disabled, style, testID, b
            cannot use the app at all. */
         state={{ disabled: !!disabled }}
       >
-        <View style={{ paddingVertical: 10, paddingHorizontal: 22,
-                       alignItems: "center", minHeight: 44,
+        <View style={{ paddingVertical: 12, paddingHorizontal: 22,
+                       alignItems: "center", minHeight: 48,
                        justifyContent: "center" }}>
           {/* Semibold at 16: the label reads as a control without shouting.
               **One line, always** (the owner, 2026-11-12: "I see buttons that
@@ -629,11 +637,11 @@ export function Sheet({ visible = true, onClose, title, header, children, footer
         <View
           ref={panel}
           testID={testID}
-          style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.lg,
-                   borderTopRightRadius: radius.lg, padding: 16, paddingBottom: 22 + keyboardPad,
+          style={{ backgroundColor: t.bg, borderTopLeftRadius: radius.xl,
+                   borderTopRightRadius: radius.xl, padding: 16, paddingBottom: 22 + keyboardPad,
                    ...(tall ? { height: TALL_HEIGHT } : { maxHeight }) }}
         >
-          <View style={{ width: 38, height: 4, borderRadius: 2, backgroundColor: t.line,
+          <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: t.surface3,
                          alignSelf: "center", marginBottom: 14 }} />
           {header ? header : title ? (
             <Text style={{ color: t.ink, fontSize: type.head, fontWeight: "700", marginBottom: 14 }}>
@@ -668,7 +676,7 @@ export function Bubble({ visible = true, onClose, title, children, footer, testI
                    style={[StyleSheet.absoluteFill, { backgroundColor: SCRIM }]} />
         <View testID={testID}
               style={{ width: "100%", maxWidth: 380, maxHeight: "70%", backgroundColor: t.surface,
-                       borderRadius: radius.lg, borderWidth: 1, borderColor: t.line, padding: 18 }}>
+                       borderRadius: radius.xl, borderWidth: 1, borderColor: t.lineSoft, padding: 20 }}>
           {title ? (
             <Text style={{ color: t.ink, fontSize: type.head, fontWeight: "700", marginBottom: 8 }}>{title}</Text>
           ) : null}
@@ -851,10 +859,10 @@ export function Dropdown({ testID, sheetTestID, optionPrefix, title, label, valu
                  accessibilityLabel={`${label}: ${current ? current.name : ""}`}
                  onPress={() => setOpen(true)} hitSlop={6}
                  style={({ pressed }) => [{ flexDirection: "row", alignItems: "center", gap: 4,
-                   minHeight: 36, paddingHorizontal: 12, borderRadius: radius.lg,
-                   borderWidth: 1, borderColor: t.line, backgroundColor: t.surface,
+                   minHeight: 36, paddingHorizontal: 14, borderRadius: 99,
+                   backgroundColor: t.surface2,
                    opacity: pressed ? 0.6 : 1 }, style]}>
-        <Text numberOfLines={1} style={{ flexShrink: 1, color: t.ink2, fontSize: 13, fontWeight: "600" }}>
+        <Text numberOfLines={1} style={{ flexShrink: 1, color: t.ink, fontSize: 13, fontWeight: "600" }}>
           {current ? current.name : ""}
         </Text>
         <Text style={{ color: t.ink3, fontSize: 11 }}>▾</Text>
@@ -921,11 +929,11 @@ export function Chip({ on, label, onPress, testID }) {
   return (
     <Pressable onPress={onPress} testID={testID} accessibilityRole="button"
                accessibilityState={{ selected: !!on }}
-               style={{ borderWidth: 1, borderColor: on ? t.brand : t.line,
-                        backgroundColor: on ? t.brandBg : t.surface, borderRadius: 99,
+               style={{ borderWidth: 1, borderColor: on ? t.brand : t.surface2,
+                        backgroundColor: on ? t.brandBg : t.surface2, borderRadius: 99,
                         paddingHorizontal: 14, paddingVertical: 10, minHeight: 44,
                         justifyContent: "center" }}>
-      <Text selectable={false} style={{ color: on ? t.brandInk : t.ink2, fontSize: 14 }}>{label}</Text>
+      <Text selectable={false} style={{ color: on ? t.brandInk : t.ink, fontSize: 14, fontWeight: "600" }}>{label}</Text>
     </Pressable>
   );
 }
@@ -943,8 +951,8 @@ export function ActionChip({ label, onPress, testID, on, accessibilityLabel }) {
                accessibilityRole="button" accessibilityLabel={accessibilityLabel}
                accessibilityState={on === undefined ? undefined : { selected: !!on }}
                style={({ pressed }) => ({ minHeight: 36, paddingHorizontal: 12, justifyContent: "center",
-                 borderRadius: radius.md, borderWidth: 1, borderColor: on ? t.brand : t.line,
-                 backgroundColor: on ? t.brandBg : t.surface2, opacity: pressed ? 0.6 : 1 })}>
+                 borderRadius: radius.sm, borderWidth: 1, borderColor: on ? t.brand : t.surface3,
+                 backgroundColor: on ? t.brandBg : t.surface3, opacity: pressed ? 0.6 : 1 })}>
       <Text selectable={false} style={{ color: on ? t.brandInk : t.ink, fontSize: 14, fontWeight: "600" }}>
         {label}
       </Text>
@@ -972,7 +980,7 @@ export function CopyButton({ text, size = 36, label = "Copy", testID = "copy-but
   const glyph = Math.round(size / 2);
   return (
     <IconButton testID={testID} label={label} state={{ checked: done }} onPress={copy} size={size}
-                style={done ? { borderColor: t.good } : null}>
+                fill={done ? t.goodBg : undefined}>
       <Svg width={glyph} height={glyph} viewBox="0 0 24 24" fill="none" stroke={done ? t.good : t.ink2}
            strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
         {done ? <Path d="M5 12.5l4.5 4.5L19 7.5" />
@@ -1014,9 +1022,8 @@ export function Stepper({ value, onChange, min = 0, max = 999, step = 1, testID,
       onPress={to === value ? undefined : () => set(to)}
       hitSlop={6}
       style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center",
-               borderRadius: radius.md, borderWidth: 1,
-               borderColor: to === value ? t.lineSoft : t.line,
-               backgroundColor: t.surface }}
+               borderRadius: radius.md,
+               backgroundColor: to === value ? t.surface : t.surface2 }}
     >
       <Text style={{ color: to === value ? t.ink3 : t.ink, fontSize: 22, fontWeight: "600",
                      lineHeight: 26 }}>{mark}</Text>
@@ -1259,8 +1266,7 @@ export function Bar({ value, animate = false }) {
   const width = useFill(Math.min(1, Math.max(0, value || 0)));
   const fill = { height: "100%", backgroundColor: t.good };
   return (
-    <View style={{ height: 8, borderRadius: 4, backgroundColor: t.surface2,
-                   borderWidth: 1, borderColor: t.lineSoft, overflow: "hidden" }}>
+    <View style={{ height: 8, borderRadius: 4, backgroundColor: t.surface2, overflow: "hidden" }}>
       {animate
         ? <Animated.View style={[fill, { width }]} />
         : <View style={[fill, { width: `${Math.round(value * 100)}%` }]} />}
@@ -1312,7 +1318,7 @@ export function Thumb({ id, done, locked, n, tone }) {
   const hue = done ? t.good : key ? t[key] : t.ink3;
   const face = done ? t.goodBg : key && !locked ? t[`${key}Bg`] : t.surface2;
   return (
-    <View style={{ width: 44, height: 44, borderRadius: radius.xl, alignItems: "center",
+    <View style={{ width: 44, height: 44, borderRadius: radius.md, alignItems: "center",
                    justifyContent: "center",
                    backgroundColor: face,
                    borderWidth: done ? 2 : 0, borderColor: t.good }}>
@@ -1482,10 +1488,11 @@ export function Speaker({ text, size = 40, device = false, speak, recorded = fal
       onPress={live ? () => (speak ? speak() : say(text, { device })) : undefined}
       hitSlop={8}
       style={({ pressed }) => ({
-        width: size, height: size, borderRadius: size / 2, borderWidth: 1,
+        width: size, height: size, borderRadius: size / 2,
         // One look whatever the source (the owner, 2026-10-03: a speaker is a
         // speaker); the label still says when the phone's voice is reading.
-        borderColor: t.brand, alignItems: "center",
+        // A filled tint, not a ring (2026-11-18): the ring read as an empty circle.
+        backgroundColor: t.brandBg, alignItems: "center",
         justifyContent: "center",
         opacity: !live ? 0.35 : pressed ? 0.6 : 1,
       })}
@@ -1715,13 +1722,13 @@ export function HeaderTitle({ title, sub }) {
   return (
     <View style={{ alignItems: "center", justifyContent: "center" }}>
       <Text numberOfLines={1}
-            style={{ color: t.ink, fontSize: 16, fontWeight: "700",
+            style={{ color: t.ink, fontSize: 17, fontWeight: "600",
                      letterSpacing: -0.2 }}>
         {title}
       </Text>
       {sub ? (
         <Text numberOfLines={1}
-              style={{ color: t.ink3, fontSize: 10, fontWeight: "700", marginTop: 1 }}>
+              style={{ color: t.ink3, fontSize: 11, fontWeight: "500", marginTop: 1 }}>
           {sub}
         </Text>
       ) : null}
@@ -1740,5 +1747,8 @@ export function Loading() {
 }
 
 const styles = StyleSheet.create({
-  sectionLabel: { fontSize: 11, fontWeight: "600", marginBottom: 9, marginLeft: 2 },
+  /* Small capitals, tracked: the grouped-list header every phone system uses,
+     quiet enough to sit under the page title and never mistaken for a row. */
+  sectionLabel: { fontSize: 12, fontWeight: "600", letterSpacing: 0.6, textTransform: "uppercase",
+                  marginBottom: 8, marginLeft: 4 },
 });

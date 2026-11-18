@@ -14,7 +14,9 @@ import { Video } from "../src/screens/Video";
 import { DriveEpisode } from "../src/screens/Drive";
 import { videos } from "../src/data";
 import { remoteKey, resetRemote } from "../src/remote";
+import { DEFAULT_SKIP } from "../src/video";
 import * as audio from "../src/audio";
+const SKIP = DEFAULT_SKIP * 1000;
 
 jest.mock("../src/youtube", () => {
   const React = require("react");
@@ -59,16 +61,16 @@ describe("the video player", () => {
     expect(global.__remote.stopped).toBe(1);
   });
 
-  it("skip keys are back and forward five seconds; play/pause is the player's", async () => {
+  it("skip keys are the set skip, back and forward; play/pause is the player's", async () => {
     await withProfile(<Video route={{ params: { videoId: v.id } }} navigation={nav} />);
     await press("next");
-    expect(global.__skip).toHaveBeenLastCalledWith(5000, 0, 0);
+    expect(global.__skip).toHaveBeenLastCalledWith(SKIP, 0, 0);
     await press("forward");
-    expect(global.__skip).toHaveBeenLastCalledWith(5000, 0, 0);
+    expect(global.__skip).toHaveBeenLastCalledWith(SKIP, 0, 0);
     await press("previous");
-    expect(global.__skip).toHaveBeenLastCalledWith(-5000, 0, 0);
+    expect(global.__skip).toHaveBeenLastCalledWith(-SKIP, 0, 0);
     await press("rewind");
-    expect(global.__skip).toHaveBeenLastCalledWith(-5000, 0, 0);
+    expect(global.__skip).toHaveBeenLastCalledWith(-SKIP, 0, 0);
     expect(global.__skip).toHaveBeenCalledTimes(4);
     await press("toggle");
     expect(global.__toggle).toHaveBeenCalledTimes(1);

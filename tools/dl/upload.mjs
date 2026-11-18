@@ -1,4 +1,4 @@
-// node tools/dl/upload.mjs <apk> [name] [--notes "one line"] [--no-latest]
+// node tools/dl/upload.mjs <apk> [name] [--notes "bullet | bullet | bullet"] [--no-latest]
 //
 // Puts a build on the bridges-dl Worker: the file in 20 MiB pieces with a
 // seven-day expiry, then its meta record, then — when a sidecar from
@@ -6,6 +6,10 @@
 // `dl:latest` record the app compares itself against at launch
 // (native/src/update.js). No sidecar, no latest: a build with no version code
 // cannot be offered as newer than anything, and the upload says so.
+//
+// `--notes` is a few short bullets separated by `|` (or newlines); the app
+// shows the first three and offers Read more, which is `dl:changelog` — every
+// build's bullets, newest first, which this prepends to on each publish.
 //
 // The name is random when not given; the Worker looks a file up by its full
 // path name, extension included, so `.apk` is appended when missing (a bare
@@ -21,7 +25,9 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 const flag = (k) => { const i = args.indexOf(k); return i < 0 ? null : (args.splice(i, 2)[1] || ""); };
-const notes = flag("--notes") || "";
+const noteLines = (flag("--notes") || "").split(/\r?\n|\s*\|\s*/)
+  .map((s) => s.replace(/^\s*[-•*]\s*/, "").trim()).filter(Boolean);
+const notes = noteLines.join("\n");
 const noLatest = args.includes("--no-latest"); if (noLatest) args.splice(args.indexOf("--no-latest"), 1);
 const [file, given] = args;
 if (!file) { console.error("usage: node tools/dl/upload.mjs <apk> [name] [--notes \"...\"] [--no-latest]"); process.exit(2); }
@@ -75,7 +81,18 @@ if (noLatest) {
                    sha256: side.sha256 || "", size: buf.length, at: Date.now(), notes };
   writeFileSync(join(work, "latest.json"), JSON.stringify(latest));
   put("dl:latest", join(work, "latest.json"));
-  console.log(`latest: ${latest.name} (code ${latest.code})${notes ? ` — ${notes}` : ""}`);
+  console.log(`latest: ${latest.name} (code ${latest.code})${notes ? ` — ${noteLines.join(" | ")}` : ""}`);
+  /* The changelog: this build's bullets on top of what was there. A missing
+     key reads as empty, and nothing here fails the publish. */
+  if (noteLines.length) {
+    const r = spawnSync("npx", ["wrangler", "kv", "key", "get", "dl:changelog", "--binding", "FILES", "--remote",
+                                "--config", join(here, "wrangler.toml")], { encoding: "utf8", shell: true });
+    const before = r.status === 0 ? String(r.stdout || "").replace(/^﻿/, "") : "";
+    const entry = `## ${latest.name} · ${new Date().toISOString().slice(0, 10)}\n${noteLines.map((l) => `- ${l}`).join("\n")}\n\n`;
+    writeFileSync(join(work, "changelog.txt"), entry + before.trimStart());
+    put("dl:changelog", join(work, "changelog.txt"));
+    console.log(`changelog: ${noteLines.length} line${noteLines.length === 1 ? "" : "s"} added`);
+  }
 }
 rmSync(work, { recursive: true, force: true });
 console.log(`LINK https://bridges-dl.bridges-feedback.workers.dev/${name}`);

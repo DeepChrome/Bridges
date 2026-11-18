@@ -19,7 +19,7 @@ import { releaseAudio } from "../audio";
 import { useRemote } from "../remote";
 import { today } from "@core/util";
 import { newCard } from "@core/scheduler";
-import { short, minutes, clock, isFave, toggleFave } from "../video";
+import { short, minutes, clock, isFave, toggleFave, skipMsOf, DEFAULT_SKIP } from "../video";
 import { Heart } from "./Immerse";
 
 /* The player's own controls (the owner, 2026-10-01: "skip back 5 seconds,
@@ -27,7 +27,11 @@ import { Heart } from "./Immerse";
    doesn't have to interact with the video itself"). The speeds are the IFrame
    API's own steps; the label is the rate the player reports back. */
 export const VIDEO_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
-const SKIP_MS = 5000;
+/* Two taps on one half of the picture inside this are a skip, YouTube's own
+   gesture (the owner, 2026-11-18): the left half back, the right half
+   forward, by the seconds set in Settings (video.js skipMsOf). */
+const DOUBLE_TAP_MS = 300;
+const FLASH_MS = 600;
 
 /* What a press on the transport does. */
 export function videoActions(player, rate, onRate) {
@@ -122,7 +126,8 @@ function Scrubber({ pos, len, active, onSeek, onTouch }) {
 const MAXIMISE = "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5";
 const MINIMISE = "M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5";
 
-export function VideoOverlay({ player, playing, rate, onRate, onTick, length = 0, full, onFull, onCog }) {
+export function VideoOverlay({ player, playing, rate, onRate, onTick, length = 0, full, onFull, onCog,
+                               skipMs = DEFAULT_SKIP * 1000 }) {
   const { step, skip, toggle } = videoActions(player, rate, onRate);
   const [shown, setShown] = useState(false);
   const [pos, setPos] = useState(0);
@@ -135,6 +140,31 @@ export function VideoOverlay({ player, playing, rate, onRate, onTick, length = 0
     timer.current = setTimeout(() => setShown(false), OVERLAY_HIDE_MS);
   };
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  /* The double tap: which half, and when. A second tap on the same half
+     inside DOUBLE_TAP_MS skips and flashes the amount on that half for a
+     moment; a single tap shows or hides the controls as it always did. */
+  const [width, setWidth] = useState(0);
+  const lastTap = useRef({ t: 0, side: null });
+  const [flash, setFlash] = useState(null);                 // { side, text }
+  const flashTimer = useRef(null);
+  useEffect(() => () => { if (flashTimer.current) clearTimeout(flashTimer.current); }, []);
+  const secs = Math.round(skipMs / 1000);
+  const onPictureTap = (e) => {
+    const x = e && e.nativeEvent ? e.nativeEvent.locationX : undefined;
+    const side = width > 0 && typeof x === "number" ? (x < width / 2 ? "left" : "right") : null;
+    const now = Date.now();
+    if (side && lastTap.current.side === side && now - lastTap.current.t < DOUBLE_TAP_MS) {
+      lastTap.current = { t: 0, side: null };
+      skip(side === "left" ? -skipMs : skipMs);
+      setFlash({ side, text: `${side === "left" ? "−" : "+"}${secs}s` });
+      if (flashTimer.current) clearTimeout(flashTimer.current);
+      flashTimer.current = setTimeout(() => setFlash(null), FLASH_MS);
+      poke();
+      return;
+    }
+    lastTap.current = { t: now, side };
+    if (shown && playing) setShown(false); else poke();
+  };
   // Paused, the controls stay; playing, they leave shortly after a touch.
   const up = shown || !playing;
   const press = (fn) => () => { fn(); poke(); };
@@ -150,11 +180,23 @@ export function VideoOverlay({ player, playing, rate, onRate, onTick, length = 0
     <View testID="video-overlay" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
       {/* The picture: a tap shows the controls, or hides them when they are up. */}
       <Pressable testID="overlay-touch" accessibilityLabel="Show controls"
+                 accessibilityHint={`Double tap the left half to go back ${secs} seconds, the right half to go forward`}
                  style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-                 onPress={() => (shown && playing ? setShown(false) : poke())} />
+                 onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+                 onPress={onPictureTap} />
+      {flash ? (
+        <View pointerEvents="none"
+              style={{ position: "absolute", top: 0, bottom: 0, [flash.side]: 0, width: "50%",
+                       alignItems: "center", justifyContent: "center" }}>
+          <View style={{ paddingHorizontal: 18, paddingVertical: 10, borderRadius: 99,
+                         backgroundColor: "rgba(0,0,0,0.55)" }}>
+            <Text testID="overlay-flash" style={{ color: white, fontSize: 17, fontWeight: "700" }}>{flash.text}</Text>
+          </View>
+        </View>
+      ) : null}
       <View style={[corner, { bottom: 18, left: edge }]}>
-        <OverlayButton testID="overlay-back5" label="Back 5 seconds" onPress={press(() => skip(-SKIP_MS))}>{label("−5s")}</OverlayButton>
-        <OverlayButton testID="overlay-fwd5" label="Forward 5 seconds" onPress={press(() => skip(SKIP_MS))}>{label("+5s")}</OverlayButton>
+        <OverlayButton testID="overlay-back5" label={`Back ${secs} seconds`} onPress={press(() => skip(-skipMs))}>{label(`−${secs}s`)}</OverlayButton>
+        <OverlayButton testID="overlay-fwd5" label={`Forward ${secs} seconds`} onPress={press(() => skip(skipMs))}>{label(`+${secs}s`)}</OverlayButton>
       </View>
       {up ? (
         <>
@@ -345,12 +387,13 @@ export function Video({ route, navigation }) {
      2026-11-17): play/pause on the player's, skip on back and forward five
      seconds (src/remote.js). The WebView has no media session of its own, so
      without this nothing outside the screen could reach the video. */
+  const skipMs = skipMsOf(st);
   useRemote(!!v && playing, v ? v.title : "", running, {
     toggle: () => { if (player.current) player.current.toggle(); },
     play: () => { if (player.current && !running) player.current.toggle(); },
     pause: () => { if (player.current) player.current.pause(); },
-    forward: () => { if (player.current) player.current.skip(SKIP_MS, 0, 0); },
-    back: () => { if (player.current) player.current.skip(-SKIP_MS, 0, 0); },
+    forward: () => { if (player.current) player.current.skip(skipMs, 0, 0); },
+    back: () => { if (player.current) player.current.skip(-skipMs, 0, 0); },
   });
   if (!v) return null;
   const script = transcriptOf(v.id);
@@ -458,7 +501,7 @@ export function Video({ route, navigation }) {
                 }}
               />
               <VideoOverlay player={player} playing={running} rate={rate} onRate={setRate}
-                            onTick={onTick} length={v.dur ? v.dur * 1000 : 0}
+                            onTick={onTick} length={v.dur ? v.dur * 1000 : 0} skipMs={skipMs}
                             full={full} onFull={setFull} onCog={() => setCog(true)} />
             </View>
           </View>

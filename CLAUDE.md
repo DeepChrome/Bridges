@@ -7794,6 +7794,32 @@ the dictionary entry's title off centre, so that one header leaves out the
 app guide's "?". **A flow that walks a lesson leaves it through Home**: Back
 steps between cards (§30bq), and two Backs in a row only looked like leaving.
 
+## 30da. The morning after the sweep (2026-11-18)
+
+The owner's first report on the new build, and the rules it set:
+
+- **Updates are short bullets, and feedback is pulled every iteration.** He
+  wants reports as three bullet groups — what changed, issues, what he needs
+  to do — and the portal (`node backend/tools/reports.mjs --all`) read at the
+  start of every batch without being asked (memory: feedback-concise-updates).
+- **The headset keys work** on his phone (§30cy verified by him).
+- **One skip setting** (`st.skip`, Settings → Video skip: 5 / 10 / 20 / 30 s;
+  `skipMsOf` in video.js, default 10): the overlay's two buttons, the headset
+  keys and **a double tap on either half of the picture** (YouTube's own
+  gesture; `VideoOverlay`, `DOUBLE_TAP_MS`, a flash of the amount on that half)
+  all read it. The buttons' labels say the number.
+- **A wider gutter**: `space.pad` 16 → 20, so a page's primary button and the
+  first letter of a row sit a little off the edge.
+- **One installer at a time** (update.js): a new download first deletes every
+  other build's file, launch deletes any for a code no newer than the one
+  running, and a file older than `STALE_DAYS` goes whatever its code. The
+  files live in the app's cache, never in Downloads; the browser route's
+  downloads from before the in-app installer were never the app's to delete.
+- **The notes are bullets, three at most, with Read more.** `upload.mjs
+  --notes "a | b | c"`; the dl Worker keeps `dl:changelog` (prepended on each
+  publish) and serves it at `/changelog`, named in `latest.json` as `more`.
+  The download shows the percentage large over a slim bar.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

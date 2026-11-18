@@ -12,6 +12,17 @@ export const clock = (ms) => {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 };
 
+/* How far a skip goes — the overlay's two buttons, a double tap on either
+   half of the picture, a headset's skip keys (the owner, 2026-11-18: "control
+   how many seconds the rewind button takes them… 5 10 20 30… synch with the
+   same time the user set"). One setting, `st.skip`, in seconds; anything else
+   stored reads as the default. YouTube's own is ten. */
+export const SKIP_SECONDS = [5, 10, 20, 30];
+export const DEFAULT_SKIP = 10;
+export const SKIP_OPTIONS = SKIP_SECONDS.map((s) => ({ id: s, name: `${s} s` }));
+export const skipSeconds = (st) => (SKIP_SECONDS.includes(st && st.skip) ? st.skip : DEFAULT_SKIP);
+export const skipMsOf = (st) => skipSeconds(st) * 1000;
+
 export const isFave = (st, id) => !!((st.faves || {})[id]);
 /* Toggle a favourite: id -> the day it was marked. Keyed on the video id, which
    is YouTube's and survives a rebuild of the library. */

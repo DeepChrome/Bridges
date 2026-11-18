@@ -132,7 +132,7 @@ describe("installing in the app", () => {
     expect(await screen.findByTestId("update-sheet")).toBeTruthy();
     expect(screen.getByTestId("update-name")).toHaveTextContent("1.0.0-beta.10+def5678");
     expect(screen.getByTestId("update-meta")).toHaveTextContent(/288 MB/);
-    expect(screen.getByTestId("update-notes")).toHaveTextContent("Form cards and the update check");
+    expect(screen.getByTestId("update-notes")).toHaveTextContent(/Form cards and the update check/);
     await act(async () => { fireEvent.press(screen.getByTestId("update-download")); });
     expect(global.__downloads).toEqual([LATEST.url]);
     expect(global.__fs.files.get(cached)).toBe(LATEST.size);
@@ -191,6 +191,37 @@ describe("installing in the app", () => {
     expect(await screen.findByTestId("update-failed")).toBeTruthy();
     expect(global.__intents).toHaveLength(1);
     expect(Linking.openURL).not.toHaveBeenCalled();
+  });
+
+  /* The notes are bullets, three at most, and Read more opens the changelog
+     (the owner, 2026-11-18: "be less verbose. Just a few bullets and maybe an
+     option to read more in the changelog"). */
+  it("shows the notes as a few bullets, with Read more when the host has a changelog", async () => {
+    const latest = { ...LATEST, notes: "One | Two | - Three | Four", more: "https://dl.test/changelog" };
+    global.fetch = jest.fn(okJson(latest));
+    await path();
+    await screen.findByTestId("update-sheet");
+    const notes = screen.getByTestId("update-notes");
+    // A string match is the whole text; a regex is a part of it (whitespace normalised).
+    expect(notes).toHaveTextContent(/• One/);
+    expect(notes).toHaveTextContent(/• Three/);
+    expect(notes).not.toHaveTextContent(/Four/);
+    await act(async () => { fireEvent.press(screen.getByTestId("update-more")); });
+    expect(Linking.openURL).toHaveBeenCalledWith("https://dl.test/changelog");
+    expect(newerBuild({ ...latest, more: "http://x" }, INSTALLED).more).toBeUndefined();   // https or nothing
+  });
+
+  /* One installer at a time: a new download deletes every other build's
+     file first, and a file nobody installed in three days goes too. */
+  it("a download clears every other build's file first; a stale one goes at launch", async () => {
+    const other = apkPath(LATEST.code + 7);
+    global.__fs.files.set(other, 9);
+    await pruneDownloads({ keep: LATEST.code });
+    expect(global.__fs.files.has(other)).toBe(false);
+    global.__fs.files.set(other, 9);
+    const old = { getInfoAsync: async (uri) => ({ exists: true, uri, size: 9, modificationTime: 1 }) };
+    await pruneDownloads({ fs: { ...jest.requireMock("expo-file-system/legacy"), ...old }, now: 10 * 86400000 });
+    expect(global.__fs.files.has(other)).toBe(false);
   });
 
   it("at launch, files from builds no newer than this one are deleted; the offered one stays", async () => {

@@ -35,9 +35,17 @@ ok(r.status === 200, "latest answers");
 ok(r.headers.get("cache-control") === "no-store", "never cached");
 const body = await r.json();
 assert.deepEqual(body, { code: 29800000, name: "1.0.0-beta.10+abc1234", url: `https://dl.test/${file}`,
-                         size: 5, at: 1700000000000, notes: "Update check", commit: "abc1234", sha256: "ff" });
+                         size: 5, at: 1700000000000, notes: "Update check", commit: "abc1234", sha256: "ff", more: "" });
 checks++;
 ok((await get("/latest.json?x=1")).status === 200, "a query string does not matter");
+
+// The changelog: none is a 404 and no `more`; one is served as text and named.
+ok((await get("/changelog")).status === 404, "no changelog is a 404");
+kv.set("dl:changelog", "## 1.0.0-beta.10+abc1234 · 2026-11-18\n- Update check\n\n");
+const c = await get("/changelog");
+ok(c.status === 200 && (c.headers.get("content-type") || "").startsWith("text/plain"), "the changelog is plain text");
+ok((await c.text()).includes("- Update check"), "with the bullets");
+ok((await (await get("/latest.json")).json()).more === "https://dl.test/changelog", "latest names it");
 
 // The file itself streams whole.
 const d = await get(`/${file}`);

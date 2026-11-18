@@ -32,7 +32,11 @@ export const radius = { sm: 8, md: 12, lg: 16, xl: 20 };
 /* On the 4-grid, like every mobile system's spacing (Material 3 included).
    `gap` was 10, which is the sort of value that makes a row look a pixel
    wrong without anyone being able to say why (tools/design.mjs). */
-export const space = { pad: 16, gap: 12 };
+/* `pad` is a screen's side gutter. 20, not 16 (the owner, 2026-11-18: "preserve
+   a little bit of padding from the side of the screen… where the text begins…
+   doesn't need to be a ton"); the primary button at the foot of a page and
+   the first letter of a row both sit off the edge by it. */
+export const space = { pad: 20, gap: 12 };
 
 /* The type scale (2026-09-10). Before this the app used fifteen inline sizes —
    38, 30, 26, 22, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10 — chosen one screen

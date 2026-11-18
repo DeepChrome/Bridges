@@ -34,7 +34,18 @@
  * Store build must drop along with LATEST_URL**: Play's policy reserves that
  * permission for app stores. A file already downloaded for the offered code is
  * reused rather than fetched again (an install the learner backed out of), and
- * what is left in the cache from older codes is deleted at launch. */
+ * what is left in the cache from older codes is deleted at launch.
+ *
+ * **Nothing piles up** (the owner, 2026-11-18: "make sure that the downloader
+ * isn't leaving the stale installer every single time… I don't want a new
+ * version to drop a 200 MB bomb on their phone"). The file lives in the app's
+ * own cache, never in Downloads; at launch every file for a build no newer than
+ * the one running is deleted (so the build just installed clears its own
+ * installer on first open), a new download first deletes every other build's
+ * file, and anything older than STALE_DAYS goes whatever its code — the
+ * leftover of an install that never finished. At most one installer, briefly.
+ * The notes are a few bullets (NOTE_LINES), with Read more opening the host's
+ * changelog. */
 
 import React, { useState, useRef, useEffect } from "react";
 import { View, Linking } from "react-native";
@@ -77,7 +88,17 @@ export function newerBuild(latest, installed) {
     size: Number(latest.size) > 0 ? Number(latest.size) : 0,
     at: Number(latest.at) > 0 ? Number(latest.at) : 0,
     notes: typeof latest.notes === "string" ? latest.notes.trim() : "",
+    // The changelog, when the host has one: an https address, else absent.
+    ...(typeof latest.more === "string" && /^https:\/\/\S+$/.test(latest.more) ? { more: latest.more } : null),
   };
+}
+
+/* The notes as bullets: one a line, or `|`-separated on one line (what
+   tools/dl/upload.mjs is given); a leading dash or bullet is dropped. */
+export const NOTE_LINES = 3;
+export function notesList(notes) {
+  return String(notes || "").split(/\r?\n|\s*\|\s*/)
+    .map((s) => s.replace(/^\s*[-•*]\s*/, "").trim()).filter(Boolean);
 }
 
 /* Ask the host. Resolves to the update or null, and never rejects. */
@@ -139,15 +160,28 @@ export const apkPath = (code, fs = FS) => `${fs.cacheDirectory || ""}update-${co
 /* Files left from earlier offers — a build since installed, or one that was
    downloaded and never installed — go at launch; the one for the code still on
    offer is kept so a second Download costs nothing. 229 MB is not something to
-   leave lying about. */
-export async function pruneDownloads({ fs = FS, installed = installedBuild() } = {}) {
+   leave lying about. `keep` (a code) deletes every *other* build's file too,
+   which is what a new download does first; and a file older than STALE_DAYS
+   goes whatever its code, since an installer nobody ran in three days is
+   not going to be run. */
+export const STALE_DAYS = 3;
+export async function pruneDownloads({ fs = FS, installed = installedBuild(), keep, now = Date.now() } = {}) {
   if (!fs.cacheDirectory) return;
   const names = await fs.readDirectoryAsync(fs.cacheDirectory);
   for (const name of names) {
     const m = APK_NAME.exec(name);
-    if (m && Number(m[1]) <= installed.code) {
-      await fs.deleteAsync(fs.cacheDirectory + name, { idempotent: true }).catch(() => {});
+    if (!m) continue;
+    const code = Number(m[1]);
+    const uri = fs.cacheDirectory + name;
+    let gone = code <= installed.code || (keep !== undefined && code !== keep);
+    if (!gone) {
+      try {
+        const info = await fs.getInfoAsync(uri);
+        const t = info && info.modificationTime;                  // seconds, where the platform says
+        gone = typeof t === "number" && now - t * 1000 > STALE_DAYS * 86400000;
+      } catch (e) { gone = false; }
     }
+    if (gone) await fs.deleteAsync(uri, { idempotent: true }).catch(() => {});
   }
 }
 
@@ -193,22 +227,32 @@ const dayOf = (at) => {
 };
 
 /* What is on offer, as a card (resumesheet.js RunCard's shape): the build's
-   name large, size and date under it, the note in its own line. */
+   name, size and date under it, a few bullets, and Read more where the host
+   keeps a changelog (the owner, 2026-11-18: "be less verbose. Just a few
+   bullets and maybe an option to read more"). */
 export function UpdateCard({ update }) {
   const t = useTheme();
   const meta = [mb(update.size), dayOf(update.at)].filter(Boolean).join(" · ");
+  const lines = notesList(update.notes).slice(0, NOTE_LINES);
   return (
     <View testID="update-card"
-          style={{ padding: 14, borderRadius: radius.lg, backgroundColor: t.surface,
-                   borderWidth: 1, borderColor: t.line, gap: 2 }}>
+          style={{ padding: 16, borderRadius: radius.lg, backgroundColor: t.surface,
+                   borderWidth: 1, borderColor: t.lineSoft, gap: 2 }}>
       <Text testID="update-name" numberOfLines={1}
-            style={{ color: t.ink, fontSize: T.head, fontWeight: "700" }}>
+            style={{ color: t.ink, fontSize: T.head, fontWeight: "600" }}>
         {update.name || "A newer build"}
       </Text>
       {meta ? <Muted testID="update-meta" numberOfLines={1}>{meta}</Muted> : null}
-      {update.notes ? (
-        <Text testID="update-notes" style={{ color: t.ink2, fontSize: T.body, marginTop: 8 }}>
-          {update.notes}
+      {lines.length ? (
+        <Text testID="update-notes" style={{ color: t.ink2, fontSize: T.body, lineHeight: 23, marginTop: 10 }}>
+          {lines.map((line) => `•  ${line}`).join("\n")}
+        </Text>
+      ) : null}
+      {update.more ? (
+        <Text testID="update-more" accessibilityRole="link" suppressHighlighting
+              onPress={() => Promise.resolve().then(() => Linking.openURL(update.more)).catch(() => {})}
+              style={{ color: t.brandInk, fontSize: T.body, fontWeight: "600", marginTop: 10, paddingVertical: 4 }}>
+          Read more
         </Text>
       ) : null}
     </View>
@@ -223,6 +267,7 @@ export function UpdateCard({ update }) {
    that cannot fail for the app's own reasons. Leaving the screen mid-download
    cancels it; the next launch offers the build again. */
 export function UpdateSheet({ update, onClose }) {
+  const t = useTheme();
   const [phase, setPhase] = useState("offer");          // offer · downloading · failed
   const [progress, setProgress] = useState({ written: 0, total: update.size });
   const task = useRef(null);
@@ -231,6 +276,8 @@ export function UpdateSheet({ update, onClose }) {
 
   const install = async () => {
     try {
+      // Every other build's file goes before this one is fetched: one at a time.
+      await pruneDownloads({ keep: update.code }).catch(() => {});
       let uri = await downloadedUpdate(update);
       if (!uri) {
         setPhase("downloading");
@@ -270,14 +317,21 @@ export function UpdateSheet({ update, onClose }) {
     </View>
   );
   const totalMb = Math.round((progress.total || update.size) / 1048576);
+  const frac = totalMb > 0 ? Math.min(1, progress.written / totalMb) : 0;
   return (
     <Sheet testID="update-sheet" title="Update available" onClose={phase === "downloading" ? cancel : onClose}
            footer={footer}>
       <UpdateCard update={update} />
       {phase === "downloading" ? (
-        <View testID="update-progress" style={{ marginTop: 14, gap: 6 }}>
-          <Bar value={totalMb > 0 ? progress.written / totalMb : 0} />
-          <Muted testID="update-progress-text" style={{ textAlign: "center" }}>
+        /* The percentage is the thing: large, the bar under it, the megabytes
+           quiet beneath (the owner, 2026-11-18: "make the downloader look a
+           little more modern as it's happening"). */
+        <View testID="update-progress" style={{ marginTop: 20, alignItems: "center", gap: 10 }}>
+          <Text testID="update-percent" style={{ color: t.ink, fontSize: T.display, fontWeight: "700" }}>
+            {`${Math.round(frac * 100)}%`}
+          </Text>
+          <View style={{ alignSelf: "stretch" }}><Bar value={frac} /></View>
+          <Muted testID="update-progress-text">
             {totalMb > 0 ? `${progress.written} of ${totalMb} MB` : `${progress.written} MB`}
           </Muted>
         </View>

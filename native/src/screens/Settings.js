@@ -11,6 +11,7 @@ import { List, Row, Btn, Muted, Avatar, Choice, Sheet, Text, Stepper, RowText, T
 import { CharacterPicker } from "./Gate";
 import { STATS } from "../data";
 import { CUE_NAMES, WRONG_NAMES, SPEEDS, previewCue, rightCueOf, wrongCueOf } from "../audio";
+import { SKIP_OPTIONS, skipSeconds } from "../video";
 import { backupProfile, restoreProfile, shareCrashes } from "../backup";
 import { readCrashes, clearCrashes } from "../crash";
 import { importDeck } from "../anki";
@@ -249,6 +250,15 @@ export function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedbac
                   <Muted>Press a speaker twice for slower</Muted>
                   <Choice testID="speed-choice" options={SPEEDS} value={st.speed || "normal"} style={{ marginTop: 8 }}
                           onPick={(id) => update((p) => ({ ...p, speed: id }))} />
+                </View>
+              </Row>
+              {/* How far a video skips: the overlay's buttons, a double tap on
+                  the picture, a headset's skip keys (video.js skipMsOf). */}
+              <Row>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: t.ink, fontSize: T.body }}>Video skip</Text>
+                  <Choice testID="skip-choice" options={SKIP_OPTIONS} value={skipSeconds(st)} style={{ marginTop: 8 }}
+                          onPick={(id) => update((p) => ({ ...p, skip: id }))} />
                 </View>
               </Row>
               <Row>

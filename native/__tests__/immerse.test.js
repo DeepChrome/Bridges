@@ -15,6 +15,7 @@ import { flushState } from "../src/store";
 import { Immerse, VideoHistory } from "../src/screens/Immerse";
 import { Video, VideoOverlay, VIDEO_SPEEDS } from "../src/screens/Video";
 import { videos } from "../src/data";
+import { DEFAULT_SKIP } from "../src/video";
 import { setVideoPosition, openedVideo, watchHistory, videoPosition, libraryState,
          loadImmerse, flushImmerse, resetImmerse } from "../src/immerse";
 
@@ -177,10 +178,11 @@ describe("the player", () => {
     // left the renderer a render behind and broke the tests after this one.
     const press = (id) => act(async () => { fireEvent.press(screen.getByTestId(id)); });
     expect(screen.getByTestId("video-overlay")).toBeTruthy();
+    // By the set skip (video.js skipMsOf), the default here.
     await press("overlay-back5");
-    expect(global.__skip).toHaveBeenCalledWith(-5000, 0, 0);
+    expect(global.__skip).toHaveBeenCalledWith(-DEFAULT_SKIP * 1000, 0, 0);
     await press("overlay-fwd5");
-    expect(global.__skip).toHaveBeenCalledWith(5000, 0, 0);
+    expect(global.__skip).toHaveBeenCalledWith(DEFAULT_SKIP * 1000, 0, 0);
     expect(screen.getByTestId("overlay-scrub")).toBeTruthy();
     // Paused (the player has not reported playing), the rest stay up.
     await press("overlay-toggle");

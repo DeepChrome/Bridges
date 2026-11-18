@@ -4,9 +4,13 @@
 //   GET /<name>.apk      streams the file from KV, where upload.mjs stored it in
 //                        20 MiB pieces (a KV value stops at 25 MiB); seven-day TTL
 //   GET /latest.json     the newest published build: { code, name, url, size, at,
-//                        notes, commit, sha256 } — or 404 when there is none, or
-//                        when the file it names has expired, so the app says
-//                        nothing rather than offer a dead link
+//                        notes, commit, sha256, more } — or 404 when there is
+//                        none, or when the file it names has expired, so the app
+//                        says nothing rather than offer a dead link. `notes` is a
+//                        few lines, one bullet each; `more` is the changelog's
+//                        address when there is one
+//   GET /changelog       every build's bullets, newest first (plain text), kept
+//                        in `dl:changelog` by upload.mjs
 //
 // Nothing else is served. The name of a file is random (upload.mjs), which is
 // the only thing standing between a URL and the file, so a name under sixteen
@@ -23,13 +27,23 @@ export default {
       const file = latest && typeof latest.file === "string" ? latest.file : null;
       const meta = file ? await env.FILES.get(`dl:${file}:meta`, "json") : null;
       if (!latest || !meta) return new Response("not found", { status: 404 });
+      const changelog = await env.FILES.get("dl:changelog");
       const body = {
         code: latest.code, name: latest.name, url: `${url.origin}/${file}`,
         size: meta.size, at: latest.at, notes: latest.notes || "",
         commit: latest.commit || "", sha256: latest.sha256 || "",
+        more: changelog ? `${url.origin}/changelog` : "",
       };
       return new Response(JSON.stringify(body), { headers: {
         "content-type": "application/json", "cache-control": "no-store" } });
+    }
+
+    if (name === "changelog") {
+      if (request.method !== "GET") return new Response("method", { status: 405 });
+      const text = await env.FILES.get("dl:changelog");
+      if (!text) return new Response("not found", { status: 404 });
+      return new Response(text, { headers: {
+        "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
     }
 
     // ?dl=1 saves the file instead of playing it in the tab.

@@ -7787,7 +7787,12 @@ grey box with a line round it. The sweep is at the tokens and the primitives
 
 The palette did not move (`contrast.js` 110 checks unchanged); the type
 scale did not move. What the instruments cannot say is whether it *looks*
-right, and that is the walkthrough on the emulator, read by a person (§31).
+right, and that was read off the emulator the same night — `native/flows/
+sweep.txt`, eighteen shots from the gate to Settings. One thing the pictures
+found that no suite could: five header buttons beside a centred title pushed
+the dictionary entry's title off centre, so that one header leaves out the
+app guide's "?". **A flow that walks a lesson leaves it through Home**: Back
+steps between cards (§30bq), and two Backs in a row only looked like leaving.
 
 ## 31. Verification
 

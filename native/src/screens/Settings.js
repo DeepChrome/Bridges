@@ -12,6 +12,7 @@ import { CharacterPicker } from "./Gate";
 import { STATS } from "../data";
 import { CUE_NAMES, WRONG_NAMES, SPEEDS, previewCue, rightCueOf, wrongCueOf } from "../audio";
 import { SKIP_OPTIONS, skipSeconds } from "../video";
+import { tutorProfile } from "./Tutor";
 import { backupProfile, restoreProfile, shareCrashes } from "../backup";
 import { readCrashes, clearCrashes } from "../crash";
 import { importDeck } from "../anki";
@@ -97,6 +98,55 @@ export function PictureSection() {
           <CharacterPicker value={account ? account.avatar : null}
                            onPick={(id) => { updateAccount({ avatar: id }); }} />
         </View>
+      ) : null}
+    </>
+  );
+}
+
+/* What the AI is told about this learner, for the developer (the owner,
+   2026-11-18: "in dev mode, I'd like to be able to see how the app/AI is
+   maintaining the context of the learner"). It is `tutorProfile` — the very
+   object every tutor turn carries (screens/Tutor.js) — laid out a section a
+   key, so what is shown is what is sent and not a description of it. Its own
+   component, since a sheet opened from state held in Settings does not redraw
+   (§30be). */
+const CONTEXT_LABELS = {
+  chapter: "Chapter", lesson: "Lesson", level: "Level", trouble: "Trouble words", strong: "Held well",
+  misses: "Recent misses", notes: "The tutor's notes", chapters: "Chapters worked on", skills: "Skill averages",
+  holes: "Meaning holes", resting: "Resting words", recentDays: "Days studied of the last seven",
+  intro: "Questionnaire",
+};
+const line = (v) => (v === null || v === undefined || v === "" ? "—"
+  : typeof v === "object" ? JSON.stringify(v) : String(v));
+function AiContextRow({ st, last, at }) {
+  const t = useTheme();
+  const [open, setOpen] = useState(false);
+  const profile = open ? tutorProfile(st) : null;
+  return (
+    <>
+      {/* `last` and `at` are what List hands its rows; a wrapper that
+          dropped them broke the group's last hairline (lists.test.js). */}
+      <Row testID="open-ai-context" onPress={() => setOpen(true)} last={last} at={at}>
+        <RowText title="AI context" bold={false} />
+      </Row>
+      {open ? (
+        <Sheet testID="ai-context" title="What the AI is told" onClose={() => setOpen(false)}
+               footer={<Btn block kind="pri" label="Done" style={{ marginTop: 14 }} onPress={() => setOpen(false)} />}>
+          {Object.keys(profile).map((k) => {
+            const v = profile[k];
+            const items = Array.isArray(v) ? v : [v];
+            return (
+              <View key={k} style={{ marginBottom: 14 }}>
+                <Text style={{ color: t.ink, fontSize: T.body, fontWeight: "600", marginBottom: 4 }}>
+                  {CONTEXT_LABELS[k] || k}
+                </Text>
+                {items.length ? items.slice(0, 40).map((it, i) => (
+                  <Text key={i} selectable style={{ color: t.ink2, fontSize: T.small, lineHeight: 18 }}>{line(it)}</Text>
+                )) : <Muted>—</Muted>}
+              </View>
+            );
+          })}
+        </Sheet>
       ) : null}
     </>
   );
@@ -306,6 +356,7 @@ export function Settings({ visible, onClose, onLab, onTour, onCredits, onFeedbac
                   <RowText title="STT Lab" bold={false} />
                 </Row>
               ) : null}
+              {st.dev ? <AiContextRow st={st} /> : null}
             </List>
 
             {/* This profile on another device (src/syncui.js, 2026-11-07). */}

@@ -94,16 +94,19 @@ describe("a list's hairlines", () => {
     /* "Cards: recognise" led this list until the flashcards' directions moved
        to the Study picker (§30ai); "Reviews a day" after that, until the
        scheduler's settings came down to new words a day (2026-09-29). */
+    // AI context (2026-11-18) closes the group with developer mode on; it is
+    // a wrapper around a Row and has to forward `last`, as ToggleRow does.
     const group = ["New words a day", "On-screen Russian keyboard", "Dark mode", "Reading speed",
-                   "Right-answer sound", "Show the tour", "Developer mode", "STT Lab"];
+                   "Right-answer sound", "Show the tour", "Developer mode", "STT Lab", "AI context"];
     for (const label of group.slice(0, -1)) expect(rowAround(label)).toBe(1);
-    expect(rowAround("STT Lab")).toBe(0);
+    expect(rowAround("AI context")).toBe(0);
 
     await act(async () => {
       fireEvent(screen.getByTestId("dev-switch"), "valueChange", false);
     });
     expect(screen.queryByText("STT Lab")).toBeNull();
-    for (const label of group.slice(0, -2)) expect(rowAround(label)).toBe(1);
+    expect(screen.queryByText("AI context")).toBeNull();
+    for (const label of group.slice(0, -3)) expect(rowAround(label)).toBe(1);
     // With the lab gone, developer mode closes the group.
     expect(rowAround("Developer mode")).toBe(0);
   });

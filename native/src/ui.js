@@ -9,12 +9,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   View, Pressable, ScrollView, ActivityIndicator, StyleSheet, Modal, Animated, Image, Switch, Keyboard,
+  RefreshControl,
 } from "react-native";
 /* Renamed on the way in: the app's own `Text` and `TextInput` are defined below
    and are what everything else imports (font.test.js). */
 import { Text as RNText, TextInput as RNTextInput } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, SafeAreaInsetsContext } from "react-native-safe-area-context";
+import { hidesTabBar } from "./fullscreen";
 import Svg, { Path, SvgXml, Circle } from "react-native-svg";
 import { iconFor } from "@core/icons";
 import { AV, AV_IDS, AV_LEGACY, avatarOf } from "@core/avatars";
@@ -23,7 +25,7 @@ import { useTheme, radius, space, type, faceFor, useShadow } from "./theme";
 import { useFill, usePress, useEnter, motionOff } from "./motion";
 import { say, hasRealAudio, hasRussianVoice, probeVoices, onVoicesChanged, onAudioFailure } from "./audio";
 import { MicButton } from "./mic";
-import { Linked } from "./words";
+import { Linked, navRef } from "./words";
 
 /* How deep a control's edge is, and how far it travels when pressed. One
    number, so a quiz answer and the primary button are pressed by the same
@@ -220,13 +222,30 @@ function measureBottom(node, cb) {
   node.measureInWindow((x, y, w, h) => cb(y + h));
 }
 
+/* `onRefresh`: a pull down the page runs it (the path asks the download host
+   again). `footer` on a screen with no tab bar under it — a run, a video's
+   summary — takes the bottom inset itself, or its button sits on the gesture
+   bar (the owner, 2026-11-18, of "Watch video": "the padding issue still
+   exists on the bottom"); a screen with the tab bar leaves the inset to it.
+   Which it is comes off the navigator's current route (fullscreen.js), and
+   nothing when there is no navigator, as in the tests. */
 export function Screen({ children, scroll = true, fill = false, safeTop = false, footer,
-                         restoreY, onScrollY, keyboard = false }) {
+                         restoreY, onScrollY, keyboard = false, onRefresh }) {
   const t = useTheme();
   const Body = scroll ? ScrollView : View;
   // `keyboard`: the screen has a text field, and makes room for the keys.
   const pad = useKeyboardPad();
   const keyboardPad = keyboard ? pad : 0;
+  // The context, not the hook: the hook throws with no provider above it,
+  // which is every screen a test renders on its own; no provider is no inset.
+  const insets = React.useContext(SafeAreaInsetsContext) || { bottom: 0 };
+  const route = navRef.isReady && navRef.isReady() && navRef.getCurrentRoute ? navRef.getCurrentRoute() : null;
+  const footerInset = footer && route && hidesTabBar(route.name) ? insets.bottom || 0 : 0;
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = async () => {
+    setRefreshing(true);
+    try { await onRefresh(); } finally { setRefreshing(false); }
+  };
   /* `restoreY`/`onScrollY`: a screen that keeps its place (Immerse, 2026-10-01:
      "if you navigate away from the immerse page, it remembers the exact
      state you were in"). The offset is applied once, when the content is tall
@@ -267,15 +286,17 @@ export function Screen({ children, scroll = true, fill = false, safeTop = false,
         // Continue and a tapped search result needed two presses; found on the
         // emulator walkthrough. "handled" lets the button take the press.
         {...(scroll ? { keyboardShouldPersistTaps: "handled" } : null)}
+        {...(scroll && onRefresh ? { refreshControl: <RefreshControl refreshing={refreshing} onRefresh={refresh}
+                                                                      tintColor={t.brand} colors={[t.brand]} /> } : null)}
         {...remember}
       >
         {children}
       </Body>
       {footer ? (
         <View testID="screen-footer"
-              style={{ borderTopWidth: 1, borderTopColor: t.line,
+              style={{ borderTopWidth: 1, borderTopColor: t.lineSoft,
                        backgroundColor: t.bg,
-                       paddingHorizontal: space.pad, paddingTop: 10, paddingBottom: 12 }}>
+                       paddingHorizontal: space.pad, paddingTop: 10, paddingBottom: 12 + footerInset }}>
           {footer}
         </View>
       ) : null}
@@ -919,6 +940,32 @@ export function Subheading({ children, testID, style }) {
   return (
     <Text testID={testID} accessibilityRole="header"
           style={[{ color: t.brand, fontSize: 13, fontWeight: "700", marginBottom: 2 }, style]}>{children}</Text>
+  );
+}
+
+/* A tile: an activity as a button, two across (Practice, 2026-11-18). Its
+   icon in the family colour, the name, and one word under it saying what
+   kind of thing it is — a label, not an explanation (rule 20.7). Pressed into
+   its edge like every other control (`Lift`), so a grid of them reads as
+   things to do rather than as cards. */
+export function Tile({ icon, tone, title, caption, onPress, testID, style }) {
+  const t = useTheme();
+  return (
+    <Lift testID={testID} onPress={onPress} fill={t.surface} edge={t.surface3} border={t.lineSoft} bw={1}
+          r={radius.lg} style={[{ flexBasis: "47%", flexGrow: 1 }, style]} label={title}>
+      <View style={{ padding: 14, gap: 10, minHeight: 112 }}>
+        <Thumb id={icon} tone={tone} />
+        <View>
+          <Text numberOfLines={1} style={{ color: t.ink, fontSize: type.body, fontWeight: "600" }}>{title}</Text>
+          {caption ? <Muted numberOfLines={1} style={{ marginTop: 1 }}>{caption}</Muted> : null}
+        </View>
+      </View>
+    </Lift>
+  );
+}
+export function TileGrid({ children, testID }) {
+  return (
+    <View testID={testID} style={{ flexDirection: "row", flexWrap: "wrap", gap: space.gap }}>{children}</View>
   );
 }
 

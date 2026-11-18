@@ -7820,6 +7820,33 @@ The owner's first report on the new build, and the rules it set:
   publish) and serves it at `/changelog`, named in `latest.json` as `more`.
   The download shows the percentage large over a slim bar.
 
+His second note the same morning, and what it set:
+
+- **Practice is three groups in three shapes** (`Practice.js`): the eight
+  activities as a grid of `Tile`s two across (ui.js: a `Lift` with the icon
+  in its family colour and one word under the name saying its kind), the
+  grammar as rows, the reference as rows. Six sections of fifteen identical
+  rows read as a settings page. No row carries a caption: the chapter's
+  grammar row printed its card's title ("Every noun has a gender") under it.
+- **A run's footer takes the bottom inset itself** (`Screen`): "Watch video"
+  sat on the gesture bar. The route comes off `navRef`, the inset off
+  `SafeAreaInsetsContext` — the hook throws with no provider, which is every
+  screen a test renders alone, and that broke forty tests before the context
+  replaced it.
+- **The install lives outside any screen** (update.js `startInstall`,
+  `installState`, `useInstall`, `UpdateBanner`): leaving the path used to
+  cancel the download and hide that anything was happening. The sheet starts
+  it and shows it; closing the sheet leaves it running; `UpdateBanner` on the
+  path shows the percentage, "Opening the installer", or a failure with Retry
+  and a dismissal; only Cancel stops it. `resetUpdate` clears the job too, or
+  one test's download runs into the next.
+- **A pull down the path asks the host again** (`Screen onRefresh` →
+  `recheckUpdate`), with "Up to date" for a moment when there is nothing
+  newer. In a test the control is `screen-body`'s `refreshControl` prop.
+- **Developer mode shows what the AI is told**: Settings → AI context lays
+  out `tutorProfile(st)` a section a key — the very object a tutor turn
+  carries, not a description of it.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,

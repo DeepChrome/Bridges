@@ -138,7 +138,7 @@ export async function launchUpdate(deps) {
    screen that is gone, so it is on offer again for the next mount. */
 export function putBackUpdate() { offered = false; }
 /* Tests start each case as a fresh launch. */
-export function resetUpdate() { launched = null; offered = false; }
+export function resetUpdate() { launched = null; offered = false; cancelInstall(); }
 
 /* The fallback: the browser fetches the file and Android offers to install it,
    as the testers first installed. A failure to open is nothing to report: the
@@ -259,80 +259,159 @@ export function UpdateCard({ update }) {
   );
 }
 
-/* The sheet runs the whole install: Download fetches the file (a bar and the
-   megabytes under the card, Cancel beside it) and opens the installer the
-   moment it is whole; a file already whole opens the installer at once. The
-   sheet closes behind the installer, which takes the screen. Where the fetch
-   or the installer fails, it says so and offers the browser — the one route
-   that cannot fail for the app's own reasons. Leaving the screen mid-download
-   cancels it; the next launch offers the build again. */
+/* The install, outside any screen (the owner, 2026-11-18: "if you navigate
+   away, the update will stop. Or at least hide… I was unsure if it was
+   updating at all"). One job at a time, held here: Download starts it, the
+   sheet and the banner on the path read it, leaving a screen does not touch
+   it, and only Cancel stops it. `phase` is downloading · installing · failed;
+   a finished job is gone, since the installer has the screen by then. */
+let job = null;                       // { update, phase, written, total, task }
+const watchers = new Set();
+const tell = () => { const s = installState(); for (const fn of watchers) fn(s); };
+export function installState() {
+  return job ? { update: job.update, phase: job.phase, written: job.written, total: job.total } : null;
+}
+export function onInstall(fn) { watchers.add(fn); return () => watchers.delete(fn); }
+export function useInstall() {
+  const [s, setS] = useState(installState);
+  useEffect(() => onInstall(setS), []);
+  return s;
+}
+export async function startInstall(update, deps = {}) {
+  if (job && job.phase !== "failed" && job.update.code === update.code) return;   // already on its way
+  const mine = { update, phase: "downloading", written: 0, total: update.size, task: null };
+  job = mine;
+  tell();
+  try {
+    // Every other build's file goes before this one is fetched: one at a time.
+    await pruneDownloads({ keep: update.code, ...deps }).catch(() => {});
+    let uri = await downloadedUpdate(update, deps.fs);
+    if (!uri) {
+      let shown = -1;
+      mine.task = downloadUpdate(update, {
+        fs: deps.fs,
+        /* The native task reports many times a second; the screens redraw
+           once a megabyte. */
+        onProgress: (written, total) => {
+          const mb = Math.floor(written / 1048576);
+          if (job !== mine || mb === shown) return;
+          shown = mb; mine.written = mb; mine.total = total;
+          tell();
+        },
+      });
+      uri = await mine.task.promise;
+      if (job !== mine) return;                                   // cancelled meanwhile
+      mine.task = null;
+    }
+    mine.phase = "installing"; tell();
+    await installUpdate(uri, deps);
+    if (job === mine) { job = null; tell(); }
+  } catch (e) {
+    if (job === mine) { mine.phase = "failed"; mine.task = null; tell(); }
+  }
+}
+export function cancelInstall() {
+  const j = job;
+  job = null;
+  if (j && j.task) j.task.cancel();
+  tell();
+}
+/* A failed job is kept so the banner can say so; this is the dismissal. */
+export function clearInstall() { if (job && job.phase === "failed") { job = null; tell(); } }
+
+/* A second look at the host, on a pull down the path (the owner, 2026-11-18:
+   "rather than restarting the app, I can just drag up on the home screen and
+   it will refresh and check for an update"). The once-a-launch memory is
+   reset, so the update is handed out again. */
+export async function recheckUpdate(deps) {
+  launched = null; offered = false;
+  return launchUpdate(deps);
+}
+
+/* Where an install stands, on the path (and anywhere else that shows it):
+   the percentage while it downloads, a word while the installer opens, and a
+   failure with Retry and a dismissal. Pressing it reopens the sheet. */
+export function UpdateBanner({ onPress }) {
+  const t = useTheme();
+  const s = useInstall();
+  if (!s) return null;
+  const totalMb = Math.round((s.total || s.update.size) / 1048576);
+  const frac = totalMb > 0 ? Math.min(1, s.written / totalMb) : 0;
+  const text = s.phase === "failed" ? "Update failed"
+    : s.phase === "installing" ? "Opening the installer"
+    : `Updating · ${Math.round(frac * 100)}%`;
+  return (
+    <View testID="update-banner"
+          style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12,
+                   paddingHorizontal: 14, paddingVertical: 10, borderRadius: radius.md,
+                   backgroundColor: s.phase === "failed" ? t.badBg : t.brandBg }}>
+      <Text testID="update-banner-text" onPress={onPress} accessibilityRole="button"
+            style={{ flex: 1, color: t.ink, fontSize: T.body, fontWeight: "600" }}>{text}</Text>
+      {s.phase === "downloading" ? (
+        <View style={{ width: 90 }}><Bar value={frac} /></View>
+      ) : s.phase === "failed" ? (
+        <>
+          <Text testID="update-banner-retry" accessibilityRole="button" onPress={() => startInstall(s.update)}
+                style={{ color: t.brandInk, fontSize: T.body, fontWeight: "600", paddingHorizontal: 6 }}>Retry</Text>
+          <Text testID="update-banner-dismiss" accessibilityRole="button" accessibilityLabel="Dismiss"
+                onPress={clearInstall} style={{ color: t.ink3, fontSize: T.body, paddingHorizontal: 6 }}>✕</Text>
+        </>
+      ) : null}
+    </View>
+  );
+}
+
+/* The sheet offers the build and starts the install; it shows the install's
+   progress while it is open and closes when the installer takes the screen.
+   Closing it mid-download leaves the download running — the banner on the
+   path carries it from there — and Cancel is the one thing that stops it.
+   Where the fetch or the installer fails, it says so and offers the browser,
+   the one route that cannot fail for the app's own reasons. */
 export function UpdateSheet({ update, onClose }) {
   const t = useTheme();
-  const [phase, setPhase] = useState("offer");          // offer · downloading · failed
-  const [progress, setProgress] = useState({ written: 0, total: update.size });
-  const task = useRef(null);
+  const s = useInstall();
+  const mine = s && s.update.code === update.code ? s : null;
+  const phase = mine ? mine.phase : "offer";                // offer · downloading · installing · failed
   const gone = useRef(false);
-  useEffect(() => () => { gone.current = true; if (task.current) task.current.cancel(); }, []);
-
+  useEffect(() => () => { gone.current = true; }, []);
   const install = async () => {
-    try {
-      // Every other build's file goes before this one is fetched: one at a time.
-      await pruneDownloads({ keep: update.code }).catch(() => {});
-      let uri = await downloadedUpdate(update);
-      if (!uri) {
-        setPhase("downloading");
-        let shown = -1;
-        task.current = downloadUpdate(update, {
-          /* The native task reports many times a second; the screen redraws
-             once a megabyte. */
-          onProgress: (written, total) => {
-            const mb = Math.floor(written / 1048576);
-            if (gone.current || mb === shown) return;
-            shown = mb;
-            setProgress({ written: mb, total });
-          },
-        });
-        uri = await task.current.promise;
-        task.current = null;
-      }
-      if (gone.current) return;
-      await installUpdate(uri);
-      if (!gone.current) onClose();
-    } catch (e) {
-      task.current = null;
-      if (!gone.current) setPhase("failed");
-    }
+    await startInstall(update);
+    // Finished and handed over: the installer has the screen, the sheet goes.
+    if (!gone.current && !installState()) onClose();
   };
-  const cancel = () => { if (task.current) task.current.cancel(); task.current = null; onClose(); };
+  const cancel = () => { cancelInstall(); onClose(); };
+  const later = () => { clearInstall(); onClose(); };
 
-  const footer = phase === "downloading" ? (
+  const footer = phase === "downloading" || phase === "installing" ? (
     <Btn kind="ghost" testID="update-cancel" label="Cancel" block onPress={cancel} />
   ) : (
     <View style={{ flexDirection: "row", gap: 10 }}>
-      <Btn kind="ghost" testID="update-later" label="Later" style={{ flex: 1 }} onPress={onClose} />
+      <Btn kind="ghost" testID="update-later" label="Later" style={{ flex: 1 }} onPress={later} />
       {phase === "failed"
         ? <Btn kind="pri" testID="update-browser" label="Open in browser" style={{ flex: 1 }}
-               onPress={() => { openUpdate(update); onClose(); }} />
+               onPress={() => { openUpdate(update); later(); }} />
         : <Btn kind="pri" testID="update-download" label="Download" style={{ flex: 1 }} onPress={install} />}
     </View>
   );
+  const progress = mine || { written: 0, total: update.size };
   const totalMb = Math.round((progress.total || update.size) / 1048576);
   const frac = totalMb > 0 ? Math.min(1, progress.written / totalMb) : 0;
   return (
-    <Sheet testID="update-sheet" title="Update available" onClose={phase === "downloading" ? cancel : onClose}
+    <Sheet testID="update-sheet" title="Update available" onClose={phase === "failed" ? later : onClose}
            footer={footer}>
       <UpdateCard update={update} />
-      {phase === "downloading" ? (
+      {phase === "downloading" || phase === "installing" ? (
         /* The percentage is the thing: large, the bar under it, the megabytes
            quiet beneath (the owner, 2026-11-18: "make the downloader look a
            little more modern as it's happening"). */
         <View testID="update-progress" style={{ marginTop: 20, alignItems: "center", gap: 10 }}>
           <Text testID="update-percent" style={{ color: t.ink, fontSize: T.display, fontWeight: "700" }}>
-            {`${Math.round(frac * 100)}%`}
+            {phase === "installing" ? "100%" : `${Math.round(frac * 100)}%`}
           </Text>
-          <View style={{ alignSelf: "stretch" }}><Bar value={frac} /></View>
+          <View style={{ alignSelf: "stretch" }}><Bar value={phase === "installing" ? 1 : frac} /></View>
           <Muted testID="update-progress-text">
-            {totalMb > 0 ? `${progress.written} of ${totalMb} MB` : `${progress.written} MB`}
+            {phase === "installing" ? "Opening the installer"
+              : totalMb > 0 ? `${progress.written} of ${totalMb} MB` : `${progress.written} MB`}
           </Muted>
         </View>
       ) : phase === "failed" ? (

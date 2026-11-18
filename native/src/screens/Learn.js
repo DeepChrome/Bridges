@@ -39,7 +39,7 @@ import {
 } from "../data";
 import { launchOffer, clearRun } from "../resume";
 import { ResumeSheet } from "../resumesheet";
-import { launchUpdate, putBackUpdate, UpdateSheet } from "../update";
+import { launchUpdate, putBackUpdate, recheckUpdate, UpdateSheet, UpdateBanner, installState } from "../update";
 import { nextOpening, markOpening } from "@core/openings";
 import { dayDone } from "@core/scheduler";
 import { today } from "@core/util";
@@ -484,6 +484,20 @@ export default function Learn({ navigation }) {
     launchUpdate().then((u) => { if (!u) return; if (alive) setUpd(u); else putBackUpdate(); });
     return () => { alive = false; };
   }, [ready]);
+  /* A pull down the path asks the host again (the owner, 2026-11-18: "drag
+     up on the home screen and it will refresh and check for an update"); with
+     nothing newer it says so for a moment, since a spinner that stops is not
+     an answer. */
+  const [upToDate, setUpToDate] = useState(false);
+  useEffect(() => {
+    if (!upToDate) return undefined;
+    const timer = setTimeout(() => setUpToDate(false), 2500);
+    return () => clearTimeout(timer);
+  }, [upToDate]);
+  const refresh = async () => {
+    const u = await recheckUpdate();
+    if (u) setUpd(u); else setUpToDate(true);
+  };
   const goRun = (run, params) => {
     setOffer(null);
     if (run.tab) navigation.navigate(run.tab, { screen: run.route, params });
@@ -505,7 +519,7 @@ export default function Learn({ navigation }) {
   };
 
   return (
-    <Screen>
+    <Screen onRefresh={refresh}>
       {offer ? (
         <ResumeSheet run={offer}
                      onContinue={() => goRun(offer, { ...offer.params, resume: true })}
@@ -514,6 +528,10 @@ export default function Learn({ navigation }) {
       ) : upd ? (
         <UpdateSheet update={upd} onClose={() => setUpd(null)} />
       ) : null}
+      {/* An install under way, or failed, whatever screen it was started from
+          (update.js); a press reopens the sheet. */}
+      <UpdateBanner onPress={() => { const s = installState(); if (s) setUpd(s.update); }} />
+      {upToDate ? <Muted testID="update-none" style={{ textAlign: "center", marginBottom: 10 }}>Up to date</Muted> : null}
       {/* The streak and the "Review · N due" button used to open this screen.
           Both went on 2026-09-29 (the owner: "remove the review from the top
           of the Learn page"; the streak "can just be on the profile page").

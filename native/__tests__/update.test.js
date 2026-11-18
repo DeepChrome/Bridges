@@ -11,7 +11,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SessionProvider } from "../src/session";
 import { flushState } from "../src/store";
 import Learn from "../src/screens/Learn";
-import { installedBuild, newerBuild, checkForUpdate, launchUpdate, resetUpdate, pruneDownloads,
+import { RefreshControl } from "react-native";
+import { installedBuild, newerBuild, checkForUpdate, launchUpdate, resetUpdate, pruneDownloads, startInstall,
          downloadedUpdate, apkPath, APK_TYPE, INSTALL_ACTION, CHECK_TIMEOUT_MS, LATEST_URL } from "../src/update";
 import { feedbackFacts } from "../src/screens/Feedback";
 
@@ -191,6 +192,67 @@ describe("installing in the app", () => {
     expect(await screen.findByTestId("update-failed")).toBeTruthy();
     expect(global.__intents).toHaveLength(1);
     expect(Linking.openURL).not.toHaveBeenCalled();
+  });
+
+  /* The install lives outside the sheet (the owner, 2026-11-18: "if you
+     navigate away, the update will stop… I was unsure if it was updating at
+     all"): closing the sheet leaves it running, the banner on the path shows
+     it, and it still opens the installer when the file is whole. */
+  it("goes on when the sheet is closed, shown by the banner, and installs", async () => {
+    let release;
+    global.__downloadHold = new Promise((res) => { release = res; });
+    await path();
+    await screen.findByTestId("update-sheet");
+    await act(async () => { fireEvent.press(screen.getByTestId("update-download")); });
+    await act(async () => { fireEvent.press(screen.getByTestId("sheet-backdrop")); });   // close, not Cancel
+    expect(screen.queryByTestId("update-sheet")).toBeNull();
+    expect(screen.getByTestId("update-banner-text")).toHaveTextContent(/Updating/);
+    // The banner reopens the sheet on the running download.
+    await act(async () => { fireEvent.press(screen.getByTestId("update-banner-text")); });
+    expect(screen.getByTestId("update-progress")).toBeTruthy();
+    await act(async () => { release(); });
+    expect(global.__intents).toHaveLength(1);
+    expect(screen.queryByTestId("update-banner")).toBeNull();                       // handed over: gone
+  });
+
+  /* An install that failed while the learner was elsewhere waits on the
+     banner with Retry; closing the sheet on a failure dismisses it instead. */
+  it("a failed install stays on the banner with Retry, until dismissed", async () => {
+    global.__downloadFail = () => true;
+    global.fetch = jest.fn(okJson({ ...LATEST, code: INSTALLED.code }));     // no sheet in the way
+    await path();
+    await screen.findByTestId("screen-root");
+    await act(async () => { await startInstall(LATEST); });
+    expect(screen.getByTestId("update-banner-text")).toHaveTextContent(/failed/);
+    global.__downloadFail = null;
+    await act(async () => { fireEvent.press(screen.getByTestId("update-banner-retry")); });
+    expect(global.__intents).toHaveLength(1);                                // the retry went through
+    expect(screen.queryByTestId("update-banner")).toBeNull();
+    global.__downloadFail = () => true;
+    global.__fs.files.clear();                                                 // or the whole file installs again
+    await act(async () => { await startInstall(LATEST); });
+    await act(async () => { fireEvent.press(screen.getByTestId("update-banner-dismiss")); });
+    expect(screen.queryByTestId("update-banner")).toBeNull();
+  });
+
+  /* A pull down the path asks the host again; nothing newer says so briefly. */
+  it("a pull asks the host again", async () => {
+    global.fetch = jest.fn(okJson({ ...LATEST, code: INSTALLED.code }));     // nothing newer
+    const r = await path();
+    await screen.findByTestId("screen-root");
+    expect(screen.queryByTestId("update-sheet")).toBeNull();
+    global.fetch = jest.fn(okJson(LATEST));
+    const pull = () => act(async () => { await screen.getByTestId("screen-body").props.refreshControl.props.onRefresh(); });
+    await pull();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(await screen.findByTestId("update-sheet")).toBeTruthy();
+    expect(screen.queryByTestId("update-none")).toBeNull();
+    // And with nothing new, the line that says so.
+    await act(async () => { fireEvent.press(screen.getByTestId("update-later")); });
+    global.fetch = jest.fn(okJson({ ...LATEST, code: INSTALLED.code }));
+    await pull();
+    expect(screen.getByTestId("update-none")).toBeTruthy();
+    expect(r).toBeTruthy();
   });
 
   /* The notes are bullets, three at most, and Read more opens the changelog

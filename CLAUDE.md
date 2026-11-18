@@ -7655,6 +7655,35 @@ What each was:
   is its encircled discs and lit tracks (§30as, §30ar); the word said it
   again. "locked" stays, once, on a chapter not yet open.
 
+## 30cx. Subtitles off means off (2026-11-17)
+
+The owner: *"the subtitles on the immerse youtube player stay on regardless
+of what is toggled… a lot of these videos already have subtitles built in."*
+The cog's switch fired and the player obeyed it; what came back on was the
+**next video**. The page is built with `cc_load_policy: 0` for a learner who
+turned them off, and 0 is not "off" — it is YouTube's default, which for a
+video with a Russian track and `hl: "ru"` is on. So the choice was remembered
+and overridden on every open.
+
+- **The page applies the wanted state itself** (`wantCaptions`,
+  `applyCaptions` in youtube.js): when the player is ready and again when
+  playing starts, because the captions module loads with playback and a call
+  made before it exists does nothing. Off is `setOption("captions", "track",
+  {})` plus `unloadModule`; on is `loadModule` plus the Russian track.
+  `brCaptions` sets the wish and applies it, and a switch flipped before the
+  player exists is queued in the component (`queuedCc`), not dropped.
+- **Verified against the real player, not the mock**: `tools/yt_captions.mjs`
+  serves the app's own host page (lifted out of youtube.js, never a copy)
+  from localhost, plays a video in Playwright's Chromium and reads the
+  caption windows inside YouTube's iframe — on at the start, gone when
+  switched off, back when switched on with no line drawn twice, and none
+  when the page is built with them off. It failed on the last of those
+  against the old page and passes on both videos tried. Desktop Chromium is
+  not the Android WebView, but both run the same player script. Run it after
+  touching youtube.js; the IFrame API's caption calls are undocumented and
+  have moved before. `immerse.test.js` proves the cog's call and nothing
+  about the destination (§23).
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -7686,6 +7715,7 @@ node tools/audit_banks.mjs --pool 150   # how many distinct questions a learner 
 node tools/audit_dead.mjs      # exports nothing imports, files nothing reaches (§30aj)
 node tools/audit_links.mjs     # every word the app shows a working link, misses by reason (§30ch)
 node tools/audit_answers.mjs   # no typed cue that marks a right answer wrong (§30ch)
+node tools/yt_captions.mjs     # after touching youtube.js: the real player obeys the subtitle switch (§30cx)
 node tools/design.mjs          # scale, rhythm and depth: the arithmetic of looking designed (§30ax)
 node tools/release_check.mjs   # the built bundle: who signed it, size, permissions (§30ag)
 node tools/eas_upload.mjs      # before any EAS build: archive size, and nothing needed excluded

@@ -61,11 +61,33 @@ const page = (videoId, captions) => `<!doctype html>
 <script>
   var player = null;
   var holdTimer = null;
+  var wantCaptions = ${captions ? "true" : "false"};
 
   function post(msg) {
     if (window.ReactNativeWebView) {
       window.ReactNativeWebView.postMessage(JSON.stringify(msg));
     }
+  }
+
+  /* Subtitles are applied, never only asked for. cc_load_policy has no
+     "off": 0 means YouTube's default, and with a Russian track and hl=ru that
+     default is on, so a learner who turned subtitles off found them back on
+     every later video (the owner, 2026-11-17: "stay on regardless of what is
+     toggled"). The captions module loads with playback — a wish recorded
+     before it exists does nothing — so the page applies the wanted state
+     when the player is ready and again when playing starts. Verified against
+     the real player by tools/yt_captions.mjs; run it after touching this. */
+  function applyCaptions() {
+    if (!player || !player.setOption) return;
+    try {
+      if (wantCaptions) {
+        if (player.loadModule) player.loadModule("captions");
+        player.setOption("captions", "track", { languageCode: "ru" });
+      } else {
+        player.setOption("captions", "track", {});
+        if (player.unloadModule) player.unloadModule("captions");
+      }
+    } catch (e) { post({ type: "log", what: "captions: " + e.message }); }
   }
 
   function onYouTubeIframeAPIReady() {
@@ -94,9 +116,11 @@ const page = (videoId, captions) => `<!doctype html>
       },
       events: {
         onReady: function () {
+          if (!wantCaptions) applyCaptions();
           post({ type: "ready", len: player.getDuration ? Math.round(player.getDuration() * 1000) : 0 });
         },
         onStateChange: function (e) {
+          if (e.data === YT.PlayerState.PLAYING && !wantCaptions) applyCaptions();
           if (e.data === YT.PlayerState.ENDED) post({ type: "ended" });
           // Playing or paused, for the app's own play/pause button.
           if (e.data === YT.PlayerState.PLAYING || e.data === YT.PlayerState.PAUSED
@@ -168,18 +192,10 @@ const page = (videoId, captions) => `<!doctype html>
   window.brRate = function (rate) {
     if (player && player.setPlaybackRate) player.setPlaybackRate(rate);
   };
-  /* Captions on or off from the app's settings cog: the captions module,
-     loaded with the Russian track or unloaded. */
+  /* Captions on or off from the app's settings cog. */
   window.brCaptions = function (on) {
-    if (!player || !player.loadModule) return;
-    try {
-      if (on) {
-        player.loadModule("captions");
-        player.setOption("captions", "track", { languageCode: "ru" });
-      } else {
-        player.unloadModule("captions");
-      }
-    } catch (e) { post({ type: "log", what: "captions: " + e.message }); }
+    wantCaptions = !!on;
+    applyCaptions();
   };
   /* A seek from the scrubber: to the moment, keeping whether it was playing. */
   window.brSeekTo = function (seconds) {
@@ -215,6 +231,8 @@ export const YouTube = forwardRef(function YouTube(
   const web = useRef(null);
   const isReady = useRef(false);
   const queued = useRef(null);
+  // A subtitle switch flipped before the player exists is kept, not dropped.
+  const queuedCc = useRef(null);
   const [failed, setFailed] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -262,7 +280,8 @@ export const YouTube = forwardRef(function YouTube(
     },
     /* YouTube's Russian captions on or off. */
     captions(on) {
-      if (!web.current || !isReady.current) return;
+      if (!web.current) return;
+      if (!isReady.current) { queuedCc.current = !!on; return; }
       web.current.injectJavaScript(`window.brCaptions(${on ? "true" : "false"}); true;`);
     },
     /* To a moment, as the scrubber asks, without changing play or pause. */
@@ -322,6 +341,10 @@ export const YouTube = forwardRef(function YouTube(
             if (queued.current) {
               runSeek(queued.current[0], queued.current[1]);
               queued.current = null;
+            }
+            if (queuedCc.current !== null) {
+              web.current.injectJavaScript(`window.brCaptions(${queuedCc.current ? "true" : "false"}); true;`);
+              queuedCc.current = null;
             }
             onReady && onReady(msg.len || 0);
           }

@@ -182,7 +182,7 @@ function MeButton({ navigation }) {
   );
 }
 
-function HeaderRight({ navigation, route }) {
+function HeaderRight({ navigation, route, help = true }) {
   const home = !route || route.name !== "Path";
   /* The report flag and the AI sparkle (askai.js); on an exercise they sit in
      the exercise beside the speaker and the bulb instead (`INLINE_TOOLS`). */
@@ -191,7 +191,7 @@ function HeaderRight({ navigation, route }) {
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       {inline ? null : <ReportButton />}
       {inline ? null : <AskButton />}
-      <HelpButton route={route && route.name} />
+      {help ? <HelpButton route={route && route.name} /> : null}
       {home ? <HomeButton /> : null}
       <MeButton navigation={navigation} />
     </View>
@@ -487,8 +487,11 @@ const wordTitled = ({ navigation, route }) => {
     /* The same header as every other screen — the sparkle included (the
        owner, 2026-11-18: "the user should be able to pull up the AI helper
        pretty much constantly… when I'm browsing the detailed word
-       definitions"). It carried only the flag and Home before. */
-    headerRight: () => <HeaderRight navigation={navigation} route={route} />,
+       definitions"). It carried only the flag and Home before. Without the
+       app-guide "?": a word under a centred title and five buttons pushed
+       the title off centre on the emulator, and on an entry the sparkle is
+       the help that matters. */
+    headerRight: () => <HeaderRight navigation={navigation} route={route} help={false} />,
     headerTitle: () => (
       <HeaderTitle title={w ? w.w : "Word"} sub={w && w.p ? w.p : "Dictionary"} />
     ),

@@ -1,0 +1,98 @@
+# The aesthetic sweep (CLAUDE.md 30cz, 2026-11-18), on a clean install: the
+# way in, the path, a lesson's rule card and word card, the entry with its new
+# header, the unit, Practice, Study and its options, Immerse, Search, the
+# profile and Settings.
+#
+#   adb shell pm clear app.bridges.russian; launch; then
+#   .\native\tools\walk.ps1 -Flow native\flows\sweep.txt -Device emulator-5554
+#
+# Screenshots land in native/screenshots/walk/. Read them - that is the audit.
+# The emulator needs a universal APK (31).
+
+wait:3
+shot:s00-gate
+tap:Your name
+type:Jared
+tap:^Continue$
+wait:2
+shot:s01-tour
+tap:^Skip$
+wait:2
+shot:s02-placement
+tap:^Start from the beginning$
+wait:4
+shot:s03-learn
+
+# A lesson: the rule card first, then the word cards.
+tap:^Start
+wait:3
+shot:s04-rule-card
+tap:^Continue$
+wait:2
+shot:s05-word-list
+tap:^Start learning$
+wait:2
+shot:s05b-word-card
+tap:^More$
+wait:3
+shot:s06-entry
+back
+wait:1
+tap:^Continue$
+wait:2
+shot:s07-word-card-2
+# Back inside a lesson steps between cards (30bq); Home leaves it.
+tap:^Home
+wait:2
+
+# The unit and its lessons.
+tap:^First Words
+wait:2
+shot:s08-unit
+tap:^Lesson 1
+wait:2
+shot:s09-lesson-steps
+back
+wait:1
+back
+wait:1
+
+tap:^Practice$
+wait:2
+shot:s10-practice
+scroll
+shot:s11-practice-more
+scrolltop
+
+tap:^Study$
+wait:3
+shot:s12-study
+tap:Options
+wait:2
+shot:s13-study-options
+back
+wait:1
+
+tap:^Immerse$
+wait:3
+shot:s14-immerse
+
+tap:^Search$
+wait:2
+tap:Russian or English
+type:dog
+wait:2
+shot:s15-search
+back
+wait:1
+
+tap:your profile
+wait:2
+shot:s16-you
+tap:^Settings$
+wait:2
+shot:s17-settings
+scroll
+shot:s18-settings-more
+back
+wait:1

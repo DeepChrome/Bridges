@@ -1,0 +1,22 @@
+// The media-key bridge (src/remote.js; CLAUDE.md 30cy). A local Expo module:
+// autolinking finds it in native/modules at Gradle time, so no prebuild.
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'ya.remote'
+version = '1.0.0'
+
+android {
+  namespace "ya.remote"
+  defaultConfig {
+    versionCode 1
+    versionName '1.0.0'
+  }
+}
+
+dependencies {
+  // The same Media3 line expo-audio pins, so one copy of the library ships.
+  implementation "androidx.media3:media3-session:1.9.0"
+}

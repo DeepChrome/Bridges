@@ -55,6 +55,12 @@ foreach ($d in @("generated\assets\react\release", "generated\res\react\release"
   if (Test-Path $p) { Remove-Item -Recurse -Force $p }
 }
 
+# expo-audio's sessions hand their media keys to the app (CLAUDE.md 30cy). The
+# patch lives in node_modules, which npm install rewrites, so it is applied
+# before every build; a failure here is a build whose drive mode misses presses.
+& node (Join-Path $root "tools\patch_expo_audio.mjs") 2>&1 | Out-File $log -Append -Encoding ascii
+if ($LASTEXITCODE -ne 0) { Write-Output "patch_expo_audio failed; see $log"; exit 4 }
+
 $gradlew = Join-Path $native "android\gradlew.bat"
 & $gradlew -p (Join-Path $native "android") assembleRelease "-PreactNativeArchitectures=$Arch" `
   "-PyaBuildCode=$code" "-PyaBuildName=$name" --max-workers=2 2>&1 | Out-File $log -Append -Encoding ascii

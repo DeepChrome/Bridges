@@ -16,6 +16,7 @@ import { Transcript } from "../transcript";
 import { useWords } from "../words";
 import { libraryState, setLibraryState, openedVideo, setVideoPosition, videoPosition } from "../immerse";
 import { releaseAudio } from "../audio";
+import { useRemote } from "../remote";
 import { today } from "@core/util";
 import { newCard } from "@core/scheduler";
 import { short, minutes, clock, isFave, toggleFave } from "../video";
@@ -340,6 +341,17 @@ export function Video({ route, navigation }) {
   }, [full]);
   // Full screen belongs to a playing video; if the player goes away, so does it.
   useEffect(() => { if (!playing && full) setFull(false); }, [playing, full]);
+  /* A headset's or a car's keys, on the transport's own buttons (the owner,
+     2026-11-17): play/pause on the player's, skip on back and forward five
+     seconds (src/remote.js). The WebView has no media session of its own, so
+     without this nothing outside the screen could reach the video. */
+  useRemote(!!v && playing, v ? v.title : "", running, {
+    toggle: () => { if (player.current) player.current.toggle(); },
+    play: () => { if (player.current && !running) player.current.toggle(); },
+    pause: () => { if (player.current) player.current.pause(); },
+    forward: () => { if (player.current) player.current.skip(SKIP_MS, 0, 0); },
+    back: () => { if (player.current) player.current.skip(-SKIP_MS, 0, 0); },
+  });
   if (!v) return null;
   const script = transcriptOf(v.id);
   const seekTo = (ms) => {

@@ -48,6 +48,7 @@ import { troubleWords } from "../studycards";
 import { say, speakLine, stop, whenIdle, hasRealAudio, startCarrier, pauseCarrier,
          resumeCarrier, stopCarrier, waitMs } from "../audio";
 import { useRecognizer, LANG_EN } from "../speech";
+import { useRemote } from "../remote";
 import { driveScript, driveLength, drivePrefs, buildEpisodes, focusScript, focusTables,
          focusTableName, parseCommand, COMMANDS, FOCUS, COMMAND_WORDS, SLEEP_MINUTES,
          DRIVE_OPTIONS, REVIEW_GROUPS } from "@core/drive";
@@ -633,6 +634,18 @@ export function DriveEpisode({ route }) {
     const end = min ? Date.now() + min * 60000 : null;
     sleepRef.current = end; setSleep(end);
   };
+
+  /* A headset's or a car's keys, on the big keys: its play/pause is the play
+     key, its skip keys are Previous and Next (src/remote.js). The carrier's
+     own lock-screen play/pause still works beside it. */
+  useRemote(!!list, list ? (typeof id === "number" ? `Episode ${id}` : list.title) : "",
+            state === "playing", {
+    toggle: () => { if (stateRef.current === "playing") pause(false); else start(); },
+    play: () => { if (stateRef.current !== "playing") start(); },
+    pause: () => { if (stateRef.current === "playing") pause(false); },
+    forward: () => jump(1),
+    back: () => jump(-1),
+  });
 
   if (!list) return <Screen><Muted testID="drive-empty">Nothing to play here yet.</Muted></Screen>;
   const minutes = Math.max(1, Math.round(driveLength(script) / 60000));

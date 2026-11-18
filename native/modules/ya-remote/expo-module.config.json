@@ -1,0 +1,6 @@
+{
+  "platforms": ["android"],
+  "android": {
+    "modules": ["ya.remote.RemoteModule"]
+  }
+}

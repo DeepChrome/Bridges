@@ -7684,6 +7684,60 @@ and overridden on every open.
   have moved before. `immerse.test.js` proves the cog's call and nothing
   about the destination (§23).
 
+## 30cy. A headset's keys on the buttons already there (2026-11-18)
+
+The owner: *"make those rewind 5 forward five buttons connect to external
+controllers… my headphones can already control player apps… don't make new
+buttons, just make them work with the 2 buttons on there already."* Android
+hands a media key — a headset's, a car's, a Bluetooth remote's — to the app
+whose **MediaSession** played most recently, and that is why play/pause from
+his headphones already reached drive mode: its silent carrier is an
+expo-audio player, and every expo-audio player carries a session. Two walls
+stood between the keys and the skip buttons:
+
+- **The video player has no session at all** — it is a YouTube WebView — so
+  nothing outside the screen could reach it, play/pause included.
+- **expo-audio's own callback discards next and previous** (the keys most
+  headsets send for skip) and seeks its own player for the rest, with no
+  event to JavaScript. In drive mode a word clip is the newest session for
+  most of the run, so a press during one was simply swallowed.
+
+What was built, and the rule each piece holds:
+
+- **`native/modules/ya-remote`** is a local Expo module (autolinked from
+  `native/modules`, no prebuild): a Media3 session over a **stub player that
+  makes no sound** (`SimpleBasePlayer`), reporting only playing/paused and a
+  title, so the platform counts it as the current player and sends it the
+  keys. An expo-audio player would have held the audio route and silenced
+  the WebView (§30h′). Every key — and a transport command from a controller
+  that sends commands rather than keys — goes out as a `remoteKey` event;
+  nothing is acted on natively.
+- **`src/remote.js useRemote(on, title, playing, handlers)`** is the one way
+  a screen takes the keys: play/pause/toggle to its own play-pause, next and
+  fast-forward to `forward`, previous and rewind to `back`. The video routes
+  them to the transport's own back/forward five seconds and the player's
+  toggle; drive mode to its Previous and Next keys and its play key. One
+  screen is in charge at a time; with none, pause and toggle stop the app's
+  sound.
+- **expo-audio is patched, and built from source so the patch counts.**
+  `tools/patch_expo_audio.mjs` has both of expo-audio's session callbacks
+  broadcast the KeyEvent to the app (the module's receiver turns it into the
+  same event) instead of swallowing it — whichever session Android picked,
+  the press lands. It edits `node_modules`, so `build.ps1` applies it before
+  every Gradle run and `--check` fails the gate when it is not in. **SDK 57
+  ships expo-audio as a prebuilt AAR**, which Gradle takes over the source
+  unless `expo.autolinking.android.buildFromSource` in `native/package.json`
+  names the package; without that line the patch compiled into nothing and
+  `:expo-audio` was not even a Gradle project. The check reads that line
+  too. An expo-audio upgrade that moves the patched lines fails the build
+  with the file named.
+- **Verified only as far as a desk can**: `remote.test.js` drives the mock
+  bridge through both screens and the no-screen default; the two Kotlin
+  modules compile; the APK carries them. Whether a given headset's double-tap
+  arrives as *next* or as *fast-forward*, and whether Android routes a key
+  pressed mid-clip to the clip's session or the app's, is the phone's to
+  show — both pairs land on the same two buttons either way.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -7716,6 +7770,7 @@ node tools/audit_dead.mjs      # exports nothing imports, files nothing reaches 
 node tools/audit_links.mjs     # every word the app shows a working link, misses by reason (§30ch)
 node tools/audit_answers.mjs   # no typed cue that marks a right answer wrong (§30ch)
 node tools/yt_captions.mjs     # after touching youtube.js: the real player obeys the subtitle switch (§30cx)
+node tools/patch_expo_audio.mjs --check   # expo-audio hands media keys to the app, and is built from source (§30cy)
 node tools/design.mjs          # scale, rhythm and depth: the arithmetic of looking designed (§30ax)
 node tools/release_check.mjs   # the built bundle: who signed it, size, permissions (§30ag)
 node tools/eas_upload.mjs      # before any EAS build: archive size, and nothing needed excluded

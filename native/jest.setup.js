@@ -289,6 +289,19 @@ jest.mock("expo-application", () => ({
   get nativeBuildVersion() { return global.__build.code == null ? null : String(global.__build.code); },
   get nativeApplicationVersion() { return global.__build.name; },
 }));
+/* The media-key bridge (modules/ya-remote): which screen holds the session
+   and with what, and `__remote.press(key)` for a headset's button. A press
+   leaves nothing in the render tree but what the handler did. */
+global.__remote = { started: null, playing: null, title: null, stopped: 0, listeners: [],
+  press(key) { for (const fn of global.__remote.listeners) fn(key); } };
+jest.mock("./modules/ya-remote", () => ({
+  available: true,
+  start: jest.fn((title, playing) => { global.__remote.started = title; global.__remote.title = title; global.__remote.playing = playing; }),
+  setPlaying: jest.fn((on) => { global.__remote.playing = on; }),
+  setTitle: jest.fn((t) => { global.__remote.title = t; }),
+  stop: jest.fn(() => { global.__remote.stopped++; global.__remote.started = null; }),
+  onKey: jest.fn((fn) => { global.__remote.listeners.push(fn); return () => {}; }),
+}));
 /* The clipboard: what was last copied, for a test to read back. */
 global.__clipboard = null;
 jest.mock("expo-clipboard", () => ({

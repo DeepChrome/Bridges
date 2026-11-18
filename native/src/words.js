@@ -21,6 +21,7 @@ import { View, Pressable } from "react-native";
 import { createNavigationContainerRef, StackActions, CommonActions } from "@react-navigation/native";
 import { useTheme, radius } from "./theme";
 import { Sheet, Btn, Senses, SenseList, Text, Speaker, Flag, useSelectable } from "./ui";
+import { cardSenses } from "@core/util";
 import { L, IX, deepFormOf, resolveWord, sensesOf } from "./data";
 import { fold, TOKEN } from "@core/util";
 import { summarise, grammarLine } from "@core/forms";
@@ -219,7 +220,9 @@ export function GrammarLine({ lemma, surface, style, center, all }) {
 /* By the lemma's own place in L, never `idxOfWord(b)`: that is the first
    owner of the form key, which for «всё» or «его» is another word (§23). */
 function SheetSenses({ lemma, size, style }) {
-  const senses = sensesOf(L.indexOf(lemma));
+  // The glance reads the senses as a card does: translations, never the
+  // explanation Wiktionary opens a function word on (core/util.js, §30db).
+  const senses = cardSenses(sensesOf(L.indexOf(lemma)));
   return senses
     ? <SenseList senses={senses} size={size} max={SHEET_SENSES} plain style={style} />
     : <Senses e={lemma.e} size={size} align="left" max={SHEET_SENSES} plain style={style} />;

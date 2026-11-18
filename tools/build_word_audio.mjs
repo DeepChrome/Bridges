@@ -84,8 +84,9 @@ const RESTATE = process.argv.includes("--restate");
    data/curated/audio_review.json by pull.mjs): a recording whose latest
    verdict is a flag *on the clip it has now* is bought again another way.
    `rebuyLadder` names the renderings not yet tried for it — the statement,
-   the bare word, capitalised, and, where an accented spelling is known, that
-   spelling with its stress mark (`=` passes text as given) — so each flag
+   the ellipsis («Слух...», which makes a lifted word fall), the bare word,
+   capitalised, and, where an accented spelling is known, that spelling with
+   its stress mark (`=` passes text as given) — so each flag
    moves the recording on rather than buying the same clip back. Every clip
    bought this way is recorded under the key's `rebought`. */
 const REVIEW = join(ROOT, "data", "curated", "audio_review.json");
@@ -100,7 +101,7 @@ export function rebuyLadder(text, accented, it, currentId) {
      second flag on «мужчина» bought back the first clip it had replaced. */
   const tried = new Set([currentId, ...((it && it.rebought) || []),
                          ...((it && it.verdicts) || []).filter((v) => v.verdict === "flag").map((v) => v.id)]);
-  const options = ["stop", "", "cap"].map((h) => [h, clipId(rendering(text, h))]);
+  const options = ["stop", "dots", "", "cap"].map((h) => [h, clipId(rendering(text, h))]);
   if (accented && accented !== text) options.push(["=" + accented, clipId(accented)]);
   return options.filter(([, id]) => !tried.has(id)).map(([h]) => h);
 }
@@ -154,7 +155,15 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 // A sentence that already ends on its stop is not given a second one: a
 // flagged sentence was being bought again as «…знаешь..».
 const stopped = (s) => (/[.!?…]$/.test(s.trim()) ? s : s + ".");
-const rendering = (text, how) => (how === "cap" ? cap(text) : how === "stop" ? stopped(cap(text)) : text);
+/* `dots` — «Слух...» — is the rendering for a word the voice lifts at the end
+   (§30db): tools/audio_intonation.py found 444 of 4,046 statement clips
+   ending three semitones and more above their lowest third, read as
+   questions («Бабушка?»), and ten of them bought again with the ellipsis all
+   came back falling (ends 102–204 Hz). The stop is still bought first; the
+   dots are what a rising flag moves on to. */
+const dotted = (s) => (/\s/.test(s.trim()) ? stopped(cap(s)) : `${cap(s)}...`);   // a word; a sentence has no dots rung
+const rendering = (text, how) =>
+  (how === "cap" ? cap(text) : how === "stop" ? stopped(cap(text)) : how === "dots" ? dotted(text) : text);
 
 /* Buy one utterance, and for a word keep buying until what came back is a word.
  *
@@ -426,8 +435,12 @@ async function main() {
     const rkey = `${m.word ? "word" : "sentence"}:${m.key}`;
     const it = flagged(rkey, m.id);
     if (!it) continue;
-    const ladder = rebuyLadder(m.text, null, it, m.id);
-    if (!ladder.length) { console.log(`   !! ${m.text}: every rendering tried — needs a person's fix`); continue; }
+    /* A person's fix is `say` on the review item: the text to hand the voice
+       when every rendering of the sentence itself has been tried — a dash
+       where the voice ran two words together («Сериал сериалу — рознь.»), a
+       full stop for a shouted exclamation. It is tried as given. */
+    const ladder = rebuyLadder(m.text, it.say || null, it, m.id);
+    if (!ladder.length) { console.log(`   !! ${m.text}: every rendering tried — needs a person's fix (\`say\` on the review item)`); continue; }
     m.ladder = ladder;
     m.rebuyKey = rkey;
     m.id = `rebuy-${m.key}`;                       // not on disk, so it is bought

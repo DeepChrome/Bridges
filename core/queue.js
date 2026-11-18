@@ -493,16 +493,16 @@ export const cooledDown = (card, now) => {
   if (!card || card.lastAt === undefined || card.lastAt === null) return true;
   return dayOf(card.lastAt) < dayOf(now) - FILL_COOLDOWN_DAYS;
 };
-/* The draw: every candidate keyed by u^(1/weight), highest keys first.
-   `drawKeys` keeps the key and the weight beside each, for the panel that
-   says why a card came up. */
+/* The draw (Efraimidis–Spirakis): every candidate keyed by u^(1/weight),
+   highest keys first. The key and the weight ride beside each entry for the
+   panel that says why a card came up (§30cw); the bare-list form this once
+   had beside it (`weightedDraw`) had no caller and went. */
 export function drawKeys(list, weightOf, random) {
   return list.map((x) => {
     const w = Math.max(1e-9, Number(weightOf(x)) || 0);
     return { x, w, key: Math.pow(random(), 1 / w) };
   }).sort((a, b) => b.key - a.key);
 }
-export const weightedDraw = (list, weightOf, random) => drawKeys(list, weightOf, random).map((e) => e.x);
 
 export function goalSession({ seen, words, dirs, now, daily, opts, rng, owed, beyond, familiar, order, next, rare }) {
   const o = Object.assign({}, QUEUE_DEFAULTS);

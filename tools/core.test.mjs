@@ -11,7 +11,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-import { fold, bare, translit, translitBack, firstSense, askSense, onSense, shuffle, sample, TOKEN }
+import { fold, bare, translit, translitBack, firstSense, askSense, onSense, shuffle, sample, TOKEN,
+         cardGloss, cardSenses, CARD_GLOSS }
   from "../core/util.js";
 import { fsrsReview, fsrsPreview, isTrouble, retrievability, gradeFor, applyGrade }
   from "../core/fsrs.js";
@@ -128,6 +129,49 @@ ok(askSense({ e: "I, me", b: "я", p: "pronoun" }) === "I, me", "«я» is asked
 ok(askSense({ e: "tea, tea-party", b: "чай" }) === "tea", "a real word stays alone");
 ok(askSense({ e: "to try, to attempt", b: "пробовать", p: "verb" }) === "to try",
    "a verb keeps its first sense");
+
+group("a card's meaning is a translation (§30db)");
+{
+  // Wiktionary's own first senses for the words the owner reported, 2026-11-11/12.
+  const cases = [
+    ["выстрел", "shot, gunshot (launching or firing of a projectile; the sound of the firing)", "shot, gunshot"],
+    ["нет", "there is not, there are no [with genitive ‘something’ and у (u, + genitive) ‘possessed by someone’] (often idiomatically)", "there is not, there are no"],
+    ["же", "Marks an objection by pointing to the rationale behind said objection: after all, but", "after all, but"],
+    ["такой", "such (a), such, that/this kind/sort/type of, those/these kinds/sorts/types of, like that/this/those/these; in the negative also: no such", "such"],
+    ["итак", "so, now, right, okay (used at or near the beginning of a sentence, which is a logical conclusion)", "so, now, right, okay"],
+    ["себя", "myself, yourself, himself, herself, itself, ourselves, yourselves, themselves (no nominative case)", "myself, yourself, himself, herself, itself, ourselves"],
+    ["являться", "to be [with instrumental ‘something’] (often used in literary contexts)", "to be"],
+    ["книга", "book", "book"],
+  ];
+  for (const [b, g, want] of cases) ok(cardGloss(g) === want, `«${b}» on a card reads "${want}"`, cardGloss(g));
+  // An explanation with no translation in it is refused, not cut.
+  const refused = [
+    ["по", "used broadly to indicate action, typically involving movement, across a surface or across several things in a generally flat plane; across, on, along, down, up, all over, (all)…"],
+    ["то", 'Optional part of "е́сли (jésli, “if”) …, то (to, “then”) …"–type constructions, sometimes translated to "then"'],
+    ["это", 'Generic demonstrative pronoun. Translated as "this" or "that" (or their plural forms, "these" or "those"), depending'],
+    ["вот", "Used in place of a pronoun to direct attention towards something; this (is), here (is), that (is), there (is)"],
+    // «такой»'s later senses: a short head that is still a definition.
+    ["такой 3", "used with a pronoun, name or noun to specify the meaning of кто (kto) as \"what's the nature/essence (of)\""],
+    ["такой 4", "used with (usually after) a noun when speaking of the existence of something resembling what has just been observed"],
+  ];
+  ok(cardGloss("used, second-hand") === "used, second-hand", "a translation that starts with \"used\" survives");
+  {
+    const takoi = cardSenses([{ g: "such (a), such, that/this kind/sort/type of, those/these kinds/sorts/types of, like that/this/those/these; in the negative also: no such" },
+                              { g: "such (a), such (used to indicate a sufficient degree of something, such that the following clause is true)" },
+                              { g: refused[4][1] }, { g: refused[5][1] }]);
+    ok(takoi.length === 1 && takoi[0].g === "such", "«такой» on a card is one line, \"such\"", JSON.stringify(takoi));
+  }
+  for (const [b, g] of refused) ok(cardGloss(g) === null, `«${b}»'s explanation is refused`, cardGloss(g));
+  ok(cardSenses([{ g: refused[0][1] }, { g: "for, on, about" }]) === null,
+     "a first sense with no translation sends the card back to the gloss");
+  const list = cardSenses([{ g: cases[0][1], x: [1] }, { g: refused[3][1] }, { g: "report (of a gun)", t: ["dated"] }]);
+  // A short sense keeps its bracket: "report (of a gun)" is the disambiguation
+  // a card wants, as "you (singular, informal)" is; only a sense that runs long
+  // is cut back to the text before it.
+  ok(list.length === 2 && list[0].g === "shot, gunshot" && list[0].x && list[1].g === "report (of a gun)" && list[1].t,
+     "later senses are cut the same way or left off, keeping their examples and labels", JSON.stringify(list));
+  ok(list.every((s) => s.g.length <= CARD_GLOSS), "nothing on a card runs past the cap");
+}
 {
   // «вилка» is taught as "fork"; the plug sentence is another word (2026-10-05).
   const fork = { e: "fork; plug", b: "вилка", p: "noun" };

@@ -7847,6 +7847,65 @@ His second note the same morning, and what it set:
   out `tutorProfile(st)` a section a key — the very object a tutor turn
   carries, not a description of it.
 
+## 30db. The portal's November reports, and the words that rise (2026-11-18)
+
+Nine reports on the portal from 2026-11-11 to 11-16 that §30cw's five had
+not covered, read as one list while waiting on the owner (§30da's rule: pull
+the portal every iteration).
+
+- **A card shows translations, never Wiktionary's explanation**
+  (`cardGloss`, `cardSenses` in core/util.js; the owner of «такой»: *"out of
+  control and looks extremely unprofessional"*, of «по»: *"says the same
+  thing in white and grey"*). Wiktionary defines a function word by
+  explaining it — «по» "used broadly to indicate action, typically involving
+  movement, across a surface…" — and drawn whole as the English front of a
+  produce card that was the largest text on the screen; a noun glosses and
+  then defines in brackets («выстрел» "shot, gunshot (launching or firing of
+  a projectile…)"). Measured: 80 of 1,306 curriculum words open on a sense
+  over 60 characters. On a card a sense is cut to its translation — the text
+  before a bracket, or after a colon that introduces one («же» "…: after all,
+  but"), a comma list trimmed to what fits in `CARD_GLOSS` (60) — and a head
+  that is still a definition (five words before its first comma, "used
+  with…", "Marks…", an open quote, Russian inside it) is refused rather than
+  cut. A refused *first* sense sends the whole card back to OpenRussian's
+  gloss, so both fronts still name one meaning (§30cm); a refused later sense
+  is left off; two senses cut to one text are one line. The flashcard's
+  front, back and partial hint and the word sheet read through it; the entry
+  and the AI's view of the card keep the full senses. A short sense keeps its
+  bracket: "you (singular, informal)" is the disambiguation a card wants.
+- **«Ваш прогресс это часы инпута.»** is dropped (`sentence_review.json`):
+  YouTube language-learning slang is not a learner's sentence. «Она мне
+  больше не нравится.» → "I don't like it anymore" is right in its video (a
+  camera). «твой»'s "thy, thine" is renamed (`sense_overrides.json`).
+- **A person's fix for a sentence recording is `say` on its review item**
+  (build_word_audio.mjs `--rebuy-flagged`): the text handed the voice when
+  every rendering of the sentence itself has been tried. «Сериал сериалу
+  рознь.» came back as two words — whisper hears «Сериал урозня» — and
+  «Сериал сериалу — рознь.» says all three; «То же самое!» was shouted and
+  «То же самое.» is not. Both verified by whisper and by pitch, not by ear.
+- **Which single-word clips rise at the end** — `tools/audio_intonation.py`,
+  the instrument the owner asked for ("abnormal intonation… I notice it the
+  most on individual words"). A Praat pitch contour per clip
+  (parselmouth); the clip's end against the lowest of its thirds, in
+  semitones; a trailing voiced run under 60 ms discarded, because the
+  release of a final «к» or «т» («снег», «мост») tracks at 440–490 Hz for
+  30 ms and read as a two-octave rise. A statement in this voice ends 4–7
+  semitones *under* its opening, around 150 Hz; «видео» ended at 342 Hz,
+  +6.8. **Whisper's punctuation is not the instrument**: it marked about
+  half the rising clips as questions whatever their rise, and "Видео?" was
+  luck. Measured over the 4,046 word clips: **444 rising (11 %)** at ≥ 3 st
+  and ≥ 250 Hz. `--flag` writes each into `audio_review.json` so the rebuy
+  ladders pick them up, and the ladder gained a rung: **`dots` — «Слух...»**,
+  tried after the statement, because ten rising words bought that way all
+  came back falling (ends 102–204 Hz) where the bare word tends to lift. Four
+  rungs took the words **444 → 67 → 28 → 13**; the 11,672 table forms
+  measured 1,476 rising, the dots rung alone took them to 200, the next to
+  93 — **106 clips in all** still rise after every rendering and stay flagged.
+  About $0.70 all told. A clip still flagged after every rung is
+  listed for a person on the review site. A sentence has no dots rung — a question is meant to rise, and a
+  stop was being doubled. **Run the tool after buying any words**, and read
+  the ranked list before `--flag`.
+
 ## 31. Verification
 
 `node tools/smoke.js` loads the *built* `site/index.html` in jsdom and drives it: boots,
@@ -7874,6 +7933,7 @@ stylesheet's `[hidden] { display:none }`. Layout bugs need the browser.
 python tools/build_site.py     # or the full pipeline if data changed
 node tools/check_scripts.mjs --strict   # the written passages: level, coverage, no repeats
 node tools/audio_qa.mjs        # a track per lesson, its hash current, its length sane
+py tools/audio_intonation.py   # after buying words or forms: which clips rise at the end (§30db); --forms, --flag
 node tools/audit_banks.mjs --pool 150   # how many distinct questions a learner meets (§30ac)
 node tools/audit_dead.mjs      # exports nothing imports, files nothing reaches (§30aj)
 node tools/audit_links.mjs     # every word the app shows a working link, misses by reason (§30ch)

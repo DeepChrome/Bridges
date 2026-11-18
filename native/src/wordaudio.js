@@ -2,7 +2,7 @@
  *
  * The bought Chirp3-HD clips, bundled: the curriculum words (ROADMAP 13.32,
  * then every Core 5000 one) and the speaking and listening pools' sentences
- * (2026-09-19). 10235 clips, keyed by the **folded** utterance, which
+ * (2026-09-19). 10231 clips, keyed by the **folded** utterance, which
  * is the key `say()` already derives (rule 20.2 — the manifest folds ё to е
  * and a lemma's bare form does not, which is how the first count of these
  * came out at 75 instead of 61).
@@ -74,7 +74,6 @@ export const WORD_CLIPS = {
   "а вы их знаете в лицо?": require("../assets/words/s-b292523bd4aa.mp3"),
   "а вы не пробовали пользоваться дезодорантом?": require("../assets/words/s-88e05ef550b1.mp3"),
   "а вы работаете только в россии?": require("../assets/words/s-d0347c53f561.mp3"),
-  "а где ваш кот?": require("../assets/words/s-5435c011212c.mp3"),
   "а где купить билет на метро?": require("../assets/words/s-56638f2707e9.mp3"),
   "а документальное кино вам никогда не хотелось снять?": require("../assets/words/s-ca9db032f588.mp3"),
   "а если и есть...": require("../assets/words/s-7150baf2ec3e.mp3"),
@@ -709,7 +708,6 @@ export const WORD_CLIPS = {
   "ваш": require("../assets/words/vash.mp3"),
   "ваш билет, пожалуйста.": require("../assets/words/s-f0217bf70e0e.mp3"),
   "ваш офис защищен от прослушивания?": require("../assets/words/s-fb18d785ea40.mp3"),
-  "ваш прогресс это часы инпута.": require("../assets/words/s-fa26c3602346.mp3"),
   "ваша дочь учится или работает?": require("../assets/words/s-9152e54d4068.mp3"),
   "ваша теория смехотворна.": require("../assets/words/s-cb2dbfbf9a94.mp3"),
   "ваше мнение для меня особенно важно.": require("../assets/words/s-65a64715a58a.mp3"),
@@ -4474,7 +4472,6 @@ export const WORD_CLIPS = {
   "носков должно быть два.": require("../assets/words/s-023f90234370.mp3"),
   "ноутбук": require("../assets/words/noutbuk.mp3"),
   "ночевать": require("../assets/words/nochevat.mp3"),
-  "ночи в сентябре холодные, а стоит только взойти солнцу, и холода как не бывало.": require("../assets/words/s-df8ada473a25.mp3"),
   "ночной": require("../assets/words/nochnoj.mp3"),
   "ночь": require("../assets/words/noch.mp3"),
   "ночью мороз усилился.": require("../assets/words/s-b1e0e1301dff.mp3"),
@@ -7062,7 +7059,7 @@ export const WORD_CLIPS = {
   "серебро": require("../assets/words/serebro.mp3"),
   "середина": require("../assets/words/seredina.mp3"),
   "сериал": require("../assets/words/serial.mp3"),
-  "сериал сериалу рознь.": require("../assets/words/s-f778f2379ea9.mp3"),
+  "сериал сериалу рознь.": require("../assets/words/s-2e3955df1953.mp3"),
   "серия": require("../assets/words/seriya.mp3"),
   "серый": require("../assets/words/seryj.mp3"),
   "серьезно пострадало около двадцати домов.": require("../assets/words/s-582736c005c6.mp3"),
@@ -7839,7 +7836,7 @@ export const WORD_CLIPS = {
   "тишина": require("../assets/words/tishina.mp3"),
   "ткань": require("../assets/words/tkan.mp3"),
   "то": require("../assets/words/to.mp3"),
-  "то же самое!": require("../assets/words/s-10a5f10d220f.mp3"),
+  "то же самое!": require("../assets/words/s-53615d2e7029.mp3"),
   "то и дело он прикрывал рукой больное горло.": require("../assets/words/s-02da1f92f047.mp3"),
   "то он занимается музыкой, то он снимается в кино.": require("../assets/words/s-367a755513ac.mp3"),
   "то холодрыга, то лето.": require("../assets/words/s-89b141cf9ebd.mp3"),
@@ -9237,6 +9234,7 @@ export const WORD_CLIPS = {
   "это компактный, полностью автоматический прибор для измерения давления.": require("../assets/words/s-1df89099d48d.mp3"),
   "это культура, пронизанная прагматизмом.": require("../assets/words/s-97be86da2ce6.mp3"),
   "это кухня.": require("../assets/words/s-3ccaf18fbde6.mp3"),
+  "это кухня?": require("../assets/words/s-a7a16d655965.mp3"),
   "это лекарство отпускается только по рецепту.": require("../assets/words/s-35234ab27a12.mp3"),
   "это лиса?": require("../assets/words/s-0d9e19f98a98.mp3"),
   "это магазин беспошлинной торговли?": require("../assets/words/s-b2227d78a4c7.mp3"),
@@ -9270,7 +9268,6 @@ export const WORD_CLIPS = {
   "это нарушение закона.": require("../assets/words/s-505814521021.mp3"),
   "это наш директор.": require("../assets/words/s-9162a0949714.mp3"),
   "это наш дом.": require("../assets/words/s-a68161e311ea.mp3"),
-  "это наш кот.": require("../assets/words/s-a29ed2eadd5c.mp3"),
   "это наша фирма.": require("../assets/words/s-01684f05d95a.mp3"),
   "это не было ошибкой.": require("../assets/words/s-4eb08e060665.mp3"),
   "это не вилка это ложка.": require("../assets/words/s-cd72f5655452.mp3"),
@@ -9525,7 +9522,6 @@ export const WORD_CLIPS = {
   "я вижу дом.": require("../assets/words/s-983e14ad49c2.mp3"),
   "я вижу его.": require("../assets/words/s-e02339a71655.mp3"),
   "я вижу ее только по понедельникам.": require("../assets/words/s-13d8aed77bac.mp3"),
-  "я вижу кота.": require("../assets/words/s-2624f8d56cd8.mp3"),
   "я вижу маму.": require("../assets/words/s-4ff917cc2a85.mp3"),
   "я вижу страх у тебя в глазах.": require("../assets/words/s-a44722f1831d.mp3"),
   "я вижу что-то!": require("../assets/words/s-f4f1f3cb55aa.mp3"),

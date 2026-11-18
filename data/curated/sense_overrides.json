@@ -37,6 +37,7 @@
   "наука|noun": { "drop": ["Nauka ("] },
   "дальше|other": { "lead": "farther, further" },
   "никогда|other": { "rename": { "never, nevermore": "never" } },
+  "твой|adjective": { "rename": { "thy, thine": "your, yours (informal, to one person)" } },
   "иметь|verb": { "drop": ["to fuck", "to have to; to be obliged (to do something)"], "examples": ["Herod"] },
   "книжка|noun": { "drop": ["omasum", "notebook, passport"] },
   "марка|noun": { "drop": ["LSD", "chip or token used for payment in taverns or point-counting in games", "march, mark (medieval administrative unit used for borderlands)"] },

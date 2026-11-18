@@ -100,4 +100,33 @@ describe("the card after its first turn", () => {
     expect(within(screen.getByTestId("sense-list")).getAllByText(new RegExp(esc(senses[0].g))).length).toBeGreaterThan(0);
     expect(screen.getByTestId("card-actions")).toBeTruthy();
   });
+
+  /* A card shows translations, never Wiktionary's explanation (the owner,
+     2026-11-11, of «такой»: "out of control and looks extremely
+     unprofessional"; 2026-11-12, of «по»: "says the same thing in white and
+     grey"). «по» opens "used broadly to indicate action…", so the whole card
+     falls back to the gloss; «такой» opens "such (a), such, that/this
+     kind/sort/type of…", cut to the translation before the bracket. */
+  it("cuts a card's meaning to its translation, or falls back to the gloss", async () => {
+    const po = exactIdx("по");
+    expect(sensesOf(po)[0].g.length).toBeGreaterThan(60);
+    await withProfile({ seen: { "по": { recognise: due() } }, flash: ["produce"] });
+    expect(screen.getByTestId("card-meaning-front").props.children).toBe(L[po].e.split(";")[0].trim());
+    await show();
+    await turn();
+    expect(screen.queryByTestId("sense-list")).toBeNull();
+    expect(screen.getByTestId("senses")).toBeTruthy();
+  });
+
+  it("shows «такой» as \"such\", not its definition", async () => {
+    await withProfile({ seen: { "такой": { recognise: due() } }, flash: ["produce"] });
+    expect(screen.getByTestId("card-meaning-front").props.children).toBe("such");
+    await show();
+    await turn();   // the Russian-headed side carries the sense list
+    expect(within(await screen.findByTestId("sense-list")).getByTestId("sense-primary")).toHaveTextContent("such");
+    // The definition's wording is gone; a later sense's real translation
+    // ("a kind/sort/type of") may stay.
+    expect(screen.queryByText(/that\/this kind\/sort\/type of/)).toBeNull();
+    expect(screen.queryByText(/used with/)).toBeNull();
+  });
 });

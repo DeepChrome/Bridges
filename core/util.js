@@ -161,3 +161,80 @@ export function askSense(w) {
 export function asInfinitive(s) {
   return /^(to\b|\()/i.test(s) ? s : `to ${s}`;
 }
+
+/* The meaning a *card* shows (§30db).
+ *
+ * Wiktionary defines a function word by explaining it — «по» opens "used
+ * broadly to indicate action, typically involving movement, across a surface
+ * or across several things in a generally flat plane; across, on, along…" —
+ * and a noun by glossing and then defining in brackets: «выстрел» "shot,
+ * gunshot (launching or firing of a projectile; the sound of the firing…)".
+ * A dictionary entry wants all of that. A flashcard answered in three seconds
+ * wants the translation, and drawn whole on the English front of a produce
+ * card the explanation was the largest text on the screen (the owner,
+ * 2026-11-11, of «такой»: "out of control and looks extremely
+ * unprofessional"; of «по»: "says the same thing in white and grey").
+ *
+ * So on a card a sense is cut back to its translation: the text before a
+ * bracketed definition («нет» "there is not, there are no [with genitive…]"),
+ * or after a colon that introduces one («же» "Marks an objection…: after all,
+ * but"), and a list of translations trimmed to the ones that fit. A head that
+ * is itself an explanation — five words or more before its first comma, a
+ * quotation left open, Russian inside it («то» 'Optional part of "е́сли…') —
+ * is refused, because a cut explanation is worse than a long one.
+ *
+ * `cardSenses` applies it to a word's list: a later sense with no translation
+ * in it is left off the card; a *first* sense with none sends the whole card
+ * back to OpenRussian's gloss (null), which is always a list of translations.
+ * Both fronts of one card read through this, so they still name one meaning
+ * (§30cm); the entry and the AI's view of the card keep the full senses. */
+export const CARD_GLOSS = 60;
+/* How Wiktionary opens a definition that is not a translation: "used with a
+   pronoun…", "Marks an objection…", "Generic demonstrative pronoun…". A
+   translation can start with "used" too («подержанный» "used, second-hand"),
+   so it is the word *after* it that tells them apart. */
+const DEFINES = /^(used (with|in|to|as|before|after|broadly|for|when|only|of|at|by|on)\b|marks\b|indicates?\b|expresses\b|denotes\b|emphasi[sz]es\b|generic\b|optional\b|translated\b|refers to\b|introduces\b|placed\b|(a|the|an) (word|particle|form|suffix|prefix)\b)/i;
+const EXPLAINS = (head) => {
+  const first = head.split(/[,;]/)[0].trim();
+  return first.split(/\s+/).length >= 5
+    || DEFINES.test(first)
+    || (head.match(/"/g) || []).length % 2 === 1
+    || /[Ѐ-ӿ]/.test(head);
+};
+export function cardGloss(g) {
+  const s = String(g || "").replace(/\s+/g, " ").trim();
+  if (!s) return null;
+  if (s.length <= CARD_GLOSS && !EXPLAINS(s)) return s;
+  let head = s.replace(/\s*[(\[].*$/s, "").replace(/[\s,;:—-]+$/, "");
+  if (head.length > CARD_GLOSS) {
+    const colon = head.lastIndexOf(": ");
+    const tail = colon >= 0 ? head.slice(colon + 2).trim() : "";
+    if (tail && tail.length <= CARD_GLOSS && !EXPLAINS(tail)) return tail;
+    // A list of translations keeps the ones that fit, never half an item.
+    const items = head.split(/,\s*/);
+    let kept = "";
+    for (const it of items) {
+      const next = kept ? `${kept}, ${it}` : it;
+      if (next.length > CARD_GLOSS) break;
+      kept = next;
+    }
+    head = kept;
+  }
+  if (!head || head.length < 2 || EXPLAINS(head)) return null;
+  return head;
+}
+export function cardSenses(senses) {
+  if (!senses || !senses.length) return null;
+  const first = cardGloss(senses[0].g);
+  if (!first) return null;
+  // Two senses cut to one translation are one line on a card («такой»: "such
+  // (a), such, that/this kind…" and "such (a), such (used to indicate…)").
+  const out = [], seen = new Set();
+  senses.forEach((s, k) => {
+    const g = k === 0 ? first : cardGloss(s.g);
+    if (!g || seen.has(g.toLowerCase())) return;
+    seen.add(g.toLowerCase());
+    out.push(g === s.g ? s : { ...s, g });
+  });
+  return out;
+}

@@ -20,6 +20,7 @@ import { Screen, Card, Btn, Bar, Pill, Speaker, Muted, List, Row, Senses, SenseL
          Familiarity, familiarityColor, RowText, ActionChip } from "../ui";
 import { PartialHintButton, PartialHintLine } from "../hint";
 import { hintSteps, hintMask } from "@core/hint";
+import { cardSenses } from "@core/util";
 import { RunTools } from "../askai";
 import { L, idxOfWord, exactIdx, sensesOf, goalNow, goalOpts, rankOf, lowPriority } from "../data";
 import { Linked, GrammarLine } from "../words";
@@ -145,7 +146,11 @@ function Meaning({ face, senses }) {
     return <Text testID="card-meaning-front" style={{ color: t.ink, fontSize: 22, fontWeight: "600",
                                                        textAlign: "center" }}>{face.e || "—"}</Text>;
   }
-  const groups = senses && senses.length ? senses.map((s) => s.g).filter(Boolean)
+  /* …cut to their translations (core/util.js cardSenses, §30db): an
+     explanation Wiktionary opens on — «по», «это» — sends the card back to
+     the gloss rather than standing as the largest text on the screen. */
+  const brief = cardSenses(senses);
+  const groups = brief ? brief.map((s) => s.g).filter(Boolean)
     : String(face.e || "").split(";").map((s) => s.trim()).filter(Boolean);
   if (!groups.length) return <Text style={{ color: t.ink, fontSize: 22, fontWeight: "600" }}>—</Text>;
   return (
@@ -168,7 +173,8 @@ function Meaning({ face, senses }) {
 export function frontAnswer(face, direction, senses) {
   if (direction === "produce") return String(face.w || "");
   if (face.sentence) return String(face.e || "");
-  const group = senses && senses.length && senses[0].g ? senses[0].g : String(face.e || "").split(";")[0];
+  const brief = cardSenses(senses);
+  const group = brief ? brief[0].g : String(face.e || "").split(";")[0];
   return String(group || "").split(",")[0].trim();
 }
 
@@ -1053,7 +1059,7 @@ export default function Study({ navigation, route }) {
                         style={{ color: t.ink, fontSize: 18, marginTop: 12, textAlign: "center" }}>
                     {face.e || "—"}
                   </Text>
-                ) : senses ? <SenseList senses={senses} size={16} max={4} brief mark={cardLemma} style={{ marginTop: 10 }} />
+                ) : cardSenses(senses) ? <SenseList senses={cardSenses(senses)} size={16} max={4} brief mark={cardLemma} style={{ marginTop: 10 }} />
                   : <Senses e={face.e} size={16} align="left" style={{ alignSelf: "stretch" }} />}
                 {(face.x || []).slice(0, 3).map((ex, k) => (
                   // The word in use, three ways: the entry reads like a dictionary,
